@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 // To be compatible with VSC Express edition that does not have tr1
 #ifndef HAS_UNORDERED_MAP_H
@@ -79,15 +80,16 @@ class DLLExport DiffractionFocussing2: public API::Algorithm
 {
 public:
   /// Default constructor
-  DiffractionFocussing2() : API::Algorithm() {}
+  DiffractionFocussing2();
   /// Destructor
-  virtual ~DiffractionFocussing2() {}
+  virtual ~DiffractionFocussing2();
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "DiffractionFocussing"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual const int version() const { return 2; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
+  
 private:
   // Overridden Algorithm methods
   void init();
@@ -100,8 +102,8 @@ private:
   void determineRebinParameters();
   int validateSpectrumInGroup(int spectrum_number);
   
-  /// Shared pointer to the inputWorkspace
-  API::MatrixWorkspace_const_sptr inputW;
+  /// Shared pointer to the input workspace
+  DataObjects::Workspace2D_const_sptr inputW;
   // This map does not need to be ordered, just a lookup for udet
 #ifndef HAS_UNORDERED_MAP_H
   /// typedef for the storage of the UDET-group mapping

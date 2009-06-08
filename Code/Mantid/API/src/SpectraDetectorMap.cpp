@@ -36,6 +36,15 @@ namespace Mantid
       return;
     }
 
+    void SpectraDetectorMap::addSpectrumEntries(const int spectrum, const std::vector<int>& udetList)
+    {
+      std::vector<int>::const_iterator it;
+      for (it = udetList.begin(); it != udetList.end(); ++it)
+      {
+        m_s2dmap.insert(std::pair<int,int>(spectrum,*it));
+      }
+    }
+    
     /** Moves all detectors assigned to a particular spectrum number to a different one.
     *  Does nothing if the oldSpectrum number does not exist in the map.
     *  @param oldSpectrum The spectrum number to be removed and have its detectors reassigned
@@ -64,6 +73,12 @@ namespace Mantid
       m_s2dmap.erase(oldSpectrum);
     }
 
+    /// Empties the map - use with care!
+    void SpectraDetectorMap::clear()
+    {
+      m_s2dmap.clear();
+    }
+    
     const int SpectraDetectorMap::ndet(const int spectrum_number) const
     {
       return m_s2dmap.count(spectrum_number);
@@ -107,9 +122,9 @@ namespace Mantid
       {
         try
         {
-            std::multimap<int,int>::iterator found = dsMap.find(*it);
-            int spectra = found != dsMap.end()? found->second : 0;
-            spectraList.push_back(spectra);
+          std::multimap<int,int>::iterator found = dsMap.find(*it);
+          int spectra = found != dsMap.end()? found->second : 0;
+          spectraList.push_back(spectra);
         }
         catch (std::runtime_error&)
         {

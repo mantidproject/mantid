@@ -25,6 +25,34 @@ public:
     TS_ASSERT_EQUALS(sdMap.nElements(),length);
   }
 
+  void testAddSpectrumEntries()
+  {
+    //use my own local sdmap as I will be altering it
+    SpectraDetectorMap sdMapLocal;
+    TS_ASSERT_EQUALS(sdMapLocal.nElements(),0);
+    std::vector<int> dets;
+    dets.push_back(10);
+    dets.push_back(20);
+    TS_ASSERT_THROWS_NOTHING(sdMapLocal.addSpectrumEntries(1,dets));
+    TS_ASSERT_EQUALS(sdMapLocal.nElements(),2);
+    TS_ASSERT_EQUALS(sdMapLocal.ndet(1),2);
+    std::vector<int> detsOut = sdMapLocal.getDetectors(1);
+    TS_ASSERT_EQUALS(detsOut.size(),2);
+    TS_ASSERT_EQUALS(detsOut[0],10);
+    TS_ASSERT_EQUALS(detsOut[1],20);
+  }
+  
+  void testClear()
+  {
+    //use my own local sdmap as I will be altering it
+    SpectraDetectorMap sdMapLocal;
+    populateSDMap(sdMapLocal,length,offset);
+    TS_ASSERT_EQUALS(sdMapLocal.nElements(),length);
+    
+    TS_ASSERT_THROWS_NOTHING(sdMapLocal.clear());
+    TS_ASSERT_EQUALS(sdMapLocal.nElements(),0);
+  }
+  
   void testNdet()
   {
     for (int i = 0; i < length; i++)
@@ -82,7 +110,7 @@ public:
   }
 
 private:
-  void populateSDMap(SpectraDetectorMap& sdMap, int length, int offset)
+  void populateSDMap(SpectraDetectorMap& sdMap, int length, const int offset)
   {
     int* udet = new int [length];
     int* spec = new int [length];

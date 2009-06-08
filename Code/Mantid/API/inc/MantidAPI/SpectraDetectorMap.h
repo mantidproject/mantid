@@ -64,12 +64,16 @@ public:
   
   /// Constructor
   SpectraDetectorMap();
-  /// virtual destructor
+  /// Virtual destructor
   virtual ~SpectraDetectorMap();
-  /// populate the Map with _spec and _udet C array
+  /// Populate the Map with _spec and _udet C array
   void populate(int* _spec, int* _udet, int nentries);
+  /// Link a list of UDETs to the given spectrum
+  void addSpectrumEntries(const int spectrum, const std::vector<int>& udetList);
   /// Move a detector from one spectrum to another
   void remap(const int oldSpectrum, const int newSpectrum);
+  /// Empties the map
+  void clear();
   /// Return number of detectors contributing to this spectrum
   const int ndet(const int spectrum_number) const;
   /// Get a vector of detectors ids contributing to a spectrum

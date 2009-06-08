@@ -21,21 +21,30 @@ namespace Algorithms
 DECLARE_ALGORITHM(DiffractionFocussing2)
 
 using namespace Kernel;
-using API::MatrixWorkspace_sptr;
-using API::MatrixWorkspace;
+using DataObjects::Workspace2D;
 
 // Get a reference to the logger
 Logger& DiffractionFocussing2::g_log = Logger::get("DiffractionFocussing2");
+
+/// Constructor
+DiffractionFocussing2::DiffractionFocussing2() : 
+  API::Algorithm(), inputW(), udet2group(), spectra_group(), group2xvector(),
+  group2wgtvector(), nGroups(0), nHist(0), nPoints(0)
+{}
+
+/// Destructor
+DiffractionFocussing2::~DiffractionFocussing2()
+{}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */
 void DiffractionFocussing2::init()
 {
-  API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
-  wsValidator->add(new API::WorkspaceUnitValidator<>("dSpacing"));
-  wsValidator->add(new API::RawCountValidator<>);
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
+  API::CompositeValidator<Workspace2D> *wsValidator = new API::CompositeValidator<Workspace2D>;
+  wsValidator->add(new API::WorkspaceUnitValidator<Workspace2D>("dSpacing"));
+  wsValidator->add(new API::RawCountValidator<Workspace2D>);
+  declareProperty(new API::WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")));
@@ -60,12 +69,17 @@ void DiffractionFocussing2::exec()
 
   determineRebinParameters();
 
-  MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(inputW,nGroups,nPoints,nPoints-1);
+  API::MatrixWorkspace_sptr out=API::WorkspaceFactory::Instance().create(inputW,nGroups,nPoints,nPoints-1);
+  // The spectaDetectorMap will have been copied from the input, but we don't want it
+  out->mutableSpectraMap().clear();
 
   // Now the real work
   std::vector<bool> flags(nGroups,true); //Flag to determine whether the X for a group has been set
   MantidVec limits(2), weights_default(1,1.0), emptyVec(1,0.0);  // Vectors for use with the masking stuff
 
+  const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
+  const API::Axis* const inSpecAxis = inputW->getAxis(1);
+  
   for (int i=0;i<nHist;i++)
   {
     //Check whether this spectra is in a valid group
@@ -87,8 +101,12 @@ void DiffractionFocussing2::exec()
       flags[dif]=false;
       // Initialize the group's weight vector here too
       group2wgtvector[group] = boost::shared_ptr<MantidVec>(new MantidVec(nPoints-1,0.0));
+      // Also set the spectrum number to the group number
+      out->getAxis(1)->spectraNo(static_cast<int>(dif)) = group;
     }
-    
+    // Add the detectors for this spectrum to the output workspace's spectra-detector map
+    out->mutableSpectraMap().addSpectrumEntries(group,inSpecMap.getDetectors(inSpecAxis->spectraNo(i)));
+
     // Get the references to Y and E output and rebin
     MantidVec& Yout=out->dataY(static_cast<int>(dif));
     MantidVec& Eout=out->dataE(static_cast<int>(dif));
@@ -111,9 +129,9 @@ void DiffractionFocussing2::exec()
       MantidVec weight_bins,weights;
       weight_bins.push_back(Xin.front());
       // If there are masked bins, get a reference to the list of them
-      const MatrixWorkspace::MaskList& mask = inputW->maskedBins(i);
+      const API::MatrixWorkspace::MaskList& mask = inputW->maskedBins(i);
       // Now iterate over the list, adjusting the weights for the affected bins
-      for (MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+      for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
       {
         const double currentX = Xin[(*it).first];
         // Add an intermediate bin with full weight if masked bins aren't consecutive
@@ -224,7 +242,7 @@ void DiffractionFocussing2::determineRebinParameters()
   group2minmaxmap::iterator gpit;
 
   spectra_group.resize(nHist);
-  API::Axis* spectra_Axis = inputW->getAxis(1);
+  const API::Axis* const spectra_Axis = inputW->getAxis(1);
 
   for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
@@ -288,7 +306,7 @@ int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
 {
   // Get the spectra to detector map
   const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
-  std::vector<int> dets = spectramap.getDetectors(spectrum_number);
+  const std::vector<int> dets = spectramap.getDetectors(spectrum_number);
   if (dets.empty()) // Not in group
     return -1;
 
@@ -296,7 +314,7 @@ int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
   udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
   if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
     return -1;
-  int group = (*mapit).second;
+  const int group = (*mapit).second;
   int new_group;
   for (it + 1; it != dets.end(); it++) // Loop other all other udets
   {
@@ -307,6 +325,7 @@ int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
     if (new_group != group) // At least one udet does not belong to the same group
       return -1;
   }
+  
   return group;
 }
 
