@@ -75,7 +75,7 @@ double Detector::getPhi() const
 {
   double phi = 0.0, dummy;
   this->getPos().getSpherical(dummy,dummy,phi);
-  return phi;
+  return phi*M_PI/180.0;
 }
 
 double Detector::solidAngle(const V3D& observer) const

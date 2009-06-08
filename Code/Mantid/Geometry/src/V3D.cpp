@@ -36,9 +36,9 @@ V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
   */
 void V3D::spherical(const double& R, const double& theta, const double& phi)
 {
-	double deg2rad=M_PI/180.0;
+	const double deg2rad=M_PI/180.0;
 	z=R*cos(theta*deg2rad);
-	double ct=sin(theta*deg2rad);
+	const double ct=sin(theta*deg2rad);
 	x=R*ct*cos(phi*deg2rad);
 	y=R*ct*sin(phi*deg2rad);
 
@@ -355,7 +355,11 @@ V3D::operator[](const int Index)
     }
 }
 
-/// Return the vector's position in spherical coordinates
+/** Return the vector's position in spherical coordinates
+ *  @param R     Returns the radial distance
+ *  @param theta Returns the theta angle in degrees
+ *  @param phi   Returns the phi (azimuthal) angle in degrees
+ */
 void V3D::getSpherical(double& R, double& theta, double& phi) const
 {
   const double rad2deg = 180.0/M_PI;

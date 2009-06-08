@@ -103,13 +103,9 @@ void CylinderAbsorption::exec()
 
     // Get detector position
     IDetector_const_sptr det;
-//    V3D detPos;
     try
     {
       det = inputWS->getDetector(i);
-//      detPos = inputWS->getDetector(i)->getPos();
-      // Need to convert detPos from metres to cm
-//      detPos *= 100.0;
     } catch (Exception::NotFoundError)
     {
       // Catch when a spectrum doesn't have an attached detector and go to next one
@@ -283,8 +279,10 @@ void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr
 
         // We need to make sure this is right for grouped detectors - should use average theta & phi
         V3D detectorPos;
-        detectorPos.spherical(100.0*detector->getDistance(Component("dummy",currentPosition)),
-            detector->getTwoTheta(currentPosition,V3D(0.0,0.0,1.0)),detector->getPhi());
+        // *** ASSUMES THAT SAMPLE AT ORIGIN AND BEAM ALONG Z ***
+        detectorPos.spherical(100.0*detector->getDistance(Component("dummy",V3D(0.0,0.0,0.0))),
+            detector->getTwoTheta(V3D(0.0,0.0,0.0),V3D(0.0,0.0,1.0))*180.0/M_PI,detector->getPhi()*180.0/M_PI);
+        
         // Create track for distance in cylinder between scattering point and detector
         V3D direction = detectorPos - currentPosition;
         direction.normalize();

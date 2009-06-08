@@ -63,11 +63,11 @@ public:
   /** Gives the angle of this detector object with respect to an axis
    *  @param observer The point to calculate the angle relative to (typically the sample position)
    *  @param axis     The axis to which the required angle is relative
-   *  @return The angle
+   *  @return The angle in radians
    */
   virtual double getTwoTheta(const V3D& observer, const V3D& axis) const = 0;
 
-  /// Gives the phi of this detector object
+  /// Gives the phi of this detector object in radians
   virtual double getPhi() const = 0;
   
   /** Gives the approximate angle subtended by the detector

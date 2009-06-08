@@ -118,7 +118,7 @@ double DetectorGroup::getPhi() const
     V3D detPos = (*it).second->getPos();
     double phi = 0.0, dummy;
     detPos.getSpherical(dummy,dummy,phi);
-    result += phi;
+    result += phi*M_PI/180.0;;
   }
   return result/m_detectors.size();  
 }

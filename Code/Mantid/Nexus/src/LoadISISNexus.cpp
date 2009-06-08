@@ -397,6 +397,7 @@ void LoadISISNexus::getTimeChannels()
  *  @param period The data period
  *  @param hist The index of the histogram in the workspace
  *  @param i The index of the histogram in the file
+ *  @param localWorkspace The workspace
  */
 void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspace2D_sptr localWorkspace)
 {
@@ -544,7 +545,7 @@ void LoadISISNexus::loadProtonCharge(DataObjects::Workspace2D_sptr ws)
  *   /raw_data_1/runlog group of the file. Call to this method must be done
  *   within /raw_data_1 group.
  *   @param ws The workspace to load the logs to.
- *   @period The period of this workspace
+ *   @param period The period of this workspace
  */
 void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,int period)
 {

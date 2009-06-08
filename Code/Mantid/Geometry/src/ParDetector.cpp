@@ -70,7 +70,7 @@ double ParDetector::getPhi() const
 {
   double phi = 0.0, dummy;
   this->getPos().getSpherical(dummy,dummy,phi);
-  return phi;  
+  return phi*M_PI/180.0;
 }
 
 double ParDetector::solidAngle(const V3D& observer) const

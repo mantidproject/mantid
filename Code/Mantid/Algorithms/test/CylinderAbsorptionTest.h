@@ -18,8 +18,8 @@ public:
     loader.setPropertyValue("Filename","../../../../Test/Data/GEM40979.raw");
     inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.setPropertyValue("spectrum_min","1000");
-    loader.setPropertyValue("spectrum_max","1000");
+//    loader.setPropertyValue("spectrum_min","1000");
+//    loader.setPropertyValue("spectrum_max","1000");
     loader.execute();
 
     Mantid::Algorithms::ConvertUnits convert;
