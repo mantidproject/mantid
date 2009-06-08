@@ -71,6 +71,8 @@ private:
   QString getRawFilePath(const QString & data_dir, const QString & run_no) const;
   /// Create a mask string
   QString createMaskString() const;
+  /// Construct the list of workspace names from the information provided
+  QStringList constructWorkspaceNames() const;
   //@}
 
   /**@name Python code utility commands */

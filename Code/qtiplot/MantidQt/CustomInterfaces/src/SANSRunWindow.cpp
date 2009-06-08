@@ -419,13 +419,17 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
   lms = source->getPos().distance(sample->getPos());
    
   //Find the main detector bank
-  boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName("main-detector-bank");
+  std::string comp_name("main-detector-bank");
+  if( m_uiForm.inst_opt->currentText().startsWith("S") ) comp_name = "front-detector";
+  boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName(comp_name);
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
     lsda = sample->getPos().distance(comp->getPos());
   }
 
-  comp = instr->getComponentByName("HAB");
+  comp_name = "HAB";
+  if( m_uiForm.inst_opt->currentText().startsWith("S") ) comp_name = "rear-detector";
+  comp = instr->getComponentByName(comp_name);
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
     lsdb = sample->getPos().distance(comp->getPos());
@@ -552,6 +556,33 @@ QString SANSRunWindow::createMaskString() const
   }
   maskstring += m_uiForm.user_maskEdit->text();
   return maskstring;
+}
+
+/**
+* Construct the names of the workspaces from the boxes
+*/
+QStringList SANSRunWindow::constructWorkspaceNames() const
+{
+  QString file_ext(m_uiForm.file_opt->currentText());
+  QStringList wslist;
+  for( int i = 0; i < 9; ++i )
+  {
+    QString box_text = m_run_no_boxes.value(i)->text();
+    if( box_text.isEmpty() ) 
+    {
+     wslist.append("");
+      continue;
+    }
+    if( i < 3 )
+    {
+      wslist.append(box_text + "_sans_" + file_ext);
+    }
+    else
+    {
+      wslist.append(box_text + "_trans_" + file_ext);
+    }
+  }
+  return wslist;
 }
 
 //-------------------------------------
@@ -755,7 +786,7 @@ void SANSRunWindow::handleLoadButtonClick()
 
   if( warn_user )
   {
-    showInformationBox("Warning: Some component distances are inconsistent for the sample and can/background runs.\nSee the Geometry tab for details");
+    showInformationBox("Warning: Some component distances are inconsistent for the sample and can/background runs.\nSee the Geometry tab for details.");
   } 
   //We can now process some data
   emit dataReadyToProcess(true);
@@ -768,42 +799,36 @@ void SANSRunWindow::handleLoadButtonClick()
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
   if( !readPyReductionTemplate() ) return;
-
   if( m_ins_defdir.isEmpty() ) m_ins_defdir = m_data_dir;
-
-  QStringList wslist(m_uiForm.sct_sample_edit->text() + "_sans_" + m_uiForm.file_opt->currentText()); 
-  wslist << m_uiForm.sct_can_edit->text() + "_sans_" + m_uiForm.file_opt->currentText() 
-	 <<  m_uiForm.tra_sample_edit->text() + "_trans_" + m_uiForm.file_opt->currentText()
-	 << m_uiForm.tra_can_edit->text() + "_trans_" + m_uiForm.file_opt->currentText() 
-	 << m_uiForm.direct_sample_edit->text() + "_trans_" + m_uiForm.file_opt->currentText();
-  QStringListIterator itr(wslist);
-  while( itr.hasNext() )
+  // Quick check that scattering sample number has been entered
+  if( m_uiForm.sct_sample_edit->text().isEmpty() )
   {
-    // Quick check that the workspaces we need actually exist
-    QString testws = itr.next();
-    if( !workspaceExists(testws) )
-    {
-      showInformationBox("Error: " + testws + " does not exist. Please check that the relevant data has been loaded.");
-      return;
-    }
+    showInformationBox("Error: A scattering sample run number is required to continue.");
+    return;
   }
-
+  QStringList wslist = constructWorkspaceNames();
+  
+  // There is a number but it doesn't exist as a workpace
+  if( !workspaceExists(wslist.at(0)) )
+  {
+    showInformationBox("Error: Please check " + wslist.at(0) + " has been loaded.");
+    return;
+  }
   int idtype(0);
   if( type.startsWith("2") ) idtype = 1;
 
   //Disable buttons so that interaction is limited while processing data
   setProcessingState(true, idtype);
-  
   //Construct the code to execute
   QString py_code = m_pycode_loqreduce;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   py_code.replace("|SCATTERSAMPLE|", wslist.at(0));
   py_code.replace("|SCATTERCAN|", wslist.at(1));
-  py_code.replace("|TRANSMISSIONSAMPLE|", wslist.at(2));
-  py_code.replace("|TRANSMISSIONCAN|", wslist.at(3));
-  py_code.replace("|DIRECTSAMPLE|", wslist.at(4));
+  py_code.replace("|TRANSMISSIONSAMPLE|", wslist.at(3));
+  py_code.replace("|TRANSMISSIONCAN|", wslist.at(4));
+  py_code.replace("|DIRECTSAMPLE|", wslist.at(6));
 
-  //Limit replacement
+  // Limit replacement
   py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
   py_code.replace("|RADIUSMAX|", m_uiForm.rad_max->text());
   py_code.replace("|XBEAM|", m_uiForm.beam_x->text());

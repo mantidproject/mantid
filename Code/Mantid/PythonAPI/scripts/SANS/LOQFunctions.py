@@ -75,31 +75,33 @@ def MaskByDetNumber(workspace, detlist):
     MaskDetectors(workspace, DetectorList = detlist)
 
 # Isolate the monitor data
-def GetMonitor(inputWS, outputWS):
+def GetMonitor(inputWS, outputWS, monitorid):
     '''Isolate the monitor data'''
-    CropWorkspace(inputWS, OutputWorkspace=outputWS, StartSpectrum="1", EndSpectrum="1")
+    #  Account for Mantid's off by one storage
+    CropWorkspace(inputWS, OutputWorkspace=outputWS, StartSpectrum=str(monitorid - 1), EndSpectrum=str(monitorid - 1))
     RemoveBins(outputWS,outputWS,"19900","20500",Interpolation="Linear")
     FlatBackground(outputWS,outputWS,"0","31000","39000")
     
 # Isolate small angle bank
 def GetMainBank(inputWS, startid, endid, outputWS):
     '''Isolate the small angle bank data'''
+    #  Account for Mantid's off by one storage
     CropWorkspace(inputWS, OutputWorkspace=outputWS, StartSpectrum=str(startid - 1),EndSpectrum=str(endid - 1))
 
-# Setup the data to process
-def SetupSmallAngle(inputWS, outputWS, firstsmall, lastsmall, rmin, rmax, maskstring, xshift, yshift):
-    # Get the monitor
-    GetMonitor(inputWS, "Monitor-" + inputWS)
-    # Get the small angle banks
-    GetMainBank(inputWS, firstsmall, lastsmall, outputWS)
-    # Mask beam stop
-    MaskInsideCylinder(outputWS, rmin)
-    # Mask corners
-    MaskOutsideCylinder(outputWS, rmax)
-    # Mask others that are defined
-    detlist = ConvertToDetList(maskstring)
-    MaskByDetNumber(outputWS, detlist)
-    MoveInstrumentComponent(outputWS, "main-detector-bank", X = xshift, Y = yshift, RelativePosition="1")
+# # Setup the data to process
+# def SetupSmallAngle(inputWS, outputWS, firstsmall, lastsmall, rmin, rmax, maskstring, xshift, yshift):
+    # # Get the monitor
+    # GetMonitor(inputWS, "Monitor-" + inputWS)
+    # # Get the small angle banks
+    # GetMainBank(inputWS, firstsmall, lastsmall, outputWS)
+    # # Mask beam stop
+    # MaskInsideCylinder(outputWS, rmin)
+    # # Mask corners
+    # MaskOutsideCylinder(outputWS, rmax)
+    # # Mask others that are defined
+    # detlist = ConvertToDetList(maskstring)
+    # MaskByDetNumber(outputWS, detlist)
+    # MoveInstrumentComponent(outputWS, "main-detector-bank", X = xshift, Y = yshift, RelativePosition="1")
 
 # Setup the transmission data
 def SetupTransmissionData(inputWS, instr_file, wavbining):

@@ -37,12 +37,11 @@ direct_beam_file = '|DIRECTFILE|'
 CORRECTIONTYPE = '|ANALYSISTYPE|'
 
 ### Main correction function ###
-def Correct(sampleWS, transWS, suffix):
+def Correct(sampleWS, transWS, resultWS, suffix):
 	'''Performs the data reduction steps'''
 	monitorWS = "Monitor"
-	resultWS = "_" + suffix
 	# Get the monitor
-	LOQFunctions.GetMonitor(sampleWS, monitorWS)
+	LOQFunctions.GetMonitor(sampleWS, monitorWS, 2)
 	# Get small angle banks
 	firstsmall = 130
 	lastsmall = 16130
@@ -77,17 +76,21 @@ def Correct(sampleWS, transWS, suffix):
 
  	# Correct by transmission
  	# Need to remove prompt spike and, later, flat background
-	trans_tmp_out = LOQFunctions.SetupTransmissionData(transWS, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
-	direct_tmp_out = LOQFunctions.SetupTransmissionData(direct_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
-	trans_ws = transWS.split('_')[0] + "_trans_" + suffix
-	CalculateTransmission(trans_tmp_out,direct_tmp_out,trans_ws)
-	mantid.deleteWorkspace(trans_tmp_out)
-	mantid.deleteWorkspace(direct_tmp_out)
-	# Apply the correction
-	Divide(tmpWS, trans_ws, tmpWS)
+ 	if transWS and direct_sample:
+                trans_tmp_out = LOQFunctions.SetupTransmissionData(transWS, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
+        	direct_tmp_out = LOQFunctions.SetupTransmissionData(direct_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
+                trans_ws = transWS.split('_')[0] + "_trans_" + suffix
+                CalculateTransmission(trans_tmp_out,direct_tmp_out,trans_ws)
+                mantid.deleteWorkspace(trans_tmp_out)
+                mantid.deleteWorkspace(direct_tmp_out)
+                # Apply the correction
+                Divide(tmpWS, trans_ws, tmpWS)
 	
 	# Correct for efficiency
 	CorrectToFile(tmpWS, direct_beam_file, tmpWS, "Wavelength", "Divide")
+
+	# Correct for sample/Can volume
+	LOQFunctions.ScaleByVolume(tmpWS, rescale);
 
 	# Steps differ here depending on type
 	if CORRECTIONTYPE == '1D':
@@ -125,10 +128,7 @@ def Correct(sampleWS, transWS, suffix):
 		Qxy(tmpWS, resultWS, "small_angle2D.Q", str(qxy2), str(dqxy))
 		
 	mantid.deleteWorkspace(tmpWS)
-	# Correct for sample/Can volume
-	LOQFunctions.ScaleByVolume(resultWS, rescale);
-		
-	return resultWS
+	return
 
 ### End of Correct function ###
 
@@ -136,14 +136,9 @@ def Correct(sampleWS, transWS, suffix):
 # Perform correction for the sample and can.
 # result = sample - can
 # Final workspace containing the output of the sample correction
-sample_correction = Correct(scatter_sample, trans_sample, "sample")
-can_correction = Correct(scatter_can, trans_can, "can")
-Minus(sample_correction, can_correction, scatter_sample.split('_')[0] + '_' + CORRECTIONTYPE)
-mantid.deleteWorkspace(sample_correction)
-mantid.deleteWorkspace(can_correction)
-
-#step 12 - Save 1D data
-# this writes to the /bin directory - why ?
-# Want to be able to write out to new XML format
-#SaveRKH(resultWS+wavname,Filename=resultWS+wavname+".Q",FirstColumnValue="MomentumTransfer")
-
+final_workspace = scatter_sample.split('_')[0] + '_' + CORRECTIONTYPE
+Correct(scatter_sample, trans_sample, final_workspace, "sample")
+if scatter_can:
+        Correct(scatter_can, trans_can, "tmp_can_output", "can")
+        Minus(final_workspace, "tmp_can_output", final_workspace)
+        mantid.deleteWorkspace("tmp_can_output")
