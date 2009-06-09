@@ -59,7 +59,7 @@ m_progressDialog(0)
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
 
-  	actionCopyRowToTable = new QAction(tr("Copy spectra to Table"), this);
+  	actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
 	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyRowToTable, SIGNAL(activated()), this, SLOT(copyRowToTable()));
 
@@ -71,7 +71,7 @@ m_progressDialog(0)
 	actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
 	connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 
-    actionCopyDetectorsToTable = new QAction(tr("Copy Detectors to Table"), this);
+    actionCopyDetectorsToTable = new QAction(tr("Copy detectors to Table"), this);
 	actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
 
@@ -79,15 +79,15 @@ m_progressDialog(0)
 	actionCopyValues->setIcon(QIcon(QPixmap(copy_xpm)));
 	connect(actionCopyValues, SIGNAL(activated()), this, SLOT(copyValues()));
 
-  	actionCopyColumnToTable = new QAction(tr("Copy time bin to Table"), this);
+  	actionCopyColumnToTable = new QAction(tr("Copy bin to table"), this);
 	actionCopyColumnToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyColumnToTable, SIGNAL(activated()), this, SLOT(copyColumnToTable()));
 
-  	actionCopyColumnToGraph = new QAction(tr("Plot time bin (values only)"), this);
+  	actionCopyColumnToGraph = new QAction(tr("Plot bin (values only)"), this);
 	actionCopyColumnToGraph->setIcon(QIcon(QPixmap(graph_xpm)));
 	connect(actionCopyColumnToGraph, SIGNAL(activated()), this, SLOT(copyColumnToGraph()));
 
-  	actionCopyColumnToGraphErr = new QAction(tr("Plot time bin (values + errors)"), this);
+  	actionCopyColumnToGraphErr = new QAction(tr("Plot bin (values + errors)"), this);
 	actionCopyColumnToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
 	connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
 
@@ -548,7 +548,7 @@ void MantidUI::copyRowToTable()
 {
     MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
     if (!m || !m->isA("MantidMatrix")) return;
-    Table* t = createTableFromSelectedRows(m,true);
+    Table* t = createTableFromSelectedRows(m,true,true);
     t->showNormal();
 }
 
@@ -556,7 +556,8 @@ void MantidUI::copyColumnToTable()
 {
     MantidMatrix* m = (MantidMatrix*)appWindow()->activeWindow();
     if (!m || !m->isA("MantidMatrix")) return;
-    createTableFromSelectedColumns(m,true);
+    Table* t = createTableFromSelectedColumns(m,true);
+    t->showNormal();
 }
 
 void MantidUI::copyRowToGraph()
@@ -1450,9 +1451,9 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
      if (indexList.size()==0) return 0;
 
      int c = errs?2:1;
-     int numRows = workspace->blocksize() - 1;
+     int numRows = workspace->blocksize();
      bool isHistogram = workspace->isHistogramData();
-     if (isHistogram) numRows++;
+     if (isHistogram && (!binCentres)) numRows++;
 
      Table* t = new Table(appWindow()->scriptEnv, numRows, c*indexList.size() + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
@@ -1485,7 +1486,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
              t->setCell(j,kY,dataY[j]); 
              if (errs) t->setCell(j,kErr,dataE[j]);
          }
-         if (isHistogram)
+         if (isHistogram && (!binCentres))
          {
              int iRow = numRows;
              t->addRows(1);
