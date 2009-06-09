@@ -1,7 +1,7 @@
 #include "AlgorithmHistoryWindow.h"
-#include "QMessageBox"
+
 // Get a reference to the logger
-Mantid::Kernel::Logger& AlgorithmHistoryWindow::g_log = Mantid::Kernel::Logger::get("AlgorithmHistoryWindow");
+//Mantid::Kernel::Logger& AlgorithmHistoryWindow::g_log = Mantid::Kernel::Logger::get("AlgorithmHistoryWindow");
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w):QGroupBox(title,w),
 m_execDurationlabel(NULL),m_execDurationEdit(NULL),m_Datelabel(NULL),m_execDateTimeEdit(NULL),
@@ -12,9 +12,9 @@ m_algexecDuration(NULL)
 		m_execDurationEdit->setReadOnly(1);
 		int charWidth = m_execDurationEdit->fontMetrics().maxWidth();
 		m_execDurationEdit->setMaximumWidth(charWidth*4);
-		m_execDurationEdit->setMaximumHeight(100);
+		m_execDurationEdit->setMaximumHeight(20);
 	}
-	m_execDurationlabel=new QLabel("&Duration",this,0);
+	m_execDurationlabel=new QLabel("&Duration:",this,0);
 	if(m_execDurationlabel)m_execDurationlabel->setBuddy(m_execDurationEdit);
 		
 	QDateTime datetime(QDate(0,0,0), QTime(0,0,0),Qt::LocalTime );
@@ -23,21 +23,18 @@ m_algexecDuration(NULL)
 		m_execDateTimeEdit->setReadOnly(1);
 		int charWidth = m_execDateTimeEdit->fontMetrics().maxWidth();
 		m_execDateTimeEdit->setMaximumWidth(charWidth*6);
-		m_execDateTimeEdit->setGeometry(5,310,100,100);
+		//m_execDateTimeEdit->setGeometry(5,310,100,100);
 	}
-	m_Datelabel=new QLabel("&Date",this,0);
+	m_Datelabel=new QLabel("&Date:",this,0);
 	if(m_Datelabel)m_Datelabel->setBuddy(m_execDateTimeEdit);
 		
-	QVBoxLayout *vbox = new QVBoxLayout;
-	if(vbox)
-	{	vbox->addWidget(m_execDurationlabel);
-		vbox->addWidget(m_execDurationEdit);
-		vbox->addWidget(m_Datelabel);
-		vbox->addWidget(m_execDateTimeEdit);
-		vbox->addStretch(1);
-		setLayout(vbox);
+	QFormLayout *formLayout = new QFormLayout;
+	if(formLayout){
+		formLayout->addRow(m_execDurationlabel,m_execDurationEdit);
+		formLayout->addRow(m_Datelabel,m_execDateTimeEdit);
+		setLayout(formLayout);
 	}
-	setGeometry (5,210,210,200);
+	setGeometry (5,210,205,130);
 }
 AlgExecSummaryGrpBox::~AlgExecSummaryGrpBox()
 {
@@ -97,7 +94,7 @@ m_frmworkVersionLabel(NULL),m_frmwkVersnEdit(NULL)
 		m_osNameEdit->setMaximumWidth(charWidth*4);
 		m_osNameEdit->setMaximumHeight(100);
 	}
-	m_osNameLabel=new QLabel("&OSName",this,0);
+	m_osNameLabel=new QLabel("&OSName:",this,0);
 	if(m_osNameLabel)m_osNameLabel->setBuddy(m_osNameEdit);
 
 	//OS Version Label & Edit Box
@@ -108,7 +105,7 @@ m_frmworkVersionLabel(NULL),m_frmwkVersnEdit(NULL)
 		charWidth = m_osVersionEdit->fontMetrics().maxWidth();
 		m_osVersionEdit->setMaximumWidth(charWidth*10);
 		m_osVersionEdit->setMaximumHeight(100);
-		m_osVersionLabel=new QLabel("&OSVersion",this,0);
+		m_osVersionLabel=new QLabel("&OSVersion:",this,0);
 	}
 	if(m_osVersionLabel)
 		m_osVersionLabel->setBuddy(m_osVersionEdit);
@@ -122,23 +119,19 @@ m_frmworkVersionLabel(NULL),m_frmwkVersnEdit(NULL)
 		m_frmwkVersnEdit->setMaximumWidth(charWidth*4);
 		m_frmwkVersnEdit->setMaximumHeight(100);
 	}
-	m_frmworkVersionLabel=new QLabel("&FrameWorkVersion",this,0);
+	m_frmworkVersionLabel=new QLabel("&FrameWorkVersion:",this,0);
 	if(m_frmworkVersionLabel)
 	m_frmworkVersionLabel->setBuddy(m_frmwkVersnEdit);
 	
-	QVBoxLayout *vbox = new QVBoxLayout;
-	if(vbox)
+	QFormLayout * formLayout=new QFormLayout();
+	if(formLayout)
 	{
-		vbox->addWidget(m_osNameLabel);
-		vbox->addWidget(m_osNameEdit);
-		vbox->addWidget(m_osVersionLabel);
-		vbox->addWidget(m_osVersionEdit);
-		vbox->addWidget(m_frmworkVersionLabel);
-		vbox->addWidget(m_frmwkVersnEdit);
-		vbox->addStretch(1);
-		setLayout(vbox);
+		formLayout->addRow(m_osNameLabel,m_osNameEdit);
+		formLayout->addRow(m_osVersionLabel,m_osVersionEdit);
+		formLayout->addRow(m_frmworkVersionLabel,m_frmwkVersnEdit);
+		setLayout(formLayout);
 	}
-	setGeometry (220,210,375,200);
+	setGeometry (214,210,347,130);
 }
 AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox()
 {
@@ -152,7 +145,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox()
 }
 AlgHistScriptButton::AlgHistScriptButton(QString title,QWidget* w):QPushButton(title,w)
 {
-	setGeometry (500,420,100,30);
+	setGeometry (460,350,100,30);
 	connect(this,SIGNAL(clicked()),w,SLOT(generateScript()));
 }
 AlgHistScriptButton::~AlgHistScriptButton()
@@ -163,15 +156,15 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(ApplicationWindow *w,const std::v
 MantidQtDialog(w),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_algName(""),m_nVersion(0)
 {
     setWindowTitle(tr("Algorithm History"));
-	setMinimumHeight(470);
-    setMinimumWidth(610);
-	setGeometry(50,150,560,420); 
+	setMinimumHeight(400);
+    setMinimumWidth(570);
+	setGeometry(50,150,540,380); 
 	
 	//Create a tree widget to display the algorithm names in the workspacehistory
 	m_Historytree = new AlgHistoryTreeWidget(this);
 	if(m_Historytree)
 	{	m_Historytree->setHeaderLabel("Algorithms");
-		m_Historytree->setGeometry (5,5,210,200);
+		m_Historytree->setGeometry (5,5,205,200);   
 	}
 	//Populate the History Tree widget
 	populateAlgHistoryTreeWidget();
@@ -274,7 +267,6 @@ void AlgorithmHistoryWindow::generateScript()
 	//QString tempScript("");
 	string tempScript("");
 	QString script("");
-	int nVersion=-1;
 	vector<Property*> algPropUnmngd;
 	vector<Property*>::const_iterator itUmnngd;
 	vector<PropertyHistory>algHistProp;
@@ -291,7 +283,7 @@ void AlgorithmHistoryWindow::generateScript()
 		string name=(*algHistIter).name();
 		int nVersion=(*algHistIter).version();
 		int nexecCount=(*algHistIter).execCount();
-		g_log.error() << "mantid Plot" <<" " << name <<nexecCount << " " << std::endl;
+		//g_log.error() << "mantid Plot" <<" " << name <<nexecCount << " " << std::endl;
 		//creating an unmanaged instance of the selected algorithm
 		//this is bcoz algorith history is giving dynamically generated workspaces for some 
 		//algorithms like LoadRaw.But python script for LoadRaw has only one output workspace parameter
@@ -367,18 +359,7 @@ void AlgorithmHistoryWindow::writeToScriptFile(const QString& script)
 	{scriptPath="C\\Mantid\\Code\\Mantid\\PythonAPI\\Scripts";
 	}
 	else{scriptPath=prevdir;}//last opened path
-	//setting the script filename in dialog to 
-	//selected algorithm name&version  by default
-	/*QString algName=getAlgorithmName();
-	QString algName=getAlgorithmName();
-	int nVer=getAlgorithmVersion();
-	algName+="v";
-	algName+=QString::number(nVer,10);
-	algName=algName+".py";
-	scriptPath+="\\";
-	scriptPath+=algName;
-	*/
-
+	
 	QString filePath=QFileDialog::getSaveFileName(this,tr("Save Script As "),scriptPath,tr("Script files (*.py)"));
 	QFile scriptfile(filePath);
 	if (!scriptfile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -524,7 +505,8 @@ m_Histprop(propHist)
 	{	m_histpropTree->setColumnCount(5);
 		m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
 		m_histpropTree->setHeaderLabels(hList);
-		m_histpropTree->setGeometry (213,5,385,200);
+		//m_histpropTree->setGeometry (213,5,385,200);
+		m_histpropTree->setGeometry (213,5,350,200);
 	}
 }
 void AlgHistoryProperties::clearData()

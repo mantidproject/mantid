@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QTextStream>
+#include <QFormLayout>
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AlgorithmHistory.h"
@@ -26,6 +27,7 @@
 #include "MantidQtAPI/MantidQtDialog.h"
 #include "../ApplicationWindow.h"
 #include "MantidKernel/Logger.h"
+#include "QMessageBox"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -138,7 +140,7 @@ private:
 	const QString& getAlgorithmName() const;
 	void setAlgorithmVersion(const int& version);
 	const int& getAlgorithmVersion()const;
-	static Mantid::Kernel::Logger& g_log;
+	//static Mantid::Kernel::Logger& g_log;
 	
 private:
 	vector<AlgorithmHistory>m_algHist;
