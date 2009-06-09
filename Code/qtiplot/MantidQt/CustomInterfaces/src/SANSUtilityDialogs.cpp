@@ -58,7 +58,7 @@ SANSPlotDialog::SANSPlotDialog(QWidget *parent) :
   QPushButton *add1D = new QPushButton("Add 1D");
   connect(add1D, SIGNAL(clicked()), this, SLOT(add1DPlot()));
   m_spec_list = new QLineEdit;
-  m_spec_list->setText("0");
+  m_spec_list->setText("1");
   m_spec_list->setToolTip("A comma-separated list of workspace indexes");
   grid->addWidget(add1D, 2,0);
   grid->addWidget(m_spec_list, 2, 1);
@@ -163,7 +163,7 @@ void SANSPlotDialog::add1DPlot()
       dataset->setText(1, spec_nums);
     }
   }
-  m_spec_list->setText("0");
+  m_spec_list->setText("1");
   m_opt_input->expandAll();
 }
 
@@ -184,7 +184,6 @@ void SANSPlotDialog::add2DPlot()
  */
 void SANSPlotDialog::plotButtonClicked()
 {
-    //throw std::runtime_error("Hello!");
   QString py_code;
   QTreeWidgetItem *root = m_opt_input->invisibleRootItem();
   int toplevel_count = root->childCount();
@@ -213,12 +212,14 @@ void SANSPlotDialog::plotButtonClicked()
 	//The very first curve is special as it creates the referece to the plot that is needed to add the others
 	if( first_curve )
 	{
-	  py_code += writePlotCmd(data, itr.next(), true) + "\n";
+	  int spec = itr.next().toInt() - 1;
+	  py_code += writePlotCmd(data, QString::number(spec), true) + "\n";
 	  first_curve = false;
 	}
 	while( itr.hasNext() )
 	{
-	  QString plotcmd = writePlotCmd(data, itr.next(), false);
+	  int spec = itr.next().toInt() - 1;
+	  QString plotcmd = writePlotCmd(data, QString::number(spec), false);
 	  if( !plotcmd.isEmpty() )
 	  {
 	    py_code += "plot" + QString::number(p) + ".insertCurve(" + plotcmd + ", 0)\n";
@@ -287,7 +288,7 @@ QString SANSPlotDialog::checkSpectraList(const QString & workspace, const QStrin
   {
     QString entry = itr.next();
     if( validlist.contains(entry) ) continue;
-    int spec = entry.toInt();
+    int spec = entry.toInt() - 1;
     if( spec < 0 || spec >= nhist ) 
     {
       allvalid = false;
