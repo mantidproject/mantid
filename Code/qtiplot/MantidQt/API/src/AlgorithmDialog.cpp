@@ -225,19 +225,29 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
     filter = "All Files (*.*)";
   }
   
-  QString filepath; 
   const Mantid::Kernel::FileValidator *file_checker = dynamic_cast<const Mantid::Kernel::FileValidator*>(prop->getValidator());
+  QFileDialog dialog(this);
+  dialog.setNameFilter(filter);
+  dialog.setDirectory(AlgorithmInputHistory::Instance().getPreviousDirectory());
   if( file_checker && !file_checker->fileMustExist() )
   {
-    filepath = QFileDialog::getSaveFileName(this, tr("Select File"), AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+    dialog.setFileMode(QFileDialog::AnyFile);
   }
   else
   {
-    filepath = QFileDialog::getOpenFileName(this, tr("Select File"), AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+    dialog.setFileMode(QFileDialog::ExistingFile);
   }
+
+  QStringList file_names;
+  if (dialog.exec()) file_names = dialog.selectedFiles();
   
-  if( !filepath.isEmpty() ) AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filepath).absoluteDir().path());
-  return filepath;
+  if( !file_names.isEmpty() ) 
+  {
+    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(file_names[0]).absoluteDir().path());
+    return file_names[0];
+  }
+
+  return QString();
 }
 
 /**

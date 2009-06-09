@@ -263,5 +263,5 @@ void LoadRawDialog::browseClicked()
   }
 
   //Add a suggestion for workspace name
-  if( m_wsBox->isEnabled() ) m_wsBox->setText(QFileInfo(filepath).baseName());
+  if( m_wsBox->isEnabled() && !filepath.isEmpty() ) m_wsBox->setText(QFileInfo(filepath).baseName());
 }
