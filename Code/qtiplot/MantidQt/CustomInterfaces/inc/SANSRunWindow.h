@@ -58,7 +58,7 @@ private:
   /// Read a limit line from the user file
   void readLimits(const QString & com_line);
   /// Get the component distances
-  void componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb);
+  void componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb, double & lmm);
   /// Enable/disable user interaction
   void setProcessingState(bool running, int type);
   ///Check for workspace name in the AnalysisDataService
@@ -72,7 +72,9 @@ private:
   /// Create a mask string
   QString createMaskString() const;
   /// Construct the list of workspace names from the information provided
-  QStringList constructWorkspaceNames() const;
+  void constructWorkspaceNames();
+  /// Setup the geometry details tab
+  void setupGeometryDetails();
   //@}
 
   /**@name Python code utility commands */
@@ -124,6 +126,9 @@ private:
 
   /// A hash for quickly retrieving the different label fields
   QHash<int, QLabel*> m_period_lbls;
+
+  /// A list of the full workspace names
+  QStringList m_workspace_names;
 
   /// The template to perform the LOQ data reduction
   QString m_pycode_loqreduce;

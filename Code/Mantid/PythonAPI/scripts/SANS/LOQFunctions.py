@@ -88,25 +88,8 @@ def GetMainBank(inputWS, startid, endid, outputWS):
     #  Account for Mantid's off by one storage
     CropWorkspace(inputWS, OutputWorkspace=outputWS, StartSpectrum=str(startid - 1),EndSpectrum=str(endid - 1))
 
-# # Setup the data to process
-# def SetupSmallAngle(inputWS, outputWS, firstsmall, lastsmall, rmin, rmax, maskstring, xshift, yshift):
-    # # Get the monitor
-    # GetMonitor(inputWS, "Monitor-" + inputWS)
-    # # Get the small angle banks
-    # GetMainBank(inputWS, firstsmall, lastsmall, outputWS)
-    # # Mask beam stop
-    # MaskInsideCylinder(outputWS, rmin)
-    # # Mask corners
-    # MaskOutsideCylinder(outputWS, rmax)
-    # # Mask others that are defined
-    # detlist = ConvertToDetList(maskstring)
-    # MaskByDetNumber(outputWS, detlist)
-    # MoveInstrumentComponent(outputWS, "main-detector-bank", X = xshift, Y = yshift, RelativePosition="1")
-
 # Setup the transmission data
 def SetupTransmissionData(inputWS, instr_file, wavbining):
-    # Change the instrument definition to the correct one
-    LoadInstrument(inputWS, instr_file)
     tmpWS = inputWS + '_tmp'
     RemoveBins(inputWS,tmpWS,"19900","20500",Interpolation="Linear")
     FlatBackground(tmpWS,tmpWS,"1,2","31000","39000")

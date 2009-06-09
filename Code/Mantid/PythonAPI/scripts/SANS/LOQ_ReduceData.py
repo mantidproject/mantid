@@ -17,6 +17,7 @@ trans_can = '|TRANSMISSIONCAN|'
 direct_sample = '|DIRECTSAMPLE|'
 maskstring = '|MASKSTRING|'
 instr_dir = '|INSTRUMENTPATH|'
+instr_name = '|INSTRUMENTNAME|'
 rmin = |RADIUSMIN|/1000.0
 rmax = |RADIUSMAX|/1000.0
 xshift = str( (317.5 - |XBEAM|)/1000.0 )
@@ -35,13 +36,15 @@ direct_beam_file = '|DIRECTFILE|'
 
 # This indicates whether a 1D or a 2D analysis is performed
 CORRECTIONTYPE = '|ANALYSISTYPE|'
+MONITORSPECTRUM = |MONSPEC|
+
 
 ### Main correction function ###
 def Correct(sampleWS, transWS, resultWS, suffix):
 	'''Performs the data reduction steps'''
 	monitorWS = "Monitor"
 	# Get the monitor
-	LOQFunctions.GetMonitor(sampleWS, monitorWS, 2)
+	LOQFunctions.GetMonitor(sampleWS, monitorWS, MONITORSPECTRUM)
 	# Get small angle banks
 	firstsmall = 130
 	lastsmall = 16130
@@ -54,7 +57,10 @@ def Correct(sampleWS, transWS, resultWS, suffix):
 	# Mask others that are defined
 	detlist = LOQFunctions.ConvertToDetList(maskstring)
 	LOQFunctions.MaskByDetNumber(resultWS, detlist)
-	MoveInstrumentComponent(resultWS, "main-detector-bank", X = xshift, Y = yshift, RelativePosition="1")
+	if instr_name == "LOQ":
+                MoveInstrumentComponent(resultWS, "main-detector-bank", X = xshift, Y = yshift, RelativePosition="1")
+        else:
+                MoveInstrumentComponent(resultWS, "front-detector", X = xshift, Y = yshift, RelativePosition="1")  
 
 	# Convert all of the files to wavelength and rebin
 	# ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
@@ -77,8 +83,12 @@ def Correct(sampleWS, transWS, resultWS, suffix):
  	# Correct by transmission
  	# Need to remove prompt spike and, later, flat background
  	if transWS and direct_sample:
-                trans_tmp_out = LOQFunctions.SetupTransmissionData(transWS, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
-        	direct_tmp_out = LOQFunctions.SetupTransmissionData(direct_sample, instr_dir + "/LOQ_trans_Definition.xml", wavbin)
+                # Change the instrument definition to the correct one in the LOQ case 
+                if instr_name == "LOQ":
+                        LoadInstrument(transWS, instr_dir + "/LOQ_trans_Definition.xml")
+                        LoadInstrument(direct_sample, instr_dir + "/LOQ_trans_Definition.xml")
+                trans_tmp_out = LOQFunctions.SetupTransmissionData(transWS, wavbin)
+        	direct_tmp_out = LOQFunctions.SetupTransmissionData(direct_sample, wavbin)
                 trans_ws = transWS.split('_')[0] + "_trans_" + suffix
                 CalculateTransmission(trans_tmp_out,direct_tmp_out,trans_ws)
                 mantid.deleteWorkspace(trans_tmp_out)

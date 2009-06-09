@@ -8,6 +8,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IInstrument.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/V3D.h"
 
@@ -67,8 +68,7 @@ void SANSRunWindow::initLayout()
 
     connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
     connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
-    //    m_uiForm.plotBtn->setEnabled(false);
-
+ 
     // Disable most things so that load is the only thing that can be done
     m_uiForm.oneDBtn->setEnabled(false);
     m_uiForm.twoDBtn->setEnabled(false);
@@ -240,6 +240,13 @@ bool SANSRunWindow::loadUserFile()
   
   //Clear the def masking info table
   m_uiForm.def_mask_table->clear();
+
+  //Set a couple of things to default values that will get overwritten if present in the file
+  if( m_uiForm.inst_opt->currentIndex() == 0 ) m_uiForm.monitor_spec->setText("2");
+  else m_uiForm.monitor_spec->setText("73730");
+
+  m_uiForm.dist_mod_mon->setText("0.0000");
+
   QTextStream stream(&user_file);
   QString data;
   while( !stream.atEnd() )
@@ -251,22 +258,37 @@ bool SANSRunWindow::loadUserFile()
     }
     else if( com_line.startsWith("MON") )
     {
-      QString filepath = QFileInfo(filetext).absoluteDir().absoluteFilePath(com_line.section("]", 1));
       //Line has the form MON/FIELD=...
       QString field = com_line.section("/", 1).section("=", 0, 0);
-      if( field.compare("direct", Qt::CaseInsensitive) == 0 )
+      if( field.compare("length", Qt::CaseInsensitive) == 0 )
       {
-	m_uiForm.direct_file->setText(filepath);
+        QStringList line_items = com_line.section('=',1).split(' ');
+        if( line_items.count() == 2 )
+        {
+          m_uiForm.dist_mod_mon->setText(line_items[0]);
+          m_uiForm.monitor_spec->setText(line_items[1]);
+        }
       }
-      else if( field.compare("hab", Qt::CaseInsensitive) == 0 )
+      else
       {
-	m_uiForm.hab_file->setText(filepath);
+        QString filepath;
+        if( com_line.contains(']') ) filepath = QFileInfo(filetext).absoluteDir().absoluteFilePath(com_line.section("]", 1));
+        else filepath = com_line.section('=',1);
+
+        if( field.compare("direct", Qt::CaseInsensitive) == 0 )
+        {
+      	  m_uiForm.direct_file->setText(filepath);
+        }
+        else if( field.compare("hab", Qt::CaseInsensitive) == 0 )
+        {
+	        m_uiForm.hab_file->setText(filepath);
+        }
+        else if( field.compare("flat", Qt::CaseInsensitive) == 0 )
+        {
+	        m_uiForm.flat_file->setText(filepath);
+        }
+        else {}
       }
-      else if( field.compare("flat", Qt::CaseInsensitive) == 0 )
-      {
-	m_uiForm.flat_file->setText(filepath);
-      }
-      else {}
     }
     else if( com_line.startsWith("set centre") )
     {
@@ -300,7 +322,6 @@ bool SANSRunWindow::loadUserFile()
       QTableWidgetItem *item2 = new QTableWidgetItem(col2_txt);
       m_uiForm.def_mask_table->setItem(row, 0, item1);
       m_uiForm.def_mask_table->setItem(row, 1, item2);
-
     }
     else {}
        
@@ -401,26 +422,32 @@ void SANSRunWindow::readLimits(const QString & com_line)
  * @param lms The result of the moderator-sample distance
  * @param lsda The result of the sample-detector bank 1 distance
  * @param lsdb The result of the sample-detector bank 2 distance
+ * @param lmm The moderator-monitor distance
  */
-void SANSRunWindow::componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb)
+void SANSRunWindow::componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb, double & lmm)
 {
   if( !workspaceExists(wsname) ) return;
-  Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+  Mantid::API::MatrixWorkspace_sptr workspace_ptr = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
     (Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
-  Mantid::API::IInstrument_sptr instr = ws->getInstrument();
+  Mantid::API::IInstrument_sptr instr = workspace_ptr->getInstrument();
   if( instr == boost::shared_ptr<Mantid::API::IInstrument>() ) return;
 
-  Mantid::Geometry::IObjComponent_sptr source =  instr->getSource();
+  Mantid::Geometry::IObjComponent_sptr source = instr->getSource();
   if( source == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
-  Mantid::Geometry::IObjComponent_sptr sample =  instr->getSample();
+  Mantid::Geometry::IObjComponent_sptr sample = instr->getSample();
   if( sample == boost::shared_ptr<Mantid::Geometry::IObjComponent>() ) return;
 
   lms = source->getPos().distance(sample->getPos());
    
   //Find the main detector bank
   std::string comp_name("main-detector-bank");
-  if( m_uiForm.inst_opt->currentText().startsWith("S") ) comp_name = "front-detector";
+  bool isS2D(false);
+  if( m_uiForm.inst_opt->currentIndex() == 1 ) 
+  {
+    isS2D = true;
+    comp_name = "front-detector";
+  }
   boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName(comp_name);
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
@@ -428,13 +455,19 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
   }
 
   comp_name = "HAB";
-  if( m_uiForm.inst_opt->currentText().startsWith("S") ) comp_name = "rear-detector";
+  if( isS2D ) comp_name = "rear-detector";
   comp = instr->getComponentByName(comp_name);
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
     lsdb = sample->getPos().distance(comp->getPos());
   }
+  if( lmm < 0.0 ) return;
 
+  int monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
+  std::vector<int> dets = workspace_ptr->spectraMap().getDetectors(monitor_spectrum);
+  if( dets.empty() ) return;
+  Mantid::Geometry::IDetector_sptr detector = instr->getDetector(dets[0]);
+  lmm = detector->getDistance(*source);
 }
 
 /**
@@ -516,9 +549,14 @@ QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & 
   QString filename = directory.absoluteFilePath(prefix + run_no + ext);
   if( QFileInfo(filename).exists() ) return filename;
   
+  // If nothing pad the number and check
+  QString padded_no = run_no.rightJustified(8, '0', true);
+  filename = directory.absoluteFilePath(prefix + padded_no + ext);
+  if( QFileInfo(filename).exists() ) return filename;
+  else return QString();
   //Otherwise check entries with padded
   //RegExp2 will be default for Qt >= 5. It matches more like other regex engines
-  QRegExp rx(prefix + "[0]*" + run_no + ".raw", Qt::CaseInsensitive, QRegExp::RegExp2);
+  /*QRegExp rx(prefix + "[0]*" + run_no + ".raw", Qt::CaseInsensitive, QRegExp::RegExp2);
   QRegExpValidator matcher(rx, 0);
   QStringList files = directory.entryList( QStringList(prefix + "*"), QDir::Files | QDir::NoSymLinks );
   QStringListIterator itr(files);
@@ -537,7 +575,7 @@ QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & 
     }
   }
   if( filename.isEmpty() ) return QString();
-  else return directory.absoluteFilePath(filename);
+  else return directory.absoluteFilePath(filename);*/
 }
  
 /**
@@ -559,30 +597,92 @@ QString SANSRunWindow::createMaskString() const
 }
 
 /**
-* Construct the names of the workspaces from the boxes
+* Construct the mapp for names of the workspaces from the boxes
 */
-QStringList SANSRunWindow::constructWorkspaceNames() const
+void SANSRunWindow::constructWorkspaceNames()
 {
+  m_workspace_names.clear();
   QString file_ext(m_uiForm.file_opt->currentText());
-  QStringList wslist;
   for( int i = 0; i < 9; ++i )
   {
     QString box_text = m_run_no_boxes.value(i)->text();
     if( box_text.isEmpty() ) 
     {
-     wslist.append("");
+      m_workspace_names.append("");
       continue;
     }
     if( i < 3 )
     {
-      wslist.append(box_text + "_sans_" + file_ext);
+      m_workspace_names.append(box_text + "_sans_" + file_ext);
     }
     else
     {
-      wslist.append(box_text + "_trans_" + file_ext);
+      m_workspace_names.append(box_text + "_trans_" + file_ext);
     }
   }
-  return wslist;
+}
+
+void SANSRunWindow::setupGeometryDetails()
+{
+  QString wsname = m_workspace_names[0];
+  if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
+    // Set up distance information
+  double dist_ms_smp(0.0), dist_sd1_smp(0.0), dist_sd2_smp(0.0), dist_mm(-1.0);
+  if( m_uiForm.dist_mod_mon->text() == "0.0000" ) dist_mm = 0.0;
+  componentDistances(wsname, dist_ms_smp, dist_sd1_smp, dist_sd2_smp, dist_mm);
+  const char format('f');
+  const int prec(4);
+  m_uiForm.dist_sample_ms->setText(QString::number(dist_ms_smp, format, prec));
+  m_uiForm.dist_sample_sd1->setText(QString::number(dist_sd1_smp, format, prec));
+  m_uiForm.dist_sample_sd2->setText(QString::number(dist_sd2_smp, format, prec));
+
+  if( dist_mm > 0.0 ) m_uiForm.dist_mod_mon->setText(QString::number(dist_mm, format, prec));
+  
+  wsname = m_workspace_names[1];
+  if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
+
+  double dist_ms_can(0.0), dist_sd1_can(0.0), dist_sd2_can(0.0);
+  // We only need the moderator-monitor from the sample so -1.0 flags not to calculate it
+  dist_mm = -1.0;
+  componentDistances(wsname, dist_ms_can, dist_sd1_can, dist_sd2_can, dist_mm);
+  
+  m_uiForm.dist_can_ms->setText(QString::number(dist_ms_can, format, prec));
+  m_uiForm.dist_can_sd1->setText(QString::number(dist_sd1_can, format, prec));
+  m_uiForm.dist_can_sd2->setText(QString::number(dist_sd2_can, format, prec));
+  bool warn_user(false);  
+  if( dist_ms_can > 0.0 && abs(dist_ms_can - dist_ms_smp) > 5e-3 )
+  {
+    warn_user = true;
+    m_uiForm.dist_sample_ms->setText("<font color='red'>" + m_uiForm.dist_sample_ms->text() + "</font>");
+    m_uiForm.dist_can_ms->setText("<font color='red'>" + m_uiForm.dist_can_ms->text() + "</font>");
+  }
+  if( dist_sd1_can > 0.0  && abs(dist_sd1_can - dist_sd1_smp) > 5e-3 )
+  {
+    warn_user = true;
+    m_uiForm.dist_sample_sd1->setText("<font color='red'>" + m_uiForm.dist_sample_sd1->text() + "</font>");
+    m_uiForm.dist_can_sd1->setText("<font color='red'>" + m_uiForm.dist_can_sd1->text() + "</font>");
+  }
+  if( dist_sd2_can > 0.0 && abs(dist_sd2_can - dist_sd2_smp) > 5e-3 )
+  {
+    warn_user = true;
+    m_uiForm.dist_sample_sd2->setText("<font color='red'>" + m_uiForm.dist_sample_sd2->text() + "</font>");
+    m_uiForm.dist_can_sd2->setText("<font color='red'>" + m_uiForm.dist_can_sd2->text() + "</font>");
+  }
+  
+  wsname = m_workspace_names[2];
+  if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
+
+  double dist_ms_bckd(0.0), dist_sd1_bckd(0.0), dist_sd2_bckd(0.0);
+  componentDistances(wsname, dist_ms_bckd, dist_sd1_bckd, dist_sd2_bckd, dist_mm);
+  m_uiForm.dist_bkgd_ms->setText(QString::number(dist_ms_bckd, format, prec));
+  m_uiForm.dist_bkgd_sd1->setText(QString::number(dist_sd1_bckd, format, prec));
+  m_uiForm.dist_bkgd_sd2->setText(QString::number(dist_sd2_bckd, format, prec));
+
+  if( warn_user )
+  {
+    showInformationBox("Warning: Some component distances are inconsistent for the sample and can/background runs.\nSee the Geometry tab for details.");
+  }
+  return;
 }
 
 //-------------------------------------
@@ -665,25 +765,41 @@ void SANSRunWindow::handleLoadButtonClick()
     if( code.isEmpty() ) continue;
 
     runPythonCode(code, true);
-    data_loaded = true;
-    if( itr.key() == 0 && workspaceExists(ws_name) )
+    
+    if( itr.key() == 0 )
     {
-      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-       (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
-      if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
+      if( workspaceExists(ws_name) )
       {
-        double xbeg = ws->readX(0).front();
-        m_uiForm.tof_min->setText(QString::number(xbeg)); 
-        double xend = ws->readX(0).back();
-        m_uiForm.tof_max->setText(QString::number(xend));
+        data_loaded = true;
+        Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+          (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
+        if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
+        {
+          double xbeg = ws->readX(0).front();
+          m_uiForm.tof_min->setText(QString::number(xbeg)); 
+          double xend = ws->readX(0).back();
+          m_uiForm.tof_max->setText(QString::number(xend));
+        }
+      }
+      else
+      {
+        data_loaded = false;
+        break;
       }
     }
+    else if( workspaceExists(ws_name) )
+    {
+     data_loaded = true;
+    }
+    else data_loaded = false;
   }
   // Cannot do anything if nothing was loaded
   if( !data_loaded ) 
   {
-   return;
+    return;
   }
+  /// Build the list of full workspace names
+  constructWorkspaceNames();
 
   //We need to sort out the number of periods in each data set
   QString code = "wksp_dict = {}\n"
@@ -729,65 +845,14 @@ void SANSRunWindow::handleLoadButtonClick()
 
     userentry->setText("1");
   }
-  
+  //Fill in the information on the geometry tab
+  setupGeometryDetails();
+
   for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
   {
     m_uiForm.tabWidget->setTabEnabled(index, true);
   }
-
-  QString wsname = m_uiForm.sct_sample_edit->text() + "_sans_" + m_uiForm.file_opt->currentText();;
-  if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
-    // Set up distance information
-  double dist_ms_smp(0.0), dist_sd1_smp(0.0), dist_sd2_smp(0.0);
-  componentDistances(wsname, dist_ms_smp, dist_sd1_smp, dist_sd2_smp);
-  const char format('f');
-  const int prec(4);
-  m_uiForm.dist_sample_ms->setText(QString::number(dist_ms_smp, format, prec));
-  m_uiForm.dist_sample_sd1->setText(QString::number(dist_sd1_smp, format, prec));
-  m_uiForm.dist_sample_sd2->setText(QString::number(dist_sd2_smp, format, prec));
-  
-  wsname = m_uiForm.sct_can_edit->text() + "_sans_" + m_uiForm.file_opt->currentText();
-  if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
-
-  double dist_ms_can(0.0), dist_sd1_can(0.0), dist_sd2_can(0.0);
-  componentDistances(wsname, dist_ms_can, dist_sd1_can, dist_sd2_can);
-  
-  m_uiForm.dist_can_ms->setText(QString::number(dist_ms_can, format, prec));
-  m_uiForm.dist_can_sd1->setText(QString::number(dist_sd1_can, format, prec));
-  m_uiForm.dist_can_sd2->setText(QString::number(dist_sd2_can, format, prec));
-  bool warn_user(false);  
-  if( dist_ms_can > 0.0 && abs(dist_ms_can - dist_ms_smp) > 5e-3 )
-  {
-    warn_user = true;
-    m_uiForm.dist_sample_ms->setText("<font color='red'>" + m_uiForm.dist_sample_ms->text() + "</font>");
-    m_uiForm.dist_can_ms->setText("<font color='red'>" + m_uiForm.dist_can_ms->text() + "</font>");
-  }
-  if( dist_sd1_can > 0.0  && abs(dist_sd1_can - dist_sd1_smp) > 5e-3 )
-  {
-    warn_user = true;
-    m_uiForm.dist_sample_sd1->setText("<font color='red'>" + m_uiForm.dist_sample_sd1->text() + "</font>");
-    m_uiForm.dist_can_sd1->setText("<font color='red'>" + m_uiForm.dist_can_sd1->text() + "</font>");
-  }
-  if( dist_sd2_can > 0.0 && abs(dist_sd2_can - dist_sd2_smp) > 5e-3 )
-  {
-    warn_user = true;
-    m_uiForm.dist_sample_sd2->setText("<font color='red'>" + m_uiForm.dist_sample_sd2->text() + "</font>");
-    m_uiForm.dist_can_sd2->setText("<font color='red'>" + m_uiForm.dist_can_sd2->text() + "</font>");
-  }
-  
-  wsname = m_uiForm.sct_bkgd_edit->text() + "_sans_" + m_uiForm.file_opt->currentText();
-  if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
-
-  double dist_ms_bckd(0.0), dist_sd1_bckd(0.0), dist_sd2_bckd(0.0);
-  componentDistances(wsname, dist_ms_bckd, dist_sd1_bckd, dist_sd2_bckd);
-  m_uiForm.dist_bkgd_ms->setText(QString::number(dist_ms_bckd, format, prec));
-  m_uiForm.dist_bkgd_sd1->setText(QString::number(dist_sd1_bckd, format, prec));
-  m_uiForm.dist_bkgd_sd2->setText(QString::number(dist_sd2_bckd, format, prec));
-
-  if( warn_user )
-  {
-    showInformationBox("Warning: Some component distances are inconsistent for the sample and can/background runs.\nSee the Geometry tab for details.");
-  } 
+ 
   //We can now process some data
   emit dataReadyToProcess(true);
 }
@@ -806,12 +871,11 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     showInformationBox("Error: A scattering sample run number is required to continue.");
     return;
   }
-  QStringList wslist = constructWorkspaceNames();
-  
+    
   // There is a number but it doesn't exist as a workpace
-  if( !workspaceExists(wslist.at(0)) )
+  if( !workspaceExists(m_workspace_names.at(0)) )
   {
-    showInformationBox("Error: Please check " + wslist.at(0) + " has been loaded.");
+    showInformationBox("Error: Please check " + m_workspace_names.at(0) + " has been loaded.");
     return;
   }
   int idtype(0);
@@ -822,11 +886,13 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   //Construct the code to execute
   QString py_code = m_pycode_loqreduce;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
-  py_code.replace("|SCATTERSAMPLE|", wslist.at(0));
-  py_code.replace("|SCATTERCAN|", wslist.at(1));
-  py_code.replace("|TRANSMISSIONSAMPLE|", wslist.at(3));
-  py_code.replace("|TRANSMISSIONCAN|", wslist.at(4));
-  py_code.replace("|DIRECTSAMPLE|", wslist.at(6));
+  py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
+
+  py_code.replace("|SCATTERSAMPLE|", m_workspace_names.at(0));
+  py_code.replace("|SCATTERCAN|", m_workspace_names.at(1));
+  py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.at(3));
+  py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.at(4));
+  py_code.replace("|DIRECTSAMPLE|", m_workspace_names.at(6));
 
   // Limit replacement
   py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
@@ -869,6 +935,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   py_code.replace("|SCALEFACTOR|", m_uiForm.scale_factor->text());
   py_code.replace("|MASKSTRING|", createMaskString());
   py_code.replace("|ANALYSISTYPE|", type);
+  py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
   
   //Execute the code
   runPythonCode(py_code);
@@ -923,6 +990,7 @@ void SANSRunWindow::handleShowMaskButtonClick()
 
   QString py_code = m_pycode_viewmask;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
+  py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
   //Shape mask defaults
   py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
   py_code.replace("|RADIUSMAX|", m_uiForm.rad_max->text());

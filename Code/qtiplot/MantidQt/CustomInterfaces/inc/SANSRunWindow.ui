@@ -925,9 +925,9 @@
        <property name="geometry" >
         <rect>
          <x>9</x>
-         <y>9</y>
+         <y>-1</y>
          <width>493</width>
-         <height>181</height>
+         <height>173</height>
         </rect>
        </property>
        <property name="title" >
@@ -1006,7 +1006,11 @@
         <item row="0" column="3" >
          <widget class="QLabel" name="label_23" >
           <property name="text" >
-           <string>Max</string>
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Max&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
@@ -1107,7 +1111,11 @@
         <item row="0" column="1" >
          <widget class="QLabel" name="label_13" >
           <property name="text" >
-           <string>Min</string>
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Min&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
@@ -1119,33 +1127,27 @@
       <widget class="QGroupBox" name="groupBox_5" >
        <property name="geometry" >
         <rect>
-         <x>508</x>
-         <y>9</y>
+         <x>507</x>
+         <y>-1</y>
          <width>239</width>
-         <height>126</height>
+         <height>127</height>
         </rect>
        </property>
        <property name="title" >
         <string>Spectra Details</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3" >
-        <item row="1" column="1" >
+        <item row="2" column="1" >
          <widget class="QLineEdit" name="spec_min" />
         </item>
-        <item row="0" column="1" >
+        <item row="1" column="1" >
          <widget class="QLabel" name="label_5" >
           <property name="text" >
-           <string>Min</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2" >
-         <widget class="QLabel" name="label_9" >
-          <property name="text" >
-           <string>Max</string>
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Min&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
@@ -1153,27 +1155,51 @@
          </widget>
         </item>
         <item row="1" column="2" >
+         <widget class="QLabel" name="label_9" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Max&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2" >
          <widget class="QLineEdit" name="spec_max" />
         </item>
-        <item row="1" column="0" >
+        <item row="2" column="0" >
          <widget class="QLabel" name="label_22" >
           <property name="text" >
            <string>Spectra Nos</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0" >
+        <item row="3" column="0" >
          <widget class="QLabel" name="label_24" >
           <property name="text" >
            <string>T-O-F</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1" >
+        <item row="3" column="1" >
          <widget class="QLineEdit" name="tof_min" />
         </item>
-        <item row="2" column="2" >
+        <item row="3" column="2" >
          <widget class="QLineEdit" name="tof_max" />
+        </item>
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_41" >
+          <property name="text" >
+           <string>Monitor Spectrum</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="monitor_spec" />
         </item>
        </layout>
       </widget>
@@ -1225,8 +1251,8 @@
       <widget class="QGroupBox" name="groupBox_7" >
        <property name="geometry" >
         <rect>
-         <x>197</x>
-         <y>210</y>
+         <x>195</x>
+         <y>193</y>
          <width>202</width>
          <height>88</height>
         </rect>
@@ -1290,7 +1316,7 @@
        <property name="geometry" >
         <rect>
          <x>9</x>
-         <y>209</y>
+         <y>192</y>
          <width>182</width>
          <height>88</height>
         </rect>
@@ -1317,8 +1343,8 @@
       <widget class="QGroupBox" name="groupBox_9" >
        <property name="geometry" >
         <rect>
-         <x>404</x>
-         <y>211</y>
+         <x>406</x>
+         <y>192</y>
          <width>97</width>
          <height>88</height>
         </rect>
@@ -1347,7 +1373,7 @@
          <x>19</x>
          <y>10</y>
          <width>314</width>
-         <height>119</height>
+         <height>124</height>
         </rect>
        </property>
        <property name="title" >
@@ -1357,24 +1383,32 @@
         <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout_6" >
-        <item row="0" column="1" >
+        <item row="1" column="1" >
          <widget class="QLabel" name="label_35" >
           <property name="text" >
-           <string>Sample</string>
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Sample&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2" >
+        <item row="1" column="2" >
          <widget class="QLabel" name="label_36" >
           <property name="text" >
-           <string>Can</string>
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Can&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="0" column="0" >
+        <item row="1" column="0" >
          <spacer name="horizontalSpacer_5" >
           <property name="orientation" >
            <enum>Qt::Horizontal</enum>
@@ -1387,7 +1421,7 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0" >
+        <item row="2" column="0" >
          <widget class="QLabel" name="label_37" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
@@ -1400,7 +1434,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0" >
+        <item row="3" column="0" >
          <widget class="QLabel" name="label_38" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
@@ -1413,7 +1447,7 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1" >
+        <item row="2" column="1" >
          <widget class="QLabel" name="dist_sample_ms" >
           <property name="text" >
            <string>0.0000</string>
@@ -1421,9 +1455,12 @@
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
           </property>
+          <property name="textInteractionFlags" >
+           <set>Qt::LinksAccessibleByMouse</set>
+          </property>
          </widget>
         </item>
-        <item row="1" column="2" >
+        <item row="2" column="2" >
          <widget class="QLabel" name="dist_can_ms" >
           <property name="text" >
            <string>0.0000</string>
@@ -1431,9 +1468,12 @@
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
           </property>
+          <property name="textInteractionFlags" >
+           <set>Qt::LinksAccessibleByMouse</set>
+          </property>
          </widget>
         </item>
-        <item row="2" column="2" >
+        <item row="3" column="2" >
          <widget class="QLabel" name="dist_can_sd1" >
           <property name="text" >
            <string>0.0000</string>
@@ -1443,7 +1483,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="1" >
+        <item row="3" column="1" >
          <widget class="QLabel" name="dist_sample_sd1" >
           <property name="text" >
            <string>0.0000</string>
@@ -1453,7 +1493,7 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="0" >
+        <item row="4" column="0" >
          <widget class="QLabel" name="label_39" >
           <property name="sizePolicy" >
            <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
@@ -1466,7 +1506,7 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="1" >
+        <item row="4" column="1" >
          <widget class="QLabel" name="dist_sample_sd2" >
           <property name="text" >
            <string>0.0000</string>
@@ -1476,7 +1516,7 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="2" >
+        <item row="4" column="2" >
          <widget class="QLabel" name="dist_can_sd2" >
           <property name="text" >
            <string>0.0000</string>
@@ -1486,20 +1526,14 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="3" >
+        <item row="1" column="3" >
          <widget class="QLabel" name="label_40" >
           <property name="text" >
-           <string>Bkgrd</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3" >
-         <widget class="QLabel" name="dist_bkgd_ms" >
-          <property name="text" >
-           <string>0.0000</string>
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Bkgrd&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
@@ -1507,6 +1541,19 @@
          </widget>
         </item>
         <item row="2" column="3" >
+         <widget class="QLabel" name="dist_bkgd_ms" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="textInteractionFlags" >
+           <set>Qt::LinksAccessibleByMouse</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3" >
          <widget class="QLabel" name="dist_bkgd_sd1" >
           <property name="text" >
            <string>0.0000</string>
@@ -1516,13 +1563,30 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="3" >
+        <item row="4" column="3" >
          <widget class="QLabel" name="dist_bkgd_sd2" >
           <property name="text" >
            <string>0.0000</string>
           </property>
           <property name="alignment" >
            <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLabel" name="dist_mod_mon" >
+          <property name="text" >
+           <string>0.0000</string>
+          </property>
+          <property name="textInteractionFlags" >
+           <set>Qt::LinksAccessibleByMouse</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_42" >
+          <property name="text" >
+           <string>moderator - monitor </string>
           </property>
          </widget>
         </item>

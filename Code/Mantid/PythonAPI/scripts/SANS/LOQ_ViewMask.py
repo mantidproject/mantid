@@ -10,7 +10,10 @@
 import LOQFunctions
 
 topLayer = 'CurrentMask'
-LoadEmptyInstrument('|INSTRUMENTPATH|/LOQ_Definition.xml',topLayer)
+
+instr_path = '|INSTRUMENTPATH|'
+instr_name = '|INSTRUMENTNAME|'
+LoadEmptyInstrument(instr_path + '/' + instr_name + "_Definition.xml",topLayer)
 
 rmin = |RADIUSMIN|/1000.0
 LOQFunctions.MaskInsideCylinder(topLayer, rmin)
