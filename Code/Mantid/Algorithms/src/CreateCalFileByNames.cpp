@@ -50,7 +50,7 @@ void CreateCalFileByNames::exec()
 	// Check that the instrument is in store
 	std::string instname=getProperty("InstrumentName");
 	// Get only the first 3 letters
-	std::string instshort=instname.substr(0,3);
+	std::string instshort=instname;
 	std::transform(instshort.begin(),instshort.end(),instshort.begin(),toupper);
 	instshort=instshort+"_Definition.xml";
 	// If instrument not in store, insult the user
