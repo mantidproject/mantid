@@ -25,8 +25,12 @@ NormaliseByCurrent::~NormaliseByCurrent() {}
 
 void NormaliseByCurrent::init()
 {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+    "Name of the input workspace" );
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "Name of the output workspace");
 }
 
 void NormaliseByCurrent::exec()

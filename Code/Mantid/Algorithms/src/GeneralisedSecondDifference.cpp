@@ -38,15 +38,24 @@ namespace Mantid
     {
 
       //Input and output workspaces
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        "Name of the input workspace");
+      declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace to be created as the output of the algorithm");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty("z",0,mustBePositive);
-      declareProperty("m",0,mustBePositive->clone());
-      declareProperty("spectra_min",0,mustBePositive->clone());
-      declareProperty("spectra_max",0,mustBePositive->clone());
+      declareProperty("m",0,mustBePositive->clone(),
+        "The number of points for averaging, i.e. summing will be done in the\n"
+        "range [y(i-m),y(i+m)]");
+      declareProperty("z",0,mustBePositive,
+        "The number of iteration steps in the averaging procedure" );
+      declareProperty("spectra_min",0,mustBePositive->clone(),
+        "Lower bound of the spectrum range (default 0)");
+      declareProperty("spectra_max",0,mustBePositive->clone(),
+        "Upper bound of the spectrum range (default workspace max)");
      }
 
     /** Executes the algorithm

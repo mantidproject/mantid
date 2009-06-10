@@ -34,20 +34,22 @@ void Linear::init()
   declareProperty("SpectrumIndex",0, mustBePositive,
     "Index number of the spectrum to fit");
   declareProperty("StartX", EMPTY_DBL(),
-    "An X value in the first bin to include in the fit (default is the lowest value of X)");
+    "An X value in the first bin to include in the fit (default\n"
+    "lowest value of X)");
   declareProperty("EndX", EMPTY_DBL(),
-    "An X value in the last bin to be included in the range (default the high X value");
-  declareProperty("FitStatus", "", 
-//add this STEVE    "Empty if the fit succeeded, otherwise contains the gsl error message",
-    Direction::Output);
+    "An X value in the last bin to be included in the range\n"
+    "(default the high X value");
+  declareProperty("FitStatus", "", new NullValidator<std::string>,
+    "Empty if the fit succeeded, otherwise contains the gsl error\n"
+    "message", Direction::Output);
   declareProperty("FitIntercept", 0.0,
-//add this STEVE            "The intercept with the ordinate of the fitted line. c0 in the equation below",
-    Direction::Output);
+    "The intercept with the ordinate of the fitted line. c0 in the\n"
+    "equation below", new NullValidator<double>, Direction::Output);
   declareProperty("FitSlope",0.0,
-//add this STEVE    "The slope of the fitted line. c1 in the equation below",
-    Direction::Output);
+    "The slope of the fitted line. c1 in the equation below",
+    new NullValidator<double>, Direction::Output);
   declareProperty("Chi^2",0.0,
-    //add this STEVE        "The goodness of the fit",
+    "The goodness of the fit", new NullValidator<double>,
     Direction::Output);
 
   // Disable default gsl error handler (which is to call abort!)

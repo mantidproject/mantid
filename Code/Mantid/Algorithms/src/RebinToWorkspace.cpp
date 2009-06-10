@@ -22,9 +22,14 @@ Mantid::Kernel::Logger& RebinToWorkspace::g_log = Mantid::Kernel::Logger::get("R
 void RebinToWorkspace::init()
 {
   //  using namespace Mantid::DataObjects;
-  declareProperty(new WorkspaceProperty<>("WorkspaceToRebin","", Kernel::Direction::Input));
-  declareProperty(new WorkspaceProperty<>("WorkspaceToMatch","",Kernel::Direction::Input));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output));
+  declareProperty(
+    new WorkspaceProperty<>("WorkspaceToRebin","", Kernel::Direction::Input),
+    "The workspace on which to perform the algorithm" );
+  declareProperty(
+    new WorkspaceProperty<>("WorkspaceToMatch","",Kernel::Direction::Input),
+    "The workspace to match the bin boundaries against" );
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output),
+    "The name of the workspace to be created as the output of the algorithm" );
 }
 
 /**

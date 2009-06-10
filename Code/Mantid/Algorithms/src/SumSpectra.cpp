@@ -23,15 +23,22 @@ Logger& SumSpectra::g_log = Logger::get("SumSpectra");
  */
 void SumSpectra::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new CommonBinsValidator<>));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new CommonBinsValidator<>),
+    "The workspace containing the spectra to be summed" );
+  declareProperty(
+    new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "The name of the workspace to be created as the output of the algorithm" );
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartSpectrum",0, mustBePositive);
+  declareProperty("StartSpectrum",0, mustBePositive,
+    "The first spectra index to be included in the summing (default 0)" );
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndSpectrum",0, mustBePositive->clone());
+  declareProperty("EndSpectrum",0, mustBePositive->clone(),
+    "The last spectra index to be included in the summing (default\n"
+    "highest index)" );
 }
 
 /** Executes the algorithm

@@ -64,7 +64,9 @@ namespace NeXus
       "A title to describe the saved workspace" );
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("EntryNumber", unSetInt, mustBePositive );
+    declareProperty("EntryNumber", unSetInt, mustBePositive,
+      "(Not implemented yet) The index number of the workspace within the Nexus file\n"
+      "(default leave unchanged)" );
     declareProperty("spectrum_min", 0, mustBePositive->clone(),
       "Number of first spectrum to read, only for single period data.\n"
       "Not yet implemented");

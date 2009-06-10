@@ -40,17 +40,28 @@ void ConvertUnits::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>);
   wsValidator->add(new HistogramValidator<>);
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+    "Name of the input workspace");
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "Name of the output workspace, can be the same as the input" );
 
   // Extract the current contents of the UnitFactory to be the allowed values of the Target property
-  declareProperty("Target","",new ListValidator(UnitFactory::Instance().getKeys()) );
-  declareProperty("Emode",0,new BoundedValidator<int>(0,2));
+  declareProperty("Target","",new ListValidator(UnitFactory::Instance().getKeys()),
+    "The name of the units to convert to (must be one of those registered in\n"
+    "the Unit Factory)");
+  declareProperty("Emode",0,new BoundedValidator<int>(0,2),
+    "The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry,\n"
+    "default is elastic)");
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
-  declareProperty("Efixed",0.0,mustBePositive);
+  declareProperty("Efixed",0.0,mustBePositive,
+    "Value of fixed energy in meV : EI (emode=1) or EF (emode=2) . Must be\n"
+    "set if the target unit requires it (e.g. DeltaE)");
 
-  declareProperty("AlignBins",false);
+  declareProperty("AlignBins",false,
+    "Set AlignBins to true to insure that all spectra in the output workspace\n"
+    "have identical bin boundaries.  Rebin with (with linear binning) is run,\n"
+    "where necessary, to ensure this (default false)");
 }
 
 /** Executes the algorithm

@@ -40,18 +40,24 @@ void ReadGroupsFromFile::init()
 {
 
 	// The name of the instrument
-  declareProperty("InstrumentName","");
+  declareProperty("InstrumentName","",
+    "The name of the instrument. This needs to be have been loaded during\n"
+    "this Mantid session either by loading a dataset from that instrument\n"
+    "or calling LoadEmptyInstrument" );
   // The calibration file that contains the grouping information
-  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal"),true));
+  declareProperty("GroupingFileName","",
+    new FileValidator(std::vector<std::string>(1,"cal"),true),
+    "The CalFile containing the grouping you want to visualize" );
   // Flag to consider unselected detectors in the cal file
   std::vector<std::string> select;
   select.push_back("True");
   select.push_back("False");
-  declareProperty("ShowUnselected","True",new ListValidator(select));
+  declareProperty("ShowUnselected", "True", new ListValidator(select),
+    "Whether to show detectors that are not in any group (default yes)" );
   // The output worksapce (2D) that will contain the group information
-  declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
-  // Show not selected detectors
-
+  declareProperty(
+    new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
+    "The name of the output workspace" );
 }
 
 /** Executes the algorithm

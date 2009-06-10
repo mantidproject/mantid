@@ -29,13 +29,17 @@ namespace Mantid
 		*/
 		void Rebunch::init()
 		{
-			declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-			declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+			declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        "Name of the input workspace" );
+			declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace to be created as the output of the algorithm");
 
 			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
 			mustBePositive->setLower(1);
-			declareProperty("n_bunch",1, mustBePositive);
-
+			declareProperty("n_bunch",1, mustBePositive,
+        "The number of bins to that will be summed in each bunch");
 		}
 
 		/** Executes the rebin algorithm

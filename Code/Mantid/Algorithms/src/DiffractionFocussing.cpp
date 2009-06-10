@@ -29,10 +29,15 @@ Logger& DiffractionFocussing::g_log = Logger::get("DiffractionFocussing");
  */
 void DiffractionFocussing::init()
 {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
-
-  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")));
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+    "The input workspace" );
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "The result of diffraction focussing of InputWorkspace" );
+  declareProperty("GroupingFileName", "",
+    new FileValidator(std::vector<std::string>(1,"cal")),
+    "The name of the CalFile with grouping data" );
 }
 
 /** Executes the algorithm

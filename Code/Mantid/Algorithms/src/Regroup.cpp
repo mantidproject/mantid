@@ -77,10 +77,16 @@ void Regroup::init()
   API::CompositeValidator<> *wsVal = new API::CompositeValidator<>;
   wsVal->add(new API::HistogramValidator<>);
   wsVal->add(new API::CommonBinsValidator<>);
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsVal));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, wsVal),
+    "Name of the input workspace" );
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "The name of the workspace to be created as the output of the regrouping");
 
-  declareProperty(new ArrayProperty<double>("params", new RegroupParamsValidator));
+  declareProperty(
+    new ArrayProperty<double>("params", new RegroupParamsValidator),
+    "The new approximate bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
 }
 
 /** Executes the regroup algorithm

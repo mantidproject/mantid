@@ -44,10 +44,14 @@ void DiffractionFocussing2::init()
   API::CompositeValidator<Workspace2D> *wsValidator = new API::CompositeValidator<Workspace2D>;
   wsValidator->add(new API::WorkspaceUnitValidator<Workspace2D>("dSpacing"));
   wsValidator->add(new API::RawCountValidator<Workspace2D>);
-  declareProperty(new API::WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(
+    new API::WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,wsValidator),
+    "A 2D workspace with X values of d-spacing" );
+  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "The result of diffraction focussing of InputWorkspace" );
 
-  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")));
+  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")),
+    "The name of the CalFile with grouping data" );
 }
 
 /** Executes the algorithm

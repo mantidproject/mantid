@@ -34,9 +34,14 @@ CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
  */
 void CreateCalFileByNames::init()
 {
-  declareProperty("InstrumentName","");
-  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal"),false));
-  declareProperty("GroupNames","");
+  declareProperty("InstrumentName", "",
+    "The name of the instrument, needs to be present in the Instrument Data Service" );
+  declareProperty("GroupingFileName","",
+    new FileValidator(std::vector<std::string>(1,"cal"),false),
+    "The name of the output CalFile" );
+  declareProperty("GroupNames","",
+    "A string of the instrument component names to use as separate groups. Use / or , to\n"
+    "separate multiple groups");
 }
 
 /** Executes the algorithm

@@ -26,20 +26,26 @@ FindPeaks::FindPeaks() : API::Algorithm() {}
 
 void FindPeaks::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+    "Name of the workspace to search" );
   BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("fwhm",7,range);
+  declareProperty("fwhm",7,range,
+    "Estimated number of points covered by the fwhm of a peak (default 7)" );
   // The tolerance allowed in meeting the conditions
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(1);
-  declareProperty("Tolerance",4,min);
+  declareProperty("Tolerance", 4, min,
+    "A measure of the strictness desired in meeting the condition on peak candidates,\n"
+    "Mariscotti recommends 2 (default 4)");
   
   // Temporary so that I can look at the smoothed data
   declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
 
   // The found peaks in a table
-  declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output));
+  declareProperty(
+    new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
+    "The name of the TableWorkspace in which to store the list of peaks found" );
   
   // Set up the columns for the TableWorkspace holding the peak information
   m_peaks = WorkspaceFactory::Instance().createTable("TableWorkspace");

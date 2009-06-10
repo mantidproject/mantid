@@ -19,11 +19,13 @@ void CreateSingleValuedWorkspace::init()
 {
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
-  declareProperty("DataValue", 0.0);
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "Name to use for the output workspace" );
+  declareProperty("DataValue", 0.0, "The value to place in the workspace");
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
-  declareProperty("ErrorValue", 0.0, mustBePositive);
+  declareProperty("ErrorValue", 0.0, mustBePositive,
+    "The error value to place in the workspace (default 0.0)" );
 }
 
 void CreateSingleValuedWorkspace::exec()

@@ -31,9 +31,9 @@ CropWorkspace::~CropWorkspace() {}
 void CropWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,new CommonBinsValidator<Workspace2D>),
-    "The input workspace must have common bins" );
+    "The input workspace2D must have common bins" );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-    "Name of the output workspace" );
+    "Name of the output workspace2D" );
 
   declareProperty("XMin",0.0,
     "An X value that is within the first (lowest X value) bin that will be retained\n"

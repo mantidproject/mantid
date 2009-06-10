@@ -34,7 +34,7 @@ void GroupDetectors::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut,
     new CommonBinsValidator<Workspace2D>),
-    "The name of the workspace on which to perform the algorithm");
+    "The name of the workspace2D on which to perform the algorithm");
   declareProperty(new ArrayProperty<int>("SpectraList"),
     "An array containing a list of the indexes of the spectra to combine");
   declareProperty(new ArrayProperty<int>("DetectorList"), 
@@ -42,8 +42,8 @@ void GroupDetectors::init()
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
     "An array of workspace indices to combine");
   declareProperty("ResultIndex", -1,
-//add this STEVE        "The workspace index of the summed spectrum", 
-    Direction::Output);
+    "The workspace index of the summed spectrum",
+    new NullValidator<int>, Direction::Output);
 }
 
 void GroupDetectors::exec()

@@ -41,7 +41,7 @@ void NormaliseToMonitor::init()
   val->add(new RawCountValidator<Workspace2D>);
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,val),
-    "Name of the input workspace");
+    "Name of the input workspace2D");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name to use for the output workspace");
 

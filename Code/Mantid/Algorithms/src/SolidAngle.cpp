@@ -37,15 +37,24 @@ namespace Mantid
 		/// Initialisation method
 		void SolidAngle::init()
 		{
-			declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input));
-			declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+			declareProperty(
+        new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        "This workspace is used to identify the instrument to use and also which\n"
+        "spectra to create a solid angle for. If the Max and Min spectra values are\n"
+        "not provided one solid angle will be created for each spectra in the input\n"
+        "workspace" );
+			declareProperty(
+        new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace to be created as the output of the algorithm" );
 
 			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
 			mustBePositive->setLower(0);
-			declareProperty("StartSpectrum",0, mustBePositive);
+			declareProperty("StartSpectrum",0, mustBePositive,
+        "The index number of the first spectrum to use (default 0)" );
 			// As the property takes ownership of the validator pointer, have to take care to pass in a unique
 			// pointer to each property.
-			declareProperty("EndSpectrum",0, mustBePositive->clone());
+			declareProperty("EndSpectrum",0, mustBePositive->clone(),
+        "The index number of the last spectrum to use (default 0)");
 		}
 
 		/** Executes the algorithm

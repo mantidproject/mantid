@@ -24,18 +24,37 @@ namespace Mantid
     /// Initialisation method.
     void FindDeadDetectors::init()
     {
-      declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(
+        new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input),
+        "Name of the input workspace2D" );
+      declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "The name to use for the output workspace" );
 
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0);
-      declareProperty("DeadThreshold",0.0, mustBePositive);
+      declareProperty("DeadThreshold",0.0, mustBePositive,
+        "The threshold against which to judge if a spectrum belongs to a dead\n"
+        "detector" );
       // As the property takes ownership of the validator pointer, have to take care to pass in a unique
       // pointer to each property.
-      declareProperty("LiveValue",0.0, mustBePositive->clone());
-      declareProperty("DeadValue",100.0, mustBePositive->clone());
-
-      declareProperty("OutputFile","");
+      declareProperty("LiveValue",0.0, mustBePositive->clone(),
+        "The value to assign to an integrated spectrum flagged as 'live'\n"
+        "(default 0.0)");
+      declareProperty("DeadValue",100.0, mustBePositive->clone(),
+        "The value to assign to an integrated spectrum flagged as 'dead'\n"
+        "(default 100.0)" );
+/*to add under ticket #597.  Delete if the ticket is closed
+must the start value be positive? declareProperty("StartX", EMPTY_DBL(), mustBePositive->clone(),
+        "An X value in the first bin of the region to be used to decide if\n"
+        "the detector is 'dead' (default: the start of the spectra)" );
+      declareProperty("EndX", EMPTY_DBL(), mustBePositive->clone(),
+        "An X value in the last bin to be used to decide if a detector is 'dead'\n"
+        "(default: the end of the spectra)" );
+I guess the start and the end of the spectra can be different for each detector
+remember to update the wiki, are the Python docs updated automatically?*/
+      declareProperty("OutputFile","",
+        "A filename to which to write the list of dead detector UDETs" );
       // This output property will contain the list of UDETs for the dead detectors
       declareProperty("FoundDead",std::vector<int>(),Direction::Output);
     }

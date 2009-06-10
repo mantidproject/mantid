@@ -24,40 +24,50 @@ using namespace API;
 Logger& CylinderAbsorption::g_log = Logger::get("CylinderAbsorption");
 
 CylinderAbsorption::CylinderAbsorption() :
-  API::Algorithm(), m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0),
-      m_scattering(0), m_L1s(), m_Ltot(), m_elementVolumes(), n_lambda(0), x_step(0), exp_options()
+  API::Algorithm(),                                      //the base class constructor
+  m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),
+  m_L1s(), m_Ltot(), m_elementVolumes(), n_lambda(unSetInt), x_step(0), exp_options()      //n_lambda i slinked to the NumberOfWavelengthPoints, unSetInt is a flag to say that values weren't passed for NumberOfWavelengthPoints/n_lambda
 {
 }
 
 void CylinderAbsorption::init()
 {
   declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input,
-      new WorkspaceUnitValidator<> ("Wavelength")));
-  declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output));
+    new WorkspaceUnitValidator<> ("Wavelength")),
+    "The X values for the input workspace must be in units of wavelength");
+  declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "", Direction::Output),
+    "Output workspace name");
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double> ();
   mustBePositive->setLower(0.0);
   declareProperty("CylinderSampleHeight", -1.0, mustBePositive,
-      "The height of the cylindrical sample in centimetres.");
+    "The height of the cylindrical sample in centimetres");
   declareProperty("CylinderSampleRadius", -1.0, mustBePositive->clone(),
-      "The radius of the cylindrical sample in centimetres.");
+    "The radius of the cylindrical sample in centimetres");
   declareProperty("AttenuationXSection", -1.0, mustBePositive->clone(),
-      "The attenuation cross-section for the sample material in barns.");
+    "The attenuation cross-section for the sample material in barns");
   declareProperty("ScatteringXSection", -1.0, mustBePositive->clone(),
-      "The scattering cross-section for the sample material in barns.");
+    "The scattering cross-section for the sample material in barns");
   declareProperty("SampleNumberDensity", -1.0, mustBePositive->clone(),
-      "The number density of the sample in number per cubic angstrom.");
+    "The number density of the sample in number per cubic angstrom");
+
   BoundedValidator<int> *positiveInt = new BoundedValidator<int> ();
   positiveInt->setLower(1);
   declareProperty("NumberOfSlices", 1, positiveInt,
-      "The number of slices into which the cylinder is divided for the calculation.");
+    "The number of slices into which the cylinder is divided for the\n"
+    "calculation");
   declareProperty("NumberOfAnnuli", 1, positiveInt->clone(),
-      "The number of annuli into which each slice is divided for the calculation.");
-  declareProperty("NumberOfWavelengthPoints", 1, positiveInt->clone());
+    "The number of annuli into which each slice is divided for the\n"
+    "calculation");
+  declareProperty("NumberOfWavelengthPoints", unSetInt, positiveInt->clone(),
+    "The number of wavelength points for which the numerical integral is\n"
+    "calculated (default: all points)");
 
   exp_options.push_back("Normal");
   exp_options.push_back("FastApprox");
-  declareProperty("ExpMethod", "Normal", new ListValidator(exp_options));
+  declareProperty("ExpMethod", "Normal", new ListValidator(exp_options),
+    "Select the method to use to calculate exponentials, normal or a\n"
+    "fast approximation (default is Normal)" );
 }
 
 void CylinderAbsorption::exec()
@@ -78,8 +88,7 @@ void CylinderAbsorption::exec()
   const int specSize = inputWS->blocksize();
 
   // If the number of wavelength points has not been given, use them all
-  if (n_lambda == 0)
-    n_lambda = specSize;
+  if (n_lambda == unSetInt) n_lambda = specSize;
   x_step = specSize / n_lambda; // Bin step between points to calculate
 
   if (x_step == 0) //Number of wavelength points >number of histogram points
@@ -160,7 +169,7 @@ void CylinderAbsorption::retrieveProperties()
   const double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
   m_refAtten = -sigma_atten * rho / 1.798;
   m_scattering = -sigma_s * rho;
-
+  
   n_lambda = getProperty("NumberOfWavelengthPoints");
 
   std::string exp_string = getProperty("ExpMethod");

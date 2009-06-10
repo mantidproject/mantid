@@ -28,8 +28,11 @@ MergeRuns::~MergeRuns() {}
 void MergeRuns::init()
 {
   // declare arbitrary number of input workspaces as a list of strings at the moment
-  declareProperty(new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(
+    new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >),
+    "The names of the input workspaces as a comma-separated list" );
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "Name of the output workspace" );
 }
 
 /** Executes the algorithm

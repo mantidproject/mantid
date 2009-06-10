@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Object.h"
+#include <climits>
 
 namespace Mantid
 {
@@ -107,6 +108,9 @@ private:
 
   typedef double (*expfunction)(double); ///< Typedef pointer to exponential function
   expfunction EXPONENTIAL; ///< Pointer to exponential function
+      
+  ///a flag int value to indicate that the value wasn't set by users
+  static const int unSetInt = INT_MAX-15;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

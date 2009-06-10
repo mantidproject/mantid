@@ -31,10 +31,15 @@ namespace Mantid
       CompositeValidator<> *wsValidator = new CompositeValidator<>;
       wsValidator->add(new HistogramValidator<>);
       //wsValidator->add(new RawCountValidator<>);
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
-
-      declareProperty(new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >));
+      declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+        "The name of the Workspace2D to take as input" );
+      declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace to be created as the output of the algorithm" );
+      declareProperty(
+        new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >),
+        "The new bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
     }
 
     /** Executes the rebin algorithm

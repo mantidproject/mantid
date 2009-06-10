@@ -22,6 +22,12 @@ namespace Algorithms
     <LI> OutputWorkspace - The name under which to store the output workspace. </LI>
     </UL>
 
+    Optional Properties:
+    <UL>
+    <LI> fwhm - passed to the FindPeaks subalgorithm</LI>
+    <LI> Tolerance - passed to the FindPeaks subalgorithm</LI>
+    </UL>
+
     @author Russell Taylor, Tessella Support Services plc
     @date 30/10/2008
 

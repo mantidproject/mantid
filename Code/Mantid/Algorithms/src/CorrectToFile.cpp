@@ -17,17 +17,22 @@ Mantid::Kernel::Logger& CorrectToFile::g_log = Mantid::Kernel::Logger::get("Corr
 
 void CorrectToFile::init()
 {
-  declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input));
-  declareProperty("Filename","",new Kernel::FileValidator());
+  declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input),
+    "Name of the input workspace" );
+  declareProperty("Filename","",new Kernel::FileValidator(),
+    "The file containing the correction factors");
 
   std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
   propOptions.push_back("SpectraNumber");
-  declareProperty("FirstColumnValue", "Wavelength", new Kernel::ListValidator(propOptions) );
+  declareProperty("FirstColumnValue", "Wavelength", new Kernel::ListValidator(propOptions),
+    "The units of the first column of the correction file (default wavelength)");
 
   std::vector<std::string> operations(1, std::string("Divide"));
   operations.push_back("Multiply");
-  declareProperty("WorkspaceOperation", "Divide", new Kernel::ListValidator(operations));
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output));
+  declareProperty("WorkspaceOperation", "Divide", new Kernel::ListValidator(operations),
+    "Allowed values: Divide, Multiply (default is divide)");
+  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output),
+    "Name of the output workspace to store the results in" );
 }
 
 void CorrectToFile::exec()

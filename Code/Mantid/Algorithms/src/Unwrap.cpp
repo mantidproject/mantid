@@ -34,12 +34,17 @@ void Unwrap::init()
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>);
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+    "A workspace with x values in units of TOF and y values in counts" );
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "The name of the workspace to be created as the output of the algorithm" );
 
   BoundedValidator<double> *validator = new BoundedValidator<double>;
   validator->setLower(0.01);
-  declareProperty("LRef", 0.0, validator);
+  declareProperty("LRef", 0.0, validator,
+    "The length of the reference flightpath (in metres)" );
 
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;

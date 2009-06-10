@@ -284,7 +284,8 @@ void AlgorithmDialog::accept()
   else
   {
     QMessageBox::critical(this, "", 
-			  "One or more properties are invalid. They are marked with a *");
+			  "One or more properties are invalid. The invalid properties are\n"
+        "marked with a *, hold your mouse over the * for more information." );
   } 
 }
 

@@ -21,13 +21,19 @@ Logger& SmoothData::g_log = Logger::get("SmoothData");
 
 void SmoothData::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+    "Name of the input workspace");
+  declareProperty(
+    new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    "The name of the workspace to be created as the output of the algorithm" );
 
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(3);
   // The number of points to use in the smoothing.
-  declareProperty("NPoints",3,min);
+  declareProperty("NPoints", 3, min,
+    "The number of points to average over (minimum 3). If an even number is\n"
+    "given, it will be incremented by 1 to make it odd (default value 3)" );
 }
 
 void SmoothData::exec()
