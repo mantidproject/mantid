@@ -1453,7 +1453,6 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
      int c = errs?2:1;
      int numRows = workspace->blocksize();
      bool isHistogram = workspace->isHistogramData();
-     if (isHistogram && (!binCentres)) numRows++;
 
      Table* t = new Table(appWindow()->scriptEnv, numRows, c*indexList.size() + 1, "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
