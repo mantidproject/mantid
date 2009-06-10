@@ -1219,6 +1219,9 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
   if( !sc_engine ) return;
 
+  // If not specified, keep the same as now
+  if( type < 0 ) type = axisType(axis);
+
   if (type == Graph::Log10)
   {
     sc_engine->setType(QwtScaleTransformation::Log10);

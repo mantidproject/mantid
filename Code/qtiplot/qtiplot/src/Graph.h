@@ -293,7 +293,7 @@ class Graph: public QWidget
 				int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4, bool breakDecoration = true);
 		double axisStep(int axis){return d_user_step[axis];};
                 //! Set the axis scale
-                void setAxisScale(int axis, double start, double end, int type, double step = 0.0, 
+                void setAxisScale(int axis, double start, double end, int type = -1, double step = 0.0, 
 				  int majorTicks = 5, int minorTicks = 5);
 
 		//! \name Curves Layout

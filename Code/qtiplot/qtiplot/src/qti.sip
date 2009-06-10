@@ -616,7 +616,7 @@ public:
 				double left_break = -DBL_MAX, double right_break = DBL_MAX, int pos = 50,
 				double stepBeforeBreak = 0.0, double stepAfterBreak = 0.0, int minTicksBeforeBreak = 4,
 				int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4, bool breakDecoration = true);
-  void setAxisScale(int, double, double, int, double=0.0, int=5, int=5);
+  void setAxisScale(int, double, double, int = -1, double=0.0, int=5, int=5);
   void setAutoScale();
   void setMargin(int);
   void setFrame(int width = 1, const QColor& color = QColor(Qt::black));
