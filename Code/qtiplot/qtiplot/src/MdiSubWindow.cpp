@@ -93,7 +93,7 @@ switch (d_caption_policy)
 
 void MdiSubWindow::resizeEvent( QResizeEvent* e )
 {
-	emit resizedWindow(this);
+  //emit resizedWindow(this);
 	QMdiSubWindow::resizeEvent( e );
 }
 
