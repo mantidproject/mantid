@@ -1645,6 +1645,15 @@ void Graph::initTitle(bool on, const QFont& fnt)
 	}
 }
 
+void Graph::setCurveTitle(int index, const QString & title)
+{
+  QwtPlotItem *curve = plotItem(index);
+  if( !curve ) return;
+  
+  curve->setTitle(title);
+  legend()->repaint();
+}
+
 void Graph::removeLegend()
 {
 	if (d_legend){

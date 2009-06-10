@@ -514,6 +514,8 @@ class Graph: public QWidget
 
 		void removeTitle();
 		void initTitle( bool on, const QFont& fnt);
+
+                void setCurveTitle(int index, const QString & title);
 		//@}
 
 		//! \name Modifing insertCurve Data

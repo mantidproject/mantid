@@ -624,6 +624,8 @@ public:
   void setBackgroundColor(const QColor& color);
   void setCanvasBackground(const QColor& color) /PyName=setCanvasColor/;
 
+  void setCurveTitle(int, const QString &);
+
   Grid* grid();
   void showGrid(int);
   void showGrid();
