@@ -236,10 +236,11 @@ namespace Mantid
 			Quat rot(unit,axis);
 			rot.GLMatrix(mat);
 			glMultMatrixd(mat);
-			gluCylinder(qobj,radius,radius,height,10,5);
-			gluDisk(qobj,0,radius,10,1);
+			GLint nslices(10);
+			gluCylinder(qobj,radius,radius,height,nslices, 1);
+			gluDisk(qobj,0,radius,nslices, 1);
 			glTranslated(0.0,0.0,height);
-			gluDisk(qobj,0,radius,10,1);
+			gluDisk(qobj,0,radius,nslices,1);
 			glPopMatrix();
 		}
 	}
