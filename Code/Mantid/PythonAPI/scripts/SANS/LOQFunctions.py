@@ -89,7 +89,7 @@ def GetMainBank(inputWS, startid, endid, outputWS):
     CropWorkspace(inputWS, OutputWorkspace=outputWS, StartSpectrum=str(startid - 1),EndSpectrum=str(endid - 1))
 
 # Setup the transmission data
-def SetupTransmissionData(inputWS, instr_file, wavbining):
+def SetupTransmissionData(inputWS, wavbining):
     tmpWS = inputWS + '_tmp'
     RemoveBins(inputWS,tmpWS,"19900","20500",Interpolation="Linear")
     FlatBackground(tmpWS,tmpWS,"1,2","31000","39000")
