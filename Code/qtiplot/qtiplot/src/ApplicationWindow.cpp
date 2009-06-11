@@ -493,7 +493,7 @@ void ApplicationWindow::initGlobalConstants()
 	autoSave = true;
 	autoSaveTime = 15;
 	d_backup_files = true;
-	defaultScriptingLang = "muParser";  //M. Gigg
+	defaultScriptingLang = "Python";  //Mantid M. Gigg
 	d_thousands_sep = true;
 	d_locale = QLocale::system().name();
 	if (!d_thousands_sep)
@@ -4293,7 +4293,7 @@ void ApplicationWindow::readSettings()
 	autoSaveTime = settings.value("/AutoSaveTime",15).toInt();
     d_backup_files = settings.value("/BackupProjects", true).toBool();
 	d_init_window_type = (WindowType)settings.value("/InitWindow", NoWindow).toInt();
-	defaultScriptingLang = settings.value("/ScriptingLang","muParser").toString();    //M. Gigg
+	defaultScriptingLang = settings.value("/ScriptingLang","Python").toString();    //Mantid M. Gigg
 	d_thousands_sep = settings.value("/ThousandsSeparator", true).toBool();
 	d_locale = QLocale(settings.value("/Locale", QLocale::system().name()).toString());
 	if (!d_thousands_sep)
