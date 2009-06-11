@@ -2990,6 +2990,7 @@ void Graph::insertCurve(Graph* g, int i)
   if( dc ) 
   {
     addCurves(dc->table(), QStringList(dc->table()->colName(1)));
+    setCurveStyle(g->visibleCurves(), dc->style());
   }
 }
 
