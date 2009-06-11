@@ -133,7 +133,13 @@ API::IAlgorithm* FrameworkManager::execute(const std::string& algName, const std
  **/
 API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& wsName)
 {
-  return dynamic_cast<API::MatrixWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
+  API::MatrixWorkspace *mtx_wksp = dynamic_cast<API::MatrixWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
+  if( !mtx_wksp )
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. This may be a table workspace, try getTableWorkspace().");
+  }
+  //Normal path
+  return mtx_wksp;
 }
 
 /**
@@ -143,7 +149,12 @@ API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& ws
 **/
 API::ITableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
 {
-  return dynamic_cast<API::ITableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
+  API::ITableWorkspace *tbl_wksp = dynamic_cast<API::ITableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
+  if( !tbl_wksp )
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not a table workspace. This may be a matrix workspace, try getMatrixWorkspace().");
+  }
+  return tbl_wksp;
 }
 
 /**
