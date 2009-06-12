@@ -196,7 +196,7 @@ V3D ParametrizedComponent::getPos() const
     // RJT: I think that the parent's rotation should be used here instead of the child's
     // @todo Have a discussion with Laurent to clarify this
 //    rot.rotate(temp);
-    parent->getRelativeRot().rotate(temp);
+    parent->getRotation().rotate(temp);
     temp+=parent->getPos();
     return temp;
   }
@@ -227,7 +227,7 @@ const Quat ParametrizedComponent::getRotation() const
   }
   else
   {
-    return getRelativeRot()*parent->getRotation();
+    return parent->getRotation()*getRelativeRot();
   }
 }
 

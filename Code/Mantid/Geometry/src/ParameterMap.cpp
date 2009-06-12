@@ -132,7 +132,7 @@ void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::strin
 }
 
 /// Create or adjust "rot" parameter for a component
-void ParameterMap::addRotationParam(const IComponent* comp, const double deg)
+void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
 {
   Parameter_sptr param = get(comp,"rot");
   Quat quat;
@@ -148,8 +148,24 @@ void ParameterMap::addRotationParam(const IComponent* comp, const double deg)
   }
 
   // adjust rotation
-  quat.setRotation(deg);
 
+  if ( name.compare("rotx")==0 )
+  {
+      quat = Quat(deg,V3D(1,0,0))*quat;
+  }
+  else if ( name.compare("roty")==0 )
+  {
+      quat = Quat(deg,V3D(0,1,0))*quat;
+  }
+  else if ( name.compare("rotz")==0 )
+  {
+      quat = Quat(deg,V3D(0,0,1))*quat;
+  }
+  else
+  {
+    g_log.warning() << "addRotationParam() called with unrecognised coordinate symbol: " << name;
+    return;
+  }
 
   // finally add or update "pos" parameter
   if (param)

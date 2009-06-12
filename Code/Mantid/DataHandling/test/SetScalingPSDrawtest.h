@@ -14,7 +14,6 @@
 #include <stdexcept>
 
 
-
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -107,10 +106,10 @@ public:
       int id=det->getID();
       TS_ASSERT_EQUALS(2110001,id);
       V3D pos = det->getPos();
-      V3D expectedPos = V3D(-1.000006658,-1.5135122,2.291297);
+      V3D expectedPos = V3D(-1.00894,-1.51351,2.30497);
       TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
       double sa=det->solidAngle(V3D(0,0,0));
-      TS_ASSERT_DELTA(sa,7.43552e-6,1e-10)
+      TS_ASSERT_DELTA(sa,7.37824e-6,1e-10)
       
       // check that points lie on correct side of the scaled object
       boost::shared_ptr<ParObjComponent> pdet= boost::dynamic_pointer_cast<ParObjComponent>(comp);
@@ -156,11 +155,11 @@ public:
       id=det2->getID();
       TS_ASSERT_EQUALS(2110002,id);
       pos = det2->getPos();
-      expectedPos = V3D(-1.00000628,-1.5105951,2.291297);
+      expectedPos = V3D(-1.00894,-1.51059,2.30497);
       TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
       sa=det2->solidAngle(V3D(0,0,0));
       //TS_ASSERT_DELTA(sa,2.188361e-5,1e-10)
-      TS_ASSERT_DELTA(sa,7.833662e-6,1e-10)
+      TS_ASSERT_DELTA(sa,7.7732e-6,1e-10)
   }
 
 private:

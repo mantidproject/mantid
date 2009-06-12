@@ -466,8 +466,8 @@ namespace Mantid
           std::string paramN = ((*it).second)->m_paramName;
           if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
             paramMap->addPositionCoordinate(((*it).second)->m_component, paramN, value);
-          else if ( paramN.compare("rot")==0 )
-            paramMap->addRotationParam(((*it).second)->m_component, value);
+          else if ( paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
+            paramMap->addRotationParam(((*it).second)->m_component, paramN, value);
           else
             paramMap->addDouble(((*it).second)->m_component, paramN, value);
         }

@@ -6,6 +6,7 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/XMLlogfile.h"
+#include "MantidAPI/Progress.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidGeometry/vtkGeometryCacheReader.h"
 #include "MantidGeometry/vtkGeometryCacheWriter.h"
@@ -181,8 +182,10 @@ void LoadInstrument::exec()
   // do analysis for each top level compoment element
   NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
   unsigned int pNL_comp_length = pNL_comp->length();
+  API::Progress prog(this,0,1,pNL_comp_length);
   for (unsigned int i = 0; i < pNL_comp_length; i++)
   {
+      prog.report();
     // we are only interest in the top level component elements hence
     // the reason for the if statement below
 
@@ -809,9 +812,14 @@ void LoadInstrument::makeXYplaneFaceComponent(Geometry::Component* &in, const Ge
   // now aim to rotate shape such that the z-axis of of the object we want to rotate
   // points in the direction of facingDirection. That way the XY plane faces the 'facing object'.
 
-  Geometry::V3D normal = facingDirection.cross_prod(Geometry::V3D(0,0,1));
+  Geometry::V3D z = Geometry::V3D(0,0,1);
+  Geometry::Quat R = in->getRotation();
+  R.inverse();
+  R.rotate(facingDirection);
+
+  Geometry::V3D normal = facingDirection.cross_prod(z);
   normal.normalize();
-  double theta = (180.0/M_PI)*facingDirection.angle(Geometry::V3D(0,0,1));
+  double theta = (180.0/M_PI)*facingDirection.angle(z);
 
   if ( normal.norm() > 0.0 )
     in->rotate(Geometry::Quat(-theta, normal));

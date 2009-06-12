@@ -115,7 +115,7 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 	return;
 }
 
-/** Set the rotation (both don't change rotation axis)
+/** Set the rotation (both don't change rotation axis). This method has an error
  * \param deg :: angle of rotation
  */
 void Quat::setRotation(const double deg)

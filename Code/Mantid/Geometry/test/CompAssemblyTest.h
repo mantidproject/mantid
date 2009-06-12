@@ -293,7 +293,7 @@ public:
     comp.setRot(rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1);
     comp.rotate(rot2);
-    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot2*rot1);
+    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1*rot2);
   }
 
   void testRelativeRotate()
@@ -306,14 +306,14 @@ public:
     comp.setRot(rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1);
     comp.rotate(rot2);
-    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot2*rot1);
+    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1*rot2);
     //Get the location of the CompAssembly
     V3D beforeParentPos = comp.getPos();
     //assign a parent
     Component parent("parent", V3D(0, 0, 0), parentRot);
     comp.setParent(&parent);
     //check relative values have not moved
-    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot2*rot1);
+    TS_ASSERT_EQUALS(comp.getRelativeRot(), rot1*rot2);
     TS_ASSERT_EQUALS(comp.getRelativePos(), beforeParentPos);
     //but the absolute pos should have changed due to the parents roatation (the parent is centered on the origin)
     TS_ASSERT_DIFFERS(comp.getPos(), beforeParentPos);

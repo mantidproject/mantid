@@ -89,6 +89,8 @@ public:
   /// Returns the set of parameters modifying the base instrument
   boost::shared_ptr<Geometry::ParameterMap> InstrumentParameters() {return sptr_parmap;}
   void newInstrumentParameters();
+  // Add parameters to the instrument parameter map
+  void populateInstrumentParameters();
 
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace

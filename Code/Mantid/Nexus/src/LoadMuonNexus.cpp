@@ -10,6 +10,7 @@
 #include "MantidGeometry/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include "Poco/Path.h"
 
@@ -151,7 +152,6 @@ namespace Mantid
                 // Only run the sub-algorithms once
                 runLoadInstrument(localWorkspace );
                 runLoadMappingTable(localWorkspace );
-                runLoadLog(localWorkspace );
             }
             else   // We are working on a higher period of a multiperiod raw file
             {
@@ -169,8 +169,10 @@ namespace Mantid
                 std::string WSName = localWSName + "_" + suffix.str();
                 declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
                 g_log.information() << "Workspace " << WSName << " created. \n";
-                runLoadLog(localWorkspace );
             }
+
+            runLoadLog(localWorkspace );
+            localWorkspace->populateInstrumentParameters();
 
             int counter = 0;
             for (int i = m_spec_min; i < m_spec_max; ++i)
@@ -431,6 +433,22 @@ namespace Mantid
       }
 
       if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
+
+
+      NXRoot root(m_filename);
+      NXChar start_time = root.openNXChar("run/start_time");
+      start_time.load();
+      NXChar orientation = root.openNXChar("run/instrument/detector/orientation");
+      orientation.load();
+
+      if (orientation[0] == 't')
+      {
+          Kernel::TimeSeriesProperty<double>* p = new Kernel::TimeSeriesProperty<double>("fromNexus");
+          p->addValue(start_time(),-90.);
+          localWorkspace->getSample()->addLogData(p);
+      }
+
+
     }
 
     double LoadMuonNexus::dblSqrt(double in)

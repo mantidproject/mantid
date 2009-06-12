@@ -173,7 +173,7 @@ void Component::translate(const V3D& v)
  */
 void Component::rotate(const Quat& r)
 {
-  rot=r*rot;
+  rot=rot*r;
 }
 
 /*! Rotate the component by an angle in degrees with respect to an axis.
@@ -208,7 +208,8 @@ V3D Component::getPos() const
     // RJT: I think that the parent's rotation should be used here instead of the child's
     // @todo Have a discussion with Laurent to clarify this
 //    rot.rotate(temp);
-    parent->getRelativeRot().rotate(temp);
+
+    parent->getRotation().rotate(temp);
     temp+=parent->getPos();
     return temp;
   }
@@ -233,7 +234,7 @@ const Quat Component::getRotation() const
   }
   else
   {
-    return rot*parent->getRotation();
+    return parent->getRotation()*rot;
   }
 }
 

@@ -5,7 +5,9 @@
 #include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/ParInstrument.h"
+#include "MantidAPI/XMLlogfile.h"
 #include "MantidGeometry/DetectorGroup.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid
 {
@@ -365,6 +367,68 @@ const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int& spectrum
 long int MatrixWorkspace::getMemorySize() const
 {
   return 3*size()*sizeof(double)/1024;
+}
+
+/** Add parameters to the instrument parameter map that are defined in instrument
+*   definition file and for which logfile data are available. Logs must be loaded 
+*   before running this method.
+*/
+void MatrixWorkspace::populateInstrumentParameters()
+{
+    // Get instrument and sample
+
+    boost::shared_ptr<Instrument> instrument = getBaseInstrument();
+    boost::shared_ptr<Sample> sample = getSample();
+
+    // Get the data in the logfiles associated with the raw data
+
+    const std::vector<Kernel::Property*>& logfileProp = sample->getLogData();
+
+
+    // Get pointer to parameter map that we may add parameters to and information about
+    // the parameters that my be specified in the instrument definition file (IDF)
+
+    boost::shared_ptr<Geometry::ParameterMap> paramMap = InstrumentParameters();
+    std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
+
+
+    // iterator to browse throw the multimap: paramInfoFromIDF
+
+    std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> > :: const_iterator it;
+    std::pair<std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator,
+        std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >::iterator> ret;
+
+
+    // loop over all logfiles and see if any of these are associated with parameters in the
+    // IDF
+
+    unsigned int N = logfileProp.size();
+    for (unsigned int i = 0; i < N; i++)
+    {
+        // Remove the path, the run number and extension from logfile filename
+
+        std::string logName = logfileProp[i]->name();
+
+        // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map
+
+        ret = paramInfoFromIDF.equal_range(logName);
+        for (it=ret.first; it!=ret.second; ++it)
+        {
+            double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
+
+            // special case if parameter name is "x", "y" or "z" and "rot"
+
+            std::string paramN = ((*it).second)->m_paramName;
+            if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
+                paramMap->addPositionCoordinate(((*it).second)->m_component, paramN, value);
+            else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
+            {
+                paramMap->addRotationParam(((*it).second)->m_component, paramN, value);
+            }
+            else
+                paramMap->addDouble(((*it).second)->m_component, paramN, value);
+        }
+    }
 }
 
 

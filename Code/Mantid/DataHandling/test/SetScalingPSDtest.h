@@ -108,10 +108,10 @@ public:
       int id=det->getID();
       TS_ASSERT_EQUALS(2110001,id);
       V3D pos = det->getPos();
-      V3D expectedPos = V3D(-1.000004,-1.5145256,2.291291);
+      V3D expectedPos = V3D(-1.00894,-1.51453,2.30497);
       TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
       double sa=det->solidAngle(V3D(0,0,0));
-      TS_ASSERT_DELTA(sa,7.68027e-6,1e-10)
+      TS_ASSERT_DELTA(sa,7.62114e-6,1e-10)
       
       // check that points lie on correct side of the scaled object
       boost::shared_ptr<ParObjComponent> pdet= boost::dynamic_pointer_cast<ParObjComponent>(comp);

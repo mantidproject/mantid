@@ -71,10 +71,10 @@ public:
     // Check centre point
     TS_ASSERT( pocyl.isValid(V3D(0,10,-10)) )
     // Check a point that wouldn't be inside if the cylinder isn't rotated correctly
-    TS_ASSERT( pocyl.isValid(V3D(0,10.5,-11.1)) )
-    TS_ASSERT( pocyl.isValid(V3D(0.5,10,-7)) )
+    TS_ASSERT( pocyl.isValid(V3D(0,11.1,-10.5)) )
+    TS_ASSERT( pocyl.isValid(V3D(0.5,7,-10)) )
     // Check that a point is not inside, that would be if no rotation
-    TS_ASSERT( ! pocyl.isValid(V3D(0,11.1,-10)) )
+    TS_ASSERT( ! pocyl.isValid(V3D(0,10,-11.1)) )
     TS_ASSERT( ! pocyl.isValid(V3D(1,10,-10)) )
     // Take out component's rotation - it should make no difference because it's about the cylinder axis
     ocyl.setRot(Quat(1,0,0,0));
@@ -117,11 +117,11 @@ public:
     Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     ocyl.setParent(&parent);
     TS_ASSERT( pocyl.isOnSide(V3D(0.5,10,-10)) )
-    TS_ASSERT( pocyl.isOnSide(V3D(0,10.5,-9)) )
-    TS_ASSERT( pocyl.isOnSide(V3D(0,10,-11.2)) )
-    TS_ASSERT( pocyl.isOnSide(V3D(0.2,9.6,-6.8)) )
-    TS_ASSERT( pocyl.isOnSide(V3D(-0.5,10,-11.2)) )
-    TS_ASSERT( pocyl.isOnSide(V3D(0,9.5,-6.8)) )
+    TS_ASSERT( pocyl.isOnSide(V3D(0,9,-10.5)) )
+    TS_ASSERT( pocyl.isOnSide(V3D(0,11.2,-10)) )
+    TS_ASSERT( pocyl.isOnSide(V3D(0.2,6.8,-9.6)) )
+    TS_ASSERT( pocyl.isOnSide(V3D(-0.5,11.2,-10)) )
+    TS_ASSERT( pocyl.isOnSide(V3D(0,6.8,-9.5)) )
     TS_ASSERT( ! pocyl.isOnSide(V3D(0,0,0)) )
     // Take out component's rotation - it should make no difference because it's about the cylinder axis
     ocyl.setRot(Quat(1,0,0,0));
@@ -207,8 +207,8 @@ public:
     A.setParent(&parent);
 
     // See testSolidAngleCappedCylinder in ObjectTest - these tests are a subset of them
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(0,10,-11.7)),1.840302,satol);
-    TS_ASSERT_DELTA(pA.solidAngle(V3D(0,10,-6.13333333)),1.25663708,satol);
+    TS_ASSERT_DELTA(pA.solidAngle(V3D(0,11.7,-10)),1.840302,satol);
+    TS_ASSERT_DELTA(pA.solidAngle(V3D(0,6.13333333,-10)),1.25663708,satol);
     // internal point (should be 4pi)
     TS_ASSERT_DELTA(pA.solidAngle(V3D(0,10,-10)),4*M_PI,satol);
     // surface point
@@ -244,8 +244,8 @@ void testBoundingBoxCappedCylinder()
 	// note that input values are ignored in this case as cached results used.
 	pA.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
 	// consistent with the solid angle results
-    TS_ASSERT_DELTA(zmax,-6.8,1e-5);
-    TS_ASSERT_DELTA(zmin,-11.2,1e-5);
+    TS_ASSERT_DELTA(zmax,-9.5,1e-5);
+    TS_ASSERT_DELTA(zmin,-10.5,1e-5);
   }
 
 void testgetPointInObject()
@@ -289,9 +289,9 @@ void testgetPointInObject()
     //Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
     D.setParent(&parent);
     TS_ASSERT_EQUALS(pD.getPointInObject(point),1);
-    TS_ASSERT_DELTA(point.X(),21.5,1e-6);
-    TS_ASSERT_DELTA(point.Y(),10.0,1e-6);
-    TS_ASSERT_DELTA(point.Z(),-11.0,1e-6);
+    TS_ASSERT_DELTA(point.X(),0,1e-6);
+    TS_ASSERT_DELTA(point.Y(),11,1e-6);
+    TS_ASSERT_DELTA(point.Z(),-31.5,1e-6);
   }
 
 private:

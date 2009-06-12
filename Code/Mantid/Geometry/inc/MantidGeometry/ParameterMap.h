@@ -121,7 +121,7 @@ public:
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
 
     /// Create or adjust "rot" parameter for a component
-    void addRotationParam(const IComponent* comp, const double deg);
+    void addRotationParam(const IComponent* comp,const std::string& name, const double deg);
 
     // Concrete parameter adding methods.
     /**  Adds a double value to the parameter map.

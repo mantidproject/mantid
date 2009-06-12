@@ -180,6 +180,11 @@ namespace NeXus
         }
     }
 
+    NXRoot::~NXRoot()
+    {
+        NXclose(&m_fileID);
+    }
+
     bool NXRoot::isStandard()const
     {
         return true;

@@ -424,7 +424,7 @@ namespace Mantid
         public:
             NXRoot(const std::string& fname);
             NXRoot(const std::string& fname,const std::string& entry);
-            //~NXRoot();
+            ~NXRoot();
             /// Return the NX class for a class (HDF group) or "SDS" for a data set;
             std::string NX_class()const{return "NXroot";}
             /// True if complies with our understanding of the www.nexusformat.org definition.

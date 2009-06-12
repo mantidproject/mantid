@@ -234,7 +234,7 @@ public:
     Component comp("testSetRot",V3D(1,1,1),rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1);
     comp.rotate(rot2);
-    TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);
+    TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1*rot2);
 
     // Rotate by angle+axis not implemented yet. Check for exception throw
     TS_ASSERT_THROWS(comp.rotate(45,V3D(1,1,1)), Mantid::Kernel::Exception::NotImplementedError )
@@ -248,14 +248,14 @@ public:
     Component comp("testSetRot",V3D(1,1,1),rot1);
     TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1);
     comp.rotate(rot2);
-    TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);
+    TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1*rot2);
     //Get the location of the component
     V3D beforeParentPos = comp.getPos();
     //assign a parent
     Component parent("parent",V3D(0,0,0),parentRot);
     comp.setParent(&parent);
     //check relative values have not moved
-    TS_ASSERT_EQUALS(comp.getRelativeRot(),rot2*rot1);
+    TS_ASSERT_EQUALS(comp.getRelativeRot(),rot1*rot2);
     TS_ASSERT_EQUALS(comp.getRelativePos(),beforeParentPos);
     //but the absolute pos should have changed due to the parent's rotation (the parent is centered on the origin)
     TS_ASSERT_DIFFERS(comp.getPos(),beforeParentPos);

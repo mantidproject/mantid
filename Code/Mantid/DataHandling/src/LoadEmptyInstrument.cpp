@@ -147,7 +147,7 @@ namespace Mantid
         fullPathIDF = directoryName + "/" + filename;
       }
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1);
       loadInst->setPropertyValue("Filename", fullPathIDF);
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("WorkspaceSingleValue",1,1,1);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",ws);
