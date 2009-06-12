@@ -113,7 +113,45 @@ bool Algorithm::execute()
     }
     // Try the validation again
     if ( !validateProperties() ) throw std::runtime_error("Some invalid Properties found");
+	
   }
+// get properties and check one of the input properties is a work space group
+// if it's a group call process group 
+ // if not normal execution
+
+  std::vector<Property*> Prop=getProperties();
+  std::vector<Property*>::const_iterator itr;
+  for (itr=Prop.begin();itr!=Prop.end();itr++)
+  {
+	  const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(*itr);
+	  if (wsProp)
+	  { 
+		  const Property *wsPropProp = dynamic_cast<Property*>(*itr);
+		  unsigned int direction = wsPropProp->direction();
+		  if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
+		  { 
+			  std::string wsname=wsPropProp->value();
+			  try
+			  {					
+				  //checking the input is a group
+				  boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+					  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
+				  if(wsGrpSptr)
+				  {	
+					  g_log.debug()<<"input is workspace group-processGroups called "<<std::endl;
+					  return(Algorithm::processGroups(wsGrpSptr,Prop));
+
+				  }
+			  }
+			  catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
+			  {
+				g_log.information()<<" Trying to retrieve  Object "<< wsname<<" which is not there in ADS"<<std::endl;
+
+			  }
+		  }//end of if loop checking the direction
+	  }//end of if loop for checking workspace properties
+
+  }// end of for loop for checking the properties for workspace groups
 
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try
@@ -204,7 +242,7 @@ bool Algorithm::execute()
   // and then converts to success if less than the maximum. This is clearly related to
   // having an event loop, and thus we shouldn't want it. This is the only place it's used.
 
-  m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+   m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   // Only gets to here if algorithm ended normally
   return isExecuted();
 }
@@ -389,7 +427,7 @@ void Algorithm::findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorksp
       if (direction == Direction::Input || direction == Direction::InOut)
       {
         inputWorkspaces.push_back(wsProp->getWorkspace());
-      }
+	  }
       if (direction == Direction::Output || direction == Direction::InOut)
       {
         outputWorkspaces.push_back(wsProp->getWorkspace());
@@ -446,16 +484,188 @@ void Algorithm::setChild(const bool isChild)
   m_isChildAlgorithm = isChild;
 }
 
+/** To Process workspace groups.
+ *  @param input workspacegroup pointer to iterate through all members
+ *  @param  a vector holding the input properties
+ *  @returns true - if all the workspace members are executed.
+ */
 
-bool Algorithm::executeAsyncImpl(const int&)
+bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<Mantid::Kernel::Property*>&prop)
+{	
+	int nPeriod=1;
+	int execPercentage=0;
+	bool bgroupExecStatus=true;
+	bool bgroupFailed=false;
+	std::string outWSParentName("");
+	WorkspaceGroup_sptr sptrWSGrp1; 
+	WorkspaceGroup_sptr sptrWSGrp2;
+	bool bnewGoup1=true;
+	bool bnewGoup2=true;
+	bool bStatus=false;
+	
+	//getting the input workspace group names
+	std::vector<std::string> inputWSNames=inputwsPtr->getNames();
+	int nSize=inputWSNames.size();
+	//size is one if only group header.
+	//return if atleast one meber is not there in group to process
+	if(nSize<2)
+	{	g_log.error()<<"Input WorkspaceGruop has no child workspaces  "<<std::endl;
+		return false;
+	}
+	std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
+	int execTotal=0;
+	//removing the header count from the totalsize
+	execTotal=(nSize-1)*10;
+	m_notificationCenter.postNotification(new StartedNotification(this));
+	
+	//for each member in the input workspace group
+	//starts from the 2nd item in the group as 1st item is group header
+	for(++wsItr;wsItr!=inputWSNames.end();wsItr++)
+	{		
+		IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",1);
+		//set  properties
+		std::vector<Mantid::Kernel::Property*>::const_iterator itr;
+		for (itr=prop.begin();itr!=prop.end();itr++)
+		{	
+			int outWSCount=0;		
+			if(isWorkspaceProperty(*itr) )
+			{
+				if(isInputWorkspaceProperty(*itr))
+				{setInputWSProperties(alg,*itr,*wsItr);
+				}
+				if(isOutputWorkspaceProperty(*itr))
+				{
+					++outWSCount;
+					//create a group and pass that to setOutputWSProperties properties
+					if(outWSCount==1)
+					{ 	if( bnewGoup1)
+							{	sptrWSGrp1= WorkspaceGroup_sptr(new WorkspaceGroup);
+								bnewGoup1=false;
+							}
+						setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp1,outWSParentName);
+					}
+					if(outWSCount==2)
+					{	if( bnewGoup2){sptrWSGrp2= WorkspaceGroup_sptr(new WorkspaceGroup);
+						bnewGoup2=false;
+					}
+						setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp2,outWSParentName);
+					}
+																		
+				}
+
+			}
+			else
+			{
+				alg->setPropertyValue((*itr)->name(),(*itr)->value());
+			}
+		}
+		// execute the algorithm 
+		bStatus=alg->execute();
+		bgroupExecStatus=bgroupExecStatus&&bStatus;
+		bgroupFailed=bgroupFailed||bStatus;
+		execPercentage+=10;
+		progress(double((execPercentage)/execTotal));
+			//increment count for outworkpsace name
+		if(!bStatus)
+		{  	g_log.error()<<"Algorithm execution failed for the input workspace "<<(*wsItr)<<std::endl;
+		}
+		nPeriod++;
+
+	}//end of for loop for input workspace group
+	//if all passed 
+	if(bgroupExecStatus)
+	{setExecuted(true);
+	}
+	//if all failed
+	if(!bgroupFailed)
+	{
+		AnalysisDataService::Instance().remove(outWSParentName);
+	}
+
+	m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+	return bStatus;
+}
+ 
+void Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string&inputWS )
 {
-    try
-    {
-        m_runningAsync = true;
-        bool res = execute();
-        m_runningAsync = false;
-        return res;
-    }
+	std::string wsname=prop->value();
+	try
+	{
+		boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+			boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
+		if(wsGrpSptr)
+		{
+			pAlg->setPropertyValue(prop->name(), inputWS);
+		}
+		else
+		{
+			pAlg->setPropertyValue(prop->name(), wsname);
+		}
+	}
+	catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
+	{
+		g_log.information()<<" Trying to retrieve  Object "<< wsname<<" which is not there in ADS"<<std::endl;
+
+	}
+}
+void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nPeriod,WorkspaceGroup_sptr sptrWSGrp,std::string &outWSParentName)
+{
+	std::string outWSChildName("");
+	outWSParentName=prop->value();
+	//std::string outWSParentName=prop->value();
+	std::stringstream suffix;
+	suffix<<nPeriod;
+	outWSChildName=outWSParentName+"_"+suffix.str();
+	pAlg->setPropertyValue(prop->name(), outWSChildName);
+	if(nPeriod==1){
+		if(sptrWSGrp)sptrWSGrp->add(outWSParentName);
+		AnalysisDataService::Instance().addOrReplace(outWSParentName,sptrWSGrp );
+	}
+	//adding to wsgroup vector
+	if(sptrWSGrp)
+	{
+		g_log.information()<< outWSChildName<<" adding to group"<<std::endl;
+		sptrWSGrp->add(outWSChildName);
+	}
+}
+bool Algorithm::isWorkspaceProperty( Mantid::Kernel::Property* prop)
+{
+	const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
+	bool bStatus(false);
+	(wsProp)? (bStatus=true) :( bStatus= false);
+	return bStatus;
+	
+}
+
+bool Algorithm::isInputWorkspaceProperty( Mantid::Kernel::Property* prop)
+{
+	const Property *wsPropProp = dynamic_cast<Property*>(prop);
+	unsigned int direction = wsPropProp->direction();
+	if (direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)
+	{
+		return true;
+	}
+	else return false;
+}
+bool Algorithm::isOutputWorkspaceProperty( Mantid::Kernel::Property* prop)
+{
+	const Property *wsPropProp = dynamic_cast<Property*>(prop);
+	unsigned int direction = wsPropProp->direction();
+	if (direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)
+	{
+		return true;
+	}
+	else return false;
+}
+bool Algorithm::executeAsyncImpl(const int&)
+{	try
+	{
+		m_runningAsync = true;
+		bool res = execute();
+		m_runningAsync = false;
+
+		return res;
+	}
     catch(...)
     { }
     return false;

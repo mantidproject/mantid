@@ -194,7 +194,7 @@ public:
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
   MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
   bool runAlgorithmAsynchronously(const QString & algName);
-  bool createPropertyInputDialog(const QString & algName, const QString & message, const QString & suggestedValues);
+  bool createPropertyInputDialog(const QString & algName, const QString & message, const QString & suggestedValues);	
 public slots:
   void cancelAllRunningAlgorithms();
 
@@ -349,6 +349,9 @@ private:
 
     // Sets the dependence between sindows: if the first one closes the second must close too.
     void setDependency(MdiSubWindow*,MdiSubWindow*);
+	
+
+	
 
     // Private variables
 
@@ -378,6 +381,9 @@ private:
 
     // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
     std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
+	static Mantid::Kernel::Logger& logObject;
+   // std::vector<std::string> m_wsGroupNames;
+
 };
 
 static const char * mantid_matrix_xpm[] = { 
@@ -432,5 +438,40 @@ static const char * mantid_xpm[] = {
 "             ",
 "             ",
 "             "};
+
+static const char * mantid_wsgroup_xpm[] = { 
+"13 12 20 1",
+" 	c None",
+".	c #000821",
+"+	c #000720",
+"@	c #000927",
+"#	c #000C39",
+"$	c #000C37",
+"%	c #000929",
+"&	c #00041B",
+"*	c #000519",
+"=	c #597384",
+"-	c #010101",
+";	c #00061E",
+">	c #4C7799",
+",	c #517595",
+"'	c #000212",
+")	c #000209",
+"!	c #000207",
+"~	c #00030C",
+"{	c #010101",
+"]	c #00FFFF",
+"{{{{{{{       ",
+"{]]{]]]       ",
+"{]]{]]{]]{]]{",
+"{]]{]]{]]{]]{",
+"{]]{]]{]]{]]{",
+"{{{{{{{{{{{{{",
+"{]]{]]{]]{]]{",
+"{]]{]]{]]{]]{",
+"{{{{{{{{{{{{{",
+"{]]{]]{]]{]]{",
+"{]]{]]{]]{]]{",
+"{{{{{{{{{{{{{"};
 
 #endif

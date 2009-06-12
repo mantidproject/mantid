@@ -29,6 +29,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Poco/ActiveMethod.h>
@@ -247,6 +248,7 @@ protected:
   void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
   ///Child algorithm progress observer
 	Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
+	
 
   ///checks that the value was not set by users, uses the value in EMPTY_DBL()
   static bool isEmpty(double toCheck) { return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
@@ -265,6 +267,14 @@ private:
   void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
                                std::vector<Workspace_sptr>& outputWorkspaces) const;
   void algorithm_info() const;
+  void setProperties(IAlgorithm* pAlg,const std::vector<Mantid::Kernel::Property*>&prop,const std::string&inputWS, 
+						const int nPeriod, std::string& outWSParentName,std::string& outWSChildName,WorkspaceGroup_sptr sptrWSGrp1,WorkspaceGroup_sptr sptrWSGrp2 );
+  virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+  bool isWorkspaceProperty( Mantid::Kernel::Property* prop);
+  bool isInputWorkspaceProperty( Mantid::Kernel::Property* prop);
+  bool isOutputWorkspaceProperty( Mantid::Kernel::Property* prop);
+  void setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string&inputWS );
+  void setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nperiod,WorkspaceGroup_sptr sptrWSGrp,std::string &outParentname);
 
   /// Poco::ActiveMethod used to implement asynchronous execution.
   Poco::ActiveMethod<bool, int, Algorithm> m_executeAsync;

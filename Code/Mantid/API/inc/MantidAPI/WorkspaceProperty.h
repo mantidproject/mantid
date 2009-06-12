@@ -10,6 +10,7 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <iostream>
 #include <string>
@@ -70,7 +71,6 @@ public:
     Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
     m_workspaceName( wsName ), m_initialWSName( wsName )
   {
-
   }
 
   /// Copy constructor, the default name stored in the new object is the same as the default name from the original object
@@ -125,13 +125,13 @@ public:
     m_workspaceName = value;
     // Try and get the workspace from the ADS, but don't worry if we can't
     try {
-      Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
+	     Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
         boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
     }
     catch (Kernel::Exception::NotFoundError)
     {
       // Set to null property if not found
-      this->clear();
+	   this->clear();
       //the workspace name is not reset here, however.
     }
     
@@ -146,7 +146,7 @@ public:
    */
   std::string isValid() const 
   {
-    //start with the no error condition
+	 //start with the no error condition
     std::string error = "";
 
     // If an output workspace it must have a name, although it might not exist in the ADS yet
@@ -176,14 +176,24 @@ public:
         //it either exists and is the wrong type or does not exist
         try
         {
-          //try to get he workspace of any type matching the name from the ADS
-          boost::shared_ptr<Workspace> wsTest =
-            boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(m_workspaceName));
-          //workspace exists but is wrong type
-          error = "Workspace " + this->value() + " is not of the correct type";
-          //the log has more detail, note that type() calls uses type_info which is implementation dependent
-          g_log.debug() << "Problem validating workspace: " << error << ".  \""
-              << m_workspaceName << "\" is not of type " << Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() << std::endl;
+			       
+			boost::shared_ptr<WorkspaceGroup> wsGroup=
+				boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(m_workspaceName));
+			if(wsGroup)
+			{
+				g_log.debug() <<" Intput Workspacegroup found "<<std::endl;
+			}
+			else
+			{ 
+				//try to get he workspace of any type matching the name from the ADS
+				boost::shared_ptr<Workspace> wsTest =
+					boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(m_workspaceName));
+				//workspace exists but is wrong type
+				error = "Workspace " + this->value() + " is not of the correct type";
+				//the log has more detail, note that type() calls uses type_info which is implementation dependent
+				g_log.debug() << "Problem validating workspace: " << error << ".  \""
+					<< m_workspaceName << "\" is not of type " << Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() << std::endl;
+			}
         }
         catch (Kernel::Exception::NotFoundError)
         {
@@ -195,6 +205,17 @@ public:
             g_log.debug() << "Problem validating workspace: " << error << std::endl;
             return error;
           }
+		  boost::shared_ptr<WorkspaceGroup> wsGroup=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(m_workspaceName));
+		  if(wsGroup)
+		  {
+			  g_log.debug() <<" Intput Workspacegroup found "<<std::endl;
+		  }
+		  else
+		  {
+			  error = "Workspace \"" + this->value() + "\" is not found in the Analysis Data Service";
+			  //the log has more detail, note that type() calls uses type_info which is implementation dependent
+			  g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
+		  }
           error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
           //the log has more detail, note that type() calls uses type_info which is implementation dependent
           g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;

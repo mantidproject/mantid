@@ -6,6 +6,7 @@
 #include <QComboBox>
 #include <QPoint>
 #include "MantidAPI/Workspace.h"
+#include <MantidAPI/WorkspaceGroup.h>
 
 class MantidUI;
 class ApplicationWindow;
@@ -20,6 +21,11 @@ class MantidDockWidget: public QDockWidget
 public:
     MantidDockWidget(QWidget*w):QDockWidget(w){}
     MantidDockWidget(MantidUI *mui, ApplicationWindow *w);
+private:
+	const std::vector<std::string>& getWSGroupNamesFromFW();
+	bool isItWorkspaceGroupItem(const std::vector<std::string> & wsGroupNames,const QString & ws_name);
+	bool isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace);
+	void removeFromWSGroupNames(const QString& wsName);
 public slots:
     void clickedWorkspace(QTreeWidgetItem*, int);
     void deleteWorkspaces();
@@ -29,6 +35,9 @@ protected slots:
 private slots:
   void updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr);
   void removeWorkspaceEntry(const QString &);
+  void populateWorkspaceTree(const QString & ws_name, Mantid::API::Workspace_sptr,bool isitParent);
+  
+  
   
 protected:
     QTreeWidget *m_tree;
@@ -37,6 +46,9 @@ private:
     QPushButton *m_loadButton;
     QPushButton *m_deleteButton;
     MantidUI *m_mantidUI;
+	static Mantid::Kernel::Logger& logObject;
+	std::vector<std::string> m_wsGroupNames;
+	//Mantid::API::WorkspaceGroup_sptr m_grpSptr;
 };
 
 
@@ -55,6 +67,7 @@ public:
 private:
     QPoint m_dragStartPosition;
     MantidUI *m_mantidUI;
+	static Mantid::Kernel::Logger& logObject;
 };
 
 class FindAlgComboBox:public QComboBox

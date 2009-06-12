@@ -48,6 +48,8 @@
 using namespace std;
 
 using namespace Mantid::API;
+
+Mantid::Kernel::Logger& MantidUI::logObject=Mantid::Kernel::Logger::get("MantidUI");
  
 MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw),
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
@@ -210,7 +212,8 @@ void MantidUI::loadWorkspace()
   //Just use the generic executeAlgorithm method which now uses specialised dialogs if they are
   //available
   executeAlgorithm("LoadRaw", -1);
-}
+ }
+
 
 /**
     loadDAEWorkspace
@@ -261,7 +264,7 @@ void MantidUI::loadDAEWorkspace()
 */
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
 {
-    bool ret = FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
+	bool ret = FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
     if (ret) update();
     return ret;
 }
@@ -289,11 +292,13 @@ QString MantidUI::getSelectedWorkspaceName()
     if( !items.empty() )
     {
       QTreeWidgetItem *item = items[0];
-      if( item->parent() )
+	  //commented below if loop as it was pointing to the parent item in the tree
+	  //this will fail incase of  workspace groups as right click on child item always points to parent item
+     /* if( item->parent() )
       {
-	item = item->parent();
-      }
-      str = item->text(0);
+		item = item->parent();
+      }*/
+	  if(item) str = item->text(0);
     }
     if( !str.isEmpty() ) return str;
 
@@ -303,6 +308,25 @@ QString MantidUI::getSelectedWorkspaceName()
     
     return m->workspaceName();
 }
+/*void MantidUI::removeFromWSGroupNames(const QString& wsName)
+{
+	//std::vector<std::string> wsGrpNames=getWorkspaceGroupNames();
+	std::vector<std::string>::iterator it;
+	if(!m_wsGroupNames.empty())
+	{ 
+		for (it=m_wsGroupNames.begin();it!=m_wsGroupNames.end();it++)
+		{
+			//logObject.error()<<"comparison string "<<pchild->text(0).toStdString()<<endl;;
+			if((*it)==(wsName.toStdString()))
+			{
+				//logObject.error()<<"name erased from vector=  "<<(*it)<<endl;
+				m_wsGroupNames.erase(it);
+				return;
+			}
+		}
+	}
+	
+}*/
 
 Mantid::API::Workspace_sptr MantidUI::getSelectedWorkspace()
 {
@@ -444,7 +468,7 @@ void MantidUI::showAlgorithmHistory()
 	QString wsName=getSelectedWorkspaceName();
 	Mantid::API::Workspace_sptr wsptr=getWorkspace(wsName);
 	if(wsptr)
-	{		
+	{	
 		WorkspaceHistory wsHistory= wsptr->getHistory();
 		std::vector<AlgorithmHistory>algHistory=wsHistory.getAlgorithmHistories();
 		EnvironmentHistory envHistory=wsHistory.getEnvironmentHistory(); 
@@ -780,7 +804,7 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
     m_algMonitor->add(alg);
     try
     {
-      Poco::ActiveResult<bool> res = alg->executeAsync(); 
+	  Poco::ActiveResult<bool> res = alg->executeAsync(); 
       if ( !res.tryWait(100) && showDialog)
       {
           //Use show rather than exec so that control is returned to the caller immediately
