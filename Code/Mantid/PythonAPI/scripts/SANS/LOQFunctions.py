@@ -38,7 +38,7 @@ def MaskOutsideCylinder(workspace, radius):
     MaskWithCylinder(workspace, radius, '#')
 
 # Convert a mask string from the GUI to a list of detector numbers
-def ConvertToDetList(maskstring):
+def ConvertToDetList(maskstring,firstdet,dimension):
     '''Compile detector ID list'''
     masklist = maskstring.split(',')
     detlist = ''
@@ -50,18 +50,18 @@ def ConvertToDetList(maskstring):
             upp = int(pieces[1].lstrip('hv'))
             if 'h' in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                detlist += detBlock(2 + low + 1,nstrips,128) + ','
+                detlist += detBlock(firstdet + low*dimension,dimension,nstrips,dimension) + ','
             elif 'v' in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                detlist += detBlock(2 + low*128,128,nstrips) + ','
+                detlist += detBlock(firstdet + low,nstrips,dimension,dimension) + ','
             else:
                 for i in range(low, upp + 1):
                     detlist += str(i) + ','
         elif 'h' in x:
-            detlist += detBlock(2 + int(x.lstrip('h')) + 1, 1, 128) + ','
+            low = int(x.lstrip('h'))
+            detlist += detBlock(firstdet + low*dimension,dimension, 1, dimension) + ','
         elif 'v' in x:
-            low = int(x.lstrip('v'))
-            detlist += detBlock(2 + low*128,128, 1) + ','
+            detlist += detBlock(firstdet + int(x.lstrip('v')), 1, dimension, dimension) + ','
         else:
             detlist += x + ','
     

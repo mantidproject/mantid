@@ -46,8 +46,10 @@ def Correct(sampleWS, transWS, resultWS, suffix):
 	# Get the monitor
 	LOQFunctions.GetMonitor(sampleWS, monitorWS, MONITORSPECTRUM)
 	# Get small angle banks
-	firstsmall = 130
-	lastsmall = 16130
+	# Need more general way of getting these, since this hardcoding only applies to LOQ LAB
+	firstsmall = 3
+	lastsmall = 16386
+	dimension = int(sqrt(lastsmall - firstsmall + 1))
 	# Get the small angle banks
 	LOQFunctions.GetMainBank(sampleWS, firstsmall, lastsmall, resultWS)
 	# Mask beam stop
@@ -55,7 +57,7 @@ def Correct(sampleWS, transWS, resultWS, suffix):
 	# Mask corners
 	LOQFunctions.MaskOutsideCylinder(resultWS, rmax)
 	# Mask others that are defined
-	detlist = LOQFunctions.ConvertToDetList(maskstring)
+	detlist = LOQFunctions.ConvertToDetList(maskstring,firstsmall,dimension)
 	LOQFunctions.MaskByDetNumber(resultWS, detlist)
 	if instr_name == "LOQ":
                 MoveInstrumentComponent(resultWS, "main-detector-bank", X = xshift, Y = yshift, RelativePosition="1")
