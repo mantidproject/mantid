@@ -119,6 +119,11 @@ m_progressDialog(0)
         qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
     }
 
+    QAction* tstAction = new QAction("Test",this);
+    tstAction->setShortcut(QKeySequence::fromString("Ctrl+A"));
+    connect(tstAction,SIGNAL(triggered()), this, SLOT(test()));
+    mantidMenu->addAction(tstAction);
+
 }
 
 // Should it be moved to the constructor?
@@ -1568,6 +1573,8 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& Name, Mantid::A
     ax = workspace->getAxis(0);
     std::string s;
     if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    else if (!ax->title().empty())
+        s = ax->title();
     else
         s = "X axis";
     g->setXAxisTitle(tr(s.c_str()));
@@ -1898,3 +1905,31 @@ void MantidUI::memoryImage()
 //=======================================================================
 // End of Windows specfic stuff
 //=======================================================================
+
+#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/CompAssembly.h"
+
+void MantidUI::test()
+{
+    std::cerr<<"\nTest\n\n";
+
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getSelectedWorkspace());
+    if (ws)
+    {
+        boost::shared_ptr<Mantid::API::Instrument> instr = ws->getBaseInstrument();
+        boost::shared_ptr<Mantid::Geometry::CompAssembly> both = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*instr)[3]);
+        if (both)
+        {
+            boost::shared_ptr<Mantid::Geometry::CompAssembly> first = boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*both)[0]);
+            if (first)
+            {
+                static int i = 0;
+                Mantid::Geometry::V3D u = i++ ? Mantid::Geometry::V3D(1,0,0) : Mantid::Geometry::V3D(0,1,0);
+                Mantid::Geometry::Quat q(30,u);
+                first->rotate(q);
+                return;
+            }
+        }
+    }
+    std::cerr<<"Failed...\n";
+}

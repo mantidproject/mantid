@@ -226,6 +226,8 @@ signals:
 					   
 public slots:
 
+    void test();
+
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
 

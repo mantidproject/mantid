@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/SimpleIntegration.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/Progress.h"
 
 namespace Mantid
 {
@@ -27,8 +28,8 @@ void SimpleIntegration::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  declareProperty("Range_lower",0.0);
-  declareProperty("Range_upper",0.0);
+  declareProperty("Range_lower",EMPTY_DBL());
+  declareProperty("Range_upper",EMPTY_DBL());
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("StartSpectrum",0, mustBePositive);
@@ -75,15 +76,14 @@ void SimpleIntegration::exec()
   // Create the 1D workspace for the output
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
-  int progress_step = (m_MaxSpec-m_MinSpec+1) / 100;
-  if (progress_step == 0) progress_step = 1;
-
   std::vector<double> widths(0);
 
   bool is_distrib=outputWorkspace->isDistribution();
   if (is_distrib)
 	  widths.resize(localworkspace->blocksize()); // Will contain the bin widths of distribution
 
+  MantidVec::difference_type distmin0 = 1,distmax0 = 0;
+  Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
   double sumY, sumE;
   // Loop over spectra
   for (int i = m_MinSpec, j=0; i <= m_MaxSpec; ++i, ++j)
@@ -100,10 +100,10 @@ void SimpleIntegration::exec()
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
-    if (std::abs(m_MinRange)<1e-7) lowit=X.begin();
+    if (m_MinRange == EMPTY_DBL()) lowit=X.begin();
     else lowit=std::lower_bound(X.begin(),X.end(),m_MinRange);
 
-    if (std::abs(m_MaxRange)<1e-7) highit=X.end();
+    if (m_MaxRange == EMPTY_DBL()) highit=X.end();
     else highit=std::find_if(lowit,X.end(),std::bind2nd(std::greater<double>(),m_MaxRange));
 
     // If range specified doesn't overlap with this spectrum then bail out
@@ -113,6 +113,13 @@ void SimpleIntegration::exec()
   
     MantidVec::difference_type distmin=std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax=std::distance(X.begin(),highit);
+
+    if (distmin0 != distmin || distmax0 != distmax)
+        g_log.information()<<"Starting with spectrum "<<i<<" bins selected: from "<<distmin<<" ("<<*(X.begin()+distmin)
+        <<") to "<<distmax<<" ("<<*(X.begin()+distmax)<<")\n";
+
+    distmin0 = distmin;
+    distmax0 = distmax;
 
     if (!is_distrib) //Sum the Y, and sum the E in quadrature
     {
@@ -132,11 +139,7 @@ void SimpleIntegration::exec()
     outputWorkspace->dataY(j)[0] = sumY;
     outputWorkspace->dataE(j)[0] = sqrt(sumE); // Propagate Gaussian error
 
-    if (j % progress_step == 0)
-    {
-        interruption_point();
-        progress( double(j)/(m_MaxSpec-m_MinSpec+1) );
-    }
+    progress.report();
   }
 
   // Assign it to the output workspace property

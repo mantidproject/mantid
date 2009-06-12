@@ -10,7 +10,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
+#include "MantidAPI/Progress.h"
 
 namespace Mantid
 {
@@ -39,7 +41,14 @@ namespace Mantid
         declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
         declareProperty("LogValue","",new MandatoryValidator<std::string>());
         declareProperty("Period", 1, Direction::Input);
-        declareProperty("Int",true);
+
+        std::vector<std::string> options;
+        options.push_back("Integral");
+        options.push_back("Differential");
+        declareProperty("Type","Integral",new ListValidator(options));
+
+        declareProperty("StartX",EMPTY_DBL(),"Starting X value for integration");
+        declareProperty("EndX",EMPTY_DBL(),"Ending X value for integration");
 	   
         //BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
         //zeroOrGreater->setLower(0);
@@ -57,8 +66,11 @@ namespace Mantid
 	    //int backward = getProperty("BackwardSpectra");   
 	    //double alpha = getProperty("Alpha");
         
+        std::string logName = getProperty("LogValue");
+
         int Period = getProperty("Period");
-        m_int = getProperty("Int");
+        std::string stype = getProperty("Type");
+        m_int = stype == "Integral";
 
         std::string firstFN = getProperty("FirstRun");
         std::string lastFN = getProperty("LastRun");
@@ -95,9 +107,8 @@ namespace Mantid
                    npoints,    //  the number of data points on a plot
                    npoints     //  it's not a histogram
                  ));
-        //localWorkspace->setTitle(title);
-        //localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
+        Progress progress(this,0,1,is,ie+1,1);
         for(size_t i=is;i<=ie;i++)
         {
             std::ostringstream fn,fnn;
@@ -113,8 +124,6 @@ namespace Mantid
 
             std::string wsProp = "OutputWorkspace";
             //std::string wsName = "tmp"+fnn.str();
-
-            std::string logName = getProperty("LogValue");
 
             // Run through the periods of the loaded file and do calculatons on the selected ones
             int period = 1;
@@ -137,8 +146,11 @@ namespace Mantid
                 wsProp = "OutputWorkspace" + suffix.str();// form the property name for higher periods
                 //wsName = "tmp"+fnn.str() + "_" + suffix.str();
             }
+            progress.report();
         }
 
+        outWS->getAxis(0)->title() = logName;
+        outWS->setYUnit("Asymmetry");
         // Assign the result to the output workspace property
         setProperty("OutputWorkspace",outWS);
 	    
@@ -149,6 +161,15 @@ namespace Mantid
      */
     void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws, double& Y, double& E)
     {
+        Property* startXprop = getProperty("StartX");
+        Property* endXprop = getProperty("EndX");
+        bool setX = !startXprop->isDefault() && !endXprop->isDefault();
+        double startX,endX;
+        if (setX)
+        {
+            startX = getProperty("StartX");
+            endX = getProperty("EndX");
+        }
         if (!m_int)
         {   //  "Differential asymmetry"
             IAlgorithm_sptr asym = createSubAlgorithm("AsymmetryCalc");
@@ -162,6 +183,11 @@ namespace Mantid
             IAlgorithm_sptr integr = createSubAlgorithm("Integration");
             integr->setProperty("InputWorkspace",asymWS);
             integr->setPropertyValue("OutputWorkspace","tmp");
+            if (setX)
+            {
+                integr->setProperty("Range_lower",startX);
+                integr->setProperty("Range_upper",endX);
+            }
             integr->execute();
             MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
 
@@ -185,6 +211,11 @@ namespace Mantid
             IAlgorithm_sptr integr = createSubAlgorithm("Integration");
             integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
             integr->setPropertyValue("OutputWorkspace","tmp");
+            if (setX)
+            {
+                integr->setProperty("Range_lower",startX);
+                integr->setProperty("Range_upper",endX);
+            }
             integr->execute();
             MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
 
