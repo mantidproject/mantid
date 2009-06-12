@@ -73,6 +73,7 @@ private:
   void exec();
   /// Sub-algorithm for calculating Smoothed second difference
   void generalisedSecondDifference();
+  //read in the values passed to this algorithm and set any default values
   void retrieveProperties();
   void analyseVector();
   /// Static reference to the logger class

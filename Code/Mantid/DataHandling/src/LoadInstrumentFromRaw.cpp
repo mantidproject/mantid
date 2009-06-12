@@ -33,8 +33,12 @@ LoadInstrumentFromRaw::LoadInstrumentFromRaw()
 void LoadInstrumentFromRaw::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
-  declareProperty("Filename","",new MandatoryValidator<std::string>);
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+    "The name of the workspace in which to store the imported instrument" );
+  declareProperty("Filename", "", new MandatoryValidator<std::string>,
+    "The filename (including its full or relative path) of an ISIS RAW file.\n"
+    "The file extension must either be .raw or .s??" );
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

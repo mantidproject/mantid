@@ -42,12 +42,18 @@ namespace Algorithms
     std::vector<std::string> exts;
     exts.push_back("sca");
     exts.push_back("raw");
-    declareProperty("ScalingFilename","",new FileValidator(exts));
-    //declareProperty(new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut,wsValidator));
-    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut));
+    declareProperty("ScalingFilename","",new FileValidator(exts),
+      "The name of the scaling calibrations file to read, including its\n"
+      "full or relative path. The file extension must be either .sca or\n"
+      ".raw (filenames are case sensitive on linux)" );
+    declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
+      "The name of the workspace to apply the scaling to. This must be\n"
+      "associated with an instrument appropriate for the scaling file" );
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("scalingOption",0, mustBePositive);
+    declareProperty("scalingOption",0, mustBePositive,
+      "Control scaling calculation - 0 => use average of left and right\n"
+      "scaling (default). 1 => use maximum scaling. 2 => maximum + 5%" );
   }
 
   /** Executes the algorithm.

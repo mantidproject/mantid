@@ -158,15 +158,21 @@ public:
 	TS_ASSERT_EQUALS( wsp3->isValid(), "")
   }
 
-  void testIsDefault()
+  void testIsDefaultAndGetDefault()
   {
+    //The constructor set wsp2 = "" so getDefault should always equal "", we'll change the value and check
+    TS_ASSERT_EQUALS(wsp2->getDefault(), "")
+    //change the value to something else anything
     wsp2->setValue("ws2");
-    //The constructor set wsp2 = "" so this should fail
+    //it is not default now
     TS_ASSERT( !wsp2->isDefault() )
+    //is default should stay the same
+    TS_ASSERT_EQUALS(wsp2->getDefault(), "")
     wsp2->setValue("");
     TS_ASSERT( wsp2->isDefault() )
+    TS_ASSERT_EQUALS(wsp2->getDefault(), "")
   }
-  
+
   void testAllowedValues()
   {
     std::vector<std::string> vals;
@@ -190,7 +196,7 @@ public:
     TS_ASSERT_EQUALS( history.type(), wsp1->type() )
     TS_ASSERT_EQUALS( history.direction(), 0 )
 
-    //change the name back to ws2 to cehck that isDefault() fails
+    //change the name back to ws2 to check that isDefault() fails
     wsp2->setValue("ws2");
     PropertyHistory history2 = wsp2->createHistory();
     TS_ASSERT_EQUALS( history2.name(), "workspace2" )

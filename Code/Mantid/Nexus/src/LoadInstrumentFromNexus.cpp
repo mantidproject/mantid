@@ -33,12 +33,16 @@ LoadInstrumentFromNexus::LoadInstrumentFromNexus()
 void LoadInstrumentFromNexus::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
-//  declareProperty("Filename","",new MandatoryValidator<std::string>);
-      std::vector<std::string> exts;
-      exts.push_back("nxs");
-      exts.push_back("NXS");		
-      declareProperty("Filename","",new FileValidator(exts));
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+    "The name of the workspace in which to attach the imported instrument" );
+  std::vector<std::string> exts;
+  exts.push_back("nxs");
+  exts.push_back("NXS");
+  declareProperty("Filename", "", new FileValidator(exts),
+    "The name (including its full or relative path) of the Nexus file to\n"
+    "attempt to load the instrument from. The file extension must either be\n"
+    ".nxs or .NXS" );
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

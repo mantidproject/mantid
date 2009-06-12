@@ -79,6 +79,30 @@ public:
     TS_ASSERT_EQUALS( s.operator()(), "it works" )
   }
 
+  void testGetValue()
+  {
+    PropertyWithValue<std::string> s("defau=theDef", "theDef");
+    TS_ASSERT_EQUALS( s.getDefault(), "theDef" )
+    TS_ASSERT_EQUALS( s.setValue("somethingElse"), "" )
+    TS_ASSERT_EQUALS( s.getDefault(), "theDef" )
+
+    PropertyWithValue<int> i("defau1", 3);
+    TS_ASSERT_EQUALS( i.getDefault(), "3" )
+    TS_ASSERT_EQUALS( i.setValue("5"), "" )
+    TS_ASSERT_EQUALS( i.getDefault(), "3" )
+    TS_ASSERT_EQUALS( i.setValue("garbage"),
+      "Could not set property defau1. Can not convert \"garbage\" to " + i.type() )
+    TS_ASSERT_EQUALS( i.getDefault(), "3" )
+
+    PropertyWithValue<double> d("defau3.33", 3.33);
+    TS_ASSERT_EQUALS( d.getDefault(), "3.33" )
+    TS_ASSERT_EQUALS( d.setValue("1.6"), "" )
+    TS_ASSERT_EQUALS( d.getDefault(), "3.33" )
+    TS_ASSERT_EQUALS( d.setValue("garbage"),
+      "Could not set property defau3.33. Can not convert \"garbage\" to " + d.type() )
+    TS_ASSERT_EQUALS( d.getDefault(), "3.33" )
+  }
+
   void testCopyConstructor()
   {
     PropertyWithValue<int> i = *iProp;

@@ -103,9 +103,13 @@ void Fit1D::init()
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("SpectrumIndex",0, mustBePositive,
-    "The spectrum to fit, using the workspace numbering of the spectra (default 0)");
-  declareProperty("StartX", EMPTY_DBL(), "X value to start fitting from");
-  declareProperty("EndX", EMPTY_DBL(), "last X value to include in fitting range");
+    "The spectrum to fit, uses the workspace numbering of the spectra (default 0)");
+  declareProperty("StartX", EMPTY_DBL(),
+    "A value of x in the first bin to include in the fit (default lowest value\n"
+    "of x");
+  declareProperty("EndX", EMPTY_DBL(),
+    "A value in the last bin in the fitting range (default the highest value\n"
+    "of x");
 
   // declare parameters specific to a given fitting function
   declareParameters();
@@ -117,7 +121,7 @@ void Fit1D::init()
     m_parameterNames.push_back(props[i]->name());
   }
 
-  declareProperty("MaxIterations",500, mustBePositive->clone(),
+  declareProperty("MaxIterations", 500, mustBePositive->clone(),
     "Stop after this number of iterations if a good fit is not found" );
   declareProperty("Output Status","", Direction::Output);
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);

@@ -20,10 +20,14 @@ Logger& Gaussian1D::g_log = Logger::get("Gaussian1D");
 void Gaussian1D::declareParameters()
 {
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
-  declareProperty("bg0",0.0, Direction::InOut);
-  declareProperty("height",0.0, Direction::InOut);
-  declareProperty("peakCentre",0.0, Direction::InOut);
-  declareProperty("sigma",1.0, positiveDouble, "", Direction::InOut);
+  declareProperty("bg0", 0.0,
+    "Constant background value (default 0)", Direction::InOut);
+  declareProperty("height", 0.0, "Height of peak (default 0)",
+    Direction::InOut);
+  declareProperty("peakCentre",0.0, "Centre of peak (default 0)",
+    Direction::InOut);
+  declareProperty("sigma", 1.0, positiveDouble,
+    "Standard deviation (default 1)", Direction::InOut);
 }
 
 void Gaussian1D::modifyStartOfRange(double& startX) 

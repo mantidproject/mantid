@@ -27,8 +27,11 @@ Mantid::Kernel::Logger& CreateSampleShape::g_log = Mantid::Kernel::Logger::get("
 void CreateSampleShape::init()
 {
   using namespace Mantid::Kernel;
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-  declareProperty("ShapeXML","",new MandatoryValidator<std::string>());
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+    "The workspace with which to associate the sample ");
+  declareProperty("ShapeXML","",new MandatoryValidator<std::string>(),
+    "The XML that describes the shape" );
 }
 
 /**

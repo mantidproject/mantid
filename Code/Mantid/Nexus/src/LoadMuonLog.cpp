@@ -34,8 +34,11 @@ LoadMuonLog::LoadMuonLog()
 void LoadMuonLog::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
-  declareProperty("Filename","");
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+    "Name of the Muon Nexus file to read, as a full or relative path" );
+  declareProperty("Filename","",
+    "The name of the workspace to which the log data will be added" );
 }
 
 /** Executes the algorithm. Reading in Log entries from the Nexus file

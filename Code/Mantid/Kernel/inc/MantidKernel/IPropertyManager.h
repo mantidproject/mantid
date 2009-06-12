@@ -128,21 +128,19 @@ protected:
         declareProperty(p, doc);
     }
 
-    /** Add a property of the template type to the list of managed properties
+    /** Add a property to the list of managed properties with no validator
     *  @param name The name to assign to the property
     *  @param value The initial value to assign to the property
     *  @param doc The documentation string
-    *  @param validator Pointer to the (optional) validator. Ownership will be taken over.
-    *  @param direction The (optional) direction of the property, in, out or inout
+    *  @param direction The (optional) direction of the property, in (default), out or inout
     *  @throw Exception::ExistsError if a property with the given name already exists
     *  @throw std::invalid_argument  if the name argument is empty
     */
     template <typename T>
     void declareProperty(const std::string &name, T value, const std::string &doc,
-      IValidator<T> *validator = new NullValidator<T>,
       const unsigned int direction = Direction::Input)
     {
-      Property *p = new PropertyWithValue<T>(name, value, validator, direction);
+      Property *p = new PropertyWithValue<T>(name, value, new NullValidator<T>, direction);
       declareProperty(p, doc);
     }
 

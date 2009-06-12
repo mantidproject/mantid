@@ -27,12 +27,17 @@ Mantid::Kernel::Logger& SaveFocusedXYE::g_log = Mantid::Kernel::Logger::get("Sav
  */
 void SaveFocusedXYE::init()
 {
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input));
-  declareProperty("Filename","", new Mantid::Kernel::FileValidator(std::vector<std::string>(), false), "", Kernel::Direction::Input);
+  declareProperty(
+    new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
+    "The name of the workspace containing the data you wish to save" );
+  declareProperty("Filename", "",
+    new Mantid::Kernel::FileValidator(std::vector<std::string>(), false),
+    "The filename to use when saving data", Kernel::Direction::Input);
   std::vector<std::string> Split(2);
   Split[0] = "True";
   Split[1] = "False";
-  declareProperty("SplitFiles","True",new Kernel::ListValidator(Split));
+  declareProperty("SplitFiles", "True", new Kernel::ListValidator(Split),
+    "Save each spectrum in a different file (default true)" );
 }
 
 /**

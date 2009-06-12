@@ -64,10 +64,19 @@ SaveCSV::SaveCSV()
  */
 void SaveCSV::init()
 {
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input));
-  declareProperty("Filename", "", new Kernel::MandatoryValidator<std::string>);
-  declareProperty("Separator", ",");
-  declareProperty("LineSeparator", "\n");
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+    "The filename of the output CSV file" );
+  declareProperty("Filename", "",
+    new Kernel::MandatoryValidator<std::string>,
+    "The name of the workspace containing the data you want to save to\n"
+    "a CSV file" );
+  declareProperty("Separator", ",",
+    "The separator that will go between the numbers on a line in the\n"
+    "output file (default ',')" );
+  declareProperty("LineSeparator", "\n",
+    "The string to place at the end of lines (default new line\n"
+    "character)" );
 }
 
 /** Executes the algorithm. Retrieve the Filename, separator and Lineseparator

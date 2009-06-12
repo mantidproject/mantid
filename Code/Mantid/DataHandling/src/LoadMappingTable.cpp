@@ -24,8 +24,13 @@ LoadMappingTable::LoadMappingTable()
 
 void LoadMappingTable::init()
 {
-  declareProperty("Filename","",new MandatoryValidator<std::string>); // Filename for RAW file
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut)); // Associated workspace
+  declareProperty("Filename","", new MandatoryValidator<std::string>,
+    "The name of the RAW file from which to obtain the mapping information,\n"
+    "including its full or relative path" );
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+    "The name of the input and output workspace on which to perform the\n"
+    "algorithm" );
 }
 
 void LoadMappingTable::exec()

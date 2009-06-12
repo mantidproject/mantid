@@ -35,13 +35,20 @@ namespace DataHandling
   void SaveVTK::init()
   {
     //Declare mandatory properties
-    declareProperty("Filename", "", new MandatoryValidator<std::string>(), "", Direction::Input);
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input));
+    declareProperty("Filename", "", new MandatoryValidator<std::string>(),
+      "The name to use when writing the file", Direction::Input);
+    declareProperty(
+      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
+      "The workspace name to use as input" );
     //Declare optional properties
     BoundedValidator<double> * mustBePositive = new BoundedValidator<double>();
     mustBePositive->setLower(0.0);
-    declareProperty("Xminimum", 0.0, mustBePositive);
-    declareProperty("Xmaximum", 0.0, mustBePositive->clone());
+    declareProperty("Xminimum", 0.0, mustBePositive,
+      "No bin that contains x values lower than this will be saved (default\n"
+      "0)" );
+    declareProperty("Xmaximum", 0.0, mustBePositive->clone(),
+      "No bin that contains x values higher than this will saved (default\n"
+      "the highest x value)" );
   }
 
   /**

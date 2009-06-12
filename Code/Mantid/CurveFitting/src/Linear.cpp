@@ -44,13 +44,12 @@ void Linear::init()
     "message", Direction::Output);
   declareProperty("FitIntercept", 0.0,
     "The intercept with the ordinate of the fitted line. c0 in the\n"
-    "equation below", new NullValidator<double>, Direction::Output);
+    "equation below", Direction::Output);
   declareProperty("FitSlope",0.0,
     "The slope of the fitted line. c1 in the equation below",
-    new NullValidator<double>, Direction::Output);
-  declareProperty("Chi^2",0.0,
-    "The goodness of the fit", new NullValidator<double>,
     Direction::Output);
+  declareProperty("Chi^2",0.0,
+    "The goodness of the fit", Direction::Output);
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();

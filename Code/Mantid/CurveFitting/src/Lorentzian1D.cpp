@@ -22,11 +22,19 @@ Logger& Lorentzian1D::g_log = Logger::get("Lorentzian1D");
 void Lorentzian1D::declareParameters()
 {
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
-  declareProperty("bg0",0.0, Direction::InOut);
-  declareProperty("bg1",0.0, Direction::InOut);
-  declareProperty("height",0.0, Direction::InOut);
-  declareProperty("peakCentre",0.0, Direction::InOut);
-  declareProperty("hwhm",1.0, positiveDouble, "", Direction::InOut);
+  NullValidator<double> *noValidation = new NullValidator<double>;                    //the null validator always returns valid, there is no validation
+  declareProperty("bg0", 0.0, noValidation,
+    "Constant background value (default 0)", Direction::InOut);
+  declareProperty("bg1", 0.0, noValidation->clone(),
+    "Linear background modelling parameter (default 0)",
+    Direction::InOut);
+  declareProperty("height", 0.0, noValidation->clone(),
+    "Peak height (may be refined to a negative value to fit a dipped curve)",
+    Direction::InOut);
+  declareProperty("peakCentre",0.0,  noValidation->clone(),
+    "Centre of peak (default 0)", Direction::InOut);
+  declareProperty("hwhm",1.0, positiveDouble,
+    "half-width at half-maximum (default 1)", Direction::InOut);
 }
 
 

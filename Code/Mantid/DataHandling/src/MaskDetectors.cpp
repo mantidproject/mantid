@@ -31,10 +31,20 @@ MaskDetectors::~MaskDetectors() {}
 
 void MaskDetectors::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut));
-  declareProperty(new ArrayProperty<int>("SpectraList"));
-  declareProperty(new ArrayProperty<int>("DetectorList"));
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"));
+  declareProperty(
+    new WorkspaceProperty<Workspace2D>("Workspace","", Direction::InOut),
+    "The name of the 2D workspace that will be used as input and\n"
+    "output for the algorithm" );
+  declareProperty(new ArrayProperty<int>("SpectraList"),
+    "A coma separated list or array containing a list of spectra to\n"
+    "mask (DetectorList and WorkspaceIndexList are ignored if this\n"
+    "is set)" );
+  declareProperty(new ArrayProperty<int>("DetectorList"),
+    "A coma separated list or array containing a list of detector ID's\n"
+    "to mask (WorkspaceIndexList is ignored if this is set)" );
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+    "A coma separated list or array containing the workspace indices\n"
+    "to mask" );
 }
 
 void MaskDetectors::exec()

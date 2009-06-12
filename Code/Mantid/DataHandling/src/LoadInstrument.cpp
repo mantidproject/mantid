@@ -48,12 +48,15 @@ LoadInstrument::LoadInstrument() : Algorithm(), m_haveDefaultFacing(false), m_de
 void LoadInstrument::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
+  declareProperty(
+    new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
+    "The name of the workspace to load the instrument definition into" );
   std::vector<std::string> exts;
   exts.push_back("XML");
   exts.push_back("xml");
-  declareProperty("Filename","",new FileValidator(exts,false));
-  //declareProperty("Filename","",new MandatoryValidator<std::string>);
+  declareProperty("Filename","",new FileValidator(exts,false),
+    "The filename (including its full or relative path) of an ISIS instrument\n"
+    "defintion file" );
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

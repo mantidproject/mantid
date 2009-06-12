@@ -21,12 +21,22 @@ Logger& BackToBackExponential1D::g_log = Logger::get("BackToBackExponential1D");
 
 void BackToBackExponential1D::declareParameters()
 {
-  declareProperty("I",0.0, Direction::InOut);
-  declareProperty("a",0.0, Direction::InOut);
-  declareProperty("b",0.0, Direction::InOut);
-  declareProperty("x0",0.0, Direction::InOut);
-  declareProperty("s",1.0, Direction::InOut);
-  declareProperty("bk",0.0, Direction::InOut);
+  NullValidator<double> *noValidation = new NullValidator<double>;                      //the null validator always returns valid, there is no validation
+  declareProperty("I", 0.0, noValidation, "Height of the peak (default 0)",
+    Direction::InOut);
+  declareProperty("a",0.0, noValidation->clone(),
+    "Exponential constant of rising part of neutron pulse (default 0)",
+    Direction::InOut);
+  declareProperty("b", 0.0, noValidation->clone(),
+    "Exponential constant of decaying part of neutron pulse (default 0)",
+    Direction::InOut);
+  declareProperty("x0", 0.0, noValidation->clone(), 
+    "Peak position (default 0)", Direction::InOut );
+  declareProperty("s", 1.0, noValidation->clone(),
+    "Standard deviation of the gaussian part of the peakshape (default 1)",
+    Direction::InOut );
+  declareProperty("bk", 0.0, noValidation->clone(),
+    "Constant background value (default 0)", Direction::InOut);
 }
 
 

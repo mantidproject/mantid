@@ -35,10 +35,18 @@ namespace Mantid
 
 		void FindDetectorsInShape::init()
 		{
-			declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","",Direction::Input));
-			declareProperty("ShapeXML","",new MandatoryValidator<std::string>());
-			declareProperty("IncludeMonitors",false);
-			declareProperty("DetectorList",std::vector<int>(),Direction::Output);
+			declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("Workspace","",Direction::Input),
+        "Name of the input workspace" );
+			declareProperty("ShapeXML", "", new MandatoryValidator<std::string>(),
+        "The XML definition of the shape");
+			declareProperty("IncludeMonitors", false,
+        "Whether monitors should be included if they are contained in the\n"
+        "shape (default false)");
+			declareProperty("DetectorList", std::vector<int>(),
+        new NullValidator< std::vector<int> >,                                      //the null validator always returns valid, there is no validation
+        "The list of detector ids included within the shape",
+        Direction::Output);
 		}
 
 		void FindDetectorsInShape::exec()

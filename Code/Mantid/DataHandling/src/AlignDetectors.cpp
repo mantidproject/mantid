@@ -34,9 +34,15 @@ void AlignDetectors::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new RawCountValidator<>);
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator));
-  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
-  declareProperty("CalibrationFile","",new FileValidator(std::vector<std::string>(1,"cal")));
+  declareProperty(
+    new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+    "A workspace with units of TOF" );
+  declareProperty(
+    new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+    "The name to use for the output workspace" );
+  declareProperty("CalibrationFile", "",
+    new FileValidator(std::vector<std::string>(1,"cal")),
+    "The CalFile containing the position correction factors" );
 }
 
 /** Executes the algorithm

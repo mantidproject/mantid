@@ -39,13 +39,21 @@ namespace Mantid
       std::vector<std::string> exts;
       exts.push_back("XML");
       exts.push_back("xml");			
-      declareProperty("Filename","",new FileValidator(exts));
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+      declareProperty("Filename","",new FileValidator(exts),
+        "The filename (including its full or relative path) of an ISIS\n"
+        "instrument defintion file");
+      declareProperty(
+        new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace in which to store the imported instrument" );
       
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0.0);
-      declareProperty("detector_value",1.0, mustBePositive);
-      declareProperty("monitor_value",2.0, mustBePositive->clone());
+      declareProperty("detector_value",1.0, mustBePositive,
+        "This value affects the colour of the detectors in the instrument\n"
+        "display window (default 1)" );
+      declareProperty("monitor_value",2.0, mustBePositive->clone(),
+        "This value affects the colour of the monitors in the instrument\n"
+        "display window (default 2)");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating

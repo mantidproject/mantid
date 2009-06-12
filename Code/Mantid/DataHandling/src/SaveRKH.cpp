@@ -26,8 +26,11 @@ Mantid::Kernel::Logger& SaveRKH::g_log = Mantid::Kernel::Logger::get("SaveRKH");
  */
 void SaveRKH::init()
 {
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input));
-  declareProperty("Filename","",Kernel::Direction::Input);
+  declareProperty(
+    new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
+    "The name of the workspace to save");
+  declareProperty("Filename", "",
+    "The name to use when saving the file");
 
   //Get the units registered with the UnitFactory
   std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
@@ -35,7 +38,9 @@ void SaveRKH::init()
   //Add some others that will make this orient the other way
   m_RKHKeys.insert("SpectraNumber");
   propOptions.insert(propOptions.end(), m_RKHKeys.begin(), m_RKHKeys.end());
-  declareProperty("FirstColumnValue", "Wavelength", new Kernel::ListValidator(propOptions) );
+  declareProperty("FirstColumnValue", "Wavelength",
+    new Kernel::ListValidator(propOptions),
+    "The units of the first column (defualt Wavelengh)" );
  
 }
 

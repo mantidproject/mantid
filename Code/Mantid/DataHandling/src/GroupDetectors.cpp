@@ -36,14 +36,16 @@ void GroupDetectors::init()
     new CommonBinsValidator<Workspace2D>),
     "The name of the workspace2D on which to perform the algorithm");
   declareProperty(new ArrayProperty<int>("SpectraList"),
-    "An array containing a list of the indexes of the spectra to combine");
+    "An array containing a list of the indexes of the spectra to combine\n"
+    "(DetectorList and WorkspaceIndexList are ignored if this is set)" );
   declareProperty(new ArrayProperty<int>("DetectorList"), 
-    "An array of detector ID's");
+    "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
+    "set)" );
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-    "An array of workspace indices to combine");
+    "An array of workspace indices to combine" );
   declareProperty("ResultIndex", -1,
-    "The workspace index of the summed spectrum",
-    new NullValidator<int>, Direction::Output);
+    "The workspace index of the summed spectrum (or -1 on error)",
+    Direction::Output);
 }
 
 void GroupDetectors::exec()

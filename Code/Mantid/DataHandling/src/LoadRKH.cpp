@@ -24,8 +24,11 @@ Mantid::Kernel::Logger& LoadRKH::g_log = Mantid::Kernel::Logger::get("LoadRKH");
  */
 void LoadRKH::init()
 {
-  declareProperty("Filename","", new Kernel::FileValidator());
-  declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
+  declareProperty("Filename","", new Kernel::FileValidator(),
+    "Name of the RKH file to load" );
+  declareProperty(
+    new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
+    "The name to use for the output workspace" );
   //Get the units registered with the UnitFactory
   std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
   m_unitKeys.insert(propOptions.begin(), propOptions.end());
@@ -33,7 +36,10 @@ void LoadRKH::init()
   //Add some others that will make this orient the other way
   m_RKHKeys.insert("SpectraNumber");
   propOptions.insert(propOptions.end(), m_RKHKeys.begin(), m_RKHKeys.end());
-  declareProperty("FirstColumnValue", "Wavelength", new Kernel::ListValidator(propOptions) );
+  declareProperty("FirstColumnValue", "Wavelength",
+    new Kernel::ListValidator(propOptions),
+    "The units of the first column in the RKH file (default\n"
+    "Wavelength)" );
 }
 
 /**

@@ -44,7 +44,7 @@ void Unwrap::init()
   BoundedValidator<double> *validator = new BoundedValidator<double>;
   validator->setLower(0.01);
   declareProperty("LRef", 0.0, validator,
-    "The length of the reference flightpath (in metres)" );
+    "The length of the reference flight path (in metres)" );
 
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;
