@@ -1,4 +1,4 @@
-#include "MantidAPI\WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceGroup.h"
 //#include<iostream>
 
 Mantid::Kernel::Logger& Mantid::API::WorkspaceGroup::g_log=Mantid::Kernel::Logger::get("WorkspaceGroup");
@@ -15,7 +15,7 @@ namespace Mantid
 			//std::cout<<"WorkspaceGroup desctructor called "<<std::endl;
 		}
 		void WorkspaceGroup::add(const std::string& name)
-		{			
+		{
 			m_wsNames.push_back(name);
 			//g_log.error()<<"workspacename added to group vector=  "<<name<<std::endl;
 		}
