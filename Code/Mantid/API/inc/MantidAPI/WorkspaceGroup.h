@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAOBJECTS_WORKSPACEGROUP_H
 #define MANTID_DATAOBJECTS_WORKSPACEGROUP_H
 #include "MantidAPI/Workspace.h"
-#include "Mantidkernel/DataService.h"
-#include "MantidAPI\AnalysisDataService.h"
+#include "MantidKernel/DataService.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include<string>
 #include<map>
 #include<iostream>
@@ -19,7 +19,7 @@ namespace Mantid
 		public:
 			WorkspaceGroup();
 			~WorkspaceGroup();
-			virtual const std::string id()const {return "WorkspaceGroup";} 
+			virtual const std::string id()const {return "WorkspaceGroup";}
 			virtual long int getMemorySize() const { return 0;} ;
 			void add(const std::string& wsName);
 			const std::vector<std::string>& getNames() const{return m_wsNames;}
