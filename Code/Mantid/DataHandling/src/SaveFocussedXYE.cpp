@@ -62,7 +62,7 @@ void SaveFocusedXYE::exec()
   std::string split=getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
-  
+
 	for (int i=0;i<nHist;i++)
 	{
 		const std::vector<double>& X=inputWS->readX(i);
@@ -76,7 +76,7 @@ void SaveFocusedXYE::exec()
 		else if (split=="True")//Several files will be created with names: filename-i.ext
 		{
 			number << "-" << i;
-			out.open((filename+number.str()+ext).c_str(),std::ios::out);
+			out.open((filename+number.str()+"."+ext).c_str(),std::ios::out);
 			number.str("");
 			writeHeaders(out,inputWS);
 		}
@@ -108,7 +108,7 @@ void SaveFocusedXYE::exec()
     } // End separate scope
     //Close at each iteration
   	if (split=="True")
-    {	
+    {
       out.close();
     }
   }
