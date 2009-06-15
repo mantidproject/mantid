@@ -40,7 +40,7 @@ namespace Mantid
 			std::vector<std::string>::const_iterator itr;
 			for(itr=m_wsNames.begin();itr!=m_wsNames.end();itr++)
 			{
-				g_log.error()<<"workspacename in group vector=  "<<*itr<<std::endl;
+				g_log.information()<<"workspacename in group vector=  "<<*itr<<std::endl;
 			}
 		}
 
