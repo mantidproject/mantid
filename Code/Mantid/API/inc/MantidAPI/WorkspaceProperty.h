@@ -180,7 +180,14 @@ namespace Mantid
             }
             catch( Kernel::Exception::NotFoundError &)
             {
-              error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
+              if( m_workspaceName.empty() ) 
+              {
+                error = "Enter a name for the workspace";
+              }
+              else
+              {
+                error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
+              }
               g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
               return error;
             }
