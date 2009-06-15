@@ -249,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadRaw3.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRKH.cpp"
 				>
 			</File>
@@ -274,6 +278,10 @@
 			</File>
 			<File
 				RelativePath=".\src\SaveFocussedXYE.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SaveGSS.cpp"
 				>
 			</File>
 			<File
@@ -403,6 +411,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidDataHandling\LoadRaw3.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\LoadRawTest.h"
 				>
 			</File>
@@ -452,6 +464,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\SaveFocusedXYE.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveGSS.h"
 				>
 			</File>
 			<File

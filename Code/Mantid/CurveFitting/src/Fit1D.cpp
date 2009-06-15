@@ -105,11 +105,11 @@ void Fit1D::init()
   declareProperty("SpectrumIndex",0, mustBePositive,
     "The spectrum to fit, uses the workspace numbering of the spectra (default 0)");
   declareProperty("StartX", EMPTY_DBL(),
-    "A value of x in the first bin to include in the fit (default lowest value\n"
-    "of x");
+    "A value of x in, or on the low x boundary of, the first bin to include in\n"
+    "the fit (default lowest value of x)" );
   declareProperty("EndX", EMPTY_DBL(),
-    "A value in the last bin in the fitting range (default the highest value\n"
-    "of x");
+    "A value in, or on the high x boundary of, the last bin the fitting range\n"
+    "(default the highest value of x)" );
 
   // declare parameters specific to a given fitting function
   declareParameters();

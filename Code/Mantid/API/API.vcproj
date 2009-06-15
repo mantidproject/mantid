@@ -285,6 +285,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\WorkspaceGroup.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\WorkspaceHistory.cpp"
 				>
 			</File>
@@ -500,6 +504,10 @@
 			</File>
 			<File
 				RelativePath=".\test\WorkspaceFactoryTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\WorkspaceGroup.h"
 				>
 			</File>
 			<File

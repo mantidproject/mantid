@@ -59,7 +59,9 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      FindDeadDetectors() : API::Algorithm() {};
+      FindDeadDetectors() : API::Algorithm(),
+        m_deadThreshold(0.0), m_liveValue(0.0), m_deadValue(100.0)
+      {};
       /// Destructor
       virtual ~FindDeadDetectors() {};
       /// Algorithm's name for identification overriding a virtual method
@@ -75,6 +77,13 @@ namespace Mantid
       void exec();
 
       API::MatrixWorkspace_sptr integrateWorkspace(std::string outputWorkspaceName);
+      
+      void checkAndLoadInputs();
+      double m_deadThreshold;
+      double m_liveValue;
+      double m_deadValue;
+      double m_startX;
+      double m_endX;
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

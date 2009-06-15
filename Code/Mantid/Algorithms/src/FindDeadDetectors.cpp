@@ -44,15 +44,16 @@ namespace Mantid
       declareProperty("DeadValue",100.0, mustBePositive->clone(),
         "The value to assign to an integrated spectrum flagged as 'dead'\n"
         "(default 100.0)" );
-/*to add under ticket #597.  Delete if the ticket is closed
-must the start value be positive? declareProperty("StartX", EMPTY_DBL(), mustBePositive->clone(),
-        "An X value in the first bin of the region to be used to decide if\n"
-        "the detector is 'dead' (default: the start of the spectra)" );
-      declareProperty("EndX", EMPTY_DBL(), mustBePositive->clone(),
-        "An X value in the last bin to be used to decide if a detector is 'dead'\n"
-        "(default: the end of the spectra)" );
-I guess the start and the end of the spectra can be different for each detector
-remember to update the wiki, are the Python docs updated automatically?*/
+      //EMPTY_DBL() is a tag that tells us that no value has been set and we want to use the default
+      declareProperty("StartX", EMPTY_DBL(),
+        "No bin with a boundary at an x value less than this will be used\n"
+        "in the summation that decides if a detector is 'dead' (default: the\n"
+        "start of each histogram)" );
+//STEVES remember to update the wiki
+      declareProperty("EndX", EMPTY_DBL(),
+        "No bin with a boundary at an x value higher than this value will\n"
+        "be used in the summation that decides if a detector is 'dead'\n"
+        "(default: the end of each histogram)" );
       declareProperty("OutputFile","",
         "A filename to which to write the list of dead detector UDETs" );
       // This output property will contain the list of UDETs for the dead detectors
@@ -65,10 +66,7 @@ remember to update the wiki, are the Python docs updated automatically?*/
      */
     void FindDeadDetectors::exec()
     {
-      // Try and retrieve the optional properties
-      double deadThreshold = getProperty("DeadThreshold");
-      double liveValue = getProperty("LiveValue");
-      double deadValue = getProperty("DeadValue");
+      checkAndLoadInputs();
 
       // Try and open the output file, if specified, and write a header
       std::ofstream file(getPropertyValue("OutputFile").c_str());
@@ -93,14 +91,14 @@ remember to update the wiki, are the Python docs updated automatically?*/
       for (int i = 0; i < numSpec; ++i)
       {
         double &y = integratedWorkspace->dataY(i)[0];
-        if ( y > deadThreshold )
+        if ( y > m_deadThreshold )
         {
-        y = liveValue;
+        y = m_liveValue;
         }
         else
         {
           ++countSpec;
-          y = deadValue;
+          y = m_deadValue;
           const int specNo = specAxis->spectraNo(i);
           // Write the spectrum number to file
           file << i << " " << specNo;
@@ -142,8 +140,11 @@ remember to update the wiki, are the Python docs updated automatically?*/
       g_log.information() << "Integrating input workspace" << std::endl;
 
       API::IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
-      childAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
-      childAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
+      //pass inputed values straight to this sub-algorithm, checking must be done there
+      childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
+      childAlg->setPropertyValue( "OutputWorkspace", outputWorkspaceName);
+      childAlg->setPropertyValue( "Range_lower",  getPropertyValue("StartX") );
+      childAlg->setPropertyValue( "Range_upper", getPropertyValue("EndX") );
 
       // Now execute the sub-algorithm. Catch and log any error
       try
@@ -162,6 +163,39 @@ remember to update the wiki, are the Python docs updated automatically?*/
 
       return retVal;
     }
+
+    void FindDeadDetectors::checkAndLoadInputs()
+    {
+      // Try and retrieve the optional properties
+      m_deadThreshold = getProperty("DeadThreshold");
+      m_liveValue = getProperty("LiveValue");
+      m_deadValue = getProperty("DeadValue");
+      //more checking of StartX and EndX is done when it is passed to SimpleIngegration but there is some checking needed here
+      double startX = getProperty("StartX");
+      //a very low user startX value will cause SimpleIntegration to disregard the value
+      if ( std::abs(startX) < 1e-7 )
+      {//as this might not have been intended log it
+        g_log.information("Low value of StartX, " + getPropertyValue("StartX") + ", disregarded the integration will be from the start of each spectrium");
+      }
+      //check if no value was set
+      if ( isEmpty(startX) )
+      {//it wasn't set use the dummy value that causes SimpleIntegration to use the start of the range
+        setPropertyValue("StartX", "0.0");
+      }
+      
+      double endX = getProperty("EndX");
+      //look for a very low user EndX value
+      if ( std::abs(endX) < 1e-7 )
+      {//as this will cause SimpleIntegration to disregard the value user value
+        g_log.information("Low value of EndX, " + getPropertyValue("EndX") + ", disregarded the integration will continue to the end of each spectrium");
+      }
+      //if no value was set
+      if ( isEmpty(endX) )
+      {//use the dummy value that causes SimpleIntegration do the default behavour
+        setPropertyValue("EndX", "0.0");
+      }
+    }
+
 
   } // namespace Algorithm
 } // namespace Mantid
