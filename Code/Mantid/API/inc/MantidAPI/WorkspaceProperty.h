@@ -17,9 +17,9 @@
 
 namespace Mantid
 {
-namespace API
-{
-/** A property class for workspaces. Inherits from PropertyWithValue, with the value being
+  namespace API
+  {
+    /** A property class for workspaces. Inherits from PropertyWithValue, with the value being
     a pointer to the workspace type given to the WorkspaceProperty constructor. This kind
     of property also holds the name of the workspace (as used by the AnalysisDataService)
     and an indication of whether it is an input or output to an algorithm (or both).
@@ -53,274 +53,250 @@ namespace API
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-*/	
-template <typename TYPE = MatrixWorkspace>
-class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >, public IWorkspaceProperty
-{
-public:
-  /** Constructor.
-   *  Sets the property and workspace names but initialises the workspace pointer to null.
-   *  @param name The name to assign to the property
-   *  @param wsName The name of the workspace
-   *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
-   *  @param validator The (optional) validator to use for this property
-   *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
-   */
-  WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
-                     Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
-    Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-    m_workspaceName( wsName ), m_initialWSName( wsName )
-  {
-  }
-
-  /// Copy constructor, the default name stored in the new object is the same as the default name from the original object
-  WorkspaceProperty( const WorkspaceProperty& right ) :
-    Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >( right ),
-      m_workspaceName( right.m_workspaceName ), m_initialWSName( right.m_initialWSName )
-  {    
-  }
-
-  /// Copy assignment operator. Only copies the value (i.e. the pointer to the workspace)
-  WorkspaceProperty& operator=( const WorkspaceProperty& right )
-  {
-    if ( &right == this ) return *this;
-    Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( right );
-    return *this;
-  }
-
-  // Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
-  virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
-  {
-    return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
-  }
-
-  /// Virtual destructor
-  virtual ~WorkspaceProperty()
-  {
-  }
-
-  /** Get the name of the workspace
-   *  @return The workspace's name
-   */
-  virtual std::string value() const
-  {
-    return m_workspaceName;
-  }
-
-  /** Get the value the property was initialised with -its default value
-   *  @return The default value
-   */
-  virtual std::string getDefault() const
-  {
-    return m_initialWSName;
-  }
-
-  /** Set the name of the workspace.
-   *  Also tries to retrieve it from the AnalysisDataService.
-   *  @param value The new name for the workspace
-   *  @return 
-   */
-  virtual std::string setValue( const std::string& value )
-  {
-    m_workspaceName = value;
-    // Try and get the workspace from the ADS, but don't worry if we can't
-    try {
-	     Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
-        boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
-    }
-    catch (Kernel::Exception::NotFoundError)
+    */	
+    template <typename TYPE = MatrixWorkspace>
+    class WorkspaceProperty : public Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >, public IWorkspaceProperty
     {
-      // Set to null property if not found
-	   this->clear();
-      //the workspace name is not reset here, however.
-    }
-    
-    return isValid();
-  }
-
-   /** Checks whether the entered workspace is valid.
-   *  To be valid, in addition to satisfying the conditions of any validators,
-   *  an output property must not have an empty name and an input one must point to
-   *  a workspace of the correct type.
-   *  @returns A user level description of the problem or "" if it is valid.
-   */
-  std::string isValid() const 
-  {
-	 //start with the no error condition
-    std::string error = "";
-
-    // If an output workspace it must have a name, although it might not exist in the ADS yet
-    if ( this->direction() == Kernel::Direction::Output ) 
-    {
-      if ( !this->value().empty() )
+    public:
+      /** Constructor.
+      *  Sets the property and workspace names but initialises the workspace pointer to null.
+      *  @param name The name to assign to the property
+      *  @param wsName The name of the workspace
+      *  @param direction Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
+      *  @param validator The (optional) validator to use for this property
+      *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
+      */
+      WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
+        Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
+      Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
+        m_workspaceName( wsName ), m_initialWSName( wsName )
       {
-        //it has a name and that is enough so return the success
-        return "";
       }
-      else
-      {
-        //Return a user level error
-        error = "Enter a name for the workspace";
-        //the debug message has more detail to put it in context
-        g_log.debug() << "Problem validating workspace: " << error << std::endl;
-        return error;
-      }
-    }
 
-    // If an input (or inout) workspace, must point to something, although it doesn't have to have a name
-    if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
-    {
-      if ( !Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) 
+      /// Copy constructor, the default name stored in the new object is the same as the default name from the original object
+      WorkspaceProperty( const WorkspaceProperty& right ) :
+      Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >( right ),
+        m_workspaceName( right.m_workspaceName ), m_initialWSName( right.m_initialWSName )
+      {    
+      }
+
+      /// Copy assignment operator. Only copies the value (i.e. the pointer to the workspace)
+      WorkspaceProperty& operator=( const WorkspaceProperty& right )
       {
-        //We know there is an error
-        //it either exists and is the wrong type or does not exist
-        try
-        {
-			       
-			boost::shared_ptr<WorkspaceGroup> wsGroup=
-				boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(m_workspaceName));
-			if(wsGroup)
-			{
-				g_log.debug() <<" Intput Workspacegroup found "<<std::endl;
-			}
-			else
-			{ 
-				//try to get he workspace of any type matching the name from the ADS
-				boost::shared_ptr<Workspace> wsTest =
-					boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(m_workspaceName));
-				//workspace exists but is wrong type
-				error = "Workspace " + this->value() + " is not of the correct type";
-				//the log has more detail, note that type() calls uses type_info which is implementation dependent
-				g_log.debug() << "Problem validating workspace: " << error << ".  \""
-					<< m_workspaceName << "\" is not of type " << Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() << std::endl;
-			}
+        if ( &right == this ) return *this;
+        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( right );
+        return *this;
+      }
+
+      // Bring in the PropertyWithValue assignment operator explicitly (avoids VSC++ warning)
+      virtual boost::shared_ptr<TYPE>& operator=( const boost::shared_ptr<TYPE>& value )
+      {
+        return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
+      }
+
+      /// Virtual destructor
+      virtual ~WorkspaceProperty()
+      {
+      }
+
+      /** Get the name of the workspace
+      *  @return The workspace's name
+      */
+      virtual std::string value() const
+      {
+        return m_workspaceName;
+      }
+
+      /** Get the value the property was initialised with -its default value
+      *  @return The default value
+      */
+      virtual std::string getDefault() const
+      {
+        return m_initialWSName;
+      }
+
+      /** Set the name of the workspace.
+      *  Also tries to retrieve it from the AnalysisDataService.
+      *  @param value The new name for the workspace
+      *  @return 
+      */
+      virtual std::string setValue( const std::string& value )
+      {
+        m_workspaceName = value;
+        // Try and get the workspace from the ADS, but don't worry if we can't
+        try {
+          Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
+            boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
         }
-        catch (Kernel::Exception::NotFoundError)
+        catch (Kernel::Exception::NotFoundError &)
         {
-          //workspace really does not exist
-          //check that it even has a name
-          if ( value().empty() )
+          // Set to null property if not found
+          this->clear();
+          //the workspace name is not reset here, however.
+        }
+
+        return isValid();
+      }
+
+      /** Checks whether the entered workspace is valid.
+      *  To be valid, in addition to satisfying the conditions of any validators,
+      *  an output property must not have an empty name and an input one must point to
+      *  a workspace of the correct type.
+      *  @returns A user level description of the problem or "" if it is valid.
+      */
+      std::string isValid() const 
+      {
+        //start with the no error condition
+        std::string error = "";
+
+        // If an output workspace it must have a name, although it might not exist in the ADS yet
+        if ( this->direction() == Kernel::Direction::Output ) 
+        {
+          if ( !this->value().empty() )
           {
+            //it has a name and that is enough so return the success
+            return "";
+          }
+          else
+          {
+            //Return a user level error
             error = "Enter a name for the workspace";
+            //the debug message has more detail to put it in context
             g_log.debug() << "Problem validating workspace: " << error << std::endl;
             return error;
           }
-		  boost::shared_ptr<WorkspaceGroup> wsGroup=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(m_workspaceName));
-		  if(wsGroup)
-		  {
-			  g_log.debug() <<" Intput Workspacegroup found "<<std::endl;
-		  }
-		  else
-		  {
-			  error = "Workspace \"" + this->value() + "\" is not found in the Analysis Data Service";
-			  //the log has more detail, note that type() calls uses type_info which is implementation dependent
-			  g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
-		  }
-          error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
-          //the log has more detail, note that type() calls uses type_info which is implementation dependent
-          g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
         }
-        return error;
+
+        // If an input (or inout) workspace, must point to something, although it doesn't have to have a name
+        if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
+        {
+          // Workspace groups will not have a value since they are not of type TYPE
+          if ( !Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value ) 
+          {
+            Mantid::API::Workspace_sptr wksp;
+            try 
+            {
+              wksp = AnalysisDataService::Instance().retrieve(m_workspaceName);
+            }
+            catch( Kernel::Exception::NotFoundError &)
+            {
+              error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
+              g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
+              return error;
+            }
+
+            //At this point we have a valid pointer to a Workspace so we need to test whether it is a group
+            if( boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp) )
+            {
+              g_log.debug() << " Input WorkspaceGroup found " <<std::endl;
+            }
+            else
+            {
+              error = "Workspace " + this->value() + " is not of the correct type";
+              g_log.debug() << "Problem validating workspace: " << error << ".  \""
+                  << m_workspaceName << "\" is not of type " << Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::type() << std::endl;
+            }
+            return error;
+          }
+        }
+        // Call superclass method to access any attached validators (which do their own logging)
+        return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
       }
-    }
-    // Call superclass method to access any attached validators (which do their own logging)
-    return Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::isValid();
-  }
 
-  /** Indicates if the object is still pointing to the same workspace, using the worksapce name
-  *  @return true if the value is the same as the initial value or false otherwise
-  */
-  bool isDefault() const
-  {
-    return  m_initialWSName == m_workspaceName;
-  }
+      /** Indicates if the object is still pointing to the same workspace, using the worksapce name
+      *  @return true if the value is the same as the initial value or false otherwise
+      */
+      bool isDefault() const
+      {
+        return  m_initialWSName == m_workspaceName;
+      }
 
-  /** Returns the current contents of the AnalysisDataService for input workspaces.
-   *  For output workspaces, an empty vector is returned
-   */
-  virtual const std::vector<std::string> allowedValues() const
-  {
-    if ( this->direction() == 0 || this->direction() == 2 )
-    {
-      // If an input workspace, get the list of workspaces currently in the ADS
-      return AnalysisDataService::Instance().getObjectNames();
-    }
-    else
-    {
-      // For output workspaces, just return an empty vector
-      return std::vector<std::string>();
-    }
-  }
+      /** Returns the current contents of the AnalysisDataService for input workspaces.
+      *  For output workspaces, an empty vector is returned
+      */
+      virtual const std::vector<std::string> allowedValues() const
+      {
+        if ( this->direction() == 0 || this->direction() == 2 )
+        {
+          // If an input workspace, get the list of workspaces currently in the ADS
+          return AnalysisDataService::Instance().getObjectNames();
+        }
+        else
+        {
+          // For output workspaces, just return an empty vector
+          return std::vector<std::string>();
+        }
+      }
 
-  virtual const Kernel::PropertyHistory createHistory() const
-  {
-    return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction());
-  }
+      virtual const Kernel::PropertyHistory createHistory() const
+      {
+        return Kernel::PropertyHistory(this->name(),this->value(),this->type(),this->isDefault(),Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >::direction());
+      }
 
-  /** If this is an output workspace, store it into the AnalysisDataService
-   *  @return True if the workspace is an output workspace and has been stored
-   *  @throw std::runtime_error if unable to store the workspace successfully
-   */
-  virtual bool store()
-  {
-    bool result = false;
+      /** If this is an output workspace, store it into the AnalysisDataService
+      *  @return True if the workspace is an output workspace and has been stored
+      *  @throw std::runtime_error if unable to store the workspace successfully
+      */
+      virtual bool store()
+      {
+        bool result = false;
 
-    if ( this->direction() ) // Output or InOut
-    {
-      // Check that workspace exists
-      if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
-      // Note use of addOrReplace rather than add
-      API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, this->operator()() );
-      result = true;
-    }
-    //always clear the internal pointer after storing
-    clear();
+        if ( this->direction() ) // Output or InOut
+        {
+          // Check that workspace exists
+          if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
+          // Note use of addOrReplace rather than add
+          API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, this->operator()() );
+          result = true;
+        }
+        //always clear the internal pointer after storing
+        clear();
 
-    return result;
-  }
+        return result;
+      }
 
-  Workspace_sptr getWorkspace() const
-  {
-    return this->operator()();
-  }
+      Workspace_sptr getWorkspace() const
+      {
+        return this->operator()();
+      }
 
-private:
-  /// Reset the pointer to the workspace
-  void clear()
-  {
-    Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::shared_ptr<TYPE>();
-  }
+    private:
+      /// Reset the pointer to the workspace
+      void clear()
+      {
+        Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value = boost::shared_ptr<TYPE>();
+      }
 
-  /** Attempts to retreive the data from the ADS
-   *  if the data is not foung the internal pointer is set to null.
-  */
-  void retrieveWorkspaceFromADS()
-  {
-    // Try and get the workspace from the ADS, but don't worry if we can't
-    try {
-      Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
-        boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
-    }
-    catch (Kernel::Exception::NotFoundError)
-    {
-      // Set to null property if not found
-      this->clear();
-    }
-  }
+      /** Attempts to retreive the data from the ADS
+      *  if the data is not foung the internal pointer is set to null.
+      */
+      void retrieveWorkspaceFromADS()
+      {
+        // Try and get the workspace from the ADS, but don't worry if we can't
+        try {
+          Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::m_value =
+            boost::dynamic_pointer_cast<TYPE>(AnalysisDataService::Instance().retrieve(m_workspaceName));
+        }
+        catch (Kernel::Exception::NotFoundError)
+        {
+          // Set to null property if not found
+          this->clear();
+        }
+      }
 
-  /// The name of the workspace (as used by the AnalysisDataService)
-  std::string m_workspaceName;
-  /// The name of the workspace that the this this object was created for
-  std::string m_initialWSName;
+      /// The name of the workspace (as used by the AnalysisDataService)
+      std::string m_workspaceName;
+      /// The name of the workspace that the this this object was created for
+      std::string m_initialWSName;
 
-  /// for access to logging streams
-  static Kernel::Logger& g_log;
-};
+      /// for access to logging streams
+      static Kernel::Logger& g_log;
+    };
 
-template <typename TYPE>
-Kernel::Logger& WorkspaceProperty<TYPE>::g_log = Kernel::Logger::get("WorkspaceProperty");
+    template <typename TYPE>
+    Kernel::Logger& WorkspaceProperty<TYPE>::g_log = Kernel::Logger::get("WorkspaceProperty");
 
-} // namespace API
+  } // namespace API
 } // namespace Mantid
 
 #endif /*MANTID_API_WORKSPACEPROPERTY_H_*/
