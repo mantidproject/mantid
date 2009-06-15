@@ -48,12 +48,11 @@ namespace Mantid
       declareProperty("StartX", EMPTY_DBL(),
         "No bin with a boundary at an x value less than this will be used\n"
         "in the summation that decides if a detector is 'dead' (default: the\n"
-        "start of each histogram)" );
-//STEVES remember to update the wiki
+        "start of each spectrum)" );
       declareProperty("EndX", EMPTY_DBL(),
         "No bin with a boundary at an x value higher than this value will\n"
         "be used in the summation that decides if a detector is 'dead'\n"
-        "(default: the end of each histogram)" );
+        "(default: the end of each spectrum)" );
       declareProperty("OutputFile","",
         "A filename to which to write the list of dead detector UDETs" );
       // This output property will contain the list of UDETs for the dead detectors
@@ -66,7 +65,9 @@ namespace Mantid
      */
     void FindDeadDetectors::exec()
     {
-      checkAndLoadInputs();
+      double deadThreshold = getProperty("DeadThreshold");
+      double liveValue = getProperty("LiveValue");
+      double deadValue = getProperty("DeadValue");
 
       // Try and open the output file, if specified, and write a header
       std::ofstream file(getPropertyValue("OutputFile").c_str());
@@ -91,14 +92,14 @@ namespace Mantid
       for (int i = 0; i < numSpec; ++i)
       {
         double &y = integratedWorkspace->dataY(i)[0];
-        if ( y > m_deadThreshold )
+        if ( y > deadThreshold )
         {
-        y = m_liveValue;
+        y = liveValue;
         }
         else
         {
           ++countSpec;
-          y = m_deadValue;
+          y = deadValue;
           const int specNo = specAxis->spectraNo(i);
           // Write the spectrum number to file
           file << i << " " << specNo;
@@ -163,39 +164,6 @@ namespace Mantid
 
       return retVal;
     }
-
-    void FindDeadDetectors::checkAndLoadInputs()
-    {
-      // Try and retrieve the optional properties
-      m_deadThreshold = getProperty("DeadThreshold");
-      m_liveValue = getProperty("LiveValue");
-      m_deadValue = getProperty("DeadValue");
-      //more checking of StartX and EndX is done when it is passed to SimpleIngegration but there is some checking needed here
-      double startX = getProperty("StartX");
-      //a very low user startX value will cause SimpleIntegration to disregard the value
-      if ( std::abs(startX) < 1e-7 )
-      {//as this might not have been intended log it
-        g_log.information("Low value of StartX, " + getPropertyValue("StartX") + ", disregarded the integration will be from the start of each spectrium");
-      }
-      //check if no value was set
-      if ( isEmpty(startX) )
-      {//it wasn't set use the dummy value that causes SimpleIntegration to use the start of the range
-        setPropertyValue("StartX", "0.0");
-      }
-      
-      double endX = getProperty("EndX");
-      //look for a very low user EndX value
-      if ( std::abs(endX) < 1e-7 )
-      {//as this will cause SimpleIntegration to disregard the value user value
-        g_log.information("Low value of EndX, " + getPropertyValue("EndX") + ", disregarded the integration will continue to the end of each spectrium");
-      }
-      //if no value was set
-      if ( isEmpty(endX) )
-      {//use the dummy value that causes SimpleIntegration do the default behavour
-        setPropertyValue("EndX", "0.0");
-      }
-    }
-
 
   } // namespace Algorithm
 } // namespace Mantid

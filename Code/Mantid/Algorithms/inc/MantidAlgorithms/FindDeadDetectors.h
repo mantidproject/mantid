@@ -29,6 +29,8 @@ namespace Mantid
     <LI> DeadThreshold - The threshold against which to judge if a spectrum belongs to a dead detector (default 0.0)</LI>
     <LI> LiveValue - The value to assign to an integrated spectrum flagged as 'live' (default 0.0)</LI>
     <LI> DeadValue - The value to assign to an integrated spectrum flagged as 'dead' (default 100.0)</LI>
+    <LI> StartX - Start the integration at the above bin above the one that this value is in (default: the start of each histogram)</LI>
+    <LI> EndX - Stop the integration at the bin before the one that contains this x value (default: the end of each histogram)</LI>
     <LI> OutputFile - (Optional) A filename to which to write the list of dead detector UDETs </LI>
     </UL>
 
@@ -59,8 +61,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      FindDeadDetectors() : API::Algorithm(),
-        m_deadThreshold(0.0), m_liveValue(0.0), m_deadValue(100.0)
+      FindDeadDetectors() : API::Algorithm()
       {};
       /// Destructor
       virtual ~FindDeadDetectors() {};
@@ -78,13 +79,6 @@ namespace Mantid
 
       API::MatrixWorkspace_sptr integrateWorkspace(std::string outputWorkspaceName);
       
-      void checkAndLoadInputs();
-      double m_deadThreshold;
-      double m_liveValue;
-      double m_deadValue;
-      double m_startX;
-      double m_endX;
-
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
     };
