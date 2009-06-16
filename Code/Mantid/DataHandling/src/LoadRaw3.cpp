@@ -106,11 +106,29 @@ namespace Mantid
       int total_specs;
       if( m_interval || m_list)
       {
-        total_specs = m_spec_list.size();
         if (m_interval)
         {
-          total_specs += (m_spec_max-m_spec_min+1);
+          total_specs = (m_spec_max-m_spec_min+1);
           m_spec_max += 1;
+        }
+        else
+            total_specs = 0;
+
+        if (m_list)
+        {
+            if (m_interval)
+            {
+                for(std::vector<int>::iterator it=m_spec_list.begin();it!=m_spec_list.end();)
+                    if (*it >= m_spec_min && *it <m_spec_max)
+                    {
+                        it = m_spec_list.erase(it);
+                    }
+                    else
+                        it++;
+
+            }
+            if (m_spec_list.size() == 0) m_list = false;
+            total_specs += m_spec_list.size();
         }
       }
       else

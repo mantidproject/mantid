@@ -175,46 +175,46 @@ public:
   void testfail()
   {
     if ( !loader3.isInitialized() ) loader3.initialize();
-
+	std::string outWS="LoadRaw3-out2";
     loader3.setPropertyValue("Filename", inputFile);
-    loader3.setPropertyValue("OutputWorkspace", "out2");
+    loader3.setPropertyValue("OutputWorkspace",outWS );
     loader3.setPropertyValue("spectrum_list", "0,999,1000");
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "10");
     loader3.execute();
     Workspace_sptr output;
     // test that there is no workspace as it should have failed
-    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),std::runtime_error);
 
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "1");
      loader3.execute();
-    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),std::runtime_error);
 
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "3");
     loader3.execute();
-    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),std::runtime_error);
 
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "5");
     loader3.execute();
-    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),std::runtime_error);
 
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "3000");
     loader3.execute();
-    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),std::runtime_error);
 
     loader3.setPropertyValue("spectrum_min", "5");
     loader3.setPropertyValue("spectrum_max", "10");
     loader3.setPropertyValue("spectrum_list", "999,3000");
     loader3.execute();
-    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
+    TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),std::runtime_error);
 
     loader3.setPropertyValue("spectrum_list", "999,2000");
     loader3.execute();
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out2"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWS));
   }
 
   void testMultiPeriod()
@@ -224,11 +224,7 @@ public:
     loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
 	loader5.setPropertyValue("spectrum_list", "10,50,100,195");
-    // Set these properties to check they're ignored
-    //loader5.setPropertyValue("spectrum_list", "998,999,1000");
-    //loader5.setPropertyValue("spectrum_min", "1");
-    //loader5.setPropertyValue("spectrum_max", "2");
-
+    
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
 	
@@ -263,33 +259,25 @@ public:
 	MatrixWorkspace_sptr  outsptr3=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
 	MatrixWorkspace_sptr  outsptr4=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
 	MatrixWorkspace_sptr  outsptr5=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
-	//MatrixWorkspace_sptr  outsptr6=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
-	
+		
 	TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr3->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr4->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr5->dataX(1) )
-   // TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr6->dataX(1) )
 
 	// But the data should be different
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr2->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr3->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr4->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr5->dataY(1)[555] )
-    //TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
 
-    // Check these are the same
-	std::cout << &outsptr1 << " " << &outsptr2 <<std::endl;
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr2->getSample() )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr3->getSample() )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr4->getSample() )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr5->getSample() )
-    //TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
-   // TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
-   // TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr6->getSample() )
-
+    
   }
 
   void testWithManagedWorkspace()

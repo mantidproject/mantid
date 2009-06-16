@@ -1,5 +1,5 @@
-#ifndef PLUSTEST_H_
-#define PLUSTEST_H_
+#ifndef WORKSPACEGROUP_H_
+#define WORKSPACEGROUP_H_
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>

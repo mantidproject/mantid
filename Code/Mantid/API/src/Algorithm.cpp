@@ -130,22 +130,36 @@ bool Algorithm::execute()
 		  unsigned int direction = wsPropProp->direction();
 		  if (direction == Kernel::Direction::Input ||direction==Kernel::Direction::InOut)
 		  { 
-			  std::string wsname=wsPropProp->value();
+			  std::string wsName=wsPropProp->value();
 			  try
 			  {					
 				  //checking the input is a group
-				  boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-					  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
-				  if(wsGrpSptr)
-				  {	
-					  g_log.debug()<<"input is workspace group-processGroups called "<<std::endl;
-					  return(Algorithm::processGroups(wsGrpSptr,Prop));
+				  try
+				  {
+					//check if the pointer is valid, it won't be if it is a group
+					 Workspace_sptr wsSptr=wsProp->getWorkspace();
+					 if(!wsSptr)
+					 {
+						 boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+							 boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
+						 if(wsGrpSptr)
+						 {	 //this must be a group - test for that
+							 g_log.debug()<<"input is workspace group-processGroups called "<<std::endl;
+							 return(Algorithm::processGroups(wsGrpSptr,Prop));
+					     }
+					 }
 
 				  }
+				  catch (std::exception &ex)
+				  {					 
+					  g_log.debug()<<ex.what()<<std::endl; 
+					
+				  }
+				 
 			  }
 			  catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
 			  {
-				g_log.information()<<" Trying to retrieve  Object "<< wsname<<" which is not there in ADS"<<std::endl;
+				g_log.debug()<<" Failing to cast the workspace pointer of workspace  "<< wsName<<" Workspace group"<<std::endl;
 
 			  }
 		  }//end of if loop checking the direction
@@ -561,14 +575,16 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 		}
 		// execute the algorithm 
 		bStatus=alg->execute();
+		// status of eac execution is checking 
 		bgroupExecStatus=bgroupExecStatus&&bStatus;
 		bgroupFailed=bgroupFailed||bStatus;
 		execPercentage+=10;
 		progress(double((execPercentage)/execTotal));
-			//increment count for outworkpsace name
+		//if a workspace execution fails
 		if(!bStatus)
 		{  	g_log.error()<<"Algorithm execution failed for the input workspace "<<(*wsItr)<<std::endl;
 		}
+		//increment count for outworkpsace name
 		nPeriod++;
 
 	}//end of for loop for input workspace group
@@ -579,6 +595,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	//if all failed
 	if(!bgroupFailed)
 	{
+		// remove the group parent  from the ADS - bcoz only group parent will come in mantid plot
 		AnalysisDataService::Instance().remove(outWSParentName);
 	}
 
