@@ -318,8 +318,9 @@ bool PythonScripting::loadInitFile(const QString &path)
 			PyErr_Print();
 		pycFile.refresh();
 	  }
-	  QFile::remove(testfile);
-	    if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) {
+    //Remove the testing file   
+    tester.remove();
+    if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) {
 		// run the newly compiled pycFile
 		FILE *f = fopen(pycFile.filePath(), "rb");
 		success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
