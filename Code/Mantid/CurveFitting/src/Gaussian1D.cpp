@@ -68,7 +68,7 @@ void Gaussian1D::function(double* in, double* out, double* xValues, double* yVal
     double peakCentre = in[2];
     double weight = in[3];
 
-    for (size_t i = 0; i < nData; i++) {
+    for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         double Yi = height*exp(-0.5*diff*diff*weight)+bg0;
         out[i] = (Yi - yValues[i])/yErrors[i];
@@ -82,7 +82,7 @@ void Gaussian1D::functionDeriv(double* in, double* out, double* xValues, double*
     double weight = in[3];
 
     int nParam = m_parameterNames.size();
-    for (size_t i = 0; i < nData; i++) {
+    for (int i = 0; i < nData; i++) {
         double s = yErrors[i];
         double diff = xValues[i]-peakCentre;
         double e = exp(-0.5*diff*diff*weight)/s;

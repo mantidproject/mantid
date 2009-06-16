@@ -103,9 +103,7 @@ static int gsl_fdf(const gsl_vector * x, void *params,
     the least-squared scheme.
 * @param x Input function arguments
 * @param params Input data
-* @param f Output function values = (y_cal-y_cal)/sigma for each data point
-* @param J Output derivatives
-* @return A GSL status information
+* @return Value of least squared cost function
 */
 static double gsl_costFunction(const gsl_vector * x, void *params)
 {
@@ -120,7 +118,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 
     double retVal = 0.0;
 
-    for (int i = 0; i < ((struct FitData *)params)->n; i++)
+    for (unsigned int i = 0; i < ((struct FitData *)params)->n; i++)
       retVal += l_forSimplexLSwrap[i]*l_forSimplexLSwrap[i];
 
     
@@ -130,6 +128,12 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 
 /** Base class implementation of derivative function throws error. This is to check if such a function is provided
     by derivative class
+* @param in Input fitting parameter values
+* @param out Derivatives
+* @param xValues X values for data points
+* @param yValues Y values for data points
+* @param yErrors Errors (standard deviations) on yValues
+* @param nData Number of data points
  */
 void Fit1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData) 
 {
@@ -370,7 +374,7 @@ void Fit1D::exec()
     finalCostFuncVal = chi*chi / dof;
 
     // put final converged fitting values back into m_fittedParameter
-    for (int i = 0; i < l_data.p; i++)
+    for (unsigned int i = 0; i < l_data.p; i++)
       m_fittedParameter[i] = gsl_vector_get(s->x,i);
   }
   else
@@ -391,7 +395,7 @@ void Fit1D::exec()
     finalCostFuncVal = simplexMinimizer->fval / dof;
 
     // put final converged fitting values back into m_fittedParameter
-    for (int i = 0; i < l_data.p; i++)
+    for (unsigned int i = 0; i < l_data.p; i++)
       m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,i);
   }
 

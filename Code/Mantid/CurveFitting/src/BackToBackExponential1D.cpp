@@ -51,7 +51,7 @@ void BackToBackExponential1D::function(double* in, double* out, double* xValues,
     double bk = in[5];
 
     double s2 = s*s;
-    for (size_t i = 0; i < nData; i++) {
+    for (int i = 0; i < nData; i++) {
       double diff=xValues[i]-x0;
       double Yi = I*(exp(a/2*(a*s2+2*diff))*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2))
                     + exp(b/2*(b*s2-2*diff))*gsl_sf_erfc((b*s2-diff)/sqrt(2*s2)))+bk;
@@ -69,7 +69,7 @@ void BackToBackExponential1D::functionDeriv(double* in, double* out, double* xVa
 
     double s2 = s*s;
     int nParam = m_parameterNames.size();
-    for (size_t i = 0; i < nData; i++) {
+    for (int i = 0; i < nData; i++) {
         double diff = xValues[i]-x0;
 
         double e_a = exp(0.5*a*(a*s2+2*diff));

@@ -73,7 +73,7 @@ namespace Mantid
 
 
     protected:
-      // overwrite base class methods
+      /// overwrite base class methods
       virtual void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
       virtual void declareParameters();
       virtual void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);

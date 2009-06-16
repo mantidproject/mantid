@@ -72,7 +72,7 @@ void GaussianLinearBG1D::function(double* in, double* out, double* xValues, doub
     double peakCentre = in[3];
     double weight = in[4];
 
-    for (size_t i = 0; i < nData; i++) {
+    for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         double Yi = height*exp(-0.5*diff*diff*weight)+bg0+bg1*xValues[i];
         out[i] = (Yi - yValues[i])/yErrors[i];
@@ -86,7 +86,7 @@ void GaussianLinearBG1D::functionDeriv(double* in, double* out, double* xValues,
     double weight = in[4];
 
     int nParam = m_parameterNames.size();
-    for (size_t i = 0; i < nData; i++) {
+    for (int i = 0; i < nData; i++) {
         double s = yErrors[i];
         double diff = xValues[i]-peakCentre;
         double e = exp(-0.5*diff*diff*weight)/s;
