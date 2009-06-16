@@ -71,15 +71,16 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "CurveFitting";}
 
-    private:
-      // Overridden Fit1D methods
-      void declareParameters();
-      void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
-      void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
-      void modifyStartOfRange(double& startX);
-      void modifyEndOfRange(double& endX);
-      void modifyInitialFittedParameters(std::vector<double>& fittedParameter);
-      void modifyFinalFittedParameters(std::vector<double>& fittedParameter);
+
+    protected:
+      // overwrite base class methods
+      virtual void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+      virtual void declareParameters();
+      virtual void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+      virtual void modifyStartOfRange(double& startX);
+      virtual void modifyEndOfRange(double& endX);
+      virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter);
+      virtual void modifyFinalFittedParameters(std::vector<double>& fittedParameter);
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

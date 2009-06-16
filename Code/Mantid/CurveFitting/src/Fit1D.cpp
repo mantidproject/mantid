@@ -6,9 +6,11 @@
 #include <numeric>
 #include <math.h>
 #include <iomanip>
+#include "MantidKernel/Exception.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
+#include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
 
 namespace Mantid
@@ -41,12 +43,15 @@ struct FitData {
   double * sigmaData;
   /// pointer to instance of Fit1D
   Fit1D* fit1D;
+  /// Needed to use the simplex algorithm within the gsl least-squared framework.
+  /// Will store output function values from gsl_f
+  double * forSimplexLSwrap; 
 };
 
 /** Fit1D GSL function wrapper
 * @param x Input function arguments
 * @param params Input data
-* @param f Output function value
+* @param f Output function values = (y_cal-y_cal)/sigma for each data point
 * @return A GSL status information
 */
 static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
@@ -82,7 +87,7 @@ static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
 /** Fit1D derivatives and function GSL wrapper
 * @param x Input function arguments
 * @param params Input data
-* @param f Output function value
+* @param f Output function values = (y_cal-y_cal)/sigma for each data point
 * @param J Output derivatives
 * @return A GSL status information
 */
@@ -91,6 +96,44 @@ static int gsl_fdf(const gsl_vector * x, void *params,
     gsl_f(x, params, f);
     gsl_df(x, params, J);
     return GSL_SUCCESS;
+}
+
+/** Calculating the cost function assuming it has the least-squared
+    format. Initially implemented to use the gsl simplex routine within
+    the least-squared scheme.
+* @param x Input function arguments
+* @param params Input data
+* @param f Output function values = (y_cal-y_cal)/sigma for each data point
+* @param J Output derivatives
+* @return A GSL status information
+*/
+static double gsl_costFunction(const gsl_vector * x, void *params)
+{
+  double * l_forSimplexLSwrap = ((struct FitData *)params)->forSimplexLSwrap;
+    
+  ((struct FitData *)params)->fit1D->function (x->data, 
+                   l_forSimplexLSwrap, 
+                   ((struct FitData *)params)->X, 
+                   ((struct FitData *)params)->Y, 
+                   ((struct FitData *)params)->sigmaData, 
+                   ((struct FitData *)params)->n);
+
+    double retVal = 0.0;
+
+    for (int i = 0; i < ((struct FitData *)params)->n; i++)
+      retVal += l_forSimplexLSwrap[i]*l_forSimplexLSwrap[i];
+
+    
+    return retVal;
+}
+
+
+/** Base class implementation of derivative function throws error. This is to check if such a function is provided
+    by derivative class
+ */
+void Fit1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData) 
+{
+  throw Exception::NotImplementedError("No derivative function provided");
 }
 
 
@@ -137,6 +180,20 @@ void Fit1D::init()
  */
 void Fit1D::exec()
 {
+  // check if derivative defined in derived class
+
+  bool isDerivDefined = true;
+  double inTest = 0, outTest, xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
+  try
+  {
+    functionDeriv(&inTest, &outTest, &xValuesTest, &yValuesTest, &yErrorsTest, 1);
+  }
+  catch (Exception::NotImplementedError e)
+  {
+    isDerivDefined = false;
+  }
+
+
   // Try to retrieve optional properties
   int histNumber = getProperty("SpectrumIndex");
   const int maxInterations = getProperty("MaxIterations");
@@ -198,7 +255,6 @@ void Fit1D::exec()
   }
 
 
-
   // create and populate GSL data container
 
   FitData l_data;
@@ -210,6 +266,7 @@ void Fit1D::exec()
   l_data.Y = new double[l_data.n];
   l_data.sigmaData = new double[l_data.n];
   l_data.fit1D = this;
+  l_data.forSimplexLSwrap = new double[l_data.n];
 
   // check if histogram data in which case the mid points of X values will be used further below
   const bool isHistogram = localworkspace->isHistogramData();
@@ -244,6 +301,14 @@ void Fit1D::exec()
   }
 
 
+  // set-up GSL container to be used with GSL simplex algorithm
+
+  gsl_multimin_function gslSimplexContainer;
+  gslSimplexContainer.n = l_data.p;  // n here refers to number of parameters
+  gslSimplexContainer.f = &gsl_costFunction;
+  gslSimplexContainer.params = &l_data;
+
+
   // set-up GSL least squares container
 
   gsl_multifit_function_fdf f;
@@ -254,53 +319,93 @@ void Fit1D::exec()
   f.p = l_data.p;
   f.params = &l_data;
 
-  // set-up remaining GSL machinery
+  // set-up remaining GSL machinery for least squared
 
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
-  gsl_multifit_fdfsolver *s = gsl_multifit_fdfsolver_alloc(T, l_data.n, l_data.p);
-  gsl_multifit_fdfsolver_set(s, &f, initFuncArg);
+  gsl_multifit_fdfsolver *s;
+  if (isDerivDefined)
+  {
+    s = gsl_multifit_fdfsolver_alloc(T, l_data.n, l_data.p);
+    gsl_multifit_fdfsolver_set(s, &f, initFuncArg);
+  }
 
+  // set-up remaining GSL machinery to use simplex algorithm
+
+  const gsl_multimin_fminimizer_type *simplexType = gsl_multimin_fminimizer_nmsimplex;
+  gsl_multimin_fminimizer *simplexMinimizer;
+  gsl_vector *simplexStepSize;
+  if (!isDerivDefined)
+  {
+    simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);
+    simplexStepSize = gsl_vector_alloc(l_data.p);
+    gsl_vector_set_all (simplexStepSize, 1.0);  // is this always a sensible starting step size?
+    gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
+  }
 
   // finally do the fitting
 
   int iter = 0;
   int status;
-  do
+  double size; // for simplex algorithm
+  double finalCostFuncVal; 
+  double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
+
+  // Standard least-squares used if derivative function defined otherwise simplex
+
+  if (isDerivDefined)
   {
-    iter++;
-    status = gsl_multifit_fdfsolver_iterate(s);
+    do
+    {
+      iter++;
+      status = gsl_multifit_fdfsolver_iterate(s);
 
-    if (status)  // break if error
-      break;
+      if (status)  // break if error
+        break;
 
-    status = gsl_multifit_test_delta(s->dx, s->x, 1e-4, 1e-4);
+      status = gsl_multifit_test_delta(s->dx, s->x, 1e-4, 1e-4);
+    }
+    while (status == GSL_CONTINUE && iter < maxInterations);
+
+    double chi = gsl_blas_dnrm2(s->f);
+    finalCostFuncVal = chi*chi / dof;
+
+    // put final converged fitting values back into m_fittedParameter
+    for (int i = 0; i < l_data.p; i++)
+      m_fittedParameter[i] = gsl_vector_get(s->x,i);
   }
-  while (status == GSL_CONTINUE && iter < maxInterations);
-
-  gsl_matrix *covar = gsl_matrix_alloc(l_data.p, l_data.p);
-  gsl_multifit_covar(s->J, 0.0, covar);
-
-
-  // put final converged fitting values back into m_fittedParameter
-
-  for (size_t i = 0; i < l_data.p; i++)
+  else
   {
-    m_fittedParameter[i] = gsl_vector_get(s->x,i);
+    do
+    {
+      iter++;
+      status = gsl_multimin_fminimizer_iterate(simplexMinimizer);
+
+      if (status)  // break if error
+        break;
+
+      size = gsl_multimin_fminimizer_size(simplexMinimizer);
+      status = gsl_multimin_test_size(size, 1e-2);
+    }
+    while (status == GSL_CONTINUE && iter < maxInterations);
+
+    finalCostFuncVal = simplexMinimizer->fval / dof;
+
+    // put final converged fitting values back into m_fittedParameter
+    for (int i = 0; i < l_data.p; i++)
+      m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,i);
   }
-  modifyFinalFittedParameters(m_fittedParameter); // do nothing except if overwritten by derived class
+
+  modifyFinalFittedParameters(m_fittedParameter);   // do nothing except if overwritten by derived class
 
 
   // Output summary to log file
-
-  double chi = gsl_blas_dnrm2(s->f);
-  double dof = l_data.n - l_data.p;
 
   std::string reportOfFit = gsl_strerror(status);
 
   g_log.information() << "Attempt to fit: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2)\n" <<
     "Iteration = " << iter << "\n" <<
     "Status = " << reportOfFit << "\n" <<
-    "Chi^2/DoF = " << chi*chi / dof << "\n";
+    "Chi^2/DoF = " << finalCostFuncVal << "\n";
   for (size_t i = 0; i < l_data.p; i++)
     g_log.information() << m_parameterNames[i] << " = " << m_fittedParameter[i] << "  ";
   
@@ -308,7 +413,7 @@ void Fit1D::exec()
   // also output summary to properties
 
   setProperty("Output Status", reportOfFit);
-  setProperty("Output Chi^2/DoF", chi*chi / dof);
+  setProperty("Output Chi^2/DoF", finalCostFuncVal);
   for (size_t i = 0; i < l_data.p; i++)
     setProperty(m_parameterNames[i], m_fittedParameter[i]);
 
@@ -318,10 +423,17 @@ void Fit1D::exec()
   delete [] l_data.X;
   delete [] l_data.Y;
   delete [] l_data.sigmaData;
+  delete [] l_data.forSimplexLSwrap;
 
   gsl_vector_free(initFuncArg);
-  gsl_multifit_fdfsolver_free(s);
 
+  if (isDerivDefined)
+    gsl_multifit_fdfsolver_free(s);
+  else
+  {
+    gsl_vector_free(simplexStepSize);
+    gsl_multimin_fminimizer_free(simplexMinimizer);  
+  }
 
   return;
 }

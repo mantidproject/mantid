@@ -11,12 +11,32 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
+#include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::CurveFitting::Gaussian1D;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+
+// Algorithm to force Gaussian1D to be run by simplex algorithm
+class ToyAlgorithm : public Gaussian1D
+{
+public:
+  virtual ~ToyAlgorithm() {}
+  const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
+  const int version() const { return 1;} ///< Algorithm's version for identification
+  const std::string category() const { return "Cat";} ///< Algorithm's category for identification
+
+protected:
+  void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+  {
+      throw Exception::NotImplementedError("No derivative function provided");
+  }
+};
+
+DECLARE_ALGORITHM(ToyAlgorithm)
+
 
 class Gaussian1DTest : public CxxTest::TestSuite
 {
@@ -65,20 +85,8 @@ public:
     TS_ASSERT_DELTA( dummy, 6357.8 ,0.2);
   }
 
-  void testAgainstMockData()
+  void getMockData(Mantid::MantidVec& y, Mantid::MantidVec& e)
   {
-    Gaussian1D alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
-    // create mock data to test against
-    std::string wsName = "GaussMockData";
-    int histogramNumber = 1;
-    int timechannels = 20;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
-    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
     y[0] =   3.56811123;
     y[1] =   3.25921675;
     y[2] =   2.69444562;
@@ -99,7 +107,7 @@ public:
     y[17] =   3.70180447;
     y[18] =   2.77832668;
     y[19] =   2.29507565;
-    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+
     e[0] =   1.72776328;
     e[1] =   1.74157482;
     e[2] =   1.73451042;
@@ -120,6 +128,24 @@ public:
     e[17] =   1.73116711;
     e[18] =   1.71790285;
     e[19] =   1.72734254;
+  }
+
+  void testAgainstMockData()
+  {
+    Gaussian1D alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // create mock data to test against
+    std::string wsName = "GaussMockData";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
 
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
@@ -148,6 +174,57 @@ public:
     TS_ASSERT_DELTA( dummy, 2.8765 ,0.0001);
     dummy = alg2.getProperty("height");
     TS_ASSERT_DELTA( dummy, 97.804 ,0.001);
+    dummy = alg2.getProperty("peakCentre");
+    TS_ASSERT_DELTA( dummy, 11.2356 ,0.0001);
+    dummy = alg2.getProperty("sigma");
+    TS_ASSERT_DELTA( dummy, 1.1142 ,0.0001);
+
+  }
+
+  void testAgainstMockDataSimplex()
+  {
+    ToyAlgorithm alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // create mock data to test against
+    std::string wsName = "GaussMockDataSimplex";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("SpectrumIndex","1");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
+    alg2.setPropertyValue("bg0", "3.0");
+    alg2.setPropertyValue("height", "100.7");
+    alg2.setPropertyValue("peakCentre", "11.2");
+    alg2.setPropertyValue("sigma", "1.1");
+
+    // execute fit
+   TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+
+    TS_ASSERT( alg2.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 0.076185,0.0001);
+    dummy = alg2.getProperty("bg0");
+    TS_ASSERT_DELTA( dummy, 2.8775 ,0.0001);
+    dummy = alg2.getProperty("height");
+    TS_ASSERT_DELTA( dummy, 97.785 ,0.001);
     dummy = alg2.getProperty("peakCentre");
     TS_ASSERT_DELTA( dummy, 11.2356 ,0.0001);
     dummy = alg2.getProperty("sigma");

@@ -53,7 +53,7 @@ namespace Mantid
       /// Function you want to least-square fit to 
       virtual void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit 
-      virtual void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData) = 0;
+      virtual void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
 
     protected:
       // Overridden Algorithm methods
@@ -85,6 +85,7 @@ namespace Mantid
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
+
     };
 
   } // namespace CurveFitting
