@@ -254,22 +254,31 @@ public:
 	}
 	std::vector<std::string>::const_iterator itr=wsNamevec.begin();
 	itr++;
-	MatrixWorkspace_sptr  outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr)));
-	MatrixWorkspace_sptr  outsptr2=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
-	MatrixWorkspace_sptr  outsptr3=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
-	MatrixWorkspace_sptr  outsptr4=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
-	MatrixWorkspace_sptr  outsptr5=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr)));
+	MatrixWorkspace_sptr  outsptr1;
+	TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
+	MatrixWorkspace_sptr  outsptr2;
+	TS_ASSERT_THROWS_NOTHING(outsptr2=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+	MatrixWorkspace_sptr  outsptr3;
+	TS_ASSERT_THROWS_NOTHING(outsptr3=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+	MatrixWorkspace_sptr  outsptr4;
+	TS_ASSERT_THROWS_NOTHING(outsptr4=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+	MatrixWorkspace_sptr  outsptr5;
+	TS_ASSERT_THROWS_NOTHING(outsptr5=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+	MatrixWorkspace_sptr  outsptr6;
+	TS_ASSERT_THROWS_NOTHING(outsptr6=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
 		
 	TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr3->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr4->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr5->dataX(1) )
+	TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr6->dataX(1) )
 
 	// But the data should be different
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr2->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr3->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr4->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr5->dataY(1)[555] )
+	 TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
 
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
@@ -277,6 +286,9 @@ public:
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr3->getSample() )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr4->getSample() )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr5->getSample() )
+	TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
+    TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
+    TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr6->getSample() )
     
   }
 
