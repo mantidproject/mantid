@@ -255,7 +255,7 @@ int MuonNexusReader::readLogData(const std::string& filename)
       count++;
    }
 
-   //
+   NXclose(&fileID);
    if(stat==NX_ERROR) return(1);
    return(0);
 }

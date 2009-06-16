@@ -357,9 +357,11 @@ namespace Mantid
             NXDouble openNXDouble(const std::string& name)const{return openNXData<double>(name);}
             NXChar openNXChar(const std::string& name)const{return openNXData<char>(name);}
 
+            std::vector<NXClassInfo>& groups()const{return *m_groups.get();}
+
+        protected:
             boost::shared_ptr<std::vector<NXClassInfo> > m_groups;
             boost::shared_ptr<std::vector<NXInfo> > m_datasets;
-        protected:
             void readAllInfo();
             void open();
             void clear(); // deletes content of m_groups and m_datasets
@@ -377,7 +379,21 @@ namespace Mantid
             std::string NX_class()const{return "NXlog";}
         };
 
-        
+        class DLLExport NXNote:public NXClass
+        {
+        public:
+            NXNote(const NXClass& parent,const std::string& name):NXClass(parent,name),m_author_ok(),m_data_ok(),m_description_ok(){}
+            std::string NX_class()const{return "NXnote";}
+            std::string author();
+            std::vector< std::string >& data();
+            std::string description();
+        private:
+            std::string m_author;
+            std::vector< std::string > m_data;
+            std::string m_description;
+            bool m_author_ok,m_data_ok,m_description_ok;
+        };
+
         //-------------------- main classes -------------------------------//
 
         class DLLExport NXMainClass:public NXClass
@@ -385,6 +401,7 @@ namespace Mantid
         public:
             NXMainClass(const NXClass& parent,const std::string& name):NXClass(parent,name){}
             NXLog openNXLog(const std::string& name){return openNXClass<NXLog>(name);}
+            NXNote openNXNote(const std::string& name){return openNXClass<NXNote>(name);}
         };
 
 

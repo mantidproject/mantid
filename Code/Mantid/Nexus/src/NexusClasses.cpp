@@ -121,6 +121,7 @@ namespace NeXus
             {
                 m_groups->push_back(info);
             }
+            //std::cerr<<'!'<<info.nxname<<'\n';
         }
         reset();
     }
@@ -144,6 +145,53 @@ namespace NeXus
     {
         m_groups.reset(new std::vector<NXClassInfo>);
         m_datasets.reset(new std::vector<NXInfo>);
+    }
+
+    //---------------------------------------------------------
+    //          NXNote methods
+    //---------------------------------------------------------
+
+    std::string NXNote::author()
+    {
+        if (!m_author_ok)
+        {
+            NXChar aut = openNXChar("author");
+            aut.load();
+            m_author = std::string(aut(),aut.dim0());
+            m_author_ok = true;
+        }
+        return m_author;
+    }
+
+    std::vector< std::string >& NXNote::data()
+    {
+        if (!m_data_ok)
+        {
+            NXChar str = openNXChar("data");
+            str.load();
+            std::istringstream istr(std::string(str(),str.dim0()));
+            std::string line;
+            size_t i = 0;
+            while(getline(istr,line))
+            {
+                m_data.push_back(line);
+                //std::cerr<<"data("<<i++<<"):"<<line<<'\n';
+            }
+            m_data_ok = true;
+        }
+        return m_data;
+    }
+
+    std::string NXNote::description()
+    {
+        if (!m_description_ok)
+        {
+            NXChar str = openNXChar("description");
+            str.load();
+            m_description = std::string(str(),str.dim0());
+            m_description_ok = true;
+        }
+        return m_description;
     }
 
     //---------------------------------------------------------

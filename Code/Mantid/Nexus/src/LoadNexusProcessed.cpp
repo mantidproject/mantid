@@ -12,7 +12,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidNexus/NexusFileIO.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include "Poco/Path.h"
 #include <cmath>
@@ -202,6 +204,8 @@ void LoadNexusProcessed::exec()
   setProperty(outputWorkspace, localWorkspace);
   nexusFile->closeNexusFile();
 
+  loadAlgorithmHistory(localWorkspace);
+
   return;
 }
 
@@ -282,6 +286,95 @@ void LoadNexusProcessed::runLoadInstrument(DataObjects::Workspace2D_sptr localWo
   //{
   //runLoadInstrumentFromNexus(localWorkspace);
   //}
+}
+
+void LoadNexusProcessed::loadAlgorithmHistory(DataObjects::Workspace2D_sptr localWorkspace)
+{
+    NXRoot root(m_filename);
+    std::ostringstream path;
+    int entrynumber = m_entrynumber ? m_entrynumber : 1;
+    path << "mantid_workspace_"<<entrynumber<<"/process";
+    NXMainClass process = root.openNXClass<NXMainClass>(path.str());
+    for(size_t i=0;i<process.groups().size();i++)
+    {
+        NXClassInfo inf = process.groups()[i];
+        if (inf.nxname.substr(0,16) != "MantidAlgorithm_") continue;
+        NXNote history = process.openNXNote(inf.nxname);
+        std::vector< std::string >& hst = history.data();
+        if (hst.size() == 0) continue;
+        try
+        {
+            std::istringstream ianame(hst[0]);
+            std::string name,vers,dummy;
+            ianame >> dummy >> name >> vers;
+            int version = atoi( vers.substr(1).c_str() );
+            boost::shared_ptr<API::Algorithm> alg = 
+                boost::dynamic_pointer_cast<API::Algorithm>(API::AlgorithmFactory::Instance().create(name,version));
+            alg->initialize();
+            for(size_t i=4;i<hst.size();i++)
+            {
+                std::string str = hst[i];
+                std::string name,value,deflt,direction;
+                size_t i0 = str.find("Name:");
+                size_t i1 = str.find(", Value:",i0+1);
+                size_t i2 = str.find(", Default?:",i1+1);
+                size_t i3 = str.find(", Direction",i2+1);
+                name = str.substr(i0+6,i1-i0-6);
+                value = str.substr(i1+9,i2-i1-9);
+                deflt = str.substr(i2+12,i3-i2-12);
+                direction = str.substr(i3+13);
+                if (deflt == "No")
+                {
+                    alg->setPropertyValue(name,value);
+                }
+            }
+            API::AlgorithmHistory ahist(alg.get());
+            time_t tim = createTime_t_FromString(hst[1].substr(16,21));
+            size_t ii = hst[2].find("sec");
+            double dur = atof(hst[2].substr(20,ii-21).c_str());
+            ahist.addExecutionInfo(tim,dur);
+            localWorkspace->history().addAlgorithmHistory(ahist);
+
+        }
+        catch(...)
+        {
+            g_log.warning("Cannot load algorithm history: cannot create algorithm");
+            continue;
+        }
+    }
+}
+
+std::time_t LoadNexusProcessed::createTime_t_FromString(const std::string &str)
+{
+
+    std::map<std::string,int> Month;
+    Month["Jan"] = 1;
+    Month["Feb"] = 2;
+    Month["Mar"] = 3;
+    Month["Apr"] = 4;
+    Month["May"] = 5;
+    Month["Jun"] = 6;
+    Month["Jul"] = 7;
+    Month["Aug"] = 8;
+    Month["Sep"] = 9;
+    Month["Oct"] = 10;
+    Month["Nov"] = 11;
+    Month["Dec"] = 12;
+
+    std::tm time_since_1900;
+    time_since_1900.tm_isdst = -1;
+
+    // create tm struct
+    time_since_1900.tm_year = atoi(str.substr(0,4).c_str()) - 1900;
+    std::string month = str.substr(5,3);
+
+    time_since_1900.tm_mon = Month[str.substr(5,3)];
+    time_since_1900.tm_mday = atoi(str.substr(9,2).c_str());
+    time_since_1900.tm_hour = atoi(str.substr(12,2).c_str());
+    time_since_1900.tm_min = atoi(str.substr(15,2).c_str());
+    time_since_1900.tm_sec = atoi(str.substr(18,2).c_str());
+
+    return std::mktime(&time_since_1900);
 }
 
 } // namespace NeXus
