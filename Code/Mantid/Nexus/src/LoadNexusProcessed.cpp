@@ -38,11 +38,10 @@ Logger& LoadNexusProcessed::g_log = Logger::get("LoadNexusProcessed");
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() :
   Algorithm(),                                    //call the constructor for the base class
-  m_filename(), m_entrynumber(0), m_list(false), m_interval(false),
+  nexusFile(new NexusFileIO()), m_filename(), m_entrynumber(0), m_list(false), m_interval(false),
   m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
-{
-  nexusFile = new NexusFileIO();
-}
+{}
+
 /// Delete NexusFileIO in destructor
 LoadNexusProcessed::~LoadNexusProcessed()
 {
@@ -187,13 +186,16 @@ void LoadNexusProcessed::exec()
   sample = localWorkspace->getSample();
   nexusFile->readNexusProcessedSample(sample);
   // Run the LoadIntsturment algorithm if name available
-  if (nexusFile->readNexusInstrumentXmlName(m_instrumentxml, m_instrumentdate, m_instrumentversion))
-  {
-    if (m_instrumentxml != "NoXmlFileFound" && m_instrumentxml != "NoNameAvailable")
-      runLoadInstrument(localWorkspace);
-    else
-      g_log.warning("No instrument file name found in the Nexus file");
-  }
+  m_instrumentName = nexusFile->readNexusInstrumentName();
+  if ( ! m_instrumentName.empty() )
+    runLoadInstrument(localWorkspace);
+//  if (nexusFile->readNexusInstrumentXmlName(m_instrumentxml, m_instrumentdate, m_instrumentversion))
+//  {
+//    if (m_instrumentxml != "NoXmlFileFound" && m_instrumentxml != "NoNameAvailable")
+//      runLoadInstrument(localWorkspace);
+  else
+    g_log.warning("No instrument file name found in the Nexus file");
+//  }
   // get any spectraMap info
   boost::shared_ptr<IInstrument> localInstrument = localWorkspace->getInstrument();
   SpectraDetectorMap& spectraMap = localWorkspace->mutableSpectraMap();
@@ -246,13 +248,13 @@ void LoadNexusProcessed::checkOptionalProperties()
   }
 }
 
-/// Run the sub-algorithm LoadInstrument (as for LoadRaw)
+/** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+ *  @param localWorkspace The workspace to insert the instrument into
+ */
 void LoadNexusProcessed::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
 {
-  /// Determine the search directory for XML instrument definition files (IDFs)
-  /// @param localWorkspace - pointer to the 2D workspace to put the instrument data into
-  std::string directoryName = Kernel::ConfigService::Instance().getString(
-      "instrumentDefinition.directory");
+  // Determine the search directory for XML instrument definition files (IDFs)
+  std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
   if (directoryName.empty())
   {
     // This is the assumed deployment directory for IDFs, where we need to be relative to the
@@ -262,12 +264,16 @@ void LoadNexusProcessed::runLoadInstrument(DataObjects::Workspace2D_sptr localWo
   }
 
   // For Nexus Mantid processed, Instrument XML file name is read from nexus 
-  std::string instrumentID = m_instrumentxml;
-  std::string fullPathIDF = directoryName + "/" + instrumentID;
+//  std::string instrumentID = m_instrumentxml;
+  std::string instrumentID = m_instrumentName;
+  // force ID to upper case
+  std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
+//  std::string fullPathIDF = directoryName + "/" + instrumentID;
+  std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
   IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", fullPathIDF);
-  loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
   try

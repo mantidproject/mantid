@@ -80,7 +80,7 @@ void MaskDetectors::exec()
   }
 
   // Need to get hold of the parameter map
-  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->InstrumentParameters();
+  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->instrumentParameters();
   
   // If explicitly given a list of detectors to mask, just mark those.
   // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below

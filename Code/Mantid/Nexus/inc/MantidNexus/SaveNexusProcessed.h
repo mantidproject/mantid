@@ -22,7 +22,7 @@ namespace Mantid
     <UL>
     <LI> Filename - The name of and path to the output Nexus file (may exist) </LI>
     <LI> InputWorkspace - The name of the workspace to store the file </LI>
-	<LI> Title - the title to describe the saved processed data
+    <LI> Title - the title to describe the saved processed data
     </UL>
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
@@ -50,7 +50,6 @@ namespace Mantid
     public:
       /// Default constructor
       SaveNexusProcessed();
-
       /// Destructor
       ~SaveNexusProcessed() {}
       /// Algorithm's name for identification overriding a virtual method
@@ -61,10 +60,8 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling";}
 
     private:
-
       /// Overwrites Algorithm method.
       void init();
-
       /// Overwrites Algorithm method
       void exec();
 
@@ -72,14 +69,14 @@ namespace Mantid
       std::string m_filename;
       /// The name and path of the input file
       std::string m_entryname;
-	  /// The title of the processed data section
+      /// The title of the processed data section
       std::string m_title;
       /// Pointer to the local workspace
-      API::MatrixWorkspace_sptr m_inputWorkspace;
-	  /// Flag set if list of spectra to save is specifed
-	  bool m_list;
-	  /// Flag set if interval of spectra to write is set
-	  bool m_interval;
+      API::MatrixWorkspace_const_sptr m_inputWorkspace;
+      /// Flag set if list of spectra to save is specifed
+      bool m_list;
+      /// Flag set if interval of spectra to write is set
+      bool m_interval;
       /// The value of the spectrum_list property
       std::vector<int> m_spec_list;
       /// The value of the spectrum_min property

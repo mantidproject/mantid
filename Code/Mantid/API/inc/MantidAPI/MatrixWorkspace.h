@@ -87,7 +87,7 @@ public:
   virtual long int getMemorySize() const;
 
   /// Returns the set of parameters modifying the base instrument
-  boost::shared_ptr<Geometry::ParameterMap> InstrumentParameters() {return sptr_parmap;}
+  boost::shared_ptr<Geometry::ParameterMap> instrumentParameters() const {return sptr_parmap;}
   void newInstrumentParameters();
   // Add parameters to the instrument parameter map
   void populateInstrumentParameters();

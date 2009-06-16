@@ -4,8 +4,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/SaveNexusProcessed.h"
-#include "MantidDataObjects/Workspace1D.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -110,7 +108,7 @@ namespace NeXus
     }
 
     // write instrument data, if present and writer enabled
-    boost::shared_ptr<IInstrument> instrument = m_inputWorkspace->getInstrument();
+    IInstrument_const_sptr instrument = m_inputWorkspace->getInstrument();
     nexusFile->writeNexusInstrument(instrument);
 
     nexusFile->writeNexusParameterMap(m_inputWorkspace);
@@ -149,10 +147,9 @@ namespace NeXus
        throw Exception::FileError("Failed to write NXsample", m_filename);
     }
 
-    const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(m_inputWorkspace);
-    const int numberOfHist = localworkspace->getNumberHistograms();
+    const int numberOfHist = m_inputWorkspace->getNumberHistograms();
     // check if all X() are in fact the same array
-    bool uniformSpectra= API::WorkspaceHelpers::commonBoundaries(localworkspace);
+    bool uniformSpectra= API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
     m_spec_min=0;
     m_spec_max=numberOfHist-1;
     if( m_interval )
@@ -165,11 +162,13 @@ namespace NeXus
         throw std::invalid_argument("Inconsistent properties defined");
       }
     }
-    nexusFile->writeNexusProcessedData(localworkspace,uniformSpectra,m_spec_min,m_spec_max);
-    nexusFile->writeNexusProcessedProcess(localworkspace);
-    const SpectraDetectorMap& spectraMap=localworkspace->spectraMap();
+    nexusFile->writeNexusProcessedData(m_inputWorkspace,uniformSpectra,m_spec_min,m_spec_max);
+    nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
+    const SpectraDetectorMap& spectraMap=m_inputWorkspace->spectraMap();
     nexusFile->writeNexusProcessedSpectraMap(spectraMap, m_spec_min, m_spec_max);
     nexusFile->closeNexusFile();
+    
+    delete nexusFile;
 
     return;
   }

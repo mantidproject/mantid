@@ -241,6 +241,7 @@ namespace NeXus
           return(false);
       return(true);
   }
+  
   bool NexusFileIO::readNexusInstrumentXmlName(std::string& instrumentXml,std::string& date,
                     std::string& version)
   {
@@ -261,7 +262,19 @@ namespace NeXus
 
       return(true);
   }
-  bool NexusFileIO::writeNexusInstrument(const boost::shared_ptr<API::IInstrument>& instrument)
+  
+  std::string NexusFileIO::readNexusInstrumentName()
+  {
+    std::vector<std::string> attributes,avalues;
+    std::string name;
+    bool status=NXopengroup(fileID,"instrument","NXinstrument");
+    if (! status) return "";
+    if (! readNxText("name",name,attributes,avalues) ) name = "";
+    NXclosegroup(fileID);
+    return name;
+  }
+  
+  bool NexusFileIO::writeNexusInstrument(const API::IInstrument_const_sptr& instrument)
   {
    NXstatus status;
 
@@ -773,7 +786,7 @@ namespace NeXus
   }
 
 
-  int NexusFileIO::writeNexusProcessedData( const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
+  int NexusFileIO::writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
 							const bool& uniformSpectra, const int& m_spec_min, const int& m_spec_max)
   {
    NXstatus status;
@@ -787,7 +800,7 @@ namespace NeXus
    const int nHist=localworkspace->getNumberHistograms();
    if(nHist<1)
 	   return(2);
-   const int nSpectBins=localworkspace->dataY(0).size();
+   const int nSpectBins=localworkspace->readY(0).size();
    const int nSpect=m_spec_max-m_spec_min+1;
    int dims_array[2] = { nSpect,nSpectBins };
    std::string name=localworkspace->getTitle();
@@ -798,7 +811,7 @@ namespace NeXus
    status=NXopendata(fileID, name.c_str());
    for(int i=m_spec_min;i<=m_spec_max;i++)
    {
-      status=NXputslab(fileID, (void*)&(localworkspace->dataY(i)[0]),start,asize);
+      status=NXputslab(fileID, (void*)&(localworkspace->readY(i)[0]),start,asize);
 	  start[0]++;
    }
    int signal=1;
@@ -833,28 +846,28 @@ namespace NeXus
    start[0]=0;
    for(int i=m_spec_min;i<=m_spec_max;i++)
    {
-      status=NXputslab(fileID, (void*)&(localworkspace->dataE(i)[0]),start,asize);
+      status=NXputslab(fileID, (void*)&(localworkspace->readE(i)[0]),start,asize);
 	  start[0]++;
    }
    status=NXclosedata(fileID);
    // write X data, as single array or all values if "ragged"
    if(uniformSpectra)
    {
-	   dims_array[0]=localworkspace->dataX(0).size();
+	   dims_array[0]=localworkspace->readX(0).size();
 	   status=NXmakedata(fileID, "axis1", NX_FLOAT64, 1, dims_array);
        status=NXopendata(fileID, "axis1");
-	   status=NXputdata(fileID, (void*)&(localworkspace->dataX(0)[0]));
+	   status=NXputdata(fileID, (void*)&(localworkspace->readX(0)[0]));
    }
    else
    {
 	   dims_array[0]=nSpect;
-	   dims_array[1]=localworkspace->dataX(0).size();
+	   dims_array[1]=localworkspace->readX(0).size();
 	   status=NXmakedata(fileID, "axis1", NX_FLOAT64, 2, dims_array);
        status=NXopendata(fileID, "axis1");
 	   start[0]=0; asize[1]=dims_array[1];
        for(int i=m_spec_min;i<=m_spec_max;i++)
        {
-           status=NXputslab(fileID, (void*)&(localworkspace->dataX(i)[0]),start,asize);
+           status=NXputslab(fileID, (void*)&(localworkspace->readX(i)[0]),start,asize);
 	       start[0]++;
        }
    }
@@ -1045,7 +1058,7 @@ namespace NeXus
   }
 
 
-  int NexusFileIO::writeNexusProcessedProcess(const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace)
+  int NexusFileIO::writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace)
   {
    // Write Process section
    NXstatus status;
@@ -1322,14 +1335,14 @@ namespace NeXus
   }
 
 
-  bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_sptr ws)
+  bool NexusFileIO::writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws)
   {
    /*! Writes the instrument parameter map if not empty. Must be called inside NXentry group.
        @param ws The workspace
        @return true for OK, false for error
    */
 
-      boost::shared_ptr<Geometry::ParameterMap> params = ws->InstrumentParameters();
+      const boost::shared_ptr<const Geometry::ParameterMap> params = ws->instrumentParameters();
       std::string str = params->asString();
       if (str.empty()) str = " ";
       return writeNxNote("instrument_parameter_map"," "," "," ",str);
@@ -1352,7 +1365,7 @@ namespace NeXus
       if( ! readNxText( "data", value, attributes, avalues) )
           return(false);
 
-      boost::shared_ptr<Geometry::ParameterMap> params = ws->InstrumentParameters();
+      boost::shared_ptr<Geometry::ParameterMap> params = ws->instrumentParameters();
       params->clear();
       IInstrument_sptr instr = ws->getBaseInstrument();
 

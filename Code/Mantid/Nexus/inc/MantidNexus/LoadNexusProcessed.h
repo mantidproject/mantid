@@ -87,10 +87,10 @@ namespace Mantid
       std::string m_title;
       /// Pointer to the local workspace
       API::MatrixWorkspace_sptr m_outputWorkspace;
-	  /// Flag set if list of spectra to save is specifed
-	  bool m_list;
-	  /// Flag set if interval of spectra to write is set
-	  bool m_interval;
+      /// Flag set if list of spectra to save is specifed
+      bool m_list;
+      /// Flag set if interval of spectra to write is set
+      bool m_interval;
       /// The value of the spectrum_list property
       std::vector<int> m_spec_list;
       /// The value of the spectrum_min property
@@ -109,12 +109,14 @@ namespace Mantid
       std::string m_axes;
       /// Y units from Nexus file
       std::string m_yunits;
-      /// The instrument XML file name read from the Nexus file
-      std::string m_instrumentxml;
-      /// Instrument xml file date
-      std::string m_instrumentdate;
-      /// Instrument xml file version
-      std::string m_instrumentversion;
+      /// The name of the instrument
+      std::string m_instrumentName;
+//      /// The instrument XML file name read from the Nexus file
+//      std::string m_instrumentxml;
+//      /// Instrument xml file date
+//      std::string m_instrumentdate;
+//      /// Instrument xml file version
+//      std::string m_instrumentversion;
       /// Function to try and load instrument data from XML
       void runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace);
       ///a flag int value that indicates a value that wasn't set

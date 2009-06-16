@@ -106,7 +106,7 @@ void MoveInstrumentComponent::exec()
   }
 
   //Need to get the address to the base instrument component
-  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->InstrumentParameters();
+  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->instrumentParameters();
   ParametrizedComponent* pcomp = dynamic_cast<ParametrizedComponent*>(comp.get());
   const IComponent* baseComp;
   if (pcomp)
@@ -127,7 +127,7 @@ void MoveInstrumentComponent::exec()
   return;
 }
 
-boost::shared_ptr<IComponent> MoveInstrumentComponent::findByID(boost::shared_ptr<IComponent> comp,int id)
+boost::shared_ptr<Geometry::IComponent> MoveInstrumentComponent::findByID(boost::shared_ptr<Geometry::IComponent> comp,int id)
 {
     boost::shared_ptr<IDetector> det = boost::dynamic_pointer_cast<IDetector>(comp);
     if (det && det->getID() == id) return comp;
@@ -141,7 +141,7 @@ boost::shared_ptr<IComponent> MoveInstrumentComponent::findByID(boost::shared_pt
     return boost::shared_ptr<IComponent>();
 }
 
-boost::shared_ptr<IComponent> MoveInstrumentComponent::findByName(boost::shared_ptr<IComponent> comp,const std::string& CName)
+boost::shared_ptr<Geometry::IComponent> MoveInstrumentComponent::findByName(boost::shared_ptr<Geometry::IComponent> comp,const std::string& CName)
 {
     if (comp->getName() == CName) return comp;
     boost::shared_ptr<ICompAssembly> asmb = boost::dynamic_pointer_cast<ICompAssembly>(comp);

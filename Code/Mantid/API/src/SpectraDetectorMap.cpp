@@ -19,7 +19,7 @@ namespace Mantid
     SpectraDetectorMap::~SpectraDetectorMap()
     {}
 
-    void SpectraDetectorMap::populate(int* _spectable, int* _udettable, int nentries)
+    void SpectraDetectorMap::populate(const int* _spectable, const int* _udettable, int nentries)
     {
       m_s2dmap.clear();
       if (nentries<=0)

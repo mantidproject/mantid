@@ -10,7 +10,8 @@ namespace Mantid
 namespace Algorithms
 {
   /**
-     Rebins a workspace to the same binning as a specified workspace
+     Rebins a workspace so that the binning, for all its spectra, match that of the first spectrum
+     of a second workspace.
 
      Required properties:
      <UL>

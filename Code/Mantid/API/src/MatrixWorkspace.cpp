@@ -388,7 +388,7 @@ void MatrixWorkspace::populateInstrumentParameters()
     // Get pointer to parameter map that we may add parameters to and information about
     // the parameters that my be specified in the instrument definition file (IDF)
 
-    boost::shared_ptr<Geometry::ParameterMap> paramMap = InstrumentParameters();
+    boost::shared_ptr<Geometry::ParameterMap> paramMap = instrumentParameters();
     std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
 
 

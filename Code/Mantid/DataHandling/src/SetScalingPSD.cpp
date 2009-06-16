@@ -316,7 +316,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
       }
     
       //Need to get the address to the base instrument component
-      boost::shared_ptr<Geometry::ParameterMap> pmap = WS->InstrumentParameters();
+      boost::shared_ptr<Geometry::ParameterMap> pmap = WS->instrumentParameters();
       ParametrizedComponent* pcomp = dynamic_cast<ParametrizedComponent*>(comp.get());
       const IComponent* baseComp;
       if (pcomp)

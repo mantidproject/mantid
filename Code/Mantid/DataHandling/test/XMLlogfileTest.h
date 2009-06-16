@@ -45,7 +45,7 @@ public:
     TS_ASSERT_EQUALS( output2->getNumberHistograms(), 4 )
 
     // get the parameter map for the period 1 CRISP data
-    boost::shared_ptr<ParameterMap> paramMap = output1->InstrumentParameters();
+    boost::shared_ptr<ParameterMap> paramMap = output1->instrumentParameters();
 
     // check that parameter have been read into the instrument parameter map
     std::vector<V3D> ret1 = paramMap->getV3D("point-detector", "pos");

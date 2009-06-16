@@ -70,7 +70,7 @@ public:
     
     // Mark one detector dead to test that it leads to zero solid angle
     Detector* det143 = dynamic_cast<Detector*>(space2D->getDetector(143).get());
-    boost::shared_ptr<ParameterMap> pmap = space2D->InstrumentParameters();
+    boost::shared_ptr<ParameterMap> pmap = space2D->instrumentParameters();
     pmap->addBool(det143,"masked",true);
   }
 

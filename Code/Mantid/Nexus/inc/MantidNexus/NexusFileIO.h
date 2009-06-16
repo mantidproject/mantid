@@ -60,7 +60,7 @@ namespace Mantid
       /// read sample data
       int readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample);
       /// write the workspace data
-      int writeNexusProcessedData( const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
+      int writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
 							const bool& uniformSpectra, const int& fromY, const int& toY);
       /// find size of open entry data section
       int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
@@ -74,22 +74,24 @@ namespace Mantid
       bool readNexusProcessedData( boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
 							bool& uniformSpectra, int& m_spec_min, int& m_spec_max);
       /// write the algorithm and environment information
-      int writeNexusProcessedProcess(const boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace);
+      int writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace);
       /// write the source XML file used, if it exists
       bool writeNexusInstrumentXmlName(const std::string& instrumentXml,const std::string& date,
                             const std::string& version);
       /// read the source XML file used
       bool readNexusInstrumentXmlName(std::string& instrumentXml,std::string& date,
                             std::string& version);
+      /// read the source XML file used
+      std::string readNexusInstrumentName();
       /// write an instrument section - currently only the name
-      bool writeNexusInstrument(const boost::shared_ptr<API::IInstrument>& instrument);
+      bool writeNexusInstrument(const API::IInstrument_const_sptr& instrument);
       /// write any spectra map information to Nexus file
       bool writeNexusProcessedSpectraMap(const API::SpectraDetectorMap& spectraMap,
                             const int& m_spec_min, const int& m_spec_max);
       /// read spectra map information
       bool readNexusProcessedSpectraMap(API::SpectraDetectorMap& spectraMap, const int& m_spec_min, const int& m_spec_max);
       /// write instrument parameters
-      bool writeNexusParameterMap(API::MatrixWorkspace_sptr ws);
+      bool writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws);
       /// read instrument parameters
       bool readNexusParameterMap(API::MatrixWorkspace_sptr ws);
       /// close the nexus file

@@ -226,7 +226,7 @@ void Fit1D::exec()
   }
 
 
-  for (int i = 0; i < l_data.p; i++)
+  for (size_t i = 0; i < l_data.p; i++)
   {
     m_fittedParameter.push_back(getProperty(m_parameterNames[i]));
   }
@@ -238,7 +238,7 @@ void Fit1D::exec()
   gsl_vector *initFuncArg;
   initFuncArg = gsl_vector_alloc(l_data.p);
 
-  for (int i = 0; i < l_data.p; i++)
+  for (size_t i = 0; i < l_data.p; i++)
   {
     gsl_vector_set(initFuncArg, i, m_fittedParameter[i]);
   }
@@ -283,7 +283,7 @@ void Fit1D::exec()
 
   // put final converged fitting values back into m_fittedParameter
 
-  for (int i = 0; i < l_data.p; i++)
+  for (size_t i = 0; i < l_data.p; i++)
   {
     m_fittedParameter[i] = gsl_vector_get(s->x,i);
   }
@@ -301,7 +301,7 @@ void Fit1D::exec()
     "Iteration = " << iter << "\n" <<
     "Status = " << reportOfFit << "\n" <<
     "Chi^2/DoF = " << chi*chi / dof << "\n";
-  for (int i = 0; i < l_data.p; i++)
+  for (size_t i = 0; i < l_data.p; i++)
     g_log.information() << m_parameterNames[i] << " = " << m_fittedParameter[i] << "  ";
   
 
@@ -309,7 +309,7 @@ void Fit1D::exec()
 
   setProperty("Output Status", reportOfFit);
   setProperty("Output Chi^2/DoF", chi*chi / dof);
-  for (int i = 0; i < l_data.p; i++)
+  for (size_t i = 0; i < l_data.p; i++)
     setProperty(m_parameterNames[i], m_fittedParameter[i]);
 
 
