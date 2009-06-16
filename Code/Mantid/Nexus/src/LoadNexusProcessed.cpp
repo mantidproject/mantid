@@ -308,45 +308,33 @@ void LoadNexusProcessed::loadAlgorithmHistory(DataObjects::Workspace2D_sptr loca
         NXNote history = process.openNXNote(inf.nxname);
         std::vector< std::string >& hst = history.data();
         if (hst.size() == 0) continue;
-        try
-        {
-            std::istringstream ianame(hst[0]);
-            std::string name,vers,dummy;
-            ianame >> dummy >> name >> vers;
-            int version = atoi( vers.substr(1).c_str() );
-            boost::shared_ptr<API::Algorithm> alg = 
-                boost::dynamic_pointer_cast<API::Algorithm>(API::AlgorithmFactory::Instance().create(name,version));
-            alg->initialize();
-            for(size_t i=4;i<hst.size();i++)
-            {
-                std::string str = hst[i];
-                std::string name,value,deflt,direction;
-                size_t i0 = str.find("Name:");
-                size_t i1 = str.find(", Value:",i0+1);
-                size_t i2 = str.find(", Default?:",i1+1);
-                size_t i3 = str.find(", Direction",i2+1);
-                name = str.substr(i0+6,i1-i0-6);
-                value = str.substr(i1+9,i2-i1-9);
-                deflt = str.substr(i2+12,i3-i2-12);
-                direction = str.substr(i3+13);
-                if (deflt == "No")
-                {
-                    alg->setPropertyValue(name,value);
-                }
-            }
-            API::AlgorithmHistory ahist(alg.get());
-            time_t tim = createTime_t_FromString(hst[1].substr(16,21));
-            size_t ii = hst[2].find("sec");
-            double dur = atof(hst[2].substr(20,ii-21).c_str());
-            ahist.addExecutionInfo(tim,dur);
-            localWorkspace->history().addAlgorithmHistory(ahist);
 
-        }
-        catch(...)
+        std::string name,vers,dummy;
+        std::istringstream ianame(hst[0]);
+        ianame >> dummy >> name >> vers;
+        int version = atoi( vers.substr(1).c_str() );
+
+        time_t tim = createTime_t_FromString(hst[1].substr(16,21));
+        size_t ii = hst[2].find("sec");
+        double dur = atof(hst[2].substr(20,ii-21).c_str());
+        API::AlgorithmHistory ahist(name,version,tim,dur);
+
+        for(size_t i=4;i<hst.size();i++)
         {
-            g_log.warning("Cannot load algorithm history: cannot create algorithm");
-            continue;
+            std::string str = hst[i];
+            std::string name,value,deflt,direction;
+            size_t i0 = str.find("Name:");
+            size_t i1 = str.find(", Value:",i0+1);
+            size_t i2 = str.find(", Default?:",i1+1);
+            size_t i3 = str.find(", Direction",i2+1);
+            name = str.substr(i0+6,i1-i0-6);
+            value = str.substr(i1+9,i2-i1-9);
+            deflt = str.substr(i2+12,i3-i2-12);
+            direction = str.substr(i3+13);
+            ahist.addProperty(name,value,deflt == "Yes");
         }
+        localWorkspace->history().addAlgorithmHistory(ahist);
+
     }
 }
 

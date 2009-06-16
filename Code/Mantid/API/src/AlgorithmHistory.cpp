@@ -33,6 +33,19 @@ AlgorithmHistory::~AlgorithmHistory()
 {}
 
 /*!
+    Construct AlgorithmHistory by name. Can be used for rstoring the history from saved records.
+    \param name The algorithm name.
+    \param vers The algorithm version.
+    \param start The start time of the algorithm execution (optional).
+    \param duration The time (in seconds) that it took to run this algorithm (optional).
+ */
+AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const dateAndTime& start, const double& duration) :
+  m_name(name),m_version(vers),m_executionDate(start),
+  m_executionDuration(duration)
+{
+}
+
+/*!
     Standard Copy Constructor
     \param A :: AlgorithmHistory Item to copy
  */
@@ -50,6 +63,16 @@ void AlgorithmHistory::addExecutionInfo(const dateAndTime& start, const double& 
 {
   m_executionDate = start;
   m_executionDuration = duration;
+}
+
+/** Add a property to the history.
+    @param name The name of the property
+    @param value The value of the property
+    @param isdefault True if the property is default
+ */
+void AlgorithmHistory::addProperty(const std::string& name,const std::string& value, bool isdefault)
+{
+    m_properties.push_back(Kernel::PropertyHistory(name,value,"",isdefault));
 }
 
 /** Prints a text representation of itself
