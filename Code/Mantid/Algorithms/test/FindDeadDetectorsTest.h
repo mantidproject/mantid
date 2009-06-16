@@ -88,7 +88,7 @@ public:
     std::string filename = "testFile.txt";
     alg.setPropertyValue("OutputFile",filename);
 
-    // Testing behavour with startX or endX not set
+    // Testing behavour with Range_lower or Range_upper not set
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     std::vector<int> deadDets;
@@ -117,8 +117,8 @@ public:
     outFile.close();
     remove(filename.c_str());
 
-    // Set startX to later in the histogram when the yTooDead detectors stop working
-    alg.setPropertyValue("startX", "11.0");
+    // Set Range_lower to later in the histogram when the yTooDead detectors stop working
+    alg.setPropertyValue("Range_lower", "11.0");
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -137,8 +137,8 @@ public:
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
 
-    // Set endX to before the end which will pickup the strange
-    alg.setPropertyValue("endX", "20");
+    // Set Range_upper to before the end which will pickup the strange
+    alg.setPropertyValue("Range_upper", "20");
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
