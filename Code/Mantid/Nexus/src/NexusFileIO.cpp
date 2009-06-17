@@ -267,8 +267,8 @@ namespace NeXus
   {
     std::vector<std::string> attributes,avalues;
     std::string name;
-    bool status=NXopengroup(fileID,"instrument","NXinstrument");
-    if (! status) return "";
+    NXstatus status=NXopengroup(fileID,"instrument","NXinstrument");
+    if (status==NX_ERROR) return "";
     if (! readNxText("name",name,attributes,avalues) ) name = "";
     NXclosegroup(fileID);
     return name;

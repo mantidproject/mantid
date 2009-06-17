@@ -79,7 +79,7 @@ void LoadInstrument::exec()
 
   // Remove the path from the filename for use with the InstrumentDataService
   const int stripPath = m_filename.find_last_of("\\/");
-  std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());  // get the 1st 3 letters of filename part
+  std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
   // Check whether the instrument is already in the InstrumentDataService
   if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
   {
@@ -176,8 +176,11 @@ void LoadInstrument::exec()
 
   // Get reference to Instrument and set its name
   m_instrument = localWorkspace->getBaseInstrument();
-  if ( pRootElem->hasAttribute("name") ) m_instrument->setName( pRootElem->getAttribute("name") );
-
+  // We don't want the name taken out of the file itself, it should be the stem of the filename
+  //if ( pRootElem->hasAttribute("name") ) m_instrument->setName( pRootElem->getAttribute("name") );
+  // Strip off "_Definition.xml"
+  const size_t underScore = instrumentFile.find_first_of("_");
+  m_instrument->setName( instrumentFile.substr(0,underScore) );
 
   // do analysis for each top level compoment element
   NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
