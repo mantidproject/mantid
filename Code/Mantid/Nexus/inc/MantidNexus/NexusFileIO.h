@@ -196,7 +196,7 @@ namespace Mantid
           std::vector<double> times;
           time_t t0; // ,time;
           bool first=true;
-          for(std::map<time_t, T>::const_iterator dv=dV.begin();dv!=dV.end();dv++)
+          for(typename std::map<time_t, T>::const_iterator dv=dV.begin();dv!=dV.end();dv++)
           {
               T val = double(dv->second);
               time_t time = dv->first;
