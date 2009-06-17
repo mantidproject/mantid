@@ -506,17 +506,27 @@ namespace NeXus
        std::string name=sampleProps[i]->name();
        std::string type=sampleProps[i]->type();
        //std::string value=sampleProps[i]->value();
-       TimeSeriesProperty<double> *d_timeSeries=dynamic_cast<TimeSeriesProperty<double>*>(sampleProps[i]);
-       if(d_timeSeries!=0)
+       TimeSeriesProperty<std::string> *s_timeSeries=dynamic_cast<TimeSeriesProperty<std::string>*>(sampleProps[i]);
+       if(s_timeSeries!=0)
        {
-           writeNexusDoubleLog(d_timeSeries);
+           writeNexusStringLog(s_timeSeries);
        }
        else
        {
-           TimeSeriesProperty<std::string> *s_timeSeries=dynamic_cast<TimeSeriesProperty<std::string>*>(sampleProps[i]);
-           if(s_timeSeries!=0)
+           TimeSeriesProperty<double> *d_timeSeries=dynamic_cast<TimeSeriesProperty<double>*>(sampleProps[i]);
+           TimeSeriesProperty<int> *i_timeSeries=dynamic_cast<TimeSeriesProperty<int>*>(sampleProps[i]);
+           TimeSeriesProperty<bool> *b_timeSeries=dynamic_cast<TimeSeriesProperty<bool>*>(sampleProps[i]);
+           if(d_timeSeries!=0)
            {
-                writeNexusStringLog(s_timeSeries);
+               writeNexusNumericLog<double>(d_timeSeries);
+           }
+           else if(i_timeSeries!=0)
+           {
+               writeNexusNumericLog<int>(i_timeSeries);
+           }
+           else if(b_timeSeries!=0)
+           {
+               writeNexusNumericLog<bool>(b_timeSeries);
            }
        }
    }
@@ -764,7 +774,37 @@ namespace NeXus
       {
           l_PropertyDouble->addValue(startTime+static_cast<time_t>(timeVals[j]), dataVals[j]);
       }
-      sample->addLogData(l_PropertyDouble);
+      char aname[] = "type";
+      char adata[NX_MAXNAMELEN];
+      int iDataLen = NX_MAXNAMELEN,iType = NX_CHAR;
+      NXgetattr(fileID, aname, adata, &iDataLen, &iType);
+      std::string logType = std::string(adata,iDataLen);
+      if (logType == "int")
+      {
+          TimeSeriesProperty<int> *l_Property = new TimeSeriesProperty<int>(nxname);
+          std::map<dateAndTime, double> pd = l_PropertyDouble->valueAsMap();
+          for(std::map<dateAndTime, double>::const_iterator p=pd.begin();p!=pd.end();p++)
+          {
+              l_Property->addValue(p->first,int(p->second));
+          }
+          delete l_PropertyDouble;
+          sample->addLogData(l_Property);
+      }
+      else if (logType == "bool")
+      {
+          TimeSeriesProperty<bool> *l_Property = new TimeSeriesProperty<bool>(nxname);
+          std::map<dateAndTime, double> pd = l_PropertyDouble->valueAsMap();
+          for(std::map<dateAndTime, double>::const_iterator p=pd.begin();p!=pd.end();p++)
+          {
+              l_Property->addValue(p->first,p->second != 0.0);
+          }
+          delete l_PropertyDouble;
+          sample->addLogData(l_Property);
+      }
+      else
+      {
+          sample->addLogData(l_PropertyDouble);
+      }
    }
    else if(type==NX_CHAR)
    {
@@ -834,7 +874,8 @@ namespace NeXus
    }
    std::vector<double> histNumber;
 	 for(int i=m_spec_min;i<=m_spec_max;i++) histNumber.push_back((*sAxis)(i));
-   const std::string axesNames=xLabel+":"+sLabel;
+   //const std::string axesNames=xLabel+":"+sLabel;
+   const std::string axesNames="axis1,axis2";
    status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
    std::string yUnits=localworkspace->YUnit();
    status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
@@ -873,12 +914,14 @@ namespace NeXus
    }
    std::string dist=(localworkspace->isDistribution()) ? "1" : "0";
    status=NXputattr(fileID, "distribution", (void*)dist.c_str(), 2, NX_CHAR);
+   NXputattr (fileID, "units", (void*)xLabel.c_str(), xLabel.size(), NX_CHAR);
    status=NXclosedata(fileID);
    // write axis2, maybe just spectra number
    dims_array[0]=m_spec_max-m_spec_min+1;
    status=NXmakedata(fileID, "axis2", NX_FLOAT64, 1, dims_array);
    status=NXopendata(fileID, "axis2");
    status=NXputdata(fileID, (void*)&(histNumber[m_spec_min]));
+   NXputattr (fileID, "units", (void*)sLabel.c_str(), sLabel.size(), NX_CHAR);
    status=NXclosedata(fileID);
 
    status=NXclosegroup(fileID);
@@ -886,7 +929,7 @@ namespace NeXus
   }
 
   int NexusFileIO::getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
-      bool& uniformBounds, std::string& axesNames, std::string& yUnits )
+      bool& uniformBounds, std::string& axesUnits, std::string& yUnits )
   {
    //
    // Read the size of the data section in a mantid_workspace_entry and also get the names of axes
@@ -922,9 +965,6 @@ namespace NeXus
    int len=NX_MAXNAMELEN;
    type=NX_CHAR;
    //
-   status=NXgetattr(fileID,"axes",(void *)sbuf,&len,&type);
-   if(status!=NX_ERROR)
-       axesNames=sbuf;
    len=NX_MAXNAMELEN;
    if(checkAttributeName("units"))
    {
@@ -938,6 +978,10 @@ namespace NeXus
    status=NXopendata(fileID,"axis1");
    if(status==NX_ERROR)
        return(4);
+   len=NX_MAXNAMELEN;
+   type=NX_CHAR;
+   NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
+   axesUnits = std::string(sbuf,len);
    status=NXgetinfo(fileID, &rank, dim, &type);
    // non-uniform X has 2D axis1 data
    if(rank==1)
@@ -950,6 +994,13 @@ namespace NeXus
        numberOfXpoints=dim[1];
        uniformBounds=false;
    }
+   NXclosedata(fileID);
+   status=NXopendata(fileID,"axis2");
+   len=NX_MAXNAMELEN;
+   type=NX_CHAR;
+   NXgetattr(fileID,"units",(void *)sbuf,&len,&type);
+   axesUnits += std::string(":") + std::string(sbuf,len);
+   NXclosedata(fileID);
    status=NXclosegroup(fileID);
    return(0);
   }
@@ -1394,6 +1445,15 @@ namespace NeXus
       return(true);
    
   }
+
+  template<>
+  std::string NexusFileIO::logValueType<double>()const{return "double";}
+
+  template<>
+  std::string NexusFileIO::logValueType<int>()const{return "int";}
+
+  template<>
+  std::string NexusFileIO::logValueType<bool>()const{return "bool";}
 
 } // namespace NeXus
 } // namespace Mantid
