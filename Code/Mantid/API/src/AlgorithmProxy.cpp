@@ -165,6 +165,7 @@ bool AlgorithmProxy::executeAsyncImpl(const int&)
     Poco::ActiveResult<bool> res = m_alg->executeAsync();
     res.wait();
     m_isExecuted = m_alg->isExecuted();
+    m_alg.reset();
     return res.data();
 }
 

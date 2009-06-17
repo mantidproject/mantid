@@ -157,11 +157,10 @@ bool Algorithm::execute()
 				  }
 				 
 			  }
-			  catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
-			  {
-				g_log.debug()<<" Failing to cast the workspace pointer of workspace  "<< wsName<<" Workspace group"<<std::endl;
-
-			  }
+        catch(Exception::NotFoundError&)//if not a valid object in analysis data service
+        {
+          g_log.debug()<<" Failing to cast the workspace pointer of workspace  "<< wsName<<" Workspace group"<<std::endl;
+  	    }
 		  }//end of if loop checking the direction
 	  }//end of if loop for checking workspace properties
 
@@ -619,10 +618,9 @@ void Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* 
 			pAlg->setPropertyValue(prop->name(), wsname);
 		}
 	}
-	catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
+	catch(Exception::NotFoundError&)//if not a valid object in analysis data service
 	{
 		g_log.information()<<" Trying to retrieve  Object "<< wsname<<" which is not there in ADS"<<std::endl;
-
 	}
 }
 void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nPeriod,WorkspaceGroup_sptr sptrWSGrp,std::string &outWSParentName)
