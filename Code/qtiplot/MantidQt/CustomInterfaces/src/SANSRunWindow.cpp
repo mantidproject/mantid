@@ -5,8 +5,13 @@
 #include "MantidQtCustomInterfaces/SANSUtilityDialogs.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/Exception.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IInstrument.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -36,14 +41,19 @@ namespace CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 
+// Initialize the logger
+Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANSRunWindow");
+
 //----------------------
 // Public member functions
 //----------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), m_period_lbls(), m_pycode_loqreduce("")
+  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), 
+  m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false), m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace)
 {
   m_reducemapper = new QSignalMapper(this);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 }
 
 ///Destructor
@@ -60,6 +70,7 @@ SANSRunWindow::~SANSRunWindow()
  */
 void SANSRunWindow::initLayout()
 {
+    g_log.debug("Initializing interface layout");
     m_uiForm.setupUi(this);
 
     //Button connections
@@ -99,6 +110,12 @@ void SANSRunWindow::initLayout()
     m_run_no_boxes.insert(7, m_uiForm.direct_can_edit);
     m_run_no_boxes.insert(8, m_uiForm.direct_bkgd_edit);
 
+    //Connect each box's edited signal to flag if the box's text has changed
+    for( int idx = 0; idx < 9; ++idx )
+    {
+      connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runBoxEdited()));
+    }
+
     //Period label hash. Each label has a buddy set to its corresponding text edit field
     m_period_lbls.insert(0, m_uiForm.sct_prd_tot1);
     m_period_lbls.insert(1, m_uiForm.sct_prd_tot2);
@@ -109,6 +126,9 @@ void SANSRunWindow::initLayout()
     m_period_lbls.insert(6, m_uiForm.direct_prd_tot1);
     m_period_lbls.insert(7, m_uiForm.direct_prd_tot2);   
     m_period_lbls.insert(8, m_uiForm.direct_prd_tot3);
+
+    // Full workspace names as they appear in the service
+    m_workspace_names.clear();
 
     // Combo boxes
     connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
@@ -130,6 +150,7 @@ void SANSRunWindow::initLayout()
  */
 void SANSRunWindow::readSettings()
 {
+  g_log.debug("Reading settings.");
   QSettings value_store;
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
   m_uiForm.datadir_edit->setText(value_store.value("data_dir").toString());
@@ -139,6 +160,9 @@ void SANSRunWindow::readSettings()
   //The instrument definition directory
   m_ins_defdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory"));
   
+  g_log.debug() << "Found previous data directory " << m_uiForm.datadir_edit->text().toStdString()
+    << "\nFound previous user mask file" << m_uiForm.userfile_edit->text().toStdString() 
+    << "\nFound instrument definition directory " << m_ins_defdir.toStdString() << std::endl;
 }
 
 /**
@@ -538,15 +562,17 @@ bool SANSRunWindow::isUserFileLoaded() const
 /**
  * Get the path the the raw file indicated by the run number.This checks the given directory for the number 
  * given. Left-padding of zeroes is done as required.
+ * @param data_dir The data directory
  * @param run_no The run number to search for
+ * @param ext The file extension
  */
-QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & run_no) const
+QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & run_no, const QString & ext) const
 {
   //Do a quick check for the existence of the file with these exact credentials
   QDir directory(data_dir);
   QString prefix = m_uiForm.inst_opt->currentText();
-  QString ext = m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString();
   QString filename = directory.absoluteFilePath(prefix + run_no + ext);
+  g_log.debug("Found file path " + filename.toStdString());
   if( QFileInfo(filename).exists() ) return filename;
   
   // If nothing pad the number and check
@@ -554,28 +580,6 @@ QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & 
   filename = directory.absoluteFilePath(prefix + padded_no + ext);
   if( QFileInfo(filename).exists() ) return filename;
   else return QString();
-  //Otherwise check entries with padded
-  //RegExp2 will be default for Qt >= 5. It matches more like other regex engines
-  /*QRegExp rx(prefix + "[0]*" + run_no + ".raw", Qt::CaseInsensitive, QRegExp::RegExp2);
-  QRegExpValidator matcher(rx, 0);
-  QStringList files = directory.entryList( QStringList(prefix + "*"), QDir::Files | QDir::NoSymLinks );
-  QStringListIterator itr(files);
-  filename.clear();
-  while( itr.hasNext() )
-  {
-    filename = itr.next();
-    int pos(0);
-    if( matcher.validate(filename, pos) == QValidator::Acceptable )
-    {
-      break;
-    }
-    else 
-    {
-      filename.clear();
-    }
-  }
-  if( filename.isEmpty() ) return QString();
-  else return directory.absoluteFilePath(filename);*/
 }
  
 /**
@@ -596,35 +600,9 @@ QString SANSRunWindow::createMaskString() const
   return maskstring;
 }
 
-/**
-* Construct the mapp for names of the workspaces from the boxes
-*/
-void SANSRunWindow::constructWorkspaceNames()
-{
-  m_workspace_names.clear();
-  QString file_ext(m_uiForm.file_opt->currentText());
-  for( int i = 0; i < 9; ++i )
-  {
-    QString box_text = m_run_no_boxes.value(i)->text();
-    if( box_text.isEmpty() ) 
-    {
-      m_workspace_names.append("");
-      continue;
-    }
-    if( i < 3 )
-    {
-      m_workspace_names.append(box_text + "_sans_" + file_ext);
-    }
-    else
-    {
-      m_workspace_names.append(box_text + "_trans_" + file_ext);
-    }
-  }
-}
-
 void SANSRunWindow::setupGeometryDetails()
 {
-  QString wsname = m_workspace_names[0];
+  QString wsname = m_workspace_names.value(0);
   if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
     // Set up distance information
   double dist_ms_smp(0.0), dist_sd1_smp(0.0), dist_sd2_smp(0.0), dist_mm(-1.0);
@@ -638,7 +616,7 @@ void SANSRunWindow::setupGeometryDetails()
 
   if( dist_mm > 0.0 ) m_uiForm.dist_mod_mon->setText(QString::number(dist_mm, format, prec));
   
-  wsname = m_workspace_names[1];
+  wsname = m_workspace_names.value(1);
   if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
 
   double dist_ms_can(0.0), dist_sd1_can(0.0), dist_sd2_can(0.0);
@@ -669,7 +647,7 @@ void SANSRunWindow::setupGeometryDetails()
     m_uiForm.dist_can_sd2->setText("<font color='red'>" + m_uiForm.dist_can_sd2->text() + "</font>");
   }
   
-  wsname = m_workspace_names[2];
+  wsname = m_workspace_names.value(2);
   if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
 
   double dist_ms_bckd(0.0), dist_sd1_bckd(0.0), dist_sd2_bckd(0.0);
@@ -752,99 +730,62 @@ void SANSRunWindow::handleLoadButtonClick()
   while( itr.hasNext() )
   {
     itr.next();
+    int key = itr.key();
     QString run_no = itr.value()->text();
-    if( run_no.isEmpty() ) continue;
-
-    QString ws_name;
-    if( itr.key() < 3 ) ws_name = run_no + "_sans_" + m_uiForm.file_opt->currentText();
-    else ws_name = run_no + "_trans_" + m_uiForm.file_opt->currentText();
-    
-    if( workspaceExists(ws_name) ) continue;
-    //Load the file. This checks for required padding of zeros etc
-    QString code = writeLoadCmd(work_dir, run_no, ws_name);
-    if( code.isEmpty() ) continue;
-
-    runPythonCode(code, true);
-    
-    if( itr.key() == 0 )
+    if( run_no.isEmpty() ) 
     {
-      if( workspaceExists(ws_name) )
-      {
-        data_loaded = true;
-        Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-          (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
+      m_workspace_names.insert(key, "");
+      continue;
+    }
+    //Construct a workspace name that will go into the ADS
+    QString ws_name;
+    if( key < 3 ) ws_name = run_no + "_sans_" + m_uiForm.file_opt->currentText();
+    else ws_name = run_no + "_trans_" + m_uiForm.file_opt->currentText();
+    //Check if we already have it and do nothing if that is so
+    if( workspaceExists(ws_name) ) 
+    {
+      data_loaded = true;
+      continue;
+    }
+    //Load the file. This checks for required padding of zeros etc
+    int n_periods = runLoadData(work_dir, run_no, m_uiForm.file_opt->currentText(), ws_name);
+    // If this is zero then something went wrong with trying to load a file
+    if( n_periods == 0 ) 
+    {
+      m_workspace_names.insert(key, "");
+      showInformationBox("Error: Cannot load run " + run_no + ".\nPlease check that the correct instrument and file extension are selected");
+      //Bail out completely now
+      return;
+    }
+
+    //At this point we know the workspace exists
+    m_workspace_names.insert(key, ws_name);
+    if( key == 0 )
+    {
+      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+        (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
         if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
         {
-          double xbeg = ws->readX(0).front();
-          m_uiForm.tof_min->setText(QString::number(xbeg)); 
-          double xend = ws->readX(0).back();
-          m_uiForm.tof_max->setText(QString::number(xend));
+          m_uiForm.tof_min->setText(QString::number(ws->readX(0).front())); 
+          m_uiForm.tof_max->setText(QString::number(ws->readX(0).back()));
         }
-      }
-      else
-      {
-        data_loaded = false;
-        break;
-      }
     }
-    else if( workspaceExists(ws_name) )
-    {
-     data_loaded = true;
-    }
-    else data_loaded = false;
+
+    QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
+    label->setText("/ " + QString::number(n_periods));
+    QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
+    userentry->setText("1");
+
+    data_loaded = true;
   }
+
   // Cannot do anything if nothing was loaded
   if( !data_loaded ) 
   {
     return;
   }
-  /// Build the list of full workspace names
-  constructWorkspaceNames();
+  m_run_changed = false;
 
-  //We need to sort out the number of periods in each data set
-  QString code = "wksp_dict = {}\n"
-    "for name in mtd.getWorkspaceNames():\n"
-    "\tname = name.split('_')[0]\n"
-    "\tif wksp_dict.has_key(name):\n"
-    "\t\twksp_dict[name] += 1\n"
-    "\telse:\n"
-    "\t\twksp_dict[name] = 1\n\n"
-    "for k,v in wksp_dict.iteritems():\n"
-    "\tprint k + ':' + str(v)\n";
-
-  //// Get the min and max X values
-  //code += "\nwksp = mtd.getMatrixWorkspace(mtd.getWorkspaceNames()[0])\n"
-  //  "print 'X:MIN:' + str(wksp.readX(0)[0])\n"
-  //  "print 'X:MAX:' + str(wksp.readX(0)[len(wksp.readX(0))-1])\n";
-  QString results = runPythonCode(code);
-  if( results.isEmpty() ) return;
-  
-  QStringList output_lines = results.split("\n");
-  QStringListIterator sitr(output_lines);
-  QHash<QString, int> period_nos;
-  while( sitr.hasNext() )
-  {
-    QString line = sitr.next();
-    period_nos.insert(line.section(":", 0, 0), line.section(":",1, 1).toInt());
-  }
-
-  //Now update the relevant boxes
-  itr = m_run_no_boxes;
-  while( itr.hasNext() )
-  {
-    itr.next();
-    QString text = itr.value()->text();
-    if( text.isEmpty() ) continue;
-    int total_periods = period_nos.value(text);
-    QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(itr.key()));
-    if( !label ) continue;
-
-    label->setText("/ " + QString::number(total_periods));
-    QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
-    if( !userentry ) continue;
-
-    userentry->setText("1");
-  }
   //Fill in the information on the geometry tab
   setupGeometryDetails();
 
@@ -870,14 +811,14 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   {
     showInformationBox("Error: A scattering sample run number is required to continue.");
     return;
-  }
-    
-  // There is a number but it doesn't exist as a workpace
-  if( !workspaceExists(m_workspace_names.at(0)) )
+  } 
+
+  if( m_run_changed )
   {
-    showInformationBox("Error: Please check " + m_workspace_names.at(0) + " has been loaded.");
-    return;
+    g_log.debug("A run number has changed, running load routine.");
+    handleLoadButtonClick();
   }
+
   int idtype(0);
   if( type.startsWith("2") ) idtype = 1;
 
@@ -888,11 +829,11 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
 
-  py_code.replace("|SCATTERSAMPLE|", m_workspace_names.at(0));
-  py_code.replace("|SCATTERCAN|", m_workspace_names.at(1));
-  py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.at(3));
-  py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.at(4));
-  py_code.replace("|DIRECTSAMPLE|", m_workspace_names.at(6));
+  py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
+  py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
+  py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.value(3));
+  py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.value(4));
+  py_code.replace("|DIRECTSAMPLE|", m_workspace_names.value(6));
 
   // Limit replacement
   py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
@@ -1000,28 +941,85 @@ void SANSRunWindow::handleShowMaskButtonClick()
   runPythonCode(py_code);
 }
 
-//-----------------------------------------
-// Python code utility functions
-//-----------------------------------------
 /**
- * Write a Python LoadRaw command. This assumes that the filename has already been validated
- * @param filename The Filename property value
- * @param workspace The OutputWorkspace property value
+ * Flip the flag saying that something has been edited in one of the run boxes
  */
-QString SANSRunWindow::writeLoadCmd(const QString & work_dir, const QString & run_no, const QString & workspace)  
+void SANSRunWindow::runBoxEdited()
 {
-  QString filepath = getRawFilePath(work_dir, run_no);
+  m_run_changed = true;
+}
+
+/**
+ * Run the appropriate command to load the data
+ * @param work_dir The directory
+ * @param run_no The run number
+ * @param ext The file extension
+ * @param workspace The OutputWorkspace
+ * @returns The number of periods in the workspace. Returns zero on failure
+ */
+int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no, const QString & ext, const QString & workspace)  
+{
+  QString filepath = getRawFilePath(work_dir, run_no, "." + ext);
   if( filepath.isEmpty() )
-  {
-    showInformationBox("Warning: Cannot load a file with run number " + run_no + ".\nPlease check that the correct instrument and file extension are selected");
-    return QString();
+  {   
+    return 0;
   }
-  if( m_uiForm.file_opt->currentIndex() == 0 )
+  bool raw_file(true);
+  if( ext.startsWith('n', Qt::CaseInsensitive) )
   {
-    return "LoadRaw(Filename = '" + filepath+ "', OutputWorkspace = '" + workspace + "')\n";
+    raw_file = false;
+  }
+  Mantid::API::FrameworkManagerImpl & f_mgr = Mantid::API::FrameworkManager::Instance();
+  Mantid::API::IAlgorithm *loader(NULL);
+  if( raw_file )
+  {
+    loader = f_mgr.createAlgorithm("LoadRaw");
   }
   else
   {
-    return "LoadISISNexus(Filename = '" + filepath+ "', OutputWorkspace = '" + workspace + "')\n";
+    loader = f_mgr.createAlgorithm("LoadISISNexus"); 
+  }
+  loader->setPropertyValue("Filename", filepath.toStdString());
+  std::string workspace_name = workspace.toStdString();
+  loader->setPropertyValue("OutputWorkspace", workspace_name);
+  if( !loader->execute() )
+  {
+    return 0;
+  }
+  else
+  {
+    g_log.debug("Loading algorithm succeeded.");
+    //Load succeeded so find the number of periods. (Here the number of workspaces in the group)
+    //Retrieve shoudn't throw but lets wrap it just in case
+     Mantid::API::Workspace_sptr wksp_ptr;
+    try
+    {
+     wksp_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name);
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError &)
+    {
+      g_log.error("Couldn't find workspace " + workspace_name + " in ADS.");
+      return 0;
+    }
+    Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp_ptr);
+    if( ws_group )
+    {
+      return ws_group->size();
+    }
+    else
+    {
+      return 1;
+    }
   }
 }
+
+/**
+ * Handle a delete notification from Mantid
+ * @param p_dnf A Mantid delete notification
+ */
+void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf)
+{
+  QString wksp_name = QString::fromStdString(p_dnf->object_name());
+  m_run_changed = true;
+}
+	

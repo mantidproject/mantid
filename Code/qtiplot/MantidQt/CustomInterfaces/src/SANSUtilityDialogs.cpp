@@ -194,7 +194,7 @@ void SANSPlotDialog::plotButtonClicked()
     //Check for 2D plot
     if( top_item->data(0, Qt::UserRole).toInt() == 100 )
     {
-      py_code += "m = newMantidMatrix('" + top_item->text(0) + "')\n"
+      py_code += "m = importMantidMatrix('" + top_item->text(0) + "')\n"
 	"m.plotGraph2D()\n"
 	"m.hide()\n";
     }
