@@ -37,8 +37,8 @@ LogParser::LogParser(const std::string& eventFName)
     std::ifstream file(eventFName.c_str());
     if (!file)
     {
-        periods->addValue(Kernel::dateAndTime(),1);
-        status->addValue(Kernel::dateAndTime(),true);
+        periods->addValue(Kernel::dateAndTime()+1,1);
+        status->addValue(Kernel::dateAndTime()+1,true);
         g_log.warning()<<"Cannot open ICPevent file "<<eventFName<<". Period 1 assumed for all data.\n";
         return;
     }

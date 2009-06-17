@@ -218,6 +218,8 @@ namespace Mantid
           attributes.push_back("type");
           avalues.push_back(logValueType<T>());
           writeNxFloatArray("value", values,  attributes, avalues);
+          attributes.clear();
+          avalues.clear();
           // get ISO time, if t0 valid
           char buffer [25];
           if(t0>0)
