@@ -180,6 +180,7 @@ namespace Mantid
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 	 
 	  WorkspaceGroup_sptr sptrWSGrp= WorkspaceGroup_sptr(new WorkspaceGroup);
+	  
 	  if(m_numberOfPeriods>1)
 	  {		 
 		 
@@ -191,7 +192,7 @@ namespace Mantid
 	  {
 		  setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
 	  }
-      std::string outws("");
+   
       //if (dhdr.d_comp == 0) throw std::runtime_error("Oops..");
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       //for (int period = 0; period < m_numberOfPeriods; ++period) {
@@ -258,7 +259,6 @@ namespace Mantid
         // Just a sanity check
         assert(counter == total_specs);
 
-       
 	    if (period == 0)
         {
           // Only run the sub-algorithms once
@@ -268,7 +268,7 @@ namespace Mantid
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
           localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
-		
+			
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -284,6 +284,10 @@ namespace Mantid
 			//if(sptrWSGrp)sptrWSGrp->add(wsName);
 			//declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,wsName,Direction::Output));
 			//setProperty(outws,boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
+
+			//std::string outputWorkspace = "OutputWorkspace";
+			
+			//declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,wsName,Direction::Output));
 			runLoadLog(localWorkspace,period+1);
         }
 
@@ -291,15 +295,22 @@ namespace Mantid
         populateInstrumentParameters(localWorkspace);
 
         // Assign the result to the output workspace property
-       // setProperty(outputWorkspace,localWorkspace);  
-		std::string outputWorkspace = "OutputWorkspace";
+       // setProperty(outputWorkspace,localWorkspace); 
+	
+        std::string outputWorkspace = "OutputWorkspace";
+		std::string outws("");
 		std::stringstream suffix;
 		suffix <<(period+1);
 		std::string wsName = localWSName + "_" + suffix.str();
 		outws=outputWorkspace+"_"+suffix.str();
-		if(sptrWSGrp)sptrWSGrp->add(wsName);
-		declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,wsName,Direction::Output));
-		setProperty(outws,boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
+
+		if(m_numberOfPeriods>1)
+		{
+			declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,wsName,Direction::Output));
+			if(sptrWSGrp)sptrWSGrp->add(wsName);
+			setProperty(outws,boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
+		}
+			
 		
       } // loop over periods
 
