@@ -79,7 +79,7 @@ std::string ParameterMap::asString()const
     for(pmap_it it=m_map.begin();it!=m_map.end();it++)
     {
         boost::shared_ptr<Parameter> p = it->second;
-        if (p)
+        if (p && it->first)
         {
             out << (it->first)->getName() << ';' << p->type()<< ';' << p->name() << ';' << p->asString() << '|';
         }
