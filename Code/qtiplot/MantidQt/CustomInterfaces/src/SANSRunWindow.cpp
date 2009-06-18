@@ -50,7 +50,8 @@ Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANS
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), 
-  m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false), m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace)
+  m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false), 
+  m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace)
 {
   m_reducemapper = new QSignalMapper(this);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
@@ -137,6 +138,9 @@ void SANSRunWindow::initLayout()
 	    SLOT(handleStepComboChange(int)));
     connect(m_uiForm.qy_dqy_opt, SIGNAL(currentIndexChanged(int)), this, 
 	    SLOT(handleStepComboChange(int)));
+
+    connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
+	    SLOT(handleInstrumentChange(int)));
 
     // file extensions
     m_uiForm.file_opt->setItemData(0, ".raw");
@@ -262,12 +266,26 @@ bool SANSRunWindow::loadUserFile()
   QFile user_file(filetext);
   if( !user_file.open(QIODevice::ReadOnly) ) return false;
   
-  //Clear the def masking info table
-  m_uiForm.def_mask_table->clear();
+  //Clear the def masking info table.
+  int mask_table_count = m_uiForm.mask_table->rowCount();
+  for( int i = mask_table_count - 1; i >= 0; --i )
+  {
+    m_uiForm.mask_table->removeRow(i);
+  }
 
   //Set a couple of things to default values that will get overwritten if present in the file
-  if( m_uiForm.inst_opt->currentIndex() == 0 ) m_uiForm.monitor_spec->setText("2");
-  else m_uiForm.monitor_spec->setText("73730");
+  if( m_uiForm.inst_opt->currentIndex() == 0 ) 
+  {
+    m_uiForm.monitor_spec->setText("2");
+    m_uiForm.bank_spec_min->setText("3");
+    m_uiForm.bank_spec_max->setText("16386"); 
+  }
+  else
+  { 
+    m_uiForm.monitor_spec->setText("73730");
+    m_uiForm.bank_spec_min->setText("1");
+    m_uiForm.bank_spec_max->setText("36864");
+  }
 
   m_uiForm.dist_mod_mon->setText("0.0000");
 
@@ -276,6 +294,9 @@ bool SANSRunWindow::loadUserFile()
   while( !stream.atEnd() )
   {
     QString com_line = stream.readLine();
+    //Skip comments lines
+    if( com_line.startsWith("!") ) continue;
+    
     if( com_line.startsWith("L/") )
     {
       readLimits(com_line.section("/", 1));
@@ -327,10 +348,10 @@ bool SANSRunWindow::loadUserFile()
     {
       QString type = com_line.section(' ',1, 1);
       QString col1_txt(""), col2_txt("");
-      if( type.startsWith('S', Qt::CaseInsensitive) )
+      if( type.startsWith('s', Qt::CaseInsensitive) )
       {
 	col1_txt = "Spectrum";
-	col2_txt = type.section('S', 1, -1, QString::SectionCaseInsensitiveSeps);
+	col2_txt = type;//.section('S', 1, -1, QString::SectionCaseInsensitiveSeps);
       }
       else if( type.startsWith('h', Qt::CaseInsensitive) )
       {
@@ -339,13 +360,13 @@ bool SANSRunWindow::loadUserFile()
       }
       else continue;
       
-      int row = m_uiForm.def_mask_table->rowCount();
+      int row = m_uiForm.mask_table->rowCount();
       //Insert line after last row
-      m_uiForm.def_mask_table->insertRow(row);
+      m_uiForm.mask_table->insertRow(row);
       QTableWidgetItem *item1 = new QTableWidgetItem(col1_txt);
       QTableWidgetItem *item2 = new QTableWidgetItem(col2_txt);
-      m_uiForm.def_mask_table->setItem(row, 0, item1);
-      m_uiForm.def_mask_table->setItem(row, 1, item2);
+      m_uiForm.mask_table->setItem(row, 0, item1);
+      m_uiForm.mask_table->setItem(row, 1, item2);
     }
     else {}
        
@@ -385,23 +406,23 @@ void SANSRunWindow::readLimits(const QString & com_line)
     m_uiForm.rad_max->setText(max);
     m_uiForm.rad_dr->setText(step);
     //Add mask values to table
-    int row = m_uiForm.def_mask_table->rowCount();
+    int row = m_uiForm.mask_table->rowCount();
     //Insert line after last row
-    m_uiForm.def_mask_table->insertRow(row);
+    m_uiForm.mask_table->insertRow(row);
     QTableWidgetItem *item1 = new QTableWidgetItem("Beam stop");
-    QTableWidgetItem *item2 = new QTableWidgetItem("Shape");
-    m_uiForm.def_mask_table->setItem(row, 0, item1);
-    m_uiForm.def_mask_table->setItem(row, 1, item2);
-    m_uiForm.def_mask_table->insertRow(++row);
+    QTableWidgetItem *item2 = new QTableWidgetItem("infinite-cylinder");
+    m_uiForm.mask_table->setItem(row, 0, item1);
+    m_uiForm.mask_table->setItem(row, 1, item2);
+    m_uiForm.mask_table->insertRow(++row);
     item1 = new QTableWidgetItem("Corners");
-    item2 = new QTableWidgetItem("Shape");
-    m_uiForm.def_mask_table->setItem(row, 0, item1);
-    m_uiForm.def_mask_table->setItem(row, 1, item2);
+    item2 = new QTableWidgetItem("infinite-cylinder");
+    m_uiForm.mask_table->setItem(row, 0, item1);
+    m_uiForm.mask_table->setItem(row, 1, item2);
   }
   else if( quantity == "SP" )
   {
-    m_uiForm.spec_min->setText(min);
-    m_uiForm.spec_max->setText(max);
+    m_uiForm.all_spec_min->setText(min);
+    m_uiForm.all_spec_max->setText(max);
   }
   else
   {
@@ -478,6 +499,12 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
     lsda = sample->getPos().distance(comp->getPos());
   }
 
+  g_log.debug() << "Position of " << comp_name << " " << comp->getPos() << "\n";
+  std::vector<int> detsA = workspace_ptr->spectraMap().getDetectors(16386);
+  if( !detsA.empty() )
+  {
+    g_log.debug() << "Position of centre detector " << instr->getDetector(detsA[0])->getPos() << "\n";
+  }
   comp_name = "HAB";
   if( isS2D ) comp_name = "rear-detector";
   comp = instr->getComponentByName(comp_name);
@@ -485,6 +512,7 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
   {
     lsdb = sample->getPos().distance(comp->getPos());
   }
+  g_log.debug() << "Position of " << comp_name << " " << comp->getPos() << "\n";
   if( lmm < 0.0 ) return;
 
   int monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
@@ -572,12 +600,13 @@ QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & 
   QDir directory(data_dir);
   QString prefix = m_uiForm.inst_opt->currentText();
   QString filename = directory.absoluteFilePath(prefix + run_no + ext);
-  g_log.debug("Found file path " + filename.toStdString());
+  g_log.debug("Checking for run " + run_no.toStdString());
   if( QFileInfo(filename).exists() ) return filename;
-  
+
   // If nothing pad the number and check
   QString padded_no = run_no.rightJustified(8, '0', true);
   filename = directory.absoluteFilePath(prefix + padded_no + ext);
+  g_log.debug("Not found. Checking padded name " + filename.toStdString());
   if( QFileInfo(filename).exists() ) return filename;
   else return QString();
 }
@@ -588,13 +617,13 @@ QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & 
 QString SANSRunWindow::createMaskString() const
 {
   QString maskstring;
-  int nrows = m_uiForm.def_mask_table->rowCount();
+  int nrows = m_uiForm.mask_table->rowCount();
   for( int r = 0; r < nrows; ++r )
   {
-    QString type = m_uiForm.def_mask_table->item(r, 1)->text();
-    if( type == "Shape" ) continue;
+    QString type = m_uiForm.mask_table->item(r, 1)->text();
+    if( type == "infinite-cylinder" ) continue;
     
-    maskstring += m_uiForm.def_mask_table->item(r, 1)->text() + ",";
+    maskstring += m_uiForm.mask_table->item(r, 1)->text() + ",";
   }
   maskstring += m_uiForm.user_maskEdit->text();
   return maskstring;
@@ -718,12 +747,18 @@ void SANSRunWindow::handleLoadButtonClick()
   m_data_dir = work_dir;
 
   // Check if we have loaded the data_file
-  if( !isUserFileLoaded() && !loadUserFile() )
+  if( !isUserFileLoaded() )
+  {
+    showInformationBox("Please load the relevant user file.");
+    return;
+  }
+  
+  if( !loadUserFile() )
   {
     showInformationBox("Error loading user file '" + m_uiForm.userfile_edit->text() + "',  cannot continue.");
     return;
   }
-  
+
   //A load command for each box if there is anything in it and it has not already been loaded
   QMapIterator<int, QLineEdit*> itr(m_run_no_boxes);
   bool data_loaded(false);
@@ -748,12 +783,14 @@ void SANSRunWindow::handleLoadButtonClick()
       continue;
     }
     //Load the file. This checks for required padding of zeros etc
-    int n_periods = runLoadData(work_dir, run_no, m_uiForm.file_opt->currentText(), ws_name);
+    int n_periods = runLoadData(work_dir, run_no, 
+				m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString(), ws_name);
     // If this is zero then something went wrong with trying to load a file
     if( n_periods == 0 ) 
     {
       m_workspace_names.insert(key, "");
-      showInformationBox("Error: Cannot load run " + run_no + ".\nPlease check that the correct instrument and file extension are selected");
+      showInformationBox("Error: Cannot load run " + run_no 
+			 + ".\nPlease check that the correct instrument and file extension are selected");
       //Bail out completely now
       return;
     }
@@ -828,6 +865,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   QString py_code = m_pycode_loqreduce;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
+  py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
+  py_code.replace("|SPECMAX|", m_uiForm.bank_spec_max->text());
 
   py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
   py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
@@ -836,8 +875,14 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   py_code.replace("|DIRECTSAMPLE|", m_workspace_names.value(6));
 
   // Limit replacement
-  py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
-  py_code.replace("|RADIUSMAX|", m_uiForm.rad_max->text());
+  QString radius = m_uiForm.rad_min->text();
+  if( radius.isEmpty() ) radius = "-1.0";
+  py_code.replace("|RADIUSMIN|", radius);
+
+  radius = m_uiForm.rad_max->text();
+  if( radius.isEmpty() ) radius = "-1.0";
+  py_code.replace("|RADIUSMAX|", radius);
+
   py_code.replace("|XBEAM|", m_uiForm.beam_x->text());
   py_code.replace("|YBEAM|", m_uiForm.beam_y->text());
   py_code.replace("|WAVMIN|", m_uiForm.wav_min->text());
@@ -878,6 +923,17 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   py_code.replace("|ANALYSISTYPE|", type);
   py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
   
+
+  QFile tmp("LOQ_Code_to_Run.py");
+  if (tmp.open(QIODevice::WriteOnly | QIODevice::Text))
+  {
+      QTextStream out(&tmp);
+      out << py_code;
+      tmp.close();
+  }
+         
+
+
   //Execute the code
   runPythonCode(py_code);
   //Reenable stuff
@@ -932,9 +988,15 @@ void SANSRunWindow::handleShowMaskButtonClick()
   QString py_code = m_pycode_viewmask;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
-  //Shape mask defaults
-  py_code.replace("|RADIUSMIN|", m_uiForm.rad_min->text());
-  py_code.replace("|RADIUSMAX|", m_uiForm.rad_max->text());
+
+  // Shape mask if applicable
+  QString radius = m_uiForm.rad_min->text();
+  if( radius.isEmpty() ) radius = "-1.0";
+  py_code.replace("|RADIUSMIN|", radius);
+
+  radius = m_uiForm.rad_max->text();
+  if( radius.isEmpty() ) radius = "-1.0";
+  py_code.replace("|RADIUSMAX|", radius);
 
   //Other masks
   py_code.replace("|MASKLIST|", createMaskString());
@@ -950,6 +1012,26 @@ void SANSRunWindow::runBoxEdited()
 }
 
 /**
+ * A different instrument has been selected
+ */
+void SANSRunWindow::handleInstrumentChange(int index)
+{
+  if( index == 0 ) 
+  {
+    m_uiForm.monitor_spec->setText("2");
+    m_uiForm.bank_spec_min->setText("3");
+    m_uiForm.bank_spec_max->setText("16386"); 
+  }
+  else
+  { 
+    m_uiForm.monitor_spec->setText("73730");
+    m_uiForm.bank_spec_min->setText("1");
+    m_uiForm.bank_spec_max->setText("36864");
+  }
+  m_cfg_loaded = false;
+}
+
+/**
  * Run the appropriate command to load the data
  * @param work_dir The directory
  * @param run_no The run number
@@ -959,11 +1041,12 @@ void SANSRunWindow::runBoxEdited()
  */
 int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no, const QString & ext, const QString & workspace)  
 {
-  QString filepath = getRawFilePath(work_dir, run_no, "." + ext);
+  QString filepath = getRawFilePath(work_dir, run_no, ext);
   if( filepath.isEmpty() )
   {   
     return 0;
   }
+  g_log.debug("Attempting to load " + filepath.toStdString());
   bool raw_file(true);
   if( ext.startsWith('n', Qt::CaseInsensitive) )
   {
@@ -1020,6 +1103,14 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
 void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf)
 {
   QString wksp_name = QString::fromStdString(p_dnf->object_name());
-  m_run_changed = true;
+  QHashIterator<int, QString> itr(m_workspace_names);
+  int names_count = m_workspace_names.count();
+  for( int key = 0; key < names_count; ++key )
+  {
+    if( wksp_name == m_workspace_names.value(key) )
+    {
+      m_run_changed = true;
+      return;
+    }
+  }
 }
-	

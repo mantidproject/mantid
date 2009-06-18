@@ -3,17 +3,7 @@
 # common to the LOQ scripts
 ##############################################
 from mantidsimple import *
-
-# Determine the detector numbers to mask out
-def detBlock(startID, ydim, xdim, stripdim = 128):
-    '''Compile a list of detector IDs for rectangular block of size xdim by ydim'''
-    output = ""
-    for j in range(0, xdim):
-        for i in range(0, ydim):
-            output += str(startID + i + (stripdim*j)) + ","
-    
-    output = output.rstrip(",")
-    return output
+import math
 
 # Mask a cylinder, specifying the algebra to use
 def MaskWithCylinder(workspace, radius, algebra):
@@ -37,62 +27,59 @@ def MaskOutsideCylinder(workspace, radius):
     '''Mask out the outside of a cylinder or specified radius'''
     MaskWithCylinder(workspace, radius, '#')
 
-# Convert a mask string from the GUI to a list of detector numbers
-def ConvertToDetList(maskstring,firstdet,dimension):
-    '''Compile detector ID list'''
+# Work out the spectra IDs for block of detectors
+def spectrumBlock(start_spec, ydim, xdim, strip_dim):
+    '''Compile a list of spectrum IDs for rectangular block of size xdim by ydim'''
+    output = ''
+    for y in range(0, ydim):
+        for x in range(0, xdim):
+            output += str(start_spec + x + (y*strip_dim)) + ','
+    output = output.rstrip(",")
+    return output
+
+# Convert a mask string to a spectra list
+def ConvertToSpecList(maskstring, firstspec, dimension):
+    '''Compile spectra ID list'''
     masklist = maskstring.split(',')
-    detlist = ''
+    speclist = ''
     for x in masklist:
         x = x.lower()
         if '>' in x:
             pieces = x.split('>')
-            low = int(pieces[0].lstrip('hv'))
-            upp = int(pieces[1].lstrip('hv'))
+            low = int(pieces[0].lstrip('hvs'))
+            upp = int(pieces[1].lstrip('hvs'))
             if 'h' in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                detlist += detBlock(firstdet + low*dimension,dimension,nstrips,dimension) + ','
+                speclist += spectrumBlock(firstspec + low*dimension, nstrips, dimension, dimension) + ','
             elif 'v' in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                detlist += detBlock(firstdet + low,nstrips,dimension,dimension) + ','
+                speclist += spectrumBlock(firstspec + low, dimension, nstrips, dimension) + ','
             else:
                 for i in range(low, upp + 1):
-                    detlist += str(i) + ','
+                    speclist += str(i) + ','
         elif 'h' in x:
             low = int(x.lstrip('h'))
-            detlist += detBlock(firstdet + low*dimension,dimension, 1, dimension) + ','
+            speclist += spectrumBlock(firstspec + low*dimension, 1, dimension, dimension) + ','
         elif 'v' in x:
-            detlist += detBlock(firstdet + int(x.lstrip('v')), 1, dimension, dimension) + ','
+            speclist += spectrumBlock(firstspec + int(x.lstrip('v')), dimension, 1, dimension) + ','
         else:
-            detlist += x + ','
+            speclist += x.lstrip('s') + ','
     
-    return detlist
+    return speclist
 
 # Mask by detector number
-def MaskByDetNumber(workspace, detlist):
-    detlist = detlist.rstrip(',')
-    if detlist == '':
+def MaskBySpecNumber(workspace, speclist):
+    speclist = speclist.rstrip(',')
+    if speclist == '':
         return
-    MaskDetectors(workspace, DetectorList = detlist)
+    MaskDetectors(workspace, SpectraList = speclist)
 
-# Isolate the monitor data
-def GetMonitor(inputWS, outputWS, monitorid):
-    '''Isolate the monitor data'''
-    #  Account for Mantid's off by one storage
-    CropWorkspace(inputWS, OutputWorkspace=outputWS, StartSpectrum=str(monitorid - 1), EndSpectrum=str(monitorid - 1))
-    RemoveBins(outputWS,outputWS,"19900","20500",Interpolation="Linear")
-    FlatBackground(outputWS,outputWS,"0","31000","39000")
-    
-# Isolate small angle bank
-def GetMainBank(inputWS, startid, endid, outputWS):
-    '''Isolate the small angle bank data'''
-    #  Account for Mantid's off by one storage
-    CropWorkspace(inputWS, OutputWorkspace=outputWS, StartSpectrum=str(startid - 1),EndSpectrum=str(endid - 1))
 
 # Setup the transmission data
-def SetupTransmissionData(inputWS, wavbining):
+def SetupTransmissionData(inputWS, spec_list, fitmon_start, fitmon_end, backmon_start, backmon_end, wavbining):
     tmpWS = inputWS + '_tmp'
-    RemoveBins(inputWS,tmpWS,"19900","20500",Interpolation="Linear")
-    FlatBackground(tmpWS,tmpWS,"1,2","31000","39000")
+    RemoveBins(inputWS,tmpWS, fitmon_start, fitmon_end,Interpolation="Linear")
+    FlatBackground(tmpWS,tmpWS, spec_list, backmon_start, backmon_end)
     ConvertUnits(tmpWS,tmpWS,"Wavelength")
     Rebin(tmpWS, tmpWS, wavbining)
     return tmpWS
@@ -100,7 +87,7 @@ def SetupTransmissionData(inputWS, wavbining):
 # Correct of for the volume of the sample/can
 def ScaleByVolume(inputWS, factor):
     thickness = 1.0
-    area = 3.14159265*8*8/4
+    area = math.pi*8.*8./4
     correction = factor/(thickness*area)
     
     CreateSingleValuedWorkspace("scalar",str(correction),"0.0")

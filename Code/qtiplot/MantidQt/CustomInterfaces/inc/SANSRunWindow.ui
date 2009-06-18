@@ -926,7 +926,7 @@
         <rect>
          <x>9</x>
          <y>-1</y>
-         <width>493</width>
+         <width>470</width>
          <height>173</height>
         </rect>
        </property>
@@ -1127,20 +1127,20 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_5" >
        <property name="geometry" >
         <rect>
-         <x>507</x>
+         <x>489</x>
          <y>-1</y>
-         <width>239</width>
-         <height>127</height>
+         <width>257</width>
+         <height>184</height>
         </rect>
        </property>
        <property name="title" >
         <string>Spectra Details</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3" >
-        <item row="2" column="1" >
-         <widget class="QLineEdit" name="spec_min" />
+        <item row="4" column="1" >
+         <widget class="QLineEdit" name="all_spec_min" />
         </item>
-        <item row="1" column="1" >
+        <item row="2" column="1" >
          <widget class="QLabel" name="label_5" >
           <property name="text" >
            <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
@@ -1154,7 +1154,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="1" column="2" >
+        <item row="2" column="2" >
          <widget class="QLabel" name="label_9" >
           <property name="text" >
            <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
@@ -1168,48 +1168,61 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="2" column="2" >
-         <widget class="QLineEdit" name="spec_max" />
+        <item row="4" column="2" >
+         <widget class="QLineEdit" name="all_spec_max" />
         </item>
-        <item row="2" column="0" >
+        <item row="4" column="0" >
          <widget class="QLabel" name="label_22" >
           <property name="text" >
-           <string>Spectra Nos</string>
+           <string>All Spectra</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0" >
+        <item row="5" column="0" >
          <widget class="QLabel" name="label_24" >
           <property name="text" >
            <string>T-O-F</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1" >
+        <item row="5" column="1" >
          <widget class="QLineEdit" name="tof_min" />
         </item>
-        <item row="3" column="2" >
+        <item row="5" column="2" >
          <widget class="QLineEdit" name="tof_max" />
         </item>
         <item row="0" column="0" >
          <widget class="QLabel" name="label_41" >
           <property name="text" >
-           <string>Monitor Spectrum</string>
+           <string>Monitor Spec.</string>
           </property>
          </widget>
         </item>
         <item row="0" column="1" >
          <widget class="QLineEdit" name="monitor_spec" />
         </item>
+        <item row="3" column="0" >
+         <widget class="QLabel" name="label_43" >
+          <property name="text" >
+           <string>Bank Spectra</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" >
+         <widget class="QLineEdit" name="bank_spec_min" />
+        </item>
+        <item row="3" column="2" >
+         <widget class="QLineEdit" name="bank_spec_max" />
+        </item>
        </layout>
       </widget>
       <widget class="QGroupBox" name="groupBox_6" >
        <property name="geometry" >
         <rect>
-         <x>508</x>
-         <y>141</y>
-         <width>239</width>
-         <height>182</height>
+         <x>489</x>
+         <y>186</y>
+         <width>258</width>
+         <height>144</height>
         </rect>
        </property>
        <property name="title" >
@@ -1251,9 +1264,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_7" >
        <property name="geometry" >
         <rect>
-         <x>195</x>
-         <y>193</y>
-         <width>202</width>
+         <x>179</x>
+         <y>191</y>
+         <width>184</width>
          <height>88</height>
         </rect>
        </property>
@@ -1315,9 +1328,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_8" >
        <property name="geometry" >
         <rect>
-         <x>9</x>
-         <y>192</y>
-         <width>182</width>
+         <x>16</x>
+         <y>191</y>
+         <width>148</width>
          <height>88</height>
         </rect>
        </property>
@@ -1343,8 +1356,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_9" >
        <property name="geometry" >
         <rect>
-         <x>406</x>
-         <y>192</y>
+         <x>376</x>
+         <y>190</y>
          <width>97</width>
          <height>88</height>
         </rect>
@@ -1611,7 +1624,7 @@ p, li { white-space: pre-wrap; }
        </property>
        <layout class="QVBoxLayout" name="verticalLayout" >
         <item>
-         <widget class="QTableWidget" name="def_mask_table" >
+         <widget class="QTableWidget" name="mask_table" >
           <property name="editTriggers" >
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
@@ -1711,8 +1724,8 @@ p, li { white-space: pre-wrap; }
   <tabstop>qy_max</tabstop>
   <tabstop>qy_dqy</tabstop>
   <tabstop>qy_dqy_opt</tabstop>
-  <tabstop>spec_min</tabstop>
-  <tabstop>spec_max</tabstop>
+  <tabstop>all_spec_min</tabstop>
+  <tabstop>all_spec_max</tabstop>
   <tabstop>tof_min</tabstop>
   <tabstop>tof_max</tabstop>
   <tabstop>beam_x</tabstop>
@@ -1724,7 +1737,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>flat_file</tabstop>
   <tabstop>showMaskBtn</tabstop>
   <tabstop>user_maskEdit</tabstop>
-  <tabstop>def_mask_table</tabstop>
+  <tabstop>mask_table</tabstop>
  </tabstops>
  <resources/>
  <connections/>
