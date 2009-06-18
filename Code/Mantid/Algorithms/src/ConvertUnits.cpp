@@ -472,7 +472,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     // Now the indirect instruments. In this case we could want to keep a different
     // number of bins in each spectrum because, in general L2 is different for each
     // one.
-    // This, we first need to loop to find largest 'good' range
+    // Thus, we first need to loop to find largest 'good' range
     std::vector<MantidVec::difference_type> lastBins(numSpec);
     int maxBins = 0;
     for (int i = 0; i < numSpec; ++i)
@@ -483,7 +483,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
       lastBins[i] = bins;
       if (bins > maxBins) maxBins = bins;
     }
-    g_log.error() << maxBins << std::endl;
+    g_log.debug() << maxBins << std::endl;
     // Now create an output workspace large enough for the longest 'good' range
     result = WorkspaceFactory::Instance().create(workspace,numSpec,maxBins,maxBins-1);
     if (specAxis) outAxis = result->getAxis(1);
@@ -503,8 +503,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
         Ynew[k] = Y[k];
         Enew[k] = E[k];
       }
-      ++k;
       Xnew[k] = X[k];
+      ++k;
       // If necessary, add on some fake values to the end of the X array (Y&E will be zero)
       if (k < maxBins)
       {
