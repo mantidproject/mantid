@@ -359,6 +359,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ReplaceSpecialValues.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SimpleIntegration.cpp"
 				>
 			</File>
@@ -706,6 +710,14 @@
 			</File>
 			<File
 				RelativePath=".\test\RemoveBinsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ReplaceSpecialValues.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ReplaceSpecialValuesTest.h"
 				>
 			</File>
 			<File
