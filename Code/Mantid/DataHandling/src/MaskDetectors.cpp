@@ -113,10 +113,11 @@ void MaskDetectors::exec()
     if (!detsMasked)
     {
       // In this case, mask all detectors contributing to spectrum
-      const std::vector<int> dets = specMap.getDetectors(*it);
+      int spectrum_number = WS->getAxis(1)->spectraNo(*it);
+      const std::vector<int> dets = specMap.getDetectors(spectrum_number);
       for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
-        if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
+        if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*iter).get()) )
         {
           pmap->addBool(det,"masked",true);
         }        
