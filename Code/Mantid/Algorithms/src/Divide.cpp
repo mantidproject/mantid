@@ -63,7 +63,7 @@ namespace Mantid
         if (fabs(Y)>1.0e-12)
         {
           const double lhsFactor = (lhsE[j]<1.0e-12 || fabs(leftY)<1.0e-12) ? 0.0 : pow((lhsE[j]/leftY),2);
-          EOut[j] = Y * sqrt(lhsFactor+rhsFactor);
+          EOut[j] = std::abs(Y) * sqrt(lhsFactor+rhsFactor);
         }
 
         // Copy result in
