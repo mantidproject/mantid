@@ -70,7 +70,19 @@ namespace Mantid
 	for( Poco::DirectoryIterator itr(scripts_dir); itr != iend; ++itr )
 	{
 	  Poco::File entry(itr->path());
-	  if( entry.isDirectory() )
+	  bool is_dir(false);
+	  // This avoids an error where the directory iterator gives a path to a file that Poco::File can't actually access.
+	  // This happened when I had emacs open with an unsaved file which creates a hidden symbolic link to a strange location!
+	  // that Poco can't seem to handle. - M. Gigg
+	  try
+	  {
+	    is_dir = entry.isDirectory();
+	  }
+	  catch( Poco::FileNotFoundException &e)
+	  {
+	    continue;
+	  }
+	  if( is_dir && !entry.isHidden() )
 	  {
 	    module << "sys.path.append('" << sanitizePath(itr->path()) << "')\n";
 	  }
