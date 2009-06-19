@@ -39,7 +39,7 @@ namespace Mantid
           //  Multiply that proportional error by c to get the actual standard deviation Sc.
           const double lhsFactor = (lhsE[j]<1.0e-12|| fabs(leftY)<1.0e-12) ? 0.0 : pow((lhsE[j]/leftY),2);
           const double rhsFactor = rhsE[j]<1.0e-12 ? 0.0 : pow((rhsE[j]/rightY),2);
-          EOut[j] = Y * sqrt(lhsFactor+rhsFactor);
+          EOut[j] = std::abs(Y) * sqrt(lhsFactor+rhsFactor);
         }
 
         // Now store the result
@@ -70,6 +70,6 @@ namespace Mantid
         YOut[j] = Y;
       }
     }
-    
+
   } // namespace Algorithms
 } // namespace Mantid
