@@ -12,6 +12,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadRaw.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -130,6 +131,8 @@ public:
     // Just check that an input bin boundary is unchanged
     std::vector<double> xIn = input2D->dataX(66);
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
+
+    AnalysisDataService::Instance().remove("outputSpace");
   }
 
   void testConvertQuickly()
@@ -147,6 +150,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("quickOut2")) )
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "Energy")
     TS_ASSERT_DELTA( output->dataX(1)[1], 10.10, 0.01 )
+
+    AnalysisDataService::Instance().remove("quickOut2");
   }
 
   void testConvertQuicklyCommonBins()
@@ -171,6 +176,54 @@ public:
     {
       TS_ASSERT_EQUALS( it->X(), 2.0*M_PI )
     }
+
+    AnalysisDataService::Instance().remove("quickIn");
+    AnalysisDataService::Instance().remove("quickOut");
+  }
+
+  void testDeltaE()
+  {
+    IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
+    loader->initialize();
+    loader->setPropertyValue("Filename", "../../../../Test/Data/MAR11060.RAW");
+    loader->setPropertyValue("spectrum_list", "900");
+    std::string ws = "mar";
+    loader->setPropertyValue("OutputWorkspace", ws);
+    TS_ASSERT_THROWS_NOTHING( loader->execute() )
+    TS_ASSERT( loader->isExecuted() )
+
+    ConvertUnits conv;
+    conv.initialize();
+    conv.setPropertyValue("InputWorkspace",ws);
+    std::string outputSpace = "outWorkspace";
+    conv.setPropertyValue("OutputWorkspace",outputSpace);
+    conv.setPropertyValue("Target","DeltaE");
+    conv.setPropertyValue("Emode","1");
+    conv.setPropertyValue("Efixed","12");
+    conv.execute();
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE")
+    TS_ASSERT_EQUALS( output->blocksize(), 472 )
+
+    AnalysisDataService::Instance().remove(outputSpace);
+
+    ConvertUnits conv2;
+    conv2.initialize();
+    conv2.setPropertyValue("InputWorkspace",ws);
+    conv.setPropertyValue("OutputWorkspace",outputSpace);
+    conv.setPropertyValue("Target","DeltaE_inWavenumber");
+    conv.setPropertyValue("Emode","2");
+    conv.setPropertyValue("Efixed","10");
+    conv.execute();
+
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) )
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber")
+    TS_ASSERT_EQUALS( output->blocksize(), 965 )
+
+    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().remove(outputSpace);
   }
 
 private:
