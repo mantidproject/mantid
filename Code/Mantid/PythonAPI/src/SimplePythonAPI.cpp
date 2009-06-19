@@ -82,7 +82,7 @@ namespace Mantid
 	  {
 	    continue;
 	  }
-	  if( is_dir && !entry.isHidden() )
+	  if( is_dir )
 	  {
 	    module << "sys.path.append('" << sanitizePath(itr->path()) << "')\n";
 	  }
