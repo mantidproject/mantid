@@ -138,10 +138,10 @@ void CrossCorrelate::exec()
 	double refMeanE2=std::accumulate(refE.begin(),refE.end(),0.0,VectorHelper::SumSquares<double>());
 	refMean/=static_cast<double>(nY);
 	refMeanE2/=static_cast<double>(nY*nY);
-    mess.str("");
-    mess << "refMeanE2" << refMeanE2;
-    g_log.information(mess.str());
-    std::vector<double>::iterator itY=refY.begin();
+  mess.str("");
+  mess << "refMeanE2" << refMeanE2;
+  g_log.information(mess.str());
+  std::vector<double>::iterator itY=refY.begin();
 	std::vector<double>::iterator itE=refE.begin();
 
 	double refVar=0.0, refVarE=0.0;
@@ -151,7 +151,7 @@ void CrossCorrelate::exec()
 		(*itE)=(*itE)*(*itE)+refMeanE2; // New error squared
 		double t=(*itY)*(*itY);
 		refVar+=t;
-		refVarE+=4.0*t*(*itE)*(*itE);
+		refVarE+=4.0*t*(*itE);
 	}
 
 	double refNorm=1.0/sqrt(refVar);
@@ -201,7 +201,7 @@ void CrossCorrelate::exec()
 			(*itE)=(*itE)*(*itE)+tempMeanE2; // New error squared
 			double t=(*itY)*(*itY);
 			tempVar+=t;
-			tempVarE+=4.0*t*(*itE)*(*itE);
+			tempVarE+=4.0*t*(*itE);
 		}
 
 		// Calculate the normalisation constant
@@ -209,6 +209,10 @@ void CrossCorrelate::exec()
 		double tempNormE=0.5*pow(tempNorm,3)*sqrt(tempVarE);
 		double normalisation=refNorm*tempNorm;
 		double normalisationE2=pow((refNorm*tempNormE),2)+pow((tempNorm*refNormE),2);
+		mess.str("");
+		mess << "Norm: " << normalisation << " Error : " << sqrt(normalisationE2) << std::endl;
+		g_log.information(mess.str());
+		mess.str("");
 		// Get reference to the ouput spectrum
 		std::vector<double>& outY=out->dataY(i);
 		std::vector<double>& outE=out->dataE(i);
@@ -234,7 +238,7 @@ void CrossCorrelate::exec()
 					yE=refE[j+kp];
 				}
 				val+=(x*y);
-				err2+=pow((x*yE),2)+pow((y*xE),2);
+				err2+=x*x*yE+y*y*xE;
 			}
 			outY[k+nY-2]=(val*normalisation);
 			outE[k+nY-2]=sqrt(val*val*normalisationE2+normalisation*normalisation*err2);
