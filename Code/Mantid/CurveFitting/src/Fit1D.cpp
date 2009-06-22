@@ -45,7 +45,7 @@ struct FitData {
   Fit1D* fit1D;
   /// Needed to use the simplex algorithm within the gsl least-squared framework.
   /// Will store output function values from gsl_f
-  double * forSimplexLSwrap; 
+  double * forSimplexLSwrap;
 };
 
 /** Fit1D GSL function wrapper
@@ -56,10 +56,10 @@ struct FitData {
 */
 static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 
-    ((struct FitData *)params)->fit1D->function (x->data, f->data, 
-                   ((struct FitData *)params)->X, 
-                   ((struct FitData *)params)->Y, 
-                   ((struct FitData *)params)->sigmaData, 
+    ((struct FitData *)params)->fit1D->function (x->data, f->data,
+                   ((struct FitData *)params)->X,
+                   ((struct FitData *)params)->Y,
+                   ((struct FitData *)params)->sigmaData,
                    ((struct FitData *)params)->n);
 
 
@@ -74,10 +74,10 @@ static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 */
 static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
 
-    ((struct FitData *)params)->fit1D->functionDeriv (x->data, J->data, 
-                   ((struct FitData *)params)->X, 
-                   ((struct FitData *)params)->Y, 
-                   ((struct FitData *)params)->sigmaData, 
+    ((struct FitData *)params)->fit1D->functionDeriv (x->data, J->data,
+                   ((struct FitData *)params)->X,
+                   ((struct FitData *)params)->Y,
+                   ((struct FitData *)params)->sigmaData,
                    ((struct FitData *)params)->n);
 
 
@@ -108,12 +108,12 @@ static int gsl_fdf(const gsl_vector * x, void *params,
 static double gsl_costFunction(const gsl_vector * x, void *params)
 {
   double * l_forSimplexLSwrap = ((struct FitData *)params)->forSimplexLSwrap;
-    
-  ((struct FitData *)params)->fit1D->function (x->data, 
-                   l_forSimplexLSwrap, 
-                   ((struct FitData *)params)->X, 
-                   ((struct FitData *)params)->Y, 
-                   ((struct FitData *)params)->sigmaData, 
+
+  ((struct FitData *)params)->fit1D->function (x->data,
+                   l_forSimplexLSwrap,
+                   ((struct FitData *)params)->X,
+                   ((struct FitData *)params)->Y,
+                   ((struct FitData *)params)->sigmaData,
                    ((struct FitData *)params)->n);
 
     double retVal = 0.0;
@@ -121,7 +121,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
     for (unsigned int i = 0; i < ((struct FitData *)params)->n; i++)
       retVal += l_forSimplexLSwrap[i]*l_forSimplexLSwrap[i];
 
-    
+
     return retVal;
 }
 
@@ -135,7 +135,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 * @param yErrors Errors (standard deviations) on yValues
 * @param nData Number of data points
  */
-void Fit1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData) 
+void Fit1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
 {
   throw Exception::NotImplementedError("No derivative function provided");
 }
@@ -221,14 +221,14 @@ void Fit1D::exec()
 
   //Read in the fitting range data that we were sent
   double startX = getProperty("StartX");
-  double endX = getProperty("EndX"); 
+  double endX = getProperty("EndX");
   //check if the values had been set, otherwise use defaults
   if ( isEmpty( startX ) )
   {
     startX = XValues.front();
     modifyStartOfRange(startX); // does nothing by default but derived class may provide a more intelligent value
   }
-  if ( isEmpty( endX ) ) 
+  if ( isEmpty( endX ) )
   {
     endX = XValues.back();
     modifyEndOfRange(endX); // does nothing by default but derived class may previde a more intelligent value
@@ -265,7 +265,7 @@ void Fit1D::exec()
 
   l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19.
                               // The data includes both of these array elements
-  l_data.p = m_parameterNames.size(); 
+  l_data.p = m_parameterNames.size();
   l_data.X = new double[l_data.n];
   l_data.Y = new double[l_data.n];
   l_data.sigmaData = new double[l_data.n];
@@ -351,7 +351,7 @@ void Fit1D::exec()
   int iter = 0;
   int status;
   double size; // for simplex algorithm
-  double finalCostFuncVal; 
+  double finalCostFuncVal;
   double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
 
   // Standard least-squares used if derivative function defined otherwise simplex
@@ -412,7 +412,7 @@ void Fit1D::exec()
     "Chi^2/DoF = " << finalCostFuncVal << "\n";
   for (size_t i = 0; i < l_data.p; i++)
     g_log.information() << m_parameterNames[i] << " = " << m_fittedParameter[i] << "  ";
-  
+
 
   // also output summary to properties
 
@@ -436,10 +436,17 @@ void Fit1D::exec()
   else
   {
     gsl_vector_free(simplexStepSize);
-    gsl_multimin_fminimizer_free(simplexMinimizer);  
+    gsl_multimin_fminimizer_free(simplexMinimizer);
   }
 
   return;
+}
+
+double Fit1D::getFittedParam(const unsigned int i) const
+{
+	if (i>=m_fittedParameter.size())
+		throw std::range_error("Fitted parameter out of range");
+	return m_fittedParameter[i];
 }
 
 

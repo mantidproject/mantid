@@ -50,26 +50,26 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "CurveFitting";}
 
-      /// Function you want to least-square fit to 
+      /// Function you want to least-square fit to
       virtual void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData) = 0;
-      /// Derivatives of function with respect to parameters you are trying to fit 
+      /// Derivatives of function with respect to parameters you are trying to fit
       virtual void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
-
+      double getFittedParam(const unsigned int) const;
     protected:
       // Overridden Algorithm methods
       void init();
       void exec();
 
-      /// Option for providing intelligent range starting value based e.g. on the user input parameter values 
+      /// Option for providing intelligent range starting value based e.g. on the user input parameter values
       virtual void modifyStartOfRange(double& startX) {}
-      /// Option for providing intelligent range finishing value based e.g. on the user input parameter values 
+      /// Option for providing intelligent range finishing value based e.g. on the user input parameter values
       virtual void modifyEndOfRange(double& endX) {}
 
       /// Declare parameters specific to fitting function
       virtual void declareParameters() = 0;
 
-      /// Overload this function if the actual fitted parameters are different from 
-      /// those the user specifies. 
+      /// Overload this function if the actual fitted parameters are different from
+      /// those the user specifies.
       virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter) {}
 
       /// If modifyInitialFittedParameters is overloaded this method must also be overloaded
@@ -77,11 +77,11 @@ namespace Mantid
       virtual void modifyFinalFittedParameters(std::vector<double>& fittedParameter) {}
 
       /// Holds a copy of the value of the parameters that are actually least-squared fitted.
-      std::vector<double> m_fittedParameter; 
+      std::vector<double> m_fittedParameter;
 
       /// Holds a copy of the names of the fitting parameters
       std::vector<std::string> m_parameterNames;
-     
+
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
