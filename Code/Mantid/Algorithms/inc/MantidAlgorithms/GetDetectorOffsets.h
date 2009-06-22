@@ -88,7 +88,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  void fitSpectra(const int);
+  double fitSpectra(const int);
   void retrieveProperties();
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
