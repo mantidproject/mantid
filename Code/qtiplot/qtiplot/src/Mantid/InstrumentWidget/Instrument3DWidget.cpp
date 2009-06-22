@@ -76,7 +76,6 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
 	int iDecId;
 	for(std::set<QRgb>::const_iterator it=pickedColors.begin();it!=pickedColors.end();it++)
 	{
-
 		iDecId=mInstrumentActor->getDetectorIDFromColor(qRed((*it))*65536+qGreen((*it))*256+qBlue((*it)));
 		if(iDecId!=-1)
 		{
@@ -119,7 +118,6 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 		emit actionDetectorHighlighted(-1,-1,-1);
 		return;
 	}
-
 	int iDecId=mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536+qGreen(pickedColor)*256+qBlue(pickedColor));
 	if(iDecId!=-1)
 	{
@@ -217,8 +215,6 @@ std::vector<int> Instrument3DWidget::getDetectorIDList() const
 	std::vector<int> idDecVec;
 	if(mInstrumentActor)
 		mInstrumentActor->getDectorIDList(idDecVec);
-	else
-		std::cout<<"mInstrument Not initialized"<<std::endl;
 	return idDecVec;
 }
 
@@ -288,6 +284,7 @@ void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const 
 		  cIndex=(noOfColors-1);
 		}
 		iColorList.push_back(colorMap.getColor(cIndex));
+
 	} // Looping through the dectors/Actors list
 	mInstrumentActor->setDetectorColors(iColorList);
 }
@@ -375,8 +372,7 @@ void Instrument3DWidget::AssignColors()
 	std::vector<int> histIndexList = this->getSpectraIndexList(detectorList);
 	std::vector<double> values;
 	double minval,maxval;
-	MatrixWorkspace_sptr output;
-    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
+	MatrixWorkspace_sptr output = output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 	switch(mDataMapping)
 	{
 	case SINGLE_BIN:
@@ -390,7 +386,6 @@ void Instrument3DWidget::AssignColors()
 		DataMinValue=minval;
 	if(DataMaxValue==DBL_MAX)
 		DataMaxValue=maxval;
-	//std::cout<<"Min and Max Values: "<<minval<<" "<<maxval<<std::endl;
 	this->setColorForDetectors(DataMinValue,DataMaxValue,values,this->mColorMap);
 	mInstrumentActor->refresh();
 //	updateGL();

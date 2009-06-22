@@ -284,22 +284,26 @@ using namespace Geometry;
 	 */
 	int CompAssemblyActor::findDectorIDUsingColor(int rgb)
 	{
-		if(rgb<mChildObjCompActors.size())
-		{
-			const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb])->getObjComponent());
-			if(iDec!=boost::shared_ptr<Mantid::Geometry::IDetector>())
-				return iDec->getID();
-			std::cout<<"Error:::: non detector is drawn"<<std::endl;
-		}
-		rgb-=mChildObjCompActors.size();
-		for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
-		{
-			if(rgb<(*iAssem)->getNumberOfDetectors())
-				return (*iAssem)->findDectorIDUsingColor(rgb);
-			rgb-=(*iAssem)->getNumberOfDetectors();
-		}
-		std::cout<<"Error:::: asked for a non existent color"<<std::endl;
-		return -1;
+	  size_t n_comp_actors = mChildObjCompActors.size();
+	  if(rgb > 0 && rgb <= n_comp_actors)
+	  {
+	    const boost::shared_ptr<Mantid::Geometry::IDetector>  iDec= boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((mChildObjCompActors[rgb - 1])->getObjComponent());
+	    if(iDec!=boost::shared_ptr<Mantid::Geometry::IDetector>())
+	    {
+	      return iDec->getID();
+	    }
+	  }
+	  rgb -= n_comp_actors;
+ 
+	  for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
+	  {
+	    if(rgb > 0 && rgb <= (*iAssem)->getNumberOfDetectors() )
+	    {
+	      return (*iAssem)->findDectorIDUsingColor(rgb);
+	    }
+	    rgb -= (*iAssem)->getNumberOfDetectors();
+	  }
+	  return -1;
 	}
 
   /**

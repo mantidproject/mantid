@@ -78,15 +78,7 @@ public slots:
 	void setViewDirectionXNegative();
 	void setViewDirectionYNegative();
 	void setViewDirectionZNegative();
-	void pickedID(int id)
-	{
-		std::cout<<"ID of the detector selected "<<id<<std::endl;
-	}
 
-	void pickedSpectra(int id)
-	{
-		std::cout<<"Spectra Index selected "<<id<<std::endl;
-	}
 signals:
 	void actionDetectorSelected(int);
 	void actionSpectraSelected(int);

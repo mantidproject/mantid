@@ -25,7 +25,6 @@ ObjComponentActor::~ObjComponentActor()
  */
 void ObjComponentActor::define()
 {
-	//std::cout<<"Define ObjComponentActor: "<<mObjComp->getName()<<std::endl;
 	glPushMatrix();
 	V3D pos  =mObjComp->getPos();
 	Quat rot =mObjComp->getRotation();

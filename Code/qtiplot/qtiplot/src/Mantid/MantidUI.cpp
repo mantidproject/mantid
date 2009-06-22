@@ -715,7 +715,7 @@ void MantidUI::setDependency(MdiSubWindow* first,MdiSubWindow* second)
 // Called in response to closedWindow(...) signal from a window with dependecies
 void MantidUI::closeDependents(MdiSubWindow* w)
 {
-    std::cerr<<"Hi\n";
+  //    std::cerr<<"Hi\n";
 }
 
 void MantidUI::getSelectedAlgorithm(QString& algName, int& version)

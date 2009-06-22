@@ -100,8 +100,6 @@ void GLGroupPickBox::mouseReleaseEvent ( QMouseEvent * event )
 		mPickingActive=false;
 		mBoxEndPtX=event->x();
 		mBoxEndPtY=event->y();	
-		//for testing 
-		//mPickImage.copy(mBoxStartPtX,mBoxStartPtY,mBoxEndPtX-mBoxStartPtX,mBoxEndPtY-mBoxStartPtY).save("C:\\outputpart.ppm","PPM");
 		//Lookup in the actors collection which have same pixel color value as the
 		//pixels in the box, collect unique colors
 		std::set<QRgb> colorSet;

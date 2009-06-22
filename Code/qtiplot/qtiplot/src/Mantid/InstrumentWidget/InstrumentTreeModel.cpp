@@ -42,7 +42,7 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const
 	}
 	catch(...)
 	{
-		std::cout<<"Exception :: columnCount"<<std::endl;
+	  //std::cout<<"Exception :: columnCount"<<std::endl;
 	}
 }
 
@@ -51,7 +51,6 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const
  */
 QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const
 {
-//	std::cout<<"Data +++++++++ row"<<index.row()<<" column "<<index.column()<<" is valid "<<index.isValid()<<std::endl;
 	try
 	{
 		if(role != Qt::DisplayRole)
@@ -67,7 +66,7 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const
 	}
 	catch(...)
 	{
-		std::cout<<" Exception: in data"<<std::endl;
+	  //std::cout<<" Exception: in data"<<std::endl;
 	}
 }
 
@@ -121,7 +120,7 @@ QModelIndex InstrumentTreeModel::index(int row, int column, const QModelIndex &p
 	}
 	catch(...)
 	{
-		std::cout<<"Exception: in index"<<std::endl;
+	  //std::cout<<"Exception: in index"<<std::endl;
 	}
 	return QModelIndex();
 }
@@ -154,7 +153,7 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const
 	}
 	catch(...)
 	{
-		std::cout<<"Excpetion: in parent"<<std::endl;
+	  //		std::cout<<"Excpetion: in parent"<<std::endl;
 	}
 	return QModelIndex();
 }
@@ -189,7 +188,7 @@ int InstrumentTreeModel::rowCount(const QModelIndex &parent) const
 	}
 	catch(...)
 	{
-		std::cout<<"Exception: in rowCount"<<std::endl;
+	  //std::cout<<"Exception: in rowCount"<<std::endl;
 	}
 	return 0;
 }

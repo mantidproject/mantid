@@ -306,8 +306,10 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 	{
 		mPickBox->mouseReleaseEvent(event);
 		std::set<QRgb> result=mPickBox->getListOfColorsPicked();
-		if(result.size()!=0)
-			emit actorsPicked(result);
+		if(!result.empty())
+		{
+		  emit actorsPicked(result);
+		}
 	}
 	update();
 }
