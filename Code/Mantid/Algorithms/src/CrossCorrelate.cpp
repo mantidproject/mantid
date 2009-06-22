@@ -64,17 +64,23 @@ void CrossCorrelate::exec()
    		throw std::runtime_error("Can't find reference spectra");
    	const int index_ref=index_map_it->second;
 
-	// Now check if the range between x_min and x_max is valid
+   	// Now check if the range between x_min and x_max is valid
    	const std::vector<double>& referenceX=inputWS->dataX(index_ref);
    	double xmin=getProperty("X_min");
    	std::vector<double>::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
    	if (minIt==referenceX.end())
    		throw std::runtime_error("No data above X_min");
-
+   	std::ostringstream mess;
+   	mess << *(minIt);
+   	g_log.information(mess.str());
+   	mess.str("");
    	double xmax=getProperty("X_max");
    	std::vector<double>::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
    	if (minIt==maxIt)
    		throw std::runtime_error("Range is not valid");
+   	mess << *(maxIt);
+   	g_log.information(mess.str());
+   	mess.str("");
    	//
    	std::vector<double>::difference_type difminIt=std::distance(referenceX.begin(),minIt);
    	std::vector<double>::difference_type difmaxIt=std::distance(referenceX.begin(),maxIt);
@@ -95,52 +101,44 @@ void CrossCorrelate::exec()
    		++nspecs;
    	}
 
-   	std::ostringstream mess; // Use for log message
 
-   	if (nspecs==0) // Throw if no spectra in range
+	if (nspecs==0) // Throw if no spectra in range
 	{
 		mess<< "No spectra in range between" << specmin << " and " << specmax;
 		throw std::runtime_error(mess.str());
 	}
 
-   	// Output message information
-   	mess << "There are " << nspecs << " spectra in the range" << std::endl;
-   	g_log.information(mess.str());
-   	mess.str("");
+	// Output message information
+	mess << "There are " << nspecs << " spectra in the range" << std::endl;
+	g_log.information(mess.str());
+	mess.str("");
 
 	// Take a copy of  the reference spectrum
 	const std::vector<double>& referenceY=inputWS->dataY(index_ref);
 	const std::vector<double>& referenceE=inputWS->dataE(index_ref);
-	int test=maxIt-minIt+1;
-	mess<< "There are " << test << " bins";
+
+	std::vector<double> refX(maxIt-minIt);
+	std::vector<double> refY(maxIt-minIt-1);
+	std::vector<double> refE(maxIt-minIt-1);
+
+	std::copy(minIt,maxIt,refX.begin());
+	mess << "min max" << refX.front() << " " << refX.back();
 	g_log.information(mess.str());
 	mess.str("");
+	std::copy(referenceY.begin()+difminIt,referenceY.begin()+difmaxIt-1,refY.begin());
+	std::copy(referenceE.begin()+difminIt,referenceE.begin()+difmaxIt-1,refE.begin());
 
-   	std::vector<double> refX(maxIt-minIt+1);
-   	std::vector<double> refY(maxIt-minIt+1);
-   	std::vector<double> refE(maxIt-minIt+1);
-
-   	std::copy(minIt,maxIt,refX.begin());
-   	std::copy(referenceY.begin()+difminIt,referenceY.begin()+difmaxIt,refY.begin());
-   	std::copy(referenceE.begin()+difminIt,referenceE.begin()+difmaxIt,refE.begin());
-
-   	// Now start the real stuff
+  // Now start the real stuff
 	// Create a 2DWorkspace that will hold the result
-   	const int nY=refY.size();
-   	mess << "and here there are " << nY << " bins";
-   	g_log.information(mess.str());
-   	mess.str("");
+ 	const int nY=refY.size();
 	const int npoints=2*nY-3;
 	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,npoints,npoints);
 
-   	// Calculate the mean value of the reference spectrum and associated error squared
+	// Calculate the mean value of the reference spectrum and associated error squared
 	double refMean=std::accumulate(refY.begin(),refY.end(),0.0);
 	double refMeanE2=std::accumulate(refE.begin(),refE.end(),0.0,VectorHelper::SumSquares<double>());
 	refMean/=static_cast<double>(nY);
 	refMeanE2/=static_cast<double>(nY*nY);
-  mess.str("");
-  mess << "refMeanE2" << refMeanE2;
-  g_log.information(mess.str());
   std::vector<double>::iterator itY=refY.begin();
 	std::vector<double>::iterator itE=refE.begin();
 
@@ -149,52 +147,45 @@ void CrossCorrelate::exec()
 	{
 		(*itY)-=refMean; // Now the vector is (y[i]-refMean)
 		(*itE)=(*itE)*(*itE)+refMeanE2; // New error squared
-		double t=(*itY)*(*itY);
-		refVar+=t;
-		refVarE+=4.0*t*(*itE);
+		double t=(*itY)*(*itY); //(y[i]-refMean)^2
+		refVar+=t;              // Sum previous term
+		refVarE+=4.0*t*(*itE);  // Error squared
 	}
 
 	double refNorm=1.0/sqrt(refVar);
 	double refNormE=0.5*pow(refNorm,3)*sqrt(refVarE);
-	mess.str("");
-	mess << "refNorm" << refNorm << "error" << refNormE;
-	g_log.information(mess.str());
-	mess << "Reference spectrum mean value: " << refMean << ", Variance: " << refVar;
-	g_log.information(mess.str());
 
-   	// Now copy the other spectra
-   	bool is_distrib=inputWS->isDistribution();
+	// Now copy the other spectra
+	bool is_distrib=inputWS->isDistribution();
 
-   	std::vector<double> tempY(nY);
-   	std::vector<double> tempE(nY);
-   	std::vector<double> XX(npoints);
-   	for (int i=0;i<npoints;++i)
-   	{
+	std::vector<double> tempY(nY);
+	std::vector<double> tempE(nY);
+	std::vector<double> XX(npoints);
+  for (int i=0;i<npoints;++i)
    		XX[i]=static_cast<double>(i-nY+2);
-   	}
 
-   	for (int i=0;i<nspecs;++i) // Now loop on all spectra
-   	{
-   		int spec_index=indexes[i]; // Get the spectrum index from the table
-   		//Copy spectra info from input Workspace
-   		out->getAxis(1)->spectraNo(i)=inputWS->getAxis(1)->spectraNo(spec_index);
-   		out->dataX(i)=XX;
-   		// Get temp references
-   		const std::vector<double>&  iX=inputWS->dataX(spec_index);
-   		const std::vector<double>&  iY=inputWS->dataY(spec_index);
-   		const std::vector<double>&  iE=inputWS->dataE(spec_index);
-   		// Copy Y,E data of spec(i) to temp vector
-   		// Now rebin on the grid of reference spectrum
-   		VectorHelper::rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
-   		// Calculate the mean value of tempY
-   		double tempMean=std::accumulate(tempY.begin(),tempY.end(),0.0);
-   		tempMean/=static_cast<double>(nY);
-   		double tempMeanE2=std::accumulate(tempE.begin(),tempE.end(),0.0,VectorHelper::SumSquares<double>());
-   		tempMeanE2/=static_cast<double>(nY*nY);
-   		//
-   		itY=tempY.begin();
-   		itE=tempE.begin();
-   		double tempVar=0.0, tempVarE=0.0;
+  for (int i=0;i<nspecs;++i) // Now loop on all spectra
+	{
+		int spec_index=indexes[i]; // Get the spectrum index from the table
+		//Copy spectra info from input Workspace
+		out->getAxis(1)->spectraNo(i)=inputWS->getAxis(1)->spectraNo(spec_index);
+		out->dataX(i)=XX;
+		// Get temp references
+		const std::vector<double>&  iX=inputWS->dataX(spec_index);
+		const std::vector<double>&  iY=inputWS->dataY(spec_index);
+		const std::vector<double>&  iE=inputWS->dataE(spec_index);
+		// Copy Y,E data of spec(i) to temp vector
+		// Now rebin on the grid of reference spectrum
+		VectorHelper::rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
+		// Calculate the mean value of tempY
+		double tempMean=std::accumulate(tempY.begin(),tempY.end(),0.0);
+		tempMean/=static_cast<double>(nY);
+		double tempMeanE2=std::accumulate(tempE.begin(),tempE.end(),0.0,VectorHelper::SumSquares<double>());
+		tempMeanE2/=static_cast<double>(nY*nY);
+		//
+		itY=tempY.begin();
+		itE=tempE.begin();
+		double tempVar=0.0, tempVarE=0.0;
 		for (;itY!=tempY.end();++itY,++itE)
 		{
 			(*itY)-=tempMean; // Now the vector is (y[i]-refMean)
@@ -209,10 +200,6 @@ void CrossCorrelate::exec()
 		double tempNormE=0.5*pow(tempNorm,3)*sqrt(tempVarE);
 		double normalisation=refNorm*tempNorm;
 		double normalisationE2=pow((refNorm*tempNormE),2)+pow((tempNorm*refNormE),2);
-		mess.str("");
-		mess << "Norm: " << normalisation << " Error : " << sqrt(normalisationE2) << std::endl;
-		g_log.information(mess.str());
-		mess.str("");
 		// Get reference to the ouput spectrum
 		std::vector<double>& outY=out->dataY(i);
 		std::vector<double>& outE=out->dataE(i);
@@ -247,10 +234,8 @@ void CrossCorrelate::exec()
 		double prog=static_cast<double>(i)/nspecs;
 		progress(prog);
 		interruption_point();
-   	}
-
+	}
    	setProperty("OutputWorkspace",out);
-
    	return;
 }
 
