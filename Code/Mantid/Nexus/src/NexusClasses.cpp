@@ -171,7 +171,7 @@ namespace NeXus
             str.load();
             std::istringstream istr(std::string(str(),str.dim0()));
             std::string line;
-            size_t i = 0;
+            //size_t i = 0;
             while(getline(istr,line))
             {
                 m_data.push_back(line);

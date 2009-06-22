@@ -30,7 +30,7 @@ class RebinHistogramTest : public CxxTest::TestSuite
   /// Perform another rebin in the opposite direction and check that the data are identical to initial values
   void TestRebinSmallerSteps()
   {
-	size1=12;size2=23;
+	  size1=12;size2=23;
   	xin.resize(size1);
   	yin.resize(size1-1);
   	ein.resize(size1-1);
@@ -51,19 +51,16 @@ class RebinHistogramTest : public CxxTest::TestSuite
   	{
   		TS_ASSERT_DELTA(yout[i],0.5,1e-7);
   		TS_ASSERT_DELTA(eout[i],1.0/sqrt(2.0),1e-7);
-
   	}
-  std::vector<double> returnX(xin), returnY(size1-1), returnE(size1-1);
+  	std::vector<double> returnX(xin), returnY(size1-1), returnE(size1-1);
 
-  VectorHelper::rebinHistogram(xout,yout,eout,returnX,returnY,returnE,false);
-  for (int i=0;i<size1-1;i++)
-  {
-	  TS_ASSERT_DELTA(returnY[i],yin[i],1e-7);
-	  TS_ASSERT_DELTA(returnE[i],ein[i],1e-7);
+  	VectorHelper::rebinHistogram(xout,yout,eout,returnX,returnY,returnE,false);
+  	for (int i=0;i<size1-1;i++)
+  	{
+  	  TS_ASSERT_DELTA(returnY[i],yin[i],1e-7);
+  	  TS_ASSERT_DELTA(returnE[i],ein[i],1e-7);
+  	}  	
   }
-
-  }
-
 
 };
 

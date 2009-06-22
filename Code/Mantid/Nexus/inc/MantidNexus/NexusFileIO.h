@@ -198,7 +198,7 @@ namespace Mantid
           bool first=true;
           for(typename std::map<time_t, T>::const_iterator dv=dV.begin();dv!=dV.end();dv++)
           {
-              T val = double(dv->second);
+              T val = dv->second;
               time_t time = dv->first;
               values.push_back(val);
               if(first)
