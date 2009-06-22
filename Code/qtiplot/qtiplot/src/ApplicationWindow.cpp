@@ -7337,13 +7337,19 @@ void ApplicationWindow::copySelection()
 
         if (g->activeTool()){
             if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
+            {
                 ((RangeSelectorTool *)g->activeTool())->copySelection();
+            }
             else if (g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
+            {
                 ((DataPickerTool *)g->activeTool())->copySelection();
+            }
 		} else if (g->markerSelected()){
 			copyMarker();
 		} else
+        {
 			copyActiveLayer();
+        }
 
 		plot->copyAllLayers();
 	}
@@ -10702,11 +10708,9 @@ void ApplicationWindow::copyActiveLayer()
 		return;
 
 	Graph *g = plot->activeGraph();
-	delete lastCopiedLayer;
-	lastCopiedLayer = new Graph(0);
-	lastCopiedLayer->setAttribute(Qt::WA_DeleteOnClose);
-	lastCopiedLayer->setGeometry(0, 0, g->width(), g->height());
-	lastCopiedLayer->copy(g);
+
+    lastCopiedLayer = g;
+	connect (g, SIGNAL(destroyed()), this, SLOT(closedLastCopiedLayer()));
 	g->copyImage();
 }
 

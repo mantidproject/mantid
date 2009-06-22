@@ -1030,6 +1030,7 @@ private slots:
 
 	void hideSelectedColumns();
 	void showAllColumns();
+	void closedLastCopiedLayer(){lastCopiedLayer = NULL;};
 	
 // TODO: a lot of this stuff should be private
 public:
