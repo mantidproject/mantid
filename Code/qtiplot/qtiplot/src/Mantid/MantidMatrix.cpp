@@ -37,6 +37,7 @@
 
 using namespace Mantid::API;
 
+
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
 : MdiSubWindow(label, parent, name, 0),m_funct(this),m_histogram(false),
   y_start(0.0),y_end(0.0),m_min(0),m_max(0),m_are_min_max_set(false),
@@ -62,6 +63,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
     m_modelX = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::X);
     m_table_viewX = new QTableView();
     connectTableView(m_table_viewX,m_modelX);
+	// m_table_viewY->setSelectionModel(m_table_viewX->selectionModel());
     setColumnsWidth(1,MantidPreferences::MantidMatrixColumnWidthX());
     setNumberFormat(1,MantidPreferences::MantidMatrixNumberFormatX(),
                       MantidPreferences::MantidMatrixNumberPrecisionX());
@@ -81,8 +83,18 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
     m_tabs->insertTab(0,m_table_viewY, m_YTabLabel);
     m_tabs->insertTab(1,m_table_viewX, m_XTabLabel); 
     m_tabs->insertTab(2,m_table_viewE, m_ETabLabel);
+	
     setWidget(m_tabs);
+	//for synchronizing the views
+	//index is zero for the defualt view
+	m_PrevIndex=0;
+	//install event filter on  these objects
+	m_table_viewY->installEventFilter(this);
+	m_table_viewX->installEventFilter(this);
+	m_table_viewE->installEventFilter(this);
 
+	connect(m_tabs,SIGNAL(currentChanged(int)),this,SLOT(viewChanged(int)));
+  
     setGeometry(50, 50, QMIN(5, numCols())*m_table_viewY->horizontalHeader()->sectionSize(0) + 55,
                 (QMIN(10,numRows())+1)*m_table_viewY->verticalHeader()->sectionSize(0)+100);
  
@@ -92,7 +104,8 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
     connect(this,SIGNAL(needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::MatrixWorkspace_sptr)));
     connect(this,SIGNAL(needDeleteWorkspace()),this,SLOT(deleteWorkspace()));
     connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
-
+  
+	
     askOnCloseEvent(false);
 }
 
@@ -104,7 +117,50 @@ MantidMatrix::~MantidMatrix()
     delete m_modelX;
     delete m_modelE;
 }
+bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
+{	
+// if it's context menu on any of the views 
+	if (e->type() == QEvent::ContextMenu && (object == m_table_viewY || object == m_table_viewX || object == m_table_viewE)){
+		emit showContextMenu();
+        return true;
+	}
+	return MdiSubWindow::eventFilter(object, e);
+}
+void MantidMatrix::viewChanged(int index)
+{
 
+	//m_table_viewY->setSelectionModel(m_table_viewX->selectionModel());
+	
+	// get the previous view , selection model and selection indexes
+	QTableView* prevView=(QTableView*)m_tabs->widget(m_PrevIndex);
+	if(prevView)
+	{
+		QItemSelectionModel *oldSelModel = prevView->selectionModel();
+		QModelIndexList indexList = oldSelModel->selectedIndexes();
+		if (indexList.size())
+		{
+			//deselect previous view
+			QItemSelection deSelect;
+			deSelect.select(indexList.first(),indexList.last());
+			oldSelModel->select(deSelect, QItemSelectionModel::Deselect);
+
+			//select current view
+			QItemSelection sel(indexList.first(),indexList.last());
+			QItemSelectionModel *selModel = activeView()->selectionModel();
+			if(selModel)selModel->select(sel,QItemSelectionModel::Select);
+		}
+		m_PrevIndex=index;
+		//get the previous tab scrollbar positions
+		int hValue=  prevView->horizontalScrollBar()->value();
+		int vValue = prevView->verticalScrollBar()->value();
+		//to synchronize the views
+		//set  the previous view  scrollbar positions to current view 
+		activeView()->horizontalScrollBar()->setValue(hValue);
+		activeView()->verticalScrollBar()->setValue(vValue);
+
+	}
+
+}
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int end)
 {
     if (!ws.get())
@@ -778,7 +834,7 @@ bool MantidMatrix::setSelectedColumns()
 {
   QTableView *tv = activeView();
   QItemSelectionModel *selModel = tv->selectionModel();
-  if( !selModel ) return false;
+  if( !selModel ||  !selModel->hasSelection()) return false;
 
   QPoint localCursor = tv->mapFromGlobal(QCursor::pos());
   //This is due to what I think is a bug in Qt where it seems to include

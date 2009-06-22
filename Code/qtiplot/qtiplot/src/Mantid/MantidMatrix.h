@@ -25,6 +25,10 @@
 #include <string>
 #include <iostream>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidLog.h"
+using namespace Mantid::Kernel;
+
 class QLabel;
 class QStackedWidget;
 class QShortcut;
@@ -140,6 +144,7 @@ signals:
     void needsUpdating();
     void needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
     void needDeleteWorkspace();
+	void showContextMenu();
 
 public slots:
 
@@ -204,6 +209,11 @@ public slots:
     void selfClosed(MdiSubWindow* w);
     void repaintAll();
     void closeDependants();
+	// for context menu filtering
+	bool eventFilter(QObject *object, QEvent *e);
+	//to synchronize the views
+	void viewChanged(int);
+
 
     // Opens modified QtiPlot's MatrixDialog and sets column width and number format
     void setMatrixProperties();
@@ -260,6 +270,9 @@ protected:
 
     //The tab labels
     QString m_YTabLabel, m_XTabLabel, m_ETabLabel;
+  	//index to identify the previous view on tab switch
+	int m_PrevIndex;
+
 };
 
 /**

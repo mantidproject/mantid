@@ -214,7 +214,6 @@ void MantidUI::loadWorkspace()
   executeAlgorithm("LoadRaw", -1);
  }
 
-
 /**
     loadDAEWorkspace
 
@@ -551,15 +550,15 @@ void MantidUI::removeWindowFromLists(MdiSubWindow* m)
 void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
     if (w->isA("MantidMatrix")) 
-    {
+    {			 
         bool areSpectraSelected = static_cast<MantidMatrix*>(w)->setSelectedRows();
         bool areColumnsSelected = static_cast<MantidMatrix*>(w)->setSelectedColumns();
-
         cm.addAction(actionCopyValues);
         if (areSpectraSelected) cm.addAction(actionCopyRowToTable);
         if (areColumnsSelected) cm.addAction(actionCopyColumnToTable);
         cm.addAction(actionCopyDetectorsToTable);
         cm.addSeparator();
+		
         if (areSpectraSelected)
         {
             cm.addAction(actionCopyRowToGraph);
@@ -1471,7 +1470,7 @@ void MantidUI::showLogFileWindow()
  */
 Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs, bool binCentres)
 {
-     int nspec = workspace->getNumberHistograms();
+	 int nspec = workspace->getNumberHistograms();
 	 //Loop through the list of index and remove all the indexes that are out of range
 	 for(std::vector<int>::iterator it=indexList.begin();it!=indexList.end();it++)
 	 {
@@ -1482,43 +1481,59 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
      int c = errs?2:1;
      int numRows = workspace->blocksize();
      bool isHistogram = workspace->isHistogramData();
-
-     Table* t = new Table(appWindow()->scriptEnv, numRows, c*indexList.size() + 1, "", appWindow(), 0);
+	 Table* t = new Table(appWindow()->scriptEnv, numRows, (1+c)*indexList.size(), "", appWindow(), 0);
 	 appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
 	 t->askOnCloseEvent(false);
 
-     int kY,kErr;
+     int kX,kY,kErr;
      for(int i=0;i<indexList.size();i++)
      {
          const std::vector<double>& dataX = workspace->readX(indexList[i]);
 		 const std::vector<double>& dataY = workspace->readY(indexList[i]);
          const std::vector<double>& dataE = workspace->readE(indexList[i]);
     
-         kY = c*i+1;
-         t->setColName(kY,"YS"+QString::number(indexList[i]));
+         kY =(c+1)*i+1;
+		 kX=(c+1)*i;
+		 t->setColName(kY,"YS"+QString::number(indexList[i]));
+		 t->setColName(kX,"XS"+QString::number(indexList[i]));
+         t->setColPlotDesignation(kX,Table::X);
          if (errs)
          {
-             kErr = 2*i + 2;
+            // kErr = 2*i + 2;
+			 kErr=(c+1)*i+2;
              t->setColPlotDesignation(kErr,Table::yErr);
              t->setColName(kErr,"ES"+QString::number(indexList[i]));
          }
          for(int j=0;j<numRows;j++)
          {
-             if (i == 0) 
-             {
+			 
+             //if (i == 0) 
+             //{
                  // in histograms the point is to be drawn in the centre of the bin.
-                 if (isHistogram && binCentres) t->setCell(j,0,( dataX[j] + dataX[j+1] )/2);
+                 if (isHistogram && binCentres) 
+				 {
+					// logObject.error()<<"inside isHistogram true= "<<j<< std::endl;
+					 t->setCell(j,kX,( dataX[j] + dataX[j+1] )/2);
+				 }
                  else
-                     t->setCell(j,0,dataX[j]);
-             }
-             t->setCell(j,kY,dataY[j]); 
+				 {//logObject.error()<<"inside isHistogram false= "<< std::endl;
+                     t->setCell(j,kX,dataX[j]);
+				 }
+    //         }
+			 //else
+			 //{
+				// t->setCell(j,kX,dataX[j]);
+			 //}
+		     t->setCell(j,kY,dataY[j]);
+			
+			 
              if (errs) t->setCell(j,kErr,dataE[j]);
          }
          if (isHistogram && (!binCentres))
          {
              int iRow = numRows;
              t->addRows(1);
-             if (i == 0) t->setCell(iRow,0,dataX[iRow]);
+	         if (i == 0) t->setCell(iRow,0,dataX[iRow]);
              t->setCell(iRow,kY,0); 
              if (errs) t->setCell(iRow,kErr,0);
          }
@@ -1575,11 +1590,26 @@ Table* MantidUI::createTableFromSpectraRange(const QString& wsName, Mantid::API:
 MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
 {
     if (!t) return NULL;
-    MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
-    Graph *g = ml->activeGraph();
-    appWindow()->polishGraph(g,type);
-    g->setCurveStyle(0,type);
-    ml->askOnCloseEvent(false);
+	QStringList  lst=t->colNames();
+	QStringList::const_iterator itr;
+	for (itr=lst.begin();itr!=lst.end();itr++)
+	{
+		//remove the X names from the column list and pass the X removed list
+		//to multilayerPlot
+		QString str=(*itr);
+		int index=0;
+		if(str.contains("XS",Qt::CaseInsensitive))
+		{
+			index=lst.indexOf(str);
+			lst.removeAt(index);
+		}
+	}
+	//MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+	MultiLayer* ml = appWindow()->multilayerPlot(t,lst,Graph::Line);
+	Graph *g = ml->activeGraph();
+	appWindow()->polishGraph(g,type);
+	g->setCurveStyle(0,type);
+	ml->askOnCloseEvent(false);
 
     return ml;
 }
