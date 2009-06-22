@@ -65,8 +65,8 @@ namespace Mantid
       if( attr_test.exists() && attr_test.isDirectory() )
       {
 	//Also append scripts directory and all sub directories
-	  module << "sys.path.append('" << sanitizePath(scripts_dir) << "')\n";
-    Poco::DirectoryIterator iend;
+	module << "sys.path.append('" << convertPathToUnix(scripts_dir) << "')\n";
+	Poco::DirectoryIterator iend;
 	for( Poco::DirectoryIterator itr(scripts_dir); itr != iend; ++itr )
 	{
 	  Poco::File entry(itr->path());
@@ -84,7 +84,7 @@ namespace Mantid
 	  }
 	  if( is_dir )
 	  {
-	    module << "sys.path.append('" << sanitizePath(itr->path()) << "')\n";
+	    module << "sys.path.append('" << convertPathToUnix(itr->path()) << "')\n";
 	  }
 	}
       }
@@ -109,11 +109,13 @@ namespace Mantid
       if( gui )	module << "PYTHONAPIINMANTIDPLOT = True\n\n";
       else module << "PYTHONAPIINMANTIDPLOT = False\n\n";
 
-      //Make the FrameworkManager object available
+      //Make the FrameworkManager object available with case variations
       module << "# The main API object\n"
 	     << "mantid = FrameworkManager()\n"
-	     << "# An alias\n"
-	     << "mtd = mantid\n\n";
+	     << "# Aliases\n"
+	     << "Mantid = mantid\n"
+	     << "mtd = mantid\n"
+	     << "Mtd = mantid\n\n";
 
       //First a simple function to change the working directory
       module << "# A wrapper for changing the directory\n"
@@ -206,7 +208,7 @@ namespace Mantid
       unsigned int iMand(0), iarg(0);
       for( ; pIter != pEnd; ++iarg)
       {
-	sanitizedNames[iarg] = sanitizePropertyName((*pIter)->name());
+	sanitizedNames[iarg] = removeCharacters((*pIter)->name(), "");
 	os << sanitizedNames[iarg];
 
 	//For gui mode, set all properties as optional
@@ -316,7 +318,7 @@ namespace Mantid
 	  os << "\\n\"\n";
 	}
       }
-      os << "\thelpmsg += \"For help with a specific command type: mtdHelp(\\\"cmd\\\")\\n\"\n"
+      os << "\thelpmsg += \"For help with a specific command type: mantidHelp(\\\"cmd\\\")\\n\"\n"
        << "\tif PYTHONAPIINMANTIDPLOT == True:\n"
        << "\t\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
        << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n"
@@ -334,30 +336,38 @@ namespace Mantid
     std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog)
     {
       std::ostringstream os;
-      os << "\t\thelpmsg =  \"Usage: " << algm;
+      os << "\t\thelpmsg =  '" << algm;
       if( dialog ) os << "Dialog(";
       else os << "(";
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
       for( ; pIter != pEnd ; )
       {
-	os << sanitizePropertyName((*pIter)->name());
+	// Keep only alpha numeric characters
+	os << removeCharacters((*pIter)->name(), "");
 	if( ++pIter != pEnd ) os << ", ";
       }
-      if( dialog ) os << ", message)\\n\"\n";
-      else os << ")\\n\"\n";
-      os << "\t\thelpmsg += \"Argument description:\\n\"\n";
+      if( dialog ) os << ", message)\\n'\n";
+      else os << ")\\n'\n";
+
+      os << "\t\thelpmsg += 'Argument description:\\n'\n";
+      std::string example(algm + std::string("("));
       pIter = properties.begin();
       for( ; pIter != pEnd ; ++pIter )
       {
 	Mantid::Kernel::Property* prop = *pIter;
-	os << "\t\thelpmsg += \"\\tName: " << sanitizePropertyName((*pIter)->name()) << ", Optional: ";  
+	std::string pname = removeCharacters((*pIter)->name(), "");
+	os << "\t\thelpmsg += '     Name: " << pname << ", Optional: ";  
 	if( prop->isValid() == "")
 	{
-		os << "Yes, Default value: " << sanitizePropertyValue(prop->value());
+	  os << "Yes, Default value: " << convertEOLToString(prop->value());
 	}
-	else os << "No";
-	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());// << ", ";
+	else 
+	{
+	  example += pname + std::string("=") + "\"param_value\",";
+	  os << "No";
+	}
+	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());
 	StringVector allowed = prop->allowedValues();
 	if( !allowed.empty() )
 	{
@@ -370,15 +380,16 @@ namespace Mantid
 	    if( ++sIter != sEnd ) os << ", ";
 	  }
 	}
-	os << "\\n\"\n";	
+	os << ". Description: " << removeCharacters(prop->documentation(),"\n\r", true) << "\\n'\n";
       }
       if( dialog )
       {      
-	os << "\t\thelpmsg += \"\\tName: message, Optional: Yes, Default value: \\\"\\\", Direction: Input\\n\"\n";
+	os << "\t\thelpmsg += '     Name: message, Optional: Yes, Default value: '', Direction: Input\\n'\n";
       }
-      os << "\t\thelpmsg += \"Note 1: All arguments must be wrapped in string quotes  \\\"\\\", regardless of their type.\\n\"\n";
-      os << "\t\thelpmsg += \"Note 2: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\\"value\\\".\\n\"\n";
-      os << "\t\tprint helpmsg,\n\n";
+      os << "\t\thelpmsg += 'Note 1: All arguments must be wrapped in string quotes \"\", regardless of their type.\\n'\n"
+	 << "\t\thelpmsg += 'Note 2: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\'value\\'.\\n\\n'\n"
+	 << "\t\thelpmsg += '     Example: " + std::string(example.begin(), example.end() - 1) + ")\\n'\n"
+	 << "\t\tprint helpmsg,\n\n";
       return os.str();
     }
 
@@ -400,28 +411,32 @@ namespace Mantid
       //Functons help
       SimplePythonAPI::IndexVector::const_iterator mIter = helpStrings.begin();
       SimplePythonAPI::IndexVector::const_iterator mEnd = helpStrings.end();
-      os << "\tif cmd == \"" << (*mIter).first << "\":\n" 
+      os << "\tif cmd == '" << (*mIter).first << "':\n" 
 	 << (*mIter).second;
       while( ++mIter != mEnd )
       {
-	os << "\telif cmd == \"" << (*mIter).first << "\":\n" 
+	os << "\telif cmd == '" << (*mIter).first << "':\n" 
 	   << (*mIter).second;
       }
       os << "\telse:\n"
-	 << "\t\tprint \"mtdHelp() - '\" + cmd + \"' not found in help list\"\n\n";
+	 << "\t\tprint 'mtdHelp() - '' + cmd + '' not found in help list'\n\n";
    
-  //Write an alias function called mantidHelp
-      os << "def mantidHelp(cmd = -1):\n"
-         << "\tmtdHelp(cmd)\n\n";
+      //Aliases
+      os << "# Help function aliases\n"
+	 << "mtdhelp = mtdHelp\n"
+	 << "Mtdhelp = mtdHelp\n"
+	 << "MtdHelp = mtdHelp\n"
+	 << "mantidhelp = mtdHelp\n"
+	 << "mantidHelp = mtdHelp\n"
+	 << "MantidHelp = mtdHelp\n";
     }
 
     /**
-     * Take a property value as a string and if only special characters are present, i.e.
-     * EOL characters then replace them with their string represenations
+     * Takes a string and if only EOL characters are present then they are replaced with their string represenations
      * @param value The property value
      * @returns A string containing the sanitized property value
      */
-    std::string SimplePythonAPI::sanitizePropertyValue(const std::string & value)
+    std::string SimplePythonAPI::convertEOLToString(const std::string & value)
     {
       if( value == "\n\r" )
 	return std::string("\\\\") + std::string("n") + std::string("\\\\") + std::string("r");
@@ -431,26 +446,67 @@ namespace Mantid
     }
     
     /**
-     * Takes a list of properties and makes a list of names that can be used as parameters
-     * by removing special characters such as spaces etc
-     * @param name The full property name
-     * @returns The sanitized property names
+     * Remove all cases of 
      */
-    std::string SimplePythonAPI::sanitizePropertyName(const std::string & name)
+
+    /**
+     * Takes a string and removes the characters given in the optional second argument. If none are given then only alpha-numeric
+     * characters are retained.
+     * @param name The string to analyse
+     * @param cs A string of characters to remove
+     * @returns The sanitized value
+     */
+    std::string SimplePythonAPI::removeCharacters(const std::string & value, const std::string & cs, bool eol_to_space)
     {
-      std::string arg;
-      std::string::const_iterator sIter = name.begin();
-      std::string::const_iterator sEnd = name.end();
-      for( ; sIter != sEnd; ++sIter )
+      if( value.empty() ) return value; 
+
+      std::string retstring;
+      std::string::const_iterator sIter = value.begin();
+      std::string::const_iterator sEnd = value.end();
+
+      // No characeters specified, only keep alpha-numeric
+      if( cs.empty() )
       {
-	      int letter = (int)(*sIter);
-	      if( (letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) ||
-	          (letter >= 65 && letter <= 90) )
-	      {
-	        arg.push_back(*sIter);
-	      }
+	for( ; sIter != sEnd; ++sIter )
+	{
+	  int letter = static_cast<int>(*sIter);
+	  if( (letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) ||
+	      (letter >= 65 && letter <= 90) )
+	  {
+	    retstring.push_back(*sIter);
+	  }
+	}
       }
-      return arg;
+      else
+      {
+	for( ; sIter != sEnd; ++sIter )
+	{
+	  const char letter = (*sIter);
+	  // If the letter is NOT one to remove
+	  if( cs.find_first_of(letter) == std::string::npos )
+	  {
+	    //This is because I use single-quotes to delimit my strings in the module and if any in strings
+	    //that I try to write contain these, it will confuse Python so I'll convert them
+	    if( letter == '\'' )
+	    {
+	      retstring.push_back('\"');
+	    }
+	    // Keep the character
+	    else
+	    {
+	      retstring.push_back(letter);
+	    }
+	  }
+	  else
+	  {
+	    if( eol_to_space && letter == '\n' )
+	    {
+	      retstring.push_back(' ');
+	    }
+	  }
+	}
+      }
+      return retstring;
     }
 
     /**
@@ -458,7 +514,7 @@ namespace Mantid
      * converts all '\' characters for '/' ones
      * @param path The path string to check
      */
-    std::string SimplePythonAPI::sanitizePath(const std::string & path)
+    std::string SimplePythonAPI::convertPathToUnix(const std::string & path)
     {
       size_t nchars = path.size();
       std::string retvalue;
@@ -476,6 +532,7 @@ namespace Mantid
       }
       return retvalue;
     }
+
   } //namespace PythonAPI
 
 } //namespace Mantid

@@ -72,7 +72,11 @@ public:
     TS_ASSERT_EQUALS(line, "mantid = FrameworkManager()");
     getline(is, line);
     getline(is, line);
+    TS_ASSERT_EQUALS(line, "Mantid = mantid");
+    getline(is, line);
     TS_ASSERT_EQUALS(line, "mtd = mantid");
+    getline(is, line);
+    TS_ASSERT_EQUALS(line, "Mtd = mantid");
 
     //next non-blank line should be setWorkingDirectory()
     //eat blank lines

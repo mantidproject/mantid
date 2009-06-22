@@ -64,16 +64,25 @@ class DLLExport SimplePythonAPI
   ///private constructor
   SimplePythonAPI();
   
-  ///Private methods
+  // Private methods
+  /// Creates a map between algorithms and versions 
   static void createVersionMap(VersionMap & versionMap, const StringVector & algorithmKeys);
+  /// Gets the algorithm name from a fully qualified name
   static std::string extractAlgName(const std::string & algKey);
+  /// Writes the Python function definition for the given algorithm
   static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties, bool gui);
+  /// Writes the global help command
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
+  /// Creates a help string for the given algorithm
   static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog);
+  /// Writes the given help strings to the Python module
   static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings);
-  static std::string sanitizePropertyValue(const std::string & value);
-  static std::string sanitizePropertyName(const std::string & name);
-  static std::string sanitizePath(const std::string & path);
+  /// Convert EOL characters to their string representation
+  static std::string convertEOLToString(const std::string & value);
+  /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
+  static std::string removeCharacters(const std::string & value, const std::string & cs = "", bool eol_to_space = false);
+  /// Converts windows style paths to forward-slash paths
+  static std::string convertPathToUnix(const std::string & path);
 
   ///Functor for use with std::sort to put the properties that do not
   ///have valid values first
