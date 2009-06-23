@@ -106,7 +106,7 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.0002,0.0001);
+    TS_ASSERT_DELTA( dummy, 0.0002,0.0005);
     dummy = alg2.getProperty("bg0");
     TS_ASSERT_DELTA( dummy, 3.0192,0.002);
     dummy = alg2.getProperty("bg1");
