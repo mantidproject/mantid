@@ -372,7 +372,7 @@ void Instrument3DWidget::AssignColors()
 	std::vector<int> histIndexList = this->getSpectraIndexList(detectorList);
 	std::vector<double> values;
 	double minval,maxval;
-	MatrixWorkspace_sptr output = output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
+	MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 	switch(mDataMapping)
 	{
 	case SINGLE_BIN:
