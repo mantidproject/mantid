@@ -54,6 +54,7 @@ public:
 	void saveToPPM(QString filename);
 	void setViewDirection(AxisDirection);
 	void setBackgroundColor(QColor);
+        QColor currentBackgroundColor() const;
 signals:
 	void actorsPicked(const std::set<QRgb>& );
 	void actorHighlighted( QRgb );
@@ -70,14 +71,22 @@ protected:
 	void keyPressEvent(QKeyEvent *);
 	void keyReleaseEvent(QKeyEvent *);
 	void defaultProjection();
-	virtual void drawSceneUsingColorID()=0;
+  
+        virtual void drawSceneUsingColorID()=0;
 	virtual void setSceneLowResolution()=0;
 	virtual void setSceneHighResolution()=0;
 	virtual void getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)=0;
-	boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
-    GLTrackball* _trackball;       ///< Trackball for user interaction
-    GLViewport* _viewport;         ///< Opengl View port [World -> Window]
+
+  boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
+  GLTrackball* _trackball;       ///< Trackball for user interaction
+  GLViewport* _viewport;         ///< Opengl View port [World -> Window]
+	
+protected slots:
+        void setLightingState(int);
+	
 private:
+        void setRenderingOptions();
+        void setLightingModel(int);
 	void drawDisplayScene();
 	void drawPickingScene();
 	void switchToPickingMode();
@@ -87,6 +96,7 @@ private:
 	GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
 	GLActor* mPickedActor;
 	bool isKeyPressed;
+  int mLightingState;
 };
 
 #endif /*GL3DWIDGET_H_*/

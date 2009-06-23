@@ -4882,7 +4882,9 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/FormatToolBar", d_format_tool_bar);
 	settings.endGroup();
 
-	
+	//Save mantid settings
+	mantidUI->saveSettings();
+
 	//--------------------------------------
 	// Mantid - Save custom scripts
 	settings.beginGroup("CustomScripts");
@@ -8378,6 +8380,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 				break;
 		}
 	} else {
+
 		saveSettings();
 		ce->accept();
 	}

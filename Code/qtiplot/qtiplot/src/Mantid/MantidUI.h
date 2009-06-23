@@ -78,6 +78,9 @@ public:
 
     // Destructor
     ~MantidUI();
+
+    // Save settings to a persistent store
+    void saveSettings() const;
     
     // Initialization
     void init();

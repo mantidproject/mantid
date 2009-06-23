@@ -388,17 +388,17 @@ void Instrument3DWidget::AssignColors()
 		DataMaxValue=maxval;
 	this->setColorForDetectors(DataMinValue,DataMaxValue,values,this->mColorMap);
 	mInstrumentActor->refresh();
-//	updateGL();
+	updateGL();
 }
 
 /**
  * This method takes the input name as the filename and reads the file for the color index values.
  * NOTE: This method can only read 256 color index with RGB values
  */
-void Instrument3DWidget::setColorMapName(const std::string& name)
+void Instrument3DWidget::setColorMapName(const QString & name)
 {
-	mColorMap.setColorMapFile(name);
-	AssignColors();
+  mColorMap.setColorMapFile(name.toStdString());
+  AssignColors();
 }
 
 /**

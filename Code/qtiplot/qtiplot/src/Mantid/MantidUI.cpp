@@ -159,10 +159,13 @@ void MantidUI::init()
 
 MantidUI::~MantidUI()
 {
-//  InputHistory::Instance().save();
- MantidQt::API::AlgorithmInputHistory::Instance().save();
   if( m_algMonitor ) delete m_algMonitor;
+}
 
+void MantidUI::saveSettings() const
+{
+  // Save algorithm dialog input
+  MantidQt::API::AlgorithmInputHistory::Instance().save();
 }
 
 QString MantidUI::releaseDate()
@@ -491,7 +494,7 @@ void MantidUI::showAlgorithmHistory()
      @param makeVisible If true show the created Table, hide otherwise.
      @return A pointer to the new Table.
  */
-Table* MantidUI::importTableWorkspace(const QString& wsName, bool showDlg, bool makeVisible)
+Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisible)
 {
     ITableWorkspace_sptr ws;
   	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -713,7 +716,7 @@ void MantidUI::setDependency(MdiSubWindow* first,MdiSubWindow* second)
 }
 
 // Called in response to closedWindow(...) signal from a window with dependecies
-void MantidUI::closeDependents(MdiSubWindow* w)
+void MantidUI::closeDependents(MdiSubWindow*)
 {
   //    std::cerr<<"Hi\n";
 }
@@ -837,7 +840,7 @@ void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm* alg)
 	    return;
     }
 
-    MantidMatrix *m = importMatrixWorkspace(QString::fromStdString(wsName), -1, -1, false, true);
+    importMatrixWorkspace(QString::fromStdString(wsName), -1, -1, false, true);
 
     int updateInterval = m_DAE_map[wsName];
     if (updateInterval > 0)
@@ -1476,21 +1479,22 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
 	 {
 		if ((*it) > nspec || (*it) < 0) indexList.erase(it);
 	 }
-     if (indexList.size()==0) return 0;
+	 if ( indexList.empty() ) return 0;
 
      int c = errs?2:1;
      int numRows = workspace->blocksize();
      bool isHistogram = workspace->isHistogramData();
-	 Table* t = new Table(appWindow()->scriptEnv, numRows, (1+c)*indexList.size(), "", appWindow(), 0);
-	 appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
-	 t->askOnCloseEvent(false);
+     int no_cols = static_cast<int>(indexList.size());      
+     Table* t = new Table(appWindow()->scriptEnv, numRows, (1+c)*no_cols, "", appWindow(), 0);
+     appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
+     t->askOnCloseEvent(false);
 
-     int kX,kY,kErr;
-     for(int i=0;i<indexList.size();i++)
+     int kX(0),kY(0),kErr(0);
+     for(int i=0;i < no_cols; i++)
      {
-         const std::vector<double>& dataX = workspace->readX(indexList[i]);
-		 const std::vector<double>& dataY = workspace->readY(indexList[i]);
-         const std::vector<double>& dataE = workspace->readE(indexList[i]);
+       const std::vector<double>& dataX = workspace->readX(indexList[i]);
+       const std::vector<double>& dataY = workspace->readY(indexList[i]);
+       const std::vector<double>& dataE = workspace->readE(indexList[i]);
     
          kY =(c+1)*i+1;
 		 kX=(c+1)*i;

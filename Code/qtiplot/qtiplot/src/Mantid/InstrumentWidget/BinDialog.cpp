@@ -7,6 +7,9 @@
 #include <QDoubleValidator>
 #include <QPushButton>
 #include <QLabel>
+#include <QLineEdit>
+#include <QRadioButton>
+
 /**
  *Constructor
  */

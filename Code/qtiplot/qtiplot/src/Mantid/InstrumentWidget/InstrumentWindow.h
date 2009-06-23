@@ -1,13 +1,6 @@
 #ifndef INSTRUMENTWINDOW_H_
 #define INSTRUMENTWINDOW_H_
 
-#include <QPushButton>
-#include <QDialog>
-#include <QSlider>
-#include <QSpinBox>
-#include <QTabWidget>
-#include <QLineEdit>
-#include <QLabel>
 #include "Instrument3DWidget.h"
 #include "InstrumentTreeWidget.h"
 #include "../../MdiSubWindow.h"
@@ -25,6 +18,16 @@ namespace API
 }
 
 }
+
+// Qt forward declarations
+class QPushButton;
+class QDialog;
+class QSlider;
+class QSpinBox;
+class QTabWidget;
+class QLineEdit;
+class QLabel;
+class QCheckBox;
 
 /*!
   \class  InstrumentWindow
@@ -81,8 +84,7 @@ public slots:
 	void detectorListInformation(const std::vector<int>&);
 	void spectraInfoDialog();
 	void spectraGroupInfoDialog();
-	void changeColormap();
-	void changeColormap(const QString & file);
+	void changeColormap(const QString & filename = "");
     void sendPlotSpectraSignal();
 	void sendPlotSpectraGroupSignal();
 	void minValueChanged();
@@ -96,6 +98,7 @@ signals:
 private:
 	void updateColorMapWidget();
 	void loadSettings();
+	void saveSettings();
 	void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
 
 	QLabel*      mInteractionInfo;
@@ -114,9 +117,11 @@ private:
 	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
 	BinDialog*   mBinMapDialog;
 	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
-
+        QCheckBox *mLightingToggle; ///< A tick box to toggle the lighting
+  
         std::string mWorkspaceName; ///The name of workpace that this window is associated with
-        std::string mDefaultColorMap; ///The full path of the default color map
+        QString mDefaultColorMap; ///The full path of the default color map
+        QString mCurrentColorMap;
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/

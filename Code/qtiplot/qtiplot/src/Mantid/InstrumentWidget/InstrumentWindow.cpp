@@ -3,6 +3,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "Poco/Path.h"
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QFrame>
@@ -19,6 +20,8 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QColorDialog>
+#include <QLineEdit>
+#include <QCheckBox>
 #include "GLColorMapQwt.h"
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -96,10 +99,23 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mColorMapWidget->setScaleDiv(lse->transformation(),lse->divideScale(0,1,5,5));
 
 	//Store the path to the default color map
-	mDefaultColorMap = Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../colormap/_standard.map").toString();
+	mDefaultColorMap = QString::fromStdString(Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../colormaps/_standard.map").toString());
+	mCurrentColorMap = mDefaultColorMap;
+	
+	// Load settings
+	loadSettings();
+
 
 	//Pick background color
 	QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
+
+	//Check box to toggle high resolution lighting
+	mLightingToggle = new QCheckBox("High resolution &lighting", this);
+	mLightingToggle->setToolTip("Toggle the use of a high resolution lighting and shading model.\n"
+				    "This option is best used with a high-end graphics card."
+				    "Note: Shading will alter the coluors and hence accuracy of the image.");
+	mLightingToggle->setCheckState(Qt::Unchecked);
+	connect(mLightingToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(setLightingState(int)));
 
 	renderControlsLayout->addWidget(mSelectButton);
 	renderControlsLayout->addWidget(mSelectBin);
@@ -107,6 +123,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	renderControlsLayout->addWidget(axisViewFrame);
 	renderControlsLayout->addWidget(btnBackgroundColor);
 	renderControlsLayout->addWidget(lColormapFrame);
+	renderControlsLayout->addWidget(mLightingToggle);
 
 	//Set the main frame to the window
 	frame->setLayout(mainLayout);
@@ -145,10 +162,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QAction* plotGroupAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotGroupAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraGroupSignal()));
     mDetectorGroupPopupContext->addAction(plotGroupAction);
-
-	//load settings
-	loadSettings();
-	askOnCloseEvent(false);
+    
+    askOnCloseEvent(false);
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 /**
@@ -178,36 +194,33 @@ void InstrumentWindow::selectBinButtonClicked()
 }
 
 /**
- * Change color map button slot. This provides the file dialog box to select colormap.
+ * Change color map button slot. This provides the file dialog box to select colormap or sets it directly a string is provided
  */
-void InstrumentWindow::changeColormap()
+void InstrumentWindow::changeColormap(const QString & filename)
 {
-	QSettings settings;
-	QString filename=settings.value("Mantid/InstrumentWindow/ColormapFile", mDefaultColorMap.c_str()).value<QString>();
-	QFileInfo fileinfo(filename);
-	QString file=QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), fileinfo.filePath(),tr("Colormaps (*.map *.MAP)"));
-	if(file.isEmpty()) return; //User cancelled the colormap pick
-	mInstrumentDisplay->setColorMapName(std::string(file.ascii()));
-	QFileInfo retfile(file);
-	settings.setValue("Mantid/InstrumentWindow/ColormapFile",retfile.absoluteFilePath());
-	updateColorMapWidget();
-	mInstrumentDisplay->update();
-}
+  // Python uses the argument version of this function so just bail out if nothing 
 
-/**
- * Set a new color map file by filename
- */
-void InstrumentWindow::changeColormap(const QString & file)
-{
-	QSettings settings;
-	if(file.isEmpty()) return;
-	mInstrumentDisplay->setColorMapName(file.toStdString());
-	QFileInfo retfile(file);
-	settings.setValue("Mantid/InstrumentWindow/ColormapFile", retfile.absoluteFilePath());
-	updateColorMapWidget();
-	mInstrumentDisplay->update();
-}
 
+  //Use a file dialog if no parameter is passed
+  if( filename.isEmpty() )
+  {
+    QString fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), 
+							 QFileInfo(mCurrentColorMap).absoluteFilePath(),
+							 tr("Colormaps (*.map *.MAP)"));
+    // User cancelled if filename is still empty
+    if( fileselection.isEmpty() ) return;
+    mCurrentColorMap = fileselection;
+  }
+  else
+  {
+    mCurrentColorMap = QFileInfo(filename).absoluteFilePath();
+    if( !QFileInfo(mCurrentColorMap).exists() ) return;
+  }
+  
+  mInstrumentDisplay->setColorMapName(mCurrentColorMap);
+  updateColorMapWidget();
+  mInstrumentDisplay->update();
+}
 
 /**
  * This is the spectra information slot executed when a detector is picked/selected.
@@ -307,7 +320,8 @@ void InstrumentWindow::sendPlotSpectraGroupSignal()
  */
 InstrumentWindow::~InstrumentWindow()
 {
-	delete mInstrumentDisplay;
+  saveSettings();
+  delete mInstrumentDisplay;
 }
 
 /**
@@ -519,10 +533,8 @@ void InstrumentWindow::componentSelected(const QItemSelection & selected, const 
  */
 void InstrumentWindow::pickBackgroundColor()
 {
-	QColor color=QColorDialog::getColor(Qt::green,this);
+	QColor color = QColorDialog::getColor(Qt::green,this);
 	mInstrumentDisplay->setBackgroundColor(color);
-	QSettings settings;
-	settings.setValue("Mantid/InstrumentWindow/BackgroundColor",color);
 }
 
 /**
@@ -532,13 +544,30 @@ void InstrumentWindow::loadSettings()
 {
 	//Load Color
 	QSettings settings;
-	QColor color=settings.value("Mantid/InstrumentWindow/BackgroundColor",QColor(0,0,0,1.0)).value<QColor>();
-	mInstrumentDisplay->setBackgroundColor(color);
+	settings.beginGroup("Mantid/InstrumentWindow");
+
+	// Background colour
+	mInstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
+	
 	//Load Colormap
 	//Recent changes to the Python API mean that we can now alter the working directory, therefore relative paths
 	//should be avoided.
-
-	QString filename=settings.value("Mantid/InstrumentWindow/ColormapFile",mDefaultColorMap.c_str()).value<QString>();
-	mInstrumentDisplay->setColorMapName(filename.toStdString());
+	mCurrentColorMap = settings.value("ColormapFile", mDefaultColorMap).toString();
+	// Set values from settings
+	mInstrumentDisplay->setColorMapName(mCurrentColorMap);
 	updateColorMapWidget();
+
+	settings.endGroup();
+}
+
+/**
+ * Save properties of the window a persistent store
+ */
+void InstrumentWindow::saveSettings()
+{
+  QSettings settings;
+  settings.beginGroup("Mantid/InstrumentWindow");
+  settings.setValue("BackgroundColor", mInstrumentDisplay->currentBackgroundColor());
+  settings.setValue("ColormapFile", mCurrentColorMap);
+  settings.endGroup();
 }

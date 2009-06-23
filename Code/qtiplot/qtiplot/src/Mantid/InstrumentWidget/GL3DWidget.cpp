@@ -35,6 +35,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):
 	setFocusPolicy(Qt::StrongFocus);
     setAutoFillBackground(false);
 	bgColor=QColor(0,0,0,1);
+	mLightingState = 0;
 }
 GL3DWidget::~GL3DWidget()
 {
@@ -46,6 +47,8 @@ void GL3DWidget::setInteractionModePick()
 {
 	iInteractionMode=1;// Pick mode
 	setMouseTracking(true);
+	//Set basic lighting model
+	setLightingModel(0);
 	switchToPickingMode();
 }
 
@@ -54,6 +57,9 @@ void GL3DWidget::setInteractionModeNormal()
 	iInteractionMode=0;//Normal mode
 	setMouseTracking(false);
 	setCursor(Qt::PointingHandCursor);
+	//Revert the lighting model if necessary
+	setLightingModel(mLightingState); 
+	glEnable(GL_NORMALIZE);
 	update();
 }
 
@@ -69,39 +75,77 @@ GLActor* GL3DWidget::getPickedActor()
 void GL3DWidget::initializeGL()
 {
 	setCursor(Qt::PointingHandCursor); // This is to set the initial window mouse cursor to Hand icon
-	glEnable(GL_DEPTH_TEST);           // Enable opengl depth test to render 3D object properly
-	glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
-	glEnable (GL_LIGHTING);            // Enable light
-	glEnable(GL_LIGHT0);               // Enable opengl first light
-	glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
-	// Set Light0 Attributes, Ambient, diffuse,specular and position
-	// Its a directional light which follows camera position
-	float lamp_ambient[4]={0.0,0.0,0.0,1.0};
-	float lamp_diffuse[4]={1.0,1.0,1.0,1.0};
-	float lamp_specular[4]={1.0,1.0,1.0,1.0};
-	glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
-	float lamp_pos[4]={0.0,0.0,1.0,0.0};
-	glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
 
+	// Set the relevant OpenGL rendering options (not lighting)
+	setRenderingOptions();
+
+	// Set lighting mode
+	setLightingModel(mLightingState);
+
+	// Clear the memory buffers
+	setBackgroundColor(bgColor);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
+
+void GL3DWidget::setRenderingOptions()
+{
+  // Enable depth testing. This only draws points that are not hidden by other objects
+  glEnable(GL_DEPTH_TEST);
+
+  // Depth function for testing is Less than or equal                        
+  glDepthFunc(GL_LEQUAL);
+
+  // Disable colour blending
+  glDisable(GL_BLEND);
+}
+
+/**
+ * Toggles the use of high resolution lighting
+ * @param state An integer indicating lighting state. (Note that this is not a boolean because Qt's CheckBox emits an integer signal)
+ * Unchecked = 0, ,PartiallyChecked = 1, Checked = 2
+ */
+void GL3DWidget::setLightingModel(int state)
+{
+  // Basic lighting
+  if( state == 0 )
+  {
+    glShadeModel(GL_FLAT);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LINE_SMOOTH);
+  }
+  // High end shading and lighting
+  else if( state == 2 )
+  {
+    glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
+    glEnable (GL_LIGHTING);            // Enable light
+    glEnable(GL_LIGHT0);               // Enable opengl first light
+    glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
+    // Set Light0 Attributes, Ambient, diffuse,specular and position
+    // Its a directional light which follows camera position
+    float lamp_ambient[4]={0.0,0.0,0.0,1.0};
+    float lamp_diffuse[4]={1.0,1.0,1.0,1.0};
+    float lamp_specular[4]={1.0,1.0,1.0,1.0};
+    glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
+    float lamp_pos[4]={0.0,0.0,1.0,0.0};
+    glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
+  }
+  else return;
+
+  // Update the display
+  update();
+}
+
 
 /**
  * This method draws the scene onto the graphics context
  */
 void GL3DWidget::drawDisplayScene()
 {
-	glEnable(GL_DEPTH_TEST);            // Enable Depth test
-	glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
-	glShadeModel(GL_SMOOTH);            // Shade model is smooth
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glEnable(GL_LINE_SMOOTH);
-	glDisable(GL_BLEND);
-	glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
-	glMatrixMode(GL_MODELVIEW);
+  	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -132,14 +176,7 @@ void GL3DWidget::drawDisplayScene()
  */
 void GL3DWidget::drawPickingScene()
 {
-	glEnable(GL_DEPTH_TEST);            // Enable Depth test
-	glDepthFunc(GL_LEQUAL);             // Depth function for testing is Less than or equal
-	glShadeModel(GL_FLAT);            // Shade model is flat
-	glDisable(GL_LIGHTING);
-	glDisable(GL_LIGHT0);
-	glDisable(GL_LINE_SMOOTH);
-	glDisable(GL_BLEND);
-	glDisable(GL_NORMALIZE);
+
 	glClearColor(0.0,0.0,0.0,1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -160,7 +197,8 @@ void GL3DWidget::switchToPickingMode()
 	glReadBuffer(GL_BACK);
 	mPickBox->setDisplayImage(grabFrameBuffer(false));
     glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
-	drawPickingScene();
+    glDisable(GL_NORMALIZE);
+    drawPickingScene();
 	mPickBox->setPickImage(grabFrameBuffer(false));
     glEnable(GL_MULTISAMPLE);   //enable antialiasing
 	mPickingDraw=false;
@@ -172,7 +210,7 @@ void GL3DWidget::switchToPickingMode()
 void GL3DWidget::paintEvent(QPaintEvent *event)
 {
 	makeCurrent();
-	if(iInteractionMode){
+	if(iInteractionMode == 1){
 		if(mPickingDraw==true)
 			switchToPickingMode();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -268,10 +306,10 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
 	if(iInteractionMode==1){
 		setCursor(Qt::CrossCursor);
-		QRgb tmpColor=mPickBox->pickPoint(event->x(),event->y());
+		QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
 		emit actorHighlighted(tmpColor);
 		mPickBox->mouseMoveEvent(event);
-		update();
+				update();
 	}else{
 		if (event->buttons() & Qt::LeftButton)
 		{
@@ -497,7 +535,8 @@ void GL3DWidget::saveToPPM(QString filename)
 void GL3DWidget::setViewDirection(AxisDirection dir)
 {
 	Mantid::Geometry::V3D minPoint,maxPoint;
-	double minValue,maxValue,_bbmin[3],_bbmax[3];
+	//	double minValue,maxValue,_bbmin[3],_bbmax[3];
+	double _bbmin[3],_bbmax[3];
 	getBoundingBox(minPoint,maxPoint);
 	Mantid::Geometry::V3D centre=(maxPoint+minPoint)/2.0;
 	defaultProjection();
@@ -579,11 +618,29 @@ void GL3DWidget::defaultProjection()
 }
 
 /**
+ * Sets the flag indicating the current lighting model
+ * 
+ */
+void GL3DWidget::setLightingState(int state)
+{
+  mLightingState = state;
+  setLightingModel(state);
+}
+
+
+/**
  * This method set the background color.
  */
 void GL3DWidget::setBackgroundColor(QColor input)
 {
-	bgColor=input;
+  bgColor = input;
+  glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
+  update();
+}
+
+QColor GL3DWidget::currentBackgroundColor() const
+{
+  return bgColor;
 }
 
 /**
@@ -591,5 +648,5 @@ void GL3DWidget::setBackgroundColor(QColor input)
  */
 void GL3DWidget::resetWidget()
 {
-	setActorCollection(boost::shared_ptr<GLActorCollection>(new GLActorCollection()));
+  setActorCollection(boost::shared_ptr<GLActorCollection>(new GLActorCollection()));
 }

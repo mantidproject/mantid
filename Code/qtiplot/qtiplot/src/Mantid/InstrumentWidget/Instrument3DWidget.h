@@ -1,7 +1,7 @@
 #ifndef INSTRUMENT3DWIDGET_H_
 #define INSTRUMENT3DWIDGET_H_
 
-#include <QGLWidget>
+
 #include "GL3DWidget.h"
 #include "GLColorMapQwt.h"
 #include "boost/shared_ptr.hpp"
@@ -52,7 +52,7 @@ public:
 	virtual ~Instrument3DWidget();         ///< Destructor
 	void setWorkspace(const std::string& name);
 	std::string getWorkspaceName() const;
-	void setColorMapName(const std::string& name);
+	void setColorMapName(const QString & name);
 	GLColorMapQwt getColorMap()const;
 	double getDataMinValue() const;
 	double getDataMaxValue() const;

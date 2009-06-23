@@ -1,5 +1,12 @@
 #ifndef BINDIALOG_H_
 #define BINDIALOG_H_
+
+#include <QDialog>
+
+// Qt forward declarations
+class QLineEdit;
+class QRadioButton;
+
 /*!
   \class  BinDialog
   \brief  class to display Bin selection dialog
@@ -28,9 +35,8 @@
   
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-#include <QDialog>
-#include <QLineEdit>
-#include <QRadioButton>
+
+
 class BinDialog: public QDialog
 {
     Q_OBJECT
