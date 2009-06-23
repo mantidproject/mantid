@@ -82,13 +82,13 @@ void GetDetectorOffsets::exec()
 			// Put it into file
 			int specno=outputW->getAxis(1)->spectraNo(i);
 			const std::vector<int> dets=specMap.getDetectors(specno);
-			for (int j=0;j<dets.size();j++)
+			for (unsigned int j=0;j<dets.size();j++)
 			{
 				out << std::fixed << std::setw(9) << n++ <<
 				     std::fixed << std::setw(15) << dets[j] <<
 				     std::fixed << std::setprecision(7) << std::setw(15) << offset <<
 				     std::fixed << std::setw(8) << "1" <<
-					 std::fixed << std::setw(8) << "1"  << "\n";
+				     std::fixed << std::setw(8) << "1"  << "\n";
 			}
 			progress((double)(i)/nspec);
 		}
@@ -153,7 +153,7 @@ double GetDetectorOffsets::fitSpectra(const int s)
 	    {
 	    	offset=test->getFittedParam(3);
 	    }
-	    return (-offset*step/dreference);
+	    return (-offset*step/(dreference+offset*step));
 }
 
 
