@@ -64,12 +64,12 @@ void Lorentzian1D::functionDeriv(double* in, double* out, double* xValues, doubl
     for (int i = 0; i < nData; i++) {
         double s = yErrors[i];
         double diff = xValues[i]-peakCentre;
-        double invDenominator =  1/(diff*diff+hwhm*hwhm);
+        double invDenominator =  1/((diff*diff+hwhm*hwhm));
         out[i*nParam + 0] = 1/s;
         out[i*nParam + 1] = xValues[i]/s;
         out[i*nParam + 2] = hwhm*hwhm*invDenominator/s;
-        out[i*nParam + 3] = -2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator/s;
-        out[i*nParam + 4] = height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator /s;
+        out[i*nParam + 3] = 2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator;
+        out[i*nParam + 4] = height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator/s;
     }
 }
 

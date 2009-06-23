@@ -434,8 +434,7 @@ void Fit1D::exec()
 
   std::string reportOfFit = gsl_strerror(status);
 
-  g_log.information() << "Attempt to fit: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2)\n" <<
-    "Iteration = " << iter << "\n" <<
+  g_log.information() << "Iteration = " << iter << "\n" <<
     "Status = " << reportOfFit << "\n" <<
     "Chi^2/DoF = " << finalCostFuncVal << "\n";
   for (size_t i = 0; i < l_data.p; i++)

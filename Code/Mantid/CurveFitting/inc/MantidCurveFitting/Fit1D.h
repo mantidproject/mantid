@@ -11,7 +11,22 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Base class for 1D fitting functions.
+    Abstract base class for 1D fitting functions.
+
+    Properties common for all fitting functions:
+    <UL>
+    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+
+    <LI> SpectrumNumber - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
+    <LI> StartX - Lowest value of x data array </LI>
+    <LI> EndX - Highest value of x data array </LI>
+
+    <LI> Properties defined in derived class goes here
+
+    <LI> MaxIterations - The spectrum to fit (default 500)</LI>
+    <LI> Output Status - whether the fit was successful. Direction::Output</LI>
+    <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
+    </UL>
 
     @author Anders Markvardsen, ISIS, RAL
     @date 15/5/2009

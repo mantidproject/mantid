@@ -256,6 +256,10 @@
 				RelativePath=".\inc\MantidCurveFitting\Lorentzian1D.h"
 				>
 			</File>
+			<File
+				RelativePath=".\test\Lorentzian1DTest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

@@ -17,25 +17,14 @@ namespace Mantid
 
       I*(exp(a/2*(a*s^2+2*(x-x0)))*erfc((a*s^2+(x-x0))/sqrt(2*s^2))+exp(b/2*(b*s^2-2*(x-x0)))*erfc((b*s^2-(x-x0))/sqrt(2*s^2)))+bk.
 
-    Required Properties:
+    Properties specific to this derived class:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-    </UL>
-
-    Optional Properties (assume that you count from zero):
-    <UL>
-    <LI> SpectrumNumber - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
-    <LI> StartX - X value to start fitting from (default 0.0)</LI>
-    <LI> EndX - last X value to include in fitting range (default 1.0)</LI>
     <LI> I - height of peak (default 0.0)</LI>
     <LI> a - exponential constant of rising part of neutron pulse (default 0.0)</LI>
     <LI> b - exponential constant of decaying part of neutron pulse (default 0.0)</LI>
     <LI> x0 - peak position (default 0.0)</LI>
     <LI> s - standard deviation of gaussian part of peakshape function (default 1.0)</LI>
     <LI> bk - constant background (default 0.0)</LI>
-    <LI> MaxIterations - The spectrum to fit (default 500)</LI>
-    <LI> Output Status - whether the fit was successful. Direction::Output</LI>
-    <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

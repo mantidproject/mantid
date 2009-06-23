@@ -16,23 +16,13 @@ namespace Mantid
     a linear background.
     i.e. a function: height*( hwhm^2/((x-peakCentre)^2+hwhm^2) ) + bg0 + bg1*x
 
-    Properties:
+    Properties specific to this derived class:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
-
-    <LI> SpectrumNumber - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
-    <LI> StartX - X value to start fitting from (default 0.0)</LI>
-    <LI> EndX - last X value to include in fitting range (default 1.0)</LI>
-
     <LI> bg0 - background intercept value (default 0.0)</LI>
     <LI> bg1 - background slope value (default 0.0)</LI>
     <LI> height - height of peak (default 0.0)</LI>
     <LI> peakCentre - centre of peak (default 0.0)</LI>
     <LI> hwhm - half-width half-maximum (default 1.0)</LI>
-
-    <LI> MaxIterations - The spectrum to fit (default 500)</LI>
-    <LI> Output Status - whether the fit was successful. Direction::Output</LI>
-    <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
