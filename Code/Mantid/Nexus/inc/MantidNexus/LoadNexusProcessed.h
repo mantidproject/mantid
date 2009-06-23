@@ -88,15 +88,15 @@ namespace Mantid
       /// Pointer to the local workspace
       API::MatrixWorkspace_sptr m_outputWorkspace;
       /// Flag set if list of spectra to save is specifed
-      bool m_list;
-      /// Flag set if interval of spectra to write is set
-      bool m_interval;
-      /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
-      /// The value of the spectrum_min property
-      int m_spec_min;
-      /// The value of the spectrum_max property
-      int m_spec_max;
+      //bool m_list;
+      ///// Flag set if interval of spectra to write is set
+      //bool m_interval;
+      ///// The value of the spectrum_list property
+      //std::vector<int> m_spec_list;
+      ///// The value of the spectrum_min property
+      //int m_spec_min;
+      ///// The value of the spectrum_max property
+      //int m_spec_max;
       /// The value of the workspace number property
       int m_numberofspectra;
       /// total channels

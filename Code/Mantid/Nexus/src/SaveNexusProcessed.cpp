@@ -149,8 +149,7 @@ namespace NeXus
     const int numberOfHist = m_inputWorkspace->getNumberHistograms();
     // check if all X() are in fact the same array
     bool uniformSpectra= API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
-    m_spec_min=0;
-    m_spec_max=numberOfHist-1;
+    std::vector<int> spec;
     if( m_interval )
     {
       m_spec_min = getProperty("spectrum_min");
@@ -160,11 +159,42 @@ namespace NeXus
         g_log.error("Invalid Spectrum min/max properties");
         throw std::invalid_argument("Inconsistent properties defined");
       }
+      for(int i=m_spec_min;i<=m_spec_max;i++)
+          spec.push_back(i);
+      if (m_list)
+      {
+          for(size_t i=0;i<m_spec_list.size();i++)
+          {
+              int s = m_spec_list[i];
+              if ( s < 0 ) continue;
+              if (s < m_spec_min || s > m_spec_max)
+                  spec.push_back(s);
+          }
+      }
     }
-    nexusFile->writeNexusProcessedData(m_inputWorkspace,uniformSpectra,m_spec_min,m_spec_max);
+    else if (m_list)
+    {
+        m_spec_max=0;
+        m_spec_min=numberOfHist-1;
+        for(size_t i=0;i<m_spec_list.size();i++)
+        {
+            int s = m_spec_list[i];
+            if ( s < 0 ) continue;
+            spec.push_back(s);
+            if (s > m_spec_max) m_spec_max = s;
+            if (s < m_spec_min) m_spec_min = s;
+        }
+    }
+    else
+    {
+        m_spec_min=0;
+        m_spec_max=numberOfHist-1;
+        for(int i=m_spec_min;i<=m_spec_max;i++)
+            spec.push_back(i);
+    }
+    nexusFile->writeNexusProcessedData(m_inputWorkspace,uniformSpectra,spec);
     nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
-    const SpectraDetectorMap& spectraMap=m_inputWorkspace->spectraMap();
-    nexusFile->writeNexusProcessedSpectraMap(spectraMap, m_spec_min, m_spec_max);
+    nexusFile->writeNexusProcessedSpectraMap(m_inputWorkspace, spec);
     nexusFile->closeNexusFile();
     
     delete nexusFile;

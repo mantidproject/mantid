@@ -38,8 +38,8 @@ Logger& LoadNexusProcessed::g_log = Logger::get("LoadNexusProcessed");
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() :
   Algorithm(),                                    //call the constructor for the base class
-  nexusFile(new NexusFileIO()), m_filename(), m_entrynumber(0), m_list(false), m_interval(false),
-  m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+  nexusFile(new NexusFileIO()), m_filename(), m_entrynumber(0)
+  //, m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
 {}
 
 /// Delete NexusFileIO in destructor
@@ -74,17 +74,17 @@ void LoadNexusProcessed::init()
   // optional
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
   mustBePositive->setLower(0);
-  declareProperty("spectrum_min", 0, mustBePositive,
-    "Index number of the first spectrum to read, only used if\n"
-    "spectrum_max is set and only for single period data, not\n"
-    " yet implemented (default 0)");
-  declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
-    "Index of last spectrum to read, only for single period data,\n"
-    " not yet implemented (default the last spectrum).");
-  declareProperty(new ArrayProperty<int> ("spectrum_list"),
-    "Array, or comma separated list, of indexes of spectra to\n"
-    "load. Not yet implemented.");
-  declareProperty("EntryNumber", 0, mustBePositive->clone(),
+  //declareProperty("spectrum_min", 0, mustBePositive,
+  //  "Index number of the first spectrum to read, only used if\n"
+  //  "spectrum_max is set and only for single period data, not\n"
+  //  " yet implemented (default 0)");
+  //declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+  //  "Index of last spectrum to read, only for single period data,\n"
+  //  " not yet implemented (default the last spectrum).");
+  //declareProperty(new ArrayProperty<int> ("spectrum_list"),
+  //  "Array, or comma separated list, of indexes of spectra to\n"
+  //  "load. Not yet implemented.");
+  declareProperty("EntryNumber", 0, mustBePositive,
     "Index number of the workspace to load");
 }
 
@@ -118,24 +118,24 @@ void LoadNexusProcessed::exec()
 
   // validate the optional parameters, if set
   checkOptionalProperties();
-  int total_specs;
+  int total_specs = m_numberofspectra;
 
-  // Create the 2D workspace for the output
-  if (m_interval || m_list)
-  {
-    total_specs = m_spec_list.size();
-    if (m_interval)
-    {
-      total_specs += (m_spec_max - m_spec_min + 1);
-      m_spec_max += 1;
-    }
-  }
-  else
-  {
-    total_specs = m_numberofspectra;
-    m_spec_min = 1;
-    m_spec_max = m_numberofspectra + 1;
-  }
+  //// Create the 2D workspace for the output
+  //if (m_interval || m_list)
+  //{
+  //  total_specs = m_spec_list.size();
+  //  if (m_interval)
+  //  {
+  //    total_specs += (m_spec_max - m_spec_min + 1);
+  //    m_spec_max += 1;
+  //  }
+  //}
+  //else
+  //{
+  //  total_specs = m_numberofspectra;
+  //  m_spec_min = 1;
+  //  m_spec_max = m_numberofspectra + 1;
+  //}
 
   // create output workspace of required size
   DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -165,9 +165,9 @@ void LoadNexusProcessed::exec()
   for (int i = 1; i <= m_numberofspectra; ++i)
   {
     //int histToRead = i + period*(m_numberOfSpectra+1);
-    if ((i >= m_spec_min && i < m_spec_max) || (m_list
-        && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end()))
-    {
+    //if ((i >= m_spec_min && i < m_spec_max) || (m_list
+    //    && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end()))
+    //{
       MantidVec& values = localWorkspace->dataY(counter);
       MantidVec& errors = localWorkspace->dataE(counter);
       nexusFile->getSpectra(values, errors, i);
@@ -176,11 +176,11 @@ void LoadNexusProcessed::exec()
         nexusFile->getXValues(xValues.access(), i - 1);
       }
       localWorkspace->setX(counter,xValues);
-      localWorkspace->getAxis(1)->spectraNo(counter) = i;
+      //localWorkspace->getAxis(1)->spectraNo(counter) = i;
       //
       ++counter;
       progress.report();
-    }
+//    }
   }
 
   sample = localWorkspace->getSample();
@@ -198,8 +198,7 @@ void LoadNexusProcessed::exec()
 //  }
   // get any spectraMap info
   boost::shared_ptr<IInstrument> localInstrument = localWorkspace->getInstrument();
-  SpectraDetectorMap& spectraMap = localWorkspace->mutableSpectraMap();
-  nexusFile->readNexusProcessedSpectraMap(spectraMap, m_spec_min, m_spec_max);
+  nexusFile->readNexusProcessedSpectraMap(localWorkspace);
   nexusFile->readNexusParameterMap(localWorkspace);
   // Assign the result to the output workspace property
   std::string outputWorkspace = "OutputWorkspace";
@@ -214,38 +213,38 @@ void LoadNexusProcessed::exec()
 /// Validates the optional 'spectra to read' properties, if they have been set
 void LoadNexusProcessed::checkOptionalProperties()
 {
-  //read in the settings passed to the algorithm
-  m_spec_list = getProperty("spectrum_list");
-  m_spec_max = getProperty("spectrum_max");
-  //Are we using a list of spectra or all the spectra in a range?
-  m_list = !m_spec_list.empty();
-  m_interval = (m_spec_max != unSetInt);
-  if ( m_spec_max == unSetInt ) m_spec_max = 0;
-  
-  // Check validity of spectra list property, if set
-  if (m_list)
-  {
-    m_list = true;
-    const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
-    const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
-    if (maxlist > m_numberofspectra || minlist == 0)
-    {
-      g_log.error("Invalid list of spectra");
-      throw std::invalid_argument("Inconsistent properties defined");
-    }
-  }
+  ////read in the settings passed to the algorithm
+  //m_spec_list = getProperty("spectrum_list");
+  //m_spec_max = getProperty("spectrum_max");
+  ////Are we using a list of spectra or all the spectra in a range?
+  //m_list = !m_spec_list.empty();
+  //m_interval = (m_spec_max != unSetInt);
+  //if ( m_spec_max == unSetInt ) m_spec_max = 0;
+  //
+  //// Check validity of spectra list property, if set
+  //if (m_list)
+  //{
+  //  m_list = true;
+  //  const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
+  //  const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
+  //  if (maxlist > m_numberofspectra || minlist == 0)
+  //  {
+  //    g_log.error("Invalid list of spectra");
+  //    throw std::invalid_argument("Inconsistent properties defined");
+  //  }
+  //}
 
-  // Check validity of spectra range, if set
-  if (m_interval)
-  {
-    m_interval = true;
-    m_spec_min = getProperty("spectrum_min");
-    if (m_spec_max < m_spec_min || m_spec_max > m_numberofspectra)
-    {
-      g_log.error("Invalid Spectrum min/max properties");
-      throw std::invalid_argument("Inconsistent properties defined");
-    }
-  }
+  //// Check validity of spectra range, if set
+  //if (m_interval)
+  //{
+  //  m_interval = true;
+  //  m_spec_min = getProperty("spectrum_min");
+  //  if (m_spec_max < m_spec_min || m_spec_max > m_numberofspectra)
+  //  {
+  //    g_log.error("Invalid Spectrum min/max properties");
+  //    throw std::invalid_argument("Inconsistent properties defined");
+  //  }
+  //}
 }
 
 /** Run the sub-algorithm LoadInstrument (as for LoadRaw)

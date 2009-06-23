@@ -827,7 +827,7 @@ namespace NeXus
 
 
   int NexusFileIO::writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
-							const bool& uniformSpectra, const int& m_spec_min, const int& m_spec_max)
+							const bool& uniformSpectra, const std::vector<int>& spec)
   {
    NXstatus status;
 
@@ -841,7 +841,7 @@ namespace NeXus
    if(nHist<1)
 	   return(2);
    const int nSpectBins=localworkspace->readY(0).size();
-   const int nSpect=m_spec_max-m_spec_min+1;
+   const int nSpect=int(spec.size());
    int dims_array[2] = { nSpect,nSpectBins };
    std::string name=localworkspace->getTitle();
    if(name.size()==0)
@@ -849,9 +849,10 @@ namespace NeXus
    int start[2]={0,0},asize[2]={1,dims_array[1]};
    status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
    status=NXopendata(fileID, name.c_str());
-   for(int i=m_spec_min;i<=m_spec_max;i++)
+   for(size_t i=0;i<nSpect;i++)
    {
-      status=NXputslab(fileID, (void*)&(localworkspace->readY(i)[0]),start,asize);
+       int s = spec[i];
+      status=NXputslab(fileID, (void*)&(localworkspace->readY(s)[0]),start,asize);
 	  start[0]++;
    }
    int signal=1;
@@ -873,7 +874,11 @@ namespace NeXus
      else sLabel = "unknown";
    }
    std::vector<double> histNumber;
-	 for(int i=m_spec_min;i<=m_spec_max;i++) histNumber.push_back((*sAxis)(i));
+   for(size_t i=0;i<nSpect;i++) 
+   {
+       int s = spec[i];
+       histNumber.push_back((*sAxis)(s));
+   }
    //const std::string axesNames=xLabel+":"+sLabel;
    const std::string axesNames="axis1,axis2";
    status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
@@ -885,9 +890,10 @@ namespace NeXus
    status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
    status=NXopendata(fileID, name.c_str());
    start[0]=0;
-   for(int i=m_spec_min;i<=m_spec_max;i++)
+   for(size_t i=0;i<nSpect;i++)
    {
-      status=NXputslab(fileID, (void*)&(localworkspace->readE(i)[0]),start,asize);
+       int s = spec[i];
+      status=NXputslab(fileID, (void*)&(localworkspace->readE(s)[0]),start,asize);
 	  start[0]++;
    }
    status=NXclosedata(fileID);
@@ -906,8 +912,9 @@ namespace NeXus
 	   status=NXmakedata(fileID, "axis1", NX_FLOAT64, 2, dims_array);
        status=NXopendata(fileID, "axis1");
 	   start[0]=0; asize[1]=dims_array[1];
-       for(int i=m_spec_min;i<=m_spec_max;i++)
+       for(size_t i=0;i<nSpect;i++)
        {
+           int s = spec[i];
            status=NXputslab(fileID, (void*)&(localworkspace->readX(i)[0]),start,asize);
 	       start[0]++;
        }
@@ -917,10 +924,10 @@ namespace NeXus
    NXputattr (fileID, "units", (void*)xLabel.c_str(), xLabel.size(), NX_CHAR);
    status=NXclosedata(fileID);
    // write axis2, maybe just spectra number
-   dims_array[0]=m_spec_max-m_spec_min+1;
+   dims_array[0]=nSpect;
    status=NXmakedata(fileID, "axis2", NX_FLOAT64, 1, dims_array);
    status=NXopendata(fileID, "axis2");
-   status=NXputdata(fileID, (void*)&(histNumber[m_spec_min]));
+   status=NXputdata(fileID, (void*)&(histNumber[0]));
    NXputattr (fileID, "units", (void*)sLabel.c_str(), sLabel.size(), NX_CHAR);
    status=NXclosedata(fileID);
 
@@ -1226,8 +1233,7 @@ namespace NeXus
   }
   
 
-  bool NexusFileIO::writeNexusProcessedSpectraMap(const API::SpectraDetectorMap& spectraMap,
-                    const int& m_spec_min, const int& m_spec_max)
+  bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localworkspace, const std::vector<int>& spec)
   {
    /*! Write the details of the spectra detector mapping to the Nexus file using the format proposed for
        Muon data, but using only one NXdetector section for the whole instrument.
@@ -1241,6 +1247,8 @@ namespace NeXus
        TODO check on how to make min/max spectra work
    */
 
+   const SpectraDetectorMap& spectraMap=localworkspace->spectraMap();
+   API::Axis *spectraAxis = localworkspace->getAxis(1);
    const int nDetectors = spectraMap.nElements();
    if(nDetectors<1)
    {
@@ -1263,21 +1271,27 @@ namespace NeXus
    }
    status=NXopengroup(fileID,"detector","NXdetector");
    //
-   int numberSpec=m_spec_max-m_spec_min+1;
+   int numberSpec=int(spec.size());
    // allocate space for the Nexus Muon format of spctra-detector mapping
    int *detector_index=new int[numberSpec+1];  // allow for writing one more than required
    int *detector_count=new int[numberSpec];
    int *detector_list=new int[nDetectors];
+   int *spectra=new int[numberSpec];
    detector_index[0]=0;
    int id=0;
-   // get data from map into Nexus Muon format
-   for(int si=1;si<=numberSpec;si++)
-   {
-       const int ndet=spectraMap.ndet(si);
-       detector_index[si]=detector_index[si-1]+ndet;
-       detector_count[si-1]=ndet;
 
-       const std::vector<int> detectorgroup = spectraMap.getDetectors(si);
+   int ndet = 0;
+   // get data from map into Nexus Muon format
+   for(size_t i=0;i<numberSpec;i++)
+   {
+       int si = spec[i];
+       spectra[i] = spectraAxis->spectraNo(si);
+       const int ndet1=spectraMap.ndet(si);
+       detector_index[i+1]=detector_index[i]+ndet1; // points to start of detector list for the next spectrum
+       detector_count[i]=ndet1;
+       ndet += ndet1;
+
+       const std::vector<int> detectorgroup = spectraMap.getDetectors(spectra[i]);
        std::vector<int>::const_iterator it;
        for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
             detector_list[id++]=(*it);
@@ -1294,23 +1308,29 @@ namespace NeXus
    status=NXputdata(fileID, (void*)detector_count);
    status=NXclosedata(fileID);
    //
-   dims[0]=nDetectors;
+   dims[0]=ndet;
    status=NXcompmakedata(fileID, "detector_list", NX_INT32, 1, dims, m_nexuscompression,dims);
    status=NXopendata(fileID, "detector_list");
    status=NXputdata(fileID, (void*)detector_list);
+   status=NXclosedata(fileID);
+   //
+   dims[0]=numberSpec;
+   status=NXcompmakedata(fileID, "spectra", NX_INT32, 1, dims, m_nexuscompression,dims);
+   status=NXopendata(fileID, "spectra");
+   status=NXputdata(fileID, (void*)spectra);
    status=NXclosedata(fileID);
    // tidy up
    delete[] detector_list;
    delete[] detector_index;
    delete[] detector_count;
+   delete[] spectra;
    //
    status=NXclosegroup(fileID); // close detector group
    status=NXclosegroup(fileID); // close instrument group
    return(true);
   }
   
-  bool NexusFileIO::readNexusProcessedSpectraMap(API::SpectraDetectorMap& spectraMap,
-                    const int& m_spec_min, const int& m_spec_max)
+  bool NexusFileIO::readNexusProcessedSpectraMap(API::MatrixWorkspace_sptr localWorkspace)
   {
    /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
        Muon data. Use this to build spectraMap
@@ -1320,6 +1340,7 @@ namespace NeXus
        @return true for OK, false for error
    */
 
+   SpectraDetectorMap& spectraMap = localWorkspace->mutableSpectraMap();
    NXstatus status;
    status=NXopengroup(fileID,"instrument","NXinstrument");
    if(status==NX_ERROR)
@@ -1361,24 +1382,39 @@ namespace NeXus
    status=NXgetinfo(fileID, &rank, dim, &type);
    int nDet=dim[0];
    int *detector_list=new int[nDet];
-   int *spectra_list=new int[nDet];
    status=NXgetdata(fileID, (void*)detector_list);
+   status=NXclosedata(fileID);
+
+   status=NXopendata(fileID, "spectra");
+   status=NXgetinfo(fileID, &rank, dim, &type);
+   int nSpec=dim[0];
+   assert(nSpec == nSpectra);
+   int *spectra=new int[nSpec];
+   status=NXgetdata(fileID, (void*)spectra);
+   status=NXclosedata(fileID);
+
    // build spectra_list for populate method
+   int *spectra_list=new int[nDet];
    for(int i=0;i<nSpectra;i++)
    {
+       int s = spectra[i];
+       std::cerr<<s<<'\n';
        int offset=detector_index[i];
        for(int j=0;j<detector_count[i];j++)
        {
-           spectra_list[offset+j]=i+1;
+           spectra_list[offset+j]=s;
        }
    }
    spectraMap.populate(spectra_list,detector_list,nDet); //Populate the Spectra Map with parameters
-   status=NXclosedata(fileID);
+
+   for(int i=0;i<nSpectra;i++)
+       localWorkspace->getAxis(1)->spectraNo(i) = spectra[i];
    // tidy up
    delete[] detector_list;
    delete[] detector_index;
    delete[] detector_count;
    delete[] spectra_list;
+   delete[] spectra;
    //
    status=NXclosegroup(fileID); // close detector group
    status=NXclosegroup(fileID); // close instrument group
