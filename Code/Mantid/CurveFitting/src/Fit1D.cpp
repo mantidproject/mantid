@@ -277,26 +277,29 @@ void Fit1D::exec()
   }
 
 
-  // create and populate GSL data container
+  // create and populate GSL data container warn user if l_data.n < l_data.p 
+  // since as a rule of thumb this is required as a minimum to obtained 'accurate'
+  // fitting parameter values.
 
   FitData l_data;
 
   l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19.
-                              // The data includes both of these array elements
   l_data.p = m_parameterNames.size();
+  if (l_data.n < l_data.p)
+    g_log.warning("Number of data points less than number of parameters to be fitted.");
   l_data.X = new double[l_data.n];
   l_data.Y = new double[l_data.n];
   l_data.sigmaData = new double[l_data.n];
   l_data.fit1D = this;
   l_data.forSimplexLSwrap = new double[l_data.n];
 
-  // check if histogram data in which case the mid points of X values will be used further below
-  const bool isHistogram = localworkspace->isHistogramData();
+  // check if histogram data in which case use mid points of histogram bins
 
+  const bool isHistogram = localworkspace->isHistogramData();
   for (unsigned int i = 0; i < l_data.n; ++i)
   {
     if (isHistogram)
-      l_data.X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take mid-point if histogram data
+      l_data.X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take mid-point if histogram bin
     else
       l_data.X[i] = XValues[m_minX+i];
 
@@ -305,11 +308,18 @@ void Fit1D::exec()
   }
 
 
+  // create array of fitted parameter. Take these to those input by the user. However, for doing the
+  // underlying fitting it might be more efficient to actually perform the fitting on some of other
+  // form of the fitted parameters. For instance, take the Gaussian sigma parameter. In practice it
+  // in fact more efficient to perform the fitting not on sigma but 1/sigma^2. The methods 
+  // modifyInitialFittedParameters() and modifyFinalFittedParameters() are used to allow for this;
+  // by default these function do nothing.
+
   for (size_t i = 0; i < l_data.p; i++)
   {
     m_fittedParameter.push_back(getProperty(m_parameterNames[i]));
   }
-  modifyInitialFittedParameters(m_fittedParameter); // do nothing except if overwritten by derived class
+  modifyInitialFittedParameters(m_fittedParameter); // does nothing except if overwritten by derived class
 
 
   // set-up initial guess for fit parameters
