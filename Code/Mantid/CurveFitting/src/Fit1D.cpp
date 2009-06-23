@@ -140,6 +140,24 @@ void Fit1D::functionDeriv(double* in, double* out, double* xValues, double* yVal
   throw Exception::NotImplementedError("No derivative function provided");
 }
 
+/** Overload this function if the actual fitted parameters are different from 
+    those the user specifies. Input is an Array of initial values of the fit 
+    parameters as listed in declareParameters(). By default no changes is made
+    to these. If this method is overloaded, the method modifyFinalFittedParameters()
+    must also be overloaded.
+* @param fittedParameter Values of fitting parameters in the order listed in declareParameters()
+ */
+void Fit1D::modifyInitialFittedParameters(std::vector<double>& fittedParameter) 
+{}
+
+/** If modifyInitialFittedParameters is overloaded this method must also be overloaded
+    to reverse the effect of modifyInitialFittedParameters before outputting the results back to the user.
+* @param fittedParameter Values of fitting parameters in the order listed in declareParameters()
+ */
+void Fit1D::modifyFinalFittedParameters(std::vector<double>& fittedParameter)
+{}
+
+
 
 /** Initialisation method
  */

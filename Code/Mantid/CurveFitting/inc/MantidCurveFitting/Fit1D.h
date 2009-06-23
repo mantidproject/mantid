@@ -54,6 +54,7 @@ namespace Mantid
       virtual void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit
       virtual void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+
       double getFittedParam(const unsigned int) const;
     protected:
       // Overridden Algorithm methods
@@ -70,11 +71,11 @@ namespace Mantid
 
       /// Overload this function if the actual fitted parameters are different from
       /// those the user specifies.
-      virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter) {}
+      virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter);
 
       /// If modifyInitialFittedParameters is overloaded this method must also be overloaded
       /// to reverse the effect of modifyInitialFittedParameters before outputting the results back to the user
-      virtual void modifyFinalFittedParameters(std::vector<double>& fittedParameter) {}
+      virtual void modifyFinalFittedParameters(std::vector<double>& fittedParameter);
 
       /// Holds a copy of the value of the parameters that are actually least-squared fitted.
       std::vector<double> m_fittedParameter;
