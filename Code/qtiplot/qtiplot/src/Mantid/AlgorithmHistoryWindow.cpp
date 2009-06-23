@@ -1,5 +1,9 @@
 #include "AlgorithmHistoryWindow.h"
 
+using namespace std;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+
 // Get a reference to the logger
 //Mantid::Kernel::Logger& AlgorithmHistoryWindow::g_log = Mantid::Kernel::Logger::get("AlgorithmHistoryWindow");
 
@@ -602,4 +606,3 @@ void AlgHistoryTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
 	emit updateAlgorithmHistoryWindow(algName,nVersion);
 	QTreeWidget::mouseDoubleClickEvent(e);
 }
-

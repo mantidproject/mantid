@@ -73,7 +73,7 @@ m_progressDialog(0)
 	actionCopyRowToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
 	connect(actionCopyRowToGraphErr, SIGNAL(activated()), this, SLOT(copyRowToGraphErr()));
 
-    actionCopyDetectorsToTable = new QAction(tr("Copy detectors to Table"), this);
+    actionCopyDetectorsToTable = new QAction(tr("Copy detectors to table"), this);
 	actionCopyDetectorsToTable->setIcon(QIcon(QPixmap(table_xpm)));
 	connect(actionCopyDetectorsToTable, SIGNAL(activated()), this, SLOT(copyDetectorsToTable()));
 

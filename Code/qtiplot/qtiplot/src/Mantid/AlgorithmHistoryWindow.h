@@ -29,12 +29,6 @@
 #include "MantidKernel/Logger.h"
 #include "QMessageBox"
 
-using namespace Mantid::API;
-using namespace Mantid::Kernel;
-using namespace MantidQt::API;
-
-using namespace std;
-
 class AlgHistoryTreeWidget:public QTreeWidget
 {
     Q_OBJECT
@@ -61,6 +55,7 @@ private:
 	int m_nVersion;
 
 };
+
 class AlgExecSummaryGrpBox: public QGroupBox
 {
 	 Q_OBJECT
@@ -79,6 +74,7 @@ private:
 	QLineEdit*m_execDateTimeEdit;
 	QString m_algexecDuration;	
 };
+
 class AlgEnvHistoryGrpBox: public QGroupBox
 {
 	 Q_OBJECT
@@ -90,7 +86,7 @@ public:
 	QLineEdit* getosNameEdit()const {return m_osNameEdit;}
 	QLineEdit* getosVersionEdit()const {return m_osVersionEdit;}
 	QLineEdit* getfrmworkVersionEdit()const {return m_frmwkVersnEdit;}
-	void fillEnvHistoryGroupBox(const EnvironmentHistory& envHist);
+	void fillEnvHistoryGroupBox(const Mantid::Kernel::EnvironmentHistory& envHist);
 private:
 	QLabel *m_osNameLabel;
 	QLineEdit *m_osNameEdit;
@@ -99,33 +95,33 @@ private:
 	QLabel *m_frmworkVersionLabel;
 	QLineEdit *m_frmwkVersnEdit;
 };
+
 class AlgHistScriptButton:public QPushButton
 {
 	Q_OBJECT
 public:
 	AlgHistScriptButton(QWidget*w):QPushButton(w){}
 	AlgHistScriptButton(QString title,QWidget* w);
-    ~AlgHistScriptButton();
+  ~AlgHistScriptButton();
 };
 
 class AlgHistoryProperties;
-class AlgorithmHistoryWindow: public MantidQtDialog //QDialog 
+class AlgorithmHistoryWindow: public MantidQt::API::MantidQtDialog //QDialog 
 {
 	Q_OBJECT
 signals:
 	void updateAlgorithmHistoryWindow(QString algName);
 public:
-	AlgorithmHistoryWindow(QWidget*w):MantidQtDialog(w){}
-	AlgorithmHistoryWindow(ApplicationWindow *w,
-		const std::vector<AlgorithmHistory>&alghist,
-		const EnvironmentHistory&);
-~AlgorithmHistoryWindow();
+	AlgorithmHistoryWindow(QWidget*w) : MantidQt::API::MantidQtDialog(w){}
+	AlgorithmHistoryWindow(ApplicationWindow *w,const std::vector<Mantid::API::AlgorithmHistory>&alghist,
+	                       const Mantid::Kernel::EnvironmentHistory&);
+  ~AlgorithmHistoryWindow();
 private slots:
-		void updateAll( QString algName,int algVersion);
-		void generateScript();
+	void updateAll( QString algName,int algVersion);
+	void generateScript();
 private:
 	AlgExecSummaryGrpBox* createExecSummaryGrpBox();
-	AlgEnvHistoryGrpBox* createEnvHistGrpBox(const EnvironmentHistory& envHistory);
+	AlgEnvHistoryGrpBox* createEnvHistGrpBox(const Mantid::Kernel::EnvironmentHistory& envHistory);
 	AlgHistoryProperties * createAlgHistoryPropWindow(const QString& algName,int version);
 	void populateAlgHistoryTreeWidget();
 	QPushButton * CreateScriptButton();
@@ -134,8 +130,8 @@ private:
 	void updateAlgHistoryProperties(QString algName,int version);
 	void concatVersionwithName(QString& algName,const int version);
 	void writeToScriptFile(const QString& script);
-	string sanitizePropertyName(const string & name);
-	void handleException( const exception& e );
+	std::string sanitizePropertyName(const std::string & name);
+	void handleException( const std::exception& e );
 	void setAlgorithmName(const QString& algName);
 	const QString& getAlgorithmName() const;
 	void setAlgorithmVersion(const int& version);
@@ -143,7 +139,7 @@ private:
 	//static Mantid::Kernel::Logger& g_log;
 	
 private:
-	vector<AlgorithmHistory>m_algHist;
+	std::vector<Mantid::API::AlgorithmHistory> m_algHist;
 	QPushButton *m_scriptButton;
 	AlgHistoryTreeWidget *m_Historytree;
 	AlgHistoryProperties * m_histPropWindow; 
@@ -155,21 +151,20 @@ private:
 
 class AlgHistoryProperties: public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
    	//AlgHistoryProperties(QWidget *w,
 		//const std::vector<Mantid::API::AlgorithmHistory> &);
-	AlgHistoryProperties(QWidget*w,
-		const vector<Mantid::Kernel::PropertyHistory>& propHist);
-	void displayAlgHistoryProperties();
-	void clearData();
-	void setAlgProperties( const vector<PropertyHistory>& histProp);
-	const vector<PropertyHistory>& getAlgProperties();
+  AlgHistoryProperties(QWidget*w,const std::vector<Mantid::Kernel::PropertyHistory>& propHist);
+  void displayAlgHistoryProperties();
+  void clearData();
+  void setAlgProperties( const std::vector<Mantid::Kernel::PropertyHistory>& histProp);
+  const std::vector<Mantid::Kernel::PropertyHistory>& getAlgProperties();
 protected:
-    QTreeWidget *m_histpropTree;
+  QTreeWidget *m_histpropTree;
 private:
-	//std::vector<Mantid::API::AlgorithmHistory>m_algHist;
-	vector<Mantid::Kernel::PropertyHistory> m_Histprop;
+  //std::vector<Mantid::API::AlgorithmHistory>m_algHist;
+  std::vector<Mantid::Kernel::PropertyHistory> m_Histprop;
 };
 #endif
 
