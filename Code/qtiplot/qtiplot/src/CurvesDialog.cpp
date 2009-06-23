@@ -67,8 +67,8 @@ CurvesDialog::CurvesDialog( QWidget* parent, Qt::WFlags fl )
 	boxStyle->addItem( QPixmap(lpPlot_xpm), tr( " Line + Symbol" ) );
 	boxStyle->addItem( QPixmap(dropLines_xpm), tr( " Vertical drop lines" ) );
 	boxStyle->addItem( QPixmap(spline_xpm), tr( " Spline" ) );
-	boxStyle->addItem( QPixmap(vert_steps_xpm), tr( " Vertical steps" ) );
 	boxStyle->addItem( QPixmap(hor_steps_xpm), tr( " Horizontal steps" ) );
+	boxStyle->addItem( QPixmap(vert_steps_xpm), tr( " Vertical steps" ) );
 	boxStyle->addItem( QPixmap(area_xpm), tr( " Area" ) );
 	boxStyle->addItem( QPixmap(vertBars_xpm), tr( " Vertical Bars" ) );
 	boxStyle->addItem( QPixmap(hBars_xpm), tr( " Horizontal Bars" ) );

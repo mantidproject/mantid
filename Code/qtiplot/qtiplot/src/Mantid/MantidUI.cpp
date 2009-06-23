@@ -1608,7 +1608,8 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
 	MultiLayer* ml = appWindow()->multilayerPlot(t,lst,Graph::Line);
 	Graph *g = ml->activeGraph();
 	appWindow()->polishGraph(g,type);
-	g->setCurveStyle(0,type);
+    for(int i=0;i<g->curves();i++)
+        g->setCurveStyle(i,type);
 	ml->askOnCloseEvent(false);
 
     return ml;
