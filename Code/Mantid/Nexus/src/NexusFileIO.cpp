@@ -1286,7 +1286,7 @@ namespace NeXus
    {
        int si = spec[i];
        spectra[i] = spectraAxis->spectraNo(si);
-       const int ndet1=spectraMap.ndet(si);
+       const int ndet1=spectraMap.ndet(spectra[i]);
        detector_index[i+1]=detector_index[i]+ndet1; // points to start of detector list for the next spectrum
        detector_count[i]=ndet1;
        ndet += ndet1;
@@ -1294,7 +1294,9 @@ namespace NeXus
        const std::vector<int> detectorgroup = spectraMap.getDetectors(spectra[i]);
        std::vector<int>::const_iterator it;
        for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
-            detector_list[id++]=(*it);
+       {
+           detector_list[id++]=(*it);
+       }
    }
    // write data as Nexus sections detector{index,count,list}
    int dims[1] = { numberSpec };
@@ -1398,7 +1400,6 @@ namespace NeXus
    for(int i=0;i<nSpectra;i++)
    {
        int s = spectra[i];
-       std::cerr<<s<<'\n';
        int offset=detector_index[i];
        for(int j=0;j<detector_count[i];j++)
        {

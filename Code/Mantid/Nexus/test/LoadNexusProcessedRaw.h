@@ -179,7 +179,9 @@ void testExecOnLoadraw()
     {
 
         // Check the total number of elements in the map for HET
-        TS_ASSERT_EQUALS(map.nElements(),24964);
+        // This number is different from what we get from the RAW file because nexus SaveNexus
+        // doesn't save detectors of non-existing spectra (0 in this case)
+        TS_ASSERT_EQUALS(map.nElements(),12124);
 
         // Test one to one mapping, for example spectra 6 has only 1 pixel
         TS_ASSERT_EQUALS(map.ndet(6),1);
