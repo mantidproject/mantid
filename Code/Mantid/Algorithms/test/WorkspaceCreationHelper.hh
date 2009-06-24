@@ -101,7 +101,7 @@ public:
     x.access().resize(nbins+1);
     y.access().resize(nbins,2);
     e.access().resize(nbins,sqrt(2.0));
-    for (unsigned int i =0; i < nbins+1; ++i)
+    for (int i =0; i < nbins+1; ++i)
     {
       x.access()[i] = x0+i*deltax;
     }
