@@ -50,19 +50,20 @@ namespace NeXus
       "Name of the Nexus file to read, as a full or relative path");
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output), 
       "The name of the workspace to be created as the output. For\n"
-      "multiperiod files, one workspace will be generated for\neach period");
+      "multiperiod files, one workspace will be generated for each period");
 
     // Declare optional input parameters
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("spectrum_min",0, mustBePositive,
-      "Index number of first spectrum to read, only for single period data.");
+      "Index number of first spectrum to read, only for single period data");
     declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
-      "Index number of last spectrum to read, only for single period data.");
+      "Index number of last spectrum to read, only for single period data");
     declareProperty(new ArrayProperty<int>("spectrum_list"),
       "A comma seperated or array with the list of index number to read" );
 
-    declareProperty("EntryNumber",0, mustBePositive->clone());
+    declareProperty("EntryNumber",0, mustBePositive->clone(), 
+      "The particular entry number to read (default: the last entry)" );
   }
 
   /** Executes the algorithm. Reading in the file and creating and populating

@@ -74,8 +74,10 @@ private:
   std::vector<double> Cij;
   /// Vector that contains the prefactor coefficients Cij^2 in the range [-zm-1,zm+1]
   std::vector<double> Cij2;
-  ///
-  int z,m;
+  /// Contains the value of the property z
+  int z;
+  /// Contains the value of the property m
+  int m;
 };
 
 } // Namespace Algorithms

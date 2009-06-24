@@ -29,7 +29,8 @@ namespace Mantid
         "Name of the input workspace2D" );
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
-        "The name to use for the output workspace" );
+        "Each histogram from the input workspace maps to a histogram in this\n"
+        "workspace with one value that indicates if there was a dead detector" );
 
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0);
@@ -110,7 +111,7 @@ namespace Mantid
           {
             // Write the detector ID to file, log & the FoundDead output property
             file << " " << *it;
-            g_log.debug() << "Dead detector: " << *it << std::endl;
+            //we could write dead detectors to the log but if they are viewing the log in the MantidPlot viewer it will crash MantidPlot
             deadDets.push_back(*it);
             ++countDets;
           }
@@ -141,15 +142,14 @@ namespace Mantid
       g_log.information() << "Integrating input workspace" << std::endl;
 
       API::IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
-      //pass inputed values straight to this sub-algorithm, checking must be done there
-      childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
-      childAlg->setPropertyValue( "OutputWorkspace", outputWorkspaceName);
-      childAlg->setPropertyValue( "Range_lower",  getPropertyValue("Range_lower") );
-      childAlg->setPropertyValue( "Range_upper", getPropertyValue("Range_upper") );
-
-      // Now execute the sub-algorithm. Catch and log any error
+      // Now execute integration. Catch and log any error
       try
       {
+        //pass inputed values straight to Integration, checking must be done there
+        childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
+        childAlg->setPropertyValue( "OutputWorkspace", outputWorkspaceName);
+        childAlg->setPropertyValue( "Range_lower",  getPropertyValue("Range_lower") );
+        childAlg->setPropertyValue( "Range_upper", getPropertyValue("Range_upper") );
         childAlg->execute();
       }
       catch (std::runtime_error&)

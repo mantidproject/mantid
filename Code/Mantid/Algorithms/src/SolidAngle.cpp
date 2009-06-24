@@ -91,6 +91,13 @@ namespace Mantid
 
 			// Get the distance between the source and the sample (assume in metres)
 			Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      if ( !sample )
+      {
+        g_log.information(
+          "There appears to be no instrument information in the workspace, ");
+        g_log.information("aborting SoildAngle" );
+        throw std::logic_error("Instrument information not found");
+      }
 			Geometry::V3D samplePos = sample->getPos();
       g_log.debug() << "Sample position is " << samplePos << std::endl;
 

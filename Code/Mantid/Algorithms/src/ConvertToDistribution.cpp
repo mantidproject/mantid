@@ -19,7 +19,9 @@ void ConvertToDistribution::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>);
-  declareProperty(new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut,wsValidator));
+  declareProperty(
+    new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut,wsValidator),
+    "The name of the workspace to convert" );
 }
 
 void ConvertToDistribution::exec()

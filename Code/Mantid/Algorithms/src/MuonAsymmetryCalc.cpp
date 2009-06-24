@@ -26,14 +26,21 @@ namespace Mantid
     */
     void MuonAsymmetryCalc::init()
     {
-       declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input));
-       declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+       declareProperty(
+         new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
+         "Name of the input workspace" );
+       declareProperty(
+         new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+         "The name of the workspace to be created as the output of the algorithm" );
 	    
        BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
        zeroOrGreater->setLower(0);
-       declareProperty("ForwardSpectra", 0, Direction::Input);	   
-       declareProperty("BackwardSpectra", 1, Direction::Input);		       
-       declareProperty("Alpha",1.0,Direction::Input);
+       declareProperty("ForwardSpectra", 0,
+         "The detector number of the forward group (default 0)", Direction::Input);	   
+       declareProperty("BackwardSpectra", 1,
+         "The detector number of the backward group (default 1)", Direction::Input);		       
+       declareProperty("Alpha", 1.0, "The balance parameter (default 1)",
+         Direction::Input);
     }
 
     /** Executes the algorithm

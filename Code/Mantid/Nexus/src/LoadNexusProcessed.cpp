@@ -85,7 +85,7 @@ void LoadNexusProcessed::init()
   //  "Array, or comma separated list, of indexes of spectra to\n"
   //  "load. Not yet implemented.");
   declareProperty("EntryNumber", 0, mustBePositive,
-    "Index number of the workspace to load");
+    "The particular entry number to read (default: the last entry)" );
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

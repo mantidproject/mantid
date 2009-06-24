@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 				OptimizeReferences="2"
@@ -260,6 +260,10 @@
 			</File>
 			<File
 				RelativePath=".\src\FindPeaks1D.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\FindProblemDetectors.cpp"
 				>
 			</File>
 			<File
@@ -558,6 +562,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FindPeaksTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FindProblemDetectors.h"
 				>
 			</File>
 			<File
