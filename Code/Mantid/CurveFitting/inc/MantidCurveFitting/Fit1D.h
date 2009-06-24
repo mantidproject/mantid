@@ -76,6 +76,10 @@ namespace Mantid
       void init();
       void exec();
 
+      /// Fit1D algorithm settings. Use this method to overwrite the default algorithm settings. In particular
+      /// for now use it to specify if fitting function has derivative defined
+      virtual void overwriteDefaultSettings() {m_isDerivDefined = true;}
+
       /// Option for providing intelligent range starting value based e.g. on the user input parameter values
       virtual void modifyStartOfRange(double& startX) {}
       /// Option for providing intelligent range finishing value based e.g. on the user input parameter values
@@ -98,6 +102,8 @@ namespace Mantid
       /// Holds a copy of the names of the fitting parameters
       std::vector<std::string> m_parameterNames;
 
+      /// Does fitting function have known derivative
+      bool m_isDerivDefined;
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

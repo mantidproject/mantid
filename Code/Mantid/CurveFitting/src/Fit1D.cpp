@@ -202,9 +202,13 @@ void Fit1D::init()
  */
 void Fit1D::exec()
 {
+  // set algorithm parameters
+
+  overwriteDefaultSettings();
+
   // check if derivative defined in derived class
 
-  bool isDerivDefined = true;
+  bool isDerivDefined = m_isDerivDefined;
   /*double inTest = 0, outTest, xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
   try
   {

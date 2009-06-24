@@ -29,10 +29,7 @@ public:
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
 
 protected:
-  void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
-  {
-      throw Exception::NotImplementedError("No derivative function provided");
-  }
+  void overwriteDefaultSettings() {m_isDerivDefined = false;}
 };
 
 DECLARE_ALGORITHM(ToyAlgorithm)
