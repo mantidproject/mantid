@@ -87,6 +87,8 @@ namespace Mantid
             if (progress_step == 0) progress_step = 1;
 			for (int hist=0; hist <  histnumber;hist++)
 			{
+				// Ensure that axis information are copied to the output workspace
+				outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
 				// get const references to input Workspace arrays (no copying)
 				const std::vector<double>& XValues = inputW->readX(hist);
 				const std::vector<double>& YValues = inputW->readY(hist);
