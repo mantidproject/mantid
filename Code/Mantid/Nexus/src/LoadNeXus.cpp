@@ -195,6 +195,7 @@ namespace NeXus
          loadNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
       }
 
+      loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
