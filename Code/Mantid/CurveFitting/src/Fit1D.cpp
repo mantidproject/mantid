@@ -205,7 +205,7 @@ void Fit1D::exec()
   // check if derivative defined in derived class
 
   bool isDerivDefined = true;
-  double inTest = 0, outTest, xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
+  /*double inTest = 0, outTest, xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
   try
   {
     functionDeriv(&inTest, &outTest, &xValuesTest, &yValuesTest, &yErrorsTest, 1);
@@ -213,7 +213,7 @@ void Fit1D::exec()
   catch (Exception::NotImplementedError e)
   {
     isDerivDefined = false;
-  }
+  }*/
 
 
   // Try to retrieve optional properties
