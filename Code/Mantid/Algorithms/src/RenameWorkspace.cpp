@@ -43,11 +43,8 @@ void RenameWorkspace::exec()
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",localworkspace);
 
-	//get the name of the input workspace
-	std::string& inputWorkspaceName = getPropertyValue("InputWorkspace");
-
 	//remove the input workspace from the analysis data service
-	AnalysisDataService::Instance().remove(inputWorkspaceName);
+	AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace"));
 
   return;
 }
