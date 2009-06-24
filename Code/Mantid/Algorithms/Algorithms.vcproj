@@ -359,6 +359,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\RenameWorkspace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ReplaceSpecialValues.cpp"
 				>
 			</File>
@@ -710,6 +714,14 @@
 			</File>
 			<File
 				RelativePath=".\test\RemoveBinsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\RenameWorkspace.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\RenameWorkspaceTest.h"
 				>
 			</File>
 			<File
