@@ -8,6 +8,7 @@
 #else
 #include <unistd.h>
 #include <sys/sysinfo.h>
+#include <malloc.h>
 #endif
 
 #include "MantidAPI/MemoryManager.h"
@@ -77,6 +78,10 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
     mi.totalMemory = totPages / 1024 * pageSize;
     mi.freeRatio = int(100 * double(mi.availMemory) / mi.totalMemory);
   }
+  // Can get the info on the memory that we've already obtained but aren't using right now
+  const int unusedReserved = mallinfo().fordblks/1024;
+  g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
+  mi.availMemory += unusedReserved;
 #endif
   return mi;
 }
