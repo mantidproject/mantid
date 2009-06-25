@@ -63,9 +63,9 @@ namespace Mantid
 
     protected:
       /// overwrite base class methods
-      virtual void function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+      virtual void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
       virtual void declareParameters();
-      virtual void functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData);
+      virtual void functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
       virtual void modifyStartOfRange(double& startX);
       virtual void modifyEndOfRange(double& endX);
       virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter);

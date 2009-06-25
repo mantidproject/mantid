@@ -61,12 +61,12 @@ void Gaussian1D::modifyFinalFittedParameters(std::vector<double>& fittedParamete
 }
 
 
-void Gaussian1D::function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+void Gaussian1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
-    double bg0 = in[0];
-    double height = in[1];
-    double peakCentre = in[2];
-    double weight = in[3];
+    const double& bg0 = in[0];
+    const double& height = in[1];
+    const double& peakCentre = in[2];
+    const double& weight = in[3];
 
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
@@ -75,11 +75,11 @@ void Gaussian1D::function(double* in, double* out, double* xValues, double* yVal
     }
 }
 
-void Gaussian1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+void Gaussian1D::functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
-    double height = in[1];
-    double peakCentre = in[2];
-    double weight = in[3];
+    const double& height = in[1];
+    const double& peakCentre = in[2];
+    const double& weight = in[3];
 
     int nParam = m_parameterNames.size();
     for (int i = 0; i < nData; i++) {

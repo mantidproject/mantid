@@ -38,9 +38,9 @@ struct FitData {
   /// the data to be fitted (abscissae)
   double * X;
   /// the data to be fitted (ordinates)
-  double * Y;
+  const double * Y;
   /// the standard deviations of the Y data points
-  double * sigmaData;
+  const double * sigmaData;
   /// pointer to instance of Fit1D
   Fit1D* fit1D;
   /// Needed to use the simplex algorithm within the gsl least-squared framework.
@@ -135,7 +135,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 * @param yErrors Errors (standard deviations) on yValues
 * @param nData Number of data points
  */
-void Fit1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+void Fit1D::functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
   throw Exception::NotImplementedError("No derivative function provided");
 }
@@ -202,23 +202,22 @@ void Fit1D::init()
  */
 void Fit1D::exec()
 {
-  // set algorithm parameters
-
-  overwriteDefaultSettings();
-
   // check if derivative defined in derived class
 
-  bool isDerivDefined = m_isDerivDefined;
-  /*double inTest = 0, outTest, xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
+  bool isDerivDefined;
+  double *inTest; 
+  inTest = new double[m_parameterNames.size()];  // need to allocate this to avoid memory problem when calling functionDeriv below
+  double outTest, xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
   try
   {
-    functionDeriv(&inTest, &outTest, &xValuesTest, &yValuesTest, &yErrorsTest, 1);
+    // note nData set to zero (last argument) hence this should avoid further memory problems
+    functionDeriv(inTest, &outTest, &xValuesTest, &yValuesTest, &yErrorsTest, 0); 
   }
   catch (Exception::NotImplementedError e)
   {
     isDerivDefined = false;
-  }*/
-
+  }
+  delete [] inTest;
 
   // Try to retrieve optional properties
   int histNumber = getProperty("SpectrumIndex");
@@ -292,8 +291,6 @@ void Fit1D::exec()
   if (l_data.n < l_data.p)
     g_log.warning("Number of data points less than number of parameters to be fitted.");
   l_data.X = new double[l_data.n];
-  l_data.Y = new double[l_data.n];
-  l_data.sigmaData = new double[l_data.n];
   l_data.fit1D = this;
   l_data.forSimplexLSwrap = new double[l_data.n];
 
@@ -306,10 +303,10 @@ void Fit1D::exec()
       l_data.X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take mid-point if histogram bin
     else
       l_data.X[i] = XValues[m_minX+i];
-
-    l_data.Y[i] = YValues[m_minX+i];
-    l_data.sigmaData[i] = YErrors[m_minX+i];
   }
+
+  l_data.Y = &YValues[m_minX];
+  l_data.sigmaData = &YErrors[m_minX];
 
 
   // create array of fitted parameter. Take these to those input by the user. However, for doing the
@@ -456,8 +453,8 @@ void Fit1D::exec()
   // clean up dynamically allocated gsl stuff
 
   delete [] l_data.X;
-  delete [] l_data.Y;
-  delete [] l_data.sigmaData;
+  //delete [] l_data.Y;
+  //delete [] l_data.sigmaData;
   delete [] l_data.forSimplexLSwrap;
 
   gsl_vector_free(initFuncArg);
@@ -479,10 +476,6 @@ double Fit1D::getFittedParam(const unsigned int i) const
 		throw std::range_error("Fitted parameter out of range");
 	return m_fittedParameter[i];
 }
-
-
-
-
 
 
 } // namespace Algorithm

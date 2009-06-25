@@ -41,14 +41,14 @@ void BackToBackExponential1D::declareParameters()
 
 
 
-void BackToBackExponential1D::function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+void BackToBackExponential1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
-    double I = in[0];
-    double a = in[1];
-    double b = in[2];
-    double x0 = in[3];
-    double s = in[4];
-    double bk = in[5];
+    const double& I = in[0];
+    const double& a = in[1];
+    const double& b = in[2];
+    const double& x0 = in[3];
+    const double& s = in[4];
+    const double& bk = in[5];
 
     double s2 = s*s;
     for (int i = 0; i < nData; i++) {
@@ -59,13 +59,13 @@ void BackToBackExponential1D::function(double* in, double* out, double* xValues,
     }
 }
 
-void BackToBackExponential1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+void BackToBackExponential1D::functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
-    double I = in[0];
-    double a = in[1];
-    double b = in[2];
-    double x0 = in[3];
-    double s = in[4];
+    const double& I = in[0];
+    const double& a = in[1];
+    const double& b = in[2];
+    const double& x0 = in[3];
+    const double& s = in[4];
 
     double s2 = s*s;
     int nParam = m_parameterNames.size();

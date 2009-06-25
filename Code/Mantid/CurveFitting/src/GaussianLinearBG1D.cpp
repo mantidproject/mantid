@@ -64,13 +64,13 @@ void GaussianLinearBG1D::modifyFinalFittedParameters(std::vector<double>& fitted
 }
 
 
-void GaussianLinearBG1D::function(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+void GaussianLinearBG1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
-    double bg0 = in[0];
-    double bg1 = in[1];
-    double height = in[2];
-    double peakCentre = in[3];
-    double weight = in[4];
+    const double& bg0 = in[0];
+    const double& bg1 = in[1];
+    const double& height = in[2];
+    const double& peakCentre = in[3];
+    const double& weight = in[4];
 
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
@@ -79,11 +79,11 @@ void GaussianLinearBG1D::function(double* in, double* out, double* xValues, doub
     }
 }
 
-void GaussianLinearBG1D::functionDeriv(double* in, double* out, double* xValues, double* yValues, double* yErrors, int nData)
+void GaussianLinearBG1D::functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
-    double height = in[2];
-    double peakCentre = in[3];
-    double weight = in[4];
+    const double& height = in[2];
+    const double& peakCentre = in[3];
+    const double& weight = in[4];
 
     int nParam = m_parameterNames.size();
     for (int i = 0; i < nData; i++) {
