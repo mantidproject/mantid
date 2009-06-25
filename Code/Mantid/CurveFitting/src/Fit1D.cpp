@@ -205,19 +205,20 @@ void Fit1D::exec()
   // check if derivative defined in derived class
 
   bool isDerivDefined;
-  double *inTest; 
-  inTest = new double[m_parameterNames.size()];  // need to allocate this to avoid memory problem when calling functionDeriv below
-  double outTest, xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
+  double *inTest = new double[m_parameterNames.size()];  // need to allocate this to avoid memory problem when calling functionDeriv below
+  double *outTest = new double[m_parameterNames.size()];
+  double xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
   try
   {
     // note nData set to zero (last argument) hence this should avoid further memory problems
-    functionDeriv(inTest, &outTest, &xValuesTest, &yValuesTest, &yErrorsTest, 0); 
+    functionDeriv(&(inTest[0]), &(outTest[0]), &xValuesTest, &yValuesTest, &yErrorsTest, 0); 
   }
   catch (Exception::NotImplementedError e)
   {
     isDerivDefined = false;
   }
   delete [] inTest;
+  delete [] outTest;
 
   // Try to retrieve optional properties
   int histNumber = getProperty("SpectrumIndex");
@@ -453,8 +454,6 @@ void Fit1D::exec()
   // clean up dynamically allocated gsl stuff
 
   delete [] l_data.X;
-  //delete [] l_data.Y;
-  //delete [] l_data.sigmaData;
   delete [] l_data.forSimplexLSwrap;
 
   gsl_vector_free(initFuncArg);
