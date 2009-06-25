@@ -3,8 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidCurveFitting/Fit1D.h"
-#include "MantidCurveFitting/GaussianLinearBG1D.h"
+//#include "MantidCurveFitting/Fit1D.h"
+//#include "MantidCurveFitting/GaussianLinearBG1D.h"
 #include <fstream>
 #include <ostream>
 #include <iomanip>
@@ -111,49 +111,44 @@ void GetDetectorOffsets::retrieveProperties()
 
 double GetDetectorOffsets::fitSpectra(const int s)
 {
-	IAlgorithm_sptr fit_alg;
-	  try
-	  {
-	    fit_alg = createSubAlgorithm("Gaussian1D");
-	  }
-	  catch (Exception::NotFoundError)
-	  {
-	    g_log.error("Can't locate Gaussian1D");
-	    throw;
-	  }
-	  fit_alg->setProperty("InputWorkspace",inputW);
-	  fit_alg->setProperty("SpectrumIndex",s);
-	  fit_alg->setProperty("StartX",Xmin);
-	  fit_alg->setProperty("EndX",Xmax);
-	  fit_alg->setProperty("bg0",0.0);
-	  fit_alg->setProperty("bg1",0.0);
-	  fit_alg->setProperty("height",1.0);
-	  fit_alg->setProperty("peakCentre",0.0);
-	  fit_alg->setProperty("sigma",10.0);
-	  fit_alg->setProperty("MaxIterations",100);
+  IAlgorithm_sptr fit_alg;
+  try
+  {
+    fit_alg = createSubAlgorithm("Gaussian1D");
+  } catch (Exception::NotFoundError)
+  {
+    g_log.error("Can't locate Gaussian1D");
+    throw ;
+  }
+  fit_alg->setProperty("InputWorkspace",inputW);
+  fit_alg->setProperty("SpectrumIndex",s);
+  fit_alg->setProperty("StartX",Xmin);
+  fit_alg->setProperty("EndX",Xmax);
+  fit_alg->setProperty("bg0",0.0);
+  fit_alg->setProperty("bg1",0.0);
+  fit_alg->setProperty("height",1.0);
+  fit_alg->setProperty("peakCentre",0.0);
+  fit_alg->setProperty("sigma",10.0);
+  fit_alg->setProperty("MaxIterations",100);
 
+  try
+  {
+    fit_alg->execute();
+  }
+  catch (std::runtime_error)
+  {
+    g_log.error("Unable to successfully run Gausssian1D sub-algorithm");
+    throw;
+  }
 
-	    try {
-	      fit_alg->execute();
-	    } catch (std::runtime_error) {
-	      g_log.error("Unable to successfully run Gausssian1D sub-algorithm");
-	      throw;
-	    }
+  if ( ! fit_alg->isExecuted() )
+  {
+    g_log.error("Unable to successfully run Gaussian1D sub-algorithm");
+    throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
+  }
 
-	    if ( ! fit_alg->isExecuted() )
-	    {
-	      g_log.error("Unable to successfully run Gaussian1D sub-algorithm");
-	      throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
-	    }
-
-	    std::ostringstream mess;
-	    CurveFitting::Fit1D* test=dynamic_cast<CurveFitting::Fit1D*>(fit_alg.get());
-	    double offset=0;
-	    if (test)
-	    {
-	    	offset=test->getFittedParam(3);
-	    }
-	    return (-offset*step/(dreference+offset*step));
+  const double offset = fit_alg->getProperty("peakCentre");  
+  return (-offset*step/(dreference+offset*step));
 }
 
 
