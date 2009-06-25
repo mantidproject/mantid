@@ -87,8 +87,16 @@ namespace Mantid
             if (progress_step == 0) progress_step = 1;
 			for (int hist=0; hist <  histnumber;hist++)
 			{
-				// Ensure that axis information are copied to the output workspace
-				outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
+				// Ensure that axis information are copied to the output workspace if the axis exists
+			        try
+				{
+				  outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
+				}
+				catch( Exception::IndexError& )
+				{ 
+				  // Not a Workspace2D
+				}
+
 				// get const references to input Workspace arrays (no copying)
 				const std::vector<double>& XValues = inputW->readX(hist);
 				const std::vector<double>& YValues = inputW->readY(hist);
@@ -125,7 +133,7 @@ namespace Mantid
 			  if (inputW->getAxis(1)->unit().get())
 			    outputW->getAxis(1)->unit() = inputW->getAxis(1)->unit();
 			}
-			catch(Exception::IndexError) {
+			catch(Exception::IndexError&) {
 			  // OK, so this isn't a Workspace2D
 			}
 
