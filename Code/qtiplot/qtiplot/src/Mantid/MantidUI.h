@@ -23,6 +23,7 @@
 #include <QMap>
 #include <QMutex>
 
+
 //----------------------------------
 // Forward declarations
 //----------------------------------
@@ -263,6 +264,8 @@ public slots:
 
     void createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
 
+
+
     // Slots responding to MantidMatrix context menu commands
     void copyRowToTable();
     void copyColumnToTable();
@@ -278,7 +281,7 @@ public slots:
 
     // Execute algorithm given name and version
     void executeAlgorithm(QString algName, int version);
-
+	
     // Show Qt critical error message box
     void showCritical(const QString&);
 
@@ -317,13 +320,18 @@ public slots:
 	void importSampleLog(const QString & filename, const QString & data, bool numeric);
 	void importNumSampleLog(const QString &wsName, const QString & logname, int filter);
 
-  // Clear all Mantid related memory
-  void clearAllMemory();
+	// Clear all Mantid related memory
+	void clearAllMemory();
+	// Ticket #672
+	//for loading and saving nexus workspace
+	void loadNexusWorkspace();
+	void saveNexusWorkspace();
 
 private slots:
 
     // Called in response to closedWindow(...) signal from a window with dependecies
-    void closeDependents(MdiSubWindow* w);
+    void closeDependents(MdiSubWindow* w); 
+	
 
 #ifdef _WIN32
 public: 
@@ -352,6 +360,11 @@ private:
 
     // Sets the dependence between sindows: if the first one closes the second must close too.
     void setDependency(MdiSubWindow*,MdiSubWindow*);
+
+	//#678
+    //for savenexus algorithm
+	void executeSaveNexus(QString algName,int version);
+
 	
 
 	

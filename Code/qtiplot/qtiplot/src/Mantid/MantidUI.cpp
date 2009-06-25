@@ -107,7 +107,10 @@ m_progressDialog(0)
 
     mantidMenu = new QMenu(m_appWindow);
     mantidMenu->setObjectName("mantidMenu");
-    connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
+	// for activating the keyboard shortcut for Clear All Memory even if no clciking on Mantid Menu
+	// Ticket #672
+    //connect(mantidMenu, SIGNAL(aboutToShow()), this, SLOT(mantidMenuAboutToShow()));
+	mantidMenuAboutToShow();
 
     menuMantidMatrix = new QMenu(m_appWindow);
 	connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
@@ -121,10 +124,10 @@ m_progressDialog(0)
         qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
     }
 
-    QAction* tstAction = new QAction("Test",this);
+   /* QAction* tstAction = new QAction("Test",this);
     tstAction->setShortcut(QKeySequence::fromString("Ctrl+A"));
     connect(tstAction,SIGNAL(triggered()), this, SLOT(test()));
-    mantidMenu->addAction(tstAction);
+    mantidMenu->addAction(tstAction);*/
 
 }
 
@@ -215,7 +218,24 @@ void MantidUI::loadWorkspace()
   //Just use the generic executeAlgorithm method which now uses specialised dialogs if they are
   //available
   executeAlgorithm("LoadRaw", -1);
+ 
  }
+/** 
+    Ticket #678
+*/
+void MantidUI::loadNexusWorkspace()
+{
+	executeAlgorithm("LoadNexus", -1);
+	
+}
+/** 
+    
+    Ticket #678
+*/
+void MantidUI::saveNexusWorkspace()
+{	
+	executeSaveNexus("SaveNexus",-1);
+}
 
 /**
     loadDAEWorkspace
@@ -765,7 +785,63 @@ void MantidUI::executeAlgorithm()
     }
     executeAlgorithm(algName, version);
 }
+/**
+    executes Save Nexus
+	saveNexus Input Dialog is a generic dialog.Below code is added to remove 
+	the workspaces except the selected workspace from the InputWorkspace combo 
 
+*/
+void MantidUI::executeSaveNexus(QString algName,int version)
+{
+	QString selctedWsName = getSelectedWorkspaceName();
+	Mantid::API::IAlgorithm_sptr alg;
+	try
+	{
+		alg=Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+	
+	}
+	catch(...)
+	{
+		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
+		return;
+	}
+	if (alg)
+	{		
+		MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), (QWidget*)parent());
+		if( !dlg ) return;
+		//getting the combo box which has input workspaces and removing the workspaces except the selected one
+		QComboBox *combo =dlg->findChild<QComboBox*>();
+		if(combo)
+		{
+			int count=combo->count();
+			int index=count-1;
+			while(count>1)
+			{
+				int selectedIndex=combo->findText(selctedWsName,Qt::MatchExactly );
+				if(selectedIndex!=index)
+				{
+					combo->removeItem(index);
+					count=combo->count();
+				}
+				index=index-1;
+			
+			}
+		
+		}//end of if loop for combo
+		if ( dlg->exec() == QDialog::Accepted) 
+		{ 
+			delete dlg;
+			executeAlgorithmAsync(alg); 
+		}
+		else
+		{
+			delete dlg;
+		}
+	}
+
+
+
+}
 void MantidUI::executeAlgorithm(QString algName, int version)
 {
 
@@ -886,6 +962,12 @@ void MantidUI::logMessage(const Poco::Message& msg)
     if (!appWindow()->results) return;
     QString str = msg.getText().c_str();
     //if (s_logEdit->document()->blockCount() > 1000) s_logEdit->document()->clear();
+	//Ticket #671
+	//to display the logwindow if there is ann error or higher log message
+	if (msg.getPriority() <= Poco::Message::PRIO_ERROR)
+	{
+		appWindow()->logWindow->show();
+	}
     if (msg.getPriority() < Poco::Message::PRIO_WARNING)
         appWindow()->results->setTextColor(Qt::red);
     else
@@ -954,9 +1036,12 @@ void MantidUI::showMantidInstrument(const QString& wsName)
 void MantidUI::showMantidInstrument()
 {
 	QStringList wsNames=getWorkspaceNames();
-	bool ok;
-	QString selectedName = QInputDialog::getItem(appWindow(),tr("Select Workspace"), tr("Please select your workspace"), wsNames, 0, false,&ok);
-	if(ok) showMantidInstrument(selectedName);
+	if(!wsNames.isEmpty())
+	{
+		bool ok;
+		QString selectedName = QInputDialog::getItem(appWindow(),tr("Select Workspace"), tr("Please select your workspace"), wsNames, 0, false,&ok);
+		if(ok) showMantidInstrument(selectedName);
+	}
 }
 
 void MantidUI::showMantidInstrumentSelected()
@@ -968,10 +1053,26 @@ void MantidUI::showMantidInstrumentSelected()
 void MantidUI::mantidMenuAboutToShow()
 {
 	mantidMenu->clear();
-	
-	mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
+	// Ticket #672
+	/*mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
 	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
-	mantidMenu->insertItem(tr("&Clear All Memory"), this, SLOT(clearAllMemory()) );
+	mantidMenu->insertItem(tr("&Plot Memory Usage"), this, SLOT(manageMantidWorkspaces() ));
+	*/
+
+	QAction* tstAction = new QAction("&Instrument Window",this);
+	connect(tstAction,SIGNAL(triggered()), this, SLOT(showMantidInstrument()));
+	mantidMenu->addAction(tstAction);
+
+	tstAction = new QAction("&Plot Memory Usage",this);
+	connect(tstAction,SIGNAL(triggered()), this, SLOT(manageMantidWorkspaces() ));
+	mantidMenu->addAction(tstAction);
+
+	tstAction = new QAction("&Clear All Memory",this);
+	tstAction->setShortcut(QKeySequence::fromString("Ctrl+ALT+C"));
+	connect(tstAction,SIGNAL(triggered()), this, SLOT(clearAllMemory() ));
+	mantidMenu->addAction(tstAction);
+	
+	
 }
 
 void MantidUI::insertMenu()

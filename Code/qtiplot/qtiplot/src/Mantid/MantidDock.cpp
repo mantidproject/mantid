@@ -60,9 +60,14 @@ QDockWidget(w)
     connect(loadRawAction,SIGNAL(activated()),m_mantidUI,SLOT(loadWorkspace()));
     QAction *loadDAEAction = new QAction("Load from DAE",this);
     connect(loadDAEAction,SIGNAL(activated()),m_mantidUI,SLOT(loadDAEWorkspace()));
+
+	QAction *loadNexusAction = new QAction("Load Nexus",this);
+	connect(loadNexusAction,SIGNAL(activated()),m_mantidUI,SLOT(loadNexusWorkspace()));
+
     loadMenu->addAction(loadRawAction);
     loadMenu->addAction(loadDAEAction);
-    m_loadButton->setMenu(loadMenu);
+	loadMenu->addAction(loadNexusAction);
+	 m_loadButton->setMenu(loadMenu);
 
     connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
     connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
@@ -306,6 +311,11 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     action = new QAction("Load from DAE",this);
     connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadDAEWorkspace()));
     menu->addAction(action);
+
+	 action = new QAction("Load Nexus",this);
+	 connect(action,SIGNAL(triggered()),m_mantidUI,SLOT(loadNexusWorkspace()));
+	 menu->addAction(action);
+
   }
   //else show instrument, sample logs and delete
   else
@@ -356,6 +366,14 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
 	  if(grpWSPstr||bDisable)
 	  {action->setEnabled(false);
 	  }
+      
+	 action = new QAction("Save Nexus",this);
+	 connect(action,SIGNAL(activated()),m_mantidUI,SLOT(saveNexusWorkspace()));
+	 menu->addAction(action);
+	 if(grpWSPstr||bDisable)
+	  {action->setEnabled(false);
+	  }
+
 
 	  //separate delete
 	  menu->addSeparator();
