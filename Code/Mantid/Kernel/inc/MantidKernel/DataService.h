@@ -183,10 +183,10 @@ public:
       return;
     }
 
-    datamap.erase(it);
-//    notificationCenter.postNotification(new DeleteNotification(name,it->second));
-    notificationCenter.postNotification(new DeleteNotification(name,boost::shared_ptr<T>()));
+    notificationCenter.postNotification(new DeleteNotification(name,it->second));
+//    notificationCenter.postNotification(new DeleteNotification(name,boost::shared_ptr<T>()));
     g_log.information("Data Object '"+ name +"' deleted from data service.");
+    datamap.erase(it);
 
     return;
   }
