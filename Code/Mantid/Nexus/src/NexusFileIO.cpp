@@ -19,6 +19,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
@@ -1277,6 +1278,7 @@ namespace NeXus
    int *detector_count=new int[numberSpec];
    int *detector_list=new int[nDetectors];
    int *spectra=new int[numberSpec];
+   double *detPos = new double[nDetectors*3];
    detector_index[0]=0;
    int id=0;
 
@@ -1299,7 +1301,7 @@ namespace NeXus
        }
    }
    // write data as Nexus sections detector{index,count,list}
-   int dims[1] = { numberSpec };
+   int dims[2] = { numberSpec, 0 };
    status=NXcompmakedata(fileID, "detector_index", NX_INT32, 1, dims,m_nexuscompression,dims);
    status=NXopendata(fileID, "detector_index");
    status=NXputdata(fileID, (void*)detector_index);
@@ -1321,11 +1323,50 @@ namespace NeXus
    status=NXopendata(fileID, "spectra");
    status=NXputdata(fileID, (void*)spectra);
    status=NXclosedata(fileID);
+   //
+   try
+   {
+       Mantid::Geometry::IObjComponent_const_sptr sample = localworkspace->getInstrument()->getSample();
+       Mantid::Geometry::V3D sample_pos = sample->getPos();
+       for(int i=0;i<ndet;i++)
+       {
+           double R,Theta,Phi;
+           try
+           {
+               boost::shared_ptr<Mantid::Geometry::IDetector> det = localworkspace->getInstrument()->getDetector(detector_list[i]);
+               Mantid::Geometry::V3D pos = det->getPos() - sample_pos;
+               pos.getSpherical(R,Theta,Phi);
+               R = det->getDistance(*sample);
+               Theta = localworkspace->detectorTwoTheta(det)*180.0/M_PI;
+           }
+           catch(...)
+           {
+               R = 0.;
+               Theta = 0.;
+               Phi = 0.;
+           }
+           // Need to get R & Theta through these methods to be correct for grouped detectors
+           detPos[3*i] = R;
+           detPos[3*i + 1] = Theta;
+           detPos[3*i + 2] = Phi;
+       }
+       dims[0]=ndet;
+       dims[1]=3;
+       status=NXcompmakedata(fileID, "detector_positions", NX_FLOAT64, 2, dims, m_nexuscompression,dims);
+       status=NXopendata(fileID, "detector_positions");
+       status=NXputdata(fileID, (void*)detPos);
+       status=NXclosedata(fileID);
+   }
+   catch(...)
+   {
+       g_log.error("Unknown error cought when saving detector positions.");
+   }
    // tidy up
    delete[] detector_list;
    delete[] detector_index;
    delete[] detector_count;
    delete[] spectra;
+   delete[] detPos;
    //
    status=NXclosegroup(fileID); // close detector group
    status=NXclosegroup(fileID); // close instrument group
