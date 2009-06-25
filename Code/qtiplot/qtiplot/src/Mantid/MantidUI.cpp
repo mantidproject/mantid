@@ -1053,7 +1053,8 @@ void MantidUI::showMantidInstrumentSelected()
 void MantidUI::mantidMenuAboutToShow()
 {
 	mantidMenu->clear();
-	// Ticket #672
+	// Ticket #672 Mantid Menu Improvements
+
 	/*mantidMenu->insertItem(tr("&Manage Workspaces"), this, SLOT(manageMantidWorkspaces() ) );
 	mantidMenu->insertItem(tr("&Instrument Window"), this, SLOT(showMantidInstrument() ) );
 	mantidMenu->insertItem(tr("&Plot Memory Usage"), this, SLOT(manageMantidWorkspaces() ));
@@ -1068,7 +1069,7 @@ void MantidUI::mantidMenuAboutToShow()
 	mantidMenu->addAction(tstAction);
 
 	tstAction = new QAction("&Clear All Memory",this);
-	tstAction->setShortcut(QKeySequence::fromString("Ctrl+ALT+C"));
+	tstAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
 	connect(tstAction,SIGNAL(triggered()), this, SLOT(clearAllMemory() ));
 	mantidMenu->addAction(tstAction);
 	
