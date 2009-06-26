@@ -60,7 +60,7 @@ void SaveGSS::exec()
   	ext=filename.substr(pos+1,filename.npos);
   	filename=filename.substr(0,pos);
   }
-  bank=getProperty("Bank");
+  int bank=getProperty("Bank");
   std::string split=getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
