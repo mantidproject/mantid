@@ -13,11 +13,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Takes a histogram in a 2D workspace and fit it to a gaussian on top of a flat background.
-    i.e. the function: bg0+height*exp(-0.5*((x-peakCentre)/sigma)^2).
-
-    This function actually performs the fitting on 1/sigma^2 rather than sigma
-    for stability reasons.
+    Fits a histogram in a 2D workspace to a user defined function.
 
     Properties:
     <UL>
@@ -26,16 +22,18 @@ namespace Mantid
     <LI> SpectrumIndex - The spectrum to fit, using the workspace numbering of the spectra (default 0)</LI>
     <LI> StartX - X value to start fitting from (default to -6*sigma away from the peakCentre)</LI>
     <LI> EndX - last X value to include in fitting range (default to +6*sigma away from the peakCentre)</LI>
-
-    <LI> bg0 - background intercept value (default 0.0)</LI>
-    <LI> height - height of peak (default 0.0)</LI>
-    <LI> peakCentre - centre of peak (default 0.0)</LI>
-    <LI> sigma - standard deviation (default 1.0)</LI>
-
     <LI> MaxIterations - Max iterations (default 500)</LI>
-
     <LI> Output Status - whether the fit was successful. Direction::Output</LI>
     <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
+
+    <LI> Function - The user defined function. It must have x as its argument.</LI>
+    <LI> InitialParameters - A list of initial values for the parameters in the function. It is a comma separated
+            list of name=value items where name is the name of a parameter and value is its initial vlaue.
+            The name=value pairs can appear in any order in the list. The parameters that are not set in this property
+            will be given the default initial value of 0.0</LI>
+    <LI> Parameters - The output table workspace with the final values of the fit parameters</LI>
+    <LI> OutputWorkspace - A matrix workspace to hold the resulting model spectrum, the initial histogram and the difference
+            between them</LI>
     </UL>
 
     @author Roman Tolchenov, Tessella plc
@@ -86,7 +84,7 @@ namespace Mantid
 
           static double* AddVariable(const char *varName, void *palg);
 
-      //private:
+      private:
           /// muParser instance
           mu::Parser m_parser;
           /// Used as 'x' variable in m_parser.
