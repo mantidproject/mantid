@@ -115,7 +115,7 @@ void SimpleIntegration::exec()
     MantidVec::difference_type distmax=std::distance(X.begin(),highit);
 
     if (distmin0 != distmin || distmax0 != distmax)
-        g_log.information()<<"Starting with spectrum "<<i<<" bins selected: from "<<distmin<<" ("<<*(X.begin()+distmin)
+        g_log.debug()<<"Starting with spectrum "<<i<<" bins selected: from "<<distmin<<" ("<<*(X.begin()+distmin)
         <<") to "<<distmax<<" ("<<*(X.begin()+distmax)<<")\n";
 
     distmin0 = distmin;

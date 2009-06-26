@@ -2,7 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SumSpectra.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -14,6 +16,8 @@ DECLARE_ALGORITHM(SumSpectra)
 
 using namespace Kernel;
 using namespace API;
+using DataObjects::Workspace2D;
+using DataObjects::Workspace2D_const_sptr;
 
 // Get a reference to the logger
 Logger& SumSpectra::g_log = Logger::get("SumSpectra");
@@ -24,8 +28,9 @@ Logger& SumSpectra::g_log = Logger::get("SumSpectra");
 void SumSpectra::init()
 {
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new CommonBinsValidator<>),
-    "The workspace containing the spectra to be summed" );
+    new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,
+                                       new CommonBinsValidator<Workspace2D>),
+                                       "The workspace containing the spectra to be summed" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
@@ -52,7 +57,7 @@ void SumSpectra::exec()
   m_MaxSpec = getProperty("EndSpectrum");
 
   // Get the input workspace
-  MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+  Workspace2D_const_sptr localworkspace = getProperty("InputWorkspace");
 
   const int numberOfSpectra = localworkspace->getNumberHistograms();
   const int YLength = localworkspace->blocksize();
@@ -73,15 +78,19 @@ void SumSpectra::exec()
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,
 			1,localworkspace->readX(0).size(),YLength);
 
-  int progress_step = (m_MaxSpec-m_MinSpec+1) / 100;
-  if (progress_step == 0) progress_step = 1;
+  Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
   
-	// Create vectors to hold result
-  std::vector<double> XResult = localworkspace->readX(0);
-  std::vector<double> YSum(localworkspace->readY(0).size(),0);
-  std::vector<double> YError(localworkspace->readY(0).size(),0);
+  // Copy over the bin boundaries
+  outputWorkspace->dataX(0) = localworkspace->readX(0);
+	// Get references to the output workspaces's data vectors
+  MantidVec& YSum = outputWorkspace->dataY(0);
+  MantidVec& YError = outputWorkspace->dataE(0);
+  // Get a reference to the spectra-detector map
+  SpectraDetectorMap& specMap = outputWorkspace->mutableSpectraMap();
+  const Axis* const spectraAxis = localworkspace->getAxis(1);
+
   // Loop over spectra
-  for (int i = m_MinSpec, j = 0; i <= m_MaxSpec; ++i,++j)
+  for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
     // Retrieve the spectrum into a vector
     const std::vector<double>& YValues = localworkspace->readY(i);
@@ -93,18 +102,13 @@ void SumSpectra::exec()
       YError[k] += YErrors[k]*YErrors[k];
     }
    
-    if (j % progress_step == 0)
-    {
-        interruption_point();
-        progress( double(j)/(m_MaxSpec-m_MinSpec+1) );
-    }
+    // Map all the detectors onto the spectrum of the output (which is 0)
+    specMap.addSpectrumEntries(0,specMap.getDetectors(spectraAxis->spectraNo(i)));
 
+    progress.report();
   }
-  outputWorkspace->dataX(0) = XResult;
-  outputWorkspace->dataY(0) = YSum;
 	//take the square root of all the accumulated squared errors - Assumes Gaussian errors
-  std::transform(YError.begin(), YError.end(), YError.begin(),dblSqrt);
-  outputWorkspace->dataE(0) = YError;
+  std::transform(YError.begin(), YError.end(), YError.begin(), dblSqrt);
 	
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",outputWorkspace);
