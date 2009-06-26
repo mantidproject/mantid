@@ -38,6 +38,7 @@ void SaveGSS::init()
   Split[1] = "False";
   declareProperty("SplitFiles", "True", new Kernel::ListValidator(Split),
     "Save each spectrum in a different file (default true)" );
+  declareProperty("Bank",1);
 }
 
 /**
@@ -59,7 +60,7 @@ void SaveGSS::exec()
   	ext=filename.substr(pos+1,filename.npos);
   	filename=filename.substr(0,pos);
   }
-
+  bank=getProperty("Bank");
   std::string split=getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
@@ -96,7 +97,7 @@ void SaveGSS::exec()
 		double bc4=(X[1]-X[0])/X[0];
 		out << "# Data for spectra :"<< i << std::endl;
 		out << "BANK "
-				<< std::fixed << std::setprecision(0) << (i+1) // First bank should be 1 for GSAS
+				<< std::fixed << std::setprecision(0) << bank // First bank should be 1 for GSAS
 				<< std::fixed << " " << datasize
 				<< std::fixed << " " << datasize
 				<< std::fixed << " " << "RALF"
