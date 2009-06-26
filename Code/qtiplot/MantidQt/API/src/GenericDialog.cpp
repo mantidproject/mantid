@@ -62,16 +62,18 @@ void GenericDialog::initLayout()
         AlgorithmInputHistory::Instance().hasPreviousInput(QString::fromStdString(getAlgorithm()->name()), oldValues);
 
         //Each property is on its own row
-        int row(0);
+        int row(-1);
         std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = getAlgorithm()->getProperties().end();
         for ( std::vector<Mantid::Kernel::Property*>::const_iterator pIter = getAlgorithm()->getProperties().begin();
-            pIter != pEnd; ++pIter, ++row )
+            pIter != pEnd; ++pIter )
         {
             Mantid::Kernel::Property* prop = *pIter;
             QString propName = QString::fromStdString(prop->name());
             // Only produce allow input for output properties or workspace properties
             if ( prop->direction() == Mantid::Kernel::Direction::Output &&
                 !dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop)) continue;
+
+             ++row;
 
             // The name and valid label
             QLabel *nameLbl = new QLabel(propName);

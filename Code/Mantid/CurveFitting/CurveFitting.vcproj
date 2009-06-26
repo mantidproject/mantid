@@ -63,7 +63,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl_d.lib cblas.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl_d.lib cblas.lib muparser_d.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
@@ -148,7 +148,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib $(SolutionName)DataObjects.lib $(SolutionName)Geometry.lib gsl.lib muparser.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				LinkIncremental="0"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
@@ -218,6 +218,10 @@
 				RelativePath=".\src\Lorentzian1D.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\UserFunction1D.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -258,6 +262,10 @@
 			</File>
 			<File
 				RelativePath=".\test\Lorentzian1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\UserFunction1D.h"
 				>
 			</File>
 		</Filter>

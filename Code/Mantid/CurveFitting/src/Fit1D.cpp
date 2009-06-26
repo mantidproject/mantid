@@ -176,12 +176,14 @@ void Fit1D::init()
     "A value in, or on the high x boundary of, the last bin the fitting range\n"
     "(default the highest value of x)" );
 
+  size_t i0 = getProperties().size();
+
   // declare parameters specific to a given fitting function
   declareParameters();
 
   // load the name of these specific parameter into a vector for later use
   const std::vector< Property* > props = getProperties();
-  for ( size_t i = 4; i < props.size(); i++ )
+  for ( size_t i = i0; i < props.size(); i++ )
   {
     m_parameterNames.push_back(props[i]->name());
   }
@@ -193,6 +195,8 @@ void Fit1D::init()
 
   // Disable default gsl error handler (which is to call abort!)
   gsl_set_error_handler_off();
+
+  declareAdditionalProperties();
 }
 
 
@@ -202,6 +206,10 @@ void Fit1D::init()
  */
 void Fit1D::exec()
 {
+
+  // Custom initialization
+  prepare();
+
   // check if derivative defined in derived class
 
   bool isDerivDefined;
@@ -465,6 +473,8 @@ void Fit1D::exec()
     gsl_vector_free(simplexStepSize);
     gsl_multimin_fminimizer_free(simplexMinimizer);
   }
+
+  finalize();
 
   return;
 }

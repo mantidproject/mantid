@@ -81,6 +81,13 @@ namespace Mantid
       /// Option for providing intelligent range finishing value based e.g. on the user input parameter values
       virtual void modifyEndOfRange(double& endX) {}
 
+      /// Declare additional properties other than fitting parameters
+      virtual void declareAdditionalProperties(){};
+      /// Called in the beginning of exec(). Custom initialization
+      virtual void prepare(){};
+      /// Called in the end of exec().
+      virtual void finalize(){};
+
       /// Declare parameters specific to fitting function
       virtual void declareParameters() = 0;
 
