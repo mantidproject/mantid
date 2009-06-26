@@ -70,7 +70,6 @@ namespace Mantid
       /// Derivatives of function with respect to parameters you are trying to fit
       virtual void functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
 
-      double getFittedParam(const unsigned int) const;
     protected:
       // Overridden Algorithm methods
       void init();

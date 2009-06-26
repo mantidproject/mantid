@@ -105,11 +105,12 @@ void UserFunction1D::prepare()
  *        The fitting procedure will try to minimise Sum(out[i]^2)
  *  @param xValues The array of nData x-values.
  *  @param yValues The array of nData y-values.
+ *  @param yErrors The array of nData error values.
  *  @param nData The size of the fitted data.
  */
 void UserFunction1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
-    for(size_t i=0;i<m_nPars;i++)
+    for(int i=0;i<m_nPars;i++)
         m_parameters[i] = in[i];
 
     //mu::varmap_type variables = m_parser.GetVar();
@@ -136,7 +137,7 @@ void UserFunction1D::finalize()
     ITableWorkspace_sptr m_result = WorkspaceFactory::Instance().createTable("TableWorkspace");
     m_result->addColumn("str","Name");
     m_result->addColumn("double","Value");
-    for(size_t i=0;i<m_nPars;i++)
+    for(int i=0;i<m_nPars;i++)
     {
         TableRow row = m_result->appendRow();
         row << m_parameterNames[i] << m_parameters[i];
@@ -162,7 +163,7 @@ void UserFunction1D::finalize()
     std::vector<double>& Y = ws->dataY(1);
     std::vector<double>& E = ws->dataY(2);
 
-    for(int i=0;i<Y.size();i++)
+    for(unsigned int i=0;i<Y.size();i++)
     {
         m_x = inputX[i];
         Y[i] = m_parser.Eval();

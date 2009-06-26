@@ -47,7 +47,7 @@ void Lorentzian1D::function(const double* in, double* out, const double* xValues
     const double& peakCentre = in[3];
     const double& hwhm = in[4];
 
-    for (size_t i = 0; i < nData; i++) {
+    for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         double Yi = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) )+bg0+bg1*xValues[i];
         out[i] = (Yi - yValues[i])/yErrors[i];

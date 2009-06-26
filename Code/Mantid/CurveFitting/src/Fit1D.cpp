@@ -211,22 +211,19 @@ void Fit1D::exec()
   prepare();
 
   // check if derivative defined in derived class
-
-  bool isDerivDefined;
-  double *inTest = new double[m_parameterNames.size()];  // need to allocate this to avoid memory problem when calling functionDeriv below
-  double *outTest = new double[m_parameterNames.size()];
-  double xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
+  bool isDerivDefined = true;
   try
   {
+    const std::vector<double> inTest(m_parameterNames.size(),1.0);
+    std::vector<double> outTest(m_parameterNames.size());
+    const double xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
     // note nData set to zero (last argument) hence this should avoid further memory problems
-    functionDeriv(&(inTest[0]), &(outTest[0]), &xValuesTest, &yValuesTest, &yErrorsTest, 0); 
+    functionDeriv(&(inTest.front()), &(outTest.front()), &xValuesTest, &yValuesTest, &yErrorsTest, 0);  
   }
   catch (Exception::NotImplementedError e)
   {
     isDerivDefined = false;
   }
-  delete [] inTest;
-  delete [] outTest;
 
   // Try to retrieve optional properties
   int histNumber = getProperty("SpectrumIndex");
@@ -478,14 +475,6 @@ void Fit1D::exec()
 
   return;
 }
-
-double Fit1D::getFittedParam(const unsigned int i) const
-{
-	if (i>=m_fittedParameter.size())
-		throw std::range_error("Fitted parameter out of range");
-	return m_fittedParameter[i];
-}
-
 
 } // namespace Algorithm
 } // namespace Mantid

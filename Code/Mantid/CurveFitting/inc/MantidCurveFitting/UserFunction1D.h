@@ -65,7 +65,7 @@ namespace Mantid
       {
       public:
           /// Constructor
-          UserFunction1D():m_x_set(false),m_buffSize(100),m_nPars(0),m_parameters(new double[100]) {};
+          UserFunction1D():m_x_set(false),m_parameters(new double[100]),m_buffSize(100),m_nPars(0) {};
           /// Destructor
           virtual ~UserFunction1D() {};
           /// Algorithm's name for identification overriding a virtual method
