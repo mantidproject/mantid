@@ -61,6 +61,10 @@ void LoadInstrumentFromRaw::exec()
     g_log.error("Unable to open file " + m_filename);
     throw Exception::FileError("Unable to open File:" , m_filename);
   }
+
+  // Clear off any existing instrument for this workspace
+  localWorkspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
+
   // Get reference to Instrument and set its name
   boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
   if (instrument.get() == 0)
