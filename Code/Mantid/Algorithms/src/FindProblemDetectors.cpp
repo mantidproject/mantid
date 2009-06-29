@@ -4,6 +4,8 @@
 #include "MantidAlgorithms/FindProblemDetectors.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/scoped_array.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>
@@ -76,9 +78,6 @@ void FindProblemDetectors::init()
     "no writing to file)" );
       // This output property will contain the list of UDETs for the dead detectors
   declareProperty("FoundDead",std::vector<int>(),Direction::Output);
-  //initialise the progress estimates
-  m_PercentDone = 0;
-  totalTime = RTTotal;
 }
 
 /** Executes the algorithm that includes calls to SolidAngle and Integration
@@ -92,14 +91,17 @@ void FindProblemDetectors::exec()
   retrieveProperties();
   //now do the calculations ...  
   //calls subalgorithm SolidAngle to get the total solid angle of the detectors that acquired each spectrum or nul on failure
-  MatrixWorkspace_sptr angles = getSolidAngles(m_InputWS);
+  MatrixWorkspace_sptr angles = getSolidAngles( m_InputWS, m_MinSpec, m_MaxSpec);
   //Adds the counts from all the bins and puts them in one total bin, calls subalgorithm Integration
-  MatrixWorkspace_sptr counts = getTotalCounts();
+  MatrixWorkspace_sptr counts = getTotalCounts( m_InputWS, m_MinSpec, m_MaxSpec/*the range properties are also read by this function*/);
   //Divides the total number of counts by the number of seconds, calls the ConvertToDistribution algorithm
   counts = getRate(counts);
   //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
+  //this calculation is optional, it depends on angle information existing
   if ( angles.use_count() == 1 )
-  {//this calculation is optional, it depends on angle information existing
+  {
+    //we are going to correct for solid angle using division. OK let's remove any histograms with zero angle
+    //rejectZeros(angles);
     counts = counts/angles;     
   }
   //Gets an average of the data, the medain is less influenced by a small number of huge values than the mean
@@ -113,7 +115,6 @@ void FindProblemDetectors::exec()
 
   setProperty("FoundDead", outArray);
 }
-
 
 /** Loads and checks the values passed to the algorithm
 *
@@ -160,14 +161,16 @@ void FindProblemDetectors::retrieveProperties()
 * @param input A pointer to a workspace
 * @return A share pointer to the workspace (or an empty pointer)
 */
-MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(MatrixWorkspace_sptr input)
+MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
+                  MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information("Calculating soild angles");
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_PercentDone, t1 = advanceProgress(RTGetSolidAngle);
   IAlgorithm_sptr childAlg = createSubAlgorithm("SolidAngle", t0, t1);
-  //pass input values straight to this sub-algorithm, checking must be done there
   childAlg->setProperty( "InputWorkspace", input );
+  childAlg->setProperty( "StartSpectrum", firstSpec );
+  childAlg->setProperty( "EndSpectrum", lastSpec );
   try
   {
   // Execute the sub-algorithm, it could throw a runtime_error at this point which would abort execution
@@ -195,13 +198,16 @@ MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(MatrixWorkspace_sptr i
 *
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
-MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts()
+MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
+                  MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information() << "Integrating input workspace" << std::endl;
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_PercentDone, t1 = advanceProgress(RTGetTotalCounts);
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
-  childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", m_InputWS );
+  childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", input );
+  childAlg->setProperty( "StartSpectrum", firstSpec );
+  childAlg->setProperty( "EndSpectrum", lastSpec );
   // pass inputed values straight to this integration, checking must be done there
   childAlg->setPropertyValue( "Range_lower",  getPropertyValue("Range_lower") );
   childAlg->setPropertyValue( "Range_upper", getPropertyValue("Range_upper") );
@@ -254,7 +260,17 @@ MatrixWorkspace_sptr FindProblemDetectors::getRate(MatrixWorkspace_sptr counts)
   }
   return childAlg->getProperty("Workspace");
 }
-/* The finds the median of the values in single bin histograms
+/* Checks though the solid angle information and masks detectors in histograms linked to zero or negative solida angle info
+*
+* @param angles a workspace with single bin histograms of angles
+* @throw runtime_error If a solid angle with a negative value is found
+*/
+void FindProblemDetectors::rejectZeros( API::MatrixWorkspace_const_sptr angles ) const
+{
+//STEVE to implement this function
+}
+
+/* Finds the median of the values in single bin histograms
 *
 * @param numbers A histogram workspace with one entry in each bin
 * @return The median value of the histograms in the workspace that was passed to it
@@ -302,7 +318,7 @@ MatrixWorkspace_sptr responses, double lowLim, double highLim,
   if ( !fileName.empty() )
   {
     file.open( fileName.c_str() );
-    if ( std::ios::failbit )
+    if ( file.rdstate() & std::ios::failbit )
     {
       g_log.error("Could not open file \"" + fileName + "\"");
     }
@@ -313,19 +329,16 @@ MatrixWorkspace_sptr responses, double lowLim, double highLim,
   if ( fileOpen ) file << "Index Spectrum UDET(S)" << std::endl;  
 
   // iterate over the data values setting the live and dead values
-  g_log.information("Marking dead detectors");
+  g_log.information() << "Marking dead detectors" << std::endl;
   const int numSpec = m_MaxSpec - m_MinSpec;
   int iprogress_step = numSpec / 10;
   if (iprogress_step == 0) iprogress_step = 1;
-  for (int i = 0; i < numSpec; ++i)
+  for (int i = 0; i <= numSpec; ++i)
   {
     double &y = responses->dataY(i)[0];
-    if ( y >= lowLim && y <= highLim) y = GoodVal;
+    if ( y > lowLim && y < highLim) y = GoodVal;
     else
     {
-      y = BadVal;
-      ++countSpec;
-      
       std::string problem = "";
       if ( y < lowLim )
       {
@@ -337,12 +350,14 @@ MatrixWorkspace_sptr responses, double lowLim, double highLim,
         problem = "high";
         countHighs++;
       }
-      
+      y = BadVal;
+      countSpec++;
+            
       // Write the spectrum number to file
       const int specNo = specAxis->spectraNo(i);
       if ( fileOpen )
       {
-        file << i << " Spectrum " << specNo << " is reading too " << problem;
+        file << " Spectrum " << specNo << " is reading " << problem;
       }
 
       if ( fileOpen ) file << " detector IDs: "; 
@@ -374,21 +389,26 @@ MatrixWorkspace_sptr responses, double lowLim, double highLim,
   //output and pass back what we found out about bad detectors
   if ( fileOpen ) file.close();
   g_log.information() << "Found a total of " << countLows <<
-    " detectors reading low and " << " reading high in " <<
-    countSpec << " 'bad' spectra.";
+    " detectors reading low and " << countHighs << " reading high in " <<
+    countSpec << " 'bad' spectra." << std::endl;
+  //set the workspace to have no units
+  responses->isDistribution(false);
   responses->setYUnit("");
   return badDets;
 }
 /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
 float FindProblemDetectors::advanceProgress(int toAdd)
 {
-  return m_PercentDone += toAdd/float(RTTotal);
+  m_PercentDone += toAdd/float(m_TotalTime);
+  // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value could cause an error
+  m_PercentDone = std::abs(m_PercentDone);
+  return m_PercentDone;
 }
 /// Update the percentage complete estimate assuming that the algorithm aborted a task with estimated RunTime toAdd
 void FindProblemDetectors::failProgress(RunTime aborted)
 {
   advanceProgress(-aborted);
-  totalTime -= aborted;
+  m_TotalTime -= aborted;
 };
 
 } // namespace Algorithm
