@@ -115,16 +115,18 @@ void SmoothData::exec()
       total += Y[kp] - Y[km];
       newY[k] = total/npts;
       totalE += E[kp]*E[kp] - E[km]*E[km];
-      newE[k] = sqrt(total)/npts;
+      // Use of a moving average can lead to rounding error where what should be 
+      // zero actually comes out as a tiny negative number - bad news for sqrt so protect
+      newE[k] = std::sqrt(std::abs(totalE))/npts;
     }
-    // This deal with the 'end' at the tail of each spectrum
+    // This deals with the 'end' at the tail of each spectrum
     for (int l = vecSize-halfWidth; l < vecSize; ++l)
     {
       const int index = l-halfWidth;
       total -= Y[index-1];
       newY[l] = total/(vecSize-index);
       totalE -= E[index-1]*E[index-1];
-      newE[l] = sqrt(total)/(vecSize-index);
+      newE[l] = std::sqrt(std::abs(totalE))/(vecSize-index);
     }
   } // Loop over spectra
 

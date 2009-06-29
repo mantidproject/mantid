@@ -23,7 +23,7 @@
  */
 int Mantid::EMPTY_INT()
 {
-  return INT_MIN;
+  return INT_MAX;
 }
 
 /**
