@@ -437,7 +437,7 @@ void Instrument3DWidget::updateForNewMaxData(const double new_max)
   if( std::abs(new_max - mDataMaxValue) / mDataMaxValue < 1e-08 ) return;
   // ratio: old / new
   double range_ratio = std::abs(mWkspDataMax - mWkspDataMin) / std::abs(new_max - mDataMinValue);
-  if( std::isnan(range_ratio) || std::isinf(range_ratio) ) range_ratio = 0.0;
+  if( range_ratio != range_ratio || range_ratio == std::numeric_limits<double>::infinity() ) range_ratio = 0.0;
   const short no_colors = mColorMap.getNumberOfColors();
   const short max_ncols = mColorMap.getMaxNumberOfColors();
 
