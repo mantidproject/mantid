@@ -32,13 +32,11 @@
 */
 class InstrumentActor : public CompAssemblyActor
 {
-private:
-	std::map<int,int> mSpectraIndex; ///< List of spectra index map with the detector:: TODO: yet to implement
 public:
-	InstrumentActor(boost::shared_ptr<Mantid::API::IInstrument> ins,bool withDisplayList); ///< Constructor
+	InstrumentActor(boost::shared_ptr<Mantid::API::IInstrument> ins, bool withDisplayList); ///< Constructor
 	~InstrumentActor();								   ///< Destructor
 	virtual std::string type()const {return "InstrumentActor";} ///< Type of the GL object
-	void getDectorIDList(std::vector<int>&);
+	void getDetectorIDList(std::vector<int>&);
 	void setDetectorColors(std::vector<boost::shared_ptr<GLColor> >& list);
 	void refresh();
 	int  getDetectorIDFromColor(int rgb);

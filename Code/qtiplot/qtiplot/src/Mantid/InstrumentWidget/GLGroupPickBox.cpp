@@ -155,7 +155,10 @@ std::set<QRgb> GLGroupPickBox::getListOfColorsPicked()
  */
 QRgb GLGroupPickBox::pickPoint(int x, int y) // Picking object at coordinate of (x,y)
 {
-  if( mPickImage.valid(x, y) ) return mPickImage.pixel(x,y);
+  if( mPickImage.valid(x, y) ) 
+  {
+    return mPickImage.pixel(x,y);
+  }
   else return QRgb();
 }
 

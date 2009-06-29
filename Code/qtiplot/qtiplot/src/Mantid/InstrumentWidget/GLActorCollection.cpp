@@ -12,13 +12,17 @@ static int hash(unsigned char r, unsigned char g, unsigned char b)
 
 GLActorCollection::GLActorCollection():GLObject(true)
 {
-	referenceColorID[0]=0;referenceColorID[1]=0;referenceColorID[2]=1;
+	referenceColorID[0] = 0;
+	referenceColorID[1] = 0;
+	referenceColorID[2] = 1;
 }
 
 GLActorCollection::~GLActorCollection()
 {
 	for(std::vector<GLActor*>::iterator i=mActorsList.begin();i!=mActorsList.end();i++)
-			delete (*i);
+	{
+	  delete (*i);
+	}
 	mActorsList.clear();
 }
 
@@ -37,15 +41,17 @@ void GLActorCollection::define()
  */
 void GLActorCollection::addActor(GLActor* a)
 {
-	if (!a)
-		return;
-    mActorsList.push_back(a);
-	int rgb=referenceColorID[0]*65536+referenceColorID[1]*256+referenceColorID[2];
-	int noOfColors=a->setStartingReferenceColor(rgb);
-	rgb+=noOfColors;
-	referenceColorID[0]=rgb/65536;
-	referenceColorID[1]=(rgb%65536)/256;
-	referenceColorID[2]=(rgb%65536)%256;
+        if( !a )
+	{
+	  return;
+	}
+	mActorsList.push_back(a);
+	int rgb = referenceColorID[0]*65536 + referenceColorID[1]*256 + referenceColorID[2];
+	int noOfColors = a->setStartingReferenceColor(rgb);
+	rgb += noOfColors;
+	referenceColorID[0] = rgb / 65536;
+	referenceColorID[1] = (rgb % 65536) / 256;
+	referenceColorID[2] = (rgb % 65536) % 256;
 }
 
 /**

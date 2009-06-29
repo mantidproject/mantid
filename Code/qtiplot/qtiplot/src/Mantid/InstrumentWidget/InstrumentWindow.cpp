@@ -62,14 +62,16 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
 	mBinMapDialog = new BinDialog(this);
 	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
+
 	mMinValueBox    = new QLineEdit();
-	mMinValueBox->setText("0");
 	mMaxValueBox    = new QLineEdit();
-	mMaxValueBox->setText("1");
+	mMinValueBox->setMinimumWidth(40);
+	mMaxValueBox->setMinimumWidth(40);
+	mMinValueBox->setMaximumWidth(60);
+	mMaxValueBox->setMaximumWidth(60);
 	mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
 	mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
-	mMinValueBox->setMaximumWidth(40);
-	mMaxValueBox->setMaximumWidth(40);
+
 	//Axis view buttons
 	QFrame* axisViewFrame = new QFrame();
 	QHBoxLayout* axisViewLayout = new QHBoxLayout();
@@ -84,6 +86,13 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	axisViewLayout->addWidget(axisCombo);
 	axisViewFrame->setLayout(axisViewLayout);
 
+	//Store the path to the default color map
+	mDefaultColorMap = QString::fromStdString(Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../colormaps/_standard.map").toString());
+	mCurrentColorMap = mDefaultColorMap;
+	
+	// Load settings
+	loadSettings();
+
 	//Colormap Frame widget
 	QFrame* lColormapFrame=new QFrame();
 	QVBoxLayout* lColormapLayout=new QVBoxLayout(lColormapFrame);
@@ -97,14 +106,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
 	QwtLinearScaleEngine* lse=new QwtLinearScaleEngine();
 	mColorMapWidget->setScaleDiv(lse->transformation(),lse->divideScale(0,1,5,5));
-
-	//Store the path to the default color map
-	mDefaultColorMap = QString::fromStdString(Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../colormaps/_standard.map").toString());
-	mCurrentColorMap = mDefaultColorMap;
-	
-	// Load settings
-	loadSettings();
-
 
 	//Pick background color
 	QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
@@ -196,30 +197,30 @@ void InstrumentWindow::selectBinButtonClicked()
 /**
  * Change color map button slot. This provides the file dialog box to select colormap or sets it directly a string is provided
  */
-void InstrumentWindow::changeColormap(const QString & filename)
+void InstrumentWindow::changeColormap(const QString &filename)
 {
-  // Python uses the argument version of this function so just bail out if nothing 
-
-
+  QString fileselection;
   //Use a file dialog if no parameter is passed
   if( filename.isEmpty() )
   {
-    QString fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), 
-							 QFileInfo(mCurrentColorMap).absoluteFilePath(),
-							 tr("Colormaps (*.map *.MAP)"));
+    fileselection = QFileDialog::getOpenFileName(this, tr("Pick a Colormap"), 
+						 QFileInfo(mCurrentColorMap).absoluteFilePath(),
+						 tr("Colormaps (*.map *.MAP)"));
     // User cancelled if filename is still empty
     if( fileselection.isEmpty() ) return;
-    mCurrentColorMap = fileselection;
   }
   else
   {
-    mCurrentColorMap = QFileInfo(filename).absoluteFilePath();
-    if( !QFileInfo(mCurrentColorMap).exists() ) return;
+    fileselection = QFileInfo(filename).absoluteFilePath();
+    if( !QFileInfo(fileselection).exists() ) return;
   }
   
+  if( fileselection == mCurrentColorMap ) return;
+
+  mCurrentColorMap = fileselection;
   mInstrumentDisplay->setColorMapName(mCurrentColorMap);
   updateColorMapWidget();
-  mInstrumentDisplay->update();
+  mInstrumentDisplay->updateColorsForNewMap();
 }
 
 /**
@@ -260,30 +261,24 @@ void InstrumentWindow::detectorListInformation(const std::vector<int>& result)
  */
 void InstrumentWindow::detectorHighlighted(int detectorId,int spectraId,int count)
 {
-	QString txt;
-	QString number;
-	txt+="Detector Id: ";
-	if(detectorId!=-1)
-		txt+=number.setNum(detectorId);
-	txt+="\nSpectra Id: ";
-	if(detectorId!=-1)
-		txt+=number.setNum(spectraId);
-	txt+="  Count: ";
-	if(detectorId!=-1)
-		txt+=number.setNum(count);
-	mInteractionInfo->setText(txt);
+  QString txt("Detector ID: ");
+  if(detectorId != -1) txt += QString::number(detectorId);
+  txt+="\nSpectra ID: ";
+  if(spectraId != -1) txt += QString::number(spectraId);
+  txt += "  Count: ";
+  if(detectorId != -1) txt += QString::number(count);
+  mInteractionInfo->setText(txt);
 }
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
  */
 void InstrumentWindow::spectraInfoDialog()
 {
-	QString info;
-	info+=" The Spectra Index Id: ";
-	info+= QString::number(mSpectraIDSelected);
-	info+=" \nThe Detector Id: ";
-	info+= QString::number(mDetectorIDSelected);
-	QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
+  QString info("Workspace Index: ");
+  info += QString::number(mSpectraIDSelected);
+  info +="\nDetector ID: ";
+  info += QString::number(mDetectorIDSelected);
+  QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
 }
 
 /**
@@ -291,12 +286,11 @@ void InstrumentWindow::spectraInfoDialog()
  */
 void InstrumentWindow::spectraGroupInfoDialog()
 {
-	QString info;
-	info+=" The Spectra Index Number: ";
-	info+= QString::number(mSpectraIDSelectedList.size());
-	info+=" \nThe Detector Id Numbers: ";
-	info+= QString::number(mDetectorIDSelectedList.size());
-	QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
+  QString info("Index list size: ");
+  info += QString::number(mSpectraIDSelectedList.size());
+  info +="\nDetector list size: ";
+  info += QString::number(mDetectorIDSelectedList.size());
+  QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
 
 }
 
@@ -356,30 +350,31 @@ void InstrumentWindow::updateWindow()
   if( !workspace.get() ) return;
 
   try
+  {
+    renderInstrument(workspace.get());
+  }
+  catch(...)
+  {
+    mInstrumentDisplay->resetWidget();
+    mInstrumentDisplay->setSlowRendering();
+    resultError = true;
+  }
+  if(resultError)
+  {
+    QMessageBox::critical(this,"Mantid -- Error","Trying Slow Rendering");
+    try
     {
       renderInstrument(workspace.get());
     }
-  catch(...)
+    catch(std::bad_alloc &e)
     {
+      QMessageBox::critical(this,"Mantid -- Error","not enough memory to display this instrument");
       mInstrumentDisplay->resetWidget();
-      mInstrumentDisplay->setSlowRendering();
-      resultError=true;
     }
-  if(resultError)
-    {
-      QMessageBox::critical(this,"Mantid -- Error","Trying Slow Rendering");
-      try
-	{
-	  renderInstrument(workspace.get());
-	}
-      catch(std::bad_alloc &e)
-	{
-	  QMessageBox::critical(this,"Mantid -- Error","not enough memory to display this instrument");
-	  mInstrumentDisplay->resetWidget();
-	}
+  }
 
-    }
-  connect(mInstrumentTree->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),this,SLOT(componentSelected(const QItemSelection&, const QItemSelection&)));
+  connect(mInstrumentTree->selectionModel(),SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+	  this, SLOT(componentSelected(const QItemSelection&, const QItemSelection&)));
 }
 
 void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
@@ -388,10 +383,10 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
 
   double minValue = mInstrumentDisplay->getDataMinValue();
   double maxValue = mInstrumentDisplay->getDataMaxValue();
-  QString text;
-  mMinValueBox->setText(text.setNum(minValue));
-  mMaxValueBox->setText(text.setNum(maxValue));
+  mMinValueBox->setText(QString::number(minValue));
+  mMaxValueBox->setText(QString::number(maxValue));
   updateColorMapWidget();
+
   mInstrumentDisplay->update();
   mInstrumentTree->setInstrument(workspace->getInstrument());
 }
@@ -406,45 +401,33 @@ void InstrumentWindow::setColorMapRange(double minValue, double maxValue)
 /// Set the minimum value of the colour map
 void InstrumentWindow::setColorMapMinValue(double minValue)
 {
-  //mInstrumentDisplay->setColorMapMinValue(minValue);
   mMinValueBox->setText(QString::number(minValue));
   minValueChanged();
-  if( this->isVisible() )
-  {
-    updateColorMapWidget();
-    mInstrumentDisplay->update();
-  }
 }
 
 /// Set the maximumu value of the colour map
 void InstrumentWindow::setColorMapMaxValue(double maxValue)
 {
-  //mInstrumentDisplay->setColorMapMinValue(minValue);
   mMaxValueBox->setText(QString::number(maxValue));
   maxValueChanged();
-  if( this->isVisible() )
-  {
-    updateColorMapWidget();
-    mInstrumentDisplay->update();
-  }
 }
 
 void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue)
 {
   mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue);
-  if( this->isVisible() ) mInstrumentDisplay->update();
 }
-
-//void setDataMappingSingleBin(int binNumber);
-
 
 /**
  *
  */
 void InstrumentWindow::minValueChanged()
 {
-	QString value=mMinValueBox->displayText();
-	mInstrumentDisplay->setColorMapMinValue(value.toDouble());
+  double value = mMinValueBox->displayText().toDouble();
+  if( this->isVisible() )
+  { 
+    updateColorMapWidget();
+    mInstrumentDisplay->updateForNewMinData(value);
+  }
 }
 
 /**
@@ -452,13 +435,12 @@ void InstrumentWindow::minValueChanged()
  */
 void InstrumentWindow::maxValueChanged()
 {
-	QString value=mMaxValueBox->displayText();
-	mInstrumentDisplay->setColorMapMaxValue(value.toDouble());
-	if( this->isVisible() )
-	{
-	  updateColorMapWidget();
-	  mInstrumentDisplay->update();
-	}
+  double value = mMaxValueBox->displayText().toDouble();
+  if( this->isVisible() )
+  { 
+    updateColorMapWidget();
+    mInstrumentDisplay->updateForNewMaxData(value);
+  }
 }
 
 /**

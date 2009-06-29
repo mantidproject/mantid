@@ -83,7 +83,7 @@ void GL3DWidget::initializeGL()
 	setLightingModel(mLightingState);
 
 	// Clear the memory buffers
-	setBackgroundColor(bgColor);
+	glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -309,7 +309,7 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 		QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
 		emit actorHighlighted(tmpColor);
 		mPickBox->mouseMoveEvent(event);
-				update();
+		update();
 	}else{
 		if (event->buttons() & Qt::LeftButton)
 		{
@@ -635,6 +635,7 @@ void GL3DWidget::setBackgroundColor(QColor input)
 {
   bgColor = input;
   glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   update();
 }
 

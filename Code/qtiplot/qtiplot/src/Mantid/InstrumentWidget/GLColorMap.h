@@ -36,12 +36,14 @@ class GLColorMap
 public:
 	GLColorMap();  ///< Default constructor
 	void setColorMapFile(const std::string& name); ///< Load the color map from file
-	boost::shared_ptr<GLColor> getColor(int id) const; ///< get color corresponding to id
-	int getNumberOfColors() const; ///< Returns the number of colors in the color map
+	boost::shared_ptr<GLColor> getColor(short) const; ///< get color corresponding to id
+	short getNumberOfColors() const; ///< Returns the number of colors in the color map
+        short getMaxNumberOfColors() const; ///< Returns the maximum colors allowed in a color map
 private:
     boost::shared_ptr<GLColor> color[256]; ///< Color map storage
-	int mNumberOfColors;
+	short mNumberOfColors;
 	void defaultColormap(); ///< Sets default color map
+  static short mMaxPossibleColors;
 };
 
 #endif /*GLCOLORMAP_H_*/

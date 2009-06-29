@@ -4,46 +4,52 @@
 #include <fstream>
 #include <sstream>
 
-GLColorMap::GLColorMap()
+// Define the static constant
+short GLColorMap::mMaxPossibleColors = 256;
+
+GLColorMap::GLColorMap() : mNumberOfColors(0)
 {
-	mNumberOfColors=0;
-	for(int i=0;i<256;i++){
-		color[i]=boost::shared_ptr<GLColor>(new GLColor());
-	}
-	defaultColormap();
+  for(int i = 0; i < mMaxPossibleColors; i++)
+  {
+    color[i] = boost::shared_ptr<GLColor>(new GLColor());
+  }
+  defaultColormap();
 }
 
 void GLColorMap::setColorMapFile(const std::string& name)
 {
-	std::string line;
 	std::ifstream cmapfile(name.c_str(),std::ios::in);
 	if (cmapfile.is_open())
 	{
-		int count=0;
-		double r,g,b;
-		while (! cmapfile.eof() )
+		int count = 0;
+		double red(0.0), green(0.0), blue(0.0);
+		std::string line;
+		while ( std::getline(cmapfile, line) )
 		{
-			std::getline (cmapfile,line);
-			std::stringstream sline(line);
-			if(count==256||line=="")break;
-			sline>>r>>g>>b;
-			color[count]->set((float)r/255.0,(float)g/255.0,(float)b/255.0,1.0);
-			count++;
+		  if(count == mMaxPossibleColors || line.empty() ) break;
+		  std::stringstream sline(line);
+		  sline >> red >> green >> blue;
+		  color[count]->set((float)red/255.0,(float)green/255.0,(float)blue/255.0,1.0);
+		  ++count;
 		}
 		cmapfile.close();
-		mNumberOfColors=count;
+		mNumberOfColors = count;
 	}else{ // restore to default colormap
 		defaultColormap();
 	}
 
 }
 
-boost::shared_ptr<GLColor> GLColorMap::getColor(int id) const
+boost::shared_ptr<GLColor> GLColorMap::getColor(short id) const
 {
-	if(mNumberOfColors==0)
-		return boost::shared_ptr<GLColor>(new GLColor(1.0,0.0,0.0));
-	if(id>=0 && id<mNumberOfColors)
-		return color[id];
+	if(mNumberOfColors == 0)
+	{
+	  return boost::shared_ptr<GLColor>(new GLColor(1.0,0.0,0.0));
+	}
+	if(id >= 0 && id < mNumberOfColors)
+	{
+	  return color[id];
+	}
 	return boost::shared_ptr<GLColor>(new GLColor(0.0,0.0,0.0));
 }
 
@@ -78,7 +84,12 @@ void GLColorMap::defaultColormap()
 	mNumberOfColors=256;
 }
 
-int GLColorMap::getNumberOfColors() const
+short GLColorMap::getNumberOfColors() const
 {
-	return mNumberOfColors;
+  return mNumberOfColors;
+}
+
+short GLColorMap::getMaxNumberOfColors() const
+{
+  return mMaxPossibleColors;
 }
