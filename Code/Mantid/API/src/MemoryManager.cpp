@@ -1,18 +1,14 @@
 #include <iomanip>
 #include <iostream>
-#include <vector>
 #include <limits>
 
-#ifdef _WIN32
-#include <windows.h>
-#else
+#ifndef _WIN32
 #include <unistd.h>
 #include <sys/sysinfo.h>
 #include <malloc.h>
 #endif
 
 #include "MantidAPI/MemoryManager.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
 
 #include <fstream>
@@ -29,6 +25,9 @@ namespace API
 MemoryManagerImpl::MemoryManagerImpl() :
   g_log(Kernel::Logger::get("MemoryManager"))
 {
+#ifdef _WIN32
+  memStatus.dwLength = sizeof(MEMORYSTATUSEX);
+#endif
   g_log.debug() << "Memory Manager created." << std::endl;
 }
 
@@ -44,21 +43,20 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
 {
   MemoryInfo mi;
 #ifdef _WIN32
-  MEMORYSTATUSEX memStatus;
-  memStatus.dwLength = sizeof(MEMORYSTATUSEX);
   GlobalMemoryStatusEx( &memStatus );
+
   if (memStatus.ullTotalPhys < memStatus.ullTotalVirtual)
   {
-    mi.availMemory = memStatus.ullAvailPhys/1024;
-    mi.totalMemory = memStatus.ullTotalPhys/1024;
+    mi.availMemory = static_cast<int>(memStatus.ullAvailPhys/1024);
+    mi.totalMemory = static_cast<int>(memStatus.ullTotalPhys/1024);
   }
   else// All virtual memory will be physical, but a process cannot have more than TotalVirtual.
-
   {
-    mi.availMemory = memStatus.ullAvailVirtual/1024;
-    mi.totalMemory = memStatus.ullTotalVirtual/1024;
+    mi.availMemory = static_cast<int>(memStatus.ullAvailVirtual/1024);
+    mi.totalMemory = static_cast<int>(memStatus.ullTotalVirtual/1024);
   }
   mi.freeRatio = int(100*double(mi.availMemory)/mi.totalMemory);
+
 #else
 
   /**
@@ -144,10 +142,10 @@ bool MemoryManagerImpl::ReadMemInfo(Mantid::API::MemoryInfo & mi)
 #endif
 
 /** Decides if a ManagedWorkspace2D sould be created for the current memory conditions
- and workspace parameters NVectors, XLength,and YLength.
- @param NVectors the number of vectors
- @param XLength the size of the X vector
- @param YLength the size of the Y vector
+    and workspace parameters NVectors, XLength,and YLength.
+    @param NVectors the number of vectors
+    @param XLength the size of the X vector
+    @param YLength the size of the Y vector
  */
 bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength)
 {
@@ -180,11 +178,56 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
   MemoryInfo mi = getMemoryInfo();
   int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
   int wsSize = NVectors * (YLength * 2 + XLength) / 1024;
+
+  bool goManaged = (wsSize > triggerSize);
+#ifdef _WIN32
+  // If we're on the cusp of going managed, add in the reserved but unused memory
+  if (goManaged)
+  {
+    triggerSize += ReservedMem() / 100 * availPercent / sizeof(double);
+    goManaged = (wsSize > triggerSize);
+  }
+#endif
+
   g_log.debug() << "Requested memory: " << wsSize * sizeof(double) << " KB.\n";
   g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
   g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
-  return wsSize > triggerSize;
+
+  return goManaged;
 }
+
+#ifdef _WIN32
+/// Returns the reserved, but currently unused, memory in KB (Windows only) 
+int MemoryManagerImpl::ReservedMem()
+{
+  MEMORY_BASIC_INFORMATION info; // Windows structure
+
+  char *addr = NULL;
+  size_t unusedReserved = 0; // total reserved space
+  DWORDLONG size = 0;
+  DWORDLONG GB2 = memStatus.ullTotalVirtual; // Maximum memory available to the process
+
+  // Loop over all virtual memory to find out the status of every block.
+  do
+  {
+    VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
+        
+    // Count up the total size of reserved but unused blocks
+    if (info.State == MEM_RESERVE) unusedReserved += info.RegionSize;
+
+    addr += info.RegionSize; // Move up to the starting address for the next call
+    size += info.RegionSize;
+  } 
+  while(size < GB2);
+
+  // Convert from bytes to KB
+  unusedReserved /= 1024;
+
+  g_log.debug() << "Windows - Adding reserved but unused memory of " << unusedReserved << " KB\n";
+
+  return unusedReserved;
+}
+#endif
 
 } // namespace API
 } // namespace Mantid

@@ -4,25 +4,25 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-//#include "boost/shared_ptr.hpp"
-#include <vector>
-#include <string>
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 namespace Mantid
 {
 	namespace API
 	{
 
-        /// Information about the memory 
-        struct MemoryInfo
-        {
-            int totalMemory;  ///< total physical memory in KB
-            int availMemory;  ///< available physical memory in KB
-            int freeRatio;    ///< percentage of the available memory ( 0 - 100 )
-        };
+    /// Information about the memory 
+    struct MemoryInfo
+    {
+      int totalMemory;  ///< total physical memory in KB
+      int availMemory;  ///< available physical memory in KB
+      int freeRatio;    ///< percentage of the available memory ( 0 - 100 )
+    };
 
 		/** @class MemoryManagerImpl MemoryManager.h API/MemoryManager.h
 
@@ -31,7 +31,7 @@ namespace Mantid
 		@author Roman Tolchenov, Tessella Support Services plc
 		@date 01/08/2008
 
-		Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+		Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
 		This file is part of Mantid. 
 
@@ -51,36 +51,36 @@ namespace Mantid
 		File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
 		Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
-
 		class EXPORT_OPT_MANTID_API MemoryManagerImpl 
 		{
 		public:
-
-            ///Returns available physical memory in the system in KB.
-            MemoryInfo getMemoryInfo();
-            /// Returns true if there is not sufficient memory for a full Workspace2D.
-            bool goForManagedWorkspace(int NVectors,int XLength,int YLength);
+      ///Returns available physical memory in the system in KB.
+      MemoryInfo getMemoryInfo();
+      /// Returns true if there is not sufficient memory for a full Workspace2D.
+      bool goForManagedWorkspace(int NVectors,int XLength,int YLength);
 
 		private:
-            friend struct Mantid::Kernel::CreateUsingNew<MemoryManagerImpl>;
+      friend struct Mantid::Kernel::CreateUsingNew<MemoryManagerImpl>;
 
 			///Class cannot be instantiated by normal means
 			MemoryManagerImpl();
-            ///destructor
+      ///destructor
 			~MemoryManagerImpl();
-            ///Copy contrstrutor
+      ///Copy contrstrutor
 			MemoryManagerImpl(const MemoryManagerImpl&);
     
 			/// Standard Assignment operator    
 			MemoryManagerImpl& operator = (const MemoryManagerImpl&);
 
-#ifndef _WIN32
+#ifdef _WIN32
+      int ReservedMem();
+      MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
+#else
 			bool ReadMemInfo(MemoryInfo & mi);
 #endif
 
 			/// Static reference to the logger class
 			Kernel::Logger& g_log;
-
 		};
 
 		///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.
