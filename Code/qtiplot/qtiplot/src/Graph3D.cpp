@@ -33,6 +33,7 @@
 #include "MatrixModel.h"
 #include "UserFunction.h"//Mantid
 
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -48,6 +49,7 @@
 
 #include <gsl/gsl_vector.h>
 #include <fstream>
+Mantid::Kernel::Logger& Graph3D::logObject=Mantid::Kernel::Logger::get("Graph3D");
 
 UserParametricSurface::UserParametricSurface(const QString& xFormula, const QString& yFormula,
 											 const QString& zFormula, SurfacePlot& pw)
@@ -132,7 +134,6 @@ void Graph3D::initPlot()
 	sp->setOrtho(false);
 	sp->setSmoothMesh(false);
 	setWidget(sp);
-
 	d_autoscale = true;
 
 	title = QString();
@@ -181,12 +182,19 @@ void Graph3D::initPlot()
 	conesQuality = 32; conesRad = 0.5;
 
 	style_ = NOPLOT;
-	initCoord();
-
+	initCoord();	
+	
 	connect(sp,SIGNAL(rotationChanged(double, double, double)),this,SLOT(rotationChanged(double, double, double)));
 	connect(sp,SIGNAL(zoomChanged(double)),this,SLOT(zoomChanged(double)));
 	connect(sp,SIGNAL(scaleChanged(double, double, double)),this,SLOT(scaleChanged(double, double, double)));
 	connect(sp,SIGNAL(shiftChanged(double, double, double)),this,SLOT(shiftChanged(double, double, double)));
+
+	m_zoomInScale=1;
+	m_zoomOutScale=1;
+	m_PreviousYpos=0;
+	
+	
+
 }
 
 void Graph3D::initCoord()
@@ -906,19 +914,18 @@ void Graph3D::rotationChanged(double, double, double)
 	emit modified();
 }
 
-void Graph3D::scaleChanged(double, double, double)
-{
-	emit modified();
+void Graph3D::scaleChanged(double, double , double )
+{	emit modified();
 }
 
 void Graph3D::shiftChanged(double, double, double)
-{
+{	
 	emit modified();
 }
 
 void Graph3D::zoomChanged(double)
-{
-	emit modified();
+{	
+  	emit modified();
 }
 
 void Graph3D::resetAxesLabels()
@@ -1329,8 +1336,7 @@ void Graph3D::setScales(double xl, double xr, double yl, double yr, double zl, d
 
 void Graph3D::updateScalesFromMatrix(double xl, double xr, double yl,
 		double yr, double zl, double zr)
-{
-	double xStart = qMin(d_matrix->xStart(), d_matrix->xEnd());
+{	double xStart = qMin(d_matrix->xStart(), d_matrix->xEnd());
 	double xEnd = qMax(d_matrix->xStart(), d_matrix->xEnd());
 	double yStart = qMin(d_matrix->yStart(), d_matrix->yEnd());
 	double yEnd = qMax(d_matrix->yStart(), d_matrix->yEnd());
@@ -1981,6 +1987,78 @@ bool Graph3D::eventFilter(QObject *object, QEvent *e)
 		emit showOptionsDialog();
 		return TRUE;
 	}
+    // Ticket #623
+	//below code is added for  zoom in/zoom out the 3D graph 
+	else if (e->type() == QEvent::MouseMove)
+	{	
+		QInputEvent *keyevent=dynamic_cast<QInputEvent*>(e);
+		if(keyevent)
+		{   double zoom=sp->zoom();
+		    //ALT  key and mouse left button movement for zoomIn
+			if(keyevent->modifiers ()==Qt::AltModifier )
+			{	
+				QMouseEvent* mouseEvent=dynamic_cast<QMouseEvent*>(e);
+				if(mouseEvent)
+				{
+					//current y position of mouse
+					int yPos=mouseEvent->globalY();
+					if(m_PreviousYpos==0)
+					{
+						setZoom(zoom*1);
+					}
+					//if mouse is moved up zoomIn
+					else if(yPos<m_PreviousYpos)
+					{
+						m_zoomOutScale=1;
+						m_zoomInScale+=0.003125; 
+						{
+							setZoom(zoom*m_zoomInScale);
+						}
+					}
+					else //ZoomOut if mouse is moved backwards
+					{
+						m_zoomInScale=1;
+						m_zoomOutScale+=0.003125;
+						//if(zoom >=(m_originalzoom/zoomMax))
+							setZoom(zoom/m_zoomOutScale);
+					}
+					//storing the previous position
+					m_PreviousYpos=yPos;
+					return true;
+				}//end of if mouseevent loop
+			}//end of keyevent->modifiers() loop
+					
+		}//end of keyevent loop
+		
+	}
+	// zooming on mouse wheel  rotation
+	else if(e->type()== QEvent::Wheel)
+	{
+		QWheelEvent *wheelevent=dynamic_cast<QWheelEvent*>(e);
+		if(wheelevent)
+		{
+			if (wheelevent->orientation() == Qt::Vertical) {
+
+				double zoom=sp->zoom();
+				int delta=wheelevent->delta() ;
+				//zoom in on mouse wheel forward rotation  
+				if(delta>0)
+				{	m_zoomOutScale=1;
+				m_zoomInScale+=0.003125; 
+				setZoom(zoom*m_zoomInScale);
+				}
+				else 
+				{	//zoom out on mouse wheel backward rotation  
+					m_zoomInScale=1;
+					m_zoomOutScale+=0.003125;
+					setZoom(zoom/m_zoomOutScale);
+				}
+				return true;
+			}
+			
+		}
+	}
+	
 	return MdiSubWindow::eventFilter(object, e);
 }
 
@@ -2147,8 +2225,9 @@ void Graph3D::setRotation(double xVal, double yVal, double zVal)
 
 void Graph3D::setZoom(double val)
 {
-    if (sp->zoom() == val)
-        return;
+	
+	if (sp->zoom() == val)
+		return;
 
     sp->setZoom(val);
 }
