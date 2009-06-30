@@ -17,15 +17,19 @@ namespace Mantid
   {
     /** @class SetScalingPSD SetScalingPSD.h MantidAlgorithm/SetScalingPSD.h
 
+		Read the scaling information from a file (e.g. merlin_detector.sca) or from the RAW file (.raw)
+		and adjusts the detectors positions and scaling appropriately.
+
     Required Properties:
     <UL>
-    <LI> Filename - The name of and path to the input Nexus file </LI>
-    <LI> OutputWorkspace - The name of the workspace in which to store the imported data </LI>
-	</UL>
-	Optional Properties:
-	<UL>
-	<LI> spectrum_list - integer list of spectra numbers to load</LI>
-	<LI> spectrum_min, spectrum_max - range of spectra to load</LI>
+			<LI> ScalingFilename - The path to the file containing the detector ositions to use either .raw or .sca</LI>
+			<LI> Workspace - The name of the workspace to adjust </LI>
+		</UL>
+		Optional Properties:
+		<UL>
+			<LI> scalingOption - 0 => use average of left and right scaling (default). 
+				1 => use maximum scaling. 
+				2 => maximum + 5%</LI>
     </UL>
 
     @author Ronald Fowler

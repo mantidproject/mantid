@@ -193,7 +193,7 @@ namespace Algorithms
               Geometry::V3D detPos = det->getPos();
               Geometry::V3D shift=truepos[i]-detPos;
               double scale;
-              if(detIdLast==detIndex-1 && detIndex>100) // merlin monitors are <100, dets >100
+              if(detIdLast==detIndex-1 && !det->isMonitor()) 
               {
                   Geometry::V3D diffI=detPos-detPosLast;
                   Geometry::V3D diffT=truepos[i]-truPosLast;
