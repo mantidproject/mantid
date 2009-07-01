@@ -79,7 +79,7 @@ void GaussianLinearBG1D::function(const double* in, double* out, const double* x
     }
 }
 
-void GaussianLinearBG1D::functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void GaussianLinearBG1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
     const double& height = in[2];
     const double& peakCentre = in[3];
@@ -90,11 +90,11 @@ void GaussianLinearBG1D::functionDeriv(const double* in, double* out, const doub
         double s = yErrors[i];
         double diff = xValues[i]-peakCentre;
         double e = exp(-0.5*diff*diff*weight)/s;
-        out[i*nParam + 0] = 1/s;
-        out[i*nParam + 1] = xValues[i]/s;
-        out[i*nParam + 2] = e;
-        out[i*nParam + 3] = diff*height*e*weight;
-        out[i*nParam + 4] = -0.5*diff*diff*height*e;
+        out->set(i,0, 1/s);
+        out->set(i,1, xValues[i]/s);
+        out->set(i,2, e);
+        out->set(i,3, diff*height*e*weight);
+        out->set(i,4, -0.5*diff*diff*height*e);
     }
 }
 

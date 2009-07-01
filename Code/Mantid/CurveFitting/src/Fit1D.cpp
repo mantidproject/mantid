@@ -12,6 +12,7 @@
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
+#include <boost/tokenizer.hpp>
 
 namespace Mantid
 {
@@ -28,12 +29,37 @@ using API::Algorithm;
 // Get a reference to the logger
 Logger& Fit1D::g_log = Logger::get("Fit1D");
 
+struct FitData;
+
+/// The implementation of Jacobian
+class JacobianImpl: public Jacobian
+{
+    /// The pointer to the GSL's internal jacobian matrix
+    gsl_matrix * m_J;
+public:
+    /// The index map
+    std::map<int,int> m_map;
+    /**  Set a value to a Jacobian matrix element.
+    *   @param iY The index of the data point.
+    *   @param iP The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
+    *   @param value The derivative value.
+    */
+    void set(int iY, int iP, double value)
+    {
+        int j = m_map[iP];
+        if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
+    }
+    /// Set the pointer to the GSL's jacobian
+    void setJ(gsl_matrix * J){m_J = J;}
+};
 
 /// Structure to contain least squares data and used by GSL
 struct FitData {
+  /// Constructor
+  FitData(Fit1D* fit, const std::string& fixed);
   /// number of points to be fitted (size of X, Y and sigmaData arrays)
   size_t n;
-  /// number of fit parameters
+  /// number of (active) fit parameters
   size_t p;
   /// the data to be fitted (abscissae)
   double * X;
@@ -46,6 +72,12 @@ struct FitData {
   /// Needed to use the simplex algorithm within the gsl least-squared framework.
   /// Will store output function values from gsl_f
   double * forSimplexLSwrap;
+  /// A copy of the parameters
+  double * parameters;
+  /// Holds a boolean for each parameter, true if it's active or false if it's fixed
+  std::vector<bool> active;
+  /// Jacobi matrix interface
+  JacobianImpl J;
 };
 
 /** Fit1D GSL function wrapper
@@ -56,7 +88,11 @@ struct FitData {
 */
 static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 
-    ((struct FitData *)params)->fit1D->function (x->data, f->data,
+    for(size_t i=0,j=0;i<((struct FitData *)params)->active.size();i++)
+        if (((struct FitData *)params)->active[i])
+            ((struct FitData *)params)->parameters[i] = x->data[j++];
+
+    ((struct FitData *)params)->fit1D->function (((struct FitData *)params)->parameters, f->data,
                    ((struct FitData *)params)->X,
                    ((struct FitData *)params)->Y,
                    ((struct FitData *)params)->sigmaData,
@@ -74,12 +110,19 @@ static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 */
 static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
 
-    ((struct FitData *)params)->fit1D->functionDeriv (x->data, J->data,
+    for(size_t i=0,j=0;i<((struct FitData *)params)->active.size();i++)
+    {
+        if (((struct FitData *)params)->active[i])
+            ((struct FitData *)params)->parameters[i] = x->data[j++];
+    }
+
+    ((struct FitData *)params)->J.setJ(J);
+
+    ((struct FitData *)params)->fit1D->functionDeriv (((struct FitData *)params)->parameters, &((struct FitData *)params)->J,
                    ((struct FitData *)params)->X,
                    ((struct FitData *)params)->Y,
                    ((struct FitData *)params)->sigmaData,
                    ((struct FitData *)params)->n);
-
 
     return GSL_SUCCESS;
 }
@@ -109,7 +152,11 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 {
   double * l_forSimplexLSwrap = ((struct FitData *)params)->forSimplexLSwrap;
 
-  ((struct FitData *)params)->fit1D->function (x->data,
+    for(size_t i=0,j=0;i<((struct FitData *)params)->active.size();i++)
+        if (((struct FitData *)params)->active[i])
+            ((struct FitData *)params)->parameters[i] = x->data[j++];
+
+  ((struct FitData *)params)->fit1D->function (((struct FitData *)params)->parameters,
                    l_forSimplexLSwrap,
                    ((struct FitData *)params)->X,
                    ((struct FitData *)params)->Y,
@@ -135,7 +182,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 * @param yErrors Errors (standard deviations) on yValues
 * @param nData Number of data points
  */
-void Fit1D::functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
   throw Exception::NotImplementedError("No derivative function provided");
 }
@@ -188,6 +235,7 @@ void Fit1D::init()
     m_parameterNames.push_back(props[i]->name());
   }
 
+  declareProperty("Fix","","A list of comma separated parameter names which should be fixed in the fit");
   declareProperty("MaxIterations", 500, mustBePositive->clone(),
     "Stop after this number of iterations if a good fit is not found" );
   declareProperty("Output Status","", Direction::Output);
@@ -217,8 +265,11 @@ void Fit1D::exec()
     const std::vector<double> inTest(m_parameterNames.size(),1.0);
     std::vector<double> outTest(m_parameterNames.size());
     const double xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
+    JacobianImpl J;
+    boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(m_parameterNames.size(),1) );
+    J.setJ(M.get());
     // note nData set to zero (last argument) hence this should avoid further memory problems
-    functionDeriv(&(inTest.front()), &(outTest.front()), &xValuesTest, &yValuesTest, &yErrorsTest, 0);  
+    functionDeriv(&(inTest.front()), &J, &xValuesTest, &yValuesTest, &yErrorsTest, 0);  
   }
   catch (Exception::NotImplementedError&)
   {
@@ -290,15 +341,14 @@ void Fit1D::exec()
   // since as a rule of thumb this is required as a minimum to obtained 'accurate'
   // fitting parameter values.
 
-  FitData l_data;
+  FitData l_data(this,getProperty("Fix"));
 
   l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19.
-  l_data.p = m_parameterNames.size();
   if (l_data.n < l_data.p)
     g_log.warning("Number of data points less than number of parameters to be fitted.");
   l_data.X = new double[l_data.n];
-  l_data.fit1D = this;
   l_data.forSimplexLSwrap = new double[l_data.n];
+  l_data.parameters = new double[nParams()];
 
   // check if histogram data in which case use mid points of histogram bins
 
@@ -322,11 +372,16 @@ void Fit1D::exec()
   // modifyInitialFittedParameters() and modifyFinalFittedParameters() are used to allow for this;
   // by default these function do nothing.
 
-  for (size_t i = 0; i < l_data.p; i++)
+  m_fittedParameter.clear();
+  for (size_t i = 0; i < nParams(); i++)
   {
-    m_fittedParameter.push_back(getProperty(m_parameterNames[i]));
+      m_fittedParameter.push_back(getProperty(m_parameterNames[i]));
   }
   modifyInitialFittedParameters(m_fittedParameter); // does nothing except if overwritten by derived class
+  for (size_t i = 0; i < nParams(); i++)
+  {
+      l_data.parameters[i] = m_fittedParameter[i];
+  }
 
 
   // set-up initial guess for fit parameters
@@ -334,9 +389,10 @@ void Fit1D::exec()
   gsl_vector *initFuncArg;
   initFuncArg = gsl_vector_alloc(l_data.p);
 
-  for (size_t i = 0; i < l_data.p; i++)
+  for (size_t i = 0,j = 0; i < nParams(); i++)
   {
-    gsl_vector_set(initFuncArg, i, m_fittedParameter[i]);
+      if (l_data.active[i])
+          gsl_vector_set(initFuncArg, j++, m_fittedParameter[i]);
   }
 
 
@@ -409,8 +465,9 @@ void Fit1D::exec()
     finalCostFuncVal = chi*chi / dof;
 
     // put final converged fitting values back into m_fittedParameter
-    for (unsigned int i = 0; i < l_data.p; i++)
-      m_fittedParameter[i] = gsl_vector_get(s->x,i);
+    for (unsigned int i = 0, j = 0; i < nParams(); i++)
+      if (l_data.active[i])
+          m_fittedParameter[i] = gsl_vector_get(s->x,j++);
   }
   else
   {
@@ -430,8 +487,9 @@ void Fit1D::exec()
     finalCostFuncVal = simplexMinimizer->fval / dof;
 
     // put final converged fitting values back into m_fittedParameter
-    for (unsigned int i = 0; i < l_data.p; i++)
-      m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,i);
+    for (unsigned int i = 0, j = 0; i < m_fittedParameter.size(); i++)
+      if (l_data.active[i])
+          m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,j++);
   }
 
   modifyFinalFittedParameters(m_fittedParameter);   // do nothing except if overwritten by derived class
@@ -444,15 +502,15 @@ void Fit1D::exec()
   g_log.information() << "Iteration = " << iter << "\n" <<
     "Status = " << reportOfFit << "\n" <<
     "Chi^2/DoF = " << finalCostFuncVal << "\n";
-  for (size_t i = 0; i < l_data.p; i++)
-    g_log.information() << m_parameterNames[i] << " = " << m_fittedParameter[i] << "  ";
+  for (size_t i = 0; i < m_fittedParameter.size(); i++)
+    g_log.information() << m_parameterNames[i] << " = " << m_fittedParameter[i] << "  \n";
 
 
   // also output summary to properties
 
   setProperty("Output Status", reportOfFit);
   setProperty("Output Chi^2/DoF", finalCostFuncVal);
-  for (size_t i = 0; i < l_data.p; i++)
+  for (size_t i = 0; i < m_fittedParameter.size(); i++)
     setProperty(m_parameterNames[i], m_fittedParameter[i]);
 
 
@@ -460,8 +518,9 @@ void Fit1D::exec()
 
   delete [] l_data.X;
   delete [] l_data.forSimplexLSwrap;
+  delete [] l_data.parameters;
 
-  gsl_vector_free(initFuncArg);
+//  gsl_vector_free(initFuncArg);
 
   if (isDerivDefined)
     gsl_multifit_fdfsolver_free(s);
@@ -474,6 +533,35 @@ void Fit1D::exec()
   finalize();
 
   return;
+}
+
+/** @param fixed A list of comma separated names of the fixed parameters.
+ */
+FitData::FitData(Fit1D* fit, const std::string& fixed):fit1D(fit)
+{
+    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+    boost::char_separator<char> sep(",");
+    boost::tokenizer<boost::char_separator<char> > names(fixed, sep);
+    active.insert(active.begin(),fit1D->m_parameterNames.size(),true);
+    for (tokenizer::iterator it = names.begin(); it != names.end(); ++it)
+    {
+        std::istringstream istr(*it);
+        std::string name;
+        istr >> name;
+        std::vector<std::string>::const_iterator i = std::find(fit1D->m_parameterNames.begin(),fit1D->m_parameterNames.end(),name);
+        if (i != fit1D->m_parameterNames.end())
+        {
+            active[i - fit1D->m_parameterNames.begin()] = false;
+        }
+        else
+            throw std::invalid_argument("Attempt to fix non-existing parameter "+name);
+    }
+    p = 0;
+    for(int i=0,j=0;i<int(active.size());i++)
+        if (active[i])
+            J.m_map[i] = p++;
+        else
+            J.m_map[i] = -1;
 }
 
 } // namespace Algorithm

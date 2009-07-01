@@ -30,7 +30,6 @@ double* UserFunction1D::AddVariable(const char *varName, void *palg)
     {
         alg.declareProperty(varName,0.0);
         alg.m_parameterNames.push_back(varName);
-        alg.m_fittedParameter.push_back(0.0);
     }
     else
     {

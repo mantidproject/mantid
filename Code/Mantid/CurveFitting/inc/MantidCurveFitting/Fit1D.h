@@ -10,6 +10,19 @@ namespace Mantid
 {
   namespace CurveFitting
   {
+      /** Represents the Jaconian in functionDeriv. The purpose of this calss is to hide from the
+       *  derived from Fit1D classes the fact that some of the parameters can be fixed.
+       */
+      class Jacobian
+      {
+      public:
+          /**  Set a value to a Jacobian matrix element.
+           *   @param iY The index of the data point.
+           *   @param iP The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
+           *   @param value The derivative value.
+           */
+          virtual void set(int iY, int iP, double value) = 0;
+      };
     /**
     Abstract base class for 1D fitting functions.
 
@@ -68,7 +81,7 @@ namespace Mantid
       /// Function you want to least-square fit to
       virtual void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit
-      virtual void functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
+      virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
 
     protected:
       // Overridden Algorithm methods
@@ -104,8 +117,13 @@ namespace Mantid
       /// Holds a copy of the names of the fitting parameters
       std::vector<std::string> m_parameterNames;
 
+      /// Number of parameters (incuding fixed).
+      size_t nParams()const{return m_parameterNames.size();}
+
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;
+
+      friend struct FitData;
 
     };
 

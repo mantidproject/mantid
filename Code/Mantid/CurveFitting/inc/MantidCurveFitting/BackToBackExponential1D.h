@@ -66,7 +66,7 @@ namespace Mantid
       // Overridden Fit1D methods
       void declareParameters();
       void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
-      void functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
+      void functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

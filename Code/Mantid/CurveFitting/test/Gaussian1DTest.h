@@ -29,7 +29,7 @@ public:
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
 
 protected:
-  void functionDeriv(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+  void functionDeriv(const double* in, Mantid::CurveFitting::Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
   {
     throw Exception::NotImplementedError("No derivative function provided");
   }
@@ -229,6 +229,58 @@ public:
     TS_ASSERT_DELTA( dummy, 11.2356 ,0.0001);
     dummy = alg2.getProperty("sigma");
     TS_ASSERT_DELTA( dummy, 1.1142 ,0.0001);
+
+  }
+
+  void testFixedParameters()
+  {
+    Gaussian1D alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // create mock data to test against
+    std::string wsName = "GaussFixed";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("SpectrumIndex","1");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
+    alg2.setPropertyValue("bg0", "3.0");
+    alg2.setPropertyValue("height", "100.7");
+    alg2.setPropertyValue("peakCentre", "11.2");
+    alg2.setPropertyValue("sigma", "1.1");
+    alg2.setPropertyValue("Fix","bg0, sigma");
+
+    // execute fit
+   TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+
+    TS_ASSERT( alg2.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 0.0732,0.0001);
+    dummy = alg2.getProperty("bg0");
+    TS_ASSERT_DELTA( dummy, 3.0 ,0.0001);
+    dummy = alg2.getProperty("height");
+    TS_ASSERT_DELTA( dummy, 98.6596 ,0.001);
+    dummy = alg2.getProperty("peakCentre");
+    TS_ASSERT_DELTA( dummy, 11.2349 ,0.0001);
+    dummy = alg2.getProperty("sigma");
+    TS_ASSERT_DELTA( dummy, 1.1 ,0.0001);
 
   }
 
