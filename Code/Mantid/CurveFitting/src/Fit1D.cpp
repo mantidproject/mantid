@@ -220,7 +220,7 @@ void Fit1D::exec()
     // note nData set to zero (last argument) hence this should avoid further memory problems
     functionDeriv(&(inTest.front()), &(outTest.front()), &xValuesTest, &yValuesTest, &yErrorsTest, 0);  
   }
-  catch (Exception::NotImplementedError e)
+  catch (Exception::NotImplementedError&)
   {
     isDerivDefined = false;
   }

@@ -24,7 +24,7 @@
 #include "MantidGeometry/Cone.h"
 #include "MantidGeometry/General.h"
 #include "MantidGeometry/Sphere.h"
-#include "MantidGeometry/Torus.h"
+//#include "MantidGeometry/Torus.h"
 #include "MantidGeometry/SurfaceFactory.h"
 
 namespace Mantid
@@ -92,7 +92,7 @@ SurfaceFactory::registerSurface()
   SGrid["Plane"]=new Plane;  
   SGrid["Cylinder"]=new Cylinder;  
   SGrid["Cone"]=new Cone;  
-  SGrid["Torus"]=new Torus;  
+  //SGrid["Torus"]=new Torus;  
   SGrid["General"]=new General;  
   SGrid["Sphere"]=new Sphere;  
   
@@ -101,7 +101,7 @@ SurfaceFactory::registerSurface()
   ID['g']="General";
   ID['p']="Plane";
   ID['s']="Sphere";
-  ID['t']="Torus";
+  //ID['t']="Torus";
   return;
 }
   

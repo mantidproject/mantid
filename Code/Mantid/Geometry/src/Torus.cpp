@@ -12,6 +12,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Support.h"
+#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/BaseVisit.h"
@@ -26,8 +27,6 @@ namespace Geometry
 
 Kernel::Logger& Torus::PLog( Kernel::Logger::get("Torus"));
 
-//const double TTolerance(1e-6);       ///< Tolerance to the surfaces.
-  
 Torus::Torus() : Surface(),
 		 Centre(), Normal(1,0,0), 
 		 Iradius(0),Dradius(0),Displacement(0)
@@ -35,7 +34,10 @@ Torus::Torus() : Surface(),
     Constructor with centre line along X axis 
     and centre on origin
   */
-{}
+{
+  PLog.error("The torus is not fully implemented currently supported. There are issues with the OpenCASCADE rendering.");
+  throw Kernel::Exception::NotImplementedError("Torus is not implemented.");
+}
  
 Torus::Torus(const Torus& A) : Surface(A),
   Centre(A.Centre), Normal(A.Normal), 
@@ -297,15 +299,20 @@ Torus::write(std::ostream& OX) const
 void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
 	///TODO:
+	PLog.warning("Torus::getBoundingBox is not implemented.");
 }
 
-/// Suppose to set the distance from centre of the torus to the centre of tube (i.e. tube which makes up the torus)
+/** Supposed to set the distance from centre of the torus to the centre of tube (i.e. tube which makes up the torus)
+ *  @param dist The distance
+ */
 void Torus::setDistanceFromCentreToTube(double dist)
 {
 	Iradius = dist;
 }
 
-/// Suppose to set the radius of the tube which makes up the torus
+/** Supposed to set the radius of the tube which makes up the torus
+ *  @param dist The radius
+ */
 void Torus::setTubeRadius(double dist)
 {
 	Dradius = dist;

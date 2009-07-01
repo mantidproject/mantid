@@ -17,7 +17,6 @@
 #include "MantidGeometry/Sphere.h"
 #include "MantidGeometry/Cone.h"
 #include "MantidGeometry/Cylinder.h"
-#include "MantidGeometry/Torus.h"
 #include "MantidGeometry/SurfaceFactory.h"
 
 
@@ -38,8 +37,6 @@ public:
 		TS_ASSERT_EQUALS(extractString(*C),"-1 cx 0\n");
 		Cone     *K=dynamic_cast<Cone*>(A->createSurface("Cone"));
 		TS_ASSERT_EQUALS(extractString(*K),"-1  kx 0 0\n");
-		Torus    *T=dynamic_cast<Torus*>(A->createSurface("Torus"));
-		TS_ASSERT_EQUALS(extractString(*T),"-1 tx [0,0,0] 0 0 0\n");		
 	}
 
 	void testCreateSurfaceID(){
@@ -53,8 +50,6 @@ public:
 		TS_ASSERT_EQUALS(extractString(*C),"-1 cx 0\n");
 		Cone     *K=dynamic_cast<Cone*>(A->createSurfaceID("k"));
 		TS_ASSERT_EQUALS(extractString(*K),"-1  kx 0 0\n");
-		Torus    *T=dynamic_cast<Torus*>(A->createSurfaceID("t"));
-		TS_ASSERT_EQUALS(extractString(*T),"-1 tx [0,0,0] 0 0 0\n");
 	}
 
 	void testProcessLine(){
@@ -76,11 +71,8 @@ public:
 		Cone tK;
 		tK.setSurface("k/x 1.0 1.0 1.0 1.0");
 		TS_ASSERT_EQUALS(extractString(*K),extractString(tK));
-		Surface *T=A->processLine("t/x 1 1 1 2 3 4");
-		Torus tT;
-		tT.setSurface("t/x 1 1 1 2 3 4");
-		TS_ASSERT_EQUALS(extractString(*T),extractString(tT));
 	}
+	
 private:
 	std::string extractString(const Surface& pv)
 	{

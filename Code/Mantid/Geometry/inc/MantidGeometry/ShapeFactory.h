@@ -35,7 +35,7 @@ namespace Mantid
     described in the XML instrument definition file.
 
     This class is now also use elsewhere, and in addition to create geometric shapes
-    from an DOM-element-node pointing to a <type> element with shape information, shapes
+    from an DOM-element-node pointing to a \<type> element with shape information, shapes
     can also be created directly from a XML shape string. 
 
     @author Anders Markvardsen, ISIS, RAL
@@ -69,7 +69,7 @@ namespace Mantid
       /// Destructor
       ~ShapeFactory() {}
 
-      /// Creates a geometric object from a DOM-element-node pointing to a <type> element
+      /// Creates a geometric object from a DOM-element-node pointing to a \<type> element
       /// containing shape information. If no shape information an empty Object is returned
       boost::shared_ptr<Object> createShape(Poco::XML::Element* pElem);
 

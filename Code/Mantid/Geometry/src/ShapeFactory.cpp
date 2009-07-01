@@ -79,7 +79,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(std::string &shapeXML)
 }
 
 
-/** Creates a geometric object from a DOM-element-node pointing to a <type> element
+/** Creates a geometric object from a DOM-element-node pointing to a \<type> element
  *  containing shape information. If no shape information an empty Object is returned
  *
  *  @param pElem XML element from instrument def. file which may specify a geometric shape
