@@ -33,14 +33,14 @@ class AlgHistoryTreeWidget:public QTreeWidget
 {
     Q_OBJECT
 signals:
-	void updateAlgorithmHistoryWindow(QString algName,int algVersion);
+	void updateAlgorithmHistoryWindow(QString algName,int algVersion,int Index);
 public:
 	/// Constructor
 	AlgHistoryTreeWidget(QWidget *w):QTreeWidget(w),m_algName(""),m_nVersion(0)
 	{
 		connect(this,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
 	}
-	void getSelectedAlgorithmName(QString& algName,int & version);
+	void getSelectedAlgorithmName(QString& algName,int & version,int & index);
 	const QString getAlgorithmName();
 	const int& getAlgorithmVersion();
 public slots:
@@ -53,6 +53,7 @@ private:
 private:
 	QString m_algName;
 	int m_nVersion;
+    static Mantid::Kernel::Logger& g_log;
 
 };
 
@@ -117,17 +118,20 @@ public:
 	                       const Mantid::Kernel::EnvironmentHistory&);
   ~AlgorithmHistoryWindow();
 private slots:
-	void updateAll( QString algName,int algVersion);
+	void updateAll( QString algName,int algVersion,int nIndex);
 	void generateScript();
 private:
 	AlgExecSummaryGrpBox* createExecSummaryGrpBox();
 	AlgEnvHistoryGrpBox* createEnvHistGrpBox(const Mantid::Kernel::EnvironmentHistory& envHistory);
-	AlgHistoryProperties * createAlgHistoryPropWindow(const QString& algName,int version);
+	//AlgHistoryProperties * createAlgHistoryPropWindow(const QString& algName,int version);
+	AlgHistoryProperties * createAlgHistoryPropWindow();
 	void populateAlgHistoryTreeWidget();
 	QPushButton * CreateScriptButton();
 	QFileDialog* createScriptDialog(const QString& algName);
-	void updateExecSummaryGrpBox(const QString& algName,const int & version);
-	void updateAlgHistoryProperties(QString algName,int version);
+	//void updateExecSummaryGrpBox(const QString& algName,const int & version);
+	void updateExecSummaryGrpBox(const QString& algName,const int & version,int index);
+	//void updateAlgHistoryProperties(QString algName,int version);
+	void updateAlgHistoryProperties(QString algName,int version,int pos);
 	void concatVersionwithName(QString& algName,const int version);
 	void writeToScriptFile(const QString& script);
 	std::string sanitizePropertyName(const std::string & name);
@@ -136,7 +140,7 @@ private:
 	const QString& getAlgorithmName() const;
 	void setAlgorithmVersion(const int& version);
 	const int& getAlgorithmVersion()const;
-	//static Mantid::Kernel::Logger& g_log;
+	static Mantid::Kernel::Logger& g_log;
 	
 private:
 	std::vector<Mantid::API::AlgorithmHistory> m_algHist;
