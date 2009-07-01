@@ -230,7 +230,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    inputFile = "../../../../Test/Instrument/SLS_Definition.xml";
+    inputFile = "../../../../Test/Instrument/SANDALS_Definition.xml";
     loaderSLS.setPropertyValue("Filename", inputFile);
 
     loaderSLS.setPropertyValue("Workspace", wsName);
@@ -291,7 +291,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    inputFile = "../../../../Test/Instrument/HRP_Definition.xml";
+    inputFile = "../../../../Test/Instrument/HRPD_Definition.xml";
     loaderHRP.setPropertyValue("Filename", inputFile);
 
     loaderHRP.setPropertyValue("Workspace", wsName);

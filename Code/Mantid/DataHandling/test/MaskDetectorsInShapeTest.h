@@ -105,7 +105,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT( loaderSLS.isInitialized() );
-    inputFile = "../../../../Test/Instrument/SLS_Definition.xml";
+    inputFile = "../../../../Test/Instrument/SANDALS_Definition.xml";
     loaderSLS.setPropertyValue("Filename", inputFile);
     wsName = "MaskDetectorsInShapeTestSLS";
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
