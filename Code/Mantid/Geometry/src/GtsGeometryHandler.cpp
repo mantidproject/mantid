@@ -10,7 +10,7 @@ namespace Mantid
 {
 	namespace Geometry
 	{
-	   /*
+	  /**
 		* This is private method used for traversing gts surface and retriving points
 		* @param p Points of the surface
 		* @param data user information, data points pointer
@@ -24,7 +24,7 @@ namespace Mantid
 			pts[index*3+2] = p->z;
 		}
 
-	   /*
+	  /**
 		* This is private method used for traversing gts surface and retriving triangle indexes
 		* @param t triangle faces of the surface
 		* @param data user information, data[0] face index pointer and data[1] index

@@ -88,8 +88,11 @@ class DLLExport Object
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
   friend class CacheGeometryHandler;
+	/// Is geometry caching enabled?
   bool bGeometryCaching;
+	/// a pointer to a class for reading from the geometry cache
   boost::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
+	/// a pointer to a class for writing to the geometry cache
   boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
   void updateGeometryHandler();
   /// for solid angle from triangulation

@@ -75,19 +75,19 @@ class DLLExport Torus : public Surface
   virtual void acceptVisitor(BaseVisit& A) const
   {  A.Accept(*this); }
 
-  int setSurface(const std::string&);
-  int side(const Geometry::V3D&) const;
-  int onSurface(const Geometry::V3D&) const;
-  double distance(const Geometry::V3D&) const;   
+  int setSurface(const std::string& Pstr);
+  int side(const Geometry::V3D& R) const;
+  int onSurface(const Geometry::V3D& R) const;
+  double distance(const Geometry::V3D& Pt) const;   
 
   /// Return centre point
   Geometry::V3D getCentre() const { return Centre; }              
   /// Central normal
   Geometry::V3D getNormal() const { return Normal; }       
-  Geometry::V3D surfaceNormal(const Geometry::V3D&) const;
+  Geometry::V3D surfaceNormal(const Geometry::V3D& Pt) const;
 
-  void setCentre(const Geometry::V3D&);              
-  void setNorm(const Geometry::V3D&);
+  void setCentre(const Geometry::V3D& A);              
+  void setNorm(const Geometry::V3D& A);
 
   /// Suppose to set the distance from centre of the torus to the centre of tube. 
   ///TODO:
@@ -97,7 +97,7 @@ class DLLExport Torus : public Surface
   ///TODO:
   void setTubeRadius(double dist);
 
-  void write(std::ostream&) const;
+  void write(std::ostream& OX) const;
   void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
 };
 

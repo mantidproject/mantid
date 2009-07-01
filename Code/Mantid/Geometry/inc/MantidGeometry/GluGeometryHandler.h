@@ -45,17 +45,27 @@ namespace Mantid
 		class V3D;
 		class DLLExport GluGeometryHandler: public GeometryHandler
 		{
-			enum GEOMETRY_TYPE{CUBOID,CYLINDER,CONE,SPHERE};
+			/// the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
+			enum GEOMETRY_TYPE
+			{
+				CUBOID,   ///< CUBOID
+				CYLINDER, ///< CYLINDER
+				CONE,     ///< CONE
+				SPHERE    ///< SPHERE
+			}; 
 		private:
 			static Kernel::Logger& PLog;           ///< The official logger
 			GluGeometryRenderer* Renderer;         ///< Geometry renderer variable used for rendering Object/ObjComponent
 
-			V3D center; //Center for sphere,cone and cylinder
-			V3D Point1,Point2,Point3,Point4; //cube coordinates
-			double radius; //Radius for the sphere, cone and cylinder
-			double height; //height for cone and cylinder;
-			V3D axis; // ¦¦ to axis
-			GEOMETRY_TYPE type;
+			V3D center; ///<Center for sphere,cone and cylinder
+			V3D Point1; ///<cube coordinates
+			V3D Point2; ///<cube coordinates
+			V3D Point3; ///<cube coordinates
+			V3D Point4; ///<cube coordinates
+			double radius; ///<Radius for the sphere, cone and cylinder
+			double height; ///<height for cone and cylinder;
+			V3D axis; ///< ¦¦ to axis
+			GEOMETRY_TYPE type; ///< the type of the geometry eg CUBOID,CYLINDER,CONE,SPHERE
 		public:
 			GluGeometryHandler(IObjComponent* obj); ///< Constructor
 			GluGeometryHandler(boost::shared_ptr<Object>       obj); ///< Constructor
@@ -63,14 +73,18 @@ namespace Mantid
 			~GluGeometryHandler(); ///< Destructor
 			GeometryHandler* createInstance(IObjComponent *comp);
 			GeometryHandler* createInstance(boost::shared_ptr<Object> obj);
+			///sets the geometry handler for a cuboid
 			void setCuboid(V3D,V3D,V3D,V3D);
+			///sets the geometry handler for a cone
 			void setSphere(V3D,double);
+			///sets the geometry handler for a cylinder
 			void setCylinder(V3D,V3D,double,double);
+			///sets the geometry handler for a cone
 			void setCone(V3D,V3D,double,double);
 			void Triangulate();
 			void Render();
 			void Initialize();
-            void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight);
+			void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight);
 		};
 
 	}   // NAMESPACE Geometry

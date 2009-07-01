@@ -74,12 +74,21 @@ private:
 // Member function specializations for ints and doubles. The defintions are in the
 // cpp file so that multiple symbol errors do not occur in the linking stage.
 // 
+
+/** Checks if the integer it is passed equals the flag value 
+*  Mantid::EMPTY_DBL(), which implies that it wasn't set by the user
+*  @param value the value to test
+*  @return "A value must be entered for this parameter" if empty or ""
+*/
 template<>
-/// A member function specialization for integers
 std::string MandatoryValidator<int>::checkValidity(const int& value) const;
 
+/** Checks if the double it is passed is within 10 parts per billon of flag
+*  value Mantid::EMPTY_DBL(), which implies that it wasn't set by the user
+*  @param value the value to test
+*  @return "A value must be entered for this parameter" if empty or ""
+*/
 template<>
-/// A member function specialization for doubles
 std::string MandatoryValidator<double>::checkValidity(const double& value) const;
 
 

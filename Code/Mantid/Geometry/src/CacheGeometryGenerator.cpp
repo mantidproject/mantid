@@ -71,6 +71,13 @@ namespace Mantid
 			return mFaces;
 		}
 
+		/**
+		Sets the geometry cache using the triangulation information provided
+		@param noPts the number of points
+		@param noFaces the number of faces
+		@param pts a double array of the points
+		@param faces an int array of the faces
+		*/
 		void CacheGeometryGenerator::setGeometryCache(int noPts,int noFaces,double* pts,int* faces)
 		{
 			if(mPoints!=NULL) delete mPoints;

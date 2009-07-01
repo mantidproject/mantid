@@ -78,7 +78,7 @@ class DLLExport Surface
   static double getSurfaceTolerance() { return 1e-6; } ///< Get Tolerance for all surface types
 
   /// Sets the surface based on a string input in MCNPX format
-  virtual int setSurface(const std::string&) =0; 
+  virtual int setSurface(const std::string& R) =0; 
   virtual int side(const V3D&) const;
 
   /// is point valid on surface 

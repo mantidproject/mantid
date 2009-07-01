@@ -46,18 +46,24 @@ namespace Mantid
 		private:			
 			static Kernel::Logger& PLog; ///< Static reference to the logger class
 			Object *Obj; ///< Input Object
-			int mNoOfVertices;
-			int mNoOfTriangles;
-			double* mPoints;
-			int* mFaces;
+			int mNoOfVertices; ///< number of vertices 
+			int mNoOfTriangles; ///< number of triangles
+			double* mPoints; ///<double array or points
+			int* mFaces; ///< Integer array of faces
 		public:
 			CacheGeometryGenerator(Object *obj);
 			~CacheGeometryGenerator();
+			/// Generate the trangles
 			void Generate();
+			/// get the number of triangles
 			int getNumberOfTriangles();
+			/// get the number of points
 			int getNumberOfPoints();
+			/// get the triangle vertices
 			double* getTriangleVertices();
+			/// get the triangle faces
 			int* getTriangleFaces();
+			/// Sets the geometry cache using the triangulation information provided
 			void setGeometryCache(int noPts,int noFaces,double* pts,int* faces);
 		};
 

@@ -148,6 +148,9 @@ namespace Mantid
 			}
 		}
 
+		/**
+		 * Writes out a vtk 2.0 file, currently hardcoded to c:\\outputcascade.vtk
+		 */
 		void OCGeometryRenderer::WriteVTK(TopoDS_Shape* out)
 		{
 			FILE *fp=fopen("C:\\outputcascade.vtk","w+");

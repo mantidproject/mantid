@@ -67,6 +67,7 @@ namespace Mantid
 			int     NumberOfPoints();
 			double* getTriangleVertices();
 			int*    getTriangleFaces();
+			/// Sets the geometry cache using the triangulation information provided
 			void setGeometryCache(int noPts,int noFaces,double* pts,int* faces);
 		};
 

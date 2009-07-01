@@ -42,6 +42,7 @@ namespace Mantid
 		class OCGeometryGenerator;
 		class IObjComponent;
 		class Object;
+
 		class DLLExport OCGeometryHandler: public GeometryHandler
 		{
 		private:
@@ -58,10 +59,15 @@ namespace Mantid
 			void Triangulate();
 			void Render();
 			void Initialize();
+			/// Returns true if the shape can be triangulated
 			bool    canTriangulate(){return true;}
+			/// get the number of Triangles
 			int     NumberOfTriangles();
+			/// get the number of points or vertices
 			int     NumberOfPoints();
+			/// Extract the vertices of the triangles
 			double* getTriangleVertices();
+			/// Extract the Faces of the triangles
 			int*    getTriangleFaces();
 		};
 
