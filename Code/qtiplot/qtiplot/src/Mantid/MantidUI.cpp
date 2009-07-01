@@ -1091,7 +1091,7 @@ void MantidUI::clearAllMemory()
   
   foreach( MdiSubWindow* sub_win, m_appWindow->windowsList() )
   {
-    if( qobject_cast<MantidMatrix*>(sub_win) )
+    if( qobject_cast<MantidMatrix*>(sub_win) || qobject_cast<InstrumentWindow*>(sub_win))
     {
       sub_win->close();
     }
