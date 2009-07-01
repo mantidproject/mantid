@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/Unwrap.h"
-#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRaw2.h"
 #include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::API;
@@ -52,7 +52,7 @@ public:
 
   void testExec()
   {
-    IAlgorithm* loader = new Mantid::DataHandling::LoadRaw;
+    IAlgorithm* loader = new Mantid::DataHandling::LoadRaw2;
     loader->initialize();
     loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
 

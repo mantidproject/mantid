@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/AlignDetectors.h"
-#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRaw2.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid::DataHandling;
@@ -16,7 +16,7 @@ class AlignDetectorsTest : public CxxTest::TestSuite
 public:
   AlignDetectorsTest()
   {
-    LoadRaw loader;
+    LoadRaw2 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/HRP38692.RAW");
     inputWS = "rawWS";

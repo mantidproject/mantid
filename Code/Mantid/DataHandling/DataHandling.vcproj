@@ -315,6 +315,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\AlignDetectorsTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\byte_rel_comp.h"
 				>
 			</File>
