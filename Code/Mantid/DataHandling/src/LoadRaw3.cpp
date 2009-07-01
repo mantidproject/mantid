@@ -36,7 +36,7 @@ namespace Mantid
     /// Constructor
     LoadRaw3::LoadRaw3() :
       Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(0)
+      m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
     {}
     
     LoadRaw3::~LoadRaw3()
@@ -58,7 +58,7 @@ namespace Mantid
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
       declareProperty("spectrum_min",1, mustBePositive);
-      declareProperty("spectrum_max",1, mustBePositive->clone());
+      declareProperty("spectrum_max",unSetInt, mustBePositive->clone());
 
       declareProperty(new ArrayProperty<int>("spectrum_list"));
       m_cache_options.push_back("If slow");
@@ -223,6 +223,7 @@ namespace Mantid
 		 }
          isisRaw->skipData(period*(m_numberOfSpectra+1));
         int counter = 0;
+		g_log.debug()<<"number Of Spectra =  "<<m_numberOfSpectra<<"  Spectra Min = "<<m_spec_min<<"  Spectra Max= "<< m_spec_max<< std::endl;
         for (int i = 1; i <= m_numberOfSpectra; ++i)
         {
             int histToRead = i + period*(m_numberOfSpectra+1);
@@ -323,10 +324,10 @@ namespace Mantid
     /// Validates the optional 'spectra to read' properties, if they have been set
     void LoadRaw3::checkOptionalProperties()
     {
-      Property *specList = getProperty("spectrum_list");
+     /* Property *specList = getProperty("spectrum_list");
       m_list = !(specList->isDefault());
       Property *specMax = getProperty("spectrum_max");
-      m_interval = !(specMax->isDefault());
+      m_interval = !(specMax->isDefault());*/
 
       /*/ If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
       if ( m_numberOfPeriods > 1)
@@ -340,7 +341,7 @@ namespace Mantid
       }//*/
 
       // Check validity of spectra list property, if set
-      if ( m_list )
+     /* if ( m_list )
       {
         m_list = true;
         m_spec_list = getProperty("spectrum_list");
@@ -359,12 +360,52 @@ namespace Mantid
         m_interval = true;
         m_spec_min = getProperty("spectrum_min");
         m_spec_max = getProperty("spectrum_max");
+		g_log.error()<<"Specra Max "<<m_spec_max<<std::endl;
+        if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
+        {
+          g_log.error("Invalid Spectrum min/max properties");
+          throw std::invalid_argument("Inconsistent properties defined");
+        }
+      }*/
+	  
+      //read in the settings passed to the algorithm
+      m_spec_list = getProperty("spectrum_list");
+      m_spec_max = getProperty("spectrum_max");
+      m_list = !m_spec_list.empty();
+      m_interval = m_spec_max != unSetInt;
+      if ( m_spec_max == unSetInt ) m_spec_max = 1; 
+
+      // Check validity of spectra list property, if set
+      if ( m_list )
+      {
+        m_list = true;
+        if (m_spec_list.size() == 0)
+        {
+            m_list = false;
+        }
+        else
+        {
+            const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+            const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+            if ( maxlist > m_numberOfSpectra || minlist <= 0)
+            {
+                g_log.error("Invalid list of spectra");
+                throw std::invalid_argument("Inconsistent properties defined");
+            }
+        }
+      }
+      // Check validity of spectra range, if set
+      if ( m_interval )
+      {
+        m_interval = true;
+        m_spec_min = getProperty("spectrum_min");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");
           throw std::invalid_argument("Inconsistent properties defined");
         }
       }
+
     }
 
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
