@@ -1248,8 +1248,8 @@ namespace NeXus
        @param spec A vector with spectra indeces
    */
 
-   const SpectraDetectorMap& spectraMap=localworkspace->spectraMap();
-   API::Axis *spectraAxis = localworkspace->getAxis(1);
+   const SpectraDetectorMap& spectraMap=localWorkspace->spectraMap();
+   API::Axis *spectraAxis = localWorkspace->getAxis(1);
    const int nDetectors = spectraMap.nElements();
    if(nDetectors<1)
    {
@@ -1326,18 +1326,18 @@ namespace NeXus
    //
    try
    {
-       Mantid::Geometry::IObjComponent_const_sptr sample = localworkspace->getInstrument()->getSample();
+       Mantid::Geometry::IObjComponent_const_sptr sample = localWorkspace->getInstrument()->getSample();
        Mantid::Geometry::V3D sample_pos = sample->getPos();
        for(int i=0;i<ndet;i++)
        {
            double R,Theta,Phi;
            try
            {
-               boost::shared_ptr<Mantid::Geometry::IDetector> det = localworkspace->getInstrument()->getDetector(detector_list[i]);
+               boost::shared_ptr<Mantid::Geometry::IDetector> det = localWorkspace->getInstrument()->getDetector(detector_list[i]);
                Mantid::Geometry::V3D pos = det->getPos() - sample_pos;
                pos.getSpherical(R,Theta,Phi);
                R = det->getDistance(*sample);
-               Theta = localworkspace->detectorTwoTheta(det)*180.0/M_PI;
+               Theta = localWorkspace->detectorTwoTheta(det)*180.0/M_PI;
            }
            catch(...)
            {
