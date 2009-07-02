@@ -16,21 +16,25 @@ namespace API
 {
 
 // Get a reference to the logger
-Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
+//Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
 
 unsigned int Algorithm::g_execCount=0;
 
 /// Constructor
 Algorithm::Algorithm() :
   PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
-  m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
+		m_executeAsync(this,&Algorithm::executeAsyncImpl),g_log(Kernel::Logger::get("Algorithm")),m_isInitialized(false),
   m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false),
   m_algorithmID(0)
-{}
+{
+
+}
 
 /// Virtual destructor
 Algorithm::~Algorithm()
-{}
+{
+	//g_log.release();
+}
 
 /** Initialization method invoked by the framework. This method is responsible
  *  for any bookkeeping of initialization required by the framework itself.
@@ -44,6 +48,8 @@ void Algorithm::initialize()
   // Bypass the initialization if the algorithm has already been initialized.
   if (m_isInitialized) return;
 
+	g_log.setName(this->name());
+	g_log.notice("I have changed my name!");
   try
   {
     // Invoke init() method of the derived class inside a try/catch clause

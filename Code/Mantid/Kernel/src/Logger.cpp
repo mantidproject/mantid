@@ -17,10 +17,11 @@ namespace Mantid
 		/** Constructor
 		* @param name The class name invoking this logger
 		*/
-		Logger::Logger(const std::string& name): _log(Poco::Logger::get(name)),_enabled(true)
+		Logger::Logger(const std::string& name):_enabled(true)
 		{  
 			_name = name;
-			_logStream = new Poco::LogStream(_log);
+			_log=&Poco::Logger::get(_name);
+			_logStream = new Poco::LogStream(*_log);
 			_nullChannel = new Poco::NullChannel;
 			Poco::Logger& nullLogger = Poco::Logger::get("NULL");
 			nullLogger.setChannel(_nullChannel);
@@ -34,6 +35,18 @@ namespace Mantid
 			delete (_logStream);
 			delete (_nullStream);
 			delete (_nullChannel);
+		}
+
+		/// Sets the Loggername to a new value.
+		void Logger::setName(std::string newName)
+		{
+			//delete the log stream
+			delete (_logStream);
+			//reassign _log
+			_name = newName;
+			_log=&Poco::Logger::get(_name);
+			//create a new Logstream
+			_logStream = new Poco::LogStream(*_log);
 		}
 
 		/** Returns true if the log is enabled
@@ -66,7 +79,7 @@ namespace Mantid
 			{
 				try
 				{
-					_log.fatal(msg); 
+					_log->fatal(msg); 
 				} 
 				catch (std::exception& e)
 				{
@@ -87,7 +100,7 @@ namespace Mantid
 			{
 				try
 				{
-					_log.error(msg);
+					_log->error(msg);
 				} 
 				catch (std::exception& e)
 				{
@@ -108,7 +121,7 @@ namespace Mantid
 			{
 				try
 				{
-					_log.warning(msg);
+					_log->warning(msg);
 				} 
 				catch (std::exception& e)
 				{
@@ -129,7 +142,7 @@ namespace Mantid
 			{
 				try
 				{
-					_log.notice(msg);
+					_log->notice(msg);
 				} 
 				catch (std::exception& e)
 				{
@@ -150,7 +163,7 @@ namespace Mantid
 			{
 				try
 				{
-					_log.information(msg);
+					_log->information(msg);
 				} 
 				catch (std::exception& e)
 				{
@@ -171,7 +184,7 @@ namespace Mantid
 			{
 				try
 				{
-					_log.debug(msg);
+					_log->debug(msg);
 				} 
 				catch (std::exception& e)
 				{
@@ -200,7 +213,7 @@ namespace Mantid
 			{
 				try
 				{
-					_log.dump(msg,buffer,length);
+					_log->dump(msg,buffer,length);
 				} 
 				catch (std::exception& e)
 				{
@@ -218,7 +231,7 @@ namespace Mantid
 			bool retVal = false;
 			try
 			{
-				retVal = _log.is(level);
+				retVal = _log->is(level);
 			} 
 			catch (std::exception& e)
 			{
@@ -232,7 +245,7 @@ namespace Mantid
 		{
 			try
 			{
-				_log.setLevel(level);
+				_log->setLevel(level);
 			} 
 			catch (std::exception& e)
 			{
@@ -241,11 +254,14 @@ namespace Mantid
 			}
 		}
 
+		/// Sets the Logger's log level using a symbolic value.
+		///
+		/// @param level Valid values are: fatal, critical, error, warning, notice, information, debug
 		void Logger::setLevel(const std::string& level)
 		{
 			try
 			{
-				_log.setLevel(level);
+				_log->setLevel(level);
 			} 
 			catch (std::exception& e)
 			{
@@ -256,7 +272,7 @@ namespace Mantid
 
 		int Logger::getLevel() const
 		{
-			return _log.getLevel();
+			return _log->getLevel();
 		}
 
 		Poco::LogStream* Logger::getStream()
@@ -345,7 +361,7 @@ namespace Mantid
 
 		/** Deletes the logger and clears it from the cache.
 		* 
-		*  @param name The logger to destroy. 
+		*  @param logger The logger to destroy. 
 		*/
 		void Logger::destroy(Logger& logger)
 		{

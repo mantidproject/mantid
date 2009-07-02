@@ -74,6 +74,23 @@ public:
 
   }
 
+	void testChangeName()
+  {
+	  //attempt some logging
+	  Logger& log1 = Logger::get("logTestName1");
+	  TS_ASSERT_THROWS_NOTHING(log1.error("This should be from logTestName1"));
+		TS_ASSERT_THROWS_NOTHING(log1.error()<<"This should be from logTestName1 via a stream" << std::endl;);
+		
+		TS_ASSERT_THROWS_NOTHING(log1.setName("logTestName2"));
+		TS_ASSERT_THROWS_NOTHING(log1.error("This should be from logTestName2"));
+		TS_ASSERT_THROWS_NOTHING(log1.error()<<"This should be from logTestName2 via a stream" << std::endl;);
+		
+		TS_ASSERT_THROWS_NOTHING(log1.setName("logTestName1"));
+		TS_ASSERT_THROWS_NOTHING(log1.error("This should be from logTestName1"));
+		TS_ASSERT_THROWS_NOTHING(log1.error()<<"This should be from logTestName1 via a stream" << std::endl;);
+		
+  }
+
   void TestSystemValues()
   {
 	  //we cannot test the return values here as they will differ based on the environment.

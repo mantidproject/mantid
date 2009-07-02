@@ -19,9 +19,6 @@ using namespace API;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_const_sptr;
 
-// Get a reference to the logger
-Logger& SumSpectra::g_log = Logger::get("SumSpectra");
-
 /** Initialisation method.
  *
  */

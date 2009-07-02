@@ -97,7 +97,7 @@ namespace Mantid
 		class DLLExport Algorithm : public IAlgorithm, public Kernel::PropertyManagerOwner
 		{
 		public:
-			#pragma region Notification Classes
+			
 			/// Base class for algorithm notifications
 			class AlgorithmNotification: public Poco::Notification
 			{
@@ -145,9 +145,7 @@ namespace Mantid
 				virtual std::string name() const{return "ErrorNotification";}///< class name
 				std::string what;///< message string
 			};
-			#pragma endregion
 
-			#pragma region Exception
 			/// CancelException is thrown to cancel execution of the algorithm. Use Algorithm::cancel() to
 			/// terminate an algorithm. The execution will only be stopped if Algorithm::exec() method calls
 			/// periodically Algorithm::interuption_point() which checks if Algorithm::cancel() has been called
@@ -172,7 +170,6 @@ namespace Mantid
 				std::string outMessage;
 
 			};
-			#pragma endregion
 
 			Algorithm();
 			virtual ~Algorithm();
@@ -257,6 +254,9 @@ namespace Mantid
 			static bool isEmpty(double toCheck) { return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
 			///checks that the value was not set by users, uses the value in EMPTY_INT()
 			static bool isEmpty(int toCheck) { return toCheck == EMPTY_INT(); }
+			
+			/// refenence to the logger class
+			Kernel::Logger& g_log;
 
 		private:
 
@@ -290,9 +290,7 @@ namespace Mantid
 			*/
 			bool executeAsyncImpl(const int& i);
 
-			/// Static refenence to the logger class
-			static Kernel::Logger& g_log;
-
+			
 			bool m_isInitialized; ///< Algorithm has been initialized flag
 			bool m_isExecuted; ///< Algorithm is executed flag
 

@@ -72,9 +72,6 @@ private:
   /// The spectrum to finish the integration at
   int m_MaxSpec;
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
-
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
 };

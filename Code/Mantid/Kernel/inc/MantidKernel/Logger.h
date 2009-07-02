@@ -77,19 +77,23 @@ namespace Kernel
 			PRIO_DEBUG = 7        ///< A debugging message.This is the lowest priority.
 		};
 
-		void fatal(const std::string& msg);
-		void error(const std::string& msg);
-		void warning(const std::string& msg);
-		void notice(const std::string& msg);
-		void information(const std::string& msg);
-		void debug(const std::string& msg);
+		/// Sets the Loggername to a new value.
+		void setName(std::string newName);
+		
+		
+		void fatal(const std::string& msg);				///< Logs at Fatal level
+		void error(const std::string& msg);				///< Logs at error level
+		void warning(const std::string& msg);			///< Logs at warning level
+		void notice(const std::string& msg);			///< Logs at notice level
+		void information(const std::string& msg);	///< Logs at information level
+		void debug(const std::string& msg);				///< Logs at debug level
 
-		std::ostream& fatal();
-		std::ostream& error();
-		std::ostream& warning();
-		std::ostream& notice();
-		std::ostream& information();
-		std::ostream& debug();
+		std::ostream& fatal();			///< Logs at Fatal level
+		std::ostream& error();			///< Logs at error level
+		std::ostream& warning();		///< Logs at warning level
+		std::ostream& notice();			///< Logs at notice level
+		std::ostream& information();///< Logs at information level
+		std::ostream& debug();			///< Logs at debug level
 
 		/// Logs the given message at debug level, followed by the data in buffer.
 		void dump(const std::string& msg, const void* buffer, std::size_t length);
@@ -101,15 +105,6 @@ namespace Kernel
 		int getLevel() const;
 		
 		/// Sets the Logger's log level using a symbolic value.
-		///
-		/// Valid values are:
-		///   - fatal
-		///   - critical
-		///   - error
-		///   - warning
-		///   - notice
-		///   - information
-		///   - debug
 		void setLevel(const std::string& level);
 
 		///returns true if the log is enabled
@@ -127,7 +122,7 @@ namespace Kernel
 		/// Returns a reference to the Logger with the given name.
 		static Logger& get(const std::string& name);
 
-		//destroy the given logger and releases resources
+		///destroy the given logger and releases resources
 		static void destroy(Logger& logger);
 
 		/// Shuts down the logging framework and releases all Loggers.
@@ -147,7 +142,7 @@ namespace Kernel
 		Logger& operator= (const Logger&);
 
 		/// Internal handle to third party logging objects
-		Poco::Logger& _log;
+		Poco::Logger* _log;
 		///A Log stream to allow streaming operations.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
 		Poco::LogStream* _logStream;
 		///A Null stream, used when the logger is disabled.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
@@ -163,9 +158,9 @@ namespace Kernel
 		/// The state of this logger, disabled loggers send no messages
 		bool _enabled;
 
-		typedef std::set<Logger*> LoggerList;
-		static LoggerList*        m_LoggerList;
-		static Poco::Mutex        m_ListMtx;
+		typedef std::set<Logger*> LoggerList;		///<A container of logger pointers
+		static LoggerList*        m_LoggerList; ///<The container of logger pointers
+		static Poco::Mutex        m_ListMtx;		///<A statc lock object
 };
 
 } // namespace Kernel
