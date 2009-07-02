@@ -53,7 +53,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      XMLlogfile(std::string& logfileID, std::string& paramName, std::string& type, 
+      XMLlogfile(std::string& logfileID, std::string& value, std::string& paramName, std::string& type, 
                  std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp);
 
       /// Destructor
@@ -62,6 +62,7 @@ namespace Mantid
 
       /// log file XML attributes from instrument definition file
       const std::string m_logfileID;  ///< logfile id
+      const std::string m_value;  ///< rather then extracting value from logfile, specify a value directly
       const std::string m_paramName;  ///< parameter name
       const std::string m_type;       ///< type of the data
       const std::string m_extractSingleValueAs;  ///< describes the way to extract a single value from the log file( average, first number, etc)

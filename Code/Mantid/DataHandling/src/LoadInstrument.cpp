@@ -951,12 +951,26 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
       throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
         " contain <parameter> element with no name attribute in XML instrument file", m_filename);
 
-    if ( !pParamElem->hasAttribute("logfile-id") )
+    if ( !pParamElem->hasAttribute("logfile-id") && !pParamElem->hasAttribute("value") )
       throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
-        " contain <parameter> element with no logfile-id attribute in XML instrument file", m_filename);
+        " contain <parameter> element with no logfile-id or value attribute in XML instrument file", m_filename);
+
+    std::string logfileID;
+    std::string value;
+
+    if ( pParamElem->hasAttribute("logfile-id") )
+    {
+      // "logfile-id" takes presedence over "value" attribute if both are present
+      // hence if "logfile-id" specified value is read from logfile
+      logfileID = pParamElem->getAttribute("logfile-id");
+    }
+    else
+    {
+      // rather then extracting value from logfile, specify a value directly
+      value = pParamElem->getAttribute("value");
+    }
 
     std::string paramName = pParamElem->getAttribute("name");
-    std::string logfileID = pParamElem->getAttribute("logfile-id");
     std::string type = "double"; // default
     std::string extractSingleValueAs = "mean"; // default
     std::string eq = "";
@@ -968,7 +982,7 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
     if ( pParamElem->hasAttribute("extract-single-value-as") )
       extractSingleValueAs = pParamElem->getAttribute("extract-single-value-as");
 
-    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, paramName, type, extractSingleValueAs, eq, comp));
+    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, paramName, type, extractSingleValueAs, eq, comp));
     logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
   }
   pNL->release();

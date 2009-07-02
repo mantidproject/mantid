@@ -20,15 +20,16 @@ Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
 
 /** Constructor
  *  @param logfileID The logfile id -- the part of the file name which identifies the log 
+ *  @param value Rather then extracting value from logfile, specify a value directly
  *  @param paramName The name of the parameter which will be created based on the log values
  *  @param type The type
  *  @param extractSingleValueAs Describes the way to extract a single value from the log file( average, first number, etc)
  *  @param eq muParser equation to calculate the parameter value from the log value
  *  @param comp The pointer to the instrument component
  */
-XMLlogfile::XMLlogfile(std::string& logfileID, std::string& paramName, std::string& type,
+XMLlogfile::XMLlogfile(std::string& logfileID, std::string& value, std::string& paramName, std::string& type,
                        std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp)
-                       : m_logfileID(logfileID), m_paramName(paramName), m_type(type),
+                       : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type),
                        m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
 {}
 
@@ -42,34 +43,39 @@ XMLlogfile::XMLlogfile(std::string& logfileID, std::string& paramName, std::stri
  */
 double XMLlogfile::createParamValue(TimeSeriesProperty<double>* logData)
 {
-  // Get for now just 1st entry of timeserie
+  double extractedValue; 
 
-  //std::map<std::time_t, double> logMap = logData->valueAsMap();
-  //std::map<std::time_t, double> :: iterator it;
-  //it = logMap.begin();
-  double extractedValue; // = nthValue(logData, 1); //(*it).second;
+  // get value either as directly specified by user using the 'value' attribute or through
+  // a logfile as specified using the 'logfile-id' attribute. Note if both specified 'logfile-id'
+  // takes precedence over the 'value' attribute
 
-
-  // get value from time series
-
-  if ( m_extractSingleValueAs.compare("mean" ) == 0 )
+  if ( !m_logfileID.empty() )
   {
-    extractedValue = timeMean(logData);
+    // get value from time series
+
+    if ( m_extractSingleValueAs.compare("mean" ) == 0 )
+    {
+      extractedValue = timeMean(logData);
+    }
+    // Looking for string: "position n", where n is an integer
+    else if ( m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10 )
+    {
+      std::stringstream extractPosition(m_extractSingleValueAs);
+      std::string dummy;
+      int position;
+      extractPosition >> dummy >> position;
+
+      extractedValue = logData->nthValue(position);
+    }
+    else
+    {
+      throw Kernel::Exception::InstrumentDefinitionError(std::string("extract-single-value-as attribute for <parameter>")
+          + " element (eq=" + m_eq + ") in instrument definition file is not recognised.");
+    }
   }
-  // Looking for string: "position n", where n is an integer
-  else if ( m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10 )
   {
-    std::stringstream extractPosition(m_extractSingleValueAs);
-    std::string dummy;
-    int position;
-    extractPosition >> dummy >> position;
-
-    extractedValue = logData->nthValue(position);
-  }
-  else
-  {
-    throw Kernel::Exception::InstrumentDefinitionError(std::string("extract-single-value-as attribute for <parameter>")
-        + " element (eq=" + m_eq + ") in instrument definition file is not recognised.");
+    std::stringstream extractValue(m_value);
+    extractValue >> extractedValue;
   }
 
   // Check if m_eq is specified if yes evaluate this equation
