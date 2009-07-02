@@ -6,7 +6,6 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/scoped_array.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>
 #include <string>
@@ -43,14 +42,13 @@ void FindProblemDetectors::init()
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0);
-  //STEVES should users beable to set the failure labels for high and low?
   declareProperty("LowThreshold", 0.1, mustBePositive,
     "Detectors with signals less than this proportion of the median\n"
     "value will be labeled as reading badly (default 0.1)" );
   declareProperty("HighThreshold", 1.5, mustBePositive->clone(),
     "Detectors with signals more than this number of times the median\n"
     "signal will be labeled as reading badly (default 1.5)" );
-/*STEVES Allow users to change the failure codes?      declareProperty("LiveValue", 0.0, mustBePositive->clone(),
+/* Allow users to change the failure codes?      declareProperty("LiveValue", 0.0, mustBePositive->clone(),
         "The value to assign to an integrated spectrum flagged as 'live'\n"
         "(default 0.0)");
       declareProperty("DeadValue", 100.0, mustBePositive->clone(),
@@ -100,22 +98,109 @@ void FindProblemDetectors::exec()
   //this calculation is optional, it depends on angle information existing
   if ( angles.use_count() == 1 )
   {
-    //we are going to correct for solid angle using division. OK let's remove any histograms with zero angle
-    //rejectZeros(angles);
+    //if some numbers in angles are zero we will get the infinty flag value in the output work space which needs to be dealt with later
     counts = counts/angles;     
   }
   //Gets an average of the data, the medain is less influenced by a small number of huge values than the mean
   double av = getMedian(counts);
   //The final piece of the calculation, remove any detectors whoses signals are outside the threshold range
   std::vector<int> outArray =
-    markDetects( counts, av*m_Low, av*m_High, getProperty("OutputFile") );
+    FindDetects( counts, av*m_Low, av*m_High, getProperty("OutputFile") );
   
   // Now the calculation is complete, setting the output property to the workspace will register it in the Analysis Data Service and allow the user to see it
   setProperty("OutputWorkspace", counts);
 
   setProperty("FoundDead", outArray);
 }
+/// Functionality to read detector masking
+/** Inteprets the instrument and detector map for a
+* workspace making it possible to see the status of a detector
+* with one function call
+*/
+class InputWSDetectorInfo
+{
+public:
+  explicit InputWSDetectorInfo(MatrixWorkspace_const_sptr input);
+  bool aDetecIsMaskedinSpec(int SpecIndex);
+  void maskAllDetectorsInSpec(int SpecIndex);
+  int getSpecNum(int SpecIndex) const;
+  std::vector<int> getDetectors(int SpecIndex) const;
+private:
+  /// a pointer the workspace with the detector information
+  const MatrixWorkspace_const_sptr m_Input;
+  /// a pointer to the instrument within the workspace
+  boost::shared_ptr<Instrument> m_Instru;
+  /// pointer to the map that links detectors to there masking with the input workspace
+  boost::shared_ptr<Geometry::ParameterMap> m_Pmap;
+};
 
+/** To find out if there is a detector in a spectrum that is masked
+*  @param SpecIndex The number of spectrum, starting at zero is passed to axis::spectraNo(.)
+*  @return True if there is a masked detector, otherwise false
+*/
+bool InputWSDetectorInfo::aDetecIsMaskedinSpec(int SpecIndex)
+{
+  const std::vector<int> dets = getDetectors(SpecIndex);
+  // we are going to go through all of them, if you know this is not neccessary then change it
+  std::vector<int>::const_iterator it;
+  for ( it = dets.begin(); it != dets.end(); ++it)
+  {
+    if (m_Instru->getDetector(*it).get()->isMasked()) return true;
+  }
+  // we didn't find any that were masked
+  return false;
+}
+/** Masks all the detectors that contribute to the specified spectrum
+*  @param SpecIndex The number of spectrum, starting at zero is passed to axis::spectraNo(.)
+*  @return True if there is a masked detector, otherwise false
+*/
+void InputWSDetectorInfo::maskAllDetectorsInSpec(int SpecIndex)
+{
+  std::vector<int> dets = getDetectors(SpecIndex);
+  // there may be many detectors that are responcible for the spectrum, loop through them
+  std::vector<int>::const_iterator it;
+  for ( it = dets.begin(); it != dets.end(); ++it)
+  {
+    Geometry::Detector* det =
+      dynamic_cast<Geometry::Detector*>( m_Instru->getDetector(*it).get() );
+    if ( det )
+    {
+      m_Pmap->addBool(det, "masked", true);
+    }
+  }
+}
+/// convert spectrum index to spectrum number
+int InputWSDetectorInfo::getSpecNum(int SpecIndex) const
+{
+  return m_Input->getAxis(1)->spectraNo(SpecIndex);
+}
+/** Copies pointers to the Instrument and ParameterMap to data members
+* @param input A pointer to a workspace that contains instrument information
+* @throw invalid_argument if there is no instrument information in the workspace
+*/
+InputWSDetectorInfo::InputWSDetectorInfo(MatrixWorkspace_const_sptr input) :
+  m_Input(input)
+{
+  // first something that points to the detectors
+  m_Instru = input->getBaseInstrument();
+
+  if ( !m_Instru )
+  {
+    throw std::invalid_argument(
+      "There is no instrument data in the input workspace can not run this algorithm on that workspace");
+  }
+  // the space that contains which are masked
+  m_Pmap = m_Input->instrumentParameters();
+}
+/**A spectrum can be generated by one or many detectors, this function returns their IDs
+* @param SpecIndex The number of the spectrum as listed in memory, starting at zero, is passed to axis::spectraNo(int)
+* @return An array of detector identification numbers
+* @throw Kernel::Exception::IndexError if you give it an index number that's out of range
+*/
+std::vector<int> InputWSDetectorInfo::getDetectors(int SpecIndex) const
+{
+  return m_Input->spectraMap().getDetectors(getSpecNum(SpecIndex)); 
+}
 /** Loads and checks the values passed to the algorithm
 *
 *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
@@ -124,6 +209,20 @@ void FindProblemDetectors::retrieveProperties()
 {
   m_InputWS = getProperty("WhiteBeamWorkspace");
   int maxSpecIndex = m_InputWS->getNumberHistograms() - 1;
+  // construting this object will throw an invalid_argument if there is no instrument information, we don't catch it we the algorithm will be stopped
+  InputWSDetectorInfo testTesting(m_InputWS);
+  try
+  {//more testing
+    testTesting.aDetecIsMaskedinSpec(0);
+  }
+  catch(Kernel::Exception::NotFoundError)
+  {// we assume we are here because there is no masked detector map, 
+    //disable future calls to functions that use the detector map
+    m_usableMaskMap = false;
+    // this is probably not a problem and so we carry on
+    g_log.warning(
+        "Precision warning: Detector masking map can't be found, assuming that no detectors have been previously marked unreliable in this workspace");
+  }
 
   m_MinSpec = getProperty("StartSpectrum");
   if ( (m_MinSpec < 0) || (m_MinSpec > maxSpecIndex) )
@@ -151,15 +250,13 @@ void FindProblemDetectors::retrieveProperties()
     throw std::invalid_argument("The threshold for reading high must be greater than the low threshold");
   }
 }
-/*STEVES Allow users to change the failure codes?           
-      m_liveValue = getProperty("LiveValue");
-      m_deadValue = getProperty("DeadValue");
-}*/
-
-/* Makes a worksapce with the total solid angle all the detectors in each spectrum cover from the sample
+/// Calculates the sum of soild angles of detectors for each histogram
+/** Makes a worksapce with the total solid angle all the detectors in each spectrum cover from the sample
 *  note returns an empty shared pointer on failure, uses the SolidAngle algorithm
 * @param input A pointer to a workspace
-* @return A share pointer to the workspace (or an empty pointer)
+* @param firstSpec the index number of the first histogram to analyse
+* @param lastSpec the index number of the last histogram to analyse
+* @return A pointer to the workspace (or an empty pointer)
 */
 MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
                   MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
@@ -177,25 +274,30 @@ MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
     childAlg->execute();
     if ( ! childAlg->isExecuted() )
     {
-      throw std::runtime_error("The SolidAngle algorithm executed unsuccessfully");
+      throw std::runtime_error("Unexpected problem calculating solid angles");
     }
   }
-  //any exception causes an empty workspace pointer to be returned which must be handled by the calling function
+  //catch all exceptions because the solid angle calculation is optional
   catch(std::exception e)
   {
     g_log.warning(
       "Precision warning:  Can't find detector geometry " + name() +
       " will continue with the solid angles of all spectra set to the same value" );
     failProgress(RTGetSolidAngle);
+    //The return is an empty workspace pointer, which must be handled by the calling function
     MatrixWorkspace_sptr empty;
+    //function returns normally
     return empty;
   }
   return childAlg->getProperty("OutputWorkspace");
 }
 
-/* Runs Integration as a sub-algorithm to get the sum of counts in the 
-* range specfied by the properties Range_lower and Range_upper
-*
+/// Calculates the sum counts in each histogram
+/** Runs Integration as a sub-algorithm to get the sum of counts in the 
+* range specfied by the algorithm properties Range_lower and Range_upper
+* @param input points to the workspace to modify
+* @param firstSpec the index number of the first histogram to analyse
+* @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
 MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
@@ -229,8 +331,8 @@ MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
   }
   return childAlg->getProperty("OutputWorkspace");
 }
-
-/* Divides number of counts by time using ConvertToDistribution as a sub-algorithm
+/// Converts numbers of particle counts into count rates
+/** Divides number of counts by time using ConvertToDistribution as a sub-algorithm
 *
 * @param counts A histogram workspace with counts in time bins 
 * @return A workspace of the counts per unit time in each bin
@@ -260,37 +362,64 @@ MatrixWorkspace_sptr FindProblemDetectors::getRate(MatrixWorkspace_sptr counts)
   }
   return childAlg->getProperty("Workspace");
 }
-/* Checks though the solid angle information and masks detectors in histograms linked to zero or negative solida angle info
-*
-* @param angles a workspace with single bin histograms of angles
-* @throw runtime_error If a solid angle with a negative value is found
-*/
-void FindProblemDetectors::rejectZeros( API::MatrixWorkspace_const_sptr angles ) const
-{
-//STEVE to implement this function
-}
-
-/* Finds the median of the values in single bin histograms
-*
-* @param numbers A histogram workspace with one entry in each bin
+/// Finds the median of values in single bin histograms
+/** Finds the median of values in single bin histograms rejecting spectra from masked
+*  detectors. 
+* @param input A histogram workspace with one entry in each bin
 * @return The median value of the histograms in the workspace that was passed to it
+* @throw logic_error if an input values is negative
 */
-double FindProblemDetectors::getMedian(API::MatrixWorkspace_const_sptr numbers) const
+double FindProblemDetectors::getMedian(MatrixWorkspace_const_sptr input) const
 {
   g_log.information("Calculating the median of spectra count rates");
-  //make an array for all the single value in each histogram
-  boost::scoped_array<double> nums( new double[numbers->getNumberHistograms()] );
-  //copy the data into this array
-  for (int i = 0; i < numbers->getNumberHistograms(); ++i)
+
+  // we need to check and exclude masked detectors
+  InputWSDetectorInfo DetectorInfoHelper(input);
+  // we'll allow a detector that has zero solid angle extent to the sample if it has no counts, I don't know if this neccessary but such unused detectors wont change the results of the calculation so why abort?  We just count them, warn people and mask people
+  int numUnusedDects = 0;
+
+  // make an array for all the values in the single bin histograms that can be converted to a C-style array for the GNU Scientifc Library
+  MantidVec nums;
+  // copy the data into this array
+  for (int i = 0; i < input->getNumberHistograms(); ++i)
   {
-    nums[i] = numbers->readY(i)[0];
+    if ( (!m_usableMaskMap) || (!DetectorInfoHelper.aDetecIsMaskedinSpec(i)) )
+    {
+      double toCopy = input->readY(i)[0];
+      //we shouldn't have negative numbers of counts, probably a SolidAngle correction problem
+      if ( toCopy  < 0 )
+      {
+        g_log.debug() <<
+          "Negative count rate found for spectrum number " << DetectorInfoHelper.getSpecNum(i);
+        throw std::logic_error(
+          "Negative number of counts found, could be corrupted raw counts or solid angle data");
+      }
+      //there has been a divide by zero, likely to be due to a etector with zero solid angle
+      if ( toCopy == std::numeric_limits<double>::infinity() )
+      {
+        g_log.debug() <<
+          "numeric_limits<double>::infinity() found spectrum number " << DetectorInfoHelper.getSpecNum(i);
+        throw std::runtime_error("Divide by zero error, one or more detectors has zero solid angle and a non-zero number of counts");
+      }
+      if ( toCopy != toCopy )
+      {//this fun thing can happen if there was a zero divided by zero, solid angles again, as this, maybe, could be caused by a detector that is not used I wont exit because of this
+        DetectorInfoHelper.maskAllDetectorsInSpec(i);
+      }
+      //if we get to here we have a good value, copy it over!
+      nums.push_back( toCopy );
+    }
+  }
+  if (numUnusedDects > 0)
+  {
+    g_log.debug() << "Found \"Not a Number\" in the numbers of counts, assuming a least one detector with zero solid angle and zero counts was found";
+    g_log.warning() << numUnusedDects << " detectors were found with zero solid angle and no counts they have been masked and will be ignored";
   }
   //we need a sorted array to calculate the median
-  gsl_sort( nums.get(), 1, numbers->getNumberHistograms() );
-  return gsl_stats_median_from_sorted_data
-                            ( nums.get(), 1, numbers->getNumberHistograms() );
+  gsl_sort( &nums[0], 1, nums.size() );//The address of foo[0] will return a pointer to a contiguous memory block that contains the values of foo. Vectors are guaranteed to store there memory elements in sequential order, so this operation is legal, and commonly used (http://bytes.com/groups/cpp/453169-dynamic-arrays-convert-vector-array)
+  return gsl_stats_median_from_sorted_data( &nums[0], 1, nums.size() );
 }
-/* Takes a single valued histogram workspace and assesses which histograms are within the limits
+/// Produces a workspace of single value histograms that indicate if the spectrum is within limits
+/** Takes a single valued histogram workspace and assesses which histograms are within the limits
 *
 * @param responses a workspace of histograms with one bin
 * @param lowLim histograms with a value less than this will be listed as failed
@@ -298,19 +427,18 @@ double FindProblemDetectors::getMedian(API::MatrixWorkspace_const_sptr numbers) 
 * @param fileName name of a file to store the list of failed spectra in (pass "" to aviod writing to file)
 * @return An array that of the index numbers of the histograms that fail
 */
-std::vector<int> FindProblemDetectors::markDetects(
-MatrixWorkspace_sptr responses, double lowLim, double highLim,
+std::vector<int> FindProblemDetectors::FindDetects(
+  MatrixWorkspace_sptr responses, double lowLim, double highLim,
   std::string fileName)
 {
   g_log.information("Apply the criteria to find failing detectors");
-  //get dector information
-  const SpectraDetectorMap& specMap = responses->spectraMap();
-  Axis* specAxis = responses->getAxis(1);
 
-  // get ready to write dead detectors to an array
+  // get ready to report the number of bad detectors found to the log
+  int cLows = 0, cHighs = 0, cAlreadyMasked = 0;
+
+  //an array that will store the IDs of bad detectors
   std::vector<int> badDets;
-  // get ready to report the numbers found to the log
-  int countSpec = 0, countLows = 0, countHighs = 0;
+
   // ready to write dead detectors to a file
   std::ofstream file;
   bool fileOpen = false;
@@ -325,44 +453,52 @@ MatrixWorkspace_sptr responses, double lowLim, double highLim,
     //file opening ws successful, we'll write to the file
     else fileOpen = true;
   }
-
   if ( fileOpen ) file << "Index Spectrum UDET(S)" << std::endl;  
 
   // iterate over the data values setting the live and dead values
-  g_log.information() << "Marking dead detectors" << std::endl;
   const int numSpec = m_MaxSpec - m_MinSpec;
   int iprogress_step = numSpec / 10;
   if (iprogress_step == 0) iprogress_step = 1;
   for (int i = 0; i <= numSpec; ++i)
   {
-    double &y = responses->dataY(i)[0];
-    if ( y > lowLim && y < highLim) y = GoodVal;
+    double &yInputOutput = responses->dataY(i)[0];
+    //report detectors that are already marked as masked 
+    InputWSDetectorInfo DetectorInfoHelper(responses);
+    if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
+    {
+      yInputOutput = BadVal;
+      cAlreadyMasked ++;
+    }// is the value within the acceptance range?
+    else if ( yInputOutput > lowLim && yInputOutput < highLim)
+    {// it is an acceptable value; just write the good flag to the output workspace, no further logging is needed
+      yInputOutput = GoodVal;
+    }
     else
     {
+      // the value has been found to be bad, do all the logging
       std::string problem = "";
-      if ( y < lowLim )
+      if ( yInputOutput < lowLim )
       {
         problem = "low";
-        countLows++;
+        cLows++;
       }
       else
       {
         problem = "high";
-        countHighs++;
+        cHighs++;
       }
-      y = BadVal;
-      countSpec++;
-            
+      //this is all that is need for the output workspace
+      yInputOutput = BadVal;
       // Write the spectrum number to file
-      const int specNo = specAxis->spectraNo(i);
       if ( fileOpen )
       {
-        file << " Spectrum " << specNo << " is reading " << problem;
+        file << " Spectrum with number " << DetectorInfoHelper.getSpecNum(i)
+          << " is too " << problem;
       }
-
+      
       if ( fileOpen ) file << " detector IDs: "; 
       // Get the list of detectors for this spectrum and iterate over
-      const std::vector<int> dets = specMap.getDetectors(specNo);
+      const std::vector<int> dets = DetectorInfoHelper.getDetectors(i);
       std::vector<int>::const_iterator it;
       for (it = dets.begin(); it != dets.end(); ++it)
       {
@@ -377,6 +513,8 @@ MatrixWorkspace_sptr responses, double lowLim, double highLim,
       }
       if ( fileOpen ) file << std::endl;
     }
+    // the y values are just aribitary flags, an error value doesn't make sense
+    responses->dataE(i)[0] = 0;
 
     // update the progressbar information
     if (i % iprogress_step == 0)
@@ -388,9 +526,9 @@ MatrixWorkspace_sptr responses, double lowLim, double highLim,
   }
   //output and pass back what we found out about bad detectors
   if ( fileOpen ) file.close();
-  g_log.information() << "Found a total of " << countLows <<
-    " detectors reading low and " << countHighs << " reading high in " <<
-    countSpec << " 'bad' spectra." << std::endl;
+  g_log.information() << "Found a total of " << cLows <<
+    " spectra with low counts and " << cHighs << "spectra with high counts, "<<
+    cAlreadyMasked << " were already marked bad." << std::endl;
   //set the workspace to have no units
   responses->isDistribution(false);
   responses->setYUnit("");

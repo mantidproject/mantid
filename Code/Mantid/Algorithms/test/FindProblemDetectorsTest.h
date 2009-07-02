@@ -34,9 +34,12 @@ static int GoodVal = 0;
 class FindProblemDetectorsTest : public CxxTest::TestSuite
 {
 public:
+
   void testWithoutAngles()
   {
     FindProblemDetectors alg;
+    //TS_ASSERT_EQUALS( alg.name(), "FindProblemDetectors" )
+    TS_ASSERT_EQUALS( alg.version(), 1 )
     //the spectra were setup in the constructor and passed to our algorithm through this function
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( runInit(alg) ) )
@@ -99,7 +102,7 @@ public:
   }
 
   void testWithSolidAngles()
-  {/*
+  {/* STEVE activate this test
     TS_ASSERT_THROWS_NOTHING( addInstrumentGeom() )
     
 //    // Mark one detector dead to test that it leads to zero solid angle
@@ -146,7 +149,7 @@ public:
         correctLine << "Index Spectrum UDET(S)";
       else
       {
-        correctLine << " Spectrum " << numHist << " is reading too low";
+        correctLine << " Spectrum " << numHist << " is too low";
         correctLine << " detector IDs: " << numHist*2 << ", " << numHist*2+1;
         correctLine << std::endl;
       }
@@ -167,7 +170,7 @@ public:
     for (int numHist = lastGoodSpec+1 ; numHist < Nhist; numHist++ )
     {
       std::ostringstream correctLine;
-      correctLine << " Spectrum " << numHist << " is reading high";
+      correctLine << " Spectrum " << numHist << " is too high";
       correctLine << " detector IDs: " << numHist*2 << ", " << numHist*2+1;
       correctLine << std::endl;
       
@@ -178,7 +181,7 @@ public:
         throw std::exception(
           "File incomplete, end of file found while reading the high reading detector list");
       }
-      if ( !fileLine.compare(correctLine.str()) )
+      if ( fileLine != correctLine.str() )
       {
         throw std::runtime_error( "Problem on line " +
           boost::lexical_cast<std::string>(numHist) + " " + OFileName );
@@ -187,7 +190,7 @@ public:
     testFile.close();
     remove(OFileName.c_str());*/
   }
-
+    
   FindProblemDetectorsTest() : m_IWSName("FindProbDetectsTestInput")
   {
     using namespace Mantid;
@@ -223,7 +226,7 @@ public:
       space2D->getAxis(1)->spectraNo(j) = j;
     }
     
-    // Populate the spectraDetectorMap with fake data, each spectrum has two detectors
+    // Populate the spectraDetectorMap with fake data, each spectrum will have two detectors
     std::vector<int> udetList(2);
     for ( int j = 0; j < Nhist; j++ )
     {

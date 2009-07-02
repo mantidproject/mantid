@@ -7,16 +7,14 @@ namespace Mantid
 namespace Geometry
 {
 
-    /**  Create V3D parameter from a string.
-     *  @param value A V3D vaule as a string
-     */
+   /// @cond
   template<>
   void ParameterV3D::fromString(const std::string &value)
   {
     std::istringstream istr(value);
     m_value.readPrinted(istr);
   }
-
+  /// @endcond
 
     ParameterFactory::FactoryMap ParameterFactory::s_map;
 

@@ -94,9 +94,9 @@ namespace Mantid
       if ( !sample )
       {
         g_log.information(
-          "There appears to be no instrument information in the workspace, ");
-        g_log.information("aborting SoildAngle" );
-        throw std::logic_error("Instrument information not found");
+          "There doesn't appear to be any sample location information in the workspace");
+        throw std::logic_error(
+          "Sample location not found, aborting algorithm SoildAngle");
       }
 			Geometry::V3D samplePos = sample->getPos();
       g_log.debug() << "Sample position is " << samplePos << std::endl;

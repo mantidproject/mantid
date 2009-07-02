@@ -68,12 +68,11 @@ namespace Mantid
     class DLLExport FindProblemDetectors : public API::Algorithm
     {
     public:
-      /// Default constructor initialised all values to zero and runs the base class constructor
+      /// Default constructor initialises all values to zero and runs the base class constructor
       FindProblemDetectors() :
           API::Algorithm(),
           m_Low(0.1), m_High(1.5), m_MinSpec(0), m_MaxSpec(UNSETINT),
-          m_PercentDone(0.0), m_TotalTime(RTTotal)
-// STEVES Allow users to change the failure codes?  m_liveValue(???), double m_deadValue(???)
+          m_PercentDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
       {};
       /// Destructor
       virtual ~FindProblemDetectors() {};
@@ -91,21 +90,13 @@ namespace Mantid
       
       // The different steps of the calculation, all called by exec()
       void retrieveProperties();
-      /// Uses the SolidAngle algorithm to get the sum of soild angles for the detectors that form each spectrum
       API::MatrixWorkspace_sptr getSolidAngles(
         API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec );
-      /// Uses the Integrate algorithm to sum counts in each histogram
       API::MatrixWorkspace_sptr getTotalCounts(
         API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec );
-      /// Uses the ConvertToDistribution algorithm divide the counts in each bin by time that counts were collected for
       API::MatrixWorkspace_sptr getRate(API::MatrixWorkspace_sptr counts);
-      /// Checks though the solid angle information masking detectors with bad solid angle info
-      void rejectZeros(API::MatrixWorkspace_const_sptr angles) const;
-
-      /// Calculates the median number counts over all histograms
-      double getMedian(API::MatrixWorkspace_const_sptr numbers) const;
-      /// Produces a workspace of single value histograms where the value indicates if the spectrum is outside the limits or not
-      std::vector<int> markDetects(API::MatrixWorkspace_sptr responses,
+      double getMedian(API::MatrixWorkspace_const_sptr input) const;
+      std::vector<int> FindDetects(API::MatrixWorkspace_sptr responses,
         double lowLim, double highLim, std::string fileName);
       
       /// Value written to the output workspace where bad spectra are found
@@ -149,6 +140,9 @@ namespace Mantid
       int m_MinSpec;
       /// The index of the last spectrum to calculate
       int m_MaxSpec;
+      /// when this is set to false reading and writing to the detector map is disabled, this is done if there is no map in the workspace
+      bool m_usableMaskMap;
+
 
       /// Static reference to the logger class
       static Mantid::Kernel::Logger& g_log;

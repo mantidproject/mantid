@@ -251,6 +251,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ExtractSingleSpectrum.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FindDeadDetectors.cpp"
 				>
 			</File>
@@ -542,6 +546,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\ExponentialCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ExtractSingleSpectrum.h"
 				>
 			</File>
 			<File
