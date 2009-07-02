@@ -174,6 +174,8 @@ void ParameterMap::addRotationParam(const IComponent* comp,const std::string& na
     addQuat(comp, "rot", quat);
 }
 
+/** @param str The error message
+ */
 void ParameterMap::reportError(const std::string& str)
 {
     g_log.error(str);

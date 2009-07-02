@@ -158,6 +158,9 @@ namespace Mantid
 
     /**  Calculate the integral asymmetry for a workspace. 
      *   The calculation is done by MuonAsymmetryCalc and SimpleIntegration algorithms.
+     *   @param ws The workspace
+     *   @param Y Reference to a variable receiving the value of asymmetry
+     *   @param E Reference to a variable receiving the value of the error
      */
     void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws, double& Y, double& E)
     {

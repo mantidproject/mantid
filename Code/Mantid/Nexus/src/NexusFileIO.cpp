@@ -1117,6 +1117,9 @@ namespace NeXus
   }
 
 
+  /** Write the algorithm and environment information.
+   *  @param localworkspace The workspace
+   */
   int NexusFileIO::writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace)
   {
    // Write Process section
@@ -1234,18 +1237,15 @@ namespace NeXus
   }
   
 
-  bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localworkspace, const std::vector<int>& spec)
+  bool NexusFileIO::writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec)
   {
    /*! Write the details of the spectra detector mapping to the Nexus file using the format proposed for
        Muon data, but using only one NXdetector section for the whole instrument.
        Also do not place other data the Muon NXdetector would hold.
        NXdetector section to be placed in existing NXinstrument.
        return should leave Nexus at entry level.
-       @param spectraMap pointer to the SpectraDetectorMap
-       @param m_spec_min starting spectrum to write
-       @param m_spec_max last spectrum to write
-       @return true for OK, false for error
-       TODO check on how to make min/max spectra work
+       @param localWorkspace The workspace
+       @param spec A vector with spectra indeces
    */
 
    const SpectraDetectorMap& spectraMap=localworkspace->spectraMap();
@@ -1377,9 +1377,7 @@ namespace NeXus
   {
    /*! read the details of the spectra detector mapping to the Nexus file using the format proposed for
        Muon data. Use this to build spectraMap
-       @param spectraMap pointer to the SpectraDetectorMap
-       @param m_spec_min starting spectrum to write
-       @param m_spec_max last spectrum to write
+       @param localWorkspace The workspace
        @return true for OK, false for error
    */
 

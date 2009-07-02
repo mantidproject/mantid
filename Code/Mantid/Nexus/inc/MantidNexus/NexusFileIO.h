@@ -86,9 +86,9 @@ namespace Mantid
       /// write an instrument section - currently only the name
       bool writeNexusInstrument(const API::IInstrument_const_sptr& instrument);
       /// write any spectra map information to Nexus file
-      bool writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localworkspace, const std::vector<int>& spec);
+      bool writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec);
       /// read spectra map information
-      bool readNexusProcessedSpectraMap(API::MatrixWorkspace_sptr localworkspace);
+      bool readNexusProcessedSpectraMap(API::MatrixWorkspace_sptr localWorkspace);
       /// write instrument parameters
       bool writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws);
       /// read instrument parameters
@@ -179,6 +179,10 @@ namespace Mantid
          return std::mktime(&time_since_1900);
       }
 
+      /** Writes a numeric log to the Nexus file
+       *  @tparam T A numeric type (double, int, bool)
+       *  @param timeSeries A pointer to the log property
+       */
       template<class T>
       void writeNexusNumericLog(const Kernel::TimeSeriesProperty<T> *timeSeries)
       {
@@ -238,6 +242,7 @@ namespace Mantid
           //
       }
 
+      /// Return the log value type as string
       template<class T>
       std::string logValueType()const{return "unknown";}
 

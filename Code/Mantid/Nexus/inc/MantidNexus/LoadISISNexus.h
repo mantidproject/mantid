@@ -25,9 +25,9 @@ namespace Mantid
          */
         struct NexusInfo
         {
-            int rank; // number of dimensions of the data
-            int dims[4]; // sizes along each dimension
-            int type; // type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
+            int rank;    ///< number of dimensions of the data
+            int dims[4]; ///< sizes along each dimension
+            int type;    ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
         };
 
         /** @class LoadISISNexus LoadISISNexus.h NeXus/LoadISISNexus.h

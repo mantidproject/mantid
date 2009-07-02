@@ -96,7 +96,9 @@ LogParser::LogParser(const std::string& eventFName)
 
 }
 
-/// Create given the icpevent log property
+/** Create given the icpevent log property.
+ *  @param log A pointer to the property
+ */
 LogParser::LogParser(const Kernel::Property* log)
 :m_nOfPeriods(1)
 {
@@ -247,7 +249,9 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     return 0;
 }
 
-/// Ctreates a TimeSeriesProperty<bool> showing times when a particular period was active
+/** Ctreates a TimeSeriesProperty<bool> showing times when a particular period was active.
+ *  @param period The data period
+ */
 Kernel::Property* LogParser::createPeriodLog(int period)const
 {
     Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());

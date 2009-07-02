@@ -72,6 +72,7 @@ public:
     TableRow(const TableRowHelper& trh);
     /// Returns the row number of the TableRow 
     int row()const{return m_row;}
+    /// Returns the number of rows in the TableWorkspace
     int size()const{return m_nrows;}
     void row(int i);
     bool next();

@@ -51,19 +51,21 @@ namespace Mantid
          */
         struct NXInfo
         {
-            std::string nxname;  // name of the object
-            int rank;    // number of dimensions of the data
-            int dims[4]; // sizes along each dimension
-            int type;    // type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
+            std::string nxname;  ///< name of the object
+            int rank;    ///< number of dimensions of the data
+            int dims[4]; ///< sizes along each dimension
+            int type;    ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
         };
 
+        /**  Information about a Nexus class
+         */
         struct NXClassInfo
         {
-            std::string nxname;  // name of the object
-            std::string nxclass; // NX class of the object or "SDS" if a dataset
-            int datatype;        // NX data type if a dataset
-            NXstatus stat;
-            operator bool(){return stat == NX_OK;}
+            std::string nxname;  ///< name of the object
+            std::string nxclass; ///< NX class of the object or "SDS" if a dataset
+            int datatype;        ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see napi.h
+            NXstatus stat;       ///< return status
+            operator bool(){return stat == NX_OK;} ///< returns success of an operation
         };
 
         /**  Nexus attributes. The type of each attribute is NX_CHAR
@@ -74,13 +76,14 @@ namespace Mantid
             int n()const{return int(m_values.size());} ///< number of attributes
             std::vector<std::string> names()const;  ///< Returns the list of attribute names
             std::vector<std::string> values()const;  ///< Returns the list of attribute values
-            std::string operator()(const std::string& name)const; // returns the value of attribute with name name
-            void set(const std::string& name,const std::string& value); // set the attribute's value
-            void set(const std::string& name,double value); // set the attribute's value as a double
+            std::string operator()(const std::string& name)const; ///< returns the value of attribute with name name
+            void set(const std::string& name,const std::string& value); ///< set the attribute's value
+            void set(const std::string& name,double value); ///< set the attribute's value as a double
         private:
             std::map<std::string,std::string> m_values;  ///< the list of attributes
         };
 
+        /// Forward declaration
         class NXClass;
 
         /**  The base abstract class for NeXus classes and data sets. 
@@ -88,66 +91,124 @@ namespace Mantid
          */
         class DLLExport NXObject
         {
-            friend class NXDataSet;
-            friend class NXClass;
-            friend class NXRoot;
+            friend class NXDataSet;  ///< a friend class declaration
+            friend class NXClass;    ///< a friend class declaration
+            friend class NXRoot;     ///< a friend class declaration
         public:
+            // Constructor
             NXObject(const NXhandle fileID,const NXClass* parent,const std::string& name);
             virtual ~NXObject(){};
-            /// Return the NX class for a class (HDF group) or "SDS" for a data set;
+            /// Return the NX class name for a class (HDF group) or "SDS" for a data set;
             virtual std::string NX_class()const = 0;
-            /// True if complies with our understanding of the www.nexusformat.org definition.
+            // True if complies with our understanding of the www.nexusformat.org definition.
             //virtual bool isStandard()const = 0;
+            /// Returns the absolute path to the object
             std::string path()const{return m_path;}
         protected:
             void getData(void* data);
             void getSlab(void* data, int start[], int size[]);
-            NXhandle m_fileID;
-            std::string m_path;
+            NXhandle m_fileID;      ///< Nexus file id
+            std::string m_path;     ///< Keeps the absolute path to the object
             //boost::shared_ptr<NXClass> m_parent;
-            bool m_open;
+            bool m_open;            ///< Set to true if the object has been open
         private:
-            NXObject():m_fileID(){}
+            NXObject():m_fileID(){} ///< Private default constructor
         };
 
-        /** Abstract base class for a data set.
+        /** Abstract base class for a Nexus data set. A typical use include:
+         *  <ul>
+         *       <li>Creating a dataset object using either the concrete type constructor or specialized methods of NXClass'es</li>
+         *       <li>Opening the dataset with open() method. Specialized NXClass creation methods call open() internally 
+         *           (so no need to call it again).</li>
+         *       <li>Loading the data using load(...) method. The data can be loaded either in full or by chunks of smaller rank (dimension)</li>
+         *  </ul>
+         *  There is no need to free the memory allocated by the NXDataSet as it is done at the destruction.
          */
         class DLLExport NXDataSet: public NXObject
         {
         public:
+            // Constructor
             NXDataSet(const NXClass& parent,const std::string& name);
+            /// NX class name. Returns "SDS" 
             std::string NX_class()const{return "SDS";}
-            void open();
+            /// Opens the data set. Does not read in any data. Call load(...) to load the data
+            void open(); 
+            /// Returns the rank (number of dimensions) of the data. The maximum is 4
             int rank()const{return m_info.rank;}
+            /// Returns the number of elements along i-th dimension
             int dims(int i)const{return i<4?m_info.dims[i]:0;}
+            /// Returns the number of elements along the first dimension
             int dim0()const{return m_info.dims[0];}
+            /// Returns the number of elements along the second dimension
             int dim1()const{return m_info.dims[1];}
+            /// Returns the number of elements along the third dimension
             int dim2()const{return m_info.dims[2];}
+            /// Returns the number of elements along the fourth dimension
             int dim3()const{return m_info.dims[3];}
+            /// Returns the name of the data set
             std::string name()const{return m_info.nxname;}
+            /// Returns the Nexus type of the data. The types are defied in napi.h
             int type()const{return m_info.type;}
+            /**  Load the data from the file. Calling this method with all default arguments
+            *   makes it to read in all the data.
+            *   @param i Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
+            *            of the chunk. The rank of the data must be >= 1
+            *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. 
+            *            The rank of the data must be >= 2
+            *   @param k Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indeces. 
+            *            The rank of the data must be >= 3
+            *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
+            *            The rank of the data must be 4
+            */
             virtual void load(int i=-1,int j=-1,int k=-1,int l=-1) = 0;
         private:
-            NXInfo m_info;
+            NXInfo m_info;  ///< Holds the data info
         };
 
+        /**  Templated class implementation of NXDataSet. After loading the data it can be accessed via operators () and [].
+         */
         template<class T>
         class NXDataSetTyped: public NXDataSet
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the dataset.
+            *   @param name The name of the dataset relative to its parent
+            */
             NXDataSetTyped(const NXClass& parent,const std::string& name):NXDataSet(parent,name){}
+            /** Returns a pointer to the internal data buffer.
+             *  @throw runtime_error exception if the data have not been loaded / initialized.
+             */
             T* operator()()const
             {
                 if (!m_data) throw std::runtime_error("Attempt to read uninitialized data");
                 return m_data.get();
             }
+            /** Returns the i-th value in the internal buffer
+             *  @param i The linear index of the data element
+             *  @throw runtime_error if the data have not been loaded / initialized.
+             *  @throw range_error if the index is greater than the buffer size.
+             */
             T operator[](int i)const
             {
                 if (!m_data) throw std::runtime_error("Attempt to read uninitialized data");
                 if (i < 0 || i >= m_n) rangeError();
                 return m_data[i];
             }
+            /// Returns the size of the data buffer
             int size()const{return m_n;}
+            /**  Implementation of the virtual NXDataSet::load(...) method. Internally the data are stored as a 1d array. 
+             *   If the data are loaded in chunks the newly read in data replace the old ones. The actual rank of the loaded
+             *   data is equal or less than the rank of the dataset (returned by rank() method).
+             *   @param i Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
+             *            of the chunk. The rank of the data must be >= 1
+             *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. 
+             *            The rank of the data must be >= 2
+             *   @param k Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indeces. 
+             *            The rank of the data must be >= 3
+             *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
+             *            The rank of the data must be 4
+             */
             void load(int i=-1,int j=-1,int k=-1,int l=-1)
             {
                 if (rank()>4)
@@ -281,6 +342,9 @@ namespace Mantid
                 getSlab(m_data.get(),start,m_size);
             }
         protected:
+            /** Allocates memory for the data buffer
+             *  @param n The number of elements to allocate.
+             */
             void alloc(int n)
             {
                 try
@@ -294,18 +358,23 @@ namespace Mantid
                     throw std::runtime_error(ostr.str());
                 }
             }
+            /// A shortcut to "throw std::range_error("Nexus dataset range error");"
             void rangeError()const
             {
                 throw std::range_error("Nexus dataset range error");
             }
-            boost::shared_array<T> m_data;
-            int m_size[4];
-            int m_n;
+            boost::shared_array<T> m_data; ///< The data buffer
+            int m_size[4];                 ///< The sizes of the loaded data
+            int m_n;                       ///< The buffer size
         };
 
+        /// The integer dataset type
         typedef NXDataSetTyped<int> NXInt;
+        /// The float dataset type
         typedef NXDataSetTyped<float> NXFloat;
+        /// The double dataset type
         typedef NXDataSetTyped<double> NXDouble;
+        /// The char dataset type
         typedef NXDataSetTyped<char> NXChar;
         
 //#define NX_FLOAT32   5   float
@@ -324,16 +393,35 @@ namespace Mantid
 
         //-------------------- classes --------------------------//
 
+        /**  The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes.
+         *   The NeXus file format (www.nexusformat.org) specifies the content of the Nexus classes.
+         *   Derived classes have specialized methods for creating classes and datasets specific for the particular Nexus class.
+         *   NXClass is a conctrete C++ class so arbitrary, non-standard Nexus classes (groups) can be created and loaded from
+         *   NeXus files.
+         */
         class DLLExport NXClass: public NXObject
         {
             friend class NXRoot;
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXClass(const NXClass& parent,const std::string& name);
+            /// The NX class identifier
             std::string NX_class()const{return "NXClass";}
+            /**  Returns the class information about the next entry (class or dataset) in this class.
+             */
             NXClassInfo getNextEntry();
             /// Creates a new object in the NeXus file at path path.
             //virtual void make(const std::string& path) = 0;
+            /// Resets the current position for getNextEntry() to the beginning
             void reset();
+            /**  Templated method for creating derived NX classes. It also opens the created class.
+             *   @param name The name of the class
+             *   @tparam NX Concrete Nexus class
+             *   @return The new object
+             */
             template<class NX>
             NX openNXClass(const std::string& name)const
             {
@@ -342,8 +430,16 @@ namespace Mantid
                 return nxc;
             }
 
+            /**  Creates and opens an arbitrary (non-standard) class (group).
+             *   @param name The name of the class.
+             */
             NXClass openNXGroup(const std::string& name)const{return openNXClass<NXClass>(name);}
 
+            /**  Templated method for creating datasets. It also opens the created set.
+             *   @param name The name of the dataset
+             *   @tparam T The type of the data (int, double, ...).
+             *   @return The new object
+             */
             template<class T>
             NXDataSetTyped<T> openNXData(const std::string& name)const
             {
@@ -352,103 +448,189 @@ namespace Mantid
                 return data;
             }
 
+            /**  Creates and opens an integer dataset
+             *   @param name The name of the dataset
+             */
             NXInt openNXInt(const std::string& name)const{return openNXData<int>(name);}
+            /**  Creates and opens a float dataset
+             *   @param name The name of the dataset
+             */
             NXFloat openNXFloat(const std::string& name)const{return openNXData<float>(name);}
+            /**  Creates and opens a double dataset
+             *   @param name The name of the dataset
+             */
             NXDouble openNXDouble(const std::string& name)const{return openNXData<double>(name);}
+            /**  Creates and opens a char dataset
+             *   @param name The name of the dataset
+             */
             NXChar openNXChar(const std::string& name)const{return openNXData<char>(name);}
 
+            /// Returns a list of all classes (or groups) in this NXClass
             std::vector<NXClassInfo>& groups()const{return *m_groups.get();}
 
         protected:
-            boost::shared_ptr<std::vector<NXClassInfo> > m_groups;
-            boost::shared_ptr<std::vector<NXInfo> > m_datasets;
-            void readAllInfo();
-            void open();
-            void clear(); // deletes content of m_groups and m_datasets
+            boost::shared_ptr<std::vector<NXClassInfo> > m_groups; ///< Holds info about the child NXClasses
+            boost::shared_ptr<std::vector<NXInfo> > m_datasets;    ///< Holds info about the datasets in this NXClass
+            void readAllInfo();  ///< Fills in m_groups and m_datasets.
+            void open();         ///< Opens this NXClass
+            void clear();        ///< Deletes content of m_groups and m_datasets
         private:
+            /// Pricate constructor.
             NXClass():NXObject(){clear();}
         };
 
-        //------------------- auxilary classes ----------------------------//
+        //------------------- auxiliary classes ----------------------------//
 
-        
+        /**  Implements NXlog Nexus class.
+         */
         class DLLExport NXLog:public NXClass
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXLog(const NXClass& parent,const std::string& name):NXClass(parent,name){}
+            /// Nexus class id
             std::string NX_class()const{return "NXlog";}
         };
 
+        /**  Implements NXnote Nexus class.
+         */
         class DLLExport NXNote:public NXClass
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXNote(const NXClass& parent,const std::string& name):NXClass(parent,name),m_author_ok(),m_data_ok(),m_description_ok(){}
+            /// Nexus class id
             std::string NX_class()const{return "NXnote";}
+            /// Returns the note's author
             std::string author();
+            /// Returns the note's content
             std::vector< std::string >& data();
+            /// Returns the description string
             std::string description();
         private:
-            std::string m_author;
-            std::vector< std::string > m_data;
-            std::string m_description;
-            bool m_author_ok,m_data_ok,m_description_ok;
+            std::string m_author;                ///< author
+            std::vector< std::string > m_data;   ///< content
+            std::string m_description;           ///< description
+            bool m_author_ok;                    ///< author loaded indicator
+            bool m_data_ok;                      ///< data loaded indicator
+            bool m_description_ok;               ///< description loaded indicator
         };
 
         //-------------------- main classes -------------------------------//
 
+        /**  Main class is the one that can contain auxiliary classes.
+         */
         class DLLExport NXMainClass:public NXClass
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXMainClass(const NXClass& parent,const std::string& name):NXClass(parent,name){}
+            /**  Opens a NXLog class
+             *   @param name The name of the NXLog
+             */
             NXLog openNXLog(const std::string& name){return openNXClass<NXLog>(name);}
+            /**  Opens a NXNote class
+             *   @param name The name of the NXNote
+             */
             NXNote openNXNote(const std::string& name){return openNXClass<NXNote>(name);}
         };
 
 
 
+        /**  Implements NXdata Nexus class.
+         */
         class DLLExport NXData:public NXMainClass
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXData(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
+            /// Nexus class id
             std::string NX_class()const{return "NXdata";}
         };
 
+        /**  Implements NXdetector Nexus class.
+         */
         class DLLExport NXDetector:public NXMainClass
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXDetector(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
+            /// Nexus class id
             std::string NX_class()const{return "NXdetector";}
         };
 
+        /**  Implements NXinstrument Nexus class.
+         */
         class DLLExport NXInstrument:public NXMainClass
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXInstrument(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
+            /// Nexus class id
             std::string NX_class()const{return "NXinstrument";}
         };
 
+        /**  Implements NXentry Nexus class.
+         */
         class DLLExport NXEntry:public NXMainClass
         {
         public:
+            /**  Constructor.
+            *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+            *   @param name The name of the NXClass relative to its parent
+            */
             NXEntry(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
+            /// Nexus class id
             std::string NX_class()const{return "NXentry";}
+            /**  Opens a NXData
+             *   @param name The name of the class
+             */
             NXData openNXData(const std::string& name){return openNXClass<NXData>(name);}
+            /**  Opens a NXInstrument
+             *   @param name The name of the class
+             */
             NXInstrument openNXInstrument(const std::string& name){return openNXClass<NXInstrument>(name);}
         };
 
+        /**  Implements NXroot Nexus class.
+         */
         class DLLExport NXRoot: public NXClass
         {
         public:
+            // Constructor
             NXRoot(const std::string& fname);
+            // Constructor
             NXRoot(const std::string& fname,const std::string& entry);
+            /// Destructor
             ~NXRoot();
             /// Return the NX class for a class (HDF group) or "SDS" for a data set;
             std::string NX_class()const{return "NXroot";}
             /// True if complies with our understanding of the www.nexusformat.org definition.
             bool isStandard()const;
+            /**  Opens an entry -- a topmost Nexus class
+             *   @param name The name of the entry
+             */
             NXEntry openEntry(const std::string& name){return openNXClass<NXEntry>(name);}
         private:
-            const std::string m_filename;
+            const std::string m_filename; ///< The file name
         };
 
 

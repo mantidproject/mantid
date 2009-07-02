@@ -150,6 +150,7 @@ static int gsl_fdf(const gsl_vector * x, void *params,
 */
 static double gsl_costFunction(const gsl_vector * x, void *params)
 {
+
   double * l_forSimplexLSwrap = ((struct FitData *)params)->forSimplexLSwrap;
 
     for(size_t i=0,j=0;i<((struct FitData *)params)->active.size();i++)
@@ -535,7 +536,9 @@ void Fit1D::exec()
   return;
 }
 
-/** @param fixed A list of comma separated names of the fixed parameters.
+/**  Constructor.
+ *   @param fit A pointer to the Fit1D class
+ *   @param fixed A list of comma separated names of the fixed parameters.
  */
 FitData::FitData(Fit1D* fit, const std::string& fixed):fit1D(fit)
 {

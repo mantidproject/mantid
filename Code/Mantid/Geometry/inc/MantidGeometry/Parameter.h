@@ -60,6 +60,7 @@ public:
     /// Virtual destructor
     virtual ~Parameter(){}
 
+    /// Parameter type
     const std::string& type() const{return m_type;};
 	/// Parameter name
     const std::string& name() const{return m_name;};

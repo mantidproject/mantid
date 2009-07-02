@@ -96,13 +96,20 @@ namespace Geometry
         static void subscribe(const std::string& className);
         static Parameter* create(const std::string& className, const std::string& name);
     private:
+        /// Private default constructor
         ParameterFactory();
+        /// Private copy constructor
         ParameterFactory(const ParameterFactory&);
+        /// Private assignment operator
         ParameterFactory& operator=(const ParameterFactory&);
         /// The map holding the registered class names and their instantiators
         static FactoryMap s_map;
     };
 
+    /**  Templated method for parameter subscription
+     *   @param className The parameter type name
+     *   @tparam C The parameter type
+     */
     template<class C>
     void ParameterFactory::subscribe(const std::string& className)
     {

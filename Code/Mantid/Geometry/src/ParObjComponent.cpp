@@ -12,11 +12,17 @@ namespace Mantid
 {
 namespace Geometry
 {
-
+    /**  Constructor.
+     *   @param base A pointer to the base ObjComponent
+     *   @param map A pointer to the parameter map 
+     */
     ParObjComponent::ParObjComponent(const ObjComponent* base, const ParameterMap* map)
         :ParametrizedComponent(base,map)
     {
     }
+    /**  Copy constructor.
+     *   @param comp A reference to the component to copy from
+     */
     ParObjComponent::ParObjComponent(const ParObjComponent& comp)
         :ParametrizedComponent(comp)
     {

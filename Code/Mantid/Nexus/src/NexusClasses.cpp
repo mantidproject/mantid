@@ -63,6 +63,11 @@ namespace NeXus
     //          NXObject methods
     //---------------------------------------------------------
 
+    /**  NXObject constructor.
+     *   @param fileID The Nexus file id
+     *   @param parent The parent Nexus class. In terms of HDF it is the group containing the object.
+     *   @param name The name of the object relative to its parent
+     */
     NXObject::NXObject(const NXhandle fileID,const NXClass* parent,const std::string& name):m_fileID(fileID),m_open(false)
     {
         if (parent && !name.empty())
@@ -71,12 +76,24 @@ namespace NeXus
         }
     }
 
+    /**  Wrapper to the NXgetdata.
+     *   @param data The pointer to the buffer accepting the data from the file.
+     *   @throw runtime_error if the operation fails.
+     */
     void NXObject::getData(void* data)
     {
         if (NXgetdata(m_fileID,data) != NX_OK)
             throw std::runtime_error("Cannot read data from NeXus file");
     }
 
+    /**  Wrapper to the NXgetslab.
+     *   @param data The pointer to the buffer accepting the data from the file.
+     *   @param start The array of starting indeces to read in from the file. The size of the array must be equal to 
+     *          the rank of the data.
+     *   @param size The array of numbers of data elements to read along each dimenstion.
+     *          The number of dimensions (the size of the array) must be equal to the rank of the data.
+     *   @throw runtime_error if the operation fails.
+     */
     void NXObject::getSlab(void* data, int start[], int size[])
     {
         if (NXgetslab(m_fileID,data,start,size) != NX_OK)
@@ -199,6 +216,7 @@ namespace NeXus
     //---------------------------------------------------------
 
     /**  Constructor. On creation opens the Nexus file for reading only.
+     *   @param fname The file name to open
      */
     NXRoot::NXRoot(const std::string& fname)
         :m_filename(fname)
@@ -214,7 +232,7 @@ namespace NeXus
 
     /**  Constructor.
      *   Creates a new Nexus file. The first root entry will be also created.
-     *   @param fanme The file name to create
+     *   @param fname The file name to create
      *   @param entry The name of the first entry in the new file
      */
     NXRoot::NXRoot(const std::string& fname,const std::string& entry)
@@ -242,11 +260,17 @@ namespace NeXus
     //          NXDataSet methods
     //---------------------------------------------------------
 
+    /**  Constructor.
+     *   @param parent The parent Nexus class. In terms of HDF it is the group containing the dataset.
+     *   @param name The name of the dataset relative to its parent
+     */
     NXDataSet::NXDataSet(const NXClass& parent,const std::string& name)
         :NXObject(parent.m_fileID,&parent,name)
     {
         m_info.nxname = name;
     }
+
+    // Opens the data set. Does not read in any data. Call load(...) to load the data
     void NXDataSet::open()
     {
         if (NX_ERROR == NXopenpath(m_fileID,m_path.c_str())) 

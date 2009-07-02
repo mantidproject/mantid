@@ -337,6 +337,9 @@ void LoadNexusProcessed::loadAlgorithmHistory(DataObjects::Workspace2D_sptr loca
     }
 }
 
+/** Create time_t value from a string
+ *  @param str The string with date and time in format: YYYY-MMM-DD HH:MM:SS
+ */
 std::time_t LoadNexusProcessed::createTime_t_FromString(const std::string &str)
 {
 

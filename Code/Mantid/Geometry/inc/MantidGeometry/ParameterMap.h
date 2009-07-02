@@ -108,10 +108,14 @@ public:
     //    m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
     //}
 
-    /// The same as above except that the caller is resposible for setting the parameter's value.
-    /// e.g. CustomParameter* param = new CustomParameter;
-    ///      param->setItsValue(value);
-    ///      AMap.add(param,"comp","name");
+    /** The same as above except that the caller is resposible for setting the parameter's value.
+     *      e.g. CustomParameter* param = new CustomParameter;
+     *      param->setItsValue(value);
+     *      AMap.add(param,"comp","name");
+     *  @param param A pointer to the parameter
+     *  @param comp A pointer to the component
+     *  @param name The paramenter name
+     */
     void add(Parameter* param,const IComponent* comp,const std::string& name)
     {
         m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
@@ -199,7 +203,11 @@ public:
      */
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name)const;
 
-    /// Get the values of a given parameter of all the components that have the name: compName
+    /** Get the values of a given parameter of all the components that have the name: compName
+     *  @tparam The parameter type
+     *  @param compName The name of the component
+     *  @param name The name of the parameter
+     */
     template<class T>
     std::vector<T> getType(const std::string& compName,const std::string& name)const
     {
@@ -219,13 +227,13 @@ public:
     }
 
     /**  Returns a double parameter as vector's first element if exists and an empty vector if it doesn't
-         @param comp Component name
+         @param compName Component name
          @param name Parameter name
      */
     std::vector<double> getDouble(const std::string& compName,const std::string& name)const{return getType<double>(compName,name);}
 
     /**  Returns a V3D parameter as vector's first element if exists and an empty vector if it doesn't
-         @param comp Component name
+         @param compName Component name
          @param name Parameter name
      */
     std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const{return getType<V3D>(compName,name);}
@@ -236,14 +244,16 @@ public:
     /// Returns a string with all component names, parameter names and values
     std::string asString()const;
 
-    /** Populates the map from a string containing triplets of <comp name>,<param name>,<param value> separated by 
+    /** Populates the map from a string containing triplets of comp_name,param_name,param_value separated by 
         semicolons, e.g. "monitor1,pos,V3D,[0,0,1.0];detector_bank2,pos,V3D,[1,2,0]"
+        @param str The input string
      */
     void fromString(const std::string& str);
 
 private:
   ///Assignment operator
   ParameterMap& operator=(const ParameterMap& rhs);
+  /// report an error
   void reportError(const std::string& str);
   /// insternal parameter map instance
   pmap m_map;

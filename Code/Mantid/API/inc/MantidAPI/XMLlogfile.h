@@ -61,12 +61,12 @@ namespace Mantid
 
 
       /// log file XML attributes from instrument definition file
-      const std::string m_logfileID;
-      const std::string m_paramName;
-      const std::string m_type;
-      const std::string m_extractSingleValueAs;
-      const std::string m_eq;
-      const Geometry::Component* m_component;
+      const std::string m_logfileID;  ///< logfile id
+      const std::string m_paramName;  ///< parameter name
+      const std::string m_type;       ///< type of the data
+      const std::string m_extractSingleValueAs;  ///< describes the way to extract a single value from the log file( average, first number, etc)
+      const std::string m_eq;         ///< muParser equation to calculate the parameter value from the log value
+      const Geometry::Component* m_component;  ///< the component address
 
       ///Returns parameter value as generated using possibly equation expression etc
       double createParamValue(Mantid::Kernel::TimeSeriesProperty<double>* logData);

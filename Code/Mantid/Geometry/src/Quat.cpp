@@ -480,6 +480,10 @@ std::ostream& operator<<(std::ostream& os,const Quat& q)
 	return os;
 }
 
+/**  Reads in a quat from an input stream
+ *   @param ins The input stream
+ *   @param q The quat
+ */
 std::istream& operator>>(std::istream& ins,Quat& q)
 {
     q.readPrinted(ins);

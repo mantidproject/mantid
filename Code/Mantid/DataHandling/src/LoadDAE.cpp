@@ -352,7 +352,10 @@ namespace Mantid
     }
 
 
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+    /** Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw).
+     *  @param localWorkspace The workspace
+     *  @param iName The instrument name
+     */
     void LoadDAE::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace, const char* iName)
     {
       // Determine the search directory for XML instrument definition files (IDFs)

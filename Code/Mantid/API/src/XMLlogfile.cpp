@@ -18,7 +18,14 @@ using namespace API;
 
 Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
 
-/// Constructor
+/** Constructor
+ *  @param logfileID The logfile id -- the part of the file name which identifies the log 
+ *  @param paramName The name of the parameter which will be created based on the log values
+ *  @param type The type
+ *  @param extractSingleValueAs Describes the way to extract a single value from the log file( average, first number, etc)
+ *  @param eq muParser equation to calculate the parameter value from the log value
+ *  @param comp The pointer to the instrument component
+ */
 XMLlogfile::XMLlogfile(std::string& logfileID, std::string& paramName, std::string& type,
                        std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp)
                        : m_logfileID(logfileID), m_paramName(paramName), m_type(type),
