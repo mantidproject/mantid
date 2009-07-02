@@ -89,19 +89,25 @@ namespace Mantid
       void exec();
       
       // The different steps of the calculation, all called by exec()
+      /// Loads and checks the values passed to the algorithm
       void retrieveProperties();
+      /// Calculates the sum of soild angles of detectors for each histogram
       API::MatrixWorkspace_sptr getSolidAngles(
         API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec );
+      /// Calculates the sum counts in each histogram
       API::MatrixWorkspace_sptr getTotalCounts(
         API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec );
+      /// Converts numbers of particle counts into count rates
       API::MatrixWorkspace_sptr getRate(API::MatrixWorkspace_sptr counts);
+      /// Finds the median of values in single bin histograms
       double getMedian(API::MatrixWorkspace_const_sptr input) const;
+      /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
       std::vector<int> FindDetects(API::MatrixWorkspace_sptr responses,
         double lowLim, double highLim, std::string fileName);
       
       /// Value written to the output workspace where bad spectra are found
       static const int BadVal = 100;
-        /// Marks accepted spectra the output workspace
+      /// Marks accepted spectra the output workspace
       static const int GoodVal = 0;
       ///a flag int value to indicate that the value wasn't set by users
       static const int UNSETINT = INT_MAX-15;

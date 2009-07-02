@@ -258,8 +258,8 @@ void FindProblemDetectors::retrieveProperties()
 * @param lastSpec the index number of the last histogram to analyse
 * @return A pointer to the workspace (or an empty pointer)
 */
-MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
-                  MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
+API::MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
+            API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information("Calculating soild angles");
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -300,8 +300,8 @@ MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
 * @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
-MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
-                  MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
+API::MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
+                API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information() << "Integrating input workspace" << std::endl;
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -337,7 +337,8 @@ MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
 * @param counts A histogram workspace with counts in time bins 
 * @return A workspace of the counts per unit time in each bin
 */
-MatrixWorkspace_sptr FindProblemDetectors::getRate(MatrixWorkspace_sptr counts)
+API::MatrixWorkspace_sptr FindProblemDetectors::getRate
+                                           (API::MatrixWorkspace_sptr counts)
 {
   g_log.information("Calculating time averaged count rates");
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -369,7 +370,8 @@ MatrixWorkspace_sptr FindProblemDetectors::getRate(MatrixWorkspace_sptr counts)
 * @return The median value of the histograms in the workspace that was passed to it
 * @throw logic_error if an input values is negative
 */
-double FindProblemDetectors::getMedian(MatrixWorkspace_const_sptr input) const
+double FindProblemDetectors::getMedian(API::MatrixWorkspace_const_sptr input)
+  const
 {
   g_log.information("Calculating the median of spectra count rates");
 
@@ -428,7 +430,7 @@ double FindProblemDetectors::getMedian(MatrixWorkspace_const_sptr input) const
 * @return An array that of the index numbers of the histograms that fail
 */
 std::vector<int> FindProblemDetectors::FindDetects(
-  MatrixWorkspace_sptr responses, double lowLim, double highLim,
+  API::MatrixWorkspace_sptr responses, double lowLim, double highLim,
   std::string fileName)
 {
   g_log.information("Apply the criteria to find failing detectors");
