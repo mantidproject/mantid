@@ -128,7 +128,7 @@ namespace Kernel
 		static Logger& get(const std::string& name);
 
 		//destroy the given logger and releases resources
-		static void Logger::destroy(Logger& logger);
+		static void destroy(Logger& logger);
 
 		/// Shuts down the logging framework and releases all Loggers.
 		static void shutdown();
