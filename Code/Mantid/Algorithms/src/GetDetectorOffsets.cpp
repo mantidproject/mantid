@@ -3,8 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-//#include "MantidCurveFitting/Fit1D.h"
-//#include "MantidCurveFitting/GaussianLinearBG1D.h"
 #include <fstream>
 #include <ostream>
 #include <iomanip>
@@ -54,15 +52,13 @@ void GetDetectorOffsets::init()
 /** Executes the algorithm
  *
  *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
- *  @throw std::runtime_error If the rebinning process fails
  */
 void GetDetectorOffsets::exec()
 {
-	///
 	retrieveProperties();
-	/// Fit all the spectra with a gaussian
+	// Fit all the spectra with a gaussian
 	std::string filename=getProperty("GroupingFileName");
-    const SpectraDetectorMap& specMap = inputW->spectraMap();
+	const SpectraDetectorMap& specMap = inputW->spectraMap();
 	std::fstream out;
 	out.open(filename.c_str(),std::ios::out);
 	if (!out.is_open())
@@ -109,6 +105,10 @@ void GetDetectorOffsets::retrieveProperties()
 	outputW=API::WorkspaceFactory::Instance().create(inputW,nspec,2,1);
 }
 
+/** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
+ *  @param s The spectrum index to fit
+ *  @return The calculated offset value
+ */
 double GetDetectorOffsets::fitSpectra(const int s)
 {
   IAlgorithm_sptr fit_alg;

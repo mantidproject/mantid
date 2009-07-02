@@ -11,39 +11,7 @@ namespace Mantid
 namespace Algorithms
 {
 /**
- Algorithm to focus powder diffraction data into a number of histograms according to a
- grouping scheme defined in a file.
- The structure of the grouping file is as follows:
- # Format: number  UDET offset  select  group
- 0        611  0.0000000  1    0
- 1        612  0.0000000  1    0
- 2        601  0.0000000  0    0
- 3        602  0.0000000  0    0
- 4        621  0.0000000  1    0
- The first column is simply an index, the second is a UDET identifier for the detector,
- the third column corresponds to an offset in Deltad/d (not applied, usually applied using
- the AlignDetectors algorithm). The forth column is a flag to indicate whether the detector
- is selected. The fifth column indicates the group this detector belongs to (number >=1),
- zero is not considered as a group.
-
- Given an InputWorkspace and a Grouping filename, the algorithm follows:
- 1) The calibration file is read and a map of corresponding udet-group is created.
- 2) The algorithm determine the X boundaries for each group as the upper and lower limits
- of all contributing detectors to this group and determine a logarithmic step that will ensure
- preserving the number of bins in the initial workspace.
- 3) All histograms are read and rebinned to the new grid for their group.
- 4) A new workspace with N histograms is created.
-
- Since the new X boundaries depend on the group and not the entire workspace,
- this focusing algorithm does not create overestimated Xranges for multi-group intruments.
-
- Required Properties:
- <UL>
- <LI> InputWorkspace - The name of the 2D Workspace to take as input.
- It should be an histogram and the X-unit should be d-spacing. </LI>
- <LI> GroupingFileName - The path to a grouping file</LI>
- <LI> OutputWorkspace - The name of the 2D workspace in which to store the result </LI>
- </UL>
+ Find the offsets for each detector
 
  @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
  @date 08/03/2009
@@ -83,20 +51,24 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
-  API::MatrixWorkspace_sptr inputW;
-  API::MatrixWorkspace_sptr outputW;
+  API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
+  API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
   // Overridden Algorithm methods
   void init();
   void exec();
-  double fitSpectra(const int);
+  /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
+  double fitSpectra(const int s);
+  /// Read in all the input parameters
   void retrieveProperties();
+  
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;
-  double Xmin;
-  double Xmax;
-  double dreference;
-  double step;
-  int nspec;
+  
+  double Xmin;        ///< The start of the X range for fitting
+  double Xmax;        ///< The end of the X range for fitting
+  double dreference;  ///< The expected peak position in d-spacing (?)
+  double step;        ///< The step size
+  int nspec;          ///< The number of spectra in the input workspace
 };
 
 } // namespace Algorithm
