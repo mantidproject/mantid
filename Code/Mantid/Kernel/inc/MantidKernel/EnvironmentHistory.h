@@ -45,9 +45,13 @@ public:
   virtual ~EnvironmentHistory();
   /// print contents of object
   void printSelf(std::ostream&, const int indent = 0)const;
+  /// returns the frameworkversion
   const std::string& frameworkVersion()  const{ return m_version;}
+   /// returns the os name
   const std::string& osName()const {return m_osName;}
+   /// returns the os version
   const std::string& osVersion()const {return m_osVersion;} 
+   /// returns the user name
   const std::string& userName()const {return m_userName;}
  
 private:

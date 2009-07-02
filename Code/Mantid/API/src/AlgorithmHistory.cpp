@@ -15,6 +15,7 @@ using Kernel::Property;
  *  @param alg      A pointer to the algorithm for which the history should be constructed
  *  @param start    The start time of the algorithm execution (optional)
  *  @param duration The time (in seconds) that it took to run this algorithm (optional)
+ *  @param uexeccount an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const dateAndTime& start, const double& duration,unsigned int uexeccount) :
   m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount)

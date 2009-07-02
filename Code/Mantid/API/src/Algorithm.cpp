@@ -174,7 +174,7 @@ bool Algorithm::execute()
       if (!m_isChildAlgorithm) m_running = true;
       time(&start_time);
       start = clock();
-      //count used to know how many times an algorithm executed
+      //count used for defining the algorithm execution order
       ++Algorithm::g_execCount; 
       // Call the concrete algorithm's exec method
       this->exec();
@@ -393,6 +393,7 @@ void Algorithm::interruption_point()
 /** Fills History, Algorithm History and Algorithm Parameters
  *  @param start a date and time defnining the start time of the algorithm
  *  @param duration a double defining the length of duration of the algorithm
+ *  @param  uexecCount an unsigned int for defining the excution order of algorithm
  */
 void Algorithm::fillHistory(AlgorithmHistory::dateAndTime start,double duration,unsigned int uexecCount)
 {
@@ -498,8 +499,8 @@ void Algorithm::setChild(const bool isChild)
 }
 
 /** To Process workspace groups.
- *  @param input workspacegroup pointer to iterate through all members
- *  @param  a vector holding the input properties
+ *  @param inputwsPtr input workspacegroup pointer to iterate through all members
+ *  @param  prop a vector holding the input properties
  *  @returns true - if all the workspace members are executed.
  */
 
@@ -602,6 +603,11 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	return bStatus;
 }
  
+/** setting input workspace properties for an algorithm,for handling workspace goups.
+ *  @param pAlg  pointer to algorithm
+ *  @param  prop  pointer to a vector holding the input properties
+ *  @param  inputWS input workspace name
+ */
 void Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string&inputWS )
 {
 	std::string wsname=prop->value();
@@ -623,6 +629,13 @@ void Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* 
 		g_log.information()<<" Trying to retrieve  Object "<< wsname<<" which is not there in ADS"<<std::endl;
 	}
 }
+/** setting output workspace properties for an algorithm,for handling workspace goups..
+ *  @param pAlg  pointer to algorithm
+ *  @param  prop  pointer to the input properties
+ *  @param  nPeriod  period number
+ *  @param sptrWSGrp shared pointer for workspacegroup
+ *  @param  outWSParentName outputworksapce name
+ */
 void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nPeriod,WorkspaceGroup_sptr sptrWSGrp,std::string &outWSParentName)
 {
 	std::string outWSChildName("");
@@ -643,6 +656,9 @@ void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
 		sptrWSGrp->add(outWSChildName);
 	}
 }
+/** To query the property is a workspace property
+  * @param prop pointer to input properties
+*/
 bool Algorithm::isWorkspaceProperty( Mantid::Kernel::Property* prop)
 {
 	const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
@@ -651,7 +667,9 @@ bool Algorithm::isWorkspaceProperty( Mantid::Kernel::Property* prop)
 	return bStatus;
 	
 }
-
+/** checks the property is a input workspace property
+  * @param prop pointer to the input properties
+*/
 bool Algorithm::isInputWorkspaceProperty( Mantid::Kernel::Property* prop)
 {
 	const Property *wsPropProp = dynamic_cast<Property*>(prop);
@@ -662,6 +680,9 @@ bool Algorithm::isInputWorkspaceProperty( Mantid::Kernel::Property* prop)
 	}
 	else return false;
 }
+/** checks the property is a output workspace property
+  * @param prop pointer to input  properties
+*/
 bool Algorithm::isOutputWorkspaceProperty( Mantid::Kernel::Property* prop)
 {
 	const Property *wsPropProp = dynamic_cast<Property*>(prop);

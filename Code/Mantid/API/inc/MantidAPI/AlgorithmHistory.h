@@ -60,12 +60,12 @@ public:
   const std::string& name() const {return m_name;}
   /// get version number of algorithm in history const
   const int& version() const {return m_version;}
-  // get execution duration in hist const
+  /// get execution duration
   double executionDuration() const { return m_executionDuration;}
-  // get execution date in hist const
+  /// get execution date 
   dateAndTime executionDate() const {return m_executionDate;}
+  ///get the execution count
   const int& execCount() const {return m_execCount;}
-
   /// get parameter list of algorithm in history const
   const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
   /// print contents of object
@@ -93,6 +93,7 @@ private:
   double m_executionDuration;
   /// The PropertyHistory's defined for the algorithm
   std::vector<Kernel::PropertyHistory> m_properties;
+  ///count keeps track of execution order of an algorithm
   int m_execCount;
 };
 

@@ -270,13 +270,17 @@ namespace Mantid
 			void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
 				std::vector<Workspace_sptr>& outputWorkspaces) const;
 			void algorithm_info() const;
-			void setProperties(IAlgorithm* pAlg,const std::vector<Mantid::Kernel::Property*>&prop,const std::string&inputWS, 
-				const int nPeriod, std::string& outWSParentName,std::string& outWSChildName,WorkspaceGroup_sptr sptrWSGrp1,WorkspaceGroup_sptr sptrWSGrp2 );
+			/// process workspace groups
 			virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+			///checks the property is a workspace property
 			bool isWorkspaceProperty( Mantid::Kernel::Property* prop);
+			/// checks the property is input workspace property
 			bool isInputWorkspaceProperty( Mantid::Kernel::Property* prop);
+			/// checks the property is output workspace property
 			bool isOutputWorkspaceProperty( Mantid::Kernel::Property* prop);
+			/// setting the input properties for an algorithm - to handle workspace groups 
 			void setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string&inputWS );
+			/// setting the output properties for an algorithm -to handle workspace groups 
 			void setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nperiod,WorkspaceGroup_sptr sptrWSGrp,std::string &outParentname);
 
 			/// Poco::ActiveMethod used to implement asynchronous execution.
@@ -302,6 +306,7 @@ namespace Mantid
 			double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
 
 			AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
+			 ///< count keeps track of  algorithm execution order
 			static unsigned int g_execCount;
 		};
 
