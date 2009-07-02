@@ -5,8 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
+#include <map>
 #include "MantidKernel/System.h"
-//#include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"

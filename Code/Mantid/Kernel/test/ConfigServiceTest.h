@@ -6,6 +6,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "Poco/Path.h"
+#include "boost/shared_ptr.hpp"
+#include "TestChannel.hh"
 #include <string>
 
 using namespace Mantid::Kernel;
@@ -26,6 +28,7 @@ public:
 
 	  TS_ASSERT_THROWS_NOTHING(log1.debug("a debug string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.information("an information string"));
+	  TS_ASSERT_THROWS_NOTHING(log1.information("a notice string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.warning("a warning string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.error("an error string"));
 	  TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string"));
@@ -34,17 +37,40 @@ public:
 		log1.fatal()<<"A fatal message from the stream operators " << 4.5 << std::endl;
 		log1.error()<<"A error message from the stream operators " << -0.2 << std::endl;
 		log1.warning()<<"A warning message from the stream operators " << 999.99 << std::endl;
+		log1.notice()<<"A notice message from the stream operators " << 0.0 << std::endl;
 		log1.information()<<"A information message from the stream operators " << -999.99 << std::endl;
 		log1.debug()<<"A debug message from the stream operators " << 5684568 << std::endl;
+
+
 	  );
 
 	  //checking the level - this should be set to debug in the config file
 	  //therefore this should only return false for debug
 	  TS_ASSERT(log1.is(Logger::PRIO_DEBUG) == false); //debug
 	  TS_ASSERT(log1.is(Logger::PRIO_INFORMATION)); //information
+	  TS_ASSERT(log1.is(Logger::PRIO_NOTICE)); //information
 	  TS_ASSERT(log1.is(Logger::PRIO_WARNING)); //warning
 	  TS_ASSERT(log1.is(Logger::PRIO_ERROR)); //error
 	  TS_ASSERT(log1.is(Logger::PRIO_FATAL)); //fatal
+  }
+
+	void testEnabled()
+  {
+	  //attempt some logging
+	  Logger& log1 = Logger::get("logTestEnabled");
+		TS_ASSERT(log1.getEnabled());
+	  TS_ASSERT_THROWS_NOTHING(log1.fatal("a fatal string with enabled=true"));
+		TS_ASSERT_THROWS_NOTHING(log1.fatal()<<"A fatal message from the stream operators with enabled=true " << 4.5 << std::endl;);
+		
+		TS_ASSERT_THROWS_NOTHING(log1.setEnabled(false));
+		TS_ASSERT(!log1.getEnabled());
+		TS_ASSERT_THROWS_NOTHING(log1.fatal("YOU SHOULD NEVER SEE THIS"));
+		TS_ASSERT_THROWS_NOTHING(log1.fatal()<<"YOU SHOULD NEVER SEE THIS VIA A STREAM" << std::endl;);
+		
+		TS_ASSERT_THROWS_NOTHING(log1.setEnabled(true));
+		TS_ASSERT(log1.getEnabled());
+		TS_ASSERT_THROWS_NOTHING(log1.fatal("you are allowed to see this"));
+		TS_ASSERT_THROWS_NOTHING(log1.fatal()<<"you are allowed to see this via a stream" << std::endl;);
 
   }
 

@@ -81,9 +81,9 @@ namespace Mantid
 		*/
 		ConfigServiceImpl::~ConfigServiceImpl()
 		{
+			Kernel::Logger::shutdown();
 			delete m_pSysConfig;
 			delete m_pConf;                // potential double delete???
-			//		g_log.debug() << "ConfigService destroyed." << std::endl;
 		}
 
 		/**

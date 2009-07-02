@@ -8,6 +8,7 @@
 #include "MantidGeometry/Component.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
+#include <map>
 
 namespace Mantid
 {

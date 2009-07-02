@@ -8,6 +8,7 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Detector.h"
 #include <boost/shared_ptr.hpp>
+#include <map>
 #include <string>
 #include <ostream>
 

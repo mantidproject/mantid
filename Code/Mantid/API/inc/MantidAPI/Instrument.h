@@ -10,6 +10,7 @@
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/Detector.h"
 #include <string>
+#include <map>
 #include <ostream>
 
 namespace Mantid

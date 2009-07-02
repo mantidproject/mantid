@@ -1,6 +1,8 @@
 #ifndef Rules_h
 #define Rules_h
 
+#include <map>
+
 namespace Mantid
 {
 

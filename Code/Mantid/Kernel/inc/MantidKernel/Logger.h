@@ -6,8 +6,8 @@
 //----------------------------------------------------------------------
 #include "System.h"
 #include <string>
+#include <set>
 #include <exception>
-#include <map>
 #include <ostream>
 #include <streambuf>
 
@@ -19,6 +19,8 @@ namespace Poco
 {
 	class Logger;
 	class LogStream;
+	class NullChannel;
+	class Mutex;
 }
 /// @endcond
 
@@ -70,6 +72,7 @@ namespace Kernel
 			PRIO_FATAL = 1,		  ///< A fatal error. The application will most likely terminate. This is the highest priority.
 			PRIO_ERROR = 3,       ///< An error. An operation did not complete successfully, but the application as a whole is not affected.
 			PRIO_WARNING = 4,     ///< A warning. An operation completed with an unexpected result.
+			PRIO_NOTICE = 5,      ///< An informational message, usually denoting the successful completion of an Algorithm, These are the headlines of what we should be reporting to the user.
 			PRIO_INFORMATION = 6, ///< An informational message, usually denoting the successful completion of an operation.
 			PRIO_DEBUG = 7        ///< A debugging message.This is the lowest priority.
 		};
@@ -77,36 +80,67 @@ namespace Kernel
 		void fatal(const std::string& msg);
 		void error(const std::string& msg);
 		void warning(const std::string& msg);
+		void notice(const std::string& msg);
 		void information(const std::string& msg);
 		void debug(const std::string& msg);
 
 		std::ostream& fatal();
 		std::ostream& error();
 		std::ostream& warning();
+		std::ostream& notice();
 		std::ostream& information();
 		std::ostream& debug();
 
 		/// Logs the given message at debug level, followed by the data in buffer.
 		void dump(const std::string& msg, const void* buffer, std::size_t length);
 
+		/// Sets the Logger's log level.
+		void setLevel(int level);
+		
+		/// Returns the Logger's log level.
+		int getLevel() const;
+		
+		/// Sets the Logger's log level using a symbolic value.
+		///
+		/// Valid values are:
+		///   - fatal
+		///   - critical
+		///   - error
+		///   - warning
+		///   - notice
+		///   - information
+		///   - debug
+		void setLevel(const std::string& level);
+
+		///returns true if the log is enabled
+		bool getEnabled() const;
+
+		///set if the logging is enabled
+		void setEnabled(const bool enabled);
+		
 		/// Returns true if at least the given log level is set.
 		bool is(int level) const;
+
+		/// releases resources and deletes this object
+		void release();
 
 		/// Returns a reference to the Logger with the given name.
 		static Logger& get(const std::string& name);
 
+		//destroy the given logger and releases resources
+		static void Logger::destroy(Logger& logger);
+
 		/// Shuts down the logging framework and releases all Loggers.
 		static void shutdown();
 
-		~Logger();
 
 	protected:
 		/// Protected constructor called by static get method
 		Logger(const std::string& name);
 
-
+		/// Protected destructor - call release instead
+		~Logger();
 	private:
-
 		Logger();
 
 		/// Overload of = operator
@@ -114,11 +148,24 @@ namespace Kernel
 
 		/// Internal handle to third party logging objects
 		Poco::Logger& _log;
-		///This pointer is owned by this class, initialized in the constructor and deleted in the destructor
+		///A Log stream to allow streaming operations.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
 		Poco::LogStream* _logStream;
+		///A Null stream, used when the logger is disabled.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
+		Poco::LogStream* _nullStream;
+		/// a null channell used to create the null stream		
+		Poco::NullChannel*  _nullChannel;
+
+		///returns the correct stream depending on the enabled status
+		Poco::LogStream* getStream();
 
 		/// Name of this logging object
 		std::string _name;
+		/// The state of this logger, disabled loggers send no messages
+		bool _enabled;
+
+		typedef std::set<Logger*> LoggerList;
+		static LoggerList*        m_LoggerList;
+		static Poco::Mutex        m_ListMtx;
 };
 
 } // namespace Kernel
