@@ -19,6 +19,7 @@ using namespace API;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_const_sptr;
 
+
 /** Initialisation method.
  *
  */

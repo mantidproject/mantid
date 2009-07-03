@@ -2,7 +2,7 @@
 #include <Poco/Logger.h>
 #include <Poco/LogStream.h>
 #include <Poco/Message.h>
-#include <Poco/NullChannel.h>
+#include <Poco/NullStream.h>
 #include <iostream>
 #include <sstream>
 
@@ -10,7 +10,8 @@ namespace Mantid
 {
 	namespace Kernel
 	{
-		Logger::LoggerList* Logger::m_LoggerList = 0;
+		Logger::LoggerList* Logger::m_LoggerList = 0;		
+		Poco::NullOutputStream* Logger::m_nullStream = 0;
 
 		/** Constructor
 		* @param name The class name invoking this logger
@@ -20,19 +21,12 @@ namespace Mantid
 			_name = name;
 			_log=&Poco::Logger::get(_name);
 			_logStream = new Poco::LogStream(*_log);
-			_nullChannel = new Poco::NullChannel;
-			Poco::Logger& nullLogger = Poco::Logger::get("NULL");
-			nullLogger.setChannel(_nullChannel);
-			_nullStream = new Poco::LogStream(nullLogger,Poco::Message::PRIO_FATAL);
-
 		}
 
 		///destructor
 		Logger::~Logger()
 		{
 			delete (_logStream);
-			delete (_nullStream);
-			delete (_nullChannel);
 		}
 
 		/// Sets the Loggername to a new value.
@@ -273,11 +267,6 @@ namespace Mantid
 			return _log->getLevel();
 		}
 
-		Poco::LogStream* Logger::getStream()
-		{
-			return _enabled?_logStream:_nullStream;
-		}
-
 		/** This class implements an ostream interface to the Logger for fatal messages.
 		*
 		* The stream's buffer appends all characters written to it
@@ -287,7 +276,10 @@ namespace Mantid
 		*/
 		std::ostream& Logger::fatal()
 		{
-			return getStream()->fatal();
+			if (_enabled)
+				return _logStream->fatal();
+			else
+				return *m_nullStream;
 		}
 
 		/** This class implements an ostream interface to the Logger for error messages.
@@ -299,7 +291,10 @@ namespace Mantid
 		*/
 		std::ostream& Logger::error()
 		{
-			return getStream()->error();
+			if (_enabled)
+				return _logStream->error();
+			else
+				return *m_nullStream;
 		}
 
 		/** This class implements an ostream interface to the Logger for warning messages.
@@ -311,7 +306,10 @@ namespace Mantid
 		*/
 		std::ostream& Logger::warning()
 		{
-			return getStream()->warning();
+			if (_enabled)
+				return _logStream->warning();
+			else
+				return *m_nullStream;
 		}
 
 		/** This class implements an ostream interface to the Logger for notice messages.
@@ -323,7 +321,10 @@ namespace Mantid
 		*/
 		std::ostream& Logger::notice()
 		{
-			return getStream()->notice();
+			if (_enabled)
+				return _logStream->notice();
+			else
+				return *m_nullStream;
 		}
 
 		/** This class implements an ostream interface to the Logger for information messages.
@@ -335,7 +336,10 @@ namespace Mantid
 		*/
 		std::ostream& Logger::information()
 		{
-			return getStream()->information();
+			if (_enabled)
+				return _logStream->information();
+			else
+				return *m_nullStream;
 		}
 
 		/** This class implements an ostream interface to the Logger for debug messages.
@@ -347,14 +351,17 @@ namespace Mantid
 		*/
 		std::ostream& Logger::debug()
 		{
-			return getStream()->debug();
+			if (_enabled)
+				return _logStream->debug();
+			else
+				return *m_nullStream;
 		}
 
 		/** releases resources and deletes this object.
 		*/
 		void Logger::release()
 		{
-			delete(this);
+			destroy(*this);
 		}
 
 		/** Deletes the logger and clears it from the cache.
@@ -378,6 +385,7 @@ namespace Mantid
 		/// Shuts down the logging framework and releases all Loggers.  
 		void Logger::shutdown()
 		{
+			
 			try
 			{
 				//first release the POCO loggers
@@ -392,6 +400,13 @@ namespace Mantid
 					}
 					delete m_LoggerList;
 					m_LoggerList = 0;
+				}
+
+				//delete the NullChannel
+				if (m_nullStream)
+				{
+					delete(m_nullStream);
+					m_nullStream=0;
 				}
 			} 
 			catch (std::exception& e)
@@ -409,8 +424,14 @@ namespace Mantid
 		Logger& Logger::get(const std::string& name)
 		{
 			Logger* pLogger = new Logger(name);
+			//assert the nullSteam
+			if(!m_nullStream)
+				m_nullStream = new Poco::NullOutputStream;
+
+			//assert the loggerlist
 			if (!m_LoggerList)
 				m_LoggerList = new LoggerList;
+			//insert the newly created logger
 			m_LoggerList->insert(pLogger);
 
 			return *pLogger;

@@ -19,7 +19,7 @@ namespace Poco
 {
 	class Logger;
 	class LogStream;
-	class NullChannel;
+	class NullOutputStream;
 	class Mutex;
 }
 /// @endcond
@@ -146,12 +146,7 @@ namespace Kernel
 		///A Log stream to allow streaming operations.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
 		Poco::LogStream* _logStream;
 		///A Null stream, used when the logger is disabled.  This pointer is owned by this class, initialized in the constructor and deleted in the destructor
-		Poco::LogStream* _nullStream;
-		/// a null channell used to create the null stream		
-		Poco::NullChannel*  _nullChannel;
-
-		///returns the correct stream depending on the enabled status
-		Poco::LogStream* getStream();
+		//Poco::NullOutputStream* _nullStream;
 
 		/// Name of this logging object
 		std::string _name;
@@ -160,6 +155,7 @@ namespace Kernel
 
 		typedef std::set<Logger*> LoggerList;		///<A container of logger pointers
 		static LoggerList*        m_LoggerList; ///<The container of logger pointers
+		static Poco::NullOutputStream* m_nullStream;; ///<The container of logger pointers
 };
 
 } // namespace Kernel

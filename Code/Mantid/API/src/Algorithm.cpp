@@ -33,7 +33,7 @@ Algorithm::Algorithm() :
 /// Virtual destructor
 Algorithm::~Algorithm()
 {
-	//g_log.release();
+	g_log.release();
 }
 
 /** Initialization method invoked by the framework. This method is responsible
@@ -49,7 +49,6 @@ void Algorithm::initialize()
   if (m_isInitialized) return;
 
 	g_log.setName(this->name());
-	g_log.notice("I have changed my name!");
   try
   {
     // Invoke init() method of the derived class inside a try/catch clause

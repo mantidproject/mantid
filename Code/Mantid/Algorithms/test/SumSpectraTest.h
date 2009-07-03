@@ -62,7 +62,7 @@ public:
   }
 
 
-  void testExecWithLimits()
+  void xtestExecWithLimits()
   {
     if ( !alg.isInitialized() ) alg.initialize();
     TS_ASSERT_THROWS_NOTHING( alg.execute());
@@ -99,7 +99,7 @@ public:
 
 	}
 	
-	void testExecWithoutLimits()
+	void xtestExecWithoutLimits()
   {
 		
 		SumSpectra alg2;
