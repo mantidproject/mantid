@@ -20,9 +20,6 @@ using namespace Kernel;
 using namespace Geometry;
 using namespace API;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& CylinderAbsorption::g_log = Logger::get("CylinderAbsorption");
-
 CylinderAbsorption::CylinderAbsorption() :
   API::Algorithm(),                                      //the base class constructor
   m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),

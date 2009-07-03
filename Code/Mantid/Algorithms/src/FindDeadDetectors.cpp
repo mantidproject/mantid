@@ -18,9 +18,6 @@ namespace Mantid
     using namespace API;
     using DataObjects::Workspace2D;
 
-    // Get a reference to the logger
-    Logger& FindDeadDetectors::g_log = Logger::get("FindDeadDetectors");
-
     /// Initialisation method.
     void FindDeadDetectors::init()
     {

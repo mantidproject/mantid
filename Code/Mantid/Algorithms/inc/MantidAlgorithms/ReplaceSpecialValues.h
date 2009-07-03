@@ -87,8 +87,6 @@ namespace Mantid
 			/// flag to indicate if the infinity check is to be performed
 		  bool m_performInfiniteCheck;
 
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithms

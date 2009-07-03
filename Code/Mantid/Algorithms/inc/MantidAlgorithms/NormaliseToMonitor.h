@@ -92,8 +92,6 @@ private:
   /// The upper bound of the integration range
   double m_integrationMax;
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

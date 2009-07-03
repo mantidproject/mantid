@@ -14,9 +14,6 @@ DECLARE_ALGORITHM(NormaliseByCurrent)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger
-Logger& NormaliseByCurrent::g_log = Logger::get("NormaliseByCurrent");
-
 /// Default constructor
 NormaliseByCurrent::NormaliseByCurrent() : Algorithm() {}
 

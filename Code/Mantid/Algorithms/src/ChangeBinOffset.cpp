@@ -21,9 +21,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(ChangeBinOffset)
 
-    // Get a reference to the logger
-    Logger& ChangeBinOffset::g_log = Logger::get("ChangeBinOffset");
-
     /**
      * Default constructor
      */

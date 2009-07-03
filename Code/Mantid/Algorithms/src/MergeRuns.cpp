@@ -15,9 +15,6 @@ DECLARE_ALGORITHM(MergeRuns)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger
-Logger& MergeRuns::g_log = Logger::get("MergeRuns");
-
 /// Default constructor
 MergeRuns::MergeRuns() : Algorithm() {}
 

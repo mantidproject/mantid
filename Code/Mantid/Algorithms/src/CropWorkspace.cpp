@@ -16,9 +16,6 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::Workspace2D;
 
-// Get a reference to the logger.
-Logger& CropWorkspace::g_log = Logger::get("CropWorkspace");
-
 /// Default constructor
 CropWorkspace::CropWorkspace() : 
   Algorithm(),                                                //call the parent constructor

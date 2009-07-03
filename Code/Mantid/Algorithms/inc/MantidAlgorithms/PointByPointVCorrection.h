@@ -53,8 +53,7 @@ private:
   void exec();
   void check_validity(API::MatrixWorkspace_const_sptr& w1,
 		  API::MatrixWorkspace_const_sptr& w2,API::MatrixWorkspace_sptr& out);
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+
 };
 
 } // namespace Algorithm

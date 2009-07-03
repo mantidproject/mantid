@@ -63,8 +63,6 @@ private:
   void init();
   void exec();
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

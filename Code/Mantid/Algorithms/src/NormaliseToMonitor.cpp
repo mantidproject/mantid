@@ -20,9 +20,6 @@ using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D_const_sptr;
 
-// Get a reference to the logger
-Logger& NormaliseToMonitor::g_log = Logger::get("NormaliseToMonitor");
-
 /// Default constructor
 NormaliseToMonitor::NormaliseToMonitor() :
   Algorithm(),                                                //base class constructor

@@ -25,9 +25,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
-    // Get a reference to the logger
-    Logger& PlotAsymmetryByLogValue::g_log = Logger::get("PlotAsymmetryByLogValue");
-
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */

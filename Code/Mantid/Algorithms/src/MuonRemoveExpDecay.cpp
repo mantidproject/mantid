@@ -19,9 +19,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(MuonRemoveExpDecay)
 
-    // Get a reference to the logger
-    Logger& MuonRemoveExpDecay::g_log = Logger::get("MuonRemoveExpDecay");
-
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */

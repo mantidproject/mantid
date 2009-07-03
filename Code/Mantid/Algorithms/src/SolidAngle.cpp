@@ -21,9 +21,6 @@ namespace Mantid
 		using namespace API;
 		using namespace DataObjects;
 
-		// Get a reference to the logger
-		Logger& SolidAngle::g_log = Logger::get("SolidAngle");
-
 		/// Default constructor
 		SolidAngle::SolidAngle() : Algorithm()
 		{

@@ -18,9 +18,6 @@ DECLARE_ALGORITHM(PointByPointVCorrection)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger
-Logger& PointByPointVCorrection::g_log = Logger::get("PointByPointVCorrection");
-
 /// Default constructor
 PointByPointVCorrection::PointByPointVCorrection() : Algorithm()
 {}

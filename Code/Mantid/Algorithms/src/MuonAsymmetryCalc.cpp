@@ -18,9 +18,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(MuonAsymmetryCalc)
 
-    // Get a reference to the logger
-    Logger& MuonAsymmetryCalc::g_log = Logger::get("MuonAsymmetryCalc");
-
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */

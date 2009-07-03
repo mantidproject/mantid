@@ -16,9 +16,6 @@ DECLARE_ALGORITHM(Unwrap)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger
-Logger& Unwrap::g_log = Logger::get("Unwrap");
-
 /// Default constructor
 Unwrap::Unwrap()
 {}

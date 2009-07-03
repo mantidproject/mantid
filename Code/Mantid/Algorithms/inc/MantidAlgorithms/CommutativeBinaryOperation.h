@@ -51,9 +51,6 @@ namespace Mantid
       /// Checks the overall size compatability of two workspaces
       virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 
-    private:
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithm

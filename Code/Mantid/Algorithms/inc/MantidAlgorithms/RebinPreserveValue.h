@@ -75,8 +75,6 @@ private:
   
   int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithms

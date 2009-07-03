@@ -73,8 +73,6 @@ private:
   /// The name of the output workspace property for BinaryOperation
 	virtual const std::string outputPropName() const { return "OutputWorkspace";}
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

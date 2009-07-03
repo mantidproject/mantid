@@ -27,9 +27,6 @@ using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace;
 
-// Get a reference to the logger
-Logger& ReadGroupsFromFile::g_log = Logger::get("ReadGroupsFromFile");
-
 ReadGroupsFromFile::ReadGroupsFromFile():API::Algorithm(),calibration()
 {
 }

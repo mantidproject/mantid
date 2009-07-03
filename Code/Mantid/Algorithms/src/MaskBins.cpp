@@ -16,9 +16,6 @@ DECLARE_ALGORITHM(MaskBins)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& MaskBins::g_log = Logger::get("MaskBins");
-
 MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init()

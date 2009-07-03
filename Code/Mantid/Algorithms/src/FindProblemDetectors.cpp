@@ -24,9 +24,6 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::Workspace2D;
 
-// Get a reference to the logger
-Logger& FindProblemDetectors::g_log = Logger::get("FindProblemDetectors");
-
 void FindProblemDetectors::init()
 {
   //STEVE update the wiki

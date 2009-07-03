@@ -68,8 +68,6 @@ private:
   void exec();
   ///
   void computePrefactors();
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
   /// Vector that contains the prefactor coefficients Cij in the range [-zm-1,zm+1]
   std::vector<double> Cij;
   /// Vector that contains the prefactor coefficients Cij^2 in the range [-zm-1,zm+1]

@@ -87,8 +87,6 @@ private:
   /// For conversions to energy transfer, removes bins corresponding to inaccessible values
   API::MatrixWorkspace_sptr removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

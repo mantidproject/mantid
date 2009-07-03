@@ -13,9 +13,6 @@ namespace Algorithms
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(ExponentialCorrection)
 
-  // Get a reference to the logger
-  Logger& ExponentialCorrection::g_log = Logger::get("ExponentialCorrection");
-
   void ExponentialCorrection::defineProperties()
   {
     declareProperty("c0",1.0);

@@ -11,9 +11,6 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    // Get a reference to the logger
-    Logger& UnaryOperation::g_log = Logger::get("UnaryOperation");
-
     UnaryOperation::UnaryOperation() : API::Algorithm() {}
     
     UnaryOperation::~UnaryOperation() {}

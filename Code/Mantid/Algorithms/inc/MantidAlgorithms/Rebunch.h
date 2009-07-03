@@ -69,8 +69,7 @@ namespace Mantid
 			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const size_t n_bunch, const bool distribution);
       void rebunch_point(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
 			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const int n_bunch);
-	  /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
+
     };
 
   } // namespace Algorithm

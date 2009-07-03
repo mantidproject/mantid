@@ -21,9 +21,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-// Get a reference to the logger
-Logger& ConvertUnits::g_log = Logger::get("ConvertUnits");
-
 /// Default constructor
 ConvertUnits::ConvertUnits() : Algorithm()
 {

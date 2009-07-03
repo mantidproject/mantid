@@ -20,9 +20,6 @@ namespace Mantid
     using DataObjects::Workspace2D;
     using DataObjects::Workspace2D_sptr;
 
-    // Get a reference to the logger
-    Logger& SimpleRebin::g_log = Logger::get("SimpleRebin");
-
     /** Initialisation method. Declares properties to be used in algorithm.
     *
     */

@@ -15,9 +15,6 @@ DECLARE_ALGORITHM(FlatBackground)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& FlatBackground::g_log = Logger::get("FlatBackground");
-
 void FlatBackground::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input ),

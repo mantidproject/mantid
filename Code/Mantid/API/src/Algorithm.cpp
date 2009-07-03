@@ -194,7 +194,7 @@ bool Algorithm::execute()
 
       // RJT, 19/3/08: Moved this up from below the catch blocks
       setExecuted(true);
-      if (!m_isChildAlgorithm) g_log.information() << "Algorithm successful, Duration "
+      if (!m_isChildAlgorithm) g_log.notice() << name() << " successful, Duration "
                                      << double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
       m_running = false;
     }

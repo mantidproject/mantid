@@ -23,9 +23,6 @@ DECLARE_ALGORITHM(CreateCalFileByNames)
 
 using namespace Kernel;
 
-// Get a reference to the logger
-Logger& CreateCalFileByNames::g_log = Logger::get("CreateCalFileByNames");
-
 CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
 {
 }

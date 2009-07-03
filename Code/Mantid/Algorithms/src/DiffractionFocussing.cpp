@@ -21,9 +21,6 @@ using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace;
 
-// Get a reference to the logger
-Logger& DiffractionFocussing::g_log = Logger::get("DiffractionFocussing");
-
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */

@@ -78,8 +78,6 @@ private:
   Kernel::Unit_sptr m_rangeUnit;                     ///< The unit in which the above range is given
   bool m_interpolate;                                ///< Whether removed bins should be interpolated
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

@@ -150,8 +150,6 @@ namespace Mantid
       bool m_usableMaskMap;
 
 
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithm

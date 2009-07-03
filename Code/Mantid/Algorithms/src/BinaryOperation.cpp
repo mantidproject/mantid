@@ -12,9 +12,6 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    // Get a reference to the logger
-    Logger& BinaryOperation::g_log = Logger::get("BinaryOperation");
-
     BinaryOperation::BinaryOperation() : API::Algorithm(), m_progress(NULL) {}
     
     BinaryOperation::~BinaryOperation()

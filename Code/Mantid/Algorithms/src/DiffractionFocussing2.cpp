@@ -23,9 +23,6 @@ DECLARE_ALGORITHM(DiffractionFocussing2)
 using namespace Kernel;
 using DataObjects::Workspace2D;
 
-// Get a reference to the logger
-Logger& DiffractionFocussing2::g_log = Logger::get("DiffractionFocussing2");
-
 /// Constructor
 DiffractionFocussing2::DiffractionFocussing2() : 
   API::Algorithm(), inputW(), udet2group(), spectra_group(), group2xvector(),

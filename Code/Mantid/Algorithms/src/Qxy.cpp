@@ -23,9 +23,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& Qxy::g_log = Logger::get("AnisotropicQ");
-
 void Qxy::init()
 {
   CompositeValidator<> *wsValidator = new CompositeValidator<>;

@@ -75,8 +75,6 @@ private:
   void retrieveProperties();
   /// Performs the peak searching
   void analyseVector();
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
   // Parameters
   API::MatrixWorkspace_sptr input;            ///< The input workspace
   API::MatrixWorkspace_sptr second_diff_spec; ///< A workspace holding the generalised second difference

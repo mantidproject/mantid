@@ -14,9 +14,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Minus)
 
-    // Get a reference to the logger
-    Logger& Minus::g_log = Logger::get("Minus");
-    
     void Minus::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {

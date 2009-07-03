@@ -77,10 +77,6 @@ namespace Mantid
        *  @param EOut A reference to the output error
        */
       virtual void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut) = 0;
-      
-    private:
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithm

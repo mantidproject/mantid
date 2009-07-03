@@ -72,8 +72,6 @@ private:
   /// Progress reporting object
   API::Progress *m_progress;
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

@@ -13,9 +13,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PoissonErrors)
 
-    // Get a reference to the logger
-    Logger& PoissonErrors::g_log = Logger::get("PoissonErrors");
-
     /** Performs a simple check to see if the sizes of two workspaces are identically sized
     * @param lhs the first workspace to compare
     * @param rhs the second workspace to compare

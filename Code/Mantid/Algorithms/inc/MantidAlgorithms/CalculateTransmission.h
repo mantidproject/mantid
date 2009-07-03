@@ -79,8 +79,6 @@ private:
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
   
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

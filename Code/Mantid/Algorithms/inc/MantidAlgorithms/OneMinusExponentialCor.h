@@ -66,8 +66,6 @@ namespace Mantid
       double m_c;    ///< The constant term in the exponent
       bool m_divide; ///< Whether the data should be divided by the correction (true) or multiplied by it (false)
       
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithms

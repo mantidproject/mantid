@@ -17,9 +17,6 @@ using namespace API;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_const_sptr;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& ExtractSingleSpectrum::g_log = Logger::get("ExtractSingleSpectrum");
-
 void ExtractSingleSpectrum::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input));

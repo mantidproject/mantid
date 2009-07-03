@@ -93,8 +93,6 @@ private:
   ///a flag int value to indicate that the value wasn't set by users
   static const int unSetInt = INT_MAX-15;
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithms

@@ -67,8 +67,6 @@ private:
   /// Create the rebin paraeters
   void createRebinParameters(Mantid::API::MatrixWorkspace_sptr toMatch, std::vector<double> & rb_params);
   
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 }

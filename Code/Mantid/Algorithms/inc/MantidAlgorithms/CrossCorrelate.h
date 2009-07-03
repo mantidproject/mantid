@@ -79,8 +79,6 @@ private:
   void init();
   ///Execution code
   void exec();
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
   /// Spectra to index map
   spec2index_map index_map;
   /// Iterator for the spectra to index map

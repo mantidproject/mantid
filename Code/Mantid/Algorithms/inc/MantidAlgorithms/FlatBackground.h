@@ -68,8 +68,6 @@ private:
   void checkRange(double& startX, double& endX);
   double doFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithms

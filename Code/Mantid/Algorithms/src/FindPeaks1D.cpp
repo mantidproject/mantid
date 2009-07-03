@@ -15,9 +15,6 @@ DECLARE_ALGORITHM(FindPeaks1D)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& FindPeaks1D::g_log = Logger::get("FindPeaks1D");
-
 /// Constructor
 FindPeaks1D::FindPeaks1D() : API::Algorithm() {}
 

@@ -103,8 +103,6 @@ private:
   /// Calibration map containing the detector entries found in the *.cal file. The key is the udet number,
 	/// the value of is a pair of <group,selected>.
   calmap calibration;
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithms

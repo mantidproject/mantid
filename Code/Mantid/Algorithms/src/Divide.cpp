@@ -13,9 +13,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Divide)
 
-    // Get a reference to the logger
-    Logger& Divide::g_log = Logger::get("Divide");
-
     void Divide::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {

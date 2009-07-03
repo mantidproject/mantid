@@ -14,10 +14,6 @@ DECLARE_ALGORITHM(LOQScriptInput)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& LOQScriptInput::g_log = Mantid::Kernel::Logger::get("LOQScriptInput");
-
 void LOQScriptInput::init()
 {
   //First the data files

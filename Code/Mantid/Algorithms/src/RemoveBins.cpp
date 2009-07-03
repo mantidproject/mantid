@@ -18,9 +18,6 @@ using namespace API;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RemoveBins)
 
-// Get a reference to the logger
-Logger& RemoveBins::g_log = Logger::get("RemoveTimeBins");
-
 RemoveBins::RemoveBins() : API::Algorithm(), m_rangeUnit()
 {}
 

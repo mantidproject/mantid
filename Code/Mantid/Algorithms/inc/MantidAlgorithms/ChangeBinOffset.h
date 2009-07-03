@@ -68,8 +68,6 @@ namespace Mantid
       /// The progress reporting object
       API::Progress *m_progress;
        
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithm

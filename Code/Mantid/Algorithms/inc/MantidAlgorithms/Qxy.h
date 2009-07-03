@@ -68,8 +68,7 @@ private:
   API::MatrixWorkspace_sptr setUpOutputWorkspace();
   void writeResult(API::MatrixWorkspace_const_sptr result);
   
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
+  
 };
 
 } // namespace Algorithms

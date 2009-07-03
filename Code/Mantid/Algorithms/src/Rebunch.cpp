@@ -21,9 +21,6 @@ namespace Mantid
 		using API::MatrixWorkspace_const_sptr;
 		using API::MatrixWorkspace;
 
-		// Get a reference to the logger
-		Logger& Rebunch::g_log = Logger::get("Rebunch");
-
 		/** Initialisation method. Declares properties to be used in algorithm.
 		*
 		*/

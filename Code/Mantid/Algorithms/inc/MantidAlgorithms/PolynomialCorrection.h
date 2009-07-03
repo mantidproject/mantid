@@ -65,8 +65,6 @@ namespace Mantid
       std::vector<double> m_coeffs;              ///< Holds the coefficients for the polynomial correction function
       std::vector<double>::size_type m_polySize; ///< The order of the polynomial
       
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithms

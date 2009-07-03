@@ -68,9 +68,6 @@ using API::MatrixWorkspace_sptr;
 using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
 
-// Get a reference to the logger
-Logger& Regroup::g_log = Logger::get("Regroup");
-
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init()
 {

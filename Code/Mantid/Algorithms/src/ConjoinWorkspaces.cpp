@@ -10,18 +10,11 @@ namespace Mantid
 {
 namespace Algorithms
 {
-
-// Register with the algorithm factory
-DECLARE_ALGORITHM(ConjoinWorkspaces)
-
 using namespace Kernel;
 using namespace API;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D_const_sptr;
-
-// Get a reference to the logger
-Logger& ConjoinWorkspaces::g_log = Logger::get("ConjoinWorkspaces");
 
 /// Default constructor
   ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL) {}

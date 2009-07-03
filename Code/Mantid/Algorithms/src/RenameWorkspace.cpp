@@ -15,9 +15,6 @@ DECLARE_ALGORITHM(RenameWorkspace)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger
-Logger& RenameWorkspace::g_log = Logger::get("RenameWorkspace");
-
 /** Initialisation method.
  *
  */

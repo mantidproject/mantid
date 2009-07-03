@@ -13,9 +13,6 @@ namespace Algorithms
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(OneMinusExponentialCor)
 
-  // Get a reference to the logger
-  Logger& OneMinusExponentialCor::g_log = Logger::get("OneMinusExponentialCor");
-
   void OneMinusExponentialCor::defineProperties()
   {
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();

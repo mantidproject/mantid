@@ -17,8 +17,6 @@ DECLARE_ALGORITHM(SimpleIntegration)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger
-Logger& SimpleIntegration::g_log = Logger::get("SimpleIntegration");
 
 /** Initialisation method.
  *

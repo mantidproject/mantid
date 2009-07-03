@@ -62,8 +62,6 @@ private:
   /// Execution code
   void exec();
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithms

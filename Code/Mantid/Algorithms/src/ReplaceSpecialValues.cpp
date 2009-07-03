@@ -16,9 +16,6 @@ namespace Mantid
 		// Register the class into the algorithm factory
 		DECLARE_ALGORITHM(ReplaceSpecialValues)
 
-		// Get a reference to the logger
-		Logger& ReplaceSpecialValues::g_log = Logger::get("ReplaceSpecialValues");
-
 		void ReplaceSpecialValues::defineProperties()
 		{
 			declareProperty("NaNValue", Mantid::EMPTY_DBL(),

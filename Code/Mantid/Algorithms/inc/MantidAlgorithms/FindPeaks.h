@@ -81,8 +81,6 @@ private:
   /// Storage of the peak data
   API::ITableWorkspace_sptr m_peaks;
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithms

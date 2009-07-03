@@ -71,8 +71,6 @@ private:
   double m_startX;                                   ///< The range start point
   double m_endX;                                     ///< The range end point
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace Algorithms

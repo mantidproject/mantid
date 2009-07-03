@@ -12,9 +12,6 @@ using namespace Mantid::Algorithms;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorrectToFile)
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& CorrectToFile::g_log = Mantid::Kernel::Logger::get("CorrectToFile");
-
 void CorrectToFile::init()
 {
   declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input),

@@ -22,9 +22,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Get a reference to the logger
-    Logger& GeneralisedSecondDifference::g_log = Logger::get("GeneralisedSecondDifference");
-
     /// Constructor
     GeneralisedSecondDifference::GeneralisedSecondDifference(): Algorithm(),Cij(0),Cij2(0),z(0),m(0)
     {

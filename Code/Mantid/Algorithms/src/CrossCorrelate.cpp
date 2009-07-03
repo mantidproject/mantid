@@ -19,9 +19,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Get a reference to the logger
-    Logger& CrossCorrelate::g_log = Logger::get("CrossCorrelate");
-
     /// Initialisation method.
     void CrossCorrelate::init()
     {

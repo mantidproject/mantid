@@ -13,9 +13,6 @@ namespace Mantid
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Multiply)
 
-    // Get a reference to the logger
-    Logger& Multiply::g_log = Logger::get("Multiply");
-
     void Multiply::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
     {

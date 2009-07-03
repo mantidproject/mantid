@@ -15,9 +15,6 @@ DECLARE_ALGORITHM(FindPeaks)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& FindPeaks::g_log = Logger::get("FindPeaks");
-
 // Set the number of smoothing iterations to 5, the optimum value according to Mariscotti
 int FindPeaks::g_z = 5;
 

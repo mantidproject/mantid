@@ -7,9 +7,6 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    // Get a reference to the logger
-    Kernel::Logger& CommutativeBinaryOperation::g_log = Kernel::Logger::get("CommutativeBinaryOperation");
-
     /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
     * In order to be size compatible then the larger workspace
     * must divide be the size of the smaller workspace leaving no remainder

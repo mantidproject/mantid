@@ -128,8 +128,6 @@ private:
   int nHist;
   /// Number of points in the 2D workspace
   int nPoints;
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

@@ -13,9 +13,6 @@ DECLARE_ALGORITHM(StripPeaks)
 using namespace Kernel;
 using namespace API;
 
-// Get a reference to the logger.
-Logger& StripPeaks::g_log = Logger::get("StripPeaks");
-
 StripPeaks::StripPeaks() : API::Algorithm() {}
 
 void StripPeaks::init()

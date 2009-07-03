@@ -79,8 +79,6 @@ namespace Mantid
 
       API::MatrixWorkspace_sptr integrateWorkspace(std::string outputWorkspaceName);
       
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
 

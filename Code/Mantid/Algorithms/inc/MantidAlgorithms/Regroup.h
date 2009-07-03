@@ -68,8 +68,7 @@ private:
 
   void rebin(const std::vector<double>& , const std::vector<double>& , const std::vector<double>& ,
              const std::vector<int>& , std::vector<double>&, std::vector<double>&, bool);
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
+
 };
 
 } // namespace Algorithm

@@ -12,9 +12,6 @@ using namespace Mantid::Algorithms;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSingleValuedWorkspace)
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& CreateSingleValuedWorkspace::g_log = Mantid::Kernel::Logger::get("CreateSingleValuedWorkspace");
-
 void CreateSingleValuedWorkspace::init()
 {
   using namespace Mantid::Kernel;

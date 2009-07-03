@@ -65,8 +65,7 @@ namespace Mantid
       void exec();
       void removeDecay(const std::vector<double>& inX, const std::vector<double>& inY, std::vector<double>& outY);
 
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
+      
     };
 
   } // namespace Algorithm

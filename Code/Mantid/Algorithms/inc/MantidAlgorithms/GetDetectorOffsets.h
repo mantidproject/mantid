@@ -61,8 +61,6 @@ private:
   /// Read in all the input parameters
   void retrieveProperties();
   
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
   
   double Xmin;        ///< The start of the X range for fitting
   double Xmax;        ///< The end of the X range for fitting

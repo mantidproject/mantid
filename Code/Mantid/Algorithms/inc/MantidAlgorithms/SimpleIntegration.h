@@ -80,8 +80,6 @@ private:
   /// The spectrum to finish the integration at
   int m_MaxSpec;
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 } // namespace Algorithm

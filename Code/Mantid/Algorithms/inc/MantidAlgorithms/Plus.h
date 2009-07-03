@@ -64,8 +64,6 @@ namespace Mantid
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
       const bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
 
     };
 

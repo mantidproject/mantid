@@ -80,8 +80,6 @@ private:
   void saveGroupingFile(const std::string&,bool overwrite) const;
   static void writeCalEntry(std::ostream& os, int number, int udet, double offset, int select, int group);
   void writeHeaders(std::ostream& os,const std::string& filename,bool overwrite) const;
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
   /// The names of the groups
   std::string groups;
   /// Calibration map used if the *.cal file exist.

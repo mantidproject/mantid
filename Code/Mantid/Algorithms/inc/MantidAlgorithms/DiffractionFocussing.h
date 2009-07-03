@@ -87,8 +87,6 @@ namespace Mantid
       void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
     
       
-	  /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace Algorithm

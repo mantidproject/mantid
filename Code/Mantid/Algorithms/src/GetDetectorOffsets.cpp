@@ -19,9 +19,6 @@ using namespace Kernel;
 using namespace API;
 using DataObjects::Workspace2D;
 
-// Get a reference to the logger
-Logger& GetDetectorOffsets::g_log = Logger::get("GetDetectorOffsets");
-
 /// Constructor
 GetDetectorOffsets::GetDetectorOffsets() :
   API::Algorithm()
