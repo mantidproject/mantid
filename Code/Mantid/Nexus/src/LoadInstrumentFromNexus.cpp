@@ -23,8 +23,6 @@ DECLARE_ALGORITHM(LoadInstrumentFromNexus)
 using namespace Kernel;
 using namespace API;
 
-Logger& LoadInstrumentFromNexus::g_log = Logger::get("LoadInstrumentFromNexus");
-
 /// Empty default constructor
 LoadInstrumentFromNexus::LoadInstrumentFromNexus()
 {}

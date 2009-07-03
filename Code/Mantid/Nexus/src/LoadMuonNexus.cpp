@@ -29,9 +29,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& LoadMuonNexus::g_log = Logger::get("LoadMuonNexus");
-
     /// Empty default constructor
     LoadMuonNexus::LoadMuonNexus() : 
       Algorithm(),

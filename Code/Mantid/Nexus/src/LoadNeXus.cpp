@@ -25,9 +25,7 @@ namespace NeXus
   using namespace API;
   using namespace DataObjects;
 
-  Logger& LoadNexus::g_log = Logger::get("LoadNexus");
-
-  /// Empty default constructor
+	/// Empty default constructor
   LoadNexus::LoadNexus() :
       Algorithm(), m_filename()
   {

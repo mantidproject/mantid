@@ -121,8 +121,6 @@ namespace Mantid
       void runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace);
       ///a flag int value that indicates a value that wasn't set
       static const int unSetInt = INT_MAX-15;
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
 
     };
 

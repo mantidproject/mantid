@@ -86,9 +86,6 @@ namespace Mantid
       /// Pointer to the local workspace
       DataObjects::Workspace2D_sptr m_localWorkspace;
 
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
-
 	  /// run LoadMuonNexus
 	  void runLoadMuonNexus();
 

@@ -117,11 +117,8 @@ namespace Mantid
       ///a flag int value that indicates a value that wasn't set
       static const int unSetInt = INT_MAX-15;
 
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
-
       /// Personal wrapper for sqrt to allow msvs to compile
-	  static double dblSqrt(double in);
+			static double dblSqrt(double in);
     };
 
   } // namespace NeXus

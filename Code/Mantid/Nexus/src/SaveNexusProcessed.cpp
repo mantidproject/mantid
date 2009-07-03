@@ -27,8 +27,6 @@ namespace NeXus
   using namespace API;
   using namespace DataObjects;
 
-  Logger& SaveNexusProcessed::g_log = Logger::get("SaveNexusProcessed");
-
   /// Empty default constructor
   SaveNexusProcessed::SaveNexusProcessed() :
     Algorithm(),

@@ -87,9 +87,6 @@ namespace Mantid
 
       /// check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
       bool isDateTimeString(const std::string& str);
-
-      /// static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace NeXus

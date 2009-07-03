@@ -28,9 +28,6 @@ DECLARE_ALGORITHM(LoadISISNexus)
 using namespace Kernel;
 using namespace API;
 
-// Initialise the logger
-Logger& LoadISISNexus::g_log = Logger::get("LoadISISNexus");
-
 /// Empty default constructor
 LoadISISNexus::LoadISISNexus() : 
 Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),

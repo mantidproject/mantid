@@ -24,8 +24,6 @@ using API::MatrixWorkspace_sptr;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
-Logger& LoadMuonLog::g_log = Logger::get("LoadMuonLog");
-
 /// Empty default constructor
 LoadMuonLog::LoadMuonLog()
 {}

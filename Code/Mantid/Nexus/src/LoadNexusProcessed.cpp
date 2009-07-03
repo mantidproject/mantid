@@ -32,9 +32,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-// Initialise logger
-Logger& LoadNexusProcessed::g_log = Logger::get("LoadNexusProcessed");
-
 /// Default constructor
 LoadNexusProcessed::LoadNexusProcessed() :
   Algorithm(),                                    //call the constructor for the base class
