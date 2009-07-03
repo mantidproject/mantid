@@ -17,6 +17,13 @@ public:
     sProp = new ArrayProperty<std::string>("stringProp");    
   }
   
+  ~ArrayPropertyTest()
+  {
+    delete iProp;
+    delete dProp;
+    delete sProp;
+  }
+  
   void testConstructor()
   {
     TS_ASSERT( ! iProp->name().compare("intProp") )

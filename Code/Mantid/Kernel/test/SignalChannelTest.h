@@ -41,6 +41,7 @@ public:
     Poco::Channel* createdChannel = Poco::LoggingFactory::defaultFactory().createChannel("SignalChannel");
     Poco::SignalChannel* castedSignalChannel = dynamic_cast<Poco::SignalChannel*>(createdChannel);
 	  TS_ASSERT_DIFFERS(castedSignalChannel,empty);
+	  createdChannel->release();
   }
 
   void testConnect()

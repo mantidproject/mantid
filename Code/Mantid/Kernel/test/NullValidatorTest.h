@@ -26,6 +26,8 @@ public:
     IValidator<int> *vv = v->clone();
     TS_ASSERT_DIFFERS( v, vv )
     TS_ASSERT( dynamic_cast<NullValidator<int>*>(vv) )
+    delete v;
+    delete vv;
   }
 
   void testCast()
@@ -36,6 +38,9 @@ public:
     TS_ASSERT( dynamic_cast<IValidator<double>*>(vv) )
     NullValidator<std::string> *vvv = new NullValidator<std::string>;
     TS_ASSERT( dynamic_cast<IValidator<std::string>*>(vvv) )
+    delete v;
+    delete vv;
+    delete vvv;
   }
 
   void testIntNullValidator()

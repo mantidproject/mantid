@@ -11,6 +11,9 @@
 # Author: Russell Taylor, 07/11/07
 #
 
+# Clean up any old executable
+rm -rf runner.*
+
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
 #  - it's always a good idea to run your new/changed test on its own
@@ -24,7 +27,7 @@ echo
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../../Third_Party/include \
             -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
-            -lMantidKernel -lPocoFoundation -lPocoUtil -lboost_signals
+            -lMantidKernel -lPocoFoundationd -lPocoUtild -lboost_signals
 echo
 
 echo "Running the tests..."
@@ -36,7 +39,6 @@ echo
 # Remove the generated files to ensure that they're not inadvertently run
 #   when something in the chain has failed.
 echo "Cleaning up..."
-rm -rf runner.*
 rm -f *.properties
 rm -f *Test.log
 rm FileValidatorTest.cpp

@@ -40,6 +40,15 @@ public:
     IValidator<std::vector<std::string> > *ss = s->clone();
     TS_ASSERT_DIFFERS( s, ss )
     TS_ASSERT( dynamic_cast<MandatoryValidator<std::vector<std::string> >*>(ss) )
+    
+    delete v;
+    delete vv;
+    delete i;
+    delete ii;
+    delete d;
+    delete dd;
+    delete s;
+    delete ss;
 }
 
   void testCast()
@@ -53,6 +62,11 @@ public:
     TS_ASSERT( dynamic_cast<IValidator<std::vector<double> >*>(d) )
     MandatoryValidator<std::vector<std::string> > *s = new MandatoryValidator<std::vector<std::string> >;
     TS_ASSERT( dynamic_cast<IValidator<std::vector<std::string> >*>(s) )
+    
+    delete v;
+    delete i;
+    delete d;
+    delete s;
   }
 
   void testMandatoryValidator()

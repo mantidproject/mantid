@@ -254,6 +254,8 @@ public:
     // Chain the base class assignment operator for clarity (although it does nothing)
     Property::operator=( right );
     m_value = right.m_value;
+    // Delete the existing validator
+    delete m_validator;
     m_validator = right.m_validator->clone();
     return *this;
   }

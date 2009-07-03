@@ -32,6 +32,8 @@ public:
     TS_ASSERT_EQUALS( bv.hasUpper(), bvv->hasUpper() )
     TS_ASSERT_EQUALS( bv.lower(), bvv->lower() )
     TS_ASSERT_EQUALS( bv.upper(), bvv->upper() )
+    delete v;
+    delete vv;
   }
 
   void testCast()
@@ -42,6 +44,9 @@ public:
     TS_ASSERT( dynamic_cast<IValidator<double>*>(vv) )
     BoundedValidator<std::string> *vvv = new BoundedValidator<std::string>;
     TS_ASSERT( dynamic_cast<IValidator<std::string>*>(vvv) )
+    delete v,
+    delete vv;
+    delete vvv;
   }
 
   void testIntClear()

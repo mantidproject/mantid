@@ -118,6 +118,7 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
             t2 = f2->nthInterval(j);
         }
 
+        delete f2;
         f->clearFilter();
         m_filter.reset(f);
     }

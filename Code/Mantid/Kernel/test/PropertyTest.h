@@ -35,6 +35,7 @@ public:
   {
     Property *pp = new PropertyHelper;
     TS_ASSERT( ! pp->documentation().compare("") )
+    delete pp;
   }
 
   void testType_info()

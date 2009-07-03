@@ -207,6 +207,7 @@ public:
 	  TS_ASSERT_EQUALS(castedTestChannel,tChannel);
     
 	  Poco::LoggingRegistry::defaultRegistry().unregisterChannel("tChannel");
+	  tChannel->release();
   }
 
   void testCreateThroughFactory()
@@ -219,6 +220,7 @@ public:
     Poco::Channel* createdChannel = Poco::LoggingFactory::defaultFactory().createChannel("FilterChannel");
     Poco::FilterChannel* castedFilterChannel = dynamic_cast<Poco::FilterChannel*>(createdChannel);
 	  TS_ASSERT_DIFFERS(castedFilterChannel,empty);
+	  createdChannel->release();
   }
 
 };

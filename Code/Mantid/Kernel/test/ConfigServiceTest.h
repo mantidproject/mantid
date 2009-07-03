@@ -117,9 +117,9 @@ public:
    void TestCustomPropertyAsValue()
   {
 	  //Mantid.legs is defined in the properties script as 6
-	  int value;
+	  int value = 0;
 	  int retVal = ConfigService::Instance().getValue("mantid.legs",value);
-	  double dblValue;
+	  double dblValue = 0;
 	  retVal = ConfigService::Instance().getValue("mantid.legs",dblValue);
 
 	  TS_ASSERT_EQUALS(value, 6);

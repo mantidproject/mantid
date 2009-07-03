@@ -41,7 +41,7 @@ namespace Mantid
       std::string key = p->name();
       if (key.empty())
       {
-        //    delete p;
+        delete p;
         throw std::invalid_argument("An empty property name is not permitted");
       }
 
@@ -52,8 +52,9 @@ namespace Mantid
       }
       else
       {
-        //    delete p;
-        throw Exception::ExistsError("Property with given name already exists", p->name() );
+        // Don't delete if this is actually the same property object!!!
+        if ( m_properties.find(key)->second != p ) delete p;
+        throw Exception::ExistsError( "Property with given name already exists", key );
       }
       p->setDocumentation(doc);
     }
