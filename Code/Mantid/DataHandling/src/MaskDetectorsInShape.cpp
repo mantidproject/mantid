@@ -15,9 +15,6 @@ namespace Mantid
 		using namespace API;
 		using namespace DataObjects;
 
-		// Initialise the logger
-		Kernel::Logger& MaskDetectorsInShape::g_log = Kernel::Logger::get("MaskDetectorsInShape");
-
 		/// (Empty) Constructor
 		MaskDetectorsInShape::MaskDetectorsInShape() {}
 

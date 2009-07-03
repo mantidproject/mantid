@@ -39,8 +39,6 @@ DECLARE_ALGORITHM(LoadInstrument)
 using namespace Kernel;
 using namespace API;
 
-Logger& LoadInstrument::g_log = Logger::get("LoadInstrument");
-
 /// Empty default constructor
 LoadInstrument::LoadInstrument() : Algorithm(), m_haveDefaultFacing(false), m_deltaOffsets(false)
 {}

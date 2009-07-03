@@ -193,9 +193,6 @@ namespace API
 
       /// Map to store positions of parent components in spherical coordinates
       std::map<const Geometry::ComponentID,SphVec> m_tempPosHolder;
-
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace DataHandling

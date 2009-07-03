@@ -18,8 +18,6 @@ using namespace Kernel;
 using namespace Geometry;
 using namespace API;
 
-Logger& MoveInstrumentComponent::g_log = Logger::get("MoveInstrumentComponent");
-
 /// Empty default constructor
 MoveInstrumentComponent::MoveInstrumentComponent()
 {}

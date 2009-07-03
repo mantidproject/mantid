@@ -77,9 +77,6 @@ private:
 		const std::string shapeXML, const bool includeMonitors);
 	/// Calls MaskDetectors as a sub-algorithm
 	void runMaskDetectors(DataObjects::Workspace2D_sptr workspace, const std::vector<int> detectorIds);
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace DataHandling

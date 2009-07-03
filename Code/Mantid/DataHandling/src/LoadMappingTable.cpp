@@ -16,8 +16,6 @@ using namespace API;
 
 DECLARE_ALGORITHM(LoadMappingTable)
 
-Logger& LoadMappingTable::g_log = Logger::get("LoadMappingTable");
-
 LoadMappingTable::LoadMappingTable()
 {
 }

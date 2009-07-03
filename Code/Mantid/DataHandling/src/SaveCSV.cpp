@@ -52,8 +52,6 @@ using DataObjects::Workspace2D;
 using DataObjects::Workspace1D_sptr;
 using DataObjects::Workspace2D_sptr;
 
-Logger& SaveCSV::g_log = Logger::get("SaveCSV");
-
 /// Empty default constructor
 SaveCSV::SaveCSV()
 {

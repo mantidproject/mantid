@@ -18,9 +18,6 @@ DECLARE_ALGORITHM(AlignDetectors)
 using namespace Kernel;
 using namespace API;
 
-// Initialise the logger
-Logger& AlignDetectors::g_log = Logger::get("AlignDetectors");
-
 /// (Empty) Constructor
 AlignDetectors::AlignDetectors()
 {}

@@ -111,8 +111,6 @@ namespace Mantid
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
 
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
 	   ///a flag int value to indicate that the value wasn't set by users
       static const int unSetInt = INT_MAX-15;
 

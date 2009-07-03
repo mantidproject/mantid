@@ -26,9 +26,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& LoadEmptyInstrument::g_log = Logger::get("LoadEmptyInstrument");
-
     /// Empty default constructor
     LoadEmptyInstrument::LoadEmptyInstrument() : Algorithm()
     {}

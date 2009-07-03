@@ -24,9 +24,6 @@ namespace Mantid
 		using namespace Kernel;
 		using namespace API;
 
-		// Initialise the logger
-		Kernel::Logger& FindDetectorsInShape::g_log = Kernel::Logger::get("FindDetectorsInShape");
-
 		/// (Empty) Constructor
 		FindDetectorsInShape::FindDetectorsInShape() {}
 

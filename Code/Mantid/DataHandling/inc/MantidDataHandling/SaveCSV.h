@@ -110,9 +110,6 @@ namespace Mantid
 
       /// The line seperator for the CSV file
       std::string m_lineSeparator;   
-
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace DataHandling

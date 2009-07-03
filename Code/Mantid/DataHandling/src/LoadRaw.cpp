@@ -24,9 +24,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& LoadRaw::g_log = Logger::get("LoadRaw");
-
     /// Empty default constructor
     LoadRaw::LoadRaw() :
       Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),

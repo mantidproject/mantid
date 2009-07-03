@@ -13,9 +13,6 @@ using namespace Mantid::DataHandling;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadRKH)
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& LoadRKH::g_log = Mantid::Kernel::Logger::get("LoadRKH");
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------

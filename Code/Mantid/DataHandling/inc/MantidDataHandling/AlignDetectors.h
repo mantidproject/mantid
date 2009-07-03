@@ -62,9 +62,6 @@ private:
   void exec();
 
   bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets);
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace DataHandling

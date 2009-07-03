@@ -18,9 +18,6 @@ namespace DataHandling
 using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& CreateSampleShape::g_log = Mantid::Kernel::Logger::get("CreateSampleShape");
-
 /**
  * Initialize the algorithm
  */

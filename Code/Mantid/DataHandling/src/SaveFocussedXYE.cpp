@@ -16,9 +16,6 @@ using namespace Mantid::DataHandling;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveFocusedXYE)
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& SaveFocusedXYE::g_log = Mantid::Kernel::Logger::get("SaveFocusedXYE");
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------

@@ -27,7 +27,7 @@ namespace Mantid
     using namespace API;
 
     // Initialise the logger
-    Logger& LoadDAE::g_log = Logger::get("LoadDAE");
+    Logger& LoadDAE::g_StaticLog = Logger::get("LoadDAE-IDC");
 
     /// Empty default constructor
     LoadDAE::LoadDAE() :
@@ -105,7 +105,7 @@ namespace Mantid
      */
     void LoadDAE::IDCReporter(int status, int code, const char* message)
     {
-      g_log.error(message);
+      g_StaticLog.error(message);
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating

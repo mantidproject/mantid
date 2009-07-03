@@ -90,9 +90,6 @@ namespace API
 
       /// The name and path of the input file
       std::string m_filename;
-
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace DataHandling

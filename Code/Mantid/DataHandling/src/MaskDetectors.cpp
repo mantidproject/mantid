@@ -20,9 +20,6 @@ using namespace API;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
-// Initialise the logger
-Kernel::Logger& MaskDetectors::g_log = Kernel::Logger::get("MaskDetectors");
-
 /// (Empty) Constructor
 MaskDetectors::MaskDetectors() {}
 

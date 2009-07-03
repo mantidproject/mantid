@@ -25,8 +25,6 @@ namespace Algorithms
   using namespace Geometry;
   using namespace DataObjects;
 
-  Logger& SetScalingPSD::g_log = Logger::get("SetScalingPSD");
-
   /// Empty default constructor
   SetScalingPSD::SetScalingPSD() :
       Algorithm()

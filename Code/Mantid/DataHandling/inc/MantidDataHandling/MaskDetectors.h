@@ -68,9 +68,6 @@ private:
   void exec();
   void fillIndexListFromSpectra(std::vector<int>& indexList, std::vector<int>& spectraList,
                                 const DataObjects::Workspace2D_sptr WS);
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace DataHandling

@@ -21,9 +21,6 @@ using namespace API;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
-// Initialise the logger
-Kernel::Logger& GroupDetectors::g_log = Kernel::Logger::get("GroupDetectors");
-
 /// (Empty) Constructor
 GroupDetectors::GroupDetectors() {}
 

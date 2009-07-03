@@ -108,9 +108,6 @@ namespace Mantid
       ///a flag int value to indicate that the value wasn't set by users
       static const int unSetInt = INT_MAX-15;
 
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
-
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
     };

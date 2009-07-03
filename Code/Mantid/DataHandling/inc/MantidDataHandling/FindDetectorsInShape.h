@@ -69,9 +69,6 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
-
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace DataHandling

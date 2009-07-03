@@ -86,8 +86,6 @@ namespace DataHandling
     /// The x-axis minimum
     double m_Xmax;
     
-    /// A reference to the logger class
-    static Kernel::Logger & g_log;
   };
 
 }

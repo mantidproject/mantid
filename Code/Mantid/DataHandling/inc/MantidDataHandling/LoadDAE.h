@@ -123,7 +123,7 @@ namespace Mantid
       ///a flag int value to indicate that the value wasn't set by users
       static const int unSetInt = INT_MAX-15;
       ///static reference to the logger class
-      static Kernel::Logger& g_log;
+      static Kernel::Logger& g_StaticLog;
       
       /// reporter function called when the IDC reading routines raise an error
       static void IDCReporter(int status, int code, const char* message);

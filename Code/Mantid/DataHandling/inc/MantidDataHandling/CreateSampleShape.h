@@ -57,9 +57,6 @@ private:
   void init();
   ///Execution code
   void exec();
-
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 }

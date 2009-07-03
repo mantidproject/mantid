@@ -12,9 +12,6 @@ using namespace Mantid::DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(UpdateDAE);
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& UpdateDAE::g_log = Mantid::Kernel::Logger::get("UpdateDAE");
-
 void UpdateDAE::init()
 {
       declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::Input));

@@ -76,9 +76,6 @@ namespace Mantid
 
       /// Overwrites Algorithm method
       void exec();
-
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace DataHandling

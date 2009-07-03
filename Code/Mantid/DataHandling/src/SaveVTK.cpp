@@ -22,8 +22,6 @@ namespace DataHandling
   using namespace DataObjects;
   using namespace API;
 
-  // Set the reference to the logger 
-  Logger& SaveVTK::g_log = Logger::get("SaveVTK");
 
   /// Default constructor
   SaveVTK::SaveVTK() : m_Xmin(0), m_Xmax(0) {}

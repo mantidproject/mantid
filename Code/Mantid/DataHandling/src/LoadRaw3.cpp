@@ -30,9 +30,6 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& LoadRaw3::g_log = Logger::get("LoadRaw3");
-
     /// Constructor
     LoadRaw3::LoadRaw3() :
       Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),

@@ -16,9 +16,6 @@ using namespace Mantid::DataHandling;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& SaveGSS::g_log = Mantid::Kernel::Logger::get("SaveGSS");
-
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------

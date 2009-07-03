@@ -23,8 +23,6 @@ DECLARE_ALGORITHM(LoadInstrumentFromRaw)
 using namespace Kernel;
 using namespace API;
 
-Logger& LoadInstrumentFromRaw::g_log = Logger::get("LoadInstrumentFromRaw");
-
 /// Empty default constructor
 LoadInstrumentFromRaw::LoadInstrumentFromRaw()
 {}

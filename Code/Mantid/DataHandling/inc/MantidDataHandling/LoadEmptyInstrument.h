@@ -73,10 +73,6 @@ namespace Mantid
       void exec();
 
       API::IInstrument_sptr runLoadInstrument();
-
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
-
     };
 
   } // namespace DataHandling

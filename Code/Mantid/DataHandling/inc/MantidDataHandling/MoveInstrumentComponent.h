@@ -82,8 +82,6 @@ namespace Mantid
       /// Find component by name
       boost::shared_ptr<Geometry::IComponent> findByName(boost::shared_ptr<Geometry::IComponent> instr,const std::string& CName);
 
-      /// static reference to the logger class
-      static Kernel::Logger& g_log;
     };
 
   } // namespace DataHandling

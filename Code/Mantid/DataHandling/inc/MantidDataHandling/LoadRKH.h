@@ -72,8 +72,6 @@ private:
   /// Store the units added as options for this algorithm
   std::set<std::string> m_RKHKeys;
 
-  /// Static reference to the logger class
-  static Mantid::Kernel::Logger& g_log;
 };
 
 }

@@ -24,7 +24,7 @@ Kernel::Logger& AlgorithmProxy::g_log = Kernel::Logger::get("AlgorithmProxyProxy
 /// Constructor
 AlgorithmProxy::AlgorithmProxy(IAlgorithm_sptr alg) :
   PropertyManagerOwner(),_executeAsync(this,&AlgorithmProxy::executeAsyncImpl),
-  m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),m_isExecuted()
+  m_name(alg->name()),m_category(alg->category()),m_version(alg->version()),m_isExecuted(),m_isLoggingEnabled(true)
 {
     Algorithm_sptr a = boost::dynamic_pointer_cast<Algorithm>(alg);
     if (!a)

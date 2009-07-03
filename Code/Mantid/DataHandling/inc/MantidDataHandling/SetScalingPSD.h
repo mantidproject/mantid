@@ -85,8 +85,6 @@ namespace Mantid
       API::MatrixWorkspace_sptr m_workspace; ///< Pointer to the workspace
       //void runMoveInstrumentComp(const int& detIndex, const Geometry::V3D& shift);
 
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
       /// get a vector of shared pointers to each detector in the comp
       void findAll(boost::shared_ptr<Geometry::IComponent> comp);
       /// the vector of shared pointers

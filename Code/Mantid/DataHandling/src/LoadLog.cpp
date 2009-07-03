@@ -29,8 +29,6 @@ using API::MatrixWorkspace_sptr;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 
-Logger& LoadLog::g_log = Logger::get("LoadLog");
-
 /// Empty default constructor
 LoadLog::LoadLog()
 {}
