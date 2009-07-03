@@ -2,7 +2,6 @@
 #include <Poco/Logger.h>
 #include <Poco/LogStream.h>
 #include <Poco/Message.h>
-#include <Poco/Mutex.h>
 #include <Poco/NullChannel.h>
 #include <iostream>
 #include <sstream>
@@ -12,7 +11,6 @@ namespace Mantid
 	namespace Kernel
 	{
 		Logger::LoggerList* Logger::m_LoggerList = 0;
-		Poco::Mutex Logger::m_ListMtx;
 
 		/** Constructor
 		* @param name The class name invoking this logger
@@ -365,8 +363,7 @@ namespace Mantid
 		*/
 		void Logger::destroy(Logger& logger)
 		{
-			Poco::Mutex::ScopedLock lock(m_ListMtx);
-
+			
 			if (m_LoggerList)
 			{
 				LoggerList::iterator it = m_LoggerList->find(&logger);
@@ -381,7 +378,6 @@ namespace Mantid
 		/// Shuts down the logging framework and releases all Loggers.  
 		void Logger::shutdown()
 		{
-			Poco::Mutex::ScopedLock lock(m_ListMtx);
 			try
 			{
 				//first release the POCO loggers

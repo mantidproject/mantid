@@ -160,7 +160,6 @@ namespace Kernel
 
 		typedef std::set<Logger*> LoggerList;		///<A container of logger pointers
 		static LoggerList*        m_LoggerList; ///<The container of logger pointers
-		static Poco::Mutex        m_ListMtx;		///<A statc lock object
 };
 
 } // namespace Kernel
