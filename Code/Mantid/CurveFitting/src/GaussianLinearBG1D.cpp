@@ -13,10 +13,6 @@ DECLARE_ALGORITHM(GaussianLinearBG1D)
 
 using namespace Kernel;
 
-// Get a reference to the logger
-Logger& GaussianLinearBG1D::g_log = Logger::get("Gaussian1D");
-
-
 void GaussianLinearBG1D::declareParameters()
 {
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();

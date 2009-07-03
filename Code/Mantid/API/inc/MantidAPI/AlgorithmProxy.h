@@ -115,6 +115,11 @@ public:
   /// Remove an observer
   void removeObserver(const Poco::AbstractObserver& observer)const;
 
+	///Logging can be disabled by passing a value of false
+	void setLogging(const bool value){m_isLoggingEnabled=value;}
+	///returns the status of logging, True = enabled
+	bool isLogging() const {return m_isLoggingEnabled;}
+
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -152,6 +157,7 @@ private:
 
     Algorithm_sptr m_alg;  ///< Pointer to the real algorithm, only defined when the algorithm is running
     bool m_isExecuted;     ///< Executed flag
+		bool m_isLoggingEnabled;///< is the logging of the underlying algorithm enabled
 
     /// Temporary holder of external observers wishing to subscribe
     mutable std::vector<const Poco::AbstractObserver*> m_externalObservers;

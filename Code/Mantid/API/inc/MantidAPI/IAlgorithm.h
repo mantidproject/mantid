@@ -125,6 +125,11 @@ public:
   /// Remove an observer
   virtual void removeObserver(const Poco::AbstractObserver& observer)const = 0;
 
+	///Logging can be disabled by passing a value of false
+	virtual void setLogging(const bool value) = 0;
+	///returns the status of logging, True = enabled
+	virtual bool isLogging() const = 0;
+
 };
 
 typedef boost::shared_ptr<IAlgorithm> IAlgorithm_sptr;

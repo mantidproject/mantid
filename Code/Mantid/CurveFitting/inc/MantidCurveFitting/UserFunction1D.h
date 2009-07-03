@@ -97,8 +97,6 @@ namespace Mantid
           const int m_buffSize;
           /// Number of actual parameters
           int m_nPars;
-          /// Static reference to the logger class
-          static Mantid::Kernel::Logger& g_log;
       };
 
   } // namespace CurveFitting

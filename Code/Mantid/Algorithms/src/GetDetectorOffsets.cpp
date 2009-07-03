@@ -111,7 +111,8 @@ double GetDetectorOffsets::fitSpectra(const int s)
   IAlgorithm_sptr fit_alg;
   try
   {
-    fit_alg = createSubAlgorithm("Gaussian1D");
+		//set the subalgorithm no to log as this will be run once per spectra
+    fit_alg = createSubAlgorithm("Gaussian1D",-1,-1,false);
   } catch (Exception::NotFoundError)
   {
     g_log.error("Can't locate Gaussian1D");

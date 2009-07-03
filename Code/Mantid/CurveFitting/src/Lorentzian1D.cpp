@@ -15,10 +15,6 @@ DECLARE_ALGORITHM(Lorentzian1D)
 
 using namespace Kernel;
 
-// Get a reference to the logger
-Logger& Lorentzian1D::g_log = Logger::get("Lorentzian1D");
-
-
 void Lorentzian1D::declareParameters()
 {
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();

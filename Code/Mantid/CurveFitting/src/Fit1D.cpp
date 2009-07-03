@@ -26,9 +26,6 @@ using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
 using API::Algorithm;
 
-// Get a reference to the logger
-Logger& Fit1D::g_log = Logger::get("Fit1D");
-
 struct FitData;
 
 /// The implementation of Jacobian

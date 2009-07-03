@@ -120,9 +120,6 @@ namespace Mantid
       /// Number of parameters (incuding fixed).
       size_t nParams()const{return m_parameterNames.size();}
 
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
-
       friend struct FitData;
 
     };

@@ -15,10 +15,6 @@ DECLARE_ALGORITHM(BackToBackExponential1D)
 
 using namespace Kernel;
 
-// Get a reference to the logger
-Logger& BackToBackExponential1D::g_log = Logger::get("BackToBackExponential1D");
-
-
 void BackToBackExponential1D::declareParameters()
 {
   NullValidator<double> *noValidation = new NullValidator<double>;                      //the null validator always returns valid, there is no validation

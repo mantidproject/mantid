@@ -212,6 +212,11 @@ namespace Mantid
 			/// True if the algorithm is running.
 			bool isRunning(){return m_running;}
 
+			///Logging can be disabled by passing a value of false
+			void setLogging(const bool value){g_log.setEnabled(value);}
+			///returns the status of logging, True = enabled
+			bool isLogging() const {return g_log.getEnabled();}
+
 		protected:
 
 			// Equivalents of Gaudi's initialize & execute  methods
@@ -225,7 +230,8 @@ namespace Mantid
 			void initializeFromProxy(const AlgorithmProxy&);
 
 			//creates a sub algorithm for use in this algorithm
-			IAlgorithm_sptr createSubAlgorithm(const std::string& name, double startProgress = -1., double endProgress = -1.);
+			IAlgorithm_sptr createSubAlgorithm(const std::string& name, const double startProgress = -1.,
+				const double endProgress = -1., const bool enableLogging=true);
 
 			void setInitialized();
 			void setExecuted(bool state);

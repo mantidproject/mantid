@@ -85,8 +85,6 @@ private:
   /// The X bin to finish the fitting at
   int m_maxX;
 
-  /// Static reference to the logger class
-  static Kernel::Logger& g_log;
 };
 
 } // namespace CurveFitting

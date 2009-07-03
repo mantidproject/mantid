@@ -41,9 +41,6 @@ double* UserFunction1D::AddVariable(const char *varName, void *palg)
     return &alg.m_parameters[alg.m_nPars++];
 }
 
-// Get a reference to the logger
-Logger& UserFunction1D::g_log = Logger::get("UserFunction1D");
-
 /** Declare properties that are not fit parameters
  */
 void UserFunction1D::declareAdditionalProperties()

@@ -16,8 +16,6 @@ DECLARE_ALGORITHM(Linear)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-// Get a reference to the logger. It is used to print out information, warning and error messages
-Logger& Linear::g_log = Logger::get("Linear");
 
 Linear::Linear() : API::Algorithm(), m_minX(0), m_maxX(0)
 {}

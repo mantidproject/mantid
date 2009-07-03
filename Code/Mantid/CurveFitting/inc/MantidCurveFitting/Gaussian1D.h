@@ -71,8 +71,6 @@ namespace Mantid
       virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter);
       virtual void modifyFinalFittedParameters(std::vector<double>& fittedParameter);
 
-      /// Static reference to the logger class
-      static Mantid::Kernel::Logger& g_log;
     };
 
   } // namespace CurveFitting

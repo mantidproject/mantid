@@ -285,13 +285,15 @@ bool Algorithm::isExecuted() const
  *  @param name    The concrete algorithm class of the sub algorithm
  *  @param startProgress  The percentage progress value of the overall algorithm where this child algorithm starts
  *  @param endProgress    The percentage progress value of the overall algorithm where this child algorithm ends
+ *  @param enableLogging    Set to false to disable logging from the child algorithm
  *  @returns Set to point to the newly created algorithm object
  */
-IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, double startProgress, double endProgress)
+IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress, const bool enableLogging)
 {
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name);
   //set as a child
   alg->setChild(true);
+	alg->setLogging(enableLogging);
 
   // Initialise the sub-algorithm
   try
@@ -359,6 +361,7 @@ void Algorithm::initializeFromProxy(const AlgorithmProxy& proxy)
     copyPropertiesFrom(proxy);
     setInitialized();
     m_algorithmID = proxy.getAlgorithmID();
+		setLogging(proxy.isLogging());
 }
 
 /// Set the Algorithm initialized state
