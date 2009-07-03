@@ -14,11 +14,6 @@ using namespace API;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D;
 
-
-// Get a reference to the logger. It is used to print out information,
-// warning, and error messages
-Logger& ModifyData::g_log = Logger::get("ModifyData");
-
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
@@ -41,6 +36,8 @@ void ModifyData::init()
  */
 void ModifyData::exec()
 {
+		// g_log is a reference to the logger. It is used to print out information,
+		// warning, and error messages
     g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Get the input workspace

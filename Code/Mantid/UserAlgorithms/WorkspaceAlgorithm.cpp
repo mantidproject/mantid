@@ -17,11 +17,6 @@ using DataObjects::Workspace1D;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D;
 
-
-// Get a reference to the logger. It is used to print out information,
-// warning, and error messages
-Logger& WorkspaceAlgorithm::g_log = Logger::get("WorkspaceAlgorithm");
-
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
@@ -38,7 +33,9 @@ void WorkspaceAlgorithm::init()
  */
 void WorkspaceAlgorithm::exec()
 {
-    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
+  	// g_log is a reference to the logger. It is used to print out information,
+		// warning, and error messages  
+		g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Get the input workspace
     Workspace1D_sptr workspace = getProperty("Workspace");

@@ -10,10 +10,6 @@ DECLARE_ALGORITHM(PropertyAlgorithm)
 
 using namespace Kernel;
 
-// Get a reference to the logger. It is used to print out information,
-// warning, and error messages
-Mantid::Kernel::Logger& PropertyAlgorithm::g_log = Mantid::Kernel::Logger::get("PropertyAlgorithm");
-
 /**  Initialization code
  *
  *   Properties have to be declared here before they can be used
@@ -51,7 +47,9 @@ void PropertyAlgorithm::init()
  */
 void PropertyAlgorithm::exec()
 {
-    g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
+  	// g_log is a reference to the logger. It is used to print out information,
+		// warning, and error messages  
+		g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Retrieve properties values
 
