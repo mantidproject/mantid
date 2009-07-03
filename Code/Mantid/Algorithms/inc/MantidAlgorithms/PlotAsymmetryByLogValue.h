@@ -74,8 +74,12 @@ namespace Mantid
       void init();
       void exec();
 
-      /// Calculate the integral asymmetry for a workspace
+      /// Calculate the integral asymmetry for a workspace (single period)
       void calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws, double& Y, double& E);
+
+      /// Calculate the integral asymmetry for a workspace (red & green)
+      void calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
+                            boost::shared_ptr<DataObjects::Workspace2D> ws_geen,double& Y, double& E);
 
       /// Stores property "Int"
       bool m_int;

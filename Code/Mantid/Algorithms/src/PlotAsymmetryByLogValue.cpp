@@ -37,7 +37,8 @@ namespace Mantid
         declareProperty("LastRun","",new FileValidator(exts));
         declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
         declareProperty("LogValue","",new MandatoryValidator<std::string>());
-        declareProperty("Period", 1, Direction::Input);
+        declareProperty("Red", EMPTY_INT(), Direction::Input);
+        declareProperty("Green", EMPTY_INT(), Direction::Input);
 
         std::vector<std::string> options;
         options.push_back("Integral");
@@ -65,7 +66,14 @@ namespace Mantid
         
         std::string logName = getProperty("LogValue");
 
-        int Period = getProperty("Period");
+        int red = getProperty("Red");
+        int green = getProperty("Green");
+        int Period = EMPTY_INT();
+        if (red  == EMPTY_INT() && green != EMPTY_INT()) Period = green;
+        else if (red  != EMPTY_INT() && green == EMPTY_INT()) Period = red;
+        else if (red  == EMPTY_INT() && green == EMPTY_INT()) 
+            throw std::invalid_argument("Neither Red nor Green property are set");
+
         std::string stype = getProperty("Type");
         m_int = stype == "Integral";
 
@@ -122,11 +130,14 @@ namespace Mantid
             std::string wsProp = "OutputWorkspace";
             //std::string wsName = "tmp"+fnn.str();
 
+            DataObjects::Workspace2D_sptr ws_red;
+            DataObjects::Workspace2D_sptr ws_green;
             // Run through the periods of the loaded file and do calculatons on the selected ones
             int period = 1;
             while( loadNexus->existsProperty(wsProp) )
             {
-                if (period == Period)
+                // Do only one period
+                if (Period != EMPTY_INT() && period == Period)
                 {
                     DataObjects::Workspace2D_sptr ws = loadNexus->getProperty(wsProp);
                     //AnalysisDataService::Instance().add(wsName,ws);
@@ -137,11 +148,26 @@ namespace Mantid
                     outWS->dataX(0)[i-is] = logp->lastValue();
                     outWS->dataE(0)[i-is] = E;
                 }
+                else // red & green
+                {
+                    if (period == red) ws_red = loadNexus->getProperty(wsProp);
+                    if (period == green) ws_green = loadNexus->getProperty(wsProp);
+                }
                 
                 std::stringstream suffix;
                 suffix << (++period);
                 wsProp = "OutputWorkspace" + suffix.str();// form the property name for higher periods
                 //wsName = "tmp"+fnn.str() + "_" + suffix.str();
+            }
+            // red & green claculation
+            if (Period == EMPTY_INT())
+            {
+                TimeSeriesProperty<double>* logp = dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
+                double Y,E; 
+                calcIntAsymmetry(ws_red,ws_green,Y,E);
+                outWS->dataY(0)[i-is] = Y;
+                outWS->dataX(0)[i-is] = logp->lastValue();
+                outWS->dataE(0)[i-is] = E;
             }
             progress.report();
         }
@@ -196,17 +222,6 @@ namespace Mantid
         }
         else
         {   
-            //double dlt = 0.1;
-            //for(int i=0;i<ws->blocksize();i++)
-            //{
-            //    double f = ws->dataY(0)[i];
-            //    double fd = (1. - dlt*f);
-            //    ws->dataY(0)[i] = fd? f / fd : 0;
-
-            //    double b = ws->dataY(1)[i];
-            //    double bd = (1. - dlt*b);
-            //    ws->dataY(1)[i] = bd? b / bd : 0;
-            //}
             //  "Integral asymmetry"
             IAlgorithm_sptr integr = createSubAlgorithm("Integration");
             integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
@@ -231,6 +246,94 @@ namespace Mantid
 
         }
 
+
+    }
+
+    /**  Calculate the integral asymmetry for a workspace (red & green). 
+    *   The calculation is done by MuonAsymmetryCalc and SimpleIntegration algorithms.
+    *   @param ws_red The red workspace
+    *   @param ws_green The green workspace
+    *   @param Y Reference to a variable receiving the value of asymmetry
+    *   @param E Reference to a variable receiving the value of the error
+    */
+    void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
+        boost::shared_ptr<DataObjects::Workspace2D> ws_green,double& Y, double& E)
+    {
+        Property* startXprop = getProperty("StartX");
+        Property* endXprop = getProperty("EndX");
+        bool setX = !startXprop->isDefault() && !endXprop->isDefault();
+        double startX,endX;
+        if (setX)
+        {
+            startX = getProperty("StartX");
+            endX = getProperty("EndX");
+        }
+        if (!m_int)
+        {   //  "Differential asymmetry"
+
+            MatrixWorkspace_sptr tmpWS = API::WorkspaceFactory::Instance().create(ws_red,1,ws_red->readX(0).size(),ws_red->readY(0).size());
+
+            for(size_t i=0;i<tmpWS->dataY(0).size();i++)
+            {
+                double FNORM = ws_green->readY(0)[i] + ws_red->readY(0)[i];
+                FNORM = FNORM != 0.0 ? 1.0 / FNORM : 1.0;
+                double BNORM = ws_green->readY(1)[i] + ws_red->readY(1)[i];
+                BNORM = BNORM != 0.0 ? 1.0 / BNORM : 1.0;
+                double ZF = ( ws_green->readY(0)[i] - ws_red->readY(0)[i] ) * FNORM;
+                double ZB = ( ws_green->readY(1)[i] - ws_red->readY(1)[i] ) * BNORM;
+                tmpWS->dataY(0)[i] = ZB - ZF;
+                tmpWS->dataE(0)[i] = (1.0+ZF*ZF)*FNORM+(1.0+ZB*ZB)*BNORM;
+            }
+
+            IAlgorithm_sptr integr = createSubAlgorithm("Integration");
+            integr->setProperty("InputWorkspace",tmpWS);
+            integr->setPropertyValue("OutputWorkspace","tmp");
+            if (setX)
+            {
+                integr->setProperty("Range_lower",startX);
+                integr->setProperty("Range_upper",endX);
+            }
+            integr->execute();
+            MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
+
+            Y = out->readY(0)[0] / tmpWS->dataY(0).size();
+            E = out->readE(0)[0] / tmpWS->dataY(0).size();
+        }
+        else
+        {   
+            //  "Integral asymmetry"
+            IAlgorithm_sptr integr = createSubAlgorithm("Integration");
+            integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws_red));
+            integr->setPropertyValue("OutputWorkspace","tmp");
+            if (setX)
+            {
+                integr->setProperty("Range_lower",startX);
+                integr->setProperty("Range_upper",endX);
+            }
+            integr->execute();
+            MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
+
+            integr = createSubAlgorithm("Integration");
+            integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws_green));
+            integr->setPropertyValue("OutputWorkspace","tmp");
+            if (setX)
+            {
+                integr->setProperty("Range_lower",startX);
+                integr->setProperty("Range_upper",endX);
+            }
+            integr->execute();
+            MatrixWorkspace_sptr intWS_green = integr->getProperty("OutputWorkspace");
+
+            double YIF = ( intWS_green->readY(0)[0] - intWS_red->readY(0)[0] ) / ( intWS_green->readY(0)[0] + intWS_red->readY(0)[0] );
+            double YIB = ( intWS_green->readY(1)[0] - intWS_red->readY(1)[0] ) / ( intWS_green->readY(1)[0] + intWS_red->readY(1)[0] );
+
+            Y = YIB - YIF;
+
+            double VARIF = (1.0 + YIF*YIF) / ( intWS_green->readY(0)[0] + intWS_red->readY(0)[0] );
+            double VARIB = (1.0 + YIB*YIB) / ( intWS_green->readY(1)[0] + intWS_red->readY(1)[0] );
+
+            E = sqrt( VARIF + VARIB );
+        }
 
     }
 
