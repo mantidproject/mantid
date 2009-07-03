@@ -446,65 +446,62 @@ namespace Mantid
     }
     
     /**
-     * Remove all cases of 
-     */
-
-    /**
      * Takes a string and removes the characters given in the optional second argument. If none are given then only alpha-numeric
      * characters are retained.
-     * @param name The string to analyse
+     * @param value The string to analyse
      * @param cs A string of characters to remove
+     * @param eol_to_space Flag signalling whether end of line characters should be changed to a space
      * @returns The sanitized value
      */
     std::string SimplePythonAPI::removeCharacters(const std::string & value, const std::string & cs, bool eol_to_space)
     {
-      if( value.empty() ) return value; 
+      if (value.empty())
+        return value;
 
       std::string retstring;
       std::string::const_iterator sIter = value.begin();
       std::string::const_iterator sEnd = value.end();
 
       // No characeters specified, only keep alpha-numeric
-      if( cs.empty() )
+      if (cs.empty())
       {
-	for( ; sIter != sEnd; ++sIter )
-	{
-	  int letter = static_cast<int>(*sIter);
-	  if( (letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) ||
-	      (letter >= 65 && letter <= 90) )
-	  {
-	    retstring.push_back(*sIter);
-	  }
-	}
+        for (; sIter != sEnd; ++sIter)
+        {
+          int letter = static_cast<int> (*sIter);
+          if ((letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) || (letter >= 65 && letter <= 90))
+          {
+            retstring.push_back(*sIter);
+          }
+        }
       }
       else
       {
-	for( ; sIter != sEnd; ++sIter )
-	{
-	  const char letter = (*sIter);
-	  // If the letter is NOT one to remove
-	  if( cs.find_first_of(letter) == std::string::npos )
-	  {
-	    //This is because I use single-quotes to delimit my strings in the module and if any in strings
-	    //that I try to write contain these, it will confuse Python so I'll convert them
-	    if( letter == '\'' )
-	    {
-	      retstring.push_back('\"');
-	    }
-	    // Keep the character
-	    else
-	    {
-	      retstring.push_back(letter);
-	    }
-	  }
-	  else
-	  {
-	    if( eol_to_space && letter == '\n' )
-	    {
-	      retstring.push_back(' ');
-	    }
-	  }
-	}
+        for (; sIter != sEnd; ++sIter)
+        {
+          const char letter = (*sIter);
+          // If the letter is NOT one to remove
+          if (cs.find_first_of(letter) == std::string::npos)
+          {
+            //This is because I use single-quotes to delimit my strings in the module and if any in strings
+            //that I try to write contain these, it will confuse Python so I'll convert them
+            if (letter == '\'')
+            {
+              retstring.push_back('\"');
+            }
+            // Keep the character
+            else
+            {
+              retstring.push_back(letter);
+            }
+          }
+          else
+          {
+            if (eol_to_space && letter == '\n')
+            {
+              retstring.push_back(' ');
+            }
+          }
+        }
       }
       return retstring;
     }

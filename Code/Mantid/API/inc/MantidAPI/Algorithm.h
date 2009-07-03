@@ -304,8 +304,8 @@ namespace Mantid
 			double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
 
 			AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
-			 ///< count keeps track of  algorithm execution order
-			static unsigned int g_execCount;
+			 
+			static unsigned int g_execCount; ///< Counter to keep track of algorithm execution order
 		};
 
 		///Typedef for a shared pointer to an Algorithm

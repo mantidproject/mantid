@@ -418,7 +418,7 @@ void Fit1D::exec()
   // set-up remaining GSL machinery for least squared
 
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
-  gsl_multifit_fdfsolver *s;
+  gsl_multifit_fdfsolver *s = NULL;
   if (isDerivDefined)
   {
     s = gsl_multifit_fdfsolver_alloc(T, l_data.n, l_data.p);
@@ -428,8 +428,8 @@ void Fit1D::exec()
   // set-up remaining GSL machinery to use simplex algorithm
 
   const gsl_multimin_fminimizer_type *simplexType = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *simplexMinimizer;
-  gsl_vector *simplexStepSize;
+  gsl_multimin_fminimizer *simplexMinimizer = NULL;
+  gsl_vector *simplexStepSize = NULL;
   if (!isDerivDefined)
   {
     simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);

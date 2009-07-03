@@ -635,12 +635,12 @@ void Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* 
 		g_log.information()<<" Trying to retrieve  Object "<< wsname<<" which is not there in ADS"<<std::endl;
 	}
 }
-/** setting output workspace properties for an algorithm,for handling workspace goups..
- *  @param pAlg  pointer to algorithm
- *  @param  prop  pointer to the input properties
- *  @param  nPeriod  period number
+/** setting output workspace properties for an algorithm,for handling workspace goups.
+ *  @param pAlg      pointer to algorithm
+ *  @param prop      pointer to the input properties
+ *  @param nPeriod   period number
  *  @param sptrWSGrp shared pointer for workspacegroup
- *  @param  outWSParentName outputworksapce name
+ *  @param outWSParentName outputworksapce name
  */
 void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nPeriod,WorkspaceGroup_sptr sptrWSGrp,std::string &outWSParentName)
 {
