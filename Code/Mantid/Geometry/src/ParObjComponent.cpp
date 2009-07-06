@@ -5,7 +5,6 @@
 #include "MantidGeometry/Object.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/GeometryHandler.h"
-#include "MantidGeometry/GtsGeometryHandler.h"
 #include <cfloat>
 
 namespace Mantid

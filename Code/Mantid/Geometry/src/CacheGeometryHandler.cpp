@@ -1,4 +1,4 @@
-#include "gts.h"
+//#include "gts.h"
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/GeometryHandler.h"

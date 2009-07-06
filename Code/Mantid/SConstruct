@@ -61,8 +61,6 @@ boost_path = ''
 poco_path = ''
 fortran_type=''
 third_party=''
-gts_path = ''
-glib_path = ''
 opencascade_path = ''
 python_path = ''
 
@@ -75,8 +73,6 @@ if os.name == 'nt':
 	
 	python_path = 'C:/Python25/'
 	opencascade_path=third_party + '/include/OpenCascade'
-	gts_path = third_party + '/include/gts'
-	glib_path = third_party + '/include/gts/glib-2.0'
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
@@ -95,8 +91,6 @@ if os.name == 'nt':
 		libList.append('libNeXus-0')
 
 	libList.append('gsl')
-	libList.append('glib-2.0') #glib required by gts
-	libList.append('gts-0.7') #gts
 	libList.append('opengl32')#opengl required for rendering
 	libList.append('glu32') #glu companion for opengl
 	libList.append('ws2_32')   # winsock library
@@ -111,7 +105,7 @@ if os.name == 'nt':
 	libList.append('TKMesh')
 	libList.append('TKG2d')
 
-	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', gts_path, glib_path, opencascade_path, third_party+'/include/muParser']
+	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser']
 	
 	#set up scons to embed manifest files
 	env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
@@ -203,8 +197,6 @@ else :
 	cppPaths.append(USRINCLUDE)
 	cppPaths.append(USRLOCALINCLUDE)
 	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
-	#cppPaths.append(USRINCLUDE + '/glib-2.0/')
-	#cppPaths.append(USRLIB + '/glib-2.0/include/')
 	#OpenCASCADE Include
 	cppPaths.append(opencascade_path + '/inc')
 	
@@ -260,17 +252,6 @@ else :
 	flags=re.sub('\n','',f.readline())
 	lpts=re.split("\s+",flags)
 	lpts.append('-g')
-	#check for GTS library
-	f=os.popen('gts-config --cflags')
-	flags=re.sub('\n','',f.readline())
-	if (len(flags)>1):
-		cflags.append(re.split("\s+",flags))
-	f.close()
-	f=os.popen('gts-config --libs')
-	flags=re.sub('\n','',f.readline())
-	temp=re.split("\s+",flags)
-	for l in temp:
-		lpts.append(l)
 			
 print "CPPPATHS: ",cppPaths
 print "CFLAGS: ",cflags

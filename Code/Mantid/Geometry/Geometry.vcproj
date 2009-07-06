@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib gts-0.7.lib glib-2.0.lib opengl32.lib glu32.lib TKBO.lib TKPrim.lib TKBRep.lib TKernel.lib TKTopAlgo.lib TKMath.lib TKMesh.lib TKG2d.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib opengl32.lib glu32.lib TKBO.lib TKPrim.lib TKBRep.lib TKernel.lib TKTopAlgo.lib TKMath.lib TKMesh.lib TKG2d.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -136,7 +136,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib gts-0.7.lib opengl32.lib glu32.lib TKBO.lib TKPrim.lib TKBRep.lib TKernel.lib TKTopAlgo.lib TKMath.lib TKMesh.lib TKG2d.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib gsl.lib opengl32.lib glu32.lib TKBO.lib TKPrim.lib TKBRep.lib TKernel.lib TKTopAlgo.lib TKMath.lib TKMesh.lib TKG2d.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 				OptimizeReferences="2"
@@ -240,18 +240,6 @@
 			</File>
 			<File
 				RelativePath=".\src\GluGeometryRenderer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\GtsGeometryGenerator.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\GtsGeometryHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\GtsGeometryRenderer.cpp"
 				>
 			</File>
 			<File
@@ -565,19 +553,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\GtsGeometryGenerator.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidGeometry\GtsGeometryHandler.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\GtsGeometryHandlerTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidGeometry\GtsGeometryRenderer.h"
 				>
 			</File>
 			<File
@@ -761,11 +737,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\RotCounter.h"
 				>
 			</File>
 			<File

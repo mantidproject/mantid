@@ -1,8 +1,8 @@
-#include "gts.h"
+//#include "gts.h"
 #include "MantidGeometry/Object.h"
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/GeometryHandler.h"
-#include "MantidGeometry/GtsGeometryRenderer.h"
+//#include "MantidGeometry/GtsGeometryRenderer.h"
 #include "MantidGeometry/GluGeometryHandler.h"
 #include "MantidGeometry/GluGeometryRenderer.h"
 
