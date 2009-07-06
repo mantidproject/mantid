@@ -16,6 +16,9 @@ using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
 using DataObjects::Workspace2D_const_sptr;
 
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(ConjoinWorkspaces)
+
 /// Default constructor
   ConjoinWorkspaces::ConjoinWorkspaces() : Algorithm(), m_progress(NULL) {}
 
