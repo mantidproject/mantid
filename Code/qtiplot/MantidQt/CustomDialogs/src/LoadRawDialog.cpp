@@ -107,7 +107,7 @@ void LoadRawDialog::parseInput()
   addPropertyValueToMap("SpectrumList", m_specList->text());
   
   //Cache
-   addPropertyValueToMap("Cache", m_cacheBox->currentText());
+  addPropertyValueToMap("Cache", m_cacheBox->currentText());
   
 }
 
@@ -215,10 +215,17 @@ void LoadRawDialog::addCacheOptions()
   QLabel *cacheLabel = new QLabel("Cache file locally:");
   m_cacheBox = new QComboBox;
   cacheLabel->setBuddy(m_cacheBox);
-  m_cacheBox->insertItem(0, "If Slow");
-  m_cacheBox->insertItem(1, "Always");
-  m_cacheBox->insertItem(2, "Never");
-  m_cacheBox->setCurrentIndex(0);
+
+  Mantid::Kernel::Property *prop = getAlgorithmProperty("Cache");
+  std::vector<std::string> values = prop->allowedValues();
+  
+  const int nvalues = static_cast<int>(values.size()); 
+  for( int i = 0; i < nvalues; ++i )
+  {
+    m_cacheBox->insertItem(i, QString::fromStdString(values[i]));
+    if( prop->value() == values[i] ) m_cacheBox->setCurrentIndex(i);
+  }
+  
   setOldComboField("Cache");
   QHBoxLayout *cacheline = new QHBoxLayout;
   
@@ -234,15 +241,13 @@ void LoadRawDialog::addCacheOptions()
 /// Set old input for combo box
 void LoadRawDialog::setOldComboField(const QString & propName)
 {
-  Mantid::Kernel::Property *prop =getAlgorithmProperty(propName);
+  Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
   QString selectedValue("");
   if( isForScript() ) selectedValue = QString::fromStdString(prop->value());
   else if( m_oldValues.contains(propName) ) selectedValue = m_oldValues[propName];
   else return;
   
-  if( selectedValue.startsWith("I") ) m_cacheBox->setCurrentIndex(0);
-  else if( selectedValue.startsWith("A") ) m_cacheBox->setCurrentIndex(1);
-  else m_cacheBox->setCurrentIndex(2);
+  m_cacheBox->setCurrentIndex(m_cacheBox->findText(selectedValue));
 }
 
 /**
