@@ -49,11 +49,11 @@ public:
     alg.setPropertyValue("EndX","79615");   
 
     alg.setPropertyValue("I", "297.0");
-    alg.setPropertyValue("a", "2.0");
-    alg.setPropertyValue("b", "0.03");
-    alg.setPropertyValue("x0", "79400.0");
-    alg.setPropertyValue("s", "8.0");
-    alg.setPropertyValue("bk", "8.0");
+    alg.setPropertyValue("A", "2.0");
+    alg.setPropertyValue("B", "0.03");
+    alg.setPropertyValue("X0", "79400.0");
+    alg.setPropertyValue("S", "8.0");
+    alg.setPropertyValue("BK", "8.0");
   }
 
   void testExec()
@@ -66,15 +66,15 @@ public:
     TS_ASSERT_DELTA( dummy, 9.15,0.1);
     dummy = alg.getProperty("I");
     TS_ASSERT_DELTA( dummy, 294.37 ,0.1);
-    dummy = alg.getProperty("a");
+    dummy = alg.getProperty("A");
     TS_ASSERT_DELTA( dummy, 2.38 ,0.1);
-    dummy = alg.getProperty("b");
+    dummy = alg.getProperty("B");
     TS_ASSERT_DELTA( dummy, 0.03 ,0.1);
-    dummy = alg.getProperty("x0");
+    dummy = alg.getProperty("X0");
     TS_ASSERT_DELTA( dummy, 79400.02 ,0.1);
-    dummy = alg.getProperty("s");
+    dummy = alg.getProperty("S");
     TS_ASSERT_DELTA( dummy, 8.15 ,0.1);
-    dummy = alg.getProperty("bk");
+    dummy = alg.getProperty("BK");
     TS_ASSERT_DELTA( dummy, 7.88 ,0.1);
   }
 

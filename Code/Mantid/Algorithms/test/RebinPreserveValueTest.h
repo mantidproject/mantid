@@ -39,7 +39,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace","input") )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","output") )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("params","0,2,13") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Params","0,2,13") )
     TS_ASSERT_THROWS_NOTHING( alg.execute() )
     TS_ASSERT( alg.isExecuted() )
 

@@ -65,13 +65,13 @@ namespace NeXus
     declareProperty("EntryNumber", unSetInt, mustBePositive,
       "(Not implemented yet) The index number of the workspace within the Nexus file\n"
       "(default leave unchanged)" );
-    declareProperty("spectrum_min", 0, mustBePositive->clone(),
+    declareProperty("SpectrumMin", 0, mustBePositive->clone(),
       "Number of first spectrum to read, only for single period data.\n"
       "Not yet implemented");
-    declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+    declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
       "Number of last spectrum to read, only for single period data.\n"
       "Not yet implemented.");
-    declareProperty(new ArrayProperty<int>("spectrum_list"),
+    declareProperty(new ArrayProperty<int>("SpectrumList"),
       "List of spectrum numbers to read, only for single period data.\n"
       "Not yet implemented");
     // option which might be required in future - should be a choice e.g. MantidProcessed/Muon1
@@ -111,19 +111,19 @@ namespace NeXus
       std::string inputWorkspace="inputWorkspace";
       saveNexusPro->setPropertyValue(inputWorkspace,m_inputWorkspace);
       //
-      std::vector<int> specList = getProperty("spectrum_list");
+      std::vector<int> specList = getProperty("SpectrumList");
       if( !specList.empty() )
-         saveNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
+         saveNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
       //
-      int specMax = getProperty("spectrum_max");
+      int specMax = getProperty("SpectrumMax");
       if( specMax != unSetInt )
       {
-         saveNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
-         saveNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
+         saveNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
+         saveNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
       }
-      std::string title = getProperty("title");
+      std::string title = getProperty("Title");
       if( !title.empty() )
-         saveNexusPro->setPropertyValue("title",getPropertyValue("title"));
+         saveNexusPro->setPropertyValue("Title",getPropertyValue("Title"));
       int entryNum = getProperty("EntryNumber");
       if( entryNum != unSetInt )
          saveNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));

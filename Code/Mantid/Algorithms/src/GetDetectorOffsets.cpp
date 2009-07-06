@@ -38,9 +38,9 @@ void GetDetectorOffsets::init()
     "A 2D workspace with X values of d-spacing" );
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"Workspace containing the offsets");
   declareProperty("Step",0.001);
-  declareProperty("dReference",2.0);
-  declareProperty("Xmin",0.0);
-  declareProperty("Xmax",0.0);
+  declareProperty("DReference",2.0);
+  declareProperty("XMin",0.0);
+  declareProperty("XMax",0.0);
   declareProperty("GroupingFileName","",
       new FileValidator(std::vector<std::string>(1,"cal"),false),
       "The name of the output CalFile" );
@@ -94,9 +94,9 @@ void GetDetectorOffsets::exec()
 void GetDetectorOffsets::retrieveProperties()
 {
 	inputW=getProperty("InputWorkspace");
-	Xmin=getProperty("Xmin");
-	Xmax=getProperty("Xmax");
-	dreference=getProperty("dReference");
+	Xmin=getProperty("XMin");
+	Xmax=getProperty("XMax");
+	dreference=getProperty("DReference");
 	step=getProperty("Step");
 	nspec=inputW->getNumberHistograms();
 	outputW=API::WorkspaceFactory::Instance().create(inputW,nspec,2,1);

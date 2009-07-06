@@ -45,9 +45,9 @@ void LoadISISNexus::init()
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("spectrum_min", 0, mustBePositive);
-    declareProperty("spectrum_max", unSetInt, mustBePositive->clone());
-    declareProperty(new ArrayProperty<int>("spectrum_list"));
+    declareProperty("SpectrumMin", 0, mustBePositive);
+    declareProperty("SpectrumMax", unSetInt, mustBePositive->clone());
+    declareProperty(new ArrayProperty<int>("SpectrumList"));
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -191,8 +191,8 @@ void LoadISISNexus::exec()
 void LoadISISNexus::checkOptionalProperties()
 {
     //read in the data supplied to the algorithm
-    m_spec_list = getProperty("spectrum_list");
-    m_spec_max = getProperty("spectrum_max");
+    m_spec_list = getProperty("SpectrumList");
+    m_spec_max = getProperty("SpectrumMax");
     //now check that data
     m_interval = !( m_spec_max == unSetInt );
     if ( m_spec_max == unSetInt ) m_spec_max = 0;
@@ -226,7 +226,7 @@ void LoadISISNexus::checkOptionalProperties()
     if ( m_interval )
     {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
+        m_spec_min = getProperty("SpectrumMin");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
             g_log.error("Invalid Spectrum min/max properties");

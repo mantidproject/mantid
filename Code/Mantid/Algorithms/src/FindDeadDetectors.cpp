@@ -43,11 +43,11 @@ namespace Mantid
         "The value to assign to an integrated spectrum flagged as 'dead'\n"
         "(default 100.0)" );
       //EMPTY_DBL() is a tag that tells us that no value has been set and we want to use the default
-      declareProperty("Range_lower", EMPTY_DBL(),
+      declareProperty("RangeLower", EMPTY_DBL(),
         "No bin with a boundary at an x value less than this will be used\n"
         "in the summation that decides if a detector is 'dead' (default: the\n"
         "start of each histogram)" );
-      declareProperty("Range_upper", EMPTY_DBL(),
+      declareProperty("RangeUpper", EMPTY_DBL(),
         "No bin with a boundary at an x value higher than this value will\n"
         "be used in the summation that decides if a detector is 'dead'\n"
         "(default: the end of each histogram)" );
@@ -145,8 +145,8 @@ namespace Mantid
         //pass inputed values straight to Integration, checking must be done there
         childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
         childAlg->setPropertyValue( "OutputWorkspace", outputWorkspaceName);
-        childAlg->setPropertyValue( "Range_lower",  getPropertyValue("Range_lower") );
-        childAlg->setPropertyValue( "Range_upper", getPropertyValue("Range_upper") );
+        childAlg->setPropertyValue( "RangeLower",  getPropertyValue("RangeLower") );
+        childAlg->setPropertyValue( "RangeUpper", getPropertyValue("RangeUpper") );
         childAlg->execute();
       }
       catch (std::runtime_error&)

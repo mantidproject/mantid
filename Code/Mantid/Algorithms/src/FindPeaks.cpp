@@ -27,7 +27,7 @@ void FindPeaks::init()
     "Name of the workspace to search" );
   BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("fwhm",7,range,
+  declareProperty("Fwhm",7,range,
     "Estimated number of points covered by the fwhm of a peak (default 7)" );
   // The tolerance allowed in meeting the conditions
   BoundedValidator<int> *min = new BoundedValidator<int>();
@@ -62,7 +62,7 @@ void FindPeaks::exec()
   MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(inputWS);
 
   // The optimum number of points in the smoothing, according to Mariscotti, is 0.6*fwhm
-  const int fwhm = getProperty("fwhm");
+  const int fwhm = getProperty("Fwhm");
   int w = static_cast<int>(0.6 * fwhm);
   // w must be odd
   if (!(w%2)) ++w;

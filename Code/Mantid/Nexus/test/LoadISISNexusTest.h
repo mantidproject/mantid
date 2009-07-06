@@ -20,6 +20,9 @@ class LoadISISNexusTest : public CxxTest::TestSuite
 public:
     void testExec()
     {
+	//	std::string s;
+	//	std::getline(std::cin,s);
+
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus ld;
         ld.initialize();
@@ -75,9 +78,9 @@ public:
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/LOQ49886.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
-        ld.setPropertyValue("spectrum_min","10");
-        ld.setPropertyValue("spectrum_max","20");
-        ld.setPropertyValue("spectrum_list","30,33,38");
+        ld.setPropertyValue("SpectrumMin","10");
+        ld.setPropertyValue("SpectrumMax","20");
+        ld.setPropertyValue("SpectrumList","30,33,38");
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 

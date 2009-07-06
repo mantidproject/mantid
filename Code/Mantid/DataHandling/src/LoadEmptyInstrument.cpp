@@ -45,10 +45,10 @@ namespace Mantid
       
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
       mustBePositive->setLower(0.0);
-      declareProperty("detector_value",1.0, mustBePositive,
+      declareProperty("DetectorValue",1.0, mustBePositive,
         "This value affects the colour of the detectors in the instrument\n"
         "display window (default 1)" );
-      declareProperty("monitor_value",2.0, mustBePositive->clone(),
+      declareProperty("MonitorValue",2.0, mustBePositive->clone(),
         "This value affects the colour of the monitors in the instrument\n"
         "display window (default 2)");
     }
@@ -62,8 +62,8 @@ namespace Mantid
     void LoadEmptyInstrument::exec()
     {
       // Get other properties
-      const double detector_value = getProperty("detector_value");
-      const double monitor_value = getProperty("monitor_value");
+      const double detector_value = getProperty("DetectorValue");
+      const double monitor_value = getProperty("MonitorValue");
 
       // load the instrument into this workspace
       IInstrument_sptr instrument = this->runLoadInstrument();

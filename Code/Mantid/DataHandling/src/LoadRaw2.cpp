@@ -53,14 +53,14 @@ namespace Mantid
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
-      declareProperty("spectrum_min", 1, mustBePositive);
-      declareProperty("spectrum_max", unSetInt, mustBePositive->clone());
+      declareProperty("SpectrumMin", 1, mustBePositive);
+      declareProperty("SpectrumMax", unSetInt, mustBePositive->clone());
 
-      declareProperty(new ArrayProperty<int>("spectrum_list"));
-      m_cache_options.push_back("If slow");
+      declareProperty(new ArrayProperty<int>("SpectrumList"));
+      m_cache_options.push_back("If Slow");
       m_cache_options.push_back("Always");
       m_cache_options.push_back("Never");
-      declareProperty("Cache","If slow",new ListValidator(m_cache_options));
+      declareProperty("Cache","If Slow",new ListValidator(m_cache_options));
 
     }
 
@@ -262,8 +262,8 @@ namespace Mantid
     void LoadRaw2::checkOptionalProperties()
     {
       //read in the settings passed to the algorithm
-      m_spec_list = getProperty("spectrum_list");
-      m_spec_max = getProperty("spectrum_max");
+      m_spec_list = getProperty("SpectrumList");
+      m_spec_max = getProperty("SpectrumMax");
 
       m_list = !m_spec_list.empty();
       m_interval = m_spec_max != unSetInt;
@@ -293,7 +293,7 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
+        m_spec_min = getProperty("SpectrumMin");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

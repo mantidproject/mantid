@@ -54,14 +54,14 @@ namespace Mantid
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
-      declareProperty("spectrum_min",1, mustBePositive);
-      declareProperty("spectrum_max",unSetInt, mustBePositive->clone());
+      declareProperty("SpectrumMin",1, mustBePositive);
+      declareProperty("SpectrumMax",unSetInt, mustBePositive->clone());
 
-      declareProperty(new ArrayProperty<int>("spectrum_list"));
-      m_cache_options.push_back("If slow");
+      declareProperty(new ArrayProperty<int>("SpectrumList"));
+      m_cache_options.push_back("If Slow");
       m_cache_options.push_back("Always");
       m_cache_options.push_back("Never");
-      declareProperty("Cache","If slow",new ListValidator(m_cache_options));
+      declareProperty("Cache","If Slow",new ListValidator(m_cache_options));
 
     }
 
@@ -178,6 +178,7 @@ namespace Mantid
 	 
 	  WorkspaceGroup_sptr sptrWSGrp= WorkspaceGroup_sptr(new WorkspaceGroup);
 	  
+	  
 	  if(m_numberOfPeriods>1)
 	  {		 
 		 
@@ -193,7 +194,7 @@ namespace Mantid
       //if (dhdr.d_comp == 0) throw std::runtime_error("Oops..");
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       //for (int period = 0; period < m_numberOfPeriods; ++period) {
-	  g_log.debug()<<"Number of Periods=  "<<m_numberOfPeriods<<std::endl;
+	  //g_log.debug()<<"Number of Periods=  "<<m_numberOfPeriods<<std::endl;
 	  for (int period = 0; period < m_numberOfPeriods; ++period) {
 
         if ( period > 0 )
@@ -220,7 +221,7 @@ namespace Mantid
 		 }
          isisRaw->skipData(period*(m_numberOfSpectra+1));
         int counter = 0;
-		g_log.debug()<<"number Of Spectra =  "<<m_numberOfSpectra<<"  Spectra Min = "<<m_spec_min<<"  Spectra Max= "<< m_spec_max<< std::endl;
+		//g_log.debug()<<"number Of Spectra =  "<<m_numberOfSpectra<<"  Spectra Min = "<<m_spec_min<<"  Spectra Max= "<< m_spec_max<< std::endl;
         for (int i = 1; i <= m_numberOfSpectra; ++i)
         {
             int histToRead = i + period*(m_numberOfSpectra+1);
@@ -241,9 +242,9 @@ namespace Mantid
                 // NOTE: Raw numbers go straight into the workspace
                 //     - no account taken of bin widths/units etc.
                 ++counter;
-                if (++histCurrent % 100 == 0)
+               if (++histCurrent % 100 == 0)
 				{
-					//g_log.error() << "histCurrent=   "<<double(histCurrent)/histTotal<< std::endl;
+					//g_log.debug() << "histCurrent=   "<<double(histCurrent)/histTotal<< std::endl;
 					progress(double(histCurrent)/histTotal);
 				}
                 interruption_point();
@@ -253,7 +254,7 @@ namespace Mantid
                 isisRaw->skipData(histToRead);
             }
         }
-
+      //  progress(double(period+1)/m_numberOfPeriods);
         // Just a sanity check
         assert(counter == total_specs);
 
@@ -305,25 +306,28 @@ namespace Mantid
 		if(m_numberOfPeriods>1)
 		{
 			declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,wsName,Direction::Output));
+			
 			if(sptrWSGrp)sptrWSGrp->add(wsName);
 			setProperty(outws,boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
+			//g_log.debug()<<"setting property  "<< wsName<<std::endl;
 		}
 			
 		
       } // loop over periods
 
+	  //std::vector<std::string> wsnames=sptrWSGrp-getNames();
       // Clean up
       delete[] timeChannels;
       //delete[] spectrum;
       fclose(file);
-    }
+   }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
     void LoadRaw3::checkOptionalProperties()
     {
-     /* Property *specList = getProperty("spectrum_list");
+     /* Property *specList = getProperty("SpectrumList");
       m_list = !(specList->isDefault());
-      Property *specMax = getProperty("spectrum_max");
+      Property *specMax = getProperty("SpectrumMax");
       m_interval = !(specMax->isDefault());*/
 
       /*/ If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
@@ -341,7 +345,7 @@ namespace Mantid
      /* if ( m_list )
       {
         m_list = true;
-        m_spec_list = getProperty("spectrum_list");
+        m_spec_list = getProperty("SpectrumList");
         const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
         const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
         if ( maxlist > m_numberOfSpectra || minlist <= 0)
@@ -355,8 +359,8 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
-        m_spec_max = getProperty("spectrum_max");
+        m_spec_min = getProperty("SpectrumMin");
+        m_spec_max = getProperty("SpectrumMax");
 		g_log.error()<<"Specra Max "<<m_spec_max<<std::endl;
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
@@ -366,8 +370,8 @@ namespace Mantid
       }*/
 	  
       //read in the settings passed to the algorithm
-      m_spec_list = getProperty("spectrum_list");
-      m_spec_max = getProperty("spectrum_max");
+      m_spec_list = getProperty("SpectrumList");
+      m_spec_max = getProperty("SpectrumMax");
       m_list = !m_spec_list.empty();
       m_interval = m_spec_max != unSetInt;
       if ( m_spec_max == unSetInt ) m_spec_max = 1; 
@@ -395,7 +399,7 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
+        m_spec_min = getProperty("SpectrumMin");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

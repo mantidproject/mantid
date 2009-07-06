@@ -18,7 +18,7 @@ void UpdateDAE::init()
       
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty("update_rate",10, mustBePositive);
+      declareProperty("UpdateRate",10, mustBePositive);
 }
 
 void UpdateDAE::exec()

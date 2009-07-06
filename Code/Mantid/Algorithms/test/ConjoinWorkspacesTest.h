@@ -19,8 +19,8 @@ public:
     loader->initialize();
     loader->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
     loader->setPropertyValue("OutputWorkspace", "top");
-    loader->setPropertyValue("spectrum_min","1");
-    loader->setPropertyValue("spectrum_max","10");
+    loader->setPropertyValue("SpectrumMin","1");
+    loader->setPropertyValue("SpectrumMax","10");
     TS_ASSERT_THROWS_NOTHING( loader->execute() )
     TS_ASSERT( loader->isExecuted() )
     delete loader;
@@ -29,8 +29,8 @@ public:
     loader2->initialize();
     loader2->setPropertyValue("Filename", "../../../../Test/Data/osi11886.raw");
     loader2->setPropertyValue("OutputWorkspace", "bottom");
-    loader2->setPropertyValue("spectrum_min","11");
-    loader2->setPropertyValue("spectrum_max","25");
+    loader2->setPropertyValue("SpectrumMin","11");
+    loader2->setPropertyValue("SpectrumMax","25");
     TS_ASSERT_THROWS_NOTHING( loader2->execute() )
     TS_ASSERT( loader2->isExecuted() )
     delete loader2;

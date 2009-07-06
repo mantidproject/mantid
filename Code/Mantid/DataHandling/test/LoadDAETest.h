@@ -52,8 +52,8 @@ public:
 
     // Set inputs
     m_loader.setPropertyValue("DAEname", m_inputDAE);
-    m_loader.setPropertyValue("spectrum_min", "1");
-    m_loader.setPropertyValue("spectrum_max", "2");
+    m_loader.setPropertyValue("SpectrumMin", "1");
+    m_loader.setPropertyValue("SpectrumMax", "2");
 
     m_outputSpace = "DAEouter";
     m_loader.setPropertyValue("OutputWorkspace", m_outputSpace);

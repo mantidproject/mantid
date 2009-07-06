@@ -61,9 +61,9 @@ namespace Mantid
       void exec();
 
       /// The name of the first input workspace property
-			virtual const std::string inputPropName1() const { return "InputWorkspace_1";}
+			virtual const std::string inputPropName1() const { return "LHSWorkspace";}
       /// The name of the second input workspace property
-			virtual const std::string inputPropName2() const { return "InputWorkspace_2";}
+			virtual const std::string inputPropName2() const { return "RHSWorkspace";}
       /// The name of the output workspace property
 			virtual const std::string outputPropName() const { return "OutputWorkspace";}
 

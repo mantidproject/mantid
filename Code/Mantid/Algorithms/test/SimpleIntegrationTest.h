@@ -54,8 +54,8 @@ public:
     outputSpace = "IntegrationOuter";
     alg.setPropertyValue("OutputWorkspace",outputSpace);
 
-    alg.setPropertyValue("Range_lower","0.1");
-    alg.setPropertyValue("Range_upper","4.0");
+    alg.setPropertyValue("RangeLower","0.1");
+    alg.setPropertyValue("RangeUpper","4.0");
     alg.setPropertyValue("StartSpectrum","2");
     alg.setPropertyValue("EndSpectrum","4");
 

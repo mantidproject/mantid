@@ -51,18 +51,18 @@ namespace Mantid
       
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty( "spectrum_min",0, mustBePositive,
+      declareProperty( "SpectrumMin",0, mustBePositive,
         "Index number of the first spectrum to read, only used if\n"
         "spectrum_max is set and only for single period data\n"
         "(default 0)" );
-      declareProperty( "spectrum_max", unSetInt, mustBePositive->clone(),
+      declareProperty( "SpectrumMax", unSetInt, mustBePositive->clone(),
         "Index of last spectrum to read, only for single period data\n"
         "(default the last spectrum)");
 	    
-      declareProperty(new ArrayProperty<int>("spectrum_list"), 
+      declareProperty(new ArrayProperty<int>("SpectrumList"), 
         "Array, or comma separated list, of indexes of spectra to\n"
         "load");
-      declareProperty("auto_group",false,
+      declareProperty("AutoGroup",false,
         "Determines whether the spectra are automatically grouped\n"
         "together based on the groupings in the NeXus file, only\n"
         "for single period data (default no)");
@@ -193,7 +193,7 @@ namespace Mantid
             // Just a sanity check
             assert(counter == total_specs);
 
-            bool autogroup = getProperty("auto_group");
+            bool autogroup = getProperty("AutoGroup");
 
             if (autogroup)
             {
@@ -262,8 +262,8 @@ namespace Mantid
     void LoadMuonNexus::checkOptionalProperties()
     {
       //read in the settings passed to the algorithm
-      m_spec_list = getProperty("spectrum_list");
-      m_spec_max = getProperty("spectrum_max");
+      m_spec_list = getProperty("SpectrumList");
+      m_spec_max = getProperty("SpectrumMax");
       //Are we using a list of spectra or all the spectra in a range?
       m_list = !m_spec_list.empty();
       m_interval = (m_spec_max != unSetInt);
@@ -297,7 +297,7 @@ namespace Mantid
       if ( m_interval )
       {
         m_interval = true;
-        m_spec_min = getProperty("spectrum_min");
+        m_spec_min = getProperty("SpectrumMin");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
           g_log.error("Invalid Spectrum min/max properties");

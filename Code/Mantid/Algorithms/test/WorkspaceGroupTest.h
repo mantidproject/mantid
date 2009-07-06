@@ -108,8 +108,8 @@ public:
 	}
 	Plus alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1","test_in");
-    alg.setPropertyValue("InputWorkspace_2","test_in_1");    
+    alg.setPropertyValue("LHSWorkspace","test_in");
+    alg.setPropertyValue("RHSWorkspace","test_in_1");    
     alg.setPropertyValue("OutputWorkspace","test_out");
     alg.execute();
 	TS_ASSERT( alg.isExecuted() );

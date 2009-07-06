@@ -35,9 +35,9 @@ public:
     TS_ASSERT_THROWS( regroup.execute(), std::runtime_error )
     TS_ASSERT( ! regroup.isExecuted() )
     // Trying to set the property with an error fails
-    TS_ASSERT_THROWS(regroup.setPropertyValue("params", "1.5,2.0,20,-0.1,15,1.0,35"), std::invalid_argument)
+    TS_ASSERT_THROWS(regroup.setPropertyValue("Params", "1.5,2.0,20,-0.1,15,1.0,35"), std::invalid_argument)
 	// Now set the property
-    TS_ASSERT_THROWS_NOTHING( regroup.setPropertyValue("params", "1.5,1,19,-0.1,30,1,35") )
+    TS_ASSERT_THROWS_NOTHING( regroup.setPropertyValue("Params", "1.5,1,19,-0.1,30,1,35") )
 
     TS_ASSERT(regroup.execute())
     TS_ASSERT( regroup.isExecuted())
@@ -86,7 +86,7 @@ public:
 	std::vector<Property*>::const_iterator iter = regroup.getProperties().begin();
 	for( ;iter < regroup.getProperties().end(); iter ++ )
 	{
-	  if ( (*iter)->name() == "params")
+	  if ( (*iter)->name() == "Params")
 	  {
 	    pPropWithVal = 
 	      dynamic_cast< PropertyWithValue< std::vector<double> >* >(*iter);

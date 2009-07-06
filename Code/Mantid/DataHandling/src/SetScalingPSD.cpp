@@ -49,7 +49,7 @@ namespace Algorithms
       "associated with an instrument appropriate for the scaling file" );
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("scalingOption",0, mustBePositive,
+    declareProperty("ScalingOption",0, mustBePositive,
       "Control scaling calculation - 0 => use average of left and right\n"
       "scaling (default). 1 => use maximum scaling. 2 => maximum + 5%" );
   }
@@ -64,7 +64,7 @@ namespace Algorithms
     m_filename = getPropertyValue("ScalingFilename");
     //m_workspace = getPropertyValue("Workspace");
     m_workspace = getProperty("Workspace");
-    m_scalingOption = getProperty("scalingOption");
+    m_scalingOption = getProperty("ScalingOption");
     std::vector<Geometry::V3D> truepos;
     processScalingFile(m_filename,truepos);
     //calculateDetectorShifts(truepos);

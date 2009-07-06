@@ -118,7 +118,7 @@ public:
     remove(filename.c_str());
 
     // Set Range_lower to later in the histogram when the yTooDead detectors stop working
-    alg.setPropertyValue("Range_lower", "11.0");
+    alg.setPropertyValue("RangeLower", "11.0");
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -138,7 +138,7 @@ public:
     }
 
     // Set Range_upper to before the end which will pickup the strange
-    alg.setPropertyValue("Range_upper", "20");
+    alg.setPropertyValue("RangeUpper", "20");
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );

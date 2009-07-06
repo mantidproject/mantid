@@ -27,7 +27,7 @@ public:
     rebunch.initialize();
     rebunch.setPropertyValue("InputWorkspace","test_in1D");
     rebunch.setPropertyValue("OutputWorkspace","test_out");
-    rebunch.setPropertyValue("n_bunch", "5");
+    rebunch.setPropertyValue("Nbunch", "5");
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
     const std::vector<double> outX=rebunchdata->dataX(0);
@@ -57,7 +57,7 @@ public:
     rebunch.initialize();
     rebunch.setPropertyValue("InputWorkspace","test_in1D");
     rebunch.setPropertyValue("OutputWorkspace","test_out");
-    rebunch.setPropertyValue("n_bunch", "7");
+    rebunch.setPropertyValue("Nbunch", "7");
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
@@ -91,7 +91,7 @@ public:
     rebunch.initialize();
     rebunch.setPropertyValue("InputWorkspace","test_in2D");
     rebunch.setPropertyValue("OutputWorkspace","test_out");
-    rebunch.setPropertyValue("n_bunch", "5");
+    rebunch.setPropertyValue("Nbunch", "5");
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
@@ -124,7 +124,7 @@ public:
     rebunch.initialize();
     rebunch.setPropertyValue("InputWorkspace","test_in2D");
     rebunch.setPropertyValue("OutputWorkspace","test_out");
-    rebunch.setPropertyValue("n_bunch", "7");
+    rebunch.setPropertyValue("Nbunch", "7");
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
     const std::vector<double> outX=rebunchdata->dataX(5);

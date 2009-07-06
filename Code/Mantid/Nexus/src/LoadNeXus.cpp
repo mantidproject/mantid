@@ -53,11 +53,11 @@ namespace NeXus
     // Declare optional input parameters
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("spectrum_min",0, mustBePositive,
+    declareProperty("SpectrumMin",0, mustBePositive,
       "Index number of first spectrum to read, only for single period data");
-    declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+    declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
       "Index number of last spectrum to read, only for single period data");
-    declareProperty(new ArrayProperty<int>("spectrum_list"),
+    declareProperty(new ArrayProperty<int>("SpectrumList"),
       "A comma seperated or array with the list of index number to read" );
 
     declareProperty("EntryNumber",0, mustBePositive->clone(), 
@@ -123,15 +123,15 @@ namespace NeXus
       std::string outputWorkspace="OutputWorkspace";
       loadMuonNexus->setPropertyValue(outputWorkspace,m_workspace);
       //Get the array passed in the spectrum_list, if an empty array was passed use the default 
-      std::vector<int> specList = getProperty("spectrum_list");
+      std::vector<int> specList = getProperty("SpectrumList");
       if ( !specList.empty() )
-         loadMuonNexus->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
+         loadMuonNexus->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
       //
-      int specMax = getProperty("spectrum_max");
+      int specMax = getProperty("SpectrumMax");
       if( specMax != unSetInt )
       {
-         loadMuonNexus->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
-         loadMuonNexus->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
+         loadMuonNexus->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
+         loadMuonNexus->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
       }
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
@@ -183,15 +183,15 @@ namespace NeXus
       std::string outputWorkspace="OutputWorkspace";
       loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
       //Get the array passed in the spectrum_list, if an empty array was passed use the default 
-      std::vector<int> specList = getProperty("spectrum_list");
+      std::vector<int> specList = getProperty("SpectrumList");
       if ( !specList.empty() )
-         loadNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
+         loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
       //
-      int specMax = getProperty("spectrum_max");
+      int specMax = getProperty("SpectrumMax");
       if ( specMax != unSetInt )
       {
-         loadNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
-         loadNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
+         loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
+         loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
       }
 
       loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
@@ -245,15 +245,15 @@ namespace NeXus
       std::string outputWorkspace="OutputWorkspace";
       loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
       //Get the array passed in the spectrum_list, if an empty array was passed use the default 
-      std::vector<int> specList = getProperty("spectrum_list");
+      std::vector<int> specList = getProperty("SpectrumList");
       if ( !specList.empty() )
-        loadNexusPro->setPropertyValue("spectrum_list",getPropertyValue("spectrum_list"));
+        loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
       //
-      int specMax = getProperty("spectrum_max");
+      int specMax = getProperty("SpectrumMax");
       if ( specMax != unSetInt )
       {
-         loadNexusPro->setPropertyValue("spectrum_max",getPropertyValue("spectrum_max"));
-         loadNexusPro->setPropertyValue("spectrum_min",getPropertyValue("spectrum_min"));
+         loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
+         loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
       }
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.

@@ -20,8 +20,8 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48127.raw");
     loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.setPropertyValue("spectrum_min","2");
-    loader.setPropertyValue("spectrum_max","4");
+    loader.setPropertyValue("SpectrumMin","2");
+    loader.setPropertyValue("SpectrumMax","4");
     loader.execute();
 
     Mantid::Algorithms::ConvertUnits convert;
@@ -56,7 +56,7 @@ public:
 	
 	void testExec()
 	{
-    if ( !trans.isInitialized() ) trans.initialize();
+	if ( !trans.isInitialized() ) trans.initialize();
 
     TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("SampleRunWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("DirectRunWorkspace",inputWS) )

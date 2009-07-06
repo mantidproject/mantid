@@ -44,14 +44,14 @@ namespace Mantid
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty("m",0,mustBePositive->clone(),
+      declareProperty("M",0,mustBePositive->clone(),
         "The number of points for averaging, i.e. summing will be done in the\n"
         "range [y(i-m),y(i+m)]");
-      declareProperty("z",0,mustBePositive,
+      declareProperty("Z",0,mustBePositive,
         "The number of iteration steps in the averaging procedure" );
-      declareProperty("spectra_min",0,mustBePositive->clone(),
+      declareProperty("SpectraMin",0,mustBePositive->clone(),
         "Lower bound of the spectrum range (default 0)");
-      declareProperty("spectra_max",0,mustBePositive->clone(),
+      declareProperty("SpectraMax",0,mustBePositive->clone(),
         "Upper bound of the spectrum range (default workspace max)");
      }
 
@@ -66,8 +66,8 @@ void GeneralisedSecondDifference::exec()
 
 	// Get some properties
   	MatrixWorkspace_const_sptr inputWS=getProperty("InputWorkspace");
-  	int spec_min=getProperty("spectra_min");
-  	int spec_max=getProperty("spectra_max");
+  	int spec_min=getProperty("SpectraMin");
+  	int spec_max=getProperty("SpectraMax");
   	int n_hists=inputWS->getNumberHistograms();
 
   	if (spec_min==0 && spec_max==0) // Values per default, take all spectra
@@ -85,8 +85,8 @@ void GeneralisedSecondDifference::exec()
 	}
 
 	// Get some more input fields
-  	z=getProperty("z");
-  	m=getProperty("m");
+  	z=getProperty("Z");
+  	m=getProperty("M");
   	const int n_av=z*m+1;
 
   	// Calculate the Cij and Cij^2 coefficients

@@ -26,8 +26,8 @@ void SimpleIntegration::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  declareProperty("Range_lower",EMPTY_DBL());
-  declareProperty("Range_upper",EMPTY_DBL());
+  declareProperty("RangeLower",EMPTY_DBL());
+  declareProperty("RangeUpper",EMPTY_DBL());
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("StartSpectrum",0, mustBePositive);
@@ -43,8 +43,8 @@ void SimpleIntegration::init()
 void SimpleIntegration::exec()
 {
   // Try and retrieve the optional properties
-  m_MinRange = getProperty("Range_lower");
-  m_MaxRange = getProperty("Range_upper");
+  m_MinRange = getProperty("RangeLower");
+  m_MaxRange = getProperty("RangeUpper");
   m_MinSpec = getProperty("StartSpectrum");
   m_MaxSpec = getProperty("EndSpectrum");
 

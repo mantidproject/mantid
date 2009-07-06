@@ -141,9 +141,9 @@ public:
 
     loader2.setPropertyValue("Filename", inputFile);
     loader2.setPropertyValue("OutputWorkspace", "outWS");
-    loader2.setPropertyValue("spectrum_list", "998,999,1000");
-    loader2.setPropertyValue("spectrum_min", "5");
-    loader2.setPropertyValue("spectrum_max", "10");
+    loader2.setPropertyValue("SpectrumList", "998,999,1000");
+    loader2.setPropertyValue("SpectrumMin", "5");
+    loader2.setPropertyValue("SpectrumMax", "10");
 
     TS_ASSERT_THROWS_NOTHING(loader2.execute());
     TS_ASSERT( loader2.isExecuted() );
@@ -177,41 +177,41 @@ public:
 
     loader3.setPropertyValue("Filename", inputFile);
     loader3.setPropertyValue("OutputWorkspace", "out2");
-    loader3.setPropertyValue("spectrum_list", "0,999,1000");
-    loader3.setPropertyValue("spectrum_min", "5");
-    loader3.setPropertyValue("spectrum_max", "10");
+    loader3.setPropertyValue("SpectrumList", "0,999,1000");
+    loader3.setPropertyValue("SpectrumMin", "5");
+    loader3.setPropertyValue("SpectrumMax", "10");
     loader3.execute();
     Workspace_sptr output;
     // test that there is no workspace as it should have failed
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 
-    loader3.setPropertyValue("spectrum_min", "5");
-    loader3.setPropertyValue("spectrum_max", "1");
+    loader3.setPropertyValue("SpectrumMin", "5");
+    loader3.setPropertyValue("SpectrumMax", "1");
      loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 
-    loader3.setPropertyValue("spectrum_min", "5");
-    loader3.setPropertyValue("spectrum_max", "3");
+    loader3.setPropertyValue("SpectrumMin", "5");
+    loader3.setPropertyValue("SpectrumMax", "3");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 
-    loader3.setPropertyValue("spectrum_min", "5");
-    loader3.setPropertyValue("spectrum_max", "5");
+    loader3.setPropertyValue("SpectrumMin", "5");
+    loader3.setPropertyValue("SpectrumMax", "5");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 
-    loader3.setPropertyValue("spectrum_min", "5");
-    loader3.setPropertyValue("spectrum_max", "3000");
+    loader3.setPropertyValue("SpectrumMin", "5");
+    loader3.setPropertyValue("SpectrumMax", "3000");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 
-    loader3.setPropertyValue("spectrum_min", "5");
-    loader3.setPropertyValue("spectrum_max", "10");
-    loader3.setPropertyValue("spectrum_list", "999,3000");
+    loader3.setPropertyValue("SpectrumMin", "5");
+    loader3.setPropertyValue("SpectrumMax", "10");
+    loader3.setPropertyValue("SpectrumList", "999,3000");
     loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve("out2"),std::runtime_error);
 
-    loader3.setPropertyValue("spectrum_list", "999,2000");
+    loader3.setPropertyValue("SpectrumList", "999,2000");
     loader3.execute();
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out2"));
   }
@@ -222,9 +222,9 @@ public:
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod2");
-    loader5.setPropertyValue("spectrum_list", "10,50,100,195");
-    //loader5.setPropertyValue("spectrum_min", "1");
-    //loader5.setPropertyValue("spectrum_max", "2");
+    loader5.setPropertyValue("SpectrumList", "10,50,100,195");
+    //loader5.setPropertyValue("SpectrumMin", "1");
+    //loader5.setPropertyValue("SpectrumMax", "2");
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
 

@@ -28,7 +28,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
-      declareProperty(new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >));
+      declareProperty(new ArrayProperty<double>("Params", new MandatoryValidator<std::vector<double> >));
     }
 
     /** Executes the rebin algorithm
@@ -38,7 +38,7 @@ namespace Mantid
     void SimpleRebin::exec()
     {
       // retrieve the properties
-      std::vector<double> rb_params=getProperty("params");
+      std::vector<double> rb_params=getProperty("Params");
 
       // Get the input workspace
       MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");

@@ -72,7 +72,7 @@ void testExecOnMuon()
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("title") );
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Title") );
     TS_ASSERT( ! result.compare(title));
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("InputWorkspace") );
     TS_ASSERT( ! result.compare(outputSpace));

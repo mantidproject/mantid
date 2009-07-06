@@ -102,9 +102,9 @@ void LoadRawDialog::parseInput()
   //workspace name
   addPropertyValueToMap("OutputWorkspace", m_wsBox->text());
   //Spectra
-  addPropertyValueToMap("spectrum_min", m_minSpec->text());
-  addPropertyValueToMap("spectrum_max", m_maxSpec->text());
-  addPropertyValueToMap("spectrum_list", m_specList->text());
+  addPropertyValueToMap("SpectrumMin", m_minSpec->text());
+  addPropertyValueToMap("SpectrumMax", m_maxSpec->text());
+  addPropertyValueToMap("SpectrumList", m_specList->text());
   
   //Cache
    addPropertyValueToMap("Cache", m_cacheBox->currentText());
@@ -165,24 +165,24 @@ void LoadRawDialog::addSpectraInput()
   
   QLabel *min = new QLabel("Start:");
   m_minSpec = new QLineEdit;
-  setOldLineEditInput("spectrum_min", m_minSpec);
+  setOldLineEditInput("SpectrumMin", m_minSpec);
 
   int charWidth = m_minSpec->fontMetrics().maxWidth();
   m_minSpec->setMaximumWidth(charWidth*3);
   
-  QLabel *validmin = getValidatorMarker("spectrum_min");
-  QLabel *validmax = getValidatorMarker("spectrum_max");
-  QLabel *validlist = getValidatorMarker("spectrum_list");
+  QLabel *validmin = getValidatorMarker("SpectrumMin");
+  QLabel *validmax = getValidatorMarker("SpectrumMax");
+  QLabel *validlist = getValidatorMarker("SpectrumList");
   
   QLabel *max = new QLabel("End:");
   m_maxSpec = new QLineEdit;
-  setOldLineEditInput("spectrum_max", m_maxSpec);
+  setOldLineEditInput("SpectrumMax", m_maxSpec);
   
   m_maxSpec->setMaximumWidth(charWidth*3);
   
   QLabel *list = new QLabel("List:");
   m_specList = new QLineEdit;
-  setOldLineEditInput("spectrum_list", m_specList);
+  setOldLineEditInput("SpectrumList", m_specList);
   
   m_specList->setMaximumWidth(charWidth*10);
 
@@ -215,7 +215,7 @@ void LoadRawDialog::addCacheOptions()
   QLabel *cacheLabel = new QLabel("Cache file locally:");
   m_cacheBox = new QComboBox;
   cacheLabel->setBuddy(m_cacheBox);
-  m_cacheBox->insertItem(0, "If slow");
+  m_cacheBox->insertItem(0, "If Slow");
   m_cacheBox->insertItem(1, "Always");
   m_cacheBox->insertItem(2, "Never");
   m_cacheBox->setCurrentIndex(0);

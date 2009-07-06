@@ -34,7 +34,7 @@ void PropertyAlgorithm::init()
 
     // A validator belongs to the propery. Two properties cannot have the same validator.
     // To use the same validating conditions a validator can be cloned:
-    declareProperty("PositiveIntValue_1",0, mustBePositive->clone());
+    declareProperty("PositiveIntValue1",0, mustBePositive->clone());
 
     // A property can be an array of int, double, or std::string
     declareProperty(new ArrayProperty<int>("IntArray"));

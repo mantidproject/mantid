@@ -28,8 +28,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg.setPropertyValue("InputWorkspace_1","test_in21"), std::invalid_argument )
-    TS_ASSERT_THROWS( alg.setPropertyValue("InputWorkspace_2","test_in22"), std::invalid_argument )
+    TS_ASSERT_THROWS( alg.setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument )
+    TS_ASSERT_THROWS( alg.setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","test_out2") )
   }
 
@@ -46,8 +46,8 @@ public:
 
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("InputWorkspace_1","test_in11");
-      alg.setPropertyValue("InputWorkspace_2","test_in12");    
+      alg.setPropertyValue("LHSWorkspace","test_in11");
+      alg.setPropertyValue("RHSWorkspace","test_in12");    
       alg.setPropertyValue("OutputWorkspace","test_out1");
     )
     alg.execute();
@@ -75,8 +75,8 @@ public:
     AnalysisDataService::Instance().add("test_in21", work_in1);
     AnalysisDataService::Instance().add("test_in22", work_in2);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1","test_in21");
-    alg.setPropertyValue("InputWorkspace_2","test_in22");    
+    alg.setPropertyValue("LHSWorkspace","test_in21");
+    alg.setPropertyValue("RHSWorkspace","test_in22");    
     alg.setPropertyValue("OutputWorkspace","test_out2");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -106,8 +106,8 @@ public:
     AnalysisDataService::Instance().add(wsName1, work_in1);
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("LHSWorkspace",wsName1);
+    alg.setPropertyValue("RHSWorkspace",wsName2);    
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -137,8 +137,8 @@ public:
     AnalysisDataService::Instance().add(wsName1, work_in1);
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("LHSWorkspace",wsName1);
+    alg.setPropertyValue("RHSWorkspace",wsName2);    
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -168,8 +168,8 @@ public:
     AnalysisDataService::Instance().add(wsName1, work_in1);
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("LHSWorkspace",wsName1);
+    alg.setPropertyValue("RHSWorkspace",wsName2);    
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -198,8 +198,8 @@ public:
     AnalysisDataService::Instance().add(wsName1, work_in1);
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);
+    alg.setPropertyValue("LHSWorkspace",wsName1);
+    alg.setPropertyValue("RHSWorkspace",wsName2);
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -237,8 +237,8 @@ public:
     Multiply alg;
 
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1","test_in11");
-    alg.setPropertyValue("InputWorkspace_2","test_in12");    
+    alg.setPropertyValue("LHSWorkspace","test_in11");
+    alg.setPropertyValue("RHSWorkspace","test_in12");    
     alg.setPropertyValue("OutputWorkspace","test_out1");
     alg.execute();
 
@@ -268,8 +268,8 @@ public:
     AnalysisDataService::Instance().add(wsName1, work_in1);
     AnalysisDataService::Instance().add(wsName2, work_in2);
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace_1",wsName1);
-    alg.setPropertyValue("InputWorkspace_2",wsName2);    
+    alg.setPropertyValue("LHSWorkspace",wsName1);
+    alg.setPropertyValue("RHSWorkspace",wsName2);    
     alg.setPropertyValue("OutputWorkspace",wsNameOut);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );

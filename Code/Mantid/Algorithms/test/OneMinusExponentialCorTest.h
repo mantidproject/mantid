@@ -46,7 +46,7 @@ public:
     TS_ASSERT( props[1]->isDefault() )
     TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[1]) )
 
-    TS_ASSERT_EQUALS( props[2]->name(), "c" )
+    TS_ASSERT_EQUALS( props[2]->name(), "C" )
     TS_ASSERT( props[2]->isDefault() )
     TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[2]) )
 
@@ -65,7 +65,7 @@ public:
     expon3.initialize();
     TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("InputWorkspace","InputWS") )
     TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("OutputWorkspace","WSCor") )
-    TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("c","2.0") )
+    TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("C","2.0") )
     
     TS_ASSERT_THROWS_NOTHING( expon3.execute() )
     TS_ASSERT( expon3.isExecuted() )
@@ -98,7 +98,7 @@ public:
     expon3.initialize();
     TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("InputWorkspace","InputWS") )
     TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("OutputWorkspace","WSCor") )
-    TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("c","2.0") )
+    TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("C","2.0") )
     TS_ASSERT_THROWS_NOTHING( expon3.setPropertyValue("Operation","Multiply") )
     
     TS_ASSERT_THROWS_NOTHING( expon3.execute() )

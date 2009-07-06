@@ -30,22 +30,22 @@ void LOQScriptInput::init()
   mustBePositive->setLower(0.0);
   
   //Radius range
-  declareProperty<double>("Radius_min",38.0, mustBePositive);
-  declareProperty<double>("Radius_max",419.0, mustBePositive->clone());
+  declareProperty<double>("RadiusMin",38.0, mustBePositive);
+  declareProperty<double>("RadiusMax",419.0, mustBePositive->clone());
 
   //Wavelength range and binning
-  declareProperty<double>("Wavelength_min",2.2, mustBePositive->clone());
-  declareProperty<double>("Wavelength_max",10.0, mustBePositive->clone());
-  declareProperty<double>("Wavelength_delta",-0.035);
+  declareProperty<double>("WavelengthMin",2.2, mustBePositive->clone());
+  declareProperty<double>("WavelengthMax",10.0, mustBePositive->clone());
+  declareProperty<double>("WavelengthDelta",-0.035);
 
   //Q range and binning
-  declareProperty<double>("Q_min",0.008, mustBePositive->clone());
+  declareProperty<double>("QMin",0.008, mustBePositive->clone());
   declareProperty<double>("Q_max",0.28, mustBePositive->clone());
   declareProperty<double>("Q_delta",0.02);
 
   //Beam centre position
-  declareProperty<double>("Beam_Centre_X", 317.5);
-  declareProperty<double>("Beam_Centre_Y", 317.5);
+  declareProperty<double>("BeamCentreX", 317.5);
+  declareProperty<double>("BeamCentreY", 317.5);
   
   //Efficiency correction
   declareProperty("EfficiencyCorrectionFile", "", new FileValidator());

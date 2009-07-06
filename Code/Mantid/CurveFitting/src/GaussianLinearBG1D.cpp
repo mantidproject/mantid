@@ -16,38 +16,38 @@ using namespace Kernel;
 void GaussianLinearBG1D::declareParameters()
 {
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
-  declareProperty("bg0", 0.0,
+  declareProperty("BG0", 0.0,
     "Constant background value (default 0)", Direction::InOut);
-  declareProperty("bg1", 0.0,
+  declareProperty("BG1", 0.0,
     "Linear background modelling parameter (default 0)",
     Direction::InOut);
-  declareProperty("height", 0.0, "Height of peak (default 0)",
+  declareProperty("Height", 0.0, "Height of peak (default 0)",
     Direction::InOut);
-  declareProperty("peakCentre", 0.0, "Centre of peak (default 0)",
+  declareProperty("PeakCentre", 0.0, "Centre of peak (default 0)",
     Direction::InOut);
-  declareProperty("sigma", 1.0, positiveDouble, 
+  declareProperty("Sigma", 1.0, positiveDouble, 
     "Standard deviation (default 1)", Direction::InOut);
 }
 
 void GaussianLinearBG1D::modifyStartOfRange(double& startX) 
 {
-  const double peak_val = getProperty("peakCentre");
-  const double sigma = getProperty("sigma");
+  const double peak_val = getProperty("PeakCentre");
+  const double sigma = getProperty("Sigma");
 
   startX = peak_val-(6*sigma);
 }
 
 void GaussianLinearBG1D::modifyEndOfRange(double& endX) 
 {
-  const double peak_val = getProperty("peakCentre");
-  const double sigma = getProperty("sigma");
+  const double peak_val = getProperty("PeakCentre");
+  const double sigma = getProperty("Sigma");
 
   endX = peak_val+(6*sigma);
 }
 
 void GaussianLinearBG1D::modifyInitialFittedParameters(std::vector<double>& fittedParameter)
 {
-  const double sigma = getProperty("sigma");
+  const double sigma = getProperty("Sigma");
 
   fittedParameter[4] = 1/(sigma*sigma);  // the fitting is actually done on 1/sigma^2, also referred to as the weight
 }

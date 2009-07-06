@@ -42,8 +42,8 @@ public:
 
     outputSpace = "testWS";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.setPropertyValue("spectrum_min","1");
-    loader.setPropertyValue("spectrum_max","100");
+    loader.setPropertyValue("SpectrumMin","1");
+    loader.setPropertyValue("SpectrumMax","100");
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
@@ -58,9 +58,9 @@ public:
   void testInitProperties()
   {
     // get scaling from raw file
-    alg.setPropertyValue("ScalingFileName", "../../../../Test/Data/MER02257.raw");
+    alg.setPropertyValue("ScalingFilename", "../../../../Test/Data/MER02257.raw");
     alg.setPropertyValue("Workspace", "testWS");
-       alg.setPropertyValue("scalingOption", "2");
+       alg.setPropertyValue("ScalingOption", "2");
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Workspace") )
     TS_ASSERT( ! result.compare("testWS"));

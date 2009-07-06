@@ -17,7 +17,7 @@ namespace Algorithms
   {
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
     mustBePositive->setLower(0.0);
-    declareProperty("c",1.0,mustBePositive);
+    declareProperty("C",1.0,mustBePositive);
     
     std::vector<std::string> operations(2);
     operations[0] = "Multiply";
@@ -27,7 +27,7 @@ namespace Algorithms
   
   void OneMinusExponentialCor::retrieveProperties()
   {
-    m_c = getProperty("c");
+    m_c = getProperty("C");
     std::string op = getProperty("Operation");
     m_divide = ( op == "Divide" ) ? true : false;
   }

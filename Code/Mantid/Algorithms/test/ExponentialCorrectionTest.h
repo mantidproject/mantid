@@ -46,11 +46,11 @@ public:
     TS_ASSERT( props[1]->isDefault() )
     TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[1]) )
 
-    TS_ASSERT_EQUALS( props[2]->name(), "c0" )
+    TS_ASSERT_EQUALS( props[2]->name(), "C0")
     TS_ASSERT( props[2]->isDefault() )
     TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[2]) )
 
-    TS_ASSERT_EQUALS( props[3]->name(), "c1" )
+    TS_ASSERT_EQUALS( props[3]->name(), "C1")
     TS_ASSERT( props[3]->isDefault() )
     TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[3]) )
 

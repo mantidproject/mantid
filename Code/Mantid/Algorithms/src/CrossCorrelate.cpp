@@ -31,11 +31,11 @@ namespace Mantid
       // Reference spectra against which cross correlation is performed
       declareProperty("ReferenceSpectra",0, mustBePositive);
       // Spectra in the range [min to max] will be cross correlated to reference.
-      declareProperty("Spectra_min",0, mustBePositive->clone());
-      declareProperty("Spectra_max",0, mustBePositive->clone());
+      declareProperty("SpectraMin",0, mustBePositive->clone());
+      declareProperty("SpectraMax",0, mustBePositive->clone());
       // Only the data in the range X_min, X_max will be used
-      declareProperty("X_min",0.0);
-      declareProperty("X_max",0.0);
+      declareProperty("XMin",0.0);
+      declareProperty("XMax",0.0);
      }
 
     /** Executes the algorithm
@@ -63,7 +63,7 @@ void CrossCorrelate::exec()
 
    	// Now check if the range between x_min and x_max is valid
    	const std::vector<double>& referenceX=inputWS->dataX(index_ref);
-   	double xmin=getProperty("X_min");
+   	double xmin=getProperty("XMin");
    	std::vector<double>::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
    	if (minIt==referenceX.end())
    		throw std::runtime_error("No data above X_min");
@@ -71,7 +71,7 @@ void CrossCorrelate::exec()
    	mess << *(minIt);
    	g_log.information(mess.str());
    	mess.str("");
-   	double xmax=getProperty("X_max");
+   	double xmax=getProperty("XMax");
    	std::vector<double>::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
    	if (minIt==maxIt)
    		throw std::runtime_error("Range is not valid");
@@ -84,8 +84,8 @@ void CrossCorrelate::exec()
 
    	// Now loop on the spectra in the range spectra_min and spectra_max and get valid spectra
 
-   	int specmin=getProperty("Spectra_min");
-   	int specmax=getProperty("Spectra_max");
+   	int specmin=getProperty("SpectraMin");
+   	int specmax=getProperty("SpectraMax");
    	// Get the number of spectra in range specmin to specmax
    	int nspecs=0;
    	std::vector<int> indexes; // Indexes of all spectra in range

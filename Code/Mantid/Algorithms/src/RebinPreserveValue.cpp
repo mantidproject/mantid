@@ -35,7 +35,7 @@ namespace Mantid
         new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace to be created as the output of the algorithm" );
       declareProperty(
-        new ArrayProperty<double>("params", new MandatoryValidator<std::vector<double> >),
+        new ArrayProperty<double>("Params", new MandatoryValidator<std::vector<double> >),
         "The new bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
     }
 

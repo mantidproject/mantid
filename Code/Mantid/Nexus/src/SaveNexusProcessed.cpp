@@ -57,13 +57,13 @@ namespace NeXus
       "A title to describe the saved workspace");
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("spectrum_min", 0, mustBePositive->clone(), 
+    declareProperty("SpectrumMin", 0, mustBePositive->clone(), 
       "Index number of first spectrum to read, only for single\n"
       "period data. Not yet implemented");
-    declareProperty("spectrum_max", unSetInt, mustBePositive->clone(),
+    declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
       "Index of last spectrum to read, only for single period\n"
       "data. Not yet implemented");
-    declareProperty(new ArrayProperty<int>("spectrum_list"),
+    declareProperty(new ArrayProperty<int>("SpectrumList"),
       "List of spectrum numbers to read, only for single period\n"
       "data. Not yet implemented");
     declareProperty("EntryNumber", 0, mustBePositive);
@@ -82,8 +82,8 @@ namespace NeXus
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
 
-    m_spec_list = getProperty("spectrum_list");
-    m_spec_max = getProperty("spectrum_max");
+    m_spec_list = getProperty("SpectrumList");
+    m_spec_max = getProperty("SpectrumMax");
     m_list = !m_spec_list.empty();
     m_interval = (m_spec_max != unSetInt);
     if ( m_spec_max == unSetInt ) m_spec_max = 0;
@@ -150,8 +150,8 @@ namespace NeXus
     std::vector<int> spec;
     if( m_interval )
     {
-      m_spec_min = getProperty("spectrum_min");
-      m_spec_max = getProperty("spectrum_max");
+      m_spec_min = getProperty("SpectrumMin");
+      m_spec_max = getProperty("SpectrumMax");
       if ( m_spec_max < m_spec_min || m_spec_max > numberOfHist-1 )
       {
         g_log.error("Invalid Spectrum min/max properties");

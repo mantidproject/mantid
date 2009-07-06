@@ -60,11 +60,11 @@ void FindProblemDetectors::init()
   declareProperty("EndSpectrum", UNSETINT, mustBePosInt->clone(),
     "The index number of the last spectrum to include in the calculation\n"
     "(default 0)" );
-  declareProperty("Range_lower", EMPTY_DBL(),
+  declareProperty("RangeLower", EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be used\n"
     "in the summation that decides if a detector is 'dead' (default: the\n"
     "start of each histogram)" );
-  declareProperty("Range_upper", EMPTY_DBL(),
+  declareProperty("RangeUpper", EMPTY_DBL(),
     "No bin with a boundary at an x value higher than this value will\n"
     "be used in the summation that decides if a detector is 'dead'\n"
     "(default: the end of each histogram)" );
@@ -308,8 +308,8 @@ API::MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
   childAlg->setProperty( "StartSpectrum", firstSpec );
   childAlg->setProperty( "EndSpectrum", lastSpec );
   // pass inputed values straight to this integration, checking must be done there
-  childAlg->setPropertyValue( "Range_lower",  getPropertyValue("Range_lower") );
-  childAlg->setPropertyValue( "Range_upper", getPropertyValue("Range_upper") );
+  childAlg->setPropertyValue( "RangeLower",  getPropertyValue("RangeLower") );
+  childAlg->setPropertyValue( "RangeUpper", getPropertyValue("RangeUpper") );
   try
   {
     // Now execute integrate

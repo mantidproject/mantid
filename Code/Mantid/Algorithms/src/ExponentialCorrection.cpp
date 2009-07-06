@@ -15,8 +15,8 @@ namespace Algorithms
 
   void ExponentialCorrection::defineProperties()
   {
-    declareProperty("c0",1.0);
-    declareProperty("c1",0.0);
+    declareProperty("C0",1.0);
+    declareProperty("C1",0.0);
     
     std::vector<std::string> operations(2);
     operations[0] = "Multiply";
@@ -26,8 +26,8 @@ namespace Algorithms
   
   void ExponentialCorrection::retrieveProperties()
   {
-    m_c0 = getProperty("c0");
-    m_c1 = getProperty("c1");
+    m_c0 = getProperty("C0");
+    m_c1 = getProperty("C1");
     std::string op = getProperty("Operation");
     m_divide = ( op == "Divide" ) ? true : false;
   }

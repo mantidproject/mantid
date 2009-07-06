@@ -219,9 +219,9 @@ public:
     
     nxload3.setPropertyValue("Filename", inputFile);    
     nxload3.setPropertyValue("OutputWorkspace", "outWS");    
-    nxload3.setPropertyValue("spectrum_list", "29,30,31");
-    nxload3.setPropertyValue("spectrum_min", "5");
-    nxload3.setPropertyValue("spectrum_max", "10");
+    nxload3.setPropertyValue("SpectrumList", "29,30,31");
+    nxload3.setPropertyValue("SpectrumMin", "5");
+    nxload3.setPropertyValue("SpectrumMax", "10");
     
     TS_ASSERT_THROWS_NOTHING(nxload3.execute());    
     TS_ASSERT( nxload3.isExecuted() );    

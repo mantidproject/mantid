@@ -91,11 +91,11 @@ public:
     alg2.setPropertyValue("SpectrumIndex","1");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
-    alg2.setPropertyValue("bg0", "2.0");
-    alg2.setPropertyValue("bg1", "0.0");
-    alg2.setPropertyValue("height", "105.7");
-    alg2.setPropertyValue("peakCentre", "13.5");
-    alg2.setPropertyValue("hwhm", "1.2");
+    alg2.setPropertyValue("BG0", "2.0");
+    alg2.setPropertyValue("BG1", "0.0");
+    alg2.setPropertyValue("Height", "105.7");
+    alg2.setPropertyValue("PeakCentre", "13.5");
+    alg2.setPropertyValue("Hwhm", "1.2");
 
     // execute fit
    TS_ASSERT_THROWS_NOTHING(
@@ -107,15 +107,15 @@ public:
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0002,0.0005);
-    dummy = alg2.getProperty("bg0");
+    dummy = alg2.getProperty("BG0");
     TS_ASSERT_DELTA( dummy, 3.0192,0.002);
-    dummy = alg2.getProperty("bg1");
+    dummy = alg2.getProperty("BG1");
     TS_ASSERT_DELTA( dummy, 0.0 ,0.005);
-    dummy = alg2.getProperty("height");
+    dummy = alg2.getProperty("Height");
     TS_ASSERT_DELTA( dummy, 100.66 ,0.01);
-    dummy = alg2.getProperty("peakCentre");
+    dummy = alg2.getProperty("PeakCentre");
     TS_ASSERT_DELTA( dummy, 11.20 ,0.01);
-    dummy = alg2.getProperty("hwhm");
+    dummy = alg2.getProperty("Hwhm");
     TS_ASSERT_DELTA( dummy, 1.10 ,0.01);
 
   }

@@ -419,6 +419,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadRaw3Test.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\LoadRawTest.h"
 				>
 			</File>

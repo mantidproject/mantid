@@ -20,7 +20,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-/// Custom validator for the "params" parameter of this algorithm
+/// Custom validator for the "Params" parameter of this algorithm
 class RegroupParamsValidator: public Kernel::IValidator<std::vector<double> >
 {
 public:
@@ -82,7 +82,7 @@ void Regroup::init()
     "The name of the workspace to be created as the output of the regrouping");
 
   declareProperty(
-    new ArrayProperty<double>("params", new RegroupParamsValidator),
+    new ArrayProperty<double>("Params", new RegroupParamsValidator),
     "The new approximate bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
 }
 
@@ -93,7 +93,7 @@ void Regroup::init()
 void Regroup::exec()
 {
   // retrieve the properties
-  std::vector<double> rb_params=getProperty("params");
+  std::vector<double> rb_params=getProperty("Params");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");

@@ -27,8 +27,11 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
   alg->setChild(true);
   alg->initialize();
 
-  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_1",lhs);
-  alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_2",rhs);
+  //alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_1",lhs);
+  //alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_2",rhs);
+
+   alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
+  alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
 
   // Have to set a text name for the output workspace even though it will not be used.
   //   This satisfies the validation.
