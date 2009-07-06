@@ -95,7 +95,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
 
 // Now the testing class itself
 public:
-  WorkspaceFactoryTest()
+  void testSetup()
   {
     ConfigService::Instance().loadConfig("MantidTest.properties");
 
@@ -169,6 +169,8 @@ public:
 
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error )
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",10,10,10), std::runtime_error )
+
+    ConfigService::Instance().loadConfig("Mantid.properties");
   }
 };
 
