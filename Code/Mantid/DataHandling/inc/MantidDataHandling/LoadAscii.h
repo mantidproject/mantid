@@ -20,9 +20,9 @@ namespace Mantid
     Loads a workspace from a coma-separated ascii file. Spectra must be stored in columns.
     Properties:
     <ul>
-          <li>Filename - the name of the file to read from.  <li/>
-          <li>Workspace - the workspace name that will be created and hold the loaded data.<li/>
-    <ul/>
+          <li>Filename - the name of the file to read from.  </li>
+          <li>Workspace - the workspace name that will be created and hold the loaded data.</li>
+    </ul>
 
     @author Roman Tolchenov, Tessella plc
     @date 3/07/09
