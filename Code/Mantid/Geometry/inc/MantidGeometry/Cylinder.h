@@ -93,6 +93,10 @@ class DLLExport Cylinder : public Quadratic
   void print() const;
   void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
 
+  //The number of slices to approximate a cylinder
+  static int g_nslices;
+  //The number of stacks to approximate a cylinder
+  static int g_nstacks;
 };
 
 }   // NAMESPACE MonteCarlo

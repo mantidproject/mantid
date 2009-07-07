@@ -1,7 +1,7 @@
-//#include "gts.h"
 #include "MantidGeometry/GluGeometryRenderer.h"
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/Quat.h"
+#include "MantidGeometry/Cylinder.h"
 #include <climits>
 #ifdef _WIN32
 #include "windows.h"
@@ -236,11 +236,10 @@ namespace Mantid
 			Quat rot(unit,axis);
 			rot.GLMatrix(mat);
 			glMultMatrixd(mat);
-			GLint nslices(10);
-			gluCylinder(qobj,radius,radius,height,nslices, 1);
-			gluDisk(qobj,0,radius,nslices, 1);
+			gluCylinder(qobj,radius,radius,height, Cylinder::g_nslices, Cylinder::g_nstacks);
+			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);
 			glTranslated(0.0,0.0,height);
-			gluDisk(qobj,0,radius,nslices,1);
+			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);
 			glPopMatrix();
 		}
 	}

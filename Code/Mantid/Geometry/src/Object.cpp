@@ -30,6 +30,8 @@
 #include "MantidGeometry/CacheGeometryHandler.h"
 #include "MantidGeometry/vtkGeometryCacheReader.h"
 #include "MantidGeometry/vtkGeometryCacheWriter.h"
+#include "MantidGeometry/Cylinder.h"
+
 namespace Mantid
 {
 
@@ -931,6 +933,7 @@ namespace Mantid
 	  xmin=ymin=zmin=-big;
 	  xmax=ymax=zmax=big;
 	  getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+	  std::cerr << "Ray trace bb " << xmin << " " << xmax << " " << ymin << " " << ymax << " " << zmin << " " << zmax << "\n";
 	  // Is the bounding box a reasonable one?
 	  if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
       {
@@ -1078,44 +1081,47 @@ namespace Mantid
                    return(4.0*M_PI);
            }
        }
-	   int nTri=this->NumberOfTriangles();
+
+       int nTri = this->NumberOfTriangles();
        //
        // If triangulation is not available fall back to ray tracing method, unless
-       // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
-       // and Cone cases as well.
+       // object is a standard shape, currently: sphere, cuboid or cylinder.
        //
        if(nTri==0)
        {
-           double height=0.0,radius;
-           int type;
-           std::vector<Geometry::V3D> vectors;
-           this->GetObjectGeom( type, vectors, radius, height);
-           if(type==1)
-               return CuboidSolidAngle(observer,vectors);
-           else if(type==2)
-               return SphereSolidAngle(observer,vectors,radius);
-           //
-           // No special case, do the ray trace.
-           //
-           return rayTraceSolidAngle(observer);
+	 double height(0.0),radius(0.0);
+	 int type(0);
+	 std::vector<Mantid::Geometry::V3D> geometry_vectors(0);
+	 this->GetObjectGeom( type, geometry_vectors, radius, height);
+	 if(type==1)
+	   return CuboidSolidAngle(observer, geometry_vectors);
+	 else if(type==2)
+	   return SphereSolidAngle(observer, geometry_vectors, radius);
+	 else if(type==3)
+	   return CylinderSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
+	 return rayTraceSolidAngle(observer);
        }
-	   double* vertices=this->getTriangleVertices();
-	   int *faces=this->getTriangleFaces();
-       double sangle=0,sneg=0;
-       for(int i=0;i<NumberOfTriangles();i++)
+       
+       double* vertices = this->getTriangleVertices();
+       int *faces = this->getTriangleFaces();
+       double sangle(0.0), sneg(0.0);
+       for(int i=0; i < nTri; i++)
        {
-           int p1=faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
-           V3D vp1=V3D(vertices[3*p1],vertices[3*p1+1],vertices[3*p1+2]);
-           V3D vp2=V3D(vertices[3*p2],vertices[3*p2+1],vertices[3*p2+2]);
-           V3D vp3=V3D(vertices[3*p3],vertices[3*p3+1],vertices[3*p3+2]);
-           double sa=getTriangleSolidAngle(vp1,vp2,vp3,observer);
-           if(sa>0)
-              sangle+=sa;
+           int p1 = faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
+           V3D vp1 = V3D(vertices[3*p1],vertices[3*p1+1],vertices[3*p1+2]);
+           V3D vp2 = V3D(vertices[3*p2],vertices[3*p2+1],vertices[3*p2+2]);
+           V3D vp3 = V3D(vertices[3*p3],vertices[3*p3+1],vertices[3*p3+2]);
+	   double sa = getTriangleSolidAngle(vp1,vp2,vp3,observer);
+           if(sa > 0.0)
+	   {
+	     sangle += sa;
+	   }
            else
-              sneg+=sa;
-     //    std::cout << vp1 << vp2 << vp2;
+	   {
+	     sneg += sa;
+	   }
        }
-       return(0.5*(sangle-sneg));
+       return 0.5*(sangle-sneg);
     }
     /**
      * Find solid angle of object from point "observer" using the
@@ -1157,7 +1163,7 @@ namespace Mantid
        //
        if(nTri==0)
        {
-           double height=0.0,radius;
+	 double height=0.0,radius(0.0);
            int type;
            std::vector<Geometry::V3D> vectors;
            this->GetObjectGeom( type, vectors, radius, height);
@@ -1176,8 +1182,8 @@ namespace Mantid
        }
 	   double* vertices=this->getTriangleVertices();
 	   int *faces=this->getTriangleFaces();
-       double sangle=0,sneg=0;
-       for(int i=0;i<NumberOfTriangles();i++)
+	   double sangle(0.0), sneg(0.0);
+       for(int i=0;i<nTri;i++)
        {
            int p1=faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
            // would be more efficient to pre-multiply the vertices (copy of) by these factors beforehand
@@ -1185,7 +1191,7 @@ namespace Mantid
            V3D vp2=V3D(sx*vertices[3*p2],sy*vertices[3*p2+1],sz*vertices[3*p2+2]);
            V3D vp3=V3D(sx*vertices[3*p3],sy*vertices[3*p3+1],sz*vertices[3*p3+2]);
            double sa=getTriangleSolidAngle(vp1,vp2,vp3,observer);
-           if(sa>0)
+           if(sa > 0.0)
               sangle+=sa;
            else
               sneg+=sa;
@@ -1258,6 +1264,132 @@ namespace Mantid
       }
       return(sangle);
    }
+
+   /**
+    * Calculate the solid angle for a sphere using triangulation.
+    * @param observer The observer's point
+    * @param vectors The centre and axis vectors respectively
+    * @param radius The radius
+    * @param height The height
+    * @returns The solid angle value
+    */
+    double Object::CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
+				      const Mantid::Geometry::V3D & axis, 
+				      const double radius, const double height) const
+   {
+     // The cone is broken down into three pieces and then in turn broken down into triangles. Any triangle
+     // that has a normal facing away from the observer gives a negative solid angle and is excluded
+     // For simplicity the triangulation points are constructed such that the cone axis points up the +Z axis
+     // and then rotated into their final position
+
+     Geometry::V3D  axis_direction = axis;
+     axis_direction.normalize();
+     // Required rotation
+     Geometry::V3D initial_axis = Geometry::V3D(0., 0., 1.0);
+     Geometry::V3D final_axis = axis_direction;
+     Geometry::Quat transform(initial_axis, final_axis);
+
+     // Do the base cap which is a point at the centre and nslices points around it
+     const int nslices(Mantid::Geometry::Cylinder::g_nslices);
+     const double angle_step = 2*M_PI/(double)nslices;
+     // Store the (x,y) points as they are used quite frequently
+     double cos_table[nslices]; //= new double[nslices];
+     double sin_table[nslices]; //= new double[nslices];
+
+     double solid_angle(0.0);
+     for( int sl = 0; sl < nslices; ++sl )
+     {
+       int vertex = sl;
+       cos_table[vertex] = radius*cos(angle_step*vertex);
+       sin_table[vertex] = radius*sin(angle_step*vertex);
+       Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], 0.0) + centre;
+
+       if( sl < nslices - 1 ) vertex = sl + 1;
+       else vertex = 0;
+       Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], 0.0) + centre;
+       
+       transform.rotate(pt2);
+       transform.rotate(pt3);       
+       double sa = getTriangleSolidAngle(centre, pt3, pt2, observer);
+       if( sa > 0.0 )
+       {
+	 solid_angle += sa;
+       }
+     }
+
+     // Second the top cap
+     Geometry::V3D top_centre = Geometry::V3D(0.0, 0.0, height) + centre;
+     transform.rotate(top_centre);
+
+     for( int sl = 0; sl < nslices; ++sl )
+     {
+       int vertex = sl;
+       Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], height) + centre;
+
+       if( sl < nslices - 1 ) vertex = sl + 1;
+       else vertex = 0;
+       Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], height) + centre;
+
+       // Rotate them to the correct axis orientation
+       transform.rotate(pt2);
+       transform.rotate(pt3);       
+       double sa = getTriangleSolidAngle(top_centre, pt2, pt3, observer);
+       if( sa > 0.0 )
+       {
+	 solid_angle += sa;
+       }
+     }
+
+     // Now the main section
+     const int nstacks(Mantid::Geometry::Cylinder::g_nstacks);
+     const double z_step = height / nstacks;
+     double z0(0.0), z1(z_step);
+
+     for( int st = 1; st <= nstacks; ++st )
+     {
+       if( st == nstacks ) z1 = height;
+       
+       for( int sl = 0; sl < nslices; ++sl )
+       {
+	 int vertex = sl;
+	 Geometry::V3D pt1 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z0) + centre;
+	 if( sl < nslices - 1 ) vertex = sl + 1;
+	 else vertex = 0;
+	 Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z0) + centre;
+
+	 vertex = sl;
+	 Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z1) + centre;
+	 if( sl < nslices - 1 ) vertex = sl + 1;
+	 else vertex = 0;
+	 Geometry::V3D pt4 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z1) + centre;
+	 // Rotations
+	 transform.rotate(pt1);
+	 transform.rotate(pt3);
+	 transform.rotate(pt2);
+	 transform.rotate(pt4);
+
+	 double sa = getTriangleSolidAngle(pt1, pt3, pt4, observer);
+	 if( sa > 0.0 ) 
+	 {
+	   solid_angle += sa;
+	 }
+	 sa = getTriangleSolidAngle(pt1, pt4, pt2, observer);
+	 if( sa > 0.0 )
+	 { 
+	   solid_angle += sa;
+	 }
+       }
+
+       z0 = z1;
+       z1 += z_step;
+     }
+
+//      delete [] cos_table;
+//      delete [] sin_table;
+
+     return solid_angle;
+   }
+
 	/**
 	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
 	 * object and returns them back in max and min points.
@@ -1647,7 +1779,7 @@ namespace Mantid
     /**
     * get info on standard shapes
     */
-    void Object::GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight) const
+    void Object::GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const
     {
        type=0;
        if(handle==NULL)return;

@@ -84,7 +84,7 @@ namespace Mantid
 			void Triangulate();
 			void Render();
 			void Initialize();
-			void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight);
+			void GetObjectGeom(int& mytype, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight);
 		};
 
 	}   // NAMESPACE Geometry

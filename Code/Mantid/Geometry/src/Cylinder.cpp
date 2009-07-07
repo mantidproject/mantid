@@ -32,8 +32,11 @@ namespace Geometry
 
 Kernel::Logger& Cylinder::PLog(Kernel::Logger::get("Cylinder"));
 
+// The number of slices to use to approximate a cylinder
+int Cylinder::g_nslices = 10;
 
-//const double CTolerance(1e-6);  ///< Tolerance
+// The number of slices to use to approximate a cylinder
+int Cylinder::g_nstacks = 1;
 
 Cylinder::Cylinder() : Quadratic(),
    Centre(),Normal(1,0,0),Nvec(0),Radius(0.0)

@@ -85,6 +85,10 @@ class DLLExport Object
   double getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const;
   double CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const;
   double SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const;
+  double CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
+			    const Mantid::Geometry::V3D & axis, 
+			    const double radius, const double height) const;
+
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;
   friend class CacheGeometryHandler;
@@ -100,7 +104,7 @@ class DLLExport Object
   int NumberOfPoints() const;
   int* getTriangleFaces() const;
   double* getTriangleVertices() const;
-  void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double myheight) const;
+  void GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const;
 
 
  protected:
