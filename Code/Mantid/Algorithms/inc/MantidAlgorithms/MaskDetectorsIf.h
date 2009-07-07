@@ -67,8 +67,11 @@ private:
 #else
 	typedef std::tr1::unordered_map<int,bool> udet2valuem;
 #endif
+	/// A map of detector numbers to mask boolean
 	udet2valuem umap;
+	/// Get the properties
 	void retrieveProperties();
+	/// Create a new cal file
 	void createNewCalFile(const std::string& oldfile,const std::string& newfile);
   API::MatrixWorkspace_const_sptr inputW;
   double value;

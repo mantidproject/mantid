@@ -96,6 +96,9 @@ void MaskDetectorsIf::exec()
 	return;
 }
 
+/**
+ * Get the input properties and store them in the object variables
+ */
 void MaskDetectorsIf::retrieveProperties()
 {
 	inputW=getProperty("InputWorkspace");
@@ -129,6 +132,11 @@ void MaskDetectorsIf::retrieveProperties()
 		 return;
 }
 
+/**
+ * Create a new cal file based on the old file
+ * @param oldfile The old cal file path
+ * @param newfile The new cal file path
+ */
 void MaskDetectorsIf::createNewCalFile(const std::string& oldfile, const std::string& newfile)
 {
 	  std::ifstream oldf(oldfile.c_str());
