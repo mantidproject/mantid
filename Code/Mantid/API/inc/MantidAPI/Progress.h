@@ -50,7 +50,7 @@ public:
   */
   Progress(Algorithm* alg,double start,double end, int n, int step=1)
     :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(static_cast<int>(double(n)*step/100/(end-start))),
-    m_dp((end-start)/(n-1)),m_i(0)
+    m_dp((end-start)/(n-1)),m_i(0),m_last_reported(-m_step)
   {if (m_step <= 0) m_step = 1;}
   
   /** Creates a Progress instance
@@ -63,7 +63,7 @@ public:
   */
   Progress(Algorithm* alg,double start,double end, int ifirst, int n, int step)
     :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step(static_cast<int>(double(n-ifirst)*step/100/(end-start))),
-    m_dp((end-start)/(n-ifirst-1)),m_i(ifirst)
+    m_dp((end-start)/(n-ifirst-1)),m_i(ifirst),m_last_reported(ifirst-m_step)
   {if (m_step <= 0) m_step = 1;}
   
   void report(const std::string& msg = "");
@@ -78,6 +78,7 @@ private:
   int m_step;        ///< Frequency of sending the notification (every m_step times)
   const double m_dp;       ///< Progress increment at each loop
   int m_i;           ///< Loop counter
+  int m_last_reported;     ///< Last loop counter value the was a peport
 };
 
 } // namespace API

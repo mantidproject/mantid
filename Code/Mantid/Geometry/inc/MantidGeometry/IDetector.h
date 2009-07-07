@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
-//#include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IComponent.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -82,6 +82,9 @@ public:
 
   /// Indicates whether this is a monitor detector
   virtual bool isMonitor() const = 0;
+
+  /// Must return a pointer to itself if derived from IComponent
+  virtual IComponent& getComponent(){throw std::runtime_error("This detecor class does not inherit from IComponent.");}
 
   /// (Empty) Constructor
 	IDetector() {}

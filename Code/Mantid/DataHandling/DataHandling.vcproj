@@ -217,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadAscii.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadDAE.cpp"
 				>
 			</File>
@@ -270,6 +274,10 @@
 			</File>
 			<File
 				RelativePath=".\src\MoveInstrumentComponent.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SaveAscii.cpp"
 				>
 			</File>
 			<File
@@ -360,6 +368,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\item_struct.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadAscii.h"
 				>
 			</File>
 			<File
@@ -460,6 +472,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\MoveInstrumentComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveAscii.h"
 				>
 			</File>
 			<File

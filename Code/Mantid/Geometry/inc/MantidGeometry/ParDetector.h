@@ -52,15 +52,17 @@ public:
 	void setID(int);
 
 	// IDetector methods
-	int getID() const;
-	V3D getPos() const;
-	double getDistance(const IComponent& comp) const;
-  double getTwoTheta(const V3D& observer, const V3D& axis) const;
-  double getPhi() const;
-  double solidAngle(const V3D& observer) const; 
-	bool isMasked() const;
-	bool isMonitor() const;
-  bool isValid(const V3D& point) const;
+    int getID() const;
+    V3D getPos() const;
+    double getDistance(const IComponent& comp) const;
+    double getTwoTheta(const V3D& observer, const V3D& axis) const;
+    double getPhi() const;
+    double solidAngle(const V3D& observer) const; 
+    bool isMasked() const;
+    bool isMonitor() const;
+    bool isValid(const V3D& point) const;
+    /// Returns a reference to itself
+    IComponent& getComponent(){return *static_cast<IComponent*>(this);}
 	// end IDetector methods
 
 	void markAsMonitor(const bool flag = true);
