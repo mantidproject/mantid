@@ -20,10 +20,11 @@ namespace Mantid
     that deviate far enough from median value of all detectors to be suspious.  The factors used
     to define detectors as reading too low or reading too high are selectable by setting the
     "Low" and "High" properties.  By default the median value is calculated using the entire
-    spectrum but a region can be selected by setting startX and endX.  The algorithm returns an
-    array with a list of detectors and produces a workspace where the ???????.  If the
-    OutputFile property is set to a valid name the list of dead detector with be written to that
-    file.
+    spectrum but a region can be selected by setting startX and endX.  The output workspace
+    contains one value for each spectrum in the input workspace, a value of 0 marks a spectrum
+    with no problems and 100 a spectrum that failed.  The algorithm also returns an
+    array with a list of the detector IDs asociated with failing spectra and if the OutputFile
+    property is set the same list is written to that file.
 
     Required Properties:
     <UL>
@@ -71,8 +72,8 @@ namespace Mantid
       /// Default constructor initialises all values to zero and runs the base class constructor
       WBVMedianTest() :
           API::Algorithm(),
-          m_Low(0.1), m_High(1.5), m_MinSpec(0), m_MaxSpec(UNSETINT),
-          m_PercentDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
+          m_Low(0.1), m_High(1.5), m_PercentDone(0.0), m_TotalTime(RTTotal), 
+          m_usableMaskMap(true), m_MinSpec(0), m_MaxSpec(UNSETINT)
       {};
       /// Destructor
       virtual ~WBVMedianTest() {};

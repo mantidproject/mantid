@@ -259,6 +259,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FindDetectorsOutsideLimits.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FindPeaks.cpp"
 				>
 			</File>
@@ -562,6 +566,14 @@
 			</File>
 			<File
 				RelativePath=".\test\FindDeadDetectorsTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FindDetectorsOutsideLimits.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FindDetectorsOutsideLimitsTest.h"
 				>
 			</File>
 			<File
