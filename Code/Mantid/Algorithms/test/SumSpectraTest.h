@@ -40,6 +40,8 @@ public:
       space2D->setData(j, boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(a+(5*j), a+(5*j)+5)),
           boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(e+(5*j), e+(5*j)+5)));
     }
+    delete[] a;
+    delete[] e;
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(inputSpace, space);
 

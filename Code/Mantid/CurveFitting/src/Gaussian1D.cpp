@@ -77,7 +77,6 @@ void Gaussian1D::functionDeriv(const double* in, Jacobian* out, const double* xV
     const double& peakCentre = in[2];
     const double& weight = in[3];
 
-    int nParam = m_parameterNames.size();
     for (int i = 0; i < nData; i++) {
         double s = yErrors[i];
         double diff = xValues[i]-peakCentre;

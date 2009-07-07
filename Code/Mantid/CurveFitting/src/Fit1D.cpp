@@ -26,8 +26,6 @@ using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
 using API::Algorithm;
 
-struct FitData;
-
 /// The implementation of Jacobian
 class JacobianImpl: public Jacobian
 {
@@ -557,7 +555,7 @@ FitData::FitData(Fit1D* fit, const std::string& fixed):fit1D(fit)
             throw std::invalid_argument("Attempt to fix non-existing parameter "+name);
     }
     p = 0;
-    for(int i=0,j=0;i<int(active.size());i++)
+    for(int i=0; i<int(active.size()); i++)
         if (active[i])
             J.m_map[i] = p++;
         else

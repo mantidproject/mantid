@@ -23,7 +23,7 @@ unsigned int Algorithm::g_execCount=0;
 /// Constructor
 Algorithm::Algorithm() :
   PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
-		m_executeAsync(this,&Algorithm::executeAsyncImpl),g_log(Kernel::Logger::get("Algorithm")),m_isInitialized(false),
+  g_log(Kernel::Logger::get("Algorithm")),m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
   m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false),
   m_algorithmID(0)
 {

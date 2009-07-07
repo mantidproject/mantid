@@ -11,6 +11,8 @@
 # Author: Russell Taylor, 07/11/07
 #
 
+rm -rf runner.*
+
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
 #  - it's always a good idea to run your new/changed test on its own
@@ -42,7 +44,6 @@ echo
 # Remove the generated files to ensure that they're not inadvertently run
 #   when something in the chain has failed.
 echo "Cleaning up..."
-rm -rf runner.*
 rm -f *.properties
 rm -f *.log
 echo "Done."

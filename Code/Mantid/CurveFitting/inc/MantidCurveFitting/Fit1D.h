@@ -10,19 +10,11 @@ namespace Mantid
 {
   namespace CurveFitting
   {
-      /** Represents the Jaconian in functionDeriv. The purpose of this calss is to hide from the
-       *  derived from Fit1D classes the fact that some of the parameters can be fixed.
-       */
-      class Jacobian
-      {
-      public:
-          /**  Set a value to a Jacobian matrix element.
-           *   @param iY The index of the data point.
-           *   @param iP The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
-           *   @param value The derivative value.
-           */
-          virtual void set(int iY, int iP, double value) = 0;
-      };
+    //----------------------------------------------------------------------
+    // Forward Declaration
+    //----------------------------------------------------------------------
+    class Jacobian;
+  
     /**
     Abstract base class for 1D fitting functions.
 
@@ -121,9 +113,25 @@ namespace Mantid
       size_t nParams()const{return m_parameterNames.size();}
 
       friend struct FitData;
-
     };
 
+    
+    /** Represents the Jacobian in functionDeriv. The purpose of this class is to hide from the
+     *  derived Fit1D classes the fact that some of the parameters can be fixed.
+     */
+    class Jacobian
+    {
+    public:
+      /**  Set a value to a Jacobian matrix element.
+       *   @param iY The index of the data point.
+       *   @param iP The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
+       *   @param value The derivative value.
+       */
+      virtual void set(int iY, int iP, double value) = 0;
+      /// Virtual destructor
+      virtual ~Jacobian() {};
+    };
+    
   } // namespace CurveFitting
 } // namespace Mantid
 

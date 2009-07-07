@@ -133,6 +133,8 @@ public:
     // Test that trying to get the Detector throws.
     std::vector<int> test = map.getDetectors(5);
     TS_ASSERT(test.empty());
+    
+    AnalysisDataService::Instance().remove(outputSpace);    
   }
 
   void testarrayin()
@@ -169,6 +171,7 @@ public:
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(8)[777], 554.1875);
 
+    AnalysisDataService::Instance().remove("outWS");
   }
 
   void testfail()
@@ -214,6 +217,8 @@ public:
     loader3.setPropertyValue("SpectrumList", "999,2000");
     loader3.execute();
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out2"));
+    
+    AnalysisDataService::Instance().remove("out2");
   }
 
   void testMultiPeriod()
@@ -268,6 +273,8 @@ public:
     TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output6->spectraMap()) )
     TS_ASSERT_DIFFERS( output1->getSample(), output6->getSample() )
+    
+    AnalysisDataService::Instance().remove("multiperiod2");
   }
 
   void testWithManagedWorkspace()
@@ -284,6 +291,9 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
     TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
+    
+    ConfigService::Instance().loadConfig("Mantid.properties");
+    AnalysisDataService::Instance().remove("managedws2");
   }
 
 private:

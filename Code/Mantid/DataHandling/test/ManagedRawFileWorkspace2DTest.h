@@ -9,7 +9,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
-using namespace std;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -128,8 +127,8 @@ public:
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    TS_ASSERT(boost::dynamic_pointer_cast<ManagedRawFileWorkspace2D>(output2D) )
+    Workspace2D_const_sptr output2D = boost::dynamic_pointer_cast<const Workspace2D>(output);
+    TS_ASSERT(boost::dynamic_pointer_cast<const ManagedRawFileWorkspace2D>(output2D) )
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);
     // Check two X vectors are the same
@@ -206,7 +205,8 @@ public:
     std::vector<int> test = map.getDetectors(5);
     TS_ASSERT(test.empty());
     
-    ConfigService::Instance().loadConfig("MantidTest.properties");
+    AnalysisDataService::Instance().remove(outputSpace);
+    ConfigService::Instance().loadConfig("Mantid.properties");
   }
 
 private:

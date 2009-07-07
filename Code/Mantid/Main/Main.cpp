@@ -40,22 +40,11 @@ int main()
 
     loader->execute();
 
-    IAlgorithm* focus = fm.createAlgorithm("DiffractionFocussing");
-    focus->setPropertyValue("GroupingFileName", "../../../Test/Data/offsets_2006_cycle064.cal");
-
-    std::string resultSpace = "result";
-    focus->setPropertyValue("InputWorkspace", outputSpace); 
-    focus->setPropertyValue("OutputWorkspace", resultSpace);    
-
-    focus->execute();
-
-
 #endif
 
 
-  FrameworkManager::Instance().clear();
-  exit(0);//*/
-
+  fm.clear();
+  exit(0);
 
 }
 

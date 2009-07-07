@@ -47,7 +47,7 @@ void SaveGSS::exec()
   //Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   const int nHist=inputWS->getNumberHistograms();
-  const bool isHistogram = inputWS->isHistogramData();
+  //const bool isHistogram = inputWS->isHistogramData();
 
   std::string filename = getProperty("Filename");
   std::size_t pos=filename.find_first_of(".");

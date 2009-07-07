@@ -56,7 +56,6 @@ void Lorentzian1D::functionDeriv(const double* in, Jacobian* out, const double* 
     const double& peakCentre = in[3];
     const double& hwhm = in[4];
 
-    int nParam = m_parameterNames.size();
     for (int i = 0; i < nData; i++) {
         double s = yErrors[i];
         double diff = xValues[i]-peakCentre;

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/AlignDetectors.h"
-#include "MantidDataHandling/LoadRaw2.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
 using namespace Mantid::DataHandling;
@@ -16,11 +16,13 @@ class AlignDetectorsTest : public CxxTest::TestSuite
 public:
   AlignDetectorsTest()
   {
-    LoadRaw2 loader;
+    LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/HRP38692.RAW");
     inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
+    loader.setProperty("SpectrumMin",320);
+    loader.setProperty("SpectrumMax",330);
     loader.execute();
   }
 
@@ -71,9 +73,9 @@ public:
     TS_ASSERT_EQUALS( outWS->size(), inWS->size() )
     TS_ASSERT_EQUALS( outWS->blocksize(), inWS->blocksize() )
 
-    TS_ASSERT_DELTA( outWS->dataX(321)[50], 0.7223, 0.0001 )
-    TS_ASSERT_EQUALS( outWS->dataY(321)[50], inWS->dataY(321)[50] )
-    TS_ASSERT_EQUALS( outWS->dataY(321)[50], inWS->dataY(321)[50] )
+    TS_ASSERT_DELTA( outWS->dataX(2)[50], 0.7223, 0.0001 )
+    TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] )
+    TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] )
   }
 
 private:

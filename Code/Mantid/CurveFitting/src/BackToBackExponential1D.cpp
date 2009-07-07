@@ -64,7 +64,6 @@ void BackToBackExponential1D::functionDeriv(const double* in, Jacobian* out, con
     const double& s = in[4];
 
     double s2 = s*s;
-    int nParam = m_parameterNames.size();
     for (int i = 0; i < nData; i++) {
         double diff = xValues[i]-x0;
 

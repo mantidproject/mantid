@@ -850,7 +850,7 @@ namespace NeXus
    int start[2]={0,0},asize[2]={1,dims_array[1]};
    status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
    status=NXopendata(fileID, name.c_str());
-   for(size_t i=0;i<nSpect;i++)
+   for(int i=0;i<nSpect;i++)
    {
        int s = spec[i];
       status=NXputslab(fileID, (void*)&(localworkspace->readY(s)[0]),start,asize);
@@ -875,7 +875,7 @@ namespace NeXus
      else sLabel = "unknown";
    }
    std::vector<double> histNumber;
-   for(size_t i=0;i<nSpect;i++) 
+   for(int i=0;i<nSpect;i++) 
    {
        int s = spec[i];
        histNumber.push_back((*sAxis)(s));
@@ -891,7 +891,7 @@ namespace NeXus
    status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
    status=NXopendata(fileID, name.c_str());
    start[0]=0;
-   for(size_t i=0;i<nSpect;i++)
+   for(int i=0;i<nSpect;i++)
    {
        int s = spec[i];
       status=NXputslab(fileID, (void*)&(localworkspace->readE(s)[0]),start,asize);
@@ -911,14 +911,13 @@ namespace NeXus
 	   dims_array[0]=nSpect;
 	   dims_array[1]=localworkspace->readX(0).size();
 	   status=NXmakedata(fileID, "axis1", NX_FLOAT64, 2, dims_array);
-       status=NXopendata(fileID, "axis1");
+	   status=NXopendata(fileID, "axis1");
 	   start[0]=0; asize[1]=dims_array[1];
-       for(size_t i=0;i<nSpect;i++)
-       {
-           int s = spec[i];
-           status=NXputslab(fileID, (void*)&(localworkspace->readX(i)[0]),start,asize);
-	       start[0]++;
-       }
+	   for(int i=0;i<nSpect;i++)
+	   {
+	     status=NXputslab(fileID, (void*)&(localworkspace->readX(i)[0]),start,asize);
+	     start[0]++;
+	   }
    }
    std::string dist=(localworkspace->isDistribution()) ? "1" : "0";
    status=NXputattr(fileID, "distribution", (void*)dist.c_str(), 2, NX_CHAR);
@@ -1284,7 +1283,7 @@ namespace NeXus
 
    int ndet = 0;
    // get data from map into Nexus Muon format
-   for(size_t i=0;i<numberSpec;i++)
+   for(int i=0;i<numberSpec;i++)
    {
        int si = spec[i];
        spectra[i] = spectraAxis->spectraNo(si);
