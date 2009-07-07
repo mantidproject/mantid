@@ -20,12 +20,12 @@ namespace Mantid
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    <LI> HighThreshold - Spectra whose total number of counts are above or equal to this value will be marked dead</LI>
     </UL>
 
     Optional Properties:
     <UL>
-    <LI> LowThreshold - Spectra whose total number of counts are below or equal to this value will be marked dead (default 0)<\LI>
-    <LI> HighThreshold - Spectra whose total number of counts are above or equal to this value will be marked dead<\LI>
+    <LI> LowThreshold - Spectra whose total number of counts are below or equal to this value will be marked dead (default 0)</LI>
     <LI> LiveValue - The value to assign to an integrated spectrum flagged as 'live' (default 0.0)</LI>
     <LI> DeadValue - The value to assign to an integrated spectrum flagged as 'dead' (default 100.0)</LI>
     <LI> StartX - Start the integration at the above bin above the one that this value is in (default: the start of each histogram)</LI>
