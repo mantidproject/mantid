@@ -25,7 +25,7 @@ void StripPeaks::init()
 
   BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("Fwhm", 7, range,
+  declareProperty("FWHM", 7, range,
     "Estimated number of points covered by the fwhm of a peak (default 7)" );
   // The tolerance allowed in meeting the conditions
   BoundedValidator<int> *min = new BoundedValidator<int>();
@@ -69,7 +69,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 
   API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks");
   findpeaks->setProperty("InputWorkspace", WS);
-  findpeaks->setProperty<int>("Fwhm",getProperty("Fwhm"));
+  findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
   findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
 
   // Now execute the sub-algorithm. Catch and log any error
