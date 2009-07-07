@@ -275,6 +275,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GEMScriptInput.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\GeneralisedSecondDifference.cpp"
 				>
 			</File>
@@ -582,6 +586,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FlatBackgroundTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\GEMScriptInput.h"
 				>
 			</File>
 			<File
