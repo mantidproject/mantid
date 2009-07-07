@@ -29,7 +29,7 @@ void Lorentzian1D::declareParameters()
     Direction::InOut);
   declareProperty("PeakCentre",0.0,  noValidation->clone(),
     "Centre of peak (default 0)", Direction::InOut);
-  declareProperty("Hwhm",1.0, positiveDouble,
+  declareProperty("HWHM",1.0, positiveDouble,
     "half-width at half-maximum (default 1)", Direction::InOut);
 }
 

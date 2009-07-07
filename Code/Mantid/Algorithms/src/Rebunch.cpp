@@ -35,7 +35,7 @@ namespace Mantid
 
 			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
 			mustBePositive->setLower(1);
-			declareProperty("Nbunch",1, mustBePositive,
+			declareProperty("NBunch",1, mustBePositive,
         "The number of bins to that will be summed in each bunch");
 		}
 
@@ -46,7 +46,7 @@ namespace Mantid
 		void Rebunch::exec()
 		{
 			// retrieve the properties
-			int n_bunch=getProperty("Nbunch");
+			int n_bunch=getProperty("NBunch");
 
 			// Get the input workspace
 			MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");

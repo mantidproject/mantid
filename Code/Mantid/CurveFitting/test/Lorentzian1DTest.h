@@ -95,7 +95,7 @@ public:
     alg2.setPropertyValue("BG1", "0.0");
     alg2.setPropertyValue("Height", "105.7");
     alg2.setPropertyValue("PeakCentre", "13.5");
-    alg2.setPropertyValue("Hwhm", "1.2");
+    alg2.setPropertyValue("HWHM", "1.2");
 
     // execute fit
    TS_ASSERT_THROWS_NOTHING(
@@ -115,7 +115,7 @@ public:
     TS_ASSERT_DELTA( dummy, 100.66 ,0.01);
     dummy = alg2.getProperty("PeakCentre");
     TS_ASSERT_DELTA( dummy, 11.20 ,0.01);
-    dummy = alg2.getProperty("Hwhm");
+    dummy = alg2.getProperty("HWHM");
     TS_ASSERT_DELTA( dummy, 1.10 ,0.01);
 
   }

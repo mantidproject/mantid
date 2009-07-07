@@ -33,7 +33,7 @@ void FindPeaks1D::init()
   declareProperty("Spectrum",0,min);
   BoundedValidator<int> *min2 = new BoundedValidator<int>();
   min2->setLower(1);
-  declareProperty("SmoothNpts",1,min->clone());
+  declareProperty("SmoothNPts",1,min->clone());
   declareProperty("SmoothIter",1,min->clone());
   BoundedValidator<double> *mind = new BoundedValidator<double>();
   mind->setLower(1.0);
@@ -49,7 +49,7 @@ void FindPeaks1D::retrieveProperties()
 	spec_number= getProperty("Spectrum");
 	if (spec_number>input->getNumberHistograms())
 		throw std::runtime_error("FindPeaks1D, spectrum not valid");
-	smooth_npts=getProperty("SmoothNpts");
+	smooth_npts=getProperty("SmoothNPts");
 	smooth_iter=getProperty("SmoothIter");
 	threashold=getProperty("Threashold");
 	return;
