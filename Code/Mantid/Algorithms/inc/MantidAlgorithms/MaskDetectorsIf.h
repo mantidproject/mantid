@@ -63,8 +63,10 @@ public:
 
 private:
 #ifndef HAS_UNORDERED_MAP_H
+  /// Typedef for detector to value map
 	typedef std::map<int,bool> udet2valuem;
 #else
+  // Typedef for det to value map
 	typedef std::tr1::unordered_map<int,bool> udet2valuem;
 #endif
 	/// A map of detector numbers to mask boolean
@@ -73,13 +75,18 @@ private:
 	void retrieveProperties();
 	/// Create a new cal file
 	void createNewCalFile(const std::string& oldfile,const std::string& newfile);
-  API::MatrixWorkspace_const_sptr inputW;
-  double value;
-  boost::function<bool (double,double)> compar_f;
-  bool select_on;
-  // Overridden Algorithm methods
-  void init();
-  void exec();
+	/// The input workspace
+	API::MatrixWorkspace_const_sptr inputW;
+	/// The Value parameter
+	double value;
+	/// A comparator function
+	boost::function<bool (double,double)> compar_f;
+	/// Whether select is on or off
+	bool select_on;
+	/// Overidden init
+	void init();
+	/// Overidden exec
+	void exec();
 
 };
 
