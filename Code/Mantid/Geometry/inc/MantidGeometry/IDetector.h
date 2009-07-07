@@ -8,6 +8,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IComponent.h"
 #include <boost/shared_ptr.hpp>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -17,7 +18,6 @@ namespace Geometry
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-class IComponent;
 class V3D;
 
 /** Interface class for detector objects.
