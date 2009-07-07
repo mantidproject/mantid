@@ -75,7 +75,7 @@ namespace Mantid
 #ifdef _WIN32
       int ReservedMem();
       MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
-#else
+#elif defined __linux__
 			bool ReadMemInfo(MemoryInfo & mi);
 #endif
 

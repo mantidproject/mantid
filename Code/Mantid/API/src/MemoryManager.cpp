@@ -2,9 +2,8 @@
 #include <iostream>
 #include <limits>
 
-#ifndef _WIN32
+#ifdef __linux__
 #include <unistd.h>
-#include <sys/sysinfo.h>
 #include <malloc.h>
 #endif
 
@@ -55,11 +54,10 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
     mi.availMemory = static_cast<int>(memStatus.ullAvailVirtual/1024);
     mi.totalMemory = static_cast<int>(memStatus.ullTotalVirtual/1024);
   }
-  mi.freeRatio = int(100*double(mi.availMemory)/mi.totalMemory);
 
-#else
+#elif defined __linux__
 
-  /**
+  /*
    * As usual things are more complex on Linux. I think we need to take into account
    * the value of Cached as well since, especially if the system has been running for a long time,
    * MemFree will seem a lot smaller than it should be.
@@ -74,22 +72,28 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
     long int pageSize = sysconf(_SC_PAGESIZE);
     mi.availMemory = avPages / 1024 * pageSize;
     mi.totalMemory = totPages / 1024 * pageSize;
-    mi.freeRatio = int(100 * double(mi.availMemory) / mi.totalMemory);
   }
   // Can get the info on the memory that we've already obtained but aren't using right now
   const int unusedReserved = mallinfo().fordblks/1024;
   g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   mi.availMemory += unusedReserved;
+#else // Currently get to here if building on a mac. For now just use big numbers.
+  mi.availMemory = 9000000;
+  mi.totalMemory = 10000000;
 #endif
+    
+  mi.freeRatio = static_cast<int>(100.0*mi.availMemory/mi.totalMemory);
+  g_log.debug() << "Percentage of memory taken to be available for use (incl. cache): "
+      << mi.freeRatio << "%.\n";
   return mi;
 }
 
-#ifndef _WIN32
+#ifdef __linux__
 /**
  * A unix specific function to read values from /proc/meminfo
  * @param mi A struct to fill with the appropriate values
  */
-bool MemoryManagerImpl::ReadMemInfo(Mantid::API::MemoryInfo & mi)
+bool MemoryManagerImpl::ReadMemInfo(MemoryInfo & mi)
 {
   std::ifstream file("/proc/meminfo");
   std::string line;
@@ -127,11 +131,8 @@ bool MemoryManagerImpl::ReadMemInfo(Mantid::API::MemoryInfo & mi)
       continue;
     if (values_found == 3)
     {
-      mi.freeRatio = static_cast<int> (double(mi.availMemory) / mi.totalMemory * 100);
       g_log.debug() << "Linux - Memory taken to be available for use (incl. cache): " << mi.availMemory
           << " KB.\n";
-      g_log.debug() << "Linux - Percentage of memory taken to be available for use (incl. cache): "
-          << mi.freeRatio << "%.\n";
       file.close();
       return true;
     }
