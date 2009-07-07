@@ -17,7 +17,7 @@ namespace Algorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input. Must have common bins. </LI>
+    <LI> InputWorkspace - The name of the Workspace2D to take as input. </LI>
     <LI> OutputWorkspace - The name under which to store the output workspace. </LI>
     </UL>
 
@@ -29,6 +29,7 @@ namespace Algorithms
     <LI> EndSpectrum - The workspace index number to end the cropped workspace at (default max)</LI>
     </UL>
 
+    If cropping in X, then the input workspace must have common bin boundaries/X values.
     If an X value given does not exactly match a bin boundary, then the closest bin boundary
     within the range will be used.
     Note that if none of the optional properties are given, then the output workspace will be
@@ -37,7 +38,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 15/10/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -76,8 +77,8 @@ private:
   void exec();
 
   void checkProperties();
-  void getXMin();
-  void getXMax();
+  bool getXMin();
+  bool getXMax();
 
   /// The input workspace
   DataObjects::Workspace2D_const_sptr m_inputWorkspace;
@@ -89,6 +90,8 @@ private:
   int m_minSpec;
   /// The spectrum index to end the cropped workspace at
   int m_maxSpec;
+  /// Flag indicating whether the input workspace has common boundaries
+  bool m_commonBoundaries;
   
   ///a flag int value to indicate that the value wasn't set by users
   static const int unSetInt = INT_MAX-15;

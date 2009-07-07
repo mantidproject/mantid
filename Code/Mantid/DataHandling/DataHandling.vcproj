@@ -451,14 +451,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\MarkDeadDetectorsInShapeTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\MarkDeadDetectorsTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidDataHandling\MaskDetectors.h"
 				>
 			</File>
@@ -492,10 +484,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\SaveGSS.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\SaveNeXusTest.h"
 				>
 			</File>
 			<File
