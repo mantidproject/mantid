@@ -1268,7 +1268,8 @@ namespace Mantid
    /**
     * Calculate the solid angle for a sphere using triangulation.
     * @param observer The observer's point
-    * @param vectors The centre and axis vectors respectively
+    * @param centre The centre vector
+    * @param axis The axis vector
     * @param radius The radius
     * @param height The height
     * @returns The solid angle value
@@ -1293,8 +1294,8 @@ namespace Mantid
      const int nslices(Mantid::Geometry::Cylinder::g_nslices);
      const double angle_step = 2*M_PI/(double)nslices;
      // Store the (x,y) points as they are used quite frequently
-     double cos_table[nslices]; //= new double[nslices];
-     double sin_table[nslices]; //= new double[nslices];
+     double *cos_table = new double[nslices];
+     double *sin_table = new double[nslices];
 
      double solid_angle(0.0);
      for( int sl = 0; sl < nslices; ++sl )
@@ -1384,8 +1385,8 @@ namespace Mantid
        z1 += z_step;
      }
 
-//      delete [] cos_table;
-//      delete [] sin_table;
+     delete [] cos_table;
+     delete [] sin_table;
 
      return solid_angle;
    }
