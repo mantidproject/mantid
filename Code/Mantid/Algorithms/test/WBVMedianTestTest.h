@@ -1,10 +1,10 @@
-#ifndef FINDPROBLEMDETECTORSTEST_H_
-#define FINDPROBLEMDETECTORSTEST_H_
+#ifndef WBVMEDIANTESTTEST_H_
+#define WBVMEDIANTESTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "WorkspaceCreationHelper.hh"
 
-#include "MantidAlgorithms/FindProblemDetectors.h"
+#include "MantidAlgorithms/WBVMedianTest.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -27,18 +27,18 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-//these values must match the values in FindProblemDetectors
+//these values must match the values in WBVMedianTest
 static int BadVal = 100;
 static int GoodVal = 0;
 
-class FindProblemDetectorsTest : public CxxTest::TestSuite
+class WBVMedianTestTest : public CxxTest::TestSuite
 {
 public:
 
-  void testWithoutAngles()
+  void testWorkspaceAndArray()
   {
-    FindProblemDetectors alg;
-    //TS_ASSERT_EQUALS( alg.name(), "FindProblemDetectors" )
+    WBVMedianTest alg;
+    TS_ASSERT_EQUALS( alg.name(), "WBVMedianTest" )
     TS_ASSERT_EQUALS( alg.version(), 1 )
     //the spectra were setup in the constructor and passed to our algorithm through this function
     TS_ASSERT_THROWS_NOTHING(
@@ -57,22 +57,22 @@ public:
     TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty( "FoundDead" ) )
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("FindProbDetectsTestOutput"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("WBVMedianTestTestOutput"));
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(m_IWSName));
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("FindProbDetectsTestOutput"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("WBVMedianTestTestOutput"));
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
-    if ( !outputMat ) throw std::logic_error("outputMat is null or not a Matrix workspace, aborting some asserts");
+    TS_ASSERT ( outputMat ) ;
     TS_ASSERT_EQUALS( outputMat->YUnit(), "" )
 
     //There are three output, a workspace (tested in the next code block), an array (later, this test) and a file (next test)
     //were all the spectra output?
 		const int numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
-    //the number of counts is proportional to spectra number (no solid angle calculation to disturb things) so the number that are below the low limit is the number below the median (half of them) x threshold fraction
-    int firstGoodSpec = static_cast<int>(ceil(lowThres*Nhist/2.0));//the factor of 2 here is because the threshold is related to the median
-    int lastGoodSpec = static_cast<int>(floor(highThres*Nhist/2.0));
-    for (int lHist = 0; lHist < firstGoodSpec; lHist++)
+    // the numbers below are threshold values that were found by trail and error running these tests
+    int firstGoodSpec = 36;
+    int lastGoodSpec = 95;
+    for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), BadVal )
@@ -90,27 +90,22 @@ public:
     //now check the array
     std::vector<int>::const_iterator it = OArray.begin();
     for (int lHist = 0 ; lHist < firstGoodSpec; lHist++ )
-    {// for each spectrum we have linked two detectors, check that both of those are listed
-      TS_ASSERT_EQUALS( *it, lHist*2 )
-      TS_ASSERT_THROWS_NOTHING( ++it )
-      TS_ASSERT_EQUALS( *it, lHist*2+1 )
-      TS_ASSERT_THROWS_NOTHING( 
-        if ( it != OArray.end() ) ++it )
+    {
+      TS_ASSERT_EQUALS( *it, lHist+1 )
+      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
+    }
+    for (int lHist = lastGoodSpec+1 ; lHist < Nhist ; lHist++ )
+    {
+      TS_ASSERT_EQUALS( *it, lHist+1 )
+      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
     }
     //check that extra entries haven't been written to the array
-    TS_ASSERT( it != OArray.end() )
+    TS_ASSERT_EQUALS( it, OArray.end() )
   }
 
-  void testWithSolidAngles()
-  {/* STEVE activate this test
-    TS_ASSERT_THROWS_NOTHING( addInstrumentGeom() )
-    
-//    // Mark one detector dead to test that it leads to zero solid angle
-//    Detector* det143 = dynamic_cast<Detector*>(input2D->getDetector(143).get());
-//    boost::shared_ptr<ParameterMap> pmap = input2D->instrumentParameters();
-//    pmap->addBool(det143,"masked",true);
-
-    FindProblemDetectors alg;
+  void testFile()
+  {
+    WBVMedianTest alg;
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( runInit(alg) ) )
 
@@ -124,10 +119,10 @@ public:
     alg.setProperty( "EndSpectrum", lSpec );
     //a couple of random numbers in the range
     const double lRang = 4000, uRange = 10000;
-    alg.setProperty( "Range_lower", lRang );
-    alg.setProperty( "Range_upper", uRange );
+    alg.setProperty( "RangeLower", lRang );
+    alg.setProperty( "RangeUpper", uRange );
 
-    std::string OFileName("FindProbDetectsTestFile.txt");  
+    std::string OFileName("WBVMedianTestTestFile.txt");  
     alg.setPropertyValue( "OutputFile", OFileName );
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
@@ -136,11 +131,11 @@ public:
     //test file output
     std::fstream testFile(OFileName.c_str(), std::ios::in);
     //the tests here are done as unhandled exceptions cxxtest will handle the exceptions and display a message but only after this function has been abandoned, which leaves the file undeleted so it can be viewed
-    if ( !testFile )
-      throw std::runtime_error("Could not open the file " + OFileName);
+    TS_ASSERT ( testFile )
     
-    int firstGoodSpec = static_cast<int>(ceil(lowThres*Nhist/2.0));//the factor of 2 here is because the threshold is related to the median
-    int lastGoodSpec = static_cast<int>(floor(highThres*Nhist/2.0));
+    // comfirmed these values by following the debugger up to this point
+    int firstGoodSpec = 16;
+    int lastGoodSpec = 360;
     std::string fileLine = "";
     for (int numHist = -1 ; numHist < firstGoodSpec; numHist++ )
     {
@@ -149,49 +144,30 @@ public:
         correctLine << "Index Spectrum UDET(S)";
       else
       {
-        correctLine << " Spectrum " << numHist << " is too low";
-        correctLine << " detector IDs: " << numHist*2 << ", " << numHist*2+1;
-        correctLine << std::endl;
+        correctLine << " Spectrum with number " << numHist+1 << " is too low";
+      correctLine << " detector IDs: " << numHist+1;
       }
         
       std::getline( testFile, fileLine );
         
-      if ( testFile.rdstate() & std::ios::failbit )
-      {
-        throw std::exception(
-          "File incomplete, end of file found while reading the low reading detector list");
-      }
-      if ( fileLine != correctLine.str() )
-      {
-        throw std::runtime_error( "Output file testing: problem on line " +
-          boost::lexical_cast<std::string>(numHist+1) + " of file " + OFileName );
-      }
+      TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
     }
     for (int numHist = lastGoodSpec+1 ; numHist < Nhist; numHist++ )
     {
       std::ostringstream correctLine;
-      correctLine << " Spectrum " << numHist << " is too high";
-      correctLine << " detector IDs: " << numHist*2 << ", " << numHist*2+1;
-      correctLine << std::endl;
+      correctLine << " Spectrum with number " << numHist+1 << " is too high";
+      correctLine << " detector IDs: " << numHist+1;
       
       std::getline( testFile, fileLine );
 
-      if ( testFile.rdstate() & std::ios::failbit )
-      {
-        throw std::exception(
-          "File incomplete, end of file found while reading the high reading detector list");
-      }
-      if ( fileLine != correctLine.str() )
-      {
-        throw std::runtime_error( "Problem on line " +
-          boost::lexical_cast<std::string>(numHist) + " " + OFileName );
-      }
+      TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
+
     }
     testFile.close();
-    remove(OFileName.c_str());*/
+    remove(OFileName.c_str());
   }
     
-  FindProblemDetectorsTest() : m_IWSName("FindProbDetectsTestInput")
+  WBVMedianTestTest() : m_IWSName("WBVMedianTestTestInput")
   {
     using namespace Mantid;
     // Set up a small workspace for testing
@@ -212,51 +188,25 @@ public:
     boost::shared_ptr<MantidVec> errors( new MantidVec( ySize, 1) );
     boost::shared_ptr<MantidVec> spectrum;
 
+    int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j)
     {
       space2D->setX(j, x);
       spectrum.reset( new MantidVec );
-      //the spectrums are multiples of the random numbers above
+      //the spectravalues will be multiples of the random numbers above
       for ( int l = 0; l < ySize; ++l )
       {
         spectrum->push_back( j*yArray[l] );
       }
       space2D->setData( j, spectrum, errors );
       // Just set the spectrum number to match the index
-      space2D->getAxis(1)->spectraNo(j) = j;
-    }
-    
-    // Populate the spectraDetectorMap with fake data, each spectrum will have two detectors
-    std::vector<int> udetList(2);
-    for ( int j = 0; j < Nhist; j++ )
-    {
-      udetList[0] = 2*j;
-      udetList[1] = 2*j+1;
-      space2D->mutableSpectraMap().addSpectrumEntries( j, udetList);
+      space2D->getAxis(1)->spectraNo(j) = j+1;
+      forSpecDetMap[j] = j+1;
     }
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(m_IWSName, space);
-  }
-
-  bool runInit(FindProblemDetectors &alg)
-  {
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    bool good = alg.isInitialized();
-
-    // Set the properties
-    alg.setPropertyValue("WhiteBeamWorkspace", m_IWSName);
-    alg.setPropertyValue("OutputWorkspace","FindProbDetectsTestOutput");
-    return good;
-  }
-
-  void addInstrumentGeom()
-  {
-    // Get input workspace back to add detector geometry info to
-    Workspace_sptr input;
-    input = AnalysisDataService::Instance().retrieve(m_IWSName);
-    Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
-   
+    
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
@@ -264,13 +214,28 @@ public:
     std::string inputFile = "../../../../Test/Instrument/INS_Definition.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("Workspace", m_IWSName);
-    loader.execute();
+    loader.execute(); 
+
+    space2D->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist);
+
+    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }
- 
+
+  bool runInit(WBVMedianTest &alg)
+  {
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    bool good = alg.isInitialized();
+
+    // Set the properties
+    alg.setPropertyValue("WhiteBeamWorkspace", m_IWSName);
+    alg.setPropertyValue("OutputWorkspace","WBVMedianTestTestOutput");
+    return good;
+  }
+
 private:
   std::string m_IWSName;
   double m_YSum;
   enum { Nhist = 144 };
 };
 
-#endif /*FINDPROBLEMDETECTORSTEST_H_*/
+#endif /*WBVMEDIANTESTTEST_H_*/

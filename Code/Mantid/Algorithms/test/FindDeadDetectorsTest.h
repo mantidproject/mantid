@@ -43,7 +43,6 @@ public:
     Workspace2D_sptr work_in =
     //the x values look like this -1, 2, 5, 8, 11, 14, 17, 20, 23, 26
       WorkspaceCreationHelper::Create2DWorkspaceBinned(sizey, sizex, -1, 3.0);
-    int forSpecDetMap[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
 
     //yVeryDead is a detector that never responds and produces no counts
     boost::shared_ptr<Mantid::MantidVec> yVeryDead(new Mantid::MantidVec(sizex,0));
@@ -56,16 +55,16 @@ public:
     for (int i=0; i< sizey; i++)
     {
       if (i%3 == 0)
-      {//the last column is set arbitrarily because the errors shouldn't make any difference
-        work_in->setData(i,yTooDead,yTooDead);
+      {//the last column is set arbitrarily to have the same values as the second because the errors shouldn't make any difference
+        work_in->setData(i, yTooDead, yTooDead);
       }
       if (i%2 == 0)
       {
-        work_in->setData(i,yVeryDead,yVeryDead);
+        work_in->setData(i, yVeryDead, yVeryDead);
       }
       if (i == 19)
       {
-        work_in->setData(i,yStrange,yTooDead);
+        work_in->setData(i, yStrange, yTooDead);
       }
       work_in->getAxis(1)->spectraNo(i) = i;
       Mantid::Geometry::Detector* det = new Mantid::Geometry::Detector("",NULL);
@@ -74,6 +73,7 @@ public:
       instr->add(det);
       instr->markAsDetector(det);
     }
+    int forSpecDetMap[20] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
     work_in->mutableSpectraMap().populate(forSpecDetMap,forSpecDetMap,20);
 
     FindDeadDetectors alg;

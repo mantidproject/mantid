@@ -267,10 +267,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FindProblemDetectors.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\FlatBackground.cpp"
 				>
 			</File>
@@ -412,6 +408,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Unwrap.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\WBVMedianTest.cpp"
 				>
 			</File>
 		</Filter>
@@ -574,10 +574,6 @@
 			</File>
 			<File
 				RelativePath=".\test\FindPeaksTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\FindProblemDetectors.h"
 				>
 			</File>
 			<File
@@ -822,6 +818,14 @@
 			</File>
 			<File
 				RelativePath=".\test\UnwrapTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\WBVMedianTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\WBVMedianTestTest.h"
 				>
 			</File>
 		</Filter>

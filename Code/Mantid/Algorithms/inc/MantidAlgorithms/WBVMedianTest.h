@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_FINDPROBLEMDETECTORS_H_
-#define MANTID_ALGORITHM_FINDPROBLEMDETECTORS_H_
+#ifndef MANTID_ALGORITHM_WBVMEDIANTEST_H_
+#define MANTID_ALGORITHM_WBVMEDIANTEST_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -65,19 +65,19 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport FindProblemDetectors : public API::Algorithm
+    class DLLExport WBVMedianTest : public API::Algorithm
     {
     public:
       /// Default constructor initialises all values to zero and runs the base class constructor
-      FindProblemDetectors() :
+      WBVMedianTest() :
           API::Algorithm(),
           m_Low(0.1), m_High(1.5), m_MinSpec(0), m_MaxSpec(UNSETINT),
           m_PercentDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
       {};
       /// Destructor
-      virtual ~FindProblemDetectors() {};
+      virtual ~WBVMedianTest() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "FindProblemDetectors";}
+      virtual const std::string name() const { return "WBVMedianTest";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
@@ -155,4 +155,4 @@ namespace Mantid
   } // namespace Algorithm
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_FINDPROBLEMDETECTORS_H_*/
+#endif /*MANTID_ALGORITHM_WBVMEDIANTEST_H_*/

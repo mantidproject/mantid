@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/FindProblemDetectors.h"
+#include "MantidAlgorithms/WBVMedianTest.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/shared_ptr.hpp>
@@ -18,13 +18,13 @@ namespace Algorithms
 {
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(FindProblemDetectors)
+DECLARE_ALGORITHM(WBVMedianTest)
 
 using namespace Kernel;
 using namespace API;
 using DataObjects::Workspace2D;
 
-void FindProblemDetectors::init()
+void WBVMedianTest::init()
 {
   //STEVE update the wiki
   HistogramValidator<MatrixWorkspace> *val =
@@ -80,7 +80,7 @@ void FindProblemDetectors::init()
 *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
 *  @throw runtime_error if algorithm cannot execute
 */
-void FindProblemDetectors::exec()
+void WBVMedianTest::exec()
 {
   //gets and checks the values passed to the algorithm that need checking, throws an invalid_argument if we can't find a good value for a property
   retrieveProperties();
@@ -202,7 +202,7 @@ std::vector<int> InputWSDetectorInfo::getDetectors(int SpecIndex) const
 *
 *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
 */
-void FindProblemDetectors::retrieveProperties()
+void WBVMedianTest::retrieveProperties()
 {
   m_InputWS = getProperty("WhiteBeamWorkspace");
   int maxSpecIndex = m_InputWS->getNumberHistograms() - 1;
@@ -255,7 +255,7 @@ void FindProblemDetectors::retrieveProperties()
 * @param lastSpec the index number of the last histogram to analyse
 * @return A pointer to the workspace (or an empty pointer)
 */
-API::MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
+API::MatrixWorkspace_sptr WBVMedianTest::getSolidAngles(
             API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information("Calculating soild angles");
@@ -297,7 +297,7 @@ API::MatrixWorkspace_sptr FindProblemDetectors::getSolidAngles(
 * @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
-API::MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
+API::MatrixWorkspace_sptr WBVMedianTest::getTotalCounts(
                 API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information() << "Integrating input workspace" << std::endl;
@@ -334,7 +334,7 @@ API::MatrixWorkspace_sptr FindProblemDetectors::getTotalCounts(
 * @param counts A histogram workspace with counts in time bins 
 * @return A workspace of the counts per unit time in each bin
 */
-API::MatrixWorkspace_sptr FindProblemDetectors::getRate
+API::MatrixWorkspace_sptr WBVMedianTest::getRate
                                            (API::MatrixWorkspace_sptr counts)
 {
   g_log.information("Calculating time averaged count rates");
@@ -367,10 +367,10 @@ API::MatrixWorkspace_sptr FindProblemDetectors::getRate
 * @return The median value of the histograms in the workspace that was passed to it
 * @throw logic_error if an input values is negative
 */
-double FindProblemDetectors::getMedian(API::MatrixWorkspace_const_sptr input)
+double WBVMedianTest::getMedian(API::MatrixWorkspace_const_sptr input)
   const
 {
-  g_log.information("Calculating the median of spectra count rates");
+  g_log.information("Calculating the median count rate of the spectra");
 
   // we need to check and exclude masked detectors
   InputWSDetectorInfo DetectorInfoHelper(input);
@@ -393,8 +393,8 @@ double FindProblemDetectors::getMedian(API::MatrixWorkspace_const_sptr input)
         throw std::logic_error(
           "Negative number of counts found, could be corrupted raw counts or solid angle data");
       }
-      //there has been a divide by zero, likely to be due to a etector with zero solid angle
-      if ( toCopy == std::numeric_limits<double>::infinity() )
+      //there has been a divide by zero, likely to be due to a detector with zero solid angle
+      if ( std::abs(toCopy) == std::numeric_limits<double>::infinity() )
       {
         g_log.debug() <<
           "numeric_limits<double>::infinity() found spectrum number " << DetectorInfoHelper.getSpecNum(i);
@@ -426,7 +426,7 @@ double FindProblemDetectors::getMedian(API::MatrixWorkspace_const_sptr input)
 * @param fileName name of a file to store the list of failed spectra in (pass "" to aviod writing to file)
 * @return An array that of the index numbers of the histograms that fail
 */
-std::vector<int> FindProblemDetectors::FindDetects(
+std::vector<int> WBVMedianTest::FindDetects(
   API::MatrixWorkspace_sptr responses, double lowLim, double highLim,
   std::string fileName)
 {
@@ -460,32 +460,36 @@ std::vector<int> FindProblemDetectors::FindDetects(
   if (iprogress_step == 0) iprogress_step = 1;
   for (int i = 0; i <= numSpec; ++i)
   {
+    // get the address of the value of the first bin the spectra, we'll check it's value and then write a pass or fail to that location
     double &yInputOutput = responses->dataY(i)[0];
-    //report detectors that are already marked as masked 
+    // hold information about whether it passes or fails and why
+    std::string problem = "";
+    // first look for detectors that have been marked as dead
     InputWSDetectorInfo DetectorInfoHelper(responses);
     if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
     {
-      yInputOutput = BadVal;
-      cAlreadyMasked ++;
-    }// is the value within the acceptance range?
-    else if ( yInputOutput > lowLim && yInputOutput < highLim)
-    {// it is an acceptable value; just write the good flag to the output workspace, no further logging is needed
-      yInputOutput = GoodVal;
+       problem = "Detector already masked";
+       cAlreadyMasked ++;
     }
-    else
+    else // not already marked dead, check is the value within the acceptance range
     {
-      // the value has been found to be bad, do all the logging
-      std::string problem = "";
       if ( yInputOutput < lowLim )
       {
         problem = "low";
         cLows++;
       }
-      else
+      if ( yInputOutput > highLim )
       {
         problem = "high";
         cHighs++;
       }
+    }
+    if ( problem == "" )
+    {// it is an acceptable value; just write the good flag to the output workspace and go on to check the next value
+        yInputOutput = GoodVal;
+    }
+    else
+    {//we have a bad spectrum do the reporting
       //this is all that is need for the output workspace
       yInputOutput = BadVal;
       // Write the spectrum number to file
@@ -495,20 +499,21 @@ std::vector<int> FindProblemDetectors::FindDetects(
           << " is too " << problem;
       }
       
-      if ( fileOpen ) file << " detector IDs: "; 
+      if ( fileOpen ) file << " detector IDs:"; 
       // Get the list of detectors for this spectrum and iterate over
       const std::vector<int> dets = DetectorInfoHelper.getDetectors(i);
-      std::vector<int>::const_iterator it;
-      for (it = dets.begin(); it != dets.end(); ++it)
+      std::vector<int>::const_iterator it = dets.begin();
+      for ( ; it != dets.end(); ++it)
       {
-        // don't put a comma before the first entry
+        //write to the vector array that this function returns
+        badDets.push_back(*it);
+        // now record to file
         if ( fileOpen )
         {
+        // don't put a comma before the first entry
           if ( it != dets.begin() ) file << ", ";
           file << " " << *it;
         }
-        //write to the vector array that this function returns
-        badDets.push_back(*it);
       }
       if ( fileOpen ) file << std::endl;
     }
@@ -534,7 +539,7 @@ std::vector<int> FindProblemDetectors::FindDetects(
   return badDets;
 }
 /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
-float FindProblemDetectors::advanceProgress(int toAdd)
+float WBVMedianTest::advanceProgress(int toAdd)
 {
   m_PercentDone += toAdd/float(m_TotalTime);
   // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value could cause an error
@@ -542,7 +547,7 @@ float FindProblemDetectors::advanceProgress(int toAdd)
   return m_PercentDone;
 }
 /// Update the percentage complete estimate assuming that the algorithm aborted a task with estimated RunTime toAdd
-void FindProblemDetectors::failProgress(RunTime aborted)
+void WBVMedianTest::failProgress(RunTime aborted)
 {
   advanceProgress(-aborted);
   m_TotalTime -= aborted;
