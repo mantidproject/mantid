@@ -31,6 +31,7 @@ public:
 		TS_ASSERT_EQUALS(tree->display(),"(10 11) : (12 10)");
 		//TS_ASSERT_EQUALS(Rule::makeCNFcopy(tree),1);
 		//TS_ASSERT_EQUALS(tree->display(),"(10 11) : (12 10)");
+		delete tree;
 	}
 
 	void testRemoveComplementary(){
@@ -38,6 +39,7 @@ public:
 		TS_ASSERT_EQUALS(tree->display(),"10 : 10 : 12 : 11");
 		TS_ASSERT_EQUALS(tree->removeComplementary(tree),1);
 //		TS_ASSERT_EQUALS(tree->display(),"10 : 12 : 11"); //Problem: The comments don't match to the functionaility it is supposed to do
+		delete tree;
 	}
 
 	void testRemoveItem(){ //Problem: in removing the item of the tree that has more than one instances,possibly double deletion
@@ -46,6 +48,7 @@ public:
 //		TS_ASSERT_EQUALS(tree->removeItem(tree,10),2);
 		TS_ASSERT_EQUALS(tree->removeItem(tree,11),0);
 		TS_ASSERT_EQUALS(tree->removeItem(tree,12),1);
+		delete tree;
 	}
 
 	void testCommonType(){
@@ -55,14 +58,18 @@ public:
 		TS_ASSERT_EQUALS(iTree->commonType(),1);
 		Rule *mTree=createAMixedTree();
 		TS_ASSERT_EQUALS(mTree->commonType(),0);
+		delete uTree;
+		delete iTree;
+		delete mTree;
 	}
 
 	void testSubstituteSurf(){
 		Rule *uTree=createAUnionTree();
 		TS_ASSERT_EQUALS(uTree->substituteSurf(11,13,new Cone()),1);
 		TS_ASSERT_EQUALS(uTree->display(),"10 : 10 : 12 : 13");
-		TS_ASSERT_EQUALS(uTree->substituteSurf(10,14,new Sphere()),1); //its suppose to return 2
+		TS_ASSERT_EQUALS(uTree->substituteSurf(10,14,new Sphere()),2); //its suppose to return 2
 		TS_ASSERT_EQUALS(uTree->display(),"14 : 14 : 12 : 13");
+		delete uTree;
 	}
 
 	void testEliminate(){
@@ -82,7 +89,7 @@ private:
 		C->setKeyN(12);
 		
 		Union *Left;
-		Left=new Union(A,A);
+		Left=new Union(A,A->clone());
 
 		Union *Right;
 		Right=new Union(C,B);
@@ -113,7 +120,7 @@ private:
 
 		Intersection *Right;
 		Right=new Intersection();
-		Right->setLeaves(C,A);
+		Right->setLeaves(C,A->clone());
 
 		Root->setLeaves(Left,Right);
 		return Root;
@@ -139,7 +146,7 @@ private:
 
 		Intersection *Right;
 		Right=new Intersection();
-		Right->setLeaves(C,A);
+		Right->setLeaves(C,A->clone());
 
 		Root->setLeaves(Left,Right);
 		return Root;
@@ -168,15 +175,15 @@ public:
 
 	void testTwoRuleConstructor(){ //Creating a half sphere
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(-11);
 		Intersection A(S1,S2);
 		TS_ASSERT_EQUALS(A.leaf(0),S2);
@@ -186,15 +193,15 @@ public:
 
 	void testThreeRuleConstructor(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Intersection Parent;
 		Intersection A(&Parent,S1,S2);
@@ -206,15 +213,15 @@ public:
 
 	void testClone(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -226,19 +233,20 @@ public:
 		TS_ASSERT_EQUALS(B->leaf(0)->display(),S1->display());
 		TS_ASSERT_EQUALS(B->leaf(1)->display(),S2->display());
 		TS_ASSERT_EQUALS(B->display(),"10 11");
+		delete B;
 	}
 
 	void testIntersectionConstructor(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -253,15 +261,15 @@ public:
 
 	void testAssignment(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -277,15 +285,15 @@ public:
 
 	void testFindLeaf(){
 		SurfPoint *S1,*S2,S3;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -299,15 +307,15 @@ public:
 
 	void testFindKey(){
 		SurfPoint *S1,*S2,S3;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -321,15 +329,15 @@ public:
 
 	void testIsComplementary(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -347,15 +355,15 @@ public:
 
 	void testIsValid(){
 		SurfPoint *S1,*S2,S3;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(-11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -371,15 +379,15 @@ public:
 
 	void testBoundingBox(){
 		SurfPoint *S1,*S2,S3;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(-11);
 		Intersection A;
 		A.setLeaves(S1,S2);
@@ -406,15 +414,15 @@ public:
 
 	void testTwoRuleConstructor(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+		Plane *P1 = new Plane;
+		Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A(S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : 11");
@@ -425,15 +433,15 @@ public:
 	void testThreeRuleConstructor(){
 		Union Parent;
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+		Plane *P1 = new Plane;
+		Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A(&Parent,S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : 11");
@@ -444,15 +452,15 @@ public:
 
 	void testUnionConstructor(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A(S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : 11");
@@ -466,15 +474,15 @@ public:
 
 	void testClone(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A(S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : 11");
@@ -485,19 +493,20 @@ public:
 		TS_ASSERT_EQUALS(B->display(),"10 : 11");
 		TS_ASSERT_EQUALS(B->leaf(0)->display(),S1->display());
 		TS_ASSERT_EQUALS(B->leaf(1)->display(),S2->display());
+		delete B;
 	}
 
 	void testAssignment(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A(S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : 11");
@@ -512,15 +521,15 @@ public:
 
 	void testSetLeaves(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A;
 		A.setLeaves(S1,S2);
@@ -531,15 +540,15 @@ public:
 
 	void testSetLeaf(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A;
 		A.setLeaf(S2,1);
@@ -553,15 +562,15 @@ public:
 
 	void testFindLeaf(){
 		SurfPoint *S1,*S2,S3;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A;
 		A.setLeaves(S1,S2);
@@ -575,15 +584,15 @@ public:
 
 	void testFindKey(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A;
 		A.setLeaves(S1,S2);
@@ -597,15 +606,15 @@ public:
 
 	void testIsComplementary(){ //Problem: it only detects whether first leaf or second leaf but not both
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(11);
 		Union A(S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : 11");
@@ -622,15 +631,15 @@ public:
 
 	void testIsValid(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(-11);
 		Union A(S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : -11");
@@ -644,15 +653,15 @@ public:
 
 	void testIsValidMap(){
 		SurfPoint *S1,*S2;
-		Plane P1;
-		Sphere Sp1;
-		P1.setSurface("px 5"); //yz plane with x=5
-		Sp1.setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
+    Plane *P1 = new Plane;
+    Sphere *Sp1 = new Sphere;
+		P1->setSurface("px 5"); //yz plane with x=5
+		Sp1->setSurface("s 5.0 0.0 0.0 5");//a sphere with center (5,0,0) and radius 5. this will touch origin
 		S1=new SurfPoint();
 		S2=new SurfPoint();
-		S1->setKey(&P1);
+		S1->setKey(P1);
 		S1->setKeyN(10);
-		S2->setKey(&Sp1);
+		S2->setKey(Sp1);
 		S2->setKeyN(-11);
 		Union A(S1,S2);
 		TS_ASSERT_EQUALS(A.display(),"10 : -11");
@@ -683,9 +692,9 @@ public:
 	void testSetKey(){
 		SurfPoint A;
 		TS_ASSERT_EQUALS(A.display(),"0");
-		Plane P1;
-		A.setKey(&P1);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		Plane *P1 = new Plane;
+		A.setKey(P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 	}
 
 	void testSetKeyN(){
@@ -698,10 +707,10 @@ public:
 
 	void testFullCreatedObject(){
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 	}
@@ -709,8 +718,8 @@ public:
 	void testSimplyfy(){ //A simple leafnode of SurfPoint cannot be simplefield so it should always return 0
 		SurfPoint A;
 		TS_ASSERT_EQUALS(A.simplify(),0);
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
 		TS_ASSERT_EQUALS(A.simplify(),0);
 	}
@@ -719,8 +728,8 @@ public:
 		SurfPoint A;
 		TS_ASSERT_EQUALS(A.simplify(),0);
 		TS_ASSERT_EQUALS(A.leaf(0),(Rule*)0);
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
 		TS_ASSERT_EQUALS(A.simplify(),0);
 		TS_ASSERT_EQUALS(A.leaf(10),(Rule*)0);
@@ -729,63 +738,63 @@ public:
 	void testSetLeaves(){ //This should not enabled as surfpoint cannot have leaves
 						  //TODO:disable setleaves function
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		SurfPoint B;
-		Sphere S1;
-		B.setKey(&S1);
+		Sphere *S1 = new Sphere;
+		B.setKey(S1);
 		B.setKeyN(11);
-		TS_ASSERT_EQUALS(B.getKey(),&S1);
+		TS_ASSERT_EQUALS(B.getKey(),S1);
 		TS_ASSERT_EQUALS(B.getKeyN(),11);
 		TS_ASSERT_EQUALS(B.display(),"11");
 		A.setLeaves(&B,(Rule*)0);
-		TS_ASSERT_EQUALS(A.getKey(),&S1);
+		TS_ASSERT(dynamic_cast<Sphere*>(A.getKey()));
 		TS_ASSERT_EQUALS(A.getKeyN(),11);
 		TS_ASSERT_EQUALS(A.display(),"11");
 	}
 
 	void testSetLeaf(){ //TODO: disable setleaf function as surfpoint cannot have leaves
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		SurfPoint B;
-		Sphere S1;
-		B.setKey(&S1);
+		Sphere *S1 = new Sphere;
+		B.setKey(S1);
 		B.setKeyN(11);
-		TS_ASSERT_EQUALS(B.getKey(),&S1);
+		TS_ASSERT_EQUALS(B.getKey(),S1);
 		TS_ASSERT_EQUALS(B.getKeyN(),11);
 		TS_ASSERT_EQUALS(B.display(),"11");
 		A.setLeaf(&B,0);
-		TS_ASSERT_EQUALS(A.getKey(),&S1);
+    TS_ASSERT(dynamic_cast<Sphere*>(A.getKey()));
 		TS_ASSERT_EQUALS(A.getKeyN(),11);
 		TS_ASSERT_EQUALS(A.display(),"11");
 	}
 
 	void testfindLeaf(){//TODO: disable to find leaf as this is final
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		SurfPoint B;
-		Sphere S1;
-		B.setKey(&S1);
+		Sphere *S1 = new Sphere;
+		B.setKey(S1);
 		B.setKeyN(11);
-		TS_ASSERT_EQUALS(B.getKey(),&S1);
+		TS_ASSERT_EQUALS(B.getKey(),S1);
 		TS_ASSERT_EQUALS(B.getKeyN(),11);
 		TS_ASSERT_EQUALS(B.display(),"11");
 		TS_ASSERT_EQUALS(A.findLeaf(&B),-1);
-		B.setKey(&P1);
+		B.setKey(P1->clone());
 		B.setKeyN(10);
 		TS_ASSERT_EQUALS(A.findLeaf(&B),-1);
 		TS_ASSERT_EQUALS(A.findLeaf(&A),0);
@@ -793,10 +802,10 @@ public:
 
 	void testFindKey(){
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+		Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.findKey(10),&A);
@@ -805,10 +814,10 @@ public:
 
 	void testGetSign(){
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.getSign(),1);
@@ -819,15 +828,15 @@ public:
 
 	void testSelfConstructor(){
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.getSign(),1);
 		SurfPoint B(A);
-		TS_ASSERT_EQUALS(B.getKey(),&P1);
+		TS_ASSERT(dynamic_cast<Plane*>(B.getKey()));
 		TS_ASSERT_EQUALS(B.getKeyN(),10);
 		TS_ASSERT_EQUALS(B.display(),"10");
 		TS_ASSERT_EQUALS(B.getSign(),1);
@@ -835,33 +844,34 @@ public:
 
 	void testClone(){
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.getSign(),1);
 		SurfPoint *B;
 		B=A.clone();
-		TS_ASSERT_EQUALS(B->getKey(),&P1);
+		TS_ASSERT(dynamic_cast<Plane*>(B->getKey()));
 		TS_ASSERT_EQUALS(B->getKeyN(),10);
 		TS_ASSERT_EQUALS(B->display(),"10");
 		TS_ASSERT_EQUALS(B->getSign(),1);
+		delete B;
 	}
 
 	void testAssignment(){
 		SurfPoint A;
-		Plane P1;
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.getSign(),1);
 		SurfPoint B;
 		B=A;
-		TS_ASSERT_EQUALS(B.getKey(),&P1);
+    TS_ASSERT(dynamic_cast<Plane*>(B.getKey()));
 		TS_ASSERT_EQUALS(B.getKeyN(),10);
 		TS_ASSERT_EQUALS(B.display(),"10");
 		TS_ASSERT_EQUALS(B.getSign(),1);
@@ -869,11 +879,11 @@ public:
 
 	void testIsValid(){
 		SurfPoint A;
-		Plane P1;
-		P1.setSurface("px 5");
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		P1->setSurface("px 5");
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.getSign(),1);
@@ -884,11 +894,11 @@ public:
 
 	void testIsValidMap(){
 		SurfPoint A;
-		Plane P1;
-		P1.setSurface("px 5");
-		A.setKey(&P1);
+    Plane *P1 = new Plane;
+		P1->setSurface("px 5");
+		A.setKey(P1);
 		A.setKeyN(10);
-		TS_ASSERT_EQUALS(A.getKey(),&P1);
+		TS_ASSERT_EQUALS(A.getKey(),P1);
 		TS_ASSERT_EQUALS(A.getKeyN(),10);
 		TS_ASSERT_EQUALS(A.display(),"10");
 		TS_ASSERT_EQUALS(A.getSign(),1);
@@ -949,6 +959,7 @@ public:
 		TS_ASSERT_EQUALS(B->display(),"#10");
 		TS_ASSERT_EQUALS(B->getObjN(),10);
 		TS_ASSERT_EQUALS(B->getObj(),&cpCylinder);
+		delete B;
 	}
 
 	void testAssignment(){
@@ -1128,6 +1139,7 @@ public:
 		CompGrp *B;
 		B=A.clone();
 		TS_ASSERT_EQUALS(B->leaf(0)->display(),uSC->display());
+		delete B;
 	}
 
 	void testAssignment(){
@@ -1261,6 +1273,7 @@ public:
 		TS_ASSERT_EQUALS(B->leaf(0),(Rule*)0);
 		TS_ASSERT_EQUALS(B->leaf(1),(Rule*)0);
 		TS_ASSERT_EQUALS(B->display()," False ");
+		delete B;
 	}
 
 	void testAssignment(){
@@ -1295,6 +1308,8 @@ public:
 		C->setStatus(0);
 		A.setLeaf(C,1);
 		TS_ASSERT_EQUALS(A.display()," False ");
+		delete B;
+		delete C;
 	}
 
 	void testFindOperations(){
@@ -1312,6 +1327,7 @@ public:
 		TS_ASSERT_EQUALS(A.findLeaf(&A),0);
 		TS_ASSERT_EQUALS(A.findLeaf(B),-1);
 		TS_ASSERT_EQUALS(A.findKey(0),(Rule*)0);
+		delete B;
 	}
 
 	void testIsValid(){

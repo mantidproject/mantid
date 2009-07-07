@@ -303,11 +303,12 @@ public:
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
     std::string ObjB="80001 -80002 60003 -60004 60005 -60006";
     
-    createSurfaces();
+    createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
     object1.populate(SMap);
 
+    createSurfaces(ObjB);
     Object object2=Object();
     object2.setObject(4,ObjB);
     object2.populate(SMap);
@@ -334,11 +335,12 @@ public:
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006";
     std::string ObjB="60002 -80002 60003 -60004 60005 -60006";
 
-    createSurfaces();
+    createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
     object1.populate(SMap);
 
+    createSurfaces(ObjB);
     Object object2=Object();
     object2.setObject(4,ObjB);
     object2.populate(SMap);
@@ -366,11 +368,12 @@ public:
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006 71";
     std::string ObjB="-71";
 
-    createSurfaces();
+    createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
     object1.populate(SMap);
 
+    createSurfaces(ObjB);
     Object object2=Object();
     object2.setObject(4,ObjB);
     object2.populate(SMap);
@@ -397,11 +400,12 @@ public:
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
     std::string ObjB="(-72 : -73)";
    
-    createSurfaces();
+    createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
     object1.populate(SMap);
 
+    createSurfaces(ObjB);
     Object object2=Object();
     object2.setObject(4,ObjB);
     object2.populate(SMap);
@@ -429,11 +433,12 @@ public:
     std::string ObjA="60001 -60002 60003 -60004 60005 -60006 72 73";
     std::string ObjB="(-72 : -73)";
     
-    createSurfaces();
+    createSurfaces(ObjA);
     Object object1=Object();
     object1.setObject(3,ObjA);
     object1.populate(SMap);
 
+    createSurfaces(ObjB);
     Object object2=Object();
     object2.setObject(4,ObjB);
     object2.populate(SMap);
@@ -835,14 +840,11 @@ private:
     or destruction.
     */
   {
-    STYPE::iterator mc;
-    for(mc=SMap.begin();mc!=SMap.end();mc++)
-      delete mc->second;
-    SMap.erase(SMap.begin(),SMap.end());
+    SMap.clear();
     return;
   }
 
-  void createSurfaces()
+  void createSurfaces(const std::string& desired)
     /*!
     Creates a list of surfaces for used in the objects
     and populates the MObj layers.
@@ -854,19 +856,30 @@ private:
 
     typedef std::pair<int,std::string> SCompT;
     std::vector<SCompT> SurfLine;
-    SurfLine.push_back(SCompT(60001,"px -1"));
-    SurfLine.push_back(SCompT(60002,"px 1"));
-    SurfLine.push_back(SCompT(60003,"py -2"));
-    SurfLine.push_back(SCompT(60004,"py 2"));
-    SurfLine.push_back(SCompT(60005,"pz -3"));
-    SurfLine.push_back(SCompT(60006,"pz 3"));
+    if (desired.find("60001") != std::string::npos)
+      SurfLine.push_back(SCompT(60001,"px -1"));
+    if (desired.find("60002") != std::string::npos)
+      SurfLine.push_back(SCompT(60002,"px 1"));
+    if (desired.find("60003") != std::string::npos)
+      SurfLine.push_back(SCompT(60003,"py -2"));
+    if (desired.find("60004") != std::string::npos)
+      SurfLine.push_back(SCompT(60004,"py 2"));
+    if (desired.find("60005") != std::string::npos)
+      SurfLine.push_back(SCompT(60005,"pz -3"));
+    if (desired.find("60006") != std::string::npos)
+      SurfLine.push_back(SCompT(60006,"pz 3"));
 
-    SurfLine.push_back(SCompT(80001,"px 4.5"));
-    SurfLine.push_back(SCompT(80002,"px 6.5"));
+    if (desired.find("80001") != std::string::npos)
+      SurfLine.push_back(SCompT(80001,"px 4.5"));
+    if (desired.find("80002") != std::string::npos)
+      SurfLine.push_back(SCompT(80002,"px 6.5"));
 
-    SurfLine.push_back(SCompT(71,"so 0.8"));
-    SurfLine.push_back(SCompT(72,"s -0.7 0 0 0.3"));
-    SurfLine.push_back(SCompT(73,"s 0.6 0 0 0.4"));
+    if (desired.find("71") != std::string::npos)
+      SurfLine.push_back(SCompT(71,"so 0.8"));
+    if (desired.find("72") != std::string::npos)
+      SurfLine.push_back(SCompT(72,"s -0.7 0 0 0.3"));
+    if (desired.find("73") != std::string::npos)
+      SurfLine.push_back(SCompT(73,"s 0.6 0 0 0.4"));
 
     std::vector<SCompT>::const_iterator vc;
 

@@ -184,25 +184,27 @@ void
 Intersection::setLeaf(Rule* nR,const int side)
   /*!
     Replaces a leaf with a rule.
-    No deletion is carried out
+    Calls delete on previous leaf.
     \param nR :: new rule
     \param side :: side to use 
     - 0 == LHS 
-    - true == RHS
+    - 1 == RHS
   */
 {
   if (side)
-    {
-      B=nR;
-      if (B)
-	B->setParent(this);
-    }
+  {
+    delete B;
+    B=nR;
+    if (B)
+      B->setParent(this);
+  }
   else
-    {
-      A=nR;
-      if (A)
-	A->setParent(this);
-    }
+  {
+    delete A;
+    A=nR;
+    if (A)
+      A->setParent(this);
+  }
   return;
 }
 
@@ -478,25 +480,27 @@ void
 Union::setLeaf(Rule* nR,const int side)
   /*!
     Replaces a leaf with a rule.
-    No deletion is carried out
+    Calls delete on previous leaf.
     \param nR :: new rule
     \param side :: side to use 
     - 0 == LHS 
-    - true == RHS
+    - 1 == RHS
   */
 {
   if (side)
-    {
-      B=nR;
-      if (B)
-	B->setParent(this);
-    }
+  {
+    delete B;
+    B=nR;
+    if (B)
+      B->setParent(this);
+  }
   else
-    {
-      A=nR;
-      if (A)
-	A->setParent(this);
-    }
+  {
+    delete A;
+    A=nR;
+    if (A)
+      A->setParent(this);
+  }
   return;
 }
 
@@ -705,7 +709,7 @@ SurfPoint::SurfPoint() : Rule(),
 {}
 
 SurfPoint::SurfPoint(const SurfPoint& A) : Rule(),
-  key(A.key),keyN(A.keyN),sign(A.sign)
+  key(A.key->clone()),keyN(A.keyN),sign(A.sign)
   /*!
     Copy constructor
     \param A ::SurfPoint to copy
@@ -732,11 +736,12 @@ SurfPoint::operator=(const SurfPoint& A)
   */
 {
   if (&A!=this)
-    {
-      key=A.key;
-      keyN=A.keyN;
-      sign=A.sign;
-    }
+  {
+    delete key;
+    key=A.key->clone();
+    keyN=A.keyN;
+    sign=A.sign;
+  }
   return *this;
 }
 
@@ -744,7 +749,9 @@ SurfPoint::~SurfPoint()
   /*!
     Destructor
   */
-{}
+{
+  delete key;
+}
 
 void
 SurfPoint::setLeaf(Rule* nR,const int)
@@ -817,10 +824,11 @@ SurfPoint::setKeyN(const int Ky)
 void
 SurfPoint::setKey(Surface* Spoint)
   /*!
-    Sets the key pointter
+    Sets the key pointer. The class takes ownership.
     \param Spoint :: new key values
   */
 {
+  if (key!=Spoint) delete key;
   key=Spoint;
   return;
 }

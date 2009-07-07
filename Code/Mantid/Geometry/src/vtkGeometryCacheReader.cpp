@@ -46,6 +46,7 @@ namespace Mantid
 		*/
 		vtkGeometryCacheReader::~vtkGeometryCacheReader()
 		{
+		  mDoc->release();
 			delete pParser;
 		}
 

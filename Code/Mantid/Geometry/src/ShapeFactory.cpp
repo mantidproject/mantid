@@ -222,6 +222,8 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     }
   }
 
+  pNL->release();
+  
   if ( defaultAlgebra == false )
   {
     // Translate algebra string defined by the user into something Mantid can

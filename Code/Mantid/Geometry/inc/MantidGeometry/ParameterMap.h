@@ -81,23 +81,24 @@ public:
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name, const std::string& value)
     {
-        Parameter* param = ParameterFactory::create(type,name);
-        param->fromString(value);
-        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
+      boost::shared_ptr<Parameter> param = ParameterFactory::create(type,name);
+      param->fromString(value);
+      m_map.insert(std::make_pair(comp,param));
     }
 
     /// Method for adding a parameter providing its value of a particular type
     template<class T>
     void add(const std::string& type,const IComponent* comp,const std::string& name, const T& value)
     {
-        ParameterType<T> *param = dynamic_cast<ParameterType<T> *>(ParameterFactory::create(type,name));
-        if (!param) 
-        {
-            reportError("Error in adding parameter: incompatible types");
-            throw std::runtime_error("Error in adding parameter: incompatible types");
-        }
-        param->setValue(value);
-        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
+      boost::shared_ptr<Parameter> param = ParameterFactory::create(type,name);
+      ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
+      if (!paramT)
+      {
+        reportError("Error in adding parameter: incompatible types");
+        throw std::runtime_error("Error in adding parameter: incompatible types");
+      }
+      paramT->setValue(value);
+      m_map.insert(std::make_pair(comp,param));
     }
 
     /// Method is provided to add a parameter of any custom type which must be created with 'new' operator.

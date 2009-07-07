@@ -308,9 +308,8 @@ namespace Mantid
           }
         }
       }
-#if debugObject
-      std::cerr<<"Populated surfaces =="<<Rcount<<" in "<<ObjName<<std::endl;
-#endif
+      
+      PLog.debug() <<"Populated surfaces =="<<Rcount<<" in "<<ObjName<<std::endl;
 
       createSurfaceList();
       return 0;

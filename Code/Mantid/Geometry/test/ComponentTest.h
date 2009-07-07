@@ -107,6 +107,7 @@ public:
     TS_ASSERT_EQUALS(q.getRelativePos(),copy->getRelativePos());
     TS_ASSERT_EQUALS(q.getPos(),copy->getPos());
     TS_ASSERT_EQUALS(q.getRelativeRot(),copy->getRelativeRot());
+    delete copy;
   }
 
   void testGetParent()

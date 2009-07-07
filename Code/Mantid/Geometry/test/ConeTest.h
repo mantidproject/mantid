@@ -51,6 +51,7 @@ public:
 		TS_ASSERT_EQUALS(B->getNormal(),V3D(1.0,0.0,0.0));
 		TS_ASSERT_EQUALS(B->getCentre(),V3D(1.0,1.0,1.0));	
 		TS_ASSERT_EQUALS(extractString(*B),"-1  k/x 1 1 1 1\n");	
+		delete B;
 	}
 
 	void testAssignment()

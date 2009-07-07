@@ -24,7 +24,8 @@ public:
     d2->setPos(3.0,4.0,5.0);
     d2->markAsMonitor();
     group->addDetector(d2);
-    dg = new DetectorGroup( *(new std::vector<boost::shared_ptr<IDetector> >(1,boost::shared_ptr<IDetector>(group))) );
+    std::vector<IDetector_sptr> vec(1,boost::shared_ptr<IDetector>(group));
+    dg = new DetectorGroup( vec );
     d3 = boost::shared_ptr<Detector>(new Detector("d3",0));
     d3->setID(10);
     d3->setPos(5.0,5.0,5.0);
@@ -33,8 +34,7 @@ public:
 
   ~DetectorGroupTest()
   {
-    //delete d1, d2, d3;
-    //delete dg, group;
+    delete dg, group;
   }
 
   void testConstructors()

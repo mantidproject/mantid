@@ -59,6 +59,7 @@ public:
 		TS_ASSERT_EQUALS(d.X(),1.0);
 		TS_ASSERT_EQUALS(d.Y(),2.0);
 		TS_ASSERT_EQUALS(d.Z(),3.0);
+		delete[] t;
 	}
 	void testPlusOperation()
 	{

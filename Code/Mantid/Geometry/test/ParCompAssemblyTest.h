@@ -55,10 +55,10 @@ public:
   {
     CompAssembly* parent = new CompAssembly("Parent");
     //name and parent
-    CompAssembly q("Child", parent);
+    CompAssembly* q = new CompAssembly("Child", parent);
 
     ParameterMap pmap;
-    ParCompAssembly pq(&q,&pmap);
+    ParCompAssembly pq(q,&pmap);
 
     TS_ASSERT_EQUALS(pq.getName(), "Child");
     TS_ASSERT_EQUALS(pq.nelements(), 0);
@@ -71,6 +71,7 @@ public:
     TS_ASSERT_EQUALS(pq.getRelativeRot(), Quat(1, 0, 0, 0));
     //as the parent is at 0,0,0 GetPos should equal getRelativePos
     TS_ASSERT_EQUALS(pq.getRelativePos(), pq.getPos());
+    delete parent;
   }
 
   void testAdd()

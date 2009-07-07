@@ -46,8 +46,8 @@ namespace Mantid
 		 */
 		CacheGeometryGenerator::~CacheGeometryGenerator()
 		{
-			if(mFaces!=NULL) delete mFaces;
-			if(mPoints!=NULL) delete mPoints;
+			if(mFaces!=NULL) delete[] mFaces;
+			if(mPoints!=NULL) delete[] mPoints;
 		}
 
 
@@ -80,8 +80,8 @@ namespace Mantid
 		*/
 		void CacheGeometryGenerator::setGeometryCache(int noPts,int noFaces,double* pts,int* faces)
 		{
-			if(mPoints!=NULL) delete mPoints;
-			if(mFaces!=NULL) delete mFaces;
+			if(mPoints!=NULL) delete[] mPoints;
+			if(mFaces!=NULL) delete[] mFaces;
 			mNoOfVertices=noPts;
 			mNoOfTriangles=noFaces;
 			mPoints=pts;

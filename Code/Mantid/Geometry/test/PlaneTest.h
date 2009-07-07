@@ -42,6 +42,7 @@ public :
 		TS_ASSERT_EQUALS(A.getNormal(),V3D(2.0/3.0,2.0/3.0,1.0/3.0));
 		TS_ASSERT_EQUALS(A.getDistance(),5.0);	
 		//TS_ASSERT_EQUALS(extractString(*B),"-1 p 0.6666666667 0.6666666667 0.3333333333 5\n");	
+		delete B;
 	}
 
 	void testAssignment()

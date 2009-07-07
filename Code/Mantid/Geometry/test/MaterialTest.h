@@ -75,7 +75,8 @@ public:
 		TS_ASSERT_EQUALS(B->getName(),"Rb");
 		TS_ASSERT_EQUALS(B->getScat(),22.0);
 		TS_ASSERT_EQUALS(B->getCoh(),20.0);
-		TS_ASSERT_EQUALS(B->getInc(),2.0)
+		TS_ASSERT_EQUALS(B->getInc(),2.0);
+		delete B;
 	}
 
 	void testAssignment(){

@@ -43,6 +43,7 @@ public:
 		General *B;
 		B=A.clone();
 		TS_ASSERT_EQUALS(extractString(*B),"-1 gq  1  1  1  0  0  0  0  0  0  -1 \n");
+		delete B;
 	}
 
 	void testEqualOperator(){

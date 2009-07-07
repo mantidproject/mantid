@@ -411,45 +411,44 @@ Rule::removeItem(Rule* &TRule,const int SurfN)
   */
 {
   int cnt(0);
-  Rule* Ptr=TRule->findKey(SurfN);
-  while(Ptr)
-    {	    
-      Rule* LevelOne=Ptr->getParent();   // Must work
-      Rule* LevelTwo=(LevelOne) ? LevelOne->getParent() : 0;
+  Rule* Ptr = TRule->findKey(SurfN);
+  while (Ptr)
+  {
+    Rule* LevelOne = Ptr->getParent(); // Must work
+    Rule* LevelTwo = (LevelOne) ? LevelOne->getParent() : 0;
 
-      if (LevelTwo)                     /// Not the top level
-        {
-	  // Decide which of the pairs is to be copied
-	  Rule* PObj= (LevelOne->leaf(0)!=Ptr) ?
-	    LevelOne->leaf(0) : LevelOne->leaf(1);
-	  // 
-	  LevelOne->setLeaves(0,0);          // Delete from Ptr, and copy
-	  const int side=(LevelTwo->leaf(0)!=LevelOne) ? 1 : 0;
-	  LevelTwo->setLeaf(PObj,side);
-	}
-      else if (LevelOne)                // LevelOne is the top rule
-        {
-	  // Decide which of the pairs is to be copied
-	  Rule* PObj= (LevelOne->leaf(0)!=Ptr) ?
-	    LevelOne->leaf(0) : LevelOne->leaf(1);
-
-	  PObj->setParent(0);      /// New Top rule
-	  TRule=PObj;
-	  LevelOne->setLeaves(0,0);          // Delete from Ptr, and copy
-	  // Note we now need to delete this 
-	}
-      else  // Basic surf object
-        {
-	  SurfPoint* SX=dynamic_cast<SurfPoint*>(Ptr);
-	  SX->setKeyN(0);
-	  SX->setKey(0);
-	  return cnt+1;
-	}
-      delete Ptr;
-      delete LevelOne;
-      Ptr=TRule->findKey(SurfN);
-      cnt++;
+    if (LevelTwo) /// Not the top level
+    {
+      // Decide which of the pairs is to be copied
+      Rule* PObj = (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
+      // 
+      LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
+      const int side = (LevelTwo->leaf(0) != LevelOne) ? 1 : 0;
+      LevelTwo->setLeaf(PObj, side);
     }
+    else if (LevelOne) // LevelOne is the top rule
+    {
+      // Decide which of the pairs is to be copied
+      Rule* PObj = (LevelOne->leaf(0) != Ptr) ? LevelOne->leaf(0) : LevelOne->leaf(1);
+
+      PObj->setParent(0); /// New Top rule
+      TRule = PObj;
+      LevelOne->setLeaves(0, 0); // Delete from Ptr, and copy
+      // Note we now need to delete this 
+      delete LevelOne;
+    }
+    else // Basic surf object
+    {
+      SurfPoint* SX = dynamic_cast<SurfPoint*> (Ptr);
+      SX->setKeyN(0);
+      SX->setKey(0);
+      return cnt + 1;
+    }
+    delete Ptr;
+    //delete LevelOne; // Shouldn't delete now we're deleting in setLeaf.
+    Ptr = TRule->findKey(SurfN);
+    cnt++;
+  }
   return cnt;
 }
 
@@ -627,13 +626,14 @@ Rule::substituteSurf(const int SurfN,const int newSurfN,Surface* SPtr)
   int cnt(0);
   SurfPoint* Ptr=dynamic_cast<SurfPoint*>(findKey(SurfN));
   while(Ptr)
-    {
-      Ptr->setKeyN(Ptr->getSign()*newSurfN);
-      Ptr->setKey(SPtr);
-      cnt++;
-      // get next key
-      Ptr=dynamic_cast<SurfPoint*>(findKey(SurfN));
-    }
+  {
+    Ptr->setKeyN(Ptr->getSign()*newSurfN);
+    Ptr->setKey(SPtr->clone());  // Clone to ensure uniqueness
+    cnt++;
+    // get next key
+    Ptr=dynamic_cast<SurfPoint*>(findKey(SurfN));
+  }
+  delete SPtr;  // Delete incoming pointer
   return cnt;
 }
 

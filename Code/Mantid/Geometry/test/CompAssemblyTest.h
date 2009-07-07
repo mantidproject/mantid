@@ -44,20 +44,21 @@ public:
 
   void testNameParentValueConstructor()
   {
-    CompAssembly* parent = new CompAssembly("Parent");
+    CompAssembly *parent = new CompAssembly("Parent");
     //name and parent
-    CompAssembly q("Child", parent);
-    TS_ASSERT_EQUALS(q.getName(), "Child");
-    TS_ASSERT_EQUALS(q.nelements(), 0);
-    TS_ASSERT_THROWS(q[0], std::runtime_error);
+    CompAssembly *q = new CompAssembly("Child", parent);
+    TS_ASSERT_EQUALS(q->getName(), "Child");
+    TS_ASSERT_EQUALS(q->nelements(), 0);
+    TS_ASSERT_THROWS((*q)[0], std::runtime_error);
     //check the parent
-    TS_ASSERT(q.getParent());
-    TS_ASSERT_EQUALS(q.getParent()->getName(), parent->getName());
+    TS_ASSERT(q->getParent());
+    TS_ASSERT_EQUALS(q->getParent()->getName(), parent->getName());
 
-    TS_ASSERT_EQUALS(q.getPos(), V3D(0, 0, 0));
-    TS_ASSERT_EQUALS(q.getRelativeRot(), Quat(1, 0, 0, 0));
+    TS_ASSERT_EQUALS(q->getPos(), V3D(0, 0, 0));
+    TS_ASSERT_EQUALS(q->getRelativeRot(), Quat(1, 0, 0, 0));
     //as the parent is at 0,0,0 GetPos should equal getRelativePos
-    TS_ASSERT_EQUALS(q.getRelativePos(), q.getPos());
+    TS_ASSERT_EQUALS(q->getRelativePos(), q->getPos());
+    delete parent;
   }
 
   void testAdd()
@@ -127,6 +128,7 @@ public:
     TS_ASSERT_EQUALS(q.getRelativePos(), copy.getRelativePos());
     TS_ASSERT_EQUALS(q.getPos(), copy.getPos());
     TS_ASSERT_EQUALS(q.getRelativeRot(), copy.getRelativeRot());
+    delete parent;
   }
 
   void testClone()
@@ -153,6 +155,8 @@ public:
     TS_ASSERT_EQUALS(q.getRelativePos(), copy->getRelativePos());
     TS_ASSERT_EQUALS(q.getPos(), copy->getPos());
     TS_ASSERT_EQUALS(q.getRelativeRot(), copy->getRelativeRot());
+    delete copyAsComponent;
+    delete parent;
   }
 
   void testGetParent()
@@ -272,16 +276,17 @@ public:
 
     CompAssembly* parent = new CompAssembly("testTranslate");
     parent->setPos(parentPos);
-    CompAssembly child("testTranslate", parent);
-    child.setPos(pos1);
-    TS_ASSERT_EQUALS(child.getPos(), pos1+parentPos);
-    TS_ASSERT_EQUALS(child.getRelativePos(), pos1);
-    child.translate(translate1);
-    TS_ASSERT_EQUALS(child.getPos(), pos2+parentPos);
-    TS_ASSERT_EQUALS(child.getRelativePos(), pos2);
-    child.translate(translate2.X(), translate2.Y(), translate2.Z());
-    TS_ASSERT_EQUALS(child.getPos(), pos3+parentPos);
-    TS_ASSERT_EQUALS(child.getRelativePos(), pos3);
+    CompAssembly* child = new CompAssembly("testTranslate", parent);
+    child->setPos(pos1);
+    TS_ASSERT_EQUALS(child->getPos(), pos1+parentPos);
+    TS_ASSERT_EQUALS(child->getRelativePos(), pos1);
+    child->translate(translate1);
+    TS_ASSERT_EQUALS(child->getPos(), pos2+parentPos);
+    TS_ASSERT_EQUALS(child->getRelativePos(), pos2);
+    child->translate(translate2.X(), translate2.Y(), translate2.Z());
+    TS_ASSERT_EQUALS(child->getPos(), pos3+parentPos);
+    TS_ASSERT_EQUALS(child->getRelativePos(), pos3);
+    delete parent;
   }
 
   void testRotate()
