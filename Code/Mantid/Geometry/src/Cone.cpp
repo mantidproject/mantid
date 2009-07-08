@@ -28,7 +28,15 @@ namespace Mantid
 	namespace Geometry
 	{
 
+
 		Kernel::Logger& Cone::PLog(Kernel::Logger::get("Cone"));
+
+	        // The number of slices to use to approximate a cylinder
+	        int Cone::g_nslices = 10;
+
+	        // The number of slices to use to approximate a cylinder
+	        int Cone::g_nstacks = 1;
+
 
 		/// Floating point tolerance
 		//const double CTolerance(1e-6);

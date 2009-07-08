@@ -88,6 +88,9 @@ class DLLExport Object
   double CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
 			    const Mantid::Geometry::V3D & axis, 
 			    const double radius, const double height) const;
+  double ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
+			    const Mantid::Geometry::V3D & axis, 
+			    const double radius, const double height) const;
 
   /// Geometry Handle for rendering
   boost::shared_ptr<GeometryHandler> handle;

@@ -31,6 +31,13 @@ Kernel::Logger& Sphere::PLog(Kernel::Logger::get("Sphere"));
 
 //const double STolerance(1e-6);  ///< Tolerance (should be replaced with boost::)
 
+// The number of slices to use to approximate a sphere
+int Sphere::g_nslices = 5;
+
+// The number of slices to use to approximate a sphere
+int Sphere::g_nstacks = 5;
+
+
 Sphere::Sphere() : Quadratic(),
   Centre(0,0,0),Radius(0.0)
   /*!

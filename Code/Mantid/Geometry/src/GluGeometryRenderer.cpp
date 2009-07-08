@@ -2,6 +2,8 @@
 #include "MantidGeometry/ObjComponent.h"
 #include "MantidGeometry/Quat.h"
 #include "MantidGeometry/Cylinder.h"
+#include "MantidGeometry/Cone.h"
+#include "MantidGeometry/Sphere.h"
 #include <climits>
 #ifdef _WIN32
 #include "windows.h"
@@ -142,7 +144,7 @@ namespace Mantid
 			gluQuadricNormals(qobj,GL_SMOOTH);
 			glPushMatrix();
 			glTranslated(center[0],center[1],center[2]);
-			gluSphere(qobj,radius,5,5);
+			gluSphere(qobj,radius, Geometry::Sphere::g_nslices, Geometry::Sphere::g_nstacks);
 			glPopMatrix();
 			gluDeleteQuadric(qobj);
 		}
@@ -211,9 +213,9 @@ namespace Mantid
 			Quat rot(unit,axis);
 			rot.GLMatrix(mat);
 			glMultMatrixd(mat);
-			gluCylinder(qobj,0,radius,height,10,5);
+    		        gluCylinder(qobj,0,radius,height,Geometry::Cone::g_nslices,Geometry::Cone::g_nstacks);
 			glTranslated(0.0,0.0,height);
-			gluDisk(qobj,0,radius,10,1);
+			gluDisk(qobj,0,radius,Geometry::Cone::g_nslices,1);
 			glPopMatrix();
 		}
 

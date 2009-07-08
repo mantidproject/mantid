@@ -104,6 +104,10 @@ class DLLExport Cone : public Quadratic
   ///This will get the bounding box for the cone
   void getBoundingBox(double& xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);	
 
+  /// The number of slices to approximate a cone
+  static int g_nslices;
+  /// The number of stacks to approximate a cone
+  static int g_nstacks;
 };
 
 }  // NAMESPACE MonteCarlo

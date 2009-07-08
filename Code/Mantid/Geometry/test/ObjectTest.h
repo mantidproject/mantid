@@ -17,6 +17,8 @@
 #include "MantidGeometry/SurfaceFactory.h" 
 #include "MantidGeometry/Track.h" 
 
+#include "MantidGeometry/GluGeometryHandler.h"
+
 using namespace Mantid;
 using namespace Geometry;
 
@@ -564,29 +566,33 @@ public:
     Test solid angle calculation for a capped cylinder
     */
   {
-    Object A = createCappedCylinder();
-    double satol=2e-2; // tolerance for solid angle
+    Object A = createSmallCappedCylinder();
+    // Want to test triangulation so setup a geometry handler
+    boost::shared_ptr<GluGeometryHandler> h = boost::shared_ptr<GluGeometryHandler>(new GluGeometryHandler(&A));
+    h->setCylinder(V3D(-1.0,0.0,0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
+    A.setGeometryHandler(h);
 
-    // solid angle at distance 4 from capped cyl -3.2 1.2 in x, rad 3
+    double satol(1e-4); // tolerance for solid angle
+
+    // solid angle at point -0.5 from capped cyl -1.0 -0.997 in x, rad 0.005 - approx WISH cylinder
     //
     // soild angle of circle radius 3, distance 3 is 2pi(1-cos(t)) where
-    // t is atan(3/3), should be 1.840302,
-    // Work round for reverse track intercept has been made in Object.cpp
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(4.2,0,0)),1.840302,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(-7.2,0,0)),1.25663708,satol);
+    // t is atan(3/3), should be 0.000317939
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.000317939, satol);
+    // Other end
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.000317939, satol);
+
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,7)),0.7531,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,7,0)),0.7531,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0, 0, 0.1)), 8.03225e-05, satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0, 0.1, 0)), 8.03225e-05, satol);
+
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,0)),4*M_PI,satol);
-    // surface point
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(1.2,0,0)),2*M_PI,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(-3.2,0,0)),2*M_PI,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,3,0)),2*M_PI,satol);
-    // distant points
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(20,0,0)),0.07850147,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(200,0,0)),0.000715295,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(2000,0,0)),7.08131e-6,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-0.999, 0.0, 0.0)),4*M_PI,satol);
+
+    // surface points
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-1.0, 0.0, 0.0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-0.997, 0.0, 0.0)),2*M_PI,satol);
+
   }
 
   void testSolidAngleCubeTriangles()
@@ -789,6 +795,38 @@ private:
     std::string C31="cx 3.0";         // cylinder x-axis radius 3
     std::string C32="px 1.2";
     std::string C33="px -3.2";
+
+    // First create some surfaces
+    std::map<int,Surface*> CylSurMap;
+    CylSurMap[31]=new Cylinder();
+    CylSurMap[32]=new Plane();
+    CylSurMap[33]=new Plane();
+
+    CylSurMap[31]->setSurface(C31);
+    CylSurMap[32]->setSurface(C32);
+    CylSurMap[33]->setSurface(C33);
+    CylSurMap[31]->setName(31);
+    CylSurMap[32]->setName(32);
+    CylSurMap[33]->setName(33);
+
+    // Capped cylinder (id 21) 
+    // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
+    std::string ObjCapCylinder="-31 -32 33";
+
+    Object retVal; 
+    retVal.setObject(21,ObjCapCylinder);
+    retVal.populate(CylSurMap);
+
+    return retVal;
+  }
+  
+  // This creates a cylinder to test the solid angle that is more realistic in size
+  // for a detector cylinder
+  Object createSmallCappedCylinder()
+  {
+    std::string C31="cx 0.005";         // cylinder x-axis radius 0.005 and height 0.003
+    std::string C32="px -0.997";
+    std::string C33="px -1.0";
 
     // First create some surfaces
     std::map<int,Surface*> CylSurMap;

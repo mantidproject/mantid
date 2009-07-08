@@ -84,7 +84,12 @@ namespace Mantid
       void setBaseEqn();
 	  ///Writes the sphere equatation in MCNP format
       void write(std::ostream&) const; 
-	  void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
+      void getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin);
+
+      /// The number of slices to approximate a sphere
+      static int g_nslices;
+      /// The number of stacks to approximate a sphere
+      static int g_nstacks;
     };
 
   }   // NAMESPACE Geometry
