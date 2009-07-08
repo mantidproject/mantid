@@ -62,7 +62,7 @@ void FindPeaks::exec()
   MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(inputWS);
 
   // The optimum number of points in the smoothing, according to Mariscotti, is 0.6*fwhm
-  const int fwhm = getProperty("Fwhm");
+  const int fwhm = getProperty("FWHM");
   int w = static_cast<int>(0.6 * fwhm);
   // w must be odd
   if (!(w%2)) ++w;

@@ -198,7 +198,7 @@ public:
     std::string outputSpace = "outWorkspace";
     conv.setPropertyValue("OutputWorkspace",outputSpace);
     conv.setPropertyValue("Target","DeltaE");
-    conv.setPropertyValue("Emode","1");
+    conv.setPropertyValue("Emode","Direct");
     conv.setPropertyValue("Efixed","12");
     conv.execute();
 
@@ -214,7 +214,7 @@ public:
     conv2.setPropertyValue("InputWorkspace",ws);
     conv.setPropertyValue("OutputWorkspace",outputSpace);
     conv.setPropertyValue("Target","DeltaE_inWavenumber");
-    conv.setPropertyValue("Emode","2");
+    conv.setPropertyValue("Emode","Indirect");
     conv.setPropertyValue("Efixed","10");
     conv.execute();
 

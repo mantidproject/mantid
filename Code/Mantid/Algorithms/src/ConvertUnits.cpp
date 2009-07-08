@@ -46,17 +46,20 @@ void ConvertUnits::init()
   declareProperty("Target","",new ListValidator(UnitFactory::Instance().getKeys()),
     "The name of the units to convert to (must be one of those registered in\n"
     "the Unit Factory)");
-  declareProperty("Emode",0,new BoundedValidator<int>(0,2),
-    "The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry,\n"
-    "default is elastic)");
+  std::vector<std::string> propOptions;
+  propOptions.push_back("Elastic");
+  propOptions.push_back("Direct");
+  propOptions.push_back("Indirect");
+  declareProperty("EMode","Elastic",new ListValidator(propOptions),
+    "The energy mode, default is elastic)");
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
-  declareProperty("Efixed",0.0,mustBePositive,
-    "Value of fixed energy in meV : EI (emode=1) or EF (emode=2) . Must be\n"
+  declareProperty("EFixed",0.0,mustBePositive,
+    "Value of fixed energy in meV : EI (EMode=Direct) or EF (EMode=Indirect) . Must be\n"
     "set if the target unit requires it (e.g. DeltaE)");
 
   declareProperty("AlignBins",false,
-    "Set AlignBins to true to insure that all spectra in the output workspace\n"
+    "Set AlignBins to true to ensure that all spectra in the output workspace\n"
     "have identical bin boundaries.  Rebin with (with linear binning) is run,\n"
     "where necessary, to ensure this (default false)");
 }
@@ -234,15 +237,19 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
  */
 void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
 {
+  using namespace Geometry;
+
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
+  // Get the parameter map
+  boost::shared_ptr<const ParameterMap> pmap = outputWS->instrumentParameters();
 
   // Get the unit object for each workspace
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
 
   // Get the distance between the source and the sample (assume in metres)
-  Geometry::IObjComponent_const_sptr source = instrument->getSource();
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  IObjComponent_const_sptr source = instrument->getSource();
+  IObjComponent_const_sptr sample = instrument->getSample();
   double l1;
   try
   {
@@ -258,21 +265,26 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
   const int notFailed = -99;
   int failedDetectorIndex = notFailed;
 
+  /// @todo No implementation for any of these in the geometry yet so using properties
+  const std::string emodeStr = getProperty("EMode");
+  // Convert back to an integer representation
+  int emode = 0;
+  if (emodeStr == "Direct") emode=1;
+  else if (emodeStr == "Indirect") emode=2;
+
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
 
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
 
-    /// @todo No implementation for any of these in the geometry yet so using properties
-    const int emode = getProperty("Emode");
-    const double efixed = getProperty("Efixed");
+    double efixed = getProperty("Efixed");
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
 
     try {
       // Now get the detector object for this histogram
-      Geometry::IDetector_const_sptr det = outputWS->getDetector(i);
+      IDetector_sptr det = outputWS->getDetector(i);
       // Get the sample-detector distance for this detector (in metres)
       double l2, twoTheta;
       if ( ! det->isMonitor() )
@@ -280,6 +292,13 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         l2 = det->getDistance(*sample);
         // The scattering angle for this detector (in radians).
         twoTheta = outputWS->detectorTwoTheta(det);
+        // If an indirect instrument, try getting Efixed from the geometry
+        if (emode==2)
+        {
+          Parameter_sptr par = pmap->get((IComponent*)(det->getComponent().getComponentID()),"Efixed");
+          if (par) efixed = par->value<double>();
+          g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
+        }
       }
       else  // If this is a monitor then make l2 = source-detector distance, l1=0 and twoTheta=0
       {
@@ -287,14 +306,18 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         l2 = l2-l1;
         twoTheta = 0.0;
         // Energy transfer is meaningless for a monitor, so set l2 to 0.
-        if (outputUnit->unitID().find("Delta")==0) l2 = 0.0;
+        if (outputUnit->unitID().find("Delta")==0)
+        {
+          l2 = 0.0;
+          efixed = DBL_MIN;
+        }
       }
       if (failedDetectorIndex != notFailed)
       {
         g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;
         failedDetectorIndex = notFailed;
       }
-
+    
       // Convert the input unit to time-of-flight
       fromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
       // Convert from time-of-flight to the desired unit
@@ -440,8 +463,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
   if (workspace->axes() > 1) specAxis = workspace->getAxis(1);
 
   const int numSpec = workspace->getNumberHistograms();
-  const int emode = getProperty("Emode");
-  if (emode==1)
+  const std::string emode = getProperty("Emode");
+  if (emode=="Direct")
   {
     // First the easy case of direct instruments, where all spectra will need the
     // same number of bins removed
@@ -464,7 +487,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
       if (specAxis) outAxis->spectraNo(i) = specAxis->spectraNo(i);
     }
   }
-  else if (emode==2) 
+  else if (emode=="Indirect") 
   {
     // Now the indirect instruments. In this case we could want to keep a different
     // number of bins in each spectrum because, in general L2 is different for each
