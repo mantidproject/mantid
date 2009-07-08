@@ -106,8 +106,11 @@ namespace Mantid
       module << "import string\n\n";
 
       //In GUI need to define a global variable to tell if we are using it or not
-      if( gui )	module << "PYTHONAPIINMANTIDPLOT = True\n\n";
-      else module << "PYTHONAPIINMANTIDPLOT = False\n\n";
+      module << "PYTHONAPI_IN_MANTIDPLOT = ";
+      if( gui )	module << "True\n";
+      else module << "False\n";
+
+      module << "EMPTY_PARAM_VALUE = -999\n\n";
 
       //Make the FrameworkManager object available with case variations
       module << "# The main API object\n"
@@ -117,7 +120,21 @@ namespace Mantid
 	     << "mtd = mantid\n"
 	     << "Mtd = mantid\n\n";
 
-      //First a simple function to change the working directory
+      // A function to convert things to a string. Basically does something
+      // different if the value is a list
+      module << "# Convert a value to a string with special handing for boolean or lists\n"
+	     << "def makeString(value):\n"
+	     << "\tif isinstance(value, list):\n"
+	     <<	"\t\treturn str(value).lstrip('[').rstrip(']')\n"
+	     <<	"\telif isinstance(value, bool):\n"
+	     << "\t\tif value:\n"
+	     << "\t\t\treturn '1'\n"
+	     << "\t\telse:\n"
+	     << "\t\t\treturn '0'\n"
+	     << "\telse:\n"
+	     <<	"\t\treturn str(value)\n\n";
+
+      // A simple function to change the working directory
       module << "# A wrapper for changing the directory\n"
 	     << "def setWorkingDirectory(path):\n"
 	     << "\tos.chdir(path)\n\n";
@@ -214,14 +231,14 @@ namespace Mantid
 	//For gui mode, set all properties as optional
 	if( gui )
 	{
-	  os << " = -1,";
+	  os << " = EMPTY_PARAM_VALUE,";
 	  ++pIter;
 	}
 	else
 	{
-	  //properties are optional unless their current value results in an error (isValid != ""
+	  //properties are optional unless their current value results in an error (isValid != "")
 	  if( (*pIter)->isValid() != "" ) ++iMand;
-	  else os  << " = -1";
+	  else os  << " = EMPTY_PARAM_VALUE";
 	  if( ++pIter != pEnd ) os << ", ";
 	}
       }
@@ -245,28 +262,22 @@ namespace Mantid
 	std::string pvalue = sanitizedNames[iarg];
 	if( gui )
 	{
-	  os << "\tif " << pvalue << " != -1:\n"
-	     << "\t\tvalues += '" << (*pIter)->name() << "=' + " << pvalue << " + '|'\n";
+	  os << "\tif " << pvalue << " != EMPTY_PARAM_VALUE:\n"
+	     << "\t\tvalues += '" << (*pIter)->name() << "=' + makeString(" << pvalue << ") + '|'\n";
 	}
 	else
 	{
 	  if( iarg < iMand )
 	  {
-	    os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << pvalue << ".lstrip('? '))\n";
+	    os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" << pvalue << ").lstrip('? '))\n";
 	  }
 	  else
 	  {
-	    os << "\tif " << pvalue << " != -1:\n"
-	       << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << pvalue << ".lstrip('? '))\n";
+	    os << "\tif " << pvalue << " != EMPTY_PARAM_VALUE:\n"
+	       << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" << pvalue << ").lstrip('? '))\n";
 	  }
 	}
-// 	if( !gui && iarg < iMand )
-// 	  os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
-// 	else {
-// 	  os << "\tif " << sanitizedNames[iarg] << " != -1:\n"
-// 	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", " << sanitizedNames[iarg] << ")\n";
       }
-
 
       if( gui )
       {
@@ -281,7 +292,7 @@ namespace Mantid
       }
       else
       {
-	os << "\tif PYTHONAPIINMANTIDPLOT == True:\n"
+	os << "\tif PYTHONAPI_IN_MANTIDPLOT == True:\n"
 	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
 	   << "\t\tif result == False:\n"
 	   << "\t\t\tsys.exit('An error occurred while running " << algm << "')\n"
@@ -319,7 +330,7 @@ namespace Mantid
 	}
       }
       os << "\thelpmsg += \"For help with a specific command type: mantidHelp(\\\"cmd\\\")\\n\"\n"
-       << "\tif PYTHONAPIINMANTIDPLOT == True:\n"
+       << "\tif PYTHONAPI_IN_MANTIDPLOT == True:\n"
        << "\t\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
        << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n"
        << "\tprint helpmsg,\n"
@@ -386,8 +397,7 @@ namespace Mantid
       {      
 	os << "\t\thelpmsg += '     Name: message, Optional: Yes, Default value: '', Direction: Input\\n'\n";
       }
-      os << "\t\thelpmsg += 'Note 1: All arguments must be wrapped in string quotes \"\", regardless of their type.\\n'\n"
-	 << "\t\thelpmsg += 'Note 2: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\'value\\'.\\n\\n'\n"
+      os << "\t\thelpmsg += 'Note: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\'value\\'.\\n\\n'\n"
 	 << "\t\thelpmsg += '     Example: " + std::string(example.begin(), example.end() - 1) + ")\\n'\n"
 	 << "\t\tprint helpmsg,\n\n";
       return os.str();
@@ -402,9 +412,9 @@ namespace Mantid
     {
       if ( helpStrings.empty() ) return;
 
-      os << "def mtdHelp(cmd = -1):\n";
+      os << "def mtdHelp(cmd = EMPTY_PARAM_VALUE):\n";
       
-      os << "\tif cmd == -1:\n"
+      os << "\tif cmd == EMPTY_PARAM_VALUE or cmd == '':\n"
 	 << "\t\tmtdGlobalHelp()\n"
 	 << "\t\treturn\n";
       os << "\n\tcmd = string.lower(cmd)\n";
@@ -419,7 +429,7 @@ namespace Mantid
 	   << (*mIter).second;
       }
       os << "\telse:\n"
-	 << "\t\tprint 'mtdHelp() - '' + cmd + '' not found in help list'\n\n";
+	 << "\t\tprint 'mtdHelp() - ' + cmd + ' not found in help list'\n\n";
    
       //Aliases
       os << "# Help function aliases\n"

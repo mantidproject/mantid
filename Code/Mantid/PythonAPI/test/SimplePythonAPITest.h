@@ -35,7 +35,8 @@ public:
     std::string line;
     getline(is, line);
     TS_ASSERT_EQUALS(line, "import sys");
-    //skip lines containing append commands
+
+    //skip lines containing append commands ( I don't know how
     //This will leave line containing the next either non-blank or sys cmd line
     while( getline(is, line) && (line.empty() || line.find("sys") != std::string::npos) )
     {
@@ -61,8 +62,9 @@ public:
     getline( is, line );
     getline( is, line );
 
-    TS_ASSERT_EQUALS(line, std::string("PYTHONAPIINMANTIDPLOT = False"));
-
+    TS_ASSERT_EQUALS(line, std::string("PYTHONAPI_IN_MANTIDPLOT = False"));
+    getline( is, line );
+    TS_ASSERT_EQUALS(line, std::string("EMPTY_PARAM_VALUE = -999"));
     //next non-blank line should be API objects
     //eat blank lines
     while( getline(is, line) && ( line.empty() || line[0] == '#' ) )
@@ -83,7 +85,15 @@ public:
     while( getline(is, line) && line.empty() ) 
     {
     }
+
+    getline(is, line);
+    TS_ASSERT_EQUALS(line, "def makeString(value):");
+    while( getline(is, line) && !line.empty() ) 
+    {
+    }
     
+    // Comment line first
+    getline(is, line);
     getline(is, line);
     TS_ASSERT_EQUALS(line, "def setWorkingDirectory(path):");
     getline(is, line);
