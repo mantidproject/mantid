@@ -12,6 +12,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Instrument.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -307,6 +308,46 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
     TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
   }
+
+
+  // test if parameters set in instrument definition file are loaded properly
+  void testIfParameterFromIDFLoaded()
+  {
+    LoadRaw3 loader4;
+    loader4.initialize();
+    loader4.setPropertyValue("Filename", "../../../../Test/Data/TSC10076.raw");
+    loader4.setPropertyValue("OutputWorkspace", "parameterIDF");
+    TS_ASSERT_THROWS_NOTHING( loader4.execute() )
+    TS_ASSERT( loader4.isExecuted() )
+
+    // Get back workspace and check it really is a ManagedWorkspace2D
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("parameterIDF") );
+
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+        // Check the total number of elements in the map for TOSCA
+    //TS_ASSERT_EQUALS(output2D->spectraMap().nElements(),141);
+
+
+    //boost::shared_ptr<IComponent> comp;
+
+    boost::shared_ptr<IInstrument> i = output2D->getInstrument();
+    Mantid::Geometry::IDetector_sptr ptrDet = i->getDetector(60);
+    TS_ASSERT_EQUALS( ptrDet->getID(), 60);
+
+    boost::shared_ptr<Mantid::Geometry::ParameterMap> pmap = output2D->instrumentParameters();
+    TS_ASSERT_EQUALS( pmap->size(), 140);
+
+   // Mantid::Geometry::IComponent*  comp = static_cast<IComponent*>(ptrDet);
+
+//    Mantid::Geometry::Parameter_sptr par = pmap->get(ptrDet,"Efixed");
+
+
+  }
+
+
+
 
 private:
   LoadRaw3 loader,loader2,loader3;

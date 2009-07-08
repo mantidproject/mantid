@@ -556,7 +556,7 @@ namespace Mantid
 
       std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> > :: const_iterator it;
       std::pair<std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator,
-        std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator> ret;
+      std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator> ret;
 
 
       // loop over all logfiles and see if any of these are associated with parameters in the
@@ -593,6 +593,27 @@ namespace Mantid
           else
             paramMap->addDouble(((*it).second)->m_component, paramN, value);
         }
+      } // finished looping over logfiles
+
+
+      // Check if parameters have been specified using the 'value' attribute rather than the 'logfile-id' attribute
+      // All such parameters have been stored using the key = "".
+
+      ret = paramInfoFromIDF.equal_range("");
+      TimeSeriesProperty<double>* dummy = NULL;
+      for (it=ret.first; it!=ret.second; ++it)
+      {
+        double value = ((*it).second)->createParamValue(dummy);
+
+        // special case if parameter name is "x", "y" or "z" and "rot"
+
+        std::string paramN = ((*it).second)->m_paramName;
+        if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
+          paramMap->addPositionCoordinate(((*it).second)->m_component, paramN, value);
+        else if ( paramN.compare("rot")==0 )
+          paramMap->addRotationParam(((*it).second)->m_component,paramN, value);
+        else
+          paramMap->addDouble(((*it).second)->m_component, paramN, value);
       }
     }
 
