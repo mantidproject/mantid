@@ -14,8 +14,8 @@ namespace API
 */
 void Progress::report(const std::string& msg)
 {
-  if (m_i - m_last_reported < m_step ) return;
-  double p = m_start + m_dp*(m_i++ - m_ifirst);
+  if (m_i++ - m_last_reported < m_step ) return;
+  double p = m_start + m_dp*(m_i - m_ifirst);
   if (p > m_end) p = m_end;
   m_alg->progress(p,msg);
   m_alg->interruption_point();
