@@ -27,7 +27,7 @@ void FindPeaks::init()
     "Name of the workspace to search" );
   BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
   // The estimated width of a peak in terms of number of channels
-  declareProperty("Fwhm",7,range,
+  declareProperty("FWHM",7,range,
     "Estimated number of points covered by the fwhm of a peak (default 7)" );
   // The tolerance allowed in meeting the conditions
   BoundedValidator<int> *min = new BoundedValidator<int>();
