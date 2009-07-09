@@ -25,15 +25,16 @@ private:
 
 Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name)const
 {
-    pmap_it it_found = m_map.find(comp);
+    const ComponentID id = comp->getComponentID();
+    pmap_it it_found = m_map.find(id);
     if (it_found == m_map.end()) 
     {
         //g_log.error("Component "+comp+" does not have any parameters.");
         return Parameter_sptr();// ?
     }
 
-    pmap_it it_begin = m_map.lower_bound(comp);
-    pmap_it it_end = m_map.upper_bound(comp);
+    pmap_it it_begin = m_map.lower_bound(id);
+    pmap_it it_end = m_map.upper_bound(id);
 
     pmap_it param = std::find_if(it_begin,it_end,equalParameterName(name));
 
@@ -57,21 +58,23 @@ std::vector<std::string> ParameterMap::nameList(const IComponent* comp)const
 {
     std::vector<std::string> lst;
 
-    pmap_it it_found = m_map.find(comp);
+    const ComponentID id = comp->getComponentID();
+
+    pmap_it it_found = m_map.find(id);
     if (it_found == m_map.end()) 
     {
         return lst;
     }
 
-    pmap_it it_begin = m_map.lower_bound(comp);
-    pmap_it it_end = m_map.upper_bound(comp);
+    pmap_it it_begin = m_map.lower_bound(id);
+    pmap_it it_end = m_map.upper_bound(id);
 
     for(pmap_it it = it_begin;it!=it_end;it++)
         lst.push_back(it->second->name());
 
     return lst;
 
-}
+} 
 
 std::string ParameterMap::asString()const
 {
@@ -81,7 +84,7 @@ std::string ParameterMap::asString()const
         boost::shared_ptr<Parameter> p = it->second;
         if (p && it->first)
         {
-            out << (it->first)->getName() << ';' << p->type()<< ';' << p->name() << ';' << p->asString() << '|';
+            out << ((const IComponent*)(it->first))->getName() << ';' << p->type()<< ';' << p->name() << ';' << p->asString() << '|';
         }
     }
     return out.str();

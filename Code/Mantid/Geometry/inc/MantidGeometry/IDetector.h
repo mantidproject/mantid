@@ -84,7 +84,7 @@ public:
   virtual bool isMonitor() const = 0;
 
   /// Must return a pointer to itself if derived from IComponent
-  virtual IComponent& getComponent(){throw std::runtime_error("This detecor class does not inherit from IComponent.");}
+  virtual IComponent* getComponent(){throw std::runtime_error("This detecor class does not inherit from IComponent.");}
 
   /// (Empty) Constructor
 	IDetector() {}

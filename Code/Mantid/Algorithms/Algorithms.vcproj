@@ -255,6 +255,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FFT.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FindDeadDetectors.cpp"
 				>
 			</File>
@@ -558,6 +562,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\ExtractSingleSpectrum.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\FFT.h"
 				>
 			</File>
 			<File

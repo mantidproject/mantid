@@ -295,7 +295,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode==2)
         {
-          Parameter_sptr par = pmap->get((IComponent*)(det->getComponent().getComponentID()),"Efixed");
+          Parameter_sptr par = pmap->get(det->getComponent(),"Efixed");
           if (par) efixed = par->value<double>();
           g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
         }

@@ -1,4 +1,4 @@
-#ifndef PARAMETERMAP_H_
+#ifndef PARAMETERMAP_H_ 
 #define PARAMETERMAP_H_
 
 #include "MantidKernel/System.h"
@@ -58,14 +58,14 @@ class DLLExport ParameterMap
 public:
 #ifndef HAS_UNORDERED_MAP_H
   /// Parameter map typedef
-    typedef std::multimap<const IComponent*,boost::shared_ptr<Parameter> > pmap;
+    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
   /// Parameter map iterator typedef
-  typedef std::multimap<const IComponent*,boost::shared_ptr<Parameter> >::const_iterator pmap_it;
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_it;
 #else
   /// Parameter map typedef
-  typedef std::tr1::unordered_multimap<const IComponent*,boost::shared_ptr<Parameter> > pmap;
+  typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
   /// Parameter map iterator typedef
-  typedef std::tr1::unordered_multimap<const IComponent*,boost::shared_ptr<Parameter> >::const_iterator pmap_it;
+  typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_it;
 #endif
     ///Constructor
     ParameterMap(){}
@@ -83,7 +83,7 @@ public:
     {
       boost::shared_ptr<Parameter> param = ParameterFactory::create(type,name);
       param->fromString(value);
-      m_map.insert(std::make_pair(comp,param));
+      m_map.insert(std::make_pair(comp->getComponentID(),param));
     }
 
     /// Method for adding a parameter providing its value of a particular type
@@ -98,7 +98,7 @@ public:
         throw std::runtime_error("Error in adding parameter: incompatible types");
       }
       paramT->setValue(value);
-      m_map.insert(std::make_pair(comp,param));
+      m_map.insert(std::make_pair(comp->getComponentID(),param));
     }
 
     /// Method is provided to add a parameter of any custom type which must be created with 'new' operator.
@@ -119,7 +119,7 @@ public:
      */
     void add(Parameter* param,const IComponent* comp,const std::string& name)
     {
-        m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
+        m_map.insert(std::make_pair(comp->getComponentID(),boost::shared_ptr<Parameter>(param)));
     }
 
     /// Create or adjust "pos" parameter for a component
@@ -217,9 +217,9 @@ public:
       pmap_it it;
       for (it = m_map.begin(); it != m_map.end(); ++it)
       {
-        if ( compName.compare(((*it).first)->getName()) == 0 )  
+        if ( compName.compare(((const IComponent*)(*it).first)->getName()) == 0 )  
         {
-          boost::shared_ptr<Parameter> param = get((*it).first,name);
+          boost::shared_ptr<Parameter> param = get((const IComponent*)(*it).first,name);
           if (param)
             retval.push_back( param->value<T>() );
         }

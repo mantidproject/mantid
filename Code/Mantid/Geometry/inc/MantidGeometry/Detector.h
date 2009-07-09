@@ -61,7 +61,7 @@ public:
     bool isMasked() const;
     bool isMonitor() const;
     /// Returns a reference to itself
-    IComponent& getComponent(){return *static_cast<IComponent*>(this);}
+    IComponent* getComponent(){return static_cast<IComponent*>(this);}
 	// end IDetector methods
 
 	void markAsMonitor(const bool flag = true);
