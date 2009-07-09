@@ -289,7 +289,7 @@ Kernel::Property* LogParser::createRunningLog()const
 
 /** Returns the mean value if the property is TimeSeriesProperty<double>. 
     @param p Property with the data
-    @retrun The mean value over time.
+    @return The mean value over time.
  */
 double timeMean(const Kernel::Property* p)
 {

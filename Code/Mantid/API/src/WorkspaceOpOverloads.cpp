@@ -19,6 +19,7 @@ namespace API
  *  @param algorithmName The name of the binary operation to perform
  *  @param lhs left hand side workspace shared pointer
  *  @param rhs left hand side workspace shared pointer
+ *  @param lhsAsOutput If true, indicates that the lhs input is the same workspace as the output one
  *  @returns The result in a workspace shared pointer
  */
 static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmName, const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs, bool lhsAsOutput = false)
@@ -27,10 +28,7 @@ static MatrixWorkspace_sptr executeBinaryOperation(const std::string algorithmNa
   alg->setChild(true);
   alg->initialize();
 
-  //alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_1",lhs);
-  //alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace_2",rhs);
-
-   alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
+  alg->setProperty<MatrixWorkspace_sptr>("LHSWorkspace",lhs);
   alg->setProperty<MatrixWorkspace_sptr>("RHSWorkspace",rhs);
 
   // Have to set a text name for the output workspace even though it will not be used.
