@@ -277,6 +277,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\RotateInstrumentComponent.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveAscii.cpp"
 				>
 			</File>
@@ -464,6 +468,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\MoveInstrumentComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\RotateInstrumentComponent.h"
 				>
 			</File>
 			<File
