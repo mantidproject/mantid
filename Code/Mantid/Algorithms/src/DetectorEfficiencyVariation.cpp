@@ -102,15 +102,19 @@ void DetectorEfficiencyVariation::exec()
   
   // information on bad spectra will be writen to counts1 by this function, it looks for spectra whose number of counts differ in the two workspaces by more than frac
   std::vector<int> outArray =
-    markBad( counts1, counts2, vari, getProperty("OutputFile") );
+    markBad( counts1, counts2, av, vari, getProperty("OutputFile") );
   // counts1 was overwriten by the last function, now register it with the Analysis Data Service so that users can see it
   setProperty("OutputWorkspace", counts1);
   // make the output array visible to the user too
   setProperty("BadIDs", outArray);
 }
-/** Loads and checks the values passed to the algorithm
-*
-*  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
+/** Loads, checks and passes back the values passed to the algorithm
+* @param whiteBeam1 A white beam vanadium spectrum that will be used to check detector efficiency variations
+* @param whiteBeam2 The other white beam vanadium spectrum from the same instrument to use for comparison
+* @param vari The maximum fractional variation above the median that is allowed for god detectors
+* @param minSpec Index number of the first spectrum to use
+* @param maxSpec Index number of the last spectrum to use
+* @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
 */
 void DetectorEfficiencyVariation::retrieveProperties(
   MatrixWorkspace_sptr &whiteBeam1, MatrixWorkspace_sptr &whiteBeam2,
@@ -174,8 +178,8 @@ void DetectorEfficiencyVariation::retrieveProperties(
 * @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
-API::MatrixWorkspace_sptr DetectorEfficiencyVariation::getTotalCounts(
-                API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
+MatrixWorkspace_sptr DetectorEfficiencyVariation::getTotalCounts(
+                MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information() << "Integrating input workspace" << std::endl;
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -213,7 +217,7 @@ API::MatrixWorkspace_sptr DetectorEfficiencyVariation::getTotalCounts(
 * @param input A histogram workspace with one entry in each bin
 * @return The median value of the histograms in the workspace that was passed to it
 */
-double DetectorEfficiencyVariation::getMedian(API::MatrixWorkspace_const_sptr input) const
+double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) const
 {
   g_log.information() << "Calculating the median count rate of the spectra" << std::endl;
 
@@ -265,14 +269,25 @@ double DetectorEfficiencyVariation::getMedian(API::MatrixWorkspace_const_sptr in
 *
 * @param a this single bin histogram input workspace is overwriten
 * @param b single bin histogram input workspace that is compared to a
-* @param frac the maximum fractional variation between histogram values that is _not_ identified as a problem
+* @param average The median value of the ratio of the total number of counts between equivalent spectra in the two workspaces
+* @param variation The ratio between equivalent spectra can be greater than the median value by this factor, if the variation is greater the detector will be marked bad
 * @param fileName name of a file to store the list of failed spectra in (pass "" to aviod writing to file)
 * @return An array that of the index numbers of the histograms that fail
 */
-std::vector<int> DetectorEfficiencyVariation::markBad( API::MatrixWorkspace_sptr a,
-  API::MatrixWorkspace_const_sptr b, double frac, std::string fileName )
+std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
+  MatrixWorkspace_const_sptr b, double average, double variation,
+  std::string fileName )
 {
   g_log.information("Apply the criteria to find failing detectors");
+
+  // criterion for if the the first spectrum is larger than expected
+  double forwardLargest = average*(1+variation);
+  // criterion for if the the first spectrum is lower than expected
+  double forwardLowest = average*(1-variation);
+  // repeat the same pattern
+  double reverseLargest = (1+variation)/average;
+  //because the user can enter the workspace either way around
+  double reverseLowest = (1-variation)/average;
 
   // get ready to report the number of bad detectors found to the log
   int cChanged = 0, cAlreadyMasked = 0;
@@ -317,7 +332,8 @@ std::vector<int> DetectorEfficiencyVariation::markBad( API::MatrixWorkspace_sptr
       // examine the data, which should all be in the first bin of each histogram
       double v1 = a->readY(i)[0];
       double v2 = b->readY(i)[0];
-      if ( ( (v1/v2)>(1+frac) ) || ( (v2/v1)>(1+frac) ) )
+      if ( ( v1/v2 > forwardLargest ) || ( v1/v2 < forwardLowest ) ||
+        ( v2/v1 > reverseLargest ) || ( v2/v1 < reverseLowest ) ) 
       {// either v1 or v2 is too big, 
         problem = "the number of counts has changed by a factor of " +
           //convert the ratio into a string to display but without too many significant figures
@@ -370,7 +386,8 @@ std::vector<int> DetectorEfficiencyVariation::markBad( API::MatrixWorkspace_sptr
   //output and pass back what we found out about bad detectors
   if ( fileOpen ) file.close();
   g_log.information() << "Marked a total of " << cChanged <<
-    " spectra that had changed by more than " << frac*100 << "%. " <<
+    " spectra changed by more than " << 100*average << "% over or"
+    "under the median change." <<
     cAlreadyMasked << " were already marked bad." << std::endl;
   //finish off setting up the output workspace, it should have no units
   a->isDistribution(false);

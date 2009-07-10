@@ -48,7 +48,7 @@ namespace Mantid
     public:
       /// Default constructor initialises all values to zero and runs the base class constructor
       DetectorEfficiencyVariation() :
-          API::Algorithm(),
+          Algorithm(),                                                        //call the base class constructor
           m_PercentDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
       {};
       /// Destructor
@@ -77,7 +77,8 @@ namespace Mantid
       double getMedian(MatrixWorkspace_const_sptr input) const;
       /// Overwrites the first workspace with bad spectrum information, also outputs an array and a file
       std::vector<int> markBad( MatrixWorkspace_sptr a,
-        MatrixWorkspace_const_sptr b, double frac, std::string fileName);
+        MatrixWorkspace_const_sptr b, double average, double variation,
+        std::string fileName);
 
       /// Value written to the output workspace where bad spectra are found
       static const int BadVal = 100;
@@ -104,6 +105,7 @@ namespace Mantid
       /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
       float advanceProgress(int toAdd);
     private:
+      /// when this is set to false reading and writing to the detector map is disabled, this is done if there is no map in the workspace
       bool m_usableMaskMap;
     };
 
