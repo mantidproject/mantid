@@ -28,18 +28,18 @@ namespace Mantid
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+    <LI> WhiteBeamWorkspace - The name of the Workspace2D to take as input </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
     </UL>
 
     Optional Properties:
     <UL>
-    <LI> Low - Detectors with signals of this proportion of the median value, or less, will be labeled as reading low (default 0.1)</LI>
-    <LI> High - Detectors with signals this number of times, or more, than the median signal will be labeled as reading high (default 1.5)</LI>
-    <LI> StartX - Start the integration at the bin above the one that this value is in (default: the start of each spectrum)</LI>
-    <LI> EndX - Stop the integration at the bin before the one that contains this x value (default: the end of each spectrum)</LI>
-    <LI> LiveValue - The value to assign to an integrated spectrum flagged as 'live' (default 0.0)</LI>
-    <LI> DeadValue - The value to assign to an integrated spectrum flagged as 'dead' (default 100.0)</LI>
+    <LI> LowThreshold - Detectors with signals of this proportion of the median value, or less, will be labeled as reading low (default 0.1)</LI>
+    <LI> HighThreshold - Detectors with signals this number of times, or more, than the median signal will be labeled as reading high (default 1.5)</LI>
+    <LI> StartSpectrum - The index number of the first spectrum to include in the calculation (default 0)</LI>
+    <LI> EndSpectrum - The index number of the last spectrum to include in the calculation (default the last histogram) </LI>
+    <LI> RangeLower - Start the integration at the bin above the one that this value is in (default: the start of each spectrum)</LI>
+    <LI> RangeUpper - Stop the integration at the bin before the one that contains this x value (default: the end of each spectrum)</LI>
     <LI> OutputFile - (Optional) A filename to which to write the list of dead detector UDETs </LI>
     </UL>
 
@@ -125,7 +125,7 @@ namespace Mantid
         RTGetTotalCounts = 5000,
         /// Work required by the ConvertToDistribution algorithm
         RTGetRate = 100,
-        /// Time taken to find failind detectors
+        /// Time taken to find failing detectors
         RTMarkDetects = 200,
         /// The total of all run times
         RTTotal = RTGetSolidAngle + RTGetTotalCounts + RTGetRate + RTMarkDetects

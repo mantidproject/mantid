@@ -12,9 +12,9 @@ namespace Mantid
   {
     /**
     Takes a workspace as input and identifies all spectra were the sum of the 
-    counts in all bins is outside a range. This is then used to mark all 'dead'
-    detectors with a 'dead' marker value, while all spectra from live detectors
-    are given a value of 'live' marker value.
+    counts in all bins is outside a range. This is then used to mark all 'bad'
+    detectors with a 'bad' marker value, while all spectra from live detectors
+    are given a value of 'good' marker value.
 
     Required Properties:
     <UL>

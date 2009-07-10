@@ -85,7 +85,7 @@ public:
     alg.setPropertyValue("LowThreshold","1");
     alg.setPropertyValue("HighThreshold","21.01");
     alg.setPropertyValue("RangeLower", "-1");
-    alg.setPropertyValue("LiveValue", liveVal);
+    alg.setPropertyValue("GoodValue", liveVal);
     alg.setPropertyValue("BadValue", deadVal);
     std::string filename = "FindDetectorsOutsideLimitsTestFile.txt";
     alg.setPropertyValue("OutputFile",filename);

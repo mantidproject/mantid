@@ -5,7 +5,6 @@
 #include "WorkspaceCreationHelper.hh"
 
 #include "MantidAlgorithms/WBVMedianTest.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -27,10 +26,6 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-//these values must match the values in WBVMedianTest
-static int BadVal = 100;
-static int GoodVal = 0;
-
 class WBVMedianTestTest : public CxxTest::TestSuite
 {
 public:
@@ -45,10 +40,9 @@ public:
       TS_ASSERT( runInit(alg) ) )
 
     //these are realistic values that I just made up
-    const double lowThres = 0.5,  highThres = 1.3333;
-    alg.setProperty( "LowThreshold", lowThres );
-    alg.setProperty( "HighThreshold", highThres );
-    //we are using the defaults on StartSpectrum, EndSpectrum, Range_lower and Range_upper which is to use the whole spectrum
+    alg.setProperty( "LowThreshold", 0.5 );
+    alg.setProperty( "HighThreshold", 1.3333 );
+    //we are using the defaults on StartSpectrum, EndSpectrum, RangeLower and RangeUpper which is to use the whole spectrum
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
@@ -60,12 +54,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("WBVMedianTestTestOutput"));
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(m_IWSName));
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("WBVMedianTestTestOutput"));
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT ( outputMat ) ;
     TS_ASSERT_EQUALS( outputMat->YUnit(), "" )
 
-    //There are three output, a workspace (tested in the next code block), an array (later, this test) and a file (next test)
+    //There are three outputs, a workspace (tested in the next code block), an array (later, this test) and a file (next test)
     //were all the spectra output?
 		const int numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
@@ -109,17 +102,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( runInit(alg) ) )
 
-    //these are realistic values that I just made up
-    const double lowThres = 0.44444,  highThres = 5;
-    alg.setProperty( "LowThreshold", lowThres );
-    alg.setProperty( "HighThreshold", highThres );
+    // values a little extreme, I just made them up
+    alg.setProperty( "LowThreshold", 0.44444 );
+    alg.setProperty( "HighThreshold", 5.0 );
 
     const int fSpec = 0,  lSpec = Nhist/2;
     alg.setProperty( "StartSpectrum", fSpec );
     alg.setProperty( "EndSpectrum", lSpec );
     //a couple of random numbers in the range
-    const double lRang = 4000, uRange = 10000;
-    alg.setProperty( "RangeLower", lRang );
+    const double lRange = 4000, uRange = 10000;
+    alg.setProperty( "RangeLower", lRange );
     alg.setProperty( "RangeUpper", uRange );
 
     std::string OFileName("WBVMedianTestTestFile.txt");  
@@ -137,26 +129,26 @@ public:
     int firstGoodSpec = 16;
     int lastGoodSpec = 360;
     std::string fileLine = "";
-    for (int numHist = -1 ; numHist < firstGoodSpec; numHist++ )
+    for (int iHist = -1 ; iHist < firstGoodSpec; iHist++ )
     {
       std::ostringstream correctLine;
-      if ( numHist == -1 )
+      if ( iHist == -1 )
         correctLine << "Index Spectrum UDET(S)";
       else
       {
-        correctLine << " Spectrum with number " << numHist+1 << " is too low";
-      correctLine << " detector IDs: " << numHist+1;
+        correctLine << " Spectrum number " << iHist+1 << " is too low, ";
+      correctLine << "detector IDs: " << iHist+1;
       }
         
       std::getline( testFile, fileLine );
         
       TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
     }
-    for (int numHist = lastGoodSpec+1 ; numHist < Nhist; numHist++ )
+    for (int iHist = lastGoodSpec+1 ; iHist < Nhist; iHist++ )
     {
       std::ostringstream correctLine;
-      correctLine << " Spectrum with number " << numHist+1 << " is too high";
-      correctLine << " detector IDs: " << numHist+1;
+      correctLine << " Spectrum with number " << iHist+1 << " is too high";
+      correctLine << " detector IDs: " << iHist+1;
       
       std::getline( testFile, fileLine );
 
@@ -235,7 +227,9 @@ public:
 private:
   std::string m_IWSName;
   double m_YSum;
-  enum { Nhist = 144 };
+  enum { Nhist = 144, 
+    //these values must match the values in DetectorEfficiencyVariation.h
+    BadVal  = 100, GoodVal = 0 };
 };
 
 #endif /*WBVMEDIANTESTTEST_H_*/

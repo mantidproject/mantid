@@ -1,7 +1,5 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAlgorithms/WBVMedianTest.h"
+#include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <boost/shared_ptr.hpp>
@@ -16,7 +14,6 @@ namespace Mantid
 {
 namespace Algorithms
 {
-
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(WBVMedianTest)
 
@@ -59,18 +56,18 @@ void WBVMedianTest::init()
   //UNSETINT and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
   declareProperty("EndSpectrum", UNSETINT, mustBePosInt->clone(),
     "The index number of the last spectrum to include in the calculation\n"
-    "(default 0)" );
+    "(default the last histogram)" );
   declareProperty("RangeLower", EMPTY_DBL(),
-    "No bin with a boundary at an x value less than this will be used\n"
-    "in the summation that decides if a detector is 'dead' (default: the\n"
+    "No bin with a boundary at an x value less than this will be included\n"
+    "in the summation used to decide if a detector is 'dead' (default: the\n"
     "start of each histogram)" );
   declareProperty("RangeUpper", EMPTY_DBL(),
     "No bin with a boundary at an x value higher than this value will\n"
-    "be used in the summation that decides if a detector is 'dead'\n"
+    "be included in the summation used to decide if a detector is 'dead'\n"
     "(default: the end of each histogram)" );
   declareProperty("OutputFile","",
-    "A filename to which to write the list of dead detector UDETs (default\n"
-    "no writing to file)" );
+    "The name of a file to write the list of dead detector UDETs (default\n"
+    "no file output)" );
       // This output property will contain the list of UDETs for the dead detectors
   declareProperty("FoundDead",std::vector<int>(),Direction::Output);
 }
@@ -109,95 +106,6 @@ void WBVMedianTest::exec()
 
   setProperty("FoundDead", outArray);
 }
-/// Functionality to read detector masking
-/** Inteprets the instrument and detector map for a
-* workspace making it possible to see the status of a detector
-* with one function call
-*/
-class InputWSDetectorInfo
-{
-public:
-  explicit InputWSDetectorInfo(MatrixWorkspace_const_sptr input);
-  bool aDetecIsMaskedinSpec(int SpecIndex);
-  void maskAllDetectorsInSpec(int SpecIndex);
-  int getSpecNum(int SpecIndex) const;
-  std::vector<int> getDetectors(int SpecIndex) const;
-private:
-  /// a pointer the workspace with the detector information
-  const MatrixWorkspace_const_sptr m_Input;
-  /// a pointer to the instrument within the workspace
-  boost::shared_ptr<Instrument> m_Instru;
-  /// pointer to the map that links detectors to there masking with the input workspace
-  boost::shared_ptr<Geometry::ParameterMap> m_Pmap;
-};
-
-/** To find out if there is a detector in a spectrum that is masked
-*  @param SpecIndex The number of spectrum, starting at zero is passed to axis::spectraNo(.)
-*  @return True if there is a masked detector, otherwise false
-*/
-bool InputWSDetectorInfo::aDetecIsMaskedinSpec(int SpecIndex)
-{
-  const std::vector<int> dets = getDetectors(SpecIndex);
-  // we are going to go through all of them, if you know this is not neccessary then change it
-  std::vector<int>::const_iterator it;
-  for ( it = dets.begin(); it != dets.end(); ++it)
-  {
-    if (m_Instru->getDetector(*it).get()->isMasked()) return true;
-  }
-  // we didn't find any that were masked
-  return false;
-}
-/** Masks all the detectors that contribute to the specified spectrum
-*  @param SpecIndex The number of spectrum, starting at zero is passed to axis::spectraNo(.)
-*  @return True if there is a masked detector, otherwise false
-*/
-void InputWSDetectorInfo::maskAllDetectorsInSpec(int SpecIndex)
-{
-  std::vector<int> dets = getDetectors(SpecIndex);
-  // there may be many detectors that are responcible for the spectrum, loop through them
-  std::vector<int>::const_iterator it;
-  for ( it = dets.begin(); it != dets.end(); ++it)
-  {
-    Geometry::Detector* det =
-      dynamic_cast<Geometry::Detector*>( m_Instru->getDetector(*it).get() );
-    if ( det )
-    {
-      m_Pmap->addBool(det, "masked", true);
-    }
-  }
-}
-/// convert spectrum index to spectrum number
-int InputWSDetectorInfo::getSpecNum(int SpecIndex) const
-{
-  return m_Input->getAxis(1)->spectraNo(SpecIndex);
-}
-/** Copies pointers to the Instrument and ParameterMap to data members
-* @param input A pointer to a workspace that contains instrument information
-* @throw invalid_argument if there is no instrument information in the workspace
-*/
-InputWSDetectorInfo::InputWSDetectorInfo(MatrixWorkspace_const_sptr input) :
-  m_Input(input)
-{
-  // first something that points to the detectors
-  m_Instru = input->getBaseInstrument();
-
-  if ( !m_Instru )
-  {
-    throw std::invalid_argument(
-      "There is no instrument data in the input workspace can not run this algorithm on that workspace");
-  }
-  // the space that contains which are masked
-  m_Pmap = m_Input->instrumentParameters();
-}
-/**A spectrum can be generated by one or many detectors, this function returns their IDs
-* @param SpecIndex The number of the spectrum as listed in memory, starting at zero, is passed to axis::spectraNo(int)
-* @return An array of detector identification numbers
-* @throw Kernel::Exception::IndexError if you give it an index number that's out of range
-*/
-std::vector<int> InputWSDetectorInfo::getDetectors(int SpecIndex) const
-{
-  return m_Input->spectraMap().getDetectors(getSpecNum(SpecIndex)); 
-}
 /** Loads and checks the values passed to the algorithm
 *
 *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
@@ -214,11 +122,11 @@ void WBVMedianTest::retrieveProperties()
   }
   catch(Kernel::Exception::NotFoundError)
   {// we assume we are here because there is no masked detector map, 
-    //disable future calls to functions that use the detector map
+    // disable future calls to functions that use the detector map
     m_usableMaskMap = false;
-    // this is probably not a problem and so we carry on
+    // it still makes sense to carry on
     g_log.warning(
-        "Precision warning: Detector masking map can't be found, assuming that no detectors have been previously marked unreliable in this workspace");
+      "Precision warning: Detector masking map can't be found, assuming that no detectors have been previously marked unreliable in this workspace");
   }
 
   m_MinSpec = getProperty("StartSpectrum");
@@ -304,6 +212,7 @@ API::MatrixWorkspace_sptr WBVMedianTest::getTotalCounts(
   // get percentage completed estimates for now, t0 and when we've finished t1
   double t0 = m_PercentDone, t1 = advanceProgress(RTGetTotalCounts);
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
+  
   childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", input );
   childAlg->setProperty( "StartSpectrum", firstSpec );
   childAlg->setProperty( "EndSpectrum", lastSpec );
@@ -360,12 +269,13 @@ API::MatrixWorkspace_sptr WBVMedianTest::getRate
   }
   return childAlg->getProperty("Workspace");
 }
-/// Finds the median of values in single bin histograms
+/// Finds the median of numbers of counts in single bin histograms
 /** Finds the median of values in single bin histograms rejecting spectra from masked
-*  detectors. 
+*  detectors and the results of divide by zero (infinite and NaN).  The median is an
+*  average that is less affected by small numbers of very large values.
 * @param input A histogram workspace with one entry in each bin
 * @return The median value of the histograms in the workspace that was passed to it
-* @throw logic_error if an input values is negative
+* @throw logic_error if an input value is negative
 */
 double WBVMedianTest::getMedian(API::MatrixWorkspace_const_sptr input)
   const
@@ -389,7 +299,8 @@ double WBVMedianTest::getMedian(API::MatrixWorkspace_const_sptr input)
       if ( toCopy  < 0 )
       {
         g_log.debug() <<
-          "Negative count rate found for spectrum number " << DetectorInfoHelper.getSpecNum(i);
+          "Negative count rate found for spectrum number " <<
+          DetectorInfoHelper.getSpecNum(i) << std::endl;
         throw std::logic_error(
           "Negative number of counts found, could be corrupted raw counts or solid angle data");
       }
@@ -397,12 +308,15 @@ double WBVMedianTest::getMedian(API::MatrixWorkspace_const_sptr input)
       if ( std::abs(toCopy) == std::numeric_limits<double>::infinity() )
       {
         g_log.debug() <<
-          "numeric_limits<double>::infinity() found spectrum number " << DetectorInfoHelper.getSpecNum(i);
+          "numeric_limits<double>::infinity() found spectrum number "
+          << DetectorInfoHelper.getSpecNum(i) << std::endl;
         throw std::runtime_error("Divide by zero error, one or more detectors has zero solid angle and a non-zero number of counts");
       }
       if ( toCopy != toCopy )
-      {//this fun thing can happen if there was a zero divided by zero, solid angles again, as this, maybe, could be caused by a detector that is not used I wont exit because of this
+      {//this fun thing can happen if there was a zero divide by zero, solid angles again, as this, maybe, could be caused by a detector that is not used I wont exit because of this
         DetectorInfoHelper.maskAllDetectorsInSpec(i);
+        // we'll report how many times this happened so that the user can think about how good, bad, there data is 
+        numUnusedDects ++;
       }
       //if we get to here we have a good value, copy it over!
       nums.push_back( toCopy );
@@ -410,8 +324,12 @@ double WBVMedianTest::getMedian(API::MatrixWorkspace_const_sptr input)
   }
   if (numUnusedDects > 0)
   {
-    g_log.debug() << "Found \"Not a Number\" in the numbers of counts, assuming a least one detector with zero solid angle and zero counts was found";
-    g_log.warning() << numUnusedDects << " detectors were found with zero solid angle and no counts they have been masked and will be ignored";
+    g_log.debug() <<
+      "Found \"Not a Number\" in the numbers of counts, assuming a least one detector with zero solid angle and zero counts was found"
+       << std::endl;
+    g_log.warning() << numUnusedDects <<
+      " detectors were found with zero solid angle and no counts they have been masked and will be ignored"
+      << std::endl;
   }
   //we need a sorted array to calculate the median
   gsl_sort( &nums[0], 1, nums.size() );//The address of foo[0] will return a pointer to a contiguous memory block that contains the values of foo. Vectors are guaranteed to store there memory elements in sequential order, so this operation is legal, and commonly used (http://bytes.com/groups/cpp/453169-dynamic-arrays-convert-vector-array)
@@ -468,23 +386,23 @@ std::vector<int> WBVMedianTest::FindDetects(
     InputWSDetectorInfo DetectorInfoHelper(responses);
     if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
     {
-       problem = "Detector already masked";
+       problem = ", detector already masked";
        cAlreadyMasked ++;
     }
     else // not already marked dead, check is the value within the acceptance range
     {
       if ( yInputOutput < lowLim )
       {
-        problem = "low";
+        problem = "is too low";
         cLows++;
       }
       if ( yInputOutput > highLim )
       {
-        problem = "high";
+        problem = "is too high";
         cHighs++;
       }
     }
-    if ( problem == "" )
+    if ( problem.empty() )
     {// it is an acceptable value; just write the good flag to the output workspace and go on to check the next value
         yInputOutput = GoodVal;
     }
@@ -495,11 +413,11 @@ std::vector<int> WBVMedianTest::FindDetects(
       // Write the spectrum number to file
       if ( fileOpen )
       {
-        file << " Spectrum with number " << DetectorInfoHelper.getSpecNum(i)
-          << " is too " << problem;
+        file << " Spectrum number " << DetectorInfoHelper.getSpecNum(i)
+          << " " << problem;
       }
       
-      if ( fileOpen ) file << " detector IDs:"; 
+      if ( fileOpen ) file << ", detector IDs:"; 
       // Get the list of detectors for this spectrum and iterate over
       const std::vector<int> dets = DetectorInfoHelper.getDetectors(i);
       std::vector<int>::const_iterator it = dets.begin();

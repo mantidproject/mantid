@@ -235,6 +235,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DetectorEfficiencyVariation.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DiffractionFocussing.cpp"
 				>
 			</File>
@@ -291,11 +295,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\InputWSDetectorInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LOQScriptInput.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\MaskBins.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\MaskDetectorsIf.cpp"
 				>
 			</File>
 			<File
@@ -537,6 +549,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\DetectorEfficiencyVariation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DetectorEfficiencyVariationTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\DiffractionFocussing.h"
 				>
 			</File>
@@ -617,11 +637,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\InputWSDetectorInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\LOQScriptInput.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\MaskBins.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\MaskDetectorsIf.h"
 				>
 			</File>
 			<File

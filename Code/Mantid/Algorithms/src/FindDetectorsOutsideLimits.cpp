@@ -24,17 +24,17 @@ namespace Algorithms
       new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector" );
+    declareProperty("HighThreshold", EMPTY_DBL(),
+        new MandatoryValidator<double>(),
+        "Spectra whose total number of counts are above or equal to this value will be\n"
+        "marked bad" );
 
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
     mustBePositive->setLower(0);
     declareProperty("LowThreshold",0.0, mustBePositive,
         "Spectra whose total number of counts are below or equal to this value will be\n"
         "marked bad (default 0)" );
-    declareProperty("HighThreshold", EMPTY_DBL(),
-        new MandatoryValidator<double>(),
-        "Spectra whose total number of counts are above or equal to this value will be\n"
-        "marked bad" );
-      declareProperty("LiveValue",0.0, mustBePositive->clone(),
+      declareProperty("GoodValue",0.0, mustBePositive->clone(),
         "The value to assign to an integrated spectrum flagged as 'live'\n"
         "(default 0.0)");
       declareProperty("BadValue",100.0, mustBePositive->clone(),
@@ -62,7 +62,7 @@ namespace Algorithms
     {
       double lowThreshold = getProperty("LowThreshold");
       double highThreshold = getProperty("HighThreshold");
-      double liveValue = getProperty("LiveValue");
+      double liveValue = getProperty("GoodValue");
       double deadValue = getProperty("BadValue");
 
       // Try and open the output file, if specified, and write a header
