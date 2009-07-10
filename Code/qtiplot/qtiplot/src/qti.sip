@@ -1748,13 +1748,14 @@ sipTypeDef *t;
 
 public:  
   MultiLayer* plotSpectrum(const QString&,int,bool = true,bool = false);
-  void mergePlots(MultiLayer*, MultiLayer*);
+  MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   MantidMatrix* getMantidMatrix(const QString &);
   MultiLayer* plotTimeBin(const QString&,int,bool = false);  
+  MultiLayer* plotBin(const QString&,int,bool = false);  
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* importTableWorkspace(const QString&, bool = false, bool = false);	
   bool runAlgorithmAsynchronously(const QString &);
-  bool createPropertyInputDialog(const QString &, const QString &, const QString&);
+  bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QString&);
   QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &);
   private:

@@ -137,8 +137,6 @@ void MantidUI::init()
     FrameworkManager::Instance();
     MantidLog::connect(this);
  
-//    InputHistory::Instance();
-
 	actionToggleMantid = m_exploreMantid->toggleViewAction();
 	actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
 	actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
@@ -264,12 +262,12 @@ void MantidUI::loadDAEWorkspace()
 	    alg->setPropertyValue("OutputWorkspace", dlg->getWorkspaceName().toStdString());
         if ( !dlg->getSpectrumMin().isEmpty() && !dlg->getSpectrumMax().isEmpty() )
         {
-	        alg->setPropertyValue("spectrum_min", dlg->getSpectrumMin().toStdString());
-	        alg->setPropertyValue("spectrum_max", dlg->getSpectrumMax().toStdString());
+	        alg->setPropertyValue("SpectrumMin", dlg->getSpectrumMin().toStdString());
+	        alg->setPropertyValue("SpectrumMax", dlg->getSpectrumMax().toStdString());
         }
         if ( !dlg->getSpectrumList().isEmpty() )
         {
-	        alg->setPropertyValue("spectrum_list", dlg->getSpectrumList().toStdString());
+	        alg->setPropertyValue("SpectrumList", dlg->getSpectrumList().toStdString());
      }
 
         m_DAE_map[dlg->getWorkspaceName().toStdString()] = dlg->updateInterval();
@@ -889,7 +887,6 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
           m_progressDialog->exec();
       }
 
-//        InputHistory::Instance().updateAlgorithm(alg);
     }
     catch(...)
     {
@@ -1175,6 +1172,11 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   return ml;
 }
 
+MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool showMatrix)
+{
+  return plotTimeBin(wsName, bin, showMatrix);
+}
+
 //-------------------------------------------------
 // The following commands are purely for the Python
 // interface
@@ -1210,9 +1212,10 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showPlo
 /**
  * Merge the curves from the two given MultiLayer objects
  */
-void MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
+MultiLayer* MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
 {
-  if( !mlayer_1 || !mlayer_2 ) return;
+  if( !mlayer_1 ) return NULL;
+  if( !mlayer_2 ) return mlayer_1;
 
   int ncurves_on_two = mlayer_2->activeGraph()->visibleCurves();
   for( int c = 0; c < ncurves_on_two; ++c )
@@ -1224,7 +1227,7 @@ void MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
   // deletes the curves that were associated with it
   mlayer_2->hide();
 
-  return;
+  return mlayer_1;
 };
 
 MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
@@ -1269,15 +1272,17 @@ void MantidUI::cancelAllRunningAlgorithms()
   if( m_algMonitor ) m_algMonitor->cancelAll();
 }
 
-bool MantidUI::createPropertyInputDialog(const QString & algName, const QString & message, const QString & suggestedValues)
+bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString & preset_values, 
+					 const QString & optional_msg,  const QString & enabled_names)
 {
-  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(algName);
+  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
   if( !alg ) 
   {
     return false;
   }
 
-  MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), 0, true, message, suggestedValues);
+  MantidQt::API::AlgorithmDialog *dlg = 
+    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), 0, true, preset_values, optional_msg, enabled_names);
   return (dlg->exec() == QDialog::Accepted);
 }
 
