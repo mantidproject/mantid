@@ -33,6 +33,10 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) :
   m_forScript(false), m_strMessage(""), m_msgAvailable(false), m_bIsInitialized(false), m_algProperties(), 
   m_validators()
 {
+  // This disables the WhatsThis question mark button that appears next to the cross on windows
+  Qt::WindowFlags flags = windowFlags();
+  flags &= !Qt::WindowContextHelpButtonHint;
+  setWindowFlags(flags);
 }
 
 /**
