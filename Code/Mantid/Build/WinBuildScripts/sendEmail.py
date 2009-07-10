@@ -248,7 +248,7 @@ Server said: %s
 %s
 
 %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
-      raise smtplib.SMTPException, errstr
+      print errstr
 except:
   print "Failed to send the build results email"
 
