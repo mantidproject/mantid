@@ -3,6 +3,7 @@ import smtplib
 import os
 from shutil import move
 from time import strftime
+import buildNotification
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
@@ -146,6 +147,18 @@ move(filedoxy,archiveDir)
 lastDoxy = int(open('prevDoxy','r').read())
 currentDoxy = open('prevDoxy','w')
 currentDoxy.write(str(warnCount))
+
+#Notify build completion
+buildErrors =1
+testBuildErrors=1
+if buildSuccess:
+  buildErrors=0
+if testsBuildSuccess:
+  testBuildErrors=0
+buildNotification.sendTestCompleted(project="Mantid", \
+                    testCount=testCount,testFail=failCount, \
+                    compWarn=compilerWarnCount,docuWarn=warnCount, \
+                    buildErrors=buildErrors,testBuildErrors=testBuildErrors)
 
 #Construct Message
 httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
