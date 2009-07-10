@@ -70,7 +70,10 @@ class DLLExport SimplePythonAPI
   /// Gets the algorithm name from a fully qualified name
   static std::string extractAlgName(const std::string & algKey);
   /// Writes the Python function definition for the given algorithm
-  static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties, bool gui);
+  static void writeFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties, 
+			       bool async);
+  /// Writes the GUI version of the Python function definition for the given algorithm
+  static void writeGUIFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties);
   /// Writes the global help command
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
   /// Creates a help string for the given algorithm

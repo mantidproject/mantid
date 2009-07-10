@@ -33,7 +33,8 @@ Mantid::Kernel::Logger & InterfaceManagerImpl::g_log = Mantid::Kernel::Logger::g
  * @returns An AlgorithmDialog object
  */
 AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent,
-						 bool forScript, const QString & msg, const QString & suggestions)
+						    bool forScript, const QString & preset_values,
+						    const QString & optional_msg,  const QString & enabled_names)
 {
   AlgorithmDialog* dlg = NULL;
   if( InterfaceFactory::Instance().exists(alg->name() + "Dialog") )
@@ -47,13 +48,18 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
     g_log.debug() << "No specialised dialog exists for the " << alg->name() 
 		  << " algorithm: a generic one has been created" << std::endl;
   }
-  
+
+  // Set the content
   dlg->setParent(parent);
   dlg->setAlgorithm(alg);
-  dlg->setSuggestedValues(suggestions);
+  dlg->setPresetValues(preset_values);
   dlg->isForScript(forScript);
-  dlg->setOptionalMessage(msg);
+  dlg->setOptionalMessage(optional_msg);
+  dlg->setEnabledNames(enabled_names);
+
+  // Setup the layout
   dlg->initializeLayout();
+
   return dlg;  
 }
 

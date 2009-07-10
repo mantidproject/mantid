@@ -7,7 +7,6 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 
 #include <QString>
-#include <QHash>
 
 //---------------------------
 // Qt Forward declarations
@@ -92,9 +91,6 @@ private:
   
   ///Cache combo box 
   void addCacheOptions();
-
-  /// Set old input for combo box
-  void setOldComboField(const QString & propName);
   //@}
   
   /// The main layout
@@ -111,9 +107,6 @@ private:
   
   ///Store the allowed extensions
   QString m_fileFilter;
-  
-  ///Previous values
-  QHash<QString, QString> m_oldValues;
 };
 
 }

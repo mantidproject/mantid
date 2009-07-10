@@ -78,8 +78,9 @@ public:
   
   /// Create a new instance of the correct type of AlgorithmDialog
   AlgorithmDialog* createDialog(Mantid::API::IAlgorithm* alg, QWidget* parent = 0,
-				bool forScript = false, const QString & msg = QString(""), const QString & suggestions = QString(""));
-
+				bool forScript = false, const QString & preset_values = QString(), 
+				const QString & optional_msg = QString(), const QString & enabled_names = QString());
+				
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow* createSubWindow(const QString & interface_name, QWidget* parent = 0);
 

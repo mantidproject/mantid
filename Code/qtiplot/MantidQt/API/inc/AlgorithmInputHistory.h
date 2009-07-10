@@ -74,9 +74,6 @@ public:
   /// Clear values for a particular algorithm
   void clearAlgorithmInput(const QString & algName);
 
-  /// Retrieve all of the old parameter values for an algorithm
-  bool hasPreviousInput(const QString & algName, QHash<QString, QString> & values) const;
-
   /// Retrieve an old parameter value 
   QString previousInput(const QString & algName, const QString & propName) const;
   

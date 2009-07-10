@@ -34,7 +34,7 @@ using namespace MantidQt::CustomDialogs;
 /**
  * Constructor
  */
-LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent),  m_fileFilter(""), m_oldValues()
+LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent),  m_fileFilter("")
 {
 }
 
@@ -53,8 +53,6 @@ LoadRawDialog::~LoadRawDialog()
  */
 void LoadRawDialog::initLayout()
 {
- MantidQt::API::AlgorithmInputHistory::Instance().hasPreviousInput(QString::fromStdString(getAlgorithm()->name()),  m_oldValues);
-
   m_mainLayout = new QVBoxLayout(this);
 
   if( isMessageAvailable() )
@@ -80,34 +78,23 @@ void LoadRawDialog::initLayout()
   addCacheOptions();
   
   //Buttons 
-  QPushButton *loadButton = new QPushButton("Load");
-  loadButton->setDefault(true);
-  connect(loadButton, SIGNAL(clicked()), this, SLOT(accept()));
-
-  QPushButton *cancelButton = new QPushButton("Cancel");
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(close()));
-
-  QHBoxLayout *buttonRowLayout = new QHBoxLayout;
-  buttonRowLayout->addStretch();
-  buttonRowLayout->addWidget(loadButton);
-  buttonRowLayout->addWidget(cancelButton);
-  m_mainLayout->addLayout(buttonRowLayout);
+  m_mainLayout->addLayout(createDefaultButtonLayout("?", "Load", "Cancel"));
   
 }
 
 void LoadRawDialog::parseInput()
 {
   //Filename property
-  addPropertyValueToMap("Filename", m_pathBox->text());
+  storePropertyValue("Filename", m_pathBox->text());
   //workspace name
-  addPropertyValueToMap("OutputWorkspace", m_wsBox->text());
+  storePropertyValue("OutputWorkspace", m_wsBox->text());
   //Spectra
-  addPropertyValueToMap("SpectrumMin", m_minSpec->text());
-  addPropertyValueToMap("SpectrumMax", m_maxSpec->text());
-  addPropertyValueToMap("SpectrumList", m_specList->text());
+  storePropertyValue("SpectrumMin", m_minSpec->text());
+  storePropertyValue("SpectrumMax", m_maxSpec->text());
+  storePropertyValue("SpectrumList", m_specList->text());
   
   //Cache
-  addPropertyValueToMap("Cache", m_cacheBox->currentText());
+  storePropertyValue("Cache", m_cacheBox->currentText());
   
 }
 
@@ -118,10 +105,10 @@ void LoadRawDialog::addFilenameInput()
 {
   QLabel *fileName = new QLabel("Select a file to load:");
   m_pathBox = new QLineEdit;
-  fileName->setBuddy(m_pathBox);
+
   m_browseBtn = new QPushButton("Browse");
   connect(m_browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
-  setOldLineEditInput("Filename", m_pathBox);
+  fillLineEdit("Filename", m_pathBox);
   
   m_pathBox->setMinimumWidth(m_pathBox->fontMetrics().maxWidth()*13); 
   
@@ -134,6 +121,10 @@ void LoadRawDialog::addFilenameInput()
   nameline->addWidget(validLbl);  
   nameline->addWidget(m_browseBtn);  
 
+  bool isEnabled = isWidgetEnabled("Filename");
+  m_pathBox->setEnabled(isEnabled);
+  m_browseBtn->setEnabled(isEnabled);
+  
   m_mainLayout->addLayout(nameline); 
 }
 
@@ -142,7 +133,7 @@ void LoadRawDialog::addOutputWorkspaceInput()
 {
   QLabel *wsName = new QLabel("Enter name for workspace:");
   m_wsBox = new QLineEdit;
-  setOldLineEditInput("OutputWorkspace", m_wsBox);
+  fillLineEdit("OutputWorkspace", m_wsBox);
   m_wsBox->setMaximumWidth(m_wsBox->fontMetrics().maxWidth()*7); 
 
   QHBoxLayout *wsline = new QHBoxLayout;
@@ -150,9 +141,11 @@ void LoadRawDialog::addOutputWorkspaceInput()
   wsline->addWidget(m_wsBox);  
   QLabel *validLbl = getValidatorMarker("OutputWorkspace");
   wsline->addWidget(validLbl);  
-  
+
   wsline->addStretch();
     
+  m_wsBox->setEnabled(isWidgetEnabled("OutputWorkspace"));
+
   m_mainLayout->addLayout(wsline); 
 }
 
@@ -165,7 +158,7 @@ void LoadRawDialog::addSpectraInput()
   
   QLabel *min = new QLabel("Start:");
   m_minSpec = new QLineEdit;
-  setOldLineEditInput("SpectrumMin", m_minSpec);
+  fillLineEdit("SpectrumMin", m_minSpec);
 
   int charWidth = m_minSpec->fontMetrics().maxWidth();
   m_minSpec->setMaximumWidth(charWidth*3);
@@ -176,13 +169,13 @@ void LoadRawDialog::addSpectraInput()
   
   QLabel *max = new QLabel("End:");
   m_maxSpec = new QLineEdit;
-  setOldLineEditInput("SpectrumMax", m_maxSpec);
+  fillLineEdit("SpectrumMax", m_maxSpec);
   
   m_maxSpec->setMaximumWidth(charWidth*3);
   
   QLabel *list = new QLabel("List:");
   m_specList = new QLineEdit;
-  setOldLineEditInput("SpectrumList", m_specList);
+  fillLineEdit("SpectrumList", m_specList);
   
   m_specList->setMaximumWidth(charWidth*10);
 
@@ -202,6 +195,10 @@ void LoadRawDialog::addSpectraInput()
   minmaxLine->addWidget(validlist);
   
   minmaxLine->addStretch();
+
+  m_minSpec->setEnabled(isWidgetEnabled("SpectrumMin"));
+  m_maxSpec->setEnabled(isWidgetEnabled("SpectrumMax"));
+  m_specList->setEnabled(isWidgetEnabled("SpectrumList"));
     
   spectra->addLayout(minmaxLine);
   
@@ -214,19 +211,8 @@ void LoadRawDialog::addCacheOptions()
 {
   QLabel *cacheLabel = new QLabel("Cache file locally:");
   m_cacheBox = new QComboBox;
-  cacheLabel->setBuddy(m_cacheBox);
+  fillAndSetComboBox("Cache", m_cacheBox);
 
-  Mantid::Kernel::Property *prop = getAlgorithmProperty("Cache");
-  std::vector<std::string> values = prop->allowedValues();
-  
-  const int nvalues = static_cast<int>(values.size()); 
-  for( int i = 0; i < nvalues; ++i )
-  {
-    m_cacheBox->insertItem(i, QString::fromStdString(values[i]));
-    if( prop->value() == values[i] ) m_cacheBox->setCurrentIndex(i);
-  }
-  
-  setOldComboField("Cache");
   QHBoxLayout *cacheline = new QHBoxLayout;
   
   cacheline->addWidget(cacheLabel, 0, Qt::AlignRight);
@@ -236,18 +222,6 @@ void LoadRawDialog::addCacheOptions()
   cacheline->addStretch();  
   
   m_mainLayout->addLayout(cacheline);
-}
-
-/// Set old input for combo box
-void LoadRawDialog::setOldComboField(const QString & propName)
-{
-  Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
-  QString selectedValue("");
-  if( isForScript() ) selectedValue = QString::fromStdString(prop->value());
-  else if( m_oldValues.contains(propName) ) selectedValue = m_oldValues[propName];
-  else return;
-  
-  m_cacheBox->setCurrentIndex(m_cacheBox->findText(selectedValue));
 }
 
 /**

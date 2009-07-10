@@ -31,6 +31,10 @@
 //----------------------------------
 class QLabel;
 class QLineEdit;
+class QComboBox;
+class QCheckBox;
+class QPushButton;
+class QHBoxLayout;
 
 //----------------------------------
 // Mantid Forward declarations
@@ -105,50 +109,61 @@ protected:
   /// This does the work and must be overridden in each deriving class
   virtual void initLayout() = 0;
 
-  /// Parse out the values entered into the dialog boxes. Use addPropertyValueToMap()
+  /// Parse out the values entered into the dialog boxes. Use storePropertyValue()
   /// to store the <name, value> pair in the base class so that they can be retrieved later
   virtual void parseInput() = 0;
 
   /// Get the algorithm pointer
   Mantid::API::IAlgorithm* getAlgorithm() const;
 
-  /// Get the usage boolean value
-  bool isForScript() const;
+  /// Get the a named property 
+  Mantid::Kernel::Property* getAlgorithmProperty(const QString & propName) const;
+
+  /// Get a property validator label
+  QLabel* getValidatorMarker(const QString & propname) const;
 
   /// Get the message string
   const QString & getOptionalMessage() const;
 
+  /// Get the usage boolean value
+  bool isForScript() const;
+ 
   /// Is there a message string available
   bool isMessageAvailable() const;
 
-  /// Get the a named property 
-  Mantid::Kernel::Property* getAlgorithmProperty(const QString & propName) const;
-  
-  /// Get a property validator label
-  QLabel* getValidatorMarker(const QString & propname) const;
-  
+  /// Check is a given property should have its control enabled or not
+  bool isWidgetEnabled(const QString & propName) const;
+
   /// Adds a property (name,value) pair to the stored map
-  void addPropertyValueToMap(const QString & name, const QString & value);
-
-  /// Checks the properties to find if they are valid
-  bool validateProperties();
-
-  /// Set the properties that have been parsed from the dialog
-  bool setPropertyValues();
-
-  /// Is the value a suggested value
-  bool isValueSuggested(const QString & propName) const;
+  void storePropertyValue(const QString & name, const QString & value);
 
   /// Open a file dialog to select an existing file
-  QString openLoadFileDialog(const QString & propName); 
+  QString openLoadFileDialog(const QString & propName);
 
-  //  Set old input for line edit field
-  void setOldLineEditInput(const QString & propName, QLineEdit* field);
-	      
-protected slots:
+  /// Fill a combo box for the named algorithm's allowed values
+  void fillAndSetComboBox(const QString & propName, QComboBox* optionsBox) const;
+
+  /// Set the state of a check box for the named algorithm's boolean property
+  void setCheckBoxState(const QString & propName, QCheckBox* checkBox) const;
+  
+  /// Fill in the necessary input for a text field 
+  void fillLineEdit(const QString & propName, QLineEdit* field);
+
+  /// Create a row layout of buttons with specified text
+  QHBoxLayout *createDefaultButtonLayout(const QString & helpText = QString("?"),
+					 const QString & loadText = QString("Run"), 
+					 const QString & cancelText = QString("Cancel"));
+
+  /// Create a help button for this algorithm
+  QPushButton* createHelpButton(const QString & helpText = QString("?")) const;
+							       
+ protected slots:
   
   /// A default slot that can be used for an OK button.
   virtual void accept();
+
+  /// Help button clicked;
+  void helpClicked();
 
 private:
   // This is so that it can set the algorithm and initialize the layout.
@@ -158,10 +173,22 @@ private:
   
   /// Set the algorithm associated with this dialog
   void setAlgorithm(Mantid::API::IAlgorithm*);
-  
+
+  /// Set the properties that have been parsed from the dialog
+  bool setPropertyValues();
+
+  /// Save the input history of an accepted dialog
+  void saveInput();
+    
   /// Set a list of suggested values  
-  void setSuggestedValues(const QString & suggestedValues);
+  void setPresetValues(const QString & presetValues);
+
+  /// Set comma-separated-list of enabled parameter names
+  void setEnabledNames(const QString & enabledNames);
   
+  /// Test if the given name's widget should be left enabled
+  bool isInEnabledList(const QString& propName) const;
+
   /// Set whether this is intended for use from a script or not
   void isForScript(bool forScript);
 
@@ -182,8 +209,8 @@ private:
   /// A map of property <name, value> pairs that have been taken from the dialog
   QHash<QString, QString> m_propertyValueMap;
   
-  /// A Hash of property names to suggested values
-  QList<QString> m_suggestedValues;
+  /// A list of property names that should have their widgets enabled
+  QStringList m_enabledNames;
   
   /// A boolean indicating whether this is for a script or not
   bool m_forScript;

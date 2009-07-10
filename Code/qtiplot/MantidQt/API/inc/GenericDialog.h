@@ -14,7 +14,6 @@
 //----------------------------------
 class QSignalMapper;
 class QGridLayout;
-class QPushButton;
 class QLineEdit;
 
 namespace MantidQt
@@ -86,12 +85,6 @@ private:
 
   /// A map of QLineEdit pointers to the Property names
   QHash<QLineEdit*, QString> m_editBoxes;
-
-  /// An ok button
-  QPushButton *m_okButton;
-  /// A cancel button
-  QPushButton *m_exitButton;
-  
 };
 
 }

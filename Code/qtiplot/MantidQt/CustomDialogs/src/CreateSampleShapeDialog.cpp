@@ -121,9 +121,6 @@ void CreateSampleShapeDialog::initLayout()
   view_box_layout->addWidget(m_object_viewer);
   m_uiForm.view_box->setLayout(view_box_layout);
 
-  //  connect(m_uiForm.tempBtn, SIGNAL(clicked()), this, SLOT(update3DView()));
-
-  
   // Check input workspace property. If there are available workspaces then
   // these have been set as allowed values
   std::vector<std::string> workspaces = getAlgorithmProperty("InputWorkspace")->allowedValues();
@@ -133,6 +130,9 @@ void CreateSampleShapeDialog::initLayout()
   }
   QLabel *validlbl = getValidatorMarker("InputWorkspace");
   m_uiForm.bottomlayout->insertWidget(2, validlbl);
+
+  //Connect the help button
+  connect(m_uiForm.helpButton, SIGNAL(clicked()), this, SLOT(helpClicked()));
 }
 
 /**
@@ -150,10 +150,10 @@ void CreateSampleShapeDialog::parseInput()
   }
 
 
-  addPropertyValueToMap("ShapeXML", xml);
+  storePropertyValue("ShapeXML", xml);
     
   // Get workspace value
-  addPropertyValueToMap("InputWorkspace", m_uiForm.wksp_opt->currentText());
+  storePropertyValue("InputWorkspace", m_uiForm.wksp_opt->currentText());
 }
 
 /**

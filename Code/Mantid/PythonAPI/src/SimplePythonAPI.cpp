@@ -105,12 +105,9 @@ namespace Mantid
       module << "import os\n";
       module << "import string\n\n";
 
-      //In GUI need to define a global variable to tell if we are using it or not
-      module << "PYTHONAPI_IN_MANTIDPLOT = ";
-      if( gui )	module << "True\n";
-      else module << "False\n";
-
-      module << "EMPTY_PARAM_VALUE = -999\n\n";
+      // Define a value to use as an unset parameter
+      module << "# Define a value to use as an unset parameter\n"
+	     << "UNSET_PARAM_VALUE = -9999\n\n";
 
       //Make the FrameworkManager object available with case variations
       module << "# The main API object\n"
@@ -138,6 +135,25 @@ namespace Mantid
       module << "# A wrapper for changing the directory\n"
 	     << "def setWorkingDirectory(path):\n"
 	     << "\tos.chdir(path)\n\n";
+
+      // A function to sort out whether the dialog parameters are disabled or not
+      if( gui )
+      {
+	module << "# A utility function for the dialog routines that decides if the parameter\n"
+	       << "# should be added to the final list of parameters that have their widgets enabled\n"
+	       << "def convertToPair(param_name, param_value, enabled_list, disabled_list):\n"
+	       << "\tif param_value == UNSET_PARAM_VALUE:\n"
+	       << "\t\tif not param_name in disabled_list:\n"
+	       << "\t\t\treturn ('', param_name)\n"
+	       << "\t\telse:\n"
+	       << "\t\t\treturn ('', '')\n"
+	       << "\telse:\n"
+	       << "\t\tstrval = makeString(param_value)\n"
+	       << "\t\tif param_name in enabled_list or strval[0] == '?':\n"
+	       << "\t\t\treturn (param_name + '=' + strval.lstrip('?'), param_name)\n"
+	       << "\t\telse:\n"
+	       << "\t\t\treturn (param_name + '=' + strval, '')\n\n";
+      }
 		  
       //Algorithm keys
       using namespace Mantid::API;
@@ -157,8 +173,11 @@ namespace Mantid
 	PropertyVector orderedProperties(algm->getProperties());
 	std::sort(orderedProperties.begin(), orderedProperties.end(), SimplePythonAPI::PropertyOrdering());
 	std::string name(vIter->first);
-	writeFunctionDef(module, name , orderedProperties, false);
-	if( gui ) writeFunctionDef(module, name , orderedProperties, true);
+	writeFunctionDef(module, name , orderedProperties, gui);
+	if( gui ) 
+	{
+	  writeGUIFunctionDef(module, name, orderedProperties);
+	}
 	std::transform(name.begin(), name.end(), name.begin(), tolower);
 	helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties, false)));
 	//The help for the dialog functions if necessary
@@ -207,16 +226,14 @@ namespace Mantid
      * @param os The stream to use to write the definition
      * @param algm The name of the algorithm
      * @param properties The list of properties
-     * @param gui If this is true create the necessary framework to use the dialog
-     * boxes in qtiplot
+     * @param async Whether the algorithm should be executed asynchonously or not
      */
     void SimplePythonAPI::writeFunctionDef(std::ostream & os, const std::string & algm,
-					   const PropertyVector & properties, bool gui)
+					   const PropertyVector & properties, bool async)
     {
       os << "# Definition of \"" << algm << "\" function.\n";
       //start of definition
       os << "def " << algm;
-      if( gui ) os << "Dialog";
       os << "(";
       //Iterate through properties
       PropertyVector::const_iterator pIter = properties.begin();
@@ -228,80 +245,99 @@ namespace Mantid
 	sanitizedNames[iarg] = removeCharacters((*pIter)->name(), "");
 	os << sanitizedNames[iarg];
 
-	//For gui mode, set all properties as optional
-	if( gui )
-	{
-	  os << " = EMPTY_PARAM_VALUE,";
-	  ++pIter;
-	}
-	else
-	{
-	  //properties are optional unless their current value results in an error (isValid != "")
-	  if( (*pIter)->isValid() != "" ) ++iMand;
-	  else os  << " = EMPTY_PARAM_VALUE";
-	  if( ++pIter != pEnd ) os << ", ";
-	}
+	//properties are optional unless their current value results in an error (isValid != "")
+	if( (*pIter)->isValid() != "" ) ++iMand;
+	else os  << " = UNSET_PARAM_VALUE";
+	if( ++pIter != pEnd ) os << ", ";
       }
+
       //end of function parameters
-      if( gui )
-      {
-	os << "message = \"\"):\n";
-      }
-      else
-      {
-	os << "):\n";
-      }
-      os << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
+      os << "):\n"
+	 << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
 
-      if( gui ) os << "\tvalues = ''\n";
-
+      // Redo loop for setting values
       pIter = properties.begin();
       iarg = 0;
       for( ; pIter != pEnd; ++pIter, ++iarg )
       {
 	std::string pvalue = sanitizedNames[iarg];
-	if( gui )
+	if( iarg < iMand )
 	{
-	  os << "\tif " << pvalue << " != EMPTY_PARAM_VALUE:\n"
-	     << "\t\tvalues += '" << (*pIter)->name() << "=' + makeString(" << pvalue << ") + '|'\n";
+	  os << "\talgm.setPropertyValue(\"" << (*pIter)->name() 
+	     << "\", makeString(" << pvalue << ").lstrip('? '))\n";
 	}
 	else
 	{
-	  if( iarg < iMand )
-	  {
-	    os << "\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" << pvalue << ").lstrip('? '))\n";
-	  }
-	  else
-	  {
-	    os << "\tif " << pvalue << " != EMPTY_PARAM_VALUE:\n"
-	       << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" << pvalue << ").lstrip('? '))\n";
-	  }
+	  os << "\tif " << pvalue << " != UNSET_PARAM_VALUE:\n"
+	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" 
+	     << pvalue << ").lstrip('? '))\n";
 	}
       }
-
-      if( gui )
+    
+      if( async )
       {
-	os << "\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm << "\" , message, values)\n"
-	   << "\tif dialog == True:\n"
-	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
-	   << "\telse:\n"
-	   << "\t\tsys.exit('Information: Script execution cancelled')\n"
+	os << "\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
 	   << "\tif result == False:\n"
-	   << "\t\tsys.exit('An error occurred while running " << algm << "')\n"
-	   << "\treturn algm\n";
+	   << "\t\tsys.exit('An error occurred while running " << algm << "')\n";
       }
       else
       {
-	os << "\tif PYTHONAPI_IN_MANTIDPLOT == True:\n"
-	   << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
-	   << "\t\tif result == False:\n"
-	   << "\t\t\tsys.exit('An error occurred while running " << algm << "')\n"
-	   << "\telse:\n"
-	   << "\t\talgm.execute()\n"
-	   << "\treturn algm\n";
+	os << "\talgm.execute()\n";
       }
-      //Add space at end of definition
-      os << "\n";
+
+      // Return the IAlgorithm object
+      os << "\treturn algm\n\n";
+    }
+
+    /**
+     * Write the GUI version of the Python function that raises a Qt dialog
+     * @param os The stream to use to write the definition
+     * @param algm The name of the algorithm
+     * @param properties The list of properties
+     */
+    void SimplePythonAPI::writeGUIFunctionDef(std::ostream & os, const std::string & algm,
+					      const PropertyVector & properties)
+    {
+      os << "# Definition of \"" << algm << "\" function.\n";
+      //start of definition
+      os << "def " << algm << "Dialog(";
+      //Iterate through properties
+      PropertyVector::const_iterator pIter = properties.begin();
+      PropertyVector::const_iterator pEnd = properties.end();
+      StringVector sanitizedNames(properties.size());
+      for( int iarg = 0; pIter != pEnd; ++pIter, ++iarg)
+      {
+	sanitizedNames[iarg] = removeCharacters((*pIter)->name(), "");
+	os << sanitizedNames[iarg];
+	
+	os << " = UNSET_PARAM_VALUE,";
+      }
+      //end of algorithm function parameters but add other arguments
+      os << "message = \"\", enable=\"\", disable=\"\"):\n"
+	 << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n"
+	 << "\tenabled_list = [s.lstrip(' ') for s in enable.split(',')]\n"
+	 << "\tdisabled_list = [s.lstrip(' ') for s in disable.split(',')]\n"
+	 << "\tvalues = '|'\n"
+	 << "\tfinal_enabled = ''\n\n";
+
+      pIter = properties.begin();
+      for( int iarg = 0; pIter != pEnd; ++pIter, ++iarg)
+      {
+	os << "\tvalpair = convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
+	   << ", enabled_list, disabled_list)\n"
+	   << "\tvalues += valpair[0] + '|'\n"
+	   << "\tfinal_enabled += valpair[1] + ','\n\n";
+      }
+
+      os << "\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
+	 << "\" , values, message, final_enabled)\n"
+	 << "\tif dialog == True:\n"
+	 << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
+	 << "\telse:\n"
+	 << "\t\tsys.exit('Information: Script execution cancelled')\n"
+	 << "\tif result == False:\n"
+	 << "\t\tsys.exit('An error occurred while running " << algm << "')\n"
+	 << "\treturn algm\n\n";
     }
 
     /**
@@ -412,9 +448,9 @@ namespace Mantid
     {
       if ( helpStrings.empty() ) return;
 
-      os << "def mtdHelp(cmd = EMPTY_PARAM_VALUE):\n";
+      os << "def mtdHelp(cmd = UNSET_PARAM_VALUE):\n";
       
-      os << "\tif cmd == EMPTY_PARAM_VALUE or cmd == '':\n"
+      os << "\tif cmd == UNSET_PARAM_VALUE or cmd == '':\n"
 	 << "\t\tmtdGlobalHelp()\n"
 	 << "\t\treturn\n";
       os << "\n\tcmd = string.lower(cmd)\n";

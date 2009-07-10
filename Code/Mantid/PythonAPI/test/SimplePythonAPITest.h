@@ -59,12 +59,12 @@ public:
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("import string"));
 
+    // Empty line and comment line
     getline( is, line );
     getline( is, line );
 
-    TS_ASSERT_EQUALS(line, std::string("PYTHONAPI_IN_MANTIDPLOT = False"));
     getline( is, line );
-    TS_ASSERT_EQUALS(line, std::string("EMPTY_PARAM_VALUE = -999"));
+    TS_ASSERT_EQUALS(line, std::string("UNSET_PARAM_VALUE = -9999"));
     //next non-blank line should be API objects
     //eat blank lines
     while( getline(is, line) && ( line.empty() || line[0] == '#' ) )

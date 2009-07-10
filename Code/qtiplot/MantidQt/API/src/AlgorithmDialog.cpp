@@ -13,6 +13,12 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QLineEdit>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QPushButton>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QHBoxLayout>
 
 using namespace MantidQt::API;
 
@@ -23,8 +29,9 @@ using namespace MantidQt::API;
  * Default Constructor
  */
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
-  QDialog(parent), m_algorithm(NULL), m_algName(""), m_propertyValueMap(), m_forScript(false), m_strMessage(""), 
-  m_msgAvailable(false), m_bIsInitialized(false), m_algProperties(),  m_validators()
+  QDialog(parent), m_algorithm(NULL), m_algName(""), m_propertyValueMap(), m_enabledNames(),
+  m_forScript(false), m_strMessage(""), m_msgAvailable(false), m_bIsInitialized(false), m_algProperties(), 
+  m_validators()
 {
 }
 
@@ -49,11 +56,12 @@ void AlgorithmDialog::initializeLayout()
 
   createValidatorLabels();
   
-  //This derived class function adds buttons and dialogboxes loaded with default values
+  // This derived class function creates the layout of the widget. It can also add default input if the
+  // dialog has been written this way
   this->initLayout();
-  //we want those default values
+  // Check if there is any default input 
   this->parseInput();
-  //because we will set properties to those values, which will do the validation, which will show users what needs chang
+  // Try to set these values. This will validate the defaults and mark those that are invalid, if any.
   setPropertyValues();
 
   m_bIsInitialized = true;
@@ -82,34 +90,6 @@ Mantid::API::IAlgorithm* AlgorithmDialog::getAlgorithm() const
 }
 
 /**
- * Are we for a script or not
- * @returns A boolean inidcating whether we are being called from a script
- */
-bool AlgorithmDialog::isForScript() const
-{
-  return m_forScript;
-}
-
-/**
- * Return the message string
- * @returns the message string
- */
-const QString & AlgorithmDialog::getOptionalMessage() const
-{
-  return m_strMessage;
-}
-
-/*
- * Is there a message string available
- * @returns A boolean indicating whether the message string is empty
- */
-bool AlgorithmDialog::isMessageAvailable() const
-{
-  return !m_strMessage.isEmpty();
-}
-
-
-/**
  * Get a named property for this algorithm
  * @param propName The name of the property
  */
@@ -128,69 +108,66 @@ QLabel* AlgorithmDialog::getValidatorMarker(const QString & propname) const
 }
 
 /**
+ * Return the message string
+ * @returns the message string
+ */
+const QString & AlgorithmDialog::getOptionalMessage() const
+{
+  return m_strMessage;
+}
+
+/**
+ * Are we for a script or not
+ * @returns A boolean inidcating whether we are being called from a script
+ */
+bool AlgorithmDialog::isForScript() const
+{
+  return m_forScript;
+}
+
+/*
+ * Is there a message string available
+ * @returns A boolean indicating whether the message string is empty
+ */
+bool AlgorithmDialog::isMessageAvailable() const
+{
+  return !m_strMessage.isEmpty();
+}
+
+/**
+ * Check if the control should be enabled for this property
+ * @param propName The name of the property
+ */
+bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
+{
+  // If this dialog is not for a script then always enable
+  if( !isForScript() || propName.isEmpty() )
+  {
+    return true;
+  }
+
+  if( isInEnabledList(propName) ) return true;
+
+  // Otherwise it must be disabled but only if it is valid
+  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  if( property->isValid().empty() )
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
+}
+
+/**
  * Adds a property (name,value) pair to the stored map
  */
-void AlgorithmDialog::addPropertyValueToMap(const QString & name, const QString & value)
+void AlgorithmDialog::storePropertyValue(const QString & name, const QString & value)
 {
-  if( name.isEmpty() /*|| value.isEmpty()*/ ) return;
+  if( name.isEmpty() ) return;
   
   m_propertyValueMap.insert(name, value);
-}
-
-/**
- * Set the properties that have been parsed from the dialog.
- * @returns A boolean that indicates if the validation was successful.
- */
-bool AlgorithmDialog::setPropertyValues()
-{
-  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
-  QString algName = QString::fromStdString(getAlgorithm()->name());
-  AlgorithmInputHistory::Instance().clearAlgorithmInput(algName);
-  bool allValid(true);
-  for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
-       pitr != pend; ++pitr )
-  {
-    Mantid::Kernel::Property *prop = pitr.value();
-    QString pName = pitr.key();
-    QString value = m_propertyValueMap.value(pName);
-    QLabel *validator = getValidatorMarker(pitr.key());
-
-    std::string error = "";
-    if ( !value.isEmpty() )
-    {//if there something in the box then use it
-      error = prop->setValue(value.toStdString());
-    }
-    else
-    {//else use the default with may or may not be a valid property value
-      error = prop->setValue(prop->getDefault());
-    }
-
-    if( error == "" )
-    {//no error
-      if( validator ) validator->hide();
-      //Store value for future input
-      AlgorithmInputHistory::Instance().storeNewValue(algName, QPair<QString, QString>(pName, value));
-    }
-    else
-    {//the property could not be set
-      allValid = false;
-      if( validator && validator->parent() )
-      {
-        //a description of the problem will be visible to users if they linger their mouse over validator star mark
-        validator->setToolTip(  QString::fromStdString(error) );
-        validator->show();
-      }
-    }
-  }
-  return allValid;
-}
-
-/**
- * Is the value a suggested value
- */
-bool AlgorithmDialog::isValueSuggested(const QString & propName) const
-{
-  return m_suggestedValues.contains(propName);
 }
 
 /**
@@ -251,26 +228,132 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
 }
 
 /**
- * Set old input for text edit field
+ * Takes a combobox and adds the allowed values of the given property to its list. 
+ * It also sets the displayed value to the correct one based on either the history
+ * or a script input value
  * @param propName The name of the property
- * @param field The QLineEdit field
+ * @param optionsBox A pointer to a QComoboBox object
+ * @returns A newed QComboBox
  */
-void AlgorithmDialog::setOldLineEditInput(const QString & propName, QLineEdit* field)
+void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* optionsBox) const
 {
-  Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
-  if( !prop ) return;
-  if( isForScript() && ( prop->isValid() == "" ) &&
-	  !prop->isDefault() && !isValueSuggested(propName))
+  if( !optionsBox ) return;
+  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  if( !property ) return;
+  
+  std::vector<std::string> items = property->allowedValues();
+  std::vector<std::string>::const_iterator vend = items.end();
+  for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+      ++vitr)
   {
-    field->setText(QString::fromStdString(prop->value()));
-    field->setEnabled(false);
+    optionsBox->addItem(QString::fromStdString(*vitr));
   }
-  else
+
+  // Display the appropriate value
+  QString displayed("");
+  if( !isForScript() )
   {
-    field->setText(AlgorithmInputHistory::Instance().previousInput(m_algName, propName));
+    displayed = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+  }
+  if( displayed.isEmpty() )
+  {
+    displayed = QString::fromStdString(property->value());
+  }
+
+  int index = optionsBox->findText(displayed);
+  if( index >= 0 )
+  {
+    optionsBox->setCurrentIndex(index);
   }
 }
 
+/**
+ * Takes the given property and QCheckBox pointer and sets the state based on either
+ * the history or property value
+ * @param propName The name of the property
+ * @param 
+ * @returns A newed QCheckBox
+ */
+void AlgorithmDialog::setCheckBoxState(const QString & propName, QCheckBox* checkBox) const
+{
+  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  if( !property ) return;
+  
+  //Check boxes are special in that if they have a default value we need to display it
+  QString displayed("");
+  if( !isForScript() )
+  {
+    displayed = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+  }
+  if( displayed.isEmpty() )
+  {
+    displayed = QString::fromStdString(property->value());
+  }
+
+  if( displayed == "0" )
+  {
+    checkBox->setCheckState(Qt::Unchecked);
+  }
+  else
+  {
+    checkBox->setCheckState(Qt::Checked);
+  }
+
+}
+
+/**
+ * Set the input for a text box based on either the history or a script value
+ * @param propName The name of the property
+ * @param field The QLineEdit field
+ */
+void AlgorithmDialog::fillLineEdit(const QString & propName, QLineEdit* textField)
+{
+  if( !isForScript() )
+  {
+    textField->setText(AlgorithmInputHistory::Instance().previousInput(m_algName, propName));
+  }
+  else
+  {
+    Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+    if( property && property->isValid().empty() && !property->isDefault() ) 
+    {
+      textField->setText(QString::fromStdString(property->value()));
+    }
+  }
+}
+
+QHBoxLayout *
+AlgorithmDialog::createDefaultButtonLayout(const QString & helpText,
+					   const QString & loadText,
+					   const QString & cancelText)
+{
+  QPushButton *okButton = new QPushButton(loadText);
+  connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
+  okButton->setDefault(true);
+
+  QPushButton *exitButton = new QPushButton(cancelText);
+  connect(exitButton, SIGNAL(clicked()), this, SLOT(close()));
+
+  QHBoxLayout *buttonRowLayout = new QHBoxLayout;
+  buttonRowLayout->addWidget(createHelpButton(helpText));
+  buttonRowLayout->addStretch();
+  buttonRowLayout->addWidget(okButton);
+  buttonRowLayout->addWidget(exitButton);
+    
+  return buttonRowLayout;
+}
+
+/**
+ * Create a help button that, when clicked, will open a browser to the Mantid wiki page
+ * for that algorithm
+ */
+QPushButton* AlgorithmDialog::createHelpButton(const QString & helpText) const
+{
+  QPushButton *help = new QPushButton(helpText);
+  help->setMaximumWidth(25);
+  connect(help, SIGNAL(clicked()), this, SLOT(helpClicked()));
+  return help;
+}
 
 /**
  * A slot that can be used to connect a button that accepts the dialog if
@@ -280,7 +363,11 @@ void AlgorithmDialog::accept()
 {
   parseInput();
   
-  if( setPropertyValues() ) QDialog::accept();
+  if( setPropertyValues() )
+  {
+    saveInput();
+    QDialog::accept();
+  }
   else
   {
     QMessageBox::critical(this, "", 
@@ -289,8 +376,13 @@ void AlgorithmDialog::accept()
   } 
 }
 
-
-
+/**
+ * A slot to handle the help button click
+ */
+void AlgorithmDialog::helpClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + m_algName));
+}
 
 //------------------------------------------------------
 // Private member functions
@@ -313,30 +405,101 @@ void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
 }
 
 /**
-  * Set a list of suggested values for the properties
-  * @param suggestedValues A string containing a list of "name=value" pairs with each separated by an '|' character
-  */
-void AlgorithmDialog::setSuggestedValues(const QString & suggestedValues)
+ * Set the properties that have been parsed from the dialog.
+ * @returns A boolean that indicates if the validation was successful.
+ */
+bool AlgorithmDialog::setPropertyValues()
 {
-  if( suggestedValues.isEmpty() ) return;
-  QStringList suggestions = suggestedValues.split('|', QString::SkipEmptyParts);
-  QStringListIterator itr(suggestions);
-  m_suggestedValues.clear();
+  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
+  bool allValid(true);
+  for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
+       pitr != pend; ++pitr )
+  {
+    Mantid::Kernel::Property *prop = pitr.value();
+    QString pName = pitr.key();
+    QString value = m_propertyValueMap.value(pName);
+    QLabel *validator = getValidatorMarker(pitr.key());
+
+    std::string error = "";
+    if ( !value.isEmpty() )
+    {//if there something in the box then use it
+      error = prop->setValue(value.toStdString());
+    }
+    else
+    {//else use the default with may or may not be a valid property value
+      error = prop->setValue(prop->getDefault());
+    }
+
+    if( error.empty() )
+    {//no error
+      if( validator ) validator->hide();
+      //Store value for future input if it is not default
+    }
+    else
+    {//the property could not be set
+      allValid = false;
+      if( validator && validator->parent() )
+      {
+        //a description of the problem will be visible to users if they linger their mouse over validator star mark
+        validator->setToolTip(  QString::fromStdString(error) );
+        validator->show();
+      }
+    }
+  }
+  return allValid;
+}
+
+/**
+ * Save the property values to the input history
+ */
+void AlgorithmDialog::saveInput()
+{
+  AlgorithmInputHistory::Instance().clearAlgorithmInput(m_algName);
+  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
+  for( QHash<QString, Mantid::Kernel::Property*>::const_iterator pitr = m_algProperties.begin();
+       pitr != pend; ++pitr )
+  {
+    QString pName = pitr.key();
+    QString value = m_propertyValueMap.value(pName);
+    AlgorithmInputHistory::Instance().storeNewValue(m_algName, QPair<QString, QString>(pName, value));
+  }
+}
+
+/**
+  * Set a list of values for the properties
+  * @param presetValues A string containing a list of "name=value" pairs with each separated by an '|' character
+  */
+void AlgorithmDialog::setPresetValues(const QString & presetValues)
+{
+  if( presetValues.isEmpty() ) return;
+  QStringList presets = presetValues.split('|', QString::SkipEmptyParts);
+  QStringListIterator itr(presets);
   while( itr.hasNext() )
   {
     QString namevalue = itr.next();
     QString name = namevalue.section('=', 0, 0);
     // Simplified removes trims from start and end and replaces all n counts of whitespace with a single whitespace
     QString value = namevalue.section('=', 1, 1).simplified();
-    if( value.startsWith('?') )
-    {
-      value.remove(0, 1);
-      m_suggestedValues.append(name);
-    }
-    addPropertyValueToMap(name, value.trimmed());
+    storePropertyValue(name, value.trimmed());
   }
   setPropertyValues();
   m_propertyValueMap.clear();
+}
+
+/** 
+ * Set comma-separated list of enabled parameter names
+ * @param enabledNames A comma-separated list of parameter names to keep enabled
+ */
+void AlgorithmDialog::setEnabledNames(const QString & enabledNames)
+{
+  if( enabledNames.isEmpty() ) return;
+  
+  m_enabledNames = enabledNames.split(',', QString::SkipEmptyParts);
+}
+
+bool AlgorithmDialog::isInEnabledList(const QString& propName) const
+{
+  return m_enabledNames.contains(propName);
 }
 
 /**

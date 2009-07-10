@@ -39,28 +39,28 @@ void LOQScriptInputDialog::initLayout()
   
   connect( m_uiForm.browseButton, SIGNAL(clicked()), this, SLOT(browseClicked()) );
 
-  setOldLineEditInput("SampleWorkspace", m_uiForm.sampleBox);
-  setOldLineEditInput("EmptyCanWorkspace", m_uiForm.emptycanBox);
-  setOldLineEditInput("TransmissionSampleWorkspace", m_uiForm.transSampleBox);
-  setOldLineEditInput("TransmissionDirectWorkspace", m_uiForm.transDirectBox);
-  setOldLineEditInput("TransmissionEmptyCanWorkspace", m_uiForm.transEmptyBox);
+  fillLineEdit("SampleWorkspace", m_uiForm.sampleBox);
+  fillLineEdit("EmptyCanWorkspace", m_uiForm.emptycanBox);
+  fillLineEdit("TransmissionSampleWorkspace", m_uiForm.transSampleBox);
+  fillLineEdit("TransmissionDirectWorkspace", m_uiForm.transDirectBox);
+  fillLineEdit("TransmissionEmptyCanWorkspace", m_uiForm.transEmptyBox);
   
-  setOldLineEditInput("Radius_min", m_uiForm.radMinBox);
-  setOldLineEditInput("Radius_max", m_uiForm.radMaxBox);
+  fillLineEdit("Radius_min", m_uiForm.radMinBox);
+  fillLineEdit("Radius_max", m_uiForm.radMaxBox);
 
-  setOldLineEditInput("Wavelength_min", m_uiForm.wavMinBox);
-  setOldLineEditInput("Wavelength_max", m_uiForm.wavMaxBox);
-  setOldLineEditInput("Wavelength_delta", m_uiForm.wavBinBox);
+  fillLineEdit("Wavelength_min", m_uiForm.wavMinBox);
+  fillLineEdit("Wavelength_max", m_uiForm.wavMaxBox);
+  fillLineEdit("Wavelength_delta", m_uiForm.wavBinBox);
 
-  setOldLineEditInput("Q_min", m_uiForm.momMinBox);
-  setOldLineEditInput("Q_max", m_uiForm.momMaxBox);
-  setOldLineEditInput("Q_delta", m_uiForm.momBinBox);
+  fillLineEdit("Q_min", m_uiForm.momMinBox);
+  fillLineEdit("Q_max", m_uiForm.momMaxBox);
+  fillLineEdit("Q_delta", m_uiForm.momBinBox);
 
-  setOldLineEditInput("Beam_Centre_X", m_uiForm.beamXBox);
-  setOldLineEditInput("Beam_Centre_Y", m_uiForm.beamYBox);
+  fillLineEdit("Beam_Centre_X", m_uiForm.beamXBox);
+  fillLineEdit("Beam_Centre_Y", m_uiForm.beamYBox);
   
   //Efficiency correction
-  setOldLineEditInput("EfficiencyCorrectionFile", m_uiForm.effFileBox);
+  fillLineEdit("EfficiencyCorrectionFile", m_uiForm.effFileBox);
 
   m_uiForm.sampleBox->setFocus();
   
@@ -74,31 +74,31 @@ void LOQScriptInputDialog::parseInput()
   // All elements within the dialog are public memebers of the LOQScriptInputDialog class
   // and have the names given to them in Qt Designer
   
-  //Simply access each widget and use addPropertyValueToMap( propName, m_uiForm->propValue)    
+  //Simply access each widget and use storePropertyValue( propName, m_uiForm->propValue)    
   //method of the AlgorithmDialog base class to add the input value for this property
 
-  addPropertyValueToMap("SampleWorkspace", m_uiForm.sampleBox->text());
-  addPropertyValueToMap("EmptyCanWorkspace", m_uiForm.emptycanBox->text());
-  addPropertyValueToMap("TransmissionSampleWorkspace", m_uiForm.transSampleBox->text());
-  addPropertyValueToMap("TransmissionDirectWorkspace", m_uiForm.transDirectBox->text());
-  addPropertyValueToMap("TransmissionEmptyCanWorkspace", m_uiForm.transEmptyBox->text());
+  storePropertyValue("SampleWorkspace", m_uiForm.sampleBox->text());
+  storePropertyValue("EmptyCanWorkspace", m_uiForm.emptycanBox->text());
+  storePropertyValue("TransmissionSampleWorkspace", m_uiForm.transSampleBox->text());
+  storePropertyValue("TransmissionDirectWorkspace", m_uiForm.transDirectBox->text());
+  storePropertyValue("TransmissionEmptyCanWorkspace", m_uiForm.transEmptyBox->text());
   
-  addPropertyValueToMap("Radius_min", m_uiForm.radMinBox->text());
-  addPropertyValueToMap("Radius_max", m_uiForm.radMaxBox->text());
+  storePropertyValue("Radius_min", m_uiForm.radMinBox->text());
+  storePropertyValue("Radius_max", m_uiForm.radMaxBox->text());
 
-  addPropertyValueToMap("Wavelength_min", m_uiForm.wavMinBox->text());
-  addPropertyValueToMap("Wavelength_max", m_uiForm.wavMaxBox->text());
-  addPropertyValueToMap("Wavelength_delta", m_uiForm.wavBinBox->text());
+  storePropertyValue("Wavelength_min", m_uiForm.wavMinBox->text());
+  storePropertyValue("Wavelength_max", m_uiForm.wavMaxBox->text());
+  storePropertyValue("Wavelength_delta", m_uiForm.wavBinBox->text());
 
-  addPropertyValueToMap("Q_min", m_uiForm.momMinBox->text());
-  addPropertyValueToMap("Q_max", m_uiForm.momMaxBox->text());
-  addPropertyValueToMap("Q_delta", m_uiForm.momBinBox->text());
+  storePropertyValue("Q_min", m_uiForm.momMinBox->text());
+  storePropertyValue("Q_max", m_uiForm.momMaxBox->text());
+  storePropertyValue("Q_delta", m_uiForm.momBinBox->text());
 
-  addPropertyValueToMap("Beam_Centre_X", m_uiForm.beamXBox->text());
-  addPropertyValueToMap("Beam_Centre_Y", m_uiForm.beamYBox->text());
+  storePropertyValue("Beam_Centre_X", m_uiForm.beamXBox->text());
+  storePropertyValue("Beam_Centre_Y", m_uiForm.beamYBox->text());
   
   //Efficiency correction
-  addPropertyValueToMap("EfficiencyCorrectionFile", m_uiForm.effFileBox->text());
+  storePropertyValue("EfficiencyCorrectionFile", m_uiForm.effFileBox->text());
 
 }
 

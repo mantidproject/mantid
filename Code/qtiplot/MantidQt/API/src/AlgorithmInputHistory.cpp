@@ -34,26 +34,6 @@ void AlgorithmInputHistoryImpl::clearAlgorithmInput(const QString & algName)
 }
 
 /**
- * If there is previous input for the named algorithm then pass it back through the second argument.
- * @param algName The name of the algorithm
- * @param values A map containing the (name,value) pairs for the named algorithm: if any exist.
- * @returns A boolean indicating whether the search has been successful or not
- */
-bool AlgorithmInputHistoryImpl::hasPreviousInput(const QString & algName, QHash<QString, QString> & values) const
-{
-  if( m_lastInput.contains(algName) )
-  {
-    values = m_lastInput[algName];
-    return true;
-  }
-  else
-  {
-    values.clear();
-    return false;
-  }
-}
-
-/**
  * Retrieve an old parameter value 
  * @param algName The name of the algorithm
  * @param The name of the property
@@ -62,7 +42,7 @@ QString AlgorithmInputHistoryImpl::previousInput(const QString & algName, const 
 {
   if( !m_lastInput.contains(algName) ) return "";
   
-  if( m_lastInput[algName].contains(propName) ) return m_lastInput[algName][propName];
+  if( m_lastInput.value(algName).contains(propName) ) return m_lastInput.value(algName).value(propName);
   else return "";
 }
 
