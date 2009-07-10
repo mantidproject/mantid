@@ -28,7 +28,9 @@ using namespace Mantid::DataObjects;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite
 {
+
 public:
+
   bool runInit(DetectorEfficiencyVariation &alg)//this is run by both tests so I thought I'd take it out and split things up
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -67,18 +69,15 @@ public:
     int lastGoodSpec = (Nhist/2)+int(variation/m_ramp);
     for (int lHist = 0; lHist < firstGoodSpec; lHist++)
     {
-      TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), BadVal )
+      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(),  BadVal )
     }
     for (int lHist = firstGoodSpec; lHist <= lastGoodSpec; lHist++)
     {
-      TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), GoodVal )
+      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(),  GoodVal )
     }
     for (int lHist = lastGoodSpec+1; lHist < Nhist; lHist++)
     {
-      TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), BadVal )
+      TS_ASSERT_EQUALS(outputMat->readY(lHist).front(),  BadVal )
     }
     std::vector<int> OArray;
     TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty( "BadIDs" ) )
@@ -151,7 +150,8 @@ public:
   }
         
   DetectorEfficiencyVariationTest() :
-    m_WB1Name("DetEfficVariTestWSI1"), m_WB2Name("DetEfficVariTestWSI2"), m_ramp(0.01)
+    m_WB1Name("DetEfficVariTestWSI1"), m_WB2Name("DetEfficVariTestWSI2"), m_ramp(0.01),
+    GoodVal(0.0), BadVal(100.0)
   {
     using namespace Mantid;
     // Set up a small workspace for testing
@@ -228,9 +228,11 @@ public:
 private:
   std::string m_WB1Name, m_WB2Name;
   double m_ramp, m_LargeValue;
-  enum { Nhist = 84, NXs = 34, 
-    //these values must match the values in DetectorEfficiencyVariation.h
-    BadVal  = 100, GoodVal = 0 };
+  enum { Nhist = 84, NXs = 34}; 
+
+  //these values must match the values in DetectorEfficiencyVariation.h
+  const double BadVal;
+  const double GoodVal;
 };
 
 

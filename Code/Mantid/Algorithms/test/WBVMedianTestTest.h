@@ -159,7 +159,7 @@ public:
     remove(OFileName.c_str());
   }
     
-  WBVMedianTestTest() : m_IWSName("WBVMedianTestTestInput")
+  WBVMedianTestTest() : m_IWSName("WBVMedianTestTestInput"), BadVal(100.0), GoodVal(0.0)
   {
     using namespace Mantid;
     // Set up a small workspace for testing
@@ -227,9 +227,10 @@ public:
 private:
   std::string m_IWSName;
   double m_YSum;
-  enum { Nhist = 144, 
-    //these values must match the values in DetectorEfficiencyVariation.h
-    BadVal  = 100, GoodVal = 0 };
+  enum { Nhist = 144 };
+  //these values must match the values in DetectorEfficiencyVariation.h
+  const double BadVal;
+  const double GoodVal;
 };
 
 #endif /*WBVMEDIANTESTTEST_H_*/
