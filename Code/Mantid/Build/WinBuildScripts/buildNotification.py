@@ -43,7 +43,10 @@ def getSVNRevision():
   put, get = os.popen4("svnversion .")
   line=get.readline()
   #remove non alphanumeric indicators
-  line=line.strip("MSP")
+  line=line.replace("M","")
+  line=line.replace("S","")
+  line=line.replace("P","")
+  line=line.strip("")
   versionList = line.split(":")
   #get the max version no
   try:

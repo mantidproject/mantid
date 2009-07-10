@@ -1,6 +1,7 @@
 import re
 import smtplib
 import os
+import socket
 from shutil import move
 from time import strftime
 import buildNotification
@@ -233,19 +234,23 @@ else:
 
 #Send Email
 session = smtplib.SMTP(smtpserver)
+#timeout in seconds
+socket.setdefaulttimeout(30)
+try:
+  smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
 
-smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
-
-if smtpresult:
-    errstr = ""
-    for recip in smtpresult.keys():
-        errstr = """Could not delivery mail to: %s
+  if smtpresult:
+      errstr = ""
+      for recip in smtpresult.keys():
+          errstr = """Could not delivery mail to: %s
 
 Server said: %s
 %s
 
 %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
-    raise smtplib.SMTPException, errstr
+      raise smtplib.SMTPException, errstr
+except:
+  print "Failed to send the build results email"
 
 if not buildSuccess:
      exit(1)
