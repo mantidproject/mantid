@@ -30,8 +30,8 @@ using namespace MantidQt::API;
  */
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
   QDialog(parent), m_algorithm(NULL), m_algName(""), m_propertyValueMap(), m_enabledNames(),
-  m_forScript(false), m_strMessage(""), m_msgAvailable(false), m_bIsInitialized(false), m_algProperties(), 
-  m_validators()
+  m_forScript(false), m_python_arguments(), m_strMessage(""), m_msgAvailable(false), 
+  m_bIsInitialized(false), m_algProperties(), m_validators()
 {
   // This disables the WhatsThis question mark button that appears next to the cross on windows
   Qt::WindowFlags flags = windowFlags();
@@ -319,7 +319,8 @@ void AlgorithmDialog::fillLineEdit(const QString & propName, QLineEdit* textFiel
   else
   {
     Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
-    if( property && property->isValid().empty() && !property->isDefault() ) 
+    if( property && property->isValid().empty() && 
+	( m_python_arguments.contains(propName) || !property->isDefault() ) ) 
     {
       textField->setText(QString::fromStdString(property->value()));
     }
@@ -478,10 +479,12 @@ void AlgorithmDialog::setPresetValues(const QString & presetValues)
   if( presetValues.isEmpty() ) return;
   QStringList presets = presetValues.split('|', QString::SkipEmptyParts);
   QStringListIterator itr(presets);
+  m_python_arguments.clear();
   while( itr.hasNext() )
   {
     QString namevalue = itr.next();
     QString name = namevalue.section('=', 0, 0);
+    m_python_arguments.append(name);
     // Simplified removes trims from start and end and replaces all n counts of whitespace with a single whitespace
     QString value = namevalue.section('=', 1, 1).simplified();
     storePropertyValue(name, value.trimmed());

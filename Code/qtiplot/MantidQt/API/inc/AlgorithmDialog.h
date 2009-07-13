@@ -215,6 +215,9 @@ private:
   /// A boolean indicating whether this is for a script or not
   bool m_forScript;
 
+  /// A list of property names that have been passed from Python
+  QStringList m_python_arguments;
+
   /// The message string to be displayed at the top of the widget; if it exists.
   QString m_strMessage;
 
