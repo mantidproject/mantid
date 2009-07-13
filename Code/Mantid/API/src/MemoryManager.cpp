@@ -177,8 +177,15 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
     g_log.warning("ManagedWorkspace.LowerMemoryLimit is greater than 90%. Danger of memory errors.");
   }
   MemoryInfo mi = getMemoryInfo();
-  int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
-  int wsSize = NVectors * (YLength * 2 + XLength) / 1024;
+  unsigned int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
+  // Avoid int overflow
+  unsigned int wsSize;
+  if (NVectors > 1024)
+      wsSize = NVectors / 1024 * (YLength * 2 + XLength);
+  else if (YLength * 2 + XLength > 1024)
+      wsSize = (YLength * 2 + XLength) / 1024 * NVectors;
+  else
+      NVectors * (YLength * 2 + XLength) / 1024;
 
   bool goManaged = (wsSize > triggerSize);
 #ifdef _WIN32
@@ -199,7 +206,7 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
 
 #ifdef _WIN32
 /// Returns the reserved, but currently unused, memory in KB (Windows only) 
-int MemoryManagerImpl::ReservedMem()
+unsigned int MemoryManagerImpl::ReservedMem()
 {
   MEMORY_BASIC_INFORMATION info; // Windows structure
 

@@ -14,20 +14,19 @@ namespace Mantid
   {
     /** @class RotateInstrumentComponent RotateInstrumentComponent.h DataHandling/RotateInstrumentComponent.h
 
-    Moves an instrument component to a new position by setting corresponding parameter in ParameterMap.
+    Rotates an instrument component to a new orientation by setting corresponding parameter ("rot") in ParameterMap.
 
     Required Properties:
     <UL>
     <LI> Workspace - The workspace to which the change will apply </LI>
-    <LI> ComponentName - The name of the component which will be moved </LI>
-    <LI> DetectorID - The detector id of the component to move. Either ComponentName or DetectorID 
+    <LI> ComponentName - The name of the component which will be rotated </LI>
+    <LI> DetectorID - The detector id of the component to rotate. Either ComponentName or DetectorID 
          can be used to identify the component. If both are given the DetectorID will bw used.
     </LI>
-    <LI> X - New x coordinate of the component or the shift along x axis depending on the value of RelativePosition property.</LI>
-    <LI> Y - New y coordinate of the component or the shift along y axis depending on the value of RelativePosition property.</LI>
-    <LI> Z - New z coordinate of the component or the shift along z axis depending on the value of RelativePosition property.</LI>
-    <LI> RelativePosition - Boolean. If false (X,Y,Z) is the new absolute position of the component, if true (X,Y,Z) is the 
-    shift and NewPos = OldPos + (X,Y,Z). The default value is true.</LI>
+    <LI> X - New x coordinate of the rotation axis in the coordinate system attached to the component.</LI>
+    <LI> Y - New y coordinate of the rotation axis in the coordinate system attached to the component.</LI>
+    <LI> Z - New z coordinate of the rotation axis in the coordinate system attached to the component.</LI>
+    <LI> Angle - The angle of rotation in degrees.</LI>
     </UL>
 
     @author Roman Tolchenov, Tessella Support Services plc

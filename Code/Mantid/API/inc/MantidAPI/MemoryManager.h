@@ -19,9 +19,9 @@ namespace Mantid
     /// Information about the memory 
     struct MemoryInfo
     {
-      int totalMemory;  ///< total physical memory in KB
-      int availMemory;  ///< available physical memory in KB
-      int freeRatio;    ///< percentage of the available memory ( 0 - 100 )
+      unsigned int totalMemory;  ///< total physical memory in KB
+      unsigned int availMemory;  ///< available physical memory in KB
+      unsigned int freeRatio;    ///< percentage of the available memory ( 0 - 100 )
     };
 
 		/** @class MemoryManagerImpl MemoryManager.h API/MemoryManager.h
@@ -73,7 +73,7 @@ namespace Mantid
 			MemoryManagerImpl& operator = (const MemoryManagerImpl&);
 
 #ifdef _WIN32
-      int ReservedMem();
+      unsigned int ReservedMem();
       MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
 #elif defined __linux__
 			bool ReadMemInfo(MemoryInfo & mi);

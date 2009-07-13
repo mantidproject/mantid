@@ -73,7 +73,7 @@ IComponent* Component::clone() const
 */
 const ComponentID Component::getComponentID()const
 {
-    return ComponentID(this);
+    return ComponentID((const IComponent*)(this));
 }
 
 /*! Set the parent. Previous parenting is lost.
