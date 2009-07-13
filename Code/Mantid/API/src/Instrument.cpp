@@ -60,7 +60,7 @@ Geometry::IObjComponent_sptr Instrument::getSample() const
  */
 boost::shared_ptr<Geometry::IComponent> Instrument::getComponentByID(Geometry::ComponentID id)
 {
-    return boost::shared_ptr<Geometry::IComponent>((Geometry::Component*)id,NoDeleting());
+    return boost::shared_ptr<Geometry::IComponent>((Geometry::IComponent*)id,NoDeleting());
 }
 
 /**	Gets a pointer to the detector from its ID
