@@ -179,13 +179,13 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
   MemoryInfo mi = getMemoryInfo();
   unsigned int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
   // Avoid int overflow
-  unsigned int wsSize;
+  unsigned int wsSize = 0;
   if (NVectors > 1024)
       wsSize = NVectors / 1024 * (YLength * 2 + XLength);
   else if (YLength * 2 + XLength > 1024)
       wsSize = (YLength * 2 + XLength) / 1024 * NVectors;
   else
-      NVectors * (YLength * 2 + XLength) / 1024;
+      wsSize = NVectors * (YLength * 2 + XLength) / 1024;
 
   bool goManaged = (wsSize > triggerSize);
 #ifdef _WIN32
