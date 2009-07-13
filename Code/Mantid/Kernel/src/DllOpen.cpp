@@ -191,8 +191,15 @@ void DllOpen::addSearchDirectoryImpl(const std::string& dir)
 }
 
 #else
+
 const std::string DllOpen::LIB_PREFIX = "lib";
+// Shared libraries end in "so" on linux, "dylib" on the Mac
+#ifdef __linux__
 const std::string DllOpen::LIB_POSTFIX = ".so";
+#elif defined __APPLE__
+const std::string DllOpen::LIB_POSTFIX = ".dylib";
+#endif
+
 const std::string DllOpen::PATH_SEPERATOR = "/";
 
 /* Opens the Linux .so file

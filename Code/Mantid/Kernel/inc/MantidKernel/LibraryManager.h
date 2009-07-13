@@ -71,6 +71,9 @@ private:
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for LibraryManagerImpl (needed for dllexport/dllimport) and a typedef for it.
+#ifdef __APPLE__
+inline
+#endif
 template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
 typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<LibraryManagerImpl> LibraryManager;
 

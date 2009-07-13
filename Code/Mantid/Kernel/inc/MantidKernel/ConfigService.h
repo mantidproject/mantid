@@ -183,9 +183,12 @@ class Logger;
     const std::string m_user_properties_file_name;
 	};
 	
-	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
-	template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
-	typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
+///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+#ifdef __APPLE__
+inline
+#endif
+template class EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl>;
+typedef EXPORT_OPT_MANTID_KERNEL Mantid::Kernel::SingletonHolder<ConfigServiceImpl> ConfigService;
 
 } // namespace Kernel
 } // namespace Mantid
