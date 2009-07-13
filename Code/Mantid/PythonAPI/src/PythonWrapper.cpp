@@ -37,6 +37,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Quat.h"
 
 // PythonAPI
 #include "MantidPythonAPI/FrameworkManager.h"
@@ -743,6 +744,23 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def(self == self)
      .def(self_ns::str(self))
      ;
+   //Quat class
+   class_< Mantid::Geometry::Quat >("Quaternion", init<double, double, double, double>())
+     .def("rotate", &Mantid::Geometry::Quat::rotate)
+     .def("real", &Mantid::Geometry::Quat::real)
+     .def("imagI", &Mantid::Geometry::Quat::imagI)
+     .def("imagJ", &Mantid::Geometry::Quat::imagJ)
+     .def("imagK", &Mantid::Geometry::Quat::imagK)
+     .def(self + self)
+     .def(self += self)
+     .def(self - self)
+     .def(self -= self)
+     .def(self * self)
+     .def(self *= self)
+     .def(self == self)
+     .def(self != self)
+     .def(self_ns::str(self))
+     ;
 
    //IComponent class
    class_< Mantid::Geometry::IComponent, boost::noncopyable, Mantid_Geometry_IComponent_Wrapper>("IComponent", no_init)
@@ -763,6 +781,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getDistance", pure_virtual(&Mantid::Geometry::IDetector::getDistance))
      .def("getTwoTheta", pure_virtual(&Mantid::Geometry::IDetector::getTwoTheta))
      .def("getPhi", pure_virtual(&Mantid::Geometry::IDetector::getPhi))
+     .def("getNumberParameter", pure_virtual(&Mantid::Geometry::IDetector::getNumberParameter))
+     .def("getPositionParameter", pure_virtual(&Mantid::Geometry::IDetector::getPositionParameter))
+     .def("getRotationParameter", pure_virtual(&Mantid::Geometry::IDetector::getRotationParameter))
      ;
    
    //IInstrument class

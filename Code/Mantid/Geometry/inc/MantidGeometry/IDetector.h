@@ -19,6 +19,7 @@ namespace Geometry
 // Forward declaration
 //----------------------------------------------------------------------
 class V3D;
+class Quat;
 
 /** Interface class for detector objects.
 
@@ -45,7 +46,7 @@ class V3D;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IDetector//: public virtual IComponent
+class DLLExport IDetector
 {
 public:
   /// Get the detector ID
@@ -84,12 +85,34 @@ public:
   virtual bool isMonitor() const = 0;
 
   /// Must return a pointer to itself if derived from IComponent
-  virtual IComponent* getComponent(){throw std::runtime_error("This detecor class does not inherit from IComponent.");}
+  virtual IComponent* getComponent(){throw std::runtime_error("This detector class does not inherit from IComponent.");}
 
-  /// (Empty) Constructor
-	IDetector() {}
-	/// Virtual destructor
-	virtual ~IDetector() {}
+  /// Get a double value from the parameter map. This default version returns an empty vector to indicate that
+  /// we are not in a parameterized component
+  virtual std::vector<double> getNumberParameter(const std::string & param_name) const
+  {
+    return std::vector<double>(0);
+  } 
+
+  /// Get a postion from the parameter map. This default version returns an empty vector to indicate that
+  /// we are not in a parameterized component
+  virtual std::vector<V3D> getPositionParameter(const std::string & param_name) const
+  {
+    return std::vector<V3D>(0);
+  } 
+
+  /// Get a rotation from the parameter map. This default version returns an empty vector to indicate that
+  /// we are not in a parameterized component
+  virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const
+  {
+    return std::vector<Quat>(0);
+  } 
+  
+   /// (Empty) Constructor
+  IDetector() {}
+  /// Virtual destructor
+  virtual ~IDetector() {}
+
 };
 
 /// Shared pointer to IDetector

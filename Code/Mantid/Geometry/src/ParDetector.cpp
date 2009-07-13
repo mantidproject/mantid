@@ -97,5 +97,36 @@ void ParDetector::markAsMonitor(const bool flag)
   //m_isMonitor = flag;
 }
 
+/**
+ * Get a parameter value from the Parameter map.
+ * @name p_name The parameter name
+ * @return A vector of either size zero or one. The parameter value, if found, is placed as the first item in the vector
+ */
+std::vector<double> ParDetector::getNumberParameter(const std::string & p_name) const
+{
+  return getParameter<double>(p_name);
+}
+
+/**
+ * Get a position parameter value from the Parameter map.
+ * @name p_name The parameter name
+ * @return A vector of either size zero or one. The parameter value, if found, is placed as the first item in the vector
+ */
+std::vector<V3D> ParDetector::getPositionParameter(const std::string & p_name) const
+{
+  return getParameter<V3D>(p_name);
+}
+
+/**
+ * Get a rotation parameter value from the Parameter map.
+ * @name p_name The parameter name
+ * @return A vector of either size zero or one. The parameter value, if found, is placed as the first item in the vector
+ */
+std::vector<Quat> ParDetector::getRotationParameter(const std::string & p_name) const
+{
+  return getParameter<Quat>(p_name);
+}
+
+
 } //Namespace Geometry
 } //Namespace Mantid

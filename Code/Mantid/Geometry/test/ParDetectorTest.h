@@ -91,6 +91,57 @@ public:
     TS_ASSERT_THROWS_NOTHING( det.markAsMonitor(false) )
     TS_ASSERT( ! pdet.isMonitor() )
   }
+
+  void testGetNumberParameter()
+  {
+    Detector det("det",0);
+
+    ParameterMap pmap;
+    pmap.add("double", &det, "testparam", 5.0);
+    ParDetector pdet(&det,&pmap);
+    IDetector *idet = static_cast<IDetector*>(&pdet);
+
+    TS_ASSERT_EQUALS(idet->getNumberParameter("testparam").size(), 1)
+    TS_ASSERT_DELTA(idet->getNumberParameter("testparam")[0], 5.0, 1e-08)
+
+  }
+
+  void testGetPositionParameter()
+  {
+    Detector det("det",0);
+
+    ParameterMap pmap;
+    pmap.add("V3D", &det, "testparam", Mantid::Geometry::V3D(0.5, 1.0, 1.5));
+    ParDetector pdet(&det,&pmap);
+    IDetector *idet = static_cast<IDetector*>(&pdet);
+
+    std::vector<Mantid::Geometry::V3D> pos = idet->getPositionParameter("testparam");
+
+    TS_ASSERT_EQUALS(pos.size(), 1)
+    TS_ASSERT_DELTA(pos[0].X(), 0.5, 1e-08)
+    TS_ASSERT_DELTA(pos[0].Y(), 1.0, 1e-08)
+    TS_ASSERT_DELTA(pos[0].Z(), 1.5, 1e-08)
+
+  }
+
+  void testGetRotationParameter()
+  {
+    Detector det("det",0);
+
+    ParameterMap pmap;
+    pmap.add("Quat", &det, "testparam", Mantid::Geometry::Quat(1.0, 0.25, 0.5, 0.75));
+    ParDetector pdet(&det,&pmap);
+    IDetector *idet = static_cast<IDetector*>(&pdet);
+
+    std::vector<Mantid::Geometry::Quat> rot = idet->getRotationParameter("testparam");
+
+    TS_ASSERT_EQUALS(rot.size(), 1)
+    TS_ASSERT_DELTA(rot[0].real(), 1.0, 1e-08)
+    TS_ASSERT_DELTA(rot[0].imagI(), 0.25, 1e-08)
+    TS_ASSERT_DELTA(rot[0].imagJ(), 0.5, 1e-08)
+    TS_ASSERT_DELTA(rot[0].imagK(), 0.75, 1e-08)
+  }
+ 
 };
 
 #endif

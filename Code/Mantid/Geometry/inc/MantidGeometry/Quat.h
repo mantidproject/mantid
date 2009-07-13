@@ -104,6 +104,20 @@ namespace Mantid
       bool   operator!=(const Quat&) const;
       const double& operator[](int) const;
       double& operator[](int);
+
+      
+      /** @name Element access. */
+      //@{
+      /// Access the real part
+      inline double real() const { return w; }
+      /// Access the coefficient of i
+      inline double imagI() const { return a; }
+      /// Access the coefficient of j
+      inline double imagJ() const { return b; }
+      /// Access the coefficient of k
+      inline double imagK() const { return c; }
+      //@}
+
       void printSelf(std::ostream&) const;
       void readPrinted(std::istream&);
     private:
