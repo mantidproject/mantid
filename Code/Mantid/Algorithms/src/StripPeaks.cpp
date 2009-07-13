@@ -67,7 +67,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Calling FindPeaks as a sub-algorithm");
 
-  API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks");
+  API::IAlgorithm_sptr findpeaks = createSubAlgorithm("FindPeaks",0.0,0.2);
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
   findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
@@ -82,8 +82,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
     g_log.error("Unable to successfully run FindPeaks sub-algorithm");
     throw;
   }
-
-  if ( ! findpeaks->isExecuted() ) g_log.error("Unable to successfully run FindPeaks sub-algorithm");
+   if ( ! findpeaks->isExecuted() ) g_log.error("Unable to successfully run FindPeaks sub-algorithm");
 
   return findpeaks->getProperty("PeaksList");
 }
@@ -102,14 +101,21 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
   // Copy the data over from the input to the output workspace
   const int hists = input->getNumberHistograms();
+  //progress 0.2 to 0.3 in this loop
+  double prg=0.2;
   for (int k = 0; k < hists; ++k)
   {
     outputWS->dataX(k) = input->readX(k);
     outputWS->dataY(k) = input->readY(k);
     outputWS->dataE(k) = input->readE(k);
+	prg+=(0.1/hists);
+	//g_log.error()<<"progress inside hists loop "<<prg<<std::endl;
+	progress(prg);
   }
 
   const bool isHistogramData = outputWS->isHistogramData();
+  //progress from 0.3 to 1.0 here 
+  prg=0.3;
   // Loop over the list of peaks
   for (int i = 0; i < peakslist->rowCount(); ++i)
   {
@@ -139,6 +145,9 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
       // Subtract the calculated value from the data
       Y[j] -= funcVal;
     }
+	prg+=(0.7/peakslist->rowCount());
+	//g_log.error()<<" insdie pealist loops  prg = "<<prg<<std::endl;
+	progress(prg);
   }
 
   return outputWS;

@@ -60,6 +60,7 @@ void SaveFocusedXYE::exec()
   std::ostringstream number;
   std::fstream out;
 
+   Progress progress(this,0.0,1.0,nHist);
 	for (int i=0;i<nHist;i++)
 	{
 		const std::vector<double>& X=inputWS->readX(i);
@@ -108,6 +109,7 @@ void SaveFocusedXYE::exec()
     {
       out.close();
     }
+	progress.report();
   }
 	// Close if single file
 	if (split=="False")

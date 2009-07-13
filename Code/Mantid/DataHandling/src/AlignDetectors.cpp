@@ -93,7 +93,7 @@ void AlignDetectors::exec()
   const int numberOfSpectra = inputWS->size() / inputWS->blocksize();
 
   // Initialise the progress reporting object
-  Progress progress(this,0.0,1.0,numberOfSpectra,100);
+  Progress progress(this,0.0,1.0,numberOfSpectra);
   
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i)

@@ -82,6 +82,7 @@ namespace Mantid
 
             int progress_step = histnumber / 100;
             if (progress_step == 0) progress_step = 1;
+			PARALLEL_FOR2(inputW,outputW)
 			for (int hist=0; hist <  histnumber;hist++)
 			{
 				// Ensure that axis information are copied to the output workspace if the axis exists

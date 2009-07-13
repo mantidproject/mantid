@@ -160,7 +160,8 @@ void CrossCorrelate::exec()
 	std::vector<double> XX(npoints);
   for (int i=0;i<npoints;++i)
    		XX[i]=static_cast<double>(i-nY+2);
-
+   // Initialise the progress reporting object
+  m_progress = new Progress(this,0.0,1.0,nspecs);
   for (int i=0;i<nspecs;++i) // Now loop on all spectra
 	{
 		int spec_index=indexes[i]; // Get the spectrum index from the table
@@ -228,9 +229,10 @@ void CrossCorrelate::exec()
 			outE[k+nY-2]=sqrt(val*val*normalisationE2+normalisation*normalisation*err2);
 		}
 		// Update progress information
-		double prog=static_cast<double>(i)/nspecs;
-		progress(prog);
-		interruption_point();
+		//double prog=static_cast<double>(i)/nspecs;
+		//progress(prog);
+		m_progress->report();
+		//interruption_point();
 	}
    	setProperty("OutputWorkspace",out);
    	return;

@@ -139,6 +139,7 @@ namespace NeXus
       }
       if ( ! saveNexusPro->isExecuted() ) g_log.error("Unable to successfully run SaveNexusProcessed sub-algorithm");
       //
+	  progress(1);
   }
 } // namespace NeXus
 } // namespace Mantid

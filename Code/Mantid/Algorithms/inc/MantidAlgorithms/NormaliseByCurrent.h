@@ -60,6 +60,9 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  /// Progress reporting
+  API::Progress* m_progress;
+
 
   
 };

@@ -49,7 +49,7 @@ namespace Mantid
       const bool isHist = in_work->isHistogramData();
 
       // Initialise the progress reporting object
-      Progress progress(this,0.0,1.0,numSpec,100);
+      Progress progress(this,0.0,1.0,numSpec);
       
       // Loop over every cell in the workspace, calling the abstract correction function
       for (int i = 0; i < numSpec; ++i)

@@ -61,7 +61,7 @@ void SaveGSS::exec()
   std::string split=getProperty("SplitFiles");
   std::ostringstream number;
   std::fstream out;
-
+   Progress p(this,0.2,1.0,nHist);
 	for (int i=0;i<nHist;i++)
 	{
 		const std::vector<double>& X=inputWS->readX(i);
@@ -115,6 +115,7 @@ void SaveGSS::exec()
     {
       out.close();
     }
+	p.report();
   }
 	// Close if single file
 	if (split=="False")

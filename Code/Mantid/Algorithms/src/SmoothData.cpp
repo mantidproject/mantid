@@ -64,6 +64,8 @@ void SmoothData::exec()
   Histogram1D::RCtype newX;
   newX.access() = inputWorkspace->readX(0);
 
+  Progress progress(this,0.0,1.0,inputWorkspace->getNumberHistograms());
+  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   // Loop over all the spectra in the workspace
   for (int i = 0; i < inputWorkspace->getNumberHistograms(); ++i)
   {
@@ -125,6 +127,7 @@ void SmoothData::exec()
       totalE -= E[index-1]*E[index-1];
       newE[l] = std::sqrt(std::abs(totalE))/(vecSize-index);
     }
+	progress.report();
   } // Loop over spectra
 
   // Set the output workspace to its property

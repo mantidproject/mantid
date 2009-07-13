@@ -23,6 +23,7 @@ using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;
+using API::Progress;
 
 /// Empty default constructor
 LoadMuonLog::LoadMuonLog()
@@ -68,7 +69,7 @@ void LoadMuonLog::exec()
   // Attempt to load the content of each NXlog section into the Sample object
   // Assumes that MuonNexusReader has read all log data
   // Two cases of double or string data allowed
-
+ Progress prog(this,0.0,1.0,nxload.numberOfLogs());
   for (int i = 0; i < nxload.numberOfLogs(); i++)
   {
     std::string logName=nxload.getLogName(i);
@@ -111,7 +112,7 @@ void LoadMuonLog::exec()
       sample->addLogData(l_PropertyString);
       delete l_PropertyDouble;
     }
-
+    prog.report();
   } // end for
 
 

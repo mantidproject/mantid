@@ -98,18 +98,22 @@ namespace NeXus
        g_log.error("Failed to open file");
        throw Exception::FileError("Failed to open file", m_filename);
     }
-
+	progress(0.2);
     if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
     {
        g_log.error("Failed to write file");
        throw Exception::FileError("Failed to write to file", m_filename);
     }
 
+    progress(0.3);
     // write instrument data, if present and writer enabled
     IInstrument_const_sptr instrument = m_inputWorkspace->getInstrument();
     nexusFile->writeNexusInstrument(instrument);
-
+   
     nexusFile->writeNexusParameterMap(m_inputWorkspace);
+
+	progress(0.5);
+	
 
     // write XML source file name, if it exists - otherwise write "NoNameAvailable"
     std::string instrumentName=instrument->getName();
@@ -136,7 +140,7 @@ namespace NeXus
     else
        nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
 
-
+    progress(0.7);
     boost::shared_ptr<Mantid::API::Sample> sample=m_inputWorkspace->getSample();
     if( nexusFile->writeNexusProcessedSample( sample->getName(), sample) != 0 )
     {
@@ -194,6 +198,7 @@ namespace NeXus
     nexusFile->writeNexusProcessedProcess(m_inputWorkspace);
     nexusFile->writeNexusProcessedSpectraMap(m_inputWorkspace, spec);
     nexusFile->closeNexusFile();
+	progress(1.0);
     
     delete nexusFile;
 

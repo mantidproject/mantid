@@ -63,7 +63,7 @@ void LoadInstrumentFromNexus::exec()
     g_log.error("Unable to open file " + m_filename);
     throw Exception::FileError("Unable to open File:" , m_filename);
   }
-
+  progress(0.5);
   // Get reference to Instrument and set its name
   boost::shared_ptr<API::Instrument> instrument = localWorkspace->getBaseInstrument();
   instrument->setName(nxload.getInstrumentName());
@@ -89,6 +89,7 @@ void LoadInstrumentFromNexus::exec()
     if (l1 == 0)  l1 = 10.0;
   }
   source->setPos(0.0,-1.0*l1,0.0);
+    progress(1.0);
 
   // add detectors
   /* **** Ignoring all this for the moment - the sample Nexus files do not contain most of these values

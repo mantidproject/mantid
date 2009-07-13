@@ -49,9 +49,9 @@ class DLLExport FlatBackground : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  FlatBackground() : API::Algorithm() {}
+  FlatBackground() : API::Algorithm(),m_progress(NULL) {}
   /// Virtual destructor
-  virtual ~FlatBackground() {}
+  virtual ~FlatBackground() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "FlatBackground"; }
   /// Algorithm's version
@@ -67,6 +67,9 @@ private:
 
   void checkRange(double& startX, double& endX);
   double doFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
+
+  /// Progress reporting
+  API::Progress* m_progress;
 
 };
 

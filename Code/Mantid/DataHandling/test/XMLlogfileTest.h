@@ -26,7 +26,7 @@ public:
 
   // LoadRaw2 uses XMLlogfile to populate its parameter map. Hence the test here simply
   // checks that this is done ok
-  void testParameterMap()
+  void xtestParameterMap()
   {
     LoadRaw2 loader;
     loader.initialize();

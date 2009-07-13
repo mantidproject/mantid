@@ -19,7 +19,7 @@ using namespace API;
 int FindPeaks::g_z = 5;
 
 /// Constructor
-FindPeaks::FindPeaks() : API::Algorithm() {}
+FindPeaks::FindPeaks() : API::Algorithm(),m_progress(NULL) {}
 
 void FindPeaks::init()
 {
@@ -87,15 +87,19 @@ void FindPeaks::exec()
   // Loop over the spectra searching for peaks
   const int numHists = smoothedData->getNumberHistograms();
   const int blocksize = smoothedData->blocksize();
+  m_progress = new Progress(this,0.0,1.0,numHists);
+
   for (int k = 0; k < numHists; ++k)
   {
     const std::vector<double> &S = smoothedData->readY(k);
     const std::vector<double> &F = smoothedData->readE(k);
-
+     //progress(double(k/numHists));
+	
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
     for ( int i = 1; i < blocksize; ++i)
     {
+		
       int M = 0;
       if ( S[i] > F[i] ) M = 1;
       else { S[i] > 0 ? M = 2 : M = 3; }
@@ -216,6 +220,9 @@ void FindPeaks::exec()
       }
 
     } // loop through a single spectrum
+
+	m_progress->report();
+	
   } // loop over spectra
 
   g_log.information() << "Total of " << m_peaks->rowCount() << " peaks found and successfully fitted." << std::endl;

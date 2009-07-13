@@ -43,6 +43,7 @@ void LoadMappingTable::exec()
     g_log.error("Unable to open file " + m_filename);
     throw Kernel::Exception::FileError("Unable to open File:" , m_filename);
   }
+  progress(0.5);
   const int number_spectra=iraw.i_det; // Number of entries in the spectra/udet table
   if ( number_spectra == 0 )
   {
@@ -50,6 +51,7 @@ void LoadMappingTable::exec()
   }
   //Populate the Spectra Map with parameters
   localWorkspace->mutableSpectraMap().populate(iraw.spec,iraw.udet,number_spectra);
+  progress(1);
 
   return;
 }

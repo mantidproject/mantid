@@ -15,6 +15,7 @@ namespace Mantid
   {
 
    using namespace Kernel;
+   using API::Progress;
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(MuonRemoveExpDecay)
@@ -54,30 +55,38 @@ namespace Mantid
 	    
 	    if (Spectra.size() == 0)
 	    {
-		    //Do all the spectra	    
+			Progress prog(this,0.0,1.0,numSpectra);
+		    //Do all the spectra	
+			PARALLEL_FOR2(inputWS,outputWS)
 		    for (int i=0; i < numSpectra; ++i)
 		    {
 			    removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
 			    outputWS->dataX(i) = inputWS->readX(i);
 			    
 			    //Need to do something about the errors?
+				prog.report();
 		    }
 	    }
 	    else
 	    {
+			Progress prog(this,0.0,1.0,numSpectra+Spectra.size());
 		    if (getPropertyValue("InputWorkspace") != getPropertyValue("OutputWorkspace"))
 		   {
+			   
 			//Copy all the X,Y and E data
+			   PARALLEL_FOR2(inputWS,outputWS)
 			for (int i=0; i < numSpectra; ++i)
 			{
 			    outputWS->dataX(i) = inputWS->readX(i);
 			    outputWS->dataY(i) = inputWS->readY(i);
 			    outputWS->dataE(i) = inputWS->readE(i);
+				prog.report();
 			}  
 		    }
 		    
 		    //Do the specified spectra only
-		    for (size_t i=0; i < Spectra.size(); ++i)
+			   PARALLEL_FOR2(inputWS,outputWS)
+		    for (int i=0; i < Spectra.size(); ++i)
 		    {
 			    if (Spectra[i] > numSpectra)
 				{
@@ -89,6 +98,7 @@ namespace Mantid
 			   outputWS->dataX(Spectra[i]) = inputWS->readX(Spectra[i]);
 			    
 			    //Need to do something about the errors?
+			   prog.report();
 		    }
 	    }
   

@@ -18,7 +18,6 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-
 void CalculateTransmission::init()
 {
   CompositeValidator<Workspace2D> *wsValidator = new CompositeValidator<Workspace2D>;
@@ -82,22 +81,28 @@ void CalculateTransmission::exec()
     declareProperty(new WorkspaceProperty<>("UnfittedData",outputWSName,Direction::Output));
     setProperty("UnfittedData",transmission);
   }
-
+  
   // Take a copy of this workspace for the fitting
   MatrixWorkspace_sptr logTransmission = this->extractSpectrum(boost::dynamic_pointer_cast<DataObjects::Workspace2D>(transmission),0);
+  
+ 
   // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
   std::vector<double> &Y = logTransmission->dataY(0);
   std::vector<double> &E = logTransmission->dataE(0);
+  m_progress= new Progress(this,0.1,0.7,Y.size());
   for (unsigned int i=0; i < Y.size(); ++i)
   {
     const double errorPerc = E[i]/Y[i];
     Y[i] = std::log10(Y[i]);
     E[i] = std::abs(errorPerc*Y[i]);
+     m_progress->report();
   }
- 
+  
+ // m_progress= new Progress(this,0.7,1.0,1);
   // Now fit this to a straight line
   MatrixWorkspace_sptr fit = this->fitToData(logTransmission);
-  
+ // m_progress->report();
+   
   setProperty("OutputWorkspace",fit);
 }
 
@@ -109,7 +114,7 @@ void CalculateTransmission::exec()
 API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index)
 {
   // Would be better to write an 'ExtractSingleSpectrum' algorithm for here, that returns a Workspace1D
-  IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
+  IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace",0.0,0.1);
   childAlg->setProperty<Workspace2D_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("StartSpectrum", index);
   childAlg->setProperty<int>("EndSpectrum", index);
@@ -142,7 +147,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Wo
 API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Fitting the experimental transmission curve");
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear");
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear",0.7,1.0);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   const double lambdaMin = getProperty("MinWavelength");
   const double lambdaMax = getProperty("MaxWavelength");
@@ -172,7 +177,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
     g_log.error("Unable to successfully fit the data");
     throw std::runtime_error("Unable to successfully fit the data");
   }
-  
+ 
   // Only get to here if successful
   MatrixWorkspace_sptr result = childAlg->getProperty("OutputWorkspace");
   // Need to transform back to 'unlogged'

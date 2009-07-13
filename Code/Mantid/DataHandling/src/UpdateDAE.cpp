@@ -57,13 +57,12 @@ void UpdateDAE::exec()
 
     int rate = getProperty("update_rate");
     rate *= 1000;// in milliseconds
-
-    for(;;)
+     for(;;)
     {
         loader->execute();
         thread->sleep(rate);
         interruption_point();
+		
     }
-
 }
 

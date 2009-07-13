@@ -17,7 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 
-Linear::Linear() : API::Algorithm(), m_minX(0), m_maxX(0)
+Linear::Linear() : API::Algorithm(), m_minX(0), m_maxX(0),m_progress(NULL)
 {}
 
 void Linear::init()
@@ -78,6 +78,10 @@ void Linear::exec()
   
   const bool isHistogram = inputWorkspace->isHistogramData();
   const int numPoints = m_maxX - m_minX;
+  
+  //m_progress=new Progress(this,0.0,1.0,3);
+
+  progress(0);
 
   // Create the X & E vectors required for the gsl call
   std::vector<double> XCen(numPoints), weights(numPoints);
@@ -95,6 +99,7 @@ void Linear::exec()
     //   doesn't take account of the errors.
     if ( noErrors && currentE ) noErrors = false;
   }
+     progress(0.3);
   
   // Call the gsl fitting function
   // The stride value of 1 reflects that fact that we want every element of out input vectors
@@ -111,6 +116,7 @@ void Linear::exec()
   {
     status = gsl_fit_wlinear(&XCen[0],stride,&weights[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
   }
+  progress(0.8);
   
   // Check that the fit succeeded
   std::string fitStatus = gsl_strerror(status);
@@ -147,7 +153,7 @@ void Linear::exec()
     if (err) g_log.warning() << "Problem in filling the output workspace: " << gsl_strerror(err) << std::endl;
   }
   setProperty("OutputWorkspace",outputWorkspace);
-  
+  progress(1);
   // Clean up
   delete c0;
   delete c1;

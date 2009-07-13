@@ -65,8 +65,7 @@ namespace Mantid
       {
         out_work = WorkspaceFactory::Instance().create(lhs);
       }
-
-      // Initialise the progress reporting object
+	       // Initialise the progress reporting object
       m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms());
       
       // There are now 4 possible scenarios, shown schematically here:
@@ -193,8 +192,7 @@ namespace Mantid
       
       // Now loop over the spectra of the left hand side calling the virtual function
       const int numHists = lhs->getNumberHistograms();
-
-			PARALLEL_FOR3(lhs,rhs,out)
+				PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
         out->dataX(i) = lhs->readX(i);
@@ -217,8 +215,7 @@ namespace Mantid
 
       // Now loop over the spectra of the left hand side calling the virtual function
       const int numHists = lhs->getNumberHistograms();
-
-			PARALLEL_FOR3(lhs,rhs,out)
+				PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
         out->dataX(i) = lhs->readX(i);
@@ -238,7 +235,6 @@ namespace Mantid
       // Now loop over the spectra of the left hand side pulling out the single value from each rhs 'spectrum'
       // and then calling the virtual function
       const int numHists = lhs->getNumberHistograms();
-
 			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
@@ -261,13 +257,13 @@ namespace Mantid
     {
       // Loop over the spectra calling the virtual function for each one
       const int numHists = lhs->getNumberHistograms();
-
-			PARALLEL_FOR3(lhs,rhs,out)
+	 			PARALLEL_FOR3(lhs,rhs,out)
       for (int i = 0; i < numHists; ++i)
       {
         out->dataX(i) = lhs->readX(i);
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));
         m_progress->report();
+		//progress(double(i/numHists));
       }      
     }
     

@@ -58,9 +58,9 @@ class DLLExport CalculateTransmission : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  CalculateTransmission() : API::Algorithm() {}
+  CalculateTransmission() : API::Algorithm(),m_progress(NULL){}
   /// Virtual destructor
-  virtual ~CalculateTransmission() {}
+  virtual ~CalculateTransmission() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "CalculateTransmission"; }
   /// Algorithm's version
@@ -78,7 +78,10 @@ private:
   API::MatrixWorkspace_sptr extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
-  
+   /// Progress reporting object
+  API::Progress *m_progress;
+ 
+   
 };
 
 } // namespace Algorithm

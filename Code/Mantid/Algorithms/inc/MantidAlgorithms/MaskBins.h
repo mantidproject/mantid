@@ -52,7 +52,7 @@ public:
   /// Constructor
   MaskBins();
   /// Virtual destructor
-  virtual ~MaskBins() {}
+  virtual ~MaskBins() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "MaskBins"; }
   /// Algorithm's version
@@ -70,6 +70,9 @@ private:
 
   double m_startX;                                   ///< The range start point
   double m_endX;                                     ///< The range end point
+       
+   /// Progress reporting
+   API::Progress* m_progress;
 
 };
 

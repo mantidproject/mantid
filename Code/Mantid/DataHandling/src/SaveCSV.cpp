@@ -44,6 +44,7 @@ namespace DataHandling
 DECLARE_ALGORITHM(SaveCSV)
 
 using namespace Kernel;
+using namespace API;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace;
 using API::MatrixWorkspace_sptr;
@@ -129,25 +130,28 @@ void SaveCSV::exec()
     const std::vector<double>& xValue = localworkspace->dataX();
     const std::vector<double>& yValue = localworkspace->dataY();
     const std::vector<double>& eValue = localworkspace->dataE();
-
+    Progress p(this,0,1,xValue.size());
     // write to file
-
+    
     for (int i = 0; i < (int)xValue.size(); i++)
     {
       outCSV_File << std::setw(15) << xValue[i] << m_separator << std::setw(15)
           << yValue[i] << m_separator << std::setw(15) << eValue[i]
           << m_lineSeparator;
+		  p.report();
     }
   }
   else if ( workspaceID.find("Workspace2D") != std::string::npos )
   {
-
+	 
+   
     const Workspace2D_sptr localworkspace = boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
 
     // Get info from 2D workspace
 
     const int numberOfHist = localworkspace->getNumberHistograms();
-
+    
+	
     // Add first x-axis line to output file
 
     {
@@ -161,8 +165,9 @@ void SaveCSV::exec()
       }
 
       outCSV_File << m_lineSeparator;
+	  progress(0.2);
     }
-
+    Progress p(this,0.2,1.0,2*numberOfHist);
     for (int i = 0; i < numberOfHist; i++)
     {
       // check if x-axis has changed. If yes print out new x-axis line
@@ -197,6 +202,7 @@ void SaveCSV::exec()
       }
 
       outCSV_File << m_lineSeparator;
+	  p.report();
     }
     // print out errors
 
@@ -213,7 +219,9 @@ void SaveCSV::exec()
         outCSV_File << std::setw(15) << eValue[j] << m_separator;
       }
       outCSV_File << m_lineSeparator;
+	   p.report();
     }
+
   }
   else
   {

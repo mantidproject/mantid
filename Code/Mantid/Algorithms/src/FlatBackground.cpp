@@ -44,15 +44,23 @@ void FlatBackground::exec()
   // Copy over all the data
   const int numHists = inputWS->getNumberHistograms();
   const int blocksize = inputWS->blocksize();
+ // Get the spectra under consideration
+  const std::vector<int> toFit = getProperty("SpectrumIndexList");
+ // Initialise the progress reporting object
+  m_progress = new Progress(this,0.0,0.3,numHists); 
+  PARALLEL_FOR2(inputWS,outputWS)
   for (int i=0; i < numHists; ++i)
   {
     outputWS->dataX(i) = inputWS->readX(i);
     outputWS->dataY(i) = inputWS->readY(i);
     outputWS->dataE(i) = inputWS->readE(i);
+	m_progress->report();
   }
-
-  // Get the spectra under consideration
-  const std::vector<int> toFit = getProperty("SpectrumIndexList");
+ 
+ // m_progress = new Progress(this,0.3,1.0,toFit.size()); 
+  
+  int toFitsize=toFit.size();
+  double prg=0.3;
   std::vector<int>::const_iterator specIt;
   // Now loop over the required spectra
   for (specIt = toFit.begin(); specIt != toFit.end(); ++specIt)
@@ -79,7 +87,9 @@ void FlatBackground::exec()
       if (Y[j] < 0.0) Y[j]=0;
       // Will do errors later...
     }
-
+	prg+=(0.7/toFitsize);
+	progress(double(prg));
+    // m_progress->report();
   } // Loop over spectra to be fitted
 
   // Assign the output workspace to its property

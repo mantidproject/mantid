@@ -64,9 +64,9 @@ public:
 	typedef std::tr1::unordered_map<int,int> spec2index_map;
 	#endif
   /// (Empty) Constructor
-  CrossCorrelate() : API::Algorithm() {}
+  CrossCorrelate() : API::Algorithm(),m_progress(NULL) {}
   /// Virtual destructor
-  virtual ~CrossCorrelate() {}
+  virtual ~CrossCorrelate() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "CrossCorrelate"; }
   /// Algorithm's version
@@ -83,6 +83,9 @@ private:
   spec2index_map index_map;
   /// Iterator for the spectra to index map
   spec2index_map::iterator index_map_it;
+
+  /// Progress reporting
+  API::Progress* m_progress;
 };
 
 

@@ -57,7 +57,7 @@ void RebinToWorkspace::exec()
     g_log.information("Unable to successfully run Rebin sub-algorithm");
     throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
   }
-  
+  progress(1);
   MatrixWorkspace_sptr ws = runRebin->getProperty("OutputWorkspace");
 
   setProperty("OutputWorkspace", ws);

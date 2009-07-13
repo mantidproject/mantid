@@ -22,6 +22,7 @@ namespace Algorithms
 DECLARE_ALGORITHM(CreateCalFileByNames)
 
 using namespace Kernel;
+using API::Progress;
 
 CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
 {
@@ -111,6 +112,7 @@ void CreateCalFileByNames::exec()
 	bool overwrite=groupingFileDoesExist(filename);
 
 	int number=0;
+	Progress prog(this,0.0,0.8,assemblies.size());
 	while(!assemblies.empty()) //Travel the tree from the instrument point
 	{
 		current=assemblies.front().first;
@@ -143,9 +145,11 @@ void CreateCalFileByNames::exec()
 				}
 			}
 		}
+		prog.report();
 	}
 	// Write the results in a file
 	saveGroupingFile(filename,overwrite);
+	progress(0.2);
 	return;
 }
 

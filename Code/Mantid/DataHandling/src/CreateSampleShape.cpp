@@ -44,5 +44,6 @@ void CreateSampleShape::exec()
   boost::shared_ptr<Geometry::Object> shape_sptr = sFactory.createShape(shapeXML);
 
   workspace->getSample()->setGeometry(shape_sptr);
+  progress(1);
 }
 

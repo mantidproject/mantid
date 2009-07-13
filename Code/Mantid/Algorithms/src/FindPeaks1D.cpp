@@ -61,8 +61,10 @@ void FindPeaks1D::exec()
   retrieveProperties();
   // Now run generalisedsecondDifference sub-algo
   generalisedSecondDifference();
+  progress(0.5);
   // Now find peaks in the vector
   analyseVector();
+  progress(0.5);
   // Assign output
   setProperty("PeaksList",peaks);
   return;
@@ -81,10 +83,10 @@ void FindPeaks1D::generalisedSecondDifference()
 	    throw;
 	  }
 	  second_diff_alg->setProperty("InputWorkspace",input);
-	  second_diff_alg->setProperty("z",smooth_iter);
-	  second_diff_alg->setProperty("m",smooth_npts);
-	  second_diff_alg->setProperty("spectra_min",spec_number);
-	  second_diff_alg->setProperty("spectra_max",spec_number);
+	  second_diff_alg->setProperty("Z",smooth_iter);
+	  second_diff_alg->setProperty("M",smooth_npts);
+	  second_diff_alg->setProperty("SpectraMin",spec_number);
+	  second_diff_alg->setProperty("SpectraMax",spec_number);
 
 	    try {
 	      second_diff_alg->execute();

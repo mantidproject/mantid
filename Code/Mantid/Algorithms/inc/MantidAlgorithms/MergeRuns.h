@@ -72,6 +72,9 @@ private:
   void intersectionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
   void inclusionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
   API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params);
+  /// Progress reporting
+  API::Progress* m_progress;
+
 
 };
 

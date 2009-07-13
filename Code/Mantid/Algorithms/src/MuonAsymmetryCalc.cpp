@@ -14,6 +14,7 @@ namespace Mantid
   {
 
    using namespace Kernel;
+   using API::Progress;
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(MuonAsymmetryCalc)
@@ -58,6 +59,7 @@ namespace Mantid
 	    	    
 	    //Calculate asymmetry for each time bin
 	    //F-aB / F+aB
+		Progress prog(this,0.0,1.0,inputWS->blocksize());
 	    for (int j = 0; j < inputWS->blocksize(); ++j)
 	    {
 		    double numerator = inputWS->dataY(forward)[j] - alpha * inputWS->dataY(backward)[j];
@@ -72,6 +74,7 @@ namespace Mantid
             double ratio = numerator && denominator? sqrt( pow(quadrature/numerator, 2) + pow(quadrature/denominator, 2)) : 0.;
 		    
 		    outputWS->dataE(0)[j] =  ratio * outputWS->dataY(0)[j];
+			prog.report();
 	    }
 	    
 	    //Copy the imput time bins on to the output

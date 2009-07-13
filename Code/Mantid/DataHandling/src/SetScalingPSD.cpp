@@ -115,9 +115,10 @@ namespace Algorithms
           getline(sFile,str); // skip title line
           int detIdLast=-10;
           Geometry:: V3D truPosLast,detPosLast;
-
+         
+		  Progress prog(this,0.0,0.5,detectorCount);
           // Now loop through lines, one for each detector/monitor. The latter are ignored.
-
+        
           while(getline(sFile,str))
           {
               if (str.empty() || str[0] == '#') continue;
@@ -168,6 +169,7 @@ namespace Algorithms
               truPosLast=truPos;
               posMap[detIndex]=shift;
               //
+			  prog.report();
           }
       }
       else if(scalingFile.find(".raw")!=std::string::npos || scalingFile.find(".RAW")!=std::string::npos )
@@ -184,6 +186,7 @@ namespace Algorithms
           }
           int detIdLast=-10;
           Geometry:: V3D truPosLast,detPosLast;
+		  Progress prog(this,0.0,0.5,detectorCount);
           for(int i=0;i<detectorCount;i++)
           {
               int detIndex=detID[i];
@@ -228,6 +231,7 @@ namespace Algorithms
               truPosLast=truepos[i];
               posMap[detIndex]=shift;
               //
+			  prog.report();
           }
       }
       movePos( m_workspace, posMap, scaleMap);
@@ -288,6 +292,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
 
   double scale,maxScale=-1e6,minScale=1e6,aveScale=0.0;
   int scaleCount=0;
+  //progress 50% here inside the for loop
+  double prog=0.5;
   // loop over detector (IComps)
   for(size_t id=0;id<m_vectDet.size();id++)
   {
@@ -347,6 +353,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
               pmap->addV3D(baseComp,"sca",V3D(1.0,it->second,1.0));
       }
       //
+	  prog+= double(1)/m_vectDet.size();
+	  progress(prog);
   }
   g_log.debug() << "Range of scaling factors is " << minScale << " to " << maxScale << "\n"
                 << "Average abs scaling fraction is " << aveScale/scaleCount << "\n";

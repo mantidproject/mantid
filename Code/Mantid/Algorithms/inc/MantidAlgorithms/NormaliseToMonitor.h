@@ -91,6 +91,8 @@ private:
   double m_integrationMin;
   /// The upper bound of the integration range
   double m_integrationMax;
+  /// Progress reporting
+  API::Progress* m_progress;
 
 };
 

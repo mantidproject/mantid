@@ -100,6 +100,8 @@ void CylinderAbsorption::exec()
   int iprogress_step = numHists / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;
+
+  Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
   for (int i = 0; i < numHists; ++i)
   {
@@ -139,11 +141,12 @@ void CylinderAbsorption::exec()
       interpolate(X, Y, isHist);
     }
 
-    if (i % iprogress_step == 0)
+  /*  if (i % iprogress_step == 0)
     {
       progress(double(i) / numHists);
       interruption_point();
-    }
+    }*/
+	prog.report();
 
   }
   g_log.information() << "Total number of elements in the integration was " << m_L1s.size() << std::endl;

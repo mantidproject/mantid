@@ -25,6 +25,7 @@ using API::Axis;
 using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
 using API::Algorithm;
+using API::Progress;
 
 /// The implementation of Jacobian
 class JacobianImpl: public Jacobian
@@ -442,9 +443,10 @@ void Fit1D::exec()
   double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
 
   // Standard least-squares used if derivative function defined otherwise simplex
-
+  Progress prog(this,0.0,1.0,maxInterations);
   if (isDerivDefined)
   {
+	  
     do
     {
       iter++;
@@ -454,6 +456,7 @@ void Fit1D::exec()
         break;
 
       status = gsl_multifit_test_delta(s->dx, s->x, 1e-4, 1e-4);
+	  prog.report();
     }
     while (status == GSL_CONTINUE && iter < maxInterations);
 
@@ -477,6 +480,7 @@ void Fit1D::exec()
 
       size = gsl_multimin_fminimizer_size(simplexMinimizer);
       status = gsl_multimin_test_size(size, 1e-2);
+	  prog.report();
     }
     while (status == GSL_CONTINUE && iter < maxInterations);
 

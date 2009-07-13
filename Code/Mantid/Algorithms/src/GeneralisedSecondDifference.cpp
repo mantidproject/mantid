@@ -78,12 +78,12 @@ void GeneralisedSecondDifference::exec()
 
 	if (spec_max>n_hists)
 	{
-		message << "Spectra_max "<< spec_max << " > number of histograms, Spectra_max reset to "<< (n_hists-1);
+		message << "SpectraMax "<< spec_max << " > number of histograms, SpectraMax reset to "<< (n_hists-1);
 		g_log.information(message.str());
 		message.str("");
 		spec_max=n_hists-1;
 	}
-
+ 	
 	// Get some more input fields
   	z=getProperty("Z");
   	m=getProperty("M");
@@ -98,7 +98,8 @@ void GeneralisedSecondDifference::exec()
   	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,n_specs,n_points+1,n_points);
 
 	const int nsteps=2*n_av+1;
-
+    //PARALLEL_FOR1(inputWS)
+    m_progress=new Progress(this,0.0,1.0,(spec_max-spec_min));
   	for (int i=spec_min;i<=spec_max;i++)
   	{
   		int out_index=i-spec_min;
@@ -124,6 +125,7 @@ void GeneralisedSecondDifference::exec()
   			err2=std::inner_product(itInE,itInE+nsteps,Cij2.begin(),0.0);
   			(*itOutE)=sqrt(err2);
   		}
+	   m_progress->report();
   	}
   	setProperty("OutputWorkspace",out);
 

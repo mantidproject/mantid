@@ -101,7 +101,12 @@ void ConvertUnits::exec()
 
   int iprogress_step = numberOfSpectra / 100;
   if (iprogress_step == 0) iprogress_step = 1;
+   //input and output workspaces are checked to ensure they suitable for multithreaded access.
+  
   // Loop over the histograms (detector spectra)
+  Progress prog(this,0.0,0.5,numberOfSpectra);  
+  //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
+  //PARALLEL_FOR2(inputWS, outputWS)
   for (int i = 0; i < numberOfSpectra; ++i) {
 
     // Take the bin width dependency out of the Y & E data
@@ -127,6 +132,7 @@ void ConvertUnits::exec()
         progress( double(i)/numberOfSpectra/2 );
         interruption_point();
     }
+	prog.report();
 
   }
 
@@ -205,14 +211,16 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
       {
         Histogram1D::RCtype xVals;
         xVals.access() = outputWS->dataX(0);
+		Progress prog(this,0.5,1.0,numberOfSpectra);
         for (int j = 1; j < numberOfSpectra; ++j)
         {
           WS2D->setX(j,xVals);
-          if ( j % 100 == 0)
+         /* if ( j % 100 == 0)
           {
               progress( 0.5 + double(j)/numberOfSpectra/2 );
               interruption_point();
-          }
+          }*/
+		  prog.report();
         }
       }
       return;
@@ -274,7 +282,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
-
+  Progress prog(this,0.5,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i) {
 
@@ -334,11 +342,12 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
       outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
     }
 
-    if ( i % 100 == 0)
+   /* if ( i % 100 == 0)
     {
         progress( 0.5 + double(i)/numberOfSpectra/2 );
         interruption_point();
-    }
+    }*/
+	prog.report();
   } // loop over spectra
 
   if (failedDetectorIndex != notFailed)

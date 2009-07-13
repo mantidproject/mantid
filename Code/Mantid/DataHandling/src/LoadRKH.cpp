@@ -117,6 +117,7 @@ void LoadRKH::exec()
   //Now stream sits at the first line of data 
   fileline = "";
   std::vector<double> columnOne, ydata, errdata;
+  Progress prog(this,0.0,1.0,readEnd);
   for( int index = 1; index <= readEnd; ++index )
   {
     getline(file, fileline);
@@ -127,6 +128,7 @@ void LoadRKH::exec()
     columnOne.push_back(x);
     ydata.push_back(y);
     errdata.push_back(yerr);
+	prog.report();
   }
   file.close();
 

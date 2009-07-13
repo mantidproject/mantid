@@ -58,6 +58,8 @@ namespace Mantid
 
       int progress_step = histnumber / 100;
       if (progress_step == 0) progress_step = 1;
+	 // PARALLEL_FOR2(inputW,outputW)
+	  Progress prog(this,0.0,1.0,histnumber);
       for (int hist=0; hist <  histnumber;++hist)
       {
         // get const references to input Workspace arrays (no copying)
@@ -100,11 +102,12 @@ namespace Mantid
           this->propagateMasks(inputW,outputW,hist);
         }
         
-        if (hist % progress_step == 0)
+       /* if (hist % progress_step == 0)
         {
           progress(double(hist)/histnumber);
           interruption_point();
-        }
+        }*/
+        prog.report();
       }
       outputW->isDistribution(dist);
 

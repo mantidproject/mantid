@@ -104,7 +104,7 @@ void MaskDetectors::exec()
   
   // Get a reference to the spectra-detector map to get hold of detector ID's
   const SpectraDetectorMap& specMap = WS->spectraMap();
-  
+  double prog=0.0;
   for (it = indexList.begin(); it != indexList.end(); ++it)
   {
     if (!detsMasked)
@@ -124,6 +124,10 @@ void MaskDetectors::exec()
     // Zero the workspace spectra (data and errors, not X values)
     WS->dataY(*it).assign(vectorSize,0.0);
     WS->dataE(*it).assign(vectorSize,0.0);
+
+	prog+=(double( 1)/indexList.size());
+//	g_log.error()<<" progress = "<<prog<<std::endl;
+	progress(prog);
   }
 
 }

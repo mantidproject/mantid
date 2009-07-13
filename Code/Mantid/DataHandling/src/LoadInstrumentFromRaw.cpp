@@ -83,6 +83,8 @@ void LoadInstrumentFromRaw::exec()
   Geometry::ObjComponent *source = new Geometry::ObjComponent("Source",instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
+  
+  progress(0.5);
   double l1;
   // If user has provided an L1, use that
   if ( ! Kernel::ConfigService::Instance().getValue("instrument.L1", l1) )
@@ -103,7 +105,7 @@ void LoadInstrumentFromRaw::exec()
    // Is ut01 (=phi) present? Sometimes an array is present but has wrong values e.g.all 1.0 or all 2.0
    bool phiPresent = iraw.i_use>0 && phi[0]!= 1.0 && phi[0] !=2.0; 
 
-
+  double prog=0.5;
   for (int i = 0; i < numDetector; ++i)
   {
     // Create a new detector. Instrument will take ownership of pointer so no need to delete.
@@ -121,7 +123,11 @@ void LoadInstrumentFromRaw::exec()
     detector->setID(detID[i]);
     instrument->add(detector);
     instrument->markAsDetector(detector);
-  }
+	prog+=(0.5/numDetector); 
+	progress(prog);
+  }  
+   
+
 
   // Now mark the up the monitors
   const int numMonitors = iraw.i_mon;     // The number of monitors

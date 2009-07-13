@@ -16,10 +16,10 @@ using namespace Kernel;
 using namespace API;
 
 /// Default constructor
-MergeRuns::MergeRuns() : Algorithm() {}
+MergeRuns::MergeRuns() : Algorithm(),m_progress(NULL) {}
 
 /// Destructor
-MergeRuns::~MergeRuns() {}
+MergeRuns::~MergeRuns() {if(m_progress) delete m_progress;m_progress=NULL;}
 
 /// Initialisation method
 void MergeRuns::init()
@@ -51,6 +51,8 @@ void MergeRuns::exec()
   std::list<MatrixWorkspace_sptr>::iterator it = inWS.begin();
   // Take the first input workspace as the first argument to the addition
   MatrixWorkspace_sptr outWS = inWS.front();
+  int n=inWS.size()-1;
+  m_progress=new Progress(this,0.0,1.0,n);
   // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
   for (++it; it != inWS.end(); ++it)
   {
@@ -72,7 +74,10 @@ void MergeRuns::exec()
 
     // Add the current workspace to the total
     outWS = outWS + addee;
+	m_progress->report();
   }
+ // progress(++i/inWS.size()-1);
+  
 
   // Set the final workspace to the output property
   setProperty("OutputWorkspace",outWS);

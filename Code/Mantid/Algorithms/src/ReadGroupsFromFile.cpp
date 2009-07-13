@@ -87,6 +87,7 @@ void ReadGroupsFromFile::exec()
 	const std::string su=getProperty("ShowUnselected");
 	bool showunselected=(!su.compare("True"));
 	bool success=false;
+	
 	for (int i=0;i<nHist;i++)
 	{
 		int spec=specAxis->spectraNo(i);
@@ -111,9 +112,11 @@ void ReadGroupsFromFile::exec()
 		}
 		else
 			localWorkspace->dataY(i)[0]=static_cast<double>(((*it).second).first);
-		if (!success) success=true; //At least one detector is found in the cal file
+		if (!success) success=true; //At least one detector is found in the cal file 
+       
 	}
-
+	progress(1);
+ 
 	calibration.clear();
 	if (!success) //Do some cleanup
 	{
@@ -146,6 +149,7 @@ DataObjects::Workspace2D_sptr ReadGroupsFromFile::loadEmptyInstrument(const std:
 	{
 		g_log.error("Unable to successfully run LoadEmptyInstrument sub-algorithm");
 	}
+	progress(0.3);
 	// Get back the output workspace
 	return loadInst->getProperty("OutputWorkspace");
 }
@@ -171,6 +175,7 @@ void ReadGroupsFromFile::readGroupingFile(const std::string& filename)
 	    calibration[udet]=std::make_pair<int,int>(group,sel);
 	  }
 	  grFile.close();
+	  progress(0.7);
 	  return;
 }
 

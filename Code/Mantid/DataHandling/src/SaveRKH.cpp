@@ -93,11 +93,12 @@ void SaveRKH::exec()
     const std::vector<double> & edata = inputWS->dataE(0);
 
     assert( (int)xdata.size() == noDataPoints + 1);
-
+    Progress prg(this,0.0,1.0,noDataPoints);
     for( int i = 0; i < noDataPoints; ++i )
     {
       outRKH << "     " << std::fixed << std::setprecision(5) << (xdata[i] + xdata[i + 1])/2.0 << "    " << std::scientific << std::setprecision(6) << ydata[i] << "    " 
               << std::scientific << std::setprecision(6) << edata[i] << "\n"; 
+      prg.report();
     }
   }
   else
@@ -122,12 +123,14 @@ void SaveRKH::exec()
            << " 0         0         0         0\n"
            << " 3 (F12.5,2E16.6)\n";
     //The x data in this workspace is arbitrary, the file should have the spectrum number in the x column
+	Progress prg(this,0.0,1.0,noHist);
    for( int index = 0; index < noHist; ++index )
    {
      const std::vector<double> & ydata = inputWS->dataY(index);
      const std::vector<double> & edata = inputWS->dataE(index);
      outRKH << "     " << std::fixed << std::setprecision(5) << (double)(index + 1) << "    " << std::scientific << std::setprecision(6) << ydata[0] << "    " 
               << std::scientific << std::setprecision(6) << edata[0] << "\n"; 
+	 prg.report();
    }
   }
   

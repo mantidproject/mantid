@@ -55,7 +55,7 @@ public:
   /// Constructor
   FindPeaks();
   /// Virtual destructor
-  virtual ~FindPeaks() {}
+  virtual ~FindPeaks() {if(m_progress) delete m_progress; m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "FindPeaks"; }
   /// Algorithm's version
@@ -80,6 +80,8 @@ private:
   
   /// Storage of the peak data
   API::ITableWorkspace_sptr m_peaks;
+    /// Progress reporting
+      API::Progress* m_progress;
 
 };
 

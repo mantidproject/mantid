@@ -150,11 +150,15 @@ namespace Mantid
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
           localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+		  Progress prog(this,0.0,1.0,m_numberOfSpectra);
           for (int i = 0; i < m_numberOfSpectra; ++i)
+		  {
               localWorkspace->getAxis(1)->spectraNo(i)= i+1;
+			  prog.report();
+		  }
           populateInstrumentParameters(localWorkspace);
           setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          return;
+		  return;
       }
 
       float* timeChannels = new float[lengthIn];
@@ -190,11 +194,12 @@ namespace Mantid
 	  {
 		  setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
 	  }
-   
+      //Progress prog(this,0.0,1.0,histTotal);
       //if (dhdr.d_comp == 0) throw std::runtime_error("Oops..");
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       //for (int period = 0; period < m_numberOfPeriods; ++period) {
-	  //g_log.debug()<<"Number of Periods=  "<<m_numberOfPeriods<<std::endl;
+	  
+	 
 	  for (int period = 0; period < m_numberOfPeriods; ++period) {
 
         if ( period > 0 )
@@ -221,6 +226,9 @@ namespace Mantid
 		 }
          isisRaw->skipData(period*(m_numberOfSpectra+1));
         int counter = 0;
+		double prog=0.0;
+		
+
 		//g_log.debug()<<"number Of Spectra =  "<<m_numberOfSpectra<<"  Spectra Min = "<<m_spec_min<<"  Spectra Max= "<< m_spec_max<< std::endl;
         for (int i = 1; i <= m_numberOfSpectra; ++i)
         {
@@ -228,26 +236,29 @@ namespace Mantid
             if ((i >= m_spec_min && i < m_spec_max) ||
                 (m_list && find(m_spec_list.begin(),m_spec_list.end(),i) != m_spec_list.end()))
             {
-                isisRaw->readData(histToRead);
-                // Copy the data into the workspace vector, discarding the 1st entry, which is rubbish
-                // But note that the last (overflow) bin is kept
-                MantidVec& Y = localWorkspace->dataY(counter);
-                Y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + lengthIn);
-                // Fill the vector for the errors, containing sqrt(count)
-                MantidVec& E = localWorkspace->dataE(counter);
-                std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-                // Set the X vector pointer and spectrum number
-                localWorkspace->setX(counter, timeChannelsVec);
-                localWorkspace->getAxis(1)->spectraNo(counter)= i;
-                // NOTE: Raw numbers go straight into the workspace
-                //     - no account taken of bin widths/units etc.
-                ++counter;
-               if (++histCurrent % 100 == 0)
-				{
-					//g_log.debug() << "histCurrent=   "<<double(histCurrent)/histTotal<< std::endl;
-					progress(double(histCurrent)/histTotal);
+				isisRaw->readData(histToRead);
+				// Copy the data into the workspace vector, discarding the 1st entry, which is rubbish
+				// But note that the last (overflow) bin is kept
+				MantidVec& Y = localWorkspace->dataY(counter);
+				Y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + lengthIn);
+				// Fill the vector for the errors, containing sqrt(count)
+				MantidVec& E = localWorkspace->dataE(counter);
+				std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+				// Set the X vector pointer and spectrum number
+				localWorkspace->setX(counter, timeChannelsVec);
+				localWorkspace->getAxis(1)->spectraNo(counter)= i;
+				// NOTE: Raw numbers go straight into the workspace
+				//     - no account taken of bin widths/units etc.
+				++counter;
+				if(m_numberOfPeriods==1)
+				{				
+					if (++histCurrent % 100 == 0)
+					{
+					  progress(double(histCurrent)/histTotal);
+					}
+					interruption_point();
+					//prog.report();
 				}
-                interruption_point();
             }
             else
             {
@@ -309,7 +320,10 @@ namespace Mantid
 			
 			if(sptrWSGrp)sptrWSGrp->add(wsName);
 			setProperty(outws,boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
-			//g_log.debug()<<"setting property  "<< wsName<<std::endl;
+		// progress for workspace groups 
+			//g_log.debug()<<"progress is  = " << double (period) /(m_numberOfPeriods-1)<<std::endl;
+			prog+=( double (period) /(m_numberOfPeriods-1));
+			progress(prog);
 		}
 			
 		

@@ -91,12 +91,14 @@ namespace DataHandling
 
       //Write out whole range
       bool xMin(m_Xmin > 0.0), xMax(m_Xmax > 0.0);
+	  Progress porg(this,0.0,1.0,97);
       if( !xMin && !xMax )
       {
 	for( int hNum = 2; hNum < 100; ++hNum )
 	{
 	  writeVTKPiece(outVTP, localWorkspace->dataX(hNum), localWorkspace->dataY(hNum), 
 			localWorkspace->dataE(hNum), hNum);
+	  porg.report();
       	}
       }
       else
@@ -125,6 +127,7 @@ namespace DataHandling
 	  assert( (int)xValue.size() == (int)yValue.size() + 1 );
 	  
 	  writeVTKPiece(outVTP, xValue, yValue, errors, hNum);
+	  porg.report();
 	}
       }
     }

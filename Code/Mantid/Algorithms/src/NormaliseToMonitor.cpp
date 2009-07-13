@@ -24,11 +24,11 @@ using DataObjects::Workspace2D_const_sptr;
 NormaliseToMonitor::NormaliseToMonitor() :
   Algorithm(),                                                //base class constructor
   m_monitorIndex(-1), m_integrationMin( EMPTY_DBL() ),//EMPTY_DBL() is a tag to say that the value hasn't been set
-  m_integrationMax( EMPTY_DBL() )
+  m_integrationMax( EMPTY_DBL() ),m_progress(NULL)
 {}
 
 // Destructor
-NormaliseToMonitor::~NormaliseToMonitor() {}
+NormaliseToMonitor::~NormaliseToMonitor() {if(m_progress) delete m_progress;m_progress=NULL;}
 
 void NormaliseToMonitor::init()
 {
@@ -66,7 +66,9 @@ void NormaliseToMonitor::exec()
   this->checkProperties();
   //see if the normalisation with integration properties are set, throws std::runtime_error if a property is invalid
   const bool integrate = setIntegrateProps();
-  
+  //
+  //m_progress= new Progress(this,0.0,1.0,1);
+
     // Get the input workspace
   const Workspace2D_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS;
@@ -76,6 +78,8 @@ void NormaliseToMonitor::exec()
   if ( integrate )
   {
     outputWS = this->normaliseByIntegratedCount(inputWS);
+	//m_progress->report();
+	progress(1);
   }
   else
   {
@@ -88,6 +92,8 @@ void NormaliseToMonitor::exec()
 
     const double monitorSum = std::accumulate(monY.begin(), monY.end(), 0.0);
     const double range = monX.back() - monX.front();
+	MatrixWorkspace::iterator wi(*monitor);
+    Progress prog(this,0.0,1.0,monitor->size());
     for(MatrixWorkspace::iterator wi(*monitor); wi != wi.end(); ++wi)
     {
         LocatedDataRef tr = *wi;
@@ -98,9 +104,11 @@ void NormaliseToMonitor::exec()
         // division below, instead of infinities or nan
         if (tr.Y() == 0) tr.Y() = DBL_MAX;
         if (tr.E() == 0) tr.E() = DBL_MAX;
+		prog.report();
     }
 
     outputWS = inputWS / monitor;
+	//m_progress->report();
     outputWS->isDistribution(false);
   }
 

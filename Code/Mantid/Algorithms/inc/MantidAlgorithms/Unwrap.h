@@ -73,6 +73,8 @@ private:
   double m_Tmin; ///< The start of the time-of-flight frame
   double m_Tmax; ///< The end of the time-of-flight frame
   unsigned int m_XSize; ///< The size of the X vectors in the input workspace
+  /// Progress reporting
+  API::Progress* m_progress;
 };
 
 } // namespace Algorithm

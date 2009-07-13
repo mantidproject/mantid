@@ -23,7 +23,6 @@ CropWorkspace::CropWorkspace() :
 
 /// Destructor
 CropWorkspace::~CropWorkspace() {}
-
 void CropWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input),
@@ -81,7 +80,7 @@ void CropWorkspace::exec()
     const MantidVec& oldX = m_inputWorkspace->readX(m_minSpec);
     newX.access().assign(oldX.begin()+m_minX,oldX.begin()+m_maxX);
   }
-
+  Progress prog(this,0.0,1.0,(m_maxSpec-m_minSpec));
   // Loop over the required spectra, copying in the desired bins
   for (int i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
   {
@@ -110,6 +109,8 @@ void CropWorkspace::exec()
           outputWorkspace->maskBin(j,maskIndex-m_minX,(*it).second);
       }
     }
+	//progress(double(i/(m_maxSpec+1)));
+	prog.report();
   }
 
   setProperty("OutputWorkspace", outputWorkspace);

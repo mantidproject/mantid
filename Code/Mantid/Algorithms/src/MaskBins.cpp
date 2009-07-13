@@ -16,7 +16,7 @@ DECLARE_ALGORITHM(MaskBins)
 using namespace Kernel;
 using namespace API;
 
-MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
+MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0),m_progress(NULL) {}
 
 void MaskBins::init()
 {
@@ -66,20 +66,26 @@ void MaskBins::exec()
   }
   
   const int numHists = inputWS->getNumberHistograms();
+  m_progress=new Progress(this,0.0,1.0,numHists); 
+  //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
+  //PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numHists; ++i)
   {
     // Copy over the data
-    const MantidVec& X = outputWS->dataX(i) = inputWS->readX(i);
+    outputWS->dataX(i) = inputWS->readX(i);
+    const MantidVec& X = outputWS->dataX(i);
     outputWS->dataY(i) = inputWS->readY(i);
     outputWS->dataE(i) = inputWS->readE(i);
     
-    if (!commonBins) this->findIndices(X,startBin,endBin);
-    
+	MantidVec::difference_type startBinLoop(startBin),endBinLoop(endBin);
+    if (!commonBins) this->findIndices(X,startBinLoop,endBinLoop);
+
     // Loop over masking each bin in the range
-    for (int j = startBin; j < endBin; ++j)
+    for (int j = startBinLoop; j < endBinLoop; ++j)
     {
       outputWS->maskBin(i,j);
     }
+	  m_progress->report();
   }
  
 }

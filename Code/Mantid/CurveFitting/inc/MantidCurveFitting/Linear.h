@@ -64,7 +64,7 @@ public:
   /// Constructor
   Linear();
   /// Virtual destructor
-  virtual ~Linear() {}
+  virtual ~Linear() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
   virtual const std::string name() const { return "Linear"; }
   /// Algorithm's version
@@ -84,6 +84,8 @@ private:
   int m_minX;
   /// The X bin to finish the fitting at
   int m_maxX;
+   /// Progress reporting object
+  API::Progress *m_progress;
 
 };
 

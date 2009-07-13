@@ -58,7 +58,8 @@ void NormaliseByCurrent::exec()
 //  	  }
 	  const int nspec=inputWS->getNumberHistograms()-1;
 	  const int nbin=inputWS->blocksize()-1;
-	  for (int i=nspec;i>=0;--i)
+	  m_progress =new Progress(this,0.0,1.0,nspec);
+	   for (int i=nspec;i>=0;--i)
 	  {
 		  std::vector<double>& refY=inputWS->dataY(i);
 		  std::vector<double>& refE=inputWS->dataE(i);
@@ -67,6 +68,7 @@ void NormaliseByCurrent::exec()
 			 refY[j]*=charge;
 			 refE[j]*=charge;
 		  }
+		  m_progress->report();
 	  }
     }
   else

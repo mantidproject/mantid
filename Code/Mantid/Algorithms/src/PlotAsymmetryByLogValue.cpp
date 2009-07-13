@@ -124,7 +124,7 @@ namespace Mantid
             IAlgorithm_sptr loadNexus = createSubAlgorithm("LoadMuonNexus");
             loadNexus->setPropertyValue("Filename", fn.str());
             loadNexus->setPropertyValue("OutputWorkspace","tmp"+fnn.str());
-            loadNexus->setPropertyValue("auto_group","1");
+            loadNexus->setPropertyValue("AutoGroup","1");
             loadNexus->execute();
 
             std::string wsProp = "OutputWorkspace";
@@ -211,8 +211,8 @@ namespace Mantid
             integr->setPropertyValue("OutputWorkspace","tmp");
             if (setX)
             {
-                integr->setProperty("Range_lower",startX);
-                integr->setProperty("Range_upper",endX);
+                integr->setProperty("RangeLower",startX);
+                integr->setProperty("RangeUpper",endX);
             }
             integr->execute();
             MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
@@ -228,8 +228,8 @@ namespace Mantid
             integr->setPropertyValue("OutputWorkspace","tmp");
             if (setX)
             {
-                integr->setProperty("Range_lower",startX);
-                integr->setProperty("Range_upper",endX);
+                integr->setProperty("RangeLower",startX);
+                integr->setProperty("RangeUpper",endX);
             }
             integr->execute();
             MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
@@ -290,8 +290,8 @@ namespace Mantid
             integr->setPropertyValue("OutputWorkspace","tmp");
             if (setX)
             {
-                integr->setProperty("Range_lower",startX);
-                integr->setProperty("Range_upper",endX);
+                integr->setProperty("RangeLower",startX);
+                integr->setProperty("RangeUpper",endX);
             }
             integr->execute();
             MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
@@ -307,8 +307,8 @@ namespace Mantid
             integr->setPropertyValue("OutputWorkspace","tmp");
             if (setX)
             {
-                integr->setProperty("Range_lower",startX);
-                integr->setProperty("Range_upper",endX);
+                integr->setProperty("RangeLower",startX);
+                integr->setProperty("RangeUpper",endX);
             }
             integr->execute();
             MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
@@ -318,8 +318,8 @@ namespace Mantid
             integr->setPropertyValue("OutputWorkspace","tmp");
             if (setX)
             {
-                integr->setProperty("Range_lower",startX);
-                integr->setProperty("Range_upper",endX);
+                integr->setProperty("RangeLower",startX);
+                integr->setProperty("RangeUpper",endX);
             }
             integr->execute();
             MatrixWorkspace_sptr intWS_green = integr->getProperty("OutputWorkspace");

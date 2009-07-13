@@ -17,12 +17,12 @@ using namespace Kernel;
 using namespace API;
 
 /// Default constructor
-Unwrap::Unwrap()
+Unwrap::Unwrap():m_progress(NULL)
 {}
 
 /// Destructor
 Unwrap::~Unwrap()
-{}
+{if(m_progress) delete m_progress;m_progress=NULL;}
 
 /// Initialisation method
 void Unwrap::init()
@@ -78,7 +78,7 @@ void Unwrap::exec()
 
   // This will be used later to store the maximum number of bin BOUNDARIES for the rebinning
   unsigned int max_bins = 0;
-
+  m_progress=new Progress(this,0.0,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i)
   {
@@ -107,6 +107,7 @@ void Unwrap::exec()
       const unsigned int XLen = tempWS->dataX(i).size();
       if ( XLen > max_bins ) max_bins = XLen;
     }
+	m_progress->report();
   } // loop over spectra
 
   // Calculate the minimum and maximum possible wavelengths for the rebinning
