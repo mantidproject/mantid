@@ -148,6 +148,9 @@ QString PythonScripting::errorMsg()
 	if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
 	{
 	  int errline = getFirstLineNumber() + toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
+	  // Update the line marker as this will not get done by the tracing function
+	  // since we have not begun execution yet
+	  d_parent->scriptingInformation(errline);
 	  msg = QString("Error on line ") + QString::number(errline) + ": " +
 	    toString(PyObject_GetAttrString(value, "msg"), true);
  	  Py_DECREF(exception);

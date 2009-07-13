@@ -15220,7 +15220,6 @@ void ApplicationWindow::runPythonScript(const QString & code)
   ScriptEdit *script = new ScriptEdit(scriptEnv, 0);
   connect(script, SIGNAL(outputMessage(const QString &)), this, SLOT(scriptPrint(const QString &)));
   connect(script, SIGNAL(outputError(const QString &)), this, SLOT(scriptPrint(const QString &)));
-  connect(this, SIGNAL(scriptingLineChange(int)), script, SLOT(updateLineMarker(int)));
   script->importCodeBlock(code);
   d_user_script_running = true;
   script->executeAll();
