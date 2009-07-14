@@ -158,6 +158,14 @@ API::ITableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsN
 }
 
 /**
+ * Return a pointer to the specified workspace group
+ */
+API::WorkspaceGroup* FrameworkManager::getWorkspaceGroup(const std::string& group_name)
+{
+  return dynamic_cast<API::WorkspaceGroup*>( API::FrameworkManager::Instance().getWorkspace(group_name) );
+}
+
+/**
  * Deletes a specified workspace.
  * \param wsName :: The name of the workspace to delete.
  * \return Boolean result.

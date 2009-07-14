@@ -51,6 +51,8 @@ public:
   void add(const std::string& wsName);
   /// Returns the workspaces that make up this group
   const std::vector<std::string>& getNames() const { return m_wsNames; }
+  /// Return the number of entries within the group
+  int getNumberOfEntries() const { return static_cast<int>(m_wsNames.size()); }
   void print();
   void removeAll();
   void remove(const std::string& name);

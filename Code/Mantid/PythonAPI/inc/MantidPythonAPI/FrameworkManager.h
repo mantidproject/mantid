@@ -22,6 +22,7 @@ namespace API
   class Algorithm;
   class MatrixWorkspace;
   class ITableWorkspace;
+  class WorkspaceGroup;
 }
 
 namespace PythonAPI
@@ -91,6 +92,9 @@ public:
 	// Returns a pointer to the TableWorkspace requested
 	API::ITableWorkspace* getTableWorkspace(const std::string& wsName);
 
+	// Returns a pointer to the Workspace group requested
+	API::WorkspaceGroup* getWorkspaceGroup(const std::string& group_name);
+
 	// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);
 
@@ -99,6 +103,9 @@ public:
 	
 	// Return the list of currently available workspace names
 	std::vector<std::string> getWorkspaceNames() const;
+
+	// Return a list of the workspace groups available
+	std::vector<std::string> getWorkspaceGroupNames() const;
 
 	// Create the simple Python API for Mantid
 	void createPythonSimpleAPI(bool);

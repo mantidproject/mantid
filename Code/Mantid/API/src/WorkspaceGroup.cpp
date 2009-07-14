@@ -40,10 +40,15 @@ void WorkspaceGroup::remove(const std::string& name)
   for (itr = m_wsNames.begin(); itr != m_wsNames.end(); itr++)
   {
     if ((*itr) == name)
+    {
       m_wsNames.erase(itr);
-    else
-      g_log.warning("Workspace  " + name + "not found in workspacegroup");
+      return;
+    }
   }
+  // Getting to here means we have gone through the entire loop and not
+  // found a match
+  g_log.warning("Workspace  " + name + "not found in workspacegroup");
+  
 }
 
 /// Print the names of all the workspaces in this group to the logger (at information level)

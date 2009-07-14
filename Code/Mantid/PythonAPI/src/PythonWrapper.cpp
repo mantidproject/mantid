@@ -28,6 +28,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/IInstrument.h"
@@ -382,18 +383,6 @@ namespace PythonAPI
     PyObject* py_self;
   };
 
-//   /// A wrapper for IObjComponent
-//   struct Mantid_Geometry_IObjComponent_Wrapper : Mantid::Geometry::IObjComponent
-//   {
-//     Mantid::Geometry::V3D getPos() const
-//     {
-//       return call_method<Mantid::Geometry::V3D>(py_self, "getPos");
-//     }
-
-//     PyObject* py_self;
-//   };
-
-
   ///A wrapper for IDetector
   struct Mantid_Geometry_IDetector_Wrapper: Mantid::Geometry::IDetector
   {
@@ -555,6 +544,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   /// A pointer to a TableWorkspace object
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::ITableWorkspace )
 
+  /// A pointer to a WorkspaceGroup object
+  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::WorkspaceGroup )
+
   /// A pointer to an IInstrument object
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::IInstrument )
     
@@ -652,6 +644,14 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getString", Mantid::PythonAPI::ITableWorkspace_GetString, return_value_policy< copy_non_const_reference >())
      ;
 
+   // Workspace group class
+   class_< Mantid::API::WorkspaceGroup, boost::noncopyable >("WorkspaceGroup", no_init)
+     .def("size", &Mantid::API::WorkspaceGroup::getNumberOfEntries)
+     .def("getNames", &Mantid::API::WorkspaceGroup::getNames, return_value_policy< copy_const_reference >())
+     .def("add", &Mantid::API::WorkspaceGroup::add)
+     .def("remove", &Mantid::API::WorkspaceGroup::remove)
+     ;
+
    //Framework Class
    class_< Mantid::PythonAPI::FrameworkManager, boost::noncopyable  >("FrameworkManager", init<  >())
      .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
@@ -672,6 +672,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
      .def("getMatrixWorkspace", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspace, return_value_policy< reference_existing_object >())
      .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, return_value_policy< reference_existing_object >())
+     .def("getWorkspaceGroup", &Mantid::PythonAPI::FrameworkManager::getWorkspaceGroup, return_value_policy< reference_existing_object >())
      .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
      .def("getAlgorithmNames", &Mantid::PythonAPI::FrameworkManager::getAlgorithmNames)
      .def("getWorkspaceNames", &Mantid::PythonAPI::FrameworkManager::getWorkspaceNames)
