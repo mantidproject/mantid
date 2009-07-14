@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Property.h"
 #include <climits>
@@ -94,6 +95,9 @@ namespace Mantid
 
 	  /// run LoadNexusProcessed
 	  void runLoadNexusProcessed();
+
+      /// run LoadSNSNexus
+	  void runLoadSNSNexus();
 
       ///a flag int value that indicates a value that wasn't set
       static const int unSetInt = INT_MAX-15;

@@ -104,6 +104,10 @@ namespace Mantid
             //virtual bool isStandard()const = 0;
             /// Returns the absolute path to the object
             std::string path()const{return m_path;}
+            /// Returns the name of the object
+            std::string name()const;
+            /// Attributes
+            NXAttributes attributes;
         protected:
             void getData(void* data);
             void getSlab(void* data, int start[], int size[]);
@@ -113,6 +117,7 @@ namespace Mantid
             bool m_open;            ///< Set to true if the object has been open
         private:
             NXObject():m_fileID(){} ///< Private default constructor
+            void getAttributes();
         };
 
         /** Abstract base class for a Nexus data set. A typical use include:
@@ -160,7 +165,7 @@ namespace Mantid
             *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
             *            The rank of the data must be 4
             */
-            virtual void load(int i=-1,int j=-1,int k=-1,int l=-1) = 0;
+            virtual void load(int i=-1,int j=-1,int k=-1,int l=-1){};
         private:
             NXInfo m_info;  ///< Holds the data info
         };
@@ -441,7 +446,7 @@ namespace Mantid
              *   @return The new object
              */
             template<class T>
-            NXDataSetTyped<T> openNXData(const std::string& name)const
+            NXDataSetTyped<T> openNXDataSet(const std::string& name)const
             {
                 NXDataSetTyped<T> data(*this,name);
                 data.open();
@@ -451,22 +456,24 @@ namespace Mantid
             /**  Creates and opens an integer dataset
              *   @param name The name of the dataset
              */
-            NXInt openNXInt(const std::string& name)const{return openNXData<int>(name);}
+            NXInt openNXInt(const std::string& name)const{return openNXDataSet<int>(name);}
             /**  Creates and opens a float dataset
              *   @param name The name of the dataset
              */
-            NXFloat openNXFloat(const std::string& name)const{return openNXData<float>(name);}
+            NXFloat openNXFloat(const std::string& name)const{return openNXDataSet<float>(name);}
             /**  Creates and opens a double dataset
              *   @param name The name of the dataset
              */
-            NXDouble openNXDouble(const std::string& name)const{return openNXData<double>(name);}
+            NXDouble openNXDouble(const std::string& name)const{return openNXDataSet<double>(name);}
             /**  Creates and opens a char dataset
              *   @param name The name of the dataset
              */
-            NXChar openNXChar(const std::string& name)const{return openNXData<char>(name);}
+            NXChar openNXChar(const std::string& name)const{return openNXDataSet<char>(name);}
 
             /// Returns a list of all classes (or groups) in this NXClass
             std::vector<NXClassInfo>& groups()const{return *m_groups.get();}
+            /// Returns a list of all datasets in this NXClass
+            std::vector<NXInfo>& datasets()const{return *m_datasets.get();}
 
         protected:
             boost::shared_ptr<std::vector<NXClassInfo> > m_groups; ///< Holds info about the child NXClasses
@@ -555,9 +562,32 @@ namespace Mantid
             *   @param parent The parent Nexus class. In terms of HDF it is the group containing the NXClass.
             *   @param name The name of the NXClass relative to its parent
             */
-            NXData(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
+            NXData(const NXClass& parent,const std::string& name);
             /// Nexus class id
             std::string NX_class()const{return "NXdata";}
+            /**  Opens the dataset within this NXData with signal=1 attribute.
+             */
+            template<typename T>
+            NXDataSetTyped<T> openData()
+            {
+                for(std::vector<NXInfo>::const_iterator it=datasets().begin();it!=datasets().end();it++)
+                {
+                    NXDataSet dset(*this,it->nxname);
+                    dset.open();
+                    if (dset.attributes("signal") == "1") 
+                    {
+                        return openNXDataSet<T>(it->nxname);
+                    }
+                }
+                throw std::runtime_error("NXData does not seem to contain the data");
+                return NXDataSetTyped<T>(*this,"");
+            }
+            /// Opens data of double type
+            NXDouble openDoubleData(){return openData<double>();}
+            /// Opens data of float type
+            NXFloat openFloatData(){return openData<float>();}
+            /// Opens data of int type
+            NXInt openIntData(){return openData<int>();}
         };
 
         /**  Implements NXdetector Nexus class.

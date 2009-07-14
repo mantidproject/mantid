@@ -8,7 +8,9 @@
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NeXusUtils.h"
+#include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -46,7 +48,7 @@ namespace NeXus
     exts.push_back("xml");
     declareProperty("Filename","",new FileValidator(exts),
       "Name of the Nexus file to read, as a full or relative path");
-    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output), 
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), 
       "The name of the workspace to be created as the output. For\n"
       "multiperiod files, one workspace will be generated for each period");
 
@@ -108,8 +110,18 @@ namespace NeXus
     }
     else
     {
-        g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
-        throw Exception::FileError("Unable to read File:" , m_filename);
+        NXRoot root(m_filename);
+        NXEntry entry = root.openEntry(root.groups().front().nxname);
+        try
+        {
+            NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
+        }
+        catch(...)
+        {
+            g_log.error("File " + m_filename + " is a currently unsupported type of NeXus file");
+            throw Exception::FileError("Unable to read File:" , m_filename);
+        }
+        runLoadSNSNexus();
     }
     return;
   }
@@ -146,7 +158,7 @@ namespace NeXus
       if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
       // Get pointer to the workspace created
       m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
-      setProperty<Workspace2D_sptr>(outputWorkspace,m_localWorkspace);
+      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
       //
       // copy pointers to any new output workspaces created by alg LoadMuonNexus to alg LoadNexus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
@@ -207,7 +219,7 @@ namespace NeXus
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadNexusProcessed sub-algorithm");
       // Get pointer to the workspace created
       m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
-      setProperty<Workspace2D_sptr>(outputWorkspace,m_localWorkspace);
+      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
       //
       // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
@@ -268,7 +280,7 @@ namespace NeXus
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
       // Get pointer to the workspace created
       m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
-      setProperty<Workspace2D_sptr>(outputWorkspace,m_localWorkspace);
+      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
       //
       // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
@@ -296,6 +308,61 @@ namespace NeXus
       }
   }
 
+  void LoadNexus::runLoadSNSNexus()
+  {
+      IAlgorithm_sptr loadNexusPro = createSubAlgorithm("LoadSNSNexus",0.,1.);
+      // Pass through the same input filename
+      loadNexusPro->setPropertyValue("Filename",m_filename);
+      // Set the workspace property
+      std::string outputWorkspace="OutputWorkspace";
+      loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
+      //Get the array passed in the spectrum_list, if an empty array was passed use the default 
+      std::vector<int> specList = getProperty("SpectrumList");
+      if ( !specList.empty() )
+         loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
+      //
+      int specMax = getProperty("SpectrumMax");
+      if ( specMax != unSetInt )
+      {
+         loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
+         loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
+      }
+
+      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      try
+      {
+        loadNexusPro->execute();
+      }
+      catch (std::runtime_error&)
+      {
+        g_log.error("Unable to successfully run LoadSNSNexus sub-algorithm");
+      }
+      if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadSNSNexus sub-algorithm");
+      // Get pointer to the workspace created
+      Workspace_sptr localWorkspace = loadNexusPro->getProperty(outputWorkspace); 
+      setProperty(outputWorkspace,localWorkspace);
+      //
+      // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
+      // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
+      // until name not found.
+      //
+
+      WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(m_localWorkspace);
+      if (wsGroup)
+      {
+          const std::vector<std::string>& wsNames = wsGroup->getNames();
+          for(size_t i=0;i<wsNames.size();i++)
+          {
+              std::stringstream suffix;
+              suffix << '_' << (i+1);
+              std::string opWS = outputWorkspace + suffix.str();
+              std::string WSName = m_workspace + suffix.str();
+              Workspace_sptr localWorkspace = loadNexusPro->getProperty(opWS); 
+              declareProperty(new WorkspaceProperty<Workspace>(opWS,WSName,Direction::Output));
+              setProperty(opWS,localWorkspace);
+          }
+      }
+  }
 
 } // namespace NeXus
 } // namespace Mantid

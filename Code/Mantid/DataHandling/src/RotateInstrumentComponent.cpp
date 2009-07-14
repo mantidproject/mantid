@@ -50,6 +50,8 @@ void RotateInstrumentComponent::exec()
   const double Z = getProperty("Z");
   const double angle = getProperty("Angle");
 
+  if (X + Y + Z == 0.0) throw std::invalid_argument("The rotation axis must not be a zero vector");
+
   boost::shared_ptr<IInstrument> inst = WS->getInstrument();
   boost::shared_ptr<IComponent> comp;
 
