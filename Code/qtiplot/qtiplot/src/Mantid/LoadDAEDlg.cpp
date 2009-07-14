@@ -34,7 +34,13 @@ m_updateInterval(0)
 	
 	QHBoxLayout *bottomRowLayout = new QHBoxLayout;
 	QPushButton *loadButton = new QPushButton(tr("Load"));
+	loadButton->setDefault(true);
 	QPushButton *cancelButton = new QPushButton(tr("Cancel"));
+	QPushButton *help = new QPushButton("?");
+	help->setMaximumWidth(25);
+	connect(help, SIGNAL(clicked()), this, SLOT(helpClicked()));
+	
+	bottomRowLayout->addWidget(help);
 	bottomRowLayout->addStretch();
 	bottomRowLayout->addWidget(cancelButton);
 	bottomRowLayout->addWidget(loadButton);
@@ -134,4 +140,9 @@ void loadDAEDlg::updateIntervalEntered(const QString & text )
         updateCheck->setCheckState(Qt::Checked);
     else
         updateCheck->setCheckState(Qt::Unchecked);
+}
+
+void loadDAEDlg::helpClicked()
+{
+  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/LoadDAE")));
 }
