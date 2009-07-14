@@ -51,7 +51,7 @@ void ReplaceSpecialValues::retrieveProperties()
   m_performBigCheck = !checkifPropertyEmpty(m_bigThreshold);
   if (!(m_performNaNCheck || m_performInfiniteCheck || m_performBigCheck))
   {
-    throw std::invalid_argument("No value was defined for NaN or inifinity");
+    throw std::invalid_argument("No value was defined for NaN, infinity or BigValueThreshold");
   }
 }
 

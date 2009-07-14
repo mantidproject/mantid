@@ -37,6 +37,10 @@ public:
 		TS_ASSERT_EQUALS(extractString(*C),"-1 cx 0\n");
 		Cone     *K=dynamic_cast<Cone*>(A->createSurface("Cone"));
 		TS_ASSERT_EQUALS(extractString(*K),"-1  kx 0 0\n");
+		delete P;
+		delete B;
+		delete C;
+		delete K;
 	}
 
 	void testCreateSurfaceID(){
@@ -50,6 +54,10 @@ public:
 		TS_ASSERT_EQUALS(extractString(*C),"-1 cx 0\n");
 		Cone     *K=dynamic_cast<Cone*>(A->createSurfaceID("k"));
 		TS_ASSERT_EQUALS(extractString(*K),"-1  kx 0 0\n");
+		delete P;
+		delete B;
+		delete C;
+		delete K;
 	}
 
 	void testProcessLine(){
@@ -71,6 +79,10 @@ public:
 		Cone tK;
 		tK.setSurface("k/x 1.0 1.0 1.0 1.0");
 		TS_ASSERT_EQUALS(extractString(*K),extractString(tK));
+		delete P;
+		delete S;
+		delete C;
+		delete K;
 	}
 	
 private:

@@ -57,7 +57,7 @@ std::string Mantid::Kernel::getPathToExecutable()
   std::string execpath("");
   const size_t LEN(1024);
   char pBuf[LEN];
-// The linux function returns and int, the Windows & Mac ones an unsigned type
+// The linux function returns an int, the Windows & Mac ones an unsigned type
 #ifndef __linux__
   unsigned 
 #endif

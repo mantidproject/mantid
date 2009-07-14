@@ -12,7 +12,7 @@
 
 #include <fstream>
 
-
+#include "Poco/AutoPtr.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"
@@ -102,7 +102,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   bool defaultAlgebra = false; // if no <algebra> element then use default algebra
 
   // get algebra string
-  NodeList* pNL_algebra = pElem->getElementsByTagName("algebra");
+  Poco::AutoPtr<NodeList> pNL_algebra = pElem->getElementsByTagName("algebra");
   std::string algebraFromUser;
   if ( pNL_algebra->length() == 0 )
   {
@@ -119,7 +119,6 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
                     << "Maximum one allowed. Therefore empty shape is returned.";
     return retVal;
   }
-  pNL_algebra->release();
 
   std::map<std::string,std::string> idMatching; // match id given to a shape by the user to 
                                                 // id understandable by Mantid code 
@@ -280,7 +279,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
 	}
 
     // get bounding box string
-    NodeList* pNL_boundingBox = pElem->getElementsByTagName("bounding-box");
+    Poco::AutoPtr<NodeList> pNL_boundingBox = pElem->getElementsByTagName("bounding-box");
     if ( pNL_boundingBox->length() != 1)  // should probably throw an error if more than 1 bounding box is defined...
       return retVal;
     pNL_boundingBox->release();
@@ -822,14 +821,13 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 Poco::XML::Element* ShapeFactory::getShapeElement(Poco::XML::Element* pElem, const std::string& name)
 {
   // check if this shape element contain an element with name specified by the 2nd function argument
-  NodeList* pNL = pElem->getElementsByTagName(name);
+  Poco::AutoPtr<NodeList> pNL = pElem->getElementsByTagName(name);
   if ( pNL->length() != 1)
   {
     throw std::invalid_argument("XML element: <" + pElem->tagName() +
       "> must contain exactly one sub-element with name: <" + name + ">.");
   }
-  Element* retVal = static_cast<Element*>(pNL->item(0)); 
-  pNL->release();
+  Element* retVal = static_cast<Element*>(pNL->item(0));
   return retVal;
 }
 

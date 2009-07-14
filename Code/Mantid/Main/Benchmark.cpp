@@ -113,8 +113,8 @@ void Benchmark::RunPlusTest(int detectorCount, int timeBinCount)
   IAlgorithm* alg = FrameworkManager::Instance().createAlgorithm("Plus", "",1);
 
   //alg.initialize();
-  alg->setPropertyValue("InputWorkspace_1","test_in11");
-  alg->setPropertyValue("InputWorkspace_2","test_in12");    
+  alg->setPropertyValue("LHSWorkspace","test_in11");
+  alg->setPropertyValue("RHSWorkspace","test_in12");    
   alg->setPropertyValue("OutputWorkspace","test_out1");
   clock_t start = clock();
   alg->execute();
