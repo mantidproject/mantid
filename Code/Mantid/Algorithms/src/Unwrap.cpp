@@ -75,6 +75,8 @@ void Unwrap::exec()
 
   // Need a new workspace. Will just be used temporarily until the data is rebinned.
   MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create(m_inputWS,numberOfSpectra,m_XSize,m_XSize-1);
+  // Set the correct X unit on the output workspace
+  tempWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
   // This will be used later to store the maximum number of bin BOUNDARIES for the rebinning
   unsigned int max_bins = 0;
@@ -107,20 +109,24 @@ void Unwrap::exec()
       const unsigned int XLen = tempWS->dataX(i).size();
       if ( XLen > max_bins ) max_bins = XLen;
     }
-	m_progress->report();
+    m_progress->report();
   } // loop over spectra
 
-  // Calculate the minimum and maximum possible wavelengths for the rebinning
-  const double minLambda = (m_conversionConstant * m_Tmin) / m_LRef;
-  const double maxLambda = (m_conversionConstant * m_Tmax) / m_LRef;
-  // Rebin the data into common wavelength bins
-  MatrixWorkspace_sptr outputWS = this->rebin( tempWS, minLambda, maxLambda, max_bins-1);
+  // Only rebin if more that just a single monitor spectrum in the input WS
+  if ( numberOfSpectra > 1 )
+  {
+    // Calculate the minimum and maximum possible wavelengths for the rebinning
+    const double minLambda = (m_conversionConstant * m_Tmin) / m_LRef;
+    const double maxLambda = (m_conversionConstant * m_Tmax) / m_LRef;
+    // Rebin the data into common wavelength bins
+    MatrixWorkspace_sptr outputWS = this->rebin( tempWS, minLambda, maxLambda, max_bins-1);
 
-  g_log.debug() << "Rebinned workspace has " << outputWS->getNumberHistograms() << " histograms of "
+    g_log.debug() << "Rebinned workspace has " << outputWS->getNumberHistograms() << " histograms of "
                 << outputWS->blocksize() << " bins each" << std::endl;
-  // Set the correct X unit on the output workspace
-  outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-  setProperty("OutputWorkspace",outputWS);
+    setProperty("OutputWorkspace",outputWS);
+  }
+  else setProperty("OutputWorkspace",tempWS);
+
   m_inputWS.reset();
 }
 
