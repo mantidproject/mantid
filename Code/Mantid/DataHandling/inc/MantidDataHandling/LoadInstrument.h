@@ -192,7 +192,7 @@ namespace API
       };
 
       /// Map to store positions of parent components in spherical coordinates
-      std::map<const Geometry::ComponentID,SphVec> m_tempPosHolder;
+      std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
     };
 
   } // namespace DataHandling
