@@ -56,18 +56,18 @@ libDirList = [uppath,cwdpath ]
 cflags = []
 dirList = []
 cppPaths = []
+lpts = []
 
 boost_path = ''
 poco_path = ''
 fortran_type=''
-third_party=''
+third_party = os.path.abspath('../Third_Party/')
 opencascade_path = ''
 python_path = ''
 
 #Get paths
 if os.name == 'nt': 
 	print "* COMMENCING WINDOWS BUILD *"
-	third_party = os.path.abspath('../Third_Party/')
 #	boost_path = 'C:/Program Files/boost/boost_1_34_1/boost'
 	boost_path = third_party + '/include/'
 	
@@ -180,7 +180,7 @@ if os.name == 'nt':
 			cflags.extend(['/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
 			cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
 			env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
-else :
+elif platform.system() == 'Linux':
 	if not rpmBuild:
 		cppPaths.append(poco_path + 'include')
 		cppPaths.append(poco_path +'Util')
@@ -196,38 +196,26 @@ else :
 	cppPaths.append(boost_path)
 	cppPaths.append(USRINCLUDE)
 	cppPaths.append(USRLOCALINCLUDE)
-	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
-	#OpenCASCADE Include
-	cppPaths.append(opencascade_path + '/inc')
 	
 	libDirList.append(USRLIB)
-	#OpenCASCADE lib
-	libDirList.append(opencascade_path + '/lib64')
-	libDirList.append(opencascade_path + '/lib')	
+elif platform.system() == 'Darwin':
+	cppPaths.append(third_party+'/include')
+	cppPaths.append(third_party+'/include/muParser')
+	libDirList.append(third_party+'/lib/mac')
 	
-	libList.append('python' + sys.version[0:3])
+if os.name == 'posix':
+	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
+	#libList.append('python' + sys.version[0:3])
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
-	libList.append('PocoNet')
 	libList.append('boost_python'+boost_append)
 	libList.append('boost_regex'+boost_append)
 	libList.append('boost_signals'+boost_append)
 	libList.append('boost_date_time'+boost_append)
 	libList.append('NeXus')
 	libList.append('muparser')
-	libList.append('GL')
-	libList.append('GLU')
-	
-	#OpenCASCADE Libraries
-	libList.append('TKBO')
-	libList.append('TKPrim')
-	libList.append('TKBRep')
-	libList.append('TKernel')
-	libList.append('TKTopAlgo')
-	libList.append('TKMath')
-	libList.append('TKMesh')
-	libList.append('TKG2d')
+	libList.append('gsl')
 
 	# OpenMP support library which doesn't get linked by default for some reason
 	# Add the library if it is available on the system
@@ -235,12 +223,14 @@ else :
 	if conf.CheckLib('gomp'):
 	   print 'Found OpenMP runtime library, adding to linker list'
 	   libList.append('gomp')
+	   cflags.append('-fopenmp')
 	conf.Finish()
 
+	cflags.append(['-g','-Wall'])
 	if int(debug) :
-	    cflags.append(['-g','-O0','-Wall','-fopenmp'])
+	    cflags.append('-O0')
 	else :
-	    cflags.append(['-g','-O3','-Wall','-fopenmp'])
+	    cflags.append('-O3')
 
 	env.Append(LINKFLAGS=['-g'])
 	f=os.popen('gsl-config --cflags')
@@ -284,8 +274,6 @@ MantidBuild.collectIncludes('.', 'includes')
 libDirList.append(os.path.abspath('./Bin/Shared'))
 
 if os.name != 'nt':	
-    lpts.append('-Wl,-rpath,'+opencascade_path + '/lib64')
-    lpts.append('-Wl,-rpath,'+opencascade_path + '/lib')
     if rpmBuild :
 	lpts.append('-Wl,-rpath,'+MANTIDLIB)
 	lpts.append('-Wl,-rpath,'+MANTIDPLUGINS)
@@ -318,7 +306,6 @@ subProjs.append('Algorithms')
 subProjs.append('DataHandling')
 subProjs.append('Nexus')
 subProjs.append('PythonAPI')
-#subProjs.append('Services')
 
 # we want to link libraries in the reverse order we build them
 shared_libraries = []
@@ -372,7 +359,7 @@ skiptest=ARGUMENTS.get('skiptest',0)
 if not int(skiptest):
 	print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
 		# tests
-	if os.name == 'nt':
+	if platform.system() != 'Linux':
 		ret = SConscript(['Build/Tests/SConscript'])
 	else:
 		cxxtestgen = env.WhereIs('cxxtestgen.py')

@@ -1,6 +1,7 @@
 #For MantidGeometry
 
 import os
+import platform
 import MantidBuild
 
 #GET LIST OF CPPS
@@ -12,9 +13,27 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_GEOMETRY',1)])
+
+#For Windows, OpenCascade stuff is still in the main SConstruct
+if platform.system() == 'Darwin':
+   myenv.Append(CPPDEFINES=['HAVE_IOSTREAM','HAVE_LIMITS','HAVE_IOMANIP'])
+   myenv.Append(CPPPATH=['../../Third_Party/include/OpenCascade','/usr/X11/include/GL'])
+   myenv.Append(MYLIBDIRLIST='/usr/X11/lib')
+elif platform.system() == 'Linux':
+   opencascade_path='/opt/OpenCASCADE'
+   myenv.Append(CPPPATH=opencascade_path + '/inc')
+   myenv.Append(MYLIBDIRLIST=opencascade_path + '/lib64')
+   myenv.Append(MYLIBDIRLIST=opencascade_path + '/lib')
+   myenv.Append(LINKFLAGS='-Wl,-rpath,'+opencascade_path+'/lib64')
+   myenv.Append(LINKFLAGS='-Wl,-rpath,'+opencascade_path+'/lib')
+
+if os.name == 'posix':
+   myenv.Append(MYLIBLIST=['GL','GLU'])
+   myenv.Append(MYLIBLIST=['TKBO','TKPrim','TKBRep','TKernel','TKTopAlgo','TKMath','TKMesh','TKG2d'])
+
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE
-shared = myenv.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB='lib/MantidGeometry.pdb')
+shared = myenv.SharedLibrary('lib/MantidGeometry', listCpps, LIBS=myenv['MYLIBLIST'], LIBPATH=myenv['MYLIBDIRLIST'], PDB='lib/MantidGeometry.pdb')
 retval = { 'shared': shared, 'sharedobjs' : listSharedObjects, 'libs': [ 'MantidGeometry' ] }
 Return('retval')
