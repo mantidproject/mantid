@@ -282,7 +282,6 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
     Poco::AutoPtr<NodeList> pNL_boundingBox = pElem->getElementsByTagName("bounding-box");
     if ( pNL_boundingBox->length() != 1)  // should probably throw an error if more than 1 bounding box is defined...
       return retVal;
-    pNL_boundingBox->release();
 
     double xmin = atof( ((getShapeElement(pElem, "x-min"))->getAttribute("val")).c_str() );
     double ymin = atof( ((getShapeElement(pElem, "y-min"))->getAttribute("val")).c_str() );

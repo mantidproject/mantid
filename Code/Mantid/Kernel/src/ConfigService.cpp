@@ -42,8 +42,10 @@ namespace Mantid
 			//Register the SignalChannel with the Poco logging factory
 			Poco::LoggingFactory::defaultFactory().registerChannelClass("SignalChannel",new Poco::Instantiator<Poco::SignalChannel, Poco::Channel>);
 
-			//Determine how we are running mantid
-			if( Mantid::Kernel::getPathToExecutable().rfind("python") != std::string::npos )
+			// Determine how we are running mantid. If within python we want to use the current directory rather than that
+			// where the executable (i.e. python in this case) resides.
+			// RJT 15/7/09: Leading 'p' removed from seach string becaus it's capital on the Mac, but not on Linux
+			if( Mantid::Kernel::getPathToExecutable().rfind("ython") != std::string::npos )
 			{
 				m_strBaseDir = Poco::Path::current();
 			}
