@@ -91,7 +91,7 @@ namespace NeXus
         std::vector<int> getSpectraSelection();
 
         /// Read in an entry (period).
-        API::Workspace_sptr loadEntry(NXEntry entry,int period);
+        API::Workspace_sptr loadEntry(NXEntry entry,int period, double progress_start, double progress_end);
 
         /// Personal wrapper for sqrt to allow msvs to compile
         static double dblSqrt(double in);

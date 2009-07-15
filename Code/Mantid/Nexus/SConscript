@@ -8,7 +8,7 @@ codeFolder = os.path.abspath('./src')
 listCpps = MantidBuild.getCPPFiles(codeFolder)#Import environment
 Import('env')
 myenv = env.Clone()
-myenv.Append(CPPDEFINES=[('IN_MANTID_NEXUS',1)])
+myenv.Append(CPPDEFINES=[('IN_MANTID_NEXUS',1),'NOMINMAX']])
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
 #BUILD CODE

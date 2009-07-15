@@ -347,7 +347,7 @@ namespace NeXus
       // until name not found.
       //
 
-      WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(m_localWorkspace);
+      WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(localWorkspace);
       if (wsGroup)
       {
           const std::vector<std::string>& wsNames = wsGroup->getNames();

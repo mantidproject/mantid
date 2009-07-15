@@ -76,12 +76,17 @@ void LoadSNSNexus::exec()
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(sptrWSGrp));
     }
 
+    double progress_step = 1.0/nPeriods;
     int period = 0;
+    // Loop over entries loading each entry into a separate workspace
     for(std::vector<NXClassInfo>::const_iterator it=root.groups().begin();it!=root.groups().end();it++)
     if (it->nxclass == "NXentry")
     {
         ++period;
-        Workspace_sptr ws = loadEntry(root.openEntry(it->nxname),period);
+        double progress_start = (period-1)*progress_step;
+        double progress_end = progress_start + progress_step;
+
+        Workspace_sptr ws = loadEntry(root.openEntry(it->nxname),period,progress_start,progress_end);
 
         // Save the workspace property
         if (nPeriods == 1)
@@ -104,50 +109,81 @@ void LoadSNSNexus::exec()
 /** Loads one entry from an SNS Nexus file
  *  @param entry The entry to read the data from
  *  @param period The period of the data
+ *  @param progress_start The starting progress
+ *  @param progress_end The ending progress
  *  @return A shared pointer to the created workspace
  */
-API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period)
+API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double progress_start, double progress_end)
 {
     // To keep sorted bank names
     std::set<std::string,CompareBanks> banks;
+    std::set<std::string> monitors;
 
-    // Find out the workspace dimensions
+    // Calculate the workspace dimensions
     int nSpectra = 0;
     int nBins = 0;
+    
     for(std::vector<NXClassInfo>::const_iterator it=entry.groups().begin();it!=entry.groups().end();it++)
-    if (it->nxclass == "NXdata")
+    if (it->nxclass == "NXdata") // Count detectors
     {
             NXData dataGroup = entry.openNXData(it->nxname);
             NXFloat data = dataGroup.openFloatData();
             if (data.rank() != 3) throw std::runtime_error("SNS NXdata is expected to be a 3D array");
             if (nBins == 0) nBins = data.dim2();
             nSpectra += data.dim0() * data.dim1();
-            banks.insert(it->nxname);
+            banks.insert(it->nxname); // sort the bank names
+    }
+    else if (it->nxclass == "NXmonitor") // Count monitors
+    {
+        nSpectra += 1;
+        monitors.insert(it->nxname);
     }
 
+    // Create the output workspace
     DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins+1,nBins));
     ws->setTitle(entry.name());
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
+    // Init loaded spectra counter
     int spec = 0;
-    Progress progress(this,0,1,nSpectra);
+
+    // Load monitor readings
+    for(std::set<std::string>::const_iterator it=monitors.begin();it!=monitors.end();it++)
+    {
+        NXData dataGroup = entry.openNXData(*it);
+        NXFloat timeBins = dataGroup.openNXFloat("time_of_flight");
+        timeBins.load();
+        MantidVec& X = ws->dataX(spec);
+        X.assign(timeBins(),timeBins()+nBins+1);
+        NXFloat data = dataGroup.openFloatData();
+        data.load();
+        MantidVec& Y = ws->dataY(spec);
+        Y.assign(data(),data()+nBins);
+        MantidVec& E = ws->dataE(spec);
+        std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+        spec++;
+    }
+
+    int specData = spec;
+
+    // Load detector readings
+    Progress progress(this,progress_start,progress_end,nSpectra);
     for(std::set<std::string,CompareBanks>::const_iterator it=banks.begin();it!=banks.end();it++)
     {
         NXData dataGroup = entry.openNXData(*it);
-        if (spec == 0)
+        if (spec == specData)
         {
             NXFloat timeBins = dataGroup.openNXFloat("time_of_flight");
             timeBins.load();
-            MantidVec& X = ws->dataX(0);
-            for(int i=0;i<X.size();i++)
-                X[i] = timeBins[i];
+            MantidVec& X = ws->dataX(spec);
+            X.assign(timeBins(),timeBins()+nBins+1);
         }
         NXFloat data = dataGroup.openFloatData();
         for(int i = 0;i<data.dim0();i++)
             for(int j = 0; j < data.dim1(); j++)
             {
-                if (spec > 0) ws->dataX(spec) = ws->dataX(0);
+                if (spec > specData) ws->dataX(spec) = ws->dataX(specData);
                 data.load(i,j);
                 ////-- simulate input --
                 //for(int k=0;k<nBins;k++)
@@ -161,6 +197,14 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period)
                 progress.report();
             }
     }
+
+    boost::shared_array<int> spectra(new int[nSpectra]);
+    for(int i=0;i<nSpectra;i++)
+    {
+        spectra[i] = i + 1;
+        ws->getAxis(1)->spectraNo(i)= i+1;
+    }
+    ws->mutableSpectraMap().populate(spectra.get(),spectra.get(),nSpectra);
 
     return ws;
 }
