@@ -81,16 +81,21 @@ void FFT::exec()
     std::string transform = getProperty("Transform");
 
     DataObjects::Workspace2D_sptr outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D",2,xSize,ySize));
+        (WorkspaceFactory::Instance().create("Workspace2D",3,xSize,ySize));
 
     double df = 1.0 / (dx * (xSize - 1));
+
+    // shift == true means that the zero on the x axis is assumed to be in the data centre 
+    // at point with index i = ySize/2. If shift == false the zero is at i = 0
+    bool shift = true;
 
     if (transform == "Forward")
     {
         for(int i=0;i<ySize;i++)
         {
-            data[2*i] = inWS->dataY(iReal)[i];
-            data[2*i+1] = isComplex? inWS->dataY(iImag)[i] : 0.;
+            int j = shift? (ySize/2 + i) % ySize : i; 
+            data[2*i] = inWS->dataY(iReal)[j];
+            data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
         }
 
         gsl_fft_complex_forward (data.get(), 1, ySize, wavetable, workspace);
@@ -98,12 +103,15 @@ void FFT::exec()
         {
             int j = (ySize/2 + i) % ySize;
             outWS->dataX(0)[i] = df*(-ySize/2 + i);
-            outWS->dataY(0)[i] = data[2*j]; // real part
-            outWS->dataY(1)[i] = data[2*j+1]; // imaginary part
+            double re = data[2*j];
+            double im = data[2*j+1];
+            outWS->dataY(0)[i] = re; // real part
+            outWS->dataY(1)[i] = im; // imaginary part
+            outWS->dataY(2)[i] = sqrt(re*re + im*im); // modulus
         }
         if (xSize == ySize + 1) outWS->dataX(0)[ySize] = outWS->dataX(0)[ySize - 1] + df;
     }
-    else
+    else // Backward
     {
         for(int i=0;i<ySize;i++)
         {
@@ -114,18 +122,24 @@ void FFT::exec()
         gsl_fft_complex_backward(data.get(), 1, ySize, wavetable, workspace);
         for(int i=0;i<ySize;i++)
         {
-            outWS->dataX(0)[i] = df*i;
-            outWS->dataY(0)[i] = data[2*i]; // real part
-            outWS->dataY(1)[i] = data[2*i+1]; // imaginary part
+            double x = df*i;
+            if (shift) x -= df*ySize/2;
+            outWS->dataX(0)[i] = x;
+            int j = shift? (ySize/2 + i) % ySize : i; 
+            double re = data[2*j]/ySize;
+            double im = data[2*j+1]/ySize;
+            outWS->dataY(0)[i] = re; // real part
+            outWS->dataY(1)[i] = im; // imaginary part
+            outWS->dataY(2)[i] = sqrt(re*re + im*im); // modulus
         }
+        if (xSize == ySize + 1) outWS->dataX(0)[ySize] = outWS->dataX(0)[ySize - 1] + df;
     }
 
     gsl_fft_complex_wavetable_free (wavetable);
     gsl_fft_complex_workspace_free (workspace);
-        
-        
 
     outWS->dataX(1) = outWS->dataX(0);
+    outWS->dataX(2) = outWS->dataX(0);
 
     setProperty("OutputWorkspace",outWS);
 
