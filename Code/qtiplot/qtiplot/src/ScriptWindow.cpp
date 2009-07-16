@@ -496,6 +496,13 @@ void ScriptWindow::setEditEnabled(bool toggle)
 OutputTextArea::OutputTextArea(QWidget * parent, const char * name) : QTextEdit(parent, name)
 {
   setReadOnly(true);
+  setLineWrapMode(QTextEdit::FixedColumnWidth);
+  setLineWrapColumnOrWidth(105);
+  setAutoFormatting(QTextEdit::AutoNone);
+  // Change to fix width font so that table formatting isn't screwed up
+  QFont f("Andale Mono");
+  f.setPointSize(8);
+  setCurrentFont(f);
 }
 
 void OutputTextArea::contextMenuEvent(QContextMenuEvent *e)

@@ -104,7 +104,20 @@ public:
     while( getline(is, line) && line.empty() ) 
     {
     }
+    
+    TS_ASSERT_EQUALS(line, std::string("def numberRows(descr, fw):"))
+    while( getline(is, line) && !line.empty() ) 
+    {
+    }
+
+    getline(is, line);
+    TS_ASSERT_EQUALS(line, std::string("def createParamTable(param_list, dialog):"))
+    while( getline(is, line) && !line.empty() ) 
+    {
+    }
+
     modline = "def mtdGlobalHelp():";
+    getline(is, line);
     getline(is, line);
     TS_ASSERT_EQUALS(line, modline);
 

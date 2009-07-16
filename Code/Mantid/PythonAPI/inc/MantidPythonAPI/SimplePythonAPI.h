@@ -56,8 +56,10 @@ class DLLExport SimplePythonAPI
   /// Typedef a vector of a pair of strings for help commands
   typedef std::vector<std::pair<std::string, std::string> > IndexVector;
 
-  ///Public methods
+  /// Public methods
+  /// Create the simple API module
   static void createModule(bool gui);
+  /// Create and return the full-qualified path name for the module
   static std::string getModuleName(); 
   
   private:
@@ -79,13 +81,16 @@ class DLLExport SimplePythonAPI
   /// Creates a help string for the given algorithm
   static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog);
   /// Writes the given help strings to the Python module
-  static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings);
+  static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings, 
+				const std::map<std::string, std::set<std::string> >& categories);
   /// Convert EOL characters to their string representation
   static std::string convertEOLToString(const std::string & value);
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
   static std::string removeCharacters(const std::string & value, const std::string & cs = "", bool eol_to_space = false);
   /// Converts windows style paths to forward-slash paths
   static std::string convertPathToUnix(const std::string & path);
+  /// A split function that mimics Python's split function
+  static std::vector<std::string> split(const std::string & str, const std::string & delim = " ");
 
   ///Functor for use with std::sort to put the properties that do not
   ///have valid values first

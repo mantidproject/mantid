@@ -3,8 +3,11 @@
 //-----------------------------
 #include "MantidKernel/System.h"
 #include "Poco/Path.h"
+#include "boost/shared_ptr.hpp"
 #include <climits>
 #include <cfloat>
+#include <typeinfo>
+#include <map>
 
 // Need OS defined functions
 #ifdef _WIN32
@@ -19,6 +22,20 @@
 #elif defined __APPLE__
   #include <mach-o/dyld.h>
 #endif
+
+// MG 16/07/09: Some forward declarations of things from API. I need this so
+// that the typeid function in getUnmangledTypeName knows about them
+// This way I don't need to actually include the headers and I don't
+// introduce unwanted dependencies
+namespace Mantid
+{
+  namespace API
+  {
+    class Workspace;
+    class MatrixWorkspace;
+    class ITableWorkspace;
+  }
+}
 
 /**
  * Return what we consider to be an empty integer
@@ -152,4 +169,43 @@ bool Mantid::Kernel::isNetworkDrive(const std::string & path)
   // Not yet implemented for the mac
   return false;
 #endif
+}
+
+/**
+ * Get the unmangled name of the given typestring for some common types that we use. Note that
+ * this is just a lookup and NOT an unmangling algorithm
+ * @param A pointer to the type_info object for this type
+ * @returns An unmangled version of the name
+ */
+std::string  Mantid::Kernel::getUnmangledTypeName(const std::type_info& type)
+{
+  // Compile a lookup table. This is a static local variable that
+  // will get initialized when the function is first used
+  static std::map<std::string, std::string> typestrings;
+  if( typestrings.empty() ) 
+  {
+    typestrings.insert(std::make_pair(typeid(char).name(), std::string("letter")));
+    typestrings.insert(std::make_pair(typeid(int).name(), std::string("number")));
+    typestrings.insert(std::make_pair(typeid(double).name(), std::string("number")));
+    typestrings.insert(std::make_pair(typeid(bool).name(), std::string("boolean")));
+    typestrings.insert(std::make_pair(typeid(std::string).name(), std::string("string")));
+    typestrings.insert(std::make_pair(typeid(std::vector<std::string>).name(), std::string("str list")));
+    typestrings.insert(std::make_pair(typeid(std::vector<int>).name(), std::string("num list")));
+    typestrings.insert(std::make_pair(typeid(std::vector<double>).name(), std::string("num list")));
+
+    //Workspaces
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::Workspace>).name(), std::string("string")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::MatrixWorkspace>).name(), std::string("string")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::ITableWorkspace>).name(), std::string("string")));
+
+
+  }
+  std::map<std::string, std::string>::const_iterator mitr = typestrings.find(type.name());
+  if( mitr != typestrings.end() )
+  {
+    return mitr->second;
+  }
+
+  return type.name();
+
 }

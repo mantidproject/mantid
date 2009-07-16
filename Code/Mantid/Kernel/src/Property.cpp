@@ -74,7 +74,7 @@ const std::type_info* Property::type_info() const
  */
 const std::string Property::type() const
 {
-  return m_typeinfo->name();
+  return Mantid::Kernel::getUnmangledTypeName(*m_typeinfo);
 }
 
 /** Overridden functions checks whether the property has a valid value.

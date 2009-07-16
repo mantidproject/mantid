@@ -83,6 +83,9 @@ namespace Kernel
   //Check if the path is on a network drive
   DLLExport bool isNetworkDrive(const std::string & path);
 
+  /// Return the name corresponding to the mangled string given by typeid
+  DLLExport std::string getUnmangledTypeName(const std::type_info& type);
+
 } // namespace Kernel
 } // namespace Mantid
 

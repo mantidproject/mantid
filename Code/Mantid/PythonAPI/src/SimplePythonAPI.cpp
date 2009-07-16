@@ -2,6 +2,7 @@
 //Includes
 //-----------------------------------
 #include <vector>
+#include <set>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -154,6 +155,77 @@ namespace Mantid
 	       << "\t\telse:\n"
 	       << "\t\t\treturn (param_name + '=' + strval, '')\n\n";
       }
+
+      // A couple of functions to aid in the formatting of help commands
+      module << "def numberRows(descr, fw):\n"
+	     << "\tdes_len = len(descr)\n"
+	     << "\tif des_len == 0:\n"
+	     << "\t\treturn (1, [''])\n"
+	     << "\tnrows = 0\n"
+	     << "\ti = 0\n"
+	     << "\tdescr_split = []\n"
+	     << "\twhile i < des_len:\n"
+	     << "\t\tnrows += 1\n"
+	     << "\t\tdescr_split.append(descr[i:i+fw])\n"
+	     << "\t\ti += fw\n"
+	     << "\treturn (nrows, descr_split)\n\n";
+
+      // A rather complicated function to format the help into a table
+      module << "def createParamTable(param_list, dialog):\n"
+	     << "\tflw = 100\n"
+	     << "\tcol_widths = [flw/5, 6, 8, 6, flw/3, flw/4]\n"
+	     << "\ttopline = '|' + 'Param Name'.center(col_widths[0]) + '|' + 'In/Out'.center(col_widths[1]) + '|' + 'Type'.center(col_widths[2]) + '|' + 'Req\\'d?'.center(col_widths[3]) + '|' + 'Description'.center(col_widths[4])  + '|' + 'Allowed Values'.center(col_widths[5]) + '\\n'\n"
+	     << "\trow_delim = '-' * len(topline) + '\\n'\n"
+	     << "\thelpstr =  row_delim + topline + row_delim\n"
+	     << "\tif dialog == True:\n"
+	     << "\t\tparam_list.append(['message','Input','string','','A message to display', ''])\n"
+	     << "\t\tparam_list.append(['enable','Input','string','','Comma-separated list of param names to keep enabled in the dialog', ''])\n"
+	     << "\t\tparam_list.append(['disable','Input','string','','Comma-separated list of param names to disable in the dialog', ''])\n"
+	     << "\tfor pstr in param_list:\n"
+	     << "\t\tndes, descr_split = numberRows(pstr[4], col_widths[4])\n"
+	     << "\t\tnall, allow_split = numberRows(pstr[5], col_widths[5])\n"
+	     << "\t\tif ndes  == 1 and nall == 1:\n"
+	     << "\t\t\thelpstr += ''.join(['|' + pstr[s].center(col_widths[s]) for s in range(0, 6)]) + '\\n'\n"
+	     << "\t\telse:\n"
+	     << "\t\t\tmidline = 0\n"
+	     << "\t\t\ttot_rows = max(ndes, nall)\n"
+	     << "\t\t\tif bool(tot_rows % 2):\n"
+	     << "\t\t\t\tmidline = (tot_rows + 1) / 2\n"
+	     << "\t\t\telse:\n"
+	     << "\t\t\t\tmidline = tot_rows / 2\n"
+	     << "\t\t\tfor r in range(0, tot_rows):\n"
+	     << "\t\t\t\tline = []\n"
+	     << "\t\t\t\tif ndes == nall:\n"
+	     << "\t\t\t\t\tif r != midline - 1:\n"
+	     << "\t\t\t\t\t\tline = ['','','','',descr_split[r], allow_split[r]]\n"
+	     << "\t\t\t\t\telse:\n"
+	     << "\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], allow_split[r]]\n" 
+	     << "\t\t\t\telif ndes > nall:\n"
+	     << "\t\t\t\t\tif r < nall:\n"
+	     << "\t\t\t\t\t\tif r != midline - 1:\n"
+	     << "\t\t\t\t\t\t\tline = ['','','','',descr_split[r], allow_split[r]]\n"
+	     << "\t\t\t\t\t\telse:\n"
+	     << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], allow_split[r]]\n" 
+	     << "\t\t\t\t\telse:\n"
+	     << "\t\t\t\t\t\tif r != midline - 1:\n"
+	     << "\t\t\t\t\t\t\tline = ['','','','',descr_split[r], '']\n"
+	     << "\t\t\t\t\t\telse:\n"
+	     << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], '']\n"
+	     << "\t\t\t\telse:\n"
+	     << "\t\t\t\t\tif r < ndes:\n"
+	     << "\t\t\t\t\t\tif r != midline - 1:\n"
+	     << "\t\t\t\t\t\t\tline = ['','','','',descr_split[r], allow_split[r]]\n"
+	     << "\t\t\t\t\t\telse:\n"
+	     << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2],pstr[3],descr_split[r], allow_split[r]]\n"
+	     << "\t\t\t\t\telse:\n"
+	     << "\t\t\t\t\t\tif r != midline - 1:\n"
+	     << "\t\t\t\t\t\t\tline = ['','','','', '',allow_split[r]]\n"
+	     << "\t\t\t\t\t\telse:\n"
+	     << "\t\t\t\t\t\t\tline = [pstr[0],pstr[1],pstr[2], pstr[3],'', allow_split[r]]\n"
+	     << "\t\t\t\thelpstr += ''.join(['|' + line[s].center(col_widths[s]) for s in  range(0,6)]) + '\\n'\n"
+	     << "\t\thelpstr += row_delim\n"
+	     << "\treturn helpstr\n\n";
+
 		  
       //Algorithm keys
       using namespace Mantid::API;
@@ -165,6 +237,7 @@ namespace Mantid
       writeGlobalHelp(module, vMap);
       //Function definitions for each algorithm
       IndexVector helpStrings;
+      std::map<std::string, std::set<std::string> > categories;
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
 	   ++vIter)
       {
@@ -178,6 +251,8 @@ namespace Mantid
 	{
 	  writeGUIFunctionDef(module, name, orderedProperties);
 	}
+	
+	// Help strings
 	std::transform(name.begin(), name.end(), name.begin(), tolower);
 	helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties, false)));
 	//The help for the dialog functions if necessary
@@ -185,9 +260,32 @@ namespace Mantid
 	{
 	  helpStrings.push_back(make_pair(name + "dialog", createHelpString(vIter->first, orderedProperties, true)));
 	}
+
+	// Get the category and save it to our map
+	std::string category = algm->category();
+	std::string::size_type idx = category.find("\\");
+	std::string topcategory(category), tail(vIter->first); 
+	if( idx != std::string::npos )
+	{
+	  topcategory = category.substr(0, idx);
+	  tail = category.substr(idx + 1) + "\\" + vIter->first;
+	}
+
+	std::map<std::string, std::set<std::string> >::iterator itr = categories.find(topcategory);
+	if( itr != categories.end() )
+	{
+	  (*itr).second.insert(tail);
+	}
+	else
+	{
+	  std::set<std::string> cat_algms;
+	  cat_algms.insert(tail);
+	  categories.insert(std::make_pair<std::string, std::set<std::string> >(topcategory, cat_algms));
+	}
       }
-      //First function without dialog
-      writeFunctionHelp(module, helpStrings);
+      
+      //Help strings
+      writeFunctionHelp(module, helpStrings, categories);
       module.close();
 
     }
@@ -383,42 +481,31 @@ namespace Mantid
     std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog)
     {
       std::ostringstream os;
-      os << "\t\thelpmsg =  '" << algm;
-      if( dialog ) os << "Dialog(";
-      else os << "(";
+      os << "\t\tparams_list = [";
+      std::string argument_list("");
+      argument_list += algm;
+      if( dialog )
+      {
+	argument_list += "Dialog";
+      }
+      argument_list += "(";
+
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
       for( ; pIter != pEnd ; )
       {
-	// Keep only alpha numeric characters
-	os << removeCharacters((*pIter)->name(), "");
-	if( ++pIter != pEnd ) os << ", ";
-      }
-      if( dialog ) os << ", message)\\n'\n";
-      else os << ")\\n'\n";
-
-      os << "\t\thelpmsg += 'Argument description:\\n'\n";
-      std::string example(algm + std::string("("));
-      pIter = properties.begin();
-      for( ; pIter != pEnd ; ++pIter )
-      {
-	Mantid::Kernel::Property* prop = *pIter;
-	std::string pname = removeCharacters((*pIter)->name(), "");
-	os << "\t\thelpmsg += '     Name: " << pname << ", Optional: ";  
-	if( prop->isValid() == "")
+	Mantid::Kernel::Property *prop = *pIter;
+	argument_list += removeCharacters((*pIter)->name(), "");
+	os << "['" << prop->name() << "','" << Mantid::Kernel::Direction::asText(prop->direction()) << "', '" 
+	   << prop->type() << "','";
+	if( !prop->isValid().empty() )
 	{
-	  os << "Yes, Default value: " << convertEOLToString(prop->value());
+	  os << "X";
 	}
-	else 
-	{
-	  example += pname + std::string("=") + "\"param_value\",";
-	  os << "No";
-	}
-	os << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());
+	os << "', '" << removeCharacters(prop->documentation(),"\n\r", true) << "','";
 	StringVector allowed = prop->allowedValues();
 	if( !allowed.empty() )
 	{
-	  os << ", Allowed values: ";
 	  StringVector::const_iterator sIter = allowed.begin();
 	  StringVector::const_iterator sEnd = allowed.end();
 	  for( ; sIter != sEnd ; )
@@ -427,15 +514,32 @@ namespace Mantid
 	    if( ++sIter != sEnd ) os << ", ";
 	  }
 	}
-	os << ". Description: " << removeCharacters(prop->documentation(),"\n\r", true) << "\\n'\n";
+	os << "']";
+	if( ++pIter != pEnd ) 
+	{
+	  os << ",";
+	  argument_list += ",";
+	  }
       }
       if( dialog )
-      {      
-	os << "\t\thelpmsg += '     Name: message, Optional: Yes, Default value: '', Direction: Input\\n'\n";
+      {
+	argument_list += ",message,enable,disable";
       }
-      os << "\t\thelpmsg += 'Note: To include a particular optional argument, it should be given after the mandatory arguments in the form argumentname=\\'value\\'.\\n\\n'\n"
-	 << "\t\thelpmsg += '     Example: " + std::string(example.begin(), example.end() - 1) + ")\\n'\n"
-	 << "\t\tprint helpmsg,\n\n";
+      argument_list += ")";
+
+      os << "]\n"
+	 << "\t\thelpstring = '\\nUsage: ' + '" << argument_list << "\\n\\n'\n"
+	 << "\t\thelpstring += createParamTable(params_list,";
+      if( dialog )
+      {
+	os << "True";
+      }
+      else
+      {
+	os << "False";
+      }
+      os << ")\n"
+	 << "\t\tprint helpstring,\n";
       return os.str();
     }
 
@@ -443,8 +547,10 @@ namespace Mantid
      * Write the help function that takes a command as an argument
      * @param os The stream to use for the output
      * @param helpStrings A map of function names to help strings
+     * @param categories The list categories and their associated algorithms
      */
-    void SimplePythonAPI::writeFunctionHelp(std::ostream & os, const IndexVector & helpStrings)
+    void SimplePythonAPI::writeFunctionHelp(std::ostream & os, const IndexVector & helpStrings, 
+					    const std::map<std::string, std::set<std::string> > & categories)
     {
       if ( helpStrings.empty() ) return;
 
@@ -464,6 +570,27 @@ namespace Mantid
 	os << "\telif cmd == '" << (*mIter).first << "':\n" 
 	   << (*mIter).second;
       }
+      
+      //Categories
+      std::map<std::string, std::set<std::string> >::const_iterator cat_end = categories.end();
+      for( std::map<std::string, std::set<std::string> >::const_iterator cat_itr = categories.begin(); cat_itr != cat_end; ++cat_itr )
+      {
+	std::string topcategory = cat_itr->first;
+	std::string lowercase = topcategory;
+	std::transform(lowercase.begin(), lowercase.end(), lowercase.begin(), tolower);
+	os << std::string("\telif cmd == '") << lowercase << std::string("':\n\t\thelpstr = 'The algorithms in the ") 
+	   << topcategory << std::string(" category are:\\n'\n");		
+	std::set<std::string>::const_iterator alg_end = cat_itr->second.end();
+	for( std::set<std::string>::const_iterator alg_itr = cat_itr->second.begin(); alg_itr != alg_end; ++alg_itr )
+	{
+	  os << std::string("\t\thelpstr += '\t") << (*alg_itr) << "\\n'\n";
+	}
+	os << "\t\tprint helpstr,\n";
+      }
+
+
+
+      // Finally add a "default" clause if the name cannot be found
       os << "\telse:\n"
 	 << "\t\tprint 'mtdHelp() - ' + cmd + ' not found in help list'\n\n";
    
@@ -574,6 +701,36 @@ namespace Mantid
         }
       }
       return retvalue;
+    }
+
+    /**
+     * Split the string on the given delimiter
+     * @param str The string to split
+     * @param delim The delimiter to use
+     */
+    std::vector<std::string> SimplePythonAPI::split(const std::string & str,  const std::string & delim)
+    {
+      std::vector<std::string> splitlist;
+      std::string::size_type idx = str.find(delim);
+      if( idx == std::string::npos ) return splitlist;
+      
+      splitlist.push_back( str.substr(0, idx) );
+      std::string::size_type offset = delim.size();
+      std::string::size_type start(idx + offset);
+      std::string::size_type end(str.size());
+      while( true )
+      {
+	idx = str.find(delim, start);
+	if( idx == std::string::npos ) 
+	{
+	  splitlist.push_back( str.substr(start, end - start) );
+	  break;
+	}
+	splitlist.push_back( str.substr(start, idx - start) );
+	start = idx + offset;
+      }
+
+      return splitlist;
     }
 
   } //namespace PythonAPI
