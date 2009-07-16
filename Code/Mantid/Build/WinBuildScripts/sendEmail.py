@@ -144,7 +144,7 @@ if m:
   
 reTicket = re.compile("#(\\d+)", re.IGNORECASE)
 mList=reTicket.findall(mssgSvn)
-while m in mList:
+for m in mList:
   ticketList.append(m.group(1))
   
 #Read doxygen log
