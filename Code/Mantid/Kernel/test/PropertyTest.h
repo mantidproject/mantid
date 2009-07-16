@@ -45,11 +45,15 @@ public:
 
   void testType()
   {
-#ifdef __GNUC__
-    TS_ASSERT( ! p->type().compare("i") )
-#else
-    TS_ASSERT( ! p->type().compare("int") )
-#endif
+//#ifdef __GNUC__
+//    TS_ASSERT( ! p->type().compare("i") )
+//#else
+//    TS_ASSERT( ! p->type().compare("int") )
+//#endif
+// MG 16/07/2009: Type now returns something standardized across platforms
+// so that it can be shown in the interfaces
+  TS_ASSERT( ! p->type().compare("number") )
+  
   }
 
   void testisValid()
