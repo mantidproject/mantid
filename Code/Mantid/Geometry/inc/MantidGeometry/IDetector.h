@@ -85,28 +85,28 @@ public:
   virtual bool isMonitor() const = 0;
 
   /// Must return a pointer to itself if derived from IComponent
-  virtual IComponent* getComponent(){throw std::runtime_error("This detector class does not inherit from IComponent.");}
+  virtual IComponent* getComponent();
 
-  /// Get a double value from the parameter map. This default version returns an empty vector to indicate that
-  /// we are not in a parameterized component
-  virtual std::vector<double> getNumberParameter(const std::string & param_name) const
-  {
-    return std::vector<double>(0);
-  } 
+  /** Get a double value from the parameter map. This default version returns an empty vector to indicate that
+   * we are not in a parameterized component.
+   * @param param_name The name of the parameter to retrieve
+   * @return The parameter as the first component of the vector
+   */
+  virtual std::vector<double> getNumberParameter(const std::string & param_name) const;
 
-  /// Get a postion from the parameter map. This default version returns an empty vector to indicate that
-  /// we are not in a parameterized component
-  virtual std::vector<V3D> getPositionParameter(const std::string & param_name) const
-  {
-    return std::vector<V3D>(0);
-  } 
+  /** Get a position value from the parameter map. This default version returns an empty vector to indicate that
+   * we are not in a parameterized component.
+   * @param param_name The name of the parameter to retrieve
+   * @return The parameter as the first component of the vector
+   */
+  virtual std::vector<V3D> getPositionParameter(const std::string & param_name) const;
 
-  /// Get a rotation from the parameter map. This default version returns an empty vector to indicate that
-  /// we are not in a parameterized component
-  virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const
-  {
-    return std::vector<Quat>(0);
-  } 
+  /** Get a rotation value from the parameter map as a quaternion. This default version returns an empty vector to indicate that
+   * we are not in a parameterized component.
+   * @param param_name The name of the parameter to retrieve
+   * @return The parameter as the first component of the vector
+   */
+  virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const;
   
    /// (Empty) Constructor
   IDetector() {}

@@ -66,8 +66,6 @@ public:
     // end IDetector methods
     void markAsMonitor(const bool flag = true);
 
-    /** @name Access to parameterized values for Python. */
-    //@{
     /**
      * Return the value, as a double, of the named parameter for this detector. If no value is found then an empty
      * vector is returned
@@ -88,7 +86,6 @@ public:
      * @param param_name The name of the parameter value
      */
     virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const;
-    //@}
 
  private:
     /**
