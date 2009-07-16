@@ -23,6 +23,7 @@ else:
      SENDER = 'Linux' + SENDER
      localServerName = localServerName + os.getenv('HOSTNAME') + '/'
 
+tracLink = 'http://trac.mantidproject.org/mantid/'
 #Set up email content 
 buildSuccess = False
 testsBuildSuccess = False
@@ -39,6 +40,8 @@ mssgTestsRunErr = ''
 mssgTestsResults = ''
 mssgSvn  = ''
 mssgDoxy = ''
+ticketList = []
+svnRevision = ''
 logDir = '../../../../logs/Mantid/'
 
 testCount = 0
@@ -133,7 +136,17 @@ move(filetestsRun,archiveDir)
 filesvn = logDir+'svn.log'
 mssgSvn = open(filesvn,'r').read()
 move(filesvn,archiveDir)
-
+#attempt to parse out the svn revision and ticket number
+reSvnRevision = re.compile("r(\\d+)\\s\\|", re.IGNORECASE)
+m=reSvnRevision.search(mssgSvn)
+if m:
+  svnRevision = m.group(1)
+  
+reTicket = re.compile("#(\\d+)", re.IGNORECASE)
+mList=reTicket.findAll(mssgSvn)
+while m in mList:
+  ticketList.append(m.group(1))
+  
 #Read doxygen log
 filedoxy = logDir+'doxy.log'
 mssgDoxy = open(filedoxy,'r').read()
@@ -185,6 +198,12 @@ if warnCount>0:
 else:
   message += "\n"
 message += "\n"
+if len(svnRevision) > 0:
+  message += "SVN Revision: " + svnRevision
+  message += " " + tracLink + "changeset/" + svnRevision + "\n"
+while ticket in ticketList:
+  message += "TRAC ticket: " + ticket 
+  message += " " + tracLink + "ticket/" + ticket + "\n"
 message += mssgSvn + "\n"
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'
