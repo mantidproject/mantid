@@ -201,7 +201,7 @@ message += "\n"
 if len(svnRevision) > 0:
   message += "SVN Revision: " + svnRevision
   message += " " + tracLink + "changeset/" + svnRevision + "\n"
-while ticket in ticketList:
+for ticket in ticketList:
   message += "TRAC ticket: " + ticket 
   message += " " + tracLink + "ticket/" + ticket + "\n"
 message += mssgSvn + "\n"
