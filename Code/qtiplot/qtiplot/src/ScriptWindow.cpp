@@ -501,6 +501,7 @@ OutputTextArea::OutputTextArea(QWidget * parent, const char * name) : QTextEdit(
   setAutoFormatting(QTextEdit::AutoNone);
   // Change to fix width font so that table formatting isn't screwed up
   QFont f("Andale Mono");
+  f.setFixedPitch(true);
   f.setPointSize(8);
   setCurrentFont(f);
 }
