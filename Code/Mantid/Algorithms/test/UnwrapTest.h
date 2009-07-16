@@ -35,7 +35,7 @@ public:
     TS_ASSERT( unwrap.isInitialized() )
 
     const std::vector<Property*> props = unwrap.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 3 )
+    TS_ASSERT_EQUALS( props.size(), 4 )
 
     TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" )
     TS_ASSERT( props[0]->isDefault() )
