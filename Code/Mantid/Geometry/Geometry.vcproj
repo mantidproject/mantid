@@ -553,10 +553,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\GtsGeometryHandlerTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidGeometry\ICompAssembly.h"
 				>
 			</File>
