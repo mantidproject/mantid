@@ -43,6 +43,8 @@ void Unwrap::init()
   declareProperty("LRef", 0.0, validator,
     "The length of the reference flight path (in metres)" );
 
+  declareProperty("JoinWavelength",0.0,Direction::Output);
+
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
@@ -252,6 +254,14 @@ const std::vector<int> Unwrap::unwrapX(const API::MatrixWorkspace_sptr& tempWS, 
     std::pair<int,int> binLimits = this->handleFrameOverlapped(xdata, Ld, tempX_L);
     binRange[0] = binLimits.first;
     binRange[1] = binLimits.second;
+  }
+
+  // Record the point at which the unwrapped sections are joined, first time through only
+  Property* join = getProperty("JoinWavelength");
+  if (join->isDefault())
+  {
+    g_log.information() << "Joining wavelength: " << tempX_L.front() << "Angstrom\n";
+    setProperty("JoinWavelength",tempX_L.front());
   }
 
   // Append first vector to back of second

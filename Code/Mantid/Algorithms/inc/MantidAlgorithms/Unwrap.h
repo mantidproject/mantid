@@ -24,7 +24,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 

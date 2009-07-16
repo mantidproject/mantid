@@ -243,6 +243,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IDetector.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\IObjComponent.cpp"
 				>
 			</File>
@@ -733,11 +737,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File
