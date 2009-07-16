@@ -75,7 +75,7 @@ public:
   /// Algorithm's version
   virtual const int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "DIFFRACTION"; }
+  virtual const std::string category() const { return "Diffraction"; }
 
 private:
   /// Initialisation code

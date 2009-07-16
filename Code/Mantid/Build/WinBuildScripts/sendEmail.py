@@ -254,7 +254,7 @@ else:
 #Send Email
 session = smtplib.SMTP(smtpserver)
 #timeout in seconds
-socket.setdefaulttimeout(30)
+socket.setdefaulttimeout(180)
 try:
   smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
 

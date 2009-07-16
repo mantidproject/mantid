@@ -22,23 +22,13 @@ MANTIDLIB = '/opt/Mantid/bin'
 MANTIDPLUGINS = '/opt/Mantid/plugins'
   
 opts = Options('scons_options.py')
-opts.Add('mingw','Set to 1 to use MinGW on Windows', 0)
-opts.Add('msvc','Set to 1 to use Microsoft Visual Studio Compiler on Windows', 1)
 opts.Add('debug','Set to 1 to build debug', 0)
 opts.Add('matlab','Set to 1 to build matlab API', 0)
 
-base_env = Environment(ENV=os.environ, options = opts)
-mingw_env = Environment(ENV=os.environ, options = opts, tools = [ 'mingw' ])
+env = Environment(ENV=os.environ, options = opts)
 Help(opts.GenerateHelpText(base_env))
-mingw = ARGUMENTS.get('mingw', 0)
-msvc = ARGUMENTS.get('msvc', 1)
 debug = ARGUMENTS.get('debug', 0)
-bigshared = ARGUMENTS.get('bigshared', 0)
 matlab = ARGUMENTS.get('matlab', 0)
-if int(msvc) :
-	env = base_env
-if int(mingw) :
-	env = mingw_env
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
@@ -60,7 +50,6 @@ lpts = []
 
 boost_path = ''
 poco_path = ''
-fortran_type=''
 third_party = os.path.abspath('../Third_Party/')
 opencascade_path = ''
 python_path = ''
@@ -68,7 +57,6 @@ python_path = ''
 #Get paths
 if os.name == 'nt': 
 	print "* COMMENCING WINDOWS BUILD *"
-#	boost_path = 'C:/Program Files/boost/boost_1_34_1/boost'
 	boost_path = third_party + '/include/'
 	
 	python_path = 'C:/Python25/'
@@ -77,33 +65,13 @@ if os.name == 'nt':
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
 	libDirList.append(python_path + '/libs/')
-	if int(mingw) :
-		libDirList.append(third_party + '/lib/win32-MinGW/')
-		libList.append('boost_python-mgw34-mt-1_34_1')
-		libList.append('boost_regex-mgw34-mt-1_34_1')
-		libList.append('libpython25')
-		libList.append('NeXus')
-	else :
-		libDirList.append(third_party + '/lib/win32/')
-#		libList.append('boost_python-vc80-mt-1_34_1')
-#		libList.append('boost_regex-vc80-mt-1_34_1')
-		libList.append('python25')
-		libList.append('libNeXus-0')
+	libDirList.append(third_party + '/lib/win32/')
+	libList.append('python25')
+	libList.append('libNeXus-0')
 
 	libList.append('gsl')
-	libList.append('opengl32')#opengl required for rendering
-	libList.append('glu32') #glu companion for opengl
 	libList.append('ws2_32')   # winsock library
 	libList.append('muparser') # Muparser used in DataHandling
-#   Opencascade libraries
-	libList.append('TKBO')
-	libList.append('TKPrim')
-	libList.append('TKBRep')
-	libList.append('TKernel')
-	libList.append('TKTopAlgo')
-	libList.append('TKMath')
-	libList.append('TKMesh')
-	libList.append('TKG2d')
 
 	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser']
 	
@@ -120,13 +88,11 @@ else:
 			boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
 			python_path=MantidBuild.procHeaderPath(ln,'PYTHON_LIB',python_path)
-			#fortran_type=MantidBuild.procHeader(ln,'FORTRAN',fortran_type)
 			#third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 		f.close()
 	else:
 		boost_path=''
 		poco_path=''
-		fortran_type=''
 		third_party=''
 		python_path = ''
 		boost_append = ''
@@ -165,21 +131,17 @@ print "THIRD_PARTY: ",third_party
 print "PYTHON_ROOT: ",python_path
 
 if os.name == 'nt':
-	if int(mingw) :
-		cflags = ['-g', '-O2', '-DPOCO_DLL']
-		env.Append(LINKFLAGS=['-g','-Wl,--export-all-symbols'])
+	if int(debug) :
+		cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP',  ]
+		cflags.extend(['/D_DEBUG', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL', '/DWINVER=0x0500'])
+		cflags.extend(['/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
+		cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
 	else :
-		if int(debug) :
-			cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP',  ]
-			cflags.extend(['/D_DEBUG', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL', '/DWINVER=0x0500'])
-			cflags.extend(['/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
-			cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
-		else :
-			cflags = ['/Ox', '/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL']
-			cflags.extend(['/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500'])
-			cflags.extend(['/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
-			cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
-			env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
+		cflags = ['/Ox', '/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL']
+		cflags.extend(['/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500'])
+		cflags.extend(['/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
+		cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
+		env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
 elif platform.system() == 'Linux':
 	if not rpmBuild:
 		cppPaths.append(poco_path + 'include')
@@ -205,7 +167,6 @@ elif platform.system() == 'Darwin':
 	
 if os.name == 'posix':
 	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
-	#libList.append('python' + sys.version[0:3])
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
@@ -274,14 +235,14 @@ MantidBuild.collectIncludes('.', 'includes')
 libDirList.append(os.path.abspath('./Bin/Shared'))
 
 if os.name != 'nt':	
-    if rpmBuild :
-	lpts.append('-Wl,-rpath,'+MANTIDLIB)
-	lpts.append('-Wl,-rpath,'+MANTIDPLUGINS)
-    else :
+  if rpmBuild :
+    lpts.append('-Wl,-rpath,'+MANTIDLIB)
+    lpts.append('-Wl,-rpath,'+MANTIDPLUGINS)
+  else :
 	##
 	## BIT FOR -Wl,-rpath : This avoids the STUPID STUPID export LD_PATH in run_test 
 	## 
-	lpts.append('-Wl,-rpath,./Bin/Shared')
+    lpts.append('-Wl,-rpath,./Bin/Shared')
     print lpts
     env.Append(LINKFLAGS=lpts)
 	
@@ -335,13 +296,6 @@ env.Replace(SHARED_LIST=shared_libraries)
 for i in range(len(shared_objects)) :
     shared_objects[i] = string.replace(shared_objects[i], '$OBJSUFFIX', env['OBJSUFFIX'])
 
-#
-# one big shared library
-#
-if int(bigshared) :
-    big_shared = env.SharedLibrary('Bin/Shared/Mantid', shared_objects, LIBS=libList, LIBPATH=env['MYLIBDIRLIST'], PDB='Bin/Shared/Mantid.pdb')
-    env.Replace(MYLIBLIST=['Mantid'] + orig_libs)
-
 # User Algs
 ret = SConscript(['UserAlgorithms/SConscript'])
 env.Install('Bin/Plugins', ret['shared'])
@@ -369,4 +323,3 @@ if not int(skiptest):
 			print 'CXXTESTGEN is not installed - tests will not be built'
 else:
 	print "Not Building Tests."
-

@@ -34,7 +34,10 @@ elif platform.system() == 'Linux':
 
 if os.name == 'posix':
    myenv.Append(MYLIBLIST=['GL','GLU'])
-   myenv.Append(MYLIBLIST=['TKBO','TKPrim','TKBRep','TKernel','TKTopAlgo','TKMath','TKMesh','TKG2d'])
+else:
+   myenv.Append(MYLIBLIST=['opengl32','glu32'])
+   
+myenv.Append(MYLIBLIST=['TKBO','TKPrim','TKBRep','TKernel','TKTopAlgo','TKMath','TKMesh','TKG2d'])
 
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
