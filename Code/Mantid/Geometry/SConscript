@@ -27,6 +27,11 @@ elif platform.system() == 'Linux':
    myenv.Append(LINKFLAGS='-Wl,-rpath,'+opencascade_path+'/lib64')
    myenv.Append(LINKFLAGS='-Wl,-rpath,'+opencascade_path+'/lib')
 
+   # MG: On Ubuntu the pre-packaged OpenCascade resides in the location below. Adding this to the path
+   # shouldn't have a harmful effect if it isn't there. The libraries are in standard locations
+   # so the library path doesn't need to be touched
+   myenv.Append(CPPPATH='/usr/include/opencascade')
+
 if os.name == 'posix':
    myenv.Append(MYLIBLIST=['GL','GLU'])
    myenv.Append(MYLIBLIST=['TKBO','TKPrim','TKBRep','TKernel','TKTopAlgo','TKMath','TKMesh','TKG2d'])
