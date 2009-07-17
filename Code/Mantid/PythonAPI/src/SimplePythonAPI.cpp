@@ -234,7 +234,7 @@ namespace Mantid
       StringVector algKeys = AlgorithmFactory::Instance().getKeys();
       VersionMap vMap;
       createVersionMap(vMap, algKeys);
-      writeGlobalHelp(module, vMap);
+      writeGlobalHelp(module, vMap, gui);
       //Function definitions for each algorithm
       IndexVector helpStrings;
       std::map<std::string, std::set<std::string> > categories;
@@ -442,8 +442,9 @@ namespace Mantid
      * Write a global help command called mtdHelp, which takes no arguments
      * @param os The stream to use to write the command
      * @param vMap The map of algorithm names to highest version numbers
+     * @param gui Create GUI help message with extra information about dialog functions
      */
-    void SimplePythonAPI::writeGlobalHelp(std::ostream & os, const VersionMap & vMap)
+    void SimplePythonAPI::writeGlobalHelp(std::ostream & os, const VersionMap & vMap, bool gui)
     {
       os << "# The help command with no parameters\n";
       os << "def mtdGlobalHelp():\n";
@@ -463,12 +464,14 @@ namespace Mantid
 	  os << "\\n\"\n";
 	}
       }
-      os << "\thelpmsg += \"For help with a specific command type: mantidHelp(\\\"cmd\\\")\\n\"\n"
-       << "\tif PYTHONAPI_IN_MANTIDPLOT == True:\n"
-       << "\t\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
-       << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n"
-       << "\tprint helpmsg,\n"
-       << "\n";
+      os << "\thelpmsg += \"For help with a specific command type: mantidHelp(\\\"cmd\\\")\\n\"\n";
+      if( gui )
+      {
+	os << "\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
+	  << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n"
+	  << "\tprint helpmsg,\n"
+	  << "\n";
+      }
     }
 
     /**
