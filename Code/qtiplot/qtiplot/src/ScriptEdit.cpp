@@ -138,14 +138,21 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
 
   menu.insertSeparator();
   //Now the running actions (the shortcuts are assigned to the ScriptWindow actions)
-  menu.addAction(actionExecute);
-  menu.addAction(actionExecuteAll);  
-  menu.addAction(actionEval);  
-
-  menu.insertSeparator();
-  //Abort option
-  menu.addAction(actionAbort);
-
+  bool inMuParser(false);
+  if( scriptEnv->scriptingLanguage().startsWith("P") )
+  {
+    menu.addAction(actionExecute);
+    menu.addAction(actionExecuteAll);  
+    menu.insertSeparator();
+    //Abort option
+    menu.addAction(actionAbort);
+  }
+  else
+  {
+    menu.addAction(actionEval);
+    inMuParser = true;
+  }
+  
   if (parent()->isA("Note")){
     Note *sp = (Note*) parent();
     action = new QAction(tr("Auto&exec"), &menu);
@@ -155,7 +162,7 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
     menu.addAction(action);
   }
   
-  if( scriptEnv->scriptingLanguage() == "muParser" )
+  if( inMuParser )
   {
     functionsMenu->clear();
     functionsMenu->setTearOffEnabled(true);

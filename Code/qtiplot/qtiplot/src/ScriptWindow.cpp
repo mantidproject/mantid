@@ -126,6 +126,21 @@ void ScriptWindow::customEvent(QEvent *e)
       outputText->clear();
       ScriptingChangeEvent* event = (ScriptingChangeEvent*)e;
       d_env = event->scriptingEnv();
+      // In Python we only want execute and executeAll and 
+      // in muParser we only want evaluate
+      if( d_env->scriptingLanguage().startsWith("P") )
+      {
+	actionExecute->setEnabled(true);
+	actionExecuteAll->setEnabled(true);
+ 	actionEval->setEnabled(false);
+      }
+      else
+      {
+	actionExecute->setEnabled(false);
+	actionExecuteAll->setEnabled(false);
+ 	actionEval->setEnabled(true);
+      }
+
       updateWindowTitle();
     }
 }
@@ -240,7 +255,7 @@ void ScriptWindow::initActions()
 	connect(actionClearOutput, SIGNAL(activated()), outputText, SLOT(clear()));
 	edit->addAction(actionClearOutput);
 	
-   // Run actions
+	// Run actions
 	actionExecute = new QAction(tr("E&xecute"), this);
 	actionExecute->setShortcut( tr("Ctrl+Return") );
 	executeShortcuts.append(QKeySequence("Ctrl+Return"));
@@ -259,7 +274,20 @@ void ScriptWindow::initActions()
 	connect(actionEval, SIGNAL(activated()), te, SLOT(evaluate()));
 	run->addAction(actionEval);
 
-  //Window actions
+	// In Python we only want execute and executeAll and 
+	// in muParser we only want evaluate
+	if( d_env->scriptingLanguage().startsWith("P") )
+	{
+	  actionEval->setEnabled(false);
+	}
+	else
+	{
+	  actionExecute->setEnabled(false);
+	  actionExecuteAll->setEnabled(false);
+	}
+	
+
+	//Window actions
 	actionAlwaysOnTop = new QAction(tr("Always on &Top"), this);
 	actionAlwaysOnTop->setCheckable(true);
 	if (d_app)
