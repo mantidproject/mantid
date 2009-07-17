@@ -150,7 +150,7 @@ namespace Mantid
 	       << "\t\t\treturn ('', '')\n"
 	       << "\telse:\n"
 	       << "\t\tstrval = makeString(param_value)\n"
-	       << "\t\tif param_name in enabled_list or strval[0] == '?':\n"
+	       << "\t\tif param_name in enabled_list or (len(strval) > 0 and strval[0] == '?'):\n"
 	       << "\t\t\treturn (param_name + '=' + strval.lstrip('?'), param_name)\n"
 	       << "\t\telse:\n"
 	       << "\t\t\treturn (param_name + '=' + strval, '')\n\n";
