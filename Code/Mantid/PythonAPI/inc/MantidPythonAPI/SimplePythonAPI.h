@@ -77,7 +77,7 @@ class DLLExport SimplePythonAPI
   /// Writes the GUI version of the Python function definition for the given algorithm
   static void writeGUIFunctionDef(std::ostream & output, const std::string & algName, const PropertyVector & properties);
   /// Writes the global help command
-  static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap);
+  static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap, bool gui);
   /// Creates a help string for the given algorithm
   static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog);
   /// Writes the given help strings to the Python module
