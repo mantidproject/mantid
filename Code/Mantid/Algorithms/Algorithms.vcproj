@@ -419,6 +419,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SubtractTimeFinal.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SumSpectra.cpp"
 				>
 			</File>
@@ -846,6 +850,10 @@
 			</File>
 			<File
 				RelativePath=".\test\StripPeaksTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\SubtractTimeFinal.h"
 				>
 			</File>
 			<File

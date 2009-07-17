@@ -511,6 +511,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SetScalingPSDtest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\UpdateDAE.h"
 				>
 			</File>

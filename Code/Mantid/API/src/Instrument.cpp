@@ -80,7 +80,9 @@ Geometry::IDetector_sptr Instrument::getDetector(const int &detector_id) const
   if ( it == _detectorCache.end() )
   {
     g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
-    throw Kernel::Exception::NotFoundError("Instrument: Detector is not found.","");
+    std::stringstream readInt;
+    readInt << detector_id;
+    throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
   }
 
   return Geometry::IDetector_sptr(it->second,NoDeleting());
