@@ -7,6 +7,8 @@
 #include <QGLWidget>
 #include "boost/shared_ptr.hpp"
 
+#include "MantidGeometry/V3D.h"
+
 //-----------------------------------------
 // Forward Declarations
 //-----------------------------------------
@@ -79,6 +81,8 @@ private:
   void setYRotation(int angle);
   /// Set the rotation angle around the Z-axis
   void setZRotation(int angle);
+  /// Calculate and set the orthographic projection matrix
+  void setOrthoProjectionMatrix(GLdouble aspect_ratio);
 
 private:
   /// Ensure the angle is in the range 0 < angle < 360
@@ -95,6 +99,10 @@ private:
   GLdouble m_scale_factor;
   /// The location of the cursor when the mouse button was clicked
   QPoint m_click_point;
+  /// The separation of the bounding box sides in x,y,z respectively
+  GLdouble m_bb_widths[3];
+  /// The centre of the bounding box
+  GLdouble m_bb_centres[3];
 };
 
 }

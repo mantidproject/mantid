@@ -26,6 +26,9 @@ namespace MantidQt
 namespace CustomDialogs
 {
 
+// Forward declartion
+class ShapeDetails;
+
 /**
  * A custom group box for a 3D point
  */
@@ -76,9 +79,6 @@ struct Operation
   int binaryop;
 };
 
-// Forward declartion
-class ShapeDetails;
-
 /**
  * Base instantiator to store in a map
  */
@@ -86,6 +86,8 @@ struct BaseInstantiator
 {
   /// Default constructor
   BaseInstantiator() {}
+  /// Virtual destructor
+  virtual ~BaseInstantiator() {}
   ///Create an instance
   virtual ShapeDetails* createInstance() const = 0;
 private:

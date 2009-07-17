@@ -27,8 +27,8 @@ namespace CustomDialogs
 class BinaryTreeWidget;
 class BinaryTreeWidgetItem;
 class ShapeDetails;
-class BaseInstantiator;
-class Operation;
+struct BaseInstantiator;
+struct Operation;
 class MantidGLWidget;
 
 /** 
