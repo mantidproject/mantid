@@ -101,7 +101,6 @@ public:
       int id=det->getID();
       TS_ASSERT_EQUALS(2110001,id);
       V3D pos = det->getPos();
-      std::cout << pos;
       V3D expectedPos = V3D(-1.0,-1.51453,2.29129);
       TS_ASSERT_DELTA((pos-expectedPos).norm(),0.0,1e-5)
       

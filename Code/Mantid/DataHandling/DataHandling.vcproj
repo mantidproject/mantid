@@ -511,6 +511,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\SetScalingPSDrawtest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\SetScalingPSDtest.h"
 				>
 			</File>
