@@ -158,11 +158,28 @@ API::ITableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsN
 }
 
 /**
- * Return a pointer to the specified workspace group
+ * Return a list of pointers to all of the workspaces in a specified workspace group
+ * @param group_name The name of the group
+ * @return A vector of pointers to API::Workspace objects
  */
-API::WorkspaceGroup* FrameworkManager::getWorkspaceGroup(const std::string& group_name)
+std::vector<API::MatrixWorkspace*> FrameworkManager::getMatrixWorkspaceGroup(const std::string& group_name)
 {
-  return dynamic_cast<API::WorkspaceGroup*>( API::FrameworkManager::Instance().getWorkspace(group_name) );
+  API::WorkspaceGroup* ws_group = 
+    dynamic_cast<API::WorkspaceGroup*>( API::FrameworkManager::Instance().getWorkspace(group_name) );
+  std::vector<API::MatrixWorkspace*> group_ptrs; 
+  if( ws_group )
+  {
+    const std::vector<std::string> & ws_names = ws_group->getNames();
+    std::vector<std::string>::const_iterator iend = ws_names.end();
+    for( std::vector<std::string>::const_iterator itr = ws_names.begin(); itr != iend;
+	 ++itr )
+    {
+      API::MatrixWorkspace *mtx_wksp = 
+	dynamic_cast<API::MatrixWorkspace*>(API::FrameworkManager::Instance().getWorkspace(*itr));
+      if( mtx_wksp ) group_ptrs.push_back(mtx_wksp);
+    }
+  }
+  return group_ptrs;
 }
 
 /**
@@ -182,6 +199,28 @@ bool FrameworkManager::deleteWorkspace(const std::string& wsName)
 std::vector<std::string> FrameworkManager::getWorkspaceNames() const
 {
   return API::AnalysisDataService::Instance().getObjectNames();
+}
+
+/**
+ * Returns the names of all the workspace groups
+ * \return A vector of strings.
+ **/
+std::vector<std::string> FrameworkManager::getWorkspaceGroupNames() const
+{
+  std::vector<std::string> ws_names = getWorkspaceNames();
+  std::vector<std::string> grp_names;
+  std::vector<std::string>::const_iterator iend = ws_names.end();
+  for( std::vector<std::string>::const_iterator itr = ws_names.begin(); itr != iend;
+       ++itr )
+  {
+    API::Workspace *wksp =  API::FrameworkManager::Instance().getWorkspace(*itr);
+    if( dynamic_cast<API::WorkspaceGroup*>(wksp) )
+    {
+      grp_names.push_back(*itr);
+    }
+
+  }
+  return grp_names;
 }
 
 /**

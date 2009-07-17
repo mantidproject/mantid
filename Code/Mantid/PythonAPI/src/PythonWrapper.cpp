@@ -501,9 +501,6 @@ namespace PythonAPI
 #define REGISTER_SHAREDPTR_WITH_PYTHON(type) \
   register_ptr_to_python< boost::shared_ptr<type> >();
 
-// Cannot register this for some reason
-//   register_ptr_to_python< const boost::shared_ptr<const type> >();
-  
 /**
  * The actual module definition begins here. The names are different for
  * Windows and Linux due to the difference in library names
@@ -531,6 +528,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   REGISTER_VECTOR_WITH_PYTHON(Mantid::Kernel::PropertyHistory, "PropHistVector")	  
   /// A vector of Property pointers
   REGISTER_VECTOR_WITH_PYTHON(Mantid::Kernel::Property*, "PropPtrVector")	  
+  /// A vector of MatrixWorkspace pointers
+  REGISTER_VECTOR_WITH_PYTHON(Mantid::API::MatrixWorkspace*, "MatrixWorkspacePtrVector")	  
+
   //@}
 
   /**
@@ -539,13 +539,13 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
    */
   //@{
   /// A pointer to a MatrixWorkspace object
-  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::MatrixWorkspace )
+  register_ptr_to_python<Mantid::API::MatrixWorkspace*>();
 
   /// A pointer to a TableWorkspace object
-  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::ITableWorkspace )
+  register_ptr_to_python<Mantid::API::ITableWorkspace*>();
 
   /// A pointer to a WorkspaceGroup object
-  REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::WorkspaceGroup )
+  register_ptr_to_python<Mantid::API::WorkspaceGroup*>();
 
   /// A pointer to an IInstrument object
   REGISTER_SHAREDPTR_WITH_PYTHON( Mantid::API::IInstrument )
@@ -672,10 +672,11 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	  return_value_policy< reference_existing_object >(), Mantid_PythonAPI_FrameworkManager_execute_overloads_2())
      .def("getMatrixWorkspace", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspace, return_value_policy< reference_existing_object >())
      .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, return_value_policy< reference_existing_object >())
-     .def("getWorkspaceGroup", &Mantid::PythonAPI::FrameworkManager::getWorkspaceGroup, return_value_policy< reference_existing_object >())
+     .def("getMatrixWorkspaceGroup", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspaceGroup)
      .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
      .def("getAlgorithmNames", &Mantid::PythonAPI::FrameworkManager::getAlgorithmNames)
      .def("getWorkspaceNames", &Mantid::PythonAPI::FrameworkManager::getWorkspaceNames)
+     .def("getWorkspaceGroupNames", &Mantid::PythonAPI::FrameworkManager::getWorkspaceGroupNames)
      .def("createPythonSimpleAPI", &Mantid::PythonAPI::FrameworkManager::createPythonSimpleAPI)
      .def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
      .def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)

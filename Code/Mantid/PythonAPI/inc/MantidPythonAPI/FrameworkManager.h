@@ -62,7 +62,7 @@ public:
 	FrameworkManager();
 	~FrameworkManager() {};
 
-	// Clears all memory associated with the FrameworkManager 
+	/// Clears all memory associated with the FrameworkManager 
 	void clear();
 
 	/// Clear memory associated with the AlgorithmManager
@@ -74,43 +74,48 @@ public:
 	/// Clear memory associated with the ADS
 	void clearInstruments();	
 
-	// Creates and instance of an algorithm
+	/// Creates and instance of an algorithm
 	API::IAlgorithm* createAlgorithm(const std::string& algName);
+	/// Creates and instance of an algorithm of a specific version
 	API::IAlgorithm* createAlgorithm(const std::string& algName, const int& version);
 
 	// Creates an instance of an algorithm and sets the properties provided
 	API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray);
+	// Creates an instance of an algorithm of a specific version and sets the properties provided
 	API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version);
 
-	// Creates an instance of an algorithm, sets the properties provided & then executes it.
+	/// Creates an instance of an algorithm, sets the properties provided & then executes it.
 	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray);
+	/// Creates an algorithm of a given version, sets the properties provided & then executes it.
 	API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray,const int& version);
 
-	// Returns a pointer to the MatrixWorkspace requested
+	/// Returns a pointer to the MatrixWorkspace requested
 	API::MatrixWorkspace* getMatrixWorkspace(const std::string& wsName);
 
-	// Returns a pointer to the TableWorkspace requested
+	/// Returns a pointer to the TableWorkspace requested
 	API::ITableWorkspace* getTableWorkspace(const std::string& wsName);
 
-	// Returns a pointer to the Workspace group requested
-	API::WorkspaceGroup* getWorkspaceGroup(const std::string& group_name);
+	/// Returns a list of pointers to the MatrixWorkspace objects with a group
+	std::vector<API::MatrixWorkspace*> getMatrixWorkspaceGroup(const std::string& group_name);
 
-	// Deletes a workspace from the framework
+	/// Deletes a workspace from the framework
 	bool deleteWorkspace(const std::string& wsName);
 
-	// Return the list of currently registered algorithm names
+	/// Return the list of currently registered algorithm names
 	std::vector<std::string> getAlgorithmNames() const;
 	
-	// Return the list of currently available workspace names
+	/// Return the list of currently available workspace names
 	std::vector<std::string> getWorkspaceNames() const;
 
-	// Return a list of the workspace groups available
+	/// Return a list of the currently available workspace groups
 	std::vector<std::string> getWorkspaceGroupNames() const;
 
-	// Create the simple Python API for Mantid
+	/// Create the simple Python API for Mantid
 	void createPythonSimpleAPI(bool);
 	
+	/// Add a Python alogirthm
 	int addPythonAlgorithm(PyObject* pyAlg);
+	/// Execute a Python algorithm
 	void executePythonAlgorithm(std::string algName);
 
 private:
