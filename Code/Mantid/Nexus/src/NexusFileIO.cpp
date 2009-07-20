@@ -1425,13 +1425,23 @@ namespace NeXus
    status=NXgetdata(fileID, (void*)detector_list);
    status=NXclosedata(fileID);
 
+   int *spectra = NULL;
    status=NXopendata(fileID, "spectra");
-   status=NXgetinfo(fileID, &rank, dim, &type);
-   int nSpec=dim[0];
-   assert(nSpec == nSpectra);
-   int *spectra=new int[nSpec];
-   status=NXgetdata(fileID, (void*)spectra);
-   status=NXclosedata(fileID);
+   if (status == NX_OK)
+   {
+       status=NXgetinfo(fileID, &rank, dim, &type);
+       int nSpec=dim[0];
+       assert(nSpec == nSpectra);
+       spectra=new int[nSpec];
+       status=NXgetdata(fileID, (void*)spectra);
+       status=NXclosedata(fileID);
+   }
+   else
+   {
+       spectra = new int[nSpectra];
+       for(int i=0;i<nSpectra;i++)
+           spectra[i] = i + 1;
+   }
 
    // build spectra_list for populate method
    int *spectra_list=new int[nDet];
