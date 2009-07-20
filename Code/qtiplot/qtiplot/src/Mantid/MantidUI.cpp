@@ -805,10 +805,11 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 	}
 	if (alg)
 	{		
-		MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), (QWidget*)parent());
+		MantidQt::API::AlgorithmDialog *dlg = 
+		  MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
 		if( !dlg ) return;
 		//getting the combo box which has input workspaces and removing the workspaces except the selected one
-		QComboBox *combo =dlg->findChild<QComboBox*>();
+		QComboBox *combo = dlg->findChild<QComboBox*>();
 		if(combo)
 		{
 			int count=combo->count();
@@ -856,7 +857,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
     }
     if (alg)
     {		
-      MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), (QWidget*)parent());
+      MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
       if( !dlg ) return;
       if ( dlg->exec() == QDialog::Accepted) 
       { 
@@ -1282,7 +1283,8 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
   }
 
   MantidQt::API::AlgorithmDialog *dlg = 
-    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), 0, true, preset_values, optional_msg, enabled_names);
+    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow->getScriptWindowHandle(), 
+							     true, preset_values, optional_msg, enabled_names);
   return (dlg->exec() == QDialog::Accepted);
 }
 

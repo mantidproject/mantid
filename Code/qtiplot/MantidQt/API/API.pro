@@ -42,6 +42,8 @@ HEADERS = \
 #-----------------------------
 TARGET = MantidQtAPI
 
+DESTDIR = "$$MANTIDPATH/Bin/Shared"
+
 unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtAPI"'
 win32:headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtAPI"'
 PRE_TARGETDEPS = headercopy
