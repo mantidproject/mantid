@@ -49,16 +49,18 @@ AlgorithmDialog* InterfaceManagerImpl::createDialog(Mantid::API::IAlgorithm* alg
 		  << " algorithm: a generic one has been created" << std::endl;
   }
 
-  // MG 20/07/2009: I have to set the QDialog window flag manually for some reason. I assumed that the QDialog
-  // base class would define this but it doesn't. This should mean that the dialog will pop up on top of the
-  // relevant widget
+  // The parent so that the dialog appears on top of it
+  dlg->setParent(parent);
+  
+  // MG 20/07/2009: I have to set the QDialog window flag manually for some reason. 
+  //I assumed that the QDialog
+  // base class would define this but it doesn't. This should mean that the dialog 
+  //will pop up on top of the relevant widget
   Qt::WindowFlags flags = 0;
   flags |= Qt::Dialog;
   flags |= Qt::WindowContextHelpButtonHint;
   dlg->setWindowFlags(flags);
 
-  // The parent
-  dlg->setParent(parent);
 
   // Set the content
   dlg->setAlgorithm(alg);
