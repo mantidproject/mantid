@@ -106,8 +106,14 @@ static mexfunc_s_t mex_functions[] = {
 #ifdef _WIN32
   /// The function to use to compare case
   #define compare_nocase stricmp
-
-// some old versions of Matlab needed the definte but newer versions can't deal with it, if this lines it still commented out in Nov 2009 remove it define mwSize int
+ 
+#ifdef MX_COMPAT_32
+  /// new versions of Matlab define mwSize like this, old ones don't so to maintain compatibility don't use mwSize, use this instead
+  typedef int ISISmwSize;
+#else
+  /// new versions of Matlab define mwSize like this, old ones don't so to maintain compatibility don't use mwSize, use this instead
+  typedef size_t    ISISmwSize;
+#endif
 
   /// A 64-bit integer
   #define uint64_t UINT64
@@ -296,7 +302,7 @@ mxArray* ixbcreateclassarray(const char* class_name, int* n)
   */
 int CreateFrameworkManager(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-  mwSize dims[2] = {1, 1};
+  ISISmwSize dims[2] = {1, 1};
 	try
 	{
         FrameworkManagerImpl& fmgr = FrameworkManager::Instance();
@@ -328,7 +334,7 @@ int GetWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
     mxGetString(prhs[0], buffer, sizeof(buffer));
     std::string wsName(buffer);
     Workspace* wksptr = FrameworkManager::Instance().getWorkspace(wsName);
-    mwSize ndims[2] = {1, 1};
+    ISISmwSize ndims[2] = {1, 1};
     plhs[0]=mxCreateNumericArray(2, ndims, mxUINT64_CLASS, mxREAL);
     uint64_t* data = (uint64_t*)mxGetData(plhs[0]);
     data[0] = (uint64_t)wksptr;
@@ -378,7 +384,7 @@ int DeleteWorkspace(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
    */
 int CreateAlgorithm(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-	mwSize dims[2] = { 1, 1 };
+	ISISmwSize dims[2] = { 1, 1 };
     char algName[128];
 	try
 	{
@@ -524,7 +530,7 @@ static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field,
 		break;
 
 	}
-	mwSize dims[2] = { 1, data->size() };
+	ISISmwSize dims[2] = { 1, data->size() };
 	mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
 	memcpy(mxGetPr(mptr), &(data->front()), data->size() * sizeof(double));
 	return mptr;
@@ -542,7 +548,7 @@ int WorkspaceGetAllFields(int nlhs, mxArray *plhs[], int nrhs, const mxArray* pr
 {
   // char work_name[128];
 	// mxGetString(prhs[0], work_name, sizeof(work_name));
-	// mwSize dims_array[2] = { 1, 1 };
+  // ISISmwSize	 dims_array[2] = { 1, 1 };// mwSize dims_array[2] = { 1, 1 };
   // int nfields = 3;
 	// char fieldnames[3] = { 'x', 'y', 'e' };
 	// plhs[0] = mxCreateStructArray(2, dims_array, nfields, fieldnames);
