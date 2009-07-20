@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# Nightly RPM build kit
+#
+# @author Freddie Akeroyd, STFC ISIS facility
+#
+trap error_found ERR
+MESS=/tmp/build_mantid.$$
+
+function error_found() {
+    local exit_status=${1:-$?}
+    echo "Subject: RPM build R$rev FAILED" > $MESS
+    echo >> $MESS
+    echo "Nightly RPM build of svn R$rev FAILED with error code $exit_status - see http://vlinux2.isis.cclrc.ac.uk/buildlog/build.log" >> $MESS
+    /usr/sbin/sendmail -fRPMBuildServer1@mantidproject.org mantid-buildserver@mantidproject.org < $MESS
+    rm -f $MESS
+    echo Exiting $0 with $exit_status
+    exit $exit_status
+}
+
+yum_base=/isis/yum/rhel/testing/5
+build_base=/home/faa59/mybuilds
+find $build_base -type f -name 'Mantid-*' -exec rm -f {} \;
+cd ~faa59/Mantid
+svn update
+rev=`svnversion -n`
+cd Code/RPM_Kit
+sh make_rpm.sh -r $rev
+scp $build_base/SRPMS/Mantid-*.*-0.svnR$rev.*.src.rpm isisupdate@shadow:$yum_base/SRPMS
+scp $build_base/RPMS/x86_64/Mantid-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64
+scp $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64/debug
+echo "Subject: RPM build R$rev SUCCEEDED" > $MESS
+echo >> $MESS
+echo "Nightly RPM build of svn R$rev SUCCEEDED - see http://vlinux2.isis.cclrc.ac.uk/buildlog/build.log" >> $MESS
+/usr/sbin/sendmail -fRPMBuildServer1@mantidproject.org mantid-buildserver@mantidproject.org < $MESS
+rm -f $MESS
+exit 0
