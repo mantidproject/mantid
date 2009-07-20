@@ -11,7 +11,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 
 #include <cmath>
-#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
 #include "Poco/Path.h"
 
 #include "LoadDAE/idc.h"
@@ -152,7 +152,7 @@ namespace Mantid
 
       // Read in the time bin boundaries
       const int lengthIn = m_channelsPerSpectrum + 1;
-      boost::shared_ptr<float> timeChannels(new float[lengthIn]);
+      boost::shared_array<float> timeChannels(new float[lengthIn]);
 
       dims_array[0] = lengthIn;
       if (IDCgetparr(dae_handle, "RTCB1", timeChannels.get(), dims_array, &sv_ndims) != 0)
@@ -164,7 +164,7 @@ namespace Mantid
       boost::shared_ptr<std::vector<double> > timeChannelsVec
                           (new std::vector<double>(timeChannels.get(), timeChannels.get() + lengthIn));
       // Create an array to hold the read-in data
-      boost::shared_ptr<int> spectrum(new int[lengthIn]);
+      boost::shared_array<int> spectrum(new int[lengthIn]);
 
       // Read the instrument name
       char* iName = 0;
@@ -205,7 +205,7 @@ namespace Mantid
       }
 
       // Decide if we can read in all the data at once
-      boost::shared_ptr<int> allData;
+      boost::shared_array<int> allData;
       int ndata = (m_numberOfSpectra+1)*(m_channelsPerSpectrum+1)*m_numberOfPeriods*4;
       if (ndata/1000000 < 10) // arbitrary number
       {
@@ -298,8 +298,9 @@ namespace Mantid
         g_log.error("Unable to close DAE " + m_daename);
         throw Exception::FileError("Unable to close DAE:" , m_daename);
       }
-      // Clean up
-      if (iName) delete[] iName;
+      // Can't delete this here - it's allocated with malloc deep in the C code.
+      // Just accept the small leak.
+      //if (iName) delete[] iName;
     }
 
     /// Validates the optional 'spectra to read' properties, if they have been set
@@ -410,7 +411,7 @@ namespace Mantid
           throw Exception::FileError("Unable to read NDET from DAE " , m_daename);
       };
 
-      boost::shared_ptr<int> udet(new int[ndet]);
+      boost::shared_array<int> udet(new int[ndet]);
       //int* udet= new int[ndet];
       dims_array[0] = ndet;
       sv_ndims = 1;
@@ -421,7 +422,7 @@ namespace Mantid
       }
       else
       {
-          boost::shared_ptr<int> spec(new int[ndet]);
+          boost::shared_array<int> spec(new int[ndet]);
           if (IDCgetpari(dae_handle, "SPEC", spec.get(), dims_array, &sv_ndims) != 0)
           {
               g_log.error("Unable to read detector information (SPEC) from DAE " + m_daename);

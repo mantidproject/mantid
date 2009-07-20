@@ -18,6 +18,14 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
+CalculateTransmission::CalculateTransmission() : API::Algorithm(),m_progress(NULL)
+{}
+
+CalculateTransmission::~CalculateTransmission()
+{
+  if (m_progress) delete m_progress;
+}
+
 void CalculateTransmission::init()
 {
   CompositeValidator<Workspace2D> *wsValidator = new CompositeValidator<Workspace2D>;
@@ -28,8 +36,12 @@ void CalculateTransmission::init()
   declareProperty(new WorkspaceProperty<Workspace2D>("DirectRunWorkspace","",Direction::Input,wsValidator->clone()));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
-  declareProperty("MinWavelength",2.2);
-  declareProperty("MaxWavelength",10.0);
+  // The defaults here are the correct detector numbers for LOQ
+  declareProperty("IncidentBeamMonitor",2,"The UDET of the incident beam monitor");
+  declareProperty("TransmissionMonitor",3,"The UDET of the transmission monitor");
+
+  declareProperty("MinWavelength",2.2,"The minimum wavelength for the fit");
+  declareProperty("MaxWavelength",10.0,"The maximum wavelength for the fit");
 
   declareProperty("OutputUnfittedData",false);
 }
@@ -39,6 +51,12 @@ void CalculateTransmission::exec()
   Workspace2D_sptr sampleWS = getProperty("SampleRunWorkspace");
   Workspace2D_sptr directWS = getProperty("DirectRunWorkspace");
 
+  // Check that the two input workspaces are from the same instrument
+  if ( sampleWS->getBaseInstrument() != directWS->getBaseInstrument() )
+  {
+    g_log.error("The input workspaces do not come from the same instrument");
+    throw std::invalid_argument("The input workspaces do not come from the same instrument");
+  }
   // Check that the two inputs have matching binning
   if ( ! WorkspaceHelpers::matchingBins(sampleWS,directWS) )
   {
@@ -49,25 +67,31 @@ void CalculateTransmission::exec()
   // Extract the required spectra into separate workspaces
   std::vector<int> udets,indices;
   // For LOQ at least, the incident beam monitor's UDET is 2 and the transmission monitor is 3
-  udets.push_back(2);
-  udets.push_back(3);
+  udets.push_back(getProperty("IncidentBeamMonitor"));
+  udets.push_back(getProperty("TransmissionMonitor"));
+  // Convert UDETs to workspace indices via spectrum numbers
   const std::vector<int> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
   WorkspaceHelpers::getIndicesFromSpectra(sampleWS,sampleSpectra,indices);
-  // These asserts may need changing/removing when this algorithm is used for instruments other than LOQ
-  assert( sampleSpectra.size() == 2 );
-  assert( sampleSpectra[0] == 2 );
-  assert( sampleSpectra[1] == 3 );
+  // Check that given spectra are monitors
+  if ( !sampleWS->getDetector(indices.front())->isMonitor()
+       || !sampleWS->getDetector(indices.front())->isMonitor() )
+  {
+    g_log.error("One of the UDETs provided is not marked as a monitor");
+    throw std::invalid_argument("One of the UDETs provided is not marked as a monitor");
+  }
   MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
   MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
   const std::vector<int> directSpectra = directWS->spectraMap().getSpectra(udets);
-  assert( directSpectra.size() == 2 );
-  assert( directSpectra[0] == 2 );
-  assert( directSpectra[1] == 3 );
   WorkspaceHelpers::getIndicesFromSpectra(sampleWS,directSpectra,indices);
+  // Check that given spectra are monitors
+  if ( !directWS->getDetector(indices.front())->isMonitor()
+       || !directWS->getDetector(indices.front())->isMonitor() )
+  {
+    g_log.error("One of the UDETs provided is not marked as a monitor");
+    throw std::invalid_argument("One of the UDETs provided is not marked as a monitor");
+  }
   MatrixWorkspace_sptr M2_direct = this->extractSpectrum(directWS,indices[0]);
   MatrixWorkspace_sptr M3_direct = this->extractSpectrum(directWS,indices[1]);
-  
-  // Need to remove prompt spike and correct for flat background in each
   
   // The main calculation
   MatrixWorkspace_sptr transmission = (M3_sample/M3_direct)*(M2_direct/M2_sample);
@@ -89,19 +113,17 @@ void CalculateTransmission::exec()
   // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
   std::vector<double> &Y = logTransmission->dataY(0);
   std::vector<double> &E = logTransmission->dataE(0);
-  m_progress= new Progress(this,0.1,0.7,Y.size());
+  m_progress = new Progress(this,0.1,0.7,Y.size());
   for (unsigned int i=0; i < Y.size(); ++i)
   {
     const double errorPerc = E[i]/Y[i];
     Y[i] = std::log10(Y[i]);
     E[i] = std::abs(errorPerc*Y[i]);
-     m_progress->report();
+    m_progress->report();
   }
   
- // m_progress= new Progress(this,0.7,1.0,1);
   // Now fit this to a straight line
   MatrixWorkspace_sptr fit = this->fitToData(logTransmission);
- // m_progress->report();
    
   setProperty("OutputWorkspace",fit);
 }
@@ -114,10 +136,9 @@ void CalculateTransmission::exec()
 API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index)
 {
   // Would be better to write an 'ExtractSingleSpectrum' algorithm for here, that returns a Workspace1D
-  IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace",0.0,0.1);
+  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.1);
   childAlg->setProperty<Workspace2D_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("StartSpectrum", index);
-  childAlg->setProperty<int>("EndSpectrum", index);
+  childAlg->setProperty<int>("SpectrumIndex", index);
 
   // Now execute the sub-algorithm. Catch and log any error
   try
@@ -132,8 +153,8 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Wo
 
   if ( ! childAlg->isExecuted() )
   {
-    g_log.error("Unable to successfully run sub-algorithm");
-    throw std::runtime_error("Unable to successfully run sub-algorithm");
+    g_log.error("Unable to successfully run ExtractSingleSpectrum sub-algorithm");
+    throw std::runtime_error("Unable to successfully run ExtractSingleSpectrum sub-algorithm");
   }
 
   // Only get to here if successful
