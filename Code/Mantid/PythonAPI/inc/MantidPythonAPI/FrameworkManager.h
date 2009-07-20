@@ -110,6 +110,9 @@ public:
 	/// Return a list of the currently available workspace groups
 	std::vector<std::string> getWorkspaceGroupNames() const;
 
+  /// Return the list of names within a workspace group
+  std::vector<std::string> getWorkspaceGroupEntries(const std::string & group_name) const;
+    
 	/// Create the simple Python API for Mantid
 	void createPythonSimpleAPI(bool);
 	

@@ -224,6 +224,22 @@ std::vector<std::string> FrameworkManager::getWorkspaceGroupNames() const
 }
 
 /**
+ * Get the names within a workspace group
+ * @param group_name The name of the group
+ */
+std::vector<std::string> FrameworkManager::getWorkspaceGroupEntries(const std::string & group_name) const
+{
+  API::WorkspaceGroup* ws_group = 
+    dynamic_cast<API::WorkspaceGroup*>( API::FrameworkManager::Instance().getWorkspace(group_name) );
+  std::vector<std::string> entries;
+  if( ws_group )
+  {
+    entries = ws_group->getNames();
+  }
+  return entries;
+}
+
+/**
  * Returns the name of all the algorithms.
  * \return Vector of strings.
  **/
