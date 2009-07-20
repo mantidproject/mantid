@@ -110,12 +110,14 @@ void LoadRawDialog::addFilenameInput()
   connect(m_browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   fillLineEdit("Filename", m_pathBox);
   
-  m_pathBox->setMinimumWidth(m_pathBox->fontMetrics().maxWidth()*13); 
-  
+  m_pathBox->setMinimumWidth(m_pathBox->fontMetrics().maxWidth()*13);
+  QString docstring = QString::fromStdString(getAlgorithmProperty("Filename")->documentation());
+  m_pathBox->setToolTip(docstring);
+  m_browseBtn->setToolTip(docstring);
+
   QHBoxLayout *nameline = new QHBoxLayout;
   nameline->addWidget(fileName);  
-  nameline->addWidget(m_pathBox);
-   
+  nameline->addWidget(m_pathBox);   
     
   QLabel *validLbl = getValidatorMarker("Filename");
   nameline->addWidget(validLbl);  
@@ -135,13 +137,13 @@ void LoadRawDialog::addOutputWorkspaceInput()
   m_wsBox = new QLineEdit;
   fillLineEdit("OutputWorkspace", m_wsBox);
   m_wsBox->setMaximumWidth(m_wsBox->fontMetrics().maxWidth()*7); 
+  m_wsBox->setToolTip(  QString::fromStdString(getAlgorithmProperty("OutputWorkspace")->documentation()) );
 
   QHBoxLayout *wsline = new QHBoxLayout;
   wsline->addWidget(wsName);  
   wsline->addWidget(m_wsBox);  
   QLabel *validLbl = getValidatorMarker("OutputWorkspace");
   wsline->addWidget(validLbl);  
-
   wsline->addStretch();
     
   m_wsBox->setEnabled(isWidgetEnabled("OutputWorkspace"));
@@ -158,6 +160,7 @@ void LoadRawDialog::addSpectraInput()
   
   QLabel *min = new QLabel("Start:");
   m_minSpec = new QLineEdit;
+  m_minSpec->setToolTip(  QString::fromStdString(getAlgorithmProperty("SpectrumMin")->documentation()) );
   fillLineEdit("SpectrumMin", m_minSpec);
 
   int charWidth = m_minSpec->fontMetrics().maxWidth();
@@ -169,6 +172,7 @@ void LoadRawDialog::addSpectraInput()
   
   QLabel *max = new QLabel("End:");
   m_maxSpec = new QLineEdit;
+  m_maxSpec->setToolTip( QString::fromStdString(getAlgorithmProperty("SpectrumMax")->documentation()) );
   fillLineEdit("SpectrumMax", m_maxSpec);
   
   m_maxSpec->setMaximumWidth(charWidth*3);
@@ -178,6 +182,7 @@ void LoadRawDialog::addSpectraInput()
   fillLineEdit("SpectrumList", m_specList);
   
   m_specList->setMaximumWidth(charWidth*10);
+  m_specList->setToolTip( QString::fromStdString(getAlgorithmProperty("SpectrumList")->documentation()) );
 
   QHBoxLayout *minmaxLine = new QHBoxLayout;
   minmaxLine->addWidget(min);
@@ -212,6 +217,7 @@ void LoadRawDialog::addCacheOptions()
   QLabel *cacheLabel = new QLabel("Cache file locally:");
   m_cacheBox = new QComboBox;
   fillAndSetComboBox("Cache", m_cacheBox);
+  m_cacheBox->setToolTip( QString::fromStdString(getAlgorithmProperty("Cache")->documentation()) );
 
   QHBoxLayout *cacheline = new QHBoxLayout;
   

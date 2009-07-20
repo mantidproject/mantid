@@ -207,28 +207,38 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
   }
   
   const Mantid::Kernel::FileValidator *file_checker = dynamic_cast<const Mantid::Kernel::FileValidator*>(prop->getValidator());
-  QFileDialog dialog(this);
-  dialog.setNameFilter(filter);
-  dialog.setDirectory(AlgorithmInputHistory::Instance().getPreviousDirectory());
+  
+  /* MG 20/07/09: Static functions as these then use native Windows and MAC dialogs in those environments and are alot faster */
+  
+  //QFileDialog dialog(this);
+  //dialog.setNameFilter(filter);
+  //dialog.setDirectory(AlgorithmInputHistory::Instance().getPreviousDirectory());
+  //if( file_checker && !file_checker->fileMustExist() )
+  //{
+  //  dialog.setFileMode(QFileDialog::AnyFile);
+  //}
+  //else
+  //{
+  //  dialog.setFileMode(QFileDialog::ExistingFile);
+  //}
+  QString filename;
   if( file_checker && !file_checker->fileMustExist() )
   {
-    dialog.setFileMode(QFileDialog::AnyFile);
+    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   }
   else
   {
-    dialog.setFileMode(QFileDialog::ExistingFile);
+    filename = QFileDialog::getOpenFileName(this, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   }
 
-  QStringList file_names;
-  if (dialog.exec()) file_names = dialog.selectedFiles();
+  //QStringList file_names;
+  //if (dialog.exec()) file_names = dialog.selectedFiles();
   
-  if( !file_names.isEmpty() ) 
+  if( !filename.isEmpty() ) 
   {
-    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(file_names[0]).absoluteDir().path());
-    return file_names[0];
+    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filename).absoluteDir().path());
   }
-
-  return QString();
+  return filename;
 }
 
 /**

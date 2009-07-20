@@ -34,16 +34,18 @@ namespace Mantid
     void LoadRaw::init()
     {
       // Extension checking is not case sensitive
+      // MG 20/07/09: I've had to change these extensions so that the native Windows file dialog can recognise
+      // the file types correctly
       std::vector<std::string> exts;
       exts.push_back("raw");
-      exts.push_back("sav");
-      exts.push_back("s[0-9][0-9]");
+      exts.push_back("s*");
+      //exts.push_back("sav");
+      //exts.push_back("s[0-9][0-9]");
 
       declareProperty("Filename", "", new FileValidator(exts),
         "The name of the RAW file to read, including its full or relative\n"
-        "path.  The file extension must be .raw or .RAW (N.B. case sensitive\n"
-        "if running on Linux).");
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
+        "path. (N.B. case sensitive if running on Linux).");
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.  If the input\n"
         "RAW file contains multiple periods higher periods will be stored in\n"
