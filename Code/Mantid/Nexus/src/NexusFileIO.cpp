@@ -1326,29 +1326,35 @@ namespace NeXus
    try
    {
        Mantid::Geometry::IObjComponent_const_sptr sample = localWorkspace->getInstrument()->getSample();
-       Mantid::Geometry::V3D sample_pos = sample->getPos();
-       for(int i=0;i<ndet;i++)
+       if (sample)
        {
-           double R,Theta,Phi;
-           try
+           Mantid::Geometry::V3D sample_pos = sample->getPos();
+           for(int i=0;i<ndet;i++)
            {
-               boost::shared_ptr<Mantid::Geometry::IDetector> det = localWorkspace->getInstrument()->getDetector(detector_list[i]);
-               Mantid::Geometry::V3D pos = det->getPos() - sample_pos;
-               pos.getSpherical(R,Theta,Phi);
-               R = det->getDistance(*sample);
-               Theta = localWorkspace->detectorTwoTheta(det)*180.0/M_PI;
+               double R,Theta,Phi;
+               try
+               {
+                   boost::shared_ptr<Mantid::Geometry::IDetector> det = localWorkspace->getInstrument()->getDetector(detector_list[i]);
+                   Mantid::Geometry::V3D pos = det->getPos() - sample_pos;
+                   pos.getSpherical(R,Theta,Phi);
+                   R = det->getDistance(*sample);
+                   Theta = localWorkspace->detectorTwoTheta(det)*180.0/M_PI;
+               }
+               catch(...)
+               {
+                   R = 0.;
+                   Theta = 0.;
+                   Phi = 0.;
+               }
+               // Need to get R & Theta through these methods to be correct for grouped detectors
+               detPos[3*i] = R;
+               detPos[3*i + 1] = Theta;
+               detPos[3*i + 2] = Phi;
            }
-           catch(...)
-           {
-               R = 0.;
-               Theta = 0.;
-               Phi = 0.;
-           }
-           // Need to get R & Theta through these methods to be correct for grouped detectors
-           detPos[3*i] = R;
-           detPos[3*i + 1] = Theta;
-           detPos[3*i + 2] = Phi;
        }
+       else
+           for(int i=0;i<3*ndet;i++)
+               detPos[i] = 0.;
        dims[0]=ndet;
        dims[1]=3;
        status=NXcompmakedata(fileID, "detector_positions", NX_FLOAT64, 2, dims, m_nexuscompression,dims);
