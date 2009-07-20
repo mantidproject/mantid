@@ -42,19 +42,28 @@ namespace Mantid
 			//Register the SignalChannel with the Poco logging factory
 			Poco::LoggingFactory::defaultFactory().registerChannelClass("SignalChannel",new Poco::Instantiator<Poco::SignalChannel, Poco::Channel>);
 
-			// Determine how we are running mantid. If within python we want to use the current directory rather than that
-			// where the executable (i.e. python in this case) resides.
-			// RJT 15/7/09: Leading 'p' removed from seach string becaus it's capital on the Mac, but not on Linux
-			if( Mantid::Kernel::getPathToExecutable().rfind("ython") != std::string::npos )
-			{
-				m_strBaseDir = Poco::Path::current();
-			}
-			else
-			{
-				m_strBaseDir = Mantid::Kernel::getDirectoryOfExecutable();
-			}
-
-			//attempt to load the default properties file that resides in the directory of the executable
+      // this Mantid API might be being called from python, MantidPlot or Matlab, we are going to check
+      std::string callingApplication = getPathToExecutable();
+      callingApplication = Poco::Path(callingApplication).getFileName();
+      // the cases used in the names varies on different systems so we do this case insensitive
+      std::transform(callingApplication.begin(), callingApplication.end(),
+        callingApplication.begin(), tolower);
+      // WONT WORK if they rename the python executable to something that is too bad
+      if ( callingApplication.find("python") != std::string::npos )
+      {
+        // do not look for property files in the system's python directory
+			  m_strBaseDir = Poco::Path::current();
+      }
+      else if ( callingApplication.find("matlab") != std::string::npos )
+      {
+        // look for the property files in the same directory the user called mantid_setup.m from, not the system's matlab directory
+			  m_strBaseDir = Poco::Path::current();
+      }
+      else
+      {
+        m_strBaseDir = Mantid::Kernel::getDirectoryOfExecutable();
+      }
+      //attempt to load the default properties file that resides in the directory of the executable
 			loadConfig( getBaseDir() + m_properties_file_name);
 			//and then append the user properties
 			loadConfig( getOutputDir() + m_user_properties_file_name, true);

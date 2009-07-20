@@ -106,8 +106,9 @@ static mexfunc_s_t mex_functions[] = {
 #ifdef _WIN32
   /// The function to use to compare case
   #define compare_nocase stricmp
-  /// The type of mwSize
-  #define mwSize int
+
+// some old versions of Matlab needed the definte but newer versions can't deal with it, if this lines it still commented out in Nov 2009 remove it define mwSize int
+
   /// A 64-bit integer
   #define uint64_t UINT64
 #else

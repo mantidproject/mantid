@@ -14,6 +14,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <math.h>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -117,6 +118,7 @@ public:
     //this is an extreme value for the variation there is only one value that I inserted that will fail
     alg.setProperty( "Variation", 1.5 );
     int lastGoodSpec = Nhist-2;
+
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
@@ -132,19 +134,22 @@ public:
     correctLine << "Index Spectrum UDET(S)";
     
     TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
-    
+
     for (int iHist = lastGoodSpec+1 ; iHist < Nhist; iHist++ )
     {
       std::ostringstream correctLine;
       correctLine << "In spectrum number " << iHist+1 << ", " <<
         "the number of counts has changed by a factor of " <<
-        boost::lexical_cast<std::string>(static_cast<float>(1/m_LargeValue));
+        std::setprecision(5) << 1.0/m_LargeValue;
 
       correctLine << " detector IDs: " << iHist+1;
       
       std::getline( testFile, fileLine );
       TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
     }
+    std::getline( testFile, fileLine );
+    TS_ASSERT(fileLine.empty())
+    TS_ASSERT( testFile.rdstate() & std::ios::failbit )
     testFile.close();
     remove(OFileName.c_str());
   }

@@ -18,7 +18,7 @@ namespace Algorithms
   void FindDetectorsOutsideLimits::init()
   {
     declareProperty(
-      new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input),
+      new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
       "Name of the input workspace2D" );
     declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
@@ -56,7 +56,7 @@ namespace Algorithms
 
     /** Executes the algorithm
      *
-     *  @throw runtime_error Thrown if algorithm cannot execute
+     *  @throw runtime_error Thrown if the algorithm cannot execute
      */
     void FindDetectorsOutsideLimits::exec()
     {

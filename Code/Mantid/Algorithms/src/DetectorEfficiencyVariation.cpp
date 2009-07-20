@@ -5,11 +5,11 @@
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <boost/shared_ptr.hpp>
-#include <boost/lexical_cast.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>
 #include <string>
 #include <vector>
+#include <iomanip>
 #include <fstream>
 
 namespace Mantid
@@ -26,20 +26,20 @@ using DataObjects::Workspace2D;
 
 void DetectorEfficiencyVariation::init()
 {
-  //STEVE update the wiki
   HistogramValidator<MatrixWorkspace> *val =
     new HistogramValidator<MatrixWorkspace>;
   declareProperty(
-    new WorkspaceProperty<>("WhiteBeamBase","",Direction::Input,val),
+    new WorkspaceProperty<MatrixWorkspace>("WhiteBeamBase", "",
+    Direction::Input,val),
     "Name of a white beam vanadium workspace" );
   // The histograms, the detectors in each histogram and their first and last bin boundary must match
   declareProperty(
-    new WorkspaceProperty<>("WhiteBeamCompare","",Direction::Input,
+    new WorkspaceProperty<MatrixWorkspace>("WhiteBeamCompare","",Direction::Input,
     val->clone()),
     "Name of a matching second white beam vanadium run from the same\n"
     "instrument" );
   declareProperty(
-    new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+    new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Each histogram from the input workspace maps to a histogram in this\n"
     "workspace with one value that indicates if there was a dead detector" );
 
@@ -47,29 +47,29 @@ void DetectorEfficiencyVariation::init()
   // it doesn't make sense for this to be less than one but I think it is OK if it has a high value
   mustBePositive->setLower(0);
   //UNSETINT and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
-  declareProperty("Variation", EMPTY_DBL(), mustBePositive,
-    "When the number of counts varies between the input workspaces by more\n"
-    "by more than this fraction that histogram and its associated detectors\n"
-    "are marked bad" );
+  declareProperty("Variation", -EMPTY_DBL(), mustBePositive,
+    "When the number of counts varies between input workspaces by more\n"
+    "than this fraction of the median that histogram and its\n"
+    "associated detectors are marked bad" );
 
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
   mustBePosInt->setLower(0);
   declareProperty("StartSpectrum", 0, mustBePosInt,
     "The index number of the first spectrum to include in the calculation\n"
-    "(default 0)" );
+    "(default: 0)" );
   declareProperty("EndSpectrum", UNSETINT, mustBePosInt->clone(),
     "The index number of the last spectrum to include in the calculation\n"
-    "(default 0)" );
+    "(default: the last spectrum in the workspace)" );
   declareProperty("RangeLower", EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be included\n"
-    "in the summation used to decide if a detector is 'dead' (default: the\n"
+    "in the summation used to decide if a detector is 'bad' (default: the\n"
     "start of each histogram)" );
   declareProperty("RangeUpper", EMPTY_DBL(),
     "No bin with a boundary at an x value higher than this value will\n"
-    "be included in the summation used to decide if a detector is 'dead'\n"
+    "be included in the summation used to decide if a detector is 'bad'\n"
     "(default: the end of each histogram)" );
   declareProperty("OutputFile","",
-    "The name of a file to write the list of dead detector UDETs (default\n"
+    "The name of a file to write the list of dead detector UDETs (default:\n"
     "no file output)" );
       // This output property will contain the list of UDETs for the dead detectors
   declareProperty("BadIDs",std::vector<int>(),Direction::Output);
@@ -284,7 +284,7 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   double forwardLargest = average*(1+variation);
   // criterion for if the the first spectrum is lower than expected
   double forwardLowest = average*(1-variation);
-  // repeat the same pattern
+  // these lines make the algorithm work identically if the workspaces are swapped
   double reverseLargest = (1+variation)/average;
   //because the user can enter the workspace either way around
   double reverseLowest = (1-variation)/average;
@@ -318,14 +318,17 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   for (int i = 0; i < numSpec; ++i)
   {
     // hold information about whether the histogram passes or fails and why
-    std::string problem = "";
+    std::ostringstream problem;
     // first look for detectors that have been marked as dead
 
-    InputWSDetectorInfo DetectorInfoHelper(a);
-    if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
+    InputWSDetectorInfo Detector1Info(a);
+    InputWSDetectorInfo Detector2Info(b);
+    if ( m_usableMaskMap &&
+      ( Detector1Info.aDetecIsMaskedinSpec(i) ||
+        Detector2Info.aDetecIsMaskedinSpec(i) ) )
     {
-       problem = "detector already masked";
-       cAlreadyMasked ++;
+      problem << "detector already masked";
+      cAlreadyMasked ++;
     }
     else // not already marked bad, check is the value within the acceptance range
     {
@@ -335,26 +338,25 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
       if ( ( v1/v2 > forwardLargest ) || ( v1/v2 < forwardLowest ) ||
         ( v2/v1 > reverseLargest ) || ( v2/v1 < reverseLowest ) ) 
       {// either v1 or v2 is too big, 
-        problem = "the number of counts has changed by a factor of " +
-          //convert the ratio into a string to display but without too many significant figures
-          boost::lexical_cast<std::string>(static_cast<float>(v1/v2));
+        problem << "the number of counts has changed by a factor of " <<
+          std::setprecision(5) << v1/v2;
         cChanged++;
       }
     }
-    if ( !problem.empty() )
+    if ( !problem.str().empty() )
     {//we have a bad spectrum, do the reporting
       // write to the output workput space, which is also an input workspace
       a->dataY(i)[0] = BadVal;
       // Write the spectrum number to file
       if ( fileOpen )
       {
-        file << "In spectrum number " << DetectorInfoHelper.getSpecNum(i)
-          << ", " << problem;
+        file << "In spectrum number " << Detector1Info.getSpecNum(i)
+          << ", " << problem.str();
       }
       
       if ( fileOpen ) file << " detector IDs:"; 
       // Get the list of detectors for this spectrum and iterate over
-      const std::vector<int> dets = DetectorInfoHelper.getDetectors(i);
+      const std::vector<int> dets = Detector1Info.getDetectors(i);
       std::vector<int>::const_iterator it = dets.begin();
       for ( ; it != dets.end(); ++it)
       {
@@ -370,7 +372,7 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
       }
       if ( fileOpen ) file << std::endl;
     }
-    else//problem == ""
+    else// problem is empty
     {// this is a good spectrum, only need to write to the output workspace
       a->dataY(i)[0] = GoodVal;
     }
@@ -386,8 +388,8 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   //output and pass back what we found out about bad detectors
   if ( fileOpen ) file.close();
   g_log.information() << "Marked a total of " << cChanged <<
-    " spectra changed by more than " << 100*average << "% over or"
-    "under the median change." <<
+    " spectra that changed by more than " << 100.0*variation << "% over or "
+    "under the median change. " <<
     cAlreadyMasked << " were already marked bad." << std::endl;
   //finish off setting up the output workspace, it should have no units
   a->isDistribution(false);

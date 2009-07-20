@@ -23,7 +23,6 @@ using DataObjects::Workspace2D;
 
 void WBVMedianTest::init()
 {
-  //STEVE update the wiki
   HistogramValidator<MatrixWorkspace> *val =
     new HistogramValidator<MatrixWorkspace>;
   declareProperty(
@@ -32,7 +31,8 @@ void WBVMedianTest::init()
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Each histogram from the input workspace maps to a histogram in this\n"
-    "workspace with one value that indicates if there was a dead detector" );
+    "workspace that has just one value which indicates if there was a\n"
+    "bad detector" );
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0);
@@ -59,11 +59,11 @@ void WBVMedianTest::init()
     "(default the last histogram)" );
   declareProperty("RangeLower", EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be included\n"
-    "in the summation used to decide if a detector is 'dead' (default: the\n"
+    "in the summation used to decide if a detector is 'bad' (default: the\n"
     "start of each histogram)" );
   declareProperty("RangeUpper", EMPTY_DBL(),
     "No bin with a boundary at an x value higher than this value will\n"
-    "be included in the summation used to decide if a detector is 'dead'\n"
+    "be included in the summation used to decide if a detector is 'bad'\n"
     "(default: the end of each histogram)" );
   declareProperty("OutputFile","",
     "The name of a file to write the list of dead detector UDETs (default\n"

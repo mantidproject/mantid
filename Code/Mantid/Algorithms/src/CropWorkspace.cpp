@@ -38,13 +38,13 @@ void CropWorkspace::init()
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("StartSpectrum",0, mustBePositive,
-    "The index number of the first spectrum in the series that will be retained\n"
-    "(default: last spectrum)");
+    "The index number of the first spectrum in that will be loaded\n"
+    "(default: first spectrum)");
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
   declareProperty("EndSpectrum", EMPTY_INT(), mustBePositive->clone(),
-    "The index number of the last spectrum in the series to be retained\n"
-    "(default: first spectrum)");
+    "The index number of the last spectrum that will be loaded\n"
+    "(default: last spectrum)");
 }
 
 /** Executes the algorithm
