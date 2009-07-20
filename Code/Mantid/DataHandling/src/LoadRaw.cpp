@@ -45,7 +45,7 @@ namespace Mantid
       declareProperty("Filename", "", new FileValidator(exts),
         "The name of the RAW file to read, including its full or relative\n"
         "path. (N.B. case sensitive if running on Linux).");
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.  If the input\n"
         "RAW file contains multiple periods higher periods will be stored in\n"
