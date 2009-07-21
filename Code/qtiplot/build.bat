@@ -1,5 +1,4 @@
 @echo off
-svn update
 python release_date.py
 
 IF "%VCINSTALLDIR%"=="" CALL "%VS80COMNTOOLS%"vsvars32
