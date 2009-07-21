@@ -1065,13 +1065,13 @@ void ApplicationWindow::initMainMenu()
 	help->addAction(actionChooseHelpFolder);
 	help->insertSeparator();
 	help->addAction(actionHomePage);
-	help->addAction(actionCheckUpdates);
-	help->addAction(actionDownloadManual);
-	help->addAction(actionTranslations);
-	help->insertSeparator();
-	help->addAction(actionTechnicalSupport);
-	help->addAction(actionDonate);
-	help->addAction(actionHelpForums);
+	//help->addAction(actionCheckUpdates); //Mantid change - commented out
+	//help->addAction(actionDownloadManual); //Mantid change - commented out
+	//help->addAction(actionTranslations); //Mantid change - commented out
+	//help->insertSeparator();//Mantid change - commented out
+	//help->addAction(actionTechnicalSupport);//Mantid change - commented out
+	//help->addAction(actionDonate);//Mantid change - commented out
+	//help->addAction(actionHelpForums);//Mantid change - commented out
 	help->addAction(actionHelpBugReports);
 	help->insertSeparator();
 	help->addAction(actionAbout);
@@ -11671,10 +11671,10 @@ void ApplicationWindow::createActions()
 	actionMultiPeakLorentz = new QAction(tr("&Lorentzian..."), this);
 	connect(actionMultiPeakLorentz, SIGNAL(activated()), this, SLOT(fitMultiPeakLorentz()));
 
-	actionCheckUpdates = new QAction(tr("Search for &Updates"), this);
-	connect(actionCheckUpdates, SIGNAL(activated()), this, SLOT(searchForUpdates()));
+	//actionCheckUpdates = new QAction(tr("Search for &Updates"), this);
+	//connect(actionCheckUpdates, SIGNAL(activated()), this, SLOT(searchForUpdates()));
 
-	actionHomePage = new QAction(tr("&QtiPlot Homepage"), this);
+	actionHomePage = new QAction(tr("&Mantid Homepage"), this); //Mantid change
 	connect(actionHomePage, SIGNAL(activated()), this, SLOT(showHomePage()));
 
 	actionHelpForums = new QAction(tr("QtiPlot &Forums"), this);
@@ -11683,8 +11683,8 @@ void ApplicationWindow::createActions()
 	actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
 	connect(actionHelpBugReports, SIGNAL(triggered()), this, SLOT(showBugTracker()));
 
-	actionDownloadManual = new QAction(tr("Download &Manual"), this);
-	connect(actionDownloadManual, SIGNAL(activated()), this, SLOT(downloadManual()));
+	//actionDownloadManual = new QAction(tr("Download &Manual"), this);
+	//connect(actionDownloadManual, SIGNAL(activated()), this, SLOT(downloadManual()));
 
 	actionTranslations = new QAction(tr("&Translations"), this);
 	connect(actionTranslations, SIGNAL(activated()), this, SLOT(downloadTranslation()));
@@ -12229,14 +12229,14 @@ void ApplicationWindow::translateActionsStrings()
 
 	actionMultiPeakGauss->setMenuText(tr("&Gaussian..."));
 	actionMultiPeakLorentz->setMenuText(tr("&Lorentzian..."));
-	actionHomePage->setMenuText(tr("&QtiPlot Homepage"));
-	actionCheckUpdates->setMenuText(tr("Search for &Updates"));
-	actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
+	actionHomePage->setMenuText(tr("&Mantid Homepage")); // Mantid change
+	//actionCheckUpdates->setMenuText(tr("Search for &Updates")); //Mantid change - commented out
+	//actionHelpForums->setText(tr("Visit QtiPlot &Forums"));
 	actionHelpBugReports->setText(tr("Report a &Bug"));
-	actionDownloadManual->setMenuText(tr("Download &Manual"));
-	actionTranslations->setMenuText(tr("&Translations"));
-	actionDonate->setMenuText(tr("Make a &Donation"));
-	actionTechnicalSupport->setMenuText(tr("Technical &Support"));
+	//actionDownloadManual->setMenuText(tr("Download &Manual"));//Mantid change - commented out
+	//actionTranslations->setMenuText(tr("&Translations"));//Mantid change - commented out
+	//actionDonate->setMenuText(tr("Make a &Donation"));
+	//actionTechnicalSupport->setMenuText(tr("Technical &Support"));
 
 #ifdef SCRIPTING_DIALOG
 	actionScriptingLang->setMenuText(tr("Scripting &language"));
@@ -12895,40 +12895,40 @@ void ApplicationWindow::fitMultiPeak(int profile)
 	}
 }
 
-void ApplicationWindow::showSupportPage()
-{
-	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/contracts.html"));
-}
+//void ApplicationWindow::showSupportPage()
+//{
+//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/contracts.html"));
+//}
 
 
-void ApplicationWindow::showDonationsPage()
-{
-	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/why_donate.html"));
-}
+//void ApplicationWindow::showDonationsPage()
+//{
+//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/why_donate.html"));
+//}
 
-void ApplicationWindow::downloadManual()
-{
-	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/manuals.html"));
-}
-
-void ApplicationWindow::downloadTranslation()
-{
-	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/translations.html"));
-}
+//void ApplicationWindow::downloadManual()
+//{
+//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/manuals.html"));
+//}
+//
+//void ApplicationWindow::downloadTranslation()
+//{
+//	QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/translations.html"));
+//}
 
 void ApplicationWindow::showHomePage()
 {
-	QDesktopServices::openUrl(QUrl("http://www.qtiplot.ro"));
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
-
-void ApplicationWindow::showForums()
-{
-	QDesktopServices::openUrl(QUrl("https://developer.berlios.de/forum/?group_id=6626"));
-}
+//
+//void ApplicationWindow::showForums()
+//{
+//	QDesktopServices::openUrl(QUrl("https://developer.berlios.de/forum/?group_id=6626"));
+//}
 
 void ApplicationWindow::showBugTracker()
 {
-	QDesktopServices::openUrl(QUrl("https://developer.berlios.de/bugs/?group_id=6626"));
+	QDesktopServices::openUrl(QUrl("mailto:mantid-help@mantidproject.org"));
 }
 
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
@@ -14344,57 +14344,57 @@ bool ApplicationWindow::copyFolder(Folder *src, Folder *dest)
 	}
 	return true;
 }
-
-void ApplicationWindow::searchForUpdates()
-{
-    int choice = QMessageBox::question(this, tr("QtiPlot"),
-					tr("QtiPlot will try to download necessary information about the last available updates. Please modify your firewall settings in order to allow QtiPlot to connect to the internet!") + "\n" +
-					tr("Do you wish to continue?"),
-					QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape);
-
-    if (choice == QMessageBox::Yes){
-        version_buffer.open(IO_WriteOnly);
-        http.setHost("soft.proindependent.com");
-        http.get("/version.txt", &version_buffer);
-        http.closeConnection();
-    }
-}
-
-void ApplicationWindow::receivedVersionFile(bool error)
-{
-	if (error){
-		QMessageBox::warning(this, tr("QtiPlot - HTTP get version file"),
-				tr("Error while fetching version file with HTTP: %1.").arg(http.errorString()));
-		return;
-	}
-
-	version_buffer.close();
-
-	if (version_buffer.open(IO_ReadOnly))
-	{
-		QTextStream t( &version_buffer );
-		t.setEncoding(QTextStream::UnicodeUTF8);
-		QString version = t.readLine();
-		version_buffer.close();
-
-		QString currentVersion = QString::number(maj_version) + "." + QString::number(min_version) +
-			"." + QString::number(patch_version) + QString(extra_version);
-
-		if (currentVersion != version)
-		{
-			if(QMessageBox::question(this, tr("QtiPlot - Updates Available"),
-						tr("There is a newer version of QtiPlot (%1) available for download. Would you like to download it?").arg(version),
-						QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape) == QMessageBox::Yes)
-				QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/download.html"));
-		}
-		else if (!autoSearchUpdatesRequest)
-		{
-			QMessageBox::information(this, tr("QtiPlot - No Updates Available"),
-					tr("No updates available. Your current version %1 is the last version available!").arg(version));
-		}
-		autoSearchUpdatesRequest = false;
-	}
-}
+//Mantid commented out
+//void ApplicationWindow::searchForUpdates()
+//{
+//    int choice = QMessageBox::question(this, tr("QtiPlot"),
+//					tr("QtiPlot will try to download necessary information about the last available updates. Please modify your firewall settings in order to allow QtiPlot to connect to the internet!") + "\n" +
+//					tr("Do you wish to continue?"),
+//					QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape);
+//
+//    if (choice == QMessageBox::Yes){
+//        version_buffer.open(IO_WriteOnly);
+//        http.setHost("soft.proindependent.com");
+//        http.get("/version.txt", &version_buffer);
+//        http.closeConnection();
+//    }
+//}
+//
+//void ApplicationWindow::receivedVersionFile(bool error)
+//{
+//	if (error){
+//		QMessageBox::warning(this, tr("QtiPlot - HTTP get version file"),
+//				tr("Error while fetching version file with HTTP: %1.").arg(http.errorString()));
+//		return;
+//	}
+//
+//	version_buffer.close();
+//
+//	if (version_buffer.open(IO_ReadOnly))
+//	{
+//		QTextStream t( &version_buffer );
+//		t.setEncoding(QTextStream::UnicodeUTF8);
+//		QString version = t.readLine();
+//		version_buffer.close();
+//
+//		QString currentVersion = QString::number(maj_version) + "." + QString::number(min_version) +
+//			"." + QString::number(patch_version) + QString(extra_version);
+//
+//		if (currentVersion != version)
+//		{
+//			if(QMessageBox::question(this, tr("QtiPlot - Updates Available"),
+//						tr("There is a newer version of QtiPlot (%1) available for download. Would you like to download it?").arg(version),
+//						QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape) == QMessageBox::Yes)
+//				QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/download.html"));
+//		}
+//		else if (!autoSearchUpdatesRequest)
+//		{
+//			QMessageBox::information(this, tr("QtiPlot - No Updates Available"),
+//					tr("No updates available. Your current version %1 is the last version available!").arg(version));
+//		}
+//		autoSearchUpdatesRequest = false;
+//	}
+//}
 
 /*!
   Turns 3D animation on or off

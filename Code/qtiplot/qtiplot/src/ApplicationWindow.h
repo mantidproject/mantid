@@ -791,24 +791,24 @@ public slots:
 	void updateRecentProjectsList();
 
 	//!  connected to the done(bool) signal of the http object
-	void receivedVersionFile(bool error);
+	//void receivedVersionFile(bool error);
 	//!  called when the user presses the actionCheckUpdates
-	void searchForUpdates();
+	//void searchForUpdates();
 
 	//! Open support page in external browser
-	void showSupportPage();
+	//void showSupportPage();
 	//! Open donation page in external browser
-	void showDonationsPage();
+	//void showDonationsPage();
 	//! Open QtiPlot homepage in external browser
 	void showHomePage();
 	//! Open forums page at berliOS in external browser
-	void showForums();
+	//void showForums();
 	//! Open bug tracking system at berliOS in external browser
 	void showBugTracker();
 	//! Show download page in external browser
-	void downloadManual();
+	//void downloadManual();
 	//! Show translations page in external browser
-	void downloadTranslation();
+	//void downloadTranslation();
 #ifdef QTIPLOT_DEMO
 	//! Shown when the user tries to save the project.
 	void showDemoVersionMessage();
