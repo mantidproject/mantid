@@ -6,7 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-
+#include "engine.h"
 /// A debugging define
 #define ARGCHECK   // Also need mwdebug.c for this
 
@@ -106,9 +106,12 @@ static mexfunc_s_t mex_functions[] = {
 #ifdef _WIN32
   /// The function to use to compare case
   #define compare_nocase stricmp
-  #ifdef NEED_MWSIZE_SCONSCRIPT
-    /// The type of mwSize
-    #define mwSize int
+  //starting from MATLAB R2006b (version 7.3.0)
+  #if MX_API_VER <= 0x07020000 /* Version 7.2.0 */
+  //mwSize and mwIndex are defined and must be used. However,
+  /// these typedefs are not defined in previous MATLAB versions and must be defined 
+  typedef int mwSize;
+  typedef int mwIndex;
   #endif
   /// A 64-bit integer
   #define uint64_t UINT64

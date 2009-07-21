@@ -5,17 +5,33 @@ import shutil
 import re
 import MantidBuild
 
-#reject directory names that are not like r2008a
-def readVersion(dirName) :      
-        dirName = dirName.lower()
-        matVersPat = 'r\\d{4}[a-z]+'
-        compiledPat = re.compile(matVersPat)
-        goodVersion = compiledPat.findall(dirName)
-        if goodVersion :
-                return goodVersion[0]
-        else :
-                return 'Error'
+#reject directory names that aren't like r2008a or matlab_2007a
+def checkVersionInfo(dirName) :      
+  dirName = dirName.lower()
+  matVersPat = '(matlab_|r)\\d{4}[a-z]+'
+  foundVersions = re.findall(matVersPat, dirName)
+  if foundVersions :
+    return foundVersions[0]
+  else :
+    return 'Error'
 
+# gets what looks like the oldest version that is installed in the passed directory
+def getInstallDir(baseDir) :
+  allContents = os.listdir(baseDir)
+  # using dictionary for case insentive sorting 
+  keys = []
+  paths = {}
+  for dir in allContents :
+    if ( checkVersionInfo(dir) != 'Error' ) :
+      keys.append(dir.lower())
+      paths[dir.lower()] = dir
+  
+  if ( len(keys) < 1 ) :
+    print '--Fatal error: couldn\'t find your matlab directory.  Is it in a default locations?----'
+  keys.sort()                            #the version numbers go up in alphabetical order, everything is in lower case now
+  matlabDir = paths[keys[0]]              #the earliest version is this one at the start of the list, use that
+  return baseDir + matlabDir
+  
 #GET LIST OF CPPS
 codeFolder = os.path.abspath('./src')
 listCpps = MantidBuild.getCPPFiles(codeFolder)
@@ -26,24 +42,7 @@ myenv.Append(CPPDEFINES=[('IN_MANTID_MATLAB_API',1),('MATLAB_MEX_FILE',1)])
 
 if os.name == 'nt' :
   # get a list of their matlab install directories, should be one directory for each installed version
-  MATLABBASE = 'C:/Matlab/'              #demand they have installed in this directory
-  allContents = os.listdir(MATLABBASE)
-  # we are going  to store version information in a dictionary and link it to the directorys via a key
-  keys = []
-  versions = {}
-  paths = {}
-  for dir in allContents :
-    if ( readVersion(dir) != 'Error' ) :
-	  keys.append(dir.lower())
-	  paths[dir.lower()] = dir
-	  versions[dir.lower()] = readVersion(dir)
-  
-  if ( len(keys) < 1 ) :
-    print '--Fatal error: couldn\'t find your matlab directory.  Is it in a default locations?----'
-  keys.sort()                            #the version numbers go up in alphabetical order, everything is in lower case now
-  matlabDir = paths[keys[0]]              #the earliest version is this one at the start of the list, use that
-  matlabPath = MATLABBASE + matlabDir
-  matlabVersion = versions[keys[0]]
+  matlabPath = getInstallDir('C:/Matlab/')  #requires that matlab is in a subdirectory of this directory
   
   shutil.copy(matlabPath+'/extern/src/mwdebug.c','./src')
   myenv.Append(CPPPATH=[matlabPath+'/extern/include'])
@@ -51,17 +50,10 @@ if os.name == 'nt' :
   myenv.Append(MYLIBLIST=['libmex', 'libmx','libmat'])
     
 else:
-    myenv.Append(CPPPATH=['/usr/local/matlab_2007a/extern/include'])
-    myenv.Append(MYLIBDIRLIST=['/usr/local/matlab_2007a/bin/glnxa64'])
-    myenv.Append(MYLIBLIST=['mex'])
-
-#now check that the version old versions require us to define something, new versions require that we don't
-MWSIZE_PROBLEM_VERSION = 'r2006a'       #in this version, and all versions before, mwSize is not defined in the Matlab headers
-versionCompare = [MWSIZE_PROBLEM_VERSION]
-versionCompare.append(matlabVersion)  #get ready to compare our versions to those problem ones
-versionCompare.sort()                 #is the version higher or lower?
-if ( versionCompare[len(versionCompare)-1] == MWSIZE_PROBLEM_VERSION ) : #the version is less than or equal to r2006a
-  myenv.Append(CPPDEFINES=[('NEED_MWSIZE_SCONSCRIPT',1)])
+  matlabPath = getInstallDir('/usr/local/')         #requires matlab is installed on /usr/local, there may be more than one version there
+  myenv.Append(CPPPATH=[matlabPath+'/extern/include'])
+  myenv.Append(MYLIBDIRLIST=[matlabPath+'/bin/glnxa64'])
+  myenv.Append(MYLIBLIST=['mex'])
 
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
