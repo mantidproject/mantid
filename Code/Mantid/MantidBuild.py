@@ -93,5 +93,13 @@ def copyTreeWithRe(source, dest, pattern):
 				shutil.copy2(source + '/' +  file,dest + '/' +  file)
 		
 	
-
-
+# call with e.g.  getConfigFlags(''gsl-config --cflags')
+def getConfigFlags(command) :
+	f=os.popen(command)
+	flags=re.sub('\n','',f.readline())
+	f.close()
+	if (len(flags)>1) :
+		res = re.split("\s+",flags)
+	else :
+		res = flags
+	return res

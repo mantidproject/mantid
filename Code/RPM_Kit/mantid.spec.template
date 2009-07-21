@@ -66,7 +66,7 @@ Mantid
 cd Code/Mantid
 sed -i -e "s!USRLOCALINCLUDE = .*'!USRLOCALINCLUDE = '/usr/local/include'!" SConstruct
 sed -i -e "s!USRINCLUDE = .*!USRINCLUDE = '%{_includedir}'!" SConstruct
-sed -i -e "s!USRLIB = .*'!USRLIB = '%{usrlibdir}'!" SConstruct
+sed -i -e "s!USRLIB = .*'!USRLIB = '%{_usrlibdir}'!" SConstruct
 sed -i -e "s!MANTIDLIB = .*'!MANTIDLIB = '%{mantidlibdir}'!" SConstruct
 sed -i -e "s!MANTIDPLUGINS = .*'!MANTIDPLUGINS = '%{mantidpluginsdir}'!" SConstruct
 

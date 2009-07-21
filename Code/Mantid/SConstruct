@@ -17,7 +17,7 @@ else :
 USRLOCALINCLUDE = '/usr/local/include'
 USRLOCALLIB = '/usr/local/lib'
 USRINCLUDE = '/usr/include'
-USRLIB = '%{usrlibdir}'
+USRLIB = '%{_usrlibdir}'
 MANTIDLIB = '/opt/Mantid/bin'
 MANTIDPLUGINS = '/opt/Mantid/plugins'
   
@@ -194,14 +194,8 @@ if os.name == 'posix':
 	    cflags.append('-O3')
 
 	env.Append(LINKFLAGS=['-g'])
-	f=os.popen('gsl-config --cflags')
-	flags=re.sub('\n','',f.readline())
-	if (len(flags)>1):
-		cflags.append(re.split("\s+",flags))
-	f.close()
-	f=os.popen('gsl-config --libs')
-	flags=re.sub('\n','',f.readline())
-	lpts=re.split("\s+",flags)
+	cflags.append(MantidBuild.getConfigFlags('gsl-config --cflags'))
+	lpts.append(MantidBuild.getConfigFlags('gsl-config --libs'))
 	lpts.append('-g')
 			
 print "CPPPATHS: ",cppPaths
@@ -239,13 +233,12 @@ if os.name != 'nt':
     lpts.append('-Wl,-rpath,'+MANTIDLIB)
     lpts.append('-Wl,-rpath,'+MANTIDPLUGINS)
   else :
-	##
-	## BIT FOR -Wl,-rpath : This avoids the STUPID STUPID export LD_PATH in run_test 
-	## 
+    ##
+    ## BIT FOR -Wl,-rpath : This avoids the STUPID STUPID export LD_PATH in run_test 
+    ## 
     lpts.append('-Wl,-rpath,./Bin/Shared')
-    print lpts
-    env.Append(LINKFLAGS=lpts)
-	
+  print 'LINKFLAGS: ',lpts
+  env.Append(LINKFLAGS=lpts)
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
 env.Append(CPPPATH=cppPaths)
