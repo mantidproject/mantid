@@ -9,7 +9,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidDataHandling/LoadInstrument.h"
 //
-#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -111,7 +111,7 @@ void testExecOnLoadraw()
     TS_ASSERT( algToBeTested.isExecuted() );
 
     // Get back the saved workspace
-    MatrixWorkspace_sptr output;
+   MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // set to 4 for CSP78173
@@ -127,7 +127,7 @@ void testExecOnLoadraw()
     // Check that the X data is as expected
     TS_ASSERT_EQUALS( output2D->dataX(2)[777], 15550.0);
 
-    // Check the unit has been set correctly
+     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
     // Check units of Y axis are "Counts"
@@ -139,20 +139,22 @@ void testExecOnLoadraw()
     //
     // check that the instrument data has been loaded, copied from LoadInstrumentTest
     //
-    boost::shared_ptr<IInstrument> i = output->getInstrument();
+   boost::shared_ptr<IInstrument> i = output->getInstrument();
     //std::cerr << "Count = " << i.use_count();
     boost::shared_ptr<IComponent> source = i->getSource();
     TS_ASSERT( source != NULL);
-    if(source != NULL )
+  if(source != NULL )
     {
         TS_ASSERT_EQUALS( source->getName(), "source");
         TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
 
-        boost::shared_ptr<IComponent> samplepos = i->getSample();
+       boost::shared_ptr<IComponent> samplepos = i->getSample();
         TS_ASSERT_EQUALS( samplepos->getName(), "some-surface-holder");
         TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
 
-        boost::shared_ptr<Detector> ptrDet103 = boost::dynamic_pointer_cast<Detector>(i->getDetector(103));
+      boost::shared_ptr<Detector> ptrDet103 = boost::dynamic_pointer_cast<Detector>(i->getDetector(103));
+	  if(ptrDet103!=NULL)
+	  {
         TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
         TS_ASSERT_EQUALS( ptrDet103->getName(), "linear-detector-pixel");
         TS_ASSERT_DELTA( ptrDet103->getPos().X(), 12.403,0.01);
@@ -161,10 +163,12 @@ void testExecOnLoadraw()
         TS_ASSERT_DELTA(d,2.1561,0.0001);
         double cmpDistance = ptrDet103->getDistance(*samplepos);
         TS_ASSERT_DELTA(cmpDistance,2.1561,0.0001);
+	  }
     }
+
     //
     // Get the map from the workspace : TESTS from LoadMappingTest.h
-    const SpectraDetectorMap& map=output->spectraMap();
+  	  const SpectraDetectorMap& map=output->spectraMap();
     TS_ASSERT( &map != NULL);
     if(&map != NULL )
     {
@@ -234,7 +238,7 @@ private:
   std::string myOutputSpace;
 
   SaveNexusProcessed saveNexusP;
-  Mantid::DataHandling::LoadRaw loader;
+  Mantid::DataHandling::LoadRaw3 loader;
   std::string outputSpace;
   std::string outputFile;
 };

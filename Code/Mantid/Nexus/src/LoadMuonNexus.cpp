@@ -19,6 +19,7 @@
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
 
+
 namespace Mantid
 {
   namespace NeXus
@@ -33,7 +34,7 @@ namespace Mantid
     LoadMuonNexus::LoadMuonNexus() : 
       Algorithm(),
       m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
-      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),m_entrynumber(0)
     {}
 
     /// Initialisation method.
@@ -44,10 +45,15 @@ namespace Mantid
       exts.push_back("nxs");
       declareProperty( "Filename", "", new FileValidator(exts),
         "Name of the Nexus file to read, as a full or relative path");
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
+     /* declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
+        "The name of the workspace to be created as the output of the\n"
+        "algorithm. For multiperiod files, one workspace will be\n"
+        "generated for each period");*/
+	  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace to be created as the output of the\n"
         "algorithm. For multiperiod files, one workspace will be\n"
         "generated for each period");
+
       
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
@@ -66,6 +72,9 @@ namespace Mantid
         "Determines whether the spectra are automatically grouped\n"
         "together based on the groupings in the NeXus file, only\n"
         "for single period data (default no)");
+
+	   declareProperty("EntryNumber", 0, mustBePositive->clone(),
+    "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -78,6 +87,8 @@ namespace Mantid
     {
         // Retrieve the filename from the properties
         m_filename = getPropertyValue("Filename");
+		// Retrieve the entry number
+	    m_entrynumber = getProperty("EntryNumber");
 
         MuonNexusReader nxload;
         if (nxload.readFromFile(m_filename) != 0)
@@ -90,8 +101,19 @@ namespace Mantid
         m_instrument_name = nxload.getInstrumentName();
         // Read in the number of spectra in the Nexus file
         m_numberOfSpectra = nxload.t_nsp1;
-        // Read the number of periods in this file
-        m_numberOfPeriods = nxload.t_nper;
+		if(m_entrynumber!=0)
+		{
+			m_numberOfPeriods=1;
+			if(m_entrynumber>nxload.t_nper)
+			{
+				throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
+			}
+		}
+		else
+		{
+			// Read the number of periods in this file
+			m_numberOfPeriods = nxload.t_nper;
+		}
         // Need to extract the user-defined output workspace name
         Property *ws = getProperty("OutputWorkspace");
         std::string localWSName = ws->value();
@@ -138,15 +160,30 @@ namespace Mantid
         // Set the unit on the workspace to TOF
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
+		//g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
+		WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+		if(m_numberOfPeriods>1)
+		{	
+			if(wsGrpSptr)wsGrpSptr->add(localWSName);
+			setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+		}
+		
         API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
         // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
         for (int period = 0; period < m_numberOfPeriods; ++period) {
+			if(m_entrynumber!=0)
+			{
+				period=m_entrynumber-1;
+				if(period!=0)
+				{
+					runLoadInstrument(localWorkspace );
+					runLoadMappingTable(localWorkspace );
+				}
+			}
 
-
-            std::string outputWorkspace = "OutputWorkspace";
             if (period == 0)
             {
-                // Only run the sub-algorithms once
+				// Only run the sub-algorithms once
                 runLoadInstrument(localWorkspace );
                 runLoadMappingTable(localWorkspace );
             }
@@ -160,13 +197,27 @@ namespace Mantid
                 // Create a WorkspaceProperty for the new workspace of a higher period
                 // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
                 //                (for all but the first period, which has no suffix)
-                std::stringstream suffix;
+                /*std::stringstream suffix;
                 suffix << (period+1);
-                outputWorkspace += suffix.str();
+				std::string outws("");
+                outws +="_"+suffix.str();
                 std::string WSName = localWSName + "_" + suffix.str();
-                declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
+                declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+				if(wsGrpSptr)wsGrpSptr->add(localWSName);
                 g_log.information() << "Workspace " << WSName << " created. \n";
+				if(wsGrpSptr)wsGrpSptr->add(localWSName);*/
             }
+            std::string outws("");
+			if(m_numberOfPeriods>1)
+			{
+				std::string outputWorkspace = "OutputWorkspace";
+				std::stringstream suffix;
+				suffix << (period+1);
+				outws =outputWorkspace+"_"+suffix.str();
+				std::string WSName = localWSName + "_" + suffix.str();
+				declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+				if(wsGrpSptr)wsGrpSptr->add(WSName);
+			}
 
             runLoadLog(localWorkspace );
             localWorkspace->populateInstrumentParameters();
@@ -243,13 +294,25 @@ namespace Mantid
                 groupedWS->mutableSpectraMap().populate(spec.get(),dets.get(),numHists);
 
                 // Assign the result to the output workspace property
-                setProperty(outputWorkspace,groupedWS);
+				if(m_numberOfPeriods>1)
+					setProperty(outws,groupedWS);
+				else
+				{
+					setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(groupedWS));
+
+				}
 
             }
             else
             {
                 // Assign the result to the output workspace property
-                setProperty(outputWorkspace,localWorkspace);
+				if(m_numberOfPeriods>1)
+					setProperty(outws,localWorkspace);
+				else
+				{
+					setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+				}
+
             }
 
         } // loop over periods

@@ -70,7 +70,7 @@ namespace Mantid
 
         /**  Nexus attributes. The type of each attribute is NX_CHAR
          */
-        class NXAttributes
+        class DLLExport NXAttributes
         {
         public:
             int n()const{return int(m_values.size());} ///< number of attributes

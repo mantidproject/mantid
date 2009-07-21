@@ -11,6 +11,7 @@
 #include <climits>
 
 #include <boost/shared_array.hpp>
+#include "MantidAPI/WorkspaceGroup.h"
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -119,6 +120,8 @@ namespace Mantid
             bool m_list;
             /// Have the spectrum_min/max properties been set?
             bool m_interval;
+			  /// The number of the input entry
+            int m_entrynumber;
             /// The value of the spectrum_list property
             std::vector<int> m_spec_list;
             /// The value of the spectrum_min property

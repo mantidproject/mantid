@@ -87,6 +87,10 @@ namespace Mantid
       ///a flag int value that indicates a value that wasn't set
       static const int unSetInt = INT_MAX-15;
 
+	  /// boolean flag used  to determine over write or append .nxs file
+	  bool m_bAppend;
+
+
     };
 
   } // namespace NeXus

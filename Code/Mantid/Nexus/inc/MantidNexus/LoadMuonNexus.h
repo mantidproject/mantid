@@ -8,6 +8,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include <climits>
+#include "MantidAPI/WorkspaceGroup.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -96,6 +97,9 @@ namespace Mantid
       std::string m_instrument_name;
 	  /// The sample name read from Nexus
 	  std::string m_samplename;
+
+	   /// The number of the input entry
+      int m_entrynumber;
      
       /// The number of spectra in the raw file
       int m_numberOfSpectra;

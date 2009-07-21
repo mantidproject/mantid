@@ -15,6 +15,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "Poco/Path.h"
 #include <cmath>
@@ -61,13 +62,23 @@ void LoadNexusProcessed::init()
   // required
   declareProperty("FileName", "", new FileValidator(exts),
     "Name of the Nexus file to read, as a full or relative path");
-  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> ("OutputWorkspace", "",
+  /*declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> ("OutputWorkspace", "",
+      Direction::Output),
+      "The name of the workspace to be created as the output of the\n"
+      "algorithm. For multiperiod files, one workspace may be\n"
+      "generated for each period. Currently only one workspace can\n"
+      "be saved at a time so multiperiod Mantid files are not\n"
+      "generated");*/
+
+  declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "",
       Direction::Output),
       "The name of the workspace to be created as the output of the\n"
       "algorithm. For multiperiod files, one workspace may be\n"
       "generated for each period. Currently only one workspace can\n"
       "be saved at a time so multiperiod Mantid files are not\n"
       "generated");
+
+  
   // optional
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
   mustBePositive->setLower(0);
@@ -92,117 +103,174 @@ void LoadNexusProcessed::init()
  */
 void LoadNexusProcessed::exec()
 {
-  // Retrieve the filename from the properties
-  m_filename = getPropertyValue("FileName");
-  // Need to extract the user-defined output workspace name
-  Property *ws = getProperty("OutputWorkspace");
-  std::string localWSName = ws->value();
-  boost::shared_ptr<Sample> sample;
-  //
-  m_entrynumber = getProperty("EntryNumber");
+	// Retrieve the filename from the properties
+	m_filename = getPropertyValue("FileName");
+	// Need to extract the user-defined output workspace name
+	Property *ws = getProperty("OutputWorkspace");
+	std::string localWSName = ws->value();
+	boost::shared_ptr<Sample> sample;
+	//
+	m_entrynumber = getProperty("EntryNumber");
+	double startProg=0.0;
+	double endProg=0.0;
+	double p=1.0;
+	int numberOfPeriods=0;
+	
+	//count used for the no.of workspaces in .nxs file
+	//it's zero  when an EntryNumber is given from UI
+	// if no EntryNumber number given from UI it's equal to 
+	//the number of workspaces in .nxs file
+	int period=1;
+	
+	// create ws group
+	WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+	
+	//if  EntryNumber property is 0( default value ) create ws group and 
+	//load all the workspaces from  .nxs file to workspace group
+	if(m_entrynumber==0)
+	{
+		//root of  .nxs file
+		NXRoot nexusRoot (m_filename);
+		//add  outputworkspace to workspace group
+	    if(wsGrpSptr)wsGrpSptr->add(localWSName);
+		 setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+		 //get the no.of workspaces in .nxs files
+		 std::vector<NXClassInfo> grpVec=nexusRoot.groups();
+		 // get the workspace count from .nxs file
+		 numberOfPeriods=period=grpVec.size();
+		  
+		  p= double(1)/period;
+	}
+	
+   //below do...while loop is introduced to handle workspace groups
+	//if no EntryNumber given from UI loop is  executed period times
+	// if an EntryNumber is given from UI it's executed once to select the given workspace no. from.nxs file
+	do{
+		endProg+=p;
+		if (nexusFile->openNexusRead(m_filename, m_entrynumber) != 0)
+	{
+		g_log.error("Failed to read file " + m_filename);
+		throw Exception::FileError("Failed to read to file", m_filename);
+	}
+	if (nexusFile->getWorkspaceSize(m_numberofspectra, m_numberofchannels, m_xpoints, m_uniformbounds,
+		m_axes, m_yunits) != 0)
+	{
+		g_log.error("Failed to read data size");
+		throw Exception::FileError("Failed to read data size", m_filename);
+	}
 
-  if (nexusFile->openNexusRead(m_filename, m_entrynumber) != 0)
-  {
-    g_log.error("Failed to read file " + m_filename);
-    throw Exception::FileError("Failed to read to file", m_filename);
-  }
-  if (nexusFile->getWorkspaceSize(m_numberofspectra, m_numberofchannels, m_xpoints, m_uniformbounds,
-      m_axes, m_yunits) != 0)
-  {
-    g_log.error("Failed to read data size");
-    throw Exception::FileError("Failed to read data size", m_filename);
-  }
+	// validate the optional parameters, if set
+	checkOptionalProperties();
+	int total_specs = m_numberofspectra;
 
-  // validate the optional parameters, if set
-  checkOptionalProperties();
-  int total_specs = m_numberofspectra;
+	//// Create the 2D workspace for the output
+	//if (m_interval || m_list)
+	//{
+	//  total_specs = m_spec_list.size();
+	//  if (m_interval)
+	//  {
+	//    total_specs += (m_spec_max - m_spec_min + 1);
+	//    m_spec_max += 1;
+	//  }
+	//}
+	//else
+	//{
+	//  total_specs = m_numberofspectra;
+	//  m_spec_min = 1;
+	//  m_spec_max = m_numberofspectra + 1;
+	//}
 
-  //// Create the 2D workspace for the output
-  //if (m_interval || m_list)
-  //{
-  //  total_specs = m_spec_list.size();
-  //  if (m_interval)
-  //  {
-  //    total_specs += (m_spec_max - m_spec_min + 1);
-  //    m_spec_max += 1;
-  //  }
-  //}
-  //else
-  //{
-  //  total_specs = m_numberofspectra;
-  //  m_spec_min = 1;
-  //  m_spec_max = m_numberofspectra + 1;
-  //}
+	// create output workspace of required size
+	DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+		WorkspaceFactory::Instance().create("Workspace2D", total_specs, m_xpoints, m_numberofchannels));
+	// set first axis name
+	size_t colon = m_axes.find(":");
+	if (colon != std::string::npos)
+	{
+		try
+		{
+			localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0, colon));
+		} catch (std::runtime_error&)
+		{ 
+			g_log.warning("Unable to set Axis(0) units");
+		}
+	}
+	// set Yunits
+	if (m_yunits.size() > 0)
+		localWorkspace->setYUnit(m_yunits);
 
-  // create output workspace of required size
-  DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      WorkspaceFactory::Instance().create("Workspace2D", total_specs, m_xpoints, m_numberofchannels));
-  // set first axis name
-  size_t colon = m_axes.find(":");
-  if (colon != std::string::npos)
-  {
-    try
-    {
-      localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0, colon));
-    } catch (std::runtime_error&)
-    { 
-      g_log.warning("Unable to set Axis(0) units");
-    }
-  }
-  // set Yunits
-  if (m_yunits.size() > 0)
-    localWorkspace->setYUnit(m_yunits);
+	Histogram1D::RCtype xValues;
+	xValues.access() = localWorkspace->dataX(0);
+	if (m_uniformbounds)
+		nexusFile->getXValues(xValues.access(), 0);
+	int counter = 0;
+	API::Progress progress(this,startProg,endProg,period*m_numberofspectra);
+	for (int i = 1; i <= m_numberofspectra; ++i)
+	{
+		//int histToRead = i + period*(m_numberOfSpectra+1);
+		//if ((i >= m_spec_min && i < m_spec_max) || (m_list
+		//    && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end()))
+		//{
+		MantidVec& values = localWorkspace->dataY(counter);
+		MantidVec& errors = localWorkspace->dataE(counter);
+		nexusFile->getSpectra(values, errors, i);
+		if (!m_uniformbounds)
+		{
+			nexusFile->getXValues(xValues.access(), i - 1);
+		}
+		localWorkspace->setX(counter,xValues);
+		//localWorkspace->getAxis(1)->spectraNo(counter) = i;
+		//
+		++counter;
+		progress.report();
+		//    }
+	}
 
-  Histogram1D::RCtype xValues;
-  xValues.access() = localWorkspace->dataX(0);
-  if (m_uniformbounds)
-    nexusFile->getXValues(xValues.access(), 0);
-  int counter = 0;
-  API::Progress progress(this,0.,1.,m_numberofspectra);
-  for (int i = 1; i <= m_numberofspectra; ++i)
-  {
-    //int histToRead = i + period*(m_numberOfSpectra+1);
-    //if ((i >= m_spec_min && i < m_spec_max) || (m_list
-    //    && find(m_spec_list.begin(), m_spec_list.end(), i) != m_spec_list.end()))
-    //{
-      MantidVec& values = localWorkspace->dataY(counter);
-      MantidVec& errors = localWorkspace->dataE(counter);
-      nexusFile->getSpectra(values, errors, i);
-      if (!m_uniformbounds)
-      {
-        nexusFile->getXValues(xValues.access(), i - 1);
-      }
-      localWorkspace->setX(counter,xValues);
-      //localWorkspace->getAxis(1)->spectraNo(counter) = i;
-      //
-      ++counter;
-      progress.report();
-//    }
-  }
+	sample = localWorkspace->getSample();
+	nexusFile->readNexusProcessedSample(sample);
+	// Run the LoadIntsturment algorithm if name available
+	m_instrumentName = nexusFile->readNexusInstrumentName();
+	if ( ! m_instrumentName.empty() )
+		runLoadInstrument(localWorkspace);
+	//  if (nexusFile->readNexusInstrumentXmlName(m_instrumentxml, m_instrumentdate, m_instrumentversion))
+	//  {
+	//    if (m_instrumentxml != "NoXmlFileFound" && m_instrumentxml != "NoNameAvailable")
+	//      runLoadInstrument(localWorkspace);
+	else
+		g_log.warning("No instrument file name found in the Nexus file");
+	//  }
+	// get any spectraMap info
+	boost::shared_ptr<IInstrument> localInstrument = localWorkspace->getInstrument();
+	nexusFile->readNexusProcessedSpectraMap(localWorkspace);
+	// Assign the result to the output workspace property
+	std::string outputWorkspace = "OutputWorkspace";
+	nexusFile->readNexusParameterMap(localWorkspace);
+	//if(period!=0)
+	if(numberOfPeriods!=0)
+	{	
+		std::stringstream suffix;
+		suffix << (m_entrynumber+1);
+		std::string outws =outputWorkspace+"_"+suffix.str();
+		std::string WSName = localWSName + "_" + suffix.str();
+		declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+		if(wsGrpSptr)wsGrpSptr->add(WSName);
+		setProperty(outws,boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
+		//--period;
+		++m_entrynumber;
+	}
+	else
+	{	
+		setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+	}
+	
+	nexusFile->closeNexusFile();
 
-  sample = localWorkspace->getSample();
-  nexusFile->readNexusProcessedSample(sample);
-  // Run the LoadIntsturment algorithm if name available
-  m_instrumentName = nexusFile->readNexusInstrumentName();
-  if ( ! m_instrumentName.empty() )
-    runLoadInstrument(localWorkspace);
-//  if (nexusFile->readNexusInstrumentXmlName(m_instrumentxml, m_instrumentdate, m_instrumentversion))
-//  {
-//    if (m_instrumentxml != "NoXmlFileFound" && m_instrumentxml != "NoNameAvailable")
-//      runLoadInstrument(localWorkspace);
-  else
-    g_log.warning("No instrument file name found in the Nexus file");
-//  }
-  // get any spectraMap info
-  boost::shared_ptr<IInstrument> localInstrument = localWorkspace->getInstrument();
-  nexusFile->readNexusProcessedSpectraMap(localWorkspace);
-  nexusFile->readNexusParameterMap(localWorkspace);
-  // Assign the result to the output workspace property
-  std::string outputWorkspace = "OutputWorkspace";
-  setProperty(outputWorkspace, localWorkspace);
-  nexusFile->closeNexusFile();
+	loadAlgorithmHistory(localWorkspace);
+	startProg=endProg;
+	--period;
+	
+	}while(period!=0);
 
-  loadAlgorithmHistory(localWorkspace);
 
   return;
 }

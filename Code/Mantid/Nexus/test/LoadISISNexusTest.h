@@ -14,6 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/WorkspaceGroup.h"
 
 class LoadISISNexusTest : public CxxTest::TestSuite
 {
@@ -84,6 +85,10 @@ public:
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 
+	
+		
+		
+
         MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
         TS_ASSERT_EQUALS(ws->blocksize(),5);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
@@ -99,6 +104,70 @@ public:
         TS_ASSERT_EQUALS(ws->readY(7)[1],2.);
         TS_ASSERT_EQUALS(ws->readY(9)[3],1.);
         TS_ASSERT_EQUALS(ws->readY(12)[1],1.);
+    }
+	 void testMultiPeriodEntryNumberZero()
+    {
+        Mantid::API::FrameworkManager::Instance();
+        LoadISISNexus ld;
+        ld.initialize();
+        ld.setPropertyValue("Filename","../../../../Test/Nexus/TEST00000008.nxs");
+        ld.setPropertyValue("OutputWorkspace","outWS");
+        ld.setPropertyValue("SpectrumMin","10");
+        ld.setPropertyValue("SpectrumMax","20");
+ 		ld.setPropertyValue("EntryNumber","0");
+        TS_ASSERT_THROWS_NOTHING(ld.execute());
+        TS_ASSERT(ld.isExecuted());
+		
+		WorkspaceGroup_sptr grpout;//=WorkspaceGroup_sptr(new WorkspaceGroup);
+		TS_ASSERT_THROWS_NOTHING(grpout=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("outWS")));
+
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS_1"));
+        TS_ASSERT_EQUALS(ws->blocksize(),995);
+        TS_ASSERT_EQUALS(ws->getNumberHistograms(),30);
+
+        TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
+        TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
+        TS_ASSERT_EQUALS(ws->readX(0)[2],7.);
+        
+        TS_ASSERT_EQUALS(ws->readY(5)[1],0.);
+        TS_ASSERT_EQUALS(ws->readY(6)[0],0.);
+        TS_ASSERT_EQUALS(ws->readY(8)[3],0.);
+
+        TS_ASSERT_EQUALS(ws->readY(7)[1],0.);
+        TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
+        TS_ASSERT_EQUALS(ws->readY(12)[1],0.);
+    }
+	  void testMultiPeriodEntryNumberNonZero()
+    {
+        Mantid::API::FrameworkManager::Instance();
+        LoadISISNexus ld;
+        ld.initialize();
+        ld.setPropertyValue("Filename","../../../../Test/Nexus/TEST00000008.nxs");
+        ld.setPropertyValue("OutputWorkspace","outWS");
+        ld.setPropertyValue("SpectrumMin","10");
+        ld.setPropertyValue("SpectrumMax","20");
+  		ld.setPropertyValue("EntryNumber","5");
+        TS_ASSERT_THROWS_NOTHING(ld.execute());
+        TS_ASSERT(ld.isExecuted());
+		
+		//WorkspaceGroup_sptr grpout;//=WorkspaceGroup_sptr(new WorkspaceGroup);
+		//TS_ASSERT_THROWS_NOTHING(grpout=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("outWS")));
+
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS_5"));
+        TS_ASSERT_EQUALS(ws->blocksize(),995);
+        TS_ASSERT_EQUALS(ws->getNumberHistograms(),30);
+
+        TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
+        TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
+        TS_ASSERT_EQUALS(ws->readX(0)[2],7.);
+        
+        TS_ASSERT_EQUALS(ws->readY(5)[1],0.);
+        TS_ASSERT_EQUALS(ws->readY(6)[0],0.);
+        TS_ASSERT_EQUALS(ws->readY(8)[3],0.);
+
+        TS_ASSERT_EQUALS(ws->readY(7)[1],0.);
+        TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
+        TS_ASSERT_EQUALS(ws->readY(12)[1],0.);
     }
 };
 

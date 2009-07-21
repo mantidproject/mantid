@@ -63,7 +63,7 @@ namespace NeXus
       "A comma seperated or array with the list of index number to read" );
 
     declareProperty("EntryNumber",0, mustBePositive->clone(), 
-      "The particular entry number to read (default: the last entry)" );
+      "The particular entry number to read (default: Load all workspaces and creates a workspace group)" );
   }
 
   /** Executes the algorithm. Reading in the file and creating and populating
@@ -98,15 +98,15 @@ namespace NeXus
     }
     if( definition[0]==muonTd )
     {
-        runLoadMuonNexus();
+	     runLoadMuonNexus();
     }
     else if( entryName[0]=="mantid_workspace_1" )
     {
-        runLoadNexusProcessed();
+		     runLoadNexusProcessed();
     }
     else if( entryName[0]=="raw_data_1" )
     {
-        runLoadIsisNexus();
+		runLoadIsisNexus();
     }
     else
     {
@@ -145,7 +145,8 @@ namespace NeXus
          loadMuonNexus->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
          loadMuonNexus->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
       }
-
+	  loadMuonNexus->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
+    
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
@@ -157,33 +158,38 @@ namespace NeXus
       }
       if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
       // Get pointer to the workspace created
-      m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
-      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
+    //  m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
+    //  setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
+	  Workspace_sptr localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
+	  setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
       //
       // copy pointers to any new output workspaces created by alg LoadMuonNexus to alg LoadNexus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
       // until name not found
       //
-      int period=0;
-      bool noError=true;
-      while(noError)
-      {
-          std::stringstream suffix;
-          period++;
-          suffix << (period+1);
-          std::string opWS = outputWorkspace + suffix.str();
-          std::string WSName = m_workspace + "_" + suffix.str();
-          try
-          {
-              m_localWorkspace=loadMuonNexus->getProperty(opWS); 
-              declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
-              setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
-          }
-          catch (Exception::NotFoundError)
-          {
-              noError=false;
-          }
-      }
+	
+	  int period=0;
+	  bool noError=true;
+	  while(noError)
+	  {
+		  std::stringstream suffix;
+		  //period++;
+		  suffix << (period+1);
+		  std::string opWS = outputWorkspace + "_"+suffix.str();
+		  std::string WSName = m_workspace + "_" + suffix.str();
+		  try
+		  {
+			  m_localWorkspace=loadMuonNexus->getProperty(opWS); 
+			  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
+			  setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+			  period++;
+		  }
+		  catch (Exception::NotFoundError)
+		  {
+			  noError=false;
+		  }
+	  }
+	 
   }
 
   void LoadNexus::runLoadNexusProcessed()
@@ -218,8 +224,11 @@ namespace NeXus
       }
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadNexusProcessed sub-algorithm");
       // Get pointer to the workspace created
-      m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
-      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
+     // m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
+     // setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
+	   Workspace_sptr localworkspace=loadNexusPro->getProperty(outputWorkspace);
+	   setProperty<Workspace_sptr>(outputWorkspace,localworkspace); 
+	 //  g_log.error()<<"Outputworkspace ="<<localworkspace<<std::endl;
       //
       // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
@@ -231,15 +240,16 @@ namespace NeXus
       while(noError)
       {
           std::stringstream suffix;
-          period++;
+         // period++;
           suffix << (period+1);
-          std::string opWS = outputWorkspace + suffix.str();
+          std::string opWS = outputWorkspace + "_"+ suffix.str();
           std::string WSName = m_workspace + "_" + suffix.str();
           try
           {
               m_localWorkspace=loadNexusPro->getProperty(opWS); 
               declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
               setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+			  period++;
           }
           catch (Exception::NotFoundError)
           {
@@ -267,6 +277,7 @@ namespace NeXus
          loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
          loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
       }
+	  loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -279,8 +290,10 @@ namespace NeXus
       }
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
       // Get pointer to the workspace created
-      m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
-      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
+      //m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
+      //setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
+	  Workspace_sptr localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
+      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
       //
       // copy pointers to any new output workspaces created by alg LoadNexusProcessed to alg LoadNexus
       // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
@@ -291,15 +304,16 @@ namespace NeXus
       while(noError)
       {
           std::stringstream suffix;
-          period++;
+         // period++;
           suffix << (period+1);
-          std::string opWS = outputWorkspace + suffix.str();
+          std::string opWS = outputWorkspace + "_"+suffix.str();
           std::string WSName = m_workspace + "_" + suffix.str();
           try
           {
               m_localWorkspace=loadNexusPro->getProperty(opWS); 
               declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
               setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
+			  period++;
           }
           catch (Exception::NotFoundError)
           {

@@ -66,7 +66,9 @@ namespace NeXus
     declareProperty(new ArrayProperty<int>("SpectrumList"),
       "List of spectrum numbers to read, only for single period\n"
       "data. Not yet implemented");
-    declareProperty("EntryNumber", 0, mustBePositive);
+    //declareProperty("EntryNumber", 0, mustBePositive);
+	declareProperty("Append",false,"Determines whether .nxs file needs to be\n"
+		"over written or appended"); 
   }
 
   /** Executes the algorithm. Reading in the file and creating and populating
@@ -81,6 +83,7 @@ namespace NeXus
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
+	m_bAppend=getProperty("Append");
 
     m_spec_list = getProperty("SpectrumList");
     m_spec_max = getProperty("SpectrumMax");
@@ -91,6 +94,7 @@ namespace NeXus
     const std::string workspaceID = m_inputWorkspace->id();
     if (workspaceID.find("Workspace2D") == std::string::npos )
         throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces.");
+	
 
     NexusFileIO *nexusFile= new NexusFileIO();
     if( nexusFile->openNexusWrite( m_filename ) != 0 )
@@ -99,11 +103,12 @@ namespace NeXus
        throw Exception::FileError("Failed to open file", m_filename);
     }
 	progress(0.2);
-    if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
-    {
-       g_log.error("Failed to write file");
-       throw Exception::FileError("Failed to write to file", m_filename);
-    }
+	if( nexusFile->writeNexusProcessedHeader( m_title ) != 0 )
+	{
+		g_log.error("Failed to write file");
+		throw Exception::FileError("Failed to write to file", m_filename);
+	}
+
 
     progress(0.3);
     // write instrument data, if present and writer enabled

@@ -52,7 +52,7 @@ namespace Geometry
 */
 class IComponent;
 /// Define a type for a unique component identifier.
-typedef void* ComponentID;
+typedef IComponent* ComponentID;
 
 class DLLExport IComponent
 {

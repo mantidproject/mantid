@@ -91,17 +91,18 @@ namespace NeXus
    // format otherwise as compressed hdf5
    //
    if(Poco::File(m_filename).exists())
-       mode = NXACC_RDWR;
+ 	   mode = NXACC_RDWR;
+	
    else
    {
-       if( fileName.find(".xml") < fileName.size() || fileName.find(".XML") < fileName.size() )
-       {
-           mode = NXACC_CREATEXML;
-           m_nexuscompression = NX_COMP_NONE;
-       }
-       else
-           mode = m_nexusformat;
-       mantidEntryName="mantid_workspace_1";
+	   if( fileName.find(".xml") < fileName.size() || fileName.find(".XML") < fileName.size() )
+	   {
+		   mode = NXACC_CREATEXML;
+		   m_nexuscompression = NX_COMP_NONE;
+	   }
+	   else
+		   mode = m_nexusformat;
+	   mantidEntryName="mantid_workspace_1";
    }
    status=NXopen(fileName.c_str(), mode, &fileID);
    if(status==NX_ERROR)
@@ -109,6 +110,7 @@ namespace NeXus
        g_log.error("Unable to open file " + fileName);
        throw Exception::FileError("Unable to open File:" , fileName);	  
    }
+   
    //
    // for existing files, search for any current mantid_workspace_<n> entries and set the
    // new name to be n+1 so that we do not over-write by default. This may need changing.
@@ -116,9 +118,9 @@ namespace NeXus
    if(mode==NXACC_RDWR)
    {
        int count=findMantidWSEntries();
-       std::stringstream suffix;
-       suffix << (count+1);
-       mantidEntryName="mantid_workspace_"+suffix.str();
+	   std::stringstream suffix;
+	   suffix << (count+1);
+	   mantidEntryName="mantid_workspace_"+suffix.str();
    }
    //
    // make and open the new mantid_workspace_<n> group
@@ -126,7 +128,8 @@ namespace NeXus
    //
    status=NXmakegroup(fileID,mantidEntryName.c_str(),className.c_str());
    if(status==NX_ERROR)
-       return(2);
+	   return(2);
+
    status=NXopengroup(fileID,mantidEntryName.c_str(),className.c_str());
    return(0);
   }
@@ -189,9 +192,10 @@ namespace NeXus
 
   int NexusFileIO::closeNexusFile()
   {
+
    NXstatus status;
    status=NXclosegroup(fileID);
-   status=NXclose(&fileID);
+   status=NXclose(&fileID);   
    return(0);
   }
 
@@ -302,13 +306,15 @@ namespace NeXus
   {
    NXstatus status;
    int dimensions[1];
-   dimensions[0]=value.size()+1;
+   std::string value1 = value;
+   if (value1.empty()) value1 += ' ';
+   dimensions[0]=value1.size() + 1;
    status=NXmakedata(fileID, name.c_str(), NX_CHAR, 1, dimensions);
    if(status==NX_ERROR) return(false);
    status=NXopendata(fileID, name.c_str());
    for(unsigned int it=0; it<attributes.size(); ++it)
        status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size(), NX_CHAR);
-   status=NXputdata(fileID, (void*)value.c_str());
+   status=NXputdata(fileID, (void*)value1.c_str());
    status=NXclosedata(fileID);
    return(true);
   }

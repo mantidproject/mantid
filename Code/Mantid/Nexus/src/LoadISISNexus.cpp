@@ -41,13 +41,17 @@ void LoadISISNexus::init()
     exts.push_back("NXS");
     exts.push_back("nxs");
     declareProperty("Filename","",new FileValidator(exts));
-    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+   // declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+
+	declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("SpectrumMin", 0, mustBePositive);
     declareProperty("SpectrumMax", unSetInt, mustBePositive->clone());
     declareProperty(new ArrayProperty<int>("SpectrumList"));
+	  declareProperty("EntryNumber", 0, mustBePositive->clone(),
+    "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -60,6 +64,8 @@ void LoadISISNexus::exec()
 {
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
+     // Retrieve the entry number
+	 m_entrynumber = getProperty("EntryNumber");
 
     // Open NeXus file
     NXstatus stat=NXopen(m_filename.c_str(), NXACC_READ, &m_fileID);
@@ -78,6 +84,11 @@ void LoadISISNexus::exec()
     openNexusGroup("detector_1","NXdata");
 
     readDataDimensions();
+	if(m_entrynumber!=0)
+	{
+		m_numberOfPeriods=1;
+		
+	}
 
     const int lengthIn = m_numberOfChannels + 1;
 
@@ -116,6 +127,14 @@ void LoadISISNexus::exec()
 
     std::string outputWorkspace = "OutputWorkspace";
 
+	WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+	if(m_numberOfPeriods>1)
+	{	
+		if(wsGrpSptr)wsGrpSptr->add(localWSName);
+		setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+	}
+		
+
     // Create the 2D workspace for the output
     DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
@@ -126,6 +145,17 @@ void LoadISISNexus::exec()
     // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
     for (int period = 0; period < m_numberOfPeriods; ++period) {
 
+		if(m_entrynumber!=0)
+		{
+			period=m_entrynumber-1;
+			if(period!=0)
+			{
+				runLoadInstrument(localWorkspace );
+				loadMappingTable(localWorkspace );
+				loadProtonCharge(localWorkspace);
+				loadLogs(localWorkspace );
+			}
+		}
         if (period == 0)
         {
             // Only run the sub-algorithms once
@@ -144,12 +174,12 @@ void LoadISISNexus::exec()
             // Create a WorkspaceProperty for the new workspace of a higher period
             // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
             //                (for all but the first period, which has no suffix)
-            std::stringstream suffix;
+           /* std::stringstream suffix;
             suffix << (period+1);
             outputWorkspace += suffix.str();
             std::string WSName = localWSName + "_" + suffix.str();
             declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
-            g_log.information() << "Workspace " << WSName << " created. \n";
+            g_log.information() << "Workspace " << WSName << " created. \n";*/
             loadLogs(localWorkspace ,period);
         }
 
@@ -178,8 +208,26 @@ void LoadISISNexus::exec()
         // Just a sanity check
         assert(counter == total_specs);
 
+		std::string outws("");
+		std::string outputWorkspace = "OutputWorkspace";
+		if(m_numberOfPeriods>1)
+		{
+
+			std::stringstream suffix;
+			suffix << (period+1);
+			outws =outputWorkspace+"_"+suffix.str();
+			std::string WSName = localWSName + "_" + suffix.str();
+			declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+			if(wsGrpSptr)wsGrpSptr->add(WSName);
+			setProperty(outws,localWorkspace);
+		}
+		 else
+		 {
+			 setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+		 }
+
         // Assign the result to the output workspace property
-        setProperty(outputWorkspace,localWorkspace);
+       // setProperty(outputWorkspace,localWorkspace);
 
     }
 

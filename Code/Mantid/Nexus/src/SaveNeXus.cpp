@@ -12,6 +12,7 @@
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
+#include "Poco/File.h"
 
 namespace Mantid
 {
@@ -62,9 +63,9 @@ namespace NeXus
       "A title to describe the saved workspace" );
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("EntryNumber", unSetInt, mustBePositive,
-      "(Not implemented yet) The index number of the workspace within the Nexus file\n"
-      "(default leave unchanged)" );
+   // declareProperty("EntryNumber", unSetInt, mustBePositive,
+    //  "(Not implemented yet) The index number of the workspace within the Nexus file\n"
+     // "(default leave unchanged)" );
     declareProperty("SpectrumMin", 0, mustBePositive->clone(),
       "Number of first spectrum to read, only for single period data.\n"
       "Not yet implemented");
@@ -74,6 +75,8 @@ namespace NeXus
     declareProperty(new ArrayProperty<int>("SpectrumList"),
       "List of spectrum numbers to read, only for single period data.\n"
       "Not yet implemented");
+	declareProperty("Append",false,"Determines whether .nxs file needs to be\n"
+		"over written or appended"); 
     // option which might be required in future - should be a choice e.g. MantidProcessed/Muon1
     // declareProperty("Filetype","",new NullValidator<std::string>);
   }
@@ -88,6 +91,32 @@ namespace NeXus
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("FileName");
     m_inputWorkspace = getPropertyValue("InputWorkspace");
+   //retrieve the append property
+	m_bAppend=getProperty("Append");
+	//int period1=1;
+	std::string period("1");
+	//getting the workspace number which gives the period 
+	std::basic_string<char>::size_type index;
+	//looking for the number after "_"
+	index= m_inputWorkspace.find_last_of("_");
+	if(index!=-1)
+	{
+		std::basic_string <char>::reference ref=m_inputWorkspace.at(index+1);
+		period=ref;
+		//g_log.error()<<"str "<<str<<std::endl;
+	}
+	//if period==1
+	if(!period.compare("1"))
+	{	// if m_bAppend is default (false) overwrite (delete )the .nxs file for period 1
+		if(!m_bAppend)
+		{
+			Poco::File file(m_filename);
+			if(file.exists())
+			{
+				file.remove();
+			}
+		}
+	}
     m_filetype="NexusProcessed";
 
     if (m_filetype == "NexusProcessed")
@@ -124,9 +153,9 @@ namespace NeXus
       std::string title = getProperty("Title");
       if( !title.empty() )
          saveNexusPro->setPropertyValue("Title",getPropertyValue("Title"));
-      int entryNum = getProperty("EntryNumber");
-      if( entryNum != unSetInt )
-         saveNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
+    // int entryNum = getProperty("EntryNumber");
+   // if( entryNum != unSetInt )
+   //     saveNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try

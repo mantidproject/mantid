@@ -62,7 +62,11 @@ public:
     //
     //  test workspace, copied from LoadMuonNexusTest.h
     MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));    
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace))); 
+
+	// MatrixWorkspace_sptr output;
+    //TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"))); 
+
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006473.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
@@ -77,6 +81,7 @@ public:
 
   void testExec2()
   {
+	  //multi period test
     // same tests but with 2nd Muon Nexus file that contains 4 periods
     if ( !alg2.isInitialized() ) alg2.initialize();
   
@@ -97,12 +102,18 @@ public:
     // Copied from LoadMuonTest.h
     // Test workspace data - should be 4 separate workspaces for this 4 period file
     //
-    MatrixWorkspace_sptr output,output2,output3,output4;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+   // MatrixWorkspace_sptr output,output2,output3,output4;
+	 MatrixWorkspace_sptr output,output1,output2,output3,output4;
+   // TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+	WorkspaceGroup_sptr work_grpout;
+	TS_ASSERT_THROWS_NOTHING(work_grpout = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace))); 
+	TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
+
     TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
     TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
     TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
-    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    
+	Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output1);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006475.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
@@ -118,9 +129,8 @@ public:
     TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
 
     // Check the unit has been set correctly
-    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
+    TS_ASSERT_EQUALS( output2->getAxis(0)->unit()->unitID(), "TOF" )
   }
-
  
 private:
   LoadNexus algToBeTested,alg2;
@@ -128,5 +138,6 @@ private:
   std::string outputSpace;
 
 };
+
 
 #endif /*LOADNEXUSTEST_H_*/

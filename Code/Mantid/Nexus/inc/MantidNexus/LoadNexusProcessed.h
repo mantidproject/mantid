@@ -7,7 +7,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusFileIO.h"
+#include "MantidNexus/NexusClasses.h"
 #include <climits>
+#include "MantidAPI/WorkspaceGroup.h"
 //class NexusFileIO;
 
 
@@ -72,7 +74,7 @@ namespace Mantid
       void exec();
       /// NexusFileIO instance to do IO operations
       NexusFileIO *nexusFile;
-
+	 
       /// Load algorithm history (or process)
       void loadAlgorithmHistory(DataObjects::Workspace2D_sptr localWorkspace);
       std::time_t createTime_t_FromString(const std::string &str);

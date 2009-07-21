@@ -19,6 +19,7 @@
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "Poco/File.h"
+#include "MantidDataHandling/LoadRaw3.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -98,6 +99,7 @@ public:
   }
 void testExecOnMuon()
   {
+
     LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
@@ -132,6 +134,7 @@ void testExecOnMuon()
     algToBeTested.setPropertyValue("FileName", outputFile);
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
+	algToBeTested.setPropertyValue("Append", "0");
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
@@ -143,7 +146,7 @@ void testExecOnMuon()
     TS_ASSERT( algToBeTested.isExecuted() );
 
 	// try writing data again
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+   TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
     if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
@@ -182,6 +185,7 @@ void testExecOnLoadraw()
     algToBeTested.setPropertyValue("FileName", outputFile);
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
+	algToBeTested.setPropertyValue("Append", "0");
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
@@ -199,6 +203,9 @@ void testExecOnLoadraw()
 
 void testExecOnMuonXml()
   {
+	//  std::string s;
+   //std::getline(std::cin,s);
+
     LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
@@ -256,7 +263,7 @@ private:
   std::string title;
   Workspace2D myworkspace;
 
-  Mantid::DataHandling::LoadRaw loader;
+  Mantid::DataHandling::LoadRaw3 loader;
   std::string inputFile;
   std::string outputSpace;
   bool clearfiles;

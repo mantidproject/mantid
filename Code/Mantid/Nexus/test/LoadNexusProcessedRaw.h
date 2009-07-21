@@ -22,6 +22,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -59,8 +61,11 @@ void testExecOnLoadraw()
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
 
-    outputSpace = "het15869";
-    loader.setPropertyValue("OutputWorkspace", outputSpace);
+    outputSpace = "het158691";
+    loader.setPropertyValue("OutputWorkspace", "het158691");
+
+	// loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
+    //loader5.setPropertyValue("OutputWorkspace", "multiperiod");
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
@@ -68,11 +73,11 @@ void testExecOnLoadraw()
     //
     // get workspace
     //
-    MatrixWorkspace_sptr output;
+       MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     //
-    if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
+if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
 
     //
     saveNexusP.setPropertyValue("InputWorkspace", outputSpace);
@@ -206,6 +211,124 @@ void testExecOnLoadraw()
     }
 
   }
+  void testExecLNPwithEntryNumberZero()
+  {
+	  // test LoadNexusProcessed reading the data from SNP on Loadraw HET15869
+
+	  if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
+
+	  // specify name of workspace
+	  myOutputSpace="testLNP3";
+	  TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("OutputWorkspace", myOutputSpace));
+	  // file name to load
+	  inputFile = outputFile; // output from SNP used an input to LNP
+	  entryNumber=0;
+	  TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", inputFile));
+	  algToBeTested.setProperty("EntryNumber", entryNumber);
+
+	  std::string result;
+	  TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("FileName") )
+		  TS_ASSERT( ! result.compare(inputFile));
+	  TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("OutputWorkspace") )
+		  TS_ASSERT( ! result.compare(myOutputSpace));
+	  int res=-1;
+	  TS_ASSERT_THROWS_NOTHING( res = algToBeTested.getProperty("EntryNumber") )
+		  TS_ASSERT( res==entryNumber);
+
+	  //
+	  TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+	  TS_ASSERT( algToBeTested.isExecuted() );
+
+	  WorkspaceGroup_sptr grpoutput;
+	  TS_ASSERT_THROWS_NOTHING(grpoutput = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
+
+	  // Get back the saved workspace
+	  MatrixWorkspace_sptr output;
+	  TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(myOutputSpace+"_1")));
+	  Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+	  // Should be 2584 for file HET15869.RAW
+	  TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);
+	  // Check two X vectors are the same
+	  TS_ASSERT( (output2D->dataX(99)) == (output2D->dataX(1734)) );
+	  // Check two Y arrays have the same number of elements
+	  TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->dataY(2111).size() );
+	  // Check one particular value
+	  TS_ASSERT_EQUALS( output2D->dataY(999)[777], 9);
+	  // Check that the error on that value is correct
+	  TS_ASSERT_EQUALS( output2D->dataE(999)[777], 3);
+	  // Check that the error on that value is correct
+	  TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
+
+	  // Check the unit has been set correctly
+	  TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
+		  TS_ASSERT( ! output-> isDistribution() )
+		  // Check units of Y axis are "Counts"
+		  TS_ASSERT_EQUALS( output->YUnit(), "Counts" )
+
+		  // Check the proton charge has been set correctly
+		  TS_ASSERT_DELTA( output->getSample()->getProtonCharge(), 171.0353, 0.0001 )
+
+		  //
+		  // check that the instrument data has been loaded, copied from LoadInstrumentTest
+		  //
+		  boost::shared_ptr<IInstrument> i = output->getInstrument();
+	  //std::cerr << "Count = " << i.use_count();
+	  boost::shared_ptr<IComponent> source = i->getSource();
+	  TS_ASSERT( source != NULL);
+	  if(source != NULL )
+	  {
+		  TS_ASSERT_EQUALS( source->getName(), "undulator");
+		  TS_ASSERT_DELTA( source->getPos().Y(), 0.0,0.01);
+
+		  boost::shared_ptr<IComponent> samplepos = i->getSample();
+		  TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
+		  TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
+
+		  boost::shared_ptr<Detector> ptrDet103 = boost::dynamic_pointer_cast<Detector>(i->getDetector(103));
+		  TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
+		  TS_ASSERT_EQUALS( ptrDet103->getName(), "pixel");
+		  TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
+		  TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
+		  double d = ptrDet103->getPos().distance(samplepos->getPos());
+		  TS_ASSERT_DELTA(d,2.512,0.0001);
+		  double cmpDistance = ptrDet103->getDistance(*samplepos);
+		  TS_ASSERT_DELTA(cmpDistance,2.512,0.0001);
+	  }
+	  //
+	  // Get the map from the workspace : TESTS from LoadMappingTest.h
+	  const SpectraDetectorMap& map=output->spectraMap();
+	  TS_ASSERT( &map != NULL);
+	  if( &map != NULL )
+	  {
+
+		  // Check the total number of elements in the map for HET
+		  // This number is different from what we get from the RAW file because nexus SaveNexus
+		  // doesn't save detectors of non-existing spectra (0 in this case)
+		  TS_ASSERT_EQUALS(map.nElements(),12124);
+
+		  // Test one to one mapping, for example spectra 6 has only 1 pixel
+		  TS_ASSERT_EQUALS(map.ndet(6),1);
+
+		  // Test one to many mapping, for example 10 pixels contribute to spectra 2084
+		  TS_ASSERT_EQUALS(map.ndet(2084),10);
+
+		  // Check the id number of all pixels contributing
+		  std::vector<int> detectorgroup;
+		  detectorgroup=map.getDetectors(2084);
+		  std::vector<int>::const_iterator it;
+		  int pixnum=101191;
+		  for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
+			  TS_ASSERT_EQUALS(*it,pixnum++);
+
+		  // Test with spectra that does not exist
+		  // Test that number of pixel=0
+		  TS_ASSERT_EQUALS(map.ndet(5),0);
+		  // Test that trying to get the Detector throws.
+		  std::vector<int> test = map.getDetectors(5);
+		  TS_ASSERT(test.empty());
+	  }
+
+  }
 
 
   void testExecLoadNexus()
@@ -311,7 +434,7 @@ private:
   std::string myOutputSpace;
 
   SaveNexusProcessed saveNexusP;
-  Mantid::DataHandling::LoadRaw loader;
+  Mantid::DataHandling::LoadRaw3 loader;
   std::string outputSpace;
   std::string outputFile;
 };

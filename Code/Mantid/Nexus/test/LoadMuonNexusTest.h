@@ -162,13 +162,15 @@ public:
 
   void testExec2()
   {
-    
+    //test for multi period
     // Now set required filename and output workspace name
     inputFile2 = "../../../../Test/Nexus/emu00006475.nxs";
     nxLoad.setPropertyValue("FileName", inputFile2);
 
     outputSpace="outer2";
-    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace); 
+	nxLoad.setPropertyValue("EntryNumber", "1");  
+	int entryNumber=nxLoad.getProperty("EntryNumber");
     
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") )
@@ -181,11 +183,53 @@ public:
     //
     // Test workspace data - should be 4 separate workspaces for this 4 period file
     //
+	if(entryNumber==0)
+	{
+		WorkspaceGroup_sptr outGrp;
+    TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+
+	}
+	//if entry number is given
+	if(entryNumber==1)
+	{
+		MatrixWorkspace_sptr output;
+		TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+
+		Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+		//Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
+		// Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006475.nxs";
+		TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
+		// Check two X vectors are the same
+		TS_ASSERT( (output2D->dataX(3)) == (output2D->dataX(31)) );
+		// Check two Y arrays have the same number of elements
+		TS_ASSERT_EQUALS( output2D->dataY(5).size(), output2D->dataY(17).size() );
+		// Check that the time is as expected from bin boundary update
+		TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
+
+		// Check the unit has been set correctly
+		TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
+			TS_ASSERT( ! output-> isDistribution() )
+
+			//check that sample name has been set correctly
+			boost::shared_ptr<Sample> sample,sample2;
+		sample = output->getSample();
+		//sample2 = output2->getSample();
+		//TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
+		TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
+
+	}
     MatrixWorkspace_sptr output,output2,output3,output4;
-    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
-    TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
-    TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
-    TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+	WorkspaceGroup_sptr outGrp;
+	//if no entry number load the group workspace
+	if(entryNumber==0)
+	{
+		TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+
+		TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
+		TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+		TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
+		TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+	
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
     // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006475.nxs";
@@ -210,7 +254,75 @@ public:
     sample = output->getSample();
     sample2 = output2->getSample();
     TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
-    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")    
+    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
+	
+	}  
+  }
+   void testExec2withZeroEntryNumber()
+  {
+    //test for multi period
+    // Now set required filename and output workspace name
+    inputFile2 = "../../../../Test/Nexus/emu00006475.nxs";
+    nxLoad.setPropertyValue("FileName", inputFile2);
+
+    outputSpace="outer2";
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace); 
+	nxLoad.setPropertyValue("EntryNumber", "0");  
+	int entryNumber=nxLoad.getProperty("EntryNumber");
+    
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = nxLoad.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile2)); 
+    //
+    // Test execute to read file and populate workspace
+    //
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
+    TS_ASSERT( nxLoad.isExecuted() );    
+    //
+    // Test workspace data - should be 4 separate workspaces for this 4 period file
+    //
+	WorkspaceGroup_sptr outGrp;
+    TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+	
+    MatrixWorkspace_sptr output,output2,output3,output4;
+	//WorkspaceGroup_sptr outGrp;
+	//if no entry number load the group workspace
+	if(entryNumber==0)
+	{
+		//TS_ASSERT_THROWS_NOTHING(outGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(outputSpace)));
+
+		TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1")));
+		TS_ASSERT_THROWS_NOTHING(output2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_2")));
+		TS_ASSERT_THROWS_NOTHING(output3 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_3")));
+		TS_ASSERT_THROWS_NOTHING(output4 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_4")));
+	
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D2 = boost::dynamic_pointer_cast<Workspace2D>(output2);
+    // Should be 32 for file inputFile = "../../../../Test/Nexus/emu00006475.nxs";
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 32);
+    // Check two X vectors are the same
+    TS_ASSERT( (output2D->dataX(3)) == (output2D->dataX(31)) );
+    // Check two Y arrays have the same number of elements
+    TS_ASSERT_EQUALS( output2D->dataY(5).size(), output2D->dataY(17).size() );
+    // Check one particular value
+    TS_ASSERT_EQUALS( output2D2->dataY(8)[502], 121);
+    // Check that the error on that value is correct
+    TS_ASSERT_EQUALS( output2D2->dataE(8)[502], 11);
+    // Check that the time is as expected from bin boundary update
+    TS_ASSERT_DELTA( output2D->dataX(11)[687], 10.738,0.001);
+
+    // Check the unit has been set correctly
+    TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
+    TS_ASSERT( ! output-> isDistribution() )
+
+    //check that sample name has been set correctly
+    boost::shared_ptr<Sample> sample,sample2;
+    sample = output->getSample();
+    sample2 = output2->getSample();
+    TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
+    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
+	
+	}  
   }
 
   void testarrayin()
