@@ -4,8 +4,6 @@
 #
 # Also Passes through command line arguments to Scons.
 #
-echo 1.0 > vers.txt
-svnversion . >> vers.txt
 python release_version.py
 #
 # Third_Party is not part of rpm distribution, so look for local scons
