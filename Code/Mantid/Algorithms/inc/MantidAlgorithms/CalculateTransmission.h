@@ -24,6 +24,8 @@ namespace Algorithms
 
     Optional Properties:
     <UL>
+    <LI> IncidentBeamMonitor - The UDET of the incident beam monitor (Default: 2, as for LOQ). </LI>
+    <LI> TransmissionMonitor - The UDET of the transmission monitor (Default: 3, as for LOQ). </LI>
     <LI> MinWavelength       - The minimum wavelength for the fit (Default: 2.2 Angstroms). </LI>
     <LI> MaxWavelength       - The maximum wavelength for the fit (Default: 10 Angstroms). </LI>
     <LI> OutputUnfittedData  - If true (false is the default), will output an additional workspace

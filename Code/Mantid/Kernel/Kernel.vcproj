@@ -227,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ListValidator.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LogFilter.cpp"
 				>
 			</File>

@@ -17,7 +17,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
     
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -41,19 +41,12 @@ template <typename TYPE>
 class DLLExport NullValidator : public IValidator<TYPE>
 {
 public:
-   /** Returns the string "null"
-   *
-   *  @returns the string "null"
-   */
-  const std::string getType() const
-  {
-	  return "null";
-  }
+  std::string getType() const { return "null"; }
 
   IValidator<TYPE>* clone() { return new NullValidator(*this); }
+
 private:
-   /** Always returns valid, that is ""
-   * 
+  /** Always returns valid, that is ""
    *  @returns an empty string
    */
    std::string checkValidity( const TYPE &) const { return ""; }

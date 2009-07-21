@@ -27,7 +27,7 @@ public:
   RegroupParamsValidator() {}
   virtual ~RegroupParamsValidator() {}
 
-  const std::string getType() const { return "regroup"; }
+  std::string getType() const { return "regroup"; }
 
   Kernel::IValidator<std::vector<double> >* clone() { return new RegroupParamsValidator(*this); }
 private:

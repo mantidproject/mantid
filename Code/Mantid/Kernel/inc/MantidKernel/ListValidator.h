@@ -18,7 +18,7 @@ namespace Kernel
     @author Russell Taylor, Tessella Support Services plc
     @date 18/06/2008
  
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -41,65 +41,20 @@ namespace Kernel
 class DLLExport ListValidator : public IValidator<std::string>
 {
 public:
-  /// Default constructor. Sets up an empty list of valid values.
-  ListValidator() : IValidator<std::string>(), m_allowedValues()
-  {}
-	
-  /** Constructor
-   *  @param values A vector of strings containing the valid values 
-   */
-  explicit ListValidator(const std::vector<std::string>& values) : 
-    IValidator<std::string>(),
-    m_allowedValues(values.begin(),values.end())
-  {}
+  ListValidator();	
+  explicit ListValidator(const std::vector<std::string>& values);  
+	virtual ~ListValidator();
+  IValidator<std::string>* clone();
   
-	/// Destructor
-	virtual ~ListValidator() {}
-
-  /// Returns the set of valid values
-  const std::set<std::string>& allowedValues() const
-  {
-    return m_allowedValues;
-  }
-  
-  ///Return the type of the validator
-  const std::string getType() const
-  {
-	  return "list";
-  }
-  
-  /// Adds the argument to the set of valid values
-  void addAllowedValue(const std::string &value)
-  {
-    m_allowedValues.insert(value);
-  }
-  
-  IValidator<std::string>* clone() { return new ListValidator(*this); }
+  std::string getType() const;
+  const std::set<std::string>& allowedValues() const;
+  void addAllowedValue(const std::string &value);
   
 private:
+  std::string checkValidity(const std::string &value) const;
+
   /// The set of valid values
   std::set<std::string> m_allowedValues;
-
-  /** Checks if the string passed is in the list
-  *  @param value The value to test
-  *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
-  */
-  std::string checkValidity(const std::string &value) const
-  {
-    if ( value.empty() )
-    {
-      return "Select a value";
-    }
-    if ( m_allowedValues.count(value) )
-    {
-      return "";
-    }
-    else
-    {
-      return "The value \"" + value + "\" is not in the list of allowed values";
-    }
-  }
-
 };
 
 } // namespace Kernel

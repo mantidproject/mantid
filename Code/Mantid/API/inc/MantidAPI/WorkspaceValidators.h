@@ -22,7 +22,7 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 16/09/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -58,24 +58,7 @@ public:
   }
 
   // IValidator methods
-  const std::string getType() const { return "composite"; }
-
-  /** Checks the value of all child validators. Fails if any child fails.
-   *  @param value The workspace to test
-   *  @return A user level description of the first problem it finds otherwise ""
-   */
-  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
-  {
-	//Go though all the validators
-	for (unsigned int i=0; i < m_children.size(); ++i)
-	{
-		std::string error = m_children[i]->isValid(value);
-		//exit on the first error, to avoid passing doing more tests on invalid objects that could fail
-		if (error != "") return error;
-	}
-	//there were no errors
-	return "";
-  }
+  std::string getType() const { return "composite"; }
 
   Kernel::IValidator<boost::shared_ptr<TYPE> >* clone()
   {
@@ -98,6 +81,23 @@ public:
 private:
   /// Private Copy constructor: NO DIRECT COPY ALLOWED
   CompositeValidator(const CompositeValidator&);
+
+  /** Checks the value of all child validators. Fails if any child fails.
+   *  @param value The workspace to test
+   *  @return A user level description of the first problem it finds otherwise ""
+   */
+  std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
+  {
+    //Go though all the validators
+    for (unsigned int i=0; i < m_children.size(); ++i)
+    {
+      std::string error = m_children[i]->isValid(value);
+      //exit on the first error, to avoid passing doing more tests on invalid objects that could fail
+      if (error != "") return error;
+    }
+    //there were no errors
+    return "";
+  }
 
   /// A container for the child validators
   std::vector<Kernel::IValidator<boost::shared_ptr<TYPE> >*> m_children;
@@ -122,8 +122,11 @@ public:
 
   virtual ~WorkspaceUnitValidator() {}
 
-  const std::string getType() const { return "workspaceunit"; }
+  std::string getType() const { return "workspaceunit"; }
 
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new WorkspaceUnitValidator(*this); }
+
+private:
   /** Checks that the units of the workspace data are declared match any required units
    *
    *  @param value The workspace to test
@@ -148,9 +151,6 @@ public:
     }
   }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new WorkspaceUnitValidator(*this); }
-
-private:
   /// The name of the required unit
   const std::string m_unitID;
 };
@@ -175,8 +175,11 @@ public:
 
   virtual ~HistogramValidator() {}
 
-  const std::string getType() const { return "histogram"; }
+  std::string getType() const { return "histogram"; }
 
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new HistogramValidator(*this); }
+
+private:
   /** Checks if the workspace contains a histogram when it shouldn't and vice-versa
    *  @param value The workspace to test
    *  @return A user level description if a problem exists or ""
@@ -195,9 +198,6 @@ public:
 	  }
   }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new HistogramValidator(*this); }
-
-private:
   /// A flag indicating whether this validator requires that the workspace be a histogram (true) or not
   const bool m_mustBeHistogram;
 };
@@ -220,8 +220,11 @@ public:
 
   virtual ~RawCountValidator() {}
 
-  const std::string getType() const { return "rawcount"; }
+  std::string getType() const { return "rawcount"; }
 
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new RawCountValidator(*this); }
+
+private:
   /** Checks if the workspace must be a distribution but isn't and vice-versa
    *  @param value The workspace to test
    *  @return A user level description of any problem that exists or "" no problem
@@ -240,9 +243,6 @@ public:
 	  }
   }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new RawCountValidator(*this); }
-
-private:
   /// A flag indicating whether this validator requires that the workspace must be a distribution (false) or not (true, the default)
   const bool m_mustNotBeDistribution;
 };
@@ -261,24 +261,23 @@ class DLLExport CommonBinsValidator : public Kernel::IValidator<boost::shared_pt
 {
 public:
   CommonBinsValidator() {}
-
   virtual ~CommonBinsValidator() {}
 
-  /** Get the name of this validator
-   *  @return "commonbins"
-   */
-  const std::string getType() const { return "commonbins"; }
+  std::string getType() const { return "commonbins"; }
 
+  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new CommonBinsValidator(*this); }
+
+private:
   /** Checks that the bin boundaries of each histogram in the workspace are the same
    *  @param value The workspace to test
    *  @return A message for users saying that bins are different, otherwise ""
    */
   std::string checkValidity( const boost::shared_ptr<TYPE>& value ) const
   {
-	if ( !value ) return "Enter an existing workspace"; 
-   //there being only one or zero histograms is accepted as not being an error
-	if ( !value->blocksize() || value->getNumberHistograms() < 2) return "";
-	//otherwise will compare some of the data, to save time just check two the first and the last
+    if ( !value ) return "Enter an existing workspace"; 
+    //there being only one or zero histograms is accepted as not being an error
+    if ( !value->blocksize() || value->getNumberHistograms() < 2) return "";
+    //otherwise will compare some of the data, to save time just check two the first and the last
     const int lastSpec = value->getNumberHistograms() - 1;
     // Quickest check is to see if they are actually the same vector
     if ( &(value->readX(0)[0]) == &(value->readX(lastSpec)[0]) ) return "";
@@ -286,13 +285,12 @@ public:
     const double first = std::accumulate(value->readX(0).begin(),value->readX(0).end(),0.);
     const double last = std::accumulate(value->readX(lastSpec).begin(),value->readX(lastSpec).end(),0.);
     if ( std::abs(first-last)/std::abs(first+last) > 1.0E-9 )
-	{
-		return "The workspace must have common bin boundaries for all histograms";
-	}
+    {
+      return "The workspace must have common bin boundaries for all histograms";
+    }
     return "";
   }
 
-  Kernel::IValidator<boost::shared_ptr<TYPE> >* clone() { return new CommonBinsValidator(*this); }
 };
 
 } // namespace API

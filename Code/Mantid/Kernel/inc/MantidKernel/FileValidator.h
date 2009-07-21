@@ -111,8 +111,8 @@ public:
   /// Destructor
   virtual ~FileValidator() {}
 
-   ///Return the type of the validator
-  const std::string getType() const
+  ///Return the type of the validator
+  std::string getType() const
   {
     return "file";
   }

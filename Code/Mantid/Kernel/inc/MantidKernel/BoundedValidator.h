@@ -21,7 +21,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
  
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -63,19 +63,14 @@ public:
     m_hasUpperBound( true), 
     m_lowerBound(lowerBound), 
     m_upperBound(upperBound)
-  {
-  }
+  {}
 
   /// Destructor
   virtual ~BoundedValidator()
-  {
-  }
+  {}
   
-    ///Return the type of the validator
-  const std::string getType() const
-  {
-	  return "bounded";
-  }
+  ///Return the type of the validator
+  std::string getType() const { return "bounded"; }
 
   /// Return if it has a lower bound
   bool        hasLower() const { return m_hasLowerBound; }
@@ -123,8 +118,7 @@ private:
   ///the upper bound
   TYPE     m_upperBound;
 
-  
-   /** Checks that the value is within any upper and lower limits
+  /** Checks that the value is within any upper and lower limits
    * 
    *  @param value The value to test
    *  @returns An error message to display to users or an empty string on no error

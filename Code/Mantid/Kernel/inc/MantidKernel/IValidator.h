@@ -19,7 +19,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
     
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -67,7 +67,7 @@ public:
    * 
    *  @returns String describing the type
    */	  
-  virtual const std::string getType() const = 0;
+  virtual std::string getType() const = 0;
 
   /// Make a copy of the present type of validator
   virtual IValidator* clone() = 0;

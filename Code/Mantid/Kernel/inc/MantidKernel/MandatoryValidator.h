@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
-#include <string>
 
 namespace Mantid
 {
@@ -20,7 +19,7 @@ namespace Kernel
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -44,53 +43,30 @@ template< class TYPE >
 class DLLExport MandatoryValidator : public IValidator<TYPE>
 {
 public:
-
-   /** Gets the type name of the validator
-   *
-   *  @return validator type
-   */
-  const std::string getType() const
-  {
-	  return "mandatory";
-  }
+  std::string getType() const { return "mandatory"; }
 
   IValidator<TYPE>* clone() { return new MandatoryValidator(*this); }
 
 private:
   /** Checks if the string is empty
-  *
-  *  @param value the string to test
-  *  @return "A value must be entered for this parameter" if empty or ""
-  */
+   *
+   *  @param value the string to test
+   *  @return "A value must be entered for this parameter" if empty or ""
+   */
   std::string checkValidity(const TYPE& value) const
   {
 	  if ( value.empty() ) return "A value must be entered for this parameter";
 	  else return "";
   }
-
 };
 
-
-// Member function specializations for ints and doubles. The defintions are in the
+// Member function specializations for ints and doubles. The definitions are in the
 // cpp file so that multiple symbol errors do not occur in the linking stage.
-// 
-
-/** Checks if the integer it is passed equals the flag value 
-*  Mantid::EMPTY_DBL(), which implies that it wasn't set by the user
-*  @param value the value to test
-*  @return "A value must be entered for this parameter" if empty or ""
-*/
 template<>
 std::string MandatoryValidator<int>::checkValidity(const int& value) const;
 
-/** Checks if the double it is passed is within 10 parts per billon of flag
-*  value Mantid::EMPTY_DBL(), which implies that it wasn't set by the user
-*  @param value the value to test
-*  @return "A value must be entered for this parameter" if empty or ""
-*/
 template<>
 std::string MandatoryValidator<double>::checkValidity(const double& value) const;
-
 
 } // namespace Kernel
 } // namespace Mantid
