@@ -105,7 +105,7 @@ public:
         TS_ASSERT_EQUALS(ws->readY(9)[3],1.);
         TS_ASSERT_EQUALS(ws->readY(12)[1],1.);
     }
-	 void testMultiPeriodEntryNumberZero()
+	 void xtestMultiPeriodEntryNumberZero()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus ld;
@@ -137,7 +137,7 @@ public:
         TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
         TS_ASSERT_EQUALS(ws->readY(12)[1],0.);
     }
-	  void testMultiPeriodEntryNumberNonZero()
+	  void xtestMultiPeriodEntryNumberNonZero()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus ld;
