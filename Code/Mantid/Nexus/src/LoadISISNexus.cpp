@@ -544,6 +544,8 @@ void LoadISISNexus::loadMappingTable(DataObjects::Workspace2D_sptr ws)
 
     closeNexusGroup(); // isis_vms_compat
 
+
+
     openNexusGroup("detector_1","NXdata");
 
     openNexusData("spectrum_index");

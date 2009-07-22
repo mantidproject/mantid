@@ -182,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadISISNexus2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadMuonLog.cpp"
 				>
 			</File>
@@ -241,6 +245,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidNexus\LoadISISNexus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\LoadISISNexus2.h"
 				>
 			</File>
 			<File

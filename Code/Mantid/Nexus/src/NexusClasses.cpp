@@ -131,7 +131,7 @@ void NXObject::getAttributes()
                 }
                 int nz = iLength + 1;
                 NXgetattr(m_fileID,pName,buff.get(),&iLength,&iType);
-                buff[nz] = '\0';
+                buff[nz-1] = '\0';
                 attributes.set(pName,buff.get());
                 break;
             }
@@ -183,7 +183,7 @@ void NXClass::readAllInfo()
         {
             NXInfo data_info;
             NXopendata(m_fileID,info.nxname.c_str());
-            NXgetinfo(m_fileID, &data_info.rank, data_info.dims, &data_info.type);
+            data_info.stat = NXgetinfo(m_fileID, &data_info.rank, data_info.dims, &data_info.type);
             NXclosedata(m_fileID);
             data_info.nxname = info.nxname;
             m_datasets->push_back(data_info);
@@ -216,6 +216,45 @@ void NXClass::clear()
 {
     m_groups.reset(new std::vector<NXClassInfo>);
     m_datasets.reset(new std::vector<NXInfo>);
+}
+
+std::string NXClass::getString(const std::string& name)const
+{
+    NXChar buff = openNXChar(name);
+    buff.load();
+    return std::string(buff(),buff.dim0());
+}
+
+double NXClass::getDouble(const std::string& name)const
+{
+    NXDouble number = openNXDouble(name);
+    number.load();
+    return *number();
+}
+
+float NXClass::getFloat(const std::string& name)const
+{
+    NXFloat number = openNXFloat(name);
+    number.load();
+    return *number();
+}
+
+int NXClass::getInt(const std::string& name)const
+{
+    NXInt number = openNXInt(name);
+    number.load();
+    return *number();
+}
+
+NXInfo NXClass::getDataSetInfo(const std::string& name)const
+{
+    NXInfo info;
+    for(std::vector<NXInfo>::const_iterator it=datasets().begin();it!=datasets().end();it++)
+    {
+        if (it->nxname == name) return *it;
+    }
+    info.stat = NX_ERROR;
+    return info;
 }
 
 //---------------------------------------------------------
@@ -342,6 +381,68 @@ void NXDataSet::open()
 
 NXData::NXData(const NXClass& parent,const std::string& name):NXMainClass(parent,name)
 {
+}
+
+//---------------------------------------------------------
+//          NXLog methods
+//---------------------------------------------------------
+
+Kernel::Property* NXLog::createTimeSeries()
+{
+    std::string logName = name();
+
+    NXFloat times = openNXFloat("time");
+    times.load();
+
+    time_t start_t = Kernel::TimeSeriesProperty<std::string>::createTime_t_FromString(times.attributes("start"));
+    NXInfo vinfo = getDataSetInfo("value");
+    if (!vinfo) return NULL;
+
+    if (vinfo.dims[0] != times.dim0()) return NULL;
+
+    if (vinfo.type == NX_CHAR)
+    {
+        Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(logName);
+        NXChar value = openNXChar("value");
+        value.load();
+        for(int i=0;i<value.dim0();i++)
+        {
+            time_t t = start_t + int(times[i]);
+            for(int j=0;j<value.dim1();j++)
+            {
+                char* c = &value(i,j);
+                if (!isprint(*c)) *c = ' ';
+            }
+            logv->addValue(t,std::string(value()+i*value.dim1(),value.dim1()));
+        }
+        return logv;
+    }
+    else if (vinfo.type == NX_FLOAT32)
+    {
+        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
+        NXFloat value = openNXFloat("value");
+        value.load();
+        for(int i=0;i<value.dim0();i++)
+        {
+            time_t t = start_t + int(times[i]);
+            logv->addValue(t,value[i]);
+        }
+        return logv;
+    }
+    else if (vinfo.type == NX_INT32)
+    {
+        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
+        NXInt value = openNXInt("value");
+        value.load();
+        for(int i=0;i<value.dim0();i++)
+        {
+            time_t t = start_t + int(times[i]);
+            logv->addValue(t,value[i]);
+        }
+        return logv;
+    }
+
+    return NULL;
 }
 
 } // namespace DataHandling

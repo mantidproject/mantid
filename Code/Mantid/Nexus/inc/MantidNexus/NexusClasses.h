@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <napi.h>
 
 #include <boost/shared_ptr.hpp>
@@ -55,6 +56,8 @@ namespace Mantid
             int rank;    ///< number of dimensions of the data
             int dims[4]; ///< sizes along each dimension
             int type;    ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
+            NXstatus stat;       ///< return status
+            operator bool(){return stat == NX_OK;} ///< returns success of an operation
         };
 
         /**  Information about a Nexus class
@@ -194,11 +197,21 @@ namespace Mantid
              *  @throw runtime_error if the data have not been loaded / initialized.
              *  @throw range_error if the index is greater than the buffer size.
              */
-            T operator[](int i)const
+            T& operator[](int i)const
             {
                 if (!m_data) throw std::runtime_error("Attempt to read uninitialized data");
                 if (i < 0 || i >= m_n) rangeError();
                 return m_data[i];
+            }
+            /** Returns a value assuming the data is a two-dimensional array
+             *  @param i The index along dim0()
+             *  @param j The index along dim1()
+             *  @throw runtime_error if the data have not been loaded / initialized.
+             *  @throw range_error if the indeces point outside the buffer.
+             */
+            T& operator()(int i, int j)const
+            {
+                return this->operator [](i*dim1()+j);
             }
             /// Returns the size of the data buffer
             int size()const{return m_n;}
@@ -469,11 +482,32 @@ namespace Mantid
              *   @param name The name of the dataset
              */
             NXChar openNXChar(const std::string& name)const{return openNXDataSet<char>(name);}
+            /**  Returns a string 
+             *   @param name The name of the NXChar dataset
+             */
+            std::string getString(const std::string& name)const;
+            /**  Returns a double 
+             *   @param name The name of the NXDouble dataset
+             */
+            double getDouble(const std::string& name)const;
+            /**  Returns a float 
+             *   @param name The name of the NXFloat dataset
+             */
+            float getFloat(const std::string& name)const;
+            /**  Returns a int 
+             *   @param name The name of the NXInt dataset
+             */
+            int getInt(const std::string& name)const;
 
             /// Returns a list of all classes (or groups) in this NXClass
             std::vector<NXClassInfo>& groups()const{return *m_groups.get();}
             /// Returns a list of all datasets in this NXClass
             std::vector<NXInfo>& datasets()const{return *m_datasets.get();}
+            /** Returns NXInfo for a dataset
+             *  @param name The name of the dataset
+             *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
+             */
+            NXInfo getDataSetInfo(const std::string& name)const;
 
         protected:
             boost::shared_ptr<std::vector<NXClassInfo> > m_groups; ///< Holds info about the child NXClasses
@@ -500,6 +534,8 @@ namespace Mantid
             NXLog(const NXClass& parent,const std::string& name):NXClass(parent,name){}
             /// Nexus class id
             std::string NX_class()const{return "NXlog";}
+            /// Creates a TimeSeriesProperty and returns a pointer to it
+            Kernel::Property* createTimeSeries();
         };
 
         /**  Implements NXnote Nexus class.
@@ -602,6 +638,12 @@ namespace Mantid
             NXDetector(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
             /// Nexus class id
             std::string NX_class()const{return "NXdetector";}
+            /// Opens the dataset containing pixel distances
+            NXFloat openDistance(){return openNXFloat("distance");}
+            /// Opens the dataset containing pixel azimuthal angles
+            NXFloat openAzimuthalAngle(){return openNXFloat("azimuthal_angle");}
+            /// Opens the dataset containing pixel polar angles
+            NXFloat openPolarAngle(){return openNXFloat("polar_angle");}
         };
 
         /**  Implements NXinstrument Nexus class.
@@ -616,6 +658,10 @@ namespace Mantid
             NXInstrument(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
             /// Nexus class id
             std::string NX_class()const{return "NXinstrument";}
+            /**  Opens a NXDetector
+             *   @param name The name of the class
+             */
+            NXDetector openNXDetector(const std::string& name){return openNXClass<NXDetector>(name);}
         };
 
         /**  Implements NXentry Nexus class.
