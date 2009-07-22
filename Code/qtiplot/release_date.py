@@ -19,7 +19,7 @@ def getSVNRevision():
         maxVersion = int(versionStr)
     return str(maxVersion)
   except:
-    return versionList[0]
+    return versionList[0].rstrip()
 #end def
 
 def main(argv=None):
