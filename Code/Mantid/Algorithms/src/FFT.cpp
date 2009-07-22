@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Exception.h"
 
 #include <boost/shared_array.hpp>
 #include <gsl/gsl_errno.h>
@@ -29,6 +30,47 @@ DECLARE_ALGORITHM(FFT)
 
 using namespace Kernel;
 using namespace API;
+
+class LabelUnit: public Kernel::Unit
+{
+public:
+  /// The name of the unit. For a concrete unit, this method's definition is in the DECLARE_UNIT
+  /// macro and it will return the argument passed to that macro (which is the unit's key in the
+  /// factory).
+    const std::string unitID() const {return "Label";};
+  /// The full name of the unit
+    const std::string caption() const {return "Time";};
+  /// A label for the unit to be printed on axes
+    const std::string label() const {return "seconds";};
+  /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
+   *  @param xdata    The array of X data to be converted
+   *  @param ydata    Not currently used (ConvertUnits passes an empty vector)
+   *  @param l1       The source-sample distance (in metres)
+   *  @param l2       The sample-detector distance (in metres)
+   *  @param twoTheta The scattering angle (in radians)
+   *  @param emode    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param efixed   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+   *  @param delta    Not currently used
+   */
+  void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const 
+  {throw Kernel::Exception::NotImplementedError("Cannot convert this unit to time of flight");};
+
+  /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
+   *  @param xdata    The array of X data to be converted
+   *  @param ydata    Not currently used (ConvertUnits passes an empty vector)
+   *  @param l1       The source-sample distance (in metres)
+   *  @param l2       The sample-detector distance (in metres)
+   *  @param twoTheta The scattering angle (in radians)
+   *  @param emode    The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry)
+   *  @param efixed   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+   *  @param delta    Not currently used
+   */
+  void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
+      const double& twoTheta, const int& emode, const double& efixed, const double& delta) const
+  {throw Kernel::Exception::NotImplementedError("Cannot convert time of flight to this unit ");};
+
+};
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init()
@@ -80,14 +122,35 @@ void FFT::exec()
     boost::shared_array<double> data(new double[2*ySize]);
     std::string transform = getProperty("Transform");
 
+    // The number of spectra in the output workspace
+    int nOut = 3;
+    bool addPositiveOnly = false;
+    // If the input is real add 3 more spectra with positive "frequencies" only
+    if (!isComplex && transform == "Forward") 
+    {
+        nOut += 3;
+        addPositiveOnly = true;
+    }
+
     DataObjects::Workspace2D_sptr outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D",3,xSize,ySize));
+        (WorkspaceFactory::Instance().create("Workspace2D",nOut,xSize,ySize));
+    outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
 
     double df = 1.0 / (dx * (xSize - 1));
 
     // shift == true means that the zero on the x axis is assumed to be in the data centre 
     // at point with index i = ySize/2. If shift == false the zero is at i = 0
     bool shift = true;
+
+    int iRe = 0;
+    int iIm = 1;
+    int iAbs = 2;
+    if (addPositiveOnly)
+    {
+        iRe = 3;
+        iIm = 4;
+        iAbs = 5;
+    }
 
     if (transform == "Forward")
     {
@@ -102,14 +165,35 @@ void FFT::exec()
         for(int i=0;i<ySize;i++)
         {
             int j = (ySize/2 + i) % ySize;
-            outWS->dataX(0)[i] = df*(-ySize/2 + i);
+            outWS->dataX(iRe)[i] = df*(-ySize/2 + i);
             double re = data[2*j];
             double im = data[2*j+1];
-            outWS->dataY(0)[i] = re; // real part
-            outWS->dataY(1)[i] = im; // imaginary part
-            outWS->dataY(2)[i] = sqrt(re*re + im*im); // modulus
+            outWS->dataY(iRe)[i] = re; // real part
+            outWS->dataY(iIm)[i] = im; // imaginary part
+            outWS->dataY(iAbs)[i] = sqrt(re*re + im*im); // modulus
+            if (addPositiveOnly)
+            {
+                outWS->dataX(0)[i] = df*i;
+                if (j < ySize/2)
+                {
+                    outWS->dataY(0)[j] = re; // real part
+                    outWS->dataY(1)[j] = im; // imaginary part
+                    outWS->dataY(2)[j] = sqrt(re*re + im*im); // modulus
+                }
+                else
+                {
+                    outWS->dataY(0)[j] = 0.; // real part
+                    outWS->dataY(1)[j] = 0.; // imaginary part
+                    outWS->dataY(2)[j] = 0.; // modulus
+                }
+            }
         }
-        if (xSize == ySize + 1) outWS->dataX(0)[ySize] = outWS->dataX(0)[ySize - 1] + df;
+        if (xSize == ySize + 1) 
+        {
+            outWS->dataX(0)[ySize] = outWS->dataX(0)[ySize - 1] + df;
+            if (addPositiveOnly)
+                outWS->dataX(iRe)[ySize] = outWS->dataX(iRe)[ySize - 1] + df;
+        }
     }
     else // Backward
     {
@@ -140,6 +224,12 @@ void FFT::exec()
 
     outWS->dataX(1) = outWS->dataX(0);
     outWS->dataX(2) = outWS->dataX(0);
+
+    if (addPositiveOnly)
+    {
+        outWS->dataX(iIm) = outWS->dataX(iRe);
+        outWS->dataX(iAbs) = outWS->dataX(iRe);
+    }
 
     setProperty("OutputWorkspace",outWS);
 

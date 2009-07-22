@@ -53,13 +53,13 @@ public:
         MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
             (AnalysisDataService::Instance().retrieve("FFT_WS_forward"));
 
-        const MantidVec& X0 = fWS->readX(0);
-        const MantidVec& X1 = fWS->readX(1);
-        const MantidVec& X2 = fWS->readX(2);
+        const MantidVec& X0 = fWS->readX(3);
+        const MantidVec& X1 = fWS->readX(4);
+        const MantidVec& X2 = fWS->readX(5);
 
-        const MantidVec& Y0 = fWS->readY(0);
-        const MantidVec& Y1 = fWS->readY(1);
-        const MantidVec& Y2 = fWS->readY(2);
+        const MantidVec& Y0 = fWS->readY(3);
+        const MantidVec& Y1 = fWS->readY(4);
+        const MantidVec& Y2 = fWS->readY(5);
 
         TS_ASSERT_DELTA(X0[0],-5.0505,0.0001);
         TS_ASSERT_DELTA(X1[0],-5.0505,0.0001);
@@ -92,8 +92,8 @@ public:
         fft->initialize();
         fft->setPropertyValue("InputWorkspace","FFT_WS_forward");
         fft->setPropertyValue("OutputWorkspace","FFT_WS_backward");
-        fft->setPropertyValue("Real","0");
-        fft->setPropertyValue("Imaginary","1");
+        fft->setPropertyValue("Real","3");
+        fft->setPropertyValue("Imaginary","4");
         fft->setPropertyValue("Transform","Backward");
         fft->execute();
 
