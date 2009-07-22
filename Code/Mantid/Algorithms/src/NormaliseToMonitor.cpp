@@ -123,6 +123,10 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   {
     // Check that the spectrum given is related to a monitor
     const int monitorSpec = getProperty("MonitorSpectrum");
+    if (monitorSpec < 1)
+    {
+      g_log.error("MonitorSpectrum must be at least 1");
+    }
     Axis::spec2index_map specs;
     inputWorkspace->getAxis(1)->getSpectraIndexMap(specs);
     const int monitorIndex = specs[monitorSpec];

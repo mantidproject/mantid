@@ -21,14 +21,19 @@ namespace Algorithms
     range in X. In this case, the range of the output workspace will have its limits
     at the closest bins within the range values given (i.e. bins may be removed with
     respect to the start and end of the input workspace, but the bin boundaries will
-    remain the same). No bin width correction takes place in this case.
+    remain the same). No bin width correction takes place in this case. In this scenario
+    the input workspace must have common bins.
+
+    The monitor spectrum can be provided either as an index in the main input workspace
+    or as a separate single-spectrum workspace.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The name of the input Workspace2D. Must be a histogram with
-              common bins and not a distribution.</LI>
-    <LI> OutputWorkspace - The name of the output Workspace2D. </LI>
-    <LI> MonitorSpectrum - The spectrum number for the monitor to normalise with </LI>
+    <LI> InputWorkspace   - The name of the input Workspace2D. Must be a histogram
+                            and not a distribution.</LI>
+    <LI> OutputWorkspace  - The name of the output Workspace2D. </LI>
+    <LI> MonitorSpectrum  - The spectrum number for the monitor to normalise with </LI>
+    <LI> MonitorWorkspace - A workspace containing the monitor spectrum </LI>
     </UL>
 
     Optional Properties:
