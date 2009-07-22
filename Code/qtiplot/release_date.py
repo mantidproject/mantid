@@ -1,3 +1,4 @@
+import sys
 import os
 from datetime import date
 
@@ -21,17 +22,32 @@ def getSVNRevision():
     return versionList[0]
 #end def
 
-svn = getSVNRevision()
-f = open('qtiplot/src/Mantid/MantidPlotReleaseDate.h','w')
-f.write('#ifndef MANTIDPLOT_RELEASE_DATE\n')
-f.write('#define MANTIDPLOT_RELEASE_DATE "')
-f.write(date.today().strftime("%d %b %Y"))
-f.write(' (Version 1.0')
-f.write(', SVN R'+ svn )
-f.write(')')
-f.write('"\n#endif\n\n')
-f.write('#ifndef MANTIDPLOT_RELEASE_VERSION\n')
-f.write('#define MANTIDPLOT_RELEASE_VERSION "')
-f.write('1.0.'+ svn )
-f.write('"\n#endif\n')
-f.close()
+def main(argv=None):
+  if argv is None:
+    argv = sys.argv
+  svn = ''
+  version='1.0'
+  if len(argv) > 1:
+    version = argv[1]
+  if len(argv) > 2:
+    svn = argv[2]
+  else:
+    svn = getSVNRevision()
+  f = open('qtiplot/src/Mantid/MantidPlotReleaseDate.h','w')
+  f.write('#ifndef MANTIDPLOT_RELEASE_DATE\n')
+  f.write('#define MANTIDPLOT_RELEASE_DATE "')
+  f.write(date.today().strftime("%d %b %Y"))
+  f.write(' (Version ' + version)
+  f.write(', SVN R'+ svn )
+  f.write(')')
+  f.write('"\n#endif\n\n')
+  f.write('#ifndef MANTIDPLOT_RELEASE_VERSION\n')
+  f.write('#define MANTIDPLOT_RELEASE_VERSION "')
+  f.write(version + '.'+ svn )
+  f.write('"\n#endif\n')
+  f.close()
+  return 0
+#end def
+
+if __name__ == "__main__":
+  sys.exit(main())
