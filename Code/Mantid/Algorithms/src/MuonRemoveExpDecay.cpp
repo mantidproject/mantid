@@ -86,7 +86,7 @@ namespace Mantid
 		    
 		    //Do the specified spectra only
 			   PARALLEL_FOR2(inputWS,outputWS)
-		    for (int i=0; i < Spectra.size(); ++i)
+		    for (unsigned int i=0; i < Spectra.size(); ++i)
 		    {
 			    if (Spectra[i] > numSpectra)
 				{

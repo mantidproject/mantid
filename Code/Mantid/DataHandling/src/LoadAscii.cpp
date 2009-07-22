@@ -97,7 +97,7 @@ namespace Mantid
                 ostr << "Number of columns changed in line " << iLine;
                 throw std::runtime_error(ostr.str());
             }
-            for(int i=0;i<nSpectra;i++)
+            for(unsigned int i=0;i<nSpectra;i++)
             {
                 spectra[i].dataX().push_back(input[0]);
                 spectra[i].dataY().push_back(input[i*2+1]);
@@ -111,7 +111,7 @@ namespace Mantid
 //        localWorkspace->setTitle(title);
         localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Energy");
 
-        for(int i=0;i<nSpectra;i++)
+        for(unsigned int i=0;i<nSpectra;i++)
         {
             localWorkspace->dataX(i) = spectra[i].dataX();
             localWorkspace->dataY(i) = spectra[i].dataY();

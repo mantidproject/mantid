@@ -72,7 +72,7 @@ void FFT::exec()
     //Check that the x values are evenly spaced
     double dx = (X.back() - X.front()) / (X.size() - 1);
     for(size_t i=0;i<X.size()-2;i++)
-        if (abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
+        if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
 
     gsl_fft_complex_wavetable * wavetable = gsl_fft_complex_wavetable_alloc(ySize);
     gsl_fft_complex_workspace * workspace = gsl_fft_complex_workspace_alloc(ySize);

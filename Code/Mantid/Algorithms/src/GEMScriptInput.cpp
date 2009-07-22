@@ -17,8 +17,6 @@ using namespace Mantid::API;
 void GEMScriptInput::init()
 {
   //First the data files
-  MandatoryValidator<std::string> *notEmpty = new MandatoryValidator<std::string>();
-
   declareProperty("SampleFile", "", new FileValidator());
   declareProperty("SampleBackgroudFile", "", new FileValidator());
   declareProperty("VanadiumFile", "", new FileValidator());

@@ -50,8 +50,8 @@ namespace Mantid
     {
         // Get the workspace
         DataObjects::Workspace2D_sptr ws = getProperty("Workspace");
-        size_t nSpectra = ws->getNumberHistograms();
-        size_t nBins = ws->blocksize();
+        int nSpectra = ws->getNumberHistograms();
+        int nBins = ws->blocksize();
 
         // Get the properties
         std::vector<int> spec_list = getProperty("SpectrumList");

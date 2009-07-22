@@ -115,7 +115,7 @@ void NXObject::getAttributes()
 {
     NXname pName;
     int iLength, iType;
-    size_t nbuff = 127;
+    int nbuff = 127;
     boost::shared_array<char> buff(new char[nbuff+1]);
     while(NXgetnextattr(m_fileID, pName, &iLength, &iType) != NX_EOD)
     {

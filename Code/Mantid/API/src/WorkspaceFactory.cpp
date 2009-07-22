@@ -129,7 +129,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
       }
 
       MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
-      if ( blockMemory*100/1024 > mi.availMemory )
+      if ( static_cast<unsigned int>(blockMemory)*100/1024 > mi.availMemory )
       {
           g_log.error("There is not enough memory to allocate the workspace");
           throw std::runtime_error("There is not enough memory to allocate the workspace");

@@ -9,6 +9,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "WorkspaceCreationHelper.hh"
+#include "Poco/File.h"
 #include <fstream>
 
 using namespace Mantid::API;
@@ -116,10 +117,9 @@ public:
       if ( i == 19 ) valExpected = 2;
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
-    std::fstream outFile(filename.c_str());
-    TS_ASSERT( outFile )
-    outFile.close();
-    remove(filename.c_str());
+    
+    TS_ASSERT( Poco::File(filename).exists() )
+    Poco::File(filename).remove();
 
     // Set cut off much of the range and yTooDead will stop failing on high counts
     alg.setPropertyValue("RangeUpper", "4.9");
@@ -140,6 +140,8 @@ public:
       if ( i%2==0 || i == 19) valExpected = boost::lexical_cast<double>(deadVal);
       TS_ASSERT_DELTA(val,valExpected,1e-9);
     }
+    
+    Poco::File(filename).remove();
 
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");

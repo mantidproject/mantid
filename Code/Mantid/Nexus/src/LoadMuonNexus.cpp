@@ -33,8 +33,8 @@ namespace Mantid
     /// Empty default constructor
     LoadMuonNexus::LoadMuonNexus() : 
       Algorithm(),
-      m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
-      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),m_entrynumber(0)
+      m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
+      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
     {}
 
     /// Initialisation method.

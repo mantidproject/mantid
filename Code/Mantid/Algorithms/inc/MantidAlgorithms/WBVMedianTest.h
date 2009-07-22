@@ -72,7 +72,7 @@ namespace Mantid
       /// Default constructor initialises all values to zero and runs the base class constructor
       WBVMedianTest() :
           API::Algorithm(),
-          m_PercentDone(0.0), m_Low(0.1), m_High(1.5), m_TotalTime(RTTotal), 
+          m_PercentDone(0.0), m_TotalTime(RTTotal), m_Low(0.1), m_High(1.5),
           m_MinSpec(0), m_MaxSpec(UNSETINT), m_usableMaskMap(true)
       {};
       /// Destructor
