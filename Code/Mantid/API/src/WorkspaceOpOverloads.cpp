@@ -246,7 +246,7 @@ MatrixWorkspace_sptr operator/=(const MatrixWorkspace_sptr lhs, const double& rh
  *  @param WS The workspace to check
  *  @return True if the bins match
  */
-const bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
+bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
 {
   if ( !WS->blocksize() || WS->getNumberHistograms() < 2) return true;
   // Quickest check is to see if they are actually all the same vector
@@ -270,7 +270,7 @@ const bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr W
  *                   are checked and the two workspaces must have the same number of spectra
  *  @return True if the test passes
  */
-const bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
+bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
                                           const MatrixWorkspace_const_sptr ws2, const bool firstOnly)
 {
   // First of all, the first vector must be the same size
@@ -307,7 +307,7 @@ const bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
 }
 
 /// Checks whether all the X vectors in a workspace are the same one underneath
-const bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS)
+bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS)
 {
   const double& first = WS->readX(0)[0];
   const int numHist = WS->getNumberHistograms();

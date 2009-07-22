@@ -59,12 +59,12 @@ MatrixWorkspace_sptr DLLExport operator/=(const MatrixWorkspace_sptr lhs, const 
 struct DLLExport WorkspaceHelpers
 {
   // Checks whether a workspace has common X bins/values
-  static const bool commonBoundaries(const MatrixWorkspace_const_sptr WS);
+  static bool commonBoundaries(const MatrixWorkspace_const_sptr WS);
   // Checks whether the binning is the same in two histograms
-  static const bool matchingBins(const MatrixWorkspace_const_sptr ws1,
-                                 const MatrixWorkspace_const_sptr ws2, const bool firstOnly = false);
+  static bool matchingBins(const MatrixWorkspace_const_sptr ws1,
+                           const MatrixWorkspace_const_sptr ws2, const bool firstOnly = false);
   // Checks whether a the X vectors in a workspace are actually the same vector
-  static const bool sharedXData(const MatrixWorkspace_const_sptr WS);
+  static bool sharedXData(const MatrixWorkspace_const_sptr WS);
   // Divides the data in a workspace by the bin width to make it a distribution (or the reverse)
   static void makeDistribution(MatrixWorkspace_sptr workspace, const bool forwards = true);
   // Convert a list of spectrum numbers to the corresponding workspace indices

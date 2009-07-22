@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -28,6 +29,7 @@ public:
       input->dataX(1)[i] = i;
       input->dataX(2)[i] = i;
     }
+    input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument and spectra-detector map
     int forSpecDetMap[3] = {0,1,2};
     input->getAxis(1)->spectraNo(0) = 0;
@@ -45,6 +47,22 @@ public:
     input->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 3);
 
     AnalysisDataService::Instance().add("normMon",input);
+
+    // Create a single spectrum workspace to be the monitor one
+    MatrixWorkspace_sptr monWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,20,0.1,0.5);
+    monWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    // Now need to set up a minimal instrument and spectra-detector map
+    int forSpecDetMap2[1] = {0};
+    monWS->getAxis(1)->spectraNo(0) = 0;
+    monWS->setInstrument(input->getInstrument());
+    //Mantid::Geometry::Detector *mon2 = new Mantid::Geometry::Detector("monitor",NULL);
+    //mon2->setID(0);
+    //instr = boost::dynamic_pointer_cast<Instrument>(monWS->getInstrument());
+    //instr->add(mon2);
+    //instr->markAsMonitor(mon2);
+    monWS->mutableSpectraMap().populate(forSpecDetMap2, forSpecDetMap2, 1);
+
+    AnalysisDataService::Instance().add("monWS",monWS);
   }
 
   void testName()
@@ -147,6 +165,28 @@ public:
     }
   }
 
+  void testFailsOnSettingBothMethods()
+  {
+    NormaliseToMonitor norm3;
+    norm3.initialize();
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon3") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorSpectrum","0") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorWorkspace","monWS") )
+    TS_ASSERT_THROWS_NOTHING( norm3.execute() )
+    TS_ASSERT( ! norm3.isExecuted() )
+  }
+
+  void testSeparateWorkspaceWithRebin()
+  {
+    NormaliseToMonitor norm4;
+    norm4.initialize();
+    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("InputWorkspace","normMon") )
+    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("OutputWorkspace","normMon4") )
+    TS_ASSERT_THROWS_NOTHING( norm4.setPropertyValue("MonitorWorkspace","monWS") )
+    TS_ASSERT_THROWS_NOTHING( norm4.execute() )
+    TS_ASSERT( norm4.isExecuted() )
+  }
 };
 
 #endif /*NORMALISETOMONITORTEST_H_*/

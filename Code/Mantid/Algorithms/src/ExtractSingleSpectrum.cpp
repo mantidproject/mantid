@@ -38,7 +38,6 @@ void ExtractSingleSpectrum::exec()
     g_log.error("SpectrumIndex is greater than the number of spectra in this workspace.");
     throw Exception::IndexError(desiredSpectrum,inputWorkspace->getNumberHistograms(),this->name());
   }
-  //m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms());
 
   Progress p(this,0.0,1.0,1);
   // Now create a single spectrum workspace for the output

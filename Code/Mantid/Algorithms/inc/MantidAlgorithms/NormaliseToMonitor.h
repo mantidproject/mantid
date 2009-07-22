@@ -41,7 +41,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 30/09/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -78,22 +78,26 @@ private:
   void init();
   void exec();
 
-  // called by init()
-  void checkProperties() const;
-  bool setIntegrateProps();
+  void checkProperties(API::MatrixWorkspace_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const int index);
+  bool setIntegrationProps(API::MatrixWorkspace_const_sptr inputWorkspace);
 
-  void findMonitorIndex(API::MatrixWorkspace_const_sptr inputWorkspace);
-  API::MatrixWorkspace_sptr normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace);
+  void normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace, 
+                                  API::MatrixWorkspace_sptr& outputWorkspace);
+  void cropWorkspace(API::MatrixWorkspace_sptr& WS);
 
-  /// The index of the monitor to which to normalise
-  int m_monitorIndex;
+  void normaliseBinByBin(API::MatrixWorkspace_const_sptr inputWorkspace,
+                         API::MatrixWorkspace_sptr& outputWorkspace);
+  void normalisationFactor(const MantidVec& X, MantidVec* Y, MantidVec* E);
+
+  /// A single spectrum workspace containing the monitor
+  API::MatrixWorkspace_sptr m_monitor;
+  /// Whether the input workspace has common bins
+  bool m_commonBins;
   /// The lower bound of the integration range
   double m_integrationMin;
   /// The upper bound of the integration range
   double m_integrationMax;
-  /// Progress reporting
-  API::Progress* m_progress;
-
 };
 
 } // namespace Algorithm

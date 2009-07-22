@@ -137,7 +137,7 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
  *  @param ynew Rebinned data. Must be 1 element shorter than xnew.
  *  @param enew Rebinned errors. Must be same length as ynew.
  *  @param addition If true, rebinned values are added to the existing ynew/enew vectors.
- *  @throw runtime_error Thrown if vector sizes are inconsistent or if the X vectors do no overlap
+ *  @throw runtime_error Thrown if vector sizes are inconsistent
  **/
 void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
     const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition)
@@ -162,15 +162,15 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
   if (xnew.front() > xold.front())
   {
     std::vector<double>::const_iterator it = std::upper_bound(xold.begin(), xold.end(), xnew.front());
-    if (it == xold.end())
-      throw std::runtime_error("No overlap: max of X-old < min of X-new");
+    if (it == xold.end()) return;
+//      throw std::runtime_error("No overlap: max of X-old < min of X-new");
     iold = std::distance(xold.begin(), it) - 1; // Old bin to start at (counting from 0)
   }
   else
   {
     std::vector<double>::const_iterator it = std::upper_bound(xnew.begin(), xnew.end(), xold.front());
-    if (it == xnew.end())
-      throw std::runtime_error("No overlap: max of X-new < min of X-old");
+    if (it == xnew.end()) return;
+//      throw std::runtime_error("No overlap: max of X-new < min of X-old");
     inew = std::distance(xnew.begin(), it) - 1; // New bin to start at (counting from 0)
   }
   
