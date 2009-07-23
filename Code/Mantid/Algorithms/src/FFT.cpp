@@ -140,9 +140,21 @@ void FFT::exec()
 
     DataObjects::Workspace2D_sptr outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",nOut,xSize,ySize));
-    outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
+
+    bool isEnergyMeV = false;
+    if (inWS->getAxis(0)->unit() && 
+        (inWS->getAxis(0)->unit()->caption() == "Energy" ||
+         inWS->getAxis(0)->unit()->caption() == "Energy transfer")&&
+        inWS->getAxis(0)->unit()->label() == "meV")
+    {
+        outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit("Time","ns"));
+        isEnergyMeV = true;
+    }
+    else
+        outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
 
     double df = 1.0 / (dx * (xSize - 1));
+    if (isEnergyMeV) df /= 2.418e2;
 
     // shift == true means that the zero on the x axis is assumed to be in the data centre 
     // at point with index i = ySize/2. If shift == false the zero is at i = 0
