@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/WBVMedianTest.h"
+#include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -15,19 +15,19 @@ namespace Mantid
 namespace Algorithms
 {
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(WBVMedianTest)
+DECLARE_ALGORITHM(MedianDetectorTest)
 
 using namespace Kernel;
 using namespace API;
 using DataObjects::Workspace2D;
 
-void WBVMedianTest::init()
+void MedianDetectorTest::init()
 {
   HistogramValidator<MatrixWorkspace> *val =
     new HistogramValidator<MatrixWorkspace>;
   declareProperty(
-    new WorkspaceProperty<>("WhiteBeamWorkspace","",Direction::Input,val),
-    "Name of a white beam vanadium workspace" );
+    new WorkspaceProperty<>("InputWorkspace","",Direction::Input,val),
+    "Name of the input workspace" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Each histogram from the input workspace maps to a histogram in this\n"
@@ -36,12 +36,17 @@ void WBVMedianTest::init()
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0);
-  declareProperty("LowThreshold", 0.1, mustBePositive,
-    "Detectors with signals less than this proportion of the median\n"
-    "value will be labeled as reading badly (default 0.1)" );
+  declareProperty("SignificanceTest", 3.3, mustBePositive,
+    "Set this to a nonzero value and detectors in spectra with a total\n"
+    "number of counts is within this number of standard deviations from the\n"
+    "median will not be labelled bad (default 3.3)" );
+  declareProperty("LowThreshold", 0.1, mustBePositive->clone(),
+    "Detectors corresponding to spectra with total counts less than this\n"
+    "proportion of the median number of counts would be labelled as reading\n"
+    "badly (default 0.1)" );
   declareProperty("HighThreshold", 1.5, mustBePositive->clone(),
-    "Detectors with signals more than this number of times the median\n"
-    "signal will be labeled as reading badly (default 1.5)" );
+    "Detectors corresponding to spectra with total counts more than this\n"
+    "number of the median would be labelled as reading badly (default 1.5)" );
 /* Allow users to change the failure codes?      declareProperty("LiveValue", 0.0, mustBePositive->clone(),
         "The value to assign to an integrated spectrum flagged as 'live'\n"
         "(default 0.0)");
@@ -69,7 +74,7 @@ void WBVMedianTest::init()
     "The name of a file to write the list of dead detector UDETs (default\n"
     "no file output)" );
       // This output property will contain the list of UDETs for the dead detectors
-  declareProperty("FoundDead",std::vector<int>(),Direction::Output);
+  declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
 }
 
 /** Executes the algorithm that includes calls to SolidAngle and Integration
@@ -77,7 +82,7 @@ void WBVMedianTest::init()
 *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
 *  @throw runtime_error if algorithm cannot execute
 */
-void WBVMedianTest::exec()
+void MedianDetectorTest::exec()
 {
   //gets and checks the values passed to the algorithm that need checking, throws an invalid_argument if we can't find a good value for a property
   retrieveProperties();
@@ -98,21 +103,20 @@ void WBVMedianTest::exec()
   //Gets an average of the data, the medain is less influenced by a small number of huge values than the mean
   double av = getMedian(counts);
   //The final piece of the calculation, remove any detectors whoses signals are outside the threshold range
-  std::vector<int> outArray =
-    FindDetects( counts, av*m_Low, av*m_High, getProperty("OutputFile") );
-  
+  std::vector<int> outArray = FindDetects( counts, av );// function uses reads several properties, the ErrorThreshold, lower and upper thresholds and the outputfile
+
   // Now the calculation is complete, setting the output property to the workspace will register it in the Analysis Data Service and allow the user to see it
   setProperty("OutputWorkspace", counts);
 
-  setProperty("FoundDead", outArray);
+  setProperty("BadDetectorIDs", outArray);
 }
 /** Loads and checks the values passed to the algorithm
 *
-*  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
+*  @throw invalid_argument if there is an incapatible property value so the algorithm can't continue
 */
-void WBVMedianTest::retrieveProperties()
+void MedianDetectorTest::retrieveProperties()
 {
-  m_InputWS = getProperty("WhiteBeamWorkspace");
+  m_InputWS = getProperty("InputWorkspace");
   int maxSpecIndex = m_InputWS->getNumberHistograms() - 1;
   // construting this object will throw an invalid_argument if there is no instrument information, we don't catch it we the algorithm will be stopped
   InputWSDetectorInfo testTesting(m_InputWS);
@@ -163,7 +167,7 @@ void WBVMedianTest::retrieveProperties()
 * @param lastSpec the index number of the last histogram to analyse
 * @return A pointer to the workspace (or an empty pointer)
 */
-API::MatrixWorkspace_sptr WBVMedianTest::getSolidAngles(
+API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(
             API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information("Calculating soild angles");
@@ -205,7 +209,7 @@ API::MatrixWorkspace_sptr WBVMedianTest::getSolidAngles(
 * @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
-API::MatrixWorkspace_sptr WBVMedianTest::getTotalCounts(
+API::MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(
                 API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information() << "Integrating input workspace" << std::endl;
@@ -243,7 +247,7 @@ API::MatrixWorkspace_sptr WBVMedianTest::getTotalCounts(
 * @param counts A histogram workspace with counts in time bins 
 * @return A workspace of the counts per unit time in each bin
 */
-API::MatrixWorkspace_sptr WBVMedianTest::getRate
+API::MatrixWorkspace_sptr MedianDetectorTest::getRate
                                            (API::MatrixWorkspace_sptr counts)
 {
   g_log.information("Calculating time averaged count rates");
@@ -277,7 +281,7 @@ API::MatrixWorkspace_sptr WBVMedianTest::getRate
 * @return The median value of the histograms in the workspace that was passed to it
 * @throw logic_error if an input value is negative
 */
-double WBVMedianTest::getMedian(API::MatrixWorkspace_const_sptr input)
+double MedianDetectorTest::getMedian(API::MatrixWorkspace_const_sptr input)
   const
 {
   g_log.information("Calculating the median count rate of the spectra");
@@ -339,27 +343,30 @@ double WBVMedianTest::getMedian(API::MatrixWorkspace_const_sptr input)
 /** Takes a single valued histogram workspace and assesses which histograms are within the limits
 *
 * @param responses a workspace of histograms with one bin
-* @param lowLim histograms with a value less than this will be listed as failed
-* @param highLim histograms with a value higher than this will be listed as failed
-* @param fileName name of a file to store the list of failed spectra in (pass "" to aviod writing to file)
+* @param baseNum The number expected number of counts, spectra near to this number of counts won't fail
 * @return An array that of the index numbers of the histograms that fail
 */
-std::vector<int> WBVMedianTest::FindDetects(
-  API::MatrixWorkspace_sptr responses, double lowLim, double highLim,
-  std::string fileName)
+std::vector<int> MedianDetectorTest::FindDetects(
+                           API::MatrixWorkspace_sptr responses, double baseNum)
 {
   g_log.information("Apply the criteria to find failing detectors");
-
-  // get ready to report the number of bad detectors found to the log
-  int cLows = 0, cHighs = 0, cAlreadyMasked = 0;
+  
+  // prepare to fail spectra with numbers of counts less than this
+  double lowLim = baseNum*m_Low;
+  // prepare to fail spectra with numbers of counts greater than this
+  double highLim = baseNum*m_High;
+  //but a spectra can't fail if the statistics show its value is consistent with the mean value, check the error and how many errorbars we are away
+  double minNumStandDevs = getProperty("SignificanceTest");
 
   //an array that will store the IDs of bad detectors
   std::vector<int> badDets;
-
+  // get ready to write to the log the number of bad detectors found
+  int cLows = 0, cHighs = 0, cAlreadyMasked = 0;
   // ready to write dead detectors to a file
   std::ofstream file;
   bool fileOpen = false;
-  //it is not an error if the name is "", we'll just leave the file marked not open to ignore writing
+  std::string fileName = getProperty("OutputFile");
+  //it is not an error if the name is "", we'll just leave the fileOpen == false to prevent writing
   if ( !fileName.empty() )
   {
     file.open( fileName.c_str() );
@@ -372,7 +379,7 @@ std::vector<int> WBVMedianTest::FindDetects(
   }
   if ( fileOpen ) file << "Index Spectrum UDET(S)" << std::endl;  
 
-  // iterate over the data values setting the live and dead values
+  // Main part of the function, iterate over the data values setting the live and dead values
   const int numSpec = m_MaxSpec - m_MinSpec;
   int iprogress_step = numSpec / 10;
   if (iprogress_step == 0) iprogress_step = 1;
@@ -392,14 +399,20 @@ std::vector<int> WBVMedianTest::FindDetects(
     else // not already marked dead, check is the value within the acceptance range
     {
       if ( yInputOutput < lowLim )
-      {
-        problem = "is too low";
-        cLows++;
+      {// compare the difference against the size of the errorbar -statistical significance check
+        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+        {
+          problem = "is too low";
+          cLows++;
+        }
       }
       if ( yInputOutput > highLim )
-      {
-        problem = "is too high";
-        cHighs++;
+      {// check that the deviation is not within the errors
+        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+        {
+          problem = "is too high";
+          cHighs++;
+        }
       }
     }
     if ( problem.empty() )
@@ -435,7 +448,7 @@ std::vector<int> WBVMedianTest::FindDetects(
       }
       if ( fileOpen ) file << std::endl;
     }
-    // the y values are just aribitary flags, an error value doesn't make sense
+    // the y values are just aribitary flags, an error value doesn't make sense now
     responses->dataE(i)[0] = 0;
 
     // update the progressbar information
@@ -457,7 +470,7 @@ std::vector<int> WBVMedianTest::FindDetects(
   return badDets;
 }
 /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
-float WBVMedianTest::advanceProgress(int toAdd)
+float MedianDetectorTest::advanceProgress(int toAdd)
 {
   m_PercentDone += toAdd/float(m_TotalTime);
   // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value could cause an error
@@ -465,7 +478,7 @@ float WBVMedianTest::advanceProgress(int toAdd)
   return m_PercentDone;
 }
 /// Update the percentage complete estimate assuming that the algorithm aborted a task with estimated RunTime toAdd
-void WBVMedianTest::failProgress(RunTime aborted)
+void MedianDetectorTest::failProgress(RunTime aborted)
 {
   advanceProgress(-aborted);
   m_TotalTime -= aborted;

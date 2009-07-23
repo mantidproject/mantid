@@ -311,6 +311,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\MedianDetectorTest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MergeRuns.cpp"
 				>
 			</File>
@@ -428,10 +432,6 @@
 			</File>
 			<File
 				RelativePath=".\src\Unwrap.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\WBVMedianTest.cpp"
 				>
 			</File>
 		</Filter>
@@ -653,6 +653,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\MedianDetectorTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MedianDetectorTestTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\MergeRuns.h"
 				>
 			</File>
@@ -866,14 +874,6 @@
 			</File>
 			<File
 				RelativePath=".\test\UnwrapTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\WBVMedianTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\WBVMedianTestTest.h"
 				>
 			</File>
 		</Filter>

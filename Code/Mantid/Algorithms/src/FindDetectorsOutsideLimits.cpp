@@ -35,11 +35,9 @@ namespace Algorithms
         "Spectra whose total number of counts are below or equal to this value will be\n"
         "marked bad (default 0)" );
       declareProperty("GoodValue",0.0, mustBePositive->clone(),
-        "The value to assign to an integrated spectrum flagged as 'live'\n"
-        "(default 0.0)");
+        "The value to be assigned to spectra flagged as 'live' (default 0.0)" );
       declareProperty("BadValue",100.0, mustBePositive->clone(),
-        "The value to assign to an integrated spectrum flagged as 'bad'\n"
-        "(default 100.0)" );
+        "The value to be assign to spectra flagged as 'bad' (default 100.0)" );
       declareProperty("RangeLower", EMPTY_DBL(),
         "No bin with a boundary at an x value less than this will be used\n"
         "in the summation that decides if a detector is 'bad' (default: the\n"
@@ -51,7 +49,7 @@ namespace Algorithms
       declareProperty("OutputFile","",
         "A filename to which to write the list of dead detector UDETs" );
       // This output property will contain the list of UDETs for the dead detectors
-      declareProperty("FoundDead",std::vector<int>(),Direction::Output);
+      declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
     }
 
     /** Executes the algorithm
@@ -137,7 +135,7 @@ namespace Algorithms
 
       // Assign it to the output workspace property
       setProperty("OutputWorkspace",integratedWorkspace);
-      setProperty("FoundDead",deadDets);
+      setProperty("BadDetectorIDs",deadDets);
 
       // Close the output file
       file.close();

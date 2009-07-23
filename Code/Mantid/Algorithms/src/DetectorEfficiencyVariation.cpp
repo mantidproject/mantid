@@ -72,7 +72,7 @@ void DetectorEfficiencyVariation::init()
     "The name of a file to write the list of dead detector UDETs (default:\n"
     "no file output)" );
       // This output property will contain the list of UDETs for the dead detectors
-  declareProperty("BadIDs",std::vector<int>(),Direction::Output);
+  declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
 }
 
 /** Executes the algorithm that includes calls to SolidAngle and Integration
@@ -106,7 +106,7 @@ void DetectorEfficiencyVariation::exec()
   // counts1 was overwriten by the last function, now register it with the Analysis Data Service so that users can see it
   setProperty("OutputWorkspace", counts1);
   // make the output array visible to the user too
-  setProperty("BadIDs", outArray);
+  setProperty("BadDetectorIDs", outArray);
 }
 /** Loads, checks and passes back the values passed to the algorithm
 * @param whiteBeam1 A white beam vanadium spectrum that will be used to check detector efficiency variations

@@ -82,7 +82,7 @@ public:
         static_cast<double>(BadVal) )
     }
     std::vector<int> OArray;
-    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty( "BadIDs" ) )
+    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty( "BadDetectorIDs" ) )
     //now check the array
     std::vector<int>::const_iterator it = OArray.begin();
     for (int lHist = 0 ; lHist < firstGoodSpec; lHist++ )

@@ -95,7 +95,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT( alg.isExecuted() );
     std::vector<int> deadDets;
-    TS_ASSERT_THROWS_NOTHING( deadDets = alg.getProperty("FoundDead") )
+    TS_ASSERT_THROWS_NOTHING( deadDets = alg.getProperty("BadDetectorIDs") )
     //it will scan the whole range and so only find the very dead detectors, there are 10 of them
     TS_ASSERT_EQUALS( deadDets.size(), 11 )
 

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "WorkspaceCreationHelper.hh"
 
-#include "MantidAlgorithms/WBVMedianTest.h"
+#include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -26,32 +26,33 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class WBVMedianTestTest : public CxxTest::TestSuite
+class MedianDetectorTestTest : public CxxTest::TestSuite
 {
 public:
 
   void testWorkspaceAndArray()
   {
-    WBVMedianTest alg;
-    TS_ASSERT_EQUALS( alg.name(), "WBVMedianTest" )
+    MedianDetectorTest alg;
+    TS_ASSERT_EQUALS( alg.name(), "MedianDetectorTest" )
     TS_ASSERT_EQUALS( alg.version(), 1 )
     //the spectra were setup in the constructor and passed to our algorithm through this function
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( runInit(alg) ) )
 
+    alg.setProperty("SignificanceTest", 1.0);
     //these are realistic values that I just made up
     alg.setProperty( "LowThreshold", 0.5 );
     alg.setProperty( "HighThreshold", 1.3333 );
     //we are using the defaults on StartSpectrum, EndSpectrum, RangeLower and RangeUpper which is to use the whole spectrum
-
+ 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
     std::vector<int> OArray;
-    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty( "FoundDead" ) )
+    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty( "BadDetectorIDs" ) )
     // Get back the saved workspace
     Workspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("WBVMedianTestTestOutput"));
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("MedianDetectorTestOutput"));
     Workspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(m_IWSName));
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
@@ -65,6 +66,7 @@ public:
     // the numbers below are threshold values that were found by trail and error running these tests
     int firstGoodSpec = 36;
     int lastGoodSpec = 95;
+    int savedBySignific = Nhist-1;
     for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
@@ -75,10 +77,15 @@ public:
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), GoodVal )
     }
-    for (int lHist = lastGoodSpec+1; lHist < Nhist; lHist++)
+    for (int lHist = lastGoodSpec+1; lHist < savedBySignific; lHist++)
     {
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), BadVal )
+    }
+    for (int lHist = savedBySignific; lHist < Nhist; lHist++)
+    {
+      TS_ASSERT_EQUALS(
+        outputMat->readY(lHist).front(), GoodVal )
     }
     //now check the array
     std::vector<int>::const_iterator it = OArray.begin();
@@ -87,10 +94,11 @@ public:
       TS_ASSERT_EQUALS( *it, lHist+1 )
       TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
     }
-    for (int lHist = lastGoodSpec+1 ; lHist < Nhist ; lHist++ )
+    for (int lHist = lastGoodSpec+1 ; lHist < savedBySignific ; lHist++ )
     {
       TS_ASSERT_EQUALS( *it, lHist+1 )
-      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
+      if ( it != OArray.end() ) ++it;
+      else TS_ASSERT_EQUALS( lHist, savedBySignific - 1 );
     }
     //check that extra entries haven't been written to the array
     TS_ASSERT_EQUALS( it, OArray.end() )
@@ -98,13 +106,15 @@ public:
 
   void testFile()
   {
-    WBVMedianTest alg;
+    MedianDetectorTest alg;
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( runInit(alg) ) )
 
     // values a little extreme, I just made them up
     alg.setProperty( "LowThreshold", 0.44444 );
     alg.setProperty( "HighThreshold", 5.0 );
+    // this should turn off examining the errors.  This makes things simplier, significance testing was tested in the last test
+    alg.setProperty("SignificanceTest", 0.0);
 
     const int fSpec = 0,  lSpec = Nhist/2;
     alg.setProperty( "StartSpectrum", fSpec );
@@ -114,7 +124,7 @@ public:
     alg.setProperty( "RangeLower", lRange );
     alg.setProperty( "RangeUpper", uRange );
 
-    std::string OFileName("WBVMedianTestTestFile.txt");  
+    std::string OFileName("MedianDetectorTestTestFile.txt");  
     alg.setPropertyValue( "OutputFile", OFileName );
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
@@ -159,37 +169,46 @@ public:
     remove(OFileName.c_str());
   }
     
-  WBVMedianTestTest() : m_IWSName("WBVMedianTestTestInput"), BadVal(100.0), GoodVal(0.0)
+  MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput"), BadVal(100.0), GoodVal(0.0)
   {
     using namespace Mantid;
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",Nhist,11,10);
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    boost::shared_ptr<MantidVec> x(new MantidVec(11));
-    for (int i = 0; i < 11; ++i)
+    const short specLength = 22;
+    boost::shared_ptr<MantidVec> x(new MantidVec(specLength));
+    for (int i = 0; i < specLength; ++i)
     {
       (*x)[i]=i*1000;
     }
-    // 21 random numbers that will be copied into the workspace spectra
-    const short ySize = 21;
-    double yArray[ySize] =
+    // the data will be 21 random numbers
+    double yArray[specLength-1] =
       {0.2,4,50,0.001,0,0,0,1,0,15,4,0,0.001,2e-10,0,8,0,1e-4,1,7,11};
-    m_YSum = 0; for (int i = 0; i < ySize; i++) m_YSum += yArray[i];
+    m_YSum = 0; for (int i = 0; i < specLength-1; i++) m_YSum += yArray[i];
 
-    //the error values aren't used and aren't tested so we'll use some basic data
-    boost::shared_ptr<MantidVec> errors( new MantidVec( ySize, 1) );
-    boost::shared_ptr<MantidVec> spectrum;
+    // most error values will be small so that they wont affect the tests
+    boost::shared_ptr<MantidVec> smallErrors( 
+      new MantidVec( specLength-1, 0.01*m_YSum/specLength ) );
+    // if the SignificanceTest property is set to one, knowing what happens in the loop below, these errors will just make or break the tests
+    boost::shared_ptr<MantidVec> almostBigEnough( new MantidVec( specLength-1, 0) );
+    (*almostBigEnough)[0] = 0.9*m_YSum*(0.5*Nhist-1);
+    boost::shared_ptr<MantidVec> bigEnough( new MantidVec( specLength-1, 0 ) );
+    (*bigEnough)[0] = 1.2*m_YSum*(0.5*Nhist);
 
     int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j)
     {
       space2D->setX(j, x);
-      spectrum.reset( new MantidVec );
+      boost::shared_ptr<MantidVec> spectrum( new MantidVec );
       //the spectravalues will be multiples of the random numbers above
-      for ( int l = 0; l < ySize; ++l )
+      for ( int l = 0; l < specLength-1; ++l )
       {
         spectrum->push_back( j*yArray[l] );
       }
+      boost::shared_ptr<MantidVec> errors = smallErrors;
+      if ( j == Nhist-2 ) errors = almostBigEnough;
+      if ( j == Nhist-1 ) errors = bigEnough;
+
       space2D->setData( j, spectrum, errors );
       // Just set the spectrum number to match the index
       space2D->getAxis(1)->spectraNo(j) = j+1;
@@ -213,14 +232,14 @@ public:
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   }
 
-  bool runInit(WBVMedianTest &alg)
+  bool runInit(MedianDetectorTest &alg)
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     bool good = alg.isInitialized();
 
     // Set the properties
-    alg.setPropertyValue("WhiteBeamWorkspace", m_IWSName);
-    alg.setPropertyValue("OutputWorkspace","WBVMedianTestTestOutput");
+    alg.setPropertyValue("InputWorkspace", m_IWSName);
+    alg.setPropertyValue("OutputWorkspace","MedianDetectorTestOutput");
     return good;
   }
 

@@ -66,19 +66,19 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport WBVMedianTest : public API::Algorithm
+    class DLLExport MedianDetectorTest : public API::Algorithm
     {
     public:
       /// Default constructor initialises all values to zero and runs the base class constructor
-      WBVMedianTest() :
+      MedianDetectorTest() :
           API::Algorithm(),
-          m_PercentDone(0.0), m_TotalTime(RTTotal), m_Low(0.1), m_High(1.5),
+          m_PercentDone(0.0), m_Low(0.1), m_High(1.5), m_TotalTime(RTTotal), 
           m_MinSpec(0), m_MaxSpec(UNSETINT), m_usableMaskMap(true)
       {};
       /// Destructor
-      virtual ~WBVMedianTest() {};
+      virtual ~MedianDetectorTest() {};
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "WBVMedianTest";}
+      virtual const std::string name() const { return "MedianDetectorTest";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return (1);}
       /// Algorithm's category for identification overriding a virtual method
@@ -104,7 +104,7 @@ namespace Mantid
       double getMedian(API::MatrixWorkspace_const_sptr input) const;
       /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
       std::vector<int> FindDetects(API::MatrixWorkspace_sptr responses,
-        double lowLim, double highLim, std::string fileName);
+                                                              double baseNum);
       
       /// Value written to the output workspace where bad spectra are found
       static const int BadVal = 100;
