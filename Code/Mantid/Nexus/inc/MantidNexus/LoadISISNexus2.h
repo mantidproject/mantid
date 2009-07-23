@@ -113,6 +113,8 @@ namespace Mantid
             int m_spec_min;
             /// The value of the spectrum_max property
             int m_spec_max;
+			  /// The number of the input entry
+            int m_entrynumber;
             /// The group which each detector belongs to in order
             std::vector<int> m_groupings;
             /// Time channels

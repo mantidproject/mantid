@@ -98,15 +98,15 @@ namespace NeXus
     }
     if( definition[0]==muonTd )
     {
-	     runLoadMuonNexus();
+		     runLoadMuonNexus();
     }
     else if( entryName[0]=="mantid_workspace_1" )
     {
-		     runLoadNexusProcessed();
+			 runLoadNexusProcessed();
     }
     else if( entryName[0]=="raw_data_1" )
     {
-		runLoadIsisNexus();
+			runLoadIsisNexus();
     }
     else
     {
@@ -148,14 +148,14 @@ namespace NeXus
 	  loadMuonNexus->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
     
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      try
-      {
+     // try
+     // {
         loadMuonNexus->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
-      }
+     // }
+     // catch (std::runtime_error&)
+     // {
+     //   g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
+    //  }
       if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
       // Get pointer to the workspace created
     //  m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
@@ -214,14 +214,14 @@ namespace NeXus
 
       loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      try
-      {
+     // try
+      //{
         loadNexusPro->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run LoadNexusprocessed sub-algorithm");
-      }
+      //}
+     // catch (std::runtime_error&)
+    //  {
+   //     g_log.error("Unable to successfully run LoadNexusprocessed sub-algorithm");
+   //   }
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadNexusProcessed sub-algorithm");
       // Get pointer to the workspace created
      // m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 
@@ -280,14 +280,14 @@ namespace NeXus
 	  loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      try
-      {
+     // try
+     // {
         loadNexusPro->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
-      }
+      //}
+     // catch (std::runtime_error&)
+     // {
+     //   g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
+    //  }
       if ( ! loadNexusPro->isExecuted() ) g_log.error("Unable to successfully run LoadISISNexus sub-algorithm");
       // Get pointer to the workspace created
       //m_localWorkspace=loadNexusPro->getProperty(outputWorkspace); 

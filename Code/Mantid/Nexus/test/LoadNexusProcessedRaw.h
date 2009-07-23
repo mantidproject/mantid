@@ -239,12 +239,12 @@ if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
 	  TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
 	  TS_ASSERT( algToBeTested.isExecuted() );
 
-	  WorkspaceGroup_sptr grpoutput;
-	  TS_ASSERT_THROWS_NOTHING(grpoutput = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
+	 // WorkspaceGroup_sptr grpoutput;
+	 // TS_ASSERT_THROWS_NOTHING(grpoutput = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
 
 	  // Get back the saved workspace
 	  MatrixWorkspace_sptr output;
-	  TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(myOutputSpace+"_1")));
+	  TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(myOutputSpace)));
 	  Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 	  // Should be 2584 for file HET15869.RAW
 	  TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);

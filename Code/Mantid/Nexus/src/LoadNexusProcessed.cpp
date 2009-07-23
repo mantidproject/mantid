@@ -116,31 +116,50 @@ void LoadNexusProcessed::exec()
 	double p=1.0;
 	int numberOfPeriods=0;
 	
-	//count used for the no.of workspaces in .nxs file
-	//it's zero  when an EntryNumber is given from UI
+	//period  used for the no.of workspaces in .nxs file
+	//it's one   when an EntryNumber is given from UI
 	// if no EntryNumber number given from UI it's equal to 
 	//the number of workspaces in .nxs file
-	int period=1;
-	
+	int period=0;
+	//open the  .nxs file
+	NXRoot* nexusRoot=new NXRoot (m_filename);
+	if(nexusRoot)
+	{
+		//get the no.of workspaces in .nxs files
+		std::vector<NXClassInfo> grpVec=nexusRoot->groups();
+		// get the workspace count from .nxs file
+		if(!grpVec.empty())
+			numberOfPeriods=period=grpVec.size();
+		if(m_entrynumber>period)
+		{
+			throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
+		}
+		delete nexusRoot;
+	}
+		
 	// create ws group
 	WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
 	
 	//if  EntryNumber property is 0( default value ) create ws group and 
-	//load all the workspaces from  .nxs file to workspace group
+	//load all the workspaces from  .nxs file to workspace group if the number of workspaces >1
 	if(m_entrynumber==0)
 	{
-		//root of  .nxs file
-		NXRoot nexusRoot (m_filename);
-		//add  outputworkspace to workspace group
-	    if(wsGrpSptr)wsGrpSptr->add(localWSName);
-		 setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
-		 //get the no.of workspaces in .nxs files
-		 std::vector<NXClassInfo> grpVec=nexusRoot.groups();
-		 // get the workspace count from .nxs file
-		 numberOfPeriods=period=grpVec.size();
+		//if(period>1)
+		if(numberOfPeriods>1)
+		 {
+			//  numberOfPeriods=period;
+			 //add  outputworkspace to workspace group
+			 if(wsGrpSptr)wsGrpSptr->add(localWSName);
+			 setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+		 }
 		  
 		  p= double(1)/period;
 	}
+	else
+	{
+		numberOfPeriods=period=1;
+	}
+
 	
    //below do...while loop is introduced to handle workspace groups
 	//if no EntryNumber given from UI loop is  executed period times
@@ -246,7 +265,8 @@ void LoadNexusProcessed::exec()
 	std::string outputWorkspace = "OutputWorkspace";
 	nexusFile->readNexusParameterMap(localWorkspace);
 	//if(period!=0)
-	if(numberOfPeriods!=0)
+	//if(numberOfPeriods!=0)
+	if(numberOfPeriods>1)
 	{	
 		std::stringstream suffix;
 		suffix << (m_entrynumber+1);

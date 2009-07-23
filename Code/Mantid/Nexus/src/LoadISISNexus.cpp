@@ -86,7 +86,12 @@ void LoadISISNexus::exec()
     readDataDimensions();
 	if(m_entrynumber!=0)
 	{
-		m_numberOfPeriods=1;
+		if(m_entrynumber>m_numberOfPeriods)
+		{
+			throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
+		}
+		else
+			m_numberOfPeriods=1;
 		
 	}
 

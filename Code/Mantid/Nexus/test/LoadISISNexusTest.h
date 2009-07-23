@@ -9,6 +9,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidNexus/LoadISISNexus2.h"
 using namespace Mantid::NeXus;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -25,7 +26,7 @@ public:
 	//	std::getline(std::cin,s);
 
         Mantid::API::FrameworkManager::Instance();
-        LoadISISNexus ld;
+        LoadISISNexus2 ld;
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/LOQ49886.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
@@ -51,7 +52,7 @@ public:
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->getSample()->getLogData("icp_event"));
         TS_ASSERT(slog);
         std::string str = slog->value();
-        TS_ASSERT_EQUALS(str.size(),1012);
+        TS_ASSERT_EQUALS(str.size(),1023);
         TS_ASSERT_EQUALS(str.substr(0,37),"2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
         slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->getSample()->getLogData("icp_debug"));
@@ -70,12 +71,12 @@ public:
         TS_ASSERT(blog);
         TS_ASSERT_EQUALS(blog->size(),1);
 
-        TS_ASSERT_EQUALS(ws->getSample()->getName(),"PMMA_SAN25_1.5%_TRANS_150");
+        TS_ASSERT_EQUALS(ws->getSample()->getName(),"");
     }
     void testExec2()
     {
         Mantid::API::FrameworkManager::Instance();
-        LoadISISNexus ld;
+        LoadISISNexus2 ld;
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/LOQ49886.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
@@ -85,11 +86,7 @@ public:
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 
-	
-		
-		
-
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+	    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
         TS_ASSERT_EQUALS(ws->blocksize(),5);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
 
@@ -105,16 +102,18 @@ public:
         TS_ASSERT_EQUALS(ws->readY(9)[3],1.);
         TS_ASSERT_EQUALS(ws->readY(12)[1],1.);
     }
-	 void xtestMultiPeriodEntryNumberZero()
+	 void testMultiPeriodEntryNumberZero()
     {
+		
         Mantid::API::FrameworkManager::Instance();
-        LoadISISNexus ld;
+        LoadISISNexus2 ld;
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/TEST00000008.nxs");
-        ld.setPropertyValue("OutputWorkspace","outWS");
+	    ld.setPropertyValue("OutputWorkspace","outWS");
         ld.setPropertyValue("SpectrumMin","10");
-        ld.setPropertyValue("SpectrumMax","20");
+        ld.setPropertyValue("SpectrumMax","19");
  		ld.setPropertyValue("EntryNumber","0");
+		//ld.setPropertyValue("SpectrumList","30,31");
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
 		
@@ -123,7 +122,7 @@ public:
 
         MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS_1"));
         TS_ASSERT_EQUALS(ws->blocksize(),995);
-        TS_ASSERT_EQUALS(ws->getNumberHistograms(),30);
+        TS_ASSERT_EQUALS(ws->getNumberHistograms(),10);
 
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
         TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
@@ -135,27 +134,26 @@ public:
 
         TS_ASSERT_EQUALS(ws->readY(7)[1],0.);
         TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
-        TS_ASSERT_EQUALS(ws->readY(12)[1],0.);
+        TS_ASSERT_EQUALS(ws->readY(9)[1],0.);
     }
-	  void xtestMultiPeriodEntryNumberNonZero()
+	  void testMultiPeriodEntryNumberNonZero()
     {
         Mantid::API::FrameworkManager::Instance();
-        LoadISISNexus ld;
+        LoadISISNexus2 ld;
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/TEST00000008.nxs");
         ld.setPropertyValue("OutputWorkspace","outWS");
         ld.setPropertyValue("SpectrumMin","10");
         ld.setPropertyValue("SpectrumMax","20");
+		ld.setPropertyValue("SpectrumList","29,30,31");
   		ld.setPropertyValue("EntryNumber","5");
         TS_ASSERT_THROWS_NOTHING(ld.execute());
         TS_ASSERT(ld.isExecuted());
-		
-		//WorkspaceGroup_sptr grpout;//=WorkspaceGroup_sptr(new WorkspaceGroup);
-		//TS_ASSERT_THROWS_NOTHING(grpout=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("outWS")));
+			
 
-        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS_5"));
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
         TS_ASSERT_EQUALS(ws->blocksize(),995);
-        TS_ASSERT_EQUALS(ws->getNumberHistograms(),30);
+        TS_ASSERT_EQUALS(ws->getNumberHistograms(),14);
 
         TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
         TS_ASSERT_EQUALS(ws->readX(0)[1],6.);
@@ -167,7 +165,7 @@ public:
 
         TS_ASSERT_EQUALS(ws->readY(7)[1],0.);
         TS_ASSERT_EQUALS(ws->readY(9)[3],0.);
-        TS_ASSERT_EQUALS(ws->readY(12)[1],0.);
+        TS_ASSERT_EQUALS(ws->readY(9)[1],0.);
     }
 };
 

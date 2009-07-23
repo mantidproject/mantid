@@ -41,13 +41,16 @@ void LoadISISNexus2::init()
     exts.push_back("NXS");
     exts.push_back("nxs");
     declareProperty("Filename","",new FileValidator(exts));
-    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+    //declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
+	declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
     declareProperty("SpectrumMin", 0, mustBePositive);
     declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
     declareProperty(new ArrayProperty<int>("SpectrumList"));
+	  declareProperty("EntryNumber", 0, mustBePositive->clone(),
+    "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -66,6 +69,9 @@ void LoadISISNexus2::exec()
 
     // Read in the instrument name from the Nexus file
     m_instrument_name = entry.getString("name");
+
+	 // Retrieve the entry number
+	 m_entrynumber = getProperty("EntryNumber");
 
     NXInt spectrum_index = entry.openNXInt("instrument/detector_1/spectrum_index");
     spectrum_index.load();
@@ -102,6 +108,18 @@ void LoadISISNexus2::exec()
     for(size_t i=nmon;i<udet.dim0();i++)
         spectra[i] = i + 1;
 
+	if(m_entrynumber!=0)
+	{
+		if(m_entrynumber>m_numberOfPeriods)
+		{
+			throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
+		}
+		else
+			m_numberOfPeriods=1;
+
+	}
+	
+
     if (spectrum_index.dim0() + nmon != udet.dim0() ||
         data.dim1() != spectrum_index.dim0())
         throw std::runtime_error("Spectra - detector mismatch");
@@ -111,6 +129,12 @@ void LoadISISNexus2::exec()
     // Need to extract the user-defined output workspace name
     Property *ws = getProperty("OutputWorkspace");
     std::string localWSName = ws->value();
+	WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+	if(m_numberOfPeriods>1)
+	{	
+		if(wsGrpSptr)wsGrpSptr->add(localWSName);
+		setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+	}
     // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
     boost::shared_ptr<IInstrument> instrument;
     boost::shared_ptr<Sample> sample;
@@ -132,6 +156,21 @@ void LoadISISNexus2::exec()
     Progress prog(this,0.,1.,total_specs*m_numberOfPeriods);
     // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
     for (int period = 0; period < m_numberOfPeriods; ++period) {
+		
+		if(m_entrynumber!=0)
+		{
+			period=m_entrynumber-1;
+			if(period!=0)
+			{
+				// Only run the sub-algorithms once
+				runLoadInstrument(localWorkspace );
+				localWorkspace->mutableSpectraMap().populate(spectra.get(),udet(),udet.dim0());
+
+				localWorkspace ->getSample()->setProtonCharge(entry.getFloat("proton_charge"));
+
+				loadLogs(localWorkspace, entry);
+			}
+		}
 
         if (period == 0)
         {
@@ -153,12 +192,12 @@ void LoadISISNexus2::exec()
             // Create a WorkspaceProperty for the new workspace of a higher period
             // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
             //                (for all but the first period, which has no suffix)
-            std::stringstream suffix;
+            /*std::stringstream suffix;
             suffix << (period+1);
             outputWorkspace += suffix.str();
             std::string WSName = localWSName + "_" + suffix.str();
             declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
-            g_log.information() << "Workspace " << WSName << " created. \n";
+            g_log.information() << "Workspace " << WSName << " created. \n";*/
             loadLogs(localWorkspace,entry ,period+1);
         }
 
@@ -197,7 +236,25 @@ void LoadISISNexus2::exec()
         }
 
         // Assign the result to the output workspace property
-        setProperty(outputWorkspace,localWorkspace);
+       // setProperty(outputWorkspace,localWorkspace);
+		std::string outws("");
+		std::string outputWorkspace = "OutputWorkspace";
+		if(m_numberOfPeriods>1)
+		{
+
+			std::stringstream suffix;
+			suffix << (period+1);
+			outws =outputWorkspace+"_"+suffix.str();
+			std::string WSName = localWSName + "_" + suffix.str();
+			declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+			if(wsGrpSptr)wsGrpSptr->add(WSName);
+			setProperty(outws,localWorkspace);
+		}
+		else
+		{
+			setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+		}
+
 
     }
 
