@@ -23,7 +23,8 @@ using namespace API;
 CylinderAbsorption::CylinderAbsorption() :
   API::Algorithm(),                                      //the base class constructor
   m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),
-  m_L1s(), m_Ltot(), m_elementVolumes(), n_lambda(unSetInt), x_step(0), exp_options()      //n_lambda i slinked to the NumberOfWavelengthPoints, unSetInt is a flag to say that values weren't passed for NumberOfWavelengthPoints/n_lambda
+  m_L1s(), m_elementVolumes(), n_lambda(unSetInt), x_step(0), exp_options(),      //n_lambda i slinked to the NumberOfWavelengthPoints, unSetInt is a flag to say that values weren't passed for NumberOfWavelengthPoints/n_lambda
+	m_numSlices(0),m_sliceThickness(0),m_numAnnuli(0),m_deltaR(0),m_numVolumeElements(0)
 {
 }
 
@@ -50,10 +51,10 @@ void CylinderAbsorption::init()
 
   BoundedValidator<int> *positiveInt = new BoundedValidator<int> ();
   positiveInt->setLower(1);
-  declareProperty("NumberOfSlices", 1, positiveInt,
+  declareProperty("NumberOfSlices", 1, positiveInt, 
     "The number of slices into which the cylinder is divided for the\n"
     "calculation");
-  declareProperty("NumberOfAnnuli", 1, positiveInt->clone(),
+  declareProperty("NumberOfAnnuli", 1, positiveInt->clone(), 
     "The number of annuli into which each slice is divided for the\n"
     "calculation");
   declareProperty("NumberOfWavelengthPoints", unSetInt, positiveInt->clone(),
@@ -97,12 +98,17 @@ void CylinderAbsorption::exec()
   message.str("");
 
   const bool isHist = inputWS->isHistogramData();
+
+	//calculate the cached values of L1 and element volumes
+	initialiseCachedDistances();
+
   int iprogress_step = numHists / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
+	PARALLEL_FOR2(inputWS,correctionFactors)
   for (int i = 0; i < numHists; ++i)
   {
     // Copy over bin boundaries
@@ -120,7 +126,8 @@ void CylinderAbsorption::exec()
       continue;
     }
 
-    this->calculateDistances(det);
+		std::vector<double> lTotal(m_numVolumeElements);
+    calculateDistances(det,lTotal);
 
     // Get a reference to the Y's in the output WS for storing the factors
     MantidVec& Y = correctionFactors->dataY(i);
@@ -129,14 +136,14 @@ void CylinderAbsorption::exec()
     for (int j = 0; j < specSize; j = j + x_step)
     {
       const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
-      Y[j] = this->doIntegration(lambda);
+      Y[j] = this->doIntegration(lambda, lTotal);
       Y[j] /= cylinder_volume; // Divide by total volume of the cylinder
     }
 
     if (x_step > 1) // Interpolate linearly between points separated by x_step, last point required
     {
       const double lambda = (isHist ? (0.5 * (X[specSize - 1] + X[specSize])) : X[specSize - 1]);
-      Y[specSize - 1] = this->doIntegration(lambda);
+      Y[specSize - 1] = this->doIntegration(lambda, lTotal);
       Y[specSize - 1] /= cylinder_volume;
       interpolate(X, Y, isHist);
     }
@@ -154,7 +161,6 @@ void CylinderAbsorption::exec()
 
   // Now do some cleaning-up since destructor is not called
   m_L1s.clear();
-  m_Ltot.clear();
   m_elementVolumes.clear();
   exp_options.clear();
 }
@@ -178,6 +184,17 @@ void CylinderAbsorption::retrieveProperties()
     EXPONENTIAL = exp;
   else if (exp_string == "FastApprox") // Use the compact approximation
     EXPONENTIAL = fast_exp;
+
+	m_numSlices = getProperty("NumberOfSlices");
+  m_sliceThickness = m_cylHeight / m_numSlices;
+  m_numAnnuli = getProperty("NumberOfAnnuli");
+	m_deltaR = m_cylRadius / m_numAnnuli;
+
+  /* The number of volume elements is
+   * numslices*(1+2+3+.....+numAnnuli)*6
+   * Since the first annulus is separated in 6 segments, the next one in 12 and so on.....
+   */
+  m_numVolumeElements = m_numSlices * m_numAnnuli * (m_numAnnuli + 1) * 3;
 }
 
 /// Create the cylinder object using the Geometry classes
@@ -221,71 +238,79 @@ void CylinderAbsorption::constructCylinderSample()
   g_log.information("Successfully constructed the sample object");
 }
 
-/// Calculate the distances traversed by the neutrons within the sample
-void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr& detector)
+/// Calculate the distances for L1 and element size for each element in the sample
+void CylinderAbsorption::initialiseCachedDistances()
 {
-  // Test whether I need to calculate distances
-  const bool calculateL1s = m_L1s.empty();
-
-  const int numSlices = getProperty("NumberOfSlices");
-  const double sliceThickness = m_cylHeight / numSlices;
-  const int numAnnuli = getProperty("NumberOfAnnuli");
-  ;
-  const double deltaR = m_cylRadius / numAnnuli;
-
-  /* The number of volume elements is
-   * numslices*(1+2+3+.....+numAnnuli)*6
-   * Since the first annulus is separated in 6 segments, the next one in 12 and so on.....
-   */
-  if (calculateL1s)
-  {
-    int n_volume_elements = numSlices * numAnnuli * (numAnnuli + 1) * 3;
-
-    m_L1s.resize(n_volume_elements);
-    m_Ltot.resize(n_volume_elements);
-    m_elementVolumes.resize(n_volume_elements);
-  }
+  m_L1s.resize(m_numVolumeElements);
+  m_elementVolumes.resize(m_numVolumeElements);
+  
   int counter = 0;
   // loop over slices
 
   V3D currentPosition;
 
-  for (int i = 0; i < numSlices; ++i)
+  for (int i = 0; i < m_numSlices; ++i)
   {
-    const double z = (i + 0.5) * sliceThickness - 0.5 * m_cylHeight;
+    const double z = (i + 0.5) * m_sliceThickness - 0.5 * m_cylHeight;
 
     // Number of elements in 1st annulus
     int Ni = 0;
     // loop over annuli
-    for (int j = 0; j < numAnnuli; ++j)
+    for (int j = 0; j < m_numAnnuli; ++j)
     {
       Ni += 6;
-      const double R = (j * m_cylRadius / numAnnuli) + (deltaR / 2.0);
+      const double R = (j * m_cylRadius / m_numAnnuli) + (m_deltaR / 2.0);
       // loop over elements in current annulus
       for (int k = 0; k < Ni; ++k)
       {
-        // These need only be calculated once
-        if (calculateL1s)
-        {
-          const double phi = 2* M_PI * k / Ni;
-          // Calculate the current position in the sample in Cartesian coordinates.
-          // Remember that our cylinder has its axis along the y axis
-          currentPosition(R * sin(phi), z, R * cos(phi));
-          assert(m_cylinderSample.isValid(currentPosition));
-          // Create track for distance in cylinder before scattering point
-          // Remember beam along Z direction
-          Track incoming(currentPosition, V3D(0.0, 0.0, -1.0));
-          int tmp = m_cylinderSample.interceptSurface(incoming);
-          assert(tmp == 1);
-          m_L1s[counter] = incoming.begin()->Dist;
+        const double phi = 2* M_PI * k / Ni;
+        // Calculate the current position in the sample in Cartesian coordinates.
+        // Remember that our cylinder has its axis along the y axis
+        currentPosition(R * sin(phi), z, R * cos(phi));
+        assert(m_cylinderSample.isValid(currentPosition));
+        // Create track for distance in cylinder before scattering point
+        // Remember beam along Z direction
+        Track incoming(currentPosition, V3D(0.0, 0.0, -1.0));
+        int tmp = m_cylinderSample.interceptSurface(incoming);
+        assert(tmp == 1);
+        m_L1s[counter] = incoming.begin()->Dist;
 
-          // Also calculate element volumes here
-          const double outerR = R + (deltaR / 2.0);
-          const double innerR = outerR - deltaR;
-          const double elementVolume = M_PI * (outerR * outerR - innerR * innerR) * sliceThickness / Ni;
-          m_elementVolumes[counter] = elementVolume;
-        }
+        // Also calculate element volumes here
+        const double outerR = R + (m_deltaR / 2.0);
+        const double innerR = outerR - m_deltaR;
+        const double elementVolume = M_PI * (outerR * outerR - innerR * innerR) * m_sliceThickness / Ni;
+        m_elementVolumes[counter] = elementVolume;
+ 
+        counter++;
+      }
+    }
+  }
+}
 
+/// Calculate the distances traversed by the neutrons within the sample
+/// @param detector the detector we are working on
+/// @param lTotal a vestor of the total length (L1+ L2) for  each segment of the sample
+void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& lTotal) const
+{
+  int counter = 0;
+  // loop over slices
+
+  V3D currentPosition;
+
+  for (int i = 0; i < m_numSlices; ++i)
+  {
+    const double z = (i + 0.5) * m_sliceThickness - 0.5 * m_cylHeight;
+
+    // Number of elements in 1st annulus
+    int Ni = 0;
+    // loop over annuli
+    for (int j = 0; j < m_numAnnuli; ++j)
+    {
+      Ni += 6;
+      const double R = (j * m_cylRadius / m_numAnnuli) + (m_deltaR / 2.0);
+      // loop over elements in current annulus
+      for (int k = 0; k < Ni; ++k)
+      {
         // We need to make sure this is right for grouped detectors - should use average theta & phi
         V3D detectorPos;
         // *** ASSUMES THAT SAMPLE AT ORIGIN AND BEAM ALONG Z ***
@@ -314,7 +339,7 @@ void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr
           g_log.error(message.str());
           throw std::runtime_error("Problem in CylinderAbsorption::calculateDistances");
         }
-        m_Ltot[counter] = outgoing.begin()->Dist + m_L1s[counter];
+        lTotal[counter] = outgoing.begin()->Dist + m_L1s[counter];
         counter++;
       }
     }
@@ -322,19 +347,19 @@ void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr
 }
 
 /// Carries out the numerical integration over the cylinder
-double CylinderAbsorption::doIntegration(const double& lambda) const
+double CylinderAbsorption::doIntegration(const double& lambda, const std::vector<double>& lTotal) const
 {
   double integral = 0.0;
   double exponent;
 
-  int el = m_Ltot.size();
+  int el = lTotal.size();
 
   // Iterate over all the elements, summing up the integral
   for (int i = 0; i < el; ++i)
   {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
-    exponent = ((m_refAtten * lambda) + m_scattering) * (m_Ltot[i]);
+    exponent = ((m_refAtten * lambda) + m_scattering) * (lTotal[i]);
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
   }
 

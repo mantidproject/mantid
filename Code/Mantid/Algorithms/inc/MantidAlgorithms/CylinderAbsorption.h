@@ -88,8 +88,9 @@ private:
 
   void retrieveProperties();
   void constructCylinderSample();
-  void calculateDistances(const Geometry::IDetector_const_sptr& detector);
-  inline double doIntegration(const double& lambda) const;
+  void initialiseCachedDistances();
+  void calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& lTotal) const;
+  inline double doIntegration(const double& lambda,const std::vector<double>& lTotal) const;
   void interpolate(const MantidVec& x, MantidVec& y, bool is_histogram);
   
   /// Sample object. Keeping separate from the full instrument geometry for now.
@@ -99,10 +100,14 @@ private:
   double m_refAtten;    ///< The attenuation cross-section in barns at 1.8A
   double m_scattering;  ///< The scattering cross-section in barns
   std::vector<double> m_L1s,  ///< Cached L1 distances
-                      m_Ltot,  ///< Cached (L1+L2) distances
                       m_elementVolumes;  ///< Cached element volumes
   int n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
   int x_step;           ///< The step in bin number between adjacent points
+	int m_numSlices;				///< The unmber of slices
+  double m_sliceThickness;///<  The slice thickness
+  int m_numAnnuli;				///< The number of annuli
+  double m_deltaR;				///< radius of the cylindrical sample in cm / The number of annuli
+  int m_numVolumeElements;///< the number of volume elements
 
   std::vector<std::string> exp_options; ///< Options to compute exponential function
 
