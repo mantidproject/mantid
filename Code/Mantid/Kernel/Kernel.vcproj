@@ -215,6 +215,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Glob.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\IPropertyManager.cpp"
 				>
 			</File>
@@ -382,6 +386,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FilterChannelTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\Glob.h"
 				>
 			</File>
 			<File

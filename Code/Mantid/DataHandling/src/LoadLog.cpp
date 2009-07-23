@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Glob.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -111,19 +112,32 @@ void LoadLog::exec()
     std::string l_rawID = stringToLower(l_filenamePart.substr(0,l_pos));
 
     // look for log files in the directory of the raw datafile
-    Poco::DirectoryIterator end_iter;
-    for ( Poco::DirectoryIterator dir_itr( Poco::Path(l_path.path()).makeAbsolute().parent() ); dir_itr != end_iter; ++dir_itr )
+    size_t idot = m_filename.find('.');
+    std::set<std::string> logNames;
+    Poco::Path pattern(m_filename.substr(0,idot) + "_*.txt");
+
+    Poco::Path base(pattern);
+    base.makeParent();
+    Kernel::Glob::glob(base,pattern,logNames);
+
+    if (logNames.size() > 0)
+        potentialLogFiles.assign(logNames.begin(),logNames.end());
+    else
     {
-      if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 
-      l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
-      if ( !isLogFile(l_filenamePart) ) continue;
-	
-      if ( stringToLower(l_filenamePart).find(l_rawID) != std::string::npos )
-      {
-	  potentialLogFiles.push_back( dir_itr->path() );
-      }
+        Poco::DirectoryIterator end_iter;
+        for ( Poco::DirectoryIterator dir_itr( Poco::Path(l_path.path()).makeAbsolute().parent() ); dir_itr != end_iter; ++dir_itr )
+        {
+            if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 
+            l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+            if ( !isLogFile(l_filenamePart) ) continue;
+
+            if ( stringToLower(l_filenamePart).find(l_rawID) != std::string::npos )
+            {
+                potentialLogFiles.push_back( dir_itr->path() );
+            }
+        }
     }
   }
   else
@@ -131,7 +145,6 @@ void LoadLog::exec()
     g_log.error("In LoadLog: " + m_filename + " found to be neither a raw datafile nor a log file.");
     throw Exception::FileError("Filename found to be neither a raw datafile nor a log file." , m_filename);    
   }
-
 
   // Attempt to load the content of each potential log file into the Sample object
 
@@ -141,6 +154,8 @@ void LoadLog::exec()
     // open log file
 
     std::ifstream inLogFile(file->c_str());
+
+    //std::cerr<<"processing "<<*file<<'\n';
 
     if (!inLogFile)
     {
