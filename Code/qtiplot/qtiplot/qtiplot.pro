@@ -347,7 +347,8 @@ HEADERS  += src/ApplicationWindow.h \
 		src/Mantid/InstrumentWidget/InstrumentTreeModel.h \
 		src/Mantid/InstrumentWidget/CompAssemblyActor.h \
 		src/Mantid/InstrumentWidget/ObjComponentActor.h \
-		src/Mantid/InstrumentWidget/InstrumentActor.h
+		src/Mantid/InstrumentWidget/InstrumentActor.h \
+		src/Mantid/InstrumentWidget/MantidColorMap.h
 
 ###################### FORMS ##############################################
 
@@ -507,7 +508,8 @@ SOURCES  += src/ApplicationWindow.cpp \
 		src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp \
 		src/Mantid/InstrumentWidget/CompAssemblyActor.cpp	\
 		src/Mantid/InstrumentWidget/ObjComponentActor.cpp	\	
-		src/Mantid/InstrumentWidget/InstrumentActor.cpp
+		src/Mantid/InstrumentWidget/InstrumentActor.cpp \
+		src/Mantid/InstrumentWidget/MantidColorMap.cpp
 
 
 ###############################################################
