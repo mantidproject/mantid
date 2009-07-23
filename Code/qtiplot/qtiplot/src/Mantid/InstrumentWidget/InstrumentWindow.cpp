@@ -22,7 +22,6 @@
 #include <QColorDialog>
 #include <QLineEdit>
 #include <QCheckBox>
-#include "GLColorMapQwt.h"
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
 #include "qwt_scale_engine.h"
@@ -30,13 +29,14 @@
 using namespace Mantid::API;
 
 /**
- * Contructor, creates the mdi subwindow within mantidplot
+ * Constructor.
  */
-InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ):MdiSubWindow(label,app,name,f)
+InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
+  MdiSubWindow(label, app, name, f)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
-	QFrame *frame= new QFrame();
+	QFrame *frame = new QFrame();
 	QVBoxLayout* mainLayout = new QVBoxLayout;
 	QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
 
@@ -63,8 +63,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mBinMapDialog = new BinDialog(this);
 	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
 
-	mMinValueBox    = new QLineEdit();
-	mMaxValueBox    = new QLineEdit();
+	mMinValueBox = new QLineEdit();
+	mMaxValueBox = new QLineEdit();
 	mMinValueBox->setMinimumWidth(40);
 	mMaxValueBox->setMinimumWidth(40);
 	mMinValueBox->setMaximumWidth(60);
@@ -86,26 +86,32 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	axisViewLayout->addWidget(axisCombo);
 	axisViewFrame->setLayout(axisViewLayout);
 
-	//Store the path to the default color map
-	mDefaultColorMap = QString::fromStdString(Poco::Path(Mantid::Kernel::getDirectoryOfExecutable()).resolve("../colormaps/_standard.map").toString());
-	mCurrentColorMap = mDefaultColorMap;
-	
-	// Load settings
-	loadSettings();
-
 	//Colormap Frame widget
-	QFrame* lColormapFrame=new QFrame();
-	QVBoxLayout* lColormapLayout=new QVBoxLayout(lColormapFrame);
+	QFrame* lColormapFrame = new QFrame();
+
+	QVBoxLayout* lColormapLayout = new QVBoxLayout;
 	lColormapLayout->addWidget(mMaxValueBox);
 	lColormapLayout->addWidget(mColorMapWidget);
 	lColormapLayout->addWidget(mMinValueBox);
-	mColorMapWidget->setColorMap(QwtDoubleInterval(0,1),mInstrumentDisplay->getColorMap());
 	mColorMapWidget->setColorBarEnabled(true);
 	mColorMapWidget->setColorBarWidth(20);
 	mColorMapWidget->setAlignment(QwtScaleDraw::RightScale);
 	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
-	QwtLinearScaleEngine* lse=new QwtLinearScaleEngine();
-	mColorMapWidget->setScaleDiv(lse->transformation(),lse->divideScale(0,1,5,5));
+
+	mScaleOptions = new QComboBox;
+	mScaleOptions->addItem("Log10", QVariant(MantidColorMap::Log10));
+	mScaleOptions->addItem("Linear", QVariant(MantidColorMap::Linear));
+	connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
+
+	QVBoxLayout* options_layout = new QVBoxLayout;
+	options_layout->addStretch();
+	options_layout->addWidget(mScaleOptions);
+
+	QHBoxLayout *colourmap_layout = new QHBoxLayout;
+	colourmap_layout->addLayout(lColormapLayout);
+	colourmap_layout->addLayout(options_layout);
+	lColormapFrame->setLayout(colourmap_layout);
+
 
 	//Pick background color
 	QPushButton *btnBackgroundColor=new QPushButton("Pick Background");
@@ -114,7 +120,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mLightingToggle = new QCheckBox("High resolution &lighting", this);
 	mLightingToggle->setToolTip("Toggle the use of a high resolution lighting and shading model.\n"
 				    "This option is best used with a high-end graphics card."
-				    "Note: Shading will alter the coluors and hence accuracy of the image.");
+				    "Note: Shading will alter the colours and hence accuracy of the image.");
 	mLightingToggle->setCheckState(Qt::Unchecked);
 	connect(mLightingToggle, SIGNAL(stateChanged(int)), mInstrumentDisplay, SLOT(setLightingState(int)));
 
@@ -147,25 +153,28 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(double,double)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double)));
 	connect(axisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
 	connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
-    mPopupContext = new QMenu(mInstrumentDisplay);
+	mPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoAction = new QAction(tr("&Info"), this);
 	connect(infoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
-    mPopupContext->addAction(infoAction);
-
+	mPopupContext->addAction(infoAction);
+	
 	QAction* plotAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraSignal()));
-    mPopupContext->addAction(plotAction);
-
+	mPopupContext->addAction(plotAction);
+	
 	mDetectorGroupPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoGroupAction = new QAction(tr("&Info"), this);
 	connect(infoGroupAction,SIGNAL(triggered()),this,SLOT(spectraGroupInfoDialog()));
-    mDetectorGroupPopupContext->addAction(infoGroupAction);
+	mDetectorGroupPopupContext->addAction(infoGroupAction);
 	QAction* plotGroupAction = new QAction(tr("&Plot spectra"), this);
 	connect(plotGroupAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraGroupSignal()));
-    mDetectorGroupPopupContext->addAction(plotGroupAction);
+	mDetectorGroupPopupContext->addAction(plotGroupAction);
     
-    askOnCloseEvent(false);
-    setAttribute(Qt::WA_DeleteOnClose);
+	// Load settings
+	loadSettings();
+    
+	askOnCloseEvent(false);
+	setAttribute(Qt::WA_DeleteOnClose);
 }
 
 /**
@@ -218,8 +227,8 @@ void InstrumentWindow::changeColormap(const QString &filename)
   if( fileselection == mCurrentColorMap ) return;
 
   mCurrentColorMap = fileselection;
-  mInstrumentDisplay->setColorMapName(mCurrentColorMap);
-  updateColorMapWidget();
+  mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
+  setupColorBarScaling();
   mInstrumentDisplay->updateColorsForNewMap();
 }
 
@@ -385,9 +394,15 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
   double maxValue = mInstrumentDisplay->getDataMaxValue();
   mMinValueBox->setText(QString::number(minValue));
   mMaxValueBox->setText(QString::number(maxValue));
-  updateColorMapWidget();
 
+  // Setup the colour map details
+  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
+  mInstrumentDisplay->mutableColorMap().changeScaleType(type);
+  setupColorBarScaling();
+  
+  // Ensure the 3D display is up-to-date
   mInstrumentDisplay->update();
+  // Populate the instrument tree
   mInstrumentTree->setInstrument(workspace->getInstrument());
 }
 
@@ -412,6 +427,33 @@ void InstrumentWindow::setColorMapMaxValue(double maxValue)
   maxValueChanged();
 }
 
+/**
+ *
+ */
+void InstrumentWindow::setupColorBarScaling()
+{
+  double minValue = mMinValueBox->displayText().toDouble();
+  double maxValue = mMaxValueBox->displayText().toDouble();
+
+  if( mScaleOptions->currentIndex() == MantidColorMap::Linear )
+  {
+    QwtLinearScaleEngine linScaler;
+    mColorMapWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
+    mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue),mInstrumentDisplay->getColorMap());
+  }
+  else
+  {
+    QwtLog10ScaleEngine logScaler;    
+    double logmin(minValue);
+    if( logmin < 1.0 )
+    {
+      logmin = 1.0;
+    }
+    mColorMapWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
+    mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), mInstrumentDisplay->getColorMap());
+  }
+}
+
 void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue)
 {
   mInstrumentDisplay->setDataMappingIntegral(minValue, maxValue);
@@ -425,7 +467,7 @@ void InstrumentWindow::minValueChanged()
   double value = mMinValueBox->displayText().toDouble();
   if( this->isVisible() )
   { 
-    updateColorMapWidget();
+    setupColorBarScaling();
     mInstrumentDisplay->updateForNewMinData(value);
   }
 }
@@ -438,22 +480,12 @@ void InstrumentWindow::maxValueChanged()
   double value = mMaxValueBox->displayText().toDouble();
   if( this->isVisible() )
   { 
-    updateColorMapWidget();
+    setupColorBarScaling();
     mInstrumentDisplay->updateForNewMaxData(value);
   }
 }
 
-/**
- *
- */
-void InstrumentWindow::updateColorMapWidget()
-{
-	QwtLinearScaleEngine lse;
-	double minValue=mMinValueBox->displayText().toDouble();
-	double maxValue=mMaxValueBox->displayText().toDouble();
-	mColorMapWidget->setScaleDiv(lse.transformation(),lse.divideScale(minValue,maxValue,20,5));
-	mColorMapWidget->setColorMap(QwtDoubleInterval(minValue,maxValue),mInstrumentDisplay->getColorMap());
-}
+
 
 /**
  * This is the callback for the combo box that selects the view direction
@@ -520,26 +552,41 @@ void InstrumentWindow::pickBackgroundColor()
 }
 
 /**
+ * A slot called when the scale type combo box's selection changes
+ */
+void InstrumentWindow::scaleTypeChanged(int index)
+{
+  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)mScaleOptions->itemData(index).toUInt();
+  mInstrumentDisplay->mutableColorMap().changeScaleType(type);
+  setupColorBarScaling();
+  mInstrumentDisplay->recount();
+}
+
+/**
  * This method loads the setting from QSettings
  */
 void InstrumentWindow::loadSettings()
 {
-	//Load Color
-	QSettings settings;
-	settings.beginGroup("Mantid/InstrumentWindow");
-
-	// Background colour
-	mInstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
-	
-	//Load Colormap
-	//Recent changes to the Python API mean that we can now alter the working directory, therefore relative paths
-	//should be avoided.
-	mCurrentColorMap = settings.value("ColormapFile", mDefaultColorMap).toString();
-	// Set values from settings
-	mInstrumentDisplay->setColorMapName(mCurrentColorMap);
-	updateColorMapWidget();
-
-	settings.endGroup();
+  //Load Color
+  QSettings settings;
+  settings.beginGroup("Mantid/InstrumentWindow");
+  
+  // Background colour
+  mInstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
+  
+  //Load Colormap. If the file is invalid the default stored colour map is used
+  mCurrentColorMap = settings.value("ColormapFile", "").toString();
+  // Set values from settings
+  mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
+  
+  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)settings.value("ScaleType", MantidColorMap::Log10).toUInt();
+  // Block signal emission temporarily since we have not fully initialized the window
+  mScaleOptions->blockSignals(true);
+  mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));
+  mScaleOptions->blockSignals(false);
+  mInstrumentDisplay->mutableColorMap().changeScaleType(type);
+  
+  settings.endGroup();
 }
 
 /**
@@ -551,5 +598,6 @@ void InstrumentWindow::saveSettings()
   settings.beginGroup("Mantid/InstrumentWindow");
   settings.setValue("BackgroundColor", mInstrumentDisplay->currentBackgroundColor());
   settings.setValue("ColormapFile", mCurrentColorMap);
+  settings.setValue("ScaleType", mInstrumentDisplay->getColorMap().getScaleType());
   settings.endGroup();
 }

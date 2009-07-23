@@ -1,9 +1,8 @@
 #ifndef INSTRUMENT3DWIDGET_H_
 #define INSTRUMENT3DWIDGET_H_
 
-
 #include "GL3DWidget.h"
-#include "GLColorMapQwt.h"
+#include "MantidColorMap.h"
 #include "boost/shared_ptr.hpp"
 #include <vector>
 #include "MantidGeometry/V3D.h"
@@ -58,8 +57,8 @@ public:
   virtual ~Instrument3DWidget();         ///< Destructor
   void setWorkspace(const std::string& name);
   std::string getWorkspaceName() const;
-  void setColorMapName(const QString & name);
-  GLColorMapQwt getColorMap()const;
+  const MantidColorMap & getColorMap() const;
+  MantidColorMap & mutableColorMap();
   double getDataMinValue() const;
   double getDataMaxValue() const;
   double getBinMinValue() const;
@@ -73,6 +72,7 @@ public:
   void updateColorsForNewMap();
   void updateForNewMaxData(const double);
   void updateForNewMinData(const double);
+  void recount();				
 public slots:
   void fireDetectorsPicked(const std::set<QRgb>& );
   void fireDetectorHighligted(QRgb);
@@ -111,7 +111,8 @@ private:
   bool mFastRendering;
   int iTimeBin;
   DataMappingType mDataMapping;
-  GLColorMapQwt mColorMap;
+  MantidColorMap mColorMap;
+  
   InstrumentActor* mInstrumentActor;
   Mantid::Geometry::V3D mAxisDirection;
   Mantid::Geometry::V3D mAxisUpVector;
@@ -127,10 +128,9 @@ private:
 
   std::string strWorkspaceName;
   /// Store a value between 0->255 for each of the integrated spectra.
-  std::vector<short> mScaledValues;
+  std::vector<unsigned char> mScaledValues;
 
   void getSpectraIndexList(const std::vector<int>& idDecVec, std::vector<int>& wkspIndices ) const;
-  void setColorForDetectors(double minval,double maxval,const std::vector<double>& values,const GLColorMap& colMap);
 
 };
 

@@ -349,7 +349,7 @@ void ApplicationWindow::init(bool factorySettings)
 	connect(scriptEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
 	connect(recent, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
-	connect(&http, SIGNAL(done(bool)), this, SLOT(receivedVersionFile(bool)));
+	//connect(&http, SIGNAL(done(bool)), this, SLOT(receivedVersionFile(bool)));
 
 	// this has to be done after connecting scriptEnv
 	scriptEnv->initialize();
@@ -11677,23 +11677,23 @@ void ApplicationWindow::createActions()
 	actionHomePage = new QAction(tr("&Mantid Homepage"), this); //Mantid change
 	connect(actionHomePage, SIGNAL(activated()), this, SLOT(showHomePage()));
 
-	actionHelpForums = new QAction(tr("QtiPlot &Forums"), this);
-	connect(actionHelpForums, SIGNAL(triggered()), this, SLOT(showForums()));
+       	//actionHelpForums = new QAction(tr("QtiPlot &Forums"), this); // Mantid change
+	//	connect(actionHelpForums, SIGNAL(triggered()), this, SLOT(showForums())); // Mantid change
 
 	actionHelpBugReports = new QAction(tr("Report a &Bug"), this);
 	connect(actionHelpBugReports, SIGNAL(triggered()), this, SLOT(showBugTracker()));
 
-	//actionDownloadManual = new QAction(tr("Download &Manual"), this);
-	//connect(actionDownloadManual, SIGNAL(activated()), this, SLOT(downloadManual()));
+	//actionDownloadManual = new QAction(tr("Download &Manual"), this); // Mantid change
+	//connect(actionDownloadManual, SIGNAL(activated()), this, SLOT(downloadManual())); // Mantid change
 
-	actionTranslations = new QAction(tr("&Translations"), this);
-	connect(actionTranslations, SIGNAL(activated()), this, SLOT(downloadTranslation()));
+	//actionTranslations = new QAction(tr("&Translations"), this); // Mantid change
+	//connect(actionTranslations, SIGNAL(activated()), this, SLOT(downloadTranslation())); // Mantid change
 
-	actionDonate = new QAction(tr("Make a &Donation"), this);
-	connect(actionDonate, SIGNAL(activated()), this, SLOT(showDonationsPage()));
+	//actionDonate = new QAction(tr("Make a &Donation"), this); // Mantid change
+	//connect(actionDonate, SIGNAL(activated()), this, SLOT(showDonationsPage())); // Mantid change
 
-	actionTechnicalSupport = new QAction(tr("Technical &Support"), this);
-	connect(actionTechnicalSupport, SIGNAL(activated()), this, SLOT(showSupportPage()));
+// 	actionTechnicalSupport = new QAction(tr("Technical &Support"), this); // Mantid change
+// 	connect(actionTechnicalSupport, SIGNAL(activated()), this, SLOT(showSupportPage())); // Mantid change
 
 #ifdef SCRIPTING_DIALOG
 	actionScriptingLang = new QAction(tr("Scripting &language"), this);

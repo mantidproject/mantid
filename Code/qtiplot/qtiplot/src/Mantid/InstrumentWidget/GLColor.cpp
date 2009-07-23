@@ -1,56 +1,87 @@
+//--------------------------------
+// Includes
+//--------------------------------
 #include "GLColor.h"
-#ifdef WIN32
+
+// On Windows, the windows header file is needed before the OpenGL header
+#ifdef _WIN32
 #include <windows.h>
 #endif
+
 #include <GL/gl.h>
 
-GLColor::GLColor(float R, float G, float B, float alpha)
+/**
+ * Default Constructor
+ * @param red The red component of the RGB colour
+ * @param green The green component of the RGB colour
+ * @param blue The blue component of the RGB colour
+ * @param alpha The alpha blending value
+ 
+ */
+GLColor::GLColor(float red, float green, float blue, float alpha)
 {
-   _v[0]=R;_v[1]=G;_v[2]=B;_v[3]=alpha;
+  m_rgba[0] = red;
+  m_rgba[1] = green;
+  m_rgba[2] = blue;
+  m_rgba[3] = alpha;
 }
-GLColor::GLColor(const GLColor& color)
-{
-    _v[0]=color._v[0];_v[1]=color._v[1];_v[2]=color._v[2];_v[3]=color._v[3];
-}
+
+/**
+ * (virtual) Destructor
+ */
 GLColor::~GLColor()
 {
 }
 
 /**
  * This method sets the Red, Green, Blue, Alpha values of the color
- * @param R Red component of color value between [0 - 1]
- * @param G Green Componenent of color value between [0 - 1]
- * @param B Blue Componenent of color value between [0 - 1]
+ * @param red Red component of color value between [0 - 1]
+ * @param green Green Componenent of color value between [0 - 1]
+ * @param blue Blue Componenent of color value between [0 - 1]
  * @param alpha Alpha componenet of color value between [0 - 1]
  */
-void GLColor::set(float R, float G, float B, float alpha)
+void GLColor::set(float red, float green, float blue, float alpha)
 {
-    _v[0]=R;_v[1]=G;_v[2]=B;_v[3]=alpha;
+  m_rgba[0] = red;
+  m_rgba[1] = green;
+  m_rgba[2] = blue;
+  m_rgba[3] = alpha;
 }
 
 /**
  * This method sets the Red, Green, Blue, Alpha values of the color
- * @param R Red component of color value between [0 - 1]
- * @param G Green Componenent of color value between [0 - 1]
- * @param B Blue Componenent of color value between [0 - 1]
+ * @param red Red component of color value between [0 - 1]
+ * @param green Green Componenent of color value between [0 - 1]
+ * @param blue Blue Componenent of color value between [0 - 1]
  * @param alpha Alpha componenet of color value between [0 - 1]
  */
-void GLColor::get(float& R, float& G, float& B, float& alpha)
+void GLColor::get(float& red, float& green, float& blue, float& alpha)
 {
-    R=_v[0];G=_v[1];B=_v[2];alpha=_v[3];
+  red = m_rgba[0];
+  green = m_rgba[1];
+  blue = m_rgba[2];
+  alpha = m_rgba[3];
 }
 
 /**
  * This method executes opengl color commands based on the method provided.
- * @param method type of opengl color to be used
+ * @param pm type of opengl color to be used
  */
-void GLColor::paint(paintMethod method)
+void GLColor::paint(GLColor::PaintMethod pm)
 {
-    if (method==PLAIN) glColor4fv(_v);
-	else if (method==MATERIAL){
-//		GLfloat mat_specular[]={1.0,1.0,1.0,1.0};
-		glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,_v); 
-		glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,20.0);
-//		glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,mat_specular);
-	}else glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,_v);
+  if(pm == PLAIN) 
+  {
+    glColor4fv(m_rgba);
+  }
+  else if(pm == MATERIAL)
+  {
+    //GLfloat mat_specular[]={1.0,1.0,1.0,1.0};
+    glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,m_rgba); 
+    glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,20.0);
+    //glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,mat_specular);
+  }
+  else 
+  {
+    glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,m_rgba);
+  }
 }

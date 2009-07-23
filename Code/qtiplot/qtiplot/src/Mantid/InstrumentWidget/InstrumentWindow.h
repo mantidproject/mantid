@@ -1,3 +1,4 @@
+
 #ifndef INSTRUMENTWINDOW_H_
 #define INSTRUMENTWINDOW_H_
 
@@ -28,6 +29,7 @@ class QTabWidget;
 class QLineEdit;
 class QLabel;
 class QCheckBox;
+class QComboBox;
 
 /*!
   \class  InstrumentWindow
@@ -92,14 +94,20 @@ public slots:
 	void setViewDirection(const QString&);
 	void componentSelected(const QItemSelection&, const QItemSelection&);
 	void pickBackgroundColor();
+
 signals:
     void plotSpectra(const QString&,int);
 	void plotSpectraList(const QString&,const std::vector<int>&);
+
+private slots:
+        void scaleTypeChanged(int);
+
 private:
-	void updateColorMapWidget();
+
 	void loadSettings();
 	void saveSettings();
 	void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
+        void setupColorBarScaling();
 
 	QLabel*      mInteractionInfo;
 	QTabWidget*  mControlsTab;
@@ -115,6 +123,7 @@ private:
 	QwtScaleWidget* mColorMapWidget; ///< colormap display widget
 	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
 	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
+        QComboBox *mScaleOptions;
 	BinDialog*   mBinMapDialog;
 	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
         QCheckBox *mLightingToggle; ///< A tick box to toggle the lighting

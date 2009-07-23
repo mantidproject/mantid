@@ -1,5 +1,6 @@
 #ifndef GLCOLOR_H_
 #define GLCOLOR_H_
+
 /*!
   \class  GLColor
   \brief  class handling OpenGL color for objects
@@ -11,7 +12,7 @@
   rendering selected. eg. MATERIAL by specifying color as glMaterial rather than
   glColor.
 
-  Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+  Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
 
   This file is part of Mantid.
  	
@@ -33,15 +34,23 @@
 class GLColor
 {
 public:
-    enum paintMethod {PLAIN=0,MATERIAL=1,EMIT=2};
-	GLColor(float R=0,float G=0,float B=0,float A=0); ///< Constructor
-    GLColor(const GLColor&);                          ///< Constructor
-	virtual ~GLColor();                               ///< Destructor
-    void set(float,float,float,float);
-	void get(float&,float&,float&,float&);
-    void paint(paintMethod);
+  /// Enumeration for painting type
+  enum PaintMethod {PLAIN = 0, MATERIAL = 1, EMIT = 2};
+  
+  /// Default Constructor
+  GLColor(float red = 0, float green = 0,float blue = 0, float alpha = 0);
+  /// Destructor
+  virtual ~GLColor();  
+
+  /// Set all four values atomically
+  void set(float red, float green ,float blue, float alpha);
+  /// Retrieve the component colours
+  void get(float&,float&,float&,float&);
+  /// Set the painting method
+  void paint(GLColor::PaintMethod pm);
 private:
-    float _v[4];                                      ///< Color Component Values
+  /// The individual components
+  float m_rgba[4];
 };
 
 #endif /*GLCOLOR_H_*/

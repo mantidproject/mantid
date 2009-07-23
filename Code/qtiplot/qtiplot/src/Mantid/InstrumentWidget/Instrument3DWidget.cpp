@@ -1,7 +1,6 @@
 #include "Instrument3DWidget.h"
 #include "InstrumentActor.h"
 #include "MantidObject.h"
-#include "GLColorMap.h"
 
 #include "MantidAPI/IInstrument.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -37,7 +36,7 @@ static const QRgb BLACK = qRgb(0,0,0);
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
-  mColorMap(GLColorMapQwt()), mInstrumentActor(NULL), mAxisDirection(Mantid::Geometry::V3D(0.0,0.0,1.0)), 
+  mColorMap(), mInstrumentActor(NULL), mAxisDirection(Mantid::Geometry::V3D(0.0,0.0,1.0)), 
   mAxisUpVector(Mantid::Geometry::V3D(0.0,1.0,0.0)), mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX), 
   mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), 
   mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), strWorkspaceName(""), mScaledValues(0)
@@ -263,20 +262,6 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     int widx = index_list[i];
     if( widx != -1 )
     {
-//       std::vector<double>::const_iterator bin_itr = workspace->readX(widx).begin();
-//       std::vector<double>::const_iterator bin_end = workspace->readX(widx).end();
-//       std::vector<double>::const_iterator data_itr = workspace->readY(widx).begin();
-//       std::vector<double>::const_iterator data_end = workspace->readY(widx).end();
-//       double sum(0.0);
-//       for( ; data_itr != data_end; ++data_itr, ++bin_itr )
-//       {
-// 	double binvalue = *bin_itr;
-// 	if( binvalue >= mBinMinValue && binvalue <= mBinMaxValue )
-// 	{
-// 	  sum += *data_itr;
-// 	}
-//       }
-//      integrated_values[i] = sum;
       double sum = integrateSingleSpectra(workspace, widx);
       integrated_values[i] = sum;
       if( sum < mWkspDataMin )
@@ -307,61 +292,40 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     mDataMaxValue = mWkspDataMax;
   }
 
-  // This is the maximum number of colours that we allow for any colour map
-  const short max_ncols = mColorMap.getMaxNumberOfColors();
-  // This is the number of colours in the current colour map
-  const short no_colors = mColorMap.getNumberOfColors();
-
-
-  //Store values scaled to 1->256
-  double wksp_datarange = std::abs(mWkspDataMax - mWkspDataMin);
-
-  if( wksp_datarange < 1e-08 )
-  {
-    wksp_datarange = 1.0;
-  }
-  double user_datarange = std::abs(mDataMaxValue - mDataMinValue);
-  if( user_datarange < 1e-08 )
-  {
-    user_datarange = 1.0;
-  }
-
-  mScaledValues = std::vector<short>(n_spec, 0);
+  const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
+  mScaledValues = std::vector<unsigned char>(n_spec, 0);
   std::vector<boost::shared_ptr<GLColor> > colorlist(n_spec);
+  QwtDoubleInterval wksp_interval(mWkspDataMin, mWkspDataMax);
+  QwtDoubleInterval user_interval(mDataMinValue, mDataMaxValue);
+
   std::vector<double>::const_iterator val_end = integrated_values.end();
   int idx(0);
   for( std::vector<double>::const_iterator val_itr = integrated_values.begin(); val_itr != val_end; 
        ++val_itr, ++idx )
   {
-    short c_index(no_colors);
+    unsigned char c_index(mColorMap.getTopCIndex());
     if( (*val_itr) < 0.0 ) 
     {
-      mScaledValues[idx] = -1;
+      mScaledValues[idx] = mColorMap.getLargestAllowedCIndex();
     }
     else
     {
-      short cache_value = std::floor(1.0 + ((*val_itr - mWkspDataMin)*max_ncols/wksp_datarange) );
-      if( cache_value > max_ncols ) cache_value = max_ncols;
-      mScaledValues[idx]  = cache_value;
-
-      // Now compute a color index for this color map
-      int adjusted_index = std::floor(1.0 + ((*val_itr - mDataMinValue)*no_colors/user_datarange) );
-      if( adjusted_index <= (int)no_colors && adjusted_index > 0) 
+      // Index to store
+      short index = std::floor( mColorMap.normalize(user_interval, *val_itr)*max_ncols );
+      if( index >= max_ncols )
       {
-	c_index = adjusted_index;
+	index = max_ncols;
       }
-      // This will happen for very small ranges
-      else if( adjusted_index <= 0 )
+      else if( index < 0 )
       {
-	c_index = 1;
+	index = 0;
       }
-      else
-      {
-	c_index = no_colors;
-      }
+      else {}
+      mScaledValues[idx] = static_cast<unsigned char>(index);
+      c_index = mColorMap.colorIndex(user_interval, *val_itr);
 
     }
-    colorlist[idx] = mColorMap.getColor(c_index - 1);
+    colorlist[idx] = mColorMap.getColor(c_index);
   }
   mInstrumentActor->setDetectorColors(colorlist);
 }
@@ -385,45 +349,56 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
 }
 
 /**
+ * Run a recount for the current workspace
+ */
+void Instrument3DWidget::recount()
+{
+  MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
+  if( output.get() )
+  {
+    calculateColorCounts(output);
+    mInstrumentActor->refresh();
+    update();
+  }
+}
+
+/**
  * For a change in the colour map, just update the color indices
  */
 void Instrument3DWidget::updateColorsForNewMap()
 {
-  double wksp_datarange = std::abs(mWkspDataMax - mWkspDataMin);
-  double current_range = std::abs(mDataMaxValue - mDataMinValue);
-
-  const short no_colors = mColorMap.getNumberOfColors();
-  const short max_ncols = mColorMap.getMaxNumberOfColors();
+  
+  const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
+  const short ncols = mColorMap.getTopCIndex() + 1;
 
   std::vector<boost::shared_ptr<GLColor> > colorlist(mScaledValues.size());
-  std::vector<short>::const_iterator val_end = mScaledValues.end();
-  int idx(0);
-  for( std::vector<short>::const_iterator val_itr = mScaledValues.begin(); val_itr != val_end; 
-       ++val_itr, ++idx )
+  if( max_ncols == ncols ) 
   {
-    //Value between 1->256
-    short cache_value = *val_itr;
-    short c_index(no_colors);
-    if( cache_value >= 0 )
+    std::vector<unsigned char>::const_iterator val_end = mScaledValues.end();
+    int idx(0);
+    for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin(); 
+	 val_itr != val_end; ++val_itr, ++idx )
     {
-      double x_i = ((double)(cache_value - 1) * wksp_datarange / max_ncols ) + mWkspDataMin;
-      int adjusted_index = std::floor(1.0 + ((x_i - mDataMinValue)*no_colors/current_range) );
-      if( adjusted_index <= (int)no_colors && adjusted_index > 0) 
-      {
-	c_index = adjusted_index;
-      }
-      else if( adjusted_index <= 0 )
-      {
-	c_index = 1;
-      }
-      else
-      {
-	c_index = no_colors;
-      }
-
+      colorlist[idx] = mColorMap.getColor(*val_itr);
     }
-    colorlist[idx] = mColorMap.getColor(c_index - 1);
   }
+  else
+  {
+    std::vector<unsigned char>::const_iterator val_end = mScaledValues.end();
+    int idx(0);
+    const double ratio = (double)ncols / max_ncols;
+    for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin(); 
+	 val_itr != val_end; ++val_itr, ++idx )
+    {
+      short cache_value = static_cast<short>(*val_itr);
+      short c_index = std::ceil((cache_value + 1)*ratio);
+      if( c_index <= 0 ) c_index = 1;
+      else if( c_index > ncols) c_index = ncols;
+      else {}
+      colorlist[idx] = mColorMap.getColor(static_cast<unsigned char>(c_index - 1));
+    }
+  }
+    
   mInstrumentActor->setDetectorColors(colorlist);
   mInstrumentActor->refresh();
   update();
@@ -434,47 +409,11 @@ void Instrument3DWidget::updateColorsForNewMap()
  */
 void Instrument3DWidget::updateForNewMaxData(const double new_max)
 {
+  // If the new value is the same
   if( std::abs(new_max - mDataMaxValue) / mDataMaxValue < 1e-08 ) return;
-  // ratio: old / new
-  double range_ratio = std::abs(mWkspDataMax - mWkspDataMin) / std::abs(new_max - mDataMinValue);
-  if( range_ratio != range_ratio || range_ratio == std::numeric_limits<double>::infinity() ) range_ratio = 0.0;
-  const short no_colors = mColorMap.getNumberOfColors();
-  const short max_ncols = mColorMap.getMaxNumberOfColors();
-
-  std::vector<boost::shared_ptr<GLColor> > colorlist(mScaledValues.size());
-  std::vector<short>::const_iterator val_end = mScaledValues.end();
-  int idx(0);
-  for( std::vector<short>::const_iterator val_itr = mScaledValues.begin(); val_itr != val_end; 
-       ++val_itr, ++idx )
-  {
-    short cache_value = *val_itr;
-    short c_index(no_colors);
-    if( cache_value >= 0 )
-    {
-      int adjusted_index = std::ceil((double)cache_value * range_ratio * no_colors / max_ncols);
-      if( adjusted_index <= (int)no_colors && adjusted_index > 0) 
-      {
-	c_index = adjusted_index;
-      }
-      // This will happen for very small ranges
-      else if( adjusted_index <= 0 )
-      {
-	c_index = 1;
-      }
-      else
-      {
-	c_index = no_colors;
-      }
-    }
-    colorlist[idx] = mColorMap.getColor(c_index - 1);
-  }
-
-  mInstrumentActor->setDetectorColors(colorlist);
-  mInstrumentActor->refresh();
-  update();
-
-  // Keep the new value
+  
   mDataMaxValue = new_max;
+  recount();
 }
 
 /**
@@ -482,51 +421,11 @@ void Instrument3DWidget::updateForNewMaxData(const double new_max)
  */
 void Instrument3DWidget::updateForNewMinData(const double new_min)
 {
-  // Don't do anything if no change from the current value
-  if( std::abs(new_min - mDataMinValue) < 1e-08 ) return; 
+  // If the new value is the same
+  if( std::abs(new_min - mDataMinValue) / mDataMinValue < 1e-08 ) return;
 
-  // ratio: old / new
-  double wksp_datarange = std::abs(mWkspDataMax - mWkspDataMin);
-  double new_range = std::abs(mDataMaxValue - new_min);
-  
-  const short no_colors = mColorMap.getNumberOfColors();
-  const short max_ncols = mColorMap.getMaxNumberOfColors();
-
-  std::vector<boost::shared_ptr<GLColor> > colorlist(mScaledValues.size());
-  std::vector<short>::const_iterator val_end = mScaledValues.end();
-  int idx(0);
-  for( std::vector<short>::const_iterator val_itr = mScaledValues.begin(); val_itr != val_end; 
-       ++val_itr, ++idx )
-  {
-    short cache_value = *val_itr;
-    short c_index(no_colors);
-    if( cache_value >= 0 )
-    {
-      double x_i = ((double)(cache_value - 1) * wksp_datarange / max_ncols ) + mWkspDataMin;
-      int adjusted_index = std::floor(1.0 + ((x_i - new_min)*no_colors/new_range) );
-      if( adjusted_index <= (int)no_colors && adjusted_index > 0) 
-      {
-	c_index = adjusted_index;
-      }
-      else if( adjusted_index <= 0 )
-      {
-	c_index = 1;
-      }
-      else
-      {
-	c_index = no_colors;
-      }
-
-    }
-    colorlist[idx] = mColorMap.getColor(c_index - 1);
-  }
-  mInstrumentActor->setDetectorColors(colorlist);
-  mInstrumentActor->refresh();
-  update();
-
-  // Keep the new value
   mDataMinValue = new_min;
-
+  recount();
 }
 
 
@@ -569,52 +468,6 @@ void Instrument3DWidget::getSpectraIndexList(const std::vector<int>& detIDs, std
 }
 
 /**
- * This method assigns colors to the dectors using the values
- * @param minval input minimum value for scaling of the colormap
- * @param maxval input maximum value for scaling of the colormap
- * @param values input values that coorespond to each detector
- * @param colorMap input color map class which is used for looking up the color to be assigned based on the value of detector.
- */
-void Instrument3DWidget::setColorForDetectors(double minval,double maxval,const std::vector<double>& values,const GLColorMap& colorMap)
-{
-	std::vector<boost::shared_ptr<GLColor> > iColorList;
-	int noOfColors=colorMap.getNumberOfColors();
-	std::vector<double>::size_type nvals = values.size();
-  for(std::vector<double>::size_type i = 0; i < nvals; i++)
-	{
-		int cIndex;
-		if(maxval-minval<0.00000001)
-		{
-		  cIndex = 0;
-		}
-		else
-		{
-		  cIndex=floor(((values[i]-minval)/(maxval-minval))*(noOfColors-1));
-		}
-		if(cIndex<0)
-		{
-		  cIndex = noOfColors - 1;
-		}
-		else if(cIndex>(noOfColors-1))
-		{
-		  cIndex=(noOfColors-1);
-		}
-		iColorList.push_back(colorMap.getColor(cIndex));
-
-	} // Looping through the dectors/Actors list
-	mInstrumentActor->setDetectorColors(iColorList);
-}
-
-/**
- * This method takes the input name as the filename and reads the file for the color index values.
- * NOTE: This method can only read 256 color index with RGB values
- */
-void Instrument3DWidget::setColorMapName(const QString & name)
-{
-  mColorMap.setColorMapFile(name.toStdString());
-}
-
-/**
  * This method sets the Time bin values. the value has to be greater than zero
  * @param value input is the time bin value
  */
@@ -636,12 +489,21 @@ std::string Instrument3DWidget::getWorkspaceName() const
 }
 
 /**
- * Returns Colormap
+ * Returns a reference to the constant colormap
  */
-GLColorMapQwt Instrument3DWidget::getColorMap()const
+const MantidColorMap & Instrument3DWidget::getColorMap() const
 {
-	return mColorMap;
+  return mColorMap;
 }
+
+/**
+ * Returns a reference to the colormap
+ */
+MantidColorMap & Instrument3DWidget::mutableColorMap()
+{
+  return mColorMap;
+}
+
 
 /**
  * This method takes the input name as the min value Colormap scale.

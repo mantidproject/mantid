@@ -332,7 +332,6 @@ HEADERS  += src/ApplicationWindow.h \
             src/Mantid/AlgorithmHistoryWindow.h\
         src/Mantid/MantidMatrixDialog.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
-	    src/Mantid/InstrumentWidget/GLColorMap.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
 	    src/Mantid/InstrumentWidget/GLTrackball.h \
 	    src/Mantid/InstrumentWidget/GLViewport.h \
@@ -342,7 +341,6 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/InstrumentWidget/GLActorCollection.h \
 	    src/Mantid/InstrumentWidget/MantidObject.h \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.h \
-		src/Mantid/InstrumentWidget/GLColorMapQwt.h \
 		src/Mantid/InstrumentWidget/BinDialog.h	\
 		src/Mantid/InstrumentWidget/GLGroupPickBox.h \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.h \
@@ -494,7 +492,6 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/Mantid/AlgorithmHistoryWindow.cpp\
         src/Mantid/MantidMatrixDialog.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
-	    src/Mantid/InstrumentWidget/GLColorMap.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \
 	    src/Mantid/InstrumentWidget/GLTrackball.cpp \
 	    src/Mantid/InstrumentWidget/GLViewport.cpp \
@@ -504,7 +501,6 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/InstrumentWidget/GLActorCollection.cpp \
 	    src/Mantid/InstrumentWidget/MantidObject.cpp \
 	    src/Mantid/InstrumentWidget/InstrumentWindow.cpp \
-		src/Mantid/InstrumentWidget/GLColorMapQwt.cpp \
 		src/Mantid/InstrumentWidget/BinDialog.cpp  \
 		src/Mantid/InstrumentWidget/GLGroupPickBox.cpp \
 		src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp \
