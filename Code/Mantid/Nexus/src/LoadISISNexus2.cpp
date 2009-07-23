@@ -73,7 +73,16 @@ void LoadISISNexus2::exec()
     udet.load();
     boost::shared_array<int> spectra(new int[udet.dim0()]);
     
+    NXData nxData = entry.openNXData("detector_1");
+    NXInt data = nxData.openIntData();
+
+    m_numberOfPeriods  = data.dim0();
+    m_numberOfSpectra  = udet.dim0();
+    m_numberOfChannels = data.dim2();
+
     std::vector<int> spec_list = getSpectraSelection();
+
+    int nmon = 0;
 
     if (udet.dim0() != spectrum_index.dim0())
     {
@@ -87,19 +96,13 @@ void LoadISISNexus2::exec()
                 NXInt mon = entry.openNXInt(std::string(it->nxname) + "/monitor_number");
                 mon.load();
                 spectra[*index()-1] = *mon();
+                nmon ++ ;
             }
     }
-    for(size_t i=m_monitors.size();i<udet.dim0();i++)
+    for(size_t i=nmon;i<udet.dim0();i++)
         spectra[i] = i + 1;
 
-    NXData nxData = entry.openNXData("detector_1");
-    NXInt data = nxData.openIntData();
-
-    m_numberOfPeriods  = data.dim0();
-    m_numberOfSpectra  = udet.dim0();
-    m_numberOfChannels = data.dim2();
-
-    if (spectrum_index.dim0() + m_monitors.size() != udet.dim0() ||
+    if (spectrum_index.dim0() + nmon != udet.dim0() ||
         data.dim1() != spectrum_index.dim0())
         throw std::runtime_error("Spectra - detector mismatch");
 
@@ -163,7 +166,7 @@ void LoadISISNexus2::exec()
         for (int i = m_monitors.size(); i < total_specs; ++i)
         {
             int j = spec_list.size() > 0 ? spec_list[i] : i;
-            data.load(period,j - m_monitors.size());
+            data.load(period,j - nmon);
             MantidVec& Y = localWorkspace->dataY(i);
             Y.assign(data(),data()+m_numberOfChannels);
             MantidVec& E = localWorkspace->dataE(i);
@@ -294,7 +297,7 @@ std::vector<int> LoadISISNexus2::getSpectraSelection()
     std::vector<int> spec;
     if( is_interval )
     {
-        if ( spec_max < spec_min )
+        if ( spec_max < spec_min || spec_min >= m_numberOfSpectra || spec_max >= m_numberOfSpectra)
         {
             g_log.error("Invalid Spectrum min/max properties");
             throw std::invalid_argument("Inconsistent properties defined");
@@ -307,6 +310,11 @@ std::vector<int> LoadISISNexus2::getSpectraSelection()
             {
                 int s = spec_list[i];
                 if ( s < 0 ) continue;
+                if (s >= m_numberOfSpectra)
+                {
+                    g_log.error("Invalid Spectrum list property");
+                    throw std::invalid_argument("Inconsistent properties defined");
+                }
                 if (s < spec_min || s > spec_max)
                     spec.push_back(s);
             }
