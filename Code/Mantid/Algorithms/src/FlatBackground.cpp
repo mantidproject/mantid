@@ -51,13 +51,14 @@ void FlatBackground::exec()
   PARALLEL_FOR2(inputWS,outputWS)
   for (int i=0; i < numHists; ++i)
   {
+		PARALLEL_START_INTERUPT_REGION
     outputWS->dataX(i) = inputWS->readX(i);
     outputWS->dataY(i) = inputWS->readY(i);
     outputWS->dataE(i) = inputWS->readE(i);
-	m_progress->report();
+		m_progress->report();
+		PARALLEL_END_INTERUPT_REGION
   }
- 
- // m_progress = new Progress(this,0.3,1.0,toFit.size()); 
+	PARALLEL_CHECK_INTERUPT_REGION
   
   int toFitsize=toFit.size();
   double prg=0.3;

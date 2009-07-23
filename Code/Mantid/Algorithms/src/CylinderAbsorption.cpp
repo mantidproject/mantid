@@ -111,6 +111,8 @@ void CylinderAbsorption::exec()
 	PARALLEL_FOR2(inputWS,correctionFactors)
   for (int i = 0; i < numHists; ++i)
   {
+		PARALLEL_START_INTERUPT_REGION
+
     // Copy over bin boundaries
     const MantidVec& X = inputWS->readX(i);
     correctionFactors->dataX(i) = X;
@@ -148,14 +150,13 @@ void CylinderAbsorption::exec()
       interpolate(X, Y, isHist);
     }
 
-  /*  if (i % iprogress_step == 0)
-    {
-      progress(double(i) / numHists);
-      interruption_point();
-    }*/
-	prog.report();
+		prog.report();
 
+		PARALLEL_END_INTERUPT_REGION
   }
+	PARALLEL_CHECK_INTERUPT_REGION
+	
+
   g_log.information() << "Total number of elements in the integration was " << m_L1s.size() << std::endl;
   setProperty("OutputWorkspace", correctionFactors);
 

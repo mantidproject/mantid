@@ -68,7 +68,7 @@ void MaskBins::exec()
   const int numHists = inputWS->getNumberHistograms();
   m_progress=new Progress(this,0.0,1.0,numHists); 
   //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
-  //PARALLEL_FOR2(inputWS,outputWS)
+
   for (int i = 0; i < numHists; ++i)
   {
     // Copy over the data

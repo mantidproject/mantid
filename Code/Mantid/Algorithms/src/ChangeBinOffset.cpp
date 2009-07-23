@@ -70,6 +70,7 @@ namespace Mantid
 	    PARALLEL_FOR2(inputW, outputW)
 	    for (int i=0; i < histnumber; ++i)
 	    {		    
+				PARALLEL_START_INTERUPT_REGION
 		    //Do the offsetting
 		    for (size_t j=0; j <  inputW->readX(i).size(); ++j)
 		    {
@@ -80,19 +81,21 @@ namespace Mantid
 		    outputW->dataY(i) = inputW->dataY(i);
 		    outputW->dataE(i) = inputW->dataE(i);
 		    m_progress->report();
+				PARALLEL_END_INTERUPT_REGION
 	    }
+			PARALLEL_CHECK_INTERUPT_REGION
 	    
 	    // Copy units
-            if (outputW->getAxis(0)->unit().get())
-                outputW->getAxis(0)->unit() = inputW->getAxis(0)->unit();
-            try
-            {
-                if (inputW->getAxis(1)->unit().get())
-                    outputW->getAxis(1)->unit() = inputW->getAxis(1)->unit();
-            }
-            catch(Exception::IndexError) {
-                // OK, so this isn't a Workspace2D
-            }
+      if (outputW->getAxis(0)->unit().get())
+          outputW->getAxis(0)->unit() = inputW->getAxis(0)->unit();
+      try
+      {
+          if (inputW->getAxis(1)->unit().get())
+              outputW->getAxis(1)->unit() = inputW->getAxis(1)->unit();
+      }
+      catch(Exception::IndexError) {
+          // OK, so this isn't a Workspace2D
+      }
 
 	    // Assign it to the output workspace property
 	    setProperty("OutputWorkspace",outputW);

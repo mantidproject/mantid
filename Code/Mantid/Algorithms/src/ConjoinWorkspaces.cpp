@@ -73,6 +73,7 @@ void ConjoinWorkspaces::exec()
   PARALLEL_FOR2(ws1, output2D)
   for (int i = 0; i < nhist1; ++i)
   {
+		PARALLEL_START_INTERUPT_REGION
     output2D->setX(i,XValues);
     output2D->dataY(i) = ws1->readY(i);
     output2D->dataE(i) = ws1->readE(i);
@@ -89,7 +90,9 @@ void ConjoinWorkspaces::exec()
       }
     }    
     m_progress->report();
+		PARALLEL_END_INTERUPT_REGION
   }
+	PARALLEL_CHECK_INTERUPT_REGION
   //For second loop we use the offset from the first
   const int& nhist2 = ws2->getNumberHistograms();
   const Axis* axis2 = ws2->getAxis(1);
@@ -97,6 +100,7 @@ void ConjoinWorkspaces::exec()
   PARALLEL_FOR2(ws2, output2D)
   for (int j = 0; j < nhist2; ++j)
   {
+		PARALLEL_START_INTERUPT_REGION
     output2D->setX(nhist1 + j,XValues);
     output2D->dataY(nhist1 + j) = ws2->readY(j);
     output2D->dataE(nhist1 + j) = ws2->readE(j);
@@ -113,7 +117,9 @@ void ConjoinWorkspaces::exec()
       }
     }
     m_progress->report();
+		PARALLEL_END_INTERUPT_REGION
   }
+	PARALLEL_CHECK_INTERUPT_REGION
 
   // Delete the input workspaces from the ADS
   AnalysisDataService::Instance().remove(getPropertyValue("InputWorkspace1"));

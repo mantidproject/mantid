@@ -362,6 +362,7 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_const_sptr input
   PARALLEL_FOR3(inputWorkspace,outputWorkspace,m_monitor)
   for (int i = 0; i < numHists; ++i)
   {
+		PARALLEL_START_INTERUPT_REGION
     prog.report();
 
     const MantidVec& X = inputWorkspace->readX(i);
@@ -407,8 +408,9 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_const_sptr input
     } // end loop over current spectrum
 
     if (!m_commonBins) { delete Y; delete E; }
+		PARALLEL_END_INTERUPT_REGION
   } // end loop over spectra
-
+	PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /** Calculates the overall normalisation factor.

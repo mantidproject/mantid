@@ -69,6 +69,7 @@ void SmoothData::exec()
   // Loop over all the spectra in the workspace
   for (int i = 0; i < inputWorkspace->getNumberHistograms(); ++i)
   {
+		PARALLEL_START_INTERUPT_REGION
     // Copy the X data over. Preserve data sharing if present in input workspace.
     const std::vector<double> &X = inputWorkspace->readX(i);
     if (output2D && XFirst==&X)
@@ -127,8 +128,10 @@ void SmoothData::exec()
       totalE -= E[index-1]*E[index-1];
       newE[l] = std::sqrt(std::abs(totalE))/(vecSize-index);
     }
-	progress.report();
+		progress.report();
+		PARALLEL_END_INTERUPT_REGION
   } // Loop over spectra
+	PARALLEL_CHECK_INTERUPT_REGION
 
   // Set the output workspace to its property
   setProperty("OutputWorkspace", outputWorkspace);

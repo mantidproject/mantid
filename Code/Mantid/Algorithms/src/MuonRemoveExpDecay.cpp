@@ -56,12 +56,15 @@ void MuonRemoveExpDecay::exec()
     PARALLEL_FOR2(inputWS,outputWS)
     for (int i = 0; i < numSpectra; ++i)
     {
+			PARALLEL_START_INTERUPT_REGION
       removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
       outputWS->dataX(i) = inputWS->readX(i);
 
       //Need to do something about the errors?
       prog.report();
+			PARALLEL_END_INTERUPT_REGION
     }
+		PARALLEL_CHECK_INTERUPT_REGION
   }
   else
   {
@@ -73,11 +76,14 @@ void MuonRemoveExpDecay::exec()
       PARALLEL_FOR2(inputWS,outputWS)
       for (int i = 0; i < numSpectra; ++i)
       {
+				PARALLEL_START_INTERUPT_REGION
         outputWS->dataX(i) = inputWS->readX(i);
         outputWS->dataY(i) = inputWS->readY(i);
         outputWS->dataE(i) = inputWS->readE(i);
         prog.report();
+				PARALLEL_END_INTERUPT_REGION
       }
+			PARALLEL_CHECK_INTERUPT_REGION
     }
 
     //Do the specified spectra only
@@ -85,6 +91,7 @@ void MuonRemoveExpDecay::exec()
     PARALLEL_FOR2(inputWS,outputWS)
     for (int i = 0; i < specLength; ++i)
     {
+			PARALLEL_START_INTERUPT_REGION
       if (Spectra[i] > numSpectra)
       {
         g_log.error("Spectra size greater than the number of spectra!");
@@ -96,7 +103,9 @@ void MuonRemoveExpDecay::exec()
 
       //Need to do something about the errors?
       prog.report();
+			PARALLEL_END_INTERUPT_REGION
     }
+		PARALLEL_CHECK_INTERUPT_REGION
   }
 
   setProperty("OutputWorkspace", outputWS);

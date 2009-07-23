@@ -62,6 +62,7 @@ namespace Mantid
 	    PARALLEL_FOR2(inputW,outputW)
       for (int hist=0; hist <  histnumber;++hist)
       {
+				PARALLEL_START_INTERUPT_REGION
         // get const references to input Workspace arrays (no copying)
         const MantidVec& XValues = inputW->readX(hist);
         const MantidVec& YValues = inputW->readY(hist);
@@ -102,13 +103,10 @@ namespace Mantid
           this->propagateMasks(inputW,outputW,hist);
         }
         
-       /* if (hist % progress_step == 0)
-        {
-          progress(double(hist)/histnumber);
-          interruption_point();
-        }*/
         prog.report();
+				PARALLEL_END_INTERUPT_REGION
       }
+			PARALLEL_CHECK_INTERUPT_REGION
       outputW->isDistribution(dist);
 
       for (int i=0; i < outputW->axes(); ++i)

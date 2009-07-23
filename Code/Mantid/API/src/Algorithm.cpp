@@ -22,9 +22,9 @@ unsigned int Algorithm::g_execCount=0;
 
 /// Constructor
 Algorithm::Algorithm() :
-  PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
+  PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),m_cancel(false),
   g_log(Kernel::Logger::get("Algorithm")),m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
-  m_isExecuted(false),m_isChildAlgorithm(false),m_cancel(false),m_runningAsync(false),m_running(false),
+  m_isExecuted(false),m_isChildAlgorithm(false),m_runningAsync(false),m_running(false),
   m_algorithmID(0)
 {
 
@@ -391,7 +391,11 @@ void Algorithm::progress(double p, const std::string& msg)
 
 void Algorithm::interruption_point()
 {
-    if (m_cancel) throw CancelException();
+		//only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
+		// that defines that all loops must complete, and no exception can leave an OpenMP section
+	  // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
+    IF_NOT_PARALLEL
+		if (m_cancel) throw CancelException();
 }
 
 //----------------------------------------------------------------------

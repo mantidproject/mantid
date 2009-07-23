@@ -260,7 +260,8 @@ namespace Mantid
 			static bool isEmpty(double toCheck) { return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
 			///checks that the value was not set by users, uses the value in EMPTY_INT()
 			static bool isEmpty(int toCheck) { return toCheck == EMPTY_INT(); }
-			
+
+			mutable bool m_cancel; ///< set to true to stop execution			
 			/// refenence to the logger class
 			Kernel::Logger& g_log;
 
@@ -302,7 +303,6 @@ namespace Mantid
 
 			bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
 
-			mutable bool m_cancel; ///< set to true to stop execution
 			bool m_runningAsync; ///< Algorithm is running asynchronously
 			bool m_running; ///< Algorithm is running
 

@@ -105,10 +105,11 @@ void ConvertUnits::exec()
   
   // Loop over the histograms (detector spectra)
   Progress prog(this,0.0,0.5,numberOfSpectra);  
-  //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
-  //PARALLEL_FOR2(inputWS, outputWS)
-  for (int i = 0; i < numberOfSpectra; ++i) {
-
+  
+	PARALLEL_FOR2(inputWS, outputWS)
+  for (int i = 0; i < numberOfSpectra; ++i) 
+	{
+		PARALLEL_START_INTERUPT_REGION
     // Take the bin width dependency out of the Y & E data
     if (distribution)
     {
@@ -132,9 +133,10 @@ void ConvertUnits::exec()
         progress( double(i)/numberOfSpectra/2 );
         interruption_point();
     }
-	prog.report();
-
+		prog.report();
+		PARALLEL_END_INTERUPT_REGION
   }
+	PARALLEL_CHECK_INTERUPT_REGION
 
   // Check whether there is a quick conversion available
   double factor, power;
@@ -211,30 +213,35 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
       {
         Histogram1D::RCtype xVals;
         xVals.access() = outputWS->dataX(0);
-		Progress prog(this,0.5,1.0,numberOfSpectra);
+				Progress prog(this,0.5,1.0,numberOfSpectra);
+
+				PARALLEL_FOR1(outputWS)
         for (int j = 1; j < numberOfSpectra; ++j)
         {
+					PARALLEL_START_INTERUPT_REGION
           WS2D->setX(j,xVals);
-         /* if ( j % 100 == 0)
-          {
-              progress( 0.5 + double(j)/numberOfSpectra/2 );
-              interruption_point();
-          }*/
-		  prog.report();
+
+					prog.report();
+					PARALLEL_END_INTERUPT_REGION
         }
+				PARALLEL_CHECK_INTERUPT_REGION
       }
       return;
     }
   }
   // If we get to here then the bins weren't aligned and each spectrum is unique
   // Loop over the histograms (detector spectra)
+	PARALLEL_FOR1(outputWS)
   for (int k = 0; k < numberOfSpectra; ++k) {
+		PARALLEL_START_INTERUPT_REGION
     std::vector<double>::iterator it;
     for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
     {
       *it = factor * std::pow(*it,power);
     }
+		PARALLEL_END_INTERUPT_REGION
   }
+	PARALLEL_CHECK_INTERUPT_REGION
   return;
 }
 
@@ -270,8 +277,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", outputWS->getTitle());
   }
 
-  const int notFailed = -99;
-  int failedDetectorIndex = notFailed;
+  int failedDetectorCount = 0;
 
   /// @todo No implementation for any of these in the geometry yet so using properties
   const std::string emodeStr = getProperty("EMode");
@@ -284,8 +290,10 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
   std::vector<double> emptyVec;
   Progress prog(this,0.5,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
-  for (int i = 0; i < numberOfSpectra; ++i) {
-
+	PARALLEL_FOR1(outputWS)
+  for (int i = 0; i < numberOfSpectra; ++i) 
+	{
+		PARALLEL_START_INTERUPT_REGION
     double efixed = getProperty("Efixed");
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
@@ -320,11 +328,6 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
           efixed = DBL_MIN;
         }
       }
-      if (failedDetectorIndex != notFailed)
-      {
-        g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << i-1 << "] distance. Zeroing spectrum." << std::endl;
-        failedDetectorIndex = notFailed;
-      }
     
       // Convert the input unit to time-of-flight
       fromUnit->toTOF(outputWS->dataX(i),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
@@ -333,26 +336,20 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 
    } catch (Exception::NotFoundError e) {
       // Get to here if exception thrown when calculating distance to detector
-      if (failedDetectorIndex == notFailed)
-      {
-        failedDetectorIndex = i;
-      }
+      failedDetectorCount++;
       outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
       outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
       outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
     }
 
-   /* if ( i % 100 == 0)
-    {
-        progress( 0.5 + double(i)/numberOfSpectra/2 );
-        interruption_point();
-    }*/
-	prog.report();
+		prog.report();
+		PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
+	PARALLEL_CHECK_INTERUPT_REGION
 
-  if (failedDetectorIndex != notFailed)
+  if (failedDetectorCount != 0)
   {
-    g_log.information() << "Unable to calculate sample-detector[" << failedDetectorIndex << "-" << numberOfSpectra-1 << "] distance. Zeroing spectrum." << std::endl;
+    g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount << " spectra. Zeroing spectrum." << std::endl;
   }
 
 }

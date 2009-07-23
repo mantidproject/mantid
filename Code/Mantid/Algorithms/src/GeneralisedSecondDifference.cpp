@@ -98,7 +98,7 @@ void GeneralisedSecondDifference::exec()
   	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,n_specs,n_points+1,n_points);
 
 	const int nsteps=2*n_av+1;
-    //PARALLEL_FOR1(inputWS)
+
     m_progress=new Progress(this,0.0,1.0,(spec_max-spec_min));
   	for (int i=spec_min;i<=spec_max;i++)
   	{
