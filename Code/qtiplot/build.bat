@@ -11,6 +11,7 @@ cd "%ROOTDIR%\MantidQt"
 qmake
 nmake clean
 nmake
+nmake /Q
 IF %ERRORLEVEL% NEQ 0 goto qtiploterr
 
 :: Now build qtiplot
@@ -18,6 +19,7 @@ cd "%ROOTDIR%\qtiplot"
 nmake clean
 qmake
 nmake
+nmake /Q
 IF %ERRORLEVEL% NEQ 0 goto qtiploterr
 EXIT /B 0
 
