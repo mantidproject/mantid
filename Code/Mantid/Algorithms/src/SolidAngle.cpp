@@ -101,11 +101,16 @@ namespace Mantid
 			const int notFailed = -99;
 			int failedDetectorIndex = notFailed;
 
+			int loopIterations = m_MaxSpec-m_MinSpec;
+			int failCount=0;
+			Progress prog(this,0.0,1.0,numberOfSpectra);
 
-			int iprogress_step = (m_MaxSpec-m_MinSpec+1) / 100;
-			if (iprogress_step == 0) iprogress_step = 1;
 			// Loop over the histograms (detector spectra)
-			for (int i = m_MinSpec, j = 0; i <= m_MaxSpec; ++i,++j) {
+			PARALLEL_FOR2(outputWS,inputWS)
+			for (int j = 0; j <= loopIterations; ++j) 
+			{
+				PARALLEL_START_INTERUPT_REGION
+				int i = j + m_MinSpec;
 				try {
 					// Get the spectrum number for this histogram
 					outputWS->getAxis(1)->spectraNo(j) = inputWS->getAxis(1)->spectraNo(i);
@@ -118,34 +123,24 @@ namespace Mantid
 					outputWS->dataX(j)[1] = inputWS->readX(i).back();
 					outputWS->dataY(j)[0] = solidAngle;
 					outputWS->dataE(j)[0] = 0;
-					if (failedDetectorIndex != notFailed)
-					{
-						g_log.information() << "Unable to calculate solid angle[" << failedDetectorIndex << "-" << i-1 << "]. Zeroing spectrum." << std::endl;
-						failedDetectorIndex = notFailed;
-					}
-
-
-				} catch (Exception::NotFoundError e) {
+				} 
+				catch (Exception::NotFoundError e)
+				{
 					// Get to here if exception thrown when calculating distance to detector
-					if (failedDetectorIndex == notFailed)
-					{
-						failedDetectorIndex = i;
-					}
+					failCount++;
 					outputWS->dataX(j).assign(outputWS->dataX(j).size(),0.0);
 					outputWS->dataY(j).assign(outputWS->dataY(j).size(),0.0);
 					outputWS->dataE(j).assign(outputWS->dataE(j).size(),0.0);
 				}
 
-				if ( j % 100 == 0)
-				{
-					progress( double(j)/numberOfSpectra );
-					interruption_point();
-				}
+				prog.report();
+				PARALLEL_END_INTERUPT_REGION
 			} // loop over spectra
+			PARALLEL_CHECK_INTERUPT_REGION
 
-			if (failedDetectorIndex != notFailed)
+			if (failCount != 0)
 			{
-				g_log.information() << "Unable to calculate solid angle[" << failedDetectorIndex << "-" << numberOfSpectra-1 << "]. Zeroing spectrum." << std::endl;
+				g_log.information() << "Unable to calculate solid angle for " << failCount << " spectra. Zeroing spectrum." << std::endl;
 			}
 
 		}
