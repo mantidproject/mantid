@@ -152,12 +152,10 @@ cow_ptr<DataType>::access()
   if (Data.unique())
     return *Data;
 
-  PARALLEL_CRITICAL(cow_ptr_access)
-	{
   ptr_type oldData=Data; 
   Data.reset();
   Data=ptr_type(new DataType(*oldData));
-	}
+
   return *Data;
 }
 
