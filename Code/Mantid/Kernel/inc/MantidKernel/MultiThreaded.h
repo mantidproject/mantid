@@ -63,10 +63,16 @@
 */
 #define PARALLEL_END_INTERUPT_REGION \
 								}
+
 /** Adds a check after a Parallel region to see if it was interupted
 */
 #define PARALLEL_CHECK_INTERUPT_REGION \
 								interruption_point();
+
+/** Specifies that the next code line or block will only allow one thread through at a time
+*/
+#define PARALLEL_CRITICAL(name) \
+								PRAGMA(omp critical(name))
 
 #else //_OPENMP
 ///Empty definitions - to enable set your complier to enable openMP
@@ -79,6 +85,7 @@
 #define PARALLEL_START_INTERUPT_REGION
 #define PARALLEL_END_INTERUPT_REGION
 #define PARALLEL_CHECK_INTERUPT_REGION
+#define PARALLEL_CRITICAL(name)
 #endif //_OPENMP
 
 #endif //MANTID_KERNEL_MULTITHREADED_H_

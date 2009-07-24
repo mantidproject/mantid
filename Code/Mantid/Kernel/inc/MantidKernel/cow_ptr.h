@@ -2,6 +2,7 @@
 #define MANTIDKERNEL_COW_PTR_H
 
 #include "boost/shared_ptr.hpp"
+#include "MultiThreaded.h"
 
 namespace Mantid
 {
@@ -151,9 +152,12 @@ cow_ptr<DataType>::access()
   if (Data.unique())
     return *Data;
 
+  PARALLEL_CRITICAL(cow_ptr_access)
+	{
   ptr_type oldData=Data; 
   Data.reset();
   Data=ptr_type(new DataType(*oldData));
+	}
   return *Data;
 }
 
