@@ -11,7 +11,7 @@ cd "%ROOTDIR%\MantidQt"
 qmake
 nmake clean
 nmake
-IF %ERRORLEVEL% NEQ 0 goto qtiploterr
+IF %ERRORLEVEL% NEQ 0 goto mantidqt
 
 :: Now build qtiplot
 cd "%ROOTDIR%\qtiplot"
@@ -19,12 +19,13 @@ nmake clean
 qmake
 nmake
 IF %ERRORLEVEL% NEQ 0 goto qtiploterr
-EXIT /B 0
+echo "MantidQt and MantidPlot build succeeded."
+EXIT 0
 
 :mantidqterr
-echo "MantidQt build failed"
-EXIT /B 1
+echo "MantidQt build failed."
+EXIT 1
 
 :qtiploterr
-echo "MantidPlot build failed"
-EXIT /B 1
+echo "MantidPlot build failed."
+EXIT 1
