@@ -99,7 +99,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
 
 	mScaleOptions = new QComboBox;
-	mScaleOptions->addItem("Log10", QVariant(MantidColorMap::Log10));
+	//mScaleOptions->addItem("Log10", QVariant(MantidColorMap::Log10));
 	mScaleOptions->addItem("Linear", QVariant(MantidColorMap::Linear));
 	connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
 
@@ -435,7 +435,8 @@ void InstrumentWindow::setupColorBarScaling()
   double minValue = mMinValueBox->displayText().toDouble();
   double maxValue = mMaxValueBox->displayText().toDouble();
 
-  if( mScaleOptions->currentIndex() == MantidColorMap::Linear )
+  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
+  if( type == MantidColorMap::Linear )
   {
     QwtLinearScaleEngine linScaler;
     mColorMapWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
@@ -443,14 +444,14 @@ void InstrumentWindow::setupColorBarScaling()
   }
   else
   {
-    QwtLog10ScaleEngine logScaler;    
-    double logmin(minValue);
-    if( logmin < 1.0 )
-    {
-      logmin = 1.0;
-    }
-    mColorMapWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
-    mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), mInstrumentDisplay->getColorMap());
+//    QwtLog10ScaleEngine logScaler;    
+    //double logmin(minValue);
+    //if( logmin < 1.0 )
+    //{
+    //  logmin = 1.0;
+    //}
+    //mColorMapWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
+    //mColorMapWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), mInstrumentDisplay->getColorMap());
   }
 }
 
@@ -579,7 +580,7 @@ void InstrumentWindow::loadSettings()
   // Set values from settings
   mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
   
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)settings.value("ScaleType", MantidColorMap::Log10).toUInt();
+  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)settings.value("ScaleType", MantidColorMap::Linear).toUInt();
   // Block signal emission temporarily since we have not fully initialized the window
   mScaleOptions->blockSignals(true);
   mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));
