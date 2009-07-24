@@ -11,7 +11,7 @@ cd "%ROOTDIR%\MantidQt"
 qmake
 nmake clean
 nmake
-IF %ERRORLEVEL% NEQ 0 goto mantidqt
+IF %ERRORLEVEL% NEQ 0 goto mantidqterr
 
 :: Now build qtiplot
 cd "%ROOTDIR%\qtiplot"
