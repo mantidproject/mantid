@@ -84,7 +84,10 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
 			  else
 			  {
 				  if(version == it->second )
-					  throw std::runtime_error("cannot register algorithm "+ className + " twice with the same version\n");
+          {
+					  g_log.fatal() << "Cannot register algorithm " << className << " twice with the same version\n";
+					  throw std::runtime_error("Cannot register algorithm "+ className + " twice with the same version\n");
+          }
 				  if(version > it->second)
 					  _vmap[className]=version;
 			  }  

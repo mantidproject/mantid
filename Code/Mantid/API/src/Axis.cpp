@@ -167,10 +167,11 @@ int& Axis::spectraNo(const int& index)
  */
 int Axis::length() const
 {
-	if (m_isSpectra)
-		return m_spectraValues.size();
-	else
-		return m_numericValues.size();
+  return m_size;
+	//if (m_isSpectra)
+	//	return m_spectraValues.size();
+	//else
+	//	return m_numericValues.size();
 }
 
 /** Check if two axis defined as spectra or numeric axis are equivalent

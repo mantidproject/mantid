@@ -168,7 +168,7 @@ def Correct(sampleWS, transWS, resultWS, suffix):
 		
 	else:
 		# Run 2D algorithm
-		Qxy(tmpWS, resultWS, "small_angle2D.Q", str(qxy2), str(dqxy))
+		Qxy(tmpWS, resultWS, str(qxy2), str(dqxy))
 		
 	mantid.deleteWorkspace(tmpWS)
 	return

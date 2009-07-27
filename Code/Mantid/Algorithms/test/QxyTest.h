@@ -58,15 +58,11 @@ public:
 	  
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("InputWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("OutputWorkspace","result") )
-    const std::string filename("2d_result.Q");
-    TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("OutputFilename",filename) )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("MaxQxy","0.1") )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("DeltaQ","0.002") )
 	  
     TS_ASSERT_THROWS_NOTHING( qxy.execute() )
     TS_ASSERT( qxy.isExecuted() )
-	  
-    remove(filename.c_str());
   }
 	
 private:

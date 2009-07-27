@@ -11,13 +11,13 @@ namespace Mantid
 namespace Algorithms
 {
 /** This algorithm rebins a 2D workspace in units of wavelength into 2D Q.
-    The results is stored in a 2D workspace and written to file in the FISH format.
+    The result is stored in a 2D workspace with units of Q on both axes.
+    @todo Doesn't (yet) calculate the errors.
 
     Required Properties:
     <UL>
     <LI> InputWorkspace  - The corrected data in units of wavelength. </LI>
     <LI> OutputWorkspace - The workspace in which to store data as x & y components of Q. </LI>
-    <LI> OutputFilename  - The filename under which to store the 2d data </LI>
     <LI> MaxQxy          - The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy). </LI>
     <LI> DeltaQ          - The dimension of a Qx-Qy cell. </LI>
     </UL>
@@ -66,9 +66,6 @@ private:
   void exec();
 
   API::MatrixWorkspace_sptr setUpOutputWorkspace();
-  void writeResult(API::MatrixWorkspace_const_sptr result);
-  
-  
 };
 
 } // namespace Algorithms

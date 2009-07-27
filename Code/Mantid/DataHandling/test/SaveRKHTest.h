@@ -13,8 +13,13 @@ class SaveRKHTest : public CxxTest::TestSuite
 public:
   ///Constructor
   SaveRKHTest() : outputFile("SAVERKH.out")
+  {} 
+
+  ~SaveRKHTest()
   {
-  } 
+    //Remove the file
+    Poco::File(outputFile).remove();
+  }
 
   void testInit()
   {
@@ -27,7 +32,7 @@ public:
  
   }
 
-  void testExec()
+  void testExecHorizontal()
   {
     if ( !testAlgorithm1.isInitialized() ) testAlgorithm1.initialize();
     
@@ -42,7 +47,7 @@ public:
 
     testAlgorithm1.setPropertyValue("InputWorkspace", "testInputOne");
     testAlgorithm1.setPropertyValue("Filename", outputFile);
-    testAlgorithm1.setPropertyValue("FirstColumnValue", "Wavelength");
+    testAlgorithm2.setProperty<bool>("Append", false);
 
     //Execute the algorithm
     TS_ASSERT_THROWS_NOTHING( testAlgorithm1.execute() );
@@ -92,29 +97,30 @@ public:
     TS_ASSERT_DELTA(err, 1.414214, 1e-06);
     
     file.close();
-    //Remove the file
-    TS_ASSERT_THROWS_NOTHING( Poco::File(outputFile).remove() );
-    TS_ASSERT( ! Poco::File(outputFile).exists() );
+  }
 
+  void xtestExecVertical()
+  {
     //Now a workspace of the other kind
     if ( !testAlgorithm2.isInitialized() ) testAlgorithm2.initialize();
     
     TS_ASSERT_THROWS(testAlgorithm2.execute(), std::runtime_error);
 
-   MatrixWorkspace_sptr inputWS2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 1, 0.0);
+    using namespace Mantid::API;
+    MatrixWorkspace_sptr inputWS2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(10, 1, 0.0);
     //Register workspace
     AnalysisDataService::Instance().add("testInputTwo", inputWS2);
 
     testAlgorithm2.setPropertyValue("InputWorkspace", "testInputTwo");
     testAlgorithm2.setPropertyValue("Filename", outputFile);
-    testAlgorithm2.setPropertyValue("FirstColumnValue", "SpectraNumber");
+    testAlgorithm2.setProperty<bool>("Append", false);
 
     //Execute the algorithm
     TS_ASSERT_THROWS_NOTHING( testAlgorithm2.execute() );
     TS_ASSERT( testAlgorithm2.isExecuted() );
     
     //Check if the file exists  
-      TS_ASSERT( Poco::File(outputFile).exists() );
+    TS_ASSERT( Poco::File(outputFile).exists() );
 
     //Open it and check a few lines
     std::ifstream file2(outputFile.c_str());
@@ -122,20 +128,20 @@ public:
     TS_ASSERT(file2);
 
     //Bury the first 5 lines and then read the next
-    count = 0;
+    int count = 0;
+    std::string fileline;
     while( ++count < 7 )
     {
       getline(file2, fileline);
     }
+    std::istringstream strReader(fileline);
     strReader.clear();
     strReader.str(fileline.c_str());
-    x = 0.0;
-    y = 0.0;
-    err = 0.0;
+    double x(0.0), y(0.0), err(0.0);
     strReader >> x >> y >> err;
 
     //Test values
-    TS_ASSERT_DELTA(x, 1.0, 1e-08);
+    TS_ASSERT_DELTA(x, 0.0, 1e-08);
     TS_ASSERT_DELTA(y, 2.0, 1e-08);
     TS_ASSERT_DELTA(err, 1.414214, 1e-06);
 
@@ -154,14 +160,11 @@ public:
     strReader >> x >> y >> err;
 
     //Test values
-    TS_ASSERT_DELTA(x, 6.0, 1e-08);
+    TS_ASSERT_DELTA(x, 0.0, 1e-08);
     TS_ASSERT_DELTA(y, 2.0, 1e-08);
     TS_ASSERT_DELTA(err, 1.414214, 1e-06);
     
     file2.close();
-    //Remove the file
-    TS_ASSERT_THROWS_NOTHING( Poco::File(outputFile).remove() );
-    TS_ASSERT( ! Poco::File(outputFile).exists() );
   }
 
 private:

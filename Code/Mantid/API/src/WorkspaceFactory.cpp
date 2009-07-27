@@ -64,6 +64,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   MatrixWorkspace_sptr ws = create(parent->id(),NVectors,XLength,YLength);
 
   // Copy over certain parent data members
+  ws->setTitle(parent->getTitle());
   ws->setInstrument(parent->getInstrument());
   ws->m_spectramap = parent->m_spectramap;
   ws->setSample(parent->getSample());

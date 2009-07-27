@@ -30,7 +30,6 @@ void Qxy::init()
   wsValidator->add(new HistogramValidator<>);
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
-  declareProperty("OutputFilename","",new MandatoryValidator<std::string>);
   
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(1.0e-12);
@@ -45,6 +44,9 @@ void Qxy::exec()
 
   // Create the output Qx-Qy grid
   MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace();
+  // Copy over the instrument name and the workspace title
+  outputWorkspace->getInstrument()->setName(inputWorkspace->getInstrument()->getName());
+  outputWorkspace->setTitle(inputWorkspace->getTitle());
   // Will also need an identically-sized workspace to hold the solid angles
   MatrixWorkspace_sptr solidAngles = WorkspaceFactory::Instance().create(outputWorkspace);
   // Copy the X values from the output workspace to the solidAngles one
@@ -116,9 +118,16 @@ void Qxy::exec()
   // Divide the output data by the solid angles
   outputWorkspace /= solidAngles;
   
-  this->writeResult(outputWorkspace);
-  
-  // Need to log a count of the number of empty cells
+  // Count of the number of empty cells
+  MatrixWorkspace::const_iterator wsIt(*outputWorkspace);
+  int emptyBins = 0;
+  for (;wsIt != wsIt.end(); ++wsIt)
+  {
+      if (wsIt->Y() < 1.0e-12) ++emptyBins;
+  }
+  // Log the number of empty bins
+  g_log.notice() << "There are a total of " << emptyBins << " (" 
+                 << (100*emptyBins)/(outputWorkspace->size()) << "%) empty Q bins.\n"; 
 }
 
 /** Creates the output workspace, setting the X vector to the bins boundaries in Qx.
@@ -133,10 +142,11 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   if ( bins*delta != max ) ++bins; // Stop at first boundary past MaxQxy if max is not a multiple of delta
   const double startVal = -1.0*delta*bins;
   bins *= 2; // go from -max to +max
+  bins += 1; // Add 1 - this is a histogram
   
   // Create the output workspace
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",bins,bins+1,bins);
-  
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",bins-1,bins,bins-1);
+
   // Create a numeric axis to replace the vertical one
   Axis* verticalAxis = new Axis(AxisType::Numeric,bins);
   outputWorkspace->replaceAxis(1,verticalAxis);
@@ -144,23 +154,19 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   // Build up the X values
   Kernel::cow_ptr<MantidVec> axis;
   MantidVec& horizontalAxisRef = axis.access();
-  horizontalAxisRef.resize(bins+1);
+  horizontalAxisRef.resize(bins);
   for (int i = 0; i < bins; ++i)
   {
     const double currentVal = startVal + i*delta;
     // Set the X value
     horizontalAxisRef[i] = currentVal;
-    // Set the value on the new axis to the mid-point of the bin
-    // Later may want vertical axis to properly model bins, but since this is presently
-    // just for display purposes, it doesn't really matter
-    verticalAxis->setValue(i,currentVal+(delta/2.0));
+    // Set the Y value on the axis
+    verticalAxis->setValue(i,currentVal);
   }
-  // One extra value for the X vector
-  horizontalAxisRef[bins] = startVal + bins*delta;
   
   // Fill the X vectors in the output workspace
   DataObjects::Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWorkspace);
-  for (int i=0; i < bins; ++i)
+  for (int i=0; i < bins-1; ++i)
   {
     ws2D->setX(i,axis);
   }
@@ -168,94 +174,10 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   // Set the axis units
   outputWorkspace->getAxis(1)->unit() = outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
   // Set the 'Y' unit (gets confusing here...this is probably a Z axis in this case)
-  outputWorkspace->setYUnit("Cross Section");
+  outputWorkspace->setYUnit("Cross Section (1/cm)");
 
   setProperty("OutputWorkspace",ws2D);
   return outputWorkspace;
-}
-
-// Later, should be spun out into a separate algorithm
-/** Writes a FISH file containing the 2D data
- *  @param result The workspace to write out
- */
-void Qxy::writeResult(API::MatrixWorkspace_const_sptr result)
-{
-  const std::string filename = getProperty("OutputFilename");
-  std::ofstream outRKH(filename.c_str());
-
-  if( !outRKH )
-  {
-    g_log.error() << "An error occurred while attempting to open the output file" << std::endl;;
-    throw std::runtime_error("An error occurred while trying to open the output file for writing");
-  }
-
-  outRKH <<  " LOQ ";
-  Poco::Timestamp timestamp;
-  //The sample file has the format of the data/time as in this example Thu 28-OCT-2004 12:23
-  outRKH << Poco::DateTimeFormatter::format(timestamp, std::string("%w")) << " " << Poco::DateTimeFormatter::format(timestamp, std::string("%d")) 
-         << "-";
-  std::string month = Poco::DateTimeFormatter::format(timestamp, std::string("%b"));
-  std::transform(month.begin(), month.end(), month.begin(), toupper);
-  outRKH << month << "-" << Poco::DateTimeFormatter::format(timestamp, std::string("%Y %H:%M")) << "\n";
-  // The units that the data is in
-  outRKH << "  6 Q (\\A\\u-1\\d)\n";
-  outRKH << "  6 Q (\\A\\u-1\\d)\n";
-  outRKH << "  0 Cross section (cm\\u-1\\d)\n";
-  outRKH << "  0\n";
-  // Now the axis values
-  const MantidVec& X = result->readX(0);
-  const size_t bins = X.size(); 
-  outRKH << "  " << bins << "\n";
-  for (size_t i = 0; i < bins; ++i) 
-  {
-    outRKH << " " << std::scientific << std::setprecision(6) << X[i];
-    if ((i+1)%8 == 0) outRKH << "\n";
-  }
-  outRKH << "\n  " << bins << std::endl;
-  // This just uses the X vector for both axes, so relies on them being the same
-  for (size_t i = 0; i < bins; ++i) 
-  {
-    outRKH << " " << std::scientific << std::setprecision(6) << X[i];
-    if ((i+1)%8 == 0) outRKH << "\n";
-  }
-  const int xSize = result->blocksize();
-  const int ySize = result->getNumberHistograms();
-  outRKH << "\n   " << xSize << "   " << ySize << "  " 
-         << std::scientific << std::setprecision(12) << 1.0 << "\n";
-  const int iflag = 3;
-  // Windows puts 3 figures in the exponent, Linux only two and as far as I can tell there's no way of changing it
-#ifdef _WIN32
-  outRKH << "  " << iflag << "(8E13.4)\n";
-#else
-  outRKH << "  " << iflag << "(8E12.4)\n";
-#endif
-  // Question over whether I have X & Y swapped over compared to what they're expecting
-  int emptyBins = 0;
-  for (int i = 0; i < ySize; ++i)
-  {
-    const MantidVec& Y = result->readY(i);
-    for (int j = 0; j < xSize; ++j) 
-    {
-      outRKH << (Y[j]<0 ? " " : "  ") << std::scientific << std::setprecision(4) << Y[j];
-      if (((i*ySize)+j+1)%8 == 0) outRKH << "\n";
-      // Count the empty bins for logging
-      if (Y[j] < 1.0e-12) ++emptyBins;
-    }
-  }
-  // Log the number of empty bins
-  g_log.information() << "There are a total of " << emptyBins << " (" 
-                                                 << (100*emptyBins)/(xSize*ySize) << "%) empty Q bins." << std::endl; 
-  for (int i = 0; i < ySize; ++i)
-  {
-    const MantidVec& E = result->readE(i);
-    for (int j = 0; j < xSize; ++j) 
-    {
-      outRKH << (E[j]<0 ? " " : "  ") << std::scientific << std::setprecision(4) << E[j];
-      if (((i*ySize)+j+1)%8 == 0) outRKH << "\n";
-    }
-  }
-  
-  outRKH.close();
 }
 
 } // namespace Algorithms

@@ -247,7 +247,7 @@ Axis* const MatrixWorkspace::getAxis(const int& axisIndex) const
  *  @param axisIndex The index of the axis to replace
  *  @param newAxis A pointer to the new axis. The class will take ownership.
  *  @throw IndexError If the axisIndex given is outside the range of axes held by this workspace
- *  @throw std::runtime_error If the new axis is not of the correct length (the same as the old one)
+ *  @throw std::runtime_error If the new axis is not of the correct length (within one of the old one)
  */
 void MatrixWorkspace::replaceAxis(const int& axisIndex, Axis* const newAxis)
 {
@@ -259,10 +259,10 @@ void MatrixWorkspace::replaceAxis(const int& axisIndex, Axis* const newAxis)
   }
   // Now check that the new axis is of the correct length
   // Later, may want to allow axis to be one longer than number of vectors, to allow bins.
-  if ( newAxis->length() != m_axes[axisIndex]->length() )
+  if ( std::abs(newAxis->length() - m_axes[axisIndex]->length()) > 1 )
   {
-    g_log.error("replaceAxis: The new index is not of the correct length");
-    throw std::runtime_error("replaceAxis: The new index is not of the correct length");
+    g_log.error("replaceAxis: The new axis is not a valid length");
+    throw std::runtime_error("replaceAxis: The new axis is not a valid length");
   }
 
   // If we're OK, then delete the old axis and set the pointer to the new one

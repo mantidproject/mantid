@@ -1,56 +1,55 @@
-#ifndef DATAHANDING_SAVERKH_H_
-#define DATAHANDING_SAVERKH_H_
+#ifndef MANTID_DATAHANDLING_SAVERKH_H_
+#define MANTID_DATAHANDLING_SAVERKH_H_
 
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include <fstream>
 
 namespace Mantid
 {
-
 namespace DataHandling
 {
-/**
-     Saves a workspace in the RKH file format
+/** Saves a workspace in the RKH file format
 
-     Required properties:
-     <UL>
-     <LI> Filename - The path save the file</LI>
-     <LI> FirstColumnValue - The units of the first column in the file</LI>
-     <LI> InputWorkspace - The name workspace to save.</LI>
-     </UL>
+    Required properties:
+    <UL>
+    <LI> InputWorkspace - The name workspace to save.</LI>
+    <LI> Filename - The path save the file</LI>
+    <LI> Append - Whether to append to a file that already exists (true, the default), or overwrite</LI>
+    </UL>
 
-     @author Martyn Gigg, Tessella Support Services plc
-     @date 26/01/2009
+    @author Martyn Gigg, Tessella Support Services plc
+    @date 26/01/2009
      
-     Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
      
-     This file is part of Mantid.
+    This file is part of Mantid.
      
-     Mantid is free software; you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation; either version 3 of the License, or
-     (at your option) any later version.
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
      
-     Mantid is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     GNU General Public License for more details.
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
      
-     You should have received a copy of the GNU General Public License
-     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
      
-     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-     Code Documentation is available at: <http://doxygen.mantidproject.org>    
-  */
-class DLLExport SaveRKH : public Mantid::API::Algorithm
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+ */
+class DLLExport SaveRKH : public API::Algorithm
 {
 public:
-  /// (Empty) Constructor
-  SaveRKH() : Mantid::API::Algorithm(), m_unitKeys(), m_RKHKeys() {}
+  /// Constructor
+  SaveRKH();
   /// Virtual destructor
-  virtual ~SaveRKH() {}
+  virtual ~SaveRKH();
   /// Algorithm's name
   virtual const std::string name() const { return "SaveRKH"; }
   /// Algorithm's version
@@ -64,15 +63,19 @@ private:
   ///Execution code
   void exec();
 
-  ///Store the units known to the UnitFactory
-  std::set<std::string> m_unitKeys;
+  void writeHeader();
+  void write1D();
+  void write2D();
 
-  ///Store the units added as options for this algorithm
-  std::set<std::string> m_RKHKeys;
+  /// The input workspace
+  API::MatrixWorkspace_const_sptr m_workspace;
+  /// Whether this is a 2D dataset
+  bool m_2d;
+  /// The output filehandle
+  std::ofstream m_outRKH;
 };
 
 }
-
 }
 
-#endif //DATAHANDING_SAVERKH_H_
+#endif //MANTID_DATAHANDLING_SAVERKH_H_
