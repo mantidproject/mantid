@@ -850,17 +850,15 @@ namespace NeXus
    const int nSpectBins=localworkspace->readY(0).size();
    const int nSpect=int(spec.size());
    int dims_array[2] = { nSpect,nSpectBins };
-   std::string name=localworkspace->getTitle();
-   if(name.size()==0)
-	   name="values";
+   std::string name="values";
    int start[2]={0,0},asize[2]={1,dims_array[1]};
    status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
    status=NXopendata(fileID, name.c_str());
    for(int i=0;i<nSpect;i++)
    {
-       int s = spec[i];
-      status=NXputslab(fileID, (void*)&(localworkspace->readY(s)[0]),start,asize);
-	  start[0]++;
+     int s = spec[i];
+     status=NXputslab(fileID, (void*)&(localworkspace->readY(s)[0]),start,asize);
+	   start[0]++;
    }
    int signal=1;
    status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);

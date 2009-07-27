@@ -83,7 +83,9 @@ namespace NeXus
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
-	m_bAppend=getProperty("Append");
+    // If no title's been given, use the workspace title field
+    if (m_title.empty()) m_title = m_inputWorkspace->getTitle();
+    m_bAppend=getProperty("Append");
 
     m_spec_list = getProperty("SpectrumList");
     m_spec_max = getProperty("SpectrumMax");
