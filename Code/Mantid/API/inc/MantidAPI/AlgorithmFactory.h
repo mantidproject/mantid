@@ -8,15 +8,10 @@
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
-	
-namespace Kernel
-{
-  class Logger;
-}
-	
 namespace API
 {
 
