@@ -348,12 +348,12 @@ void LoadSNSNexus::loadInstrument(API::Workspace_sptr localWS,
         NXFloat detSize = nxDet.openNXFloat("origin/shape/size");
         detSize.load();
 
-        double szX = detSize[0] != detSize[0] ? 0.001 : detSize[0]/2/10;
-        double szY = detSize[1] != detSize[1] ? 0.001 : detSize[1]/2/10;
+        double szX = detSize[0] != detSize[0] ? 0.001 : detSize[0]/2;
+        double szY = detSize[1] != detSize[1] ? 0.001 : detSize[1]/2;
         double szZ = 0.001; //detSize[2] != detSize[2] ? 0.001 : detSize[2]/2;
 
-        std::ostringstream xmlShape;
-        xmlShape 
+        std::ostringstream xmlShapeStream;
+        xmlShapeStream 
             << " <cuboid id=\"detector-shape\"> " 
             << "<left-front-bottom-point x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<-szZ<<"\"  /> " 
             << "<left-front-top-point  x=\""<<szX<<"\" y=\""<<-szY<<"\" z=\""<<szZ<<"\"  /> " 
@@ -361,7 +361,8 @@ void LoadSNSNexus::loadInstrument(API::Workspace_sptr localWS,
             << "<right-front-bottom-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> " 
             << "</cuboid>";
 
-        boost::shared_ptr<Geometry::Object> shape = shapeCreator.createShape(xmlShape.str());
+        std::string xmlShape(xmlShapeStream.str());
+        boost::shared_ptr<Geometry::Object> shape = shapeCreator.createShape(xmlShape);
 
         Geometry::V3D shift; 
         Geometry::Quat rot;
@@ -459,7 +460,7 @@ void LoadSNSNexus::calcRotation(const Geometry::V3D& X,const Geometry::V3D& Y,co
     else
     {
 
-//        throw std::runtime_error("The case of arbitrary direction cosines is not implemented yet");
+        throw std::runtime_error("The case of arbitrary direction cosines is not implemented yet");
 
         double A1 = xx - 1. + xz*zx/(1.-zz);
         double A2 = xy + xz*zy/(1.-zz);
