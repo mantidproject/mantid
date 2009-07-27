@@ -16,9 +16,9 @@ namespace DataHandling
 
      Required properties:
      <UL>
+     <LI> OutputWorkspace - The name output workspace.</LI>
      <LI> Filename - The path to the file in RKH format</LI>
      <LI> FirstColumnValue - The units of the first column in the file</LI>
-     <LI> OutputWorkspace - The name output workspace.</LI>
      </UL>
 
      @author Martyn Gigg, Tessella Support Services plc

@@ -20,7 +20,7 @@ void CorrectToFile::init()
     "The file containing the correction factors");
 
   std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
-  propOptions.push_back("SpectraNumber");
+  propOptions.push_back("SpectrumNumber");
   declareProperty("FirstColumnValue", "Wavelength", new Kernel::ListValidator(propOptions),
     "The units of the first column of the correction file (default wavelength)");
 
@@ -78,13 +78,11 @@ void CorrectToFile::exec()
   const std::string operation = getProperty("WorkspaceOperation");
   const bool divide = (operation == "Divide") ? true : false;
   double Yfactor,Efactor;
-  //double step=0.0;
 
   Progress prg(this,0.0,1.0,outputWS->size());
   MatrixWorkspace::iterator outIt(*outputWS);
   for (MatrixWorkspace::const_iterator inIt(*toCorrect); inIt != inIt.end(); ++inIt,++outIt)
   {
-	// int size=
     const double currentX = histogramData ? (inIt->X()+inIt->X2())/2.0 : inIt->X();
     // Find out the index of the first correction point after this value
     std::vector<double>::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
@@ -124,7 +122,7 @@ void CorrectToFile::exec()
     // Copy X value over
     outIt->X() = inIt->X();
     if (histogramData) outIt->X2() = inIt->X2();
-	prg.report();
+    prg.report();
 
   }
 

@@ -31,7 +31,7 @@ void LoadRKH::init()
   m_unitKeys.insert(propOptions.begin(), propOptions.end());
 
   //Add some others that will make this orient the other way
-  m_RKHKeys.insert("SpectraNumber");
+  m_RKHKeys.insert("SpectrumNumber");
   propOptions.insert(propOptions.end(), m_RKHKeys.begin(), m_RKHKeys.end());
   declareProperty("FirstColumnValue", "Wavelength",
     new Kernel::ListValidator(propOptions),
@@ -128,7 +128,7 @@ void LoadRKH::exec()
     columnOne.push_back(x);
     ydata.push_back(y);
     errdata.push_back(yerr);
-	prog.report();
+    prog.report();
   }
   file.close();
 
@@ -140,28 +140,10 @@ void LoadRKH::exec()
   API::MatrixWorkspace_sptr localworkspace;
   if( colIsUnit )
   {
-    //The data is bin centred and so needs to be adjusted to a histogram format
- //   std::vector<double> xnew(pointsToRead + 1, 0.0);
- //   for( int i = 0; i < pointsToRead; ++i )
- //   {
- //     if( i == 0 )
- //     {
-	//double delta = columnOne[i+1] - columnOne[i];
-	//xnew[i] = columnOne[i] - delta/2.0;
-	//xnew[i + 1] = columnOne[i] + delta/2.0;
- //     }
- //     else
- //     {
-	//double delta = columnOne[i] - xnew[i];
-	//xnew[i + 1] = columnOne[i] + delta;
- //     }
- //   }
-
     localworkspace = 
       WorkspaceFactory::Instance().create("Workspace1D", 1, pointsToRead, pointsToRead);
     localworkspace->getAxis(0)->unit() = UnitFactory::Instance().create(firstColVal);
     localworkspace->dataX(0) = columnOne;
-//    localworkspace->dataX(0) = xnew;
     localworkspace->dataY(0) = ydata;
     localworkspace->dataE(0) = errdata;
   }
@@ -172,7 +154,7 @@ void LoadRKH::exec()
     //Set the appropriate values
     for( int index = 0; index < pointsToRead; ++index )
     {
-      localworkspace->getAxis(1)->spectraNo(index) = (int)columnOne[index];
+      localworkspace->getAxis(1)->spectraNo(index) = static_cast<int>(columnOne[index]);
       localworkspace->dataY(index)[0] = ydata[index];
       localworkspace->dataE(index)[0] = errdata[index];
     }
