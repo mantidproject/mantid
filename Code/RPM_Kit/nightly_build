@@ -29,7 +29,7 @@ cd ~faa59/Mantid
 svn update
 rev=`svnversion -n`
 cd Code/RPM_Kit
-sh make_rpm.sh -r $rev
+env MANTID_BUILD_FLAGS="gcc43=1" sh make_rpm.sh -r $rev
 scp $build_base/SRPMS/Mantid-*.*-0.svnR$rev.*.src.rpm isisupdate@shadow:$yum_base/SRPMS
 scp $build_base/RPMS/x86_64/Mantid-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64
 scp $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64/debug

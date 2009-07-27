@@ -10,7 +10,7 @@ python release_version.py
 #
 sc=`which scons 2>/dev/null`
 if test x$sc = x; then
-    python ../Third_Party/src/scons-local/scons.py $*
+    python ../Third_Party/src/scons-local/scons.py $* $MANTID_BUILD_FLAGS
 else
-    $sc $*
+    $sc $* $MANTID_BUILD_FLAGS
 fi
