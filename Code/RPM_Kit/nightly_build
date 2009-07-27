@@ -12,6 +12,10 @@ function error_found() {
     echo "Subject: RPM build R$rev FAILED" > $MESS
     echo >> $MESS
     echo "Nightly RPM build of svn R$rev FAILED with error code $exit_status - see http://vlinux2.isis.cclrc.ac.uk/buildlog/build.log" >> $MESS
+    echo >> $MESS
+    echo "** Last few lines of build error **" >> $MESS
+    echo >> $MESS
+    tail -20 /var/www/html/buildlog/build.log >> $MESS
     /usr/sbin/sendmail -fRPMBuildServer1@mantidproject.org mantid-buildserver@mantidproject.org < $MESS
     rm -f $MESS
     echo Exiting $0 with $exit_status
