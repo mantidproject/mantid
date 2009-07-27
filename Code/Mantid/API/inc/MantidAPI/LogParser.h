@@ -112,7 +112,7 @@ private:
 };
 
 /// Returns the mean value if the property is TimeSeriesProperty<double>
-double timeMean(const Kernel::Property* p);
+double DLLExport timeMean(const Kernel::Property* p);
 
 
 } // namespace API
