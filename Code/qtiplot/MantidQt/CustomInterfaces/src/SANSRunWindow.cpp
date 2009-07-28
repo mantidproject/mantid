@@ -159,6 +159,9 @@ void SANSRunWindow::readSettings()
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
   m_uiForm.datadir_edit->setText(value_store.value("data_dir").toString());
   m_uiForm.userfile_edit->setText(value_store.value("user_file").toString());
+  
+  m_uiForm.inst_opt->setCurrentIndex(value_store.value("instrument", 0).toInt());
+  m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
   value_store.endGroup();
 
   //The instrument definition directory
@@ -176,8 +179,17 @@ void SANSRunWindow::saveSettings()
 {
   QSettings value_store;
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
-  if( !m_data_dir.isEmpty() ) value_store.setValue("data_dir", m_data_dir);
-  if( !m_uiForm.userfile_edit->text().isEmpty() ) value_store.setValue("user_file", m_uiForm.userfile_edit->text());
+  if( !m_data_dir.isEmpty() ) 
+  {
+    value_store.setValue("data_dir", m_data_dir);
+  }
+  if( !m_uiForm.userfile_edit->text().isEmpty() ) 
+  {
+    value_store.setValue("user_file", m_uiForm.userfile_edit->text());
+  }
+  value_store.setValue("instrument", m_uiForm.inst_opt->currentIndex());
+  value_store.setValue("fileextension", m_uiForm.file_opt->currentIndex());
+  
   value_store.endGroup();
 }
 
@@ -190,7 +202,7 @@ void SANSRunWindow::saveSettings()
 bool SANSRunWindow::readPyReductionTemplate()
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
-  QString reduce_script = scriptsdir.absoluteFilePath("SANS/LOQ_ReduceData.py");
+  QString reduce_script = scriptsdir.absoluteFilePath("SANS/SANSReduction.py");
     
   if( !QFileInfo(reduce_script).exists() ) 
   {
@@ -283,11 +295,12 @@ bool SANSRunWindow::loadUserFile()
   else
   { 
     m_uiForm.monitor_spec->setText("73730");
-    m_uiForm.bank_spec_min->setText("1");
-    m_uiForm.bank_spec_max->setText("36864");
+    m_uiForm.bank_spec_min->setText("36865");
+    m_uiForm.bank_spec_max->setText("73728");
   }
 
   m_uiForm.dist_mod_mon->setText("0.0000");
+  m_uiForm.smpl_offset->setText("0.0");
 
   QTextStream stream(&user_file);
   QString data;
@@ -380,6 +393,7 @@ bool SANSRunWindow::loadUserFile()
   m_cfg_loaded = true;
   m_uiForm.userfileBtn->setText("Reload");
   m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
+  //  m_uiForm.tabWidget->setTabEnabled(1, true);
   return true;
 }
 
@@ -491,7 +505,7 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
   if( m_uiForm.inst_opt->currentIndex() == 1 ) 
   {
     isS2D = true;
-    comp_name = "front-detector";
+    comp_name = "rear-detector";
   }
   boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName(comp_name);
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
@@ -499,20 +513,13 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
     lsda = sample->getPos().distance(comp->getPos());
   }
 
-  g_log.debug() << "Position of " << comp_name << " " << comp->getPos() << "\n";
-  std::vector<int> detsA = workspace_ptr->spectraMap().getDetectors(16386);
-  if( !detsA.empty() )
-  {
-    g_log.debug() << "Position of centre detector " << instr->getDetector(detsA[0])->getPos() << "\n";
-  }
   comp_name = "HAB";
-  if( isS2D ) comp_name = "rear-detector";
+  if( isS2D ) comp_name = "front-detector";
   comp = instr->getComponentByName(comp_name);
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
     lsdb = sample->getPos().distance(comp->getPos());
   }
-  g_log.debug() << "Position of " << comp_name << " " << comp->getPos() << "\n";
   if( lmm < 0.0 ) return;
 
   int monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
@@ -520,6 +527,32 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
   if( dets.empty() ) return;
   Mantid::Geometry::IDetector_sptr detector = instr->getDetector(dets[0]);
   lmm = detector->getDistance(*source);
+
+//   //  dets = workspace_ptr->spectraMap().getDetectors(m_uiForm.bank_spec_min->text().toInt());
+//   g_log.debug() << "main-detector  pos " << instr->getComponentByName("rear-detector")->getPos() << "\n";
+  
+
+//   dets = workspace_ptr->spectraMap().getDetectors(36865);
+//   if( !dets.empty() ) 
+//   {
+//     g_log.debug() << "Spectrum 3 pos " << instr->getDetector(dets[0])->getPos() << "\n";
+//   }
+//  //   dets = workspace_ptr->spectraMap().getDetectors();
+// //   if( !dets.empty() ) 
+// //   {
+// //     g_log.debug() << "Spectrum 8130 pos " << instr->getDetector(dets[0])->getPos() << "\n";
+// //   }
+
+// //   dets = workspace_ptr->spectraMap().getDetectors(8131);
+// //   if( !dets.empty() ) 
+// //   {
+// //     g_log.debug() << "Spectrum 8131 pos " << instr->getDetector(dets[0])->getPos() << "\n";
+// //   }
+//   dets = workspace_ptr->spectraMap().getDetectors(73728);
+//   if( !dets.empty() ) 
+//   {
+//     g_log.debug() << "Spectrum 16386 pos " << instr->getDetector(dets[0])->getPos() << "\n";
+//   }
 }
 
 /**
@@ -865,8 +898,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   QString py_code = m_pycode_loqreduce;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
-  py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
-  py_code.replace("|SPECMAX|", m_uiForm.bank_spec_max->text());
+
+  //  py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
+  //  py_code.replace("|SPECMAX|", m_uiForm.bank_spec_max->text());
 
   py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
   py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
@@ -916,6 +950,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     py_code.replace("|QXYDELTA|", step_prefix  + m_uiForm.qy_dqy->text());
   }
   py_code.replace("|DIRECTFILE|", m_uiForm.direct_file->text());
+  py_code.replace("|SAMPLEZOFFSET|", m_uiForm.smpl_offset->text());
   py_code.replace("|FLATFILE|", m_uiForm.flat_file->text());
   
   py_code.replace("|SCALEFACTOR|", m_uiForm.scale_factor->text());
@@ -923,16 +958,25 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   py_code.replace("|ANALYSISTYPE|", type);
   py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
   
-
-  QFile tmp("LOQ_Code_to_Run.py");
-  if (tmp.open(QIODevice::WriteOnly | QIODevice::Text))
+  QString backmonstart(""), backmonend("");
+  if( m_uiForm.inst_opt->currentText().startsWith("l", Qt::CaseInsensitive) )
   {
-      QTextStream out(&tmp);
-      out << py_code;
-      tmp.close();
+    backmonstart = "31000";
+    backmonend = "39000";
   }
-         
+  else
+  {
+    backmonstart = "85000";
+    backmonend = "100000";
+  }
 
+  py_code.replace("|BACKMONSTART|", backmonstart);
+  py_code.replace("|BACKMONEND|", backmonend);
+
+  py_code.replace("|DETBANK|", "front-detector");
+
+
+  std::cerr << py_code.toStdString() << "\n";
 
   //Execute the code
   runPythonCode(py_code);
@@ -992,13 +1036,16 @@ void SANSRunWindow::handleShowMaskButtonClick()
   // Shape mask if applicable
   QString radius = m_uiForm.rad_min->text();
   if( radius.isEmpty() ) radius = "-1.0";
+  g_log.debug("Min radius " + radius.toStdString());
   py_code.replace("|RADIUSMIN|", radius);
 
   radius = m_uiForm.rad_max->text();
   if( radius.isEmpty() ) radius = "-1.0";
+  g_log.debug("Max radius " + radius.toStdString());
   py_code.replace("|RADIUSMAX|", radius);
-
+  
   //Other masks
+  py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
   py_code.replace("|MASKLIST|", createMaskString());
   runPythonCode(py_code);
 }
@@ -1047,14 +1094,10 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
     return 0;
   }
   g_log.debug("Attempting to load " + filepath.toStdString());
-  bool raw_file(true);
-  if( ext.startsWith('n', Qt::CaseInsensitive) )
-  {
-    raw_file = false;
-  }
+
   Mantid::API::FrameworkManagerImpl & f_mgr = Mantid::API::FrameworkManager::Instance();
   Mantid::API::IAlgorithm *loader(NULL);
-  if( raw_file )
+  if( ext == ".raw" )
   {
     loader = f_mgr.createAlgorithm("LoadRaw");
   }

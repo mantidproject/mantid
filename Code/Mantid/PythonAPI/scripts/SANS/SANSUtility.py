@@ -1,15 +1,15 @@
-##############################################
-# This module contains utility functions
-# common to the LOQ scripts
-##############################################
+#########################################################
+# This module contains utility functions common to the 
+# SANS data reduction scripts
+########################################################
 from mantidsimple import *
 import math
 
 # Mask a cylinder, specifying the algebra to use
-def MaskWithCylinder(workspace, radius, algebra):
+def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     '''Mask a cylinder on the input workspace.'''
     xmldef = "<infinite-cylinder id='shape'> "
-    xmldef += "<centre x='0.0' y='0.0' z='0.0' /> " 
+    xmldef += "<centre x=" + xcentre + "y=" + ycentre + "z='0.0' /> " 
     xmldef += "<axis x='0.0' y='0.0' z='1' /> "
     xmldef += "<radius val='"+str(radius)+"' /> "
     xmldef += "</infinite-cylinder> "
@@ -18,14 +18,14 @@ def MaskWithCylinder(workspace, radius, algebra):
     MaskDetectorsInShape(workspace,xmldef)
 
 # Mask the inside of a cylinder
-def MaskInsideCylinder(workspace, radius):
+def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
     '''Mask out the inside of a cylinder or specified radius'''
-    MaskWithCylinder(workspace, radius, '')
+    MaskWithCylinder(workspace, radius, xcentre, ycentre, '')
 
 # Mask the outside of a cylinder
-def MaskOutsideCylinder(workspace, radius):
+def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
     '''Mask out the outside of a cylinder or specified radius'''
-    MaskWithCylinder(workspace, radius, '#')
+    MaskWithCylinder(workspace, radius, xcentre, ycentre, '#')
 
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(start_spec, ydim, xdim, strip_dim):
@@ -40,6 +40,8 @@ def spectrumBlock(start_spec, ydim, xdim, strip_dim):
 # Convert a mask string to a spectra list
 def ConvertToSpecList(maskstring, firstspec, dimension):
     '''Compile spectra ID list'''
+    if maskstring == '':
+        return ''
     masklist = maskstring.split(',')
     speclist = ''
     for x in masklist:
@@ -71,18 +73,9 @@ def ConvertToSpecList(maskstring, firstspec, dimension):
 def MaskBySpecNumber(workspace, speclist):
     speclist = speclist.rstrip(',')
     if speclist == '':
-        return
+        return ''
     MaskDetectors(workspace, SpectraList = speclist)
 
-
-# Setup the transmission data
-def SetupTransmissionData(inputWS, spec_list, fitmon_start, fitmon_end, backmon_start, backmon_end, wavbining):
-    tmpWS = inputWS + '_tmp'
-    RemoveBins(inputWS,tmpWS, fitmon_start, fitmon_end,Interpolation="Linear")
-    FlatBackground(tmpWS,tmpWS, spec_list, backmon_start, backmon_end)
-    ConvertUnits(tmpWS,tmpWS,"Wavelength")
-    Rebin(tmpWS, tmpWS, wavbining)
-    return tmpWS
 
 # Correct of for the volume of the sample/can
 def ScaleByVolume(inputWS, factor):
