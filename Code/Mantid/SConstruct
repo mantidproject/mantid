@@ -261,11 +261,11 @@ if os.name != 'nt':
   print 'LINKFLAGS: ',lpts
   env.Append(LINKFLAGS=lpts)
 
-  
-if int(win64):
-  lpts.append('/MACHINE:X64')
-  env.Append(LINKFLAGS=lpts)
-  print 'LINKFLAGS: ',lpts
+else: 
+  if int(win64):
+    lpts.append('/MACHINE:X64')
+    env.Append(LINKFLAGS=lpts)
+    print 'LINKFLAGS: ',lpts
   
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
