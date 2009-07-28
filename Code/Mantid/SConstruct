@@ -64,6 +64,7 @@ poco_path = ''
 third_party = os.path.abspath('../Third_Party/')
 opencascade_path = ''
 python_path = ''
+win64 = ''
 
 #Get paths
 if os.name == 'nt': 
@@ -76,7 +77,16 @@ if os.name == 'nt':
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
 	libDirList.append(python_path + '/libs/')
-	libDirList.append(third_party + '/lib/win32/')
+	
+	win64=ARGUMENTS.get('win64',0)
+	
+	if not int(win64):
+		libDirList.append(third_party + '/lib/win32/')
+	else:
+		print "* Building for 64bit Windows *"
+		libDirList.append(third_party + '/lib/win64/')
+		
+	
 	libList.append('python25')
 	libList.append('libNeXus-0')
 
@@ -250,6 +260,13 @@ if os.name != 'nt':
     lpts.append('-Wl,-rpath,./Bin/Shared')
   print 'LINKFLAGS: ',lpts
   env.Append(LINKFLAGS=lpts)
+
+  
+if int(win64):
+  lpts.append('/MACHINE:X64')
+  env.Append(LINKFLAGS=lpts)
+  print 'LINKFLAGS: ',lpts
+  
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
 env.Append(CPPPATH=cppPaths)
