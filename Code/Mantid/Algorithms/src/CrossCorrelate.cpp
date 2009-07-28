@@ -31,8 +31,8 @@ namespace Mantid
       // Reference spectra against which cross correlation is performed
       declareProperty("ReferenceSpectra",0, mustBePositive);
       // Spectra in the range [min to max] will be cross correlated to reference.
-      declareProperty("SpectraMin",0, mustBePositive->clone());
-      declareProperty("SpectraMax",0, mustBePositive->clone());
+      declareProperty("WorkspaceIndexMin",0, mustBePositive->clone());
+      declareProperty("WorkspaceIndexMax",0, mustBePositive->clone());
       // Only the data in the range X_min, X_max will be used
       declareProperty("XMin",0.0);
       declareProperty("XMax",0.0);
@@ -84,8 +84,8 @@ void CrossCorrelate::exec()
 
    	// Now loop on the spectra in the range spectra_min and spectra_max and get valid spectra
 
-   	int specmin=getProperty("SpectraMin");
-   	int specmax=getProperty("SpectraMax");
+   	int specmin=getProperty("WorkspaceIndexMin");
+   	int specmax=getProperty("WorkspaceIndexMax");
    	// Get the number of spectra in range specmin to specmax
    	int nspecs=0;
    	std::vector<int> indexes; // Indexes of all spectra in range
@@ -101,12 +101,12 @@ void CrossCorrelate::exec()
 
 	if (nspecs==0) // Throw if no spectra in range
 	{
-		mess<< "No spectra in range between" << specmin << " and " << specmax;
+		mess<< "No Workspaces in range between" << specmin << " and " << specmax;
 		throw std::runtime_error(mess.str());
 	}
 
 	// Output message information
-	mess << "There are " << nspecs << " spectra in the range" << std::endl;
+	mess << "There are " << nspecs << " Workspaces in the range" << std::endl;
 	g_log.information(mess.str());
 	mess.str("");
 

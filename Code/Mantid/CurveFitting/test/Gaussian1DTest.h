@@ -62,7 +62,7 @@ public:
 
     // Set which spectrum to fit against and initial starting values
     alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("SpectrumIndex","2");
+    alg.setPropertyValue("WorkspaceIndex","2");
     alg.setPropertyValue("BG0", "-2000.0");
     alg.setPropertyValue("Height", "8000.0");
     alg.setPropertyValue("PeakCentre", "10000.0");
@@ -152,7 +152,7 @@ public:
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("SpectrumIndex","1");
+    alg2.setPropertyValue("WorkspaceIndex","1");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
     alg2.setPropertyValue("BG0", "3.0");
@@ -203,7 +203,7 @@ public:
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("SpectrumIndex","1");
+    alg2.setPropertyValue("WorkspaceIndex","1");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
     alg2.setPropertyValue("BG0", "3.0");
@@ -254,7 +254,7 @@ public:
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("SpectrumIndex","1");
+    alg2.setPropertyValue("WorkspaceIndex","1");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
     alg2.setPropertyValue("BG0", "3.0");

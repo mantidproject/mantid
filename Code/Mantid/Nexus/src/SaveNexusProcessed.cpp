@@ -57,13 +57,13 @@ namespace NeXus
       "A title to describe the saved workspace");
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("SpectrumMin", 0, mustBePositive->clone(), 
+    declareProperty("WorkspaceIndexMin", 0, mustBePositive->clone(), 
       "Index number of first spectrum to read, only for single\n"
       "period data. Not yet implemented");
-    declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
+    declareProperty("WorkspaceIndexMax", unSetInt, mustBePositive->clone(),
       "Index of last spectrum to read, only for single period\n"
       "data. Not yet implemented");
-    declareProperty(new ArrayProperty<int>("SpectrumList"),
+    declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
       "List of spectrum numbers to read, only for single period\n"
       "data. Not yet implemented");
     //declareProperty("EntryNumber", 0, mustBePositive);
@@ -87,8 +87,8 @@ namespace NeXus
     if (m_title.empty()) m_title = m_inputWorkspace->getTitle();
     m_bAppend=getProperty("Append");
 
-    m_spec_list = getProperty("SpectrumList");
-    m_spec_max = getProperty("SpectrumMax");
+    m_spec_list = getProperty("WorkspaceIndexList");
+    m_spec_max = getProperty("WorkspaceIndexMax");
     m_list = !m_spec_list.empty();
     m_interval = (m_spec_max != unSetInt);
     if ( m_spec_max == unSetInt ) m_spec_max = 0;
@@ -161,11 +161,11 @@ namespace NeXus
     std::vector<int> spec;
     if( m_interval )
     {
-      m_spec_min = getProperty("SpectrumMin");
-      m_spec_max = getProperty("SpectrumMax");
+      m_spec_min = getProperty("WorkspaceIndexMin");
+      m_spec_max = getProperty("WorkspaceIndexMax");
       if ( m_spec_max < m_spec_min || m_spec_max > numberOfHist-1 )
       {
-        g_log.error("Invalid Spectrum min/max properties");
+        g_log.error("Invalid WorkspaceIndex min/max properties");
         throw std::invalid_argument("Inconsistent properties defined");
       }
       for(int i=m_spec_min;i<=m_spec_max;i++)

@@ -44,7 +44,7 @@ public:
 
     // Set the properties
     alg.setPropertyValue("InputWorkspace",outputSpace);
-    alg.setPropertyValue("SpectrumIndex","2");
+    alg.setPropertyValue("WorkspaceIndex","2");
     alg.setPropertyValue("StartX","79280"); 
     alg.setPropertyValue("EndX","79615");   
 

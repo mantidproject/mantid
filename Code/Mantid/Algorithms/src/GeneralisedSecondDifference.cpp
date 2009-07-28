@@ -49,9 +49,9 @@ namespace Mantid
         "range [y(i-m),y(i+m)]");
       declareProperty("Z",0,mustBePositive,
         "The number of iteration steps in the averaging procedure" );
-      declareProperty("SpectraMin",0,mustBePositive->clone(),
+      declareProperty("WorkspaceIndexMin",0,mustBePositive->clone(),
         "Lower bound of the spectrum range (default 0)");
-      declareProperty("SpectraMax",0,mustBePositive->clone(),
+      declareProperty("WorkspaceIndexMax",0,mustBePositive->clone(),
         "Upper bound of the spectrum range (default workspace max)");
      }
 
@@ -66,8 +66,8 @@ void GeneralisedSecondDifference::exec()
 
 	// Get some properties
   	MatrixWorkspace_const_sptr inputWS=getProperty("InputWorkspace");
-  	int spec_min=getProperty("SpectraMin");
-  	int spec_max=getProperty("SpectraMax");
+  	int spec_min=getProperty("WorkspaceIndexMin");
+  	int spec_max=getProperty("WorkspaceIndexMax");
   	int n_hists=inputWS->getNumberHistograms();
 
   	if (spec_min==0 && spec_max==0) // Values per default, take all spectra
@@ -78,7 +78,7 @@ void GeneralisedSecondDifference::exec()
 
 	if (spec_max>n_hists)
 	{
-		message << "SpectraMax "<< spec_max << " > number of histograms, SpectraMax reset to "<< (n_hists-1);
+		message << "WorkspaceIndexMax "<< spec_max << " > number of histograms, WorkspaceIndexMax reset to "<< (n_hists-1);
 		g_log.information(message.str());
 		message.str("");
 		spec_max=n_hists-1;

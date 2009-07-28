@@ -35,12 +35,12 @@ void SumSpectra::init()
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartSpectrum",0, mustBePositive,
-    "The first spectra index to be included in the summing (default 0)" );
+  declareProperty("StartWorkspaceIndex",0, mustBePositive,
+    "The first Workspace index to be included in the summing (default 0)" );
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndSpectrum",0, mustBePositive->clone(),
-    "The last spectra index to be included in the summing (default\n"
+  declareProperty("EndWorkspaceIndex",0, mustBePositive->clone(),
+    "The last Workspace index to be included in the summing (default\n"
     "highest index)" );
 }
 
@@ -51,8 +51,8 @@ void SumSpectra::init()
 void SumSpectra::exec()
 {
   // Try and retrieve the optional properties
-  m_MinSpec = getProperty("StartSpectrum");
-  m_MaxSpec = getProperty("EndSpectrum");
+  m_MinSpec = getProperty("StartWorkspaceIndex");
+  m_MaxSpec = getProperty("EndWorkspaceIndex");
 
   // Get the input workspace
   Workspace2D_const_sptr localworkspace = getProperty("InputWorkspace");
@@ -62,13 +62,13 @@ void SumSpectra::exec()
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_MinSpec > numberOfSpectra )
   {
-    g_log.warning("StartSpectrum out of range! Set to 0.");
+    g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
     m_MinSpec = 0;
   }
   if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
   if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
   {
-    g_log.warning("EndSpectrum out of range! Set to max spectrum number");
+    g_log.warning("EndWorkspaceIndex out of range! Set to max Workspace Index");
     m_MaxSpec = numberOfSpectra;
   }
 

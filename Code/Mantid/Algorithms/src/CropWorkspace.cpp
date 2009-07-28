@@ -37,14 +37,14 @@ void CropWorkspace::init()
     "An X value that is in the highest X value bin to be retained (default: max X)");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartSpectrum",0, mustBePositive,
-    "The index number of the first spectrum in that will be loaded\n"
-    "(default: first spectrum)");
+  declareProperty("StartWorkspaceIndex",0, mustBePositive,
+    "The index number of the first entry in the Workspace that will be loaded\n"
+    "(default: first entry in the Workspace)");
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndSpectrum", EMPTY_INT(), mustBePositive->clone(),
-    "The index number of the last spectrum that will be loaded\n"
-    "(default: last spectrum)");
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive->clone(),
+    "The index number of the last entry in the Workspace to be loaded\n"
+    "(default: last entry in the Workspace)");
 }
 
 /** Executes the algorithm
@@ -145,26 +145,26 @@ void CropWorkspace::checkProperties()
     }
   }
 
-  m_minSpec = getProperty("StartSpectrum");
+  m_minSpec = getProperty("StartWorkspaceIndex");
   const int numberOfSpectra = m_inputWorkspace->getNumberHistograms();
-  m_maxSpec = getProperty("EndSpectrum");
+  m_maxSpec = getProperty("EndWorkspaceIndex");
   if ( isEmpty(m_maxSpec) ) m_maxSpec = numberOfSpectra-1;
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_minSpec > numberOfSpectra-1 )
   {
-    g_log.error("StartSpectrum out of range!");
+    g_log.error("StartWorkspaceIndex out of range!");
     throw std::out_of_range("StartSpectrum out of range!");
   }
   if ( m_maxSpec > numberOfSpectra-1 )
   {
     g_log.error("EndSpectrum out of range!");
-    throw std::out_of_range("EndSpectrum out of range!");
+    throw std::out_of_range("EndWorkspaceIndex out of range!");
   }
   if ( m_maxSpec < m_minSpec )
   {
-    g_log.error("StartSpectrum must be less than or equal to EndSpectrum");
-    throw std::out_of_range("StartSpectrum must be less than or equal to EndSpectrum");
+    g_log.error("StartWorkspaceIndex must be less than or equal to EndWorkspaceIndex");
+    throw std::out_of_range("StartWorkspaceIndex must be less than or equal to EndWorkspaceIndex");
   }
 }
 

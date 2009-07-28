@@ -88,7 +88,7 @@ public:
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("SpectrumIndex","1");
+    alg2.setPropertyValue("WorkspaceIndex","1");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
     alg2.setPropertyValue("BG0", "2.0");

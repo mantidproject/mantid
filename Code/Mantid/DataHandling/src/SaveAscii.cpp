@@ -37,8 +37,8 @@ namespace Mantid
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
-      declareProperty("SpectrumMin", 1, mustBePositive);
-      declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
+      declareProperty("WorkspaceIndexMin", 1, mustBePositive);
+      declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive->clone());
       declareProperty(new ArrayProperty<int>("SpectrumList"));
       declareProperty("Precision", EMPTY_INT(), mustBePositive->clone());
     }
@@ -55,8 +55,8 @@ namespace Mantid
 
         // Get the properties
         std::vector<int> spec_list = getProperty("SpectrumList");
-        int spec_min = getProperty("SpectrumMin");
-        int spec_max = getProperty("SpectrumMax");
+        int spec_min = getProperty("WorkspaceIndexMin");
+        int spec_max = getProperty("WorkspaceIndexMax");
 
         // Create an spectra index list for output
         std::set<int> idx;

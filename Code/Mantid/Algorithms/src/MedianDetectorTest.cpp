@@ -55,11 +55,11 @@ void MedianDetectorTest::init()
         "(default 100.0)" );*/
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
   mustBePosInt->setLower(0);
-  declareProperty("StartSpectrum", 0, mustBePosInt,
+  declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
     "The index number of the first spectrum to include in the calculation\n"
     "(default 0)" );
   //UNSETINT and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
-  declareProperty("EndSpectrum", UNSETINT, mustBePosInt->clone(),
+  declareProperty("EndWorkspaceIndex", UNSETINT, mustBePosInt->clone(),
     "The index number of the last spectrum to include in the calculation\n"
     "(default the last histogram)" );
   declareProperty("RangeLower", EMPTY_DBL(),
@@ -133,13 +133,13 @@ void MedianDetectorTest::retrieveProperties()
       "Precision warning: Detector masking map can't be found, assuming that no detectors have been previously marked unreliable in this workspace");
   }
 
-  m_MinSpec = getProperty("StartSpectrum");
+  m_MinSpec = getProperty("StartWorkspaceIndex");
   if ( (m_MinSpec < 0) || (m_MinSpec > maxSpecIndex) )
   {
     g_log.warning("StartSpectrum out of range, changed to 0");
     m_MinSpec = 0;
   }
-  m_MaxSpec = getProperty("EndSpectrum");
+  m_MaxSpec = getProperty("EndWorkspaceIndex");
   if (m_MaxSpec == UNSETINT) m_MaxSpec = maxSpecIndex;
   if ( (m_MaxSpec < 0) || (m_MaxSpec > maxSpecIndex ) )
   {
@@ -175,8 +175,8 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(
   double t0 = m_PercentDone, t1 = advanceProgress(RTGetSolidAngle);
   IAlgorithm_sptr childAlg = createSubAlgorithm("SolidAngle", t0, t1);
   childAlg->setProperty( "InputWorkspace", input );
-  childAlg->setProperty( "StartSpectrum", firstSpec );
-  childAlg->setProperty( "EndSpectrum", lastSpec );
+  childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
+  childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
   try
   {
   // Execute the sub-algorithm, it could throw a runtime_error at this point which would abort execution
@@ -218,8 +218,8 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
   
   childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", input );
-  childAlg->setProperty( "StartSpectrum", firstSpec );
-  childAlg->setProperty( "EndSpectrum", lastSpec );
+  childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
+  childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
   // pass inputed values straight to this integration, checking must be done there
   childAlg->setPropertyValue( "RangeLower",  getPropertyValue("RangeLower") );
   childAlg->setPropertyValue( "RangeUpper", getPropertyValue("RangeUpper") );

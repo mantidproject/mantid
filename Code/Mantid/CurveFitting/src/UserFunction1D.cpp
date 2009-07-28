@@ -142,7 +142,7 @@ void UserFunction1D::finalize()
 
     // Save the fitted and simulated spectra in the output workspace
     MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-    int iSpec = getProperty("SpectrumIndex");
+    int iSpec = getProperty("WorkspaceIndex");
     const std::vector<double>& inputX = inputWorkspace->readX(iSpec);
     const std::vector<double>& inputY = inputWorkspace->readY(iSpec);
 

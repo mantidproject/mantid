@@ -30,10 +30,10 @@ void SimpleIntegration::init()
   declareProperty("RangeUpper",EMPTY_DBL());
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartSpectrum",0, mustBePositive);
+  declareProperty("StartWorkspaceIndex",0, mustBePositive);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndSpectrum",0, mustBePositive->clone());
+  declareProperty("EndWorkspaceIndex",0, mustBePositive->clone());
 }
 
 /** Executes the algorithm
@@ -45,8 +45,11 @@ void SimpleIntegration::exec()
   // Try and retrieve the optional properties
   m_MinRange = getProperty("RangeLower");
   m_MaxRange = getProperty("RangeUpper");
-  m_MinSpec = getProperty("StartSpectrum");
-  m_MaxSpec = getProperty("EndSpectrum");
+  //m_MinSpec = getProperty("StartSpectrum");
+  //m_MaxSpec = getProperty("EndSpectrum");
+  m_MinSpec = getProperty("StartWorkspaceIndex");
+  m_MaxSpec = getProperty("EndWorkspaceIndex");
+
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");

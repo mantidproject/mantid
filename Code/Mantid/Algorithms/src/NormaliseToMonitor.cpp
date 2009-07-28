@@ -202,7 +202,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::Matrix
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum");
   DataObjects::Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(WS);
   childAlg->setProperty<Workspace2D_sptr>("InputWorkspace", input2D);
-  childAlg->setProperty<int>("SpectrumIndex", index);
+  childAlg->setProperty<int>("WorkspaceIndex", index);
 
   // Now execute the sub-algorithm. Catch and log any error
   try

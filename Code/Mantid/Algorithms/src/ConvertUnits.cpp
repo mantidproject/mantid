@@ -356,7 +356,7 @@ API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr work
   // Create a Rebin child algorithm
   IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
-  childAlg->setProperty<std::vector<double> >("params",this->calculateRebinParams(workspace));
+  childAlg->setProperty<std::vector<double> >("Params",this->calculateRebinParams(workspace));
 
   // Now execute the sub-algorithm. Catch and log any error
   try

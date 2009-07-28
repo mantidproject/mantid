@@ -46,12 +46,12 @@ namespace Mantid
 
 			BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
 			mustBePositive->setLower(0);
-			declareProperty("StartSpectrum",0, mustBePositive,
-        "The index number of the first spectrum to use (default 0)" );
+			declareProperty("StartWorkspaceIndex",0, mustBePositive,
+        "The index number of the first Workspace to use (default 0)" );
 			// As the property takes ownership of the validator pointer, have to take care to pass in a unique
 			// pointer to each property.
-			declareProperty("EndSpectrum",0, mustBePositive->clone(),
-        "The index number of the last spectrum to use (default 0)");
+			declareProperty("EndWorkspaceIndex",0, mustBePositive->clone(),
+        "The index number of the last Workspace to use (default 0)");
 		}
 
 		/** Executes the algorithm
@@ -60,21 +60,21 @@ namespace Mantid
 		{
 			// Get the workspaces
 			API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");	
-			int m_MinSpec = getProperty("StartSpectrum");
-			int m_MaxSpec = getProperty("EndSpectrum");
+			int m_MinSpec = getProperty("StartWorkspaceIndex");
+			int m_MaxSpec = getProperty("EndWorkspaceIndex");
 
 			const int numberOfSpectra = inputWS->getNumberHistograms();
 
 			// Check 'StartSpectrum' is in range 0-numberOfSpectra
 			if ( m_MinSpec > numberOfSpectra )
 			{
-				g_log.warning("StartSpectrum out of range! Set to 0.");
+				g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
 				m_MinSpec = 0;
 			}
 			if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
 			if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
 			{
-				g_log.warning("EndSpectrum out of range! Set to max detector number");
+				g_log.warning("EndWorkspaceIndex out of range! Set to max detector number");
 				m_MaxSpec = numberOfSpectra-1;
 			}
 

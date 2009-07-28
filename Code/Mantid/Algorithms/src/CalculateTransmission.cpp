@@ -137,8 +137,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Wo
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.1);
   childAlg->setProperty<Workspace2D_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("SpectrumIndex", index);
-
+  childAlg->setProperty<int>("WorkspaceIndex", index);
   // Now execute the sub-algorithm. Catch and log any error
   try
   {

@@ -380,7 +380,7 @@ API::MatrixWorkspace_sptr Unwrap::rebin(const API::MatrixWorkspace_sptr& workspa
   paramArray.push_back(min);
   paramArray.push_back(step);
   paramArray.push_back(max);
-  childAlg->setProperty<std::vector<double> >("params",paramArray);
+  childAlg->setProperty<std::vector<double> >("Params",paramArray);
   g_log.debug() << "Rebinning unwrapped data into " << numBins << " bins of width " << step
                 << " Angstroms, running from " << min << " to " << max << std::endl;
 

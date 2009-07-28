@@ -45,7 +45,7 @@ namespace Mantid
     void RebinPreserveValue::exec()
     {
       // retrieve the properties
-      std::vector<double> rb_params=getProperty("params");
+      std::vector<double> rb_params=getProperty("Params");
 
       // Get the input workspace
       MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");

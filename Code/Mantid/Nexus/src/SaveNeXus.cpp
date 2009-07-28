@@ -64,14 +64,14 @@ void SaveNexus::init()
   // declareProperty("EntryNumber", unSetInt, mustBePositive,
   //  "(Not implemented yet) The index number of the workspace within the Nexus file\n"
   // "(default leave unchanged)" );
-  declareProperty("SpectrumMin", 0, mustBePositive->clone(),
-      "Number of first spectrum to read, only for single period data.\n"
+  declareProperty("WorkspaceIndexMin", 0, mustBePositive->clone(),
+      "Number of first WorkspaceIndex to read, only for single period data.\n"
         "Not yet implemented");
-  declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
-      "Number of last spectrum to read, only for single period data.\n"
+  declareProperty("WorkspaceIndexMax", unSetInt, mustBePositive->clone(),
+      "Number of last WorkspaceIndex to read, only for single period data.\n"
         "Not yet implemented.");
-  declareProperty(new ArrayProperty<int> ("SpectrumList"),
-      "List of spectrum numbers to read, only for single period data.\n"
+  declareProperty(new ArrayProperty<int> ("WorkspaceIndexList"),
+      "List of WorkspaceIndex numbers to read, only for single period data.\n"
         "Not yet implemented");
   declareProperty("Append", false, "Determines whether .nxs file needs to be\n"
     "over written or appended");
@@ -134,15 +134,15 @@ void SaveNexus::runSaveNexusProcessed()
   std::string inputWorkspace = "inputWorkspace";
   saveNexusPro->setPropertyValue(inputWorkspace, m_inputWorkspace);
   //
-  std::vector<int> specList = getProperty("SpectrumList");
+  std::vector<int> specList = getProperty("WorkspaceIndexList");
   if (!specList.empty())
-    saveNexusPro->setPropertyValue("SpectrumList", getPropertyValue("SpectrumList"));
+    saveNexusPro->setPropertyValue("WorkspaceIndexList", getPropertyValue("WorkspaceIndexList"));
   //
-  int specMax = getProperty("SpectrumMax");
+  int specMax = getProperty("WorkspaceIndexMax");
   if (specMax != unSetInt)
   {
-    saveNexusPro->setPropertyValue("SpectrumMax", getPropertyValue("SpectrumMax"));
-    saveNexusPro->setPropertyValue("SpectrumMin", getPropertyValue("SpectrumMin"));
+    saveNexusPro->setPropertyValue("WorkspaceIndexMax", getPropertyValue("WorkspaceIndexMax"));
+    saveNexusPro->setPropertyValue("WorkspaceIndexMin", getPropertyValue("WorkspaceIndexMin"));
   }
   std::string title = getProperty("Title");
   if (!title.empty())

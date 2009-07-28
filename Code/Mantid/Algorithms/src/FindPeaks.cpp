@@ -352,7 +352,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
     throw;
   }
   fit->setProperty("InputWorkspace",input);
-  fit->setProperty("SpectrumIndex",spectrum);
+  fit->setProperty("WorkspaceIndex",spectrum);
 
   const std::vector<double> &X = input->readX(spectrum);
   const std::vector<double> &Y = input->readY(spectrum);

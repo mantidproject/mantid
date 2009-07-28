@@ -21,7 +21,7 @@ void FlatBackground::init()
     "Name of the input workspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output ),
     "Name to use for the output workspace.");
-  declareProperty(new ArrayProperty<int>("SpectrumIndexList", new MandatoryValidator<std::vector<int> > ),
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList", new MandatoryValidator<std::vector<int> > ),
     "Indices of the spectra that will have their background removed");
   MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
   declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
@@ -45,7 +45,7 @@ void FlatBackground::exec()
   const int numHists = inputWS->getNumberHistograms();
   const int blocksize = inputWS->blocksize();
  // Get the spectra under consideration
-  const std::vector<int> toFit = getProperty("SpectrumIndexList");
+  const std::vector<int> toFit = getProperty("WorkspaceIndexList");
  // Initialise the progress reporting object
   m_progress = new Progress(this,0.0,0.3,numHists); 
   PARALLEL_FOR2(inputWS,outputWS)
@@ -121,7 +121,7 @@ double FlatBackground::doFit(API::MatrixWorkspace_sptr WS, int spectrum, double 
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("Linear");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("SpectrumIndex",spectrum);
+  childAlg->setProperty<int>("WorkspaceIndex",spectrum);
   childAlg->setProperty<double>("StartX",startX);
   childAlg->setProperty<double>("EndX",endX);
 

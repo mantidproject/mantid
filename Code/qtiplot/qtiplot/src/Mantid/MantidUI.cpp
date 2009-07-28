@@ -1759,7 +1759,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 {
     Graph* g = ml->activeGraph();
     g->setTitle(tr("Workspace ")+Name);
-    g->setXAxisTitle(tr("Spectrum"));
+    g->setXAxisTitle(tr("WorkspaceIndex"));
     g->setYAxisTitle(tr(workspace->YUnit().c_str()));
     g->setAntialiasing(false);
 }

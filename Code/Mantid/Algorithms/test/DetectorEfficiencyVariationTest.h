@@ -106,7 +106,7 @@ public:
       TS_ASSERT( runInit(alg) ) )
 
     const int fSpec = Nhist/2;
-    alg.setProperty( "StartSpectrum", fSpec );
+    alg.setProperty( "StartWorkspaceIndex", fSpec );
     //a couple of random numbers in the range
     const double lRange = 4000, uRange = 10000;
     alg.setProperty( "RangeLower", lRange );

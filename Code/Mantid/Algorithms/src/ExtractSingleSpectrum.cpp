@@ -24,7 +24,7 @@ void ExtractSingleSpectrum::init()
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);  
-  declareProperty("SpectrumIndex",-1,mustBePositive);
+  declareProperty("WorkspaceIndex",-1,mustBePositive);
 }
 
 void ExtractSingleSpectrum::exec()
@@ -32,10 +32,10 @@ void ExtractSingleSpectrum::exec()
   // Get hold of the input workspace
   Workspace2D_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Get the desired spectrum number and check it's in range
-  const int desiredSpectrum = getProperty("SpectrumIndex");
+  const int desiredSpectrum = getProperty("WorkspaceIndex");
   if ( desiredSpectrum >= inputWorkspace->getNumberHistograms() )
   {
-    g_log.error("SpectrumIndex is greater than the number of spectra in this workspace.");
+    g_log.error("WorkspaceIndex is greater than the number of entries in this workspace.");
     throw Exception::IndexError(desiredSpectrum,inputWorkspace->getNumberHistograms(),this->name());
   }
 

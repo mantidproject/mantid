@@ -211,8 +211,8 @@ void Fit1D::init()
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumIndex",0, mustBePositive,
-    "The spectrum to fit, uses the workspace numbering of the spectra (default 0)");
+  declareProperty("WorkspaceIndex",0, mustBePositive,
+    "The Workspace to fit, uses the workspace numbering of the spectra (default 0)");
   declareProperty("StartX", EMPTY_DBL(),
     "A value of x in, or on the low x boundary of, the first bin to include in\n"
     "the fit (default lowest value of x)" );
@@ -274,7 +274,7 @@ void Fit1D::exec()
   }
 
   // Try to retrieve optional properties
-  int histNumber = getProperty("SpectrumIndex");
+  int histNumber = getProperty("WorkspaceIndex");
   const int maxInterations = getProperty("MaxIterations");
 
   // Get the input workspace
@@ -285,7 +285,7 @@ void Fit1D::exec()
   // Check that the index given is valid
   if ( histNumber >= numberOfSpectra )
   {
-    g_log.warning("Invalid spectrum index given, using first spectrum");
+    g_log.warning("Invalid Workspace index given, using first Workspace");
     histNumber = 0;
   }
 

@@ -60,7 +60,7 @@ public:
     
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("InputWorkspace","flatBG") )
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("OutputWorkspace","Removed") )
-    TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("SpectrumIndexList","0") )
+    TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("WorkspaceIndexList","0") )
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("StartX","9.5") )
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("EndX","20.5") )
 

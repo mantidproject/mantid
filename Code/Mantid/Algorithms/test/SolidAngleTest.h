@@ -129,8 +129,8 @@ public:
     if ( !alg.isInitialized() ) alg.initialize();
     alg.setPropertyValue("InputWorkspace",inputSpace);
     alg.setPropertyValue("OutputWorkspace",outputSpace);
-    alg.setPropertyValue("StartSpectrum","50");
-    alg.setPropertyValue("EndSpectrum","59");
+    alg.setPropertyValue("StartWorkspaceIndex","50");
+    alg.setPropertyValue("EndWorkspaceIndex","59");
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 

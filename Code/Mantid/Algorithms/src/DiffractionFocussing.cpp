@@ -209,7 +209,7 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
 
   API::IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
-  childAlg->setProperty<std::vector<double> >("params",paramArray);
+  childAlg->setProperty<std::vector<double> >("Params",paramArray);
   childAlg->addObserver(m_childProgressObserver);
 
   // Now execute the sub-algorithm. Catch and log any error

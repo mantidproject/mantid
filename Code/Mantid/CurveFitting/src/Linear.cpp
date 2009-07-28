@@ -29,8 +29,8 @@ void Linear::init()
 
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("SpectrumIndex",0, mustBePositive,
-    "Index number of the spectrum to fit");
+  declareProperty("WorkspaceIndex",0, mustBePositive,
+    "Index number of the Workspace to fit");
   declareProperty("StartX", EMPTY_DBL(),
     "An X value in the first bin to include in the fit (default\n"
     "lowest value of X)");
@@ -58,12 +58,12 @@ void Linear::exec()
   // Get the input workspace
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Get the spectrum to fit
-  const int histNumber = getProperty("SpectrumIndex");
+  const int histNumber = getProperty("WorkspaceIndex");
   // Check validity
   if ( histNumber >= inputWorkspace->getNumberHistograms() )
   {
-    g_log.error() << "SpectrumIndex set to an invalid value of " << histNumber << std::endl;
-    throw Exception::IndexError(histNumber,inputWorkspace->getNumberHistograms(),"Linear SpectrumIndex property");
+    g_log.error() << "WorkspaceIndex set to an invalid value of " << histNumber << std::endl;
+    throw Exception::IndexError(histNumber,inputWorkspace->getNumberHistograms(),"Linear WorkspaceIndex property");
   }
 
   // Get references to the data in the chosen spectrum

@@ -54,11 +54,11 @@ void DetectorEfficiencyVariation::init()
 
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
   mustBePosInt->setLower(0);
-  declareProperty("StartSpectrum", 0, mustBePosInt,
-    "The index number of the first spectrum to include in the calculation\n"
+  declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
+    "The index number of the first entry in the Workspace to include in the calculation\n"
     "(default: 0)" );
-  declareProperty("EndSpectrum", UNSETINT, mustBePosInt->clone(),
-    "The index number of the last spectrum to include in the calculation\n"
+  declareProperty("EndWorkspaceIndex", UNSETINT, mustBePosInt->clone(),
+    "The index number of the last entry in the Workspace  to include in the calculation\n"
     "(default: the last spectrum in the workspace)" );
   declareProperty("RangeLower", EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be included\n"
@@ -151,22 +151,22 @@ void DetectorEfficiencyVariation::retrieveProperties(
 
   vari = getProperty("Variation");
   
-  minSpec = getProperty("StartSpectrum");
+  minSpec = getProperty("StartWorkspaceIndex");
   if ( (minSpec < 0) || (minSpec > maxSpecIndex) )
   {
-    g_log.warning("StartSpectrum out of range, changed to 0");
+    g_log.warning("StartWorkspaceIndex out of range, changed to 0");
     minSpec = 0;
   }
-  maxSpec = getProperty("EndSpectrum");
+  maxSpec = getProperty("EndWorkspaceIndex");
   if (maxSpec == UNSETINT) maxSpec = maxSpecIndex;
   if ( (maxSpec < 0) || (maxSpec > maxSpecIndex ) )
   {
-    g_log.warning("EndSpectrum out of range, changed to max spectrum number");
+    g_log.warning("EndWorkspaceIndex out of range, changed to max Workspace number");
     maxSpec = maxSpecIndex;
   }
   if ( (maxSpec < minSpec) )
   {
-    g_log.warning("EndSpectrum can not be less than the StartSpectrum, changed to max spectrum number");
+    g_log.warning("EndWorkspaceIndex can not be less than the StartWorkspaceIndex, changed to max Workspace number");
     maxSpec = maxSpecIndex;
   }
 }
@@ -187,8 +187,8 @@ MatrixWorkspace_sptr DetectorEfficiencyVariation::getTotalCounts(
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
 
   childAlg->setProperty( "InputWorkspace", input );
-  childAlg->setProperty( "StartSpectrum", firstSpec );
-  childAlg->setProperty( "EndSpectrum", lastSpec );
+  childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
+  childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
   // pass inputed values straight to this integration, checking must be done there
   childAlg->setPropertyValue( "RangeLower",  getPropertyValue("RangeLower") );
   childAlg->setPropertyValue( "RangeUpper", getPropertyValue("RangeUpper") );

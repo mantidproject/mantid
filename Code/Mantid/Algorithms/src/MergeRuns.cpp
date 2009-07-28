@@ -332,7 +332,7 @@ API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr&
   // Create a Rebin child algorithm
   IAlgorithm_sptr rebin = createSubAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", workspace);
-  rebin->setProperty("params",params);
+  rebin->setProperty("Params",params);
 
   // Now execute the sub-algorithm. Catch and log any error
   try { rebin->execute(); }

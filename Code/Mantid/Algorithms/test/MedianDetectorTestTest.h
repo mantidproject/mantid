@@ -117,8 +117,8 @@ public:
     alg.setProperty("SignificanceTest", 0.0);
 
     const int fSpec = 0,  lSpec = Nhist/2;
-    alg.setProperty( "StartSpectrum", fSpec );
-    alg.setProperty( "EndSpectrum", lSpec );
+    alg.setProperty( "StartWorkspaceIndex", fSpec );
+    alg.setProperty( "EndWorkspaceIndex", lSpec );
     //a couple of random numbers in the range
     const double lRange = 4000, uRange = 10000;
     alg.setProperty( "RangeLower", lRange );

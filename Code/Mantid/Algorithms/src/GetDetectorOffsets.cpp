@@ -119,7 +119,7 @@ double GetDetectorOffsets::fitSpectra(const int s)
     throw ;
   }
   fit_alg->setProperty("InputWorkspace",inputW);
-  fit_alg->setProperty("SpectrumIndex",s);
+  fit_alg->setProperty("WorkspaceIndex",s);
   fit_alg->setProperty("StartX",Xmin);
   fit_alg->setProperty("EndX",Xmax);
   fit_alg->setProperty("bg0",0.0);

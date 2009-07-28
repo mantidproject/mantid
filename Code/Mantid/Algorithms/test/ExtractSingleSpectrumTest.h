@@ -49,7 +49,7 @@ public:
     
     TS_ASSERT_THROWS_NOTHING( extractor.setPropertyValue("InputWorkspace","input") )
     TS_ASSERT_THROWS_NOTHING( extractor.setPropertyValue("OutputWorkspace","output") )
-    TS_ASSERT_THROWS_NOTHING( extractor.setProperty("SpectrumIndex",spectrum) )
+    TS_ASSERT_THROWS_NOTHING( extractor.setProperty("WorkspaceIndex",spectrum) )
     
     TS_ASSERT_THROWS_NOTHING( extractor.execute() )
     TS_ASSERT( extractor.isExecuted() )
