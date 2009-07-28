@@ -161,14 +161,14 @@ def Correct(sampleWS, transWS, resultWS, suffix):
 	############################# Setup workspaces ############################
 	monitorWS = "Monitor"
 	# Get the monitor ( StartSpectrum is off by one with cropworkspace)
-	CropWorkspace(sampleWS, OutputWorkspace = monitorWS, StartSpectrum = str(monitorspectrum - 1), EndSpectrum = str(monitorspectrum - 1))
+	CropWorkspace(sampleWS, monitorWS, StartWorkspaceIndex = str(monitorspectrum - 1), EndWorkspaceIndex = str(monitorspectrum - 1))
 	if instr_name == 'LOQ':
 		RemoveBins(monitorWS, monitorWS, '19900', '20500', Interpolation="Linear")
 	# Remove flat background
 	FlatBackground(monitorWS, monitorWS, '0', backmon_start, backmon_end)
 	# Get the bank we are looking at. Crop uses workspace indices so StartSpectrum is a bit
 	# confusing here but it's off by one
-	CropWorkspace(sampleWS, resultWS, StartSpectrum=str(specmin - 1), EndSpectrum=str(specmax - 1))
+	CropWorkspace(sampleWS, resultWS, StartWorkspaceIndex = (specmin - 1), EndWorkspaceIndex = str(specmax - 1))
 	###########################################################################
 	
 	########################## Masking  #######################################

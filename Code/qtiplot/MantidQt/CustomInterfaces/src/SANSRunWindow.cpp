@@ -975,8 +975,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
 
   py_code.replace("|DETBANK|", "front-detector");
 
-
-  std::cerr << py_code.toStdString() << "\n";
+  //  std::cerr << py_code.toStdString() << "\n";
 
   //Execute the code
   runPythonCode(py_code);
