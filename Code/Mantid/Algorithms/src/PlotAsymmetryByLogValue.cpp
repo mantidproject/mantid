@@ -37,7 +37,7 @@ namespace Mantid
         declareProperty("LastRun","",new FileValidator(exts));
         declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
         declareProperty("LogValue","",new MandatoryValidator<std::string>());
-        declareProperty("Red", EMPTY_INT(), Direction::Input);
+        declareProperty("Red", 1, Direction::Input);
         declareProperty("Green", EMPTY_INT(), Direction::Input);
 
         std::vector<std::string> options;
@@ -45,8 +45,8 @@ namespace Mantid
         options.push_back("Differential");
         declareProperty("Type","Integral",new ListValidator(options));
 
-        declareProperty("StartX",EMPTY_DBL(),"Starting X value for integration");
-        declareProperty("EndX",EMPTY_DBL(),"Ending X value for integration");
+        declareProperty("TimeMin",EMPTY_DBL(),"Starting X value for integration");
+        declareProperty("TimeMax",EMPTY_DBL(),"Ending X value for integration");
 	   
         //BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
         //zeroOrGreater->setLower(0);
@@ -68,11 +68,6 @@ namespace Mantid
 
         int red = getProperty("Red");
         int green = getProperty("Green");
-        int Period = EMPTY_INT();
-        if (red  == EMPTY_INT() && green != EMPTY_INT()) Period = green;
-        else if (red  != EMPTY_INT() && green == EMPTY_INT()) Period = red;
-        else if (red  == EMPTY_INT() && green == EMPTY_INT()) 
-            throw std::invalid_argument("Neither Red nor Green property are set");
 
         std::string stype = getProperty("Type");
         m_int = stype == "Integral";
@@ -106,9 +101,10 @@ namespace Mantid
         int npoints = ie - is + 1;
 
         // Create the 2D workspace for the output
+        int nplots = green != EMPTY_INT() ? 4 : 1;
         DataObjects::Workspace2D_sptr outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                  (WorkspaceFactory::Instance().create("Workspace2D",
-                   1,          //  the number of plots
+                   nplots,          //  the number of plots
                    npoints,    //  the number of data points on a plot
                    npoints     //  it's not a histogram
                  ));
@@ -132,44 +128,91 @@ namespace Mantid
 
             DataObjects::Workspace2D_sptr ws_red;
             DataObjects::Workspace2D_sptr ws_green;
+
             // Run through the periods of the loaded file and do calculatons on the selected ones
-            int period = 1;
-            while( loadNexus->existsProperty(wsProp) )
+            Workspace_sptr tmp = loadNexus->getProperty(wsProp);
+            WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(tmp);
+            if (!wsGroup)
             {
-                // Do only one period
-                if (Period != EMPTY_INT() && period == Period)
-                {
-                    DataObjects::Workspace2D_sptr ws = loadNexus->getProperty(wsProp);
-                    //AnalysisDataService::Instance().add(wsName,ws);
-                    TimeSeriesProperty<double>* logp = dynamic_cast<TimeSeriesProperty<double>*>(ws->getSample()->getLogData(logName));
-                    double Y,E; 
-                    calcIntAsymmetry(ws,Y,E);
-                    outWS->dataY(0)[i-is] = Y;
-                    outWS->dataX(0)[i-is] = logp->lastValue();
-                    outWS->dataE(0)[i-is] = E;
-                }
-                else // red & green
-                {
-                    if (period == red) ws_red = loadNexus->getProperty(wsProp);
-                    if (period == green) ws_green = loadNexus->getProperty(wsProp);
-                }
-                
-                std::stringstream suffix;
-                suffix << (++period);
-                wsProp = "OutputWorkspace" + suffix.str();// form the property name for higher periods
-                //wsName = "tmp"+fnn.str() + "_" + suffix.str();
-            }
-            // red & green claculation
-            if (Period == EMPTY_INT())
-            {
-                TimeSeriesProperty<double>* logp = dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
+                ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
+                TimeSeriesProperty<double>* logp = 
+                    dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
                 double Y,E; 
-                calcIntAsymmetry(ws_red,ws_green,Y,E);
+                calcIntAsymmetry(ws_red,Y,E);
                 outWS->dataY(0)[i-is] = Y;
                 outWS->dataX(0)[i-is] = logp->lastValue();
                 outWS->dataE(0)[i-is] = E;
             }
-            progress.report();
+            else
+            {
+                
+                for( size_t j = 1; j < wsGroup->getNumberOfEntries(); j++ )
+                {
+                    int period = j;
+                    std::stringstream suffix;
+                    suffix << period;
+                    wsProp = "OutputWorkspace_" + suffix.str();// form the property name for higher periods
+                    //wsName = "tmp"+fnn.str() + "_" + suffix.str();
+                    // Do only one period
+                    if (green == EMPTY_INT() && period == red)
+                    {
+                        ws_red = loadNexus->getProperty(wsProp);
+                        //AnalysisDataService::Instance().add(wsName,ws);
+                        TimeSeriesProperty<double>* logp = 
+                            dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
+                        double Y,E; 
+                        calcIntAsymmetry(ws_red,Y,E);
+                        outWS->dataY(0)[i-is] = Y;
+                        outWS->dataX(0)[i-is] = logp->lastValue();
+                        outWS->dataE(0)[i-is] = E;
+                    }
+                    else // red & green
+                    {
+                        if (period == red)
+                        {
+                            ws_red = loadNexus->getProperty(wsProp);
+                        }
+                        if (period == green)
+                        {
+                            ws_green = loadNexus->getProperty(wsProp);
+                        }
+                    }
+
+                }
+                // red & green claculation
+                if (green != EMPTY_INT())
+                {
+                    if (!ws_red || !ws_green)
+                        throw std::invalid_argument("Red or green period is out of range");
+                    TimeSeriesProperty<double>* logp = 
+                        dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
+                    double Y,E; 
+                    calcIntAsymmetry(ws_red,ws_green,Y,E);
+                    outWS->dataY(0)[i-is] = Y;
+                    outWS->dataX(0)[i-is] = logp->lastValue();
+                    outWS->dataE(0)[i-is] = E;
+
+                    double Y1,E1;
+                    calcIntAsymmetry(ws_red,Y,E);
+                    calcIntAsymmetry(ws_green,Y1,E1);
+                    outWS->dataY(1)[i-is] = Y;
+                    outWS->dataX(1)[i-is] = logp->lastValue();
+                    outWS->dataE(1)[i-is] = E;
+
+                    outWS->dataY(2)[i-is] = Y1;
+                    outWS->dataX(2)[i-is] = logp->lastValue();
+                    outWS->dataE(2)[i-is] = E1;
+
+                    outWS->dataY(3)[i-is] = Y + Y1;
+                    outWS->dataX(3)[i-is] = logp->lastValue();
+                    outWS->dataE(3)[i-is] = E + E1;
+                }
+                else
+                    if (!ws_red)
+                        throw std::invalid_argument("Red period is out of range");
+
+                progress.report();
+            }
         }
 
         outWS->getAxis(0)->title() = logName;
@@ -187,14 +230,14 @@ namespace Mantid
      */
     void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws, double& Y, double& E)
     {
-        Property* startXprop = getProperty("StartX");
-        Property* endXprop = getProperty("EndX");
+        Property* startXprop = getProperty("TimeMin");
+        Property* endXprop = getProperty("TimeMax");
         bool setX = !startXprop->isDefault() && !endXprop->isDefault();
         double startX,endX;
         if (setX)
         {
-            startX = getProperty("StartX");
-            endX = getProperty("EndX");
+            startX = getProperty("TimeMin");
+            endX = getProperty("TimeMax");
         }
         if (!m_int)
         {   //  "Differential asymmetry"
@@ -259,14 +302,14 @@ namespace Mantid
     void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
         boost::shared_ptr<DataObjects::Workspace2D> ws_green,double& Y, double& E)
     {
-        Property* startXprop = getProperty("StartX");
-        Property* endXprop = getProperty("EndX");
+        Property* startXprop = getProperty("TimeMin");
+        Property* endXprop = getProperty("TimeMax");
         bool setX = !startXprop->isDefault() && !endXprop->isDefault();
         double startX,endX;
         if (setX)
         {
-            startX = getProperty("StartX");
-            endX = getProperty("EndX");
+            startX = getProperty("TimeMin");
+            endX = getProperty("TimeMax");
         }
         if (!m_int)
         {   //  "Differential asymmetry"
