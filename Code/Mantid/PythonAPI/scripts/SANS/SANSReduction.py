@@ -13,7 +13,7 @@
 #
 import SANSUtility
 
-################################# Input from GUI ##########################
+################################# Input from GUI ###########################################
 # The tags get replaced by input from the GUI
 # The workspaces
 scatter_sample = '|SCATTERSAMPLE|'
@@ -48,18 +48,6 @@ direct_beam_file = '|DIRECTFILE|'
 correction_type = '|ANALYSISTYPE|'
 # Component positions
 sample_z_corr = |SAMPLEZOFFSET|/1000.
-
-# hardware, rotation radius of front det
-Front_Det_Radius = 306.
-# LOG files for SANS2d will have these encoder readings  ============================================
-# When the GUI loads the data it inspects the log files and moves the components accordingly so the
-# values here get set by the GUI with the correct ones
-#Front_Det_z = |FRONTDETZ|
-#Front_Det_x = |FRONTDETX|
-#Front_Det_Rot = |FRONTDETROT|
-#Rear_Det_z = |REARDETZ|
-# Rear_Det_x  will be needed to calc relative X translation of front detector 
-#Rear_Det_x = |REARDETX|
 
 # These values are used for the start and end bins for FlatBackground removal.
 ###############################################################################################
@@ -319,7 +307,7 @@ else:
 	# default in instrument description is 23.281m - 4.000m from sample at 19,281m !
 	# need to add ~58mm to det1 to get to centre of detector, before it is rotated.
 	zshift = (Front_Det_z + Front_Det_z_corr + Front_Det_Radius*(1 - cos(RotRadians )) )/1000.  -front_det_default_sd_m
-	MoveInstrumentComponent(scatter_sample, 'front-detector', X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
+	MoveInstrumentComponent(scatter_sample, detbank, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 
 # For SANS2D runs before 568 the spectrum numbers were swapped around so correct for this if necessary
 if instr_name == 'SANS2D':
@@ -339,12 +327,12 @@ if instr_name == 'SANS2D':
 final_workspace = scatter_sample.split('_')[0]
 if detbank == 'front-detector':
 	final_workspace += 'front'
-elif detbank == 'HAB':
-	final_workspace += 'hab'
+elif detbank == 'rear-detector':
+	final_workspace += 'rear'
 elif detbank == 'main-detector-bank':
 	final_workspace += 'main'
 else:
-	final_workspace += 'front'
+	final_workspace += 'HAB'
 	
 final_workspace += '_' + correction_type
 Correct(scatter_sample, trans_sample, final_workspace, "sample")
