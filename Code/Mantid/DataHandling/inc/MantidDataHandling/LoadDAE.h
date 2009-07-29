@@ -7,7 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <climits>
-
+#include "MantidAPI/WorkspaceGroup.h"
 
 //----------------------------------------------------------------------
 // Forward declaration

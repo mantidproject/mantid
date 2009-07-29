@@ -77,12 +77,20 @@ namespace Mantid
     {
       declareProperty("DAEname","", new MandatoryValidator<std::string>(),
         "The name of and path to the input DAE host.");
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace",
+      /*declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace",
+        "",Direction::Output),
+        "The name of the workspace that will be created, filled with the\n"
+        "read-in data and stored in the Analysis Data Service.  If the\n"
+        "input data contain multiple periods higher periods will be\n"
+        "stored in separate workspaces called OutputWorkspace_PeriodNo.");*/
+
+	  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
         "",Direction::Output),
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.  If the\n"
         "input data contain multiple periods higher periods will be\n"
         "stored in separate workspaces called OutputWorkspace_PeriodNo.");
+
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
@@ -222,12 +230,21 @@ namespace Mantid
 
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-               (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
+               (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1)); 
+
+	// workspace group added to handle  multi periods
+	  WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+	  if(m_numberOfPeriods>1)
+	  {	
+		  if(wsGrpSptr)wsGrpSptr->add(localWSName);
+		  setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+	  }
+
       // Set the unit on the workspace to TOF
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
       loadSpectraMap(dae_handle, localWorkspace);
-
+	
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
@@ -242,10 +259,12 @@ namespace Mantid
         }
 
         int counter = 0;
+		//g_log.error()<<"max spec =" <<m_spec_max<<std::endl;
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
           int histToRead = i + period*total_specs;
+		 // g_log.error()<<"hist to read =  "<<histToRead<<" i" <<i<<std::endl;
           loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum.get(),localWorkspace,allData.get() );
           counter++;
           if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
@@ -254,9 +273,9 @@ namespace Mantid
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
         {
-          for(unsigned int i=0; i < m_spec_list.size(); ++i)
+		  for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
-            loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum.get(), localWorkspace,allData.get() );
+			loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum.get(), localWorkspace,allData.get() );
             counter++;
             if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
             interruption_point();
@@ -280,16 +299,31 @@ namespace Mantid
           // Create a WorkspaceProperty for the new workspace of a higher period
           // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
           //                (for all but the first period, which has no suffix)
-          std::stringstream suffix;
+          /*std::stringstream suffix;
           suffix << (period+1);
           outputWorkspace += suffix.str();
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
-          g_log.information() << "Workspace " << WSName << " created. \n";
+          g_log.information() << "Workspace " << WSName << " created. \n";*/
         }
+		if(m_numberOfPeriods>1)
+		{
+			std::stringstream suffix;
+			suffix << (period+1);
+			std::string outws("");
+			outws=outputWorkspace+"_"+suffix.str();
+			std::string WSName = localWSName + "_" + suffix.str();
+			declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+			g_log.information() << "Workspace " << WSName << " created. \n";
+			 if(wsGrpSptr)wsGrpSptr->add(WSName);
+			// Assign the result to the output workspace property
+	        setProperty(outws,localWorkspace);
+		}
+		else 
+			setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
 
         // Assign the result to the output workspace property
-        setProperty(outputWorkspace,localWorkspace);
+       // setProperty(outputWorkspace,localWorkspace);
 
       } // loop over periods
 
