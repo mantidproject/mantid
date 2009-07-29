@@ -268,6 +268,8 @@ std::vector<int> LoadSNSNexus::getSpectraSelection()
 /** Loads the instrument from the SNS file
  *  @param localWS The workspace
  *  @param entry The entry in the Nexus file
+ *  @param banks A sorted set of bank names
+ *  @param monitors A set of monitor names
  */
 void LoadSNSNexus::loadInstrument(API::Workspace_sptr localWS,
                             NXEntry entry,    
