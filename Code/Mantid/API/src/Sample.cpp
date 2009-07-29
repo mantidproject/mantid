@@ -10,7 +10,8 @@ namespace API
 
 /// Constructor
 Sample::Sample() :
-  m_name(), m_manager(), m_protonCharge(0.0), m_sample_shape()
+  m_name(), m_manager(), m_protonCharge(0.0), m_sample_shape(), m_geom_id(0), m_thick(0.0),
+  m_height(0.0), m_width(0.0)
 {
 }
 
@@ -81,7 +82,7 @@ const double& Sample::getProtonCharge() const
  * Set the object that describes the sample shape
  * @param sample_shape The shape object
  */
-void Sample::setGeometry(boost::shared_ptr<Geometry::Object> sample_shape)
+void Sample::setShapeObject(boost::shared_ptr<Geometry::Object> sample_shape)
 {
   m_sample_shape = sample_shape;
 }
@@ -90,9 +91,55 @@ void Sample::setGeometry(boost::shared_ptr<Geometry::Object> sample_shape)
  * Get a pointer to the sample shape object
  * @returns A shared pointer to the sample object
  */
-boost::shared_ptr<Geometry::Object> Sample::getGeometry() const
+boost::shared_ptr<Geometry::Object> Sample::getShapeObject() const
 {
   return m_sample_shape;
+}
+
+/**
+ * Set the geometry flag that is specfied in the raw file within the SPB_STRUCT
+ * 1 = cylinder, 2 = flat plate, 3 = disc, 4 = single crystal
+ * @param geom_id The flag for the geometry
+ */
+void Sample::setGeometryFlag(int geom_id)
+{
+  m_geom_id = geom_id;
+}
+
+/**
+ * Get the geometry flag that is specified in the raw file within the SPB_STRUCT
+ * 1 = cylinder, 2 = flat plate, 3 = disc, 4 = single crystal
+ * @returns The flag for the sample geometry
+ */
+int Sample::getGeometryFlag() const
+{
+  return m_geom_id;
+}
+
+/**
+ * Set the thickness, width and height values that are pecified in the raw file.
+ * @param thick The parameter e_thick in the SPB_STRUCT
+ * @param height The parameter e_height in the SPB_STRUCT
+ * @param width The parameter e_width in the SPB_STRUCT
+ */
+void Sample::setGeometry(double thick, double height, double width)
+{
+  m_thick = thick;
+  m_height = height;
+  m_width = width;
+}
+
+/**
+ * Get the thickness, width and height values that are specified in the raw file.
+ * @param thick An output parameter for e_thick in the SPB_STRUCT
+ * @param height An output parameter for e_height in the SPB_STRUCT
+ * @param width An output parameter for e_width in the SPB_STRUCT
+ */
+void Sample::getGeometry(double &thick, double &height, double &width) const
+{
+  thick = m_thick;
+  height = m_height;
+  width = m_width;
 }
 
 

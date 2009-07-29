@@ -210,7 +210,11 @@ void MatrixWorkspace::newSample()
   sptr_sample.reset(new Sample);
   sptr_sample->setProtonCharge(old_sample->getProtonCharge());
   sptr_sample->setName(old_sample->getName());
-  sptr_sample->setGeometry(old_sample->getGeometry());
+  sptr_sample->setShapeObject(old_sample->getShapeObject());
+  sptr_sample->setGeometryFlag(old_sample->getGeometryFlag());
+  double thick(0.0), height(0.0), width(0.0);
+  old_sample->getGeometry(thick,height,width);
+  old_sample->setGeometry(thick,height,width);
 }
 
 /** Create new empty instrument parameter map

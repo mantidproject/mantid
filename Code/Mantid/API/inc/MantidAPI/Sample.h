@@ -54,8 +54,14 @@ public:
   void setProtonCharge( const double &charge);
   const double& getProtonCharge() const;
 
-  void setGeometry(boost::shared_ptr<Geometry::Object> sample_shape);
-  boost::shared_ptr<Geometry::Object> getGeometry() const;
+  void setShapeObject(boost::shared_ptr<Geometry::Object> sample_shape);
+  boost::shared_ptr<Geometry::Object> getShapeObject() const;
+
+  void setGeometryFlag(int geom_id);
+  int getGeometryFlag() const;
+
+  void setGeometry(double thick, double height, double width);
+  void getGeometry(double &thick, double &height, double &width) const;
 
 private:
   /// Private copy constructor. NO COPY ALLOWED!
@@ -71,6 +77,14 @@ private:
   double m_protonCharge;
   /// The sample shape object
   boost::shared_ptr<Geometry::Object> m_sample_shape;
+  /// The sample geometry flag
+  int m_geom_id;
+  /// The sample thickness from the SPB_STRUCT in the raw file
+  double m_thick;
+  /// The sample height from the SPB_STRUCT in the raw file
+  double m_height;
+  /// The sample width from the SPB_STRUCT in the raw file
+  double m_width;
 };
 
 } // namespace API
