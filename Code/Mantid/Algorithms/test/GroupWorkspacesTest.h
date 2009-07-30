@@ -70,7 +70,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","NewGroup"));
 		//only one workspace selected.,so it would throw
-		TS_ASSERT_THROWS( grpwsalg.execute(),std::exception);
+		TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
 		TS_ASSERT( !grpwsalg.isExecuted() );
 	}
 	void testExecGroupTwoNormalWorkspaces()
@@ -244,7 +244,7 @@ public:
 		input.push_back("foundpeaks");
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","NewGroup"));
-		TS_ASSERT_THROWS( grpwsalg.execute(),std::exception);
+		TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
 		TS_ASSERT( !grpwsalg.isExecuted() );
 				
 	}

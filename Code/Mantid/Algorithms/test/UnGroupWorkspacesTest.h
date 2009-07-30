@@ -43,11 +43,6 @@ public:
 		TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspaces" );
 		TS_ASSERT( props[0]->isDefault() );
 		
-	/*	TS_ASSERT_EQUALS( props[1]->name(), "OutputWorkspace" );
-		TS_ASSERT( props[1]->isDefault() );
-		TS_ASSERT( dynamic_cast<WorkspaceProperty<WorkspaceGroup>* >(props[1]) );*/
-
-	
 	}
 
 	void testExecUnGroupSingleGroupWorkspace()
@@ -127,7 +122,7 @@ public:
 	}
 	void testExecUnGroupOneNormalWorkspace()
 	{
-		LoadRaw3 alg;
+	  	LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/Data/LOQ48098.raw"));
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48098"));
@@ -141,8 +136,9 @@ public:
 		input.push_back("LOQ48098");
 		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.setProperty("InputWorkspaces",input));
 		//this throws exception as selcted workspace is not a group ws
-		TS_ASSERT_THROWS( ungrpwsalg.execute(),std::exception);
-					
+		TS_ASSERT_THROWS_NOTHING( ungrpwsalg.execute());
+		TS_ASSERT(! ungrpwsalg.isExecuted() );
+							
 	}
 	
 };

@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GroupWorkspaces.h"
-#include <exception>
 
 namespace Mantid
 {
@@ -20,7 +19,7 @@ namespace Mantid
 				"Name of the workspace to be created as the output of grouping ");
 		}
 		/** Executes the algorithm
-		*  @throw std::exception If theselected workspaces are not of same types
+		*  @throw std::runtime_error If theselected workspaces are not of same types
 		*/
 		void GroupWorkspaces::exec()
 		{
@@ -29,7 +28,7 @@ namespace Mantid
 				std::vector<std::string> inputWS=getProperty("InputWorkspaces");
 				std::string newGroup=getPropertyValue("OutputWorkspace");
 				if(inputWS.size()<2)
-				{	throw std::invalid_argument("Select atleast two workspaces to group ");
+				{	throw std::runtime_error("Select atleast two workspaces to group ");
 				}
 				//creates workspace group
 				WorkspaceGroup_sptr outputGrpWS=WorkspaceGroup_sptr(new WorkspaceGroup);
@@ -49,8 +48,8 @@ namespace Mantid
 							if(isCompatibleWorkspaces(firstWS,(*itr)))
 								outputGrpWS->add((*itr));
 							else
-							{
-								throw std::invalid_argument("Selected workspaces are not of same Types.\n"
+							{  
+								throw std::runtime_error("Selected workspaces are not of same Types.\n"
 									"Check the selected workspaces and ensure that they are of same types to group");
 							}
 						}

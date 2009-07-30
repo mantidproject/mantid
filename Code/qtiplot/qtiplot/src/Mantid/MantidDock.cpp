@@ -445,12 +445,12 @@ void MantidDockWidget::groupOrungroupWorkspaces()
 {
 	if(m_groupButton)
 	{
-		std::string sButtonName=m_groupButton->text();
-		if(!sButtonName.compare("Group"))
+		QString qButtonName=m_groupButton->text();
+		if(!qButtonName.compare("Group"))
 			m_mantidUI->groupWorkspaces();
 		else
 		{
-		 if(!sButtonName.compare("UnGroup"))
+		 if(!qButtonName.compare("UnGroup"))
 			m_mantidUI->ungroupWorkspaces();
 		}
 	}
