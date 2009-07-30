@@ -14,6 +14,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
 
 #include <Poco/NObserver.h>
 
@@ -202,6 +203,12 @@ public:
   bool runAlgorithmAsynchronously(const QString & algName);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values, 
 				 const QString & optional_msg,  const QString & enabled_names);
+/// Group selected workspaces
+	void groupWorkspaces();
+	/// UnGroup selected groupworkspace
+	void ungroupWorkspaces();
+
+
 public slots:
   void cancelAllRunningAlgorithms();
 
@@ -266,9 +273,7 @@ public slots:
     void plotFirstSpectrum();
 
     void createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
-
-
-
+	
     // Slots responding to MantidMatrix context menu commands
     void copyRowToTable();
     void copyColumnToTable();
@@ -329,6 +334,7 @@ public slots:
 	//for loading and saving nexus workspace
 	void loadNexusWorkspace();
 	void saveNexusWorkspace();
+	void renameWorkspace();
 
 private slots:
 
@@ -368,7 +374,9 @@ private:
     //for savenexus algorithm
 	void executeSaveNexus(QString algName,int version);
 
-	
+    void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
+	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
+	void moveSelctedWSChildrentoRenamedWS(const std::string & renamedWSName,QList<QTreeWidgetItem*>& selectedItems);
 
 	
 

@@ -29,13 +29,15 @@ private:
 public slots:
     void clickedWorkspace(QTreeWidgetItem*, int);
     void deleteWorkspaces();
-    void clearWorkspaceTree();			   
+    void clearWorkspaceTree();	
 protected slots:
     void popupMenu(const QPoint & pos);
 private slots:
   void updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr);
   void removeWorkspaceEntry(const QString &);
   void populateWorkspaceTree(const QString & ws_name, Mantid::API::Workspace_sptr,bool isitParent);
+ void treeSelectionChanged();
+ void groupOrungroupWorkspaces();
   
   
   
@@ -48,13 +50,14 @@ private:
     MantidUI *m_mantidUI;
 	static Mantid::Kernel::Logger& logObject;
 	std::vector<std::string> m_wsGroupNames;
-	//Mantid::API::WorkspaceGroup_sptr m_grpSptr;
+	QPushButton *m_groupButton;
 };
 
 
 class MantidTreeWidget:public QTreeWidget
 {
     Q_OBJECT
+
 public:
     MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui)
     {
