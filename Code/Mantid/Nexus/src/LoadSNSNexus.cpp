@@ -170,7 +170,7 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
             MantidVec& X = ws->dataX(spec);
             X.assign(timeBins(),timeBins()+nBins+1);
         }
-        NXFloat data = dataGroup.openFloatData();
+        NXInt data = dataGroup.openIntData();
         for(int i = 0;i<data.dim0();i++)
             for(int j = 0; j < data.dim1(); j++)
             {
