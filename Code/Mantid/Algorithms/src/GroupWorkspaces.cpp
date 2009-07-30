@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include <exception>
 
 namespace Mantid
 {
@@ -28,19 +29,19 @@ namespace Mantid
 				std::vector<std::string> inputWS=getProperty("InputWorkspaces");
 				std::string newGroup=getPropertyValue("OutputWorkspace");
 				if(inputWS.size()<2)
-				{	throw std::exception("Select atleast two workspaces to group ");
+				{	throw std::invalid_argument("Select atleast two workspaces to group ");
 				}
 				//creates workspace group
 				WorkspaceGroup_sptr outputGrpWS=WorkspaceGroup_sptr(new WorkspaceGroup);
 				if(outputGrpWS)
 				{
 					//add "NewGroup" to  workspace group
-					outputGrpWS->add(newGroup);	
+					outputGrpWS->add(newGroup);
 					setProperty("OutputWorkspace",outputGrpWS);
 					// iterate through the selected input workspaces
 					std::vector<std::string>::const_iterator itr;
 					for (itr=inputWS.begin();itr!=inputWS.end();itr++)
-					{	
+					{
 						std::vector<std::string> groupVec=outputGrpWS->getNames();
 						if(groupVec.size()>1)
 						{
@@ -48,8 +49,8 @@ namespace Mantid
 							if(isCompatibleWorkspaces(firstWS,(*itr)))
 								outputGrpWS->add((*itr));
 							else
-							{  
-								throw std::exception("Selected workspaces are not of same Types.\n"
+							{
+								throw std::invalid_argument("Selected workspaces are not of same Types.\n"
 									"Check the selected workspaces and ensure that they are of same types to group");
 							}
 						}
@@ -65,12 +66,12 @@ namespace Mantid
 			}
 			catch(std::runtime_error& )
 			{
-				//g_log.error()<<"Error:"<<ex.what()<<std::endl; 
+				//g_log.error()<<"Error:"<<ex.what()<<std::endl;
 				throw;
 			}
 			catch(std::exception& )
 			{
-				//g_log.error()<<"Error:"<<ex.what()<<std::endl; 
+				//g_log.error()<<"Error:"<<ex.what()<<std::endl;
 				throw;
 			}
 
@@ -87,7 +88,7 @@ namespace Mantid
 			Workspace_sptr wsSptr1=Mantid::API::AnalysisDataService::Instance().retrieve(firstWS);
 			firstWSTypeId=wsSptr1->id();
 
-			//check the typeid  of the  next workspace 
+			//check the typeid  of the  next workspace
 			std::string wsTypeId("");
 			Workspace_sptr wsSptr=Mantid::API::AnalysisDataService::Instance().retrieve(newWStoAdd);
 			if(wsSptr) wsTypeId=wsSptr->id();

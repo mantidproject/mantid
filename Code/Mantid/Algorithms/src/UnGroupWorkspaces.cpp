@@ -44,14 +44,14 @@ namespace Mantid
 							//g_log.error()<<"InputWorkspace: "<< inputWSName<<" Removed from ADS"<<std::endl;
 						}
 						else
-							throw std::exception("Selected Workspace is not a Group to Ungroup ");
+							throw std::invalid_argument("Selected Workspace is not a Group to Ungroup ");
 					}
 				}
-			
+
 			}
 			catch(std::invalid_argument &)
 			{
-				//g_log.error()<<"Error:"<<ex.what()<<std::endl; 
+				//g_log.error()<<"Error:"<<ex.what()<<std::endl;
 				throw;
 			}
 			catch(Mantid::Kernel::Exception::NotFoundError&)
@@ -61,7 +61,7 @@ namespace Mantid
 			}
 			catch(std::runtime_error&)
 			{
-				//g_log.error()<<"Error:"<<ex.what()<<std::endl; 
+				//g_log.error()<<"Error:"<<ex.what()<<std::endl;
 				throw;
 			}
 			catch(std::exception& )
