@@ -178,9 +178,9 @@ namespace Mantid
 	     << "\trow_delim = '-' * len(topline) + '\\n'\n"
 	     << "\thelpstr =  row_delim + topline + row_delim\n"
 	     << "\tif dialog == True:\n"
-	     << "\t\tparam_list.append(['message','Input','string','','A message to display', ''])\n"
-	     << "\t\tparam_list.append(['enable','Input','string','','Comma-separated list of param names to keep enabled in the dialog', ''])\n"
-	     << "\t\tparam_list.append(['disable','Input','string','','Comma-separated list of param names to disable in the dialog', ''])\n"
+	     << "\t\tparam_list.append(['Message','Input','string','','A message to display', ''])\n"
+	     << "\t\tparam_list.append(['Enable','Input','string','','Comma-separated list of param names to keep enabled in the dialog', ''])\n"
+	     << "\t\tparam_list.append(['Disable','Input','string','','Comma-separated list of param names to disable in the dialog', ''])\n"
 	     << "\tfor pstr in param_list:\n"
 	     << "\t\tndes, descr_split = numberRows(pstr[4], col_widths[4])\n"
 	     << "\t\tnall, allow_split = numberRows(pstr[5], col_widths[5])\n"
@@ -411,10 +411,10 @@ namespace Mantid
 	os << " = UNSET_PARAM_VALUE,";
       }
       //end of algorithm function parameters but add other arguments
-      os << "message = \"\", enable=\"\", disable=\"\"):\n"
+      os << "Message = \"\", Enable=\"\", Disable=\"\"):\n"
 	 << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n"
-	 << "\tenabled_list = [s.lstrip(' ') for s in enable.split(',')]\n"
-	 << "\tdisabled_list = [s.lstrip(' ') for s in disable.split(',')]\n"
+	 << "\tenabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
+	 << "\tdisabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"
 	 << "\tvalues = '|'\n"
 	 << "\tfinal_enabled = ''\n\n";
 
@@ -428,7 +428,7 @@ namespace Mantid
       }
 
       os << "\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
-	 << "\" , values, message, final_enabled)\n"
+	 << "\" , values, Message, final_enabled)\n"
 	 << "\tif dialog == True:\n"
 	 << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
 	 << "\telse:\n"
@@ -526,7 +526,7 @@ namespace Mantid
       }
       if( dialog )
       {
-	argument_list += ",message,enable,disable";
+	argument_list += ",Message,Enable,Disable";
       }
       argument_list += ")";
 
