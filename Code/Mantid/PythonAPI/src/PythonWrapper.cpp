@@ -801,6 +801,8 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 	  Mantid_API_Sample_getLogData_overloads_1())
      .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)&Mantid::API::Sample::getLogData, return_value_policy< reference_existing_object>(),
 	  Mantid_API_Sample_getLogData_overloads_2())
+     .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
+     .def("getProtonCharge", &Mantid::API::Sample::getProtonCharge, return_value_policy< copy_const_reference>())
      ;
    
    //PyAlgorithm Class
