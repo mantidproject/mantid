@@ -114,8 +114,8 @@ public:
 	{
 		LoadRaw3 alg;
 		alg.initialize();
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/Data/HET15869.raw"));
-		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","HET15869"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","../../../../Test/Data/LOQ48094.raw"));
+		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace","LOQ48094"));
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 
@@ -136,7 +136,7 @@ public:
 		GroupWorkspaces grpwsalg;
 		grpwsalg.initialize();
 		std::vector<std::string >input;
-		input.push_back("HET15869");
+		input.push_back("LOQ48094");
 		input.push_back("LOQ48098");
 		input.push_back("LOQ48097");
 		TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
@@ -148,12 +148,12 @@ public:
 		std::vector<std::string> grpVec=result->getNames();
 		TS_ASSERT_EQUALS(grpVec.size(),4);
 		Workspace_sptr result1;
-		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("HET15869")) );
+		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("LOQ48094")) );
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("LOQ48098")) );
 		TS_ASSERT_THROWS_NOTHING( result1 = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("LOQ48097")) );
 
 		AnalysisDataService::Instance().remove("NewGroup");
-		AnalysisDataService::Instance().remove("HET15869");
+		AnalysisDataService::Instance().remove("LOQ48094");
 		AnalysisDataService::Instance().remove("LOQ48098");
 		AnalysisDataService::Instance().remove("LOQ48097");
 	}
