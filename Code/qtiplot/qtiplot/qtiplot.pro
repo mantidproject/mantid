@@ -85,12 +85,31 @@ unix {
 ##################### Windows ###############################################
 win32 {
   LIBS += -lqscintilla2
-  LIBS += ../../Third_Party/lib/win32/muparser.lib
-  LIBS += ../../Third_Party/lib/win32/qwtplot3d.lib
-  LIBS += ../../Third_Party/lib/win32/qwt.lib
-  LIBS += ../../Third_Party/lib/win32/gsl.lib
-  LIBS += ../../Third_Party/lib/win32/cblas.lib
-  LIBS += ../../Third_Party/lib/win32/zlib1.lib
+  
+  CONFIG(build64)  {
+	LIBS += ../../Third_Party/lib/win64/muparser.lib
+    LIBS += ../../Third_Party/lib/win64/qwtplot3d.lib
+    LIBS += ../../Third_Party/lib/win64/qwt.lib
+    LIBS += ../../Third_Party/lib/win64/gsl.lib
+    LIBS += ../../Third_Party/lib/win64/cblas.lib
+    LIBS += ../../Third_Party/lib/win64/zlib1.lib
+	LIBS += ../../Third_Party/lib/win64/PocoUtil.lib
+    LIBS += ../../Third_Party/lib/win64/PocoFoundation.lib
+    LIBS += ../../Third_Party/lib/win64/libboost_signals-vc80-mt-1_34_1.lib 
+	message(SETTING FOR x64)
+  } else  {
+	LIBS += ../../Third_Party/lib/win32/muparser.lib
+    LIBS += ../../Third_Party/lib/win32/qwtplot3d.lib
+    LIBS += ../../Third_Party/lib/win32/qwt.lib
+    LIBS += ../../Third_Party/lib/win32/gsl.lib
+    LIBS += ../../Third_Party/lib/win32/cblas.lib
+    LIBS += ../../Third_Party/lib/win32/zlib1.lib
+	LIBS += ../../Third_Party/lib/win32/PocoUtil.lib
+    LIBS += ../../Third_Party/lib/win32/PocoFoundation.lib
+    LIBS += ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib 
+	message(SETTING FOR x86)
+  }
+  
 
   LIBS += ../../Mantid/Bin/Shared/MantidAPI.lib
   LIBS += ../../Mantid/Bin/Shared/MantidGeometry.lib
@@ -98,9 +117,7 @@ win32 {
 
   LIBS += ../MantidQt/lib/MantidQtAPI.lib
 
-  LIBS += ../../Third_Party/lib/win32/PocoUtil.lib
-  LIBS += ../../Third_Party/lib/win32/PocoFoundation.lib
-  LIBS += ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib 
+  
 }
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
