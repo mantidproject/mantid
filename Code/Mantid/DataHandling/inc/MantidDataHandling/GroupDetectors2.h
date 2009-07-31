@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_GROUPDETECTORS_H_
-#define MANTID_DATAHANDLING_GROUPDETECTORS_H_
+#ifndef MANTID_DATAHANDLING_GROUPDETECTORS2_H_
+#define MANTID_DATAHANDLING_GROUPDETECTORS2_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -32,7 +32,7 @@ namespace DataHandling
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
-    @date 17/04/2008
+    @date 27/07/2009
 
     Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
@@ -54,16 +54,16 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GroupDetectors : public API::Algorithm
+class DLLExport GroupDetectors2 : public API::Algorithm
 {
 public:
-  GroupDetectors();
-  virtual ~GroupDetectors();
+  GroupDetectors2();
+  virtual ~GroupDetectors2();
 
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "GroupDetectors";};
   /// Algorithm's version for identification overriding a virtual method
-  virtual const int version() const { return 1;};
+  virtual const int version() const { return 2;};
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "DataHandling\\Detectors";}
 
@@ -76,4 +76,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_GROUPDETECTORS_H_*/
+#endif /*MANTID_DATAHANDLING_GROUPDETECTORS2_H_*/

@@ -282,15 +282,17 @@ bool Algorithm::isExecuted() const
  *  algorithms directly via the new operator is prefered since then
  *  the framework can take care of all of the necessary book-keeping.
  *
- *  @param name    The concrete algorithm class of the sub algorithm
+ *  @param name           The concrete algorithm class of the sub algorithm
  *  @param startProgress  The percentage progress value of the overall algorithm where this child algorithm starts
  *  @param endProgress    The percentage progress value of the overall algorithm where this child algorithm ends
- *  @param enableLogging    Set to false to disable logging from the child algorithm
+ *  @param enableLogging  Set to false to disable logging from the child algorithm
+ *  @param version        The version of the child algorithm to create. By default gives the latest version.
  *  @returns Set to point to the newly created algorithm object
  */
-IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress, const bool enableLogging)
+IAlgorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress, 
+                                              const bool enableLogging, const int& version)
 {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name);
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name,version);
   //set as a child
   alg->setChild(true);
 	alg->setLogging(enableLogging);

@@ -98,9 +98,6 @@ namespace Mantid
 			Geometry::V3D samplePos = sample->getPos();
       g_log.debug() << "Sample position is " << samplePos << std::endl;
 
-			const int notFailed = -99;
-			int failedDetectorIndex = notFailed;
-
 			int loopIterations = m_MaxSpec-m_MinSpec;
 			int failCount=0;
 			Progress prog(this,0.0,1.0,numberOfSpectra);

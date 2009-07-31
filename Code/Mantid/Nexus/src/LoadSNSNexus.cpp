@@ -429,7 +429,7 @@ void LoadSNSNexus::calcRotation(const Geometry::V3D& X,const Geometry::V3D& Y,co
     double xy = X.Y();
     double xz = X.Z();
 
-    double yx = Y.X();
+    //double yx = Y.X();
     double yy = Y.Y();
     double yz = Y.Z();
 

@@ -45,5 +45,5 @@ echo
 #   when something in the chain has failed.
 echo "Cleaning up..."
 rm -f *.properties
-rm -f *.log
+#rm -f *.log
 echo "Done."

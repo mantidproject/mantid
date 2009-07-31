@@ -231,7 +231,7 @@ namespace Mantid
 
 			//creates a sub algorithm for use in this algorithm
 			IAlgorithm_sptr createSubAlgorithm(const std::string& name, const double startProgress = -1.,
-				const double endProgress = -1., const bool enableLogging=true);
+				const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
 
 			void setInitialized();
 			void setExecuted(bool state);

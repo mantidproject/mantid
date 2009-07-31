@@ -90,7 +90,8 @@ void DiffractionFocussing::exec()
     std::vector<int> detectorList;
     for(std::multimap<int,int>::const_iterator d = from;d!=to;d++)
       detectorList.push_back(d->second);
-    API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors");
+    // Want version 1 of GroupDetectors here
+    API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors",-1.0,-1.0,true,1);
     DataObjects::Workspace2D_sptr tmpW2D = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpW);
     childAlg->setProperty<DataObjects::Workspace2D_sptr>("Workspace", tmpW2D);
     childAlg->setProperty< std::vector<int> >("DetectorList",detectorList);

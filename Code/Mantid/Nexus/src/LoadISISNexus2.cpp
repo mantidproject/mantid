@@ -105,7 +105,7 @@ void LoadISISNexus2::exec()
                 nmon ++ ;
             }
     }
-    for(size_t i=nmon;i<udet.dim0();i++)
+    for(int i=nmon;i<udet.dim0();i++)
         spectra[i] = i + 1;
 
 	if(m_entrynumber!=0)
@@ -314,7 +314,6 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, NXEntry entry,in
 {
 
     std::string stime = entry.getString("start_time");
-    time_t start_t = Kernel::TimeSeriesProperty<std::string>::createTime_t_FromString(stime);
 
     NXMainClass runlogs = entry.openNXClass<NXMainClass>("runlog");
 

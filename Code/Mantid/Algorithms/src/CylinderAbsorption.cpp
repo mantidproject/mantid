@@ -23,8 +23,8 @@ using namespace API;
 CylinderAbsorption::CylinderAbsorption() :
   API::Algorithm(),                                      //the base class constructor
   m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),
-  m_L1s(), m_elementVolumes(), n_lambda(unSetInt), x_step(0), exp_options(),      //n_lambda i slinked to the NumberOfWavelengthPoints, unSetInt is a flag to say that values weren't passed for NumberOfWavelengthPoints/n_lambda
-	m_numSlices(0),m_sliceThickness(0),m_numAnnuli(0),m_deltaR(0),m_numVolumeElements(0)
+  m_L1s(), m_elementVolumes(), n_lambda(unSetInt), x_step(0),      //n_lambda i slinked to the NumberOfWavelengthPoints, unSetInt is a flag to say that values weren't passed for NumberOfWavelengthPoints/n_lambda
+	m_numSlices(0),m_sliceThickness(0),m_numAnnuli(0),m_deltaR(0),m_numVolumeElements(0),exp_options()
 {
 }
 
@@ -300,15 +300,12 @@ void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr
 
   for (int i = 0; i < m_numSlices; ++i)
   {
-    const double z = (i + 0.5) * m_sliceThickness - 0.5 * m_cylHeight;
-
     // Number of elements in 1st annulus
     int Ni = 0;
     // loop over annuli
     for (int j = 0; j < m_numAnnuli; ++j)
     {
       Ni += 6;
-      const double R = (j * m_cylRadius / m_numAnnuli) + (m_deltaR / 2.0);
       // loop over elements in current annulus
       for (int k = 0; k < Ni; ++k)
       {
