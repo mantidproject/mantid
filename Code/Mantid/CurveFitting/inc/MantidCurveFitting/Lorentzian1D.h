@@ -14,15 +14,15 @@ namespace Mantid
     /**
     Takes a histogram in a 2D workspace and fit it to a Lorentzian on top of
     a linear background.
-    i.e. a function: height*( hwhm^2/((x-peakCentre)^2+hwhm^2) ) + bg0 + bg1*x
+    i.e. a function: Height*( HWHM^2/((x-PeakCentre)^2+HWHM^2) ) + BG0 + BG1*x
 
     Properties specific to this derived class:
     <UL>
-    <LI> bg0 - background intercept value (default 0.0)</LI>
-    <LI> bg1 - background slope value (default 0.0)</LI>
-    <LI> height - height of peak (default 0.0)</LI>
-    <LI> peakCentre - centre of peak (default 0.0)</LI>
-    <LI> hwhm - half-width half-maximum (default 1.0)</LI>
+    <LI> BG0 - background intercept value (default 0.0)</LI>
+    <LI> BG1 - background slope value (default 0.0)</LI>
+    <LI> Height - height of peak (default 0.0)</LI>
+    <LI> PeakCentre - centre of peak (default 0.0)</LI>
+    <LI> HWHM - half-width half-maximum (default 1.0)</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

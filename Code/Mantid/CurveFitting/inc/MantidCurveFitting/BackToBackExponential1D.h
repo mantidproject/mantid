@@ -15,16 +15,16 @@ namespace Mantid
     Takes a histogram in a 2D workspace and fit it to a back-to-back exponential
     peak function, that is the function:
 
-      I*(exp(a/2*(a*s^2+2*(x-x0)))*erfc((a*s^2+(x-x0))/sqrt(2*s^2))+exp(b/2*(b*s^2-2*(x-x0)))*erfc((b*s^2-(x-x0))/sqrt(2*s^2)))+bk.
+      I*(exp(A/2*(A*S^2+2*(x-X0)))*erfc((A*S^2+(x-X0))/sqrt(2*S^2))+exp(B/2*(B*S^2-2*(x-X0)))*erfc((B*S^2-(x-X0))/sqrt(2*S^2)))+BK.
 
     Properties specific to this derived class:
     <UL>
     <LI> I - height of peak (default 0.0)</LI>
-    <LI> a - exponential constant of rising part of neutron pulse (default 0.0)</LI>
-    <LI> b - exponential constant of decaying part of neutron pulse (default 0.0)</LI>
-    <LI> x0 - peak position (default 0.0)</LI>
-    <LI> s - standard deviation of gaussian part of peakshape function (default 1.0)</LI>
-    <LI> bk - constant background (default 0.0)</LI>
+    <LI> A - exponential constant of rising part of neutron pulse (default 0.0)</LI>
+    <LI> B - exponential constant of decaying part of neutron pulse (default 0.0)</LI>
+    <LI> X0 - peak position (default 0.0)</LI>
+    <LI> S - standard deviation of gaussian part of peakshape function (default 1.0)</LI>
+    <LI> BK - constant background (default 0.0)</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

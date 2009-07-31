@@ -13,18 +13,18 @@ namespace Mantid
     /**
     Takes a histogram in a 2D workspace and fit it to a Gaussian on top of
     a linear background.
-    i.e. a function: height*exp(-0.5*((x-peakCentre)/sigma)^2) + bg0 + bg1*x
+    i.e. a function: Height*exp(-0.5*((x-PeakCentre)/Sigma)^2) + BG0 + BG1*x
 
-    This function actually performs the fitting on 1/sigma^2 rather than sigma
+    This function actually performs the fitting on 1/Sigma^2 rather than Sigma
     for stability reasons.
 
     Properties specific to this derived class:
     <UL>
-    <LI> bg0 - background intercept value (default 0.0)</LI>
-    <LI> bg1 - background slope value (default 0.0)</LI>
-    <LI> height - height of peak (default 0.0)</LI>
-    <LI> peakCentre - centre of peak (default 0.0)</LI>
-    <LI> sigma - standard deviation (default 1.0)</LI>
+    <LI> BG0 - background intercept value (default 0.0)</LI>
+    <LI> BG1 - background slope value (default 0.0)</LI>
+    <LI> Height - height of peak (default 0.0)</LI>
+    <LI> PeakCentre - centre of peak (default 0.0)</LI>
+    <LI> Sigma - standard deviation (default 1.0)</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
