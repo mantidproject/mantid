@@ -75,7 +75,7 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
     if (m_monitorDlg->isVisible()) 
-    emit needUpdateProgress(pNf->algorithm(),int(pNf->progress*100),QString::fromStdString(pNf->message));
+    emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),int(pNf->progress*100),QString::fromStdString(pNf->message));
 }
 
 void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)
@@ -113,8 +113,8 @@ MonitorDlg::MonitorDlg(QWidget *parent,AlgorithmMonitor *algMonitor):QDialog(par
     m_tree = 0;
     update(0);
     connect(algMonitor,SIGNAL(countChanged(int)),this,SLOT(update(int)), Qt::QueuedConnection);
-    connect(algMonitor,SIGNAL(needUpdateProgress(const Mantid::API::IAlgorithm*,int, const QString&)),
-	    SLOT(updateProgress(const Mantid::API::IAlgorithm*,int, const QString&)));
+    connect(algMonitor,SIGNAL(needUpdateProgress(void*,int, const QString&)),
+	    SLOT(updateProgress(void*,int, const QString&)));
 
     QHBoxLayout *buttonLayout = new QHBoxLayout;
     QPushButton *closeButton = new QPushButton("Close");
@@ -185,13 +185,15 @@ void MonitorDlg::update(int)
     m_algMonitor->unlock();
 }
 
-void MonitorDlg::updateProgress(const IAlgorithm* alg,int p, const QString& msg)
+// The void* corresponds to Mantid::API::AlgorithmID, but Qt wasn't coping with the typedef
+void MonitorDlg::updateProgress(void* alg, const int p, const QString& msg)
 {
   m_algMonitor->lock();
-  int index = m_algMonitor->algorithms().indexOf(alg->getAlgorithmID());
+  const int index = m_algMonitor->algorithms().indexOf(alg);
   m_algMonitor->unlock();
+  if ( index == -1 ) return;
   QTreeWidgetItem *item = m_tree->topLevelItem(index);
-  if( !item ) return;
+  if ( !item ) return;
  
   QProgressBar *algProgress = static_cast<QProgressBar*>( m_tree->itemWidget(item, 1) );
   algProgress->setValue(p);

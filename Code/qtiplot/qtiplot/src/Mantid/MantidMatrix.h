@@ -27,7 +27,6 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidLog.h"
-using namespace Mantid::Kernel;
 
 class QLabel;
 class QStackedWidget;
