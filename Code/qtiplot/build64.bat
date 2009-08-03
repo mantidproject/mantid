@@ -1,5 +1,6 @@
 @echo off
 python release_date.py
+python MantidQt\win64.py
 
 IF "%VCINSTALLDIR%"=="" CALL "%VS80COMNTOOLS%"vsvars32
 IF "%VCINSTALLDIR%"=="" CALL "%VCINSTALLDIR%"\vcvarsall.bat amd64
@@ -9,7 +10,7 @@ SET ROOTDIR=%CD%
 
 :: First, build dialog library
 cd "%ROOTDIR%\MantidQt"
-qmake CONFIG+=build64
+qmake
 nmake clean
 nmake
 IF %ERRORLEVEL% NEQ 0 goto mantidqterr
