@@ -2,15 +2,13 @@
 import os
 import re
 
-path = os.getcwd() + '\mantidqt.pri'
-print path
+path = os.getcwd() + '\MantidQt\mantidqt.pri'
 
 lines = []
 
 f = open(path, 'r')
 for line in f:
 	line = re.sub('/lib/win32/', '/lib/win64/', line)
-	print line
 	lines.append(line)
 	
 f.close()
