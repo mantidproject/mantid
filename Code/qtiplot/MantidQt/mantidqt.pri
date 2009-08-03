@@ -58,14 +58,7 @@ win32 {
   LIBS += "$$MANTIDLIBPATH/MantidKernel.lib"
   LIBS += "$$MANTIDLIBPATH/MantidGeometry.lib"
   LIBS += "$$MANTIDLIBPATH/MantidAPI.lib"
-  
-  CONFIG(build64)  {
-	LIBS += "$$THIRDPARTY/lib/win64/PocoFoundation.lib"
-	message(SETTING FOR x64)
-  } else  {
-	LIBS += "$$THIRDPARTY/lib/win32/PocoFoundation.lib"
-	message(SETTING FOR x86)
-  }
+  LIBS += "$$THIRDPARTY/lib/win32/PocoFoundation.lib"
 }
 
 MOC_DIR = "$$TMPDIR"
