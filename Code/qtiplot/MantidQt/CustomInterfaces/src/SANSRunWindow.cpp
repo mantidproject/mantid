@@ -60,6 +60,8 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
 ///Destructor
 SANSRunWindow::~SANSRunWindow()
 {
+  // Seems to crash on destruction of if I don't do this 
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
   saveSettings();
 }
 
@@ -170,6 +172,9 @@ void SANSRunWindow::readSettings()
   g_log.debug() << "Found previous data directory " << m_uiForm.datadir_edit->text().toStdString()
     << "\nFound previous user mask file" << m_uiForm.userfile_edit->text().toStdString() 
     << "\nFound instrument definition directory " << m_ins_defdir.toStdString() << std::endl;
+
+  // Setup for instrument
+  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
 }
 
 /**
@@ -286,18 +291,7 @@ bool SANSRunWindow::loadUserFile()
   }
 
   //Set a couple of things to default values that will get overwritten if present in the file
-  if( m_uiForm.inst_opt->currentIndex() == 0 ) 
-  {
-    m_uiForm.monitor_spec->setText("2");
-    m_uiForm.bank_spec_min->setText("3");
-    m_uiForm.bank_spec_max->setText("16386"); 
-  }
-  else
-  { 
-    m_uiForm.monitor_spec->setText("73730");
-    m_uiForm.bank_spec_min->setText("36865");
-    m_uiForm.bank_spec_max->setText("73728");
-  }
+  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
 
   m_uiForm.dist_mod_mon->setText("0.0000");
   m_uiForm.smpl_offset->setText("0.0");
@@ -898,10 +892,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   QString py_code = m_pycode_loqreduce;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
-
-  //  py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
-  //  py_code.replace("|SPECMAX|", m_uiForm.bank_spec_max->text());
-
+  py_code.replace("|DETBANK|", m_uiForm.detbank_sel->currentText());
+  
   py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
   py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
   py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.value(3));
@@ -953,11 +945,11 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   py_code.replace("|SAMPLEZOFFSET|", m_uiForm.smpl_offset->text());
   py_code.replace("|FLATFILE|", m_uiForm.flat_file->text());
   
-  py_code.replace("|SCALEFACTOR|", m_uiForm.scale_factor->text());
   py_code.replace("|MASKSTRING|", createMaskString());
   py_code.replace("|ANALYSISTYPE|", type);
   py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
-  
+
+ 
   QString backmonstart(""), backmonend("");
   if( m_uiForm.inst_opt->currentText().startsWith("l", Qt::CaseInsensitive) )
   {
@@ -969,12 +961,15 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     backmonstart = "85000";
     backmonend = "100000";
   }
-
   py_code.replace("|BACKMONSTART|", backmonstart);
   py_code.replace("|BACKMONEND|", backmonend);
 
-  py_code.replace("|DETBANK|", "front-detector");
-
+  py_code.replace("|SCALEFACTOR|", m_uiForm.scale_factor->text());
+  py_code.replace("|GEOMID|", m_uiForm.sample_geomid->currentText().at(0));
+  py_code.replace("|SAMPLEWIDTH|", m_uiForm.sample_width->text());
+  py_code.replace("|SAMPLEHEIGHT|", m_uiForm.sample_height->text());
+  py_code.replace("|SAMPLETHICK|", m_uiForm.sample_thick->text());
+  
   //  std::cerr << py_code.toStdString() << "\n";
 
   //Execute the code
@@ -1044,7 +1039,7 @@ void SANSRunWindow::handleShowMaskButtonClick()
   py_code.replace("|RADIUSMAX|", radius);
   
   //Other masks
-  py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
+  //py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
   py_code.replace("|MASKLIST|", createMaskString());
   runPythonCode(py_code);
 }
@@ -1065,14 +1060,14 @@ void SANSRunWindow::handleInstrumentChange(int index)
   if( index == 0 ) 
   {
     m_uiForm.monitor_spec->setText("2");
-    m_uiForm.bank_spec_min->setText("3");
-    m_uiForm.bank_spec_max->setText("16386"); 
+    m_uiForm.detbank_sel->setItemText(0, "main-detector-bank");
+    m_uiForm.detbank_sel->setItemText(1, "HAB");
   }
   else
   { 
-    m_uiForm.monitor_spec->setText("73730");
-    m_uiForm.bank_spec_min->setText("1");
-    m_uiForm.bank_spec_max->setText("36864");
+    m_uiForm.monitor_spec->setText("2");
+    m_uiForm.detbank_sel->setItemText(0, "rear-detector");
+    m_uiForm.detbank_sel->setItemText(1, "front-detector");
   }
   m_cfg_loaded = false;
 }
@@ -1114,6 +1109,12 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
   else
   {
     g_log.debug("Loading algorithm succeeded.");
+    // Run load sample geometry
+    loader =  f_mgr.createAlgorithm("LoadSampleDetailsFromRaw");
+    loader->setPropertyValue("InputWorkspace", workspace_name);
+    loader->setPropertyValue("Filename", filepath.toStdString());
+    loader->execute();
+    
     //Load succeeded so find the number of periods. (Here the number of workspaces in the group)
     //Retrieve shoudn't throw but lets wrap it just in case
      Mantid::API::Workspace_sptr wksp_ptr;

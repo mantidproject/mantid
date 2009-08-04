@@ -28,7 +28,7 @@
       <string notr="true" />
      </property>
      <property name="currentIndex" >
-      <number>1</number>
+      <number>2</number>
      </property>
      <property name="elideMode" >
       <enum>Qt::ElideNone</enum>
@@ -927,8 +927,8 @@
       <widget class="QGroupBox" name="groupBox_4" >
        <property name="geometry" >
         <rect>
-         <x>9</x>
-         <y>-1</y>
+         <x>11</x>
+         <y>9</y>
          <width>449</width>
          <height>173</height>
         </rect>
@@ -1172,17 +1172,17 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_5" >
        <property name="geometry" >
         <rect>
-         <x>489</x>
-         <y>-1</y>
-         <width>257</width>
-         <height>184</height>
+         <x>10</x>
+         <y>200</y>
+         <width>218</width>
+         <height>123</height>
         </rect>
        </property>
        <property name="title" >
-        <string>Spectra Details</string>
+        <string>Spectra from Mask</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_3" >
-        <item row="4" column="1" >
+        <item row="3" column="1" >
          <widget class="QLineEdit" name="all_spec_min" />
         </item>
         <item row="2" column="1" >
@@ -1213,60 +1213,37 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="2" >
+        <item row="3" column="2" >
          <widget class="QLineEdit" name="all_spec_max" />
         </item>
-        <item row="4" column="0" >
+        <item row="3" column="0" >
          <widget class="QLabel" name="label_22" >
           <property name="text" >
            <string>All Spectra</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="0" >
+        <item row="4" column="0" >
          <widget class="QLabel" name="label_24" >
           <property name="text" >
            <string>T-O-F</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="1" >
+        <item row="4" column="1" >
          <widget class="QLineEdit" name="tof_min" />
         </item>
-        <item row="5" column="2" >
+        <item row="4" column="2" >
          <widget class="QLineEdit" name="tof_max" />
-        </item>
-        <item row="0" column="0" >
-         <widget class="QLabel" name="label_41" >
-          <property name="text" >
-           <string>Monitor Spec.</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1" >
-         <widget class="QLineEdit" name="monitor_spec" />
-        </item>
-        <item row="3" column="0" >
-         <widget class="QLabel" name="label_43" >
-          <property name="text" >
-           <string>Bank Spectra</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1" >
-         <widget class="QLineEdit" name="bank_spec_min" />
-        </item>
-        <item row="3" column="2" >
-         <widget class="QLineEdit" name="bank_spec_max" />
         </item>
        </layout>
       </widget>
       <widget class="QGroupBox" name="groupBox_6" >
        <property name="geometry" >
         <rect>
-         <x>490</x>
-         <y>192</y>
-         <width>258</width>
+         <x>467</x>
+         <y>184</y>
+         <width>280</width>
          <height>150</height>
         </rect>
        </property>
@@ -1306,115 +1283,17 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_7" >
-       <property name="geometry" >
-        <rect>
-         <x>11</x>
-         <y>185</y>
-         <width>282</width>
-         <height>136</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Position Information</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_7" >
-        <item row="0" column="0" >
-         <widget class="QLabel" name="label_30" >
-          <property name="text" >
-           <string>Beam Centre (mm)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2" >
-         <widget class="QLineEdit" name="beam_x" >
-          <property name="text" >
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4" >
-         <widget class="QLineEdit" name="beam_y" />
-        </item>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="label_31" >
-          <property name="text" >
-           <string>Sample z-offset (mm)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2" colspan="2" >
-         <widget class="QLineEdit" name="smpl_offset" />
-        </item>
-        <item row="0" column="1" >
-         <widget class="QLabel" name="label_32" >
-          <property name="font" >
-           <font>
-            <pointsize>16</pointsize>
-           </font>
-          </property>
-          <property name="text" >
-           <string>(</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5" >
-         <widget class="QLabel" name="label_44" >
-          <property name="font" >
-           <font>
-            <pointsize>16</pointsize>
-           </font>
-          </property>
-          <property name="text" >
-           <string>)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="2" >
-         <widget class="QLineEdit" name="phi_min" />
-        </item>
-        <item row="2" column="4" >
-         <widget class="QLineEdit" name="phi_max" />
-        </item>
-        <item row="2" column="0" >
-         <widget class="QLabel" name="label_45" >
-          <property name="text" >
-           <string>Phi (degrees)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3" >
-         <widget class="QLabel" name="label_33" >
-          <property name="text" >
-           <string>to</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3" >
-         <widget class="QLabel" name="label_46" >
-          <property name="font" >
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text" >
-           <string>,</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
       <widget class="QGroupBox" name="groupBox_9" >
        <property name="geometry" >
         <rect>
-         <x>353</x>
-         <y>225</y>
+         <x>254</x>
+         <y>199</y>
          <width>89</width>
          <height>68</height>
         </rect>
        </property>
        <property name="title" >
-        <string>Scaling Factor</string>
+        <string>Scale Factor</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_13" >
         <item>
@@ -1426,13 +1305,65 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <zorder>groupBox_4</zorder>
-      <zorder>groupBox_5</zorder>
-      <zorder>groupBox_6</zorder>
-      <zorder>groupBox_7</zorder>
-      <zorder>groupBox_8</zorder>
-      <zorder>groupBox_9</zorder>
-      <zorder>beam_x</zorder>
+      <widget class="QGroupBox" name="groupBox_14" >
+       <property name="geometry" >
+        <rect>
+         <x>473</x>
+         <y>9</y>
+         <width>271</width>
+         <height>96</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string>Bank Selection</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_9" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_41" >
+          <property name="text" >
+           <string>Monitor Spectrum</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="monitor_spec" />
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_43" >
+          <property name="text" >
+           <string>Detector</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" colspan="2" >
+         <widget class="QComboBox" name="detbank_sel" >
+          <item>
+           <property name="text" >
+            <string>main-detector-bank</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>HAB</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <spacer name="horizontalSpacer_6" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_4" >
       <attribute name="title" >
@@ -1441,10 +1372,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_12" >
        <property name="geometry" >
         <rect>
-         <x>19</x>
-         <y>10</y>
+         <x>39</x>
+         <y>13</y>
          <width>314</width>
-         <height>124</height>
+         <height>134</height>
         </rect>
        </property>
        <property name="title" >
@@ -1658,6 +1589,199 @@ p, li { white-space: pre-wrap; }
          <widget class="QLabel" name="label_42" >
           <property name="text" >
            <string>moderator - monitor </string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_8" >
+       <property name="geometry" >
+        <rect>
+         <x>276</x>
+         <y>164</y>
+         <width>214</width>
+         <height>157</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string>Sample Details</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_5" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_47" >
+          <property name="text" >
+           <string>Geometry:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QComboBox" name="sample_geomid" >
+          <property name="currentIndex" >
+           <number>2</number>
+          </property>
+          <item>
+           <property name="text" >
+            <string>1: Cylinder</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>2: Flat plate</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>3: Disc</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_48" >
+          <property name="text" >
+           <string>Thickness (mm):</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" >
+         <widget class="QLabel" name="label_49" >
+          <property name="text" >
+           <string>Height(mm):</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" >
+         <widget class="QLabel" name="label_50" >
+          <property name="text" >
+           <string>Width(mm):</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QLineEdit" name="sample_thick" >
+          <property name="text" >
+           <string>1.0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" >
+         <widget class="QLineEdit" name="sample_height" >
+          <property name="text" >
+           <string>1.0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1" >
+         <widget class="QLineEdit" name="sample_width" >
+          <property name="text" >
+           <string>1.0</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QGroupBox" name="groupBox_7" >
+       <property name="geometry" >
+        <rect>
+         <x>408</x>
+         <y>12</y>
+         <width>282</width>
+         <height>136</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string>Position Information</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_7" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_30" >
+          <property name="text" >
+           <string>Beam Centre (mm)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="beam_x" >
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4" >
+         <widget class="QLineEdit" name="beam_y" />
+        </item>
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_31" >
+          <property name="text" >
+           <string>Sample z-offset (mm)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" colspan="2" >
+         <widget class="QLineEdit" name="smpl_offset" />
+        </item>
+        <item row="0" column="1" >
+         <widget class="QLabel" name="label_32" >
+          <property name="font" >
+           <font>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="text" >
+           <string>(</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5" >
+         <widget class="QLabel" name="label_44" >
+          <property name="font" >
+           <font>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="text" >
+           <string>)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2" >
+         <widget class="QLineEdit" name="phi_min" />
+        </item>
+        <item row="2" column="4" >
+         <widget class="QLineEdit" name="phi_max" />
+        </item>
+        <item row="2" column="0" >
+         <widget class="QLabel" name="label_45" >
+          <property name="text" >
+           <string>Limit Phi (degrees)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3" >
+         <widget class="QLabel" name="label_33" >
+          <property name="text" >
+           <string>to</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" >
+         <widget class="QLabel" name="label_46" >
+          <property name="font" >
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text" >
+           <string>,</string>
           </property>
          </widget>
         </item>
