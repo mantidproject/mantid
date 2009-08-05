@@ -46,6 +46,7 @@ namespace NeXus
     exts.push_back("nx5");
     exts.push_back("XML");
     exts.push_back("xml");
+    exts.push_back("s*");
     declareProperty("Filename","",new FileValidator(exts),
       "Name of the Nexus file to read, as a full or relative path");
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), 

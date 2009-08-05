@@ -40,10 +40,9 @@ void LoadISISNexus::init()
     std::vector<std::string> exts;
     exts.push_back("NXS");
     exts.push_back("nxs");
+    exts.push_back("s*");
     declareProperty("Filename","",new FileValidator(exts));
-   // declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
-
-	declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
