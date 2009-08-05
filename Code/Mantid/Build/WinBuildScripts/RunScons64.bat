@@ -1,7 +1,10 @@
+@echo off
 rem del ..\..\..\..\logs\Mantid\scons.log
 rem del ..\..\..\..\logs\Mantid\sconsErr.log
 rem del ..\..\..\..\logs\Mantid\svn.log
 rem del ..\..\..\..\logs\Mantid\doxy.log
+rem must set to be 64 bit
+CALL "%VCINSTALLDIR%"\vcvarsall.bat amd64
 svn up
 svn log -v -rBASE > ..\..\..\..\logs\Mantid\svn.log
 svn up ../Third_Party
