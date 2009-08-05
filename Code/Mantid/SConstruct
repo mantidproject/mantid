@@ -266,7 +266,11 @@ else:
     lpts.append('/MACHINE:X64')
     env.Append(LINKFLAGS=lpts)
     print 'LINKFLAGS: ',lpts
-  
+
+#Disable assert macro.
+if int(debug) == 0:
+  env.Append(CPPDEFINES='NDEBUG')
+
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
 env.Append(CPPPATH=cppPaths)
