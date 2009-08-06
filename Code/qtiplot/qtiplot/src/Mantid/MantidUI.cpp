@@ -1585,7 +1585,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool showMatrix)
 // In Python scripts we don't click and import a matrix so that we can plot
 // spectra from it so this command does an import of a workspace and then plots
 // the requested spectrum
-MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showPlot, bool showMatrix)
+MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool errorbars, bool showPlot, bool showMatrix)
 {
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
@@ -1599,7 +1599,7 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool showPlo
   }
   if (!ws.get()) return NULL;
   
-  Table *t = createTableFromSpectraRange(wsName, ws, spec, spec, false, false);
+  Table *t = createTableFromSpectraRange(wsName, ws, spec, spec, errorbars, false);
   int type = ws->isHistogramData() ? 3 : 1;  // Type 3 is steps, 1 is a line
   MultiLayer* ml = createGraphFromTable(t,type);
   if (!ml) return NULL;

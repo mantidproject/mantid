@@ -193,7 +193,7 @@ public:
   /** ---------------------------------
    * Commands purely for python interaction
    */
-  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool showPlot = true, bool showMatrix = false);
+  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool errorbars = false, bool showPlot = true, bool showMatrix = false);
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
