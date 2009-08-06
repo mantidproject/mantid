@@ -9,8 +9,8 @@ import buildNotification
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
 
-RECIPIENTS = ['matt.clarke@stfc.ac.uk']
-#RECIPIENTS = ['mantid-buildserver@mantidproject.org']
+#RECIPIENTS = ['matt.clarke@stfc.ac.uk']
+RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 #,'mantid-developers@mantidproject.org'
 SENDER = 'BuildServer64@mantidproject.org'
 
