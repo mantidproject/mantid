@@ -26,6 +26,7 @@ MantidUIImports = [
     'importTableWorkspace',
     'plotSpectrum',
     'plotTimeBin',
+    'plotBin',
     'getMantidMatrix',
     'getInstrumentView', 
     'getSelectedWorkspaceName',
