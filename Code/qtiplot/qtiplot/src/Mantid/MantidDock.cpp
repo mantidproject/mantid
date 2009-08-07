@@ -612,22 +612,26 @@ QDockWidget(w)
     m_findAlgChanged = false;
 
     setWidget(f);
-    update();
 
 }
 
-bool Algorithm_descriptor_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
-{
+//Use an anonymous namespace to keep these at file scope
+namespace { 
+  
+  bool Algorithm_descriptor_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
+  {
     if (d1.category < d2.category) return true;
     else if (d1.category == d2.category && d1.name < d2.name) return true;
     else if (d1.name == d2.name && d1.version > d2.version) return true;
-
+    
     return false;
-}
-
-bool Algorithm_descriptor_name_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
-{
+  }
+  
+  bool Algorithm_descriptor_name_less(const Algorithm_descriptor& d1,const Algorithm_descriptor& d2)
+  {
     return d1.name < d2.name;
+  }
+  
 }
 
 void AlgorithmDockWidget::update()
@@ -636,11 +640,6 @@ void AlgorithmDockWidget::update()
 
     typedef std::vector<Algorithm_descriptor> AlgNamesType;
     AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
-
-    /*Algorithm_descriptor desc = {"LoadLog","DataHandling\\Logs",3};
-    Algorithm_descriptor desc1 = {"LoadLog","DataHandling\\Logs",7};
-    names.push_back(desc);
-    names.push_back(desc1);//*/
 
     // sort by algorithm names only to fill m_findAlg combobox
     sort(names.begin(),names.end(),Algorithm_descriptor_name_less);

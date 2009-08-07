@@ -93,7 +93,6 @@ m_progressDialog(0)
 	actionCopyColumnToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
 	connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
 
-    connect(this,SIGNAL(needsUpdating()),this,SLOT(update()));
     connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*)),this,SLOT(createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*)));
     connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
 
@@ -137,24 +136,17 @@ void MantidUI::init()
     FrameworkManager::Instance();
     MantidLog::connect(this);
  
-	actionToggleMantid = m_exploreMantid->toggleViewAction();
-	actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
-	actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
+    actionToggleMantid = m_exploreMantid->toggleViewAction();
+    actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
+    actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
     appWindow()->view->addAction(actionToggleMantid);
-
-	actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
-	//actionToggleAlgorithms->setIcon(QPixmap(mantid_matrix_xpm));
-	actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
+    
+    actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
+    actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
     appWindow()->view->addAction(actionToggleAlgorithms);
 
-    update();
-  
-	//MultiLayer* ml = new MultiLayer(appWindow());
-	//QString label = "caption";
-	//appWindow()->initMultilayerPlot(ml, label.replace(QRegExp("_"), "-"));
- //   Graph *g = ml->activeGraph();
- //   MantidCurve* tc = new MemoryImage;
- //   g->insertPlotItem(tc,1);
+    // Now that the framework is initialized we need to populate the algorithm tree
+    m_exploreAlgorithms->update();
 
 }
 
@@ -286,20 +278,7 @@ void MantidUI::loadDAEWorkspace()
 */
 bool MantidUI::deleteWorkspace(const QString& workspaceName)
 {
-	bool ret = FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
-    if (ret) update();
-    return ret;
-}
-
-/**
-     update
-
-     Widgets showing workspaces and algorithms are updated.
-*/
-void MantidUI::update()
-{
-  //  m_exploreMantid->update();
-  m_exploreAlgorithms->update();
+  return FrameworkManager::Instance().deleteWorkspace(workspaceName.toStdString());
 }
 
 /**
@@ -1296,7 +1275,6 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
-    emit needsUpdating();
     emit needToCreateLoadDAEMantidMatrix(pNf->algorithm());
 }
 
@@ -1339,19 +1317,16 @@ void MantidUI::showAlgMonitor()
 void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
 {
   emit workspace_replaced(QString::fromStdString(pNf->object_name()), pNf->object());
-  emit needsUpdating();
 }
 
 void MantidUI::handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf)
 {
   emit workspace_replaced(QString::fromStdString(pNf->object_name()), pNf->object());
-  emit needsUpdating();
 }
 
 void MantidUI::handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf)
 {
   emit workspace_removed(QString::fromStdString(pNf->object_name()));
-  emit needsUpdating();
 }
 
 void MantidUI::logMessage(const Poco::Message& msg)
@@ -1497,7 +1472,6 @@ void MantidUI::clearAllMemory()
   // Note that this call does not emit delete notifications
   Mantid::API::FrameworkManager::Instance().clear();
   m_exploreMantid->clearWorkspaceTree();
-  update();
 }
 
 /**

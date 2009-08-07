@@ -228,7 +228,6 @@ signals:
     // (e.g. handlers of algorithm notifications)
 
     // Signals that the UI needs to be updated.
-    void needsUpdating();
     void workspace_added(const QString &, Mantid::API::Workspace_sptr);
     void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
     void workspace_removed(const QString &);
@@ -244,9 +243,6 @@ public slots:
 
     // Display a message in QtiPlot's results window. Used by MantidLog class to display Mantid log information.
     void logMessage(const Poco::Message& msg);
-
-    // Updates Mantid user interface
-    void update();
 
     // Load a workspace from a raw file by running a LoadRaw algorithm with properties supplied through a dialog box.
     void loadWorkspace();
