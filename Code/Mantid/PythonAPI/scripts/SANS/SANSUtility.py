@@ -5,6 +5,32 @@
 from mantidsimple import *
 import math
 
+# Return the details specific to the instrument and bank given
+# as:
+#   dimension, specmin, specmax, backmon_start, backmon_end
+def GetInstrumentDetails(instr_name, detbank):
+	if instr_name == 'LOQ':
+		if detbank == 'main-detector-bank':
+			return 128, 3, 16386, 31000, 39000
+		elif detbank == 'HAB':
+			return 128, 16387, 17792, 31000, 39000
+		else:
+			return -1, -1, -1, -1, -1
+	else:
+		# This is the number of monitors before the first set of detectors 
+		monstart = 8
+		dim = 192
+		if detbank == 'front-detector':
+			smin = dim*dim + 1 + monstart
+			smax = dim*dim*2 + monstart
+			return dim, smin, smax, 85000, 100000
+		elif detbank == 'rear-detector':
+			smin = 1 + monstart
+			smax = dim*dim + monstart
+			return 192, smin, smax, 85000, 100000
+		else:
+			return -1, -1, -1, -1, -1
+
 # Mask a cylinder, specifying the algebra to use
 def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     '''Mask a cylinder on the input workspace.'''
