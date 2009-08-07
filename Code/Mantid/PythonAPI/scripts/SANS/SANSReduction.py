@@ -361,97 +361,99 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
 
 
 ####################### A function to calculate residual for centre finding ################################################
-# These variables keep track of the centre coordinates that have been used so that we can calculate a relative shift of the
-# detector
-XVAR_PREV = 0.0
-YVAR_PREV = 0.0
 
-import scipy.optimize
+try:
+	import scipy.optimize
+	# These variables keep track of the centre coordinates that have been used so that we can calculate a relative shift of the
+	# detector
+	XVAR_PREV = 0.0
+	YVAR_PREV = 0.0
 
-def Residuals(vars, *args):
-	'''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants (cones really)'''
-	# *args indicates a list of arguments.
-	global XVAR_PREV, YVAR_PREV
-	xcentre = vars[0]
-	ycentre= vars[1]
+	def Residuals(vars, *args):
+		'''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants (cones really)'''
+		# *args indicates a list of arguments.
+		global XVAR_PREV, YVAR_PREV
+		xcentre = vars[0]
+		ycentre= vars[1]
 
-	xshift = xcentre - XVAR_PREV
-	yshift = ycentre - YVAR_PREV
-	XVAR_PREV = xcentre
-	YVAR_PREV = ycentre
+		xshift = xcentre - XVAR_PREV
+		yshift = ycentre - YVAR_PREV
+		XVAR_PREV = xcentre
+		YVAR_PREV = ycentre
 
-	# Do the correction
-	if xshift <> 0.0 or yshift <> 0.0:
-		MoveInstrumentComponent(SCATTER_SAMPLE, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
-		# Arguments 0 and 1 are the sample and can setup details
-		FullWavReduction(args[0], args[1], True)
-	
-	zpos = args[2]
-	rlimit = args[3]
-	# The workspace that we want to group is the output of the sample reduction
-	ws_togroup = args[0][1]
-	quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, zpos, rlimit)
-	left = mtd.getMatrixWorkspace(quad_ws[0])
-	right = mtd.getMatrixWorkspace(quad_ws[1])
-	up = mtd.getMatrixWorkspace(quad_ws[2])
-	dn = mtd.getMatrixWorkspace(quad_ws[3])
-
-	residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
-	return residue
-
-def FindBeamCentre(rlimit, MaxIter = 10, xstart = None, ystart = None):
-	global XVAR_PREV, YVAR_PREV
-	
-	if xstart == None or ystart == None:
-		# If a starting point is not provided, do a quick sweep to find the maximum count as an 
-		# approximate place to start the search
-		Integration(SCATTER_SAMPLE, 'tmp')
-		t = mtd.getMatrixWorkspace("tmp")
-		nhist = t.getNumberHistograms()
-		maxcount = -1.0
-		idet = -1
-		for idx in range(0, nhist):
-			try:
-				d = t.getDetector(idx)
-				if d.isMonitor() == True:
-					continue
-			except:
-				continue
-			ycount = t.readY(idx)[0]
-			if ycount > maxcount:
-				maxcount = ycount
-				idet = idx
-			if idx > SPECMAX:
-				break
-		mtd.deleteWorkspace('tmp')
-		detpos = mtd.getMatrixWorkspace(SCATTER_SAMPLE).getDetector(idet).getPos()
-		xstart = detpos.getX()
-		ystart = detpos.getY()
+		# Do the correction
+		if xshift <> 0.0 or yshift <> 0.0:
+			MoveInstrumentComponent(SCATTER_SAMPLE, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
+			# Arguments 0 and 1 are the sample and can setup details
+			FullWavReduction(args[0], args[1], True)
 		
+		zpos = args[2]
+		rlimit = args[3]
+		# The workspace that we want to group is the output of the sample reduction
+		ws_togroup = args[0][1]
+		quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, zpos, rlimit)
+		left = mtd.getMatrixWorkspace(quad_ws[0])
+		right = mtd.getMatrixWorkspace(quad_ws[1])
+		up = mtd.getMatrixWorkspace(quad_ws[2])
+		dn = mtd.getMatrixWorkspace(quad_ws[3])
 
-	# Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
-	scatter_setup = InitReduction(SCATTER_SAMPLE, [xstart*1000., ystart*1000.], EmptyCell = False)
-	can_setup = InitReduction(SCATTER_CAN, [xstart*1000., ystart*1000.], EmptyCell = True)
-	FullWavRangeReduction(scatter_setup, can_setup, FindingCentre=True)
+		residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
+		return residue
 
-	XVAR_PREV = -xstart
-	YVAR_PREV =  -ystart
-	# Any pixels z position on the rear/main detector will be fine 
-	rdet_zpos = mtd.getMatrixWorkspace(SCATTER_SAMPLE).getDetector(8000).getPos().getZ()
-	coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rdet_zpos, rlimit),xtol=1e-2, maxiter=MaxIter)
-	
-	# Tidy up
-	mtd.deleteWorkspace('Left')
-	mtd.deleteWorkspace('Right')
-	mtd.deleteWorkspace('Up')
-	mtd.deleteWorkspace('Down')
-	
-	# The coordinates returned are the position of the detector so the beam centre is -coords
-	return -coords
+	def FindBeamCentre(rlimit, MaxIter = 10, xstart = None, ystart = None):
+		global XVAR_PREV, YVAR_PREV
+		
+		if xstart == None or ystart == None:
+			# If a starting point is not provided, do a quick sweep to find the maximum count as an 
+			# approximate place to start the search
+			Integration(SCATTER_SAMPLE, 'tmp')
+			t = mtd.getMatrixWorkspace("tmp")
+			nhist = t.getNumberHistograms()
+			maxcount = -1.0
+			idet = -1
+			for idx in range(0, nhist):
+				try:
+					d = t.getDetector(idx)
+					if d.isMonitor() == True:
+						continue
+				except:
+					continue
+				ycount = t.readY(idx)[0]
+				if ycount > maxcount:
+					maxcount = ycount
+					idet = idx
+				if idx > SPECMAX:
+					break
+			mtd.deleteWorkspace('tmp')
+			detpos = mtd.getMatrixWorkspace(SCATTER_SAMPLE).getDetector(idet).getPos()
+			xstart = detpos.getX()
+			ystart = detpos.getY()
+			
 
+		# Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
+		scatter_setup = InitReduction(SCATTER_SAMPLE, [xstart*1000., ystart*1000.], EmptyCell = False)
+		can_setup = InitReduction(SCATTER_CAN, [xstart*1000., ystart*1000.], EmptyCell = True)
+		FullWavRangeReduction(scatter_setup, can_setup, FindingCentre=True)
+
+		XVAR_PREV = -xstart
+		YVAR_PREV =  -ystart
+		# Any pixels z position on the rear/main detector will be fine 
+		rdet_zpos = mtd.getMatrixWorkspace(SCATTER_SAMPLE).getDetector(8000).getPos().getZ()
+		coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rdet_zpos, rlimit),xtol=1e-2, maxiter=MaxIter)
+		
+		# Tidy up
+		mtd.deleteWorkspace('Left')
+		mtd.deleteWorkspace('Right')
+		mtd.deleteWorkspace('Up')
+		mtd.deleteWorkspace('Down')
+		
+		# The coordinates returned are the position of the detector so the beam centre is -coords
+		return -coords
+except:
+        pass
 ############################################################################################################################
 
-################################### Script execution begins here ###########################################################
+################################### Begin script here ###########################################################
 
 # The beam finding alters the raw data workspace so be careful before performing other analyses straight after
 # using this
@@ -459,7 +461,7 @@ def FindBeamCentre(rlimit, MaxIter = 10, xstart = None, ystart = None):
 #print beamcoords
 
 # Do corrections		
-sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_MASKFILE, YBEAM_MASKFILE], False)
-can_setup = InitReduction(SCATTER_CAN, [XBEAM_MASKFILE,YBEAM_MASKFILE], True)
-FullWavRangeReduction(sample_setup, can_setup)
+#sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_MASKFILE, YBEAM_MASKFILE], False)
+#can_setup = InitReduction(SCATTER_CAN, [XBEAM_MASKFILE,YBEAM_MASKFILE], True)
+#FullWavRangeReduction(sample_setup, can_setup)
 
