@@ -404,7 +404,7 @@ ManagedDataBlock2D* AbsManagedWorkspace2D<NBlocks>::getDataBlock(const int index
 {
   int startIndex = index - ( index%m_vectorsPerBlock );
   // Look to see if the data block is already buffered
-  mru_list::const_iterator it = m_bufferedData.find(startIndex);
+  typename mru_list::const_iterator it = m_bufferedData.find(startIndex);
   if ( it != m_bufferedData.end() )
   {
     return *it;
