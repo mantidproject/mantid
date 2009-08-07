@@ -3,7 +3,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <zlib123/zlib.h>
+#include <zlib.h>
 #include <cstring>
 
 DECLARE_WORKSPACE(CompressedWorkspace2D)

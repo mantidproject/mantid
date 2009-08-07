@@ -95,7 +95,7 @@ if os.name == 'nt':
 	libList.append('muparser') # Muparser used in DataHandling
 	libList.append('zlib1')    # used in DataObjects
 
-	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser']
+	cppPaths = [boost_path, third_party + '/include/', python_path + '/include/', opencascade_path, third_party+'/include/muParser', third_party+'/include/zlib123']
 	
 	#set up scons to embed manifest files
 	env['LINKCOM'] = [env['LINKCOM'], 'mt.exe -nologo -manifest ${TARGET}.manifest -outputresource:$TARGET;1']
