@@ -48,7 +48,7 @@ void UserFunction1D::declareAdditionalProperties()
     declareProperty("Function","",new MandatoryValidator<std::string>,"The fit function");
     declareProperty("InitialParameters","","The comma separated list of initial values of the fit parameters in the form varName=value");
     declareProperty(
-        new WorkspaceProperty<API::ITableWorkspace>("Parameters","",Direction::Output),
+        new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
         "The name of the TableWorkspace in which to store the final fit parameters" );
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), 
         "Name of the output Workspace holding resulting simlated spectrum");
@@ -138,7 +138,7 @@ void UserFunction1D::finalize()
         TableRow row = m_result->appendRow();
         row << m_parameterNames[i] << m_parameters[i];
     }
-    setProperty("Parameters",m_result);
+    setProperty("OutputParameters",m_result);
 
     // Save the fitted and simulated spectra in the output workspace
     MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");

@@ -148,7 +148,7 @@ bool MemoryManagerImpl::ReadMemInfo(MemoryInfo & mi)
     @param XLength the size of the X vector
     @param YLength the size of the Y vector
  */
-bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength)
+bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength, bool* isCompressedOK)
 {
   int AlwaysInMemory;// Check for disabling flag
   if (Kernel::ConfigService::Instance().getValue("ManagedWorkspace.AlwaysInMemory", AlwaysInMemory)
@@ -196,6 +196,25 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
     goManaged = (wsSize > triggerSize);
   }
 #endif
+
+  if (isCompressedOK)
+    if (goManaged)
+    {
+      int notOK = 0;
+      if ( !Kernel::ConfigService::Instance().getValue("CompressedWorkspace.DoNotUse",notOK) ) notOK = 0;
+      if (notOK) *isCompressedOK = false;
+      else
+      {
+        double compressRatio;
+        if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.EstimatedCompressRatio",compressRatio)) compressRatio = 4.;
+        int VectorsPerBlock;
+        if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.VectorsPerBlock",VectorsPerBlock)) VectorsPerBlock = 4;
+        double compressedSize = (1./compressRatio + 100.0*VectorsPerBlock/NVectors) * wsSize;
+        *isCompressedOK =  compressedSize < double(triggerSize);
+      }
+    }
+    else
+      *isCompressedOK = false;
 
   g_log.debug() << "Requested memory: " << wsSize * sizeof(double) << " KB.\n";
   g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";

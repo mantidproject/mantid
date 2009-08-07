@@ -197,6 +197,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GroupDetectors2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadDAE\idc.cpp"
 				>
 			</File>
@@ -352,6 +356,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\GroupDetectors.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\GroupDetectors2.h"
 				>
 			</File>
 			<File

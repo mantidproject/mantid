@@ -57,7 +57,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib zlib1.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32"
 				GenerateDebugInformation="true"
@@ -134,7 +134,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)kernel.lib"
+				AdditionalDependencies="$(SolutionName)kernel.lib zlib1.lib"
 				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).dll"
 				AdditionalLibraryDirectories="../release;../../Third_Party/lib/win32"
 				OptimizeReferences="2"
@@ -177,6 +177,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\CompressedWorkspace2D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Histogram1D.cpp"
 				>
 			</File>
@@ -214,6 +218,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\inc\MantidDataObjects\AbsManagedWorkspace2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataObjects\CompressedWorkspace2D.h"
+				>
+			</File>
 			<File
 				RelativePath=".\inc\MantidDataObjects\Histogram1D.h"
 				>

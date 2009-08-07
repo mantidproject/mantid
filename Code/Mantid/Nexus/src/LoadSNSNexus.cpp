@@ -174,7 +174,12 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
         for(int i = 0;i<data.dim0();i++)
             for(int j = 0; j < data.dim1(); j++)
             {
-                if (spec > specData) ws->dataX(spec) = ws->dataX(specData);
+                if (spec > specData)
+                {
+                    MantidVec& newX = ws->dataX(spec);
+                    MantidVec& oldX = ws->dataX(specData);
+                    newX.assign(oldX.begin(),oldX.end());
+                }
                 data.load(i,j);
                 ////-- simulate input --
                 //for(int k=0;k<nBins;k++)

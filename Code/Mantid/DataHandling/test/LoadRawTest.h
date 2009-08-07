@@ -6,6 +6,7 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/ManagedWorkspace2D.h"
+#include "MantidDataObjects/CompressedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
@@ -324,7 +325,7 @@ public:
     // Get back workspace and check it really is a ManagedWorkspace2D
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws") );
-    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
+    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) || dynamic_cast<CompressedWorkspace2D*>(output.get()) )
     
     AnalysisDataService::Instance().remove("managedws");
     ConfigService::Instance().loadConfig("Mantid.properties");

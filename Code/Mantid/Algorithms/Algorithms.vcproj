@@ -431,6 +431,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\UnGroupWorkspaces.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Unwrap.cpp"
 				>
 			</File>
@@ -634,6 +638,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\GetDetectorOffsets.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GroupWorkspaces.cpp"
 				>
 			</File>
 			<File
@@ -866,6 +874,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\UnaryOperation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\UnGroupWorkspaces.h"
 				>
 			</File>
 			<File

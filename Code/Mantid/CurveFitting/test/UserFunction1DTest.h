@@ -52,7 +52,7 @@ public:
         alg->setPropertyValue("InputWorkspace","UserFunction1DWS");
         alg->setPropertyValue("WorkspaceIndex","0");
         alg->setPropertyValue("Function","a+b*x");
-        alg->setPropertyValue("Parameters","UserFunction1D_params");
+        alg->setPropertyValue("OutputParameters","UserFunction1D_params");
         alg->setPropertyValue("OutputWorkspace","UserFunction1D_result");
         TS_ASSERT_THROWS_NOTHING(alg->execute());
 
@@ -68,7 +68,7 @@ public:
         alg1->setPropertyValue("InputWorkspace","UserFunction1DWS");
         alg1->setPropertyValue("WorkspaceIndex","1");
         alg1->setPropertyValue("Function","a+b*x");
-        alg1->setPropertyValue("Parameters","UserFunction1D_params1");
+        alg1->setPropertyValue("OutputParameters","UserFunction1D_params1");
         alg1->setPropertyValue("OutputWorkspace","UserFunction1D_result1");
         TS_ASSERT_THROWS_NOTHING(alg1->execute());
 
