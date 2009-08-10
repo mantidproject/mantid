@@ -798,13 +798,9 @@ class ApplicationWindow: QMainWindow
 %End
 %ConvertToSubClassCode
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
-sipClass=NULL;
-QString cN = sipCpp->className();
-sipTypeDef *t;
-  for (int i=0; i<sipModuleAPI_qti.em_nrtypes; i++)
-  if (((t=sipModuleAPI_qti.em_types[i]->type)->td_cname && cN == t->td_cname) ||
-      (!t->td_cname && cN == t->td_name+4))
-    sipClass = sipModuleAPI_qti.em_types[i];
+// Russell Taylor, 4/8/09: Change needed for mac build.
+//   Taken from main qtiplot svn revision 1187.
+sipClass=sipFindClass(sipCpp->className());
 %End
 
 public:
@@ -1737,13 +1733,9 @@ class MantidUI: QObject
 %End
 %ConvertToSubClassCode
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
-sipClass=NULL;
-QString cN = sipCpp->className();
-sipTypeDef *t;
-  for (int i=0; i<sipModuleAPI_qti.em_nrtypes; i++)
-  if (((t=sipModuleAPI_qti.em_types[i]->type)->td_cname && cN == t->td_cname) ||
-      (!t->td_cname && cN == t->td_name+4))
-    sipClass = sipModuleAPI_qti.em_types[i];
+// Russell Taylor, 4/8/09: Change needed for mac build.
+//   Taken from main qtiplot svn revision 1187.
+sipClass=sipFindClass(sipCpp->className());
 %End
 
 public:  
