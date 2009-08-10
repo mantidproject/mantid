@@ -230,7 +230,7 @@ message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
 #Create Subject
 subject = 'Subject: '
 if (os.name=='nt'):
-     subject += "Windows"
+     subject += "Windows 64bit"
 else:
      subject += "Linux"
           
