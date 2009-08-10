@@ -77,6 +77,8 @@ void LoadISISNexus2::exec()
     spectrum_index.load();
     NXInt udet = entry.openNXInt("isis_vms_compat/UDET");
     udet.load();
+    NXInt spec = entry.openNXInt("isis_vms_compat/SPEC");
+    spec.load();
     boost::shared_array<int> spectra(new int[udet.dim0()]);
     
     NXData nxData = entry.openNXData("detector_1");
@@ -164,7 +166,7 @@ void LoadISISNexus2::exec()
 			{
 				// Only run the sub-algorithms once
 				runLoadInstrument(localWorkspace );
-				localWorkspace->mutableSpectraMap().populate(spectra.get(),udet(),udet.dim0());
+				localWorkspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
 
 				localWorkspace ->getSample()->setProtonCharge(entry.getFloat("proton_charge"));
 
@@ -176,7 +178,7 @@ void LoadISISNexus2::exec()
         {
             // Only run the sub-algorithms once
             runLoadInstrument(localWorkspace );
-            localWorkspace->mutableSpectraMap().populate(spectra.get(),udet(),udet.dim0());
+            localWorkspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
 
             localWorkspace ->getSample()->setProtonCharge(entry.getFloat("proton_charge"));
 
