@@ -11,9 +11,11 @@
 # A tracing function to report the currently executing line number  
 #
 def traceit(frame, event, arg):
-    if event == 'line' and frame.f_globals['__name__'] == '__main__':
-        lineno = frame.f_lineno
-        qti.app.scriptingInformation(lineno)
+    if event == 'line':
+        filename = frame.f_globals['__file__']
+        if 'qtiUtil' in filename:
+            lineno = frame.f_lineno
+            qti.app.scriptingInformation(lineno)
     return traceit
 
 # Set the trace function
