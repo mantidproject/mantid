@@ -24,14 +24,14 @@ namespace Algorithms
     <UL>
     <LI> Range_lower - The X value to integrate from (default 0)</LI>
     <LI> Range_upper - The X value to integrate to (default max)</LI>
-    <LI> StartSpectrum - Workspace index number to integrate from (default 0)</LI>
-    <LI> EndSpectrum - Workspace index number to integrate to (default max)</LI>
+    <LI> StartWorkspaceIndex - Workspace index number to integrate from (default 0)</LI>
+    <LI> EndWorkspaceIndex - Workspace index number to integrate to (default max)</LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 05/10/2007
-	@author L C Chapon, ISIS, Rutherford Appleton Laboratory
-	@date 01/03/2009 Modified to account for distribution.
+	  @author L C Chapon, ISIS, Rutherford Appleton Laboratory
+	  @date 01/03/2009 Modified to account for distribution.
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.

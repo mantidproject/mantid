@@ -78,8 +78,6 @@ namespace Mantid
       /// Load algorithm history (or process)
       void loadAlgorithmHistory(DataObjects::Workspace2D_sptr localWorkspace);
       std::time_t createTime_t_FromString(const std::string &str);
-      /// check optional params
-      void checkOptionalProperties();
       /// Object to han
       /// The name and path of the input file
       std::string m_filename;

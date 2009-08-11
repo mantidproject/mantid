@@ -311,6 +311,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Max.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MedianDetectorTest.cpp"
 				>
 			</File>
@@ -645,6 +649,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\GroupWorkspaces.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\InputWSDetectorInfo.h"
 				>
 			</File>
@@ -658,6 +666,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\MaskDetectorsIf.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Max.h"
 				>
 			</File>
 			<File

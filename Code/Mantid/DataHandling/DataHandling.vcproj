@@ -245,6 +245,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadLOQDistancesFromRaw.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadMappingTable.cpp"
 				>
 			</File>
@@ -262,6 +266,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRKH.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadSampleDetailsFromRaw.cpp"
 				>
 			</File>
 			<File
@@ -423,6 +431,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidDataHandling\LoadLOQDistancesFromRaw.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadMappingTable.h"
 				>
 			</File>
@@ -452,6 +464,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadRKH.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadSampleDetailsFromRaw.h"
 				>
 			</File>
 			<File

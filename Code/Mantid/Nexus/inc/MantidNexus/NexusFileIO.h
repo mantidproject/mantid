@@ -70,9 +70,6 @@ namespace Mantid
       /// read values and errors for spectra
       int getSpectra(std::vector<double>& values, std::vector<double>& errors, const int& spectra);
 
-      /// read the Nexus Processed Data
-      //bool readNexusProcessedData( boost::shared_ptr<Mantid::DataObjects::Workspace2D>& localworkspace,
-		//					bool& uniformSpectra, int& m_spec_min, int& m_spec_max);
       /// write the algorithm and environment information
       int writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace);
       /// write the source XML file used, if it exists
@@ -89,6 +86,8 @@ namespace Mantid
       bool writeNexusProcessedSpectraMap(const API::MatrixWorkspace_const_sptr& localWorkspace, const std::vector<int>& spec);
       /// read spectra map information
       bool readNexusProcessedSpectraMap(API::MatrixWorkspace_sptr localWorkspace);
+      /// Read the vertical axis (axis(1)) values
+      bool readNexusProcessedAxis(API::MatrixWorkspace_sptr localWorkspace);
       /// write instrument parameters
       bool writeNexusParameterMap(API::MatrixWorkspace_const_sptr ws);
       /// read instrument parameters

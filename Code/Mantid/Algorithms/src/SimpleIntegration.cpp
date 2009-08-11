@@ -45,11 +45,8 @@ void SimpleIntegration::exec()
   // Try and retrieve the optional properties
   m_MinRange = getProperty("RangeLower");
   m_MaxRange = getProperty("RangeUpper");
-  //m_MinSpec = getProperty("StartSpectrum");
-  //m_MaxSpec = getProperty("EndSpectrum");
   m_MinSpec = getProperty("StartWorkspaceIndex");
   m_MaxSpec = getProperty("EndWorkspaceIndex");
-
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
@@ -77,18 +74,16 @@ void SimpleIntegration::exec()
   // Create the 1D workspace for the output
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
-  std::vector<double> widths(0);
-
   bool is_distrib=outputWorkspace->isDistribution();
-  if (is_distrib)
-	  widths.resize(localworkspace->blocksize()); // Will contain the bin widths of distribution
 
-  MantidVec::difference_type distmin0 = 1,distmax0 = 0;
   Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
   double sumY, sumE;
   // Loop over spectra
-  for (int i = m_MinSpec, j=0; i <= m_MaxSpec; ++i, ++j)
+  PARALLEL_FOR1(localworkspace)
+  for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
+    const int j = i - m_MinSpec;
     if (localworkspace->axes() > 1)
     {
       outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
@@ -115,13 +110,6 @@ void SimpleIntegration::exec()
     MantidVec::difference_type distmin=std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax=std::distance(X.begin(),highit);
 
-    if (distmin0 != distmin || distmax0 != distmax)
-        g_log.debug()<<"Starting with spectrum "<<i<<" bins selected: from "<<distmin<<" ("<<*(X.begin()+distmin)
-        <<") to "<<distmax<<" ("<<*(X.begin()+distmax)<<")\n";
-
-    distmin0 = distmin;
-    distmax0 = distmax;
-
     if (!is_distrib) //Sum the Y, and sum the E in quadrature
     {
       sumY=std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
@@ -129,6 +117,7 @@ void SimpleIntegration::exec()
     }
     else // Sum Y*binwidth and Sum the (E*binwidth)^2.
     {
+      std::vector<double> widths(localworkspace->blocksize());
       std::adjacent_difference(lowit,highit,widths.begin());
       sumY=std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
       sumE=std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),VectorHelper::TimesSquares<double>());
@@ -141,7 +130,9 @@ void SimpleIntegration::exec()
     outputWorkspace->dataE(j)[0] = sqrt(sumE); // Propagate Gaussian error
 
     progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",outputWorkspace);

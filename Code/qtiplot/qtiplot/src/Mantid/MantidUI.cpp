@@ -2132,7 +2132,14 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 {
     Graph* g = ml->activeGraph();
     g->setTitle(tr("Workspace ")+Name);
-    g->setXAxisTitle(tr("WorkspaceIndex"));
+    std::string xtitle;
+    if (workspace->axes() > 1)   // Protection against calling this on 1D/single value workspaces
+    {
+      const Axis* const axis = workspace->getAxis(1);
+      if ( axis->isSpectra() ) xtitle = "Spectrum Number";
+      else if ( axis->unit() ) xtitle = axis->unit()->caption() + " / " + axis->unit()->label();
+    }
+    g->setXAxisTitle(tr(xtitle.c_str()));
     g->setYAxisTitle(tr(workspace->YUnit().c_str()));
     g->setAntialiasing(false);
 }
@@ -2277,12 +2284,14 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
     }
     for(int j = j0; j <= j1; j++)
     {
-        const std::vector<double>& dataY = workspace->readY(j);
-        const std::vector<double>& dataE = workspace->readE(j);
+      const std::vector<double>& dataY = workspace->readY(j);
+      const std::vector<double>& dataE = workspace->readE(j);
 
 	    if (i == c0) 
 	    {
-	        t->setCell(j,0,j);
+	      // Get the X axis values from the vertical axis of the workspace
+	      if (workspace->axes() > 1) t->setCell(j,0,(*workspace->getAxis(1))(j));
+	      else t->setCell(j,0,j);
 	    }
 	    t->setCell(j,kY,dataY[i]); 
 	    if (errs) t->setCell(j,kErr,dataE[i]);
