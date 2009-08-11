@@ -100,9 +100,12 @@ void ScriptEdit::customEvent(QEvent *e)
 {
   if (e->type() == SCRIPTING_CHANGE_EVENT)
     {
-      ScriptingChangeEvent* event = (ScriptingChangeEvent*)e;
+      ScriptingChangeEvent* sce = (ScriptingChangeEvent*)e;
+      //Forward the call to the script base class to deal with the environment change
+      scripted::scriptingChangeEvent(sce);
+
+      // Create a new script class from the new environment
       delete myScript;
-      scriptEnv = event->scriptingEnv();
       myScript = scriptEnv->newScript("", this, name());
       connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
       connect(myScript, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
@@ -250,6 +253,9 @@ void ScriptEdit::execute()
   scriptEnv->setFirstLineNumber(lineFrom);
   m_iFirstLineNumber = lineFrom;
 
+  //If we get here everything is successful
+  setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
+
   //Run the code
   runScript(code);
 }
@@ -259,6 +265,9 @@ void ScriptEdit::executeAll()
   if( text().isEmpty() ) return;
   scriptEnv->setFirstLineNumber(0);
   m_iFirstLineNumber = 0;
+
+  //If we get here everything is successful
+  setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
   
   //Run the code
   runScript(text().remove('\r'));
@@ -268,9 +277,6 @@ void ScriptEdit::runScript(const QString & code)
 {
    //Disable editor
   setEditorActive(false);
-
-  //If we get here everything is successful
-  setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
     
   //Execute the code 
   myScript->setCode(code);
@@ -291,9 +297,15 @@ void ScriptEdit::runScript(const QString & code)
 
 void ScriptEdit::updateLineMarker(int number)
 {
+  // Take a negative number as a sign to remove the arrow completely
+  markerDeleteAll();
+  if( number < 0 )
+  {
+    return;
+  }
+  
   int lineNumber = number + m_iFirstLineNumber - 1;
   ensureLineVisible(lineNumber);
-  markerDeleteAll();
   markerAdd(lineNumber, m_iCodeMarkerHandle);
 }
 

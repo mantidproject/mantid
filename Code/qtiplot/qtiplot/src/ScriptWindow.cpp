@@ -56,52 +56,55 @@
 #include <QPrintDialog>
 #include <QStatusBar>
 
-ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app)
+ScriptWindow::ScriptWindow(ScriptingEnv *env, ApplicationWindow *app, bool showProgressArrow)
   : QMainWindow(), d_env(env), d_app(app), fileName(QString::null), fileSaved(true)
 {	
   //---------- Mantid ---------------
-	outputWindow = new QDockWidget(this);
-	outputWindow->setObjectName(tr("outputWindow"));
-	outputWindow->setWindowTitle(tr("Script Output - Status: Stopped"));
-	outputWindow->titleBarWidget();
-	outputWindow->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
-	
-	addDockWidget( Qt::BottomDockWidgetArea, outputWindow );
-	
-	outputText = new OutputTextArea(outputWindow);
-	outputWindow->setWidget(outputText);
-	outputText->setMinimumHeight(25);
-	outputWindow->setMinimumHeight(25);
+  outputWindow = new QDockWidget(this);
+  outputWindow->setObjectName(tr("outputWindow"));
+  outputWindow->setWindowTitle(tr("Script Output - Status: Stopped"));
+  outputWindow->titleBarWidget();
+  outputWindow->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
+  
+  addDockWidget( Qt::BottomDockWidgetArea, outputWindow );
+  
+  outputText = new OutputTextArea(outputWindow);
+  outputWindow->setWidget(outputText);
+  outputText->setMinimumHeight(25);
+  outputWindow->setMinimumHeight(25);
   //---------------------------------
 	
 
+  te = new ScriptEdit(env, this, name());
+  te->setContext(this);
+  te->setDirPath(d_app->scriptsDirPath);
+  te->resize(600,300);
+  connect(te, SIGNAL(dirPathChanged(const QString&)), d_app, SLOT(scriptsDirPathChanged(const QString&)));
+  connect(te, SIGNAL(outputMessage(const QString&)), this, SLOT(scriptMessage(const QString&)));
+  connect(te, SIGNAL(outputError(const QString&)), this, SLOT(scriptError(const QString&)));
+  connect(te, SIGNAL(textChanged()), this, SLOT(editChanged()));
+  connect(te, SIGNAL(abortExecution()), static_cast<QObject*>(d_app->mantidUI), SLOT(cancelAllRunningAlgorithms()));
+  connect(te, SIGNAL(ScriptIsActive(bool)), this, SLOT(executionStateChange(bool)));
+  connect(d_app, SIGNAL(scriptingLineChange(int)), te, SLOT(updateLineMarker(int)));
+  setCentralWidget(te);
 
-	te = new ScriptEdit(env, this, name());
-	te->setContext(this);
-	te->setDirPath(d_app->scriptsDirPath);
-	te->resize(600,300);
-	connect(te, SIGNAL(dirPathChanged(const QString&)), d_app, SLOT(scriptsDirPathChanged(const QString&)));
-	connect(te, SIGNAL(outputMessage(const QString&)), this, SLOT(scriptMessage(const QString&)));
-	connect(te, SIGNAL(outputError(const QString&)), this, SLOT(scriptError(const QString&)));
-	connect(te, SIGNAL(textChanged()), this, SLOT(editChanged()));
-	connect(te, SIGNAL(abortExecution()), static_cast<QObject*>(d_app->mantidUI), SLOT(cancelAllRunningAlgorithms()));
-	connect(te, SIGNAL(ScriptIsActive(bool)), this, SLOT(executionStateChange(bool)));
-	connect(d_app, SIGNAL(scriptingLineChange(int)), te, SLOT(updateLineMarker(int)));
-	setCentralWidget(te);
-
-	initMenu();
+  initMenu();
 
   //Mantid - Moved this to after output and scriptedit have been created
-	initActions();
+  initActions();
 
-	//	setIcon(QPixmap(logo_xpm));
-	setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+  // Set the arrow visibility to that provided by the constructor
+  actionToggleArrow->setChecked(showProgressArrow);
+  toggleProgressArrow(showProgressArrow);
+  
+  //	setIcon(QPixmap(logo_xpm));
+  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
 
-	//updateWindowTitle(env->scriptingLanguage());
+  //updateWindowTitle(env->scriptingLanguage());
   setWindowTitle("MantidPlot: " + env->scriptingLanguage() + " Window - New File");
 
-	setFocusProxy(te);
-	setFocusPolicy(Qt::StrongFocus);
+  setFocusProxy(te);
+  setFocusPolicy(Qt::StrongFocus);
 }
 
 ScriptWindow::~ScriptWindow()
@@ -168,6 +171,18 @@ void ScriptWindow::askSave()
      save();
   }
   else return;
+}
+
+bool ScriptWindow::progressArrowVisible() const
+{
+  if( actionToggleArrow )
+  {
+    return actionToggleArrow->isChecked();
+  }
+  else 
+  {
+    return true;
+  }
 }
 
 void ScriptWindow::initMenu()
@@ -300,9 +315,15 @@ void ScriptWindow::initActions()
 	windowMenu->addAction(actionHide);
 
 	actionViewScriptOutput = outputWindow->toggleViewAction();
-	actionViewScriptOutput->setText("&Show Script Window");
+	actionViewScriptOutput->setText("&Show Output");
 	actionViewScriptOutput->setChecked(true);
-	windowMenu->addAction(actionViewScriptOutput);	
+	windowMenu->addAction(actionViewScriptOutput);
+
+	//Show/hide the execution arrow
+	actionToggleArrow = new QAction(tr("Show &Progress Arrow"), this);
+	actionToggleArrow->setCheckable(true);
+	windowMenu->addAction(actionToggleArrow);
+	connect(actionToggleArrow, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
 	
 	connect(te, SIGNAL(copyAvailable(bool)), actionCut, SLOT(setEnabled(bool)));
 	connect(te, SIGNAL(copyAvailable(bool)), actionCopy, SLOT(setEnabled(bool)));
@@ -389,6 +410,28 @@ void ScriptWindow::executionStateChange(bool active)
   {
     outputWindow->setWindowTitle("Script Output - Status: Stopped");
   }
+}
+
+void ScriptWindow::toggleProgressArrow(bool on)
+{
+  QString code = "sys.settrace(";
+  if( on )
+  {
+    code += "traceit";
+    connect(d_app, SIGNAL(scriptingLineChange(int)), te, SLOT(updateLineMarker(int)));
+  }
+  else
+  {
+    code += "None";
+    disconnect(d_app, SIGNAL(scriptingLineChange(int)), te, SLOT(updateLineMarker(int)));
+    te->updateLineMarker(-1);
+  }
+
+  code += ")";
+  // This should be a silent command so disable output redirection
+  disconnect(te, SIGNAL(outputMessage(const QString&)), this, SLOT(scriptMessage(const QString&)));
+  te->runScript(code);
+  connect(te, SIGNAL(outputMessage(const QString&)), this, SLOT(scriptMessage(const QString&)));
 }
 
 void ScriptWindow::newScript()

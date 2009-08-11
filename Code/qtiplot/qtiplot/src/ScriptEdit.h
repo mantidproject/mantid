@@ -92,6 +92,8 @@ public slots:
   QString outputSeparator();
   void updateLineMarker(int);
 
+  void runScript(const QString & code);
+
   signals:
   void outputMessage(const QString& text);
   void outputError(const QString& text);
@@ -105,9 +107,6 @@ public slots:
 
   protected:
   virtual void contextMenuEvent(QContextMenuEvent *e);
-
-private:
-  void runScript(const QString & code);
 
   private:
     Script *myScript;

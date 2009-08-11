@@ -4548,7 +4548,8 @@ void ApplicationWindow::readSettings()
 	settings.beginGroup("/ScriptWindow");
 	d_script_win_on_top = settings.value("/AlwaysOnTop", false).toBool();  //M. Gigg, Mantid
 	d_script_win_rect = QRect(settings.value("/x", 0).toInt(), settings.value("/y", 0).toInt(),
-							settings.value("/width", 500).toInt(), settings.value("/height", 300).toInt());
+				  settings.value("/width", 500).toInt(), settings.value("/height", 300).toInt());
+	d_script_win_arrow = settings.value("/ProgressArrow", true).toBool();  // Mantid - restore progress arrow state
 	settings.endGroup();
 
 	settings.beginGroup("/ToolBars");
@@ -4862,13 +4863,17 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/KeepAspect", d_keep_plot_aspect);
 	settings.endGroup(); // ExportImage
 
-	settings.beginGroup("/ScriptWindow");
-	settings.setValue("/AlwaysOnTop", d_script_win_on_top);
-	settings.setValue("/x", d_script_win_rect.x());
-	settings.setValue("/y", d_script_win_rect.y());
-	settings.setValue("/width", d_script_win_rect.width());
-	settings.setValue("/height", d_script_win_rect.height());
-	settings.endGroup();
+	if( scriptWindow )
+	{
+	  settings.beginGroup("/ScriptWindow");
+	  settings.setValue("/AlwaysOnTop", d_script_win_on_top);
+	  settings.setValue("/x", d_script_win_rect.x());
+	  settings.setValue("/y", d_script_win_rect.y());
+	  settings.setValue("/width", d_script_win_rect.width());
+	  settings.setValue("/height", d_script_win_rect.height());
+	  settings.setValue("/ProgressArrow", scriptWindow->progressArrowVisible());
+	  settings.endGroup();
+	}
 
     settings.beginGroup("/ToolBars");
     settings.setValue("/FileToolBar", d_file_tool_bar);
@@ -14492,7 +14497,7 @@ void ApplicationWindow::goToColumn()
 void ApplicationWindow::showScriptWindow()
 {
 	if (!scriptWindow){
-		scriptWindow = new ScriptWindow(scriptEnv, this);
+	  scriptWindow = new ScriptWindow(scriptEnv, this, d_script_win_arrow);
     //scriptWindow->setWindowTitle(tr("MantidPlot - Script Window"));   Mantid - title is now set dynamically
 		scriptWindow->resize(d_script_win_rect.size());
 		scriptWindow->move(d_script_win_rect.topLeft());
