@@ -7,5 +7,5 @@
 ../Nexus/test/LoadNexusTest.h
 ../Nexus/test/LoadRSaveNLoadNcspTest.h
 ../Nexus/test/SaveNexusProcessedTest.h
-../Nexus/test/SaveNexusTest.h
+../Nexus/test/SaveNeXusTest.h
 
