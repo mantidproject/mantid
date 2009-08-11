@@ -77,7 +77,6 @@ void SimpleIntegration::exec()
   bool is_distrib=outputWorkspace->isDistribution();
 
   Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
-  double sumY, sumE;
   // Loop over spectra
   PARALLEL_FOR1(localworkspace)
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
@@ -110,6 +109,7 @@ void SimpleIntegration::exec()
     MantidVec::difference_type distmin=std::distance(X.begin(),lowit);
     MantidVec::difference_type distmax=std::distance(X.begin(),highit);
 
+    double sumY, sumE;
     if (!is_distrib) //Sum the Y, and sum the E in quadrature
     {
       sumY=std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);

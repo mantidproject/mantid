@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_GROUP_H_
-#define MANTID_ALGORITHM_GROUP_H_
+#ifndef MANTID_ALGORITHM_UNGROUP_H_
+#define MANTID_ALGORITHM_UNGROUP_H_
 
 //----------------------------------------------------------------------
 // Includes
