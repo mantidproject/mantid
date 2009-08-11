@@ -77,15 +77,15 @@ void Max::exec()
   // Create the 1D workspace for the output
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
-
+  MantidVec::difference_type distmin0 = 1,distmax0 = 0;
   Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
-
+  int j=0;
   // Loop over spectra
-  for (int i = m_MinSpec,j=0; i <= m_MaxSpec; ++i,++j)
+  for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
     if (localworkspace->axes() > 1)
     {
-      outputWorkspace->getAxis(1)->spectraNo(j) = localworkspace->getAxis(1)->spectraNo(i);
+      outputWorkspace->getAxis(1)->spectraNo(j++) = localworkspace->getAxis(1)->spectraNo(i);
     }
 
     // Retrieve the spectrum into a vector
@@ -112,8 +112,10 @@ void Max::exec()
         g_log.debug()<<"Starting with spectrum "<<i<<" bins selected: from "<<distmin<<" ("<<*(X.begin()+distmin)
         <<") to "<<distmax<<" ("<<*(X.begin()+distmax)<<")\n";
 
+    // Find the max element
     MantidVec::const_iterator maxY=std::max_element(Y.begin()+distmin,Y.begin()+distmax);
     MantidVec::difference_type d=std::distance(Y.begin(),maxY);
+    // X boundaries for the max element
     outputWorkspace->dataX(i)[0]=*(X.begin()+d);
     outputWorkspace->dataX(i)[1]=*(X.begin()+d+1); //This is safe since X is of dimension Y+1
     outputWorkspace->dataY(i)[0]=*maxY;
