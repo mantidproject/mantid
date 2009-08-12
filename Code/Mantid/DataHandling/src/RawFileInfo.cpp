@@ -47,7 +47,7 @@ void RawFileInfo::exec()
   isis_raw->ioRAW(file, true);
   
   //  First get the general information about the run
-  std::string title(isis_raw->hdr.hd_run, 80);
+  std::string title(isis_raw->hdr.hd_run, 69);
   // Insert some spaces to tidy the string up a bit
   title.insert(5, " ");
   title.insert(26, " ");
@@ -106,7 +106,7 @@ void RawFileInfo::exec()
       << static_cast<double>(isis_raw->rpb.r_gd_prtn_chrg) << static_cast<double>(isis_raw->rpb.r_tot_prtn_chrg)
       << isis_raw->rpb.r_goodfrm << isis_raw->rpb.r_rawfrm << isis_raw->rpb.r_dur_wanted
       << isis_raw->rpb.r_dur_secs << isis_raw->rpb.r_mon_sum1 << isis_raw->rpb.r_mon_sum2 << isis_raw->rpb.r_mon_sum3
-      << std::string(isis_raw->rpb.r_enddate, 12) << std::string(isis_raw->rpb.r_endtime, 8) << isis_raw->rpb.r_prop;
+      << std::string(isis_raw->rpb.r_enddate, 11) << std::string(isis_raw->rpb.r_endtime, 8) << isis_raw->rpb.r_prop;
     
     setProperty("RunParameterTable", run_table);
   }
