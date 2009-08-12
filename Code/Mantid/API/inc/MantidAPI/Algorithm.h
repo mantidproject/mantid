@@ -286,7 +286,7 @@ namespace Mantid
 			/// checks the property is output workspace property
 			bool isOutputWorkspaceProperty( Mantid::Kernel::Property* prop);
 			/// setting the input properties for an algorithm - to handle workspace groups 
-			bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropName,Mantid::Kernel::Property* prop,const std::string&inputWS );
+			bool setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropName,Mantid::Kernel::Property* prop,const std::string&inputWS );
 			/// setting the output properties for an algorithm -to handle workspace groups 
 			void setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nperiod,WorkspaceGroup_sptr sptrWSGrp,std::string &outParentname);
 
