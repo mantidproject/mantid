@@ -37,7 +37,7 @@ class AlgorithmMonitor;
 class InstrumentWindow;
 
 
-/** 
+/**
     MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid framework.
 
     @author Roman Tolchenov, Tessella Support Services plc
@@ -61,7 +61,7 @@ class InstrumentWindow;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-    Code Documentation is available at: <http://doxygen.mantidproject.org>    
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 /// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
@@ -83,49 +83,49 @@ public:
 
     // Save settings to a persistent store
     void saveSettings() const;
-    
+
     // Initialization
     void init();
-   
+
     // Pointer to QtiPLot main window
     ApplicationWindow *appWindow(){return m_appWindow;}
-    
+
     // Release date string formed during scons building
     QString releaseDate();
 
     // Returns a list of open workspaces
     QStringList getWorkspaceNames();
-    
+
     // Returns a list of registered algorithms
     QStringList getAlgorithmNames();
-    
+
     // Create an algorithm using Mantid FrameworkManager
     Mantid::API::IAlgorithm_sptr CreateAlgorithm(const QString& algName);
-    
+
     // Gets a pointer to workspace workspaceName
     Mantid::API::Workspace_sptr getWorkspace(const QString& workspaceName);
 
     // Deletes workspace from QtiPlot
     bool deleteWorkspace(const QString& workspaceName);
-    
+
     // Returns the name of selected workspace in exploreMantid window
     QString getSelectedWorkspaceName();
-    
+
     // Returns the pointer of workspace selected in exploreMantid window
     Mantid::API::Workspace_sptr getSelectedWorkspace();
-    
+
     // Returns the name and version of the algorithm selected in algorithm dock window
     void getSelectedAlgorithm(QString& algName, int& version);
-    
+
     // Adjusts QtiPlot's main menu if a MantidMatrix becomes active (receives focus)
     bool menuAboutToShow(QMdiSubWindow *w);
-    
+
     // Removes references to MantidMatrix w in QtiPlot (called when matrix closes)
     void removeWindowFromLists(MdiSubWindow* w);
-    
+
     // Prepares the contex menu for MantidMatrix
     void showContextMenu(QMenu& cm, MdiSubWindow* w);
-    
+
     // Handles workspace drop operation to QtiPlot (imports the workspace to MantidMatrix)
     bool drop(QDropEvent* e);
 
@@ -133,13 +133,13 @@ public:
 
     // Creates a 3D plot in QtiPlot if the active window is a MantidMatrix
     Graph3D *plot3DMatrix(int style);
-    
+
     // Creates a 2D plot in QtiPlot if the active window is a MantidMatrix
     MultiLayer *plotSpectrogram(Graph::CurveType type);
 
     /// Create a Table form specified spectra in a MatrixWorkspace
     Table* createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs=true, bool binCentres=false);
-    
+
 
     // Copies selected rows from MantidMatrix to Y and errY columns of a new Table.
     Table* createTableFromSelectedRows(MantidMatrix *m, bool errs = true, bool binCentres=false);
@@ -152,7 +152,7 @@ public:
     MultiLayer* createGraphFromTable(Table* t, int type = 0);
 
     /// Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* createGraphFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs=true, bool binCentres=false, bool tableVisible = false);
+    MultiLayer* createGraphFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int>& indexList, bool errs=true, bool binCentres=false, bool tableVisible = false);
 
     /// Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* createGraphFromSpectraRange(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool binCentres=false, bool tableVisible = false);
@@ -201,7 +201,7 @@ public:
   // An alias for plotTimeBin
   MultiLayer* plotBin(const QString& wsName, int bin, bool showMatrix = false);
   bool runAlgorithmAsynchronously(const QString & algName);
-  bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values, 
+  bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QString & enabled_names);
 /// Group selected workspaces
 	void groupWorkspaces();
@@ -236,7 +236,7 @@ signals:
 
     // Display a critical error dialog box
     void needToShowCritical(const QString&);
-					   
+
 public slots:
 
     void test();
@@ -254,12 +254,12 @@ public slots:
     void importWorkspace();
 	// #539: For adding Workspace History display to MantidPlot
 	void showAlgorithmHistory();
-    
+
     // Import a workspace wsName
     void importWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
 
   // Create a MantidMatrix from workspace wsName
-  MantidMatrix *importMatrixWorkspace(const QString& wsName, int lower = -1, int upper = -1, 
+  MantidMatrix *importMatrixWorkspace(const QString& wsName, int lower = -1, int upper = -1,
 				      bool showDlg = true, bool makeVisible = true);
 
     // Create a MantidMatrix from workspace wsName
@@ -269,7 +269,7 @@ public slots:
     void plotFirstSpectrum();
 
     void createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
-	
+
     // Slots responding to MantidMatrix context menu commands
     void copyRowToTable();
     void copyColumnToTable();
@@ -285,14 +285,14 @@ public slots:
 
     // Execute algorithm given name and version
     void executeAlgorithm(QString algName, int version);
-	
+
     // Show Qt critical error message box
     void showCritical(const QString&);
 
     // Show the dialog monitoring currently running algorithms
     void showAlgMonitor();
 
-    // Called from ApplicationWindow to customize the main menu 
+    // Called from ApplicationWindow to customize the main menu
 	void mantidMenuAboutToShow();
 
 	void manageMantidWorkspaces();
@@ -335,11 +335,11 @@ public slots:
 private slots:
 
     // Called in response to closedWindow(...) signal from a window with dependecies
-    void closeDependents(MdiSubWindow* w); 
-	
+    void closeDependents(MdiSubWindow* w);
+
 
 #ifdef _WIN32
-public: 
+public:
     // Shows 2D plot of current memory usage.
     void memoryImage();
 #endif
@@ -374,7 +374,7 @@ private:
 	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
 	void moveSelctedWSChildrentoRenamedWS(const std::string & renamedWSName,QList<QTreeWidgetItem*>& selectedItems);
 
-	
+
 
     // Private variables
 
@@ -409,7 +409,7 @@ private:
 
 };
 
-static const char * mantid_matrix_xpm[] = { 
+static const char * mantid_matrix_xpm[] = {
 "13 12 20 1",
 " 	c None",
 ".	c #000821",
@@ -444,7 +444,7 @@ static const char * mantid_matrix_xpm[] = {
 "{]]{]]{]]{]]{",
 "{{{{{{{{{{{{{"};
 
-static const char * mantid_xpm[] = { 
+static const char * mantid_xpm[] = {
 "13 12 3 1",
 " 	c None",
 ".	c #000821",
@@ -462,7 +462,7 @@ static const char * mantid_xpm[] = {
 "             ",
 "             "};
 
-static const char * mantid_wsgroup_xpm[] = { 
+static const char * mantid_wsgroup_xpm[] = {
 "13 12 20 1",
 " 	c None",
 ".	c #000821",
