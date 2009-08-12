@@ -97,8 +97,12 @@ void SaveNexus::exec()
   std::string::size_type index = m_inputWorkspace.find_last_of("_");
   if (index != std::string::npos)
   {
-    std::string::reference ref = m_inputWorkspace.at(index + 1);
+	std::string::size_type len= m_inputWorkspace.length();
+
+   // std::string::reference ref = m_inputWorkspace.at(index + 1);
+	std::string ref=m_inputWorkspace.substr(index + 1,len-index);
     period = ref;
+	//g_log.error()<<"period = "<<period<<std::endl;
   }
   if (!period.compare("1"))
   { // if m_bAppend is default (false) overwrite (delete )the .nxs file for period 1
