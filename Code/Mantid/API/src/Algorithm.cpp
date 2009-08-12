@@ -141,31 +141,31 @@ bool Algorithm::execute()
 				  //checking the input is a group
 				  try
 				  {
-					//check if the pointer is valid, it won't be if it is a group
-					 Workspace_sptr wsSptr=wsProp->getWorkspace();
-					 if(!wsSptr)
-					 {
-						 boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
-							 boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
-						 if(wsGrpSptr)
-						 {	 //this must be a group - test for that
-							 g_log.debug()<<"input is workspace group-processGroups called "<<std::endl;
-							 return(Algorithm::processGroups(wsGrpSptr,Prop));
-					     }
-					 }
+					  //check if the pointer is valid, it won't be if it is a group
+					  Workspace_sptr wsSptr=wsProp->getWorkspace();
+					  if(!wsSptr)
+					  {
+						  boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+							  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
+						  if(wsGrpSptr)
+						  {	 //this must be a group - test for that
+							  g_log.debug()<<"input is workspace group-processGroups called "<<std::endl;
+							  return(Algorithm::processGroups(wsGrpSptr,Prop));
+						  }
+					  }
 
 				  }
 				  catch (std::exception &ex)
 				  {					 
-					  g_log.debug()<<ex.what()<<std::endl; 
-					
+					  g_log.error()<<ex.what()<<std::endl; 
+
 				  }
-				 
+
 			  }
-        catch(Exception::NotFoundError&)//if not a valid object in analysis data service
-        {
-          g_log.debug()<<" Failing to cast the workspace pointer of workspace  "<< wsName<<" Workspace group"<<std::endl;
-  	    }
+			  catch(Exception::NotFoundError&e)//if not a valid object in analysis data service
+			  {
+				  g_log.debug()<<e.what()<<std::endl;
+			  }
 		  }//end of if loop checking the direction
 	  }//end of if loop for checking workspace properties
 
@@ -530,6 +530,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	bool bnewGoup1=true;
 	bool bnewGoup2=true;
 	bool bStatus=false;
+	std::string prevPropName("");
 	
 	//getting the input workspace group names
 	std::vector<std::string> inputWSNames=inputwsPtr->getNames();
@@ -537,7 +538,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	//size is one if only group header.
 	//return if atleast one meber is not there in group to process
 	if(nSize<2)
-	{	g_log.error()<<"Input WorkspaceGruop has no child workspaces  "<<std::endl;
+	{	g_log.error()<<"Input WorkspaceGroup has no members to process  "<<std::endl;
 		return false;
 	}
 	std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
@@ -559,7 +560,15 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 			if(isWorkspaceProperty(*itr) )
 			{
 				if(isInputWorkspaceProperty(*itr))
-				{setInputWSProperties(alg,*itr,*wsItr);
+				{
+					//setInputWSProperties(alg,*itr,*wsItr);
+					bool b=setInputWSProperties(alg,prevPropName,*itr,*wsItr);
+					if(!b)
+					{
+					 g_log.error("Giving two workspace groups as input is not yet implemented");
+					 return false;
+						
+					}
 				}
 				if(isOutputWorkspaceProperty(*itr))
 				{
@@ -586,7 +595,9 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 			{
 				alg->setPropertyValue((*itr)->name(),(*itr)->value());
 			}
-		}
+		}//end of for loop for setting properties
+		//resetting the previous properties at the end of each execution 
+		prevPropName="";
 		// execute the algorithm 
 		bStatus=alg->execute();
 		// status of eac execution is checking 
@@ -596,12 +607,12 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 		progress(double((execPercentage)/execTotal));
 		//if a workspace execution fails
 		if(!bStatus)
-		{  	g_log.error()<<"Algorithm execution failed for the input workspace "<<(*wsItr)<<std::endl;
+		{  	g_log.error()<<" execution failed for the input workspace "<<(*wsItr)<<std::endl;
 		}
 		//increment count for outworkpsace name
 		nPeriod++;
 
-	}//end of for loop for input workspace group
+	}//end of for loop for input workspace group members processing
 	//if all passed 
 	if(bgroupExecStatus)
 	{setExecuted(true);
@@ -621,27 +632,46 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
  *  @param pAlg  pointer to algorithm
  *  @param  prop  pointer to a vector holding the input properties
  *  @param  inputWS input workspace name
+ *  @returns true - if property is set .
  */
-void Algorithm::setInputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property* prop,const std::string&inputWS )
+bool  Algorithm::setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropName,Mantid::Kernel::Property* prop,const std::string&inputWS )
 {
-	std::string wsname=prop->value();
+	 std::string wsname=prop->value();
 	try
-	{
+	{ 
+		std::string currentPropName=prop->name();
+		if(!prevPropName.empty())
+		{			
+			//check the property name 
+			if(currentPropName.compare(prevPropName))
+			{
+				boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
+					boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
+				if(wsGrpSptr)
+				{
+					return false;
+				}
+			}
+		}
 		boost::shared_ptr<WorkspaceGroup> wsGrpSptr =
 			boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsname));
 		if(wsGrpSptr)
 		{
 			pAlg->setPropertyValue(prop->name(), inputWS);
+			prevPropName=currentPropName;
 		}
 		else
 		{
 			pAlg->setPropertyValue(prop->name(), wsname);
 		}
+		return true;
 	}
-	catch(Exception::NotFoundError&)//if not a valid object in analysis data service
+	catch(Exception::NotFoundError&e )//if not a valid object in analysis data service
 	{
-		g_log.information()<<" Trying to retrieve  Object "<< wsname<<" which is not there in ADS"<<std::endl;
+		g_log.error()<<e.what()<<std::endl;
+		return false;
 	}
+	
 }
 /** setting output workspace properties for an algorithm,for handling workspace goups.
  *  @param pAlg      pointer to algorithm
