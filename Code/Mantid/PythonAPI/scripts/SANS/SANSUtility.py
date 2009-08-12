@@ -30,15 +30,18 @@ def GetInstrumentDetails(instr_name, detbank):
 			return 192, smin, smax, 85000, 100000
 		else:
 			return -1, -1, -1, -1, -1
+			
+def InfiniteCylinderXML(id, centre, radius, axis):
+	return  '<infinite-cylinder id="' + str(id) + '">' + \
+	'<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
+	'<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
+	'<radius val="' + str(radius) + '" />' + \
+	'</infinite-cylinder>\n'
 
 # Mask a cylinder, specifying the algebra to use
 def MaskWithCylinder(workspace, radius, xcentre, ycentre, algebra):
     '''Mask a cylinder on the input workspace.'''
-    xmldef = '<infinite-cylinder id="shape">'
-    xmldef += '<centre x="' + str(xcentre) + '" y="' + str(ycentre) + '" z="0.0" />'
-    xmldef += '<axis x="0.0" y="0.0" z="1" />'
-    xmldef += '<radius val="' + str(radius) + '" />'
-    xmldef += '</infinite-cylinder>'
+    xmldef = InfiniteCylinderXML('shape', [xcentre, ycentre, 0.0], radius, [0,0,1])
     xmldef += '<algebra val="' + algebra + 'shape" />'
     # Apply masking
     MaskDetectorsInShape(workspace,xmldef)
@@ -64,6 +67,7 @@ def spectrumBlock(start_spec, ydim, xdim, strip_dim):
     return output
 
 # Convert a mask string to a spectra list
+# 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
 def ConvertToSpecList(maskstring, firstspec, dimension):
     '''Compile spectra ID list'''
     if maskstring == '':
@@ -72,7 +76,36 @@ def ConvertToSpecList(maskstring, firstspec, dimension):
     speclist = ''
     for x in masklist:
         x = x.lower()
-        if '>' in x:
+#   new stuff -----------------------------------------------------------
+        if '+' in x:
+            bigPieces = x.split('+')
+            if '>' in bigPieces[0]:
+                pieces = bigPieces[0].split('>')
+                low = int(pieces[0].lstrip('hv'))
+                upp = int(pieces[1].lstrip('hv'))
+            else:
+                low = int(bigPieces[0].lstrip('hv'))
+                upp = low
+            if '>' in bigPieces[1]:
+                pieces = bigPieces[1].split('>')
+                low2 = int(pieces[0].lstrip('hv'))
+                upp2 = int(pieces[1].lstrip('hv'))
+            else:
+                low2 = int(bigPieces[1].lstrip('hv'))
+                upp2 = low2            
+            if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
+                ydim=abs(upp-low)+1
+                xdim=abs(upp2-low2)+1
+                speclist += spectrumBlock(firstspec + low*dimension + low2, ydim, xdim, dimension) + ','
+            elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
+                xdim=abs(upp-low)+1
+                ydim=abs(upp2-low2)+1
+                speclist += spectrumBlock(firstspec + low2*dimension + low, ydim, xdim, dimension) + ','
+            else:
+                print "error in mask, ignored:  " + x
+# end of new stuff --------------------------------------------
+# CHECK taking abs(upp-low) may avoid array index issues, but to get h9>h8 to work need to use low = min(low,upp) ???
+        elif '>' in x:
             pieces = x.split('>')
             low = int(pieces[0].lstrip('hvs'))
             upp = int(pieces[1].lstrip('hvs'))
@@ -133,64 +166,55 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 	Multiply(inputWS, "scalar", inputWS)
 	mantid.deleteWorkspace("scalar")
 
-# Define a cone in XML for the centre finding algorithm 
-def ConeXML(id, tip_pt, height, axis, angle = 45.0):
-	'''Defiine a cone in XML'''
-	return'<cone id="' + id + '" >' + \
-	'<tip-point x="' + str(tip_pt[0]) + '" y="' + str(tip_pt[1]) + '" z="' + str(tip_pt[2]) + '" />' + \
-	'<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-	'<angle val="' + str(angle) + '" />' + \
-	'<height val="' + str(height) +'" />' + \
-	'</cone>\n'
-
-# Define a sphere in XML for the centre finding algorithm 
-def SphereXML(id, centre, radius):
-	'''Define a hemisphere where the axis points from the base to the arc'''
-	return '<sphere id="' + id + '">' + \
-	'<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' +str(centre[2]) + '" />' + \
-	'<radius val="' + str(radius) + '" />' + \
-	'</sphere>\n'
-
-# Define a plane in XML for the centre finding algorithm 
-def InfinitePlaneXML(id, centre, axis):
-	return '<infinite-plane id="' + id+ '">' + \
-	'<point-in-plane x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' +str(centre[2]) + '" />' + \
-	'<normal-to-plane x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-	'</infinite-plane>\n'
-
-# Define a cone with a hemisphere attached to its base for the centre finding algorithm 
-def RoundedConeXML(tip_pt, hypot, axis, id):
-	coneheight = hypot/math.sqrt(2.0)
-	cid = id+ '-cone'
-	xmlstring = ConeXML(cid , tip_pt, coneheight, axis)
-	# The sphere centre is the coneheight times the axis direction (assuming a unit axis vector)
-	spherecentre = [ tip_pt[idx] + coneheight*(-1.*axis[idx]) for idx in range(0,3) ]
-	sphradius = hypot*( 1.0 - (1.0/math.sqrt(2.0)) )
-	sid = id + '-sph'
-	xmlstring += SphereXML(sid, spherecentre, sphradius)
-	# Not cut off half of the sphere with a plane
-	pid = id + '-pla'
-	xmlstring += InfinitePlaneXML(pid, spherecentre, [-1*axis[idx] for idx in range(0,3)])
-	# This first takes the intersection of the plane and the sphere and then takes the union of that with the
-	# cone to produce a cone with a hemisphere stuck on the end
-	xmlstring+= '<algebra val = "' + cid + ':' + '(' + sid + ' ' + pid + ')' + '"/>\n'
+def InfinitePlaneXML(id, planept, normalpt):
+	return  '<infinite-plane id="' + str(id) + '">' + \
+	    '<point-in-plane x="' + str(planept[0]) + '" y="' + str(planept[1]) + '" z="' + str(planept[2]) + '" />' + \
+	    '<normal-to-plane x="' +str(normalpt[0]) + '" y="' + str(normalpt[1]) + '" z="' + str(normalpt[2]) + '" />' + \
+	    '</infinite-plane>'
+								     
+def QuadrantXML(centre,rmin,rmax,quadrant):
+	cin_id = 'cyl-in'
+	xmlstring = InfiniteCylinderXML(cin_id, centre, rmin, [0,0,1])
+	cout_id = 'cyl-out'
+	xmlstring+= InfiniteCylinderXML(cout_id, centre, rmax, [0,0,1])
+	plane1Axis=None
+	plane2Axis=None
+	if quadrant == 'Left':
+		plane1Axis = [-1,1,0]
+		plane2Axis = [-1,-1,0]
+	elif quadrant == 'Right':
+		plane1Axis = [1,-1,0]
+		plane2Axis = [1,1,0]
+	elif quadrant == 'Up':
+		plane1Axis = [1,1,0]
+		plane2Axis = [-1,1,0]
+	elif quadrant == 'Down':
+		plane1Axis = [-1,-1,0]
+		plane2Axis = [1,-1,0]
+	else:
+		return ''
+	p1id = 'pl-a'
+	xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
+	p2id = 'pl-b'
+	xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
+	xmlstring += '<algebra val="(#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '"/>\n' 
 	return xmlstring
 
 # Create a workspace with a quadrant value in it 
-def CreateQuadrant(workspace, quadrant, xcentre, ycentre, zpos, rlimit, axis):
-	objxml = RoundedConeXML([xcentre,ycentre,zpos], rlimit, axis, 'quadrant')
+def CreateQuadrant(workspace, quadrant, xcentre, ycentre, rmin, rmax):
+	objxml = QuadrantXML([xcentre,ycentre, 0.0], rmin, rmax, quadrant)
 	finddead = FindDetectorsInShape(workspace, ShapeXML=objxml)
 	groupdet = GroupDetectors(workspace, quadrant, DetectorList = finddead.getPropertyValue("DetectorList"))
 	Integration(quadrant, quadrant)
 
 # Create 4 quadrants for the centre finding algorithm and return their names
-def GroupIntoQuadrants(workspace, xcentre, ycentre, zpos, rlimit):
+def GroupIntoQuadrants(workspace, xcentre, ycentre, rmin, rmax):
 	left_ws = 'Left'
-	CreateQuadrant(workspace, left_ws,xcentre, ycentre, zpos, rlimit, [1,0,0])
+	CreateQuadrant(workspace, left_ws,xcentre, ycentre, rmin, rmax)
 	right_ws = 'Right'
-	CreateQuadrant(workspace, right_ws, xcentre, ycentre, zpos, rlimit, [-1,0,0])
+	CreateQuadrant(workspace, right_ws,xcentre, ycentre, rmin, rmax)
 	up_ws = 'Up'
-	CreateQuadrant(workspace, up_ws, xcentre, ycentre, zpos, rlimit, [0,-1,0])
+	CreateQuadrant(workspace, up_ws,xcentre, ycentre, rmin, rmax)
 	dw_ws = 'Down'
-	CreateQuadrant(workspace, dw_ws,xcentre, ycentre, zpos, rlimit, [0,1,0])
+	CreateQuadrant(workspace, dw_ws,xcentre, ycentre, rmin, rmax)
 	return (left_ws, right_ws, up_ws, dw_ws)

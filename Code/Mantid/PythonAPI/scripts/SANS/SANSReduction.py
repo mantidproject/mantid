@@ -387,11 +387,11 @@ try:
 			# Arguments 0 and 1 are the sample and can setup details
 			FullWavReduction(args[0], args[1], True)
 		
-		zpos = args[2]
-		rlimit = args[3]
+		rlow = args[2]
+		rupp = args[3]
 		# The workspace that we want to group is the output of the sample reduction
 		ws_togroup = args[0][1]
-		quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, zpos, rlimit)
+		quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, 0.0, rlow, rupp)
 		left = mtd.getMatrixWorkspace(quad_ws[0])
 		right = mtd.getMatrixWorkspace(quad_ws[1])
 		up = mtd.getMatrixWorkspace(quad_ws[2])
@@ -400,7 +400,7 @@ try:
 		residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
 		return residue
 
-	def FindBeamCentre(rlimit, MaxIter = 10, xstart = None, ystart = None):
+	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 		global XVAR_PREV, YVAR_PREV
 		
 		if xstart == None or ystart == None:
@@ -437,9 +437,7 @@ try:
 
 		XVAR_PREV = -xstart
 		YVAR_PREV =  -ystart
-		# Any pixels z position on the rear/main detector will be fine 
-		rdet_zpos = mtd.getMatrixWorkspace(SCATTER_SAMPLE).getDetector(8000).getPos().getZ()
-		coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rdet_zpos, rlimit),xtol=1e-2, maxiter=MaxIter)
+		coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter)
 		
 		# Tidy up
 		mtd.deleteWorkspace('Left')
