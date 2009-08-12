@@ -213,7 +213,7 @@ void LoadISISNexus2::exec()
             MantidVec& E = localWorkspace->dataE(i);
             std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
             localWorkspace->getAxis(1)->spectraNo(i)= j + 1;
-            localWorkspace->dataX(i) = *m_timeChannelsVec;
+            localWorkspace->setX(i, m_timeChannelsVec);
             prog.report();
         }
 
