@@ -78,7 +78,7 @@ void SimpleIntegration::exec()
 
   Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
   // Loop over spectra
-  PARALLEL_FOR1(localworkspace,outputWorkspace)
+  PARALLEL_FOR2(localworkspace,outputWorkspace)
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
