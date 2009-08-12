@@ -151,21 +151,20 @@ namespace Mantid
       if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(total_specs,lengthIn,channelsPerSpectrum) &&
           total_specs == m_numberOfSpectra)
       {
-          ManagedRawFileWorkspace2D *localWorkspace_ptr = new ManagedRawFileWorkspace2D;
-          DataObjects::Workspace2D_sptr localWorkspace( dynamic_cast<DataObjects::Workspace2D*>(localWorkspace_ptr) );
-          const std::string cache_option = getPropertyValue("Cache");
-          int option = find(m_cache_options.begin(),m_cache_options.end(),cache_option) - m_cache_options.begin();
-          progress(0.,"Reading raw file...");
-          localWorkspace_ptr->setRawFile(m_filename,option);
-          runLoadInstrument(localWorkspace );
-          runLoadMappingTable(localWorkspace );
-          runLoadLog(localWorkspace );
-          localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
-          for (int i = 0; i < m_numberOfSpectra; ++i)
-              localWorkspace->getAxis(1)->spectraNo(i)= i+1;
-          populateInstrumentParameters(localWorkspace);
-          setProperty("OutputWorkspace",localWorkspace);
-          return;
+        const std::string cache_option = getPropertyValue("Cache");
+        int option = find(m_cache_options.begin(),m_cache_options.end(),cache_option) - m_cache_options.begin();
+        DataObjects::Workspace2D_sptr localWorkspace = 
+          DataObjects::Workspace2D_sptr(new ManagedRawFileWorkspace2D(m_filename, option));
+        progress(0.,"Reading raw file...");
+        runLoadInstrument(localWorkspace );
+        runLoadMappingTable(localWorkspace );
+        runLoadLog(localWorkspace );
+        localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+        for (int i = 0; i < m_numberOfSpectra; ++i)
+          localWorkspace->getAxis(1)->spectraNo(i)= i+1;
+        populateInstrumentParameters(localWorkspace);
+        setProperty("OutputWorkspace",localWorkspace);
+        return;
       }
 
       float* timeChannels = new float[lengthIn];

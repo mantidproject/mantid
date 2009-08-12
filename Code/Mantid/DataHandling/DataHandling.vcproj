@@ -289,6 +289,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\RawFileInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\RotateInstrumentComponent.cpp"
 				>
 			</File>
@@ -492,6 +496,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\MoveInstrumentComponent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\RawFileInfo.h"
 				>
 			</File>
 			<File

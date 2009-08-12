@@ -19,49 +19,38 @@ class ManagedRawFileWorkspace2DTest : public CxxTest::TestSuite
 public:
   ManagedRawFileWorkspace2DTest()
   {
+    Workspace = new ManagedRawFileWorkspace2D("../../../../Test/Data/HET15869.RAW",2);
   }
-  
-  void testWrongInit()
+
+  ~ManagedRawFileWorkspace2DTest()
   {
-    ManagedRawFileWorkspace2D ws;
-    ws.setTitle("testInit");
-    TS_ASSERT_THROWS_NOTHING( ws.initialize(5,5,5) )
-    TS_ASSERT_EQUALS( ws.getNumberHistograms(), 5 )
-    TS_ASSERT_EQUALS( ws.blocksize(), 5 )
-    TS_ASSERT_EQUALS( ws.size(), 25 )
-    
-    TS_ASSERT_THROWS( ws.dataX(0), std::runtime_error )
+    delete Workspace;
   }
 
   void testSetFile()
   {
-    ManagedRawFileWorkspace2D ws;
-    ws.setRawFile("../../../../Test/Data/HET15869.RAW",2);
-
-    TS_ASSERT_EQUALS( ws.getNumberHistograms(), 2584 )
-    TS_ASSERT_EQUALS( ws.blocksize(), 1675 )
-    TS_ASSERT_EQUALS( ws.size(), 4328200 )
+    TS_ASSERT_EQUALS( Workspace->getNumberHistograms(), 2584 )
+    TS_ASSERT_EQUALS( Workspace->blocksize(), 1675 )
+    TS_ASSERT_EQUALS( Workspace->size(), 4328200 )
     
-    TS_ASSERT_THROWS_NOTHING( ws.readX(0) )
+    TS_ASSERT_THROWS_NOTHING( Workspace->readX(0) )
   }
 
   void testCast()
   {
-    ManagedRawFileWorkspace2D *ws = new ManagedRawFileWorkspace2D;
-    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(ws) )
-    TS_ASSERT( dynamic_cast<Workspace2D*>(ws) )
-    TS_ASSERT( dynamic_cast<Mantid::API::Workspace*>(ws) )
+    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(Workspace) )
+    TS_ASSERT( dynamic_cast<Workspace2D*>(Workspace) )
+    TS_ASSERT( dynamic_cast<Mantid::API::Workspace*>(Workspace) )
   }
 
   void testId()
   {
-    TS_ASSERT( ! Workspace.id().compare("ManagedRawFileWorkspace2D") )
+    TS_ASSERT( ! Workspace->id().compare("ManagedRawFileWorkspace2D") )
   }
 
   void testData()
   {
-    ManagedRawFileWorkspace2D ws;
-    ws.setRawFile("../../../../Test/Data/HET15869.RAW");
+    ManagedRawFileWorkspace2D ws("../../../../Test/Data/HET15869.RAW");
 
     const std::vector<double>& x0 = ws.readX(0);
     TS_ASSERT_EQUALS( x0[0], 5. )
@@ -81,8 +70,7 @@ public:
 
   void testChanges()
   {
-    ManagedRawFileWorkspace2D ws;
-    ws.setRawFile("../../../../Test/Data/HET15869.RAW");
+    ManagedRawFileWorkspace2D ws("../../../../Test/Data/HET15869.RAW");
 
     std::vector<double>& y0 = ws.dataY(0);
     double oldValue0 = y0[100];
@@ -210,7 +198,7 @@ public:
   }
 
 private:
-  ManagedRawFileWorkspace2D Workspace;
+  ManagedRawFileWorkspace2D* Workspace;
 };
 
 #endif /*ManagedRawFileWorkspace2DTEST_H_*/

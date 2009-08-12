@@ -33,7 +33,8 @@ using namespace API;
 /// Constructor
 LoadRaw3::LoadRaw3() :
   Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0), 
-  m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+  m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),
+  m_prog(0.0)
 {
 }
 
@@ -89,7 +90,6 @@ void LoadRaw3::exec()
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  //ISISRAW iraw(NULL);
   FILE* file = fopen(m_filename.c_str(), "rb");
   if (file == NULL)
   {
@@ -158,26 +158,7 @@ void LoadRaw3::exec()
   if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(total_specs, lengthIn,
       channelsPerSpectrum) && total_specs == m_numberOfSpectra)
   {
-    ManagedRawFileWorkspace2D *localWorkspace_ptr = new ManagedRawFileWorkspace2D;
-    DataObjects::Workspace2D_sptr localWorkspace(
-        dynamic_cast<DataObjects::Workspace2D*> (localWorkspace_ptr));
-    const std::string cache_option = getPropertyValue("Cache");
-    int option = find(m_cache_options.begin(), m_cache_options.end(), cache_option)
-        - m_cache_options.begin();
-    progress(0., "Reading raw file...");
-    localWorkspace_ptr->setRawFile(m_filename, option);
-    runLoadInstrument(localWorkspace);
-    runLoadMappingTable(localWorkspace);
-    runLoadLog(localWorkspace);
-    localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
-    Progress prog(this, 0.0, 1.0, m_numberOfSpectra);
-    for (int i = 0; i < m_numberOfSpectra; ++i)
-    {
-      localWorkspace->getAxis(1)->spectraNo(i) = i + 1;
-      prog.report();
-    }
-    populateInstrumentParameters(localWorkspace);
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+    goManagedRaw();
     return;
   }
 
@@ -228,7 +209,6 @@ void LoadRaw3::exec()
     }
     isisRaw->skipData(period * (m_numberOfSpectra + 1));
     int counter = 0;
-    double prog = 0.0;
 
     for (int i = 1; i <= m_numberOfSpectra; ++i)
     {
@@ -236,6 +216,7 @@ void LoadRaw3::exec()
       if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
           i) != m_spec_list.end()))
       {
+        progress(m_prog,"Reading raw file data...");
         isisRaw->readData(histToRead);
         // Copy the data into the workspace vector, discarding the 1st entry, which is rubbish
         // But note that the last (overflow) bin is kept
@@ -254,7 +235,7 @@ void LoadRaw3::exec()
         {
           if (++histCurrent % 100 == 0)
           {
-            progress(double(histCurrent) / histTotal);
+            m_prog = double(histCurrent) / histTotal;
           }
           interruption_point();
         }
@@ -303,8 +284,7 @@ void LoadRaw3::exec()
         sptrWSGrp->add(wsName);
       setProperty(outws, boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
       // progress for workspace groups 
-      prog += (double(period) / (m_numberOfPeriods - 1));
-      progress(prog);
+      m_prog = (double(period) / (m_numberOfPeriods - 1));
     }
 
   } // loop over periods
@@ -358,9 +338,40 @@ void LoadRaw3::checkOptionalProperties()
 
 }
 
+/// Creates a ManagedRawFileWorkspace2D
+void LoadRaw3::goManagedRaw()
+{
+  const std::string cache_option = getPropertyValue("Cache");
+  int option = find(m_cache_options.begin(), m_cache_options.end(), cache_option)
+    - m_cache_options.begin();
+  progress(m_prog, "Reading raw file data...");
+  DataObjects::Workspace2D_sptr localWorkspace = 
+    DataObjects::Workspace2D_sptr(new ManagedRawFileWorkspace2D(m_filename, option));
+  m_prog = 0.2;
+  runLoadInstrument(localWorkspace);
+  m_prog = 0.4;
+  runLoadMappingTable(localWorkspace);
+  m_prog = 0.5;
+  runLoadLog(localWorkspace);
+  localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+  m_prog = 0.7;
+  progress(m_prog);
+  for (int i = 0; i < m_numberOfSpectra; ++i)
+  {
+    localWorkspace->getAxis(1)->spectraNo(i) = i + 1;
+  }
+  m_prog = 0.9;
+  populateInstrumentParameters(localWorkspace);
+  m_prog = 1.0;
+  progress(m_prog);
+  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+}
+
 /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
 void LoadRaw3::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
 {
+  g_log.debug("Loading the instrument definition...");
+  progress(m_prog,"Loading the instrument geometry...");
   // Determine the search directory for XML instrument definition files (IDFs)
   std::string directoryName = Kernel::ConfigService::Instance().getString(
       "instrumentDefinition.directory");
@@ -428,6 +439,8 @@ void LoadRaw3::runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr localWorks
 /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
 void LoadRaw3::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
 {
+  g_log.debug("Loading the spectra-detector mapping...");
+  progress(m_prog,"Loading the spectra-detector mapping...");
   // Now determine the spectra to detector map calling sub-algorithm LoadMappingTable
   // There is a small penalty in re-opening the raw file but nothing major.
   IAlgorithm_sptr loadmap = createSubAlgorithm("LoadMappingTable");
@@ -448,6 +461,8 @@ void LoadRaw3::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
 /// Run the LoadLog sub-algorithm
 void LoadRaw3::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int period)
 {
+  g_log.debug("Loading the log files...");
+  progress(m_prog, "Reading log files...");
   IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");
   // Pass through the same input filename
   loadLog->setPropertyValue("Filename", m_filename);
@@ -480,6 +495,8 @@ double LoadRaw3::dblSqrt(double in)
  */
 void LoadRaw3::populateInstrumentParameters(DataObjects::Workspace2D_sptr localWorkspace)
 {
+  g_log.debug("Populating the instrument parameters...");
+  progress(m_prog,"Populating the instrument parameters...");
   // Get instrument and sample
   boost::shared_ptr<Instrument> instrument;
   boost::shared_ptr<Sample> sample;

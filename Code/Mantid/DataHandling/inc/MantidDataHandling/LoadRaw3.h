@@ -83,6 +83,7 @@ namespace Mantid
       void exec();
 
       void checkOptionalProperties();
+      void goManagedRaw();
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
@@ -110,8 +111,10 @@ namespace Mantid
       int m_spec_max;
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
+      /// The current value of the progress counter
+      double m_prog;
 
-	   ///a flag int value to indicate that the value wasn't set by users
+	    ///a flag int value to indicate that the value wasn't set by users
       static const int unSetInt = INT_MAX-15;
 
       /// Personal wrapper for sqrt to allow msvs to compile
