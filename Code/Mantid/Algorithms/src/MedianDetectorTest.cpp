@@ -19,7 +19,6 @@ DECLARE_ALGORITHM(MedianDetectorTest)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 
 void MedianDetectorTest::init()
 {

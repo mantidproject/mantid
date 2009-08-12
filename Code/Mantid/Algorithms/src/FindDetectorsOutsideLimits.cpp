@@ -24,33 +24,32 @@ namespace Algorithms
       new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector" );
-    declareProperty("HighThreshold", EMPTY_DBL(),
-        new MandatoryValidator<double>(),
-        "Spectra whose total number of counts are above or equal to this value will be\n"
-        "marked bad" );
+    declareProperty("HighThreshold", 0.0,
+      "Spectra whose total number of counts are above this value will be\n"
+      "marked bad" );
+    declareProperty("LowThreshold",0.0,
+      "Spectra whose total number of counts are below this value will be\n"
+      "marked bad (default 0)" );
 
     BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
     mustBePositive->setLower(0);
-    declareProperty("LowThreshold",0.0, mustBePositive,
-        "Spectra whose total number of counts are below or equal to this value will be\n"
-        "marked bad (default 0)" );
-      declareProperty("GoodValue",0.0, mustBePositive->clone(),
-        "The value to be assigned to spectra flagged as 'live' (default 0.0)" );
-      declareProperty("BadValue",100.0, mustBePositive->clone(),
-        "The value to be assign to spectra flagged as 'bad' (default 100.0)" );
-      declareProperty("RangeLower", EMPTY_DBL(),
-        "No bin with a boundary at an x value less than this will be used\n"
-        "in the summation that decides if a detector is 'bad' (default: the\n"
-        "start of each histogram)" );
-      declareProperty("RangeUpper", EMPTY_DBL(),
-        "No bin with a boundary at an x value higher than this value will\n"
-        "be used in the summation that decides if a detector is 'bad'\n"
-        "(default: the end of each histogram)" );
-      declareProperty("OutputFile","",
-        "A filename to which to write the list of dead detector UDETs" );
+    declareProperty("GoodValue",0.0, mustBePositive,
+      "The value to be assigned to spectra flagged as 'live' (default 0.0)" );
+    declareProperty("BadValue",100.0, mustBePositive->clone(),
+      "The value to be assign to spectra flagged as 'bad' (default 100.0)" );
+    declareProperty("RangeLower", EMPTY_DBL(),
+      "No bin with a boundary at an x value less than this will be used\n"
+      "in the summation that decides if a detector is 'bad' (default: the\n"
+      "start of each histogram)" );
+    declareProperty("RangeUpper", EMPTY_DBL(),
+      "No bin with a boundary at an x value higher than this value will\n"
+      "be used in the summation that decides if a detector is 'bad'\n"
+      "(default: the end of each histogram)" );
+    declareProperty("OutputFile","",
+      "A filename to which to write the list of dead detector UDETs" );
       // This output property will contain the list of UDETs for the dead detectors
-      declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
-    }
+    declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
+  }
 
     /** Executes the algorithm
      *
@@ -58,10 +57,16 @@ namespace Algorithms
      */
     void FindDetectorsOutsideLimits::exec()
     {
-      double lowThreshold = getProperty("LowThreshold");
-      double highThreshold = getProperty("HighThreshold");
       double liveValue = getProperty("GoodValue");
       double deadValue = getProperty("BadValue");
+      double lowThreshold = getProperty("LowThreshold");
+      double highThreshold = getProperty("HighThreshold");
+      if ( highThreshold < lowThreshold )
+      {
+        g_log.warning() << "Lower limit (" << lowThreshold <<
+          ") > the higher limit (" << highThreshold <<
+          "), all detectors will be marked bad";
+      }
 
       // Try and open the output file, if specified, and write a header
       std::ofstream file(getPropertyValue("OutputFile").c_str());
@@ -88,12 +93,12 @@ namespace Algorithms
         double &yInputOutput = integratedWorkspace->dataY(i)[0];
         // hold information about whether it passes or fails and why
         std::string problem = "";
-        if ( yInputOutput <= lowThreshold )
+        if ( yInputOutput < lowThreshold )
         {
           problem = "low";
           cLows++;
         }
-        if ( yInputOutput >= highThreshold )
+        if ( yInputOutput > highThreshold )
         {
           problem = "high";
           cHighs++;

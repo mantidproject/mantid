@@ -22,7 +22,6 @@ DECLARE_ALGORITHM(DetectorEfficiencyVariation)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
 
 void DetectorEfficiencyVariation::init()
 {

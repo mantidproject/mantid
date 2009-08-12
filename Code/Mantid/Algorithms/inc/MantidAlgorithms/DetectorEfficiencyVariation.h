@@ -46,7 +46,7 @@ namespace Mantid
     class DLLExport DetectorEfficiencyVariation : public Algorithm
     {
     public:
-      /// Default constructor initialises all values to zero and runs the base class constructor
+      /// Default constructor initialises all data members and runs the base class constructor
       DetectorEfficiencyVariation() :
           Algorithm(),                                                        //call the base class constructor
           m_PercentDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
