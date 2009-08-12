@@ -79,8 +79,8 @@ private:
       int r_goodfrm = run_table->getRef<int>("r_goodfrm", 0);
       TS_ASSERT_EQUALS(r_goodfrm, 33538);
 
-      int r_dur = run_table->getRef<int>("r_dur", 670);
-      TS_ASSERT_EQUALS(r_dur, 0);
+      int r_dur = run_table->getRef<int>("r_dur", 0);
+      TS_ASSERT_EQUALS(r_dur, 670);
 
       double r_gd_prtn_chrg = run_table->getRef<double>("r_gd_prtn_chrg", 0);
       TS_ASSERT_DELTA(r_gd_prtn_chrg, 30.1481, 1e-4);
