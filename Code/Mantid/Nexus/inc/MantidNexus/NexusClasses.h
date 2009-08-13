@@ -112,8 +112,6 @@ namespace Mantid
             /// Attributes
             NXAttributes attributes;
         protected:
-            void getData(void* data);
-            void getSlab(void* data, int start[], int size[]);
             NXhandle m_fileID;      ///< Nexus file id
             std::string m_path;     ///< Keeps the absolute path to the object
             //boost::shared_ptr<NXClass> m_parent;
@@ -169,6 +167,9 @@ namespace Mantid
             *            The rank of the data must be 4
             */
             virtual void load(int i=-1,int j=-1,int k=-1,int l=-1){};
+        protected:
+            void getData(void* data);
+            void getSlab(void* data, int start[], int size[]);
         private:
             NXInfo m_info;  ///< Holds the data info
         };
@@ -233,21 +234,21 @@ namespace Mantid
                 {
                     throw std::runtime_error("Cannot load dataset of rank greater than 4");
                 }
-                m_n = 0;
+                int n = 0;
                 int start[4];
                 if (rank() == 4)
                 {
                     if (i < 0) // load all data
                     {
-                        m_n = dim0()*dim1()*dim2()*dim3();
-                        alloc(m_n);
+                        n = dim0()*dim1()*dim2()*dim3();
+                        alloc(n);
                         getData(m_data.get());
                         return;
                     }
                     else if (j < 0)
                     {
                         if (i >= dim0()) rangeError();
-                        m_n = dim1()*dim2()*dim3();
+                        n = dim1()*dim2()*dim3();
                         start[0] = i; m_size[0] = 1;
                         start[1] = 0; m_size[1] = dim1();
                         start[2] = 0; m_size[2] = dim2();
@@ -256,7 +257,7 @@ namespace Mantid
                     else if (k < 0)
                     {
                         if (i >= dim0() || j >= dim1()) rangeError();
-                        m_n = dim2()*dim3();
+                        n = dim2()*dim3();
                         start[0] = i; m_size[0] = 1;
                         start[1] = j; m_size[1] = 1;
                         start[2] = 0; m_size[2] = dim2();
@@ -265,7 +266,7 @@ namespace Mantid
                     else if (l < 0)
                     {
                         if (i >= dim0() || j >= dim1() || k >= dim2()) rangeError();
-                        m_n = dim3();
+                        n = dim3();
                         start[0] = i; m_size[0] = 1;
                         start[1] = j; m_size[1] = 1;
                         start[2] = k; m_size[2] = 1;
@@ -274,7 +275,7 @@ namespace Mantid
                     else
                     {
                         if (i >= dim0() || j >= dim1() || k >= dim2() || l >= dim3()) rangeError();
-                        m_n = dim3();
+                        n = dim3();
                         start[0] = i; m_size[0] = 1;
                         start[1] = j; m_size[1] = 1;
                         start[2] = k; m_size[2] = 1;
@@ -285,15 +286,15 @@ namespace Mantid
                 {
                     if (i < 0)
                     {
-                        m_n = dim0()*dim1()*dim2();
-                        alloc(m_n);
+                        n = dim0()*dim1()*dim2();
+                        alloc(n);
                         getData(m_data.get());
                         return;
                     }
                     else if (j < 0)
                     {
                         if (i >= dim0()) rangeError();
-                        m_n = dim1()*dim2();
+                        n = dim1()*dim2();
                         start[0] = i; m_size[0] = 1;
                         start[1] = 0; m_size[1] = dim1();
                         start[2] = 0; m_size[2] = dim2();
@@ -301,7 +302,7 @@ namespace Mantid
                     else if (k < 0)
                     {
                         if (i >= dim0() || j >= dim1()) rangeError();
-                        m_n = dim2();
+                        n = dim2();
                         start[0] = i; m_size[0] = 1;
                         start[1] = j; m_size[1] = 1;
                         start[2] = 0; m_size[2] = dim2();
@@ -309,7 +310,7 @@ namespace Mantid
                     else
                     {
                         if (i >= dim0() || j >= dim1() || k >= dim2()) rangeError();
-                        m_n = 1;
+                        n = 1;
                         start[0] = i; m_size[0] = 1;
                         start[1] = j; m_size[1] = 1;
                         start[2] = k; m_size[2] = 1;
@@ -319,22 +320,22 @@ namespace Mantid
                 {
                     if (i < 0)
                     {
-                        m_n = dim0()*dim1();
-                        alloc(m_n);
+                        n = dim0()*dim1();
+                        alloc(n);
                         getData(m_data.get());
                         return;
                     }
                     else if (j < 0)
                     {
                         if (i >= dim0()) rangeError();
-                        m_n = dim1();
+                        n = dim1();
                         start[0] = i; m_size[0] = 1;
                         start[1] = 0; m_size[1] = dim1();
                     }
                     else
                     {
                         if (i >= dim0() || j >= dim1()) rangeError();
-                        m_n = dim1();
+                        n = dim1();
                         start[0] = i; m_size[0] = 1;
                         start[1] = j; m_size[1] = 1;
                     }
@@ -343,20 +344,20 @@ namespace Mantid
                 {
                     if (i < 0)
                     {
-                        m_n = dim0();
-                        alloc(m_n);
+                        n = dim0();
+                        alloc(n);
                         getData(m_data.get());
                         return;
                     }
                     else
                     {
                         if (i >= dim0()) rangeError();
-                        m_n = 1;
+                        n = 1;
                         start[0] = i;
                         m_size[0] = 1;
                     }
                 }
-                alloc(m_n);
+                alloc(n);
                 getSlab(m_data.get(),start,m_size);
             }
         protected:
@@ -367,7 +368,11 @@ namespace Mantid
             {
                 try
                 {
+                  if (m_n != n)
+                  {
                     m_data.reset(new T[n]);
+                    m_n = n;
+                  }
                 }
                 catch(...)
                 {

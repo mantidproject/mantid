@@ -89,10 +89,12 @@ std::string NXObject::name()const
  *   @param data The pointer to the buffer accepting the data from the file.
  *   @throw runtime_error if the operation fails.
  */
-void NXObject::getData(void* data)
+void NXDataSet::getData(void* data)
 {
+    NXopendata(m_fileID,name().c_str());
     if (NXgetdata(m_fileID,data) != NX_OK)
         throw std::runtime_error("Cannot read data from NeXus file");
+    NXclosedata(m_fileID);
 }
 
 /**  Wrapper to the NXgetslab.
@@ -103,10 +105,12 @@ void NXObject::getData(void* data)
  *          The number of dimensions (the size of the array) must be equal to the rank of the data.
  *   @throw runtime_error if the operation fails.
  */
-void NXObject::getSlab(void* data, int start[], int size[])
+void NXDataSet::getSlab(void* data, int start[], int size[])
 {
+    NXopendata(m_fileID,name().c_str());
     if (NXgetslab(m_fileID,data,start,size) != NX_OK)
         throw std::runtime_error("Cannot read data slab from NeXus file");
+    NXclosedata(m_fileID);
 }
 
 /**  Reads in attributes
@@ -360,18 +364,29 @@ bool NXRoot::isStandard()const
 NXDataSet::NXDataSet(const NXClass& parent,const std::string& name)
     :NXObject(parent.m_fileID,&parent,name)
 {
+  size_t i = name.find_last_of('/');
+  if (i == std::string::npos)
     m_info.nxname = name;
+  else if (name.empty() || i == name.size()-1)
+    throw std::runtime_error("Improper dataset name "+name);
+  else
+    m_info.nxname = name.substr(i+1);
 }
 
 // Opens the data set. Does not read in any data. Call load(...) to load the data
 void NXDataSet::open()
 {
-    if (NX_ERROR == NXopenpath(m_fileID,m_path.c_str())) 
-    {
-        throw std::runtime_error("Cannot open dataset "+m_path);
-    }
-    NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type);
-    getAttributes();
+  size_t i = m_path.find_last_of('/');
+  if (i == std::string::npos || i == 0) return; // we are in the root group, assume it is open
+  std::string group_path = m_path.substr(0,i);
+  if (NX_ERROR == NXopenpath(m_fileID,group_path.c_str())) 
+  {
+    throw std::runtime_error("Cannot open dataset "+m_path);
+  }
+  NXopendata(m_fileID,name().c_str());
+  NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type);
+  getAttributes();
+  NXclosedata(m_fileID);
 }
 
 
