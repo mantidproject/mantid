@@ -7,7 +7,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <climits>
-//#include "isisraw2.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -42,7 +41,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 26/09/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -83,7 +82,10 @@ namespace Mantid
       void exec();
 
       void checkOptionalProperties();
+      int calculateWorkspaceSize();
       void goManagedRaw();
+      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int& regimes, 
+                                                                 const int& lengthIn);
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
@@ -111,14 +113,13 @@ namespace Mantid
       int m_spec_max;
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
+      /// A map for storing the time regime for each spectrum
+      std::map<int,int> m_specTimeRegimes;
       /// The current value of the progress counter
       double m_prog;
 
-	    ///a flag int value to indicate that the value wasn't set by users
+	    /// A flag int value to indicate that the value wasn't set by users
       static const int unSetInt = INT_MAX-15;
-
-      /// Personal wrapper for sqrt to allow msvs to compile
-      static double dblSqrt(double in);
     };
 
   } // namespace DataHandling

@@ -34,7 +34,7 @@ using namespace API;
 LoadRaw3::LoadRaw3() :
   Algorithm(), isisRaw(new ISISRAW2), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0), 
   m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),
-  m_prog(0.0)
+  m_specTimeRegimes(),m_prog(0.0)
 {
 }
 
@@ -103,7 +103,7 @@ void LoadRaw3::exec()
   title.insert(5, " ");
   title.insert(26, " ");
   title.insert(51, " ");
-  g_log.information("*** Run title: " + title + "***");
+  g_log.information("*** Run title: " + title + " ***");
 
   // Read in the number of spectra in the RAW file
   m_numberOfSpectra = isisRaw->t_nsp1;
@@ -118,41 +118,7 @@ void LoadRaw3::exec()
   checkOptionalProperties();
 
   // Calculate the size of a workspace, given its number of periods & spectra to read
-  int total_specs;
-  if (m_interval || m_list)
-  {
-    if (m_interval)
-    {
-      total_specs = (m_spec_max - m_spec_min + 1);
-      m_spec_max += 1;
-    }
-    else
-      total_specs = 0;
-
-    if (m_list)
-    {
-      if (m_interval)
-      {
-        for (std::vector<int>::iterator it = m_spec_list.begin(); it != m_spec_list.end();)
-          if (*it >= m_spec_min && *it < m_spec_max)
-          {
-            it = m_spec_list.erase(it);
-          }
-          else
-            it++;
-      }
-      if (m_spec_list.size() == 0)
-        m_list = false;
-      total_specs += m_spec_list.size();
-    }
-  }
-  else
-  {
-    total_specs = m_numberOfSpectra;
-    // In this case want all the spectra, but zeroth spectrum is garbage so go from 1 to NSP1
-    m_spec_min = 1;
-    m_spec_max = m_numberOfSpectra + 1;
-  }
+  const int total_specs = calculateWorkspaceSize();
 
   // If there is not enough memory use ManagedRawFileWorkspace2D.
   if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(total_specs, lengthIn,
@@ -162,11 +128,11 @@ void LoadRaw3::exec()
     return;
   }
 
-  float* timeChannels = new float[lengthIn];
-  isisRaw->getTimeChannels(timeChannels, lengthIn);
-  // Put the read in array into a vector (inside a shared pointer)
-  boost::shared_ptr<std::vector<double> > timeChannelsVec(new std::vector<double>(timeChannels,
-      timeChannels + lengthIn));
+  // Now check whether there is more than one time regime in use
+  const int noTimeRegimes = isisRaw->daep.n_tr_shift;
+  // Get the time channel array(s) and store in a vector inside a shared pointer
+  std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec = 
+                                               getTimeChannels(noTimeRegimes,lengthIn);
 
   // Need to extract the user-defined output workspace name
   Property *ws = getProperty("OutputWorkspace");
@@ -182,19 +148,20 @@ void LoadRaw3::exec()
   localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
   WorkspaceGroup_sptr sptrWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup);
-
   if (m_numberOfPeriods > 1)
   {
-
-    if (sptrWSGrp)
-      sptrWSGrp->add(localWSName);
+    sptrWSGrp->add(localWSName);
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(sptrWSGrp));
-
   }
   else
   {
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(localWorkspace));
   }
+
+  // Pointer to sqrt function (used in calculating errors)
+  typedef double (*uf)(double);
+  uf dblSqrt = std::sqrt;
+
   // Loop over the number of periods in the raw file, putting each period in a separate workspace
   for (int period = 0; period < m_numberOfPeriods; ++period)
   {
@@ -226,7 +193,10 @@ void LoadRaw3::exec()
         MantidVec& E = localWorkspace->dataE(counter);
         std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
         // Set the X vector pointer and spectrum number
-        localWorkspace->setX(counter, timeChannelsVec);
+        if ( noTimeRegimes < 2 )
+          localWorkspace->setX(counter, timeChannelsVec[0]);
+        else // Use std::vector::at just incase spectrum missing from spec array
+          localWorkspace->setX(counter, timeChannelsVec.at(m_specTimeRegimes[i]-1));
         localWorkspace->getAxis(1)->spectraNo(counter) = i;
         // NOTE: Raw numbers go straight into the workspace
         //     - no account taken of bin widths/units etc.
@@ -280,8 +250,7 @@ void LoadRaw3::exec()
     {
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> (outws, wsName, Direction::Output));
 
-      if (sptrWSGrp)
-        sptrWSGrp->add(wsName);
+      sptrWSGrp->add(wsName);
       setProperty(outws, boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
       // progress for workspace groups 
       m_prog = (double(period) / (m_numberOfPeriods - 1));
@@ -290,7 +259,6 @@ void LoadRaw3::exec()
   } // loop over periods
 
   // Clean up
-  delete[] timeChannels;
   fclose(file);
 }
 
@@ -335,7 +303,48 @@ void LoadRaw3::checkOptionalProperties()
       throw std::invalid_argument("Inconsistent properties defined");
     }
   }
+}
 
+/// Calculates the total number of spectra in the workspace, given the input properties
+int LoadRaw3::calculateWorkspaceSize()
+{
+  int total_specs(0);
+  if (m_interval || m_list)
+  {
+    if (m_interval)
+    {
+      total_specs = (m_spec_max - m_spec_min + 1);
+      m_spec_max += 1;
+    }
+    else
+      total_specs = 0;
+
+    if (m_list)
+    {
+      if (m_interval)
+      {
+        for (std::vector<int>::iterator it = m_spec_list.begin(); it != m_spec_list.end();)
+          if (*it >= m_spec_min && *it < m_spec_max)
+          {
+            it = m_spec_list.erase(it);
+          }
+          else
+            it++;
+      }
+      if (m_spec_list.size() == 0)
+        m_list = false;
+      total_specs += m_spec_list.size();
+    }
+  }
+  else
+  {
+    total_specs = m_numberOfSpectra;
+    // In this case want all the spectra, but zeroth spectrum is garbage so go from 1 to NSP1
+    m_spec_min = 1;
+    m_spec_max = m_numberOfSpectra + 1;
+  }
+
+  return total_specs;
 }
 
 /// Creates a ManagedRawFileWorkspace2D
@@ -365,6 +374,53 @@ void LoadRaw3::goManagedRaw()
   m_prog = 1.0;
   progress(m_prog);
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+}
+
+/** Constructs the time channel (X) vector(s)
+ *  @param regimes  The number of time regimes (if 1 regime, will actually contain 0)
+ *  @param lengthIn The number of time channels
+ *  @return The vector(s) containing the time channel boundaries, in a vector of shared ptrs
+ */
+std::vector<boost::shared_ptr<MantidVec> > LoadRaw3::getTimeChannels(const int& regimes, 
+                                                                     const int& lengthIn)
+{
+  float* const timeChannels = new float[lengthIn];
+  isisRaw->getTimeChannels(timeChannels, lengthIn);
+
+  std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec;
+  if ( regimes >=2 )
+  {
+    g_log.debug() << "Raw file contains " << regimes << " time regimes\n"; 
+    // If more than 1 regime, create a timeChannelsVec for each regime
+    for (int i=0; i < regimes; ++i)
+    {
+      // Create a vector with the 'base' time channels
+      boost::shared_ptr<MantidVec> channelsVec(new MantidVec(timeChannels,timeChannels + lengthIn));
+      const double shift = isisRaw->daep.tr_shift[i];
+      g_log.debug() << "Time regime " << i+1 << " shifted by " << shift << " microseconds\n";
+      // Add on the shift for this vector
+      std::transform(channelsVec->begin(), channelsVec->end(),
+        channelsVec->begin(), std::bind2nd(std::plus<double>(),shift));
+      timeChannelsVec.push_back(channelsVec);
+    }
+    // In this case, also need to populate the map of spectrum-regime correspondence
+    const int ndet = isisRaw->i_det;
+    std::map<int,int>::iterator hint = m_specTimeRegimes.begin();
+    for (int j=0; j < ndet; ++j)
+    {
+      // No checking for consistency here - that all detectors for given spectrum
+      // are declared to use same time regime. Will just use first encountered
+      hint = m_specTimeRegimes.insert(hint,std::make_pair(isisRaw->spec[j],isisRaw->timr[j]));
+    }
+  }
+  else // Just need one in this case
+  {
+    boost::shared_ptr<MantidVec> channelsVec(new MantidVec(timeChannels,timeChannels + lengthIn));
+    timeChannelsVec.push_back(channelsVec);
+  }
+  // Done with the timeChannels C array so clean up
+  delete[] timeChannels;
+  return timeChannelsVec;
 }
 
 /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
@@ -481,11 +537,6 @@ void LoadRaw3::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int peri
 
   if (!loadLog->isExecuted())
     g_log.error("Unable to successfully run LoadLog sub-algorithm");
-}
-
-double LoadRaw3::dblSqrt(double in)
-{
-  return sqrt(in);
 }
 
 /** Add parameters to the instrument parameter map that are defined in instrument
