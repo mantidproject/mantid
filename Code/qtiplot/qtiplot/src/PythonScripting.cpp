@@ -257,22 +257,22 @@ bool PythonScripting::initialize()
 	setQObject(this, "stderr", sys);
 
 	// Add to the module search path the location of mantid output files and bin directory
-  QString mantidbin = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir());
-  std::string pycode = 
-	  "import sys; sys.path.append('" + QDir(mantidbin).absolutePath() + "');";
-  QString mantidoutput = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir());
+  QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
+  QString pycode = 
+	  QString("import sys; sys.path.append('") + mantidbin.absolutePath() + QString("');");
+  QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
 	if( mantidoutput != mantidbin )
 	{
-	  pycode += "sys.path.append('" + QDir(mantidoutput).absolutePath() + "');";
+	  pycode += QString("sys.path.append('") + mantidoutput.absolutePath() + QString("');");
 	}
-	PyRun_SimpleString(pycode.c_str());
+	PyRun_SimpleString(pycode.toStdString().c_str());
 
 	// Changed initialization to include a script which also loads the 
 	// MantidPythonAPI - M. Gigg
-	bool initglob = loadInitFile(mantidbin + "/qtiplotrc");
+	bool initglob = loadInitFile(mantidbin.absoluteFilePath("qtiplotrc"));
 	if( !initglob ) return false;
 
-	bool initmtd = loadInitFile(mantidbin + "/mantidplotrc");
+	bool initmtd = loadInitFile(mantidbin.absoluteFilePath("mantidplotrc"));
 	
 //	PyEval_ReleaseLock();
 	return initmtd;
