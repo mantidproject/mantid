@@ -27,6 +27,7 @@
 #include <map>
 #include <cmath>
 #include <cfloat>
+#include <numeric> >
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -36,9 +37,9 @@ static const QRgb BLACK = qRgb(0,0,0);
 
 Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
-  mColorMap(), mInstrumentActor(NULL), mAxisDirection(Mantid::Geometry::V3D(0.0,0.0,1.0)), 
-  mAxisUpVector(Mantid::Geometry::V3D(0.0,1.0,0.0)), mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX), 
-  mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), 
+  mColorMap(), mInstrumentActor(NULL), mAxisDirection(Mantid::Geometry::V3D(0.0,0.0,1.0)),
+  mAxisUpVector(Mantid::Geometry::V3D(0.0,1.0,0.0)), mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX),
+  mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX),
   mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), strWorkspaceName(""), mScaledValues(0)
 {
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
@@ -74,7 +75,7 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
     {
       detectorIds.push_back(iDecId);
     }
-    
+
   }
   //convert detector ids to spectra index ids
   std::vector<int> spectraIndices;
@@ -95,7 +96,7 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
       //emit the spectra ids
       emit actionSpectraSelectedList(spectraIndices);
     }
-    
+
   }
 }
 
@@ -176,7 +177,7 @@ void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::
 	makeCurrent();
 	boost::shared_ptr<GLActorCollection> scene = boost::shared_ptr<GLActorCollection>(new GLActorCollection);
 	mInstrumentActor = new InstrumentActor(ins, mFastRendering);
-	scene->addActor(mInstrumentActor);	 
+	scene->addActor(mInstrumentActor);
 	this->setActorCollection(scene);
 }
 
@@ -231,12 +232,12 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
   {
       mBinMinValue = mWkspBinMin;
   }
-  
+
   if( mBinMaxValue > mWkspBinMax || mBinMaxValue < mWkspBinMin )
   {
     mBinMaxValue = mWkspBinMax;
   }
-  
+
 
 }
 
@@ -252,7 +253,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
   if( detector_list.empty() ) return;
   std::vector<int> index_list;
   getSpectraIndexList(detector_list, index_list);
-  
+
   const int n_spec = index_list.size();
   std::vector<double> integrated_values(n_spec, 0.0);
   mWkspDataMin = DBL_MAX;
@@ -273,7 +274,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 	mWkspDataMax = sum;
       }
       else continue;
-      
+
     }
     else
     {
@@ -300,11 +301,11 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 
   std::vector<double>::const_iterator val_end = integrated_values.end();
   int idx(0);
-  for( std::vector<double>::const_iterator val_itr = integrated_values.begin(); val_itr != val_end; 
+  for( std::vector<double>::const_iterator val_itr = integrated_values.begin(); val_itr != val_end;
        ++val_itr, ++idx )
   {
     unsigned char c_index(mColorMap.getTopCIndex());
-    if( (*val_itr) < 0.0 ) 
+    if( (*val_itr) < 0.0 )
     {
       mScaledValues[idx] = mColorMap.getLargestAllowedCIndex();
     }
@@ -332,20 +333,30 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 
 double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_sptr workspace, const int wksp_index)
 {
-  std::vector<double>::const_iterator bin_itr = workspace->readX(wksp_index).begin();
-  std::vector<double>::const_iterator bin_end = workspace->readX(wksp_index).end();
-  std::vector<double>::const_iterator data_end = workspace->readY(wksp_index).end();
-  double sum(0.0);
-  for( std::vector<double>::const_iterator data_itr = workspace->readY(wksp_index).begin();
-       data_itr != data_end; ++data_itr, ++ bin_itr )
-  {
-    double binvalue = *bin_itr;
-    if( binvalue >= mBinMinValue && binvalue <= mBinMaxValue )
-    {
-      sum += *data_itr;
-    }
-  }
-  return sum;
+	// If the index is not valid for this workspace
+	if (wksp_index<0 || wksp_index>workspace->getNumberHistograms())
+		return 0.0;
+
+	// Get Handle to data
+	const std::vector<double>& x=workspace->readX(wksp_index);
+	const std::vector<double>& y=workspace->readY(wksp_index);
+	// If it is a 1D workspace, no need to integrate
+	if (x.size()==2)
+		return y[0];
+	// Iterators for limits
+	std::vector<double>::const_iterator lowit=x.begin(),highit=x.end()-1;
+	// If the first element is lower that the xmin then search for new lowit
+	if ((*lowit)<mBinMinValue)
+		lowit=std::lower_bound(x.begin(),x.end(),mBinMinValue);
+	// If the last element is higher that the xmax then search for new lowit
+	if ((*highit)>mBinMaxValue)
+		highit=std::upper_bound(lowit,x.end(),mBinMaxValue);
+	// Get the range for the y vector
+	std::vector<double>::difference_type distmin=std::distance(x.begin(),lowit);
+	std::vector<double>::difference_type distmax=std::distance(x.begin(),highit);
+	// Integrate
+	double sum=std::accumulate(y.begin()+distmin,y.begin()+distmax,0.0);
+	return sum;
 }
 
 /**
@@ -367,16 +378,16 @@ void Instrument3DWidget::recount()
  */
 void Instrument3DWidget::updateColorsForNewMap()
 {
-  
+
   const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
   const short ncols = mColorMap.getTopCIndex() + 1;
 
   std::vector<boost::shared_ptr<GLColor> > colorlist(mScaledValues.size());
-  if( max_ncols == ncols ) 
+  if( max_ncols == ncols )
   {
     std::vector<unsigned char>::const_iterator val_end = mScaledValues.end();
     int idx(0);
-    for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin(); 
+    for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin();
 	 val_itr != val_end; ++val_itr, ++idx )
     {
       colorlist[idx] = mColorMap.getColor(*val_itr);
@@ -387,7 +398,7 @@ void Instrument3DWidget::updateColorsForNewMap()
     std::vector<unsigned char>::const_iterator val_end = mScaledValues.end();
     int idx(0);
     const double ratio = (double)ncols / max_ncols;
-    for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin(); 
+    for( std::vector<unsigned char>::const_iterator val_itr = mScaledValues.begin();
 	 val_itr != val_end; ++val_itr, ++idx )
     {
       short cache_value = static_cast<short>(*val_itr);
@@ -398,7 +409,7 @@ void Instrument3DWidget::updateColorsForNewMap()
       colorlist[idx] = mColorMap.getColor(static_cast<unsigned char>(c_index - 1));
     }
   }
-    
+
   mInstrumentActor->setDetectorColors(colorlist);
   mInstrumentActor->refresh();
   update();
@@ -411,7 +422,7 @@ void Instrument3DWidget::updateForNewMaxData(const double new_max)
 {
   // If the new value is the same
   if( std::abs(new_max - mDataMaxValue) / mDataMaxValue < 1e-08 ) return;
-  
+
   mDataMaxValue = new_max;
   recount();
 }
@@ -563,9 +574,9 @@ void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue)
 	this->mBinMinValue = minValue;
 	this->mBinMaxValue = maxValue;
 	setDataMappingType(INTEGRAL);
-	if( this->isVisible() ) 
+	if( this->isVisible() )
 	{
-	  MatrixWorkspace_sptr workspace = 
+	  MatrixWorkspace_sptr workspace =
 	    boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
 	  calculateColorCounts(workspace);
 	  mInstrumentActor->refresh();
@@ -740,7 +751,7 @@ void Instrument3DWidget::setSceneLowResolution()
 }
 
 /**
- * Draws the scene in high resolution. 
+ * Draws the scene in high resolution.
  */
 void Instrument3DWidget::setSceneHighResolution()
 {
@@ -751,7 +762,7 @@ void Instrument3DWidget::setSceneHighResolution()
  * Returns the boundig box of the scene
  * @param minBound :: output min point of the bounding box of scene
  * @param maxBound :: output max point of the bounding box of scene
- */ 
+ */
 void Instrument3DWidget::getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound)
 {
 	mInstrumentActor->getBoundingBox(minBound,maxBound);
