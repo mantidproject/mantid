@@ -99,9 +99,9 @@ private slots:
 
 	void chooseTranslationsFolder();
 	void chooseHelpFolder();
-#ifdef SCRIPTING_PYTHON
-	void choosePythonConfigFolder();
-#endif
+// #ifdef SCRIPTING_PYTHON
+// 	void choosePythonConfigFolder();
+// #endif
 
 private:
 	void initPlotsPage();
