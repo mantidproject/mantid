@@ -1957,8 +1957,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
 {
 	 int nspec = workspace->getNumberHistograms();
 	 //Loop through the list of index and remove all the indexes that are out of range
-	 for (std::vector<int>::iterator it=indexList.begin();it!=indexList.end();it++)
-		std::cout << *it << "\n";
+
 	 for(std::vector<int>::iterator it=indexList.begin();it!=indexList.end();it++)
 	 {
 		if ((*it) > nspec || (*it) < 0) indexList.erase(it);
