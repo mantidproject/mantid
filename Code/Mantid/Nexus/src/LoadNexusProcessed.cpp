@@ -112,14 +112,13 @@ namespace Mantid
         // get the workspace count from .nxs file
         if(!grpVec.empty())
           numberOfPeriods=period=grpVec.size();
-        if(m_entrynumber>period)
+		if(m_entrynumber>period)
         {
           throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
         }
         delete nexusRoot;
       }
-
-      // create ws group
+          // create ws group
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
 
       //if  EntryNumber property is 0( default value ) create ws group and 
@@ -131,6 +130,7 @@ namespace Mantid
           //add  outputworkspace to workspace group
           if(wsGrpSptr)wsGrpSptr->add(localWSName);
           setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+		  m_entrynumber=1;
         }
 
         p= double(1)/period;
@@ -139,7 +139,6 @@ namespace Mantid
       {
         numberOfPeriods=period=1;
       }
-
 
       //below do...while loop is introduced to handle workspace groups
       //if no EntryNumber given from UI loop is  executed period times
@@ -226,7 +225,7 @@ namespace Mantid
         if(numberOfPeriods>1)
         {	
           std::stringstream suffix;
-          suffix << (m_entrynumber+1);
+          suffix << (m_entrynumber);
           std::string outws =outputWorkspace+"_"+suffix.str();
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
@@ -240,6 +239,11 @@ namespace Mantid
         }
 
         nexusFile->closeNexusFile();
+
+		//it was giving  an error message from nexus "Cannot open group" if the entry number exceeds
+		// number of periods,so resetting it to number of periods after execution
+		if(m_entrynumber>numberOfPeriods)
+			m_entrynumber=numberOfPeriods;
 
         loadAlgorithmHistory(localWorkspace);
         startProg=endProg;
