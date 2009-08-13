@@ -42,8 +42,8 @@ MASKSTRING = '|MASKSTRING|'
 INSTR_DIR = '|INSTRUMENTPATH|'
 INSTR_NAME = '|INSTRUMENTNAME|'
 # Beam centre in mm
-XBEAM_MASKFILE = |XBEAM|
-YBEAM_MASKFILE = |YBEAM|
+XBEAM_CENTRE = |XBEAM|/1000.
+YBEAM_CENTRE = |YBEAM|/1000.
 
 # Analysis tab values
 RMIN = |RADIUSMIN|/1000.0
@@ -53,7 +53,7 @@ WAV2 = |WAVMAX|
 DWAV = |WAVDELTA|
 FULLWAVBIN = str(WAV1) + "," + str(DWAV) + "," + str(WAV2)
 Q1 = |QMIN|
-q2 = |QMAX|
+Q2 = |QMAX|
 DQ = |QDELTA|
 QXY2 = |QXYMAX|
 DQXY = |QXYDELTA|
@@ -159,8 +159,8 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
 	
 	# The detector
 	if INSTR_NAME == 'LOQ':
-		xshift = (317.5 - xbeam)/1000.
-		yshift = (317.5 - ybeam)/1000.
+		xshift = (317.5/1000.) - xbeam
+		yshift = (317.5/1000.) - ybeam
 		MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, RelativePosition="1")
 		# LOQ instrument description has detector at 0.0, 0.0
 		return [xshift, yshift], [xshift, yshift] 
@@ -170,16 +170,16 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
 			rotateDet = (-Front_Det_Rot -  Front_Det_Rot_corr)
 			RotateInstrumentComponent(dataws, detector,X="0.",Y="1.0",Z="0.",Angle=rotateDet)
    			RotRadians = math.pi*(Front_Det_Rot + Front_Det_Rot_corr)/180.
-			xshift = (Rear_Det_x + Rear_Det_x_corr - Front_Det_x - Front_Det_x_corr + Front_Det_Radius*math.sin(RotRadians ) )/1000. - front_det_default_x_m - xbeam/1000.
-			yshift = (Front_Det_y_corr /1000.  - ybeam/1000.)
+			xshift = (Rear_Det_x + Rear_Det_x_corr - Front_Det_x - Front_Det_x_corr + Front_Det_Radius*math.sin(RotRadians ) )/1000. - front_det_default_x_m - xbeam
+			yshift = (Front_Det_y_corr /1000.  - ybeam)
 			# default in instrument description is 23.281m - 4.000m from sample at 19,281m !
 			# need to add ~58mm to det1 to get to centre of detector, before it is rotated.
 			zshift = (Front_Det_z + Front_Det_z_corr + Front_Det_Radius*(1 - math.cos(RotRadians)) )/1000.  -front_det_default_sd_m
 			MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 			return [0.0, 0.0], [0.0, 0.0]
 		else:
-   			xshift = -xbeam/1000.
-			yshift = -ybeam/1000.
+   			xshift = -xbeam
+			yshift = -ybeam
 			zshift = (Rear_Det_z + Rear_Det_z_corr)/1000. - 4.000
    			MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 			return [0.0,0.0], [xshift, yshift]
@@ -269,7 +269,7 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 		ws.isDistribution(True)
 		
 		# Rebin to desired Q bins
-		q_bins = str(Q1) + "," + str(DQ) + "," + str(q2)
+		q_bins = str(Q1) + "," + str(DQ) + "," + str(Q2)
 		Rebin(final_result, final_result, q_bins)
 		# Calculate the solid angle corrections
 		if FindingCentre == False:
@@ -345,7 +345,7 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 
 # This runs the full wavelength range
 def FullWavRangeReduction(sample_setup, can_setup, FindingCentre = False):
-	return WavRangeReduction(sample_setup, can_setup, WAV1, WAV2, FindingCentre = False)
+	return WavRangeReduction(sample_setup, can_setup, WAV1, WAV2, FindingCentre)
 
 # This runs a specified range
 def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre = False):
@@ -357,6 +357,7 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
 		Correct(SCATTER_CAN, can_setup[0], can_setup[1], wav_start, wav_end, can_setup[2], can_setup[3], FindingCentre)
 		Minus(final_workspace, can_setup[1], final_workspace)
 		mantid.deleteWorkspace(can_setup[1])
+	return final_workspace
 ############################################################################################################################
 
 
@@ -384,14 +385,13 @@ try:
 		# Do the correction
 		if xshift <> 0.0 or yshift <> 0.0:
 			MoveInstrumentComponent(SCATTER_SAMPLE, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
-			# Arguments 0 and 1 are the sample and can setup details
-			FullWavReduction(args[0], args[1], True)
-		
+	
+		# Arguments 0 and 1 are the sample and can setup details
+		ws_togroup = FullWavRangeReduction(args[0], args[1], FindingCentre=True)
 		rlow = args[2]
 		rupp = args[3]
 		# The workspace that we want to group is the output of the sample reduction
-		ws_togroup = args[0][1]
-		quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, 0.0, rlow, rupp)
+		quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, rlow, rupp)
 		left = mtd.getMatrixWorkspace(quad_ws[0])
 		right = mtd.getMatrixWorkspace(quad_ws[1])
 		up = mtd.getMatrixWorkspace(quad_ws[2])
@@ -400,7 +400,7 @@ try:
 		residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
 		return residue
 
-	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
+	def FindBeamCentre(rlow, rupp, MaxIter = 15, xstart = None, ystart = None):
 		global XVAR_PREV, YVAR_PREV
 		
 		if xstart == None or ystart == None:
@@ -429,15 +429,13 @@ try:
 			xstart = detpos.getX()
 			ystart = detpos.getY()
 			
-
 		# Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
-		scatter_setup = InitReduction(SCATTER_SAMPLE, [xstart*1000., ystart*1000.], EmptyCell = False)
-		can_setup = InitReduction(SCATTER_CAN, [xstart*1000., ystart*1000.], EmptyCell = True)
-		FullWavRangeReduction(scatter_setup, can_setup, FindingCentre=True)
+		scatter_setup = InitReduction(SCATTER_SAMPLE, [xstart, ystart], EmptyCell = False)
+		can_setup = InitReduction(SCATTER_CAN, [xstart, ystart], EmptyCell = True)
 
 		XVAR_PREV = -xstart
 		YVAR_PREV =  -ystart
-		coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter)
+		coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rlow, rupp),xtol=1e-3, maxiter=MaxIter)
 		
 		# Tidy up
 		mtd.deleteWorkspace('Left')
@@ -448,18 +446,30 @@ try:
 		# The coordinates returned are the position of the detector so the beam centre is -coords
 		return -coords
 except:
-        pass
+	def FindBeamCentre(rlow, rupp, MaxIter = 15, xstart = None, ystart = None):
+		print 'This function requires the scipy package to be installed.'
+		return
 ############################################################################################################################
 
-################################### Begin script here ###########################################################
+################################### Work begins here #####################################################################
+# The GUI appends it's own commands here so if you are using this as a script then the best thing is to use this as a template
+# and copy it to another file and execute that, making sure that the details at the top are appropriately filled in.
 
+### Example code:
 # The beam finding alters the raw data workspace so be careful before performing other analyses straight after
 # using this
-#beamcoords = FindBeamCentre(rlimit = 0.15, MaxIter = 10)
+#beamcoords = FindBeamCentre(rlow = 0.06, rupp= 0.28, MaxIter = 10)
 #print beamcoords
 
-# Do corrections		
-#sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_MASKFILE, YBEAM_MASKFILE], False)
-#can_setup = InitReduction(SCATTER_CAN, [XBEAM_MASKFILE,YBEAM_MASKFILE], True)
-#FullWavRangeReduction(sample_setup, can_setup)
+# Remove and reload all workspaces before doing corrections
+#mtd.clear();
+
+# Do the initialization
+#sample_setup = InitReduction(SCATTER_SAMPLE, [0.082, -0.193], False)
+#can_setup = InitReduction(SCATTER_CAN, [0.082, -0.193], True)
+
+### Corrections
+# FullWavRangeReduction(sample_setup, can_setup)
+### Or for a smaller lambda range 
+# WavRangeReduction(sample_setup, can_setup, 2, 4)
 
