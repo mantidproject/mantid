@@ -691,7 +691,8 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 	MultiLayer* g = a->multilayerPlot(a->generateUniqueName(tr("Graph")));
     m_plots2D<<g;
     connect(g, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-    a->connectMultilayerPlot(g);
+	//#799 fix for  multiple dialog creation on double clicking/ right click menu scale on  2d plot 
+ //   a->connectMultilayerPlot(g);
     Graph* plot = g->activeGraph();
 	a->setPreferences(plot);
     plot->setTitle(tr("Workspace ") + name());
