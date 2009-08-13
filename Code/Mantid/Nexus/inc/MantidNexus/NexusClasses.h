@@ -184,7 +184,7 @@ namespace Mantid
             *   @param parent The parent Nexus class. In terms of HDF it is the group containing the dataset.
             *   @param name The name of the dataset relative to its parent
             */
-            NXDataSetTyped(const NXClass& parent,const std::string& name):NXDataSet(parent,name){}
+            NXDataSetTyped(const NXClass& parent,const std::string& name):NXDataSet(parent,name),m_n(0){}
             /** Returns a pointer to the internal data buffer.
              *  @throw runtime_error exception if the data have not been loaded / initialized.
              */

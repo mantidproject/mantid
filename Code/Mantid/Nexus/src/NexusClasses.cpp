@@ -85,34 +85,6 @@ std::string NXObject::name()const
         return m_path.substr(i+1,m_path.size()-i-1);
 }
 
-/**  Wrapper to the NXgetdata.
- *   @param data The pointer to the buffer accepting the data from the file.
- *   @throw runtime_error if the operation fails.
- */
-void NXDataSet::getData(void* data)
-{
-    NXopendata(m_fileID,name().c_str());
-    if (NXgetdata(m_fileID,data) != NX_OK)
-        throw std::runtime_error("Cannot read data from NeXus file");
-    NXclosedata(m_fileID);
-}
-
-/**  Wrapper to the NXgetslab.
- *   @param data The pointer to the buffer accepting the data from the file.
- *   @param start The array of starting indeces to read in from the file. The size of the array must be equal to 
- *          the rank of the data.
- *   @param size The array of numbers of data elements to read along each dimenstion.
- *          The number of dimensions (the size of the array) must be equal to the rank of the data.
- *   @throw runtime_error if the operation fails.
- */
-void NXDataSet::getSlab(void* data, int start[], int size[])
-{
-    NXopendata(m_fileID,name().c_str());
-    if (NXgetslab(m_fileID,data,start,size) != NX_OK)
-        throw std::runtime_error("Cannot read data slab from NeXus file");
-    NXclosedata(m_fileID);
-}
-
 /**  Reads in attributes
  */
 void NXObject::getAttributes()
@@ -123,6 +95,7 @@ void NXObject::getAttributes()
     boost::shared_array<char> buff(new char[nbuff+1]);
     while(NXgetnextattr(m_fileID, pName, &iLength, &iType) != NX_EOD)
     {
+        //std::cerr<<"name="<<path()<<'\n';
         //std::cerr<<pName<<' ' <<iLength<<' '<<iType<<'\n';
         switch(iType)
         {
@@ -387,6 +360,34 @@ void NXDataSet::open()
   NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type);
   getAttributes();
   NXclosedata(m_fileID);
+}
+
+/**  Wrapper to the NXgetdata.
+ *   @param data The pointer to the buffer accepting the data from the file.
+ *   @throw runtime_error if the operation fails.
+ */
+void NXDataSet::getData(void* data)
+{
+    NXopendata(m_fileID,name().c_str());
+    if (NXgetdata(m_fileID,data) != NX_OK)
+        throw std::runtime_error("Cannot read data from NeXus file");
+    NXclosedata(m_fileID);
+}
+
+/**  Wrapper to the NXgetslab.
+ *   @param data The pointer to the buffer accepting the data from the file.
+ *   @param start The array of starting indeces to read in from the file. The size of the array must be equal to 
+ *          the rank of the data.
+ *   @param size The array of numbers of data elements to read along each dimenstion.
+ *          The number of dimensions (the size of the array) must be equal to the rank of the data.
+ *   @throw runtime_error if the operation fails.
+ */
+void NXDataSet::getSlab(void* data, int start[], int size[])
+{
+    NXopendata(m_fileID,name().c_str());
+    if (NXgetslab(m_fileID,data,start,size) != NX_OK)
+        throw std::runtime_error("Cannot read data slab from NeXus file");
+    NXclosedata(m_fileID);
 }
 
 
