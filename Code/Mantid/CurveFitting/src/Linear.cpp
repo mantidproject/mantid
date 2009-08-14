@@ -71,7 +71,7 @@ void Linear::exec()
   const MantidVec& Y = inputWorkspace->dataY(histNumber);
   const MantidVec& E = inputWorkspace->dataE(histNumber);
   // Check if this spectrum has errors
-  int errorsCount = 0;
+  double errorsCount = 0.0;
 
   // Retrieve the Start/EndX properties, if set
   this->setRange(X,Y);
@@ -100,13 +100,13 @@ void Linear::exec()
   progress(0.3);
   
   // Call the gsl fitting function
-  // The stride value of 1 reflects that fact that we want every element of out input vectors
+  // The stride value of 1 reflects that fact that we want every element of our input vectors
   const int stride = 1;
   double *c0(new double),*c1(new double),*cov00(new double),*cov01(new double),*cov11(new double),*chisq(new double);
   int status;
-  // If this spectrum had ALL (or all but one) zeros for the errors, 
+  // Unless our spectrum has error values for vast majority of points, 
   //   call the gsl function that doesn't use errors
-  if ( errorsCount < 2 )
+  if ( errorsCount/numPoints < 0.9 )
   {
     g_log.debug("Calling gsl_fit_linear (doesn't use errors in fit)");
     status = gsl_fit_linear(&XCen[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
