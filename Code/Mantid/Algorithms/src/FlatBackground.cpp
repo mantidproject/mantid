@@ -75,11 +75,11 @@ void FlatBackground::exec()
     const double background = this->doFit(outputWS,currentSpec,startX,endX);
     if (background < 0)
     {
-      g_log.warning() << "Background fit failed for spectrum with index " << currentSpec << std::endl;
+      g_log.warning() << "Background fit failed for spectrum with index " << currentSpec << "\n";
       continue;
     }
     g_log.information() << "The background to be subtracted from spectrum " << currentSpec
-                        << " is " << background << std::endl;
+                        << " is " << background << "\n";
 
     // Now subtract the background from the data. Make sure it doesn't lead to negative values.
     for (int j=0; j < blocksize; ++j)
@@ -88,9 +88,8 @@ void FlatBackground::exec()
       if (Y[j] < 0.0) Y[j]=0;
       // Will do errors later...
     }
-	prg+=(0.7/toFitsize);
-	progress(double(prg));
-    // m_progress->report();
+    prg+=(0.7/toFitsize);
+    progress(double(prg));
   } // Loop over spectra to be fitted
 
   // Assign the output workspace to its property

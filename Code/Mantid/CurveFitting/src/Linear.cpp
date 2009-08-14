@@ -67,11 +67,11 @@ void Linear::exec()
   }
 
   // Get references to the data in the chosen spectrum
-  const std::vector<double>& X = inputWorkspace->dataX(histNumber);
-  const std::vector<double>& Y = inputWorkspace->dataY(histNumber);
-  const std::vector<double>& E = inputWorkspace->dataE(histNumber);
+  const MantidVec& X = inputWorkspace->dataX(histNumber);
+  const MantidVec& Y = inputWorkspace->dataY(histNumber);
+  const MantidVec& E = inputWorkspace->dataE(histNumber);
   // Check if this spectrum has errors
-  bool noErrors = true;
+  int errorsCount = 0;
 
   // Retrieve the Start/EndX properties, if set
   this->setRange(X,Y);
@@ -79,8 +79,6 @@ void Linear::exec()
   const bool isHistogram = inputWorkspace->isHistogramData();
   const int numPoints = m_maxX - m_minX;
   
-  //m_progress=new Progress(this,0.0,1.0,3);
-
   progress(0);
 
   // Create the X & E vectors required for the gsl call
@@ -97,34 +95,39 @@ void Linear::exec()
     weights[i] = (currentE ? 1.0/(currentE*currentE) : 0.0);
     // However, if the spectrum given has all errors of zero, then we should use the gsl function that
     //   doesn't take account of the errors.
-    if ( noErrors && currentE ) noErrors = false;
+    if ( currentE ) ++errorsCount;
   }
-     progress(0.3);
+  progress(0.3);
   
   // Call the gsl fitting function
   // The stride value of 1 reflects that fact that we want every element of out input vectors
   const int stride = 1;
   double *c0(new double),*c1(new double),*cov00(new double),*cov01(new double),*cov11(new double),*chisq(new double);
   int status;
-  // If this spectrum had ALL zeros for the errors, call the gsl function that doesn't use errors
-  if ( noErrors )
+  // If this spectrum had ALL (or all but one) zeros for the errors, 
+  //   call the gsl function that doesn't use errors
+  if ( errorsCount < 2 )
   {
+    g_log.debug("Calling gsl_fit_linear (doesn't use errors in fit)");
     status = gsl_fit_linear(&XCen[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
   }
   // Otherwise, call the one that does account for errors on the data points
   else
   {
+    g_log.debug("Calling gsl_fit_wlinear (uses errors in fit)");
     status = gsl_fit_wlinear(&XCen[0],stride,&weights[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
   }
   progress(0.8);
-  
+
   // Check that the fit succeeded
   std::string fitStatus = gsl_strerror(status);
-  if (status) g_log.error() << "The fit failed: " << fitStatus << std::endl;
+  // For some reason, a fit where c0,c1 & chisq are all infinity doesn't report as a 
+  //   failure, so check explicitly.
+  if ( !gsl_finite(*chisq) || !gsl_finite(*c0) || !gsl_finite(*c1) )
+    fitStatus = "Fit gives infinities";
+  if (fitStatus != "success") g_log.error() << "The fit failed: " << fitStatus << "\n";
   else
-  {
-    g_log.debug() << "The fit succeeded, giving y = " << *c0 << " + " << *c1 << "*x, with a Chi^2 of " << *chisq << std::endl;
-  }
+    g_log.information() << "The fit succeeded, giving y = " << *c0 << " + " << *c1 << "*x, with a Chi^2 of " << *chisq << "\n";
   
   // Set the fit result output properties
   setProperty("FitStatus",fitStatus);
