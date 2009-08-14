@@ -3336,8 +3336,11 @@ void Graph::zoomed (const QwtDoubleRect &)
 
 void Graph::zoom(bool on)
 {
+	//fix for #798 - zooming on the spectrogram 2D graph plot should not change the color map
+	setAutoScale();
 	d_zoomer[0]->setEnabled(on);
-	d_zoomer[1]->setEnabled(on);
+	//fix for #798,zooming on the spectrogram 2D graph plot should not change the color map
+	d_zoomer[1]->setEnabled(false);
 	for (int i=0; i<n_curves; i++)
   	{
   		Spectrogram *sp = (Spectrogram *)this->curve(i);
