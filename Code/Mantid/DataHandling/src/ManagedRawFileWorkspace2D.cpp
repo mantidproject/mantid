@@ -45,9 +45,8 @@ namespace Mantid
     }
 
     /** Sets the RAW file for this workspace.
-    \param fileName The path to the RAW file.
-    \param opt Caching option.  0 - cache on local drive if raw file is very slow to read.
-    1 - cache anyway, 2 - never cache.
+        \param opt Caching option.  0 - cache on local drive if raw file is very slow to read.
+        1 - cache anyway, 2 - never cache.
     */
     void ManagedRawFileWorkspace2D::setRawFile(const int opt)
     {
