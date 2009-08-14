@@ -34,7 +34,7 @@ namespace Mantid
       ManagedWorkspace2D(),
       isisRaw(new ISISRAW2),m_filenameRaw(fileName),m_fileRaw(NULL),m_readIndex(0)
     {
-      this->setRawFile(m_filenameRaw,opt);
+      this->setRawFile(opt);
     }
 
     ///Destructor
@@ -49,7 +49,7 @@ namespace Mantid
     \param opt Caching option.  0 - cache on local drive if raw file is very slow to read.
     1 - cache anyway, 2 - never cache.
     */
-    void ManagedRawFileWorkspace2D::setRawFile(const std::string& fileName,int opt)
+    void ManagedRawFileWorkspace2D::setRawFile(const int opt)
     {
       m_fileRaw = fopen(m_filenameRaw.c_str(),"rb");
       if (m_fileRaw == NULL)
@@ -72,24 +72,62 @@ namespace Mantid
       if ( noOfBlocks * m_vectorsPerBlock != m_noVectors ) ++noOfBlocks;
       m_changedBlock.resize(noOfBlocks,false);
 
-      float* timeChannels = new float[m_numberOfBinBoundaries];
-      isisRaw->getTimeChannels(timeChannels, m_numberOfBinBoundaries);
       isisRaw->skipData(0);
       fgetpos(m_fileRaw, &m_data_pos); //< Save the data start position.
 
-      m_timeChannels.reset(new std::vector<double>(timeChannels, timeChannels + m_numberOfBinBoundaries));
+      getTimeChannels();
       getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
     }
 
-
-    static double dblSqrt(double in)
+    /// Constructs the time channel (X) vector(s)
+    void ManagedRawFileWorkspace2D::getTimeChannels()
     {
-      return sqrt(in);
+      float* const timeChannels = new float[m_numberOfBinBoundaries];
+      isisRaw->getTimeChannels(timeChannels, m_numberOfBinBoundaries);
+
+      const int regimes = isisRaw->daep.n_tr_shift;
+      if ( regimes >=2 )
+      {
+        g_log.debug() << "Raw file contains " << regimes << " time regimes\n"; 
+        // If more than 1 regime, create a timeChannelsVec for each regime
+        for (int i=0; i < regimes; ++i)
+        {
+          // Create a vector with the 'base' time channels
+          boost::shared_ptr<MantidVec> channelsVec(
+            new MantidVec(timeChannels,timeChannels + m_numberOfBinBoundaries));
+          const double shift = isisRaw->daep.tr_shift[i];
+          g_log.debug() << "Time regime " << i+1 << " shifted by " << shift << " microseconds\n";
+          // Add on the shift for this vector
+          std::transform(channelsVec->begin(), channelsVec->end(),
+            channelsVec->begin(), std::bind2nd(std::plus<double>(),shift));
+          m_timeChannels.push_back(channelsVec);
+        }
+        // In this case, also need to populate the map of spectrum-regime correspondence
+        const int ndet = isisRaw->i_det;
+        std::map<int,int>::iterator hint = m_specTimeRegimes.begin();
+        for (int j=0; j < ndet; ++j)
+        {
+          // No checking for consistency here - that all detectors for given spectrum
+          // are declared to use same time regime. Will just use first encountered
+          hint = m_specTimeRegimes.insert(hint,std::make_pair(isisRaw->spec[j],isisRaw->timr[j]));
+        }
+      }
+      else // Just need one in this case
+      {
+        boost::shared_ptr<MantidVec> channelsVec(
+          new MantidVec(timeChannels,timeChannels + m_numberOfBinBoundaries));
+        m_timeChannels.push_back(channelsVec);
+      }
+      // Done with the timeChannels C array so clean up
+      delete[] timeChannels;
     }
+
+    // Pointer to sqrt function (used in calculating errors below)
+    typedef double (*uf)(double);
+    static uf dblSqrt = std::sqrt;
 
     // readData(int) should be changed to readNextSpectrum() returning the spectrum index
     // and skipData to skipNextSpectrum()
-    //void ManagedRawFileWorkspace2D::readSpectrum(int index)const
     void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const
     {
       Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
@@ -139,7 +177,19 @@ namespace Mantid
         y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
         MantidVec& e = newBlock->dataE(index);
         std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
-        newBlock->setX(index,m_timeChannels);
+        if (m_timeChannels.size() == 1)
+          newBlock->setX(index,m_timeChannels[0]);
+        else
+        {
+          std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
+          if ( regime == m_specTimeRegimes.end() ) 
+          {
+            g_log.error() << "Spectrum " << index << " not present in spec array:\n";
+            g_log.error(" Assuming time regime of spectrum 1");
+            regime = m_specTimeRegimes.begin();
+          }
+          newBlock->setX(index,m_timeChannels[(*regime).second-1]);
+        }
       }
       newBlock->hasChanges(false);
     }
@@ -155,7 +205,7 @@ namespace Mantid
     /**
     Decides if the raw file must be copied to a cache file on the local drive to improve reading time.
     */
-    bool ManagedRawFileWorkspace2D::needCache(int opt)
+    bool ManagedRawFileWorkspace2D::needCache(const int opt)
     {
       if (opt == 1) return true;
       if (opt == 2) return false;

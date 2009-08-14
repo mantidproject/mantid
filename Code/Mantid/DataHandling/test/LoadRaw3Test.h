@@ -170,13 +170,12 @@ public:
     TS_ASSERT_EQUALS( output2D->dataE(8)[777], 3);
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(8)[777], 554.1875);
-
   }
 
   void testfail()
   {
     if ( !loader3.isInitialized() ) loader3.initialize();
-	std::string outWS="LoadRaw3-out2";
+    std::string outWS="LoadRaw3-out2";
     loader3.setPropertyValue("Filename", inputFile);
     loader3.setPropertyValue("OutputWorkspace",outWS );
     loader3.setPropertyValue("SpectrumList", "0,999,1000");
@@ -224,7 +223,7 @@ public:
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
-	loader5.setPropertyValue("SpectrumList", "10,50,100,195");
+    loader5.setPropertyValue("SpectrumList", "10,50,100,195");
     
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
@@ -232,54 +231,54 @@ public:
     WorkspaceGroup_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod")));
 	
-	Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
-	WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-	std::vector<std::string>wsNamevec;
-	wsNamevec=sptrWSGrp->getNames();
-	int period=1;
-	std::vector<std::string>::const_iterator it=wsNamevec.begin();
-	for (it++;it!=wsNamevec.end();it++)
-	{	std::stringstream count;
-	count <<period;
-	std::string wsName="multiperiod_"+count.str();
-	TS_ASSERT_EQUALS(*it,wsName)
-		period++;
-	}
-   std::vector<std::string>::const_iterator itr1=wsNamevec.begin();
-	for (itr1++;itr1!=wsNamevec.end();itr1++)
-	{	
-		MatrixWorkspace_sptr  outsptr;
-		TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
-		TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 4 )
+    Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
+    WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+    std::vector<std::string>wsNamevec;
+    wsNamevec=sptrWSGrp->getNames();
+    int period=1;
+    std::vector<std::string>::const_iterator it=wsNamevec.begin();
+    for (it++;it!=wsNamevec.end();it++)
+    {	std::stringstream count;
+      count <<period;
+      std::string wsName="multiperiod_"+count.str();
+      TS_ASSERT_EQUALS(*it,wsName)
+      period++;
+    }
+    std::vector<std::string>::const_iterator itr1=wsNamevec.begin();
+    for (itr1++;itr1!=wsNamevec.end();itr1++)
+    {	
+      MatrixWorkspace_sptr  outsptr;
+      TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
+      TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 4 )
+
+    }
+    std::vector<std::string>::const_iterator itr=wsNamevec.begin();
+    itr++;
+    MatrixWorkspace_sptr  outsptr1;
+    TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
+    MatrixWorkspace_sptr  outsptr2;
+    TS_ASSERT_THROWS_NOTHING(outsptr2=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+    MatrixWorkspace_sptr  outsptr3;
+    TS_ASSERT_THROWS_NOTHING(outsptr3=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+    MatrixWorkspace_sptr  outsptr4;
+    TS_ASSERT_THROWS_NOTHING(outsptr4=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+    MatrixWorkspace_sptr  outsptr5;
+    TS_ASSERT_THROWS_NOTHING(outsptr5=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
+    MatrixWorkspace_sptr  outsptr6;
+    TS_ASSERT_THROWS_NOTHING(outsptr6=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
 		
-	}
-	std::vector<std::string>::const_iterator itr=wsNamevec.begin();
-	itr++;
-	MatrixWorkspace_sptr  outsptr1;
-	TS_ASSERT_THROWS_NOTHING(outsptr1=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr))));
-	MatrixWorkspace_sptr  outsptr2;
-	TS_ASSERT_THROWS_NOTHING(outsptr2=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-	MatrixWorkspace_sptr  outsptr3;
-	TS_ASSERT_THROWS_NOTHING(outsptr3=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-	MatrixWorkspace_sptr  outsptr4;
-	TS_ASSERT_THROWS_NOTHING(outsptr4=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-	MatrixWorkspace_sptr  outsptr5;
-	TS_ASSERT_THROWS_NOTHING(outsptr5=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-	MatrixWorkspace_sptr  outsptr6;
-	TS_ASSERT_THROWS_NOTHING(outsptr6=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*++itr))));
-		
-	TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
+    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr3->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr4->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr5->dataX(1) )
-	TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr6->dataX(1) )
+    TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr6->dataX(1) )
 
-	// But the data should be different
+    // But the data should be different
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr2->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr3->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr4->dataY(1)[555] )
     TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr5->dataY(1)[555] )
-	 TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
 
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
@@ -287,10 +286,9 @@ public:
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr3->getSample() )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr4->getSample() )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr5->getSample() )
-	TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
+    TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
     TS_ASSERT_DIFFERS( outsptr1->getSample(), outsptr6->getSample() )
-    
   }
 
   void testWithManagedWorkspace()
@@ -326,27 +324,33 @@ public:
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
-        // Check the total number of elements in the map for TOSCA
-    //TS_ASSERT_EQUALS(output2D->spectraMap().nElements(),141);
-
-
-    //boost::shared_ptr<IComponent> comp;
-
     boost::shared_ptr<IInstrument> i = output2D->getInstrument();
     Mantid::Geometry::IDetector_sptr ptrDet = i->getDetector(60);
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
     boost::shared_ptr<Mantid::Geometry::ParameterMap> pmap = output2D->instrumentParameters();
     TS_ASSERT_EQUALS( pmap->size(), 140);
-
-   // Mantid::Geometry::IComponent*  comp = static_cast<IComponent*>(ptrDet);
-
-//    Mantid::Geometry::Parameter_sptr par = pmap->get(ptrDet,"Efixed");
-
-
   }
 
+  void testTwoTimeRegimes()
+  {
+    LoadRaw3 loader5;
+    loader5.initialize();
+    loader5.setPropertyValue("Filename", "../../../../Test/Data/IRS38633.raw");
+    loader5.setPropertyValue("OutputWorkspace", "twoRegimes");
+    loader5.setPropertyValue("SpectrumList", "2,3");
+    TS_ASSERT_THROWS_NOTHING( loader5.execute() )
+    TS_ASSERT( loader5.isExecuted() )
 
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT( output = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("twoRegimes")) )
+    // Shift should be 3300 - check a couple of values
+    TS_ASSERT_EQUALS( output->readX(0).front()+3300, output->readX(1).front() )
+    TS_ASSERT_EQUALS( output->readX(0).back()+3300, output->readX(1).back() )
+
+    AnalysisDataService::Instance().remove("twoRegimes");
+  }
 
 
 private:

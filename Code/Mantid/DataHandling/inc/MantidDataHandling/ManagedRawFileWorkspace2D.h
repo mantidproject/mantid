@@ -76,8 +76,9 @@ private:
   ManagedRawFileWorkspace2D& operator=(const ManagedRawFileWorkspace2D&);
 
   /// Sets the RAW file for this workspace. Called by the constructor.
-  void setRawFile(const std::string& fileName,int opt=0);
-  bool needCache(int opt);
+  void setRawFile(const int opt);
+  void getTimeChannels();
+  bool needCache(const int opt);
   void openTempFile();
   void removeTempFile()const;
 
@@ -86,7 +87,9 @@ private:
   FILE* m_fileRaw;          ///< RAW file pointer.
   fpos_t m_data_pos;        ///< Position in the file where the data start.
   mutable int m_readIndex;  ///< Index of the spectrum which starts at current position in the file (== index_of_last_read + 1)
-  boost::shared_ptr< std::vector<double> > m_timeChannels; ///< Time bins
+  std::vector<boost::shared_ptr<MantidVec> > m_timeChannels; ///< Time bins
+  std::map<int,int> m_specTimeRegimes;   ///< Stores the time regime for each spectrum
+
   /** For each data block holds true if it has been modified and must read from ManagedWorkspace2D flat file
       of false if it must be read from the RAW file.
       The block's index = startIndex / m_vectorsPerBlock.

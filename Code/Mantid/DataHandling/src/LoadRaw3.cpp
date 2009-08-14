@@ -259,6 +259,7 @@ void LoadRaw3::exec()
   } // loop over periods
 
   // Clean up
+  isisRaw.reset();
   fclose(file);
 }
 
