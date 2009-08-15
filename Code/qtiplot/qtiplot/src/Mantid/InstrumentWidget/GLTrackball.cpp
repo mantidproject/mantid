@@ -227,34 +227,41 @@ void GLTrackball::setViewToZNegative()
 
 void GLTrackball::rotateBoundingBox(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax)
 {
-	Mantid::Geometry::V3D maxT(xmax,ymax,zmax);
-	Mantid::Geometry::V3D minT(xmin,ymin,zmin);
-	maxT-=_modelCenter;
+	// Defensive
+	if (xmin>xmax) std::swap(xmin,xmax);
+	if (ymin>ymax) std::swap(ymin,ymax);
+	if (zmin>zmax) std::swap(zmin,zmax);
+	// Get the min and max of the cube, and remove centring offset
+	Mantid::Geometry::V3D minT(xmin,ymin,zmin), maxT(xmax,ymax,zmax);
 	minT-=_modelCenter;
-	Mantid::Geometry::V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
-		v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
-	std::vector<Mantid::Geometry::V3D> points;
-	points.clear();
-	points.push_back(v0); points.push_back(v1); points.push_back(v2); points.push_back(v3);
-	points.push_back(v4); points.push_back(v5); points.push_back(v6); points.push_back(v7);
-	maxT[0]=-DBL_MAX;maxT[1]=-DBL_MAX;maxT[2]=-DBL_MAX;
-	minT[0]=DBL_MAX; minT[1]=DBL_MAX; minT[2]=DBL_MAX;
-	Mantid::Geometry::Quat Rotate = _quaternion;
-	std::vector<Mantid::Geometry::V3D>::const_iterator vc;
-	for(vc=points.begin();vc!=points.end();vc++)
+	maxT-=_modelCenter;
+	// Get the rotation matrix
+	double rotMatr[16];
+	_quaternion.GLMatrix(&rotMatr[0]);
+	// Now calculate new min and max depending on the sign of matrix components
+	// Much faster than creating 8 points and rotate them. The new min (max)
+	// can only be obtained by summing the smallest (largest) components
+	//
+	Mantid::Geometry::V3D minV, maxV;
+	// Looping on rows of matrix
+	int index;
+	for (int i=0;i<3;i++)
 	{
-		Mantid::Geometry::V3D pt= (*vc);
-		Rotate.rotate(pt);
-		for(int i=0;i<3;i++)
+		for (int j=0;j<3;j++)
 		{
-			if(maxT[i]<pt[i]) maxT[i]=pt[i];
-			if(minT[i]>pt[i]) minT[i]=pt[i];
+			index=j+i*4; // The OpenGL matrix is linear and represent a 4x4 matrix but only the 3x3 upper-left inner part
+			// contains the rotation
+			minV[j]+=(rotMatr[index]>0)?rotMatr[index]*minT[i]:rotMatr[index]*maxT[i];
+			maxV[j]+=(rotMatr[index]>0)?rotMatr[index]*maxT[i]:rotMatr[index]*minT[i];
 		}
 	}
-	maxT=maxT+_modelCenter;
-	minT=minT+_modelCenter;
-	xmax=maxT[0]; ymax=maxT[1]; zmax=maxT[2];
-	xmin=minT[0]; ymin=minT[1]; zmin=minT[2];
+	// Re-apply offset
+	minV+=_modelCenter;
+	maxV+=_modelCenter;
+	// Adjust value.
+	xmax=maxV[0]; ymax=maxV[1]; zmax=maxV[2];
+	xmin=minV[0]; ymin=minV[1]; zmin=minV[2];
+	return;
 }
 
 void GLTrackball::setRotation(const Mantid::Geometry::Quat& quat)
