@@ -58,7 +58,7 @@ namespace Mantid
 			V3D pos  =ObjComp->getPos();
 			Quat rot =ObjComp->getRotation();
 			double rotGL[16];
-			rot.GLMatrix(rotGL);
+			rot.GLMatrix(&rotGL[0]);
 			glTranslated(pos[0],pos[1],pos[2]);
 			glMultMatrixd(rotGL);
 			V3D scaleFactor=ObjComp->getScaleFactor();
@@ -97,7 +97,7 @@ namespace Mantid
 			V3D pos  =ObjComp->getPos();
 			Quat rot =ObjComp->getRotation();
 			double rotGL[16];
-			rot.GLMatrix(rotGL);
+			rot.GLMatrix(&rotGL[0]);
 			glTranslated(pos[0],pos[1],pos[2]);
 			glMultMatrixd(rotGL);
 			V3D scaleFactor=ObjComp->getScaleFactor();
@@ -107,7 +107,7 @@ namespace Mantid
 		}
 
 		/**
-		 * Renders TopoDS Shape by traversing through the TopoDS_Shape 
+		 * Renders TopoDS Shape by traversing through the TopoDS_Shape
 		 */
 		void OCGeometryRenderer::RenderTopoDS(TopoDS_Shape* ObjSurf)
 		{
@@ -142,8 +142,8 @@ namespace Mantid
 						glNormal3d(normal.X(),normal.Y(),normal.Z());
 						glVertex3d(point1.X(),point1.Y(),point1.Z());
 						glVertex3d(point2.X(),point2.Y(),point2.Z());
-						glVertex3d(point3.X(),point3.Y(),point3.Z());		
-					}		
+						glVertex3d(point3.X(),point3.Y(),point3.Z());
+					}
 				}
 			}
 		}
@@ -167,7 +167,7 @@ namespace Mantid
 				Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
 				countVert+=facing->NbNodes();
 				countFace+=facing->NbTriangles();
-			}	
+			}
 			fprintf(fp,"POINTS %d float\n",countVert);
 			for(Ex.Init(*out,TopAbs_FACE);Ex.More();Ex.Next())
 			{
@@ -197,7 +197,7 @@ namespace Mantid
 					Standard_Integer index1,index2,index3;
 					trian.Get(index1,index2,index3);
 					fprintf(fp,"3 %d %d %d\n",maxindex+index1-1,maxindex+index2-1,maxindex+index3-1);
-				}		
+				}
 				maxindex+=facing->NbNodes();
 			}
 			fclose(fp);

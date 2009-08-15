@@ -124,7 +124,7 @@ namespace Mantid
 			V3D pos  =ObjComp->getPos();
 			Quat rot =ObjComp->getRotation();
 			double rotGL[16];
-			rot.GLMatrix(rotGL);
+			rot.GLMatrix(&rotGL[0]);
 			glTranslated(pos[0],pos[1],pos[2]);
 			glMultMatrixd(rotGL);
 			ObjComp->drawObject();
@@ -211,7 +211,7 @@ namespace Mantid
 			GLdouble mat[16];
 			V3D unit(0,0,1);
 			Quat rot(unit,axis);
-			rot.GLMatrix(mat);
+			rot.GLMatrix(&mat[0]);
 			glMultMatrixd(mat);
     		        gluCylinder(qobj,0,radius,height,Geometry::Cone::g_nslices,Geometry::Cone::g_nstacks);
 			glTranslated(0.0,0.0,height);
@@ -236,7 +236,7 @@ namespace Mantid
 			GLdouble mat[16];
 			V3D unit(0,0,1);
 			Quat rot(unit,axis);
-			rot.GLMatrix(mat);
+			rot.GLMatrix(&mat[0]);
 			glMultMatrixd(mat);
 			gluCylinder(qobj,radius,radius,height, Cylinder::g_nslices, Cylinder::g_nstacks);
 			gluDisk(qobj,0,radius,Cylinder::g_nslices, 1);

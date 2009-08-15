@@ -45,7 +45,7 @@ namespace Mantid
 			V3D pos  =ObjComp->getPos();
 			Quat rot =ObjComp->getRotation();
 			double rotGL[16];
-			rot.GLMatrix(rotGL);
+			rot.GLMatrix(&rotGL[0]);
 			glTranslated(pos[0],pos[1],pos[2]);
 			glMultMatrixd(rotGL);
 			V3D scaleFactor=ObjComp->getScaleFactor();
@@ -96,7 +96,7 @@ namespace Mantid
 			V3D pos  =ObjComp->getPos();
 			Quat rot =ObjComp->getRotation();
 			double rotGL[16];
-			rot.GLMatrix(rotGL);
+			rot.GLMatrix(&rotGL[0]);
 			glTranslated(pos[0],pos[1],pos[2]);
 			glMultMatrixd(rotGL);
 			V3D scaleFactor=ObjComp->getScaleFactor();
