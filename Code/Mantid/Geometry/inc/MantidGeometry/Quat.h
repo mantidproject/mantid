@@ -57,13 +57,14 @@ namespace Mantid
     public:
       Quat();
       Quat(const double, const double, const double, const double);
-	  Quat(const V3D& vec1,const V3D& vec2);
+      Quat(const V3D& vec1,const V3D& vec2);
       Quat(const Quat&);
       //! Set quaternion form an angle in degrees and an axis
       Quat(const double _deg, const V3D& _axis);
       //Quat(const M33&);
       ~Quat();
       Quat& operator=(const Quat&);
+      void operator()(const Quat&);
       void operator()(const double ww, const double aa, const double bb, const double cc);
       void operator()(const double angle, const V3D&);
       // Set quaternion from a 3x3 matrix
@@ -88,9 +89,9 @@ namespace Mantid
       //! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
       //! stored as an linear array of 16 double
       //! The function glRotated must be called
-      void GLMatrix(double[16]);
-	  //! Convert GL Matrix into Quat
-	  void setQuat(double[16]);
+      void GLMatrix(double* glmat);
+      //! Convert GL Matrix into Quat
+      void setQuat(double[16]);
       //! Rotate a vector
       void rotate(V3D&) const;
       //! Overload operators
@@ -105,7 +106,7 @@ namespace Mantid
       const double& operator[](int) const;
       double& operator[](int);
 
-      
+
       /** @name Element access. */
       //@{
       /// Access the real part

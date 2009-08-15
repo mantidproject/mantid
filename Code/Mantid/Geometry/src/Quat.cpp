@@ -24,7 +24,7 @@ Quat::Quat():w(1),a(0),b(0),c(0)
 
 /*!
  * Construct a Quat between two vectors.
- * v=(src+des)/�src+des�
+ * v=(src+des)/src+des
  * w=v.des
  * (a,b,c)=(v x des)
  * @param src the source position
@@ -73,10 +73,13 @@ Quat::Quat(const double _deg,const V3D& _axis)
  */
 Quat& Quat::operator=(const Quat& q)
 {
-	w=q.w;
-	a=q.a;
-	b=q.b;
-	c=q.c;
+	if (this!=&q)
+	{
+		w=q.w;
+		a=q.a;
+		b=q.b;
+		c=q.c;
+	}
 	return *this;
 }
 
@@ -124,6 +127,16 @@ void Quat::setRotation(const double deg)
 	w = cos(0.5*deg*deg2rad);
 }
 
+void Quat::operator()(const Quat& rhs)
+{
+	if (this!=&rhs)
+	{
+		w=rhs.w;
+		a=rhs.a;
+		b=rhs.b;
+		c=rhs.c;
+	}
+}
 /** Sets the quat values from four doubles
  * @param ww the value for w
  * @param aa the value for a
@@ -261,7 +274,7 @@ bool Quat::operator!=(const Quat& _q) const
 void Quat::normalize()
 {
 	double overnorm;
-	if(len2()==0) 
+	if(len2()==0)
 		overnorm=1.0;
 	else
 		overnorm=1.0/len2();
@@ -336,7 +349,7 @@ void Quat::rotate(V3D& v) const
  * The function glRotated must be called
  * param mat The output matrix
  */
-void Quat::GLMatrix(double mat[16])
+void Quat::GLMatrix(double* mat)
 {
 	double aa      = a * a;
 	double ab      = a * b;
@@ -347,17 +360,22 @@ void Quat::GLMatrix(double mat[16])
 	double bw      = b * w;
 	double cc      = c * c;
 	double cw      = c * w;
-	mat[0]  = 1.0 - 2.0 * ( bb + cc );
-	mat[4]  =     2.0 * ( ab - cw );
-	mat[8]  =     2.0 * ( ac + bw );
-	mat[1]  =     2.0 * ( ab + cw );
-	mat[5]  = 1.0 - 2.0 * ( aa + cc );
-	mat[9]  =     2.0 * ( bc - aw );
-	mat[2]  =     2.0 * ( ac - bw );
-	mat[6]  =     2.0 * ( bc + aw );
-	mat[10] = 1.0 - 2.0 * ( aa + bb );
-	mat[12]  = mat[13] = mat[14] = mat[3] = mat[7] = mat[11] = 0.0;
-	mat[15] = 1.0;
+	*mat  = 1.0 - 2.0 * ( bb + cc );++mat;
+	*mat  =     2.0 * ( ab + cw );++mat;
+	*mat  =     2.0 * ( ac - bw );++mat;
+	*mat  =0;++mat;
+	*mat  =     2.0 * ( ab - cw );++mat;
+	*mat  = 1.0 - 2.0 * ( aa + cc );++mat;
+	*mat  =     2.0 * ( bc + aw );++mat;
+	*mat  = 0;++mat;
+	*mat  =     2.0 * ( ac + bw );mat++;
+	*mat  =     2.0 * ( bc - aw );mat++;
+	*mat = 1.0 - 2.0 * ( aa + bb );mat++;
+	for (int i=0;i<4;++i)
+	{
+		*mat=0;mat++;
+	}
+	*mat=1.0;
 	return;
 }
 
@@ -458,7 +476,7 @@ void Quat::readPrinted(std::istream& IX)
     size_t c1 = in.find_first_of(',');
     size_t c2 = in.find_first_of(',',c1+1);
     size_t c3 = in.find_first_of(',',c2+1);
-    if (c1 == std::string::npos || c2 == std::string::npos || c3 == std::string::npos) 
+    if (c1 == std::string::npos || c2 == std::string::npos || c3 == std::string::npos)
         throw std::runtime_error("Wrong format for Quat input: ["+in+"]");
 
     w = atof(in.substr(i+1,c1-i-1).c_str());

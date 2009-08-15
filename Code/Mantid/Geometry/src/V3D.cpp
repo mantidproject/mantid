@@ -293,7 +293,7 @@ V3D::operator()(const double xx, const double yy, const double zz)
 }
 
   /**
-    Set is x position 
+    Set is x position
     \param xx The X coordinate
   */
 void V3D::setX(const double xx)
@@ -302,7 +302,7 @@ void V3D::setX(const double xx)
 }
 
   /**
-    Set is y position 
+    Set is y position
     \param yy The Y coordinate
   */
 void V3D::setY(const double yy)
@@ -311,7 +311,7 @@ void V3D::setY(const double yy)
 }
 
   /**
-    Set is z position 
+    Set is z position
     \param zz The Z coordinate
   */
 void V3D::setZ(const double zz)
@@ -538,7 +538,12 @@ V3D::nullVector(const double Tol) const
     \retval 0 :: Vector bigger than Tol
   */
 {
-  return ((x*x+y*y+z*z)>Tol) ? 0 :1;
+	if (std::fabs(x)>Tol)
+		return false;
+	if (std::fabs(y)>Tol)
+			return false;
+	if (std::fabs(z)>Tol)
+			return false;
 }
 
 int
