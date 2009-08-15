@@ -5,7 +5,6 @@
 #include "GLViewport.h"
 #define _USE_MATH_DEFINES true
 #include <cmath>
-#include <float.h>
 #include <GL/gl.h>
 
 GLTrackball::GLTrackball(GLViewport* parent):_viewport(parent)
