@@ -28,7 +28,7 @@
       <string notr="true" />
      </property>
      <property name="currentIndex" >
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="elideMode" >
       <enum>Qt::ElideNone</enum>
@@ -1172,10 +1172,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_5" >
        <property name="geometry" >
         <rect>
-         <x>10</x>
-         <y>200</y>
+         <x>27</x>
+         <y>203</y>
          <width>218</width>
-         <height>123</height>
+         <height>133</height>
         </rect>
        </property>
        <property name="title" >
@@ -1241,10 +1241,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_6" >
        <property name="geometry" >
         <rect>
-         <x>467</x>
-         <y>184</y>
-         <width>280</width>
-         <height>150</height>
+         <x>282</x>
+         <y>207</y>
+         <width>257</width>
+         <height>134</height>
         </rect>
        </property>
        <property name="title" >
@@ -1252,7 +1252,11 @@ p, li { white-space: pre-wrap; }
        </property>
        <layout class="QGridLayout" name="gridLayout_2" >
         <item row="0" column="1" >
-         <widget class="QLineEdit" name="direct_file" />
+         <widget class="QLineEdit" name="direct_file" >
+          <property name="alignment" >
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
         </item>
         <item row="0" column="0" >
          <widget class="QLabel" name="label_27" >
@@ -1276,18 +1280,26 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
         <item row="2" column="1" >
-         <widget class="QLineEdit" name="flat_file" />
+         <widget class="QLineEdit" name="flat_file" >
+          <property name="alignment" >
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
         </item>
         <item row="1" column="1" >
-         <widget class="QLineEdit" name="hab_file" />
+         <widget class="QLineEdit" name="hab_file" >
+          <property name="alignment" >
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
       <widget class="QGroupBox" name="groupBox_9" >
        <property name="geometry" >
         <rect>
-         <x>254</x>
-         <y>199</y>
+         <x>598</x>
+         <y>234</y>
          <width>89</width>
          <height>68</height>
         </rect>
@@ -1364,6 +1376,41 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
+      <widget class="QGroupBox" name="groupBox_15" >
+       <property name="geometry" >
+        <rect>
+         <x>475</x>
+         <y>113</y>
+         <width>242</width>
+         <height>80</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string>Phi range</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout" >
+        <item>
+         <widget class="QLabel" name="label_45" >
+          <property name="text" >
+           <string>Limit Phi (degrees)</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="phi_min" />
+        </item>
+        <item>
+         <widget class="QLabel" name="label_33" >
+          <property name="text" >
+           <string>to</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="phi_max" />
+        </item>
+       </layout>
+      </widget>
      </widget>
      <widget class="QWidget" name="tab_4" >
       <attribute name="title" >
@@ -1372,8 +1419,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_12" >
        <property name="geometry" >
         <rect>
-         <x>39</x>
-         <y>13</y>
+         <x>36</x>
+         <y>8</y>
          <width>314</width>
          <height>134</height>
         </rect>
@@ -1597,10 +1644,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_8" >
        <property name="geometry" >
         <rect>
-         <x>276</x>
-         <y>164</y>
-         <width>214</width>
-         <height>157</height>
+         <x>75</x>
+         <y>149</y>
+         <width>248</width>
+         <height>191</height>
         </rect>
        </property>
        <property name="title" >
@@ -1687,47 +1734,37 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item row="4" column="0" >
+         <widget class="QLabel" name="label_31" >
+          <property name="text" >
+           <string>Z-offset (mm)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" >
+         <widget class="QLineEdit" name="smpl_offset" />
+        </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_7" >
+      <widget class="QGroupBox" name="groupBox_13" >
        <property name="geometry" >
         <rect>
-         <x>408</x>
-         <y>12</y>
-         <width>282</width>
-         <height>136</height>
+         <x>384</x>
+         <y>9</y>
+         <width>301</width>
+         <height>262</height>
         </rect>
        </property>
        <property name="title" >
-        <string>Position Information</string>
+        <string>Beam Centre</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_7" >
+       <layout class="QGridLayout" name="gridLayout_8" >
         <item row="0" column="0" >
-         <widget class="QLabel" name="label_30" >
+         <widget class="QLabel" name="label_51" >
           <property name="text" >
-           <string>Beam Centre (mm)</string>
+           <string>Current (mm)</string>
           </property>
          </widget>
-        </item>
-        <item row="0" column="2" >
-         <widget class="QLineEdit" name="beam_x" >
-          <property name="text" >
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4" >
-         <widget class="QLineEdit" name="beam_y" />
-        </item>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="label_31" >
-          <property name="text" >
-           <string>Sample z-offset (mm)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2" colspan="2" >
-         <widget class="QLineEdit" name="smpl_offset" />
         </item>
         <item row="0" column="1" >
          <widget class="QLabel" name="label_32" >
@@ -1738,6 +1775,41 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="text" >
            <string>(</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="beam_x" >
+          <property name="maximumSize" >
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" >
+         <widget class="QLabel" name="label_46" >
+          <property name="font" >
+           <font>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
+          <property name="text" >
+           <string>,</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4" >
+         <widget class="QLineEdit" name="beam_y" >
+          <property name="maximumSize" >
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
           </property>
          </widget>
         </item>
@@ -1753,35 +1825,129 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="2" column="2" >
-         <widget class="QLineEdit" name="phi_min" />
-        </item>
-        <item row="2" column="4" >
-         <widget class="QLineEdit" name="phi_max" />
-        </item>
-        <item row="2" column="0" >
-         <widget class="QLabel" name="label_45" >
+        <item row="4" column="0" >
+         <widget class="QLabel" name="label_56" >
           <property name="text" >
-           <string>Limit Phi (degrees)</string>
+           <string>Starting position:</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="2" column="3" >
-         <widget class="QLabel" name="label_33" >
+        <item row="4" column="2" colspan="3" >
+         <widget class="QComboBox" name="beamstart_box" >
+          <item>
+           <property name="text" >
+            <string>Auto Find</string>
+           </property>
+          </item>
+          <item>
+           <property name="text" >
+            <string>Current</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="5" column="0" >
+         <widget class="QLabel" name="label_57" >
+          <property name="text" >
+           <string>Radius limits(mm):</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="2" >
+         <widget class="QLineEdit" name="beam_rmin" >
+          <property name="maximumSize" >
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string>60</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="4" >
+         <widget class="QLineEdit" name="beam_rmax" >
+          <property name="maximumSize" >
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string>200</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="3" >
+         <widget class="QLabel" name="label_58" >
           <property name="text" >
            <string>to</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="3" >
-         <widget class="QLabel" name="label_46" >
-          <property name="font" >
-           <font>
-            <pointsize>14</pointsize>
-           </font>
+        <item row="7" column="3" colspan="4" >
+         <widget class="QPushButton" name="runcentreBtn" >
+          <property name="text" >
+           <string>Run</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="7" >
+         <widget class="Line" name="line" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="7" >
+         <widget class="Line" name="line_3" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2" >
+         <widget class="QLabel" name="label_30" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">Automatic search:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2" colspan="3" >
+         <widget class="QLabel" name="label_59" >
+          <property name="text" >
+           <string>This will overwrite the coordinates above</string>
+          </property>
+          <property name="wordWrap" >
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" >
+         <widget class="QLabel" name="label_60" >
+          <property name="text" >
+           <string>Max. iterations</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="2" >
+         <widget class="QLineEdit" name="beam_iter" >
+          <property name="maximumSize" >
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
           </property>
           <property name="text" >
-           <string>,</string>
+           <string>15</string>
           </property>
          </widget>
         </item>

@@ -92,31 +92,30 @@ DETBANK = '|DETBANK|'
 # it from the instrument name 
 MONITORSPECTRUM = |MONSPEC|
 
-# Detector position information for SANS2D (the log files don't seem to work at the moment)
-Front_Det_Radius = 306.
-front_det_default_sd_m = 4.0
-front_det_default_x_m = 1.1
-rear_det_default_sd_m = 4.0
-# LOG files for SANS2d will have these encoder readings  ============================================
-# TASK Get the current values on the workspace
-Front_Det_z = 4500.
-Front_Det_x = -1000.
-Front_Det_Rot = -12.
-Rear_Det_z = 6000.
-# Rear_Det_x  will be needed to calc relative X translation of front detector 
-Rear_Det_x = 100.
-      
+# Detector position information for SANS2D
+FRONT_DET_RADIUS = 306.0
+FRONT_DET_DEFAULT_SD_M = 4.0
+FRONT_DET_DEFAULT_X_M = 1.1
+REAR_DET_DEFAULT_SD_M = 4.0
+
+# LOG files for SANS2D will have these encoder readings  
+FRONT_DET_Z = |ZFRONTDET|
+FRONT_DET_X = |XFRONTDET|
+FRONT_DET_ROT = |ROTFRONTDET|
+REAR_DET_Z = |ZREARDET|
+# Rear_Det_X  Will Be Needed To Calc Relative X Translation Of Front Detector 
+REAR_DET_X = |XREARDET|
+
 # MASK file stuff ==========================================================
 # correction terms to SANS2d encoders - store in MASK file ?
-Rear_Det_z_corr = 58.
-Rear_Det_x_corr = 0.0
-Front_Det_z_corr = 47.
-Front_Det_x_corr = -33.
-Front_Det_y_corr = -20.
-Front_Det_Rot_corr = 0.0
+FRONT_DET_Z_CORR = |ZCORRFRONTDET| #47.
+FRONT_DET_Y_CORR = |YCORRFRONTDET| #-33.
+FRONT_DET_X_CORR = |XCORRFRONTDET| #-20.
+FRONT_DET_ROT_CORR = |ROTCORRFRONTDET| #0.0
+REAR_DET_Z_CORR = |ZCORREARDET| #58.
+REAR_DET_X_CORR = |XCORREARDET| #0.0
 
 #------------------------------- End of input section --------------------------------------------------
-
 
 # Transmission variables for SANS2D. The CalculateTransmission algorithm contains the defaults
 # for LOQ so these are not used for LOQ
@@ -151,7 +150,7 @@ def CalculateTransmissionCorrection(trans_raw, DIRECT_SAMPLE, wavbin, outputwork
 #######################################################################################################################
 
 ############################## Setup the component positions ##########################################################
-def SetupComponentPositions(detector, dataws, xbeam, ybeam):
+def SetupComponentPositions(detector, dataws, xbeam, ybeam, logfile = None):
 	### Sample correction #### 
 	# Put the components in the correct place
 	# The sample
@@ -165,22 +164,22 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
 		# LOQ instrument description has detector at 0.0, 0.0
 		return [xshift, yshift], [xshift, yshift] 
 		## !TASK! HAB
-	else:  
+	else:
   		if detector == 'front-detector':
-			rotateDet = (-Front_Det_Rot -  Front_Det_Rot_corr)
+			rotateDet = (-FRONT_DET_ROT - FRONT_DET_ROT_CORR)
 			RotateInstrumentComponent(dataws, detector,X="0.",Y="1.0",Z="0.",Angle=rotateDet)
-   			RotRadians = math.pi*(Front_Det_Rot + Front_Det_Rot_corr)/180.
-			xshift = (Rear_Det_x + Rear_Det_x_corr - Front_Det_x - Front_Det_x_corr + Front_Det_Radius*math.sin(RotRadians ) )/1000. - front_det_default_x_m - xbeam
-			yshift = (Front_Det_y_corr /1000.  - ybeam)
+   			RotRadians = math.pi*(FRONT_DET_ROT + FRONT_DET_ROT_CORR)/180.
+			xshift = (REAR_DET_X + REAR_DET_X_CORR - FRONT_DET_X - FRONT_DET_X_CORR + FRONT_DET_RADIUS*math.sin(RotRadians ) )/1000. - FRONT_DET_DEFAULT_X_M - xbeam
+			yshift = (FRONT_DET_X_CORR /1000.  - ybeam)
 			# default in instrument description is 23.281m - 4.000m from sample at 19,281m !
 			# need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-			zshift = (Front_Det_z + Front_Det_z_corr + Front_Det_Radius*(1 - math.cos(RotRadians)) )/1000.  -front_det_default_sd_m
+			zshift = (FRONT_DET_Z + FRONT_DET_Z_CORR + FRONT_DET_Radius*(1 - math.cos(RotRadians)) )/1000. - FRONT_DET_DEFAULT_SD_M
 			MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 			return [0.0, 0.0], [0.0, 0.0]
 		else:
    			xshift = -xbeam
 			yshift = -ybeam
-			zshift = (Rear_Det_z + Rear_Det_z_corr)/1000. - 4.000
+			zshift = (REAR_DET_Z + REAR_DET_Z_CORR)/1000. - REAR_DET_DEFAULT_SD_M
    			MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 			return [0.0,0.0], [xshift, yshift]
 		# Should never reach here
@@ -209,7 +208,7 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 	CropWorkspace(sample_raw, monitorWS, StartWorkspaceIndex = str(MONITORSPECTRUM - 1), EndWorkspaceIndex = str(MONITORSPECTRUM - 1))
 	if INSTR_NAME == 'LOQ':
 		RemoveBins(monitorWS, monitorWS, '19900', '20500', Interpolation="Linear")
-	# Remove flat background
+		# Remove flat background
 	FlatBackground(monitorWS, monitorWS, '0', BACKMON_START, BACKMON_END)
 	# Get the bank we are looking at
 	CropWorkspace(sample_raw, final_result, StartWorkspaceIndex = (SPECMIN - 1), EndWorkspaceIndex = str(SPECMAX - 1))
@@ -434,7 +433,7 @@ try:
 		can_setup = InitReduction(SCATTER_CAN, [xstart, ystart], EmptyCell = True)
 
 		XVAR_PREV = -xstart
-		YVAR_PREV =  -ystart
+		YVAR_PREV = -ystart
 		coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rlow, rupp),xtol=1e-3, maxiter=MaxIter)
 		
 		# Tidy up

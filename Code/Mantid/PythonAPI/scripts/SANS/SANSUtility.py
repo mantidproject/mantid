@@ -31,6 +31,20 @@ def GetInstrumentDetails(instr_name, detbank):
 		else:
 			return -1, -1, -1, -1, -1
 			
+# Parse a log file containing run information and return the detector positions
+def parseLogFile(logfile):
+	logkeywords = {'Rear_Det_X':0.0, 'Rear_Det_Z':0.0, 'Front_Det_X':0.0, 'Front_Det_Z':0.0, \
+		'Front_Det_Rot':0.0}
+	if logfile == None:
+		return tuple(logkeywords.values())
+	file = open(logfile, 'rU')
+	for line in file:
+		entry = line.split()[1]
+		if entry in logkeywords.keys():
+			logkeywords[entry] = float(line.split()[2])
+	
+	return tuple(logkeywords.values())
+			
 def InfiniteCylinderXML(id, centre, radius, axis):
 	return  '<infinite-cylinder id="' + str(id) + '">' + \
 	'<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \

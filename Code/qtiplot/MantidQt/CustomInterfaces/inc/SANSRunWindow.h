@@ -67,6 +67,8 @@ private:
   bool readPyViewMaskTemplate();
   /// Load the user file specified in the text field
   bool loadUserFile();
+  /// Construct the reduction code from the Python script template
+  QString constructReductionCode();
   /// Read a limit line from the user file
   void readLimits(const QString & com_line);
   /// Get the component distances
@@ -87,6 +89,8 @@ private:
   void setupGeometryDetails();
   /// Load the data by running the required Mantid algorithm
   int runLoadData(const QString & work_dir, const QString & run_no, const QString & ext, const QString & workspace);
+  /// Parse a log information
+  void loadDetectorLogs(const QString & work_dir, const QString & run_no);
   /// Handle a delete notification from Mantid
   void handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf);
 	//@}
@@ -106,6 +110,9 @@ private slots:
 
   /// Plot button has been clicked
   void handlePlotButtonClick();
+
+  /// Find centre button click handler
+  void handleRunFindCentre();
 
   /// A ComboBox option change
   void handleStepComboChange(int new_index);
@@ -158,6 +165,12 @@ private:
 
   // An observer for a delete notification from Mantid
   Poco::NObserver<SANSRunWindow, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
+
+  // A store of the log values for the sample run
+  QHash<QString, double> m_logvalues;
+
+  // A store of the mask file correction values for the sample run
+  QHash<QString, double> m_maskcorrections;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

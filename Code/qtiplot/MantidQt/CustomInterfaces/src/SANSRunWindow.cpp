@@ -82,6 +82,7 @@ void SANSRunWindow::initLayout()
 
     connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
     connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
+    connect(m_uiForm.runcentreBtn, SIGNAL(clicked()), this, SLOT(handleRunFindCentre()));
  
     // Disable most things so that load is the only thing that can be done
     m_uiForm.oneDBtn->setEnabled(false);
@@ -296,6 +297,16 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.dist_mod_mon->setText("0.0000");
   m_uiForm.smpl_offset->setText("0.0");
 
+  //Setup mask file detector corrections
+  m_maskcorrections.clear();
+  m_maskcorrections["Front_Det_Z_corr"] = 0.0;
+  m_maskcorrections["Front_Det_Y_corr"] = 0.0;
+  m_maskcorrections["Front_Det_X_corr"] = 0.0;
+  m_maskcorrections["Front_Det_Rot_corr"] = 0.0;
+  m_maskcorrections["Rear_Det_Z_corr"] = 0.0;
+  m_maskcorrections["Rear_Det_X_corr"] = 0.0;
+ 
+
   QTextStream stream(&user_file);
   QString data;
   while( !stream.atEnd() )
@@ -374,6 +385,46 @@ bool SANSRunWindow::loadUserFile()
       QTableWidgetItem *item2 = new QTableWidgetItem(col2_txt);
       m_uiForm.mask_table->setItem(row, 0, item1);
       m_uiForm.mask_table->setItem(row, 1, item2);
+    }
+    else if( com_line.startsWith("DET/CORR", Qt::CaseInsensitive) )
+    {
+      QString det = com_line.section(' ',1, 1);
+      QString axis = com_line.section(' ',2, 2);
+      double value = com_line.section(' ',3, 3).toDouble();
+      QString key;
+
+
+      if( det.compare("rear", Qt::CaseInsensitive) == 0 )
+      {
+	if( axis.compare("x", Qt::CaseInsensitive) == 0 )
+	{
+	  key = "Rear_Det_X_corr";
+	}
+	else
+	{
+	  key = "Rear_Det_Z_corr";
+	}
+      }
+      else
+      {
+	if( axis.compare("x", Qt::CaseInsensitive) == 0 )
+	{
+	  key = "Front_Det_X_corr";
+	}
+	else if( axis.compare("y", Qt::CaseInsensitive) == 0 )
+	{
+	  key = "Front_Det_Y_corr";
+	}
+	else if( axis.compare("z", Qt::CaseInsensitive) == 0 )
+	{
+	  key = "Front_Det_Z_corr";
+	}
+	else
+	{
+	  key = "Front_Det_Rot_corr";
+	}
+      }
+      m_maskcorrections[key] = value;
     }
     else {}
        
@@ -522,31 +573,6 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
   Mantid::Geometry::IDetector_sptr detector = instr->getDetector(dets[0]);
   lmm = detector->getDistance(*source);
 
-//   //  dets = workspace_ptr->spectraMap().getDetectors(m_uiForm.bank_spec_min->text().toInt());
-//   g_log.debug() << "main-detector  pos " << instr->getComponentByName("rear-detector")->getPos() << "\n";
-  
-
-//   dets = workspace_ptr->spectraMap().getDetectors(36865);
-//   if( !dets.empty() ) 
-//   {
-//     g_log.debug() << "Spectrum 3 pos " << instr->getDetector(dets[0])->getPos() << "\n";
-//   }
-//  //   dets = workspace_ptr->spectraMap().getDetectors();
-// //   if( !dets.empty() ) 
-// //   {
-// //     g_log.debug() << "Spectrum 8130 pos " << instr->getDetector(dets[0])->getPos() << "\n";
-// //   }
-
-// //   dets = workspace_ptr->spectraMap().getDetectors(8131);
-// //   if( !dets.empty() ) 
-// //   {
-// //     g_log.debug() << "Spectrum 8131 pos " << instr->getDetector(dets[0])->getPos() << "\n";
-// //   }
-//   dets = workspace_ptr->spectraMap().getDetectors(73728);
-//   if( !dets.empty() ) 
-//   {
-//     g_log.debug() << "Spectrum 16386 pos " << instr->getDetector(dets[0])->getPos() << "\n";
-//   }
 }
 
 /**
@@ -569,6 +595,7 @@ void SANSRunWindow::setProcessingState(bool running, int type)
     }
     m_uiForm.oneDBtn->setEnabled(false);
     m_uiForm.twoDBtn->setEnabled(false);
+    m_uiForm.runcentreBtn->setEnabled(false);
   }
   else
   {
@@ -576,6 +603,7 @@ void SANSRunWindow::setProcessingState(bool running, int type)
     m_uiForm.twoDBtn->setText("2D Reduce");
     m_uiForm.oneDBtn->setEnabled(true);
     m_uiForm.twoDBtn->setEnabled(true);
+    m_uiForm.runcentreBtn->setEnabled(true);
     m_uiForm.load_dataBtn->setEnabled(true);
   }
 }
@@ -833,6 +861,18 @@ void SANSRunWindow::handleLoadButtonClick()
           m_uiForm.tof_min->setText(QString::number(ws->readX(0).front())); 
           m_uiForm.tof_max->setText(QString::number(ws->readX(0).back()));
         }
+
+	// Load log information
+	loadDetectorLogs(work_dir, run_no);
+
+	// Set the geometry
+	int geomid  = ws->getSample()->getGeometryFlag();
+	m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
+	double thick(0.0), width(0.0), height(0.0);
+	ws->getSample()->getGeometry(thick, width, height);
+	m_uiForm.sample_thick->setText(QString::number(thick));
+	m_uiForm.sample_width->setText(QString::number(width));
+	m_uiForm.sample_height->setText(QString::number(height));
     }
 
     QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
@@ -862,19 +902,19 @@ void SANSRunWindow::handleLoadButtonClick()
   emit dataReadyToProcess(true);
 }
 
-/**
- * Run the LOQ analysis script
- * @param type The data reduction type, 1D or 2D
+/** 
+ * Construct the python code to perform the analysis based on the 
+ * settings
  */
-void SANSRunWindow::handleReduceButtonClick(const QString & type)
+QString SANSRunWindow::constructReductionCode()
 {
-  if( !readPyReductionTemplate() ) return;
+  if( !readPyReductionTemplate() ) return QString();
   if( m_ins_defdir.isEmpty() ) m_ins_defdir = m_data_dir;
   // Quick check that scattering sample number has been entered
   if( m_uiForm.sct_sample_edit->text().isEmpty() )
   {
     showInformationBox("Error: A scattering sample run number is required to continue.");
-    return;
+    return QString();
   } 
 
   if( m_run_changed )
@@ -883,11 +923,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     handleLoadButtonClick();
   }
 
-  int idtype(0);
-  if( type.startsWith("2") ) idtype = 1;
-
-  //Disable buttons so that interaction is limited while processing data
-  setProcessingState(true, idtype);
   //Construct the code to execute
   QString py_code = m_pycode_loqreduce;
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
@@ -921,32 +956,26 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     step_prefix = "-";
   }
   py_code.replace("|WAVDELTA|", step_prefix + m_uiForm.wav_dw->text());
-    
+
+  //dQ
   step_prefix = "";
-  if( idtype == 0 )
-  {
-    if( m_uiForm.q_dq_opt->currentIndex() == 1 ) step_prefix = "-";
-    py_code.replace("|QMIN|", m_uiForm.q_min->text());
-    py_code.replace("|QMAX|", m_uiForm.q_max->text());
-    py_code.replace("|QDELTA|", step_prefix  + m_uiForm.q_dq->text());
-    py_code.replace("|QXYMAX|", "0");
-    py_code.replace("|QXYDELTA|", "0");
-  }
-  else
-  {
-    if( m_uiForm.qy_dqy_opt->currentIndex() == 1 ) step_prefix = "-";
-    py_code.replace("|QMIN|", "0");
-    py_code.replace("|QMAX|", "0");
-    py_code.replace("|QDELTA|", "0");
-    py_code.replace("|QXYMAX|", m_uiForm.qy_max->text());
-    py_code.replace("|QXYDELTA|", step_prefix  + m_uiForm.qy_dqy->text());
-  }
+  py_code.replace("|QMIN|", m_uiForm.q_min->text());
+  py_code.replace("|QMAX|", m_uiForm.q_max->text());
+  if( m_uiForm.q_dq_opt->currentIndex() == 1 ) step_prefix = "-";
+  py_code.replace("|QDELTA|", step_prefix  + m_uiForm.q_dq->text());
+
+  // Qxy
+  py_code.replace("|QXYMAX|", m_uiForm.qy_max->text());
+  if( m_uiForm.qy_dqy_opt->currentIndex() == 1 ) step_prefix = "-";
+  py_code.replace("|QXYDELTA|", step_prefix  + m_uiForm.qy_dqy->text());
+
+  // Efficiency
   py_code.replace("|DIRECTFILE|", m_uiForm.direct_file->text());
-  py_code.replace("|SAMPLEZOFFSET|", m_uiForm.smpl_offset->text());
   py_code.replace("|FLATFILE|", m_uiForm.flat_file->text());
+
   
+  py_code.replace("|SAMPLEZOFFSET|", m_uiForm.smpl_offset->text());
   py_code.replace("|MASKSTRING|", createMaskString());
-  py_code.replace("|ANALYSISTYPE|", type);
   py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
 
  
@@ -970,7 +999,48 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   py_code.replace("|SAMPLEHEIGHT|", m_uiForm.sample_height->text());
   py_code.replace("|SAMPLETHICK|", m_uiForm.sample_thick->text());
   
-  //  std::cerr << py_code.toStdString() << "\n";
+  // Log information
+  py_code.replace("|ZFRONTDET|", QString::number(m_logvalues["Front_Det_Z"]));
+  py_code.replace("|XFRONTDET|", QString::number(m_logvalues["Front_Det_X"]));
+  py_code.replace("|ROTFRONTDET|", QString::number(m_logvalues["Front_Det_Rot"]));
+  py_code.replace("|ZREARDET|", QString::number(m_logvalues["Rear_Det_Z"]));
+  py_code.replace("|XREARDET|", QString::number(m_logvalues["Rear_Det_X"]));
+  //Mask file correction values
+  py_code.replace("|ZCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Z_corr"]));
+  py_code.replace("|YCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Y_corr"]));
+  py_code.replace("|XCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_X_corr"]));
+  py_code.replace("|ROTCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Rot_corr"]));
+  py_code.replace("|ZCORREARDET|", QString::number(m_maskcorrections["Rear_Det_Z_corr"]));
+  py_code.replace("|XCORREARDET|", QString::number(m_maskcorrections["Rear_Det_X_corr"]));
+
+
+  return py_code;
+}
+
+
+/**
+ * Run the analysis script
+ * @param type The data reduction type, 1D or 2D
+ */
+void SANSRunWindow::handleReduceButtonClick(const QString & type)
+{
+
+  QString py_code = constructReductionCode();
+  if( py_code.isEmpty() )
+  {
+    return;
+  }
+
+  int idtype(0);
+  if( type.startsWith("2") ) idtype = 1;
+  py_code.replace("|ANALYSISTYPE|", type);
+  py_code += 
+    "sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_CENTRE, YBEAM_CENTRE], False)\n"
+    "can_setup = InitReduction(SCATTER_CAN, [XBEAM_CENTRE, YBEAM_CENTRE], True)\n"
+    "FullWavRangeReduction(sample_setup, can_setup)";
+
+  //Disable buttons so that interaction is limited while processing data
+  setProcessingState(true, idtype);
 
   //Execute the code
   runPythonCode(py_code);
@@ -987,6 +1057,81 @@ void SANSRunWindow::handlePlotButtonClick()
   dialog.setAvailableData(currentWorkspaceList());
   connect(&dialog, SIGNAL(pythonCodeConstructed(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
   dialog.exec();
+}
+
+void SANSRunWindow::handleRunFindCentre()
+{
+  QString py_code = constructReductionCode();
+  if( py_code.isEmpty() )
+  {
+    return;
+  }
+
+  py_code.replace("|ANALYSISTYPE|", "1D");
+  if( m_uiForm.beam_rmin->text().isEmpty() )
+  {
+    m_uiForm.beam_rmin->setText("60");
+  }
+
+  if( m_uiForm.beam_rmax->text().isEmpty() )
+  {
+    if( m_uiForm.inst_opt->currentIndex() == 0 )
+    {
+      m_uiForm.beam_rmax->setText("200");
+    }
+    else
+    {
+      m_uiForm.beam_rmax->setText("280");
+    }
+  }
+
+  if( m_uiForm.beam_iter->text().isEmpty() )
+  {
+    m_uiForm.beam_iter->setText("15");
+  }
+
+  if( m_uiForm.beamstart_box->currentIndex() == 0 )
+  {
+    py_code += "Xstart = None; Ystart = None\n";
+  }
+  else
+  {
+    //
+    if( !m_uiForm.beam_x->text().isEmpty() || !m_uiForm.beam_y->text().isEmpty() )
+    {
+      showInformationBox("Current centre postion is invalid.");
+      return;
+    }
+    else
+    {
+      py_code += "Xstart = " + m_uiForm.beam_x->text() + "/1000.; Ystart = " + m_uiForm.beam_y->text() + "/1000\n";
+    }
+  }
+
+  py_code += "\nbeamcoords = FindBeamCentre(";
+  py_code += "rlow = " + m_uiForm.beam_rmin->text() + "/1000., rupp = " 
+    + m_uiForm.beam_rmax->text() + "/1000., MaxIter = " + m_uiForm.beam_iter->text() 
+    + ", xstart = Xstart, ystart = Ystart)\n"
+    + "print str(beamcoords[0]) + ' ' + str(beamcoords[1])\n"
+    + "mtd.clear()";
+
+  //  std::cerr << py_code.toStdString() << "\n";
+  setProcessingState(true, 0);
+  //Execute the code
+  QString result = runPythonCode(py_code, true);
+
+  QStringList xycoords = result.split(" ");
+  if( xycoords.size() == 2 )
+  {
+    double x = xycoords[0].toDouble();
+    double y = xycoords[1].toDouble();
+
+    m_uiForm.beam_x->setText(QString::number(x*1000));
+    m_uiForm.beam_y->setText(QString::number(y*1000));
+  }
+  //Reenable stuff
+  setProcessingState(false, 0);
+  
 }
 
 /**
@@ -1062,12 +1207,16 @@ void SANSRunWindow::handleInstrumentChange(int index)
     m_uiForm.monitor_spec->setText("2");
     m_uiForm.detbank_sel->setItemText(0, "main-detector-bank");
     m_uiForm.detbank_sel->setItemText(1, "HAB");
+    m_uiForm.beam_rmin->setText("60");
+    m_uiForm.beam_rmax->setText("200");
   }
   else
   { 
     m_uiForm.monitor_spec->setText("2");
     m_uiForm.detbank_sel->setItemText(0, "rear-detector");
     m_uiForm.detbank_sel->setItemText(1, "front-detector");
+    m_uiForm.beam_rmin->setText("60");
+    m_uiForm.beam_rmax->setText("280");
   }
   m_cfg_loaded = false;
 }
@@ -1097,7 +1246,7 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
   }
   else
   {
-    loader = f_mgr.createAlgorithm("LoadISISNexus"); 
+    loader = f_mgr.createAlgorithm("LoadISISNexus");
   }
   loader->setPropertyValue("Filename", filepath.toStdString());
   std::string workspace_name = workspace.toStdString();
@@ -1117,7 +1266,7 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
     
     //Load succeeded so find the number of periods. (Here the number of workspaces in the group)
     //Retrieve shoudn't throw but lets wrap it just in case
-     Mantid::API::Workspace_sptr wksp_ptr;
+    Mantid::API::Workspace_sptr wksp_ptr;
     try
     {
      wksp_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name);
@@ -1127,6 +1276,8 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
       g_log.error("Couldn't find workspace " + workspace_name + " in ADS.");
       return 0;
     }
+    
+    // Find the number of periods
     Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp_ptr);
     if( ws_group )
     {
@@ -1136,6 +1287,53 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
     {
       return 1;
     }
+  }
+}
+
+/**
+ * Load log information. If the file has a raw extension then a log file with the same stem but .log is used
+ * @param work_dir The directory
+ * @param run_no The run number
+ */
+void SANSRunWindow::loadDetectorLogs(const QString& work_dir, const QString & run_no)
+{
+  //Not necesary for LOQ for
+  if( m_uiForm.inst_opt->currentIndex() == 0 ) return;
+  
+  if( m_uiForm.file_opt->currentIndex() == 0 )
+  {
+    QString filepath = getRawFilePath(work_dir, run_no, ".raw");
+    QString logname = QFileInfo(filepath).baseName();
+    QString suffix = ".log";
+    QString logpath = QFileInfo(filepath).path() + "/" + logname + suffix;
+    QFile handle(logpath);
+  
+    if( !handle.open(QIODevice::ReadOnly | QIODevice::Text) )
+    {
+      return;
+    }
+
+    m_logvalues.clear();
+    m_logvalues["Rear_Det_X"] = 0.0;
+    m_logvalues["Rear_Det_Z"] = 0.0;
+    m_logvalues["Front_Det_X"] = 0.0;
+    m_logvalues["Front_Det_Z"] = 0.0;
+    m_logvalues["Front_Det_Rot"] = 0.0;
+    QList<QString> logkeys = m_logvalues.keys();
+  
+    QTextStream reader(&handle);
+    while( !reader.atEnd() )
+      {
+	QString line = reader.readLine();
+	QStringList items = line.split(QRegExp("\\s+"));
+	QString entry = items.value(1);
+	if( logkeys.contains(entry) )
+	  {
+	    // Log values are in mm 
+	    m_logvalues[entry] = items.value(2).toDouble();
+	  }
+      }
+    handle.close();
   }
 }
 
