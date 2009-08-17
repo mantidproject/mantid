@@ -226,40 +226,14 @@ void GLTrackball::setViewToZNegative()
 
 void GLTrackball::rotateBoundingBox(double& xmin,double& xmax,double& ymin,double& ymax,double& zmin,double& zmax)
 {
-	// Defensive
-	if (xmin>xmax) std::swap(xmin,xmax);
-	if (ymin>ymax) std::swap(ymin,ymax);
-	if (zmin>zmax) std::swap(zmin,zmax);
-	// Get the min and max of the cube, and remove centring offset
-	Mantid::Geometry::V3D minT(xmin,ymin,zmin), maxT(xmax,ymax,zmax);
-	minT-=_modelCenter;
-	maxT-=_modelCenter;
-	// Get the rotation matrix
-	double rotMatr[16];
-	_quaternion.GLMatrix(&rotMatr[0]);
-	// Now calculate new min and max depending on the sign of matrix components
-	// Much faster than creating 8 points and rotate them. The new min (max)
-	// can only be obtained by summing the smallest (largest) components
-	//
-	Mantid::Geometry::V3D minV, maxV;
-	// Looping on rows of matrix
-	int index;
-	for (int i=0;i<3;i++)
-	{
-		for (int j=0;j<3;j++)
-		{
-			index=j+i*4; // The OpenGL matrix is linear and represent a 4x4 matrix but only the 3x3 upper-left inner part
-			// contains the rotation
-			minV[j]+=(rotMatr[index]>0)?rotMatr[index]*minT[i]:rotMatr[index]*maxT[i];
-			maxV[j]+=(rotMatr[index]>0)?rotMatr[index]*maxT[i]:rotMatr[index]*minT[i];
-		}
-	}
+	// remove offset
+	xmin-=_modelCenter[0];ymin-=_modelCenter[1];zmin-=_modelCenter[2];
+	xmax-=_modelCenter[0];ymax-=_modelCenter[1];zmax-=_modelCenter[2];
+	// Get the new bounding box
+	_quaternion.rotateBB(xmin,ymin,zmin,xmax,ymax,zmax);
 	// Re-apply offset
-	minV+=_modelCenter;
-	maxV+=_modelCenter;
-	// Adjust value.
-	xmax=maxV[0]; ymax=maxV[1]; zmax=maxV[2];
-	xmin=minV[0]; ymin=minV[1]; zmin=minV[2];
+	xmin+=_modelCenter[0];ymin+=_modelCenter[1];zmin+=_modelCenter[2];
+	xmax+=_modelCenter[0];ymax+=_modelCenter[1];zmax+=_modelCenter[2];
 	return;
 }
 

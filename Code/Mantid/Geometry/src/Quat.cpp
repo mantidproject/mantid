@@ -24,7 +24,7 @@ Quat::Quat():w(1),a(0),b(0),c(0)
 
 /*!
  * Construct a Quat between two vectors.
- * v=(src+des)/src+des
+ * v=(src+des)/�src+des�
  * w=v.des
  * (a,b,c)=(v x des)
  * @param src the source position
@@ -127,16 +127,6 @@ void Quat::setRotation(const double deg)
 	w = cos(0.5*deg*deg2rad);
 }
 
-void Quat::operator()(const Quat& rhs)
-{
-	if (this!=&rhs)
-	{
-		w=rhs.w;
-		a=rhs.a;
-		b=rhs.b;
-		c=rhs.c;
-	}
-}
 /** Sets the quat values from four doubles
  * @param ww the value for w
  * @param aa the value for a
@@ -156,6 +146,16 @@ void Quat::operator()(const double angle, const V3D& axis)
 {
 	this->setAngleAxis(angle,axis);
 }
+
+void Quat::operator()(const Quat& q)
+{
+	w=q.w;
+	a=q.a;
+	b=q.b;
+	c=q.c;
+	return;
+}
+
 
 //! Destructor
 Quat::~Quat()
@@ -349,7 +349,7 @@ void Quat::rotate(V3D& v) const
  * The function glRotated must be called
  * param mat The output matrix
  */
-void Quat::GLMatrix(double* mat)
+void Quat::GLMatrix(double mat[16])
 {
 	double aa      = a * a;
 	double ab      = a * b;
@@ -360,22 +360,17 @@ void Quat::GLMatrix(double* mat)
 	double bw      = b * w;
 	double cc      = c * c;
 	double cw      = c * w;
-	*mat  = 1.0 - 2.0 * ( bb + cc );++mat;
-	*mat  =     2.0 * ( ab + cw );++mat;
-	*mat  =     2.0 * ( ac - bw );++mat;
-	*mat  =0;++mat;
-	*mat  =     2.0 * ( ab - cw );++mat;
-	*mat  = 1.0 - 2.0 * ( aa + cc );++mat;
-	*mat  =     2.0 * ( bc + aw );++mat;
-	*mat  = 0;++mat;
-	*mat  =     2.0 * ( ac + bw );mat++;
-	*mat  =     2.0 * ( bc - aw );mat++;
-	*mat = 1.0 - 2.0 * ( aa + bb );mat++;
-	for (int i=0;i<4;++i)
-	{
-		*mat=0;mat++;
-	}
-	*mat=1.0;
+	mat[0]  = 1.0 - 2.0 * ( bb + cc );
+	mat[4]  =     2.0 * ( ab - cw );
+	mat[8]  =     2.0 * ( ac + bw );
+	mat[1]  =     2.0 * ( ab + cw );
+	mat[5]  = 1.0 - 2.0 * ( aa + cc );
+	mat[9]  =     2.0 * ( bc - aw );
+	mat[2]  =     2.0 * ( ac - bw );
+	mat[6]  =     2.0 * ( bc + aw );
+	mat[10] = 1.0 - 2.0 * ( aa + bb );
+	mat[12]  = mat[13] = mat[14] = mat[3] = mat[7] = mat[11] = 0.0;
+	mat[15] = 1.0;
 	return;
 }
 
@@ -506,6 +501,40 @@ std::istream& operator>>(std::istream& ins,Quat& q)
 {
     q.readPrinted(ins);
     return ins;
+}
+
+void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, double& ymax, double& zmax)
+{
+	// Defensive
+	if (xmin>xmax) std::swap(xmin,xmax);
+	if (ymin>ymax) std::swap(ymin,ymax);
+	if (zmin>zmax) std::swap(zmin,zmax);
+	// Get the min and max of the cube, and remove centring offset
+	Mantid::Geometry::V3D minT(xmin,ymin,zmin), maxT(xmax,ymax,zmax);
+	// Get the rotation matrix
+	double rotMatr[16];
+	GLMatrix(&rotMatr[0]);
+	// Now calculate new min and max depending on the sign of matrix components
+	// Much faster than creating 8 points and rotate them. The new min (max)
+	// can only be obtained by summing the smallest (largest) components
+	//
+	Mantid::Geometry::V3D minV, maxV;
+	// Looping on rows of matrix
+	int index;
+	for (int i=0;i<3;i++)
+	{
+		for (int j=0;j<3;j++)
+		{
+			index=j+i*4; // The OpenGL matrix is linear and represent a 4x4 matrix but only the 3x3 upper-left inner part
+			// contains the rotation
+			minV[j]+=(rotMatr[index]>0)?rotMatr[index]*minT[i]:rotMatr[index]*maxT[i];
+			maxV[j]+=(rotMatr[index]>0)?rotMatr[index]*maxT[i]:rotMatr[index]*minT[i];
+		}
+	}
+	// Adjust value.
+	xmin=minV[0]; ymin=minV[1]; zmin=minV[2];
+	xmax=maxV[0]; ymax=maxV[1]; zmax=maxV[2];
+	return;
 }
 
 } // Namespace Geometry

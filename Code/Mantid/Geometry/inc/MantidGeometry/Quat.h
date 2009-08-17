@@ -59,11 +59,10 @@ namespace Mantid
       Quat(const double, const double, const double, const double);
       Quat(const V3D& vec1,const V3D& vec2);
       Quat(const Quat&);
+      Quat& operator=(const Quat&);
       //! Set quaternion form an angle in degrees and an axis
       Quat(const double _deg, const V3D& _axis);
-      //Quat(const M33&);
       ~Quat();
-      Quat& operator=(const Quat&);
       void operator()(const Quat&);
       void operator()(const double ww, const double aa, const double bb, const double cc);
       void operator()(const double angle, const V3D&);
@@ -94,6 +93,10 @@ namespace Mantid
       void setQuat(double[16]);
       //! Rotate a vector
       void rotate(V3D&) const;
+      //! Taking two points defining a cuboid bounding box (xmin,ymin,zmin) and (xmax,ymax,zmax)
+      // which means implicitly that the cube edges are parallel to the axes,
+      // find the smallest bounding box with the edges also parallel to the axes after rotation of the object.
+      void rotateBB(double& xmin,double& ymin,double& zmin,double& xmax,double& ymax, double& zmax);
       //! Overload operators
       Quat  operator+(const Quat&) const;
       Quat& operator+=(const Quat&);
