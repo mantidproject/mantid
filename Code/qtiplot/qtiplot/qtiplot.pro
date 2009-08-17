@@ -115,7 +115,7 @@ win32 {
   LIBS += ../../Mantid/Bin/Shared/MantidGeometry.lib
   LIBS += ../../Mantid/Bin/Shared/MantidKernel.lib
 
-  LIBS += ../MantidQt/lib/MantidQtAPI.lib
+  LIBS += ../../Mantid/Bin/Shared/MantidQtAPI.lib
 
   
 }
@@ -160,13 +160,13 @@ contains(CONFIG, CustomInstall){
 	DEFINES       += MANUAL_PATH="\\\"$$replace(manual.path," ","\ ")\\\"
 	}
 	
-win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32
+win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 _USE_MATH_DEFINES=true
 QT            += opengl qt3support network svg xml
 
 MOC_DIR        = ../tmp/qtiplot
 OBJECTS_DIR    = ../tmp/qtiplot
 SIP_DIR        = ../tmp/qtiplot
-DESTDIR        = ./
+DESTDIR        = ../../Mantid/Bin/Shared
 
 #############################################################################
 ###################### PROJECT FILES SECTION ################################
