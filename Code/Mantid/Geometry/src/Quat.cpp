@@ -349,7 +349,7 @@ void Quat::rotate(V3D& v) const
  * The function glRotated must be called
  * param mat The output matrix
  */
-void Quat::GLMatrix(double mat[16])
+void Quat::GLMatrix(double* mat) const
 {
 	double aa      = a * a;
 	double ab      = a * b;
@@ -360,17 +360,22 @@ void Quat::GLMatrix(double mat[16])
 	double bw      = b * w;
 	double cc      = c * c;
 	double cw      = c * w;
-	mat[0]  = 1.0 - 2.0 * ( bb + cc );
-	mat[4]  =     2.0 * ( ab - cw );
-	mat[8]  =     2.0 * ( ac + bw );
-	mat[1]  =     2.0 * ( ab + cw );
-	mat[5]  = 1.0 - 2.0 * ( aa + cc );
-	mat[9]  =     2.0 * ( bc - aw );
-	mat[2]  =     2.0 * ( ac - bw );
-	mat[6]  =     2.0 * ( bc + aw );
-	mat[10] = 1.0 - 2.0 * ( aa + bb );
-	mat[12]  = mat[13] = mat[14] = mat[3] = mat[7] = mat[11] = 0.0;
-	mat[15] = 1.0;
+	*mat  = 1.0 - 2.0 * ( bb + cc );++mat;
+	*mat  =     2.0 * ( ab + cw );++mat;
+	*mat  =     2.0 * ( ac - bw );++mat;
+	*mat  =0;++mat;
+	*mat  =     2.0 * ( ab - cw );++mat;
+	*mat  = 1.0 - 2.0 * ( aa + cc );++mat;
+	*mat  =     2.0 * ( bc + aw );++mat;
+	*mat  = 0;++mat;
+	*mat  =     2.0 * ( ac + bw );mat++;
+	*mat  =     2.0 * ( bc - aw );mat++;
+	*mat = 1.0 - 2.0 * ( aa + bb );mat++;
+	for (int i=0;i<4;++i)
+	{
+		*mat=0;mat++;
+	}
+	*mat=1.0;
 	return;
 }
 
@@ -503,7 +508,7 @@ std::istream& operator>>(std::istream& ins,Quat& q)
     return ins;
 }
 
-void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, double& ymax, double& zmax)
+void Quat::rotateBB(double& xmin, double& ymin, double& zmin, double& xmax, double& ymax, double& zmax) const
 {
 	// Defensive
 	if (xmin>xmax) std::swap(xmin,xmax);

@@ -88,7 +88,7 @@ namespace Mantid
       //! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
       //! stored as an linear array of 16 double
       //! The function glRotated must be called
-      void GLMatrix(double* glmat);
+      void GLMatrix(double* glmat) const;
       //! Convert GL Matrix into Quat
       void setQuat(double[16]);
       //! Rotate a vector
@@ -96,7 +96,7 @@ namespace Mantid
       //! Taking two points defining a cuboid bounding box (xmin,ymin,zmin) and (xmax,ymax,zmax)
       // which means implicitly that the cube edges are parallel to the axes,
       // find the smallest bounding box with the edges also parallel to the axes after rotation of the object.
-      void rotateBB(double& xmin,double& ymin,double& zmin,double& xmax,double& ymax, double& zmax);
+      void rotateBB(double& xmin,double& ymin,double& zmin,double& xmax,double& ymax, double& zmax) const;
       //! Overload operators
       Quat  operator+(const Quat&) const;
       Quat& operator+=(const Quat&);
