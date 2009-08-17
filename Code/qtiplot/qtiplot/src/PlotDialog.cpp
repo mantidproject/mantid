@@ -46,7 +46,7 @@
 #include "DoubleSpinBox.h"
 #include "Folder.h"
 #include "ContourLinesEditor.h"
-#include <PenStyleBox.h>
+#include "PenStyleBox.h"
 
 #include <QTreeWidget>
 #include <QLineEdit>
