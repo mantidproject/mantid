@@ -115,7 +115,7 @@ win32 {
   LIBS += ../../Mantid/Bin/Shared/MantidGeometry.lib
   LIBS += ../../Mantid/Bin/Shared/MantidKernel.lib
 
-  LIBS += ../../Mantid/Bin/Shared/MantidQtAPI.lib
+  LIBS += ../MantidQt/lib/MantidQtAPI.lib
 
   
 }
@@ -166,7 +166,7 @@ QT            += opengl qt3support network svg xml
 MOC_DIR        = ../tmp/qtiplot
 OBJECTS_DIR    = ../tmp/qtiplot
 SIP_DIR        = ../tmp/qtiplot
-DESTDIR        = ../../Mantid/Bin/Shared
+DESTDIR        = ./
 
 #############################################################################
 ###################### PROJECT FILES SECTION ################################

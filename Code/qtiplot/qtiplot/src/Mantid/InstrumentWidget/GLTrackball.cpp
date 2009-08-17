@@ -1,7 +1,6 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-//#define _USE_MATH_DEFINES true
 #include "GLTrackball.h"
 #include "GLViewport.h"
 #include <cmath>
