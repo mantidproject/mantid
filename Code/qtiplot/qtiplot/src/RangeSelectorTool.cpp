@@ -60,6 +60,7 @@ RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target,
 	}
 
     d_enabled = true;
+	d_visible = true;
 	d_active_point = 0;
 	d_inactive_point = d_selected_curve->dataSize() - 1;
 	int marker_size = 20;

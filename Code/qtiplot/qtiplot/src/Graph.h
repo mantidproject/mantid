@@ -34,11 +34,14 @@
 #include <QPrinter>
 #include <QVector>
 #include <QEvent>
+#include <QSettings>
 
 #include <qwt_text.h>
 #include <qwt_plot.h>
 #include <qwt_plot_marker.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_magnifier.h>
 
 #include "Plot.h"
 #include "Table.h"
@@ -46,10 +49,16 @@
 #include "PlotToolInterface.h"
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
+//#include "Spectrogram.h"
+//#include "MantidKernel/Logger.h"
+#include "boost/shared_ptr.hpp"
+
 
 #include <float.h>
 
 class QwtPlotCurve;
+class QwtPlotPanner;
+class QwtPlotMagnifier;
 class QwtPlotZoomer;
 class QwtPieCurve;
 class Table;
@@ -89,7 +98,14 @@ typedef struct{
   int sType;       //!< symbol type (shape)
   int connectType; //!< symbol connection type
 }  CurveLayout;
-
+namespace Mantid
+{
+  namespace API
+  {
+    class IInstrument;
+    class MatrixWorkspace;
+  }
+}
 /**
  * \brief A 2D-plotting widget.
  *
@@ -118,7 +134,7 @@ typedef struct{
  * [ Framework needs to support plug-ins; assigned to ion ]
  */
 
-class Graph: public QWidget
+class Graph: public QWidget //QwtPlot //QWidget
 {
 	Q_OBJECT
 
@@ -154,6 +170,9 @@ class Graph: public QWidget
         void restoreCurveLabels(int curveID, const QStringList& lst);
 		//! Called first time we add curves in order to determine the best plot limits.
 		void initScaleLimits();
+		Spectrogram* getSpectrogram(){ return m_spectrogram;}
+		//! Returns true if a plot/data tool is enabled.
+		bool hasActiveTool();
 
 	public slots:
 		//! Accessor method for #d_plot.
@@ -676,19 +695,20 @@ signals:
 
 		void showAxisDialog(int);
 		void axisDblClicked(int);
-
+		
 		void showAxisTitleDialog();
 
 		void dataRangeChanged();
 		void showFitResults(const QString&);
 		void currentFontChanged(const QFont&);
         void enableTextEditor(Graph *);
-
+		
 	private:
         //! Finds bounding interval of the plot data.
         QwtDoubleInterval axisBoundingInterval(int axis);
         void deselectCurves();
 		void addLegendItem();
+		void loadSettings();
 
         Plot *d_plot;
 		QwtPlotZoomer *d_zoomer[2];
@@ -723,12 +743,17 @@ signals:
 		//! The current curve selection, or NULL if none is active.
 		QPointer<RangeSelectorTool> d_range_selector;
 		//! The currently active tool, or NULL for default (pointer).
-		PlotToolInterface *d_active_tool;
+		PlotToolInterface *d_active_tool,*d_peak_fit_tool;
 		//! Pointer to the currently selected text/legend
 		LegendWidget *d_selected_text;
 		//! Pointer to the current legend
 		LegendWidget *d_legend;
         //! Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
 		bool d_auto_scale;
+		//static Mantid::Kernel::Logger &g_log;
+		Spectrogram* m_spectrogram;
+		 QString mCurrentColorMap;
+		 QwtPlotMagnifier *d_magnifier;
+		 QwtPlotPanner *d_panner;
 };
 #endif // GRAPH_H

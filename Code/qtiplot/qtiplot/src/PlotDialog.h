@@ -32,6 +32,9 @@
 #include <QDialog>
 #include <QTreeWidgetItem>
 #include "MultiLayer.h"
+//#include "MantidKernel/Logger.h"
+
+
 
 class QCheckBox;
 class QComboBox;
@@ -58,6 +61,8 @@ class SymbolBox;
 class ColorMapEditor;
 class QwtPlotItem;
 class DoubleSpinBox;
+class PenStyleBox;
+class ContourLinesEditor;
 
 static const char* folder_closed[]={
     "16 16 9 1",
@@ -175,10 +180,12 @@ private slots:
 	//spectrograms
   	void showDefaultContourLinesBox(bool show);
 	void showColorMapEditor(bool show);
+	void showSelectColorMapButton(bool show);
 
 	//layer geometry
 	void adjustLayerHeight(int width);
 	void adjustLayerWidth(int height);
+	void changeColormap(const QString & filename = "");
 
 protected slots:
     void setActiveLayer(LayerItem *item);
@@ -197,6 +204,7 @@ protected slots:
 	void setLegendsFont();
 	void editCurve();
 	void chooseLabelsFont();
+	void showCustomPenColumn(bool on);
 
 private:
     int labelsAlignment();
@@ -221,7 +229,11 @@ private:
 	void initPieLabelsPage();
 	void initPrintPage();
 	void initLabelsPage();
+	void initContourLinesPage();
     void contextMenuEvent(QContextMenuEvent *e);
+	void updateContourLevelsDisplay(Spectrogram *sp);
+	void setEquidistantLevels();
+	void showAllLabelControls(bool show = true);
 
 	double aspect_ratio;
 
@@ -235,7 +247,9 @@ private:
 
     QPushButton *btnTitle, *btnAxesLabels, *btnAxesNumbers, *btnLegend;
 	ColorMapEditor *colorMapEditor;
-    QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage;
+	QPushButton* mSelectColormap;
+	QString mCurrentColorMap;
+    QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;;
     QTreeWidget* listBox;
     QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops;
     ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor;
@@ -271,7 +285,7 @@ private:
     DoubleSpinBox* widthBox;
     QComboBox* capBox;
     QCheckBox* throughBox;
-	QLabel *labelPosition, *labelXEnd, *labelYEnd;
+	QLabel *labelPosition, *labelXEnd, *labelYEnd,*justifyLabelsLbl,*labelsColumnLbl;
 	QGroupBox* GroupBoxH;
 	QWidget *histogramPage, *spacingPage;
 	QLineEdit *binSizeBox, *histogramBeginBox, *histogramEndBox;
@@ -289,7 +303,8 @@ private:
 	QLabel 	*whiskerCoeffLabel, *whiskerRangeLabel, *boxCoeffLabel;
 	QLabel *boxRangeLabel, *whiskerCntLabel, *boxCntLabel;
 	QGroupBox *GroupBoxVectEnd;
-	QComboBox *vectPosBox, *boxXAxis, *boxYAxis, *colorScaleBox, *boxContourStyle;
+	QComboBox *vectPosBox, *boxXAxis, *boxYAxis, *colorScaleBox;//, *boxContourStyle;
+	PenStyleBox	*penContourStyle,*boxContourStyle;;
   	QSpinBox *levelsBox, *colorScaleWidthBox;
 	DoubleSpinBox *contourWidthBox;
   	QGroupBox *levelsGroupBox, *axisScaleBox, *imageGroupBox;
@@ -303,17 +318,20 @@ private:
     DoubleSpinBox *boxLabelsAngle;
     QSpinBox *boxLabelsXOffset, *boxLabelsYOffset;
     QCheckBox *boxLabelsWhiteOut;
-    QPushButton *btnLabelsFont;
+    QPushButton *btnLabelsFont,*btnSetEquidistantLevels;
     QComboBox *boxLabelsAlign, *boxLabelsColumn;
     ColorBox* boxLabelsColor;
     QWidget *labelsPage;
 
     QGroupBox *pieAutoLabelsBox, *boxPieWedge;
-	DoubleSpinBox *boxPieStartAzimuth, *boxPieEdgeDist, *boxPieViewAngle, *boxPieThickness;
+	DoubleSpinBox *boxPieStartAzimuth, *boxPieEdgeDist, *boxPieViewAngle, *boxPieThickness,*firstContourLineBox,*contourLinesDistanceBox;
 	QCheckBox *boxPieConterClockwise, *boxPieValues, *boxPiePercentages, *boxPieCategories;
 	QWidget *pieLabelsPage;
     QSpinBox *boxPieOffset;
 	QWidget *pieGeometryPage;
+	ContourLinesEditor *contourLinesEditor;
+	QRadioButton *customPenBtn;
+	//static Mantid::Kernel::Logger &g_log;
 };
 
 /*****************************************************************************

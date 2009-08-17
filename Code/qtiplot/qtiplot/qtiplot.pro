@@ -328,6 +328,8 @@ HEADERS  += src/ApplicationWindow.h \
             src/DoubleSpinBox.h\
             src/MatrixCommand.h  \
             src/UserFunction.h  \
+            src/ContourLinesEditor.h\
+            src/PenStyleBox.h\
             src/Mantid/MantidApplication.h \
 	    src/Mantid/LoadRawDlg.h \
 	    src/Mantid/LoadDAEDlg.h \
@@ -490,6 +492,8 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/DoubleSpinBox.cpp\
             src/MatrixCommand.cpp \
             src/UserFunction.cpp \
+            src/ContourLinesEditor.cpp \
+            src/PenStyleBox.cpp \
             src/Mantid/MantidApplication.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
 	    src/Mantid/LoadDAEDlg.cpp \

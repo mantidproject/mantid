@@ -35,18 +35,37 @@
 #include <qwt_plot.h>
 #include <qwt_plot_spectrogram.h>
 #include <qwt_color_map.h>
+#include <qwt_plot_marker.h>
+#include "qwt_color_map.h"
+#include "PlotCurve.h"
 
 #include <fstream>
+#include <float.h>
+//#include "MantidKernel/Logger.h"
+#include "Mantid//InstrumentWidget//MantidColorMap.h"
+#include "Mantid//InstrumentWidget//GLColor.h"
+#include "boost/shared_ptr.hpp"
+#include <QPainter>
 
 class MatrixData;
-
+class PlotMarker;
+namespace Mantid
+{
+  namespace API
+  {
+    class IInstrument;
+    class MatrixWorkspace;
+  }
+}
 class Spectrogram: public QwtPlotSpectrogram
 {
 public:
 	Spectrogram();
     Spectrogram(Matrix *m);
     Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
-    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
+    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,Graph *graph);//Mantid
+	~Spectrogram();
+
 
 	enum ColorMapPolicy{GrayScale, Default, Custom};
 
@@ -69,6 +88,7 @@ public:
 	static QwtLinearColorMap defaultColorMap();
 
 	void setCustomColorMap(const QwtLinearColorMap& map);
+	void setMantidColorMap(const MantidColorMap &map);
 	void updateData(Matrix *m);
 
 	//! Used when saving a project file
@@ -77,8 +97,49 @@ public:
 	ColorMapPolicy colorMapPolicy(){return color_map_policy;};
 
 	virtual QwtDoubleRect boundingRect() const;
+	void setContourPenList(QList<QPen> lst);
+	QList<QPen> contourPenList(){return d_pen_list;};
+	//! Flag telling if we use the color map to calculate the pen (QwtPlotSpectrogram::contourPen()).
+	bool d_color_map_pen;
+	bool useColorMapPen(){return d_color_map_pen;};
+	void setColorMapPen(bool on = true);
+	void showContourLineLabels(bool show = true);
+	bool hasLabels(){return d_show_labels;};
+	QList <PlotMarker *> labelsList(){return d_labels_list;};
+	const MantidColorMap & getColorMap() const;
+    MantidColorMap & mutableColorMap();
+	void setupColorBarScaling();
+	void saveSettings();
+	void loadSettings();
+	void setColorMapFileName(QString colormapName);
+	double labelsRotation(){return d_labels_angle;};
+	void setLabelsRotation(double angle);
+	bool labelsWhiteOut(){return d_white_out_labels;};
+	void setLabelsWhiteOut(bool whiteOut);
+	void setLabelsOffset(double x, double y);
+	void setLabelOffset(int index, double x, double y);
+	QColor labelsColor(){return d_labels_color;};
+	void setLabelsColor(const QColor& c);
+//	void setLabelOffset(int index, double x, double y);
+	void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
+    double integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wks_index);
+	void updateForNewMaxData(const double new_max);
+	void updateForNewMinData(const double new_min);
+	void recount();
+	void setCustomColorMap(const QwtColorMap &map);
+	
+	void setContourLevels (const QwtValueList & levels);
+	bool hasSelectedLabels();
+	bool selectedLabels(const QPoint& pos);
+	double labelsXOffset(){return d_labels_x_offset;};
+    double labelsYOffset(){return d_labels_y_offset;};
+	 void selectLabel(bool on);
+
 
 protected:
+	virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
+	void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
+	void createLabels();
 	//! Pointer to the source data matrix
 	Matrix *d_matrix;
     UserHelperFunction *d_funct;
@@ -90,6 +151,42 @@ protected:
 	ColorMapPolicy color_map_policy;
 
 	QwtLinearColorMap color_map;
+	//static Mantid::Kernel::Logger &g_log;
+	QList<QPen> d_pen_list;
+	//! Flag telling if we display the labels
+	bool d_show_labels;
+	//! Flag telling if we paint a white background for the labels
+	bool d_white_out_labels;
+	double d_labels_angle;
+	//! List of the text labels associated to this spectrogram.
+	QList <PlotMarker *> d_labels_list;
+	//! Keeps track of the plot marker on which the user clicked when selecting the labels.
+	PlotMarker *d_selected_label;
+
+	//! Keep track of the coordinates of the point where the user clicked when selecting the labels.
+	double d_click_pos_x, d_click_pos_y;
+	//! Labels color
+	QColor d_labels_color;
+	double d_labels_x_offset, d_labels_y_offset;
+	int d_labels_align;
+     //! Labels font
+	QFont d_labels_font;
+	//! Pointer to the parent plot
+	Graph *d_graph;
+	MantidColorMap mColorMap;
+	QString mCurrentColorMap;
+	// The user requested data and bin ranges
+  double mDataMinValue, mDataMaxValue;
+  double mBinMinValue, mBinMaxValue;
+
+  // The workspace data and bin range limits
+  double mWkspDataMin, mWkspDataMax;
+  double mWkspBinMin, mWkspBinMax;
+  int m_nRows;
+  int m_nColumns;
+  /// Store a value between 0->255 for each of the integrated spectra.
+  std::vector<unsigned char> mScaledValues;
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> mWorkspaceSptr;
 };
 
 

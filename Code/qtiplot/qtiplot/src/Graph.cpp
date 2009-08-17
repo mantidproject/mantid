@@ -155,18 +155,22 @@ static const char *unzoom_xpm[]={
 #include <qwt_text_label.h>
 #include <qwt_color_map.h>
 
+
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
 
+
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
-: QWidget(parent, f)
+: QWidget(parent, f)//QwtPlot(parent)
 {
+	setWindowFlags(f);
 	n_curves=0;
 	d_active_tool = NULL;
 	d_selected_text = NULL;
 	d_legend = NULL; // no legend for an empty graph
+	d_peak_fit_tool = NULL;
 	widthLine=1;
 	selectedMarker=-1;
 	drawTextOn=false;
@@ -208,6 +212,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 	setFocusPolicy(Qt::StrongFocus);
 	setFocusProxy(d_plot);
 	setMouseTracking(true );
+	
 	
 	connect (cp,SIGNAL(selectPlot()),this,SLOT(activateGraph()));
 	connect (cp,SIGNAL(drawTextOff()),this,SIGNAL(drawTextOff()));
@@ -686,7 +691,9 @@ void Graph::showAxis(int axis, int type, const QString& formatInfo, Table *table
 			d_plot->minorTickLength(), d_plot->majorTickLength());
 
 	if (axisOn && (axis == QwtPlot::xTop || axis == QwtPlot::yRight))
+	{
 		updateSecondaryAxis(axis);//synchronize scale divisions
+	}
 
 	scalePicker->refresh();
 	d_plot->updateLayout();	//This is necessary in order to enable/disable tick labels
@@ -1246,20 +1253,19 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   d_plot->setAxisMaxMinor (axis, minorTicks);
 
   d_plot->setAxisScaleDiv (axis, div);
-
-  d_zoomer[0]->setZoomBase();
-  d_zoomer[1]->setZoomBase();
+   d_zoomer[0]->setZoomBase();
+   d_zoomer[1]->setZoomBase();
   
-  d_user_step[axis] = step;
+   d_user_step[axis] = step;
 
-  if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft)
+ if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft)
   {
     updateSecondaryAxis(QwtPlot::xTop);
     updateSecondaryAxis(QwtPlot::yRight);
   }
 
   d_plot->replot();
-  //keep markers on canvas area
+  ////keep markers on canvas area
   updateMarkersBoundingRect();
   d_plot->replot();
   d_plot->axisWidget(axis)->repaint();
@@ -3333,13 +3339,21 @@ void Graph::zoomed (const QwtDoubleRect &)
 {
 	emit modifiedGraph();
 }
+bool Graph::hasActiveTool()
+{
+	if (zoomOn() || drawLineActive() || d_active_tool || d_peak_fit_tool ||
+		d_magnifier || d_panner ||
+		(d_range_selector && d_range_selector->isVisible()))
+		return true;
+
+	return false;
+}
+
 
 void Graph::zoom(bool on)
 {
-	//fix for #798 - zooming on the spectrogram 2D graph plot should not change the color map
 	setAutoScale();
 	d_zoomer[0]->setEnabled(on);
-	//fix for #798,zooming on the spectrogram 2D graph plot should not change the color map
 	d_zoomer[1]->setEnabled(false);
 	for (int i=0; i<n_curves; i++)
   	{
@@ -3989,6 +4003,7 @@ void Graph::showAxisContextMenu(int axis)
 {
 	QMenu menu(this);
 	menu.setCheckable(true);
+
 	menu.insertItem(QPixmap(unzoom_xpm), tr("&Rescale to show all"), this, SLOT(setAutoScale()), tr("Ctrl+Shift+R"));
 	menu.insertSeparator();
 	menu.insertItem(tr("&Hide axis"), this, SLOT(hideSelectedAxis()));
@@ -4003,6 +4018,7 @@ void Graph::showAxisContextMenu(int axis)
 	}
 
 	menu.insertSeparator();
+	
 	menu.insertItem(tr("&Scale..."), this, SLOT(showScaleDialog()));
 	menu.insertItem(tr("&Properties..."), this, SLOT(showAxisDialog()));
 	menu.exec(QCursor::pos());
@@ -4531,7 +4547,6 @@ Spectrogram* Graph::plotSpectrogram(Matrix *m, CurveType type)
   		return 0;
 
   	Spectrogram *d_spectrogram = new Spectrogram(m);
-
     return plotSpectrogram(d_spectrogram,type);
 }
 Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type)
@@ -4549,7 +4564,7 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,Q
 	if (type != GrayScale && type != ColorMap && type != Contour)
   		return 0;
 
-  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
+  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,this);
 
     return plotSpectrogram(d_spectrogram,type);
 }
@@ -4565,8 +4580,8 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   	    }
   	else if (type == ColorMap)
   	    {
-  	    d_spectrogram->setDefaultColorMap();
-  	    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
+	     d_spectrogram->setDefaultColorMap();
+		 d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
   	    }
   	c_keys.resize(++n_curves);
   	c_keys[n_curves-1] = d_plot->insertCurve(d_spectrogram);
@@ -4576,13 +4591,19 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 
     QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
   	rightAxis->setColorBarEnabled(type != Contour);
-  	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
-    d_plot->setAxisScale(QwtPlot::yRight,
-  	d_spectrogram->data().range().minValue(),
-  	d_spectrogram->data().range().maxValue());
-  	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
+	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
+	rightAxis->setColorBarEnabled(true);
+	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
+	d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
+	d_spectrogram->setupColorBarScaling();
 
+	/*d_plot->setAxisScale(QwtPlot::yRight,
+  	d_spectrogram->data().range().minValue(),
+  	d_spectrogram->data().range().maxValue());*/
+  	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
   	d_plot->replot();
+	m_spectrogram=d_spectrogram;
+
 	return d_spectrogram;
 }
 
@@ -4631,7 +4652,7 @@ void Graph::restoreSpectrogram(ApplicationWindow *app, const QStringList& lst)
             {
                 s = (*(++line)).stripWhiteSpace();
                 QStringList l = QStringList::split("\t", s.remove("<Stop>").remove("</Stop>"));
-                colorMap.addColorStop(l[0].toDouble(), QColor(l[1]));
+			    colorMap.addColorStop(l[0].toDouble(), QColor(l[1]));
             }
             sp->setCustomColorMap(colorMap);
             line++;
@@ -4757,6 +4778,8 @@ Graph::~Graph()
 	setActiveTool(NULL);
 	if (d_range_selector)
 		delete d_range_selector;
+	if(d_peak_fit_tool)
+        delete d_peak_fit_tool;
 	delete titlePicker;
 	delete scalePicker;
 	delete cp;
@@ -5067,3 +5090,23 @@ void Graph::setAxisFormula(int axis, const QString &formula)
 	if (sd)
 		sd->setFormula(formula);
 }
+void Graph::loadSettings()
+{
+  //Load Color
+  QSettings settings;
+  settings.beginGroup("Mantid/InstrumentWindow");
+  
+  // Background colour
+ // m_spectrogram->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
+  
+  //Load Colormap. If the file is invalid the default stored colour map is used
+  mCurrentColorMap = settings.value("ColormapFile", "").toString();
+  // Set values from settings
+  m_spectrogram->mutableColorMap().loadMap(mCurrentColorMap);
+  
+  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)settings.value("ScaleType", MantidColorMap::Log10).toUInt();
+  m_spectrogram->mutableColorMap().changeScaleType(type);
+  
+  settings.endGroup();
+}
+

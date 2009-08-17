@@ -833,7 +833,9 @@ void DataCurve::moveLabels(const QPoint& pos)
 
 PlotMarker::PlotMarker(int index, double angle):QwtPlotMarker(),
 	d_index(index),
-	d_angle(angle)
+	d_angle(angle),
+	d_label_x_offset(0.0),
+	d_label_y_offset(0.0)
 {}
 
 void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const

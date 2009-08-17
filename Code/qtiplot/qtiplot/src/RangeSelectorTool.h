@@ -70,6 +70,7 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
         void clearSelection();
         void pasteSelection();
         virtual int rtti() const {return PlotToolInterface::Rtti_RangeSelector;};
+		bool isVisible(){return d_visible;};
 
 	public slots:
 		virtual void pointSelected(const QPoint &point);
@@ -95,6 +96,7 @@ class RangeSelectorTool : public QwtPlotPicker, public PlotToolInterface
 		int d_active_point, d_inactive_point;
 		QwtPlotCurve *d_selected_curve;
 		bool d_enabled;
+		bool d_visible;
 };
 
 #endif // ifndef RANGE_SELECTOR_TOOL_H

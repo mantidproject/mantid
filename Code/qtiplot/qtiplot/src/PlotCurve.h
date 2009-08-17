@@ -189,6 +189,7 @@ public:
 
 	double angle(){return d_angle;};
 	void setAngle(double a){d_angle = a;};
+	void setLabelOffset(double xOffset, double yOffset){d_label_x_offset = xOffset; d_label_y_offset = yOffset;};
 
 	//QwtDoubleRect boundingRect() const;
 
@@ -198,5 +199,8 @@ protected:
 
 	int d_index;
 	double d_angle;
+	double d_label_x_offset;
+	//! y coordinate offset
+	double d_label_y_offset;
 };
 #endif
