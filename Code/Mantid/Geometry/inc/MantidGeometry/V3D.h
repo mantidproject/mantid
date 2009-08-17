@@ -113,8 +113,8 @@ namespace Mantid
 
       int reBase(const V3D&,const V3D&,const V3D&);         ///<rebase to new basis vector
       int masterDir(const double Tol =1e-3) const;               ///< Determine if there is a master direction
-      int nullVector(const double Tol =1e-3) const;              ///< Determine if the point is null
-      int coLinear(const V3D&,const V3D&) const;
+      bool nullVector(const double Tol =1e-3) const;              ///< Determine if the point is null
+      bool coLinear(const V3D&,const V3D&) const;
 
     private:
 

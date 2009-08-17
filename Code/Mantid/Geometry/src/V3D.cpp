@@ -515,20 +515,20 @@ V3D::rotate(const Geometry::Matrix<double>& A)
 }
 
 /*!
-  Determines if this,B,C are collinear (returns 1 if true)
+  Determines if this,B,C are collinear
   \param Bv :: Vector to test
   \param Cv :: Vector to test
-  \returns 0 is no colinear and 1 if they are (within Ptolerance)
+  \returns false is no colinear and true if they are (within Ptolerance)
 */
-int
+bool
 V3D::coLinear(const V3D& Bv,const V3D& Cv) const
 {
   const V3D& Av=*this;
   const V3D Tmp((Bv-Av).cross_prod(Cv-Av));
-  return (Tmp.norm()>Tolerance) ? 0 : 1;
+  return (Tmp.norm()>Tolerance) ? false : true;
 }
 
-int
+bool
 V3D::nullVector(const double Tol) const
   /*!
     Checks the size of the vector
@@ -538,12 +538,15 @@ V3D::nullVector(const double Tol) const
     \retval 0 :: Vector bigger than Tol
   */
 {
-	if (std::fabs(x)>Tol)
-		return false;
-	if (std::fabs(y)>Tol)
-			return false;
-	if (std::fabs(z)>Tol)
-			return false;
+  if (std::fabs(x)>Tol)
+    return false;
+  if (std::fabs(y)>Tol)
+    return false;
+  if (std::fabs(z)>Tol)
+    return false;
+
+  // Getting to this point means a null vector
+  return true;
 }
 
 int
