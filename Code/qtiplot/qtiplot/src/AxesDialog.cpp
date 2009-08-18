@@ -1183,7 +1183,7 @@ static const char* const image7_data[] = {
 //Mantid::Kernel::Logger & AxesDialog::g_log=Mantid::Kernel::Logger::get("AxesDialog");
 AxesDialog::AxesDialog( QWidget* parent, Qt::WFlags fl )
 : QDialog( parent, fl ),m_bscaleTypeChanged(false),m_bstartValueChanged(false),
-m_bendValueChanged(false)
+m_bendValueChanged(false),m_ScaleTYpe(0)
 {
 	QPixmap image4( ( const char** ) image4_data );
     QPixmap image5( ( const char** ) image5_data );
@@ -3167,11 +3167,11 @@ void AxesDialog::endvalueChanged(double endVal)
 	m_bendValueChanged=true;
 	double start = 0.0, end = 0.0;
 	start = boxStart->value();
-	end = endVal;//boxEnd->value();
+	end = endVal;
 
 	Spectrogram* spectrogram = d_graph->getSpectrogram();
 	if(spectrogram==NULL) return;
-	 MantidColorMap::ScaleType scaleType = (MantidColorMap::ScaleType)boxScaleType->itemData(boxScaleType->currentIndex()).toUInt();
+	 MantidColorMap::ScaleType scaleType =(MantidColorMap::ScaleType)getSacleType();
 	 MantidColorMap::ScaleType type ;
 	if(scaleType==0)
 		type=MantidColorMap::Linear;
@@ -3187,12 +3187,12 @@ void AxesDialog::startvalueChanged(double startVal)
 {
 	m_bstartValueChanged=true;
 	double start = 0.0, end = 0.0;
-	start = startVal;//boxStart->value();
+	start = startVal;
 	end = boxEnd->value();
 	Spectrogram* spectrogram = d_graph->getSpectrogram();
 	if(spectrogram==NULL) return;
 
-	MantidColorMap::ScaleType scaleType = (MantidColorMap::ScaleType)boxScaleType->itemData(boxScaleType->currentIndex()).toUInt();
+	MantidColorMap::ScaleType scaleType =(MantidColorMap::ScaleType)getSacleType();
 	 MantidColorMap::ScaleType type ;
 	if(scaleType==0)
 		type=MantidColorMap::Linear;
