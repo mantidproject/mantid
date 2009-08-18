@@ -95,6 +95,8 @@ private:
   void handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf);
   // Format a double in a string with a specfied colour, format and precision
   QString formatDouble(double value, char format, int precision, const QString & colour);
+  /// Reset the geometry box to blank
+  void resetGeometryDetailsBox();
   //@}
 
 private slots:

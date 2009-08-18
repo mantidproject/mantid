@@ -155,23 +155,7 @@ void SANSRunWindow::initLayout()
 
     readSettings();
 
-    // Test for scipy optimize module and disable centre finding if it is not found
-    QString scipycode = 
-      "try:\n"
-      "\timport scipy.optimize\n"
-      "except(ImportError):\n"
-      "\tprint 'scipy package is not installed'\n";
 
-    QString result = runPythonCode(scipycode);
-    m_havescipy = true;
-    m_scipy_warning = false;
-    if( !result.isEmpty() )
-    {
-      // When the user flicks to the geometry tab for the first time a warning will be shown
-      m_scipy_warning = true;
-      m_havescipy = false;
-      m_uiForm.runcentreBtn->setEnabled(false);
-    }
 
 }    
 
@@ -713,9 +697,14 @@ QString SANSRunWindow::createMaskString() const
 
 void SANSRunWindow::setupGeometryDetails()
 {
+  // Reset the geometry box
+  resetGeometryDetailsBox();
+
   const char format('f');
   const int prec(3);
   bool warn_user(false);  
+  
+
   // LOQ
   if( m_uiForm.inst_opt->currentIndex() == 0 )
   {
@@ -729,8 +718,11 @@ void SANSRunWindow::setupGeometryDetails()
     m_uiForm.dist_sample_ms->setText(QString::number(dist_ms_smp, format, prec));
     m_uiForm.dist_smp_mdb->setText(QString::number(dist_sample_mdb, format, prec));
     m_uiForm.dist_smp_hab->setText(QString::number(dist_smp_hab, format, prec));
-    
-    if( dist_mm > 0.0 ) m_uiForm.dist_mod_mon->setText(QString::number(dist_mm, format, prec));
+
+    if( dist_mm > 0.0 ) 
+    {
+      m_uiForm.dist_mod_mon->setText(QString::number(dist_mm, format, prec));
+    }
     
     wsname = m_workspace_names.value(1);
     if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
@@ -775,6 +767,19 @@ void SANSRunWindow::setupGeometryDetails()
   //SANS2D
   else
   {
+    QString wsname = m_workspace_names.value(0);
+    if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
+    double dummy(0.0), dist_ms_smp(0.0), dist_mm(-1.0);
+    if( m_uiForm.dist_mon_s2d->text() == "-" ) dist_mm = 0.0;
+    componentDistances(wsname, dist_ms_smp, dummy, dummy, dist_mm);
+    m_uiForm.dist_sample_ms_s2d->setText(QString::number(dist_ms_smp, format, prec));
+
+    if( dist_mm > 0.0 ) 
+    {
+      m_uiForm.dist_mon_s2d->setText(QString::number(dist_mm, format, prec));
+    }
+
+
     //Sample run
     //rear X
     double smp_rearX = m_logvalues.value("Rear_Det_X") + m_maskcorrections.value("Rear_Det_X_corr");
@@ -783,18 +788,25 @@ void SANSRunWindow::setupGeometryDetails()
     double smp_rearZ  = m_logvalues.value("Rear_Det_Z") + m_maskcorrections.value("Rear_Det_Z_corr");
     m_uiForm.dist_smp_rearZ->setText(formatDouble(smp_rearZ, format, prec, "black"));
     //front X
-//     value = m_logvalues.value("Front_Det_X") + m_maskcorrections.value("Front_Det_X_corr");
-//     m_uiForm.dist_smp_frontX->setText(QString::number(value, format, prec));
-//     //front Z
-//     value = m_logvalues.value("Front_Det_Z") + m_maskcorrections.value("Front_Det_Z_corr");
-//     m_uiForm.dist_smp_frontZ->setText(QString::number(value, format, prec));
-//     //front Z
-//     value = m_logvalues.value("Front_Det_Rot") + m_maskcorrections.value("Front_Det_Rot_corr");
-//     m_uiForm.rot_smp->setText(QString::number(value, format, prec));
+    double smp_frontX = m_logvalues.value("Front_Det_X") + m_maskcorrections.value("Front_Det_X_corr");
+    m_uiForm.dist_smp_frontX->setText(QString::number(smp_frontX, format, prec));
+    //front Z
+    double smp_frontZ = m_logvalues.value("Front_Det_Z") + m_maskcorrections.value("Front_Det_Z_corr");
+    m_uiForm.dist_smp_frontZ->setText(QString::number(smp_frontZ, format, prec));
+    //front rot
+    double smp_rot = m_logvalues.value("Front_Det_Rot") + m_maskcorrections.value("Front_Det_Rot_corr");
+    m_uiForm.smp_rot->setText(QString::number(smp_rot, format, prec));
     
     //Can
-    if( !m_workspace_names.value(1).isEmpty() )
+    wsname = m_workspace_names.value(1);
+    if( !wsname.isEmpty() )
     {
+      if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
+      dist_ms_smp = 0.0;
+      dummy = -1.0;
+      componentDistances(wsname, dist_ms_smp, dummy, dummy, dummy);
+      m_uiForm.dist_can_ms_s2d->setText(QString::number(dist_ms_smp, format, prec));
+
       //Get log values for this workspace
       QHash<QString, double> logs = loadDetectorLogs(QDir(m_uiForm.datadir_edit->text()).absolutePath(), m_uiForm.sct_can_edit->text());
       //rear X
@@ -823,11 +835,53 @@ void SANSRunWindow::setupGeometryDetails()
       {
 	m_uiForm.dist_can_rearZ->setText(formatDouble(can_rearZ, format, prec, "black"));
       }
+      //front X
+      double can_frontX = logs.value("Front_Det_X") + m_maskcorrections.value("Front_Det_X_corr");
+      if( std::fabs(smp_frontX - can_frontX) > 5e-3 )
+      {
+	warn_user = true;
+	m_uiForm.dist_can_frontX->setText(formatDouble(can_frontX, format, prec, "red"));
+	m_uiForm.dist_smp_frontX->setText(formatDouble(smp_frontX, format, prec, "red"));
+      }
+      else
+      {
+	m_uiForm.dist_can_frontX->setText(formatDouble(can_frontX, format, prec, "black"));
+      }
+      //front Z
+      double can_frontZ = logs.value("Front_Det_Z") + m_maskcorrections.value("Front_Det_Z_corr");
+      if( std::fabs(smp_frontZ - can_frontZ) > 5e-3 )
+      {
+	warn_user = true;
+	m_uiForm.dist_can_frontZ->setText(formatDouble(can_frontZ, format, prec, "red"));
+	m_uiForm.dist_smp_frontZ->setText(formatDouble(smp_frontZ, format, prec, "red"));
+      }
+      else
+      {
+	m_uiForm.dist_can_frontZ->setText(formatDouble(can_frontZ, format, prec, "black"));
+      }
+      //front rot
+      double can_rot = logs.value("Front_Det_Rot") + m_maskcorrections.value("Front_Det_Rot_corr");
+      if( std::fabs(smp_rot - can_rot) > 5e-3 )
+      {
+	warn_user = true;
+	m_uiForm.can_rot->setText(formatDouble(can_rot, format, prec, "red"));
+	m_uiForm.smp_rot->setText(formatDouble(smp_rot, format, prec, "red"));
+      }
+      else
+      {
+	m_uiForm.can_rot->setText(formatDouble(can_rot, format, prec, "black"));
+      }
 
-   }
-
-    if( !m_workspace_names.value(2).isEmpty() )
+    }
+    // Background
+    wsname = m_workspace_names.value(2);
+    if( !wsname.isEmpty() )
     {
+      if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
+      dist_ms_smp = 0.0;
+      componentDistances(wsname, dist_ms_smp, dummy, dummy, dummy);
+      m_uiForm.dist_bkgd_ms_s2d->setText(QString::number(dist_ms_smp, format, prec));
+
       //Get log values for this workspace
       QHash<QString, double> logs = loadDetectorLogs(QDir(m_uiForm.datadir_edit->text()).absolutePath(), m_uiForm.sct_bkgd_edit->text());
       //rear X
@@ -856,7 +910,42 @@ void SANSRunWindow::setupGeometryDetails()
       {
 	m_uiForm.dist_bkgd_rearZ->setText(formatDouble(bkgd_rearZ, format, prec, "black"));
       }
-
+      //front X
+      double bkgd_frontX = logs.value("Front_Det_X") + m_maskcorrections.value("Front_Det_X_corr");
+      if( std::fabs(smp_frontX - bkgd_frontX) > 5e-3 )
+      {
+	warn_user = true;
+	m_uiForm.dist_bkgd_frontX->setText(formatDouble(bkgd_frontX, format, prec, "red"));
+	m_uiForm.dist_smp_frontX->setText(formatDouble(smp_frontX, format, prec, "red"));
+      }
+      else
+      {
+	m_uiForm.dist_bkgd_frontX->setText(formatDouble(bkgd_frontX, format, prec, "black"));
+      }
+      //front Z
+      double bkgd_frontZ = logs.value("Front_Det_Z") + m_maskcorrections.value("Front_Det_Z_corr");
+      if( std::fabs(smp_frontZ - bkgd_frontZ) > 5e-3 )
+      {
+	warn_user = true;
+	m_uiForm.dist_bkgd_frontZ->setText(formatDouble(bkgd_frontZ, format, prec, "red"));
+	m_uiForm.dist_smp_frontZ->setText(formatDouble(smp_frontZ, format, prec, "red"));
+      }
+      else
+      {
+	m_uiForm.dist_bkgd_frontZ->setText(formatDouble(bkgd_frontZ, format, prec, "black"));
+      }
+      //front rot
+      double bkgd_rot = logs.value("Front_Det_Rot") + m_maskcorrections.value("Front_Det_Rot_corr");
+      if( std::fabs(smp_rot - bkgd_rot) > 5e-3 )
+      {
+	warn_user = true;
+	m_uiForm.bkgd_rot->setText(formatDouble(bkgd_rot, format, prec, "red"));
+	m_uiForm.smp_rot->setText(formatDouble(smp_rot, format, prec, "red"));
+      }
+      else
+      {
+	m_uiForm.bkgd_rot->setText(formatDouble(bkgd_rot, format, prec, "black"));
+      }
 
     }
   }
@@ -1368,13 +1457,26 @@ void SANSRunWindow::handleInstrumentChange(int index)
  */
 void SANSRunWindow::handleTabChange(int index)
 {
-  if( m_scipy_warning && index == 2 )
-  {
-    showInformationBox("The centre-finding functionality requires the scipy Python package to be installed,\n"
-		       "please install it if you wish to use this function.");
+  if( index != 2 ) return;
+
+  // Test for scipy optimize module and disable centre finding if it is not found
+  QString scipycode = 
+    "try:\n"
+    "\timport scipy.optimize\n"
+    "except(ImportError):\n"
+    "\tprint 'scipy package is not installed'\n";
+
+    QString result = runPythonCode(scipycode);
+    m_havescipy = true;
     m_scipy_warning = false;
-  }
-  
+    if( !result.isEmpty() )
+    {
+      showInformationBox("The centre-finding functionality requires the scipy Python package to be installed,\n"
+			 "please install it if you wish to use this function.");
+      m_havescipy = false;
+      m_uiForm.runcentreBtn->setEnabled(false);
+    }
+    disconnect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChange(int)));
 }
 
 /**
@@ -1526,4 +1628,51 @@ void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNoti
 QString SANSRunWindow::formatDouble(double value, char format, int precision, const QString & colour)
 {
   return QString("<font color='") + colour + QString("'>") + QString::number(value, format, precision)  + QString("</font>");
+}
+
+/**
+ * Rest the geometry details box 
+ */
+void SANSRunWindow::resetGeometryDetailsBox()
+{
+  QString blank("-");
+  //LOQ
+  m_uiForm.dist_mod_mon->setText(blank);
+  m_uiForm.dist_sample_ms->setText(blank);
+  m_uiForm.dist_smp_mdb->setText(blank);
+  m_uiForm.dist_smp_hab->setText(blank);
+
+  m_uiForm.dist_can_ms->setText(blank);
+  m_uiForm.dist_can_mdb->setText(blank);
+  m_uiForm.dist_can_hab->setText(blank);
+
+  m_uiForm.dist_bkgd_ms->setText(blank);
+  m_uiForm.dist_bkgd_mdb->setText(blank);
+  m_uiForm.dist_bkgd_hab->setText(blank);
+  
+
+  //SANS2D
+  m_uiForm.dist_mon_s2d->setText(blank);
+  m_uiForm.dist_sample_ms_s2d->setText(blank);
+  m_uiForm.dist_can_ms_s2d->setText(blank);
+  m_uiForm.dist_bkgd_ms_s2d->setText(blank);
+
+  m_uiForm.dist_smp_rearX->setText(blank);
+  m_uiForm.dist_smp_rearZ->setText(blank);
+  m_uiForm.dist_smp_frontX->setText(blank);
+  m_uiForm.dist_smp_frontZ->setText(blank);
+  m_uiForm.smp_rot->setText(blank);
+
+  m_uiForm.dist_can_rearX->setText(blank);
+  m_uiForm.dist_can_rearZ->setText(blank);
+  m_uiForm.dist_can_frontX->setText(blank);
+  m_uiForm.dist_can_frontZ->setText(blank);
+  m_uiForm.can_rot->setText(blank);
+
+  m_uiForm.dist_bkgd_rearX->setText(blank);
+  m_uiForm.dist_bkgd_rearZ->setText(blank);
+  m_uiForm.dist_bkgd_frontX->setText(blank);
+  m_uiForm.dist_bkgd_frontZ->setText(blank);
+  m_uiForm.bkgd_rot->setText(blank);
+
 }
