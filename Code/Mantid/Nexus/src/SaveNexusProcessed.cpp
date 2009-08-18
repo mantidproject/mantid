@@ -83,10 +83,36 @@ namespace NeXus
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
+	std::string inputWSName=getPropertyValue("InputWorkspace");
     // If no title's been given, use the workspace title field
     if (m_title.empty()) m_title = m_inputWorkspace->getTitle();
     m_bAppend=getProperty("Append");
-
+	//fix for #826
+	bool bChild=isChild();
+	if(!bChild)
+	{
+		std::string period("1");
+		//getting the workspace number which gives the period 
+		//looking for the number after "_"
+		std::string::size_type index = inputWSName.find_last_of("_");
+		if (index != std::string::npos)
+		{
+			std::string::size_type len= inputWSName.length();
+			std::string ref=inputWSName.substr(index + 1,len-index);
+			period = ref;
+		}
+		if (!period.compare("1"))
+		{ // if m_bAppend is default (false) overwrite (delete )the .nxs file for period 1
+			if (!m_bAppend)
+			{
+				Poco::File file(m_filename);
+				if (file.exists())
+				{
+					file.remove();
+				}
+			}
+		}
+	}
     m_spec_list = getProperty("WorkspaceIndexList");
     m_spec_max = getProperty("WorkspaceIndexMax");
     m_list = !m_spec_list.empty();
