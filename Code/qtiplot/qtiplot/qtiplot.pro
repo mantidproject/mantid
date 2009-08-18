@@ -638,7 +638,6 @@ contains(SCRIPTING_LANGS, Python) {
 #             $${SIP_DIR}/sipqtiTable.h\
 #             $${SIP_DIR}/sipqtiMatrix.h\
 #             $${SIP_DIR}/sipqtiMdiSubWindow.h\
-#             $${SIP_DIR}/sipqtiScriptEdit.h\
 #             $${SIP_DIR}/sipqtiNote.h\
 #             $${SIP_DIR}/sipqtiPythonScript.h\
 #             $${SIP_DIR}/sipqtiPythonScripting.h\
@@ -685,7 +684,6 @@ contains(SCRIPTING_LANGS, Python) {
              $${SIP_DIR}/sipqtiTable.cpp\
              $${SIP_DIR}/sipqtiMatrix.cpp\
              $${SIP_DIR}/sipqtiMdiSubWindow.cpp\
-             $${SIP_DIR}/sipqtiScriptEdit.cpp\
              $${SIP_DIR}/sipqtiNote.cpp\
              $${SIP_DIR}/sipqtiPythonScript.cpp\
              $${SIP_DIR}/sipqtiPythonScripting.cpp\

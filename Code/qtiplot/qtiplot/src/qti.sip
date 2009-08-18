@@ -32,22 +32,6 @@
 %Module qti 0
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
-%Import Qsci/qscimod4.sip
-
-class ScriptEdit: QsciScintilla
-{
-%TypeHeaderCode
-#include "src/ScriptEdit.h"
-%End
-public slots:
-  void execute();
-  void executeAll();
-  void evaluate();
-  void print();
-  void insertFunction(const QString &);
-private:
-  ScriptEdit(ScriptEdit&);
-};
 
 class MdiSubWindow: QMdiSubWindow /PyName=MDIWindow/
 {
