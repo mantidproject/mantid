@@ -401,7 +401,7 @@ try:
 		residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
 		return residue
 
-	def FindBeamCentre(rlow, rupp, MaxIter = 15, xstart = None, ystart = None):
+	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 		global XVAR_PREV, YVAR_PREV
 		
 		if xstart == None or ystart == None:
@@ -458,7 +458,7 @@ try:
 except:
 	def FindBeamCentre(rlow, rupp, MaxIter = 15, xstart = None, ystart = None):
 		print 'This function requires the scipy package to be installed.'
-		return
+		return [0,0]
 ############################################################################################################################
 
 ################################### Work begins here #####################################################################
