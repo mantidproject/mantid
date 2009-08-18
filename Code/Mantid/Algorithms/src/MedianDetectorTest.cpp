@@ -99,9 +99,9 @@ void MedianDetectorTest::exec()
     //if some numbers in angles are zero we will get the infinty flag value in the output work space which needs to be dealt with later
     counts = counts/angles;     
   }
-  //Gets an average of the data, the medain is less influenced by a small number of huge values than the mean
+  // An average of the data, the medain is less influenced by a small number of huge values than the mean
   double av = getMedian(counts);
-  //The final piece of the calculation, remove any detectors whoses signals are outside the threshold range
+  // The final piece of the calculation! Remove any detectors whoses signals are outside the threshold range
   std::vector<int> outArray = FindDetects( counts, av );// function uses reads several properties, the ErrorThreshold, lower and upper thresholds and the outputfile
 
   // Now the calculation is complete, setting the output property to the workspace will register it in the Analysis Data Service and allow the user to see it

@@ -43,22 +43,20 @@ void DetectorEfficiencyVariation::init()
     "workspace with one value that indicates if there was a dead detector" );
 
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
-  // it doesn't make sense for this to be less than one but I think it is OK if it has a high value
-  mustBePositive->setLower(0);
-  //UNSETINT and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
-  declareProperty("Variation", -EMPTY_DBL(), mustBePositive,
-    "When the number of counts varies between input workspaces by more\n"
-    "than this fraction of the median that histogram and its\n"
-    "associated detectors are marked bad" );
-
+  // Variation can't be zero as we take its reciprocal, so I've set the minimum to something below which double precession arithmetic might start to fail
+  mustBePositive->setLower(1e-280);
+  declareProperty("Variation", -1.0, mustBePositive,
+    "Identify histograms whose total number of counts has changed by more\n"
+    "than this factor of the median change between the two input workspaces" );
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
   mustBePosInt->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
-    "The index number of the first entry in the Workspace to include in the calculation\n"
-    "(default: 0)" );
+    "The index number of the first entry in the Workspace to include in\n"
+    "the calculation (default: 0)" );
+  //UNSETINT and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
   declareProperty("EndWorkspaceIndex", UNSETINT, mustBePosInt->clone(),
-    "The index number of the last entry in the Workspace  to include in the calculation\n"
-    "(default: the last spectrum in the workspace)" );
+    "The index number of the last entry in the Workspace  to include in\n"
+    "the calculation (default: the last spectrum in the workspace)" );
   declareProperty("RangeLower", EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be included\n"
     "in the summation used to decide if a detector is 'bad' (default: the\n"
@@ -269,7 +267,7 @@ double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) 
 * @param a this single bin histogram input workspace is overwriten
 * @param b single bin histogram input workspace that is compared to a
 * @param average The median value of the ratio of the total number of counts between equivalent spectra in the two workspaces
-* @param variation The ratio between equivalent spectra can be greater than the median value by this factor, if the variation is greater the detector will be marked bad
+* @param variation The ratio between equivalent spectra can be greater than the median ratio by this factor, if the variation is greater the detector will be marked bad
 * @param fileName name of a file to store the list of failed spectra in (pass "" to aviod writing to file)
 * @return An array that of the index numbers of the histograms that fail
 */
@@ -279,14 +277,15 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
 {
   g_log.information("Apply the criteria to find failing detectors");
 
+  // This algorithm will assume that r is more than 1
+  if ( variation < 1 )
+  {// diag in libISIS did this.  A variation of less than 1 doesn't make sense in this algorithm
+    variation = 1/variation;
+  }
   // criterion for if the the first spectrum is larger than expected
-  double forwardLargest = average*(1+variation);
+  double largest = average*variation;
   // criterion for if the the first spectrum is lower than expected
-  double forwardLowest = average*(1-variation);
-  // these lines make the algorithm work identically if the workspaces are swapped
-  double reverseLargest = (1+variation)/average;
-  //because the user can enter the workspace either way around
-  double reverseLowest = (1-variation)/average;
+  double lowest = average/variation;
 
   // get ready to report the number of bad detectors found to the log
   int cChanged = 0, cAlreadyMasked = 0;
@@ -332,13 +331,11 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
     else // not already marked bad, check is the value within the acceptance range
     {
       // examine the data, which should all be in the first bin of each histogram
-      double v1 = a->readY(i)[0];
-      double v2 = b->readY(i)[0];
-      if ( ( v1/v2 > forwardLargest ) || ( v1/v2 < forwardLowest ) ||
-        ( v2/v1 > reverseLargest ) || ( v2/v1 < reverseLowest ) ) 
+      double ratio = a->readY(i)[0]/b->readY(i)[0];
+      if ( ( ratio > largest ) || ( ratio < lowest ) ) 
       {// either v1 or v2 is too big, 
         problem << "the number of counts has changed by a factor of " <<
-          std::setprecision(5) << v1/v2;
+          std::setprecision(5) << ratio;
         cChanged++;
       }
     }

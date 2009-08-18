@@ -50,7 +50,7 @@ public:
       TS_ASSERT( runInit(alg) ) )
 
     //these are realistic values that I just made up
-    double variation = 0.1;
+    double variation = 1.1;
     alg.setProperty( "Variation", variation );
 
     //we are using the defaults on StartSpectrum, EndSpectrum, RangeLower and RangeUpper which is to use the whole spectrum
@@ -64,8 +64,8 @@ public:
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT ( outputMat ) ;
     TS_ASSERT_EQUALS( outputMat->YUnit(), "" )
-    int firstGoodSpec = (Nhist/2)-int(variation/m_ramp)+1;
-    int lastGoodSpec = (Nhist/2)+int(variation/m_ramp)-1;
+    int firstGoodSpec = (Nhist/2)-int((variation-1)/m_ramp)+1;
+    int lastGoodSpec = (Nhist/2)+int((variation-1)/m_ramp)-1;
     for (int lHist = 0; lHist < firstGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(static_cast<double>(outputMat->readY(lHist).front()),
@@ -116,7 +116,7 @@ public:
     alg.setPropertyValue( "OutputFile", OFileName );
 
     //this is an extreme value for the variation there is only one value that I inserted that will fail
-    alg.setProperty( "Variation", 1.5 );
+    alg.setProperty( "Variation", 2.5 );
     int lastGoodSpec = Nhist-2;
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());

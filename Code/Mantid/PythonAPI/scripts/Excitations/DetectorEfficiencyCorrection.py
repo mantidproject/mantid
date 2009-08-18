@@ -13,7 +13,6 @@ try:
   rebin(TempWorkspace, TempWorkspace, RebinBoundaries)
   # ??correct for detector efficiency??
   maskdetectors
-  which order do we run group and then mask detectors in?
   # loop around and run groupdetectors depending on what is in their file
   
   #does solid angle work OK with the masked?
@@ -21,4 +20,5 @@ try:
   TempWorkspace = divide(TempWorkspace, SA.getPropertyValue("OutputWorkspace"))
   
   # -output to file OutputFN in ASCII, this is an algorithm like SaveAscii
-#mantidHelp("DetectorEfficiencyVariation")
+finally:
+mantid.delete(TempWorkspace)

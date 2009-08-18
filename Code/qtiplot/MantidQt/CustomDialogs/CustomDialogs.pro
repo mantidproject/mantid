@@ -29,20 +29,23 @@ SOURCES = \
   $$SRCDIR/LOQScriptInputDialog.cpp \
   $$SRCDIR/CreateSampleShapeDialog.cpp \
   $$SRCDIR/SampleShapeHelpers.cpp \
-  $$SRCDIR/MantidGLWidget.cpp
+  $$SRCDIR/MantidGLWidget.cpp \
+  $$SRCDIR/DiagScriptInputDialog.cpp
 
 HEADERS = \
   $$HEADERDIR/LoadRawDialog.h \
   $$HEADERDIR/LOQScriptInputDialog.h \
   $$HEADERDIR/CreateSampleShapeDialog.h \
   $$HEADERDIR/SampleShapeHelpers.h \
-  $$HEADERDIR/MantidGLWidget.h
+  $$HEADERDIR/MantidGLWidget.h \
+  $$HEADERDIR/DiagScriptInputDialog.h
 
 UI_DIR = $$HEADERDIR
 
 FORMS = \
   $$HEADERDIR/LOQScriptInputDialog.ui \
-  $$HEADERDIR/CreateSampleShapeDialog.ui
+  $$HEADERDIR/CreateSampleShapeDialog.ui \
+  $$HEADERDIR/DiagScriptInputDialog.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomDialogs"
 

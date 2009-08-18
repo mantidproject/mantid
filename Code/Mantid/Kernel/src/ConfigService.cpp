@@ -48,7 +48,7 @@ namespace Mantid
       // the cases used in the names varies on different systems so we do this case insensitive
       std::transform(callingApplication.begin(), callingApplication.end(),
         callingApplication.begin(), tolower);
-      // WONT WORK if they rename the python executable to something that is too bad
+      // WONT WORK if they rename the python executable
       if ( callingApplication.find("python") != std::string::npos )
       {
         // do not look for property files in the system's python directory

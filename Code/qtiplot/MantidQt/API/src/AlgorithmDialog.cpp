@@ -437,7 +437,7 @@ bool AlgorithmDialog::setPropertyValues()
       error = prop->setValue(value.toStdString());
     }
     else
-    {//else use the default with may or may not be a valid property value
+    {//else use the default which may or may not be a valid property value
       error = prop->setValue(prop->getDefault());
     }
 
