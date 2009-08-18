@@ -161,7 +161,7 @@ static const char *unzoom_xpm[]={
 #include <stdio.h>
 #include <stddef.h>
 
-
+//Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 : QWidget(parent, f)//QwtPlot(parent)
 {
@@ -1254,7 +1254,8 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 
   d_plot->setAxisScaleDiv (axis, div);
    d_zoomer[0]->setZoomBase();
-   d_zoomer[1]->setZoomBase();
+  // d_zoomer[1]->setZoomBase();
+   
   
    d_user_step[axis] = step;
 
@@ -1270,7 +1271,6 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   d_plot->replot();
   d_plot->axisWidget(axis)->repaint();
 }
-
 
 QStringList Graph::analysableCurvesList()
 {
@@ -3122,7 +3122,7 @@ void Graph::updateScale()
 
 	d_plot->replot();//TODO: avoid 2nd replot!
 	d_zoomer[0]->setZoomBase();
-	d_zoomer[1]->setZoomBase();
+//	d_zoomer[1]->setZoomBase();
 }
 
 void Graph::setBarsGap(int curve, int gapPercent, int offset)
@@ -3377,7 +3377,7 @@ void Graph::zoom(bool on)
 void Graph::zoomOut()
 {
 	d_zoomer[0]->zoom(-1);
-	d_zoomer[1]->zoom(-1);
+	//d_zoomer[1]->zoom(-1);
 
 	updateSecondaryAxis(QwtPlot::xTop);
   	updateSecondaryAxis(QwtPlot::yRight);
@@ -4597,9 +4597,9 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 	d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
 	d_spectrogram->setupColorBarScaling();
 
-	/*d_plot->setAxisScale(QwtPlot::yRight,
+	d_plot->setAxisScale(QwtPlot::yRight,
   	d_spectrogram->data().range().minValue(),
-  	d_spectrogram->data().range().maxValue());*/
+  	d_spectrogram->data().range().maxValue());
   	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
   	d_plot->replot();
 	m_spectrogram=d_spectrogram;

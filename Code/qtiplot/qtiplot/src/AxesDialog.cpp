@@ -60,6 +60,7 @@
 #include <qwt_plot.h>
 #include <qwt_scale_widget.h>
 #include "plot2D/ScaleEngine.h"
+#include "Spectrogram.h"
 
 /* XPM */
 static const char* const bottom_scl_xpm[] = {
@@ -1179,9 +1180,10 @@ static const char* const image7_data[] = {
 #ifndef M_PI
 #define M_PI	3.141592653589793238462643
 #endif
-
+//Mantid::Kernel::Logger & AxesDialog::g_log=Mantid::Kernel::Logger::get("AxesDialog");
 AxesDialog::AxesDialog( QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+: QDialog( parent, fl ),m_bscaleTypeChanged(false),m_bstartValueChanged(false),
+m_bendValueChanged(false)
 {
 	QPixmap image4( ( const char** ) image4_data );
     QPixmap image5( ( const char** ) image5_data );
@@ -1423,6 +1425,8 @@ void AxesDialog::initScalesPage()
 	connect(boxScaleType,SIGNAL(activated(int)), this, SLOT(updateMinorTicksList(int)));
 	connect(btnStep,SIGNAL(clicked()), this, SLOT(stepEnabled()));
 	connect(btnMajor,SIGNAL(clicked()), this, SLOT(stepDisabled()));
+	connect(boxEnd, SIGNAL(valueChanged(double)), this, SLOT(endvalueChanged(double)));
+	connect(boxStart, SIGNAL(valueChanged(double)), this, SLOT(startvalueChanged(double)));
 }
 
 void AxesDialog::initGridPage()
@@ -2213,7 +2217,7 @@ void AxesDialog::updateGrid()
     switch(boxApplyGridFormat->currentIndex()){
         case 0:
         {
-            applyChangesToGrid(d_graph->plotWidget()->grid());
+		    applyChangesToGrid(d_graph->plotWidget()->grid());
             d_graph->replot();
             d_graph->notifyChanges();
         }
@@ -2221,7 +2225,7 @@ void AxesDialog::updateGrid()
 
         case 1:
         {
-            MultiLayer *plot = d_graph->multiLayer();
+			MultiLayer *plot = d_graph->multiLayer();
             if (!plot)
                 return;
 
@@ -2239,7 +2243,7 @@ void AxesDialog::updateGrid()
 
         case 2:
         {
-            ApplicationWindow *app = (ApplicationWindow *)parent();
+		    ApplicationWindow *app = (ApplicationWindow *)parent();
             if (!app)
                 return;
 
@@ -2423,25 +2427,33 @@ bool AxesDialog::updatePlot()
 {
 	if (generalDialog->currentWidget()==(QWidget*)scalesPage)
 	{
+		
         int a = mapToQwtAxis(axesList->currentRow());
         ScaleDraw::ScaleType type = d_graph->axisType(a);
 
 		double start = 0.0, end = 0.0;
 		if (type == ScaleDraw::Date){
-            ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
+	         ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
             QDateTime origin = sclDraw->dateTimeOrigin();
             start = (double)origin.secsTo(boxStartDateTime->dateTime());
             end = (double)origin.secsTo(boxEndDateTime->dateTime());
 		} else if (type == ScaleDraw::Time){
-            ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
+		    ScaleDraw *sclDraw = (ScaleDraw *)d_graph->plotWidget()->axisScaleDraw(a);
             QTime origin = sclDraw->dateTimeOrigin().time();
             start = (double)origin.msecsTo(boxStartTime->time());
             end = (double)origin.msecsTo(boxEndTime->time());
 		} else {
-            start = boxStart->value();
+		    start = boxStart->value();
             end = boxEnd->value();
+		/*	if(m_bscaleTypeChanged)
+			{
+				int type=getSacleType();
+				scaleTypeChanged(type);
+				return true ;
+			}*/
+					
 		}
-
+        
 		double step = 0.0;
         if (btnStep->isChecked()){
 			step = boxStep->value();
@@ -2478,13 +2490,16 @@ bool AxesDialog::updatePlot()
 			breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
 			breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
 		}
-
+		if(!m_bscaleTypeChanged)
+		{
 		d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
-                          boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
-                          boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
-                          boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
-                          boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
-		d_graph->notifyChanges();
+				boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
+				boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
+				boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
+				boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
+			d_graph->notifyChanges();
+		}
+	
 	}
 	else if (generalDialog->currentWidget() == gridPage)
 		updateGrid();
@@ -3077,18 +3092,117 @@ int AxesDialog::exec()
 
 void AxesDialog::updateMinorTicksList(int scaleType)
 {
-	updatePlot();
-
-	boxMinorValue->clear();
-	if (scaleType)//log scale
-		boxMinorValue->addItems(QStringList()<<"0"<<"2"<<"4"<<"8");
-	else
-		boxMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
-
-	int a = mapToQwtAxis(axesList->currentRow());
-	boxMinorValue->setEditText(QString::number(d_graph->plotWidget()->axisMaxMinor(a)));
+	m_bscaleTypeChanged=true;
+	setScaleType(scaleType);
+	scaleTypeChanged(scaleType);
 }
+void AxesDialog::setScaleType(int scaleType)
+{
+	m_ScaleTYpe=scaleType;
+}
+int AxesDialog::getSacleType() const
+{
+	return m_ScaleTYpe;
+}
+void AxesDialog::scaleTypeChanged(int scaleType)
+{
+	double start = 0.0, end = 0.0;
+	start = boxStart->value();
+	end = boxEnd->value();
+	
+	Plot *d_plot = d_graph->plotWidget();
+	Spectrogram* spectrogram = d_graph->getSpectrogram();
+	if(spectrogram)
+	{
+	MantidColorMap::ScaleType type ;
+	if(scaleType==0)
+		type=MantidColorMap::Linear;
+	else
+		type=MantidColorMap::Log10;
+	spectrogram->mutableColorMap().changeScaleType(type);
+	setupColorBarScaling(type);
+//	spectrogram->recount();
+	}
+	
+}
+void AxesDialog::setupColorBarScaling(int Type)
+{
+	double start = 0.0, end = 0.0;
+	start = boxStart->value();
+	end = boxEnd->value();
+	Plot *d_plot = d_graph->plotWidget();
+	Spectrogram* spectrogram = d_graph->getSpectrogram();
+	if(!spectrogram) return;
+	
+	QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
+	if(rightAxis==NULL)return;
+	rightAxis->setColorBarEnabled(true);
+	if (Type==MantidColorMap::Log10)//log scale
+	{
+		boxMinorValue->addItems(QStringList()<<"0"<<"2"<<"4"<<"8");
+		QwtLog10ScaleEngine logScaler;    
+		double logmin(start);
+		if( logmin < 1.0 )
+		{
+			logmin = 1.0;
+		}
+		rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, end, 20, 5));
+		rightAxis->setColorMap(QwtDoubleInterval(start, end), spectrogram->getColorMap());
+	}
+	else
+	{
+		// for linear scale transformation
+		boxMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
+		QwtLinearScaleEngine linScaler;
+		rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(start, end, 10, 5));
+		rightAxis->setColorMap(QwtDoubleInterval(start, end),spectrogram->getColorMap());
+					
+	}
+}
+/**
+slot called when the end  spinbox value changed
+*/
+void AxesDialog::endvalueChanged(double endVal)
+{
+	m_bendValueChanged=true;
+	double start = 0.0, end = 0.0;
+	start = boxStart->value();
+	end = endVal;//boxEnd->value();
 
+	Spectrogram* spectrogram = d_graph->getSpectrogram();
+	if(spectrogram==NULL) return;
+	 MantidColorMap::ScaleType scaleType = (MantidColorMap::ScaleType)boxScaleType->itemData(boxScaleType->currentIndex()).toUInt();
+	 MantidColorMap::ScaleType type ;
+	if(scaleType==0)
+		type=MantidColorMap::Linear;
+	else
+		type=MantidColorMap::Log10;
+	spectrogram->mutableColorMap().changeScaleType(type);
+	spectrogram->setScaleType(type);
+	setupColorBarScaling(type);
+    spectrogram->updateForNewMaxData(end);
+
+}
+void AxesDialog::startvalueChanged(double startVal)
+{
+	m_bstartValueChanged=true;
+	double start = 0.0, end = 0.0;
+	start = startVal;//boxStart->value();
+	end = boxEnd->value();
+	Spectrogram* spectrogram = d_graph->getSpectrogram();
+	if(spectrogram==NULL) return;
+
+	MantidColorMap::ScaleType scaleType = (MantidColorMap::ScaleType)boxScaleType->itemData(boxScaleType->currentIndex()).toUInt();
+	 MantidColorMap::ScaleType type ;
+	if(scaleType==0)
+		type=MantidColorMap::Linear;
+	else
+		type=MantidColorMap::Log10;
+	spectrogram->mutableColorMap().changeScaleType(type);
+	setupColorBarScaling(type);
+	spectrogram->updateForNewMinData(start);
+	
+  }
 void AxesDialog::showAxis(int axis, int type, const QString& labelsColName, bool axisOn,
 		int majTicksType, int minTicksType, bool labelsOn, const QColor& c, int format,
 		int prec, int rotation, int baselineDist, const QString& formula, const QColor& labelsColor)

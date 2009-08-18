@@ -133,13 +133,19 @@ public:
 	bool selectedLabels(const QPoint& pos);
 	double labelsXOffset(){return d_labels_x_offset;};
     double labelsYOffset(){return d_labels_y_offset;};
-	 void selectLabel(bool on);
+	void selectLabel(bool on);
+	void setScaleType(int scaleType);
 
 
 protected:
 	virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void createLabels();
+	int getScaleType() const;
+	
+
+	int m_ScaleType;
+
 	//! Pointer to the source data matrix
 	Matrix *d_matrix;
     UserHelperFunction *d_funct;

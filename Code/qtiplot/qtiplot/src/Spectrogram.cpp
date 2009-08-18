@@ -103,6 +103,7 @@ d_labels_x_offset(0),
 d_labels_y_offset(0),
 d_selected_label(NULL),
 d_labels_align(Qt::AlignHCenter),
+m_ScaleType(1),
 //color_map(QwtLinearColorMap())
 mColorMap(), mDataMinValue(minz), mDataMaxValue(maxz), 
 mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), 
@@ -117,7 +118,7 @@ mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX),m_nRows(nrows),m_nColumns(ncols),mSc
 		level < data().range().maxValue(); level += step )
 		contourLevels += level;
  	setContourLevels(contourLevels);
-	loadSettings();
+	//loadSettings();
 
 }
 Spectrogram::~Spectrogram()
@@ -568,10 +569,11 @@ void Spectrogram::setupColorBarScaling()
   double minValue = mDataMinValue;
   double maxValue = mDataMaxValue;
   QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight);
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)1;
+  if(rightAxis==NULL) return;
+  int scaleType=getScaleType();
+  MantidColorMap::ScaleType type =(MantidColorMap::ScaleType)scaleType;
   if( type == MantidColorMap::Linear )
   {
-	
     QwtLinearScaleEngine linScaler;
     rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
     rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue),getColorMap());  
@@ -587,9 +589,17 @@ void Spectrogram::setupColorBarScaling()
     rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
     rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue), getColorMap());
   }
-  plot()->setAxisScale(QwtPlot::yRight,
-  	mDataMinValue,
-  	mDataMaxValue);
+ /* plot()->setAxisScale(QwtPlot::yRight,
+  	minValue,
+  	minValue);*/
+}
+void Spectrogram::setScaleType(int scaleType)
+{
+	m_ScaleType=scaleType;
+}
+int Spectrogram::getScaleType()const
+{
+	return m_ScaleType;
 }
 /**
  * Save properties of the window a persistent store
@@ -927,7 +937,7 @@ void Spectrogram::updateForNewMinData(const double new_min)
  */
 void Spectrogram::recount()
 {
-    calculateColorCounts(mWorkspaceSptr);
+   // calculateColorCounts(mWorkspaceSptr);
  }
 
 
