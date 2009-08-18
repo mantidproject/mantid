@@ -108,12 +108,12 @@ REAR_DET_X = |XREARDET|
 
 # MASK file stuff ==========================================================
 # correction terms to SANS2d encoders - store in MASK file ?
-FRONT_DET_Z_CORR = |ZCORRFRONTDET| #47.
-FRONT_DET_Y_CORR = |YCORRFRONTDET| #-33.
-FRONT_DET_X_CORR = |XCORRFRONTDET| #-20.
-FRONT_DET_ROT_CORR = |ROTCORRFRONTDET| #0.0
-REAR_DET_Z_CORR = |ZCORREARDET| #58.
-REAR_DET_X_CORR = |XCORREARDET| #0.0
+FRONT_DET_Z_CORR = |ZCORRFRONTDET| 
+FRONT_DET_Y_CORR = |YCORRFRONTDET| 
+FRONT_DET_X_CORR = |XCORRFRONTDET| 
+FRONT_DET_ROT_CORR = |ROTCORRFRONTDET|
+REAR_DET_Z_CORR = |ZCORREARDET| 
+REAR_DET_X_CORR = |XCORREARDET| 
 
 #------------------------------- End of input section --------------------------------------------------
 
@@ -384,6 +384,8 @@ try:
 		# Do the correction
 		if xshift <> 0.0 or yshift <> 0.0:
 			MoveInstrumentComponent(SCATTER_SAMPLE, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
+			if SCATTER_CAN != '':
+				MoveInstrumentComponent(SCATTER_CAN, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
 	
 		# Arguments 0 and 1 are the sample and can setup details
 		ws_togroup = FullWavRangeReduction(args[0], args[1], FindingCentre=True)
@@ -425,22 +427,31 @@ try:
 					break
 			mtd.deleteWorkspace('tmp')
 			detpos = mtd.getMatrixWorkspace(SCATTER_SAMPLE).getDetector(idet).getPos()
-			xstart = detpos.getX()
-			ystart = detpos.getY()
-			
-		# Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
-		scatter_setup = InitReduction(SCATTER_SAMPLE, [xstart, ystart], EmptyCell = False)
-		can_setup = InitReduction(SCATTER_CAN, [xstart, ystart], EmptyCell = True)
+			XVAR_PREV = detpos.getX()
+			YVAR_PREV = detpos.getY()
+		else:
+			XVAR_PREV = xstart
+			YVAR_PREV = ystart
 
-		XVAR_PREV = -xstart
-		YVAR_PREV = -ystart
-		coords = scipy.optimize.fmin(Residuals, [-xstart, -ystart], (scatter_setup, can_setup, rlow, rupp),xtol=1e-3, maxiter=MaxIter)
+		# Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
+		scatter_setup = InitReduction(SCATTER_SAMPLE, [XVAR_PREV, YVAR_PREV], EmptyCell = False)
+		can_setup = InitReduction(SCATTER_CAN, [XVAR_PREV, YVAR_PREV], EmptyCell = True)
+
+		XVAR_PREV = -XVAR_PREV
+		YVAR_PREV = -YVAR_PREV
+		
+#		print 'starting at ' + str(XVAR_PREV) + ' ' + str(YVAR_PREV)
+		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter)
 		
 		# Tidy up
 		mtd.deleteWorkspace('Left')
 		mtd.deleteWorkspace('Right')
 		mtd.deleteWorkspace('Up')
 		mtd.deleteWorkspace('Down')
+		mtd.deleteWorkspace(scatter_setup[1])
+		mtd.deleteWorkspace(SCATTER_SAMPLE)
+		if SCATTER_CAN != '':
+			mtd.deleteWorkspace(SCATTER_CAN)
 		
 		# The coordinates returned are the position of the detector so the beam centre is -coords
 		return -coords

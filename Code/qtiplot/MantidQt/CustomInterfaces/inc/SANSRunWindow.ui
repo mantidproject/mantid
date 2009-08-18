@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>778</width>
-    <height>393</height>
+    <height>395</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -28,7 +28,7 @@
       <string notr="true" />
      </property>
      <property name="currentIndex" >
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="elideMode" >
       <enum>Qt::ElideNone</enum>
@@ -735,7 +735,7 @@
         <rect>
          <x>22</x>
          <y>281</y>
-         <width>340</width>
+         <width>426</width>
          <height>33</height>
         </rect>
        </property>
@@ -765,6 +765,13 @@
          <widget class="QPushButton" name="twoDBtn" >
           <property name="text" >
            <string>2D Reduce</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4" >
+         <widget class="QPushButton" name="pushButton" >
+          <property name="text" >
+           <string>Save</string>
           </property>
          </widget>
         </item>
@@ -855,10 +862,10 @@
       <widget class="QWidget" name="horizontalLayoutWidget_11" >
        <property name="geometry" >
         <rect>
-         <x>465</x>
-         <y>278</y>
-         <width>283</width>
-         <height>34</height>
+         <x>479</x>
+         <y>281</y>
+         <width>270</width>
+         <height>30</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_12" >
@@ -1117,9 +1124,12 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="maximumSize" >
            <size>
-            <width>70</width>
+            <width>95</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="currentIndex" >
+           <number>0</number>
           </property>
           <item>
            <property name="text" >
@@ -1173,7 +1183,7 @@ p, li { white-space: pre-wrap; }
        <property name="geometry" >
         <rect>
          <x>27</x>
-         <y>203</y>
+         <y>194</y>
          <width>218</width>
          <height>133</height>
         </rect>
@@ -1241,8 +1251,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_6" >
        <property name="geometry" >
         <rect>
-         <x>282</x>
-         <y>207</y>
+         <x>276</x>
+         <y>194</y>
          <width>257</width>
          <height>134</height>
         </rect>
@@ -1416,238 +1426,13 @@ p, li { white-space: pre-wrap; }
       <attribute name="title" >
        <string>Geometry</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox_12" >
-       <property name="geometry" >
-        <rect>
-         <x>36</x>
-         <y>8</y>
-         <width>314</width>
-         <height>134</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Component Distances (m)</string>
-       </property>
-       <property name="checkable" >
-        <bool>false</bool>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_6" >
-        <item row="1" column="1" >
-         <widget class="QLabel" name="label_35" >
-          <property name="text" >
-           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Sample&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2" >
-         <widget class="QLabel" name="label_36" >
-          <property name="text" >
-           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Can&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" >
-         <spacer name="horizontalSpacer_5" >
-          <property name="orientation" >
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0" >
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="2" column="0" >
-         <widget class="QLabel" name="label_37" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text" >
-           <string>moderator - sample</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0" >
-         <widget class="QLabel" name="label_38" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text" >
-           <string>sample - detector bank 1</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1" >
-         <widget class="QLabel" name="dist_sample_ms" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="textInteractionFlags" >
-           <set>Qt::LinksAccessibleByMouse</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="2" >
-         <widget class="QLabel" name="dist_can_ms" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="textInteractionFlags" >
-           <set>Qt::LinksAccessibleByMouse</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="2" >
-         <widget class="QLabel" name="dist_can_sd1" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1" >
-         <widget class="QLabel" name="dist_sample_sd1" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0" >
-         <widget class="QLabel" name="label_39" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text" >
-           <string>sample - detector bank 2</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1" >
-         <widget class="QLabel" name="dist_sample_sd2" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="2" >
-         <widget class="QLabel" name="dist_can_sd2" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3" >
-         <widget class="QLabel" name="label_40" >
-          <property name="text" >
-           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
-&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
-p, li { white-space: pre-wrap; }
-&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Bkgrd&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3" >
-         <widget class="QLabel" name="dist_bkgd_ms" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-          <property name="textInteractionFlags" >
-           <set>Qt::LinksAccessibleByMouse</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="3" >
-         <widget class="QLabel" name="dist_bkgd_sd1" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="3" >
-         <widget class="QLabel" name="dist_bkgd_sd2" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2" >
-         <widget class="QLabel" name="dist_mod_mon" >
-          <property name="text" >
-           <string>0.0000</string>
-          </property>
-          <property name="textInteractionFlags" >
-           <set>Qt::LinksAccessibleByMouse</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0" >
-         <widget class="QLabel" name="label_42" >
-          <property name="text" >
-           <string>moderator - monitor </string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
       <widget class="QGroupBox" name="groupBox_8" >
        <property name="geometry" >
         <rect>
-         <x>75</x>
-         <y>149</y>
-         <width>248</width>
-         <height>191</height>
+         <x>21</x>
+         <y>3</y>
+         <width>314</width>
+         <height>111</height>
         </rect>
        </property>
        <property name="title" >
@@ -1661,8 +1446,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="1" >
+        <item row="0" column="1" colspan="2" >
          <widget class="QComboBox" name="sample_geomid" >
+          <property name="maximumSize" >
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
           <property name="currentIndex" >
            <number>2</number>
           </property>
@@ -1683,45 +1474,24 @@ p, li { white-space: pre-wrap; }
           </item>
          </widget>
         </item>
-        <item row="1" column="0" >
-         <widget class="QLabel" name="label_48" >
-          <property name="text" >
-           <string>Thickness (mm):</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0" >
-         <widget class="QLabel" name="label_49" >
-          <property name="text" >
-           <string>Height(mm):</string>
-          </property>
-          <property name="alignment" >
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="0" >
          <widget class="QLabel" name="label_50" >
           <property name="text" >
            <string>Width(mm):</string>
           </property>
           <property name="alignment" >
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
         <item row="1" column="1" >
          <widget class="QLineEdit" name="sample_thick" >
-          <property name="text" >
-           <string>1.0</string>
+          <property name="maximumSize" >
+           <size>
+            <width>45</width>
+            <height>16777215</height>
+           </size>
           </property>
-         </widget>
-        </item>
-        <item row="2" column="1" >
-         <widget class="QLineEdit" name="sample_height" >
           <property name="text" >
            <string>1.0</string>
           </property>
@@ -1729,34 +1499,96 @@ p, li { white-space: pre-wrap; }
         </item>
         <item row="3" column="1" >
          <widget class="QLineEdit" name="sample_width" >
+          <property name="maximumSize" >
+           <size>
+            <width>45</width>
+            <height>16777215</height>
+           </size>
+          </property>
           <property name="text" >
            <string>1.0</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0" >
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_48" >
+          <property name="text" >
+           <string>Thickness (mm):</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2" >
+         <widget class="QLabel" name="label_49" >
+          <property name="text" >
+           <string>Height(mm):</string>
+          </property>
+          <property name="alignment" >
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3" >
+         <widget class="QLineEdit" name="sample_height" >
+          <property name="maximumSize" >
+           <size>
+            <width>45</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string>1.0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2" >
          <widget class="QLabel" name="label_31" >
           <property name="text" >
            <string>Z-offset (mm)</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1" >
-         <widget class="QLineEdit" name="smpl_offset" />
+        <item row="3" column="3" >
+         <widget class="QLineEdit" name="smpl_offset" >
+          <property name="maximumSize" >
+           <size>
+            <width>45</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
         </item>
        </layout>
+       <zorder>label_47</zorder>
+       <zorder>sample_geomid</zorder>
+       <zorder>label_50</zorder>
+       <zorder>sample_thick</zorder>
+       <zorder>sample_width</zorder>
+       <zorder>label_48</zorder>
+       <zorder>label_49</zorder>
+       <zorder>sample_height</zorder>
+       <zorder>label_31</zorder>
+       <zorder>smpl_offset</zorder>
       </widget>
       <widget class="QGroupBox" name="groupBox_13" >
        <property name="geometry" >
         <rect>
-         <x>384</x>
+         <x>401</x>
          <y>9</y>
-         <width>301</width>
+         <width>298</width>
          <height>262</height>
         </rect>
        </property>
        <property name="title" >
         <string>Beam Centre</string>
+       </property>
+       <property name="flat" >
+        <bool>false</bool>
+       </property>
+       <property name="checkable" >
+        <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout_8" >
         <item row="0" column="0" >
@@ -1775,19 +1607,6 @@ p, li { white-space: pre-wrap; }
           </property>
           <property name="text" >
            <string>(</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2" >
-         <widget class="QLineEdit" name="beam_x" >
-          <property name="maximumSize" >
-           <size>
-            <width>60</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text" >
-           <string/>
           </property>
          </widget>
         </item>
@@ -1951,7 +1770,717 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="beam_x" >
+          <property name="maximumSize" >
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+        </item>
        </layout>
+       <zorder>label_51</zorder>
+       <zorder>label_32</zorder>
+       <zorder>label_46</zorder>
+       <zorder>beam_y</zorder>
+       <zorder>label_44</zorder>
+       <zorder>label_56</zorder>
+       <zorder>beamstart_box</zorder>
+       <zorder>label_57</zorder>
+       <zorder>beam_rmin</zorder>
+       <zorder>beam_rmax</zorder>
+       <zorder>label_58</zorder>
+       <zorder>runcentreBtn</zorder>
+       <zorder>line</zorder>
+       <zorder>line_3</zorder>
+       <zorder>label_30</zorder>
+       <zorder>label_59</zorder>
+       <zorder>label_60</zorder>
+       <zorder>beam_iter</zorder>
+       <zorder>beam_x</zorder>
+      </widget>
+      <widget class="QStackedWidget" name="geom_stack" >
+       <property name="geometry" >
+        <rect>
+         <x>20</x>
+         <y>113</y>
+         <width>317</width>
+         <height>235</height>
+        </rect>
+       </property>
+       <property name="currentIndex" >
+        <number>1</number>
+       </property>
+       <widget class="QWidget" name="page_3" >
+        <layout class="QVBoxLayout" name="verticalLayout_8" >
+         <item>
+          <widget class="QGroupBox" name="loq_geometry" >
+           <property name="title" >
+            <string>LOQ Geometry (mm)</string>
+           </property>
+           <property name="checkable" >
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_7" >
+            <item row="1" column="1" >
+             <widget class="QLabel" name="label_52" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Sample&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" >
+             <widget class="QLabel" name="label_53" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Can&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <spacer name="horizontalSpacer_5" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_54" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>moderator - sample</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" >
+             <widget class="QLabel" name="label_55" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>sample - main-detector bank</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" >
+             <widget class="QLabel" name="dist_sample_ms" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2" >
+             <widget class="QLabel" name="dist_can_ms" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="2" >
+             <widget class="QLabel" name="dist_can_mdb" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" >
+             <widget class="QLabel" name="dist_smp_mdb" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" >
+             <widget class="QLabel" name="label_61" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>sample - HAB</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" >
+             <widget class="QLabel" name="dist_smp_hab" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2" >
+             <widget class="QLabel" name="dist_can_hab" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3" >
+             <widget class="QLabel" name="label_62" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Bkgrd&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3" >
+             <widget class="QLabel" name="dist_bkgd_ms" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="3" >
+             <widget class="QLabel" name="dist_bkgd_mdb" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3" >
+             <widget class="QLabel" name="dist_bkgd_hab" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label_63" >
+              <property name="text" >
+               <string>moderator - monitor </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QLabel" name="dist_mod_mon" >
+              <property name="font" >
+               <font>
+                <pointsize>9</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer" >
+           <property name="orientation" >
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page" >
+        <layout class="QHBoxLayout" name="horizontalLayout_41" >
+         <item>
+          <widget class="QGroupBox" name="groupBox_43" >
+           <property name="title" >
+            <string>SANS2D Geometry (mm)</string>
+           </property>
+           <property name="checkable" >
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_26" >
+            <item row="1" column="1" >
+             <widget class="QLabel" name="label_181" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Sample&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" >
+             <widget class="QLabel" name="label_182" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Can&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <spacer name="horizontalSpacer_5" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_183" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>moderator - sample</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" >
+             <widget class="QLabel" name="label_184" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">rear-detector:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" >
+             <widget class="QLabel" name="dist_sample_ms_s2d" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="2" >
+             <widget class="QLabel" name="dist_can_ms_s2d" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3" >
+             <widget class="QLabel" name="label_185" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Bkgrd&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3" >
+             <widget class="QLabel" name="dist_bkgd_ms_s2d" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QLabel" name="dist_mon_s2d" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0" colspan="2" >
+             <widget class="QLabel" name="label_186" >
+              <property name="text" >
+               <string>moderator - monitor </string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" >
+             <widget class="QLabel" name="label_187" >
+              <property name="text" >
+               <string>X</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1" >
+             <widget class="QLabel" name="dist_smp_rearX" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="2" >
+             <widget class="QLabel" name="dist_can_rearX" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3" >
+             <widget class="QLabel" name="dist_bkgd_rearX" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0" >
+             <widget class="QLabel" name="label_188" >
+              <property name="text" >
+               <string>Z</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="0" >
+             <widget class="QLabel" name="label_189" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
+p, li { white-space: pre-wrap; }
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">front-detector:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="0" >
+             <widget class="QLabel" name="label_190" >
+              <property name="text" >
+               <string>X</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="0" >
+             <widget class="QLabel" name="label_191" >
+              <property name="text" >
+               <string>Z</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="0" >
+             <widget class="QLabel" name="label_192" >
+              <property name="text" >
+               <string>Rot</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1" >
+             <widget class="QLabel" name="dist_smp_rearZ" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="2" >
+             <widget class="QLabel" name="dist_can_rearZ" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="3" >
+             <widget class="QLabel" name="dist_bkgd_rearZ" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="1" >
+             <widget class="QLabel" name="dist_smp_frontX" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="2" >
+             <widget class="QLabel" name="dist_can_frontX" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="7" column="3" >
+             <widget class="QLabel" name="dist_bkgd_frontX" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="1" >
+             <widget class="QLabel" name="dist_smp_frontZ" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="2" >
+             <widget class="QLabel" name="dist_can_frontZ" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="8" column="3" >
+             <widget class="QLabel" name="dist_bkgd_frontZ" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="1" >
+             <widget class="QLabel" name="rot_smp" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="2" >
+             <widget class="QLabel" name="rot_can" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+            <item row="9" column="3" >
+             <widget class="QLabel" name="rot_bkgd" >
+              <property name="text" >
+               <string>-</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="textInteractionFlags" >
+               <set>Qt::LinksAccessibleByMouse</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
      <widget class="QWidget" name="tab_3" >
