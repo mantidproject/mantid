@@ -628,8 +628,9 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	return bStatus;
 }
  
-/** setting input workspace properties for an algorithm,for handling workspace goups.
+/** Setting input workspace properties for an algorithm,for handling workspace groups.
  *  @param pAlg  pointer to algorithm
+ *  @param prevPropName An in/out string argument denoting the previous property's name to keep track of this in a group
  *  @param  prop  pointer to a vector holding the input properties
  *  @param  inputWS input workspace name
  *  @returns true - if property is set .
