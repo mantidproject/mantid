@@ -39,6 +39,7 @@
 #include "Table.h"
 #include "DoubleSpinBox.h"
 #include "ScaleDraw.h"
+#include <float.h>
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -1182,8 +1183,7 @@ static const char* const image7_data[] = {
 #endif
 //Mantid::Kernel::Logger & AxesDialog::g_log=Mantid::Kernel::Logger::get("AxesDialog");
 AxesDialog::AxesDialog( QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl ),m_bscaleTypeChanged(false),m_bstartValueChanged(false),
-m_bendValueChanged(false),m_ScaleTYpe(0)
+: QDialog( parent, fl ),m_ScaleTYpe(0)
 {
 	QPixmap image4( ( const char** ) image4_data );
     QPixmap image5( ( const char** ) image5_data );
@@ -2490,16 +2490,28 @@ bool AxesDialog::updatePlot()
 			breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
 			breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
 		}
-		if(!m_bscaleTypeChanged)
+		bool hasBreak=false;
+		if( (breakLeft == breakRight) || (breakLeft == -DBL_MAX && breakRight == DBL_MAX))
+		{	hasBreak=false;
+		}
+		else
+			hasBreak=true;
+		if(hasBreak)
 		{
-		d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
+			d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
 				boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
 				boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
 				boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
 				boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
 			d_graph->notifyChanges();
 		}
-	
+		else
+		{
+			int type=getSacleType();
+			scaleTypeChanged(type);
+		}
+		
+			
 	}
 	else if (generalDialog->currentWidget() == gridPage)
 		updateGrid();
@@ -2666,7 +2678,7 @@ return a;
 
 void AxesDialog::updateScale()
 {
-    int axis = axesList->currentRow();
+   int axis = axesList->currentRow();
 
     boxStart->clear();
     boxEnd->clear();
@@ -3092,9 +3104,8 @@ int AxesDialog::exec()
 
 void AxesDialog::updateMinorTicksList(int scaleType)
 {
-	m_bscaleTypeChanged=true;
 	setScaleType(scaleType);
-	scaleTypeChanged(scaleType);
+	//scaleTypeChanged(scaleType);
 }
 void AxesDialog::setScaleType(int scaleType)
 {
@@ -3106,10 +3117,6 @@ int AxesDialog::getSacleType() const
 }
 void AxesDialog::scaleTypeChanged(int scaleType)
 {
-	double start = 0.0, end = 0.0;
-	start = boxStart->value();
-	end = boxEnd->value();
-	
 	Plot *d_plot = d_graph->plotWidget();
 	Spectrogram* spectrogram = d_graph->getSpectrogram();
 	if(spectrogram)
@@ -3159,12 +3166,12 @@ void AxesDialog::setupColorBarScaling(int Type)
 					
 	}
 }
+
 /**
 slot called when the end  spinbox value changed
 */
 void AxesDialog::endvalueChanged(double endVal)
 {
-	m_bendValueChanged=true;
 	double start = 0.0, end = 0.0;
 	start = boxStart->value();
 	end = endVal;
@@ -3185,7 +3192,6 @@ void AxesDialog::endvalueChanged(double endVal)
 }
 void AxesDialog::startvalueChanged(double startVal)
 {
-	m_bstartValueChanged=true;
 	double start = 0.0, end = 0.0;
 	start = startVal;
 	end = boxEnd->value();
