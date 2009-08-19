@@ -70,6 +70,7 @@ namespace Mantid
       //void operator()(const M33&);
       void set(const double ww, const double aa, const double bb, const double cc);
       void setAngleAxis(const double _deg, const V3D& _axis);
+      void getAngleAxis(double& _deg,double& _axis1,double& _axis2,double& axis3) const;
       //void setRotMatrix(const M33&);
       //! Norm of a quaternion
       /// Set the rotation (both don't change rotation axis)
@@ -85,6 +86,8 @@ namespace Mantid
       void conjugate();
       //! Inverse a quaternion (in the sense of rotation inversion)
       void inverse();
+      //! Is the quaternion representing a null rotation
+      bool isNull(const double tolerance=0.001) const;
       //! Convert quaternion rotation to an OpenGL matrix [4x4] matrix
       //! stored as an linear array of 16 double
       //! The function glRotated must be called

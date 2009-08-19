@@ -118,6 +118,33 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 	return;
 }
 
+bool Quat::isNull(const double tolerance) const
+{
+	double pw=std::fabs(w)-1;
+	return (std::fabs(pw)<tolerance);
+}
+
+void Quat::getAngleAxis(double& _deg,double& _ax0, double& _ax1, double& _ax2) const
+{
+	// If it represents a rotation of 0(2\pi), get an angle of 0 and axis (0,0,1)
+	if (isNull(1e-5))
+	{
+		_deg=0;
+		_ax0=0;
+		_ax1=0;
+		_ax2=1.0;
+		return;
+	}
+	// Semi-angle in radians
+	_deg=acos(w);
+	// Prefactor for the axis part
+	double s=sin(_deg);
+	// Angle in degrees
+	_deg*=360.0/M_PI;
+	_ax0=a/s;_ax1=b/s;_ax2=c/s;
+	return;
+}
+
 /** Set the rotation (both don't change rotation axis). This method has an error
  * \param deg :: angle of rotation
  */

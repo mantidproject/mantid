@@ -21,10 +21,10 @@ CompAssemblyActor::CompAssemblyActor(bool withDisplayList):GLActor(withDisplayLi
 }
 
 /**
- * This is a constructor for CompAssembly Actor 
+ * This is a constructor for CompAssembly Actor
  * @param objs            :: list of objects that are used by IObjCompenent actors and will be filled with the new objects
  * @param id              :: ComponentID of this object of CompAssembly
- * @param ins             :: Instrument 
+ * @param ins             :: Instrument
  * @param withDisplayList :: true to create a display list for the compassembly and its subcomponents
  */
 CompAssemblyActor::CompAssemblyActor(boost::shared_ptr<std::map<const boost::shared_ptr<const Object>,MantidObject*> >& objs, Mantid::Geometry::ComponentID id,boost::shared_ptr<Mantid::API::IInstrument> ins,bool withDisplayList):GLActor(withDisplayList),mNumberOfDetectors(0),minBoundBox(DBL_MAX,DBL_MAX,DBL_MAX),maxBoundBox(-DBL_MAX,-DBL_MAX,-DBL_MAX)
@@ -41,7 +41,7 @@ CompAssemblyActor::CompAssemblyActor(boost::shared_ptr<std::map<const boost::sha
  * Destructor which removes the actors created by this object
  */
 CompAssemblyActor::~CompAssemblyActor()
-{	
+{
   //Remove all the child CompAssembly Actors
   for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
     delete (*iAssem);
@@ -121,7 +121,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
   //bounding box
   Mantid::Geometry::V3D minBound;
   Mantid::Geometry::V3D maxBound;
-  //Iterate through CompAssembly children 
+  //Iterate through CompAssembly children
   boost::shared_ptr<Mantid::Geometry::ICompAssembly> CompAssemPtr=boost::dynamic_pointer_cast<Mantid::Geometry::ICompAssembly>(CompPtr);
   if(CompAssemPtr!=boost::shared_ptr<Mantid::Geometry::ICompAssembly>())
     {
@@ -142,7 +142,7 @@ void CompAssemblyActor::initChilds(bool withDisplayList)
 	  else //it has to be a ObjComponent child, create a ObjComponentActor for the child use the same display list attribute
 	    {
 	      boost::shared_ptr<Mantid::Geometry::IObjComponent> ChildObjPtr=boost::dynamic_pointer_cast<Mantid::Geometry::IObjComponent>(ChildCompPtr);
-	      ObjComponentActor* iActor=new ObjComponentActor(getMantidObject(ChildObjPtr->Shape(),withDisplayList),ChildObjPtr,withDisplayList);
+	      ObjComponentActor* iActor=new ObjComponentActor(getMantidObject(ChildObjPtr->Shape(),withDisplayList),ChildObjPtr,false);
 	      iActor->getBoundingBox(minBound,maxBound);
 	      AppendBoundingBox(minBound,maxBound);
 	      mChildObjCompActors.push_back(iActor);
@@ -202,12 +202,12 @@ int CompAssemblyActor::setStartingReferenceColor(int rgb)
  */
 void CompAssemblyActor::init()
 {
-  for_each(mChildObjCompActors.begin(),mChildObjCompActors.end(),std::mem_fun(&GLActor::draw));
+  //for_each(mChildObjCompActors.begin(),mChildObjCompActors.end(),std::mem_fun(&GLActor::draw));
   for_each(mChildCompAssemActors.begin(),mChildCompAssemActors.end(),std::mem_fun(&GLActor::draw));
 }
 
 /**
- * This method adds the detector ids of the children of CompAssembly to the input idList. 
+ * This method adds the detector ids of the children of CompAssembly to the input idList.
  * @param idList :: output list of detector ids for child detectors
  */
 void CompAssemblyActor::appendObjCompID(std::vector<int>& idList)
@@ -227,7 +227,7 @@ void CompAssemblyActor::appendObjCompID(std::vector<int>& idList)
 	      idList.push_back(-1);
 	    }
 	}
-		  
+
     }
 
   for(std::vector<CompAssemblyActor*>::const_iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end(); ++iAssem)
@@ -294,7 +294,7 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
 	}
     }
   rgb -= n_comp_actors;
- 
+
   for(std::vector<CompAssemblyActor*>::iterator iAssem=mChildCompAssemActors.begin();iAssem!=mChildCompAssemActors.end();iAssem++)
     {
       if(rgb > 0 && rgb <= (*iAssem)->getNumberOfDetectors() )
@@ -307,7 +307,7 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
 }
 
 /**
- * Return the bounding box 
+ * Return the bounding box
  * @param minBound :: min point of the bounding box
  * @param maxBound :: max point of the bounding box
  */
