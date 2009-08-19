@@ -68,7 +68,7 @@ private:
   /// Load the user file specified in the text field
   bool loadUserFile();
   /// Construct the reduction code from the Python script template
-  QString constructReductionCode();
+  QString constructReductionCode(bool replacewsnames = true, bool checkchanges = true);
   /// Read a limit line from the user file
   void readLimits(const QString & com_line);
   /// Get the component distances
@@ -117,6 +117,9 @@ private slots:
 
   /// Find centre button click handler
   void handleRunFindCentre();
+
+  ///Handle save button click
+  void handleSaveButtonClick();
 
   /// A ComboBox option change
   void handleStepComboChange(int new_index);
@@ -182,8 +185,8 @@ private:
   // A boolean indicating if scipy is installed
   bool m_havescipy;
 
-  // A boolean indicating whether to show the scipy warning dialog
-  bool m_scipy_warning;
+  // An integer to save the last run reduction type
+  int m_lastreducetype;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

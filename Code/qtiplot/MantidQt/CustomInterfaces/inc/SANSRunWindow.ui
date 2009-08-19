@@ -1,60 +1,65 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ui version="4.0">
+<ui version="4.0" >
  <class>SANSRunWindow</class>
- <widget class="QWidget" name="SANSRunWindow">
-  <property name="geometry">
+ <widget class="QWidget" name="SANSRunWindow" >
+  <property name="geometry" >
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>778</width>
-    <height>395</height>
+    <width>808</width>
+    <height>418</height>
    </rect>
   </property>
-  <property name="windowTitle">
+  <property name="windowTitle" >
    <string>SANS</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout_3" >
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="minimumSize">
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize" >
       <size>
-       <width>760</width>
-       <height>360</height>
+       <width>790</width>
+       <height>400</height>
       </size>
      </property>
-     <property name="autoFillBackground">
+     <property name="autoFillBackground" >
       <bool>false</bool>
      </property>
-     <property name="styleSheet">
-      <string notr="true"/>
+     <property name="styleSheet" >
+      <string notr="true" />
      </property>
-     <property name="currentIndex">
-      <number>2</number>
+     <property name="currentIndex" >
+      <number>0</number>
      </property>
-     <property name="elideMode">
+     <property name="elideMode" >
       <enum>Qt::ElideNone</enum>
      </property>
-     <property name="usesScrollButtons">
+     <property name="usesScrollButtons" >
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
        <string>Run Numbers</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox" >
+       <property name="geometry" >
         <rect>
          <x>20</x>
-         <y>70</y>
+         <y>63</y>
          <width>228</width>
          <height>191</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Scattering</string>
        </property>
-       <widget class="QWidget" name="horizontalLayoutWidget_2">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_2" >
+        <property name="geometry" >
          <rect>
           <x>3</x>
           <y>32</y>
@@ -62,30 +67,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2" >
          <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
+          <widget class="QLabel" name="label_2" >
+           <property name="text" >
             <string>Sample</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="sct_sample_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="sct_sample_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_1">
-           <property name="orientation">
+          <spacer name="spacer_1" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -94,14 +99,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="sct_smp_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="sct_smp_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -110,19 +115,19 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="sct_prd_tot1">
-           <property name="text">
+          <widget class="QLabel" name="sct_prd_tot1" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>sct_smp_prd</cstring>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
-       <widget class="QLabel" name="label">
-        <property name="geometry">
+       <widget class="QLabel" name="label" >
+        <property name="geometry" >
          <rect>
           <x>159</x>
           <y>13</y>
@@ -130,12 +135,12 @@
           <height>18</height>
          </rect>
         </property>
-        <property name="text">
+        <property name="text" >
          <string>Period</string>
         </property>
        </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_3">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_3" >
+        <property name="geometry" >
          <rect>
           <x>4</x>
           <y>86</y>
@@ -143,30 +148,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_3" >
          <item>
-          <widget class="QLabel" name="label_12">
-           <property name="text">
+          <widget class="QLabel" name="label_12" >
+           <property name="text" >
             <string>Can      </string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="sct_can_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="sct_can_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_2">
-           <property name="orientation">
+          <spacer name="spacer_2" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -175,14 +180,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="sct_can_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="sct_can_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -191,19 +196,19 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="sct_prd_tot2">
-           <property name="text">
+          <widget class="QLabel" name="sct_prd_tot2" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>sct_can_prd</cstring>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_4">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_4" >
+        <property name="geometry" >
          <rect>
           <x>3</x>
           <y>141</y>
@@ -211,30 +216,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <layout class="QHBoxLayout" name="horizontalLayout_4" >
          <item>
-          <widget class="QLabel" name="label_14">
-           <property name="text">
+          <widget class="QLabel" name="label_14" >
+           <property name="text" >
             <string>Backg'd</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="sct_bkgd_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="sct_bkgd_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_3">
-           <property name="orientation">
+          <spacer name="spacer_3" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -243,14 +248,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="sct_bkgd_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="sct_bkgd_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -259,11 +264,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="sct_prd_tot3">
-           <property name="text">
+          <widget class="QLabel" name="sct_prd_tot3" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>sct_bkgd_prd</cstring>
            </property>
           </widget>
@@ -271,20 +276,20 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QGroupBox" name="groupBox_2">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_2" >
+       <property name="geometry" >
         <rect>
-         <x>262</x>
-         <y>72</y>
+         <x>261</x>
+         <y>66</y>
          <width>224</width>
          <height>190</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Transmission</string>
        </property>
-       <widget class="QWidget" name="horizontalLayoutWidget_5">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_5" >
+        <property name="geometry" >
          <rect>
           <x>3</x>
           <y>32</y>
@@ -292,30 +297,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_5" >
          <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
+          <widget class="QLabel" name="label_4" >
+           <property name="text" >
             <string>Sample</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="tra_sample_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="tra_sample_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_4">
-           <property name="orientation">
+          <spacer name="spacer_4" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -324,14 +329,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="tra_sample_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="tra_sample_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -340,19 +345,19 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="tra_prd_tot1">
-           <property name="text">
+          <widget class="QLabel" name="tra_prd_tot1" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>tra_sample_prd</cstring>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
-       <widget class="QLabel" name="label_6">
-        <property name="geometry">
+       <widget class="QLabel" name="label_6" >
+        <property name="geometry" >
          <rect>
           <x>154</x>
           <y>12</y>
@@ -360,12 +365,12 @@
           <height>18</height>
          </rect>
         </property>
-        <property name="text">
+        <property name="text" >
          <string>Period</string>
         </property>
        </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_6">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_6" >
+        <property name="geometry" >
          <rect>
           <x>4</x>
           <y>86</y>
@@ -373,30 +378,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <layout class="QHBoxLayout" name="horizontalLayout_6" >
          <item>
-          <widget class="QLabel" name="label_15">
-           <property name="text">
+          <widget class="QLabel" name="label_15" >
+           <property name="text" >
             <string>Can      </string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="tra_can_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="tra_can_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_5">
-           <property name="orientation">
+          <spacer name="spacer_5" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -405,14 +410,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="tra_can_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="tra_can_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -421,19 +426,19 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="tra_prd_tot2">
-           <property name="text">
+          <widget class="QLabel" name="tra_prd_tot2" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>tra_can_prd</cstring>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_7">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_7" >
+        <property name="geometry" >
          <rect>
           <x>3</x>
           <y>141</y>
@@ -441,30 +446,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <layout class="QHBoxLayout" name="horizontalLayout_7" >
          <item>
-          <widget class="QLabel" name="label_17">
-           <property name="text">
+          <widget class="QLabel" name="label_17" >
+           <property name="text" >
             <string>Backg'd</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="tra_bkgd_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="tra_bkgd_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_6">
-           <property name="orientation">
+          <spacer name="spacer_6" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -473,14 +478,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="tra_bckd_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="tra_bckd_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -489,11 +494,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="tra_prd_tot3">
-           <property name="text">
+          <widget class="QLabel" name="tra_prd_tot3" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>tra_bckd_prd</cstring>
            </property>
           </widget>
@@ -501,20 +506,20 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QGroupBox" name="groupBox_3">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_3" >
+       <property name="geometry" >
         <rect>
-         <x>501</x>
-         <y>72</y>
+         <x>502</x>
+         <y>65</y>
          <width>232</width>
          <height>191</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Direct</string>
        </property>
-       <widget class="QWidget" name="horizontalLayoutWidget_8">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_8" >
+        <property name="geometry" >
          <rect>
           <x>3</x>
           <y>32</y>
@@ -522,30 +527,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <layout class="QHBoxLayout" name="horizontalLayout_8" >
          <item>
-          <widget class="QLabel" name="label_8">
-           <property name="text">
+          <widget class="QLabel" name="label_8" >
+           <property name="text" >
             <string>Sample</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="direct_sample_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="direct_sample_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_7">
-           <property name="orientation">
+          <spacer name="spacer_7" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -554,14 +559,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="direct_smp_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="direct_smp_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -570,19 +575,19 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="direct_prd_tot1">
-           <property name="text">
+          <widget class="QLabel" name="direct_prd_tot1" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>direct_smp_prd</cstring>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
-       <widget class="QLabel" name="label_10">
-        <property name="geometry">
+       <widget class="QLabel" name="label_10" >
+        <property name="geometry" >
          <rect>
           <x>160</x>
           <y>14</y>
@@ -590,12 +595,12 @@
           <height>18</height>
          </rect>
         </property>
-        <property name="text">
+        <property name="text" >
          <string>Period</string>
         </property>
        </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_9">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_9" >
+        <property name="geometry" >
          <rect>
           <x>4</x>
           <y>86</y>
@@ -603,30 +608,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <layout class="QHBoxLayout" name="horizontalLayout_9" >
          <item>
-          <widget class="QLabel" name="label_18">
-           <property name="text">
+          <widget class="QLabel" name="label_18" >
+           <property name="text" >
             <string>Can      </string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="direct_can_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="direct_can_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_8">
-           <property name="orientation">
+          <spacer name="spacer_8" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -635,14 +640,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="direct_can_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="direct_can_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -651,19 +656,19 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="direct_prd_tot2">
-           <property name="text">
+          <widget class="QLabel" name="direct_prd_tot2" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>direct_can_prd</cstring>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_10">
-        <property name="geometry">
+       <widget class="QWidget" name="horizontalLayoutWidget_10" >
+        <property name="geometry" >
          <rect>
           <x>3</x>
           <y>141</y>
@@ -671,30 +676,30 @@
           <height>37</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <layout class="QHBoxLayout" name="horizontalLayout_10" >
          <item>
-          <widget class="QLabel" name="label_20">
-           <property name="text">
+          <widget class="QLabel" name="label_20" >
+           <property name="text" >
             <string>Backg'd</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="direct_bkgd_edit">
-           <property name="enabled">
+          <widget class="QLineEdit" name="direct_bkgd_edit" >
+           <property name="enabled" >
             <bool>true</bool>
            </property>
-           <property name="text">
+           <property name="text" >
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="spacer_9">
-           <property name="orientation">
+          <spacer name="spacer_9" >
+           <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>40</width>
              <height>20</height>
@@ -703,14 +708,14 @@
           </spacer>
          </item>
          <item>
-          <widget class="QLineEdit" name="direct_bckd_prd">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+          <widget class="QLineEdit" name="direct_bckd_prd" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="maximumSize">
+           <property name="maximumSize" >
             <size>
              <width>60</width>
              <height>16777215</height>
@@ -719,11 +724,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="direct_prd_tot3">
-           <property name="text">
+          <widget class="QLabel" name="direct_prd_tot3" >
+           <property name="text" >
             <string>/ ??</string>
            </property>
-           <property name="buddy">
+           <property name="buddy" >
             <cstring>direct_bckd_prd</cstring>
            </property>
           </widget>
@@ -731,55 +736,8 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QWidget" name="gridLayoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>22</x>
-         <y>281</y>
-         <width>451</width>
-         <height>33</height>
-        </rect>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QPushButton" name="load_dataBtn">
-          <property name="text">
-           <string>Load Data</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="oneDBtn">
-          <property name="text">
-           <string>1D Reduce</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QPushButton" name="plotBtn">
-          <property name="text">
-           <string>Plot</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QPushButton" name="twoDBtn">
-          <property name="text">
-           <string>2D Reduce</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <widget class="QPushButton" name="pushButton">
-          <property name="text">
-           <string>Save</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="horizontalLayoutWidget">
-       <property name="geometry">
+      <widget class="QWidget" name="horizontalLayoutWidget" >
+       <property name="geometry" >
         <rect>
          <x>13</x>
          <y>14</y>
@@ -787,17 +745,17 @@
          <height>42</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
+       <layout class="QHBoxLayout" name="horizontalLayout_11" >
         <item>
-         <widget class="QLabel" name="label_7">
-          <property name="text">
+         <widget class="QLabel" name="label_7" >
+          <property name="text" >
            <string>Data directory</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="datadir_edit">
-          <property name="minimumSize">
+         <widget class="QLineEdit" name="datadir_edit" >
+          <property name="minimumSize" >
            <size>
             <width>150</width>
             <height>0</height>
@@ -806,21 +764,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="data_dirBtn">
-          <property name="text">
+         <widget class="QPushButton" name="data_dirBtn" >
+          <property name="text" >
            <string>Browse</string>
           </property>
-          <property name="autoDefault">
+          <property name="autoDefault" >
            <bool>false</bool>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
+         <spacer name="horizontalSpacer" >
+          <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0">
+          <property name="sizeHint" stdset="0" >
            <size>
             <width>40</width>
             <height>20</height>
@@ -829,74 +787,74 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_11">
-          <property name="text">
+         <widget class="QLabel" name="label_11" >
+          <property name="text" >
            <string>User file</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="userfile_edit">
-          <property name="minimumSize">
+         <widget class="QLineEdit" name="userfile_edit" >
+          <property name="minimumSize" >
            <size>
             <width>150</width>
             <height>0</height>
            </size>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="userfileBtn">
-          <property name="text">
-           <string>Load</string>
+         <widget class="QPushButton" name="userfileBtn" >
+          <property name="text" >
+           <string>Load Mask</string>
           </property>
-          <property name="autoDefault">
+          <property name="autoDefault" >
            <bool>false</bool>
           </property>
          </widget>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="horizontalLayoutWidget_11">
-       <property name="geometry">
+      <widget class="QWidget" name="horizontalLayoutWidget_11" >
+       <property name="geometry" >
         <rect>
-         <x>479</x>
+         <x>447</x>
          <y>281</y>
          <width>321</width>
          <height>33</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_12">
+       <layout class="QHBoxLayout" name="horizontalLayout_12" >
         <item>
-         <widget class="QLabel" name="label_34">
-          <property name="text">
+         <widget class="QLabel" name="label_34" >
+          <property name="text" >
            <string>Instrument:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="inst_opt">
+         <widget class="QComboBox" name="inst_opt" >
           <item>
-           <property name="text">
+           <property name="text" >
             <string>LOQ</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>SANS2D</string>
            </property>
           </item>
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
+         <spacer name="horizontalSpacer_4" >
+          <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0">
+          <property name="sizeHint" stdset="0" >
            <size>
             <width>40</width>
             <height>20</height>
@@ -905,21 +863,21 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="label_26">
-          <property name="text">
+         <widget class="QLabel" name="label_26" >
+          <property name="text" >
            <string>File type:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="file_opt">
+         <widget class="QComboBox" name="file_opt" >
           <item>
-           <property name="text">
+           <property name="text" >
             <string>raw</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>nexus</string>
            </property>
           </item>
@@ -927,13 +885,60 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="gridLayoutWidget_2" >
+       <property name="geometry" >
+        <rect>
+         <x>16</x>
+         <y>266</y>
+         <width>254</width>
+         <height>80</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_6" >
+        <item row="0" column="0" >
+         <widget class="QPushButton" name="load_dataBtn" >
+          <property name="text" >
+           <string>Load Data</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QPushButton" name="twoDBtn" >
+          <property name="text" >
+           <string>2D Reduce</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" >
+         <widget class="QPushButton" name="oneDBtn" >
+          <property name="text" >
+           <string>1D Reduce</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" >
+         <widget class="QPushButton" name="plotBtn" >
+          <property name="text" >
+           <string>Plot</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" >
+         <widget class="QPushButton" name="saveBtn" >
+          <property name="text" >
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
-     <widget class="QWidget" name="tab_2">
-      <attribute name="title">
+     <widget class="QWidget" name="tab_2" >
+      <attribute name="title" >
        <string>Analysis Details</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox_4">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_4" >
+       <property name="geometry" >
         <rect>
          <x>11</x>
          <y>9</y>
@@ -941,25 +946,25 @@
          <height>173</height>
         </rect>
        </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Preferred" hsizetype="MinimumExpanding" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Limits</string>
        </property>
-       <property name="checkable">
+       <property name="checkable" >
         <bool>false</bool>
        </property>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <spacer name="horizontalSpacer_2">
-          <property name="orientation">
+       <layout class="QGridLayout" name="gridLayout_4" >
+        <item row="0" column="0" >
+         <spacer name="horizontalSpacer_2" >
+          <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0">
+          <property name="sizeHint" stdset="0" >
            <size>
             <width>40</width>
             <height>20</height>
@@ -967,12 +972,12 @@
           </property>
          </spacer>
         </item>
-        <item row="0" column="2">
-         <spacer name="horizontalSpacer_3">
-          <property name="orientation">
+        <item row="0" column="2" >
+         <spacer name="horizontalSpacer_3" >
+          <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0">
+          <property name="sizeHint" stdset="0" >
            <size>
             <width>40</width>
             <height>20</height>
@@ -980,208 +985,203 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_3">
-          <property name="text">
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_3" >
+          <property name="text" >
            <string>Radius (mm)</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_16">
-          <property name="text">
+        <item row="2" column="0" >
+         <widget class="QLabel" name="label_16" >
+          <property name="text" >
            <string>Wavelength (Angstroms)</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_19">
-          <property name="text">
+        <item row="3" column="0" >
+         <widget class="QLabel" name="label_19" >
+          <property name="text" >
            <string>Qx (Angstroms^-1)</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_21">
-          <property name="text">
+        <item row="4" column="0" >
+         <widget class="QLabel" name="label_21" >
+          <property name="text" >
            <string>Qxy (Angstroms^-1)</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="rad_min"/>
+        <item row="1" column="1" >
+         <widget class="QLineEdit" name="rad_min" />
         </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="wav_min"/>
+        <item row="2" column="1" >
+         <widget class="QLineEdit" name="wav_min" />
         </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="q_min"/>
+        <item row="3" column="1" >
+         <widget class="QLineEdit" name="q_min" />
         </item>
-        <item row="1" column="3">
-         <widget class="QLineEdit" name="rad_max"/>
+        <item row="1" column="3" >
+         <widget class="QLineEdit" name="rad_max" />
         </item>
-        <item row="0" column="3">
-         <widget class="QLabel" name="label_23">
-          <property name="text">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        <item row="0" column="3" >
+         <widget class="QLabel" name="label_23" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Max&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Max&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="2" column="3">
-         <widget class="QLineEdit" name="wav_max"/>
+        <item row="2" column="3" >
+         <widget class="QLineEdit" name="wav_max" />
         </item>
-        <item row="3" column="3">
-         <widget class="QLineEdit" name="q_max"/>
+        <item row="3" column="3" >
+         <widget class="QLineEdit" name="q_max" />
         </item>
-        <item row="4" column="3">
-         <widget class="QLineEdit" name="qy_max"/>
+        <item row="4" column="3" >
+         <widget class="QLineEdit" name="qy_max" />
         </item>
-        <item row="1" column="4">
-         <widget class="QLabel" name="rad_step_lbl">
-          <property name="text">
+        <item row="1" column="4" >
+         <widget class="QLabel" name="rad_step_lbl" >
+          <property name="text" >
            <string>stepping</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="4">
-         <widget class="QLabel" name="wav_step_lbl">
-          <property name="text">
+        <item row="2" column="4" >
+         <widget class="QLabel" name="wav_step_lbl" >
+          <property name="text" >
            <string>stepping</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="4">
-         <widget class="QLabel" name="q_step_lbl">
-          <property name="text">
+        <item row="3" column="4" >
+         <widget class="QLabel" name="q_step_lbl" >
+          <property name="text" >
            <string>stepping</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="4">
-         <widget class="QLabel" name="qy_step_lbl">
-          <property name="text">
+        <item row="4" column="4" >
+         <widget class="QLabel" name="qy_step_lbl" >
+          <property name="text" >
            <string>stepping</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="5">
-         <widget class="QLineEdit" name="rad_dr"/>
+        <item row="1" column="5" >
+         <widget class="QLineEdit" name="rad_dr" />
         </item>
-        <item row="2" column="5">
-         <widget class="QLineEdit" name="wav_dw"/>
+        <item row="2" column="5" >
+         <widget class="QLineEdit" name="wav_dw" />
         </item>
-        <item row="3" column="5">
-         <widget class="QLineEdit" name="q_dq"/>
+        <item row="3" column="5" >
+         <widget class="QLineEdit" name="q_dq" />
         </item>
-        <item row="4" column="5">
-         <widget class="QLineEdit" name="qy_dqy"/>
+        <item row="4" column="5" >
+         <widget class="QLineEdit" name="qy_dqy" />
         </item>
-        <item row="2" column="6">
-         <widget class="QComboBox" name="wav_dw_opt">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+        <item row="2" column="6" >
+         <widget class="QComboBox" name="wav_dw_opt" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Ignored" >
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize">
+          <property name="minimumSize" >
            <size>
             <width>0</width>
             <height>0</height>
            </size>
           </property>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>Linear</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>Logarithmic</string>
            </property>
           </item>
          </widget>
         </item>
-        <item row="3" column="6">
-         <widget class="QComboBox" name="q_dq_opt">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <item row="3" column="6" >
+         <widget class="QComboBox" name="q_dq_opt" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize">
+          <property name="minimumSize" >
            <size>
             <width>0</width>
             <height>0</height>
            </size>
           </property>
-          <property name="maximumSize">
+          <property name="maximumSize" >
            <size>
             <width>95</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="currentIndex">
+          <property name="currentIndex" >
            <number>0</number>
           </property>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>Linear</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>Logarithmic</string>
            </property>
           </item>
          </widget>
         </item>
-        <item row="4" column="6">
-         <widget class="QComboBox" name="qy_dqy_opt">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
+        <item row="4" column="6" >
+         <widget class="QComboBox" name="qy_dqy_opt" >
+          <property name="sizePolicy" >
+           <sizepolicy vsizetype="Fixed" hsizetype="Ignored" >
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>Linear</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Logarithmic</string>
            </property>
           </item>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="label_13">
-          <property name="text">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        <item row="0" column="1" >
+         <widget class="QLabel" name="label_13" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Min&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_5">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_5" >
+       <property name="geometry" >
         <rect>
          <x>27</x>
          <y>194</y>
@@ -1189,68 +1189,68 @@ p, li { white-space: pre-wrap; }
          <height>133</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Spectra from Mask</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="all_spec_min"/>
+       <layout class="QGridLayout" name="gridLayout_3" >
+        <item row="3" column="1" >
+         <widget class="QLineEdit" name="all_spec_min" />
         </item>
-        <item row="2" column="1">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        <item row="2" column="1" >
+         <widget class="QLabel" name="label_5" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Min&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Min&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="2" column="2">
-         <widget class="QLabel" name="label_9">
-          <property name="text">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        <item row="2" column="2" >
+         <widget class="QLabel" name="label_9" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Max&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Max&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="QLineEdit" name="all_spec_max"/>
+        <item row="3" column="2" >
+         <widget class="QLineEdit" name="all_spec_max" />
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_22">
-          <property name="text">
+        <item row="3" column="0" >
+         <widget class="QLabel" name="label_22" >
+          <property name="text" >
            <string>All Spectra</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_24">
-          <property name="text">
+        <item row="4" column="0" >
+         <widget class="QLabel" name="label_24" >
+          <property name="text" >
            <string>T-O-F</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="1">
-         <widget class="QLineEdit" name="tof_min"/>
+        <item row="4" column="1" >
+         <widget class="QLineEdit" name="tof_min" />
         </item>
-        <item row="4" column="2">
-         <widget class="QLineEdit" name="tof_max"/>
+        <item row="4" column="2" >
+         <widget class="QLineEdit" name="tof_max" />
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_6">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_6" >
+       <property name="geometry" >
         <rect>
          <x>276</x>
          <y>194</y>
@@ -1258,56 +1258,56 @@ p, li { white-space: pre-wrap; }
          <height>134</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Efficiency correction</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="direct_file">
-          <property name="alignment">
+       <layout class="QGridLayout" name="gridLayout_2" >
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="direct_file" >
+          <property name="alignment" >
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_27">
-          <property name="text">
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_27" >
+          <property name="text" >
            <string>Direct</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_28">
-          <property name="text">
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_28" >
+          <property name="text" >
            <string>HAB</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_29">
-          <property name="text">
+        <item row="2" column="0" >
+         <widget class="QLabel" name="label_29" >
+          <property name="text" >
            <string>Flat</string>
           </property>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="flat_file">
-          <property name="alignment">
+        <item row="2" column="1" >
+         <widget class="QLineEdit" name="flat_file" >
+          <property name="alignment" >
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="hab_file">
-          <property name="alignment">
+        <item row="1" column="1" >
+         <widget class="QLineEdit" name="hab_file" >
+          <property name="alignment" >
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_9">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_9" >
+       <property name="geometry" >
         <rect>
          <x>598</x>
          <y>234</y>
@@ -1315,21 +1315,21 @@ p, li { white-space: pre-wrap; }
          <height>68</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Scale Factor</string>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_13">
+       <layout class="QHBoxLayout" name="horizontalLayout_13" >
         <item>
-         <widget class="QLineEdit" name="scale_factor">
-          <property name="enabled">
+         <widget class="QLineEdit" name="scale_factor" >
+          <property name="enabled" >
            <bool>false</bool>
           </property>
          </widget>
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_14">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_14" >
+       <property name="geometry" >
         <rect>
          <x>473</x>
          <y>9</y>
@@ -1337,47 +1337,47 @@ p, li { white-space: pre-wrap; }
          <height>96</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Bank Selection</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_9">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_41">
-          <property name="text">
+       <layout class="QGridLayout" name="gridLayout_9" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_41" >
+          <property name="text" >
            <string>Monitor Spectrum</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="monitor_spec"/>
+        <item row="0" column="1" >
+         <widget class="QLineEdit" name="monitor_spec" />
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_43">
-          <property name="text">
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_43" >
+          <property name="text" >
            <string>Detector</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="QComboBox" name="detbank_sel">
+        <item row="1" column="1" colspan="2" >
+         <widget class="QComboBox" name="detbank_sel" >
           <item>
-           <property name="text">
+           <property name="text" >
             <string>main-detector-bank</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>HAB</string>
            </property>
           </item>
          </widget>
         </item>
-        <item row="0" column="2">
-         <spacer name="horizontalSpacer_6">
-          <property name="orientation">
+        <item row="0" column="2" >
+         <spacer name="horizontalSpacer_6" >
+          <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
-          <property name="sizeHint" stdset="0">
+          <property name="sizeHint" stdset="0" >
            <size>
             <width>40</width>
             <height>20</height>
@@ -1387,8 +1387,8 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_15">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_15" >
+       <property name="geometry" >
         <rect>
          <x>475</x>
          <y>113</y>
@@ -1396,39 +1396,39 @@ p, li { white-space: pre-wrap; }
          <height>80</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Phi range</string>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <layout class="QHBoxLayout" name="horizontalLayout" >
         <item>
-         <widget class="QLabel" name="label_45">
-          <property name="text">
+         <widget class="QLabel" name="label_45" >
+          <property name="text" >
            <string>Limit Phi (degrees)</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="phi_min"/>
+         <widget class="QLineEdit" name="phi_min" />
         </item>
         <item>
-         <widget class="QLabel" name="label_33">
-          <property name="text">
+         <widget class="QLabel" name="label_33" >
+          <property name="text" >
            <string>to</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="phi_max"/>
+         <widget class="QLineEdit" name="phi_max" />
         </item>
        </layout>
       </widget>
      </widget>
-     <widget class="QWidget" name="tab_4">
-      <attribute name="title">
+     <widget class="QWidget" name="tab_4" >
+      <attribute name="title" >
        <string>Geometry</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox_8">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_8" >
+       <property name="geometry" >
         <rect>
          <x>21</x>
          <y>3</y>
@@ -1436,124 +1436,124 @@ p, li { white-space: pre-wrap; }
          <height>111</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Sample Details</string>
        </property>
-       <layout class="QGridLayout" name="gridLayout_5">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_47">
-          <property name="text">
+       <layout class="QGridLayout" name="gridLayout_5" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_47" >
+          <property name="text" >
            <string>Geometry:</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QComboBox" name="sample_geomid">
-          <property name="maximumSize">
+        <item row="0" column="1" colspan="2" >
+         <widget class="QComboBox" name="sample_geomid" >
+          <property name="maximumSize" >
            <size>
             <width>16777215</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="currentIndex">
+          <property name="currentIndex" >
            <number>2</number>
           </property>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>1: Cylinder</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>2: Flat plate</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>3: Disc</string>
            </property>
           </item>
          </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="label_50">
-          <property name="text">
+        <item row="3" column="0" >
+         <widget class="QLabel" name="label_50" >
+          <property name="text" >
            <string>Width(mm):</string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="sample_thick">
-          <property name="maximumSize">
+        <item row="1" column="1" >
+         <widget class="QLineEdit" name="sample_thick" >
+          <property name="maximumSize" >
            <size>
             <width>45</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>1.0</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="sample_width">
-          <property name="maximumSize">
+        <item row="3" column="1" >
+         <widget class="QLineEdit" name="sample_width" >
+          <property name="maximumSize" >
            <size>
             <width>45</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>1.0</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_48">
-          <property name="text">
+        <item row="1" column="0" >
+         <widget class="QLabel" name="label_48" >
+          <property name="text" >
            <string>Thickness (mm):</string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="1" column="2">
-         <widget class="QLabel" name="label_49">
-          <property name="text">
+        <item row="1" column="2" >
+         <widget class="QLabel" name="label_49" >
+          <property name="text" >
            <string>Height(mm):</string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="1" column="3">
-         <widget class="QLineEdit" name="sample_height">
-          <property name="maximumSize">
+        <item row="1" column="3" >
+         <widget class="QLineEdit" name="sample_height" >
+          <property name="maximumSize" >
            <size>
             <width>45</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>1.0</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="QLabel" name="label_31">
-          <property name="text">
+        <item row="3" column="2" >
+         <widget class="QLabel" name="label_31" >
+          <property name="text" >
            <string>Z-offset (mm)</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="3">
-         <widget class="QLineEdit" name="smpl_offset">
-          <property name="maximumSize">
+        <item row="3" column="3" >
+         <widget class="QLineEdit" name="smpl_offset" >
+          <property name="maximumSize" >
            <size>
             <width>45</width>
             <height>16777215</height>
@@ -1563,59 +1563,59 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QGroupBox" name="groupBox_13">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_13" >
+       <property name="geometry" >
         <rect>
          <x>401</x>
          <y>9</y>
-         <width>302</width>
+         <width>286</width>
          <height>262</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Beam Centre</string>
        </property>
-       <property name="flat">
+       <property name="flat" >
         <bool>false</bool>
        </property>
-       <property name="checkable">
+       <property name="checkable" >
         <bool>false</bool>
        </property>
-       <layout class="QGridLayout" name="gridLayout_8">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_51">
-          <property name="text">
+       <layout class="QGridLayout" name="gridLayout_8" >
+        <item row="0" column="0" >
+         <widget class="QLabel" name="label_51" >
+          <property name="text" >
            <string>Current (mm)</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="label_32">
-          <property name="font">
+        <item row="0" column="1" >
+         <widget class="QLabel" name="label_32" >
+          <property name="font" >
            <font>
             <pointsize>16</pointsize>
            </font>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>(</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="3">
-         <widget class="QLabel" name="label_46">
-          <property name="font">
+        <item row="0" column="3" >
+         <widget class="QLabel" name="label_46" >
+          <property name="font" >
            <font>
             <pointsize>14</pointsize>
            </font>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>,</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="4">
-         <widget class="QLineEdit" name="beam_y">
-          <property name="maximumSize">
+        <item row="0" column="4" >
+         <widget class="QLineEdit" name="beam_y" >
+          <property name="maximumSize" >
            <size>
             <width>60</width>
             <height>16777215</height>
@@ -1623,161 +1623,161 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="5">
-         <widget class="QLabel" name="label_44">
-          <property name="font">
+        <item row="0" column="5" >
+         <widget class="QLabel" name="label_44" >
+          <property name="font" >
            <font>
             <pointsize>16</pointsize>
            </font>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>)</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_56">
-          <property name="text">
+        <item row="4" column="0" >
+         <widget class="QLabel" name="label_56" >
+          <property name="text" >
            <string>Starting position:</string>
           </property>
-          <property name="alignment">
+          <property name="alignment" >
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="4" column="2" colspan="3">
-         <widget class="QComboBox" name="beamstart_box">
+        <item row="4" column="2" colspan="3" >
+         <widget class="QComboBox" name="beamstart_box" >
           <item>
-           <property name="text">
+           <property name="text" >
             <string>Auto Find</string>
            </property>
           </item>
           <item>
-           <property name="text">
+           <property name="text" >
             <string>Current</string>
            </property>
           </item>
          </widget>
         </item>
-        <item row="5" column="0">
-         <widget class="QLabel" name="label_57">
-          <property name="text">
+        <item row="5" column="0" >
+         <widget class="QLabel" name="label_57" >
+          <property name="text" >
            <string>Radius limits(mm):</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="2">
-         <widget class="QLineEdit" name="beam_rmin">
-          <property name="maximumSize">
+        <item row="5" column="2" >
+         <widget class="QLineEdit" name="beam_rmin" >
+          <property name="maximumSize" >
            <size>
             <width>60</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>60</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="4">
-         <widget class="QLineEdit" name="beam_rmax">
-          <property name="maximumSize">
+        <item row="5" column="4" >
+         <widget class="QLineEdit" name="beam_rmax" >
+          <property name="maximumSize" >
            <size>
             <width>60</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>200</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="3">
-         <widget class="QLabel" name="label_58">
-          <property name="text">
+        <item row="5" column="3" >
+         <widget class="QLabel" name="label_58" >
+          <property name="text" >
            <string>to</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="3" colspan="4">
-         <widget class="QPushButton" name="runcentreBtn">
-          <property name="text">
+        <item row="7" column="3" colspan="4" >
+         <widget class="QPushButton" name="runcentreBtn" >
+          <property name="text" >
            <string>Run</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="7">
-         <widget class="Line" name="line">
-          <property name="orientation">
+        <item row="1" column="0" colspan="7" >
+         <widget class="Line" name="line" >
+          <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="7">
-         <widget class="Line" name="line_3">
-          <property name="orientation">
+        <item row="2" column="0" colspan="7" >
+         <widget class="Line" name="line_3" >
+          <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QLabel" name="label_30">
-          <property name="text">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+        <item row="3" column="0" colspan="2" >
+         <widget class="QLabel" name="label_30" >
+          <property name="text" >
+           <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Automatic search:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">Automatic search:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
           </property>
          </widget>
         </item>
-        <item row="3" column="2" colspan="3">
-         <widget class="QLabel" name="label_59">
-          <property name="text">
+        <item row="3" column="2" colspan="3" >
+         <widget class="QLabel" name="label_59" >
+          <property name="text" >
            <string>This will overwrite the coordinates above</string>
           </property>
-          <property name="wordWrap">
+          <property name="wordWrap" >
            <bool>true</bool>
           </property>
          </widget>
         </item>
-        <item row="6" column="0">
-         <widget class="QLabel" name="label_60">
-          <property name="text">
+        <item row="6" column="0" >
+         <widget class="QLabel" name="label_60" >
+          <property name="text" >
            <string>Max. iterations</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="2">
-         <widget class="QLineEdit" name="beam_iter">
-          <property name="maximumSize">
+        <item row="6" column="2" >
+         <widget class="QLineEdit" name="beam_iter" >
+          <property name="maximumSize" >
            <size>
             <width>40</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
+          <property name="text" >
            <string>10</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QLineEdit" name="beam_x">
-          <property name="maximumSize">
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="beam_x" >
+          <property name="maximumSize" >
            <size>
             <width>60</width>
             <height>16777215</height>
            </size>
           </property>
-          <property name="text">
+          <property name="text" >
            <string/>
           </property>
          </widget>
         </item>
        </layout>
       </widget>
-      <widget class="QStackedWidget" name="geom_stack">
-       <property name="geometry">
+      <widget class="QStackedWidget" name="geom_stack" >
+       <property name="geometry" >
         <rect>
          <x>20</x>
          <y>113</y>
@@ -1785,51 +1785,51 @@ p, li { white-space: pre-wrap; }
          <height>235</height>
         </rect>
        </property>
-       <property name="currentIndex">
+       <property name="currentIndex" >
         <number>1</number>
        </property>
-       <widget class="QWidget" name="page_3">
-        <layout class="QVBoxLayout" name="verticalLayout_8">
+       <widget class="QWidget" name="page_3" >
+        <layout class="QVBoxLayout" name="verticalLayout_8" >
          <item>
-          <widget class="QGroupBox" name="loq_geometry">
-           <property name="title">
+          <widget class="QGroupBox" name="loq_geometry" >
+           <property name="title" >
             <string>LOQ Geometry (mm)</string>
            </property>
-           <property name="checkable">
+           <property name="checkable" >
             <bool>false</bool>
            </property>
-           <layout class="QGridLayout" name="gridLayout_7">
-            <item row="1" column="1">
-             <widget class="QLabel" name="label_52">
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+           <layout class="QGridLayout" name="gridLayout_7" >
+            <item row="1" column="1" >
+             <widget class="QLabel" name="label_52" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Sample&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Sample&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
-             <widget class="QLabel" name="label_53">
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+            <item row="1" column="2" >
+             <widget class="QLabel" name="label_53" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Can&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Can&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <spacer name="horizontalSpacer_5">
-              <property name="orientation">
+            <item row="1" column="0" >
+             <spacer name="horizontalSpacer_5" >
+              <property name="orientation" >
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0">
+              <property name="sizeHint" stdset="0" >
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -1837,181 +1837,181 @@ p, li { white-space: pre-wrap; }
               </property>
              </spacer>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_54">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_54" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
+              <property name="text" >
                <string>moderator - sample</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_55">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <item row="3" column="0" >
+             <widget class="QLabel" name="label_55" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
+              <property name="text" >
                <string>sample - main-detector bank</string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="dist_sample_ms">
-              <property name="text">
+            <item row="2" column="1" >
+             <widget class="QLabel" name="dist_sample_ms" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
-             <widget class="QLabel" name="dist_can_ms">
-              <property name="text">
+            <item row="2" column="2" >
+             <widget class="QLabel" name="dist_can_ms" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="3" column="2">
-             <widget class="QLabel" name="dist_can_mdb">
-              <property name="text">
+            <item row="3" column="2" >
+             <widget class="QLabel" name="dist_can_mdb" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QLabel" name="dist_smp_mdb">
-              <property name="text">
+            <item row="3" column="1" >
+             <widget class="QLabel" name="dist_smp_mdb" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_61">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <item row="4" column="0" >
+             <widget class="QLabel" name="label_61" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
+              <property name="text" >
                <string>sample - HAB</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QLabel" name="dist_smp_hab">
-              <property name="text">
+            <item row="4" column="1" >
+             <widget class="QLabel" name="dist_smp_hab" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="4" column="2">
-             <widget class="QLabel" name="dist_can_hab">
-              <property name="text">
+            <item row="4" column="2" >
+             <widget class="QLabel" name="dist_can_hab" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="label_62">
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+            <item row="1" column="3" >
+             <widget class="QLabel" name="label_62" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Bkgrd&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Bkgrd&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="3">
-             <widget class="QLabel" name="dist_bkgd_ms">
-              <property name="text">
+            <item row="2" column="3" >
+             <widget class="QLabel" name="dist_bkgd_ms" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="3" column="3">
-             <widget class="QLabel" name="dist_bkgd_mdb">
-              <property name="text">
+            <item row="3" column="3" >
+             <widget class="QLabel" name="dist_bkgd_mdb" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="4" column="3">
-             <widget class="QLabel" name="dist_bkgd_hab">
-              <property name="text">
+            <item row="4" column="3" >
+             <widget class="QLabel" name="dist_bkgd_hab" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_63">
-              <property name="text">
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label_63" >
+              <property name="text" >
                <string>moderator - monitor </string>
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="dist_mod_mon">
-              <property name="font">
+            <item row="0" column="2" >
+             <widget class="QLabel" name="dist_mod_mon" >
+              <property name="font" >
                <font>
                 <pointsize>9</pointsize>
                 <weight>50</weight>
                 <bold>false</bold>
                </font>
               </property>
-              <property name="text">
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
@@ -2020,11 +2020,11 @@ p, li { white-space: pre-wrap; }
           </widget>
          </item>
          <item>
-          <spacer name="verticalSpacer">
-           <property name="orientation">
+          <spacer name="verticalSpacer" >
+           <property name="orientation" >
             <enum>Qt::Vertical</enum>
            </property>
-           <property name="sizeHint" stdset="0">
+           <property name="sizeHint" stdset="0" >
             <size>
              <width>20</width>
              <height>40</height>
@@ -2034,48 +2034,48 @@ p, li { white-space: pre-wrap; }
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="page">
-        <layout class="QHBoxLayout" name="horizontalLayout_41">
+       <widget class="QWidget" name="page" >
+        <layout class="QHBoxLayout" name="horizontalLayout_41" >
          <item>
-          <widget class="QGroupBox" name="groupBox_43">
-           <property name="title">
+          <widget class="QGroupBox" name="groupBox_43" >
+           <property name="title" >
             <string>SANS2D Geometry (mm)</string>
            </property>
-           <property name="checkable">
+           <property name="checkable" >
             <bool>false</bool>
            </property>
-           <layout class="QGridLayout" name="gridLayout_26">
-            <item row="1" column="1">
-             <widget class="QLabel" name="label_181">
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+           <layout class="QGridLayout" name="gridLayout_26" >
+            <item row="1" column="1" >
+             <widget class="QLabel" name="label_181" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Sample&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Sample&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
-             <widget class="QLabel" name="label_182">
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+            <item row="1" column="2" >
+             <widget class="QLabel" name="label_182" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Can&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Can&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <spacer name="horizontalSpacer_5">
-              <property name="orientation">
+            <item row="1" column="0" >
+             <spacer name="horizontalSpacer_5" >
+              <property name="orientation" >
                <enum>Qt::Horizontal</enum>
               </property>
-              <property name="sizeHint" stdset="0">
+              <property name="sizeHint" stdset="0" >
                <size>
                 <width>40</width>
                 <height>20</height>
@@ -2083,367 +2083,367 @@ p, li { white-space: pre-wrap; }
               </property>
              </spacer>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_183">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_183" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
+              <property name="text" >
                <string>moderator - sample</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_184">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <item row="3" column="0" >
+             <widget class="QLabel" name="label_184" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;rear-detector:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">rear-detector:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
-             <widget class="QLabel" name="dist_sample_ms_s2d">
-              <property name="text">
+            <item row="2" column="1" >
+             <widget class="QLabel" name="dist_sample_ms_s2d" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="2">
-             <widget class="QLabel" name="dist_can_ms_s2d">
-              <property name="text">
+            <item row="2" column="2" >
+             <widget class="QLabel" name="dist_can_ms_s2d" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="1" column="3">
-             <widget class="QLabel" name="label_185">
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+            <item row="1" column="3" >
+             <widget class="QLabel" name="label_185" >
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Bkgrd&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-size:8pt; font-weight:600;">Bkgrd&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="3">
-             <widget class="QLabel" name="dist_bkgd_ms_s2d">
-              <property name="text">
+            <item row="2" column="3" >
+             <widget class="QLabel" name="dist_bkgd_ms_s2d" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="dist_mon_s2d">
-              <property name="text">
+            <item row="0" column="2" >
+             <widget class="QLabel" name="dist_mon_s2d" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="0" column="0" colspan="2">
-             <widget class="QLabel" name="label_186">
-              <property name="text">
+            <item row="0" column="0" colspan="2" >
+             <widget class="QLabel" name="label_186" >
+              <property name="text" >
                <string>moderator - monitor </string>
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_187">
-              <property name="text">
+            <item row="4" column="0" >
+             <widget class="QLabel" name="label_187" >
+              <property name="text" >
                <string>X</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QLabel" name="dist_smp_rearX">
-              <property name="text">
+            <item row="4" column="1" >
+             <widget class="QLabel" name="dist_smp_rearX" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="4" column="2">
-             <widget class="QLabel" name="dist_can_rearX">
-              <property name="text">
+            <item row="4" column="2" >
+             <widget class="QLabel" name="dist_can_rearX" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="4" column="3">
-             <widget class="QLabel" name="dist_bkgd_rearX">
-              <property name="text">
+            <item row="4" column="3" >
+             <widget class="QLabel" name="dist_bkgd_rearX" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="label_188">
-              <property name="text">
+            <item row="5" column="0" >
+             <widget class="QLabel" name="label_188" >
+              <property name="text" >
                <string>Z</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="label_189">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <item row="6" column="0" >
+             <widget class="QLabel" name="label_189" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Fixed" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text">
-               <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+&lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;front-detector:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style>&lt;/head>&lt;body style=" font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;">
+&lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">&lt;span style=" font-weight:600;">front-detector:&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
               </property>
              </widget>
             </item>
-            <item row="7" column="0">
-             <widget class="QLabel" name="label_190">
-              <property name="text">
+            <item row="7" column="0" >
+             <widget class="QLabel" name="label_190" >
+              <property name="text" >
                <string>X</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="label_191">
-              <property name="text">
+            <item row="8" column="0" >
+             <widget class="QLabel" name="label_191" >
+              <property name="text" >
                <string>Z</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="label_192">
-              <property name="text">
+            <item row="9" column="0" >
+             <widget class="QLabel" name="label_192" >
+              <property name="text" >
                <string>Rot</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
              </widget>
             </item>
-            <item row="5" column="1">
-             <widget class="QLabel" name="dist_smp_rearZ">
-              <property name="text">
+            <item row="5" column="1" >
+             <widget class="QLabel" name="dist_smp_rearZ" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="5" column="2">
-             <widget class="QLabel" name="dist_can_rearZ">
-              <property name="text">
+            <item row="5" column="2" >
+             <widget class="QLabel" name="dist_can_rearZ" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="5" column="3">
-             <widget class="QLabel" name="dist_bkgd_rearZ">
-              <property name="text">
+            <item row="5" column="3" >
+             <widget class="QLabel" name="dist_bkgd_rearZ" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="7" column="1">
-             <widget class="QLabel" name="dist_smp_frontX">
-              <property name="text">
+            <item row="7" column="1" >
+             <widget class="QLabel" name="dist_smp_frontX" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="7" column="2">
-             <widget class="QLabel" name="dist_can_frontX">
-              <property name="text">
+            <item row="7" column="2" >
+             <widget class="QLabel" name="dist_can_frontX" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="7" column="3">
-             <widget class="QLabel" name="dist_bkgd_frontX">
-              <property name="text">
+            <item row="7" column="3" >
+             <widget class="QLabel" name="dist_bkgd_frontX" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="8" column="1">
-             <widget class="QLabel" name="dist_smp_frontZ">
-              <property name="text">
+            <item row="8" column="1" >
+             <widget class="QLabel" name="dist_smp_frontZ" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="8" column="2">
-             <widget class="QLabel" name="dist_can_frontZ">
-              <property name="text">
+            <item row="8" column="2" >
+             <widget class="QLabel" name="dist_can_frontZ" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="8" column="3">
-             <widget class="QLabel" name="dist_bkgd_frontZ">
-              <property name="text">
+            <item row="8" column="3" >
+             <widget class="QLabel" name="dist_bkgd_frontZ" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="9" column="1">
-             <widget class="QLabel" name="smp_rot">
-              <property name="text">
+            <item row="9" column="1" >
+             <widget class="QLabel" name="smp_rot" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="9" column="2">
-             <widget class="QLabel" name="can_rot">
-              <property name="text">
+            <item row="9" column="2" >
+             <widget class="QLabel" name="can_rot" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
             </item>
-            <item row="9" column="3">
-             <widget class="QLabel" name="bkgd_rot">
-              <property name="text">
+            <item row="9" column="3" >
+             <widget class="QLabel" name="bkgd_rot" >
+              <property name="text" >
                <string>-</string>
               </property>
-              <property name="alignment">
+              <property name="alignment" >
                <set>Qt::AlignCenter</set>
               </property>
-              <property name="textInteractionFlags">
+              <property name="textInteractionFlags" >
                <set>Qt::LinksAccessibleByMouse</set>
               </property>
              </widget>
@@ -2455,12 +2455,12 @@ p, li { white-space: pre-wrap; }
        </widget>
       </widget>
      </widget>
-     <widget class="QWidget" name="tab_3">
-      <attribute name="title">
+     <widget class="QWidget" name="tab_3" >
+      <attribute name="title" >
        <string>Masking</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox_10">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_10" >
+       <property name="geometry" >
         <rect>
          <x>50</x>
          <y>11</y>
@@ -2468,22 +2468,22 @@ p, li { white-space: pre-wrap; }
          <height>229</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>Default Mask</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
+       <layout class="QVBoxLayout" name="verticalLayout" >
         <item>
-         <widget class="QTableWidget" name="mask_table">
-          <property name="editTriggers">
+         <widget class="QTableWidget" name="mask_table" >
+          <property name="editTriggers" >
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
           <column>
-           <property name="text">
+           <property name="text" >
             <string>Type</string>
            </property>
           </column>
           <column>
-           <property name="text">
+           <property name="text" >
             <string>Details</string>
            </property>
           </column>
@@ -2491,8 +2491,11 @@ p, li { white-space: pre-wrap; }
         </item>
        </layout>
       </widget>
-      <widget class="QPushButton" name="showMaskBtn">
-       <property name="geometry">
+      <widget class="QPushButton" name="showMaskBtn" >
+       <property name="enabled" >
+        <bool>true</bool>
+       </property>
+       <property name="geometry" >
         <rect>
          <x>39</x>
          <y>255</y>
@@ -2500,12 +2503,12 @@ p, li { white-space: pre-wrap; }
          <height>28</height>
         </rect>
        </property>
-       <property name="text">
+       <property name="text" >
         <string>Display Mask</string>
        </property>
       </widget>
-      <widget class="QGroupBox" name="groupBox_11">
-       <property name="geometry">
+      <widget class="QGroupBox" name="groupBox_11" >
+       <property name="geometry" >
         <rect>
          <x>346</x>
          <y>13</y>
@@ -2513,19 +2516,19 @@ p, li { white-space: pre-wrap; }
          <height>95</height>
         </rect>
        </property>
-       <property name="title">
+       <property name="title" >
         <string>User Mask</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <layout class="QVBoxLayout" name="verticalLayout_2" >
         <item>
-         <widget class="QLabel" name="label_25">
-          <property name="text">
+         <widget class="QLabel" name="label_25" >
+          <property name="text" >
            <string>Spectra IDs</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="user_maskEdit"/>
+         <widget class="QLineEdit" name="user_maskEdit" />
         </item>
        </layout>
       </widget>
@@ -2557,8 +2560,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>direct_can_prd</tabstop>
   <tabstop>direct_bkgd_edit</tabstop>
   <tabstop>direct_bckd_prd</tabstop>
-  <tabstop>load_dataBtn</tabstop>
-  <tabstop>oneDBtn</tabstop>
   <tabstop>rad_min</tabstop>
   <tabstop>rad_max</tabstop>
   <tabstop>rad_dr</tabstop>
@@ -2587,19 +2588,19 @@ p, li { white-space: pre-wrap; }
  <resources/>
  <connections/>
  <designerdata>
-  <property name="gridDeltaX">
+  <property name="gridDeltaX" >
    <number>10</number>
   </property>
-  <property name="gridDeltaY">
+  <property name="gridDeltaY" >
    <number>10</number>
   </property>
-  <property name="gridSnapX">
+  <property name="gridSnapX" >
    <bool>false</bool>
   </property>
-  <property name="gridSnapY">
+  <property name="gridSnapY" >
    <bool>false</bool>
   </property>
-  <property name="gridVisible">
+  <property name="gridVisible" >
    <bool>true</bool>
   </property>
  </designerdata>

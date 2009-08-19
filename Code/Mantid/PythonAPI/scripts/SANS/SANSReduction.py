@@ -173,7 +173,7 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam, logfile = None):
 			yshift = (FRONT_DET_X_CORR /1000.  - ybeam)
 			# default in instrument description is 23.281m - 4.000m from sample at 19,281m !
 			# need to add ~58mm to det1 to get to centre of detector, before it is rotated.
-			zshift = (FRONT_DET_Z + FRONT_DET_Z_CORR + FRONT_DET_Radius*(1 - math.cos(RotRadians)) )/1000. - FRONT_DET_DEFAULT_SD_M
+			zshift = (FRONT_DET_Z + FRONT_DET_Z_CORR + FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000. - FRONT_DET_DEFAULT_SD_M
 			MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
 			return [0.0, 0.0], [0.0, 0.0]
 		else:
@@ -294,7 +294,7 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 		PoissonErrors(tmpWS, final_result, final_result)
 	# 2D	
 	else:
-		# Run 2D algorithm !TASK! - saving stuff
+		# Run 2D algorithm
 		Qxy(tmpWS, final_result, QXY2, DQXY)
 
 	# Replaces NANs with zeroes but would be nice to have StripLRSpecialValues type routine	
@@ -440,7 +440,6 @@ try:
 		XVAR_PREV = -XVAR_PREV
 		YVAR_PREV = -YVAR_PREV
 		
-#		print 'starting at ' + str(XVAR_PREV) + ' ' + str(YVAR_PREV)
 		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter)
 		
 		# Tidy up
@@ -448,7 +447,7 @@ try:
 		mtd.deleteWorkspace('Right')
 		mtd.deleteWorkspace('Up')
 		mtd.deleteWorkspace('Down')
-		mtd.deleteWorkspace(scatter_setup[1])
+		mtd.deleteWorkspace(scatter_setup[1] + '_' + str(WAV1) + '_' + str(WAV2))
 		mtd.deleteWorkspace(SCATTER_SAMPLE)
 		if SCATTER_CAN != '':
 			mtd.deleteWorkspace(SCATTER_CAN)

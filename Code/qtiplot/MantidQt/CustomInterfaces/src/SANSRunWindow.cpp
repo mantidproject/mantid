@@ -27,7 +27,6 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QRegExp>
-#include <QRegExpValidator>
 #include <QSignalMapper>
 
 //Add this class to the list of specialised dialogs in this namespace
@@ -52,7 +51,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), 
   m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace),
-  m_logvalues(), m_maskcorrections(), m_havescipy(true), m_scipy_warning(false)
+  m_logvalues(), m_maskcorrections(), m_havescipy(true), m_lastreducetype(-1)
 {
   m_reducemapper = new QSignalMapper(this);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
@@ -84,14 +83,14 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
     connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
     connect(m_uiForm.runcentreBtn, SIGNAL(clicked()), this, SLOT(handleRunFindCentre()));
+    connect(m_uiForm.saveBtn, SIGNAL(clicked()), this, SLOT(handleSaveButtonClick()));
  
     // Disable most things so that load is the only thing that can be done
     m_uiForm.oneDBtn->setEnabled(false);
     m_uiForm.twoDBtn->setEnabled(false);
-    for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
-    {
-      m_uiForm.tabWidget->setTabEnabled(index, false);
-    }
+    m_uiForm.tabWidget->setTabEnabled(1, false);
+    m_uiForm.tabWidget->setTabEnabled(2, false);
+    m_uiForm.tabWidget->setTabEnabled(3, false);
     
     // Connect
     connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChange(int)));
@@ -248,7 +247,7 @@ bool SANSRunWindow::readPyReductionTemplate()
 bool SANSRunWindow::readPyViewMaskTemplate()
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
-  QString mask_script = scriptsdir.absoluteFilePath("SANS/LOQ_ViewMask.py");
+  QString mask_script = scriptsdir.absoluteFilePath("SANS/SANSViewMask.py");
     
   if( !QFileInfo(mask_script).exists() ) 
   {
@@ -991,7 +990,17 @@ void SANSRunWindow::selectUserFile()
   if( file_path.isEmpty() || QFileInfo(file_path).isDir() ) return;
   m_uiForm.userfile_edit->setText(file_path);
   
-  loadUserFile();
+  if( !loadUserFile() )
+  {
+    showInformationBox("Error loading user file '" + m_uiForm.userfile_edit->text() + "',  cannot continue.");
+    return;
+  }
+  
+  m_uiForm.tabWidget->setTabEnabled(1, true);
+  m_uiForm.tabWidget->setTabEnabled(2, true);
+  m_uiForm.tabWidget->setTabEnabled(3, true);
+  
+
   //path() returns the directory
   m_last_dir = QFileInfo(file_path).path();
 }
@@ -1018,12 +1027,6 @@ void SANSRunWindow::handleLoadButtonClick()
     return;
   }
   
-  if( !loadUserFile() )
-  {
-    showInformationBox("Error loading user file '" + m_uiForm.userfile_edit->text() + "',  cannot continue.");
-    return;
-  }
-
   //A load command for each box if there is anything in it and it has not already been loaded
   QMapIterator<int, QLineEdit*> itr(m_run_no_boxes);
   bool data_loaded(false);
@@ -1042,7 +1045,7 @@ void SANSRunWindow::handleLoadButtonClick()
     if( key < 3 ) ws_name = run_no + "_sans_" + m_uiForm.file_opt->currentText();
     else ws_name = run_no + "_trans_" + m_uiForm.file_opt->currentText();
     //Check if we already have it and do nothing if that is so
-    if( workspaceExists(ws_name) ) 
+    if( workspaceExists(ws_name) && !m_run_changed ) 
     {
       data_loaded = true;
       continue;
@@ -1114,9 +1117,11 @@ void SANSRunWindow::handleLoadButtonClick()
 
 /** 
  * Construct the python code to perform the analysis based on the 
- * settings
+ * current settings
+ * @ replacewsnames Whether to replace the data workspace names
+ * @param checkchanges Whether to check that a data reload is necessary
  */
-QString SANSRunWindow::constructReductionCode()
+QString SANSRunWindow::constructReductionCode(bool replacewsnames, bool checkchanges)
 {
   if( !readPyReductionTemplate() ) return QString();
   if( m_ins_defdir.isEmpty() ) m_ins_defdir = m_data_dir;
@@ -1127,7 +1132,7 @@ QString SANSRunWindow::constructReductionCode()
     return QString();
   } 
 
-  if( m_run_changed )
+  if( checkchanges && m_run_changed )
   {
     g_log.debug("A run number has changed, running load routine.");
     handleLoadButtonClick();
@@ -1139,11 +1144,14 @@ QString SANSRunWindow::constructReductionCode()
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
   py_code.replace("|DETBANK|", m_uiForm.detbank_sel->currentText());
   
-  py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
-  py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
-  py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.value(3));
-  py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.value(4));
-  py_code.replace("|DIRECTSAMPLE|", m_workspace_names.value(6));
+  if( replacewsnames )
+  {
+    py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
+    py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
+    py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.value(3));
+    py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.value(4));
+    py_code.replace("|DIRECTSAMPLE|", m_workspace_names.value(6));
+  }
 
   // Limit replacement
   QString radius = m_uiForm.rad_min->text();
@@ -1176,6 +1184,7 @@ QString SANSRunWindow::constructReductionCode()
 
   // Qxy
   py_code.replace("|QXYMAX|", m_uiForm.qy_max->text());
+  step_prefix = "";
   if( m_uiForm.qy_dqy_opt->currentIndex() == 1 ) step_prefix = "-";
   py_code.replace("|QXYDELTA|", step_prefix  + m_uiForm.qy_dqy->text());
 
@@ -1242,6 +1251,16 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
 
   int idtype(0);
   if( type.startsWith("2") ) idtype = 1;
+
+  if( m_lastreducetype >= 0 && m_lastreducetype != idtype)
+  {
+    m_run_changed = true;
+    handleLoadButtonClick();
+    m_run_changed = false;
+  }
+
+  m_lastreducetype = idtype;
+
   py_code.replace("|ANALYSISTYPE|", type);
   py_code += 
     "sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_CENTRE, YBEAM_CENTRE], False)\n"
@@ -1271,11 +1290,51 @@ void SANSRunWindow::handlePlotButtonClick()
 void SANSRunWindow::handleRunFindCentre()
 {
   // This checks whether we have a sample run and that it has been loaded
-  QString py_code = constructReductionCode();
+  QString py_code = constructReductionCode(false, false);
   if( py_code.isEmpty() )
   {
     return;
   }
+
+  // Use different names for the centre finding so that the workspace list is not confusing
+  //Scatter sample
+  QString work_dir = QDir(m_uiForm.datadir_edit->text()).absolutePath();
+  QVector<QString> varnames(5, "");
+  varnames[0] = "|SCATTERSAMPLE|";
+  varnames[1] = "|SCATTERCAN|";
+  varnames[2] = "|TRANSMISSIONSAMPLE|";
+  varnames[3] = "|TRANSMISSIONCAN|";
+  varnames[4] = "|DIRECTSAMPLE|";
+
+  QVector<QPair<QString, QString> > runmap(5);
+  runmap[0] = qMakePair(QString("centre-smp"), m_uiForm.sct_sample_edit->text());
+  runmap[1] = qMakePair(QString("centre-can"), m_uiForm.sct_can_edit->text());
+  runmap[2] = qMakePair(QString("centre-trans"), m_uiForm.tra_sample_edit->text());
+  runmap[3] = qMakePair(QString("centre-trans-can"),m_uiForm.tra_can_edit->text());
+  runmap[4] = qMakePair(QString("centre-direct"), m_uiForm.direct_sample_edit->text());
+
+  for( int i = 0; i < 5; ++i )
+  {
+    QString run = runmap.at(i).second;
+    QString wsname = run + "_" + runmap.at(i).first;
+    int nprds = runLoadData(work_dir, run, m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString(), 
+			    wsname);
+    //Raise an error if nothing could be loaded
+    if( !run.isEmpty() && nprds == 0 )
+    {
+      showInformationBox("An error occurred while trying to load run " + run);
+      return;
+    }
+    if( nprds > 0 )
+    {
+      py_code.replace(varnames.at(i), wsname);      
+    }
+    else
+    {
+      py_code.replace(varnames.at(i), "");      
+    }
+  }
+  
 
   py_code.replace("|ANALYSISTYPE|", "1D");
   if( m_uiForm.beam_rmin->text().isEmpty() )
@@ -1329,8 +1388,8 @@ void SANSRunWindow::handleRunFindCentre()
   m_uiForm.tabWidget->setTabEnabled(1, false);
   m_uiForm.tabWidget->setTabEnabled(3, false);
 
-
   m_uiForm.beamstart_box->setFocus();
+
   //Execute the code
   QString result = runPythonCode(py_code);
 
@@ -1358,6 +1417,14 @@ void SANSRunWindow::handleRunFindCentre()
   m_uiForm.tabWidget->setTabEnabled(0, true);
   m_uiForm.tabWidget->setTabEnabled(1, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);  
+}
+
+/**
+ * Save a workspace
+ */
+void SANSRunWindow::handleSaveButtonClick()
+{
+  runPythonCode("SaveRKHDialog()", false);
 }
 
 /**
@@ -1398,6 +1465,9 @@ void SANSRunWindow::handleShowMaskButtonClick()
   py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
 
+  py_code.replace("|XCENTRE|", m_uiForm.beam_x->text());
+  py_code.replace("|YCENTRE|", m_uiForm.beam_y->text());
+
   // Shape mask if applicable
   QString radius = m_uiForm.rad_min->text();
   if( radius.isEmpty() ) radius = "-1.0";
@@ -1410,7 +1480,6 @@ void SANSRunWindow::handleShowMaskButtonClick()
   py_code.replace("|RADIUSMAX|", radius);
   
   //Other masks
-  //py_code.replace("|SPECMIN|", m_uiForm.bank_spec_min->text());
   py_code.replace("|MASKLIST|", createMaskString());
   runPythonCode(py_code);
 }
@@ -1468,7 +1537,6 @@ void SANSRunWindow::handleTabChange(int index)
 
     QString result = runPythonCode(scipycode);
     m_havescipy = true;
-    m_scipy_warning = false;
     if( !result.isEmpty() )
     {
       showInformationBox("The centre-finding functionality requires the scipy Python package to be installed,\n"
@@ -1489,6 +1557,10 @@ void SANSRunWindow::handleTabChange(int index)
  */
 int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no, const QString & ext, const QString & workspace)  
 {
+  if( workspace.isEmpty() )
+  {
+    return 0;
+  }
   QString filepath = getRawFilePath(work_dir, run_no, ext);
   if( filepath.isEmpty() )
   {   

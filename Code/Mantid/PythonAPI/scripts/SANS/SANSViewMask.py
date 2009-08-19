@@ -7,7 +7,7 @@
 # its own, the empty layer is added to some real data)
 # 
 #####################################################
-import LOQFunctions
+import SANSUtility
 
 topLayer = 'CurrentMask'
 
@@ -15,27 +15,30 @@ instr_path = '|INSTRUMENTPATH|'
 instr_name = '|INSTRUMENTNAME|'
 LoadEmptyInstrument(instr_path + '/' + instr_name + "_Definition.xml",topLayer)
 
-# The GUI replaces these with the appropriate values. If the GUI doens't containt
-#any values then they will be replace by -1 
+xcentre_rear = |XCENTRE|/1000.
+ycentre_rear = |YCENTRE|/1000.
+
+# The GUI replaces these with the appropriate values. If the GUI doens't contain
+# any values then they will be replace by -1 
 rmin = |RADIUSMIN|/1000.0
 if rmin > 0.0:
-    LOQFunctions.MaskInsideCylinder(topLayer, rmin)
+    SANSUtility.MaskInsideCylinder(topLayer, rmin, xcentre_rear, ycentre_rear)
 
 rmax = |RADIUSMAX|/1000.0
 if rmax > 0.0:
-    LOQFunctions.MaskOutsideCylinder(topLayer, rmax)
+    SANSUtility.MaskOutsideCylinder(topLayer, rmax)
 
 # Masking other spectra
 # This assumes a list of comma separated values
 maskstring = '|MASKLIST|'
-# Hardcoded numbers for LOQ low-angle bank. Will need to do more for this to work with SANS2D (& LOQ HAB)
 dimension = 128
+firstspec = 3
 if instr_name == "SANS2D":
     dimension = 192
+    firstspec += 6
 
-firstspec = 3
-detlist = LOQFunctions.ConvertToSpecList(maskstring, firstspec, dimension);
-LOQFunctions.MaskBySpecNumber(topLayer, detlist)
+detlist = SANSUtility.ConvertToSpecList(maskstring, firstspec, dimension);
+SANSUtility.MaskBySpecNumber(topLayer, detlist)
 
 # Find the zeroed spectrum and mark them with a value of 500 and mark everything else
 # with a value of 0
