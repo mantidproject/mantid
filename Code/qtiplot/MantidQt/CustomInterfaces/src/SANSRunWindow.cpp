@@ -312,6 +312,7 @@ bool SANSRunWindow::loadUserFile()
   m_maskcorrections["Rear_Det_Z_corr"] = 0.0;
   m_maskcorrections["Rear_Det_X_corr"] = 0.0;
  
+  QDir work_dir = QDir(m_uiForm.datadir_edit->text());
 
   QTextStream stream(&user_file);
   QString data;
@@ -341,8 +342,14 @@ bool SANSRunWindow::loadUserFile()
       else
       {
         QString filepath;
-        if( com_line.contains(']') ) filepath = QFileInfo(filetext).absoluteDir().absoluteFilePath(com_line.section("]", 1));
+        if( com_line.contains(']') ) filepath = com_line.section("]", 1);
         else filepath = com_line.section('=',1);
+
+        //Check for relative or absolute path
+        if( QFileInfo(filepath).isRelative() )
+        {
+          filepath = work_dir.absoluteFilePath(filepath);
+        }
 
         if( field.compare("direct", Qt::CaseInsensitive) == 0 )
         {
