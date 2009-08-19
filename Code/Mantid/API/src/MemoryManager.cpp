@@ -147,7 +147,7 @@ bool MemoryManagerImpl::ReadMemInfo(MemoryInfo & mi)
     @param NVectors the number of vectors
     @param XLength the size of the X vector
     @param YLength the size of the Y vector
-    @param isCompressOK The address of a boolean indicating if the compression succeeded or not
+    @param isCompressedOK The address of a boolean indicating if the compression succeeded or not
  */
 bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength, bool* isCompressedOK)
 {
