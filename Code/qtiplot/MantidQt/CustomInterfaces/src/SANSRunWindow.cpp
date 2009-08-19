@@ -992,10 +992,11 @@ void SANSRunWindow::selectUserFile()
   
   if( !loadUserFile() )
   {
+    m_cfg_loaded = false;
     showInformationBox("Error loading user file '" + m_uiForm.userfile_edit->text() + "',  cannot continue.");
     return;
   }
-  
+  m_cfg_loaded = true;
   m_uiForm.tabWidget->setTabEnabled(1, true);
   m_uiForm.tabWidget->setTabEnabled(2, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);
