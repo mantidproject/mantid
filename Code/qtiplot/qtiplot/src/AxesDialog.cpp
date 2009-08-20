@@ -2506,8 +2506,7 @@ bool AxesDialog::updatePlot()
 			d_graph->notifyChanges();
 		}
 		else
-		{
-			int type=getSacleType();
+		{	int type=getSacleType();
 			scaleTypeChanged(type);
 		}
 		
@@ -2685,7 +2684,7 @@ void AxesDialog::updateScale()
     boxStep->clear();
     boxUnit->hide();
     boxUnit->clear();
-
+    
     Plot *d_plot = d_graph->plotWidget();
     int a = mapToQwtAxis(axis);
     const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(a);
@@ -3127,8 +3126,9 @@ void AxesDialog::scaleTypeChanged(int scaleType)
 	else
 		type=MantidColorMap::Log10;
 	spectrogram->mutableColorMap().changeScaleType(type);
+	spectrogram->setScaleType(type);
 	setupColorBarScaling(type);
-//	spectrogram->recount();
+    //spectrogram->recount();
 	}
 	
 }
@@ -3145,25 +3145,24 @@ void AxesDialog::setupColorBarScaling(int Type)
 	if(rightAxis==NULL)return;
 	rightAxis->setColorBarEnabled(true);
 	if (Type==MantidColorMap::Log10)//log scale
-	{
-		boxMinorValue->addItems(QStringList()<<"0"<<"2"<<"4"<<"8");
+	{	boxMinorValue->addItems(QStringList()<<"0"<<"2"<<"4"<<"8");
 		QwtLog10ScaleEngine logScaler;    
 		double logmin(start);
 		if( logmin < 1.0 )
 		{
 			logmin = 1.0;
 		}
-		rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, end, 20, 5));
+		//rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, end, 20, 5));
+		rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, end, boxMajorValue->value(),boxMinorValue->currentText().toInt()));
 		rightAxis->setColorMap(QwtDoubleInterval(start, end), spectrogram->getColorMap());
 	}
 	else
-	{
-		// for linear scale transformation
+	{	// for linear scale transformation
 		boxMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
 		QwtLinearScaleEngine linScaler;
-		rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(start, end, 10, 5));
+	    //rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(start, end, 10, 5));
+		rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(start, end, boxMajorValue->value(),boxMinorValue->currentText().toInt()));
 		rightAxis->setColorMap(QwtDoubleInterval(start, end),spectrogram->getColorMap());
-					
 	}
 }
 

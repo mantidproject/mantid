@@ -34,6 +34,7 @@
 #include "ArrowMarker.h"
 #include "PlotCurve.h"
 #include "ApplicationWindow.h"
+#include "Spectrogram.h"
 
 #include <QVector>
 #include <qwt_text_label.h>
@@ -53,6 +54,7 @@ CanvasPicker::CanvasPicker(Graph *graph):
 
 bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 {
+	
 	QVector<int> images = plot()->imageMarkerKeys();
 	QVector<int> lines = plot()->lineMarkerKeys();
 
@@ -129,14 +131,15 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 
 		case QEvent::MouseMove:
 			{
+			    
 				const QMouseEvent *me = (const QMouseEvent *)e;
 				if (me->state() != Qt::LeftButton)
   	            	return true;
 
 				QPoint pos = me->pos();
-
 				DataCurve *c = plot()->selectedCurveLabels();
 				if (c){
+					
 					c->moveLabels(pos);
 					return true;
 				}
@@ -145,7 +148,6 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 					drawLineMarker(pos, plot()->drawArrow());
 					return true;
 				}
-
 				return false;
 			}
 			break;
@@ -177,9 +179,12 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 					g->drawLine(false);
 					mrk.detach();
 					plotWidget->replot();
-
 					return true;
 				}
+				//fix for colormap changing on releasing the mouse button after zooming
+				Graph * gr=plot();
+				Spectrogram * spectrogram=gr->getSpectrogram();
+				spectrogram->setupColorBarScaling();
 				return false;
 			}
 			break;

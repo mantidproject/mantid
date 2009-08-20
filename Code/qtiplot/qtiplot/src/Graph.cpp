@@ -204,6 +204,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 	d_zoomer[1] = new QwtPlotZoomer(QwtPlot::xTop, QwtPlot::yRight,
 			QwtPicker::DragSelection | QwtPicker::CornerToCorner,
 			QwtPicker::AlwaysOff, d_plot->canvas());
+	m_spectrogram=NULL;
 	zoom(false);
 
 	c_type = QVector<int>();
@@ -244,8 +245,12 @@ void Graph::notifyChanges()
 
 void Graph::activateGraph()
 {
+	
 	emit selectedGraph(this);
 	setFocus();
+	/*if(m_spectrogram)
+	{m_spectrogram->setupColorBarScaling();
+	}*/
 }
 
 void Graph::deselectMarker()
@@ -1171,7 +1176,6 @@ void Graph::setScale(int axis, double start, double end, double step,
 	sc_engine->setMinTicksAfterBreak(minTicksAfterBreak);
 	sc_engine->setLog10ScaleAfterBreak(log10AfterBreak);
 	sc_engine->setAttribute(QwtScaleEngine::Inverted, inverted);
-
 	setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
 	
 // 	if (type == Graph::Log10)
@@ -1253,16 +1257,16 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   d_plot->setAxisMaxMinor (axis, minorTicks);
 
   d_plot->setAxisScaleDiv (axis, div);
-   d_zoomer[0]->setZoomBase();
+  d_zoomer[0]->setZoomBase();
+    //below code is commented as it was zooming the right color  axis on scaling
   // d_zoomer[1]->setZoomBase();
-   
-  
-   d_user_step[axis] = step;
 
- if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft)
+  d_user_step[axis] = step;
+
+  if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft)
   {
-    updateSecondaryAxis(QwtPlot::xTop);
-    updateSecondaryAxis(QwtPlot::yRight);
+	  updateSecondaryAxis(QwtPlot::xTop);
+	  updateSecondaryAxis(QwtPlot::yRight);
   }
 
   d_plot->replot();
@@ -1271,6 +1275,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   d_plot->replot();
   d_plot->axisWidget(axis)->repaint();
 }
+
 
 QStringList Graph::analysableCurvesList()
 {
@@ -3352,35 +3357,43 @@ bool Graph::hasActiveTool()
 
 void Graph::zoom(bool on)
 {
-	setAutoScale();
+	//setAutoScale();
 	d_zoomer[0]->setEnabled(on);
 	d_zoomer[1]->setEnabled(false);
 	for (int i=0; i<n_curves; i++)
   	{
   		Spectrogram *sp = (Spectrogram *)this->curve(i);
-  	    if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+		if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
   	    {
   	     	if (sp->colorScaleAxis() == QwtPlot::xBottom || sp->colorScaleAxis() == QwtPlot::yLeft)
   	        	d_zoomer[0]->setEnabled(false);
   	        else
   	        	d_zoomer[1]->setEnabled(false);
+			
+			
   	    }
   	}
-
+	
 	QCursor cursor=QCursor (QPixmap(lens_xpm),-1,-1);
 	if (on)
 		d_plot->canvas()->setCursor(cursor);
 	else
 		d_plot->canvas()->setCursor(Qt::arrowCursor);
+	
 }
 
 void Graph::zoomOut()
 {
 	d_zoomer[0]->zoom(-1);
-	//d_zoomer[1]->zoom(-1);
+//	d_zoomer[1]->zoom(-1);
 
 	updateSecondaryAxis(QwtPlot::xTop);
   	updateSecondaryAxis(QwtPlot::yRight);
+	// colormap was getting changed on zoomout 
+	//so call the function colomatsetup
+	if(m_spectrogram)
+		m_spectrogram->setupColorBarScaling();
+
 }
 
 void Graph::drawText(bool on)
@@ -4559,12 +4572,13 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,d
     return plotSpectrogram(d_spectrogram,type);
 }
 
-Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz, CurveType type)
+Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
 {
 	if (type != GrayScale && type != ColorMap && type != Contour)
   		return 0;
 
-  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,this);
+  	//Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,this,workspace);
+	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,this);
 
     return plotSpectrogram(d_spectrogram,type);
 }
@@ -4602,7 +4616,8 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   	d_spectrogram->data().range().maxValue());
   	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
   	d_plot->replot();
-	m_spectrogram=d_spectrogram;
+	setSpectrogram(d_spectrogram);
+	//m_spectrogram=d_spectrogram;
 
 	return d_spectrogram;
 }

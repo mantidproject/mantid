@@ -49,7 +49,6 @@
 #include "PlotToolInterface.h"
 #include "MultiLayer.h"
 #include "ScaleDraw.h"
-//#include "Spectrogram.h"
 //#include "MantidKernel/Logger.h"
 #include "boost/shared_ptr.hpp"
 
@@ -174,6 +173,10 @@ class Graph: public QWidget //QwtPlot //QWidget
 		//! Returns true if a plot/data tool is enabled.
 		bool hasActiveTool();
 
+		void setSpectrogram(Spectrogram* spectrogram )
+		{ m_spectrogram=spectrogram;
+		}
+	
 	public slots:
 		//! Accessor method for #d_plot.
 		Plot* plotWidget(){return d_plot;};
@@ -314,6 +317,7 @@ class Graph: public QWidget //QwtPlot //QWidget
                 //! Set the axis scale
                 void setAxisScale(int axis, double start, double end, int type = -1, double step = 0.0, 
 				  int majorTicks = 5, int minorTicks = 5);
+				
 
 		//! \name Curves Layout
 		//@{
@@ -656,7 +660,9 @@ class Graph: public QWidget //QwtPlot //QWidget
 		//! Add a spectrogram to the graph
   		Spectrogram* plotSpectrogram(Matrix *m, CurveType type);
         Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type);//Mantid
-        Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz, CurveType type);//Mantid
+   //     Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz, 
+			//CurveType type,boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);//Mantid
+		 Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
         Spectrogram* plotSpectrogram(Spectrogram *d_spectrogram, CurveType type);//Mantid
 		//! Restores a spectrogram. Used when opening a project file.
   		void restoreSpectrogram(ApplicationWindow *app, const QStringList& lst);
@@ -702,7 +708,7 @@ signals:
 		void showFitResults(const QString&);
 		void currentFontChanged(const QFont&);
         void enableTextEditor(Graph *);
-		
+				
 	private:
         //! Finds bounding interval of the plot data.
         QwtDoubleInterval axisBoundingInterval(int axis);

@@ -104,7 +104,7 @@ d_labels_y_offset(0),
 d_selected_label(NULL),
 d_labels_align(Qt::AlignHCenter),
 m_ScaleType(1),
-//color_map(QwtLinearColorMap())
+//mWorkspaceSptr(workspace),
 mColorMap(), mDataMinValue(minz), mDataMaxValue(maxz), 
 mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), 
 mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX),m_nRows(nrows),m_nColumns(ncols),mScaledValues(0)
@@ -561,21 +561,23 @@ MantidColorMap & Spectrogram::mutableColorMap()
 }
 void Spectrogram::setupColorBarScaling()
 {
-/* double minValue = data().range().minValue();
-  double maxValue = data().range().maxValue();
-  QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight);
-  rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue),getColorMap());*/
 	
   double minValue = mDataMinValue;
   double maxValue = mDataMaxValue;
-  QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight);
+  QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight); 
   if(rightAxis==NULL) return;
+  QwtScaleDiv *scDiv = plot()->axisScaleDiv(QwtPlot::yRight);
+  QwtValueList lst = scDiv->ticks (QwtScaleDiv::MajorTick);
+  double majTicks=lst.count();
+  lst = scDiv->ticks (QwtScaleDiv::MinorTick);
+  double minTicks=lst.count();
+  
   int scaleType=getScaleType();
   MantidColorMap::ScaleType type =(MantidColorMap::ScaleType)scaleType;
   if( type == MantidColorMap::Linear )
   {
     QwtLinearScaleEngine linScaler;
-    rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
+    rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  majTicks,minTicks));
     rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue),getColorMap());  
   }
   else
@@ -586,12 +588,10 @@ void Spectrogram::setupColorBarScaling()
     {
       logmin = 1.0;
     }
-    rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
+   // rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
+	rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, majTicks, minTicks));
     rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue), getColorMap());
   }
- /* plot()->setAxisScale(QwtPlot::yRight,
-  	minValue,
-  	minValue);*/
 }
 void Spectrogram::setScaleType(int scaleType)
 {
@@ -639,8 +639,6 @@ void Spectrogram::loadSettings()
 void Spectrogram::setColorMapFileName(QString colormapName)
 {
 	mCurrentColorMap=colormapName;
-	//QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight);
-  // rightAxis->setColorMap(data().range(), getColorMap());
 }
 QwtDoubleRect Spectrogram::boundingRect() const
 {
@@ -884,11 +882,11 @@ void Spectrogram::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWork
   }
    QwtColorMap& qwtMap = dynamic_cast<QwtLinearColorMap&>( color_map);//QwtLinearColorMap
   // mColorMap=qwtMap;
-   setCustomColorMap(qwtMap);
+  // setCustomColorMap(qwtMap);
    setColorMap(qwtMap);
-  // QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight);
-  // rightAxis->setColorMap(QwtDoubleInterval(mDataMinValue, mDataMaxValue),qwtMap);
-}
+  }
+
+
 double Spectrogram::integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wksp_index)
 {
   std::vector<double>::const_iterator bin_itr = workspace->readX(wksp_index).begin();
@@ -917,7 +915,7 @@ void Spectrogram::updateForNewMaxData(const double new_max)
 	  return;
   }
   mDataMaxValue = new_max;
-  recount();
+ // recount();
 }
 
 /**
@@ -930,14 +928,14 @@ void Spectrogram::updateForNewMinData(const double new_min)
   {	  return;
   }
   mDataMinValue = new_min;
-  recount();
+  //recount();
 }
 /**
  * Run a recount for the current workspace
  */
 void Spectrogram::recount()
 {
-   // calculateColorCounts(mWorkspaceSptr);
+  // calculateColorCounts(mWorkspaceSptr);
  }
 
 
