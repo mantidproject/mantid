@@ -41,7 +41,7 @@ for line in f.readlines():
 f.close()
 move(fileBuild,archiveDir)
 
-if buildResult.startswith('nmake failed'):
+if 'failed' in buildResult:
 	buildSuccess = False	
 	
 fileBuildErr = logDir+'error.log'
