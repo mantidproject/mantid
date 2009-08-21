@@ -34,7 +34,6 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     bool good = alg.isInitialized();
-
     // Set the properties
     alg.setPropertyValue("WhiteBeamBase", m_WB1Name);
     alg.setPropertyValue("WhiteBeamCompare", m_WB2Name);

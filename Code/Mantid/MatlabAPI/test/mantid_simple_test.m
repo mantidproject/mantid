@@ -1,6 +1,6 @@
 % Perform some algorithms
-LoadRaw('../../../../Test/Data/csp78173.raw','test');
-ConvertUnits('test','converted','dSpacing');
+LoadRaw('../../../../Test/Data/HET15869.raw','raw');
+ConvertUnits('raw','converted','dSpacing');
 Rebin('converted','rebinned','0.1,0.001,5');
 
 % clear up intermediate workspaces
@@ -8,6 +8,6 @@ Rebin('converted','rebinned','0.1,0.001,5');
 %mtd.deleteWorkspace('converted')
 
 % extract the one we want
-w = MantidWorkspace('test');
+w = MantidWorkspace('raw');
 
-plot(w.x(1:end-1),w.y)
+plot(w.x(1:end-1,4:9),w.y(:,4:9))

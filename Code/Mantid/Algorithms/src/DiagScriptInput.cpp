@@ -17,6 +17,7 @@ using namespace API;
 void DiagScriptInput::init()
 {
   declareProperty( "OutputFile","",
+    new FileValidator(std::vector<std::string>(),false),
     "A filename to which to write the list of dead detector UDETs" );
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0);
@@ -29,14 +30,9 @@ void DiagScriptInput::init()
   declareProperty(
     new WorkspaceProperty<>("WBVanadium1","", Direction::Input, val),
     "Name of a white beam vanadium workspace" );
-  // optional second WBV, it is OK if they add nothing here, if they enter a workspace name it is checked at run time
-/*  // if this is changed from an empty string it must be the name of a workspace from the same instrument as the WBV workspaces
-  declareProperty("ExperimentWorkspace", "",
-    "The workspace that contains the experimental data that you\n"
-    "want to correct" );*/
-  declareProperty("HighAbsolute", 0.0,
+  declareProperty("HighAbsolute", 1e8,
     "Spectra whose total number of counts are above or equal to this value will be\n"
-    "marked bad" );
+    "marked bad (default 1x10^8)" );
   declareProperty("LowAbsolute",0.0,
     "Spectra whose total number of counts are below or equal to this value will be\n"
     "marked bad (default 0)" );
@@ -47,28 +43,36 @@ void DiagScriptInput::init()
     "Detectors corresponding to spectra with total counts less than this\n"
     "proportion of the median number of counts would be labelled as reading\n"
     "badly (default 0.1)" );
+  // optional second WBV, it is OK if they add nothing here, if they enter a workspace name it is checked at run time
   declareProperty("WBVanadium2", "",
     "Name of a matching second white beam vanadium run from the same\n"
     "instrument" );
   declareProperty("Variation", -2.0, mustBePositive->clone(),
-    "The ratio of total counts between equivalent histograms in the\n"
+    "The ratio of total counts between equivalent spectra in the\n"
     "two white vanadiums are compared to the median variation. If the\n"
     "ratio is different by more than this fraction of the median that\n"
-    "spectrum and associated detectors are marked bad");
+    "spectrum and its associated detectors are marked bad");
   declareProperty( "Experimental", "",
     "An experimental run that will be used in the background test to find\n"
     "bad detectors" );
-  declareProperty( "RemoveZero", false, "" );
-  declareProperty( "MaskExper", false, "" );
-  declareProperty( "BackgroundAccept", EMPTY_DBL(), "" );
+  declareProperty( "RemoveZero", false,
+    "Identify histograms and their detectors that contain no counts in\n"
+    "the background region" );
+  declareProperty( "MaskExper", false,
+    "Write to the experiment workspace filling all spectra identified\n"
+    "with bad detectors with zeros and write to the detector mask map" );
+  declareProperty( "BackgroundAccept", -2.0, mustBePositive->clone(),
+    "Accept spectra whose white beam normalised background count is no\n"
+    "more than this factor of the median count and identify the others\n"
+    "as bad" );
   declareProperty( "RangeLower", EMPTY_DBL(),
-    "No bin with a boundary at an x value less than this will be used\n"
-    "in the summation that decides if a detector is 'bad' (default: the\n"
-    "start of each histogram)" );
+    "Marks the start of background region.  It is non-inclusive, the bin\n"
+    "that contains this x value wont be used  (default: the start of each\n"
+    "histogram)" );
   declareProperty( "RangeUpper", EMPTY_DBL(),
-    "No bin with a boundary at an x value higher than this value will\n"
-    "be used in the summation that decides if a detector is 'bad'\n"
-    "(default: the end of each histogram)" );
+    "Marks the end of background region.  It is non-inclusive, the bin\n"
+    "that contains this x value wont be used (default: the end of each\n"
+    "histogram)" );
 }
 
 void DiagScriptInput::exec()

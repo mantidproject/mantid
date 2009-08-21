@@ -3,6 +3,8 @@
 //----------------------
 #include "MantidQtCustomDialogs/DiagScriptInputDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include <QFileInfo>
+#include <QDir>
 #include <boost/lexical_cast.hpp>
 #include <string>
 
@@ -32,7 +34,9 @@ void DiagScriptInputDialog::initLayout()
   m_uiForm.setupUi(this);
 
   // for each property fill up any comboboxes and display previously selected values
-  fillLineEdit("OutputFile", m_uiForm.leOFile);
+  fillLineEdit("OutputFile", m_uiForm.leFile);
+  connect( m_uiForm.pbFile, SIGNAL(clicked()), this, SLOT(browseClicked()) );
+  
   fillLineEdit("SignificanceTest", m_uiForm.leSignificance);
   fillAndSetComboBox("WBVanadium1", m_uiForm.cbWBV1);
 
@@ -73,23 +77,31 @@ void DiagScriptInputDialog::initLayout()
 /// Parse input when the Run button is pressed
 void DiagScriptInputDialog::parseInput()
 {
-  storePropertyValue( "OutputFile", m_uiForm.leOFile->text() );
+  storePropertyValue( "OutputFile", m_uiForm.leFile->text() );
   storePropertyValue( "SignificanceTest", m_uiForm.leSignificance->text() );
   storePropertyValue( "WBVanadium1", m_uiForm.cbWBV1->currentText() );
   storePropertyValue( "HighAbsolute", m_uiForm.leHighAbs->text() );
   storePropertyValue( "LowAbsolute", m_uiForm.leLowAbs->text() );
   storePropertyValue( "HighMedian", m_uiForm.leHighMed->text() );
-  storePropertyValue( "LowMedian", m_uiForm.leHighMed->text() );
+  storePropertyValue( "LowMedian", m_uiForm.leLowMed->text() );
 
   storePropertyValue( "WBVanadium2", m_uiForm.cbWBV2->currentText() );
-  storePropertyValue( "Variation", m_uiForm.leVariation->text() );
+  if ( m_uiForm.cbWBV2->currentText().isEmpty() )
+  {// the Variation property won't be used if there is no second white beam run we'll give it a dummy value so that it passes the valdator
+    storePropertyValue( "Variation", "0" );
+  }
+  else storePropertyValue( "Variation", m_uiForm.leVariation->text() );
 
   storePropertyValue( "Experimental", m_uiForm.cbExper->currentText() );
   storePropertyValue( "RemoveZero", 
     m_uiForm.ckZeroCounts->isChecked() ? "1" : "0" );
   storePropertyValue( "MaskExper",
     m_uiForm.ckMaskExper->isChecked() ? "1" : "0" );
-  storePropertyValue( "BackgroundAccept", m_uiForm.leAcceptance->text() );
+  if ( m_uiForm.cbExper->currentText().isEmpty() )
+  {// no experiment file has been selected and so this property wont used, set it to a dummy value
+    storePropertyValue( "BackgroundAccept", "0" );
+  }
+  else storePropertyValue( "BackgroundAccept", m_uiForm.leAcceptance->text() );
   storePropertyValue( "RangeLower", m_uiForm.leStartTime->text() );
   storePropertyValue( "RangeUpper", m_uiForm.leEndTime->text() );
 }
@@ -124,7 +136,24 @@ void DiagScriptInputDialog::addValidatorLabels()
   validlbl = getValidatorMarker("Experimental");
   experimentGrid->addWidget(validlbl, 0, 3);  
   validlbl = getValidatorMarker("RemoveZero");
-  experimentGrid->addWidget(validlbl, 0, 5);  
+  experimentGrid->addWidget(validlbl, 0, 5);
   validlbl = getValidatorMarker("MaskExper");
   experimentGrid->addWidget(validlbl, 1, 5);
+  validlbl = getValidatorMarker("BackgroundAccept");
+  experimentGrid->addWidget(validlbl, 2, 2);
+}
+
+/**
+  * A slot for the browse button "clicked" signal
+  */
+void DiagScriptInputDialog::browseClicked()
+{
+  if( !m_uiForm.leFile->text().isEmpty() )
+  {
+    QString dir = QFileInfo(m_uiForm.leFile->text()).absoluteDir().path();
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
+  }  
+
+  QString filepath = this->openLoadFileDialog("OutputFile");
+  if( !filepath.isEmpty() ) m_uiForm.leFile->setText(filepath);
 }

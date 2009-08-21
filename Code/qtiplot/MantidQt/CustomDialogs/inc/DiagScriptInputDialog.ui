@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>439</height>
+    <width>550</width>
+    <height>473</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -60,7 +60,7 @@
        <widget class="QLineEdit" name="leHighMed" />
       </item>
       <item row="2" column="5" >
-       <widget class="QLineEdit" name="leLowAbs_2" />
+       <widget class="QLineEdit" name="leLowMed" />
       </item>
       <item row="1" column="4" >
        <widget class="QLabel" name="label_12" >
@@ -143,13 +143,14 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1" >
-       <widget class="QLineEdit" name="leOFile" />
-      </item>
-      <item row="0" column="3" >
-       <widget class="QLineEdit" name="leSignificance" />
-      </item>
       <item row="0" column="2" >
+       <widget class="QPushButton" name="pbFile" >
+        <property name="text" >
+         <string>Browse</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" >
        <widget class="QLabel" name="label_11" >
         <property name="text" >
          <string>Don't reject spectra less than this number of error bars from the median (only used in median tests)</string>
@@ -158,6 +159,12 @@
          <bool>true</bool>
         </property>
        </widget>
+      </item>
+      <item row="2" column="1" colspan="2" >
+       <widget class="QLineEdit" name="leSignificance" />
+      </item>
+      <item row="0" column="1" >
+       <widget class="QLineEdit" name="leFile" />
       </item>
      </layout>
     </widget>
@@ -181,7 +188,7 @@
       <item row="0" column="3" >
        <widget class="QLabel" name="label_6" >
         <property name="text" >
-         <string>Maximium allowed fractional variation, above or below the median </string>
+         <string>Maximum allowed proportional change as factor of the median change</string>
         </property>
         <property name="wordWrap" >
          <bool>true</bool>
@@ -233,14 +240,14 @@
         </property>
        </widget>
       </item>
-      <item row="11" column="0" colspan="2" >
+      <item row="12" column="0" colspan="2" >
        <widget class="QLabel" name="label_3" >
         <property name="text" >
          <string>Start of time of flight window</string>
         </property>
        </widget>
       </item>
-      <item row="11" column="3" >
+      <item row="12" column="3" >
        <widget class="QLineEdit" name="leStartTime" />
       </item>
       <item row="0" column="0" >
@@ -253,25 +260,22 @@
       <item row="0" column="1" >
        <widget class="QComboBox" name="cbExper" />
       </item>
-      <item row="11" column="6" >
+      <item row="12" column="6" >
        <widget class="QLineEdit" name="leEndTime" />
       </item>
-      <item row="11" column="4" >
+      <item row="12" column="4" >
        <widget class="QLabel" name="label_4" >
         <property name="text" >
          <string>End of time of flight window</string>
         </property>
        </widget>
       </item>
-      <item row="10" column="0" >
+      <item row="11" column="0" >
        <widget class="QLabel" name="label_13" >
         <property name="text" >
          <string>Acceptance Factor</string>
         </property>
        </widget>
-      </item>
-      <item row="10" column="1" >
-       <widget class="QLineEdit" name="leAcceptance" />
       </item>
       <item row="0" column="2" >
        <widget class="QLabel" name="validatorSpace_7" >
@@ -319,25 +323,38 @@
         </property>
        </widget>
       </item>
+      <item row="11" column="1" >
+       <widget class="QLineEdit" name="leAcceptance" />
+      </item>
+      <item row="11" column="2" >
+       <widget class="QLabel" name="validatorSpace_8" >
+        <property name="minimumSize" >
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>leOFile</tabstop>
-  <tabstop>leSignificance</tabstop>
   <tabstop>cbWBV1</tabstop>
   <tabstop>leHighAbs</tabstop>
   <tabstop>leLowAbs</tabstop>
   <tabstop>leHighMed</tabstop>
-  <tabstop>leLowAbs_2</tabstop>
+  <tabstop>leLowMed</tabstop>
   <tabstop>cbWBV2</tabstop>
   <tabstop>leVariation</tabstop>
   <tabstop>cbExper</tabstop>
   <tabstop>ckZeroCounts</tabstop>
   <tabstop>ckMaskExper</tabstop>
-  <tabstop>leAcceptance</tabstop>
   <tabstop>leStartTime</tabstop>
   <tabstop>leEndTime</tabstop>
  </tabstops>

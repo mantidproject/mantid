@@ -26,7 +26,7 @@ namespace Algorithms
       "workspace with one value that indicates if there was a dead detector" );
     declareProperty("HighThreshold", 0.0,
       "Spectra whose total number of counts are above this value will be\n"
-      "marked bad" );
+      "marked bad (default 0)" );
     declareProperty("LowThreshold",0.0,
       "Spectra whose total number of counts are below this value will be\n"
       "marked bad (default 0)" );

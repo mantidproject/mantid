@@ -42,11 +42,11 @@ void DetectorEfficiencyVariation::init()
     "Each histogram from the input workspace maps to a histogram in this\n"
     "workspace with one value that indicates if there was a dead detector" );
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  BoundedValidator<double> *moreThanZero = new BoundedValidator<double>();
   // Variation can't be zero as we take its reciprocal, so I've set the minimum to something below which double precession arithmetic might start to fail
-  mustBePositive->setLower(1e-280);
-  declareProperty("Variation", -1.0, mustBePositive,
-    "Identify histograms whose total number of counts has changed by more\n"
+  moreThanZero->setLower(1e-280);
+  declareProperty("Variation", -1.0, moreThanZero,
+    "Identify spectra whose total number of counts has changed by more\n"
     "than this factor of the median change between the two input workspaces" );
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
   mustBePosInt->setLower(0);
@@ -55,7 +55,7 @@ void DetectorEfficiencyVariation::init()
     "the calculation (default: 0)" );
   //UNSETINT and EMPTY_DBL() are tags that indicate that no value has been set and we want to use the default
   declareProperty("EndWorkspaceIndex", UNSETINT, mustBePosInt->clone(),
-    "The index number of the last entry in the Workspace  to include in\n"
+    "The index number of the last entry in the Workspace to include in\n"
     "the calculation (default: the last spectrum in the workspace)" );
   declareProperty("RangeLower", EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be included\n"

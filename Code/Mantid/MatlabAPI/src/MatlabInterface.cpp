@@ -499,7 +499,7 @@ int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
 }
 
 /**
-  *  A helper function to retrieve a fileld from a workspace
+  *  A helper function to retrieve a values from a workspace
   * @param wksptr A pointer to a Mantid MatrixWorkspace
   * @param field A character indicating the field to return, i.e. x, y or e
   * @param ispec The spectrum number of the field to return
@@ -507,30 +507,57 @@ int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
   */
 static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field, int ispec)
 {
-	mxArray* mptr;
-  std::vector<double>* data = NULL;
+	int nHist = wksptr->getNumberHistograms();
+  mxArray* mptr = NULL;
+
 	switch(field)
 	{
+    //remove iSpec
 	  case 'x':
-    data = &(wksptr->dataX(ispec));
+    {
+      mwSize dims[2] = { wksptr->dataX(0).size(), nHist };
+      mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+      char *start_of_pr = (char *)mxGetData(mptr);
+      for ( int i = 0; i < wksptr->getNumberHistograms(); i++ )
+      {
+        size_t byteSize = wksptr->dataX(i).size()*sizeof(double);
+        memcpy( start_of_pr, &(wksptr->dataX(i).front()), byteSize );
+        start_of_pr += byteSize;
+      }
+    }
     break;
 
 	  case 'y':
-		data = &(wksptr->dataY(ispec));
+    {
+      mwSize dims[2] = { wksptr->dataY(0).size(), nHist };
+      mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+      char *start_of_pr = (char *)mxGetData(mptr);
+      for ( int i = 0; i < wksptr->getNumberHistograms(); i++ )
+      {
+        size_t byteSize = wksptr->dataY(i).size()*sizeof(double);
+        memcpy( start_of_pr, &(wksptr->dataY(i).front()), byteSize );
+        start_of_pr += byteSize;
+      }
+    }
 		break;
 
 	  case 'e':
-		data = &(wksptr->dataE(ispec));
+    {
+      mwSize dims[2] = { wksptr->dataE(0).size(), nHist };
+      mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+      char *start_of_pr = (char *)mxGetData(mptr);
+      for ( int i = 0; i < wksptr->getNumberHistograms(); i++ )
+      {
+        size_t byteSize = wksptr->dataE(i).size()*sizeof(double);
+        memcpy( start_of_pr, &(wksptr->dataE(i).front()), byteSize );
+        start_of_pr += byteSize;
+      }
+    }
 		break;
 
 	  default:
 		return NULL;
-		break;
-
 	}
-	mwSize dims[2] = { 1, data->size() };
-	mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-	memcpy(mxGetPr(mptr), &(data->front()), data->size() * sizeof(double));
 	return mptr;
 }
 

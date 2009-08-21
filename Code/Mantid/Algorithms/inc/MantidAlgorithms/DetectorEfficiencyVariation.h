@@ -17,9 +17,24 @@ namespace Mantid
   {
     using namespace API;
     /**
+    Required Properties:
+    <UL>
+    <LI> WhiteBeamBase - Name of a white beam vanadium workspace </LI>
+    <LI> WhiteBeamCompare - Name of a matching second white beam vanadium run from the same instrument </LI>
+    <LI> OutputWorkspace - Each histogram from the input workspace maps to a histogram in this workspace with one value that indicates if there was a dead detector </LI>
+    <LI> Variation - Identify spectra whose total number of counts has changed by more than this factor of the median change between the two input workspaces </LI>
+    </UL>
+
+    Optional Properties:
+    <UL>
+    <LI> StartWorkspaceIndex - The index number of the first entry in the Workspace to include in the calculation </LI>
+    <LI> EndWorkspaceIndex - The index number of the last entry in the Workspace to include in the calculation </LI>
+    <LI> RangeLower - No bin with a boundary at an x value less than this will be included in the summation used to decide if a detector is 'bad' </LI>
+    <LI> RangeUpper - No bin with a boundary at an x value higher than this value will be included in the summation used to decide if a detector is 'bad' </LI>
+    <LI> OutputFile - The name of a file to write the list of dead detector UDETs </LI>
+    <LI> BadDetectorIDs - Output array </LI>
+    </UL>
     
-
-
     @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
     @date 15/06/2009
 

@@ -8,6 +8,9 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <functional>
+#include <algorithm>
+
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
 
@@ -260,9 +263,35 @@ private:
   /// DataService name. This is set only at construction.
   /// DataService name should be provided when construction of derived classes
   std::string svc_name;
+  
+  /// functor for the less binary function that compares strings alphabetically without taking account of case
+  struct ci_less : std::binary_function<std::string, std::string, bool>
+  {
+    
+    /// functor for case-independent less binary function for characters
+    struct nocase_compare : public std::binary_function<unsigned char,unsigned char,bool> 
+    {
+      /// case-independent less binary function for characters
+      bool operator() (const unsigned char &c1, const unsigned char &c2) const 
+      {
+        return tolower (c1) < tolower (c2);
+      }
+    };
+    /** case-independent (ci) less binary function for strings
+    * Compares strings alphabetically
+    * @param s1 first string for comparison
+    * @param s2 second string for comparison
+    * @return true if s1 < s2
+    */
+    bool operator() (const std::string &s1, const std::string &s2) const
+    {
+      return lexicographical_compare 
+        (s1.begin(), s1.end(), s2.begin(), s2.end(), nocase_compare());
+    }
+  }; // end of ci_less
 
   /// Typedef for the map holding the names of and pointers to the data objects
-	typedef std::map<std::string,boost::shared_ptr<T> > svcmap;
+  typedef std::map<std::string,  boost::shared_ptr<T>, ci_less > svcmap;
 	/// Iterator for the data store map
 	typedef typename svcmap::iterator svc_it;
   /// Const iterator for the data store map
