@@ -181,10 +181,16 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 					plotWidget->replot();
 					return true;
 				}
-				//fix for colormap changing on releasing the mouse button after zooming
-				Graph * gr=plot();
-				Spectrogram * spectrogram=gr->getSpectrogram();
-				spectrogram->setupColorBarScaling();
+				if(plot()->zoomOn())
+				{
+					//fix for colormap changing on releasing the mouse button after zooming
+					Graph * gr=plot();
+					if(!gr)
+						return NULL;
+					Spectrogram * spectrogram=gr->getSpectrogram();
+					if(spectrogram)
+						spectrogram->setupColorBarScaling();
+				}
 				return false;
 			}
 			break;

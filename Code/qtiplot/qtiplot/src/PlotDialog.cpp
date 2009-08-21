@@ -69,8 +69,6 @@
 #include <QMenu>
 #include <QDateTime>
 
-//Mantid::Kernel::Logger & PlotDialog::g_log=Mantid::Kernel::Logger::get("PlotDialog");
-
 PlotDialog::PlotDialog(bool showExtended, QWidget* parent, Qt::WFlags fl )
 : QDialog(parent, fl),
   d_ml(0)
@@ -809,7 +807,7 @@ void PlotDialog::initLabelsPage()
 	QHBoxLayout* hlayout = new QHBoxLayout(labelsPage);
 	hlayout->addWidget(labelsGroupBox);
 	privateTabWidget->addTab(labelsPage, tr("Labels"));
-	privateTabWidget->setTabEnabled(3,false);
+	//privateTabWidget->setTabEnabled(3,true);
 
     connect(labelsGroupBox, SIGNAL(toggled(bool)), this, SLOT(acceptParams()));
     connect(boxLabelsColumn, SIGNAL(activated(int)), this, SLOT(acceptParams()));
@@ -2391,13 +2389,13 @@ bool PlotDialog::acceptParams()
   	   boxXAxis->setCurrentItem(sp->xAxis()-2);
   	   boxYAxis->setCurrentItem(sp->yAxis());
   	}else if (privateTabWidget->currentPage() == contourLinesPage){
+		
 		Spectrogram *sp = (Spectrogram *)plotItem;
 	  	    if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
 		{
 	 	    	return false;
 		}
-        
-		if (defaultContourBox->isChecked()){ 
+			if (defaultContourBox->isChecked()){ 
 		//below line  3 rd parameter changed as it was giving compilation error
 		//   copied these lines from latest qtiplot code and it's giving error on compilation
 			// Qpen 3rd parametr changed as it was giving error .... 

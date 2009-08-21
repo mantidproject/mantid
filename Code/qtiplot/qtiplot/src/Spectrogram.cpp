@@ -94,7 +94,7 @@ Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRec
 d_matrix(0),d_funct(f),
 color_axis(QwtPlot::yRight),
 color_map_policy(Default),
-d_show_labels(false),
+d_show_labels(true),
 d_labels_color(Qt::black),
 d_labels_font(QFont()),
 d_white_out_labels(false),
@@ -104,7 +104,6 @@ d_labels_y_offset(0),
 d_selected_label(NULL),
 d_labels_align(Qt::AlignHCenter),
 m_ScaleType(1),
-//mWorkspaceSptr(workspace),
 mColorMap(), mDataMinValue(minz), mDataMaxValue(maxz), 
 mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), 
 mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX),m_nRows(nrows),m_nColumns(ncols),mScaledValues(0)
@@ -355,8 +354,6 @@ void Spectrogram::createLabels()
 		delete m;
 	}
 	d_labels_list.clear();
-	
-	int index = 0;
 	QwtValueList levels = contourLevels();
 	const int numLevels = levels.size();
     for (int l = 0; l < numLevels; l++){
@@ -374,53 +371,30 @@ void Spectrogram::createLabels()
         int x_axis = xAxis();
         int y_axis = yAxis();
 		m->setAxis(x_axis, y_axis);
-		
-		//QwtPlot *d_plot = plot();
-		//if (!d_plot)
-		//	return;
-	
-		//QSize size = t.textSize();
-  //      int dx = int(d_labels_x_offset*0.01*size.height());
-  //      int dy = -int((d_labels_y_offset*0.01 + 0.5)*size.height());
-  //      int x2 =80;//d_plot->transform(x_axis, levels[l]) + dx;
-  //      int y2 =80;//d_plot->transform(y_axis, levels[l]) + dy;
-  //      switch(d_labels_align){
-  //          case Qt::AlignLeft:
-  //          break;
-  //          case Qt::AlignHCenter:
-  //              x2 -= size.width()/2;
-  //          break;
-  //          case Qt::AlignRight:
-  //              x2 -= size.width();
-  //          break;
-  //      }
-  //      m->setXValue(d_plot->invTransform(x_axis, x2));
-  //      m->setYValue(d_plot->invTransform(y_axis, y2));
-	
-
-  //      if (d_graph && d_show_labels)
-		//{//g_log.error()<<"plotmarker attach called"<<std::endl;
-		//	m->attach(d_plot);
-		//}
+    
+		QwtPlot *d_plot = plot();
+		if (!d_plot)
+			return;
+	     if (d_graph && d_show_labels)
+		{	m->attach(d_plot);
+		}
 		d_labels_list << m;
-		index++;
 	}
 }
 void Spectrogram::showContourLineLabels(bool show)
 {
-	d_show_labels=false;
 	if (show == d_show_labels)
 	{
         return;
 	}
     d_show_labels = show;
-	createLabels();
+	//createLabels();
 	QwtPlot *d_plot = plot();
 		if (!d_plot)
 			return;
 	foreach(PlotMarker *m, d_labels_list){
 		if (d_show_labels)
-		{		m->attach(d_plot);
+		{	m->attach(d_plot);
 		}
 		else
 			m->detach();
@@ -470,24 +444,27 @@ void Spectrogram::selectLabel(bool on)
 bool Spectrogram::selectedLabels(const QPoint& pos)
 {
 	d_selected_label = NULL;
+	QwtPlot *d_plot = plot();
+		if (!d_plot)
+			return false;
 
 	if (d_graph->hasActiveTool())
 		return false;
-    /*foreach(PlotMarker *m, d_labels_list){
-        int x = d_graph->transform(xAxis(), m->xValue());
-        int y = d_graph->transform(yAxis(), m->yValue());
+   foreach(PlotMarker *m, d_labels_list){
+        int x = d_plot->transform(xAxis(), m->xValue());
+        int y = d_plot->transform(yAxis(), m->yValue());
 
         QMatrix wm;
         wm.translate(x, y);
 		wm.rotate(-d_labels_angle);
         if (wm.mapToPolygon(QRect(QPoint(0, 0), m->label().textSize())).containsPoint(pos, Qt::OddEvenFill)){
 			d_selected_label = m;
-			d_click_pos_x = d_graph->invTransform(xAxis(), pos.x());
-			d_click_pos_y = d_graph->invTransform(yAxis(), pos.y());
+			d_click_pos_x = d_plot->invTransform(xAxis(), pos.x());
+			d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());
             selectLabel(true);
             return true;
         }
-	}*/
+	}
 	return false;
 }
 
@@ -571,7 +548,6 @@ void Spectrogram::setupColorBarScaling()
   double majTicks=lst.count();
   lst = scDiv->ticks (QwtScaleDiv::MinorTick);
   double minTicks=lst.count();
-  
   int scaleType=getScaleType();
   MantidColorMap::ScaleType type =(MantidColorMap::ScaleType)scaleType;
   if( type == MantidColorMap::Linear )
@@ -714,8 +690,8 @@ void Spectrogram::setLabelsWhiteOut(bool whiteOut)
 }
 void Spectrogram::drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &contourLines) const
 {
-	//QwtPlotSpectrogram::drawContourLines(p, xMap, yMap, contourLines);
 
+	//QwtPlotSpectrogram::drawContourLines(p, xMap, yMap, contourLines);
 	QwtValueList levels = contourLevels();
     const int numLevels = (int)levels.size();
     for (int l = 0; l < numLevels; l++){
@@ -728,7 +704,7 @@ void Spectrogram::drawContourLines (QPainter *p, const QwtScaleMap &xMap, const 
         if ( pen.style() == Qt::NoPen )
             continue;
 
-       // p->setPen(QwtPainter::scaledPen(pen));
+      //  p->setPen(QwtPainter::scaledPen(pen));
 
         const QPolygonF &lines = contourLines[level];
         for ( int i = 0; i < (int)lines.size(); i += 2 ){
@@ -748,7 +724,11 @@ void Spectrogram::drawContourLines (QPainter *p, const QwtScaleMap &xMap, const 
 void Spectrogram::updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap,
 		const QwtRasterData::ContourLines &contourLines) const
 {
-	/*QwtValueList levels = contourLevels();
+	QwtPlot *d_plot = plot();
+		if (!d_plot)
+			return;
+
+	QwtValueList levels = contourLevels();
 	const int numLevels = levels.size();
 	int x_axis = xAxis();
 	int y_axis = yAxis();
@@ -767,12 +747,13 @@ void Spectrogram::updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtSc
 
 		double x = lines[i].x();
 		double y = lines[i].y();
-		int x2 = d_graph->transform(x_axis, x) + dx;
-        int y2 = d_graph->transform(y_axis, y) + dy;
+		int x2 = d_plot->transform(x_axis, x) + dx;
+        int y2 = d_plot->transform(y_axis, y) + dy;
 
-        mrk->setValue(d_graph->invTransform(x_axis, x2),
-					d_graph->invTransform(y_axis, y2));
-    }*/
+        mrk->setValue(d_plot->invTransform(x_axis, x2),
+					d_plot->invTransform(y_axis, y2));
+    }
+
 }
 /**
      for setting the lables color on contour lines
@@ -795,14 +776,8 @@ void Spectrogram::setLabelsColor(const QColor& c)
  */
 void Spectrogram::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
 {
-  /* std::vector<int> detector_list(0);
-  mInstrumentActor->getDetectorIDList(detector_list);
-  if( detector_list.empty() ) return;
-  std::vector<int> index_list;
-  getSpectraIndexList(detector_list, index_list);
-  */
-	QwtLinearColorMap color_map;
-   const int n_spec=m_nRows ;//= index_list.size();
+  QwtLinearColorMap color_map;
+  const int n_spec=m_nRows ;//= index_list.size();
   std::vector<double> integrated_values(n_spec, 0.0);
   mWkspDataMin = DBL_MAX;
   mWkspDataMax = -DBL_MAX;
