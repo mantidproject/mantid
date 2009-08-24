@@ -186,6 +186,7 @@ private slots:
 	void adjustLayerHeight(int width);
 	void adjustLayerWidth(int height);
 	void changeColormap(const QString & filename = "");
+	void setEquidistantLevels();
 
 protected slots:
     void setActiveLayer(LayerItem *item);
@@ -232,7 +233,7 @@ private:
 	void initContourLinesPage();
     void contextMenuEvent(QContextMenuEvent *e);
 	void updateContourLevelsDisplay(Spectrogram *sp);
-	void setEquidistantLevels();
+	
 	void showAllLabelControls(bool show = true);
 
 	double aspect_ratio;
