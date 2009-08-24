@@ -17,17 +17,17 @@ class StripPeaksTest : public CxxTest::TestSuite
 public:
   StripPeaksTest()
   {
-    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,100,0.5,0.02);
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,200,0.5,0.02);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
-    std::vector<double> &X = WS->dataX(1);
+    const std::vector<double> &X = WS->readX(1);
     std::vector<double> &Y = WS->dataY(1);
     std::vector<double> &E = WS->dataE(1);
     std::vector<double> &Y0 = WS->dataY(0);
     for (int i = 0; i < Y.size(); ++i)
     {
       const double x = (X[i]+X[i+1])/2;
-      double funcVal = 2500*exp(-0.5*pow((x-2.14)/0.012,2));
+      double funcVal = 2500*exp(-0.5*pow((x-3.14)/0.012,2));
       funcVal += 1000*exp(-0.5*pow((x-1.22)/0.01,2));
       Y[i] = 5000 + funcVal;
       E[i] = sqrt(Y[i]);
@@ -38,20 +38,20 @@ public:
     AnalysisDataService::Instance().add("toStrip",WS);
   }
 
-	void testName()
-	{
+  void testName()
+  {
     TS_ASSERT_EQUALS( strip.name(), "StripPeaks" )
-	}
+  }
 
-	void testVersion()
-	{
+  void testVersion()
+  {
     TS_ASSERT_EQUALS( strip.version(), 1 )
-	}
+  }
 
-	void testCategory()
-	{
+  void testCategory()
+  {
     TS_ASSERT_EQUALS( strip.category(), "General" )
-	}
+  }
 
   void testInit()
   {
@@ -83,6 +83,7 @@ public:
     }
 
     AnalysisDataService::Instance().remove(outputWS);
+    AnalysisDataService::Instance().remove("toStrip");
   }
 
 private:
