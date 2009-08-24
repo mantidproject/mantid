@@ -23,9 +23,9 @@ namespace Mantid
     /** @class LoadDAE LoadDAE.h DataHandling/LoadDAE.h
 
     Loads data from the ISIS DATA acquisition system and stores it in a 2D workspace 
-    (Workspace2D class). LoadDAE is an algorithm and as such inherits
-    from the Algorithm class, via DataHandlingCommand, and overrides
-    the init() & exec() methods.
+    (Workspace2D class).
+
+    @todo Doesn't currently support multiple time regimes
 
     Required Properties:
     <UL>
