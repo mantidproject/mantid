@@ -63,7 +63,7 @@ public:
 	Spectrogram();
     Spectrogram(Matrix *m);
     Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
-    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,Graph *graph);//Mantid
+    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
 	~Spectrogram();
 
 
@@ -135,14 +135,13 @@ public:
     double labelsYOffset(){return d_labels_y_offset;};
 	void selectLabel(bool on);
 	void setScaleType(int scaleType);
-
+	
 
 protected:
 	virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void createLabels();
 	int getScaleType() const;
-	
 
 	int m_ScaleType;
 
@@ -157,7 +156,7 @@ protected:
 	ColorMapPolicy color_map_policy;
 
 	QwtLinearColorMap color_map;
-	//static Mantid::Kernel::Logger &g_log;
+	
 	QList<QPen> d_pen_list;
 	//! Flag telling if we display the labels
 	bool d_show_labels;
@@ -178,7 +177,7 @@ protected:
      //! Labels font
 	QFont d_labels_font;
 	//! Pointer to the parent plot
-	Graph *d_graph;
+	//Graph *d_graph;
 	MantidColorMap mColorMap;
 	QString mCurrentColorMap;
 	// The user requested data and bin ranges
@@ -193,6 +192,7 @@ protected:
   /// Store a value between 0->255 for each of the integrated spectra.
   std::vector<unsigned char> mScaledValues;
   boost::shared_ptr<Mantid::API::MatrixWorkspace> mWorkspaceSptr;
+ // static Mantid::Kernel::Logger &g_log;
 };
 
 

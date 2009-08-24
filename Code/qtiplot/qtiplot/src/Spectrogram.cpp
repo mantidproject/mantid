@@ -41,8 +41,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 using namespace Mantid::API;
 
-//Mantid::Kernel::Logger & Spectrogram::g_log=Mantid::Kernel::Logger::get("Spectrogram");
-
 Spectrogram::Spectrogram():
 	QwtPlotSpectrogram(),
 	d_matrix(0),d_funct(0),//Mantid
@@ -89,8 +87,8 @@ Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left,
 	
 }
 
-Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,Graph *graph)
-:	QwtPlotSpectrogram(),d_graph(graph),
+Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
+:	QwtPlotSpectrogram(),
 d_matrix(0),d_funct(f),
 color_axis(QwtPlot::yRight),
 color_map_policy(Default),
@@ -98,6 +96,7 @@ d_show_labels(true),
 d_labels_color(Qt::black),
 d_labels_font(QFont()),
 d_white_out_labels(false),
+d_color_map_pen(false),
 d_labels_angle(0.0),
 d_labels_x_offset(0),
 d_labels_y_offset(0),
@@ -367,7 +366,7 @@ void Spectrogram::createLabels()
         else
             t.setBackgroundBrush(QBrush(Qt::transparent));
 		m->setLabel(t);
-
+	
         int x_axis = xAxis();
         int y_axis = yAxis();
 		m->setAxis(x_axis, y_axis);
@@ -375,7 +374,7 @@ void Spectrogram::createLabels()
 		QwtPlot *d_plot = plot();
 		if (!d_plot)
 			return;
-	     if (d_graph && d_show_labels)
+	     if (d_plot && d_show_labels)
 		{	m->attach(d_plot);
 		}
 		d_labels_list << m;
@@ -388,7 +387,6 @@ void Spectrogram::showContourLineLabels(bool show)
         return;
 	}
     d_show_labels = show;
-	//createLabels();
 	QwtPlot *d_plot = plot();
 		if (!d_plot)
 			return;
@@ -419,9 +417,12 @@ bool Spectrogram::hasSelectedLabels()
 }
 void Spectrogram::selectLabel(bool on)
 {
+	QwtPlot *d_plot = plot();
+	if (!d_plot)
+		return;
 	if (on){
-		d_graph->deselect();
-		d_graph->notifyFontChange(d_labels_font);
+		//d_plot->deselect();
+		//d_plot->notifyFontChange(d_labels_font);
 	}
 
 	foreach(PlotMarker *m, d_labels_list){
@@ -436,8 +437,7 @@ void Spectrogram::selectLabel(bool on)
 
 		m->setLabel(t);
 	}
-
-	d_graph->replot();
+   d_plot->replot();
 }
 
 
@@ -448,8 +448,8 @@ bool Spectrogram::selectedLabels(const QPoint& pos)
 		if (!d_plot)
 			return false;
 
-	if (d_graph->hasActiveTool())
-		return false;
+	/*if (d_plot->hasActiveTool())
+		return false;*/
    foreach(PlotMarker *m, d_labels_list){
         int x = d_plot->transform(xAxis(), m->xValue());
         int y = d_plot->transform(yAxis(), m->yValue());
@@ -538,7 +538,6 @@ MantidColorMap & Spectrogram::mutableColorMap()
 }
 void Spectrogram::setupColorBarScaling()
 {
-	
   double minValue = mDataMinValue;
   double maxValue = mDataMaxValue;
   QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight); 
@@ -704,7 +703,7 @@ void Spectrogram::drawContourLines (QPainter *p, const QwtScaleMap &xMap, const 
         if ( pen.style() == Qt::NoPen )
             continue;
 
-      //  p->setPen(QwtPainter::scaledPen(pen));
+        p->setPen(pen);
 
         const QPolygonF &lines = contourLines[level];
         for ( int i = 0; i < (int)lines.size(); i += 2 ){
@@ -733,14 +732,13 @@ void Spectrogram::updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtSc
 	int x_axis = xAxis();
 	int y_axis = yAxis();
     for (int l = 0; l < numLevels; l++){
-        const double level = levels[l];
+	    const double level = levels[l];
         const QPolygonF &lines = contourLines[level];
         int i = (int)lines.size()/2;
 
 		PlotMarker *mrk = d_labels_list[l];
 		if (!mrk)
 			return;
-
 		QSize size = mrk->label().textSize();
         int dx =int((d_labels_x_offset )*0.01*size.height()); //int((d_labels_x_offset + mrk->xLabelOffset())*0.01*size.height());
         int dy = -int(((d_labels_y_offset )*0.01 + 0.5)*size.height());

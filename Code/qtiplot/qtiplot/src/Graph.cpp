@@ -4578,7 +4578,7 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,Q
   		return 0;
 
   	//Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,this,workspace);
-	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,this);
+	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
 
     return plotSpectrogram(d_spectrogram,type);
 }

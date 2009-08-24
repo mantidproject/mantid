@@ -272,7 +272,7 @@ void PlotDialog::initContourLinesPage()
 	//privateTabWidget->addTab(layerGeometryPage, tr("Contour Lines"));
 }
 void PlotDialog::setEquidistantLevels()
-{
+{	
 	QTreeWidgetItem *it = listBox->currentItem();
     if (!it)
         return;
@@ -285,6 +285,7 @@ void PlotDialog::setEquidistantLevels()
 	Spectrogram *sp = (Spectrogram *)plotItem;
 	if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
 		return;
+	
 
 	QwtValueList levels;
 	double firstVal = firstContourLineBox->value();
@@ -2348,25 +2349,10 @@ bool PlotDialog::acceptParams()
 		{
   	    	return false;
 		}
-       //this code is commented as contour lines groupbox is removed and a new tab for contour lines is introduced
-		 // on the same dialog
-  	    /*sp->setLevelsNumber(levelsBox->value());
-  	    if (autoContourBox->isChecked())
-  	    	sp->setDefaultContourPen(Qt::NoPen);
-  	    else
-  	    	sp->setDefaultContourPen(QPen(levelsColorBox->color(), contourWidthBox->value(),
-  	                            Graph::getPenStyle(boxContourStyle->currentItem())));
-
-  	   sp->setDisplayMode(QwtPlotSpectrogram::ContourMode, levelsGroupBox->isChecked());
-  	   sp->setDisplayMode(QwtPlotSpectrogram::ImageMode, imageGroupBox->isChecked());*/
-
-	   
-  	   if (grayScaleBox->isChecked()){
+        if (grayScaleBox->isChecked()){
 		   sp->setGrayScale();
-	   	  // colorMapEditor->setColorMap(QwtLinearColorMap(Qt::black, Qt::white));
-  	   } else if (defaultScaleBox->isChecked()){
+	  	   } else if (defaultScaleBox->isChecked()){
 	   	   sp->setDefaultColorMap();
-		 //  colorMapEditor->setColorMap(Spectrogram::defaultColorMap());
 	   }
 	   //if customScaleBox radiobutton is selected it loads teh colormap file and 
 	   //updates the spectrogram,colormap widget with the loaded file
@@ -2378,12 +2364,9 @@ bool PlotDialog::acceptParams()
 		   //saves the settings
 		   sp->saveSettings();
 	   }
-	   //below line commented as colormap editor removed from this version
-	  // else
-	   	//   sp->setCustomColorMap(colorMapEditor->colorMap());
-
-  	  // sp->showColorScale((QwtPlot::Axis)colorScaleBox->currentItem(), axisScaleBox->isChecked());
-  	  // sp->setColorBarWidth(colorScaleWidthBox->value());
+	
+  	   sp->showColorScale((QwtPlot::Axis)colorScaleBox->currentItem(), axisScaleBox->isChecked());
+  	   sp->setColorBarWidth(colorScaleWidthBox->value());
 
   	   //Update axes page
   	   boxXAxis->setCurrentItem(sp->xAxis()-2);
@@ -2395,10 +2378,7 @@ bool PlotDialog::acceptParams()
 		{
 	 	    	return false;
 		}
-			if (defaultContourBox->isChecked()){ 
-		//below line  3 rd parameter changed as it was giving compilation error
-		//   copied these lines from latest qtiplot code and it's giving error on compilation
-			// Qpen 3rd parametr changed as it was giving error .... 
+		if (defaultContourBox->isChecked()){ 
 			QPen pen = QPen(levelsColorBox->color(), contourWidthBox->value(),Graph::getPenStyle(boxContourStyle->currentIndex()));
 		   	pen.setCosmetic(true);
   	    	sp->setDefaultContourPen(pen);
