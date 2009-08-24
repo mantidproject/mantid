@@ -297,8 +297,11 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 		# Run 2D algorithm
 		Qxy(tmpWS, final_result, QXY2, DQXY)
 
-	# Replaces NANs with zeroes but would be nice to have StripLRSpecialValues type routine	
+	# Replaces NANs with zeroes
 	ReplaceSpecialValues(InputWorkspace=final_result,OutputWorkspace=final_result,NaNValue="0",InfinityValue="0")
+	# Crop Workspace to remove leading and trailing zeroes
+	if CORRECTION_TYPE == '1D':
+                SANSUtility.StripEndZeroes(final_result)
 	mantid.deleteWorkspace(tmpWS)
 	
 	return

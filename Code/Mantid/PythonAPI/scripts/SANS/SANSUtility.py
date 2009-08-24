@@ -232,3 +232,25 @@ def GroupIntoQuadrants(workspace, xcentre, ycentre, rmin, rmax):
 	dw_ws = 'Down'
 	CreateQuadrant(workspace, dw_ws,xcentre, ycentre, rmin, rmax)
 	return (left_ws, right_ws, up_ws, dw_ws)
+
+def StripEndZeroes(workspace):
+        result_ws = mantid.getMatrixWorkspace(workspace)
+        y_vals = result_ws.readY(0)
+        length = len(y_vals)-1
+        # Find the first non-zero value
+        start = 0
+        for i in range(0, length):
+                if ( y_vals[i] != 0.0 ):
+                        start = i
+                        break
+        # Now find the last non-zero value
+        stop = 0
+        for j in range(length, 0,-1):
+                if ( y_vals[j] != 0.0 ):
+                        stop = j
+                        break
+        # Find the appropriate X values and call CropWorkspace
+        x_vals = result_ws.readX(0)
+        startX = x_vals[start]
+        endX = 1.001*x_vals[stop+1]
+        CropWorkspace(workspace,workspace,startX,endX)
