@@ -293,6 +293,7 @@ subProjs.append('Algorithms')
 subProjs.append('DataHandling')
 subProjs.append('Nexus')
 subProjs.append('PythonAPI')
+subProjs.append('Crystal')
 
 # we want to link libraries in the reverse order we build them
 shared_libraries = []
