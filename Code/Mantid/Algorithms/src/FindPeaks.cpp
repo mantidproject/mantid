@@ -361,8 +361,8 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   {
     // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
     unsigned int i_min = 1;
-    if (i0 > static_cast<int>(5*width)) i_min = i0 - 5*width;
-    unsigned int i_max = i0 + 5*width;
+    if (i0 > static_cast<int>(25*width)) i_min = i0 - 25*width;
+    unsigned int i_max = i0 + 25*width;
     // Bounds checks
     if (i_min<1) i_min=1;
     if (i_max>=Y.size()-1) i_max=Y.size()-2;
