@@ -6,6 +6,9 @@ import MantidBuild
 # GET LIST OF CPPS
 codeFolder = os.path.abspath('./src')
 listCpps = MantidBuild.getCPPFiles(codeFolder)
+if len(listCpps) == 0:
+   retval = {}
+   Return('retval')
 
 # Import environment
 Import('env')

@@ -306,6 +306,8 @@ f=open('libs.txt', 'w')
 
 for subproj in subProjs:
 	ret = SConscript([subproj+'/SConscript'])
+	if len(ret) == 0:
+	   continue
 	env.Install('Bin/Shared', ret['shared'])
 	f.write(str( ret['shared'][0]) + '\n')
 	shared_libraries.insert(0,ret['shared'])
