@@ -160,7 +160,7 @@ contains(CONFIG, CustomInstall){
 	DEFINES       += MANUAL_PATH="\\\"$$replace(manual.path," ","\ ")\\\"
 	}
 	
-win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 _USE_MATH_DEFINES=true
+win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 _USE_MATH_DEFINES=true QSCINTILLA_DLL
 QT            += opengl qt3support network svg xml
 
 MOC_DIR        = ../tmp/qtiplot
