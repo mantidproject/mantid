@@ -33,6 +33,15 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("Workspace",
         "",Direction::Output), "The name of the workspace that will be created.");
 
+	  m_seperator_options.push_back("CSV");
+	  m_seperator_options.push_back("Tab");
+	  m_seperator_options.push_back("Space");
+	  declareProperty("Separator", "CSV", new ListValidator(m_seperator_options));
+
+	  m_separatormap.insert(separator_pair("CSV",","));
+	  m_separatormap.insert(separator_pair("Tab","\t"));
+	  m_separatormap.insert(separator_pair("Space"," "));
+
     }
 
     /** 
@@ -41,6 +50,7 @@ namespace Mantid
     void LoadAscii::exec()
     {
         std::string filename = getProperty("Filename");
+		std::string separator =getProperty("Separator");
         std::ifstream file(filename.c_str());
 
         file.seekg (0, std::ios::end);
@@ -54,14 +64,19 @@ namespace Mantid
         size_t ncols = 0;  // number of comma-separated columns
         size_t nSpectra = 0;
         size_t nBins = 0;
-        while(getline(file,str))
-        {
-            ++iLine;
-
+		std::map<std::string,const char*>::const_iterator it;
+		it=m_separatormap.find(separator);
+		const char* ch;
+		if(it!=m_separatormap.end())
+		{  //get the key for the selected separator string
+			ch=it->second;
+		}
+	    while(getline(file,str))
+        {   ++iLine;
             progress.report(file.tellg());
             if (str.empty()) continue;
             typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-            boost::char_separator<char> sep(",");
+			boost::char_separator<char> sep(ch);
             boost::tokenizer<boost::char_separator<char> > values(str, sep);
 
             // define sizes
