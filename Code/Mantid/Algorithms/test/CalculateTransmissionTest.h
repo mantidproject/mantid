@@ -4,7 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CalculateTransmission.h"
-#include "MantidDataHandling/LoadRaw2.h"
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidCurveFitting/Linear.h"
@@ -16,13 +17,19 @@ class CalculateTransmissionTest : public CxxTest::TestSuite
 public:
   CalculateTransmissionTest() : trans(), inputWS("LOQWS")
   {
-    Mantid::DataHandling::LoadRaw2 loader;
+    Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48127.raw");
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumMin","2");
     loader.setPropertyValue("SpectrumMax","4");
     loader.execute();
+
+    Mantid::DataHandling::LoadInstrument inst;
+    inst.initialize();
+    inst.setPropertyValue("Workspace",inputWS);
+    inst.setPropertyValue("Filename","../../../../Test/Instrument/LOQ_trans_Definition.xml");
+    inst.execute();
 
     Mantid::Algorithms::ConvertUnits convert;
     convert.initialize();
@@ -33,30 +40,30 @@ public:
     convert.execute();    
   }
   
-	void testName()
-	{
+  void testName()
+  {
     TS_ASSERT_EQUALS( trans.name(), "CalculateTransmission" )
-	}
+  }
 
-	void testVersion()
-	{
+  void testVersion()
+  {
     TS_ASSERT_EQUALS( trans.version(), 1 )
-	}
+  }
 
-	void testCategory()
-	{
+  void testCategory()
+  {
     TS_ASSERT_EQUALS( trans.category(), "SANS" )
-	}
+  }
 
-	void testInit()
-	{
+  void testInit()
+  {
     TS_ASSERT_THROWS_NOTHING( trans.initialize() )
     TS_ASSERT( trans.isInitialized() )	  
-	}
-	
-	void testExec()
-	{
-	if ( !trans.isInitialized() ) trans.initialize();
+  }
+
+  void testExec()
+  {
+    if ( !trans.isInitialized() ) trans.initialize();
 
     TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("SampleRunWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( trans.setPropertyValue("DirectRunWorkspace",inputWS) )
@@ -74,8 +81,8 @@ public:
     {
       TS_ASSERT_DELTA( Y[i], 1.0, 0.005 )
     }
-	}
-	
+  }
+
 private:
   Mantid::Algorithms::CalculateTransmission trans;
   std::string inputWS;

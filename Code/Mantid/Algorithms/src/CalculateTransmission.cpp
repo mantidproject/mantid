@@ -36,12 +36,16 @@ void CalculateTransmission::init()
   declareProperty(new WorkspaceProperty<Workspace2D>("DirectRunWorkspace","",Direction::Input,wsValidator->clone()));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
+  BoundedValidator<int> *oneOrMore = new BoundedValidator<int>();
+  oneOrMore->setLower(1);
   // The defaults here are the correct detector numbers for LOQ
-  declareProperty("IncidentBeamMonitor",2,"The UDET of the incident beam monitor");
-  declareProperty("TransmissionMonitor",3,"The UDET of the transmission monitor");
+  declareProperty("IncidentBeamMonitor",2,oneOrMore,"The UDET of the incident beam monitor");
+  declareProperty("TransmissionMonitor",3,oneOrMore->clone(),"The UDET of the transmission monitor");
 
-  declareProperty("MinWavelength",2.2,"The minimum wavelength for the fit");
-  declareProperty("MaxWavelength",10.0,"The maximum wavelength for the fit");
+  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
+  mustBePositive->setLower(0.0);  
+  declareProperty("MinWavelength",2.2,mustBePositive,"The minimum wavelength for the fit");
+  declareProperty("MaxWavelength",10.0,mustBePositive->clone(),"The maximum wavelength for the fit");
 
   declareProperty("OutputUnfittedData",false);
 }
@@ -74,7 +78,7 @@ void CalculateTransmission::exec()
   WorkspaceHelpers::getIndicesFromSpectra(sampleWS,sampleSpectra,indices);
   // Check that given spectra are monitors
   if ( !sampleWS->getDetector(indices.front())->isMonitor()
-       || !sampleWS->getDetector(indices.front())->isMonitor() )
+       || !sampleWS->getDetector(indices.back())->isMonitor() )
   {
     g_log.error("One of the UDETs provided is not marked as a monitor");
     throw std::invalid_argument("One of the UDETs provided is not marked as a monitor");
@@ -85,7 +89,7 @@ void CalculateTransmission::exec()
   WorkspaceHelpers::getIndicesFromSpectra(sampleWS,directSpectra,indices);
   // Check that given spectra are monitors
   if ( !directWS->getDetector(indices.front())->isMonitor()
-       || !directWS->getDetector(indices.front())->isMonitor() )
+       || !directWS->getDetector(indices.back())->isMonitor() )
   {
     g_log.error("One of the UDETs provided is not marked as a monitor");
     throw std::invalid_argument("One of the UDETs provided is not marked as a monitor");

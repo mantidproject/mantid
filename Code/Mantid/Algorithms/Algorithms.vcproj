@@ -431,6 +431,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SumRowColumn.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SumSpectra.cpp"
 				>
 			</File>
@@ -882,6 +886,10 @@
 			</File>
 			<File
 				RelativePath=".\test\StripPeaksTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\SumRowColumn.h"
 				>
 			</File>
 			<File
