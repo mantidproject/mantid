@@ -282,6 +282,7 @@ HEADERS  += src/ApplicationWindow.h \
             src/ScriptingEnv.h\
             src/Script.h\
             src/ScriptEdit.h\
+            src/ScriptEditor.h\
             src/FunctionCurve.h\
             src/Fit.h\
             src/MultiPeakFit.h\
@@ -330,6 +331,8 @@ HEADERS  += src/ApplicationWindow.h \
             src/UserFunction.h  \
             src/ContourLinesEditor.h\
             src/PenStyleBox.h\
+            src/ScriptingWindow.h\
+            src/ScriptManagerWidget.h\
             src/Mantid/MantidApplication.h \
 	    src/Mantid/LoadRawDlg.h \
 	    src/Mantid/LoadDAEDlg.h \
@@ -444,6 +447,7 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/FindDialog.cpp\
             src/TextFormatButtons.cpp\
             src/ScriptEdit.cpp\
+            src/ScriptEditor.cpp\
             src/ImportASCIIDialog.cpp\
             src/ImageExportDialog.cpp\
             src/ScaleDraw.cpp\
@@ -494,6 +498,8 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/UserFunction.cpp \
             src/ContourLinesEditor.cpp \
             src/PenStyleBox.cpp \
+            src/ScriptingWindow.cpp\
+            src/ScriptManagerWidget.cpp\
             src/Mantid/MantidApplication.cpp \
 	    src/Mantid/LoadRawDlg.cpp \
 	    src/Mantid/LoadDAEDlg.cpp \

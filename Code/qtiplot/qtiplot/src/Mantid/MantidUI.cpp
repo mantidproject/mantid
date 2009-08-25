@@ -10,7 +10,7 @@
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
 #include "MantidSampleLogDialog.h"
-#include "../ScriptWindow.h"
+#include "../ScriptingWindow.h"
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/LogFilter.h"
@@ -122,12 +122,6 @@ m_progressDialog(0)
         qRegisterMetaType<Mantid::API::Workspace_sptr>();
         qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
     }
-
-   /* QAction* tstAction = new QAction("Test",this);
-    tstAction->setShortcut(QKeySequence::fromString("Ctrl+A"));
-    connect(tstAction,SIGNAL(triggered()), this, SLOT(test()));
-    mantidMenu->addAction(tstAction);*/
-
 }
 
 // Should it be moved to the constructor?

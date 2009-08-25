@@ -80,6 +80,8 @@ class ScriptingEnv : public QObject
     const QString fileFilter() const;
 
     const QString scriptingLanguage() const;
+    //If the environment supports evaluation as well as execution then override and return true
+    virtual bool supportsEvaluation() { return false; }
 
     // Mantid - For QScintilla. This is overridden in the concrete implementation to return the appropriate
     // code lexer if one is required

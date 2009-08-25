@@ -88,6 +88,7 @@ class AssociationsDialog;
 
 //Mantid
 class MantidUI;
+class ScriptingWindow;
 
 /**
  * \brief QtiPlot's main window.
@@ -158,7 +159,7 @@ public:
   void removeUserMenuAction(const QString & menu, const QString & action); //Mantid
   const QList<QMenu*> & getCustomMenus() const; //Mantid
   void scriptingInformation(int linenumber); //Mantid
-  ScriptWindow* getScriptWindowHandle() { return scriptWindow; }
+  ScriptingWindow* getScriptWindowHandle() { return scriptingWindow; }
   //-------------------
   	//@}
 
@@ -1184,7 +1185,7 @@ private:
 	QSplitter *explorerSplitter;
 
 	QAssistantClient *assistant;
-	ScriptWindow *scriptWindow;
+	ScriptingWindow *scriptingWindow; //Mantid
 	QTranslator *appTranslator, *qtTranslator;
 	QDockWidget *explorerWindow, *undoStackWindow;
 	QTextEdit *results;

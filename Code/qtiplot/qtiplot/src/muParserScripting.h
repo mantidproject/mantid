@@ -60,6 +60,7 @@ class muParserScripting: public ScriptingEnv
     
     // Mantid - follows changes to ScriptingEnv for QScintilla
     virtual QsciLexer* scriptCodeLexer() const { return NULL; }
+    virtual bool supportsEvaluation() { return true; }
 
     // we do not support global variables
     bool setQObject(QObject*, const char*) { return false; }

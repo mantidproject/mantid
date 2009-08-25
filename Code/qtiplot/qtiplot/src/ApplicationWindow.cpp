@@ -161,6 +161,8 @@
 #include <iostream>
 
 //Mantid
+#include "ScriptingWindow.h"
+
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
@@ -302,8 +304,8 @@ void ApplicationWindow::init(bool factorySettings)
 
 	hiddenWindows = new QList<QWidget*>();
 
-	scriptWindow = 0;
-    d_text_editor = NULL;
+	scriptingWindow = NULL;
+	d_text_editor = NULL;
 
 	renamedTables = QStringList();
 	if (!factorySettings)
@@ -422,7 +424,7 @@ void ApplicationWindow::initGlobalConstants()
 
 	show_windows_policy = ActiveFolder;
 	d_script_win_on_top = false;  //M. Gigg, Mantid
-	d_script_win_rect = QRect(0, 0, 500, 300);
+	d_script_win_rect = QRect(0, 0, 600, 660);
 	d_init_window_type = NoWindow;
 
 	QString aux = qApp->applicationDirPath();
@@ -905,8 +907,6 @@ void ApplicationWindow::insertTranslatedStrings()
 	lv->setColumnText (4, tr("Created"));
 	lv->setColumnText (5, tr("Label"));
 
-	if (scriptWindow)
-		scriptWindow->setWindowTitle(tr("MantidPlot - Script Window"));//Mantid
 	explorerWindow->setWindowTitle(tr("Project Explorer"));
 	logWindow->setWindowTitle(tr("Results Log"));
 	undoStackWindow->setWindowTitle(tr("Undo Stack"));
@@ -4111,12 +4111,12 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang, bool force)
 	foreach(QObject *i, findChildren<QObject*>())
 		QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
 	
-	if (scriptWindow)
+	if (scriptingWindow)
 	  {
       //Mantid - This is so that the title of the script window reflects the current scripting language
-	    QApplication::postEvent(scriptWindow, new ScriptingChangeEvent(newEnv)); 
+	    QApplication::postEvent(scriptingWindow, new ScriptingChangeEvent(newEnv)); 
 	    
-	    foreach(QObject *i, scriptWindow->findChildren<QObject*>())
+	    foreach(QObject *i, scriptingWindow->findChildren<QObject*>())
 	      QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
 	  }
 	
@@ -4125,8 +4125,16 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang, bool force)
 
 void ApplicationWindow::showScriptingLangDialog()
 {
-	ScriptingLangDialog* d = new ScriptingLangDialog(scriptEnv, this);
-	d->exec();
+  // If a script is currently active, don't let a new one be selected
+  if( d_user_script_running || (scriptingWindow && scriptingWindow->isScriptRunning()) )
+  {
+    QMessageBox msg_box;
+    msg_box.setText("Cannot change scripting language, a script is still running.");
+    msg_box.exec();
+    return;
+  }
+  ScriptingLangDialog* d = new ScriptingLangDialog(scriptEnv, this);
+  d->exec();
 }
 
 void ApplicationWindow::restartScriptingEnv()
@@ -4548,7 +4556,7 @@ void ApplicationWindow::readSettings()
 	settings.beginGroup("/ScriptWindow");
 	d_script_win_on_top = settings.value("/AlwaysOnTop", false).toBool();  //M. Gigg, Mantid
 	d_script_win_rect = QRect(settings.value("/x", 0).toInt(), settings.value("/y", 0).toInt(),
-				  settings.value("/width", 500).toInt(), settings.value("/height", 300).toInt());
+				  settings.value("/width", 600).toInt(), settings.value("/height", 660).toInt());
 	d_script_win_arrow = settings.value("/ProgressArrow", true).toBool();  // Mantid - restore progress arrow state
 	settings.endGroup();
 
@@ -4863,16 +4871,9 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/KeepAspect", d_keep_plot_aspect);
 	settings.endGroup(); // ExportImage
 
-	if( scriptWindow )
-	{
-	  settings.beginGroup("/ScriptWindow");
-	  settings.setValue("/AlwaysOnTop", d_script_win_on_top);
-	  settings.setValue("/x", d_script_win_rect.x());
-	  settings.setValue("/y", d_script_win_rect.y());
-	  settings.setValue("/width", d_script_win_rect.width());
-	  settings.setValue("/height", d_script_win_rect.height());
-	  settings.setValue("/ProgressArrow", scriptWindow->progressArrowVisible());
-	  settings.endGroup();
+	if( scriptingWindow )
+ 	{
+	  scriptingWindow->saveSettings(); //Mantid
 	}
 
     settings.beginGroup("/ToolBars");
@@ -8342,53 +8343,39 @@ void ApplicationWindow::dragMoveEvent( QDragMoveEvent* e )
 
 void ApplicationWindow::closeEvent( QCloseEvent* ce )
 {
-    #ifdef QTIPLOT_DEMO
-        showDemoVersionMessage();
-    #endif
+#ifdef QTIPLOT_DEMO
+  showDemoVersionMessage();
+#endif
 
-	//Mantid. Need to do something if a script is still running
-	if( ( scriptWindow && scriptWindow->scriptEditor()->isRunning() ) ||  d_user_script_running )
-	{
-	  if( QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", 
-				    tr("Yes"), tr("No")) == 0 )
-	  {
-	    mantidUI->cancelAllRunningAlgorithms();
-	  }
-	  else
-	  {
-	    ce->ignore();
-	    return;
-	  }	  
-	}
-	
-	if (!saved){
-		QString s = tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
-		switch( QMessageBox::information(this, tr("MantidPlot"), s, tr("Yes"), tr("No"),//Mantid
-					tr("Cancel"), 0, 2 ) ){
-			case 0:
-				if (!saveProject()){
-					ce->ignore();
-					break;
-				}
-				saveSettings();
-				ce->accept();
-				break;
+  // Mantid changes here
 
-			case 1:
-			default:
-				saveSettings();
-				ce->accept();
-				break;
+  if( d_user_script_running || ( scriptingWindow && scriptingWindow->isScriptRunning() ) )
+  {
+    if( QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
+    {
+      mantidUI->cancelAllRunningAlgorithms();
+    }
+    else
+    {
+      ce->ignore();
+      return;
+    }	  
+  }
 
-			case 2:
-				ce->ignore();
-				break;
-		}
-	} else {
-
-		saveSettings();
-		ce->accept();
-	}
+  if( !saved )
+  {
+    QString savemsg = tr("Save changes to project: <p><b> %1 </b> ?").arg(projectname);
+    int result = QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"), tr("No"), tr("Cancel"), 0, 2);
+    if( result == 2 || (result == 0 && !saveProject()) )
+    {
+      ce->ignore();
+      return;
+    }
+  }
+ 
+  //Save the settings and exit
+  saveSettings();
+  ce->accept();
 }
 
 void ApplicationWindow::customEvent(QEvent *e)
@@ -14496,23 +14483,28 @@ void ApplicationWindow::goToColumn()
 
 void ApplicationWindow::showScriptWindow()
 {
-	if (!scriptWindow){
-	  scriptWindow = new ScriptWindow(scriptEnv, this, d_script_win_arrow);
-    //scriptWindow->setWindowTitle(tr("MantidPlot - Script Window"));   Mantid - title is now set dynamically
-		scriptWindow->resize(d_script_win_rect.size());
-		scriptWindow->move(d_script_win_rect.topLeft());
-		connect(scriptWindow, SIGNAL(visibilityChanged(bool)), actionShowScriptWindow, SLOT(setOn(bool)));
-	}
+  if (!scriptingWindow)
+  {
+    scriptingWindow = new ScriptingWindow(scriptEnv);
+    scriptingWindow->resize(d_script_win_rect.size());
+    scriptingWindow->move(d_script_win_rect.topLeft());
+  }
 
-	if (!scriptWindow->isVisible()){
-		Qt::WindowFlags flags = 0;
-		if (d_script_win_on_top)
-			flags |= Qt::WindowStaysOnTopHint;
-		scriptWindow->setWindowFlags(flags);
-		scriptWindow->show();
-		scriptWindow->setFocus();
-	} else
-		scriptWindow->hide();
+  if (!scriptingWindow->isVisible())
+  {
+    Qt::WindowFlags flags = Qt::Window;
+    if (d_script_win_on_top)
+    {
+      flags |= Qt::WindowStaysOnTopHint;
+    }
+    scriptingWindow->setWindowFlags(flags);
+    scriptingWindow->show();
+    scriptingWindow->setFocus();
+  } 
+  else
+  {
+    scriptingWindow->hide();
+  }
 }
 
 /*!
@@ -14558,9 +14550,9 @@ ApplicationWindow::~ApplicationWindow()
 
 	delete hiddenWindows;
 
-	if (scriptWindow){
-	  scriptWindow->setAttribute(Qt::WA_DeleteOnClose);
-	  scriptWindow->close();
+	if (scriptingWindow){
+	  scriptingWindow->setAttribute(Qt::WA_DeleteOnClose);
+	  scriptingWindow->close();
 	}
 
     if (d_text_editor)
@@ -14615,10 +14607,10 @@ ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execut
 	setScriptingLanguage("Python");
 	restoreApplicationGeometry();
 	showScriptWindow();
-	scriptWindow->open(fn);
+	scriptingWindow->open(fn);
 	QApplication::restoreOverrideCursor();
 	if (execute)
-		scriptWindow->executeAll();
+		scriptingWindow->executeAll();
 	return this;
 #else
     QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
