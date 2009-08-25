@@ -11,6 +11,9 @@
 # Author: Russell Taylor, 07/11/07
 #
 
+# Remove previously generated files to ensure that they're not inadvertently run
+#   when something in the chain has failed.
+rm -f *.log
 rm -rf runner.*
 
 echo "Generating the source file from the test header files..."
@@ -41,9 +44,5 @@ ln ../../Build/Tests/*.properties .
 ./runner.exe
 echo
 
-# Remove the generated files to ensure that they're not inadvertently run
-#   when something in the chain has failed.
-echo "Cleaning up..."
 rm -f *.properties
-#rm -f *.log
 echo "Done."

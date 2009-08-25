@@ -311,10 +311,13 @@ std::string ShapeFactory::parseSphere(Poco::XML::Element* pElem, std::map<int, S
   Element* pElemCentre = getShapeElement(pElem, "centre"); 
   Element* pElemRadius = getShapeElement(pElem, "radius"); 
 
+  // getDoubleAttribute can throw - put the calls above any new
+  const double radius = getDoubleAttribute(pElemRadius,"val");
+  
   // create sphere
   Sphere* pSphere = new Sphere;
   pSphere->setCentre(parsePosition(pElemCentre)); 
-  pSphere->setRadius(getDoubleAttribute(pElemRadius,"val"));
+  pSphere->setRadius(radius);
   prim[l_id] = pSphere;
 
   std::stringstream retAlgebraMatch;
@@ -365,6 +368,9 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
   Element* pElemAxis = getShapeElement(pElem, "axis");   
   Element* pElemRadius = getShapeElement(pElem, "radius"); 
 
+  // getDoubleAttribute can throw - put the calls above any new
+  const double radius = getDoubleAttribute(pElemRadius,"val");
+  
   // create infinite-cylinder
   Cylinder* pCylinder = new Cylinder();
   pCylinder->setCentre(parsePosition(pElemCentre));      
@@ -374,7 +380,7 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
   pCylinder->setNorm(parsePosition(pElemAxis));
   V3D dummy2 = pCylinder->getNormal();
 
-  pCylinder->setRadius(getDoubleAttribute(pElemRadius,"val"));
+  pCylinder->setRadius(radius);
   prim[l_id] = pCylinder;
 
   std::stringstream retAlgebraMatch;
@@ -403,11 +409,15 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
 
+  // getDoubleAttribute can throw - put the calls above any new
+  const double radius = getDoubleAttribute(pElemRadius,"val");
+  const double height = getDoubleAttribute(pElemHeight,"val");
+  
   // add infinite cylinder
   Cylinder* pCylinder = new Cylinder();
   pCylinder->setCentre(parsePosition(pElemCentre));              
   pCylinder->setNorm(normVec);  
-  pCylinder->setRadius(getDoubleAttribute(pElemRadius,"val"));
+  pCylinder->setRadius(radius);
   prim[l_id] = pCylinder;
 
   std::stringstream retAlgebraMatch;
@@ -417,7 +427,6 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
   // add top plane
   Plane* pPlaneTop = new Plane();
   V3D pointInPlane = parsePosition(pElemCentre);
-  double height = getDoubleAttribute(pElemHeight,"val");
   pointInPlane += (normVec * height); // to get point in top plane
   pPlaneTop->setPlane(pointInPlane, normVec); 
   prim[l_id] = pPlaneTop;
@@ -533,11 +542,14 @@ std::string ShapeFactory::parseInfiniteCone(Poco::XML::Element* pElem, std::map<
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
 
+  // getDoubleAttribute can throw - put the calls above any new
+  const double angle = getDoubleAttribute(pElemAngle,"val");
+  
   // add infinite double cone
   Cone* pCone = new Cone();
   pCone->setCentre(parsePosition(pElemTipPoint));              
   pCone->setNorm(normVec);  
-  pCone->setAngle(getDoubleAttribute(pElemAngle,"val"));
+  pCone->setAngle(angle);
   prim[l_id] = pCone;
 
   std::stringstream retAlgebraMatch;
@@ -575,11 +587,15 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Sur
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
 
+  // getDoubleAttribute can throw - put the calls above any new
+  const double angle = getDoubleAttribute(pElemAngle,"val");
+  const double height = getDoubleAttribute(pElemHeight, "val");
+  
   // add infinite double cone
   Cone* pCone = new Cone();
   pCone->setCentre(parsePosition(pElemTipPoint));              
   pCone->setNorm(normVec);  
-  pCone->setAngle(getDoubleAttribute(pElemAngle,"val"));
+  pCone->setAngle(angle);
   prim[l_id] = pCone;
 
   std::stringstream retAlgebraMatch;
@@ -589,7 +605,6 @@ std::string ShapeFactory::parseCone(Poco::XML::Element* pElem, std::map<int, Sur
   // Plane to cut off cone from below
   Plane* pPlaneTop = new Plane();
   V3D pointInPlane = parsePosition(pElemTipPoint);
-  double height = getDoubleAttribute(pElemHeight, "val");
   pointInPlane -= (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec); 
   prim[l_id] = pPlaneTop;
@@ -713,12 +728,16 @@ std::string ShapeFactory::parseTorus(Poco::XML::Element* pElem, std::map<int, Su
   V3D normVec = parsePosition(pElemAxis);
   normVec.normalize();
 
+  // getDoubleAttribute can throw - put the calls above any new
+  const double radiusCentre = getDoubleAttribute(pElemRadiusFromCentre,"val");
+  const double radiusTube = getDoubleAttribute(pElemRadiusTube, "val");
+  
   // add torus
   Torus* pTorus = new Torus();
   pTorus->setCentre(parsePosition(pElemCentre));              
   pTorus->setNorm(normVec);  
-  pTorus->setDistanceFromCentreToTube(getDoubleAttribute(pElemRadiusFromCentre,"val"));
-  pTorus->setTubeRadius(getDoubleAttribute(pElemRadiusTube,"val"));
+  pTorus->setDistanceFromCentreToTube(radiusCentre);
+  pTorus->setTubeRadius(radiusTube);
   prim[l_id] = pTorus;
 
   std::stringstream retAlgebraMatch;
@@ -745,10 +764,13 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
   Element* pElemOuterRadius = getShapeElement(pElem, "outer-radius");  
   Element* pElemDepth = getShapeElement(pElem, "depth"); 
 
-  double innerRadius = getDoubleAttribute(pElemInnerRadius,"val");
-  double outerRadius = getDoubleAttribute(pElemOuterRadius,"val");
-  double middleRadius = (outerRadius + innerRadius)/2.0;
+  const double innerRadius = getDoubleAttribute(pElemInnerRadius,"val");
+  const double outerRadius = getDoubleAttribute(pElemOuterRadius,"val");
+  const double middleRadius = (outerRadius + innerRadius)/2.0;
 
+  const double depth = getDoubleAttribute(pElemDepth,"val");
+  const double arc = (M_PI/180.0) * getDoubleAttribute(pElemArc,"val");
+  
   V3D normVec(0,0,1);
   V3D centrePoint(-middleRadius,0,0);
 
@@ -773,7 +795,6 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 
   // add top cutoff plane of infinite cylinder ring
   Plane* pPlaneTop = new Plane();
-  double depth = getDoubleAttribute(pElemDepth,"val");
   pPlaneTop->setPlane(V3D(0,0,depth), normVec); 
   prim[l_id] = pPlaneTop;
   retAlgebraMatch << "-" << l_id << " ";
@@ -789,8 +810,6 @@ std::string ShapeFactory::parseSliceOfCylinderRing(Poco::XML::Element* pElem, st
 
 
   // the two planes that are going to cut a slice of the cylinder ring
-
-  double arc = (M_PI/180.0) * getDoubleAttribute(pElemArc,"val");
 
   Plane* pPlaneSlice1 = new Plane();
   pPlaneSlice1->setPlane(V3D(-middleRadius,0,0), V3D(cos(arc/2.0+M_PI/2.0),sin(arc/2.0+M_PI/2.0),0)); 
