@@ -20,6 +20,8 @@
 #include "Poco/DOM/NodeFilter.h"
 #include "Poco/File.h"
 
+#include <sstream>
+
 using Poco::XML::DOMParser;
 using Poco::XML::Document;
 using Poco::XML::Element;
@@ -78,6 +80,7 @@ void LoadInstrument::exec()
   // Remove the path from the filename for use with the InstrumentDataService
   const int stripPath = m_filename.find_last_of("\\/");
   std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
+
   // Check whether the instrument is already in the InstrumentDataService
   if ( InstrumentDataService::Instance().doesExist(instrumentFile) )
   {
@@ -101,7 +104,6 @@ void LoadInstrument::exec()
 
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
-
   if ( !pRootElem->hasChildNodes() )
   {
     g_log.error("XML file: " + m_filename + "contains no root element.");
@@ -126,7 +128,6 @@ void LoadInstrument::exec()
   Geometry::ShapeFactory shapeCreator;
 
   NodeList* pNL_type = pRootElem->getElementsByTagName("type");
-
   if ( pNL_type->length() == 0 )
   {
     g_log.error("XML file: " + m_filename + "contains no type elements.");
@@ -138,6 +139,14 @@ void LoadInstrument::exec()
   {
     Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
     std::string typeName = pTypeElem->getAttribute("name");
+
+    // Each type in the IDF must be uniquely named, hence return error if type
+    // has already been defined
+    if ( getTypeElement.find(typeName) != getTypeElement.end() )
+    {
+      g_log.error("XML file: " + m_filename + "contains more than one type element named " + typeName);
+      throw Kernel::Exception::InstrumentDefinitionError("XML instrument file contains more than one type element named " + typeName, m_filename);
+    }
     getTypeElement[typeName] = pTypeElem;
 
     // identify for now a type to be an assemble by it containing elements
@@ -233,13 +242,15 @@ void LoadInstrument::exec()
 
         if (idList.counted != static_cast<int>(idList.vec.size()) )
         {
+          std::stringstream ss1, ss2;
+          ss1 << idList.vec.size(); ss2 << idList.counted;
           g_log.error("The number of detector IDs listed in idlist named "
             + pElem->getAttribute("idlist") +
             " is not equal to the number of detectors listed in type = "
             + pElem->getAttribute("type"));
           throw Kernel::Exception::InstrumentDefinitionError(
-            "Number of IDs listed in idlist does not match number of detectors listed in type = "
-            + pElem->getAttribute("type"), m_filename);
+            "Number of IDs listed in idlist (=" + ss1.str() + ") does not match number of detectors listed in type = "
+            + pElem->getAttribute("type") + " (=" + ss2.str() + ")", m_filename);
         }
       }
       else
