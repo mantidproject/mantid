@@ -41,6 +41,7 @@ namespace Mantid
 		*/
 		vtkGeometryCacheWriter::~vtkGeometryCacheWriter()
 		{
+		  mRoot->release();
 			mDoc->release();
 		}
 
