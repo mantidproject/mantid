@@ -53,10 +53,11 @@ private:
   void exec();
   void check_validity(API::MatrixWorkspace_const_sptr& w1,
 		  API::MatrixWorkspace_const_sptr& w2,API::MatrixWorkspace_sptr& out);
-
+  void check_masks(const API::MatrixWorkspace_const_sptr& w1,
+		  const API::MatrixWorkspace_const_sptr& w2, const int& index) const;
 };
 
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_NORMALISETOMONITOR_H_ */
+#endif /* MANTID_ALGORITHMS_POINTBYPOINTVCORRECTION_H_ */
