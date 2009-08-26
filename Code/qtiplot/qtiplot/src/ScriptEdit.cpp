@@ -45,7 +45,6 @@
 #include <QApplication>
 #include <Qsci/qscilexer.h>
 #include <Qsci/qsciprinter.h>
-#include "ScriptWindow.h"
 #include <QPrinterInfo>
 #include <cmath>
 #include <QDateTime>
@@ -206,7 +205,6 @@ void ScriptEdit::insertErrorMsg(const QString &message)
   setMarkerBackgroundColor(QColor("red"), m_iCodeMarkerHandle);
   emit outputError(outputSeparator() + message + "\n");
   m_bErrorRaised = true;
-  setEditorActive(true);
 }
 
 void ScriptEdit::scriptPrint(const QString &text)
@@ -276,7 +274,7 @@ void ScriptEdit::executeAll()
 void ScriptEdit::runScript(const QString & code)
 {
    //Disable editor
-  setEditorActive(false);
+  setExecuteActionsEnabled(false);
     
   //Execute the code 
   myScript->setCode(code);
@@ -292,7 +290,7 @@ void ScriptEdit::runScript(const QString & code)
   if( !m_bErrorRaised ) scriptPrint("Script execution completed successfully.");
 
   //Reenable editor
-  setEditorActive(true);
+  setExecuteActionsEnabled(true);
 }
 
 void ScriptEdit::updateLineMarker(int number)
@@ -342,18 +340,9 @@ void ScriptEdit::evaluate()
 
 }
 
-//------------------------------------
-void ScriptEdit::setEditorActive(bool toggle)
-{
-  ScriptWindow *scriptWindow = static_cast<ScriptWindow*>(parent());
-  if( scriptWindow )
-  {
-    scriptWindow->setEditEnabled(toggle);
-  }
-}
-
 void ScriptEdit::setExecuteActionsEnabled(bool toggle)
 {
+  setReadOnly(!toggle);
   actionExecute->setEnabled(toggle);
   actionExecuteAll->setEnabled(toggle);
   actionEval->setEnabled(toggle);
@@ -396,11 +385,6 @@ void ScriptEdit::importCodeBlock(const QString & code)
 QString ScriptEdit::importASCII(const QString &filename)
 {
 
-  ScriptWindow* scriptWindow = static_cast<ScriptWindow*>(parent());
-  if( scriptWindow )
-  {
-    scriptWindow->askSave();
-  }
 	QString filter = scriptEnv->fileFilter();
 	filter += tr("Text") + " (*.txt *.TXT);;";
 	filter += tr("All Files")+" (*)";

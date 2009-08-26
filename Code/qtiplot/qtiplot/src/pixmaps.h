@@ -11098,7 +11098,7 @@ static const char * qtiplot_logo_xpm[] = {
 "                                                                                                                                "};
 
 
-static char * Fit_xpm[] = {
+static const char * Fit_xpm[] = {
 "32 32 3 1",
 " 	c None",
 ".	c #FF0000",

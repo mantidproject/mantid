@@ -87,7 +87,6 @@ public slots:
 
   void updateEditor();
 
-  void setEditorActive(bool);
   void setExecuteActionsEnabled(bool);
   QString outputSeparator();
   void updateLineMarker(int);

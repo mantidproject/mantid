@@ -294,7 +294,6 @@ HEADERS  += src/ApplicationWindow.h \
 			src/LogisticFit.h\
             src/customevents.h\
             src/ScriptingLangDialog.h\
-            src/ScriptWindow.h\
             src/TextFormatButtons.h\
             src/TableStatistics.h\
             src/Spectrogram.h\
@@ -466,7 +465,6 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/ScriptingEnv.cpp\
             src/Script.cpp\
             src/ScriptingLangDialog.cpp\
-            src/ScriptWindow.cpp\
             src/TableStatistics.cpp\
             src/Spectrogram.cpp\
             src/ColorMapEditor.cpp\

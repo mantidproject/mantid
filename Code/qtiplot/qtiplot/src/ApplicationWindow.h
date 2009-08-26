@@ -76,7 +76,6 @@ class FunctionDialog;
 class Folder;
 class FolderListItem;
 class FolderListView;
-class ScriptWindow;
 class Plot3DDialog;
 class TableStatistics;
 class CurveRangeDialog;
