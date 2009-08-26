@@ -1,20 +1,26 @@
 #ifndef SCRIPTMANAGERWIDGET_H_
 #define SCRIPTMANAGERWIDGET_H_
 
-//----------------------------------
+//---------------------------------------------------------
 // Includes
-//----------------------------------
+//---------------------------------------------------------
 #include <QTabWidget>
+#include <QDialog>
 #include "Script.h"
 
-//----------------------------------
+//---------------------------------------------------------
 // Forward declarations
-//----------------------------------
+//--------------------------------------------------------
 class QTabWidget;
 class QPoint;
 class ScriptEditor;
 class QAction;
 class ScriptingWindow;
+class QPushButton;
+class QCheckBox;
+class QComboBox;
+
+class FindReplaceDialog;
 
 /** 
     This class manages ScriptEdit objects and displays them in a series
@@ -58,7 +64,7 @@ public:
   void askSave(int index);
   /// Open a script from a file and read the file into a QString. 
   /// QStrings are implicity shared so the return, seemingly by value, is not expensive
-  QString readScript(const QString& filename);
+  QString readScript(const QString& filename, bool *ok);
   ///Run script code
   bool runScriptCode(const QString & code);
   /// Is a script running?
@@ -66,6 +72,9 @@ public:
   {
     return m_script_executing;
   }
+
+  /// Return the current editor
+  ScriptEditor *currentEditor() const;
 
 signals:
   ///A message is ready to be printed
@@ -86,6 +95,8 @@ public slots:
   void save(int index = -1);
   /// Close all tabs
   void closeAllTabs();
+  /// Show the find dialog
+  void showFindDialog(bool replace = true);
   
   /** @name Execute members.*/
   //@{
@@ -152,9 +163,81 @@ private:
   /// File actions
   QAction *m_new_tab, *m_open_curtab, *m_open_newtab, *m_save, *m_saveas, *m_close_tab;
   ///Edit actions
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste;
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_find;
   /// Script execute actions
   QAction *m_exec, *m_exec_all, *m_eval;
+
+  /// The find replace dialog
+  FindReplaceDialog *m_findrep_dlg;
 };
+
+
+/**
+   @class FindReplaceDialog
+
+   This class raises a dialog to find and optionally replace text within in a text edit. 
+   Note: It came from the main qtiplot repository at r1341 and it has been modified to
+   work with our script window (also added comments). Since it's keyed to work only with Script editing
+   classes, it's definition may aswell just go here
+ */
+class FindReplaceDialog : public QDialog
+{
+  // Qt macro
+  Q_OBJECT
+
+public:
+  ///Constructor
+  FindReplaceDialog(ScriptManagerWidget *manager, bool replace = false, 
+		    QWidget* parent = 0, Qt::WindowFlags fl = 0 );
+
+public slots:
+  /// An option has been toggled or the manager has some update that is necessary
+  void resetSearchFlag();
+
+protected slots:
+  /// Find 
+  bool find(bool backwards = false);
+  /// Replace slot
+  void replace();
+  /// Replace all slot
+  void replaceAll();
+
+private slots:
+  /// A slot for the findClicked button
+  void findClicked();
+
+private:
+  ///The current text editor we are working on
+  ScriptManagerWidget *m_manager;
+  
+  ///Find next match button
+  QPushButton* buttonNext;
+  /// Replace text button
+  QPushButton* buttonReplace;
+  /// Replace all text button
+  QPushButton* buttonReplaceAll;
+  /// Cancel dialog button
+  QPushButton* buttonCancel;
+  
+  /// Find box
+  QComboBox* boxFind;
+  /// Replace box
+  QComboBox* boxReplace;
+  
+  /// Case-sensitive check box
+  QCheckBox *boxCaseSensitive;
+  /// Whole words check box
+  QCheckBox *boxWholeWords;
+  /// Search backwards
+  QCheckBox *boxSearchBackwards;
+  /// Wrap around
+  QCheckBox *boxWrapAround;
+  /// Treat as regular expressions
+  QCheckBox *boxRegex;
+
+  // If a find is in progress
+  bool m_find_inprogress;
+};
+
 
 #endif

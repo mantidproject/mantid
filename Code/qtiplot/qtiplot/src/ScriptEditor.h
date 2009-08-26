@@ -5,7 +5,8 @@
 // Includes
 //----------------------------------
 #include <Qsci/qsciscintilla.h>
-
+#include <QDialog>
+#include <QTextDocument>
 
 //----------------------------------
 // Forward declarations
@@ -94,7 +95,12 @@ public:
   {
     return m_paste;
   }
-  
+
+  /// Find action for this editor
+  inline QAction* findAction() const
+  {
+    return m_find;
+  }  
 
 signals:
   /// Inform observers that undo information is available
@@ -111,8 +117,12 @@ private:
   QString m_filename;
 
   //Each editor needs its own undo/redo etc
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste;
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_find;
 };
+
+
+
+
 
 
 #endif //SCRIPTEDITOR_H_

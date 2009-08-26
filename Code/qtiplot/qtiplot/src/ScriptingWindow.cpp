@@ -175,6 +175,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
 
   // Create menus and actions
   initMenus();
+  editAboutToShow();
 
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->scriptingLanguage() + " Window");
@@ -269,7 +270,12 @@ void ScriptingWindow::editAboutToShow()
   //Paste
   if( m_manager->m_paste ) m_edit_menu->addAction(m_manager->m_paste);
 
+  //Find and replace
+  m_edit_menu->insertSeparator();
+  if( m_manager->m_paste ) m_edit_menu->addAction(m_manager->m_find);
+  
   //Clear output
+  m_edit_menu->insertSeparator();
   m_edit_menu->addAction(m_clear_output);
   
 }
@@ -313,9 +319,10 @@ void ScriptingWindow::initMenus()
   //************* Edit menu *************
   m_edit_menu = menuBar()->addMenu(tr("&Edit"));
   connect(m_edit_menu, SIGNAL(aboutToShow()), this, SLOT(editAboutToShow()));
-  // Clear output
-  m_clear_output = new QAction(tr("&Clear Output"), this);
+   // Clear output
+   m_clear_output = new QAction(tr("&Clear Output"), this);
   connect(m_clear_output, SIGNAL(activated()), m_output_dock, SLOT(clear()));
+  
 
   //************* Run menu *************
   m_run_menu = menuBar()->addMenu(tr("E&xecute"));

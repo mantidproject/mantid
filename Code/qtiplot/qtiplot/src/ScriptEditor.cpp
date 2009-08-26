@@ -9,6 +9,13 @@
 #include <QMessageBox>
 #include <QAction>
 
+#include <iostream>
+
+//***************************************************************************
+//
+// ScriptEditor class
+//
+//***************************************************************************
 //------------------------------------------------
 // Public member functions
 //------------------------------------------------
@@ -49,6 +56,7 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
   m_paste->setShortcut(tr("Ctrl+V"));
   connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
 
+  //Update the editor
   update();
 }
 
@@ -100,3 +108,4 @@ void ScriptEditor::update()
   emit undoAvailable(isUndoAvailable());
   emit redoAvailable(isRedoAvailable());
 }
+
