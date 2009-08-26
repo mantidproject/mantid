@@ -82,7 +82,7 @@
 #include "ScaleDraw.h"
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
-#include "ScriptWindow.h"
+#include "ScriptingWindow.h"
 #include "TableStatistics.h"
 #include "Fit.h"
 #include "MultiPeakFit.h"
