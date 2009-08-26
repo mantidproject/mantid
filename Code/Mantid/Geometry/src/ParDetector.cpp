@@ -10,7 +10,7 @@ namespace Geometry
  *  @param base Pointer to a base instrument detector
  *  @param map Pointer to a parameter map
  */
-ParDetector::ParDetector(const Detector* base, const ParameterMap* map) :
+ParDetector::ParDetector(const Detector* base, const ParameterMap& map) :
   ParObjComponent(base,map)
 {
 }
@@ -80,7 +80,7 @@ double ParDetector::solidAngle(const V3D& observer) const
 
 bool ParDetector::isMasked() const
 {
-  Parameter_sptr par = m_map->get(m_base,"masked");
+  Parameter_sptr par = m_map.get(m_base,"masked");
   return par ? true : false;
 }
 

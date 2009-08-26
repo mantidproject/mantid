@@ -20,7 +20,7 @@ public:
     Component q;
 
     ParameterMap pmap;
-    ParametrizedComponent pq(&q,&pmap);
+    ParametrizedComponent pq(&q,pmap);
 
     TS_ASSERT_EQUALS(pq.getName(),"");
     TS_ASSERT(!pq.getParent());
@@ -36,7 +36,7 @@ public:
     //name and parent
     Component q("Child",V3D(5,6,7),Quat(1,1,1,1),&parent);
     ParameterMap pmap;
-    ParametrizedComponent pq(&q,&pmap);
+    ParametrizedComponent pq(&q,pmap);
 
     TS_ASSERT_EQUALS(pq.getName(),"Child");
     //check the parent

@@ -19,7 +19,7 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : Workspace(), m_axes(), m_isInitialized(false),
   sptr_instrument(new Instrument), m_spectramap(), sptr_sample(new Sample),
-  m_YUnit("Counts"), m_isDistribution(false), sptr_parmap(new Geometry::ParameterMap), m_masks()
+  m_YUnit("Counts"), m_isDistribution(false), m_parmap(), m_masks()
 {}
 
 /// Destructor
@@ -82,7 +82,7 @@ void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
     if (tmp)
     {
       sptr_instrument = tmp->baseInstrument();
-      sptr_parmap = tmp->getParameterMap();
+      m_parmap = tmp->getParameterMap();
     }
   }
 }
@@ -174,8 +174,8 @@ double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) con
  */
 IInstrument_sptr MatrixWorkspace::getInstrument()const
 {
-  if ( sptr_parmap->size() == 0 )  return sptr_instrument;
-  ParInstrument* pi = new ParInstrument(sptr_instrument,sptr_parmap);
+  if ( m_parmap->size() == 0 )  return sptr_instrument;
+  ParInstrument* pi = new ParInstrument(sptr_instrument,m_parmap);
   IInstrument* ii = static_cast<IInstrument*>(pi);
   boost::shared_ptr<IInstrument> tmp(ii);
   return (tmp);
@@ -221,9 +221,21 @@ void MatrixWorkspace::newSample()
  *  Used when creating workspaces for multiple period data: each period must have
  *  instrumet parameters of its own.
  */
-void MatrixWorkspace::newInstrumentParameters() 
+//void MatrixWorkspace::newInstrumentParameters() 
+//{
+//    sptr_parmap.reset(new Geometry::ParameterMap);
+//}
+
+/**  Returns a new copy of the instrument parameters
+ */
+Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const
 {
-    sptr_parmap.reset(new Geometry::ParameterMap);
+  return m_parmap.access();
+}
+
+const Geometry::ParameterMap& MatrixWorkspace::constInstrumentParameters() const
+{
+  return *m_parmap;
 }
 
 /// The number of axes which this workspace has
@@ -392,7 +404,7 @@ void MatrixWorkspace::populateInstrumentParameters()
     // Get pointer to parameter map that we may add parameters to and information about
     // the parameters that my be specified in the instrument definition file (IDF)
 
-    boost::shared_ptr<Geometry::ParameterMap> paramMap = instrumentParameters();
+    Geometry::ParameterMap& paramMap = instrumentParameters();
     std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& paramInfoFromIDF = instrument->getLogfileCache();
 
 
@@ -424,13 +436,13 @@ void MatrixWorkspace::populateInstrumentParameters()
 
             std::string paramN = ((*it).second)->m_paramName;
             if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
-                paramMap->addPositionCoordinate(((*it).second)->m_component, paramN, value);
+                paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
             else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )
             {
-                paramMap->addRotationParam(((*it).second)->m_component, paramN, value);
+                paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
             }
             else
-                paramMap->addDouble(((*it).second)->m_component, paramN, value);
+                paramMap.addDouble(((*it).second)->m_component, paramN, value);
         }
     }
 }

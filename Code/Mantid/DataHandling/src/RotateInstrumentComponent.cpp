@@ -88,13 +88,13 @@ void RotateInstrumentComponent::exec()
   Quat Rot = Rot0 * Quat(angle,V3D(X,Y,Z));
 
   //Need to get the address to the base instrument component
-  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->instrumentParameters();
+  Geometry::ParameterMap& pmap = WS->instrumentParameters();
 
   // Set "pos" instrument parameter. 
-  Parameter_sptr par = pmap->get(comp.get(),"rot");
+  Parameter_sptr par = pmap.get(comp.get(),"rot");
   if (par) par->set(Rot);
   else
-      pmap->addQuat(comp.get(),"rot",Rot);
+      pmap.addQuat(comp.get(),"rot",Rot);
 
   return;
 }

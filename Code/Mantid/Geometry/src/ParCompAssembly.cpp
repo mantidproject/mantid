@@ -11,7 +11,7 @@ namespace Mantid
 namespace Geometry
 {
 
-ParCompAssembly::ParCompAssembly(const CompAssembly* base, const ParameterMap* map)
+ParCompAssembly::ParCompAssembly(const CompAssembly* base, const ParameterMap& map)
       :ParametrizedComponent(base,map){}
 
 /*! Clone method

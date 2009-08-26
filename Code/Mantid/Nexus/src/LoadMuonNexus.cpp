@@ -192,20 +192,8 @@ namespace Mantid
                 localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                     (WorkspaceFactory::Instance().create(localWorkspace));
                 localWorkspace->newSample();
-                localWorkspace->newInstrumentParameters();
+                //localWorkspace->newInstrumentParameters(); ???
 
-                // Create a WorkspaceProperty for the new workspace of a higher period
-                // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
-                //                (for all but the first period, which has no suffix)
-                /*std::stringstream suffix;
-                suffix << (period+1);
-				std::string outws("");
-                outws +="_"+suffix.str();
-                std::string WSName = localWSName + "_" + suffix.str();
-                declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
-				if(wsGrpSptr)wsGrpSptr->add(localWSName);
-                g_log.information() << "Workspace " << WSName << " created. \n";
-				if(wsGrpSptr)wsGrpSptr->add(localWSName);*/
             }
             std::string outws("");
 			if(m_numberOfPeriods>1)

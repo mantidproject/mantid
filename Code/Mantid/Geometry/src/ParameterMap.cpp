@@ -23,6 +23,11 @@ private:
     std::string m_name;///< parameter name
 };
 
+ParameterMap::ParameterMap(const ParameterMap& copy)
+:m_map(copy.m_map)
+{
+}
+
 Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name)const
 {
     const ComponentID id = comp->getComponentID();

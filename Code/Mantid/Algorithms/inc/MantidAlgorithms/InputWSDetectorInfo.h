@@ -56,7 +56,7 @@ namespace Mantid
       /// a pointer to the instrument within the workspace
       boost::shared_ptr<Instrument> m_Instru;
       /// pointer to the map that links detectors to there masking with the input workspace
-      boost::shared_ptr<Geometry::ParameterMap> m_Pmap;
+      Geometry::ParameterMap* m_Pmap;
     };
   }
 }

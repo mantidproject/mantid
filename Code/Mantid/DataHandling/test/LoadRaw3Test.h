@@ -328,8 +328,8 @@ public:
     Mantid::Geometry::IDetector_sptr ptrDet = i->getDetector(60);
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
-    boost::shared_ptr<Mantid::Geometry::ParameterMap> pmap = output2D->instrumentParameters();
-    TS_ASSERT_EQUALS( pmap->size(), 140);
+    Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
+    TS_ASSERT_EQUALS( pmap.size(), 140);
   }
 
   void testTwoTimeRegimes()

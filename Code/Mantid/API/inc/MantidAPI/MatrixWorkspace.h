@@ -87,8 +87,10 @@ public:
   virtual long int getMemorySize() const;
 
   /// Returns the set of parameters modifying the base instrument
-  boost::shared_ptr<Geometry::ParameterMap> instrumentParameters() const {return sptr_parmap;}
-  void newInstrumentParameters();
+  Geometry::ParameterMap& instrumentParameters()const;
+  /// Const version
+  const Geometry::ParameterMap& constInstrumentParameters() const;
+  //void newInstrumentParameters();
   // Add parameters to the instrument parameter map
   void populateInstrumentParameters();
 
@@ -178,7 +180,7 @@ private:
   bool m_isDistribution;
 
   /// Parameters modifying the base instrument
-  boost::shared_ptr<Geometry::ParameterMap> sptr_parmap;
+ mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
 
   /// The set of masked bins in a map keyed on spectrum index
   std::map< int, MaskList > m_masks;

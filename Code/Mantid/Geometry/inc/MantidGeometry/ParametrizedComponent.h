@@ -48,7 +48,7 @@ class DLLExport ParametrizedComponent:public virtual IComponent
 {
 public:
     /// Constructor
-    ParametrizedComponent(const IComponent* base, const ParameterMap* map);
+    ParametrizedComponent(const IComponent* base, const ParameterMap& map);
     /// Copy Constructor
     ParametrizedComponent(const ParametrizedComponent&);
     ///  destructor
@@ -121,7 +121,7 @@ protected:
     const IComponent* m_base;
 
     /// Reference to the map
-    const ParameterMap* m_map;
+    const ParameterMap& m_map;
 
     /// Parent ParametrizedComponent
     //mutable ParametrizedComponent *m_parent;

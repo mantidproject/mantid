@@ -253,7 +253,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
   // Get the parameter map
-  boost::shared_ptr<const ParameterMap> pmap = outputWS->instrumentParameters();
+  const ParameterMap& pmap = outputWS->constInstrumentParameters();
 
   // Get the unit object for each workspace
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
@@ -307,7 +307,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         // If an indirect instrument, try getting Efixed from the geometry
         if (emode==2)
         {
-          Parameter_sptr par = pmap->get(det->getComponent(),"Efixed");
+          Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
           if (par) efixed = par->value<double>();
           g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
         }

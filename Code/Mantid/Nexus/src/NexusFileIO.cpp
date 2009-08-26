@@ -1533,8 +1533,8 @@ namespace Mantid
       @return true for OK, false for error
       */
 
-      const boost::shared_ptr<const Geometry::ParameterMap> params = ws->instrumentParameters();
-      std::string str = params->asString();
+      const Geometry::ParameterMap& params = ws->constInstrumentParameters();
+      std::string str = params.asString();
       if (str.empty()) str = " ";
       return writeNxNote("instrument_parameter_map"," "," "," ",str);
 
@@ -1556,8 +1556,8 @@ namespace Mantid
       if( ! readNxText( "data", value, attributes, avalues) )
         return(false);
 
-      boost::shared_ptr<Geometry::ParameterMap> params = ws->instrumentParameters();
-      params->clear();
+      Geometry::ParameterMap& params = ws->instrumentParameters();
+      params.clear();
       IInstrument_sptr instr = ws->getBaseInstrument();
 
       typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
@@ -1577,7 +1577,7 @@ namespace Mantid
           std::string val = *i;
           Geometry::IComponent* comp = instr->getComponentByName(compName).get();
           if (!comp) continue;
-          params->add(type,comp,name,val);
+          params.add(type,comp,name,val);
         }
       }
 

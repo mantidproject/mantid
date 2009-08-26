@@ -320,7 +320,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
       }
     
       //Need to get the address to the base instrument component
-      boost::shared_ptr<Geometry::ParameterMap> pmap = WS->instrumentParameters();
+      Geometry::ParameterMap& pmap = WS->instrumentParameters();
       ParametrizedComponent* pcomp = dynamic_cast<ParametrizedComponent*>(comp.get());
       const IComponent* baseComp;
       if (pcomp)
@@ -333,10 +333,10 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
       }
     
       // Set "pos" instrument parameter. 
-      Parameter_sptr par = pmap->get(baseComp,"pos");
+      Parameter_sptr par = pmap.get(baseComp,"pos");
       if (par) par->set(Pos);
       else
-          pmap->addV3D(baseComp,"pos",Pos);
+          pmap.addV3D(baseComp,"pos",Pos);
 
       // Set the "sca" instrument parameter
       std::map<int,double>::iterator it=scaleMap.find(idet);
@@ -347,10 +347,10 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
           if(maxScale<scale) maxScale=scale;
           aveScale+=fabs(1.0-scale);
           scaleCount++;
-          par = pmap->get(baseComp,"sca");
+          par = pmap.get(baseComp,"sca");
           if (par) par->set(V3D(1.0,it->second,1.0));
           else
-              pmap->addV3D(baseComp,"sca",V3D(1.0,it->second,1.0));
+              pmap.addV3D(baseComp,"sca",V3D(1.0,it->second,1.0));
       }
       //
 	  prog+= double(1)/m_vectDet.size();

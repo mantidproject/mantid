@@ -171,7 +171,7 @@ void LoadRaw3::exec()
       localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
       localWorkspace->newSample();
-      localWorkspace->newInstrumentParameters();
+      //localWorkspace->newInstrumentParameters(); ????
 
     }
     isisRaw->skipData(period * (m_numberOfSpectra + 1));
@@ -560,7 +560,7 @@ void LoadRaw3::populateInstrumentParameters(DataObjects::Workspace2D_sptr localW
 
   // Get pointer to parameter map that we may add parameters to and information about
   // the parameters that my be specified in the instrument definition file (IDF)
-  boost::shared_ptr<Geometry::ParameterMap> paramMap = localWorkspace->instrumentParameters();
+  Geometry::ParameterMap& paramMap = localWorkspace->instrumentParameters();
   std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& paramInfoFromIDF =
       instrument->getLogfileCache();
 
@@ -595,11 +595,11 @@ void LoadRaw3::populateInstrumentParameters(DataObjects::Workspace2D_sptr localW
 
       std::string paramN = ((*it).second)->m_paramName;
       if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-        paramMap->addPositionCoordinate(((*it).second)->m_component, paramN, value);
+        paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
       else if (paramN.compare("rot") == 0)
-        paramMap->addRotationParam(((*it).second)->m_component, paramN, value);
+        paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
       else
-        paramMap->addDouble(((*it).second)->m_component, paramN, value);
+        paramMap.addDouble(((*it).second)->m_component, paramN, value);
     }
   } // finished looping over logfiles
 
@@ -614,11 +614,11 @@ void LoadRaw3::populateInstrumentParameters(DataObjects::Workspace2D_sptr localW
     // special case if parameter name is "x", "y" or "z" and "rot"
     std::string paramN = ((*it).second)->m_paramName;
     if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-      paramMap->addPositionCoordinate(((*it).second)->m_component, paramN, value);
+      paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
     else if (paramN.compare("rot") == 0)
-      paramMap->addRotationParam(((*it).second)->m_component, paramN, value);
+      paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
     else
-      paramMap->addDouble(((*it).second)->m_component, paramN, value);
+      paramMap.addDouble(((*it).second)->m_component, paramN, value);
   }
 }
 

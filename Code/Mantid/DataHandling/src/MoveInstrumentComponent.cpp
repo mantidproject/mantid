@@ -104,7 +104,7 @@ void MoveInstrumentComponent::exec()
   }
 
   //Need to get the address to the base instrument component
-  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->instrumentParameters();
+  Geometry::ParameterMap& pmap = WS->instrumentParameters();
   ParametrizedComponent* pcomp = dynamic_cast<ParametrizedComponent*>(comp.get());
   const IComponent* baseComp;
   if (pcomp)
@@ -117,10 +117,10 @@ void MoveInstrumentComponent::exec()
   }
 
   // Set "pos" instrument parameter. 
-  Parameter_sptr par = pmap->get(baseComp,"pos");
+  Parameter_sptr par = pmap.get(baseComp,"pos");
   if (par) par->set(Pos);
   else
-      pmap->addV3D(baseComp,"pos",Pos);
+      pmap.addV3D(baseComp,"pos",Pos);
 
   return;
 }

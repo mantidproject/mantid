@@ -5,22 +5,18 @@ namespace Mantid
 namespace Geometry
 {
 
-ParametrizedComponent::ParametrizedComponent(const IComponent* base,  const ParameterMap* map)
-:m_base(base),m_map(map)//,m_parent(0)
+ParametrizedComponent::ParametrizedComponent(const IComponent* base,  const ParameterMap& map)
+:m_base(base),m_map(map)
 {
 }
 
 ParametrizedComponent::ParametrizedComponent(const ParametrizedComponent& comp)
+:m_base(comp.m_base),m_map(comp.m_map)
 {
-    m_base = comp.m_base;
-    m_map = comp.m_map;
-    //m_parent = 0;
 }
 
 ParametrizedComponent::~ParametrizedComponent()
 {
-    //std::cerr<<"PDeleted\n";
-    //if (m_parent) delete m_parent;
 }
 
 /*! Clone method
@@ -159,7 +155,7 @@ void ParametrizedComponent::rotate(double angle, const V3D& axis)
  */
 V3D ParametrizedComponent::getRelativePos() const
 {
-    Parameter_sptr par = m_map->get(m_base,"pos");
+    Parameter_sptr par = m_map.get(m_base,"pos");
     if (par)
     {
         return par->value<V3D>();
@@ -172,7 +168,7 @@ V3D ParametrizedComponent::getRelativePos() const
  */
 V3D ParametrizedComponent::getScaleFactorP() const
 {
-    Parameter_sptr par = m_map->get(m_base,"sca");
+    Parameter_sptr par = m_map.get(m_base,"sca");
     if (par)
     {
         return par->value<V3D>();
@@ -207,7 +203,7 @@ V3D ParametrizedComponent::getPos() const
  */
 const Quat& ParametrizedComponent::getRelativeRot() const
 {
-    Parameter_sptr par = m_map->get(m_base,"rot");
+    Parameter_sptr par = m_map.get(m_base,"rot");
     if (par)
     {
         return par->value<Quat>();

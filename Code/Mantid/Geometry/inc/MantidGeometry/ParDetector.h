@@ -46,7 +46,7 @@ class DLLExport ParDetector : public ParObjComponent, public IDetector
 public:
   ///A string representation of the component type
 	virtual std::string type() const {return "ParDetectorComponent";}
-	ParDetector(const Detector* base, const ParameterMap* map);
+	ParDetector(const Detector* base, const ParameterMap& map);
 	virtual ~ParDetector();
 	virtual IComponent* clone() const {return new ParDetector(*this);}
 	void setID(int);
@@ -94,7 +94,7 @@ public:
     template <class TYPE>
     std::vector<TYPE> getParameter(const std::string & p_name) const
     {
-      Parameter_sptr param = m_map->get(this, p_name);
+      Parameter_sptr param = m_map.get(this, p_name);
       if( param != Parameter_sptr() )
       {
 	return std::vector<TYPE>(1, param->value<TYPE>());

@@ -15,7 +15,7 @@ namespace Geometry
      *   @param base A pointer to the base ObjComponent
      *   @param map A pointer to the parameter map 
      */
-    ParObjComponent::ParObjComponent(const ObjComponent* base, const ParameterMap* map)
+    ParObjComponent::ParObjComponent(const ObjComponent* base, const ParameterMap& map)
         :ParametrizedComponent(base,map)
     {
     }

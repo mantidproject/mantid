@@ -46,7 +46,7 @@ public:
   ///String description of the type of component
   virtual std::string type() const { return "ParCompAssembly";}
   /// Constructor
-  ParCompAssembly(const CompAssembly* base, const ParameterMap* map); 
+  ParCompAssembly(const CompAssembly* base, const ParameterMap& map); 
   //! Destructor
   ~ParCompAssembly(){}
   //! Make a clone of the present component

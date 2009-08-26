@@ -16,8 +16,8 @@ namespace API
 Kernel::Logger& ParInstrument::g_log = Kernel::Logger::get("ParInstrument");
 
 /// Constructor with name
-ParInstrument::ParInstrument(const boost::shared_ptr<Instrument> instr, const boost::shared_ptr<Geometry::ParameterMap> map)
-:Geometry::ParCompAssembly(instr.get(),map.get()),m_instr(instr),m_parmap(map)
+ParInstrument::ParInstrument(const boost::shared_ptr<Instrument> instr, const Kernel::cow_ptr<Geometry::ParameterMap> map)
+:Geometry::ParCompAssembly(instr.get(),*map),m_instr(instr),m_parmap(map)
 {}
 
   
@@ -29,7 +29,7 @@ std::map<int, Geometry::IDetector_sptr> ParInstrument::getDetectors() const
   std::map<int, Geometry::IDetector_sptr> res,dets = m_instr->getDetectors();
   for(std::map<int, Geometry::IDetector_sptr>::const_iterator it=dets.begin();it!=dets.end();it++)
     res.insert(std::pair<int, Geometry::IDetector_sptr>
-    (it->first,Geometry::IDetector_sptr( new Geometry::ParDetector( dynamic_cast<Geometry::Detector*>(it->second.get()), m_parmap.get()  ))));
+    (it->first,Geometry::IDetector_sptr( new Geometry::ParDetector( dynamic_cast<Geometry::Detector*>(it->second.get()), *m_parmap  ))));
   return res;
 }
 

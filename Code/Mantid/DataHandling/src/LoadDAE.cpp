@@ -255,7 +255,7 @@ namespace Mantid
             localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                 (WorkspaceFactory::Instance().create(localWorkspace));
             localWorkspace->newSample();
-            localWorkspace->newInstrumentParameters();
+            //localWorkspace->newInstrumentParameters(); ????
         }
 
         int counter = 0;

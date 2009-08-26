@@ -77,7 +77,7 @@ void MaskDetectors::exec()
   }
 
   // Need to get hold of the parameter map
-  boost::shared_ptr<Geometry::ParameterMap> pmap = WS->instrumentParameters();
+  Geometry::ParameterMap& pmap = WS->instrumentParameters();
   
   // If explicitly given a list of detectors to mask, just mark those.
   // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
@@ -90,7 +90,7 @@ void MaskDetectors::exec()
     {
       if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
       {
-        pmap->addBool(det,"masked",true);
+        pmap.addBool(det,"masked",true);
       }
     }
     detsMasked = true;
@@ -116,7 +116,7 @@ void MaskDetectors::exec()
       {
         if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*iter).get()) )
         {
-          pmap->addBool(det,"masked",true);
+          pmap.addBool(det,"masked",true);
         }        
       }
     }

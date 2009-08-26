@@ -7,6 +7,7 @@
 #include "MantidAPI/ParInstrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/DetectorGroup.h"
+#include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -33,7 +34,6 @@ public:
     det3 = boost::shared_ptr<Detector>(new Detector("det3",0));
     det3->setID(11);
     instrument->markAsDetector(det3.get());
-    pmap.reset(new Mantid::Geometry::ParameterMap);
   }
 
   ~ParInstrumentTest()
@@ -84,7 +84,7 @@ public:
 
 private:
   boost::shared_ptr<Instrument> instrument;
-  boost::shared_ptr<Mantid::Geometry::ParameterMap> pmap;
+  Mantid::Kernel::cow_ptr<Mantid::Geometry::ParameterMap> pmap;
   boost::shared_ptr<Detector> det, det2, det3;
 };
 

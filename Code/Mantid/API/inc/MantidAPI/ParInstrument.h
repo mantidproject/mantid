@@ -9,6 +9,7 @@
 #include "MantidGeometry/ParObjComponent.h"
 #include "MantidGeometry/Detector.h"
 #include "MantidAPI/Instrument.h"
+#include "MantidKernel/cow_ptr.h"
 #include <string>
 #include <ostream>
 
@@ -54,7 +55,7 @@ public:
   std::string type() const { return "ParInstrument"; }
 
   //ParInstrument( Geometry::ParameterMap* map){}
-  ParInstrument(const boost::shared_ptr<Instrument> instr,const boost::shared_ptr<Geometry::ParameterMap> map);
+  ParInstrument(const boost::shared_ptr<Instrument> instr,const Kernel::cow_ptr<Geometry::ParameterMap> map);
   ///Virtual destructor
   virtual ~ParInstrument() {}
 
@@ -65,7 +66,7 @@ public:
   /// Pointer to the 'real' instrument
   boost::shared_ptr<Instrument> baseInstrument()const{return m_instr;}
   /// Pointer to the ParameterMap holding the parameters of the modified instrument components.
-  boost::shared_ptr<Geometry::ParameterMap> getParameterMap(){return m_parmap;}
+  Kernel::cow_ptr<Geometry::ParameterMap> getParameterMap(){return m_parmap;}
 
 
   /// return reference to detector cache 
@@ -88,7 +89,7 @@ private:
   /// Pointer to the "real" instrument.
   boost::shared_ptr<Instrument> m_instr;
   /// Pointer to the parameter map
-  boost::shared_ptr<Geometry::ParameterMap> m_parmap;
+  Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

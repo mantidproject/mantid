@@ -59,7 +59,7 @@ public:
   virtual std::string type() {return "ParObjComponent";}
 
   /// Constructor
-  ParObjComponent(const ObjComponent* base, const ParameterMap* map);
+  ParObjComponent(const ObjComponent* base, const ParameterMap& map);
 
   /** Virtual Copy Constructor
    *  @returns A pointer to a copy of the input ObjComponent
