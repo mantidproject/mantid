@@ -33,15 +33,21 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("Workspace",
         "",Direction::Output), "The name of the workspace that will be created.");
 
+	  //fix for #782
 	  m_seperator_options.push_back("CSV");
 	  m_seperator_options.push_back("Tab");
 	  m_seperator_options.push_back("Space");
+	  m_seperator_options.push_back("Colon");
+	  m_seperator_options.push_back("SemiColon");
+	
 	  declareProperty("Separator", "CSV", new ListValidator(m_seperator_options));
 
 	  m_separatormap.insert(separator_pair("CSV",","));
 	  m_separatormap.insert(separator_pair("Tab","\t"));
 	  m_separatormap.insert(separator_pair("Space"," "));
-
+	  m_separatormap.insert(separator_pair("SemiColon",";"));
+	  m_separatormap.insert(separator_pair("Colon",":"));
+	
     }
 
     /** 
@@ -64,6 +70,7 @@ namespace Mantid
         size_t ncols = 0;  // number of comma-separated columns
         size_t nSpectra = 0;
         size_t nBins = 0;
+		//fix for #782
 		std::map<std::string,const char*>::const_iterator it;
 		it=m_separatormap.find(separator);
 		const char* ch;
