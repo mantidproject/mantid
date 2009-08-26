@@ -117,6 +117,7 @@
 #include "LineProfileTool.h"
 #include "RangeSelectorTool.h"
 #include "PlotToolInterface.h"
+#include "Mantid/PeakFitDialog.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -167,6 +168,7 @@
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
 #include "Mantid/MantidCustomActionDialog.h"
+#include "Mantid/PeakPickerTool.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -178,6 +180,7 @@ extern "C"
 void file_compress(char  *file, char  *mode);
 void file_uncompress(char  *file);
 }
+
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
 : QMainWindow(), scripted(ScriptingLangManager::newEnv(this))
@@ -738,6 +741,13 @@ void ApplicationWindow::initToolBars()
 	btnRemovePoints->setIcon(QIcon(QPixmap(gomme_xpm)));
 	plotTools->addAction(btnRemovePoints);
 
+	btnPeakPick = new QAction(tr("Select Peak..."), this);
+	//btnPeakPick->setShortcut( tr("Alt+B") );
+	btnPeakPick->setActionGroup(dataTools);
+	btnPeakPick->setCheckable( true );
+	btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
+	plotTools->addAction(btnPeakPick);
+
 	connect( dataTools, SIGNAL( triggered( QAction* ) ), this, SLOT( pickDataTool( QAction* ) ) );
 	plotTools->addSeparator ();
 
@@ -890,11 +900,21 @@ void ApplicationWindow::initToolBars()
 	formatToolBar->hide();
 
 	//Mantid
+
+	mantidPeakFitTools = new QToolBar(tr( "Peaks" ), this);
+	mantidPeakFitTools->setObjectName("peakTools"); // this is needed for QMainWindow::restoreState()
+	mantidPeakFitTools->setIconSize( QSize(18,20) );
+	addToolBar( Qt::TopToolBarArea, mantidPeakFitTools);
+	QAction* actionFitPeaks = new QAction(tr("Fit"), this);
+	connect(actionFitPeaks, SIGNAL(activated()), this, SLOT(showPeakFitDialog()));
+  connect(btnPeakPick,SIGNAL(toggled(bool)),mantidPeakFitTools,SLOT(setVisible(bool)));
+  mantidPeakFitTools->addAction(actionFitPeaks);
+
 // 	QList<QToolBar *> toolBars = toolBarsList();
 // 	foreach (QToolBar *t, toolBars)
 // 		connect(t, SIGNAL(actionTriggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
 }
-
+ 
 void ApplicationWindow::insertTranslatedStrings()
 {
 	if (projectname == "untitled")
@@ -922,6 +942,7 @@ void ApplicationWindow::insertTranslatedStrings()
 	plotMatrixBar->setWindowTitle(tr("Matrix Plot"));
 	plot3DTools->setWindowTitle(tr("3D Surface"));
 	formatToolBar->setWindowTitle(tr("Format"));
+  mantidPeakFitTools->setWindowTitle(tr("Peak Fit"));
 
 	fileMenu->changeItem(recentMenuID, tr("&Recent Projects"));
 
@@ -7061,6 +7082,46 @@ void ApplicationWindow::showCursor()
 	displayBar->show();
 }
 
+/**  Switch on the peak selecting tool
+ */
+void ApplicationWindow::selectPeak()
+{
+	MultiLayer *plot = (MultiLayer *)activeWindow(MultiLayerWindow);
+	if (!plot)
+		return;
+	if (plot->isEmpty()){
+		QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
+				tr("<h4>There are no plot layers available in this window.</h4>"
+					"<p><h4>Please add a layer and try again!</h4>"));
+		btnPointer->setChecked(true);
+		return;
+	}
+
+	if ((Graph*)plot->activeGraph()->isPiePlot()){
+		QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
+				tr("This functionality is not available for pie plots!"));
+		btnPointer->setChecked(true);
+		return;
+	}
+
+  QList<Graph *> layers = plot->layersList();
+  foreach(Graph *g, layers){
+    if (g->isPiePlot() || !g->curves())
+    {
+      continue;
+    }
+    if (g->validCurvesDataSize())
+    {
+      PeakPickerTool* ppicker = new PeakPickerTool(g, this);
+      g->setActiveTool(ppicker);
+      connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
+      mantidPeakFitTools->show();
+      mantidPeakFitTools->setEnabled(true);
+    }
+  }
+
+}
+
 void ApplicationWindow::newLegend()
 {
 	MultiLayer *plot = (MultiLayer *)activeWindow(MultiLayerWindow);
@@ -10907,6 +10968,8 @@ void ApplicationWindow::pickDataTool( QAction* action )
 		drawArrow();
 	else if (action == btnLine)
 		drawLine();
+	else if (action == btnPeakPick)
+		selectPeak();
 }
 
 void ApplicationWindow::connectSurfacePlot(Graph3D *plot)
@@ -14829,6 +14892,12 @@ void ApplicationWindow::showToolBarsMenu()
 	connect(actionFormatToolBar, SIGNAL(toggled(bool)), formatToolBar, SLOT(setVisible(bool)));
 	toolBarsMenu.addAction(actionFormatToolBar);
 
+	QAction *actionMantidPeakFitToolBar = new QAction(mantidPeakFitTools->windowTitle(), this);
+	actionMantidPeakFitToolBar->setCheckable(true);
+	actionMantidPeakFitToolBar->setChecked(mantidPeakFitTools->isVisible());
+	connect(actionMantidPeakFitToolBar, SIGNAL(toggled(bool)), mantidPeakFitTools, SLOT(setVisible(bool)));
+	toolBarsMenu.addAction(actionMantidPeakFitToolBar);
+
 	QAction *action = toolBarsMenu.exec(QCursor::pos());
 	if (!action)
 		return;
@@ -15434,4 +15503,24 @@ QString ApplicationWindow::endOfLine()
 		break;
 	}
 	return "\n";
+}
+
+void ApplicationWindow::showPeakFitDialog()
+{
+  MultiLayer* w = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
+  if (!w) return;
+
+  Graph* g = w->activeGraph();
+  if (!g) return;
+
+  PeakPickerTool* ppicker = dynamic_cast<PeakPickerTool*>(g->activeTool());
+  if (!ppicker) return;
+
+  PeakFitDialog* dlg = new PeakFitDialog(this,ppicker);
+  dlg->show();
+}
+
+void ApplicationWindow::enableMantidPeakFit(bool yes)
+{
+  mantidPeakFitTools->setEnabled(yes);
 }
