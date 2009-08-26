@@ -60,11 +60,14 @@ public:
   ScriptOutputDock(const QString & title, QWidget *parent = 0, 
 		   Qt::WindowFlags flags = 0);
 
+  //Is there anything here
+  bool isEmpty() const;
+
 public slots:
   /// Clear the text
   void clear();
   /// Print the text within the window
-  //  void printOutput();
+  void print();
   /// Change the title based on the script's execution state
   void setScriptIsRunning(bool running);    
 	      
@@ -111,10 +114,14 @@ private:
   void customEvent(QEvent * event);
 
 private slots:
+  /// File menu is about to show
+  void fileAboutToShow();
   /// Edit menu is about to show
   void editAboutToShow();
   /// Update window flags
   void updateWindowFlags();
+  /// Update based on tab changes
+  void tabSelectionChanged();
 
 private:
   /// The script editors manager
@@ -133,7 +140,7 @@ private:
   /// Window menu
   QMenu *m_window_menu;
   /// Window actions
-  QAction *m_always_on_top, *m_hide, *m_toggle_output;
+  QAction *m_always_on_top, *m_hide, *m_toggle_output, *m_print_output;
 };
 
 #endif //SCRIPTINGWINDOW_H_

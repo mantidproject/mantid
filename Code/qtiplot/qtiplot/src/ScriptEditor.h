@@ -96,11 +96,15 @@ public:
     return m_paste;
   }
 
-  /// Find action for this editor
-  inline QAction* findAction() const
+  /// Print action for this editor
+  inline QAction* printAction() const
   {
-    return m_find;
+    return m_print;
   }  
+
+public slots:
+  /// Print the text within the widget
+  void print();
 
 signals:
   /// Inform observers that undo information is available
@@ -117,7 +121,7 @@ private:
   QString m_filename;
 
   //Each editor needs its own undo/redo etc
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_find;
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_print;
 };
 
 

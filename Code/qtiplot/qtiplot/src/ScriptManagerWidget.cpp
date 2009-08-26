@@ -64,7 +64,7 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent) :
   // Execution state change
   connect(this, SIGNAL(ScriptIsActive(bool)), this, SLOT(setScriptIsRunning(bool)));
   //Tab change
-  connect(this, SIGNAL(currentChanged(int)), this, SLOT(newTabSelected()));
+  //  connect(this, SIGNAL(currentChanged(int)), this, SLOT(newTabSelected()));
   
   // Start with a blank tab
   newTab();
@@ -190,6 +190,77 @@ ScriptEditor* ScriptManagerWidget::currentEditor() const
 {
   if( count() == 0 ) return NULL;
   return static_cast<ScriptEditor*>(currentWidget());
+}
+
+/**
+ * Undo action for the current editor
+ */
+QAction* ScriptManagerWidget::undoAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->undoAction();
+  }
+  else return NULL;
+}
+/**
+ * Redo action for the current editor
+ */
+QAction* ScriptManagerWidget::redoAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->redoAction();
+  }
+  else return NULL;
+}
+
+/**
+ * Cut action for the current editor
+ */
+QAction* ScriptManagerWidget::cutAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->cutAction();
+  }
+  else return NULL;
+}
+
+/** 
+ * Copy action for the current editor
+ */
+QAction* ScriptManagerWidget::copyAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->copyAction();
+  }
+  else return NULL;
+}
+
+/**
+ * Paste action for the current editor
+ */
+QAction* ScriptManagerWidget::pasteAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->pasteAction();
+  }
+  else return NULL;
+}
+
+/**
+ * Print action for the current editor
+ */
+QAction* ScriptManagerWidget::printAction() const
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    return editor->printAction();
+  }
+  else return NULL;
 }
 
 //-------------------------------------------
@@ -383,11 +454,13 @@ void ScriptManagerWidget::editorContextMenu(const QPoint &)
   //File actions
   context.addAction(m_open_curtab);
   context.addAction(m_save);
-  context.insertSeparator();
+  context.addAction(printAction());
+  
   // Edit actions
-  context.addAction(m_copy);
-  context.addAction(m_cut);
-  context.addAction(m_paste);
+  context.insertSeparator();
+  context.addAction(copyAction());
+  context.addAction(cutAction());
+  context.addAction(pasteAction());
 
   context.insertSeparator();
   
@@ -427,14 +500,14 @@ void ScriptManagerWidget::closeClickedTab()
  */
 void ScriptManagerWidget::newTabSelected()
 {
-  // Rewire all editing actions so that they refer to the new editor
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
-  if( !editor ) return;
-  m_undo = editor->undoAction();
-  m_redo = editor->redoAction();
-  m_cut = editor->cutAction();
-  m_copy = editor->copyAction();
-  m_paste = editor->pasteAction();
+//   // Rewire all editing actions so that they refer to the new editor
+//   ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
+//   if( !editor ) return;
+//   m_undo = editor->undoAction();
+//   m_redo = editor->redoAction();
+//   m_cut = editor->cutAction();
+//   m_copy = editor->copyAction();
+//   m_paste = editor->pasteAction();
 }
 
 /**
@@ -670,9 +743,6 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
   //Get the widget attached to the tab first as this is not deleted
   //when remove is called
   editor->deleteLater();
-  m_undo = NULL; m_redo = NULL;
-  m_cut = NULL; m_copy = NULL;
-  m_paste = NULL;
   //  If we are removing the final tab, close the find replace dialog if it exists and is visible
   if( m_findrep_dlg && m_findrep_dlg->isVisible() && count() == 1 )
   {

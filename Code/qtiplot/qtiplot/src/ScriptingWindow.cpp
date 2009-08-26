@@ -13,8 +13,8 @@
 #include <QAction>
 #include <QSettings>
 #include <QCloseEvent>
-
-#include <iostream>
+#include <QPrintDialog>
+#include <QPrinter>
 
 //***************************************************************************
 //
@@ -52,6 +52,14 @@ ScriptOutputDock::ScriptOutputDock(const QString & title, QWidget * parent,
 	  SLOT(showContextMenu(const QPoint&)));
 
   setWidget(m_text_display);
+}
+
+/**
+ * Is there anything here
+ */
+bool ScriptOutputDock::isEmpty() const
+{
+  return m_text_display->document()->isEmpty();
 }
 
 /**
@@ -119,27 +127,24 @@ void ScriptOutputDock::showContextMenu(const QPoint & pos)
 
   if( !m_text_display->document()->isEmpty() )
   {
-    //    QAction* print = new QAction(QPixmap(fileprint_xpm), "Print", this);
-    //    connect(print, SIGNAL(activated()), this, SLOT(printOutput()));
-    // menu.addAction(print);
+    QAction* print = new QAction(QPixmap(fileprint_xpm), "&Print", this);
+    connect(print, SIGNAL(activated()), this, SLOT(print()));
+    menu.addAction(print);
   }
   
   menu.exec(m_text_display->mapToGlobal(pos));
 }
 
-// void ScriptOutputDock::printOutput()
-// {
-//   QTextDocument* doc = m_text_display->document(); 
-//   QPrinter printer;
-//   printer.setColorMode(QPrinter::GrayScale);
-//   printer.setCreator("MantidPlot");
-//   QPrintDialog printDialog(&printer);
-//   printDialog.setWindowTitle("MantidPlot - Print Script Output");
-//   if (printDialog.exec() == QDialog::Accepted) 
-//   {
-//     doc->print(&printer);
-//   }
-// }
+void ScriptOutputDock::print()
+{
+  QPrinter printer;
+  QPrintDialog *print_dlg = new QPrintDialog(&printer, this);
+  print_dlg->setWindowTitle(tr("Print Output"));
+  if (print_dlg->exec() != QDialog::Accepted)
+    return;
+  QTextDocument document(m_text_display->text());
+  document.print(&printer);
+}
 
 //***************************************************************************
 //
@@ -175,7 +180,11 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
 
   // Create menus and actions
   initMenus();
+  fileAboutToShow();
   editAboutToShow();
+
+  // This connection must occur after the objects have been created and initialized
+  connect(m_manager, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged()));
 
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->scriptingLanguage() + " Window");
@@ -253,33 +262,74 @@ void ScriptingWindow::customEvent(QEvent *event)
 }
 
 /**
+ * Construct the file menu
+ */
+void ScriptingWindow::fileAboutToShow()
+{
+  m_file_menu->clear();
+
+  // New tab
+  m_file_menu->addAction(m_manager->m_new_tab);
+  // Open a file in current tab
+  m_file_menu->addAction(m_manager->m_open_curtab);
+  //Open in new tab
+  m_file_menu->addAction(m_manager->m_open_newtab);
+
+  // Save a script
+  m_file_menu->insertSeparator();
+  m_file_menu->addAction(m_manager->m_save);
+  // Save a script under a new file name
+  m_file_menu->addAction(m_manager->m_saveas);
+
+  //Print
+  if( m_manager->count() > 0 )
+  {
+    m_file_menu->addAction(m_manager->printAction());
+  }
+  if( !m_output_dock->isEmpty() )
+  {
+    m_file_menu->addAction(m_print_output);
+  }
+
+  // Close current tab
+  m_file_menu->insertSeparator();
+  m_file_menu->addAction(m_manager->m_close_tab);
+
+}
+
+/**
  * Construct the edit menu
  */
 void ScriptingWindow::editAboutToShow()
 {
   m_edit_menu->clear();
 
-  // Undo
-  if( m_manager->m_undo ) m_edit_menu->addAction(m_manager->m_undo);
-  //Redo 
-  if( m_manager->m_redo ) m_edit_menu->addAction(m_manager->m_redo);
-  //Cut
-  if( m_manager->m_cut ) m_edit_menu->addAction(m_manager->m_cut);
-  //Copy
-  if( m_manager->m_copy ) m_edit_menu->addAction(m_manager->m_copy);
-  //Paste
-  if( m_manager->m_paste ) m_edit_menu->addAction(m_manager->m_paste);
+  if( m_manager->count() > 0 )
+  {
+    // Undo
+    m_edit_menu->addAction(m_manager->undoAction());
+    //Redo 
+    m_edit_menu->addAction(m_manager->redoAction());
+    //Cut
+    m_edit_menu->addAction(m_manager->cutAction());
+    //Copy
+    m_edit_menu->addAction(m_manager->copyAction());
+    //Paste
+    m_edit_menu->addAction(m_manager->pasteAction());
 
-  //Find and replace
-  m_edit_menu->insertSeparator();
-  if( m_manager->m_paste ) m_edit_menu->addAction(m_manager->m_find);
+    //Find and replace
+    m_edit_menu->insertSeparator();
+    m_edit_menu->addAction(m_manager->m_find);
+    m_edit_menu->insertSeparator();
   
+  }
   //Clear output
-  m_edit_menu->insertSeparator();
-  m_edit_menu->addAction(m_clear_output);
-  
+  m_edit_menu->addAction(m_clear_output);  
 }
 
+/**
+ *
+ */
 void ScriptingWindow::updateWindowFlags()
 {
   Qt::WindowFlags flags = Qt::Window;
@@ -293,6 +343,13 @@ void ScriptingWindow::updateWindowFlags()
   show();
 }
 
+void ScriptingWindow::tabSelectionChanged()
+{
+  // Ensure that the shortcuts are active
+  fileAboutToShow();
+  editAboutToShow();
+}
+
 //-------------------------------------------
 // Private non-slot member functions
 //-------------------------------------------
@@ -303,24 +360,16 @@ void ScriptingWindow::initMenus()
 {
   //************* File menu *************
   m_file_menu = menuBar()->addMenu(tr("&File"));
-  // New tab
-  m_file_menu->addAction(m_manager->m_new_tab);
-  // Open a file in current tab
-  m_file_menu->addAction(m_manager->m_open_curtab);
-  //Open in new tab
-  m_file_menu->addAction(m_manager->m_open_newtab);
-  // Save a script
-  m_file_menu->addAction(m_manager->m_save);
-  // Save a script under a new file name
-  m_file_menu->addAction(m_manager->m_saveas);
-  // Close current tab
-  m_file_menu->addAction(m_manager->m_close_tab);
+  connect(m_file_menu, SIGNAL(aboutToShow()), this, SLOT(fileAboutToShow()));
+
+  m_print_output = new QAction(tr("Print &Output"), this);
+  connect(m_print_output, SIGNAL(activated()), m_output_dock, SLOT(print()));
 
   //************* Edit menu *************
   m_edit_menu = menuBar()->addMenu(tr("&Edit"));
   connect(m_edit_menu, SIGNAL(aboutToShow()), this, SLOT(editAboutToShow()));
    // Clear output
-   m_clear_output = new QAction(tr("&Clear Output"), this);
+  m_clear_output = new QAction(tr("&Clear Output"), this);
   connect(m_clear_output, SIGNAL(activated()), m_output_dock, SLOT(clear()));
   
 

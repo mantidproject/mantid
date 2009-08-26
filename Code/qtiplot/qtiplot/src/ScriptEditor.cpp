@@ -8,8 +8,8 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QAction>
-
-#include <iostream>
+#include <QPrintDialog>
+#include <QPrinter>
 
 //***************************************************************************
 //
@@ -56,6 +56,11 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
   m_paste->setShortcut(tr("Ctrl+V"));
   connect(m_paste, SIGNAL(activated()), this, SLOT(paste()));
 
+  //Print
+  m_print = new QAction(tr("&Print script"), this);
+  m_print->setShortcut(tr("Ctrl+P"));
+  connect(m_print, SIGNAL(activated()), this, SLOT(print()));
+
   //Update the editor
   update();
 }
@@ -67,9 +72,6 @@ ScriptEditor::~ScriptEditor()
 {
 }
 
-//-----------------------------------------------
-// Public slots
-//-----------------------------------------------
 /**
  * Save the text to the given filename
  * @param filename The filename to use
@@ -95,6 +97,25 @@ bool ScriptEditor::saveScript(const QString & filename)
   file.close();
 
   return true;
+}
+
+//-----------------------------------------------
+// Public slots
+//-----------------------------------------------
+/**
+ * Print the current text
+ */
+void ScriptEditor::print()
+{
+  QPrinter printer(QPrinter::HighResolution);
+  QPrintDialog *print_dlg = new QPrintDialog(&printer, this);
+  print_dlg->setWindowTitle(tr("Print Script"));
+  if (print_dlg->exec() != QDialog::Accepted) 
+  {
+    return;
+  }
+  QTextDocument document(text());
+  document.print(&printer);
 }
 
 //-----------------------------------------------------

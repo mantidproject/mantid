@@ -14,8 +14,8 @@
 class QTabWidget;
 class QPoint;
 class ScriptEditor;
-class QAction;
 class ScriptingWindow;
+class QAction;
 class QPushButton;
 class QCheckBox;
 class QComboBox;
@@ -72,9 +72,20 @@ public:
   {
     return m_script_executing;
   }
-
   /// Return the current editor
   ScriptEditor *currentEditor() const;
+  /// Undo action for the current editor
+  QAction* undoAction() const;
+  /// Redo action for the current editor
+  QAction* redoAction() const;
+  /// Cut action for the current editor
+  QAction* cutAction() const;
+  /// Copy action for the current editor
+  QAction* copyAction() const;
+  /// Paste action for the current editor
+  QAction* pasteAction() const;
+  /// Print action for the current editor
+  QAction* printAction() const;
 
 signals:
   ///A message is ready to be printed
@@ -162,8 +173,8 @@ private:
 
   /// File actions
   QAction *m_new_tab, *m_open_curtab, *m_open_newtab, *m_save, *m_saveas, *m_close_tab;
-  ///Edit actions
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_find;
+  ///Edit actions that are necessary for the manager
+  QAction *m_find;
   /// Script execute actions
   QAction *m_exec, *m_exec_all, *m_eval;
 
