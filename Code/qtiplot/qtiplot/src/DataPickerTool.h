@@ -48,6 +48,7 @@ class DataPickerTool : public QwtPlotPicker, public PlotToolInterface
 		enum MoveMode {Free, Vertical, Horizontal};
 		DataPickerTool(Graph *graph, ApplicationWindow *app, Mode mode, const QObject *status_target=NULL, const char *status_slot="");
 		virtual ~DataPickerTool();
+    Mode getMode()const{return d_mode;}
 		virtual bool eventFilter(QObject *obj, QEvent *event);
 		bool keyEventFilter(QKeyEvent *ke);
 		QwtPlotCurve *selectedCurve() const { return d_selected_curve; }

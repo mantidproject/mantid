@@ -997,6 +997,7 @@ private slots:
 	void customColumnActions();
 	void disableToolbars();
 	void customToolBars(QMdiSubWindow* w);
+  void customMultilayerToolButtons(MultiLayer* w);
 	void customMenu(QMdiSubWindow* w);
 	void windowActivated(QMdiSubWindow *w);
 	//@}

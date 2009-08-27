@@ -557,6 +557,8 @@ class Graph: public QWidget //QwtPlot //QWidget
 		 * tool interface.
 		 */
 		bool enableRangeSelectors(const QObject *status_target=NULL, const char *status_slot="");
+    /// Check if the gange selectors are active
+    bool areRangeSelectorsOn()const{return !d_range_selector.isNull();}
 
 		//! \name Border and Margin
 		//@{

@@ -741,12 +741,12 @@ void ApplicationWindow::initToolBars()
 	btnRemovePoints->setIcon(QIcon(QPixmap(gomme_xpm)));
 	plotTools->addAction(btnRemovePoints);
 
-	btnPeakPick = new QAction(tr("Select Peak..."), this);
-	//btnPeakPick->setShortcut( tr("Alt+B") );
-	btnPeakPick->setActionGroup(dataTools);
-	btnPeakPick->setCheckable( true );
-	btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
-	plotTools->addAction(btnPeakPick);
+	//btnPeakPick = new QAction(tr("Select Peak..."), this);
+	////btnPeakPick->setShortcut( tr("Alt+B") );
+	//btnPeakPick->setActionGroup(dataTools);
+	//btnPeakPick->setCheckable( true );
+	//btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
+	//plotTools->addAction(btnPeakPick);
 
 	connect( dataTools, SIGNAL( triggered( QAction* ) ), this, SLOT( pickDataTool( QAction* ) ) );
 	plotTools->addSeparator ();
@@ -899,16 +899,27 @@ void ApplicationWindow::initToolBars()
 	formatToolBar->setEnabled(false);
 	formatToolBar->hide();
 
-	//Mantid
+	// ---  Mantid Peak Fitting tool --- //
 
 	mantidPeakFitTools = new QToolBar(tr( "Peaks" ), this);
 	mantidPeakFitTools->setObjectName("peakTools"); // this is needed for QMainWindow::restoreState()
 	mantidPeakFitTools->setIconSize( QSize(18,20) );
 	addToolBar( Qt::TopToolBarArea, mantidPeakFitTools);
-	QAction* actionFitPeaks = new QAction(tr("Fit"), this);
+
+  QAction* actionFitPeaks = new QAction(tr("Fit"), this);
 	connect(actionFitPeaks, SIGNAL(activated()), this, SLOT(showPeakFitDialog()));
-  connect(btnPeakPick,SIGNAL(toggled(bool)),mantidPeakFitTools,SLOT(setVisible(bool)));
   mantidPeakFitTools->addAction(actionFitPeaks);
+
+	btnPeakPick = new QAction(tr("Select Peak..."), this);
+	//btnPeakPick->setShortcut( tr("Alt+B") );
+	btnPeakPick->setActionGroup(dataTools);
+	btnPeakPick->setCheckable( true );
+	btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
+	mantidPeakFitTools->addAction(btnPeakPick);
+
+  connect(btnPeakPick,SIGNAL(toggled(bool)),mantidPeakFitTools,SLOT(setVisible(bool)));
+
+  // ---------------------------------- //
 
 // 	QList<QToolBar *> toolBars = toolBarsList();
 // 	foreach (QToolBar *t, toolBars)
@@ -1411,7 +1422,7 @@ void ApplicationWindow::customColumnActions()
 
 void ApplicationWindow::customToolBars(QMdiSubWindow* w)
 {
-    disableToolbars();
+  disableToolbars();
 	if (!w)
         return;
 
@@ -1419,6 +1430,10 @@ void ApplicationWindow::customToolBars(QMdiSubWindow* w)
         if(!plotTools->isVisible())
             plotTools->show();
         plotTools->setEnabled (true);
+        if (!mantidPeakFitTools->isVisible())
+          mantidPeakFitTools->show();
+        mantidPeakFitTools->setEnabled(true);
+        customMultilayerToolButtons((MultiLayer*)w);
 		if(d_format_tool_bar && !formatToolBar->isVisible()){
 			formatToolBar->setEnabled (true);
             formatToolBar->show();
@@ -1458,6 +1473,7 @@ void ApplicationWindow::disableToolbars()
 	columnTools->setEnabled(false);
 	plot3DTools->setEnabled(false);
 	plotMatrixBar->setEnabled(false);
+  mantidPeakFitTools->setEnabled(false);
 }
 
 void ApplicationWindow::plot3DRibbon()
@@ -15523,4 +15539,53 @@ void ApplicationWindow::showPeakFitDialog()
 void ApplicationWindow::enableMantidPeakFit(bool yes)
 {
   mantidPeakFitTools->setEnabled(yes);
+}
+
+/**  Switch on the right tool buttons associated with a MultiLayer window
+ *   @param w The active MultiLayer window.
+ */
+void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
+{
+  if (!w)
+  {
+    btnPointer->setOn(true);
+    return;
+  }
+
+  Graph* g = w->activeGraph();
+  if (g)
+  {
+    PlotToolInterface* tool = g->activeTool();
+    if (g->zoomOn())
+      btnZoomIn->setOn(true);
+    else if (g->areRangeSelectorsOn())
+      btnSelect->setOn(true);
+    else if (dynamic_cast<PeakPickerTool*>(tool))
+      btnPeakPick->setOn(true);
+    else if (dynamic_cast<DataPickerTool*>(tool))
+    {
+      switch(((DataPickerTool*)tool)->getMode())
+      {
+      case DataPickerTool::Move:
+        btnMovePoints->setOn(true);
+        break;
+      case DataPickerTool::Remove:
+        btnRemovePoints->setOn(true);
+        break;
+      case DataPickerTool::Display:
+        btnCursor->setOn(true);
+        break;
+      default:
+        btnPointer->setOn(true);
+      }
+    }
+    else if (dynamic_cast<DrawPointTool*>(tool))
+      actionDrawPoints->setOn(true);
+    else if (dynamic_cast<ScreenPickerTool*>(tool))
+      btnPicker->setOn(true);
+    else
+      btnPointer->setOn(true);
+  }
+  else
+    btnPointer->setOn(true);
 }
