@@ -102,7 +102,7 @@ public:
   void saveSettings();
   /// Open a script in a new tab. This is here for backwards compatability with the old
   /// ScriptWindow class
-  void open(const QString & filename);
+  void open(const QString & filename, bool newtab = true);
   /// Execute all code. This is here for backwards compatability with the old
   /// ScriptWindow class
   void executeAll();

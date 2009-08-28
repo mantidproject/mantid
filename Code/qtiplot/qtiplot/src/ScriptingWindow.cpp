@@ -259,10 +259,11 @@ void ScriptingWindow::saveSettings()
  * Open a script directly. This is here for backwards compatability with the old ScriptWindow
  * class
  * @param filename The file name
+ * @param newtab Do we want a new tab
  */
-void ScriptingWindow::open(const QString & filename)
+void ScriptingWindow::open(const QString & filename, bool newtab)
 {
-  m_manager->openInNewTab(filename);
+  m_manager->open(newtab, filename);
 }
 
 void ScriptingWindow::executeAll()

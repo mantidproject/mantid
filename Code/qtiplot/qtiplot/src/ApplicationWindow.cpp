@@ -13014,6 +13014,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 
 	QString str;
 	bool exec = false;
+	bool quit = false;
 	bool default_settings = false;
 	foreach(str, args){
 		if( (str == "-a" || str == "--about") ||
@@ -13070,8 +13071,16 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 				QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
 						tr("<b> %1 </b>: Wrong locale option or no translation available!").arg(locale));
 		}
-		else if (str.startsWith("--execute") || str.startsWith("-x"))
-			exec = true;
+		else if (str.endsWith("--execute") || str.endsWith("-x"))
+		{
+		  exec = true;
+		  quit = false;
+		}		
+		else if (str.endsWith("--execandquit") || str.endsWith("-xq"))
+		{
+		  exec = true;
+		  quit = true;
+		}
 		else if (str.startsWith("-") || str.startsWith("--"))
 		{
 			QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
@@ -13106,9 +13115,9 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 		saveSettings();//the recent projects must be saved
 
 		if (exec)
-			loadScript(file_name, exec, default_settings);
+		  loadScript(file_name, exec, quit);
 		else
-			open(file_name, default_settings, false);
+		  open(file_name, default_settings, false);
 	}
 }
 
@@ -14680,17 +14689,22 @@ void ApplicationWindow::cascade()
     modifiedProject();
 }
 
-ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execute, bool)
+ApplicationWindow * ApplicationWindow::loadScript(const QString& fn, bool execute, bool quit)
 {
 #ifdef SCRIPTING_PYTHON
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));	
 	setScriptingLanguage("Python");
 	restoreApplicationGeometry();
 	showScriptWindow();
-	scriptingWindow->open(fn);
+	scriptingWindow->open(fn, false);
 	QApplication::restoreOverrideCursor();
 	if (execute)
 		scriptingWindow->executeAll();
+	if( quit ) 
+	{
+	  saved = true;
+	  this->close();
+	}
 	return this;
 #else
     QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
