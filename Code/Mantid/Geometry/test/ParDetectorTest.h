@@ -2,9 +2,9 @@
 #define MANTID_TESTPARDETECTOR__
 
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Detector.h"
-#include "MantidGeometry/ParDetector.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParDetector.h"
+#include "MantidGeometry/Instrument/Component.h"
 
 using namespace Mantid::Geometry;
 

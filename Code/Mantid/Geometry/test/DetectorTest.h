@@ -2,8 +2,8 @@
 #define MANTID_TESTDETECTOR__
 
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/Detector.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/Component.h"
 
 using namespace Mantid::Geometry;
 

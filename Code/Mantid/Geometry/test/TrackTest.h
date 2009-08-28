@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Track.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/V3D.h"
 
 using namespace Mantid;

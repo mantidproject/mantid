@@ -9,15 +9,15 @@
 #include <ctime>
 
 #include "MantidGeometry/V3D.h" 
-#include "MantidGeometry/Object.h" 
-#include "MantidGeometry/Cylinder.h" 
-#include "MantidGeometry/Sphere.h" 
-#include "MantidGeometry/Plane.h" 
-#include "MantidGeometry/Algebra.h" 
-#include "MantidGeometry/SurfaceFactory.h" 
-#include "MantidGeometry/Track.h" 
+#include "MantidGeometry/Objects/Object.h" 
+#include "MantidGeometry/Surfaces/Cylinder.h" 
+#include "MantidGeometry/Surfaces/Sphere.h" 
+#include "MantidGeometry/Surfaces/Plane.h" 
+#include "MantidGeometry/Math/Algebra.h" 
+#include "MantidGeometry/Surfaces/SurfaceFactory.h" 
+#include "MantidGeometry/Objects/Track.h" 
 
-#include "MantidGeometry/GluGeometryHandler.h"
+#include "MantidGeometry/Rendering/GluGeometryHandler.h"
 
 using namespace Mantid;
 using namespace Geometry;

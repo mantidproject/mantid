@@ -2,9 +2,9 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/DetectorGroup.h"
-#include "MantidGeometry/ParObjComponent.h"
-#include "MantidGeometry/ParDetector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ParObjComponent.h"
+#include "MantidGeometry/Instrument/ParDetector.h"
 #include <algorithm>
 #include <iostream>
 

@@ -179,67 +179,67 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\Acomp.cpp"
+				RelativePath=".\src\Math\Acomp.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Algebra.cpp"
+				RelativePath=".\src\Math\Algebra.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\BnId.cpp"
+				RelativePath=".\src\Math\BnId.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\CacheGeometryGenerator.cpp"
+				RelativePath=".\src\Rendering\CacheGeometryGenerator.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\CacheGeometryHandler.cpp"
+				RelativePath=".\src\Rendering\CacheGeometryHandler.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\CacheGeometryRenderer.cpp"
+				RelativePath=".\src\Rendering\CacheGeometryRenderer.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\CompAssembly.cpp"
+				RelativePath=".\src\Instrument\CompAssembly.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Component.cpp"
+				RelativePath=".\src\Instrument\Component.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Cone.cpp"
+				RelativePath=".\src\Surfaces\Cone.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Cylinder.cpp"
+				RelativePath=".\src\Surfaces\Cylinder.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Detector.cpp"
+				RelativePath=".\src\Instrument\Detector.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\DetectorGroup.cpp"
+				RelativePath=".\src\Instrument\DetectorGroup.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\General.cpp"
+				RelativePath=".\src\Surfaces\General.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GeometryHandler.cpp"
+				RelativePath=".\src\Rendering\GeometryHandler.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GluGeometryHandler.cpp"
+				RelativePath=".\src\Rendering\GluGeometryHandler.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\GluGeometryRenderer.cpp"
+				RelativePath=".\src\Rendering\GluGeometryRenderer.cpp"
 				>
 			</File>
 			<File
@@ -251,23 +251,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Line.cpp"
+				RelativePath=".\src\Objects\Line.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\LineIntersectVisit.cpp"
+				RelativePath=".\src\Objects\LineIntersectVisit.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Material.cpp"
+				RelativePath=".\src\Objects\Material.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\mathSupport.cpp"
+				RelativePath=".\src\Math\mathSupport.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Matrix.cpp"
+				RelativePath=".\src\Math\Matrix.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -289,79 +289,75 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\MatrixBase.cpp"
+				RelativePath=".\src\Math\MatrixBase.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ObjComponent.cpp"
+				RelativePath=".\src\Instrument\ObjComponent.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Object.cpp"
+				RelativePath=".\src\Objects\Object.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ObjectSurfaceEvaluator.cpp"
+				RelativePath=".\src\Rendering\OCGeometryGenerator.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\OCGeometryGenerator.cpp"
+				RelativePath=".\src\Rendering\OCGeometryHandler.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\OCGeometryHandler.cpp"
+				RelativePath=".\src\Rendering\OCGeometryRenderer.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\OCGeometryRenderer.cpp"
+				RelativePath=".\src\Instrument\Parameter.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Parameter.cpp"
+				RelativePath=".\src\Instrument\ParameterMap.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ParameterMap.cpp"
+				RelativePath=".\src\Instrument\ParametrizedComponent.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ParametrizedComponent.cpp"
+				RelativePath=".\src\Instrument\ParCompAssembly.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ParCompAssembly.cpp"
+				RelativePath=".\src\Instrument\ParDetector.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ParDetector.cpp"
+				RelativePath=".\src\Instrument\ParObjComponent.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ParObjComponent.cpp"
+				RelativePath=".\src\Surfaces\Plane.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Plane.cpp"
+				RelativePath=".\src\Math\PolyBase.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\PolyBase.cpp"
+				RelativePath=".\src\Math\PolyFunction.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\PolyFunction.cpp"
+				RelativePath=".\src\Math\PolyVar.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\PolyVar.cpp"
+				RelativePath=".\src\Math\PolyVarOne.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\PolyVarOne.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\Quadratic.cpp"
+				RelativePath=".\src\Surfaces\Quadratic.cpp"
 				>
 			</File>
 			<File
@@ -369,7 +365,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\RegexSupport.cpp"
+				RelativePath=".\src\Math\RegexSupport.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -391,47 +387,47 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\RotCounter.cpp"
+				RelativePath=".\src\Math\RotCounter.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\RuleItems.cpp"
+				RelativePath=".\src\Objects\RuleItems.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Rules.cpp"
+				RelativePath=".\src\Objects\Rules.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\ShapeFactory.cpp"
+				RelativePath=".\src\Objects\ShapeFactory.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Sphere.cpp"
+				RelativePath=".\src\Surfaces\Sphere.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\SupportGeometry.cpp"
+				RelativePath=".\src\Math\SupportGeometry.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Surface.cpp"
+				RelativePath=".\src\Surfaces\Surface.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\SurfaceFactory.cpp"
+				RelativePath=".\src\Surfaces\SurfaceFactory.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Torus.cpp"
+				RelativePath=".\src\Surfaces\Torus.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Track.cpp"
+				RelativePath=".\src\Objects\Track.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Triple.cpp"
+				RelativePath=".\src\Math\Triple.cpp"
 				>
 			</File>
 			<File
@@ -439,11 +435,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\vtkGeometryCacheReader.cpp"
+				RelativePath=".\src\Rendering\vtkGeometryCacheReader.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\vtkGeometryCacheWriter.cpp"
+				RelativePath=".\src\Rendering\vtkGeometryCacheWriter.cpp"
 				>
 			</File>
 		</Filter>
@@ -453,11 +449,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\MantidGeometry\Acomp.h"
+				RelativePath=".\inc\MantidGeometry\Math\Acomp.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Algebra.h"
+				RelativePath=".\test\AcompTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Math\Algebra.h"
 				>
 			</File>
 			<File
@@ -469,27 +469,31 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\BaseVisit.h"
+				RelativePath=".\inc\MantidGeometry\Objects\BaseVisit.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\BnId.h"
+				RelativePath=".\inc\MantidGeometry\Math\BnId.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\CacheGeometryGenerator.h"
+				RelativePath=".\test\BnIdTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\CacheGeometryHandler.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\CacheGeometryGenerator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\CacheGeometryRenderer.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\CacheGeometryHandler.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\CompAssembly.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\CacheGeometryRenderer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Instrument\CompAssembly.h"
 				>
 			</File>
 			<File
@@ -497,7 +501,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Component.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\Component.h"
 				>
 			</File>
 			<File
@@ -505,7 +509,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Cone.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Cone.h"
 				>
 			</File>
 			<File
@@ -513,7 +517,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Cylinder.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Cylinder.h"
 				>
 			</File>
 			<File
@@ -521,11 +525,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Detector.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\Detector.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\DetectorGroup.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\DetectorGroup.h"
 				>
 			</File>
 			<File
@@ -537,7 +541,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\General.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\General.h"
 				>
 			</File>
 			<File
@@ -545,15 +549,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\GeometryHandler.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\GeometryHandler.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\GluGeometryHandler.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\GluGeometryHandler.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\GluGeometryRenderer.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\GluGeometryRenderer.h"
 				>
 			</File>
 			<File
@@ -577,11 +581,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Line.h"
+				RelativePath=".\inc\MantidGeometry\Objects\Line.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\LineIntersectVisit.h"
+				RelativePath=".\inc\MantidGeometry\Objects\LineIntersectVisit.h"
 				>
 			</File>
 			<File
@@ -593,15 +597,27 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\MapSupport.h"
+				RelativePath=".\inc\MantidGeometry\Math\MapSupport.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Material.h"
+				RelativePath=".\test\MapSupportTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\mathSupport.h"
+				RelativePath=".\inc\MantidGeometry\Objects\Material.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MaterialTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Math\mathSupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\MathSupportTest.h"
 				>
 			</File>
 			<File
@@ -609,11 +625,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\MatrixBase.h"
+				RelativePath=".\inc\MantidGeometry\Math\MatrixBase.h"
 				>
 			</File>
 			<File
@@ -621,7 +637,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ObjComponent.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\ObjComponent.h"
 				>
 			</File>
 			<File
@@ -629,11 +645,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Object.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidGeometry\ObjectSurfaceEvaluator.h"
+				RelativePath=".\inc\MantidGeometry\Objects\Object.h"
 				>
 			</File>
 			<File
@@ -641,31 +653,31 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\OCGeometryGenerator.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\OCGeometryGenerator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\OCGeometryHandler.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\OCGeometryHandler.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\OCGeometryRenderer.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\OCGeometryRenderer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Parameter.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\Parameter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ParameterFactory.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\ParameterFactory.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ParameterMap.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\ParameterMap.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ParametrizedComponent.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\ParametrizedComponent.h"
 				>
 			</File>
 			<File
@@ -673,7 +685,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ParCompAssembly.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\ParCompAssembly.h"
 				>
 			</File>
 			<File
@@ -681,7 +693,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ParDetector.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\ParDetector.h"
 				>
 			</File>
 			<File
@@ -689,7 +701,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ParObjComponent.h"
+				RelativePath=".\inc\MantidGeometry\Instrument\ParObjComponent.h"
 				>
 			</File>
 			<File
@@ -697,7 +709,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Plane.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Plane.h"
 				>
 			</File>
 			<File
@@ -705,11 +717,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\PolyBase.h"
+				RelativePath=".\inc\MantidGeometry\Math\PolyBase.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\PolyFunction.h"
+				RelativePath=".\inc\MantidGeometry\Math\PolyFunction.h"
 				>
 			</File>
 			<File
@@ -717,11 +729,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\PolyVar.h"
+				RelativePath=".\inc\MantidGeometry\Math\PolyVar.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Quadratic.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Quadratic.h"
 				>
 			</File>
 			<File
@@ -733,11 +745,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RegexSupport.h"
+				RelativePath=".\inc\MantidGeometry\Math\RegexSupport.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\RotCounter.h"
+				RelativePath=".\test\RegexSupportTest.h"
 				>
 			</File>
 			<File
@@ -745,15 +757,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Rules.h"
+				RelativePath=".\inc\MantidGeometry\Math\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\SamGeometry.h"
+				RelativePath=".\test\RotCounterTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\ShapeFactory.h"
+				RelativePath=".\inc\MantidGeometry\Objects\Rules.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\RulesTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Objects\ShapeFactory.h"
 				>
 			</File>
 			<File
@@ -761,11 +781,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Simulation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidGeometry\Sphere.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Sphere.h"
 				>
 			</File>
 			<File
@@ -773,15 +789,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Surface.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Surface.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\SurfaceEvaluator.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\SurfaceFactory.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\SurfaceFactory.h"
+				RelativePath=".\test\SurfaceFactoryTest.h"
 				>
 			</File>
 			<File
@@ -789,15 +805,27 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Torus.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Torus.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Track.h"
+				RelativePath=".\test\TorusTest.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Triple.h"
+				RelativePath=".\inc\MantidGeometry\Objects\Track.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TrackTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidGeometry\Math\Triple.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\TripleTest.h"
 				>
 			</File>
 			<File
@@ -809,11 +837,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\vtkGeometryCacheReader.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\vtkGeometryCacheReader.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\vtkGeometryCacheWriter.h"
+				RelativePath=".\inc\MantidGeometry\Rendering\vtkGeometryCacheWriter.h"
 				>
 			</File>
 			<File

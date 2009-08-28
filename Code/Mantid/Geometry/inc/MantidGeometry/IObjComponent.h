@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Track.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "boost/shared_ptr.hpp"
 
 namespace Mantid

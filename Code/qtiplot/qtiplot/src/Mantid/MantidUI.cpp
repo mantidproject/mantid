@@ -2467,7 +2467,7 @@ void MantidUI::memoryImage()
 //=======================================================================
 
 #include "MantidAPI/Instrument.h"
-#include "MantidGeometry/CompAssembly.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 
 void MantidUI::test()
 {

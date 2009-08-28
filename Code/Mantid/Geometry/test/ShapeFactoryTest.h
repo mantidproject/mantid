@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include <vector>
 
 #include "Poco/DOM/DOMParser.h"

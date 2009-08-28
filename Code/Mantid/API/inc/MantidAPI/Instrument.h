@@ -6,9 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/IInstrument.h"
-#include "MantidGeometry/CompAssembly.h"
-#include "MantidGeometry/ObjComponent.h"
-#include "MantidGeometry/Detector.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include <string>
 #include <map>
 #include <ostream>

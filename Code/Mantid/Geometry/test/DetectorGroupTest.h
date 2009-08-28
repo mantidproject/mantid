@@ -3,8 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/DetectorGroup.h"
-#include "MantidGeometry/Detector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/Detector.h"
 
 using namespace Mantid::Geometry;
 

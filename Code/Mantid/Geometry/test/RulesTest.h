@@ -7,13 +7,13 @@
 #include "MantidKernel/System.h"
 #include <cfloat>
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quadratic.h"
-#include "MantidGeometry/Object.h"
-#include "MantidGeometry/Rules.h"
-#include "MantidGeometry/Plane.h"
-#include "MantidGeometry/Sphere.h"
-#include "MantidGeometry/Cylinder.h"
-#include "MantidGeometry/Cone.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Objects/Rules.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Cone.h"
 
 using namespace Mantid;
 using namespace Geometry;

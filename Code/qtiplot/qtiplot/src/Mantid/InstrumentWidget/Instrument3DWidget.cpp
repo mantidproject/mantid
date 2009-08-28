@@ -10,13 +10,13 @@
 
 #include "MantidKernel/Exception.h"
 
-#include "MantidGeometry/Matrix.h"
+#include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/ICompAssembly.h"
-#include "MantidGeometry/Object.h"
-#include "MantidGeometry/GeometryHandler.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Rendering/GeometryHandler.h"
 
 #include "boost/shared_ptr.hpp"
 

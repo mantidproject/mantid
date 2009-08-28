@@ -14,7 +14,7 @@
 
 #include "MantidGeometry/V3D.h"
 #include <boost/regex.hpp>
-#include "MantidGeometry/RegexSupport.h"
+#include "MantidGeometry/Math/RegexSupport.h"
 
 
 using namespace Mantid;

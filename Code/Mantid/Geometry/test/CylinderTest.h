@@ -8,7 +8,7 @@
 #include <sstream>
 
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Cylinder.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
 
 using namespace Mantid;
 using namespace Geometry;

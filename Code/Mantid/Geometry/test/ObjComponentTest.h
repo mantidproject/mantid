@@ -2,12 +2,12 @@
 #define MANTID_TESTOBJCOMPNENT__
 
 #include <cxxtest/TestSuite.h>
-#include "MantidGeometry/ObjComponent.h"
-#include "MantidGeometry/Quadratic.h"
-#include "MantidGeometry/Sphere.h"
-#include "MantidGeometry/Cylinder.h"
-#include "MantidGeometry/Plane.h"
-#include "MantidGeometry/Object.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Exception.h"
 
 using namespace Mantid::Kernel;

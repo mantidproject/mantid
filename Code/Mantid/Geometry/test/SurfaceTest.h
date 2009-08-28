@@ -12,10 +12,10 @@
 #include "MantidKernel/System.h"
 
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quadratic.h"
-#include "MantidGeometry/Sphere.h"
-#include "MantidGeometry/Cone.h"
-#include "MantidGeometry/Cylinder.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
 
 
 using namespace Mantid;

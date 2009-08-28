@@ -5,9 +5,9 @@
 #include "MantidAPI/Instrument.h"
 
 #include "MantidKernel/ConfigService.h"
-#include "MantidGeometry/Detector.h"
-#include "MantidGeometry/CompAssembly.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidNexus/MuonNexusReader.h"
 
 #include <fstream>

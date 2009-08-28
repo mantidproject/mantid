@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/XMLlogfile.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <muParser.h>
 #include <ctime>

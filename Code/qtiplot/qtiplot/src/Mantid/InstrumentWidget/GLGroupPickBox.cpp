@@ -4,7 +4,6 @@
 #endif
 #include "GLActor.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/ObjComponent.h"
 #include "MantidObject.h"
 #include "GLActorCollection.h"
 #include <QMessageBox>

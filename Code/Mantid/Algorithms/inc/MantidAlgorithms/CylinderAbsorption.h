@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Object.h"
+#include "MantidGeometry/Objects/Object.h"
 #include <climits>
 
 namespace Mantid

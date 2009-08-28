@@ -22,14 +22,17 @@ def procHeader(ln,keyname,out):
   return out
   
 def getCPPFiles(codeFolder) :
-    listCpps = []
-    if os.path.exists(codeFolder):
-	files = os.listdir(codeFolder)
-	for file in files:
-		if file.endswith('.cpp'):
-			listCpps.append(codeFolder + '/' +  file)
+  ## recursively searches for cpp files and returns the full paths in a list.
+  listCpps = []
+  if os.path.exists(codeFolder):
+    files = os.listdir(codeFolder)
+    for file in files:
+      if file.endswith('.cpp'):
+        listCpps.append(codeFolder + '/' +  file)
 #			print file
-    return listCpps
+      if os.path.isdir(os.path.join(codeFolder, file)):
+        listCpps.extend(getCPPFiles(codeFolder + '/' +  file))
+  return listCpps
 
 def getSharedObjects(listCpps, env) :
     listSharedObjects = []
@@ -85,9 +88,9 @@ def copyTreeWithRe(source, dest, pattern):
 	regex = re.compile(pattern)
 	allFiles=os.listdir(source)
 	for file in allFiles:
-		if (os.path.isdir(os.path.abspath(file)) and (not file.endswith('svn'))):
+		if (os.path.isdir(os.path.abspath(source + '/' +  file)) and (not file.endswith('svn'))):
 			#this is a directory - recurse
-			copyTreeWithRe(source + '/' +  file,dest + '/' +  file, pattern);
+			copyTreeWithRe(source + '/' +  file,dest + '/' +  file, pattern)
 		if pattern != "":
 			if regex.search(file):
 				shutil.copy2(source + '/' +  file,dest + '/' +  file)

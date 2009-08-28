@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------
 #include "MantidQtCustomDialogs/MantidGLWidget.h"
-#include "MantidGeometry/Object.h"
+#include "MantidGeometry/Objects/Object.h"
 //#include "MantidGeometry/V3D.h"
 //#include "MantidGeometry/Quat.h"
 

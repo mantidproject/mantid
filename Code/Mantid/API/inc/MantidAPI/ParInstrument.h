@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/ParCompAssembly.h"
-#include "MantidGeometry/ParObjComponent.h"
-#include "MantidGeometry/Detector.h"
+#include "MantidGeometry/Instrument/ParCompAssembly.h"
+#include "MantidGeometry/Instrument/ParObjComponent.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidKernel/cow_ptr.h"
 #include <string>

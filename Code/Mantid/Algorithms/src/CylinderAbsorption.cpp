@@ -4,8 +4,8 @@
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidGeometry/Cylinder.h"
-#include "MantidGeometry/Plane.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Fast_Exponential.h"
 
 namespace Mantid

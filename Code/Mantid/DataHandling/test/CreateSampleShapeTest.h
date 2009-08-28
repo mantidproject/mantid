@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
-#include "MantidGeometry/Object.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "../../Algorithms/test/WorkspaceCreationHelper.hh"
 
 using namespace Mantid::DataHandling;

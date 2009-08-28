@@ -375,6 +375,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\GroupDetectors2Test.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\GroupDetectorsTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadDAE\idc.h"
 				>
 			</File>
@@ -443,6 +451,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadMappingTableTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadRaw.h"
 				>
 			</File>
@@ -471,7 +483,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadRKHTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadSampleDetailsFromRaw.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadSaveAsciiTest.h"
 				>
 			</File>
 			<File
@@ -495,11 +515,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\MaskDetectorsTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\MoveInstrumentComponent.h"
 				>
 			</File>
 			<File
+				RelativePath=".\test\MoveInstrumentComponentTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\RawFileInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\RawFileInfoTest.h"
 				>
 			</File>
 			<File
@@ -520,6 +552,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\SaveFocusedXYE.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SaveFocussedXYETest.h"
 				>
 			</File>
 			<File
@@ -556,6 +592,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadRaw\vms_convert.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\XMLlogfileTest.h"
 				>
 			</File>
 		</Filter>

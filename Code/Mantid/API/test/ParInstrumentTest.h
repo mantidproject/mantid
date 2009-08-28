@@ -6,7 +6,7 @@
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/ParInstrument.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/cow_ptr.h"
 
 using namespace Mantid::Kernel;

@@ -5,7 +5,7 @@
 
 #include "MantidAPI/Instrument.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -8,8 +8,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Property.h"
-#include "MantidGeometry/ParametrizedComponent.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Instrument/ParametrizedComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
 
 namespace Mantid
 {

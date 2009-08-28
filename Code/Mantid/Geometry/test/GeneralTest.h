@@ -4,8 +4,8 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quadratic.h"
-#include "MantidGeometry/General.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/General.h"
 
 using namespace Mantid;
 using namespace Geometry;

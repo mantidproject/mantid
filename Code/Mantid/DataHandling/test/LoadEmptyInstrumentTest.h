@@ -13,7 +13,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include <vector>
 
 using namespace Mantid::API;

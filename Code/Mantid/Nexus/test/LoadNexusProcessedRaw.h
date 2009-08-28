@@ -20,7 +20,7 @@
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/WorkspaceGroup.h"

@@ -2,7 +2,7 @@
 // Includes
 //--------------------------------
 #include "MantidDataHandling/CreateSampleShape.h"
-#include "MantidGeometry/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 

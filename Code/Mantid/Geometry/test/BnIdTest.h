@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/BnId.h"
+#include "MantidGeometry/Math/BnId.h"
 
 using namespace Mantid;
 using namespace Geometry;

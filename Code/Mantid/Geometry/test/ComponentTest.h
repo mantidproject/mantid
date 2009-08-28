@@ -5,7 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <string>
-#include "MantidGeometry/Component.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
 #include "MantidKernel/Exception.h"

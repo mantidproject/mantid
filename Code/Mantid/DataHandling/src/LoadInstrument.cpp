@@ -2,14 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidGeometry/ShapeFactory.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/Progress.h"
-#include "MantidGeometry/Detector.h"
-#include "MantidGeometry/vtkGeometryCacheReader.h"
-#include "MantidGeometry/vtkGeometryCacheWriter.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
+#include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
 
 #include "Poco/DOM/DOMParser.h"

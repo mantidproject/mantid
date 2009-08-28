@@ -10,7 +10,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/Axis.h"
-#include "MantidGeometry/ParameterMap.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"

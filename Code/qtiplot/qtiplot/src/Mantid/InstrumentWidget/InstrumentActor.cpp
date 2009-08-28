@@ -1,6 +1,6 @@
 #include "MantidAPI/IInstrument.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Object.h"
+#include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/Exception.h"

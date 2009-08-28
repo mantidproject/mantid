@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/RotCounter.h"
+#include "MantidGeometry/Math/RotCounter.h"
 
 using namespace Mantid;
 using namespace Geometry;

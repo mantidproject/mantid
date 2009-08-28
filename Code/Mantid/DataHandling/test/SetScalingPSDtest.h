@@ -10,7 +10,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidGeometry/ParObjComponent.h"
+#include "MantidGeometry/Instrument/ParObjComponent.h"
 #include <stdexcept>
 
 

@@ -11,7 +11,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
-#include "MantidGeometry/Material.h"
+#include "MantidGeometry/Objects/Material.h"
 
 
 using namespace Mantid;

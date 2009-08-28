@@ -10,7 +10,7 @@
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
-#include "MantidGeometry/mathSupport.h"
+#include "MantidGeometry/Math/mathSupport.h"
 
 
 using namespace Mantid;

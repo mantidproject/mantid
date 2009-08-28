@@ -284,6 +284,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadNexusTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadRSaveNLoadNcspTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidNexus\LoadSNSNexus.h"
 				>
 			</File>

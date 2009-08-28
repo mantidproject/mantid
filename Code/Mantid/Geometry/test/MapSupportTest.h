@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/MapSupport.h"
+#include "MantidGeometry/Math/MapSupport.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 

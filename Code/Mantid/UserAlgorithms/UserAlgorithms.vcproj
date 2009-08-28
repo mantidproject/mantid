@@ -26,8 +26,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="copy &quot;$(OutDir)\$(SolutionName)$(ProjectName).dll&quot; &quot;$(SolutionDir)\Bin\Plugins\$(SolutionName)$(ProjectName).dll&quot; /Y"
-				Outputs="&quot;$(SolutionDir)\debug\Mantid.properties&quot;"
+				Description="Copying dll to bin plugins"
+				CommandLine="copy &quot;$(OutDir)\$(SolutionName)$(ProjectName).dll&quot; &quot;$(SolutionDir)\Bin\Plugins\$(SolutionName)$(ProjectName).dll&quot; /Y&#x0D;&#x0A;"
+				Outputs="&quot;$(SolutionDir)\Bin\Plugins\$(SolutionName)$(ProjectName).dll&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -100,7 +101,7 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="copy &quot;$(SolutionDir)\Properties\*properties&quot; &quot;$(SolutionDir)\release&quot; /Y"
+				CommandLine="copy &quot;$(SolutionDir)\Properties\*properties&quot; &quot;$(SolutionDir)\release&quot; /Y&#x0D;&#x0A;"
 				Outputs="&quot;$(SolutionDir)\release\Mantid.properties&quot;"
 			/>
 			<Tool

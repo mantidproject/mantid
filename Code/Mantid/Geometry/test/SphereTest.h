@@ -10,8 +10,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quadratic.h"
-#include "MantidGeometry/Sphere.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
 
 using namespace Mantid;
 using namespace Geometry;

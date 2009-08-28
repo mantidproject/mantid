@@ -7,8 +7,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Quadratic.h"
-#include "MantidGeometry/Torus.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Torus.h"
 
 using namespace Mantid;
 using namespace Geometry;

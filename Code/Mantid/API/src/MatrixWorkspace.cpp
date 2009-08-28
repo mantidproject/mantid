@@ -6,7 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/ParInstrument.h"
 #include "MantidAPI/XMLlogfile.h"
-#include "MantidGeometry/DetectorGroup.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid
