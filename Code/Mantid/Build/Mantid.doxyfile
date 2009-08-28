@@ -96,7 +96,9 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../PythonAPI/inc/MantidPythonAPI \
                          ../PythonAPI/src \
                          ../MatlabAPI/inc/MatlabAPI \
-                         ../MatlabAPI/src
+                         ../MatlabAPI/src \
+                         ../Crystal/inc/MantidCrystal \
+                         ../Crystal/src
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
 RECURSIVE              = YES

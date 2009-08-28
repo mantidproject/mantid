@@ -532,7 +532,9 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../PythonAPI/inc/MantidPythonAPI \
                          ../PythonAPI/src \
                          ../MatlabAPI/inc/MatlabAPI \
-                         ../MatlabAPI/src
+                         ../MatlabAPI/src \
+                         ../Crystal/inc/MantidCrystal \
+                         ../Crystal/src
 
 # This tag can be used to specify the character encoding of the source files 
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is 
