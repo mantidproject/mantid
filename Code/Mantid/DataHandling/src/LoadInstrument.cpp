@@ -271,35 +271,39 @@ void LoadInstrument::exec()
   pDoc->release();
 
   // Get cached file name
-  std::string cacheFilename=m_filename.replace(m_filename.length()-3,3,"vtp");
+  std::string cacheFilename(m_filename.begin(),m_filename.end()-3);
+  cacheFilename += "vtp";
   // check for the geometry cache
   Poco::File defFile(m_filename);
   Poco::File vtkFile(cacheFilename);
-  bool cacheAvailable=true;
-  if((!vtkFile.exists())||defFile.getLastModified()>vtkFile.getLastModified())
-	  cacheAvailable=false;
-  if(cacheAvailable)
+  
+  bool cacheAvailable = true;
+  if ((!vtkFile.exists()) || defFile.getLastModified() > vtkFile.getLastModified())
+    cacheAvailable = false;
+  if (cacheAvailable)
   {
-	  g_log.information("Loading geometry cache from "+cacheFilename);
-	  // create a vtk reader
-	  std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
-	  boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
-	  for( objItr=mapTypeNameToShape.begin(); objItr!=mapTypeNameToShape.end();objItr++)
-	  {
-		  ((*objItr).second)->setVtkGeometryCacheReader(reader);
-	  }
+    g_log.information("Loading geometry cache from " + cacheFilename);
+    // create a vtk reader
+    std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
+    boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(
+        new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
+    for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
+    {
+      ((*objItr).second)->setVtkGeometryCacheReader(reader);
+    }
   }
   else
   {
-  	  g_log.information("Geometry cache is not avilable");
-	  // create a vtk writer
-	  std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
-	  boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
-	  for( objItr=mapTypeNameToShape.begin(); objItr!=mapTypeNameToShape.end();objItr++)
-	  {
-		  ((*objItr).second)->setVtkGeometryCacheWriter(writer);
-	  }
-	  writer->write();
+    g_log.information("Geometry cache is not available");
+    // create a vtk writer
+    std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
+    boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(
+        new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
+    for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
+    {
+      ((*objItr).second)->setVtkGeometryCacheWriter(writer);
+    }
+    writer->write();
   }
   // Add the instrument to the InstrumentDataService
   InstrumentDataService::Instance().add(instrumentFile,m_instrument);
