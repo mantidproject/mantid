@@ -80,7 +80,7 @@ QStringList ScriptingLangManager::languages()
 	return l;
 }
 
-bool Script::compile(bool for_eval)
+bool Script::compile(bool)
 {
 	emit_error("Script::compile called!", 0);
 	return false;

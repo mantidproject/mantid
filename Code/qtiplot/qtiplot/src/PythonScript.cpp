@@ -31,7 +31,7 @@
 #undef _POSIX_C_SOURCE
 #endif
 #include <Python.h>
-
+#include <frameobject.h>
 #include "PythonScript.h"
 #include "PythonScripting.h"
 #include "ApplicationWindow.h"
@@ -40,117 +40,160 @@
 #include <QVariant>
 #include <QMessageBox>
 
-PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, const QString &name)
-: Script(env, code, context, name)
+namespace
 {
-	PyCode = NULL;
-	localDict = PyDict_New();
-	setQObject(Context, "self");
+  // Keep a reference to the current PyCode filename object for the line tracing.
+  // The tracing function is a static member function so this varibable needs to be global
+  // so it's kept in an anonymous namespace to keep it at this file scope.
+  PyObject* ROOT_CODE_OBJECT = NULL;
+  PythonScript *CURRENT_SCRIPT_OBJECT = NULL;
+
+  static int _trace_callback(PyObject *, _frame *frame, int what, PyObject *)
+  {
+    // If we are in the main code and this is a line number event
+    if( ROOT_CODE_OBJECT && frame->f_code->co_filename == ROOT_CODE_OBJECT
+	&& what == PyTrace_LINE )
+      {
+	CURRENT_SCRIPT_OBJECT->broadcastNewLineNumber(frame->f_lineno);
+      }
+    // I don't care about the return value
+    return 0;
+  }
+
 }
 
+/**
+ * Constructor
+ */
+PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
+			   const QString &name)
+  : Script(env, code, context, name), PyCode(NULL), localDict(NULL), 
+    stdoutSave(NULL), stderrSave(NULL), isFunction(false)
+{
+  ROOT_CODE_OBJECT = NULL;
+  CURRENT_SCRIPT_OBJECT = this;
+  localDict = PyDict_New();
+  setQObject(Context, "self");
+}
+
+/**
+ * Destructor
+ */
 PythonScript::~PythonScript()
 {
-	Py_DECREF(localDict);
-	Py_XDECREF(PyCode);
+  Py_DECREF(localDict);
+  Py_XDECREF(PyCode);
 }
 
-void PythonScript::setContext(QObject *context)
-{
-	Script::setContext(context);
-	setQObject(Context, "self");
-}
-
+/**
+ * Compile the code
+ */
 bool PythonScript::compile(bool for_eval)
 {
-	// Support for the convenient col() and cell() functions.
-	// This can't be done anywhere else, because we need access to the local
-	// variables self, i and j.
-	if(Context->inherits("Table")) {
-		// A bit of a hack, but we need either IndexError or len() from __builtins__.
-		PyDict_SetItemString(localDict, "__builtins__",
-				PyDict_GetItemString(env()->globalDict(), "__builtins__"));
-		PyObject *ret = PyRun_String(
-				"def col(c,*arg):\n"
-				"\ttry: return self.cell(c,arg[0])\n"
-				"\texcept(IndexError): return self.cell(c,i)\n"
-				"def cell(c,r):\n"
-				"\treturn self.cell(c,r)\n"
-				"def tablecol(t,c):\n"
-				"\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
-				"def _meth_table_col_(t,c):\n"
-				"\treturn t.cell(c,i)\n"
-				"self.__class__.col = _meth_table_col_",
-				Py_file_input, localDict, localDict);
-		if (ret)
-			Py_DECREF(ret);
-		else
-			PyErr_Print();
-	} else if(Context->inherits("Matrix")) {
-		// A bit of a hack, but we need either IndexError or len() from __builtins__.
-		PyDict_SetItemString(localDict, "__builtins__",
-				PyDict_GetItemString(env()->globalDict(), "__builtins__"));
-		PyObject *ret = PyRun_String(
-				"def cell(*arg):\n"
-				"\ttry: return self.cell(arg[0],arg[1])\n"
-				"\texcept(IndexError): return self.cell(i,j)\n",
-				Py_file_input, localDict, localDict);
-		if (ret)
-			Py_DECREF(ret);
-		else
-			PyErr_Print();
-	}
-	bool success=false;
-	Py_XDECREF(PyCode);
-	// Simplest case: Code is a single expression
-	PyCode = Py_CompileString(Code, Name, Py_eval_input);
+  // Support for the convenient col() and cell() functions.
+  // This can't be done anywhere else, because we need access to the local
+  // variables self, i and j.
+  if( Context->inherits("Table") ) 
+  {
+    // A bit of a hack, but we need either IndexError or len() from __builtins__.
+    PyDict_SetItemString(localDict, "__builtins__",
+			 PyDict_GetItemString(env()->globalDict(), "__builtins__"));
+    PyObject *ret = PyRun_String(
+				 "def col(c,*arg):\n"
+				 "\ttry: return self.cell(c,arg[0])\n"
+				 "\texcept(IndexError): return self.cell(c,i)\n"
+				 "def cell(c,r):\n"
+				 "\treturn self.cell(c,r)\n"
+				 "def tablecol(t,c):\n"
+				 "\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
+				 "def _meth_table_col_(t,c):\n"
+				 "\treturn t.cell(c,i)\n"
+				 "self.__class__.col = _meth_table_col_",
+				 Py_file_input, localDict, localDict);
+    if (ret)
+      Py_DECREF(ret);
+    else
+      PyErr_Print();
+  } 
+  else if(Context->inherits("Matrix")) 
+  {
+    // A bit of a hack, but we need either IndexError or len() from __builtins__.
+    PyDict_SetItemString(localDict, "__builtins__",
+			 PyDict_GetItemString(env()->globalDict(), "__builtins__"));
+    PyObject *ret = PyRun_String(
+				 "def cell(*arg):\n"
+				 "\ttry: return self.cell(arg[0],arg[1])\n"
+				 "\texcept(IndexError): return self.cell(i,j)\n",
+				 Py_file_input, localDict, localDict);
+    if (ret)
+      Py_DECREF(ret);
+    else
+      PyErr_Print();
+  }
+  bool success(false);
+  Py_XDECREF(PyCode);
+  // Simplest case: Code is a single expression
+  PyCode = Py_CompileString(Code, Name, Py_eval_input);
 	
-	if (PyCode)
-		success = true;
-	else if (for_eval) {
-		// Code contains statements (or errors) and we want to get a return
-		// value from it.
-		// So we wrap the code into a function definition,
-		// execute that (as Py_file_input) and store the function object in PyCode.
-		// See http://mail.python.org/pipermail/python-list/2001-June/046940.html
-		// for why there isn't an easier way to do this in Python.
-		PyErr_Clear(); // silently ignore errors
-		PyObject *key, *value;
+  if( PyCode )
+  {
+    success = true;
+  }
+  else if (for_eval) 
+  {
+    // Code contains statements (or errors) and we want to get a return
+    // value from it.
+    // So we wrap the code into a function definition,
+    // execute that (as Py_file_input) and store the function object in PyCode.
+    // See http://mail.python.org/pipermail/python-list/2001-June/046940.html
+    // for why there isn't an easier way to do this in Python.
+    PyErr_Clear(); // silently ignore errors
+    PyObject *key(NULL), *value(NULL);
 #if PY_VERSION_HEX >= 0x02050000
-		Py_ssize_t i=0;
+    Py_ssize_t i(0);
 #else
-		int i=0;
+    int i(0);
 #endif
-		QString signature = "";
-		while(PyDict_Next(localDict, &i, &key, &value))
-			signature.append(PyString_AsString(key)).append(",");
-		signature.truncate(signature.length()-1);
-		QString fdef = "def __doit__("+signature+"):\n";
-		fdef.append(Code);
-		fdef.replace('\n',"\n\t");
-		PyCode = Py_CompileString(fdef, Name, Py_file_input);
-		if (PyCode){
-			PyObject *tmp = PyDict_New();
-			Py_XDECREF(PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), tmp));
-			Py_DECREF(PyCode);
-			PyCode = PyDict_GetItemString(tmp,"__doit__");
-			Py_XINCREF(PyCode);
-			Py_DECREF(tmp);
-		}
-		success = (PyCode != NULL);
-	} else {
-		// Code contains statements (or errors), but we do not need to get
-		// a return value.
-		PyErr_Clear(); // silently ignore errors
-		PyCode = Py_CompileString(Code, Name, Py_file_input);
-		success = (PyCode != NULL);
-	}
+    QString signature = "";
+    while(PyDict_Next(localDict, &i, &key, &value))
+    {
+      signature.append(PyString_AsString(key)).append(",");
+    }
+    signature.truncate(signature.length()-1);
+    QString fdef = "def __doit__("+signature+"):\n";
+    fdef.append(Code);
+    fdef.replace('\n',"\n\t");
+    PyCode = Py_CompileString(fdef, Name, Py_file_input);
+    if( PyCode )
+    {
+      PyObject *tmp = PyDict_New();
+      Py_XDECREF(PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), tmp));
+      Py_DECREF(PyCode);
+      PyCode = PyDict_GetItemString(tmp,"__doit__");
+      Py_XINCREF(PyCode);
+      Py_DECREF(tmp);
+    }
+    success = (PyCode != NULL);
+  } 
+  else 
+  {
+    // Code contains statements (or errors), but we do not need to get
+    // a return value.
+    PyErr_Clear(); // silently ignore errors
+    PyCode = Py_CompileString(Code, Name, Py_file_input);
+    success = (PyCode != NULL);
+  }
 	
-	if (!success){
-		compiled = compileErr;
-		emit_error(env()->errorMsg(), 0);
-	} else
-		compiled = isCompiled;
-	return success;
+  if(!success )
+  {
+    compiled = compileErr;
+    emit_error(constructErrorMsg(), 0);
+  } 
+  else
+  {
+    compiled = isCompiled;
+  }
+  return success;
 }
 
 QVariant PythonScript::eval()
@@ -174,7 +217,7 @@ QVariant PythonScript::eval()
             PyErr_Clear(); // silently ignore errors
 			return  QVariant("");
 		} else {
-			emit_error(env()->errorMsg(), 0);
+			emit_error(constructErrorMsg(), 0);
 			return QVariant();
 		}
 	}
@@ -209,7 +252,7 @@ QVariant PythonScript::eval()
 			if (asUTF8) {
 				qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
 				Py_DECREF(asUTF8);
-			} else if (pystring = PyObject_Str(pyret)) {
+			} else if ((pystring = PyObject_Str(pyret))) {
 				qret = QVariant(QString(PyString_AS_STRING(pystring)));
 				Py_DECREF(pystring);
 			}
@@ -223,7 +266,7 @@ QVariant PythonScript::eval()
             PyErr_Clear(); // silently ignore errors
 			return  QVariant("");
 		} else {
-			emit_error(env()->errorMsg(), 0);
+			emit_error(constructErrorMsg(), 0);
 			return QVariant();
 		}
 	} else
@@ -234,66 +277,156 @@ bool PythonScript::exec()
 {
 	if (isFunction) compiled = notCompiled;
 	if (compiled != Script::isCompiled && !compile(false))
-		return false;
-	PyObject *pyret;
-	beginStdoutRedirect();
-	if (PyCallable_Check(PyCode)){
-		PyObject *empty_tuple = PyTuple_New(0);
-		if (!empty_tuple) {
-			emit_error(env()->errorMsg(), 0);
-			return false;
-		}
-		pyret = PyObject_Call(PyCode,empty_tuple,localDict);
-		Py_DECREF(empty_tuple);
-	} else {
-		pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), env()->globalDict());
-		//pyret = PyRun_String(Code, 0, env()->globalDict(), localDict);
+	{
+	  return false;
 	}
 	
-	endStdoutRedirect();
-	if (pyret) {
-		Py_DECREF(pyret);
-		return true;
+	PyObject *pyret(NULL);
+	// Redirect the output
+	beginStdoutRedirect();
+	// This stores the address of the main file that is being executed so that
+	// we can track line numbers from the main code only
+	ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
+	if( env()->reportProgress() )
+	{
+	  PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
 	}
-	emit_error(env()->errorMsg(), 0);
+
+	if (PyCallable_Check(PyCode))
+	{
+	  PyObject *empty_tuple = PyTuple_New(0);
+	  if (!empty_tuple) 
+	  {
+	    emit_error(constructErrorMsg(), 0);
+	    return false;
+	  }
+	  pyret = PyObject_Call(PyCode,empty_tuple,localDict);
+	  Py_DECREF(empty_tuple);
+	} 
+	else 
+	{
+	  pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), env()->globalDict());
+	}
+	endStdoutRedirect();
+	
+	//Disable trace
+	PyEval_SetTrace(NULL, NULL);
+
+	if(pyret) 
+	{
+	  Py_DECREF(pyret);
+	  return true;
+	}
+	emit_error(constructErrorMsg(), 0);
 	return false;
 }
 
-void PythonScript::beginStdoutRedirect()
+QString PythonScript::constructErrorMsg()
 {
-	stdoutSave = PyDict_GetItemString(env()->sysDict(), "stdout");
-	Py_XINCREF(stdoutSave);
-	stderrSave = PyDict_GetItemString(env()->sysDict(), "stderr");
-	Py_XINCREF(stderrSave);
-	env()->setQObject(this, "stdout", env()->sysDict());
-	env()->setQObject(this, "stderr", env()->sysDict());
+  QString msg("");
+  if ( !PyErr_Occurred() ) 
+  {
+    return msg;
+  }
+  PyObject *exception(NULL), *value(NULL), *traceback(NULL);
+  PyTracebackObject *excit(NULL);
+  PyErr_Fetch(&exception, &value, &traceback);
+  PyErr_NormalizeException(&exception, &value, &traceback);
+
+  //----- Mantid - Altered error message formatting -----
+  // There is no stack for a syntax error
+  int errline(-1);
+  if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
+  {
+    errline = getLineOffset() + 
+      env()->toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
+    // Update the line marker as this will not get done by the tracing function
+    // since we have not begun execution yet
+    
+    msg = QString("Error on line ") + QString::number(errline) + ": " +
+      env()->toString(PyObject_GetAttrString(value, "msg"), true);
+    Py_DECREF(exception);
+    Py_DECREF(value);
+  }
+  else
+  {
+    // Marker will already be at this line for an execution error as the line reporting happens
+    // before each line of code is executed
+    errline = getLineOffset();
+    if( traceback )
+    {
+      excit = (PyTracebackObject*)traceback;
+      if( excit ) errline += excit->tb_lineno;
+      Py_DECREF(traceback);
+    }
+    //Format the exception in a nicer manner
+    msg = env()->toString(exception,true).section('.',1).remove("'>") + QString(" on line ") + 
+      QString::number(errline) + QString(" : ") + env()->toString(value,true);
+    }
+  //----------------------------------------------
+  emit currentLineChanged(errline, false);
+  return msg;
 }
 
-void PythonScript::endStdoutRedirect()
-{
-	PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
-	Py_XDECREF(stdoutSave);
-	PyDict_SetItemString(env()->sysDict(), "stderr", stderrSave);
-	Py_XDECREF(stderrSave);
-}
 
 bool PythonScript::setQObject(QObject *val, const char *name)
 {
-	if (!PyDict_Contains(localDict, PyString_FromString(name)))
-		compiled = notCompiled;
-	return env()->setQObject(val, name, localDict);
+  if (!PyDict_Contains(localDict, PyString_FromString(name)))
+    compiled = notCompiled;
+  return env()->setQObject(val, name, localDict);
 }
 
 bool PythonScript::setInt(int val, const char *name)
 {
-	if (!PyDict_Contains(localDict, PyString_FromString(name)))
-		compiled = notCompiled;
-	return env()->setInt(val, name, localDict);
+  if (!PyDict_Contains(localDict, PyString_FromString(name)))
+    compiled = notCompiled;
+  return env()->setInt(val, name, localDict);
 }
 
 bool PythonScript::setDouble(double val, const char *name)
 {
-	if (!PyDict_Contains(localDict, PyString_FromString(name)))
-		compiled = notCompiled;
-	return env()->setDouble(val, name, localDict);
+  if (!PyDict_Contains(localDict, PyString_FromString(name)))
+    compiled = notCompiled;
+  return env()->setDouble(val, name, localDict);
+}
+
+void PythonScript::setContext(QObject *context)
+{
+  Script::setContext(context);
+  setQObject(Context, "self");
+}
+
+//-------------------------------------------------------
+// Private
+//-------------------------------------------------------
+PythonScripting * PythonScript::env()
+{ 
+  //Env is protected in the base class
+  return static_cast<PythonScripting*>(Env); 
+}
+
+
+/**
+ * Redirect the std out to this object
+ */
+void PythonScript::beginStdoutRedirect()
+{
+  stdoutSave = PyDict_GetItemString(env()->sysDict(), "stdout");
+  Py_XINCREF(stdoutSave);
+  stderrSave = PyDict_GetItemString(env()->sysDict(), "stderr");
+  Py_XINCREF(stderrSave);
+  env()->setQObject(this, "stdout", env()->sysDict());
+  env()->setQObject(this, "stderr", env()->sysDict());
+}
+
+/**
+ * Restore the std out to this object to what it was before the last call to
+ * beginStdouRedirect
+ */
+void PythonScript::endStdoutRedirect()
+{
+  PyDict_SetItemString(env()->sysDict(), "stdout", stdoutSave);
+  Py_XDECREF(stdoutSave);
+  PyDict_SetItemString(env()->sysDict(), "stderr", stderrSave);
+  Py_XDECREF(stderrSave);
 }

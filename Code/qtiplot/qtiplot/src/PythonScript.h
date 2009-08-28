@@ -30,41 +30,66 @@
 #define PYTHON_SCRIPT_H
 
 #include "Script.h"
+#include "Python.h"
 
 class QObject;
 class QString;
-
-typedef struct _object PyObject;
-class PythonScripting;
 class ScriptingEnv;
+class PythonScripting;
 
+/**
+ * This class holds, compiles and executes the Python code. 
+ */
 class PythonScript : public Script
 {
-	Q_OBJECT
+  Q_OBJECT
+  public:
+  /// Constructor
+  PythonScript(PythonScripting *env, const QString &code, QObject *context = 0, 
+	       const QString &name="<input>");
+  ///Destructor
+  ~PythonScript();
+  /// A function to connect to the ouput stream of the running Python code
+  inline void write(const QString &text) 
+  { 
+    emit print(text); 
+  }
+  
+  // Emit a new line signal
+  inline void broadcastNewLineNumber(int lineno)
+  {
+    emit currentLineChanged(lineno, true);
+  }
+  
+signals:
+  /// Line number changed
+  void currentLineChanged(int lineno, bool error);
 
-	public:
-		PythonScript(PythonScripting *env, const QString &code, QObject *context=0, const QString &name="<input>");
-		~PythonScript();
+public slots:
+  /// Compile to bytecode
+  bool compile(bool for_eval=true);
+  /// Evaluate the current code
+  QVariant eval();
+  /// Excute the current code
+  bool exec();
+  /// Construct the error message from the stack trace (if one exists)
+  QString constructErrorMsg();
+  /// Set the name of the passed object so that Python can refer to it
+  bool setQObject(QObject *val, const char *name);
+  /// Set the name of the integer so that Python can refer to it
+  bool setInt(int val, const char* name);
+  /// Set the name of the double so that Python can refer to it
+  bool setDouble(double val, const char* name);
+  /// Set the context for this script
+  void setContext(QObject *context);
 
-		void write(const QString &text) { emit print(text); }
+private:
+  PythonScripting* env(); 
+  void beginStdoutRedirect();
+  void endStdoutRedirect();
 
-		public slots:
-		bool compile(bool for_eval=true);
-		QVariant eval();
-		bool exec();
-		bool setQObject(QObject *val, const char *name);
-		bool setInt(int val, const char* name);
-		bool setDouble(double val, const char* name);
-		void setContext(QObject *context);
-
-	private:
-		PythonScripting *env() { return (PythonScripting*)Env; }
-		void beginStdoutRedirect();
-		void endStdoutRedirect();
-
-		PyObject *PyCode, *localDict, *stdoutSave, *stderrSave;
-		bool isFunction;
+  PyObject *PyCode, *localDict, *stdoutSave, *stderrSave;
+  bool isFunction;
 };
-
 
 #endif

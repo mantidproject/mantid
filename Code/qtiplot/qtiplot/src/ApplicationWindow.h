@@ -157,7 +157,6 @@ public:
   void removeUserMenu(const QString &);  //Mantid
   void removeUserMenuAction(const QString & menu, const QString & action); //Mantid
   const QList<QMenu*> & getCustomMenus() const; //Mantid
-  void scriptingInformation(int linenumber); //Mantid
   ScriptingWindow* getScriptWindowHandle() { return scriptingWindow; }
   //-------------------
   	//@}
@@ -975,9 +974,7 @@ public slots:
   void enableMantidPeakFit(bool yes);
 
 signals:
-
 	void modified();
-  void scriptingLineChange(int);//Mantid
 
 private:
 	virtual QMenu * createPopupMenu(){return NULL;};

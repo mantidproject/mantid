@@ -6,11 +6,7 @@
 #include "ScriptingEnv.h"
 #include "Script.h"
 
-// Mantid
-#include "MantidKernel/ConfigService.h"
-
 // Qt
-#include <QApplication>
 #include <QPoint>
 #include <QAction>
 #include <QMenu>
@@ -48,13 +44,6 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent) :
   QTabWidget(parent), scripted(env), m_last_dir(""), m_script_runner(NULL), m_script_executing(false), 
   m_cursor_pos(), m_findrep_dlg(NULL)
 {
-  // Set the last directory to the Mantid scripts directory
-  m_last_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
-  if( m_last_dir.isEmpty() )
-  {
-    m_last_dir = qApp->applicationDirPath();
-  }
-
   //Create actions for this widget
   initActions();
 
@@ -63,8 +52,6 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent) :
 
   // Execution state change
   connect(this, SIGNAL(ScriptIsActive(bool)), this, SLOT(setScriptIsRunning(bool)));
-  //Tab change
-  //  connect(this, SIGNAL(currentChanged(int)), this, SLOT(newTabSelected()));
   
   // Start with a blank tab
   newTab();
@@ -277,13 +264,13 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
   connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
 	  this, SLOT(editorContextMenu(const QPoint&)));
   connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+  connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	  SLOT(updateMarker(int, bool)));
+
   QString tab_title = "New script";
   setCurrentIndex(insertTab(index, editor, tab_title));
   //Set the current code lexer, the editor takes ownership
   editor->setLexer(scriptingEnv()->scriptCodeLexer());
-  editor->setAutoIndent(true);
-  editor->setMarginLineNumbers(1,true);
-  editor->setMarginWidth(1, 38);
   // Set the current editor to focus
   setFocusProxy(editor);
   return editor;
@@ -374,8 +361,9 @@ void ScriptManagerWidget::execute()
   int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
   //Qscintilla function
   editor->getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
-  scriptingEnv()->setFirstLineNumber(lineFrom);
-  
+
+  //Execute the selection
+  m_script_runner->setLineOffset(lineFrom);
   runScriptCode(code);
 }
 
@@ -388,9 +376,9 @@ void ScriptManagerWidget::executeAll()
   ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
   QString script_txt = editor->text();
   if( script_txt.isEmpty() ) return;
-  scriptingEnv()->setFirstLineNumber(0);
-
+  
   //Run the code
+  m_script_runner->setLineOffset(0);
   runScriptCode(script_txt);
 }
 
@@ -495,22 +483,6 @@ void ScriptManagerWidget::closeClickedTab()
 }
 
 /**
- * Update actions based on new tab selection
- * @param index The index of the new tab
- */
-void ScriptManagerWidget::newTabSelected()
-{
-//   // Rewire all editing actions so that they refer to the new editor
-//   ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
-//   if( !editor ) return;
-//   m_undo = editor->undoAction();
-//   m_redo = editor->redoAction();
-//   m_cut = editor->cutAction();
-//   m_copy = editor->copyAction();
-//   m_paste = editor->pasteAction();
-}
-
-/**
  * Mark the current tab as changed
  */
 void ScriptManagerWidget::markCurrentAsChanged()
@@ -534,6 +506,35 @@ void ScriptManagerWidget::setScriptIsRunning(bool running)
   m_exec->setEnabled(!running);
   m_exec_all->setEnabled(!running);
   if( scriptingEnv()->supportsEvaluation() ) m_eval->setEnabled(!running);
+
+  // Disable tab switching if progress reporting is enabled
+  if( m_toggle_progress->isChecked() )
+  {
+    int ntabs = count();
+    for( int index = 0; index < ntabs; ++index )
+    {
+      setTabEnabled(index, !running);
+    }
+  }
+
+}
+
+/**
+ * Toggle the progress arrow on/off
+ * @param state The state of the option
+ */
+void ScriptManagerWidget::toggleProgressArrow(bool state)
+{
+  scriptingEnv()->reportProgress(state);
+  if( state == false )
+  {
+    int index_end = count() - 1;
+    for( int index = index_end; index >= 0; --index )
+    {
+      ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
+      if( editor ) editor->updateMarker(-1, true);
+    }
+  }
 }
 
 //--------------------------------------------
@@ -586,6 +587,12 @@ void ScriptManagerWidget::initActions()
   m_eval->setShortcut( tr("Ctrl+E") );
   connect(m_eval, SIGNAL(activated()), this, SLOT(evaluate()));
   m_eval->setEnabled(scriptingEnv()->supportsEvaluation());
+
+  // Toggle the progress arrow
+  m_toggle_progress = new QAction(tr("Show &Progress Marker"), this);
+  m_toggle_progress->setCheckable(true);
+  m_toggle_progress->setEnabled(scriptingEnv()->supportsProgressReporting());
+  connect(m_toggle_progress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
 }
 
 /**
@@ -673,7 +680,9 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
       return;
     }
   }
-
+  //Save last directory
+  m_last_dir = QFileInfo(file_to_open).absolutePath();
+  
   bool ok(false);
   QString script_txt = readScript(file_to_open, &ok);
   if( !ok ) return;
@@ -689,8 +698,10 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
   ScriptEditor *editor = newTab(index);
   editor->blockSignals(true);
   editor->append(script_txt);
+  editor->update();
   editor->blockSignals(false);
   setTabText(currentIndex(), QFileInfo(file_to_open).fileName());
+  editor->setFileName(file_to_open);
 
   // Set last directory
   m_last_dir = QFileInfo(file_to_open).absolutePath();

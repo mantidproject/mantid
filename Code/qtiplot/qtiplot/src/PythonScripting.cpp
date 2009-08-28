@@ -30,42 +30,48 @@
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
-#include <Python.h>
+
+#include "PythonScripting.h"
+
+// A few more Python headers
 #include <compile.h>
 #include <eval.h>
-#include <frameobject.h>
 #include <traceback.h>
 
+// From 2.5 onwards this struct is defined in the Python header
 #if PY_VERSION_HEX < 0x020400A1
-typedef struct _traceback {
-	PyObject_HEAD
-		struct _traceback *tb_next;
-	PyFrameObject *tb_frame;
-	int tb_lasti;
-	int tb_lineno;
+typedef struct _traceback 
+{
+  PyObject_HEAD
+  struct _traceback *tb_next;
+  PyFrameObject *tb_frame;
+  int tb_lasti;
+  int tb_lineno;
 } PyTracebackObject;
 #endif
 
 #include "PythonScript.h"
-#include "PythonScripting.h"
 #include "ApplicationWindow.h"
 
 #include <QObject>
 #include <QStringList>
 #include <QDir>
-#include <QDateTime>
 #include <QCoreApplication>
 
 #include <Qsci/qscilexerpython.h> //Mantid
-#include "MantidKernel/ConfigService.h"
-#include <sstream>
+#include "MantidKernel/ConfigService.h" //Mantid
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
 #include "sipAPIqti.h"
 extern "C" void initqti();
 
+// Language name
 const char* PythonScripting::langName = "Python";
-ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) { return new PythonScripting(parent); }
+
+ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
+{ 
+  return new PythonScripting(parent); 
+}
 
 //Mantid - Creates the correct code lexer for syntax highlighting
 QsciLexer* PythonScripting::scriptCodeLexer() const
@@ -131,47 +137,6 @@ bool PythonScripting::exec (const QString &code, PyObject *argDict, const char *
 	return true;
 }
 
-QString PythonScripting::errorMsg()
-{
-	PyObject *exception=0, *value=0, *traceback=0;
-	PyTracebackObject *excit=0;
-	//	PyFrameObject *frame; // Mantid
-	//char *fname; // Mantid
-	QString msg;
-	if (!PyErr_Occurred()) return "";
-
-	PyErr_Fetch(&exception, &value, &traceback);
-	PyErr_NormalizeException(&exception, &value, &traceback);
-
-	//----- Mantid - Altered error message formatting -----
-	// There is no stack for a syntax error
-	if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
-	{
-	  int errline = getFirstLineNumber() + toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
-	  // Update the line marker as this will not get done by the tracing function
-	  // since we have not begun execution yet
-	  d_parent->scriptingInformation(errline);
-	  msg = QString("Error on line ") + QString::number(errline) + ": " +
-	    toString(PyObject_GetAttrString(value, "msg"), true);
- 	  Py_DECREF(exception);
-  	  Py_DECREF(value);
-	}
-	else
-	{
-	  int errline(getFirstLineNumber());
-	  if( traceback )
-	  {
-	   excit = (PyTracebackObject*)traceback;
-	   if( excit ) errline += excit->tb_lineno;
-	   Py_DECREF(traceback);
-	  }
-	  //Format the exception in a nicer manner
-	  msg = toString(exception,true).section('.',1).remove("'>") + QString(" on line ") + 
-	    QString::number(errline) + QString(" : ") + toString(value,true);
-	}
-	//----------------------------------------------
-	return msg;
-}
 
 PythonScripting::PythonScripting(ApplicationWindow *parent)
 	: ScriptingEnv(parent, langName)

@@ -76,6 +76,11 @@ class Script : public QObject
     //! Set whether errors / exceptions are to be emitted or silently ignored
     void setEmitErrors(bool yes) { EmitErrors = yes; }
 
+  // Set the line offset of the current code
+  void setLineOffset(int offset) { m_line_offset = offset; } 
+  // The current line offset
+  int getLineOffset() const { return m_line_offset; } 
+
   public slots:
     //! Compile the Code. Return true if the implementation doesn't support compilation.
     virtual bool compile(bool for_eval=true);
@@ -106,6 +111,9 @@ class Script : public QObject
 
     void emit_error(const QString & message, int lineNumber)
       { if(EmitErrors) emit error(message, Name, lineNumber); }
+
+private:
+  int m_line_offset;
 };
 
 //! keeps a static list of available interpreters and instantiates them on demand

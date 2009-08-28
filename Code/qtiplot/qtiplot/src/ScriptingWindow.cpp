@@ -6,6 +6,9 @@
 #include "ScriptingEnv.h"
 #include "pixmaps.h"
 
+// Mantid
+#include "MantidKernel/ConfigService.h"
+
 //Qt
 #include <QTextEdit>
 #include <QMenuBar>
@@ -186,6 +189,27 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
   // This connection must occur after the objects have been created and initialized
   connect(m_manager, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged()));
 
+  QSettings settings;
+  settings.beginGroup("/ScriptWindow");
+  QString lastdir = settings.value("LastDirectoryVisted", "").toString();
+  // If nothgin, set the last directory to the Mantid scripts directory (if present)
+  if( lastdir.isEmpty() )
+  {
+    lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
+  }
+  m_manager->m_last_dir = lastdir;
+
+  if( env->supportsProgressReporting() )
+  {
+    m_manager->m_toggle_progress->setChecked(settings.value("ProgressArrow", true).toBool());
+  }
+  else
+  {
+    m_manager->m_toggle_progress->setChecked(false);
+  }
+  settings.endGroup();
+
+
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   setWindowTitle("MantidPlot: " + env->scriptingLanguage() + " Window");
 
@@ -224,7 +248,8 @@ void ScriptingWindow::saveSettings()
   settings.setValue("/y", window_size.y());
   settings.setValue("/width", window_size.width());
   settings.setValue("/height", window_size.height());
-//   settings.setValue("/ProgressArrow", scriptWindow->progressArrowVisible());
+  settings.setValue("/ProgressArrow", m_manager->m_toggle_progress->isChecked());
+  settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.endGroup();
 
   m_manager->closeAllTabs();
@@ -372,7 +397,6 @@ void ScriptingWindow::initMenus()
   m_clear_output = new QAction(tr("&Clear Output"), this);
   connect(m_clear_output, SIGNAL(activated()), m_output_dock, SLOT(clear()));
   
-
   //************* Run menu *************
   m_run_menu = menuBar()->addMenu(tr("E&xecute"));
   // Execute script
@@ -382,7 +406,7 @@ void ScriptingWindow::initMenus()
   //Evaluate function for those environments that support one
   //  m_run_menu->addAction(m_manager->m_eval);
 
-  //************* Run menu *************
+  //************* Window menu *************
   m_window_menu = menuBar()->addMenu(tr("&Window"));
   //Always on top
   m_always_on_top = new QAction(tr("Always on &Top"), this);
@@ -398,5 +422,7 @@ void ScriptingWindow::initMenus()
   m_toggle_output->setText("&Show Output");
   m_toggle_output->setChecked(true);
   m_window_menu->addAction(m_toggle_output);
+  //Toggle progress
+  m_window_menu->addAction(m_manager->m_toggle_progress);
 }
 

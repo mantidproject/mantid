@@ -103,6 +103,10 @@ public:
   }  
 
 public slots:
+  /// Update the editor
+  void update();
+  /// Update the marker on this widget
+  void updateMarker(int lineno, bool success);
   /// Print the text within the widget
   void print();
 
@@ -112,16 +116,19 @@ signals:
   /// Inform observers that redo information is available
   void redoAvailable(bool);
 
-private slots:
-  /// Update the editor
-  void update();
-
 private:
   /// The file name associated with this editor
   QString m_filename;
 
   //Each editor needs its own undo/redo etc
   QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_print;
+
+  const int m_marker_handle;
+  // The colour of the marker for a success state
+  static QColor g_success_colour;
+  // The colour of the marker for an error state
+  static QColor g_error_colour;
+
 };
 
 

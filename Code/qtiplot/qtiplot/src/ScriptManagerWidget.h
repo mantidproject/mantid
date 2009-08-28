@@ -131,12 +131,12 @@ private slots:
   int closeCurrentTab();
   /// Close clicked tab
   void closeClickedTab();
-  /// Update for tab switch
-  void newTabSelected();
   /// Mark as changed
   void markCurrentAsChanged();
   /// Enable/disable the relevant actions based on the execution state of the script
   void setScriptIsRunning(bool running);
+  /// Toggle the progress reporting arrow
+  void toggleProgressArrow(bool on);
 
 private:
   /// Initialize the actions relevant to this object
@@ -177,6 +177,8 @@ private:
   QAction *m_find;
   /// Script execute actions
   QAction *m_exec, *m_exec_all, *m_eval;
+  ///Toggle progress
+  QAction *m_toggle_progress;
 
   /// The find replace dialog
   FindReplaceDialog *m_findrep_dlg;

@@ -82,12 +82,17 @@ class ScriptingEnv : public QObject
     const QString scriptingLanguage() const;
     //If the environment supports evaluation as well as execution then override and return true
     virtual bool supportsEvaluation() { return false; }
+  //! Is progress reporting supported
+  virtual bool supportsProgressReporting() const { return false; }
+  //!Whether we should be reporting progress  
+  bool reportProgress() const { return m_report_progress; }
+  //!Set whether we should be reporting progress
+  void reportProgress(bool on) { m_report_progress = on; }
 
-    // Mantid - For QScintilla. This is overridden in the concrete implementation to return the appropriate
+    // Mantid - For QScintilla. This is overridden in the concrete implementation 
+  //to return the appropriate
     // code lexer if one is required
     virtual QsciLexer* scriptCodeLexer() const = 0;
-    //Mantid - Set the line number of the first line of code to be executed
-    void setFirstLineNumber(int num) { m_lineNo = num; }
 
   public slots:
     // global variables
@@ -119,9 +124,6 @@ class ScriptingEnv : public QObject
     //! the context in which we are running
     ApplicationWindow *d_parent;
 
-  //Mantid - Get the line number of the first line of executed code
-  int getFirstLineNumber() const { return m_lineNo; }
-
   private:
     //! the reference counter
     int d_refcount;
@@ -129,9 +131,8 @@ class ScriptingEnv : public QObject
   //Mantid - Store the language name of the concrete implementation so that
   // the script window title can be set appropriately
   const char * languageName;
-  //The line number from the editor of the first line of code to be executed 
-  int m_lineNo;
-
+  // Is progress reporting on?
+  bool m_report_progress;
 };
 
 #endif

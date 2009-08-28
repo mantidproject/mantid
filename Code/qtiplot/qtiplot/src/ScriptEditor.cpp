@@ -11,11 +11,20 @@
 #include <QPrintDialog>
 #include <QPrinter>
 
+// std
+#include <cmath>
+
 //***************************************************************************
 //
 // ScriptEditor class
 //
 //***************************************************************************
+
+// The colour for a success marker
+QColor ScriptEditor::g_success_colour = QColor("lightgreen");
+// The colour for an error marker
+QColor ScriptEditor::g_error_colour = QColor("red");
+
 //------------------------------------------------
 // Public member functions
 //------------------------------------------------
@@ -24,8 +33,13 @@
  * @param parent The parent widget (can be NULL)
  */
 ScriptEditor::ScriptEditor(QWidget *parent) : 
-  QsciScintilla(parent), m_filename("")
+  QsciScintilla(parent), m_filename(""), m_marker_handle(markerDefine(QsciScintilla::RightArrow))
 {
+  //Editor properties
+  setAutoIndent(true);
+  setMarginLineNumbers(1,true);
+  
+  // Update for a text change
   connect(this, SIGNAL(textChanged()), this, SLOT(update()));
   
   // Undo action
@@ -103,6 +117,39 @@ bool ScriptEditor::saveScript(const QString & filename)
 // Public slots
 //-----------------------------------------------
 /**
+ * Update the editor
+ */
+void ScriptEditor::update()
+{
+  emit undoAvailable(isUndoAvailable());
+  emit redoAvailable(isRedoAvailable());
+
+  setMarginWidth( 1, 38 + 5*std::log10(static_cast<double>(lines())) );
+}
+
+/**
+ * Update the arrow marker to point to the correct line and colour it depending on the error state
+ * @param lineno The line to place the marker at. A negative number will clear all markers
+ * @param success If false, the marker will turn red
+ */
+void ScriptEditor::updateMarker(int lineno, bool success)
+{
+  markerDeleteAll();
+  if( lineno < 0 ) return;
+
+  if( success )
+  {
+    setMarkerBackgroundColor(g_success_colour, m_marker_handle);
+  }
+  else
+  {
+    setMarkerBackgroundColor(g_error_colour, m_marker_handle);
+  }
+  ensureLineVisible(lineno);
+  markerAdd(lineno - 1, m_marker_handle);
+}
+
+/**
  * Print the current text
  */
 void ScriptEditor::print()
@@ -118,15 +165,4 @@ void ScriptEditor::print()
   document.print(&printer);
 }
 
-//-----------------------------------------------------
-// Private slots
-//-----------------------------------------------------
-/**
- * Update the editor
- */
-void ScriptEditor::update()
-{
-  emit undoAvailable(isUndoAvailable());
-  emit redoAvailable(isRedoAvailable());
-}
 

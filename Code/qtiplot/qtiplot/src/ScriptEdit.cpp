@@ -248,26 +248,27 @@ void ScriptEdit::execute()
   int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
   //Qscintilla function
   getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
-  scriptEnv->setFirstLineNumber(lineFrom);
+
   m_iFirstLineNumber = lineFrom;
 
   //If we get here everything is successful
   setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
 
   //Run the code
+  myScript->setLineOffset(lineFrom);
   runScript(code);
 }
 
 void ScriptEdit::executeAll()
 {
   if( text().isEmpty() ) return;
-  scriptEnv->setFirstLineNumber(0);
   m_iFirstLineNumber = 0;
 
   //If we get here everything is successful
   setMarkerBackgroundColor(QColor("lightgreen"), m_iCodeMarkerHandle);
   
   //Run the code
+  myScript->setLineOffset(0);
   runScript(text().remove('\r'));
 }
 
@@ -314,14 +315,14 @@ void ScriptEdit::evaluate()
   {
     code = text(lineNumber()).remove("\r");
     myScript->setName(code);
-    scriptEnv->setFirstLineNumber(lineNumber());
+    myScript->setLineOffset(lineNumber());
   }
   else
   {
     int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
     //Qscintilla function
     getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
-    scriptEnv->setFirstLineNumber(lineFrom);
+    myScript->setLineOffset(lineFrom);
   }
   if( code.isEmpty() ) return;
  

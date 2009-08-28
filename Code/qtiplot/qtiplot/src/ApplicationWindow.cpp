@@ -4910,6 +4910,7 @@ void ApplicationWindow::saveSettings()
 
 	if( scriptingWindow )
  	{
+	  scriptingWindow->raise();//Mantid
 	  scriptingWindow->saveSettings(); //Mantid
 	}
 
@@ -15439,13 +15440,6 @@ QList<QMenu *> ApplicationWindow::menusList()
 
 // End of a section of Mantid custom functions
 //-------------------------------------------
-
-// Mantid
-void ApplicationWindow::scriptingInformation(int linenumber)
-{
-  emit scriptingLineChange(linenumber);
-}
-
 
 QList<QToolBar *> ApplicationWindow::toolBarsList()
 {

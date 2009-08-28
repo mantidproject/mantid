@@ -7,20 +7,6 @@
 # Author Martyn Gigg, Tessella Support Services
 #
 #----------------------------------------------
-#
-# A tracing function to report the currently executing line number  
-#
-def traceit(frame, event, arg):
-    if event == 'line':
-        filename = frame.f_globals['__file__']
-        if 'qtiUtil' in filename:
-            lineno = frame.f_lineno
-            qti.app.scriptingInformation(lineno)
-    return traceit
-
-# Set the trace function
-sys.settrace(traceit)
-
 ## Make these functions available globally 
 # (i.e. so that the qti.app.mantidUI prefix is not needed)
 MantidUIImports = [

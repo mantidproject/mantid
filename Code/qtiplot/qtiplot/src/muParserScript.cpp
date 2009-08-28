@@ -400,7 +400,7 @@ bool muParserScript::compile(bool)
 			muCodeLine += ")";
 			i--;
 		} else if (Code[i] == '#')
-			for (i++; Code[i] != '\n' && i < Code.size(); i++);
+		  for (i++; Code[i] != '\n' && i < Code.size(); i++){;}
 		else if (Code[i] == '\n') {
 			muCodeLine = muCodeLine.stripWhiteSpace();
 			if (!muCodeLine.isEmpty())

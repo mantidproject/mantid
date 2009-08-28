@@ -41,7 +41,7 @@
 #endif
 
 ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
-  : QObject(0, langName), d_parent(parent), languageName(langName), m_lineNo(0)  //Mantid
+  : QObject(0, langName), d_parent(parent), languageName(langName)
 {
 	d_initialized=false;
 	d_refcount=0;
