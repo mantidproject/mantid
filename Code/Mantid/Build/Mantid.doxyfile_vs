@@ -100,7 +100,7 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../MatlabAPI/src
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
-RECURSIVE              = NO
+RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
