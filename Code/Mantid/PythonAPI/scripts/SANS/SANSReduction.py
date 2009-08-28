@@ -352,7 +352,10 @@ def FullWavRangeReduction(sample_setup, can_setup, FindingCentre = False):
 # This runs a specified range
 def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre = False):
 	# Run correction function
-	final_workspace = sample_setup[1] + '_' + str(wav_start) + '_' + str(wav_end)
+	if FindingCentre == True:
+		final_workspace = sample_setup[1].split('_')[0] + '_centre-reduced'
+	else:
+		final_workspace = sample_setup[1] + '_' + str(wav_start) + '_' + str(wav_end)
 	Correct(SCATTER_SAMPLE, sample_setup[0], final_workspace, wav_start, wav_end, sample_setup[2], sample_setup[3], FindingCentre)
 	if can_setup[1] != '':
 		# Run correction function
@@ -402,6 +405,7 @@ try:
 		dn = mtd.getMatrixWorkspace(quad_ws[3])
 
 		residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
+		exit()
 		return residue
 
 	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
@@ -446,11 +450,11 @@ try:
 		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter)
 		
 		# Tidy up
-		mtd.deleteWorkspace('Left')
-		mtd.deleteWorkspace('Right')
-		mtd.deleteWorkspace('Up')
-		mtd.deleteWorkspace('Down')
-		mtd.deleteWorkspace(scatter_setup[1] + '_' + str(WAV1) + '_' + str(WAV2))
+#		mtd.deleteWorkspace('Left')
+#		mtd.deleteWorkspace('Right')
+#		mtd.deleteWorkspace('Up')
+#		mtd.deleteWorkspace('Down')
+#		mtd.deleteWorkspace(scatter_setup[1] + '_' + str(WAV1) + '_' + str(WAV2))
 		mtd.deleteWorkspace(SCATTER_SAMPLE)
 		if SCATTER_CAN != '':
 			mtd.deleteWorkspace(SCATTER_CAN)

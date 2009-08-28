@@ -169,12 +169,12 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 	if geomid == 1:
 		# Volume = circle area * height
 		# Factor of four comes from radius = width/2
-		correction /= (height**math.pi*pow(width,2)/4.0)
+		correction /= (height*math.pi*pow(width,2)/4.0)
 	elif geomid == 2:
 		correction /= (width*height*thickness)
 	else:
 		# Factor of four comes from radius = width/2
-		correction /= (thickness**math.pi*math.pow(width, 2)/4.0)
+		correction /= (thickness*math.pi*math.pow(width, 2)/4.0)
 	
 	CreateSingleValuedWorkspace("scalar",str(correction),"0.0")
 	Multiply(inputWS, "scalar", inputWS)
