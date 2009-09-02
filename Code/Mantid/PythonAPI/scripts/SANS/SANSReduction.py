@@ -303,7 +303,6 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 	if CORRECTION_TYPE == '1D':
                 SANSUtility.StripEndZeroes(final_result)
 	mantid.deleteWorkspace(tmpWS)
-	
 	return
 ############################# End of Correct function ####################################################
 
@@ -405,7 +404,6 @@ try:
 		dn = mtd.getMatrixWorkspace(quad_ws[3])
 
 		residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
-		exit()
 		return residue
 
 	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
