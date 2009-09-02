@@ -8,6 +8,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
+#include "MantidKernel/Logger.h"
 #include <Python.h>
 
 //-------------------------------
@@ -115,7 +116,10 @@ public:
     
 	/// Create the simple Python API for Mantid
 	void createPythonSimpleAPI(bool);
-	
+
+	//Send a log message to the Mantid Framework with a specified priority
+	void sendLogMessage(const std::string & msg);
+		
 	/// Add a Python alogirthm
 	int addPythonAlgorithm(PyObject* pyAlg);
 	/// Execute a Python algorithm
@@ -127,6 +131,8 @@ private:
 	/// Assignment operator
 	FrameworkManager& operator = (const FrameworkManager&);
 
+	// A Python logger
+	static Mantid::Kernel::Logger& g_log;
 };
 
 }

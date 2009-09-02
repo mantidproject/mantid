@@ -23,6 +23,9 @@ namespace Mantid
 namespace PythonAPI
 {
 
+// Initialize the logger
+Mantid::Kernel::Logger& FrameworkManager::g_log = Mantid::Kernel::Logger::get("MantidPython");
+
 /// Default constructor
 FrameworkManager::FrameworkManager()
 {
@@ -256,6 +259,15 @@ void FrameworkManager::createPythonSimpleAPI(bool gui)
 {
   //Redirect to static helper class
   SimplePythonAPI::createModule(gui);
+}
+
+/**
+ * Send a log message to Mantid
+ * @param msg The log message
+ */
+void FrameworkManager::sendLogMessage(const std::string & msg) 
+{
+  g_log.notice(msg); 
 }
 	
 /**
