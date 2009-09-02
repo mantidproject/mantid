@@ -468,10 +468,10 @@ namespace Mantid
       if( gui )
       {
 	os << "\thelpmsg += \"Note: Each command also has a counterpart with the word 'Dialog'"
-	  << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n"
-	  << "\tprint helpmsg,\n"
-	  << "\n";
+	   << " appended to it, which when run will bring up a property input dialog for that algorithm.\\n\"\n";
       }
+      os << "\tprint helpmsg,\n"
+	 << "\n";
     }
 
     /**
