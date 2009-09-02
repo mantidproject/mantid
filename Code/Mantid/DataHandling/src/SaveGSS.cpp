@@ -2,12 +2,8 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveGSS.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/FileValidator.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "Poco/Timestamp.h"
-#include "Poco/DateTimeFormatter.h"
-#include <algorithm>
+#include "MantidAPI/WorkspaceValidators.h"
 #include <fstream>
 #include <iomanip>
 
@@ -25,16 +21,18 @@ DECLARE_ALGORITHM(SaveGSS)
 void SaveGSS::init()
 {
   // Data must be in TOF
-	declareProperty(new API::WorkspaceProperty<> ("InputWorkspace", "", Kernel::Direction::Input),
-	    "The X values for the input workspace must be in units of wavelength");
+  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
+    new API::WorkspaceUnitValidator<>("TOF")),
+    "The input workspace, which must be in time-of-flight");
   declareProperty("Filename", "",
     new Mantid::Kernel::FileValidator(std::vector<std::string>(), false),
-    "The filename to use when saving data", Kernel::Direction::Input);
+    "The filename to use for the saved data", Kernel::Direction::Input);
   std::vector<std::string> Split(2);
   Split[0] = "True";
   Split[1] = "False";
   declareProperty("SplitFiles", "True", new Kernel::ListValidator(Split),
     "Save each spectrum in a different file (default true)" );
+  declareProperty("Append",true,"If true and Filename already exists, append, else overwrite");
   declareProperty("Bank",1);
 }
 
@@ -47,82 +45,93 @@ void SaveGSS::exec()
   //Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   const int nHist=inputWS->getNumberHistograms();
-  //const bool isHistogram = inputWS->isHistogramData();
 
   std::string filename = getProperty("Filename");
   std::size_t pos=filename.find_first_of(".");
   std::string ext;
   if (pos!=std::string::npos) //Remove the extension
   {
-  	ext=filename.substr(pos+1,filename.npos);
-  	filename=filename.substr(0,pos);
+    ext=filename.substr(pos+1,filename.npos);
+    filename=filename.substr(0,pos);
   }
+
   int bank=getProperty("Bank");
   std::string split=getProperty("SplitFiles");
+
   std::ostringstream number;
-  std::fstream out;
-   Progress p(this,0.2,1.0,nHist);
-	for (int i=0;i<nHist;i++)
-	{
-		const std::vector<double>& X=inputWS->readX(i);
-		const std::vector<double>& Y=inputWS->readY(i);
-		const std::vector<double>& E=inputWS->readE(i);
+  std::ofstream out;
+  // Check whether to append to an already existing file or overwrite
+  using std::ios_base;
+  const bool append = getProperty("Append");
+  ios_base::openmode mode = ( append ? (ios_base::out | ios_base::app) : ios_base::out );
 
-		if (split=="False" && i==0) // Assign only one file
-		{
-			out.open((filename+'.'+ext).c_str(),std::ios::out);
-			writeHeaders(out,inputWS);
-		}
-		else if (split=="True")//Several files will be created with names: filename-i.ext
-		{
-			number << "-" << i;
-			out.open((filename+number.str()+"."+ext).c_str(),std::ios::out);
-			number.str("");
-			writeHeaders(out,inputWS);
-		}
+  Progress p(this,0.0,1.0,nHist);
+  for (int i=0;i<nHist;i++)
+  {
+    const MantidVec& X=inputWS->readX(i);
+    const MantidVec& Y=inputWS->readY(i);
+    const MantidVec& E=inputWS->readE(i);
 
-		{ // New scope
-		if (!out.is_open())
-		{
-			g_log.information("Could not open filename: "+filename);
-			throw std::runtime_error("Could not open filename: "+filename);
-		}
-		const int datasize = Y.size();
-		double bc1=X[0]*32;
-		double bc2=(X[1]-X[0])*32;
-		// Logarithmic step
-		double bc4=(X[1]-X[0])/X[0];
-		out << "# Data for spectra :"<< i << std::endl;
-		out << "BANK "
-				<< std::fixed << std::setprecision(0) << bank // First bank should be 1 for GSAS
-				<< std::fixed << " " << datasize
-				<< std::fixed << " " << datasize
-				<< std::fixed << " " << "RALF"
-				<< std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
-				<< std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
-				<< std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
-				<< std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
-				<< " FXYE"<<std::endl;
-    for (int j = 0; j < datasize; j++)
+    if (split=="False" && i==0) // Assign only one file
     {
-      out << std::fixed << std::setprecision(5) << std::setw(15) << 0.5*(X[j]+X[j+1])
-	        << std::fixed << std::setprecision(8) << std::setw(18) << Y[j]*X[j]*bc4
-		      << std::fixed << std::setprecision(8) << std::setw(18) << E[j]*X[j]*bc4 << "\n";
+      const std::string file(filename+'.'+ext);
+      const bool exists = Poco::File(file).exists();
+      out.open(file.c_str(),mode);
+      if ( !exists || !append ) writeHeaders(out,inputWS);
     }
+    else if (split=="True")//Several files will be created with names: filename-i.ext
+    {
+      number << "-" << i;
+      const std::string file(filename+number.str()+"."+ext);
+      const bool exists = Poco::File(file).exists();
+      out.open(file.c_str(),mode);
+      number.str("");
+      if ( !exists || !append ) writeHeaders(out,inputWS);
+    }
+
+    { // New scope
+      if (!out.is_open())
+      {
+        g_log.information("Could not open filename: "+filename);
+        throw std::runtime_error("Could not open filename: "+filename);
+      }
+      const int datasize = Y.size();
+      double bc1=X[0]*32;
+      double bc2=(X[1]-X[0])*32;
+      // Logarithmic step
+      double bc4=(X[1]-X[0])/X[0];
+      out << "# Data for spectrum :"<< i << std::endl;
+      out << "BANK "
+        << std::fixed << std::setprecision(0) << bank // First bank should be 1 for GSAS
+        << std::fixed << " " << datasize
+        << std::fixed << " " << datasize
+        << std::fixed << " " << "RALF"
+        << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
+        << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc2
+        << std::fixed << " " << std::setprecision(0) << std::setw(8) << bc1
+        << std::fixed << " " << std::setprecision(5) << std::setw(7) << bc4
+        << " FXYE"<<std::endl;
+      for (int j = 0; j < datasize; j++)
+      {
+        out << std::fixed << std::setprecision(5) << std::setw(15) << 0.5*(X[j]+X[j+1])
+          << std::fixed << std::setprecision(8) << std::setw(18) << Y[j]*X[j]*bc4
+          << std::fixed << std::setprecision(8) << std::setw(18) << E[j]*X[j]*bc4 << "\n";
+      }
     } // End separate scope
+
     //Close at each iteration
-  	if (split=="True")
+    if (split=="True")
     {
       out.close();
     }
-	p.report();
+    p.report();
   }
-	// Close if single file
-	if (split=="False")
+  // Close if single file
+  if (split=="False")
   {
-		out.close();
+    out.close();
   }
-	return;
+  return;
 }
 
 /**
@@ -132,9 +141,10 @@ void SaveGSS::exec()
  */
 void SaveGSS::writeHeaders(std::ostream& os, Mantid::API::MatrixWorkspace_const_sptr& workspace) const
 {
-	os <<"# File generated by Mantid:" << std::endl;
-	os <<"# Instrument: " << workspace->getBaseInstrument()->getName() << std::endl;
+  os << workspace->getTitle() << std::endl;
+  os <<"# File generated by Mantid:\n";
+  os <<"# Instrument: " << workspace->getBaseInstrument()->getName() << std::endl;
 
-	return;
+  return;
 }
 
