@@ -60,7 +60,7 @@ win32 {
   LIBS += "$$MANTIDLIBPATH/MantidGeometry.lib"
   LIBS += "$$MANTIDLIBPATH/MantidAPI.lib"
   LIBS += "$$THIRDPARTY/lib/win32/PocoFoundation.lib"
-  LIBS += "$$THIRDPARTY/lib/win32/libboost_signals-vc80-mt-1_34.1.lib"
+  LIBS += "$$THIRDPARTY/lib/win32/libboost_signals-vc80-mt-1_34_1.lib"
 }
 
 MOC_DIR = "$$TMPDIR"
