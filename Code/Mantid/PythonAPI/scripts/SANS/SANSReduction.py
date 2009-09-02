@@ -373,6 +373,13 @@ try:
 	# detector
 	XVAR_PREV = 0.0
 	YVAR_PREV = 0.0
+	ITER_NUM = 0
+
+	def reportProgress(xk):
+		global ITER_NUM
+		ITER_NUM += 1
+		mantid.sendLogMessage("::SANS::Iteration: " + str(ITER_NUM))
+
 
 	def Residuals(vars, *args):
 		'''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants (cones really)'''
@@ -380,7 +387,7 @@ try:
 		global XVAR_PREV, YVAR_PREV
 		xcentre = vars[0]
 		ycentre= vars[1]
-
+		
 		xshift = xcentre - XVAR_PREV
 		yshift = ycentre - YVAR_PREV
 		XVAR_PREV = xcentre
@@ -407,7 +414,7 @@ try:
 		return residue
 
 	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
-		global XVAR_PREV, YVAR_PREV
+		global XVAR_PREV, YVAR_PREV, ITER_NUM
 		
 		if xstart == None or ystart == None:
 			# If a starting point is not provided, do a quick sweep to find the maximum count as an 
@@ -444,8 +451,10 @@ try:
 
 		XVAR_PREV = -XVAR_PREV
 		YVAR_PREV = -YVAR_PREV
-		
-		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter)
+		# There's a bug in the scipy.optimize.fmin function that skips the callback function for the first iteration
+		ITER_NUM = 0
+		reportProgress([0,0])
+		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter, callback = reportProgress)
 		
 		# Tidy up
 #		mtd.deleteWorkspace('Left')

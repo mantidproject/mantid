@@ -1399,10 +1399,17 @@ void SANSRunWindow::handleRunFindCentre()
   m_uiForm.beamstart_box->setFocus();
 
   //Execute the code
+  //Connect up the logger to handle updating the centre finding status box
+  connect(this, SIGNAL(logMessageReceived(const QString&)), this, 
+	  SLOT(updateCentreFindingStatus(const QString&)));
+  // Start iteration
+  updateCentreFindingStatus("Iteration 1");
   QString result = runPythonCode(py_code);
-
+  disconnect(this, SIGNAL(logMessageReceived(const QString&)), this, 
+	     SLOT(updateCentreFindingStatus(const QString&)));
   QTextStream reader(&result, QIODevice::ReadOnly);
   double x(0.0), y(0.0);
+  bool found(false);
   while( !reader.atEnd() )
   {
     QString line = reader.readLine();
@@ -1413,12 +1420,21 @@ void SANSRunWindow::handleRunFindCentre()
       {
 	x = xycoords[1].toDouble();
 	y = xycoords[2].toDouble();
+	found = true;
       }
     }
   }
-  m_uiForm.beam_x->setText(QString::number(x*1000));
-  m_uiForm.beam_y->setText(QString::number(y*1000));
 
+  if( found )
+  {
+    m_uiForm.beam_x->setText(QString::number(x*1000));
+    m_uiForm.beam_y->setText(QString::number(y*1000));
+    updateCentreFindingStatus("::SANS::Coordinates updated");
+  }
+  else
+  {
+    updateCentreFindingStatus("::SANS::Error with search");
+  }
 
   //Reenable stuff
   setProcessingState(false, 0);
@@ -1553,6 +1569,19 @@ void SANSRunWindow::handleTabChange(int index)
       m_uiForm.runcentreBtn->setEnabled(false);
     }
     disconnect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChange(int)));
+}
+
+/**
+ * Update the centre finding status label
+ * @param msg The message string
+ */
+void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
+{
+  static QString prefix = "::SANS::";
+  if( msg.startsWith(prefix) )
+  {
+    m_uiForm.centre_stat->setText(msg.split(prefix).value(1));
+  }  
 }
 
 /**
