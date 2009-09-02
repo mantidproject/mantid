@@ -51,6 +51,7 @@ unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
   LIBS += -L$$MANTIDLIBPATH -lMantidGeometry
   LIBS += -L/usr/lib/ -lPocoFoundation
+  LIBS += -lboost_signals
 }
 
 win32 {
@@ -59,6 +60,7 @@ win32 {
   LIBS += "$$MANTIDLIBPATH/MantidGeometry.lib"
   LIBS += "$$MANTIDLIBPATH/MantidAPI.lib"
   LIBS += "$$THIRDPARTY/lib/win32/PocoFoundation.lib"
+  LIBS += "$$THIRDPARTY/lib/win32/libboost_signals-vc80-mt-1_34.1.lib"
 }
 
 MOC_DIR = "$$TMPDIR"

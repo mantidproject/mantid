@@ -22,6 +22,8 @@
 
 #include <QWidget>
 
+#include <Poco/Message.h>
+
 //----------------------------------
 // Qt Forward declarations
 //----------------------------------
@@ -88,9 +90,14 @@ public:
   /// Is this dialog initialized
   bool isInitialized() const;
 
+  /// A boost 'slot' for the Mantid signal channel connection
+  void mantidLogReceiver(const Poco::Message & msg);
+  
 signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString& code);
+  ///Mantid log message recieved
+  void logMessageReceived(const QString & msg);
 
 protected:
   /**@name Virtual Functions */
@@ -104,6 +111,7 @@ protected:
   
   /// Run a piece of python code and return any output that was written to stdout
   QString runPythonCode(const QString & code, bool no_output = false);
+
   
 private:
   // This is so that it can set the name
@@ -113,6 +121,9 @@ private:
 
   /// Set the interface name
   void setInterfaceName(const QString & iface_name);
+
+  /// Connect this object to Mantid's signal channel
+  bool connectToMantidSignal();
   
   /// Has this already been initialized
   bool m_bIsInitialized;
