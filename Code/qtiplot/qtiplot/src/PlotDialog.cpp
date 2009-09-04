@@ -77,7 +77,6 @@ PlotDialog::PlotDialog(bool showExtended, QWidget* parent, Qt::WFlags fl )
 	setWindowTitle( tr( "QtiPlot - Plot details" ) );
 	setModal(true);
 	setSizeGripEnabled(true);
-
 	listBox = new QTreeWidget();
     listBox->setColumnCount(1);
 	listBox->header()->hide();
@@ -157,6 +156,7 @@ PlotDialog::PlotDialog(bool showExtended, QWidget* parent, Qt::WFlags fl )
 
 	QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
     connect(shortcut, SIGNAL(activated()), this, SLOT(removeSelectedCurve()));
+	
 	
 }
 
@@ -768,7 +768,7 @@ void PlotDialog::initLabelsPage()
 	gl->addWidget(labelsColumnLbl, 0, 0);
     boxLabelsColumn = new QComboBox();
     gl->addWidget(boxLabelsColumn, 0, 1);
-  
+	  
     gl->addWidget(new QLabel(tr( "Color" )), 1, 0);
     boxLabelsColor = new ColorBox();
     gl->addWidget(boxLabelsColor, 1, 1);
@@ -795,7 +795,7 @@ void PlotDialog::initLabelsPage()
     boxLabelsXOffset->setRange(-INT_MAX, INT_MAX);
     boxLabelsXOffset->setSingleStep(10);
     gl->addWidget(boxLabelsXOffset, 4, 1);
-
+	
     gl->addWidget(new QLabel(tr("Y Offset (font height %)")), 5, 0);
     boxLabelsYOffset = new QSpinBox();
     boxLabelsYOffset->setRange(-INT_MAX, INT_MAX);
@@ -818,7 +818,7 @@ void PlotDialog::initLabelsPage()
     connect(boxLabelsXOffset, SIGNAL(valueChanged(int)), this, SLOT(acceptParams()));
     connect(boxLabelsYOffset, SIGNAL(valueChanged(int)), this, SLOT(acceptParams()));
     connect(boxLabelsAngle, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-    connect(btnLabelsFont, SIGNAL(clicked()), this, SLOT(chooseLabelsFont()));
+    //connect(btnLabelsFont, SIGNAL(clicked()), this, SLOT(chooseLabelsFont()));
 }
 
 void PlotDialog::initAxesPage()
@@ -2277,8 +2277,7 @@ void PlotDialog::updateEndPointColumns(const QString& text)
 
 bool PlotDialog::acceptParams()
 {
-    
-    if (privateTabWidget->currentWidget() == fontsPage){
+     if (privateTabWidget->currentWidget() == fontsPage){
 		d_ml->setFonts(titleFont, axesFont, numbersFont, legendFont);
 		return true;
     } else if (privateTabWidget->currentWidget() == printPage){
@@ -2343,8 +2342,7 @@ bool PlotDialog::acceptParams()
 		graph->setAutoScale();
 		return true;
 	} else if (privateTabWidget->currentPage() == spectrogramPage){
-		
-  		Spectrogram *sp = (Spectrogram *)plotItem;
+	 		Spectrogram *sp = (Spectrogram *)plotItem;
 		 if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
 		{
   	    	return false;
@@ -2529,7 +2527,7 @@ bool PlotDialog::acceptParams()
 				b->setWhiskersRange(boxWhiskersRange->currentIndex(), (double)boxWhiskersCoef->value());
 		}
 	} else if (privateTabWidget->currentPage() == labelsPage){
-		
+	
 		Spectrogram *sp = (Spectrogram *)plotItem;
   	    if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
 			sp->setLabelsRotation(boxLabelsAngle->value());
