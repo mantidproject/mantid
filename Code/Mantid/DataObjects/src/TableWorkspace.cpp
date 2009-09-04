@@ -153,6 +153,7 @@ namespace Mantid
     std::vector<std::string> TableWorkspace::getColumnNames()
     {
         std::vector<std::string> nameList;
+        nameList.reserve(m_columns.size());
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
             nameList.push_back((*ci)->name());
         return nameList;

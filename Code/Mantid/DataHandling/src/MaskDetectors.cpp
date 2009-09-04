@@ -140,6 +140,7 @@ void MaskDetectors::fillIndexListFromSpectra(std::vector<int>& indexList, std::v
   std::set<int> spectraSet(spectraList.begin(),spectraList.end());
   // Next line means that anything in Clear the index list first
   indexList.clear();
+  indexList.reserve(WS->getNumberHistograms());
   //get the spectra axis
   Axis *spectraAxis = WS->getAxis(1);
 

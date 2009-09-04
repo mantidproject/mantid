@@ -194,6 +194,7 @@ namespace NeXus
         g_log.error("Invalid WorkspaceIndex min/max properties");
         throw std::invalid_argument("Inconsistent properties defined");
       }
+      spec.reserve(1+m_spec_max-m_spec_min);
       for(int i=m_spec_min;i<=m_spec_max;i++)
           spec.push_back(i);
       if (m_list)
@@ -224,6 +225,7 @@ namespace NeXus
     {
         m_spec_min=0;
         m_spec_max=numberOfHist-1;
+        spec.reserve(1+m_spec_max-m_spec_min);
         for(int i=m_spec_min;i<=m_spec_max;i++)
             spec.push_back(i);
     }

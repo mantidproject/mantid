@@ -225,6 +225,7 @@ double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) 
 
   // make an array of all the values in the single bin histograms for passing to the GNU Scientifc Library
   MantidVec nums;
+  nums.reserve(input->getNumberHistograms());
   // copy the data into this array
   for (int i = 0; i < input->getNumberHistograms(); ++i)
   {

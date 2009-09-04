@@ -372,6 +372,7 @@ void WorkspaceHelpers::getIndicesFromSpectra(const MatrixWorkspace_const_sptr WS
   std::set<int> spectraSet(spectraList.begin(),spectraList.end());
   // Clear the output index list
   indexList.clear();
+  indexList.reserve(WS->getNumberHistograms());
   // get the spectra axis
   Axis *spectraAxis;
   if (WS->axes() == 2)

@@ -124,6 +124,7 @@ void ParObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, d
   Geometry::V3D V0(xmin,ymin,zmin),V1(xmin,ymin,zmax),V2(xmin,ymax,zmin),V3(xmin,ymax,zmax),
                 V4(xmax,ymin,zmin),V5(xmax,ymin,zmax),V6(xmax,ymax,zmin),V7(xmax,ymax,zmax);
   std::vector<V3D> points;
+  points.reserve(8);
   points.push_back(V0); points.push_back(V1); points.push_back(V2); points.push_back(V3);
   points.push_back(V4); points.push_back(V5); points.push_back(V6); points.push_back(V7);
   std::vector<V3D>::const_iterator vc;
@@ -149,6 +150,7 @@ void ParObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, d
   Geometry::V3D v0(minT[0],minT[1],minT[2]),v1(minT[0],minT[1],maxT[2]),v2(minT[0],maxT[1],minT[2]),v3(minT[0],maxT[1],maxT[2]),
                 v4(maxT[0],minT[1],minT[2]),v5(maxT[0],minT[1],maxT[2]),v6(maxT[0],maxT[1],minT[2]),v7(maxT[0],maxT[1],maxT[2]);
   points.clear();
+  points.reserve(8);
   points.push_back(v0); points.push_back(v1); points.push_back(v2); points.push_back(v3);
   points.push_back(v4); points.push_back(v5); points.push_back(v6); points.push_back(v7);
   maxT[0]=-DBL_MAX;maxT[1]=-DBL_MAX;maxT[2]=-DBL_MAX;

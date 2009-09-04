@@ -108,6 +108,7 @@ namespace Mantid
     std::vector<int> SpectraDetectorMap::getSpectra(const std::vector<int>& detectorList) const
     {
       std::vector<int> spectraList;
+      spectraList.reserve(detectorList.size());
 
       //invert the sdmap into a dsMap
       std::multimap<int,int> dsMap;  

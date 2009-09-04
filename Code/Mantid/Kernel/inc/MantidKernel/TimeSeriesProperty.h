@@ -101,6 +101,7 @@ public:
   std::vector<std::string> time_tValue() const
   {
     std::vector<std::string> values;
+    values.reserve(m_propertySeries.size());
 
     typename timeMap::const_iterator p = m_propertySeries.begin();
 

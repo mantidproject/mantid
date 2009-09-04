@@ -89,6 +89,7 @@ void CrossCorrelate::exec()
    	// Get the number of spectra in range specmin to specmax
    	int nspecs=0;
    	std::vector<int> indexes; // Indexes of all spectra in range
+    indexes.reserve(specmax-specmin); //reserve at leat enough space
    	for (int i=specmin;i<=specmax;++i)
    	{
    		index_map_it=index_map.find(i);

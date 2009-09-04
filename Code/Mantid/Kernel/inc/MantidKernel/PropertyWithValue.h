@@ -15,7 +15,7 @@
 #include "MantidKernel/FileValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/tokenizer.hpp>
+#include <Poco/StringTokenizer.h>
 #include <vector>
 
 namespace Mantid
@@ -120,12 +120,13 @@ private:
     void setValue(const std::string& value, std::vector<T>& result)
     {
       // Split up comma-separated properties
-      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+      typedef Poco::StringTokenizer tokenizer;
+      tokenizer values(value, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
-      boost::char_separator<char> sep(",");
-      tokenizer values(value, sep);
       std::vector<T> vec;
-      for (tokenizer::iterator it = values.begin(); it != values.end(); ++it)
+      vec.reserve(values.count());
+      
+      for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
       {
         try
         {

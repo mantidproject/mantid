@@ -102,6 +102,7 @@ static bool compare(MatrixWorkspace_sptr first, MatrixWorkspace_sptr second)
 std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector<std::string>& inputWorkspaces) const
 {
   std::list<MatrixWorkspace_sptr> inWS;
+
   int numSpec(0);
   Unit_sptr unit;
   bool dist(false);

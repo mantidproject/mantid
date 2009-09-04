@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Exception.h"
+#include <boost/tokenizer.hpp>
 #include <algorithm>
 
 namespace Mantid
