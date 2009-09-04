@@ -19,6 +19,7 @@ namespace
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const {}
   };
 } // end anonynmous namespace
+/// @endcond
 
 namespace Mantid
 {
