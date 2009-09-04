@@ -97,7 +97,7 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../CurveFitting/inc/MantidCurveFitting \
                          ../CurveFitting/src \
                          ../MatlabAPI/inc/MatlabAPI \
-                         ../MatlabAPI/src\
+                         ../MatlabAPI/src \
                          ../Crystal/inc/MantidCrystal \
                          ../Crystal/src
 INPUT_ENCODING         = UTF-8
