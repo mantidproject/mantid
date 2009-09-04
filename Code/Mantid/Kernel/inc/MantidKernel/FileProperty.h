@@ -20,7 +20,7 @@ namespace Kernel
      if found, the <code>value()</code>  a method returns the full path to the file. For 
      saving, Mantid's default save directory is used when a relative path is encountered.
    */
-class FileProperty : public PropertyWithValue<std::string>
+class DLLExport FileProperty : public PropertyWithValue<std::string>
 {
 public:
   /// An enumeration for load/save types. This is passed on to the FileValidator as a constructor parameter.
