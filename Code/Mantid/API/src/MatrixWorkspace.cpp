@@ -124,6 +124,8 @@ SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
  *          to the given spectrum number. If more than one detector contributes then
  *          the returned object's concrete type will be DetectorGroup.
  *  @throw  std::runtime_error if the SpectraDetectorMap has not been filled
+ *  @throw  Kernel::Exception::NotFoundError if the SpectraDetectorMap or the Instrument
+            do not contain the requested spectrum number of detector ID
  */
 Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int index) const
 {

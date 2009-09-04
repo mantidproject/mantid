@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ConvertSpectrumAxis.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ConvertToDistribution.cpp"
 				>
 			</File>
@@ -506,6 +510,10 @@
 			</File>
 			<File
 				RelativePath=".\test\ConvertFromDistributionTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\ConvertSpectrumAxis.h"
 				>
 			</File>
 			<File
