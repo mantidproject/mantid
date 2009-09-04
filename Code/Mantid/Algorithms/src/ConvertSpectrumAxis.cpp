@@ -8,11 +8,11 @@
 // Don't document this very long winded way of getting "radians" to print on the axis.
 namespace
 {
-  class Radians : public Mantid::Kernel::Unit
+  class Degrees : public Mantid::Kernel::Unit
   {
     const std::string unitID() const { return ""; }
     const std::string caption() const { return "Scattering angle"; }
-    const std::string label() const { return "radians"; }
+    const std::string label() const { return "degrees"; }
     void toTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
       const double& twoTheta, const int& emode, const double& efixed, const double& delta) const {}
     void fromTOF(std::vector<double>& xdata, std::vector<double>& ydata, const double& l1, const double& l2,
@@ -68,7 +68,7 @@ void ConvertSpectrumAxis::exec()
   {
     try {
       IDetector_const_sptr det = inputWS->getDetector(i);
-      theta2indexMap.insert( std::make_pair( inputWS->detectorTwoTheta(det)/2.0 , i ) );
+      theta2indexMap.insert( std::make_pair( inputWS->detectorTwoTheta(det)*180.0/M_PI/2.0 , i ) );
     } catch(Exception::NotFoundError) {
       if (!warningGiven) g_log.warning("The instrument definition is incomplete - spectra dropped from output");
       warningGiven = true;
@@ -84,7 +84,7 @@ void ConvertSpectrumAxis::exec()
   Axis* const newAxis = new Axis(AxisType::Numeric,theta2indexMap.size());
   outputWS->replaceAxis(1,newAxis);
   // The unit of this axis is radians. Use the 'radians' unit defined above.
-  newAxis->unit() = boost::shared_ptr<Unit>(new Radians);
+  newAxis->unit() = boost::shared_ptr<Unit>(new Degrees);
 
   std::multimap<double,int>::const_iterator it;
   int currentIndex = 0;
