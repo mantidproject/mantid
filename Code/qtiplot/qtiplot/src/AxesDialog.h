@@ -218,6 +218,7 @@ protected:
 	bool m_bstartValueChanged;
 	bool m_bendValueChanged;
 	int m_ScaleTYpe;
+	bool m_updatePlot;
 
 	//static Mantid::Kernel::Logger &g_log;
 };

@@ -38,9 +38,11 @@
 
 
 #include <iostream>
+#include <numeric>
 #include "MantidAPI/MatrixWorkspace.h"
 using namespace Mantid::API;
 
+//Mantid::Kernel::Logger & Spectrogram::g_log=Mantid::Kernel::Logger::get("Spectrogram");
 Spectrogram::Spectrogram():
 	QwtPlotSpectrogram(),
 	d_matrix(0),d_funct(0),//Mantid
@@ -87,7 +89,7 @@ Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left,
 	
 }
 
-Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
+Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
 :	QwtPlotSpectrogram(),
 d_matrix(0),d_funct(f),
 color_axis(QwtPlot::yRight),
@@ -102,8 +104,8 @@ d_labels_x_offset(0),
 d_labels_y_offset(0),
 d_selected_label(NULL),
 d_labels_align(Qt::AlignHCenter),
-m_ScaleType(1),
-mColorMap(), mDataMinValue(minz), mDataMaxValue(maxz), 
+m_ScaleType(MantidColorMap::Linear),mWorkspaceSptr(workspace),
+mColorMap(),mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX), //mDataMinValue(minz), mDataMaxValue(maxz), 
 mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), 
 mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX),m_nRows(nrows),m_nColumns(ncols),mScaledValues(0)
 {
@@ -117,6 +119,7 @@ mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX),m_nRows(nrows),m_nColumns(ncols),mSc
 		contourLevels += level;
  	setContourLevels(contourLevels);
 	//loadSettings();
+	calculateBinRange(mWorkspaceSptr);
 
 }
 Spectrogram::~Spectrogram()
@@ -277,7 +280,7 @@ if (colorAxis)
 
 void Spectrogram::setDefaultColorMap()
 {
-	color_map = defaultColorMap();
+	//color_map = defaultColorMap();
 	//setColorMap(color_map);
 	setColorMap(mColorMap);
 	color_map_policy = Default;
@@ -296,7 +299,6 @@ void Spectrogram::setCustomColorMap(const QwtColorMap &map)
 	setColorMap(map);
 	//color_map = map;
 	color_map_policy = Custom;
-
 	QwtPlot *plot = this->plot();
 	if (!plot)
 		return;
@@ -523,7 +525,13 @@ return s+"</spectrogram>\n";
  */
 const MantidColorMap & Spectrogram::getColorMap() const
 {
-  return mColorMap;
+	
+ return mColorMap;
+	
+}
+const QwtColorMap& Spectrogram::getSpectrogramColormap()
+{
+	return (colorMap());
 }
 void Spectrogram::setMantidColorMap(const MantidColorMap &map)
 {
@@ -538,8 +546,8 @@ MantidColorMap & Spectrogram::mutableColorMap()
 }
 void Spectrogram::setupColorBarScaling()
 {
-  double minValue = mDataMinValue;
-  double maxValue = mDataMaxValue;
+  double minValue =data().range().minValue(); //mDataMinValue;
+  double maxValue = data().range().maxValue();//mDataMaxValue;
   QwtScaleWidget *rightAxis = plot()->axisWidget(QwtPlot::yRight); 
   if(rightAxis==NULL) return;
   QwtScaleDiv *scDiv = plot()->axisScaleDiv(QwtPlot::yRight);
@@ -554,6 +562,7 @@ void Spectrogram::setupColorBarScaling()
     QwtLinearScaleEngine linScaler;
     rightAxis->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  majTicks,minTicks));
     rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue),getColorMap());  
+	//rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue),colorMap());  
   }
   else
  {
@@ -567,6 +576,7 @@ void Spectrogram::setupColorBarScaling()
 	rightAxis->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, majTicks, minTicks));
     rightAxis->setColorMap(QwtDoubleInterval(minValue, maxValue), getColorMap());
   }
+  plot()->setAxisScale(QwtPlot::yRight,minValue,maxValue);
 }
 void Spectrogram::setScaleType(int scaleType)
 {
@@ -769,34 +779,104 @@ void Spectrogram::setLabelsColor(const QColor& c)
 		m->setLabel(t);
 	}
 }
+
+/**
+ * Calculate the minimum and maximum values of the bins for the set workspace
+ */
+void Spectrogram::calculateBinRange(Mantid::API::MatrixWorkspace_sptr workspace)
+{
+  const int nHist = workspace->getNumberHistograms();
+  mWkspBinMin = DBL_MAX;
+  mWkspBinMax = -DBL_MAX;
+  for (int i = 0; i < nHist; ++i)
+  {
+    const std::vector<double> & values = workspace->readX(i);
+    double xtest = values.front();
+    if( xtest < mWkspBinMin )
+    {
+      mWkspBinMin = xtest;
+    }
+    else if( xtest > mWkspBinMax )
+    {
+      mWkspBinMax = xtest;
+    }
+    else {}
+
+    xtest = values.back();
+    if( xtest < mWkspBinMin )
+    {
+      mWkspBinMin = xtest;
+    }
+    else if( xtest > mWkspBinMax )
+    {
+      mWkspBinMax = xtest;
+    }
+    else {}
+  }
+
+  // Value has not been preset
+  if( (mBinMinValue - DBL_MAX)/DBL_MAX < 1e-08 )
+  {
+    mBinMinValue = mWkspBinMin;
+  }
+
+  // Value has not been preset
+  if( (mBinMaxValue + DBL_MAX)/DBL_MAX < 1e-08 )
+  {
+    mBinMaxValue = mWkspBinMax;
+  }
+
+  // Check validity
+  if( mBinMinValue < mWkspBinMin || mBinMinValue > mWkspBinMax )
+  {
+      mBinMinValue = mWkspBinMin;
+  }
+
+  if( mBinMaxValue > mWkspBinMax || mBinMaxValue < mWkspBinMin )
+  {
+    mBinMaxValue = mWkspBinMax;
+  }
+
+
+}
 /**
  * Integrate the workspace
  */
 void Spectrogram::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
-{
-  QwtLinearColorMap color_map;
+{  
+  MantidColorMap mantidMap;
+  int scaleType=getScaleType();
+  MantidColorMap::ScaleType type;
+  if(scaleType==1)
+   {   type=MantidColorMap::Linear;
+	}
+   else
+   {   type=MantidColorMap::Log10;
+   }
+   mantidMap.changeScaleType(type);
   const int n_spec=m_nRows ;//= index_list.size();
   std::vector<double> integrated_values(n_spec, 0.0);
   mWkspDataMin = DBL_MAX;
   mWkspDataMax = -DBL_MAX;
-  for( int i = 0; i < n_spec; ++i )
-  {
-    int widx=i ;//= index_list[i];
+  int j=0;
+ // for( int i = 0; i < n_spec; ++i )
+  for( int i = n_spec-1; i >=0; --i )
+  {	
+    int widx=i;
     if( widx != -1 )
     {
       double sum = integrateSingleSpectra(workspace, widx);
-      integrated_values[i] = sum;
-      if( sum < mWkspDataMin )
-      {
-	mWkspDataMin = sum;
-      }
-      else if( sum > mWkspDataMax )
-      {
-	mWkspDataMax = sum;
-      }
-      else continue;
-      
-    }
+	  //integrated_values[i] = sum;
+	  integrated_values[j] = sum;
+	  ++j;
+	  if( sum < mWkspDataMin )
+	  {  mWkspDataMin = sum;
+	  }
+	  else if( sum > mWkspDataMax )
+	  {  mWkspDataMax = sum;
+	  }
+	  else continue;
+     }
     else
     {
       integrated_values[i] = -1.0;
@@ -813,50 +893,55 @@ void Spectrogram::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWork
   {
     mDataMaxValue = mWkspDataMax;
   }
-
+ 
   const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
   mScaledValues = std::vector<unsigned char>(n_spec, 0);
   std::vector<boost::shared_ptr<GLColor> > colorlist(n_spec);
   QwtDoubleInterval wksp_interval(mWkspDataMin, mWkspDataMax);
   QwtDoubleInterval user_interval(mDataMinValue, mDataMaxValue);
-
   std::vector<double>::const_iterator val_end = integrated_values.end();
   int idx(0);
   for( std::vector<double>::const_iterator val_itr = integrated_values.begin(); val_itr != val_end; 
-       ++val_itr, ++idx )
-  {
-    unsigned char c_index(mColorMap.getTopCIndex());
-    if( (*val_itr) < 0.0 ) 
+       val_itr++, ++idx )
+  {	
+   unsigned char c_index(mColorMap.getTopCIndex());
+    
+   	 if( (*val_itr) < 0.0 ) 
     {
       mScaledValues[idx] = mColorMap.getLargestAllowedCIndex();
+	  
     }
     else
-    {
-      // Index to store
-      short index = std::floor( mColorMap.normalize(user_interval, *val_itr)*max_ncols );
-      if( index >= max_ncols )
+    { // Index to store
+	  short index = std::floor( mColorMap.normalize(user_interval, *val_itr)*max_ncols );
+	  if( index >= max_ncols )
       {
-	index = max_ncols;
+	   index = max_ncols;
       }
       else if( index < 0 )
       {
-	index = 0;
+	   index = 0;
       }
       else {}
       mScaledValues[idx] = static_cast<unsigned char>(index);
       c_index = mColorMap.colorIndex(user_interval, *val_itr);
-
-    }
-    colorlist[idx] = mColorMap.getColor(c_index);
+	} 
+	// colorlist[idx] = mColorMap.getColor(c_index);
+    
+	mantidMap.setColors(mColorMap.getColor(c_index),idx);
+	setColorMap(mantidMap);
+	
+  	/*
 	QRgb qrgb=mColorMap.rgb(user_interval, *val_itr);
 	QColor qclr(qrgb);
-	//GLColor clr;
-	color_map.addColorStop(idx, qclr);
+	color_map.addColorStop(idx, qclr);*/
   }
-   QwtColorMap& qwtMap = dynamic_cast<QwtLinearColorMap&>( color_map);//QwtLinearColorMap
-  // mColorMap=qwtMap;
-  // setCustomColorMap(qwtMap);
-   setColorMap(qwtMap);
+  /* QwtColorMap& qwtMap = dynamic_cast<QwtLinearColorMap&>(color_map);
+   QwtColorMap &qwtMap=dynamic_cast<MantidColorMap&>(color_map);
+   mColorMap=qwtMap;
+   std::cout<<" qwtmap is "<<&qwtMap<<std::endl;
+   setCustomColorMap(qwtMap);*/
+  
   }
 
 
@@ -882,13 +967,12 @@ double Spectrogram::integrateSingleSpectra(boost::shared_ptr<Mantid::API::Matrix
  */
 void Spectrogram::updateForNewMaxData(const double new_max)
 {
-  // If the new value is the same
+ // If the new value is the same
   if( std::abs(new_max - mDataMaxValue) / mDataMaxValue < 1e-08 ) 
-  {
-	  return;
+  {	  return;
   }
   mDataMaxValue = new_max;
- // recount();
+  recount();
 }
 
 /**
@@ -901,14 +985,14 @@ void Spectrogram::updateForNewMinData(const double new_min)
   {	  return;
   }
   mDataMinValue = new_min;
-  //recount();
+  recount();
 }
 /**
  * Run a recount for the current workspace
  */
 void Spectrogram::recount()
 {
-  // calculateColorCounts(mWorkspaceSptr);
+   calculateColorCounts(mWorkspaceSptr);
  }
 
 

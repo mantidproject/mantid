@@ -160,7 +160,7 @@ static const char *unzoom_xpm[]={
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
-
+#include <iostream>
 //Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 : QWidget(parent, f)//QwtPlot(parent)
@@ -179,6 +179,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 	ignoreResize = false;
 	drawAxesBackbone = true;
 	d_auto_scale = true;
+	//d_auto_scale = false;
 	autoScaleFonts = false;
 	d_antialiasing = false;
 	d_scale_on_print = true;
@@ -1045,10 +1046,9 @@ void Graph::updateSecondaryAxis(int axis)
 }
 
 void Graph::setAutoScale()
-{
+{	
 	for (int i = 0; i < QwtPlot::axisCnt; i++)
 		d_plot->setAxisAutoScale(i);
-
 	d_plot->replot();
 	updateScale();
 	emit modifiedGraph();
@@ -1227,6 +1227,7 @@ void Graph::setScale(int axis, double start, double end, double step,
 void Graph::setAxisScale(int axis, double start, double end, int type, double step,
 				  int majorTicks, int minorTicks)
 {
+  //std::cout<<"Graph::setAxisScale called "<<std::endl;
   ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
   if( !sc_engine ) return;
 
@@ -1268,7 +1269,6 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 	  updateSecondaryAxis(QwtPlot::xTop);
 	  updateSecondaryAxis(QwtPlot::yRight);
   }
-
   d_plot->replot();
   ////keep markers on canvas area
   updateMarkersBoundingRect();
@@ -1547,6 +1547,7 @@ void Graph::removeMarker()
 				d_markers_selector->removeAll((ImageMarker*)d_plot->marker(selectedMarker));
 		}
 		d_plot->removeMarker(selectedMarker);
+		// std::cout<<"Graph::removeMarker() d_plot->replot() called"<<std::endl;
 		d_plot->replot();
 		emit modifiedGraph();
 
@@ -1677,6 +1678,7 @@ void Graph::updateImageMarker(int x, int y, int w, int h)
 {
 	ImageMarker* mrk = (ImageMarker*) d_plot->marker(selectedMarker);
 	mrk->setRect(x, y, w, h);
+//	 std::cout<<"Graph::updateImageMarker() d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -1795,7 +1797,7 @@ void Graph::drawAxesBackbones(bool yes)
 			scale->repaint();
 		}
 	}
-
+ //std::cout<<"Graph::drawAxesBackbones d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -1833,7 +1835,7 @@ void Graph::setAxesLinewidth(int width)
 			scale->repaint();
 		}
 	}
-
+ //std::cout<<"Graph::setAxesLinewidth d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -2661,7 +2663,7 @@ void Graph::updateErrorBars(QwtErrorPlotCurve *er, bool xErr, double width, int 
 	er->drawThroughSymbol(through);
 	er->drawPlusSide(plus);
 	er->drawMinusSide(minus);
-
+//std::cout<<"Graph::updateErrorBars d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -2768,7 +2770,7 @@ QwtPieCurve* Graph::plotPie(Table* w, const QString& name, int startRow, int end
 
 	pie->loadData();
 	pie->initLabels();
-
+//std::cout<<"Graph::plotPie d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	return pie;
 }
@@ -2830,12 +2832,13 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
 
 				DataCurve* mc = masterCurve(w->colName(xcol), w->colName(ycol));
 				if (mc){
+					//std::cout<<"Graph::addcurves d_plot->replot() called"<<std::endl;
 				    d_plot->replot();
 					mc->setLabelsColumnName(labelsCol);
 				} else
 					return false;
 			} else
-                c = (PlotCurve *)insertCurve(w, names[i], style, startRow, endRow);
+				c = (PlotCurve *)insertCurve(w, names[i], style, startRow, endRow);
 
             if (c){
 				CurveLayout cl = initCurveLayout(style, curves - errCurves);
@@ -3095,7 +3098,7 @@ void Graph::updateVectorsLayout(int curve, const QColor& color, double width,
 
 	if (!xEndColName.isEmpty() && !yEndColName.isEmpty())
 		vect->setVectorEnd(xEndColName, yEndColName);
-
+//std::cout<<"Graph::updateVectorsLaout d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -3106,28 +3109,29 @@ void Graph::updatePlot()
 		for (int i = 0; i < QwtPlot::axisCnt; i++)
 			d_plot->setAxisAutoScale(i);
 	}
+	//std::cout<<"Graph::updatePlot() d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	updateScale();
 }
 
 void Graph::updateScale()
 {
-    if (!d_auto_scale){
+    if (!d_auto_scale)
+	{
     //We need this hack due to the fact that in Qwt 5.0 we can't
     //disable autoscaling in an easier way, like for example: setAxisAutoScale(axisId, false)
         for (int i = 0; i < QwtPlot::axisCnt; i++)
             d_plot->setAxisScaleDiv(i, *d_plot->axisScaleDiv(i));
     }
-
+	//std::cout<<"Graph::updateScale d_plot->replot() called"<<std::endl;
     d_plot->replot();
-
 	updateMarkersBoundingRect();
 	updateSecondaryAxis(QwtPlot::xTop);
 	updateSecondaryAxis(QwtPlot::yRight);
-
 	d_plot->replot();//TODO: avoid 2nd replot!
 	d_zoomer[0]->setZoomBase();
 //	d_zoomer[1]->setZoomBase();
+	
 }
 
 void Graph::setBarsGap(int curve, int gapPercent, int offset)
@@ -3184,6 +3188,7 @@ void Graph::removeCurves(const QString& s)
         if(((DataCurve *)it)->plotAssociation().contains(s))
             removeCurve(i);
 	}
+	//std::cout<<"Graph::removeCurves d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 
@@ -3357,7 +3362,6 @@ bool Graph::hasActiveTool()
 
 void Graph::zoom(bool on)
 {
-	//setAutoScale();
 	d_zoomer[0]->setEnabled(on);
 	d_zoomer[1]->setEnabled(false);
 	for (int i=0; i<n_curves; i++)
@@ -3385,14 +3389,14 @@ void Graph::zoom(bool on)
 void Graph::zoomOut()
 {
 	d_zoomer[0]->zoom(-1);
-//	d_zoomer[1]->zoom(-1);
+	//d_zoomer[1]->zoom(-1);
 
 	updateSecondaryAxis(QwtPlot::xTop);
   	updateSecondaryAxis(QwtPlot::yRight);
 	// colormap was getting changed on zoomout 
 	//so call the function colomatsetup
-	if(m_spectrogram)
-		m_spectrogram->setupColorBarScaling();
+	/*if(m_spectrogram)
+		m_spectrogram->setupColorBarScaling();*/
 
 }
 
@@ -3449,6 +3453,7 @@ ImageMarker* Graph::addImage(const QString& fileName)
 		picSize.setHeight(h);
 
 	mrk->setSize(picSize);
+	//std::cout<<"Graph::addImage d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 
 	emit modifiedGraph();
@@ -3765,7 +3770,7 @@ void Graph::updateMarkersBoundingRect()
 		if (im)
 			im->updateBoundingRect();
 	}
-
+//std::cout<<"Graph::updateMarkersBoundingRect d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 
@@ -3826,6 +3831,7 @@ void Graph::scaleFonts(double factor)
                 notifyFontChange(font);
         }
     }
+	//std::cout<<"Graph::scaleFonts d_plot->replot() called"<<std::endl;
     d_plot->replot();
 }
 
@@ -3983,6 +3989,7 @@ void Graph::removeAxisTitle()
 	int axis = (selectedAxis + 2)%4;//unconsistent notation in Qwt enumerations between
   	//QwtScaleDraw::alignment and QwtPlot::Axis
   	d_plot->setAxisTitle(axis, " ");//due to the plot layout updates, we must always have a non empty title
+	//std::cout<<"Graph::removeAxisTitle d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -4088,7 +4095,7 @@ void Graph::showGrid(int axis)
 		grid->enableXMin(!grid->xMinEnabled());
 	} else
 		return;
-
+    //std::cout<<"Graph::showGrid d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -4320,6 +4327,7 @@ void Graph::copy(Graph* g)
 			addArrow(lmrk);
 	}
 	setAntialiasing(g->antialiasing(), true);
+	//std::cout<<"Graph::copy d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 
@@ -4572,13 +4580,13 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,d
     return plotSpectrogram(d_spectrogram,type);
 }
 
-Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
+Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type,boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
 {
 	if (type != GrayScale && type != ColorMap && type != Contour)
   		return 0;
 
-  	//Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,this,workspace);
-	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
+  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,workspace);
+	//Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
 
     return plotSpectrogram(d_spectrogram,type);
 }
@@ -4594,31 +4602,37 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   	    }
   	else if (type == ColorMap)
   	    {
-	     d_spectrogram->setDefaultColorMap();
-		 d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
+	    // d_spectrogram->setDefaultColorMap();
+		 d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
   	    }
   	c_keys.resize(++n_curves);
   	c_keys[n_curves-1] = d_plot->insertCurve(d_spectrogram);
 
   	c_type.resize(n_curves);
-  	c_type[n_curves-1] = type;
+  	c_type[n_curves-1] = type; 
 
     QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
   	rightAxis->setColorBarEnabled(type != Contour);
-	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
 	rightAxis->setColorBarEnabled(true);
+	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
 	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
 	d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
+	d_spectrogram->setDefaultColorMap();
+	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
 	d_spectrogram->setupColorBarScaling();
-
 	d_plot->setAxisScale(QwtPlot::yRight,
   	d_spectrogram->data().range().minValue(),
   	d_spectrogram->data().range().maxValue());
   	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
+	
   	d_plot->replot();
 	setSpectrogram(d_spectrogram);
-	//m_spectrogram=d_spectrogram;
-
+	 
+	//d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
+	 d_spectrogram->recount();
+	d_plot->setAxisScale(QwtPlot::yRight,d_spectrogram->data().range().minValue(),d_spectrogram->data().range().maxValue());    
+	d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
+	
 	return d_spectrogram;
 }
 
@@ -4882,7 +4896,7 @@ void Graph::updateCurveNames(const QString& oldName, const QString& newName, boo
         if (c->type() != Function && c->plotAssociation().contains(oldName))
             c->updateColumnNames(oldName, newName, updateTableName);
 	}
-
+//std::cout<<"Graph::updatecurvenames d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 

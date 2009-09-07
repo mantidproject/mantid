@@ -37,7 +37,7 @@
 
 using namespace Mantid::API;
 
-
+//Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
 : MdiSubWindow(label, parent, name, 0),m_funct(this),m_histogram(false),
   y_start(0.0),y_end(0.0),m_min(0),m_max(0),m_are_min_max_set(false),
@@ -191,8 +191,8 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
     if (ws->axes() > 1)
     {
       const Mantid::API::Axis* const ax = ws->getAxis(1);
-      y_start = (*ax)(m_startRow);
-      y_end   = (*ax)(m_endRow);
+      y_start = m_startRow;//(*ax)(m_startRow);
+      y_end   = m_endRow;//(*ax)(m_endRow);
     }
 
     m_bk_color = QColor(128, 255, 255);
@@ -690,8 +690,8 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
     ApplicationWindow *a = applicationWindow();
 	MultiLayer* g = a->multilayerPlot(a->generateUniqueName(tr("Graph")));
     m_plots2D<<g;
-    connect(g, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
-	//#799 fix for  multiple dialog creation on double clicking/ right click menu scale on  2d plot 
+	connect(g, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
+//#799 fix for  multiple dialog creation on double clicking/ on right click menu scale on  2d plot 
  //   a->connectMultilayerPlot(g);
     Graph* plot = g->activeGraph();
 	a->setPreferences(plot);
@@ -717,17 +717,17 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
         plot->setYAxisTitle(tr("Spectrum"));
     }
 
-    // Set the range on the thirs, colour axis
-    double minz, maxz;
-    range(&minz,&maxz);
-    Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
-    if( spgrm )
-    {
-      spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
-      spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
-    }
-
-    plot->setAutoScale();
+	// Set the range on the thirs, colour axis
+	double minz, maxz;
+	range(&minz,&maxz);
+	Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type,m_workspace);
+	if( spgrm )
+	{
+		//spgrm->setWorkspace(m_workspace);
+		spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
+		spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+	}
+	plot->setAutoScale();
     g->askOnCloseEvent(false);
 
 	QApplication::restoreOverrideCursor();

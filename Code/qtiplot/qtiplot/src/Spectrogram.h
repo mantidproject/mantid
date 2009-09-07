@@ -41,6 +41,7 @@
 
 #include <fstream>
 #include <float.h>
+//#include<iostream>
 //#include "MantidKernel/Logger.h"
 #include "Mantid//InstrumentWidget//MantidColorMap.h"
 #include "Mantid//InstrumentWidget//GLColor.h"
@@ -63,7 +64,7 @@ public:
 	Spectrogram();
     Spectrogram(Matrix *m);
     Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
-    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
+    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);//Mantid
 	~Spectrogram();
 
 
@@ -135,6 +136,7 @@ public:
     double labelsYOffset(){return d_labels_y_offset;};
 	void selectLabel(bool on);
 	void setScaleType(int scaleType);
+	const QwtColorMap& getSpectrogramColormap();
 	
 
 protected:
@@ -142,6 +144,7 @@ protected:
 	void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void createLabels();
 	int getScaleType() const;
+	void calculateBinRange(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
 
 	int m_ScaleType;
 
@@ -192,7 +195,7 @@ protected:
   /// Store a value between 0->255 for each of the integrated spectra.
   std::vector<unsigned char> mScaledValues;
   boost::shared_ptr<Mantid::API::MatrixWorkspace> mWorkspaceSptr;
- // static Mantid::Kernel::Logger &g_log;
+  //static Mantid::Kernel::Logger &g_log;
 };
 
 

@@ -39,6 +39,7 @@
 #include <QVector>
 #include <qwt_text_label.h>
 #include <qwt_plot_canvas.h>
+//#include <iostream>
 
 CanvasPicker::CanvasPicker(Graph *graph):
 	QObject(graph)
@@ -54,7 +55,7 @@ CanvasPicker::CanvasPicker(Graph *graph):
 
 bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 {
-	
+
 	QVector<int> images = plot()->imageMarkerKeys();
 	QVector<int> lines = plot()->lineMarkerKeys();
 
@@ -64,12 +65,11 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 	switch(e->type())
 	{
 		case QEvent::MouseButtonPress:
-			{
+			{				
 				plot()->deselect();
 				emit selectPlot();
 
 				const QMouseEvent *me = (const QMouseEvent *)e;
-
 				bool allAxisDisabled = true;
 				for (int i=0; i < QwtPlot::axisCnt; i++){
 					if (plotWidget->axisEnabled(i)){
@@ -181,7 +181,8 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 					plotWidget->replot();
 					return true;
 				}
-				if(plot()->zoomOn())
+				
+				/*if(plot()->zoomOn())
 				{
 					//fix for colormap changing on releasing the mouse button after zooming
 					Graph * gr=plot();
@@ -190,7 +191,7 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 					Spectrogram * spectrogram=gr->getSpectrogram();
 					if(spectrogram)
 						spectrogram->setupColorBarScaling();
-				}
+				}*/
 				return false;
 			}
 			break;
