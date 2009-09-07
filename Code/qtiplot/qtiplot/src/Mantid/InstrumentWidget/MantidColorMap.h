@@ -6,6 +6,7 @@
 //---------------------------------------------
 #include "qwt_color_map.h"
 #include "boost/shared_ptr.hpp"
+#include "MantidKernel/Logger.h"
 
 //---------------------------------------------
 // Forward declarations
@@ -102,7 +103,7 @@ public:
   {
     return static_cast<unsigned char>(255);
   }
-
+  void setColors(boost::shared_ptr<GLColor> gl,int index );
 private:
 
   /// The scale choice
@@ -115,6 +116,7 @@ private:
 
   /// The number of colors in this map
   short m_num_colors;
+
 };
 
 

@@ -63,7 +63,7 @@ QwtColorMap* MantidColorMap::copy() const
  */
 void MantidColorMap::changeScaleType(MantidColorMap::ScaleType type)
 {
-  m_scale_type = type;
+    m_scale_type = type;
 }
 
 /**
@@ -148,7 +148,6 @@ void MantidColorMap::setupDefaultMap()
 
   m_colors.clear();
   m_num_colors = 256;
-
   std::stringstream colorstream(colorstring);
   float red(0.0f), green(0.0f), blue(0.0f);
   std::string line;
@@ -184,19 +183,19 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
   {
     return 1.0;
   }
-
   double ratio(0.0);
   switch(m_scale_type)
   {
   case MantidColorMap::Log10:
   default:
-    ratio = std::log10(value - interval.minValue()) / std::log10(width);
+   ratio = std::log10(value - interval.minValue()) / std::log10(width);
     break;
   case MantidColorMap::Linear:
     ratio = (value - interval.minValue()) / width;
   }
   return ratio;
 }
+
 
 /**
  * Compute an rgb value for the given data value and interval
@@ -218,10 +217,11 @@ QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
  * @param value The data value
  * @returns A color index as an unsigned character
  */
+
 unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, double value) const
 {
   double fraction = normalize(interval, value);
-  if( fraction < 0.0 ) return static_cast<unsigned char>(0);
+  if( fraction < 0.0 )return static_cast<unsigned char>(0);
 
   short index = std::floor(fraction * m_num_colors);
   // If the ratio gives back 1 then we need to adjust the index down 1
@@ -243,7 +243,7 @@ unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, dou
 QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) const
 {
   // Swicth to linear scaling when computing the lookup table
-  MantidColorMap::ScaleType current_type = m_scale_type;
+  MantidColorMap::ScaleType current_type = m_scale_type;   
   m_scale_type = MantidColorMap::Linear;
 
   short table_size = (m_num_colors > 1) ? m_num_colors : 2;
@@ -277,5 +277,10 @@ boost::shared_ptr<GLColor> MantidColorMap::getColor(unsigned char index) const
 
   // Otherwise return black
   return boost::shared_ptr<GLColor>(new GLColor(0.0f, 0.0f, 0.0f, 1.0f));
+}
+void  MantidColorMap::setColors(boost::shared_ptr<GLColor> gl,int index )
+{	
+	//m_colors.push_back(gl);
+	m_colors.insert(index,gl);
 }
 
