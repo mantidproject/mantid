@@ -137,7 +137,7 @@ public:
     TS_ASSERT(test.empty());
   }
 
-  void testarrayin()
+  void testMixedLimits()
   {
     if ( !loader2.isInitialized() ) loader2.initialize();
 
@@ -170,6 +170,95 @@ public:
     TS_ASSERT_EQUALS( output2D->dataE(8)[777], 3);
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(8)[777], 554.1875);
+  }
+
+  void testMinlimit()
+  {
+    LoadRaw3 alg;
+    std::string outWS = "outWSLimitTest";
+    if ( !alg.isInitialized() ) alg.initialize();
+
+    alg.setPropertyValue("Filename", inputFile);
+    alg.setPropertyValue("OutputWorkspace", outWS);
+    alg.setPropertyValue("SpectrumMin", "2580");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWS));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 5);
+    AnalysisDataService::Instance().remove(outWS);
+  }
+
+  void testMaxlimit()
+  {
+    LoadRaw3 alg;
+    std::string outWS = "outWSLimitTest";
+    if ( !alg.isInitialized() ) alg.initialize();
+
+    alg.setPropertyValue("Filename", inputFile);
+    alg.setPropertyValue("OutputWorkspace", outWS);
+    alg.setPropertyValue("SpectrumMax", "5");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWS));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 5);
+    AnalysisDataService::Instance().remove(outWS);
+  }
+
+  void testMinMaxlimit()
+  {
+    LoadRaw3 alg;
+    std::string outWS = "outWSLimitTest";
+    if ( !alg.isInitialized() ) alg.initialize();
+
+    alg.setPropertyValue("Filename", inputFile);
+    alg.setPropertyValue("OutputWorkspace", outWS);
+    alg.setPropertyValue("SpectrumMin", "5");
+    alg.setPropertyValue("SpectrumMax", "10");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWS));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 6);
+    AnalysisDataService::Instance().remove(outWS);
+  }
+
+  void testListlimit()
+  {
+    LoadRaw3 alg;
+    std::string outWS = "outWSLimitTest";
+    if ( !alg.isInitialized() ) alg.initialize();
+
+    alg.setPropertyValue("Filename", inputFile);
+    alg.setPropertyValue("OutputWorkspace", outWS);
+    alg.setPropertyValue("SpectrumList", "998,999,1000");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWS));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 3);
+    AnalysisDataService::Instance().remove(outWS);
   }
 
   void testfail()
