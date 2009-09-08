@@ -8,14 +8,16 @@
 
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataObjects/Workspace1D.h"
+#include "Poco/Path.h"
 
 class LoadRKHTest : public CxxTest::TestSuite
 {
 public:
 
   // A sample file is in the repository
-  LoadRKHTest() : inputFile("../../../../Test/Data/DIRECT.041")
+  LoadRKHTest() : inputFile("")
   {    
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/DIRECT.041").toString();
   }
 
   void testInit()

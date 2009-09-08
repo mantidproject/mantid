@@ -8,6 +8,7 @@
 #include "MantidDataHandling/LoadRaw2.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -98,7 +99,8 @@ public:
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(loader.execute(),std::runtime_error);
 
-    std::string inputFile = "../../../../Test/Data/HET15869.RAW";
+      std::string    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
+
     // Now set it...
     loader.setPropertyValue("Filename", inputFile);
 

@@ -44,7 +44,7 @@ void testExecOnMuon()
     nxLoad.initialize();
     // Now set required filename and output workspace name
     inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
-    nxLoad.setPropertyValue("FileName", inputFile);
+    nxLoad.setPropertyValue("Filename", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
     //
@@ -64,7 +64,8 @@ void testExecOnMuon()
     // specify parameters to algorithm
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     outputFile = "testOfSaveNexus.nxs";
-    algToBeTested.setPropertyValue("FileName", outputFile);
+    algToBeTested.setPropertyValue("Filename", outputFile);
+    outputFile = algToBeTested.getPropertyValue("Filename");
     title="Testing SaveNexus with Muon data";
     algToBeTested.setPropertyValue("Title", title);
     // comment line below to check the contents of the o/p file manually

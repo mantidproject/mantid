@@ -43,7 +43,7 @@ bool FileProperty::isLoadProperty() const
 std::string FileProperty::setValue(const std::string & filename)
 {
   // If the path is absolute then don't do any searching
-  if( Poco::Path(filename).isAbsolute() )
+  if( filename.empty() || Poco::Path(filename).isAbsolute())
   {
     return PropertyWithValue<std::string>::setValue(filename);
   }

@@ -59,14 +59,16 @@ public:
     algToBeTested.setPropertyValue("InputWorkspace", "SAVECSVTEST-testSpace");     
     
     // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(),std::runtime_error);
+    algToBeTested.execute();
+    TS_ASSERT_EQUALS(algToBeTested.isExecuted(), false)
         
     
     // Now set it...
     // specify name of file to save 1D-workspace to
     outputFile = "testOfSaveCSV.csv";
     algToBeTested.setPropertyValue("Filename", outputFile);
-    
+    outputFile = algToBeTested.getPropertyValue("Filename");
+
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(outputFile)); 

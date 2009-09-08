@@ -19,6 +19,7 @@
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/UnitFactory.h"
 #include "Poco/File.h"
+#include "Poco/Path.h"
 #include "MantidDataHandling/LoadRaw3.h"
 
 using namespace Mantid::API;
@@ -79,13 +80,14 @@ public:
     //entryName = "test";
     dataName = "spectra";
     title = "A simple workspace saved in Processed Nexus format";
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", outputFile));
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("Filename", outputFile));
+    outputFile = algToBeTested.getPropertyValue("Filename");
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
 
     std::string result;
-    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("FileName") )
+    TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(outputFile));
     //TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("EntryName") )
     //TS_ASSERT( ! result.compare(entryName));
@@ -104,8 +106,8 @@ void testExecOnMuon()
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
-    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
-    nxLoad.setPropertyValue("FileName", inputFile);
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
+    nxLoad.setPropertyValue("Filename", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     //
@@ -131,7 +133,8 @@ void testExecOnMuon()
     //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
-    algToBeTested.setPropertyValue("FileName", outputFile);
+    algToBeTested.setPropertyValue("Filename", outputFile);
+    outputFile = algToBeTested.getPropertyValue("Filename");
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
 	algToBeTested.setPropertyValue("Append", "0");
@@ -182,11 +185,11 @@ void testExecOnLoadraw()
     //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a workspace from Loadraw file";
-    algToBeTested.setPropertyValue("FileName", outputFile);
+    algToBeTested.setPropertyValue("Filename", outputFile);
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
-	algToBeTested.setPropertyValue("Append", "0");
-
+    algToBeTested.setPropertyValue("Append", "0");
+    outputFile = algToBeTested.getPropertyValue("Filename");
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));
@@ -211,7 +214,7 @@ void testExecOnMuonXml()
     nxLoad.initialize();
     // Now set required filename and output workspace name
     inputFile = "../../../../Test/Nexus/emu00006473.nxs";
-    nxLoad.setPropertyValue("FileName", inputFile);
+    nxLoad.setPropertyValue("Filename", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     //
@@ -234,10 +237,10 @@ void testExecOnMuonXml()
     //entryName = "entry4";
     dataName = "spectra";
     title = "A save of a 2D workspace from Muon file";
-    algToBeTested.setPropertyValue("FileName", outputFile);
+    algToBeTested.setPropertyValue("Filename", outputFile);
     //algToBeTested.setPropertyValue("EntryName", entryName);
     algToBeTested.setPropertyValue("Title", title);
-
+    outputFile = algToBeTested.getPropertyValue("Filename");
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = algToBeTested.getPropertyValue("Filename") );
     TS_ASSERT( ! result.compare(outputFile));

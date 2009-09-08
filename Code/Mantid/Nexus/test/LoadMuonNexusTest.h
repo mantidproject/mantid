@@ -165,7 +165,7 @@ public:
   {
     //test for multi period
     // Now set required filename and output workspace name
-    inputFile2 = "../../../../Test/Nexus/emu00006475.nxs";
+    inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006475.nxs").toString();
     nxLoad.setPropertyValue("FileName", inputFile2);
 
     outputSpace="outer2";

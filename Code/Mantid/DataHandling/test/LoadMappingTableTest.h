@@ -12,6 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -23,8 +24,8 @@ class LoadMappingTableTest : public CxxTest::TestSuite
 public:
 	LoadMappingTableTest()
 	{
-		//
-		 inputFile = "../../../../Test/Data/HET15869.RAW";
+	  //
+	  inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
 		 outputSpace = "outerWS";
 		//initialise framework manager to allow logging
 		Mantid::API::FrameworkManager::Instance();
