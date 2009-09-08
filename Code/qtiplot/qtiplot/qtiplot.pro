@@ -28,15 +28,25 @@ RESOURCES        = ../../../Images/images.qrc
 ######################################################################################
 #CONFIG          += CustomInstall
 
-CONFIG          += release
-#CONFIG          += debug
-#win32: CONFIG   += console
+win32:build_pass:CONFIG(debug, debug|release) {
+  CONFIG += console
+}
+
+build_pass:CONFIG(debug, debug|release) {
+  # Put the debug version alongside the Mantid debug dlls to make sure it picks them up
+  DESTDIR = ../../Mantid/debug
+} else {
+  DESTDIR = ./
+}
 
 ##################### 3rd PARTY HEADER FILES SECTION ########################
 #!!! Warning: You must modify these paths according to your computer settings
 #############################################################################
 # Global 
-INCLUDEPATH  += ../../Mantid/includes/
+
+INCLUDEPATH  += ../../Mantid/Kernel/inc/
+INCLUDEPATH  += ../../Mantid/Geometry/inc/
+INCLUDEPATH  += ../../Mantid/API/inc/
 INCLUDEPATH  += ../3rdparty/liborigin
 INCLUDEPATH  += ../MantidQt/includes
 
@@ -84,40 +94,53 @@ unix {
 }
 ##################### Windows ###############################################
 win32 {
+  LIBPATH += C:/Python25/libs
+
   LIBS += -lqscintilla2
   
   CONFIG(build64)  {
-	LIBS += ../../Third_Party/lib/win64/muparser.lib
-    LIBS += ../../Third_Party/lib/win64/qwtplot3d.lib
-    LIBS += ../../Third_Party/lib/win64/qwt.lib
-    LIBS += ../../Third_Party/lib/win64/gsl.lib
-    LIBS += ../../Third_Party/lib/win64/cblas.lib
-    LIBS += ../../Third_Party/lib/win64/zlib1.lib
-	LIBS += ../../Third_Party/lib/win64/PocoUtil.lib
-    LIBS += ../../Third_Party/lib/win64/PocoFoundation.lib
-    LIBS += ../../Third_Party/lib/win64/libboost_signals-vc80-mt-1_34_1.lib 
-	message(SETTING FOR x64)
-  } else  {
-	LIBS += ../../Third_Party/lib/win32/muparser.lib
-    LIBS += ../../Third_Party/lib/win32/qwtplot3d.lib
-    LIBS += ../../Third_Party/lib/win32/qwt.lib
-    LIBS += ../../Third_Party/lib/win32/gsl.lib
-    LIBS += ../../Third_Party/lib/win32/cblas.lib
-    LIBS += ../../Third_Party/lib/win32/zlib1.lib
-	LIBS += ../../Third_Party/lib/win32/PocoUtil.lib
-    LIBS += ../../Third_Party/lib/win32/PocoFoundation.lib
-    LIBS += ../../Third_Party/lib/win32/libboost_signals-vc80-mt-1_34_1.lib 
-	message(SETTING FOR x86)
+    THIRD_PARTY = ../../Third_Party/lib/win64
+    message(SETTING FOR x64)
+  } else {
+    THIRD_PARTY = ../../Third_Party/lib/win32
+    message(SETTING FOR x86)
   }
   
-
-  LIBS += ../../Mantid/Bin/Shared/MantidAPI.lib
-  LIBS += ../../Mantid/Bin/Shared/MantidGeometry.lib
-  LIBS += ../../Mantid/Bin/Shared/MantidKernel.lib
-
-  LIBS += ../MantidQt/lib/MantidQtAPI.lib
-
+  LIBS += $${THIRD_PARTY}/qwtplot3d.lib
+  LIBS += $${THIRD_PARTY}/qwt.lib
+  LIBS += $${THIRD_PARTY}/zlib1.lib
+  # Although we have debug versions of gsl & cblas, they appear to be missing some symbols
+  LIBS += $${THIRD_PARTY}/gsl.lib
+  LIBS += $${THIRD_PARTY}/cblas.lib
+  build_pass:CONFIG(debug, debug|release) {
+    LIBS += $${THIRD_PARTY}/muparser_d.lib
+    LIBS += $${THIRD_PARTY}/PocoUtild.lib
+    LIBS += $${THIRD_PARTY}/PocoFoundationd.lib
+    LIBS += $${THIRD_PARTY}/libboost_signals-vc80-mt-gd-1_34_1.lib
+  } else {
+    LIBS += $${THIRD_PARTY}/muparser.lib
+    LIBS += $${THIRD_PARTY}/PocoUtil.lib
+    LIBS += $${THIRD_PARTY}/PocoFoundation.lib
+    LIBS += $${THIRD_PARTY}/libboost_signals-vc80-mt-1_34_1.lib
+  }
   
+  build_pass:CONFIG(debug, debug|release) {
+    # Just looks at the place where Visual Studio will put a debug build
+    LIBPATH += ../../Mantid/debug
+  } else {
+    # Look in the right place for both Scons and Visual Studio builds
+    LIBPATH += ../../Mantid/Bin/Shared
+    LIBPATH += ../../Mantid/release
+    LIBPATH += ../MantidQt/lib
+  } 
+
+  LIBS += MantidAPI.lib
+  LIBS += MantidGeometry.lib
+  LIBS += MantidKernel.lib
+  LIBS += MantidQtAPI.lib
+
+  # This makes release the default build on running nmake. Must be here - after the config dependent parts above
+  CONFIG += release
 }
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
@@ -129,7 +152,7 @@ win32 {
 
 QMAKE_PROJECT_DEPTH = 0
 
-TARGET         = qtiplot
+TARGET         = MantidPlot
 TEMPLATE       = app
 CONFIG        += qt warn_on exceptions opengl thread
 CONFIG        += assistant
@@ -163,10 +186,15 @@ contains(CONFIG, CustomInstall){
 win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 _USE_MATH_DEFINES=true QSCINTILLA_DLL
 QT            += opengl qt3support network svg xml
 
-MOC_DIR        = ../tmp/qtiplot
-OBJECTS_DIR    = ../tmp/qtiplot
 SIP_DIR        = ../tmp/qtiplot
-DESTDIR        = ./
+
+CONFIG(debug, debug|release) {
+  MOC_DIR        = ../tmp/qtiplot/debug
+  OBJECTS_DIR    = ../tmp/qtiplot/debug
+} else {
+  MOC_DIR        = ../tmp/qtiplot/release
+  OBJECTS_DIR    = ../tmp/qtiplot/release
+}
 
 #############################################################################
 ###################### PROJECT FILES SECTION ################################
@@ -630,7 +658,7 @@ contains(SCRIPTING_LANGS, Python) {
 
   win32 {
     INCLUDEPATH += $$system(call python-includepath.py)
-    LIBS        += $$system(call python-libs-win.py)
+    #LIBS        += $$system(call python-libs-win.py)
     system($$system(call python-sipcmd.py) -c $${SIP_DIR} -w src/qti.sip)
   }
 

@@ -8,11 +8,7 @@
 #------------------------
 CONFIG += qt warn_on exceptions
 
-# Release mode
-CONFIG += release
-
-# Debug mode
-#CONFIG += debug
+QMAKESPEC=win32-msvc2005
 
 win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS WIN32
 
@@ -32,9 +28,23 @@ TOPBUILDDIR = $$CWD
 RESOURCES = "$$TOPBUILDDIR/../../../Images/images.qrc"
 
 # My variables
-MANTIDPATH = $$TOPBUILDDIR/../../Mantid
-MANTIDLIBPATH = $$MANTIDPATH/Bin/Shared
-THIRDPARTY = $$TOPBUILDDIR/../../Third_Party
+MANTIDPATH = "$$TOPBUILDDIR/../../Mantid"
+build_pass:CONFIG(release, debug|release) {
+  MANTIDLIBPATH = "$$MANTIDPATH/Bin/Shared"
+  # Put both Scons and Visual Studio output directories on the search path
+  LIBPATH += "$$MANTIDLIBPATH"
+  LIBPATH += "$$MANTIDPATH/release"
+}
+build_pass:CONFIG(debug, debug|release) {
+  win32 {
+    MANTIDLIBPATH = "$$MANTIDPATH/debug"
+  } else {
+    MANTIDLIBPATH = "$$MANTIDPATH/Bin/Shared"
+  }
+  LIBPATH += $$MANTIDLIBPATH
+}
+  
+THIRDPARTY = "$$TOPBUILDDIR/../../Third_Party"
 
 unix:MANTIDQTINCLUDES = $$TOPBUILDDIR/includes
 win32:MANTIDQTINCLUDES = $$TOPBUILDDIR\includes
@@ -43,7 +53,9 @@ TMPDIR = $$TOPBUILDDIR/qtbuild/MantidQt
 
 # Qt qmake variables
 
-INCLUDEPATH += "$$MANTIDPATH/includes"
+INCLUDEPATH += "$$MANTIDPATH/Kernel/inc/"
+INCLUDEPATH += "$$MANTIDPATH/Geometry/inc/"
+INCLUDEPATH += "$$MANTIDPATH/API/inc/"
 INCLUDEPATH += "$$MANTIDQTINCLUDES"
 
 unix {
@@ -56,17 +68,36 @@ unix {
 
 win32 {
   INCLUDEPATH += "$$THIRDPARTY/include"
-  LIBS += "$$MANTIDLIBPATH/MantidKernel.lib"
-  LIBS += "$$MANTIDLIBPATH/MantidGeometry.lib"
-  LIBS += "$$MANTIDLIBPATH/MantidAPI.lib"
-  LIBS += "$$THIRDPARTY/lib/win32/PocoFoundation.lib"
-  LIBS += "$$THIRDPARTY/lib/win32/libboost_signals-vc80-mt-1_34_1.lib"
+  LIBPATH     += "$$THIRDPARTY/lib/win32"
+  LIBS += "MantidKernel.lib"
+  LIBS += "MantidGeometry.lib"
+  LIBS += "MantidAPI.lib"
+  build_pass:CONFIG(release, debug|release) {
+    LIBS += "PocoFoundation.lib"
+    LIBS += "libboost_signals-vc80-mt-1_34_1.lib"
+  }
+  build_pass:CONFIG(debug, debug|release) {
+    LIBS += "PocoFoundationd.lib"
+    LIBS += "libboost_signals-vc80-mt-gd-1_34_1.lib"
+  }
 }
 
-MOC_DIR = "$$TMPDIR"
-OBJECTS_DIR = "$$TMPDIR"
+CONFIG(debug, debug|release) {
+  MOC_DIR        = "$$TMPDIR/debug"
+  OBJECTS_DIR    = "$$TMPDIR/debug"
+} else {
+  MOC_DIR        = "$$TMPDIR"
+  OBJECTS_DIR    = "$$TMPDIR"
+}
 SIP_DIR = "$$TMPDIR"
 
-DESTDIR = "$$TOPBUILDDIR/lib"
+win32:build_pass:CONFIG(debug, debug|release) {
+  # Put alongside Mantid libraries
+  DESTDIR = "$$MANTIDLIBPATH"
+} else {
+  # Put in local output directory
+  DESTDIR = "$$TOPBUILDDIR/lib"
+}
 
-
+# This makes release the default build on running nmake. Must be here - after the config dependent parts above
+CONFIG += release

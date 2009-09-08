@@ -62,7 +62,7 @@ typedef struct _traceback
 #include "MantidKernel/ConfigService.h" //Mantid
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
-#include "sipAPIqti.h"
+#include "../sipAPIqti.h"
 extern "C" void initqti();
 
 // Language name
