@@ -26,6 +26,15 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
 }
 
 /**
+ * Check if this is a load property
+ * @returns True if the property is a Load property and false if a Save type
+ */
+bool FileProperty::isLoadProperty() const
+{
+  return (m_action == FileProperty::Load);
+}
+
+/**
  * Set the filename
  * @param filename The value here is treated as a filename.
  * @returns A string indicating the outcome of the attempt to set the property. An empty string indicates success.

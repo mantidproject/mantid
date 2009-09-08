@@ -78,11 +78,12 @@ namespace Mantid
       loadConfig( getOutputDir() + m_user_properties_file_name, true);
 
       //Fill the list of possible relative path keys that may require conversion to absolute paths
-      m_vConfigPaths.resize(4, "");
+      m_vConfigPaths.resize(5, "");
       m_vConfigPaths[0] = "plugins.directory";
       m_vConfigPaths[1] = "instrumentDefinition.directory";
       m_vConfigPaths[2] = "pythonscripts.directory";
       m_vConfigPaths[3] = "ManagedWorkspace.FilePath";
+      m_vConfigPaths[3] = "defaultsave.directory";
       // Convert the relative paths into absolute ones. Note that the getString call checks whether the requested key is
       // one of the above and returns the correct absolute path
       convertRelativeToAbsolute();
@@ -153,9 +154,16 @@ namespace Mantid
       Poco::StringTokenizer tokenizer(paths, ";,", options);
       Poco::StringTokenizer::Iterator iend = tokenizer.end();
       m_vDataSearchDirs.reserve(tokenizer.count());
+      const std::string execdir = getBaseDir();
       for( Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr )
       {
-	Poco::Path token = Poco::Path(*itr).makeDirectory();
+	std::string entry = *itr;
+	if( Poco::Path(entry).isRelative() )
+	{
+	  entry = Poco::Path().resolve(entry).toString();
+	}
+
+	Poco::Path token = Poco::Path(entry).makeDirectory();
 	if( Poco::File(token).exists() )
 	{
 	  m_vDataSearchDirs.push_back(token.toString());

@@ -37,6 +37,9 @@ public:
 	       const std::vector<std::string> & exts = std::vector<std::string>(), 
 	       unsigned int direction = Direction::Input);
 
+  /// Check if this is a load type property.
+  bool isLoadProperty() const;
+
   ///Overridden setValue method
   virtual std::string setValue(const std::string & filename);
 
