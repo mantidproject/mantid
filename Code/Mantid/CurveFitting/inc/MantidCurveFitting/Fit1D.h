@@ -70,10 +70,16 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "CurveFitting";}
 
-      /// Function you want to least-square fit to
+      /// Function you want to least-square fit to.
       virtual void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit
       virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
+      /** Function you want to least-square fit to. This is the model function which is supposed to simulate 
+       *  a set of "experimental" data.
+       *  @param in The parameters of the model function.
+       *  @param x  The argument of the function.
+       */
+      virtual double function(const double* in, const double& x) = 0;
 
     protected:
       // Overridden Algorithm methods
@@ -89,8 +95,6 @@ namespace Mantid
       virtual void declareAdditionalProperties(){};
       /// Called in the beginning of exec(). Custom initialization
       virtual void prepare(){};
-      /// Called in the end of exec().
-      virtual void finalize(){};
 
       /// Declare parameters specific to fitting function
       virtual void declareParameters() = 0;

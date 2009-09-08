@@ -101,7 +101,57 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
     }
 }
 
+double IkedaCarpenterPV1D::function(const double* in, const double& xx)
+{
+    const double& I = in[0];
+    const double& alpha0 = in[1];
+    const double& alpha1 = in[2];
+    const double& beta0 = in[3];
+    const double& kappa = in[4];
+    const double& SigmaSquared = in[5];
+    const double& Gamma = in[6];
+    const double& Eta = in[7];
+    const double& X0 = in[8];
+    const double& BG = in[9];
 
+    const double alpha = 1.0 / (alpha0+alpha1); // assume wavelength = 1
+    const double beta = 1/beta0;
+
+    const double R = exp(-81.799/kappa);  // assume wavelength = 1
+    const double k = 0.05;
+    const double a_minus = alpha*(1-k);
+    const double a_plus = alpha*(1+k);
+    const double x=a_minus-beta;
+    const double y=alpha-beta;
+    const double z=a_plus-beta;    
+
+    const double Nu=1-R*a_minus/x;
+    const double Nv=1-R*a_plus/z;
+    const double Ns=-2*(1-R*alpha/y);
+    const double Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
+
+    double u,v,s,r;
+    double yu, yv, ys, yr;
+
+    const double someConst = 1/sqrt(2.0*SigmaSquared);
+
+    double diff = xx - X0;
+
+    u=a_minus*(a_minus*SigmaSquared-2*diff)/2.0;
+    v=a_plus*(a_plus*SigmaSquared-2*diff)/2.0;
+    s=alpha*(alpha*SigmaSquared-2*diff)/2.0;
+    r=beta*(beta*SigmaSquared-2*diff)/2.0;
+
+    yu = (a_minus*SigmaSquared-diff)*someConst;
+    yv = (a_plus*SigmaSquared-diff)*someConst;
+    ys = (alpha*SigmaSquared-diff)*someConst;
+    yr = (beta*SigmaSquared-diff)*someConst;
+
+    double Y = I*( Nu*exp(u)*gsl_sf_erfc(yu)+Nv*exp(v)*gsl_sf_erfc(yv) + 
+      Ns*exp(s)*gsl_sf_erfc(ys)+Nr*exp(r)*gsl_sf_erfc(yr) ) + BG;
+    
+    return Y;
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

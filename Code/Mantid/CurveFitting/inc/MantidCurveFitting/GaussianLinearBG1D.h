@@ -65,6 +65,7 @@ namespace Mantid
     private:
       // Overridden Fit1D methods
       void declareParameters();
+      double function(const double* in, const double& x);
       void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
       void functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
       void modifyStartOfRange(double& startX);

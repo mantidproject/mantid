@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunction1D.h"
-#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include <boost/tokenizer.hpp>
@@ -47,11 +46,6 @@ void UserFunction1D::declareAdditionalProperties()
 {
     declareProperty("Function","",new MandatoryValidator<std::string>,"The fit function");
     declareProperty("InitialParameters","","The comma separated list of initial values of the fit parameters in the form varName=value");
-    declareProperty(
-        new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
-        "The name of the TableWorkspace in which to store the final fit parameters" );
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), 
-        "Name of the output Workspace holding resulting simlated spectrum");
 }
 
 /**  Declare fit parameters using muParser's implicit variable initialization.
@@ -95,6 +89,15 @@ void UserFunction1D::prepare()
 
 }
 
+double UserFunction1D::function(const double* in, const double& x)
+{
+  for(int i=0;i<m_nPars;i++)
+    m_parameters[i] = in[i];
+
+  m_x = x;
+  return m_parser.Eval();
+}
+
 /** Calculate the fitting function.
  *  @param in A pointer ot the input function parameters
  *  @param out A pointer to the output fitting function buffer. The buffer must be large enough to receive nData double values.
@@ -109,11 +112,6 @@ void UserFunction1D::function(const double* in, double* out, const double* xValu
     for(int i=0;i<m_nPars;i++)
         m_parameters[i] = in[i];
 
-    //mu::varmap_type variables = m_parser.GetVar();
-    //mu::varmap_type::const_iterator item = variables.begin();
-    //for (; item!=variables.end(); ++item)
-    //    std::cout << "Name: " << item->first << " Address: [0x" << item->second << "] = "<<*item->second<<"\n";
-
     for (int i = 0; i < nData; i++) {
         m_x = xValues[i];
         double Yi = m_parser.Eval();
@@ -122,52 +120,6 @@ void UserFunction1D::function(const double* in, double* out, const double* xValu
         if (Err <= 0.) Err = 1.;
         out[i] = (Yi - Yv)/Err;
     }
-}
-
-/**  Use this method to finalize the fit. Create output workspaces with the fit parameters
- *   and the fitted function
- */
-void UserFunction1D::finalize()
-{
-    // Save the final fit parameters in the output table workspace
-    ITableWorkspace_sptr m_result = WorkspaceFactory::Instance().createTable("TableWorkspace");
-    m_result->addColumn("str","Name");
-    m_result->addColumn("double","Value");
-    for(int i=0;i<m_nPars;i++)
-    {
-        TableRow row = m_result->appendRow();
-        row << m_parameterNames[i] << m_parameters[i];
-    }
-    setProperty("OutputParameters",m_result);
-
-    // Save the fitted and simulated spectra in the output workspace
-    MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-    int iSpec = getProperty("WorkspaceIndex");
-    const std::vector<double>& inputX = inputWorkspace->readX(iSpec);
-    const std::vector<double>& inputY = inputWorkspace->readY(iSpec);
-
-    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D",3,inputX.size(),inputY.size()));
-    ws->setTitle("");
-    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-
-    for(int i=0;i<3;i++)
-        ws->dataX(i) = inputWorkspace->readX(iSpec);
-
-    ws->dataY(0) = inputWorkspace->readY(iSpec);
-
-    std::vector<double>& Y = ws->dataY(1);
-    std::vector<double>& E = ws->dataY(2);
-
-    for(unsigned int i=0;i<Y.size();i++)
-    {
-        m_x = inputX[i];
-        Y[i] = m_parser.Eval();
-        E[i] = inputY[i] - Y[i];
-    }
-
-    setProperty("OutputWorkspace",boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
-
 }
 
 } // namespace CurveFitting

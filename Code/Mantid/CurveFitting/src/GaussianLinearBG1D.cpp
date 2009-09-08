@@ -59,6 +59,17 @@ void GaussianLinearBG1D::modifyFinalFittedParameters(std::vector<double>& fitted
   fittedParameter[4] = sqrt(1/weight); // to convert back to sigma
 }
 
+double GaussianLinearBG1D::function(const double* in, const double& x)
+{
+  const double& bg0 = in[0];
+  const double& bg1 = in[1];
+  const double& height = in[2];
+  const double& peakCentre = in[3];
+  const double& weight = in[4];
+
+  double diff=x-peakCentre;
+  return height*exp(-0.5*diff*diff*weight)+bg0+bg1*x;
+}
 
 void GaussianLinearBG1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {

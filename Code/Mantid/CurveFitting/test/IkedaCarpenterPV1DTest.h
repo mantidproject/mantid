@@ -23,6 +23,11 @@ class IkedaCarpenterPV1DTest : public CxxTest::TestSuite
 {
 public:
 
+  ~IkedaCarpenterPV1DTest()
+  {
+    AnalysisDataService::Instance().remove("IkedaCarpenterPV1D_GaussMockData");
+  }
+
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -104,7 +109,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // create mock data to test against
-    std::string wsName = "GaussMockData";
+    std::string wsName = "IkedaCarpenterPV1D_GaussMockData";
     int histogramNumber = 1;
     int timechannels = 31;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);

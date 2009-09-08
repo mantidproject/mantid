@@ -7,6 +7,9 @@
 #include <math.h>
 #include <iomanip>
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -169,9 +172,32 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
     return retVal;
 }
 
+/** Calculates the residuals (output in \a out) of \a nData values of the fitting 
+ *  function calculated at points \a xValues[i]. The fitting algorithm tries to 
+ *  find such set of parameters \a in which minimizes the sum of the squares of the residuals.
+ *  The base class implementation returns: out[i] = (f(xValues[i]) - yValues[i]) / yErrors[i],
+ *  where f(x) the value returned by the virtual double Fit1D::function(const double* in, const double& x).
+ *  @param in Input fitting parameter values
+ *  @param out Residuals
+ *  @param xValues X values for data points
+ *  @param yValues Y values for data points
+ *  @param yErrors Errors (standard deviations) on yValues
+ *  @param nData Number of data points
+ */
+void Fit1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+{
+  for (int i = 0; i < nData; i++) {
+    double Yi = this->function(in,xValues[i]);
+    out[i] = yErrors[i] > 0.0 ? (Yi - yValues[i])/yErrors[i] : 0.0;
+  }
+}
+
 
 /** Base class implementation of derivative function throws error. This is to check if such a function is provided
-    by derivative class
+    by derivative class. In the derived classes this method must return the derivatives of the resuduals function
+    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
+    with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
+    algorithm is used.
 * @param in Input fitting parameter values
 * @param out Derivatives
 * @param xValues X values for data points
@@ -242,6 +268,8 @@ void Fit1D::init()
   gsl_set_error_handler_off();
 
   declareAdditionalProperties();
+
+  declareProperty("Output","","If not empty OutputParameters TableWorksace and OutputWorkspace will be created.");
 }
 
 
@@ -518,7 +546,6 @@ void Fit1D::exec()
 
   delete [] l_data.X;
   delete [] l_data.forSimplexLSwrap;
-  delete [] l_data.parameters;
 
 //  gsl_vector_free(initFuncArg);
 
@@ -530,7 +557,62 @@ void Fit1D::exec()
     gsl_multimin_fminimizer_free(simplexMinimizer);
   }
 
-  finalize();
+  std::string output = getProperty("Output");
+  if (!output.empty())
+  {
+
+    declareProperty(
+      new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
+      "The name of the TableWorkspace in which to store the final fit parameters" );
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), 
+      "Name of the output Workspace holding resulting simlated spectrum");
+
+    setPropertyValue("OutputParameters",output+"_Parameters");
+    setPropertyValue("OutputWorkspace",output+"_Workspace");
+
+    // Save the final fit parameters in the output table workspace
+    Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    m_result->addColumn("str","Name");
+    m_result->addColumn("double","Value");
+    for(int i=0;i<nParams();i++)
+    {
+      Mantid::API::TableRow row = m_result->appendRow();
+      row << m_parameterNames[i] << m_fittedParameter[i];
+      l_data.parameters[i] = m_fittedParameter[i];
+    }
+    setProperty("OutputParameters",m_result);
+
+    // Save the fitted and simulated spectra in the output workspace
+    MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+    int iSpec = getProperty("WorkspaceIndex");
+    const std::vector<double>& inputX = inputWorkspace->readX(iSpec);
+    const std::vector<double>& inputY = inputWorkspace->readY(iSpec);
+
+    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
+      (Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",3,inputX.size(),inputY.size()));
+    ws->setTitle("");
+    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+    for(int i=0;i<3;i++)
+      ws->dataX(i) = inputWorkspace->readX(iSpec);
+
+    ws->dataY(0) = inputWorkspace->readY(iSpec);
+
+    std::vector<double>& Y = ws->dataY(1);
+    std::vector<double>& E = ws->dataY(2);
+
+    for(unsigned int i=0;i<Y.size();i++)
+    {
+      double x = inputX[i];
+      Y[i] = this->function(l_data.parameters,x);
+      E[i] = inputY[i] - Y[i];
+    }
+
+    setProperty("OutputWorkspace",boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+
+  }
+
+  delete [] l_data.parameters;
 
   return;
 }

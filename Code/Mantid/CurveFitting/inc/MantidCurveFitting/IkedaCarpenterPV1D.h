@@ -56,6 +56,7 @@ namespace Mantid
       void declareParameters();
       void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
       //void functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
+      double function(const double* in, const double& xx);
 
     };
 

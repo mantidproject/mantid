@@ -35,7 +35,20 @@ void BackToBackExponential1D::declareParameters()
     "Constant background value (default 0)", Direction::InOut);
 }
 
+double BackToBackExponential1D::function(const double* in, const double& x)
+{
+  const double& I = in[0];
+  const double& a = in[1];
+  const double& b = in[2];
+  const double& x0 = in[3];
+  const double& s = in[4];
+  const double& bk = in[5];
 
+  double s2 = s*s;
+  double diff=x-x0;
+  return I*(exp(a/2*(a*s2+2*diff))*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2))
+    + exp(b/2*(b*s2-2*diff))*gsl_sf_erfc((b*s2-diff)/sqrt(2*s2)))+bk;
+}
 
 void BackToBackExponential1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {

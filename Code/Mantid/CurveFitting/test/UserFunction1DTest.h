@@ -39,10 +39,10 @@ public:
     ~UserFunction1DTest()
     {
         FrameworkManager::Instance().deleteWorkspace("UserFunction1DWS");
-        FrameworkManager::Instance().deleteWorkspace("UserFunction1D_params");
-        FrameworkManager::Instance().deleteWorkspace("UserFunction1D_result");
-        FrameworkManager::Instance().deleteWorkspace("UserFunction1D_params1");
-        FrameworkManager::Instance().deleteWorkspace("UserFunction1D_result1");
+        FrameworkManager::Instance().deleteWorkspace("UserFunction1D_Parameters");
+        FrameworkManager::Instance().deleteWorkspace("UserFunction1D_Workspace");
+        FrameworkManager::Instance().deleteWorkspace("UserFunction1D1_Parameters");
+        FrameworkManager::Instance().deleteWorkspace("UserFunction1D1_Workspace");
     }
 
     void testLinear()
@@ -52,11 +52,10 @@ public:
         alg->setPropertyValue("InputWorkspace","UserFunction1DWS");
         alg->setPropertyValue("WorkspaceIndex","0");
         alg->setPropertyValue("Function","a+b*x");
-        alg->setPropertyValue("OutputParameters","UserFunction1D_params");
-        alg->setPropertyValue("OutputWorkspace","UserFunction1D_result");
+        alg->setPropertyValue("Output","UserFunction1D");
         TS_ASSERT_THROWS_NOTHING(alg->execute());
 
-        ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D_params"));
+        ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D_Parameters"));
 
         TS_ASSERT_EQUALS(params->String(0,0),"a");
         TS_ASSERT_EQUALS(params->String(1,0),"b");
@@ -68,11 +67,10 @@ public:
         alg1->setPropertyValue("InputWorkspace","UserFunction1DWS");
         alg1->setPropertyValue("WorkspaceIndex","1");
         alg1->setPropertyValue("Function","a+b*x");
-        alg1->setPropertyValue("OutputParameters","UserFunction1D_params1");
-        alg1->setPropertyValue("OutputWorkspace","UserFunction1D_result1");
+        alg1->setPropertyValue("Output","UserFunction1D1");
         TS_ASSERT_THROWS_NOTHING(alg1->execute());
 
-        ITableWorkspace_sptr params1 = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D_params1"));
+        ITableWorkspace_sptr params1 = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D1_Parameters"));
 
         TS_ASSERT_EQUALS(params1->String(0,0),"a");
         TS_ASSERT_EQUALS(params1->String(1,0),"b");
