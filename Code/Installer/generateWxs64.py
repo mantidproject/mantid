@@ -338,16 +338,16 @@ addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','
 
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)
 addDlls(QTDIR,'qt',QTIPlot)
-QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtiplot/qtiplot.exe',QTIPlot)
+QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtiplot/MantidPlot.exe',QTIPlot)
 MantidLauncher = addFileV('MantidLauncher','SMPlot.exe','StartMantidPlot.exe','MantidLauncher/Release/MantidLauncher.exe',QTIPlot)
 startmenuQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
 desktopQTIPlot = addTo(MantidLauncher,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
 addAllFiles('toget64/pyc','pyc',QTIPlot)
 if (QTDIR == 'C:/Qt/4_4_0/bin'): 	 
-	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/qtiplot.exe.manifest',QTIPlot)
+	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/MantidPlot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
-addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':'../qtiplot/qtiplot/qtiplot.exe'})
+addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':'../qtiplot/qtiplot/MantidPlot.exe'})
 
 #plugins
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
