@@ -63,6 +63,7 @@ public:
     
     AnalysisDataService::Instance().remove(outputSpace);
     AnalysisDataService::Instance().remove("focusedWS");
+    delete loader;
 	}
 
 private:
