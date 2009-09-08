@@ -20,7 +20,8 @@ using namespace Mantid::Kernel;
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
 			   const std::vector<std::string> & exts, unsigned int direction) 
-  : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, action), direction), 
+  : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action > FileProperty::NoExistLoad) ), 
+				   direction), 
     m_action(action)
 {
 }
@@ -31,7 +32,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
  */
 bool FileProperty::isLoadProperty() const
 {
-  return (m_action == FileProperty::Load);
+  return (m_action != FileProperty::Save);
 }
 
 /**

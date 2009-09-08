@@ -26,9 +26,11 @@ public:
   /// An enumeration for load/save types. This is passed on to the FileValidator as a constructor parameter.
   enum
   {
-    // Note that changing this order will break things!
+    // Note that the order here ensures that the correct boolean gets passed to the FileValidator.
     Save = 0,
-    Load = 1
+    NoExistLoad = 1,
+    Load = 2,
+
   };
 
 public:

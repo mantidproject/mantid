@@ -53,9 +53,12 @@ void LoadInstrument::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace to load the instrument definition into" );
-  declareProperty(new FileProperty("Filename","", FileProperty::Load, std::vector<std::string>(1, "xml")),
-		  "The filename (including its full or relative path) of an ISIS\n"
-		  "instrument defintion file");
+  std::vector<std::string> exts;
+  exts.push_back("XML");
+  exts.push_back("xml");
+  declareProperty(new FileProperty("Filename","", FileProperty::NoExistLoad, exts),
+		  "The filename (including its full or relative path) of an ISIS instrument\n"
+		  "defintion file");
 
 }
 

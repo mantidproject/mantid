@@ -52,6 +52,22 @@ public:
     delete fp;
   }
 
+  void testNoExistLoadProperty()
+  {
+    std::vector<std::string> exts(1, "raw");
+    Mantid::Kernel::FileProperty *fp = 
+      new Mantid::Kernel::FileProperty("Filename","", Mantid::Kernel::FileProperty::NoExistLoad, exts);
+    // Check type
+    TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
+
+    std::string msg = fp->setValue("GEM38370.raw");
+    TS_ASSERT_EQUALS(msg, "")    
+
+    msg = fp->setValue("GEM38371.raw");
+    TS_ASSERT_EQUALS(msg, "")    
+
+  }
+
   void testSaveProperty()
   {
     Mantid::Kernel::FileProperty *fp = 
