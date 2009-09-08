@@ -1227,7 +1227,6 @@ void Graph::setScale(int axis, double start, double end, double step,
 void Graph::setAxisScale(int axis, double start, double end, int type, double step,
 				  int majorTicks, int minorTicks)
 {
-  //std::cout<<"Graph::setAxisScale called "<<std::endl;
   ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
   if( !sc_engine ) return;
 
@@ -1547,7 +1546,6 @@ void Graph::removeMarker()
 				d_markers_selector->removeAll((ImageMarker*)d_plot->marker(selectedMarker));
 		}
 		d_plot->removeMarker(selectedMarker);
-		// std::cout<<"Graph::removeMarker() d_plot->replot() called"<<std::endl;
 		d_plot->replot();
 		emit modifiedGraph();
 
@@ -1678,7 +1676,6 @@ void Graph::updateImageMarker(int x, int y, int w, int h)
 {
 	ImageMarker* mrk = (ImageMarker*) d_plot->marker(selectedMarker);
 	mrk->setRect(x, y, w, h);
-//	 std::cout<<"Graph::updateImageMarker() d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -1797,7 +1794,6 @@ void Graph::drawAxesBackbones(bool yes)
 			scale->repaint();
 		}
 	}
- //std::cout<<"Graph::drawAxesBackbones d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -1835,7 +1831,6 @@ void Graph::setAxesLinewidth(int width)
 			scale->repaint();
 		}
 	}
- //std::cout<<"Graph::setAxesLinewidth d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -2663,7 +2658,6 @@ void Graph::updateErrorBars(QwtErrorPlotCurve *er, bool xErr, double width, int 
 	er->drawThroughSymbol(through);
 	er->drawPlusSide(plus);
 	er->drawMinusSide(minus);
-//std::cout<<"Graph::updateErrorBars d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -2770,7 +2764,6 @@ QwtPieCurve* Graph::plotPie(Table* w, const QString& name, int startRow, int end
 
 	pie->loadData();
 	pie->initLabels();
-//std::cout<<"Graph::plotPie d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	return pie;
 }
@@ -2832,8 +2825,7 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
 
 				DataCurve* mc = masterCurve(w->colName(xcol), w->colName(ycol));
 				if (mc){
-					//std::cout<<"Graph::addcurves d_plot->replot() called"<<std::endl;
-				    d_plot->replot();
+					d_plot->replot();
 					mc->setLabelsColumnName(labelsCol);
 				} else
 					return false;
@@ -3098,7 +3090,6 @@ void Graph::updateVectorsLayout(int curve, const QColor& color, double width,
 
 	if (!xEndColName.isEmpty() && !yEndColName.isEmpty())
 		vect->setVectorEnd(xEndColName, yEndColName);
-//std::cout<<"Graph::updateVectorsLaout d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -3109,7 +3100,6 @@ void Graph::updatePlot()
 		for (int i = 0; i < QwtPlot::axisCnt; i++)
 			d_plot->setAxisAutoScale(i);
 	}
-	//std::cout<<"Graph::updatePlot() d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	updateScale();
 }
@@ -3123,7 +3113,6 @@ void Graph::updateScale()
         for (int i = 0; i < QwtPlot::axisCnt; i++)
             d_plot->setAxisScaleDiv(i, *d_plot->axisScaleDiv(i));
     }
-	//std::cout<<"Graph::updateScale d_plot->replot() called"<<std::endl;
     d_plot->replot();
 	updateMarkersBoundingRect();
 	updateSecondaryAxis(QwtPlot::xTop);
@@ -3188,7 +3177,6 @@ void Graph::removeCurves(const QString& s)
         if(((DataCurve *)it)->plotAssociation().contains(s))
             removeCurve(i);
 	}
-	//std::cout<<"Graph::removeCurves d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 
@@ -3453,7 +3441,6 @@ ImageMarker* Graph::addImage(const QString& fileName)
 		picSize.setHeight(h);
 
 	mrk->setSize(picSize);
-	//std::cout<<"Graph::addImage d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 
 	emit modifiedGraph();
@@ -3770,7 +3757,6 @@ void Graph::updateMarkersBoundingRect()
 		if (im)
 			im->updateBoundingRect();
 	}
-//std::cout<<"Graph::updateMarkersBoundingRect d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 
@@ -3831,8 +3817,7 @@ void Graph::scaleFonts(double factor)
                 notifyFontChange(font);
         }
     }
-	//std::cout<<"Graph::scaleFonts d_plot->replot() called"<<std::endl;
-    d_plot->replot();
+	d_plot->replot();
 }
 
 void Graph::setMargin (int d)
@@ -3989,7 +3974,6 @@ void Graph::removeAxisTitle()
 	int axis = (selectedAxis + 2)%4;//unconsistent notation in Qwt enumerations between
   	//QwtScaleDraw::alignment and QwtPlot::Axis
   	d_plot->setAxisTitle(axis, " ");//due to the plot layout updates, we must always have a non empty title
-	//std::cout<<"Graph::removeAxisTitle d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 	emit modifiedGraph();
 }
@@ -4095,8 +4079,7 @@ void Graph::showGrid(int axis)
 		grid->enableXMin(!grid->xMinEnabled());
 	} else
 		return;
-    //std::cout<<"Graph::showGrid d_plot->replot() called"<<std::endl;
-	d_plot->replot();
+  	d_plot->replot();
 	emit modifiedGraph();
 }
 
@@ -4327,7 +4310,6 @@ void Graph::copy(Graph* g)
 			addArrow(lmrk);
 	}
 	setAntialiasing(g->antialiasing(), true);
-	//std::cout<<"Graph::copy d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 
@@ -4624,13 +4606,11 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   	d_spectrogram->data().range().minValue(),
   	d_spectrogram->data().range().maxValue());
   	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
-	
-  	d_plot->replot();
+	//d_plot->replot();
 	setSpectrogram(d_spectrogram);
 	 
 	//d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
 	 d_spectrogram->recount();
-	d_plot->setAxisScale(QwtPlot::yRight,d_spectrogram->data().range().minValue(),d_spectrogram->data().range().maxValue());    
 	d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
 	
 	return d_spectrogram;
@@ -4896,7 +4876,6 @@ void Graph::updateCurveNames(const QString& oldName, const QString& newName, boo
         if (c->type() != Function && c->plotAssociation().contains(oldName))
             c->updateColumnNames(oldName, newName, updateTableName);
 	}
-//std::cout<<"Graph::updatecurvenames d_plot->replot() called"<<std::endl;
 	d_plot->replot();
 }
 

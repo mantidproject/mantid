@@ -137,13 +137,14 @@ public:
 	void selectLabel(bool on);
 	void setScaleType(int scaleType);
 	const QwtColorMap& getSpectrogramColormap();
+	int getScaleType() const;
 	
 
 protected:
 	virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void createLabels();
-	int getScaleType() const;
+	
 	void calculateBinRange(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
 
 	int m_ScaleType;

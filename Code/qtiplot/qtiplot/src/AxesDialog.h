@@ -74,7 +74,7 @@ public:
 
 	void setGraph(Graph *g);
 	void setScaleType(int scaleType);
-	int getSacleType() const;
+	int getScaleType() const;
 	
 public slots:
 	void setCurrentScale(int axisPos);
