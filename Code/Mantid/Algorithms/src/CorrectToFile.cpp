@@ -2,7 +2,7 @@
 // Includes
 //----------------------------
 #include "MantidAlgorithms/CorrectToFile.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -16,8 +16,8 @@ void CorrectToFile::init()
 {
   declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input),
     "Name of the input workspace" );
-  declareProperty("Filename","",new Kernel::FileValidator(),
-    "The file containing the correction factors");
+  declareProperty(new Kernel::FileProperty("Filename","", Kernel::FileProperty::Load),
+		  "The file containing the correction factors");
 
   std::vector<std::string> propOptions = Kernel::UnitFactory::Instance().getKeys();
   propOptions.push_back("SpectrumNumber");

@@ -10,6 +10,7 @@
 #include "MantidNexus/NeXusUtils.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include <cmath>
@@ -40,15 +41,13 @@ namespace NeXus
   {
     // Declare required input parameters for all sub algorithms
     std::vector<std::string> exts;
-    exts.push_back("NXS");
     exts.push_back("nxs");
-    exts.push_back("NX5");
     exts.push_back("nx5");
-    exts.push_back("XML");
     exts.push_back("xml");
     exts.push_back("s*");
-    declareProperty("Filename","",new FileValidator(exts),
-      "Name of the Nexus file to read, as a full or relative path");
+    declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+		    "The name of the Nexus file to load" );      
+
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), 
       "The name of the workspace to be created as the output. For\n"
       "multiperiod files, one workspace will be generated for each period");

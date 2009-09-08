@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NeXusUtils.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FileProperty.h"
 
 #include <cmath>
 #include <boost/shared_ptr.hpp>
@@ -34,16 +35,14 @@ SaveNexus::SaveNexus() : Algorithm() {}
  */
 void SaveNexus::init()
 {
-  // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspace
+  // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspac
   std::vector<std::string> exts;
-  exts.push_back("NXS");
   exts.push_back("nxs");
   exts.push_back("nx5");
-  exts.push_back("NX5");
   exts.push_back("xml");
-  exts.push_back("XML");
-  declareProperty("FileName", "", new FileValidator(exts, false),
-      "The name of the Nexus file to write, as a full or relative path");
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+		    "The name of the Nexus file to write, as a full or relative\n"
+		    "path");
   declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace", "", Direction::Input),
       "Name of the workspace to be saved");
   //

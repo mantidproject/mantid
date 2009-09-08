@@ -8,6 +8,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileProperty.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -43,15 +44,12 @@ namespace NeXus
       "Name of the workspace to be saved");
     // Declare required input parameters for algorithm
     std::vector<std::string> exts;
-    exts.push_back("NXS");
     exts.push_back("nxs");
     exts.push_back("nx5");
-    exts.push_back("NX5");
     exts.push_back("xml");
-    exts.push_back("XML");
-    declareProperty("FileName","",new FileValidator(exts,false),
-      "The name of the Nexus file to write, as a full or relative\n"
-      "path");
+    declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+		    "The name of the Nexus file to write, as a full or relative\n"
+		    "path");
     // Declare optional parameters (title now optional, was mandatory)
     declareProperty("Title", "", new NullValidator<std::string>,
       "A title to describe the saved workspace");

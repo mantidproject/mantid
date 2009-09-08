@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cfloat>
 #include <fstream>
@@ -47,8 +47,8 @@ void DiffractionFocussing2::init()
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
 
-  declareProperty("GroupingFileName","",new FileValidator(std::vector<std::string>(1,"cal")),
-    "The name of the CalFile with grouping data" );
+  declareProperty(new FileProperty("GroupingFileName", "", FileProperty::Load, std::vector<std::string>(1,"cal")),
+		  "The name of the CalFile with grouping data" );
 }
 
 /** Executes the algorithm

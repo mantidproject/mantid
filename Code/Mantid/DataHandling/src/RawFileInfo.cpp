@@ -2,6 +2,7 @@
 // Includes
 //----------------------------
 #include "MantidDataHandling/RawFileInfo.h"
+#include "MantidKernel/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/TableRow.h"
 
@@ -23,7 +24,7 @@ void RawFileInfo::init()
   
   std::vector<std::string> exts(2, "raw");
   exts[1] = "s*";
-  declareProperty("Filename", "", new FileValidator(exts), 
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
 		  "The RAW file from which to extract the information");
   declareProperty("RunTitle", std::string(""), "The title of the run", Direction::Output);
   declareProperty("SpectraCount", -1, "The number of spectra", Direction::Output);

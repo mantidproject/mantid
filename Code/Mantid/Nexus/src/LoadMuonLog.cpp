@@ -4,6 +4,7 @@
 #include "MantidNexus/LoadMuonLog.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/LogParser.h"
 
@@ -36,7 +37,7 @@ void LoadMuonLog::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "Name of the Muon Nexus file to read, as a full or relative path" );
-  declareProperty("Filename","",
+  declareProperty(new FileProperty("Filename","", FileProperty::Load),
     "The name of the workspace to which the log data will be added" );
 }
 

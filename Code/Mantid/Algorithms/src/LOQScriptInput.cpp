@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------
 #include "MantidAlgorithms/LOQScriptInput.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -48,7 +48,7 @@ void LOQScriptInput::init()
   declareProperty<double>("BeamCentreY", 317.5);
   
   //Efficiency correction
-  declareProperty("EfficiencyCorrectionFile", "", new FileValidator());
+  declareProperty(new FileProperty("EfficiencyCorrectionFile", "", FileProperty::Load));
  
 }
 

@@ -17,6 +17,7 @@
 #include "MantidNexus/SaveNeXus.h"
 #include "MantidNexus/LoadMuonNexus.h"
 #include "MantidNexus/LoadNeXus.h"
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -42,7 +43,7 @@ void testExecOnMuon()
     std::string outputSpace,inputFile;
     nxLoad.initialize();
     // Now set required filename and output workspace name
-    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
     nxLoad.setPropertyValue("FileName", inputFile);
     outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     

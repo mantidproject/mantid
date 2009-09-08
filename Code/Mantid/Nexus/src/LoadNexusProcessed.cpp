@@ -8,7 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Progress.h"
@@ -52,16 +52,11 @@ namespace Mantid
     {
       // Declare required input parameters for algorithm
       std::vector<std::string> exts;
-      exts.push_back("NXS");
       exts.push_back("nxs");
       exts.push_back("nx5");
-      exts.push_back("NX5");
       exts.push_back("xml");
-      exts.push_back("XML");
-      // required
-      declareProperty("FileName", "", new FileValidator(exts),
-        "Name of the Nexus file to read, as a full or relative path");
-
+      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+		      "The name of the processed Nexus file to load" );      
       declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "",
         Direction::Output),
         "The name of the workspace to be created as the output of the\n"

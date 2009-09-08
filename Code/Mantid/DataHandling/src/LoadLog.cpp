@@ -7,6 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Glob.h"
+#include "MantidKernel/FileProperty.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"
@@ -40,12 +41,14 @@ void LoadLog::init()
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-    "The filename (including its full or relative path) of either an ISIS log file\n"
-    "or an ISIS raw file. If a raw file is specified all log files associated with\n"
-    "that raw file are loaded into the specified workspace. The file extension must\n"
-    "either be .raw or .s when specifying a raw file" );
-  declareProperty("Filename", "",
     "The name of the workspace to which the log data will be added");
+
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load),
+		  "The filename (including its full or relative path) of either an ISIS log file\n"
+		  "or an ISIS raw file. If a raw file is specified all log files associated with\n"
+		  "that raw file are loaded into the specified workspace. The file extension must\n"
+		  "either be .raw or .s when specifying a raw file");
+
   declareProperty("Period",1);
 }
 

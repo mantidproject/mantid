@@ -4,7 +4,7 @@
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/IInstrument.h"
@@ -35,9 +35,9 @@ void CreateCalFileByNames::init()
   declareProperty("InstrumentName", "",
     "The name of the instrument, needs to be present in the Instrument Data\n"
     "Service" );
-  declareProperty("GroupingFileName","",
-    new FileValidator(std::vector<std::string>(1,"cal"),false),
-    "The name of the output CalFile" );
+  declareProperty(new FileProperty("GroupingFileName","",FileProperty::Load, 
+				   std::vector<std::string>(1,"cal")),
+		  "The name of the output CalFile");
   declareProperty("GroupNames","",
     "A string of the instrument component names to use as separate groups.\n"
     "Use / or , to separate multiple groups");

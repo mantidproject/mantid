@@ -37,14 +37,14 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
     TS_ASSERT( loaderSLS.isInitialized() );
-    inputFile = "../../../../Test/Instrument/SANDALS_Definition.xml";
-    loaderSLS.setPropertyValue("Filename", inputFile);
+    loaderSLS.setPropertyValue("Filename", "../../../../Test/Instrument/SANDALS_Definition.xml");
+    inputFile = loaderSLS.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentTestSLS";
     loaderSLS.setPropertyValue("OutputWorkspace", wsName);
 
     std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") )
-    TS_ASSERT( ! result.compare(inputFile));
+    TS_ASSERT_EQUALS( result, inputFile);
 
     TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("OutputWorkspace") )
     TS_ASSERT( ! result.compare(wsName));

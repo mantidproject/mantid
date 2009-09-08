@@ -4,7 +4,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataHandling/LoadMappingTable.h"
-
+#include "MantidKernel/FileProperty.h"
 
 namespace Mantid
 {
@@ -22,9 +22,9 @@ LoadMappingTable::LoadMappingTable()
 
 void LoadMappingTable::init()
 {
-  declareProperty("Filename","", new MandatoryValidator<std::string>,
-    "The name of the RAW file from which to obtain the mapping information,\n"
-    "including its full or relative path" );
+  declareProperty(new FileProperty("Filename","", FileProperty::Load),
+		  "The name of the RAW file from which to obtain the mapping information,\n"
+		  "including its full or relative path" );
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the input and output workspace on which to perform the\n"

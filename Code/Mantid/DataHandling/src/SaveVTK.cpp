@@ -2,7 +2,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveVTK.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -33,8 +33,8 @@ namespace Mantid
     void SaveVTK::init()
     {
       //Declare mandatory properties
-      declareProperty("Filename", "", new MandatoryValidator<std::string>(),
-        "The name to use when writing the file", Direction::Input);
+      declareProperty(new FileProperty("Filename", "", FileProperty::Save),
+		      "The name to use when writing the file");
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
         "The workspace name to use as input" );

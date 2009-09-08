@@ -8,13 +8,15 @@
 #include "MantidAlgorithms/CorrectToFile.h"
 #include "MantidKernel/UnitFactory.h"
 #include "WorkspaceCreationHelper.hh"
+#include "Poco/Path.h"
 
 class CorrectToFileTest : public CxxTest::TestSuite
 {
 public:
 
-  CorrectToFileTest() : inputFile("../../../../Test/Data/DIRECT.041") 
+  CorrectToFileTest() : inputFile("")
   {
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/DIRECT.041").toString();
   }
 
   void testInit()

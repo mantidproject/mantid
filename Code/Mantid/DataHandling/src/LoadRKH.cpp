@@ -2,7 +2,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/LoadRKH.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace1D.h"
 
@@ -21,7 +21,7 @@ DECLARE_ALGORITHM(LoadRKH)
  */
 void LoadRKH::init()
 {
-  declareProperty("Filename","", new Kernel::FileValidator(),
+  declareProperty(new Kernel::FileProperty("Filename","", Kernel::FileProperty::Load),
     "Name of the RKH file to load" );
   declareProperty(
     new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),

@@ -6,7 +6,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -41,10 +41,9 @@ namespace Mantid
     void LoadMuonNexus::init()
     {
       std::vector<std::string> exts;
-      exts.push_back("NXS");
       exts.push_back("nxs");
-      declareProperty( "Filename", "", new FileValidator(exts),
-        "Name of the Nexus file to read, as a full or relative path");
+      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+		      "The name of the Nexus file to load" );      
      /* declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
         "The name of the workspace to be created as the output of the\n"
         "algorithm. For multiperiod files, one workspace will be\n"

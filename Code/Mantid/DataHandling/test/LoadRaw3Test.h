@@ -13,6 +13,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Instrument.h"
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -26,7 +27,7 @@ public:
   LoadRaw3Test()
   {
     // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HET15869.RAW";
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
   }
 
   void testInit()

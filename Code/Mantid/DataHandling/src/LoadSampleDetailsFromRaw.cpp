@@ -2,7 +2,7 @@
 // Includes
 //------------------------------------------------------
 #include "MantidDataHandling/LoadSampleDetailsFromRaw.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/Sample.h"
 
 // The isis RAW data structure
@@ -31,7 +31,7 @@ void LoadSampleDetailsFromRaw::init()
   std::vector<std::string> exts(2, "raw");
   exts[1] = "s*";
   
-  declareProperty("Filename", "", new FileValidator(exts), 
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
 		  "The file from which to extract the information");
 }
 

@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/MaskDetectorsIf.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace1D.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <fstream>
 #include <iomanip>
@@ -52,10 +52,10 @@ void MaskDetectorsIf::init()
 	  declareProperty("Operator", "Equal", new Kernel::ListValidator(select_operator),
 	  	    "Unary operator to compare to given values" );
 	  declareProperty("Value",0.0);
-	  declareProperty("InputCalFile","",new FileValidator(std::vector<std::string>(1,"cal")),
-	      "The name of the CalFile with grouping data" );
-	  declareProperty("OutputCalFile","",new FileValidator(std::vector<std::string>(1,"cal"),false),
-	      "The name of the CalFile with grouping data" );
+	  declareProperty(new FileProperty("InputCalFile","", FileProperty::Load, std::vector<std::string>(1,"cal")),
+			  "The name of the CalFile with grouping data" );
+	  declareProperty(new FileProperty("OutputCalFile","", FileProperty::Save, std::vector<std::string>(1,"cal")),
+			  "The name of the CalFile with grouping data" );
 }
 
 /** Executes the algorithm

@@ -4,6 +4,7 @@
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/FileProperty.h"
 
 #include <fstream>
 #include <boost/tokenizer.hpp>
@@ -29,7 +30,8 @@ namespace Mantid
       exts.push_back("txt");
       exts.push_back("csv");
 
-      declareProperty("Filename","",new FileValidator(exts),"A comma separated Ascii file");
+      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+		      "A comma separated Ascii file");
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("Workspace",
         "",Direction::Output), "The name of the workspace that will be created.");
 

@@ -5,6 +5,7 @@
 #include "MantidAPI/Instrument.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -34,9 +35,13 @@ void LoadInstrumentFromRaw::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace in which to store the imported instrument" );
-  declareProperty("Filename", "", new MandatoryValidator<std::string>,
-    "The filename (including its full or relative path) of an ISIS RAW file.\n"
-    "The file extension must either be .raw or .s??" );
+  
+  std::vector<std::string> exts;
+  exts.push_back("raw");
+  exts.push_back("s*");
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+		  "The filename (including its full or relative path) of an ISIS RAW file.\n"
+		  "The file extension must either be .raw or .s??" );
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

@@ -41,10 +41,10 @@ public:
   {
     if ( !loader.isInitialized() ) loader.initialize();
 
-	  // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HRP37129_ICPevent.txt";
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", inputFile) )
-    
+    // Path to test input file assumes Test directory checked out from SVN
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "../../../../Test/Data/HRP37129_ICPevent.txt") )
+    inputFile = loader.getPropertyValue("Filename");
+
     outputSpace = "LoadLogTest-singleLogFile";
     TS_ASSERT_THROWS(loader.setPropertyValue("Workspace", outputSpace), std::invalid_argument)
     // Create an empty workspace and put it in the AnalysisDataService
@@ -91,9 +91,9 @@ public:
     loaderRawFile.initialize();
 
 	  // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HRP37125.RAW";
-    loaderRawFile.setPropertyValue("Filename", inputFile);
-
+    loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/HRP37125.RAW");
+    inputFile = loaderRawFile.getPropertyValue("Filename");
+    
     outputSpace = "LoadLogTestraw-datafile";
     // Create an empty workspace and put it in the AnalysisDataService
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
@@ -101,7 +101,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
     loaderRawFile.setPropertyValue("Workspace", outputSpace);
 
-	  std::string result;
+    std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
 
@@ -159,8 +159,8 @@ public:
     loaderRawFile.initialize();
 
 	  // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Data/HRP37129.S02";
-    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", inputFile) )
+    TS_ASSERT_THROWS_NOTHING( loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/HRP37129.S02") )
+      inputFile = loaderRawFile.getPropertyValue("Filename");
 
     outputSpace = "LoadLogTest-rawdatafile_so_type";
     TS_ASSERT_THROWS( loaderRawFile.setPropertyValue("Workspace", outputSpace), std::invalid_argument)
@@ -169,7 +169,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
 
-	  std::string result;
+    std::string result;
     TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
     TS_ASSERT( ! result.compare(inputFile));
 

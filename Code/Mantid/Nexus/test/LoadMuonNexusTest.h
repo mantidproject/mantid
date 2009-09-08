@@ -18,6 +18,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -45,7 +46,7 @@ public:
     TS_ASSERT_THROWS(nxLoad.execute(),std::runtime_error);
 
     // Now set required filename and output workspace name
-    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
     nxLoad.setPropertyValue("FileName", inputFile);
 
     outputSpace="outer";

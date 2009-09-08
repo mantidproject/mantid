@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FileProperty.h"
 
 #include <set>
 #include <fstream>
@@ -30,8 +31,8 @@ namespace Mantid
       exts.push_back("dat");
       exts.push_back("txt");
       exts.push_back("csv");
-
-      declareProperty("Filename","",new FileValidator(exts,false),"A comma separated Ascii file that will be created");
+      declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
+		      "A comma separated Ascii file that will be created");
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("Workspace",
         "",Direction::Input), "The name of the workspace that will be saved.");
 

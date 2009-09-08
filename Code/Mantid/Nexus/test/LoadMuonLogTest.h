@@ -19,6 +19,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <vector>
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -49,8 +50,8 @@ public:
     LoadMuonLog loaderNexusFile;
     loaderNexusFile.initialize();
 
-	  // Path to test input file assumes Test directory checked out from SVN
-    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
+    // Path to test input file assumes Test directory checked out from SVN
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
     loaderNexusFile.setPropertyValue("Filename", inputFile);
 
     outputSpace = "LoadMuonLogTest-nexusdatafile";

@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidAPI/Progress.h"
 
@@ -30,11 +31,9 @@ namespace Mantid
     */
     void PlotAsymmetryByLogValue::init()
     {
-        std::vector<std::string> exts;
-        exts.push_back("NXS");
-        exts.push_back("nxs");
-        declareProperty("FirstRun","",new FileValidator(exts));
-        declareProperty("LastRun","",new FileValidator(exts));
+      std::vector<std::string> exts(1, "nxs");
+      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, exts));
+      declareProperty(new FileProperty("LastRun","", FileProperty::Load, exts));
         declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output));
         declareProperty("LogValue","",new MandatoryValidator<std::string>());
         declareProperty("Red", 1, Direction::Input);

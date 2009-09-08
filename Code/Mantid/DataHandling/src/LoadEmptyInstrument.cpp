@@ -5,6 +5,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileProperty.h"
 
 #include "Poco/Path.h"
 #include <cmath>
@@ -26,12 +27,9 @@ namespace Mantid
     /// Initialisation method.
     void LoadEmptyInstrument::init()
     {
-      std::vector<std::string> exts;
-      exts.push_back("XML");
-      exts.push_back("xml");			
-      declareProperty("Filename","",new FileValidator(exts),
-        "The filename (including its full or relative path) of an ISIS\n"
-        "instrument defintion file");
+      declareProperty(new FileProperty("Filename","", FileProperty::Load, std::vector<std::string>(1, "xml")),
+		      "The filename (including its full or relative path) of an ISIS\n"
+		      "instrument defintion file");
       declareProperty(
         new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
         "The name of the workspace in which to store the imported instrument" );

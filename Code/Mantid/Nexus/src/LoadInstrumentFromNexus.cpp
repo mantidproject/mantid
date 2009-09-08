@@ -5,6 +5,7 @@
 #include "MantidAPI/Instrument.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -34,13 +35,11 @@ void LoadInstrumentFromNexus::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace in which to attach the imported instrument" );
-  std::vector<std::string> exts;
-  exts.push_back("nxs");
-  exts.push_back("NXS");
-  declareProperty("Filename", "", new FileValidator(exts),
-    "The name (including its full or relative path) of the Nexus file to\n"
-    "attempt to load the instrument from. The file extension must either be\n"
-    ".nxs or .NXS" );
+
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, std::vector<std::string>(1, "nxs")),
+		  "The name (including its full or relative path) of the Nexus file to\n"
+		  "attempt to load the instrument from. The file extension must either be\n"
+		  ".nxs or .NXS" );
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

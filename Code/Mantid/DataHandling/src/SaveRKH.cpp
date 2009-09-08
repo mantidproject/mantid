@@ -3,7 +3,7 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "Poco/LocalDateTime.h"
 #include "Poco/DateTimeFormatter.h"
 
@@ -38,9 +38,8 @@ void SaveRKH::init()
   declareProperty(
     new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace to save");
-  declareProperty("Filename", "", new Kernel::FileValidator(std::vector<std::string>(), false),
-    "The name to use when saving the file");
-
+  declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save),
+		  "The name to use when saving the file");
   declareProperty("Append",true,"If true and Filename already exists, append, else overwrite");
 }
 

@@ -6,7 +6,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 

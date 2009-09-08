@@ -13,7 +13,7 @@
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
 #include "MantidDataHandling/LoadInstrument.h" 
-//
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -50,7 +50,7 @@ public:
     
     // Now set it...
     // specify name of file to load workspace from
-    inputFile = "../../../../Test/Nexus/emu00006473.nxs";
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006473.nxs").toString();
     algToBeTested.setPropertyValue("FileName", inputFile);
    
     std::string result;

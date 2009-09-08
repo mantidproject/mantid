@@ -3,7 +3,8 @@
 //------------------------------------------------------
 #include "MantidDataHandling/LoadLOQDistancesFromRaw.h"
 
-#include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/FileProperty.h"
+
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -34,7 +35,7 @@ void LoadLOQDistancesFromRaw::init()
   std::vector<std::string> exts(2, "raw");
   exts[1] = "s*";
     
-  declareProperty("Filename", "", new FileValidator(exts), 
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), 
 		  "The file from which to extract the information");
 }
 

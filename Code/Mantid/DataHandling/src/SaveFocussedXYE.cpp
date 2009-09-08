@@ -3,7 +3,7 @@
 //---------------------------------------------------
 #include "MantidDataHandling/SaveFocusedXYE.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "Poco/Timestamp.h"
 #include "Poco/DateTimeFormatter.h"
@@ -27,9 +27,8 @@ void SaveFocusedXYE::init()
   declareProperty(
     new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace containing the data you wish to save" );
-  declareProperty("Filename", "",
-    new Mantid::Kernel::FileValidator(std::vector<std::string>(), false),
-    "The filename to use when saving data", Kernel::Direction::Input);
+  declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save),
+		  "The filename to use when saving data");
   std::vector<std::string> Split(2);
   Split[0] = "True";
   Split[1] = "False";

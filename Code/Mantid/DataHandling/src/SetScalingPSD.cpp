@@ -6,6 +6,7 @@
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cmath>
 #include <fstream>
@@ -40,10 +41,10 @@ namespace Algorithms
     std::vector<std::string> exts;
     exts.push_back("sca");
     exts.push_back("raw");
-    declareProperty("ScalingFilename","",new FileValidator(exts),
-      "The name of the scaling calibrations file to read, including its\n"
-      "full or relative path. The file extension must be either .sca or\n"
-      ".raw (filenames are case sensitive on linux)" );
+    declareProperty(new FileProperty("ScalingFilename","", FileProperty::Load, exts),
+		    "The name of the scaling calibrations file to read, including its\n"
+		    "full or relative path. The file extension must be either .sca or\n"
+		    ".raw (filenames are case sensitive on linux)" );
     declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
       "The name of the workspace to apply the scaling to. This must be\n"
       "associated with an instrument appropriate for the scaling file" );

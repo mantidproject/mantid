@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/FileProperty.h"
 #include <fstream>
 #include <ostream>
 #include <iomanip>
@@ -41,9 +42,8 @@ void GetDetectorOffsets::init()
   declareProperty("DReference",2.0);
   declareProperty("XMin",0.0);
   declareProperty("XMax",0.0);
-  declareProperty("GroupingFileName","",
-      new FileValidator(std::vector<std::string>(1,"cal"),false),
-      "The name of the output CalFile" );
+  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Load, std::vector<std::string>(1,"cal")),
+		  "The name of the output CalFile" );
 }
 
 /** Executes the algorithm

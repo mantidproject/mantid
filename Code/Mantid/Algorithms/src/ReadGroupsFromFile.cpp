@@ -4,7 +4,7 @@
 
 
 #include <fstream>
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/IInstrument.h"
@@ -42,9 +42,8 @@ void ReadGroupsFromFile::init()
     "this Mantid session either by loading a dataset from that instrument\n"
     "or calling LoadEmptyInstrument" );
   // The calibration file that contains the grouping information
-  declareProperty("GroupingFileName","",
-    new FileValidator(std::vector<std::string>(1,"cal"),true),
-    "The CalFile containing the grouping you want to visualize" );
+  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Load, std::vector<std::string>(1,"cal")),
+		  "The CalFile containing the grouping you want to visualize" );
   // Flag to consider unselected detectors in the cal file
   std::vector<std::string> select;
   select.push_back("True");

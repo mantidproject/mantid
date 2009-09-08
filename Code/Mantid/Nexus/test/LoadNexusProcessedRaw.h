@@ -24,6 +24,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -56,7 +57,7 @@ void testExecOnLoadraw()
 {
     // use SaveNexusProcessed to build a test file to load
     // for this use LoadRaw
-    std::string inputFile = "../../../../Test/Data/HET15869.RAW";
+    std::string inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
@@ -88,6 +89,7 @@ if ( !saveNexusP.isInitialized() ) saveNexusP.initialize();
     std::string dataName = "spectra";
     std::string title = "Workspace from Loadraw HET15869";
     saveNexusP.setPropertyValue("FileName", outputFile);
+    outputFile = saveNexusP.getPropertyValue("FileName");
     //saveNexusP.setPropertyValue("EntryName", entryName);
     saveNexusP.setPropertyValue("Title", title);
 

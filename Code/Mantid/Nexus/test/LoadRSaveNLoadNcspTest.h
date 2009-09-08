@@ -22,6 +22,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "Poco/Path.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -47,7 +48,7 @@ void testExecOnLoadraw()
 {
     // use SaveNexusProcessed to build a test file to load
     // for this use LoadRaw
-    std::string inputFile = "../../../../Test/Data/CSP78173.raw";
+    std::string inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/CSP78173.raw").toString();
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", inputFile);
@@ -74,6 +75,7 @@ void testExecOnLoadraw()
     std::string dataName = "spectra";
     std::string title = "Workspace from Loadraw CSP78173";
     saveNexusP.setPropertyValue("FileName", outputFile);
+    outputFile = saveNexusP.getPropertyValue("Filename");
     //saveNexusP.setPropertyValue("EntryName", entryName);
     saveNexusP.setPropertyValue("Title", title);
 
@@ -92,7 +94,7 @@ void testExecOnLoadraw()
     myOutputSpace="testLNP3";
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("OutputWorkspace", myOutputSpace));
     // file name to load
-    inputFile = "testSaveLoadrawCSP.nxs";
+    inputFile = outputFile;
     entryNumber=1;
     TS_ASSERT_THROWS_NOTHING(algToBeTested.setPropertyValue("FileName", inputFile));
     algToBeTested.setProperty("EntryNumber", entryNumber);

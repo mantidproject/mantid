@@ -25,6 +25,7 @@
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/FileProperty.h"
 
 #include <fstream>  // used to get ofstream
 #include <iomanip>  // setw() used below
@@ -66,8 +67,7 @@ void SaveCSV::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "The filename of the output CSV file" );
-  declareProperty("Filename", "",
-    new Kernel::MandatoryValidator<std::string>,
+  declareProperty(new FileProperty("Filename", "",FileProperty::Save),
     "The name of the workspace containing the data you want to save to\n"
     "a CSV file" );
   declareProperty("Separator", ",",

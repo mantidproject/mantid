@@ -2,6 +2,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include <string>
 
 namespace Mantid
@@ -16,8 +17,7 @@ using namespace API;
 
 void DiagScriptInput::init()
 {
-  declareProperty( "OutputFile","",
-    new FileValidator(std::vector<std::string>(),false),
+  declareProperty( new FileProperty("OutputFile","", FileProperty::Load),
     "A filename to which to write the list of dead detector UDETs" );
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0);

@@ -11,7 +11,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "LoadRaw/isisraw2.h"
 
@@ -50,10 +50,9 @@ namespace Mantid
       exts.push_back("s*");
       //exts.push_back("sav");
       //exts.push_back("s[0-9][0-9]");
-
-      declareProperty("Filename","",new FileValidator(exts), 
-        "The name of the RAW file to read, including its full or relative\n"
-        "path. (N.B. case sensitive if running on Linux).");
+      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+		      "The name of the RAW file to read, including its full or relative\n"
+		      "path. (N.B. case sensitive if running on Linux).");
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.  If the input\n"

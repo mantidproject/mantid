@@ -11,6 +11,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/FileProperty.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -52,12 +53,10 @@ void LoadInstrument::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
     "The name of the workspace to load the instrument definition into" );
-  std::vector<std::string> exts;
-  exts.push_back("XML");
-  exts.push_back("xml");
-  declareProperty("Filename","",new FileValidator(exts,false),
-    "The filename (including its full or relative path) of an ISIS instrument\n"
-    "defintion file" );
+  declareProperty(new FileProperty("Filename","", FileProperty::Load, std::vector<std::string>(1, "xml")),
+		  "The filename (including its full or relative path) of an ISIS\n"
+		  "instrument defintion file");
+
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating

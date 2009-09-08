@@ -6,6 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/FileProperty.h"
 #include <fstream>
 
 namespace Mantid
@@ -37,9 +38,9 @@ void AlignDetectors::init()
   declareProperty(
     new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
-  declareProperty("CalibrationFile", "",
-    new FileValidator(std::vector<std::string>(1,"cal")),
-    "The CalFile containing the position correction factors" );
+  declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, 
+				   std::vector<std::string>(1,"cal")),
+		  "The CalFile containing the position correction factors");
 }
 
 /** Executes the algorithm

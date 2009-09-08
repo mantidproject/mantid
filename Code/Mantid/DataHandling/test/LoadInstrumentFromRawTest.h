@@ -50,8 +50,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // set properties and check this are set ok
-    inputFile = "../../../../Test/Data/HET15869.RAW";
-    loader.setPropertyValue("Filename", inputFile);
+    loader.setPropertyValue("Filename", "../../../../Test/Data/HET15869.RAW");
+    inputFile = loader.getPropertyValue("Filename");
     loader.setPropertyValue("Workspace", wsName);
 
     std::string result;
