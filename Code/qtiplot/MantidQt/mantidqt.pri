@@ -38,6 +38,7 @@ win32 {
   }
   build_pass:CONFIG(debug, debug|release) {
     MANTIDLIBPATH = "$$MANTIDPATH/debug"
+    LIBPATH += $$MANTIDLIBPATH
   }
 }
 
