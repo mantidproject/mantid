@@ -169,7 +169,7 @@ def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 	if geomid == 1:
 		# Volume = circle area * height
 		# Factor of four comes from radius = width/2
-		correction /= (height*math.pi*pow(width,2)/4.0)
+		correction /= (height*math.pi*math.pow(width,2)/4.0)
 	elif geomid == 2:
 		correction /= (width*height*thickness)
 	else:
@@ -219,7 +219,6 @@ def CreateQuadrant(workspace, quadrant, xcentre, ycentre, rmin, rmax):
 	objxml = QuadrantXML([xcentre,ycentre, 0.0], rmin, rmax, quadrant)
 	finddead = FindDetectorsInShape(workspace, ShapeXML=objxml)
 	groupdet = GroupDetectors(workspace, quadrant, DetectorList = finddead.getPropertyValue("DetectorList"))
-	Integration(quadrant, quadrant)
 
 # Create 4 quadrants for the centre finding algorithm and return their names
 def GroupIntoQuadrants(workspace, xcentre, ycentre, rmin, rmax):
@@ -232,6 +231,19 @@ def GroupIntoQuadrants(workspace, xcentre, ycentre, rmin, rmax):
 	dw_ws = 'Down'
 	CreateQuadrant(workspace, dw_ws,xcentre, ycentre, rmin, rmax)
 	return (left_ws, right_ws, up_ws, dw_ws)
+
+# Calcluate the sum squared difference of the given workspaces. This assumes that a single spectrum workspace in Q
+# for each of the quadrants. The order should be L,R,U,D
+def CalculateResidue(quadrants):
+	ly = mtd.getMatrixWorkspace(quadrants[0]).readY(0)
+	ry = mtd.getMatrixWorkspace(quadrants[1]).readY(0)
+	uy = mtd.getMatrixWorkspace(quadrants[2]).readY(0)
+	dy = mtd.getMatrixWorkspace(quadrants[3]).readY(0)
+	residue = 0
+	nvals = len(ly)
+	for index in range(0, nvals):
+		residue += pow(ly[index] - ry[index], 2) + pow(uy[index] - dy[index], 2)
+	return residue
 
 def StripEndZeroes(workspace):
         result_ws = mantid.getMatrixWorkspace(workspace)

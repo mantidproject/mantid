@@ -271,15 +271,21 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 		q_bins = str(Q1) + "," + str(DQ) + "," + str(Q2)
 		Rebin(final_result, final_result, q_bins)
 		# Calculate the solid angle corrections
-		if FindingCentre == False:
-			SolidAngle(tmpWS,"solidangle")
-			RebinPreserveValue("solidangle", "solidangle", q_bins)
+		SolidAngle(tmpWS,"solidangle")
+		RebinPreserveValue("solidangle", "solidangle", q_bins)
 		Rebin(tmpWS, tmpWS, q_bins)
 
 		if FindingCentre == True:
+			Divide(tmpWS,"solidangle",tmpWS)
+			mantid.deleteWorkspace("solidangle")
 			PoissonErrors(tmpWS, final_result, final_result)
 			mantid.deleteWorkspace(tmpWS)
-			return 
+			# Replaces NANs with zeroes
+			ReplaceSpecialValues(InputWorkspace=final_result,OutputWorkspace=final_result,NaNValue="0",InfinityValue="0")
+			# Crop Workspace to remove leading and trailing zeroes
+			if CORRECTION_TYPE == '1D':
+				SANSUtility.StripEndZeroes(final_result)
+			return
 		
 		# Sum all spectra
 		SumSpectra(final_result,final_result)
@@ -405,13 +411,7 @@ try:
 		rupp = args[3]
 		# The workspace that we want to group is the output of the sample reduction
 		quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, rlow, rupp)
-		left = mtd.getMatrixWorkspace(quad_ws[0])
-		right = mtd.getMatrixWorkspace(quad_ws[1])
-		up = mtd.getMatrixWorkspace(quad_ws[2])
-		dn = mtd.getMatrixWorkspace(quad_ws[3])
-
-		residue = math.pow(left.readY(0)[0] - right.readY(0)[0], 2) + math.pow(up.readY(0)[0] - dn.readY(0)[0], 2)
-		return residue
+		return SANSUtility.CalculateResidue(quad_ws)
 
 	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 		global XVAR_PREV, YVAR_PREV, ITER_NUM
