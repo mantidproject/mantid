@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
@@ -22,11 +23,6 @@ using namespace Mantid::DataHandling;
 class IkedaCarpenterPV1DTest : public CxxTest::TestSuite
 {
 public:
-
-  ~IkedaCarpenterPV1DTest()
-  {
-    AnalysisDataService::Instance().remove("IkedaCarpenterPV1D_GaussMockData");
-  }
 
   void testInit()
   {
@@ -167,6 +163,8 @@ public:
     TS_ASSERT_DELTA( dummy, 50.0 ,0.001);
     dummy = alg2.getProperty("BG");
     TS_ASSERT_DELTA( dummy, 0.0 ,0.0001);
+
+    AnalysisDataService::Instance().remove("IkedaCarpenterPV1D_GaussMockData");
   }
 
 
