@@ -1038,8 +1038,13 @@ void Graph::updateSecondaryAxis(int axis)
 	if (!d_plot->axisEnabled(a))
 		return;
 
-	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
-	sc_engine->clone((ScaleEngine *)d_plot->axisScaleEngine(a));
+	/*ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+	sc_engine->clone((ScaleEngine *)d_plot->axisScaleEngine(a));*/
+
+	QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(axis);
+	ScaleEngine *sc_engine=dynamic_cast<ScaleEngine*>(qwtsc_engine);
+	if(sc_engine!=NULL)
+		sc_engine->clone(sc_engine);
 
 	d_plot->setAxisScaleDiv (axis, *d_plot->axisScaleDiv(a));
 	d_user_step[axis] = d_user_step[a];
@@ -1165,17 +1170,22 @@ void Graph::setScale(int axis, double start, double end, double step,
                     double stepBeforeBreak, double stepAfterBreak, int minTicksBeforeBreak,
 					int minTicksAfterBreak, bool log10AfterBreak, int breakWidth, bool breakDecoration)
 {
-	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
-	sc_engine->setBreakRegion(left_break, right_break);
-	sc_engine->setBreakPosition(breakPos);
-	sc_engine->setBreakWidth(breakWidth);
-	sc_engine->drawBreakDecoration(breakDecoration);
-	sc_engine->setStepBeforeBreak(stepBeforeBreak);
-	sc_engine->setStepAfterBreak(stepAfterBreak);
-	sc_engine->setMinTicksBeforeBreak(minTicksBeforeBreak);
-	sc_engine->setMinTicksAfterBreak(minTicksAfterBreak);
-	sc_engine->setLog10ScaleAfterBreak(log10AfterBreak);
-	sc_engine->setAttribute(QwtScaleEngine::Inverted, inverted);
+	//ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+	QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
+	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
+	if(sc_engine!=NULL)
+	{
+		sc_engine->setBreakRegion(left_break, right_break);
+		sc_engine->setBreakPosition(breakPos);
+		sc_engine->setBreakWidth(breakWidth);
+		sc_engine->drawBreakDecoration(breakDecoration);
+		sc_engine->setStepBeforeBreak(stepBeforeBreak);
+		sc_engine->setStepAfterBreak(stepAfterBreak);
+		sc_engine->setMinTicksBeforeBreak(minTicksBeforeBreak);
+		sc_engine->setMinTicksAfterBreak(minTicksAfterBreak);
+		sc_engine->setLog10ScaleAfterBreak(log10AfterBreak);
+		sc_engine->setAttribute(QwtScaleEngine::Inverted, inverted);
+	}
 	setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
 	
 // 	if (type == Graph::Log10)
@@ -1227,7 +1237,10 @@ void Graph::setScale(int axis, double start, double end, double step,
 void Graph::setAxisScale(int axis, double start, double end, int type, double step,
 				  int majorTicks, int minorTicks)
 {
-  ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+
+  //ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+	QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
+	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
   if( !sc_engine ) return;
 
   // If not specified, keep the same as now
@@ -4593,8 +4606,9 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   	c_type.resize(n_curves);
   	c_type[n_curves-1] = type; 
 
-    QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
-  	rightAxis->setColorBarEnabled(type != Contour);
+	QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
+	if(rightAxis==NULL) return 0;
+	rightAxis->setColorBarEnabled(type != Contour);
 	rightAxis->setColorBarEnabled(true);
 	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
 	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
@@ -4603,16 +4617,15 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
 	d_spectrogram->setupColorBarScaling();
 	d_plot->setAxisScale(QwtPlot::yRight,
-  	d_spectrogram->data().range().minValue(),
-  	d_spectrogram->data().range().maxValue());
-  	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
-	//d_plot->replot();
+		d_spectrogram->data().range().minValue(),
+		d_spectrogram->data().range().maxValue());
+	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
 	setSpectrogram(d_spectrogram);
-	 
 	//d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
-	 d_spectrogram->recount();
+	d_plot->replot();
+	d_spectrogram->recount();
 	d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
-	
+	d_plot->replot();
 	return d_spectrogram;
 }
 

@@ -3165,10 +3165,14 @@ void AxesDialog::scaleTypeChanged(int scaleType)
 			else
 			{type=MantidColorMap::Log10;
 			}
+			
 			spectrogram->mutableColorMap().changeScaleType(type);
 			setupColorBarScaling(type);
 			spectrogram->setScaleType(type);
+			Plot *d_plot = d_graph->plotWidget();
+			d_plot->replot();
 			spectrogram->recount();
+			d_plot->replot();
 		}
 	}
 	//if(m_bendValueChanged)

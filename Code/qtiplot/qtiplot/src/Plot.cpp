@@ -192,10 +192,14 @@ void Plot::drawItems (QPainter *painter, const QRect &rect,
 		if (!axisEnabled(i))
 			continue;
 
-		ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(i);
+		//ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(i);
+		const QwtScaleEngine *qwtsc_engine=axisScaleEngine(i);
+		const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
+		if(sc_engine!=NULL)
+		{	
 		if (!sc_engine->hasBreak())
 			continue;
-
+	
 		QwtScaleMap m = map[i];
 		int lb = m.transform(sc_engine->axisBreakLeft());
 		int rb = m.transform(sc_engine->axisBreakRight());
@@ -209,6 +213,7 @@ void Plot::drawItems (QPainter *painter, const QRect &rect,
 			painter->setClipRegion(cr.subtracted(QRegion(start, rect.y(), abs(end - start), rect.height())), Qt::IntersectClip);
 		else if (i == QwtPlot::yLeft || i == QwtPlot::yRight)
 			painter->setClipRegion(cr.subtracted(QRegion(rect.x(), end, rect.width(), abs(end - start))), Qt::IntersectClip);
+		}
 	}
 
 	QwtPlot::drawItems(painter, rect, map, pfilter);
@@ -367,46 +372,50 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
 }
 
 void Plot::drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const
-{
-    ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(axis);
-    if (!sc_engine->hasBreak() || !sc_engine->hasBreakDecoration())
-        return;
+{	
+    //ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(axis);
+	const QwtScaleEngine *qwtsc_engine=axisScaleEngine(axis);
+	const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
+	if(sc_engine!=NULL)
+	{	if (!sc_engine->hasBreak() || !sc_engine->hasBreakDecoration())
+			return;
 
-    painter->save();
+		painter->save();
 
-	QColor color = axisWidget(axis)->palette().color(QPalette::Active, QColorGroup::Foreground);
-	painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
+		QColor color = axisWidget(axis)->palette().color(QPalette::Active, QColorGroup::Foreground);
+		painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
 
-    int left = map.transform(sc_engine->axisBreakLeft());
-    int right = map.transform(sc_engine->axisBreakRight());
-    int x, y;
-	int len = majTickLength;
-    switch (axis){
-        case QwtPlot::yLeft:
+		int left = map.transform(sc_engine->axisBreakLeft());
+		int right = map.transform(sc_engine->axisBreakRight());
+		int x, y;
+		int len = majTickLength;
+		switch (axis){
+		case QwtPlot::yLeft:
 			x = rect.left() - 1;
-            QwtPainter::drawLine(painter, x, left, x + len, left - len);
-            QwtPainter::drawLine(painter, x, right, x + len, right - len);
-        break;
+			QwtPainter::drawLine(painter, x, left, x + len, left - len);
+			QwtPainter::drawLine(painter, x, right, x + len, right - len);
+			break;
 
-        case QwtPlot::yRight:
-            x = rect.right() + 1;
-            QwtPainter::drawLine(painter, x - len, left + len, x, left);
-            QwtPainter::drawLine(painter, x - len, right + len, x, right);
-        break;
+		case QwtPlot::yRight:
+			x = rect.right() + 1;
+			QwtPainter::drawLine(painter, x - len, left + len, x, left);
+			QwtPainter::drawLine(painter, x - len, right + len, x, right);
+			break;
 
-        case QwtPlot::xBottom:
+		case QwtPlot::xBottom:
 			y = rect.bottom() + 1;
 			QwtPainter::drawLine(painter, left, y, left + len, y - len);
-            QwtPainter::drawLine(painter, right, y, right + len, y - len);
-        break;
+			QwtPainter::drawLine(painter, right, y, right + len, y - len);
+			break;
 
-        case QwtPlot::xTop:
+		case QwtPlot::xTop:
 			y = rect.top() - 1;
-            QwtPainter::drawLine(painter, left - len, y + len, left, y);
-            QwtPainter::drawLine(painter, right - len, y + len, right, y);
-        break;
-    }
-	painter->restore();
+			QwtPainter::drawLine(painter, left - len, y + len, left, y);
+			QwtPainter::drawLine(painter, right - len, y + len, right, y);
+			break;
+		}
+		painter->restore();
+	}
 }
 
 void Plot::setAxesLinewidth(int width)

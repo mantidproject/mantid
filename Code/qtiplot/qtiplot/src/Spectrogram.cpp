@@ -972,6 +972,7 @@ void Spectrogram::updateForNewMaxData(const double new_max)
   {	  return;
   }
   mDataMaxValue = new_max;
+  plot()->replot();
   recount();
 }
 
@@ -985,6 +986,7 @@ void Spectrogram::updateForNewMinData(const double new_min)
   {	  return;
   }
   mDataMinValue = new_min;
+  plot()->replot();
   recount();
 }
 /**
