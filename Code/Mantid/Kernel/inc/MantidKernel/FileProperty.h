@@ -17,7 +17,7 @@ namespace Kernel
      load a file with a relative path. 
      
      When attempting to load a file this class handles searching the specified paths and, 
-     if found, the <code>value()</code>  a method returns the full path to the file. For 
+     if found, the <code>value()</code> method returns the full path to the file. For 
      saving, Mantid's default save directory is used when a relative path is encountered.
    */
 class DLLExport FileProperty : public PropertyWithValue<std::string>
@@ -29,8 +29,7 @@ public:
     // Note that the order here ensures that the correct boolean gets passed to the FileValidator.
     Save = 0,
     NoExistLoad = 1,
-    Load = 2,
-
+    Load = 2
   };
 
 public:
