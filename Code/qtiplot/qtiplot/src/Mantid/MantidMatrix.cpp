@@ -191,8 +191,8 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
     if (ws->axes() > 1)
     {
       const Mantid::API::Axis* const ax = ws->getAxis(1);
-      y_start = m_startRow;//(*ax)(m_startRow);
-      y_end   = m_endRow;//(*ax)(m_endRow);
+      y_start =(*ax)(m_startRow);
+      y_end   =(*ax)(m_endRow);
     }
 
     m_bk_color = QColor(128, 255, 255);
