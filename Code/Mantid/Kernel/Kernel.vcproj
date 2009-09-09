@@ -207,6 +207,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FileProperty.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FileValidator.cpp"
 				>
 			</File>
@@ -370,6 +374,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\Fast_Exponential.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\FileProperty.h"
 				>
 			</File>
 			<File
