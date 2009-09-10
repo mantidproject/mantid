@@ -2495,7 +2495,19 @@ bool AxesDialog::updatePlot()
 			breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
 			breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
 		}
-		bool hasBreak=false;
+		if(a==QwtPlot::yRight)
+		{	int type=getScaleType();
+			scaleTypeChanged(type);
+		}
+		else
+		{	d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
+				boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
+				boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
+				boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
+				boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
+			d_graph->notifyChanges();
+		}
+		/*bool hasBreak=false;
 		if( (breakLeft == breakRight) || (breakLeft == -DBL_MAX && breakRight == DBL_MAX))
 		{	hasBreak=false;
 		}
@@ -2515,7 +2527,7 @@ bool AxesDialog::updatePlot()
 			{	int type=getScaleType();
 				scaleTypeChanged(type);
 			}
-		}
+		}*/
 	}
 	else if (generalDialog->currentWidget() == gridPage)
 		updateGrid();
@@ -2780,7 +2792,7 @@ void AxesDialog::updateScale()
 
 		QwtScaleTransformation::Type scale_type = sc_engine->type();
 		boxMinorTicksBeforeBreak->clear();
-		if (scale_type == 0)
+		if (scale_type == QwtScaleTransformation::Log10)
 			boxMinorTicksBeforeBreak->addItems(QStringList()<<"0"<<"2"<<"4"<<"8");
 		else
 			boxMinorTicksBeforeBreak->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
@@ -3259,6 +3271,7 @@ void AxesDialog::setupColorBarScaling(int Type)
 	end = boxEnd->value();
 	
 	Plot *d_plot = d_graph->plotWidget();
+	if(!d_plot) return;
 	Spectrogram* spectrogram = d_graph->getSpectrogram();
 	if(!spectrogram) return;
 	
@@ -3275,6 +3288,7 @@ void AxesDialog::setupColorBarScaling(int Type)
 		}
 		// sets the  right axis scale engine to logscale engine
 		d_plot->setAxisScaleEngine(QwtPlot::yRight,logScaler);
+		//calculates the scale division
 		QwtScaleDiv scalDiv=logScaler->divideScale(logmin, end, boxMajorValue->value(),boxMinorValue->currentText().toInt());
 		
 		//rightAxis->setScaleDiv(logScaler->transformation(), logScaler->divideScale(logmin, end, boxMajorValue->value(),boxMinorValue->currentText().toInt()));
@@ -3283,7 +3297,7 @@ void AxesDialog::setupColorBarScaling(int Type)
 		//setting teh colormap
 		rightAxis->setColorMap(QwtDoubleInterval(start, end), spectrogram->getColorMap());
 		//d_plot->setAxisScale(QwtPlot::yRight,logmin,end);
-		// below line  disables autoscaling and sets the new scale division
+		// below line  disables autoscaling and sets the new scale division to plot object
 		d_plot->setAxisScaleDiv(QwtPlot::yRight,scalDiv);
 		
 	}
@@ -3291,7 +3305,7 @@ void AxesDialog::setupColorBarScaling(int Type)
 	{	// for linear scale transformation
 		boxMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
 		QwtLinearScaleEngine* linScaler=new QwtLinearScaleEngine();
-				// sets the  right axis scale engine to linearscale engine
+		// sets the  right axis scale engine to linearscale engine
 		d_plot->setAxisScaleEngine(QwtPlot::yRight,linScaler);
 		QwtScaleDiv scalDiv=linScaler->divideScale(start, end, boxMajorValue->value(),boxMinorValue->currentText().toInt());
 		rightAxis->setScaleDiv(linScaler->transformation(), scalDiv);
@@ -3315,40 +3329,48 @@ slot called when the  To spinbox value changed
 */
 void AxesDialog::endvalueChanged(double endVal)
 {
-	double start = 0.0, end = 0.0;
-	start = boxStart->value();
-	end = endVal;
-	Spectrogram* spectrogram = d_graph->getSpectrogram();
-	if(spectrogram==NULL) return;
-	 MantidColorMap::ScaleType scaleType =(MantidColorMap::ScaleType)getScaleType();
-	 MantidColorMap::ScaleType type ;
-	if(scaleType==1)
-		type=MantidColorMap::Linear;
-	else
-		type=MantidColorMap::Log10;
-	spectrogram->mutableColorMap().changeScaleType(type);
-	spectrogram->setScaleType(type);
-	setupColorBarScaling(type);
-    spectrogram->updateForNewMaxData(end);
+	int a = mapToQwtAxis(axesList->currentRow());
+	if(a==QwtPlot::yRight)
+	{
+		double start = 0.0, end = 0.0;
+		start = boxStart->value();
+		end = endVal;
+		Spectrogram* spectrogram = d_graph->getSpectrogram();
+		if(spectrogram==NULL) return;
+		MantidColorMap::ScaleType scaleType =(MantidColorMap::ScaleType)getScaleType();
+		MantidColorMap::ScaleType type ;
+		if(scaleType==1)
+			type=MantidColorMap::Linear;
+		else
+			type=MantidColorMap::Log10;
+		spectrogram->mutableColorMap().changeScaleType(type);
+		spectrogram->setScaleType(type);
+		setupColorBarScaling(type);
+		spectrogram->updateForNewMaxData(end);
+	}
 
 }
 void AxesDialog::startvalueChanged(double startVal)
 {
-	double start = 0.0, end = 0.0;
-	start = startVal;
-	end = boxEnd->value();
-	Spectrogram* spectrogram = d_graph->getSpectrogram();
-	if(spectrogram==NULL) return;
+	int a = mapToQwtAxis(axesList->currentRow());
+	if(a==QwtPlot::yRight)
+	{
+		double start = 0.0, end = 0.0;
+		start = startVal;
+		end = boxEnd->value();
+		Spectrogram* spectrogram = d_graph->getSpectrogram();
+		if(spectrogram==NULL) return;
 
-	MantidColorMap::ScaleType scaleType =(MantidColorMap::ScaleType)getScaleType();
-	 MantidColorMap::ScaleType type ;
-	if(scaleType==1)
-		type=MantidColorMap::Linear;
-	else
-		type=MantidColorMap::Log10;
-	spectrogram->mutableColorMap().changeScaleType(type);
-	setupColorBarScaling(type);
-	spectrogram->updateForNewMinData(start);
+		MantidColorMap::ScaleType scaleType =(MantidColorMap::ScaleType)getScaleType();
+		MantidColorMap::ScaleType type ;
+		if(scaleType==1)
+			type=MantidColorMap::Linear;
+		else
+			type=MantidColorMap::Log10;
+		spectrogram->mutableColorMap().changeScaleType(type);
+		setupColorBarScaling(type);
+		spectrogram->updateForNewMinData(start);
+	}
 	
   }
 void AxesDialog::showAxis(int axis, int type, const QString& labelsColName, bool axisOn,
