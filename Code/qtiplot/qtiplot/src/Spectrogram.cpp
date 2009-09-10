@@ -929,20 +929,19 @@ void Spectrogram::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWork
 	// colorlist[idx] = mColorMap.getColor(c_index);
     
 	mantidMap.setColors(mColorMap.getColor(c_index),idx);
-	setColorMap(mantidMap);
-	
-  	/*
+	/*
 	QRgb qrgb=mColorMap.rgb(user_interval, *val_itr);
 	QColor qclr(qrgb);
 	color_map.addColorStop(idx, qclr);*/
+		
   }
-  /* QwtColorMap& qwtMap = dynamic_cast<QwtLinearColorMap&>(color_map);
+   /* QwtColorMap& qwtMap = dynamic_cast<QwtLinearColorMap&>(color_map);
    QwtColorMap &qwtMap=dynamic_cast<MantidColorMap&>(color_map);
    mColorMap=qwtMap;
    std::cout<<" qwtmap is "<<&qwtMap<<std::endl;
    setCustomColorMap(qwtMap);*/
-  
-  }
+  setColorMap(mantidMap);
+}
 
 
 double Spectrogram::integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wksp_index)
