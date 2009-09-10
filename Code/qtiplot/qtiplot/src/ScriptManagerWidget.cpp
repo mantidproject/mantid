@@ -858,7 +858,7 @@ FindReplaceDialog::FindReplaceDialog(ScriptManagerWidget *manager, bool replace,
   find_options->addButton(boxSearchBackwards);
 
   boxWrapAround = new QCheckBox(tr("&Wrap around"));
-  boxWrapAround->setChecked(false);
+  boxWrapAround->setChecked(true);
   bottomLayout->addWidget(boxWrapAround, 1, 1);
   find_options->addButton(boxWrapAround);
 
