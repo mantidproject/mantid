@@ -161,7 +161,7 @@ class PythonTestRunner(object):
         self._framework_path = ''
         for p in sys.path:
             if 'Framework' in p:
-                self._framework_path =  os.path.abspath(p)
+                self._framework_path =  os.path.abspath(p).replace('\\','/')
         # A string to prefix the code with
         self._code_prefix = ''
         self._using_escape = need_escaping
@@ -174,10 +174,10 @@ class PythonTestRunner(object):
 
     def setMantidDir(self, mtdheader_dir):
         # Store the path to MantidPythonAPI
-        self._mtdpy_header = os.path.abspath(mtdheader_dir + '/MantidHeader.py')
+        self._mtdpy_header = os.path.abspath(mtdheader_dir + '/MantidHeader.py').replace('\\','/')
 
     def setTestDir(self, test_dir):
-        self._test_dir = os.path.abspath(test_dir)
+        self._test_dir = os.path.abspath(test_dir).replace('\\','/')
 
     def createCodePrefix(self):
         if self._using_escape == True:
@@ -185,15 +185,16 @@ class PythonTestRunner(object):
         else:
             esc = ''
 
-        self._code_prefix = 'import sys;' + \
-            'sys.path.append(' + esc + '"' + os.path.dirname(self._mtdpy_header) + esc + '");' + \
-            'sys.path.append(' + esc + '"' + self._framework_path + esc + '");' + \
-            'sys.path.append(' + esc + '"' + self._test_dir + esc + '");'
-        # On POSIX systems the mantidsimple file is placed in $HOME/.mantid
+        self._code_prefix = 'import sys;'
+        # On POSIX systems the mantidsimple file is placed in $HOME/.mantid, on windows it will be the current directory
         if os.name == 'posix':
             self._code_prefix += 'sys.path.append(' + esc + '"' + os.environ['HOME'] + '/.mantid' + esc + '");'
+        else:
+            self._code_prefix += 'sys.path.append(\'.\');'
+        self._code_prefix += 'sys.path.append(' + esc + '"' + os.path.dirname(self._mtdpy_header) + esc + '");' + \
+        'sys.path.append(' + esc + '"' + self._framework_path + esc + '");' + \
+        'sys.path.append(' + esc + '"' + self._test_dir + esc + '");'
         
-
     def getCodePrefix(self):
         '''
         Return a prefix to the code that will be executed
@@ -205,7 +206,6 @@ class PythonTestRunner(object):
         Spawn a new process and run the given command within it
         '''
         proc = subprocess.Popen(cmd, shell=True, stdout = subprocess.PIPE)
-        
         std_out = proc.communicate()[0]
         return proc.returncode, std_out
 
@@ -231,7 +231,7 @@ class PythonConsoleRunner(PythonTestRunner):
         '''
         Run the code in a new instance of a python interpreter
         '''
-        return self.spawnSubProcess('python -c ' + '"' + pycode + '"')
+        return self.spawnSubProcess('python -c \"' + self.getCodePrefix() + pycode + '\"')
 
 #########################################################################
 # A runner class to execute the tests on using the command line interface
@@ -242,9 +242,12 @@ class MantidPlotTestRunner(PythonTestRunner):
     MantidPlot
     '''
     
-    def __init__(self, mtdplot_bin):
+    def __init__(self, mtdplot_dir):
         PythonTestRunner.__init__(self)
-        self._mtdplot_bin = os.path.abspath(mtdplot_bin)
+        mtdplot_bin = mtdplot_dir + '/MantidPlot'
+        if os.name == 'nt':
+            mtdplot_bin += '.exe'
+        self._mtdplot_bin = os.path.abspath(mtdplot_bin).replace('\\','/')
         
     def start(self, pycode):
         '''
@@ -252,12 +255,23 @@ class MantidPlotTestRunner(PythonTestRunner):
         '''
         # The code needs wrapping in a temporary file so that it can be passed to MantidPlot,
         # along with the redirection of the scripting output to stdout
-        wrapper = tempfile.NamedTemporaryFile(suffix='.py')
-        wrapper.write('import sys;sys.stdout = sys.__stdout__;' + pycode)
-        # Due to buffering, the text isn't actually written to the file until you call flush. (On Linux anyway)
-        wrapper.flush()
-        return self.spawnSubProcess(self._mtdplot_bin + ' -xq ' + wrapper.name) 
-        
+        # On Windows, just using the file given back by tempfile doesn't work as the name is mangled to a short version where
+        # all characters after a space are replace by ~. So on windows use put the file in the current directory
+        if os.name == 'nt':
+            loc = '.'
+        else:
+            loc = ''
+        # MG 11/09/2009: I tried the simple tempfile.NamedTemporaryFile() method but this didn't work
+        # on Windows so I had to be a little long winded about it
+        fd, tmpfilepath = tempfile.mkstemp(suffix = '.py', dir = loc, text=True)
+            
+        os.write(fd, 'import sys;sys.stdout = sys.__stdout__;' + self.getCodePrefix() + pycode)
+        retcode, output = self.spawnSubProcess(self._mtdplot_bin + ' -xq ' + tmpfilepath) 
+        # Remove the temporary file
+        os.close(fd)
+        os.remove(tmpfilepath)
+        return retcode, output
+                
 #########################################################################
 # A class to tie together a test and its results
 #########################################################################
@@ -281,8 +295,7 @@ class TestSuite(object):
         print time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fullname
 
         # Construct the code to execute in a separate sub process
-        pycode = runner.getCodePrefix() + 'import ' + self._modname + ';'
-        pycode += self._fullname + '().execute()'
+        pycode = 'import ' + self._modname + ';' + self._fullname + '().execute()'
         # Start the new process
         retcode, output = runner.start(pycode)
         all_lines = output.split('\n')
@@ -313,10 +326,10 @@ class TestManager(object):
         
         self._runner = runner
         self._reporter = reporter
-        self._test_dir = os.path.abspath(test_dir)
+        self._test_dir = os.path.abspath(test_dir).replace('\\','/')
 
         # Pass the Mantid path (the location of the MantidHeader.py file) to the runner class
-        runner.setMantidDir(os.path.abspath(mtdheader_dir))
+        runner.setMantidDir(mtdheader_dir)
         runner.setTestDir(self._test_dir)
         runner.createCodePrefix();
 
@@ -324,7 +337,7 @@ class TestManager(object):
         sys.path.append(self._test_dir)
 
         # Init mantid
-        sys.path.append(os.path.abspath(mtdheader_dir))
+        sys.path.append(os.path.abspath(mtdheader_dir).replace('\\','/'))
         if os.name == 'posix':
             sys.path.append(os.environ['HOME'] + '/.mantid')
         execfile(runner._mtdpy_header)
