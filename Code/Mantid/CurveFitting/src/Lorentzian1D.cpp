@@ -67,14 +67,14 @@ void Lorentzian1D::functionDeriv(const double* in, Jacobian* out, const double* 
     const double& hwhm = in[4];
 
     for (int i = 0; i < nData; i++) {
-        double s = yErrors[i];
+        double invE = 1/yErrors[i];
         double diff = xValues[i]-peakCentre;
         double invDenominator =  1/((diff*diff+hwhm*hwhm));
-        out->set(i,0, 1/s);
-        out->set(i,1, xValues[i]/s);
-        out->set(i,2, hwhm*hwhm*invDenominator/s);
-        out->set(i,3, 2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator);
-        out->set(i,4, height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator/s);
+        out->set(i,0, invE);
+        out->set(i,1, xValues[i]*invE);
+        out->set(i,2, hwhm*hwhm*invDenominator*invE);
+        out->set(i,3, 2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator*invE);
+        out->set(i,4, height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator*invE);
     }
 }
 

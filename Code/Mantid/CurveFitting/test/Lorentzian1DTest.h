@@ -108,11 +108,11 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0002,0.0005);
     dummy = alg2.getProperty("BG0");
-    TS_ASSERT_DELTA( dummy, 3.0192,0.002);
+    TS_ASSERT_DELTA( dummy, 3.017,0.002);
     dummy = alg2.getProperty("BG1");
     TS_ASSERT_DELTA( dummy, 0.0 ,0.005);
     dummy = alg2.getProperty("Height");
-    TS_ASSERT_DELTA( dummy, 100.66 ,0.01);
+    TS_ASSERT_DELTA( dummy, 100.69 ,0.01);
     dummy = alg2.getProperty("PeakCentre");
     TS_ASSERT_DELTA( dummy, 11.20 ,0.01);
     dummy = alg2.getProperty("HWHM");

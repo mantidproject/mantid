@@ -78,6 +78,7 @@ void BackToBackExponential1D::functionDeriv(const double* in, Jacobian* out, con
 
     double s2 = s*s;
     for (int i = 0; i < nData; i++) {
+        double invE = 1/yErrors[i];
         double diff = xValues[i]-x0;
 
         double e_a = exp(0.5*a*(a*s2+2*diff));
@@ -89,13 +90,13 @@ void BackToBackExponential1D::functionDeriv(const double* in, Jacobian* out, con
         double div_erfc_a = - exp( -(a*s2+diff)*(a*s2+diff)/(2*s2)+0.5*a*(a*s2+2.0*diff) ) * M_SQRT2/M_SQRTPI;
         double div_erfc_b = - exp( -(b*s2-diff)*(b*s2-diff)/(2*s2)+0.5*b*(b*s2-2.0*diff) ) * M_SQRT2/M_SQRTPI;
 
-        out->set(i,0, (e_a*erfc_a+e_b*erfc_b)/yErrors[i]);
-        out->set(i,1, I*( s*div_erfc_a + e_a*(a*s2+diff)*erfc_a )/yErrors[i]);
-        out->set(i,2, I*( s*div_erfc_b + e_b*(b*s2-diff)*erfc_b )/yErrors[i]);
-        out->set(i,3, I*( (-div_erfc_a+div_erfc_b)/s + b*e_b*erfc_b - a*e_a*erfc_a )/yErrors[i]);
+        out->set(i,0, (e_a*erfc_a+e_b*erfc_b)*invE);
+        out->set(i,1, I*( s*div_erfc_a + e_a*(a*s2+diff)*erfc_a )*invE);
+        out->set(i,2, I*( s*div_erfc_b + e_b*(b*s2-diff)*erfc_b )*invE);
+        out->set(i,3, I*( (-div_erfc_a+div_erfc_b)/s + b*e_b*erfc_b - a*e_a*erfc_a )*invE);
         out->set(i,4, I*( div_erfc_b*(b+diff/s2)+div_erfc_a*(a-diff/s2)
-              + b*b*e_b*s*erfc_b + a*a*e_a*s*erfc_a )/yErrors[i]);
-        out->set(i,5, 1/yErrors[i]);
+              + b*b*e_b*s*erfc_b + a*a*e_a*s*erfc_a )*invE);
+        out->set(i,5, invE);
 
     }
 }

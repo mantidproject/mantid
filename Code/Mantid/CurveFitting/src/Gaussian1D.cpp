@@ -88,10 +88,10 @@ void Gaussian1D::functionDeriv(const double* in, Jacobian* out, const double* xV
     const double& weight = in[3];
 
     for (int i = 0; i < nData; i++) {
-        double s = yErrors[i];
+        double invE = 1/yErrors[i];
         double diff = xValues[i]-peakCentre;
-        double e = exp(-0.5*diff*diff*weight)/s;
-        out->set(i,0, 1/s);
+        double e = exp(-0.5*diff*diff*weight)*invE;
+        out->set(i,0, invE);
         out->set(i,1, e);
         out->set(i,2, diff*height*e*weight);
         out->set(i,3, -0.5*diff*diff*height*e);

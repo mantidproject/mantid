@@ -93,11 +93,11 @@ void GaussianLinearBG1D::functionDeriv(const double* in, Jacobian* out, const do
     const double& weight = in[4];
 
     for (int i = 0; i < nData; i++) {
-        double s = yErrors[i];
+        double invE = 1/yErrors[i];
         double diff = xValues[i]-peakCentre;
-        double e = exp(-0.5*diff*diff*weight)/s;
-        out->set(i,0, 1/s);
-        out->set(i,1, xValues[i]/s);
+        double e = exp(-0.5*diff*diff*weight)*invE;
+        out->set(i,0, invE);
+        out->set(i,1, xValues[i]*invE);
         out->set(i,2, e);
         out->set(i,3, diff*height*e*weight);
         out->set(i,4, -0.5*diff*diff*height*e);

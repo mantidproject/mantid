@@ -123,16 +123,16 @@ public:
     alg2.setPropertyValue("WorkspaceIndex","1");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","150");
-
+    alg2.setPropertyValue("I", "95000");
     alg2.setPropertyValue("Alpha0", "1.597107");
     alg2.setPropertyValue("Alpha1", "1.496805");
     alg2.setPropertyValue("Beta0", "31.891718");
     alg2.setPropertyValue("Kappa", "46.025921");
-    alg2.setPropertyValue("SigmaSquared", "90.0");
+    alg2.setPropertyValue("SigmaSquared", "100.0"); //"90.0");
     //alg2.setPropertyValue("Gamma", "1.0");
     //alg2.setPropertyValue("Eta", "0.0");
-    alg2.setPropertyValue("X0", "50.0");
-    alg2.setPropertyValue("Fix","BG, Alpha0, Alpha1, Beta0, X0, Kappa, Gamma, Eta");
+    alg2.setPropertyValue("X0", "45.0");
+    alg2.setPropertyValue("Fix","BG, Alpha0, Alpha1, SigmaSquared, Beta0, Kappa, Gamma, Eta");
 
 
     // execute fit
@@ -145,6 +145,8 @@ public:
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.001);
+    dummy = alg2.getProperty("I");
+    TS_ASSERT_DELTA( dummy, 100000 ,1);
     dummy = alg2.getProperty("Alpha0");
     TS_ASSERT_DELTA( dummy, 1.597107 ,0.0001);
     dummy = alg2.getProperty("Alpha1");
