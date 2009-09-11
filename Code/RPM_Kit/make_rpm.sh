@@ -59,17 +59,17 @@ else
     svn_version="$svn_rev"
     echo "Exporing mantid source revision $svn_rev from subversion ..."
     echo "Directory structure ..."
-    svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/RPM_Kit/Mantid Mantid-$mantid_version 
+    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/RPM_Kit/Mantid Mantid-$mantid_version; do echo "Retrying svn"; rm -fr Mantid-$mantid_version; sleep 30; done
 #
     cd Mantid-$mantid_version
     echo "Images ..."
-    svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Images Images
+    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Images Images; do echo "Retrying svn"; rm -fr Images; sleep 30; done
     echo "MantidPlot ..."
-    svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/qtiplot Code/qtiplot
+    while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/qtiplot Code/qtiplot; do echo "Retrying svn"; rm -fr Code/qtiplot; sleep 30; done
     echo "src ..."
-    svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Code/Mantid Code/Mantid
+    while ! svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Code/Mantid Code/Mantid; do echo "Retrying svn"; rm -fr Code/Mantid; sleep 30; done
     echo "instrument ..."
-    svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Test/Instrument instrument
+    while ! svn -q --non-interactive export --force -r "$svn_rev" $mantid_svn/Test/Instrument instrument; do echo "Retrying svn"; rm -fr instrument; sleep 30; done
     cd ..
 fi
 #mantid_release="0.`date +%Y%m%d`svnR$svn_version"
