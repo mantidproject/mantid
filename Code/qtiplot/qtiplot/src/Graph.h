@@ -176,6 +176,8 @@ class Graph: public QWidget //QwtPlot //QWidget
 		void setSpectrogram(Spectrogram* spectrogram )
 		{ m_spectrogram=spectrogram;
 		}
+		///seeting a boolean flag to when the intensity(start and end values) changed
+		void changeIntensity(bool bIntensityChanged);
 	
 	public slots:
 		//! Accessor method for #d_plot.

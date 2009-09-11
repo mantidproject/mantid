@@ -1038,13 +1038,15 @@ void Graph::updateSecondaryAxis(int axis)
 	if (!d_plot->axisEnabled(a))
 		return;
 
-	/*ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
-	sc_engine->clone((ScaleEngine *)d_plot->axisScaleEngine(a));*/
+	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+	sc_engine->clone((ScaleEngine *)d_plot->axisScaleEngine(a));
 
-	QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(axis);
+	/*QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(axis);
 	ScaleEngine *sc_engine=dynamic_cast<ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
+	{
 		sc_engine->clone(sc_engine);
+	}*/
 
 	d_plot->setAxisScaleDiv (axis, *d_plot->axisScaleDiv(a));
 	d_user_step[axis] = d_user_step[a];
@@ -1170,11 +1172,11 @@ void Graph::setScale(int axis, double start, double end, double step,
                     double stepBeforeBreak, double stepAfterBreak, int minTicksBeforeBreak,
 					int minTicksAfterBreak, bool log10AfterBreak, int breakWidth, bool breakDecoration)
 {
-	//ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
-	QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
+	 ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+	/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
 	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
-	{
+	{*/
 		sc_engine->setBreakRegion(left_break, right_break);
 		sc_engine->setBreakPosition(breakPos);
 		sc_engine->setBreakWidth(breakWidth);
@@ -1185,7 +1187,7 @@ void Graph::setScale(int axis, double start, double end, double step,
 		sc_engine->setMinTicksAfterBreak(minTicksAfterBreak);
 		sc_engine->setLog10ScaleAfterBreak(log10AfterBreak);
 		sc_engine->setAttribute(QwtScaleEngine::Inverted, inverted);
-	}
+	//}
 	setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
 	
 // 	if (type == Graph::Log10)
@@ -1238,10 +1240,11 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 				  int majorTicks, int minorTicks)
 {
 
-  //ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
-	QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
-	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
+  ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
+	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);*/
   if( !sc_engine ) return;
+  double minstart=0.0;
 
   // If not specified, keep the same as now
   if( type < 0 ) type = axisType(axis);
@@ -1254,25 +1257,61 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
       QwtDoubleInterval intv = axisBoundingInterval(axis);
       if (start < end) start = intv.minValue();
       else end = intv.minValue();
+	  if(start<1.0)
+	  {
+		  minstart =1.0;
+	  }
+	  else if (start >=1.0)
+	  {	  minstart=start;
+	  }
     }
+	else 
+		minstart=start;
   } 
   else
   {
     sc_engine->setType(QwtScaleTransformation::Linear);
+	minstart=start;
   }
 
   int max_min_intervals = minorTicks;
   if (minorTicks == 1) max_min_intervals = 3;
   if (minorTicks > 1) max_min_intervals = minorTicks + 1;
-  
-  QwtScaleDiv div = sc_engine->divideScale (QMIN(start, end), QMAX(start, end), majorTicks, max_min_intervals, step);
+  QwtScaleDiv div = sc_engine->divideScale (QMIN(minstart, end), QMAX(minstart, end), majorTicks, max_min_intervals, step);
   d_plot->setAxisMaxMajor (axis, majorTicks);
   d_plot->setAxisMaxMinor (axis, minorTicks);
 
   d_plot->setAxisScaleDiv (axis, div);
+  for (int i=0; i<n_curves; i++){
+	  QwtPlotItem *it = plotItem(i);
+	  if (!it)
+		  continue;
+	  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+		  Spectrogram *sp = (Spectrogram *)it;
+		  if(sp)
+		  {
+			  QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
+			  if(rightAxis)
+			  {
+				  MantidColorMap::ScaleType type1 ;
+				  if(type==0)
+				  {	  type1=MantidColorMap::Linear;
+				  }
+				  else
+				  {	  type1=MantidColorMap::Log10;
+				  }
+				  sp->mutableColorMap().changeScaleType(type1);
+				  rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
+				  sp->setColorMap(sp->getColorMap());
+				  if(sp->isIntensityChanged())
+					  sp->changeIntensity( start,end);
+			  }
+		  }
+	  }
+  }
   d_zoomer[0]->setZoomBase();
     //below code is commented as it was zooming the right color  axis on scaling
-  // d_zoomer[1]->setZoomBase();
+  d_zoomer[1]->setZoomBase();
 
   d_user_step[axis] = step;
 
@@ -4609,23 +4648,23 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 	QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
 	if(rightAxis==NULL) return 0;
 	rightAxis->setColorBarEnabled(type != Contour);
-	rightAxis->setColorBarEnabled(true);
+	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
 	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
 	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
 	d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
 	d_spectrogram->setDefaultColorMap();
-	rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
-	d_spectrogram->setupColorBarScaling();
+	rightAxis->setColorMap(d_spectrogram->data().range(),d_spectrogram->mutableColorMap());
+	//d_spectrogram->setupColorBarScaling();
 	d_plot->setAxisScale(QwtPlot::yRight,
 		d_spectrogram->data().range().minValue(),
 		d_spectrogram->data().range().maxValue());
-	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
+	
 	setSpectrogram(d_spectrogram);
 	//d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
-	d_plot->replot();
-	d_spectrogram->recount();
+	//d_plot->replot();
+	//d_spectrogram->recount();
 	d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
-	d_plot->replot();
+	//d_plot->replot();
 	return d_spectrogram;
 }
 
@@ -5129,5 +5168,27 @@ void Graph::loadSettings()
   m_spectrogram->mutableColorMap().changeScaleType(type);
   
   settings.endGroup();
+}
+/*
+     Sets the spectrogram intensity changed boolean flag
+*/
+void Graph::changeIntensity(bool bIntensityChanged)
+{
+	/*if(m_spectrogram)
+	{
+		m_bIntensityChanged=bIntensityChanged;
+	}*/
+	for (int i=0; i<n_curves; i++){
+		QwtPlotItem *it = plotItem(i);
+		if (!it)
+			continue;
+		if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+            Spectrogram *sp = (Spectrogram *)it;
+			if(sp)
+			{	sp->setIntensityChange(bIntensityChanged);
+			}
+           
+        }
+	}
 }
 

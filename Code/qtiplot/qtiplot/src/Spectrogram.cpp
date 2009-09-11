@@ -107,7 +107,7 @@ d_labels_align(Qt::AlignHCenter),
 m_ScaleType(MantidColorMap::Linear),mWorkspaceSptr(workspace),
 mColorMap(),mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX), //mDataMinValue(minz), mDataMaxValue(maxz), 
 mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), 
-mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX),m_nRows(nrows),m_nColumns(ncols),mScaledValues(0)
+mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX),m_nRows(nrows),m_nColumns(ncols),mScaledValues(0),m_bIntensityChanged(false)
 {
 	setTitle("UserHelperFunction");
 	setData(FunctionData(f,nrows,ncols,bRect,minz,maxz));
@@ -993,9 +993,22 @@ void Spectrogram::updateForNewMinData(const double new_min)
  */
 void Spectrogram::recount()
 {
-   calculateColorCounts(mWorkspaceSptr);
+   //calculateColorCounts(mWorkspaceSptr);
  }
-
+/*
+changes the intensity of the colors
+*/
+void Spectrogram::changeIntensity( double start,double end)
+{
+ setData(FunctionData(d_funct,m_nRows,m_nColumns,boundingRect(),start,end));
+}
+void Spectrogram::setIntensityChange(bool on)
+{
+	 m_bIntensityChanged=on;
+}
+bool Spectrogram::isIntensityChanged()
+{ return m_bIntensityChanged;
+}
 
 
 

@@ -1280,7 +1280,7 @@ void AxesDialog::initScalesPage()
 	boxAxesBreaks = new QGroupBox(tr("Show Axis &Break"));
 	boxAxesBreaks->setCheckable(true);
 	boxAxesBreaks->setChecked(false);
-	boxAxesBreaks->setEnabled (false);
+	//boxAxesBreaks->setEnabled (false);
 
 	QGridLayout * breaksLayout = new QGridLayout(boxAxesBreaks);
 	boxBreakDecoration = new QCheckBox(tr("Draw Break &Decoration"));
@@ -2450,14 +2450,7 @@ bool AxesDialog::updatePlot()
 		} else {
 		    start = boxStart->value();
             end = boxEnd->value();
-		/*	if(m_bscaleTypeChanged)
-			{
-				int type=getScaleType();
-				scaleTypeChanged(type);
-				return true ;
-			}*/
-					
-		}
+			}
         
 		double step = 0.0;
         if (btnStep->isChecked()){
@@ -2495,18 +2488,19 @@ bool AxesDialog::updatePlot()
 			breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
 			breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
 		}
-		if(a==QwtPlot::yRight)
+		/*if(a==QwtPlot::yRight)
 		{	int type=getScaleType();
 			scaleTypeChanged(type);
 		}
 		else
-		{	d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
+		{	*/
+			d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
 				boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
 				boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
 				boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
 				boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
 			d_graph->notifyChanges();
-		}
+		//}
 		/*bool hasBreak=false;
 		if( (breakLeft == breakRight) || (breakLeft == -DBL_MAX && breakRight == DBL_MAX))
 		{	hasBreak=false;
@@ -2819,19 +2813,21 @@ void AxesDialog::updateScale()
 
  	QwtValueList lst = scDiv->ticks (QwtScaleDiv::MajorTick);
 	boxMajorValue->setValue(lst.count());
-	if(a==QwtPlot::yRight)
-	{	if(d_graph)
-	{
-		Spectrogram* spectrogram = d_graph->getSpectrogram();
-		int scaleType=0;
-		if(spectrogram)
-		{   scaleType=spectrogram->getScaleType();
-		if(scaleType==1)
-			boxScaleType->setCurrentItem(0);
-		else 
-			boxScaleType->setCurrentItem(1);
-	}
-	}
+
+	/*if(a==QwtPlot::yRight)
+	{	
+		if(d_graph)
+		{
+			Spectrogram* spectrogram = d_graph->getSpectrogram();
+			int scaleType=0;
+			if(spectrogram)
+			{   scaleType=spectrogram->getScaleType();
+			if(scaleType==1)
+				boxScaleType->setCurrentItem(0);
+			else 
+				boxScaleType->setCurrentItem(1);
+			}
+	}*/
 	
 	if (d_graph->axisStep(a) != 0.0){
 		btnStep->setChecked(true);
@@ -2849,7 +2845,7 @@ void AxesDialog::updateScale()
 	}
    
 	
-	}
+	//}
 		       
 }
 
@@ -3144,7 +3140,7 @@ int AxesDialog::exec()
 
 void AxesDialog::updateMinorTicksList(int scaleType)
 {
-	QString scaleName=boxScaleType->currentText();
+	/*QString scaleName=boxScaleType->currentText();
 	int ScaleType1=0;
 	if(scaleName.compare("linear")==0)
 	{	ScaleType1=MantidColorMap::Linear;
@@ -3153,7 +3149,8 @@ void AxesDialog::updateMinorTicksList(int scaleType)
 	{ScaleType1=MantidColorMap::Log10;
 	}
 	setScaleType(ScaleType1);
-	m_bscaleTypeChanged=true;
+	m_bscaleTypeChanged=true;*/
+	
 	//scaleTypeChanged(scaleType);
 }
 void AxesDialog::setScaleType(int scaleType)
@@ -3166,7 +3163,7 @@ int AxesDialog::getScaleType() const
 }
 void AxesDialog::scaleTypeChanged(int scaleType)
 {
-	if(m_bscaleTypeChanged)
+	/*if(m_bscaleTypeChanged)
 	{	Spectrogram* spectrogram = d_graph->getSpectrogram();
 		if(spectrogram)
 		{
@@ -3186,46 +3183,8 @@ void AxesDialog::scaleTypeChanged(int scaleType)
 			spectrogram->recount();
 			d_plot->replot();
 		}
-	}
-	//if(m_bendValueChanged)
-	//{
-	//	std::cout<<"m_bendValueChanged called "<<std::endl;
-	//	Spectrogram* spectrogram = d_graph->getSpectrogram();
-	//	if(spectrogram==NULL) return;
-	//	double start = 0.0, end = 0.0;
-	//	end = boxEnd->value();
-	//	if(!m_bscaleTypeChanged)
-	//	{	
-	//		//start = boxStart->value();
-	//		////m_bendValueChanged=true;
-	//		//MantidColorMap::ScaleType scaleType =(MantidColorMap::ScaleType)getScaleType();
-	//		//MantidColorMap::ScaleType type ;
-	//		//if(scaleType==1)
-	//		//type=MantidColorMap::Linear;
-	//		//else
-	//		//type=MantidColorMap::Log10;
-	//		//spectrogram->mutableColorMap().changeScaleType(type);
-	//		//spectrogram->setScaleType(type);
-	//		//setupColorBarScaling(type);
-	//		//spectrogram->updateForNewMaxData(end);
-	//		changeEndValue();
-	//	}
-	//	else
-	//		spectrogram->updateForNewMaxData(end);
-	//}
-	//if(m_bstartValueChanged)
-	//{
-	//	Spectrogram* spectrogram = d_graph->getSpectrogram();
-	//	if(spectrogram==NULL) return;
-	//	double start = 0.0, end = 0.0;
-	//	start = boxStart->value();
-	//	if(!m_bscaleTypeChanged)
-	//	{
-	//		changeStartValue();
-	//	}
-	//	else
-	//		spectrogram->updateForNewMinData(start);
-	//}
+	}*/
+	
 	
 }
 //void AxesDialog::changeEndValue()
@@ -3329,7 +3288,10 @@ slot called when the  To spinbox value changed
 */
 void AxesDialog::endvalueChanged(double endVal)
 {
-	int a = mapToQwtAxis(axesList->currentRow());
+	if(d_graph)
+		d_graph->changeIntensity( true);
+	
+	/*int a = mapToQwtAxis(axesList->currentRow());
 	if(a==QwtPlot::yRight)
 	{
 		double start = 0.0, end = 0.0;
@@ -3347,12 +3309,17 @@ void AxesDialog::endvalueChanged(double endVal)
 		spectrogram->setScaleType(type);
 		setupColorBarScaling(type);
 		spectrogram->updateForNewMaxData(end);
-	}
+	}*/
 
 }
 void AxesDialog::startvalueChanged(double startVal)
 {
-	int a = mapToQwtAxis(axesList->currentRow());
+	if(d_graph)
+		d_graph->changeIntensity( true);
+	/*Spectrogram* spectrogram = d_graph->getSpectrogram();
+	spectrogram->changeIntesity( start,end);*/
+	
+	/*int a = mapToQwtAxis(axesList->currentRow());
 	if(a==QwtPlot::yRight)
 	{
 		double start = 0.0, end = 0.0;
@@ -3370,7 +3337,7 @@ void AxesDialog::startvalueChanged(double startVal)
 		spectrogram->mutableColorMap().changeScaleType(type);
 		setupColorBarScaling(type);
 		spectrogram->updateForNewMinData(start);
-	}
+	}*/
 	
   }
 void AxesDialog::showAxis(int axis, int type, const QString& labelsColName, bool axisOn,

@@ -138,6 +138,12 @@ public:
 	void setScaleType(int scaleType);
 	const QwtColorMap& getSpectrogramColormap();
 	int getScaleType() const;
+	/// change intensity of the colors
+	void changeIntensity( double start,double end);
+	///sets a boolan flag for intensity changes
+	void setIntensityChange(bool on);
+	/// returns boolan flag intensity change 
+	bool isIntensityChanged();
 	
 
 protected:
@@ -146,6 +152,7 @@ protected:
 	void createLabels();
 	
 	void calculateBinRange(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
+	
 
 	int m_ScaleType;
 
@@ -196,6 +203,8 @@ protected:
   /// Store a value between 0->255 for each of the integrated spectra.
   std::vector<unsigned char> mScaledValues;
   boost::shared_ptr<Mantid::API::MatrixWorkspace> mWorkspaceSptr;
+  /// boolean flag to indicate intensity changed
+  bool m_bIntensityChanged;
   //static Mantid::Kernel::Logger &g_log;
 };
 
@@ -272,6 +281,7 @@ private:
 
 	//! Y axis bottom value in the data matrix
 	double y_start;
+	 
 };
 
 class FunctionData: public QwtRasterData

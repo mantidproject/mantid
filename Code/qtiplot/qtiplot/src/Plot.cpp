@@ -192,11 +192,11 @@ void Plot::drawItems (QPainter *painter, const QRect &rect,
 		if (!axisEnabled(i))
 			continue;
 
-		//ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(i);
-		const QwtScaleEngine *qwtsc_engine=axisScaleEngine(i);
+		ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(i);
+		/*const QwtScaleEngine *qwtsc_engine=axisScaleEngine(i);
 		const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
 		if(sc_engine!=NULL)
-		{	
+		{	*/
 		if (!sc_engine->hasBreak())
 			continue;
 	
@@ -213,7 +213,7 @@ void Plot::drawItems (QPainter *painter, const QRect &rect,
 			painter->setClipRegion(cr.subtracted(QRegion(start, rect.y(), abs(end - start), rect.height())), Qt::IntersectClip);
 		else if (i == QwtPlot::yLeft || i == QwtPlot::yRight)
 			painter->setClipRegion(cr.subtracted(QRegion(rect.x(), end, rect.width(), abs(end - start))), Qt::IntersectClip);
-		}
+		//}
 	}
 
 	QwtPlot::drawItems(painter, rect, map, pfilter);
@@ -373,11 +373,12 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
 
 void Plot::drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const
 {	
-    //ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(axis);
-	const QwtScaleEngine *qwtsc_engine=axisScaleEngine(axis);
+    ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(axis);
+	/*const QwtScaleEngine *qwtsc_engine=axisScaleEngine(axis);
 	const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
-	{	if (!sc_engine->hasBreak() || !sc_engine->hasBreakDecoration())
+	{*/	
+		if (!sc_engine->hasBreak() || !sc_engine->hasBreakDecoration())
 			return;
 
 		painter->save();
@@ -415,7 +416,7 @@ void Plot::drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &ma
 			break;
 		}
 		painter->restore();
-	}
+	//}
 }
 
 void Plot::setAxesLinewidth(int width)

@@ -196,11 +196,11 @@ QwtText ScaleDraw::label(double value) const
 			QwtValueList ticks = scDiv.ticks (QwtScaleDiv::MajorTick);
 
 			double break_offset = 0;
-			//ScaleEngine *se = (ScaleEngine *)d_plot->axisScaleEngine(axis());
-			QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
+			ScaleEngine *se = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+			/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
 			ScaleEngine *se =dynamic_cast<ScaleEngine*>(qwtsc_engine);
 			if(se!=NULL)
-			{
+			{*/
 				bool inverted = se->testAttribute(QwtScaleEngine::Inverted);
 				if(se->hasBreak()){
 					double lb = se->axisBreakLeft();
@@ -249,7 +249,7 @@ QwtText ScaleDraw::label(double value) const
 					return QwtText(d_text_labels[index]);
 				else
 					return QwtText();
-			}
+			//}
 		break;
 		}
 	}
@@ -260,18 +260,19 @@ void ScaleDraw::drawLabel(QPainter *painter, double value) const
 {
     if (!d_plot)
         return;
-    //ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
-	QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
+    ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+	/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
     ScaleEngine *sc_engine =dynamic_cast< ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
-	{	if (sc_engine->hasBreak()){
+	{*/	
+		if (sc_engine->hasBreak()){
 			bool invertedScale = sc_engine->testAttribute(QwtScaleEngine::Inverted);
 			if (invertedScale && sc_engine->axisBreakRight() == value)
 				return;
 			if (!invertedScale && sc_engine->axisBreakLeft() == value)
 				return;
 		}
-	}
+	//}
 
 		QwtText lbl = tickLabel(painter->font(), value);
 		if (lbl.isEmpty())
@@ -382,11 +383,11 @@ int ScaleDraw::axis() const
 
 void ScaleDraw::drawTick(QPainter *p, double value, int len) const
 {
-	//ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
-	QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
+	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+	/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
     ScaleEngine *sc_engine =dynamic_cast< ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
-	{
+	{*/
 		if (sc_engine->hasBreak()){
 			int align = alignment();
 			bool invertedScale = sc_engine->testAttribute(QwtScaleEngine::Inverted);
@@ -402,7 +403,7 @@ void ScaleDraw::drawTick(QPainter *p, double value, int len) const
 					return;
 			}
 		}
-	}
+	//}
 		 QwtScaleDiv scDiv = scaleDiv();
 		 QwtValueList majTicks = scDiv.ticks(QwtScaleDiv::MajorTick);
 		 if (majTicks.contains(value) && (d_majTicks == In || d_majTicks == None))
@@ -427,11 +428,11 @@ void ScaleDraw::draw(QPainter *painter, const QPalette& palette) const
 
 void ScaleDraw::drawBreak(QPainter *painter) const
 {
-	//ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
-	const QwtScaleEngine * qwtsc_engine=d_plot->axisScaleEngine(axis());
+	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+	/*const QwtScaleEngine * qwtsc_engine=d_plot->axisScaleEngine(axis());
 	const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
-	{
+	{*/
 		if (!sc_engine->hasBreak() || !sc_engine->hasBreakDecoration())
 			return;
 
@@ -484,16 +485,16 @@ void ScaleDraw::drawBreak(QPainter *painter) const
 
 		QwtPainter::setMetricsMap(metricsMap); // restore metrics map
 		painter->restore();
-	}
+	//}
 }
 
 void ScaleDraw::drawBackbone(QPainter *painter) const
 {
-    //ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
-	QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
+    ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis());
+	/*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis());
 	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
-	{
+	{*/
 		if (!sc_engine->hasBreak()){
 			const int len = length();
 			const int bw = painter->pen().width();
@@ -574,7 +575,7 @@ void ScaleDraw::drawBackbone(QPainter *painter) const
 			QwtPainter::drawLine(painter, rb, aux, pos.x() + len, aux);
 			break;
 		}
-	}
+	//}
 }
 
 void ScaleDraw::setDayFormat(NameFormat format)
