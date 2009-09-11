@@ -290,11 +290,10 @@ void PeakFitDialog::fitPeaks()
         dh = peaks[i].height;
     dh /= 100.;
 
-    double aConst = 1./(2.*sqrt(2.*log(2.)));
-
+    // Loop over the selected peaks
     for(int i=0;i<peaks.size();i++)
     {
-      if ( i > 0 )
+      if ( i > 0 )// create a new algorithm for each peak
       {
         alg = createAlgorithm();
         alg->initialize();
@@ -305,6 +304,7 @@ void PeakFitDialog::fitPeaks()
           alg->setPropertyValue("Fix",fixed.toStdString());
       }
 
+      // set the parameters which are not peak centre, height or width
       for(int j=0;j<paramCount();j++)
       {
         std::string name = getName(j);
@@ -315,6 +315,7 @@ void PeakFitDialog::fitPeaks()
         }
       }
 
+      // set the centre, height and width of the peak
       std::string val = getValue(m_heightName);
       if (!val.empty()) alg->setPropertyValue(m_heightName,val);
       else
@@ -374,7 +375,7 @@ void PeakFitDialog::fitPeaks()
       Mantid::MantidVec& Y0 = outputW->dataY(0);
       Mantid::MantidVec& Y1 = outputW->dataY(1);
       Mantid::MantidVec& D = outputW->dataY(2);
-      for(int j=0;j<outputW->readX(0).size();j++)
+      for(int j=0;j<outputW->readY(0).size();j++)
       {
         try
         {
