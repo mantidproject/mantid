@@ -1,6 +1,7 @@
 import re
 import smtplib
 import os
+import platform
 import socket
 from shutil import move
 from time import strftime
@@ -9,19 +10,14 @@ import buildNotification
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
 
-#RECIPIENTS = ['nick.draper@stfc.ac.uk']
+#RECIPIENTS = ['russell.taylor@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-#,'mantid-developers@mantidproject.org'
-SENDER = 'BuildServer1@mantidproject.org'
+SENDER = platform.system()+'BuildServer1@mantidproject.org'
 
-localServerName = 'http://' 
-if (os.name =='nt'):
-     SENDER = 'Win' + SENDER
-     localServerName = localServerName + os.getenv('COMPUTERNAME') + '/'
-
-else:
-     SENDER = 'Linux' + SENDER
-     localServerName = localServerName + os.getenv('HOSTNAME') + '/'
+localServerName = 'http://' + platform.node()
+if platform.system() == 'Darwin':
+     localServerName += ':8080'
+localServerName += '/'
 
 tracLink = 'http://trac.mantidproject.org/mantid/'
 #Set up email content 
@@ -32,11 +28,9 @@ testsResult = ''
 testsPass = True
 doxyWarnings = True
 
-mssgScons = ''
-mssgSconsErr = ''
+mssgSconsWarn = ''
 mssgTestsBuild = ''
 mssgTestsErr = ''
-mssgTestsRunErr = ''
 mssgTestsResults = ''
 mssgSvn  = ''
 mssgDoxy = ''
@@ -59,7 +53,8 @@ f = open(fileScons,'r')
 
 for line in f.readlines():
      sconsResult = line
-     mssgScons = mssgScons + line
+     if os.name == 'nt':
+          mssgSconsWarn = mssgSconsWarn + line
      
 f.close()
 move(fileScons,archiveDir)
@@ -67,14 +62,17 @@ move(fileScons,archiveDir)
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
 
+# On Linux/Mac, compilation warning are in stderr file.
+# On Windows they're in stdout (read above)
+fileSconsErr = logDir+'sconsErr.log'
+if os.name == 'posix':
+     mssgSconsWarn = open(fileSconsErr,'r').read()
+move(fileSconsErr,archiveDir)
+
 # Count compilation warnings
 reWarnCount = re.compile(": warning")
-wc = reWarnCount.findall(mssgScons)
+wc = reWarnCount.findall(mssgSconsWarn)
 compilerWarnCount = len(wc)
-
-fileSconsErr = logDir+'sconsErr.log'
-mssgSconsErr = open(fileSconsErr,'r').read()
-move(fileSconsErr,archiveDir)
 
 #Get tests scons result and errors
 filetestsBuild = logDir+'testsBuild.log'
@@ -95,15 +93,6 @@ mssgTestsErr = open(filetestsBuildErr,'r').read()
 move(filetestsBuildErr,archiveDir)
 
 filetestsRunErr = logDir+'testsRunErr.log'
-f = open(filetestsRunErr,'r')
-
-for line in f.readlines():
-	temp = line
-	if temp.startswith('TestsScript.sh:'):
-		testsBuildSuccess = False
-		mssgTestsRunErr  = mssgTestsRunErr + temp[0:temp.find('>>')] + '\n'
-     
-f.close()
 move(filetestsRunErr,archiveDir)
 
 #Get tests result
@@ -147,20 +136,21 @@ mList=reTicket.findall(mssgSvn)
 for m in mList:
   ticketList.append(m)
   
-#Read doxygen log
-filedoxy = logDir+'doxy.log'
-mssgDoxy = open(filedoxy,'r').read()
-reWarnCount = re.compile("Warning:")
-m=reWarnCount.findall(mssgDoxy)
-if m:
-  warnCount = len(m)
-  if warnCount >0:
-    doxyWarnings = False
-move(filedoxy,archiveDir)
+#Read doxygen log - skip on Mac
+if platform.system() != 'Darwin':
+     filedoxy = logDir+'doxy.log'
+     mssgDoxy = open(filedoxy,'r').read()
+     reWarnCount = re.compile("Warning:")
+     m=reWarnCount.findall(mssgDoxy)
+     if m:
+          warnCount = len(m)
+          if warnCount >0:
+               doxyWarnings = False
+     move(filedoxy,archiveDir)
 
-lastDoxy = int(open('prevDoxy','r').read())
-currentDoxy = open('prevDoxy','w')
-currentDoxy.write(str(warnCount))
+     lastDoxy = int(open('prevDoxy','r').read())
+     currentDoxy = open('prevDoxy','w')
+     currentDoxy.write(str(warnCount))
 
 #Notify build completion
 buildErrors =1
@@ -187,16 +177,18 @@ message += ' ('
 if failCount>0:
     message += str(failCount) + " failed out of "
 message += str(testCount) + " tests)\n"
-message += "Code Documentation Passed: " + str(doxyWarnings)
-if warnCount>0:
-  message += " ("+str(warnCount) +" doxygen warnings"
-  if (warnCount > lastDoxy):
-    message += " - " + str(warnCount-lastDoxy) + " MORE FROM THIS CHECK-IN"
-  if (lastDoxy > warnCount):
-    message += " - " + str(lastDoxy-warnCount) + " fewer due to this check-in"  
-  message += ")\n"
-else:
-  message += "\n"
+# Not doing doxygen on the Mac
+if platform.system() != 'Darwin':
+     message += "Code Documentation Passed: " + str(doxyWarnings)
+     if warnCount>0:
+          message += " ("+str(warnCount) +" doxygen warnings"
+          if (warnCount > lastDoxy):
+               message += " - " + str(warnCount-lastDoxy) + " MORE FROM THIS CHECK-IN"
+          if (lastDoxy > warnCount):
+               message += " - " + str(lastDoxy-warnCount) + " fewer due to this check-in"  
+          message += ")\n"
+     else:
+          message += "\n"
 message += "\n"
 if len(svnRevision) > 0:
   message += "SVN Revision: " + svnRevision
@@ -208,33 +200,23 @@ message += mssgSvn + "\n"
 message += 'FRAMEWORK BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'scons.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'sconsErr.log>\n'
-#message += mssgScons + "\n\n"
-#message += mssgSconsErr + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'TESTS BUILD LOG\n\n'
 message += 'Test Build stdout <' + httpLinkToArchive + 'testsBuild.log>\n'
 message += 'Test Build stderr <' + httpLinkToArchive + 'testsBuildErr.log>\n'
-#message += mssgTestsBuild + "\n\n"
-#message += mssgTestsErr + "\n"
-#message += mssgTestsRunErr  + "\n"
 message += '------------------------------------------------------------------------\n'
 message += 'UNIT TEST LOG\n\n'
 message += 'Test Run stdout <' + httpLinkToArchive + 'testResults.log>\n'
 message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
-#message += mssgTestsResults + "\n"
 message += '------------------------------------------------------------------------\n'
-message += 'DOXYGEN LOG\n\n'
-message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
+# Not doing doxygen on the Mac
+if platform.system() != 'Darwin':
+     message += 'DOXYGEN LOG\n\n'
+     message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
 
 
 #Create Subject
-subject = 'Subject: '
-if (os.name=='nt'):
-     subject += "Windows"
-else:
-     subject += "Linux"
-          
-subject += ' Build Report: '
+subject = 'Subject: ' + platform.system() + ' Build Report: '
 
 if buildSuccess:
 	subject += '[Framework Build Successful, '
