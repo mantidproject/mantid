@@ -24,7 +24,7 @@ MANTIDPLUGINS = '/opt/Mantid/plugins'
 opts = Options('scons_options.py')
 opts.Add('debug','Set to 1 to build debug', 0)
 opts.Add('matlab','Set to 1 to build matlab API', 0)
-opts.Add('gcc43','Set to 1 to build with gcc43 on RHEL5', 0)
+opts.Add('gcc44','Set to 1 to build with gcc44 on RHEL5', 0)
 
 env = Environment(ENV=os.environ, options = opts)
 Help(opts.GenerateHelpText(env))
@@ -33,12 +33,12 @@ matlab = ARGUMENTS.get('matlab', 0)
 
 # on RHEL5 gcc 4.1 is the default
 # gcc 4.3 installed under a different name
-gcc43 = ARGUMENTS.get('gcc43', 0)
-if int(gcc43) :
-    env["CC"] = "gcc43"
-    env["CXX"] = "g++43"
-    env["SHCC"] = "gcc43"
-    env["SHCXX"] = "g++43"
+gcc44 = ARGUMENTS.get('gcc44', 0)
+if int(gcc44) :
+    env["CC"] = "gcc44"
+    env["CXX"] = "g++44"
+    env["SHCC"] = "gcc44"
+    env["SHCXX"] = "g++44"
     
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
