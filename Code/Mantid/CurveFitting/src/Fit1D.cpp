@@ -369,8 +369,16 @@ void Fit1D::exec()
   FitData l_data(this,getProperty("Fix"));
 
   l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19.
+  if (l_data.n == 0)
+  {
+    g_log.error("The data set is empty.");
+    throw std::runtime_error("The data set is empty.");
+  }
   if (l_data.n < l_data.p)
-    g_log.warning("Number of data points less than number of parameters to be fitted.");
+  {
+    g_log.error("Number of data points less than number of parameters to be fitted.");
+    throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
+  }
   l_data.X = new double[l_data.n];
   l_data.forSimplexLSwrap = new double[l_data.n];
   l_data.parameters = new double[nParams()];

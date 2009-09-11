@@ -348,10 +348,22 @@ void PeakFitDialog::fitPeaks()
       double startX = peaks[i].centre - 6*peaks[i].width;
       double endX   = peaks[i].centre + 6*peaks[i].width;
 
+      if (startX == endX)
+      {
+        QMessageBox::critical(this,"MantidPlot - Error","Zero width is set for peak at "+QString::number(peaks[i].centre));
+        return;
+      }
+
       alg->setPropertyValue("StartX",QString::number(startX).toStdString());
       alg->setPropertyValue("EndX",QString::number(endX).toStdString());
 
       alg->execute();
+
+      if (!alg->isExecuted())
+      {
+        QMessageBox::critical(this,"MantidPlot - Error","The fitting algorithm failed.");
+        return;
+      }
 
       Mantid::API::TableRow row = outParams->appendRow();
 
