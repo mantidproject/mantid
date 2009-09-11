@@ -30,6 +30,7 @@ import re
 import time
 import platform
 import subprocess
+import tempfile
 
 #########################################################################
 # The base test class.
@@ -148,12 +149,12 @@ class TextResultReporter(object):
 #########################################################################
 # A base class for a TestRunner
 #########################################################################
-class TestRunner(object):
+class PythonTestRunner(object):
     '''
     A base class to serve as a wrapper to actually run the tests in a specific 
     environment, i.e. console, gui
     '''
-    def __init__(self):
+    def __init__(self, need_escaping = False):
         self._mtdpy_header = ''
         self._test_dir = ''
         # Get the path that this module resides in so that the tests know about it
@@ -161,6 +162,15 @@ class TestRunner(object):
         for p in sys.path:
             if 'Framework' in p:
                 self._framework_path =  os.path.abspath(p)
+        # A string to prefix the code with
+        self._code_prefix = ''
+        self._using_escape = need_escaping
+
+    def commandString(self, pycode):
+        '''
+        Return the appropriate command to pass to subprocess.Popen
+        '''
+        raise NotImplementedError('"commandString(self)" should be overridden in a derived class')
 
     def setMantidDir(self, mtdheader_dir):
         # Store the path to MantidPythonAPI
@@ -170,44 +180,84 @@ class TestRunner(object):
         self._test_dir = os.path.abspath(test_dir)
 
     def createCodePrefix(self):
+        if self._using_escape == True:
+            esc = '\\'
+        else:
+            esc = ''
+
         self._code_prefix = 'import sys;' + \
-            'sys.path.append(\\"' + os.path.dirname(self._mtdpy_header) + '\\");' + \
-            'sys.path.append(\\"' + self._framework_path + '\\");' + \
-            'sys.path.append(\\"' + self._test_dir + '\\");'
+            'sys.path.append(' + esc + '"' + os.path.dirname(self._mtdpy_header) + esc + '");' + \
+            'sys.path.append(' + esc + '"' + self._framework_path + esc + '");' + \
+            'sys.path.append(' + esc + '"' + self._test_dir + esc + '");'
         # On POSIX systems the mantidsimple file is placed in $HOME/.mantid
         if os.name == 'posix':
-            self._code_prefix += 'sys.path.append(\\"' + os.environ['HOME'] + '/.mantid' + '\\");'
-#        self._code_prefix += 'execfile(\\"' + self._mtdpy_header + '\\");'
+            self._code_prefix += 'sys.path.append(' + esc + '"' + os.environ['HOME'] + '/.mantid' + esc + '");'
+        
 
     def getCodePrefix(self):
+        '''
+        Return a prefix to the code that will be executed
+        '''
         return self._code_prefix
 
-    def start(self, fullname):
-        raise NotImplementedError('"start(self, fullname)" should be overridden in a derived class')
+    def spawnSubProcess(self, cmd):
+        '''
+        Spawn a new process and run the given command within it
+        '''
+        proc = subprocess.Popen(cmd, shell=True, stdout = subprocess.PIPE)
+        
+        std_out = proc.communicate()[0]
+        return proc.returncode, std_out
 
+    def start(self, pycode):
+        '''
+        Run the given test code in a new subprocess
+        '''
+        raise NotImplementedError('"run(self, pycode)" should be overridden in a derived class')
     
 #########################################################################
 # A runner class to execute the tests on using the command line interface
 #########################################################################
-class ConsoleRunner(TestRunner):
+class PythonConsoleRunner(PythonTestRunner):
     '''
-    This class executes tests within a Mantid console environment
+    This class executes tests within a Mantid environment inside a standalone python
+    interpreter
     '''
     
     def __init__(self):
-        TestRunner.__init__(self)
+        PythonTestRunner.__init__(self, True)
+
+    def start(self, pycode):
+        '''
+        Run the code in a new instance of a python interpreter
+        '''
+        return self.spawnSubProcess('python -c ' + '"' + pycode + '"')
+
+#########################################################################
+# A runner class to execute the tests on using the command line interface
+#########################################################################
+class MantidPlotTestRunner(PythonTestRunner):
+    '''
+    This class executes tests within the Python scripting environment inside 
+    MantidPlot
+    '''
+    
+    def __init__(self, mtdplot_bin):
+        PythonTestRunner.__init__(self)
+        self._mtdplot_bin = os.path.abspath(mtdplot_bin)
         
     def start(self, pycode):
         '''
-        Run the test defined in the given test class
+        Run the code in a new instance of the MantidPlot scripting environment
         '''
-        proc = subprocess.Popen('python -c ' + '"' + pycode + '"', shell=True, stdout = subprocess.PIPE)
-        while proc.poll() == None:
-            pass
+        # The code needs wrapping in a temporary file so that it can be passed to MantidPlot,
+        # along with the redirection of the scripting output to stdout
+        wrapper = tempfile.NamedTemporaryFile(suffix='.py')
+        wrapper.write('import sys;sys.stdout = sys.__stdout__;' + pycode)
+        # Due to buffering, the text isn't actually written to the file until you call flush. (On Linux anyway)
+        wrapper.flush()
+        return self.spawnSubProcess(self._mtdplot_bin + ' -xq ' + wrapper.name) 
         
-        std_out = proc.communicate()[0]
-        return std_out
-
 #########################################################################
 # A class to tie together a test and its results
 #########################################################################
@@ -234,14 +284,15 @@ class TestSuite(object):
         pycode = runner.getCodePrefix() + 'import ' + self._modname + ';'
         pycode += self._fullname + '().execute()'
         # Start the new process
-        output = runner.start(pycode)
+        retcode, output = runner.start(pycode)
         all_lines = output.split('\n')
         for line in all_lines:
             entries = line.split(MantidStressTest.DELIMITER)
             if len(entries) == 3 and entries[0] == MantidStressTest.PREFIX:
                 self._result.addItem([entries[1], entries[2]])
+            else:
+                print line
                 
-
     def reportResults(self, reporter = TextResultReporter):
         reporter.dispatchResults(self._result)
 
@@ -253,7 +304,7 @@ class TestManager(object):
     This is the main interaction point for the framework.
     '''
 
-    def __init__(self, test_dir, mtdheader_dir, runner = ConsoleRunner(), reporter = TextResultReporter()):
+    def __init__(self, test_dir, mtdheader_dir, runner = PythonConsoleRunner(), reporter = TextResultReporter()):
         '''Initialize a class instance'''
 
         # Check whether a Mantid.properties file resides in the current directory

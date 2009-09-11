@@ -2,7 +2,7 @@
 
 # Define some necessary paths
 stressmodule_dir = '../Code/StressTestFramework'
-mtdpy_header_dir = '../Code/Mantid/Bin/Shared'
+mtdpy_header_dir = '../Code/Mantid/Bin/Shared/'
 tests_dir = '../StressTests/MantidScript'
 
 # Import the stress manager definition
@@ -12,8 +12,8 @@ import stresstesting
 
 # By default the tests are executed in the  command line environment
 # with the output printed to the console but we'll be more verbose here as a demo
-console_runner = stresstesting.PythonConsoleRunner()
+mtdplot_runner = stresstesting.MantidPlotTestRunner(mtdpy_header_dir + '/MantidPlot')
 console_reporter = stresstesting.TextResultReporter()
-mgr = stresstesting.TestManager(tests_dir, mtdpy_header_dir, runner = console_runner,
+mgr = stresstesting.TestManager(tests_dir, mtdpy_header_dir, runner = mtdplot_runner,
                                 reporter = console_reporter)
 mgr.executeAllTests()
