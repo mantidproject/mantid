@@ -16,21 +16,19 @@ buildNotification.sendTestBuildCompleted("Mantid")
 # Then run them
 buildNotification.sendTestStarted("Mantid")
 
-runlog = open("../../../../logs/Mantid/testResults.log","w")
+runlog = ''
 runerr = open("../../../../logs/Mantid/testsRunErr.log","w")
 testDir = "Build/Tests"
 testsToRun = os.listdir(testDir)
 for test in testsToRun:
     if test.endswith("cpp"):
         test = test.split(".")[0]
-        runlog.write(test+"\n")
-        runlog.flush()
+        runlog += test+"\n"
         if os.name == 'nt':
             test += ".exe"
         else:
             test = "./" + test
-        sp.call(test,stdout=runlog,stderr=runerr,shell=True,cwd=testDir)
-        runlog.flush()
+        runlog += sp.Popen(test,stdout=sp.PIPE,stderr=runerr,shell=True,cwd=testDir).communicate()[0]
 
-runlog.close()
+open("../../../../logs/Mantid/testResults.log","w").write(runlog)
 runerr.close()
