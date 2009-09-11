@@ -205,7 +205,6 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 	d_zoomer[1] = new QwtPlotZoomer(QwtPlot::xTop, QwtPlot::yRight,
 			QwtPicker::DragSelection | QwtPicker::CornerToCorner,
 			QwtPicker::AlwaysOff, d_plot->canvas());
-	m_spectrogram=NULL;
 	zoom(false);
 
 	c_type = QVector<int>();
@@ -246,12 +245,8 @@ void Graph::notifyChanges()
 
 void Graph::activateGraph()
 {
-	
 	emit selectedGraph(this);
 	setFocus();
-	/*if(m_spectrogram)
-	{m_spectrogram->setupColorBarScaling();
-	}*/
 }
 
 void Graph::deselectMarker()
@@ -3433,11 +3428,6 @@ void Graph::zoomOut()
 
 	updateSecondaryAxis(QwtPlot::xTop);
   	updateSecondaryAxis(QwtPlot::yRight);
-	// colormap was getting changed on zoomout 
-	//so call the function colomatsetup
-	/*if(m_spectrogram)
-		m_spectrogram->setupColorBarScaling();*/
-
 }
 
 void Graph::drawText(bool on)
@@ -4614,12 +4604,12 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,d
     return plotSpectrogram(d_spectrogram,type);
 }
 
-Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type,boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
+Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
 {
 	if (type != GrayScale && type != ColorMap && type != Contour)
   		return 0;
 
-  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz,workspace);
+  	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
 	//Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
 
     return plotSpectrogram(d_spectrogram,type);
@@ -4649,22 +4639,15 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 	if(rightAxis==NULL) return 0;
 	rightAxis->setColorBarEnabled(type != Contour);
 	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
-	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->colorMap());
-	//rightAxis->setColorMap(d_spectrogram->data().range(), d_spectrogram->getColorMap());
 	d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
 	d_spectrogram->setDefaultColorMap();
 	rightAxis->setColorMap(d_spectrogram->data().range(),d_spectrogram->mutableColorMap());
-	//d_spectrogram->setupColorBarScaling();
 	d_plot->setAxisScale(QwtPlot::yRight,
 		d_spectrogram->data().range().minValue(),
 		d_spectrogram->data().range().maxValue());
 	
-	setSpectrogram(d_spectrogram);
-	//d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
-	//d_plot->replot();
-	//d_spectrogram->recount();
+	//setSpectrogram(d_spectrogram);
 	d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
-	//d_plot->replot();
 	return d_spectrogram;
 }
 
@@ -5149,25 +5132,6 @@ void Graph::setAxisFormula(int axis, const QString &formula)
 	ScaleDraw *sd = (ScaleDraw *)d_plot->axisScaleDraw(axis);
 	if (sd)
 		sd->setFormula(formula);
-}
-void Graph::loadSettings()
-{
-  //Load Color
-  QSettings settings;
-  settings.beginGroup("Mantid/InstrumentWindow");
-  
-  // Background colour
- // m_spectrogram->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
-  
-  //Load Colormap. If the file is invalid the default stored colour map is used
-  mCurrentColorMap = settings.value("ColormapFile", "").toString();
-  // Set values from settings
-  m_spectrogram->mutableColorMap().loadMap(mCurrentColorMap);
-  
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)settings.value("ScaleType", MantidColorMap::Log10).toUInt();
-  m_spectrogram->mutableColorMap().changeScaleType(type);
-  
-  settings.endGroup();
 }
 /*
      Sets the spectrogram intensity changed boolean flag

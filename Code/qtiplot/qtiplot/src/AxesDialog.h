@@ -73,9 +73,7 @@ public:
     AxesDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
 
 	void setGraph(Graph *g);
-	void setScaleType(int scaleType);
-	int getScaleType() const;
-	
+		
 public slots:
 	void setCurrentScale(int axisPos);
 	void showGeneralPage();
@@ -135,7 +133,6 @@ private slots:
 	void pageChanged ( QWidget *page);
 	void showAxis(int, int, const QString&, bool, int, int, bool,
 				  const QColor&, int, int, int, int, const QString&, const QColor&);
-	void scaleTypeChanged(int);
 
 protected:
 	//! generate UI for the axes page
@@ -148,7 +145,6 @@ protected:
 	void initFramePage();
 	//! Modifies the grid
 	void applyChangesToGrid(Grid *grid);
-	void setupColorBarScaling(int type);
 
     QPushButton* buttonApply;
     QPushButton* buttonOk;
@@ -214,10 +210,6 @@ protected:
   	QWidget* lastPage;
     QDateTimeEdit *boxStartDateTime, *boxEndDateTime;
     QTimeEdit *boxStartTime, *boxEndTime;
-	bool m_bscaleTypeChanged;
-	bool m_bstartValueChanged;
-	bool m_bendValueChanged;
-	int m_ScaleTYpe;
 	bool m_updatePlot;
 
 	//static Mantid::Kernel::Logger &g_log;

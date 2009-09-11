@@ -720,7 +720,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 	// Set the range on the thirs, colour axis
 	double minz, maxz;
 	range(&minz,&maxz);
-	Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type,m_workspace);
+	Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
 	if( spgrm )
 	{
 		//spgrm->setWorkspace(m_workspace);

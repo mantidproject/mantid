@@ -64,7 +64,7 @@ public:
 	Spectrogram();
     Spectrogram(Matrix *m);
     Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
-    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);//Mantid
+    Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
 	~Spectrogram();
 
 
@@ -109,7 +109,6 @@ public:
 	QList <PlotMarker *> labelsList(){return d_labels_list;};
 	const MantidColorMap & getColorMap() const;
     MantidColorMap & mutableColorMap();
-	void setupColorBarScaling();
 	void saveSettings();
 	void loadSettings();
 	void setColorMapFileName(QString colormapName);
@@ -122,8 +121,7 @@ public:
 	QColor labelsColor(){return d_labels_color;};
 	void setLabelsColor(const QColor& c);
 //	void setLabelOffset(int index, double x, double y);
-	void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
-    double integrateSingleSpectra(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const int wks_index);
+
 	void updateForNewMaxData(const double new_max);
 	void updateForNewMinData(const double new_min);
 	void recount();
@@ -135,9 +133,6 @@ public:
 	double labelsXOffset(){return d_labels_x_offset;};
     double labelsYOffset(){return d_labels_y_offset;};
 	void selectLabel(bool on);
-	void setScaleType(int scaleType);
-	const QwtColorMap& getSpectrogramColormap();
-	int getScaleType() const;
 	/// change intensity of the colors
 	void changeIntensity( double start,double end);
 	///sets a boolan flag for intensity changes
@@ -150,11 +145,6 @@ protected:
 	virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
 	void createLabels();
-	
-	void calculateBinRange(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
-	
-
-	int m_ScaleType;
 
 	//! Pointer to the source data matrix
 	Matrix *d_matrix;

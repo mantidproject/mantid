@@ -169,13 +169,10 @@ class Graph: public QWidget //QwtPlot //QWidget
         void restoreCurveLabels(int curveID, const QStringList& lst);
 		//! Called first time we add curves in order to determine the best plot limits.
 		void initScaleLimits();
-		Spectrogram* getSpectrogram(){ return m_spectrogram;}
+		
 		//! Returns true if a plot/data tool is enabled.
 		bool hasActiveTool();
 
-		void setSpectrogram(Spectrogram* spectrogram )
-		{ m_spectrogram=spectrogram;
-		}
 		///seeting a boolean flag to when the intensity(start and end values) changed
 		void changeIntensity(bool bIntensityChanged);
 	
@@ -664,8 +661,7 @@ class Graph: public QWidget //QwtPlot //QWidget
 		//! Add a spectrogram to the graph
   		Spectrogram* plotSpectrogram(Matrix *m, CurveType type);
         Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type);//Mantid
-       Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz, 
-			CurveType type,boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);//Mantid
+       Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
 		// Spectrogram* plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type);//Mantid
         Spectrogram* plotSpectrogram(Spectrogram *d_spectrogram, CurveType type);//Mantid
 		//! Restores a spectrogram. Used when opening a project file.
@@ -718,8 +714,7 @@ signals:
         QwtDoubleInterval axisBoundingInterval(int axis);
         void deselectCurves();
 		void addLegendItem();
-		void loadSettings();
-
+	
         Plot *d_plot;
 		QwtPlotZoomer *d_zoomer[2];
 		TitlePicker *titlePicker;
@@ -761,7 +756,6 @@ signals:
         //! Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
 		bool d_auto_scale;
 		//static Mantid::Kernel::Logger &g_log;
-		Spectrogram* m_spectrogram;
 		 QString mCurrentColorMap;
 		 QwtPlotMagnifier *d_magnifier;
 		 QwtPlotPanner *d_panner;
