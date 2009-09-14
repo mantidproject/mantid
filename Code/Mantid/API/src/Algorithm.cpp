@@ -149,8 +149,8 @@ bool Algorithm::execute()
 							  boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(wsName));
 						  if(wsGrpSptr)
 						  {	 //this must be a group - test for that
-							  g_log.debug()<<"input is workspace group-processGroups called "<<std::endl;
-							  return(Algorithm::processGroups(wsGrpSptr,Prop));
+							  g_log.debug()<<" one of the inputs is a workspace group - call processGroups"<<std::endl;
+							  return(processGroups(wsGrpSptr,Prop));
 						  }
 					  }
 
@@ -546,13 +546,11 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	//removing the header count from the totalsize
 	execTotal=(nSize-1)*10;
 	m_notificationCenter.postNotification(new StartedNotification(this));
-	
+	IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",1);
 	//for each member in the input workspace group
 	//starts from the 2nd item in the group as 1st item is group header
 	for(++wsItr;wsItr!=inputWSNames.end();wsItr++)
-	{		
-		IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",1);
-		//set  properties
+	{	//set  properties
 		std::vector<Mantid::Kernel::Property*>::const_iterator itr;
 		for (itr=prop.begin();itr!=prop.end();itr++)
 		{	
@@ -620,7 +618,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	//if all failed
 	if(!bgroupFailed)
 	{
-		// remove the group parent  from the ADS - bcoz only group parent will come in mantid plot
+		// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
 		AnalysisDataService::Instance().remove(outWSParentName);
 	}
 

@@ -260,6 +260,16 @@ namespace Mantid
 			static bool isEmpty(double toCheck) { return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
 			///checks that the value was not set by users, uses the value in EMPTY_INT()
 			static bool isEmpty(int toCheck) { return toCheck == EMPTY_INT(); }
+			///checks the property is a workspace property
+			bool isWorkspaceProperty( Mantid::Kernel::Property* prop);
+			/// checks the property is input workspace property
+			bool isInputWorkspaceProperty( Mantid::Kernel::Property* prop);
+			/// checks the property is output workspace property
+			bool isOutputWorkspaceProperty( Mantid::Kernel::Property* prop);
+
+			/// process workspace groups
+			virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+			
 
 			mutable bool m_cancel; ///< set to true to stop execution			
 			/// refenence to the logger class
@@ -277,14 +287,7 @@ namespace Mantid
 			void findWorkspaceProperties(std::vector<Workspace_sptr>& inputWorkspaces,
 				std::vector<Workspace_sptr>& outputWorkspaces) const;
 			void algorithm_info() const;
-			/// process workspace groups
-			virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
-			///checks the property is a workspace property
-			bool isWorkspaceProperty( Mantid::Kernel::Property* prop);
-			/// checks the property is input workspace property
-			bool isInputWorkspaceProperty( Mantid::Kernel::Property* prop);
-			/// checks the property is output workspace property
-			bool isOutputWorkspaceProperty( Mantid::Kernel::Property* prop);
+			
 			/// setting the input properties for an algorithm - to handle workspace groups 
 			bool setInputWSProperties(IAlgorithm* pAlg, std::string& prevPropName,Mantid::Kernel::Property* prop,const std::string&inputWS );
 			/// setting the output properties for an algorithm -to handle workspace groups 

@@ -143,7 +143,7 @@ public:
 	AnalysisDataService::Instance().remove("test_out_1");
     AnalysisDataService::Instance().remove("test_out_2");
 	AnalysisDataService::Instance().remove("test_out_3");
-    AnalysisDataService::Instance().remove("test_out_4");
+    AnalysisDataService::Instance().remove("test_out_4"); 
 
   }
   
@@ -272,6 +272,275 @@ public:
 	  // MatrixWorkspace_sptr result;
 	   //TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("WSCor")) )
 
+
+   }
+   void testTwoGroupWorkspaces()
+   {
+	 int sizex = 10,sizey=20;
+    // Register the workspace in the data service
+   	MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr worklhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+	MatrixWorkspace_sptr worklhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr worklhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+
+
+	MatrixWorkspace_sptr workrhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr workrhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+	MatrixWorkspace_sptr workrhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr workrhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+
+	WorkspaceGroup_sptr wsSptr= WorkspaceGroup_sptr(new WorkspaceGroup);
+	if(wsSptr)
+	{
+		AnalysisDataService::Instance().add("testlhs_in", wsSptr);
+		wsSptr->add("testlhs_in");
+		AnalysisDataService::Instance().add("testlhs_in_1", worklhs_in1);
+		wsSptr->add("testlhs_in_1");
+		AnalysisDataService::Instance().add("testlhs_in_2", worklhs_in2);
+		wsSptr->add("testlhs_in_2");
+		AnalysisDataService::Instance().add("testlhs_in_3", worklhs_in3);
+		wsSptr->add("testlhs_in_3");
+		AnalysisDataService::Instance().add("testlhs_in_4", worklhs_in4);
+		wsSptr->add("testlhs_in_4");
+	}
+    WorkspaceGroup_sptr worklhsgrp_in;
+	worklhsgrp_in=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("testlhs_in"));
+	TS_ASSERT_EQUALS(worklhsgrp_in,wsSptr);
+	if(worklhsgrp_in) 
+	{
+		std::vector<std::string> GroupNames=worklhsgrp_in->getNames();
+		int nSize=GroupNames.size();
+		TS_ASSERT_EQUALS(nSize,5);
+	}
+
+	WorkspaceGroup_sptr wsSptr1= WorkspaceGroup_sptr(new WorkspaceGroup);
+	if(wsSptr1)
+	{
+		AnalysisDataService::Instance().add("testrhs_in", wsSptr);
+		wsSptr1->add("testrhs_in");
+		AnalysisDataService::Instance().add("testrhs_in_1", worklhs_in1);
+		wsSptr1->add("testrhs_in_1");
+		AnalysisDataService::Instance().add("testrhs_in_2", worklhs_in2);
+		wsSptr1->add("testrhs_in_2");
+		AnalysisDataService::Instance().add("testrhs_in_3", worklhs_in3);
+		wsSptr1->add("testrhs_in_3");
+		AnalysisDataService::Instance().add("testrhs_in_4", worklhs_in4);
+		wsSptr1->add("testrhs_in_4");
+	}
+    WorkspaceGroup_sptr workrhsgrp_in;
+	workrhsgrp_in=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("testrhs_in"));
+	TS_ASSERT_EQUALS(worklhsgrp_in,wsSptr);
+	if(workrhsgrp_in) 
+	{
+		std::vector<std::string> GroupNames=workrhsgrp_in->getNames();
+		int nSize=GroupNames.size();
+		TS_ASSERT_EQUALS(nSize,5);
+	}
+	
+	Plus alg;
+	alg.initialize();
+	alg.setPropertyValue("LHSWorkspace","testlhs_in");
+	alg.setPropertyValue("RHSWorkspace","testrhs_in");    
+	alg.setPropertyValue("OutputWorkspace","test_out");
+	alg.execute();
+	TS_ASSERT( alg.isExecuted() );
+
+	WorkspaceGroup_sptr work_out;
+	TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out")));
+	MatrixWorkspace_sptr work_out1 ;
+	TS_ASSERT_THROWS_NOTHING(work_out1= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_1")));
+	MatrixWorkspace_sptr work_out2;
+	TS_ASSERT_THROWS_NOTHING(work_out2= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_2")));
+	MatrixWorkspace_sptr work_out3;
+	TS_ASSERT_THROWS_NOTHING(work_out3= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_3")));
+	MatrixWorkspace_sptr work_out4;
+	TS_ASSERT_THROWS_NOTHING(work_out4= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_4")));
+
+    
+    checkData(worklhs_in1, workrhs_in1, work_out1);
+	checkData(worklhs_in2, workrhs_in2, work_out2);
+	checkData(worklhs_in3,   workrhs_in3, work_out3);
+	checkData(worklhs_in4,   workrhs_in4, work_out4);
+
+	work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out"));
+	work_out->removeAll();
+
+    AnalysisDataService::Instance().remove("testlhs_in");
+    AnalysisDataService::Instance().remove("testlhs_in_1");
+    AnalysisDataService::Instance().remove("testlhs_in_2");
+	AnalysisDataService::Instance().remove("testlhs_in_3");
+    AnalysisDataService::Instance().remove("testlhs_in_4");
+
+	AnalysisDataService::Instance().remove("testrhs_in");
+    AnalysisDataService::Instance().remove("testrhs_in_1");
+    AnalysisDataService::Instance().remove("testrhs_in_2");
+	AnalysisDataService::Instance().remove("testrhs_in_3");
+    AnalysisDataService::Instance().remove("testrhs_in_4");
+
+    AnalysisDataService::Instance().remove("test_out");
+	AnalysisDataService::Instance().remove("test_out_1");
+    AnalysisDataService::Instance().remove("test_out_2");
+	AnalysisDataService::Instance().remove("test_out_3");
+    AnalysisDataService::Instance().remove("test_out_4"); 
+
+   }
+
+   void testLHS2DWorkspaceandRHSGroupWorkspace()
+   {
+	    int sizex = 10,sizey=20;
+		
+    MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+		if(worklhs_in1)
+			AnalysisDataService::Instance().add("testlhs_in1", worklhs_in1);
+
+   
+	MatrixWorkspace_sptr workrhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr workrhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+	MatrixWorkspace_sptr workrhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr workrhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+		
+	WorkspaceGroup_sptr wsSptr1= WorkspaceGroup_sptr(new WorkspaceGroup);
+	if(wsSptr1)
+	{
+		AnalysisDataService::Instance().add("testrhs_in", wsSptr1);
+		wsSptr1->add("testrhs_in");
+		AnalysisDataService::Instance().add("testrhs_in_1", workrhs_in1);
+		wsSptr1->add("testrhs_in_1");
+		AnalysisDataService::Instance().add("testrhs_in_2", workrhs_in2);
+		wsSptr1->add("testrhs_in_2");
+		AnalysisDataService::Instance().add("testrhs_in_3", workrhs_in3);
+		wsSptr1->add("testrhs_in_3");
+		AnalysisDataService::Instance().add("testrhs_in_4", workrhs_in4);
+		wsSptr1->add("testrhs_in_4");
+	}
+    WorkspaceGroup_sptr workrhsgrp_in;
+	workrhsgrp_in=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("testrhs_in"));
+	TS_ASSERT_EQUALS(workrhsgrp_in,wsSptr1);
+	if(workrhsgrp_in) 
+	{
+		std::vector<std::string> GroupNames=workrhsgrp_in->getNames();
+		int nSize=GroupNames.size();
+		TS_ASSERT_EQUALS(nSize,5);
+	}
+	
+	Plus alg;
+	alg.initialize();
+	alg.setPropertyValue("LHSWorkspace","testlhs_in1");
+	alg.setPropertyValue("RHSWorkspace","testrhs_in");    
+	alg.setPropertyValue("OutputWorkspace","test_out");
+	alg.execute();
+	TS_ASSERT( alg.isExecuted() );
+
+	WorkspaceGroup_sptr work_out;
+	TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out")));
+	MatrixWorkspace_sptr work_out1 ;
+	TS_ASSERT_THROWS_NOTHING(work_out1= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_1")));
+	MatrixWorkspace_sptr work_out2;
+	TS_ASSERT_THROWS_NOTHING(work_out2= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_2")));
+	MatrixWorkspace_sptr work_out3;
+	TS_ASSERT_THROWS_NOTHING(work_out3= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_3")));
+	MatrixWorkspace_sptr work_out4;
+	TS_ASSERT_THROWS_NOTHING(work_out4= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_4")));
+
+    
+    checkData(worklhs_in1, workrhs_in1, work_out1);
+	checkData(worklhs_in1, workrhs_in2, work_out2);
+	checkData(worklhs_in1,   workrhs_in3, work_out3);
+	checkData(worklhs_in1,   workrhs_in4, work_out4);
+
+	work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out"));
+	work_out->removeAll();
+
+    AnalysisDataService::Instance().remove("testlhs_in1");
+    
+	AnalysisDataService::Instance().remove("testrhs_in");
+    AnalysisDataService::Instance().remove("testrhs_in_1");
+    AnalysisDataService::Instance().remove("testrhs_in_2");
+	AnalysisDataService::Instance().remove("testrhs_in_3");
+    AnalysisDataService::Instance().remove("testrhs_in_4");
+
+    AnalysisDataService::Instance().remove("test_out");
+	AnalysisDataService::Instance().remove("test_out_1");
+    AnalysisDataService::Instance().remove("test_out_2");
+	AnalysisDataService::Instance().remove("test_out_3");
+    AnalysisDataService::Instance().remove("test_out_4");  
+   }
+
+    void testLHSandRHSSameGroupWorkspaces()
+   {
+	   //this is the test for self addition
+	 int sizex = 10,sizey=20;
+    // Register the workspace in the data service
+   	MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr worklhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+	MatrixWorkspace_sptr worklhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr worklhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+
+
+	WorkspaceGroup_sptr wsSptr= WorkspaceGroup_sptr(new WorkspaceGroup);
+	if(wsSptr)
+	{
+		AnalysisDataService::Instance().add("testlhs_in", wsSptr);
+		wsSptr->add("testlhs_in");
+		AnalysisDataService::Instance().add("testlhs_in_1", worklhs_in1);
+		wsSptr->add("testlhs_in_1");
+		AnalysisDataService::Instance().add("testlhs_in_2", worklhs_in2);
+		wsSptr->add("testlhs_in_2");
+		AnalysisDataService::Instance().add("testlhs_in_3", worklhs_in3);
+		wsSptr->add("testlhs_in_3");
+		AnalysisDataService::Instance().add("testlhs_in_4", worklhs_in4);
+		wsSptr->add("testlhs_in_4");
+	}
+    WorkspaceGroup_sptr worklhsgrp_in;
+	worklhsgrp_in=boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("testlhs_in"));
+	TS_ASSERT_EQUALS(worklhsgrp_in,wsSptr);
+	if(worklhsgrp_in) 
+	{
+		std::vector<std::string> GroupNames=worklhsgrp_in->getNames();
+		int nSize=GroupNames.size();
+		TS_ASSERT_EQUALS(nSize,5);
+	}
+
+	Plus alg;
+	alg.initialize();
+	alg.setPropertyValue("LHSWorkspace","testlhs_in");
+	alg.setPropertyValue("RHSWorkspace","testlhs_in");    
+	alg.setPropertyValue("OutputWorkspace","test_out");
+	alg.execute();
+	TS_ASSERT( alg.isExecuted() );
+
+	WorkspaceGroup_sptr work_out;
+	TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out")));
+	MatrixWorkspace_sptr work_out1 ;
+	TS_ASSERT_THROWS_NOTHING(work_out1= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_1")));
+	MatrixWorkspace_sptr work_out2;
+	TS_ASSERT_THROWS_NOTHING(work_out2= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_2")));
+	MatrixWorkspace_sptr work_out3;
+	TS_ASSERT_THROWS_NOTHING(work_out3= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_3")));
+	MatrixWorkspace_sptr work_out4;
+	TS_ASSERT_THROWS_NOTHING(work_out4= boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out_4")));
+
+    
+    checkData(worklhs_in1, worklhs_in1, work_out1);
+	checkData(worklhs_in2, worklhs_in2, work_out2);
+	checkData(worklhs_in3, worklhs_in3, work_out3);
+	checkData(worklhs_in4, worklhs_in4, work_out4);
+
+	work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("test_out"));
+	work_out->removeAll();
+
+    AnalysisDataService::Instance().remove("testlhs_in");
+    AnalysisDataService::Instance().remove("testlhs_in_1");
+    AnalysisDataService::Instance().remove("testlhs_in_2");
+	AnalysisDataService::Instance().remove("testlhs_in_3");
+    AnalysisDataService::Instance().remove("testlhs_in_4");
+
+	
+    AnalysisDataService::Instance().remove("test_out");
+	AnalysisDataService::Instance().remove("test_out_1");
+    AnalysisDataService::Instance().remove("test_out_2");
+	AnalysisDataService::Instance().remove("test_out_3");
+    AnalysisDataService::Instance().remove("test_out_4"); 
 
    }
 

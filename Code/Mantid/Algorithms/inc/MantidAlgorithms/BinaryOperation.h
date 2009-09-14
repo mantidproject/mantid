@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 namespace Mantid
 {
@@ -96,13 +97,23 @@ namespace Mantid
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
+
+	   /// processing workspace groups
+	  bool processGroups(API::WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
       
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void doSingleColumn(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
-            
+
+	  /// Checks the workspace groups are of same size
+	  bool IsCompatibleSizes(std::vector<std::string> &lhsWSGrpNames,std::vector<std::string> &rhsWSGrpNames);
+	  ///gets LHS and RHS Workspacegroup name vectrors from the property vector
+	  void getGroupNames(const std::vector<Mantid::Kernel::Property*>&prop,std::vector<std::string> &lhsWSGrpNames,std::vector<std::string> &rhsWSGrpNames);
+	  /// sets teh properties for the algorithm to process workspace group members
+	  void setProperties(IAlgorithm* alg,const std::vector<Mantid::Kernel::Property*>&prop,
+		 const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,API::WorkspaceGroup_sptr outGrpWS);
       /// Progress reporting
       API::Progress* m_progress;
     };
