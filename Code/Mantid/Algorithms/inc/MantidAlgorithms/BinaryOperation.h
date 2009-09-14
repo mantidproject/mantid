@@ -98,8 +98,12 @@ namespace Mantid
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
 
-	   /// processing workspace groups
-	  bool processGroups(API::WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+	  /** This method is called if one of the selected workspaces for binary operation is a workspacegroup
+	  *  @param inputWSGrp pointer to the first workspace group
+	  *  @param prop a vector holding properties
+	  *  @retval false if  selected workspace groups sizes not match
+	*/
+	  bool processGroups(API::WorkspaceGroup_sptr inputWSGrp,const std::vector<Mantid::Kernel::Property*>&prop);
       
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
@@ -109,11 +113,23 @@ namespace Mantid
 
 	  /// Checks the workspace groups are of same size
 	  bool IsCompatibleSizes(std::vector<std::string> &lhsWSGrpNames,std::vector<std::string> &rhsWSGrpNames);
-	  ///gets LHS and RHS Workspacegroup name vectrors from the property vector
+	  
+	  /** This method iterates through property vector and returns  LHS and RHS workspaces group names vectors
+	  *  @param lhsWSGrpNames a vector holding names of LHS Workspace
+	  *  @param rhsWSGrpNames a vector holding names of RHS Workspace
+	*/
 	  void getGroupNames(const std::vector<Mantid::Kernel::Property*>&prop,std::vector<std::string> &lhsWSGrpNames,std::vector<std::string> &rhsWSGrpNames);
-	  /// sets teh properties for the algorithm to process workspace group members
+	 
+	  /** This method sets properties for the algorithm
+	  *  @param alg pointer to the algorithm
+	  *  @param prop a vector holding properties
+	  *  @param lhsWSName name of the LHS workspace
+	  *  @param rhsWSName name of the RHS workspace
+	  *  @param nPeriod period number
+	  *  @param outWSGrp shared pointer to output workspace
+	*/
 	  void setProperties(IAlgorithm* alg,const std::vector<Mantid::Kernel::Property*>&prop,
-		 const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,API::WorkspaceGroup_sptr outGrpWS);
+		 const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,API::WorkspaceGroup_sptr outWSGrp);
       /// Progress reporting
       API::Progress* m_progress;
     };

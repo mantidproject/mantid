@@ -275,7 +275,7 @@ namespace Mantid
 			PARALLEL_CHECK_INTERUPT_REGION
     }
 	/** This method is called if one of the selected workspaces for binary operation is a workspacegroup
-	  *  @param wsGrp pointer to the first workspace group
+	  *  @param inputWSGrp pointer to the first workspace group
 	  *  @param prop a vector holding properties
 	  *  @retval false if  selected workspace groups sizes not match
 	*/
