@@ -19,6 +19,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QHBoxLayout>
+#include <QSignalMapper>
 
 using namespace MantidQt::API;
 
@@ -31,8 +32,10 @@ using namespace MantidQt::API;
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
   QDialog(parent), m_algorithm(NULL), m_algName(""), m_propertyValueMap(), m_enabledNames(),
   m_forScript(false), m_python_arguments(), m_strMessage(""), m_msgAvailable(false), 
-  m_bIsInitialized(false), m_algProperties(), m_validators()
+  m_bIsInitialized(false), m_algProperties(), m_validators(), m_inputws_opts(), m_outputws_fields(),
+  m_wsbtn_tracker(), m_signal_mapper(new QSignalMapper())
 {
+  connect(m_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(replaceWSClicked(QWidget*)));
 }
 
 /**
@@ -55,7 +58,10 @@ void AlgorithmDialog::initializeLayout()
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
 
   createValidatorLabels();
-  
+
+  m_inputws_opts.clear();
+  m_outputws_fields.clear();
+  m_wsbtn_tracker.clear();
   // This derived class function creates the layout of the widget. It can also add default input if the
   // dialog has been written this way
   this->initLayout();
@@ -367,6 +373,33 @@ QPushButton* AlgorithmDialog::createHelpButton(const QString & helpText) const
 }
 
 /**
+ * Create a button that when clicked will put the name of the input workspace into the
+ * output box.
+ * @param inputBox The input combo box that contains the input workspace names
+ * @param outputEdit The output text box that should contain the output name
+ * @returns A new QPushButton linked to the appropriate widgets.
+ */
+QPushButton* AlgorithmDialog::createReplaceWSButton(QLineEdit *outputEdit)
+{
+  QPushButton *btn = new QPushButton(QIcon(":/data_replace.png"), "");
+  m_wsbtn_tracker[btn ] = 1;
+  btn->setToolTip("Replace input workspace");
+  m_outputws_fields.push_back(outputEdit);
+  connect(btn, SIGNAL(clicked()), m_signal_mapper, SLOT(map()));
+  m_signal_mapper->setMapping(btn, outputEdit);  
+  return btn;
+}
+
+/** 
+ * Flag an input workspace combobox with its property name
+ * @param optionsBox A QComboBox containing the options
+ */
+void AlgorithmDialog::flagInputWS(QComboBox *optionsBox)
+{
+  m_inputws_opts.push_back(optionsBox);
+}
+
+/**
  * A slot that can be used to connect a button that accepts the dialog if
  * all of the properties are valid
  */
@@ -393,6 +426,41 @@ void AlgorithmDialog::accept()
 void AlgorithmDialog::helpClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + m_algName));
+}
+
+/**
+ * A slot to handle the replace workspace button click
+ * @param outputEdit The line edit that is associated, via the signalmapper, with this click
+ */
+void AlgorithmDialog::replaceWSClicked(QWidget *outputEdit)
+{
+  QPushButton *btn = qobject_cast<QPushButton*>(m_signal_mapper->mapping(outputEdit));
+  if( !btn ) return;
+  int input =  m_wsbtn_tracker.value(btn);
+
+  QString wsname = m_inputws_opts.value(input - 1)->currentText();
+  //Adjust tracker
+  input = (input % m_inputws_opts.size() ) + 1;
+  m_wsbtn_tracker[btn] = input;
+
+  // Check if any of the other line edits have this name
+  QVector<QLineEdit*>::const_iterator iend = m_outputws_fields.constEnd();
+  for( QVector<QLineEdit*>::const_iterator itr = m_outputws_fields.constBegin();
+       itr != iend; ++itr )
+  {
+    //Check that we are not the field we are actually comparing against
+    if( (*itr) == outputEdit ) continue;
+    if( (*itr)->text() == wsname )
+    {
+      wsname += "-1";
+      break;
+    }
+  }
+  QLineEdit *edit = qobject_cast<QLineEdit*>(outputEdit);
+  if( edit )
+  {
+    edit->setText(wsname);
+  }
 }
 
 //------------------------------------------------------

@@ -60,17 +60,35 @@ void GenericDialog::initLayout()
       //Put the property boxes in a grid
       m_inputGrid = new QGridLayout;
 
+      // For the few algorithms (mainly loading) that do not have input workspaces, we do not
+      //want to render the 'replace input workspace button'. Do a quick scan to check.
+//       int iWkspRow(-1);
+//       QComboBox *inputWSBox = NULL;
+      bool haveInputWS(false);
+      std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = prop_list.end();
+      for(std::vector<Mantid::Kernel::Property*>::const_iterator pIter = prop_list.begin();
+	  pIter != pEnd; ++pIter)
+      {
+	Mantid::Kernel::Property *prop = *pIter;
+	if( prop->direction() == Mantid::Kernel::Direction::Input && 
+	    dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop) )
+	{
+	  haveInputWS = true;
+	  break;
+	}
+      }
+      
       //Each property is on its own row
       int row(-1);
-      std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = prop_list.end();
-      for ( std::vector<Mantid::Kernel::Property*>::const_iterator pIter = prop_list.begin();
-            pIter != pEnd; ++pIter )
+      for(std::vector<Mantid::Kernel::Property*>::const_iterator pIter = prop_list.begin();
+	  pIter != pEnd; ++pIter)
       {
 	Mantid::Kernel::Property* prop = *pIter;
 	QString propName = QString::fromStdString(prop->name());
-	// Only produce allow input for output properties or workspace properties
+	bool isWorkspaceProp(dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop));
+	// Only accept input for output properties or workspace properties
 	if( prop->direction() == Mantid::Kernel::Direction::Output &&
-	     !dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop) ) 
+	    !isWorkspaceProp )
 	{
 	  continue;
 	}
@@ -90,8 +108,7 @@ void GenericDialog::initLayout()
 	if( dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(prop) ) 
 	{
 	  QCheckBox *checkBox = new QCheckBox(propName);
-	  if( !checkBox ) continue;
-	  setCheckBoxState(propName, checkBox);
+	  this->setCheckBoxState(propName, checkBox);
 	  
 	  checkBox->setToolTip(  QString::fromStdString(prop->documentation()) );
 	  m_inputGrid->addWidget(new QLabel(""), row, 0, 0);
@@ -104,8 +121,9 @@ void GenericDialog::initLayout()
 	else if ( !prop->allowedValues().empty() && !fileType )
 	{
 	  //It is a choice of certain allowed values and can use a combination box
+	  //Check if this is the row that matches the one that we want to link to the
+	  //output box and used the saved combo box
 	  QComboBox *optionsBox = new QComboBox;
-	  if( !optionsBox ) continue;
 	  fillAndSetComboBox(propName, optionsBox);
 	  
 	  nameLbl->setBuddy(optionsBox);
@@ -117,7 +135,12 @@ void GenericDialog::initLayout()
 	  m_inputGrid->addWidget(validLbl, row, 2, 0);
           
 	  optionsBox->setEnabled(isEnabled);
+	  if( isWorkspaceProp )
+	  {
+	    flagInputWS(optionsBox);
+	  }
 	}
+	//For everything else render a text box
 	else 
 	{
 	  QLineEdit *textBox = new QLineEdit;
@@ -132,7 +155,18 @@ void GenericDialog::initLayout()
 	  m_inputGrid->addWidget(nameLbl, row, 0, 0);
 	  m_inputGrid->addWidget(textBox, row, 1, 0);
 	  m_inputGrid->addWidget(validLbl, row, 2, 0);
-	  
+
+	  // If this is an output workspace property and there is an input workspace property
+	  // add a button that replaces the input workspace
+	  if( isWorkspaceProp && haveInputWS )
+	  {
+	    QPushButton *inputWSReplace = this->createReplaceWSButton(textBox);
+	    if( inputWSReplace )
+	    {
+	      inputWSReplace->setEnabled(isEnabled);
+	      m_inputGrid->addWidget(inputWSReplace, row, 3, 0);
+	    }
+	  }
 	  textBox->setEnabled(isEnabled);
 	  
 	  if( fileType )
@@ -140,9 +174,7 @@ void GenericDialog::initLayout()
 	    QPushButton *browseBtn = new QPushButton(tr("Browse"));
 	    connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
 	    m_signalMapper->setMapping(browseBtn, textBox);
-	    
 	    m_inputGrid->addWidget(browseBtn, row, 3, 0);
-	    
 	    browseBtn->setEnabled(isEnabled);
 	  }
 	}//end combo box/dialog box decision

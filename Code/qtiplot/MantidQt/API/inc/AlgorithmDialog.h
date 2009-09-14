@@ -35,6 +35,7 @@ class QComboBox;
 class QCheckBox;
 class QPushButton;
 class QHBoxLayout;
+class QSignalMapper;
 
 //----------------------------------
 // Mantid Forward declarations
@@ -156,6 +157,12 @@ protected:
 
   /// Create a help button for this algorithm
   QPushButton* createHelpButton(const QString & helpText = QString("?")) const;
+  
+  /// Create a push button that when pressed will cause the input workspace to be replaced.
+  QPushButton* createReplaceWSButton(QLineEdit *outputEdit);
+
+  /// Flag an input workspace combobox with its property name
+  void flagInputWS(QComboBox *optionsBox);
 							       
  protected slots:
   
@@ -164,6 +171,9 @@ protected:
 
   /// Help button clicked;
   void helpClicked();
+
+  /// Replace WS
+  void replaceWSClicked(QWidget *outputEdit);
 
 private:
   // This is so that it can set the algorithm and initialize the layout.
@@ -232,6 +242,20 @@ private:
 
   /// A list of labels to use as validation markers
   QHash<QString, QLabel*> m_validators;
+
+  /// Store a list of the names of input workspace boxes
+  QVector<QComboBox*> m_inputws_opts;
+
+  /// Store a list of output workspace text edits
+  QVector<QLineEdit*> m_outputws_fields;
+
+  /// A map to keep track of button presses
+  QHash<QPushButton*, int> m_wsbtn_tracker;
+
+  /// A signal mapper
+  QSignalMapper *m_signal_mapper;
+
+;
   //@}
 };
 
