@@ -117,6 +117,7 @@ namespace Mantid
 	  /** This method iterates through property vector and returns  LHS and RHS workspaces group names vectors
 	  *  @param lhsWSGrpNames a vector holding names of LHS Workspace
 	  *  @param rhsWSGrpNames a vector holding names of RHS Workspace
+	  *  @param prop  vector holding the properties
 	*/
 	  void getGroupNames(const std::vector<Mantid::Kernel::Property*>&prop,std::vector<std::string> &lhsWSGrpNames,std::vector<std::string> &rhsWSGrpNames);
 	 
