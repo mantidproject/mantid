@@ -33,24 +33,23 @@
 
 #include "PythonScripting.h"
 
-// A few more Python headers
-#include <compile.h>
-#include <eval.h>
-#include <traceback.h>
+// // A few more Python headers
+// #include <compile.h>
+// #include <eval.h>
+// #include <traceback.h>
 
-// From 2.5 onwards this struct is defined in the Python header
-#if PY_VERSION_HEX < 0x020400A1
-typedef struct _traceback 
-{
-  PyObject_HEAD
-  struct _traceback *tb_next;
-  PyFrameObject *tb_frame;
-  int tb_lasti;
-  int tb_lineno;
-} PyTracebackObject;
-#endif
+// // From 2.5 onwards this struct is defined in the Python header
+// #if PY_VERSION_HEX < 0x020400A1
+// typedef struct _traceback 
+// {
+//   PyObject_HEAD
+//   struct _traceback *tb_next;
+//   PyFrameObject *tb_frame;
+//   int tb_lasti;
+//   int tb_lineno;
+// } PyTracebackObject;
+// #endif
 
-#include "PythonScript.h"
 #include "ApplicationWindow.h"
 
 #include <QObject>

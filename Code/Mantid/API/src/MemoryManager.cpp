@@ -199,6 +199,7 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
 #endif
 
   if (isCompressedOK)
+  {
     if (goManaged)
     {
       int notOK = 0;
@@ -215,7 +216,10 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
       }
     }
     else
+    {
       *isCompressedOK = false;
+    }
+  }
 
   g_log.debug() << "Requested memory: " << wsSize * sizeof(double) << " KB.\n";
   g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";

@@ -26,8 +26,8 @@ struct Algorithm_descriptor
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-  class IAlgorithm;
-  class Algorithm;
+class IAlgorithm;
+class Algorithm;
 /** The AlgorithmFactory class is in charge of the creation of concrete
     instances of Algorithms. It inherits most of its implementation from
     the Dynamic Factory base class.
@@ -66,7 +66,7 @@ class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory
     void subscribe()
 	  {
 		  Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
-		  boost::shared_ptr<Algorithm> tempAlg = newI-> createInstance();
+		  boost::shared_ptr<IAlgorithm> tempAlg = newI-> createInstance();
       
 		  const int version = extractAlgVersion(tempAlg);
           const std::string className = extractAlgName(tempAlg);

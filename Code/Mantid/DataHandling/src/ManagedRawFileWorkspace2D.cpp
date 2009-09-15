@@ -11,6 +11,7 @@
 #include "MantidKernel/System.h"
 
 #include "LoadRaw/isisraw2.h"
+#include <cstdio>
 #include <boost/timer.hpp>
 #include "Poco/File.h"
 #include "Poco/Path.h"

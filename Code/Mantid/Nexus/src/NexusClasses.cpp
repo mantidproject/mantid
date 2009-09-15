@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/Exception.h"
+#include <cstdio>
 
 namespace Mantid
 {

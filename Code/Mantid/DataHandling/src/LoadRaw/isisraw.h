@@ -11,10 +11,12 @@ struct ISISCRPT_STRUCT;
 #include <stdlib.h>
 #include <string.h>
 #include "item_struct.h"
-#ifdef _WIN32
+#ifdef _WIN32 /* _WIN32 */
 typedef unsigned uint32_t;
 #include <time.h>
-#endif /* _WIN32 */
+#else
+#include <stdint.h> //MG 15/09/09: Required for gcc4.4
+#endif 
 
 
 /// Run header (80 bytes)

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidAPI/WorkspaceProperty.h"
-
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

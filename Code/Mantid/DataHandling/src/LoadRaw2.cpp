@@ -18,7 +18,7 @@
 #include <boost/shared_ptr.hpp>
 #include "Poco/Path.h"
 #include <cmath>
-#include <iostream>
+#include <cstdio> //Required for gcc 4.4
 
 namespace Mantid
 {

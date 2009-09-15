@@ -7,7 +7,7 @@
 * subscribe method.
 */
 #define DECLARE_ALGORITHM(classname) \
-	namespace { \
+        namespace { \
 	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
 	((Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()) \
 	, 0)); \
@@ -18,19 +18,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/Property.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/FrameworkManager.h"
-
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include <boost/shared_ptr.hpp>
 #include <Poco/ActiveMethod.h>
 #include <Poco/NotificationCenter.h>
@@ -39,6 +38,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <cmath>
 
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "unknown"
@@ -322,5 +322,6 @@ namespace Mantid
 
 	} // namespace API
 } // namespace Mantid
+
 
 #endif /*MANTID_API_ALGORITHM_H_*/

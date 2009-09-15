@@ -4,8 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
-
-#include <iostream>
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::Kernel;
 

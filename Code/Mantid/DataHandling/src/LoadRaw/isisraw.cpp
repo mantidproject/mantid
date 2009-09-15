@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include "isisraw.h"
 #include "vms_convert.h"
 #include "byte_rel_comp.h"

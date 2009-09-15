@@ -30,7 +30,7 @@
 #define PYTHON_SCRIPT_H
 
 #include "Script.h"
-#include "Python.h"
+#include "PythonSystemHeader.h"
 
 class QObject;
 class QString;

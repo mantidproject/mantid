@@ -7,6 +7,7 @@
 
 // The isis RAW data structure
 #include "LoadRaw/isisraw2.h"
+#include <cstdio> //MG: Required for gcc 4.4
 
 namespace Mantid
 {

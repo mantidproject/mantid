@@ -5,6 +5,7 @@
 #include "MantidKernel/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidAPI/TableRow.h"
+#include <cstdio>
 
 // Register the algorithm into the AlgorithmFactory
 namespace Mantid

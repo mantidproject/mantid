@@ -31,8 +31,6 @@
 
 #include "ScriptingEnv.h"
 #include "PythonScript.h"
-#include <Python.h>
-#include <frameobject.h>
 
 class QObject;
 class QString;

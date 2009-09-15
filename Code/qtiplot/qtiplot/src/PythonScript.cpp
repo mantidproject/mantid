@@ -30,8 +30,7 @@
 #ifdef _POSIX_C_SOURCE
 #undef _POSIX_C_SOURCE
 #endif
-#include <Python.h>
-#include <frameobject.h>
+
 #include "PythonScript.h"
 #include "PythonScripting.h"
 #include "ApplicationWindow.h"

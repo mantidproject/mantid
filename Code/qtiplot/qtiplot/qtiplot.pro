@@ -645,7 +645,7 @@ contains(SCRIPTING_LANGS, Python) {
   
   DEFINES += SCRIPTING_PYTHON
 
-  HEADERS += src/PythonScript.h src/PythonScripting.h
+  HEADERS += src/PythonSystemHeader.h src/PythonScript.h src/PythonScripting.h
   SOURCES += src/PythonScript.cpp src/PythonScripting.cpp
 
   unix {
