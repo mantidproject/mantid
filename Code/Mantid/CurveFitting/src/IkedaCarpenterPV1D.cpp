@@ -5,6 +5,8 @@
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
 
+#include "MantidKernel/UnitFactory.h"
+
 namespace Mantid
 {
 namespace CurveFitting
@@ -14,6 +16,7 @@ namespace CurveFitting
 DECLARE_ALGORITHM(IkedaCarpenterPV1D)
 
 using namespace Kernel;
+//using API::MatrixWorkspace_const_sptr;
 
 void IkedaCarpenterPV1D::declareParameters()
 {
@@ -44,6 +47,40 @@ void IkedaCarpenterPV1D::declareParameters()
     "Constant background value (default 0)", Direction::InOut);
 }
 
+void IkedaCarpenterPV1D::afterDataRangedDetermined(const int& m_minX, const int& m_maxX)
+{
+  if (!mWaveLengthFixed)
+  { 
+    API::MatrixWorkspace_const_sptr workspace = getProperty("InputWorkspace");
+    int histNumber = getProperty("WorkspaceIndex");
+
+    // Get the geometric information for this detector
+    API::IInstrument_const_sptr instrument = workspace->getInstrument();
+    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+    const double l1 = instrument->getSource()->getDistance(*sample);
+    Geometry::IDetector_sptr det = workspace->getDetector(histNumber);  // i is the workspace index
+    const double l2 = det->getDistance(*sample);
+    const double twoTheta = workspace->detectorTwoTheta(det);
+   
+    Mantid::Kernel::Unit_const_sptr wavelength = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+    mWaveLength = workspace->readX(histNumber); // Copy the TOF values for the spectrum of interest
+    MantidVec y; // Create an empty vector, it's not used in fromTOF
+    wavelength->fromTOF(mWaveLength,y,l1,l2,twoTheta,0,0.0,0.0);
+
+    //std::cout <<  mWaveLength[m_minX] << std::endl;
+    if (m_minX > 0)
+      mWaveLength.erase(mWaveLength.begin(), mWaveLength.begin()+m_minX);
+    
+    mWaveLength.resize(m_maxX - m_minX);
+
+    //std::cout << m_minX << "  " << m_maxX << "  " << m_maxX - m_minX << "  " << mWaveLength.size() << std::endl;
+    //std::cout <<  mWaveLength[0] << std::endl;
+
+    // std::cout << std::endl << mWaveLength[0] << std::endl;
+    // The x you get back is now the wavelength values
+  }
+}
+
 
 
 void IkedaCarpenterPV1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
@@ -64,7 +101,7 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
 
     // equations here copied straight from Fullprof manual
 
-    const double R = exp(-81.799/kappa);  // assume wavelength = 1
+    //const double R = exp(-81.799/kappa);  // assume wavelength = 1
     const double k = 0.05;
     const double a_minus = alpha*(1-k);
     const double a_plus = alpha*(1+k);
@@ -72,18 +109,24 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
     const double y=alpha-beta;
     const double z=a_plus-beta;    
 
-    const double Nu=1-R*a_minus/x;
-    const double Nv=1-R*a_plus/z;
-    const double Ns=-2*(1-R*alpha/y);
-    const double Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
-
     double u,v,s,r;
     double yu, yv, ys, yr;
 
     const double someConst = 1/sqrt(2.0*SigmaSquared);
 
+    double R, Nu, Nv, Ns, Nr;
+
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-X0;
+
+        if (mWaveLengthFixed)
+          R = exp(-81.799/(mWaveLength[0]*mWaveLength[0]*kappa));
+        else
+          R = exp(-81.799/(mWaveLength[i]*mWaveLength[i]*kappa));
+        Nu=1-R*a_minus/x;
+        Nv=1-R*a_plus/z;
+        Ns=-2*(1-R*alpha/y);
+        Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
 
         u=a_minus*(a_minus*SigmaSquared-2*diff)/2.0;
         v=a_plus*(a_plus*SigmaSquared-2*diff)/2.0;

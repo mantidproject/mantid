@@ -100,7 +100,7 @@ public:
 
   void testAgainstMockData()
   {
-    IkedaCarpenterPV1D alg2;
+    IkedaCarpenterPV1D alg2(1.0);
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
 
@@ -168,6 +168,69 @@ public:
 
     AnalysisDataService::Instance().remove("IkedaCarpenterPV1D_GaussMockData");
   }
+
+  void testAgainstHRPD_data()
+  {
+    LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "../../../../Test/Data/HRP39182.RAW");
+    loader.setPropertyValue("OutputWorkspace", "HRP39182");
+    loader.execute();
+
+    IkedaCarpenterPV1D alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace", "HRP39182");
+    alg.setPropertyValue("WorkspaceIndex","3");
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
+    alg.setPropertyValue("I", "95000");
+    alg.setPropertyValue("Alpha0", "1.597107");
+    alg.setPropertyValue("Alpha1", "1.496805");
+    alg.setPropertyValue("Beta0", "31.891718");
+    alg.setPropertyValue("Kappa", "46.025921");
+    alg.setPropertyValue("SigmaSquared", "100.0"); //"90.0");
+    //alg2.setPropertyValue("Gamma", "1.0");
+    //alg2.setPropertyValue("Eta", "0.0");
+    alg.setPropertyValue("X0", "79400");
+    alg.setPropertyValue("Fix","BG, Alpha0, Alpha1, Beta0, Kappa, Gamma, Eta");
+
+    // execute fit
+   TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg.execute() )
+    )
+
+    TS_ASSERT( alg.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 2.9,1);
+    dummy = alg.getProperty("I");
+    TS_ASSERT_DELTA( dummy, 293704 ,1);
+    dummy = alg.getProperty("Alpha0");
+    TS_ASSERT_DELTA( dummy, 1.597107 ,0.0001);
+    dummy = alg.getProperty("Alpha1");
+    TS_ASSERT_DELTA( dummy, 1.496805 ,0.001);
+    dummy = alg.getProperty("Beta0");
+    TS_ASSERT_DELTA( dummy, 31.891718 ,0.0001);
+    dummy = alg.getProperty("Kappa");
+    TS_ASSERT_DELTA( dummy, 46.025921 ,0.0001);
+    dummy = alg.getProperty("SigmaSquared");
+    TS_ASSERT_DELTA( dummy, 439.0 ,1);
+    dummy = alg.getProperty("Gamma");
+    TS_ASSERT_DELTA( dummy, 1.0 ,0.0001);
+    dummy = alg.getProperty("Eta");
+    TS_ASSERT_DELTA( dummy, 0.0 ,0.0001);
+    dummy = alg.getProperty("X0");
+    TS_ASSERT_DELTA( dummy, 79389.0 ,1);
+    dummy = alg.getProperty("BG");
+    TS_ASSERT_DELTA( dummy, 0.0 ,0.0001);
+
+    AnalysisDataService::Instance().remove("HRP39182");
+  }
+
 
 
 private:

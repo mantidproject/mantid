@@ -95,6 +95,8 @@ namespace Mantid
       virtual void declareAdditionalProperties(){};
       /// Called in the beginning of exec(). Custom initialization
       virtual void prepare(){};
+      /// Called after the data ranged has been determined but before the fitting starts
+      virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
 
       /// Declare parameters specific to fitting function
       virtual void declareParameters() = 0;

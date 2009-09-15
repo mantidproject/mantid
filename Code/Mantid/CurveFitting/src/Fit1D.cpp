@@ -337,8 +337,8 @@ void Fit1D::exec()
     modifyEndOfRange(endX); // does nothing by default but derived class may previde a more intelligent value
   }
 
-  int m_minX; // The X bin to start the fitting from
-  int m_maxX; // The X bin to finish the fitting at
+  int m_minX;
+  int m_maxX;
 
   // Check the validity of startX
   if ( startX < XValues.front() )
@@ -361,6 +361,7 @@ void Fit1D::exec()
     for (m_maxX = m_minX; XValues[m_maxX] < endX; ++m_maxX) {}
   }
 
+  afterDataRangedDetermined(m_minX, m_maxX);
 
   // create and populate GSL data container warn user if l_data.n < l_data.p 
   // since as a rule of thumb this is required as a minimum to obtained 'accurate'
