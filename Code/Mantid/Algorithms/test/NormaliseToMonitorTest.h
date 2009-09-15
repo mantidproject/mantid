@@ -96,12 +96,6 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("InputWorkspace","normMon") )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("OutputWorkspace","normMon2") )
-    // Check it fails if MonitorIndex is set to a non-monitor spectrum
-    TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("MonitorSpectrum","1") )
-    TS_ASSERT_THROWS_NOTHING( norm.execute() )
-    TS_ASSERT( ! norm.isExecuted() )
-
-    // Now it should succeed
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("MonitorSpectrum","0") )
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )
