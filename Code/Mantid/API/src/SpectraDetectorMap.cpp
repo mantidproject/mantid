@@ -29,6 +29,8 @@ namespace Mantid
       }
       for (int i=0; i<nentries; ++i)
       {
+        // Uncomment the line below to get a print out of the mapping as it's loaded
+        // g_log.error() << *_spectable << " " << *_udettable << std::endl;
         m_s2dmap.insert(std::pair<int,int>(*_spectable,*_udettable)); // Insert current detector with Spectra number as key 
         ++_spectable;
         ++_udettable;

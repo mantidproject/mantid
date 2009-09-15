@@ -101,7 +101,6 @@ public:
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     boost::shared_ptr<Sample> sample = output2D->getSample();
-    const std::vector< Property* >& pro = sample->getLogData();
     Property *l_property = sample->getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();

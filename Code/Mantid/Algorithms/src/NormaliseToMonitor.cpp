@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
+//#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cfloat>
 
@@ -121,7 +122,7 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
 
   if (inWS)
   {
-    // Check that the spectrum given is related to a monitor
+    // Get hold of the monitor spectrum
     const int monitorSpec = getProperty("MonitorSpectrum");
     if (monitorSpec < 1)
     {
@@ -130,11 +131,6 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
     Axis::spec2index_map specs;
     inputWorkspace->getAxis(1)->getSpectraIndexMap(specs);
     const int monitorIndex = specs[monitorSpec];
-    if (! inputWorkspace->getDetector(monitorIndex)->isMonitor() )
-    {
-      g_log.error("MonitorSpectrum does not refer to a monitor spectrum");
-      throw std::runtime_error("MonitorSpectrum does not refer to a monitor spectrum");
-    }
     m_monitor = this->extractMonitorSpectrum(inputWorkspace,monitorIndex);
   }
   else
@@ -166,12 +162,6 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
       g_log.error("The MonitorWorkspace must contain histogram data");
       throw std::runtime_error("The MonitorWorkspace must contain histogram data");
     }
-    // Check that the spectrum relates to a monitor
-    if ( !m_monitor->getDetector(0)->isMonitor() )
-    {
-      g_log.error("The spectrum in MonitorWorkspace does not refer to a monitor");
-      throw std::runtime_error("The spectrum in MonitorWorkspace does not refer to a monitor");
-    }
     // Check that the two workspace come from the same instrument
     if ( m_monitor->getBaseInstrument() != inputWorkspace->getBaseInstrument() )
     {
@@ -188,6 +178,20 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
     // In this case we need to test whether the bins in the monitor workspace match
     m_commonBins = (m_commonBins && 
                     API::WorkspaceHelpers::matchingBins(inputWorkspace,m_monitor,true) );
+  }
+
+  // Check that the 'monitor' spectrum actually relates to a monitor - warn if not
+  try {
+    Geometry::IDetector_const_sptr mon = m_monitor->getDetector(0);
+    if ( !mon->isMonitor() )
+    {
+      g_log.warning("The spectrum in MonitorWorkspace does not refer to a monitor.\n"
+                    "Continuing with normalisation regardless.");
+    }
+  } catch (Kernel::Exception::NotFoundError) {
+    g_log.warning("Unable to check if the spectrum provided relates to a monitor - "
+                  "the instrument is not fully specified.\n"
+                  "Continuing with normalisation regardless.");
   }
 
 }

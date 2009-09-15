@@ -74,11 +74,9 @@ public:
     ManagedRawFileWorkspace2D ws("../../../../Test/Data/HET15869.RAW");
 
     std::vector<double>& y0 = ws.dataY(0);
-    double oldValue0 = y0[100];
     y0[100] = 1234.;
 
     std::vector<double>& y1000 = ws.dataY(1000);
-    double oldValue1000 = y1000[200];
     y1000[200] = 4321.;
 
     TS_ASSERT_EQUALS( ws.dataY(0)[100], 1234. )
