@@ -28,9 +28,12 @@ import os
 import types
 import re
 import time
+import datetime
 import platform
 import subprocess
 import tempfile
+
+import MySQLdb
 
 #########################################################################
 # The base test class.
@@ -68,17 +71,15 @@ class MantidStressTest(object):
         '''
         # Start timer
         start = time.time()
-        self.reportResult('Start time', time.strftime("%d %b %Y %H:%M:%S", time.localtime()))
-        self.reportResult('No iterations', self.maxIterations())
         countmax = self.maxIterations() + 1
         for i in range(1, countmax):
             istart = time.time()
             self.runTest()
             delta_t = time.time() - istart
-            self.reportResult('Loop ' + str(i) + ' time', '%.2f' % delta_t)
+            self.reportResult('iteration time_taken', str(i) + ' %.2f' % delta_t)
         delta_t = float(time.time() - start)
         # Finish
-        self.reportResult('Total time', '%.2f' % delta_t)
+        #self.reportResult('time_taken', '%.2f' % delta_t)
                          
     def cleanup(self):
         '''
@@ -92,7 +93,7 @@ class MantidStressTest(object):
 #########################################################################
 class TestResult(object):
     '''
-    Stores the results of each test so that they can be reported later
+    Stores the results of each test so that they can be reported later.
     '''
     
     def __init__(self):
@@ -124,14 +125,14 @@ class ResultReporter(object):
     def __init__(self):
         '''Initialize a class instance, e.g. connect to a database'''
         pass
-        
+
     def dispatchResults(self, result):
         raise NotImplementedError('"dispatchResults(self, result)" should be overridden in a derived class')
 
 #########################################################################
 # A class to report results as formatted text output
 #########################################################################
-class TextResultReporter(object):
+class TextResultReporter(ResultReporter):
     '''
     Report the results of a test using standard out
     '''
@@ -147,6 +148,62 @@ class TextResultReporter(object):
         print '*' * nstars
 
 #########################################################################
+# A class to report the results to the Mantid Test database 
+# (requires MySqldb module)
+#########################################################################
+class SQLResultReporter(ResultReporter):
+    '''
+    Send the test results to the Mantid test results database
+    '''
+
+    def __init__(self):
+        self._testfields = ['test_date', 'test_name', 'host_name', 'environment', 'status']
+        pass
+
+    def getConnection(self, host = 'ndw714', user='root', passwd='mantid',
+                 db='mantidstresstests'):
+        return MySQLdb.connect(host = host, user = user, passwd = passwd,
+                               db = db)
+    
+    def dispatchResults(self, result):
+        '''
+        Construct the SQL commands and send them to the databse
+        '''
+        dbcxn = self.getConnection()
+        cur = dbcxn.cursor()
+        last_id = dbcxn.insert_id()
+
+        testruns = []
+        itrtimings = []
+        for res in result.resultLogs():
+            name = res[0]
+            if name.startswith('iter'):
+                itrtimings.append(res)
+            else:
+                testruns.insert(self._testfields.index(res[0]), res[1])
+                
+        valuessql = "INSERT INTO testruns VALUES(NULL, " 
+        for r in testruns:
+            valuessql += "'" + r + "',"
+        valuessql = valuessql.rstrip(',')
+        valuessql += (')')
+        cur.execute(valuessql)
+        # Save test id for iteration table
+        test_id = dbcxn.insert_id()
+        
+        if len(itrtimings) > 0:
+            valuessql = "INSERT INTO iterationtimings VALUES(" + str(test_id) + ','
+            for itr in itrtimings:
+                values = itr[1].split(' ')
+                sql = valuessql + str(values[0]) + ',' + str(values[1]) + ')'
+                cur = dbcxn.cursor()
+                cur.execute(sql)
+
+        dbcxn.commit()
+        cur.close()
+        dbcxn.close()
+
+#########################################################################
 # A base class for a TestRunner
 #########################################################################
 class PythonTestRunner(object):
@@ -154,6 +211,8 @@ class PythonTestRunner(object):
     A base class to serve as a wrapper to actually run the tests in a specific 
     environment, i.e. console, gui
     '''
+    SEGFAULT_CODE = 139
+
     def __init__(self, need_escaping = False):
         self._mtdpy_header = ''
         self._test_dir = ''
@@ -205,10 +264,10 @@ class PythonTestRunner(object):
         '''
         Spawn a new process and run the given command within it
         '''
-        proc = subprocess.Popen(cmd, shell=True, stdout = subprocess.PIPE)
+        proc = subprocess.Popen(cmd, shell = True, stdout = subprocess.PIPE)
         std_out = proc.communicate()[0]
-        return proc.returncode, std_out
-
+        return proc.returncode, std_out 
+    
     def start(self, pycode):
         '''
         Run the given test code in a new subprocess
@@ -285,11 +344,21 @@ class TestSuite(object):
 
         self._result = TestResult()
         # Add some results that are not linked to the actually test itself
-        self._result.addItem(['Test', self._fullname])
+        self._result.addItem(['test_name', self._fullname])
         sysinfo = platform.uname()
-        self._result.addItem(['OS', sysinfo[0]])
-        self._result.addItem(['Hostname', sysinfo[1]])
-        self._result.addItem(['Arch', sysinfo[4]])
+        self._result.addItem(['host_name', sysinfo[1]])
+        self._result.addItem(['environment', self.envAsString()])
+
+    def envAsString(self):
+        if os.name == 'nt':
+            system = platform.system().lower()[:3]
+            arch = platform.architecture()[0][:2]
+            env = system + arch
+        elif os.name == 'mac':
+            env = platform.mac_ver()[0]
+        else:
+            env = platform.dist()[0]
+        return env
 
     def execute(self, runner):
         print time.strftime("%a, %d %b %Y %H:%M:%S", time.localtime()) + ': Executing ' + self._fullname
@@ -297,7 +366,19 @@ class TestSuite(object):
         # Construct the code to execute in a separate sub process
         pycode = 'import ' + self._modname + ';' + self._fullname + '().execute()'
         # Start the new process
+        self._result.addItem(['test_date',datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
         retcode, output = runner.start(pycode)
+        if retcode == 0:
+            status = 'success'
+        elif retcode == PythonTestRunner.SEGFAULT_CODE:
+            status = 'crashed'
+        elif retcode < 0:
+            status = 'hung'
+        else:
+            status = 'unknown'
+
+        # Check return code and add result
+        self._result.addItem(['status', status])
         all_lines = output.split('\n')
         for line in all_lines:
             entries = line.split(MantidStressTest.DELIMITER)
@@ -306,7 +387,7 @@ class TestSuite(object):
             else:
                 print line
                 
-    def reportResults(self, reporter = TextResultReporter):
+    def reportResults(self, reporter):
         reporter.dispatchResults(self._result)
 
 #########################################################################
@@ -340,7 +421,7 @@ class TestManager(object):
         sys.path.append(os.path.abspath(mtdheader_dir).replace('\\','/'))
         if os.name == 'posix':
             sys.path.append(os.environ['HOME'] + '/.mantid')
-        execfile(runner._mtdpy_header)
+            execfile(runner._mtdpy_header)
 
     def executeAllTests(self):
         # Get the defined tests
