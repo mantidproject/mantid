@@ -219,6 +219,10 @@ def CreateQuadrant(workspace, quadrant, xcentre, ycentre, rmin, rmax):
 	objxml = QuadrantXML([xcentre,ycentre, 0.0], rmin, rmax, quadrant)
 	finddead = FindDetectorsInShape(workspace, ShapeXML=objxml)
 	groupdet = GroupDetectors(workspace, quadrant, DetectorList = finddead.getPropertyValue("DetectorList"))
+	# Replaces NANs with zeroes
+	ReplaceSpecialValues(InputWorkspace=quadrant,OutputWorkspace=quadrant,NaNValue="0",InfinityValue="0")
+	# Crop Workspace to remove leading and trailing zeroes
+	StripEndZeroes(quadrant)
 
 # Create 4 quadrants for the centre finding algorithm and return their names
 def GroupIntoQuadrants(workspace, xcentre, ycentre, rmin, rmax):

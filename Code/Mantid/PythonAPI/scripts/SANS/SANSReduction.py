@@ -280,11 +280,6 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 			mantid.deleteWorkspace("solidangle")
 			PoissonErrors(tmpWS, final_result, final_result)
 			mantid.deleteWorkspace(tmpWS)
-			# Replaces NANs with zeroes
-			ReplaceSpecialValues(InputWorkspace=final_result,OutputWorkspace=final_result,NaNValue="0",InfinityValue="0")
-			# Crop Workspace to remove leading and trailing zeroes
-			if CORRECTION_TYPE == '1D':
-				SANSUtility.StripEndZeroes(final_result)
 			return
 		
 		# Sum all spectra
@@ -322,17 +317,14 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 
 	# Calculate transmission first if a run is available 
 	# It is only calculated once across the whole wavelength range and reused later
-	trans_final = TRANS_SAMPLE.split('_')[0] + "_trans_"
-	transinput = ''
-	final_workspace = ''
 	if EmptyCell == True:
-		trans_final += 'can'
 		trans_input = TRANS_CAN
+		trans_suffix = 'can'
 		final_workspace = "temp_can_holder"
 	else:
-		trans_final += 'sample'
 		trans_input = TRANS_SAMPLE
-		# Final workspace is named run+{bank}+_correctiontype for the sample run
+		trans_suffix = 'sample'
+        # Final workspace is named run+{bank}+_correctiontype for the sample run
 		final_workspace = run_ws.split('_')[0]
 		if DETBANK == 'front-detector':
 			final_workspace += 'front'
@@ -344,6 +336,7 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 			final_workspace += 'HAB'
 		final_workspace += '_' + CORRECTION_TYPE
 
+	trans_final = trans_input.split('_')[0] + "_trans_" + trans_suffix
 	have_sample_trans = CalculateTransmissionCorrection(trans_input, DIRECT_SAMPLE, FULLWAVBIN, trans_final)
 	if have_sample_trans == False:
 		trans_final = ''
@@ -365,8 +358,8 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
 	if can_setup[1] != '':
 		# Run correction function
 		Correct(SCATTER_CAN, can_setup[0], can_setup[1], wav_start, wav_end, can_setup[2], can_setup[3], FindingCentre)
-		Minus(final_workspace, can_setup[1], final_workspace)
-		mantid.deleteWorkspace(can_setup[1])
+		#Minus(final_workspace, can_setup[1], final_workspace)
+		#mantid.deleteWorkspace(can_setup[1])
 	return final_workspace
 ############################################################################################################################
 
