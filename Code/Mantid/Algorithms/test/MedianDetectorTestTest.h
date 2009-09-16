@@ -279,12 +279,11 @@ public:
 private:
   std::string m_IWSName;
   double m_YSum;
-  enum { Nhist = 144 };
+  enum { THEMASKED = 40, Nhist = 144 };
   //these values must match the values in DetectorEfficiencyVariation.h
   const double BadVal;
   const double GoodVal;
 
-  static const int THEMASKED = 40;
 };
 
 #endif /*WBVMEDIANTESTTEST_H_*/
