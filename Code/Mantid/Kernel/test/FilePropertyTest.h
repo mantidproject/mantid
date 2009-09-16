@@ -42,7 +42,7 @@ public:
     TS_ASSERT_EQUALS(msg, "")    
 
     // Test case-insensitivity
-    msg = fp->setValue("AL15739.RAW");
+    msg = fp->setValue("ALF15739.RAW");
     TS_ASSERT_EQUALS(msg, "")    
 
     //Check incorrect extension
