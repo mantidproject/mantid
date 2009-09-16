@@ -19,6 +19,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/Property.h"
