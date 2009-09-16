@@ -61,9 +61,8 @@ void GenericDialog::initLayout()
       m_inputGrid = new QGridLayout;
 
       // For the few algorithms (mainly loading) that do not have input workspaces, we do not
-      //want to render the 'replace input workspace button'. Do a quick scan to check.
-//       int iWkspRow(-1);
-//       QComboBox *inputWSBox = NULL;
+      // want to render the 'replace input workspace button'. Do a quick scan to check.
+      // Also the ones that don't have a set of allowed values as input workspace
       bool haveInputWS(false);
       std::vector<Mantid::Kernel::Property*>::const_iterator pEnd = prop_list.end();
       for(std::vector<Mantid::Kernel::Property*>::const_iterator pIter = prop_list.begin();
@@ -73,11 +72,13 @@ void GenericDialog::initLayout()
 	if( prop->direction() == Mantid::Kernel::Direction::Input && 
 	    dynamic_cast<Mantid::API::IWorkspaceProperty*>(prop) )
 	{
-	  haveInputWS = true;
+	  if( !prop->allowedValues().empty() )
+	  {
+	    haveInputWS = true;
+	  }
 	  break;
 	}
       }
-      
       //Each property is on its own row
       int row(-1);
       for(std::vector<Mantid::Kernel::Property*>::const_iterator pIter = prop_list.begin();
