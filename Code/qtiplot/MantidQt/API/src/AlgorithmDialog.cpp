@@ -382,6 +382,9 @@ QPushButton* AlgorithmDialog::createHelpButton(const QString & helpText) const
 QPushButton* AlgorithmDialog::createReplaceWSButton(QLineEdit *outputEdit)
 {
   QPushButton *btn = new QPushButton(QIcon(":/data_replace.png"), "");
+  // MG: There is no way with the QIcon class to actually ask what size it is so I had to hard
+  // code this number here to get it to a sensible size
+  btn->setMaximumWidth(32);
   m_wsbtn_tracker[btn ] = 1;
   btn->setToolTip("Replace input workspace");
   m_outputws_fields.push_back(outputEdit);
