@@ -18,11 +18,8 @@ namespace Algorithms
     Sum(Dlam_i) the sum of all bin widths (the full range).
 
     Optionally, can instead normalise by the integrated monitor count over a specified
-    range in X. In this case, the range of the output workspace will have its limits
-    at the closest bins within the range values given (i.e. bins may be removed with
-    respect to the start and end of the input workspace, but the bin boundaries will
-    remain the same). No bin width correction takes place in this case. In this scenario
-    the input workspace must have common bins.
+    range in X. In this case all bins in all spectra will simply be divided by this
+    integrated count. No bin width correction takes place in this case.
 
     The monitor spectrum can be provided either as an index in the main input workspace
     or as a separate single-spectrum workspace.
@@ -89,7 +86,6 @@ private:
 
   void normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace, 
                                   API::MatrixWorkspace_sptr& outputWorkspace);
-  void cropWorkspace(API::MatrixWorkspace_sptr& WS);
 
   void normaliseBinByBin(API::MatrixWorkspace_const_sptr inputWorkspace,
                          API::MatrixWorkspace_sptr& outputWorkspace);

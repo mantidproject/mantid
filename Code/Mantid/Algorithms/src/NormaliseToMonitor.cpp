@@ -4,7 +4,6 @@
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
-//#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cfloat>
 
@@ -269,14 +268,6 @@ bool NormaliseToMonitor::setIntegrationProps(API::MatrixWorkspace_const_sptr inp
     m_integrationMax = m_monitor->readX(0).back();
   }
   
-  // Must have common bins for this operation.
-  // Second test will always pass if only 1 input workspace and first test passed
-  if (!m_commonBins)
-  {
-    g_log.error("The input workspace(s) must have common bins to normalise by integrated count");
-    throw std::runtime_error("The input workspace(s) must have common bins to normalise by integrated count");
-  }
-
   //Return indicating that these properties should be used
   return true;
 }
@@ -288,16 +279,11 @@ bool NormaliseToMonitor::setIntegrationProps(API::MatrixWorkspace_const_sptr inp
 void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace,
                                                     API::MatrixWorkspace_sptr& outputWorkspace)
 {
-  // Don't run CropWorkspace algorithm if integrating over full workspace range
-  if ( m_integrationMin != m_monitor->readX(0).front() || m_integrationMax != m_monitor->readX(0).back() )
-  {
-    this->cropWorkspace(inputWorkspace);
-    this->cropWorkspace(m_monitor);
-  }
-
   // Add up all the bins so it's just effectively a single value with an error
   IAlgorithm_sptr integrate = createSubAlgorithm("Integration");
   integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
+  integrate->setProperty("RangeLower",m_integrationMin);
+  integrate->setProperty("RangeUpper",m_integrationMax);
   try {
     integrate->execute();
   } catch (std::runtime_error) {
@@ -321,24 +307,6 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
   // Get back the result
   outputWorkspace = divide->getProperty("OutputWorkspace");
   outputWorkspace->setYUnit(""); // It's now dimensionless
-}
-
-/// Calls CropWorkspace on a workspace as a sub-algorithms
-void NormaliseToMonitor::cropWorkspace(API::MatrixWorkspace_sptr& WS)
-{ 
-  IAlgorithm_sptr crop = createSubAlgorithm("CropWorkspace");
-  DataObjects::Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(WS);
-  crop->setProperty("InputWorkspace", input2D);
-  crop->setProperty("XMin",m_integrationMin);
-  crop->setProperty("Xmax",m_integrationMax);
-  try {
-    crop->execute();
-  } catch (std::runtime_error) {
-    g_log.error("Unable to successfully run CropWorkspace sub-algorithm");
-    throw;
-  }
-  // Get back the result
-  WS = crop->getProperty("OutputWorkspace");
 }
 
 /** Carries out the bin-by-bin normalisation

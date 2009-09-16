@@ -144,7 +144,7 @@ public:
     {
       for (int j = 0; j < output->blocksize(); ++j)
       {
-        TS_ASSERT_EQUALS( output->readX(i)[j], j+5 )
+        TS_ASSERT_EQUALS( output->readX(i)[j], j )
         TS_ASSERT_EQUALS( output->readY(i)[j], 0.04 )
         TS_ASSERT_DELTA( output->readE(i)[j], 0.0602, 0.0001 )
       }
@@ -153,7 +153,7 @@ public:
     // Now check the monitor one
     for (int k = 0; k < output->blocksize(); ++k)
     {
-      TS_ASSERT_EQUALS( output->readX(0)[k], k+5 )
+      TS_ASSERT_EQUALS( output->readX(0)[k], k )
       TS_ASSERT_EQUALS( output->readY(0)[k], 0.2 )
       TS_ASSERT_DELTA( output->readE(0)[k], 0.0657, 0.0001 )
     }
