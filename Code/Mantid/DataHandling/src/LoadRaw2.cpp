@@ -196,7 +196,7 @@ namespace Mantid
             //localWorkspace->newInstrumentParameters(); ????
         }
 
-        isisRaw->skipData(period*(m_numberOfSpectra+1));
+        isisRaw->skipData(file,period*(m_numberOfSpectra+1));
         int counter = 0;
         for (int i = 1; i <= m_numberOfSpectra; ++i)
         {
@@ -204,7 +204,7 @@ namespace Mantid
             if ((i >= m_spec_min && i < m_spec_max) ||
                 (m_list && find(m_spec_list.begin(),m_spec_list.end(),i) != m_spec_list.end()))
             {
-                isisRaw->readData(histToRead);
+                isisRaw->readData(file,histToRead);
                 // Copy the data into the workspace vector, discarding the 1st entry, which is rubbish
                 // But note that the last (overflow) bin is kept
                 MantidVec& Y = localWorkspace->dataY(counter);
@@ -222,7 +222,7 @@ namespace Mantid
             }
             else
             {
-                isisRaw->skipData(histToRead);
+                isisRaw->skipData(file,histToRead);
             }
         }
 

@@ -174,7 +174,7 @@ void LoadRaw3::exec()
       //localWorkspace->newInstrumentParameters(); ????
 
     }
-    isisRaw->skipData(period * (m_numberOfSpectra + 1));
+    isisRaw->skipData(file,period * (m_numberOfSpectra + 1));
     int counter = 0;
 
     for (int i = 1; i <= m_numberOfSpectra; ++i)
@@ -184,7 +184,7 @@ void LoadRaw3::exec()
           i) != m_spec_list.end()))
       {
         progress(m_prog,"Reading raw file data...");
-        isisRaw->readData(histToRead);
+        isisRaw->readData(file,histToRead);
         // Copy the data into the workspace vector, discarding the 1st entry, which is rubbish
         // But note that the last (overflow) bin is kept
         MantidVec& Y = localWorkspace->dataY(counter);
@@ -212,7 +212,7 @@ void LoadRaw3::exec()
       }
       else
       {
-        isisRaw->skipData(histToRead);
+        isisRaw->skipData(file,histToRead);
       }
     }
     // Just a sanity check

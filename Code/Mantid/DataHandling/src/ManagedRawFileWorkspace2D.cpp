@@ -72,7 +72,7 @@ namespace Mantid
       if ( noOfBlocks * m_vectorsPerBlock != m_noVectors ) ++noOfBlocks;
       m_changedBlock.resize(noOfBlocks,false);
 
-      isisRaw->skipData(0);
+      isisRaw->skipData(m_fileRaw,0);
       fgetpos(m_fileRaw, &m_data_pos); //< Save the data start position.
 
       getTimeChannels();
@@ -148,7 +148,7 @@ namespace Mantid
       {
         while(startIndex > m_readIndex)
         {
-          isisRaw->skipData(m_readIndex+1);// Adding 1 because we dropped the first spectrum.
+          isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
           ++m_readIndex;
         }
       }
@@ -172,7 +172,7 @@ namespace Mantid
       if (endIndex >= m_noVectors) endIndex = m_noVectors;
       for(int index = startIndex;index<endIndex;index++,m_readIndex++)
       {
-        isisRaw->readData(m_readIndex+1);
+        isisRaw->readData(m_fileRaw,m_readIndex+1);
         MantidVec& y = newBlock->dataY(index);
         y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
         MantidVec& e = newBlock->dataE(index);

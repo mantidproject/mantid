@@ -147,6 +147,25 @@ ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_np
 	updateFromCRPT();
 }
 
+// create one bound to a CRPT
+/// stuff
+ISISRAW::ISISRAW(ISISCRPT_STRUCT* crpt, bool doUpdateFromCRPT) : m_crpt(crpt),m_ntc1(0),m_nsp1(0), m_nper(0),
+																mdet(0),monp(0),spec(0),delt(0),len2(0),code(0),
+																tthe(0),ut(0),crat(0),modn(0),mpos(0),timr(0),udet(0),
+																t_tcb1(0),u_dat(0),ddes(0),dat1(0)
+{
+	e_nse = 0;
+	e_seblock = 0;
+	u_len = 0;
+	logsect.nlines = 0;
+	logsect.lines = 0;
+	addItems();
+	if (doUpdateFromCRPT)
+  {
+      updateFromCRPT();
+  }
+}
+
 // update from bound CRPT
 /// stuff
 int ISISRAW::updateFromCRPT()
@@ -519,7 +538,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 			}
 		}
 		delete[] outbuff;
-	// log section
+	  // log section
 		ioRAW(file, &logsect, 1, from_file);
 		len_log = 2 + logsect.nlines;
 		for(i=0; i<logsect.nlines; i++)
