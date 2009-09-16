@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/Exception.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_statistics.h>
@@ -39,13 +39,14 @@ void MedianDetectorTest::init()
     "Set this to a nonzero value and detectors in spectra with a total\n"
     "number of counts is within this number of standard deviations from the\n"
     "median will not be labelled bad (default 3.3)" );
-  declareProperty("LowThreshold", 0.1, mustBePositive->clone(),
-    "Detectors corresponding to spectra with total counts less than this\n"
-    "proportion of the median number of counts would be labelled as reading\n"
-    "badly (default 0.1)" );
-  declareProperty("HighThreshold", 1.5, mustBePositive->clone(),
-    "Detectors corresponding to spectra with total counts more than this\n"
-    "number of the median would be labelled as reading badly (default 1.5)" );
+  declareProperty("LowThreshold", 0.1,
+    "Detectors corresponding to spectra with total counts equal to or less\n"
+    "than this proportion of the median number of counts will be identified\n"
+    "as reading badly (default 0.1)" );
+  declareProperty("HighThreshold", 1.5,
+    "Detectors corresponding to spectra with total counts equal to or more\n"
+    "than this number of the median will be identified as reading badly\n"
+    "(default 1.5)" );
 /* Allow users to change the failure codes?      declareProperty("LiveValue", 0.0, mustBePositive->clone(),
         "The value to assign to an integrated spectrum flagged as 'live'\n"
         "(default 0.0)");
@@ -278,7 +279,7 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getRate
 *  average that is less affected by small numbers of very large values.
 * @param input A histogram workspace with one entry in each bin
 * @return The median value of the histograms in the workspace that was passed to it
-* @throw logic_error if an input value is negative
+* @throw out_of_range if an input value is infinity or negative
 */
 double MedianDetectorTest::getMedian(API::MatrixWorkspace_const_sptr input)
   const
@@ -289,54 +290,80 @@ double MedianDetectorTest::getMedian(API::MatrixWorkspace_const_sptr input)
   InputWSDetectorInfo DetectorInfoHelper(input);
   // we'll allow a detector that has zero solid angle extent to the sample if it has no counts, I don't know if this neccessary but such unused detectors wont change the results of the calculation so why abort?  We just count them, warn people and mask people
   int numUnusedDects = 0;
+  int numUnfoundDects = 0;
 
   // make an array for all the values in the single bin histograms that can be converted to a C-style array for the GNU Scientifc Library
   MantidVec nums;
+  // reduce the number of memory alloctions because we know there is probably one number of each histogram
+  nums.reserve(input->getNumberHistograms());
   // copy the data into this array
   for (int i = 0; i < input->getNumberHistograms(); ++i)
   {
-    if ( (!m_usableMaskMap) || (!DetectorInfoHelper.aDetecIsMaskedinSpec(i)) )
+    try
     {
-      double toCopy = input->readY(i)[0];
-      //we shouldn't have negative numbers of counts, probably a SolidAngle correction problem
-      if ( toCopy  < 0 )
+      if ( ( ! m_usableMaskMap ) ||
+        ( ! DetectorInfoHelper.aDetecIsMaskedinSpec(i) ) )
       {
-        g_log.debug() <<
-          "Negative count rate found for spectrum number " <<
-          DetectorInfoHelper.getSpecNum(i) << std::endl;
-        throw std::logic_error(
-          "Negative number of counts found, could be corrupted raw counts or solid angle data");
+        double toCopy = input->readY(i)[0];
+        //we shouldn't have negative numbers of counts, probably a SolidAngle correction problem
+        if ( toCopy  < 0 )
+        {
+          g_log.debug() <<
+            "Negative count rate found for spectrum index " << i << std::endl;
+          throw std::out_of_range(
+            "Negative number of counts found, could be corrupted raw counts or solid angle data");
+        }
+       //there has been a divide by zero, likely to be due to a detector with zero solid angle
+        if ( std::abs(toCopy) == std::numeric_limits<double>::infinity() )
+        {
+          g_log.debug() <<
+            "numeric_limits<double>::infinity() found" << std::endl;
+          g_log.error() <<
+            "Divide by zero error found in the spectrum with index " << i <<  "The spectrum has a non-zero number of counts but its detectors have zero solid angle. Check your instrument definition file." << std::endl;
+          try
+          {
+            DetectorInfoHelper.maskAllDetectorsInSpec(i);
+            g_log.error() << "Its detectors have been masked" << std::endl;
+          }
+          catch (std::exception)
+          {
+            throw Exception::InstrumentDefinitionError("Couldn't mask detectors that are missing shape information");
+          }
+        }
+        if ( toCopy != toCopy )
+        {//this fun thing can happen if there was a zero divided by zero, solid angles again, as this, maybe, could be caused by a detector that is not used I wont exit because of this we'll record how many times this happened so that the user can think about how good or bad, their data is 
+          numUnusedDects ++;
+        }
+        //if we get to here we have a good value, copy it over!
+        nums.push_back( toCopy );
       }
-      //there has been a divide by zero, likely to be due to a detector with zero solid angle
-      if ( std::abs(toCopy) == std::numeric_limits<double>::infinity() )
-      {
-        g_log.debug() <<
-          "numeric_limits<double>::infinity() found spectrum number "
-          << DetectorInfoHelper.getSpecNum(i) << std::endl;
-        throw std::runtime_error("Divide by zero error, one or more detectors has zero solid angle and a non-zero number of counts");
-      }
-      if ( toCopy != toCopy )
-      {//this fun thing can happen if there was a zero divide by zero, solid angles again, as this, maybe, could be caused by a detector that is not used I wont exit because of this
-        DetectorInfoHelper.maskAllDetectorsInSpec(i);
-        // we'll report how many times this happened so that the user can think about how good, bad, there data is 
-        numUnusedDects ++;
-      }
-      //if we get to here we have a good value, copy it over!
-      nums.push_back( toCopy );
+    }
+    catch (Exception::NotFoundError e)
+    {// I believe that detectors missing from the workspace shouldn't cause a problem and as it occurs with most raw files that I have I wont alert the user
+      numUnfoundDects ++;
     }
   }
   if (numUnusedDects > 0)
   {
     g_log.debug() <<
-      "Found \"Not a Number\" in the numbers of counts, assuming a least one detector with zero solid angle and zero counts was found"
+      "Found \"Not a Number\" in the numbers of counts, assuming detectors with zero solid angle and zero counts were found"
        << std::endl;
-    g_log.warning() << numUnusedDects <<
-      " detectors were found with zero solid angle and no counts they have been masked and will be ignored"
+    g_log.information() << numUnusedDects <<
+      " spectra found with non-contributing detectors that have zero solid angle and no counts, they have not been used and the detectors have been masked in the input workspace"
       << std::endl;
+    void maskAllDetectorsInSpec(int SpecIndex);
+  }
+  if (numUnfoundDects > 0)
+  {
+    g_log.warning() << name() << " ignored the values in " << numUnfoundDects <<
+      " spectra that mapped to detectors that can't be found in the instrument definition" << std::endl;
   }
   //we need a sorted array to calculate the median
   gsl_sort( &nums[0], 1, nums.size() );//The address of foo[0] will return a pointer to a contiguous memory block that contains the values of foo. Vectors are guaranteed to store there memory elements in sequential order, so this operation is legal, and commonly used (http://bytes.com/groups/cpp/453169-dynamic-arrays-convert-vector-array)
-  return gsl_stats_median_from_sorted_data( &nums[0], 1, nums.size() );
+  double median = gsl_stats_median_from_sorted_data( &nums[0], 1, nums.size() );
+  g_log.information() << name() <<
+    ": The median integrated counts or soild angle normalised counts " << median << std::endl;
+  return median;
 }
 /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
 /** Takes a single valued histogram workspace and assesses which histograms are within the limits
@@ -361,6 +388,8 @@ std::vector<int> MedianDetectorTest::FindDetects(
   std::vector<int> badDets;
   // get ready to write to the log the number of bad detectors found
   int cLows = 0, cHighs = 0, cAlreadyMasked = 0;
+  int cUnFoundDects = 0;
+
   // ready to write dead detectors to a file
   std::ofstream file;
   bool fileOpen = false;
@@ -382,41 +411,50 @@ std::vector<int> MedianDetectorTest::FindDetects(
   const int numSpec = m_MaxSpec - m_MinSpec;
   int iprogress_step = numSpec / 10;
   if (iprogress_step == 0) iprogress_step = 1;
+  // we use the functions in this class to check the detector masking
+  InputWSDetectorInfo DetectorInfoHelper(responses);
   for (int i = 0; i <= numSpec; ++i)
   {
     // get the address of the value of the first bin the spectra, we'll check it's value and then write a pass or fail to that location
     double &yInputOutput = responses->dataY(i)[0];
     // hold information about whether it passes or fails and why
     std::string problem = "";
-    // first look for detectors that have been marked as dead
-    InputWSDetectorInfo DetectorInfoHelper(responses);
-    if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
+    try
     {
-       problem = ", detector already masked";
-       cAlreadyMasked ++;
+      // first look for detectors that have been marked as dead
+      if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
+      {
+        problem = "detector already masked";
+        cAlreadyMasked ++;
+      }
+      else // not already marked dead, check is the value within the acceptance range
+      {
+        if ( yInputOutput <= lowLim )
+        {// compare the difference against the size of the errorbar -statistical significance check
+          if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+          {
+            problem = "is too low";
+            cLows++;
+          }
+        }
+        if ( yInputOutput >= highLim )
+        {// check that the deviation is not within the errors
+          if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+          {
+            problem = "is too high";
+            cHighs++;
+          }
+        }
+      } 
     }
-    else // not already marked dead, check is the value within the acceptance range
-    {
-      if ( yInputOutput < lowLim )
-      {// compare the difference against the size of the errorbar -statistical significance check
-        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
-        {
-          problem = "is too low";
-          cLows++;
-        }
-      }
-      if ( yInputOutput > highLim )
-      {// check that the deviation is not within the errors
-        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
-        {
-          problem = "is too high";
-          cHighs++;
-        }
-      }
+    catch (Exception::NotFoundError e)
+    {// I believe that detectors missing from the workspace shouldn't cause a problem and as it occurs with most raw files that I have I wont alert the user
+      cUnFoundDects ++;
+      problem = "error finding detector";
     }
     if ( problem.empty() )
     {// it is an acceptable value; just write the good flag to the output workspace and go on to check the next value
-        yInputOutput = GoodVal;
+      yInputOutput = GoodVal;
     }
     else
     {//we have a bad spectrum do the reporting
@@ -428,7 +466,7 @@ std::vector<int> MedianDetectorTest::FindDetects(
         file << " Spectrum number " << DetectorInfoHelper.getSpecNum(i)
           << " " << problem;
       }
-      
+        
       if ( fileOpen ) file << ", detector IDs:"; 
       // Get the list of detectors for this spectrum and iterate over
       const std::vector<int> dets = DetectorInfoHelper.getDetectors(i);
@@ -440,7 +478,7 @@ std::vector<int> MedianDetectorTest::FindDetects(
         // now record to file
         if ( fileOpen )
         {
-        // don't put a comma before the first entry
+          // don't put a comma before the first entry
           if ( it != dets.begin() ) file << ", ";
           file << " " << *it;
         }
@@ -458,10 +496,14 @@ std::vector<int> MedianDetectorTest::FindDetects(
       interruption_point();
     }
   }
+  if ( cUnFoundDects > 0 )
+  {
+    g_log.debug() << "Detectors in " << cUnFoundDects << " spectra couldn't be masked because they were missing" << std::endl;
+  }
   //output and pass back what we found out about bad detectors
   if ( fileOpen ) file.close();
-  g_log.information() << "Found a total of " << cLows <<
-    " spectra with low counts and " << cHighs << "spectra with high counts, "<<
+  g_log.information() << "Found " << cLows <<
+    " spectra with low counts and " << cHighs << " spectra with high counts, "<<
     cAlreadyMasked << " were already marked bad." << std::endl;
   //set the workspace to have no units
   responses->isDistribution(false);
@@ -472,7 +514,7 @@ std::vector<int> MedianDetectorTest::FindDetects(
 float MedianDetectorTest::advanceProgress(int toAdd)
 {
   m_PercentDone += toAdd/float(m_TotalTime);
-  // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value could cause an error
+  // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value will cause a problem some where
   m_PercentDone = std::abs(m_PercentDone);
   return m_PercentDone;
 }

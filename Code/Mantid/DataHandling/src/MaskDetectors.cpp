@@ -88,9 +88,16 @@ void MaskDetectors::exec()
   {
     for (it = detectorList.begin(); it != detectorList.end(); ++it)
     {
-      if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
+      try
       {
-        pmap.addBool(det,"masked",true);
+        if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*it).get()) )
+        {
+          pmap.addBool(det,"masked",true);
+        }
+      }
+      catch(Kernel::Exception::NotFoundError e)
+      {
+        g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
       }
     }
     detsMasked = true;
@@ -114,10 +121,17 @@ void MaskDetectors::exec()
       const std::vector<int> dets = specMap.getDetectors(spectrum_number);
       for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
-        if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*iter).get()) )
+        try
         {
-          pmap.addBool(det,"masked",true);
-        }        
+          if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(instrument->getDetector(*iter).get()) )
+          {
+            pmap.addBool(det,"masked",true);
+          }
+        }
+        catch(Kernel::Exception::NotFoundError e)
+        {
+          g_log.warning() << e.what() << " Found while running MaskDetectors" << std::endl;
+        }
       }
     }
     

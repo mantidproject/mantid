@@ -44,7 +44,7 @@ public:
     alg.setProperty( "LowThreshold", 0.5 );
     alg.setProperty( "HighThreshold", 1.3333 );
     //we are using the defaults on StartSpectrum, EndSpectrum, RangeLower and RangeUpper which is to use the whole spectrum
- 
+    
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
@@ -53,8 +53,14 @@ public:
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("MedianDetectorTestOutput"));
-    Workspace_sptr input;
-    TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieve(m_IWSName));
+
+    MatrixWorkspace_const_sptr input;
+    input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(m_IWSName));
+    TS_ASSERT(input)
+    TS_ASSERT(
+      input->getInstrument()->getDetector(THEMASKED).get()->isMasked()
+      )
+
     MatrixWorkspace_sptr outputMat = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT ( outputMat ) ;
     TS_ASSERT_EQUALS( outputMat->YUnit(), "" )
@@ -64,7 +70,7 @@ public:
 		const int numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     // the numbers below are threshold values that were found by trail and error running these tests
-    int firstGoodSpec = 36;
+    int firstGoodSpec = 37;
     int lastGoodSpec = 95;
     int savedBySignific = Nhist-1;
     for (int lHist = 1; lHist < firstGoodSpec; lHist++)
@@ -72,7 +78,14 @@ public:
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), BadVal )
     }
-    for (int lHist=firstGoodSpec; lHist <= lastGoodSpec; lHist++)
+    for (int lHist=firstGoodSpec; lHist < THEMASKED-1; lHist++)
+    {
+      TS_ASSERT_EQUALS(
+        outputMat->readY(lHist).front(), GoodVal )
+    }
+    TS_ASSERT_EQUALS(
+        outputMat->readY(THEMASKED-1).front(), BadVal )
+    for (int lHist=THEMASKED; lHist <= lastGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), GoodVal )
@@ -92,6 +105,10 @@ public:
     for (int lHist = 0 ; lHist < firstGoodSpec; lHist++ )
     {
       TS_ASSERT_EQUALS( *it, lHist+1 )
+      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
+    }
+    {
+      TS_ASSERT_EQUALS( *it, THEMASKED )
       TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
     }
     for (int lHist = lastGoodSpec+1 ; lHist < savedBySignific ; lHist++ )
@@ -131,7 +148,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     //test file output
-    std::fstream testFile(OFileName.c_str(), std::ios::in);
+    std::ifstream testFile(OFileName.c_str(), std::ios::in);
     //the tests here are done as unhandled exceptions cxxtest will handle the exceptions and display a message but only after this function has been abandoned, which leaves the file undeleted so it can be viewed
     TS_ASSERT ( testFile )
     
@@ -151,7 +168,15 @@ public:
       }
         
       std::getline( testFile, fileLine );
-        
+
+      TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
+    }
+    {
+      std::ostringstream correctLine;
+      correctLine << " Spectrum number " << THEMASKED << " detector already masked, detector IDs: " << THEMASKED;
+      
+      std::getline( testFile, fileLine );
+      
       TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
     }
     for (int iHist = lastGoodSpec+1 ; iHist < Nhist; iHist++ )
@@ -230,6 +255,14 @@ public:
     space2D->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist);
 
     space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+
+    // mask the detector
+    Geometry::ParameterMap* m_Pmap = &(space2D->instrumentParameters());    
+    boost::shared_ptr<Instrument> instru = space2D->getBaseInstrument();
+    Geometry::Detector* toMask =
+      dynamic_cast<Geometry::Detector*>( instru->getDetector(THEMASKED).get() );
+    TS_ASSERT(toMask)
+    m_Pmap->addBool(toMask, "masked", true);
   }
 
   bool runInit(MedianDetectorTest &alg)
@@ -250,6 +283,8 @@ private:
   //these values must match the values in DetectorEfficiencyVariation.h
   const double BadVal;
   const double GoodVal;
+
+  static const int THEMASKED = 40;
 };
 
 #endif /*WBVMEDIANTESTTEST_H_*/

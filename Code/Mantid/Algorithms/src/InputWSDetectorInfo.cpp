@@ -1,4 +1,5 @@
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
+#include "MantidKernel/Exception.h"
 
 namespace Mantid
 {
@@ -16,7 +17,7 @@ bool InputWSDetectorInfo::aDetecIsMaskedinSpec(int SpecIndex) const
   std::vector<int>::const_iterator it;
   for ( it = dets.begin(); it != dets.end(); ++it)
   {
-    if (m_Instru->getDetector(*it).get()->isMasked()) return true;
+    if (m_RInstru->getDetector(*it).get()->isMasked()) return true;
   }
   // we didn't find any that were masked
   return false;
@@ -28,16 +29,30 @@ bool InputWSDetectorInfo::aDetecIsMaskedinSpec(int SpecIndex) const
 void InputWSDetectorInfo::maskAllDetectorsInSpec(int SpecIndex)
 {
   std::vector<int> dets = getDetectors(SpecIndex);
-  // there may be many detectors that are responcible for the spectrum, loop through them
+  // there may be many detectors that are responsible for the spectrum, loop through them
   std::vector<int>::const_iterator it;
+  int missing = 0;
   for ( it = dets.begin(); it != dets.end(); ++it)
   {
     Geometry::Detector* det =
-      dynamic_cast<Geometry::Detector*>( m_Instru->getDetector(*it).get() );
+      dynamic_cast<Geometry::Detector*>( m_WInstru->getDetector(*it).get() );
     if ( det )
     {
-      m_Pmap->addBool(det, "masked", true);
+      try{
+        m_Pmap->addBool(det, "masked", true);
+      }
+      catch (Kernel::Exception::NotFoundError e)
+      {// I believe this happens if the workspace doesn't contain some information, carry on the best we can and we'll notify people of the problem at the end
+        missing ++;
+      }
     }
+  }
+  if ( missing > 0 )
+  {
+    std::ostringstream missingReport;
+    missingReport << "Information missing in the workspace for " << missing
+        << " detector" << (missing > 1 ? "s" : "");
+    throw std::runtime_error(missingReport.str());
   }
 }
 /// convert spectrum index to spectrum number
@@ -53,9 +68,10 @@ InputWSDetectorInfo::InputWSDetectorInfo(MatrixWorkspace_const_sptr input) :
   m_Input(input)
 {
   // first something that points to the detectors
-  m_Instru = input->getBaseInstrument();
+  m_WInstru = input->getBaseInstrument();
+  m_RInstru = input->getInstrument();
 
-  if ( !m_Instru )
+  if ( !m_RInstru || !m_WInstru )
   {
     throw std::invalid_argument(
       "There is no instrument data in the input workspace.  Can not run this algorithm on that workspace");

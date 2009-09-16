@@ -75,31 +75,35 @@ void DetectorEfficiencyVariation::init()
 /** Executes the algorithm that includes calls to SolidAngle and Integration
 *
 *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
-*  @throw runtime_error if algorithm cannot execute
+*  @throw runtime_error if a sub-algorithm cannot execute
 */
 void DetectorEfficiencyVariation::exec()
 {
   MatrixWorkspace_sptr WB1;
   MatrixWorkspace_sptr WB2;
+  MatrixWorkspace_sptr frac;
   double vari = EMPTY_DBL();
   int minSpec = 0;
   int maxSpec = UNSETINT;
-
   // sets the values passed to it with those from the algorithm properties, only that need checking are passed. Throws an invalid_argument if we can't find a good value for a property
   retrieveProperties( WB1, WB2, vari, minSpec, maxSpec);
-  // now do the calculations ...  
+
+  /* *** now do the calculations ...  ***/
   // Adds the counts from all the bins and puts them in one total bin, calls subalgorithm Integration
   MatrixWorkspace_sptr counts1 = getTotalCounts( WB1, minSpec, maxSpec );// function uses the data in the *Range properties too
   MatrixWorkspace_sptr counts2 = getTotalCounts( WB2, minSpec, maxSpec );// function uses the data in the *Range properties too
-  // some divide by zeros could happen here but only if there are bad detectors and they should have been removed.  We accept any divide by zeros here and check later
-  MatrixWorkspace_sptr frac = counts1/counts2;     
-  
+  try{// some divide by zeros happen when there are bad detectors.  We accept any divide by zeros here and check later and mask detectors that are a problem
+  frac = counts1/counts2;     
+  /*Mismatches in the number*/ } catch (std::invalid_argument) {
+  /*of spectra however are not*/   g_log.error() << "The two input workspaces must be from the same instrument";
+  /*allowed*/                      throw;}
   // Gets an average of the data (median is less influenced by small numbers of huge values) and checks and rejects data from divide by zero
   double av = getMedian(frac);
   
   // information on bad spectra will be writen to counts1 by this function, it looks for spectra whose number of counts differ in the two workspaces by more than frac
   std::vector<int> outArray =
     markBad( counts1, counts2, av, vari, getProperty("OutputFile") );
+
   // counts1 was overwriten by the last function, now register it with the Analysis Data Service so that users can see it
   setProperty("OutputWorkspace", counts1);
   // make the output array visible to the user too
@@ -222,6 +226,8 @@ double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) 
   InputWSDetectorInfo DetectorInfoHelper(input);
   // stores the number of divide by zeros so that the user knows if they have bad data
   int numInfinities = 0;
+  // when we can't access a detector
+  int numUnfoundDects = 0;
 
   // make an array of all the values in the single bin histograms for passing to the GNU Scientifc Library
   MantidVec nums;
@@ -229,36 +235,48 @@ double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) 
   // copy the data into this array
   for (int i = 0; i < input->getNumberHistograms(); ++i)
   {
-    if ( (!m_usableMaskMap) || (!DetectorInfoHelper.aDetecIsMaskedinSpec(i)) )
+    try
     {
-      double toCopy = input->readY(i)[0];
-      // lots zeros and divide by zeros could be a sign of bad data and could affect our accurcy
-      if ( (toCopy == 0) ||
-        ( std::abs(toCopy) == std::numeric_limits<double>::infinity() ) ||
-        // this fun thing can happen if there was a zero divide by zero
-        ( toCopy != toCopy ) )
-      {// we need to log the divide by zero because it could affect the results
-        g_log.debug() <<
-          "numeric_limits<double>::infinity() found spectrum number " << DetectorInfoHelper.getSpecNum(i) << std::endl;
-        //Howver, if much less than half the data is like this its effect will be negligeble so we'll just count and report
-        numInfinities ++;
+      if ( (!m_usableMaskMap) || (!DetectorInfoHelper.aDetecIsMaskedinSpec(i)) )
+      {
+        double toCopy = input->readY(i)[0];
+        // lots zeros and divide by zeros could be a sign of bad data and could affect our accurcy
+        if ( (toCopy == 0) ||
+          ( std::abs(toCopy) == std::numeric_limits<double>::infinity() ) ||
+          // this fun thing can happen if there was a zero divide by zero
+          ( toCopy != toCopy ) )
+        {// we need to log the divide by zero because it could affect the results
+          g_log.debug() << name() <<
+            ": numeric_limits<double>::infinity() found spectrum number " << DetectorInfoHelper.getSpecNum(i) << std::endl;
+          //  However, if much less than half the data is like this its effect will be negligeble so we'll just count and report
+          numInfinities ++;
+        }
+        // if we get to here we have a good value, copy it over!
+        nums.push_back( toCopy );
       }
-      // if we get to here we have a good value, copy it over!
-      nums.push_back( toCopy );
+    }
+    catch (Exception::NotFoundError e)
+    {// I believe that detectors missing from the workspace shouldn't cause a problem and as it occurs with most raw files that I have I wont alert the user
+      numUnfoundDects ++;
     }
   }
   if (numInfinities > 0)
   {
-    g_log.error() << numInfinities << " divide by zeros were seem in "
-      << input->getNumberHistograms() << " histograms in the input workspaces."
-      "  Consider running an algorithm like FindDeadDetectors on the input"
-      " workspaces first" << std::endl;
+    g_log.error() << name() << ": In comparing workspaces " << numInfinities <<
+      " zeros or divide by zeros were seen (out of " << input->getNumberHistograms() <<
+      ")" << " these spectra wont be included" << std::endl;
   }
+  if (numUnfoundDects > 0)
+  {
+    g_log.warning() << name() << " ignored the values in " << numUnfoundDects <<
+      " spectra that mapped to detectors that can't be found in the instrument definition" << std::endl;
+  }
+
   //we need a sorted array to calculate the median
   gsl_sort( &nums[0], 1, nums.size() );//The address of foo[0] will return a pointer to a contiguous memory block that contains the values of foo. Vectors are guaranteed to store there memory elements in sequential order, so this operation is legal, and commonly used (http://bytes.com/groups/cpp/453169-dynamic-arrays-convert-vector-array)
   double median = gsl_stats_median_from_sorted_data( &nums[0], 1, nums.size() );
-  g_log.information() <<
-    "The median ratio of the spectra in the input workspaces is " << median << std::endl;
+  g_log.information() << name() <<
+    ": The median ratio of the spectra in the input workspaces is " << median << std::endl;
   return median;
 }
 /// Overwrites the first workspace with bad spectrum information, also outputs an array and a file
@@ -314,33 +332,39 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   const int numSpec = a->getNumberHistograms();
   int iprogress_step = numSpec / 10;
   if (iprogress_step == 0) iprogress_step = 1;
+  InputWSDetectorInfo Detector1Info(a);
+  InputWSDetectorInfo Detector2Info(b);
   for (int i = 0; i < numSpec; ++i)
   {
     // hold information about whether the histogram passes or fails and why
     std::ostringstream problem;
     // first look for detectors that have been marked as dead
-
-    InputWSDetectorInfo Detector1Info(a);
-    InputWSDetectorInfo Detector2Info(b);
-    if ( m_usableMaskMap &&
-      ( Detector1Info.aDetecIsMaskedinSpec(i) ||
+    try
+    {
+      if ( m_usableMaskMap &&
+        ( Detector1Info.aDetecIsMaskedinSpec(i) ||
         Detector2Info.aDetecIsMaskedinSpec(i) ) )
-    {
-      problem << "detector already masked";
-      cAlreadyMasked ++;
-    }
-    else // not already marked bad, check is the value within the acceptance range
-    {
-      // examine the data, which should all be in the first bin of each histogram
-      double ratio = a->readY(i)[0]/b->readY(i)[0];
-      if ( ( ratio > largest ) || ( ratio < lowest ) ) 
-      {// either v1 or v2 is too big, 
-        problem << "the number of counts has changed by a factor of " <<
-          std::setprecision(5) << ratio;
-        cChanged++;
+      {
+        problem << "detector already masked";
+        cAlreadyMasked ++;
+      }
+      else // not already marked bad, check is the value within the acceptance range
+      {
+        // examine the data, which should all be in the first bin of each histogram
+        double ratio = a->readY(i)[0]/b->readY(i)[0];
+        if ( ( ratio > largest ) || ( ratio < lowest ) ) 
+        {// either v1 or v2 is too big, 
+          problem << "the number of counts has changed by a factor of " <<
+            std::setprecision(5) << ratio;
+          cChanged++;
+        }
       }
     }
-    if ( !problem.str().empty() )
+    catch (Exception::NotFoundError e)
+    {// I believe that detectors missing from the workspace shouldn't cause a problem and as it occurs with most raw files that I have I wont alert the user
+      problem << "the spectrium is mapped to a detector that is not in the instrument file";
+    }
+    if ( ! problem.str().empty() )
     {//we have a bad spectrum, do the reporting
       // write to the output workput space, which is also an input workspace
       a->dataY(i)[0] = BadVal;
@@ -373,6 +397,8 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
     {// this is a good spectrum, only need to write to the output workspace
       a->dataY(i)[0] = GoodVal;
     }
+    // Y is either the good value or the bad value there isn't a distribution of possible values
+    a->dataE(i)[0] = 0;
 
     // update the progressbar information
     if (i % iprogress_step == 0)
@@ -385,7 +411,7 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   //output and pass back what we found out about bad detectors
   if ( fileOpen ) file.close();
   g_log.information() << "Marked a total of " << cChanged <<
-    " spectra that changed by more than " << 100.0*variation << "% over or "
+    " spectra that changed by more than " << 100.0*(variation-1.0) << "% over or "
     "under the median change. " <<
     cAlreadyMasked << " were already marked bad." << std::endl;
   //finish off setting up the output workspace, it should have no units
