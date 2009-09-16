@@ -79,6 +79,10 @@ void IkedaCarpenterPV1D::afterDataRangedDetermined(const int& m_minX, const int&
     // std::cout << std::endl << mWaveLength[0] << std::endl;
     // The x you get back is now the wavelength values
   }
+
+
+
+
 }
 
 
@@ -96,18 +100,11 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
     const double& X0 = in[8];
     const double& BG = in[9];
 
-    const double alpha = 1.0 / (alpha0+alpha1); // assume wavelength = 1
     const double beta = 1/beta0;
 
     // equations here copied straight from Fullprof manual
 
-    //const double R = exp(-81.799/kappa);  // assume wavelength = 1
-    const double k = 0.05;
-    const double a_minus = alpha*(1-k);
-    const double a_plus = alpha*(1+k);
-    const double x=a_minus-beta;
-    const double y=alpha-beta;
-    const double z=a_plus-beta;    
+    const double k = 0.05;   
 
     double u,v,s,r;
     double yu, yv, ys, yr;
@@ -116,13 +113,28 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
 
     double R, Nu, Nv, Ns, Nr;
 
+    double alpha, a_minus, a_plus, x, y, z;
+
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-X0;
 
         if (mWaveLengthFixed)
+        {
           R = exp(-81.799/(mWaveLength[0]*mWaveLength[0]*kappa));
+          alpha = 1.0 / (alpha0+mWaveLength[0]*alpha1);
+        }
         else
+        {
           R = exp(-81.799/(mWaveLength[i]*mWaveLength[i]*kappa));
+          alpha = 1.0 / (alpha0+mWaveLength[i]*alpha1);
+        }
+
+        a_minus = alpha*(1-k);
+        a_plus = alpha*(1+k);
+        x=a_minus-beta;
+        y=alpha-beta;
+        z=a_plus-beta; 
+
         Nu=1-R*a_minus/x;
         Nv=1-R*a_plus/z;
         Ns=-2*(1-R*alpha/y);
@@ -159,10 +171,13 @@ double IkedaCarpenterPV1D::function(const double* in, const double& xx)
     const double& X0 = in[8];
     const double& BG = in[9];
 
-    const double alpha = 1.0 / (alpha0+alpha1); // assume wavelength = 1
+    // use for now wavelength corresponding to middle of array
+    const double lambda =  mWaveLength[static_cast<int>(mWaveLength.size()/2)];
+
+    const double alpha = 1.0 / (alpha0+lambda*alpha1); 
     const double beta = 1/beta0;
 
-    const double R = exp(-81.799/kappa);  // assume wavelength = 1
+    const double R = exp(-81.799/(lambda*lambda*kappa)); 
     const double k = 0.05;
     const double a_minus = alpha*(1-k);
     const double a_plus = alpha*(1+k);

@@ -71,7 +71,6 @@ namespace Mantid
       // For now used for in tests
       MantidVec mWaveLength; 
       bool mWaveLengthFixed;
-
     };
 
 
