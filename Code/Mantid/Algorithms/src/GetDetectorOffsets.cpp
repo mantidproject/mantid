@@ -42,7 +42,7 @@ void GetDetectorOffsets::init()
   declareProperty("DReference",2.0);
   declareProperty("XMin",0.0);
   declareProperty("XMax",0.0);
-  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Load, std::vector<std::string>(1,"cal")),
+  declareProperty(new FileProperty("GroupingFileName","", FileProperty::Save, std::vector<std::string>(1,"cal")),
 		  "The name of the output CalFile" );
 }
 
@@ -145,7 +145,7 @@ double GetDetectorOffsets::fitSpectra(const int s)
     throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
   }
 
-  const double offset = fit_alg->getProperty("peakCentre");  
+  const double offset = fit_alg->getProperty("peakCentre");
   return (-offset*step/(dreference+offset*step));
 }
 

@@ -35,7 +35,7 @@ void CreateCalFileByNames::init()
   declareProperty("InstrumentName", "",
     "The name of the instrument, needs to be present in the Instrument Data\n"
     "Service" );
-  declareProperty(new FileProperty("GroupingFileName","",FileProperty::Load, 
+  declareProperty(new FileProperty("GroupingFileName","",FileProperty::Save,
 				   std::vector<std::string>(1,"cal")),
 		  "The name of the output CalFile");
   declareProperty("GroupNames","",
