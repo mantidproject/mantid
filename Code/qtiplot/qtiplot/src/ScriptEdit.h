@@ -40,10 +40,6 @@
 #include <QMenu>
 #include <QEvent>
 
-// Scintilla needs an extra macro defining on windows
-#ifdef Q_WS_WIN
-#define QSCINTILLA_DLL
-#endif
 #include <Qsci/qsciscintilla.h>
 
 class QAction;
