@@ -89,18 +89,20 @@ namespace NeXus
 	bool bChild=isChild();
 	if(!bChild)
 	{
-		std::string period("1");
-		//getting the workspace number which gives the period 
-		//looking for the number after "_"
-		std::string::size_type index = inputWSName.find_last_of("_");
-		if (index != std::string::npos)
-		{
-			std::string::size_type len= inputWSName.length();
-			std::string ref=inputWSName.substr(index + 1,len-index);
-			period = ref;
-		}
-		if (!period.compare("1"))
-		{ // if m_bAppend is default (false) overwrite (delete )the .nxs file for period 1
+		//std::string period("1");
+		////getting the workspace number which gives the period 
+		////looking for the number after "_"
+		//std::string::size_type index = inputWSName.find_last_of("_");
+		//if (index != std::string::npos)
+		//{
+		//	std::string::size_type len= inputWSName.length();
+		//	std::string ref=inputWSName.substr(index + 1,len-index);
+		//	period = ref;
+		//}
+		int period=getPeriodNumber(inputWSName);
+		//if (!period.compare("1"))
+		if(period==1)
+		{ // if m_bAppend is false overwrite (delete )the .nxs file for period 1
 			if (!m_bAppend)
 			{
 				Poco::File file(m_filename);

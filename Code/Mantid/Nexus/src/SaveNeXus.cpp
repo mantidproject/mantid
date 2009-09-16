@@ -90,20 +90,22 @@ void SaveNexus::exec()
   m_inputWorkspace = getPropertyValue("InputWorkspace");
   //retrieve the append property
   m_bAppend = getProperty("Append");
-  std::string period("1");
-  //getting the workspace number which gives the period 
-  //looking for the number after "_"
-  std::string::size_type index = m_inputWorkspace.find_last_of("_");
-  if (index != std::string::npos)
-  {
-	std::string::size_type len= m_inputWorkspace.length();
+ // std::string period("1");
+ // //getting the workspace number which gives the period 
+ // //looking for the number after "_"
+ // std::string::size_type index = m_inputWorkspace.find_last_of("_");
+ // if (index != std::string::npos)
+ // {
+	//std::string::size_type len= m_inputWorkspace.length();
 
-   // std::string::reference ref = m_inputWorkspace.at(index + 1);
-	std::string ref=m_inputWorkspace.substr(index + 1,len-index);
-    period = ref;
-	//g_log.error()<<"period = "<<period<<std::endl;
-  }
-  if (!period.compare("1"))
+ //  // std::string::reference ref = m_inputWorkspace.at(index + 1);
+	//std::string ref=m_inputWorkspace.substr(index + 1,len-index);
+ //   period = ref;
+	////g_log.error()<<"period = "<<period<<std::endl;
+ // }
+  int period=getPeriodNumber(m_inputWorkspace);
+  //if (!period.compare("1"))
+  if(period==1)
   { // if m_bAppend is default (false) overwrite (delete )the .nxs file for period 1
     if (!m_bAppend)
     {

@@ -55,13 +55,19 @@ public:
   int getNumberOfEntries() const { return static_cast<int>(m_wsNames.size()); }
   void print();
   void removeAll();
-  void remove(const std::string& name);
+  void remove(const std::string& name); 
+   /** returns the period number for the given workspace
+  * @param wsName Workspace name
+  */
+  int getPeriodNumber(const std::string& wsName );
 
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
+ 
+ 
   
   std::vector<std::string> m_wsNames; ///< The list of workspace names in the group
   static Kernel::Logger& g_log;       ///< Static reference to the logger

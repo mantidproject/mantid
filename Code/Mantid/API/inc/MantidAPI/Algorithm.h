@@ -270,6 +270,8 @@ namespace Mantid
 
 			/// process workspace groups
 			virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+            /// returns the period number from groupworkspace vector
+			int  getPeriodNumber(const std::string &wsName);
 			
 
 			mutable bool m_cancel; ///< set to true to stop execution			

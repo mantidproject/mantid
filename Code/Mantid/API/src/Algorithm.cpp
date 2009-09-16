@@ -757,6 +757,39 @@ void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNoti
     double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
     progress(p,pNf->message);
 }
+/** this method returns the period number from the group workspace vector.useful when processing group workspaces
+ *  @param inputWSName name of input workspace 
+    @returns period number 
+ */
+int Algorithm::getPeriodNumber(const std::string &inputWSName)
+{
+	try
+	{
+		std::string::size_type index = inputWSName.find_last_of("_");
+		if (index != std::string::npos)
+		{		
+			std::string grpHeaderName=inputWSName.substr(0,index);
+			if(AnalysisDataService::Instance().doesExist(grpHeaderName))
+			{	
+				Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve(grpHeaderName);
+				WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+				if(wsGrpSptr)
+				{return wsGrpSptr->getPeriodNumber(inputWSName);
+				}
+			}
+			
+		}
+	}
+	catch(Kernel::Exception::NotFoundError &e)
+	{
+		g_log.error()<<e.what()<<std::endl;
+	}
+	catch(std::runtime_error &e )
+	{
+		g_log.error()<<e.what()<<std::endl;
+	}
+  
+}
 
 } // namespace API
 } // namespace Mantid

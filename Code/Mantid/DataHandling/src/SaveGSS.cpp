@@ -8,6 +8,7 @@
 #include <iomanip>
 
 using namespace Mantid::DataHandling;
+using namespace Mantid::API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
@@ -33,6 +34,7 @@ void SaveGSS::init()
     "Save each spectrum in a different file (default true)" );
   declareProperty("Append",true,"If true and Filename already exists, append, else overwrite");
   declareProperty("Bank",1);
+
 }
 
 /**
@@ -46,6 +48,8 @@ void SaveGSS::exec()
   const int nHist=inputWS->getNumberHistograms();
 
   std::string filename = getProperty("Filename");
+  std::string inputWSName = getProperty("InputWorkspace");
+ 
   std::size_t pos=filename.find_first_of(".");
   std::string ext;
   if (pos!=std::string::npos) //Remove the extension
@@ -60,10 +64,31 @@ void SaveGSS::exec()
   std::ostringstream number;
   std::ofstream out;
   // Check whether to append to an already existing file or overwrite
-  using std::ios_base;
   const bool append = getProperty("Append");
+  using std::ios_base;
   ios_base::openmode mode = ( append ? (ios_base::out | ios_base::app) : ios_base::out );
-
+    
+  std::string period("1");
+  int periodNum=1;
+ // std::string::size_type index = inputWSName.find_last_of("_");
+ // if (index != std::string::npos)
+ // {
+	//std::string::size_type len= inputWSName.length();
+	//std::string ref=inputWSName.substr(index + 1,len-index);
+	//std::string grpHeaderName=inputWSName.substr(0,index);
+	//if(AnalysisDataService::Instance().doesExist(grpHeaderName))
+	//{
+	//	//g_log.error()<<"group header name is "<<grpHeaderName<<std::endl;
+	//	Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve(grpHeaderName);
+	//	WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+	//	if(wsGrpSptr)
+	//	{
+	//	 periodNum=wsGrpSptr->getPeriodNumber(inputWSName);
+	//	}
+	//}
+ //   period = ref;
+ // }
+  periodNum=getPeriodNumber(inputWSName);
   Progress p(this,0.0,1.0,nHist);
   for (int i=0;i<nHist;i++)
   {
@@ -74,15 +99,40 @@ void SaveGSS::exec()
     if (split=="False" && i==0) // Assign only one file
     {
       const std::string file(filename+'.'+ext);
-      const bool exists = Poco::File(file).exists();
+	  Poco::File fileobj(file);
+      const bool exists = fileobj.exists();
+	  //if (!period.compare("1"))
+	  if(periodNum==1)
+	  {	  if (!append)
+		  {	 //for period =1 if append is false delete the file
+			 if(exists)fileobj.remove();
+		  }
+	  }
+	  //else if (period.compare("1"))
+	  else if(periodNum>1)
+	  {  //if the period is not equal to one set the append mode
+		  mode=ios_base::app;
+	  }
       out.open(file.c_str(),mode);
-      if ( !exists || !append ) writeHeaders(out,inputWS);
+      if ( !exists || !append )  writeHeaders(out,inputWS);
+
     }
     else if (split=="True")//Several files will be created with names: filename-i.ext
     {
       number << "-" << i;
       const std::string file(filename+number.str()+"."+ext);
-      const bool exists = Poco::File(file).exists();
+	  Poco::File fileobj(file);
+      const bool exists = fileobj.exists();
+	 // if (!period.compare("1"))
+	  if(periodNum==1)//for period =1 if append is false delete the file
+	  {	  if (!append)
+		  {	 if(exists)fileobj.remove();
+		   }
+	  }
+	  else if (periodNum>1)
+	  {  //if the period is not equal to one set the append mode
+		  mode=ios_base::app;
+	  }
       out.open(file.c_str(),mode);
       number.str("");
       if ( !exists || !append ) writeHeaders(out,inputWS);
@@ -146,4 +196,5 @@ void SaveGSS::writeHeaders(std::ostream& os, Mantid::API::MatrixWorkspace_const_
 
   return;
 }
+
 
