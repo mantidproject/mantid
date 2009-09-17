@@ -28,7 +28,7 @@ ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 if ret != 0:
     outcome = "MantidQt build failed"
     buildlog.write(outcome)
-    sys.exit(outcome)
+    sys.exit(0)
 
 # Now build MantidPlot
 sp.call("qmake",stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
@@ -36,7 +36,6 @@ ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
 if ret != 0:
     outcome = "MantidPlot build failed"
     buildlog.write(outcome)
-    sys.exit(outcome)
 
 buildlog.close()
 errorlog.close()
