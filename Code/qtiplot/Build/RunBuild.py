@@ -1,5 +1,42 @@
 import os
+import subprocess as sp
+import sys
 
-print 'Current path == ',os.getcwd()
-os.system('svn update')
-os.system('build.bat 1> ../../../../logs/qtiplot/build.log 2> ../../../../logs/qtiplot/error.log')
+# Set the make command for this system
+if os.name == 'posix':
+    make = "make"
+else:
+    make = "nmake"
+
+# Update the local copy
+sp.call("svn up", shell=True)
+
+# Update the header containing the revision number
+sp.call("python release_date.py",shell=True)
+
+# If the dependent Mantid framework headers have changed, clean first
+frameworkLog = sp.Popen("svn log -qv -rCOMMITTED",stdout=sp.PIPE,shell=True,cwd="../Mantid").communicate()[0]
+if ("MantidKernel" in frameworkLog) or ("MantidGeometry" in frameworkLog) or ("MantidAPI" in frameworkLog):
+    sp.call(make+" clean",shell=True,cwd="MantidQt")
+    sp.call(make+" clean",shell=True,cwd="qtiplot")
+
+buildlog = open("../../../../logs/qtiplot/build.log","w") 
+errorlog = open("../../../../logs/qtiplot/error.log","w")
+
+# Build MantidQt
+ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
+if ret != 0:
+    outcome = "MantidQt build failed"
+    buildlog.write(outcome)
+    sys.exit(outcome)
+
+# Now build MantidPlot
+sp.call("qmake",stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
+ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
+if ret != 0:
+    outcome = "MantidPlot build failed"
+    buildlog.write(outcome)
+    sys.exit(outcome)
+
+buildlog.close()
+errorlog.close()

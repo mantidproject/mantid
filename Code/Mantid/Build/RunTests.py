@@ -1,6 +1,7 @@
 import subprocess as sp
 import buildNotification
 import os
+import platform
 
 # First build the tests
 buildNotification.sendTestBuildStarted("Mantid")
@@ -16,6 +17,11 @@ buildNotification.sendTestBuildCompleted("Mantid")
 # Then run them
 buildNotification.sendTestStarted("Mantid")
 
+# On the Mac, need to set the path to the shared libraries
+# Hopefully can remove this when paths are correctly embedded by build
+if platform.system() == 'Darwin':
+    os.putenv('DYLD_LIBRARY_PATH',os.getcwd()+'/Bin/Shared:'+os.getcwd()+'/../Third_Party/lib/mac')
+
 runlog = ''
 runerr = open("../../../../logs/Mantid/testsRunErr.log","w")
 testDir = "Build/Tests"
@@ -24,11 +30,15 @@ for test in testsToRun:
     if test.endswith("cpp"):
         test = test.split(".")[0]
         runlog += test+"\n"
-        if os.name == 'nt':
-            test += ".exe"
-        else:
+        if os.name == 'posix':
             test = "./" + test
         runlog += sp.Popen(test,stdout=sp.PIPE,stderr=runerr,shell=True,cwd=testDir).communicate()[0]
+        # Extra bit to help Internet Explorer render this readably
+        if os.name == 'posix':
+            runlog += "\r\n"
 
 open("../../../../logs/Mantid/testResults.log","w").write(runlog)
 runerr.close()
+
+if platform.system() == 'Darwin':
+    os.unsetenv('DYLD_LIBRARY_PATH')

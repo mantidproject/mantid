@@ -1,27 +1,21 @@
 import re
 import smtplib
 import os
+import platform
 from shutil import move
 from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-SENDER = 'BuildServer1@mantidproject.org'
-localServerName = 'http://' 
-if (os.name =='nt'):
-     SENDER = 'Win' + SENDER
-     localServerName = localServerName + os.getenv('COMPUTERNAME') + '/'
-
-else:
-     SENDER = 'Linux' + SENDER
-     localServerName = localServerName + os.getenv('HOSTNAME') + '/'
+SENDER = platform.system() + 'BuildServer1@mantidproject.org'
+localServerName = 'http://' + platform.node()
+if platform.system() == 'Darwin':
+     localServerName += ':8080'
+localServerName += '/'
 
 #Set up email content 
 buildSuccess = True
-
-mssgBuild = ''
-mssgBuildErr = ''
 
 logDir = '../../../../logs/qtiplot/'
 
@@ -29,53 +23,51 @@ logDir = '../../../../logs/qtiplot/'
 archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
 os.mkdir(archiveDir)
 
-
 #Get build result and errors
 fileBuild = logDir+'build.log'
 f = open(fileBuild,'r')
 
-for line in f.readlines():
+for line in f:
      buildResult = line
-     mssgBuild = mssgBuild + line
      
 f.close()
 move(fileBuild,archiveDir)
 
 if 'failed' in buildResult:
-	buildSuccess = False	
+     buildSuccess = False	
 	
 fileBuildErr = logDir+'error.log'
-mssgBuildErr = open(fileBuildErr,'r').read()
 move(fileBuildErr,archiveDir)
 
 if buildSuccess:
      fileLaunchInstaller = logDir+'LaunchInstaller.txt'
      f = open(fileLaunchInstaller,'w')
      f.write('launch')
-     exit(0)
 
+last = logDir + 'lastBuild.txt'
+lastBuild = open(last,'r').read()     
+open(last,'w').write(str(buildSuccess))
+
+# We want to skip sending email if this AND previous build succeeded
+if buildSuccess and lastBuild=='True':
+     exit(0)
 
 #Construct Message
 httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
-message += 'QTIPlot Build Passed: ' + str(buildSuccess) + "\n"
+message += 'MantidPlot Build Passed: ' + str(buildSuccess) + "\n\n"
+message += '-----------------------------------------------------------------------\n'
 message += 'QTIPLOT BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
 #Create Subject
-subject = 'Subject: '
-if (os.name=='nt'):
-     subject += "Windows"
-else:
-     subject += "Linux"
-          
-subject += ' Build Report: '
+subject = 'Subject: ' + platform.system() + ' Build Report: '
 
 if buildSuccess:
-	subject += '[QTIPlot Build Successful]\n\n\n'
+	subject += '[MantidPlot Build Successful]\n\n\n'
 else:
-	subject += '[QTIPlot Build Failed]\n\n\n'
+	subject += '[MantidPlot Build Failed]\n\n\n'
 	
 #Send Email
 session = smtplib.SMTP(smtpserver)
@@ -85,7 +77,7 @@ smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
 if smtpresult:
     errstr = ""
     for recip in smtpresult.keys():
-        errstr = """Could not delivery mail to: %s
+        errstr = """Could not deliver mail to: %s
 
 Server said: %s
 %s
@@ -93,4 +85,7 @@ Server said: %s
 %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
     raise smtplib.SMTPException, errstr
 
-exit(1)
+if buildSuccess:
+     exit(0)
+else:
+     exit(1)
