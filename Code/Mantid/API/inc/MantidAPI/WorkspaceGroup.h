@@ -56,11 +56,7 @@ public:
   void print();
   void removeAll();
   void remove(const std::string& name); 
-   /** returns the period number for the given workspace
-  * @param wsName Workspace name
-  */
-  int getPeriodNumber(const std::string& wsName );
-
+ 
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);

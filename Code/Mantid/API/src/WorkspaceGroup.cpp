@@ -60,22 +60,6 @@ void WorkspaceGroup::print()
     g_log.debug() << "workspacename in group vector=  " << *itr << std::endl;
   }
 }
-/** this method iterates through group workspace vector and returns the period number for the given workspace.
- *  @param wsName The name of the input workspace .
-  * @returns the period number
- */
-int WorkspaceGroup::getPeriodNumber(const std::string& wsName )
-{
-	int periodNumber=0;
-	std::vector<std::string>::const_iterator itr=m_wsNames.begin();
-	for (++itr; itr != m_wsNames.end(); ++itr)
-	{	++periodNumber;
-		if ((*itr) == wsName)
-		{break;
-		}
-	}
-	return periodNumber;
-}
 
 } // namespace API
 } // namespace Mantid

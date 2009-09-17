@@ -139,8 +139,7 @@ bool Algorithm::execute()
 			  {					
 				  //checking the input is a group
 				  try
-				  {
-					  //check if the pointer is valid, it won't be if it is a group
+				  {	  //check if the pointer is valid, it won't be if it is a group
 					  Workspace_sptr wsSptr=wsProp->getWorkspace();
 					  if(!wsSptr)
 					  {
@@ -157,13 +156,11 @@ bool Algorithm::execute()
 				  catch (std::exception &ex)
 				  {					 
 					  g_log.error()<<ex.what()<<std::endl; 
-
 				  }
-
 			  }
 			  catch(Exception::NotFoundError&e)//if not a valid object in analysis data service
 			  {
-				  g_log.debug()<<e.what()<<std::endl;
+				  g_log.error()<<e.what()<<std::endl;
 			  }
 		  }//end of if loop checking the direction
 	  }//end of if loop for checking workspace properties
@@ -563,8 +560,8 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 					bool b=setInputWSProperties(alg,prevPropName,*itr,*wsItr);
 					if(!b)
 					{
-					 g_log.error("Giving two workspace groups as input is not yet implemented");
-					 return false;
+						g_log.error()<<"Giving two workspace groups as input is not permitted for the algorithm  "<<this->name()<<std::endl;
+						return false;
 						
 					}
 				}
@@ -766,40 +763,6 @@ void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNoti
     double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
     progress(p,pNf->message);
 }
-/** this method returns the period number from the group workspace vector.useful when processing group workspaces
- *  @param inputWSName name of input workspace 
-    @returns period number 
- */
-int Algorithm::getPeriodNumber(const std::string &inputWSName)
-{
-	try
-	{
-		std::string::size_type index = inputWSName.find_last_of("_");
-		if (index != std::string::npos)
-		{		
-			std::string grpHeaderName=inputWSName.substr(0,index);
-			if(AnalysisDataService::Instance().doesExist(grpHeaderName))
-			{	
-				Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve(grpHeaderName);
-				WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-				if(wsGrpSptr)
-				{return wsGrpSptr->getPeriodNumber(inputWSName);
-				}
-			}
-			
-		}
-	}
-	catch(Kernel::Exception::NotFoundError &e)
-	{
-		g_log.error()<<e.what()<<std::endl;
-	}
-	catch(std::runtime_error &e )
-	{
-		g_log.error()<<e.what()<<std::endl;
-	}
-  
-}
-
 
 } // namespace API
 } // namespace Mantid
