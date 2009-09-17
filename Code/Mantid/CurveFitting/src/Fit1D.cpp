@@ -597,24 +597,33 @@ void Fit1D::exec()
     const std::vector<double>& inputX = inputWorkspace->readX(iSpec);
     const std::vector<double>& inputY = inputWorkspace->readY(iSpec);
 
+    int histN = isHistogram ? 1 : 0;
     Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-      (Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",3,inputX.size(),inputY.size()));
+      (
+         Mantid::API::WorkspaceFactory::Instance().create(
+                     "Workspace2D",
+                     3,
+                     l_data.n + histN,
+                     l_data.n)
+      );
     ws->setTitle("");
-    ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    ws->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();//    UnitFactory::Instance().create("TOF");
 
     for(int i=0;i<3;i++)
-      ws->dataX(i) = inputWorkspace->readX(iSpec);
+      ws->dataX(i).assign(inputX.begin()+m_minX,inputX.begin()+m_maxX+histN);
 
-    ws->dataY(0) = inputWorkspace->readY(iSpec);
+    ws->dataY(0).assign(inputY.begin()+m_minX,inputY.begin()+m_maxX);
 
     std::vector<double>& Y = ws->dataY(1);
     std::vector<double>& E = ws->dataY(2);
 
-    for(unsigned int i=0;i<Y.size();i++)
+    for(unsigned int i=m_minX;i<m_maxX;i++)
     {
+      int j = i - m_minX;
       double x = inputX[i];
-      Y[i] = this->function(l_data.parameters,x);
-      E[i] = inputY[i] - Y[i];
+      if (isHistogram) x = (x + inputX[i+1])/2;
+      Y[j] = this->function(l_data.parameters,x);
+      E[j] = inputY[i] - Y[j];
     }
 
     setProperty("OutputWorkspace",boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
