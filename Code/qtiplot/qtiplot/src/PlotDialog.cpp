@@ -1790,7 +1790,8 @@ void PlotDialog::insertTabs(int plot_type)
     if (!item || item->type() != CurveTreeItem::PlotCurveTreeItem)
         return;
 
-    DataCurve *c = (DataCurve *)((CurveTreeItem *)item)->plotItem();
+    const DataCurve *c = dynamic_cast<const DataCurve *>(((CurveTreeItem *)item)->plotItem() );
+    if (!c) return;
     if (c && c->type() != Graph::Function){
         privateTabWidget->addTab (labelsPage, tr("Labels"));
 		if (c->hasSelectedLabels())
@@ -2204,7 +2205,8 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
 		return;
     }
 
-    DataCurve *dc = (DataCurve *)i;
+    const DataCurve *dc = dynamic_cast<const DataCurve *>(i);
+    if (!dc) return;
 	if (!dc->table()){
 		privateTabWidget->removeTab(privateTabWidget->indexOf(labelsPage));
 		return;
@@ -2537,7 +2539,8 @@ bool PlotDialog::acceptParams()
 			sp->setLabelsOffset((double)boxLabelsXOffset->value(), (double)boxLabelsYOffset->value());
 			
 		} else {
-			DataCurve *c = (DataCurve *)plotItem;
+			DataCurve *c = dynamic_cast<DataCurve *>(plotItem);
+      if (!c) return false;
 		
 			QString text = item->text(0);
 			QStringList t = text.split(": ", QString::SkipEmptyParts);
@@ -3142,23 +3145,24 @@ void PlotDialog::closeEvent(QCloseEvent* e)
 
 void PlotDialog::chooseLabelsFont()
 {
-    QTreeWidgetItem *item = listBox->currentItem();
-    if (!item || item->type() != CurveTreeItem::PlotCurveTreeItem)
-        return;
+  QTreeWidgetItem *item = listBox->currentItem();
+  if (!item || item->type() != CurveTreeItem::PlotCurveTreeItem)
+    return;
 
-    const QwtPlotItem *i = ((CurveTreeItem *)item)->plotItem();
-    Graph *graph = ((CurveTreeItem *)item)->graph();
-    if (!i || !graph)
-        return;
+  QwtPlotItem *i = ((CurveTreeItem *)item)->plotItem();
+  Graph *graph = ((CurveTreeItem *)item)->graph();
+  if (!i || !graph)
+    return;
 
-    DataCurve *c = (DataCurve *)i;
-    bool okF;
-	QFont fnt = QFontDialog::getFont(&okF, c->labelsFont(), this);
-	if (okF && fnt != c->labelsFont()){
-		c->setLabelsFont(fnt);
-        graph->replot();
-        graph->notifyChanges();
-	}
+  DataCurve *c = dynamic_cast<DataCurve *>(i);
+  if (!c) return;
+  bool okF;
+  QFont fnt = QFontDialog::getFont(&okF, c->labelsFont(), this);
+  if (okF && fnt != c->labelsFont()){
+    c->setLabelsFont(fnt);
+    graph->replot();
+    graph->notifyChanges();
+  }
 }
 
 int PlotDialog::labelsAlignment()
@@ -3208,15 +3212,16 @@ void LayerItem::insertCurvesList()
 {
 	for (int i=0; i<d_graph->curves(); i++){
         QString plotAssociation = QString();
-        const QwtPlotItem *it = (QwtPlotItem *)d_graph->plotItem(i);
+        QwtPlotItem *it = (QwtPlotItem *)d_graph->plotItem(i);
         if (!it)
             continue;
 
         if (it->rtti() == QwtPlotItem::Rtti_PlotCurve){
             PlotCurve *c = (PlotCurve *)it;
-            if (c->type() != Graph::Function && ((DataCurve *)it)->table()){
-                QString s = ((DataCurve *)it)->plotAssociation();
-                QString table = ((DataCurve *)it)->table()->name();
+            DataCurve* dc = dynamic_cast<DataCurve *>(it);
+            if (dc && c->type() != Graph::Function && dc->table()){
+                QString s = dc->plotAssociation();
+                QString table = dc->table()->name();
                 plotAssociation = table + ": " + s.remove(table + "_");
             } else
                 plotAssociation = it->title().text();
@@ -3233,7 +3238,7 @@ void LayerItem::insertCurvesList()
  *
  *****************************************************************************/
 
-CurveTreeItem::CurveTreeItem(const QwtPlotItem *curve, LayerItem *parent, const QString& s)
+CurveTreeItem::CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QString& s)
     : QTreeWidgetItem( parent, QStringList(s), PlotCurveTreeItem ),
       d_curve(curve)
 {

@@ -147,7 +147,7 @@ class Graph: public QWidget //QwtPlot //QWidget
 		enum MarkerType{None = -1, Text = 0, Arrow = 1, Image = 2};
 		enum CurveType{Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
 			Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
-			Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, Contour, Function, ImagePlot};
+			Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, Contour, Function, ImagePlot,User};
 
 		//! Returns a pointer to the parent MultiLayer object.
 		MultiLayer *multiLayer(){return (MultiLayer *)(this->parent()->parent()->parent());};
@@ -204,6 +204,7 @@ class Graph: public QWidget //QwtPlot //QWidget
 		PlotCurve* insertCurve(Table* w, const QString& name, int style, int startRow = 0, int endRow = -1);
 		PlotCurve* insertCurve(Table* w, int xcol, const QString& name, int style);
 		PlotCurve* insertCurve(Table* w, const QString& xColName, const QString& yColName, int style, int startRow = 0, int endRow = -1);
+    PlotCurve* insertCurve(PlotCurve* c);
 		void insertPlotItem(QwtPlotItem *i, int type);
 
                 void insertCurve(Graph* g, int i);
@@ -222,6 +223,7 @@ class Graph: public QWidget //QwtPlot //QWidget
 		 * \brief Removes all curves defined by the title/plot association string s.
 		 */
 		void removeCurves(const QString& s);
+    void removeCurve(PlotCurve* c);
 
 		void updateCurvesData(Table* w, const QString& yColName);
 
@@ -708,6 +710,7 @@ signals:
 		void showFitResults(const QString&);
 		void currentFontChanged(const QFont&);
         void enableTextEditor(Graph *);
+    void curveRemoved();
 				
 	private:
         //! Finds bounding interval of the plot data.

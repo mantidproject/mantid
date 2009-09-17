@@ -382,6 +382,7 @@ HEADERS  += src/ApplicationWindow.h \
         src/Mantid/MantidMatrixDialog.h \
 	    src/Mantid/PeakPickerTool.h \
 	    src/Mantid/PeakFitDialog.h \
+	    src/Mantid/MantidCurve.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
 	    src/Mantid/InstrumentWidget/GLTrackball.h \
@@ -550,6 +551,7 @@ SOURCES  += src/ApplicationWindow.cpp \
         src/Mantid/MantidMatrixDialog.cpp \
 	    src/Mantid/PeakPickerTool.cpp \
 	    src/Mantid/PeakFitDialog.cpp \
+	    src/Mantid/MantidCurve.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \
 	    src/Mantid/InstrumentWidget/GLTrackball.cpp \

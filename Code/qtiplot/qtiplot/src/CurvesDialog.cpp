@@ -35,6 +35,7 @@
 #include "ApplicationWindow.h"
 #include "Folder.h"
 #include "pixmaps.h"
+#include "Mantid/MantidCurve.h"
 
 #include <QPushButton>
 #include <QLabel>
@@ -306,6 +307,27 @@ void CurvesDialog::init()
             boxStyle->setCurrentItem(9);
     }
 
+    QList<MdiSubWindow *> wList = app->windowsList();
+    foreach(MdiSubWindow* w, wList)
+    {
+      MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
+      if (ml)// layers are numbered starting from 1
+        for(int i=1;i<=ml->layers();i++)
+        {
+          Graph* g = ml->layer(i);
+          if (g)
+          for(int j=0;j<g->curves();j++)
+          {
+            MantidCurve* c = dynamic_cast<MantidCurve*>(g->curve(j));
+            if (c)
+            {
+              available->addItem(c->title().text());
+              d_plotCurves[c->title().text()] = c;
+            }
+          }
+        }
+    }
+
 	if (!available->count())
 		btnAdd->setDisabled(true);
 }
@@ -405,6 +427,12 @@ bool CurvesDialog::addCurve(const QString& name)
 		contents->addItem(name);
 		return true;
 	}
+
+  if (d_plotCurves.find(name) != d_plotCurves.end())
+  {
+    d_graph->insertCurve(d_plotCurves[name]->clone());
+    return true;
+  }
 	return false;
 }
 

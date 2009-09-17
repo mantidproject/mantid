@@ -485,13 +485,15 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point)
 
 		if(item->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
 		{
-			PlotCurve *c = (PlotCurve *)item;
-			if (c->type() != Graph::Function && ((DataCurve *)c)->hasLabels() &&
-                ((DataCurve *)c)->selectedLabels(QPoint(xpos, ypos))){
-                dist = 0;
-			    return iter.key();
-            } else
-                ((DataCurve *)c)->setLabelsSelected(false);
+      PlotCurve *c = (PlotCurve *)item;
+      DataCurve *dc = dynamic_cast<DataCurve *>(item);
+      if (!dc) continue;
+      if (c->type() != Graph::Function && dc->hasLabels() &&
+        dc->selectedLabels(QPoint(xpos, ypos))){
+          dist = 0;
+          return iter.key();
+      } else
+        dc->setLabelsSelected(false);
 
 			for (int i=0; i<c->dataSize(); i++)
 			{
@@ -684,10 +686,11 @@ void Plot::updateCurveLabels()
 {
     QList<QwtPlotItem *> curves = curvesList();
     foreach(QwtPlotItem *i, curves){
-        if(i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        ((PlotCurve *)i)->type() != Graph::Function &&
-        ((DataCurve *)i)->hasLabels())
-            ((DataCurve *)i)->updateLabelsPosition();
+      DataCurve * dc = dynamic_cast<DataCurve *>(i);
+      if(dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
+        dc->type() != Graph::Function &&
+        dc->hasLabels())
+        dc->updateLabelsPosition();
     }
 }
 

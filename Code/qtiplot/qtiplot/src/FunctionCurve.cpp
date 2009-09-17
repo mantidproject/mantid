@@ -47,6 +47,15 @@ FunctionCurve::FunctionCurve(const FunctionType& t, const QString& name):
 	setType(Graph::Function);
 }
 
+FunctionCurve::FunctionCurve(const FunctionCurve& c)
+:PlotCurve(c.title().text()),	d_function_type(c.d_function_type),
+d_variable(c.d_variable),
+d_formulas(c.d_formulas),
+d_from(c.d_from),
+d_to(c.d_to)
+{
+}
+
 void FunctionCurve::setRange(double from, double to)
 {
 	d_from = from;

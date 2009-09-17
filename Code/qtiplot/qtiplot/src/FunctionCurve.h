@@ -39,6 +39,9 @@ public:
 
 	FunctionCurve(const FunctionType& t, const QString& name = QString());
 	FunctionCurve(const QString& name = QString());
+	FunctionCurve(const FunctionCurve& c);
+
+  PlotCurve* clone()const{return new FunctionCurve(*this);}
 
 	double startRange(){return d_from;};
 	double endRange(){return d_to;};

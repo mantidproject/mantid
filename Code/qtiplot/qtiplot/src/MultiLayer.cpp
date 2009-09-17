@@ -55,6 +55,7 @@
 #include "ApplicationWindow.h"
 
 #include <gsl/gsl_vector.h>
+#include <iostream>
 
 LayerButton::LayerButton(const QString& text, QWidget* parent)
 : QPushButton(text, parent)
@@ -1237,4 +1238,25 @@ bool MultiLayer::swapLayers(int src, int dest)
 
 	emit modifiedPlot();
 	return true;
+}
+
+/** Do something when the graphs are modified, e.g. it can close itself
+ *  if it becomes empty.
+ */
+void MultiLayer::maybeNeedToClose()
+{
+  if (d_close_on_empty)
+  {
+    bool shouldClose = true;
+    for(int i=1;i<=layers();i++)
+    {
+      Graph* g = layer(i);
+      if (g && g->curves() > 0)
+      {
+        shouldClose = false;
+        break;
+      }
+    }
+    if (shouldClose) close();
+  }
 }

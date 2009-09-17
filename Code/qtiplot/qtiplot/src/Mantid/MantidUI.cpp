@@ -3,14 +3,17 @@
 #include "MantidDock.h"
 #include <algorithm>
 #include "ImportWorkspaceDlg.h"
-
 #include "LoadDAEDlg.h"
-
 #include "AlgMonitor.h"
+#include "MantidSampleLogDialog.h"
+#include "AlgorithmHistoryWindow.h"
+//#include "MemoryImage.h"
+#include "MantidCurve.h"
+
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
-#include "MantidSampleLogDialog.h"
 #include "../ScriptingWindow.h"
+#include "../ColorBox.h"
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/LogFilter.h"
@@ -22,9 +25,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidKernel/EnvironmentHistory.h"
-#include "AlgorithmHistoryWindow.h"
 
-//#include "MemoryImage.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -1567,12 +1568,16 @@ MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool errorba
   }
   if (!ws.get()) return NULL;
 
-  Table *t = createTableFromSpectraRange(wsName, ws, spec, spec, errorbars, false);
-  int type = ws->isHistogramData() ? 3 : 1;  // Type 3 is steps, 1 is a line
-  MultiLayer* ml = createGraphFromTable(t,type);
-  if (!ml) return NULL;
+  std::set<int> indexList;
+  indexList.insert(spec);
+  MultiLayer* ml = createGraphFromSpectraSet(wsName, ws, indexList, errorbars);
 
-  m->setSpectrumGraph(ml,t);
+  //Table *t = createTableFromSpectraRange(wsName, ws, spec, spec, errorbars, false);
+  //int type = ws->isHistogramData() ? 3 : 1;  // Type 3 is steps, 1 is a line
+  //MultiLayer* ml = createGraphFromTable(t,type);
+  //if (!ml) return NULL;
+  //m->setSpectrumGraph(ml,t);
+
   if( !showPlot ) ml->setVisible(false);
   return ml;
 }
@@ -2023,6 +2028,19 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
      return t;
  }
 
+/**  Creates a list of spectra indeces corresponding to the selected rows in a MantidMatrix.
+ *  @param m The MantidMatrix
+ */
+std::set<int> MantidUI::createSpectraIndexList(MantidMatrix *m)
+{
+  int i0,i1;
+  m->getSelectedRows(i0,i1);
+  if (i0 < 0 || i1 < 0) return std::set<int>();
+  std::set<int> indexList;
+  for(int i=i0;i<=i1;i++)
+    indexList.insert(m->workspaceIndex(i));
+  return indexList;
+}
 
 /** Creates a Qtiplot Table from selected spectra of MantidMatrix m.
     The columns are: 1st column is x-values from the first selected spectrum,
@@ -2155,6 +2173,11 @@ MultiLayer* MantidUI::createGraphFromSpectraList(const QString& graphName, Manti
 	std::set<int> indexS;
 	for (std::vector<int>::iterator it=indexList.begin();it!=indexList.end();it++)
 		indexS.insert(*it);
+
+  return createGraphFromSpectraSet(graphName,workspace,indexS,errs);
+
+  //--------- old code ------------//
+
 	std::vector<int> newIndex(indexS.size());
 	std::copy(indexS.begin(),indexS.end(),newIndex.begin());
 
@@ -2170,6 +2193,36 @@ MultiLayer* MantidUI::createGraphFromSpectraList(const QString& graphName, Manti
 
     return ml;
 }
+
+/** Create a 1d graph form specified spectra in a MatrixWorkspace
+    @param graphName Graph name
+    @param workspace Shared pointer to the workspace
+    @param indexList A list of spectra indices to be shown in the graph
+    @param errs If true include the errors to the graph
+ */
+MultiLayer* MantidUI::createGraphFromSpectraSet(const QString& graphName, Mantid::API::MatrixWorkspace_sptr workspace, std::set<int>& indexList, bool errs)
+{
+	MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(graphName+"-"));
+	ml->askOnCloseEvent(false);
+  ml->setCloseOnEmpty(true);
+	Graph *g = ml->activeGraph();
+	if (!g)
+		return 0;
+
+  connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
+
+  appWindow()->setPreferences(g);
+  g->newLegend("");
+
+  for(std::set<int>::const_iterator it=indexList.begin();it!=indexList.end();it++)
+  {
+    MantidCurve* c = new MantidCurve(graphName+QString("-sp-")+QString::number(*it),workspace,g,"spectra",*it,errs);
+    connect(this,SIGNAL(workspace_removed(const QString&)),c,SLOT(workspaceRemoved(const QString&)));
+  }
+  setUpSpectrumGraph(ml,graphName,workspace);
+
+}
+
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
     @param graphName Graph name
@@ -2209,6 +2262,10 @@ MultiLayer* MantidUI::createGraphFromSpectraRange(const QString& graphName, Mant
  */
 MultiLayer* MantidUI::createGraphFromSelectedRows(MantidMatrix *m, bool errs, bool binCentres, bool tableVisible)
 {
+  std::set<int> indexList = createSpectraIndexList(m);
+  return createGraphFromSpectraSet(m->name(),m->workspace(),indexList,errs);
+
+  // -----  Old code -----------//
     Table *t = createTableFromSelectedRows(m,errs,binCentres);
 
     if (tableVisible) t->showNormal();

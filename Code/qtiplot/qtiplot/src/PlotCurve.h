@@ -36,23 +36,31 @@
 class PlotMarker;
 
 //! Abstract 2D plot curve class
-class PlotCurve: public QwtPlotCurve
+class PlotCurve: public QObject, public QwtPlotCurve
 {
-
+Q_OBJECT
 public:
 	PlotCurve(const QString& name = QString()): QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0){};
+	PlotCurve(const PlotCurve& c): QwtPlotCurve(c.title().text()), d_type(c.d_type), 
+    d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset){};
 
-	int type(){return d_type;};
+  virtual PlotCurve* clone()const = 0;
+
+	int type()const{return d_type;};
 	void setType(int t){d_type = t;};
 
-	double xOffset(){return d_x_offset;};
+	double xOffset()const{return d_x_offset;};
 	void setXOffset(double dx){d_x_offset = dx;};
 
-	double yOffset(){return d_y_offset;};
+	double yOffset()const{return d_y_offset;};
 	void setYOffset(double dy){d_y_offset = dy;};
 
 	QString saveCurveLayout();
 	void restoreCurveLayout(const QStringList& lst);
+
+signals:
+
+  void removeMe(PlotCurve*);
 
 protected:
 	int d_type;
@@ -63,50 +71,53 @@ class DataCurve: public PlotCurve
 {
 public:
 	DataCurve(Table *t, const QString& xColName, const QString& name, int startRow = 0, int endRow = -1);
+  DataCurve(const DataCurve& c);
     void clone(DataCurve* c);
+
+    PlotCurve* clone()const;
 
     QString saveToString();
 
 	QString xColumnName(){return d_x_column;};
 	void setXColumnName(const QString& name){d_x_column = name;};
 
-	bool hasLabels(){return !d_labels_list.isEmpty();};
-	QString labelsColumnName(){return d_labels_column;};
+	bool hasLabels()const{return !d_labels_list.isEmpty();};
+	QString labelsColumnName()const{return d_labels_column;};
 	void setLabelsColumnName(const QString& name);
 
-    int labelsAlignment(){return d_labels_align;};
+    int labelsAlignment()const{return d_labels_align;};
     void setLabelsAlignment(int flags);
 
-    int labelsXOffset(){return d_labels_x_offset;};
-    int labelsYOffset(){return d_labels_y_offset;};
+    int labelsXOffset()const{return d_labels_x_offset;};
+    int labelsYOffset()const{return d_labels_y_offset;};
     void setLabelsOffset(int x, int y);
 
-    double labelsRotation(){return d_labels_angle;};
+    double labelsRotation()const{return d_labels_angle;};
     void setLabelsRotation(double angle);
 
-    QFont labelsFont(){return d_labels_font;};
+    QFont labelsFont()const{return d_labels_font;};
     void setLabelsFont(const QFont& font);
 
-    QColor labelsColor(){return d_labels_color;};
+    QColor labelsColor()const{return d_labels_color;};
     void setLabelsColor(const QColor& c);
 
-    bool labelsWhiteOut(){return d_white_out_labels;};
+    bool labelsWhiteOut()const{return d_white_out_labels;};
     void setLabelsWhiteOut(bool whiteOut = true);
 
-	Table* table(){return d_table;};
+	Table* table()const{return d_table;};
 
-	int startRow(){return d_start_row;};
-	int endRow(){return d_end_row;};
+	int startRow()const{return d_start_row;};
+	int endRow()const{return d_end_row;};
 	void setRowRange(int startRow, int endRow);
 
-	bool isFullRange();
+	bool isFullRange()const;
 	void setFullRange();
 
 	virtual bool updateData(Table *t, const QString& colName);
 	virtual void loadData();
 
 	//! Returns the row index in the data source table corresponding to the data point index.
-	int tableRow(int point);
+	int tableRow(int point)const;
 
 	void remove();
 
@@ -122,11 +133,11 @@ public:
 		 *
 		 * Column ids are of the form '&lt;name of table> "_" &lt;name of column>'.
 		 */
-    virtual QString plotAssociation();
+    virtual QString plotAssociation()const;
 	virtual void updateColumnNames(const QString& oldName, const QString& newName, bool updateTableName);
 
 	//! The list of attached error bars.
-	QList<DataCurve *> errorBarsList(){return d_error_bars;};
+	QList<DataCurve *> errorBarsList()const{return d_error_bars;};
 	//! Adds a single error bars curve to the list of attached error bars.
 	void addErrorBars(DataCurve *c){if (c) d_error_bars << c;};
 	//! Remove a single error bars curve from the list of attached error bars.
@@ -139,14 +150,14 @@ public:
 	void setVisible(bool on);
 
 	bool selectedLabels(const QPoint& pos);
-	bool hasSelectedLabels();
+	bool hasSelectedLabels()const;
 	void setLabelsSelected(bool on = true);
 
 	void moveLabels(const QPoint& pos);
     void updateLabelsPosition();
 
 protected:
-	bool validCurveType();
+	bool validCurveType()const;
     void loadLabels();
 
 	//! List of the error bar curves associated to this curve.

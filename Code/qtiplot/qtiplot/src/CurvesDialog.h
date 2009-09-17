@@ -30,12 +30,14 @@
 #define CURVESDIALOG_H
 
 #include <QDialog>
+#include <QMap>
 
 class QComboBox;
 class QListWidget;
 class QPushButton;
 class QCheckBox;
 class Graph;
+class PlotCurve;
 
 //! Add/remove curves dialog
 class CurvesDialog : public QDialog
@@ -84,6 +86,7 @@ private:
 	QComboBox* boxMatrixStyle;
 	QCheckBox* boxShowRange;
 	QCheckBox* boxShowCurrentFolder;
+  QMap<QString,PlotCurve*> d_plotCurves;
 };
 
 #endif // CurvesDialog_H

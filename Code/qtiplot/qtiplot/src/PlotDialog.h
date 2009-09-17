@@ -365,17 +365,17 @@ class CurveTreeItem : public QTreeWidgetItem
 {
 public:
     enum {PlotCurveTreeItem = 1002};
-    CurveTreeItem(const QwtPlotItem *curve, LayerItem *parent, const QString& s);
+    CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QString& s);
 
     Graph* graph(){return ((LayerItem *)parent())->graph();};
     void setActive(bool on);
 
-    const QwtPlotItem *plotItem() { return d_curve; };
+    QwtPlotItem *plotItem() const{ return d_curve; };
     int plotItemType();
     int plotItemIndex();
 
 protected:
-    const QwtPlotItem *d_curve;
+    QwtPlotItem *d_curve;
 };
 
 #endif

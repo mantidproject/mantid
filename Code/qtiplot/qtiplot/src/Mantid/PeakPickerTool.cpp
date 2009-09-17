@@ -1,6 +1,6 @@
 #include "PeakPickerTool.h"
+#include "MantidCurve.h"
 #include "../ApplicationWindow.h"
-#include "../PlotCurve.h"
 #include "qwt_painter.h"
 #include <qpainter.h>
 #include <qlist.h>
@@ -11,17 +11,29 @@
 PeakPickerTool::PeakPickerTool(Graph *graph, ApplicationWindow *app) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
-d_app(app),m_range(0)
+d_app(app),m_range(0),m_wsName(),m_spec()
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
 
   if (d_graph->plotWidget()->curves().size() > 0)
   {
-    DataCurve* curve = dynamic_cast<DataCurve*>(d_graph->plotWidget()->curves().begin().value());
-    if (curve)
+    // Can we use a different curve? (not the first one). RT.
+    PlotCurve* curve = dynamic_cast<PlotCurve*>(d_graph->plotWidget()->curves().begin().value());
+    if (!curve) return;
+    DataCurve* dcurve = dynamic_cast<DataCurve*>(curve);
+    if (dcurve)
     {
-      m_wsName = curve->table()->name().section('-',0,0);
-      m_spec = curve->table()->colName(0).section('_',1,1).mid(2).toInt();
+      m_wsName = dcurve->table()->name().section('-',0,0);
+      m_spec = dcurve->table()->colName(0).section('_',1,1).mid(2).toInt();
+    }
+    else
+    {
+      MantidCurve* mcurve = dynamic_cast<MantidCurve*>(curve);
+      if (mcurve)
+      {
+        m_wsName = mcurve->title().text().section('-',0,0);
+        m_spec = mcurve->title().text().section('-',2,2).toInt();
+      }
     }
   }
 }

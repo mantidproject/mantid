@@ -137,6 +137,9 @@ public:
     // Creates a 2D plot in QtiPlot if the active window is a MantidMatrix
     MultiLayer *plotSpectrogram(Graph::CurveType type);
 
+    /// Creates a list of spectra indeces corresponding to the selected rows in a MantidMatrix
+    std::set<int> createSpectraIndexList(MantidMatrix *m);
+
     /// Create a Table form specified spectra in a MatrixWorkspace
     Table* createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs=true, bool binCentres=false);
 
@@ -153,6 +156,9 @@ public:
 
     /// Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* createGraphFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int>& indexList, bool errs=true, bool binCentres=false, bool tableVisible = false);
+
+    /// Create a 1d graph form specified spectra in a MatrixWorkspace
+    MultiLayer* createGraphFromSpectraSet(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::set<int>& indexList, bool errs=true);
 
     /// Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* createGraphFromSpectraRange(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool binCentres=false, bool tableVisible = false);

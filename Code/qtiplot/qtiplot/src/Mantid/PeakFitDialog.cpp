@@ -6,6 +6,7 @@
 #include "PeakPickerTool.h"
 #include "../ApplicationWindow.h"
 #include "MantidUI.h"
+#include "MantidCurve.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <muParser.h>
@@ -72,10 +73,12 @@ void PeakFitDialog::fit()
     if (function == "Gaussian")
     {
       fitPeaks();
+      close();
     }
     else if (function == "Lorentzian")
     {
       fitPeaks();
+      close();
     }
     else if (function == "User defined")
     {
@@ -304,6 +307,18 @@ void PeakFitDialog::fitPeaks()
           alg->setPropertyValue("Fix",fixed.toStdString());
       }
 
+      double startX = peaks[i].centre - peaks[i].width/2;
+      double endX   = peaks[i].centre + peaks[i].width/2;
+
+      if (startX == endX)
+      {
+        QMessageBox::critical(this,"MantidPlot - Error","Zero width is set for peak at "+QString::number(peaks[i].centre));
+        return;
+      }
+
+      alg->setPropertyValue("StartX",QString::number(startX).toStdString());
+      alg->setPropertyValue("EndX",QString::number(endX).toStdString());
+
       // set the parameters which are not peak centre, height or width
       for(int j=0;j<paramCount();j++)
       {
@@ -316,46 +331,73 @@ void PeakFitDialog::fitPeaks()
       }
 
       // set the centre, height and width of the peak
+      double centreParam = peaks[i].centre;
+      double heightParam = peaks[i].height;
+      double widthParam = peaks[i].width/6;
+
+      // analyze the spectrum to find more accurate height and width
+      {
+        const Mantid::MantidVec& X0 = inputW->readX(spec);
+        const Mantid::MantidVec& Y0 = inputW->readY(spec);
+        int minX = 0, maxX = Y0.size();
+        for(int i=0;i<Y0.size();i++)
+        {
+          if (X0[i] <= startX) minX = i;
+          if (X0[i] >= endX)
+          {
+            maxX = i;
+            break;
+          }
+        }
+
+        int ih = minX+1, iw = minX;
+        double h0 = (Y0[minX] + Y0[maxX-1])/2;
+        double hmax = Y0[ih]-h0;
+        for(int i=minX;i<maxX;i++)
+        {
+          double h = Y0[i] - h0;
+          if (hmax < h)
+          {
+            hmax = h;
+            ih = i;
+            double hmax2 = hmax / 2;
+            while(Y0[iw] - h0 < hmax2 && iw < ih-1) iw++;
+          }
+        }
+        centreParam = X0[ih];
+        heightParam = hmax;
+        if (ih - iw > 1)
+          widthParam = (X0[ih]-X0[iw])*2;
+        std::cerr<<"Centre->"<<centreParam<<'\n';
+        std::cerr<<"Height->"<<heightParam<<'\n';
+        std::cerr<<"Width-->"<<widthParam<<'\n';
+      }
+
       std::string val = getValue(m_heightName);
       if (!val.empty()) alg->setPropertyValue(m_heightName,val);
       else
-        alg->setPropertyValue(m_heightName,QString::number(peaks[i].height).toStdString());
+        alg->setPropertyValue(m_heightName,QString::number(heightParam).toStdString());
 
       val = getValue(m_centreName);
       if (!val.empty()) alg->setPropertyValue(m_centreName,val);
       else
-        alg->setPropertyValue(m_centreName,QString::number(peaks[i].centre).toStdString());
+        alg->setPropertyValue(m_centreName,QString::number(centreParam).toStdString());
 
       val = getValue(m_widthName);
       if (!val.empty()) alg->setPropertyValue(m_widthName,val);
       else
       {
         // --- width param correction ---
-        double widthParam;
         if (!m_widthCorrectionFormula.empty())
         {
           mu::Parser parser;
           parser.SetExpr(m_widthCorrectionFormula);
-          double width = peaks[i].width;
+          double width = widthParam;
           parser.DefineVar("w",&width);
           widthParam = parser.Eval();
         }
-        else
-          widthParam = peaks[i].width;
         alg->setPropertyValue(m_widthName,QString::number(widthParam).toStdString());
       }
-
-      double startX = peaks[i].centre - 6*peaks[i].width;
-      double endX   = peaks[i].centre + 6*peaks[i].width;
-
-      if (startX == endX)
-      {
-        QMessageBox::critical(this,"MantidPlot - Error","Zero width is set for peak at "+QString::number(peaks[i].centre));
-        return;
-      }
-
-      alg->setPropertyValue("StartX",QString::number(startX).toStdString());
-      alg->setPropertyValue("EndX",QString::number(endX).toStdString());
 
       alg->execute();
 
@@ -370,18 +412,19 @@ void PeakFitDialog::fitPeaks()
       double x;
       mu::Parser backgroundParser;
       backgroundParser.SetExpr(m_backgroundFormula);
+      backgroundParser.DefineVar("x",&x);
       mu::Parser profileParser;
       profileParser.SetExpr(m_profileFormula);
+      profileParser.DefineVar("x",&x);
       for(int j=0;j<paramCount();j++)
       {
         std::string name = getName(j);
         double *pval = &m_params[name];
         *pval = alg->getProperty(name);
         backgroundParser.DefineVar(name,pval);
-        backgroundParser.DefineVar("x",&x);
         profileParser.DefineVar(name,pval);
-        profileParser.DefineVar("x",&x);
         row << *pval ;
+        std::cerr<<j<<"  "<<name<<"  "<<*pval<<'\n';
       }
 
       Mantid::MantidVec& Y0 = outputW->dataY(0);
@@ -392,15 +435,17 @@ void PeakFitDialog::fitPeaks()
         try
         {
           x = outputW->readX(0)[j];
+          if (x < startX) continue;
+          if (x > endX) break;
           double y = profileParser.Eval();
           double y0 = backgroundParser.Eval();
-          if (fabs(y) > dh)
-            Y1[j] += y0 + y;
-          if ( i == peaks.size() - 1 )
-          {
+          //if (fabs(y) > dh)
+            Y1[j] = y0 + y;
+          //if ( i == peaks.size() - 1 )
+          //{
             Y0[j] = inputW->readY(spec)[j];
             D[j]  = Y0[j] - Y1[j];
-          }
+          //}
         }
         catch(mu::Parser::exception_type& e)
         {
@@ -413,5 +458,13 @@ void PeakFitDialog::fitPeaks()
     // Store the output workspace
     Mantid::API::AnalysisDataService::Instance().addOrReplace(ui.leOutWorkspace->text().toStdString(),outputW);
     Mantid::API::AnalysisDataService::Instance().addOrReplace(ui.leParamTable->text().toStdString(),outParams);
+
+    MantidCurve* c1 = new MantidCurve(m_peakTool->workspaceName()+QString("-fit-")+QString::number(m_peakTool->spec()),
+      outputW,m_peakTool->graph(),"spectra",1,false);
+    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c1,SLOT(workspaceRemoved(const QString&)));
+
+    MantidCurve* c2 = new MantidCurve(m_peakTool->workspaceName()+QString("-res-")+QString::number(m_peakTool->spec()),
+      outputW,m_peakTool->graph(),"spectra",2,false);
+    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c2,SLOT(workspaceRemoved(const QString&)));
 
 }

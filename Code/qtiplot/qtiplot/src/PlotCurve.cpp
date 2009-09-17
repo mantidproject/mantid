@@ -184,6 +184,24 @@ DataCurve::DataCurve(Table *t, const QString& xColName, const QString& name, int
 		d_end_row = t->numRows() - 1;
 }
 
+DataCurve::DataCurve(const DataCurve& c):
+    PlotCurve(c.title().text()),
+      d_table(c.d_table),
+      d_x_column(c.d_x_column),
+      d_start_row(c.d_start_row),
+      d_end_row(c.d_end_row),
+      d_labels_column(c.d_labels_column),
+      d_labels_color(c.d_labels_color),
+      d_labels_font(c.d_labels_font),
+      d_labels_angle(c.d_labels_angle),
+      d_white_out_labels(c.d_white_out_labels),
+      d_labels_align(c.d_labels_align),
+      d_labels_x_offset(c.d_labels_x_offset),
+      d_labels_y_offset(c.d_labels_y_offset),
+      d_selected_label(c.d_selected_label)
+{
+}
+
 void DataCurve::setRowRange(int startRow, int endRow)
 {
 	if (d_start_row == startRow && d_end_row == endRow)
@@ -209,7 +227,7 @@ void DataCurve::setFullRange()
 		c->loadData();
 }
 
-bool DataCurve::isFullRange()
+bool DataCurve::isFullRange()const
 {
 	if (d_start_row != 0 || d_end_row != d_table->numRows() - 1)
 		return false;
@@ -217,7 +235,7 @@ bool DataCurve::isFullRange()
 		return true;
 }
 
-QString DataCurve::plotAssociation()
+QString DataCurve::plotAssociation()const
 {
 	QString s = title().text();
     if (!d_x_column.isEmpty())
@@ -418,7 +436,7 @@ void DataCurve::setVisible(bool on)
 		c->setVisible(on);
 }
 
-int DataCurve::tableRow(int point)
+int DataCurve::tableRow(int point)const
 {
     if (!d_table)
         return -1;
@@ -726,31 +744,31 @@ QString DataCurve::saveToString()
 
 bool DataCurve::selectedLabels(const QPoint& pos)
 {
-	if (!validCurveType())
-		return false;
+  if (!validCurveType())
+    return false;
 
-    QwtPlot *d_plot = plot();
-    if (!d_plot)
-        return false;
+  QwtPlot *d_plot = plot();
+  if (!d_plot)
+    return false;
 
 
-    bool selected = false;
-	d_selected_label = NULL;
-    foreach(PlotMarker *m, d_labels_list){
-        int x = d_plot->transform(xAxis(), m->xValue());
-        int y = d_plot->transform(yAxis(), m->yValue());
-        if (QRect(QPoint(x, y), m->label().textSize()).contains(pos)){
-			d_selected_label = m;
-			d_click_pos_x = d_plot->invTransform(xAxis(), pos.x());
-			d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());
-            setLabelsSelected();
-            return true;
-        }
-	}
-	return selected;
+  bool selected = false;
+  d_selected_label = NULL;
+  foreach(PlotMarker *m, d_labels_list){
+    int x = d_plot->transform(xAxis(), m->xValue());
+    int y = d_plot->transform(yAxis(), m->yValue());
+    if (QRect(QPoint(x, y), m->label().textSize()).contains(pos)){
+      d_selected_label = m;
+      d_click_pos_x = d_plot->invTransform(xAxis(), pos.x());
+      d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());
+      setLabelsSelected();
+      return true;
+    }
+  }
+  return selected;
 }
 
-bool DataCurve::hasSelectedLabels()
+bool DataCurve::hasSelectedLabels()const
 {
 	if (!validCurveType())
 		return false;
@@ -792,7 +810,7 @@ void DataCurve::setLabelsSelected(bool on)
     plot()->replot();
 }
 
-bool DataCurve::validCurveType()
+bool DataCurve::validCurveType()const
 {
 	int style = type();
 	if (style == Graph::Function || style == Graph::Box ||
@@ -831,6 +849,11 @@ void DataCurve::moveLabels(const QPoint& pos)
 	d_click_pos_y = d_plot->invTransform(yAxis(), pos.y());
 }
 
+PlotCurve* DataCurve::clone()const
+{
+  return new DataCurve(*this);
+}
+
 PlotMarker::PlotMarker(int index, double angle):QwtPlotMarker(),
 	d_index(index),
 	d_angle(angle),
@@ -851,3 +874,4 @@ void PlotMarker::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &y
 	text.draw(p, QRect(QPoint(0, 0), text.textSize()));
 	p->restore();
 }
+

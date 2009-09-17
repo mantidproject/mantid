@@ -906,10 +906,6 @@ void ApplicationWindow::initToolBars()
 	mantidPeakFitTools->setIconSize( QSize(18,20) );
 	addToolBar( Qt::TopToolBarArea, mantidPeakFitTools);
 
-  QAction* actionFitPeaks = new QAction(tr("Fit"), this);
-	connect(actionFitPeaks, SIGNAL(activated()), this, SLOT(showPeakFitDialog()));
-  mantidPeakFitTools->addAction(actionFitPeaks);
-
 	btnPeakPick = new QAction(tr("Select Peak..."), this);
 	//btnPeakPick->setShortcut( tr("Alt+B") );
 	btnPeakPick->setActionGroup(dataTools);
@@ -917,7 +913,11 @@ void ApplicationWindow::initToolBars()
 	btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
 	mantidPeakFitTools->addAction(btnPeakPick);
 
-  connect(btnPeakPick,SIGNAL(toggled(bool)),mantidPeakFitTools,SLOT(setVisible(bool)));
+  QAction* actionFitPeaks = new QAction(tr("Fit"), this);
+	connect(actionFitPeaks, SIGNAL(activated()), this, SLOT(showPeakFitDialog()));
+  mantidPeakFitTools->addAction(actionFitPeaks);
+
+  //connect(btnPeakPick,SIGNAL(toggled(bool)),mantidPeakFitTools,SLOT(setVisible(bool)));
 
   // ---------------------------------- //
 
@@ -6500,17 +6500,17 @@ void ApplicationWindow::showCurveWorksheet(Graph *g, int curveIndex)
 	if (!it)
 		return;
 
-	if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-		Spectrogram *sp = (Spectrogram *)it;
-		if (sp->matrix())
-			sp->matrix()->showMaximized();
-	} else if (((PlotCurve *)it)->type() == Graph::Function)
-		g->createTable((PlotCurve *)it);
-    else {
-		showTable(it->title().text());
-		if (g->activeTool() && g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
-            ((DataPickerTool *)g->activeTool())->selectTableRow();
-    }
+  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+    Spectrogram *sp = (Spectrogram *)it;
+    if (sp->matrix())
+      sp->matrix()->showMaximized();
+  } else if (((PlotCurve *)it)->type() == Graph::Function)
+    g->createTable((PlotCurve *)it);
+  else {
+    showTable(it->title().text());
+    if (g->activeTool() && g->activeTool()->rtti() == PlotToolInterface::Rtti_DataPicker)
+      ((DataPickerTool *)g->activeTool())->selectTableRow();
+  }
 }
 
 void ApplicationWindow::showCurveWorksheet()

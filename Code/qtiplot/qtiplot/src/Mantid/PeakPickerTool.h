@@ -69,6 +69,8 @@ class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface
     const QString& workspaceName()const{return m_wsName;}
     /// Spectrum index
     int spec()const{return m_spec;}
+
+    Graph* graph()const{return d_graph;}
   public slots:
     void windowStateChanged( Qt::WindowStates oldState, Qt::WindowStates newState );
 	private:

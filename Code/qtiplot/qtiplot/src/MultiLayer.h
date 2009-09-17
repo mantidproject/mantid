@@ -80,8 +80,11 @@ public:
 	bool printCropmarksEnabled(){return d_print_cropmarks;};
 	void printCropmarks(bool on){d_print_cropmarks = on;};
 
-        //Mantid
-        void insertCurve(MultiLayer* ml, int i);
+  //Mantid
+  void insertCurve(MultiLayer* ml, int i);
+
+  /// Set whether the MultiLayer should close itself when it becomes empty
+  void setCloseOnEmpty(bool yes=true){d_close_on_empty = yes;}
 
 public slots:
 	Graph* addLayer(int x = 0, int y = 0, int width = 0, int height = 0);
@@ -153,6 +156,8 @@ public slots:
 	QString saveToString(const QString& geometry, bool = false);
 	QString saveAsTemplate(const QString& geometryInfo);
 
+  void maybeNeedToClose();
+
 signals:
 	void showTextDialog();
 	void showPlotDialog(int);
@@ -200,6 +205,7 @@ private:
     QWidget *canvas;
 
 	QPointer<SelectionMoveResizer> d_layers_selector;
+  bool d_close_on_empty;/// true makes Multilayer close itself if it becomes empty
 };
 
 //! Button with layer number
