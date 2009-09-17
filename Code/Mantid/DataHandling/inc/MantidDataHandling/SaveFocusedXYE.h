@@ -68,6 +68,8 @@ private:
   void exec();
   ///Write the header information
   void writeHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
+/// sets non workspace properties for the algorithm
+	void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 };
 
 }

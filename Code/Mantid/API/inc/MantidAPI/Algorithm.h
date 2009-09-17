@@ -270,6 +270,8 @@ namespace Mantid
 
 			/// process workspace groups
 			virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+            /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed
+			virtual void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
             /// returns the period number from groupworkspace vector
 			int  getPeriodNumber(const std::string &wsName);
 			

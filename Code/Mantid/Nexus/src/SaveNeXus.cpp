@@ -89,33 +89,16 @@ void SaveNexus::exec()
   m_filename = getPropertyValue("FileName");
   m_inputWorkspace = getPropertyValue("InputWorkspace");
   //retrieve the append property
-  m_bAppend = getProperty("Append");
- // std::string period("1");
- // //getting the workspace number which gives the period 
- // //looking for the number after "_"
- // std::string::size_type index = m_inputWorkspace.find_last_of("_");
- // if (index != std::string::npos)
- // {
-	//std::string::size_type len= m_inputWorkspace.length();
-
- //  // std::string::reference ref = m_inputWorkspace.at(index + 1);
-	//std::string ref=m_inputWorkspace.substr(index + 1,len-index);
- //   period = ref;
-	////g_log.error()<<"period = "<<period<<std::endl;
- // }
-  int period=getPeriodNumber(m_inputWorkspace);
-  //if (!period.compare("1"))
-  if(period==1)
-  { // if m_bAppend is default (false) overwrite (delete )the .nxs file for period 1
-    if (!m_bAppend)
-    {
-      Poco::File file(m_filename);
-      if (file.exists())
-      {
-        file.remove();
-      }
-    }
+  bool bAppend = getProperty("Append");
+  // if bAppend is default (false) overwrite (delete )the .nxs file 
+  if (!bAppend)
+  {
+	  Poco::File file(m_filename);
+	  if (file.exists())
+	  { file.remove();
+	  }
   }
+
   m_filetype = "NexusProcessed";
 
   if (m_filetype == "NexusProcessed")
@@ -129,7 +112,23 @@ void SaveNexus::exec()
 
   return;
 }
-
+/** virtual method to set the non workspace properties for this algorithm
+ *  @param alg pointer to the algorithm
+ *  @param propertyName name of the property
+ *  @param propertyValue value  of the property
+ *  @param perioidNum period number
+ */
+void SaveNexus::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int perioidNum)
+{	
+	if(!propertyName.compare("Append"))
+	{	if(perioidNum!=1)
+		{ alg->setPropertyValue(propertyName,"1");
+		}
+		else alg->setPropertyValue(propertyName,propertyValue);
+	}
+	else
+		Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
+ }
 void SaveNexus::runSaveNexusProcessed()
 {
   IAlgorithm_sptr saveNexusPro = createSubAlgorithm("SaveNexusProcessed");
@@ -152,10 +151,7 @@ void SaveNexus::runSaveNexusProcessed()
   std::string title = getProperty("Title");
   if (!title.empty())
     saveNexusPro->setPropertyValue("Title", getPropertyValue("Title"));
-  // int entryNum = getProperty("EntryNumber");
-  // if( entryNum != unSetInt )
-  //     saveNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
-
+ 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
   try
   {

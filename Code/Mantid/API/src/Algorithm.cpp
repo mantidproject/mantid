@@ -521,7 +521,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 {	
 	int nPeriod=1;
 	int execPercentage=0;
-	bool bgroupExecStatus=true;
+	bool bgroupPassed=true;
 	bool bgroupFailed=false;
 	std::string outWSParentName("");
 	WorkspaceGroup_sptr sptrWSGrp1; 
@@ -546,6 +546,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	execTotal=(nSize-1)*10;
 	m_notificationCenter.postNotification(new StartedNotification(this));
 	IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",1);
+	if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
 	//for each member in the input workspace group
 	//starts from the 2nd item in the group as 1st item is group header
 	for(++wsItr;wsItr!=inputWSNames.end();wsItr++)
@@ -590,15 +591,16 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 			}
 			else
 			{
-				alg->setPropertyValue((*itr)->name(),(*itr)->value());
+				//alg->setPropertyValue((*itr)->name(),(*itr)->value());
+				this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
 			}
 		}//end of for loop for setting properties
 		//resetting the previous properties at the end of each execution 
 		prevPropName="";
 		// execute the algorithm 
 		bStatus=alg->execute();
-		// status of eac execution is checking 
-		bgroupExecStatus=bgroupExecStatus&&bStatus;
+		// status of each execution is checking 
+		bgroupPassed=bgroupPassed&&bStatus;
 		bgroupFailed=bgroupFailed||bStatus;
 		execPercentage+=10;
 		progress(double((execPercentage)/execTotal));
@@ -611,20 +613,27 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 
 	}//end of for loop for input workspace group members processing
 	//if all passed 
-	if(bgroupExecStatus)
+	if(bgroupPassed)
 	{setExecuted(true);
 	}
 	//if all failed
 	if(!bgroupFailed)
-	{
-		// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
+	{	// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
 		AnalysisDataService::Instance().remove(outWSParentName);
 	}
-
 	m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
 	return bStatus;
 }
- 
+ /** virtual method to set the non workspace properties for this algorithm.
+ *  @param alg pointer to the algorithm
+ *  @param propertyName name of the property
+ *  @param propertyValue value  of the property
+ *  @param perioidNum period number
+ */ 
+void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int nPeriod)
+{
+	if(alg) alg->setPropertyValue(propertyName,propertyValue);
+}
 /** Setting input workspace properties for an algorithm,for handling workspace groups.
  *  @param pAlg  pointer to algorithm
  *  @param prevPropName An in/out string argument denoting the previous property's name to keep track of this in a group
@@ -790,6 +799,7 @@ int Algorithm::getPeriodNumber(const std::string &inputWSName)
 	}
   
 }
+
 
 } // namespace API
 } // namespace Mantid

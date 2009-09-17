@@ -81,12 +81,12 @@ namespace Mantid
       std::string m_inputWorkspace;
       /// Method to execute SNP sub algorithm
       void runSaveNexusProcessed();
+	  /// sets non workspace properties for the algorithm
+	 void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
       ///a flag int value that indicates a value that wasn't set
       static const int unSetInt = INT_MAX-15;
-	    /// boolean flag used  to determine over write or append .nxs file
-	  bool m_bAppend;
-	
+		
     };
 
   } // namespace NeXus

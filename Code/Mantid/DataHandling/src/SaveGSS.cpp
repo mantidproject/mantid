@@ -67,28 +67,6 @@ void SaveGSS::exec()
   const bool append = getProperty("Append");
   using std::ios_base;
   ios_base::openmode mode = ( append ? (ios_base::out | ios_base::app) : ios_base::out );
-    
-  std::string period("1");
-  int periodNum=1;
- // std::string::size_type index = inputWSName.find_last_of("_");
- // if (index != std::string::npos)
- // {
-	//std::string::size_type len= inputWSName.length();
-	//std::string ref=inputWSName.substr(index + 1,len-index);
-	//std::string grpHeaderName=inputWSName.substr(0,index);
-	//if(AnalysisDataService::Instance().doesExist(grpHeaderName))
-	//{
-	//	//g_log.error()<<"group header name is "<<grpHeaderName<<std::endl;
-	//	Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve(grpHeaderName);
-	//	WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-	//	if(wsGrpSptr)
-	//	{
-	//	 periodNum=wsGrpSptr->getPeriodNumber(inputWSName);
-	//	}
-	//}
- //   period = ref;
- // }
-  periodNum=getPeriodNumber(inputWSName);
   Progress p(this,0.0,1.0,nHist);
   for (int i=0;i<nHist;i++)
   {
@@ -101,19 +79,7 @@ void SaveGSS::exec()
       const std::string file(filename+'.'+ext);
 	  Poco::File fileobj(file);
       const bool exists = fileobj.exists();
-	  //if (!period.compare("1"))
-	  if(periodNum==1)
-	  {	  if (!append)
-		  {	 //for period =1 if append is false delete the file
-			 if(exists)fileobj.remove();
-		  }
-	  }
-	  //else if (period.compare("1"))
-	  else if(periodNum>1)
-	  {  //if the period is not equal to one set the append mode
-		  mode=ios_base::app;
-	  }
-      out.open(file.c_str(),mode);
+	  out.open(file.c_str(),mode);
       if ( !exists || !append )  writeHeaders(out,inputWS);
 
     }
@@ -123,17 +89,7 @@ void SaveGSS::exec()
       const std::string file(filename+number.str()+"."+ext);
 	  Poco::File fileobj(file);
       const bool exists = fileobj.exists();
-	 // if (!period.compare("1"))
-	  if(periodNum==1)//for period =1 if append is false delete the file
-	  {	  if (!append)
-		  {	 if(exists)fileobj.remove();
-		   }
-	  }
-	  else if (periodNum>1)
-	  {  //if the period is not equal to one set the append mode
-		  mode=ios_base::app;
-	  }
-      out.open(file.c_str(),mode);
+	  out.open(file.c_str(),mode);
       number.str("");
       if ( !exists || !append ) writeHeaders(out,inputWS);
     }
@@ -182,7 +138,23 @@ void SaveGSS::exec()
   }
   return;
 }
-
+/** virtual method to set the non workspace properties for this algorithm
+ *  @param alg pointer to the algorithm
+ *  @param propertyName name of the property
+ *  @param propertyValue value  of the property
+ *  @param perioidNum period number
+ */
+void SaveGSS::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int perioidNum)
+{	
+	if(!propertyName.compare("Append"))
+	{	if(perioidNum!=1)
+		{ alg->setPropertyValue(propertyName,"1");
+		}
+		else alg->setPropertyValue(propertyName,propertyValue);
+	}
+	else
+		Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
+ }
 /**
  * Write the header information for the given workspace
  * @param os The stream to use to write the information

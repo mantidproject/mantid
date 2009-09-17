@@ -64,6 +64,8 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
+	    /// sets non workspace properties for the algorithm
+	  void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
       /// The name and path of the input file
       std::string m_filename;
@@ -86,10 +88,6 @@ namespace Mantid
 
       ///a flag int value that indicates a value that wasn't set
       static const int unSetInt = INT_MAX-15;
-
-	  /// boolean flag used  to determine over write or append .nxs file
-	  bool m_bAppend;
-
 
     };
 
