@@ -628,7 +628,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
  *  @param alg pointer to the algorithm
  *  @param propertyName name of the property
  *  @param propertyValue value  of the property
- *  @param perioidNum period number
+ *  @param nPeriod period number
  */ 
 void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int nPeriod)
 {
