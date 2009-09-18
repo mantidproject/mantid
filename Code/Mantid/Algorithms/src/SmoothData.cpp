@@ -60,7 +60,7 @@ void SmoothData::exec()
   Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(outputWorkspace);
 
   // Next lines enable sharing of the X vector to be carried over to the output workspace if in the input one
-  const std::vector<double> *XFirst = &(inputWorkspace->readX(0));
+  const MantidVec * const XFirst = &(inputWorkspace->readX(0));
   Histogram1D::RCtype newX;
   newX.access() = inputWorkspace->readX(0);
 
@@ -71,7 +71,7 @@ void SmoothData::exec()
   {
 		PARALLEL_START_INTERUPT_REGION
     // Copy the X data over. Preserve data sharing if present in input workspace.
-    const std::vector<double> &X = inputWorkspace->readX(i);
+    const MantidVec &X = inputWorkspace->readX(i);
     if (output2D && XFirst==&X)
     {
       output2D->setX(i,newX);
@@ -82,10 +82,10 @@ void SmoothData::exec()
     }
 
     // Now get references to the Y & E vectors in the input and output workspaces
-    const std::vector<double> &Y = inputWorkspace->readY(i);
-    const std::vector<double> &E = inputWorkspace->readE(i);
-    std::vector<double> &newY = outputWorkspace->dataY(i);
-    std::vector<double> &newE = outputWorkspace->dataE(i);
+    const MantidVec &Y = inputWorkspace->readY(i);
+    const MantidVec &E = inputWorkspace->readE(i);
+    MantidVec &newY = outputWorkspace->dataY(i);
+    MantidVec &newE = outputWorkspace->dataE(i);
 
     // Use total to help hold our moving average
     double total = 0.0, totalE = 0.0;

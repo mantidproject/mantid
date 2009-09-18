@@ -107,7 +107,7 @@ void FindPeaks1D::generalisedSecondDifference()
 
 void FindPeaks1D::analyseVector()
 {
-	typedef std::vector<double> Vector;
+	typedef MantidVec Vector;
 
 	Vector& X=second_diff_spec->dataX(0);
 	Vector& Y=second_diff_spec->dataY(0);

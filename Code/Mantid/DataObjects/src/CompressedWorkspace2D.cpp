@@ -123,20 +123,20 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
   int j = 0;
   for(int i=0;i<m_vectorsPerBlock;i++)
   {
-    std::vector<double>& X = block->dataX(startIndex + i);
-    std::vector<double>::iterator it = std::copy(X.begin(),X.end(),m_inBuffer.begin() + j);
+    MantidVec& X = block->dataX(startIndex + i);
+    MantidVec::iterator it = std::copy(X.begin(),X.end(),m_inBuffer.begin() + j);
     j += m_XLength;
   }
   for(int i=0;i<m_vectorsPerBlock;i++)
   {
-    std::vector<double>& Y = block->dataY(startIndex + i);
-    std::vector<double>::iterator it = std::copy(Y.begin(),Y.end(),m_inBuffer.begin() + j);
+    MantidVec& Y = block->dataY(startIndex + i);
+    MantidVec::iterator it = std::copy(Y.begin(),Y.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
   for(int i=0;i<m_vectorsPerBlock;i++)
   {
-    std::vector<double>& E = block->dataE(startIndex + i);
-    std::vector<double>::iterator it = std::copy(E.begin(),E.end(),m_inBuffer.begin() + j);
+    MantidVec& E = block->dataE(startIndex + i);
+    MantidVec::iterator it = std::copy(E.begin(),E.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
 
@@ -191,19 +191,19 @@ void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,int startI
   int j = 0;
   for(int i=0;i<m_vectorsPerBlock;i++)
   {
-    std::vector<double>& X = block->dataX(startIndex + i);
+    MantidVec& X = block->dataX(startIndex + i);
     X.assign(out + j,out + j + m_XLength);
     j += m_XLength;
   }
   for(int i=0;i<m_vectorsPerBlock;i++)
   {
-    std::vector<double>& Y = block->dataY(startIndex + i);
+    MantidVec& Y = block->dataY(startIndex + i);
     Y.assign(out + j,out + j + m_YLength);
     j += m_YLength;
   }
   for(int i=0;i<m_vectorsPerBlock;i++)
   {
-    std::vector<double>& E = block->dataE(startIndex + i);
+    MantidVec& E = block->dataE(startIndex + i);
     E.assign(out + j,out + j + m_YLength);
     j += m_YLength;
   }

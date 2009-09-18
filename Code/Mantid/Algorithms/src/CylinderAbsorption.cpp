@@ -226,15 +226,14 @@ void CylinderAbsorption::constructCylinderSample()
   success = m_cylinderSample.populate(surfaces);
   assert(!success);
 
-  const double radius = m_cylRadius;
   assert(m_cylinderSample.isValid(V3D(0.0, 0.0, 0.0)));
-  assert(!m_cylinderSample.isValid(V3D(radius + 0.001, 0.0, 0.0)));
-  assert(m_cylinderSample.isValid(V3D(radius - 0.001, 0.0, 0.0)));
+  assert(!m_cylinderSample.isValid(V3D(m_cylRadius + 0.001, 0.0, 0.0)));
+  assert(m_cylinderSample.isValid(V3D(m_cylRadius - 0.001, 0.0, 0.0)));
   assert(!m_cylinderSample.isValid(V3D(0.0, m_cylHeight, 0.0)));
   assert(!m_cylinderSample.isValid(V3D(0.0, -1.0 * m_cylHeight, 0.0)));
-  assert(m_cylinderSample.isOnSide(V3D(radius, 0.0, 0.0)));
+  assert(m_cylinderSample.isOnSide(V3D(m_cylRadius, 0.0, 0.0)));
   assert(m_cylinderSample.isOnSide(V3D(0.0, m_cylHeight / 2.0, 0.0)));
-  assert(m_cylinderSample.isOnSide(V3D(radius, m_cylHeight / 2.0, 0.0)));
+  assert(m_cylinderSample.isOnSide(V3D(m_cylRadius, m_cylHeight / 2.0, 0.0)));
 
   g_log.information("Successfully constructed the sample object");
 }
@@ -272,8 +271,7 @@ void CylinderAbsorption::initialiseCachedDistances()
         // Create track for distance in cylinder before scattering point
         // Remember beam along Z direction
         Track incoming(currentPosition, V3D(0.0, 0.0, -1.0));
-        int tmp = m_cylinderSample.interceptSurface(incoming);
-        assert(tmp == 1);
+        assert(m_cylinderSample.interceptSurface(incoming) == 1);
         m_L1s[counter] = incoming.begin()->Dist;
 
         // Also calculate element volumes here

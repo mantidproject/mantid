@@ -105,11 +105,11 @@ void GroupDetectors::exec()
     WS->mutableSpectraMap().remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
     // Add up all the Y spectra and store the result in the first one
     // Need to keep the next 3 lines inside loop for now until ManagedWorkspace mru-list works properly
-    std::vector<double> &firstY = WS->dataY(firstIndex);
-    std::vector<double>::iterator fYit;
-    std::vector<double>::iterator fEit = WS->dataE(firstIndex).begin();
-    std::vector<double>::iterator Yit = WS->dataY(currentIndex).begin();
-    std::vector<double>::iterator Eit = WS->dataE(currentIndex).begin();
+    MantidVec &firstY = WS->dataY(firstIndex);
+    MantidVec::iterator fYit;
+    MantidVec::iterator fEit = WS->dataE(firstIndex).begin();
+    MantidVec::iterator Yit = WS->dataY(currentIndex).begin();
+    MantidVec::iterator Eit = WS->dataE(currentIndex).begin();
     for (fYit = firstY.begin(); fYit != firstY.end(); ++fYit, ++fEit, ++Yit, ++Eit)
     {
       *fYit += *Yit;

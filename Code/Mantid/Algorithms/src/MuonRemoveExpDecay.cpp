@@ -118,8 +118,8 @@ void MuonRemoveExpDecay::exec()
  *   @param inY  The input data vector
  *   @param outY The output data vector
  */
-void MuonRemoveExpDecay::removeDecay(const std::vector<double>& inX, const std::vector<double>& inY,
-    std::vector<double>& outY)
+void MuonRemoveExpDecay::removeDecay(const MantidVec& inX, const MantidVec& inY,
+    MantidVec& outY)
 {
   //Do the removal
   for (size_t i = 0; i < inY.size(); ++i)

@@ -115,8 +115,8 @@ void CalculateTransmission::exec()
   
  
   // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
-  std::vector<double> &Y = logTransmission->dataY(0);
-  std::vector<double> &E = logTransmission->dataE(0);
+  MantidVec & Y = logTransmission->dataY(0);
+  MantidVec & E = logTransmission->dataE(0);
   m_progress = new Progress(this,0.1,0.7,Y.size());
   for (unsigned int i=0; i < Y.size(); ++i)
   {
@@ -209,9 +209,9 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
   b = std::pow(10,b);
   m = std::pow(10,m);
 
-  const std::vector<double> &X = result->readX(0);
-  std::vector<double> &Y = result->dataY(0);
-  std::vector<double> &E = result->dataE(0);
+  const MantidVec & X = result->readX(0);
+  MantidVec & Y = result->dataY(0);
+  MantidVec & E = result->dataE(0);
   for (unsigned int i = 0; i < Y.size(); ++i)
   {
     const double errorPerc = E[i]/Y[i];

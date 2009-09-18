@@ -28,7 +28,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 22/09/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -68,9 +68,9 @@ private:
   // Methods called by exec()
   std::list<API::MatrixWorkspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces) const;
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1, const API::MatrixWorkspace_const_sptr& ws2, std::vector<double>& params) const;
-  void noOverlapParams(const std::vector<double>& X1, const std::vector<double>& X2, std::vector<double>& params) const;
-  void intersectionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
-  void inclusionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const;
+  void noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::vector<double>& params) const;
+  void intersectionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const;
+  void inclusionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const;
   API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params);
   /// Progress reporting
   API::Progress* m_progress;

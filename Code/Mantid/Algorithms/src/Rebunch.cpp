@@ -97,14 +97,14 @@ namespace Mantid
 				}
 
 				// get const references to input Workspace arrays (no copying)
-				const std::vector<double>& XValues = inputW->readX(hist);
-				const std::vector<double>& YValues = inputW->readY(hist);
-				const std::vector<double>& YErrors = inputW->readE(hist);
+				const MantidVec& XValues = inputW->readX(hist);
+				const MantidVec& YValues = inputW->readY(hist);
+				const MantidVec& YErrors = inputW->readE(hist);
 
 				//get references to output workspace data (no copying)
-				std::vector<double>& XValues_new=outputW->dataX(hist);
-				std::vector<double>& YValues_new=outputW->dataY(hist);
-				std::vector<double>& YErrors_new=outputW->dataE(hist);
+				MantidVec& XValues_new=outputW->dataX(hist);
+				MantidVec& YValues_new=outputW->dataY(hist);
+				MantidVec& YErrors_new=outputW->dataE(hist);
 
 				// output data arrays are implicitly filled by function
 				if(point)

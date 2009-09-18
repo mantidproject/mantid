@@ -68,7 +68,7 @@ void FlatBackground::exec()
   {
     const int currentSpec = *specIt;
     // Get references to the current spectrum
-    std::vector<double> &Y = outputWS->dataY(currentSpec);
+    MantidVec &Y = outputWS->dataY(currentSpec);
     //std::vector<double> &E = outputWS->dataE(currentSpec);
 
     // Now call Linear as a sub-algorithm to fit the data

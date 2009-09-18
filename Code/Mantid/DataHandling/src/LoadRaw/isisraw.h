@@ -359,7 +359,7 @@ public:
 	static int vmstime(char* timbuf, int len, time_t time_value);
 	int size_check();
 	ISISRAW();
-	~ISISRAW();
+	virtual ~ISISRAW();
 	ISISRAW(ISISCRPT_STRUCT* crpt);
   ISISRAW(ISISCRPT_STRUCT* crpt, bool doUpdateFromCRPT);
 	int updateFromCRPT();

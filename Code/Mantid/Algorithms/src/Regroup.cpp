@@ -109,7 +109,7 @@ void Regroup::exec()
 
   int histnumber = inputW->getNumberHistograms();
   DataObjects::Histogram1D::RCtype XValues_new;
-  const std::vector<double> &XValues_old = inputW->readX(0);
+  const MantidVec & XValues_old = inputW->readX(0);
   std::vector<int> xoldIndex;// indeces of new x in XValues_old
   // create new output X axis
   int ntcnew = newAxis(rb_params,XValues_old,XValues_new.access(),xoldIndex);
@@ -124,13 +124,13 @@ void Regroup::exec()
   for (int hist=0; hist <  histnumber;hist++)
   {
     // get const references to input Workspace arrays (no copying)
-    const std::vector<double>& XValues = inputW->readX(hist);
-    const std::vector<double>& YValues = inputW->readY(hist);
-    const std::vector<double>& YErrors = inputW->readE(hist);
+    const MantidVec& XValues = inputW->readX(hist);
+    const MantidVec& YValues = inputW->readY(hist);
+    const MantidVec& YErrors = inputW->readE(hist);
 
     //get references to output workspace data (no copying)
-    std::vector<double>& YValues_new=outputW->dataY(hist);
-    std::vector<double>& YErrors_new=outputW->dataE(hist);
+    MantidVec& YValues_new=outputW->dataY(hist);
+    MantidVec& YErrors_new=outputW->dataE(hist);
 
     // output data arrays are implicitly filled by function
     rebin(XValues,YValues,YErrors,xoldIndex,YValues_new,YErrors_new, dist);

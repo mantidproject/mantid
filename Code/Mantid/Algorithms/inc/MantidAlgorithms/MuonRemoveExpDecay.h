@@ -25,7 +25,7 @@ namespace Mantid
     @author
     @date 11/07/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -63,7 +63,7 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-      void removeDecay(const std::vector<double>& inX, const std::vector<double>& inY, std::vector<double>& outY);
+      void removeDecay(const MantidVec& inX, const MantidVec& inY, MantidVec& outY);
 
       
     };

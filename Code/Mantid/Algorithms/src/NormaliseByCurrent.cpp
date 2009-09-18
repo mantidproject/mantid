@@ -61,8 +61,8 @@ void NormaliseByCurrent::exec()
 	  m_progress =new Progress(this,0.0,1.0,nspec);
 	   for (int i=nspec;i>=0;--i)
 	  {
-		  std::vector<double>& refY=inputWS->dataY(i);
-		  std::vector<double>& refE=inputWS->dataE(i);
+		  MantidVec& refY=inputWS->dataY(i);
+		  MantidVec& refE=inputWS->dataE(i);
 		  for (int j=nbin;j>=0;--j)
 		  {
 			 refY[j]*=charge;

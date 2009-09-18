@@ -198,7 +198,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
     if ( WorkspaceHelpers::commonBoundaries(outputWS) )
     {
       // Calculate the new (common) X values
-      std::vector<double>::iterator iter;
+      MantidVec::iterator iter;
       for (iter = outputWS->dataX(0).begin(); iter != outputWS->dataX(0).end(); ++iter)
       {
         *iter = factor * std::pow(*iter,power);
@@ -230,7 +230,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
 	PARALLEL_FOR1(outputWS)
   for (int k = 0; k < numberOfSpectra; ++k) {
 		PARALLEL_START_INTERUPT_REGION
-    std::vector<double>::iterator it;
+    MantidVec::iterator it;
     for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
     {
       *it = factor * std::pow(*it,power);
@@ -392,7 +392,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
       Geometry::IDetector_const_sptr det = workspace->getDetector(i);
       if ( !det->isMasked() )
       {
-        const std::vector<double> &XData = workspace->readX(i);
+        const MantidVec & XData = workspace->readX(i);
         if ( XData.front() < XMin ) XMin = XData.front();
         if ( XData.back() > XMax )  XMax = XData.back();
       }

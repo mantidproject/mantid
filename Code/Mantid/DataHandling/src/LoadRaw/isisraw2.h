@@ -10,7 +10,7 @@ class ISISRAW2 : public ISISRAW
 {
 public:
 	ISISRAW2();
-	~ISISRAW2();
+	virtual ~ISISRAW2();
 	
 	virtual int ioRAW(FILE* file, bool from_file, bool do_data = true);
 

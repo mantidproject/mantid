@@ -62,9 +62,9 @@ void CrossCorrelate::exec()
    	const int index_ref=index_map_it->second;
 
    	// Now check if the range between x_min and x_max is valid
-   	const std::vector<double>& referenceX=inputWS->dataX(index_ref);
+   	const MantidVec& referenceX=inputWS->dataX(index_ref);
    	double xmin=getProperty("XMin");
-   	std::vector<double>::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
+    MantidVec::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
    	if (minIt==referenceX.end())
    		throw std::runtime_error("No data above X_min");
    	std::ostringstream mess;
@@ -72,15 +72,15 @@ void CrossCorrelate::exec()
    	g_log.information(mess.str());
    	mess.str("");
    	double xmax=getProperty("XMax");
-   	std::vector<double>::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
+   	MantidVec::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
    	if (minIt==maxIt)
    		throw std::runtime_error("Range is not valid");
    	mess << *(maxIt);
    	g_log.information(mess.str());
    	mess.str("");
    	//
-   	std::vector<double>::difference_type difminIt=std::distance(referenceX.begin(),minIt);
-   	std::vector<double>::difference_type difmaxIt=std::distance(referenceX.begin(),maxIt);
+   	MantidVec::difference_type difminIt=std::distance(referenceX.begin(),minIt);
+   	MantidVec::difference_type difmaxIt=std::distance(referenceX.begin(),maxIt);
 
    	// Now loop on the spectra in the range spectra_min and spectra_max and get valid spectra
 
@@ -112,8 +112,8 @@ void CrossCorrelate::exec()
 	mess.str("");
 
 	// Take a copy of  the reference spectrum
-	const std::vector<double>& referenceY=inputWS->dataY(index_ref);
-	const std::vector<double>& referenceE=inputWS->dataE(index_ref);
+	const MantidVec& referenceY=inputWS->dataY(index_ref);
+	const MantidVec& referenceE=inputWS->dataE(index_ref);
 
 	std::vector<double> refX(maxIt-minIt);
 	std::vector<double> refY(maxIt-minIt-1);
@@ -170,9 +170,9 @@ void CrossCorrelate::exec()
 		out->getAxis(1)->spectraNo(i)=inputWS->getAxis(1)->spectraNo(spec_index);
 		out->dataX(i)=XX;
 		// Get temp references
-		const std::vector<double>&  iX=inputWS->dataX(spec_index);
-		const std::vector<double>&  iY=inputWS->dataY(spec_index);
-		const std::vector<double>&  iE=inputWS->dataE(spec_index);
+		const MantidVec&  iX=inputWS->dataX(spec_index);
+		const MantidVec&  iY=inputWS->dataY(spec_index);
+		const MantidVec&  iE=inputWS->dataE(spec_index);
 		// Copy Y,E data of spec(i) to temp vector
 		// Now rebin on the grid of reference spectrum
 		VectorHelper::rebin(iX,iY,iE,refX,tempY,tempE,is_distrib);
@@ -200,8 +200,8 @@ void CrossCorrelate::exec()
 		double normalisation=refNorm*tempNorm;
 		double normalisationE2=pow((refNorm*tempNormE),2)+pow((tempNorm*refNormE),2);
 		// Get reference to the ouput spectrum
-		std::vector<double>& outY=out->dataY(i);
-		std::vector<double>& outE=out->dataE(i);
+		MantidVec& outY=out->dataY(i);
+		MantidVec& outE=out->dataE(i);
 
 		for (int k=-nY+2;k<=nY-2;++k)
 		{

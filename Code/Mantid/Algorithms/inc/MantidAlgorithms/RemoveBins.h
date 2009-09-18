@@ -73,9 +73,9 @@ private:
   void crop(const double& start, const double& end);
   void transformRangeUnit(const int& index, double& startX, double& endX);
   void calculateDetectorPosition(const int& index, double& l1, double& l2, double& twoTheta);
-  int findIndex(const double& value, const std::vector<double>& vec);
-  void RemoveFromEnds(int start, int end, std::vector<double>& Y, std::vector<double>& E);
-  void RemoveFromMiddle(const int& start, const int& end, const double& startFrac, const double& endFrac, std::vector<double>& Y, std::vector<double>& E);
+  int findIndex(const double& value, const MantidVec& vec);
+  void RemoveFromEnds(int start, int end, MantidVec& Y, MantidVec& E);
+  void RemoveFromMiddle(const int& start, const int& end, const double& startFrac, const double& endFrac, MantidVec& Y, MantidVec& E);
   
   API::MatrixWorkspace_const_sptr m_inputWorkspace;  ///< The input workspace
   double m_startX;                                   ///< The range start point

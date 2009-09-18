@@ -169,8 +169,8 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
  */
 void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1, const API::MatrixWorkspace_const_sptr& ws2, std::vector<double>& params) const
 {
-  const std::vector<double> &X1 = ws1->readX(0);
-  const std::vector<double> &X2 = ws2->readX(0);
+  const MantidVec & X1 = ws1->readX(0);
+  const MantidVec & X2 = ws2->readX(0);
   const double end1 = X1.back();
   const double start2 = X2.front();
   const double end2 = X2.back();
@@ -208,7 +208,7 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1,
  *  @param X2     The bin boundaries from the second workspace
  *  @param params A reference to the vector of rebinning parameters
  */
-void MergeRuns::noOverlapParams(const std::vector<double>& X1, const std::vector<double>& X2, std::vector<double>& params) const
+void MergeRuns::noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::vector<double>& params) const
 {
   // Add all the bins from the first workspace
   for (unsigned int i = 1; i < X1.size(); ++i)
@@ -238,7 +238,7 @@ void MergeRuns::noOverlapParams(const std::vector<double>& X1, const std::vector
  *  @param X2     The bin boundaries from the second workspace
  *  @param params A reference to the vector of rebinning parameters
  */
-void MergeRuns::intersectionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const
+void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const
 {
   // First calculate the number of bins in each workspace that are in the overlap region
   int overlapbins1, overlapbins2;
@@ -284,7 +284,7 @@ void MergeRuns::intersectionParams(const std::vector<double>& X1, int& i, const 
  *  @param X2     The bin boundaries from the second workspace
  *  @param params A reference to the vector of rebinning parameters
  */
-void MergeRuns::inclusionParams(const std::vector<double>& X1, int& i, const std::vector<double>& X2, std::vector<double>& params) const
+void MergeRuns::inclusionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const
 {
   // First calculate the number of bins in each workspace that are in the overlap region
   int overlapbins1, overlapbins2;

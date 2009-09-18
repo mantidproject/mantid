@@ -91,10 +91,9 @@ void FindPeaks::exec()
 
   for (int k = 0; k < numHists; ++k)
   {
-    const std::vector<double> &S = smoothedData->readY(k);
-    const std::vector<double> &F = smoothedData->readE(k);
-     //progress(double(k/numHists));
-	
+    const MantidVec &S = smoothedData->readY(k);
+    const MantidVec &F = smoothedData->readE(k);
+ 	
     // This implements the flow chart given on page 320 of Mariscotti
     int i0 = 0, i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
     for ( int i = 1; i < blocksize; ++i)
@@ -249,8 +248,8 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
     // Copy over the X values
     diffed->dataX(i) = input->readX(i);
     
-    const std::vector<double> &Y = input->readY(i);
-    std::vector<double> &S = diffed->dataY(i);
+    const MantidVec &Y = input->readY(i);
+    MantidVec &S = diffed->dataY(i);
     // Go through each spectrum calculating the second difference at each point
     // First and last points in each spectrum left as zero (you'd never be able to find peaks that close to the edge anyway)
     for (int j = 1; j < blocksize-1; ++j)
@@ -321,8 +320,8 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
   const int blocksize = smoothed->blocksize();
   for (int i = 0; i < numHists; ++i)
   {
-    const std::vector<double> &E = input->readE(i);
-    std::vector<double> &Fi = smoothed->dataE(i);
+    const MantidVec &E = input->readE(i);
+    MantidVec &Fi = smoothed->dataE(i);
 
     for (int j = 0; j < blocksize; ++j)
     {
@@ -354,8 +353,8 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   fit->setProperty("InputWorkspace",input);
   fit->setProperty("WorkspaceIndex",spectrum);
 
-  const std::vector<double> &X = input->readX(spectrum);
-  const std::vector<double> &Y = input->readY(spectrum);
+  const MantidVec &X = input->readX(spectrum);
+  const MantidVec &Y = input->readY(spectrum);
   
   for (unsigned int width = 2; width <= 10; width +=2)
   {

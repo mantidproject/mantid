@@ -318,9 +318,9 @@ void Fit1D::exec()
   }
 
   // Retrieve the spectrum into a vector
-  const std::vector<double>& XValues = localworkspace->readX(histNumber);
-  const std::vector<double>& YValues = localworkspace->readY(histNumber);
-  const std::vector<double>& YErrors = localworkspace->readE(histNumber);
+  const MantidVec& XValues = localworkspace->readX(histNumber);
+  const MantidVec& YValues = localworkspace->readY(histNumber);
+  const MantidVec& YErrors = localworkspace->readE(histNumber);
 
   //Read in the fitting range data that we were sent
   double startX = getProperty("StartX");
@@ -594,8 +594,8 @@ void Fit1D::exec()
     // Save the fitted and simulated spectra in the output workspace
     MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
     int iSpec = getProperty("WorkspaceIndex");
-    const std::vector<double>& inputX = inputWorkspace->readX(iSpec);
-    const std::vector<double>& inputY = inputWorkspace->readY(iSpec);
+    const MantidVec& inputX = inputWorkspace->readX(iSpec);
+    const MantidVec& inputY = inputWorkspace->readY(iSpec);
 
     int histN = isHistogram ? 1 : 0;
     Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
@@ -614,8 +614,8 @@ void Fit1D::exec()
 
     ws->dataY(0).assign(inputY.begin()+m_minX,inputY.begin()+m_maxX);
 
-    std::vector<double>& Y = ws->dataY(1);
-    std::vector<double>& E = ws->dataY(2);
+    MantidVec& Y = ws->dataY(1);
+    MantidVec& E = ws->dataY(2);
 
     for(unsigned int i=m_minX;i<m_maxX;i++)
     {

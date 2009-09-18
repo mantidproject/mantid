@@ -335,9 +335,9 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
 
   for (int i = 0; i < numberOfSpectra; ++i)
   {
-	  const std::vector<double>& X=workspace->readX(i);
-	  std::vector<double>& Y=workspace->dataY(i);
-	  std::vector<double>& E=workspace->dataE(i);
+	  const MantidVec& X=workspace->readX(i);
+	  MantidVec& Y=workspace->dataY(i);
+	  MantidVec& E=workspace->dataE(i);
 	  std::adjacent_difference(X.begin(),X.end(),widths.begin()); // Calculate bin widths
 
     // RJT: I'll leave this in, but X should never be out of order. 

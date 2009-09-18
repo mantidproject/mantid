@@ -166,8 +166,8 @@ namespace Mantid
       // single values, or workspaces with just a single bin/value in each spectrum, are compatible with anything
       if ((rhs->blocksize() ==1) || (lhs->blocksize() ==1)) return true;
 
-      const std::vector<double>& w1x = lhs->readX(0);
-      const std::vector<double>& w2x = rhs->readX(0);
+      const MantidVec& w1x = lhs->readX(0);
+      const MantidVec& w2x = rhs->readX(0);
 
       double sum;
       sum=0.0;

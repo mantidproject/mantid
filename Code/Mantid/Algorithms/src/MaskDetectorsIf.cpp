@@ -139,49 +139,49 @@ void MaskDetectorsIf::retrieveProperties()
  */
 void MaskDetectorsIf::createNewCalFile(const std::string& oldfile, const std::string& newfile)
 {
-	  std::ifstream oldf(oldfile.c_str());
-	  if (!oldf.is_open())
-	  {
-	    g_log.error() << "Unable to open grouping file " << oldfile << std::endl;
-	    throw Exception::FileError("Error reading .cal file",oldfile);
-	  }
-	  std::ofstream newf(newfile.c_str());
-	  if (!newf.is_open())
-	  {
-		g_log.error() << "Unable to open grouping file " << newfile << std::endl;
-		throw Exception::FileError("Error reading .cal file",newfile);
-	  }
-	  std::string str;
-	  while(getline(oldf,str))
-	  {
-	    //Comment or empty lines get copied into the new cal file
-	    if (str.empty() || str[0] == '#')
-	    {
-	    	newf << str << std::endl;
-	    	continue;
-	    }
-	    std::istringstream istr(str);
-	    int n,udet,sel,group;
-	    double offset;
-	    istr >> n >> udet >> offset >> sel >> group;
-	    udet2valuem::iterator it=umap.find(udet);
-	    bool selection;
+  std::ifstream oldf(oldfile.c_str());
+  if (!oldf.is_open())
+  {
+    g_log.error() << "Unable to open grouping file " << oldfile << std::endl;
+    throw Exception::FileError("Error reading .cal file",oldfile);
+  }
+  std::ofstream newf(newfile.c_str());
+  if (!newf.is_open())
+  {
+    g_log.error() << "Unable to open grouping file " << newfile << std::endl;
+    throw Exception::FileError("Error reading .cal file",newfile);
+  }
+  std::string str;
+  while(getline(oldf,str))
+  {
+    //Comment or empty lines get copied into the new cal file
+    if (str.empty() || str[0] == '#')
+    {
+      newf << str << std::endl;
+      continue;
+    }
+    std::istringstream istr(str);
+    int n,udet,sel,group;
+    double offset;
+    istr >> n >> udet >> offset >> sel >> group;
+    udet2valuem::iterator it=umap.find(udet);
+    bool selection;
 
-	    if (it==umap.end())
-	    	selection=sel;
-	    else
-	    	selection=(*it).second;
+    if (it==umap.end())
+      selection = (sel==0) ? false : true;
+    else
+      selection = (*it).second;
 
-	    newf << std::fixed << std::setw(9) << n <<
-				std::fixed << std::setw(15) << udet <<
-				std::fixed << std::setprecision(7) << std::setw(15)<< offset <<
-				std::fixed << std::setw(8) << selection <<
-				std::fixed << std::setw(8) << group  << std::endl;
-	  }
-	  oldf.close();
-	  newf.close();
-	  return;
-	}
+    newf << std::fixed << std::setw(9) << n <<
+      std::fixed << std::setw(15) << udet <<
+      std::fixed << std::setprecision(7) << std::setw(15)<< offset <<
+      std::fixed << std::setw(8) << selection <<
+      std::fixed << std::setw(8) << group  << std::endl;
+  }
+  oldf.close();
+  newf.close();
+  return;
+}
 
 } // namespace Algorithm
 } // namespace Mantid

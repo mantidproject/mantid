@@ -121,8 +121,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
   {
     g_log.debug() << "Subtracting peak from spectrum " << peakslist->getRef<int>("spectrum",i) << std::endl;
     // Get references to the data
-    const std::vector<double> &X = outputWS->readX(peakslist->getRef<int>("spectrum",i));
-    std::vector<double> &Y = outputWS->dataY(peakslist->getRef<int>("spectrum",i));
+    const MantidVec &X = outputWS->readX(peakslist->getRef<int>("spectrum",i));
+    MantidVec &Y = outputWS->dataY(peakslist->getRef<int>("spectrum",i));
     // Get back the gaussian parameters
     const double height = peakslist->getRef<double>("height",i);
     const double centre = peakslist->getRef<double>("centre",i);

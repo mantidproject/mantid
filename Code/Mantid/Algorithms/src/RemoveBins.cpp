@@ -307,9 +307,9 @@ void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double&
  *  @param vec   The vector to search
  *  @return The index (will give vec.size()+1 if the value is past the end of the vector)
  */
-int RemoveBins::findIndex(const double& value, const std::vector<double>& vec)
+int RemoveBins::findIndex(const double& value, const MantidVec& vec)
 {
-  std::vector<double>::const_iterator pos = std::lower_bound(vec.begin(),vec.end(),value);
+  MantidVec::const_iterator pos = std::lower_bound(vec.begin(),vec.end(),value);
   return pos-vec.begin();
 }
 
@@ -319,7 +319,7 @@ int RemoveBins::findIndex(const double& value, const std::vector<double>& vec)
  *  @param Y     The data vector
  *  @param E     The error vector
  */
-void RemoveBins::RemoveFromEnds(int start, int end, std::vector<double>& Y, std::vector<double>& E)
+void RemoveBins::RemoveFromEnds(int start, int end, MantidVec& Y, MantidVec& E)
 {
   if ( start ) --start;
   if ( end > static_cast<int>(Y.size()) ) end = Y.size();
@@ -342,7 +342,7 @@ void RemoveBins::RemoveFromEnds(int start, int end, std::vector<double>& Y, std:
  *  @param Y         The data vector
  *  @param E         The error vector
  */
-void RemoveBins::RemoveFromMiddle(const int& start, const int& end, const double& startFrac, const double& endFrac, std::vector<double>& Y, std::vector<double>& E)
+void RemoveBins::RemoveFromMiddle(const int& start, const int& end, const double& startFrac, const double& endFrac, MantidVec& Y, MantidVec& E)
 {
   //Remove bins from middle
   double valPrev = 0;

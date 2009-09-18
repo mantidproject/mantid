@@ -167,7 +167,7 @@ void Linear::exec()
 }
 
 /// Retrieve and check the Start/EndX parameters, if set
-void Linear::setRange(const std::vector<double>& X, const std::vector<double>& Y)
+void Linear::setRange(const MantidVec& X, const MantidVec& Y)
 {
   //read in the values that the user selected
   double startX = getProperty("StartX");

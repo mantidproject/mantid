@@ -104,18 +104,18 @@ void GeneralisedSecondDifference::exec()
   	{
   		int out_index=i-spec_min;
   		out->getAxis(1)->spectraNo(out_index)=inputWS->getAxis(1)->spectraNo(i);
-  		const std::vector<double>& refX=inputWS->readX(i);
-  		const std::vector<double>& refY=inputWS->readY(i);
-  		const std::vector<double>& refE=inputWS->readE(i);
-  		std::vector<double>& outX=out->dataX(out_index);
-  		std::vector<double>& outY=out->dataY(out_index);
-  		std::vector<double>& outE=out->dataE(out_index);
+  		const MantidVec& refX=inputWS->readX(i);
+  		const MantidVec& refY=inputWS->readY(i);
+  		const MantidVec& refE=inputWS->readE(i);
+  		MantidVec& outX=out->dataX(out_index);
+  		MantidVec& outY=out->dataY(out_index);
+  		MantidVec& outE=out->dataE(out_index);
 
   		std::copy(refX.begin()+n_av,refX.end()-n_av,outX.begin());
-  		std::vector<double>::const_iterator itInY=refY.begin();
-  		std::vector<double>::iterator itOutY=outY.begin();
-  		std::vector<double>::const_iterator itInE=refE.begin();
-  		std::vector<double>::iterator itOutE=outE.begin();
+  		MantidVec::const_iterator itInY=refY.begin();
+  		MantidVec::iterator itOutY=outY.begin();
+  		MantidVec::const_iterator itInE=refE.begin();
+  		MantidVec::iterator itOutE=outE.begin();
   		double err2;
   		for (;itOutY!=outY.end();itOutY++,itInY++,itOutE++,itInE++)
   		{

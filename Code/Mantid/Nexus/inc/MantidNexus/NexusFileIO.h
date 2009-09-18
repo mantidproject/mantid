@@ -66,9 +66,9 @@ namespace Mantid
       int getWorkspaceSize( int& numberOfSpectra, int& numberOfChannels, int& numberOfXpoints ,
                bool& uniformBounds, std::string& axesNames, std::string& yUnits );
       /// read X values for one (or the generic if uniform) spectra
-      int getXValues(std::vector<double>& xValues, const int& spectra);
+      int getXValues(MantidVec& xValues, const int& spectra);
       /// read values and errors for spectra
-      int getSpectra(std::vector<double>& values, std::vector<double>& errors, const int& spectra);
+      int getSpectra(MantidVec& values, MantidVec& errors, const int& spectra);
 
       /// write the algorithm and environment information
       int writeNexusProcessedProcess(const API::MatrixWorkspace_const_sptr& localworkspace);

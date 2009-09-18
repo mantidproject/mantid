@@ -68,9 +68,9 @@ void SaveFocusedXYE::exec()
    Progress progress(this,0.0,1.0,nHist);
 	for (int i=0;i<nHist;i++)
 	{
-		const std::vector<double>& X=inputWS->readX(i);
-		const std::vector<double>& Y=inputWS->readY(i);
-		const std::vector<double>& E=inputWS->readE(i);
+		const MantidVec& X=inputWS->readX(i);
+		const MantidVec& Y=inputWS->readY(i);
+		const MantidVec& E=inputWS->readE(i);
 		if (split=="False" && i==0) // Assign only one file
 		{	const std::string file(filename+'.'+ext);
 			Poco::File fileObj(file);

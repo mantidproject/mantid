@@ -136,12 +136,12 @@ void DiffractionFocussing::exec()
   {
     int i = resultIndeces[hist];
     int spNo = spectraAxis->spectraNo(i);
-    std::vector<double> &tmpE = tmpW->dataE(i);
-    std::vector<double> &outE = outputW->dataE(hist);
-    std::vector<double> &tmpY = tmpW->dataY(i);
-    std::vector<double> &outY = outputW->dataY(hist);
-    std::vector<double> &tmpX = tmpW->dataX(i);
-    std::vector<double> &outX = outputW->dataX(hist);
+    MantidVec &tmpE = tmpW->dataE(i);
+    MantidVec &outE = outputW->dataE(hist);
+    MantidVec &tmpY = tmpW->dataY(i);
+    MantidVec &outY = outputW->dataY(hist);
+    MantidVec &tmpX = tmpW->dataX(i);
+    MantidVec &outX = outputW->dataX(hist);
     outE.assign(tmpE.begin(),tmpE.end());
     outY.assign(tmpY.begin(),tmpY.end());
     outX.assign(tmpX.begin(),tmpX.end());
@@ -248,7 +248,7 @@ void DiffractionFocussing::calculateRebinParams(const API::MatrixWorkspace_const
   int length = workspace->getNumberHistograms();
   for (int i = 0; i < length; i++)
   {
-    const std::vector<double>& xVec = workspace->readX(i);
+    const MantidVec& xVec = workspace->readX(i);
     const double& localMin = xVec[0];
     const double& localMax = xVec[xVec.size()-1];
     if (localMin != std::numeric_limits<double>::infinity() &&

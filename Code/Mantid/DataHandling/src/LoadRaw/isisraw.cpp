@@ -1114,51 +1114,51 @@ int ISISRAW::printInfo(std::ostream& os)
 /// stuff
 ISISRAW::~ISISRAW()
 {
-    delete[] dat1;
-    delete[] ut;
-    delete[] mdet;
-    delete[] monp;
-    delete[] spec;
-    delete[] delt;
-    delete[] len2;
-    delete[] code;
-    delete[] tthe;
-    delete[] e_seblock;
-    delete[] crat;
-    delete[] modn;
-    delete[] mpos;
-    delete[] timr;
-    delete[] udet;
-    delete[] t_tcb1;
-    delete[] u_dat;
-    delete[] ddes;
-    for(int i=0; i<logsect.nlines; i++)
-    {
-	delete[] logsect.lines[i].data;
-    }
-    delete[] logsect.lines;
+  delete[] dat1;
+  delete[] ut;
+  delete[] mdet;
+  delete[] monp;
+  delete[] spec;
+  delete[] delt;
+  delete[] len2;
+  delete[] code;
+  delete[] tthe;
+  delete[] e_seblock;
+  delete[] crat;
+  delete[] modn;
+  delete[] mpos;
+  delete[] timr;
+  delete[] udet;
+  delete[] t_tcb1;
+  delete[] u_dat;
+  delete[] ddes;
+  for(int i=0; i<logsect.nlines; i++)
+  {
+    delete[] logsect.lines[i].data;
+  }
+  delete[] logsect.lines;
 }
 
 // rtcb1 is of size t_ntc1+1
 int ISISRAW::getTimeChannels(float* rtcb1, int n)
 {
-    if (n != t_ntc1+1)
-    {
-	return -1;
-    }
-    float extra;
-    if (frmt_ver_no > 1)
-    {
-	extra = 4 * daep.a_delay; // add on frame sync delay
-    }
-    else
-    {
-	extra = 0.0;		  // old files did not have this
-    }
-    int i;
-    for(i=0; i<t_ntc1+1; i++)
-    {
-	rtcb1[i] = t_tcb1[i] * t_pre1 / 32.0 + extra;
-    }
-    return 0;
+  if (n != t_ntc1+1)
+  {
+    return -1;
+  }
+  float extra;
+  if (frmt_ver_no > 1)
+  {
+    extra = float(4.0) * daep.a_delay; // add on frame sync delay
+  }
+  else
+  {
+    extra = 0.0;		  // old files did not have this
+  }
+  int i;
+  for(i=0; i<t_ntc1+1; i++)
+  {
+    rtcb1[i] = t_tcb1[i] * t_pre1 / float(32.0) + extra;
+  }
+  return 0;
 }

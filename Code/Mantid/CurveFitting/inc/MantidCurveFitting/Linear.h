@@ -78,7 +78,7 @@ private:
   /// Execution code
   void exec();
 
-  void setRange(const std::vector<double>& X, const std::vector<double>& Y); 
+  void setRange(const MantidVec& X, const MantidVec& Y); 
   
   /// The X bin to start the fitting from
   int m_minX;

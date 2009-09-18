@@ -214,12 +214,12 @@ const std::vector<int> Unwrap::unwrapX(const API::MatrixWorkspace_sptr& tempWS, 
   std::vector<double> tempX_L;
   tempX_L.reserve(m_XSize); // Doing this possible gives a small efficiency increase
   // Create a vector for the upper range. Make it a reference to the output histogram to save an assignment later
-  std::vector<double> &tempX_U = tempWS->dataX(spectrum);
+  MantidVec &tempX_U = tempWS->dataX(spectrum);
   tempX_U.clear();
   tempX_U.reserve(m_XSize);
 
   // Get a reference to the input x data
-  const std::vector<double>& xdata = m_inputWS->dataX(spectrum);
+  const MantidVec& xdata = m_inputWS->dataX(spectrum);
   // Loop over histogram, selecting bins in appropriate ranges.
   // At the moment, the data in the bin in which a cut-off sits is excluded.
   for (unsigned int bin = 0; bin < m_XSize; ++bin)
@@ -307,11 +307,11 @@ std::pair<int,int> Unwrap::handleFrameOverlapped(const std::vector<double>& xdat
 void Unwrap::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds)
 {
   // Copy over the relevant ranges of Y & E data
-  std::vector<double>& Y = tempWS->dataY(spectrum);
-  std::vector<double>& E = tempWS->dataE(spectrum);
+  MantidVec& Y = tempWS->dataY(spectrum);
+  MantidVec& E = tempWS->dataE(spectrum);
   // Get references to the input data
-  const std::vector<double>& YIn = m_inputWS->dataY(spectrum);
-  const std::vector<double>& EIn = m_inputWS->dataE(spectrum);
+  const MantidVec& YIn = m_inputWS->dataY(spectrum);
+  const MantidVec& EIn = m_inputWS->dataE(spectrum);
   if ( rangeBounds[2] != -1 )
   {
     // Copy in the upper range

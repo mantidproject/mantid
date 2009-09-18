@@ -82,7 +82,7 @@ namespace DataObjects
     void uncompressBlock(ManagedDataBlock2D* block,int startIndex)const;
 
     /// Data buffer used in compression and decompression
-    mutable std::vector<double> m_inBuffer;
+    mutable MantidVec m_inBuffer;
     /// Data buffer used in compression and decompression
     mutable std::vector<unsigned char> m_outBuffer;
 

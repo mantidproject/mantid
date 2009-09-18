@@ -110,7 +110,7 @@ void FFT::exec()
     int iImag = getProperty("Imaginary");
     bool isComplex = iImag != EMPTY_INT();
 
-    const std::vector<double>& X = inWS->readX(iReal);
+    const MantidVec& X = inWS->readX(iReal);
     int ySize = inWS->blocksize();
     int xSize = X.size();
 

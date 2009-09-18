@@ -1036,7 +1036,7 @@ namespace Mantid
       return false;
     }
 
-    int NexusFileIO::getXValues(std::vector<double>& xValues, const int& spectra)
+    int NexusFileIO::getXValues(MantidVec& xValues, const int& spectra)
     {
       //
       // find the X values for spectra. If uniform, the spectra number is ignored.
@@ -1073,7 +1073,7 @@ namespace Mantid
       return(0);
     }
 
-    int NexusFileIO::getSpectra(std::vector<double>& values, std::vector<double>& errors, const int& spectra)
+    int NexusFileIO::getSpectra(MantidVec& values, MantidVec& errors, const int& spectra)
     {
       //
       // read the values and errors for spectra

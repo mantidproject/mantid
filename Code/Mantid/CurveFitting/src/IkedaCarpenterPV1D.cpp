@@ -95,8 +95,8 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
     const double& beta0 = in[3];
     const double& kappa = in[4];
     const double& SigmaSquared = in[5];
-    const double& Gamma = in[6];
-    const double& Eta = in[7];
+    //const double& Gamma = in[6];
+    //const double& Eta = in[7];
     const double& X0 = in[8];
     const double& BG = in[9];
 

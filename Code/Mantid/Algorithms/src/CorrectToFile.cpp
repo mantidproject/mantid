@@ -64,9 +64,9 @@ void CorrectToFile::exec()
   }
 
   // Get references to the correction factors
-  const std::vector<double> &Xcor = rkhInput->readX(0);
-  const std::vector<double> &Ycor = rkhInput->readY(0);
-  const std::vector<double> &Ecor = rkhInput->readE(0);
+  const MantidVec &Xcor = rkhInput->readX(0);
+  const MantidVec &Ycor = rkhInput->readY(0);
+  const MantidVec &Ecor = rkhInput->readE(0);
 
   // Only create the output workspace if it's not the same as the input one
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
@@ -85,7 +85,7 @@ void CorrectToFile::exec()
   {
     const double currentX = histogramData ? (inIt->X()+inIt->X2())/2.0 : inIt->X();
     // Find out the index of the first correction point after this value
-    std::vector<double>::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
+    MantidVec::const_iterator pos = std::lower_bound(Xcor.begin(),Xcor.end(),currentX);
     const unsigned int index = pos-Xcor.begin();
     if ( index == Xcor.size() )
     {
