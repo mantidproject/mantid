@@ -1,5 +1,5 @@
 #include "MantidCurve.h"
-#include "MantidUI.h"
+//#include "MantidUI.h"
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
 
@@ -41,9 +41,9 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
        Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
     );
   init(ws,g,type,index);
-  connect(mantidUI,SIGNAL(workspace_removed(const QString&)),this,SLOT(workspaceRemoved(const QString&)));
-  connect(mantidUI,SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr))
-    ,this,SLOT(workspaceReplaced(const QString &, Mantid::API::Workspace_sptr)));
+  //connect(mantidUI,SIGNAL(workspace_removed(const QString&)),this,SLOT(workspaceRemoved(const QString&)));
+  //connect(mantidUI,SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr))
+  //  ,this,SLOT(workspaceReplaced(const QString &, Mantid::API::Workspace_sptr)));
 
 }
 
@@ -51,7 +51,7 @@ MantidCurve::MantidCurve(const MantidCurve& c)
 :PlotCurve(c.title().text()),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName)
 {
   setData(c.data());
-  connect(mantidUI,SIGNAL(workspace_removed(const QString&)),this,SLOT(workspaceRemoved(const QString&)));
+//  connect(mantidUI,SIGNAL(workspace_removed(const QString&)),this,SLOT(workspaceRemoved(const QString&)));
 }
 
 /**
