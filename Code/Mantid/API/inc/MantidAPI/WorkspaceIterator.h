@@ -73,13 +73,13 @@ private:
   template<typename T>
   struct internal_iterator_type<T*>
   {
-    typedef MantidVec::iterator iterator_type;
+    typedef std::vector<double>::iterator iterator_type;
   };
   
   template<typename T>
   struct internal_iterator_type<const T*>
   {
-    typedef MantidVec::const_iterator iterator_type;    
+    typedef std::vector<double>::const_iterator iterator_type;    
   };
   /// @endcond
   
