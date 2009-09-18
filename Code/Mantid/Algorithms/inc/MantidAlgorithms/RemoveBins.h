@@ -21,6 +21,11 @@ namespace Algorithms
     <LI> RangeUnit - The unit in which the above range is given.</LI>
     <LI> Interpolation - The type of interpolation to use for removed bins. </LI>
     </UL>
+
+    Optional Property:
+    <UL> 
+    <LI> WorkspaceIndex - The spectrum to remove bins from. Will operate on all spectra is absent. </LI>
+    </UL>
       
     @author Matt Clarke
     @date 08/12/2008

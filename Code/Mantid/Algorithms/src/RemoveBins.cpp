@@ -50,6 +50,11 @@ void RemoveBins::init()
   propOptions.push_back("Linear");
   declareProperty("Interpolation", "None", new ListValidator(propOptions),
     "Used when the region to be removed is within a bin. Linear scales the value in that bin by the proportion of it that is outside the region to be removed and none sets it to zero" );
+
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(0);
+  declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
+    "If set, only this spectrum will be acted upon (otherwise all are)");
 }
 
 /** Executes the algorithm
@@ -66,12 +71,14 @@ void RemoveBins::exec()
   const bool unitChange = (rangeUnit != "AsInput" && rangeUnit != "inputUnit");
   if (unitChange) m_rangeUnit = UnitFactory::Instance().create(rangeUnit);
   const bool commonBins = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+  const int index = getProperty("WorkspaceIndex");
+  const bool singleSpectrum = !isEmpty(index);
   const bool recalcRange = ( unitChange || !commonBins);
 
   // If the above evaluates to false, and the range given is at the edge of the workspace, then we can just call
   // CropWorkspace as a subalgorithm and we're done.
-  const std::vector<double>& X0 = m_inputWorkspace->readX(0);
-  if ( !recalcRange && ( m_startX <= X0.front() || m_endX >= X0.back() ) )
+  const MantidVec& X0 = m_inputWorkspace->readX(0);
+  if ( !singleSpectrum && !recalcRange && ( m_startX <= X0.front() || m_endX >= X0.back() ) )
   {
     double start,end;
     if (m_startX <= X0.front())
@@ -92,9 +99,9 @@ void RemoveBins::exec()
   }
 
 
-  MatrixWorkspace_sptr outputWS= getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  if (m_inputWorkspace!=outputWS) // Create the output workspace onlt if not the same as input
+  if (m_inputWorkspace!=outputWS) // Create the output workspace only if not the same as input
 	{
 	  outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
 	}
@@ -106,6 +113,20 @@ void RemoveBins::exec()
   Progress prog(this,0.0,1.0,numHists);
   for (int i=0; i < numHists; ++i)
   {
+    // Copy over the data
+    const MantidVec& X = m_inputWorkspace->readX(i);
+    MantidVec& myX = outputWS->dataX(i);
+    myX = X;
+    const MantidVec& Y = m_inputWorkspace->readY(i);
+    MantidVec& myY = outputWS->dataY(i);
+    myY = Y;
+    const MantidVec& E = m_inputWorkspace->readE(i);
+    MantidVec& myE = outputWS->dataE(i);
+    myE = E;
+
+    // If just operating on a single spectrum and this isn't it, go to next iteration
+    if ( singleSpectrum && ( i != index ) ) continue;
+
     double startX(m_startX),endX(m_endX);
     // Calculate the X limits for this spectrum, if necessary
     if (unitChange)
@@ -113,25 +134,12 @@ void RemoveBins::exec()
       this->transformRangeUnit(i,startX,endX);
     }
 
-    // Get references to the data and errors
-    const std::vector<double>& X = m_inputWorkspace->readX(i);
-
     // Calculate the bin indices corresponding to the X range, if necessary
     if ( recalcRange || !i )
     {
       start = this->findIndex(startX,X);
       end = this->findIndex(endX,X);
     }
-
-    // Copy over the data
-    std::vector<double>& myX=outputWS->dataX(i);
-    myX = X;
-    const std::vector<double>& Y=m_inputWorkspace->readY(i);
-    std::vector<double>& myY=outputWS->dataY(i);
-    myY=Y;
-    const std::vector<double>& E=m_inputWorkspace->readE(i);
-    std::vector<double>& myE=outputWS->dataE(i);
-    myE=E;
 
     if ( start == 0 || end == blockSize )
     {
@@ -170,6 +178,17 @@ void RemoveBins::checkProperties()
     const std::string failure("XMax must be greater than XMin.");
     g_log.error(failure);
     throw std::invalid_argument(failure);
+  }
+
+  // If WorkspaceIndex has been set it must be valid
+  const int index = getProperty("WorkspaceIndex");
+  if ( !isEmpty(index) && index >= m_inputWorkspace->getNumberHistograms() )
+  {
+    g_log.error() << "The value of WorkspaceIndex provided (" << index << 
+      ") is larger than the size of this workspace (" <<
+      m_inputWorkspace->getNumberHistograms() << ")\n";
+    throw Kernel::Exception::IndexError(index,m_inputWorkspace->getNumberHistograms()-1,
+      "RemoveBins WorkspaceIndex property");
   }
 
   const std::string interpolation = getProperty("Interpolation");

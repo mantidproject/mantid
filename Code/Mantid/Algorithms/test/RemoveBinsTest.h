@@ -151,6 +151,34 @@ public:
 		TS_ASSERT_EQUALS(outputWS->dataY(0)[3], 6);
 	}
 	
+  void testSingleSpectrum()
+  {
+    RemoveBins rb;
+    TS_ASSERT_THROWS_NOTHING( rb.initialize() )
+		TS_ASSERT( rb.isInitialized() )	
+		rb.setPropertyValue("InputWorkspace", "input2D");
+		rb.setPropertyValue("OutputWorkspace", "output4");
+		rb.setPropertyValue("XMin", "0");
+		rb.setPropertyValue("XMax", "40");
+    rb.setPropertyValue("WorkspaceIndex","0");
+
+    TS_ASSERT( rb.execute() )
+
+    MatrixWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("input2D"));
+    MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output4"));
+    TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
+    TS_ASSERT_EQUALS( inputWS->readX(1), outputWS->readX(1) )
+    TS_ASSERT_EQUALS( inputWS->readY(1), outputWS->readY(1) )
+    TS_ASSERT_EQUALS( inputWS->readE(1), outputWS->readE(1) )
+    for (int i = 0; i < 4; ++i)
+    {
+      TS_ASSERT_EQUALS( outputWS->readY(0)[i], 0.0 )
+      TS_ASSERT_EQUALS( outputWS->readE(0)[i], 0.0 )
+    }
+
+    AnalysisDataService::Instance().remove("output4");
+  }
+
 	void testRealData()
 	{
 		Mantid::NeXus::LoadMuonNexus loader;
