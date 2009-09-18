@@ -78,7 +78,7 @@ namespace DataHandling
     void checkOptionalProperties();
 
     /// Write a histogram to the file
-    void writeVTKPiece(std::ostream & outXML, const MantidVec& dataX, const MantidVec& dataY, const MantidVec& dataE, int index) const; 
+    void writeVTKPiece(std::ostream & outXML, const std::vector<double>& dataX, const std::vector<double>& dataY, const std::vector<double>& dataE, int index) const; 
 
     /// The x-axis minimum
     double m_Xmin;
