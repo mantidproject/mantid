@@ -56,7 +56,7 @@ void LoadInstrument::init()
   std::vector<std::string> exts;
   exts.push_back("XML");
   exts.push_back("xml");
-  declareProperty(new FileProperty("Filename","", FileProperty::NoExistLoad, exts),
+  declareProperty(new FileProperty("Filename","", FileProperty::Load, exts),
 		  "The filename (including its full or relative path) of an ISIS instrument\n"
 		  "defintion file");
 
