@@ -11,18 +11,28 @@ namespace Mantid
 namespace DataHandling
 {
 /**
-   An algorithm to extract details of the  RPB_STRUCT structure within a RAW file
+   An algorithm to extract pertinent information about a RAW file without loading the data.
    
-   Required properties:
+   Required input properties:
    <UL>
-   <LI>Filename - The raw file to use to gather the information</LI>
-   <LI>OutputTableName - The name of the TableWorkspace to output the parameters</LI>
+   <LI> Filename - The raw file to use to gather the information </LI>
+   <LI> GetRunParameters - Flag indicating whether to output run parameters (RPB_STRUCT) in a table (default false)</LI>
+   </UL>
+   
+   Output properties:
+   <UL>
+   <LI> RunTitle         - The title of the run (r_title) </LI>
+   <LI> RunHeader        - The run header (HDR_STRUCT) </LI>
+   <LI> SpectraCount     - The number of spectra (t_nsp1) </LI>
+   <LI> TimeChannelCount - The number of time channels (t_ntc1) </LI>
+   <LI> PeriodCount      - The number of periods (t_nper) </LI>
+   <LI> RunParameterTable (If requested by GetRunParameters flag above) <LI>
    </UL>
    
    @author Martyn, Tessella plc
    @date 29/07/2009
    
-   Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratories
+   Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
    This file is part of Mantid.
 

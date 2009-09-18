@@ -53,7 +53,9 @@ private:
 
     // Check the output parameters are what we expect
     std::string title = alg.getProperty("RunTitle");
-    TS_ASSERT_EQUALS(title, std::string("38370 Martin,Damay,Mannini MnV2O4 28K _T in cryomag 20-APR-2008 15:33:20"));
+    TS_ASSERT_EQUALS(title, std::string("MnV2O4 28K _T in cryomagnet                                                     "));
+    std::string header = alg.getProperty("RunHeader");
+    TS_ASSERT_EQUALS(header, std::string("38370 Martin,Damay,Mannini MnV2O4 28K _T in cryomag 20-APR-2008 15:33:20"));
     int spectra_count = alg.getProperty("SpectraCount"); //7290
     TS_ASSERT_EQUALS(spectra_count, 7290);
       
