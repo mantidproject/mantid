@@ -272,16 +272,21 @@ namespace Mantid
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-      loadInst->setPropertyValue("Filename", fullPathIDF);
-      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-
+      
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
-        loadInst->execute();
-      } catch (std::runtime_error&)
+	loadInst->setPropertyValue("Filename", fullPathIDF);
+	loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+	loadInst->execute();
+      }
+      catch( std::invalid_argument&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+	g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+      }
+      catch (std::runtime_error&)
+      {
+	g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
       }
 
     }

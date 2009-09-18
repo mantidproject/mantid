@@ -400,17 +400,24 @@ namespace Mantid
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
       
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-      loadInst->setPropertyValue("Filename", fullPathIDF);
-      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
-
+    
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      bool executionSuccessful(true);
       try
       {
-        loadInst->execute();
+	loadInst->setPropertyValue("Filename", fullPathIDF);
+	loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+	loadInst->execute();
+      }
+      catch( std::invalid_argument&)
+      {
+	g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+	executionSuccessful = false;
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+	g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+	executionSuccessful = false;
       }
 
       // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
@@ -430,21 +437,27 @@ namespace Mantid
         << "the instrument from nexus data file.\n";
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromNexus");
-      loadInst->setPropertyValue("Filename", m_filename);
-      // Set the workspace property to be the same one filled above
-      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
-
+    
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      bool executionSuccessful(true);
       try
       {
-        loadInst->execute();
+	loadInst->setPropertyValue("Filename", m_filename);
+	loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+	loadInst->execute();
+      }
+      catch( std::invalid_argument&)
+      {
+	g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+	executionSuccessful = false;
       }
       catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run LoadInstrumentFromNexus sub-algorithm");
+	g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+	executionSuccessful = false;
       }
 
-      if ( ! loadInst->isExecuted() ) g_log.error("No instrument definition loaded");      
+      if ( !executionSuccessful ) g_log.error("No instrument definition loaded");      
     }
     
     /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
