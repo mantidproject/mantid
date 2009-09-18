@@ -252,7 +252,7 @@ def CalculateResidue(quadrants):
 def StripEndZeroes(workspace):
         result_ws = mantid.getMatrixWorkspace(workspace)
         y_vals = result_ws.readY(0)
-        length = len(y_vals)-1
+        length = len(y_vals)
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
@@ -261,6 +261,7 @@ def StripEndZeroes(workspace):
                         break
         # Now find the last non-zero value
         stop = 0
+        length -= 1
         for j in range(length, 0,-1):
                 if ( y_vals[j] != 0.0 ):
                         stop = j
@@ -268,5 +269,6 @@ def StripEndZeroes(workspace):
         # Find the appropriate X values and call CropWorkspace
         x_vals = result_ws.readX(0)
         startX = x_vals[start]
+        # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop+1]
         CropWorkspace(workspace,workspace,startX,endX)

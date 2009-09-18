@@ -106,6 +106,9 @@ private slots:
   /// Select the user file
   void selectUserFile();
 
+  /// Flip the reload flag
+  void forceDataReload();
+  
   /// Receive a load button click
   void handleLoadButtonClick();
 
@@ -126,9 +129,6 @@ private slots:
 
   /// Called when the show mask button has been clicked
   void handleShowMaskButtonClick();
-
-  /// Handle a box being edited
-  void runBoxEdited();
 
   ///Handle the change in instrument 
   void handleInstrumentChange(int);
@@ -175,6 +175,9 @@ private:
 
   // A flag to mark that a data reload is necessary
   bool m_run_changed;
+
+  // A flag that causes the reload of the data
+  bool m_force_reload;
 
   // An observer for a delete notification from Mantid
   Poco::NObserver<SANSRunWindow, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;

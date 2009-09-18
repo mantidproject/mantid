@@ -131,6 +131,9 @@ DIMENSION, SPECMIN , SPECMAX, BACKMON_START, BACKMON_END = SANSUtility.GetInstru
 def CalculateTransmissionCorrection(trans_raw, DIRECT_SAMPLE, wavbin, outputworkspace):
 	if trans_raw == '' or DIRECT_SAMPLE == '':
 		return False
+
+	# Removing any ouput workspaces that exists seem to help with memory errors
+	mtd.deleteWorkspace(outputworkspace)
 	
 	if INSTR_NAME == 'LOQ':
 		# Change the instrument definition to the correct one in the LOQ case
@@ -144,13 +147,16 @@ def CalculateTransmissionCorrection(trans_raw, DIRECT_SAMPLE, wavbin, outputwork
 		direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(DIRECT_SAMPLE, '1,2', BACKMON_START, BACKMON_END, wavbin, False)
 		CalculateTransmission(trans_tmp_out,direct_tmp_out, outputworkspace, TRANS_UDET_MON, TRANS_UDET_DET, TRANS_WAV1, TRANS_WAV2)
 	
+	binning = str(WAV1) + ',' + str(DWAV) + "," + str(WAV2) 
+	Rebin(outputworkspace, outputworkspace, binning)
+		
 	mantid.deleteWorkspace(trans_tmp_out)
 	mantid.deleteWorkspace(direct_tmp_out)
 	return True
 #######################################################################################################################
 
 ############################## Setup the component positions ##########################################################
-def SetupComponentPositions(detector, dataws, xbeam, ybeam, logfile = None):
+def SetupComponentPositions(detector, dataws, xbeam, ybeam):
 	### Sample correction #### 
 	# Put the components in the correct place
 	# The sample
@@ -299,10 +305,10 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 		Qxy(tmpWS, final_result, QXY2, DQXY)
 
 	# Replaces NANs with zeroes
-	ReplaceSpecialValues(InputWorkspace=final_result,OutputWorkspace=final_result,NaNValue="0",InfinityValue="0")
+	#ReplaceSpecialValues(InputWorkspace=final_result,OutputWorkspace=final_result,NaNValue="0",InfinityValue="0")
 	# Crop Workspace to remove leading and trailing zeroes
-	if CORRECTION_TYPE == '1D':
-                SANSUtility.StripEndZeroes(final_result)
+	#if CORRECTION_TYPE == '1D':
+    #            SANSUtility.StripEndZeroes(final_result)
 	mantid.deleteWorkspace(tmpWS)
 	return
 ############################# End of Correct function ####################################################
@@ -336,16 +342,17 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 			final_workspace += 'HAB'
 		final_workspace += '_' + CORRECTION_TYPE
 
+	# Centre reduction works a lot better when pressing the button again with this here
+	mtd.deleteWorkspace(run_ws.split('_')[0] + 'rear_centre-reduced')
+
 	trans_final = trans_input.split('_')[0] + "_trans_" + trans_suffix
-	have_sample_trans = CalculateTransmissionCorrection(trans_input, DIRECT_SAMPLE, FULLWAVBIN, trans_final)
+	transwavbin = str(TRANS_WAV1) + "," + str(DWAV) + "," + str(TRANS_WAV2)
+	have_sample_trans = CalculateTransmissionCorrection(trans_input, DIRECT_SAMPLE, transwavbin, trans_final)
 	if have_sample_trans == False:
 		trans_final = ''
-
+	
 	return trans_final, final_workspace, maskpt_rmin, maskpt_rmax
 
-# This runs the full wavelength range
-def FullWavRangeReduction(sample_setup, can_setup, FindingCentre = False):
-	return WavRangeReduction(sample_setup, can_setup, WAV1, WAV2, FindingCentre)
 
 # This runs a specified range
 def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre = False):
@@ -354,12 +361,19 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
 		final_workspace = sample_setup[1].split('_')[0] + '_centre-reduced'
 	else:
 		final_workspace = sample_setup[1] + '_' + str(wav_start) + '_' + str(wav_end)
+		
 	Correct(SCATTER_SAMPLE, sample_setup[0], final_workspace, wav_start, wav_end, sample_setup[2], sample_setup[3], FindingCentre)
 	if can_setup[1] != '':
 		# Run correction function
 		Correct(SCATTER_CAN, can_setup[0], can_setup[1], wav_start, wav_end, can_setup[2], can_setup[3], FindingCentre)
-		#Minus(final_workspace, can_setup[1], final_workspace)
-		#mantid.deleteWorkspace(can_setup[1])
+		Minus(final_workspace, can_setup[1], final_workspace)
+		mantid.deleteWorkspace(can_setup[1])
+	
+	# Replaces NANs with zeroes
+	ReplaceSpecialValues(InputWorkspace=final_workspace,OutputWorkspace=final_workspace,NaNValue="0",InfinityValue="0")
+	# Crop Workspace to remove leading and trailing zeroes
+	if CORRECTION_TYPE == '1D':
+                SANSUtility.StripEndZeroes(final_workspace)
 	return final_workspace
 ############################################################################################################################
 
@@ -399,7 +413,7 @@ try:
 				MoveInstrumentComponent(SCATTER_CAN, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
 	
 		# Arguments 0 and 1 are the sample and can setup details
-		ws_togroup = FullWavRangeReduction(args[0], args[1], FindingCentre=True)
+		ws_togroup = WavRangeReduction(args[0], args[1], WAV1, WAV2, FindingCentre=True)
 		rlow = args[2]
 		rupp = args[3]
 		# The workspace that we want to group is the output of the sample reduction
@@ -409,6 +423,13 @@ try:
 	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 		global XVAR_PREV, YVAR_PREV, ITER_NUM
 		
+		# Clear any previous workspaces (Note that a log message will appear saying they don't exists
+		# if there is not but execution will continue)
+		mtd.deleteWorkspace('Left')
+		mtd.deleteWorkspace('Right')
+		mtd.deleteWorkspace('Up')
+		mtd.deleteWorkspace('Down')
+
 		if xstart == None or ystart == None:
 			# If a starting point is not provided, do a quick sweep to find the maximum count as an 
 			# approximate place to start the search
@@ -447,7 +468,7 @@ try:
 		# There's a bug in the scipy.optimize.fmin function that skips the callback function for the first iteration
 		ITER_NUM = 0
 		reportProgress([0,0])
-		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2, maxiter=MaxIter, callback = reportProgress)
+		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2,maxiter=MaxIter, callback = reportProgress)
 		
 		# Tidy up
 #		mtd.deleteWorkspace('Left')
@@ -455,9 +476,9 @@ try:
 #		mtd.deleteWorkspace('Up')
 #		mtd.deleteWorkspace('Down')
 #		mtd.deleteWorkspace(scatter_setup[1] + '_' + str(WAV1) + '_' + str(WAV2))
-		mtd.deleteWorkspace(SCATTER_SAMPLE)
-		if SCATTER_CAN != '':
-			mtd.deleteWorkspace(SCATTER_CAN)
+#		mtd.deleteWorkspace(SCATTER_SAMPLE)
+#		if SCATTER_CAN != '':
+#			mtd.deleteWorkspace(SCATTER_CAN)
 		
 		# The coordinates returned are the position of the detector so the beam centre is -coords
 		return -coords

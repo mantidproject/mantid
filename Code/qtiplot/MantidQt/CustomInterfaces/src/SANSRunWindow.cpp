@@ -49,7 +49,7 @@ Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANS
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), 
-  m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false),
+  m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false), m_force_reload(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace),
   m_logvalues(), m_maskcorrections(), m_havescipy(true), m_lastreducetype(-1)
 {
@@ -88,10 +88,11 @@ void SANSRunWindow::initLayout()
     // Disable most things so that load is the only thing that can be done
     m_uiForm.oneDBtn->setEnabled(false);
     m_uiForm.twoDBtn->setEnabled(false);
-    m_uiForm.tabWidget->setTabEnabled(1, false);
-    m_uiForm.tabWidget->setTabEnabled(2, false);
-    m_uiForm.tabWidget->setTabEnabled(3, false);
-    
+    for( int i = 1; i < 4; ++i)
+    {
+      m_uiForm.tabWidget->setTabEnabled(i, false);
+    }
+
     // Connect
     connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChange(int)));
 
@@ -103,8 +104,8 @@ void SANSRunWindow::initLayout()
     connect(m_reducemapper, SIGNAL(mapped(const QString &)), this, SLOT(handleReduceButtonClick(const QString &)));
     
     connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
-    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.oneDBtn, SLOT(setEnabled(bool)));
-    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.twoDBtn, SLOT(setEnabled(bool)));
+//    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.oneDBtn, SLOT(setEnabled(bool)));
+//    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.twoDBtn, SLOT(setEnabled(bool)));
 
     //Text edit map
     m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
@@ -120,8 +121,10 @@ void SANSRunWindow::initLayout()
     //Connect each box's edited signal to flag if the box's text has changed
     for( int idx = 0; idx < 9; ++idx )
     {
-      connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runBoxEdited()));
+      connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(forceDataReload()));
     }
+    
+    connect(m_uiForm.smpl_offset, SIGNAL(textEdited()), this, SLOT(forceDataReload()));
 
     //Period label hash. Each label has a buddy set to its corresponding text edit field
     m_period_lbls.insert(0, m_uiForm.sct_prd_tot1);
@@ -153,9 +156,6 @@ void SANSRunWindow::initLayout()
     m_uiForm.file_opt->setItemData(1, ".nxs");
 
     readSettings();
-
-
-
 }    
 
 /**
@@ -595,34 +595,41 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
  */
 void SANSRunWindow::setProcessingState(bool running, int type)
 {
+  m_uiForm.load_dataBtn->setEnabled(!running);
+  m_uiForm.oneDBtn->setEnabled(!running);
+  m_uiForm.twoDBtn->setEnabled(!running);
+  m_uiForm.plotBtn->setEnabled(!running);
+  m_uiForm.saveBtn->setEnabled(!running);
+
+  if( m_havescipy )
+  {
+    m_uiForm.runcentreBtn->setEnabled(!running);
+  }
   if( running )
   {
-    m_uiForm.load_dataBtn->setEnabled(false);
     if( type == 0 )
     {   
       m_uiForm.oneDBtn->setText("Running ...");
     }
-    else 
+    else if( type == 1 )
     {
       m_uiForm.twoDBtn->setText("Running ...");
     }
-    m_uiForm.oneDBtn->setEnabled(false);
-    m_uiForm.twoDBtn->setEnabled(false);
-    m_uiForm.runcentreBtn->setEnabled(false);
+    else {}
   }
   else
   {
     m_uiForm.oneDBtn->setText("1D Reduce");
     m_uiForm.twoDBtn->setText("2D Reduce");
-    m_uiForm.oneDBtn->setEnabled(true);
-    m_uiForm.twoDBtn->setEnabled(true);
-    m_uiForm.load_dataBtn->setEnabled(true);
-    
-    if( m_havescipy ) 
-    {
-      m_uiForm.runcentreBtn->setEnabled(true);
-    }
   }
+
+  for( int i = 0; i < 4; ++i)
+  {
+    if( i == m_uiForm.tabWidget->currentIndex() ) continue;
+    m_uiForm.tabWidget->setTabEnabled(i, !running);
+  }
+
+  QCoreApplication::processEvents();
 }
 
 /**
@@ -1014,6 +1021,15 @@ void SANSRunWindow::selectUserFile()
 }
 
 /**
+ * Flip the flag so that a data reload will be forced
+ */
+void SANSRunWindow::forceDataReload()
+{
+  m_force_reload = true;
+}
+
+
+/**
  * Receive a load button click signal
  */
 void SANSRunWindow::handleLoadButtonClick()
@@ -1034,10 +1050,11 @@ void SANSRunWindow::handleLoadButtonClick()
     showInformationBox("Please load the relevant user file.");
     return;
   }
-  
+  setProcessingState(true, -1);
+
   //A load command for each box if there is anything in it and it has not already been loaded
   QMapIterator<int, QLineEdit*> itr(m_run_no_boxes);
-  bool data_loaded(false);
+  bool load_success(false);
   while( itr.hasNext() )
   {
     itr.next();
@@ -1053,9 +1070,9 @@ void SANSRunWindow::handleLoadButtonClick()
     if( key < 3 ) ws_name = run_no + "_sans_" + m_uiForm.file_opt->currentText();
     else ws_name = run_no + "_trans_" + m_uiForm.file_opt->currentText();
     //Check if we already have it and do nothing if that is so
-    if( workspaceExists(ws_name) && !m_run_changed ) 
+    if( workspaceExists(ws_name) && !m_force_reload ) 
     {
-      data_loaded = true;
+      load_success = true;
       continue;
     }
     //Load the file. This checks for required padding of zeros etc
@@ -1067,7 +1084,9 @@ void SANSRunWindow::handleLoadButtonClick()
       m_workspace_names.insert(key, "");
       showInformationBox("Error: Cannot load run " + run_no 
 			 + ".\nPlease check that the correct instrument and file extension are selected");
-      //Bail out completely now
+      //Bail out completely now and make sure that future load will try to reload
+      m_force_reload = true;
+      setProcessingState(false, -1);
       return;
     }
 
@@ -1077,23 +1096,23 @@ void SANSRunWindow::handleLoadButtonClick()
     {
       Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
         (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
-        if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
-        {
-          m_uiForm.tof_min->setText(QString::number(ws->readX(0).front())); 
-          m_uiForm.tof_max->setText(QString::number(ws->readX(0).back()));
-        }
+      if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
+      {
+        m_uiForm.tof_min->setText(QString::number(ws->readX(0).front())); 
+        m_uiForm.tof_max->setText(QString::number(ws->readX(0).back()));
+      }
 
-	// Load log information
-	m_logvalues = loadDetectorLogs(work_dir, run_no);
+      // Load log information
+      m_logvalues = loadDetectorLogs(work_dir, run_no);
 
-	// Set the geometry
-	int geomid  = ws->getSample()->getGeometryFlag();
-	m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-	double thick(0.0), width(0.0), height(0.0);
-	ws->getSample()->getGeometry(thick, width, height);
-	m_uiForm.sample_thick->setText(QString::number(thick));
-	m_uiForm.sample_width->setText(QString::number(width));
-	m_uiForm.sample_height->setText(QString::number(height));
+      // Set the geometry
+      int geomid  = ws->getSample()->getGeometryFlag();
+      m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
+      double thick(0.0), width(0.0), height(0.0);
+      ws->getSample()->getGeometry(thick, width, height);
+      m_uiForm.sample_thick->setText(QString::number(thick));
+      m_uiForm.sample_width->setText(QString::number(width));
+      m_uiForm.sample_height->setText(QString::number(height));
     }
 
     QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
@@ -1101,16 +1120,17 @@ void SANSRunWindow::handleLoadButtonClick()
     QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
     userentry->setText("1");
 
-    data_loaded = true;
+    load_success = true;
   }
 
   // Cannot do anything if nothing was loaded
-  if( !data_loaded ) 
+  if( !load_success ) 
   {
-    return;
+   setProcessingState(false, -1);
+   return;
   }
-  m_run_changed = false;
 
+  m_force_reload = false;
   //Fill in the information on the geometry tab
   setupGeometryDetails();
 
@@ -1119,8 +1139,7 @@ void SANSRunWindow::handleLoadButtonClick()
     m_uiForm.tabWidget->setTabEnabled(index, true);
   }
  
-  //We can now process some data
-  emit dataReadyToProcess(true);
+  setProcessingState(false, -1);
 }
 
 /** 
@@ -1139,12 +1158,6 @@ QString SANSRunWindow::constructReductionCode(bool replacewsnames, bool checkcha
     showInformationBox("Error: A scattering sample run number is required to continue.");
     return QString();
   } 
-
-  if( checkchanges && m_run_changed )
-  {
-    g_log.debug("A run number has changed, running load routine.");
-    handleLoadButtonClick();
-  }
 
   //Construct the code to execute
   QString py_code = m_pycode_loqreduce;
@@ -1240,7 +1253,6 @@ QString SANSRunWindow::constructReductionCode(bool replacewsnames, bool checkcha
   py_code.replace("|ZCORREARDET|", QString::number(m_maskcorrections["Rear_Det_Z_corr"]));
   py_code.replace("|XCORREARDET|", QString::number(m_maskcorrections["Rear_Det_X_corr"]));
 
-
   return py_code;
 }
 
@@ -1251,32 +1263,28 @@ QString SANSRunWindow::constructReductionCode(bool replacewsnames, bool checkcha
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
+  int idtype(0);
+  if( type.startsWith("2") ) idtype = 1;
+
   QString py_code = constructReductionCode();
   if( py_code.isEmpty() )
   {
     return;
   }
+  //Currently the components are moved with each reduce click, so the 
+  //data needs to be reloaded each time
+  forceDataReload();
+  handleLoadButtonClick();
 
-  int idtype(0);
-  if( type.startsWith("2") ) idtype = 1;
-
-  if( m_lastreducetype >= 0 && m_lastreducetype != idtype)
-  {
-    m_run_changed = true;
-    handleLoadButtonClick();
-    m_run_changed = false;
-  }
-
+  //Disable buttons so that interaction is limited while processing data
+  setProcessingState(true, idtype);
   m_lastreducetype = idtype;
 
   py_code.replace("|ANALYSISTYPE|", type);
   py_code += 
     "sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_CENTRE, YBEAM_CENTRE], False)\n"
     "can_setup = InitReduction(SCATTER_CAN, [XBEAM_CENTRE, YBEAM_CENTRE], True)\n"
-    "FullWavRangeReduction(sample_setup, can_setup)";
-
-  //Disable buttons so that interaction is limited while processing data
-  setProcessingState(true, idtype);
+    "WavRangeReduction(sample_setup, can_setup, WAV1, WAV2)";
 
   //Execute the code
   runPythonCode(py_code, false);
@@ -1304,6 +1312,11 @@ void SANSRunWindow::handleRunFindCentre()
     return;
   }
 
+  // Disable interaction
+  setProcessingState(true, 0);
+  // Start iteration
+  updateCentreFindingStatus("::SANS::Loading data");
+
   // Use different names for the centre finding so that the workspace list is not confusing
   //Scatter sample
   QString work_dir = QDir(m_uiForm.datadir_edit->text()).absolutePath();
@@ -1320,7 +1333,8 @@ void SANSRunWindow::handleRunFindCentre()
   runmap[2] = qMakePair(QString("centre-trans"), m_uiForm.tra_sample_edit->text());
   runmap[3] = qMakePair(QString("centre-trans-can"),m_uiForm.tra_can_edit->text());
   runmap[4] = qMakePair(QString("centre-direct"), m_uiForm.direct_sample_edit->text());
-
+  
+  m_force_reload = true;
   for( int i = 0; i < 5; ++i )
   {
     QString run = runmap.at(i).second;
@@ -1391,22 +1405,19 @@ void SANSRunWindow::handleRunFindCentre()
     + ", xstart = Xstart, ystart = Ystart)\n"
     + "print '|' + str(beamcoords[0]) + '|' + str(beamcoords[1])\n";
 
-  setProcessingState(true, 0);
-  m_uiForm.tabWidget->setTabEnabled(0, false);
-  m_uiForm.tabWidget->setTabEnabled(1, false);
-  m_uiForm.tabWidget->setTabEnabled(3, false);
-
+  updateCentreFindingStatus("::SANS::Iteration 1");
   m_uiForm.beamstart_box->setFocus();
 
   //Execute the code
   //Connect up the logger to handle updating the centre finding status box
   connect(this, SIGNAL(logMessageReceived(const QString&)), this, 
 	  SLOT(updateCentreFindingStatus(const QString&)));
-  // Start iteration
-  updateCentreFindingStatus("Iteration 1");
+
   QString result = runPythonCode(py_code);
+  
   disconnect(this, SIGNAL(logMessageReceived(const QString&)), this, 
 	     SLOT(updateCentreFindingStatus(const QString&)));
+  
   QTextStream reader(&result, QIODevice::ReadOnly);
   double x(0.0), y(0.0);
   bool found(false);
@@ -1418,9 +1429,9 @@ void SANSRunWindow::handleRunFindCentre()
       QStringList xycoords = result.split("|");
       if( xycoords.size() == 3 )
       {
-	x = xycoords[1].toDouble();
-	y = xycoords[2].toDouble();
-	found = true;
+        x = xycoords[1].toDouble();
+        y = xycoords[2].toDouble();
+        found = true;
       }
     }
   }
@@ -1438,9 +1449,6 @@ void SANSRunWindow::handleRunFindCentre()
 
   //Reenable stuff
   setProcessingState(false, 0);
-  m_uiForm.tabWidget->setTabEnabled(0, true);
-  m_uiForm.tabWidget->setTabEnabled(1, true);
-  m_uiForm.tabWidget->setTabEnabled(3, true);  
 }
 
 /**
@@ -1506,14 +1514,6 @@ void SANSRunWindow::handleShowMaskButtonClick()
   //Other masks
   py_code.replace("|MASKLIST|", createMaskString());
   runPythonCode(py_code);
-}
-
-/**
- * Flip the flag saying that something has been edited in one of the run boxes
- */
-void SANSRunWindow::runBoxEdited()
-{
-  m_run_changed = true;
 }
 
 /**
@@ -1603,58 +1603,60 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
   {   
     return 0;
   }
-  g_log.debug("Attempting to load " + filepath.toStdString());
+  if( workspaceExists(workspace) )
+  {
+    runPythonCode(QString("mtd.deleteWorkspace('") + workspace + QString("')"),false);
+  }
 
-  Mantid::API::FrameworkManagerImpl & f_mgr = Mantid::API::FrameworkManager::Instance();
-  Mantid::API::IAlgorithm *loader(NULL);
+  g_log.debug("Attempting to load " + filepath.toStdString());
+  QString py_code("");
   if( ext == ".raw" )
   {
-    loader = f_mgr.createAlgorithm("LoadRaw");
+    py_code = "LoadRaw";
   }
   else
   {
-    loader = f_mgr.createAlgorithm("LoadISISNexus");
+    py_code = "LoadISISNexus";
   }
-  loader->setPropertyValue("Filename", filepath.toStdString());
-  std::string workspace_name = workspace.toStdString();
-  loader->setPropertyValue("OutputWorkspace", workspace_name);
-  if( !loader->execute() )
+  py_code += "(Filename='" + filepath + "', OutputWorkspace='" + workspace + "')"; 
+  QString results = runPythonCode(py_code);
+  if( !results.isEmpty() )
   {
     return 0;
   }
+  g_log.debug("Loading algorithm succeeded.");
+
+  if( ext == ".raw" )
+  {
+    py_code = "LoadSampleDetailsFromRaw(InputWorkspace='" + workspace 
+      + "', Filename='" + filepath + "')";
+    runPythonCode(py_code, false);
+  }
+
+  //Load succeeded so find the number of periods. (Here the number of workspaces in the group)
+  //Retrieve shoudn't throw but lets wrap it just in case
+  Mantid::API::Workspace_sptr wksp_ptr;
+  try
+  {
+    wksp_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace.toStdString());
+  }
+  catch(Mantid::Kernel::Exception::NotFoundError &)
+  {
+    g_log.error("Couldn't find workspace " + workspace.toStdString() + " in ADS.");
+    return 0;
+  }
+
+  // Find the number of periods
+  Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp_ptr);
+  if( ws_group )
+  {
+    return ws_group->getNames().size();
+  }
   else
   {
-    g_log.debug("Loading algorithm succeeded.");
-    // Run load sample geometry
-    loader =  f_mgr.createAlgorithm("LoadSampleDetailsFromRaw");
-    loader->setPropertyValue("InputWorkspace", workspace_name);
-    loader->setPropertyValue("Filename", filepath.toStdString());
-    loader->execute();
-    
-    //Load succeeded so find the number of periods. (Here the number of workspaces in the group)
-    //Retrieve shoudn't throw but lets wrap it just in case
-    Mantid::API::Workspace_sptr wksp_ptr;
-    try
-    {
-     wksp_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name);
-    }
-    catch(Mantid::Kernel::Exception::NotFoundError &)
-    {
-      g_log.error("Couldn't find workspace " + workspace_name + " in ADS.");
-      return 0;
-    }
-    
-    // Find the number of periods
-    Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp_ptr);
-    if( ws_group )
-    {
-      return ws_group->getNames().size();
-    }
-    else
-    {
-      return 1;
-    }
+    return 1;
   }
+
 }
 
 /**
