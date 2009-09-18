@@ -27,7 +27,7 @@ namespace Mantid
     /// Initialisation method.
     void LoadEmptyInstrument::init()
     {
-      declareProperty(new FileProperty("Filename","", FileProperty::NoExistLoad, std::vector<std::string>(1, "xml")),
+      declareProperty(new FileProperty("Filename","", FileProperty::Load, std::vector<std::string>(1, "xml")),
 		      "The filename (including its full or relative path) of an ISIS instrument\n"
 		      "defintion file");
       declareProperty(
