@@ -209,16 +209,16 @@ if os.name == 'posix':
 	   cflags.append('-fopenmp')
 	conf.Finish()
 
-	cflags.append(['-g','-Wall'])
+	cflags.append('-Wall')
 	if int(debug) :
 	    cflags.append('-O0')
+	    cflags.append('-g')
+	    lpts.append('-g')
 	else :
 	    cflags.append('-O3')
 
-	env.Append(LINKFLAGS=['-g'])
 	cflags.append(MantidBuild.getConfigFlags('gsl-config --cflags'))
 	lpts.append(MantidBuild.getConfigFlags('gsl-config --libs'))
-	lpts.append('-g')
 			
 print "CPPPATHS: ",cppPaths
 print "CFLAGS: ",cflags
