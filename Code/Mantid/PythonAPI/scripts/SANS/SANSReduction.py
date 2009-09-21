@@ -51,7 +51,7 @@ RMAX = |RADIUSMAX|/1000.0
 WAV1 = |WAVMIN|
 WAV2 = |WAVMAX|
 DWAV = |WAVDELTA|
-FULLWAVBIN = str(WAV1) + "," + str(DWAV) + "," + str(WAV2)
+WAVBINNING = str(WAV1) + "," + str(DWAV) + "," + str(WAV2)
 Q1 = |QMIN|
 Q2 = |QMAX|
 DQ = |QDELTA|
@@ -115,6 +115,8 @@ FRONT_DET_ROT_CORR = |ROTCORRFRONTDET|
 REAR_DET_Z_CORR = |ZCORREARDET| 
 REAR_DET_X_CORR = |XCORREARDET| 
 
+# Previous transmission
+USE_PREV_TRANS = |USEPREVTRANS|
 #------------------------------- End of input section --------------------------------------------------
 
 # Transmission variables for SANS2D. The CalculateTransmission algorithm contains the defaults
@@ -128,13 +130,20 @@ TRANS_UDET_DET = 3
 DIMENSION, SPECMIN , SPECMAX, BACKMON_START, BACKMON_END = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)
 
 #################################### Correct by the transmission function ############################################
-def CalculateTransmissionCorrection(trans_raw, DIRECT_SAMPLE, wavbin, outputworkspace):
+def CalculateTransmissionCorrection(trans_raw, DIRECT_SAMPLE, lambdamin, dlambda, lambdamax,outputworkspace):
 	if trans_raw == '' or DIRECT_SAMPLE == '':
 		return False
 
-	# Removing any ouput workspaces that exists seem to help with memory errors
+	if USE_PREV_TRANS == True:
+		lmin = TRANS_WAV1
+		lmax = TRANS_WAV2
+		wavbin = str(TRANS_WAV1) + ',' + str(dlambda) + ',' + str(TRANS_WAV2)
+	else:
+		lmin = lambdamin
+		lmax = lambdamax
+		wavbin = str(lambdamin) + ',' + str(dlambda) + ',' + str(lambdamax)
+
 	mtd.deleteWorkspace(outputworkspace)
-	
 	if INSTR_NAME == 'LOQ':
 		# Change the instrument definition to the correct one in the LOQ case
 		LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
@@ -145,13 +154,16 @@ def CalculateTransmissionCorrection(trans_raw, DIRECT_SAMPLE, wavbin, outputwork
 	else:
 		trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, False) 
 		direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(DIRECT_SAMPLE, '1,2', BACKMON_START, BACKMON_END, wavbin, False)
-		CalculateTransmission(trans_tmp_out,direct_tmp_out, outputworkspace, TRANS_UDET_MON, TRANS_UDET_DET, TRANS_WAV1, TRANS_WAV2)
-	
-	binning = str(WAV1) + ',' + str(DWAV) + "," + str(WAV2) 
-	Rebin(outputworkspace, outputworkspace, binning)
-		
+		CalculateTransmission(trans_tmp_out,direct_tmp_out, outputworkspace, TRANS_UDET_MON, TRANS_UDET_DET, lmin, lmax)
+	# Remove temopraries
 	mantid.deleteWorkspace(trans_tmp_out)
 	mantid.deleteWorkspace(direct_tmp_out)
+
+	# If we want to use previous transmission then calculate to full range and rebin
+	if USE_PREV_TRANS == True:
+		wavbin = str(lambdamin) + ',' + str(dlambda) + ',' + str(lambdamax)
+		Rebin(outputworkspace, outputworkspace, wavbin)
+		
 	return True
 #######################################################################################################################
 
@@ -304,11 +316,6 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 		# Run 2D algorithm
 		Qxy(tmpWS, final_result, QXY2, DQXY)
 
-	# Replaces NANs with zeroes
-	#ReplaceSpecialValues(InputWorkspace=final_result,OutputWorkspace=final_result,NaNValue="0",InfinityValue="0")
-	# Crop Workspace to remove leading and trailing zeroes
-	#if CORRECTION_TYPE == '1D':
-    #            SANSUtility.StripEndZeroes(final_result)
 	mantid.deleteWorkspace(tmpWS)
 	return
 ############################# End of Correct function ####################################################
@@ -346,8 +353,7 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 	mtd.deleteWorkspace(run_ws.split('_')[0] + 'rear_centre-reduced')
 
 	trans_final = trans_input.split('_')[0] + "_trans_" + trans_suffix
-	transwavbin = str(TRANS_WAV1) + "," + str(DWAV) + "," + str(TRANS_WAV2)
-	have_sample_trans = CalculateTransmissionCorrection(trans_input, DIRECT_SAMPLE, transwavbin, trans_final)
+	have_sample_trans = CalculateTransmissionCorrection(trans_input, DIRECT_SAMPLE, WAV1, DWAV, WAV2, trans_final)
 	if have_sample_trans == False:
 		trans_final = ''
 	

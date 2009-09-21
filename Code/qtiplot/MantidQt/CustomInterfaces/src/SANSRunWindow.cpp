@@ -124,7 +124,7 @@ void SANSRunWindow::initLayout()
       connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(forceDataReload()));
     }
     
-    connect(m_uiForm.smpl_offset, SIGNAL(textEdited()), this, SLOT(forceDataReload()));
+    connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(forceDataReload()));
 
     //Period label hash. Each label has a buddy set to its corresponding text edit field
     m_period_lbls.insert(0, m_uiForm.sct_prd_tot1);
@@ -438,6 +438,11 @@ bool SANSRunWindow::loadUserFile()
 	}
       }
       m_maskcorrections[key] = value;
+    }
+    else if(com_line.startsWith("SAMPLE/OFFSET"))
+    {
+      QString txt = com_line.section(' ', 1, 1);
+      m_uiForm.smpl_offset->setText(txt);
     }
     else {}
        
@@ -1209,6 +1214,16 @@ QString SANSRunWindow::constructReductionCode(bool replacewsnames, bool checkcha
   if( m_uiForm.qy_dqy_opt->currentIndex() == 1 ) step_prefix = "-";
   py_code.replace("|QXYDELTA|", step_prefix  + m_uiForm.qy_dqy->text());
 
+  // Transmission behaviour
+  if( m_uiForm.prev_trans->isChecked() )
+  {
+    py_code.replace("|USEPREVTRANS|", "True");
+  }
+  else
+  {
+    py_code.replace("|USEPREVTRANS|", "False");
+  }
+
   // Efficiency
   py_code.replace("|DIRECTFILE|", m_uiForm.direct_file->text());
   py_code.replace("|FLATFILE|", m_uiForm.flat_file->text());
@@ -1271,9 +1286,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   {
     return;
   }
-  //Currently the components are moved with each reduce click, so the 
-  //data needs to be reloaded each time
-  forceDataReload();
+
+  //Currently the components are moved with each reduce click. Check if a load is necessary
   handleLoadButtonClick();
 
   //Disable buttons so that interaction is limited while processing data
@@ -1288,6 +1302,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
 
   //Execute the code
   runPythonCode(py_code, false);
+  // Mark that a reload is necessary to rerun the same reduction
+  forceDataReload();
   //Reenable stuff
   setProcessingState(false, idtype);
 }
@@ -1334,7 +1350,7 @@ void SANSRunWindow::handleRunFindCentre()
   runmap[3] = qMakePair(QString("centre-trans-can"),m_uiForm.tra_can_edit->text());
   runmap[4] = qMakePair(QString("centre-direct"), m_uiForm.direct_sample_edit->text());
   
-  m_force_reload = true;
+  forceDataReload();
   for( int i = 0; i < 5; ++i )
   {
     QString run = runmap.at(i).second;

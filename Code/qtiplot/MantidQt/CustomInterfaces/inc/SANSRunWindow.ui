@@ -942,8 +942,8 @@
         <rect>
          <x>11</x>
          <y>9</y>
-         <width>449</width>
-         <height>173</height>
+         <width>465</width>
+         <height>201</height>
         </rect>
        </property>
        <property name="sizePolicy" >
@@ -1178,13 +1178,27 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item row="5" column="1" >
+         <widget class="QCheckBox" name="prev_trans" >
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0" >
+         <widget class="QLabel" name="label_36" >
+          <property name="text" >
+           <string>Use previous transmission</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QGroupBox" name="groupBox_5" >
        <property name="geometry" >
         <rect>
-         <x>27</x>
-         <y>194</y>
+         <x>15</x>
+         <y>222</y>
          <width>218</width>
          <height>133</height>
         </rect>
@@ -1252,8 +1266,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_6" >
        <property name="geometry" >
         <rect>
-         <x>276</x>
-         <y>194</y>
+         <x>274</x>
+         <y>224</y>
          <width>257</width>
          <height>134</height>
         </rect>
@@ -1331,9 +1345,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_14" >
        <property name="geometry" >
         <rect>
-         <x>473</x>
+         <x>483</x>
          <y>9</y>
-         <width>271</width>
+         <width>261</width>
          <height>96</height>
         </rect>
        </property>
@@ -1390,9 +1404,9 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_15" >
        <property name="geometry" >
         <rect>
-         <x>475</x>
+         <x>483</x>
          <y>113</y>
-         <width>242</width>
+         <width>234</width>
          <height>80</height>
         </rect>
        </property>
