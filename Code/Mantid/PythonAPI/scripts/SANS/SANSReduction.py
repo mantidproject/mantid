@@ -272,7 +272,7 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 	###################################################################################
 	
 	# Scale by the sample volume
-	SANSUtility.ScaleByVolume(final_result, RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS)
+	SANSUtility.ScaleByVolume(tmpWS, RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS)
 	
 	################################ Correction in Q space ############################
 	# 1D
