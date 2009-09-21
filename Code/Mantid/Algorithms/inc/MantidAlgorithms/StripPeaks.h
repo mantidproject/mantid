@@ -26,12 +26,13 @@ namespace Algorithms
     <UL>
     <LI> fwhm - passed to the FindPeaks subalgorithm</LI>
     <LI> Tolerance - passed to the FindPeaks subalgorithm</LI>
+    <LI> WorkspaceIndex - The spectrum from which to remove peaks. Will search all spectra if absent.</LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 30/10/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 

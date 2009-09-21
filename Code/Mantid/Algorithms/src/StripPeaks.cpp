@@ -23,16 +23,20 @@ void StripPeaks::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
 
-  BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
-  // The estimated width of a peak in terms of number of channels
-  declareProperty("FWHM", 7, range,
-    "Estimated number of points covered by the fwhm of a peak (default 7)" );
-  // The tolerance allowed in meeting the conditions
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(1);
-  declareProperty("Tolerance",4,min,
+  // The estimated width of a peak in terms of number of channels
+  declareProperty("FWHM", 7, min,
+    "Estimated number of points covered by the fwhm of a peak (default 7)" );
+  // The tolerance allowed in meeting the conditions
+  declareProperty("Tolerance",4,min->clone(),
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
     "Mariscotti recommends 2 (default 4)");
+  
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(0);
+  declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
+    "If set, peaks will only be removed from this spectrum (otherwise from all)");   
 }
 
 void StripPeaks::exec()
@@ -71,6 +75,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
   findpeaks->setProperty("InputWorkspace", WS);
   findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
   findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
+  // FindPeaks will do the checking on the validity of WorkspaceIndex
+  findpeaks->setProperty<int>("WorkspaceIndex",getProperty("WorkspaceIndex"));
 
   // Now execute the sub-algorithm. Catch and log any error
   try
@@ -109,7 +115,6 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     outputWS->dataY(k) = input->readY(k);
     outputWS->dataE(k) = input->readE(k);
 	prg+=(0.1/hists);
-	//g_log.error()<<"progress inside hists loop "<<prg<<std::endl;
 	progress(prg);
   }
 
@@ -145,9 +150,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
       // Subtract the calculated value from the data
       Y[j] -= funcVal;
     }
-	prg+=(0.7/peakslist->rowCount());
-	//g_log.error()<<" insdie pealist loops  prg = "<<prg<<std::endl;
-	progress(prg);
+    prg+=(0.7/peakslist->rowCount());
+    progress(prg);
   }
 
   return outputWS;

@@ -3,6 +3,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/VectorHelper.h"
+#include <numeric>
 
 namespace Mantid
 {
@@ -15,9 +17,6 @@ DECLARE_ALGORITHM(FindPeaks)
 using namespace Kernel;
 using namespace API;
 
-// Set the number of smoothing iterations to 5, the optimum value according to Mariscotti
-int FindPeaks::g_z = 5;
-
 /// Constructor
 FindPeaks::FindPeaks() : API::Algorithm(),m_progress(NULL) {}
 
@@ -25,23 +24,26 @@ void FindPeaks::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "Name of the workspace to search" );
-  BoundedValidator<int> *range = new BoundedValidator<int>(1,32);
-  // The estimated width of a peak in terms of number of channels
-  declareProperty("FWHM",7,range,
-    "Estimated number of points covered by the fwhm of a peak (default 7)" );
-  // The tolerance allowed in meeting the conditions
   BoundedValidator<int> *min = new BoundedValidator<int>();
   min->setLower(1);
-  declareProperty("Tolerance", 4, min,
+  // The estimated width of a peak in terms of number of channels
+  declareProperty("FWHM",7,min,
+    "Estimated number of points covered by the fwhm of a peak (default 7)" );
+  // The tolerance allowed in meeting the conditions
+  declareProperty("Tolerance", 4, min->clone(),
     "A measure of the strictness desired in meeting the condition on peak candidates,\n"
     "Mariscotti recommends 2 (default 4)");
+  
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(0);
+  declareProperty("WorkspaceIndex",EMPTY_INT(),mustBePositive,
+    "If set, only this spectrum will be searched for peaks (otherwise all are)");  
   
   // Temporary so that I can look at the smoothed data
   declareProperty(new WorkspaceProperty<>("SmoothedData","",Direction::Output));
 
   // The found peaks in a table
-  declareProperty(
-    new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
+  declareProperty(new WorkspaceProperty<API::ITableWorkspace>("PeaksList","",Direction::Output),
     "The name of the TableWorkspace in which to store the list of peaks found" );
   
   // Set up the columns for the TableWorkspace holding the peak information
@@ -58,6 +60,18 @@ void FindPeaks::exec()
 {
   // Retrieve the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  
+  // If WorkspaceIndex has been set it must be valid
+  const int index = getProperty("WorkspaceIndex");
+  const bool singleSpectrum = !isEmpty(index);
+  if ( singleSpectrum && index >= inputWS->getNumberHistograms() )
+  {
+    g_log.error() << "The value of WorkspaceIndex provided (" << index << 
+      ") is larger than the size of this workspace (" <<
+      inputWS->getNumberHistograms() << ")\n";
+    throw Kernel::Exception::IndexError(index,inputWS->getNumberHistograms()-1,
+      "FindPeaks WorkspaceIndex property");
+  }
 
   MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(inputWS);
 
@@ -85,11 +99,12 @@ void FindPeaks::exec()
   setProperty("SmoothedData",smoothedData);
 
   // Loop over the spectra searching for peaks
-  const int numHists = smoothedData->getNumberHistograms();
+  const int start = singleSpectrum ? index : 0;
+  const int end = singleSpectrum ? index+1 : smoothedData->getNumberHistograms();
+  m_progress = new Progress(this,0.0,1.0,end-start);
   const int blocksize = smoothedData->blocksize();
-  m_progress = new Progress(this,0.0,1.0,numHists);
 
-  for (int k = 0; k < numHists; ++k)
+  for (int k = start; k < end; ++k)
   {
     const MantidVec &S = smoothedData->readY(k);
     const MantidVec &F = smoothedData->readE(k);
@@ -302,19 +317,7 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
   // Have to adjust for fact that I normalise Si (unlike the paper)
   const int factor = static_cast<int>(std::pow(static_cast<double>(w),g_z));
 
-  // Check value of w is valid
-  if (w > 19)
-  {
-    std::string s("Invalid value of w - must not be greater than 19 (corresponding to a max fwhm of 32)");
-    g_log.error(s);
-    throw std::invalid_argument(s);
-  }
-  // These are the values of phi as a function of w for z=5. See Mariscotti p.312.
-  std::map<int,int> phi;
-  phi[1] = 6; phi[3] = 448; phi[5] = 5220; phi[7] = 27342; phi[9] = 95034; phi[11] = 257796; phi[13] = 592488;
-  phi[15] = 1209410; phi[17] = 2258382; phi[19] = 3934824;
-  
-  const double constant = sqrt(static_cast<double>(phi[w])) / factor;
+  const double constant = sqrt(static_cast<double>(this->computePhi(w))) / factor;
   
   const int numHists = smoothed->getNumberHistograms();
   const int blocksize = smoothed->blocksize();
@@ -328,6 +331,55 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
       Fi[j] = constant * E[j];
     }
   }
+}
+
+/** Calculates the coefficient phi which goes into the calculation of the error on the smoothed data
+ *  Uses Mariscotti equation (11). Pinched from the GeneralisedSecondDifference code.
+ *  Can return a very big number, hence the type.
+ *  @param  w The value of w (the size of the smoothing 'window')
+ *  @return The value of phi(g_z,w)
+ */
+long long FindPeaks::computePhi(const int& w) const
+{
+  const int m = (w-1)/2;
+  int zz=0;
+  int max_index_prev=1;
+  int n_el_prev=3;
+  std::vector<long long> previous(n_el_prev);
+  previous[0]=1;
+  previous[1]=-2;
+  previous[2]=1;
+
+  // Can't happen at present
+  if (g_z==0) return std::accumulate(previous.begin(),previous.end(),0,VectorHelper::SumSquares<int>());
+  
+  std::vector<long long> next;
+  // Calculate the Cij iteratively.
+  do
+  {
+    zz++;
+    int max_index=zz*m+1;
+    int n_el=2*max_index+1;
+    next.resize(n_el);
+    std::fill(next.begin(),next.end(),0);
+    for (int i=0;i<n_el;++i)
+    {
+      int delta=-max_index+i;
+      for (int l=delta-m;l<=delta+m;l++)
+      {
+        int index=l+max_index_prev;
+        if (index>=0 && index<n_el_prev) next[i]+=previous[index];
+      }
+    }
+    previous.resize(n_el);
+    std::copy(next.begin(),next.end(),previous.begin());
+    max_index_prev=max_index;
+    n_el_prev=n_el;
+  } while (zz != g_z);
+
+  const long long retval = std::accumulate(previous.begin(),previous.end(),0,VectorHelper::SumSquares<long long>());
+  g_log.debug() << "FindPeaks::computePhi - calculated value = " << retval << "\n";
+  return retval;
 }
 
 /** Attempts to fit a candidate peak

@@ -24,7 +24,7 @@ namespace Algorithms
 
     Optional Property:
     <UL> 
-    <LI> WorkspaceIndex - The spectrum to remove bins from. Will operate on all spectra is absent. </LI>
+    <LI> WorkspaceIndex - The spectrum to remove bins from. Will operate on all spectra if absent. </LI>
     </UL>
       
     @author Matt Clarke

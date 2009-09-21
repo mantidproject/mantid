@@ -24,6 +24,7 @@ namespace Algorithms
     <UL>
     <LI> fwhm - The number of points covered on average by the fwhm of a peak (default 7) </LI>
     <LI> Tolerance - Sets the strictness desired in meeting the conditions on peak candidates (default 4, Mariscotti recommended 2) </LI>
+    <LI> WorkspaceIndex - The spectrum to search for peaks. Will search all spectra if absent. </LI>
     </UL>
     
     @author Russell Taylor, Tessella Support Services plc
@@ -72,17 +73,17 @@ private:
   API::MatrixWorkspace_sptr calculateSecondDifference(const API::MatrixWorkspace_const_sptr &input);
   void smoothData(API::MatrixWorkspace_sptr &WS, const int &w);
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w);
+  long long computePhi(const int& w) const;
 
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i4);
 
-  /// The number of smoothing iterations
-  static int g_z;
+  /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
+  static const int g_z = 5;
   
   /// Storage of the peak data
   API::ITableWorkspace_sptr m_peaks;
-    /// Progress reporting
-      API::Progress* m_progress;
-
+  /// Progress reporting
+  API::Progress* m_progress;
 };
 
 } // namespace Algorithms
