@@ -82,7 +82,7 @@ public slots:
 	void spectraInformation(int);
 	void detectorInformation(int value);
 	void detectorHighlighted(int detectorId,int spectraid,int count);
-	void spectraListInformation(const std::vector<int>&);
+	void spectraListInformation(const std::set<int>&);
 	void detectorListInformation(const std::vector<int>&);
 	void spectraInfoDialog();
 	void spectraGroupInfoDialog();
@@ -97,7 +97,7 @@ public slots:
 
 signals:
     void plotSpectra(const QString&,int);
-	void plotSpectraList(const QString&,const std::vector<int>&);
+	void plotSpectraList(const QString&,const std::set<int>&);
 
 private slots:
         void scaleTypeChanged(int);
@@ -118,7 +118,7 @@ private:
 	Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
 	int          mSpectraIDSelected; ///< spectra index id
 	int          mDetectorIDSelected; ///< detector id
-	std::vector<int> mSpectraIDSelectedList;
+	std::set<int> mSpectraIDSelectedList;
 	std::vector<int> mDetectorIDSelectedList;
 	QwtScaleWidget* mColorMapWidget; ///< colormap display widget
 	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap

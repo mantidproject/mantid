@@ -736,7 +736,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 
 void MantidMatrix::setSpectrumGraph(MultiLayer *ml, Table* t)
 {
-    MantidUI::setUpSpectrumGraph(ml,name(),workspace());
+    MantidUI::setUpSpectrumGraph(ml,name());
     connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
     if (t) 
     {

@@ -80,7 +80,7 @@ void PeakFitDialog::fit()
       fitPeaks();
       close();
     }
-    else if (function == "User defined")
+    else if (function == "User")
     {
       std::cerr<<"Not implemented...\n";
     }
@@ -101,8 +101,6 @@ void PeakFitDialog::setLayout(const QString& functName)
   QStringList params;
   if (functName == "Gaussian")
   {
-    ui.lblExpression->hide();
-    ui.leExpression->hide();
     params << "BG0" << "BG1" << "Height" << "PeakCentre" << "Sigma";
     m_heightName = "Height";
     m_centreName = "PeakCentre";
@@ -111,11 +109,14 @@ void PeakFitDialog::setLayout(const QString& functName)
     m_backgroundFormula = "BG0+BG1*x";
     m_profileFormula = "Height*exp(-0.5*((x - PeakCentre)/Sigma)^2)";
     m_ready = true;
+    ui.lblExpression->hide();
+    ui.leExpression->hide();
+    ui.btnConstruct->hide();
+    ui.leWidthFormula->setText(QString::fromStdString(m_widthCorrectionFormula));
+    ui.leWidthFormula->setEnabled(false);
   }
   else if (functName == "Lorentzian")
   {
-    ui.lblExpression->hide();
-    ui.leExpression->hide();
     params << "BG0" << "BG1" << "Height" << "PeakCentre" << "HWHM";
     m_heightName = "Height";
     m_centreName = "PeakCentre";
@@ -124,11 +125,19 @@ void PeakFitDialog::setLayout(const QString& functName)
     m_backgroundFormula = "BG0+BG1*x";
     m_profileFormula = "Height*(HWHM^2/((x-PeakCentre)^2+HWHM^2))";
     m_ready = true;
+    ui.lblExpression->hide();
+    ui.leExpression->hide();
+    ui.btnConstruct->hide();
+    ui.leWidthFormula->setText(QString::fromStdString(m_widthCorrectionFormula));
+    ui.leWidthFormula->setEnabled(false);
   }
-  else if (functName == "User defined")
+  else if (functName == "User")
   {
     ui.lblExpression->show();
     ui.leExpression->show();
+    ui.btnConstruct->show();
+    ui.leWidthFormula->setText("");
+    ui.leWidthFormula->setEnabled(true);
     m_ready = false;
   }
 
@@ -164,7 +173,7 @@ Mantid::API::IAlgorithm_sptr PeakFitDialog::createAlgorithm()
     alg = m_mantidUI->CreateAlgorithm("Lorentzian1D");
     alg->initialize();
   }
-  else if (function == "User defined")
+  else if (function == "User")
   {
     alg = m_mantidUI->CreateAlgorithm("UserFunction1D");
     alg->initialize();
@@ -368,9 +377,6 @@ void PeakFitDialog::fitPeaks()
         heightParam = hmax;
         if (ih - iw > 1)
           widthParam = (X0[ih]-X0[iw])*2;
-        std::cerr<<"Centre->"<<centreParam<<'\n';
-        std::cerr<<"Height->"<<heightParam<<'\n';
-        std::cerr<<"Width-->"<<widthParam<<'\n';
       }
 
       std::string val = getValue(m_heightName);
@@ -424,7 +430,6 @@ void PeakFitDialog::fitPeaks()
         backgroundParser.DefineVar(name,pval);
         profileParser.DefineVar(name,pval);
         row << *pval ;
-        std::cerr<<j<<"  "<<name<<"  "<<*pval<<'\n';
       }
 
       Mantid::MantidVec& Y0 = outputW->dataY(0);
@@ -439,13 +444,9 @@ void PeakFitDialog::fitPeaks()
           if (x > endX) break;
           double y = profileParser.Eval();
           double y0 = backgroundParser.Eval();
-          //if (fabs(y) > dh)
-            Y1[j] = y0 + y;
-          //if ( i == peaks.size() - 1 )
-          //{
-            Y0[j] = inputW->readY(spec)[j];
-            D[j]  = Y0[j] - Y1[j];
-          //}
+          Y1[j] = y0 + y;
+          Y0[j] = inputW->readY(spec)[j];
+          D[j]  = Y0[j] - Y1[j];
         }
         catch(mu::Parser::exception_type& e)
         {
@@ -461,10 +462,10 @@ void PeakFitDialog::fitPeaks()
 
     MantidCurve* c1 = new MantidCurve(m_peakTool->workspaceName()+QString("-fit-")+QString::number(m_peakTool->spec()),
       outputW,m_peakTool->graph(),"spectra",1,false);
-    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c1,SLOT(workspaceRemoved(const QString&)));
+//    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c1,SLOT(workspaceRemoved(const QString&)));
 
     MantidCurve* c2 = new MantidCurve(m_peakTool->workspaceName()+QString("-res-")+QString::number(m_peakTool->spec()),
       outputW,m_peakTool->graph(),"spectra",2,false);
-    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c2,SLOT(workspaceRemoved(const QString&)));
+//    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c2,SLOT(workspaceRemoved(const QString&)));
 
 }

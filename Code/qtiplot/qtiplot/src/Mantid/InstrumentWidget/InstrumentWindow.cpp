@@ -251,7 +251,7 @@ void InstrumentWindow::detectorInformation(int value)
 /**
  * This method is a slot for the collection of the spectra index list that was selected
  */
-void InstrumentWindow::spectraListInformation(const std::vector<int>& result)
+void InstrumentWindow::spectraListInformation(const std::set<int>& result)
 {
 	mDetectorGroupPopupContext->popup(QCursor::pos());
 	mSpectraIDSelectedList=result;

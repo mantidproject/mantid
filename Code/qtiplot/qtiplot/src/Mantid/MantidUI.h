@@ -154,30 +154,20 @@ public:
     //MultiLayer* createGraphFromTable(Table* t, Graph::CurveType type = Graph::Line);
     MultiLayer* createGraphFromTable(Table* t, int type = 0);
 
-    /// Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* createGraphFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int>& indexList, bool errs=true, bool binCentres=false, bool tableVisible = false);
-
-    /// Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* createGraphFromSpectraSet(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::set<int>& indexList, bool errs=true);
-
-    /// Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* createGraphFromSpectraRange(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool binCentres=false, bool tableVisible = false);
-
     // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
-    MultiLayer* createGraphFromSelectedRows(MantidMatrix *m, bool errs = true, bool binCentres=false, bool tableVisible = false);
+    MultiLayer* plotSelectedRows(MantidMatrix *m, bool errs = true);
+
+    // Create a 1d graph form specified spectra in a MatrixWorkspace
+    MultiLayer* plotSpectraList(const QString& wsName, std::set<int>& indexList, bool errs=true);
+
+    // Create a 1d graph form specified spectra in a MatrixWorkspace
+    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true);
 
     // Set properties of a 1d graph which plots data from a workspace
-    static void setUpSpectrumGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace);
+    static void setUpSpectrumGraph(MultiLayer* ml, const QString& wsName);
 
     // Set properties of a 1d graph which plots data from a workspace
     static void setUpBinGraph(MultiLayer* ml, const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace);
-
-    // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraList(const QString& wsName, std::vector<int> indexList, bool errs=true, bool binCentres=false, bool tableVisible = false);
-
-    // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true, bool binCentres=false, bool tableVisible = false);
-
 
 
 
@@ -325,7 +315,7 @@ public slots:
 
     // Plot a spectrum in response from a InstrumentWindow signal
     MultiLayer* plotInstrumentSpectrum(const QString&,int);
-	MultiLayer* plotInstrumentSpectrumList(const QString&,std::vector<int>);
+	MultiLayer* plotInstrumentSpectrumList(const QString&,std::set<int>);
 
 	void importSampleLog(const QString & filename, const QString & data, bool numeric);
 	void importNumSampleLog(const QString &wsName, const QString & logname, int filter);

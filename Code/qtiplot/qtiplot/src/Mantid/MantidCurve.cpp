@@ -41,17 +41,16 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
        Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
     );
   init(ws,g,type,index);
-  //connect(mantidUI,SIGNAL(workspace_removed(const QString&)),this,SLOT(workspaceRemoved(const QString&)));
-  //connect(mantidUI,SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr))
-  //  ,this,SLOT(workspaceReplaced(const QString &, Mantid::API::Workspace_sptr)));
-
+  observeDelete();
+  observeAfterReplace();
 }
 
 MantidCurve::MantidCurve(const MantidCurve& c)
-:PlotCurve(c.title().text()),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName)
+:PlotCurve(createCopyName(c.title().text())),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName)
 {
   setData(c.data());
-//  connect(mantidUI,SIGNAL(workspace_removed(const QString&)),this,SLOT(workspaceRemoved(const QString&)));
+  observeDelete();
+  observeAfterReplace();
 }
 
 /**
@@ -169,6 +168,30 @@ QString MantidCurve::createCurveName(const QString& wsName,const QString& type,i
     name += "sp-";
   name += QString::number(index);
   return name;
+}
+
+/** Create the name for a curve which is a copy of another curve.
+ *  @param curveName The original curve name.
+ */
+QString MantidCurve::createCopyName(const QString& curveName)
+{
+  int i = curveName.lastIndexOf("(copy");
+  if (i < 0) return curveName+"(copy)";
+  int j = curveName.lastIndexOf(")");
+  if (j == i + 5) return curveName.mid(0,i)+"(copy2)";
+  int k = curveName.mid(i+5,j-i-5).toInt();
+  return curveName.mid(0,i)+"(copy"+QString::number(k+1)+")";
+}
+
+void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  if (m_wsName.toStdString() != wsName) return;
+  const boost::shared_ptr<Mantid::API::MatrixWorkspace> mws = 
+    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  if (!mws) return;
+  const MantidQwtData * new_mantidData = mantidData()->copy(mws);
+  setData(*new_mantidData);
+  delete new_mantidData;
 }
 
 //==========================================

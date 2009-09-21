@@ -161,10 +161,6 @@ void PeakRangeMarker::draw(QPainter *p,
                   const QwtScaleMap &xMap, const QwtScaleMap &yMap,
                   const QRect &) const
 {
-  QString sz;
-  sz.setNum(m_params.size());
-  p->setPen(QPen(QColor(0,0,0)));
-  QwtPainter::drawText(p,10,10,sz);
   for(int i=0;i<m_params.size();i++)
   {
     double c = m_params[i].centre;

@@ -2,6 +2,7 @@
 #define MANTID_CURVE_H
 
 #include "../PlotCurve.h"
+#include "WorkspaceObserver.h"
 #include "boost/shared_ptr.hpp"
 
 // Forward definitions
@@ -48,7 +49,7 @@ class MantidUI;
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
 
-class MantidCurve:public PlotCurve
+class MantidCurve:public PlotCurve, public WorkspaceObserver
 {
   Q_OBJECT
 public:
@@ -103,8 +104,18 @@ private:
   /// Init the curve
   void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
               const QString& type,int index);
+
+  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+  {
+    emit removeMe(this);
+  }
+
+  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+
   /// Make the curve name
   static QString createCurveName(const QString& wsName,const QString& type,int index);
+  /// Make a name for a copied curve
+  static QString createCopyName(const QString& curveName);
   bool m_drawErrorBars;///< True for drawing error bars
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
 };
@@ -124,6 +135,8 @@ public:
 
   bool sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const;
 
+  /// Return a new data object of the same type but with a new workspace
+  virtual MantidQwtData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const = 0;
   /// Returns the error of the i-th data point
   virtual double e(size_t i)const = 0;
   /// Returns the x position of the error bar for the i-th data point (bin)
@@ -163,6 +176,11 @@ public:
   */
   virtual double y(size_t i) const;
 
+  /// Return a new data object of the same type but with a new workspace
+  virtual MantidQwtData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
+  {
+    return new MantidQwtDataSpectra(workspace,m_spec);
+  }
   /// Returns the error of the i-th data point
   double e(size_t i)const;
   /// Returns the x position of the error bar for the i-th data point (bin)
