@@ -351,7 +351,7 @@ long long FindPeaks::computePhi(const int& w) const
   previous[2]=1;
 
   // Can't happen at present
-  if (g_z==0) return std::accumulate(previous.begin(),previous.end(),long long(0),VectorHelper::SumSquares<long long>());
+  if (g_z==0) return std::accumulate(previous.begin(),previous.end(),static_cast<long long>(0),VectorHelper::SumSquares<long long>());
   
   std::vector<long long> next;
   // Calculate the Cij iteratively.
@@ -377,7 +377,7 @@ long long FindPeaks::computePhi(const int& w) const
     n_el_prev=n_el;
   } while (zz != g_z);
 
-  const long long retval = std::accumulate(previous.begin(),previous.end(),long long(0),VectorHelper::SumSquares<long long>());
+  const long long retval = std::accumulate(previous.begin(),previous.end(),static_cast<long long>(0),VectorHelper::SumSquares<long long>());
   g_log.debug() << "FindPeaks::computePhi - calculated value = " << retval << "\n";
   return retval;
 }
