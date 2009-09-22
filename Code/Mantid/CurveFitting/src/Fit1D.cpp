@@ -501,7 +501,7 @@ void Fit1D::exec()
     finalCostFuncVal = chi*chi / dof;
 
     // put final converged fitting values back into m_fittedParameter
-    for (unsigned int i = 0, j = 0; i < nParams(); i++)
+    for (size_t i = 0, j = 0; i < nParams(); i++)
       if (l_data.active[i])
           m_fittedParameter[i] = gsl_vector_get(s->x,j++);
   }
@@ -576,7 +576,7 @@ void Fit1D::exec()
     Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
     m_result->addColumn("str","Name");
     m_result->addColumn("double","Value");
-    for(int i=0;i<nParams();i++)
+    for(size_t i=0;i<nParams();i++)
     {
       Mantid::API::TableRow row = m_result->appendRow();
       row << m_parameterNames[i] << m_fittedParameter[i];

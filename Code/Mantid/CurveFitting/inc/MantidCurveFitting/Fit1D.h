@@ -74,12 +74,6 @@ namespace Mantid
       virtual void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit
       virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
-      /** Function you want to least-square fit to. This is the model function which is supposed to simulate 
-       *  a set of "experimental" data.
-       *  @param in The parameters of the model function.
-       *  @param x  The argument of the function.
-       */
-      //virtual double function(const double* in, const double& x) {return 0.0;};
 
     protected:
       // Overridden Algorithm methods
