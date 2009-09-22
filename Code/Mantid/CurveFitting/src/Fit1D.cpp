@@ -617,7 +617,7 @@ void Fit1D::exec()
 
     for(unsigned int i=0; i<l_data.n; i++) 
     {
-      Y[i] = lOut[i]*l_data.sigmaData[i]-l_data.Y[i]; 
+      Y[i] = lOut[i]*l_data.sigmaData[i]+l_data.Y[i]; 
       E[i] = l_data.Y[i] - Y[i];
     }
 
