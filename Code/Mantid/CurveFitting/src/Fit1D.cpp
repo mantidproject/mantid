@@ -184,13 +184,13 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
  *  @param yErrors Errors (standard deviations) on yValues
  *  @param nData Number of data points
  */
-void Fit1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+/*void Fit1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
   for (int i = 0; i < nData; i++) {
     double Yi = this->function(in,xValues[i]);
     out[i] = yErrors[i] > 0.0 ? (Yi - yValues[i])/yErrors[i] : 0.0;
   }
-}
+}*/
 
 
 /** Base class implementation of derivative function throws error. This is to check if such a function is provided
@@ -369,7 +369,7 @@ void Fit1D::exec()
 
   FitData l_data(this,getProperty("Fix"));
 
-  l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array markers. I.e. e.g. 0 & 19.
+  l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
   if (l_data.n == 0)
   {
     g_log.error("The data set is empty.");
@@ -551,13 +551,6 @@ void Fit1D::exec()
     setProperty(m_parameterNames[i], m_fittedParameter[i]);
 
 
-  // clean up dynamically allocated gsl stuff
-
-  delete [] l_data.X;
-  delete [] l_data.forSimplexLSwrap;
-
-//  gsl_vector_free(initFuncArg);
-
   if (isDerivDefined)
     gsl_multifit_fdfsolver_free(s);
   else
@@ -587,7 +580,6 @@ void Fit1D::exec()
     {
       Mantid::API::TableRow row = m_result->appendRow();
       row << m_parameterNames[i] << m_fittedParameter[i];
-      l_data.parameters[i] = m_fittedParameter[i];
     }
     setProperty("OutputParameters",m_result);
 
@@ -617,19 +609,28 @@ void Fit1D::exec()
     MantidVec& Y = ws->dataY(1);
     MantidVec& E = ws->dataY(2);
 
-    for(unsigned int i=m_minX;i<m_maxX;i++)
+
+    double* lOut = new double[l_data.n];  // to capture output from call to function()
+    modifyInitialFittedParameters(m_fittedParameter); // does nothing except if overwritten by derived class
+    function(&m_fittedParameter[0], lOut, l_data.X, l_data.Y, l_data.sigmaData, l_data.n);
+    modifyInitialFittedParameters(m_fittedParameter); // reverse the effect of modifyInitialFittedParameters - if any 
+
+    for(unsigned int i=0; i<l_data.n; i++) 
     {
-      int j = i - m_minX;
-      double x = inputX[i];
-      if (isHistogram) x = (x + inputX[i+1])/2;
-      Y[j] = this->function(l_data.parameters,x);
-      E[j] = inputY[i] - Y[j];
+      Y[i] = lOut[i]*l_data.sigmaData[i]-l_data.Y[i]; 
+      E[i] = l_data.Y[i] - Y[i];
     }
+
+    delete [] lOut; 
 
     setProperty("OutputWorkspace",boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
 
   }
 
+  // clean up dynamically allocated gsl stuff
+
+  delete [] l_data.X;
+  delete [] l_data.forSimplexLSwrap;
   delete [] l_data.parameters;
 
   return;

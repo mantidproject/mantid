@@ -33,18 +33,6 @@ void Lorentzian1D::declareParameters()
     "half-width at half-maximum (default 1)", Direction::InOut);
 }
 
-double Lorentzian1D::function(const double* in, const double& x)
-{
-  const double& bg0 = in[0];
-  const double& bg1 = in[1];
-  const double& height = in[2];
-  const double& peakCentre = in[3];
-  const double& hwhm = in[4];
-
-  double diff=x-peakCentre;
-  return height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) )+bg0+bg1*x;
-}
-
 void Lorentzian1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
     const double& bg0 = in[0];

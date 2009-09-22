@@ -79,7 +79,7 @@ namespace Mantid
        *  @param in The parameters of the model function.
        *  @param x  The argument of the function.
        */
-      virtual double function(const double* in, const double& x) = 0;
+      //virtual double function(const double* in, const double& x) {return 0.0;};
 
     protected:
       // Overridden Algorithm methods
@@ -95,7 +95,14 @@ namespace Mantid
       virtual void declareAdditionalProperties(){};
       /// Called in the beginning of exec(). Custom initialization
       virtual void prepare(){};
-      /// Called after the data ranged has been determined but before the fitting starts
+
+      /** Called after the data ranged has been determined but before the fitting starts.
+       *  For example may be used to create wavelength array for each TOF data-point.
+       *  Number of data point to fit over are m_maxX-m_minX.
+       * 
+       *  @param m_minX Start array index.
+       *  @param m_maxX End array index.
+       */
       virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
 
       /// Declare parameters specific to fitting function

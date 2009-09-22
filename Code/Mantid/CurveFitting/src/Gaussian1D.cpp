@@ -56,17 +56,6 @@ void Gaussian1D::modifyFinalFittedParameters(std::vector<double>& fittedParamete
   fittedParameter[3] = sqrt(1/weight); // to convert back to sigma
 }
 
-double Gaussian1D::function(const double* in, const double& x)
-{
-    const double& bg0 = in[0];
-    const double& height = in[1];
-    const double& peakCentre = in[2];
-    const double& weight = in[3];
-
-    double diff=x-peakCentre;
-    return height*exp(-0.5*diff*diff*weight)+bg0;
-}
-
 void Gaussian1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
 {
     const double& bg0 = in[0];

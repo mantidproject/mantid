@@ -89,14 +89,14 @@ void UserFunction1D::prepare()
 
 }
 
-double UserFunction1D::function(const double* in, const double& x)
+/*double UserFunction1D::function(const double* in, const double& x)
 {
   for(int i=0;i<m_nPars;i++)
     m_parameters[i] = in[i];
 
   m_x = x;
   return m_parser.Eval();
-}
+}*/
 
 /** Calculate the fitting function.
  *  @param in A pointer ot the input function parameters

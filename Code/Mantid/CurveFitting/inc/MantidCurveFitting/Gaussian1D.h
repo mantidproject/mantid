@@ -64,7 +64,6 @@ namespace Mantid
     protected:
       /// overwrite base class methods
       virtual void function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
-      virtual double function(const double* in, const double& x);
       virtual void declareParameters();
       virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData);
       virtual void modifyStartOfRange(double& startX);
