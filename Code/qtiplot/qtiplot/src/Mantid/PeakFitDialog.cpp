@@ -82,7 +82,8 @@ void PeakFitDialog::fit()
     }
     else if (function == "User")
     {
-      std::cerr<<"Not implemented...\n";
+      fitPeaks();
+      close();
     }
   }
   else
@@ -97,53 +98,65 @@ void PeakFitDialog::returnPressed()
 // Resets the dialog alyout depending on the selected fitting function
 void PeakFitDialog::setLayout(const QString& functName)
 {
+  ui.cbPTCentre->clear();
+  ui.cbPTHeight->clear();
+  ui.cbPTWidth->clear();
   m_ready = false;
   QStringList params;
-  if (functName == "Gaussian")
-  {
-    params << "BG0" << "BG1" << "Height" << "PeakCentre" << "Sigma";
-    m_heightName = "Height";
-    m_centreName = "PeakCentre";
-    m_widthName = "Sigma";
-    m_widthCorrectionFormula = "w/2.35482"; // w stands for the FWHM
-    m_backgroundFormula = "BG0+BG1*x";
-    m_profileFormula = "Height*exp(-0.5*((x - PeakCentre)/Sigma)^2)";
-    m_ready = true;
-    ui.lblExpression->hide();
-    ui.leExpression->hide();
-    ui.btnConstruct->hide();
-    ui.leWidthFormula->setText(QString::fromStdString(m_widthCorrectionFormula));
-    ui.leWidthFormula->setEnabled(false);
-  }
-  else if (functName == "Lorentzian")
-  {
-    params << "BG0" << "BG1" << "Height" << "PeakCentre" << "HWHM";
-    m_heightName = "Height";
-    m_centreName = "PeakCentre";
-    m_widthName = "HWHM";
-    m_widthCorrectionFormula = "w/2";
-    m_backgroundFormula = "BG0+BG1*x";
-    m_profileFormula = "Height*(HWHM^2/((x-PeakCentre)^2+HWHM^2))";
-    m_ready = true;
-    ui.lblExpression->hide();
-    ui.leExpression->hide();
-    ui.btnConstruct->hide();
-    ui.leWidthFormula->setText(QString::fromStdString(m_widthCorrectionFormula));
-    ui.leWidthFormula->setEnabled(false);
-  }
-  else if (functName == "User")
+  if (functName == "User")
   {
     ui.lblExpression->show();
     ui.leExpression->show();
     ui.btnConstruct->show();
     ui.leWidthFormula->setText("");
     ui.leWidthFormula->setEnabled(true);
-    m_ready = false;
+    ui.cbPTCentre->setEnabled(true);
+    ui.cbPTHeight->setEnabled(true);
+    ui.cbPTWidth->setEnabled(true);
+    m_backgroundFormula = "0";
+    setUserParams();
   }
+  else
+  {
+    if (functName == "Gaussian")
+    {
+      params << "BG0" << "BG1" << "Height" << "PeakCentre" << "Sigma";
+      m_heightName = "Height";
+      m_centreName = "PeakCentre";
+      m_widthName = "Sigma";
+      m_widthCorrectionFormula = "w/2.35482"; // w stands for the FWHM
+      m_backgroundFormula = "BG0+BG1*x";
+      m_profileFormula = "Height*exp(-0.5*((x - PeakCentre)/Sigma)^2)";
+    }
+    else if (functName == "Lorentzian")
+    {
+      params << "BG0" << "BG1" << "Height" << "PeakCentre" << "HWHM";
+      m_heightName = "Height";
+      m_centreName = "PeakCentre";
+      m_widthName = "HWHM";
+      m_widthCorrectionFormula = "w/2";
+      m_backgroundFormula = "BG0+BG1*x";
+      m_profileFormula = "Height*(HWHM^2/((x-PeakCentre)^2+HWHM^2))";
+    }
+    m_ready = true;
+    ui.lblExpression->hide();
+    ui.leExpression->hide();
+    ui.btnConstruct->hide();
 
-  setParamTable(params);
-  for(int i=0;i<params.size();i++)
-    m_params.insert(params[i].toStdString(),0.0);
+    ui.leWidthFormula->setText(QString::fromStdString(m_widthCorrectionFormula));
+    ui.leWidthFormula->setEnabled(false);
+
+    ui.cbPTCentre->addItem(QString::fromStdString(m_centreName));
+    ui.cbPTCentre->setEnabled(false);
+
+    ui.cbPTHeight->addItem(QString::fromStdString(m_heightName));
+    ui.cbPTHeight->setEnabled(false);
+
+    ui.cbPTWidth->addItem(QString::fromStdString(m_widthName));
+    ui.cbPTWidth->setEnabled(false);
+
+    setParamTable(params);
+  }
 
 }
 
@@ -151,11 +164,13 @@ void PeakFitDialog::setLayout(const QString& functName)
 void PeakFitDialog::setParamTable(const QStringList& params)
 {
   ui.tableParams->setRowCount(0);
+  m_params.clear();
   for(int i=0;i<params.size();i++)
   {
     ui.tableParams->insertRow(i);
     ui.tableParams->setItem(i,0,new QTableWidgetItem(params[i]));
     ui.tableParams->setCellWidget(i,1,new FixedSetter);
+    m_params.insert(params[i].toStdString(),0.0);
   }
 }
 
@@ -196,11 +211,20 @@ double* AddVariable(const char *varName, void *pvar)
 
 void PeakFitDialog::setUserParams()
 {
+  std::string expression = ui.leExpression->text().toStdString();
+  if (expression.empty()) 
+  {
+    setParamTable(QStringList());
+    return;
+  }
+
+  m_profileFormula = expression;
+
   QStringList params;
   mu::Parser expr;
   double var = 2.;
   expr.SetVarFactory(AddVariable, &var);
-  expr.SetExpr(ui.leExpression->text().toStdString());
+  expr.SetExpr(expression);
   expr.Eval();
 
   mu::varmap_type variables = expr.GetVar();
@@ -226,6 +250,53 @@ void PeakFitDialog::setUserParams()
       tr("A user defined fitting function must contain x variable."));
 
   }
+
+  ui.cbPTCentre->clear();
+  ui.cbPTHeight->clear();
+  ui.cbPTWidth->clear();
+
+  ui.cbPTCentre->addItem("?");
+  ui.cbPTHeight->addItem("?");
+  ui.cbPTWidth->addItem("?");
+
+  ui.cbPTCentre->addItems(params);
+  ui.cbPTHeight->addItems(params);
+  ui.cbPTWidth->addItems(params);
+
+  m_heightName = "";
+  m_centreName = "";
+  m_widthName = "";
+
+  foreach(QString s,params)
+  {
+    QString us = s.toUpper();
+    if (m_centreName.empty())
+    {
+      if (us == "X0" || us.contains("CENTRE"))
+      {
+        m_centreName = s.toStdString();
+        ui.cbPTCentre->setCurrentIndex(ui.cbPTCentre->findText(s));
+      }
+    }
+    if (m_heightName.empty())
+    {
+      if (us == "H" || us.contains("HEI") || us == "HI" )
+      {
+        m_heightName = s.toStdString();
+        ui.cbPTHeight->setCurrentIndex(ui.cbPTHeight->findText(s));
+      }
+    }
+    if (m_widthName.empty())
+    {
+      if (us == "W" || us.contains("WID"))
+      {
+        m_widthName = s.toStdString();
+        ui.cbPTWidth->setCurrentIndex(ui.cbPTWidth->findText(s));
+      }
+    }
+  }
+
+
 }
 
 bool PeakFitDialog::isFixed(int i)const
@@ -274,6 +345,9 @@ void PeakFitDialog::fitPeaks()
         tr("The list of peaks is empty."));
       return;
     }
+
+    bool isUser = ui.cbFunction->currentText() == "User";
+
     // Ctreate algorithm according to the selected profile
     Mantid::API::IAlgorithm_sptr alg = createAlgorithm();
     alg->initialize();
@@ -328,17 +402,6 @@ void PeakFitDialog::fitPeaks()
       alg->setPropertyValue("StartX",QString::number(startX).toStdString());
       alg->setPropertyValue("EndX",QString::number(endX).toStdString());
 
-      // set the parameters which are not peak centre, height or width
-      for(int j=0;j<paramCount();j++)
-      {
-        std::string name = getName(j);
-        if (name != m_heightName && name != m_centreName && name != m_widthName)
-        {
-          std::string val = getValue(j);
-          if (!val.empty()) alg->setPropertyValue(name,val);
-        }
-      }
-
       // set the centre, height and width of the peak
       double centreParam = peaks[i].centre;
       double heightParam = peaks[i].height;
@@ -379,30 +442,72 @@ void PeakFitDialog::fitPeaks()
           widthParam = (X0[ih]-X0[iw])*2;
       }
 
-      std::string val = getValue(m_heightName);
-      if (!val.empty()) alg->setPropertyValue(m_heightName,val);
-      else
-        alg->setPropertyValue(m_heightName,QString::number(heightParam).toStdString());
+      // --- width param correction ---
+      if (!m_widthCorrectionFormula.empty())
+      {
+        mu::Parser parser;
+        parser.SetExpr(m_widthCorrectionFormula);
+        double width = widthParam;
+        parser.DefineVar("w",&width);
+        widthParam = parser.Eval();
+      }
 
-      val = getValue(m_centreName);
-      if (!val.empty()) alg->setPropertyValue(m_centreName,val);
-      else
-        alg->setPropertyValue(m_centreName,QString::number(centreParam).toStdString());
+      std::string fixed_height_val = getValue(m_heightName);
+      std::string fixed_centre_val = getValue(m_centreName);
+      std::string fixed_width_val = getValue(m_widthName);
 
-      val = getValue(m_widthName);
-      if (!val.empty()) alg->setPropertyValue(m_widthName,val);
+      if (isUser)
+      {
+        alg->setPropertyValue("Function",ui.leExpression->text().toStdString());
+        QStringList initParams;
+        for(int j=0;j<paramCount();j++)
+        {
+          std::string name = getName(j);
+          if (name != m_heightName && name != m_centreName && name != m_widthName)
+          {
+            std::string val = getValue(j);
+            if (!val.empty()) initParams << QString::fromStdString(name+"="+val);
+          }
+        }
+        if (!fixed_height_val.empty()) initParams << QString::fromStdString(m_heightName+"="+fixed_height_val);
+        else
+          initParams << QString::fromStdString(m_heightName+"="+QString::number(heightParam).toStdString());
+
+        if (!fixed_centre_val.empty()) initParams << QString::fromStdString(m_centreName+"="+fixed_centre_val);
+        else
+          initParams << QString::fromStdString(m_centreName+"="+QString::number(centreParam).toStdString());
+
+        if (!fixed_width_val.empty()) initParams << QString::fromStdString(m_widthName+"="+fixed_width_val);
+        else
+          initParams << QString::fromStdString(m_widthName+"="+QString::number(widthParam).toStdString());
+
+        alg->setPropertyValue("InitialParameters",initParams.join(",").toStdString());
+      }
       else
       {
-        // --- width param correction ---
-        if (!m_widthCorrectionFormula.empty())
+        // set the parameters which are not peak centre, height or width
+        for(int j=0;j<paramCount();j++)
         {
-          mu::Parser parser;
-          parser.SetExpr(m_widthCorrectionFormula);
-          double width = widthParam;
-          parser.DefineVar("w",&width);
-          widthParam = parser.Eval();
+          std::string name = getName(j);
+          if (name != m_heightName && name != m_centreName && name != m_widthName)
+          {
+            std::string val = getValue(j);
+            if (!val.empty()) alg->setPropertyValue(name,val);
+          }
         }
-        alg->setPropertyValue(m_widthName,QString::number(widthParam).toStdString());
+
+        // set centre, height and width
+        if (!fixed_height_val.empty()) alg->setPropertyValue(m_heightName,fixed_height_val);
+        else
+          alg->setPropertyValue(m_heightName,QString::number(heightParam).toStdString());
+
+        if (!fixed_centre_val.empty()) alg->setPropertyValue(m_centreName,fixed_centre_val);
+        else
+          alg->setPropertyValue(m_centreName,QString::number(centreParam).toStdString());
+
+        if (!fixed_width_val.empty()) alg->setPropertyValue(m_widthName,fixed_width_val);
+        else
+          alg->setPropertyValue(m_widthName,QString::number(widthParam).toStdString());
       }
 
       alg->execute();
@@ -461,11 +566,11 @@ void PeakFitDialog::fitPeaks()
     Mantid::API::AnalysisDataService::Instance().addOrReplace(ui.leParamTable->text().toStdString(),outParams);
 
     MantidCurve* c1 = new MantidCurve(m_peakTool->workspaceName()+QString("-fit-")+QString::number(m_peakTool->spec()),
-      outputW,m_peakTool->graph(),"spectra",1,false);
+      ui.leOutWorkspace->text(),m_peakTool->graph(),"spectra",1,false);
 //    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c1,SLOT(workspaceRemoved(const QString&)));
 
     MantidCurve* c2 = new MantidCurve(m_peakTool->workspaceName()+QString("-res-")+QString::number(m_peakTool->spec()),
-      outputW,m_peakTool->graph(),"spectra",2,false);
+      ui.leOutWorkspace->text(),m_peakTool->graph(),"spectra",2,false);
 //    connect(m_mantidUI,SIGNAL(workspace_removed(const QString&)),c2,SLOT(workspaceRemoved(const QString&)));
 
 }

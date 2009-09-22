@@ -58,7 +58,7 @@ public:
   //MantidCurve(const QString& name) :PlotCurve(name)   {}
 
   /// More complex constructor setting some defaults for the curve
-  MantidCurve(const QString& name,boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
+  MantidCurve(const QString& name,const QString& wsName,Graph* g,
               const QString& type,int index,bool err=false);
 
   /// More complex constructor setting some defaults for the curve
@@ -107,7 +107,8 @@ private:
 
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
-    emit removeMe(this);
+    if (wsName == m_wsName.toStdString())
+      emit removeMe(this);
   }
 
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);

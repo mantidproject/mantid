@@ -10,18 +10,24 @@
 
 /**
  *  @param name The curve's name - shown in the legend
- *  @param workspace The source workspace for the curve's data
+ *  @param wsName The workspace name.
  *  @param g The Graph widget which will display the curve
  *  @param type The type of the QwtData: "spectra" for MantidQwtDataSpectra or
  *              "bin" for MantidQwtDataBin
  *  @param index The index of the spectrum or bin in the workspace
  *  @param err True if the errors are to be plotted
  */
-MantidCurve::MantidCurve(const QString& name,boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
+MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
-:PlotCurve(name),m_drawErrorBars(err),m_wsName("")
+:PlotCurve(name),m_drawErrorBars(err),m_wsName(wsName)
 {
-  init(workspace,g,type,index);
+  Mantid::API::MatrixWorkspace_sptr ws = 
+    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+       Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
+    );
+  init(ws,g,type,index);
+  observeDelete();
+  observeAfterReplace();
 }
 
 /**
