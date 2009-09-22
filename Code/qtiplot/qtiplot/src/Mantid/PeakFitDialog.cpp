@@ -31,6 +31,9 @@ PeakFitDialog::PeakFitDialog(QWidget* parent,PeakPickerTool* peakTool) :
   connect( ui.cbFunction, SIGNAL(currentIndexChanged(const QString&)),this, SLOT(setLayout(const QString&)));
   connect( ui.leExpression, SIGNAL(editingFinished()),this, SLOT(setUserParams()) );
   connect( ui.leExpression, SIGNAL(returnPressed()),this, SLOT(returnPressed()) );
+  connect( ui.cbPTCentre, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(centreNameChanged ( const QString &)) );
+  connect( ui.cbPTHeight, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(heightNameChanged ( const QString &)) );
+  connect( ui.cbPTWidth, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(widthNameChanged ( const QString &)) );
 
   ui.cbFunction->setCurrentIndex(0);
   ui.tableParams->horizontalHeader()-> setStretchLastSection(true);
@@ -209,6 +212,21 @@ double* AddVariable(const char *varName, void *pvar)
     return (double*)pvar;
 }
 
+void PeakFitDialog::centreNameChanged ( const QString &str)
+{
+  m_centreName = str;
+}
+
+void PeakFitDialog::heightNameChanged ( const QString &str)
+{
+  m_heightName = str;
+}
+
+void PeakFitDialog::widthNameChanged ( const QString &str)
+{
+  m_widthName = str;
+}
+
 void PeakFitDialog::setUserParams()
 {
   std::string expression = ui.leExpression->text().toStdString();
@@ -224,8 +242,16 @@ void PeakFitDialog::setUserParams()
   mu::Parser expr;
   double var = 2.;
   expr.SetVarFactory(AddVariable, &var);
-  expr.SetExpr(expression);
-  expr.Eval();
+  try
+  {
+    expr.SetExpr(expression);
+    expr.Eval();
+  }
+  catch(...)
+  {
+    QMessageBox::critical(this,"Mantid - Error","The expression contains errors.");
+    return;
+  }
 
   mu::varmap_type variables = expr.GetVar();
   mu::varmap_type::const_iterator item = variables.begin();

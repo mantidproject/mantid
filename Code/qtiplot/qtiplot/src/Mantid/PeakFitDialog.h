@@ -67,6 +67,9 @@ private slots:
   void setLayout(const QString& functName);
   void setUserParams();
   void setParamTable(const QStringList& params);
+  void centreNameChanged ( const QString &);
+  void heightNameChanged ( const QString &);
+  void widthNameChanged ( const QString &);
 
 private:
   // number of paramters per one peak

@@ -140,48 +140,65 @@ public:
 int main( int argc, char ** argv )
 {
   MantidApplication app( argc, argv );
-  QStringList args = app.arguments();
-  args.removeFirst(); // remove application name
+  WaitThread t;
+  try
+  {
+    QStringList args = app.arguments();
+    args.removeFirst(); // remove application name
 
-  if( (args.count() == 1) && (args[0] == "-m" || args[0] == "--manual") )
-    ApplicationWindow::showStandAloneHelp();
-  else if ( (args.count() == 1) && (args[0] == "-a" || args[0] == "--about") ) {
-    ApplicationWindow::about();
-    exit(0);
-  } else {
+    if( (args.count() == 1) && (args[0] == "-m" || args[0] == "--manual") )
+      ApplicationWindow::showStandAloneHelp();
+    else if ( (args.count() == 1) && (args[0] == "-a" || args[0] == "--about") ) {
+      ApplicationWindow::about();
+      exit(0);
+    } else {
 
-    WaitThread t;
-    t.start();
-    QPixmap pixmap;
-    if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
-    QSplashScreen splash(pixmap);
-    splash.show();
-    app.processEvents();
-    splash.showMessage("Release: " + QString(MANTIDPLOT_RELEASE_DATE),Qt::AlignLeft | Qt::AlignBottom);
-		  
-    QString path = argv[0];
-    int i = path.lastIndexOf('/');
-    if (i < 0) i = path.lastIndexOf('\\'); 
-    if (i>=0) 
+      t.start();
+      QPixmap pixmap;
+      if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
+      QSplashScreen splash(pixmap);
+      splash.show();
+      app.processEvents();
+      splash.showMessage("Release: " + QString(MANTIDPLOT_RELEASE_DATE),Qt::AlignLeft | Qt::AlignBottom);
+
+      QString path = argv[0];
+      int i = path.lastIndexOf('/');
+      if (i < 0) i = path.lastIndexOf('\\'); 
+      if (i>=0) 
       {
-	path.remove(i,1000);
-	QDir::setCurrent(path);
+        path.remove(i,1000);
+        QDir::setCurrent(path);
       }
 
-    bool factorySettings = false;
-    if (args.contains("-d") || args.contains("--default-settings"))
-      factorySettings = true;
+      bool factorySettings = false;
+      if (args.contains("-d") || args.contains("--default-settings"))
+        factorySettings = true;
 
-    ApplicationWindow *mw = new ApplicationWindow(factorySettings);
-    mw->restoreApplicationGeometry();
-    /*if (mw->autoSearchUpdates){
+      ApplicationWindow *mw = new ApplicationWindow(factorySettings);
+      mw->restoreApplicationGeometry();
+      /*if (mw->autoSearchUpdates){
       mw->autoSearchUpdatesRequest = true;
       mw->searchForUpdates();
       }*/
-    mw->parseCommandLineArguments(args);
-    t.wait();
+      mw->parseCommandLineArguments(args);
+      t.wait();
       splash.finish(mw);
+    }
+    app.connect( &app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()) );
+    return app.exec();
   }
-  app.connect( &app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()) );
-  return app.exec();
+  catch(std::exception& e)
+  {
+    if (t.isRunning())  t.quit();
+
+    QMessageBox::critical(0,"Mantid - Error",
+      QString("An unhandled exception has been caught. MantidPlot will have to close. Details:\n\n")+e.what());
+  }
+  catch(...)
+  {
+    if (t.isRunning())  t.quit();
+
+    QMessageBox::critical(0,"Mantid - Error",
+      "An unhandled exception has been caught. MantidPlot will have to close.");
+  }
 }
