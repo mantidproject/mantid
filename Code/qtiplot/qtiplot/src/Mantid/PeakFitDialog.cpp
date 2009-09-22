@@ -214,17 +214,17 @@ double* AddVariable(const char *varName, void *pvar)
 
 void PeakFitDialog::centreNameChanged ( const QString &str)
 {
-  m_centreName = str;
+  m_centreName = str.toStdString();
 }
 
 void PeakFitDialog::heightNameChanged ( const QString &str)
 {
-  m_heightName = str;
+  m_heightName = str.toStdString();
 }
 
 void PeakFitDialog::widthNameChanged ( const QString &str)
 {
-  m_widthName = str;
+  m_widthName = str.toStdString();
 }
 
 void PeakFitDialog::setUserParams()
