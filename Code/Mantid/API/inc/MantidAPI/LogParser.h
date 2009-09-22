@@ -115,7 +115,7 @@ private:
 double DLLExport timeMean(const Kernel::Property* p);
 
 /// Extract a line from input stream, discarding any EOL characters encountered
-std::istream& DLLExport extractToEOL(std::istream& is, std::string& str);
+DLLExport std::istream& extractToEOL(std::istream& is, std::string& str);
 
 
 
