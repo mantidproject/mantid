@@ -58,8 +58,7 @@ LogParser::LogParser(const std::string& eventFName)
     std::string str,start_time;
     m_nOfPeriods = 1;
 
-
-    while(std::getline(file,str))
+    while(Mantid::extractToEOL(file,str))
     {
         std::string stime,sdata;
         stime = str.substr(0,19);
@@ -186,10 +185,13 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     std::string str,old_data;
     bool isNumeric(false);
     std::string stime,sdata;
-    while(std::getline(file,str))
+    // MG 22/09/09: If the log file was written on a Windows machine and then read on a Linux machine, std::getline will
+    // leave CR at the end of the string and this causes problems when reading out the log values. Mantid::extractTOEOL
+    // extracts all EOL characters
+    while(Mantid::extractToEOL(file,str))
     {
-        if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) 
-        {
+      if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) 
+      {
             //if the line doesn't start with a time treat it as a continuation of the previous data
             if (change_times.size() == 0 || isNumeric)
             {// if there are no previous data
@@ -201,8 +203,8 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
             continue;
         }
         stime = str.substr(0,19);
-        sdata = str.substr(19);
-
+	sdata = str.substr(19);
+	
         if (sdata == old_data) continue;// looking for a change in the data
 
         //check if the data is numeric

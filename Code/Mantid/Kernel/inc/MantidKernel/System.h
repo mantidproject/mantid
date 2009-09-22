@@ -45,6 +45,7 @@
 #endif
 
 #include <string>
+#include <istream>
 
 namespace Mantid 
 {
@@ -54,6 +55,9 @@ namespace Mantid
 
   /// Return what we consider to be an empty double, -DBL_MAX
   DLLExport double EMPTY_DBL();  
+
+  /// Extract a line from an input stream, regardless of the line-ending type.
+  DLLExport std::istream& extractToEOL(std::istream& is, std::string & str);
 
 namespace Kernel
 {
