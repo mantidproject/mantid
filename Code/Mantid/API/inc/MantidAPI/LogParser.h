@@ -114,6 +114,10 @@ private:
 /// Returns the mean value if the property is TimeSeriesProperty<double>
 double DLLExport timeMean(const Kernel::Property* p);
 
+/// Extract a line from input stream, discarding any EOL characters encountered
+std::istream& DLLExport extractToEOL(std::istream& is, std::string& str);
+
+
 
 } // namespace API
 } // namespace Mantid
