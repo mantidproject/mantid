@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 #include "qwt_scale_widget.h"
+#include <Poco/NObserver.h>
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid
 {
@@ -128,9 +130,13 @@ private:
 	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
         QCheckBox *mLightingToggle; ///< A tick box to toggle the lighting
   
-        std::string mWorkspaceName; ///The name of workpace that this window is associated with
-        QString mDefaultColorMap; ///The full path of the default color map
+        std::string mWorkspaceName; ///< The name of workpace that this window is associated with
+        QString mDefaultColorMap; ///< The full path of the default color map
         QString mCurrentColorMap;
+
+  void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
+  /// Watches for the deletion of the associated workspace
+  const Poco::NObserver<InstrumentWindow, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/

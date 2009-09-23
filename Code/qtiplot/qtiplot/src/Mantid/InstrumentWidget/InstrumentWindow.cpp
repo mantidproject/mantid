@@ -32,7 +32,7 @@ using namespace Mantid::API;
  * Constructor.
  */
 InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
-  MdiSubWindow(label, app, name, f)
+  MdiSubWindow(label, app, name, f), m_deleteObserver(*this,&InstrumentWindow::handleDeleteWorkspace)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
@@ -175,6 +175,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
     
 	askOnCloseEvent(false);
 	setAttribute(Qt::WA_DeleteOnClose);
+	
+	// Watch for the deletion of the associated workspace
+	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 }
 
 /**
@@ -323,6 +326,7 @@ void InstrumentWindow::sendPlotSpectraGroupSignal()
  */
 InstrumentWindow::~InstrumentWindow()
 {
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   saveSettings();
   delete mInstrumentDisplay;
 }
@@ -601,4 +605,14 @@ void InstrumentWindow::saveSettings()
   settings.setValue("ColormapFile", mCurrentColorMap);
   settings.setValue("ScaleType", mInstrumentDisplay->getColorMap().getScaleType());
   settings.endGroup();
+}
+
+/// Closes the window if the associated workspace is deleted
+void InstrumentWindow::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& pNf)
+{
+    if (pNf->object_name() == mWorkspaceName)
+    {
+      askOnCloseEvent(false);
+      close();
+    }
 }
