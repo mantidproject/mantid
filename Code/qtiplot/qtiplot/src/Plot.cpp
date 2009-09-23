@@ -45,7 +45,6 @@
 
 #include <QPainter>
 #include <QMessageBox>
-#include <iostream>
 
 Plot::Plot(int width, int height, QWidget *parent, const char *)
 : QwtPlot(parent)
@@ -149,10 +148,14 @@ void Plot::printCanvas(QPainter *painter, const QRect &canvasRect,
 {
 	painter->save();
 
-	const QwtPlotCanvas* plotCanvas = canvas();
-	QRect rect = canvasRect.adjusted(1, 1, -2, -2);
-    QwtPainter::fillRect(painter, rect, canvasBackground());
+	const QwtPlotCanvas* plotCanvas = canvas();	
+	//commented it was clipping the top part of the graph
+	//QRect rect = canvasRect.adjusted(1, 1, -2, -2);
+	
+	QRect rect = canvasRect.adjusted(1, -1, -2, -1);
+	
 
+    QwtPainter::fillRect(painter, rect, canvasBackground());
 	painter->setClipping(true);
 	QwtPainter::setClipRect(painter, rect);
 
@@ -768,7 +771,57 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
         printTitle(painter, plotLayout()->titleRect());
     }
 
-    QRect canvasRect = plotLayout()->canvasRect();
+	QRect canvasRect = plotLayout()->canvasRect();;
+	canvasRect = metricsMap.layoutToDevice(canvasRect);
+
+ 
+    // When using QwtPainter all sizes where computed in pixel
+    // coordinates and scaled by QwtPainter later. This limits
+    // the precision to screen resolution. A much better solution
+    // is to scale the maps and print in unlimited resolution.
+
+    QwtScaleMap map[axisCnt];
+    for (axisId = 0; axisId < axisCnt; axisId++){
+        map[axisId].setTransformation(axisScaleEngine(axisId)->transformation());
+
+        const QwtScaleDiv &scaleDiv = *axisScaleDiv(axisId);
+        map[axisId].setScaleInterval(scaleDiv.lBound(), scaleDiv.hBound());
+
+        double from, to;
+        if ( axisEnabled(axisId) ){
+            const int sDist = axisWidget(axisId)->startBorderDist();
+            const int eDist = axisWidget(axisId)->endBorderDist();
+            const QRect &scaleRect = plotLayout()->scaleRect(axisId);
+
+            if ( axisId == xTop || axisId == xBottom ){
+                from = metricsMap.layoutToDeviceX(scaleRect.left() + sDist);
+                to = metricsMap.layoutToDeviceX(scaleRect.right() + 1 - eDist);
+            } else {
+                from = metricsMap.layoutToDeviceY(scaleRect.bottom() + 1 - eDist );
+                to = metricsMap.layoutToDeviceY(scaleRect.top() + sDist);
+            }
+        } else {
+            const int margin = plotLayout()->canvasMargin(axisId);
+            if ( axisId == yLeft || axisId == yRight ){
+                from = metricsMap.layoutToDeviceX(canvasRect.bottom() - margin);
+                to = metricsMap.layoutToDeviceX(canvasRect.top() + margin);
+            } else {
+                from = metricsMap.layoutToDeviceY(canvasRect.left() + margin);
+                to = metricsMap.layoutToDeviceY(canvasRect.right() - margin);
+            }
+        }
+        map[axisId].setPaintXInterval(from, to);
+    }
+
+   // The canvas maps are already scaled.
+    QwtPainter::setMetricsMap(painter->device(), painter->device());
+    printCanvas(painter, canvasRect, map, pfilter);
+    QwtPainter::resetMetricsMap();
+
+
+  
+   canvasRect = plotLayout()->canvasRect();
+
 
     for ( axisId = 0; axisId < QwtPlot::axisCnt; axisId++ ){
         QwtScaleWidget *scaleWidget = (QwtScaleWidget *)axisWidget(axisId);
@@ -813,50 +866,7 @@ void Plot::print(QPainter *painter, const QRect &plotRect,
         painter->drawRect(boundingRect);
     }
 
-    canvasRect = metricsMap.layoutToDevice(canvasRect);
-
-    // When using QwtPainter all sizes where computed in pixel
-    // coordinates and scaled by QwtPainter later. This limits
-    // the precision to screen resolution. A much better solution
-    // is to scale the maps and print in unlimited resolution.
-
-    QwtScaleMap map[axisCnt];
-    for (axisId = 0; axisId < axisCnt; axisId++){
-        map[axisId].setTransformation(axisScaleEngine(axisId)->transformation());
-
-        const QwtScaleDiv &scaleDiv = *axisScaleDiv(axisId);
-        map[axisId].setScaleInterval(scaleDiv.lBound(), scaleDiv.hBound());
-
-        double from, to;
-        if ( axisEnabled(axisId) ){
-            const int sDist = axisWidget(axisId)->startBorderDist();
-            const int eDist = axisWidget(axisId)->endBorderDist();
-            const QRect &scaleRect = plotLayout()->scaleRect(axisId);
-
-            if ( axisId == xTop || axisId == xBottom ){
-                from = metricsMap.layoutToDeviceX(scaleRect.left() + sDist);
-                to = metricsMap.layoutToDeviceX(scaleRect.right() + 1 - eDist);
-            } else {
-                from = metricsMap.layoutToDeviceY(scaleRect.bottom() + 1 - eDist );
-                to = metricsMap.layoutToDeviceY(scaleRect.top() + sDist);
-            }
-        } else {
-            const int margin = plotLayout()->canvasMargin(axisId);
-            if ( axisId == yLeft || axisId == yRight ){
-                from = metricsMap.layoutToDeviceX(canvasRect.bottom() - margin);
-                to = metricsMap.layoutToDeviceX(canvasRect.top() + margin);
-            } else {
-                from = metricsMap.layoutToDeviceY(canvasRect.left() + margin);
-                to = metricsMap.layoutToDeviceY(canvasRect.right() - margin);
-            }
-        }
-        map[axisId].setPaintXInterval(from, to);
-    }
-
-    // The canvas maps are already scaled.
-    QwtPainter::setMetricsMap(painter->device(), painter->device());
-    printCanvas(painter, canvasRect, map, pfilter);
-    QwtPainter::resetMetricsMap();
+    
 
     ((QwtPlot *)this)->plotLayout()->invalidate();
 

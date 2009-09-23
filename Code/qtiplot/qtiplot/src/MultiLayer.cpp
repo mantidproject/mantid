@@ -135,7 +135,6 @@ d_print_cropmarks(false)
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
 }
-
 Graph *MultiLayer::layer(int num)
 {
     int index = num - 1;
@@ -822,14 +821,17 @@ void MultiLayer::printAllLayers(QPainter *painter)
 	QRect canvasRect = canvas->rect();
 	QRect pageRect = printer->pageRect();
 	QRect cr = canvasRect; // cropmarks rectangle
-
+	Qt::WindowStates qtstates=windowState();
+	if(qtstates==(Qt::WindowMaximized | Qt::WindowActive))
+	   d_scale_on_print=true;
+	else if (qtstates==Qt::WindowActive)
+		d_scale_on_print=false;
 	if (d_scale_on_print)
 	{
-        int margin = (int)((1/2.54)*printer->logicalDpiY()); // 1 cm margins
+		int margin = (int)((1/2.54)*printer->logicalDpiY()); // 1 cm margins
 		double scaleFactorX=(double)(paperRect.width()-2*margin)/(double)canvasRect.width();
 		double scaleFactorY=(double)(paperRect.height()-2*margin)/(double)canvasRect.height();
-
-        if (d_print_cropmarks)
+	     if (d_print_cropmarks)
         {
 			cr.moveTo(QPoint(margin + int(cr.x()*scaleFactorX),
 							 margin + int(cr.y()*scaleFactorY)));
@@ -841,32 +843,35 @@ void MultiLayer::printAllLayers(QPainter *painter)
 		{
 			Graph *gr=(Graph *)graphsList.at(i);
 			Plot *myPlot= gr->plotWidget();
-
 			QPoint pos=gr->pos();
 			pos=QPoint(margin + int(pos.x()*scaleFactorX), margin + int(pos.y()*scaleFactorY));
-
 			int width=int(myPlot->frameGeometry().width()*scaleFactorX);
 			int height=int(myPlot->frameGeometry().height()*scaleFactorY);
-
 			myPlot->print(painter, QRect(pos, QSize(width,height)));
 		}
 	}
 	else
-	{
-    	int x_margin = (pageRect.width() - canvasRect.width())/2;
-    	int y_margin = (pageRect.height() - canvasRect.height())/2;
-
-        if (d_print_cropmarks)
+	{	
+	   	int x_margin = (pageRect.width() - canvasRect.width())/2;
+	   	int y_margin = (pageRect.height() - canvasRect.height())/2;
+		if (d_print_cropmarks)
             cr.moveTo(x_margin, y_margin);
-
+		int margin = (int)((1/2.54)*printer->logicalDpiY()); // 1 cm margins
+		double scaleFactorX=(double)(paperRect.width()-4*margin)/(double)canvasRect.width();
+		double scaleFactorY=(double)(paperRect.height()-4*margin)/(double)canvasRect.height();
+		
 		for (int i=0; i<(int)graphsList.count(); i++)
 		{
 			Graph *gr = (Graph *)graphsList.at(i);
 			Plot *myPlot = (Plot *)gr->plotWidget();
 
 			QPoint pos = gr->pos();
-			pos = QPoint(x_margin + pos.x(), y_margin + pos.y());
-			myPlot->print(painter, QRect(pos, myPlot->size()));
+			pos = QPoint(margin + pos.x(), margin + pos.y());
+			QSize size=	myPlot->size();
+			int width=size.width()*scaleFactorX;
+			int height=size.height()*scaleFactorY;
+			myPlot->print(painter, QRect(pos, QSize(width,height)));
+		
 		}
 	}
 	if (d_print_cropmarks)
