@@ -279,182 +279,272 @@ void LegendWidget::drawSymbol(PlotCurve *c, int point, QPainter *p, int x, int y
 void LegendWidget::drawText(QPainter *p, const QRect& rect,
 		QwtArray<long> height, int symbolLineLength)
 {
-	p->save();
-	if (((Graph *)d_plot->parent())->antialiasing())
-		p->setRenderHints(QPainter::Antialiasing);
+  p->save();
+  if (((Graph *)d_plot->parent())->antialiasing())
+    p->setRenderHints(QPainter::Antialiasing);
 
-	int l = symbolLineLength;
-	QString text = d_text->text();
-	QStringList titles = text.split("\n", QString::KeepEmptyParts);
+  // RJT (22/09/09): For remainder of method, copied in code from current 
+  // QtiPlot (rev. 1373) to fix infinite loop if closing bracket missing
+  int l = symbolLineLength;
+  QString text = d_text->text();
+  QStringList titles = text.split("\n", QString::KeepEmptyParts);
 
-	for (int i=0; i<(int)titles.count(); i++){
-        int w = rect.x() + left_margin;
-		QString s = titles[i];
-		while (s.contains("\\l(") || s.contains("\\p{")){
-			int pos = s.indexOf("\\l(", 0);
-			if (pos >= 0){
-                QwtText aux(parse(s.left(pos)));
-                aux.setFont(d_text->font());
-                aux.setColor(d_text->color());
+  for (int i=0; i<(int)titles.count(); i++){
+    int w = left_margin + rect.x(); // QtiPlot Rev 1373 has this as 2nd arg: d_frame_pen.width();
+    bool  curveSymbol = false;
+    QString s = titles[i];
+    while (s.contains("\\l(",Qt::CaseInsensitive) || s.contains("\\p{",Qt::CaseInsensitive)){
+      curveSymbol = true;
+      int pos = s.indexOf("\\l(", 0,Qt::CaseInsensitive);
+      int pos2 = s.indexOf(",",pos); // two arguments in case if pie chart
+      int pos3 = s.indexOf(")",pos);
+      if (pos >= 0 && (pos2 == -1 || pos2 > pos3)){
+        QwtText aux(parse(s.left(pos))); //not a pie chart
+        aux.setFont(d_text->font());
+        aux.setColor(d_text->color());
+        aux.setRenderFlags (Qt::AlignLeft | Qt::AlignVCenter);
 
-                QSize size = aux.textSize();
-                QRect tr = QRect(QPoint(w, height[i] - size.height()/2), size);
-                aux.draw(p, tr);
-                w += size.width();
+        QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+        QRect tr = QRect(QPoint(w, height[i] - size.height()/2), size);
+        aux.draw(p, tr);
+        w += size.width();
 
-                int pos1 = s.indexOf("(", pos);
-                int pos2 = s.indexOf(")", pos1);
-				int point = -1;
-				PlotCurve *curve = getCurve(s.mid(pos1+1, pos2-pos1-1), point);
-				if (!curve){
-                	s = s.right(s.length() - pos2 - 1);
-                    continue;
-                }
+        int pos1 = s.indexOf("(", pos);
+        int pos2 = s.indexOf(")", pos1);
+        if (pos2 == -1){
+          s = s.right(s.length() - pos1 - 1);
+          continue;
+        }
+        int point = -1;
+        PlotCurve *curve = getCurve(s.mid(pos1+1, pos2-pos1-1), point);
+        if (!curve){
+          s = s.right(s.length() - pos2 - 1);
+          continue;
+        }
 
-            	drawSymbol(curve, point, p, w, height[i], l);
-            	w += l + h_space;
-            	s = s.right(s.length() - pos2 - 1);
-			} else {
-			    pos = s.indexOf("\\p{", 0);
-                if (pos >= 0){
-                    QwtText aux(parse(s.left(pos)));
-                    aux.setFont(d_text->font());
-                    aux.setColor(d_text->color());
+        drawSymbol(curve, point, p, w, height[i], l);
+        w += l + h_space;
+        s = s.right(s.length() - pos2 - 1);
+      } else { // pie chart?
+        pos = s.indexOf("\\p{", 0);
+        if (pos >= 0){  // old syntax
+          QwtText aux(parse(s.left(pos)));
+          aux.setFont(d_text->font());
+          aux.setColor(d_text->color());
+          aux.setRenderFlags (Qt::AlignLeft | Qt::AlignVCenter);
 
-                    QSize size = aux.textSize();
-                    QRect tr = QRect(QPoint(w, height[i] - size.height()/2), size);
-                    aux.draw(p, tr);
-                    w += size.width();
+          QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+          QRect tr = QRect(QPoint(w, height[i] - size.height()/2), size);
+          aux.draw(p, tr);
+          w += size.width();
 
-                    int pos1 = s.indexOf("{", pos);
-                    int pos2 = s.indexOf("}", pos1);
-                    int point = s.mid(pos1 + 1, pos2 - pos1 - 1).toInt() - 1;
-					drawSymbol((PlotCurve*)d_plot->curve(1), point, p, w, height[i], l);
-                	w += l;
-                	s = s.right(s.length() - pos2 - 1);
-                }
-			}
-		}
+          int pos1 = s.indexOf("{", pos);
+          int pos2 = s.indexOf("}", pos1);
+          if (pos2 == -1){
+          s = s.right(s.length() - pos1 - 1);
+          continue;
+          }
+          int point = s.mid(pos1 + 1, pos2 - pos1 - 1).toInt() - 1;
+          drawSymbol((PlotCurve*)d_plot->curve(0), point, p, w, height[i], l);
+          w += l;
+          s = s.right(s.length() - pos2 - 1);
+        } else {
+          pos = s.indexOf("\\l(", 0,Qt::CaseInsensitive);
+          if (pos >= 0 && pos2 != -1){ //new syntax
+            QwtText aux(parse(s.left(pos)));
+            aux.setFont(d_text->font());
+            aux.setColor(d_text->color());
+            aux.setRenderFlags (Qt::AlignLeft | Qt::AlignVCenter);
 
-		if (!s.isEmpty()){
-			w += h_space;
-			QwtText aux(parse(s));
-			aux.setFont(d_text->font());
-			aux.setColor(d_text->color());
-			QSize size = aux.textSize();
-			QRect tr = QRect(QPoint(w, height[i] - size.height()/2), size);
-			aux.draw(p, tr);
-		}
-	}
-	p->restore();
+            QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+            QRect tr = QRect(QPoint(w, height[i] - size.height()/2), size);
+            aux.draw(p, tr);
+            w += size.width();
+
+            int pos1 = s.indexOf(",", pos);
+            int pos3 = s.indexOf(")", pos1);
+            if (pos3 == -1){
+              s = s.right(s.length() - pos1 - 1);
+              continue;
+            }
+            int point = s.mid(pos1 + 1, pos3 - pos1 - 1).toInt() - 1;
+            drawSymbol((PlotCurve*)d_plot->curve(0), point, p, w, height[i], l);
+            w += l;
+            s = s.right(s.length() - pos3 - 1);
+          }
+        }
+      }
+    }
+
+    if (!s.isEmpty()){
+      if (curveSymbol)
+        w += h_space;
+      QwtText aux(parse(s));
+      aux.setFont(d_text->font());
+      aux.setColor(d_text->color());
+      aux.setRenderFlags (Qt::AlignLeft | Qt::AlignVCenter);
+
+      QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+      QRect tr = QRect(QPoint(w, height[i] - size.height()/2), size);
+      aux.draw(p, tr);
+    }
+  }
+  p->restore();
 }
 
 QwtArray<long> LegendWidget::itemsHeight(int y, int symbolLineLength, int &width, int &height)
 {
-	QString text = d_text->text();
-	QStringList titles = text.split("\n", QString::KeepEmptyParts);
-	int n = (int)titles.count();
-	QwtArray<long> heights(n);
+  // RJT (22/09/09): For most of method, copied in code from current 
+  // QtiPlot (rev. 1373) to fix infinite loop if closing bracket missing
+  QString text = d_text->text();
+  QStringList titles = text.split("\n", QString::KeepEmptyParts);
+  int n = (int)titles.count();
+  QwtArray<long> heights(n);
 
-	width = 0;
-	height = 0;
-	int maxL = 0;
-	int h = top_margin;
-	for (int i=0; i<n; i++){
-		QString s = titles[i];
-		int textL = 0;
-		while (s.contains("\\l(") || s.contains("\\p{")){
-			int pos = s.indexOf("\\l(", 0);
-			if (pos >= 0){
-                QwtText aux(parse(s.left(pos)));
-                aux.setFont(d_text->font());
-                QSize size = aux.textSize();
-                textL += size.width();
+  width = 0;
+  height = 0;
+  int maxL = 0;
+  int h = top_margin; // In QtiPlot rev 1373: + d_frame_pen.width();
+  for (int i=0; i<n; i++){
+    QString s = titles[i];
+    int textL = 0;
+    bool curveSymbol = false;
+    while (s.contains("\\l(",Qt::CaseInsensitive) || s.contains("\\p{",Qt::CaseInsensitive)){
+      int pos = s.indexOf("\\l(", 0,Qt::CaseInsensitive);
+      int pos2 = s.indexOf(",",pos); // two arguments in case if pie chart
+      int pos3 = s.indexOf(")",pos);
+      curveSymbol = true;
+      if (pos >= 0 && (pos2==-1 || pos2>pos3)){
+        QwtText aux(parse(s.left(pos))); //not a pie chart
+        aux.setFont(d_text->font());
+        QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+        textL += size.width();
 
-                int pos1 = s.indexOf("(", pos);
-                int pos2 = s.indexOf(")", pos1);
-				int point = -1;
-				PlotCurve *curve = getCurve(s.mid(pos1+1, pos2-pos1-1), point);
-				if (!curve){
-                	s = s.right(s.length() - pos2 - 1);
-                    continue;
-                }
+        int pos1 = s.indexOf("(", pos);
+        int pos2 = s.indexOf(")", pos1);
+        if (pos2 == -1){
+          s = s.right(s.length() - pos1 - 1);
+          continue;
+        }
+        int point = -1;
+        PlotCurve *curve = getCurve(s.mid(pos1+1, pos2-pos1-1), point);
+        if (!curve){
+          s = s.right(s.length() - pos2 - 1);
+          continue;
+        }
 
-                textL += symbolLineLength + h_space;
-                s = s.right(s.length() - s.indexOf(")", pos) - 1);
-            } else {
-                pos = s.indexOf("\\p{", 0);
-                if (pos >= 0){
-                    QwtText aux(parse(s.left(pos)));
-                    aux.setFont(d_text->font());
-                    QSize size = aux.textSize();
-                    textL += size.width();
-                    textL += symbolLineLength;
-                    s = s.right(s.length() - s.indexOf("}", pos) - 1);
-                }
-            }
-		}
+        textL += symbolLineLength + h_space;
+        s = s.right(s.length() - s.indexOf(")", pos) - 1);
+      } else { //Pie chart?
+        pos = s.indexOf("\\p{", 0,Qt::CaseInsensitive); //look for old syntax
+        if (pos >= 0){
+          QwtText aux(parse(s.left(pos)));
+          aux.setFont(d_text->font());
+          QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+          textL += size.width();
+          textL += symbolLineLength;
+          int pos2=s.indexOf("}", pos);
+          if (pos2==-1) pos2=pos+3;
+          s = s.right(s.length() - pos2 - 1);
+        } else {
+          pos = s.indexOf("\\l(", 0,Qt::CaseInsensitive); // new syntax
+          if (pos >= 0){
+            QwtText aux(parse(s.left(pos)));
+            aux.setFont(d_text->font());
+            QSize size = aux.textSize(); // In QtiPlot rev 1373: textSize(p, aux);
+            textL += size.width();
+            textL += symbolLineLength;
+            int pos2=s.indexOf(")", pos);
+            if (pos2==-1) pos2=pos+3;
+            s = s.right(s.length() - pos2 - 1);
+          }
+        }
+      }
+    }
+    // RJT (22/09/09): End copied in code from rev. 1373
 
-		QwtText aux(parse(s));
-		aux.setFont(d_text->font());
-		QSize size = aux.textSize();
-		textL += size.width();
+    QwtText aux(parse(s));
+    aux.setFont(d_text->font());
+    QSize size = aux.textSize();
+    textL += size.width();
 
-		if (textL > maxL)
-			maxL = textL;
+    if (textL > maxL)
+      maxL = textL;
 
-		int textH = size.height();
-		height += textH;
+    int textH = size.height();
+    height += textH;
 
-		heights[i] = y + h + textH/2;
-		h += textH;
-	}
+    heights[i] = y + h + textH/2;
+    h += textH;
+  }
 
-	height += 2*top_margin;
-	width = 2*left_margin + maxL + h_space;
+  height += 2*top_margin;
+  width = 2*left_margin + maxL + h_space;
 
-	return heights;
+  return heights;
 }
 
 int LegendWidget::symbolsMaxWidth()
 {
-	QList<int> cvs = d_plot->curveKeys();
-	int curves = cvs.count();
-	if (!curves)
-		return 0;
+  QList<int> cvs = d_plot->curveKeys();
+  int curves = cvs.count();
+  if (!curves)
+    return 0;
 
-	int maxL = 0;
-	QString text = d_text->text();
-	QStringList titles = text.split("\n", QString::KeepEmptyParts);
-	for (int i=0; i<(int)titles.count(); i++){
-		QString s = titles[i];
-		while (s.contains("\\l(")){
-			int pos = s.indexOf("\\l(", 0);
-		    int pos1 = s.indexOf("(", pos);
-            int pos2 = s.indexOf(")", pos1);
-			int cv = s.mid(pos1+1, pos2-pos1-1).toInt()-1;
-			if (cv < 0 || cv >= curves){
-				s = s.right(s.length() - pos2 - 1);
-				continue;
-			}
+  // RJT (22/09/09): For rest of method, copied in code from current 
+  // QtiPlot (rev. 1373) to fix infinite loop if closing bracket missing
+  int maxL = 0;
+  QString text = d_text->text();
+  QStringList titles = text.split("\n", QString::KeepEmptyParts);
+  for (int i=0; i<(int)titles.count(); i++){
+    QString s = titles[i];
+    while (s.contains("\\l(",Qt::CaseInsensitive)){
+      int pos = s.indexOf("\\l(", 0,Qt::CaseInsensitive);
+      int pos1 = s.indexOf("(", pos);
+      int pos2 = s.indexOf(")", pos1);
+      int pos3 = s.indexOf(",",pos1);
+      if (pos3 != -1 && pos3 < pos2 ) pos2=pos3; // for pi charts get dataset number
+      if (pos2 == -1){
+        s = s.right(s.length() - pos1 - 1);
+        continue;
+      }
 
-			const QwtPlotCurve *c = (QwtPlotCurve *)d_plot->curve(cvs[cv]);
-			if (c && c->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) {
-				int l = c->symbol().size().width();
-				if (l < 3)
-  	            	l = 3;
-  	            else if (l > 15)
-  	            	l = 15;
-  	            if (l>maxL && c->symbol().style() != QwtSymbol::NoSymbol)
-					maxL = l;
-			}
-			s = s.right(s.length() - pos2 - 1);
-		}
+      int point = 0;
+      PlotCurve* c = getCurve(s.mid(pos1 + 1, pos2 - pos1 - 1), point);
+      if (c && c->type() == Graph::Pie){
+        maxL = 2*d_text->font().pointSize();//10;
+        line_length = 0;
+        s = s.right(s.length() - pos2 - 1);
+        continue;
+      }
 
-		if (titles[i].contains("\\p{"))
-			maxL = 10;
-	}
-	return maxL;
+      if (c && c->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) {
+        if (c->type() == Graph::Pie ||
+          c->type() == Graph::VerticalBars ||
+          c->type() == Graph::HorizontalBars ||
+          c->type() == Graph::Histogram ||
+          c->type() == Graph::Box){
+          maxL = 2*d_text->font().pointSize();//10;
+          line_length = 0;
+        } else {
+          int l = c->symbol().size().width();
+          if (l < 3)
+            l = 3;
+          else if (l > 15)
+            l = 15;
+          if (l>maxL && c->symbol().style() != QwtSymbol::NoSymbol)
+            maxL = l;
+        }
+      }
+      s = s.right(s.length() - pos2 - 1);
+    }
+
+    if (titles[i].contains("\\p{")){ // old syntax for pie charts
+      maxL = 2*d_text->font().pointSize();//10;
+      line_length = 0;
+    }
+  }
+  return maxL;
 }
 
 QString LegendWidget::parse(const QString& str)
@@ -551,10 +641,12 @@ void LegendWidget::setSelected(bool on)
 
 void LegendWidget::showTextEditor()
 {
-	if (d_selector){
-        delete d_selector;
-		d_selector = NULL;
-	}
+  // RJT (22/09/09): The code below caused a warning from the QObject destructor, which can't be good
+  // The d_selector member is completely gone from the current version of this code
+  //if (d_selector){
+  //  delete d_selector;
+  //  d_selector = NULL;
+  //}
 
     ApplicationWindow *app = ((Graph *)d_plot->parent())->multiLayer()->applicationWindow();
     if (!app)
