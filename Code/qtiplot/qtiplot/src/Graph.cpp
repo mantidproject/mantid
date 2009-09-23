@@ -3380,16 +3380,22 @@ void Graph::removeLegendItem(int index)
 
 void Graph::addLegendItem()
 {
-	if (d_legend){
-		QString text = d_legend->text();
-        if (text.endsWith ("\n") || text.isEmpty())
-            text.append("\\l("+QString::number(n_curves)+")"+"%("+QString::number(n_curves)+")");
-        else
-            text.append("\n\\l("+QString::number(n_curves)+")"+"%("+QString::number(n_curves)+")");
+  if (d_legend){
+    QString text = d_legend->text();
+    if ( !text.endsWith ("\n") && !text.isEmpty() )
+      text.append("\n");
+    text.append("\\l("+QString::number(n_curves)+")");//+"%("+QString::number(n_curves)+")");
 
-        d_legend->setText(text);
-        d_legend->repaint();
-	}
+    // RJT (23/09/09): Insert actual text directly into legend rather than a 'code' for later parsing
+    PlotCurve *c = (PlotCurve *)d_plot->curve(n_curves);
+    if (c)
+      text.append(c->title().text());
+    else
+      text.append("%("+QString::number(n_curves)+")");
+
+    d_legend->setText(text);
+    d_legend->repaint();
+  }
 }
 
 void Graph::contextMenuEvent(QContextMenuEvent *e)
