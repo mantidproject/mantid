@@ -6,10 +6,12 @@
 #include "MantidKernel/SignalChannel.h"
 #undef QT_NO_KEYWORDS
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include <QIcon>
 #include <QMessageBox>
 #include <QDir>
+#include <QFileDialog>
 #include <QTemporaryFile>
 #include <QTextStream>
 
@@ -139,6 +141,57 @@ QString UserSubWindow::runPythonCode(const QString & code, bool no_output)
    return tmpstring;
 }
 
+/**
+ * Open a file selection box
+ * @param save if true a save dialog box used (prompts for replace if file exists) otherwise a load file (file must then exist)
+ * @param exts the dialog boxes will only show files that have extensions that match one of the QStrings in the list
+ */
+QString UserSubWindow::openFileDialog(const bool save, const QStringList &exts)
+{
+  QString filter;
+  if ( !exts.empty() )
+  {
+    filter = "Files (";
+    for ( int i = 0; i < exts.size(); i ++ )
+    {
+      filter.append("*." + exts[i] + " ");
+    }
+    filter.trimmed();
+    filter.append(")");
+  }
+  else
+  {
+    filter = "All Files (*.*)";
+  }
+
+  QString filename;
+  if( save )
+  {
+    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+  }
+  else
+  {
+    filename = QFileDialog::getOpenFileName(this, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+  }
+
+  if( !filename.isEmpty() ) 
+  {
+    AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filename).absoluteDir().path());
+  }
+  return filename;
+}
+/** Returns a pointer to a new validator QLabel. The code is copied from
+*  AlgorithmDialog.cpp and wont know if the validator label changes there
+*  @param parent a pointer to an object that will look after it deleting it
+*/
+QLabel* UserSubWindow::newValidator(QWidget *parent)
+{
+  QLabel *validLbl = new QLabel("*", parent);
+  QPalette pal = validLbl->palette();
+  pal.setColor(QPalette::WindowText, Qt::darkRed);
+  validLbl->setPalette(pal);
+  return validLbl;
+}
 
 //--------------------------------------
 // Private member functions

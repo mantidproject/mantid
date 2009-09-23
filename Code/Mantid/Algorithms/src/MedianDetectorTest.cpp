@@ -220,7 +220,7 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(
   childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", input );
   childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
   childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
-  // pass inputed values straight to this integration, checking must be done there
+  // pass inputed values straight to this integration trusting the checking done there
   childAlg->setPropertyValue( "RangeLower",  getPropertyValue("RangeLower") );
   childAlg->setPropertyValue( "RangeUpper", getPropertyValue("RangeUpper") );
   try

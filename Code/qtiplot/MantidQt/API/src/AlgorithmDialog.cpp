@@ -522,7 +522,7 @@ bool AlgorithmDialog::setPropertyValues()
       allValid = false;
       if( validator && validator->parent() )
       {
-        //a description of the problem will be visible to users if they linger their mouse over validator star mark
+        //a description of the problem will be visible to users if they their mouse pointer lingers over validator star mark
         validator->setToolTip(  QString::fromStdString(error) );
         validator->show();
       }

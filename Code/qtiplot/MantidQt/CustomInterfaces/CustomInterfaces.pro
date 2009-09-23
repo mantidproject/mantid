@@ -23,16 +23,21 @@ SRCDIR = src
 
 SOURCES = \
   $$SRCDIR/SANSRunWindow.cpp \
-  $$SRCDIR/SANSUtilityDialogs.cpp
+  $$SRCDIR/SANSUtilityDialogs.cpp \
+  $$SRCDIR/ExcitationsDiagnostics.cpp \
+  $$SRCDIR/ExcitationsDiagResults.cpp
 
 HEADERS = \
   $$HEADERDIR/SANSRunWindow.h \
-  $$HEADERDIR/SANSUtilityDialogs.h
+  $$HEADERDIR/SANSUtilityDialogs.h \
+  $$HEADERDIR/ExcitationsDiagnostics.h \
+  $$HEADERDIR/ExcitationsDiagResults.h
   
 UI_DIR = $$HEADERDIR
 
 FORMS = \
-  $$HEADERDIR/SANSRunWindow.ui
+  $$HEADERDIR/SANSRunWindow.ui \
+  $$HEADERDIR/ExcitationsDiagnostics.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"
 

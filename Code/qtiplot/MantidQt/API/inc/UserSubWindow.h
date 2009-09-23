@@ -21,6 +21,8 @@
 #include "InterfaceFactory.h"
 
 #include <QWidget>
+#include <QStringList>
+#include <QLabel>
 
 #include <Poco/Message.h>
 
@@ -111,8 +113,9 @@ protected:
   
   /// Run a piece of python code and return any output that was written to stdout
   QString runPythonCode(const QString & code, bool no_output = false);
+  QString openFileDialog(const bool save, const QStringList &exts);
+  QLabel* newValidator(QWidget *parent);
 
-  
 private:
   // This is so that it can set the name
   // I can't pass anything as an argument to the constructor as I am using
