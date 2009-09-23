@@ -1,7 +1,7 @@
 //----------------------
 // Includes
 //----------------------
-#include "MantidQtCustomInterfaces/ExcitationsDiagnostics.h"
+#include "MantidQtCustomInterfaces/Diagnostics.h"
 #include "MantidQtCustomInterfaces/ExcitationsDiagResults.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -27,40 +27,43 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(ExcitationsDiagnostics);
+  DECLARE_SUBWINDOW(Diagnostics);
 }
 }
 
 using namespace MantidQt::CustomInterfaces;
 // default parameters that are writen to the GUI
-const char ExcitationsDiagnostics::defHighAbsolute[5] = "1e10";
-const char ExcitationsDiagnostics::defLowAbsolute[2] = "0";
-const char ExcitationsDiagnostics::defSignificanceTest[4] = "3.3";
-const char ExcitationsDiagnostics::defHighMedian[4] = "1.5";
-const char ExcitationsDiagnostics::defLowMedian[4] = "0.1";
-const char ExcitationsDiagnostics::defVariation[4] = "1.1";
-const char ExcitationsDiagnostics::defBackground[4] = "0.1";
+const char Diagnostics::defHighAbsolute[5] = "1e10";
+const char Diagnostics::defLowAbsolute[2] = "0";
+const char Diagnostics::defSignificanceTest[4] = "3.3";
+const char Diagnostics::defHighMedian[4] = "1.5";
+const char Diagnostics::defLowMedian[4] = "0.1";
+const char Diagnostics::defVariation[4] = "1.1";
+const char Diagnostics::defBackground[4] = "0.1";
 
 //----------------------
 // Public member functions
 //----------------------
 ///Constructor
-ExcitationsDiagnostics::ExcitationsDiagnostics(QWidget *parent) :
-  m_dispDialog(0),
+Diagnostics::Diagnostics(QWidget *parent) :
+  m_dispDialog(0), m_busy(false),
   UserSubWindow(parent)
 {
 }
 
 /// slot called run by the results form (a ExcitationsDiagResults) to say that it has finished and we can start processing again
-void ExcitationsDiagnostics::childFormDied()
+void Diagnostics::childFormDied()
 {
   // label the dialog as dead so that we don't try to call it's properties
   m_dispDialog = 0;
-  // the run button was disabled when the results form was shown, as we can only do one analysis at a time, we can enable it now
-  m_uiForm.pbRun->setEnabled(true);
+  // allowing running the scripts again, if running is true this will be done later on
+  if (!m_busy)
+  {
+    m_uiForm.pbRun->setEnabled(true);
+  }
 }
 /// Set up the dialog layout
-void ExcitationsDiagnostics::initLayout()
+void Diagnostics::initLayout()
 {
   m_uiForm.setupUi(this);
 
@@ -203,7 +206,7 @@ void ExcitationsDiagnostics::initLayout()
   setPropertyValues();  
 }
 
-void ExcitationsDiagnostics::run()
+void Diagnostics::run()
 {
   // these structures are used to report progress and pass results from one test to another, at the moment there is no progress
   ExcitationsDiagResults::TestSummary test1;
@@ -226,11 +229,14 @@ void ExcitationsDiagnostics::run()
 
     // report to the dialog what's happening
     test1.status = "Analysing white beam vanadium 1";
-    if ( m_dispDialog ) m_dispDialog->notifyDialog(test1);
+
+    if ( ! m_dispDialog ) return;
+    m_dispDialog->notifyDialog(test1);
 
     // run the first test and then report again
     test1 = runWhite1();
-    if ( m_dispDialog ) m_dispDialog->notifyDialog(test1);
+    if ( ! m_dispDialog ) return;
+    m_dispDialog->notifyDialog(test1);
     if ( test1.status != "White beam vanadium 1 complete" )
     {// return to the dialog box, runWhite calls a function that some displays errors, some other errors will be in the log, we hope this covers everything, but there's not guarantee
       return;
@@ -239,10 +245,12 @@ void ExcitationsDiagnostics::run()
     if ( ! m_userSettingsMap["WBVanadium2"].isEmpty() )
     {
       test2.status = "Analysing white beam vanadium 2 and comparing";
-      if ( m_dispDialog ) m_dispDialog->notifyDialog(test2);
+      if ( ! m_dispDialog ) return;
+      m_dispDialog->notifyDialog(test2);
 
       test2 = runWhite2(test1);
-      if ( m_dispDialog ) m_dispDialog->notifyDialog(test2);
+      if ( ! m_dispDialog ) return;
+      m_dispDialog->notifyDialog(test2);
       if ( test2.status != "White beam vanadium comparison complete" )
       {
         return;
@@ -257,10 +265,12 @@ void ExcitationsDiagnostics::run()
       test3.outputWS = "";
       test3.numBad = ExcitationsDiagResults::TestSummary::NORESULTS;
       test3.inputWS = "";
-      if ( m_dispDialog ) m_dispDialog->notifyDialog(test3);
+      if ( ! m_dispDialog ) return;
+      m_dispDialog->notifyDialog(test3);
 
       test3 = runBack(test1, test2);
-      if ( m_dispDialog ) m_dispDialog->notifyDialog(test3);
+      if ( ! m_dispDialog ) return;
+      m_dispDialog->notifyDialog(test3);
     }
   }
   catch (std::exception e)
@@ -276,7 +286,7 @@ void ExcitationsDiagnostics::run()
 * with QLineEdits
 * @param buttonDis The name of the property associated with the QLineEdit
 */
-void ExcitationsDiagnostics::browseClicked(const QString &buttonDis)
+void Diagnostics::browseClicked(const QString &buttonDis)
 {
   QLineEdit *editBox;
   QStringList extensions;
@@ -306,7 +316,7 @@ void ExcitationsDiagnostics::browseClicked(const QString &buttonDis)
 /**
  * A slot to handle the help button click
  */
-void ExcitationsDiagnostics::helpClicked()
+void Diagnostics::helpClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
     "Detector Efficiency Tests"));
@@ -315,7 +325,7 @@ void ExcitationsDiagnostics::helpClicked()
 * agruement or if no agruements are passed the file in the current row
 *  @param item an item in the lwRunFiles to remove
 */
-void ExcitationsDiagnostics::removeName(QListWidgetItem *item)
+void Diagnostics::removeName(QListWidgetItem *item)
 {
   int row;
   if (item) row = m_uiForm.lwRunFiles->row(item);
@@ -325,7 +335,7 @@ void ExcitationsDiagnostics::removeName(QListWidgetItem *item)
 }
 /** A slot called by the add file button that adds an experimental file to the list 
 */
-void ExcitationsDiagnostics::addFile()
+void Diagnostics::addFile()
 {
   if( m_uiForm.lwRunFiles->count() > 0 )
   {
@@ -340,7 +350,7 @@ void ExcitationsDiagnostics::addFile()
 /** Creates instances of the algorithms used by the scripts so that we have some properties
 *  available for input parameter validation
 */
-void ExcitationsDiagnostics::loadAlgorDummies()
+void Diagnostics::loadAlgorDummies()
 {
   if ( m_algorDummies.size() > 0 ) return;
   m_algorDummies.push_back( Mantid::API::
@@ -359,7 +369,7 @@ void ExcitationsDiagnostics::loadAlgorDummies()
 }
 
 /// Parse input when the Run button is pressed
-bool ExcitationsDiagnostics::parseInput()
+bool Diagnostics::parseInput()
 {
   try
   {    
@@ -377,7 +387,7 @@ bool ExcitationsDiagnostics::parseInput()
 /** copies values from the form a map that is passed to the form and a sometimes a map
 that is used in validation
 */
-void ExcitationsDiagnostics::readTheDialog()
+void Diagnostics::readTheDialog()
 {
   //  copy the values from each input control into the storage map
   storeUserSetting("InputFile", m_uiForm.leIFile->text());
@@ -427,7 +437,7 @@ void ExcitationsDiagnostics::readTheDialog()
 *  algorithm_name.property_name with a pointer to the property
 * @param algList pointers instances of the algorithm used by the scripts
 */
-void ExcitationsDiagnostics::getAlgProperties()
+void Diagnostics::getAlgProperties()
 {
   // m_algorPropList contains, as the indexabled value, the list of all the properties used. The map is small and we only do this once so it should not be noticably slow. If we upgrade boost then use bimap instead
   std::map<std::string, std::string>::const_iterator it;
@@ -457,7 +467,7 @@ void ExcitationsDiagnostics::getAlgProperties()
   }
 }
 /// place the stars that are used as validators on the form
-void ExcitationsDiagnostics::placeValidatorLabels()
+void Diagnostics::placeValidatorLabels()
 {
   QLayout *currentLayout = m_uiForm.gbUniversal->layout();
   QGridLayout *uni = qobject_cast<QGridLayout*>(currentLayout);
@@ -469,7 +479,7 @@ void ExcitationsDiagnostics::placeValidatorLabels()
   QGridLayout *individGrid = qobject_cast<QGridLayout*>(currentLayout);
   validlbl = getValidatorMarker("LoadRaw.Filename");
   individGrid->addWidget(validlbl, 0, 7);
-  // delete the following in 2010 or uncomment out if validators are added to any of the following properties 
+// delete the following in 2010 or uncomment out if validators are added to any of the following properties 
   //validlbl = getValidatorMarker("HighAbsolute");
   //individGrid->addWidget(validlbl, 1, 3);
   //validlbl = getValidatorMarker("LowAbsolute");
@@ -482,27 +492,20 @@ void ExcitationsDiagnostics::placeValidatorLabels()
   // work on the efficency variation test groupbox
   currentLayout = m_uiForm.gbVariation->layout();
   QGridLayout *efficiencyGrid = qobject_cast<QGridLayout*>(currentLayout);
-  //validlbl = getValidatorMarker("WBVanadium2");
-  //efficiencyGrid->addWidget(validlbl, 0, 3);  
   validlbl = getValidatorMarker("DetectorEfficiencyVariation.Variation");
   efficiencyGrid->addWidget(validlbl, 1, 3);  
-  
-  // now the background groupbox
-  //currentLayout = m_uiForm.gbExperiment->layout();
-  //QGridLayout *expGrid = qobject_cast<QGridLayout*>(currentLayout);
-  //validlbl = getValidatorMarker(????);
-  //expGrid->addWidget(validlbl, 2, 2);
-
 }
 
 /** Runs python code that implements the tests on the first white beam vanadium
 *  @return a structure containing the status of running the tests, the number of bad detectors found the output workspace, etc.
 */
-ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::runWhite1()
+ExcitationsDiagResults::TestSummary Diagnostics::runWhite1()
 {  
   //run the tests on the first white beam vanadium run
   QString code = constructScript();
+  pythonIsRunning(true);
   QString result = runPythonCode(code);
+  pythonIsRunning(false);
   // data from python is all passed back as a string, read in the string and see if it contains what we want
   return readRes(result);
 }
@@ -511,12 +514,14 @@ ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::runWhite1()
 *  @param whiteBeam2 user settings for the comparison between white beams
 *  @return a structure containing the status of running the tests, the number of bad detectors found the output workspace, etc.
 */
-ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::runWhite2(
+ExcitationsDiagResults::TestSummary Diagnostics::runWhite2(
   const ExcitationsDiagResults::TestSummary &lastResults )
 {  
   //run the tests on the first white beam vanadium run
   QString code = constructScript(lastResults);
+  pythonIsRunning(true);
   QString result = runPythonCode(code);
+  pythonIsRunning(false);
   // data from python is all passed back as a string, read in the string and see if it contains what we want
   return readRes(result);
 }
@@ -525,13 +530,15 @@ ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::runWhite2(
 *  @param test2 results of comparing white beam runs, test2.numBad=ExcitationsDiagResults::TestSummary::NORESULTS to ignore test
 *  @return a structure containing the status of running the tests, the number of bad detectors found the output workspace, etc.
 */
-ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::runBack(
+ExcitationsDiagResults::TestSummary Diagnostics::runBack(
   const ExcitationsDiagResults::TestSummary &test1,
   const ExcitationsDiagResults::TestSummary &test2 )
 {
   //run the tests on the first white beam vanadium run
   QString code = constructScript(test1, test2);
+  pythonIsRunning(true);
   QString result = runPythonCode(code);
+  pythonIsRunning(false);
   // data from python is all passed back as a string, read in the string and see if it contains what we want
   return readRes(result);
 }
@@ -539,7 +546,7 @@ ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::runBack(
 *  white beam vanadium and inserts the user entered values into that code
 *  @return executable python code
 */
-QString ExcitationsDiagnostics::constructScript() const
+QString Diagnostics::constructScript() const
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
   // generate an array with the all the file names that contain the python code we are going to use
@@ -573,7 +580,7 @@ QString ExcitationsDiagnostics::constructScript() const
 *  @param foundBad the results of the tests on the first white beam run
 *  @return executable python code
 */
-QString ExcitationsDiagnostics::constructScript(
+QString Diagnostics::constructScript(
     const ExcitationsDiagResults::TestSummary &foundBad) const
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
@@ -611,7 +618,7 @@ QString ExcitationsDiagnostics::constructScript(
 *  @param test2 results of comparing white beam runs, test2.numBad=ExcitationsDiagResults::TestSummary::NORESULTS to ignore test
 *  @return executable python code
 */
-QString ExcitationsDiagnostics::constructScript(
+QString Diagnostics::constructScript(
   const ExcitationsDiagResults::TestSummary &test1,
   const ExcitationsDiagResults::TestSummary &test2) const
 {
@@ -667,7 +674,7 @@ QString ExcitationsDiagnostics::constructScript(
   return pythonScript;
 }
 
-void ExcitationsDiagnostics::readFile(const QString &pythonFile, QString &scriptText) const
+void Diagnostics::readFile(const QString &pythonFile, QString &scriptText) const
 {
   QFile py_script(pythonFile);
   try
@@ -693,7 +700,7 @@ void ExcitationsDiagnostics::readFile(const QString &pythonFile, QString &script
 *  @pythonOut string as returned by runPythonCode()
 *  @return either data (or if numBad is set to NORESULTS then diagnositic output, or possibly nothing at all)
 */
-ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::readRes(
+ExcitationsDiagResults::TestSummary Diagnostics::readRes(
                                                           QString pyhtonOut)
 {
   QStringList results = pyhtonOut.split("\n");
@@ -725,7 +732,7 @@ ExcitationsDiagResults::TestSummary ExcitationsDiagnostics::readRes(
 * detectors.
 * @param summaryInfo the results from running each the test
 */
-ExcitationsDiagResults* ExcitationsDiagnostics::raiseDialog()
+ExcitationsDiagResults* Diagnostics::raiseDialog()
 {
   ExcitationsDiagResults *dialog = 0;
   try
@@ -750,7 +757,7 @@ ExcitationsDiagResults* ExcitationsDiagnostics::raiseDialog()
 *  @param variableName the internal name for the setting, not seen by users
 *  @param value the value that setting is going to take
 */
-void ExcitationsDiagnostics::storeUserSetting(const std::string &varibleName, const QString &value)
+void Diagnostics::storeUserSetting(const std::string &varibleName, const QString &value)
 {
   // some varibles will be copied over to algorithm properties and copy them over to the map in that situation 
   std::map<std::string, std::string>::const_iterator it
@@ -762,6 +769,15 @@ void ExcitationsDiagnostics::storeUserSetting(const std::string &varibleName, co
   }
   m_userSettingsMap[varibleName] = value;
 }
+/// enable the run button if the results dialog has been closed and the python has stopped
+void Diagnostics::pythonIsRunning(bool running)
+{// the run button was disabled when the results form was shown, as we can only do one analysis at a time, we can enable it now
+  m_busy = running;
+  if (!m_dispDialog && !running)
+  {
+    m_uiForm.pbRun->setEnabled(true);
+  }
+}
 //----------------------
 // Protected member functions
 //----------------------
@@ -769,7 +785,7 @@ void ExcitationsDiagnostics::storeUserSetting(const std::string &varibleName, co
  * Set the properties that have been parsed from the dialog.
  * @returns A boolean that indicates if the validation was successful.
  */
-bool ExcitationsDiagnostics::setPropertyValues()
+bool Diagnostics::setPropertyValues()
 {
   QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
   bool allValid(true);
@@ -813,7 +829,7 @@ bool ExcitationsDiagnostics::setPropertyValues()
  * This sets up the labels that are to be used to mark whether a property is valid. It has
  * a default implmentation but can be overridden if some other marker is required
  */ 
-void ExcitationsDiagnostics::createValidatorLabels()
+void Diagnostics::createValidatorLabels()
 {
   m_validators.clear();
   QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
@@ -830,7 +846,7 @@ void ExcitationsDiagnostics::createValidatorLabels()
 ///**
 // * Save the property values to the input history
 // */
-//void ExcitationsDiagnostics::saveInput()
+//void Diagnostics::saveInput()
 //{
 //  AlgorithmInputHistory::Instance().clearAlgorithmInput(m_algName);
 //  QHash<QString, Mantid::Kernel::Property*>::const_iterator pend = m_algProperties.end();
@@ -845,14 +861,14 @@ void ExcitationsDiagnostics::createValidatorLabels()
 /**
  * Get a property validator label
  */
-QLabel* ExcitationsDiagnostics::getValidatorMarker(const QString & propname) const
+QLabel* Diagnostics::getValidatorMarker(const QString & propname) const
 {
   return m_validators.value(propname);
 }
 /**
  * Adds a property (name,value) pair to the stored map
  */
-void ExcitationsDiagnostics::storePropertyValue(const QString & name, const QString & value)
+void Diagnostics::storePropertyValue(const QString & name, const QString & value)
 {
   if( name.isEmpty() ) return;
   
