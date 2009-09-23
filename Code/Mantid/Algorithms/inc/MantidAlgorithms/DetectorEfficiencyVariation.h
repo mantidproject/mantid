@@ -62,8 +62,7 @@ namespace Mantid
     {
     public:
       /// Default constructor initialises all data members and runs the base class constructor
-      DetectorEfficiencyVariation() :
-          Algorithm(),                                                        //call the base class constructor
+      DetectorEfficiencyVariation() : Algorithm(),                                   //call the base class constructor
           m_PercentDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
       {};
       /// Destructor
@@ -95,10 +94,6 @@ namespace Mantid
         MatrixWorkspace_const_sptr b, double average, double variation,
         std::string fileName);
 
-      /// Value written to the output workspace where bad spectra are found
-      static const int BadVal = 100;
-      /// Marks accepted spectra the output workspace
-      static const int GoodVal = 0;
       ///a flag int value to indicate that the value wasn't set by users
       static const int UNSETINT = INT_MAX-15;
 

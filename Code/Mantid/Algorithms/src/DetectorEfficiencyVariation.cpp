@@ -69,6 +69,12 @@ void DetectorEfficiencyVariation::init()
     "The name of a file to write the list of dead detector UDETs (default:\n"
     "no file output)" );
       // This output property will contain the list of UDETs for the dead detectors
+  declareProperty("GoodValue", 0.0,
+    "For each input workspace spectrum that passes write this flag value\n"
+    "to the equivalent spectrum in the output workspace (default 0.0)");
+  declareProperty("BadValue", 100.0,
+    "For each input workspace spectrum that fails write this flag value\n"
+    "to the equivalent spectrum in the output workspace (default 100.0)" );
   declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
 }
 
@@ -332,8 +338,12 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   const int numSpec = a->getNumberHistograms();
   int iprogress_step = numSpec / 10;
   if (iprogress_step == 0) iprogress_step = 1;
+
   InputWSDetectorInfo Detector1Info(a);
   InputWSDetectorInfo Detector2Info(b);
+
+  double GoodVal = getProperty("GoodValue");
+  double BadVal = getProperty("BadValue");
   for (int i = 0; i < numSpec; ++i)
   {
     // hold information about whether the histogram passes or fails and why

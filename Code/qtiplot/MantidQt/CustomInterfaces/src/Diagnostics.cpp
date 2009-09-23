@@ -45,12 +45,10 @@ const char Diagnostics::defBackground[4] = "0.1";
 // Public member functions
 //----------------------
 ///Constructor
-Diagnostics::Diagnostics(QWidget *parent) :
-  m_dispDialog(0), m_busy(false),
-  UserSubWindow(parent)
+Diagnostics::Diagnostics(QWidget *parent) : UserSubWindow(parent),
+  m_dispDialog(0), m_busy(false)
 {
 }
-
 /// slot called run by the results form (a ExcitationsDiagResults) to say that it has finished and we can start processing again
 void Diagnostics::childFormDied()
 {
@@ -276,7 +274,7 @@ void Diagnostics::run()
   catch (std::exception e)
   {// any exception that works its way passed here would cause QTiplot to suggest that it's shutdown, which I think would be uneccessary
     QMessageBox::critical(this, "", 
-      QString("Error ") + QString(e.what()) + QString(" encountered during execution"));
+      QString("Exception \"") + QString(e.what()) + QString("\" encountered during execution"));
     // the following commands 
   }
   Mantid::API::FrameworkManager::Instance().deleteWorkspace(test1.inputWS.toStdString());
@@ -389,6 +387,8 @@ that is used in validation
 */
 void Diagnostics::readTheDialog()
 {
+  m_propertyValueMap.clear();
+  m_userSettingsMap.clear();
   //  copy the values from each input control into the storage map
   storeUserSetting("InputFile", m_uiForm.leIFile->text());
   storeUserSetting("OutputFile", m_uiForm.leOFile->text());
@@ -441,7 +441,7 @@ void Diagnostics::getAlgProperties()
 {
   // m_algorPropList contains, as the indexabled value, the list of all the properties used. The map is small and we only do this once so it should not be noticably slow. If we upgrade boost then use bimap instead
   std::map<std::string, std::string>::const_iterator it;
-  for (  it = m_algorPropList.begin(); it != m_algorPropList.end(); ++it )
+  for ( it = m_algorPropList.begin(); it != m_algorPropList.end(); ++it )
   {
     // now loop through all the algoriths to find the one that the property is in ( on the left of the .)
     std::string algDotProp = it->second;
@@ -700,13 +700,12 @@ void Diagnostics::readFile(const QString &pythonFile, QString &scriptText) const
 *  @pythonOut string as returned by runPythonCode()
 *  @return either data (or if numBad is set to NORESULTS then diagnositic output, or possibly nothing at all)
 */
-ExcitationsDiagResults::TestSummary Diagnostics::readRes(
-                                                          QString pyhtonOut)
+ExcitationsDiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
 {
   QStringList results = pyhtonOut.split("\n");
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
-    QString Error = "Error found " + pyhtonOut + ", while executing scripts, more details can be found in the Mantid and python log files.";
+    QString Error = "Error \"" + pyhtonOut + "\" found, while executing scripts, more details can be found in the Mantid and python log files.";
     QMessageBox::critical(this, this->windowTitle(),
       Error);
     ExcitationsDiagResults::TestSummary temp = { Error, "", "", ExcitationsDiagResults::TestSummary::NORESULTS, "" };
@@ -714,7 +713,7 @@ ExcitationsDiagResults::TestSummary Diagnostics::readRes(
   }
   if ( results.count() < 6 || results[0] != "success" )
   {// there was an error in the python, disregard these results
-    QString Error = "Error " + results[1] + " found executing scripts.  More details can be found in the Mantid and python log files.";
+    QString Error = "Error \"" + results[1] + "\" found executing scripts.  More details can be found in the Mantid and python log files.";
     QMessageBox::critical(this, this->windowTitle(),
       Error);
     ExcitationsDiagResults::TestSummary temp = { Error, "", "", ExcitationsDiagResults::TestSummary::NORESULTS, "" };
@@ -746,7 +745,7 @@ ExcitationsDiagResults* Diagnostics::raiseDialog()
   catch (std::exception& e)
   {// any exception that works its way passed here would cause QTiplot to suggest that it's shutdown, which may be excessive
     QMessageBox::critical(this, "", 
-      QString("Error ") + QString::fromStdString(e.what()) + QString(" displaying the data"));
+      QString("Exception \"") + QString::fromStdString(e.what()) + QString("\" found displaying the data"));
     m_uiForm.pbRun->setEnabled(true);
   }
   return dialog;

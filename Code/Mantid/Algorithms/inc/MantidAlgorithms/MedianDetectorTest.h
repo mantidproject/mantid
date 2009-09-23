@@ -106,10 +106,6 @@ namespace Mantid
       std::vector<int> FindDetects(API::MatrixWorkspace_sptr responses,
                                                               double baseNum);
       
-      /// Value written to the output workspace where bad spectra are found
-      static const int BadVal = 100;
-      /// Marks accepted spectra the output workspace
-      static const int GoodVal = 0;
       ///a flag int value to indicate that the value wasn't set by users
       static const int UNSETINT = INT_MAX-15;
 

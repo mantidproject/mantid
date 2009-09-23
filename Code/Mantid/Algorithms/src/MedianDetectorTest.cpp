@@ -47,12 +47,6 @@ void MedianDetectorTest::init()
     "Detectors corresponding to spectra with total counts equal to or more\n"
     "than this number of the median will be identified as reading badly\n"
     "(default 1.5)" );
-/* Allow users to change the failure codes?      declareProperty("LiveValue", 0.0, mustBePositive->clone(),
-        "The value to assign to an integrated spectrum flagged as 'live'\n"
-        "(default 0.0)");
-      declareProperty("DeadValue", 100.0, mustBePositive->clone(),
-        "The value to assign to an integrated spectrum flagged as 'dead'\n"
-        "(default 100.0)" );*/
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
   mustBePosInt->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
@@ -73,6 +67,12 @@ void MedianDetectorTest::init()
   declareProperty("OutputFile","",
     "The name of a file to write the list of dead detector UDETs (default\n"
     "no file output)" );
+  declareProperty("GoodValue", 0.0,
+    "For each input workspace spectrum that passes write this flag value\n"
+    "to the equivalent spectrum in the output workspace (default 0.0)");
+  declareProperty("BadValue", 100.0,
+    "For each input workspace spectrum that fails write this flag value\n"
+    "to the equivalent spectrum in the output workspace (default 100.0)" );
       // This output property will contain the list of UDETs for the dead detectors
   declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
 }
@@ -413,6 +413,8 @@ std::vector<int> MedianDetectorTest::FindDetects(
   if (iprogress_step == 0) iprogress_step = 1;
   // we use the functions in this class to check the detector masking
   InputWSDetectorInfo DetectorInfoHelper(responses);
+  double GoodVal = getProperty("GoodValue");
+  double BadVal = getProperty("BadValue");
   for (int i = 0; i <= numSpec; ++i)
   {
     // get the address of the value of the first bin the spectra, we'll check it's value and then write a pass or fail to that location
