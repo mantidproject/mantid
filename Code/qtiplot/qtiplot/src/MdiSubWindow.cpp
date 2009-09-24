@@ -58,7 +58,6 @@ MdiSubWindow::MdiSubWindow(const QString& label, ApplicationWindow *app, const Q
 		d_min_restore_size(QSize())
 {
 	setObjectName(name);
-	setOption(QMdiSubWindow::RubberBandResize);
 	setAttribute(Qt::WA_DeleteOnClose);
 	setLocale(app->locale());
 	if (d_folder)
@@ -93,7 +92,7 @@ switch (d_caption_policy)
 
 void MdiSubWindow::resizeEvent( QResizeEvent* e )
 {
-  //emit resizedWindow(this);
+  emit resizedWindow(this);
 	QMdiSubWindow::resizeEvent( e );
 }
 
