@@ -11024,7 +11024,7 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
 			this,SLOT(newTable(const QString&,int,int,const QString&)));
 	connect (g,SIGNAL(viewTitleDialog()),this,SLOT(showTitleDialog()));
 	connect (g,SIGNAL(modifiedWindow(MdiSubWindow*)),this,SLOT(modifiedProject(MdiSubWindow*)));
-	//    connect (g,SIGNAL(resizedWindow(MdiSubWindow*)), this, SLOT(repaintWindows()));
+	connect (g,SIGNAL(resizedWindow(MdiSubWindow*)), this, SLOT(repaintWindows()));
 	connect (g,SIGNAL(modifiedPlot()), this, SLOT(modifiedProject()));
 	connect (g,SIGNAL(showLineDialog()),this, SLOT(showLineDialog()));
 	connect (g,SIGNAL(pasteMarker()),this,SLOT(pasteSelection()));
