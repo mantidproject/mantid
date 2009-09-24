@@ -67,19 +67,12 @@ void CrossCorrelate::exec()
     MantidVec::const_iterator minIt=std::find_if(referenceX.begin(),referenceX.end(),std::bind2nd(std::greater<double>(),xmin));
    	if (minIt==referenceX.end())
    		throw std::runtime_error("No data above X_min");
-   	std::ostringstream mess;
-   	mess << *(minIt);
-   	g_log.information(mess.str());
-   	mess.str("");
    	double xmax=getProperty("XMax");
    	MantidVec::const_iterator maxIt=std::find_if(minIt,referenceX.end(),std::bind2nd(std::greater<double>(),xmax));
    	if (minIt==maxIt)
    		throw std::runtime_error("Range is not valid");
-   	mess << *(maxIt);
-   	g_log.information(mess.str());
-   	mess.str("");
-   	//
-   	MantidVec::difference_type difminIt=std::distance(referenceX.begin(),minIt);
+
+    MantidVec::difference_type difminIt=std::distance(referenceX.begin(),minIt);
    	MantidVec::difference_type difmaxIt=std::distance(referenceX.begin(),maxIt);
 
    	// Now loop on the spectra in the range spectra_min and spectra_max and get valid spectra
@@ -99,7 +92,7 @@ void CrossCorrelate::exec()
    		++nspecs;
    	}
 
-
+    std::ostringstream mess;
 	if (nspecs==0) // Throw if no spectra in range
 	{
 		mess<< "No Workspaces in range between" << specmin << " and " << specmax;
@@ -123,8 +116,8 @@ void CrossCorrelate::exec()
 	mess << "min max" << refX.front() << " " << refX.back();
 	g_log.information(mess.str());
 	mess.str("");
-	std::copy(referenceY.begin()+difminIt,referenceY.begin()+difmaxIt-1,refY.begin());
-	std::copy(referenceE.begin()+difminIt,referenceE.begin()+difmaxIt-1,refE.begin());
+	std::copy(referenceY.begin()+difminIt,referenceY.begin()+(difmaxIt-1),refY.begin());
+	std::copy(referenceE.begin()+difminIt,referenceE.begin()+(difmaxIt-1),refE.begin());
 
   // Now start the real stuff
 	// Create a 2DWorkspace that will hold the result
