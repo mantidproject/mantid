@@ -3065,13 +3065,8 @@ PlotCurve* Graph::insertCurve(PlotCurve* c)
 void Graph::insertCurve(Graph* g, int i)
 {
   if( g == this || !g ) return;
-
-  DataCurve *dc = dynamic_cast<DataCurve *>(g->curve(i));
-  if( dc ) 
-  {
-    addCurves(dc->table(), QStringList(dc->table()->colName(1)));
-    setCurveStyle(g->visibleCurves(), dc->style());
-  }
+  PlotCurve *pc = dynamic_cast<PlotCurve*>(g->curve(i));
+  if( pc ) this->insertCurve(pc);
 }
 
 

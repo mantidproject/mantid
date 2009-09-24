@@ -2177,9 +2177,10 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, std::set<int>& inde
 
   for(std::set<int>::const_iterator it=indexList.begin();it!=indexList.end();it++)
   {
-    MantidCurve* c = new MantidCurve(wsName,g,"spectra",*it,errs);
+    new MantidCurve(wsName,g,"spectra",*it,errs);
   }
   setUpSpectrumGraph(ml,wsName);
+  return ml;
 
 }
 
