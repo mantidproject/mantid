@@ -75,7 +75,7 @@ private:
   void calculateStandardDeviation(const API::MatrixWorkspace_const_sptr &input, const API::MatrixWorkspace_sptr &smoothed, const int &w);
   long long computePhi(const int& w) const;
 
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i4);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4);
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;

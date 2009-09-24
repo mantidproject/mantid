@@ -124,7 +124,6 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
   // Loop over the list of peaks
   for (int i = 0; i < peakslist->rowCount(); ++i)
   {
-    g_log.debug() << "Subtracting peak from spectrum " << peakslist->getRef<int>("spectrum",i) << std::endl;
     // Get references to the data
     const MantidVec &X = outputWS->readX(peakslist->getRef<int>("spectrum",i));
     MantidVec &Y = outputWS->dataY(peakslist->getRef<int>("spectrum",i));
@@ -136,6 +135,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     // Hope to be able to remove them when we have better fitting routine
     if ( height < 0 ) continue;              // Height must be positive
 
+    g_log.debug() << "Subtracting peak from spectrum " << peakslist->getRef<int>("spectrum",i) 
+                  << " at x = " << centre << "\n";
     // Loop over the spectrum elements
     const int spectrumLength = Y.size();
     for (int j = 0; j < spectrumLength; ++j)

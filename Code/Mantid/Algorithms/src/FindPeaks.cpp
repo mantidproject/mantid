@@ -227,7 +227,7 @@ void FindPeaks::exec()
         // If we get to here then we've identified a peak
         g_log.debug() << "Spectrum=" << k << " i0=" << inputWS->readX(k)[i0] << " i1=" << i1 << " i2=" << i2 << " i3=" << i3 << " i4=" << i4 << " i5=" << i5 << std::endl;
 
-        this->fitPeak(inputWS,k,i0,i4);
+        this->fitPeak(inputWS,k,i0,i2,i4);
         
         // reset and go searching for the next peak
         i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
@@ -386,10 +386,11 @@ long long FindPeaks::computePhi(const int& w) const
  * 
  *  @param input    The input workspace
  *  @param spectrum The spectrum index of the peak
- *  @param i0       Channel number of peak i0
- *  @param i4       Channel number of peak i4
+ *  @param i0       Channel number of peak candidate i0
+ *  @param i2       Channel number of peak candidate i2
+ *  @param i4       Channel number of peak candidate i4
  */
-void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i4)
+void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i0, const int i2, const int i4)
 {
   IAlgorithm_sptr fit;
   try
@@ -408,12 +409,14 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
   
+  const int fitWidth = i0-i2;
+
   for (unsigned int width = 2; width <= 10; width +=2)
   {
     // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
     unsigned int i_min = 1;
-    if (i0 > static_cast<int>(25*width)) i_min = i0 - 25*width;
-    unsigned int i_max = i0 + 25*width;
+    if (i0 > static_cast<int>(5*fitWidth)) i_min = i0 - 5*fitWidth;
+    unsigned int i_max = i0 + 5*fitWidth;
     // Bounds checks
     if (i_min<1) i_min=1;
     if (i_max>=Y.size()-1) i_max=Y.size()-2;
