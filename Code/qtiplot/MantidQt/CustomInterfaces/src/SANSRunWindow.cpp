@@ -48,7 +48,7 @@ Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANS
 //----------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(false), m_run_no_boxes(), 
+  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
   m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false), m_force_reload(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace),
   m_logvalues(), m_maskcorrections(), m_havescipy(true), m_lastreducetype(-1)
@@ -104,8 +104,6 @@ void SANSRunWindow::initLayout()
     connect(m_reducemapper, SIGNAL(mapped(const QString &)), this, SLOT(handleReduceButtonClick(const QString &)));
     
     connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
-//    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.oneDBtn, SLOT(setEnabled(bool)));
-//    connect(this, SIGNAL(dataReadyToProcess(bool)), m_uiForm.twoDBtn, SLOT(setEnabled(bool)));
 
     //Text edit map
     m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
@@ -348,7 +346,7 @@ bool SANSRunWindow::loadUserFile()
         //Check for relative or absolute path
         if( QFileInfo(filepath).isRelative() )
         {
-          filepath = work_dir.absoluteFilePath(filepath);
+          filepath = QFileInfo(user_file).absoluteDir().absoluteFilePath(filepath);
         }
 
         if( field.compare("direct", Qt::CaseInsensitive) == 0 )
@@ -1026,13 +1024,13 @@ void SANSRunWindow::selectUserFile()
 }
 
 /**
- * Flip the flag so that a data reload will be forced
+ * Flip the flag to confirm whether data is reloaded
+ * @param force If true, the data is reloaded when reduce is clicked
  */
-void SANSRunWindow::forceDataReload()
+void SANSRunWindow::forceDataReload(bool force)
 {
-  m_force_reload = true;
+  m_force_reload = force;
 }
-
 
 /**
  * Receive a load button click signal
@@ -1090,7 +1088,7 @@ void SANSRunWindow::handleLoadButtonClick()
       showInformationBox("Error: Cannot load run " + run_no 
 			 + ".\nPlease check that the correct instrument and file extension are selected");
       //Bail out completely now and make sure that future load will try to reload
-      m_force_reload = true;
+      forceDataReload();
       setProcessingState(false, -1);
       return;
     }
@@ -1135,7 +1133,7 @@ void SANSRunWindow::handleLoadButtonClick()
    return;
   }
 
-  m_force_reload = false;
+  forceDataReload(false);
   //Fill in the information on the geometry tab
   setupGeometryDetails();
 
@@ -1153,7 +1151,7 @@ void SANSRunWindow::handleLoadButtonClick()
  * @ replacewsnames Whether to replace the data workspace names
  * @param checkchanges Whether to check that a data reload is necessary
  */
-QString SANSRunWindow::constructReductionCode(bool replacewsnames, bool checkchanges)
+QString SANSRunWindow::constructReductionCode(bool , bool)
 {
   if( !readPyReductionTemplate() ) return QString();
   if( m_ins_defdir.isEmpty() ) m_ins_defdir = m_data_dir;
@@ -1170,14 +1168,11 @@ QString SANSRunWindow::constructReductionCode(bool replacewsnames, bool checkcha
   py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
   py_code.replace("|DETBANK|", m_uiForm.detbank_sel->currentText());
   
-  if( replacewsnames )
-  {
-    py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
-    py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
-    py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.value(3));
-    py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.value(4));
-    py_code.replace("|DIRECTSAMPLE|", m_workspace_names.value(6));
-  }
+  py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
+  py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
+  py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.value(3));
+  py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.value(4));
+  py_code.replace("|DIRECTSAMPLE|", m_workspace_names.value(6));
 
   // Limit replacement
   QString radius = m_uiForm.rad_min->text();
@@ -1321,58 +1316,20 @@ void SANSRunWindow::handlePlotButtonClick()
 
 void SANSRunWindow::handleRunFindCentre()
 {
+  // Start iteration
+  updateCentreFindingStatus("::SANS::Loading data");
+  handleLoadButtonClick();
+
+  // Disable interaction
+  setProcessingState(true, 0);
+
   // This checks whether we have a sample run and that it has been loaded
   QString py_code = constructReductionCode(false, false);
   if( py_code.isEmpty() )
   {
+    setProcessingState(false, 0);
     return;
   }
-
-  // Disable interaction
-  setProcessingState(true, 0);
-  // Start iteration
-  updateCentreFindingStatus("::SANS::Loading data");
-
-  // Use different names for the centre finding so that the workspace list is not confusing
-  //Scatter sample
-  QString work_dir = QDir(m_uiForm.datadir_edit->text()).absolutePath();
-  QVector<QString> varnames(5, "");
-  varnames[0] = "|SCATTERSAMPLE|";
-  varnames[1] = "|SCATTERCAN|";
-  varnames[2] = "|TRANSMISSIONSAMPLE|";
-  varnames[3] = "|TRANSMISSIONCAN|";
-  varnames[4] = "|DIRECTSAMPLE|";
-
-  QVector<QPair<QString, QString> > runmap(5);
-  runmap[0] = qMakePair(QString("centre-smp"), m_uiForm.sct_sample_edit->text());
-  runmap[1] = qMakePair(QString("centre-can"), m_uiForm.sct_can_edit->text());
-  runmap[2] = qMakePair(QString("centre-trans"), m_uiForm.tra_sample_edit->text());
-  runmap[3] = qMakePair(QString("centre-trans-can"),m_uiForm.tra_can_edit->text());
-  runmap[4] = qMakePair(QString("centre-direct"), m_uiForm.direct_sample_edit->text());
-  
-  forceDataReload();
-  for( int i = 0; i < 5; ++i )
-  {
-    QString run = runmap.at(i).second;
-    QString wsname = run + "_" + runmap.at(i).first;
-    int nprds = runLoadData(work_dir, run, m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString(), 
-			    wsname);
-    //Raise an error if nothing could be loaded
-    if( !run.isEmpty() && nprds == 0 )
-    {
-      showInformationBox("An error occurred while trying to load run " + run);
-      return;
-    }
-    if( nprds > 0 )
-    {
-      py_code.replace(varnames.at(i), wsname);      
-    }
-    else
-    {
-      py_code.replace(varnames.at(i), "");      
-    }
-  }
-  
 
   py_code.replace("|ANALYSISTYPE|", "1D");
   if( m_uiForm.beam_rmin->text().isEmpty() )
@@ -1462,7 +1419,7 @@ void SANSRunWindow::handleRunFindCentre()
   {
     updateCentreFindingStatus("::SANS::Error with search");
   }
-
+  forceDataReload();
   //Reenable stuff
   setProcessingState(false, 0);
 }
@@ -1573,14 +1530,18 @@ void SANSRunWindow::handleTabChange(int index)
     "try:\n"
     "\timport scipy.optimize\n"
     "except(ImportError):\n"
-    "\tprint 'scipy package is not installed'\n";
+    "\texit('scipy package is not installed')\n"
+    "try:\n"
+    "\timport numpy\n"
+    "except(ImportError):\n"
+    "\texit('scipy package is not installed')\n";
 
     QString result = runPythonCode(scipycode);
     m_havescipy = true;
     if( !result.isEmpty() )
     {
-      showInformationBox("The centre-finding functionality requires the scipy Python package to be installed,\n"
-			 "please install it if you wish to use this function.");
+      showInformationBox("The centre-finding functionality requires the scipy and numpy Python packages to be installed,\n"
+			 "please install them, taking care of to use the correct Python version, if you wish to use this function.");
       m_havescipy = false;
       m_uiForm.runcentreBtn->setEnabled(false);
     }

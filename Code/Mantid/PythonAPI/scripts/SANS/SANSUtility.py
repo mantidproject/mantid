@@ -214,61 +214,26 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
 	xmlstring += '<algebra val="(#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '"/>\n' 
 	return xmlstring
 
-# Create a workspace with a quadrant value in it 
-def CreateQuadrant(workspace, quadrant, xcentre, ycentre, rmin, rmax):
-	objxml = QuadrantXML([xcentre,ycentre, 0.0], rmin, rmax, quadrant)
-	finddead = FindDetectorsInShape(workspace, ShapeXML=objxml)
-	groupdet = GroupDetectors(workspace, quadrant, DetectorList = finddead.getPropertyValue("DetectorList"))
-	# Replaces NANs with zeroes
-	ReplaceSpecialValues(InputWorkspace=quadrant,OutputWorkspace=quadrant,NaNValue="0",InfinityValue="0")
-	# Crop Workspace to remove leading and trailing zeroes
-	StripEndZeroes(quadrant)
-
-# Create 4 quadrants for the centre finding algorithm and return their names
-def GroupIntoQuadrants(workspace, xcentre, ycentre, rmin, rmax):
-	left_ws = 'Left'
-	CreateQuadrant(workspace, left_ws,xcentre, ycentre, rmin, rmax)
-	right_ws = 'Right'
-	CreateQuadrant(workspace, right_ws,xcentre, ycentre, rmin, rmax)
-	up_ws = 'Up'
-	CreateQuadrant(workspace, up_ws,xcentre, ycentre, rmin, rmax)
-	dw_ws = 'Down'
-	CreateQuadrant(workspace, dw_ws,xcentre, ycentre, rmin, rmax)
-	return (left_ws, right_ws, up_ws, dw_ws)
-
-# Calcluate the sum squared difference of the given workspaces. This assumes that a single spectrum workspace in Q
-# for each of the quadrants. The order should be L,R,U,D
-def CalculateResidue(quadrants):
-	ly = mtd.getMatrixWorkspace(quadrants[0]).readY(0)
-	ry = mtd.getMatrixWorkspace(quadrants[1]).readY(0)
-	uy = mtd.getMatrixWorkspace(quadrants[2]).readY(0)
-	dy = mtd.getMatrixWorkspace(quadrants[3]).readY(0)
-	residue = 0
-	nvals = len(ly)
-	for index in range(0, nvals):
-		residue += pow(ly[index] - ry[index], 2) + pow(uy[index] - dy[index], 2)
-	return residue
-
-def StripEndZeroes(workspace):
+def StripEndZeroes(workspace, flag_value = 0.0):
         result_ws = mantid.getMatrixWorkspace(workspace)
         y_vals = result_ws.readY(0)
         length = len(y_vals)
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
-                if ( y_vals[i] != 0.0 ):
+                if ( y_vals[i] != flag_value ):
                         start = i
                         break
         # Now find the last non-zero value
         stop = 0
         length -= 1
         for j in range(length, 0,-1):
-                if ( y_vals[j] != 0.0 ):
+                if ( y_vals[j] != flag_value ):
                         stop = j
                         break
         # Find the appropriate X values and call CropWorkspace
         x_vals = result_ws.readX(0)
-        startX = x_vals[start]
+        startX = x_vals[start+1]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop+1]
         CropWorkspace(workspace,workspace,startX,endX)

@@ -233,16 +233,21 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 	#####################################################################################
 	
 	########################## Masking  ################################################
-	# Mask the corners and beam stop if radius parameters are given and we are not performing
-	# the centre finding algorithm
-	if FindingCentre == False:
+	# Mask the corners and beam stop if radius parameters are given
+	if FindingCentre == True:
+		if RMIN > 0.0: 
+			SANSUtility.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
+		if RMAX > 0.0:
+			SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmin[0], maskpt_rmin[1])
+	else:
 		if RMIN > 0.0: 
 			SANSUtility.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
 		if RMAX > 0.0:
 			SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
-		# Mask other requested spectra that are given in the GUI
-		speclist = SANSUtility.ConvertToSpecList(MASKSTRING, SPECMIN, DIMENSION)
-		SANSUtility.MaskBySpecNumber(final_result, speclist)
+
+	# Mask other requested spectra that are given in the GUI
+	speclist = SANSUtility.ConvertToSpecList(MASKSTRING, SPECMIN, DIMENSION)
+	SANSUtility.MaskBySpecNumber(final_result, speclist)
 	####################################################################################
 	
 	######################## Unit change and rebin #####################################
@@ -257,7 +262,7 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 
 	####################### Correct by incident beam monitor ###########################
 	# At this point need to fork off workspace name to keep a workspace containing raw counts
-	tmpWS = "temporary_workspace"
+	tmpWS = "reduce_temp_workspace"
 	Divide(final_result, monitorWS, tmpWS)
 	mantid.deleteWorkspace(monitorWS)
 	###################################################################################
@@ -280,37 +285,35 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 		# Convert to Q
 		ConvertUnits(tmpWS,tmpWS,"MomentumTransfer")
 		ConvertUnits(final_result,final_result,"MomentumTransfer")
-		
+
 		# Need to mark the workspace as a distribution at this point to get next rebin right
 		ws = mantid.getMatrixWorkspace(tmpWS)
 		ws.isDistribution(True)
-		
+
 		# Rebin to desired Q bins
 		q_bins = str(Q1) + "," + str(DQ) + "," + str(Q2)
 		Rebin(final_result, final_result, q_bins)
 		# Calculate the solid angle corrections
-		SolidAngle(tmpWS,"solidangle")
-		RebinPreserveValue("solidangle", "solidangle", q_bins)
+		solidangle_ws ="solidangle" 
+		SolidAngle(tmpWS,solidangle_ws)
+		RebinPreserveValue(solidangle_ws, solidangle_ws, q_bins)
 		Rebin(tmpWS, tmpWS, q_bins)
 
 		if FindingCentre == True:
-			Divide(tmpWS,"solidangle",tmpWS)
-			mantid.deleteWorkspace("solidangle")
-			PoissonErrors(tmpWS, final_result, final_result)
-			mantid.deleteWorkspace(tmpWS)
+			GroupIntoQuadrants(tmpWS, final_result, solidangle_ws, maskpt_rmin[0], maskpt_rmin[1])
 			return
-		
-		# Sum all spectra
-		SumSpectra(final_result,final_result)
-		SumSpectra(tmpWS,tmpWS)
-		SumSpectra("solidangle","solidangle")
-	
-		# Correct for solidangle
-		Divide(tmpWS,"solidangle",tmpWS)
-		mantid.deleteWorkspace("solidangle")
+		else:
+			# Sum all spectra
+			SumSpectra(final_result,final_result)
+			SumSpectra(tmpWS,tmpWS)
+			SumSpectra(solidangle_ws,solidangle_ws)
 
-		# Now put back the fractional error from the raw count workspace into the result
-		PoissonErrors(tmpWS, final_result, final_result)
+			# Correct for solidangle
+			Divide(tmpWS,solidangle_ws,tmpWS)
+			mantid.deleteWorkspace(solidangle_ws)
+
+			# Now put back the fractional error from the raw count workspace into the result
+			PoissonErrors(tmpWS, final_result, final_result)
 	# 2D	
 	else:
 		# Run 2D algorithm
@@ -333,7 +336,7 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 	if EmptyCell == True:
 		trans_input = TRANS_CAN
 		trans_suffix = 'can'
-		final_workspace = "temp_can_holder"
+		final_workspace = "can_temp_workspace"
 	else:
 		trans_input = TRANS_SAMPLE
 		trans_suffix = 'sample'
@@ -350,7 +353,7 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 		final_workspace += '_' + CORRECTION_TYPE
 
 	# Centre reduction works a lot better when pressing the button again with this here
-	mtd.deleteWorkspace(run_ws.split('_')[0] + 'rear_centre-reduced')
+	mtd.deleteWorkspace(run_ws.split('_')[0] + 'quadrants')
 
 	trans_final = trans_input.split('_')[0] + "_trans_" + trans_suffix
 	have_sample_trans = CalculateTransmissionCorrection(trans_input, DIRECT_SAMPLE, WAV1, DWAV, WAV2, trans_final)
@@ -364,7 +367,7 @@ def InitReduction(run_ws, beamcoords, EmptyCell):
 def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre = False):
 	# Run correction function
 	if FindingCentre == True:
-		final_workspace = sample_setup[1].split('_')[0] + '_centre-reduced'
+		final_workspace = sample_setup[1].split('_')[0] + '_quadrants'
 	else:
 		final_workspace = sample_setup[1] + '_' + str(wav_start) + '_' + str(wav_end)
 		
@@ -375,11 +378,20 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
 		Minus(final_workspace, can_setup[1], final_workspace)
 		mantid.deleteWorkspace(can_setup[1])
 	
-	# Replaces NANs with zeroes
-	ReplaceSpecialValues(InputWorkspace=final_workspace,OutputWorkspace=final_workspace,NaNValue="0",InfinityValue="0")
 	# Crop Workspace to remove leading and trailing zeroes
-	if CORRECTION_TYPE == '1D':
-                SANSUtility.StripEndZeroes(final_workspace)
+	if FindingCentre == False:
+		# Replaces NANs with zeroes
+		ReplaceSpecialValues(InputWorkspace=final_workspace,OutputWorkspace=final_workspace,NaNValue="0",InfinityValue="0")
+		if CORRECTION_TYPE == '1D':
+			SANSUtility.StripEndZeroes(final_workspace)
+	else:
+		ExtractSingleSpectrum(final_workspace, 'Left', 0)
+		ExtractSingleSpectrum(final_workspace, 'Right', 1)
+		ExtractSingleSpectrum(final_workspace, 'Up', 2)
+		ExtractSingleSpectrum(final_workspace, 'Down', 3)
+		mtd.deleteWorkspace(final_workspace)
+		final_workspace = ''
+
 	return final_workspace
 ############################################################################################################################
 
@@ -399,6 +411,62 @@ try:
 		ITER_NUM += 1
 		mantid.sendLogMessage("::SANS::Iteration: " + str(ITER_NUM))
 
+		if ITER_NUM == 2:
+			# Produce some plots
+			g = plotSpectrum('Left', 0)
+			mergePlots(g, plotSpectrum('Right', 0))
+			mergePlots(g, plotSpectrum('Up', 0))
+			mergePlots(g, plotSpectrum('Down', 0))
+			
+	# Create a workspace with a quadrant value in it 
+	def CreateQuadrant(reduced_ws, rawcount_ws, solidangle_ws, quadrant, xcentre, ycentre, quad_ws, 
+			   append = False):
+		objxml = SANSUtility.QuadrantXML([xcentre, ycentre, 0.0], RMIN, RMAX, quadrant)
+		finddet = FindDetectorsInShape(reduced_ws, ShapeXML=objxml)
+		if append == True:
+			output = 'quad_temp_spectrum'
+		else:
+			output = quad_ws
+		GroupDetectors(reduced_ws, output, DetectorList = finddet.getPropertyValue("DetectorList"))
+		tmp = 'group_temp_workspace'
+		GroupDetectors(solidangle_ws, tmp, DetectorList = finddet.getPropertyValue("DetectorList"))
+		Divide(output, tmp, output)
+		GroupDetectors(rawcount_ws, tmp, DetectorList = finddet.getPropertyValue("DetectorList"))
+		PoissonErrors(output, tmp, output)
+		mtd.deleteWorkspace(tmp)
+		flag_value = -10
+		ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue="0")
+		if CORRECTION_TYPE == '1D':
+			SANSUtility.StripEndZeroes(output, flag_value)
+			
+		if append == True:
+			ConjoinWorkspaces(quad_ws, output)
+		
+	# Create 4 quadrants for the centre finding algorithm and return their names
+	def GroupIntoQuadrants(reduced_ws, final_result, solidangle_ws, xcentre, ycentre):
+		tmp = 'quad_temp_holder'
+		CreateQuadrant(reduced_ws, final_result, solidangle_ws, 'Left', xcentre, ycentre, tmp)
+		pieces = ['Right', 'Up', 'Down']
+		for q in pieces:
+			CreateQuadrant(reduced_ws, final_result, solidangle_ws, q, xcentre, ycentre, tmp, append = True)
+		mantid.deleteWorkspace(final_result)			
+		mantid.deleteWorkspace(reduced_ws)
+		mantid.deleteWorkspace(solidangle_ws)
+		
+		RenameWorkspace(tmp, final_result)
+	
+	# Calcluate the sum squared difference of the given workspaces. This assumes that a workspace with
+	# one spectrum for each of the quadrants. The order should be L,R,U,D.
+	def CalculateResidue():
+		ly = mtd.getMatrixWorkspace('Left').readY(0)
+		ry = mtd.getMatrixWorkspace('Right').readY(0)
+		uy = mtd.getMatrixWorkspace('Up').readY(0)
+		dy = mtd.getMatrixWorkspace('Down').readY(0)
+		residue = 0
+		nvals = len(ly)
+		for index in range(0, nvals):
+			residue += pow(ly[index] - ry[index], 2) + pow(uy[index] - dy[index], 2)
+		return residue
 
 	def Residuals(vars, *args):
 		'''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants (cones really)'''
@@ -413,28 +481,24 @@ try:
 		YVAR_PREV = ycentre
 
 		# Do the correction
-		if xshift <> 0.0 or yshift <> 0.0:
+		if xshift != 0.0 or yshift != 0.0:
 			MoveInstrumentComponent(SCATTER_SAMPLE, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
 			if SCATTER_CAN != '':
 				MoveInstrumentComponent(SCATTER_CAN, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
 	
 		# Arguments 0 and 1 are the sample and can setup details
-		ws_togroup = WavRangeReduction(args[0], args[1], WAV1, WAV2, FindingCentre=True)
-		rlow = args[2]
-		rupp = args[3]
-		# The workspace that we want to group is the output of the sample reduction
-		quad_ws = SANSUtility.GroupIntoQuadrants(ws_togroup, 0.0, 0.0, rlow, rupp)
-		return SANSUtility.CalculateResidue(quad_ws)
+		info = args[0]
+		sample_details = info[0], info[1], [0.0,0.0], [xcentre, ycentre]
+		info = args[1]
+		can_details = info[0], info[1], [0.0,0.0], [xcentre, ycentre]
+		WavRangeReduction(sample_details, can_details, WAV1, WAV2,FindingCentre=True)
+	
+		return CalculateResidue()
 
 	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
-		global XVAR_PREV, YVAR_PREV, ITER_NUM
-		
-		# Clear any previous workspaces (Note that a log message will appear saying they don't exists
-		# if there is not but execution will continue)
-		mtd.deleteWorkspace('Left')
-		mtd.deleteWorkspace('Right')
-		mtd.deleteWorkspace('Up')
-		mtd.deleteWorkspace('Down')
+		global XVAR_PREV, YVAR_PREV, ITER_NUM, RMIN, RMAX
+		RMIN = rlow
+		RMAX = rupp
 
 		if xstart == None or ystart == None:
 			# If a starting point is not provided, do a quick sweep to find the maximum count as an 
@@ -474,17 +538,7 @@ try:
 		# There's a bug in the scipy.optimize.fmin function that skips the callback function for the first iteration
 		ITER_NUM = 0
 		reportProgress([0,0])
-		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, rlow, rupp),xtol=1e-2,maxiter=MaxIter, callback = reportProgress)
-		
-		# Tidy up
-#		mtd.deleteWorkspace('Left')
-#		mtd.deleteWorkspace('Right')
-#		mtd.deleteWorkspace('Up')
-#		mtd.deleteWorkspace('Down')
-#		mtd.deleteWorkspace(scatter_setup[1] + '_' + str(WAV1) + '_' + str(WAV2))
-#		mtd.deleteWorkspace(SCATTER_SAMPLE)
-#		if SCATTER_CAN != '':
-#			mtd.deleteWorkspace(SCATTER_CAN)
+		coords = scipy.optimize.fmin(Residuals, [XVAR_PREV, YVAR_PREV], (scatter_setup, can_setup, RMIN, RMAX),xtol=1e-2,maxiter=MaxIter, callback = reportProgress)
 		
 		# The coordinates returned are the position of the detector so the beam centre is -coords
 		return -coords
@@ -493,26 +547,4 @@ except:
 		print 'This function requires the scipy package to be installed.'
 		return [0,0]
 ############################################################################################################################
-
-################################### Work begins here #####################################################################
-# The GUI appends it's own commands here so if you are using this as a script then the best thing is to use this as a template
-# and copy it to another file and execute that, making sure that the details at the top are appropriately filled in.
-
-### Example code:
-# The beam finding alters the raw data workspace so be careful before performing other analyses straight after
-# using this
-#beamcoords = FindBeamCentre(rlow = 0.06, rupp= 0.28, MaxIter = 10)
-#print beamcoords
-
-# Remove and reload all workspaces before doing corrections
-#mtd.clear();
-
-# Do the initialization
-#sample_setup = InitReduction(SCATTER_SAMPLE, [0.082, -0.193], False)
-#can_setup = InitReduction(SCATTER_CAN, [0.082, -0.193], True)
-
-### Corrections
-# FullWavRangeReduction(sample_setup, can_setup)
-### Or for a smaller lambda range 
-# WavRangeReduction(sample_setup, can_setup, 2, 4)
 

@@ -107,7 +107,7 @@ private slots:
   void selectUserFile();
 
   /// Flip the reload flag
-  void forceDataReload();
+  void forceDataReload(bool force = true);
   
   /// Receive a load button click
   void handleLoadButtonClick();
