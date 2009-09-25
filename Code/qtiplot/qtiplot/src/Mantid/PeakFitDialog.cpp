@@ -231,7 +231,7 @@ void PeakFitDialog::widthNameChanged ( const QString &str)
 
 void PeakFitDialog::startUserFitFunctionDialog()
 {
-  UserFitFunctionDialog dlg(this);
+  UserFitFunctionDialog dlg((QWidget*)this);
   if (dlg.exec() == QDialog::Accepted)
   {
     ui.leExpression->setText( dlg.expression() );
