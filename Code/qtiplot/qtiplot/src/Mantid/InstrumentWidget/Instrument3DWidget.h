@@ -93,7 +93,7 @@ signals:
   void actionSpectraSelected(int);
   void actionDetectorHighlighted(int,int,int);
   void actionDetectorSelectedList(std::vector<int>);
-  void actionSpectraSelectedList(std::vector<int>);
+  void actionSpectraSelectedList(std::set<int>);
 
 private:
   void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument>);

@@ -27,7 +27,7 @@
 #include <map>
 #include <cmath>
 #include <cfloat>
-#include <numeric> >
+#include <numeric>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -91,10 +91,11 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
     }
     else // If more than one detector selected
     {
+      std::set<int> spectralist(spectraIndices.begin(), spectraIndices.end());
       //emit the detector ids
       emit actionDetectorSelectedList(detectorIds);
       //emit the spectra ids
-      emit actionSpectraSelectedList(spectraIndices);
+      emit actionSpectraSelectedList(spectralist);
     }
 
   }
