@@ -379,13 +379,22 @@ void PeakFitDialog::setPeakParams(const QString& str)
   m_widthName = "";
 
   if (list.size() > 0)
-    m_centreName = list[0].toStdString();
+  {
+    QString s = list[0];
+    m_centreName = s.toStdString();
+  }
 
   if (list.size() > 1)
-    m_heightName = list[1].toStdString();
+  {
+    QString s = list[1];
+    m_heightName = s.toStdString();
+  }
 
   if (list.size() > 2)
-    m_widthName = list[2].toStdString();
+  {
+    QString s = list[2];
+    m_widthName = s.toStdString();
+  }
 
 }
 
