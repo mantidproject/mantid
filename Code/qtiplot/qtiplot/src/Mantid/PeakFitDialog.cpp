@@ -231,7 +231,7 @@ void PeakFitDialog::widthNameChanged ( const QString &str)
 
 void PeakFitDialog::startUserFitFunctionDialog()
 {
-  UserFitFunctionDialog dlg = UserFitFunctionDialog(this);
+  UserFitFunctionDialog dlg = UserFitFunctionDialog((QWidget*)this);
   if (dlg.exec() == QDialog::Accepted)
   {
     ui.leExpression->setText( dlg.expression() );
@@ -239,7 +239,7 @@ void PeakFitDialog::startUserFitFunctionDialog()
     if (!peakP.isEmpty())
     {
       setPeakParams(peakP);
-      m_widthCorrectionFormula = dlg.widthFormula();
+      m_widthCorrectionFormula = dlg.widthFormula().toStdString();
       ui.leWidthFormula->setText(QString::fromStdString(m_widthCorrectionFormula));
     }
     setUserParams(true);
@@ -379,13 +379,13 @@ void PeakFitDialog::setPeakParams(const QString& str)
   m_widthName = "";
 
   if (list.size() > 0)
-    m_centreName = list[0];
+    m_centreName = list[0].toStdString();
 
   if (list.size() > 1)
-    m_heightName = list[1];
+    m_heightName = list[1].toStdString();
 
   if (list.size() > 2)
-    m_widthName = list[2];
+    m_widthName = list[2].toStdString();
 
 }
 

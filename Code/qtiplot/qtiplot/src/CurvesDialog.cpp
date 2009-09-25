@@ -323,6 +323,7 @@ void CurvesDialog::init()
             {
               available->addItem(c->title().text());
               d_plotCurves[c->title().text()] = c;
+              ml->setCloseOnEmpty(false);
             }
           }
         }
