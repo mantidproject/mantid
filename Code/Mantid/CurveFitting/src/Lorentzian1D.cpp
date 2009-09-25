@@ -33,7 +33,7 @@ void Lorentzian1D::declareParameters()
     "half-width at half-maximum (default 1)", Direction::InOut);
 }
 
-void Lorentzian1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void Lorentzian1D::function(const double* in, double* out, const double* xValues, const int& nData)
 {
     const double& bg0 = in[0];
     const double& bg1 = in[1];
@@ -43,26 +43,24 @@ void Lorentzian1D::function(const double* in, double* out, const double* xValues
 
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
-        double Yi = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) )+bg0+bg1*xValues[i];
-        out[i] = (Yi - yValues[i])/yErrors[i];
+        out[i] = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) )+bg0+bg1*xValues[i];
     }
 }
 
-void Lorentzian1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void Lorentzian1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
 {
     const double& height = in[2];
     const double& peakCentre = in[3];
     const double& hwhm = in[4];
 
     for (int i = 0; i < nData; i++) {
-        double invE = 1/yErrors[i];
         double diff = xValues[i]-peakCentre;
         double invDenominator =  1/((diff*diff+hwhm*hwhm));
-        out->set(i,0, invE);
-        out->set(i,1, xValues[i]*invE);
-        out->set(i,2, hwhm*hwhm*invDenominator*invE);
-        out->set(i,3, 2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator*invE);
-        out->set(i,4, height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator*invE);
+        out->set(i,0, 1);
+        out->set(i,1, xValues[i]);
+        out->set(i,2, hwhm*hwhm*invDenominator);
+        out->set(i,3, 2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator);
+        out->set(i,4, height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator);
     }
 }
 

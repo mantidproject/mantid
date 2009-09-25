@@ -82,7 +82,7 @@ struct FitData {
 /** Fit1D GSL function wrapper
 * @param x Input function arguments
 * @param params Input data
-* @param f Output function values = (y_cal-y_cal)/sigma for each data point
+* @param f Output function values = (y_cal-y_data)/sigma for each data point
 * @return A GSL status information
 */
 static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
@@ -91,12 +91,18 @@ static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
         if (((struct FitData *)params)->active[i])
             ((struct FitData *)params)->parameters[i] = x->data[j++];
 
+
+
     ((struct FitData *)params)->fit1D->function (((struct FitData *)params)->parameters, f->data,
                    ((struct FitData *)params)->X,
-                   ((struct FitData *)params)->Y,
-                   ((struct FitData *)params)->sigmaData,
                    ((struct FitData *)params)->n);
 
+    // function() return calculated data values. Need to convert this values into
+    // calculated-observed devided by error values used by GSL
+
+    for (int i = 0; i<((struct FitData *)params)->n; i++)
+      f->data[i] = 
+           (  f->data[i] - ((struct FitData *)params)->Y[i] ) / ((struct FitData *)params)->sigmaData[i];
 
     return GSL_SUCCESS;
 }
@@ -119,9 +125,14 @@ static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
 
     ((struct FitData *)params)->fit1D->functionDeriv (((struct FitData *)params)->parameters, &((struct FitData *)params)->J,
                    ((struct FitData *)params)->X,
-                   ((struct FitData *)params)->Y,
-                   ((struct FitData *)params)->sigmaData,
                    ((struct FitData *)params)->n);
+
+    // functionDeriv() return derivatives of calculated data values. Need to convert this values into
+    // derivatives of calculated-observed devided by error values used by GSL
+
+    for (int iY = 0; iY < ((struct FitData *)params)->n; iY++) 
+      for (int iP = 0; iP < ((struct FitData *)params)->p; iP++) 
+        J->data[iY*((struct FitData *)params)->p + iP] /= ((struct FitData *)params)->sigmaData[iY];
 
     return GSL_SUCCESS;
 }
@@ -159,9 +170,13 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
   ((struct FitData *)params)->fit1D->function (((struct FitData *)params)->parameters,
                    l_forSimplexLSwrap,
                    ((struct FitData *)params)->X,
-                   ((struct FitData *)params)->Y,
-                   ((struct FitData *)params)->sigmaData,
                    ((struct FitData *)params)->n);
+
+    // function() return calculated data values. Need to convert this values into
+    // calculated-observed devided by error values used by GSL
+    for (int i = 0; i<((struct FitData *)params)->n; i++)
+      l_forSimplexLSwrap[i] = 
+           (  l_forSimplexLSwrap[i] - ((struct FitData *)params)->Y[i] ) / ((struct FitData *)params)->sigmaData[i];
 
     double retVal = 0.0;
 
@@ -180,8 +195,6 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
  *  @param in Input fitting parameter values
  *  @param out Residuals
  *  @param xValues X values for data points
- *  @param yValues Y values for data points
- *  @param yErrors Errors (standard deviations) on yValues
  *  @param nData Number of data points
  */
 /*void Fit1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
@@ -201,11 +214,9 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 * @param in Input fitting parameter values
 * @param out Derivatives
 * @param xValues X values for data points
-* @param yValues Y values for data points
-* @param yErrors Errors (standard deviations) on yValues
 * @param nData Number of data points
  */
-void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
 {
   throw Exception::NotImplementedError("No derivative function provided");
 }
@@ -289,12 +300,12 @@ void Fit1D::exec()
   {
     const std::vector<double> inTest(m_parameterNames.size(),1.0);
     std::vector<double> outTest(m_parameterNames.size());
-    const double xValuesTest = 0, yValuesTest = 1, yErrorsTest = 1;
+    const double xValuesTest = 0;
     JacobianImpl J;
     boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(m_parameterNames.size(),1) );
     J.setJ(M.get());
     // note nData set to zero (last argument) hence this should avoid further memory problems
-    functionDeriv(&(inTest.front()), &J, &xValuesTest, &yValuesTest, &yErrorsTest, 0);  
+    functionDeriv(&(inTest.front()), &J, &xValuesTest, 0);  
   }
   catch (Exception::NotImplementedError&)
   {
@@ -612,12 +623,12 @@ void Fit1D::exec()
 
     double* lOut = new double[l_data.n];  // to capture output from call to function()
     modifyInitialFittedParameters(m_fittedParameter); // does nothing except if overwritten by derived class
-    function(&m_fittedParameter[0], lOut, l_data.X, l_data.Y, l_data.sigmaData, l_data.n);
+    function(&m_fittedParameter[0], lOut, l_data.X, l_data.n);
     modifyInitialFittedParameters(m_fittedParameter); // reverse the effect of modifyInitialFittedParameters - if any 
 
     for(unsigned int i=0; i<l_data.n; i++) 
     {
-      Y[i] = lOut[i]*l_data.sigmaData[i]+l_data.Y[i]; 
+      Y[i] = lOut[i]; 
       E[i] = l_data.Y[i] - Y[i];
     }
 

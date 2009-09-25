@@ -107,18 +107,14 @@ void UserFunction1D::prepare()
  *  @param yErrors The array of nData error values.
  *  @param nData The size of the fitted data.
  */
-void UserFunction1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void UserFunction1D::function(const double* in, double* out, const double* xValues, const int& nData)
 {
     for(int i=0;i<m_nPars;i++)
         m_parameters[i] = in[i];
 
     for (int i = 0; i < nData; i++) {
         m_x = xValues[i];
-        double Yi = m_parser.Eval();
-        double Yv = yValues[i];
-        double Err = yErrors[i];
-        if (Err <= 0.) Err = 1.;
-        out[i] = (Yi - Yv)/Err;
+        out[i] = m_parser.Eval();
     }
 }
 

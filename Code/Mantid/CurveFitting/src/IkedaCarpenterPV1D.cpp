@@ -80,7 +80,7 @@ void IkedaCarpenterPV1D::afterDataRangedDetermined(const int& m_minX, const int&
 
 
 
-void IkedaCarpenterPV1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void IkedaCarpenterPV1D::function(const double* in, double* out, const double* xValues, const int& nData)
 {
     const double& I = in[0];
     const double& alpha0 = in[1];
@@ -145,9 +145,8 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
 
 
 
-        double Yi = I*( Nu*exp(u)*gsl_sf_erfc(yu)+Nv*exp(v)*gsl_sf_erfc(yv) + 
+        out[i] = I*( Nu*exp(u)*gsl_sf_erfc(yu)+Nv*exp(v)*gsl_sf_erfc(yv) + 
                         Ns*exp(s)*gsl_sf_erfc(ys)+Nr*exp(r)*gsl_sf_erfc(yr) ) + BG;
-        out[i] = (Yi - yValues[i])/yErrors[i];
     }
 }
 

@@ -56,7 +56,7 @@ void Gaussian1D::modifyFinalFittedParameters(std::vector<double>& fittedParamete
   fittedParameter[3] = sqrt(1/weight); // to convert back to sigma
 }
 
-void Gaussian1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void Gaussian1D::function(const double* in, double* out, const double* xValues, const int& nData)
 {
     const double& bg0 = in[0];
     const double& height = in[1];
@@ -65,22 +65,20 @@ void Gaussian1D::function(const double* in, double* out, const double* xValues, 
 
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
-        double Yi = height*exp(-0.5*diff*diff*weight)+bg0;
-        out[i] = (Yi - yValues[i])/yErrors[i];
+        out[i] = height*exp(-0.5*diff*diff*weight)+bg0;
     }
 }
 
-void Gaussian1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void Gaussian1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
 {
     const double& height = in[1];
     const double& peakCentre = in[2];
     const double& weight = in[3];
 
     for (int i = 0; i < nData; i++) {
-        double invE = 1/yErrors[i];
         double diff = xValues[i]-peakCentre;
-        double e = exp(-0.5*diff*diff*weight)*invE;
-        out->set(i,0, invE);
+        double e = exp(-0.5*diff*diff*weight);
+        out->set(i,0, 1);
         out->set(i,1, e);
         out->set(i,2, diff*height*e*weight);
         out->set(i,3, -0.5*diff*diff*height*e);

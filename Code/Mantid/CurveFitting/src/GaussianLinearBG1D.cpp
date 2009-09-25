@@ -59,7 +59,7 @@ void GaussianLinearBG1D::modifyFinalFittedParameters(std::vector<double>& fitted
   fittedParameter[4] = sqrt(1/weight); // to convert back to sigma
 }
 
-void GaussianLinearBG1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void GaussianLinearBG1D::function(const double* in, double* out, const double* xValues, const int& nData)
 {
     const double& bg0 = in[0];
     const double& bg1 = in[1];
@@ -69,23 +69,21 @@ void GaussianLinearBG1D::function(const double* in, double* out, const double* x
 
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
-        double Yi = height*exp(-0.5*diff*diff*weight)+bg0+bg1*xValues[i];
-        out[i] = (Yi - yValues[i])/yErrors[i];
+        out[i] = height*exp(-0.5*diff*diff*weight)+bg0+bg1*xValues[i];
     }
 }
 
-void GaussianLinearBG1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+void GaussianLinearBG1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
 {
     const double& height = in[2];
     const double& peakCentre = in[3];
     const double& weight = in[4];
 
     for (int i = 0; i < nData; i++) {
-        double invE = 1/yErrors[i];
         double diff = xValues[i]-peakCentre;
-        double e = exp(-0.5*diff*diff*weight)*invE;
-        out->set(i,0, invE);
-        out->set(i,1, xValues[i]*invE);
+        double e = exp(-0.5*diff*diff*weight);
+        out->set(i,0, 1);
+        out->set(i,1, xValues[i]);
         out->set(i,2, e);
         out->set(i,3, diff*height*e*weight);
         out->set(i,4, -0.5*diff*diff*height*e);

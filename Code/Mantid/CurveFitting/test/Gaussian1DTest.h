@@ -222,9 +222,9 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.076185,0.0001);
     dummy = alg2.getProperty("BG0");
-    TS_ASSERT_DELTA( dummy, 2.8775 ,0.0001);
+    TS_ASSERT_DELTA( dummy, 2.8765 ,0.0001);
     dummy = alg2.getProperty("Height");
-    TS_ASSERT_DELTA( dummy, 97.785 ,0.001);
+    TS_ASSERT_DELTA( dummy, 97.8039 ,0.001);
     dummy = alg2.getProperty("PeakCentre");
     TS_ASSERT_DELTA( dummy, 11.2356 ,0.0001);
     dummy = alg2.getProperty("Sigma");
