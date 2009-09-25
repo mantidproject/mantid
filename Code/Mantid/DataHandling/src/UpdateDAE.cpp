@@ -55,7 +55,7 @@ void UpdateDAE::exec()
         throw std::runtime_error("Cannot execute UpdateDAE in the main thread.");
     }
 
-    int rate = getProperty("update_rate");
+    int rate = getProperty("UpdateRate");
     rate *= 1000;// in milliseconds
      for(;;)
     {

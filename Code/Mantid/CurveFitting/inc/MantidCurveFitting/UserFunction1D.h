@@ -81,6 +81,8 @@ namespace Mantid
           virtual void declareAdditionalProperties();
           virtual void declareParameters(){};
           virtual void prepare();
+          /// Derivatives of function with respect to parameters you are trying to fit
+          virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData);
 
           static double* AddVariable(const char *varName, void *palg);
 
@@ -97,6 +99,11 @@ namespace Mantid
           const int m_buffSize;
           /// Number of actual parameters
           int m_nPars;
+          /// Temporary data storage
+          boost::shared_array<double> m_tmp;
+          /// Temporary data storage
+          boost::shared_array<double> m_tmp1;
+          
       };
 
   } // namespace CurveFitting

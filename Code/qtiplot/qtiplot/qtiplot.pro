@@ -383,6 +383,8 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/PeakPickerTool.h \
 	    src/Mantid/PeakFitDialog.h \
 	    src/Mantid/MantidCurve.h \
+	    src/Mantid/WorkspaceObserver.h \
+	    src/Mantid/UserFitFunctionDialog.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
 	    src/Mantid/InstrumentWidget/GLTrackball.h \
@@ -406,6 +408,7 @@ HEADERS  += src/ApplicationWindow.h \
 
 #FORMS += src/Mantid/WorkspaceMgr.ui
 FORMS += src/Mantid/PeakFitDialog.ui
+FORMS += src/Mantid/UserFitFunctionDialog.ui
 
 ###################### SOURCES ##############################################
 
@@ -552,6 +555,7 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/PeakPickerTool.cpp \
 	    src/Mantid/PeakFitDialog.cpp \
 	    src/Mantid/MantidCurve.cpp \
+	    src/Mantid/UserFitFunctionDialog.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \
 	    src/Mantid/InstrumentWidget/GLTrackball.cpp \

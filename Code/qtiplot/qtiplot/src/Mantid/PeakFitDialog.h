@@ -70,6 +70,7 @@ private slots:
   void centreNameChanged ( const QString &);
   void heightNameChanged ( const QString &);
   void widthNameChanged ( const QString &);
+  void startUserFitFunctionDialog();
 
 private:
   // number of paramters per one peak
@@ -88,6 +89,11 @@ private:
   boost::shared_ptr<Mantid::API::IAlgorithm> createAlgorithm();
   // Fit profiles
   void fitPeaks();
+  // Set Centre, Height and Width comboboxes from a list of comma sep list of 3 parameters:
+  // <centre_name>, <height_name>, <width_name>
+  void setPeakParams(const QString& str);
+
+  void setUserParams(bool keepParamNames);
 
   std::string m_heightName;
   std::string m_centreName;

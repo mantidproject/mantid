@@ -118,5 +118,49 @@ void UserFunction1D::function(const double* in, double* out, const double* xValu
     }
 }
 
+/** 
+* @param in Input fitting parameter values
+* @param out Derivatives
+* @param xValues X values for data points
+* @param yValues Y values for data points
+* @param yErrors Errors (standard deviations) on yValues
+* @param nData Number of data points
+ */
+void UserFunction1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
+{
+  //throw Exception::NotImplementedError("No derivative function provided");
+  if (nData == 0) return;
+  std::vector<double> dp(m_nPars);
+  std::vector<double> in1(m_nPars);
+  for(int i=0;i<m_nPars;i++)
+  {
+    in1[i] = in[i];
+    m_parameters[i] = in[i];
+    if (m_parameters[i] != 0.0)
+      dp[i] = m_parameters[i]*0.01;
+    else
+      dp[i] = 0.01;
+  }
+
+  if (!m_tmp)
+  {
+    m_tmp.reset(new double[nData]);
+    m_tmp1.reset(new double[nData]);
+  }
+
+  function(in, m_tmp.get(),xValues, nData);
+
+  for (int j = 0; j < m_nPars; j++) 
+  {
+    in1[j] += dp[j];
+    function(&in1[0], m_tmp1.get(),xValues, nData);
+    for (int i = 0; i < nData; i++) 
+    {
+      out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
+    }
+    in1[j] -= dp[j];
+  }
+}
+
 } // namespace CurveFitting
 } // namespace Mantid

@@ -60,6 +60,7 @@ MdiSubWindow::MdiSubWindow(const QString& label, ApplicationWindow *app, const Q
 	setObjectName(name);
 	setAttribute(Qt::WA_DeleteOnClose);
 	setLocale(app->locale());
+  askOnCloseEvent(false);
 	if (d_folder)
 		d_folder->addWindow(this);
 }

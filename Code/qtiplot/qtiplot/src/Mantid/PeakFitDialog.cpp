@@ -7,6 +7,7 @@
 #include "../ApplicationWindow.h"
 #include "MantidUI.h"
 #include "MantidCurve.h"
+#include "UserFitFunctionDialog.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include <muParser.h>
@@ -34,6 +35,7 @@ PeakFitDialog::PeakFitDialog(QWidget* parent,PeakPickerTool* peakTool) :
   connect( ui.cbPTCentre, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(centreNameChanged ( const QString &)) );
   connect( ui.cbPTHeight, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(heightNameChanged ( const QString &)) );
   connect( ui.cbPTWidth, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(widthNameChanged ( const QString &)) );
+  connect( ui.btnConstruct, SIGNAL(clicked()), this, SLOT(startUserFitFunctionDialog()) );
 
   ui.cbFunction->setCurrentIndex(0);
   ui.tableParams->horizontalHeader()-> setStretchLastSection(true);
@@ -227,7 +229,29 @@ void PeakFitDialog::widthNameChanged ( const QString &str)
   m_widthName = str.toStdString();
 }
 
+void PeakFitDialog::startUserFitFunctionDialog()
+{
+  UserFitFunctionDialog dlg = UserFitFunctionDialog(this);
+  if (dlg.exec() == QDialog::Accepted)
+  {
+    ui.leExpression->setText( dlg.expression() );
+    QString peakP = dlg.peakParams();
+    if (!peakP.isEmpty())
+    {
+      setPeakParams(peakP);
+      m_widthCorrectionFormula = dlg.widthFormula();
+      ui.leWidthFormula->setText(QString::fromStdString(m_widthCorrectionFormula));
+    }
+    setUserParams(true);
+  }
+}
+
 void PeakFitDialog::setUserParams()
+{
+  setUserParams(false);
+}
+
+void PeakFitDialog::setUserParams(bool keepParamNames)
 {
   std::string expression = ui.leExpression->text().toStdString();
   if (expression.empty()) 
@@ -277,6 +301,11 @@ void PeakFitDialog::setUserParams()
 
   }
 
+  // Save peak parameter names since combobox manipulations below change them
+  std::string temp_centre = m_centreName;
+  std::string temp_height = m_heightName;
+  std::string temp_width = m_widthName;
+
   ui.cbPTCentre->clear();
   ui.cbPTHeight->clear();
   ui.cbPTWidth->clear();
@@ -289,39 +318,74 @@ void PeakFitDialog::setUserParams()
   ui.cbPTHeight->addItems(params);
   ui.cbPTWidth->addItems(params);
 
+  if (!keepParamNames)
+  {
+    m_heightName = "";
+    m_centreName = "";
+    m_widthName = "";
+
+    foreach(QString s,params)
+    {
+      QString us = s.toUpper();
+      if (m_centreName.empty())
+      {
+        if (us == "X0" || us.contains("CENTRE"))
+        {
+          m_centreName = s.toStdString();
+        }
+      }
+      if (m_heightName.empty())
+      {
+        if (us == "H" || us.contains("HEI") || us == "HI" )
+        {
+          m_heightName = s.toStdString();
+        }
+      }
+      if (m_widthName.empty())
+      {
+        if (us == "W" || us.contains("WID"))
+        {
+          m_widthName = s.toStdString();
+        }
+      }
+    }
+  }
+  else
+  {// restore the names
+    m_centreName = temp_centre;
+    m_heightName = temp_height;
+    m_widthName = temp_width;
+  }
+
+  if (!m_centreName.empty())
+    ui.cbPTCentre->setCurrentIndex(ui.cbPTCentre->findText(QString::fromStdString(m_centreName)));
+
+  if (!m_heightName.empty())
+    ui.cbPTHeight->setCurrentIndex(ui.cbPTHeight->findText(QString::fromStdString(m_heightName)));
+
+  if (!m_widthName.empty())
+  {
+    ui.cbPTWidth->setCurrentIndex(ui.cbPTWidth->findText(QString::fromStdString(m_widthName)));
+    int i = ui.cbPTWidth->findText(QString::fromStdString(m_widthName));
+  }
+}
+
+void PeakFitDialog::setPeakParams(const QString& str)
+{
+  QStringList list = str.split(",");
+
   m_heightName = "";
   m_centreName = "";
   m_widthName = "";
 
-  foreach(QString s,params)
-  {
-    QString us = s.toUpper();
-    if (m_centreName.empty())
-    {
-      if (us == "X0" || us.contains("CENTRE"))
-      {
-        m_centreName = s.toStdString();
-        ui.cbPTCentre->setCurrentIndex(ui.cbPTCentre->findText(s));
-      }
-    }
-    if (m_heightName.empty())
-    {
-      if (us == "H" || us.contains("HEI") || us == "HI" )
-      {
-        m_heightName = s.toStdString();
-        ui.cbPTHeight->setCurrentIndex(ui.cbPTHeight->findText(s));
-      }
-    }
-    if (m_widthName.empty())
-    {
-      if (us == "W" || us.contains("WID"))
-      {
-        m_widthName = s.toStdString();
-        ui.cbPTWidth->setCurrentIndex(ui.cbPTWidth->findText(s));
-      }
-    }
-  }
+  if (list.size() > 0)
+    m_centreName = list[0];
 
+  if (list.size() > 1)
+    m_heightName = list[1];
+
+  if (list.size() > 2)
+    m_widthName = list[2];
 
 }
 
@@ -495,17 +559,29 @@ void PeakFitDialog::fitPeaks()
             if (!val.empty()) initParams << QString::fromStdString(name+"="+val);
           }
         }
-        if (!fixed_height_val.empty()) initParams << QString::fromStdString(m_heightName+"="+fixed_height_val);
-        else
-          initParams << QString::fromStdString(m_heightName+"="+QString::number(heightParam).toStdString());
+        if (!m_heightName.empty())
+        {
+          if (!fixed_height_val.empty()) 
+            initParams << QString::fromStdString(m_heightName+"="+fixed_height_val);
+          else
+            initParams << QString::fromStdString(m_heightName+"="+QString::number(heightParam).toStdString());
+        }
 
-        if (!fixed_centre_val.empty()) initParams << QString::fromStdString(m_centreName+"="+fixed_centre_val);
-        else
-          initParams << QString::fromStdString(m_centreName+"="+QString::number(centreParam).toStdString());
+        if (!m_centreName.empty())
+        {
+          if (!fixed_centre_val.empty()) 
+            initParams << QString::fromStdString(m_centreName+"="+fixed_centre_val);
+          else
+            initParams << QString::fromStdString(m_centreName+"="+QString::number(centreParam).toStdString());
+        }
 
-        if (!fixed_width_val.empty()) initParams << QString::fromStdString(m_widthName+"="+fixed_width_val);
-        else
-          initParams << QString::fromStdString(m_widthName+"="+QString::number(widthParam).toStdString());
+        if (!m_widthName.empty())
+        {
+          if (!fixed_width_val.empty()) 
+            initParams << QString::fromStdString(m_widthName+"="+fixed_width_val);
+          else
+            initParams << QString::fromStdString(m_widthName+"="+QString::number(widthParam).toStdString());
+        }
 
         alg->setPropertyValue("InitialParameters",initParams.join(",").toStdString());
       }
@@ -523,17 +599,29 @@ void PeakFitDialog::fitPeaks()
         }
 
         // set centre, height and width
-        if (!fixed_height_val.empty()) alg->setPropertyValue(m_heightName,fixed_height_val);
-        else
-          alg->setPropertyValue(m_heightName,QString::number(heightParam).toStdString());
+        if (!m_heightName.empty())
+        {
+          if (!fixed_height_val.empty())
+            alg->setPropertyValue(m_heightName,fixed_height_val);
+          else
+            alg->setPropertyValue(m_heightName,QString::number(heightParam).toStdString());
+        }
 
-        if (!fixed_centre_val.empty()) alg->setPropertyValue(m_centreName,fixed_centre_val);
-        else
-          alg->setPropertyValue(m_centreName,QString::number(centreParam).toStdString());
+        if (!m_centreName.empty())
+        {
+          if (!fixed_centre_val.empty())
+            alg->setPropertyValue(m_centreName,fixed_centre_val);
+          else
+            alg->setPropertyValue(m_centreName,QString::number(centreParam).toStdString());
+        }
 
-        if (!fixed_width_val.empty()) alg->setPropertyValue(m_widthName,fixed_width_val);
-        else
-          alg->setPropertyValue(m_widthName,QString::number(widthParam).toStdString());
+        if (!m_widthName.empty())
+        {
+          if (!fixed_width_val.empty())
+            alg->setPropertyValue(m_widthName,fixed_width_val);
+          else
+            alg->setPropertyValue(m_widthName,QString::number(widthParam).toStdString());
+        }
       }
 
       alg->execute();

@@ -74,11 +74,14 @@ namespace DataObjects
     /// Private copy assignment operator
     CompressedWorkspace2D& operator=(const CompressedWorkspace2D&);
 
+    /// Type of a pointer to a compressed data block along with its size
     typedef std::pair<unsigned char*,size_t> CompressedPointer;
+    /// Map of the compressed data storage
     typedef std::map<size_t,CompressedPointer > CompressedMap;
 
     /// Compresses a block
     CompressedPointer compressBlock(ManagedDataBlock2D* block,int startIndex);
+    /// Uncompress a block
     void uncompressBlock(ManagedDataBlock2D* block,int startIndex)const;
 
     /// Data buffer used in compression and decompression

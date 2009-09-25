@@ -103,6 +103,10 @@ long int CompressedWorkspace2D::getMemorySize() const
   return (long int)(sz/1024);
 }
 
+/**
+ *  @param block Pointer to the source block for compression
+ *  @param startIndex The starting index of the block
+ */
 CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,int startIndex)
 {
   //std::cerr<<"compress "<<startIndex<<'\n';
@@ -150,6 +154,10 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
   return CompressedPointer(tmp,nBuff);
 }
 
+/**
+ *  @param block Pointer to the destination decompressed block
+ *  @param startIndex The starting index of the block
+ */
 void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,int startIndex)const
 {
   //std::cerr<<"uncompress "<<startIndex<<'\n';

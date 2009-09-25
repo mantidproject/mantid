@@ -16,7 +16,7 @@
 
     Optional Properties: 
     <UL>
-    <LI> update_rate  - The update period in secons.</LI>
+    <LI> UpdateRate  - The update period in secons.</LI>
     </UL>
 
     @author Roman Tolchenov, Tessella Support Services plc

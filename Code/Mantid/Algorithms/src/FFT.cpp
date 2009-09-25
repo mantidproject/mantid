@@ -31,6 +31,8 @@ DECLARE_ALGORITHM(FFT)
 using namespace Kernel;
 using namespace API;
 
+/**  A dummy unit which purpose is to have a name. It cannot be converted to or from TOF.
+ */
 class LabelUnit: public Kernel::Unit
 {
     /// Caption
@@ -38,7 +40,12 @@ class LabelUnit: public Kernel::Unit
     /// Label
     const std::string m_label;
 public:
+  /// Constructor
     LabelUnit():m_caption("Quantity"),m_label("units"){}
+  /**  Constructor
+   *   @param capt The unit's caption
+   *   @param lbl  The unit's label
+   */
     LabelUnit(const std::string& capt, const std::string& lbl):m_caption(capt),m_label(lbl){}
   /// The name of the unit. For a concrete unit, this method's definition is in the DECLARE_UNIT
   /// macro and it will return the argument passed to that macro (which is the unit's key in the

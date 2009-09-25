@@ -87,6 +87,7 @@ namespace NeXus
         /// Overwrites Algorithm method
         void exec();
 
+        /// The l1
         double m_L1;
 
         /// Class for comparing bank names in format "bank123" according to the numeric part of the name
