@@ -283,9 +283,8 @@ namespace Mantid
 	{
 		try
 		{	
-			g_log.debug()<<"BinaryOperation::processGroups called  "<<std::endl;
 			//getting the input workspace group names
-			std::vector<std::string> inputWSNames=inputWSGrp->getNames();
+			const std::vector<std::string>& inputWSNames=inputWSGrp->getNames();
 			int nSize=inputWSNames.size();
 			//return if atleast one meber is not there in the group to process
 			if(nSize<2)
@@ -302,6 +301,11 @@ namespace Mantid
 			getGroupNames(prop,lhsWSGrp,rhsWSGrp);
 			//get member from  each group and call binary execute on each member
 			IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",1);
+			if(!alg)
+			{
+				g_log.error()<<"createAlgorithm failed for  "<<this->name()<<std::endl;
+				return false;
+			}
 			std::vector<std::string>::const_iterator lhsItr=lhsWSGrp.begin(); 
 			std::vector<std::string>::const_iterator rhsItr=rhsWSGrp.begin(); 
 			int nPeriod=0;
@@ -311,7 +315,7 @@ namespace Mantid
 			{
 				if(IsCompatibleSizes(lhsWSGrp,rhsWSGrp))
 				{
-					for (++lhsItr,++rhsItr;lhsItr!=lhsWSGrp.end();lhsItr++,rhsItr++)
+					for (++lhsItr,++rhsItr;lhsItr!=lhsWSGrp.end();++lhsItr,++rhsItr)
 					{
 						++nPeriod;
 						setProperties(alg,prop,(*lhsItr),(*rhsItr),nPeriod,outWSGrp);
@@ -376,7 +380,6 @@ namespace Mantid
 	void BinaryOperation::setProperties(IAlgorithm* alg,const std::vector<Mantid::Kernel::Property*>&prop,
 		const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,WorkspaceGroup_sptr outWSGrp)
 	{
-		//g_log.error()<<" BinaryOperation::setProperties called "<<std::endl;
 		std::string prevPropName("");
 		std::string currentPropName("");
 
@@ -389,11 +392,11 @@ namespace Mantid
 				{
 					currentPropName=(*propItr)->name();
 					if(prevPropName.empty())
-					{	//LHS workspace comes here
+					{	//LHS workspace 
 						alg->setPropertyValue(currentPropName,lhsWSName);
 					}
 					else
-					{	// RHS workspace comes  here
+					{	// RHS workspace 
 						if(currentPropName.compare(prevPropName))
 						{ alg->setPropertyValue(currentPropName,rhsWSName);
 						}
@@ -459,7 +462,7 @@ namespace Mantid
 					Workspace_sptr wsPtr=AnalysisDataService::Instance().retrieve(wsName);
 					WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsPtr);
 					if(prevPropName.empty())
-					{	//LHSWorkspace comes here
+					{	//LHSWorkspace 
 						if(wsGrpSptr)
 							lhsWSGrpNames=wsGrpSptr->getNames();
 						else
@@ -468,7 +471,7 @@ namespace Mantid
 					else
 					{	
 						if(currentPropName.compare(prevPropName))
-						{ //second workspace("RHSWorkSpace") comes here
+						{ //second workspace("RHSWorkSpace") 
 							if(wsGrpSptr)
 								rhsWSGrpNames=wsGrpSptr->getNames();
 							else

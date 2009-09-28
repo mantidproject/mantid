@@ -98,21 +98,20 @@ void MantidDockWidget::clearWorkspaceTree()
 
 void MantidDockWidget::updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {	
-	bool bParent=false;
-	bParent=isItWorkspaceGroupParentItem(workspace);
-	populateWorkspaceTree(ws_name,workspace,bParent);
+	bool bGroupParent=false;
+	bGroupParent=isItWorkspaceGroupParentItem(workspace);
+	populateWorkspaceTree(ws_name,workspace,bGroupParent);
 }
-void MantidDockWidget::populateWorkspaceTree(const QString & ws_name, Mantid::API::Workspace_sptr workspace,bool bParent)
+void MantidDockWidget::populateWorkspaceTree(const QString & ws_name, Mantid::API::Workspace_sptr workspace,bool bGroupParent)
 { 	
      // This check is here because the signals don't get delivered immediately when the add/replace notification in MantidUI
 	// is recieved. The signal cannot be removed in favour of a direct call because the call is from a separate thread.
 	if( !Mantid::API::AnalysisDataService::Instance().doesExist(ws_name.toStdString()) ) return;
 	QTreeWidgetItem *ws_item = NULL;
-//	std::vector<std::string> wsNames;
 	//This will only ever be of size zero or one
 	QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name, Qt::MatchFixedString);
 	if( name_matches.isEmpty() )
-	{
+	{	
 		ws_item = new QTreeWidgetItem(QStringList(ws_name));
 	}
 	else
@@ -122,73 +121,62 @@ void MantidDockWidget::populateWorkspaceTree(const QString & ws_name, Mantid::AP
 	QTreeWidgetItem*  wsid_item=new QTreeWidgetItem(QStringList(QString::fromStdString(workspace->id())));
 	ws_item->addChild(wsid_item);
 	
-	//wsNames=Mantid::API::AnalysisDataService::Instance().getObjectNames();
-	//if(!wsNames.empty())
-	//{
-		if(bParent)
-		{
-			ws_item->setIcon(0,QIcon(QPixmap(mantid_wsgroup_xpm)));
+		if(bGroupParent)
+		{	ws_item->setIcon(0,QIcon(QPixmap(mantid_wsgroup_xpm)));
 			m_tree->addTopLevelItem(ws_item);
 		}
 		else 
 		{
-			std::vector<std::string> wsGroupNames;
-			Mantid::API::Workspace_sptr parentWS;
-			QString parentName;
-			int index=ws_name.lastIndexOf ("_",-1,Qt::CaseSensitive);
-			if(index!=-1)
+			try
 			{
-				parentName=ws_name.left(index);
-				//logObject.error()<<"Parent Name "<<parentName.toStdString()<<std::endl;
-				try
-				{//retrieve the  workspace pointer for parent
+				Mantid::API::Workspace_sptr parentWS;
+				QString parentName;
+				Mantid::API::WorkspaceGroup_sptr grpWSsptr;
+				//getting the group parent workspace name from the group member workspace name
+				int index=ws_name.lastIndexOf ("_",-1,Qt::CaseSensitive);
+				if(index!=-1)
+				{	
+					parentName=ws_name.left(index);
 					if(Mantid::API::AnalysisDataService::Instance().doesExist(parentName.toStdString()))
 					{
 						parentWS=Mantid::API::AnalysisDataService::Instance().retrieve(parentName.toStdString());
-						Mantid::API::WorkspaceGroup_sptr grpWSsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(parentWS);
-						if(grpWSsptr)
-						{  	wsGroupNames=grpWSsptr->getNames();
-
+						grpWSsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(parentWS);
+					}
+				}
+				if(isItWorkspaceGroupItem(grpWSsptr,ws_name))
+				{	
+					// at this point ws_name is workspace group member 
+					//search for the group parent workspace in workspace tree
+					QList<QTreeWidgetItem*> matchedNames=m_tree->findItems(parentName,Qt::MatchExactly);
+					if(!matchedNames.isEmpty())	
+					{
+						//check the group member already exists in the tree
+						//this check & deletion is done bcoz sometiomes when script executes group workspaces members are misplaced.
+                        QList<QTreeWidgetItem*> findNames=m_tree->findItems(ws_name,Qt::MatchExactly);
+						if(!findNames.isEmpty())
+						{	//if the group member exists in the tree then delete it
+							int index=m_tree->indexOfTopLevelItem(ws_item);
+							if(index!=-1)
+								m_tree->takeTopLevelItem(index);
 						}
+						//add the workspace group member to group parent
+                       	matchedNames[0]->addChild(ws_item);
 					}
 				}
-				catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
-				{
-					logObject.error()<<"Error:"<<e.what()<<std::endl;
+				else //non group workspace 
+				{m_tree->addTopLevelItem(ws_item);
+				}
+			}//end of try
+			catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
+			{
+				logObject.error()<<"Error:"<<e.what()<<std::endl;
+			}
+			catch (std::runtime_error &ex)
+			{					 
+				logObject.error()<<"Error: "<< ex.what()<<std::endl; 
+			}
 
-				}
-				catch (std::runtime_error &ex)
-				{					 
-					logObject.error()<<"Error: "<< ex.what()<<std::endl; 
-				}
-				/*try
-				{
-					Mantid::API::WorkspaceGroup_sptr grpWSsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(parentWS);
-					if(grpWSsptr)
-					{  	wsGroupNames=grpWSsptr->getNames();
-				
-					}
-				}
-				catch (std::runtime_error &ex)
-				{					 
-					logObject.error()<<"exception thrown  "<< ex.what()<<std::endl; 
-				}*/
-			}
-			if(isItWorkspaceGroupItem(wsGroupNames,ws_name))
-			{
-				//search for the parent name in workspace tree
-				QList<QTreeWidgetItem*> matchedNames=m_tree->findItems(parentName,Qt::MatchExactly);
-				if(!matchedNames.isEmpty())	
-				{
-					matchedNames[0]->addChild(ws_item);
-					//logObject.error()<<" child workspace "<< ws_name.toStdString()<< "added "<< std::endl;
-				}
-			}
-			else //non group workspace 
-			{
-				m_tree->addTopLevelItem(ws_item);
-			}
-		}
+		}//end of else loop
 
 
 	//}
@@ -227,22 +215,22 @@ void MantidDockWidget::populateWorkspaceTree(const QString & ws_name, Mantid::AP
 	}
 				
 }
-bool MantidDockWidget::isItWorkspaceGroupItem(const std::vector<std::string> & wsGroupNames,const QString& ws_name)
+bool MantidDockWidget::isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString& ws_name) //std::vector<std::string>wsGroupNames,const QString& ws_name)
 {
-	//logObject.error()<<" isItWorkspaceGroupItem called for   "<< ws_name.toStdString() <<std::endl;
-	std::vector<std::string>::const_iterator it;
+	if(!grpSPtr)
+	{	return false;
+	}
+	const std::vector<std::string> & wsGroupNames=grpSPtr->getNames();	
 	if(wsGroupNames.empty())return false;
+	std::vector<std::string>::const_iterator it;
    //if the name is there in m_wsGroupNames vector it's workspace group member,return then
-	for(it=wsGroupNames.begin();it!=wsGroupNames.end();it++)
+	for(it=wsGroupNames.begin();it!=wsGroupNames.end();++it)
 	{
 		if(ws_name.toStdString()==(*it))
-		{
-			logObject.debug()<<" workspace group member  "<< ws_name.toStdString() <<std::endl;
-			return true;
+		{return true;
 		}
 	}
 	return false;
-
 }
 
 bool MantidDockWidget::isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace)
@@ -251,8 +239,7 @@ bool MantidDockWidget::isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr 
 	{
 		Mantid::API::WorkspaceGroup_sptr grpWSsptr=boost::dynamic_pointer_cast< WorkspaceGroup>(workspace);
 		if(grpWSsptr)
-		{ //logObject.error()<<" ws group pointer is  "<< grpWSsptr<< std::endl;
-		  return true;
+		{  return true;
 		}
 		else return false;
 	}

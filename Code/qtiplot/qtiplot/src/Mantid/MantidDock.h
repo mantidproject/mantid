@@ -23,7 +23,7 @@ public:
     MantidDockWidget(MantidUI *mui, ApplicationWindow *w);
 private:
 	const std::vector<std::string>& getWSGroupNamesFromFW();
-	bool isItWorkspaceGroupItem(const std::vector<std::string> & wsGroupNames,const QString & ws_name);
+	bool isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString & ws_name); //std::vector<std::string> wsGroupNames,const QString & ws_name);
 	bool isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace);
 	void removeFromWSGroupNames(const QString& wsName);
 public slots:

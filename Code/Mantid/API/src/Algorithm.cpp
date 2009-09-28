@@ -529,7 +529,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	std::string prevPropName("");
 	
 	//getting the input workspace group names
-	std::vector<std::string> inputWSNames=inputwsPtr->getNames();
+	const std::vector<std::string>& inputWSNames=inputwsPtr->getNames();
 	int nSize=inputWSNames.size();
 	//size is one if only group header.
 	//return if atleast one meber is not there in group to process
