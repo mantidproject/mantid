@@ -16,6 +16,10 @@
 #include <QFile>
 #include <QTextStream>
 #include <QFormLayout>
+#include <QMenu>
+#include <QAction>
+#include <QApplication>
+#include <QClipboard>
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AlgorithmHistory.h"
@@ -119,7 +123,9 @@ public:
   ~AlgorithmHistoryWindow();
 private slots:
 	void updateAll( QString algName,int algVersion,int nIndex);
-	void generateScript();
+	
+	void copytoClipboard();
+	void writeToScriptFile();
 private:
 	AlgExecSummaryGrpBox* createExecSummaryGrpBox();
 	AlgEnvHistoryGrpBox* createEnvHistGrpBox(const Mantid::Kernel::EnvironmentHistory& envHistory);
@@ -133,7 +139,7 @@ private:
 	//void updateAlgHistoryProperties(QString algName,int version);
 	void updateAlgHistoryProperties(QString algName,int version,int pos);
 	void concatVersionwithName(QString& algName,const int version);
-	void writeToScriptFile(const QString& script);
+	void  generateScript(QString& script);
 	std::string sanitizePropertyName(const std::string & name);
 	void handleException( const std::exception& e );
 	void setAlgorithmName(const QString& algName);

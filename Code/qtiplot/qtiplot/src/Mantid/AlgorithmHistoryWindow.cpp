@@ -151,8 +151,19 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox()
 AlgHistScriptButton::AlgHistScriptButton(QString title,QWidget* w):QPushButton(title,w)
 {
 	setGeometry (460,350,100,30);
-	connect(this,SIGNAL(clicked()),w,SLOT(generateScript()));
+	//connect(this,SIGNAL(clicked()),w,SLOT(saveScriptToFile()));
+	QMenu* scriptMenu=new QMenu(this);
+	if(scriptMenu)
+	{QAction* fileAction= new QAction(" To File",this);
+	connect(fileAction,SIGNAL(triggered()),w,SLOT(writeToScriptFile()));
+	QAction* clipboardAction= new QAction(" To Clipboard",this);
+	connect(clipboardAction,SIGNAL(triggered()),w,SLOT(copytoClipboard()));
+	scriptMenu->addAction(fileAction);
+	scriptMenu->addAction(clipboardAction);
+	this->setMenu(scriptMenu);
+	}
 }
+
 AlgHistScriptButton::~AlgHistScriptButton()
 {
 }
@@ -186,6 +197,10 @@ MantidQtDialog(w),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL
 	}
 	connect(m_Historytree,SIGNAL(updateAlgorithmHistoryWindow(QString, int,int)),this,SLOT(updateAll(QString,int,int)));
 	m_scriptButton = CreateScriptButton();
+	if(m_scriptButton==NULL)
+	{	QMessageBox::critical(this,"Mantid","Generatescript Button Creation failed");
+	}
+	
 }
 AlgorithmHistoryWindow::~AlgorithmHistoryWindow()
 {	
@@ -238,18 +253,7 @@ AlgEnvHistoryGrpBox* AlgorithmHistoryWindow::createEnvHistGrpBox(const Environme
 AlgHistoryProperties* AlgorithmHistoryWindow::createAlgHistoryPropWindow()
 {	
 	vector<PropertyHistory> histProp;
-	/*for (vector <AlgorithmHistory>::reverse_iterator ralgHistory_Iter=m_algHist.rbegin( );
-		ralgHistory_Iter!=m_algHist.rend();ralgHistory_Iter++)
-	{
-		histProp=(*ralgHistory_Iter).getProperties();
-		std::string name=(*ralgHistory_Iter).name();
-		int nVer=(*ralgHistory_Iter).version();
-		if((algName==name.c_str())&& (nVer==version))
-			break;
-		       
-	}//end of algorithm history for loop
-	*/
-    vector <AlgorithmHistory>::reverse_iterator rIter=m_algHist.rbegin();
+	vector <AlgorithmHistory>::reverse_iterator rIter=m_algHist.rbegin();
 	histProp=(*rIter).getProperties();
 
 	//AlgHistoryProperties * phistPropWindow=new AlgHistoryProperties(this,m_algHist);
@@ -270,12 +274,10 @@ void AlgorithmHistoryWindow::handleException( const exception& e )
 {
 	QMessageBox::critical(0,"Mantid-Error",QString::fromStdString(e.what()));
 }
-void AlgorithmHistoryWindow::generateScript()
+void AlgorithmHistoryWindow::generateScript(QString &script)
 {	
 	string algParam("");
-	//QString tempScript("");
 	string tempScript("");
-	QString script("");
 	vector<Property*> algPropUnmngd;
 	vector<Property*>::const_iterator itUmnngd;
 	vector<PropertyHistory>algHistProp;
@@ -292,7 +294,6 @@ void AlgorithmHistoryWindow::generateScript()
 		string name=(*algHistIter).name();
 		int nVersion=(*algHistIter).version();
 		int nexecCount=(*algHistIter).execCount();
-		//g_log.error() << "mantid Plot" <<" " << name <<nexecCount << " " << std::endl;
 		//creating an unmanaged instance of the selected algorithm
 		//this is bcoz algorith history is giving dynamically generated workspaces for some 
 		//algorithms like LoadRaw.But python script for LoadRaw has only one output workspace parameter
@@ -357,10 +358,13 @@ void AlgorithmHistoryWindow::generateScript()
 	   QString qtemp=QString::fromStdString(m3_pIter->second);
 	   script+=qtemp;
    }
-	writeToScriptFile(script);
+ //writeToScriptFile(script);
 }
-void AlgorithmHistoryWindow::writeToScriptFile(const QString& script)
+void AlgorithmHistoryWindow::writeToScriptFile()
 {
+	
+    QString script("");
+	generateScript(script);
 	QString scriptPath("");
 	QString prevdir=MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
 	//default script directory
@@ -368,7 +372,6 @@ void AlgorithmHistoryWindow::writeToScriptFile(const QString& script)
 	{scriptPath="C\\Mantid\\Code\\Mantid\\PythonAPI\\Scripts";
 	}
 	else{scriptPath=prevdir;}//last opened path
-	
 	QString filePath=QFileDialog::getSaveFileName(this,tr("Save Script As "),scriptPath,tr("Script files (*.py)"));
 	QFile scriptfile(filePath);
 	if (!scriptfile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -499,39 +502,9 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(QString algName,int vers
 		   m_histPropWindow->displayAlgHistoryProperties();
 		}
 	}
-	/*
-	for (vector <AlgorithmHistory>::reverse_iterator ralgHistory_Iter=m_algHist.rbegin( );
-		ralgHistory_Iter!=m_algHist.rend();ralgHistory_Iter++)
-	{
-		histProp=(*ralgHistory_Iter).getProperties();
-		std::string name=(*ralgHistory_Iter).name();
-		int nVer=(*ralgHistory_Iter).version();
-		if((algName==name.c_str())&& (nVer==version))
-			break;
-		       
-	}//end of algorithm history for loop
-	if(m_histPropWindow)
-	{  m_histPropWindow->setAlgProperties(histProp1);
-		m_histPropWindow->clearData();
-		m_histPropWindow->displayAlgHistoryProperties();
-	}*/
 }
 void AlgorithmHistoryWindow::updateExecSummaryGrpBox(const QString& algName,const int & version,int pos)
 {
-	/*vector <AlgorithmHistory>::reverse_iterator ralgHistory_Iter;
-	for (ralgHistory_Iter=m_algHist.rbegin( );
-		ralgHistory_Iter!=m_algHist.rend();ralgHistory_Iter++)
-	{
-		std::string name=(*ralgHistory_Iter).name();
-		if(algName==name.c_str()&& version==(*ralgHistory_Iter).version())
-			break;
-	}//end of algorithm history for loop
-	double duration=0.0;
-	duration=(*ralgHistory_Iter).executionDuration();
-	Mantid::Kernel::dateAndTime date=(*ralgHistory_Iter).executionDate();
-	if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
-	*/
-
     //getting the selcted algorithm at pos from History vector
 	const AlgorithmHistory & algHist=m_algHist.at(pos);
 	std::string name=algHist.name();
@@ -543,6 +516,19 @@ void AlgorithmHistoryWindow::updateExecSummaryGrpBox(const QString& algName,cons
 		double duration=algHist.executionDuration();
 		Mantid::Kernel::dateAndTime date=algHist.executionDate();
 		if(m_execSumGrpBox)m_execSumGrpBox->setData(duration,date);
+	}
+}
+void AlgorithmHistoryWindow::copytoClipboard()
+{	
+	QString comments ("######################################################################\n"
+	"#Python Script Generated by Algorithm History Display \n"
+	"######################################################################\n");
+	QString script("");
+	generateScript(script);
+	QClipboard *clipboard = QApplication::clipboard();
+	if(clipboard)
+	{	QString clipboardData=comments+script;
+		clipboard->setText(clipboardData);
 	}
 }
 
