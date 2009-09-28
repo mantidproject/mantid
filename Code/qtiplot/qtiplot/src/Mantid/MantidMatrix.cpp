@@ -864,11 +864,6 @@ bool MantidMatrix::setSelectedColumns()
   return true;
 }
 
-void MantidMatrix::tst()
-{
-    std::cerr<<"2D plots: "<<m_plots2D.size()<<'\n';
-    std::cerr<<"1D plots: "<<m_plots1D.size()<<'\n';
-}
 
 void MantidMatrix::dependantClosed(MdiSubWindow* w)
 {
@@ -1019,12 +1014,14 @@ void MantidMatrix::closeDependants()
       ml->askOnCloseEvent(false);
       ml->close();// this calls slot dependantClosed() which removes the pointer from m_plots2D
   }
+
   while(m_plots1D.size())
   {
       MultiLayer* ml = m_plots1D.begin().key();
       ml->askOnCloseEvent(false);
       ml->close();// this calls slot dependantClosed() which removes the pointer from m_plots1D
   }
+
 }
 
 void MantidMatrix::setNumberFormat(const QChar& f,int prec, bool all)

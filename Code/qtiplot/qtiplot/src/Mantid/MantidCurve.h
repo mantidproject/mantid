@@ -5,6 +5,7 @@
 #include "WorkspaceObserver.h"
 #include "boost/shared_ptr.hpp"
 
+
 // Forward definitions
 namespace Mantid
 {
@@ -54,9 +55,6 @@ class MantidCurve:public PlotCurve, public WorkspaceObserver
   Q_OBJECT
 public:
 
-  /// Constructor of "empty" MantidCurve
-  //MantidCurve(const QString& name) :PlotCurve(name)   {}
-
   /// More complex constructor setting some defaults for the curve
   MantidCurve(const QString& name,const QString& wsName,Graph* g,
               const QString& type,int index,bool err=false);
@@ -93,13 +91,6 @@ public:
   /// Overriden virtual method
   void itemChanged();
 
-public slots:
-
-  /// Respond to workspace removal.
-  void workspaceRemoved(const QString&);
-  /// Respont to workspace replacement
-  void workspaceReplaced(const QString &, boost::shared_ptr<const Mantid::API::Workspace>);
-
 private:
   /// Init the curve
   void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
@@ -133,6 +124,8 @@ public:
   /// Copy constructor
   MantidQwtData(const MantidQwtData& data)
     :m_workspace(data.m_workspace){}
+
+  virtual ~MantidQwtData();
 
   bool sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const;
 

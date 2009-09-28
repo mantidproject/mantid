@@ -155,15 +155,15 @@ static const char *unzoom_xpm[]={
 #include <qwt_text_label.h>
 #include <qwt_color_map.h>
 
-
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <iostream>
+
 //Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
-: QWidget(parent, f)//QwtPlot(parent)
+  : QWidget(parent, f) //QwtPlot(parent)
 {
 	setWindowFlags(f);
 	n_curves=0;
@@ -1708,8 +1708,8 @@ void Graph::setCurveTitle(int index, const QString & title)
 {
   QwtPlotItem *curve = plotItem(index);
   if( !curve ) return;
-  
   curve->setTitle(title);
+  legend()->setText(legendText());
   legend()->repaint();
 }
 
@@ -3056,10 +3056,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c)
   int colorIndex , symbolIndex;
   guessUniqueCurveLayout(colorIndex, symbolIndex);
   c->setPen(QPen(ColorBox::color(colorIndex), widthLine));
+  addLegendItem();
   connect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
-
-	addLegendItem();
-	return c;
+  connect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()), Qt::BlockingQueuedConnection);
+  return c;
 }
 
 void Graph::insertCurve(Graph* g, int i)
@@ -3165,12 +3165,12 @@ void Graph::updateVectorsLayout(int curve, const QColor& color, double width,
 
 void Graph::updatePlot()
 {
-	if (d_auto_scale && !zoomOn() && d_active_tool==NULL){
-		for (int i = 0; i < QwtPlot::axisCnt; i++)
-			d_plot->setAxisAutoScale(i);
-	}
-	d_plot->replot();
-	updateScale();
+  if (d_auto_scale && !zoomOn() && d_active_tool==NULL){
+    for (int i = 0; i < QwtPlot::axisCnt; i++)
+      d_plot->setAxisAutoScale(i);
+  }
+  d_plot->replot();
+  updateScale();
 }
 
 void Graph::updateScale()
@@ -3308,8 +3308,8 @@ void Graph::removeCurve(int index)
     }
     c_type.resize(n_curves);
     c_keys.resize(n_curves);
-	emit modifiedGraph();
-  emit curveRemoved();
+    emit modifiedGraph();
+    emit curveRemoved();
 }
 
 /** Intended to be called in response of PlotCurve::removeMe signal; 

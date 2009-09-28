@@ -149,7 +149,6 @@ public slots:
 
     void changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
     void deleteWorkspace();
-    void tst();
 
 	//! Return the width of all columns
 	int columnsWidth(int i=-1);

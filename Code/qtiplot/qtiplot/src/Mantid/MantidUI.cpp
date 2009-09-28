@@ -52,11 +52,12 @@ using namespace Mantid::API;
 
 Mantid::Kernel::Logger& MantidUI::logObject=Mantid::Kernel::Logger::get("MantidUI");
 
-MantidUI::MantidUI(ApplicationWindow *aw):m_appWindow(aw),
+MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 m_addObserver(*this,&MantidUI::handleAddWorkspace),
 m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
+m_appWindow(aw),
 m_progressDialog(0)
 {
     m_exploreMantid = new MantidDockWidget(this,aw);
@@ -149,6 +150,11 @@ void MantidUI::init()
 MantidUI::~MantidUI()
 {
   if( m_algMonitor ) delete m_algMonitor;
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+
+  Mantid::API::AnalysisDataService::Instance().clear();
 }
 
 void MantidUI::saveSettings() const
@@ -698,22 +704,6 @@ bool MantidUI::drop(QDropEvent* e)
     }
 
     return false;
-}
-
-/**  Sets the dependence between sindows: if the first one closes the second must close too.
-     @param first The master window
-     @param second The dependent window
- */
-void MantidUI::setDependency(MdiSubWindow* first,MdiSubWindow* second)
-{
-    m_mdiDependency.insert( pair<MdiSubWindow*,MdiSubWindow*>(first,second) );
-    connect(first, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(closeDependents(MdiSubWindow*)));
-}
-
-// Called in response to closedWindow(...) signal from a window with dependecies
-void MantidUI::closeDependents(MdiSubWindow*)
-{
-  //    std::cerr<<"Hi\n";
 }
 
 void MantidUI::getSelectedAlgorithm(QString& algName, int& version)
@@ -1557,11 +1547,11 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool showMatrix)
 // the requested spectrum
 MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool errorbars, bool showPlot, bool showMatrix)
 {
-  MantidMatrix* m = getMantidMatrix(wsName);
-  if( !m )
-  {
-    m = importMatrixWorkspace(wsName, -1, -1, false, showMatrix);
-  }
+//   MantidMatrix* m = getMantidMatrix(wsName);
+//   if( !m )
+//   {
+//     m = importMatrixWorkspace(wsName, -1, -1, false, showMatrix);
+//   }
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
@@ -1593,7 +1583,7 @@ MultiLayer* MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
 
   // Hide the second graph for now as closing it
   // deletes the curves that were associated with it
-  mlayer_2->hide();
+  mlayer_2->close();
 
   return mlayer_1;
 };

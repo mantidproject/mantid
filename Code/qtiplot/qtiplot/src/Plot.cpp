@@ -563,7 +563,8 @@ void Plot::removeCurve(int index)
   	}
 
 	c->detach();
-	d_curves.remove (index);
+	QwtPlotItem* p = d_curves.take (index);
+	delete p;	
 }
 
 QList<int> Plot::getMajorTicksType()

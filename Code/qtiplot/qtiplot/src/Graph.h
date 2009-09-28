@@ -81,6 +81,8 @@ class VectorCurve;
 class BoxCurve;
 class QwtHistogram;
 class UserHelperFunction;
+class QMutex;
+
 
 //! Structure containing curve layout parameters
 typedef struct{
@@ -133,7 +135,7 @@ namespace Mantid
  * [ Framework needs to support plug-ins; assigned to ion ]
  */
 
-class Graph: public QWidget //QwtPlot //QWidget
+class Graph: public QWidget 
 {
 	Q_OBJECT
 
@@ -762,5 +764,7 @@ signals:
 		 QString mCurrentColorMap;
 		 QwtPlotMagnifier *d_magnifier;
 		 QwtPlotPanner *d_panner;
+
+                 QMutex *m_mutex;
 };
 #endif // GRAPH_H

@@ -41,7 +41,7 @@ public:
     m_afterReplaceObserver(*this,&WorkspaceObserver::_afterReplaceHandle)
   {}
 
-  ~WorkspaceObserver()
+  virtual ~WorkspaceObserver()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_afterReplaceObserver);

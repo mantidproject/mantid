@@ -361,7 +361,7 @@ void ApplicationWindow::init(bool factorySettings)
 
     //apply user settings
     updateAppFonts();
-	//setScriptingLanguage(defaultScriptingLang);
+    setScriptingLanguage(defaultScriptingLang);
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
     loadCustomActions();

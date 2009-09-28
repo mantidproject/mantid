@@ -1,5 +1,4 @@
 #include "MantidCurve.h"
-//#include "MantidUI.h"
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
 
@@ -19,7 +18,7 @@
  */
 MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
-:PlotCurve(name),m_drawErrorBars(err),m_wsName(wsName)
+  :PlotCurve(name),m_drawErrorBars(err),m_wsName(wsName)
 {
   Mantid::API::MatrixWorkspace_sptr ws = 
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -40,7 +39,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
  */
 MantidCurve::MantidCurve(const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
-:PlotCurve(createCurveName(wsName,type,index)),m_drawErrorBars(err),m_wsName(wsName)
+ :PlotCurve(createCurveName(wsName,type,index)),m_drawErrorBars(err),m_wsName(wsName)
 {
   Mantid::API::MatrixWorkspace_sptr ws = 
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -52,7 +51,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
 }
 
 MantidCurve::MantidCurve(const MantidCurve& c)
-:PlotCurve(createCopyName(c.title().text())),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName)
+  :PlotCurve(createCopyName(c.title().text())),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName)
 {
   setData(c.data());
   observeDelete();
@@ -89,31 +88,9 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   }
 }
 
-/** If the removed workspace is the one displayed by this curve remove this curve.
- *  @param wsName The workspace name.
- */
-void MantidCurve::workspaceRemoved(const QString& wsName)
-{
-  if (!mantidData()) return;
-  Mantid::API::MatrixWorkspace_sptr ws = 
-    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-       Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
-    );
-  if (mantidData()->sameWorkspace(ws))
-  {
-    emit removeMe(this);// this doesnot delete the curve ?
-  }
-}
-
-void MantidCurve::workspaceReplaced(const QString &, boost::shared_ptr<const Mantid::API::Workspace>)
-//void MantidCurve::workspaceReplaced(const QString &, Mantid::API::Workspace_sptr)
-{
-  std::cerr<<"MantidCurve: workspace replaced\n";
-}
 
 MantidCurve::~MantidCurve()
 {
-  //std::cerr<<"MantidCurve deleted\n";
 }
 
 void MantidCurve::setData(const QwtData &data)
@@ -198,7 +175,8 @@ void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shar
   const MantidQwtData * new_mantidData = mantidData()->copy(mws);
   setData(*new_mantidData);
   delete new_mantidData;
-}
+  emit dataUpdated();
+ }
 
 //==========================================
 //
@@ -241,6 +219,11 @@ m_E(data.m_workspace->readE(data.m_spec)),
 m_isHistogram(m_workspace->isHistogramData()),
 m_binCentres(false)
 {}
+
+MantidQwtData::~MantidQwtData()
+{
+}
+
 
 /** Size of the data set
  */

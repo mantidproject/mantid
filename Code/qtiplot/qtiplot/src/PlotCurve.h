@@ -41,7 +41,7 @@ class PlotCurve: public QObject, public QwtPlotCurve
 Q_OBJECT
 public:
 	PlotCurve(const QString& name = QString()): QwtPlotCurve(name), d_type(0), d_x_offset(0.0), d_y_offset(0.0){};
-	PlotCurve(const PlotCurve& c): QwtPlotCurve(c.title().text()), d_type(c.d_type), 
+ PlotCurve(const PlotCurve& c): QObject(), QwtPlotCurve(c.title().text()), d_type(c.d_type), 
     d_x_offset(c.d_x_offset), d_y_offset(c.d_y_offset){};
 
   virtual PlotCurve* clone()const = 0;
@@ -61,6 +61,7 @@ public:
 signals:
 
   void removeMe(PlotCurve*);
+  void dataUpdated();
 
 protected:
 	int d_type;

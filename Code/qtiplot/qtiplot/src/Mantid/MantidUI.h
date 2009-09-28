@@ -328,12 +328,6 @@ public slots:
 	void saveNexusWorkspace();
 	void renameWorkspace();
 
-private slots:
-
-    // Called in response to closedWindow(...) signal from a window with dependecies
-    void closeDependents(MdiSubWindow* w);
-
-
 #ifdef _WIN32
 public:
     // Shows 2D plot of current memory usage.
@@ -359,8 +353,6 @@ private:
     void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
     Poco::NObserver<MantidUI, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
 
-    // Sets the dependence between sindows: if the first one closes the second must close too.
-    void setDependency(MdiSubWindow*,MdiSubWindow*);
 
 	//#678
     //for savenexus algorithm

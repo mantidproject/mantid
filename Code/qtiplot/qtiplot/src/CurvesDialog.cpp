@@ -568,7 +568,18 @@ void CurvesDialog::closeEvent(QCloseEvent* e)
 {
 	ApplicationWindow *app = (ApplicationWindow *)this->parent();
 	if (app)
-		app->d_add_curves_dialog_size = this->size();
+	{
+	  app->d_add_curves_dialog_size = this->size();
+	  // Need to reenable close-on-empty behaviour so
+	  // that deleting workspaces causes the empty graphs to
+	  // disappear
+	  QList<MdiSubWindow *> wList = app->windowsList();
+	  foreach(MdiSubWindow* w, wList)
+	  {
+	    MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
+	    if( ml ) ml->setCloseOnEmpty(true);
+	  }
+	}
 
 	e->accept();
 }
