@@ -112,7 +112,7 @@ private slots:
   void forceDataReload(bool force = true);
   
   /// Receive a load button click
-  void handleLoadButtonClick();
+  bool handleLoadButtonClick();
 
   /// Reduce button clicked
   void handleReduceButtonClick(const QString & type);

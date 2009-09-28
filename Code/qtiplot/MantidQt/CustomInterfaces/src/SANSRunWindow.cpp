@@ -1042,14 +1042,14 @@ void SANSRunWindow::forceDataReload(bool force)
 /**
  * Receive a load button click signal
  */
-void SANSRunWindow::handleLoadButtonClick()
+bool SANSRunWindow::handleLoadButtonClick()
 {
   QString origin_dir = QDir::currentPath();
   QString work_dir = QDir(m_uiForm.datadir_edit->text()).absolutePath();
   if( work_dir.isEmpty() || !QDir(work_dir).exists() )
   {
     showInformationBox("The specified data directory " + m_uiForm.datadir_edit->text() + " does not exist.");
-    return;
+    return false;
   }
   if( !work_dir.endsWith('/') ) work_dir += "/";
   m_data_dir = work_dir;
@@ -1058,7 +1058,7 @@ void SANSRunWindow::handleLoadButtonClick()
   if( !isUserFileLoaded() )
   {
     showInformationBox("Please load the relevant user file.");
-    return;
+    return false;
   }
   setProcessingState(true, -1);
 
@@ -1087,6 +1087,15 @@ void SANSRunWindow::handleLoadButtonClick()
       load_success = true;
       continue;
     }
+    // Load log information first
+    m_logvalues = loadDetectorLogs(work_dir, run_no);
+    if( m_logvalues.empty() )
+    {
+      showInformationBox("Error: Canot find log file for run " + run_no + ". \nReduction cannot continue.");
+      m_uiForm.load_dataBtn->setEnabled(true);
+      return false;
+    }
+
     //Load the file. This checks for required padding of zeros etc
     int n_periods = runLoadData(work_dir, run_no, 
 				m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString(), ws_name);
@@ -1099,7 +1108,7 @@ void SANSRunWindow::handleLoadButtonClick()
       //Bail out completely now and make sure that future load will try to reload
       forceDataReload();
       setProcessingState(false, -1);
-      return;
+      return false;
     }
 
     //At this point we know the workspace exists
@@ -1114,17 +1123,24 @@ void SANSRunWindow::handleLoadButtonClick()
         m_uiForm.tof_max->setText(QString::number(ws->readX(0).back()));
       }
 
-      // Load log information
-      m_logvalues = loadDetectorLogs(work_dir, run_no);
-
       // Set the geometry
       int geomid  = ws->getSample()->getGeometryFlag();
-      m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-      double thick(0.0), width(0.0), height(0.0);
-      ws->getSample()->getGeometry(thick, width, height);
-      m_uiForm.sample_thick->setText(QString::number(thick));
-      m_uiForm.sample_width->setText(QString::number(width));
-      m_uiForm.sample_height->setText(QString::number(height));
+      if( geomid > 0 && geomid < 4 )
+      {
+	m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
+	double thick(0.0), width(0.0), height(0.0);
+	ws->getSample()->getGeometry(thick, width, height);
+	m_uiForm.sample_thick->setText(QString::number(thick));
+	m_uiForm.sample_width->setText(QString::number(width));
+	m_uiForm.sample_height->setText(QString::number(height));
+      }
+      else
+      {
+	m_uiForm.sample_geomid->setCurrentIndex(2);
+	m_uiForm.sample_thick->setText("1");
+	m_uiForm.sample_width->setText("8");
+	m_uiForm.sample_height->setText("8");
+      }
     }
 
     QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
@@ -1139,7 +1155,7 @@ void SANSRunWindow::handleLoadButtonClick()
   if( !load_success ) 
   {
    setProcessingState(false, -1);
-   return;
+   return false;
   }
 
   forceDataReload(false);
@@ -1152,6 +1168,7 @@ void SANSRunWindow::handleLoadButtonClick()
   }
  
   setProcessingState(false, -1);
+  return true;
 }
 
 /** 
@@ -1604,7 +1621,7 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
   }
   else
   {
-    py_code = "LoadISISNexus";
+    py_code = "LoadNexus";
   }
   py_code += "(Filename='" + filepath + "', OutputWorkspace='" + workspace + "')"; 
   QString results = runPythonCode(py_code);
@@ -1658,44 +1675,40 @@ QHash<QString, double> SANSRunWindow::loadDetectorLogs(const QString& work_dir, 
   //Not necesary for LOQ for
   if( m_uiForm.inst_opt->currentIndex() == 0 ) return QHash<QString, double>();
   
-  if( m_uiForm.file_opt->currentIndex() == 0 )
+  QString filepath = getRawFilePath(work_dir, run_no, m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString());
+  QString logname = QFileInfo(filepath).baseName();
+  QString suffix = ".log";
+  QString logpath = QFileInfo(filepath).path() + "/" + logname + suffix;
+  QFile handle(logpath);
+  
+  if( !handle.open(QIODevice::ReadOnly | QIODevice::Text) )
   {
-    QString filepath = getRawFilePath(work_dir, run_no, ".raw");
-    QString logname = QFileInfo(filepath).baseName();
-    QString suffix = ".log";
-    QString logpath = QFileInfo(filepath).path() + "/" + logname + suffix;
-    QFile handle(logpath);
-  
-    if( !handle.open(QIODevice::ReadOnly | QIODevice::Text) )
-    {
-      return QHash<QString, double>();
-    }
+    return QHash<QString, double>();
+  }
     
-    QHash<QString, double> logvalues;
-    logvalues["Rear_Det_X"] = 0.0;
-    logvalues["Rear_Det_Z"] = 0.0;
-    logvalues["Front_Det_X"] = 0.0;
-    logvalues["Front_Det_Z"] = 0.0;
-    logvalues["Front_Det_Rot"] = 0.0;
-    QList<QString> logkeys = logvalues.keys();
+  QHash<QString, double> logvalues;
+  logvalues["Rear_Det_X"] = 0.0;
+  logvalues["Rear_Det_Z"] = 0.0;
+  logvalues["Front_Det_X"] = 0.0;
+  logvalues["Front_Det_Z"] = 0.0;
+  logvalues["Front_Det_Rot"] = 0.0;
+  QList<QString> logkeys = logvalues.keys();
   
-    QTextStream reader(&handle);
-    while( !reader.atEnd() )
+  QTextStream reader(&handle);
+  while( !reader.atEnd() )
     {
       QString line = reader.readLine();
       QStringList items = line.split(QRegExp("\\s+"));
       QString entry = items.value(1);
       if( logkeys.contains(entry) )
-      {
-	// Log values are in mm 
-	logvalues[entry] = items.value(2).toDouble();
-      }
+	{
+	  // Log values are in mm 
+	  logvalues[entry] = items.value(2).toDouble();
+	}
     }
-    handle.close();
-    return logvalues;
-  }
-
-  return QHash<QString, double>();
+  handle.close();
+  return logvalues;
+    
 }
 
 /**
