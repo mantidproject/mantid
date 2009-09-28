@@ -405,19 +405,15 @@ try:
 	XVAR_PREV = 0.0
 	YVAR_PREV = 0.0
 	ITER_NUM = 0
+	RESIDUE_GRAPH = None
 
 	def reportProgress(xk):
-		global ITER_NUM
+		global ITER_NUM, RESIDUE_GRAPH
 		ITER_NUM += 1
 		mantid.sendLogMessage("::SANS::Iteration: " + str(ITER_NUM))
-
-		if ITER_NUM == 2:
-			# Produce some plots
-			g = plotSpectrum('Left', 0)
-			mergePlots(g, plotSpectrum('Right', 0))
-			mergePlots(g, plotSpectrum('Up', 0))
-			mergePlots(g, plotSpectrum('Down', 0))
-			
+		if RESIDUE_GRAPH != None:
+			RESIDUE_GRAPH.activeLayer().setTitle("Centre Finding: Iteration " + str(ITER_NUM))
+		
 	# Create a workspace with a quadrant value in it 
 	def CreateQuadrant(reduced_ws, rawcount_ws, solidangle_ws, quadrant, xcentre, ycentre, quad_ws, 
 			   append = False):
@@ -471,7 +467,7 @@ try:
 	def Residuals(vars, *args):
 		'''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants (cones really)'''
 		# *args indicates a list of arguments.
-		global XVAR_PREV, YVAR_PREV
+		global XVAR_PREV, YVAR_PREV, RESIDUE_GRAPH
 		xcentre = vars[0]
 		ycentre= vars[1]
 		
@@ -492,7 +488,17 @@ try:
 		info = args[1]
 		can_details = info[0], info[1], [0.0,0.0], [xcentre, ycentre]
 		WavRangeReduction(sample_details, can_details, WAV1, WAV2,FindingCentre=True)
-	
+		if RESIDUE_GRAPH == None:
+			RESIDUE_GRAPH = plotSpectrum('Left', 0)
+			mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
+			mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
+			mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
+			RESIDUE_GRAPH.activeLayer().setCurveTitle(0, 'Left')
+			RESIDUE_GRAPH.activeLayer().setCurveTitle(1, 'Right')
+			RESIDUE_GRAPH.activeLayer().setCurveTitle(2, 'Up')
+			RESIDUE_GRAPH.activeLayer().setCurveTitle(3, 'Down')
+			RESIDUE_GRAPH.activeLayer().setTitle("Centre Finding: Iteration " + str(ITER_NUM))
+			
 		return CalculateResidue()
 
 	def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):

@@ -97,6 +97,8 @@ private:
   QString formatDouble(double value, char format, int precision, const QString & colour);
   /// Reset the geometry box to blank
   void resetGeometryDetailsBox();
+  ///Cleanup old raw files
+  void cleanup();
   //@}
 
 private slots:

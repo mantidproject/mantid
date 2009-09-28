@@ -380,7 +380,7 @@ bool SANSRunWindow::loadUserFile()
       if( type.startsWith('s', Qt::CaseInsensitive) )
       {
 	col1_txt = "Spectrum";
-	col2_txt = type;//.section('S', 1, -1, QString::SectionCaseInsensitiveSeps);
+	col2_txt = type;
       }
       else if( type.startsWith('h', Qt::CaseInsensitive) )
       {
@@ -1055,6 +1055,8 @@ void SANSRunWindow::handleLoadButtonClick()
   }
   setProcessingState(true, -1);
 
+  if( m_force_reload ) cleanup();
+
   //A load command for each box if there is anything in it and it has not already been loaded
   QMapIterator<int, QLineEdit*> itr(m_run_no_boxes);
   bool load_success(false);
@@ -1273,6 +1275,10 @@ QString SANSRunWindow::constructReductionCode(bool , bool)
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
+    
+  //Currently the components are moved with each reduce click. Check if a load is necessary
+  handleLoadButtonClick();
+
   int idtype(0);
   if( type.startsWith("2") ) idtype = 1;
 
@@ -1281,9 +1287,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   {
     return;
   }
-
-  //Currently the components are moved with each reduce click. Check if a load is necessary
-  handleLoadButtonClick();
 
   //Disable buttons so that interaction is limited while processing data
   setProcessingState(true, idtype);
@@ -1316,6 +1319,7 @@ void SANSRunWindow::handlePlotButtonClick()
 
 void SANSRunWindow::handleRunFindCentre()
 {
+
   // Start iteration
   updateCentreFindingStatus("::SANS::Loading data");
   handleLoadButtonClick();
@@ -1763,4 +1767,18 @@ void SANSRunWindow::resetGeometryDetailsBox()
   m_uiForm.dist_bkgd_frontZ->setText(blank);
   m_uiForm.bkgd_rot->setText(blank);
 
+}
+
+void SANSRunWindow::cleanup()
+{
+  Mantid::API::AnalysisDataServiceImpl & ads = Mantid::API::AnalysisDataService::Instance();
+  std::vector<std::string> workspaces = ads.getObjectNames();
+  std::vector<std::string>::const_iterator iend = workspaces.end();
+  for( std::vector<std::string>::const_iterator itr = workspaces.begin(); itr != iend; ++itr )
+  {
+    if( QString::fromStdString(*itr).endsWith("_raw") )
+    {
+      ads.remove(*itr);
+    }
+  }
 }
