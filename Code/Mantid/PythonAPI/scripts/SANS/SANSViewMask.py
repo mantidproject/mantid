@@ -35,7 +35,7 @@ dimension = 128
 firstspec = 3
 if instr_name == "SANS2D":
     dimension = 192
-    firstspec += 6
+    firstspec += 2
 
 detlist = SANSUtility.ConvertToSpecList(maskstring, firstspec, dimension);
 SANSUtility.MaskBySpecNumber(topLayer, detlist)

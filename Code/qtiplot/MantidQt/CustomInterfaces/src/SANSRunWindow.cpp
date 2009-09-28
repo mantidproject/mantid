@@ -43,9 +43,9 @@ using namespace MantidQt::CustomInterfaces;
 // Initialize the logger
 Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANSRunWindow");
 
-//----------------------
+//----------------------------------------------
 // Public member functions
-//----------------------
+//----------------------------------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
@@ -65,9 +65,9 @@ SANSRunWindow::~SANSRunWindow()
   saveSettings();
 }
 
-//-----------------------------------------
+//--------------------------------------------
 // Private member functions
-//-----------------------------------------
+//--------------------------------------------
 /**
  * Set up the dialog layout
  */
@@ -382,9 +382,16 @@ bool SANSRunWindow::loadUserFile()
 	col1_txt = "Spectrum";
 	col2_txt = type;
       }
-      else if( type.startsWith('h', Qt::CaseInsensitive) )
+      else if( type.startsWith('h', Qt::CaseInsensitive) || type.startsWith('v', Qt::CaseInsensitive) )
       {
-	col1_txt = "Strip";
+	if( type.contains('+') )
+	{
+	  col1_txt = "Box";
+	}
+	else
+	{
+	  col1_txt = "Strip";
+	}
 	col2_txt = type;
       }
       else continue;
