@@ -96,6 +96,7 @@ public slots:
 	void setViewDirection(const QString&);
 	void componentSelected(const QItemSelection&, const QItemSelection&);
 	void pickBackgroundColor();
+  void saveImage();
 
 signals:
     void plotSpectra(const QString&,int);
@@ -117,6 +118,7 @@ private:
 	QMenu*       mDetectorGroupPopupContext; ///< Popup menu for detector picking
 	QPushButton* mSelectButton; ///< Select the mode Pick/Normal
 	QPushButton* mSelectColormap; ///< Select colormap button
+        QPushButton* mSaveImage; ///< Save the currently displayed image
 	Instrument3DWidget* mInstrumentDisplay; ///< This is the opengl 3d widget for instrument
 	int          mSpectraIDSelected; ///< spectra index id
 	int          mDetectorIDSelected; ///< detector id
@@ -133,6 +135,7 @@ private:
         std::string mWorkspaceName; ///< The name of workpace that this window is associated with
         QString mDefaultColorMap; ///< The full path of the default color map
         QString mCurrentColorMap;
+        QString m_savedialog_dir; /// The last used dialog directory
 
   void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
   /// Watches for the deletion of the associated workspace

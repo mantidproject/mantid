@@ -51,10 +51,11 @@ public:
 	void setInteractionModePick();
 	void setInteractionModeNormal();
 	GLActor* getPickedActor();
-	void saveToPPM(QString filename);
 	void setViewDirection(AxisDirection);
 	void setBackgroundColor(QColor);
         QColor currentBackgroundColor() const;
+        void saveToFile(const QString & filename);
+
 signals:
 	void actorsPicked(const std::set<QRgb>& );
 	void actorHighlighted( QRgb );

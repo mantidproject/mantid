@@ -1,6 +1,6 @@
 #include "InstrumentWindow.h"
 #include "../MantidUI.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "Poco/Path.h"
 
@@ -22,6 +22,7 @@
 #include <QColorDialog>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QImageWriter>
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
 #include "qwt_scale_engine.h"
@@ -62,6 +63,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	QPushButton* mSelectBin = new QPushButton(tr("Select X Range"));
 	mBinMapDialog = new BinDialog(this);
 	mColorMapWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
+	//Save control
+	mSaveImage = new QPushButton(tr("Save image"));
+	m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
 	mMinValueBox = new QLineEdit();
 	mMaxValueBox = new QLineEdit();
@@ -127,6 +131,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	renderControlsLayout->addWidget(mSelectButton);
 	renderControlsLayout->addWidget(mSelectBin);
 	renderControlsLayout->addWidget(mSelectColormap);
+	renderControlsLayout->addWidget(mSaveImage);
 	renderControlsLayout->addWidget(axisViewFrame);
 	renderControlsLayout->addWidget(btnBackgroundColor);
 	renderControlsLayout->addWidget(lColormapFrame);
@@ -142,6 +147,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mainLayout->addWidget(mInteractionInfo);
 	connect(mSelectButton, SIGNAL(clicked()), this,   SLOT(modeSelectButtonClicked()));
 	connect(mSelectColormap,SIGNAL(clicked()), this, SLOT(changeColormap()));
+	connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
 	connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
 	connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
 	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelected(int)), this, SLOT(spectraInformation(int)));
@@ -153,6 +159,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(double,double)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double)));
 	connect(axisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
 	connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
+
 	mPopupContext = new QMenu(mInstrumentDisplay);
 	QAction* infoAction = new QAction(tr("&Info"), this);
 	connect(infoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
@@ -554,6 +561,48 @@ void InstrumentWindow::pickBackgroundColor()
 {
 	QColor color = QColorDialog::getColor(Qt::green,this);
 	mInstrumentDisplay->setBackgroundColor(color);
+}
+
+void InstrumentWindow::saveImage()
+{
+  QList<QByteArray> formats = QImageWriter::supportedImageFormats();
+  QListIterator<QByteArray> itr(formats);
+  QString filter("");
+  while( itr.hasNext() )
+  {
+    filter += "*." + itr.next();
+    if( itr.hasNext() )
+    {
+      filter += ";;";
+    }
+  }
+  QString selectedFilter = "*.png";
+  QString filename = QFileDialog::getSaveFileName(this, "Save image ...", m_savedialog_dir, filter, &selectedFilter);
+
+  // If its empty, they cancelled the dialog
+  if( filename.isEmpty() ) return;
+  
+  //Save the directory used
+  QFileInfo finfo(filename);
+  m_savedialog_dir = finfo.dir().path();
+
+  QString ext = finfo.completeSuffix();
+  if( ext.isEmpty() )
+  {
+    filename += selectedFilter.section("*", 1);
+    ext = QFileInfo(filename).completeSuffix();
+  }
+  else
+  {
+    QStringList extlist = filter.split(";;");
+    if( !extlist.contains("*." + ext) )
+    {
+      QMessageBox::warning(this, "MantidPlot", "Unsupported file extension, please use one from the supported list.");
+      return;
+    }
+  }
+  
+  mInstrumentDisplay->saveToFile(filename);
 }
 
 /**

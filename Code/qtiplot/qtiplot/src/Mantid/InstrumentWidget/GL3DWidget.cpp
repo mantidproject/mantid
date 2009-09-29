@@ -519,17 +519,6 @@ void GL3DWidget::MakeObject()
 }
 
 /**
- * This saves the GL scene to PPM Image file, name of the file is given as input
- */
-void GL3DWidget::saveToPPM(QString filename)
-{
-	paintGL();
-	glReadBuffer(GL_BACK);
-	QImage img=grabFrameBuffer(false);
-	img.save(filename,"PPM");
-}
-
-/**
  * Sets the default view to input provided
  */
 void GL3DWidget::setViewDirection(AxisDirection dir)
@@ -642,6 +631,19 @@ void GL3DWidget::setBackgroundColor(QColor input)
 QColor GL3DWidget::currentBackgroundColor() const
 {
   return bgColor;
+}
+
+/**
+ * This saves the GL scene to a file.
+ * @param filename The name of the file
+ */
+void GL3DWidget::saveToFile(const QString & filename)
+{
+  if( filename.isEmpty() ) return;
+  //  QPixmap pm = renderPixmap();
+  //pm.save(filename);
+  QImage image = this->grabFrameBuffer();
+  image.save(filename);
 }
 
 /**
