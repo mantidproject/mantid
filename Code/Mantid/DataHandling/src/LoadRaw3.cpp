@@ -269,11 +269,12 @@ void LoadRaw3::checkOptionalProperties()
   //read in the settings passed to the algorithm
   m_spec_list = getProperty("SpectrumList");
   m_spec_max = getProperty("SpectrumMax");
+  m_spec_min = getProperty("SpectrumMin");
+ 
   m_list = !m_spec_list.empty();
-  m_interval = m_spec_max != unSetInt;
+  m_interval = (m_spec_max != unSetInt) ||(m_spec_min !=1);
   if (m_spec_max == unSetInt)
     m_spec_max = 1;
-
   // Check validity of spectra list property, if set
   if (m_list)
   {
@@ -298,11 +299,14 @@ void LoadRaw3::checkOptionalProperties()
   {
     m_interval = true;
     m_spec_min = getProperty("SpectrumMin");
+	if(m_spec_min!=1 &&  m_spec_max==1)
+		m_spec_max = m_numberOfSpectra ;	
     if (m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra)
     {
       g_log.error("Invalid Spectrum min/max properties");
       throw std::invalid_argument("Inconsistent properties defined");
     }
+	
   }
 }
 
@@ -314,9 +318,12 @@ int LoadRaw3::calculateWorkspaceSize()
   {
     if (m_interval)
     {
-      total_specs = (m_spec_max - m_spec_min + 1);
-      m_spec_max += 1;
-    }
+	  if(m_spec_min!=1 &&  m_spec_max==1)
+		m_spec_max = m_numberOfSpectra ;
+
+	  total_specs = (m_spec_max - m_spec_min + 1);
+	  m_spec_max += 1;
+	}
     else
       total_specs = 0;
 
@@ -335,6 +342,7 @@ int LoadRaw3::calculateWorkspaceSize()
       if (m_spec_list.size() == 0)
         m_list = false;
       total_specs += m_spec_list.size();
+	  
     }
   }
   else

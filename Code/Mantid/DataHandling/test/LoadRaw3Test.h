@@ -173,7 +173,7 @@ public:
     TS_ASSERT_EQUALS( output2D->dataX(8)[777], 554.1875);
   }
 
-  void xtestMinlimit()
+  void testMinlimit()
   {
     LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
