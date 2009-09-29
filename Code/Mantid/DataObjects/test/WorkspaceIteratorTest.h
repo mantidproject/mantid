@@ -12,6 +12,7 @@
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
 
+using Mantid::MantidVec;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
@@ -33,7 +34,7 @@ class tripleIteratorTest : public CxxTest::TestSuite
 {
 private:
 
-  typedef boost::shared_ptr<std::vector<double> > parray;
+  typedef boost::shared_ptr<MantidVec> parray;
   typedef boost::shared_ptr<Workspace1D> W1D;
   typedef boost::shared_ptr<Workspace2D> W2D;
   typedef boost::shared_ptr<WorkspaceSingleValue> WSV;
@@ -43,7 +44,7 @@ public:
 
   parray CreateRandomArray(int size)
   {
-    parray x(new std::vector<double>);
+    parray x(new MantidVec);
     x->resize(size);
     std::generate(x->begin(),x->end(),rand);
     return x;
@@ -106,9 +107,9 @@ public:
     int size = 200;
     W1D workspace = Create1DWorkspace(size);
 
-    std::vector<double> x1 = workspace->dataX();
-    std::vector<double> y1 = workspace->dataY();
-    std::vector<double> e1 = workspace->dataE();
+    const MantidVec& x1 = workspace->dataX();
+    const MantidVec& y1 = workspace->dataY();
+    const MantidVec& e1 = workspace->dataE();
 
     Workspace1D::const_iterator ti(*workspace);
     for (int i = 0; i < size; i++)
@@ -180,13 +181,13 @@ public:
     Workspace1D::iterator IB(*workB);
 
     std::copy(IA.begin(),IA.end(),IB.begin());
-    const std::vector<double>& x1 = workA->dataX();
-    const std::vector<double>& y1 = workA->dataY();
-    const std::vector<double>& e1 = workA->dataE();
+    const MantidVec& x1 = workA->dataX();
+    const MantidVec& y1 = workA->dataY();
+    const MantidVec& e1 = workA->dataE();
 
-    const std::vector<double>& x2 = workB->dataX();
-    const std::vector<double>& y2 = workB->dataY();
-    const std::vector<double>& e2 = workB->dataE();
+    const MantidVec& x2 = workB->dataX();
+    const MantidVec& y2 = workB->dataY();
+    const MantidVec& e2 = workB->dataE();
 
 
     for (int i = 0; i < size; i++)
@@ -208,9 +209,9 @@ public:
     //      sort(IA.begin(),IA.end(), (boost::bind(&LocatedDataRef::first,_1)() >
     // 				 boost::bind(&LocatedDataRef::first,_2)() );
 
-    const std::vector<double>& x1 = workA->dataX();
-    const std::vector<double>& y1 = workA->dataY();
-    const std::vector<double>& e1 = workA->dataE();
+    const MantidVec& x1 = workA->dataX();
+    const MantidVec& y1 = workA->dataY();
+    const MantidVec& e1 = workA->dataE();
 
 
     for (int i = 0; i < size; i++)

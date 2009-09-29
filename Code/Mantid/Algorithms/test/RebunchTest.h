@@ -30,9 +30,9 @@ public:
     rebunch.setPropertyValue("NBunch", "5");
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
-    const std::vector<double> outX=rebunchdata->dataX(0);
-    const std::vector<double> outY=rebunchdata->dataY(0);
-    const std::vector<double> outE=rebunchdata->dataE(0);
+    const Mantid::MantidVec outX=rebunchdata->dataX(0);
+    const Mantid::MantidVec outY=rebunchdata->dataY(0);
+    const Mantid::MantidVec outE=rebunchdata->dataE(0);
 
     TS_ASSERT_DELTA(outX[0],1.5  ,0.000001);
     TS_ASSERT_DELTA(outY[0],3.0 ,0.000001);
@@ -61,9 +61,9 @@ public:
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
-    const std::vector<double> outX=rebunchdata->dataX(0);
-    const std::vector<double> outY=rebunchdata->dataY(0);
-    const std::vector<double> outE=rebunchdata->dataE(0);
+    const Mantid::MantidVec outX=rebunchdata->dataX(0);
+    const Mantid::MantidVec outY=rebunchdata->dataY(0);
+    const Mantid::MantidVec outE=rebunchdata->dataE(0);
 
     TS_ASSERT_DELTA(outX[0],0.5  ,0.000001);
     TS_ASSERT_DELTA(outY[0],28  ,0.000001);
@@ -95,9 +95,9 @@ public:
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
-    const std::vector<double> outX=rebunchdata->dataX(5);
-    const std::vector<double> outY=rebunchdata->dataY(5);
-    const std::vector<double> outE=rebunchdata->dataE(5);
+    const Mantid::MantidVec outX=rebunchdata->dataX(5);
+    const Mantid::MantidVec outY=rebunchdata->dataY(5);
+    const Mantid::MantidVec outE=rebunchdata->dataE(5);
 
 	TS_ASSERT_DELTA(outX[0],0.5  ,0.000001);
     TS_ASSERT_DELTA(outY[0],3 ,0.000001);
@@ -127,9 +127,9 @@ public:
     rebunch.setPropertyValue("NBunch", "7");
     rebunch.execute();
     MatrixWorkspace_sptr rebunchdata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
-    const std::vector<double> outX=rebunchdata->dataX(5);
-    const std::vector<double> outY=rebunchdata->dataY(5);
-    const std::vector<double> outE=rebunchdata->dataE(5);
+    const Mantid::MantidVec outX=rebunchdata->dataX(5);
+    const Mantid::MantidVec outY=rebunchdata->dataY(5);
+    const Mantid::MantidVec outE=rebunchdata->dataE(5);
 
     TS_ASSERT_DELTA(outX[0],2.75  ,0.000001);
     TS_ASSERT_DELTA(outY[0],5.5 ,0.000001);

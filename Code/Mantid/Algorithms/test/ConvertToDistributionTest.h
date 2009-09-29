@@ -52,9 +52,9 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(dist)) )
 
-    const std::vector<double> &X = output->dataX(0);
-    const std::vector<double> &Y = output->dataY(0);
-    const std::vector<double> &E = output->dataE(0);
+    const Mantid::MantidVec &X = output->dataX(0);
+    const Mantid::MantidVec &Y = output->dataY(0);
+    const Mantid::MantidVec &E = output->dataE(0);
     for (int i = 0; i < Y.size(); ++i)
     {
       TS_ASSERT_EQUALS( X[i], i/2.0 )

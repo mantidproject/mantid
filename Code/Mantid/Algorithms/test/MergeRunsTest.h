@@ -95,7 +95,7 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) )
 
-    const std::vector<double> &X = output->readX(0);
+    const Mantid::MantidVec &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 17 )
     int i;
     for (i = 0; i < 11; ++i)
@@ -122,7 +122,7 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) )
 
-    const std::vector<double> &X = output->readX(0);
+    const Mantid::MantidVec &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 8 )
     int i;
     for (i = 0; i < 3; ++i)
@@ -149,7 +149,7 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outer")) )
 
-    const std::vector<double> &X = output->readX(0);
+    const Mantid::MantidVec &X = output->readX(0);
     TS_ASSERT_EQUALS( X.size(), 8 )
     int i;
     for (i = 0; i < 2; ++i)

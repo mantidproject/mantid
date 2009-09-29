@@ -168,8 +168,8 @@ namespace Mantid
         throw Exception::FileError("Unable to read RTCB1 from DAE " , m_daename);
       }
       // Put the read in array into a vector (inside a shared pointer)
-      boost::shared_ptr<std::vector<double> > timeChannelsVec
-                          (new std::vector<double>(timeChannels.get(), timeChannels.get() + lengthIn));
+      boost::shared_ptr<MantidVec> timeChannelsVec
+                          (new MantidVec(timeChannels.get(), timeChannels.get() + lengthIn));
       // Create an array to hold the read-in data
       boost::shared_array<int> spectrum(new int[lengthIn]);
 

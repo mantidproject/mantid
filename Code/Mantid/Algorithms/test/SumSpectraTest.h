@@ -37,8 +37,8 @@ public:
       for (int k = 0; k < 6; ++k) {
         space2D->dataX(j)[k] = k;
       }
-      space2D->setData(j, boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(a+(5*j), a+(5*j)+5)),
-          boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(e+(5*j), e+(5*j)+5)));
+      space2D->setData(j, boost::shared_ptr<Mantid::MantidVec>(new Mantid::MantidVec(a+(5*j), a+(5*j)+5)),
+          boost::shared_ptr<Mantid::MantidVec>(new Mantid::MantidVec(e+(5*j), e+(5*j)+5)));
     }
     delete[] a;
     delete[] e;
@@ -85,9 +85,9 @@ public:
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1)
     double yy[5] = {45,48,51,54,57};
 
-    std::vector<double> &x = output2D->dataX(0);
-    std::vector<double> &y = output2D->dataY(0);
-    std::vector<double> &e = output2D->dataE(0);
+    Mantid::MantidVec &x = output2D->dataX(0);
+    Mantid::MantidVec &y = output2D->dataY(0);
+    Mantid::MantidVec &e = output2D->dataE(0);
     TS_ASSERT_EQUALS( x.size(), 6 );
     TS_ASSERT_EQUALS( y.size(), 5 );
     TS_ASSERT_EQUALS( e.size(), 5 );
@@ -128,9 +128,9 @@ public:
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1);
     double yy[5] = {50,55,60,65,70};
 
-    std::vector<double> &x = output2D->dataX(0);
-    std::vector<double> &y = output2D->dataY(0);
-    std::vector<double> &e = output2D->dataE(0);
+    Mantid::MantidVec &x = output2D->dataX(0);
+    Mantid::MantidVec &y = output2D->dataY(0);
+    Mantid::MantidVec &e = output2D->dataE(0);
     TS_ASSERT_EQUALS( x.size(), 6 );
     TS_ASSERT_EQUALS( y.size(), 5 );
     TS_ASSERT_EQUALS( e.size(), 5 );

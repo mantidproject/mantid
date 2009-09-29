@@ -22,9 +22,9 @@ public:
         Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create("Workspace2D",1,100,100));
 
-        std::vector<double>& X = ws->dataX(0);
-        std::vector<double>& Y = ws->dataY(0);
-        std::vector<double>& E = ws->dataE(0);
+        Mantid::MantidVec& X = ws->dataX(0);
+        Mantid::MantidVec& Y = ws->dataY(0);
+        Mantid::MantidVec& E = ws->dataE(0);
         for(int j=0;j<100;j++)
         {
             X[j] = 0.1*(j+1);

@@ -33,8 +33,8 @@ public:
       for (int k = 0; k < 6; ++k) {
         space2D->dataX(j)[k] = k;
       }
-      space2D->setData(j, boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(a+(5*j), a+(5*j)+5)),
-          boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(e+(5*j), e+(5*j)+5)));
+      space2D->setData(j, boost::shared_ptr<Mantid::MantidVec>(new Mantid::MantidVec(a+(5*j), a+(5*j)+5)),
+          boost::shared_ptr<Mantid::MantidVec>(new Mantid::MantidVec(e+(5*j), e+(5*j)+5)));
     }
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("testSpace", space);
@@ -84,9 +84,9 @@ public:
     double yy[3] = {36,51,66};
     for (int i = 0; i < max; ++i)
     {
-      std::vector<double> &x = output2D->dataX(i);
-      std::vector<double> &y = output2D->dataY(i);
-      std::vector<double> &e = output2D->dataE(i);
+      Mantid::MantidVec &x = output2D->dataX(i);
+      Mantid::MantidVec &y = output2D->dataY(i);
+      Mantid::MantidVec &e = output2D->dataE(i);
 
       TS_ASSERT_EQUALS( x.size(), 2 )
       TS_ASSERT_EQUALS( y.size(), 1 );

@@ -7,6 +7,7 @@
 #include "boost/shared_ptr.hpp"
 #include "MantidAPI/WorkspaceFactory.h"
 
+using Mantid::MantidVec;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -23,30 +24,30 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     //section required to support iteration
     virtual int size() const {return 0;}
     virtual int blocksize() const  {return 1000000;}
-    virtual std::vector<double>& dataX(int const index) {return data;}
+    virtual MantidVec& dataX(int const index) {return data;}
     ///Returns the y data
-    virtual std::vector<double>& dataY(int const index) {return data;}
+    virtual MantidVec& dataY(int const index) {return data;}
     ///Returns the error data
-    virtual std::vector<double>& dataE(int const index) {return data;}
+    virtual MantidVec& dataE(int const index) {return data;}
 
-    virtual const std::vector<double>& dataX(int const index)const {return data;}
+    virtual const MantidVec& dataX(int const index)const {return data;}
     ///Returns the y data
-    virtual const std::vector<double>& dataY(int const index)const {return data;}
+    virtual const MantidVec& dataY(int const index)const {return data;}
     ///Returns the error data
-    virtual const std::vector<double>& dataE(int const index)const {return data;}
+    virtual const MantidVec& dataE(int const index)const {return data;}
     void setX(const cow_ptr<Mantid::MantidVec>&) {}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
-    virtual const std::vector<double>& getX(int const index) const {return data;}
+    virtual const MantidVec& getX(int const index) const {return data;}
     ///Returns the y data const
-    virtual const std::vector<double>& getY(int const index) const {return data;}
+    virtual const MantidVec& getY(int const index) const {return data;}
     ///Returns the error const
-    virtual const std::vector<double>& getE(int const index) const {return data;}
+    virtual const MantidVec& getE(int const index) const {return data;}
 
   private:
-    std::vector<double> data;
+    MantidVec data;
     int dummy;
   };
 
@@ -60,30 +61,30 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     //section required to support iteration
     virtual int size() const {return 0;}
     virtual int blocksize() const  {return 1000000;}
-    virtual std::vector<double>& dataX(int const index) {return data;}
+    virtual MantidVec& dataX(int const index) {return data;}
     ///Returns the y data
-    virtual std::vector<double>& dataY(int const index) {return data;}
+    virtual MantidVec& dataY(int const index) {return data;}
     ///Returns the error data
-    virtual std::vector<double>& dataE(int const index) {return data;}
+    virtual MantidVec& dataE(int const index) {return data;}
 
-    virtual const std::vector<double>& dataX(int const index)const {return data;}
+    virtual const MantidVec& dataX(int const index)const {return data;}
     ///Returns the y data
-    virtual const std::vector<double>& dataY(int const index)const {return data;}
+    virtual const MantidVec& dataY(int const index)const {return data;}
     ///Returns the error data
-    virtual const std::vector<double>& dataE(int const index)const {return data;}
+    virtual const MantidVec& dataE(int const index)const {return data;}
     void setX(const cow_ptr<Mantid::MantidVec>&) {}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
     //Methods for getting data via python. Do not use for anything else!
     ///Returns the x data const
-    virtual const std::vector<double>& getX(int const index) const {return data;}
+    virtual const MantidVec& getX(int const index) const {return data;}
     ///Returns the y data const
-    virtual const std::vector<double>& getY(int const index) const {return data;}
+    virtual const MantidVec& getY(int const index) const {return data;}
     ///Returns the error const
-    virtual const std::vector<double>& getE(int const index) const {return data;}
+    virtual const MantidVec& getE(int const index) const {return data;}
 
   private:
-    std::vector<double> data;
+    MantidVec data;
     int dummy;
   };
 

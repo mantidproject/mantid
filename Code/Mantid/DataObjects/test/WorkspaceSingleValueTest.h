@@ -32,14 +32,14 @@ public:
   void testsetgetXvector()
   {
     WorkspaceSingleValue ws;
-    std::vector<double> v1(1,1.1);
+    Mantid::MantidVec v1(1,1.1);
     ws.dataX() = v1;
     TS_ASSERT_EQUALS(v1,ws.dataX());
   }
   void testsetgetYvector()
   {
     WorkspaceSingleValue ws;
-    std::vector<double> v1(1,1.1);
+    Mantid::MantidVec v1(1,1.1);
     ws.dataY() = v1;
     TS_ASSERT_EQUALS(v1,ws.dataY());
   }
@@ -47,7 +47,7 @@ public:
   void testsetgetEvector()
   {
     WorkspaceSingleValue ws;
-    std::vector<double> v1(1,1.1);
+    Mantid::MantidVec v1(1,1.1);
     ws.dataE() = v1;
     TS_ASSERT_EQUALS(v1,ws.dataE());
   }

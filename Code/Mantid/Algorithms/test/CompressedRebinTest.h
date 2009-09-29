@@ -33,9 +33,9 @@ public:
     TS_ASSERT(rebin.isExecuted())
     MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
 
-    const std::vector<double> outX=rebindata->dataX(5);
-    const std::vector<double> outY=rebindata->dataY(5);
-    const std::vector<double> outE=rebindata->dataE(5);
+    const Mantid::MantidVec outX=rebindata->dataX(5);
+    const Mantid::MantidVec outY=rebindata->dataY(5);
+    const Mantid::MantidVec outE=rebindata->dataE(5);
     TS_ASSERT_DELTA(outX[7],15.5  ,0.000001);
     TS_ASSERT_DELTA(outY[7],3.0 ,0.000001);
     TS_ASSERT_DELTA(outE[7],sqrt(4.5)/2.0  ,0.000001);
@@ -71,9 +71,9 @@ public:
     TS_ASSERT(rebin.execute())
     TS_ASSERT(rebin.isExecuted())
     MatrixWorkspace_sptr rebindata = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out"));
-    const std::vector<double> outX=rebindata->dataX(5);
-    const std::vector<double> outY=rebindata->dataY(5);
-    const std::vector<double> outE=rebindata->dataE(5);
+    const Mantid::MantidVec outX=rebindata->dataX(5);
+    const Mantid::MantidVec outY=rebindata->dataY(5);
+    const Mantid::MantidVec outE=rebindata->dataE(5);
     TS_ASSERT_DELTA(outX[7],15.5  ,0.000001);
     TS_ASSERT_DELTA(outY[7],8.0 ,0.000001);
     TS_ASSERT_DELTA(outE[7],sqrt(8.0)  ,0.000001);

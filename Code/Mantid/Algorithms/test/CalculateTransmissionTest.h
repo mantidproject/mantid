@@ -75,7 +75,7 @@ public:
     
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
-    const std::vector<double> &Y = output->readY(0);
+    const Mantid::MantidVec &Y = output->readY(0);
     // Should all be 1 because I used the same workspace twice as the input
     for (unsigned int i = 0; i < Y.size(); ++i)
     {

@@ -101,8 +101,8 @@ namespace Mantid
       float* timeChannels = new float[lengthIn];
       iraw.getTimeChannels(timeChannels, lengthIn);
       // Put the read in array into a vector (inside a shared pointer)
-      boost::shared_ptr<std::vector<double> > timeChannelsVec
-                          (new std::vector<double>(timeChannels, timeChannels + lengthIn));
+      boost::shared_ptr<MantidVec> timeChannelsVec
+                          (new MantidVec(timeChannels, timeChannels + lengthIn));
       // Create an array to hold the read-in data
       int* spectrum = new int[lengthIn];
 

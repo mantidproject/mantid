@@ -98,18 +98,18 @@ public:
     // Check that the output unit is correct
     TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "Wavelength")
     // Test that y & e data is unchanged
-    std::vector<double> y = output2D->dataY(101);
-    std::vector<double> e = output2D->dataE(101);
+    Mantid::MantidVec y = output2D->dataY(101);
+    Mantid::MantidVec e = output2D->dataE(101);
     unsigned int ten = 10;
     TS_ASSERT_EQUALS( y.size(), ten );
     TS_ASSERT_EQUALS( e.size(), ten );
-    std::vector<double> yIn = input2D->dataY(101);
-    std::vector<double> eIn = input2D->dataE(101);
+    Mantid::MantidVec yIn = input2D->dataY(101);
+    Mantid::MantidVec eIn = input2D->dataE(101);
     TS_ASSERT_DELTA( y[0], yIn[0], 1e-6 );
     TS_ASSERT_DELTA( y[4], yIn[4], 1e-6 );
     TS_ASSERT_DELTA( e[1], eIn[1], 1e-6 );
     // Test that spectra that should have been zeroed have been
-    std::vector<double> x = output2D->dataX(0);
+    Mantid::MantidVec x = output2D->dataX(0);
     y = output2D->dataY(0);
     e = output2D->dataE(0);
     TS_ASSERT_EQUALS( y[1], 0 );
@@ -117,7 +117,7 @@ public:
     // Check that the data has truly been copied (i.e. isn't a reference to the same
     //    vector in both workspaces)
     double test[10] = {11, 22, 33, 44, 55, 66, 77, 88, 99, 1010};
-    boost::shared_ptr<std::vector<double> > tester(new std::vector<double>(test, test+10));
+    boost::shared_ptr<Mantid::MantidVec > tester(new Mantid::MantidVec(test, test+10));
     output2D->setData(111, tester, tester);
     y = output2D->dataY(111);
     TS_ASSERT_EQUALS( y[3], 44.0);
@@ -129,7 +129,7 @@ public:
     TS_ASSERT_DELTA( x[5], 1.5808, 0.0001 );
     TS_ASSERT_DELTA( x[10], 3.1617, 0.0001 );
     // Just check that an input bin boundary is unchanged
-    std::vector<double> xIn = input2D->dataX(66);
+    Mantid::MantidVec xIn = input2D->dataX(66);
     TS_ASSERT_EQUALS( xIn[4], 4000.0 );
 
     AnalysisDataService::Instance().remove("outputSpace");

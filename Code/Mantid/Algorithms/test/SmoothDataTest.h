@@ -77,8 +77,8 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputWS)) )
-    const std::vector<double> &Y = output->dataY(0);
-    const std::vector<double> &E = output->dataE(0);
+    const Mantid::MantidVec &Y = output->dataY(0);
+    const Mantid::MantidVec &E = output->dataE(0);
     TS_ASSERT_EQUALS( Y[0], 2 )
     TS_ASSERT_DELTA( E[0], sqrt(Y[0]/3.0), 0.0001 )
     TS_ASSERT_EQUALS( Y[1], 2.5 )

@@ -26,8 +26,8 @@ public:
     inWS->initialize(n,m+1,m);
     for(int i=0;i<n;i++)
     {
-        std::vector<double>& X = inWS->dataX(i);
-        std::vector<double>& Y = inWS->dataY(i);
+        Mantid::MantidVec& X = inWS->dataX(i);
+        Mantid::MantidVec& Y = inWS->dataY(i);
         X[0] = double(i) + .5;
         X[1] = double(i) + 4.;
         Y[0] = 10.*(i+1);
@@ -50,17 +50,17 @@ public:
     TS_ASSERT_EQUALS(WS->blocksize(),7)
 
 
-    std::vector<double>& Y0 = WS->dataY(0);
+    Mantid::MantidVec& Y0 = WS->dataY(0);
     TS_ASSERT_EQUALS(Y0[0],7.5)
     TS_ASSERT_EQUALS(Y0[1],10)
     TS_ASSERT_EQUALS(Y0[2],0)
 
-    std::vector<double>& Y1 = WS->dataY(1);
+    Mantid::MantidVec& Y1 = WS->dataY(1);
     TS_ASSERT_EQUALS(Y1[0],5)
     TS_ASSERT_EQUALS(Y1[1],20)
     TS_ASSERT_EQUALS(Y1[2],10)
 
-    std::vector<double>& Y2 = WS->dataY(2);
+    Mantid::MantidVec& Y2 = WS->dataY(2);
     TS_ASSERT_EQUALS(Y2[0],0)
     TS_ASSERT_EQUALS(Y2[1],22.5)
     TS_ASSERT_EQUALS(Y2[2],30)

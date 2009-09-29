@@ -273,7 +273,7 @@ const std::vector<int> Unwrap::unwrapX(const API::MatrixWorkspace_sptr& tempWS, 
 /** Deals with the (rare) case where the flightpath is longer than the reference
  *  Note that in this case both T1 & T2 will be greater than Tmax
  */
-std::pair<int,int> Unwrap::handleFrameOverlapped(const std::vector<double>& xdata, const double& Ld, std::vector<double>& tempX)
+std::pair<int,int> Unwrap::handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX)
 {
   // Calculate the interval to exclude
   const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef/Ld) );
@@ -338,8 +338,8 @@ void Unwrap::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spe
   if ( rangeBounds[0] != -1 && rangeBounds[1] > 0 )
   {
     // Now append the lower range
-    std::vector<double>::const_iterator YStart = YIn.begin();
-    std::vector<double>::const_iterator EStart = EIn.begin();
+    MantidVec::const_iterator YStart = YIn.begin();
+    MantidVec::const_iterator EStart = EIn.begin();
     Y.insert( Y.end(), YStart+rangeBounds[0], YStart+rangeBounds[1] );
     E.insert( E.end(), EStart+rangeBounds[0], EStart+rangeBounds[1] );
     // Propagate masking, if necessary

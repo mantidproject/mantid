@@ -20,10 +20,10 @@ public:
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,200,0.5,0.02);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 
-    const std::vector<double> &X = WS->readX(1);
-    std::vector<double> &Y = WS->dataY(1);
-    std::vector<double> &E = WS->dataE(1);
-    std::vector<double> &Y0 = WS->dataY(0);
+    const Mantid::MantidVec &X = WS->readX(1);
+    Mantid::MantidVec &Y = WS->dataY(1);
+    Mantid::MantidVec &E = WS->dataE(1);
+    Mantid::MantidVec &Y0 = WS->dataY(0);
     for (int i = 0; i < Y.size(); ++i)
     {
       const double x = (X[i]+X[i+1])/2;

@@ -29,16 +29,16 @@ public:
   }
   int size() const {return vec.size();}
   int blocksize() const {return vec.size();}
-  std::vector<double>& dataX(int const index) {return vec;}
-  std::vector<double>& dataY(int const index) {return vec;}
-  std::vector<double>& dataE(int const index) {return vec;}
-  const std::vector<double>& dataX(int const index) const {return vec;}
-  const std::vector<double>& dataY(int const index) const {return vec;}
-  const std::vector<double>& dataE(int const index) const {return vec;}
+  MantidVec& dataX(int const index) {return vec;}
+  MantidVec& dataY(int const index) {return vec;}
+  MantidVec& dataE(int const index) {return vec;}
+  const MantidVec& dataX(int const index) const {return vec;}
+  const MantidVec& dataY(int const index) const {return vec;}
+  const MantidVec& dataE(int const index) const {return vec;}
   void setX(const Kernel::cow_ptr<MantidVec>&) {}
 
 private:
-  std::vector<double> vec;
+  MantidVec vec;
   int spec;
 };
 }} // namespace

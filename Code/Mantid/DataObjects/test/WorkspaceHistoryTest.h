@@ -10,7 +10,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 
 
-
+using Mantid::MantidVec;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -41,9 +41,9 @@ public:
     double signal = getProperty("signal");
     double error = getProperty("error");
 
-    boost::shared_ptr<std::vector<double> > x1( new std::vector<double>(xlen,1));
-    boost::shared_ptr<std::vector<double> > y1( new std::vector<double>(xlen,signal));
-    boost::shared_ptr<std::vector<double> > e1( new std::vector<double>(xlen,error));
+    boost::shared_ptr<MantidVec > x1( new MantidVec(xlen,1));
+    boost::shared_ptr<MantidVec > y1( new MantidVec(xlen,signal));
+    boost::shared_ptr<MantidVec > e1( new MantidVec(xlen,error));
     Workspace2D_sptr outWS(new Workspace2D);
     outWS->initialize(ylen,xlen,xlen);
     for (int i=0; i< ylen; i++)
@@ -83,12 +83,12 @@ public:
 
     for (int i=0;i<100;i++)
     {
-      std::vector<double>& io1_Y = in_work1->dataY(i);
-      std::vector<double>& io2_Y = in_work2->dataY(i);
-      std::vector<double>& out_Y = out->dataY(i);
-      std::vector<double>& io1_e = in_work1->dataE(i);
-      std::vector<double>& io2_e = in_work2->dataE(i);
-      std::vector<double>& out_e = out->dataE(i);
+      MantidVec& io1_Y = in_work1->dataY(i);
+      MantidVec& io2_Y = in_work2->dataY(i);
+      MantidVec& out_Y = out->dataY(i);
+      MantidVec& io1_e = in_work1->dataE(i);
+      MantidVec& io2_e = in_work2->dataE(i);
+      MantidVec& out_e = out->dataE(i);
 
       for(int j=0; j < io1_Y.size(); j++)
       {

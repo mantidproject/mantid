@@ -169,8 +169,8 @@ namespace Mantid
       float* timeChannels = new float[lengthIn];
       isisRaw->getTimeChannels(timeChannels, lengthIn);
       // Put the read in array into a vector (inside a shared pointer)
-      boost::shared_ptr<std::vector<double> > timeChannelsVec
-                          (new std::vector<double>(timeChannels, timeChannels + lengthIn));
+      boost::shared_ptr<MantidVec> timeChannelsVec
+                          (new MantidVec(timeChannels, timeChannels + lengthIn));
 
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");

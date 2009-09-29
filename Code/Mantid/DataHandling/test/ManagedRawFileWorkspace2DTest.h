@@ -14,6 +14,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using Mantid::MantidVec;
 
 class ManagedRawFileWorkspace2DTest : public CxxTest::TestSuite
 {
@@ -53,17 +54,17 @@ public:
   {
     ManagedRawFileWorkspace2D ws("../../../../Test/Data/HET15869.RAW");
 
-    const std::vector<double>& x0 = ws.readX(0);
+    const MantidVec& x0 = ws.readX(0);
     TS_ASSERT_EQUALS( x0[0], 5. )
     TS_ASSERT_EQUALS( x0[10], 7.5 )
-    const std::vector<double>& x100 = ws.readX(100);
+    const MantidVec& x100 = ws.readX(100);
     TS_ASSERT_EQUALS( x100[0], 5. )
     TS_ASSERT_EQUALS( x100[10], 7.5 )
 
-    const std::vector<double>& y0 = ws.readY(0);
+    const MantidVec& y0 = ws.readY(0);
     TS_ASSERT_EQUALS( y0[0], 0. )
     TS_ASSERT_EQUALS( y0[10], 1. )
-    const std::vector<double>& y100 = ws.readY(100);
+    const MantidVec& y100 = ws.readY(100);
     TS_ASSERT_EQUALS( y100[0], 1. )
     TS_ASSERT_EQUALS( y100[10], 1. )
 
@@ -73,10 +74,10 @@ public:
   {
     ManagedRawFileWorkspace2D ws("../../../../Test/Data/HET15869.RAW");
 
-    std::vector<double>& y0 = ws.dataY(0);
+    MantidVec& y0 = ws.dataY(0);
     y0[100] = 1234.;
 
-    std::vector<double>& y1000 = ws.dataY(1000);
+    MantidVec& y1000 = ws.dataY(1000);
     y1000[200] = 4321.;
 
     TS_ASSERT_EQUALS( ws.dataY(0)[100], 1234. )

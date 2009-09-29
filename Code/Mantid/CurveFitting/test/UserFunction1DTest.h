@@ -17,25 +17,24 @@ class UserFunction1DTest : public CxxTest::TestSuite
 public:
     UserFunction1DTest()
     {
-
-        FrameworkManager::Instance();
-        Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-            (WorkspaceFactory::Instance().create("Workspace2D",3,10,10));
-        for(int i=0;i<3;i++)
+      FrameworkManager::Instance();
+      Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
+        (WorkspaceFactory::Instance().create("Workspace2D",3,10,10));
+      for(int i=0;i<3;i++)
+      {
+        Mantid::MantidVec& X = ws->dataX(i);
+        Mantid::MantidVec& Y = ws->dataY(i);
+        Mantid::MantidVec& E = ws->dataE(i);
+        for(int j=0;j<10;j++)
         {
-            std::vector<double>& X = ws->dataX(i);
-            std::vector<double>& Y = ws->dataY(i);
-            std::vector<double>& E = ws->dataE(i);
-            for(int j=0;j<10;j++)
-            {
-                X[j] = 1.*j;
-                Y[j] = (i+1)*(2. + 4.*X[j]);
-                E[j] = 1.;
-            }
+          X[j] = 1.*j;
+          Y[j] = (i+1)*(2. + 4.*X[j]);
+          E[j] = 1.;
         }
-        AnalysisDataService::Instance().add("UserFunction1DWS",ws);
-
+      }
+      AnalysisDataService::Instance().add("UserFunction1DWS",ws);
     }
+
     ~UserFunction1DTest()
     {
         FrameworkManager::Instance().deleteWorkspace("UserFunction1DWS");

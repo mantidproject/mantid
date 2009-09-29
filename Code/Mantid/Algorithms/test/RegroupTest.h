@@ -43,7 +43,7 @@ public:
     TS_ASSERT( regroup.isExecuted())
 
     MatrixWorkspace_sptr rebindata = regroup.getProperty("OutputWorkspace");
-    const std::vector<double> outX=rebindata->dataX(0);
+    const Mantid::MantidVec outX=rebindata->dataX(0);
 
     TS_ASSERT_DELTA(outX[7],12.5  ,0.000001);
     TS_ASSERT_DELTA(outX[12],20.75  ,0.000001);

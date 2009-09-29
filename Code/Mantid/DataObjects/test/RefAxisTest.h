@@ -33,7 +33,7 @@ public:
       a[i]=i+0.1;
     }
     for (int j = 0; j < 5; ++j) {
-      space->dataX(j) = *( new std::vector<double>(a+(5*j), a+(5*j)+5) );
+      space->dataX(j) = *( new Mantid::MantidVec(a+(5*j), a+(5*j)+5) );
     }
     delete a,b;
     

@@ -9,14 +9,15 @@
 #include "MantidDataObjects/Histogram1D.h" 
 
 using Mantid::DataObjects::Histogram1D;
+using Mantid::MantidVec;
 
 class Histogram1DTest : public CxxTest::TestSuite
 {
 private: 
   int nel; // Number of elements in the array
   Histogram1D h, h2; // Two histograms
-  std::vector<double> x1,y1,e1; // vectors 
-  typedef boost::shared_ptr<std::vector<double> > parray;
+  MantidVec x1,y1,e1; // vectors 
+  typedef boost::shared_ptr<MantidVec > parray;
   parray pa, pb; // Shared_ptr to vectors
 public:
   Histogram1DTest()
@@ -27,9 +28,9 @@ public:
     y1.resize(nel);
     std::fill(y1.begin(),y1.end(),rand());
     e1.resize(nel);
-    pa=parray(new std::vector<double>(nel));
+    pa=parray(new MantidVec(nel));
     std::fill(pa->begin(),pa->end(),rand());
-    pb=parray(new std::vector<double>(nel));
+    pb=parray(new MantidVec(nel));
     std::fill(pa->begin(),pa->end(),rand());
   }
   void testsetgetXvector()

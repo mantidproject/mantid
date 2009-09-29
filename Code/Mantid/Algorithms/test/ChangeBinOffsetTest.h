@@ -44,8 +44,8 @@ public:
 
             MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance(). retrieve(alg1D.getProperty("OutputWorkspace")));
 
-		std::vector<double>& Xold = input->dataX(0);
-		std::vector<double>& Xnew = output->dataX(0);
+		Mantid::MantidVec& Xold = input->dataX(0);
+		Mantid::MantidVec& Xnew = output->dataX(0);
 
 //		for (int i=0; i < Xnew.size(); ++i)
 //		{
@@ -82,8 +82,8 @@ public:
 
 		MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(alg2D.getProperty("OutputWorkspace")));
 
-		std::vector<double>& Xold = input->dataX(0);
-		std::vector<double>& Xnew = output->dataX(0);
+		Mantid::MantidVec& Xold = input->dataX(0);
+		Mantid::MantidVec& Xnew = output->dataX(0);
 
 //		for (int i=0; i < Xnew.size(); ++i)
 //		{

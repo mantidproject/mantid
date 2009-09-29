@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace Mantid::DataObjects;
+using Mantid::MantidVec;
 
 class ManagedWorkspace2DTest : public CxxTest::TestSuite
 {
@@ -34,9 +35,9 @@ public:
     bigWorkspace.initialize(nVec, vecLength, vecLength);
     for (int i=0; i< nVec; i++)
     {
-      boost::shared_ptr<std::vector<double> > x1(new std::vector<double>(vecLength,1+i) );
-      boost::shared_ptr<std::vector<double> > y1(new std::vector<double>(vecLength,5+i) );
-      boost::shared_ptr<std::vector<double> > e1(new std::vector<double>(vecLength,4+i) );
+      boost::shared_ptr<MantidVec > x1(new MantidVec(vecLength,1+i) );
+      boost::shared_ptr<MantidVec > y1(new MantidVec(vecLength,5+i) );
+      boost::shared_ptr<MantidVec > e1(new MantidVec(vecLength,4+i) );
       bigWorkspace.setX(i,x1);     
       bigWorkspace.setData(i,y1,e1);
     }
@@ -95,14 +96,14 @@ public:
     ws.setTitle("testSetX");
     ws.initialize(1,1,1);
     double aNumber = 5.5;
-    boost::shared_ptr<std::vector<double> > v(new std::vector<double>(1, aNumber));
+    boost::shared_ptr<MantidVec > v(new MantidVec(1, aNumber));
     TS_ASSERT_THROWS_NOTHING( ws.setX(0,v) )
     TS_ASSERT_EQUALS( ws.dataX(0)[0], aNumber )
     TS_ASSERT_THROWS( ws.setX(-1,v), std::range_error )
     TS_ASSERT_THROWS( ws.setX(1,v), std::range_error )
     
     double anotherNumber = 9.99;
-    boost::shared_ptr<std::vector<double> > vec(new std::vector<double>(25, anotherNumber));
+    boost::shared_ptr<MantidVec > vec(new MantidVec(25, anotherNumber));
     TS_ASSERT_THROWS_NOTHING( bigWorkspace.setX(10, vec) )
     TS_ASSERT_EQUALS( bigWorkspace.dataX(10)[7], anotherNumber )
     TS_ASSERT_EQUALS( bigWorkspace.dataX(10)[22], anotherNumber )
@@ -114,9 +115,9 @@ public:
     ws.setTitle("testSetData");
     ws.initialize(1,1,1);
     double aNumber = 9.9;
-    boost::shared_ptr<std::vector<double> > v(new std::vector<double>(1, aNumber));
+    boost::shared_ptr<MantidVec > v(new MantidVec(1, aNumber));
     double anotherNumber = 3.3;
-    boost::shared_ptr<std::vector<double> > w(new std::vector<double>(1, anotherNumber));
+    boost::shared_ptr<MantidVec > w(new MantidVec(1, anotherNumber));
     TS_ASSERT_THROWS_NOTHING( ws.setData(0,v,v) )
     TS_ASSERT_EQUALS( ws.dataY(0)[0], aNumber )    
     TS_ASSERT_THROWS( ws.setData(-1,v,v), std::range_error )
@@ -131,7 +132,7 @@ public:
     TS_ASSERT_THROWS( ws.setData(1,v,w), std::range_error )
     
     double oneMoreNumber = 8478.6728;
-    boost::shared_ptr<std::vector<double> > vec(new std::vector<double>(25, oneMoreNumber));
+    boost::shared_ptr<MantidVec > vec(new MantidVec(25, oneMoreNumber));
     TS_ASSERT_THROWS_NOTHING( bigWorkspace.setData(49, vec, vec) )
     TS_ASSERT_EQUALS( bigWorkspace.dataY(49)[0], oneMoreNumber )
     TS_ASSERT_EQUALS( bigWorkspace.dataE(49)[9], oneMoreNumber )
@@ -151,10 +152,10 @@ public:
 
   void testDataX()
   {
-    std::vector<double> x;
+    MantidVec x;
     TS_ASSERT_THROWS( smallWorkspace.dataX(-1), std::range_error )
     TS_ASSERT_THROWS_NOTHING( x = smallWorkspace.dataX(0) )
-    std::vector<double> xx;
+    MantidVec xx;
     TS_ASSERT_THROWS_NOTHING( xx = smallWorkspace.dataX(1) )
     TS_ASSERT_THROWS( smallWorkspace.dataX(2), std::range_error )
     TS_ASSERT_EQUALS( x.size(), 4 )
@@ -167,10 +168,10 @@ public:
     
     // test const version
     const ManagedWorkspace2D &constRefToData = smallWorkspace;
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataX(-1), std::range_error )
-    const std::vector<double> xc = constRefToData.dataX(0);
-    const std::vector<double> xxc = constRefToData.dataX(1);
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataX(2), std::range_error )
+    TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataX(-1), std::range_error )
+    const MantidVec xc = constRefToData.dataX(0);
+    const MantidVec xxc = constRefToData.dataX(1);
+    TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataX(2), std::range_error )
     TS_ASSERT_EQUALS( xc.size(), 4 )
     TS_ASSERT_EQUALS( xxc.size(), 4 )
     for (unsigned int i = 0; i < xc.size(); ++i)
@@ -187,10 +188,10 @@ public:
 
   void testDataY()
   {
-    std::vector<double> y;
+    MantidVec y;
     TS_ASSERT_THROWS( smallWorkspace.dataY(-1), std::range_error )
     TS_ASSERT_THROWS_NOTHING( y = smallWorkspace.dataY(0) )
-    std::vector<double> yy;
+    MantidVec yy;
     TS_ASSERT_THROWS_NOTHING( yy = smallWorkspace.dataY(1) )
     TS_ASSERT_THROWS( smallWorkspace.dataY(2), std::range_error )
     TS_ASSERT_EQUALS( y.size(), 3 )
@@ -203,10 +204,10 @@ public:
 
     // test const version
     const ManagedWorkspace2D &constRefToData = smallWorkspace;
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataY(-1), std::range_error )
-    const std::vector<double> yc = constRefToData.dataY(0);
-    const std::vector<double> yyc = constRefToData.dataY(1);
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataY(2), std::range_error )
+    TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataY(-1), std::range_error )
+    const MantidVec yc = constRefToData.dataY(0);
+    const MantidVec yyc = constRefToData.dataY(1);
+    TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataY(2), std::range_error )
     TS_ASSERT_EQUALS( yc.size(), 3 )
     TS_ASSERT_EQUALS( yyc.size(), 3 )
     for (unsigned int i = 0; i < yc.size(); ++i)
@@ -223,10 +224,10 @@ public:
 
   void testDataE()
   {
-    std::vector<double> e;
+    MantidVec e;
     TS_ASSERT_THROWS( smallWorkspace.dataE(-1), std::range_error )
     TS_ASSERT_THROWS_NOTHING( e = smallWorkspace.dataE(0) )
-    std::vector<double> ee;
+    MantidVec ee;
     TS_ASSERT_THROWS_NOTHING( ee = smallWorkspace.dataE(1) )
     TS_ASSERT_THROWS( smallWorkspace.dataE(2), std::range_error )
     TS_ASSERT_EQUALS( e.size(), 3 )
@@ -239,10 +240,10 @@ public:
     
     // test const version
     const ManagedWorkspace2D &constRefToData = smallWorkspace;
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataE(-1), std::range_error )
-    const std::vector<double> ec = constRefToData.dataE(0);
-    const std::vector<double> eec = constRefToData.dataE(1);
-    TS_ASSERT_THROWS( const std::vector<double> v = constRefToData.dataE(2), std::range_error )
+    TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataE(-1), std::range_error )
+    const MantidVec ec = constRefToData.dataE(0);
+    const MantidVec eec = constRefToData.dataE(1);
+    TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataE(2), std::range_error )
     TS_ASSERT_EQUALS( ec.size(), 3 )
     TS_ASSERT_EQUALS( eec.size(), 3 )
     for (unsigned int i = 0; i < ec.size(); ++i)

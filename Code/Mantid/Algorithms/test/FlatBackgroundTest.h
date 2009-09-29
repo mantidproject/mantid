@@ -72,7 +72,7 @@ public:
     // The X vectors should be the same
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
     // Just do a spot-check on Y & E
-    const std::vector<double> &Y = outputWS->readY(0);
+    const Mantid::MantidVec &Y = outputWS->readY(0);
     for (unsigned int i=0; i<Y.size(); ++i)
     {
       TS_ASSERT_LESS_THAN( Y[i], 1.5 )
