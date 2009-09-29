@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FFT.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Exception.h"
 
 #include <boost/shared_array.hpp>
@@ -88,9 +88,9 @@ public:
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init()
 {
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace",
+      declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
         "",Direction::Input), "The name of the input workspace.");
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace",
+      declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
         "",Direction::Output), "The name of the output workspace.");
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
@@ -111,7 +111,7 @@ void FFT::init()
  */
 void FFT::exec()
 {
-    DataObjects::Workspace2D_sptr inWS = getProperty("InputWorkspace");
+    API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
     int iReal = getProperty("Real");
     int iImag = getProperty("Imaginary");
@@ -145,8 +145,7 @@ void FFT::exec()
         addPositiveOnly = true;
     }
 
-    DataObjects::Workspace2D_sptr outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D",nOut,xSize,ySize));
+    API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("Workspace2D",nOut,xSize,ySize);
 
     bool isEnergyMeV = false;
     if (inWS->getAxis(0)->unit() && 
