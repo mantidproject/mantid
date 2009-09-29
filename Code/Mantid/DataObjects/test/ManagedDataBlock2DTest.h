@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/ManagedDataBlock2D.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::DataObjects;
 using Mantid::MantidVec;
