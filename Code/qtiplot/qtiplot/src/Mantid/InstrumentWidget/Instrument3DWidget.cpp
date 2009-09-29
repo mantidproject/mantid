@@ -192,7 +192,7 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
   mWkspBinMax = -DBL_MAX;
   for (int i = 0; i < nHist; ++i)
   {
-    const std::vector<double> & values = workspace->readX(i);
+    const Mantid::MantidVec & values = workspace->readX(i);
     double xtest = values.front();
     if( xtest < mWkspBinMin )
     {
@@ -339,13 +339,13 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
 		return 0.0;
 
 	// Get Handle to data
-	const std::vector<double>& x=workspace->readX(wksp_index);
-	const std::vector<double>& y=workspace->readY(wksp_index);
+	const Mantid::MantidVec& x=workspace->readX(wksp_index);
+	const Mantid::MantidVec& y=workspace->readY(wksp_index);
 	// If it is a 1D workspace, no need to integrate
 	if (x.size()==2)
 		return y[0];
 	// Iterators for limits
-	std::vector<double>::const_iterator lowit=x.begin(),highit=x.end()-1;
+	Mantid::MantidVec::const_iterator lowit=x.begin(),highit=x.end()-1;
 	// If the first element is lower that the xmin then search for new lowit
 	if ((*lowit)<mBinMinValue)
 		lowit=std::lower_bound(x.begin(),x.end(),mBinMinValue);
@@ -353,8 +353,8 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
 	if ((*highit)>mBinMaxValue)
 		highit=std::upper_bound(lowit,x.end(),mBinMaxValue);
 	// Get the range for the y vector
-	std::vector<double>::difference_type distmin=std::distance(x.begin(),lowit);
-	std::vector<double>::difference_type distmax=std::distance(x.begin(),highit);
+	Mantid::MantidVec::difference_type distmin=std::distance(x.begin(),lowit);
+	Mantid::MantidVec::difference_type distmax=std::distance(x.begin(),highit);
 	// Integrate
 	double sum=std::accumulate(y.begin()+distmin,y.begin()+distmax,0.0);
 	return sum;

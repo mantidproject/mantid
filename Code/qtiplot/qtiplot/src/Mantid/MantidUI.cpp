@@ -1959,9 +1959,9 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
      int kX(0),kY(0),kErr(0);
      for(int i=0;i < no_cols; i++)
      {
-       const std::vector<double>& dataX = workspace->readX(indexList[i]);
-       const std::vector<double>& dataY = workspace->readY(indexList[i]);
-       const std::vector<double>& dataE = workspace->readE(indexList[i]);
+       const Mantid::MantidVec& dataX = workspace->readX(indexList[i]);
+       const Mantid::MantidVec& dataY = workspace->readY(indexList[i]);
+       const Mantid::MantidVec& dataE = workspace->readE(indexList[i]);
 
          kY =(c+1)*i+1;
 		 kX=(c+1)*i;
@@ -2237,8 +2237,8 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
     }
     for(int j = j0; j <= j1; j++)
     {
-      const std::vector<double>& dataY = workspace->readY(j);
-      const std::vector<double>& dataE = workspace->readE(j);
+      const Mantid::MantidVec& dataY = workspace->readY(j);
+      const Mantid::MantidVec& dataE = workspace->readE(j);
 
 	    if (i == c0)
 	    {
