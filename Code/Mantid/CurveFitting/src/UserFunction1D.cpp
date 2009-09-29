@@ -103,8 +103,6 @@ void UserFunction1D::prepare()
  *  @param out A pointer to the output fitting function buffer. The buffer must be large enough to receive nData double values.
  *        The fitting procedure will try to minimise Sum(out[i]^2)
  *  @param xValues The array of nData x-values.
- *  @param yValues The array of nData y-values.
- *  @param yErrors The array of nData error values.
  *  @param nData The size of the fitted data.
  */
 void UserFunction1D::function(const double* in, double* out, const double* xValues, const int& nData)
