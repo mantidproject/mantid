@@ -271,7 +271,6 @@ int GroupDetectors2::readInt(std::string line)
   Poco::StringTokenizer dataComment(line, "#",Poco::StringTokenizer::TOK_TRIM);
   if ( dataComment.begin() != dataComment.end() )
   {
-    int test = int(0);
     Poco::StringTokenizer
       data(*(dataComment.begin()), " ", Poco::StringTokenizer::TOK_TRIM);
     if ( data.count() == 1 )
@@ -426,7 +425,7 @@ int GroupDetectors2::makeGroups( const storage_map &inputList,
   // where we are copying spectra to, we start copying to the start of the output workspace
   int outIndex = 0;
   storage_map::const_iterator it = inputList.begin();
-  for ( it; it != inputList.end() ; ++it )
+  for ( ; it != inputList.end() ; ++it )
   {
     // get the spectra number for the first spectrum in the list to be grouped
     const int firstSpecNum =

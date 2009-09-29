@@ -134,7 +134,6 @@ void FFTSmooth::exec()
  */
 void FFTSmooth::truncate(int n)
 {
-  int mx = m_unfilteredWS->readX(0).size();
   int my = m_unfilteredWS->readY(0).size();
   int my2 = my / 2;
   int ny = my / n;

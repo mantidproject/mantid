@@ -27,6 +27,21 @@ MemoryManagerImpl::MemoryManagerImpl() :
 #ifdef _WIN32
   memStatus.dwLength = sizeof(MEMORYSTATUSEX);
 #endif
+  
+#ifdef __linux__
+  /* The line below tells malloc to use a different memory allocation system call (mmap) to the 'usual'
+   * one (sbrk) for requests above the threshold of the second argument (in bytes). The effect of this 
+   * is that, for the current threshold value of 8*4096, storage for workspaces having 4096 or greater
+   * bins per spectrum will be allocated using mmap.
+   * This should have the effect that memory is returned to the kernel as soon as a workspace is deleted,
+   * preventing things going to managed workspaces when they shouldn't. This will also hopefully reduce
+   * memory fragmentation.
+   * Potential downsides to look out for are whether this memory allocation technique makes things
+   * noticeably slower and whether it wastes memory (mmap allocates in blocks of the system page size.
+   */
+  mallopt(M_MMAP_THRESHOLD, 8*4096);
+#endif
+  
   g_log.debug() << "Memory Manager created." << std::endl;
 }
 
