@@ -96,13 +96,24 @@ private:
   void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
               const QString& type,int index);
 
+  /// Handles delete notification
   void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
     if (wsName == m_wsName.toStdString())
       emit removeMe(this);
   }
-
+  /// Handles afterReplace notification
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+
+signals:
+
+  void resetData(const QString&);
+
+private slots:
+
+  void dataReset(const QString&);
+
+private:
 
   /// Make the curve name
   static QString createCurveName(const QString& wsName,const QString& type,int index);

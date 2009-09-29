@@ -26,6 +26,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
     );
   init(ws,g,type,index);
   observeDelete();
+  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
 }
 
@@ -47,6 +48,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
     );
   init(ws,g,type,index);
   observeDelete();
+  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
 }
 
@@ -55,6 +57,7 @@ MantidCurve::MantidCurve(const MantidCurve& c)
 {
   setData(c.data());
   observeDelete();
+  connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
 }
 
@@ -166,17 +169,27 @@ QString MantidCurve::createCopyName(const QString& curveName)
   return curveName.mid(0,i)+"(copy"+QString::number(k+1)+")";
 }
 
-void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+/**  Resets the data if wsName is the name of this workspace
+ *  @param wsName The name of a workspace which data has been changed in the data service.
+ */
+void MantidCurve::dataReset(const QString& wsName)
 {
-  if (m_wsName.toStdString() != wsName) return;
-  const boost::shared_ptr<Mantid::API::MatrixWorkspace> mws = 
-    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  if (m_wsName != wsName) return;
+  Mantid::API::MatrixWorkspace_sptr mws = 
+    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+       Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
+    );
   if (!mws) return;
   const MantidQwtData * new_mantidData = mantidData()->copy(mws);
   setData(*new_mantidData);
   delete new_mantidData;
-  emit dataUpdated();
- }
+  //emit dataUpdated();
+}
+
+void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  emit resetData(QString::fromStdString(wsName));
+}
 
 //==========================================
 //
