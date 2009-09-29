@@ -71,6 +71,7 @@ private slots:
   void heightNameChanged ( const QString &);
   void widthNameChanged ( const QString &);
   void startUserFitFunctionDialog();
+  void editIOParams(int);
 
 private:
   // number of paramters per one peak

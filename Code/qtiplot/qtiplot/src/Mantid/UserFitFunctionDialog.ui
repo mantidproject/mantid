@@ -85,11 +85,35 @@
    </item>
    <item>
     <property name="text" >
-     <string>Standard</string>
+     <string>Buit-in</string>
     </property>
     <property name="text" >
      <string/>
     </property>
+    <item>
+     <property name="text" >
+      <string>Boltzmann</string>
+     </property>
+     <property name="text" >
+      <string>A2+(A1-A2)/(1+exp((x-x0)/dx))</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>ExpDecay</string>
+     </property>
+     <property name="text" >
+      <string>y0+A*exp(-x/t)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text" >
+      <string>ExpGrowth</string>
+     </property>
+     <property name="text" >
+      <string>y0+A*exp(x/t)</string>
+     </property>
+    </item>
     <item>
      <property name="text" >
       <string>Gaussian</string>

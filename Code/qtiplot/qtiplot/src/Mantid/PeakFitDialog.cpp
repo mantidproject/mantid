@@ -36,6 +36,7 @@ PeakFitDialog::PeakFitDialog(QWidget* parent,PeakPickerTool* peakTool) :
   connect( ui.cbPTHeight, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(heightNameChanged ( const QString &)) );
   connect( ui.cbPTWidth, SIGNAL(currentIndexChanged ( const QString &)),this, SLOT(widthNameChanged ( const QString &)) );
   connect( ui.btnConstruct, SIGNAL(clicked()), this, SLOT(startUserFitFunctionDialog()) );
+  connect( ui.chbEnableEditIO, SIGNAL(stateChanged(int)),this,SLOT(editIOParams(int)));
 
   ui.cbFunction->setCurrentIndex(0);
   ui.tableParams->horizontalHeader()-> setStretchLastSection(true);
@@ -58,6 +59,7 @@ PeakFitDialog::PeakFitDialog(QWidget* parent,PeakPickerTool* peakTool) :
     ui.leParamTable->setText(wsName + "_" + spec + "_params");
   }
   setLayout(ui.cbFunction->currentText());
+  editIOParams(Qt::Unchecked);
 
 }
 
@@ -227,6 +229,24 @@ void PeakFitDialog::heightNameChanged ( const QString &str)
 void PeakFitDialog::widthNameChanged ( const QString &str)
 {
   m_widthName = str.toStdString();
+}
+
+void PeakFitDialog::editIOParams(int state)
+{
+  if (state == Qt::Checked)
+  {
+    ui.cbInWorkspace->setEnabled(true);
+    ui.leSpectrum->setEnabled(true);
+    ui.leOutWorkspace->setEnabled(true);
+    ui.leParamTable->setEnabled(true);
+  }
+  else
+  {
+    ui.cbInWorkspace->setEnabled(false);
+    ui.leSpectrum->setEnabled(false);
+    ui.leOutWorkspace->setEnabled(false);
+    ui.leParamTable->setEnabled(false);
+  }
 }
 
 void PeakFitDialog::startUserFitFunctionDialog()
