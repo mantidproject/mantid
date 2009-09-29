@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <iostream>
 #include <numeric>
+#include "Poco/Path.h"
 
 using Mantid::DataHandling::GroupDetectors2;
 using namespace Mantid::Kernel;
@@ -166,7 +167,7 @@ public:
     grouper.setPropertyValue("InputWorkspace", inputWS);
     std::string output(outputBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
-    grouper.setPropertyValue("MapFile", "GroupDetectors2Test_mapfile_example");
+    grouper.setPropertyValue("MapFile", Poco::Path::current()+"GroupDetectors2Test_mapfile_example");
     grouper.setProperty<bool>("KeepUngroupedSpectra",true);
 
     TS_ASSERT_THROWS_NOTHING( grouper.execute());

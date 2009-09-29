@@ -6,6 +6,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/FileProperty.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include "Poco/StringTokenizer.h"
@@ -41,7 +42,7 @@ void GroupDetectors2::init()
     new CommonBinsValidator<Workspace2D>),"The name of the input 2D workspace");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the output workspace");
-  declareProperty("MapFile", "",
+  declareProperty(new FileProperty("MapFile", "", FileProperty::NoExistLoad),
     "A file that contains lists of spectra to group. See the help for the\n"
     "file format");
   declareProperty(new ArrayProperty<int>("SpectraList"),
@@ -305,6 +306,9 @@ void GroupDetectors2::readSpectraIndexes(std::string line,
   Poco::StringTokenizer dataComment(line, "#",Poco::StringTokenizer::TOK_TRIM);
   if ( dataComment.begin() != dataComment.end() )
   {
+//    std::string
+//    replaceHyphens(dataComment, list);
+
     Poco::StringTokenizer
       data(*(dataComment.begin()), " ", Poco::StringTokenizer::TOK_TRIM);
     Poco::StringTokenizer::Iterator it = data.begin();
