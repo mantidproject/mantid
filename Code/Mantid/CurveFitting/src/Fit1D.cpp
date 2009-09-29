@@ -100,7 +100,7 @@ static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
     // function() return calculated data values. Need to convert this values into
     // calculated-observed devided by error values used by GSL
 
-    for (int i = 0; i<((struct FitData *)params)->n; i++)
+    for (size_t i = 0; i<((struct FitData *)params)->n; i++)
       f->data[i] = 
            ( f->data[i] - ((struct FitData *)params)->Y[i] ) / ((struct FitData *)params)->sigmaData[i];
 
@@ -130,8 +130,8 @@ static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
     // functionDeriv() return derivatives of calculated data values. Need to convert this values into
     // derivatives of calculated-observed devided by error values used by GSL
 
-    for (int iY = 0; iY < ((struct FitData *)params)->n; iY++) 
-      for (int iP = 0; iP < ((struct FitData *)params)->p; iP++) 
+    for (size_t iY = 0; iY < ((struct FitData *)params)->n; iY++) 
+      for (size_t iP = 0; iP < ((struct FitData *)params)->p; iP++) 
         J->data[iY*((struct FitData *)params)->p + iP] /= ((struct FitData *)params)->sigmaData[iY];
 
     return GSL_SUCCESS;
@@ -174,7 +174,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 
     // function() return calculated data values. Need to convert this values into
     // calculated-observed devided by error values used by GSL
-    for (int i = 0; i<((struct FitData *)params)->n; i++)
+    for (size_t i = 0; i<((struct FitData *)params)->n; i++)
       l_forSimplexLSwrap[i] = 
            (  l_forSimplexLSwrap[i] - ((struct FitData *)params)->Y[i] ) / ((struct FitData *)params)->sigmaData[i];
 
