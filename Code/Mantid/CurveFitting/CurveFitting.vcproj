@@ -223,6 +223,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SpecialFunctionHelper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\UserFunction1D.cpp"
 				>
 			</File>
@@ -274,6 +278,14 @@
 			</File>
 			<File
 				RelativePath=".\test\Lorentzian1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\SpecialFunctionSupport.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\SpecialFunctionSupportTest.h"
 				>
 			</File>
 			<File

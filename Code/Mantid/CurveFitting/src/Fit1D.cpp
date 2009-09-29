@@ -102,7 +102,7 @@ static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 
     for (int i = 0; i<((struct FitData *)params)->n; i++)
       f->data[i] = 
-           (  f->data[i] - ((struct FitData *)params)->Y[i] ) / ((struct FitData *)params)->sigmaData[i];
+           ( f->data[i] - ((struct FitData *)params)->Y[i] ) / ((struct FitData *)params)->sigmaData[i];
 
     return GSL_SUCCESS;
 }
@@ -187,25 +187,6 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
     return retVal;
 }
 
-/** Calculates the residuals (output in \a out) of \a nData values of the fitting 
- *  function calculated at points \a xValues[i]. The fitting algorithm tries to 
- *  find such set of parameters \a in which minimizes the sum of the squares of the residuals.
- *  The base class implementation returns: out[i] = (f(xValues[i]) - yValues[i]) / yErrors[i],
- *  where f(x) the value returned by the virtual double Fit1D::function(const double* in, const double& x).
- *  @param in Input fitting parameter values
- *  @param out Residuals
- *  @param xValues X values for data points
- *  @param nData Number of data points
- */
-/*void Fit1D::function(const double* in, double* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
-{
-  for (int i = 0; i < nData; i++) {
-    double Yi = this->function(in,xValues[i]);
-    out[i] = yErrors[i] > 0.0 ? (Yi - yValues[i])/yErrors[i] : 0.0;
-  }
-}*/
-
-
 /** Base class implementation of derivative function throws error. This is to check if such a function is provided
     by derivative class. In the derived classes this method must return the derivatives of the resuduals function
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
@@ -237,8 +218,6 @@ void Fit1D::modifyInitialFittedParameters(std::vector<double>& fittedParameter)
  */
 void Fit1D::modifyFinalFittedParameters(std::vector<double>& fittedParameter)
 {}
-
-
 
 /** Initialisation method
  */

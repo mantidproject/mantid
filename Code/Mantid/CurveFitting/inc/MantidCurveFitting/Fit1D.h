@@ -70,7 +70,7 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "CurveFitting";}
 
-      /// Function you want to least-square fit to.
+      /// Function you want to fit to.
       virtual void function(const double* in, double* out, const double* xValues, const int& nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit
       virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData);
