@@ -14,6 +14,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <iostream>
 #include <numeric>
+#include <fstream>
 #include "Poco/Path.h"
 
 using Mantid::DataHandling::GroupDetectors2;
@@ -27,7 +28,8 @@ class GroupDetectors2Test : public CxxTest::TestSuite
 public:
   GroupDetectors2Test() :
       inputWS("groupdetectorstests_input_workspace"),
-        outputBase("groupdetectorstests_output_basename")
+        outputBase("groupdetectorstests_output_basename"),
+        inputFile(Poco::Path::current()+"GroupDetectors2Test_mapfile_example")
   {
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space =
@@ -162,12 +164,15 @@ public:
 
   void testFileInput()
   {
+    // create a file in the current directory that we'll load later
+    writeTestFile();
+
     GroupDetectors2 grouper;
     grouper.initialize();
     grouper.setPropertyValue("InputWorkspace", inputWS);
     std::string output(outputBase + "File");
     grouper.setPropertyValue("OutputWorkspace", output);
-    grouper.setPropertyValue("MapFile", Poco::Path::current()+"GroupDetectors2Test_mapfile_example");
+    grouper.setPropertyValue("MapFile", inputFile);
     grouper.setProperty<bool>("KeepUngroupedSpectra",true);
 
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
@@ -202,6 +207,8 @@ public:
     TS_ASSERT_EQUALS( outputWS->dataE(3), ones )
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), 5 )
 
+    // the first two spectra should have a group of detectors the other spectra a single detector
+
     boost::shared_ptr<IDetector> det;
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
     TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
@@ -213,12 +220,28 @@ public:
     TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
     
     AnalysisDataService::Instance().remove(output);
+    std::string s;
+    std::getline(std::cin, s);
+    remove(inputFile.c_str());
   }
 
   private:
-    const std::string inputWS, outputBase;
-
+    const std::string inputWS, outputBase, inputFile;
     enum constants { m_nHist = 5, m_nBins = 4 };
+
+    void writeTestFile()
+    {
+      std::ofstream file(inputFile.c_str());
+      file << "2		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
+        << "-1 "            << std::endl
+        << "2"              << std::endl
+        << "1   3"          << std::endl
+        << "-1"             << std::endl
+        << std::endl
+        << "1"              << std::endl
+        << "4";
+      file.close();
+    }
 };
 
 #endif /*GROUPDETECTORS2TEST_H_*/
