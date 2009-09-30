@@ -15,6 +15,7 @@
 #include <QFontMetrics>
 #include <QFileInfo>
 #include <QDir>
+#include <QCheckBox>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -34,7 +35,7 @@ using namespace MantidQt::CustomDialogs;
 /**
  * Constructor
  */
-LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent),  m_fileFilter("")
+LoadRawDialog::LoadRawDialog(QWidget *parent) : AlgorithmDialog(parent),  m_fileFilter(""),m_loadLogFiles(NULL)
 {
 }
 
@@ -76,6 +77,10 @@ void LoadRawDialog::initLayout()
   
   ///Cache combo box 
   addCacheOptions();
+  //addCacheOptionsandLoadLogfilesBox();
+
+  //loadlogfiles check box
+  addLoadLogFilesCheckBox();
   
   //Buttons 
   m_mainLayout->addLayout(createDefaultButtonLayout("?", "Load", "Cancel"));
@@ -95,7 +100,18 @@ void LoadRawDialog::parseInput()
   
   //Cache
   storePropertyValue("Cache", m_cacheBox->currentText());
+
+  ///logfiles  property
+  storePropertyValueforLoadLogFiles("LoadLogFiles",m_loadLogFiles);
   
+}
+void LoadRawDialog::storePropertyValueforLoadLogFiles(const QString& name,QCheckBox * loadLogFilesBox)
+{ 
+	if(!loadLogFilesBox)return ;
+	QString loadLogFiles("1");
+	if(!loadLogFilesBox->isChecked ())
+		loadLogFiles="0";
+	storePropertyValue(name,loadLogFiles);
 }
 
 /**
@@ -217,17 +233,38 @@ void LoadRawDialog::addCacheOptions()
   QLabel *cacheLabel = new QLabel("Cache file locally:");
   m_cacheBox = new QComboBox;
   fillAndSetComboBox("Cache", m_cacheBox);
-  m_cacheBox->setToolTip( QString::fromStdString(getAlgorithmProperty("Cache")->documentation()) );
+  Mantid::Kernel::Property* prop=getAlgorithmProperty("Cache");
+  if(prop)
+  m_cacheBox->setToolTip( QString::fromStdString(prop->documentation()) );
 
-  QHBoxLayout *cacheline = new QHBoxLayout;
+  //QHBoxLayout *cacheline = new QHBoxLayout;
+  m_cacheline=new QHBoxLayout;
   
-  cacheline->addWidget(cacheLabel, 0, Qt::AlignRight);
-  cacheline->addWidget(m_cacheBox, 0, Qt::AlignLeft);
+  m_cacheline->addWidget(cacheLabel, 0, Qt::AlignRight);
+  m_cacheline->addWidget(m_cacheBox, 0, Qt::AlignLeft);
   QLabel *validLbl = getValidatorMarker("Cache");
-  cacheline->addWidget(validLbl, 0, Qt::AlignLeft);
-  cacheline->addStretch();  
+  m_cacheline->addWidget(validLbl, 0, Qt::AlignLeft);
   
-  m_mainLayout->addLayout(cacheline);
+  m_cacheline->addStretch();  
+  m_mainLayout->addLayout(m_cacheline);
+ }
+void LoadRawDialog::addLoadLogFilesCheckBox()
+{
+  Mantid::API::IAlgorithm *pAlg = getAlgorithm();
+  if(!pAlg) return;
+  const int nversion=pAlg->version();
+  if(nversion>2)
+  {
+	  m_loadLogFiles =new QCheckBox ("Load LogFiles",this);
+	  if( !m_loadLogFiles) return;
+	  setCheckBoxState("LoadLogFiles",m_loadLogFiles);
+	 Mantid::Kernel::Property*  prop=getAlgorithmProperty("LoadLogFiles");
+	  if(prop)
+		  m_loadLogFiles->setToolTip( QString::fromStdString(prop->documentation()) );
+
+	  m_cacheline->addWidget(m_loadLogFiles);
+	  m_mainLayout->addLayout(m_cacheline);
+  }
 }
 
 /**

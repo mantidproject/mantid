@@ -77,7 +77,8 @@ void LoadRaw3::init()
   m_cache_options.push_back("Always");
   m_cache_options.push_back("Never");
   declareProperty("Cache", "If Slow", new ListValidator(m_cache_options));
-}
+  declareProperty("LoadLogFiles",true," Boolean option to load or skip log files.");
+ }
 
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
@@ -89,6 +90,8 @@ void LoadRaw3::exec()
 {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
+  bool bLoadlogFiles=getProperty("LoadLogFiles");
+
 
   FILE* file = fopen(m_filename.c_str(), "rb");
   if (file == NULL)
@@ -223,7 +226,9 @@ void LoadRaw3::exec()
       // Only run the sub-algorithms once
       runLoadInstrument(localWorkspace);
       runLoadMappingTable(localWorkspace);
-      runLoadLog(localWorkspace);
+	  if(bLoadlogFiles)
+	     runLoadLog(localWorkspace);
+	 
       // Set the total proton charge for this run
       // (not sure how this works for multi_period files)
       localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
@@ -231,8 +236,9 @@ void LoadRaw3::exec()
     }
     else // We are working on a higher period of a multiperiod raw file
     {
-      runLoadLog(localWorkspace, period + 1);
-    }
+		if(bLoadlogFiles)
+			runLoadLog(localWorkspace, period + 1);
+	}
 
     // check if values stored in logfiles should be used to define parameters of the instrument
     populateInstrumentParameters(localWorkspace);
@@ -360,6 +366,7 @@ int LoadRaw3::calculateWorkspaceSize()
 void LoadRaw3::goManagedRaw()
 {
   const std::string cache_option = getPropertyValue("Cache");
+  bool bLoadlogFiles=getProperty("LoadLogFiles");
   int option = find(m_cache_options.begin(), m_cache_options.end(), cache_option)
     - m_cache_options.begin();
   progress(m_prog, "Reading raw file data...");
@@ -370,7 +377,7 @@ void LoadRaw3::goManagedRaw()
   m_prog = 0.4;
   runLoadMappingTable(localWorkspace);
   m_prog = 0.5;
-  runLoadLog(localWorkspace);
+  if(bLoadlogFiles)  runLoadLog(localWorkspace);
   localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
   m_prog = 0.7;
   progress(m_prog);

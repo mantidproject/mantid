@@ -70,6 +70,9 @@ private:
   /// Parse the user's input
   void parseInput(); 		   
   //@}
+
+  /// add property value for the property loadlogfiles 
+  void storePropertyValueforLoadLogFiles(const QString& name,QCheckBox * loadLogFilesBox);
 	
 private slots:
 
@@ -91,7 +94,10 @@ private:
   
   ///Cache combo box 
   void addCacheOptions();
+ // void addCacheOptionsandLoadLogfilesBox();
   //@}
+  ///LoadLogFiles checkbox to load or skip logfiles 
+  void addLoadLogFilesCheckBox();
   
   /// The main layout
   QVBoxLayout *m_mainLayout;
@@ -107,6 +113,11 @@ private:
   
   ///Store the allowed extensions
   QString m_fileFilter;
+
+  /// Check box for loading /skipping logfiles
+  QCheckBox* m_loadLogFiles;
+  /// layout for cache combobox and laodlogfiles checkbox 
+  QHBoxLayout *m_cacheline;
 };
 
 }
