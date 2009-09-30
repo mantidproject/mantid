@@ -26,6 +26,21 @@ MemoryManagerImpl::MemoryManagerImpl() :
 {
 #ifdef _WIN32
   memStatus.dwLength = sizeof(MEMORYSTATUSEX);
+
+  // Try to enable the Low Fragmentation Heap for all heaps
+  // Bit of a brute force approach, but don't know which heap workspace data end up on
+  HANDLE hHeaps[1025];
+  // Get the number of heaps
+  const DWORD numHeap = GetProcessHeaps(1024, hHeaps);
+  g_log.debug() << "Number of heaps: " << GetProcessHeaps(0, NULL) << "\n";
+  ULONG ulEnableLFH = 2; // 2 = Low Fragmentation Heap
+  for(DWORD i = 0; i < numHeap; i++)
+  {
+    if(!HeapSetInformation(hHeaps[i], HeapCompatibilityInformation, &ulEnableLFH, sizeof(ulEnableLFH)))
+    {
+      g_log.debug() << "Failed to enable the LFH for heap " << i << "\n";
+    }
+  }
 #endif
   
 #ifdef __linux__
