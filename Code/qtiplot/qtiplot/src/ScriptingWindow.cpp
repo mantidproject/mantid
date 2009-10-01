@@ -15,7 +15,6 @@
 #include <QMenu>
 #include <QAction>
 #include <QSettings>
-#include <QCloseEvent>
 #include <QPrintDialog>
 #include <QPrinter>
 

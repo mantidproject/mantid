@@ -363,7 +363,10 @@ QString PythonScript::constructErrorMsg()
       QString::number(errline) + QString(" : ") + env()->toString(value,true);
     }
   //----------------------------------------------
-  emit currentLineChanged(errline, false);
+  if( env()->reportProgress() )
+	{
+    emit currentLineChanged(errline, false);
+  }
   return msg;
 }
 

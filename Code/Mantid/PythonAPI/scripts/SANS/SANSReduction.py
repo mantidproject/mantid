@@ -377,7 +377,7 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
 		Correct(SCATTER_CAN, can_setup[0], can_setup[1], wav_start, wav_end, can_setup[2], can_setup[3], FindingCentre)
 		Minus(final_workspace, can_setup[1], final_workspace)
 		mantid.deleteWorkspace(can_setup[1])
-	
+		
 	# Crop Workspace to remove leading and trailing zeroes
 	if FindingCentre == False:
 		# Replaces NANs with zeroes
@@ -385,13 +385,15 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
 		if CORRECTION_TYPE == '1D':
 			SANSUtility.StripEndZeroes(final_workspace)
 	else:
-		ExtractSingleSpectrum(final_workspace, 'Left', 0)
-		ExtractSingleSpectrum(final_workspace, 'Right', 1)
-		ExtractSingleSpectrum(final_workspace, 'Up', 2)
-		ExtractSingleSpectrum(final_workspace, 'Down', 3)
-		mtd.deleteWorkspace(final_workspace)
+		RenameWorkspace(final_workspace + '_1', 'Left')
+		RenameWorkspace(final_workspace + '_2', 'Right')
+		RenameWorkspace(final_workspace + '_3', 'Up')
+		RenameWorkspace(final_workspace + '_4', 'Down')
+		UnGroupWorkspace(final_workspace)
+		for i in range(1, 5):
+			mantid.deleteWorkspace(can_setup[1] + '_' + str(i))
 		final_workspace = ''
-
+				
 	return final_workspace
 ############################################################################################################################
 
@@ -415,14 +417,10 @@ try:
 			RESIDUE_GRAPH.activeLayer().setTitle("Centre Finding: Iteration " + str(ITER_NUM))
 		
 	# Create a workspace with a quadrant value in it 
-	def CreateQuadrant(reduced_ws, rawcount_ws, solidangle_ws, quadrant, xcentre, ycentre, quad_ws, 
-			   append = False):
+	def CreateQuadrant(reduced_ws, rawcount_ws, solidangle_ws, quadrant, xcentre, ycentre, output):
 		objxml = SANSUtility.QuadrantXML([xcentre, ycentre, 0.0], RMIN, RMAX, quadrant)
 		finddet = FindDetectorsInShape(reduced_ws, ShapeXML=objxml)
-		if append == True:
-			output = 'quad_temp_spectrum'
-		else:
-			output = quad_ws
+		
 		GroupDetectors(reduced_ws, output, DetectorList = finddet.getPropertyValue("DetectorList"))
 		tmp = 'group_temp_workspace'
 		GroupDetectors(solidangle_ws, tmp, DetectorList = finddet.getPropertyValue("DetectorList"))
@@ -430,27 +428,30 @@ try:
 		GroupDetectors(rawcount_ws, tmp, DetectorList = finddet.getPropertyValue("DetectorList"))
 		PoissonErrors(output, tmp, output)
 		mtd.deleteWorkspace(tmp)
-		flag_value = -10
-		ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue="0")
+		flag_value = -10.0
+		ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
 		if CORRECTION_TYPE == '1D':
 			SANSUtility.StripEndZeroes(output, flag_value)
 			
-		if append == True:
-			ConjoinWorkspaces(quad_ws, output)
-		
+					
 	# Create 4 quadrants for the centre finding algorithm and return their names
 	def GroupIntoQuadrants(reduced_ws, final_result, solidangle_ws, xcentre, ycentre):
 		tmp = 'quad_temp_holder'
-		CreateQuadrant(reduced_ws, final_result, solidangle_ws, 'Left', xcentre, ycentre, tmp)
-		pieces = ['Right', 'Up', 'Down']
+		#CreateQuadrant(reduced_ws, final_result, solidangle_ws, 'Left', xcentre, ycentre, tmp)
+		pieces = ['Left', 'Right', 'Up', 'Down']
+		to_group = ''
+		counter = 0
 		for q in pieces:
-			CreateQuadrant(reduced_ws, final_result, solidangle_ws, q, xcentre, ycentre, tmp, append = True)
+			counter += 1
+			to_group += final_result + '_' + str(counter) + ','
+			CreateQuadrant(reduced_ws, final_result, solidangle_ws, q, xcentre, ycentre, final_result + '_' + str(counter))
+			
 		mantid.deleteWorkspace(final_result)			
 		mantid.deleteWorkspace(reduced_ws)
 		mantid.deleteWorkspace(solidangle_ws)
 		
-		RenameWorkspace(tmp, final_result)
-	
+		GroupWorkspaces(final_result, to_group.strip(','))
+				
 	# Calcluate the sum squared difference of the given workspaces. This assumes that a workspace with
 	# one spectrum for each of the quadrants. The order should be L,R,U,D.
 	def CalculateResidue():
@@ -459,13 +460,14 @@ try:
 		uy = mtd.getMatrixWorkspace('Up').readY(0)
 		dy = mtd.getMatrixWorkspace('Down').readY(0)
 		residue = 0
-		nvals = len(ly)
+		qrange = [len(ly), len(ry), len(uy), len(dy)]
+		nvals = min(qrange)
 		for index in range(0, nvals):
 			residue += pow(ly[index] - ry[index], 2) + pow(uy[index] - dy[index], 2)
 		return residue
 
 	def Residuals(vars, *args):
-		'''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants (cones really)'''
+		'''Compute the value of (L-R)^2+(U-D)^2 a circle split into four quadrants'''
 		# *args indicates a list of arguments.
 		global XVAR_PREV, YVAR_PREV, RESIDUE_GRAPH
 		xcentre = vars[0]

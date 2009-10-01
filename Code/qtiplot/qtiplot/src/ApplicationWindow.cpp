@@ -4910,8 +4910,9 @@ void ApplicationWindow::saveSettings()
 
 	if( scriptingWindow )
  	{
-	  scriptingWindow->raise();//Mantid
+	  scriptingWindow->show();//Mantid
 	  scriptingWindow->saveSettings(); //Mantid
+    scriptingWindow->hide();
 	}
 
     settings.beginGroup("/ToolBars");

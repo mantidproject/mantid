@@ -58,7 +58,7 @@ class PythonScript : public Script
   // Emit a new line signal
   inline void broadcastNewLineNumber(int lineno)
   {
-    emit currentLineChanged(lineno, true);
+    emit currentLineChanged(getLineOffset() + lineno, true);
   }
   
 signals:
