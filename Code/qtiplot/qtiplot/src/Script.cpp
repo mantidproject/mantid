@@ -51,6 +51,22 @@ ScriptingLangManager::ScriptingLang ScriptingLangManager::langs[] = {
 	{ NULL, NULL }
 };
 
+void Script::addCode(const QString &code) 
+{ 
+  Code.append(code);
+  Code.remove('\r');
+  compiled = notCompiled; 
+  emit codeChanged(); 
+}
+
+void Script::setCode(const QString &code) 
+{
+  Code=code;
+  Code.remove('\r');
+  compiled = notCompiled; 
+  emit codeChanged();
+}
+
 ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent)
 {
 	if (!langs[0].constructor)
