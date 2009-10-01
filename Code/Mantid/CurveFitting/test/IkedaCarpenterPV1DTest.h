@@ -146,7 +146,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.001);
     dummy = alg2.getProperty("I");
-    TS_ASSERT_DELTA( dummy, 100000 ,1);
+    TS_ASSERT_DELTA( dummy, 3101 ,1);
     dummy = alg2.getProperty("Alpha0");
     TS_ASSERT_DELTA( dummy, 1.597107 ,0.0001);
     dummy = alg2.getProperty("Alpha1");
@@ -186,7 +186,7 @@ public:
     alg.setPropertyValue("WorkspaceIndex","3");
     alg.setPropertyValue("StartX","79300");
     alg.setPropertyValue("EndX","79600");
-    alg.setPropertyValue("I", "95000");
+    alg.setPropertyValue("I", "9500");
     alg.setPropertyValue("Alpha0", "1.597107");
     alg.setPropertyValue("Alpha1", "1.496805");
     alg.setPropertyValue("Beta0", "31.891718");
@@ -208,7 +208,7 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 2.9,1);
     dummy = alg.getProperty("I");
-    TS_ASSERT_DELTA( dummy, 139900 ,1000);
+    TS_ASSERT_DELTA( dummy, 9106 ,1);
     dummy = alg.getProperty("Alpha0");
     TS_ASSERT_DELTA( dummy, 1.597107 ,0.0001);
     dummy = alg.getProperty("Alpha1");
@@ -218,7 +218,7 @@ public:
     dummy = alg.getProperty("Kappa");
     TS_ASSERT_DELTA( dummy, 46.025921 ,0.0001);
     dummy = alg.getProperty("SigmaSquared");
-    TS_ASSERT_DELTA( dummy, 357.0 ,1);
+    TS_ASSERT_DELTA( dummy, 358.0 ,1);
     dummy = alg.getProperty("Gamma");
     TS_ASSERT_DELTA( dummy, 1.0 ,0.0001);
     dummy = alg.getProperty("Eta");

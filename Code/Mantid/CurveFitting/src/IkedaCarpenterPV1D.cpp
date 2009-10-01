@@ -4,7 +4,7 @@
 #include "MantidCurveFitting/IkedaCarpenterPV1D.h"
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
-
+#include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
@@ -17,6 +17,7 @@ DECLARE_ALGORITHM(IkedaCarpenterPV1D)
 
 using namespace Kernel;
 //using API::MatrixWorkspace_const_sptr;
+using namespace SpecialFunctionSupport;
 
 void IkedaCarpenterPV1D::declareParameters()
 {
@@ -87,24 +88,26 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
     const double& alpha1 = in[2];
     const double& beta0 = in[3];
     const double& kappa = in[4];
-    const double& SigmaSquared = in[5];
-    //const double& Gamma = in[6];
-    //const double& Eta = in[7];
+    const double& sigmaSquared = in[5];
+    const double& gamma = in[6];
+    const double& eta = in[7];
     const double& X0 = in[8];
     const double& BG = in[9];
 
     const double beta = 1/beta0;
 
-    // equations here copied straight from Fullprof manual
+    // equations taken from Fullprof manual
 
     const double k = 0.05;   
 
     double u,v,s,r;
     double yu, yv, ys, yr;
 
-    const double someConst = 1/sqrt(2.0*SigmaSquared);
+    const double someConst = 1/sqrt(2.0*sigmaSquared);
 
-    double R, Nu, Nv, Ns, Nr;
+    double R, Nu, Nv, Ns, Nr, N;
+
+    std::complex<double> zs, zu, zv, zr;
 
     double alpha, a_minus, a_plus, x, y, z;
 
@@ -133,20 +136,28 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
         Ns=-2*(1-R*alpha/y);
         Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
 
-        u=a_minus*(a_minus*SigmaSquared-2*diff)/2.0;
-        v=a_plus*(a_plus*SigmaSquared-2*diff)/2.0;
-        s=alpha*(alpha*SigmaSquared-2*diff)/2.0;
-        r=beta*(beta*SigmaSquared-2*diff)/2.0;
+        u=a_minus*(a_minus*sigmaSquared-2*diff)/2.0;
+        v=a_plus*(a_plus*sigmaSquared-2*diff)/2.0;
+        s=alpha*(alpha*sigmaSquared-2*diff)/2.0;
+        r=beta*(beta*sigmaSquared-2*diff)/2.0;
 
-        yu = (a_minus*SigmaSquared-diff)*someConst;
-        yv = (a_plus*SigmaSquared-diff)*someConst;
-        ys = (alpha*SigmaSquared-diff)*someConst;
-        yr = (beta*SigmaSquared-diff)*someConst;
+        yu = (a_minus*sigmaSquared-diff)*someConst;
+        yv = (a_plus*sigmaSquared-diff)*someConst;
+        ys = (alpha*sigmaSquared-diff)*someConst;
+        yr = (beta*sigmaSquared-diff)*someConst;
 
+        zs = std::complex<double>(-alpha*diff, 0.5*alpha*gamma);
+        zu = (1-k)*zs;
+        zv = (1-k)*zs;
+        zr = std::complex<double>(-beta*diff, 0.5*beta*gamma);
 
+        N = 0.25*alpha*(1-k*k)/(k*k);
 
-        out[i] = I*( Nu*exp(u)*gsl_sf_erfc(yu)+Nv*exp(v)*gsl_sf_erfc(yv) + 
-                        Ns*exp(s)*gsl_sf_erfc(ys)+Nr*exp(r)*gsl_sf_erfc(yr) ) + BG;
+        out[i] = I*N*( (1-eta)*(Nu*exp(u)*gsl_sf_erfc(yu)+Nv*exp(v)*gsl_sf_erfc(yv) + 
+                        Ns*exp(s)*gsl_sf_erfc(ys)+Nr*exp(r)*gsl_sf_erfc(yr)) -
+                 eta*2.0/M_PI*(Nu*exponentialIntegral(zu).imag()+Nv*exponentialIntegral(zv).imag()
+                              +Ns*exponentialIntegral(zs).imag()+Nr*exponentialIntegral(zr).imag()) )
+                 + BG;
     }
 }
 
