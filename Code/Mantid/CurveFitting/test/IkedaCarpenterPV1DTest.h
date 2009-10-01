@@ -128,7 +128,7 @@ public:
     alg2.setPropertyValue("Alpha1", "1.496805");
     alg2.setPropertyValue("Beta0", "31.891718");
     alg2.setPropertyValue("Kappa", "46.025921");
-    alg2.setPropertyValue("SigmaSquared", "100.0"); //"90.0");
+    alg2.setPropertyValue("SigmaSquared", "100.0"); 
     //alg2.setPropertyValue("Gamma", "1.0");
     //alg2.setPropertyValue("Eta", "0.0");
     alg2.setPropertyValue("X0", "45.0");
@@ -231,7 +231,67 @@ public:
     AnalysisDataService::Instance().remove("HRP39182");
   }
 
+  void testAgainstHRPDWithLorentzian_data()
+  {
+    LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "../../../../Test/Data/HRP39182.RAW");
+    loader.setPropertyValue("OutputWorkspace", "HRP39182");
+    loader.execute();
 
+    IkedaCarpenterPV1D alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace", "HRP39182");
+    alg.setPropertyValue("WorkspaceIndex","3");
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
+    alg.setPropertyValue("I", "9106");
+    alg.setPropertyValue("Alpha0", "1.597107");
+    alg.setPropertyValue("Alpha1", "1.496805");
+    alg.setPropertyValue("Beta0", "31.891718");
+    alg.setPropertyValue("Kappa", "46.025921");
+    alg.setPropertyValue("SigmaSquared", "100.0"); 
+    //alg2.setPropertyValue("Gamma", "1.0");
+    //alg2.setPropertyValue("Eta", "0.0");
+    alg.setPropertyValue("X0", "79389");
+    alg.setPropertyValue("Fix","Alpha0, Alpha1, Beta0, Kappa");
+
+    // execute fit
+   TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg.execute() )
+    )
+
+    TS_ASSERT( alg.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 1.3,0.1);
+    dummy = alg.getProperty("I");
+    TS_ASSERT_DELTA( dummy, 8624 ,1);
+    dummy = alg.getProperty("Alpha0");
+    TS_ASSERT_DELTA( dummy, 1.597107 ,0.0001);
+    dummy = alg.getProperty("Alpha1");
+    TS_ASSERT_DELTA( dummy, 1.496805 ,0.001);
+    dummy = alg.getProperty("Beta0");
+    TS_ASSERT_DELTA( dummy, 31.891718 ,0.0001);
+    dummy = alg.getProperty("Kappa");
+    TS_ASSERT_DELTA( dummy, 46.025921 ,0.0001);
+    dummy = alg.getProperty("SigmaSquared");
+    TS_ASSERT_DELTA( dummy, 213.0 ,1);
+    dummy = alg.getProperty("Gamma");
+    TS_ASSERT_DELTA( dummy, 7.22 ,0.01);
+    dummy = alg.getProperty("Eta");
+    TS_ASSERT_DELTA( dummy, 0.04 ,0.01);
+    dummy = alg.getProperty("X0");
+    TS_ASSERT_DELTA( dummy, 79389.0 ,100);
+    dummy = alg.getProperty("BG");
+    TS_ASSERT_DELTA( dummy, 4.4 ,0.1);
+
+    AnalysisDataService::Instance().remove("HRP39182");
+  }
 
 private:
   IkedaCarpenterPV1D alg;

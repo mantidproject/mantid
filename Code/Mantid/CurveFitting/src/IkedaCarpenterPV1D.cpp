@@ -79,8 +79,6 @@ void IkedaCarpenterPV1D::afterDataRangedDetermined(const int& m_minX, const int&
 
 }
 
-
-
 void IkedaCarpenterPV1D::function(const double* in, double* out, const double* xValues, const int& nData)
 {
     const double& I = in[0];
@@ -161,80 +159,6 @@ void IkedaCarpenterPV1D::function(const double* in, double* out, const double* x
     }
 }
 
-
-/*
-void IkedaCarpenterPV1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
-{
-    const double& I = in[0];
-    const double& alpha0 = in[1];
-    const double& alpha1 = in[2];
-    const double& beta0 = in[3];
-    const double& kappa = in[4];
-    const double& SigmaSquared = in[5];
-    //const double& Gamma = in[6];
-    //const double& Eta = in[7];
-    const double& X0 = in[8];
-    const double& BG = in[9];
-
-    const double alpha = 1.0 / (alpha0+alpha1); // assume wavelength = 1
-    const double beta = 1/beta0;
-
-    const double R = exp(-81.799/kappa);  // assume wavelength = 1
-    const double k = 0.05;
-    const double a_minus = alpha*(1-k);
-    const double a_plus = alpha*(1+k);
-    const double x=a_minus-beta;
-    const double y=alpha-beta;
-    const double z=a_plus-beta;    
-
-    const double Nu=1-R*a_minus/x;
-    const double Nv=1-R*a_plus/z;
-    const double Ns=-2*(1-R*alpha/y);
-    const double Nr=2*R*alpha*alpha*beta*k*k/(x*y*z);
-
-    double u,v,s,r;
-    double yu, yv, ys, yr;
-
-    const double someConst = 1/sqrt(2.0*SigmaSquared);
-
-
-    for (int i = 0; i < nData; i++) {
-        double invE = 1/yErrors[i];
-
-
-        double diff=xValues[i]-X0;
-
-        u=a_minus*(a_minus*SigmaSquared-2*diff)/2.0;
-        v=a_plus*(a_plus*SigmaSquared-2*diff)/2.0;
-        s=alpha*(alpha*SigmaSquared-2*diff)/2.0;
-        r=beta*(beta*SigmaSquared-2*diff)/2.0;
-
-        yu = (a_minus*SigmaSquared-diff)*someConst;
-        yv = (a_plus*SigmaSquared-diff)*someConst;
-        ys = (alpha*SigmaSquared-diff)*someConst;
-        yr = (beta*SigmaSquared-diff)*someConst;
-
-        double expU = exp(u); double expV = exp(v); double expS = exp(s); double expR = exp(r);
-        double erfcYu = gsl_sf_erfc(yu); double erfcYv = gsl_sf_erfc(yv);
-        double erfcYs = gsl_sf_erfc(ys); double erfcYr = gsl_sf_erfc(yr);
-
-
-        out->set(i,0, (Nu*expU*erfcYu+Nv*expV*erfcYv+Ns*expS*erfcYs+Nr*expR*erfcYr)*invE );
-        out->set(i,1, 0.0); // Alpha0
-        out->set(i,2, 0.0); // Alpha1
-        out->set(i,3, 0.0); // Beta0
-        out->set(i,4, 0.0); // kappa
-        out->set(i,5, 0.0); // SigmaSquared
-        out->set(i,6, 0.0); // Gamma
-        out->set(i,7, 0.0); // Eta
-        // derivative for X0
-        out->set(i,8, ( (2.0*someConst/M_SQRTPI)*(-Nu*expU*exp(-u*u)-Nv*expV*exp(-v*v)-Ns*expS*exp(-s*s)-Nr*expR*exp(-r*r))  // with respect to erfc functions
-                       + Nu*expU*erfcYu*a_minus+Nv*expV*erfcYv*a_plus+Ns*expS*erfcYs*alpha+Nr*expR*erfcYr*beta )*invE ); // with respect to exp functions 
-                       
-        out->set(i,9, invE); // BG
-    }
-}
-*/
 
 } // namespace CurveFitting
 } // namespace Mantid
