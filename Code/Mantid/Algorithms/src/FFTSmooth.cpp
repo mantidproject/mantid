@@ -37,6 +37,11 @@ void FFTSmooth::init()
 
 }
 
+struct toReal : std::binary_function <double,double,double> {
+  double operator() (const double& x, const double& y) const
+    {return sqrt(x*x+y*y);}
+};
+
 /** Executes the algorithm
  */
 void FFTSmooth::exec()
@@ -47,9 +52,32 @@ void FFTSmooth::exec()
   // Save the starting x value so it can be restored after all transforms.
   m_x0 = m_inWS->readX(spec)[0];
 
+  // Symmetrize the input spectrum 
+  int dn = m_inWS->readY(0).size();
+
+  API::MatrixWorkspace_sptr symmWS = 
+    API::WorkspaceFactory::Instance().create("Workspace2D",1,m_inWS->readX(0).size()+dn,m_inWS->readY(0).size()+dn);
+
+  double dx = (m_inWS->readX(spec).back() - m_inWS->readX(spec).front()) / (m_inWS->readX(spec).size() - 1);
+  for(int i=0;i<dn;i++)
+  {
+    symmWS->dataX(0)[dn + i] = m_inWS->readX(spec)[i];
+    symmWS->dataY(0)[dn + i] = m_inWS->readY(spec)[i];
+
+    symmWS->dataX(0)[dn - i] = m_x0 - dx*i;
+    symmWS->dataY(0)[dn - i] = m_inWS->readY(spec)[i];
+  }
+  symmWS->dataY(0).front() = m_inWS->readY(spec).back();
+  symmWS->dataX(0).front() = m_x0 - dx*dn;
+  if (m_inWS->isHistogramData())
+    symmWS->dataX(0).back() = m_inWS->readX(spec).back();
+
+  //setProperty("OutputWorkspace",symmWS); return;
+
+  // Forward Fourier transform
   IAlgorithm_sptr fft = createSubAlgorithm("FFT", 0, 0.5 );
-  fft->setProperty("InputWorkspace",m_inWS);
-  fft->setProperty("Real",spec);
+  fft->setProperty("InputWorkspace",symmWS);
+  fft->setProperty("Real",0);
   try
   {
     fft->execute();
@@ -62,8 +90,8 @@ void FFTSmooth::exec()
 
   m_unfilteredWS = fft->getProperty("OutputWorkspace");
 
+  // Apply the filter
   std::string type = getProperty("Filter");
-
   if (type == "Truncation")
   {
     std::string sn = getProperty("Params");
@@ -73,17 +101,19 @@ void FFTSmooth::exec()
       n = atoi(sn.c_str());
     if (n <= 1) throw std::invalid_argument("Truncation parameter must be an integer > 1");
     truncate(n);
-  }else if (type == "Zeroing")
+  }else 
+  if (type == "Zeroing")
   {
     std::string sn = getProperty("Params");
     int n;
     if (sn.empty()) n = 2;
     else
       n = atoi(sn.c_str());
-    if (n <= 1) throw std::invalid_argument("Truncation parameter must be an integer > 1");
+    if (n < 1) throw std::invalid_argument("Truncation parameter must be an integer > 1");
     zero(n);
   }
 
+  // Backward transform
   fft = createSubAlgorithm("FFT", 0.5, 1. );
   fft->setProperty("InputWorkspace",m_filteredWS);
   fft->setProperty("Real",0);
@@ -100,12 +130,14 @@ void FFTSmooth::exec()
   }
   API::MatrixWorkspace_sptr tmpWS = fft->getProperty("OutputWorkspace");
 
+  // Create output
   API::MatrixWorkspace_sptr outWS = 
-    API::WorkspaceFactory::Instance().create(tmpWS,1,tmpWS->readX(0).size(),tmpWS->readY(0).size());
+    API::WorkspaceFactory::Instance().create(m_inWS,1,m_inWS->readX(0).size(),m_inWS->readY(0).size());
+
+  dn = tmpWS->blocksize()/2;
 
   // Correct the x values:
-  m_x0 -= tmpWS->dataX(0)[0];
-
+  m_x0 -= tmpWS->dataX(0)[dn];
   if (tmpWS->isHistogramData())
   {// Align centres of the in and out histograms
     double dX = m_inWS->readX(0)[1] - m_inWS->readX(0)[0];
@@ -113,19 +145,16 @@ void FFTSmooth::exec()
     m_x0 += (dX - dx)/2;
   }
 
-  outWS->dataX(0).assign(tmpWS->readX(0).begin(),tmpWS->readX(0).end());
-  outWS->dataY(0).assign(tmpWS->readY(0).begin(),tmpWS->readY(0).end());
+  outWS->dataX(0).assign(tmpWS->readX(0).begin()+dn,tmpWS->readX(0).end());
+  outWS->dataY(0).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
+  
+  std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(), outWS->dataX(0).begin(), 
+    std::bind2nd(std::plus<double>(), m_x0) );
 
-  for(int i=0;i<outWS->getNumberHistograms();i++)
-  {
-    for(int j=0;j<outWS->dataX(i).size();j++)
-      outWS->dataX(i)[j] += m_x0;
-  }
+  std::transform(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end(),tmpWS->readY(1).begin()+dn,
+    outWS->dataY(0).begin(),toReal());
 
   setProperty("OutputWorkspace",outWS);
-
-  std::cerr<<outWS->readX(0).back() - outWS->readX(0).front()<<'\n';
-  std::cerr<<m_inWS->readX(0).back() - m_inWS->readX(0).front()<<'\n';
 
 }
 
