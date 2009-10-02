@@ -98,9 +98,9 @@ void Property::setDocumentation( const std::string& documentation )
 /** Returns the set of valid values for this property, if such a set exists.
  *  If not, it returns an empty set.
  */
-const std::vector<std::string> Property::allowedValues() const
+std::set<std::string> Property::allowedValues() const
 {
-  return std::vector<std::string>();
+  return std::set<std::string>();
 }
 
 /// Create a PropertyHistory object representing the current state of the Property.

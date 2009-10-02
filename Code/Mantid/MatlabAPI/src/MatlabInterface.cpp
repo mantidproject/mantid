@@ -703,12 +703,12 @@ void CreateSimpleAPIHelper(const std::string& algName, const std::string& path)
     }
     else mfile << "No";
     mfile << ", Direction: " << Mantid::Kernel::Direction::asText(prop->direction());// << ", ";
-    std::vector<std::string> allowed = prop->allowedValues();
+    std::set<std::string> allowed = prop->allowedValues();
     if( !allowed.empty() )
     {
       mfile << ", Allowed values: ";
-      std::vector<std::string>::const_iterator sIter = allowed.begin();
-      std::vector<std::string>::const_iterator sEnd = allowed.end();
+      std::set<std::string>::const_iterator sIter = allowed.begin();
+      std::set<std::string>::const_iterator sEnd = allowed.end();
       for( ; sIter != sEnd ; )
       {
         mfile << (*sIter);
@@ -819,10 +819,10 @@ int CreateSimpleAPI(int, mxArray **, int nrhs, const mxArray* prhs[])
   */
 int ListWorkspaces(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
 {
-  std::vector<std::string> wkspNames = AnalysisDataService::Instance().getObjectNames();
-  std::vector<std::string>::const_iterator sEnd = wkspNames.end();
+  std::set<std::string> wkspNames = AnalysisDataService::Instance().getObjectNames();
+  std::set<std::string>::const_iterator sEnd = wkspNames.end();
   //print the list of names using mexPrintf
-  for( std::vector<std::string>::const_iterator sIter = wkspNames.begin(); sIter != sEnd;
+  for( std::set<std::string>::const_iterator sIter = wkspNames.begin(); sIter != sEnd;
       ++sIter )
   {
     mexPrintf((*sIter).c_str());

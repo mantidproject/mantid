@@ -230,17 +230,13 @@ public:
   }
 
   /// Get a vector of the names of the data objects stored by the service
-  std::vector<std::string> getObjectNames() const
+  std::set<std::string> getObjectNames() const
   {
-    int n=size();
-    std::vector<std::string> names(n);
-    if (n==0)
-      return names;
+    std::set<std::string> names;
     svc_constit it;
-    int i=0;
     for( it = datamap.begin(); it != datamap.end(); ++it)
     {
-      names[i++]=it->first;
+      names.insert(it->first);
     }
     return names;
   }

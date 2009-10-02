@@ -15,6 +15,7 @@
 #include <io.h>
 #endif /* _WIN32 */
 #include "MantidNexus/NexusFileWriter.h"
+#include "Poco/File.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid

@@ -10,6 +10,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include <iostream>
 #include <map>
+#include <vector>
 #include <sstream>
 #include <stdlib.h>
 #include <cctype>

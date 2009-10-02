@@ -9,10 +9,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/NullValidator.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/FileValidator.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include <Poco/StringTokenizer.h>
@@ -22,9 +18,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-/** @class PropertyWithValue PropertyWithValue.h Kernel/PropertyWithValue.h
-
-    The concrete, templated class for properties.
+/** The concrete, templated class for properties.
     The supported types at present are int, double, bool & std::string.
 
     With reference to the Gaudi structure, this class can be seen as the equivalent of both the
@@ -34,7 +28,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -320,23 +314,9 @@ public:
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
    */
-  virtual const std::vector<std::string> allowedValues() const
+  virtual std::set<std::string> allowedValues() const
   {
-    ListValidator *list = dynamic_cast<ListValidator*>(m_validator);
-    FileValidator *file = dynamic_cast<FileValidator*>(m_validator);
-    if (list)
-    {
-      return list->allowedValues();
-    }
-    else if (file)
-    {
-      return file->allowedValues();
-    }
-    else
-    {
-      // Just return an empty vector if the property does not have a ListValidator
-      return std::vector<std::string>();
-    }
+    return m_validator->allowedValues();
   }
 
 protected:

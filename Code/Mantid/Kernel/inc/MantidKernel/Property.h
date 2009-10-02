@@ -7,7 +7,7 @@
 #include "MantidKernel/PropertyHistory.h"
 #include <string>
 #include <typeinfo>
-#include <vector>
+#include <set>
 #include "System.h"
 
 namespace Mantid
@@ -40,15 +40,13 @@ struct Direction
   }
 };
 
-/** @class Property Property.h Kernel/Property.h
-
-    Base class for properties. Allows access without reference to templated concrete type.
+/** Base class for properties. Allows access without reference to templated concrete type.
 
     @author Russell Taylor, Tessella Support Services plc
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 13/11/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -97,7 +95,7 @@ public:
   /// Get the default value for the property which is the value the property was initialised with
   virtual std::string getDefault() const = 0; 
 
-	virtual const std::vector<std::string> allowedValues() const;
+	virtual std::set<std::string> allowedValues() const;
 
 	virtual const PropertyHistory createHistory() const;
 

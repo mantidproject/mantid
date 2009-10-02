@@ -2,8 +2,10 @@
 // Includes
 //-----------------------------------------------------------------
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/FileValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "Poco/Path.h"
+#include "Poco/File.h"
 
 using namespace Mantid::Kernel;
 
@@ -12,11 +14,11 @@ using namespace Mantid::Kernel;
 //-----------------------------------------------------------------
 /**
  * Constructor
- * @param name The name of the property
+ * @param name          The name of the property
  * @param default_value A default value for the property
- * @param exts A vector containing the allowed extensions
- * @param action An enum indicating whether this should be a load/save property
- * @param direction An optional direction (default=Input)
+ * @param exts          The set of allowed extensions
+ * @param action        An enum indicating whether this should be a load/save property
+ * @param direction     An optional direction (default=Input)
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
 			   const std::vector<std::string> & exts, unsigned int direction) 

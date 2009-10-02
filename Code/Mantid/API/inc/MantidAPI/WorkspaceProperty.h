@@ -219,9 +219,9 @@ namespace Mantid
       }
 
       /** Returns the current contents of the AnalysisDataService for input workspaces.
-      *  For output workspaces, an empty vector is returned
-      */
-      virtual const std::vector<std::string> allowedValues() const
+       *  For output workspaces, an empty set is returned
+       */
+      virtual std::set<std::string> allowedValues() const
       {
         if ( this->direction() == 0 || this->direction() == 2 )
         {
@@ -230,8 +230,8 @@ namespace Mantid
         }
         else
         {
-          // For output workspaces, just return an empty vector
-          return std::vector<std::string>();
+          // For output workspaces, just return an empty set
+          return std::set<std::string>();
         }
       }
 

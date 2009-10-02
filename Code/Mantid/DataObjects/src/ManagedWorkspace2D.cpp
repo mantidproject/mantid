@@ -6,6 +6,7 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <limits>
+#include "Poco/File.h"
 
 DECLARE_WORKSPACE(ManagedWorkspace2D)
 

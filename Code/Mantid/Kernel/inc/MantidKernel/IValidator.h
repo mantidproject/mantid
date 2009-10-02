@@ -12,9 +12,7 @@ namespace Mantid
 {
 namespace Kernel
 {
-/** @class IValidator IValidator.h Kernel/IValidator.h
-
-    IValidator is the basic interface for all validators for properties
+/** IValidator is the basic interface for all validators for properties
 
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
@@ -62,6 +60,11 @@ public:
     return failure;
   }
 
+  /** The set of allowed values that this validator may have, if a discrete set exists.
+   *  Overridden in applicable concrete validators; the base class just returns an empty set.
+   */
+  virtual std::set<std::string> allowedValues() const { return std::set<std::string>(); }
+  
   /// Make a copy of the present type of validator
   virtual IValidator* clone() = 0;
 

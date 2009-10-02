@@ -21,11 +21,19 @@ ListValidator::ListValidator(const std::vector<std::string>& values) :
   m_allowedValues(values.begin(),values.end())
 {}
   
+/** Constructor
+ *  @param values A set of strings containing the valid values 
+ */
+ListValidator::ListValidator(const std::set<std::string>& values) : 
+  IValidator<std::string>(),
+  m_allowedValues(values)
+{}
+    
 /// Destructor
 ListValidator::~ListValidator() {}
 
 /// Returns the set of valid values
-const std::vector<std::string>& ListValidator::allowedValues() const
+std::set<std::string> ListValidator::allowedValues() const
 {
   return m_allowedValues;
 }
@@ -33,7 +41,7 @@ const std::vector<std::string>& ListValidator::allowedValues() const
 /// Adds the argument to the set of valid values
 void ListValidator::addAllowedValue(const std::string &value)
 {
-  m_allowedValues.push_back(value);
+  m_allowedValues.insert(value);
 }
 
 IValidator<std::string>* ListValidator::clone() { return new ListValidator(*this); }
@@ -44,7 +52,7 @@ IValidator<std::string>* ListValidator::clone() { return new ListValidator(*this
  */
 std::string ListValidator::checkValidity(const std::string &value) const
 {
-  if ( std::find(m_allowedValues.begin(),m_allowedValues.end(),value) != m_allowedValues.end() )
+  if ( m_allowedValues.count(value) )
   {
     return "";
   }

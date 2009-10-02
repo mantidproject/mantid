@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "Poco/Timestamp.h"
 #include "Poco/DateTimeFormatter.h"
+#include "Poco/File.h"
 #include <algorithm>
 #include <fstream>
 #include <iomanip>

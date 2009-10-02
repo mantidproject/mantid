@@ -125,8 +125,8 @@ void WorkspaceTracerImpl::createAlgorithmList()
   m_vecAlgHistories.clear();
   //Need to create a temp copy of object names as the vector gets dynamically created by the
   //function call
-  std::vector<std::string> currentWorkspaces = AnalysisDataService::Instance().getObjectNames();
-  std::vector<std::string>::const_iterator sIter = currentWorkspaces.begin();
+  std::set<std::string> currentWorkspaces = AnalysisDataService::Instance().getObjectNames();
+  std::set<std::string>::const_iterator sIter = currentWorkspaces.begin();
   std::vector<std::string> updateWorkspaces;
   for( ; sIter != currentWorkspaces.end(); ++sIter )
   {
@@ -301,8 +301,8 @@ bool WorkspaceTracerImpl::isWorkspaceProperty(const PropertyHistory & prop)
  */
 Algorithm* WorkspaceTracerImpl::remakeWorkspace(const std::string & wsName)
 {
-  std::vector<std::string> currentWorkspaces = AnalysisDataService::Instance().getObjectNames();
-  std::vector<std::string>::const_iterator sIter = currentWorkspaces.begin();
+  std::set<std::string> currentWorkspaces = AnalysisDataService::Instance().getObjectNames();
+  std::set<std::string>::const_iterator sIter = currentWorkspaces.begin();
   Algorithm* alg(NULL);
   for( ; sIter != currentWorkspaces.end(); ++sIter )
   {

@@ -40,20 +40,20 @@ namespace Kernel
 class DLLExport ListValidator : public IValidator<std::string>
 {
 public:
-  ListValidator();	
+  ListValidator();
   explicit ListValidator(const std::vector<std::string>& values);  
+  explicit ListValidator(const std::set<std::string>& values);  
 	virtual ~ListValidator();
   IValidator<std::string>* clone();
   
-  std::string getType() const;
-  const std::vector<std::string>& allowedValues() const;
+  std::set<std::string> allowedValues() const;
   void addAllowedValue(const std::string &value);
   
 private:
   std::string checkValidity(const std::string &value) const;
 
   /// The set of valid values
-  std::vector<std::string> m_allowedValues;
+  std::set<std::string> m_allowedValues;
 };
 
 } // namespace Kernel

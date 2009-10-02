@@ -69,9 +69,9 @@ void MemoryTest::runMemoryTests() const
   std::cerr << "Converted units to wavelength. " << mem_step
 	    << " KB of memory available\n";
   
-  std::vector<std::string> wkspNames = AnalysisDataService::Instance().getObjectNames();
+  std::set<std::string> wkspNames = AnalysisDataService::Instance().getObjectNames();
   std::cerr << "Currently there are " << wkspNames.size()  << " workspaces:\n";
-  std::vector<std::string>::const_iterator sIter;
+  std::set<std::string>::const_iterator sIter;
   for( sIter = wkspNames.begin(); sIter != wkspNames.end(); ++sIter)
   {
     std::cerr << "\t" << *sIter << "\n";

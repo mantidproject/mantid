@@ -303,7 +303,6 @@ public:
     TS_ASSERT_EQUALS( ps.setValue("TA"), start + "TA" + greaterThan + "T" + end);
     TS_ASSERT_EQUALS(ps.value(),"T");
     TS_ASSERT_EQUALS(ps.isValid(), "");
-    TS_ASSERT( dynamic_cast<const BoundedValidator<std::string>* >(ps.getValidator()) )
   }
 
   void testListValidator()
@@ -325,12 +324,11 @@ public:
     TS_ASSERT_EQUALS( p.setValue("three"), "The value \"three\" is not in the list of allowed values" )
     TS_ASSERT_EQUALS( p.value(), "two" )
     TS_ASSERT_EQUALS( p.isValid(), "" )
-    std::vector<std::string> vals;
+    std::set<std::string> vals;
     TS_ASSERT_THROWS_NOTHING( vals = p.allowedValues() )
     TS_ASSERT_EQUALS( vals.size(), 2 )
-    TS_ASSERT_EQUALS( vals[0], "one" )
-    TS_ASSERT_EQUALS( vals[1], "two" )
-    TS_ASSERT( dynamic_cast<const ListValidator*>(p.getValidator()) )
+    TS_ASSERT( vals.count("one") )
+    TS_ASSERT( vals.count("two") )
   }
   
   void testIsDefault()

@@ -506,11 +506,11 @@ namespace Mantid
 	  os << "X";
 	}
 	os << "', '" << removeCharacters(prop->documentation(),"\n\r", true) << "','";
-	StringVector allowed = prop->allowedValues();
+	std::set<std::string> allowed = prop->allowedValues();
 	if( !allowed.empty() )
 	{
-	  StringVector::const_iterator sIter = allowed.begin();
-	  StringVector::const_iterator sEnd = allowed.end();
+	  std::set<std::string>::const_iterator sIter = allowed.begin();
+	  std::set<std::string>::const_iterator sEnd = allowed.end();
 	  for( ; sIter != sEnd ; )
 	  {
 	    os << (*sIter);

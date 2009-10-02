@@ -5,58 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IValidator.h"
-#include <set>
-#include <algorithm>
-#include "Poco/File.h"
-#include "Poco/RegularExpression.h"
+#include <vector>
 
-/// A functor for checking the file extensions against a regular expression
-namespace {
-  /// A struct holding a string to be tested against a regular expression
-  struct RegExMatcher
-  {
-    /// Constructor
-    RegExMatcher(std::string ext) : m_ext(ext) {}
-  
-    /// Operator matches expressions
-    bool operator()(const std::string & test)
-    {
-      Poco::RegularExpression regex(test, Poco::RegularExpression::RE_CASELESS);
-      bool matched = regex.match(m_ext);
-      return matched;
-    }
-  
-  private:
-    /// Private default constructor
-    RegExMatcher();
-    /// The extension to test
-    std::string m_ext;
-  };
-
-  ///Converts a shell-like pattern to a regular expression pattern
-  struct RegExConverter
-  {
-    /// Operator to convert from shell-like patterns to regular expression syntax
-    std::string operator()(const std::string & pattern)
-    {
-      std::string replacement;
-      std::string::const_iterator iend = pattern.end();
-      for( std::string::const_iterator itr = pattern.begin(); itr != iend; ++itr )
-	{
-	  char ch = *itr;
-	  if( ch == '?' ) replacement.append(".");
-	  else if( ch == '*' ) replacement.append(".*");
-	  else replacement.push_back(ch);
-	}
-      return replacement;
-    }
-  };  
-
-}
-
-/**
- * Mantid namespace
- */
 namespace Mantid
 {
 namespace Kernel
@@ -66,7 +16,7 @@ namespace Kernel
     @author Matt Clarke, ISIS.
     @date 25/06/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -89,54 +39,21 @@ namespace Kernel
 class DLLExport FileValidator : public IValidator<std::string>
 {
 public:
-  /// Default constructor.
-  FileValidator() : IValidator<std::string>(), m_extensions(), m_regex_exts(), m_fullTest(true)
-  {}
-
-  /** Constructor
-   *  @param extensions The permitted file extensions (e.g. .RAW)
-   *  @param testFileExists Flag indicating whether to test for existence of file (default: yes)
-   */
-  explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true) :
-    IValidator<std::string>(),
-    m_extensions(extensions),
-    m_regex_exts(m_extensions.size()),
-    m_fullTest(testFileExists)
-  {
-    // Transform the file extensions to regular expression syntax for matching. This could be done every time
-    // checkValidity() is called but that would create unnecessary work
-    std::transform( m_extensions.begin(), m_extensions.end(), m_regex_exts.begin(), RegExConverter() );
-  }
-
-  /// Destructor
-  virtual ~FileValidator() {}
-
-  /// Returns the set of valid values
-  const std::vector<std::string>& allowedValues() const
-  {
-    return m_extensions;
-  }
-
-  /** 
-   * Clone the validator
-   * @returns A pointer to a new validator with the same properties as this one
-   */
-  IValidator<std::string>* clone() 
-  { 
-    return new FileValidator(*this); 
-  }
+  FileValidator();
+  explicit FileValidator(const std::vector<std::string>& extensions, bool testFileExists = true);
+  virtual ~FileValidator();
+  std::set<std::string> allowedValues() const;
+  IValidator<std::string>* clone();
   
 private:
   /// The list of permitted extensions
-  const std::vector<std::string> m_extensions;
+  const std::set<std::string> m_extensions;
   /// An internal list of extensions that, if necessary, have been transformed into regular expressions
-  std::vector<std::string> m_regex_exts; 
+  std::set<std::string> m_regex_exts; 
   /// Flag indicating whether to test for existence of filename
   const bool m_fullTest;
   
-  /// Returns A user level error if the name has the wrong extension and if m_fullTest=true the named file doesn't exist
   std::string checkValidity(const std::string &value) const;
-
 };
 
 } // namespace Kernel

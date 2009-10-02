@@ -106,10 +106,10 @@ public:
 	std::vector<std::string> getAlgorithmNames() const;
 	
 	/// Return the list of currently available workspace names
-	std::vector<std::string> getWorkspaceNames() const;
+	std::set<std::string> getWorkspaceNames() const;
 
 	/// Return a list of the currently available workspace groups
-	std::vector<std::string> getWorkspaceGroupNames() const;
+	std::set<std::string> getWorkspaceGroupNames() const;
 
   /// Return the list of names within a workspace group
   std::vector<std::string> getWorkspaceGroupEntries(const std::string & group_name) const;

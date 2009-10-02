@@ -46,9 +46,9 @@ void NormaliseToMonitor::init()
   declareProperty("MonitorSpectrum",-1,
     "The spectrum number of the monitor spectrum within the InputWorkspace");
   // ...or provide it in a separate workspace
-  std::vector<std::string> allowedValues = AnalysisDataService::Instance().getObjectNames();
+  std::set<std::string> allowedValues = AnalysisDataService::Instance().getObjectNames();
   // Empty is allowed because this is an optional property
-  allowedValues.push_back("");
+  allowedValues.insert("");
   // Note that this is a text property to enable it to be optional
   declareProperty("MonitorWorkspace","",new ListValidator(allowedValues),
     "A single-spectrum workspace containing the monitor spectrum");

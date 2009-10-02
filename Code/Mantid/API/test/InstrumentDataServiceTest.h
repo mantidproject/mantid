@@ -79,10 +79,10 @@ public:
 	void testGetObjectNames()
 	{
 		Mantid::API::InstrumentDataService::Instance().add("inst2",inst2);
-		std::vector<std::string> names(2);
-		names[0]="inst1";
-		names[1]="inst2";
-		std::vector<std::string> result;
+		std::set<std::string> names;
+		names.insert("inst1");
+		names.insert("inst2");
+		std::set<std::string> result;
 		result=Mantid::API::InstrumentDataService::Instance().getObjectNames();
 		TS_ASSERT_EQUALS(result,names);
 		//Check with an empty store

@@ -5,11 +5,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "Poco/Timestamp.h"
-#include "Poco/DateTimeFormatter.h"
-
-#include <fstream>
-#include <iomanip>
 
 namespace Mantid
 {
@@ -182,4 +177,3 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
 
 } // namespace Algorithms
 } // namespace Mantid
-

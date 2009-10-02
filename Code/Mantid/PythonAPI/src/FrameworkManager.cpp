@@ -199,7 +199,7 @@ bool FrameworkManager::deleteWorkspace(const std::string& wsName)
  * Returns the name of all the workspaces.
  * \return Vector of strings.
  **/
-std::vector<std::string> FrameworkManager::getWorkspaceNames() const
+std::set<std::string> FrameworkManager::getWorkspaceNames() const
 {
   return API::AnalysisDataService::Instance().getObjectNames();
 }
@@ -208,18 +208,18 @@ std::vector<std::string> FrameworkManager::getWorkspaceNames() const
  * Returns the names of all the workspace groups
  * \return A vector of strings.
  **/
-std::vector<std::string> FrameworkManager::getWorkspaceGroupNames() const
+std::set<std::string> FrameworkManager::getWorkspaceGroupNames() const
 {
-  std::vector<std::string> ws_names = getWorkspaceNames();
-  std::vector<std::string> grp_names;
-  std::vector<std::string>::const_iterator iend = ws_names.end();
-  for( std::vector<std::string>::const_iterator itr = ws_names.begin(); itr != iend;
+  std::set<std::string> ws_names = getWorkspaceNames();
+  std::set<std::string> grp_names;
+  std::set<std::string>::const_iterator iend = ws_names.end();
+  for( std::set<std::string>::const_iterator itr = ws_names.begin(); itr != iend;
        ++itr )
   {
     API::Workspace *wksp =  API::FrameworkManager::Instance().getWorkspace(*itr);
     if( dynamic_cast<API::WorkspaceGroup*>(wksp) )
     {
-      grp_names.push_back(*itr);
+      grp_names.insert(*itr);
     }
 
   }

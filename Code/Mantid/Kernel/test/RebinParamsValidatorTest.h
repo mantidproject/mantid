@@ -6,7 +6,7 @@
 
 using namespace Mantid::Kernel;
 
-class MandatoryValidatorTest : public CxxTest::TestSuite
+class RebinParamsValidatorTest : public CxxTest::TestSuite
 {
 public:
   void testClone()

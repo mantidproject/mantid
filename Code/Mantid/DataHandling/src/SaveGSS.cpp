@@ -4,6 +4,7 @@
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "Poco/File.h"
 #include <fstream>
 #include <iomanip>
 

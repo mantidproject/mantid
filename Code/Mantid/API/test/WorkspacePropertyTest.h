@@ -176,11 +176,11 @@ public:
 
   void testAllowedValues()
   {
-    std::vector<std::string> vals;
+    std::set<std::string> vals;
     TS_ASSERT_THROWS_NOTHING( vals = wsp1->allowedValues() )
     TS_ASSERT_EQUALS( vals.size(), 2 )
-    TS_ASSERT_EQUALS( vals[0], "ws1" )
-    TS_ASSERT_EQUALS( vals[1], "ws3" )
+    TS_ASSERT( vals.count("ws1") )
+    TS_ASSERT( vals.count("ws3") )
 
     TS_ASSERT( wsp2->allowedValues().empty() )
 
