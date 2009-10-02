@@ -13,6 +13,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "Poco/File.h"
 
 using namespace Mantid;
 using namespace Mantid::PythonAPI;
@@ -71,14 +72,14 @@ public:
 
   void testgetWorkspaceNames()
   {
-    std::vector<std::string> temp = mgr->getWorkspaceNames();
+    std::set<std::string> temp = mgr->getWorkspaceNames();
     TS_ASSERT(temp.empty());
     
     Mantid::API::AnalysisDataService::Instance().add("outer",WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
 
     temp = mgr->getWorkspaceNames();
     TS_ASSERT(!temp.empty());
-    TS_ASSERT_EQUALS( temp[0], "outer" )
+    TS_ASSERT( temp.count("outer") )
     mgr->deleteWorkspace("outer");
     temp = mgr->getWorkspaceNames();
     TS_ASSERT(temp.empty());
