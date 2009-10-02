@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::Kernel;
 
