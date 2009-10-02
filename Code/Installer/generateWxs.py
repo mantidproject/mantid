@@ -387,6 +387,10 @@ includeMantidAPIDir = addDirectory('IncludeMantidAPIDir','MAPI','MantidAPI',incl
 IncludeMantidAPI = addComponent('IncludeMantidAPI','{4761DDF6-813C-4470-8852-98CB9A69EBC9}',includeMantidAPIDir)
 addAllFiles('../Mantid/includes/MantidAPI','api',IncludeMantidAPI)
 
+includeMantidCurveFittingDir = addDirectory('IncludeMantidCurveFittingDir','MAlgs','MantidCurveFitting',includeDir)
+IncludeMantidCurveFitting = addComponent('IncludeMantidCurveFitting','{44d0bdf5-e13a-4a27-8609-e273965ee860}',includeMantidCurveFittingDir)
+addAllFiles('../Mantid/includes/MantidCurveFitting','alg',IncludeMantidCurveFitting)
+
 includeMantidDataHandlingDir = addDirectory('IncludeMantidDataHandlingDir','MDH','MantidDataHandling',includeDir)
 IncludeMantidDataHandling = addComponent('IncludeMantidDataHandling','{DDD2DD4A-9A6A-4181-AF66-891B99DF8FFE}',includeMantidDataHandlingDir)
 addAllFiles('../Mantid/includes/MantidDataHandling','dh',IncludeMantidDataHandling)
@@ -556,6 +560,7 @@ addModules('toget/VCRedist',Redist)
 Includes = addFeature('Includes','Includes','Mantid and third party header files.','1',Complete)
 addCRef('IncludeMantidAlgorithms',Includes)
 addCRef('IncludeMantidAPI',Includes)
+addCRef('IncludeMantidCurveFitting',Includes)
 addCRef('IncludeMantidDataHandling',Includes)
 addCRef('IncludeMantidDataObjects',Includes)
 addCRefs(includeMantidGeometryDirList,Includes)
