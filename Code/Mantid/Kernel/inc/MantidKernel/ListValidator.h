@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "IValidator.h"
-#include <set>
 #include <vector>
 
 namespace Mantid
@@ -47,14 +46,14 @@ public:
   IValidator<std::string>* clone();
   
   std::string getType() const;
-  const std::set<std::string>& allowedValues() const;
+  const std::vector<std::string>& allowedValues() const;
   void addAllowedValue(const std::string &value);
   
 private:
   std::string checkValidity(const std::string &value) const;
 
   /// The set of valid values
-  std::set<std::string> m_allowedValues;
+  std::vector<std::string> m_allowedValues;
 };
 
 } // namespace Kernel

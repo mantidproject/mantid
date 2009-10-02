@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
 namespace Mantid
@@ -28,7 +29,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
 
-      declareProperty(new ArrayProperty<double>("Params", new MandatoryValidator<std::vector<double> >));
+      declareProperty(new ArrayProperty<double>("Params", new RebinParamsValidator));
     }
 
     /** Executes the rebin algorithm

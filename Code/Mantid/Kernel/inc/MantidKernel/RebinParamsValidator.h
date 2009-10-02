@@ -1,23 +1,22 @@
-#ifndef MANTID_KERNEL_NULLVALIDATOR_H_
-#define MANTID_KERNEL_NULLVALIDATOR_H_
+#ifndef MANTID_KERNEL_REBINPARAMSVALIDATOR_H_
+#define MANTID_KERNEL_REBINPARAMSVALIDATOR_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IValidator.h"
+#include <vector>
 
 namespace Mantid
 {
 namespace Kernel
 {
-/** @class NullValidator NullValidator.h Kernel/NullValidator.h
+/** Validator to check the format of a vector providing the rebin
+    parameters to an algorithm.
 
-    NullValidator is a validator that doesn't.
+    @author Russell Taylor, Tessella plc
 
-    @author Nick Draper, Tessella Support Services plc
-    @date 28/11/2007
-    
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -37,20 +36,18 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-template <typename TYPE>
-class DLLExport NullValidator : public IValidator<TYPE>
+class DLLExport RebinParamsValidator : public IValidator<std::vector<double> >
 {
 public:
-  IValidator<TYPE>* clone() { return new NullValidator(*this); }
+  RebinParamsValidator() {}
+  virtual ~RebinParamsValidator() {}
+  Kernel::IValidator<std::vector<double> >* clone() { return new RebinParamsValidator(*this); }
 
 private:
-  /** Always returns valid, that is ""
-   *  @returns an empty string
-   */
-   std::string checkValidity( const TYPE &) const { return ""; }
+  std::string checkValidity( const std::vector<double> &value ) const;
 };
 
 } // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_NULLVALIDATOR_H_*/
+#endif /*MANTID_KERNEL_REBINPARAMSVALIDATOR_H_*/

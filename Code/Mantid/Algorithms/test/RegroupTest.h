@@ -70,53 +70,6 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
-  
-  void test_validator()
-  {
-    Regroup regroup;
-    regroup.initialize();
-    regroup.setChild(true);
-    //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( regroup.setPropertyValue("InputWorkspace","test_in1D"), std::invalid_argument )
-    TS_ASSERT_THROWS_NOTHING( regroup.setPropertyValue("OutputWorkspace","test_out") )
-
-	//no global scope for the RegroupParamsValidator
-	//use run the validator through the property
-	PropertyWithValue< std::vector<double> > *pPropWithVal = 0;
-	std::vector<Property*>::const_iterator iter = regroup.getProperties().begin();
-	for( ;iter < regroup.getProperties().end(); iter ++ )
-	{
-	  if ( (*iter)->name() == "Params")
-	  {
-	    pPropWithVal = 
-	      dynamic_cast< PropertyWithValue< std::vector<double> >* >(*iter);
-	  }
-	}
-	TS_ASSERT(pPropWithVal)
-	if ( !pPropWithVal ) return;
-	const IValidator< std::vector<double> > *regroupVali =
-		pPropWithVal->getValidator();
-
-  	double shortBinsA[] = {1.5, 2.0};
-  	int shortBinsL = 2;
-  	double unsortedBinsA[] = {1.5, 2.0, 20, -0.1, 15, 1.0, 35};
-  	int unsortedBinsL = 7;
-  	double goodBinsA[] = {1.5, 2.0, 20};
- 	int goodBinsL = 3;
-
-	std::vector<double> bins;
-	TS_ASSERT_EQUALS( regroupVali->isValid(bins),
-		"Enter values for this property")
-	bins = std::vector<double>( shortBinsA, shortBinsA + shortBinsL );
-    TS_ASSERT_EQUALS( regroupVali->isValid(bins),
-		"The number of bin boundaries must be even"  )
-	bins = std::vector<double>( unsortedBinsA, unsortedBinsA + unsortedBinsL );
-    TS_ASSERT_EQUALS( regroupVali->isValid(bins),
-		"Bin boundary values must be given in order of increasing value"  )
-	bins = std::vector<double>( goodBinsA, goodBinsA + goodBinsL);
-    TS_ASSERT_EQUALS( regroupVali->isValid(bins), ""  )
-  }
-
 private:
   Workspace1D_sptr Create1DWorkspace(int size)
   {

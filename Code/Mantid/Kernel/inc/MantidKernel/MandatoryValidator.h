@@ -43,8 +43,6 @@ template< class TYPE >
 class DLLExport MandatoryValidator : public IValidator<TYPE>
 {
 public:
-  std::string getType() const { return "mandatory"; }
-
   IValidator<TYPE>* clone() { return new MandatoryValidator(*this); }
 
 private:

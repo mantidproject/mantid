@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/ListValidator.h"
+#include <algorithm>
 
 namespace Mantid
 {
@@ -24,21 +25,15 @@ ListValidator::ListValidator(const std::vector<std::string>& values) :
 ListValidator::~ListValidator() {}
 
 /// Returns the set of valid values
-const std::set<std::string>& ListValidator::allowedValues() const
+const std::vector<std::string>& ListValidator::allowedValues() const
 {
   return m_allowedValues;
-}
-  
-///Return the type of the validator
-std::string ListValidator::getType() const
-{
-  return "list";
 }
   
 /// Adds the argument to the set of valid values
 void ListValidator::addAllowedValue(const std::string &value)
 {
-  m_allowedValues.insert(value);
+  m_allowedValues.push_back(value);
 }
 
 IValidator<std::string>* ListValidator::clone() { return new ListValidator(*this); }
@@ -49,7 +44,7 @@ IValidator<std::string>* ListValidator::clone() { return new ListValidator(*this
  */
 std::string ListValidator::checkValidity(const std::string &value) const
 {
-  if ( m_allowedValues.count(value) )
+  if ( std::find(m_allowedValues.begin(),m_allowedValues.end(),value) != m_allowedValues.end() )
   {
     return "";
   }

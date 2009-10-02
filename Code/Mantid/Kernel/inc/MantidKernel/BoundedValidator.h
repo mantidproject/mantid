@@ -69,9 +69,6 @@ public:
   virtual ~BoundedValidator()
   {}
   
-  ///Return the type of the validator
-  std::string getType() const { return "bounded"; }
-
   /// Return if it has a lower bound
   bool        hasLower() const { return m_hasLowerBound; }
   /// Return if it has a lower bound

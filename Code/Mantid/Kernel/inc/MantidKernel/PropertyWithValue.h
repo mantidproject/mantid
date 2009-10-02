@@ -317,40 +317,20 @@ public:
     return  m_initialValue == m_value;
   }
 
-  /** Returns the type of the validator as a string
-   *  @returns String describing the type of the validator
-   */
-  virtual const std::string getValidatorType() const
-  {
-    return m_validator->getType();
-  }
-
-  /**
-   * Returns the validator
-   * @returns A pointer to the IValidator interface
-   */
-  const IValidator<TYPE>* getValidator() const
-  {
-    return m_validator;
-  }
-
   /** Returns the set of valid values for this property, if such a set exists.
    *  If not, it returns an empty vector.
    */
   virtual const std::vector<std::string> allowedValues() const
   {
     ListValidator *list = dynamic_cast<ListValidator*>(m_validator);
-
     FileValidator *file = dynamic_cast<FileValidator*>(m_validator);
-
     if (list)
     {
-      const std::set<std::string>& vals = list->allowedValues();
-      return std::vector<std::string>(vals.begin(), vals.end());
+      return list->allowedValues();
     }
     else if (file)
     {
-	   return file->allowedValues();
+      return file->allowedValues();
     }
     else
     {

@@ -5,7 +5,6 @@
 // Includes
 //-----------------------------------------------------------------
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/FileValidator.h"
 
 namespace Mantid
 {

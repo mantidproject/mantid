@@ -111,25 +111,10 @@ public:
   /// Destructor
   virtual ~FileValidator() {}
 
-  ///Return the type of the validator
-  std::string getType() const
-  {
-    return "file";
-  }
-
   /// Returns the set of valid values
   const std::vector<std::string>& allowedValues() const
   {
     return m_extensions;
-  }
-
-  /** 
-   * Is this validator concerned with whether the file exists or not
-   * @returns A boolean indicating whether this tests for file existence
-   */
-  bool fileMustExist() const
-  {
-    return m_fullTest;
   }
 
   /** 

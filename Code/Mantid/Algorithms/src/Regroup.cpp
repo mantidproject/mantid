@@ -2,9 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Regroup.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 #include <sstream>
@@ -19,45 +19,6 @@ namespace Mantid
 {
 namespace Algorithms
 {
-
-/// Custom validator for the "Params" parameter of this algorithm
-class RegroupParamsValidator: public Kernel::IValidator<std::vector<double> >
-{
-public:
-  RegroupParamsValidator() {}
-  virtual ~RegroupParamsValidator() {}
-
-  std::string getType() const { return "regroup"; }
-
-  Kernel::IValidator<std::vector<double> >* clone() { return new RegroupParamsValidator(*this); }
-private:
-  ///Quick check on the inputed bin boundaries and widths
-  std::string checkValidity( const std::vector<double> &value ) const;
-};
-
-  /** Quick check on the inputed bin boundaries and widths, returns a user level description of problems or "" for no error.  Note, note error doesn't mean that the values will work
-   *  @param value The vector of doubles to check
-   *  @return A user level description of any problem or "" if there is no problem
-   */
-std::string RegroupParamsValidator::checkValidity( const std::vector<double> &value ) const
-{
-  if ( value.empty() ) return "Enter values for this property";
-  if ( ( value.size()%2 == 0 ) || ( value.size() == 1 ) )
-  {
-    return "The number of bin boundaries must be even";
-  }
-
-  double previous = value[0];
-  for(size_t i=2; i < value.size(); i+=2)
-  {
-    if (value[i] <= previous)
-	{
-	  return "Bin boundary values must be given in order of increasing value";
-	}
-	else previous = value[i];
-  }
-  return "";
-}
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Regroup)
@@ -82,8 +43,8 @@ void Regroup::init()
     "The name of the workspace to be created as the output of the regrouping");
 
   declareProperty(
-    new ArrayProperty<double>("Params", new RegroupParamsValidator),
-    "The new approximate bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
+    new ArrayProperty<double>("Params", new RebinParamsValidator),
+    "The new bin widths in the form x1, deltax1, x2, deltax2, x3, ..." );
 }
 
 /** Executes the regroup algorithm

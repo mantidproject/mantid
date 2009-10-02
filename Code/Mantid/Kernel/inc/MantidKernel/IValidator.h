@@ -56,18 +56,11 @@ public:
     std::string failure = checkValidity(value);
     if ( failure != "" )
     {//log any problems, problems in the children of composite validators get logged twice, first as themselves then as a composite validator
-      g_log.debug() << this->getType() << " validator check failed: " << failure << std::endl;
+      g_log.debug() << "Validator check failed: " << failure << std::endl;
       //this error message may be shown to users, it is briefer than in the log because it's in context, users wont see composite validator messages because I think they don't care if the validator is a member of a composite or not
-      return failure;
     }
-    else return "";
+    return failure;
   }
-
-  /** Gets the type of the validator as a string
-   * 
-   *  @returns String describing the type
-   */	  
-  virtual std::string getType() const = 0;
 
   /// Make a copy of the present type of validator
   virtual IValidator* clone() = 0;

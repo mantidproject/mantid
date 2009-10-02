@@ -4,8 +4,7 @@
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 
 #include <QIcon>
 #include <QLabel>
@@ -183,8 +182,8 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
 QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
 {
   if( propName.isEmpty() ) return "";
-  Mantid::Kernel::PropertyWithValue<std::string>* prop = 
-    dynamic_cast< Mantid::Kernel::PropertyWithValue<std::string>* >( getAlgorithmProperty(propName) );
+  Mantid::Kernel::FileProperty* prop = 
+    dynamic_cast< Mantid::Kernel::FileProperty* >( getAlgorithmProperty(propName) );
   if( !prop ) return "";
 
   //The allowed values in this context are file extensions
@@ -208,8 +207,6 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
     filter = "All Files (*.*)";
   }
   
-  const Mantid::Kernel::FileValidator *file_checker = dynamic_cast<const Mantid::Kernel::FileValidator*>(prop->getValidator());
-  
   /* MG 20/07/09: Static functions as these then use native Windows and MAC dialogs in those environments and are alot faster */
   
   //QFileDialog dialog(this);
@@ -224,7 +221,7 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
   //  dialog.setFileMode(QFileDialog::ExistingFile);
   //}
   QString filename;
-  if( file_checker && !file_checker->fileMustExist() )
+  if( ! prop->isLoadProperty() )
   {
     filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   }
