@@ -33,18 +33,18 @@ public:
   {
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space =
-      WorkspaceFactory::Instance().create("Workspace2D", m_nHist, m_nBins+1, m_nBins);
+      WorkspaceFactory::Instance().create("Workspace2D", NHIST, NBINS+1, NBINS);
     space->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
-    Histogram1D::RCtype xs, errors, data[m_nHist];
-    xs.access().resize(m_nBins+1, 10.0);
-    errors.access().resize(m_nBins, 1.0);
-    int detIDs[m_nHist];
-    int specNums[m_nHist];
-    for (int j = 0; j < m_nHist; ++j)
+    Histogram1D::RCtype xs, errors, data[NHIST];
+    xs.access().resize(NBINS+1, 10.0);
+    errors.access().resize(NBINS, 1.0);
+    int detIDs[NHIST];
+    int specNums[NHIST];
+    for (int j = 0; j < NHIST; ++j)
     {
       space2D->setX(j,xs);
-      data[j].access().resize(m_nBins, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
+      data[j].access().resize(NBINS, j + 1);  // the y values will be different for each spectra (1+index_number) but the same for each bin
       space2D->setData(j, data[j], errors);
       space2D->getAxis(1)->spectraNo(j) = j+1;  // spectra numbers are also 1 + index_numbers because this is the tradition
       detIDs[j] = j;
@@ -65,9 +65,12 @@ public:
     Detector *d4 = new Detector("det",0);
     d4->setID(4);
     boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d4);
+    Detector *d5 = new Detector("det",0);
+    d5->setID(5);
+    boost::dynamic_pointer_cast<Instrument>(space->getInstrument())->markAsDetector(d5);
 
     // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->mutableSpectraMap().populate(specNums, detIDs, m_nHist );
+    space->mutableSpectraMap().populate(specNums, detIDs, NHIST );
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(inputWS, space);
@@ -110,11 +113,11 @@ public:
     MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 )
-    std::vector<double> tens(m_nBins+1, 10.0);
-    std::vector<double> ones(m_nBins, 1.0);
+    std::vector<double> tens(NBINS+1, 10.0);
+    std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(m_nBins, (0+1)+(1+3)) )
-    for (int i = 0; i < m_nBins; ++i)
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, (0+1)+(1+3)) )
+    for (int i = 0; i < NBINS; ++i)
     {
       TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(2)), 0.0001 )
     }
@@ -135,7 +138,7 @@ public:
     grouper3.setPropertyValue("InputWorkspace", inputWS);
     std::string output(outputBase + "Detects");
     grouper3.setPropertyValue("OutputWorkspace", output);
-    grouper3.setPropertyValue("DetectorList","3,1,4,0,2");
+    grouper3.setPropertyValue("DetectorList","3,1,4,0,2,5");
     grouper3.setProperty<bool>("KeepUngroupedSpectra", true);
 
     TS_ASSERT_THROWS_NOTHING( grouper3.execute());
@@ -144,14 +147,14 @@ public:
     MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
     TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 )
-    std::vector<double> tens(m_nBins+1, 10.0);
-    std::vector<double> ones(m_nBins, 1.0);
+    std::vector<double> tens(NBINS+1, 10.0);
+    std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
     TS_ASSERT_EQUALS( outputWS->dataY(0),
-      std::vector<double>(m_nBins, (3+1)+(1+1)+(4+1)+(0+1)+(2+1)) )
-    for (int i = 0; i < m_nBins; ++i)
-    {
-      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(5)), 0.0001 )
+      std::vector<double>(NBINS, (3+1)+(1+1)+(4+1)+(0+1)+(2+1)+(5+1)) )
+    for (int i = 0; i < NBINS; ++i)
+    {// assume that we have grouped all the spectra in the input workspace
+      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(NHIST)), 0.0001 )
     }
 
     boost::shared_ptr<IDetector> det;
@@ -162,10 +165,10 @@ public:
     AnalysisDataService::Instance().remove(output);
   }
 
-  void testFileInput()
+  void testFileList()
   {
     // create a file in the current directory that we'll load later
-    writeTestFile();
+    writeFileList();
 
     GroupDetectors2 grouper;
     grouper.initialize();
@@ -180,32 +183,35 @@ public:
 
     MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(output));
-    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), m_nHist-1 )
-    std::vector<double> tens(m_nBins+1, 10.0);
-    std::vector<double> ones(m_nBins, 1.0);
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), NHIST-1 )
+    std::vector<double> tens(NBINS+1, 10.0);
+    std::vector<double> ones(NBINS, 1.0);
     // check the two grouped spectra
     TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(m_nBins, 1+3) );
-    for (int i = 0; i < m_nBins; ++i)
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+3) );
+    for (int i = 0; i < NBINS; ++i)
     {
-      TS_ASSERT_DELTA( outputWS->dataE(0)[i], 1.4142, 0.0001 )
+      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(2)), 1e-6)
     }
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 )
     TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(m_nBins, 4 ) );
+    TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) );
     
     TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
 
       TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 )
     //check the unmoved spectra
     TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(m_nBins, 2) )
+    TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 2) )
     TS_ASSERT_EQUALS( outputWS->dataE(2), ones )
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 2 )
     TS_ASSERT_EQUALS( outputWS->dataX(3), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(3), std::vector<double>(m_nBins, 5) )
+    TS_ASSERT_EQUALS( outputWS->dataY(3), std::vector<double>(NBINS, 5) )
     TS_ASSERT_EQUALS( outputWS->dataE(3), ones )
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(3), 5 )
+    TS_ASSERT_EQUALS( outputWS->dataY(4), std::vector<double>(NBINS, 6) )
+    TS_ASSERT_EQUALS( outputWS->dataE(4), ones )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(4), 6 )
 
     // the first two spectra should have a group of detectors the other spectra a single detector
 
@@ -218,28 +224,92 @@ public:
     TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(3) )
     TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(4) )
+    TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
     
     AnalysisDataService::Instance().remove(output);
-    std::string s;
-    std::getline(std::cin, s);
+    remove(inputFile.c_str());
+  }
+  
+  void testFileRanges()
+  {
+    // create a file in the current directory that we'll load later
+    writeFileRanges();
+
+    GroupDetectors2 grouper;
+    grouper.initialize();
+    grouper.setPropertyValue("InputWorkspace", inputWS);
+    std::string output(outputBase + "File");
+    grouper.setPropertyValue("OutputWorkspace", output);
+    grouper.setPropertyValue("MapFile", inputFile);
+    grouper.setProperty<bool>("KeepUngroupedSpectra",true);
+
+    TS_ASSERT_THROWS_NOTHING( grouper.execute());
+    TS_ASSERT( grouper.isExecuted() );
+
+    MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(output));
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), NHIST-3 )
+    std::vector<double> tens(NBINS+1, 10.0);
+    std::vector<double> ones(NBINS, 1.0);
+    // check the first grouped spectrum
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+2+3) );
+    for (int i = 0; i < NBINS; ++i)
+    {
+      TS_ASSERT_DELTA(outputWS->dataE(0)[i], std::sqrt(static_cast<double>(3)), 1e-6)
+    }
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(0), 1 )
+    // check the second grouped spectrum
+    TS_ASSERT_EQUALS( outputWS->dataX(1), tens )
+    TS_ASSERT_EQUALS( outputWS->dataY(1), std::vector<double>(NBINS, 4 ) );
+    TS_ASSERT_EQUALS( outputWS->dataE(1), ones )
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(1), 4 )
+    // check the third grouped spectrum
+    TS_ASSERT_EQUALS( outputWS->dataX(2), tens )
+    TS_ASSERT_EQUALS( outputWS->dataY(2), std::vector<double>(NBINS, 5+6 ) );
+    for (int i = 0; i < NBINS; ++i)
+    {
+      TS_ASSERT_DELTA(
+        outputWS->dataE(2)[i], std::sqrt(static_cast<double>(2)), 1e-6)
+    }
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->spectraNo(2), 5 )
+
+    AnalysisDataService::Instance().remove(output);
     remove(inputFile.c_str());
   }
 
   private:
     const std::string inputWS, outputBase, inputFile;
-    enum constants { m_nHist = 5, m_nBins = 4 };
+    enum constants { NHIST = 6, NBINS = 4 };
 
-    void writeTestFile()
+    void writeFileList()
     {
       std::ofstream file(inputFile.c_str());
       file << "2		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
-        << "-1 "            << std::endl
+        << "888 "            << std::endl
         << "2"              << std::endl
         << "1   3"          << std::endl
-        << "-1"             << std::endl
+        << "888"             << std::endl
         << std::endl
         << "1"              << std::endl
         << "4";
+      file.close();
+    }
+    void writeFileRanges()
+    {
+      std::ofstream file(inputFile.c_str());
+      file << "3		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
+        << "0 "            << std::endl
+        << "3"              << std::endl
+        << "1-  3"          << std::endl
+        << "0"             << std::endl
+        << "1"              << std::endl
+        << std::endl
+        << "4"              << std::endl
+        << "0"              << std::endl
+        << "2"              << std::endl
+        << "5-6";
       file.close();
     }
 };

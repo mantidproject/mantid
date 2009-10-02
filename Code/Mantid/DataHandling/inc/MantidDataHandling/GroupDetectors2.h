@@ -31,7 +31,7 @@ namespace DataHandling
   | and comments starting with # are both allowed
 
   | "unused number"                                         |[in some implementation this is the number of groups in the file but here all groups in the file are read regardless]
-  | "unused number"                                         |[an integer must be here but the group's spectra number is the spectra number of the first spectra that went into the group and its index number is the number of groups in the list before it]
+  | "unused number"                                         |[a positive integer must be here but the group's spectra number is the spectra number of the first spectra that went into the group and its index number is the number of groups in the list before it]
   | "number_of_input_spectra1"                              |[this number must equal the number of spectra numbers on the next lines]
   | "input spec1" "input spec2" "input spec3" "input spec4" |[these spectra numbers can be listed over any number of lines]
   | "input spec5 input spec6"                               |
@@ -93,13 +93,27 @@ public:
   virtual ~GroupDetectors2();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GroupDetectors";};
+  virtual const std::string name() const { return "GroupDetectors"; };
   /// Algorithm's version for identification overriding a virtual method
-  virtual const int version() const { return 2;};
+  virtual const int version() const { return 2; };
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling\\Detectors";}
+  virtual const std::string category() const{return "DataHandling\\Detectors";}
 
 private:
+  /// provides a function that expands pairs of integers separated with a hyphen into a list of all the integers between those values
+  class RangeHelper
+  {
+  public:
+    static void getList(const std::string &line, std::vector<int> &outList);
+  private:
+    /// this class can't be constructed it is just a holder for some static things
+    RangeHelper() {};
+    /// give an enum from poco a better name here
+    enum { 
+      IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM     ///< =Poco::StringTokenizer::TOK_TRIM but saves some typing
+    };
+  };
+
 	#ifndef HAS_UNORDERED_MAP_H
   /// used to store the lists of spectra numbers that will be grouped, the keys are not used
   typedef std::map<int, std::vector<int> > storage_map;
@@ -108,50 +122,50 @@ private:
 	#endif
 
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
-  double m_PercentDone;
+  double m_FracCompl;
+  /// stores lists of spectra indexes to group, although we never do an index search on it
+  storage_map m_GroupSpecInds;
+
 
   // Implement abstract Algorithm methods
   void init();
   void exec();
   
   /// read in the input parameters and see what findout what will be to grouped
-  void getList(Workspace2D_const_sptr workspace, storage_map &outputData,
-                                             std::vector<int> &unUsedSpec);
+  void getGroups(Workspace2D_const_sptr workspace, std::vector<int> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_ _numbers_ 
-  void readTheFile(std::string fname,  Workspace2D_const_sptr workspace,
-                     storage_map &outputData, std::vector<int> &unUsedSpec);
+  void processFile(std::string fname,  Workspace2D_const_sptr workspace,
+                                                std::vector<int> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
+  void readFile(std::map<int,int> &specs2index, std::ifstream &File,
+    int &lineNum, std::vector<int> &unUsedSpec);
   /// used while reading the file reads reads specftra numbers from the string and returns spectra indexes 
   void readSpectraIndexes(std::string line, std::map<int,int> &specs2index,
                    std::vector<int> &output, std::vector<int> &unUsedSpec);
-  void readGroups(std::map<int,int> &specs2index, std::ifstream &File,
-    int &lineNum, storage_map &output, std::vector<int> &unUsedSpec);
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
   double fileReadProg(int numGroupsRead, int numInHists);
 
   /// Copy the and combine the histograms that the user requested from the input into the output workspace
-  int makeGroups(const storage_map &inputList, Workspace2D_const_sptr inputWS,
+  int formGroups(Workspace2D_const_sptr inputWS,
                  MatrixWorkspace_sptr outputWS, const double prog4Copy);
   /// Copy the data data in ungrouped histograms from the input workspace to the output
   void moveOthers(const std::set<int> &unGroupedSet,
     Workspace2D_const_sptr inputWS,MatrixWorkspace_sptr outputWS,int outIndex);
 
-  enum flagvalues                                        ///< flag values used in arrays or as return values
-  {
+  /// flag values
+  enum {
     USED = 1000-INT_MAX,                                 ///< goes in the unGrouped spectra list to say that a spectrum will be included in a group, any other value and it isn't. Spectra numbers should always be positive so we shouldn't accidientally set a spectrum number to the this
-    EMPTY_LINE = 1001-INT_MAX                            ///< when reading from the input file this value means that we found any empty line
+    EMPTY_LINE = 1001-INT_MAX,                           ///< when reading from the input file this value means that we found any empty line
+    IGNORE_SPACES = Poco::StringTokenizer::TOK_TRIM      ///< =Poco::StringTokenizer::TOK_TRIM but saves some typing
   };
   
-  enum progressReps                                       ///< contains the numbers used for progress notifcation
-  {
-    CHECKBINS = 15,                                       ///< a (worse case) estimate of the time required to check that the X bin boundaries are the same as a percentage of total algorithm run time
-    OPENINGFILE = 5,                                      ///< gives the progress bar a nudge when the file opens
-  // if CHECKBINS+OPENINGFILE+2*READFILE > 100 then the algorithm might report progress that is greater than 100
-    READFILE = 30,                                        ///< if a file must be read in estimate that reading it will take this percentage of the algorithm execution time
-    INTERVAL = 128                                        ///< copy this many histograms and then check for an algorithm notification and update the progress bar
-  };
+  static const double CHECKBINS;                         ///< a (worse case) estimate of the time required to check that the X bin boundaries are the same as a percentage of total algorithm run time
+  static const double OPENINGFILE;                       ///< gives the progress bar a nudge when the file opens
+  static const double READFILE;                          ///< if a file must be read in estimate that reading it will take this percentage of the algorithm execution time
+  static const int INTERVAL = 128;                       ///< copy this many histograms and then check for an algorithm notification and update the progress bar
+
 };
 
 } // namespace DataHandling
