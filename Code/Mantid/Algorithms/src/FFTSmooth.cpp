@@ -75,9 +75,9 @@ void FFTSmooth::exec()
   //setProperty("OutputWorkspace",symmWS); return;
 
   // Forward Fourier transform
-  IAlgorithm_sptr fft = createSubAlgorithm("FFT", 0, 0.5 );
+  IAlgorithm_sptr fft = createSubAlgorithm("RealFFT", 0, 0.5 );
   fft->setProperty("InputWorkspace",symmWS);
-  fft->setProperty("Real",0);
+  fft->setProperty("WorkspaceIndex",0);
   try
   {
     fft->execute();
@@ -114,10 +114,10 @@ void FFTSmooth::exec()
   }
 
   // Backward transform
-  fft = createSubAlgorithm("FFT", 0.5, 1. );
+  fft = createSubAlgorithm("RealFFT", 0.5, 1. );
   fft->setProperty("InputWorkspace",m_filteredWS);
-  fft->setProperty("Real",0);
-  fft->setProperty("Imaginary",1);
+  //fft->setProperty("Real",0);
+  //fft->setProperty("Imaginary",1);
   fft->setProperty("Transform","Backward");
   try
   {
@@ -138,11 +138,11 @@ void FFTSmooth::exec()
 
   // Correct the x values:
   m_x0 -= tmpWS->dataX(0)[dn];
-  if (tmpWS->isHistogramData())
-  {// Align centres of the in and out histograms
+  //if (tmpWS->isHistogramData())
+  {// Align centres of the in and out histograms. I am not sure here
     double dX = m_inWS->readX(0)[1] - m_inWS->readX(0)[0];
     double dx = tmpWS->readX(0)[1] - tmpWS->readX(0)[0];
-    m_x0 += (dX - dx)/2;
+    m_x0 += dX/2 - dx;
   }
 
   outWS->dataX(0).assign(tmpWS->readX(0).begin()+dn,tmpWS->readX(0).end());
@@ -151,8 +151,8 @@ void FFTSmooth::exec()
   std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(), outWS->dataX(0).begin(), 
     std::bind2nd(std::plus<double>(), m_x0) );
 
-  std::transform(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end(),tmpWS->readY(1).begin()+dn,
-    outWS->dataY(0).begin(),toReal());
+  //std::transform(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end(),tmpWS->readY(1).begin()+dn,
+  //  outWS->dataY(0).begin(),toReal());
 
   setProperty("OutputWorkspace",outWS);
 
@@ -174,41 +174,49 @@ void FFTSmooth::truncate(int n)
   m_filteredWS = API::WorkspaceFactory::Instance().create(m_unfilteredWS,2,nx,ny);
 
   int ny2 = ny / 2;
-  const Mantid::MantidVec& Yr = m_unfilteredWS->readY(3);
-  const Mantid::MantidVec& Yi = m_unfilteredWS->readY(4);
-  const Mantid::MantidVec& X = m_unfilteredWS->readX(3);
+  const Mantid::MantidVec& Yr = m_unfilteredWS->readY(0);
+  const Mantid::MantidVec& Yi = m_unfilteredWS->readY(1);
+  const Mantid::MantidVec& X = m_unfilteredWS->readX(0);
 
   Mantid::MantidVec& yr = m_filteredWS->dataY(0);
   Mantid::MantidVec& yi = m_filteredWS->dataY(1);
   Mantid::MantidVec& xr = m_filteredWS->dataX(0);
   Mantid::MantidVec& xi = m_filteredWS->dataX(1);
 
-  int odd = ny % 2;
+  //int odd = ny % 2;
 
-  for(int i=0;i<=ny2;i++)
-  {
-    double re = Yr[my2 - i] * f;
-    double im = Yi[my2 - i] * f;
-    double x = X[my2 - i];
-    yr[ny2 - i] = re;
-    yi[ny2 - i] = im;
-    xr[ny2 - i] = x;
-    xi[ny2 - i] = x;
-    if (odd || i < ny2)
-    {
-      yr[ny2 + i] = re;
-      if (i > 0) yi[ny2 + i] = -im;
-      x = X[my2 + i];
-      xr[ny2 + i] = x;
-      xi[ny2 + i] = x;
-    }
-  }
+  yr.assign(Yr.begin(),Yr.begin()+ny);
+  yi.assign(Yi.begin(),Yi.begin()+ny);
+  xr.assign(X.begin(),X.begin()+nx);
+  xi.assign(X.begin(),X.begin()+nx);
 
-  if (m_filteredWS->isHistogramData())
-  {
-    xr[ny] = X[my2 + ny2 + odd];
-    xi[ny] = xr[ny];
-  }
+  std::transform(yr.begin(),yr.end(),yr.begin(),std::bind2nd(std::multiplies<double>(),f));
+  std::transform(yi.begin(),yi.end(),yi.begin(),std::bind2nd(std::multiplies<double>(),f));
+
+  //for(int i=0;i<=ny2;i++)
+  //{
+  //  double re = Yr[my2 - i] * f;
+  //  double im = Yi[my2 - i] * f;
+  //  double x = X[my2 - i];
+  //  yr[ny2 - i] = re;
+  //  yi[ny2 - i] = im;
+  //  xr[ny2 - i] = x;
+  //  xi[ny2 - i] = x;
+  //  if (odd || i < ny2)
+  //  {
+  //    yr[ny2 + i] = re;
+  //    if (i > 0) yi[ny2 + i] = -im;
+  //    x = X[my2 + i];
+  //    xr[ny2 + i] = x;
+  //    xi[ny2 + i] = x;
+  //  }
+  //}
+
+  //if (m_filteredWS->isHistogramData())
+  //{
+  //  xr[ny] = X[my2 + ny2 + odd];
+  //  xi[ny] = xr[ny];
+  //}
 
 }
 
@@ -227,9 +235,9 @@ void FFTSmooth::zero(int n)
   m_filteredWS = API::WorkspaceFactory::Instance().create(m_unfilteredWS,2,mx,my);
 
   int ny2 = ny / 2;
-  const Mantid::MantidVec& Yr = m_unfilteredWS->readY(3);
-  const Mantid::MantidVec& Yi = m_unfilteredWS->readY(4);
-  const Mantid::MantidVec& X = m_unfilteredWS->readX(3);
+  const Mantid::MantidVec& Yr = m_unfilteredWS->readY(0);
+  const Mantid::MantidVec& Yi = m_unfilteredWS->readY(1);
+  const Mantid::MantidVec& X = m_unfilteredWS->readX(0);
 
   Mantid::MantidVec& yr = m_filteredWS->dataY(0);
   Mantid::MantidVec& yi = m_filteredWS->dataY(1);
@@ -241,13 +249,13 @@ void FFTSmooth::zero(int n)
   yr.assign(Yr.size(),0);
   yi.assign(Yr.size(),0);
 
-  for(int i=0;i<my;i++)
+  for(int i=0;i<ny;i++)
   {
-    if (abs(my2-i) < ny2)
-    {
+    //if (abs(my2-i) < ny2)
+    //{
       yr[i] = Yr[i];
       yi[i] = Yi[i];
-    }
+    //}
   }
 
 }

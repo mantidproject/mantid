@@ -391,6 +391,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\RealFFT.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\RebinPreserveValue.cpp"
 				>
 			</File>
@@ -806,6 +810,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\ReadGroupsFromFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\RealFFT.h"
 				>
 			</File>
 			<File
