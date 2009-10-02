@@ -235,14 +235,6 @@ namespace PythonAPI
       return Mantid::Kernel::Property::isValid();
     }
 
-    const std::string getValidatorType() const {
-      return call_method< const std::string >(py_self, "getValidatorType");
-    }
-
-    const std::string default_getValidatorType() const {
-      return Mantid::Kernel::Property::getValidatorType();
-    }
-
     std::string value() const {
       return call_method< std::string >(py_self, "value");
     }
@@ -687,7 +679,6 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
    //Property Class
    class_< Mantid::Kernel::Property, boost::noncopyable, Mantid_Kernel_Property_Wrapper >("Property", no_init)
      .def("isValid", &Mantid::Kernel::Property::isValid, &Mantid_Kernel_Property_Wrapper::default_isValid)
-     .def("getValidatorType", &Mantid::Kernel::Property::getValidatorType, &Mantid_Kernel_Property_Wrapper::default_getValidatorType)
      .def("value", pure_virtual(&Mantid::Kernel::Property::value))
      .def("setValue", pure_virtual(&Mantid::Kernel::Property::setValue))
      .def("allowedValues", &Mantid::Kernel::Property::allowedValues, &Mantid_Kernel_Property_Wrapper::default_allowedValues)

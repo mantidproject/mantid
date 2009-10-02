@@ -87,14 +87,6 @@ std::string Property::isValid() const
   return "";
 }
 
-  /** Returns the type of the validator as a string
-   *  \returns Returns ""
-   */
- const std::string Property::getValidatorType() const
-  {
-    return "";
-  }
-
 /** Sets the property's (optional) documentation string
  *  @param documentation The string containing the descriptive comment
  */

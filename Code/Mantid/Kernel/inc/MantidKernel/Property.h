@@ -82,8 +82,6 @@ public:
 	
 	///Overridden function that checks whether the property, if not overriden returns ""
 	virtual std::string isValid() const;
-  ///Overriden to return the name of the property type or "" if not overridden
-	virtual const std::string getValidatorType() const;
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
 
