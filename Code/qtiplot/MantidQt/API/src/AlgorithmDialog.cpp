@@ -187,14 +187,14 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
   if( !prop ) return "";
 
   //The allowed values in this context are file extensions
-  std::vector<std::string> exts = prop->allowedValues();
+  std::set<std::string> exts = prop->allowedValues();
   QString filter;
   if( !exts.empty() )
   {
     filter = "Files (";
 		
-    std::vector<std::string>::const_iterator iend = exts.end();
-    for( std::vector<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
+    std::set<std::string>::const_iterator iend = exts.end();
+    for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
     {
   	  filter.append("*." + QString::fromStdString(*itr) + " ");
     }
@@ -254,9 +254,9 @@ void AlgorithmDialog::fillAndSetComboBox(const QString & propName, QComboBox* op
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
   if( !property ) return;
   
-  std::vector<std::string> items = property->allowedValues();
-  std::vector<std::string>::const_iterator vend = items.end();
-  for(std::vector<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+  std::set<std::string> items = property->allowedValues();
+  std::set<std::string>::const_iterator vend = items.end();
+  for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
       ++vitr)
   {
     optionsBox->addItem(QString::fromStdString(*vitr));

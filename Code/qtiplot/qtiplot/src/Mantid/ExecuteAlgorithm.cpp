@@ -106,8 +106,8 @@ void ExecuteAlgorithm::CreateLayout(Mantid::API::IAlgorithm_sptr alg, const QStr
 			
 	  QStringList list;
 
-	  std::vector<std::string> temp = prop->allowedValues();
-	  std::vector<std::string>::const_iterator vals_iter = temp.begin();
+	  std::set<std::string> temp = prop->allowedValues();
+	  std::set<std::string>::const_iterator vals_iter = temp.begin();
 			
 	  for (;  vals_iter != temp.end(); ++vals_iter)
 	    {
@@ -238,14 +238,14 @@ void ExecuteAlgorithm::browseClicked()
 	}
 	
 	//Get the allowed file extensions
-	std::vector<std::string> exts = (*itr)->allowedValues();
+	std::set<std::string> exts = (*itr)->allowedValues();
 	QString allowed;
 	
 	if ( !exts.empty() )
 	{
 		allowed = "Files (";
 		
-		std::vector<std::string>::iterator extItr = exts.begin();
+		std::set<std::string>::iterator extItr = exts.begin();
 		for (; extItr != exts.end(); ++extItr)
 		{
 			allowed.append("*.");

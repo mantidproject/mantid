@@ -657,10 +657,10 @@ bool SANSRunWindow::workspaceExists(const QString & ws_name) const
  */
 QStringList SANSRunWindow::currentWorkspaceList() const
 {
-  std::vector<std::string> ws_list = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  std::vector<std::string>::const_iterator iend = ws_list.end();
+  std::set<std::string> ws_list = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  std::set<std::string>::const_iterator iend = ws_list.end();
   QStringList current_list;
-  for( std::vector<std::string>::const_iterator itr = ws_list.begin(); itr != iend; ++itr )
+  for( std::set<std::string>::const_iterator itr = ws_list.begin(); itr != iend; ++itr )
   {
     current_list.append(QString::fromStdString(*itr));
   }
@@ -1792,9 +1792,9 @@ void SANSRunWindow::resetGeometryDetailsBox()
 void SANSRunWindow::cleanup()
 {
   Mantid::API::AnalysisDataServiceImpl & ads = Mantid::API::AnalysisDataService::Instance();
-  std::vector<std::string> workspaces = ads.getObjectNames();
-  std::vector<std::string>::const_iterator iend = workspaces.end();
-  for( std::vector<std::string>::const_iterator itr = workspaces.begin(); itr != iend; ++itr )
+  std::set<std::string> workspaces = ads.getObjectNames();
+  std::set<std::string>::const_iterator iend = workspaces.end();
+  for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != iend; ++itr )
   {
     if( QString::fromStdString(*itr).endsWith("_raw") )
     {

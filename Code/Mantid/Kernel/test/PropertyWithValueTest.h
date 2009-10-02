@@ -6,6 +6,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
 

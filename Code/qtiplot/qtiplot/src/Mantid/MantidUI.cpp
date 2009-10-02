@@ -171,10 +171,9 @@ QString MantidUI::releaseDate()
 QStringList MantidUI::getWorkspaceNames()
 {
     QStringList sl;
-    std::vector<std::string> sv;
-    sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-    for(size_t i=0;i<sv.size();i++)
-        sl<<QString::fromStdString(sv[i]);
+    std::set<std::string> sv = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+    for (std::set<std::string>::const_iterator it = sv.begin(); it != sv.end(); ++it)
+        sl<<QString::fromStdString(*it);
     return sl;
 }
 
