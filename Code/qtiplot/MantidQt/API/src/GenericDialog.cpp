@@ -170,7 +170,7 @@ void GenericDialog::initLayout()
 	    QPushButton *browseBtn = new QPushButton(tr("Browse"));
 	    connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
 	    m_signalMapper->setMapping(browseBtn, textBox);
-	    m_inputGrid->addWidget(browseBtn, row, m_inputGrid->columnCount() - 1, 0);
+	    m_inputGrid->addWidget(browseBtn, row, m_inputGrid->columnCount(), 0);
 	    browseBtn->setEnabled(isEnabled);
 	  }
 	}//end combo box/dialog box decision
