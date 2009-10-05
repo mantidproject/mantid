@@ -128,8 +128,7 @@ void CreateSampleShapeDialog::initLayout()
   {
     m_uiForm.wksp_opt->addItem(QString::fromStdString(*itr));
   }
-  QLabel *validlbl = getValidatorMarker("InputWorkspace");
-  m_uiForm.bottomlayout->insertWidget(2, validlbl);
+  tie(m_uiForm.wksp_opt, "InputWorkspace", m_uiForm.bottomlayout);
 
   //Connect the help button
   connect(m_uiForm.helpButton, SIGNAL(clicked()), this, SLOT(helpClicked()));

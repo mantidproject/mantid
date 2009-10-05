@@ -360,7 +360,7 @@ void Diagnostics::loadAlgorDummies()
   m_algorDummies.push_back( Mantid::API::
     AlgorithmManager::Instance().createUnmanaged("DetectorEfficiencyVariation"));
 
-  for ( int i = 0; i < m_algorDummies.size(); i ++ )
+  for ( size_t i = 0; i < m_algorDummies.size(); i ++ )
   {
     m_algorDummies[i]->initialize();
   }
@@ -448,14 +448,14 @@ void Diagnostics::getAlgProperties()
     int dotPos = algDotProp.find_first_of(".");
     std::string algName = algDotProp.substr(0, dotPos);
     std::string propName = algDotProp.substr(dotPos+1 ,std::string::npos);
-    for ( int j = 0; j < m_algorDummies.size(); ++j)
+    for ( size_t j = 0; j < m_algorDummies.size(); ++j)
     {
       if ( algName == m_algorDummies[j]->name() )
       {
         std::vector<Mantid::Kernel::Property*> propsToAdd =
           m_algorDummies[j]->getProperties();
         // we've found the algorithm now get the property
-        for ( int k = 0 ; k < propsToAdd.size() ; ++k )
+        for ( size_t k = 0 ; k < propsToAdd.size() ; ++k )
         {
           if ( propName == propsToAdd[k]->name() )
           {//we have a match, a boost::bimap would be a much shorter way of doing this

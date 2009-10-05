@@ -113,7 +113,7 @@ void LOQScriptInputDialog::browseClicked()
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   }  
 
-  QString filepath = this->openLoadFileDialog("EfficiencyCorrectionFile");
+  QString filepath = this->openFileDialog("EfficiencyCorrectionFile");
   if( !filepath.isEmpty() ) m_uiForm.effFileBox->setText(filepath);
 }
 

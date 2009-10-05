@@ -154,6 +154,6 @@ void DiagScriptInputDialog::browseClicked()
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   }  
 
-  QString filepath = this->openLoadFileDialog("OutputFile");
+  QString filepath = this->openFileDialog("OutputFile");
   if( !filepath.isEmpty() ) m_uiForm.leFile->setText(filepath);
 }

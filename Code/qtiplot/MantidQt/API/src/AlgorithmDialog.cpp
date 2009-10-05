@@ -29,10 +29,11 @@ using namespace MantidQt::API;
  * Default Constructor
  */
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) :  
-  QDialog(parent), m_algorithm(NULL), m_algName(""), m_propertyValueMap(), m_enabledNames(),
-  m_forScript(false), m_python_arguments(), m_strMessage(""), m_msgAvailable(false), 
-  m_bIsInitialized(false), m_algProperties(), m_validators(), m_inputws_opts(), m_outputws_fields(),
-  m_wsbtn_tracker(), m_signal_mapper(new QSignalMapper())
+  QDialog(parent), m_algorithm(NULL), m_algName(""), m_algProperties(), 
+  m_propertyValueMap(), m_tied_properties(), m_forScript(false), m_python_arguments(), 
+  m_enabledNames(), m_strMessage(""), m_msgAvailable(false), m_isInitialized(false), 
+  m_validators(), m_inputws_opts(), m_outputws_fields(), m_wsbtn_tracker(), 
+  m_signal_mapper(new QSignalMapper())
 {
   connect(m_signal_mapper, SIGNAL(mapped(QWidget*)), this, SLOT(replaceWSClicked(QWidget*)));
 }
@@ -55,21 +56,28 @@ void AlgorithmDialog::initializeLayout()
   setWindowTitle(QString::fromStdString(getAlgorithm()->name()) + " input dialog");
   //Set the icon
   setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
-
+  
+  // Fill the map of properties<->validator markers 
   createValidatorLabels();
 
+  // These containers are for ensuring the 'replace input workspace; button works correctly
+  // Store all combo boxes that relate to an input workspace
   m_inputws_opts.clear();
+  // Store all line edit fields that relate to an output workspace name
   m_outputws_fields.clear();
+  // Keep track of the input workspace that has been used to fill the output workspace. Each button click
+  // cycles through all of the input workspaces
   m_wsbtn_tracker.clear();
+
   // This derived class function creates the layout of the widget. It can also add default input if the
   // dialog has been written this way
   this->initLayout();
   // Check if there is any default input 
-  this->parseInput();
+  this->parse();
   // Try to set these values. This will validate the defaults and mark those that are invalid, if any.
   setPropertyValues();
 
-  m_bIsInitialized = true;
+  m_isInitialized = true;
 }
 
 /**
@@ -78,13 +86,21 @@ void AlgorithmDialog::initializeLayout()
  */
 bool AlgorithmDialog::isInitialized() const
 { 
-  return m_bIsInitialized; 
+  return m_isInitialized; 
 }
 
 
 //------------------------------------------------------
 // Protected member functions
 //------------------------------------------------------
+/**
+ * Parse input from widgets on the dialog. This function does nothing in the 
+ * base class
+ */
+void AlgorithmDialog::parseInput()
+{
+}
+
 /**
  * Get the algorithm pointer
  * @returns A pointer to the algorithm that is associated with the dialog
@@ -100,7 +116,7 @@ Mantid::API::IAlgorithm* AlgorithmDialog::getAlgorithm() const
  */
 Mantid::Kernel::Property* AlgorithmDialog::getAlgorithmProperty(const QString & propName) const
 {
-  if( m_algProperties.contains(propName) ) return m_algProperties[propName];
+  if( m_algProperties.contains(propName) ) return m_algProperties.value(propName);
   else return NULL;
 }
 
@@ -109,7 +125,18 @@ Mantid::Kernel::Property* AlgorithmDialog::getAlgorithmProperty(const QString & 
  */
 QLabel* AlgorithmDialog::getValidatorMarker(const QString & propname) const
 {
+  if( m_validators.contains(propname) ) return m_validators.value(propname);
   return m_validators.value(propname);
+}
+
+/**
+ * Adds a property (name,value) pair to the stored map
+ */
+void AlgorithmDialog::storePropertyValue(const QString & name, const QString & value)
+{
+  if( name.isEmpty() ) return;
+  
+  m_propertyValueMap.insert(name, value);
 }
 
 /**
@@ -122,7 +149,8 @@ const QString & AlgorithmDialog::getOptionalMessage() const
 }
 
 /**
- * Are we for a script or not
+ * Was this dialog raised from a script? This is important when deciding what to
+ * do with properties that have old input
  * @returns A boolean inidcating whether we are being called from a script
  */
 bool AlgorithmDialog::isForScript() const
@@ -166,20 +194,54 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
 }
 
 /**
- * Adds a property (name,value) pair to the stored map
+ * Tie together an input widget and a property
+ * @param widget The widget that will collect the input
+ * @param property The name of the property to tie the given widget to
+ * @param An optional pointer to a QLayout class that is reponsible for managing the passed widget.
+ * If given, a validator label will be added for the given input widget
+ * @returns A NULL pointer if a valid label was successfully add to a passed parent_layout otherwise it
+ * returns a pointer to the QLabel instance marking the validity
  */
-void AlgorithmDialog::storePropertyValue(const QString & name, const QString & value)
+QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout *parent_layout)
 {
-  if( name.isEmpty() ) return;
+  if( m_tied_properties.contains(property) )
+  {
+    m_tied_properties.remove(property);
+  }
+  //Set a few things on the widget
+  QString docstring = QString::fromStdString(getAlgorithmProperty(property)->documentation());
+  widget->setToolTip(docstring);
+  widget->setEnabled(isWidgetEnabled(property));
+  setValue(widget, property);
+  m_tied_properties.insert(property, widget);
   
-  m_propertyValueMap.insert(name, value);
+  QLabel *validlbl = getValidatorMarker(property);
+  if( !parent_layout ) return validlbl;
+  
+  int item_index = parent_layout->indexOf(widget);
+  if( QBoxLayout *box = qobject_cast<QBoxLayout*>(parent_layout) )
+  {
+    box->insertWidget(item_index + 1, validlbl);
+  }
+  else if( QGridLayout *grid = qobject_cast<QGridLayout*>(parent_layout) )
+  {
+    int row(0), col(0), span(0);
+    grid->getItemPosition(item_index, &row, &col, &span, &span);
+    grid->addWidget(validlbl, row, col + 1);
+  }
+  else 
+  {
+  }
+
+  return NULL;
 }
 
 /**
- * Open a file selection box
- * @param The property name that this is associated with
+ * Open a file selection box. The type of dialog, i.e. load/save will depend on the
+ * property type
+ * @param The property name that this is associated with. 
  */
-QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
+QString AlgorithmDialog::openFileDialog(const QString & propName)
 {
   if( propName.isEmpty() ) return "";
   Mantid::Kernel::FileProperty* prop = 
@@ -207,32 +269,21 @@ QString AlgorithmDialog::openLoadFileDialog(const QString & propName)
     filter = "All Files (*.*)";
   }
   
-  /* MG 20/07/09: Static functions as these then use native Windows and MAC dialogs in those environments and are alot faster */
-  
-  //QFileDialog dialog(this);
-  //dialog.setNameFilter(filter);
-  //dialog.setDirectory(AlgorithmInputHistory::Instance().getPreviousDirectory());
-  //if( file_checker && !file_checker->fileMustExist() )
-  //{
-  //  dialog.setFileMode(QFileDialog::AnyFile);
-  //}
-  //else
-  //{
-  //  dialog.setFileMode(QFileDialog::ExistingFile);
-  //}
+  /* MG 20/07/09: Static functions such as these that use native Windows and MAC dialogs 
+     in those environments are alot faster. This is unforunately at the expense of 
+     shell-like pattern matching, i.e. [0-9].      
+  */
   QString filename;
-  if( ! prop->isLoadProperty() )
+  if( prop->isLoadProperty() )
   {
-    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+    filename = QFileDialog::getOpenFileName(this, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+    
   }
   else
   {
-    filename = QFileDialog::getOpenFileName(this, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
   }
 
-  //QStringList file_names;
-  //if (dialog.exec()) file_names = dialog.selectedFiles();
-  
   if( !filename.isEmpty() ) 
   {
     AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(filename).absoluteDir().path());
@@ -399,16 +450,22 @@ void AlgorithmDialog::flagInputWS(QComboBox *optionsBox)
   m_inputws_opts.push_back(optionsBox);
 }
 
+//-----------------------------------------------------------
+// Protected slots
+//-----------------------------------------------------------
 /**
  * A slot that can be used to connect a button that accepts the dialog if
  * all of the properties are valid
  */
 void AlgorithmDialog::accept()
 {
-  parseInput();
+  // Get property values
+  parse();
   
+  //Try and set and validate the properties and 
   if( setPropertyValues() )
   {
+    //Store input for next time
     saveInput();
     QDialog::accept();
   }
@@ -482,6 +539,24 @@ void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm* alg)
     m_algProperties.insert(QString::fromStdString((*itr)->name()), *itr); 
   }
 }
+
+/**
+ * Parse out information from the dialog
+ */
+void AlgorithmDialog::parse()
+{
+  QHashIterator<QString, QWidget*> itr(m_tied_properties);
+  while( itr.hasNext() )
+  {
+    itr.next();
+    //Need to do different things depending on the type of the widget. getValue sorts this out
+    storePropertyValue(itr.key(), getValue(itr.value()));
+  }
+
+  //Now call parseInput, which can be overridden in an inheriting class
+  parseInput();
+}
+
 
 /**
  * Set the properties that have been parsed from the dialog.
@@ -617,5 +692,107 @@ void AlgorithmDialog::createValidatorLabels()
     pal.setColor(QPalette::WindowText, Qt::darkRed);
     validLbl->setPalette(pal);
     m_validators[pitr.key()] = validLbl;
+  }
+}
+
+/**
+ * Get a value from a widget. The function needs to know about the types of widgets
+ * that are being used. Currently it knows about QComboBox, QLineEdit and QCheckBox
+ * @param widget A pointer to the widget
+ */
+QString AlgorithmDialog::getValue(QWidget *widget)
+{
+  if( QComboBox *opts = qobject_cast<QComboBox*>(widget) )
+  {
+    return opts->currentText();
+  }
+  else if( QLineEdit *textfield = qobject_cast<QLineEdit*>(widget) )
+  {
+    return textfield->text();
+  }
+  else if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
+  {
+    if( checker->checkState() == Qt::Checked )
+    {
+      return QString("1");
+    }
+    else
+    {
+      return QString("0");
+    }
+  }
+  else
+  {
+    QMessageBox::warning(this, windowTitle(), 
+			 QString("Cannot parse input from ") + widget->metaObject()->className() + 
+			 ". Update AlgorithmDialog::getValue() to cope with this widget.");
+    return "";
+  }
+}
+
+/**
+ * Set a value for a widget. The function needs to know about the types of widgets
+ * that are being used. Currently it knows about QComboBox, QLineEdit and QCheckBox
+ * @param widget A pointer to the widget
+ * @param property The property name
+ */
+void AlgorithmDialog::setValue(QWidget *widget, const QString & propName)
+{
+  // Get the value from either the previous input store or from Python argument
+  QString value("");
+  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+
+  if( !isForScript() )
+  {
+    value = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+  }
+  else
+  {
+    if( !property ) return;
+    if( !property->isValid().empty() ) return;
+    value = QString::fromStdString(property->value());
+  }
+
+  // Do the right thing for the widget type
+  if( QComboBox *opts = qobject_cast<QComboBox*>(widget) )
+  {
+    int index = opts->findText(value);
+    if( index >= 0 )
+    {
+      opts->setCurrentIndex(index);
+    }
+  }
+  else if( QLineEdit *textfield = qobject_cast<QLineEdit*>(widget) )
+  {
+    if( !isForScript() )
+    {
+      textfield->setText(value);
+    }
+    else
+    {
+      //Need to check if this is the default value as we don't fill them in if they are
+      if( m_python_arguments.contains(propName) || !property->isDefault() )
+      {
+	textfield->setText(value);
+      }
+    }
+  }
+  else if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
+  {
+    if( value == "0" )
+    {
+      checker->setCheckState(Qt::Unchecked);
+    }
+    else
+    {
+      checker->setCheckState(Qt::Checked);
+    }
+    
+  }
+  else
+  {
+    QMessageBox::warning(this, windowTitle(), 
+			 QString("Cannot set value for ") + widget->metaObject()->className() + 
+			 ". Update AlgorithmDialog::setValue() to cope with this widget.");
   }
 }

@@ -66,10 +66,6 @@ private:
   /// This does the work and must be overridden in each deriving class
   virtual void initLayout();
 
-  /// Parse out the values entered into the dialog boxes. Use addPropertyValueToMap()
-  /// to store the <name, value> pair in the base class so that they can be retrieved later
-  virtual void parseInput();
-
 private slots:
 
   /// Browse for a file

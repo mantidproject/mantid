@@ -47,7 +47,6 @@ namespace CustomDialogs
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-
 class LoadRawDialog : public MantidQt::API::AlgorithmDialog
 {
 
@@ -66,13 +65,7 @@ private:
   //@{
   /// Create the layout
   void initLayout();
-
-  /// Parse the user's input
-  void parseInput(); 		   
   //@}
-
-  /// add property value for the property loadlogfiles 
-  void storePropertyValueforLoadLogFiles(const QString& name,QCheckBox * loadLogFilesBox);
 	
 private slots:
 
@@ -81,43 +74,8 @@ private slots:
 
 private:
 
-  /** @name Utility functions */
-  //@{
-  ///Filename property input
-  void addFilenameInput();
-  
-  ///Output workspace property
-  void addOutputWorkspaceInput();
-
-  ///Spectra related properties
-  void addSpectraInput();
-  
-  ///Cache combo box 
-  void addCacheOptions();
- // void addCacheOptionsandLoadLogfilesBox();
-  //@}
-  ///LoadLogFiles checkbox to load or skip logfiles 
-  void addLoadLogFilesCheckBox();
-  
-  /// The main layout
-  QVBoxLayout *m_mainLayout;
-
   ///The line inputs
-  QLineEdit *m_pathBox, *m_wsBox, *m_minSpec, *m_maxSpec, *m_specList;
-  
-  /// A box to store the cache options
-  QComboBox *m_cacheBox;
-  
-  ///The browse button
-  QPushButton *m_browseBtn;
-  
-  ///Store the allowed extensions
-  QString m_fileFilter;
-
-  /// Check box for loading /skipping logfiles
-  QCheckBox* m_loadLogFiles;
-  /// layout for cache combobox and laodlogfiles checkbox 
-  QHBoxLayout *m_cacheline;
+  QLineEdit *m_pathBox, *m_wsBox;
 };
 
 }

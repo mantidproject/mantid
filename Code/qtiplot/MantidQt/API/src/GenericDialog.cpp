@@ -98,27 +98,23 @@ void GenericDialog::initLayout()
 	++row;
 	// The name and valid label
 	QLabel *nameLbl = new QLabel(propName);
-	QLabel *validLbl = getValidatorMarker(propName);
-	
+	nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
+
 	// Get the value string to enter into the box. The function figures out the
 	// appropriate value to return based on previous input, script input or nothing
 	
 	bool isEnabled = isWidgetEnabled(propName);
 	
 	//check if there are only certain allowed values for the property
-	Mantid::Kernel::FileProperty* fileType = dynamic_cast<Mantid::Kernel::FileProperty*>(prop);;
+	Mantid::Kernel::FileProperty* fileType = dynamic_cast<Mantid::Kernel::FileProperty*>(prop);
 	if( dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(prop) ) 
 	{
 	  QCheckBox *checkBox = new QCheckBox(propName);
-	  this->setCheckBoxState(propName, checkBox);
 	  
-	  checkBox->setToolTip(  QString::fromStdString(prop->documentation()) );
 	  m_inputGrid->addWidget(new QLabel(""), row, 0, 0);
 	  m_inputGrid->addWidget(checkBox, row, 1, 0);
-	  m_inputGrid->addWidget(validLbl, row, 2, 0);
 	  
-	  checkBox->setEnabled(isEnabled);
-	  
+	  tie(checkBox, propName, m_inputGrid);
 	}
 	else if ( !prop->allowedValues().empty() && !fileType )
 	{
@@ -126,17 +122,20 @@ void GenericDialog::initLayout()
 	  //Check if this is the row that matches the one that we want to link to the
 	  //output box and used the saved combo box
 	  QComboBox *optionsBox = new QComboBox;
-	  fillAndSetComboBox(propName, optionsBox);
+	  std::set<std::string> items = prop->allowedValues();
+	  std::set<std::string>::const_iterator vend = items.end();
+	  for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+	      ++vitr)
+	  {
+	    optionsBox->addItem(QString::fromStdString(*vitr));
+	  }
 	  
 	  nameLbl->setBuddy(optionsBox);
-	  nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
-	  optionsBox->setToolTip(  QString::fromStdString(prop->documentation()) );
-	  
+	  	  
 	  m_inputGrid->addWidget(nameLbl, row, 0, 0);
 	  m_inputGrid->addWidget(optionsBox, row, 1, 0);
-	  m_inputGrid->addWidget(validLbl, row, 2, 0);
-          
-	  optionsBox->setEnabled(isEnabled);
+	  tie(optionsBox, propName, m_inputGrid);
+
 	  if( isWorkspaceProp )
 	  {
 	    flagInputWS(optionsBox);
@@ -146,18 +145,14 @@ void GenericDialog::initLayout()
 	else 
 	{
 	  QLineEdit *textBox = new QLineEdit;
-	  fillLineEdit(propName, textBox);
-	  
 	  nameLbl->setBuddy(textBox);
 	  m_editBoxes[textBox] = propName;
-	  nameLbl->setToolTip(  QString::fromStdString(prop->documentation()) );
-	  textBox->setToolTip(  QString::fromStdString(prop->documentation()) );
 	  
 	  //Add the widgets to the grid
 	  m_inputGrid->addWidget(nameLbl, row, 0, 0);
 	  m_inputGrid->addWidget(textBox, row, 1, 0);
-	  m_inputGrid->addWidget(validLbl, row, 2, 0);
-
+	  tie(textBox, propName, m_inputGrid);	  
+	  
 	  // If this is an output workspace property and there is an input workspace property
 	  // add a button that replaces the input workspace
 	  if( isWorkspaceProp && haveInputWS )
@@ -166,17 +161,16 @@ void GenericDialog::initLayout()
 	    if( inputWSReplace )
 	    {
 	      inputWSReplace->setEnabled(isEnabled);
-	      m_inputGrid->addWidget(inputWSReplace, row, 3, 0);
+	      m_inputGrid->addWidget(inputWSReplace, row, m_inputGrid->columnCount(), 0);
 	    }
 	  }
-	  textBox->setEnabled(isEnabled);
 	  
 	  if( fileType )
 	  {
 	    QPushButton *browseBtn = new QPushButton(tr("Browse"));
 	    connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
 	    m_signalMapper->setMapping(browseBtn, textBox);
-	    m_inputGrid->addWidget(browseBtn, row, 3, 0);
+	    m_inputGrid->addWidget(browseBtn, row, m_inputGrid->columnCount() - 1, 0);
 	    browseBtn->setEnabled(isEnabled);
 	  }
 	}//end combo box/dialog box decision
@@ -204,48 +198,6 @@ void GenericDialog::initLayout()
     mainLay->addLayout(createDefaultButtonLayout());
 }
 
-/**
-* Parses the input from the box and adds the propery (name, value) pairs to 
-* the map stored in the base class
-*/
-void GenericDialog::parseInput()
-{
-  if (!m_inputGrid) return; // algorithm dont have properties
-  int nRows = m_inputGrid->rowCount();
-  for( int row = 0; row < nRows; ++row )
-  {
-    QWidget *control = m_inputGrid->itemAtPosition(row, 0)->widget();
-    if( !control ) continue;
-    QLabel *propName = static_cast<QLabel*>(control);
-    if( !propName->text().isEmpty() )
-    {
-      QWidget *buddy = propName->buddy();
-      if( QComboBox* select_box = qobject_cast<QComboBox*>(buddy) )
-      {
-	storePropertyValue(propName->text(), select_box->currentText());
-      }
-      else
-      {
-	storePropertyValue(propName->text(), qobject_cast<QLineEdit*>(buddy)->text());
-      }
-    }
-    else
-    {
-      QCheckBox *checker = qobject_cast<QCheckBox*>(m_inputGrid->itemAtPosition(row, 1)->widget());
-      if( !checker ) continue;
-      
-      if( checker->checkState() == Qt::Checked )
-      {
-	storePropertyValue(checker->text(), "1");
-      }
-      else
-      {
-	storePropertyValue(checker->text(), "0");
-      }
-    }
-  }
-
-}
 
 /**
  * This slot is called when a browse button is clicked
@@ -264,7 +216,7 @@ void GenericDialog::browseClicked(QWidget* widget)
   {
     AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(pathBox->text()).absoluteDir().path());
   }  
-  QString filepath = this->openLoadFileDialog(propName);
+  QString filepath = this->openFileDialog(propName);
   if( !filepath.isEmpty() ) 
   {
     pathBox->clear();
