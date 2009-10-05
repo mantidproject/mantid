@@ -7,14 +7,24 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-/** An example algorithm illustrating how to add a fitting function, in 
-    particular here the LorentzianUseDerivatives peakshape function as described 
-    http://www.mantidproject.org/LorentzianUseDerivatives1D. This implementation does
-    not uses derivatives, hence uses the simplex minimisation method
-    for miminisation. For an example with uses derivatives see 
-    FitPeakExampleLorentzianUseDerivativesUseDerivatives.h/.cpp. In general you may
-    expect the derivative implementation of a fitting function to more
-    quickly locate a local minimum. 
+/** An example algorithm illustrating how to add a fitting function, here 
+    the Lorentzian peakshape function:
+    
+      Height*( HWHM^2/((x-PeakCentre)^2+HWHM^2) ) + BG0 + BG1*x
+
+    Where the parameters means the following:
+    <UL>
+    <LI> BG0 - background intercept value </LI>
+    <LI> BG1 - background slope value )</LI>
+    <LI> Height - height of peak </LI>
+    <LI> PeakCentre - centre of peak </LI>
+    <LI> HWHM - half-width half-maximum </LI>
+    </UL>    
+    
+    This implementation uses derivatives. For an example with does not uses 
+    derivatives see FitPeakExampleLorentzian.h/.cpp. In general you may
+    expect the derivative implementation of a fitting function to be
+    faster at locating the minimum. 
 
     @author Anders J Markvardsen, ISIS, RAL
     @date 02/10/2009

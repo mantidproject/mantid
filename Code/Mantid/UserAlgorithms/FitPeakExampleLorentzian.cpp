@@ -18,27 +18,26 @@ using namespace Mantid::API;
 void FitPeakExampleLorentzian::declareParameters()
 {
   // A standard fitting parameter is added by specifying its "name", default value and 
-  // "description" (the last argument "Direction::InOut" you will rarely need to change, but
-  // is required to add)
+  // "description" (the last argument "Direction::InOut" you will rarely need to change)
   declareProperty("BG0", 0.0, "Constant background value (default 0)", Direction::InOut);
   declareProperty("BG1", 0.0, "Linear background modelling parameter (default 0)",Direction::InOut);
   declareProperty("Height", 0.0, "Peak height (may be refined to a negative value to fit a dipped curve)", Direction::InOut);
   declareProperty("PeakCentre",0.0,  "Centre of peak (default 0)", Direction::InOut);
 
   // Some parameters are not allowed to take certain values. E.g. the full width of half maximum (FWHM) is
-  // not allowed to be negative and zero (the zero may be discussed, but for the here assume this)
-  // Then first create an BoundedValidator instance as shown below
+  // not allowed to be negative and zero.
+  // First create an BoundedValidator instance:
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
   positiveDouble->setLower(std::numeric_limits<double>::min()); // set here the lowest value to the lowest 
                                                                 // possible number the CPU can store
 
-  // Finally to use this BoundedValidator add it as the 3rd argument
+  // Secondly insert this BoundedValidator as the 3rd argument
   declareProperty("HWHM",1.0, positiveDouble, "half-width at half-maximum (default 1)", Direction::InOut);
 }
 
-// Fitting function is added here. The arguments contains the following:
-// in:      Input fitting parameter values, store in the order in which they are defined in declareParameters()
-// out:     peak shape function values
+// Fitting function is added here. The arguments store the following:
+// in:      Input fitting parameter values, stored in the order in which they are defined in declareParameters()
+// out:     peak shape function values at all data points 
 // xValues: X values for data points
 // nData:   Number of data points
 void FitPeakExampleLorentzian::function(const double* in, double* out, const double* xValues, const int& nData)
