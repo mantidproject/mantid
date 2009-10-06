@@ -120,8 +120,6 @@ void UserFunction1D::function(const double* in, double* out, const double* xValu
 * @param in Input fitting parameter values
 * @param out Derivatives
 * @param xValues X values for data points
-* @param yValues Y values for data points
-* @param yErrors Errors (standard deviations) on yValues
 * @param nData Number of data points
  */
 void UserFunction1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
