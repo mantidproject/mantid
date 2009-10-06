@@ -137,8 +137,8 @@ void FFT::exec()
         {
             int j = (ySize/2 + i) % ySize;
             outWS->dataX(iRe)[i] = df*(-ySize/2 + i);
-            double re = data[2*j];
-            double im = data[2*j+1];
+            double re = data[2*j]*dx;
+            double im = data[2*j+1]*dx;
             outWS->dataY(iRe)[i] = re; // real part
             outWS->dataY(iIm)[i] = im; // imaginary part
             outWS->dataY(iAbs)[i] = sqrt(re*re + im*im); // modulus
@@ -174,15 +174,15 @@ void FFT::exec()
             data[2*i] = inWS->dataY(iReal)[j];
             data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
         }
-        gsl_fft_complex_backward(data.get(), 1, ySize, wavetable, workspace);
+        gsl_fft_complex_inverse(data.get(), 1, ySize, wavetable, workspace);
         for(int i=0;i<ySize;i++)
         {
             double x = df*i;
             if (shift) x -= df*ySize/2;
             outWS->dataX(0)[i] = x;
             int j = shift? (ySize/2 + i) % ySize : i; 
-            double re = data[2*j]/ySize;
-            double im = data[2*j+1]/ySize;
+            double re = data[2*j]/df;// /ySize;
+            double im = data[2*j+1]/df;// /ySize;
             outWS->dataY(0)[i] = re; // real part
             outWS->dataY(1)[i] = im; // imaginary part
             outWS->dataY(2)[i] = sqrt(re*re + im*im); // modulus

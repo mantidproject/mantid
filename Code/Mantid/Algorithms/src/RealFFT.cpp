@@ -107,8 +107,8 @@ void RealFFT::exec()
             outWS->dataX(0)[i] = df * i;
             double re = i!=0 ? data[j-1] : data[0];
             double im = (i!=0 && (odd || i!=yOutSize-1)) ? data[j] : 0;
-            outWS->dataY(0)[i] = re; // real part
-            outWS->dataY(1)[i] = im; // imaginary part
+            outWS->dataY(0)[i] = re*dx; // real part
+            outWS->dataY(1)[i] = im*dx; // imaginary part
         }
         if (inWS->isHistogramData()) 
         {
@@ -160,7 +160,7 @@ void RealFFT::exec()
       {
         double x = df*i;
         outWS->dataX(0)[i] = x;
-        outWS->dataY(0)[i] = data[i];//*yOutSize;
+        outWS->dataY(0)[i] = data[i]/df; // because it's integration
       }
       if (outWS->isHistogramData()) outWS->dataX(0)[yOutSize] = outWS->dataX(0)[yOutSize - 1] + df;
     }
