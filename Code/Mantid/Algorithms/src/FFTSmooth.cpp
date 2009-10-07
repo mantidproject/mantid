@@ -30,9 +30,9 @@ void FFTSmooth::init()
       declareProperty("WorkspaceIndex",0,mustBePositive,"Spectrum index for smoothing");
 
       std::vector<std::string> type;
-      type.push_back("Truncation");
+      //type.push_back("Truncation");
       type.push_back("Zeroing");
-      declareProperty("Filter","Truncation",new ListValidator(type),"The type of the applied filter");
+      declareProperty("Filter","Zeroing",new ListValidator(type),"The type of the applied filter");
       declareProperty("Params","","The filter parameters");
 
 }
@@ -92,16 +92,17 @@ void FFTSmooth::exec()
 
   // Apply the filter
   std::string type = getProperty("Filter");
-  if (type == "Truncation")
-  {
-    std::string sn = getProperty("Params");
-    int n;
-    if (sn.empty()) n = 2;
-    else
-      n = atoi(sn.c_str());
-    if (n <= 1) throw std::invalid_argument("Truncation parameter must be an integer > 1");
-    truncate(n);
-  }else 
+  // x - value correction doesn't work, so no truncation yet
+  //if (type == "Truncation")
+  //{
+  //  std::string sn = getProperty("Params");
+  //  int n;
+  //  if (sn.empty()) n = 2;
+  //  else
+  //    n = atoi(sn.c_str());
+  //  if (n <= 1) throw std::invalid_argument("Truncation parameter must be an integer > 1");
+  //  truncate(n);
+  //}else 
   if (type == "Zeroing")
   {
     std::string sn = getProperty("Params");
@@ -136,24 +137,25 @@ void FFTSmooth::exec()
 
   dn = tmpWS->blocksize()/2;
 
-  // Correct the x values:
-  m_x0 -= tmpWS->dataX(0)[dn];
+  // x-value correction is needed if the size of the spectrum is changed (e.g. after truncation)
+  // but it doesn't work accurately enough, so commented out
+  //// Correct the x values:
+  //m_x0 -= tmpWS->dataX(0)[dn];
   //if (tmpWS->isHistogramData())
-  {// Align centres of the in and out histograms. I am not sure here
-    double dX = m_inWS->readX(0)[1] - m_inWS->readX(0)[0];
-    double dx = tmpWS->readX(0)[1] - tmpWS->readX(0)[0];
-    m_x0 += dX/2 - dx;
-  }
+  //{// Align centres of the in and out histograms. I am not sure here
+  //  double dX = m_inWS->readX(0)[1] - m_inWS->readX(0)[0];
+  //  double dx = tmpWS->readX(0)[1] - tmpWS->readX(0)[0];
+  //  m_x0 += dX/2 - dx;
+  //}
+  //outWS->dataX(0).assign(tmpWS->readX(0).begin()+dn,tmpWS->readX(0).end());
+  //outWS->dataY(0).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
+  //
+  //std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(), outWS->dataX(0).begin(), 
+  //  std::bind2nd(std::plus<double>(), m_x0) );
 
-  outWS->dataX(0).assign(tmpWS->readX(0).begin()+dn,tmpWS->readX(0).end());
+  outWS->dataX(0).assign(m_inWS->readX(0).begin(),m_inWS->readX(0).end());
   outWS->dataY(0).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
   
-  std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(), outWS->dataX(0).begin(), 
-    std::bind2nd(std::plus<double>(), m_x0) );
-
-  //std::transform(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end(),tmpWS->readY(1).begin()+dn,
-  //  outWS->dataY(0).begin(),toReal());
-
   setProperty("OutputWorkspace",outWS);
 
 }
