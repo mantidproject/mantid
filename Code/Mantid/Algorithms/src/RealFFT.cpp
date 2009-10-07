@@ -78,7 +78,7 @@ void RealFFT::exec()
 
     API::MatrixWorkspace_sptr outWS;
 
-    double df = 1.0 / (dx * (xSize - 1));
+    double df = 1.0 / (dx * ySize);
 
     if (transform == "Forward")
     {
@@ -118,7 +118,6 @@ void RealFFT::exec()
     }
     else // Backward
     {
-      df /= 2;
 
       if (inWS->getNumberHistograms() < 2)
         throw std::runtime_error("The imput workspace must have at least 2 spectra.");
@@ -127,6 +126,8 @@ void RealFFT::exec()
       if (inWS->readY(1).back() != 0.0) yOutSize++;
       int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
       bool odd = yOutSize % 2 != 0;
+
+      df = 1.0 / (dx * (yOutSize));
 
       outWS = WorkspaceFactory::Instance().create("Workspace2D",1,xOutSize,yOutSize);
 
@@ -160,7 +161,7 @@ void RealFFT::exec()
       {
         double x = df*i;
         outWS->dataX(0)[i] = x;
-        outWS->dataY(0)[i] = data[i]/df; // because it's integration
+        outWS->dataY(0)[i] = data[i]/df; 
       }
       if (outWS->isHistogramData()) outWS->dataX(0)[yOutSize] = outWS->dataX(0)[yOutSize - 1] + df;
     }

@@ -106,7 +106,7 @@ void FFT::exec()
     else
         outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
 
-    double df = 1.0 / (dx * (xSize - 1));
+    double df = 1.0 / (dx * xSize);
     if (isEnergyMeV) df /= 2.418e2;
 
     // shift == true means that the zero on the x axis is assumed to be in the data centre 
@@ -123,6 +123,7 @@ void FFT::exec()
         iAbs = 5;
     }
 
+    int dys = ySize % 2;
     if (transform == "Forward")
     {
         for(int i=0;i<ySize;i++)
@@ -135,7 +136,7 @@ void FFT::exec()
         gsl_fft_complex_forward (data.get(), 1, ySize, wavetable, workspace);
         for(int i=0;i<ySize;i++)
         {
-            int j = (ySize/2 + i) % ySize;
+            int j = (ySize/2 + i + dys) % ySize;
             outWS->dataX(iRe)[i] = df*(-ySize/2 + i);
             double re = data[2*j]*dx;
             double im = data[2*j+1]*dx;
@@ -180,11 +181,11 @@ void FFT::exec()
             double x = df*i;
             if (shift) x -= df*ySize/2;
             outWS->dataX(0)[i] = x;
-            int j = shift? (ySize/2 + i) % ySize : i; 
-            double re = data[2*j]/df;// /ySize;
-            double im = data[2*j+1]/df;// /ySize;
-            outWS->dataY(0)[i] = re; // real part
-            outWS->dataY(1)[i] = im; // imaginary part
+            int j = shift? (ySize/2 + i + dys) % ySize : i; 
+            double re = data[2*j]/df;
+            double im = data[2*j+1]/df;
+            outWS->dataY(0)[i] = re;                  // real part
+            outWS->dataY(1)[i] = im;                  // imaginary part
             outWS->dataY(2)[i] = sqrt(re*re + im*im); // modulus
         }
         if (xSize == ySize + 1) outWS->dataX(0)[ySize] = outWS->dataX(0)[ySize - 1] + df;
