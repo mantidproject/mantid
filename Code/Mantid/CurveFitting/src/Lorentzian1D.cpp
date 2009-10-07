@@ -17,20 +17,15 @@ using namespace Kernel;
 
 void Lorentzian1D::declareParameters()
 {
+  declareProperty("BG0", 0.0, "Constant background value (default 0)", Direction::InOut);
+  declareProperty("BG1", 0.0, "Linear background modelling parameter (default 0)",Direction::InOut);
+  declareProperty("Height", 0.0, "Peak height (may be refined to a negative value to fit a dipped curve)", Direction::InOut);
+  declareProperty("PeakCentre",0.0,  "Centre of peak (default 0)", Direction::InOut);
+
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
-  NullValidator<double> *noValidation = new NullValidator<double>;                    //the null validator always returns valid, there is no validation
-  declareProperty("BG0", 0.0, noValidation,
-    "Constant background value (default 0)", Direction::InOut);
-  declareProperty("BG1", 0.0, noValidation->clone(),
-    "Linear background modelling parameter (default 0)",
-    Direction::InOut);
-  declareProperty("Height", 0.0, noValidation->clone(),
-    "Peak height (may be refined to a negative value to fit a dipped curve)",
-    Direction::InOut);
-  declareProperty("PeakCentre",0.0,  noValidation->clone(),
-    "Centre of peak (default 0)", Direction::InOut);
-  declareProperty("HWHM",1.0, positiveDouble,
-    "half-width at half-maximum (default 1)", Direction::InOut);
+  positiveDouble->setLower(std::numeric_limits<double>::min());
+
+  declareProperty("HWHM",1.0, positiveDouble, "half-width at half-maximum (default 1)", Direction::InOut);
 }
 
 void Lorentzian1D::function(const double* in, double* out, const double* xValues, const int& nData)

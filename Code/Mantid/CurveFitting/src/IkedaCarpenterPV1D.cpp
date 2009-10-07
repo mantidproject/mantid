@@ -22,18 +22,14 @@ using namespace SpecialFunctionSupport;
 void IkedaCarpenterPV1D::declareParameters()
 {
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
-  NullValidator<double> *noValidation = new NullValidator<double>; //the null validator always returns valid, there is no validation
-  declareProperty("I", 0.0, noValidation,
-    "Magnitude of peak (default 0)", Direction::InOut);
-  declareProperty("Alpha0",1.6, noValidation->clone(),
-    "Used to model fast decay constant (default 1.6)", Direction::InOut);
-  declareProperty("Alpha1",1.5, noValidation->clone(),
-    "Used to model fast decay constant (default 1.5)", Direction::InOut);
-  declareProperty("Beta0",31.9, positiveDouble,
-    "Inverse of slow decay constant  (default 31.9)", Direction::InOut);
-  declareProperty("Kappa",46.0, positiveDouble->clone(),
-    "Controls contribution of slow decay term   (default 46.0)", Direction::InOut);
-  declareProperty("SigmaSquared",1.0, positiveDouble->clone(),
+  positiveDouble->setLower(std::numeric_limits<double>::min());
+
+  declareProperty("I", 0.0, "Magnitude of peak (default 0)", Direction::InOut);
+  declareProperty("Alpha0",1.6, positiveDouble, "Used to model fast decay constant (default 1.6)", Direction::InOut);
+  declareProperty("Alpha1",1.5, positiveDouble->clone(), "Used to model fast decay constant (default 1.5)", Direction::InOut);
+  declareProperty("Beta0",31.9, positiveDouble->clone(), "Inverse of slow decay constant (default 31.9)", Direction::InOut);
+  declareProperty("Kappa",46.0, positiveDouble->clone(), "Controls contribution of slow decay term (default 46.0)", Direction::InOut);
+  declareProperty("SigmaSquared",1.0, positiveDouble->clone(), 
     "standard deviation squared (Guassian broadening) (default 1.0)", Direction::InOut);
   declareProperty("Gamma",1.0, positiveDouble->clone(),
     "Lorentzian broadening  (default 1.0)", Direction::InOut);
@@ -42,10 +38,8 @@ void IkedaCarpenterPV1D::declareParameters()
   declareProperty("Eta",0.0, percentageValue,
     "Mixing parameter (percentage in terms of Lorentzian part) (default 0.0)", Direction::InOut);
 
-  declareProperty("X0",0.0,  noValidation->clone(),
-    "Peak position (default 0)", Direction::InOut);
-  declareProperty("BG", 0.0, noValidation->clone(),
-    "Constant background value (default 0)", Direction::InOut);
+  declareProperty("X0",0.0, "Peak position (default 0)", Direction::InOut);
+  declareProperty("BG", 0.0, "Constant background value (default 0)", Direction::InOut);
 }
 
 void IkedaCarpenterPV1D::afterDataRangedDetermined(const int& m_minX, const int& m_maxX)

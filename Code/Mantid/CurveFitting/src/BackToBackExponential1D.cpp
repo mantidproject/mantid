@@ -17,22 +17,20 @@ using namespace Kernel;
 
 void BackToBackExponential1D::declareParameters()
 {
-  NullValidator<double> *noValidation = new NullValidator<double>;                      //the null validator always returns valid, there is no validation
-  declareProperty("I", 0.0, noValidation, "Height of the peak (default 0)",
-    Direction::InOut);
-  declareProperty("A",0.0, noValidation->clone(),
-    "Exponential constant of rising part of neutron pulse (default 0)",
-    Direction::InOut);
-  declareProperty("B", 0.0, noValidation->clone(),
-    "Exponential constant of decaying part of neutron pulse (default 0)",
-    Direction::InOut);
-  declareProperty("X0", 0.0, noValidation->clone(), 
-    "Peak position (default 0)", Direction::InOut );
-  declareProperty("S", 1.0, noValidation->clone(),
-    "Standard deviation of the gaussian part of the peakshape (default 1)",
-    Direction::InOut );
-  declareProperty("BK", 0.0, noValidation->clone(),
-    "Constant background value (default 0)", Direction::InOut);
+  BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
+  positiveDouble->setLower(std::numeric_limits<double>::min());
+
+  declareProperty("I", 0.0, "Height of the peak (default 0)", Direction::InOut);
+  declareProperty("A",1.0, positiveDouble, 
+    "Exponential constant of rising part of neutron pulse (default 0)", Direction::InOut);
+  declareProperty("B", 0.05, positiveDouble->clone(), 
+    "Exponential constant of decaying part of neutron pulse (default 0)", Direction::InOut);
+  declareProperty("X0", 0.0, "Peak position (default 0)", Direction::InOut );
+  declareProperty("S", 1.0, positiveDouble->clone(), 
+    "Standard deviation of the gaussian part of the peakshape (default 1)", Direction::InOut );
+  declareProperty("BK", 0.0, "Constant background value (default 0)", Direction::InOut);
+
+  // note the initial default guesses for in particular A and B are only based on fitting a couple of HRPD peaks.
 }
 
 void BackToBackExponential1D::function(const double* in, double* out, const double* xValues, const int& nData)

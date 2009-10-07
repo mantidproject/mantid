@@ -15,18 +15,15 @@ using namespace Kernel;
 
 void GaussianLinearBG1D::declareParameters()
 {
+  declareProperty("BG0", 0.0, "Constant background value (default 0)", Direction::InOut);
+  declareProperty("BG1", 0.0, "Linear background modelling parameter (default 0)", Direction::InOut);
+  declareProperty("Height", 0.0, "Height of peak (default 0)", Direction::InOut);
+  declareProperty("PeakCentre", 0.0, "Centre of peak (default 0)", Direction::InOut);
+
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
-  declareProperty("BG0", 0.0,
-    "Constant background value (default 0)", Direction::InOut);
-  declareProperty("BG1", 0.0,
-    "Linear background modelling parameter (default 0)",
-    Direction::InOut);
-  declareProperty("Height", 0.0, "Height of peak (default 0)",
-    Direction::InOut);
-  declareProperty("PeakCentre", 0.0, "Centre of peak (default 0)",
-    Direction::InOut);
-  declareProperty("Sigma", 1.0, positiveDouble, 
-    "Standard deviation (default 1)", Direction::InOut);
+  positiveDouble->setLower(std::numeric_limits<double>::min());
+
+  declareProperty("Sigma", 1.0, positiveDouble, "Standard deviation (default 1)", Direction::InOut);
 }
 
 void GaussianLinearBG1D::modifyStartOfRange(double& startX) 

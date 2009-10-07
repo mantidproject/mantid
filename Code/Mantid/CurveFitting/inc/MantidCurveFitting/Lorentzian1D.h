@@ -28,7 +28,7 @@ namespace Mantid
     @author Anders Markvardsen, ISIS, RAL
     @date 24/5/2009
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
