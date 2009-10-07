@@ -45,7 +45,7 @@
                 if (omp_get_num_threads() > 1)
 
 /** Ensures that the next execution line or block is only executed if
-* there is only on thread in operation
+* there is only one thread in operation
 */
 #define IF_NOT_PARALLEL \
                 if (omp_get_num_threads() == 1)
@@ -55,24 +55,39 @@
 * PARALLEL_END_INTERUPT_REGION at the end of the loop
 */
 #define PARALLEL_START_INTERUPT_REGION \
-								if (!m_cancel) {
+                if (!m_parallelException && !m_cancel) { \
+                  try {
 
 /** Ends a block to skip processing is the algorithm has been interupted
 * Note the start of the block if not defined that must be added by including 
 * PARALLEL_START_INTERUPT_REGION at the start of the loop
 */
 #define PARALLEL_END_INTERUPT_REGION \
-								}
+                  } /* End of try block in PARALLEL_START_INTERUPT_REGION */ \
+                  catch(std::exception &ex) { \
+                    if (!m_parallelException) \
+                    { \
+                      m_parallelException = true; \
+                      g_log.error() << this->name() << ": " << ex.what() << "\n"; \
+                    } \
+                  } \
+                  catch(...) { m_parallelException = true; } \
+                } // End of if block in PARALLEL_START_INTERUPT_REGION
 
 /** Adds a check after a Parallel region to see if it was interupted
 */
 #define PARALLEL_CHECK_INTERUPT_REGION \
-								interruption_point();
+                if (m_parallelException) \
+                { \
+                  g_log.debug("Exception thrown in parallel region"); \
+                  throw std::runtime_error(this->name()+": error (see log)"); \
+                } \
+                interruption_point();
 
 /** Specifies that the next code line or block will only allow one thread through at a time
 */
 #define PARALLEL_CRITICAL(name) \
-								PRAGMA(omp critical(name))
+                PRAGMA(omp critical(name))
 
 #else //_OPENMP
 ///Empty definitions - to enable set your complier to enable openMP

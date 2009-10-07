@@ -309,8 +309,11 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         {
           try {
             Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
-            if (par) efixed = par->value<double>();
-            g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
+            if (par) 
+            {
+              efixed = par->value<double>();
+              g_log.debug() << "Detector: " << det->getID() << " EFixed: " << efixed << "\n";
+            }
           } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
         }
       }

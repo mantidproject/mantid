@@ -273,14 +273,13 @@ namespace Mantid
 			bool isOutputWorkspaceProperty( Mantid::Kernel::Property* prop);
 
 			/// process workspace groups
-			virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
-            /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed
-			virtual void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
-           	
+      virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);
+      /// virtual method to set non workspace properties for an algorithm,it's useful for checking the period number when a member in a group workspace is executed
+      virtual void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
-			mutable bool m_cancel; ///< set to true to stop execution			
-			/// refenence to the logger class
-			Kernel::Logger& g_log;
+			mutable bool m_cancel;    ///< set to true to stop execution
+      bool m_parallelException; ///< Set if an exception is thrown, and not caught, within a parallel region
+			Kernel::Logger& g_log;    ///< reference to the logger class
 
 		private:
 

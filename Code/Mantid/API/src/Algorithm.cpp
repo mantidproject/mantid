@@ -14,19 +14,16 @@ namespace Mantid
 namespace API
 {
 
-// Get a reference to the logger
-//Kernel::Logger& Algorithm::g_log = Kernel::Logger::get("Algorithm");
-
 unsigned int Algorithm::g_execCount=0;
 
 /// Constructor
 Algorithm::Algorithm() :
-  PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),m_cancel(false),
-  g_log(Kernel::Logger::get("Algorithm")),m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
+  PropertyManagerOwner(),m_progressObserver(*this, &Algorithm::handleChildProgressNotification),
+  m_cancel(false),m_parallelException(false),g_log(Kernel::Logger::get("Algorithm")),
+  m_executeAsync(this,&Algorithm::executeAsyncImpl),m_isInitialized(false),
   m_isExecuted(false),m_isChildAlgorithm(false),m_runningAsync(false),m_running(false),
   m_algorithmID(0)
 {
-
 }
 
 /// Virtual destructor
@@ -199,8 +196,8 @@ bool Algorithm::execute()
       if (m_isChildAlgorithm || m_runningAsync) throw;
       else
       {
-          g_log.error()<< "Error in Execution of algorithm "<< this->name()<<std::endl;
-          g_log.error()<< ex.what()<<std::endl;
+        g_log.error()<< "Error in execution of algorithm "<< this->name()<<std::endl;
+        g_log.error()<< ex.what()<<std::endl;
       }
       m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false;
@@ -210,8 +207,8 @@ bool Algorithm::execute()
       if (m_isChildAlgorithm || m_runningAsync) throw;
       else
       {
-          g_log.error()<< "Logic Error in Execution of algorithm "<< this->name()<<std::endl;
-          g_log.error()<< ex.what()<<std::endl;
+        g_log.error()<< "Logic Error in execution of algorithm "<< this->name()<<std::endl;
+        g_log.error()<< ex.what()<<std::endl;
       }
       m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       m_running = false;
@@ -221,7 +218,7 @@ bool Algorithm::execute()
   {
       m_runningAsync = false;
       m_running = false;
-      g_log.error("Execution terminated by user.");
+      g_log.error() << this->name() << ": Execution terminated by user.\n";
       m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
       throw;
   }
@@ -233,6 +230,7 @@ bool Algorithm::execute()
     m_running = false;
 
     m_notificationCenter.postNotification(new ErrorNotification(this,ex.what()));
+    g_log.error() << "Error in execution of algorithm " << this->name() << ":\n";
     g_log.error(ex.what());
     throw;
   }
@@ -247,7 +245,7 @@ bool Algorithm::execute()
     m_running = false;
 
     m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
-    g_log.error("UNKNOWN Exception is caught ");
+    g_log.error() << this->name() << ": UNKNOWN Exception is caught\n";
     throw;
     // Gaudi calls exception service 'handle' method here
   }

@@ -1,6 +1,4 @@
 #include "WorkspaceAlgorithm.h"
-#include "MantidDataObjects/Workspace1D.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -12,10 +10,6 @@ DECLARE_ALGORITHM(WorkspaceAlgorithm)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace1D_sptr;
-using DataObjects::Workspace1D;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::Workspace2D;
 
 /**  Initialization code
  *
@@ -25,7 +19,7 @@ void WorkspaceAlgorithm::init()
 {
 
     // Declare a 1D workspace property.
-    declareProperty(new WorkspaceProperty<Workspace1D>("Workspace","",Direction::Input));
+    declareProperty(new WorkspaceProperty<Workspace>("Workspace","",Direction::Input));
 
 }
 
@@ -38,14 +32,14 @@ void WorkspaceAlgorithm::exec()
 		g_log.information() << "Running algorithm " << name() << " version " << version() << std::endl;
 
     // Get the input workspace
-    Workspace1D_sptr workspace = getProperty("Workspace");
+    MatrixWorkspace_const_sptr workspace = getProperty("Workspace");
 
     // Number of single indexable items in the workspace
     g_log.information() << "Number of items = " << workspace->size() << std::endl;
 
     int count = 0;
     // Iterate over the workspace
-    for(Workspace1D::const_iterator ti(*workspace); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
     {
         // Get the reference to a data point
         LocatedDataRef tr = *ti;
@@ -56,7 +50,7 @@ void WorkspaceAlgorithm::exec()
     count = 0;
     int loopCount = 2;
     // Do several loops
-    for(Workspace1D::const_iterator ti(*workspace,loopCount,LoopOrientation::Horizontal); ti != ti.end(); ++ti)
+    for(MatrixWorkspace::const_iterator ti(*workspace,loopCount,LoopOrientation::Horizontal); ti != ti.end(); ++ti)
     {
         // Get the reference to a data point
         LocatedDataRef tr = *ti;

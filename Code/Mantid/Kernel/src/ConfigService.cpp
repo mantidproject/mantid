@@ -128,7 +128,7 @@ namespace Mantid
           m_mAbsolutePaths.insert(std::make_pair(*sitr, Poco::Path(execdir).resolve(value).toString()));
         }
       }
-      catch (Poco::PathSyntaxException &ex)
+      catch (Poco::PathSyntaxException)
       {
         g_log.error() << "Incorrect path syntax detected in properties file for variable \"" << *sitr << "\"" << std::endl;  
         m_mAbsolutePaths.insert(std::make_pair(*sitr, execdir));
