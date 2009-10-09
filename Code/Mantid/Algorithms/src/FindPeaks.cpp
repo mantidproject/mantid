@@ -409,24 +409,26 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   const MantidVec &X = input->readX(spectrum);
   const MantidVec &Y = input->readY(spectrum);
   
+  // Get the initial estimate of the width
   const int fitWidth = i0-i2;
+
+  // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
+  unsigned int i_min = 1;
+  if (i0 > static_cast<int>(5*fitWidth)) i_min = i0 - 5*fitWidth;
+  unsigned int i_max = i0 + 5*fitWidth;
+  // Bounds checks
+  if (i_min<1) i_min=1;
+  if (i_max>=Y.size()-1) i_max=Y.size()-2;
+  const double bg_lowerSum = Y[i_min-1] + Y[i_min] + Y[i_min+1];
+  const double bg_upperSum = Y[i_max-1] + Y[i_max] + Y[i_max+1];
+
+  const double in_bg0 = (bg_lowerSum + bg_upperSum) / 6.0;
+  const double in_bg1 = (bg_upperSum - bg_lowerSum) / (3.0*(i_max-i_min+1));
+  const double in_height = Y[i4] - in_bg0;
+  const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
 
   for (unsigned int width = 2; width <= 10; width +=2)
   {
-    // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
-    unsigned int i_min = 1;
-    if (i0 > static_cast<int>(5*fitWidth)) i_min = i0 - 5*fitWidth;
-    unsigned int i_max = i0 + 5*fitWidth;
-    // Bounds checks
-    if (i_min<1) i_min=1;
-    if (i_max>=Y.size()-1) i_max=Y.size()-2;
-    const double bg_lowerSum = Y[i_min-1] + Y[i_min] + Y[i_min+1];
-    const double bg_upperSum = Y[i_max-1] + Y[i_max] + Y[i_max+1];
-
-    const double in_bg0 = (bg_lowerSum + bg_upperSum) / 6.0;
-    const double in_bg1 = (bg_upperSum - bg_lowerSum) / (3.0*(i_max-i_min+1));
-    const double in_height = Y[i4] - in_bg0;
-    const double in_centre = input->isHistogramData() ? 0.5*(X[i0]+X[i0+1]) : X[i0];
     const double in_sigma = (i0+width < X.size())? X[i0+width] - X[i0] : 0.;
   
     fit->setProperty("bg0",in_bg0);
@@ -434,8 +436,8 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
     fit->setProperty("peakCentre",in_centre);
     fit->setProperty("sigma",in_sigma);
     fit->setProperty("height",in_height);
-    fit->setProperty("StartX",X[i_min]);
-    fit->setProperty("EndX",X[i_max]);
+    fit->setProperty("StartX",(X[i0]-5*(X[i0]-X[i2])));
+    fit->setProperty("EndX",(X[i0]+5*(X[i0]-X[i2])));
   
     try {
       fit->execute();
