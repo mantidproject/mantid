@@ -233,17 +233,17 @@ if testsPass:
 else:
 	subject += 'Tests Failed]\n'	
 
-#Send Email
-session = smtplib.SMTP(smtpserver)
 #timeout in seconds
 socket.setdefaulttimeout(180)
 try:
+#Send Email
+  session = smtplib.SMTP(smtpserver)
   smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
 
   if smtpresult:
       errstr = ""
       for recip in smtpresult.keys():
-          errstr = """Could not delivery mail to: %s
+          errstr = """Could not deliver mail to: %s
 
 Server said: %s
 %s
