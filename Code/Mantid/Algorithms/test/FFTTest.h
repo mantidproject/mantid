@@ -15,126 +15,401 @@ using namespace Mantid::API;
 class FFTTest : public CxxTest::TestSuite
 {
 public:
-    FFTTest()
+  FFTTest():dX(0.2),PI(3.1415926535897932384626433832795),h(sqrt(PI/3)),a(PI*PI/3)
+  {
+  }
+  ~FFTTest()
+  {
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_");
+  }
+
+  void testForward()
+  {
+    const int N = 100;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    createWS(N,0,"even_points");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_even_points");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_out"));
+
+    const MantidVec& X = fWS->readX(3);
+    const MantidVec& Yr = fWS->readY(3);
+    const MantidVec& Yi = fWS->readY(4);
+
+
+    const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
+
+    TS_ASSERT( it != X.end() );
+    int i0 = it - X.begin();
+
+    for(int i=0;i<N/4;i++)
     {
-
-        FrameworkManager::Instance();
-        Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-            (WorkspaceFactory::Instance().create("Workspace2D",1,100,100));
-
-        Mantid::MantidVec& X = ws->dataX(0);
-        Mantid::MantidVec& Y = ws->dataY(0);
-        Mantid::MantidVec& E = ws->dataE(0);
-        for(int j=0;j<100;j++)
-        {
-            X[j] = 0.1*(j+1);
-            Y[j] = exp(-(X[j]-6)*(X[j]-6)/2);
-            E[j] = 1.;
-        }
-        AnalysisDataService::Instance().add("FFT_WS",ws);
-
+      int j = i0 + i;
+      double x = X[j];
+      //std::cerr<<j<<' '<<x<<' '<<Yr[j]<<' '<<h*exp(-a*x*x)<<'\n';
+      TS_ASSERT_DELTA(x,dx*i,0.00001);
+      TS_ASSERT_DELTA(Yr[i0+i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0+i],0.0,0.00001);
+      TS_ASSERT_DELTA(Yr[i0-i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0-i],0.0,0.00001);
     }
-    ~FFTTest()
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_points");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+  }
+
+  void testBackward()
+  {
+    const int N = 100;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    MatrixWorkspace_sptr WS = createWS(N,0,"even_points");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_even_points");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_out");
+    fft->setPropertyValue("OutputWorkspace","FFT_WS_backward");
+    fft->setPropertyValue("Real","3");
+    fft->setPropertyValue("Imaginary","4");
+    fft->setPropertyValue("Transform","Backward");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
+
+    const MantidVec& X0 = WS->readX(0);
+    const MantidVec& Y0 = WS->readY(0);
+
+    const MantidVec& X = fWS->readX(0);
+    const MantidVec& Y = fWS->readY(0);
+
+    for(int i=0;i<N;i++)
     {
-        FrameworkManager::Instance().deleteWorkspace("FFT_WS");
-        FrameworkManager::Instance().deleteWorkspace("FFT_WS_forward");
-        FrameworkManager::Instance().deleteWorkspace("FFT_WS_backward");
+      TS_ASSERT_DELTA(X[i],dX*(i - N/2),0.00001);
+      TS_ASSERT_DELTA(Y[i],Y0[i],0.00001);
     }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_points");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_backward");
+  }
 
-    void testForward()
+  void testForwardHist()
+  {
+    const int N = 100;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    createWS(N,1,"even_hist");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_even_hist");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_out"));
+
+    const MantidVec& X = fWS->readX(3);
+    const MantidVec& Yr = fWS->readY(3);
+    const MantidVec& Yi = fWS->readY(4);
+
+
+    const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
+
+    TS_ASSERT( it != X.end() );
+    int i0 = it - X.begin();
+
+    for(int i=0;i<N/4;i++)
     {
-      return;
-        IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
-        fft->initialize();
-        fft->setPropertyValue("InputWorkspace","FFT_WS");
-        fft->setPropertyValue("OutputWorkspace","FFT_WS_forward");
-        fft->setPropertyValue("Real","0");
-        fft->execute();
-
-        MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
-            (AnalysisDataService::Instance().retrieve("FFT_WS_forward"));
-
-        const MantidVec& X0 = fWS->readX(3);
-        const MantidVec& X1 = fWS->readX(4);
-        const MantidVec& X2 = fWS->readX(5);
-
-        const MantidVec& Y0 = fWS->readY(3);
-        const MantidVec& Y1 = fWS->readY(4);
-        const MantidVec& Y2 = fWS->readY(5);
-
-        TS_ASSERT_DELTA(X0[0],-5.0505,0.0001);
-        TS_ASSERT_DELTA(X1[0],-5.0505,0.0001);
-        TS_ASSERT_DELTA(X2[0],-5.0505,0.0001);
-
-        TS_ASSERT_DELTA(X0[50],0.,0.0001);
-        TS_ASSERT_DELTA(X1[50],0.,0.0001);
-        TS_ASSERT_DELTA(X2[50],0.,0.0001);
-
-        TS_ASSERT_DELTA(X0[99],4.94949,0.0001);
-        TS_ASSERT_DELTA(X1[99],4.94949,0.0001);
-        TS_ASSERT_DELTA(X2[99],4.94949,0.0001);
-
-        TS_ASSERT_DELTA(Y0[44],-0.002033,0.00001);
-        TS_ASSERT_DELTA(Y1[44],-0.000537,0.00001);
-        TS_ASSERT_DELTA(Y2[44],0.002103,0.00001);
-
-        TS_ASSERT_DELTA(Y0[50],2.50656,0.0001);
-        TS_ASSERT_DELTA(Y1[50],0.,0.0001);
-        TS_ASSERT_DELTA(Y2[50],2.50656,0.0001);
-
-        TS_ASSERT_DELTA(Y0[56],-0.002033,0.00001);
-        TS_ASSERT_DELTA(Y1[56],0.000537,0.00001);
-        TS_ASSERT_DELTA(Y2[56],0.002103,0.00001);
+      int j = i0 + i;
+      double x = X[j];
+      //std::cerr<<j<<' '<<x<<' '<<Yr[j]<<' '<<h*exp(-a*x*x)<<'\n';
+      TS_ASSERT_DELTA(x,dx*i,0.00001);
+      TS_ASSERT_DELTA(Yr[i0+i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0+i],0.0,0.00001);
+      TS_ASSERT_DELTA(Yr[i0-i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0-i],0.0,0.00001);
     }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_hist");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+  }
 
-    void testBackward()
+  void testBackwardHist()
+  {
+    const int N = 100;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    MatrixWorkspace_sptr WS = createWS(N,1,"even_points");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_even_points");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_out");
+    fft->setPropertyValue("OutputWorkspace","FFT_WS_backward");
+    fft->setPropertyValue("Real","3");
+    fft->setPropertyValue("Imaginary","4");
+    fft->setPropertyValue("Transform","Backward");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
+
+    const MantidVec& X0 = WS->readX(0);
+    const MantidVec& Y0 = WS->readY(0);
+
+    const MantidVec& X = fWS->readX(0);
+    const MantidVec& Y = fWS->readY(0);
+
+    for(int i=0;i<N;i++)
     {
-      return;
-        IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
-        fft->initialize();
-        fft->setPropertyValue("InputWorkspace","FFT_WS_forward");
-        fft->setPropertyValue("OutputWorkspace","FFT_WS_backward");
-        fft->setPropertyValue("Real","3");
-        fft->setPropertyValue("Imaginary","4");
-        fft->setPropertyValue("Transform","Backward");
-        fft->execute();
-
-        MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
-            (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
-
-        const MantidVec& X0 = fWS->readX(0);
-        const MantidVec& X1 = fWS->readX(1);
-        const MantidVec& X2 = fWS->readX(2);
-
-        const MantidVec& Y0 = fWS->readY(0);
-        const MantidVec& Y1 = fWS->readY(1);
-        const MantidVec& Y2 = fWS->readY(2);
-
-        TS_ASSERT_DELTA(X0[0],-5.0,0.0001);
-        TS_ASSERT_DELTA(X1[0],-5.0,0.0001);
-        TS_ASSERT_DELTA(X2[0],-5.0,0.0001);
-
-        TS_ASSERT_DELTA(X0[50],0.,0.0001);
-        TS_ASSERT_DELTA(X1[50],0.,0.0001);
-        TS_ASSERT_DELTA(X2[50],0.,0.0001);
-
-        TS_ASSERT_DELTA(X0[99],4.9,0.0001);
-        TS_ASSERT_DELTA(X1[99],4.9,0.0001);
-        TS_ASSERT_DELTA(X2[99],4.9,0.0001);
-
-        TS_ASSERT_DELTA(Y0[52],0.78271,0.00001);
-        TS_ASSERT_DELTA(Y1[52],0.,0.00001);
-        TS_ASSERT_DELTA(Y2[52],0.78271,0.00001);
-
-        TS_ASSERT_DELTA(Y0[59],1.,0.0001);
-        TS_ASSERT_DELTA(Y1[59],0.,0.0001);
-        TS_ASSERT_DELTA(Y2[59],1.,0.0001);
-
-        TS_ASSERT_DELTA(Y0[66],0.78271,0.00001);
-        TS_ASSERT_DELTA(Y1[66],0.,0.00001);
-        TS_ASSERT_DELTA(Y2[66],0.78271,0.00001);
+      TS_ASSERT_DELTA(X[i],dX*(i - N/2),0.00001);
+      TS_ASSERT_DELTA(Y[i],Y0[i],0.00001);
     }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_even_points");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_backward");
+  }
+
+  void testOddForward()
+  {
+    const int N = 101;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    createWS(N,0,"odd_points");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_odd_points");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_out"));
+
+    const MantidVec& X = fWS->readX(3);
+    const MantidVec& Yr = fWS->readY(3);
+    const MantidVec& Yi = fWS->readY(4);
+
+
+    const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
+
+    TS_ASSERT( it != X.end() );
+    int i0 = it - X.begin();
+
+    for(int i=0;i<N/4;i++)
+    {
+      int j = i0 + i;
+      double x = X[j];
+      //std::cerr<<j<<' '<<x<<' '<<Yr[j]<<' '<<h*exp(-a*x*x)<<'\n';
+      TS_ASSERT_DELTA(x,dx*i,0.00001);
+      TS_ASSERT_DELTA(Yr[i0+i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0+i],0.0,0.00001);
+      TS_ASSERT_DELTA(Yr[i0-i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0-i],0.0,0.00001);
+    }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_odd_points");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+  }
+
+  void testOddBackward()
+  {
+    const int N = 101;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    MatrixWorkspace_sptr WS = createWS(N,0,"odd_points");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_odd_points");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_out");
+    fft->setPropertyValue("OutputWorkspace","FFT_WS_backward");
+    fft->setPropertyValue("Real","3");
+    fft->setPropertyValue("Imaginary","4");
+    fft->setPropertyValue("Transform","Backward");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
+
+    const MantidVec& X0 = WS->readX(0);
+    const MantidVec& Y0 = WS->readY(0);
+
+    const MantidVec& X = fWS->readX(0);
+    const MantidVec& Y = fWS->readY(0);
+
+    for(int i=0;i<N;i++)
+    {
+      //std::cerr<<i<<' '<<X[i]<<' '<<X0[i]<<' '<<dX*(i - N/2)<<'\n';
+      TS_ASSERT_DELTA(X[i],dX*(i - N/2),0.00001);
+      TS_ASSERT_DELTA(Y[i],Y0[i],0.00001);
+    }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_odd_points");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_backward");
+  }
+
+  void testOddForwardHist()
+  {
+    const int N = 101;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    createWS(N,1,"odd_hist");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_odd_hist");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_out"));
+
+    const MantidVec& X = fWS->readX(3);
+    const MantidVec& Yr = fWS->readY(3);
+    const MantidVec& Yi = fWS->readY(4);
+
+
+    const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
+
+    TS_ASSERT( it != X.end() );
+    int i0 = it - X.begin();
+
+    for(int i=0;i<N/4;i++)
+    {
+      int j = i0 + i;
+      double x = X[j];
+      //std::cerr<<j<<' '<<x<<' '<<Yr[j]<<' '<<h*exp(-a*x*x)<<'\n';
+      TS_ASSERT_DELTA(x,dx*i,0.00001);
+      TS_ASSERT_DELTA(Yr[i0+i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0+i],0.0,0.00001);
+      TS_ASSERT_DELTA(Yr[i0-i] / (h*exp(-a*x*x)),1.,0.001);
+      TS_ASSERT_DELTA(Yi[i0-i],0.0,0.00001);
+    }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_odd_hist");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+  }
+
+  void testOddBackwardHist()
+  {
+    const int N = 101;
+    const double XX = dX * N;
+    double dx = 1/(XX);
+
+    MatrixWorkspace_sptr WS = createWS(N,1,"odd_hist");
+
+    IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_WS_odd_hist");
+    fft->setPropertyValue("OutputWorkspace","FFT_out");
+    fft->setPropertyValue("Real","0");
+    fft->execute();
+
+    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft->initialize();
+    fft->setPropertyValue("InputWorkspace","FFT_out");
+    fft->setPropertyValue("OutputWorkspace","FFT_WS_backward");
+    fft->setPropertyValue("Real","3");
+    fft->setPropertyValue("Imaginary","4");
+    fft->setPropertyValue("Transform","Backward");
+    fft->execute();
+
+    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
+      (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
+
+    const MantidVec& X0 = WS->readX(0);
+    const MantidVec& Y0 = WS->readY(0);
+
+    const MantidVec& X = fWS->readX(0);
+    const MantidVec& Y = fWS->readY(0);
+
+    for(int i=0;i<N;i++)
+    {
+      TS_ASSERT_DELTA(X[i],dX*(i - N/2),0.00001);
+      TS_ASSERT_DELTA(Y[i],Y0[i],0.00001);
+    }
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_odd_hist");
+    FrameworkManager::Instance().deleteWorkspace("FFT_out");
+    FrameworkManager::Instance().deleteWorkspace("FFT_WS_backward");
+  }
+
+private:
+
+  MatrixWorkspace_sptr createWS(int n,int dn,const std::string& name)
+  {
+    FrameworkManager::Instance();
+    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
+      (WorkspaceFactory::Instance().create("Workspace2D",1,n+dn,n));
+
+    Mantid::MantidVec& X = ws->dataX(0);
+    Mantid::MantidVec& Y = ws->dataY(0);
+    Mantid::MantidVec& E = ws->dataE(0);
+
+    int n2 = n / 2;
+    for(int k=0;k<=n2;k++)
+    {
+      int i = n2 - k;
+      if (i >= 0)
+      {
+        X[i] = -dX*(k);
+        Y[i] = exp(-X[i]*X[i] * 3.);
+        E[i] = 1.;
+      }
+      i = n2 + k;
+      if (i < n)
+      {
+        X[i] = dX*(k);
+        Y[i] = exp(-X[i]*X[i] * 3.);
+        E[i] = 1.;
+      }
+    }
+
+    if (dn > 0)
+      X[n] = X[n-1] + dX;
+    AnalysisDataService::Instance().add("FFT_WS_"+name,ws);
+
+    return ws;
+  }
+
+  const double dX;
+    const double PI;
+    const double h;
+    const double a;
 };
-
 
 #endif /*FFT_TEST_H_*/

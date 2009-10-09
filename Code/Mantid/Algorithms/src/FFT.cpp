@@ -106,7 +106,7 @@ void FFT::exec()
     else
         outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
 
-    double df = 1.0 / (dx * xSize);
+    double df = 1.0 / (dx * ySize);
     if (isEnergyMeV) df /= 2.418e2;
 
     // shift == true means that the zero on the x axis is assumed to be in the data centre 
@@ -179,7 +179,7 @@ void FFT::exec()
         for(int i=0;i<ySize;i++)
         {
             double x = df*i;
-            if (shift) x -= df*ySize/2;
+            if (shift) x -= df*(ySize/2);
             outWS->dataX(0)[i] = x;
             int j = shift? (ySize/2 + i + dys) % ySize : i; 
             double re = data[2*j]/df;
