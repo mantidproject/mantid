@@ -1582,10 +1582,16 @@ void SANSRunWindow::handleTabChange(int index)
  */
 void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
 {
-  static QString prefix = "::SANS::";
+  static QString prefix = "::SANS";
   if( msg.startsWith(prefix) )
   {
-    m_uiForm.centre_stat->setText(msg.split(prefix).value(1));
+    QStringList sections = msg.split("::");
+    QString txt = sections.at(2);
+    m_uiForm.centre_logging->append(txt);
+    if( sections.at(1) == "SANSIter" )
+    {
+      m_uiForm.centre_stat->setText(txt);
+    }
   }  
 }
 
