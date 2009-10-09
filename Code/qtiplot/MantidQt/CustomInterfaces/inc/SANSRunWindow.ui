@@ -821,8 +821,8 @@
       <widget class="QWidget" name="horizontalLayoutWidget_11" >
        <property name="geometry" >
         <rect>
-         <x>447</x>
-         <y>281</y>
+         <x>428</x>
+         <y>282</y>
          <width>321</width>
          <height>33</height>
         </rect>
@@ -1580,10 +1580,10 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_13" >
        <property name="geometry" >
         <rect>
-         <x>401</x>
+         <x>371</x>
          <y>9</y>
-         <width>282</width>
-         <height>276</height>
+         <width>357</width>
+         <height>358</height>
         </rect>
        </property>
        <property name="title" >
@@ -1615,23 +1615,11 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="3" >
-         <widget class="QLabel" name="label_46" >
-          <property name="font" >
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="text" >
-           <string>,</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="4" >
          <widget class="QLineEdit" name="beam_y" >
           <property name="maximumSize" >
            <size>
-            <width>60</width>
+            <width>70</width>
             <height>16777215</height>
            </size>
           </property>
@@ -1649,7 +1637,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="0" >
+        <item row="5" column="0" >
          <widget class="QLabel" name="label_56" >
           <property name="text" >
            <string>Starting position:</string>
@@ -1659,7 +1647,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="4" column="2" colspan="3" >
+        <item row="5" column="2" colspan="3" >
          <widget class="QComboBox" name="beamstart_box" >
           <item>
            <property name="text" >
@@ -1673,14 +1661,14 @@ p, li { white-space: pre-wrap; }
           </item>
          </widget>
         </item>
-        <item row="5" column="0" >
+        <item row="6" column="0" >
          <widget class="QLabel" name="label_57" >
           <property name="text" >
            <string>Radius limits(mm):</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="2" >
+        <item row="6" column="2" >
          <widget class="QLineEdit" name="beam_rmin" >
           <property name="maximumSize" >
            <size>
@@ -1693,7 +1681,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="4" >
+        <item row="6" column="4" >
          <widget class="QLineEdit" name="beam_rmax" >
           <property name="maximumSize" >
            <size>
@@ -1706,35 +1694,21 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="3" >
-         <widget class="QLabel" name="label_58" >
-          <property name="text" >
-           <string>to</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="3" colspan="4" >
-         <widget class="QPushButton" name="runcentreBtn" >
-          <property name="text" >
-           <string>Run</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="7" >
+        <item row="2" column="0" colspan="7" >
          <widget class="Line" name="line" >
           <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="7" >
+        <item row="3" column="0" colspan="7" >
          <widget class="Line" name="line_3" >
           <property name="orientation" >
            <enum>Qt::Horizontal</enum>
           </property>
          </widget>
         </item>
-        <item row="3" column="0" colspan="2" >
+        <item row="4" column="0" colspan="2" >
          <widget class="QLabel" name="label_30" >
           <property name="text" >
            <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
@@ -1745,7 +1719,7 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="3" column="2" colspan="3" >
+        <item row="4" column="2" colspan="4" >
          <widget class="QLabel" name="label_59" >
           <property name="text" >
            <string>This will overwrite the coordinates above</string>
@@ -1755,14 +1729,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="6" column="0" >
+        <item row="7" column="0" >
          <widget class="QLabel" name="label_60" >
           <property name="text" >
            <string>Max. iterations</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="2" >
+        <item row="7" column="2" >
          <widget class="QLineEdit" name="beam_iter" >
           <property name="maximumSize" >
            <size>
@@ -1775,27 +1749,14 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="2" >
-         <widget class="QLineEdit" name="beam_x" >
-          <property name="maximumSize" >
-           <size>
-            <width>60</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text" >
-           <string/>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0" >
+        <item row="10" column="0" >
          <widget class="QLabel" name="label_35" >
           <property name="text" >
            <string>Status: </string>
           </property>
          </widget>
         </item>
-        <item row="8" column="2" colspan="4" >
+        <item row="10" column="2" colspan="4" >
          <widget class="QLabel" name="centre_stat" >
           <property name="frameShape" >
            <enum>QFrame::Box</enum>
@@ -1815,7 +1776,81 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
+        <item row="11" column="0" colspan="7" >
+         <widget class="QTextBrowser" name="centre_logging" >
+          <property name="openLinks" >
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6" >
+         <spacer name="horizontalSpacer_7" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType" >
+           <enum>QSizePolicy::MinimumExpanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="12" column="4" >
+         <widget class="QPushButton" name="clear_log" >
+          <property name="text" >
+           <string>Clear log</string>
+          </property>
+         </widget>
+        </item>
+        <item row="12" column="2" >
+         <widget class="QPushButton" name="runcentreBtn" >
+          <property name="text" >
+           <string>Run</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2" >
+         <widget class="QLineEdit" name="beam_x" >
+          <property name="maximumSize" >
+           <size>
+            <width>70</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
+        </item>
        </layout>
+       <zorder>label_51</zorder>
+       <zorder>label_32</zorder>
+       <zorder>beam_y</zorder>
+       <zorder>label_44</zorder>
+       <zorder>label_56</zorder>
+       <zorder>beamstart_box</zorder>
+       <zorder>label_57</zorder>
+       <zorder>beam_rmin</zorder>
+       <zorder>beam_rmax</zorder>
+       <zorder>line</zorder>
+       <zorder>line_3</zorder>
+       <zorder>label_30</zorder>
+       <zorder>label_59</zorder>
+       <zorder>label_60</zorder>
+       <zorder>beam_iter</zorder>
+       <zorder>label_35</zorder>
+       <zorder>centre_stat</zorder>
+       <zorder>centre_logging</zorder>
+       <zorder>pushButton</zorder>
+       <zorder>clear_log</zorder>
+       <zorder>runcentreBtn</zorder>
+       <zorder>beam_x</zorder>
+       <zorder>label_46</zorder>
+       <zorder>label_58</zorder>
       </widget>
       <widget class="QStackedWidget" name="geom_stack" >
        <property name="geometry" >

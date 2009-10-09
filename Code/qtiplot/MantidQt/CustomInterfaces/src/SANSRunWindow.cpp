@@ -104,6 +104,7 @@ void SANSRunWindow::initLayout()
     connect(m_reducemapper, SIGNAL(mapped(const QString &)), this, SLOT(handleReduceButtonClick(const QString &)));
     
     connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
+    connect(m_uiForm.clear_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
 
     //Text edit map
     m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
