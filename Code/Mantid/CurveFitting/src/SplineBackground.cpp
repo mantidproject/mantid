@@ -1,0 +1,168 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidCurveFitting/SplineBackground.h"
+#include <gsl/gsl_bspline.h>
+#include <gsl/gsl_multifit.h>
+#include <gsl/gsl_statistics.h>
+
+namespace Mantid
+{
+namespace CurveFitting
+{
+
+DECLARE_ALGORITHM(SplineBackground)
+
+using namespace Kernel;
+using namespace API;
+
+/// Initialisation method
+void SplineBackground::init()
+{
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
+    "",Direction::Input), "The name of the input workspace.");
+  declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",
+    "",Direction::Output), "The name of the output workspace.");
+  BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+  mustBePositive->setLower(0);
+  declareProperty("WorkspaceIndex",0,mustBePositive,"Spectrum number to use.");
+  declareProperty("NCoeff",10,"The number of spline coefficients.");
+}
+
+/** Executes the algorithm
+ *
+ */
+void SplineBackground::exec()
+{
+
+  API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
+  int spec = getProperty("WorkspaceIndex");
+
+  const MantidVec& X = inWS->readX(spec);
+  const MantidVec& Y = inWS->readY(spec);
+  const MantidVec& E = inWS->readE(spec);
+
+  const int ncoeffs = getProperty("NCoeff");
+  const int nbreak = ncoeffs - 2;
+
+  gsl_bspline_workspace *bw;
+  gsl_vector *B;
+
+  gsl_vector *c, *w;
+  gsl_vector *x, *y;
+  gsl_matrix *Z, *cov;
+  gsl_multifit_linear_workspace *mw;
+  double chisq, Rsq, dof, tss;
+
+  int n = Y.size();
+  bool isMasked = inWS->hasMaskedBins(spec);
+  std::vector<int> masked(Y.size());
+  if (isMasked)
+  {
+    for(API::MatrixWorkspace::MaskList::const_iterator it=inWS->maskedBins(spec).begin();it!=inWS->maskedBins(spec).end();it++)
+      masked[it->first] = 1;
+    n -= inWS->maskedBins(spec).size();
+  }
+
+  /* allocate a cubic bspline workspace (k = 4) */
+  bw = gsl_bspline_alloc(4, nbreak);
+  B = gsl_vector_alloc(ncoeffs);
+
+  x = gsl_vector_alloc(n);
+  y = gsl_vector_alloc(n);
+  Z = gsl_matrix_alloc(n, ncoeffs);
+  c = gsl_vector_alloc(ncoeffs);
+  w = gsl_vector_alloc(n);
+  cov = gsl_matrix_alloc(ncoeffs, ncoeffs);
+  mw = gsl_multifit_linear_alloc(n, ncoeffs);
+
+  /* this is the data to be fitted */
+  int j = 0;
+  for (int i = 0; i < Y.size(); ++i)
+  {
+    if (isMasked && masked[i]) continue;
+
+    gsl_vector_set(x, j, X[i]);
+    gsl_vector_set(y, j, Y[i]);
+    gsl_vector_set(w, j, E[i]);
+
+    ++j;
+  }
+
+  if (n != j)
+  {
+    gsl_bspline_free(bw);
+    gsl_vector_free(B);
+    gsl_vector_free(x);
+    gsl_vector_free(y);
+    gsl_matrix_free(Z);
+    gsl_vector_free(c);
+    gsl_vector_free(w);
+    gsl_matrix_free(cov);
+    gsl_multifit_linear_free(mw);
+
+    throw std::runtime_error("Assertion failed: n != j");
+  }
+
+  double xStart = X.front();
+  double xEnd =   X.back();
+
+  /* use uniform breakpoints */
+  gsl_bspline_knots_uniform(xStart, xEnd, bw);
+
+  /* construct the fit matrix X */
+  for (int i = 0; i < n; ++i)
+  {
+    double xi = gsl_vector_get(x, i);
+
+    /* compute B_j(xi) for all j */
+    gsl_bspline_eval(xi, B, bw);
+
+    /* fill in row i of X */
+    for (j = 0; j < ncoeffs; ++j)
+    {
+      double Bj = gsl_vector_get(B, j);
+      gsl_matrix_set(Z, i, j, Bj);
+    }
+  }
+
+  /* do the fit */
+  gsl_multifit_wlinear(Z, w, y, c, cov, &chisq, mw);
+
+  //dof = n - ncoeffs;
+  //tss = gsl_stats_wtss(w->data, 1, y->data, 1, y->size);
+  //Rsq = 1.0 - chisq / tss;
+
+  //std::cerr<< "chisq/dof = "<<chisq / dof<<"%e, Rsq = "<<Rsq<<"\n";
+
+  /* output the smoothed curve */
+  API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("Workspace2D",1,X.size(),Y.size());
+  {
+    double xi, yi, yerr;
+    for (int i=0;i<Y.size();i++)
+    {
+      xi = X[i];
+      gsl_bspline_eval(xi, B, bw);
+      gsl_multifit_linear_est(B, c, cov, &yi, &yerr);
+      outWS->dataY(0)[i] = yi;
+      outWS->dataE(0)[i] = yerr;
+    }
+    outWS->dataX(0) = X;
+  }
+
+  gsl_bspline_free(bw);
+  gsl_vector_free(B);
+  gsl_vector_free(x);
+  gsl_vector_free(y);
+  gsl_matrix_free(Z);
+  gsl_vector_free(c);
+  gsl_vector_free(w);
+  gsl_matrix_free(cov);
+  gsl_multifit_linear_free(mw);
+
+  setProperty("OutputWorkspace",outWS);
+
+}
+
+} // namespace Algorithm
+} // namespace Mantid

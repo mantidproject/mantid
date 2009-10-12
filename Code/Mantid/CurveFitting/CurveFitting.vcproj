@@ -227,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SplineBackground.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\UserFunction1D.cpp"
 				>
 			</File>
@@ -286,6 +290,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SpecialFunctionSupportTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\SplineBackground.h"
 				>
 			</File>
 			<File
