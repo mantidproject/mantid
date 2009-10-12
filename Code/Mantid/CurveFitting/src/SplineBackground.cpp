@@ -38,12 +38,19 @@ void SplineBackground::exec()
   API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   int spec = getProperty("WorkspaceIndex");
 
+  if (spec > inWS->getNumberHistograms())
+    throw std::out_of_range("WorkspaceIndex is out of range.");
+
   const MantidVec& X = inWS->readX(spec);
   const MantidVec& Y = inWS->readY(spec);
   const MantidVec& E = inWS->readE(spec);
 
   const int ncoeffs = getProperty("NCoeff");
-  const int nbreak = ncoeffs - 2;
+  const int k = 4; // order of the spline + 1 (cubic)
+  const int nbreak = ncoeffs - (k - 2);
+
+  if (nbreak <= 0)
+    throw std::out_of_range("Too low NCoeff");
 
   gsl_bspline_workspace *bw;
   gsl_vector *B;
@@ -65,7 +72,7 @@ void SplineBackground::exec()
   }
 
   /* allocate a cubic bspline workspace (k = 4) */
-  bw = gsl_bspline_alloc(4, nbreak);
+  bw = gsl_bspline_alloc(k, nbreak);
   B = gsl_vector_alloc(ncoeffs);
 
   x = gsl_vector_alloc(n);
@@ -136,7 +143,7 @@ void SplineBackground::exec()
   //std::cerr<< "chisq/dof = "<<chisq / dof<<"%e, Rsq = "<<Rsq<<"\n";
 
   /* output the smoothed curve */
-  API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create("Workspace2D",1,X.size(),Y.size());
+  API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,1,X.size(),Y.size());
   {
     double xi, yi, yerr;
     for (int i=0;i<Y.size();i++)
