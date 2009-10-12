@@ -20,7 +20,6 @@ public:
   }
   ~FFTTest()
   {
-    FrameworkManager::Instance().deleteWorkspace("FFT_WS_");
   }
 
   void testForward()
