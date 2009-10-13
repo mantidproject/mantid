@@ -98,9 +98,9 @@ public:
         TS_ASSERT_EQUALS(ws->readY(6)[0],0.);
         TS_ASSERT_EQUALS(ws->readY(8)[3],0.);
 
-        TS_ASSERT_EQUALS(ws->readY(7)[1],2.);
-        TS_ASSERT_EQUALS(ws->readY(9)[3],1.);
-        TS_ASSERT_EQUALS(ws->readY(12)[1],1.);
+        TS_ASSERT_EQUALS(ws->readY(8)[1],2.);
+        TS_ASSERT_EQUALS(ws->readY(10)[3],1.);
+        TS_ASSERT_EQUALS(ws->readY(13)[4],1.);
     }
 	 void testMultiPeriodEntryNumberZero()
     {

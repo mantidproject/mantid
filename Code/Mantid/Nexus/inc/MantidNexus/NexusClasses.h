@@ -114,7 +114,6 @@ namespace Mantid
         protected:
             NXhandle m_fileID;      ///< Nexus file id
             std::string m_path;     ///< Keeps the absolute path to the object
-            //boost::shared_ptr<NXClass> m_parent;
             bool m_open;            ///< Set to true if the object has been open
         private:
             NXObject():m_fileID(){} ///< Private default constructor
@@ -159,14 +158,14 @@ namespace Mantid
             *   makes it to read in all the data.
             *   @param i Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
             *            of the chunk. The rank of the data must be >= 1
-            *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. 
+            *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indices. 
             *            The rank of the data must be >= 2
-            *   @param k Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indeces. 
+            *   @param k Non-negative value makes it read a chunk of dimension rank()-3. i,j and k are its indices. 
             *            The rank of the data must be >= 3
-            *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
+            *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indices. 
             *            The rank of the data must be 4
             */
-            virtual void load(int i=-1,int j=-1,int k=-1,int l=-1){};
+            virtual void load(const int blocksize = 8, int i = -1, int j = -1, int k = -1,int l = -1) {};
         protected:
             void getData(void* data);
             void getSlab(void* data, int start[], int size[]);
@@ -179,6 +178,10 @@ namespace Mantid
         template<class T>
         class NXDataSetTyped: public NXDataSet
         {
+	public:
+	  
+	  static int blocksize() { return 16; }
+
         public:
             /**  Constructor.
             *   @param parent The parent Nexus class. In terms of HDF it is the group containing the dataset.
@@ -228,7 +231,7 @@ namespace Mantid
              *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
              *            The rank of the data must be 4
              */
-            void load(int i=-1,int j=-1,int k=-1,int l=-1)
+	  void load(int blocksize = 8, int i = -1, int j = -1, int k = -1, int l=-1)
             {
                 if (rank()>4)
                 {
@@ -302,9 +305,9 @@ namespace Mantid
                     else if (k < 0)
                     {
                         if (i >= dim0() || j >= dim1()) rangeError();
-                        n = dim2();
+                        n = dim2() * blocksize;
                         start[0] = i; m_size[0] = 1;
-                        start[1] = j; m_size[1] = 1;
+                        start[1] = j; m_size[1] = blocksize;
                         start[2] = 0; m_size[2] = dim2();
                     }
                     else
@@ -400,20 +403,6 @@ namespace Mantid
         /// The char dataset type
         typedef NXDataSetTyped<char> NXChar;
         
-//#define NX_FLOAT32   5   float
-//#define NX_FLOAT64   6   double
-//#define NX_INT8     20  
-//#define NX_UINT8    21
-//#define NX_BOOLEAN NX_UINT
-//#define NX_INT16    22  
-//#define NX_UINT16   23
-//#define NX_INT32    24   int
-//#define NX_UINT32   25   unsigned int
-//#define NX_INT64    26
-//#define NX_UINT64   27
-//#define NX_CHAR      4   char
-//#define NX_BINARY   21
-
         //-------------------- classes --------------------------//
 
         /**  The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes.
@@ -448,9 +437,9 @@ namespace Mantid
             template<class NX>
             NX openNXClass(const std::string& name)const
             {
-                NX nxc(*this,name);
-                nxc.open();
-                return nxc;
+	      NX nxc(*this,name);
+	      nxc.open();
+	      return nxc;
             }
 
             /**  Creates and opens an arbitrary (non-standard) class (group).

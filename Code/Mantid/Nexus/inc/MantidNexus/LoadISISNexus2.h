@@ -10,36 +10,32 @@
 #include "MantidNexus/NexusClasses.h"
 #include <climits>
 
-#include <boost/shared_array.hpp>
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-
 namespace Mantid
 {
-    namespace NeXus
-    {
+  namespace NeXus
+  {
 
-        /** @class LoadISISNexus2 LoadISISNexus2.h NeXus/LoadISISNexus2.h
+        /** 
 
-        Loads a file in a Nexus format and stores it in a 2D workspace 
-        (Workspace2D class). LoadISISNexus2 is an algorithm and as such inherits
-        from the Algorithm class, via DataHandlingCommand, and overrides
+        Loads a file in a Nexus format and stores it in a 2D workspace. LoadISISNexus2 is an algorithm and 
+	as such inherits  from the Algorithm class, via DataHandlingCommand, and overrides
         the init() & exec() methods.
 
         Required Properties:
         <UL>
         <LI> Filename - The name of and path to the input Nexus file </LI>
         <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
-        (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
-        [ not yet implemented for Nexus ]</LI>
+        (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)</LI>
         </UL>
 
         Optional Properties: (note that these options are not available if reading a multiperiod file)
         <UL>
-        <LI> spectrum_min  - The spectrum to start loading from</LI>
-        <LI> spectrum_max  - The spectrum to load to</LI>
-        <LI> spectrum_list - An ArrayProperty of spectra to load</LI>
+        <LI> SpectrumMin  - The  starting spectrum number</LI>
+        <LI> SpectrumMax  - The  final spectrum number (inclusive)</LI>
+        <LI> SpectrumList - An ArrayProperty of spectra to load</LI>
         </UL>
 
         @author Roman Tolchenov, Tessella plc
@@ -83,12 +79,19 @@ namespace Mantid
             void init();
             /// Overwrites Algorithm method
             void exec();
-
+	    // Validate the optional input properties
+	    void checkOptionalProperties();
+	    /// Run LoadInstrument as a subalgorithm
             void runLoadInstrument(DataObjects::Workspace2D_sptr);
+	    /// Load log data from the nexus file
             void loadLogs(DataObjects::Workspace2D_sptr, NXEntry entry,int period = 1);
+	    // Load a given period into the workspace
+	    void loadPeriodData(int period, NXEntry & entry, //NXDataSetTyped<int> & data, 
+				DataObjects::Workspace2D_sptr local_workspace);
+	    // Load a data block
+	    void loadBlock(NXDataSetTyped<int> & data, int blocksize, int period, int start, 
+			   int &hist, int& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
 
-            /// User input spectra selection
-            std::vector<int> getSpectraSelection();
 
             /// The name and path of the input file
             std::string m_filename;
@@ -103,30 +106,31 @@ namespace Mantid
             int m_numberOfPeriods;
             /// The nuber of time chanels per spectrum
             int m_numberOfChannels;
-            /// Has the spectrum_list property been set?
-            bool m_list;
-            /// Have the spectrum_min/max properties been set?
-            bool m_interval;
-            /// The value of the spectrum_list property
-            std::vector<int> m_spec_list;
-            /// The value of the spectrum_min property
+	    /// Is there a detector block
+	    bool m_have_detector;
+	    
+            /// The value of the SpectrumMin property
             int m_spec_min;
-            /// The value of the spectrum_max property
+            /// The value of the SpectrumMax property
             int m_spec_max;
-			  /// The number of the input entry
+	    /// The value of the spectrum_list property
+            std::vector<int> m_spec_list;
+	    /// The number of the input entry
             int m_entrynumber;
-            /// The group which each detector belongs to in order
-            std::vector<int> m_groupings;
+
+            /// Have the spectrum_min/max properties been set?
+            bool m_range_supplied;
             /// Time channels
-            boost::shared_ptr<MantidVec> m_timeChannelsVec;
-            /// Counts buffer
-            boost::shared_array<int> m_data;
+            boost::shared_ptr<MantidVec> m_tof_data;
             /// Proton charge
             double m_proton_charge;
             /// Spectra numbers
             boost::shared_array<int> m_spec;
             /// Monitors
             std::map<int,std::string> m_monitors;
+
+	    //Progress reporting object
+	    boost::shared_ptr<API::Progress> m_progress;
 
             /// Personal wrapper for sqrt to allow msvs to compile
             static double dblSqrt(double in);

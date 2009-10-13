@@ -17,6 +17,8 @@
 #include <cmath>
 #include <sstream>
 #include <cctype>
+#include <functional>
+#include <algorithm>
 
 namespace Mantid
 {
@@ -30,8 +32,10 @@ namespace NeXus
 
   /// Empty default constructor
   LoadISISNexus2::LoadISISNexus2() : 
-  Algorithm(), m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-    m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT())
+    Algorithm(), m_filename(), m_instrument_name(), m_samplename(), m_numberOfSpectra(0), 
+    m_numberOfPeriods(0), m_numberOfChannels(0), m_have_detector(false), m_spec_min(0), m_spec_max(EMPTY_INT()), m_spec_list(), 
+    m_entrynumber(0), m_range_supplied(true), m_tof_data(), m_proton_charge(0.),
+    m_spec(), m_monitors(), m_progress()
   {}
 
   /// Initialisation method.
@@ -70,11 +74,21 @@ namespace NeXus
     // Read in the instrument name from the Nexus file
     m_instrument_name = entry.getString("name");
 
-    // Retrieve the entry number
-    m_entrynumber = getProperty("EntryNumber");
+    //Test if we have a detector block
+    int ndets(0);
+    try
+    {
+      NXClass det_class = entry.openNXGroup("detector_1");
+      NXInt spectrum_index = det_class.openNXInt("spectrum_index");
+      spectrum_index.load();
+      ndets = spectrum_index.dim0();
+      m_have_detector = true;
+    }
+    catch(std::runtime_error &)
+    {
+      ndets = 0;
+    }
 
-    NXInt spectrum_index = entry.openNXInt("instrument/detector_1/spectrum_index");
-    spectrum_index.load();
     NXInt nsp1 = entry.openNXInt("isis_vms_compat/NSP1");
     nsp1.load();
     NXInt udet = entry.openNXInt("isis_vms_compat/UDET");
@@ -82,171 +96,378 @@ namespace NeXus
     NXInt spec = entry.openNXInt("isis_vms_compat/SPEC");
     spec.load();
 
-    NXData nxData = entry.openNXData("detector_1");
-    NXInt data = nxData.openIntData();
-
-    m_numberOfPeriods  = data.dim0();
-    m_numberOfSpectra  = nsp1[0];
-    m_numberOfChannels = data.dim2();
-
-    std::vector<int> spec_list = getSpectraSelection();
-
-    int nmon = 0;
-
-    if (m_numberOfSpectra != spectrum_index.dim0())
+    //Pull out the monitor blocks, if any exist
+    int nmons(0);
+    for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
+	it != entry.groups().end(); ++it) 
     {
-      for(std::vector<NXClassInfo>::const_iterator it=entry.groups().begin();it!=entry.groups().end();it++)
-        if (it->nxclass == "NXmonitor") // Count monitors
-        {
-          NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
-          index.load();
-          if (spec_list.size() == 0 || std::find(spec_list.begin(),spec_list.end(),*index()) != spec_list.end())
-            m_monitors[*index()] = it->nxname;
-          NXInt mon = entry.openNXInt(std::string(it->nxname) + "/monitor_number");
-          mon.load();
-          nmon ++ ;
-        }
-    }
-
-    if(m_entrynumber!=0)
-    {
-      if(m_entrynumber>m_numberOfPeriods)
+      if (it->nxclass == "NXmonitor") // Count monitors
       {
-        throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
+	NXInt index = entry.openNXInt(std::string(it->nxname) + "/spectrum_index");
+	index.load();
+	m_monitors[*index()] = it->nxname;
+	++nmons;
       }
-      else
-        m_numberOfPeriods=1;
-
+    }
+    
+    if( ndets == 0 && nmons == 0 )
+    {
+      g_log.error() << "Invalid NeXus structure, cannot find detector or monitor blocks.";
+      throw std::runtime_error("Inconsistent NeXus file structure.");
     }
 
+    if( ndets == 0 )
+    {
 
-    if (spectrum_index.dim0() + nmon != m_numberOfSpectra ||
-      data.dim1() != spectrum_index.dim0())
-      throw std::runtime_error("Spectra - detector mismatch");
-
-    const int lengthIn = m_numberOfChannels + 1;
-
-    // Need to extract the user-defined output workspace name
-    Property *ws = getProperty("OutputWorkspace");
-    std::string localWSName = ws->value();
-    WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
-    if(m_numberOfPeriods>1)
-    {	
-      if(wsGrpSptr)wsGrpSptr->add(localWSName);
-      setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+      //Grab the number of channels
+      NXInt chans = entry.openNXInt(m_monitors.begin()->second + "/data");
+      m_numberOfPeriods = chans.dim0();
+      m_numberOfSpectra = nmons;
+      m_numberOfChannels = chans.dim2();
     }
-    // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
-    boost::shared_ptr<IInstrument> instrument;
-    boost::shared_ptr<Sample> sample;
+    else 
+    {
+      NXData nxData = entry.openNXData("detector_1");
+      NXInt data = nxData.openIntData();
+      m_numberOfPeriods  = data.dim0();
+      m_numberOfSpectra = nsp1[0];
+      m_numberOfChannels = data.dim2();
 
-    NXFloat timeBins = nxData.openNXFloat("time_of_flight");
-    timeBins.load();
-    m_timeChannelsVec.reset(new MantidVec(timeBins(), timeBins() + m_numberOfChannels + 1));
+      if( nmons > 0 && m_numberOfSpectra == data.dim1() )
+      {
+	m_monitors.clear();
+      }
+    }
+    
+    const int x_length = m_numberOfChannels + 1;
 
-    int total_specs = spec_list.size() > 0 ? spec_list.size() : m_numberOfSpectra;
+    // Check input is consistent with the file, throwing if not
+    checkOptionalProperties();
 
-    std::string outputWorkspace = "OutputWorkspace";
+    // Check which monitors need loading
+    for( std::map<int, std::string>::iterator itr = m_monitors.begin(); itr != m_monitors.end(); ++itr )
+    {
+      int index = itr->first;
+      if( (!m_spec_list.empty() && std::find(m_spec_list.begin(), m_spec_list.end(), index) == m_spec_list.end()) ||
+	  (m_range_supplied && (index < m_spec_min || index > m_spec_max)) )
+      {
+	m_monitors.erase(itr);
+      }
+    }
 
-    // Create the 2D workspace for the output
-    DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-      (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
+      
+    int total_specs(0);
+    int list_size = static_cast<int>(m_spec_list.size());
+    if( m_range_supplied )
+    {
+      //Inclusive range + list size
+      total_specs = (m_spec_max - m_spec_min + 1) + list_size;
+    }
+    else
+    {
+      total_specs = m_spec_list.size();
+    }
+    
+    m_progress = boost::shared_ptr<API::Progress>(new Progress(this, 0.0, 1.0, total_specs * m_numberOfPeriods));
+
+    DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+      (WorkspaceFactory::Instance().create("Workspace2D", total_specs, x_length, m_numberOfChannels));
     // Set the unit on the workspace to TOF
-    localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
-    Progress prog(this,0.,1.,total_specs*m_numberOfPeriods);
-    // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
-    for (int period = 0; period < m_numberOfPeriods; ++period) {
+    //Load instrument and other data once then copy it later
+    m_progress->report("Loading instrument");
+    runLoadInstrument(local_workspace);
+    
+    local_workspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
+    local_workspace ->getSample()->setProtonCharge(entry.getFloat("proton_charge"));
+    loadLogs(local_workspace, entry);
 
-      if(m_entrynumber!=0)
+    // Load first period outside loop
+    m_progress->report("Loading data");
+    if( ndets > 0 )
+    {
+      //Get the X data
+      NXFloat timeBins = entry.openNXFloat("detector_1/time_of_flight");
+      timeBins.load();
+      m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
+    }
+    int firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
+    loadPeriodData(firstentry, entry, local_workspace); 
+
+    if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
+    {
+      API::WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);      
+      //This forms the name of the group
+      const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
+      const std::string prop_name = "OutputWorkspace";
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + "1", base_name + "1", Direction::Output));
+      wksp_group->add(base_name + "1");
+      setProperty(prop_name + "1", local_workspace);
+      
+      for( int p = 2; p <= m_numberOfPeriods; ++p )
       {
-        period=m_entrynumber-1;
-        if(period!=0)
-        {
-          // Only run the sub-algorithms once
-          runLoadInstrument(localWorkspace );
-          localWorkspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
-
-          localWorkspace ->getSample()->setProtonCharge(entry.getFloat("proton_charge"));
-
-          loadLogs(localWorkspace, entry);
-        }
+	local_workspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+	  (WorkspaceFactory::Instance().create(local_workspace));
+	local_workspace->newSample();
+	loadLogs(local_workspace, entry ,p);	
+	std::ostringstream os;
+	os << p;
+	m_progress->report("Loading period " + os.str());
+	loadPeriodData(p, entry, local_workspace);
+	
+	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + os.str(), base_name + os.str(), Direction::Output));
+	wksp_group->add(base_name + os.str());
+	setProperty(prop_name + os.str(), local_workspace);
       }
+      // The group is the root property value
+      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(wksp_group));
+    }
+    else
+    {
+      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(local_workspace));
+    }
 
-      if (period == 0)
+  }
+  
+  // Function object for remove_if STL algorithm
+  namespace
+  {
+    //Check the numbers supplied are not in the range and erase the ones that are
+    struct range_check
+    {	
+      range_check(int min, int max) : m_min(min), m_max(max) {}
+      
+      bool operator()(int x)
       {
-        // Only run the sub-algorithms once
-        runLoadInstrument(localWorkspace );
-        localWorkspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
-
-        localWorkspace ->getSample()->setProtonCharge(entry.getFloat("proton_charge"));
-
-        loadLogs(localWorkspace, entry);
+	return (x >= m_min && x <= m_max);
       }
-      else   // We are working on a higher period of a multiperiod file
-      {
-        localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-          (WorkspaceFactory::Instance().create(localWorkspace));
-        localWorkspace->newSample();
-        //localWorkspace->newInstrumentParameters(); ?????
+      
+    private:
+      int m_min;
+      int m_max;
+    };
+    
+  }
 
-        loadLogs(localWorkspace,entry ,period+1);
-      }
+  /**
+   * Check the validity of the optional properties of the algorithm
+   */
+  void LoadISISNexus2::checkOptionalProperties()
+  {
+    m_spec_min = getProperty("SpectrumMin");
+    m_spec_max = getProperty("SpectrumMax");
+    
+    if( m_spec_min == 0 && m_spec_max == EMPTY_INT() )
+    {
+      m_range_supplied = false;
+    }
+	
+    if( m_spec_min == 0 )
+    {
+      m_spec_min = 1;
+    }
 
+    if( m_spec_max == EMPTY_INT() )
+    {
+      m_spec_max = m_numberOfSpectra;
+    }
+    
+    // Sanity check for min/max
+    if( m_spec_min > m_spec_max )
+    {
+      g_log.error() << "Inconsistent range properties. SpectrumMin is larger than SpectrumMax." << std::endl;
+      throw std::invalid_argument("Inconsistent range properties defined.");
+    }
+
+    if( m_spec_max > m_numberOfSpectra )
+    {
+      g_log.error() << "Inconsistent range property. SpectrumMax is larger than number of spectra: " 
+		    << m_numberOfSpectra << std::endl;
+      throw std::invalid_argument("Inconsistent range properties defined.");
+    }
+
+    // Check the entry number
+    m_entrynumber = getProperty("EntryNumber");
+    if( m_entrynumber > m_numberOfPeriods || m_entrynumber < 0 )
+    {
+      g_log.error() << "Invalid entry number entered. File contains " << m_numberOfPeriods << " period. " 
+		    << std::endl;
+      throw std::invalid_argument("Invalid entry number.");
+    }
+    if( m_numberOfPeriods == 1 )
+    {
+      m_entrynumber = 1;
+    }
+   
+    //Check the list property
+    m_spec_list = getProperty("SpectrumList");
+    if( m_spec_list.empty() ) 
+    {
+      m_range_supplied = true;
+      return;
+    }
+
+    // Sort the list so that we can check it's range
+    std::sort(m_spec_list.begin(), m_spec_list.end());
+    
+    if( m_spec_list.back() > m_numberOfSpectra )
+    {
+      g_log.error() << "Inconsistent SpectraList property defined for a total of " << m_numberOfSpectra 
+		    << " spectra." << std::endl;
+      throw std::invalid_argument("Inconsistent property defined");
+    }
+
+    //Check no negative numbers have been passed
+    std::vector<int>::iterator itr = 
+      std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::less<int>(), 0));
+    if( itr != m_spec_list.end() )
+    {
+      g_log.error() << "Negative SpectraList property encountered." << std::endl;
+      throw std::invalid_argument("Inconsistent property defined.");
+    }
+
+    range_check in_range(m_spec_min, m_spec_max);
+    if( m_range_supplied )
+    {
+      m_spec_list.erase(remove_if(m_spec_list.begin(), m_spec_list.end(), in_range), m_spec_list.end());
+    }
+
+
+  }
+
+/**
+ * Load a given period into the workspace
+ * @param period The period number to load (starting from 1) 
+ * @param The opened root entry node for accessing the monitor lists
+ * @param data The NXData object to load from
+ * @param local_workspace The workspace to place the data in
+ */
+  void LoadISISNexus2::loadPeriodData(int period, NXEntry & entry, //NXDataSetTyped<int> & data, 
+				      DataObjects::Workspace2D_sptr local_workspace)
+  {
+    int hist_index = m_monitors.size();
+    int period_index(period - 1);
+
+    if( m_have_detector )
+    {
+      NXData nxdata = entry.openNXData("detector_1");
+      NXDataSetTyped<int> data = nxdata.openIntData();
       data.open();
-      for (int i = m_monitors.size(); i < total_specs; ++i)
+      //Start with thelist members that are lower than the required spectrum
+      std::vector<int>::iterator min_end = m_spec_list.end();
+      if( !m_spec_list.empty() )
       {
-        int j = spec_list.size() > 0 ? spec_list[i] : i;
-        data.load(period,j - nmon);
-        MantidVec& Y = localWorkspace->dataY(i);
-        Y.assign(data(),data()+m_numberOfChannels);
-        MantidVec& E = localWorkspace->dataE(i);
-        std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-        localWorkspace->getAxis(1)->spectraNo(i)= j + 1;
-        localWorkspace->setX(i, m_timeChannelsVec);
-        prog.report();
+	// If we have a list, by now it is ordered so first pull in the range below the starting block range
+	// Note the reverse iteration as we want the last one
+	if( m_range_supplied )
+	{
+	  min_end = std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::greater<int>(), m_spec_min));
+	}
+	
+	for( std::vector<int>::iterator itr = m_spec_list.begin(); itr < min_end; ++itr )
+	{
+	  // Load each
+	  int spectra_no = (*itr);
+	  int filestart = spectra_no - 1;
+	  m_progress->report("Loading data");
+	  loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
+	}
+      }    
+    
+      if( m_range_supplied )
+      {
+	// When reading in blocks we need to be careful that the range is exactly divisible by the blocksize
+	// and if not have an extra read of the left overs
+	const int blocksize = 8;
+	const int rangesize = (m_spec_max - m_spec_min + 1) - m_monitors.size();
+	const int fullblocks = rangesize / blocksize;
+	int read_stop = (fullblocks * blocksize);
+	int spectra_no = m_spec_min;
+	int filestart = (m_spec_min - 1);
+	for( ; hist_index < read_stop; )
+	{
+	  
+	  loadBlock(data, blocksize, period_index, filestart, hist_index, spectra_no, local_workspace);
+	  filestart += blocksize;
+	}
+	int finalblock = rangesize - read_stop;
+	if( finalblock > 0 )
+	{
+	  loadBlock(data, finalblock, period_index, filestart, hist_index, spectra_no,  local_workspace);
+	}
       }
+      
+      //Load in the last of the list indices
+      for( std::vector<int>::iterator itr = min_end; itr < m_spec_list.end(); ++itr )
+      {
+	// Load each
+	int spectra_no = (*itr);
+	int filestart = spectra_no - 1;
+	loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
+      }
+    }
 
-      int spec = 0;
-      for(std::map<int,std::string>::const_iterator it=m_monitors.begin();it!=m_monitors.end();it++)
+    if( !m_monitors.empty() )
+    {
+      hist_index = 0;
+      for(std::map<int,std::string>::const_iterator it = m_monitors.begin(); 
+	  it != m_monitors.end(); ++it)
       {
         NXData monitor = entry.openNXData(it->second);
-        NXFloat data = monitor.openFloatData();
-        data.load(period,0);
-
-        MantidVec& Y = localWorkspace->dataY(spec);
-        Y.assign(data(),data()+m_numberOfChannels);
-        MantidVec& E = localWorkspace->dataE(spec);
-        std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-        localWorkspace->getAxis(1)->spectraNo(spec)= it->first;
+        NXInt mondata = monitor.openIntData();
+	m_progress->report("Loading monitor");
+        mondata.load();
+        MantidVec& Y = local_workspace->dataY(hist_index);
+        Y.assign(mondata(),mondata() + m_numberOfChannels);
+        MantidVec& E = local_workspace->dataE(hist_index);
+	std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+        local_workspace->getAxis(1)->spectraNo(hist_index) = it->first;
 
         NXFloat timeBins = monitor.openNXFloat("time_of_flight");
         timeBins.load();
-        localWorkspace->dataX(spec).assign(timeBins(),timeBins()+timeBins.dim0());
-        spec++;
-        prog.report();
+        local_workspace->dataX(hist_index).assign(timeBins(),timeBins() + timeBins.dim0());
+        hist_index++;
       }
-
-      std::string outws("");
-      std::string outputWorkspace = "OutputWorkspace";
-      if(m_numberOfPeriods>1)
-      {
-
-        std::stringstream suffix;
-        suffix << (period+1);
-        outws =outputWorkspace+"_"+suffix.str();
-        std::string WSName = localWSName + "_" + suffix.str();
-        declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
-        if(wsGrpSptr)wsGrpSptr->add(WSName);
-        setProperty(outws,localWorkspace);
-      }
-      else
-      {
-        setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-      }
-
-
     }
 
+    
+  }
+
+
+  /**
+   * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize
+   * @param data The NXDataSet object
+   * @param blocksize The blocksize to use
+   * @param period The period number
+   * @param start The index within the file to start reading from (zero based)
+   * @param hist The workspace index to start reading into
+   * @param spec_num The spectrum number that matches the hist variable
+   * @param local_workspace The workspace to fill the data with
+   */
+  void LoadISISNexus2::loadBlock(NXDataSetTyped<int> & data, int blocksize, int period, int start,
+				int &hist, int& spec_num, 
+				DataObjects::Workspace2D_sptr local_workspace)
+  {
+    data.load(blocksize, period, start);
+    int *data_start = data();
+    int *data_end = data_start + m_numberOfChannels;
+    int final(hist + blocksize);
+    while( hist < final )
+    {
+      m_progress->report("Loading data");
+      MantidVec& Y = local_workspace->dataY(hist);
+      Y.assign(data_start, data_end);
+      data_start += m_numberOfChannels; data_end += m_numberOfChannels;
+      MantidVec& E = local_workspace->dataE(hist);
+      std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+      // Populate the workspace. Loop starts from 1, hence i-1
+      local_workspace->setX(hist, m_tof_data);
+      local_workspace->getAxis(1)->spectraNo(hist)= spec_num;
+      ++hist;
+      ++spec_num;
+    }
+    
   }
 
   /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
@@ -330,70 +551,6 @@ namespace NeXus
       }
 
       ws->populateInstrumentParameters();
-  }
-
-  /** Creates a list of selected spectra to load from input interval and list properties.
-  *  @return An integer vector with spectra numbers to load. If an empty vector is returned
-  *  load all spectra in the file.
-  */
-  std::vector<int> LoadISISNexus2::getSpectraSelection()
-  {
-    std::vector<int> spec_list = getProperty("SpectrumList");
-    int spec_max = getProperty("SpectrumMax");
-    int spec_min = getProperty("SpectrumMin");
-    bool is_list = !spec_list.empty();
-    bool is_interval = (spec_max != EMPTY_INT());
-    if ( spec_max == EMPTY_INT() ) spec_max = 0;
-
-    // Compile a list of spectra numbers to load
-    std::vector<int> spec;
-    if( is_interval )
-    {
-      if ( spec_max < spec_min || spec_min >= m_numberOfSpectra || spec_max >= m_numberOfSpectra)
-      {
-        g_log.error("Invalid Spectrum min/max properties");
-        throw std::invalid_argument("Inconsistent properties defined");
-      }
-      for(int i=spec_min;i<=spec_max;i++)
-        spec.push_back(i);
-      if (is_list)
-      {
-        for(size_t i=0;i<spec_list.size();i++)
-        {
-          int s = spec_list[i];
-          if ( s < 0 ) continue;
-          if (s >= m_numberOfSpectra)
-          {
-            g_log.error("Invalid Spectrum list property");
-            throw std::invalid_argument("Inconsistent properties defined");
-          }
-          if (s < spec_min || s > spec_max)
-            spec.push_back(s);
-        }
-      }
-    }
-    else if (is_list)
-    {
-      spec_max=0;
-      spec_min=std::numeric_limits<int>::max();
-      for(size_t i=0;i<spec_list.size();i++)
-      {
-        int s = spec_list[i];
-        if ( s < 0 ) continue;
-        spec.push_back(s);
-        if (s > spec_max) spec_max = s;
-        if (s < spec_min) spec_min = s;
-      }
-    }
-    else
-    {
-      //spec_min=0;
-      //spec_max=nSpectra;
-      //for(int i=spec_min;i<=spec_max;i++)
-      //    spec.push_back(i);
-    }
-
-    return spec;
   }
 
   double LoadISISNexus2::dblSqrt(double in)
