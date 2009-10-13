@@ -124,13 +124,7 @@ private:
       {
         try
         {
-          // remove leading and trailing spaces
-          size_t i0 = it->find_first_not_of(" \t");
-          size_t i1 = it->find_last_not_of(" \t");
-          if (i0 == std::string::npos) throw boost::bad_lexical_cast();
-          std::string str = it->substr(i0,i1-i0+1);
-
-          vec.push_back( boost::lexical_cast<T>( str ) );
+          vec.push_back( boost::lexical_cast<T>( *it ) );
         }
         catch (boost::bad_lexical_cast e)
         {
@@ -336,6 +330,57 @@ private:
   /// Private default constructor
   PropertyWithValue();
 };
+
+/// Takes a comma-separated string of values and stores them as the vector of values
+template <>
+std::string PropertyWithValue<std::vector<int> >::setValue(const std::string& value)
+{
+  try{
+    // Split up comma-separated properties
+    typedef Poco::StringTokenizer tokenizer;
+    tokenizer values(value, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+
+    std::vector<int> vec;
+    vec.reserve(values.count());
+
+    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
+    {
+      if (it->find('-'))
+      {
+        tokenizer range(*it, "-", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+        if (range.count() == 1)
+          vec.push_back( boost::lexical_cast<int>( *it ) );
+        else
+        {
+          int iStart = boost::lexical_cast<int>( *range.begin() );
+          int iEnd = boost::lexical_cast<int>( *(range.begin()+1) );
+          for(int i=iStart;i<=iEnd;i++)
+            vec.push_back(i);
+        }
+      }
+      else
+        vec.push_back( boost::lexical_cast<int>( *it ) );
+    }
+    if (vec.size() != m_value.size())
+    {
+      g_log.information("New property value has different number of elements");
+    }
+    m_value = vec;
+    return "";
+  }
+  catch ( boost::bad_lexical_cast )
+  {
+    std::string error = "Could not set property " + name() +
+      ". Can not convert \"" + value + "\" to " + type();
+    g_log.debug() << error;
+    return error;
+  }
+  catch ( std::invalid_argument& except)
+  {
+    g_log.debug() << "Could not set property " << name() << ": " << except.what();
+    return except.what();
+  }
+}
 
 template <typename TYPE>
 Logger& PropertyWithValue<TYPE>::g_log = Logger::get("PropertyWithValue");
