@@ -138,7 +138,6 @@ namespace NeXus
 	m_monitors.clear();
       }
     }
-    
     const int x_length = m_numberOfChannels + 1;
 
     // Check input is consistent with the file, throwing if not
@@ -200,7 +199,7 @@ namespace NeXus
       API::WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);      
       //This forms the name of the group
       const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
-      const std::string prop_name = "OutputWorkspace";
+      const std::string prop_name = "OutputWorkspace_";
       declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + "1", base_name + "1", Direction::Output));
       wksp_group->add(base_name + "1");
       setProperty(prop_name + "1", local_workspace);
