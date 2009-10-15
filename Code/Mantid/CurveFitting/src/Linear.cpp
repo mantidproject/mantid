@@ -135,9 +135,9 @@ void Linear::exec()
   setProperty("FitSlope",*c1);
   setProperty("Chi^2",*chisq);
   
-  // Create and fill a workspace1D with the same bins as the fitted spectrum and the value of the fit for the centre of each bin
+  // Create and fill a workspace2D with the same bins as the fitted spectrum and the value of the fit for the centre of each bin
   const int YSize = Y.size();
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace1D",1,X.size(),YSize);
+  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",1,X.size(),YSize);
   // Copy over various data members from the input workspace
   outputWorkspace->setInstrument(inputWorkspace->getInstrument());
   outputWorkspace->setSample(inputWorkspace->getSample());
