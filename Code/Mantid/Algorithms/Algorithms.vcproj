@@ -383,6 +383,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PowerLawCorrection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Qxy.cpp"
 				>
 			</File>
@@ -798,6 +802,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\PolynomialCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\PowerLawCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\PowerLawCorrectionTest.h"
 				>
 			</File>
 			<File
