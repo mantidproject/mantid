@@ -26,24 +26,28 @@ public:
       WS->dataE(0)[i] = 0.05*WS->dataY(0)[i];   
     }
     WS->dataX(0)[numBins] = numBins;
+
+    // Mask out a couple of bins to test that functionality
+    WS->maskBin(0,15);
+    WS->maskBin(0,21,0.5);
     
     AnalysisDataService::Instance().add("Line",WS);
   }
   
-	void testName()
-	{
+  void testName()
+  {
     TS_ASSERT_EQUALS( lin.name(), "Linear" )
-	}
+  }
 
-	void testVersion()
-	{
+  void testVersion()
+  {
     TS_ASSERT_EQUALS( lin.version(), 1 )
-	}
+  }
 
-	void testCategory()
-	{
+  void testCategory()
+  {
     TS_ASSERT_EQUALS( lin.category(), "CurveFitting" )
-	}
+  }
 
   void testInit()
   {

@@ -17,8 +17,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 
-Linear::Linear() : API::Algorithm(), m_minX(0), m_maxX(0),m_progress(NULL)
+Linear::Linear() : API::Algorithm(), m_minX(0), m_maxX(0), m_progress(NULL)
 {}
+
+Linear::~Linear() {if(m_progress) delete m_progress;m_progress=NULL;}
 
 void Linear::init()
 {
@@ -77,28 +79,60 @@ void Linear::exec()
   this->setRange(X,Y);
   
   const bool isHistogram = inputWorkspace->isHistogramData();
-  const int numPoints = m_maxX - m_minX;
+  // If the spectrum to be fitted has masked bins, we want to exclude them (even if only partially masked)
+  const MatrixWorkspace::MaskList * const maskedBins = 
+    ( inputWorkspace->hasMaskedBins(histNumber) ? &(inputWorkspace->maskedBins(histNumber)) : NULL );
+  // Put indices of masked bins into a set for easy searching later
+  std::set<int> maskedIndices;
+  if (maskedBins)
+  {
+    MatrixWorkspace::MaskList::const_iterator it;
+    for (it = maskedBins->begin(); it != maskedBins->end(); ++it)
+      maskedIndices.insert(it->first);
+  }
   
   progress(0);
 
-  // Create the X & E vectors required for the gsl call
-  std::vector<double> XCen(numPoints), weights(numPoints);
+  // Declare temporary vectors and reserve enough space if they're going to be used
+  std::vector<double> XCen, unmaskedY, weights;
+  int numPoints = m_maxX - m_minX;
+  if (isHistogram) XCen.reserve(numPoints);
+  if (maskedBins) unmaskedY.reserve(numPoints);
+  weights.reserve(numPoints);
+
   for (int i = 0; i < numPoints; ++i)
   {
+    // If the current bin is masked, skip it
+    if ( maskedBins && maskedIndices.count(m_minX+i) ) continue;
     // Need to adjust X to centre of bin, if a histogram
-    XCen[i] = ( isHistogram ? 0.5*(X[m_minX+i]+X[m_minX+i+1]) : X[m_minX] );
+    if (isHistogram) XCen.push_back( 0.5*(X[m_minX+i]+X[m_minX+i+1]) );
+    // If there are masked bins present, we need to copy the unmasked Y values
+    if (maskedBins) unmaskedY.push_back(Y[m_minX+i]);
     // GSL wants the errors as weights, i.e. 1/sigma^2
     // We need to be careful if E is zero because that would naively lead to an infinite weight on the point.
     // Solution taken here is to zero weight if error is zero, which typically means Y is zero
     //   (so it is effectively excluded from the fit).
     const double& currentE = E[m_minX+i];
-    weights[i] = (currentE ? 1.0/(currentE*currentE) : 0.0);
+    weights.push_back( currentE ? 1.0/(currentE*currentE) : 0.0 );
     // However, if the spectrum given has all errors of zero, then we should use the gsl function that
     //   doesn't take account of the errors.
     if ( currentE ) ++errorsCount;
   }
   progress(0.3);
   
+  // If masked bins present, need to recalculate numPoints here
+  if (maskedBins) numPoints = unmaskedY.size();
+  // If no points left for any reason, bail out
+  if (numPoints == 0)
+  {
+    g_log.error("No points in this range to fit");
+    throw std::runtime_error("No points in this range to fit");
+  }
+
+  // Set up pointer variables to pass to gsl, pointing them to the right place
+  const double * const xVals = ( isHistogram ? &XCen[0] : &X[m_minX] );
+  const double * const yVals = ( maskedBins ? &unmaskedY[0] : &Y[m_minX] );
+
   // Call the gsl fitting function
   // The stride value of 1 reflects that fact that we want every element of our input vectors
   const int stride = 1;
@@ -109,13 +143,13 @@ void Linear::exec()
   if ( errorsCount/numPoints < 0.9 )
   {
     g_log.debug("Calling gsl_fit_linear (doesn't use errors in fit)");
-    status = gsl_fit_linear(&XCen[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
+    status = gsl_fit_linear(xVals,stride,yVals,stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
   }
   // Otherwise, call the one that does account for errors on the data points
   else
   {
     g_log.debug("Calling gsl_fit_wlinear (uses errors in fit)");
-    status = gsl_fit_wlinear(&XCen[0],stride,&weights[0],stride,&Y[m_minX],stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
+    status = gsl_fit_wlinear(xVals,stride,&weights[0],stride,yVals,stride,numPoints,c0,c1,cov00,cov01,cov11,chisq);
   }
   progress(0.8);
 

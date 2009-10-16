@@ -64,7 +64,7 @@ public:
   /// Constructor
   Linear();
   /// Virtual destructor
-  virtual ~Linear() {if(m_progress) delete m_progress;m_progress=NULL;}
+  virtual ~Linear();
   /// Algorithm's name
   virtual const std::string name() const { return "Linear"; }
   /// Algorithm's version
@@ -80,12 +80,9 @@ private:
 
   void setRange(const MantidVec& X, const MantidVec& Y); 
   
-  /// The X bin to start the fitting from
-  int m_minX;
-  /// The X bin to finish the fitting at
-  int m_maxX;
-   /// Progress reporting object
-  API::Progress *m_progress;
+  int m_minX;                ///< The X bin to start the fitting from
+  int m_maxX;                ///< The X bin to finish the fitting at
+  API::Progress *m_progress; ///< Progress reporting object
 
 };
 
