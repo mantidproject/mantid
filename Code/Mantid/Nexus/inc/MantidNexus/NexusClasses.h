@@ -156,6 +156,7 @@ namespace Mantid
             int type()const{return m_info.type;}
             /**  Load the data from the file. Calling this method with all default arguments
             *   makes it to read in all the data.
+	    *   @param blocksize The size of the block of data that should be read. Note that this is only used for rank 2 and 3 datasets currently
             *   @param i Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
             *            of the chunk. The rank of the data must be >= 1
             *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indices. 
@@ -222,6 +223,7 @@ namespace Mantid
             /**  Implementation of the virtual NXDataSet::load(...) method. Internally the data are stored as a 1d array. 
              *   If the data are loaded in chunks the newly read in data replace the old ones. The actual rank of the loaded
              *   data is equal or less than the rank of the dataset (returned by rank() method).
+	     *   @param blocksize The size of the block of data that should be read. Note that this is only used for rank 2 and 3 datasets currently
              *   @param i Calling load with non-negative i reads in a chunk of dimension rank()-1 and i is the index 
              *            of the chunk. The rank of the data must be >= 1
              *   @param j Non-negative value makes it read a chunk of dimension rank()-2. i and j are its indeces. 

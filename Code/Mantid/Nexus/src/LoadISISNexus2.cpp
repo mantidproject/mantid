@@ -338,12 +338,10 @@ namespace NeXus
 /**
  * Load a given period into the workspace
  * @param period The period number to load (starting from 1) 
- * @param The opened root entry node for accessing the monitor lists
- * @param data The NXData object to load from
+ * @param entry The opened root entry node for accessing the monitor and data nodes
  * @param local_workspace The workspace to place the data in
  */
-  void LoadISISNexus2::loadPeriodData(int period, NXEntry & entry, //NXDataSetTyped<int> & data, 
-				      DataObjects::Workspace2D_sptr local_workspace)
+  void LoadISISNexus2::loadPeriodData(int period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace)
   {
     int hist_index = m_monitors.size();
     int period_index(period - 1);
