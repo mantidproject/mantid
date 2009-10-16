@@ -80,9 +80,17 @@ namespace Mantid
       /// Calculate the integral asymmetry for a workspace (red & green)
       void calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
                             boost::shared_ptr<DataObjects::Workspace2D> ws_geen,double& Y, double& E);
+      /// Group detectors
+      void groupDetectors(boost::shared_ptr<DataObjects::Workspace2D> ws,const std::vector<int>& spectraList);
 
       /// Stores property "Int"
       bool m_int;
+      /// Store forward spectra
+      std::vector<int> m_forward_list;
+      /// Store backward spectra
+	    std::vector<int> m_backward_list;
+      /// If true call LoadMuonNexus with Autogroup on
+      bool m_autogroup;
 
     };
 

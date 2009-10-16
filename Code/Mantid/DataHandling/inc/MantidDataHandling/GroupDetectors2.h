@@ -19,7 +19,7 @@ namespace Mantid
 namespace DataHandling
 {
   using DataObjects::Workspace2D_const_sptr;
-  using API::MatrixWorkspace_sptr;
+  using DataObjects::Workspace2D_sptr;
 /** An algorithm for grouping detectors and the spectra associated with them
     into a single DetectorGroup and spectrum.
     This algorithm can only be used on a workspace that has common X bins.
@@ -149,10 +149,10 @@ private:
 
   /// Copy the and combine the histograms that the user requested from the input into the output workspace
   int formGroups(Workspace2D_const_sptr inputWS,
-                 MatrixWorkspace_sptr outputWS, const double prog4Copy);
+                 Workspace2D_sptr outputWS, const double prog4Copy);
   /// Copy the data data in ungrouped histograms from the input workspace to the output
   void moveOthers(const std::set<int> &unGroupedSet,
-    Workspace2D_const_sptr inputWS,MatrixWorkspace_sptr outputWS,int outIndex);
+    Workspace2D_const_sptr inputWS,Workspace2D_sptr outputWS,int outIndex);
 
   /// flag values
   enum {

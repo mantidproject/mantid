@@ -7,11 +7,11 @@
 #include <iomanip>
 #include <sstream>
 
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidAPI/Progress.h"
 
@@ -47,10 +47,10 @@ namespace Mantid
       declareProperty("TimeMin",EMPTY_DBL(),"Starting X value for integration");
       declareProperty("TimeMax",EMPTY_DBL(),"Ending X value for integration");
 
-      //BoundedValidator<int> *zeroOrGreater = new BoundedValidator<int>();
-      //zeroOrGreater->setLower(0);
-      //declareProperty("ForwardSpectra", 0, Direction::Input);
-      //declareProperty("BackwardSpectra", 1, Direction::Input);
+       declareProperty(new ArrayProperty<int> ("ForwardSpectra"),
+         "The spectra numbers of the forward group (default 0)");
+       declareProperty(new ArrayProperty<int> ("BackwardSpectra"),
+         "The spectra numbers of the backward group (default 1)");
       //declareProperty("Alpha",1.0,Direction::Input);
     }
 
@@ -59,8 +59,10 @@ namespace Mantid
     */
     void PlotAsymmetryByLogValue::exec()
     {
-      //int forward = getProperty("ForwardSpectra");		
-      //int backward = getProperty("BackwardSpectra");   
+      m_forward_list = getProperty("ForwardSpectra");		
+	    m_backward_list = getProperty("BackwardSpectra");   
+      m_autogroup = ( m_forward_list.size() == 0 && m_backward_list.size() == 0);
+
       //double alpha = getProperty("Alpha");
 
       std::string logName = getProperty("LogValue");
@@ -119,7 +121,8 @@ namespace Mantid
         IAlgorithm_sptr loadNexus = createSubAlgorithm("LoadMuonNexus");
         loadNexus->setPropertyValue("Filename", fn.str());
         loadNexus->setPropertyValue("OutputWorkspace","tmp"+fnn.str());
-        loadNexus->setPropertyValue("AutoGroup","1");
+        if (m_autogroup)
+          loadNexus->setPropertyValue("AutoGroup","1");
         loadNexus->execute();
 
         std::string wsProp = "OutputWorkspace";
@@ -209,14 +212,15 @@ namespace Mantid
             if (!ws_red)
               throw std::invalid_argument("Red period is out of range");
 
-          progress.report();
         }
+        progress.report();
       }
 
       outWS->getAxis(0)->title() = logName;
       outWS->setYUnit("Asymmetry");
+      std::cout<<outWS.get()<<' '<<boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outWS).get()<<'\n';
       // Assign the result to the output workspace property
-      setProperty("OutputWorkspace",outWS);
+      setProperty("OutputWorkspace", boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outWS));
 
     }
 
@@ -241,11 +245,15 @@ namespace Mantid
       {   //  "Differential asymmetry"
         IAlgorithm_sptr asym = createSubAlgorithm("AsymmetryCalc");
         asym->initialize();
-        MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-        asym->setProperty("InputWorkspace",mws);
+        asym->setProperty("InputWorkspace",ws);
         asym->setPropertyValue("OutputWorkspace","tmp");
+        if ( !m_autogroup )
+        {
+          asym->setProperty("ForwardSpectra",m_forward_list);
+          asym->setProperty("BackwardSpectra",m_backward_list);
+        }
         asym->execute();
-        MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
+        DataObjects::Workspace2D_sptr asymWS = asym->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr integr = createSubAlgorithm("Integration");
         integr->setProperty("InputWorkspace",asymWS);
@@ -256,7 +264,7 @@ namespace Mantid
           integr->setProperty("RangeUpper",endX);
         }
         integr->execute();
-        MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
+        DataObjects::Workspace2D_sptr out = integr->getProperty("OutputWorkspace");
 
         Y = out->readY(0)[0];
         E = out->readE(0)[0];
@@ -273,14 +281,19 @@ namespace Mantid
           integr->setProperty("RangeUpper",endX);
         }
         integr->execute();
-        MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
+        API::MatrixWorkspace_sptr intWS = integr->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr asym = createSubAlgorithm("AsymmetryCalc");
         asym->initialize();
-        asym->setProperty("InputWorkspace",intWS);
+        asym->setProperty("InputWorkspace",boost::dynamic_pointer_cast<DataObjects::Workspace2D>(intWS));
         asym->setPropertyValue("OutputWorkspace","tmp");
+        if ( !m_autogroup )
+        {
+          asym->setProperty("ForwardSpectra",m_forward_list);
+          asym->setProperty("BackwardSpectra",m_backward_list);
+        }
         asym->execute();
-        MatrixWorkspace_sptr out = asym->getProperty("OutputWorkspace");
+        DataObjects::Workspace2D_sptr out = asym->getProperty("OutputWorkspace");
 
         Y = out->readY(0)[0];
         E = out->readE(0)[0];
@@ -300,6 +313,14 @@ namespace Mantid
     void PlotAsymmetryByLogValue::calcIntAsymmetry(boost::shared_ptr<DataObjects::Workspace2D> ws_red, 
       boost::shared_ptr<DataObjects::Workspace2D> ws_green,double& Y, double& E)
     {
+      if ( !m_autogroup )
+      {
+        groupDetectors(ws_red,m_backward_list);
+        groupDetectors(ws_red,m_forward_list);
+        groupDetectors(ws_green,m_backward_list);
+        groupDetectors(ws_green,m_forward_list);
+      }
+
       Property* startXprop = getProperty("TimeMin");
       Property* endXprop = getProperty("TimeMax");
       bool setX = !startXprop->isDefault() && !endXprop->isDefault();
@@ -312,7 +333,9 @@ namespace Mantid
       if (!m_int)
       {   //  "Differential asymmetry"
 
-        MatrixWorkspace_sptr tmpWS = API::WorkspaceFactory::Instance().create(ws_red,1,ws_red->readX(0).size(),ws_red->readY(0).size());
+        DataObjects::Workspace2D_sptr tmpWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+          API::WorkspaceFactory::Instance().create(ws_red,1,ws_red->readX(0).size(),ws_red->readY(0).size())
+          );
 
         for(size_t i=0;i<tmpWS->dataY(0).size();i++)
         {
@@ -352,7 +375,7 @@ namespace Mantid
           integr->setProperty("RangeUpper",endX);
         }
         integr->execute();
-        MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
+        API::MatrixWorkspace_sptr intWS_red = integr->getProperty("OutputWorkspace");
 
         integr = createSubAlgorithm("Integration");
         integr->setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws_green));
@@ -363,7 +386,7 @@ namespace Mantid
           integr->setProperty("RangeUpper",endX);
         }
         integr->execute();
-        MatrixWorkspace_sptr intWS_green = integr->getProperty("OutputWorkspace");
+        API::MatrixWorkspace_sptr intWS_green = integr->getProperty("OutputWorkspace");
 
         double YIF = ( intWS_green->readY(0)[0] - intWS_red->readY(0)[0] ) / ( intWS_green->readY(0)[0] + intWS_red->readY(0)[0] );
         double YIB = ( intWS_green->readY(1)[0] - intWS_red->readY(1)[0] ) / ( intWS_green->readY(1)[0] + intWS_red->readY(1)[0] );
@@ -376,6 +399,20 @@ namespace Mantid
         E = sqrt( VARIF + VARIB );
       }
 
+    }
+
+    /**  Group detectors in the workspace.
+     *  @param ws A local workspace
+     *  @param spectraList A list of spectra to group.
+     */
+    void PlotAsymmetryByLogValue::groupDetectors(boost::shared_ptr<DataObjects::Workspace2D> ws,const std::vector<int>& spectraList)
+    {
+      API::IAlgorithm_sptr group = createSubAlgorithm("GroupDetectors");
+      group->setProperty("InputWorkspace",ws);
+      group->setProperty("SpectraList",spectraList);
+      group->setProperty("KeepUngroupedSpectra",true);
+      group->execute();
+      ws = group->getProperty("OutputWorkspace");
     }
 
   } // namespace Algorithm

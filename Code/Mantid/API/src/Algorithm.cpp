@@ -540,7 +540,7 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
 	//removing the header count from the totalsize
 	execTotal=(nSize-1)*10;
 	m_notificationCenter.postNotification(new StartedNotification(this));
-	IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",1);
+	IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",this->version());
 	if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
 	//for each member in the input workspace group
 	//starts from the 2nd item in the group as 1st item is group header

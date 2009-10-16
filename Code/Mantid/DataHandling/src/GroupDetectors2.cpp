@@ -46,7 +46,7 @@ void GroupDetectors2::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input,
     new CommonBinsValidator<Workspace2D>),"The name of the input 2D workspace");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+  declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output),
     "The name of the output workspace");
   declareProperty(new FileProperty("MapFile", "", FileProperty::NoExistLoad),
     "A file that contains lists of spectra to group. See the help for the\n"
@@ -96,9 +96,11 @@ void GroupDetectors2::exec()
   // ignore the one USED value in set or ignore all the ungrouped if the user doesn't want them
   const int numUnGrouped = keepAll ? unGroupedSet.size()-1 : 0;
 
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,
+  Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(
+    WorkspaceFactory::Instance().create(inputWS,
     m_GroupSpecInds.size()+ numUnGrouped, inputWS->readX(0).size(),
-    inputWS->blocksize());
+    inputWS->blocksize())
+    );
 
   // prepare to move the requested histograms into groups, first estimate how long for progress reporting. +1 in the demonator gets rid of any divide by zero risk
   double prog4Copy=( (1.0 - m_FracCompl)/(numInHists-unGroupedSet.size()+1) )*
@@ -148,6 +150,7 @@ void GroupDetectors2::getGroups(Workspace2D_const_sptr workspace,
   const std::vector<int> indexList = getProperty("WorkspaceIndexList");
   const std::vector<int> spectraList = getProperty("SpectraList");
   const std::vector<int> detectorList = getProperty("DetectorList");
+
   // only look at these other parameters if the file wasn't set
   if ( ! spectraList.empty() )
   {
@@ -422,7 +425,7 @@ double GroupDetectors2::fileReadProg(int numGroupsRead, int numInHists)
 *  @param outputWS user selected output workspace for the algorithm
 *  @param prog4Copy the amount of algorith progress to atribute to moving a single spectra
 */
-int GroupDetectors2::formGroups( Workspace2D_const_sptr inputWS, MatrixWorkspace_sptr outputWS, const double prog4Copy)
+int GroupDetectors2::formGroups( Workspace2D_const_sptr inputWS, Workspace2D_sptr outputWS, const double prog4Copy)
 {
   // Get hold of the axis that holds the spectrum numbers
   Axis *inputSpecNums = inputWS->getAxis(1);
@@ -488,7 +491,7 @@ int GroupDetectors2::formGroups( Workspace2D_const_sptr inputWS, MatrixWorkspace
 *  @param outputWS user selected output workspace for the algorithm
 *  @param outIndex the next spectra index available after the grouped spectra
 */
-void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, Workspace2D_const_sptr inputWS, MatrixWorkspace_sptr outputWS, int outIndex)
+void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, Workspace2D_const_sptr inputWS, Workspace2D_sptr outputWS, int outIndex)
 {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
   double prog4Copy = static_cast<float>(1.0-m_FracCompl)/unGroupedSet.size();
