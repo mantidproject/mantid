@@ -12,7 +12,7 @@ namespace Algorithms
 {
 /** Takes a Data workspace and an original counts workspace input and updates the 
     error values in the data workspace to be the same fractionally as the counts workspace.
-		The number of histograms, the binning and units of the two workspaces must match.
+    The number of histograms, the binning and units of the two workspaces must match.
 
     Required Properties:
     <UL>
@@ -64,15 +64,14 @@ private:
                               const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                               const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
-	virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+  virtual bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
   
   /// The name of the first input workspace property for BinaryOperation
-	virtual const std::string inputPropName1() const { return "InputWorkspace";}
+  virtual std::string inputPropName1() const { return "InputWorkspace";}
   /// The name of the second input workspace property for BinaryOperation
-	virtual const std::string inputPropName2() const { return "CountsWorkspace";}
+  virtual std::string inputPropName2() const { return "CountsWorkspace";}
   /// The name of the output workspace property for BinaryOperation
-	virtual const std::string outputPropName() const { return "OutputWorkspace";}
-
+  virtual std::string outputPropName() const { return "OutputWorkspace";}
 };
 
 } // namespace Algorithm

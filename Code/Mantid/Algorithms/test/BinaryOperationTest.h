@@ -26,10 +26,6 @@ public:
   {
     return BinaryOperation::checkSizeCompatibility(ws1,ws2);
   }
-  const bool checkXarrayCompatibility(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) const
-  {
-    return BinaryOperation::checkXarrayCompatibility(ws1,ws2);
-  }
   
 private:
   // Overridden BinaryOperation methods

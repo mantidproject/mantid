@@ -266,11 +266,11 @@ namespace Mantid
 			///checks that the value was not set by users, uses the value in EMPTY_INT()
 			static bool isEmpty(int toCheck) { return toCheck == EMPTY_INT(); }
 			///checks the property is a workspace property
-			bool isWorkspaceProperty( Mantid::Kernel::Property* prop);
+			bool isWorkspaceProperty(const Kernel::Property* const prop) const;
 			/// checks the property is input workspace property
-			bool isInputWorkspaceProperty( Mantid::Kernel::Property* prop);
+			bool isInputWorkspaceProperty(const Kernel::Property* const prop) const;
 			/// checks the property is output workspace property
-			bool isOutputWorkspaceProperty( Mantid::Kernel::Property* prop);
+			bool isOutputWorkspaceProperty(const Kernel::Property* const prop) const;
 
 			/// process workspace groups
       virtual bool processGroups(WorkspaceGroup_sptr wsPt,const std::vector<Mantid::Kernel::Property*>&prop);

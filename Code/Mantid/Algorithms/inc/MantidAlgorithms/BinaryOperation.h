@@ -62,18 +62,16 @@ namespace Mantid
       void exec();
 
       /// The name of the first input workspace property
-			virtual const std::string inputPropName1() const { return "LHSWorkspace";}
+      virtual std::string inputPropName1() const { return "LHSWorkspace";}
       /// The name of the second input workspace property
-			virtual const std::string inputPropName2() const { return "RHSWorkspace";}
+      virtual std::string inputPropName2() const { return "RHSWorkspace";}
       /// The name of the output workspace property
-			virtual const std::string outputPropName() const { return "OutputWorkspace";}
+      virtual std::string outputPropName() const { return "OutputWorkspace";}
 
       /// Checks the compatibility of the two workspaces
-      virtual const bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+      virtual bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       /// Checks the overall size compatibility of two workspaces
-      virtual const bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-      /// Checks the compatibility the X arrays of two workspaces
-      virtual const bool checkXarrayCompatibility(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs) const;
+      virtual bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 
       /** Carries out the binary operation on a single spectrum.
        *  @param lhsX The X values, made available if required.
@@ -86,6 +84,7 @@ namespace Mantid
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
+
       /** Carries out the binary operation when the right hand operand is a single number.
        *  @param lhsX The X values, made available if required.
        *  @param lhsY The vector of lhs data values
@@ -98,44 +97,26 @@ namespace Mantid
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
 
-	  /** This method is called if one of the selected workspaces for binary operation is a workspacegroup
-	  *  @param inputWSGrp pointer to the first workspace group
-	  *  @param prop a vector holding properties
-	  *  @retval false if  selected workspace groups sizes not match
-	*/
-	  bool processGroups(API::WorkspaceGroup_sptr inputWSGrp,const std::vector<Mantid::Kernel::Property*>&prop);
-      
+      bool processGroups(API::WorkspaceGroup_sptr inputWSGrp,const std::vector<Mantid::Kernel::Property*>&prop);
+
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void doSingleColumn(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
 
-	  /// Checks the workspace groups are of same size
-	  bool IsCompatibleSizes(std::vector<std::string> &lhsWSGrpNames,std::vector<std::string> &rhsWSGrpNames);
-	  
-	  /** This method iterates through property vector and returns  LHS and RHS workspaces group names vectors
-	  *  @param lhsWSGrpNames a vector holding names of LHS Workspace
-	  *  @param rhsWSGrpNames a vector holding names of RHS Workspace
-	  *  @param prop  vector holding the properties
-	*/
-	  void getGroupNames(const std::vector<Mantid::Kernel::Property*>&prop,std::vector<std::string> &lhsWSGrpNames,std::vector<std::string> &rhsWSGrpNames);
-	 
-	  /** This method sets properties for the algorithm
-	  *  @param alg pointer to the algorithm
-	  *  @param prop a vector holding properties
-	  *  @param lhsWSName name of the LHS workspace
-	  *  @param rhsWSName name of the RHS workspace
-	  *  @param nPeriod period number
-	  *  @param outWSGrp shared pointer to output workspace
-	*/
-	  void setProperties(IAlgorithm* alg,const std::vector<Mantid::Kernel::Property*>&prop,
-		 const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,API::WorkspaceGroup_sptr outWSGrp);
-      /// Progress reporting
-      API::Progress* m_progress;
+      void propagateMasking(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out);
+
+      bool isCompatibleSizes(const std::vector<std::string> &lhsWSGrpNames, const std::vector<std::string> &rhsWSGrpNames) const;
+      void getGroupNames(const std::vector<Kernel::Property*>&prop, 
+        std::vector<std::string> &lhsWSGrpNames, std::vector<std::string> &rhsWSGrpNames) const;
+      void setProperties(IAlgorithm* alg,const std::vector<Kernel::Property*>&prop,
+        const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,API::WorkspaceGroup_sptr outWSGrp);
+
+      API::Progress* m_progress;  ///< Progress reporting
     };
 
-  } // namespace Algorithm
+  } // namespace Algorithms
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_BINARYOPERATION_H_*/

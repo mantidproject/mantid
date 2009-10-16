@@ -702,23 +702,22 @@ void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
 		sptrWSGrp->add(outWSChildName);
 	}
 }
+
 /** To query the property is a workspace property
-  * @param prop pointer to input properties
-*/
-bool Algorithm::isWorkspaceProperty( Mantid::Kernel::Property* prop)
+ *  @param prop pointer to input properties
+ */
+bool Algorithm::isWorkspaceProperty( const Kernel::Property* const prop) const
 {
-	const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(prop);
-	bool bStatus(false);
-	(wsProp)? (bStatus=true) :( bStatus= false);
-	return bStatus;
-	
+	const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+  return (wsProp ? true : false);	
 }
+
 /** checks the property is a input workspace property
   * @param prop pointer to the input properties
 */
-bool Algorithm::isInputWorkspaceProperty( Mantid::Kernel::Property* prop)
+bool Algorithm::isInputWorkspaceProperty(const Kernel::Property* const prop) const
 {
-	const Property *wsPropProp = dynamic_cast<Property*>(prop);
+	const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
 	unsigned int direction = wsPropProp->direction();
 	if (direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)
 	{
@@ -729,9 +728,9 @@ bool Algorithm::isInputWorkspaceProperty( Mantid::Kernel::Property* prop)
 /** checks the property is a output workspace property
   * @param prop pointer to input  properties
 */
-bool Algorithm::isOutputWorkspaceProperty( Mantid::Kernel::Property* prop)
+bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) const
 {
-	const Property *wsPropProp = dynamic_cast<Property*>(prop);
+	const Property * const wsPropProp = dynamic_cast<const Property* const>(prop);
 	unsigned int direction = wsPropProp->direction();
 	if (direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)
 	{

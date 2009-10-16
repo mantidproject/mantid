@@ -32,7 +32,7 @@ namespace Mantid
         EOut = lhsE;
     }
     
-    const bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       if ( lhs->size() > 1 && rhs->size() > 1 && lhs->YUnit() != rhs->YUnit() )
       {

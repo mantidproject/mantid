@@ -231,7 +231,7 @@ namespace Mantid
              *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
              *            The rank of the data must be 4
              */
-	  void load(int blocksize = 8, int i = -1, int j = -1, int k = -1, int l=-1)
+	          void load(const int blocksize = 8, int i = -1, int j = -1, int k = -1, int l=-1)
             {
                 if (rank()>4)
                 {
