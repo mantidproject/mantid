@@ -56,10 +56,12 @@ public:
 
         ITableWorkspace_sptr params = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D_Parameters"));
 
-        TS_ASSERT_EQUALS(params->String(0,0),"a");
-        TS_ASSERT_EQUALS(params->String(1,0),"b");
-        TS_ASSERT_DELTA(params->Double(0,1),2,0.01);
-        TS_ASSERT_DELTA(params->Double(1,1),4,0.01);
+        TS_ASSERT_EQUALS(params->String(0,0),"Chi^2/DoF");
+        TS_ASSERT_EQUALS(params->String(1,0),"a");
+        TS_ASSERT_EQUALS(params->String(2,0),"b");
+        TS_ASSERT_DELTA(params->Double(0,1),0,0.01);
+        TS_ASSERT_DELTA(params->Double(1,1),2,0.01);
+        TS_ASSERT_DELTA(params->Double(2,1),4,0.01);
 
         IAlgorithm* alg1 = FrameworkManager::Instance().createAlgorithm("UserFunction1D");
         alg1->initialize();
@@ -71,10 +73,11 @@ public:
 
         ITableWorkspace_sptr params1 = boost::dynamic_pointer_cast<ITableWorkspace>(AnalysisDataService::Instance().retrieve("UserFunction1D1_Parameters"));
 
-        TS_ASSERT_EQUALS(params1->String(0,0),"a");
-        TS_ASSERT_EQUALS(params1->String(1,0),"b");
-        TS_ASSERT_DELTA(params1->Double(0,1),4,0.01);
-        TS_ASSERT_DELTA(params1->Double(1,1),8,0.01);
+        TS_ASSERT_EQUALS(params1->String(0,0),"Chi^2/DoF");
+        TS_ASSERT_EQUALS(params1->String(1,0),"a");
+        TS_ASSERT_EQUALS(params1->String(2,0),"b");
+        TS_ASSERT_DELTA(params1->Double(1,1),4,0.01);
+        TS_ASSERT_DELTA(params1->Double(2,1),8,0.01);
 
     }
 };

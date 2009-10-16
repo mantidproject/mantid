@@ -300,6 +300,10 @@
 				RelativePath=".\inc\MantidCurveFitting\UserFunction1D.h"
 				>
 			</File>
+			<File
+				RelativePath=".\test\UserFunction1DTest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
