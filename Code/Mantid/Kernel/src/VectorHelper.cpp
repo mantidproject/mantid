@@ -12,6 +12,54 @@ namespace Kernel
 namespace VectorHelper
 {
 
+/** Creates a new output X array given a 'standard' set of rebinning parameters.
+ *  @param[in]  params Rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n]
+ *  @param[out] xnew   The newly created axis resulting from the input params
+ *  @return The number of bin boundaries in the new axis
+ **/
+int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew)
+{
+  double xcurr, xs;
+  int ibound(2), istep(1), inew(1);
+  int ibounds = params.size(); //highest index in params array containing a bin boundary
+  int isteps = ibounds - 1; // highest index in params array containing a step
+  xnew.clear();
+
+  xcurr = params[0];
+  xnew.push_back(xcurr);
+
+  while ((ibound <= ibounds) && (istep <= isteps))
+  {
+    // if step is negative then it is logarithmic step
+    if (params[istep] >= 0.0)
+      xs = params[istep];
+    else
+      xs = xcurr * fabs(params[istep]);
+    /* continue stepping unless we get to almost where we want to */
+    if ((xcurr + xs) < (params[ibound] - (xs * 1.E-6)))
+    {
+      xcurr += xs;
+    }
+    else
+    {
+      xcurr = params[ibound];
+      ibound += 2;
+      istep += 2;
+    }
+    xnew.push_back(xcurr);
+    inew++;
+  }
+
+  // If the last bin is smaller than 25% of the penultimate one, then combine the last two
+  if (inew > 2 && (xnew[inew - 1] - xnew[inew - 2]) < 0.25 * (xnew[inew - 2] - xnew[inew - 3]))
+  {
+    xnew.erase(xnew.end() - 2);
+    --inew;
+  }
+
+  return inew;
+}
+
 /** Rebins data according to a new output X array
  *
  *  @param xold Old X array of data. 

@@ -41,7 +41,8 @@ namespace Kernel
  */
 namespace VectorHelper
 {
-  
+  int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew);
+
   void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
         const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
 

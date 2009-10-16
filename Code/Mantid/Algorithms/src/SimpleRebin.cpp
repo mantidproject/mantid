@@ -47,10 +47,10 @@ namespace Mantid
       bool dist = inputW->isDistribution();
 
       // workspace independent determination of length
-      int histnumber = inputW->size()/inputW->blocksize();
+      const int histnumber = inputW->size()/inputW->blocksize();
       DataObjects::Histogram1D::RCtype XValues_new;
       // create new output X axis
-      int ntcnew = newAxis(rb_params,XValues_new.access());
+      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params,XValues_new.access());
 
       // make output Workspace the same type is the input, but with new length of signal array
       API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
@@ -119,55 +119,6 @@ namespace Mantid
       setProperty("OutputWorkspace",outputW);
 
       return;
-    }
-
-    /** Creates a new  output X array  according to specific boundary defnitions
-     *
-     *  @param params - rebin parameters input [x_1, delta_1,x_2, ... ,x_n-1,delta_n-1,x_n)
-     *  @param xnew - new output workspace x array
-     *  @return The number of bin boundaries in the new X array
-     **/
-    int SimpleRebin::newAxis(const std::vector<double>& params, std::vector<double>& xnew)
-    {
-      double xcurr, xs;
-      int ibound(2), istep(1), inew(1);
-      int ibounds=params.size(); //highest index in params array containing a bin boundary
-      int isteps=ibounds-1; // highest index in params array containing a step
-      xnew.clear();
-      
-      xcurr = params[0];
-      xnew.push_back(xcurr);
-
-      while( (ibound <= ibounds) && (istep <= isteps) )
-      {
-        // if step is negative then it is logarithmic step
-        if ( params[istep] >= 0.0)
-          xs = params[istep];
-        else
-          xs = xcurr * fabs(params[istep]);
-        /* continue stepping unless we get to almost where we want to */
-        if ( (xcurr + xs) < (params[ibound] - (xs * 1.E-6)) )
-        {
-          xcurr += xs;
-        }
-        else
-        {
-          xcurr = params[ibound];
-          ibound+=2;
-          istep+=2;
-        }
-        xnew.push_back(xcurr);
-        inew++;
-      }
-      
-      // If the last bin is smaller than 25% of the penultimate one, then combine the last two
-      if ( inew > 2 && (xnew[inew-1]-xnew[inew-2]) < 0.25*(xnew[inew-2]-xnew[inew-3]) )
-      {
-        xnew.erase(xnew.end()-2);
-        --inew;
-      }
-      
-      return inew;
     }
 
     /** Takes the masks in the input workspace and apportions the weights into the new bins that overlap

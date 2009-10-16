@@ -19,8 +19,8 @@ namespace Algorithms
     <LI> RebinParameters - The new bin boundaries in the form X1,deltaX1,X2,deltaX2,X3,... </LI>
     </UL>
 
-    The algorithms used in the SimpleRebin::rebin() and SimpleRebin::newAxis() are based on the
-    algorithms used in OPENGENIE /src/transform_utils.cxx (Freddie Akeroyd, ISIS).
+    The algorithms used in the VectorHelper::rebin() and VectorHelper::createAxisFromRebinParams() 
+    are based on the algorithms used in OPENGENIE /src/transform_utils.cxx (Freddie Akeroyd, ISIS).
     When calculating the bin boundaries, if the last bin ends up with a width being less than 25%
     of the penultimate one, then the two are combined. 
 
@@ -66,9 +66,7 @@ private:
   void init();
   void exec();
   
-  int newAxis(const std::vector<double>& params, std::vector<double>& xnew);
   void propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist);
-
 };
 
 } // namespace Algorithms
