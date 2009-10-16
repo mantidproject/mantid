@@ -17,8 +17,8 @@ namespace Algorithms
   void PowerLawCorrection::defineProperties()
   {
     // We need an array property for the coefficients of the PowerLaw: C0*X^C1
-    declareProperty("C0",1.0);
-    declareProperty("C1",1.0);
+    declareProperty("C0",1.0,"The value by which the entire calculation is multiplied");
+    declareProperty("C1",1.0,"The power by which the x value is raised");
   }
   
   void PowerLawCorrection::retrieveProperties()

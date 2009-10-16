@@ -13,7 +13,7 @@ namespace Mantid
     /** 
     Corrects the data and error values on a workspace by the value of an exponential function
     which is evaluated at the X value of each data point: c0*x^C1. 
-    The data and error values are either divided or multiplied by the value of this function.
+    The data and error values are multiplied by the value of this function.
 
     Required Properties:
     <UL>
@@ -21,7 +21,6 @@ namespace Mantid
     <LI> OutputWorkspace - The name of the corrected workspace (can be the same as the input one)</LI>
     <LI> c0              - The value by which the entire calculation is multiplied (see above)</LI>
     <LI> c1              - The power by which the x value is raised (see above)</LI>
-    <LI> Operation       - Whether to divide (the default) or multiply the data by the correction function</LI>
     </UL>
 
     @author Robert Dalgliesh ISIS, STFC
