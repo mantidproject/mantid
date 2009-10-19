@@ -5,7 +5,7 @@
 #include <vector>
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
-#include "MantidGeometry/Objects/Line.h"
+#include "MantidGeometry/Surfaces/Line.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/Plane.h"

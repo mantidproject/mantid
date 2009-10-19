@@ -2,7 +2,7 @@
 #define Geometry_Surface_h
 
 #include "MantidKernel/System.h"
-#include "MantidGeometry/Objects/BaseVisit.h"
+#include "BaseVisit.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid
@@ -11,7 +11,6 @@ namespace Mantid
 namespace Geometry
 {
 
-  class BaseVisit;
   class V3D;
   template<class T>
   class Matrix;

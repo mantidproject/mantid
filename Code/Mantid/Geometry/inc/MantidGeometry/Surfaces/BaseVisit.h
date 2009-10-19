@@ -3,7 +3,6 @@
 
 namespace Mantid
 {
-
 namespace Geometry
 {
 
@@ -59,9 +58,7 @@ public:
 
 };
 
-
 } // NAMESPACE Geometry
-
 } // NAMESPACE Mantid
 
 #endif

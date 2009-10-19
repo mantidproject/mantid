@@ -251,11 +251,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Objects\Line.cpp"
+				RelativePath=".\src\Surfaces\Line.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\Objects\LineIntersectVisit.cpp"
+				RelativePath=".\src\Surfaces\LineIntersectVisit.cpp"
 				>
 			</File>
 			<File
@@ -469,7 +469,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Objects\BaseVisit.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\BaseVisit.h"
 				>
 			</File>
 			<File
@@ -581,11 +581,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Objects\Line.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\Line.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Objects\LineIntersectVisit.h"
+				RelativePath=".\inc\MantidGeometry\Surfaces\LineIntersectVisit.h"
 				>
 			</File>
 			<File
@@ -621,11 +621,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
@@ -753,11 +753,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\Math\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Math\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File

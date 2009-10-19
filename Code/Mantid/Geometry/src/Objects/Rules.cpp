@@ -17,7 +17,7 @@
 #include "MantidGeometry/Math/Triple.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Objects/BaseVisit.h"
+#include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Objects/Rules.h"
 

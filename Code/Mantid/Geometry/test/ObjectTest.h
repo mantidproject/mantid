@@ -30,14 +30,14 @@ private:
 public:
 
 
-  void testCreateUnitCube()
+  void xtestCreateUnitCube()
   {
     Object A = createUnitCube();
 
     TS_ASSERT_EQUALS(A.str(),"68 -1 0 -6 5 -4 3 -2 1");
   }
 
-  void testIsOnSideCappedCylinder()
+  void xtestIsOnSideCappedCylinder()
   {
     Object A = createCappedCylinder();
     //inside
