@@ -19,7 +19,7 @@
 #include "MantidKernel/Support.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidGeometry/Objects/BaseVisit.h"
+#include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidGeometry/Surfaces/Plane.h"
@@ -27,8 +27,8 @@
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidGeometry/Surfaces/General.h"
-#include "MantidGeometry/Objects/Line.h"
-#include "MantidGeometry/Objects/LineIntersectVisit.h"
+#include "MantidGeometry/Surfaces/Line.h"
+#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 
 namespace Mantid
 {
