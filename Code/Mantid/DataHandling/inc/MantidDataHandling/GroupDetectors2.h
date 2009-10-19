@@ -20,17 +20,32 @@ namespace DataHandling
 {
   using DataObjects::Workspace2D_const_sptr;
   using DataObjects::Workspace2D_sptr;
-/** An algorithm for grouping detectors and the spectra associated with them
-    into a single DetectorGroup and spectrum.
+/** An algorithm for grouping detectors and their associated spectra into
+  single spectra and DetectorGroups.
     This algorithm can only be used on a workspace that has common X bins.
     
-    File input must have the following format:
+    Required Properties:
+    <UL>
+    <LI> InputWorkspace - The name of the Workspace2D to take as input </LI>
+    <LI> OutputWorkspace - The name of the workspace in which to store the result </LI>
+    </UL>
+
+    Optional Properties:
+    <UL>
+    <LI> MapFile - A file that containing lists of spectra to group, its format is given below</LI>
+    <LI> SpectraList - An array containing a list of the indexes of the spectra to combine</LI>
+    <LI> DetectorList - An array of detector ID's</LI>
+    <LI> WorkspaceIndexList - An array of workspace indices to combine</LI>
+    <LI> KeepUngroupedSpectra -  If true ungrouped spectra will be copied to the output workspace</LI>
+    </UL>
+
+    Any input file must have the following format:
 
   |      The format of the grouping file each phrase in "" is replaced by
   | a single integer (ignore all | and my insersions in []). Extra space
   | and comments starting with # are both allowed
 
-  | "unused number"                                         |[in some implementation this is the number of groups in the file but here all groups in the file are read regardless]
+  | "unused number"                                         |[in some implementations this is the number of groups in the file but here all groups in the file are read regardless]
   | "unused number"                                         |[a positive integer must be here but the group's spectra number is the spectra number of the first spectra that went into the group and its index number is the number of groups in the list before it]
   | "number_of_input_spectra1"                              |[this number must equal the number of spectra numbers on the next lines]
   | "input spec1" "input spec2" "input spec3" "input spec4" |[these spectra numbers can be listed over any number of lines]
@@ -44,26 +59,26 @@ namespace DataHandling
 
   An example of an input file follows:
   2  
-  2 1  
-  3 64  
-  4 1 2 3 4 5 6 7 8 9 10  
-  5 11 12 13 14 15 16 17 18 19 20  
-  6 21 22 23 24 25 26 27 28 29 30  
-  7 31 32 33 34 35 36 37 38 39 40  
-  8 41 42 43 44 45 46 47 48 49 50  
-  9 51 52 53 54 55 56 57 58 59 60  
-  10 61 62 63 64  
-  11 2  
-  12 64  
-  13 65 66 67 68 69 70 71 72 73 74  
-  14 75 76 77 78 79 80 81 82 83 84  
-  15 85 86 87 88 89 90 91 92 93 94  
-  16 95 96 97 98 99 100 101 102 103 104  
-  17 105 106 107 108 109 110 111 112 113 114  
-  18 115 116 117 118 119 120 121 122 123 124  
-  19 125 126 127 128  
+  1  
+  64  
+  1 2 3 4 5 6 7 8 9 10  
+  11 12 13 14 15 16 17 18 19 20  
+  21 22 23 24 25 26 27 28 29 30  
+  31 32 33 34 35 36 37 38 39 40  
+  41 42 43 44 45 46 47 48 49 50  
+  51 52 53 54 55 56 57 58 59 60  
+  61 62 63 64  
+  2  
+  64  
+  65 66 67 68 69 70 71 72 73 74  
+  75 76 77 78 79 80 81 82 83 84  
+  85 86 87 88 89 90 91 92 93 94  
+  95 96 97 98 99 100 101 102 103 104  
+  105 106 107 108 109 110 111 112 113 114  
+  115 116 117 118 119 120 121 122 123 124  
+  125 126 127 128  
 
-    @author Steve Williams and Russell Taylor, Tessella Support Services plc
+    @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
 
     Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory

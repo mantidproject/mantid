@@ -229,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadDetectorInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadEmptyInstrument.cpp"
 				>
 			</File>
@@ -408,6 +412,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadDAE.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadDetectorInfo.h"
 				>
 			</File>
 			<File

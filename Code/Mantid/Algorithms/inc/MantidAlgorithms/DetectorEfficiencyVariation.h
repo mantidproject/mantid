@@ -94,12 +94,7 @@ namespace Mantid
         MatrixWorkspace_const_sptr b, double average, double variation,
         std::string fileName);
 
-      ///a flag int value to indicate that the value wasn't set by users
-      static const int UNSETINT = INT_MAX-15;
-
-      //a lot of data and functions for the progress bar 
-      /// An estimate of the percentage of the algorithm runtimes that has been completed 
-      float m_PercentDone;
+      //a lot of data and functions for the progress bar
       /// For the progress bar, estimates of how many additions (and equilivent) member functions will do for each spectrum assuming large spectra where progressing times are likely to be long
       enum RunTime
       {
@@ -110,6 +105,10 @@ namespace Mantid
         /// The total of all run times
         RTTotal = 2*RTGetTotalCounts + RTMarkDetects
       };
+      ///a flag int value to indicate that the value wasn't set by users
+      static const int UNSETINT = INT_MAX-15;
+      /// An estimate of the percentage of the algorithm runtimes that has been completed 
+      float m_PercentDone;
       /// An estimate total number of additions or equilivent are require to compute a spectrum 
       int m_TotalTime;
       /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd

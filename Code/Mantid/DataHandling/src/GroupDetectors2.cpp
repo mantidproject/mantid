@@ -7,6 +7,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/Exception.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 #include "Poco/StringTokenizer.h"
@@ -58,9 +59,10 @@ void GroupDetectors2::init()
     "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
     "set)" );
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-    "An array of workspace indices to combine" );
+    "An array of spectra indices to combine" );
   declareProperty("KeepUngroupedSpectra",false,
-    "If true, ungrouped spectra will be kept in the output workspace");
+    "If true ungrouped spectra will be copied to the output workspace\n"
+    "and placed after the groups");
 }
 
 void GroupDetectors2::exec()
@@ -193,7 +195,7 @@ void GroupDetectors2::getGroups(Workspace2D_const_sptr workspace,
 *  @param fname the full path name of the file to open
 *  @param workspace a pointer to the input workspace, used to get spectra indexes from numbers
 *  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
-*  @throws invalid_argument if there's any problem with the file or its format
+*  @throws FileError if there's any problem with the file or its format
 */
 void GroupDetectors2::processFile( std::string fname,
           Workspace2D_const_sptr workspace, std::vector<int> &unUsedSpec )
@@ -210,7 +212,7 @@ void GroupDetectors2::processFile( std::string fname,
   if ( File.rdstate() & std::ios::failbit ) 
   {
     g_log.debug() << " file state failbit set after reading attempt" << std::endl;
-    throw std::invalid_argument(std::string("Couldn't read from file ") + fname);
+    throw Exception::FileError("Couldn't read file", fname);
   }
   g_log.debug() << " success opening input file " << fname << std::endl;
   progress(m_FracCompl += OPENINGFILE);
@@ -230,7 +232,7 @@ void GroupDetectors2::processFile( std::string fname,
     // Reading file now ... 
     while ( totalNumberOfGroups == EMPTY_LINE )
     {
-      if ( ! File ) throw std::invalid_argument("The input file doesn't appear to contain any data");
+      if ( ! File ) throw Exception::FileError("The input file doesn't appear to contain any data", fname);
       std::getline( File, firstLine ), lineNum ++;
       totalNumberOfGroups = readInt(firstLine);
     }
@@ -250,7 +252,7 @@ void GroupDetectors2::processFile( std::string fname,
     std::string error(e.what() + std::string(" near line number ") + boost::lexical_cast<std::string>(lineNum));
     if ( File.rdstate() & std::ios::failbit )
       error = "Input output error while reading file ";
-    throw std::invalid_argument(error);
+    throw Exception::FileError(error, fname);
   }
   catch (boost::bad_lexical_cast &e)
   {
@@ -259,7 +261,7 @@ void GroupDetectors2::processFile( std::string fname,
     std::string error(std::string("Problem reading integer value \"") + e.what() + std::string("\" near line number ") + boost::lexical_cast<std::string>(lineNum));
     if ( File.rdstate() & std::ios::failbit )
       error = "Input output error while reading file ";
-    throw std::invalid_argument(error);
+    throw Exception::FileError(error, fname);
   }
   File.close();
   g_log.debug() << "Closed file " << fname << " after reading in " << m_GroupSpecInds.size() << " groups" << std::endl;
@@ -369,7 +371,7 @@ void GroupDetectors2::readFile(std::map<int,int> &specs2index, std::ifstream &Fi
 *  @param specs2index a map with spectra numbers as indexes and index numbers as values
 *  @param output the list of integers, with any ranges expanded
 *  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
-*  @throws boost::bad_lexical_cast when the string contains a non-integer
+*  @throws invalid_argument when a number couldn't be found or the number is not in the spectra map
 */
 void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &specs2index, std::vector<int> &output, std::vector<int> &unUsedSpec)
 {
@@ -397,7 +399,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
       }
       else
       {// the spectra was already included in a group
-        g_log.warning() << "Duplicate spectra number " << ind->second << " ignored in input file" << std::endl;
+        g_log.warning() << "Duplicate spectra number " << specNumbers[i] << " ignored in input file" << std::endl;
       }
     }
   }
@@ -501,10 +503,7 @@ void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, Workspace2D_
   copyFrIt ++;
   // go thorugh all the spectra in the input workspace
   for ( ; copyFrIt != unGroupedSet.end(); ++copyFrIt )
-  {
-    if ( outIndex == outputWS->getNumberHistograms() )
-/*STEVES get rid of this*/throw std::logic_error("Couldn't copy all of the spectra into the output workspace");
-
+  {// error checking code that code be added if ( outIndex == outputWS->getNumberHistograms() ) throw std::logic_error("Couldn't copy all of the spectra into the output workspace");
     outputWS->dataX(outIndex) = inputWS->readX(*copyFrIt);
     outputWS->dataY(outIndex) = inputWS->readY(*copyFrIt);
     outputWS->dataE(outIndex) = inputWS->readE(*copyFrIt);
@@ -530,8 +529,7 @@ void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, Workspace2D_
 /** Expands any ranges in the input string, eg. "1 3-5 4" -> "1 3 4 5 4"
 *  @param line a line of input that is interpreted and expanded
 *  @param outList all integers specified both as ranges and individually in order
-*  @throws invalid_argument if the hyphen occurs at the start or the end of the line
-*  @throws boost::bad_lexical_cast if a non-integer value was found 
+*  @throws invalid_argument if a character is found that is not an integer or hypehn and when a hyphen occurs at the start or the end of the line
 */
 void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<int> &outList)
 {
@@ -565,6 +563,11 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<
 
       Poco::StringTokenizer afterHyphen(ranges[loop+1], " ", IGNORE_SPACES);
       readPostion = afterHyphen.begin();
+      if ( readPostion == afterHyphen.end() )
+      {
+        throw std::invalid_argument("A '-' follows straight after another '-', can't interpret range specification");
+      }
+
       // the tokenizer will always return at least on string
       const int rangeEnd = boost::lexical_cast<int>(*readPostion);
     
