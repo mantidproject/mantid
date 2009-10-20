@@ -35,7 +35,7 @@ namespace CurveFitting
   using API::Jacobian;
 
   /// The implementation of Jacobian
-  class JacobianImpl: public Jacobian
+  class JacobianImpl1: public Jacobian
   {
     /// The pointer to the GSL's internal jacobian matrix
     gsl_matrix * m_J;
@@ -54,9 +54,9 @@ namespace CurveFitting
   };
 
   /// Structure to contain least squares data and used by GSL
-  struct FitData {
+  struct FitData1 {
     /// Constructor
-    FitData(Fit* f):fit(f){}
+    FitData1(Fit* f):fit(f){}
     /// number of points to be fitted (size of X, Y and sigmaData arrays)
     size_t n;
     /// number of (active) fit parameters
@@ -73,7 +73,7 @@ namespace CurveFitting
     /// Will store output function values from gsl_f
     double * forSimplexLSwrap;
     /// Jacobi matrix interface
-    JacobianImpl J;
+    JacobianImpl1 J;
   };
 
   /** Fit GSL function wrapper
@@ -84,7 +84,7 @@ namespace CurveFitting
   */
   static int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 
-    struct FitData *p = (struct FitData *)params;
+    struct FitData1 *p = (struct FitData1 *)params;
     p->fit->function (x->data, f->data, p->X, p->n);
 
     // function() return calculated data values. Need to convert this values into
@@ -105,7 +105,7 @@ namespace CurveFitting
   */
   static int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
 
-    struct FitData *p = (struct FitData *)params;
+    struct FitData1 *p = (struct FitData1 *)params;
 
     p->J.setJ(J);
 
@@ -145,7 +145,7 @@ namespace CurveFitting
   static double gsl_costFunction(const gsl_vector * x, void *params)
   {
 
-    struct FitData *p = (struct FitData *)params;
+    struct FitData1 *p = (struct FitData1 *)params;
     double * l_forSimplexLSwrap = p->forSimplexLSwrap;
 
     p->fit->function (x->data,
@@ -167,23 +167,6 @@ namespace CurveFitting
 
     return retVal;
   }
-
-  /** Overload this function if the actual fitted parameters are different from 
-  those the user specifies. Input is an Array of initial values of the fit 
-  parameters as listed in declareParameters(). By default no changes is made
-  to these. If this method is overloaded, the method modifyFinalFittedParameters()
-  must also be overloaded.
-  * @param fittedParameter Values of fitting parameters in the order listed in declareParameters()
-  */
-  void Fit::modifyInitialFittedParameters(std::vector<double>& fittedParameter) 
-  {}
-
-  /** If modifyInitialFittedParameters is overloaded this method must also be overloaded
-  to reverse the effect of modifyInitialFittedParameters before outputting the results back to the user.
-  * @param fittedParameter Values of fitting parameters in the order listed in declareParameters()
-  */
-  void Fit::modifyFinalFittedParameters(std::vector<double>& fittedParameter)
-  {}
 
   /** Initialisation method
   */
@@ -231,7 +214,7 @@ namespace CurveFitting
       const std::vector<double> inTest(nParams(),1.0);
       std::vector<double> outTest(nParams());
       const double xValuesTest = 0;
-      JacobianImpl J;
+      JacobianImpl1 J;
       boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(nParams(),1) );
       J.setJ(M.get());
       // note nData set to zero (last argument) hence this should avoid further memory problems
@@ -308,7 +291,7 @@ namespace CurveFitting
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
     // fitting parameter values.
 
-    FitData l_data(this);
+    FitData1 l_data(this);
 
     l_data.p = m_function->nActive();
     l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
@@ -338,18 +321,6 @@ namespace CurveFitting
 
     l_data.Y = &YValues[m_minX];
     l_data.sigmaData = &YErrors[m_minX];
-
-
-    // create array of fitted parameter. Take these to those input by the user. However, for doing the
-    // underlying fitting it might be more efficient to actually perform the fitting on some of other
-    // form of the fitted parameters. For instance, take the Gaussian sigma parameter. In practice it
-    // in fact more efficient to perform the fitting not on sigma but 1/sigma^2. The methods 
-    // modifyInitialFittedParameters() and modifyFinalFittedParameters() are used to allow for this;
-    // by default these function do nothing.
-
-    //m_fittedParameter.clear();
-
-    modifyInitialFittedParameters(m_fittedParameter); // does nothing except if overwritten by derived class
 
     // set-up initial guess for fit parameters
 
@@ -459,9 +430,6 @@ namespace CurveFitting
           m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,i);
     }
 
-    modifyFinalFittedParameters(m_fittedParameter);   // do nothing except if overwritten by derived class
-
-
     // Output summary to log file
 
     std::string reportOfFit = gsl_strerror(status);
@@ -541,9 +509,7 @@ namespace CurveFitting
 
 
       double* lOut = new double[l_data.n];  // to capture output from call to function()
-      modifyInitialFittedParameters(m_fittedParameter); // does nothing except if overwritten by derived class
       function(&m_fittedParameter[0], lOut, l_data.X, l_data.n);
-      modifyInitialFittedParameters(m_fittedParameter); // reverse the effect of modifyInitialFittedParameters - if any 
 
       for(unsigned int i=0; i<l_data.n; i++) 
       {

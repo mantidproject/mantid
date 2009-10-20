@@ -97,14 +97,6 @@ namespace Mantid
        */
       virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
 
-      /// Overload this function if the actual fitted parameters are different from
-      /// those the user specifies.
-      virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter);
-
-      /// If modifyInitialFittedParameters is overloaded this method must also be overloaded
-      /// to reverse the effect of modifyInitialFittedParameters before outputting the results back to the user
-      virtual void modifyFinalFittedParameters(std::vector<double>& fittedParameter);
-
       /// Holds a copy of the value of the parameters that are actually least-squared fitted.
       std::vector<double> m_fittedParameter;
 
