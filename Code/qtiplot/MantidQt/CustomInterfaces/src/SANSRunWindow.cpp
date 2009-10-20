@@ -1434,13 +1434,13 @@ void SANSRunWindow::handleRunFindCentre()
     }
     else
     {
-      py_code += "Xstart = " + m_uiForm.beam_x->text() + "/1000.; Ystart = " + m_uiForm.beam_y->text() + "/1000\n";
+      py_code += "Xstart = float(" + m_uiForm.beam_x->text() + "/1000.); Ystart = float(" + m_uiForm.beam_y->text() + "/1000.)\n";
     }
   }
 
   py_code += "\nbeamcoords = FindBeamCentre(";
-  py_code += "rlow = " + m_uiForm.beam_rmin->text() + "/1000., rupp = " 
-    + m_uiForm.beam_rmax->text() + "/1000., MaxIter = " + m_uiForm.beam_iter->text() 
+  py_code += "rlow = float(" + m_uiForm.beam_rmin->text() + "/1000.), rupp = float(" 
+    + m_uiForm.beam_rmax->text() + "/1000.), MaxIter = " + m_uiForm.beam_iter->text() 
     + ", xstart = Xstart, ystart = Ystart)\n"
     + "print '|' + str(beamcoords[0]) + '|' + str(beamcoords[1])\n";
 
