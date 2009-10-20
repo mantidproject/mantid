@@ -387,6 +387,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Q1D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Qxy.cpp"
 				>
 			</File>
@@ -810,6 +814,10 @@
 			</File>
 			<File
 				RelativePath=".\test\PowerLawCorrectionTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Q1D.h"
 				>
 			</File>
 			<File

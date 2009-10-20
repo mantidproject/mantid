@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MASKBINS_H_
-#define MANTID_ALGORITHMS_MASKBINS_H_
+#ifndef MANTID_ALGORITHMS_Q1D_H_
+#define MANTID_ALGORITHMS_Q1D_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,21 +10,23 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Masks bins in a workspace. Bins falling within the range given (even partially) are
-    masked, i.e. their data and error values are set to zero and the bin is added to the
-    list of masked bins. This range is masked for all spectra in the workspace (though the
-    workspace does not have to have common X values in all spectra).
+/** Part of the 1D data reduction chain for SANS instruments.
+    Takes a workspace in Wavelength as input, with many of the corrections
+    applied, converts it to Q, rebins to the given parameters, corrects
+    for solid angle (taking account of any bin or detector masking) and sums
+    all spectra to produce a final single spectrum result workspace
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace - The name of the Workspace to take as input. </LI>
-    <LI> OutputWorkspace - The name of the Workspace containing the masked bins. </LI>
-    <LI> XMin - The value to start masking from.</LI>
-    <LI> XMax - The value to end masking at.</LI>
+    <LI> InputWorkspace  - The (partly) corrected data in units of wavelength. </LI>
+    <LI> InputForErrors  - The workspace containing the counts to use for the error calculation
+                           Must also be in units of wavelength and have matching bins to the InputWorkspace. </LI>
+    <LI> OutputWorkspace - The workspace in which to store the result histogram. </LI>
+    <LI> OutputBinning   - The bin parameters to use for the final result. </LI>
     </UL>
-      
+ 
     @author Russell Taylor, Tessella plc
-    @date 29/04/2009
+    @date 16/10/2009
 
     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
@@ -43,36 +45,31 @@ namespace Algorithms
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-class DLLExport MaskBins : public API::Algorithm
+*/
+class DLLExport Q1D : public API::Algorithm
 {
 public:
-  /// Constructor
-  MaskBins();
+  /// (Empty) Constructor
+  Q1D() : API::Algorithm() {}
   /// Virtual destructor
-  virtual ~MaskBins() {}
+  virtual ~Q1D() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "MaskBins"; }
+  virtual const std::string name() const { return "Q1D"; }
   /// Algorithm's version
   virtual const int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "General"; }
+  virtual const std::string category() const { return "SANS"; }
 
 private:
   /// Initialisation code
   void init();
   /// Execution code
   void exec();
-  
-  void findIndices(const MantidVec& X, MantidVec::difference_type& startBin, MantidVec::difference_type& endBin);
-
-  double m_startX;                                   ///< The range start point
-  double m_endX;                                     ///< The range end point
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_MASKBINS_H_*/
+#endif /*MANTID_ALGORITHMS_Q1D_H_*/

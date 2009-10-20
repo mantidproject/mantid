@@ -16,7 +16,7 @@ DECLARE_ALGORITHM(MaskBins)
 using namespace Kernel;
 using namespace API;
 
-MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0),m_progress(NULL) {}
+MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init()
 {
@@ -66,7 +66,7 @@ void MaskBins::exec()
   }
   
   const int numHists = inputWS->getNumberHistograms();
-  m_progress=new Progress(this,0.0,1.0,numHists); 
+  Progress progress(this,0.0,1.0,numHists);
   //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
 
   for (int i = 0; i < numHists; ++i)
@@ -77,7 +77,7 @@ void MaskBins::exec()
     outputWS->dataY(i) = inputWS->readY(i);
     outputWS->dataE(i) = inputWS->readE(i);
     
-	MantidVec::difference_type startBinLoop(startBin),endBinLoop(endBin);
+    MantidVec::difference_type startBinLoop(startBin),endBinLoop(endBin);
     if (!commonBins) this->findIndices(X,startBinLoop,endBinLoop);
 
     // Loop over masking each bin in the range
@@ -85,7 +85,7 @@ void MaskBins::exec()
     {
       outputWS->maskBin(i,j);
     }
-	  m_progress->report();
+    progress.report();
   }
  
 }

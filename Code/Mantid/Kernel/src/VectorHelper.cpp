@@ -185,6 +185,7 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
  *  @param ynew Rebinned data. Must be 1 element shorter than xnew.
  *  @param enew Rebinned errors. Must be same length as ynew.
  *  @param addition If true, rebinned values are added to the existing ynew/enew vectors.
+ *                  NOTE THAT, IN THIS CASE THE RESULTING enew WILL BE THE SQUARED ERRORS!
  *  @throw runtime_error Thrown if vector sizes are inconsistent
  **/
 void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,

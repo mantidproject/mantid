@@ -287,38 +287,28 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 	################################ Correction in Q space ############################
 	# 1D
 	if CORRECTION_TYPE == '1D':
-		# Convert to Q
-		ConvertUnits(tmpWS,tmpWS,"MomentumTransfer")
-		ConvertUnits(final_result,final_result,"MomentumTransfer")
-
-		# Need to mark the workspace as a distribution at this point to get next rebin right
-		ws = mantid.getMatrixWorkspace(tmpWS)
-		ws.isDistribution(True)
-
-		# Rebin to desired Q bins
 		q_bins = str(Q1) + "," + str(DQ) + "," + str(Q2)
-		Rebin(final_result, final_result, q_bins)
-		# Calculate the solid angle corrections
-		solidangle_ws ="solidangle" 
-		SolidAngle(tmpWS,solidangle_ws)
-		RebinPreserveValue(solidangle_ws, solidangle_ws, q_bins)
-		Rebin(tmpWS, tmpWS, q_bins)
-
 		if FindingCentre == True:
+			# Convert to Q
+			ConvertUnits(tmpWS,tmpWS,"MomentumTransfer")
+			ConvertUnits(final_result,final_result,"MomentumTransfer")
+
+			# Need to mark the workspace as a distribution at this point to get next rebin right
+			ws = mantid.getMatrixWorkspace(tmpWS)
+			ws.isDistribution(True)
+
+			# Rebin to desired Q bins
+			Rebin(final_result, final_result, q_bins)
+			# Calculate the solid angle corrections
+			solidangle_ws ="solidangle" 
+			SolidAngle(tmpWS,solidangle_ws)
+			RebinPreserveValue(solidangle_ws, solidangle_ws, q_bins)
+			Rebin(tmpWS, tmpWS, q_bins)
+
 			GroupIntoQuadrants(tmpWS, final_result, solidangle_ws, maskpt_rmin[0], maskpt_rmin[1])
 			return
 		else:
-			# Sum all spectra
-			SumSpectra(final_result,final_result)
-			SumSpectra(tmpWS,tmpWS)
-			SumSpectra(solidangle_ws,solidangle_ws)
-
-			# Correct for solidangle
-			Divide(tmpWS,solidangle_ws,tmpWS)
-			mantid.deleteWorkspace(solidangle_ws)
-
-			# Now put back the fractional error from the raw count workspace into the result
-			PoissonErrors(tmpWS, final_result, final_result)
+			Q1D(tmpWS,final_result,final_result,q_bins)
 	# 2D	
 	else:
 		# Run 2D algorithm
