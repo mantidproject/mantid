@@ -11,13 +11,13 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Takes a histogram in a 2D workspace and fit it to a gaussian on top of a flat background.
-    i.e. the function: Height*exp(-0.5*((x-PeakCentre)/Sigma)^2).
+    Provide gaussian peak shape function interface to IPeakFunction.
+    I.e. the function: Height*exp(-0.5*((x-PeakCentre)/Sigma)^2).
 
     This function actually performs the fitting on 1/Sigma^2 rather than Sigma
     for stability reasons.
 
-    Properties specific to this derived class:
+    Gauassian parameters:
     <UL>
     <LI> Height - height of peak (default 0.0)</LI>
     <LI> PeakCentre - centre of peak (default 0.0)</LI>
@@ -52,39 +52,26 @@ namespace Mantid
     public:
       /// Destructor
       virtual ~Gaussian() {};
-      /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "Gaussian";}
-      /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return (1);}
-      /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "CurveFitting";}
 
+      /// overwrite IFunction base class methods
+      virtual void init();
 
-virtual void init();
-
-  /// overwrite base class methods
+      /// overwrite IPeakFunction base class methods
       virtual double centre()const {return getParameter("PeakCentre");};
+      virtual double height()const {return getParameter("Height");};
+      virtual double width()const {return 2*getParameter("Sigma");};
+      virtual void setCentre(const double c) {getParameter("PeakCentre") = c;};
+      virtual void setHeight(const double h) {getParameter("Height") = h;};
+      virtual void setWidth(const double w) {getParameter("Sigma") = w/2.0;};
 
-  virtual double height()const {return getParameter("Height");};
-  /// Returns the peak FWHM
-  virtual double width()const {return 2*getParameter("Sigma");};
-  /// Sets the parameters such that centre == c
-  virtual void setCentre(const double c) {};
-  /// Sets the parameters such that height == h
-  virtual void setHeight(const double h) {};
-  /// Sets the parameters such that FWHM = w
-  virtual void setWidth(const double w)const {};
+    //protected:
 
-
-    /// Function you want to fit to.
-  virtual void function(double* out, const double* xValues, const int& nData);
-  /// Derivatives of function with respect to parameters you are trying to fit
-  virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
-
-    protected:
-
-      //virtual void modifyStartOfRange(double& startX);
-      //virtual void modifyEndOfRange(double& endX);
+      /// overwrite IFunction base class methods
+      virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const int& nData);
+      virtual void setActiveParameter(int i,double value);
+      virtual double activeParameter(int i);
+      virtual void function(double* out, const double* xValues, const int& nData);
+      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
 
     };

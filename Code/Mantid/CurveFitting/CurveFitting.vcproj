@@ -281,6 +281,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\GaussianTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\IkedaCarpenterPV1D.h"
 				>
 			</File>

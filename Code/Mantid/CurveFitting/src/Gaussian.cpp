@@ -9,8 +9,6 @@ namespace Mantid
 namespace CurveFitting
 {
 
-// Register the class into the algorithm factory
-
 using namespace Kernel;
 using namespace API;
 
@@ -21,26 +19,6 @@ void Gaussian::init()
   declareParameter("Sigma", 1.0);
 }
 
-
-/*
-
-void Gaussian::modifyStartOfRange(double& startX) 
-{
-  const double peak_val = getProperty("PeakCentre");
-  const double sigma = getProperty("Sigma");
-
-  startX = peak_val-(6*sigma);
-}
-
-void Gaussian::modifyEndOfRange(double& endX) 
-{
-  const double peak_val = getProperty("PeakCentre");
-  const double sigma = getProperty("Sigma");
-
-  endX = peak_val+(6*sigma);
-}
-
-*/
 
 void Gaussian::function(double* out, const double* xValues, const int& nData)
 {
@@ -68,6 +46,43 @@ void Gaussian::functionDeriv(Jacobian* out, const double* xValues, const int& nD
         out->set(i,2, -0.5*diff*diff*height*e);
     }
 }
+
+void Gaussian::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
+{
+    const double& height = getParameter("Height");
+    const double& peakCentre = getParameter("PeakCentre");
+    const double& sigma = getParameter("Sigma");
+
+    for (int i = 0; i < nData; i++) {
+        double diff = xValues[i]-peakCentre;
+        double weight = 1/(sigma*sigma);
+        double e = exp(-0.5*diff*diff*weight);
+        out->set(i,0, e);
+        out->set(i,1, diff*height*e*weight);
+        out->set(i,2, diff*diff*height*e/(sigma*sigma*sigma));
+    }
+}
+
+void Gaussian::setActiveParameter(int i,double value)
+{
+  int j = indexOfActive(i);
+
+  if (nameOfActive(j) == "Sigma") 
+    parameter(j) = sqrt(1./value);
+  else
+    parameter(j) = value;
+}
+
+double Gaussian::activeParameter(int i)
+{
+  int j = indexOfActive(i);
+
+  if (nameOfActive(j) == "Sigma") 
+    return 1./pow(parameter(j),2);
+  else
+    return parameter(j);
+}
+
 
 } // namespace CurveFitting
 } // namespace Mantid
