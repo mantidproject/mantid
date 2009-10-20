@@ -102,7 +102,7 @@ namespace Mantid
       ///removes the value associated with a key
       void removeCache(const KEYTYPE key)
       {
-        std::map<const KEYTYPE,VALUETYPE >::iterator it_found = m_cacheMap.find(key);
+        CacheMapIterator it_found = m_cacheMap.find(key);
         if (it_found != m_cacheMap.end()) 
         {
           m_cacheMap.erase(it_found);
@@ -113,7 +113,7 @@ namespace Mantid
       ///Attempts to retreive a value from the cache
       bool getCacheNoStats(const KEYTYPE key, VALUETYPE& value) const
       {
-        std::map<const KEYTYPE,VALUETYPE >::const_iterator it_found = m_cacheMap.find(key);
+	CacheMapConstIterator it_found = m_cacheMap.find(key);
         if (it_found == m_cacheMap.end()) 
         {
           return false; // did not find the component
@@ -129,7 +129,10 @@ namespace Mantid
       mutable int m_cacheMiss;
       /// internal cache map
       std::map<const KEYTYPE,VALUETYPE > m_cacheMap;
-
+      /// iterator typedef 
+      typedef typename std::map<const KEYTYPE,VALUETYPE >::iterator CacheMapIterator;
+      /// const_iterator typedef 
+      typedef typename std::map<const KEYTYPE,VALUETYPE >::const_iterator CacheMapConstIterator;
     };
 
   } // namespace Kernel
