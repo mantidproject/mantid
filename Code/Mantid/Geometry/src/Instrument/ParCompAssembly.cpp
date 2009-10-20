@@ -1,8 +1,6 @@
 #include "MantidGeometry/Instrument/ParCompAssembly.h" 
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/CompAssembly.h" 
-#include "MantidGeometry/Instrument/Detector.h" 
-#include "MantidGeometry/Instrument/ParDetector.h" 
-#include "MantidGeometry/Instrument/ParObjComponent.h" 
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>
@@ -86,24 +84,8 @@ boost::shared_ptr<IComponent> ParCompAssembly::operator[](int i) const
       throw std::runtime_error("ParCompAssembly::operator[] range not valid");
   }
   boost::shared_ptr<IComponent> child_base = dynamic_cast<const CompAssembly*>(m_base)->operator[](i);
-  Detector* dc = dynamic_cast<Detector*>(child_base.get());
-  CompAssembly* ac = dynamic_cast<CompAssembly*>(child_base.get());
-  ObjComponent* oc = dynamic_cast<ObjComponent*>(child_base.get());
-  Component* cc = dynamic_cast<Component*>(child_base.get());
-  if (dc)
-      return boost::shared_ptr<IComponent>(new ParDetector(dc,m_map));
-  else if (ac)
-      return boost::shared_ptr<IComponent>(new ParCompAssembly(ac,m_map));
-  else if (oc)
-      return boost::shared_ptr<IComponent>(new ParObjComponent(oc,m_map));
-  else if (cc)
-      return boost::shared_ptr<IComponent>(new ParametrizedComponent(cc,m_map));
-  else
-  {
-      throw std::runtime_error("ParCompAssembly::operator[] zero pointer.");
-  }
-    //  return new ParObjComponent(dynamic_cast<ObjComponent*>(child_base),m_map);
-  return  boost::shared_ptr<IComponent>() ;
+
+  return ParComponentFactory::create(child_base,m_map);
 }
 
 /*! Print information about elements in the assembly to a stream
@@ -146,6 +128,39 @@ void ParCompAssembly::printTree(std::ostream& os) const
     else
     os << it->getName() << std::endl;
   }
+}
+
+/** Gets the absolute position of the ParametrizedComponentAssembly
+ * This attempts to read the cached position value from the parameter map, and creates it if it is not available.
+ * @returns A vector of the absolute position
+ */
+V3D ParCompAssembly::getPos() const
+{
+  V3D pos;
+
+  if (!m_map.getCachedLocation(m_base,pos))
+  {
+    pos = ParametrizedComponent::getPos();
+    m_map.setCachedLocation(m_base,pos);
+  }
+
+  return pos;
+}
+
+/** Gets the absolute position of the ParametrizedComponentAssembly
+ * This attempts to read the cached position value from the parameter map, and creates it if it is not available.
+ * @returns A vector of the absolute position
+ */
+const Quat ParCompAssembly::getRotation() const
+{
+  Quat rot;
+
+  if (!m_map.getCachedRotation(m_base,rot))
+  {
+    rot = ParametrizedComponent::getRotation();
+    m_map.setCachedRotation(m_base,rot);
+  }
+  return rot;
 }
 
 /*! Print information about elements in the assembly to a stream

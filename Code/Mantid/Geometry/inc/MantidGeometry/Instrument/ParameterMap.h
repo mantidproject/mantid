@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Cache.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/IComponent.h"
@@ -58,7 +59,7 @@ class DLLExport ParameterMap
 public:
 #ifndef HAS_UNORDERED_MAP_H
   /// Parameter map typedef
-    typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
   /// Parameter map iterator typedef
   typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_it;
 #else
@@ -76,7 +77,11 @@ public:
     ///Copy Contructor
     ParameterMap(const ParameterMap& copy);
     /// Clears the map
-    void clear(){m_map.clear();}
+    void clear()
+    {
+      m_map.clear();
+      clearCache();
+    }
 
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name, const std::string& value)
@@ -180,20 +185,32 @@ public:
          @param name Name for the new parameter
          @param value Parameter value as a string
      */
-    void addV3D(const IComponent* comp,const std::string& name, const std::string& value){add("V3D",comp,name,value);}
+    void addV3D(const IComponent* comp,const std::string& name, const std::string& value)
+    {
+      add("V3D",comp,name,value);
+      clearCache();
+    }
     /**  Adds a V3D value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a V3D
      */
-    void addV3D(const IComponent* comp,const std::string& name, const V3D& value){add("V3D",comp,name,value);}
+    void addV3D(const IComponent* comp,const std::string& name, const V3D& value)
+    {
+      add("V3D",comp,name,value);
+      clearCache();
+    }
 
     /**  Adds a Quat value to the parameter map.
          @param comp Component to which the new parameter is related
          @param name Name for the new parameter
          @param value Parameter value as a Quat
      */
-    void addQuat(const IComponent* comp,const std::string& name, const Quat& value){add("Quat",comp,name,value);}
+    void addQuat(const IComponent* comp,const std::string& name, const Quat& value)
+    {
+      add("Quat",comp,name,value);
+      clearCache();
+    }
 
     /// Return the value of a parameter as a string.
     std::string getString(const IComponent* comp,const std::string& name);
@@ -239,25 +256,43 @@ public:
      */
     std::vector<V3D> getV3D(const std::string& compName,const std::string& name)const{return getType<V3D>(compName,name);}
 
-    /// Returns a vector with all parameter names for componenet comp
+    /// Returns a vector with all parameter names for component comp
     std::vector<std::string> nameList(const IComponent* comp)const;
 
     /// Returns a string with all component names, parameter names and values
     std::string asString()const;
 
-    /** Populates the map from a string containing triplets of comp_name,param_name,param_value separated by 
-        semicolons, e.g. "monitor1,pos,V3D,[0,0,1.0];detector_bank2,pos,V3D,[1,2,0]"
-        @param str The input string
-     */
-    void fromString(const std::string& str);
+    ///Clears the location and roatation caches
+    void clearCache()
+    {
+      m_cacheLocMap.clear();
+      m_cacheRotMap.clear();
+    }
+ 
+    ///Sets a cached location on the location cache
+    void setCachedLocation(const IComponent* comp, V3D& location) const;
+    
+    ///Attempts to retreive a location from the location cache
+    bool getCachedLocation(const IComponent* comp, V3D& location) const;
+
+    ///Sets a cached rotation on the rotation cache
+    void setCachedRotation(const IComponent* comp, Quat& rotation) const;
+    
+    ///Attempts to retreive a rotation from the rotation cache
+    bool getCachedRotation(const IComponent* comp, Quat& rotation) const;
 
 private:
   ///Assignment operator
   ParameterMap& operator=(const ParameterMap& rhs);
   /// report an error
   void reportError(const std::string& str);
-  /// insternal parameter map instance
+  /// internal parameter map instance
   pmap m_map;
+
+  /// internal cache map instance for cached postition values
+  mutable Kernel::Cache<const ComponentID,V3D > m_cacheLocMap;
+  /// internal cache map instance for cached rotation values
+  mutable Kernel::Cache<const ComponentID,Quat > m_cacheRotMap;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

@@ -97,13 +97,13 @@ public:
      V3D getRelativePos() const;
 
     //! Get the position of the IComponent. Tree structure is traverse through the parent chain
-     V3D getPos() const;
+     virtual V3D getPos() const;
 
     //! Get the relative Orientation
      const Quat& getRelativeRot() const;
 
     //! Get the absolute orientation of the IComponent
-     const Quat getRotation() const;
+     virtual const Quat getRotation() const;
 
     //! Get the distance to another IComponent
      double getDistance(const IComponent&) const;

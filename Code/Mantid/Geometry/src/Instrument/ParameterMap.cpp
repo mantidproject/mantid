@@ -131,6 +131,9 @@ void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::strin
     return;
   }
 
+  //clear the position cache
+  clearCache();
+
   // finally add or update "pos" parameter
 
   if (param)
@@ -175,6 +178,9 @@ void ParameterMap::addRotationParam(const IComponent* comp,const std::string& na
     return;
   }
 
+  //clear the position cache
+  clearCache();
+
   // finally add or update "pos" parameter
   if (param)
     param->set(quat);
@@ -189,10 +195,40 @@ void ParameterMap::reportError(const std::string& str)
     g_log.error(str);
 }
 
-void ParameterMap::fromString(const std::string& str)
+///Sets a cached location on the location cache
+/// @param comp The Component to set the location of
+/// @param location The location 
+void ParameterMap::setCachedLocation(const IComponent* comp, V3D& location) const
 {
-
+  m_cacheLocMap.setCache(comp->getComponentID(),location);
 }
+
+///Attempts to retreive a location from the location cache
+/// @param comp The Component to find the location of
+/// @param location If the location is found it's value will be set here
+/// @returns true if the location is in the map, otherwise false
+bool ParameterMap::getCachedLocation(const IComponent* comp, V3D& location) const
+{
+  return m_cacheLocMap.getCache(comp->getComponentID(),location);
+}
+
+///Sets a cached rotation on the rotation cache
+/// @param comp The Component to set the rotation of
+/// @param rotation The rotation as a quaternion 
+void ParameterMap::setCachedRotation(const IComponent* comp, Quat& rotation) const
+{
+  m_cacheRotMap.setCache(comp->getComponentID(),rotation);
+}
+
+///Attempts to retreive a rotation from the rotation cache
+/// @param comp The Component to find the rotation of
+/// @param rotation If the rotation is found it's value will be set here
+/// @returns true if the rotation is in the map, otherwise false
+bool ParameterMap::getCachedRotation(const IComponent* comp, Quat& rotation) const
+{
+  return m_cacheRotMap.getCache(comp->getComponentID(),rotation);
+}
+
 
 } // Namespace Geometry
 

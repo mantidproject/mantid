@@ -333,6 +333,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidKernel\Cache.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\CacheTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidKernel\ConfigService.h"
 				>
 			</File>

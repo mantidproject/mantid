@@ -64,6 +64,12 @@ public:
   //! Print information about all children
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
+
+  //! Get the position of the IComponent. Tree structure is traversed through the parent chain
+  virtual V3D getPos() const;
+  //! Get the Rotation of the IComponent.
+  virtual const Quat getRotation() const;
+
 private:
   /// Private copy assignment operator
   ParCompAssembly& operator=(const ICompAssembly&);

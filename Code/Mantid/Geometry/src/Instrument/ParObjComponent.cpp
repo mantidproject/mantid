@@ -34,7 +34,7 @@ bool ParObjComponent::isValid(const V3D& point) const
   if (!Shape()) return (this->getPos() == point);
   // Otherwise pass through the shifted point to the Object::isValid method
   V3D scaleFactor=this->getScaleFactorP();
-  return Shape()->isValid( factorOutComponentPosition(point) / scaleFactor );
+  return Shape()->isValid( factorOutComponentPosition(point) / scaleFactor )!=0;
 }
 
 /// Does the point given lie on the surface of this object component?
@@ -44,7 +44,7 @@ bool ParObjComponent::isOnSide(const V3D& point) const
   if (!Shape()) return (this->getPos() == point);
   // Otherwise pass through the shifted point to the Object::isOnSide method
   V3D scaleFactor=this->getScaleFactorP();
-  return Shape()->isOnSide( factorOutComponentPosition(point) / scaleFactor );
+  return Shape()->isOnSide( factorOutComponentPosition(point) / scaleFactor )!=0;
 }
 
 /** Checks whether the track given will pass through this Component.
