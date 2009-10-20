@@ -199,6 +199,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Fit.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Fit1D.cpp"
 				>
 			</File>
@@ -250,6 +254,10 @@
 			</File>
 			<File
 				RelativePath=".\test\BackToBackExponential1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\Fit.h"
 				>
 			</File>
 			<File

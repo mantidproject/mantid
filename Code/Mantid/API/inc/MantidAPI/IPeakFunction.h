@@ -45,11 +45,11 @@ public:
   /// Returns the peak FWHM
   virtual double width()const = 0;
   /// Sets the parameters such that centre == c
-  virtual void setCentre(const double c)const = 0;
+  virtual void setCentre(const double c) = 0;
   /// Sets the parameters such that height == h
-  virtual void setHeight(const double h)const = 0;
+  virtual void setHeight(const double h) = 0;
   /// Sets the parameters such that FWHM = w
-  virtual void setWidth(const double w)const = 0;
+  virtual void setWidth(const double w) = 0;
 };
 
 } // namespace API

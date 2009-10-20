@@ -54,30 +54,48 @@ class Jacobian;
 class DLLExport IFunction
 {
 public:
+  /// Function initialization. Declare function parameters in this method.
+  virtual void init() = 0;
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
-  /// Derivatives of function with respect to parameters you are trying to fit
+  /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out, const double* xValues, const int& nData) = 0;
-  /// Update parameters after a fitting iteration
-  void updateActive(const double* in);
-  /// Number of active (in terms of fitting) parameters
-  int nActive()const{return nParams() - m_indexMap.size();}
-  /// Total number of parameters
-  int nParams()const{return m_parameters.size();};
-  /// Value of i-th active parameter
-  double& activeParameter(int i);
+  /// Derivatives to be used in covariance matrix calculation
+  virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
+
   /// Address of i-th parameter
   double& parameter(int);
+  /// Address of i-th parameter
+  double parameter(int i)const;
   /// Get parameter by name.
   double& getParameter(const std::string& name);
+  /// Get parameter by name.
+  double getParameter(const std::string& name)const;
+  /// Total number of parameters
+  int nParams()const{return m_parameters.size();};
+  /// Returns the name of parameter i
+  std::string parameterName(int i)const;
+
+  /// Number of active (in terms of fitting) parameters
+  int nActive()const{return m_indexMap.size() ? m_indexMap.size() : nParams();}
+  /// Value of i-th active parameter
+  virtual double activeParameter(int i);
+  /// Set new value of i-th active parameter
+  virtual void setActiveParameter(int i, double value);
+  /// Update parameters after a fitting iteration
+  void updateActive(const double* in);
+  /// Returns "global" index of active parameter i
+  int indexOfActive(int i)const;
+  /// Returns the name of active parameter i
+  std::string nameOfActive(int i)const;
 
 protected:
   /// Declare a new parameter
   void declareParameter(const std::string& name,double initValue = 0);
 
 private:
-  /// The index map. First index - active, second index - total
-  std::map<int,int> m_indexMap;
+  /// The index map. m_indexMap[i] gives the total index for active parameter i
+  std::vector<int> m_indexMap;
   std::vector<std::string> m_parameterNames;
   std::vector<double> m_parameters;
 };
@@ -89,8 +107,8 @@ class Jacobian
 {
 public:
   /**  Set a value to a Jacobian matrix element.
-  *   @param iY The index of the data point.
-  *   @param iP The index of the parameter.
+  *   @param iY The index of a data point.
+  *   @param iP The index of an active? parameter.
   *   @param value The derivative value.
   */
   virtual void set(int iY, int iP, double value) = 0;
