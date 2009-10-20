@@ -149,6 +149,15 @@ def MaskBySpecNumber(workspace, speclist):
         return ''
     MaskDetectors(workspace, SpectraList = speclist)
 
+# Mask by bin range
+def MaskByBinRange(workspace, timemask):
+	# timemask should be a ';' separated list of start/end values
+	ranges = timemask.split(';')
+	for r in ranges:
+		limits = r.split()
+		if len(limits) == 2:
+			MaskBins(workspace, workspace, XMin= limits[0] ,XMax=limits[1])
+
 # Setup the transmission workspace
 def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, loqremovebins):
 	tmpWS = inputWS + '_tmp'

@@ -1,3 +1,4 @@
+
 ###########################################################################
 # This is the template analysis script for reducing the SANS data.        #
 # It has place holders so that the appropriate data can be filled in at   #
@@ -36,7 +37,8 @@ TRANS_CAN = '|TRANSMISSIONCAN|'
 DIRECT_SAMPLE = '|DIRECTSAMPLE|'
 
 # Now the mask string (can be empty)
-MASKSTRING = '|MASKSTRING|'
+SPECMASKSTRING = '|SPECMASKSTRING|'
+TIMEMASKSTRING = '|TIMEMASKSTRING|'
 
 # Instrument information
 INSTR_DIR = '|INSTRUMENTPATH|'
@@ -246,8 +248,11 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 			SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
 	# Mask other requested spectra that are given in the GUI
-	speclist = SANSUtility.ConvertToSpecList(MASKSTRING, SPECMIN, DIMENSION)
+	speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, SPECMIN, DIMENSION)
+	# Spectrum mask
 	SANSUtility.MaskBySpecNumber(final_result, speclist)
+	# Time mask
+	SANSUtility.MaskByBinRange(final_result, TIMEMASKSTRING)
 	####################################################################################
 	
 	######################## Unit change and rebin #####################################

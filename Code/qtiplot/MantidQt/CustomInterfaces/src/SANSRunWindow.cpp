@@ -376,27 +376,36 @@ bool SANSRunWindow::loadUserFile()
     }
     else if( com_line.startsWith("mask", Qt::CaseInsensitive) )
     {
-      QString type = com_line.section(' ',1, 1);
       QString col1_txt(""), col2_txt("");
-      if( type.startsWith('s', Qt::CaseInsensitive) )
+      QString type = com_line.section(' ',1);
+      //TIME mask - MASK/T start end
+      if( com_line.startsWith("mask/t", Qt::CaseInsensitive) )
       {
-	col1_txt = "Spectrum";
+	col1_txt = "Time";
 	col2_txt = type;
       }
-      else if( type.startsWith('h', Qt::CaseInsensitive) || type.startsWith('v', Qt::CaseInsensitive) )
+      else 
       {
-	if( type.contains('+') )
+	if( type.startsWith('s', Qt::CaseInsensitive) )
 	{
-	  col1_txt = "Box";
+	  col1_txt = "Spectrum";
+	  col2_txt = type;
 	}
-	else
+	else if( type.startsWith('h', Qt::CaseInsensitive) || type.startsWith('v', Qt::CaseInsensitive) )
 	{
-	  col1_txt = "Strip";
+	  if( type.contains('+') )
+	  {
+	    col1_txt = "Box";
+	  }
+	  else
+	  {
+	    col1_txt = "Strip";
+	  }
+	  col2_txt = type;
 	}
-	col2_txt = type;
+	else continue;
       }
-      else continue;
-      
+
       int row = m_uiForm.mask_table->rowCount();
       //Insert line after last row
       m_uiForm.mask_table->insertRow(row);
@@ -702,22 +711,45 @@ QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & 
 }
  
 /**
- * Create the a comma separated list of masking values using the masking information from the Mask tab
+ * Create the mask strings for spectra and times
  */
-QString SANSRunWindow::createMaskString() const
+void SANSRunWindow::createMaskStrings(QString & spectramask, QString & timemask) const
 {
-  QString maskstring;
+  spectramask = "";
+  timemask = "";
   int nrows = m_uiForm.mask_table->rowCount();
   for( int r = 0; r < nrows; ++r )
   {
-    QString type = m_uiForm.mask_table->item(r, 1)->text();
-    if( type == "infinite-cylinder" ) continue;
-    
-    maskstring += m_uiForm.mask_table->item(r, 1)->text() + ",";
+    QString detail = m_uiForm.mask_table->item(r, 1)->text();
+    if( detail == "infinite-cylinder" ) continue;
+    QString type = m_uiForm.mask_table->item(r, 0)->text();
+    if( type == "Time" )
+    {
+      timemask += detail + ";";
+    }
+    else
+    {
+      spectramask += detail + ",";
+    }
   }
-  maskstring += m_uiForm.user_maskEdit->text();
-  return maskstring;
+  
+  QStringList guimask = m_uiForm.user_maskEdit->text().split(',');
+  QStringListIterator itr(guimask);
+  while(itr.hasNext())
+  {
+    QString item = itr.next();
+    if( item.startsWith('t', Qt::CaseInsensitive) )
+    {
+      timemask += item.section('t',1) + ";";
+    }
+    else
+    {
+      spectramask += item + ",";
+    }
+  }
+    
 }
+
 
 void SANSRunWindow::setupGeometryDetails()
 {
@@ -1082,21 +1114,13 @@ bool SANSRunWindow::handleLoadButtonClick()
     QString ws_name;
     if( key < 3 ) ws_name = run_no + "_sans_" + m_uiForm.file_opt->currentText();
     else ws_name = run_no + "_trans_" + m_uiForm.file_opt->currentText();
+
     //Check if we already have it and do nothing if that is so
     if( workspaceExists(ws_name) && !m_force_reload ) 
     {
       load_success = true;
       continue;
     }
-    // Load log information first
-    m_logvalues = loadDetectorLogs(work_dir, run_no);
-    if( m_logvalues.empty() )
-    {
-      showInformationBox("Error: Canot find log file for run " + run_no + ". \nReduction cannot continue.");
-      m_uiForm.load_dataBtn->setEnabled(true);
-      return false;
-    }
-
     //Load the file. This checks for required padding of zeros etc
     int n_periods = runLoadData(work_dir, run_no, 
 				m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString(), ws_name);
@@ -1116,6 +1140,15 @@ bool SANSRunWindow::handleLoadButtonClick()
     m_workspace_names.insert(key, ws_name);
     if( key == 0 )
     {
+      // Load log information first
+      m_logvalues = loadDetectorLogs(work_dir, run_no);
+      if( m_logvalues.empty() )
+      {
+	showInformationBox("Error: Cannot find log file for run " + run_no + ". \nReduction cannot continue.");
+	m_uiForm.load_dataBtn->setEnabled(true);
+	return false;
+      }
+
       Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
         (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
       if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
@@ -1252,9 +1285,13 @@ QString SANSRunWindow::constructReductionCode(bool , bool)
 
   
   py_code.replace("|SAMPLEZOFFSET|", m_uiForm.smpl_offset->text());
-  py_code.replace("|MASKSTRING|", createMaskString());
-  py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
+  QString spectramask("");
+  QString timemask("");
+  createMaskStrings(spectramask, timemask);
+  py_code.replace("|SPECMASKSTRING|", spectramask);
+  py_code.replace("|TIMEMASKSTRING|", timemask);
 
+  py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
  
   QString backmonstart(""), backmonend("");
   if( m_uiForm.inst_opt->currentText().startsWith("l", Qt::CaseInsensitive) )
@@ -1514,7 +1551,9 @@ void SANSRunWindow::handleShowMaskButtonClick()
   py_code.replace("|RADIUSMAX|", radius);
   
   //Other masks
-  py_code.replace("|MASKLIST|", createMaskString());
+  QString spectramask, dummy;
+  createMaskStrings(spectramask, dummy);
+  py_code.replace("|MASKLIST|", spectramask);
   runPythonCode(py_code);
 }
 
@@ -1681,11 +1720,14 @@ QHash<QString, double> SANSRunWindow::loadDetectorLogs(const QString& work_dir, 
 {
   //Not necesary for LOQ for
   if( m_uiForm.inst_opt->currentIndex() == 0 ) return QHash<QString, double>();
-  
+
   QString filepath = getRawFilePath(work_dir, run_no, m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString());
+  // Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the run file name for now
   QString logname = QFileInfo(filepath).baseName();
+  logname[6] = '0';
   QString suffix = ".log";
   QString logpath = QFileInfo(filepath).path() + "/" + logname + suffix;
+  std::cerr << "logpath " << logpath.toStdString() << "\n";
   QFile handle(logpath);
   
   if( !handle.open(QIODevice::ReadOnly | QIODevice::Text) )

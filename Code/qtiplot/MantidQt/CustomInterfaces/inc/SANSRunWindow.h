@@ -84,7 +84,7 @@ private:
   ///Does the raw file exist
   QString getRawFilePath(const QString & data_dir, const QString & run_no, const QString & ext) const;
   /// Create a mask string
-  QString createMaskString() const;
+  void createMaskStrings(QString & spectramask, QString & timemask) const;
   /// Setup the geometry details tab
   void setupGeometryDetails();
   /// Load the data by running the required Mantid algorithm
