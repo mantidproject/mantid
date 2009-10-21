@@ -231,7 +231,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\quadratic.cpp"
+				RelativePath=".\src\Quadratic.cpp"
 				>
 			</File>
 			<File
@@ -309,7 +309,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidCurveFitting\quadratic.h"
+				RelativePath=".\inc\MantidCurveFitting\Quadratic.h"
 				>
 			</File>
 			<File
