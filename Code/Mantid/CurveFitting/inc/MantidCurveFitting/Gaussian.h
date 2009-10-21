@@ -53,8 +53,6 @@ namespace Mantid
       /// Destructor
       virtual ~Gaussian() {};
 
-      /// overwrite IFunction base class methods
-      virtual void init();
 
       /// overwrite IPeakFunction base class methods
       virtual double centre()const {return getParameter("PeakCentre");};
@@ -64,9 +62,9 @@ namespace Mantid
       virtual void setHeight(const double h) {getParameter("Height") = h;};
       virtual void setWidth(const double w) {getParameter("Sigma") = w/2.0;};
 
-    //protected:
 
       /// overwrite IFunction base class methods
+      virtual void init();
       virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const int& nData);
       virtual void setActiveParameter(int i,double value);
       virtual double activeParameter(int i);

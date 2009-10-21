@@ -8,7 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
@@ -94,6 +93,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
+    // set up gaussian fitting function
     Gaussian gaus;
     gaus.init();
     gaus.setCentre(11.2);
@@ -109,9 +109,6 @@ public:
     alg2.setPropertyValue("WorkspaceIndex","1");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
-    ///alg2.setPropertyValue("Height", "100.7");
-    //alg2.setPropertyValue("PeakCentre", "11.2");
-    //alg2.setPropertyValue("Sigma", "1.1");
 
     // execute fit
    TS_ASSERT_THROWS_NOTHING(

@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\quadratic.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SpecialFunctionHelper.cpp"
 				>
 			</File>
@@ -302,6 +306,14 @@
 			</File>
 			<File
 				RelativePath=".\test\Lorentzian1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\quadratic.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\QuadraticTest.h"
 				>
 			</File>
 			<File
