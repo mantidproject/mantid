@@ -245,6 +245,15 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      ;
 
    /**
+    * Property class
+    */
+   class_< Mantid::Kernel::Property, boost::noncopyable>("Property", no_init)
+     .def("isValid", &Mantid::Kernel::Property::isValid)
+     .def("value", &Mantid::Kernel::Property::value)
+     .def("allowedValues", &Mantid::Kernel::Property::allowedValues)
+     ;
+
+   /**
     * Base workspace interface
     */
    class_<Mantid::API::Workspace, boost::noncopyable>("Workspace", no_init)
