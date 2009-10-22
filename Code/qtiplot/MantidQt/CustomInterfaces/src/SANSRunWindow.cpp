@@ -1142,7 +1142,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     {
       // Load log information first
       m_logvalues = loadDetectorLogs(work_dir, run_no);
-      if( m_logvalues.empty() )
+      if( m_uiForm.inst_opt->currentIndex() == 1 && m_logvalues.empty() )
       {
 	showInformationBox("Error: Cannot find log file for run " + run_no + ". \nReduction cannot continue.");
 	m_uiForm.load_dataBtn->setEnabled(true);
