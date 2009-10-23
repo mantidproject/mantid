@@ -392,16 +392,28 @@ namespace CurveFitting
         iter++;
         status = gsl_multifit_fdfsolver_iterate(s);
 
-        if (status)  // break if error
+        //std::cout << "status " << gsl_strerror(status) << " number " << status << std::endl;
+        //for (size_t i = 0; i < m_fittedParameter.size(); i++)
+        //  std::cout << m_function->nameOfActive(i) << " = " << gsl_vector_get(s->x,i) << "  \n";
+
+        // break if not status success
+        // Note that if fitting to linear function you might get that
+        // status = GSL_ETOLF, which means cannot reach the specified tolerance in function value
+        // We might interpret this as a success convergence for the linear case
+        if (status)  
           break;
 
         status = gsl_multifit_test_delta(s->dx, s->x, 1e-4, 1e-4);
+        //std::cout << "chi-out " << gsl_blas_dnrm2(s->f) << std::endl;
         prog.report();
       }
       while (status == GSL_CONTINUE && iter < maxInterations);
 
       double chi = gsl_blas_dnrm2(s->f);
       finalCostFuncVal = chi*chi / dof;
+
+
+      int j = GSL_ETOLF;
 
       // put final converged fitting values back into m_fittedParameter
       for (size_t i = 0; i < nParams(); i++)

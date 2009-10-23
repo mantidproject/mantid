@@ -36,7 +36,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // load hrpd dataset to test against
-    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    std::string inputFile = "../../../../Test/Data/HRP39182.RAW";
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
@@ -49,14 +49,16 @@ public:
     Quadratic quad;
     quad.init();
 
+    quad.getParameter("A0") = 3.0;
+
     alg2.setFunction(&quad);
 
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","1");
+    alg2.setPropertyValue("WorkspaceIndex","0");
     alg2.setPropertyValue("StartX","66000");
-    alg2.setPropertyValue("EndX","76000");
+    alg2.setPropertyValue("EndX","66100"); // not this test for now break if interval increased
 
     // execute fit
    TS_ASSERT_THROWS_NOTHING(
@@ -66,10 +68,13 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    //double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
     //std::string str = alg2.getProperty("Output Status");
-    //std::cout << str << std::endl;
-    //TS_ASSERT_DELTA( dummy, 0.0,0.1);
+    //std::cout << std::endl << str << std::endl;
+    TS_ASSERT_DELTA( dummy, 0.69,0.01);
+    TS_ASSERT_DELTA( quad.getParameter("A0"),1.74983, 0.0001);
+    TS_ASSERT_DELTA( quad.getParameter("A1"),0.03202, 0.0001);
+    TS_ASSERT_DELTA( quad.getParameter("A2"),-0.00036, 0.0001);
 
 
   }

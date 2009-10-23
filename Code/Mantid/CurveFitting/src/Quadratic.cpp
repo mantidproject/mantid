@@ -26,19 +26,18 @@ void Quadratic::function(double* out, const double* xValues, const int& nData)
     const double& a2 = getParameter("A2");
 
     for (int i = 0; i < nData; i++) {
-        out[i] = a0+a1*xValues[i]+a2*xValues[i]*xValues[i];
+        double diff = xValues[i] - xValues[0];
+        out[i] = a0+a1*diff+a2*diff*diff;
     }
 }
 
 void Quadratic::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
-    const double& a1 = getParameter("A1");
-    const double& a2 = getParameter("A2");
-
     for (int i = 0; i < nData; i++) {
+        double diff = xValues[i] - xValues[0];
         out->set(i,0, 1);
-        out->set(i,1, xValues[i]);
-        out->set(i,2, xValues[i]*xValues[i]);
+        out->set(i,1, diff);
+        out->set(i,2, diff*diff);
     }
 }
 
