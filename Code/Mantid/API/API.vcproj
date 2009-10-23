@@ -213,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CompositeFunction.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
@@ -376,6 +380,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\ColumnFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\CompositeFunction.h"
 				>
 			</File>
 			<File

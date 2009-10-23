@@ -54,49 +54,59 @@ class Jacobian;
 class DLLExport IFunction
 {
 public:
+  /// Default constructor
+  IFunction(){}
+  /// Copy contructor
+  IFunction(const IFunction&);
+  ///Assignment operator
+  IFunction& operator=(const IFunction&);
+
   /// Function initialization. Declare function parameters in this method.
   virtual void init() = 0;
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out, const double* xValues, const int& nData) = 0;
-  /// Derivatives to be used in covariance matrix calculation
+  /// Derivatives to be used in covariance matrix calculation. Override this method some of the fitted parameters
+  /// are different form the declared ones.
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
   /// Address of i-th parameter
-  double& parameter(int);
+  virtual double& parameter(int);
   /// Address of i-th parameter
-  double parameter(int i)const;
+  virtual double parameter(int i)const;
   /// Get parameter by name.
-  double& getParameter(const std::string& name);
+  virtual double& getParameter(const std::string& name);
   /// Get parameter by name.
-  double getParameter(const std::string& name)const;
+  virtual double getParameter(const std::string& name)const;
   /// Total number of parameters
-  int nParams()const{return m_parameters.size();};
+  virtual int nParams()const{return m_parameters.size();};
   /// Returns the name of parameter i
-  std::string parameterName(int i)const;
+  virtual std::string parameterName(int i)const;
 
   /// Number of active (in terms of fitting) parameters
-  int nActive()const{return m_indexMap.size() ? m_indexMap.size() : nParams();}
-  /// Value of i-th active parameter
-  virtual double activeParameter(int i);
-  /// Set new value of i-th active parameter
+  virtual int nActive()const{return m_indexMap.size() ? m_indexMap.size() : nParams();}
+  /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
+  virtual double activeParameter(int i)const;
+  /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
   virtual void setActiveParameter(int i, double value);
   /// Update parameters after a fitting iteration
-  void updateActive(const double* in);
+  virtual void updateActive(const double* in);
   /// Returns "global" index of active parameter i
-  int indexOfActive(int i)const;
+  virtual int indexOfActive(int i)const;
   /// Returns the name of active parameter i
-  std::string nameOfActive(int i)const;
+  virtual std::string nameOfActive(int i)const;
 
 protected:
   /// Declare a new parameter
-  void declareParameter(const std::string& name,double initValue = 0);
+  virtual void declareParameter(const std::string& name,double initValue = 0);
 
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i
   std::vector<int> m_indexMap;
+  /// Keeps parameter names
   std::vector<std::string> m_parameterNames;
+  /// Keeps parameter values
   std::vector<double> m_parameters;
 };
 

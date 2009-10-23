@@ -62,7 +62,7 @@ namespace Mantid
       /// Default constructor
       Fit() : API::Algorithm(),m_function(NULL) {};
       /// Destructor
-      virtual ~Fit() {};
+      virtual ~Fit();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Fit";}
       /// Algorithm's version for identification overriding a virtual method
@@ -106,7 +106,6 @@ namespace Mantid
       /// Pointer to the fitting function
       API::IFunction* m_function;
 
-      friend struct FitData;
     };
 
     

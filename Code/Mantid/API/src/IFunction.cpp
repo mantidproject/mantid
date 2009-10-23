@@ -12,6 +12,23 @@ namespace Mantid
 namespace API
 {
 
+/// Copy contructor
+IFunction::IFunction(const IFunction& f)
+{
+  m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
+  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
+  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
+}
+
+///Assignment operator
+IFunction& IFunction::operator=(const IFunction& f)
+{
+  m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
+  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
+  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
+  return *this;
+}
+
 /** Update parameters
  *  @param in Pointer to an array with active parameters values.
  */
@@ -31,7 +48,7 @@ void IFunction::setActiveParameter(int i,double value)
   parameter(j) = value;
 }
 
-double IFunction::activeParameter(int i)
+double IFunction::activeParameter(int i)const
 {
   int j = indexOfActive(i);
   return parameter(j);

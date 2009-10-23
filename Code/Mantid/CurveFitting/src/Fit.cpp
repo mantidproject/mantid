@@ -168,6 +168,12 @@ namespace CurveFitting
     return retVal;
   }
 
+  ///Destructor
+  Fit::~Fit()
+  {
+    if (m_function) delete m_function;
+  }
+
   /** Initialisation method
   */
   void Fit::init()
