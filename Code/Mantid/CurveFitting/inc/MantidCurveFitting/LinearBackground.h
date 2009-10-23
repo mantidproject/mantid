@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_QUADRATIC_H_
-#define MANTID_CURVEFITTING_QUADRATIC_H_
+#ifndef MANTID_CURVEFITTING_LINEARBACKGROUND_H_
+#define MANTID_CURVEFITTING_LINEARBACKGROUND_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,20 +11,19 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Provide quadratic function interface to IFunction.
-    I.e. the function: A0+A1*(x-x_min)+A2*(x-x_min)^2, 
+    Provide linear function interface to IFunction.
+    I.e. the function: A0+A1*(x-x_min), 
     where x_min is the lowest x-value of the x-interval
     fitting x-range specified by the user.
 
-    Quadratic parameters:
+    LinearBackground parameters:
     <UL>
     <LI> A0 - coefficient for constant term (default 0.0)</LI>
     <LI> A1 - coefficient for linear term (default 0.0)</LI>
-    <LI> A2 - coefficient for quadratic term (default 0.0)</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 20/10/2009
+    @date 23/10/2009
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
@@ -46,11 +45,11 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Quadratic : public API::IFunction
+    class DLLExport LinearBackground : public API::IFunction
     {
     public:
       /// Destructor
-      virtual ~Quadratic() {};
+      virtual ~LinearBackground() {};
 
       /// overwrite IFunction base class methods
       virtual void init();
@@ -63,4 +62,4 @@ namespace Mantid
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_QUADRATIC_H_*/
+#endif /*MANTID_CURVEFITTING_LINEARBACKGROUND_H_*/

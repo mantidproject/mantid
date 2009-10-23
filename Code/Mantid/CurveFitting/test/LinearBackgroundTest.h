@@ -1,9 +1,9 @@
-#ifndef QUADRATICTEST_H_
-#define QUADRATICTEST_H_
+#ifndef LINEARBACKGROUNDTEST_H_
+#define LINEARBACKGROUNDTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/Quadratic.h"
+#include "MantidCurveFitting/LinearBackground.h"
 
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -16,13 +16,13 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::CurveFitting::Quadratic;
+using Mantid::CurveFitting::LinearBackground;
 using Mantid::CurveFitting::Fit;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
 
-class QuadraticTest : public CxxTest::TestSuite
+class LinearBackgroundTest : public CxxTest::TestSuite
 {
 public:
 
@@ -45,7 +45,7 @@ public:
 
 
     // set up gaussian fitting function
-    Quadratic quad;
+    LinearBackground quad;
     quad.init();
 
     quad.getParameter("A0") = 3.0;
@@ -71,13 +71,12 @@ public:
     //std::string str = alg2.getProperty("Output Status");
     //std::cout << std::endl << str << std::endl;
     TS_ASSERT_DELTA( dummy, 0.69,0.01);
-    TS_ASSERT_DELTA( quad.getParameter("A0"),1.74983, 0.0001);
-    TS_ASSERT_DELTA( quad.getParameter("A1"),0.03202, 0.0001);
-    TS_ASSERT_DELTA( quad.getParameter("A2"),-0.00036, 0.0001);
+    TS_ASSERT_DELTA( quad.getParameter("A0"),2.3242, 0.0001);
+    TS_ASSERT_DELTA( quad.getParameter("A1"),-0.0048, 0.0001);
 
 
   }
 
 };
 
-#endif /*QUADRATICTEST_H_*/
+#endif /*LINEARBACKGROUNDTEST_H_*/

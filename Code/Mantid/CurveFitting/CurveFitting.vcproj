@@ -227,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LinearBackground.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Lorentzian1D.cpp"
 				>
 			</File>
@@ -298,6 +302,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\Linear.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\LinearBackground.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LinearBackgroundTest.h"
 				>
 			</File>
 			<File
