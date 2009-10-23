@@ -190,14 +190,14 @@ void Instrument::markAsMonitor(Geometry::IDetector* det)
 
 IInstrument::plottables_const_sptr Instrument::getPlottable() const
 {
-  boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res(
-    new std::vector<Geometry::IObjComponent_const_sptr> );
+  boost::shared_ptr<std::vector<Geometry::IObjComponent_sptr> > res(
+    new std::vector<Geometry::IObjComponent_sptr> );
   res->reserve(_detectorCache.size()+10);
   appendPlottable(*this,*res);
   return res;
 }
 
-void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst) const
+void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_sptr>& lst) const
 {
   for(int i=0;i<ca.nelements();i++)
   {

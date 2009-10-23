@@ -71,7 +71,7 @@ public:
   virtual std::map<int, Geometry::IDetector_sptr> getDetectors() const = 0;
 
   /// The type used to deliver the set of plottable components
-  typedef std::vector<Geometry::IObjComponent_const_sptr> plottables;
+  typedef std::vector<Geometry::IObjComponent_sptr> plottables;
   typedef const boost::shared_ptr<const plottables> plottables_const_sptr;
   /// Get pointers to plottable components
   virtual plottables_const_sptr getPlottable() const = 0;
