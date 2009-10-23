@@ -39,7 +39,7 @@ void SaveRKH::init()
     new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace to save");
   declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save),
-		  "The name to use when saving the file");
+		"The name to use when saving the file");
   declareProperty("Append",true,"If true and Filename already exists, append, else overwrite");
 }
 
@@ -48,10 +48,18 @@ void SaveRKH::init()
  */
 void SaveRKH::exec()
 {
-  //Retrieve the input workspace
+  // Retrieve the input workspace
   m_workspace = getProperty("InputWorkspace");
 
   m_2d = (m_workspace->getNumberHistograms()>1 && m_workspace->blocksize()>1) ? true : false;
+
+  // If a 2D workspace, check that it has two numeric axes - bail out if not
+  if ( m_2d && !(m_workspace->getAxis(1)->isNumeric()) )
+  {
+    g_log.error("This algorithm expects a 2d workspace to have been converted away from \
+                 spectrum numbers on the vertical axis");
+    throw std::invalid_argument("Cannot write out this kind of workspace");
+  }
 
   // Check whether to append to an already existing file or overwrite
   using std::ios_base;

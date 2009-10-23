@@ -10,7 +10,6 @@
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <string>
-#include <ostream>
 
 namespace Mantid
 {
@@ -44,7 +43,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IInstrument: public virtual Geometry::ICompAssembly
+class DLLExport IInstrument : public virtual Geometry::ICompAssembly
 {
 public:
   ///String description of the type of component
@@ -71,8 +70,11 @@ public:
   /// return reference to detector cache 
   virtual std::map<int, Geometry::IDetector_sptr> getDetectors() const = 0;
 
+  /// The type used to deliver the set of plottable components
+  typedef std::vector<Geometry::IObjComponent_const_sptr> plottables;
+  typedef const boost::shared_ptr<const plottables> plottables_const_sptr;
   /// Get pointers to plottable components
-  virtual std::vector<Geometry::IObjComponent_sptr> getPlottable() const = 0;
+  virtual plottables_const_sptr getPlottable() const = 0;
 };
 
 /// Shared pointer to IInstrument

@@ -45,65 +45,65 @@ class DLLExport ParDetector : public ParObjComponent, public IDetector
 {
 public:
   ///A string representation of the component type
-	virtual std::string type() const {return "ParDetectorComponent";}
-	ParDetector(const Detector* base, const ParameterMap& map);
-	virtual ~ParDetector();
-	virtual IComponent* clone() const {return new ParDetector(*this);}
-	void setID(int);
+  virtual std::string type() const {return "ParDetectorComponent";}
+  ParDetector(const Detector* base, const ParameterMap& map);
+  virtual ~ParDetector();
+  virtual IComponent* clone() const {return new ParDetector(*this);}
+  void setID(int);
 
-	// IDetector methods
-    int getID() const;
-    V3D getPos() const;
-    double getDistance(const IComponent& comp) const;
-    double getTwoTheta(const V3D& observer, const V3D& axis) const;
-    double getPhi() const;
-    double solidAngle(const V3D& observer) const; 
-    bool isMasked() const;
-    bool isMonitor() const;
-    bool isValid(const V3D& point) const;
-    /// Returns a reference to itself
-    IComponent* getComponent(){return static_cast<IComponent*>(this);}
-    // end IDetector methods
-    void markAsMonitor(const bool flag = true);
+  // IDetector methods
+  int getID() const;
+  V3D getPos() const;
+  double getDistance(const IComponent& comp) const;
+  double getTwoTheta(const V3D& observer, const V3D& axis) const;
+  double getPhi() const;
+  double solidAngle(const V3D& observer) const; 
+  bool isMasked() const;
+  bool isMonitor() const;
+  bool isValid(const V3D& point) const;
+  /// Returns a reference to itself
+  IComponent* getComponent(){return static_cast<IComponent*>(this);}
+  // end IDetector methods
+  void markAsMonitor(const bool flag = true);
 
-    /**
-     * Return the value, as a double, of the named parameter for this detector. If no value is found then an empty
-     * vector is returned
-     * @param param_name The name of the parameter value
-     */
-    virtual std::vector<double> getNumberParameter(const std::string & param_name) const;
-    
-    /**
-     * Return the value, as a postion vector, of the named parameter for this detector. If no value is found then an empty
-     * vector is returned
-     * @param param_name The name of the parameter value
-     */
-    virtual std::vector<V3D> getPositionParameter(const std::string & param_name) const;
+  /**
+  * Return the value, as a double, of the named parameter for this detector. If no value is found then an empty
+  * vector is returned
+  * @param param_name The name of the parameter value
+  */
+  virtual std::vector<double> getNumberParameter(const std::string & param_name) const;
 
-    /**
-     * Return the value, as a postion vector, of the named parameter for this detector. If no value is found then an empty
-     * vector is returned
-     * @param param_name The name of the parameter value
-     */
-    virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const;
+  /**
+  * Return the value, as a postion vector, of the named parameter for this detector. If no value is found then an empty
+  * vector is returned
+  * @param param_name The name of the parameter value
+  */
+  virtual std::vector<V3D> getPositionParameter(const std::string & param_name) const;
 
- private:
-    /**
-     * A templated utility function for getting various parameter types and checking if they exist
-     */
-    template <class TYPE>
-    std::vector<TYPE> getParameter(const std::string & p_name) const
+  /**
+  * Return the value, as a postion vector, of the named parameter for this detector. If no value is found then an empty
+  * vector is returned
+  * @param param_name The name of the parameter value
+  */
+  virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const;
+
+private:
+  /**
+  * A templated utility function for getting various parameter types and checking if they exist
+  */
+  template <class TYPE>
+  std::vector<TYPE> getParameter(const std::string & p_name) const
+  {
+    Parameter_sptr param = m_map.get(this, p_name);
+    if( param != Parameter_sptr() )
     {
-      Parameter_sptr param = m_map.get(this, p_name);
-      if( param != Parameter_sptr() )
-      {
-	return std::vector<TYPE>(1, param->value<TYPE>());
-      }
-      else
-      {
-	return std::vector<TYPE>(0);
-      }
+      return std::vector<TYPE>(1, param->value<TYPE>());
     }
+    else
+    {
+      return std::vector<TYPE>(0);
+    }
+  }
 
 protected:
   ParDetector(const ParDetector&);

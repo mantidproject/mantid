@@ -68,12 +68,11 @@ public:
   /// Pointer to the ParameterMap holding the parameters of the modified instrument components.
   Kernel::cow_ptr<Geometry::ParameterMap> getParameterMap(){return m_parmap;}
 
-
   /// return reference to detector cache 
   std::map<int, Geometry::IDetector_sptr> getDetectors() const;
 
   /// Get pointers to plottable components
-  virtual std::vector<Geometry::IObjComponent_sptr> getPlottable() const;
+  virtual plottables_const_sptr getPlottable() const;
 
   /// Name of the instrument.
   std::string getName()const{return Geometry::ParCompAssembly::getName();}

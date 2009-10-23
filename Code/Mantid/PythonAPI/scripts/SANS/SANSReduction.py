@@ -152,11 +152,11 @@ def CalculateTransmissionCorrection(trans_raw, DIRECT_SAMPLE, lambdamin, dlambda
 		LoadInstrument(DIRECT_SAMPLE, INSTR_DIR + "/LOQ_trans_Definition.xml")
 		trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, True)
 		direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(DIRECT_SAMPLE, '1,2', BACKMON_START, BACKMON_END, wavbin, True)
-		CalculateTransmission(trans_tmp_out,direct_tmp_out, outputworkspace)
+		CalculateTransmission(trans_tmp_out,direct_tmp_out, outputworkspace, OutputUnfittedData=True)
 	else:
 		trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, False) 
 		direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(DIRECT_SAMPLE, '1,2', BACKMON_START, BACKMON_END, wavbin, False)
-		CalculateTransmission(trans_tmp_out,direct_tmp_out, outputworkspace, TRANS_UDET_MON, TRANS_UDET_DET, lmin, lmax)
+		CalculateTransmission(trans_tmp_out,direct_tmp_out, outputworkspace, TRANS_UDET_MON, TRANS_UDET_DET, lmin, lmax, OutputUnfittedData=True)
 	# Remove temopraries
 	mantid.deleteWorkspace(trans_tmp_out)
 	mantid.deleteWorkspace(direct_tmp_out)

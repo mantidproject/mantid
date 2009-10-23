@@ -87,9 +87,7 @@ public:
   std::map<int, Geometry::IDetector_sptr> getDetectors() const;
 
   /// Get pointers to plottable components
-  std::vector< Geometry::IObjComponent_sptr > getPlottable()const;
-  /// Add a plottable component
-  void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_sptr>& lst)const;
+  plottables_const_sptr getPlottable() const;
 
   std::string getName()const{return Geometry::CompAssembly::getName();}
 
@@ -100,7 +98,8 @@ public:
   std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}
 
 private:
-    friend class ParInstrument;
+  friend class ParInstrument;
+
   /// Private copy assignment operator
   Instrument& operator=(const Instrument&);
   /// Private copy constructor
@@ -110,6 +109,9 @@ private:
   static Kernel::Logger& g_log;
 
   Geometry::IComponent* getChild(const std::string& name) const;
+
+  /// Add a plottable component
+  void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst)const;
 
   /// Map which holds detector-IDs and pointers to detector components
   std::map<int, Geometry::IDetector*> _detectorCache;

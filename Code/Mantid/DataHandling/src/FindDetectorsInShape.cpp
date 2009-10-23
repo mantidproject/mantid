@@ -61,21 +61,21 @@ namespace Mantid
 
 			//get the instrument out of the workspace
 			IInstrument_sptr instrument_sptr = WS->getInstrument();
-			std::vector<Geometry::IObjComponent_sptr> objCmptList = instrument_sptr->getPlottable();
+      IInstrument::plottables_const_sptr objCmptList = instrument_sptr->getPlottable();
 
 			std::vector<int> foundDets;
 
 			//progress
-			int objCmptCount = objCmptList.size();
+			int objCmptCount = objCmptList->size();
 			int iprogress_step = objCmptCount / 100;
 			if (iprogress_step == 0) iprogress_step = 1;
 
 			//for every plottable item
-			for (std::vector<Geometry::IObjComponent_sptr>::iterator it = objCmptList.begin(); it!=objCmptList.end(); ++it) 
+			for (IInstrument::plottables::const_iterator it = objCmptList->begin(); it!=objCmptList->end(); ++it) 
 			{
 				//attempt to dynamic cast up to an IDetector
-				boost::shared_ptr<Geometry::IDetector> detector_sptr =
-					boost::dynamic_pointer_cast<Geometry::IDetector>((*it));
+				boost::shared_ptr<const Geometry::IDetector> detector_sptr =
+					boost::dynamic_pointer_cast<const Geometry::IDetector>((*it));
 
 				if (detector_sptr)
 				{
@@ -89,10 +89,9 @@ namespace Mantid
 							foundDets.push_back(detector_sptr->getID());
 						}
 					}
-					
 				}
 
-				int i=objCmptList.end()-it;
+				int i=objCmptList->end()-it;
 				if (i % iprogress_step == 0)
 				{
 					progress(double(i)/objCmptCount);

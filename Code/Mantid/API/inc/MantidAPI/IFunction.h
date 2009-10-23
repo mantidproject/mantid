@@ -31,7 +31,7 @@ class Jacobian;
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -58,8 +58,10 @@ public:
   IFunction(){}
   /// Copy contructor
   IFunction(const IFunction&);
-  ///Assignment operator
+  /// Assignment operator
   IFunction& operator=(const IFunction&);
+  /// Virtual destructor
+  virtual ~IFunction() {}
 
   /// Function initialization. Declare function parameters in this method.
   virtual void init() = 0;

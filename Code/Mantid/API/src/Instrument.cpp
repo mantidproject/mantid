@@ -167,7 +167,7 @@ void Instrument::markAsDetector(Geometry::IDetector* det)
 /** Mark a Component which has already been added to the Instrument class
 * as a monitor and add it to the detector cache.
 *
-* @param det Component to be marked (stored for later retrievel) as a detector Component
+* @param det Component to be marked (stored for later retrieval) as a detector Component
 *
 * @throw Exception::ExistsError if cannot add detector to cache
 */
@@ -188,32 +188,34 @@ void Instrument::markAsMonitor(Geometry::IDetector* det)
   }
 }
 
-std::vector<Geometry::IObjComponent_sptr> Instrument::getPlottable()const
+IInstrument::plottables_const_sptr Instrument::getPlottable() const
 {
-    std::vector< boost::shared_ptr<Geometry::IObjComponent> > res;
-    appendPlottable(*this,res);
-    return res;
+  boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res(
+    new std::vector<Geometry::IObjComponent_const_sptr> );
+  res->reserve(_detectorCache.size()+10);
+  appendPlottable(*this,*res);
+  return res;
 }
 
-void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_sptr>& lst)const
+void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst) const
 {
-    for(int i=0;i<ca.nelements();i++)
+  for(int i=0;i<ca.nelements();i++)
+  {
+    Geometry::IComponent* c = ca[i].get();
+    Geometry::CompAssembly* a = dynamic_cast<Geometry::CompAssembly*>(c);
+    if (a) appendPlottable(*a,lst);
+    else
     {
-        Geometry::IComponent* c = ca[i].get();
-        Geometry::CompAssembly* a = dynamic_cast<Geometry::CompAssembly*>(c);
-        if (a) appendPlottable(*a,lst);
-        else
-        {
-            Geometry::Detector* d = dynamic_cast<Geometry::Detector*>(c);
-            Geometry::ObjComponent* o = dynamic_cast<Geometry::ObjComponent*>(c);
-            if (d)
-                lst.push_back(Geometry::IObjComponent_sptr(d,NoDeleting()));
-            else if (o)
-                lst.push_back(Geometry::IObjComponent_sptr(o,NoDeleting()));
-            else
-                g_log.error()<<"Unknown comp type\n";
-        }
+      Geometry::Detector* d = dynamic_cast<Geometry::Detector*>(c);
+      Geometry::ObjComponent* o = dynamic_cast<Geometry::ObjComponent*>(c);
+      if (d)
+        lst.push_back(Geometry::IObjComponent_sptr(d,NoDeleting()));
+      else if (o)
+        lst.push_back(Geometry::IObjComponent_sptr(o,NoDeleting()));
+      else
+        g_log.error()<<"Unknown comp type\n";
     }
+  }
 }
 
 
