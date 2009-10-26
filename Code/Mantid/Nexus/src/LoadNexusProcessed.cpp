@@ -1,23 +1,19 @@
-// LoadNexusProcessed
-// @author Ronald Fowler, based on SaveNexus
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadNexusProcessed.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/FileProperty.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidNexus/NexusFileIO.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 #include "Poco/Path.h"
+#include "Poco/DateTimeParser.h"
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
@@ -31,18 +27,16 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
-    using namespace DataObjects;
 
     /// Default constructor
-    LoadNexusProcessed::LoadNexusProcessed() :
-    Algorithm(),                                    //call the constructor for the base class
-      nexusFile(new NexusFileIO()), m_filename(), m_entrynumber(0)
-    {}
+    LoadNexusProcessed::LoadNexusProcessed() : Algorithm(), m_shared_bins(false), m_xbins(), m_axis1vals()
+    {
+      NXMDisableErrorReporting();
+    }
 
     /// Delete NexusFileIO in destructor
     LoadNexusProcessed::~LoadNexusProcessed()
     {
-      delete nexusFile;
     }
 
     /** Initialisation method.
@@ -70,7 +64,7 @@ namespace Mantid
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
       mustBePositive->setLower(0);
       declareProperty("EntryNumber", 0, mustBePositive,
-        "The particular entry number to read (default: the last entry)" );
+        "The particular entry number to read (default: read all entries)" );
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -80,180 +74,416 @@ namespace Mantid
     */
     void LoadNexusProcessed::exec()
     {
-      // Retrieve the filename from the properties
-      m_filename = getPropertyValue("FileName");
-      // Need to extract the user-defined output workspace name
-      Property *ws = getProperty("OutputWorkspace");
-      std::string localWSName = ws->value();
-      boost::shared_ptr<Sample> sample;
-      //
-      m_entrynumber = getProperty("EntryNumber");
-      double startProg=0.0;
-      double endProg=0.0;
-      double p=1.0;
-      int numberOfPeriods=0;
+      //Throws an approriate exception if there is a problem with file access
+      NXRoot root(getPropertyValue("Filename"));
+      
+      //Find out how many first level entries there are
+      int nperiods = root.groups().size();
+      
+      // Check for an entry number property
+      int entrynumber = getProperty("EntryNumber");
 
-      //period  used for the no.of workspaces in .nxs file
-      //it's one   when an EntryNumber is given from UI
-      // if no EntryNumber number given from UI it's equal to 
-      //the number of workspaces in .nxs file
-      int period=0;
-      //open the  .nxs file
-      NXRoot* nexusRoot=new NXRoot (m_filename);
-      if(nexusRoot)
+      if( entrynumber > 0 && entrynumber > nperiods ) 
       {
-        //get the no.of workspaces in .nxs files
-        std::vector<NXClassInfo> grpVec=nexusRoot->groups();
-        // get the workspace count from .nxs file
-        if(!grpVec.empty())
-          numberOfPeriods=period=grpVec.size();
-		if(m_entrynumber>period)
-        {
-          throw std::invalid_argument("Invalid Entry Number:Enter a valid number");
-        }
-        delete nexusRoot;
+	g_log.error() << "Invalid entry number specified. File only contains " << nperiods << " entries.\n";
+	throw std::invalid_argument("Invalid entry number specified.");
       }
-          // create ws group
-      WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
 
-      //if  EntryNumber property is 0( default value ) create ws group and 
-      //load all the workspaces from  .nxs file to workspace group if the number of workspaces >1
-      if(m_entrynumber==0)
+      const std::string basename = "mantid_workspace_";
+      if( nperiods == 1 || entrynumber > 0 )
       {
-        if(numberOfPeriods>1)
-        {
-          //add  outputworkspace to workspace group
-          if(wsGrpSptr)wsGrpSptr->add(localWSName);
-          setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
-		  m_entrynumber=1;
-        }
-
-        p= double(1)/period;
+	if( entrynumber == 0 ) ++entrynumber;
+	std::ostringstream os;
+	os << entrynumber;
+	DataObjects::Workspace2D_sptr local_workspace = loadEntry(root, basename + os.str());
+	API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(local_workspace);
+	setProperty("OutputWorkspace", workspace);
+	
       }
       else
       {
-        numberOfPeriods=period=1;
+	API::WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
+	//This forms the name of the group
+	const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
+	const std::string prop_name = "OutputWorkspace_";
+	for( int p = 1; p <= nperiods; ++p )
+	{
+	  std::ostringstream os;
+	  os << p;
+	  DataObjects::Workspace2D_sptr local_workspace = loadEntry(root, basename + os.str());
+	  declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + os.str(), base_name + os.str(), 
+									  Direction::Output));
+	  wksp_group->add(base_name + os.str());
+	  setProperty(prop_name + os.str(), local_workspace);
+	}
+	// The group is the root property value
+	setProperty("OutputWorkspace", boost::static_pointer_cast<Workspace>(wksp_group));
+
       }
 
-      //below do...while loop is introduced to handle workspace groups
-      //if no EntryNumber given from UI loop is  executed period times
-      // if an EntryNumber is given from UI it's executed once to select the given workspace no. from.nxs file
-      do{
-        endProg+=p;
-        if (nexusFile->openNexusRead(m_filename, m_entrynumber) != 0)
+      m_axis1vals.clear();
+    }
+
+    /**
+     * Load a single entry into a workspace
+     * @param root The opened root node
+     * @param entry_name The entry name
+     * @returns A 2D workspace containing the loaded data
+     */
+    DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name)
+    {
+      NXEntry mtd_entry = root.openEntry(entry_name);
+      // Get workspace characteristics
+      NXData wksp_cls = mtd_entry.openNXData("workspace");
+
+      // Axis information
+      // "X" axis
+      NXDouble xbins = wksp_cls.openNXDouble("axis1");
+      std::string unit1 = xbins.attributes("units");
+      // Non-uniform x bins get saved as a 2D 'axis1' dataset
+      int xlength(-1);
+      if( xbins.rank() == 2 )
+      {
+	xlength = xbins.dim1();
+	m_shared_bins = false;
+      }
+      else if( xbins.rank() == 1 )
+      {
+	xlength = xbins.dim0();
+	m_shared_bins = true;
+	xbins.load();
+	m_xbins.access().assign(xbins(), xbins() + xlength);
+      }
+      else
+      {
+	throw std::runtime_error("Unknown axis1 dimension encountered.");
+      }
+
+      // MatrixWorkspace axis 1
+      NXDouble axis2 = wksp_cls.openNXDouble("axis2");
+      std::string unit2 = axis2.attributes("units");
+
+      NXDataSetTyped<double> data = wksp_cls.openDoubleData();
+      int nspectra = data.dim0();
+      int nchannels = data.dim1();
+
+      DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+	(WorkspaceFactory::Instance().create("Workspace2D", nspectra, xlength, nchannels));
+
+      //Units
+      try 
+      {
+	local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create(unit1);
+	//If this doesn't throw then it is a numeric access so grab the data so we can set it later
+	axis2.load();
+	m_axis1vals = MantidVec(axis2(), axis2() + axis2.dim0());
+      }
+      catch( std::runtime_error & )
+      {
+	g_log.warning() << "Axis 0 set to unitless quantity \"" << unit1 << "\"\n";
+      }
+
+      try 
+      {
+	local_workspace->getAxis(1)->unit() = UnitFactory::Instance().create(unit2);
+      }
+      catch( std::runtime_error & )
+      {
+	g_log.warning() << "Unable set unit for axis 1 to \"" << unit2 << "\"\n";
+      }
+      local_workspace->setYUnit(data.attributes("units"));
+
+      //Are we a distribution
+      std::string dist = xbins.attributes("distribution");
+      if( dist == "1" )
+      {
+	local_workspace->isDistribution(true);
+      }
+      else
+      {
+	local_workspace->isDistribution(false);
+      }
+
+      //Get information from all but data group
+      readInstrumentGroup(mtd_entry, local_workspace);
+      readSampleGroup(mtd_entry, local_workspace);
+      readAlgorithmHistory(mtd_entry, local_workspace);
+      readParameterMap(mtd_entry, local_workspace);      
+      
+      NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
+      const int blocksize(8);
+      const int fullblocks = nspectra / blocksize;
+      int read_stop = (fullblocks * blocksize);
+      int hist_index = 0;
+      if( m_shared_bins )
+      {
+	for( ; hist_index < read_stop; )
+	{
+	  loadBlock(data, errors, blocksize, nchannels, hist_index, local_workspace);
+	}
+	int finalblock = nspectra - read_stop;
+	if( finalblock > 0 )
+	{
+	  loadBlock(data, errors, finalblock, nchannels, hist_index, local_workspace);
+	}
+      }
+      else
+      {
+	for( ; hist_index < read_stop; )
+	{
+	  loadBlock(data, errors, xbins, blocksize, nchannels, hist_index, local_workspace);
+	}
+	int finalblock = nspectra - read_stop;
+	if( finalblock > 0 )
+	{
+	  loadBlock(data, errors, xbins, finalblock, nchannels, hist_index, local_workspace);
+	}
+
+      }
+      return local_workspace;
+    }	
+    
+
+
+    /**
+     * Read the instrument group
+     * @param mtd_entry The node for the current workspace
+     * @param local_workspace The workspace to attach the instrument
+     */
+    void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
+    {
+      //Instrument information
+      NXInstrument inst = mtd_entry.openNXInstrument("instrument");
+      runLoadInstrument(inst.getString("name"), local_workspace);
+
+      //Populate the spectra-detector map
+      NXDetector detgroup = inst.openNXDetector("detector");
+      //Read necessary arrays from the file
+      // Detector list contains a list of all of the detector numbers
+      NXInt det_list = detgroup.openNXInt("detector_list");
+      int ndets = det_list.dim0();
+      det_list.load();
+
+      //Detector count contains the number of detectors associated with each spectra
+      NXInt det_count = detgroup.openNXInt("detector_count");
+      det_count.load();
+      //Detector index - contains the index of the detector in the workspace
+      NXInt det_index = detgroup.openNXInt("detector_index");
+      det_index.load();
+      int nspectra = det_index.dim0();
+
+      //Spectra block - Contains spectrum numbers for each workspace index
+      // This might not exist so wrap and check. If it doesn't exist create a default mapping
+      bool have_spectra(true);
+      boost::shared_array<int> spectra(NULL);
+      try 
+      {
+	NXInt spectra_block = detgroup.openNXInt("spectra");
+	spectra_block.load();
+	spectra.swap(spectra_block.sharedBuffer());
+      }
+      catch(std::runtime_error &)
+      {
+	have_spectra = false;
+      }
+      
+      //Now build the spectra list 
+      int *spectra_list = new int[ndets];
+      API::Axis *axis1 = local_workspace->getAxis(1);
+      for(int i = 0; i < nspectra; ++i)
+      {
+        int spectrum(-1);
+	if( have_spectra ) spectrum = spectra[i];
+	else spectrum = i + 1;
+
+	if( m_axis1vals.empty() )
+	{
+	  axis1->spectraNo(i) = spectrum;
+	}
+	else
+	{
+	  axis1->setValue(i, m_axis1vals[i]);
+	}
+
+        int offset = det_index[i];
+	int detcount = det_count[i];
+        for(int j = 0; j < detcount; j++)
         {
-          g_log.error("Failed to read file " + m_filename);
-          throw Exception::FileError("Failed to read to file", m_filename);
+          spectra_list[offset + j] = spectrum;
         }
-        if (nexusFile->getWorkspaceSize(m_numberofspectra, m_numberofchannels, m_xpoints, m_uniformbounds,
-          m_axes, m_yunits) != 0)
-        {
-          g_log.error("Failed to read data size");
-          throw Exception::FileError("Failed to read data size", m_filename);
-        }
+      }
 
-        int total_specs = m_numberofspectra;
+      local_workspace->mutableSpectraMap().populate(spectra_list, det_list(), ndets);
+    }
 
-        // create output workspace of required size
-        DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", total_specs, m_xpoints, m_numberofchannels));
-        // set first axis name
-        const size_t colon = m_axes.find(":");
-        if (colon != std::string::npos)
-        {
-          try
-          {
-            localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(m_axes.substr(0, colon));
-          } catch (std::runtime_error&)
-          { 
-            g_log.warning("Unable to set Axis(0) units");
-          }
-          // Now set the unit on the vertical axis if not spectrum number
-          try
-          {
-            // Will just throw exception if spectraNumber - caught below
-            localWorkspace->getAxis(1)->unit() = UnitFactory::Instance().create(m_axes.substr(colon+1));
-          } catch (std::runtime_error&)
-          {
-            g_log.debug() << "Unable to set Axis(1) to " << m_axes.substr(colon+1) << "\n";
-          }
-        }
-        // set Yunits
-        if (m_yunits.size() > 0)
-          localWorkspace->setYUnit(m_yunits);
+    /**
+     * Read the instrument group
+     * @param mtd_entry The node for the current workspace
+     * @param local_workspace The workspace to attach the instrument
+     */
+    void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
+    {
+      NXMainClass sample = mtd_entry.openNXClass<NXMainClass>("sample");
+      boost::shared_ptr<Mantid::API::Sample> sample_details = local_workspace->getSample();
+      try
+      {
+	sample_details->setProtonCharge(sample.getDouble("proton_charge"));
+      }
+      catch(std::runtime_error & )
+      {
+	g_log.warning() << "Cannot access proton charge field.\n";
+      }
+      try
+      {
+	sample_details->setName(sample.getString("name"));
+      }
+      catch(std::runtime_error & )
+      {
+      }
+      
+      //Log data is stored as multiple NXlog classes, each with a time and value attribute
+      boost::shared_ptr<API::Sample> run_details = local_workspace->getSample();
+      const std::vector<NXClassInfo> & logs = sample.groups();
+      std::vector<NXClassInfo>::const_iterator iend = logs.end();
+      for( std::vector<NXClassInfo>::const_iterator itr = logs.begin(); itr != iend; ++itr )
+      {
+	if( itr->nxclass == "NXlog" ) 
+	{
+	  NXLog log_entry = sample.openNXLog(itr->nxname);
+	  Kernel::Property *p = log_entry.createTimeSeries();
+	  if( p ) 
+	  {
+	    run_details->addLogData(p);
+	  }
+	}
+      }
+    }
 
-        Histogram1D::RCtype xValues;
-        xValues.access() = localWorkspace->dataX(0);
-        if (m_uniformbounds)
-          nexusFile->getXValues(xValues.access(), 0);
-        int counter = 0;
-        API::Progress progress(this,startProg,endProg,period*m_numberofspectra);
-        for (int i = 1; i <= m_numberofspectra; ++i)
-        {
-          MantidVec& values = localWorkspace->dataY(counter);
-          MantidVec& errors = localWorkspace->dataE(counter);
-          nexusFile->getSpectra(values, errors, i);
-          if (!m_uniformbounds)
-          {
-            nexusFile->getXValues(xValues.access(), i - 1);
-          }
-          localWorkspace->setX(counter,xValues);
-          ++counter;
-          progress.report();
-        }
+    /**
+     * Read the algorithm history from the "mantid_workspace_i/process" group
+     * @param mtd_entry The node for the current workspace
+     * @param local_workspace The workspace to attach the history to
+     */
+    void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
+    {
+      NXMainClass history = mtd_entry.openNXClass<NXMainClass>("process");
+      //Group will contain a class for each algorithm, called MantidAlgorithm_i and then an 
+      //environment class
+      const std::vector<NXClassInfo> & classes = history.groups();
+      std::vector<NXClassInfo>::const_iterator iend = classes.end();
+      for( std::vector<NXClassInfo>::const_iterator itr = classes.begin(); itr != iend; ++itr )
+      {
+	if( itr->nxname.find("MantidAlgorithm") != std::string::npos )
+	{
+	  NXNote entry = history.openNXNote(itr->nxname);
+	  const std::vector<std::string> & info = entry.data();
+	  const int nlines = info.size();
+	  if( nlines < 4 )
+	  {
+	    return;
+	  }
+	  //First get name and version
+	  std::string algname(""), holder("");
+	  std::istringstream is(info[0]);
+	  is >> algname >> algname >> holder;
+	  //Chop of the v from the version string
+	  holder = std::string(holder.begin() + 1, holder.end());
+	  std::istringstream iss(holder);
+	  int version(-1);
+	  iss >> version;
 
-        sample = localWorkspace->getSample();
-        nexusFile->readNexusProcessedSample(sample);
-        // Run the LoadIntsturment algorithm if name available
-        m_instrumentName = nexusFile->readNexusInstrumentName();
-        if ( ! m_instrumentName.empty() )
-          runLoadInstrument(localWorkspace);
-        else
-          g_log.warning("No instrument file name found in the Nexus file");
-        // get any spectraMap info
-        boost::shared_ptr<IInstrument> localInstrument = localWorkspace->getInstrument();
-        nexusFile->readNexusProcessedSpectraMap(localWorkspace);
-        nexusFile->readNexusProcessedAxis(localWorkspace);
-        // Assign the result to the output workspace property
-        std::string outputWorkspace = "OutputWorkspace";
-        nexusFile->readNexusParameterMap(localWorkspace);
-        if(numberOfPeriods>1)
-        {	
-          std::stringstream suffix;
-          suffix << (m_entrynumber);
-          std::string outws =outputWorkspace+"_"+suffix.str();
-          std::string WSName = localWSName + "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
-          if(wsGrpSptr)wsGrpSptr->add(WSName);
-          setProperty(outws,boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWorkspace));
-          ++m_entrynumber;
-        }
-        else
-        {	
-          setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-        }
+	  //Get the execution date/time 
+	  is.str(info[1]);
+	  is.clear();
+	  std::string date, time;
+	  is >> holder >> holder >> date >> time;
+	  Poco::DateTime start_timedate;
+	  //This is needed by the Poco parsing function
+	  int tzdiff(-1);
+	  if( !Poco::DateTimeParser::tryParse(Mantid::NeXus::g_processed_datetime, date + " " + time, start_timedate, tzdiff))
+	  {
+	    g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
+	    return;
+	  }
+	  //Get the duration
+	  is.str(info[2]);
+	  is.clear();
+	  is >> holder >> holder >> holder;
+	  iss.clear();
+	  iss.str(holder);
+	  double dur(-1.0);
+	  iss >> dur;
+	  if ( dur < 0.0 )
+	  {
+	    g_log.warning() << "Error parsing start time in algorithm history entry." << "\n";
+	    return; 
+	  }
+	  API::AlgorithmHistory alg_hist(algname, version, start_timedate.timestamp().epochTime(), dur);
+	  //Add property information
+	  for( int index = 4; index < nlines; ++index )
+	  {
+	    const std::string line = info[index];
+	    std::string::size_type colon = line.find(":");
+	    std::string::size_type comma = line.find(",");
+	    //Each colon has a space after it
+	    std::string prop_name = line.substr(colon + 2, comma - colon - 2);
+	    colon = line.find(":", comma);
+	    comma = line.find(",", colon);
+	    std::string prop_value = line.substr(colon + 2, comma - colon - 2);
+ 	    colon = line.find(":", comma);
+	    comma = line.find(",", colon);
+	    std::string is_def = line.substr(colon + 2, comma - colon - 2);
+ 	    colon = line.find(":", comma);
+	    comma = line.find(",", colon);
+	    std::string direction = line.substr(colon + 2, comma - colon - 2);
+	    alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), Mantid::Kernel::Direction::asEnum(direction));
+	  }
+	  local_workspace->history().addAlgorithmHistory(alg_hist);
+	}
+      }
+      
+    }
 
-        nexusFile->closeNexusFile();
+    /**
+     * Read the parameter map from the mantid_workspace_i/instrument_parameter_map group.
+     * @param mtd_entry The entry object that points to the root node
+     * @param local_workspace The workspace to read into
+     */
+    void LoadNexusProcessed::readParameterMap(NXEntry & mtd_entry, 
+					      DataObjects::Workspace2D_sptr local_workspace)
+    {
+      NXNote pmap_node = mtd_entry.openNXNote("instrument_parameter_map");
+      if( pmap_node.data().empty() ) return;
 
-		//it was giving  an error message from nexus "Cannot open group" if the entry number exceeds
-		// number of periods,so resetting it to number of periods after execution
-		if(m_entrynumber>numberOfPeriods)
-			m_entrynumber=numberOfPeriods;
+      const std::string & details =  pmap_node.data().front();
+      Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
+      pmap.clear();
+      IInstrument_sptr instr = local_workspace->getBaseInstrument();
 
-        loadAlgorithmHistory(localWorkspace);
-        startProg=endProg;
-        --period;
-
-      }while(period!=0);
-
-
-      return;
+      int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+      options += Poco::StringTokenizer::TOK_TRIM;
+      Poco::StringTokenizer splitter(details, "|", options);
+      
+      Poco::StringTokenizer::Iterator iend = splitter.end();
+      std::string prev_name;
+      for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
+      {
+	Poco::StringTokenizer tokens(*itr, ";");
+	if( tokens.count() != 4 ) continue;
+	std::string comp_name = tokens[0];
+	if( comp_name == prev_name ) continue;
+	prev_name = comp_name;
+	Geometry::IComponent* comp = instr->getComponentByName(comp_name).get();
+	if( !comp ) continue;
+	pmap.add(tokens[1], comp, tokens[2], tokens[3]);
+      }
     }
 
     /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
-    *  @param localWorkspace The workspace to insert the instrument into
-    */
-    void LoadNexusProcessed::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
+     * @param inst_name The name written in the Nexus file
+     * @param localWorkspace The workspace to insert the instrument into
+     */
+    void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Determine the search directory for XML instrument definition files (IDFs)
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
@@ -266,7 +496,7 @@ namespace Mantid
       }
 
       // For Nexus Mantid processed, Instrument XML file name is read from nexus 
-      std::string instrumentID = m_instrumentName;
+      std::string instrumentID = inst_name;
       // force ID to upper case
       std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
       std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
@@ -291,85 +521,81 @@ namespace Mantid
 
     }
 
-    void LoadNexusProcessed::loadAlgorithmHistory(DataObjects::Workspace2D_sptr localWorkspace)
+    /**
+     * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. This assumes that the
+     * xbins have alread been cached
+     * @param data The NXDataSet object of y values
+     * @param errors The NXDataSet object of error values
+     * @param blocksize The blocksize to use
+     * @param nchannels The number of channels for the block
+     * @param hist The workspace index to start reading into
+     * @param store A reference to the underlying storage of the block of data. Must have the correct size
+     */
+    void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, 
+				       int blocksize, int nchannels, int &hist, 
+				       DataObjects::Workspace2D_sptr local_workspace)
     {
-      NXRoot root(m_filename);
-      std::ostringstream path;
-      int entrynumber = m_entrynumber ? m_entrynumber : 1;
-      path << "mantid_workspace_"<<entrynumber<<"/process";
-      NXMainClass process = root.openNXClass<NXMainClass>(path.str());
-      for(size_t i=0;i<process.groups().size();i++)
+      data.load(blocksize,hist);
+      errors.load(blocksize,hist);
+      double *data_start = data();
+      double *data_end = data_start + nchannels;
+      double *err_start = errors();
+      double *err_end = err_start + nchannels;
+      int final(hist + blocksize);
+      while( hist < final )
       {
-        NXClassInfo inf = process.groups()[i];
-        if (inf.nxname.substr(0,16) != "MantidAlgorithm_") continue;
-        NXNote history = process.openNXNote(inf.nxname);
-        std::vector< std::string >& hst = history.data();
-        if (hst.size() == 0) continue;
-
-        std::string name,vers,dummy;
-        std::istringstream ianame(hst[0]);
-        ianame >> dummy >> name >> vers;
-        int version = atoi( vers.substr(1).c_str() );
-
-        time_t tim = createTime_t_FromString(hst[1].substr(16,21));
-        size_t ii = hst[2].find("sec");
-        double dur = atof(hst[2].substr(20,ii-21).c_str());
-        API::AlgorithmHistory ahist(name,version,tim,dur);
-
-        for(size_t i=4;i<hst.size();i++)
-        {
-          std::string str = hst[i];
-          std::string name,value,deflt,direction;
-          size_t i0 = str.find("Name:");
-          size_t i1 = str.find(", Value:",i0+1);
-          size_t i2 = str.find(", Default?:",i1+1);
-          size_t i3 = str.find(", Direction",i2+1);
-          name = str.substr(i0+6,i1-i0-6);
-          value = str.substr(i1+9,i2-i1-9);
-          deflt = str.substr(i2+12,i3-i2-12);
-          direction = str.substr(i3+13);
-          ahist.addProperty(name,value,deflt == "Yes");
-        }
-        localWorkspace->history().addAlgorithmHistory(ahist);
-
+	MantidVec& Y = local_workspace->dataY(hist);
+	Y.assign(data_start, data_end);
+	data_start += nchannels; data_end += nchannels;
+	MantidVec& E = local_workspace->dataE(hist);
+	E.assign(err_start, err_end);
+	err_start += nchannels; err_end += nchannels;
+	local_workspace->setX(hist, m_xbins);
+	++hist;
       }
     }
 
-    /** Create time_t value from a string
-    *  @param str The string with date and time in format: YYYY-MMM-DD HH:MM:SS
-    */
-    std::time_t LoadNexusProcessed::createTime_t_FromString(const std::string &str)
+    /**
+     * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. The xbins are read along with
+     * each call to the data/error loading
+     * @param data The NXDataSet object of y values
+     * @param errors The NXDataSet object of error values
+     * @param xbins The xbin NXDataSet
+     * @param blocksize The blocksize to use
+     * @param nchannels The number of channels for the block
+     * @param hist The workspace index to start reading into
+     * @param store A reference to the underlying storage of the block of data. Must have the correct size
+     */
+    void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins,
+				       int blocksize, int nchannels, int &hist, 
+				       DataObjects::Workspace2D_sptr local_workspace)
     {
-
-      std::map<std::string,int> Month;
-      Month["Jan"] = 1;
-      Month["Feb"] = 2;
-      Month["Mar"] = 3;
-      Month["Apr"] = 4;
-      Month["May"] = 5;
-      Month["Jun"] = 6;
-      Month["Jul"] = 7;
-      Month["Aug"] = 8;
-      Month["Sep"] = 9;
-      Month["Oct"] = 10;
-      Month["Nov"] = 11;
-      Month["Dec"] = 12;
-
-      std::tm time_since_1900;
-      time_since_1900.tm_isdst = -1;
-
-      // create tm struct
-      time_since_1900.tm_year = atoi(str.substr(0,4).c_str()) - 1900;
-      std::string month = str.substr(5,3);
-
-      time_since_1900.tm_mon = Month[str.substr(5,3)];
-      time_since_1900.tm_mday = atoi(str.substr(9,2).c_str());
-      time_since_1900.tm_hour = atoi(str.substr(12,2).c_str());
-      time_since_1900.tm_min = atoi(str.substr(15,2).c_str());
-      time_since_1900.tm_sec = atoi(str.substr(18,2).c_str());
-
-      return std::mktime(&time_since_1900);
+      data.load(blocksize,hist);
+      double *data_start = data();
+      double *data_end = data_start + nchannels;
+      errors.load(blocksize,hist);
+      double *err_start = errors();
+      double *err_end = err_start + nchannels;
+      xbins.load(blocksize, hist);
+      const int nxbins(nchannels + 1);
+      double *xbin_start = xbins();
+      double *xbin_end = xbin_start + nxbins;
+      int final(hist + blocksize);
+      while( hist < final )
+      {
+	MantidVec& Y = local_workspace->dataY(hist);
+	Y.assign(data_start, data_end);
+	data_start += nchannels; data_end += nchannels;
+	MantidVec& E = local_workspace->dataE(hist);
+	E.assign(err_start, err_end);
+	err_start += nchannels; err_end += nchannels;
+	MantidVec& X = local_workspace->dataX(hist);
+	X.assign(xbin_start, xbin_end);
+	xbin_start += nxbins; xbin_end += nxbins;	
+	++hist;
+      }
     }
+
 
   } // namespace NeXus
 } // namespace Mantid

@@ -10,6 +10,8 @@ namespace Mantid
 namespace NeXus
 {
 
+  
+
 std::vector<std::string> NXAttributes::names()const
 {
     std::vector<std::string> out;
@@ -175,6 +177,16 @@ void NXClass::readAllInfo()
     reset();
 }
 
+bool NXClass::isValid(const std::string & path) const
+{
+  if( NXopengrouppath(m_fileID, path.c_str()) == NX_OK)
+  {
+    NXclosegroup(m_fileID);
+    return true;
+  }
+  else return false;
+}
+
 void NXClass::open()
 {
     if (NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str())) 
@@ -255,17 +267,17 @@ std::vector< std::string >& NXNote::data()
 {
     if (!m_data_ok)
     {
-        NXChar str = openNXChar("data");
-        str.load();
-        std::istringstream istr(std::string(str(),str.dim0()));
-        std::string line;
-        //size_t i = 0;
-        while(getline(istr,line))
-        {
-            m_data.push_back(line);
-            //std::cerr<<"data("<<i++<<"):"<<line<<'\n';
-        }
-        m_data_ok = true;
+      NXChar str = openNXChar("data");
+      str.load();
+      m_data.clear();
+      if( str.size() == 0 ) return m_data;
+      std::istringstream istr(std::string(str(),str.dim0()));
+      std::string line;
+      while(getline(istr,line))
+      {
+	m_data.push_back(line);
+      }
+      m_data_ok = true;
     }
     return m_data;
 }
@@ -357,8 +369,14 @@ void NXDataSet::open()
   {
     throw std::runtime_error("Cannot open dataset "+m_path);
   }
-  NXopendata(m_fileID,name().c_str());
-  NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type);
+  if( NXopendata(m_fileID,name().c_str()) != NX_OK )
+  {
+    throw std::runtime_error("Error opening data in group \"" + name() + "\"");
+  }
+  if( NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NX_OK )
+  {
+    throw std::runtime_error("Error retrieving information for " + name() + " group");
+  }
   getAttributes();
   NXclosedata(m_fileID);
 }
@@ -406,61 +424,24 @@ NXData::NXData(const NXClass& parent,const std::string& name):NXMainClass(parent
 
 Kernel::Property* NXLog::createTimeSeries()
 {
-    std::string logName = name();
-
+  const std::string & logName = name();
+  NXInfo vinfo = getDataSetInfo("time");
+  if( vinfo.type == NX_FLOAT64)
+  {
+    NXDouble times = openNXDouble("time");
+    times.load();
+    return parseTimeSeries(logName, times);
+  }
+  else if( vinfo.type == NX_FLOAT32 )
+  {
     NXFloat times = openNXFloat("time");
     times.load();
+    return parseTimeSeries(logName, times);
+  }
 
-    time_t start_t = Kernel::TimeSeriesProperty<std::string>::createTime_t_FromString(times.attributes("start"));
-    NXInfo vinfo = getDataSetInfo("value");
-    if (!vinfo) return NULL;
-
-    if (vinfo.dims[0] != times.dim0()) return NULL;
-
-    if (vinfo.type == NX_CHAR)
-    {
-        Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(logName);
-        NXChar value = openNXChar("value");
-        value.load();
-        for(int i=0;i<value.dim0();i++)
-        {
-            time_t t = start_t + int(times[i]);
-            for(int j=0;j<value.dim1();j++)
-            {
-                char* c = &value(i,j);
-                if (!isprint(*c)) *c = ' ';
-            }
-            logv->addValue(t,std::string(value()+i*value.dim1(),value.dim1()));
-        }
-        return logv;
-    }
-    else if (vinfo.type == NX_FLOAT32)
-    {
-        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
-        NXFloat value = openNXFloat("value");
-        value.load();
-        for(int i=0;i<value.dim0();i++)
-        {
-            time_t t = start_t + int(times[i]);
-            logv->addValue(t,value[i]);
-        }
-        return logv;
-    }
-    else if (vinfo.type == NX_INT32)
-    {
-        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
-        NXInt value = openNXInt("value");
-        value.load();
-        for(int i=0;i<value.dim0();i++)
-        {
-            time_t t = start_t + int(times[i]);
-            logv->addValue(t,value[i]);
-        }
-        return logv;
-    }
-
-    return NULL;
+  return NULL;
 }
+
 
 } // namespace DataHandling
 } // namespace Mantid

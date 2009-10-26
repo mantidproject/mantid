@@ -8,16 +8,12 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidNexus/NexusClasses.h"
-#include <climits>
-#include "MantidAPI/WorkspaceGroup.h"
-//class NexusFileIO;
-
 
 namespace Mantid
 {
   namespace NeXus
   {
-    /** @class LoadNexusProcessed LoadNexusProcessed.h NeXus/LoadNexusProcessed.h
+    /**
 
     Loads a workspace from a Nexus Processed entry in a Nexus file. 
     LoadNexusProcessed is an algorithm and as such inherits
@@ -52,75 +48,52 @@ namespace Mantid
     */
     class DLLExport LoadNexusProcessed : public API::Algorithm
     {
+
     public:
       /// Default constructor
       LoadNexusProcessed();
-
       /// Destructor
       ~LoadNexusProcessed();
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadNexusProcessed";};
+      virtual const std::string name() const { return "LoadNexusProcessed";}
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling";}
 
     private:
-
       /// Overwrites Algorithm method.
       void init();
-
       /// Overwrites Algorithm method
       void exec();
-      /// NexusFileIO instance to do IO operations
-      NexusFileIO *nexusFile;
-	 
-      /// Load algorithm history (or process)
-      void loadAlgorithmHistory(DataObjects::Workspace2D_sptr localWorkspace);
-      std::time_t createTime_t_FromString(const std::string &str);
-      /// Object to han
-      /// The name and path of the input file
-      std::string m_filename;
-      /// The number of the input entry
-      int m_entrynumber;
-      /// The title of the processed data section
-      std::string m_title;
-      /// Pointer to the local workspace
-      API::MatrixWorkspace_sptr m_outputWorkspace;
-      /// Flag set if list of spectra to save is specifed
-      //bool m_list;
-      ///// Flag set if interval of spectra to write is set
-      //bool m_interval;
-      ///// The value of the spectrum_list property
-      //std::vector<int> m_spec_list;
-      ///// The value of the spectrum_min property
-      //int m_spec_min;
-      ///// The value of the spectrum_max property
-      //int m_spec_max;
-      /// The value of the workspace number property
-      int m_numberofspectra;
-      /// total channels
-      int m_numberofchannels;
-      /// total x points (m_numberofchannels or m_numberofchannels+1)
-      int m_xpoints;
-      /// flag if bounds are same for all spectra
-      bool m_uniformbounds;
-      /// axes names
-      std::string m_axes;
-      /// Y units from Nexus file
-      std::string m_yunits;
-      /// The name of the instrument
-      std::string m_instrumentName;
-//      /// The instrument XML file name read from the Nexus file
-//      std::string m_instrumentxml;
-//      /// Instrument xml file date
-//      std::string m_instrumentdate;
-//      /// Instrument xml file version
-//      std::string m_instrumentversion;
-      /// Function to try and load instrument data from XML
-      void runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace);
+      /// Load a single entry
+      DataObjects::Workspace2D_sptr loadEntry(NXRoot & root, const std::string & entry_name);
+      /// Read the data from the sample group
+      void readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      /// Read the spectra 
+      void readInstrumentGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      /// Read the algorithm history
+      void readAlgorithmHistory(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      ///Read the instrument parameter map
+      void readParameterMap(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
+      /// Run LoadInstrument sub algorithm
+      void runLoadInstrument(const std::string & inst_name, DataObjects::Workspace2D_sptr local_workspace);
+      /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
+      void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int blocksize, 
+		     int nchannels, int &hist, DataObjects::Workspace2D_sptr local_workspace);
+      /// Load a block of data into the workspace
+      void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins, 
+		     int blocksize, int nchannels, int &hist, DataObjects::Workspace2D_sptr local_workspace);
+     
+      /// Does the current workspace have uniform binning
+      bool m_shared_bins;
+      /// The cached x binning if we have bins
+      DataObjects::Histogram1D::RCtype m_xbins;
+      /// Numeric values for the second axis, if applicable
+      MantidVec m_axis1vals;
+
       ///a flag int value that indicates a value that wasn't set
-      static const int unSetInt = INT_MAX-15;
+      static const int unSetInt = INT_MAX - 15;
 
     };
 

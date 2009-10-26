@@ -71,6 +71,16 @@ namespace Mantid
             operator bool(){return stat == NX_OK;} ///< returns success of an operation
         };
 
+      /** 
+       * LoadNexusProcessed and SaveNexusProcessed need to share some attributes, put them at
+       * namespace level here
+       */
+      /// Default block size for reading and writing processed files
+      const int g_processed_blocksize = 8;
+
+      /// Formatting string for DateTime objects within the AlgorithmHistory objects
+      const std::string g_processed_datetime = std::string("%Y-%b-%d %H:%M:%S");
+
         /**  Nexus attributes. The type of each attribute is NX_CHAR
          */
         class DLLExport NXAttributes
@@ -112,7 +122,8 @@ namespace Mantid
             /// Attributes
             NXAttributes attributes;
         protected:
-            NXhandle m_fileID;      ///< Nexus file id
+            NXhandle m_fileID;
+      ///< Nexus file id
             std::string m_path;     ///< Keeps the absolute path to the object
             bool m_open;            ///< Set to true if the object has been open
         private:
@@ -166,7 +177,7 @@ namespace Mantid
             *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indices. 
             *            The rank of the data must be 4
             */
-            virtual void load(const int blocksize = 8, int i = -1, int j = -1, int k = -1,int l = -1) {};
+            virtual void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1,int l = -1) {};
         protected:
             void getData(void* data);
             void getSlab(void* data, int start[], int size[]);
@@ -179,10 +190,6 @@ namespace Mantid
         template<class T>
         class NXDataSetTyped: public NXDataSet
         {
-	public:
-	  
-	  static int blocksize() { return 16; }
-
         public:
             /**  Constructor.
             *   @param parent The parent Nexus class. In terms of HDF it is the group containing the dataset.
@@ -218,6 +225,8 @@ namespace Mantid
             {
                 return this->operator [](i*dim1()+j);
             }
+	  /// Returns a wrapped pointer to the internal buffer
+	  boost::shared_array<T> &sharedBuffer() { return m_data; }
             /// Returns the size of the data buffer
             int size()const{return m_n;}
             /**  Implementation of the virtual NXDataSet::load(...) method. Internally the data are stored as a 1d array. 
@@ -233,7 +242,7 @@ namespace Mantid
              *   @param l Non-negative value makes it read a chunk of dimension rank()-4. i,j,k and l are its indeces. 
              *            The rank of the data must be 4
              */
-	          void load(const int blocksize = 8, int i = -1, int j = -1, int k = -1, int l=-1)
+	  void load(const int blocksize = 1, int i = -1, int j = -1, int k = -1, int l=-1)
             {
                 if (rank()>4)
                 {
@@ -332,15 +341,15 @@ namespace Mantid
                     }
                     else if (j < 0)
                     {
-                        if (i >= dim0()) rangeError();
-                        n = dim1();
-                        start[0] = i; m_size[0] = 1;
-                        start[1] = 0; m_size[1] = dim1();
-                    }
+		      if (i >= dim0()) rangeError();
+		      n = dim1() * blocksize;
+		      start[0] = i; m_size[0] = blocksize;
+		      start[1] = 0; m_size[1] = dim1();
+		    }
                     else
                     {
                         if (i >= dim0() || j >= dim1()) rangeError();
-                        n = dim1();
+                        n = 1;
                         start[0] = i; m_size[0] = 1;
                         start[1] = j; m_size[1] = 1;
                     }
@@ -431,6 +440,11 @@ namespace Mantid
             //virtual void make(const std::string& path) = 0;
             /// Resets the current position for getNextEntry() to the beginning
             void reset();
+	    /**
+	     * Check if a path exists relative to the current class path
+	     * @param path A string representing the path to test
+	     */
+	    bool isValid(const std::string & path) const;
             /**  Templated method for creating derived NX classes. It also opens the created class.
              *   @param name The name of the class
              *   @tparam NX Concrete Nexus class
@@ -457,9 +471,9 @@ namespace Mantid
             template<class T>
             NXDataSetTyped<T> openNXDataSet(const std::string& name)const
             {
-                NXDataSetTyped<T> data(*this,name);
-                data.open();
-                return data;
+	      NXDataSetTyped<T> data(*this,name);
+	      data.open();
+	      return data;
             }
 
             /**  Creates and opens an integer dataset
@@ -532,6 +546,72 @@ namespace Mantid
             std::string NX_class()const{return "NXlog";}
             /// Creates a TimeSeriesProperty and returns a pointer to it
             Kernel::Property* createTimeSeries();
+	private:
+	    ///Parse a time series
+	    template<class TYPE>
+	      Kernel::Property* parseTimeSeries(const std::string & logName, TYPE times)
+	    {
+	      time_t start_t = Kernel::TimeSeriesProperty<std::string>::createTime_t_FromString(times.attributes("start"));
+	      NXInfo vinfo = getDataSetInfo("value");
+	      if (!vinfo) return NULL;
+	      
+	      if (vinfo.dims[0] != times.dim0()) return NULL;
+  
+	      if (vinfo.type == NX_CHAR)
+	      {
+		Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(logName);
+		NXChar value = openNXChar("value");
+		value.load();
+		for(int i=0;i<value.dim0();i++)
+		{
+		  time_t t = start_t + int(times[i]);
+		  for(int j=0;j<value.dim1();j++)
+		    {
+		      char* c = &value(i,j);
+		      if (!isprint(*c)) *c = ' ';
+		    }
+		  logv->addValue(t,std::string(value()+i*value.dim1(),value.dim1()));
+		}
+		return logv;
+	      }
+	      else if (vinfo.type == NX_FLOAT64 )
+	      {
+		Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
+		NXDouble value = openNXDouble("value");
+		value.load();
+		for(int i = 0; i < value.dim0(); i++)
+		{
+		  time_t t = start_t + int(times[i]);
+		  logv->addValue(t,value[i]);
+		}
+		return logv;
+	      }
+	      else if (vinfo.type == NX_FLOAT32 )
+	      {
+		Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
+		NXFloat value = openNXFloat("value");
+		value.load();
+		for(int i = 0; i < value.dim0(); i++)
+		{
+		  time_t t = start_t + int(times[i]);
+		  logv->addValue(t,value[i]);
+		}
+		return logv;
+	      }
+	      else if (vinfo.type == NX_INT32)
+	      {
+		Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
+		NXInt value = openNXInt("value");
+		value.load();
+		for(int i=0;i<value.dim0();i++)
+		{
+		  time_t t = start_t + int(times[i]);
+		  logv->addValue(t,value[i]);
+		}
+		return logv;
+	      }
+	      return NULL;
+	    }
         };
 
         /**  Implements NXnote Nexus class.

@@ -86,8 +86,7 @@ namespace Mantid
 	    /// Load log data from the nexus file
             void loadLogs(DataObjects::Workspace2D_sptr, NXEntry entry,int period = 1);
 	    // Load a given period into the workspace
-	    void loadPeriodData(int period, NXEntry & entry, //NXDataSetTyped<int> & data, 
-				DataObjects::Workspace2D_sptr local_workspace);
+	    void loadPeriodData(int period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
 	    // Load a data block
 	    void loadBlock(NXDataSetTyped<int> & data, int blocksize, int period, int start, 
 			   int &hist, int& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
