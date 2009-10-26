@@ -539,7 +539,7 @@ namespace Mantid
      * @param blocksize The blocksize to use
      * @param nchannels The number of channels for the block
      * @param hist The workspace index to start reading into
-     * @param store A reference to the underlying storage of the block of data. Must have the correct size
+     * @param local_workspace A pointer to the workspace
      */
     void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, 
 				       int blocksize, int nchannels, int &hist, 
@@ -574,7 +574,7 @@ namespace Mantid
      * @param blocksize The blocksize to use
      * @param nchannels The number of channels for the block
      * @param hist The workspace index to start reading into
-     * @param store A reference to the underlying storage of the block of data. Must have the correct size
+     * @param local_workspace A pointer to the workspace
      */
     void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins,
 				       int blocksize, int nchannels, int &hist, 
