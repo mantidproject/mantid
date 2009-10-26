@@ -454,6 +454,7 @@ void LoadRaw3::calculateWorkspacesizes(const std::vector<int>& monitorSpecList,c
  *  @param newWorkspace  shared pointer to the  workspace
  *  @param timeChannelsVec  vector holding the X data
  *  @param  wsIndex  variable used for indexing the ouputworkspace
+ *  @param  nspecNum  spectrum number
  *  @param noTimeRegimes   regime no.
  */
 void LoadRaw3::setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,
@@ -546,7 +547,7 @@ bool LoadRaw3::isMonitor(const std::vector<int>& monitorIndexes,int spectrumNum)
 }
 /** This method creates pointer to workspace
   *@param nVectors The number of vectors/histograms in the workspace
-  *@param  The number of X data points/bin boundaries in each vector 
+  *@param  lengthIn The number of X data points/bin boundaries in each vector 
   *@return Workspace2D_sptr shared pointer to the workspace
  */
 DataObjects::Workspace2D_sptr LoadRaw3::createWorkspace(int nVectors,int lengthIn)
@@ -565,10 +566,10 @@ WorkspaceGroup_sptr LoadRaw3::createGroupWorkspace()
 }
 /** This method sets the workspace property
   * @param propertyName property name for the workspace
-  * @ param title title of the workspace
+  * @param title title of the workspace
   * @param grpWS  shared pointer to group workspace
-  * @param grpWS  shared pointer to workspace
-  *param boolean falg to identify the workspace is output workspace or monitor workspace
+  * @param workspace  shared pointer to workspace
+  * @param  bMonitor to identify the workspace is an output workspace or monitor workspace
  */
 void LoadRaw3::setWorkspaceProperty(const std::string & propertyName,const std::string& title,
 									WorkspaceGroup_sptr grpWS,DataObjects::Workspace2D_sptr workspace,bool bMonitor)
@@ -717,7 +718,7 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors,bool bexcludeMonitors,bool bse
 }
 /** This method separates/excludes monitors from output workspace and creates a separate workspace for monitors
   * @param localWorkspace shared pointer to workspace
-  * @ param bincludeMonitors boolean  variable for including monitors
+  * @param bincludeMonitors boolean  variable for including monitors
   * @param bexcludeMonitors  boolean variable for excluding monitors
   * @param bseparateMonitors  boolean variable for separating the monitor workspace from output workspace
   */
