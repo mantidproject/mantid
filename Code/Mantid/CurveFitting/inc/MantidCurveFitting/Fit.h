@@ -11,9 +11,7 @@ namespace Mantid
 {
   namespace CurveFitting
   {
-    //----------------------------------------------------------------------
-    // Forward Declaration
-    //----------------------------------------------------------------------
+    //using API::Jacobian;
   
     /**
     Abstract base class for 1D fitting functions.

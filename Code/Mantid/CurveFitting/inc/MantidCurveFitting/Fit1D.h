@@ -5,15 +5,31 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFunction.h"
 
 namespace Mantid
 {
+
   namespace CurveFitting
   {
-    //----------------------------------------------------------------------
-    // Forward Declaration
-    //----------------------------------------------------------------------
-    class Jacobian;
+    using API::Jacobian;
+
+    /**
+     *  A copy of Jacobian definition. Including Jacobian from IFunction.h causes strange crashes.
+     */
+    //class Jacobian1D
+    //{
+    //public:
+    //  /**  Set a value to a Jacobian matrix element.
+    //  *   @param iY The index of a data point.
+    //  *   @param iP The index of an active? parameter.
+    //  *   @param value The derivative value.
+    //  */
+    //  virtual void set(int iY, int iP, double value) = 0;
+    //  /// Virtual destructor
+    //  virtual ~Jacobian1D() {};
+    //protected:
+    //};
   
     /**
     Abstract base class for 1D fitting functions.
@@ -122,22 +138,7 @@ namespace Mantid
       friend struct FitData;
     };
 
-    
-    /** Represents the Jacobian in functionDeriv. The purpose of this class is to hide from the
-     *  derived Fit1D classes the fact that some of the parameters can be fixed.
-     */
-    class Jacobian
-    {
-    public:
-      /**  Set a value to a Jacobian matrix element.
-       *   @param iY The index of the data point.
-       *   @param iP The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
-       *   @param value The derivative value.
-       */
-      virtual void set(int iY, int iP, double value) = 0;
-      /// Virtual destructor
-      virtual ~Jacobian() {};
-    };
+
     
   } // namespace CurveFitting
 } // namespace Mantid

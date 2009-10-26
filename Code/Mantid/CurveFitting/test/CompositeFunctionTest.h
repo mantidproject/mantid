@@ -1,0 +1,342 @@
+#ifndef COMPOSITEFUNCTIONTEST_H_
+#define COMPOSITEFUNCTIONTEST_H_
+
+#include <cxxtest/TestSuite.h>
+
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidCurveFitting/Fit.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+
+#include <iostream>
+#include <fstream>
+
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::CurveFitting;
+
+typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
+typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
+
+class Gauss: public IPeakFunction
+{
+public:
+  void init()
+  {
+    declareParameter("c");
+    declareParameter("h",1.);
+    declareParameter("s",1.);
+  }
+  void function(double* out, const double* xValues, const int& nData)
+  {
+    double c = getParameter("c");
+    double h = getParameter("h");
+    double w = getParameter("s");
+    for(int i=0;i<nData;i++)
+    {
+      double x = xValues[i] - c;
+      out[i] = h*exp(-0.5*x*x*w);
+    }
+  }
+  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  {
+    //throw Mantid::Kernel::Exception::NotImplementedError("");
+    double c = getParameter("c");
+    double h = getParameter("h");
+    double w = getParameter("s");
+    for(int i=0;i<nData;i++)
+    {
+      double x = xValues[i] - c;
+      double e = h*exp(-0.5*x*x*w);
+      out->set(i,0,x*h*e*w);
+      out->set(i,1,e);
+      out->set(i,2,-0.5*x*x*h*e);
+    }
+  }
+
+  double centre()const
+  {
+    return parameter(0);
+  }
+
+  double height()const
+  {
+    return parameter(1);
+  }
+
+  double width()const
+  {
+    return parameter(2);
+  }
+
+  void setCentre(const double c)
+  {
+    parameter(0) = c;
+  }
+  void setHeight(const double h)
+  {
+    parameter(1) = h;
+  }
+
+  void setWidth(const double w)
+  {
+    parameter(2) = w;
+  }
+};
+
+
+class Linear: public IFunction
+{
+public:
+  void init()
+  {
+    declareParameter("a");
+    declareParameter("b");
+  }
+  void function(double* out, const double* xValues, const int& nData)
+  {
+    double a = getParameter("a");
+    double b = getParameter("b");
+    for(int i=0;i<nData;i++)
+    {
+      out[i] = a + b * xValues[i];
+    }
+  }
+  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  {
+    //throw Mantid::Kernel::Exception::NotImplementedError("");
+    for(int i=0;i<nData;i++)
+    {
+      out->set(i,0,1.);
+      out->set(i,1,xValues[i]);
+    }
+  }
+};
+
+class CompositeFunctionTest : public CxxTest::TestSuite
+{
+public:
+  CompositeFunctionTest()
+  {
+    FrameworkManager::Instance();
+  }
+
+  void testFit()
+  {
+    CompositeFunction *mfun = new CompositeFunction();
+    Gauss *g1 = new Gauss(),*g2 = new Gauss();
+    Linear *bk = new Linear();
+
+    g1->init();
+    g2->init();
+    bk->init();
+
+    mfun->addFunction(bk);
+    mfun->addFunction(g1);
+    mfun->addFunction(g2);
+
+    g1->getParameter("c") = 3.1;
+    g1->getParameter("h") = 1.1;
+    g1->getParameter("s") = 1.;
+
+    g2->getParameter("c") = 7.1;
+    g2->getParameter("h") = 1.1;
+    g2->getParameter("s") = 1.;
+
+    bk->getParameter("a") = 0.8;
+
+    TS_ASSERT_EQUALS(mfun->nParams(),8);
+    TS_ASSERT_EQUALS(mfun->nActive(),8);
+
+    TS_ASSERT_EQUALS(mfun->parameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun->parameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun->parameter(2),3.1);
+    TS_ASSERT_EQUALS(mfun->parameter(3),1.1);
+    TS_ASSERT_EQUALS(mfun->parameter(4),1.0);
+    TS_ASSERT_EQUALS(mfun->parameter(5),7.1);
+    TS_ASSERT_EQUALS(mfun->parameter(6),1.1);
+    TS_ASSERT_EQUALS(mfun->parameter(7),1.0);
+
+    WS_type ws = mkWS(1,0,10,0.1);
+    addNoise(ws,0.1);
+    storeWS("mfun",ws);
+    plotWS("mfun.txt",ws);
+
+    Fit alg;
+    alg.initialize();
+
+    alg.setPropertyValue("InputWorkspace","mfun");
+    alg.setPropertyValue("WorkspaceIndex","0");
+    alg.setPropertyValue("Output","out");
+    alg.setFunction(mfun);
+    alg.execute();
+    WS_type outWS = getWS("out_Workspace");
+
+    const Mantid::MantidVec& Y00 = ws->readY(0);
+    const Mantid::MantidVec& Y0 = outWS->readY(0);
+    const Mantid::MantidVec& Y = outWS->readY(1);
+    const Mantid::MantidVec& R = outWS->readY(2);
+    for(int i=0;i<Y.size();i++)
+    {
+      TS_ASSERT_EQUALS(Y00[i],Y0[i]);
+      TS_ASSERT_DELTA(Y0[i],Y[i],0.1);
+      TS_ASSERT_DIFFERS(R[i],0);
+    }
+
+    TS_ASSERT_EQUALS(mfun->parameterName(0),"a");
+    TS_ASSERT_DELTA(mfun->parameter(0),1,0.1);
+
+    TS_ASSERT_EQUALS(mfun->parameterName(1),"b");
+    TS_ASSERT_DELTA(mfun->parameter(1),0.1,0.1);
+
+    TS_ASSERT_EQUALS(mfun->parameterName(2),"c");
+    TS_ASSERT_DELTA(mfun->parameter(2),4,0.2);
+
+    TS_ASSERT_EQUALS(mfun->parameterName(3),"h");
+    TS_ASSERT_DELTA(mfun->parameter(3),1,0.2);
+
+    TS_ASSERT_EQUALS(mfun->parameterName(4),"s");
+    TS_ASSERT_DELTA(mfun->parameter(4),2.13,0.2);
+
+    TS_ASSERT_EQUALS(mfun->parameterName(5),"c");
+    TS_ASSERT_DELTA(mfun->parameter(5),6,0.2);
+
+    TS_ASSERT_EQUALS(mfun->parameterName(6),"h");
+    TS_ASSERT_DELTA(mfun->parameter(6),2,0.2);
+
+    TS_ASSERT_EQUALS(mfun->parameterName(7),"s");
+    TS_ASSERT_DELTA(mfun->parameter(7),3.0,0.2);
+
+
+    TWS_type outParams = getTWS("out_Parameters");
+    TS_ASSERT(outParams);
+
+    TS_ASSERT_EQUALS(outParams->rowCount(),8);
+    TS_ASSERT_EQUALS(outParams->columnCount(),2);
+
+    TableRow row = outParams->getFirstRow();
+    TS_ASSERT_EQUALS(row.String(0),"a");
+    TS_ASSERT_DELTA(row.Double(1),1,0.1);
+
+    row = outParams->getRow(1);
+    TS_ASSERT_EQUALS(row.String(0),"b");
+    TS_ASSERT_DELTA(row.Double(1),0.1,0.1);
+
+    row = outParams->getRow(2);
+    TS_ASSERT_EQUALS(row.String(0),"c");
+    TS_ASSERT_DELTA(row.Double(1),4,0.2);
+
+    row = outParams->getRow(3);
+    TS_ASSERT_EQUALS(row.String(0),"h");
+    TS_ASSERT_DELTA(row.Double(1),1,0.2);
+
+    row = outParams->getRow(4);
+    TS_ASSERT_EQUALS(row.String(0),"s");
+    TS_ASSERT_DELTA(row.Double(1),2.13,0.2);
+
+    row = outParams->getRow(5);
+    TS_ASSERT_EQUALS(row.String(0),"c");
+    TS_ASSERT_DELTA(row.Double(1),6,0.2);
+
+    row = outParams->getRow(6);
+    TS_ASSERT_EQUALS(row.String(0),"h");
+    TS_ASSERT_DELTA(row.Double(1),2,0.2);
+
+    row = outParams->getRow(7);
+    TS_ASSERT_EQUALS(row.String(0),"s");
+    TS_ASSERT_DELTA(row.Double(1),3.0,0.2);
+
+    removeWS("mfun");
+    removeWS("out_Workspace");
+    removeWS("out_Parameters");
+  }
+private:
+  WS_type mkWS(int nSpec,double x0,double x1,double dx,bool isHist=false)
+  {
+    int nX = int(x1 - x0)/dx + 1;
+    int nY = nX - (isHist?1:0);
+    if (nY <= 0)
+      throw std::invalid_argument("Cannot create an empty workspace");
+
+    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
+      (WorkspaceFactory::Instance().create("Workspace2D",nSpec,nX,nY));
+
+    double spec;
+    double x;
+
+    for(int iSpec=0;iSpec<nSpec;iSpec++)
+    {
+      spec = iSpec;
+      Mantid::MantidVec& X = ws->dataX(iSpec);
+      Mantid::MantidVec& Y = ws->dataY(iSpec);
+      Mantid::MantidVec& E = ws->dataE(iSpec);
+      for(int i=0;i<nY;i++)
+      {
+        x = x0 + dx*i;
+        X[i] = x;
+        double x1 = x-4;
+        double x2 = x-6;
+        Y[i] = 1. + 0.1*x + exp(-0.5*(x1*x1)*2)+2*exp(-0.5*(x2*x2)*3);
+        E[i] = 1;
+      }
+      if (isHist)
+        X.back() = X[nY-1] + dx;
+    }
+    return ws;
+  }
+
+  void storeWS(const std::string& name,WS_type ws)
+  {
+    AnalysisDataService::Instance().add(name,ws);
+  }
+
+  void removeWS(const std::string& name)
+  {
+    AnalysisDataService::Instance().remove(name);
+  }
+
+  WS_type getWS(const std::string& name)
+  {
+    return boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(name));
+  }
+
+  TWS_type getTWS(const std::string& name)
+  {
+    return boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(AnalysisDataService::Instance().retrieve(name));
+  }
+
+  void addNoise(WS_type ws,double noise)
+  {
+    for(int iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
+    {
+      Mantid::MantidVec& Y = ws->dataY(iSpec);
+      Mantid::MantidVec& E = ws->dataE(iSpec);
+      for(int i=0;i<Y.size();i++)
+      {
+        Y[i] += noise*(-.5 + double(rand())/RAND_MAX);
+        E[i] += noise;
+      }
+    }
+  }
+
+  void plotWS(const std::string& fname,WS_type ws)
+  {
+    std::string fn = "C:\\Documents and Settings\\hqs74821\\Desktop\\tmp\\" + fname;
+    std::ofstream fil(fn.c_str());
+    char sep = '\t';
+    for(int i=0;i<ws->blocksize();i++)
+    {
+      fil << ws->readX(0)[i];
+      for(int j=0;j<ws->getNumberHistograms();j++)
+        fil << sep << ws->readY(j)[i] << sep << ws->readE(j)[i];
+      fil << '\n';
+    }
+    fil.close();
+  }
+
+};
+
+#endif /*COMPOSITEFUNCTIONTEST_H_*/

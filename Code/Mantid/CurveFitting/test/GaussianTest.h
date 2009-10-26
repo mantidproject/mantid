@@ -94,14 +94,14 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // set up gaussian fitting function
-    Gaussian gaus;
-    gaus.init();
-    gaus.setCentre(11.2);
-    gaus.setHeight(100.7);
-    gaus.setWidth(2.2);
+    Gaussian* gaus = new Gaussian();
+    gaus->init();
+    gaus->setCentre(11.2);
+    gaus->setHeight(100.7);
+    gaus->setWidth(2.2);
 
     //void setFunction(API::IFunction* fun);
-    alg2.setFunction(&gaus);
+    alg2.setFunction(gaus);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -122,9 +122,9 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
 
 
-    TS_ASSERT_DELTA( gaus.height(), 97.804 ,0.001);
-    TS_ASSERT_DELTA( gaus.centre(), 11.2356 ,0.0001);
-    TS_ASSERT_DELTA( gaus.width(), 2.2284 ,0.0001);
+    TS_ASSERT_DELTA( gaus->height(), 97.804 ,0.001);
+    TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.0001);
+    TS_ASSERT_DELTA( gaus->width(), 2.2284 ,0.0001);
 
   }
 

@@ -137,7 +137,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // create mock data to test against
-    std::string wsName = "GaussMockData";
+    std::string wsName = "GaussMockData1D";
     int histogramNumber = 1;
     int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);

@@ -45,12 +45,12 @@ public:
 
 
     // set up gaussian fitting function
-    LinearBackground quad;
-    quad.init();
+    LinearBackground* quad = new LinearBackground();
+    quad->init();
 
-    quad.getParameter("A0") = 3.0;
+    quad->getParameter("A0") = 3.0;
 
-    alg2.setFunction(&quad);
+    alg2.setFunction(quad);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -71,8 +71,8 @@ public:
     //std::string str = alg2.getProperty("Output Status");
     //std::cout << std::endl << str << std::endl;
     TS_ASSERT_DELTA( dummy, 0.69,0.01);
-    TS_ASSERT_DELTA( quad.getParameter("A0"),2.3242, 0.0001);
-    TS_ASSERT_DELTA( quad.getParameter("A1"),-0.0048, 0.0001);
+    TS_ASSERT_DELTA( quad->getParameter("A0"),2.3242, 0.0001);
+    TS_ASSERT_DELTA( quad->getParameter("A1"),-0.0048, 0.0001);
 
 
   }
