@@ -99,7 +99,7 @@ move(filetestsRunErr,archiveDir)
 filetestsRun = logDir+'testResults.log'
 f = open(filetestsRun,'r')
 
-reTestCount = re.compile("Running\\s*(\\d+)\\s*tests", re.IGNORECASE)
+reTestCount = re.compile("Running\\s*(\\d+)\\s*test", re.IGNORECASE)
 reCrashCount = re.compile("OK!")
 reFailCount = re.compile("Failed\\s*(\\d+)\\s*of\\s*(\\d+)\\s*tests", re.IGNORECASE)
 for line in f.readlines():
