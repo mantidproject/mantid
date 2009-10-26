@@ -201,7 +201,7 @@ namespace Mantid
              */
             T* operator()()const
             {
-                if (!m_data) throw std::runtime_error("Attempt to read uninitialized data");
+	      if (!m_data) throw std::runtime_error("Attempt to read uninitialized data from " + path());
                 return m_data.get();
             }
             /** Returns the i-th value in the internal buffer
@@ -211,7 +211,7 @@ namespace Mantid
              */
             T& operator[](int i)const
             {
-                if (!m_data) throw std::runtime_error("Attempt to read uninitialized data");
+                if (!m_data) throw std::runtime_error("Attempt to read uninitialized data from " + path());
                 if (i < 0 || i >= m_n) rangeError();
                 return m_data[i];
             }

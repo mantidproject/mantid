@@ -254,7 +254,16 @@ namespace Mantid
     {
       //Instrument information
       NXInstrument inst = mtd_entry.openNXInstrument("instrument");
-      runLoadInstrument(inst.getString("name"), local_workspace);
+      std::string instname("");
+      try
+      {
+	instname = inst.getString("name");
+      }
+      catch(std::runtime_error & )
+      {
+	return;
+      }
+      runLoadInstrument(instname, local_workspace);
 
       //Populate the spectra-detector map
       NXDetector detgroup = inst.openNXDetector("detector");

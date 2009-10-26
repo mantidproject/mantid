@@ -70,10 +70,12 @@ void AlgorithmHistory::addExecutionInfo(const dateAndTime& start, const double& 
     @param name The name of the property
     @param value The value of the property
     @param isdefault True if the property is default
+    @param direction The direction of the property
  */
-void AlgorithmHistory::addProperty(const std::string& name,const std::string& value, bool isdefault)
+  void AlgorithmHistory::addProperty(const std::string& name,const std::string& value, bool isdefault, 
+				     const unsigned int& direction)
 {
-    m_properties.push_back(Kernel::PropertyHistory(name,value,"",isdefault));
+  m_properties.push_back(Kernel::PropertyHistory(name,value,"",isdefault, direction));
 }
 
 /** Prints a text representation of itself
