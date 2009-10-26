@@ -66,7 +66,7 @@ namespace CurveFitting
     /// the data to be fitted (ordinates)
     const double * Y;
     /// the standard deviations of the Y data points
-    const double * sigmaData;
+    double * sigmaData;
     /// pointer to instance of Fit
     Fit* fit;
     /// Needed to use the simplex algorithm within the gsl least-squared framework.
@@ -312,6 +312,7 @@ namespace CurveFitting
       throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
     }
     l_data.X = new double[l_data.n];
+    l_data.sigmaData = new double[l_data.n];
     l_data.forSimplexLSwrap = new double[l_data.n];
 
     // check if histogram data in which case use mid points of histogram bins
@@ -326,7 +327,19 @@ namespace CurveFitting
     }
 
     l_data.Y = &YValues[m_minX];
-    l_data.sigmaData = &YErrors[m_minX];
+    //l_data.sigmaData = &YErrors[m_minX];
+
+
+    // check that no error is negative or zero
+
+    for (unsigned int i = 0; i < l_data.n; ++i)
+    {
+      if (YErrors[i] <= 0.0)
+        l_data.sigmaData[i] = 1.0;
+      else
+        l_data.sigmaData[i] = YErrors[i];
+    }
+
 
     // set-up initial guess for fit parameters
 
@@ -544,6 +557,7 @@ namespace CurveFitting
     // clean up dynamically allocated gsl stuff
 
     delete [] l_data.X;
+    delete [] l_data.sigmaData;
     delete [] l_data.forSimplexLSwrap;
 
     return;

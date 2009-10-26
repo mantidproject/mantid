@@ -57,7 +57,7 @@ public:
     alg2.setPropertyValue("InputWorkspace", wsName);
     alg2.setPropertyValue("WorkspaceIndex","0");
     alg2.setPropertyValue("StartX","66000");
-    alg2.setPropertyValue("EndX","66100"); // not this test for now break if interval increased
+    alg2.setPropertyValue("EndX","67000"); // not this test for now break if interval increased
 
     // execute fit
    TS_ASSERT_THROWS_NOTHING(
@@ -70,10 +70,10 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     //std::string str = alg2.getProperty("Output Status");
     //std::cout << std::endl << str << std::endl;
-    TS_ASSERT_DELTA( dummy, 0.69,0.01);
-    TS_ASSERT_DELTA( quad->getParameter("A0"),1.74983, 0.0001);
-    TS_ASSERT_DELTA( quad->getParameter("A1"),0.03202, 0.0001);
-    TS_ASSERT_DELTA( quad->getParameter("A2"),-0.00036, 0.0001);
+    TS_ASSERT_DELTA( dummy, 2.71,0.1);
+    TS_ASSERT_DELTA( quad->getParameter("A0"),2.7555, 0.0001);
+    TS_ASSERT_DELTA( quad->getParameter("A1"),-0.0015, 0.0001);
+    TS_ASSERT_DELTA( quad->getParameter("A2"),0.0000, 0.0001);
 
 
   }
