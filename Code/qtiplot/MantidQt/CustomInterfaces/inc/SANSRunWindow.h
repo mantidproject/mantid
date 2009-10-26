@@ -190,9 +190,6 @@ private:
   // A store of the mask file correction values for the sample run
   QHash<QString, double> m_maskcorrections;
 
-  // A boolean indicating if scipy is installed
-  bool m_havescipy;
-
   // An integer to save the last run reduction type
   int m_lastreducetype;
 

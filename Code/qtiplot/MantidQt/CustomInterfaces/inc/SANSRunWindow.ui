@@ -1596,6 +1596,22 @@ p, li { white-space: pre-wrap; }
         <bool>false</bool>
        </property>
        <layout class="QGridLayout" name="gridLayout_8" >
+        <item row="0" column="6" >
+         <spacer name="horizontalSpacer_7" >
+          <property name="orientation" >
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType" >
+           <enum>QSizePolicy::MinimumExpanding</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
         <item row="0" column="0" >
          <widget class="QLabel" name="label_51" >
           <property name="text" >
@@ -1649,6 +1665,9 @@ p, li { white-space: pre-wrap; }
         </item>
         <item row="5" column="2" colspan="3" >
          <widget class="QComboBox" name="beamstart_box" >
+          <property name="currentIndex" >
+           <number>1</number>
+          </property>
           <item>
            <property name="text" >
             <string>Auto Find</string>
@@ -1783,22 +1802,6 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="0" column="6" >
-         <spacer name="horizontalSpacer_7" >
-          <property name="orientation" >
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType" >
-           <enum>QSizePolicy::MinimumExpanding</enum>
-          </property>
-          <property name="sizeHint" stdset="0" >
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item row="12" column="4" >
          <widget class="QPushButton" name="clear_log" >
           <property name="text" >
@@ -1827,30 +1830,6 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
        </layout>
-       <zorder>label_51</zorder>
-       <zorder>label_32</zorder>
-       <zorder>beam_y</zorder>
-       <zorder>label_44</zorder>
-       <zorder>label_56</zorder>
-       <zorder>beamstart_box</zorder>
-       <zorder>label_57</zorder>
-       <zorder>beam_rmin</zorder>
-       <zorder>beam_rmax</zorder>
-       <zorder>line</zorder>
-       <zorder>line_3</zorder>
-       <zorder>label_30</zorder>
-       <zorder>label_59</zorder>
-       <zorder>label_60</zorder>
-       <zorder>beam_iter</zorder>
-       <zorder>label_35</zorder>
-       <zorder>centre_stat</zorder>
-       <zorder>centre_logging</zorder>
-       <zorder>pushButton</zorder>
-       <zorder>clear_log</zorder>
-       <zorder>runcentreBtn</zorder>
-       <zorder>beam_x</zorder>
-       <zorder>label_46</zorder>
-       <zorder>label_58</zorder>
       </widget>
       <widget class="QStackedWidget" name="geom_stack" >
        <property name="geometry" >
@@ -1901,7 +1880,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item row="1" column="0" >
-             <spacer name="horizontalSpacer_5" >
+             <spacer name="loqspacer_5" >
               <property name="orientation" >
                <enum>Qt::Horizontal</enum>
               </property>
@@ -2147,7 +2126,7 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item row="1" column="0" >
-             <spacer name="horizontalSpacer_5" >
+             <spacer name="sans2dspacer_5" >
               <property name="orientation" >
                <enum>Qt::Horizontal</enum>
               </property>

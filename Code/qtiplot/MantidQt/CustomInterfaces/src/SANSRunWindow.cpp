@@ -51,7 +51,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
   m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false), m_force_reload(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace),
-  m_logvalues(), m_maskcorrections(), m_havescipy(true), m_lastreducetype(-1)
+  m_logvalues(), m_maskcorrections(), m_lastreducetype(-1)
 {
   m_reducemapper = new QSignalMapper(this);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
@@ -620,11 +620,8 @@ void SANSRunWindow::setProcessingState(bool running, int type)
   m_uiForm.twoDBtn->setEnabled(!running);
   m_uiForm.plotBtn->setEnabled(!running);
   m_uiForm.saveBtn->setEnabled(!running);
+  m_uiForm.runcentreBtn->setEnabled(!running);
 
-  if( m_havescipy )
-  {
-    m_uiForm.runcentreBtn->setEnabled(!running);
-  }
   if( running )
   {
     if( type == 0 )
@@ -1589,31 +1586,8 @@ void SANSRunWindow::handleInstrumentChange(int index)
  * Handles the change of current tab
  * @param index The new index
  */
-void SANSRunWindow::handleTabChange(int index)
+void SANSRunWindow::handleTabChange(int)
 {
-  if( index != 2 ) return;
-
-  // Test for scipy optimize module and disable centre finding if it is not found
-  QString scipycode = 
-    "try:\n"
-    "\timport scipy.optimize\n"
-    "except(ImportError):\n"
-    "\texit('scipy package is not installed')\n"
-    "try:\n"
-    "\timport numpy\n"
-    "except(ImportError):\n"
-    "\texit('scipy package is not installed')\n";
-
-    QString result = runPythonCode(scipycode);
-    m_havescipy = true;
-    if( !result.isEmpty() )
-    {
-      showInformationBox("The centre-finding functionality requires the scipy and numpy Python packages to be installed,\n"
-			 "please install them, taking care of to use the correct Python version, if you wish to use this function.");
-      m_havescipy = false;
-      m_uiForm.runcentreBtn->setEnabled(false);
-    }
-    disconnect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChange(int)));
 }
 
 /**
@@ -1727,7 +1701,6 @@ QHash<QString, double> SANSRunWindow::loadDetectorLogs(const QString& work_dir, 
   logname[6] = '0';
   QString suffix = ".log";
   QString logpath = QFileInfo(filepath).path() + "/" + logname + suffix;
-  std::cerr << "logpath " << logpath.toStdString() << "\n";
   QFile handle(logpath);
   
   if( !handle.open(QIODevice::ReadOnly | QIODevice::Text) )
@@ -1845,7 +1818,8 @@ void SANSRunWindow::cleanup()
   std::set<std::string>::const_iterator iend = workspaces.end();
   for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != iend; ++itr )
   {
-    if( QString::fromStdString(*itr).endsWith("_raw") )
+    QString name = QString::fromStdString(*itr);
+    if( name.endsWith("_raw") || name.endsWith("_nexus"))
     {
       ads.remove(*itr);
     }
