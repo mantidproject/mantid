@@ -62,6 +62,10 @@ public:
   virtual Geometry::IObjComponent_sptr getSource() const;
   virtual Geometry::IObjComponent_sptr  getSample() const;
   virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const;
+  /// Returns a pointer to the geometrical object representing the monitor with the given ID
+  virtual Geometry::IDetector_sptr getMonitor(const int &detector_id) const;
+  /// returns a list containing  detector ids of monitors
+  virtual const std::vector<int> getMonitors()const ;
 
   /// Pointer to the 'real' instrument
   boost::shared_ptr<Instrument> baseInstrument()const{return m_instr;}

@@ -65,6 +65,9 @@ public:
   Geometry::IObjComponent_sptr getSample() const;
   Geometry::IDetector_sptr getDetector(const int &detector_id) const;
 
+   /// Returns a pointer to the geometrical object representing the monitor with the given ID
+  Geometry::IDetector_sptr getMonitor(const int &detector_id) const;
+
   /// mark a Component which has already been added to the Instrument (as a child comp.)
   /// to be 'the' samplePos Component. For now it is assumed that we have
   /// at most one of these.
@@ -85,6 +88,9 @@ public:
 
   /// return reference to detector cache 
   std::map<int, Geometry::IDetector_sptr> getDetectors() const;
+
+  /// returns a list containing  detector ids of monitors
+  const std::vector<int> getMonitors()const ;
 
   /// Get pointers to plottable components
   plottables_const_sptr getPlottable() const;
@@ -127,6 +133,9 @@ private:
   /// To store info about the parameters defined in IDF. Indexed according to logfile-IDs,
   /// which equals logfile filename minus the run number and file extension
   std::multimap<std::string, boost::shared_ptr<XMLlogfile> > _logfileCache;
+
+  /// a vector holding detector ids of monitor s
+  std::vector<int> m_monitorCache;
 };
 
 } // namespace API

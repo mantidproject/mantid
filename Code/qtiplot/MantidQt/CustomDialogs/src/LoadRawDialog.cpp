@@ -120,7 +120,7 @@ void LoadRawDialog::initLayout()
   groupbox->setLayout(prop_line);
   main_layout->addWidget(groupbox);
   
-  //------------- Cache option and log files options ---------------------
+  //------------- Cache option , log files options and Monitors Options ---------------------
   QComboBox *cacheBox = new QComboBox;
   std::set<std::string> items = getAlgorithmProperty("Cache")->allowedValues();
   std::set<std::string>::const_iterator vend = items.end();
@@ -146,6 +146,27 @@ void LoadRawDialog::initLayout()
     prop_line->addWidget(checkbox);
     tie(checkbox, "LoadLogFiles", prop_line);
   }
+  prop_line->addStretch();  
+
+
+  
+  Mantid::Kernel::Property* loadMonitors=getAlgorithmProperty("LoadMonitors");
+  if(loadMonitors)
+
+  {  //if the algorithm version 
+	  QComboBox *monitorsBox =new QComboBox;
+	  std::set<std::string> monitoritems =loadMonitors->allowedValues();
+	  std::set<std::string>::const_iterator mend = monitoritems.end();
+	  for(std::set<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; 
+		  ++mitr)
+	  {
+		  monitorsBox->addItem(QString::fromStdString(*mitr));
+	  }
+	  prop_line->addWidget(new QLabel("Monitors:"), 0, Qt::AlignRight);
+	  prop_line->addWidget(monitorsBox);
+	  tie(monitorsBox, "LoadMonitors", prop_line);
+  }
+  
   
   main_layout->addLayout(prop_line);
   

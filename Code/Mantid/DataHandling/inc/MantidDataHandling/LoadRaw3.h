@@ -83,7 +83,7 @@ namespace Mantid
 
       void checkOptionalProperties();
       int calculateWorkspaceSize();
-      void goManagedRaw();
+      void goManagedRaw(bool bincludeMonitors,bool bexcludeMonitors,bool bseparateMonitors );
       std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int& regimes, 
                                                                  const int& lengthIn);
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
@@ -91,6 +91,40 @@ namespace Mantid
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr,int period=1);
       void populateInstrumentParameters(DataObjects::Workspace2D_sptr);
+      
+	  ///getting the monitor spectrum indexes 
+	  void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<int>& monitorSpecList);
+	  
+	  /// /// returns true if the given spectrum is a monitor
+	  bool isMonitor(const std::vector<int>& monitorIndexes,int spectrumNum);
+	  /// returns true if the Exclude Monitor option(property) selected
+	  bool isExcludeMonitors();
+	  ///  returns true if the Separate Monitor Option  selected
+	  bool isSeparateMonitors();
+	   ///  returns true if the Include Monitor Option  selected
+	  bool isIncludeMonitors();
+
+	  /// creates  shared pointer to group workspace 
+	  API::WorkspaceGroup_sptr createGroupWorkspace();
+	  /// craetes hared pointer to workspace
+	  DataObjects::Workspace2D_sptr createWorkspace(int nVectors,int lengthIn);
+
+	 /// sets the workspace property 
+	 void setWorkspaceProperty(const std::string & propertyName,const std::string& title,
+		 API::WorkspaceGroup_sptr grpWS,DataObjects::Workspace2D_sptr workspace,bool bMonitor);
+
+	  /// sets the workspace property 
+	  void setWorkspaceProperty(DataObjects::Workspace2D_sptr wsPtr,API::WorkspaceGroup_sptr wsGrpSptr,const int period,bool bmonitors);
+
+	  /// calculates the workspace size for normal output workspace and monitor workspace
+	  void calculateWorkspacesizes(const std::vector<int>& monitorSpecList,const int total_specs,int& normalwsSpecs,int & monitorwsSpecs);
+
+	  /// This method sets the raw file data to workspace vectors
+	 void setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,
+								const std::vector<boost::shared_ptr<MantidVec> >& timeChannelsVec,int wsIndex,int nspecNum,int noTimeRegimes);
+
+	 /// This method is useful for separating  or excluding   monitors from the output workspace
+	 void  separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,bool bincludeMonitors,bool bexcludeMonitors,bool bseparateMonitors);
 
       /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
       boost::shared_ptr<ISISRAW2> isisRaw;
@@ -120,6 +154,14 @@ namespace Mantid
 
 	    /// A flag int value to indicate that the value wasn't set by users
       static const int unSetInt = INT_MAX-15;
+	  /// a vector holding the indexes of monitors
+	  std::vector<int> m_monitordetectorList;
+	  ///a vector holding allowed values for Monitor selection property
+	  std::vector<std::string> m_monitorOptions;
+	 // Read in the time bin boundaries
+	 int m_lengthIn;
+	 /// boolean for list spectra options
+	 bool m_bmspeclist;
     };
 
   } // namespace DataHandling

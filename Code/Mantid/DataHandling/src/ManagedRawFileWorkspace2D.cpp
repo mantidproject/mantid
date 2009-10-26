@@ -33,7 +33,7 @@ namespace Mantid
     /// Constructor
     ManagedRawFileWorkspace2D::ManagedRawFileWorkspace2D(const std::string& fileName, int opt) :
       ManagedWorkspace2D(),
-      isisRaw(new ISISRAW2),m_filenameRaw(fileName),m_fileRaw(NULL),m_readIndex(0)
+      isisRaw(new ISISRAW2),m_filenameRaw(fileName),m_fileRaw(NULL),m_readIndex(0),m_nmonitorSkipCounter(0)
     {
       this->setRawFile(opt);
     }
@@ -130,7 +130,7 @@ namespace Mantid
     // and skipData to skipNextSpectrum()
     void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const
     {
-      Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
+	   Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
       if (!m_fileRaw)
       {
         g_log.error("Raw file was not open.");
@@ -143,56 +143,148 @@ namespace Mantid
         ManagedWorkspace2D::readDataBlock(newBlock,startIndex);
         return;
       }
+  	  if(m_monitorList.size()>0)
+	  {	
+		  if (startIndex > m_readIndex)
+		  {
+			  while(startIndex > m_readIndex-m_nmonitorSkipCounter)
+			  {
+				  isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
+				  ++m_readIndex;
+				  if(isMonitor(m_readIndex))
+					  ++m_nmonitorSkipCounter;
+			  }
+		  }
+		  else
+		  {
+			  int nwords = 0;
+			  while(startIndex+m_nmonitorSkipCounter+1 < m_readIndex)
+			  {
+				  if(isMonitor(m_readIndex))
+					  --m_nmonitorSkipCounter;
+				  --m_readIndex;
+				  nwords += 4*isisRaw->ddes[m_readIndex+1].nwords;
+			  }
+			  if (fseek(m_fileRaw,-nwords,SEEK_CUR) != 0)
+			  {
+				  fclose(m_fileRaw);
+				  removeTempFile();
+				  g_log.error("Error reading RAW file.");
+				  throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
+			  }
+		  }
+		  int endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+		  if (endIndex >= m_noVectors) endIndex = m_noVectors;
+		  int index=startIndex;
+		  while(index<endIndex)
+		  {
+			  if(isMonitor(m_readIndex))
+			  {	isisRaw->skipData(m_fileRaw,m_readIndex+1);
+			  //g_log.error()<<"skipData called for monitor index"<<m_readIndex<<std::endl;
+			  ++m_nmonitorSkipCounter;
+			  ++m_readIndex;
+			  }
+			  else
+			  {
+				  isisRaw->readData(m_fileRaw,m_readIndex+1);
+				  //g_log.error()<<"readData called for spectrum index"<<m_readIndex<< " and wsIndex is "<<index<< std::endl;
+				  if(m_readIndex==(m_noVectors+m_monitorList.size()))
+					  break;
+				  MantidVec& y = newBlock->dataY(index);
+				  y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);  
+				  //g_log.error()<<"readData called for m_readIndex"<<m_readIndex<< " and wsIndex is "<<index<< "Y value at 0  column is "<<y[0]<<std::endl;
+				  MantidVec& e = newBlock->dataE(index);
+				  std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
+				  if (m_timeChannels.size() == 1)
+					  newBlock->setX(index,m_timeChannels[0]);
+				  else
+				  {
+					 // std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
+					  std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(m_readIndex+1);
+					  if ( regime == m_specTimeRegimes.end() ) 
+					  {
+						  g_log.error() << "Spectrum " << index << " not present in spec array:\n";
+						  g_log.error(" Assuming time regime of spectrum 1");
+						  regime = m_specTimeRegimes.begin();
+					  }
+					  newBlock->setX(index,m_timeChannels[(*regime).second-1]);
+				  }
+				  ++index;
+				  ++m_readIndex;
+			  }
+		  }
+ 
+	  }
+	  else
+	  {	
+		  if (startIndex > m_readIndex)
+		  {
+			  while(startIndex > m_readIndex)
+			  {
+				  isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
+				  ++m_readIndex;
+			  }
+		  }
+		  else
+		  {
+			  int nwords = 0;
+			  while(startIndex < m_readIndex)
+			  {			 
+				  --m_readIndex;
+				  nwords += 4*isisRaw->ddes[m_readIndex+1].nwords;
+			  }
+			  if (fseek(m_fileRaw,-nwords,SEEK_CUR) != 0)
+			  {
+				  fclose(m_fileRaw);
+				  removeTempFile();
+				  g_log.error("Error reading RAW file.");
+				  throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
+			  }
+		  }
+		  int endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+		  if (endIndex >= m_noVectors) endIndex = m_noVectors;
+		  int index=startIndex;
+		  for(int index = startIndex;index<endIndex;index++,m_readIndex++)
+		  {
+			  isisRaw->readData(m_fileRaw,m_readIndex+1);
+			  // g_log.error()<<"counter is "<<counter<<std::endl;
+			  MantidVec& y = newBlock->dataY(index);
+			  y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
+			  MantidVec& e = newBlock->dataE(index);
+			  std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
+			  if (m_timeChannels.size() == 1)
+				  newBlock->setX(index,m_timeChannels[0]);
+			  else
+			  {
+				  std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
+				  if ( regime == m_specTimeRegimes.end() ) 
+				  {
+					  g_log.error() << "Spectrum " << index << " not present in spec array:\n";
+					  g_log.error(" Assuming time regime of spectrum 1");
+					  regime = m_specTimeRegimes.begin();
+				  }
+				  newBlock->setX(index,m_timeChannels[(*regime).second-1]);
+			  }
 
-      if (startIndex > m_readIndex)
-      {
-        while(startIndex > m_readIndex)
-        {
-          isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
-          ++m_readIndex;
-        }
-      }
-      else
-      {
-        int nwords = 0;
-        while(startIndex < m_readIndex)
-        {
-          --m_readIndex;
-          nwords += 4*isisRaw->ddes[m_readIndex+1].nwords;
-        }
-        if (fseek(m_fileRaw,-nwords,SEEK_CUR) != 0)
-        {
-          fclose(m_fileRaw);
-          removeTempFile();
-          g_log.error("Error reading RAW file.");
-          throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
-        }
-      }
-      int endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
-      if (endIndex >= m_noVectors) endIndex = m_noVectors;
-      for(int index = startIndex;index<endIndex;index++,m_readIndex++)
-      {
-        isisRaw->readData(m_fileRaw,m_readIndex+1);
-        MantidVec& y = newBlock->dataY(index);
-        y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
-        MantidVec& e = newBlock->dataE(index);
-        std::transform(y.begin(), y.end(), e.begin(), dblSqrt);
-        if (m_timeChannels.size() == 1)
-          newBlock->setX(index,m_timeChannels[0]);
-        else
-        {
-          std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
-          if ( regime == m_specTimeRegimes.end() ) 
-          {
-            g_log.error() << "Spectrum " << index << " not present in spec array:\n";
-            g_log.error(" Assuming time regime of spectrum 1");
-            regime = m_specTimeRegimes.begin();
-          }
-          newBlock->setX(index,m_timeChannels[(*regime).second-1]);
-        }
-      }
-      newBlock->hasChanges(false);
-    }
+		  }
+	  }
+
+	  newBlock->hasChanges(false);
+	}
+	/** This method checks given spectrum is a monitor
+	  * @param readIndex a spectrum index
+	  * @return true if it's a monitor ,otherwise false
+	*/
+	bool ManagedRawFileWorkspace2D::isMonitor(const int readIndex)const
+	{
+		std::vector<int>::const_iterator itr;
+		for(itr=m_monitorList.begin();itr!=m_monitorList.end();++itr)
+		{
+			if((*itr)==readIndex)
+				return true;
+		}
+		return false;
+	}
 
     void ManagedRawFileWorkspace2D::writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite)
     {
@@ -251,6 +343,7 @@ namespace Mantid
     {
       if (!m_tempfile.empty()) Poco::File(m_tempfile).remove();
     }
+	
 
   } // namespace DataHandling
 } //NamespaceMantid

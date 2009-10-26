@@ -106,6 +106,22 @@ IInstrument::plottables_const_sptr ParInstrument::getPlottable() const
   }
   return objs;
 }
+/** This method returns monitor detector ids
+  * @return a vector holding detector ids of  monitors
+*/
+const std::vector<int> ParInstrument::getMonitors()const
+{
+	return  m_instr->getMonitors();
+}
+/**	Gets a pointer to the monitor from its ID
+  *  @param   detector_id The requested detector ID
+  *  @returns A pointer to the detector object
+  */
+Geometry::IDetector_sptr ParInstrument::getMonitor(const int &detector_id) const
+{
+	boost::shared_ptr<Geometry::Detector> det = boost::dynamic_pointer_cast<Geometry::Detector>(dynamic_cast<const Instrument*>(m_base)->getMonitor(detector_id));
+	return Geometry::IDetector_sptr(new Geometry::ParDetector(det.get(),m_map));
+}
 
 } // namespace API
 } // Namespace Mantid

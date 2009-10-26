@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "LoadRaw/isisraw.h"
+#include "MantidKernel/ArrayProperty.h"
 
 #include <fstream>
 
@@ -42,6 +43,9 @@ void LoadInstrumentFromRaw::init()
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
 		  "The filename (including its full or relative path) of an ISIS RAW file.\n"
 		  "The file extension must either be .raw or .s??" );
+  declareProperty(new ArrayProperty<int>("MonitorList"),
+      "List of detector ids of monitors loaded int to the workspace");
+ 
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -137,14 +141,16 @@ void LoadInstrumentFromRaw::exec()
   // Now mark the up the monitors
   const int numMonitors = iraw.i_mon;     // The number of monitors
   const int* const monIndex = iraw.mdet;  // Index into the udet array for each monitor
+  
   for (int j = 0; j < numMonitors; ++j)
   {
     const int detectorToMark = detID[monIndex[j]-1];
-    boost::shared_ptr<Geometry::Detector> det = boost::dynamic_pointer_cast<Geometry::Detector>(instrument->getDetector(detectorToMark));
-    det->markAsMonitor();
+    boost::shared_ptr<Geometry::IDetector> det = instrument->getDetector(detectorToMark);
+	instrument->markAsMonitor(det.get());
     g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
   }
-
+  std::vector<int> monitorList=instrument->getMonitors();
+  setProperty("MonitorList",monitorList);
   // Information to the user about what info is extracted from raw file
   g_log.information() << "SamplePos component added with position set to (0,0,0).\n"
     << "Detector components added with position coordinates assumed to be relative to the position of the sample; \n"

@@ -88,6 +88,26 @@ Geometry::IDetector_sptr Instrument::getDetector(const int &detector_id) const
   return Geometry::IDetector_sptr(it->second,NoDeleting());
 }
 
+/**	Gets a pointer to the monitor from its ID
+ *  @param   detector_id The requested detector ID
+ *  @return A pointer to the detector object
+ *  @throw   NotFoundError If no monitor is found for the detector ID given
+ */
+Geometry::IDetector_sptr Instrument::getMonitor(const int &detector_id)const
+{
+	std::vector<int>::const_iterator itr;
+	itr=find(m_monitorCache.begin(),m_monitorCache.end(),detector_id);
+	if ( itr == m_monitorCache.end() )
+	{
+		g_log.debug() << "monitor with ID " << detector_id << " not found." << std::endl;
+		std::stringstream readInt;
+		readInt << detector_id;
+		throw Kernel::Exception::NotFoundError("Instrument: Detector with ID " + readInt.str() + " not found.","");
+	}
+	Geometry::IDetector_sptr monitor=getDetector(detector_id);
+
+	return monitor;
+}
 /**	Gets a pointer to the requested child component
 * @param name the name of the object requested (case insensitive)
 * @returns a pointer to the component
@@ -151,7 +171,6 @@ void Instrument::markAsSource(Geometry::ObjComponent* comp)
 *
 * @param det Component to be marked (stored for later retrievel) as a detector Component
 *
-* @throw Exception::ExistsError if cannot add detector to cache
 */
 void Instrument::markAsDetector(Geometry::IDetector* det)
 {
@@ -160,7 +179,7 @@ void Instrument::markAsDetector(Geometry::IDetector* det)
     std::stringstream convert;
     convert << det->getID();
     g_log.error() << "Not successful in adding Detector " << convert << " to _detectorCache." << std::endl;
-    throw Kernel::Exception::ExistsError("Not successful in adding Detector to _detectorCache.", convert.str());
+    //throw Kernel::Exception::ExistsError("Not successful in adding Detector to _detectorCache.", convert.str());
   }
 }
 
@@ -175,17 +194,25 @@ void Instrument::markAsMonitor(Geometry::IDetector* det)
 {
   // attempt to add monitor to instrument detector cache
   markAsDetector(det);
-
+    
   // mark detector as a monitor
   Geometry::Detector *d = dynamic_cast<Geometry::Detector*>(det);
   if (d)
   {
     d->markAsMonitor();
+	m_monitorCache.push_back(det->getID());
   }
   else
   {
     throw std::invalid_argument("The IDetector pointer does not point to a Detector object");
   }
+}
+/** This method returns monitor detector ids
+  *@return a vector holding detector ids of  monitors
+*/
+const std::vector<int> Instrument::getMonitors()const
+{
+	return m_monitorCache;
 }
 
 IInstrument::plottables_const_sptr Instrument::getPlottable() const

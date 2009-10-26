@@ -59,6 +59,9 @@ public:
   /// Returns a pointer to the geometrical object for the detector with the given ID
   virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const = 0;
 
+  /// Returns a pointer to the geometrical object representing the monitor with the given ID
+  virtual Geometry::IDetector_sptr getMonitor(const int &detector_id) const = 0;
+
   virtual std::string getName() const = 0;
 
   /// Returns a shared pointer to a component
@@ -75,6 +78,9 @@ public:
   typedef const boost::shared_ptr<const plottables> plottables_const_sptr;
   /// Get pointers to plottable components
   virtual plottables_const_sptr getPlottable() const = 0;
+
+  /// returns a list containing  detector ids of monitors
+  virtual  const std::vector<int> getMonitors()const=0; ;
 };
 
 /// Shared pointer to IInstrument

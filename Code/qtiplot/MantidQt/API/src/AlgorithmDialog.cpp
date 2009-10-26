@@ -19,7 +19,6 @@
 #include <QUrl>
 #include <QHBoxLayout>
 #include <QSignalMapper>
-
 using namespace MantidQt::API;
 
 //------------------------------------------------------

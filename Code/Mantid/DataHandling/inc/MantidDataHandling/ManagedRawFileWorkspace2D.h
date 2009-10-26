@@ -62,7 +62,7 @@ public:
 
   explicit ManagedRawFileWorkspace2D(const std::string& fileName, int opt=0);
   virtual ~ManagedRawFileWorkspace2D();
-
+ 
 protected:
   /// Reads in a data block.
   virtual void readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const;
@@ -81,6 +81,8 @@ private:
   bool needCache(const int opt);
   void openTempFile();
   void removeTempFile()const;
+  /// returns true if the given spectrum index is a monitor
+  bool isMonitor(const int readIndex) const;
 
   boost::shared_ptr<ISISRAW2> isisRaw;        ///< Pointer to an ISISRAW2 object
   const std::string m_filenameRaw;///< RAW file name.
@@ -107,6 +109,10 @@ private:
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
+
+  /// a counter used for skipping the raw file if it's a monitor
+  mutable int m_nmonitorSkipCounter;
+ 
 };
 
 } // namespace DataHandling

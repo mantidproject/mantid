@@ -71,7 +71,7 @@ public:
   virtual void setData(int const, const Histogram1D::RCtype&);
   virtual void setData(int const, const Histogram1D::RCtype&, const Histogram1D::RCtype&);
   virtual void setData(int const, const Histogram1D::RCtype::ptr_type&, const Histogram1D::RCtype::ptr_type&);
-
+  
   /// Returns the histogram number
   const int getNumberHistograms() const;
 
@@ -92,10 +92,23 @@ public:
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const;
 
+  /* sets the monitorWorkspace indexlist
+	@param mList a vector holding the monitor workspace indexes
+  */
+  void setMonitorList(std::vector<int>& mList){m_monitorList=mList;}
+
+   /* sets the number of histograms.This method is mainly useful when the user selects 
+   monitor 'select' or 'exclude' options from loadraw UI
+	@param nhistograms is the number of histograms
+  */
+  void sethistogramNumbers(const int &nhistograms ){m_noVectors=nhistograms;}
+ 
 protected:
   /// The number of vectors in the workspace
   int m_noVectors;
-
+  /// a vector holding monitors in the workspace
+   std::vector<int> m_monitorList;
+  
 private:
   /// Private copy constructor. NO COPY ALLOWED
   Workspace2D(const Workspace2D&);

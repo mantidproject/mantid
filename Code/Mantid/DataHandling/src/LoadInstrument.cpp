@@ -20,7 +20,7 @@
 #include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
 #include "Poco/File.h"
-
+#include "MantidKernel/ArrayProperty.h"
 #include <sstream>
 
 using Poco::XML::DOMParser;
@@ -59,6 +59,9 @@ void LoadInstrument::init()
   declareProperty(new FileProperty("Filename","", FileProperty::Load, exts),
 		  "The filename (including its full or relative path) of an ISIS instrument\n"
 		  "defintion file");
+   declareProperty(new ArrayProperty<int>("MonitorList"),
+      "List of detector ids of monitors loaded in to the workspace");
+
 
 }
 
@@ -88,6 +91,11 @@ void LoadInstrument::exec()
   {
     // If it does, just use the one from the one stored there
     localWorkspace->setInstrument(InstrumentDataService::Instance().retrieve(instrumentFile));
+	 // Get reference to Instrument 
+	m_instrument = localWorkspace->getBaseInstrument();
+	//get list of monitors and set the property
+	std::vector<int>monitordetIdList=m_instrument->getMonitors();
+	setProperty("MonitorList",monitordetIdList);
     return;
   }
 
@@ -103,7 +111,6 @@ void LoadInstrument::exec()
     g_log.error("Unable to parse file " + m_filename);
     throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
   }
-
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )
@@ -197,7 +204,7 @@ void LoadInstrument::exec()
   API::Progress prog(this,0,1,pNL_comp_length);
   for (unsigned int i = 0; i < pNL_comp_length; i++)
   {
-      prog.report();
+	   prog.report();
     // we are only interest in the top level component elements hence
     // the reason for the if statement below
 
@@ -233,7 +240,7 @@ void LoadInstrument::exec()
 
 
       if ( isAssembly(pElem->getAttribute("type")) )
-      {
+      {		
         for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
           appendAssembly(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
@@ -256,12 +263,15 @@ void LoadInstrument::exec()
         }
       }
       else
-      {
-        for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
+      {	
+		for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
-          appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
-        }
+		  appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
+		 }
+		
       }
+	  std::vector<int>monitordetIdList=m_instrument->getMonitors();
+	  setProperty("MonitorList",monitordetIdList);
       pNL_location->release();
     }
   }
