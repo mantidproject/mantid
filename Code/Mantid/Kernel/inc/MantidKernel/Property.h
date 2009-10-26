@@ -38,6 +38,16 @@ struct Direction
     default:     return "N/A";
     }
   }
+
+  /// Returns an enum representation of the input Direction string
+  static int asEnum(const std::string& direction)
+  {
+    if( direction == "Input" ) return Direction::Input;
+    else if( direction == "Output" ) return Direction::Output;
+    else if( direction == "InOut" ) return Direction::InOut;
+    else return Direction::None;
+  }
+  
 };
 
 /** Base class for properties. Allows access without reference to templated concrete type.
