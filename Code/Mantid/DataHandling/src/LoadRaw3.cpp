@@ -201,7 +201,7 @@ void LoadRaw3::exec()
 			  //create monitor workspace group
 			  monitorWSGrp=createGroupWorkspace();
 			  if(normalwsSpecs>0)
-			  {	  std::string monitorWSName=localWSName+"_Monitor";
+			  {	  std::string monitorWSName=localWSName+"_Monitors";
 				  declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorWSName, Direction::Output));
 				  setWorkspaceProperty("MonitorWorkspace",title,monitorWSGrp,monitorWorkspace,true);
 			  }
@@ -357,7 +357,7 @@ void LoadRaw3::setWorkspaceProperty(DataObjects::Workspace2D_sptr wsPtr,Workspac
 	std::stringstream suffix;
 	suffix << (period + 1);
 	if(bmonitors)
-	{	wsName= localWSName + "_Monitor"+"_" + suffix.str();
+	{	wsName= localWSName + "_Monitors"+"_" + suffix.str();
 		outputWorkspace="MonitorWorkspace";
 	}
 	else
@@ -577,7 +577,7 @@ void LoadRaw3::setWorkspaceProperty(const std::string & propertyName,const std::
 	Property *ws = getProperty("OutputWorkspace");
 	std::string wsName = ws->value();
 	if(bMonitor)
-		wsName+="_Monitor";
+		wsName+="_Monitors";
 	workspace->setTitle(title);
 	workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 	if (m_numberOfPeriods > 1)
@@ -736,7 +736,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
 	{	
 		Property *ws = getProperty("OutputWorkspace");
 		std::string  localWSName =ws->value();
-		std::string monitorWSName = localWSName+"_Monitor";  
+		std::string monitorWSName = localWSName+"_Monitors";  
 		declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorWSName, Direction::Output));
 		//create monitor workspace
 		monitorWorkspace=createWorkspace(monitorSpecList.size(),m_lengthIn);

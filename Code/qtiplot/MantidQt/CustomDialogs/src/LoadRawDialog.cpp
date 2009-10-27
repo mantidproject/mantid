@@ -103,57 +103,53 @@ void LoadRawDialog::initLayout()
   prop_line->addWidget(new QLabel("Start:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMin", prop_line);
-    
   text_field = new QLineEdit;
   text_field->setMaximumWidth(charWidth*3);
   prop_line->addWidget(new QLabel("End:"));
   prop_line->addWidget(text_field);
   tie(text_field, "SpectrumMax", prop_line);
-  
   text_field = new QLineEdit;
   text_field->setMinimumWidth(charWidth*6);
   prop_line->addWidget(new QLabel("List:"));
   prop_line->addWidget(text_field);
+   
   tie(text_field, "SpectrumList", prop_line);
-  
   prop_line->addStretch();
   groupbox->setLayout(prop_line);
   main_layout->addWidget(groupbox);
   
   //------------- Cache option , log files options and Monitors Options ---------------------
-  QComboBox *cacheBox = new QComboBox;
-  std::set<std::string> items = getAlgorithmProperty("Cache")->allowedValues();
+   
+  Mantid::Kernel::Property* cacheProp= getAlgorithmProperty("Cache");
+  if(cacheProp)
+  {QComboBox *cacheBox = new QComboBox;
+  std::set<std::string> items =cacheProp->allowedValues();
   std::set<std::string>::const_iterator vend = items.end();
   for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
-      ++vitr)
+	  ++vitr)
   {
-    cacheBox->addItem(QString::fromStdString(*vitr));
+	  cacheBox->addItem(QString::fromStdString(*vitr));
   }
-  
-  
   prop_line = new QHBoxLayout;
   prop_line->addWidget(new QLabel("Cache file locally:"), 0, Qt::AlignRight);
   prop_line->addWidget(cacheBox, 0, Qt::AlignLeft);
   tie(cacheBox, "Cache", prop_line);
   
-  prop_line->addStretch();  
-
+  }
+  prop_line->addStretch();
   //If the algorithm version supports the LoadLog property add a check box for it
   Mantid::Kernel::Property *loadlogs = getAlgorithmProperty("LoadLogFiles");
   if( loadlogs )
-  {
+  {   
     QCheckBox *checkbox = new QCheckBox ("Load Log Files",this);
     prop_line->addWidget(checkbox);
     tie(checkbox, "LoadLogFiles", prop_line);
   }
   prop_line->addStretch();  
-
-
-  
+  //If the algorithm version supports the LoadMonitors property add a check box for it
   Mantid::Kernel::Property* loadMonitors=getAlgorithmProperty("LoadMonitors");
   if(loadMonitors)
-
-  {  //if the algorithm version 
+  {  	  
 	  QComboBox *monitorsBox =new QComboBox;
 	  std::set<std::string> monitoritems =loadMonitors->allowedValues();
 	  std::set<std::string>::const_iterator mend = monitoritems.end();
@@ -168,7 +164,7 @@ void LoadRawDialog::initLayout()
   }
   
   
-  main_layout->addLayout(prop_line);
+  if(prop_line)main_layout->addLayout(prop_line);
   
   //Buttons 
   main_layout->addLayout(createDefaultButtonLayout("?", "Load", "Cancel"));

@@ -207,13 +207,15 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
   {
     m_tied_properties.remove(property);
   }
-  //Set a few things on the widget
-  QString docstring = QString::fromStdString(getAlgorithmProperty(property)->documentation());
+   Mantid::Kernel::Property * prop=getAlgorithmProperty(property);
+  if(prop) 
+  { //Set a few things on the widget
+  QString docstring = QString::fromStdString(prop->documentation());
   widget->setToolTip(docstring);
+  }
   widget->setEnabled(isWidgetEnabled(property));
   setValue(widget, property);
   m_tied_properties.insert(property, widget);
-  
   QLabel *validlbl = getValidatorMarker(property);
   if( !parent_layout ) return validlbl;
   
