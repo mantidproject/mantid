@@ -12,7 +12,7 @@ namespace Mantid
   {
     /** 
     Corrects the data and error values on a workspace by one minums the value of an exponential function
-    which is evaluated at the X value of each data point: 1-exp(-c*x). 
+    which is evaluated at the X value of each data point: c1(1-exp(-c*x)). 
     The data and error values are either divided or multiplied by the value of this function.
 
     Required Properties:
@@ -20,6 +20,7 @@ namespace Mantid
     <LI> InputWorkspace  - The name of the workspace to correct</LI>
     <LI> OutputWorkspace - The name of the corrected workspace (can be the same as the input one)</LI>
     <LI> c               - The positive value by which the entire exponent calculation is multiplied (see above)</LI>
+    <LI> c1              - The value by which the entire expression is multiplied (see above)</LI>
     <LI> Operation       - Whether to divide (the default) or multiply the data by the correction function</LI>
     </UL>
 
@@ -64,6 +65,7 @@ namespace Mantid
       void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
 
       double m_c;    ///< The constant term in the exponent
+      double m_c1;    ///< The multiplier
       bool m_divide; ///< Whether the data should be divided by the correction (true) or multiplied by it (false)
       
     };
