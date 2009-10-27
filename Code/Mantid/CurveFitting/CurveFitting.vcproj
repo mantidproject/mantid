@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Lorentzian.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Lorentzian1D.cpp"
 				>
 			</File>
@@ -313,11 +317,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidCurveFitting\Lorentzian.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\Lorentzian1D.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\Lorentzian1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LorentzianTest.h"
 				>
 			</File>
 			<File
