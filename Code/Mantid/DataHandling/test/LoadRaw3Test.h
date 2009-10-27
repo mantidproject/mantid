@@ -458,7 +458,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
 	Workspace_sptr monitoroutput;
-    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve(outputSpace+"_Monitor"));
+    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve(outputSpace+"_Monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
     // Should be 2584 for file HET15869.RAW
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2580);
@@ -555,9 +555,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod")));
 
 	  WorkspaceGroup_sptr monitor_work_out;
-    TS_ASSERT_THROWS_NOTHING(monitor_work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod_Monitor")));
+    TS_ASSERT_THROWS_NOTHING(monitor_work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve("multiperiod_Monitors")));
 
-	Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitor");
+	Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitors");
     WorkspaceGroup_sptr monitorsptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
 
 	std::vector<std::string>monitorwsNamevec;
@@ -567,7 +567,7 @@ public:
     for (it++;it!=monitorwsNamevec.end();it++)
     {	std::stringstream count;
       count <<period;
-      std::string wsName="multiperiod_Monitor_"+count.str();
+      std::string wsName="multiperiod_Monitors_"+count.str();
       TS_ASSERT_EQUALS(*it,wsName)
       period++;
     }
@@ -756,7 +756,6 @@ public:
 
     // Check one particular value
     TS_ASSERT_EQUALS( output2D->dataY(1)[1], 192);
-	AnalysisDataService::Instance().remove("outWS_Monitor");
 	AnalysisDataService::Instance().remove("outWS");
     }
 
@@ -783,7 +782,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
 	Workspace_sptr monitoroutput;
-	TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitor"));
+	TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
    // Should be 6 for selected input
@@ -796,7 +795,7 @@ public:
 
     // Check two Y arrays have the same number of elements
     TS_ASSERT_EQUALS( output2D->dataY(2).size(), output2D->dataY(3).size() );
-	AnalysisDataService::Instance().remove("outWS_Monitor");
+	AnalysisDataService::Instance().remove("outWS_Monitors");
 	AnalysisDataService::Instance().remove("outWS");
 
     // Check one particular value
@@ -827,7 +826,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
 	Workspace_sptr monitoroutput;
-	TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitor"));
+	TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
 
@@ -836,7 +835,7 @@ public:
 
 	TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(),3 );
 
-	AnalysisDataService::Instance().remove("outWS_Monitor");
+	AnalysisDataService::Instance().remove("outWS_Monitors");
 	AnalysisDataService::Instance().remove("outWS");
   }
    //no monitors in the selected range 
@@ -922,10 +921,10 @@ public:
 	  TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
 	  TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
 		  Workspace_sptr output1;
-	  TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("managedws2_Monitor") );
+	  TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("managedws2_Monitors") );
 	 // TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output1.get()) )
 	  AnalysisDataService::Instance().remove("managedws2");
-	  AnalysisDataService::Instance().remove("managedws2_Monitor");
+	  AnalysisDataService::Instance().remove("managedws2_Monitors");
   } 
 private:
   LoadRaw3 loader,loader2,loader3;
