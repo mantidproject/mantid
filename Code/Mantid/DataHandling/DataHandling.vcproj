@@ -321,6 +321,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SaveSPE.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveVTK.cpp"
 				>
 			</File>
@@ -576,6 +580,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SaveRKHTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveSPE.h"
 				>
 			</File>
 			<File

@@ -72,10 +72,10 @@ void SaveSPE::exec()
   for (int i = 0; i < nHist+1; i++)
   {
     double value = (i + 1) * 0.5;
-    outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(10) << value;
+    outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << value;
     if ( (i > 0) && ((i + 1) % 8 == 0) )
     {
-        outSPE_File << std::endl;
+      outSPE_File << std::endl;
     }
   }
 
@@ -90,10 +90,10 @@ void SaveSPE::exec()
   outSPE_File << "### Energy Grid" << std::endl;
   for (MantidVec::size_type i = 0; i < X.size(); i++) // needs to be better!
   {
-    outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(10) << X[i];
+    outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << X[i];
     if ( (i > 0) && ((i + 1) % 8 == 0) )
     {
-        outSPE_File << std::endl;
+      outSPE_File << std::endl;
     }
   }
 
@@ -109,7 +109,7 @@ void SaveSPE::exec()
     outSPE_File << "### S(Phi,w)" << std::endl;
     for (int j = 0; j < nBins; j++)
     {
-      outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(10) << Y[j];
+      outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << Y[j];
       if ( (j > 0) && ((j + 1) % 8 == 0) )
       {
         outSPE_File << std::endl;
@@ -122,7 +122,7 @@ void SaveSPE::exec()
     outSPE_File << "### Errors" << std::endl;
     for (int j = 0; j < nBins; j++)
     {
-      outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(10) << E[j];
+      outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << E[j];
       if ( (j > 0) && ((j + 1) % 8 == 0) )
       {
         outSPE_File << std::endl;

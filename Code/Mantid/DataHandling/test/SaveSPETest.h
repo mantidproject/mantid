@@ -55,12 +55,60 @@ public:
     std::ifstream file(outputFile.c_str());
     
     std::string tmp;
+    double tmp2;
     
     getline(file,tmp);
     TS_ASSERT_EQUALS( tmp, "       2      10" )
     getline(file,tmp);
     TS_ASSERT_EQUALS( tmp, "### Phi Grid" )
-    
+    file >> tmp2;
+    TS_ASSERT_EQUALS( tmp2, 0.5 )
+    getline(file,tmp);
+    getline(file,tmp);
+    TS_ASSERT_EQUALS( tmp, "### Energy Grid" )
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 1 )
+    getline(file,tmp);
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 1 )
+    getline(file,tmp);
+    getline(file,tmp);
+    TS_ASSERT_EQUALS( tmp, "### S(Phi,w)" )
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 5 )
+    getline(file,tmp);
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 5 )
+    getline(file,tmp);
+    getline(file,tmp);
+    TS_ASSERT_EQUALS( tmp, "### Errors" )
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 4 )
+    getline(file,tmp);
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 4 )
+    getline(file,tmp);
+    getline(file,tmp);
+    TS_ASSERT_EQUALS( tmp, "### S(Phi,w)" )
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 5 )
+    getline(file,tmp);
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 5 )
+    getline(file,tmp);
+    getline(file,tmp);
+    TS_ASSERT_EQUALS( tmp, "### Errors" )
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 4 )
+    getline(file,tmp);
+    file >> tmp2;    
+    TS_ASSERT_EQUALS( tmp2, 4 )
+    getline(file,tmp);
+    TS_ASSERT( file.good() )
+    // That should be the end of the file
+    getline(file,tmp);
+    TS_ASSERT( file.fail() )
+
     file.close();
     
     AnalysisDataService::Instance().remove(input);
