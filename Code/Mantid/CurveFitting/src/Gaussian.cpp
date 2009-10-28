@@ -12,6 +12,8 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
+DECLARE_FUNCTION(Gaussian)
+
 void Gaussian::init()
 {
   declareParameter("Height", 0.0);

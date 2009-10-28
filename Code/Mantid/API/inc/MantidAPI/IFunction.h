@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
@@ -131,5 +132,15 @@ protected:
 
 } // namespace API
 } // namespace Mantid
+
+/**
+ * Macro for declaring a new type of function to be used with the FunctionFactory
+ */
+#define DECLARE_FUNCTION(classname) \
+        namespace { \
+	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+  ((Mantid::API::FunctionFactory::Instance().subscribe<classname>(#classname)) \
+	, 0)); \
+	}
 
 #endif /*MANTID_API_IFUNCTION_H_*/

@@ -221,6 +221,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FunctionFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\IFunction.cpp"
 				>
 			</File>
@@ -400,6 +404,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FrameworkManagerTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\FunctionFactory.h"
 				>
 			</File>
 			<File

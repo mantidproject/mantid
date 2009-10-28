@@ -80,12 +80,14 @@ double IFunction::parameter(int i)const
  */
 double& IFunction::getParameter(const std::string& name)
 {
+  std::string ucName(name);
+  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
   std::vector<std::string>::const_iterator it = 
-    std::find(m_parameterNames.begin(),m_parameterNames.end(),name);
+    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
   if (it == m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "Function parameter ("<<name<<") does not exist.";
+    msg << "Function parameter ("<<ucName<<") does not exist.";
     throw std::invalid_argument(msg.str());
   }
   return m_parameters[it - m_parameterNames.begin()];
@@ -97,12 +99,14 @@ double& IFunction::getParameter(const std::string& name)
  */
 double IFunction::getParameter(const std::string& name)const
 {
+  std::string ucName(name);
+  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
   std::vector<std::string>::const_iterator it = 
-    std::find(m_parameterNames.begin(),m_parameterNames.end(),name);
+    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
   if (it == m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "Function parameter ("<<name<<") does not exist.";
+    msg << "Function parameter ("<<ucName<<") does not exist.";
     throw std::invalid_argument(msg.str());
   }
   return m_parameters[it - m_parameterNames.begin()];
@@ -124,16 +128,18 @@ std::string IFunction::parameterName(int i)const
  */
 void IFunction::declareParameter(const std::string& name,double initValue )
 {
+  std::string ucName(name);
+  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
   std::vector<std::string>::const_iterator it = 
-    std::find(m_parameterNames.begin(),m_parameterNames.end(),name);
+    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
   if (it != m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "Function parameter ("<<name<<") already exists.";
+    msg << "Function parameter ("<<ucName<<") already exists.";
     throw std::invalid_argument(msg.str());
   }
 
-  m_parameterNames.push_back(name);
+  m_parameterNames.push_back(ucName);
   m_parameters.push_back(initValue);
 }
 

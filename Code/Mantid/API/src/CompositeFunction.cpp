@@ -13,6 +13,8 @@ namespace Mantid
 namespace API
 {
 
+DECLARE_FUNCTION(CompositeFunction)
+
 /// Copy contructor
 CompositeFunction::CompositeFunction(const CompositeFunction& f)
 :m_nActive(f.m_nParams),m_nParams(f.m_nParams)

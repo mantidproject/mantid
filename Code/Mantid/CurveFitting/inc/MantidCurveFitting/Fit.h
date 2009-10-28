@@ -95,11 +95,13 @@ namespace Mantid
        */
       virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
 
+      void processParameters();
+
       /// Holds a copy of the value of the parameters that are actually least-squared fitted.
-      std::vector<double> m_fittedParameter;
+      //std::vector<double> m_fittedParameter;
 
       /// Number of parameters.
-      size_t nParams()const{return m_fittedParameter.size();}
+      size_t nParams()const{return m_function->nActive();}
 
       /// Pointer to the fitting function
       API::IFunction* m_function;

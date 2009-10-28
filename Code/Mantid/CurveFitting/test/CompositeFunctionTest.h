@@ -10,9 +10,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
-#include <iostream>
-#include <fstream>
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -163,7 +160,6 @@ public:
     WS_type ws = mkWS(1,0,10,0.1);
     addNoise(ws,0.1);
     storeWS("mfun",ws);
-    plotWS("mfun.txt",ws);
 
     Fit alg;
     alg.initialize();
@@ -320,21 +316,6 @@ private:
         E[i] += noise;
       }
     }
-  }
-
-  void plotWS(const std::string& fname,WS_type ws)
-  {
-    std::string fn = "C:\\Documents and Settings\\hqs74821\\Desktop\\tmp\\" + fname;
-    std::ofstream fil(fn.c_str());
-    char sep = '\t';
-    for(int i=0;i<ws->blocksize();i++)
-    {
-      fil << ws->readX(0)[i];
-      for(int j=0;j<ws->getNumberHistograms();j++)
-        fil << sep << ws->readY(j)[i] << sep << ws->readE(j)[i];
-      fil << '\n';
-    }
-    fil.close();
   }
 
 };

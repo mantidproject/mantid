@@ -11,6 +11,8 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
+DECLARE_FUNCTION(LinearBackground)
+
 void LinearBackground::init()
 {
   declareParameter("A0", 0.0);

@@ -8,6 +8,7 @@
 #include <iomanip>
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -191,6 +192,8 @@ namespace CurveFitting
       "A value in, or on the high x boundary of, the last bin the fitting range\n"
       "(default the highest value of x)" );
 
+    declareProperty("InputParameters","","The name of a TableWorkspace holding fit parameters" );
+
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
     declareProperty("Output Status","", Direction::Output);
@@ -210,6 +213,8 @@ namespace CurveFitting
   void Fit::exec()
   {
 
+    processParameters();
+
     if (m_function == NULL)
       throw std::runtime_error("Function has not been set.");
 
@@ -224,7 +229,7 @@ namespace CurveFitting
       boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(nParams(),1) );
       J.setJ(M.get());
       // note nData set to zero (last argument) hence this should avoid further memory problems
-      functionDeriv(&(inTest.front()), &J, &xValuesTest, 0);  
+      functionDeriv(NULL, &J, &xValuesTest, 0);  
     }
     catch (Exception::NotImplementedError&)
     {
@@ -348,7 +353,8 @@ namespace CurveFitting
 
     for (size_t i = 0; i < nParams(); i++)
     {
-        gsl_vector_set(initFuncArg, i, m_fittedParameter[i]);
+        //gsl_vector_set(initFuncArg, i, m_fittedParameter[i]);
+        gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
     }
 
 
@@ -436,7 +442,7 @@ namespace CurveFitting
 
       // put final converged fitting values back into m_fittedParameter
       for (size_t i = 0; i < nParams(); i++)
-          m_fittedParameter[i] = gsl_vector_get(s->x,i);
+          m_function->setActiveParameter(i,gsl_vector_get(s->x,i));
     }
     else
     {
@@ -457,8 +463,9 @@ namespace CurveFitting
       finalCostFuncVal = simplexMinimizer->fval / dof;
 
       // put final converged fitting values back into m_fittedParameter
-      for (unsigned int i = 0; i < m_fittedParameter.size(); i++)
-          m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,i);
+      for (unsigned int i = 0; i < nParams(); i++)
+          //m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,i);
+          m_function->setActiveParameter(i, gsl_vector_get(simplexMinimizer->x,i));
     }
 
     // Output summary to log file
@@ -468,8 +475,8 @@ namespace CurveFitting
     g_log.information() << "Iteration = " << iter << "\n" <<
       "Status = " << reportOfFit << "\n" <<
       "Chi^2/DoF = " << finalCostFuncVal << "\n";
-    for (size_t i = 0; i < m_fittedParameter.size(); i++)
-      g_log.information() << m_function->nameOfActive(i) << " = " << m_fittedParameter[i] << "  \n";
+    for (size_t i = 0; i < nParams(); i++)
+      g_log.information() << m_function->nameOfActive(i) << " = " << m_function->activeParameter(i) << "  \n";
 
 
     // also output summary to properties
@@ -508,7 +515,7 @@ namespace CurveFitting
       for(size_t i=0;i<nParams();i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
-        row << m_function->nameOfActive(i) << m_fittedParameter[i];
+        row << m_function->nameOfActive(i) << m_function->activeParameter(i);
       }
       setProperty("OutputParameters",m_result);
 
@@ -540,7 +547,7 @@ namespace CurveFitting
 
 
       double* lOut = new double[l_data.n];  // to capture output from call to function()
-      function(&m_fittedParameter[0], lOut, l_data.X, l_data.n);
+      function(NULL, lOut, l_data.X, l_data.n);
 
       for(unsigned int i=0; i<l_data.n; i++) 
       {
@@ -567,11 +574,6 @@ namespace CurveFitting
   void Fit::setFunction(API::IFunction* fun)
   {
     m_function = fun;
-    m_fittedParameter.resize(fun->nActive());
-    for(int i=0;i<fun->nActive();i++)
-    {
-      m_fittedParameter[i] = fun->activeParameter(i);
-    }
   }
 
 /** Calculate the fitting function.
@@ -584,7 +586,7 @@ namespace CurveFitting
   void Fit::function(const double* in, double* out, const double* xValues, const int& nData)
   {
 
-    m_function->updateActive(in);
+    if (in) m_function->updateActive(in);
     m_function->function(out,xValues,nData);
   }
 
@@ -600,8 +602,64 @@ namespace CurveFitting
   */
   void Fit::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
   {
-    m_function->updateActive(in);
+    if (in) m_function->updateActive(in);
     m_function->functionDeriv(out,xValues,nData);
+  }
+
+  void Fit::processParameters()
+  {
+    std::string input = getProperty("InputParameters");
+    if (input.empty()) return;
+
+    typedef Poco::StringTokenizer tokenizer;
+    tokenizer functions(input, ";", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+
+    bool isComposite = functions.count() > 1;
+    API::IFunction* function;
+
+    if (isComposite)
+    {
+      function = API::FunctionFactory::Instance().createFunction("CompositeFunction");
+      setFunction(function);
+    }
+
+    for (tokenizer::Iterator ifun = functions.begin(); ifun != functions.end(); ++ifun)
+    {
+      tokenizer params(*ifun, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+      std::map<std::string,std::string> param;
+      for (tokenizer::Iterator par = params.begin(); par != params.end(); ++par)
+      {
+        tokenizer name_value(*par, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+        if (name_value.count() > 1)
+        {
+          std::string name = name_value[0];
+          //std::transform(name.begin(), name.end(), name.begin(), toupper);
+          param[name] = name_value[1];
+        }
+      }
+
+      std::string functionName = param["function"];
+      if (functionName.empty())
+        throw std::runtime_error("Function is not defined");
+
+      API::IFunction* fun = API::FunctionFactory::Instance().createFunction(functionName);
+      fun->init();
+
+      if (isComposite)
+        static_cast<API::CompositeFunction*>(function)->addFunction(fun);
+      else
+        setFunction(fun);
+
+      std::map<std::string,std::string>::const_iterator par = param.begin();
+      for(;par!=param.end();++par)
+      {
+        if (par->first != "function")
+        {
+          //fun->getParameter(par->first) = boost::lexical_cast<double>(par->second);
+          fun->getParameter(par->first) = atof(par->second.c_str());
+        }
+      }
+    }
   }
 
 } // namespace Algorithm
