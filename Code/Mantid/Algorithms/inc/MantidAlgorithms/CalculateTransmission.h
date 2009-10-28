@@ -28,6 +28,7 @@ namespace Algorithms
     <LI> TransmissionMonitor - The UDET of the transmission monitor (Default: 3, as for LOQ). </LI>
     <LI> MinWavelength       - The minimum wavelength for the fit (Default: 2.2 Angstroms). </LI>
     <LI> MaxWavelength       - The maximum wavelength for the fit (Default: 10 Angstroms). </LI>
+    <LI> FitMethod           - Whether to fit to the log of the transmission curve (the default) or directly (i.e. linearly). </LI>
     <LI> OutputUnfittedData  - If true (false is the default), will output an additional workspace
                                called [OutputWorkspace]_unfitted containing the unfitted transmission
                                correction. </LI>
@@ -80,8 +81,8 @@ private:
   API::MatrixWorkspace_sptr extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
-  /// Progress reporting object
-  API::Progress *m_progress;
+
+  bool logFit; ///< If true, will take log of transmission curve before fitting 
 };
 
 } // namespace Algorithm

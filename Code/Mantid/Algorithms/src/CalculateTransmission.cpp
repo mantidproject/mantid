@@ -18,19 +18,18 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-CalculateTransmission::CalculateTransmission() : API::Algorithm(),m_progress(NULL)
+CalculateTransmission::CalculateTransmission() : API::Algorithm(), logFit(false)
 {}
 
 CalculateTransmission::~CalculateTransmission()
-{
-  if (m_progress) delete m_progress;
-}
+{}
 
 void CalculateTransmission::init()
 {
   CompositeValidator<Workspace2D> *wsValidator = new CompositeValidator<Workspace2D>;
   wsValidator->add(new WorkspaceUnitValidator<Workspace2D>("Wavelength"));
   wsValidator->add(new CommonBinsValidator<Workspace2D>);
+  wsValidator->add(new HistogramValidator<Workspace2D>);
   
   declareProperty(new WorkspaceProperty<Workspace2D>("SampleRunWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<Workspace2D>("DirectRunWorkspace","",Direction::Input,wsValidator->clone()));
@@ -46,6 +45,12 @@ void CalculateTransmission::init()
   mustBePositive->setLower(0.0);  
   declareProperty("MinWavelength",2.2,mustBePositive,"The minimum wavelength for the fit");
   declareProperty("MaxWavelength",10.0,mustBePositive->clone(),"The maximum wavelength for the fit");
+
+  std::vector<std::string> options(2);
+  options[0] = "Linear";
+  options[1] = "Log";
+  declareProperty("FitMethod","Log",new ListValidator(options),
+    "Whether to fit directly to the transmission curve (Linear) or to the log of it (Log)");
 
   declareProperty("OutputUnfittedData",false);
 }
@@ -110,24 +115,35 @@ void CalculateTransmission::exec()
     setProperty("UnfittedData",transmission);
   }
   
-  // Take a copy of this workspace for the fitting
-  MatrixWorkspace_sptr logTransmission = this->extractSpectrum(boost::dynamic_pointer_cast<DataObjects::Workspace2D>(transmission),0);
-  
- 
-  // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
-  MantidVec & Y = logTransmission->dataY(0);
-  MantidVec & E = logTransmission->dataE(0);
-  m_progress = new Progress(this,0.1,0.7,Y.size());
-  for (unsigned int i=0; i < Y.size(); ++i)
+  MatrixWorkspace_sptr fit;
+  const std::string fitMethod = getProperty("FitMethod");
+  logFit = ( fitMethod == "Log" );
+  if (logFit)
   {
-    E[i] = std::abs(E[i]/Y[i]);
-    Y[i] = std::log10(Y[i]);
-    m_progress->report();
-  }
+    g_log.debug("Fitting to the logarithm of the transmission");
+    // Take a copy of this workspace for the fitting
+    MatrixWorkspace_sptr logTransmission = this->extractSpectrum(boost::dynamic_pointer_cast<DataObjects::Workspace2D>(transmission),0);
   
-  // Now fit this to a straight line
-  MatrixWorkspace_sptr fit = this->fitToData(logTransmission);
-   
+    // Take the log of each datapoint for fitting. Preserve errors percentage-wise.
+    MantidVec & Y = logTransmission->dataY(0);
+    MantidVec & E = logTransmission->dataE(0);
+    Progress progress(this,0.4,0.6,Y.size());
+    for (unsigned int i=0; i < Y.size(); ++i)
+    {
+      E[i] = std::abs(E[i]/Y[i]);
+      Y[i] = std::log10(Y[i]);
+      progress.report();
+    }
+
+    // Now fit this to a straight line
+    fit = this->fitToData(logTransmission);
+  } // logFit true
+  else
+  {
+    g_log.debug("Fitting directly to the data (i.e. linearly)");
+    fit = this->fitToData(transmission);
+  }
+
   setProperty("OutputWorkspace",fit);
 }
 
@@ -138,7 +154,7 @@ void CalculateTransmission::exec()
  */
 API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Workspace2D_sptr WS, const int index)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.1);
+  IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<Workspace2D_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", index);
   // Now execute the sub-algorithm. Catch and log any error
@@ -169,7 +185,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(DataObjects::Wo
 API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Fitting the experimental transmission curve");
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear",0.7,1.0);
+  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear",0.6,1.0);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   const double lambdaMin = getProperty("MinWavelength");
   const double lambdaMax = getProperty("MaxWavelength");
@@ -202,19 +218,23 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
  
   // Only get to here if successful
   MatrixWorkspace_sptr result = childAlg->getProperty("OutputWorkspace");
-  // Need to transform back to 'unlogged'
-  double b = childAlg->getProperty("FitIntercept");
-  double m = childAlg->getProperty("FitSlope");
-  b = std::pow(10,b);
-  m = std::pow(10,m);
 
-  const MantidVec & X = result->readX(0);
-  MantidVec & Y = result->dataY(0);
-  MantidVec & E = result->dataE(0);
-  for (unsigned int i = 0; i < Y.size(); ++i)
+  if (logFit)
   {
-    E[i] = std::abs(E[i]*Y[i]);
-    Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
+    // Need to transform back to 'unlogged'
+    double b = childAlg->getProperty("FitIntercept");
+    double m = childAlg->getProperty("FitSlope");
+    b = std::pow(10,b);
+    m = std::pow(10,m);
+
+    const MantidVec & X = result->readX(0);
+    MantidVec & Y = result->dataY(0);
+    MantidVec & E = result->dataE(0);
+    for (unsigned int i = 0; i < Y.size(); ++i)
+    {
+      E[i] = std::abs(E[i]*Y[i]);
+      Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
+    }
   }
 
   return result;
