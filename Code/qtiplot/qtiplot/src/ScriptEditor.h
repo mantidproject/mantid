@@ -160,6 +160,8 @@ signals:
   void executeLine(const QString&);
 
 private:
+  /// Disable window editing keys when we are in interpreter mode
+  void remapWindowEditingKeys();
   /// The file name associated with this editor
   QString m_filename;
 

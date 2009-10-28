@@ -147,6 +147,9 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode) :
     markerAdd(0, m_marker_handle); 
     setMarginWidth(1, 14);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // Need to disable some default key bindings that Scintilla provides as they don't really
+    // fit here
+    remapWindowEditingKeys();
   }
   else
   {
@@ -388,4 +391,33 @@ void ScriptEditor::displayOutput(const QString& msg, bool error)
   {
     append("\"" + msg + "\"");
   }
+}
+
+//------------------------------------------------
+// Private member functions
+//------------------------------------------------
+/**
+ * Disable several default key bindings, such as Ctrl+A, that Scintilla provides.
+ */
+void ScriptEditor::remapWindowEditingKeys()
+{
+  //Down
+  int keyDef = SCK_DOWN + (0 << 16);
+  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  //Up
+  keyDef = SCK_UP + (0 << 16);
+  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  //Select all 
+  keyDef = 'A' + (SCMOD_CTRL << 16);
+  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  //Undo
+  keyDef = 'Z' + (SCMOD_CTRL << 16);
+  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  //  Other key combination
+  keyDef = SCK_BACK + (SCMOD_ALT << 16);
+  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  //Redo
+  keyDef = 'Y' + (SCMOD_CTRL << 16);
+  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  
 }
