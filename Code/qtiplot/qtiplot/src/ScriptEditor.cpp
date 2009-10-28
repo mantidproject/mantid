@@ -28,11 +28,17 @@
  */
 void CommandHistory::add(QString cmd)
 {
-  //Ignore duplicates
-  if( m_commands.contains(cmd) ) return;
+  //Ignore duplicates that are the same as the last command entered and just reset the pointer
+  int ncmds = m_commands.count();
+  if( ncmds > 1 && m_commands.lastIndexOf(cmd) == ncmds - 2 ) 
+  {
+    //Reset the index pointer
+    m_current = ncmds - 1;
+    return;
+  }
 
   // If the stack is full, then remove the oldest
-  if( m_commands.count() == m_hist_maxsize + 1)
+  if( ncmds == m_hist_maxsize + 1)
   {
     m_commands.removeFirst();
   }
