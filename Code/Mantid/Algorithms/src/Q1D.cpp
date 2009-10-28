@@ -121,10 +121,10 @@ void Q1D::exec()
     {
       MantidVec included_bins,solidAngleVec;
       included_bins.push_back(Qx.front());
-      // If there are masked bins, get a reference to the list of them
-      const API::MatrixWorkspace::MaskList& mask = inputWS->maskedBins(i);
+      // Get a reference to the list of masked bins
+      const MatrixWorkspace::MaskList& mask = inputWS->maskedBins(i);
       // Now iterate over the list, adjusting the weights for the affected bins
-      for (API::MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+      for (MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
       {
         const double currentX = Qx[(*it).first];
         // Add an intermediate bin with full weight if masked bins aren't consecutive

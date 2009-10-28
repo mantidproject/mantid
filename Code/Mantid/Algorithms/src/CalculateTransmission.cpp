@@ -120,9 +120,8 @@ void CalculateTransmission::exec()
   m_progress = new Progress(this,0.1,0.7,Y.size());
   for (unsigned int i=0; i < Y.size(); ++i)
   {
-    const double errorPerc = E[i]/Y[i];
+    E[i] = std::abs(E[i]/Y[i]);
     Y[i] = std::log10(Y[i]);
-    E[i] = std::abs(errorPerc*Y[i]);
     m_progress->report();
   }
   
@@ -214,9 +213,8 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
   MantidVec & E = result->dataE(0);
   for (unsigned int i = 0; i < Y.size(); ++i)
   {
-    const double errorPerc = E[i]/Y[i];
+    E[i] = std::abs(E[i]*Y[i]);
     Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
-    E[i] = std::abs(errorPerc*Y[i]);
   }
 
   return result;
