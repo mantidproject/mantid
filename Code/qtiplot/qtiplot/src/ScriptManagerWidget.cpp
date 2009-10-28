@@ -63,6 +63,7 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent,
   if( interpreter_mode )
   {
     tabBar()->hide();
+    setContextMenuPolicy(Qt::NoContextMenu);
     ScriptEditor *editor = currentEditor();
     connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
     connect(this, SIGNAL(MessageToPrint(const QString&, bool)), editor, 
@@ -256,7 +257,11 @@ QAction* ScriptManagerWidget::printAction() const
 ScriptEditor* ScriptManagerWidget::newTab(int index)
 {
   ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode);
-  if( !m_interpreter_mode )
+  if( m_interpreter_mode )
+  {
+    editor->setContextMenuPolicy(Qt::NoContextMenu);
+  }
+  else
   {
     editor->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
@@ -264,7 +269,6 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
     connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
     connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
 	    SLOT(updateMarker(int, bool)));
-  
   }
   QString tab_title = "New script";
   setCurrentIndex(insertTab(index, editor, tab_title));
