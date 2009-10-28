@@ -15,6 +15,7 @@
 #   when something in the chain has failed.
 rm -f *.log
 rm -rf runner.*
+rm -f *.properties
 
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
@@ -44,5 +45,4 @@ ln ../../Build/Tests/*.properties .
 ./runner.exe
 echo
 
-rm -f *.properties
 echo "Done."

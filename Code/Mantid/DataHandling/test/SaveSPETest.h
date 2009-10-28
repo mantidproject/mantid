@@ -1,0 +1,74 @@
+#ifndef SAVESPETEST_H_
+#define SAVESPETEST_H_
+
+#include <cxxtest/TestSuite.h>
+
+#include "MantidDataHandling/SaveSPE.h"
+#include "MantidKernel/UnitFactory.h"
+#include "../../Algorithms/test/WorkspaceCreationHelper.hh"
+#include "Poco/File.h"
+#include <fstream>
+
+class SaveSPETest : public CxxTest::TestSuite
+{
+public:  
+  void testName()
+  {
+    TS_ASSERT_EQUALS( saver.name(), "SaveSPE" )
+  }
+
+  void testVersion()
+  {
+    TS_ASSERT_EQUALS( saver.version(), 1 )
+  }
+
+  void testCategory()
+  {
+    TS_ASSERT_EQUALS( saver.category(), "DataHandling" )
+  }
+
+  void testInit()
+  {
+    TS_ASSERT_THROWS_NOTHING( saver.initialize() )
+    TS_ASSERT( saver.isInitialized() )
+    
+    TS_ASSERT_EQUALS( saver.getProperties().size(), 2 )
+  }
+
+  void testExec()
+  {
+    using namespace Mantid::API;
+    // Create a small test workspace
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspace154(10,2);
+    inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+    const std::string input("input");
+    AnalysisDataService::Instance().add(input,inputWS);
+    
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("InputWorkspace",input) )
+    const std::string outputFile("testSPE.spe");
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",outputFile) )
+    
+    TS_ASSERT_THROWS_NOTHING( saver.execute() )
+    TS_ASSERT( saver.isExecuted() )
+    
+    TS_ASSERT( Poco::File(outputFile).exists() )
+    std::ifstream file(outputFile.c_str());
+    
+    std::string tmp;
+    
+    getline(file,tmp);
+    TS_ASSERT_EQUALS( tmp, "       2      10" )
+    getline(file,tmp);
+    TS_ASSERT_EQUALS( tmp, "### Phi Grid" )
+    
+    file.close();
+    
+    AnalysisDataService::Instance().remove(input);
+    Poco::File(outputFile).remove();
+  }
+  
+private:
+  Mantid::DataHandling::SaveSPE saver;
+};
+
+#endif /*SAVESPETEST_H_*/
