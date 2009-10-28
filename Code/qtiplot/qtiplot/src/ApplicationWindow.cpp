@@ -83,6 +83,7 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
+#include "ScriptManagerWidget.h"
 #include "TableStatistics.h"
 #include "Fit.h"
 #include "MultiPeakFit.h"
@@ -137,6 +138,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QPrinter>
+#include <QPrinterInfo>
 #include <QActionGroup>
 #include <QAction>
 #include <QToolBar>
@@ -280,6 +282,20 @@ void ApplicationWindow::init(bool factorySettings)
 	consoleWindow->setWidget(console);
 	consoleWindow->hide();
 #endif
+	connect(scriptEnv, SIGNAL(error(const QString&,const QString&,int)),
+			this, SLOT(scriptError(const QString&,const QString&,int)));
+	connect(scriptEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
+
+	m_interpreterDock = new QDockWidget(this);
+	m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
+	m_interpreterDock->setWindowTitle("Script Interpreter");
+	addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
+	// this has to be done after connecting scriptEnv
+	scriptEnv->initialize();
+	
+	m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+	m_interpreterDock->setWidget(m_scriptInterpreter);
+	m_interpreterDock->hide();
 
 	undoStackWindow = new QDockWidget(this);
 	undoStackWindow->setObjectName("undoStackWindow"); // this is needed for QMainWindow::restoreState()
@@ -349,15 +365,9 @@ void ApplicationWindow::init(bool factorySettings)
 	connect(lv, SIGNAL(itemRenamed(Q3ListViewItem *, int, const QString &)),
 			this, SLOT(renameWindow(Q3ListViewItem *, int, const QString &)));
 
-	connect(scriptEnv, SIGNAL(error(const QString&,const QString&,int)),
-			this, SLOT(scriptError(const QString&,const QString&,int)));
-	connect(scriptEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
 	connect(recent, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
 	//connect(&http, SIGNAL(done(bool)), this, SLOT(receivedVersionFile(bool)));
-
-	// this has to be done after connecting scriptEnv
-	scriptEnv->initialize();
 
     //apply user settings
     updateAppFonts();
@@ -604,7 +614,14 @@ void ApplicationWindow::initGlobalConstants()
 	d_image_export_filter = ".png";
 	d_export_transparency = false;
 	d_export_quality = 100;
-	d_export_resolution = QPrinter().resolution();
+
+	// MG: On Linux, if cups defines a printer queue that cannot be contact, the 
+	// QPrinter constructor hangs and doesn't timeout.
+
+	//	QPrinterInfo::availablePrinters();
+
+
+	//	d_export_resolution = QPrinter().resolution();
 	d_export_color = true;
 	d_export_vector_size = int(QPrinter::Custom);
 	d_keep_plot_aspect = true;
@@ -1243,11 +1260,12 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	
 	scriptingMenu->clear();
 	scriptingMenu->addAction(actionShowScriptWindow); //Mantid
+	scriptingMenu->addAction(actionShowScriptInterpreter); //Mantid
 #ifdef SCRIPTING_DIALOG
 	scriptingMenu->addAction(actionScriptingLang);
 #endif
 	scriptingMenu->addAction(actionRestartScripting);
-    scriptingMenu->addAction(actionCustomActionDialog);
+	scriptingMenu->addAction(actionCustomActionDialog);
 
     mantidUI->insertMenu();//Mantid
 
@@ -4584,7 +4602,7 @@ void ApplicationWindow::readSettings()
 	d_image_export_filter = settings.value("/ImageFileTypeFilter", ".png").toString();
 	d_export_transparency = settings.value("/ExportTransparency", false).toBool();
 	d_export_quality = settings.value("/ImageQuality", 100).toInt();
-	d_export_resolution = settings.value("/Resolution", QPrinter().resolution()).toInt();
+	//	d_export_resolution = settings.value("/Resolution", QPrinter().resolution()).toInt();
 	d_export_color = settings.value("/ExportColor", true).toBool();
 	d_export_vector_size = settings.value("/ExportPageSize", QPrinter::Custom).toInt();
 	d_keep_plot_aspect = settings.value("/KeepAspect", true).toBool();
@@ -4910,7 +4928,7 @@ void ApplicationWindow::saveSettings()
 
 	if( scriptingWindow )
  	{
-	  scriptingWindow->show();//Mantid
+	  scriptingWindow->raise();//Mantid
 	  scriptingWindow->saveSettings(); //Mantid
     scriptingWindow->hide();
 	}
@@ -11790,6 +11808,10 @@ void ApplicationWindow::createActions()
 	actionShowScriptWindow->setShortcut(tr("F3"));
 	actionShowScriptWindow->setToggleAction( true );
 	connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
+	actionShowScriptInterpreter = new QAction(QPixmap(python_xpm), tr("Command Line &Interpreter"), this);
+	actionShowScriptInterpreter->setShortcut(tr("F4"));
+	actionShowScriptInterpreter->setToggleAction(true);
+	connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
 #endif
 
 	actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
@@ -14595,6 +14617,33 @@ void ApplicationWindow::showScriptWindow()
   {
     scriptingWindow->hide();
   }
+}
+
+void ApplicationWindow::showScriptInterpreter()
+{
+  if( !m_interpreterDock )
+  {
+    m_interpreterDock = new QDockWidget(this);
+    m_interpreterDock->setObjectName("m_interpreterDock");
+    m_interpreterDock->setWindowTitle("Script Interpreter");
+    addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
+    
+    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+    m_interpreterDock->setWidget(m_scriptInterpreter);
+    m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
+    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
+  }
+
+  if( m_interpreterDock->isVisible() )
+  {
+    m_interpreterDock->hide();
+  }
+  else
+  {
+    m_interpreterDock->show();
+    m_scriptInterpreter->setFocus();
+  }
+
 }
 
 /*!

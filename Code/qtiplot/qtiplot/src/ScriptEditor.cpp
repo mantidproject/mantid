@@ -10,16 +10,85 @@
 #include <QAction>
 #include <QPrintDialog>
 #include <QPrinter>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QScrollBar>
 
 // std
 #include <cmath>
+#include <iostream>
+
+//***************************************************************************
+//
+// CommandHistory struct
+//
+//***************************************************************************
+/**
+ * Add a command to the store. 
+ */
+void CommandHistory::add(QString cmd)
+{
+  //Ignore duplicates
+  if( m_commands.contains(cmd) ) return;
+
+  // If the stack is full, then remove the oldest
+  if( m_commands.count() == m_hist_maxsize + 1)
+  {
+    m_commands.removeFirst();
+  }
+  if( !m_commands.isEmpty() )
+  {
+    //Remove blankline
+    m_commands.removeLast();
+  }
+  // Add the command and an extra blank line
+  m_commands.append(cmd);
+  m_commands.append("");
+  
+  //Reset the index pointer
+  m_current = m_commands.count() - 1;
+}
+
+/** 
+ * Is there a previous command
+ * @returns A boolean indicating whether there is command on the left of the current index
+ */
+bool CommandHistory::hasPrevious() const
+{
+  if( !m_commands.isEmpty() &&  m_current > 0 ) return true;
+  else return false;
+}
+
+/**
+ * Get the item pointed to by the current index and move it back one
+ */
+QString CommandHistory::getPrevious() const
+{
+  return m_commands.value(--m_current);
+}
+
+/** 
+ * Is there a command next on the stack
+ */
+bool CommandHistory::hasNext() const
+{
+  if( !m_commands.isEmpty() &&  m_current < m_commands.count() - 1 ) return true;
+  else return false;
+}
+
+/** 
+ * Get the item pointed to by the current index and move it down one
+ */
+QString CommandHistory::getNext() const
+{
+  return m_commands.value(++m_current);
+}
 
 //***************************************************************************
 //
 // ScriptEditor class
 //
 //***************************************************************************
-
 // The colour for a success marker
 QColor ScriptEditor::g_success_colour = QColor("lightgreen");
 // The colour for an error marker
@@ -32,16 +101,10 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * Constructor
  * @param parent The parent widget (can be NULL)
  */
-ScriptEditor::ScriptEditor(QWidget *parent) : 
-  QsciScintilla(parent), m_filename(""), m_marker_handle(markerDefine(QsciScintilla::RightArrow))
+ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode) : 
+  QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
+  m_history(), m_read_only(false)
 {
-  //Editor properties
-  setAutoIndent(true);
-  setMarginLineNumbers(1,true);
-  
-  // Update for a text change
-  connect(this, SIGNAL(textChanged()), this, SLOT(update()));
-  
   // Undo action
   m_undo = new QAction(tr("&Undo"), this);
   m_undo->setShortcut(tr("Ctrl+Z"));
@@ -75,8 +138,28 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
   m_print->setShortcut(tr("Ctrl+P"));
   connect(m_print, SIGNAL(activated()), this, SLOT(print()));
 
-  //Update the editor
-  update();
+  if( interpreter_mode )
+  {
+    m_marker_handle = markerDefine(QsciScintilla::ThreeRightArrows);
+    setMarginLineNumbers(1,false);
+    //Editor properties
+    setAutoIndent(false); 
+    markerAdd(0, m_marker_handle); 
+    setMarginWidth(1, 14);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  }
+  else
+  {
+    m_marker_handle = markerDefine(QsciScintilla::RightArrow);
+    setMarginLineNumbers(1,true);
+    //Editor properties
+    setAutoIndent(true);
+    // Update for a text change
+    connect(this, SIGNAL(textChanged()), this, SLOT(update()));
+    //Update the editor
+    update();
+  }
+  
 }
 
 /**
@@ -84,6 +167,21 @@ ScriptEditor::ScriptEditor(QWidget *parent) :
  */
 ScriptEditor::~ScriptEditor()
 {
+}
+
+/**
+ * Default size hint
+ */
+QSize ScriptEditor::sizeHint() const
+{
+  if( m_interpreter_mode )
+  {
+    return QSize(0,50);
+  }
+  else
+  {
+    return QSize(600, 500);
+  }
 }
 
 /**
@@ -111,6 +209,115 @@ bool ScriptEditor::saveScript(const QString & filename)
   file.close();
 
   return true;
+}
+
+/**
+ * Set the text on the given line, something I feel is missing from the QScintilla API. Note
+ * that like QScintilla line numbers start from 0
+ * @param lineno A zero-based index representing the linenumber, 
+ * @param text The text to insert at the given line
+ */
+void ScriptEditor::setText(int lineno, const QString& txt)
+{
+  int line_length = txt.length();
+  // Index is max of the length of current/new text
+  setSelection(lineno, 0, lineno, qMax(line_length, this->text(lineno).length()));
+  removeSelectedText();
+  insertAt(txt, lineno, 0);
+  setCursorPosition(lineno, line_length);
+}
+
+/** 
+ * Capture key presses and if in interpeter mode use Up and Down arrow keys to search the
+ * command history
+ * @event A pointer to the QKeyPressEvent object
+ */
+void ScriptEditor::keyPressEvent(QKeyEvent* event)
+{
+  if( !m_interpreter_mode )
+  {
+    return QsciScintilla::keyPressEvent(event);
+  }
+
+  // Check if we have flagged to mark the line as read only
+  if( m_read_only ) return;
+
+  int key = event->key();
+  int last_line = lines() - 1;
+  if( key == Qt::Key_Return || key == Qt::Key_Enter )
+  {
+    QString cmd = text(last_line);
+    if( cmd.isEmpty() ) return;
+    m_history.add(cmd);
+    // I was seeing strange behaviour with the first line marker disappearing after
+    // entering some text, removing it and retyping then pressing enter
+    if( last_line == 0 ) markerAdd(last_line, m_marker_handle); 
+    emit executeLine(cmd);
+    return;
+  }
+  else if( key == Qt::Key_Up )
+  {
+    if( m_history.hasPrevious() )
+    {
+      QString cmd = m_history.getPrevious();
+      setText(last_line, cmd);
+    }
+    return;
+  }
+  else if( key == Qt::Key_Down )
+  {
+    if( m_history.hasNext() )
+    {
+      QString cmd = m_history.getNext();
+      setText(last_line, cmd);
+    }
+    return;
+  }
+  //At the start of a line we don't want to go back to the previous
+  else if( key == Qt::Key_Left || key == Qt::Key_Backspace )
+  {
+    int index(-1), dummy(-1);
+    getCursorPosition(&dummy, &index);
+    if( index == 0 ) return;
+  }
+  else
+  {
+    return QsciScintilla::keyPressEvent(event);
+  }
+  return QsciScintilla::keyPressEvent(event);
+}
+
+/**
+ * Set whether or not the current line(where the cursor is located) is editable
+ */
+void ScriptEditor::setEditingState(int line)
+{
+  m_read_only = (line != lines() - 1);
+}
+
+/**
+ * Capture mouse click events to prevent moving the cursor to unwanted places
+ */
+void ScriptEditor::mousePressEvent(QMouseEvent *event)
+{  
+  QsciScintilla::mousePressEvent(event);
+  if( m_interpreter_mode )
+  {
+    int line(-1), dummy(-1);
+    getCursorPosition(&line, &dummy);
+    setEditingState(line);
+  }
+}
+
+/**
+* Create a new input line
+*/
+void ScriptEditor::newInputLine()
+{
+  int cursorline = lines();
+  append("\n");
+  markerAdd(cursorline, m_marker_handle);
+  setCursorPosition(cursorline, 0);
 }
 
 //-----------------------------------------------
@@ -165,4 +372,20 @@ void ScriptEditor::print()
   document.print(&printer);
 }
 
-
+/**
+ * Display the output from a script that has been run in interpeter mode
+ * @param msg The output string
+ * @param error If this is an error
+ */
+void ScriptEditor::displayOutput(const QString& msg, bool error)
+{
+  append("\n");
+  if( !error )
+  {
+    append(msg);
+  }
+  else
+  {
+    append("\"" + msg + "\"");
+  }
+}

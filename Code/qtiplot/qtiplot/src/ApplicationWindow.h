@@ -88,6 +88,7 @@ class AssociationsDialog;
 //Mantid
 class MantidUI;
 class ScriptingWindow;
+class ScriptManagerWidget;
 
 /**
  * \brief QtiPlot's main window.
@@ -687,6 +688,7 @@ public slots:
 	void showListViewPopupMenu(const QPoint &p);
 
 	void showScriptWindow();
+        void showScriptInterpreter();
 	void showMoreWindows();
 	void showMarkerPopupMenu();
 	void showHelp();
@@ -1195,6 +1197,8 @@ private:
 #ifdef SCRIPTING_CONSOLE
 	QDockWidget *consoleWindow;
 	QTextEdit *console;
+        QDockWidget *m_interpreterDock;
+        ScriptManagerWidget *m_scriptInterpreter;
 #endif
 	QMdiArea *d_workspace;
 
@@ -1265,7 +1269,7 @@ private:
 	QAction *actionNextWindow, *actionPrevWindow;
 	QAction *actionScriptingLang, *actionRestartScripting, *actionClearTable, *actionGoToRow, *actionGoToColumn;
 	QAction *actionNoteExecute, *actionNoteExecuteAll, *actionNoteEvaluate, *actionSaveNote;
-	QAction *actionShowScriptWindow;
+  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
 	QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
     QAction *actionDeleteRows, *actionDrawPoints;
 	QAction *btnCursor, *btnSelect, *btnPicker, *btnRemovePoints, *btnMovePoints, *btnPeakPick;

@@ -29,6 +29,8 @@
 #include <QButtonGroup>
 #include <QTextCursor>
 
+#include <iostream>
+
 //***************************************************************************
 //
 // ScriptManagerWidget class
@@ -40,9 +42,11 @@
 /**
  * Constructor
  */
-ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent) : 
-  QTabWidget(parent), scripted(env), m_last_dir(""), m_script_runner(NULL), m_script_executing(false), 
-  m_cursor_pos(), m_findrep_dlg(NULL)
+ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, 
+					 bool interpreter_mode)
+  : QTabWidget(parent), scripted(env), m_last_dir(""), m_script_runner(NULL), 
+    m_script_executing(false), m_cursor_pos(), m_findrep_dlg(NULL), 
+    m_interpreter_mode(interpreter_mode)
 {
   //Create actions for this widget
   initActions();
@@ -55,7 +59,17 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent) :
   
   // Start with a blank tab
   newTab();
-  
+
+  if( interpreter_mode )
+  {
+    tabBar()->hide();
+    ScriptEditor *editor = currentEditor();
+    connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
+    connect(this, SIGNAL(MessageToPrint(const QString&, bool)), editor, 
+	    SLOT(displayOutput(const QString&, bool)));
+
+  }
+
   setFocusPolicy(Qt::StrongFocus);
   setFocus();
 }
@@ -153,30 +167,12 @@ QString ScriptManagerWidget::readScript(const QString& filename, bool *ok)
 }
 
 /**
- * Run a piece of code in the current environment
- * @param code The chunk of code to execute
- */
-bool ScriptManagerWidget::runScriptCode(const QString & code)
-{
-  m_script_runner->setCode(code);
-  emit ScriptIsActive(true);
-  formatMessage("Script execution started.", false);
-  bool success = m_script_runner->exec();
-  emit ScriptIsActive(false);
-  if( success )
-  {
-    formatMessage("Script execution completed successfully.", false);
-  }
-  return success;
-}
-
-/**
  * Return the current editor
  */
 ScriptEditor* ScriptManagerWidget::currentEditor() const
 {
   if( count() == 0 ) return NULL;
-  return static_cast<ScriptEditor*>(currentWidget());
+  return qobject_cast<ScriptEditor*>(currentWidget());
 }
 
 /**
@@ -259,14 +255,17 @@ QAction* ScriptManagerWidget::printAction() const
  */
 ScriptEditor* ScriptManagerWidget::newTab(int index)
 {
-  ScriptEditor *editor = new ScriptEditor(this);
-  editor->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
-	  this, SLOT(editorContextMenu(const QPoint&)));
-  connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
-  connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	  SLOT(updateMarker(int, bool)));
-
+  ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode);
+  if( !m_interpreter_mode )
+  {
+    editor->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
+	    this, SLOT(editorContextMenu(const QPoint&)));
+    connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+    connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	    SLOT(updateMarker(int, bool)));
+  
+  }
   QString tab_title = "New script";
   setCurrentIndex(insertTab(index, editor, tab_title));
   //Set the current code lexer, the editor takes ownership
@@ -349,8 +348,10 @@ void ScriptManagerWidget::save(int index)
  */
 void ScriptManagerWidget::execute()
 {
+  if( m_script_runner->scriptIsRunning() ) return;
   //Current editor
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
+  ScriptEditor *editor = currentEditor();
+  if( !editor ) return;
 
   QString code = editor->selectedText();
   if( code.isEmpty() )
@@ -372,8 +373,11 @@ void ScriptManagerWidget::execute()
  */
 void ScriptManagerWidget::executeAll()
 {
+  if( m_script_runner->scriptIsRunning() ) return;
   //Current editor
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
+  ScriptEditor *editor = currentEditor();
+  if( !editor ) return;
+
   QString script_txt = editor->text();
   if( script_txt.isEmpty() ) return;
   
@@ -388,6 +392,37 @@ void ScriptManagerWidget::executeAll()
 void ScriptManagerWidget::evaluate()
 {  
   QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented yet.");
+}
+
+/** 
+ * Execute an interpreter line
+ * @param code The chunk of code to execute
+ */
+void ScriptManagerWidget::executeInterpreter(const QString & code)
+{
+  if( m_script_runner->scriptIsRunning() ) return;
+  runScriptCode(code);
+  ScriptEditor *editor = currentEditor();
+  editor->newInputLine();
+}
+
+
+/**
+ * Run a piece of code in the current environment
+ * @param code The chunk of code to execute
+ */
+bool ScriptManagerWidget::runScriptCode(const QString & code)
+{
+  m_script_runner->setCode(code);
+  emit ScriptIsActive(true);
+  if( !m_interpreter_mode ) formatMessage("Script execution started.", false);
+  bool success = m_script_runner->exec();
+  emit ScriptIsActive(false);
+  if( !m_interpreter_mode && success )
+  {
+    formatMessage("Script execution completed successfully.", false);
+  }
+  return success;
 }
 
 /** 
@@ -437,6 +472,8 @@ void ScriptManagerWidget::showFindDialog(bool replace)
  */
 void ScriptManagerWidget::editorContextMenu(const QPoint &)
 {
+  if( m_interpreter_mode ) return;
+
   QMenu context(this);
 
   //File actions
@@ -490,9 +527,7 @@ void ScriptManagerWidget::markCurrentAsChanged()
   int index = currentIndex();
   setTabText(index, tabText(index) + "*");
   //Disconnect signal so that this doesn't get run in the future
-  //Note that qobject_cast is quite fast
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
-  disconnect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+  disconnect( currentEditor(), SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
 }
 
 /**
@@ -718,10 +753,17 @@ void ScriptManagerWidget::formatMessage(const QString & msg, bool error)
   QString  msg_to_print = msg.trimmed();
   if( msg_to_print.isEmpty() ) return;
 
-  QString hashes(20, '#');
-  //Signal that the text is ready to print
-  emit MessageToPrint(hashes + " " + QDateTime::currentDateTime().toString() + "  " + 
-    hashes + "\n" + msg_to_print + "\n", error);
+  if( m_interpreter_mode )
+  {
+    emit MessageToPrint(msg_to_print, error);
+  }
+  else
+  {
+    QString hashes(20, '#');
+    //Signal that the text is ready to print
+    emit MessageToPrint(hashes + " " + QDateTime::currentDateTime().toString() + "  " + 
+			hashes + "\n" + msg_to_print + "\n", error);
+  }
 }
 
 

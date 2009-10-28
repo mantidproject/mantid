@@ -13,8 +13,8 @@
 //--------------------------------------------------------
 class QTabWidget;
 class QPoint;
-class ScriptEditor;
 class ScriptingWindow;
+class ScriptEditor;
 class QAction;
 class QPushButton;
 class QCheckBox;
@@ -57,7 +57,7 @@ class ScriptManagerWidget : public QTabWidget, scripted
 
 public:
   /// Constructor
-  ScriptManagerWidget(ScriptingEnv *env, QWidget *parent);
+  ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode = false);
   ///Destructor
   ~ScriptManagerWidget();
   /// Ask if we should save
@@ -65,8 +65,6 @@ public:
   /// Open a script from a file and read the file into a QString. 
   /// QStrings are implicity shared so the return, seemingly by value, is not expensive
   QString readScript(const QString& filename, bool *ok);
-  ///Run script code
-  bool runScriptCode(const QString & code);
   /// Is a script running?
   inline bool isScriptRunning() const
   {
@@ -86,6 +84,7 @@ public:
   QAction* pasteAction() const;
   /// Print action for the current editor
   QAction* printAction() const;
+
 
 signals:
   ///A message is ready to be printed
@@ -108,7 +107,7 @@ public slots:
   void closeAllTabs();
   /// Show the find dialog
   void showFindDialog(bool replace = true);
-  
+
   /** @name Execute members.*/
   //@{
   /// Execute
@@ -117,7 +116,11 @@ public slots:
   void executeAll();
   /// Evaluate
   void evaluate();
+  ///Execute an interpreter line
+  void executeInterpreter(const QString & code);
   //@}
+  ///Run script code
+  bool runScriptCode(const QString & code);
 
   ///Format an output message
   void formatOutput(const QString & msg);
@@ -182,6 +185,9 @@ private:
 
   /// The find replace dialog
   FindReplaceDialog *m_findrep_dlg;
+
+  ///Display mode boolean
+  bool m_interpreter_mode;
 };
 
 
@@ -248,7 +254,7 @@ private:
   /// Treat as regular expressions
   QCheckBox *boxRegex;
 
-  // If a find is in progress
+  /// If a find is in progress
   bool m_find_inprogress;
 };
 

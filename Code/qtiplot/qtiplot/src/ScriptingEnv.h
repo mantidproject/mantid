@@ -62,7 +62,8 @@ class ScriptingEnv : public QObject
     //! initialization of the interpreter may fail; or there could be other errors setting up the environment
     bool initialized() const { return d_initialized; }
     //! whether asynchronuous execution is enabled (if supported by the implementation)
-    virtual bool isRunning() const { return false; }
+    bool isRunning() const { return m_is_running; }
+    void setIsRunning(bool running) { m_is_running = running; }
     
     //! Instantiate the Script subclass matching the ScriptEnv subclass.
     virtual Script *newScript(const QString&, QObject*, const QString&) { return 0; }
@@ -133,6 +134,8 @@ class ScriptingEnv : public QObject
   const char * languageName;
   // Is progress reporting on?
   bool m_report_progress;
+  // Whether a script is running
+  bool m_is_running;
 };
 
 #endif

@@ -60,10 +60,6 @@ class PythonScript : public Script
   {
     emit currentLineChanged(getLineOffset() + lineno, true);
   }
-  
-signals:
-  /// Line number changed
-  void currentLineChanged(int lineno, bool error);
 
 public slots:
   /// Compile to bytecode

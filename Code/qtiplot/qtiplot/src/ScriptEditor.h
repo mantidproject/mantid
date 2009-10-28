@@ -12,6 +12,35 @@
 // Forward declarations
 //----------------------------------
 class QAction;
+class QKeyEvent;
+class QMouseEvent;
+
+/**
+ * A small wrapper around a QStringList to manage a command history
+ */
+struct CommandHistory
+{
+  ///Default constructor
+  CommandHistory() : m_commands(), m_hist_maxsize(100), m_current(0) {}
+  /// Add a command. 
+  void add(QString command);
+  /// Is there a previous command
+  bool hasPrevious() const;
+  /// Get the item pointed to by the current index and move it up one
+  QString getPrevious() const;
+  /// Is there a command next on the stack
+  bool hasNext() const;
+  /// Get the item pointed to by the current index and move it down one
+  QString getNext() const;
+
+private:
+  /// Store a list of command strings
+  QStringList m_commands;
+  /// History size
+  int m_hist_maxsize;
+  /// Index "pointer"
+  mutable int m_current;
+};
 
 /** 
     This class provides an area to write scripts. It inherits from QScintilla to use
@@ -44,16 +73,26 @@ class ScriptEditor : public QsciScintilla
 {
   // Qt macro
   Q_OBJECT;
-  
+
 public:
   /// Constructor
-  ScriptEditor(QWidget* parent = 0);
+  ScriptEditor(QWidget* parent = 0, bool interpreter_mode = false);
   ///Destructor
   ~ScriptEditor();
-
+  // Size hint
+  QSize sizeHint() const;
+  /// Set the text on a given line number
+  void setText(int lineno, const QString& text);
   /// Save a the text to the given filename
   bool saveScript(const QString & filename);
-
+  ///Capture key presses
+  void keyPressEvent(QKeyEvent* event);
+  /// Set whether or not the current line(where the cursor is located) is editable
+  void setEditingState(int line);
+  ///Capture mouse clicks to prevent moving the cursor to unwanted places
+  void mousePressEvent(QMouseEvent *event);
+  /// Create a new input line
+  void newInputLine();
   /// The current filename
   inline QString fileName() const
   {
@@ -109,12 +148,16 @@ public slots:
   void updateMarker(int lineno, bool success);
   /// Print the text within the widget
   void print();
+  ///Display the output from a script that has been run in interpeter mode
+  void displayOutput(const QString& msg, bool error);
 
 signals:
   /// Inform observers that undo information is available
   void undoAvailable(bool);
   /// Inform observers that redo information is available
   void redoAvailable(bool);
+  /// Notify manager that there is code to execute (only used in interpreter mode)
+  void executeLine(const QString&);
 
 private:
   /// The file name associated with this editor
@@ -122,13 +165,18 @@ private:
 
   //Each editor needs its own undo/redo etc
   QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_print;
-
-  const int m_marker_handle;
+  /// The margin marker 
+  int m_marker_handle;
+  /// Flag that we are in interpreter mode
+  bool m_interpreter_mode;
+  //Store a command history, only used in interpreter mode
+  CommandHistory m_history;
+  /// Flag whether editing is possible (only used in interpreter mode)
+  bool m_read_only;
   // The colour of the marker for a success state
   static QColor g_success_colour;
   // The colour of the marker for an error state
   static QColor g_error_colour;
-
 };
 
 

@@ -274,9 +274,11 @@ QVariant PythonScript::eval()
 
 bool PythonScript::exec()
 {
+  Env->setIsRunning(true);
 	if (isFunction) compiled = notCompiled;
 	if (compiled != Script::isCompiled && !compile(false))
 	{
+	  Env->setIsRunning(false);
 	  return false;
 	}
 	
@@ -297,6 +299,7 @@ bool PythonScript::exec()
 	  if (!empty_tuple) 
 	  {
 	    emit_error(constructErrorMsg(), 0);
+	    Env->setIsRunning(false);
 	    return false;
 	  }
 	  pyret = PyObject_Call(PyCode,empty_tuple,localDict);
@@ -314,9 +317,11 @@ bool PythonScript::exec()
 	if(pyret) 
 	{
 	  Py_DECREF(pyret);
+	  Env->setIsRunning(false);
 	  return true;
 	}
 	emit_error(constructErrorMsg(), 0);
+	Env->setIsRunning(false);
 	return false;
 }
 
@@ -337,13 +342,19 @@ QString PythonScript::constructErrorMsg()
   int errline(-1);
   if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
   {
-    errline = getLineOffset() + 
-      env()->toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
-    // Update the line marker as this will not get done by the tracing function
-    // since we have not begun execution yet
-    
-    msg = QString("Error on line ") + QString::number(errline) + ": " +
-      env()->toString(PyObject_GetAttrString(value, "msg"), true);
+    if( getLineOffset() >= 0 )
+    {
+      errline = getLineOffset() + 
+	env()->toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
+      // Update the line marker as this will not get done by the tracing function
+      // since we have not begun execution yet
+      msg = QString("Error on line ") + QString::number(errline) + ": " +
+	env()->toString(PyObject_GetAttrString(value, "msg"), true);
+    }
+    else
+    {
+      msg = env()->toString(PyObject_GetAttrString(value, "msg"), true);
+    }
     Py_DECREF(exception);
     Py_DECREF(value);
   }
@@ -352,19 +363,27 @@ QString PythonScript::constructErrorMsg()
     // Marker will already be at this line for an execution error as the line reporting happens
     // before each line of code is executed
     errline = getLineOffset();
-    if( traceback )
+    if( errline >= 0 )
     {
-      excit = (PyTracebackObject*)traceback;
-      if( excit ) errline += excit->tb_lineno;
-      Py_DECREF(traceback);
+      if( traceback )
+      {
+	excit = (PyTracebackObject*)traceback;
+	if( excit ) errline += excit->tb_lineno;
+	Py_DECREF(traceback);
+      }
+      //Format the exception in a nicer manner
+      msg = env()->toString(exception,true).section('.',1).remove("'>") + QString(" on line ") + 
+	QString::number(errline) + QString(" : ") + env()->toString(value,true);
     }
-    //Format the exception in a nicer manner
-    msg = env()->toString(exception,true).section('.',1).remove("'>") + QString(" on line ") + 
-      QString::number(errline) + QString(" : ") + env()->toString(value,true);
+    else
+    {
+      msg = env()->toString(exception,true).section('.',1).remove("'>") + 
+	QString(": ") + env()->toString(value,true);
     }
+  }
   //----------------------------------------------
   if( env()->reportProgress() )
-	{
+  {
     emit currentLineChanged(errline, false);
   }
   return msg;
