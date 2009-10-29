@@ -255,7 +255,7 @@ void LoadRaw3::exec()
 		isisRaw->readData(file,histToRead);
 		if(bincludeMonitors)
 		{	setWorkspaceData(localWorkspace,timeChannelsVec,counter,i,noTimeRegimes); 
-			localWorkspace->getAxis(1)->spectraNo(counter) = i;
+			//localWorkspace->getAxis(1)->spectraNo(counter) = i;
 			++counter;
 		}
         if(bseparateMonitors)
@@ -473,6 +473,7 @@ void LoadRaw3::setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,
 		newWorkspace->setX(wsIndex, timeChannelsVec[0]);
 	else // Use std::vector::at just incase spectrum missing from spec array
 		newWorkspace->setX(wsIndex, timeChannelsVec.at(m_specTimeRegimes[nspecNum]-1));
+	newWorkspace->getAxis(1)->spectraNo(wsIndex) = nspecNum;
 	
 }
 /** This method returns the monitor spectrun list 
