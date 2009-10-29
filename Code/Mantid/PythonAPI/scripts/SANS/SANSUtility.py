@@ -242,7 +242,7 @@ def StripEndZeroes(workspace, flag_value = 0.0):
                         break
         # Find the appropriate X values and call CropWorkspace
         x_vals = result_ws.readX(0)
-        startX = x_vals[start+1]
+        startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop+1]
         CropWorkspace(workspace,workspace,startX,endX)
