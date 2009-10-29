@@ -111,14 +111,17 @@ public:
 	/// Return a list of the currently available workspace groups
 	std::set<std::string> getWorkspaceGroupNames() const;
 
-  /// Return the list of names within a workspace group
-  std::vector<std::string> getWorkspaceGroupEntries(const std::string & group_name) const;
+	/// Return the list of names within a workspace group
+	std::vector<std::string> getWorkspaceGroupEntries(const std::string & group_name) const;
     
 	/// Create the simple Python API for Mantid
 	void createPythonSimpleAPI(bool);
 
 	//Send a log message to the Mantid Framework with a specified priority
 	void sendLogMessage(const std::string & msg);
+
+	// Check if a given workspace exists in the ADS
+	bool workspaceExists(const std::string & name) const;
 		
 	/// Add a Python alogirthm
 	int addPythonAlgorithm(PyObject* pyAlg);

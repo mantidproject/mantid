@@ -269,7 +269,16 @@ void FrameworkManager::sendLogMessage(const std::string & msg)
 {
   g_log.notice(msg); 
 }
-	
+
+/**
+ * Check if a given workspace name exists in the ADS 
+ * @param name A string specifying a name to check
+ */
+bool FrameworkManager::workspaceExists(const std::string & name) const
+{
+  return API::AnalysisDataService::Instance().doesExist(name);
+}
+
 /**
  * Adds a algorithm created in Python to Mantid's algorithms.
  * Converts the Python object to a C++ object - not sure how, will find out.

@@ -293,6 +293,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
      .def("getWorkspaceGroupEntries", &Mantid::PythonAPI::FrameworkManager::getWorkspaceGroupEntries)
      .def("createPythonSimpleAPI", &Mantid::PythonAPI::FrameworkManager::createPythonSimpleAPI)
      .def("sendLogMessage", &Mantid::PythonAPI::FrameworkManager::sendLogMessage)
+     .def("workspaceExists", &Mantid::PythonAPI::FrameworkManager::workspaceExists)
      .def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
      .def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)
      ;
