@@ -1,8 +1,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunction.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/IFunction.h"
+#include "MantidAPI/ParameterTie.h"
 
 #include <sstream>
 #include <iostream>
@@ -29,7 +30,15 @@ IFunction& IFunction::operator=(const IFunction& f)
   return *this;
 }
 
-/** Update parameters
+/// Destructor
+IFunction::~IFunction()
+{
+  for(std::map<int,ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
+      delete it->second;
+  m_ties.clear();
+}
+
+/** Update active parameters. Ties are applied.
  *  @param in Pointer to an array with active parameters values.
  */
 void IFunction::updateActive(const double* in)
@@ -39,9 +48,12 @@ void IFunction::updateActive(const double* in)
     {
       setActiveParameter(i,in[i]);
     }
-  // apply ties
+  applyTies();
 }
 
+/**
+ * Sets active parameter i to value. Ties are not applied.
+ */
 void IFunction::setActiveParameter(int i,double value)
 {
   int j = indexOfActive(i);
@@ -112,6 +124,25 @@ double IFunction::getParameter(const std::string& name)const
   return m_parameters[it - m_parameterNames.begin()];
 }
 
+/**
+ * Returns the index of the parameter named name.
+ * @param name The name of the parameter.
+ */
+int IFunction::parameterIndex(const std::string& name)const
+{
+  std::string ucName(name);
+  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
+  std::vector<std::string>::const_iterator it = 
+    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
+  if (it == m_parameterNames.end())
+  {
+    std::ostringstream msg;
+    msg << "Function parameter ("<<ucName<<") does not exist.";
+    throw std::invalid_argument(msg.str());
+  }
+  return int(it - m_parameterNames.begin());
+}
+
 /** Returns the name of parameter i
  * @param i The index of a parameter
  */
@@ -139,6 +170,7 @@ void IFunction::declareParameter(const std::string& name,double initValue )
     throw std::invalid_argument(msg.str());
   }
 
+  m_indexMap.push_back(nParams());
   m_parameterNames.push_back(ucName);
   m_parameters.push_back(initValue);
 }
@@ -149,13 +181,6 @@ void IFunction::declareParameter(const std::string& name,double initValue )
  */
 int IFunction::indexOfActive(int i)const
 {
-  if (m_indexMap.empty()) 
-  {
-    if (i < nParams()) return i;
-    else
-      throw std::out_of_range("Function parameter index out of range.");
-  }
-
   if (i >= nActive())
     throw std::out_of_range("Function parameter index out of range.");
 
@@ -169,6 +194,79 @@ int IFunction::indexOfActive(int i)const
 std::string IFunction::nameOfActive(int i)const
 {
   return m_parameterNames[indexOfActive(i)];
+}
+
+/**
+ * Returns true if parameter i is active
+ * @param i The index of a declared parameter
+ */
+bool IFunction::isActive(int i)const
+{
+  return std::find(m_indexMap.begin(),m_indexMap.end(),i) != m_indexMap.end();
+}
+
+/**
+ * @param i A declared parameter index to be removed from active
+ */
+void IFunction::removeActive(int i)
+{
+  if (i >= nParams())
+    throw std::out_of_range("Function parameter index out of range.");
+
+  if (m_indexMap.size() == 0)
+  {
+    for(int j=0;j<nParams();j++)
+      if (j != i)
+        m_indexMap.push_back(j);
+  }
+  else
+  {
+    std::vector<int>::iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
+    if (it != m_indexMap.end())
+      m_indexMap.erase(it);
+  }
+}
+
+/**
+ * @param i The index of a declared parameter
+ * @return The index of declared parameter i in the list of active parameters or -1
+ *         if the parameter is tied.
+ */
+int IFunction::activeIndex(int i)const
+{
+  std::vector<int>::const_iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
+  if (it == m_indexMap.end()) return -1;
+  return int(it - m_indexMap.begin());
+}
+
+/**
+ * Ties a parameter to other parameters
+ * @param parName The name of the parameter to tie.
+ * @param expr    A math expression 
+ */
+void IFunction::tie(const std::string& parName,const std::string& expr)
+{
+  ParameterTie* tie = new ParameterTie(this,parName);
+  int i = tie->index();
+  if (!this->isActive(i))
+  {
+    delete tie;
+    throw std::logic_error("Parameter "+parName+" is already tied.");
+  }
+  tie->set(expr);
+  m_ties[i] = tie;
+  this->removeActive(i);
+}
+
+/**
+ * Apply the ties.
+ */
+void IFunction::applyTies()
+{
+  for(std::map<int,ParameterTie*>::iterator tie=m_ties.begin();tie!=m_ties.end();++tie)
+  {
+    this->parameter(tie->first) = tie->second->eval();
+  }
 }
 
 /**

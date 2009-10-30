@@ -11,10 +11,8 @@ namespace Mantid
 {
   namespace CurveFitting
   {
-    //using API::Jacobian;
-  
     /**
-    Abstract base class for 1D fitting functions.
+    Abstract base class for fitting functions.
 
     Properties common for all fitting functions:
     <UL>
@@ -24,7 +22,7 @@ namespace Mantid
     <LI> StartX - Lowest value of x data array </LI>
     <LI> EndX - Highest value of x data array </LI>
 
-    <LI> Properties defined in derived class goes here
+    <LI> InputParameters - 
 
     <LI> MaxIterations - The spectrum to fit (default 500)</LI>
     <LI> Output Status - whether the fit was successful. Direction::Output</LI>
@@ -95,16 +93,16 @@ namespace Mantid
        */
       virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
 
+      // Process input parameters and create the fitting function.
       void processParameters();
-
-      /// Holds a copy of the value of the parameters that are actually least-squared fitted.
-      //std::vector<double> m_fittedParameter;
 
       /// Number of parameters.
       size_t nParams()const{return m_function->nActive();}
 
       /// Pointer to the fitting function
       API::IFunction* m_function;
+
+      friend struct FitData1;
 
     };
 

@@ -66,6 +66,8 @@ public:
   double getParameter(const std::string& name)const;
   /// Total number of parameters
   int nParams()const;
+  /// Returns the index of parameter name
+  int parameterIndex(const std::string& name)const;
   /// Returns the name of parameter i
   std::string parameterName(int i)const;
 
@@ -82,15 +84,28 @@ public:
   /// Returns the name of active parameter i
   std::string nameOfActive(int i)const;
 
+  /// Check if a parameter is active
+  bool isActive(int i)const;
+  /// Removes a parameter from the list of active
+  void removeActive(int i);
+  /// Get active index for a declared parameter i
+  int activeIndex(int i)const;
+
   /// Add a function
   void addFunction(IFunction* f);
   /// Returns the pointer to i-th function
-  IFunction* getFunction(int i);
+  IFunction* getFunction(int i)const;
   /// Number of functions
-  int nFunctions(){return m_functions.size();}
+  int nFunctions()const{return m_functions.size();}
 
 private:
   double m_tst;
+  /// Get the function index
+  int functionIndex(int i)const;
+  /// Get the function index
+  int functionIndexActive(int i)const;
+  /// Extract function index and parameter name from a variable name
+  static void parseName(const std::string& varName,int& index, std::string& name);
 
   /// Pointers to the included funtions
   std::vector<IFunction*> m_functions;
@@ -98,12 +113,16 @@ private:
   std::vector<int> m_activeOffsets;
   /// Individual function parameter offsets
   std::vector<int> m_paramOffsets;
-  /// Keeps the function number for each parameter
+  /// Keeps the function number for each declared parameter
   std::vector<int> m_iFunction;
+  /// Keeps the function number for each active parameter
+  std::vector<int> m_iFunctionActive;
   /// Number of active parameters
   int m_nActive;
   /// Total number of parameters
   int m_nParams;
+
+  //friend class ParameterTie;
 };
 
 } // namespace API

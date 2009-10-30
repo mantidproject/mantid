@@ -38,9 +38,10 @@ namespace CurveFitting
   /// The implementation of Jacobian
   class JacobianImpl1: public Jacobian
   {
+  public:
     /// The pointer to the GSL's internal jacobian matrix
     gsl_matrix * m_J;
-  public:
+    std::vector<int> m_index;
     /**  Set a value to a Jacobian matrix element.
     *   @param iY The index of the data point.
     *   @param iP The index of the active parameter.
@@ -48,7 +49,8 @@ namespace CurveFitting
     */
     void set(int iY, int iP, double value)
     {
-      gsl_matrix_set(m_J,iY,iP,value);
+      int j = m_index[iP];
+      if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
     /// Set the pointer to the GSL's jacobian
     void setJ(gsl_matrix * J){m_J = J;}
@@ -57,7 +59,7 @@ namespace CurveFitting
   /// Structure to contain least squares data and used by GSL
   struct FitData1 {
     /// Constructor
-    FitData1(Fit* f):fit(f){}
+    FitData1(Fit* f);
     /// number of points to be fitted (size of X, Y and sigmaData arrays)
     size_t n;
     /// number of (active) fit parameters
@@ -192,7 +194,8 @@ namespace CurveFitting
       "A value in, or on the high x boundary of, the last bin the fitting range\n"
       "(default the highest value of x)" );
 
-    declareProperty("InputParameters","","The name of a TableWorkspace holding fit parameters" );
+    declareProperty("InputParameters","","Parameters defining the fitting function and its initial values" );
+    declareProperty("Ties","","Math expressions that tie paraemters to other parameters or to constants" );
 
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
@@ -411,8 +414,8 @@ namespace CurveFitting
     Progress prog(this,0.0,1.0,maxInterations);
     if (isDerivDefined)
     {
-
-      do
+      status = GSL_CONTINUE;
+      while (status == GSL_CONTINUE && iter < maxInterations)
       {
         iter++;
         status = gsl_multifit_fdfsolver_iterate(s);
@@ -432,7 +435,6 @@ namespace CurveFitting
         //std::cout << "chi-out " << gsl_blas_dnrm2(s->f) << std::endl;
         prog.report();
       }
-      while (status == GSL_CONTINUE && iter < maxInterations);
 
       double chi = gsl_blas_dnrm2(s->f);
       finalCostFuncVal = chi*chi / dof;
@@ -446,7 +448,8 @@ namespace CurveFitting
     }
     else
     {
-      do
+      status = GSL_CONTINUE;
+      while (status == GSL_CONTINUE && iter < maxInterations)
       {
         iter++;
         status = gsl_multimin_fminimizer_iterate(simplexMinimizer);
@@ -458,7 +461,6 @@ namespace CurveFitting
         status = gsl_multimin_test_size(size, 1e-2);
         prog.report();
       }
-      while (status == GSL_CONTINUE && iter < maxInterations);
 
       finalCostFuncVal = simplexMinimizer->fval / dof;
 
@@ -475,16 +477,14 @@ namespace CurveFitting
     g_log.information() << "Iteration = " << iter << "\n" <<
       "Status = " << reportOfFit << "\n" <<
       "Chi^2/DoF = " << finalCostFuncVal << "\n";
-    for (size_t i = 0; i < nParams(); i++)
-      g_log.information() << m_function->nameOfActive(i) << " = " << m_function->activeParameter(i) << "  \n";
+    for (size_t i = 0; i < m_function->nParams(); i++)
+      g_log.information() << m_function->parameterName(i) << " = " << m_function->parameter(i) << "  \n";
 
 
     // also output summary to properties
 
     setProperty("Output Status", reportOfFit);
     setProperty("Output Chi^2/DoF", finalCostFuncVal);
-    //for (size_t i = 0; i < m_fittedParameter.size(); i++)
-    //  setProperty(m_parameterNames[i], m_fittedParameter[i]);
 
 
     if (isDerivDefined)
@@ -604,10 +604,22 @@ namespace CurveFitting
   {
     if (in) m_function->updateActive(in);
     m_function->functionDeriv(out,xValues,nData);
+    //std::cerr<<"-------------- Jacobian ---------------\n";
+    //for(int i=0;i<nParams();i++)
+    //  for(int j=0;j<nData;j++)
+    //    std::cerr<<i<<' '<<j<<' '<<gsl_matrix_get(((JacobianImpl1*)out)->m_J,j,i)<<'\n';
   }
 
+  /**
+   * Process input parameters and create the fitting function.
+   */
   void Fit::processParameters()
   {
+
+    // Parameters of different functions are separated by ';'. Parameters of the same function
+    // are separated by ','. parameterName=value pairs are used to set a parameter value. For each function
+    // "function" parameter must be set to a function name. E.g.
+    // InputParameters = "function=LinearBackground,A0=0,A1=1; function = Gaussian, PeakCentre=10.,Sigma=1"
     std::string input = getProperty("InputParameters");
     if (input.empty()) return;
 
@@ -659,6 +671,45 @@ namespace CurveFitting
           fun->getParameter(par->first) = atof(par->second.c_str());
         }
       }
+    }
+
+    // Ties property is a comma separated list of formulas of the form:
+    // tiedParamName = MathExpression, parameter names defined in the fitted function can be used
+    // as variables in MathExpression. If the fitted function is a CompositeFunction parameter names
+    // have form: f<index>.<name>, i.e. start with symbol 'f' (for function) followed by function's index 
+    // in the CompositeFunction and a period '.' which is followed by the parameter name. e.g.
+    // "f2.A = 2*f1.B + f5.C, f1.A=10"
+    std::string inputTies = getProperty("Ties");
+    if (inputTies.empty()) return;
+
+    tokenizer ties(inputTies, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+    for (tokenizer::Iterator tie = ties.begin(); tie != ties.end(); ++tie)
+    {
+      tokenizer name_value(*tie, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+      if (name_value.count() > 1)
+      {
+        m_function->tie(name_value[0],name_value[1]);
+      }
+    }
+
+  }
+
+  /**
+   * Constructor. Creates declared -> active index map
+   * @param f Pointer to the Fit algorithm
+   */
+  FitData1::FitData1(Fit* f):fit(f)
+  {
+    int j = 0;
+    for(int i=0;i<f->m_function->nParams();++i)
+    {
+      if (f->m_function->isActive(i))
+      {
+        J.m_index.push_back(j);
+        j++;
+      }
+      else
+        J.m_index.push_back(-1);
     }
   }
 

@@ -26,6 +26,7 @@ namespace API
 //----------------------------------------------------------------------
 class MatrixWorkspace;
 class Jacobian;
+class ParameterTie;
 
 /** An interface to a function.
 
@@ -62,7 +63,7 @@ public:
   /// Assignment operator
   IFunction& operator=(const IFunction&);
   /// Virtual destructor
-  virtual ~IFunction() {}
+  virtual ~IFunction();
 
   /// Function initialization. Declare function parameters in this method.
   virtual void init() = 0;
@@ -84,11 +85,13 @@ public:
   virtual double getParameter(const std::string& name)const;
   /// Total number of parameters
   virtual int nParams()const{return m_parameters.size();};
+  /// Returns the index of parameter name
+  virtual int parameterIndex(const std::string& name)const;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const;
 
   /// Number of active (in terms of fitting) parameters
-  virtual int nActive()const{return m_indexMap.size() ? m_indexMap.size() : nParams();}
+  virtual int nActive()const{return m_indexMap.size();}
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
   virtual double activeParameter(int i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
@@ -99,6 +102,18 @@ public:
   virtual int indexOfActive(int i)const;
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(int i)const;
+
+  /// Check if a declared parameter i is active
+  virtual bool isActive(int i)const;
+  /// Removes a declared parameter i from the list of active
+  virtual void removeActive(int i);
+  /// Get active index for a declared parameter i
+  virtual int activeIndex(int i)const;
+
+  /// Tie a parameter to other parameters (or a constant)
+  virtual void tie(const std::string& parName,const std::string& expr);
+  /// Apply the ties
+  virtual void applyTies();
 
 protected:
   /// Declare a new parameter
@@ -111,6 +126,8 @@ private:
   std::vector<std::string> m_parameterNames;
   /// Keeps parameter values
   std::vector<double> m_parameters;
+  /// Holds parameter ties
+  std::map<int,ParameterTie*> m_ties;
 };
 
 /** Represents the Jacobian in functionDeriv. 

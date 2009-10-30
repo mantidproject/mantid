@@ -265,6 +265,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ParameterTie.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ParInstrument.cpp"
 				>
 			</File>
@@ -484,6 +488,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\MemoryManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\ParameterTie.h"
 				>
 			</File>
 			<File
