@@ -44,11 +44,15 @@ build_pass:CONFIG(debug, debug|release) {
 #############################################################################
 # Global 
 
+DEPENDPATH  += ../../Mantid/Kernel/inc/
+DEPENDPATH  += ../../Mantid/Geometry/inc/
+DEPENDPATH  += ../../Mantid/API/inc/
+DEPENDPATH  += ../MantidQt/includes
 INCLUDEPATH  += ../../Mantid/Kernel/inc/
 INCLUDEPATH  += ../../Mantid/Geometry/inc/
 INCLUDEPATH  += ../../Mantid/API/inc/
-INCLUDEPATH  += ../3rdparty/liborigin
 INCLUDEPATH  += ../MantidQt/includes
+INCLUDEPATH  += ../3rdparty/liborigin
 
 win32 {
   INCLUDEPATH       += ../../Third_Party/include/

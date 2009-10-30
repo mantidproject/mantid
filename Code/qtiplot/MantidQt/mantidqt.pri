@@ -51,6 +51,9 @@ TMPDIR = $$TOPBUILDDIR/qtbuild/MantidQt
 
 # Qt qmake variables
 
+DEPENDPATH += "$$MANTIDPATH/Kernel/inc/"
+DEPENDPATH += "$$MANTIDPATH/Geometry/inc/"
+DEPENDPATH += "$$MANTIDPATH/API/inc/"
 INCLUDEPATH += "$$MANTIDPATH/Kernel/inc/"
 INCLUDEPATH += "$$MANTIDPATH/Geometry/inc/"
 INCLUDEPATH += "$$MANTIDPATH/API/inc/"
