@@ -57,7 +57,7 @@ public:
 
 private:
   /// MuParser callback function
-  static double* ParameterTie::AddVariable(const char *varName, void *palg);
+  static double* AddVariable(const char *varName, void *palg);
 
   mu::Parser* m_parser;         ///< math parser
   IFunction* m_function;        ///< Pointer to the function which parameter is to be tied
