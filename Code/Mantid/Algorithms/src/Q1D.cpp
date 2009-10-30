@@ -127,9 +127,9 @@ void Q1D::exec()
       // Now iterate over the list, adjusting the weights for the affected bins
       // Since we've reversed Qx, we need to reverse the list too
       MatrixWorkspace::MaskList::const_reverse_iterator it;
-      for (it = mask.rbegin(); it!= mask.rend(); ++it)
+      for (it = mask.rbegin(); it != mask.rend(); ++it)
       {
-        const double currentX = Qx[xLength-1-(*it).first];
+        const double currentX = Qx[xLength-2-(*it).first];
         // Add an intermediate bin with full weight if masked bins aren't consecutive
         if (included_bins.back() != currentX) 
         {
@@ -138,7 +138,7 @@ void Q1D::exec()
         }
         // The weight for this masked bin is 1 - the degree to which this bin is masked
         solidAngleVec.push_back( solidAngle * (1.0-(*it).second) );
-        included_bins.push_back(Qx[xLength-(*it).first]);
+        included_bins.push_back( Qx[xLength-1-(*it).first]);
       }
       // Add on a final bin with full weight if masking doesn't go up to the end
       if (included_bins.back() != Qx.back()) 
