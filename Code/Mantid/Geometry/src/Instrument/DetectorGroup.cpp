@@ -17,9 +17,7 @@ Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
  *  @throw std::invalid_argument If an empty vector is passed as argument
  */
 DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets) :
-  IDetector(),
-  m_id(),
-  m_detectors()
+  IDetector(), m_id(), m_detectors(), m_unImplementedForInterface()
 {
   if ( dets.empty() )
   {
@@ -166,6 +164,48 @@ bool DetectorGroup::isMonitor() const
   }
   return isMonitor;
 
+}
+
+/** isValid() is true if the point is inside any of the detectors, i.e. one of the
+*  detectors has isValid() == true
+*  @param point this point is tested to see if it is one of the detectors
+*  @return if the point is in a detector it returns true else it returns false
+*/
+bool DetectorGroup::isValid(const V3D& point) const
+{
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    if ( (*it).second->isValid(point) ) return true;
+  }
+  return false;
+}
+
+/** Does the point given lie on the surface of one of the detectors
+*  @param point the point that is tested to see if it is one of the detectors
+*  @return true if the point is on the side of a detector else it returns false
+*/
+bool DetectorGroup::isOnSide(const V3D& point) const
+{
+  DetCollection::const_iterator it;
+  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+  {
+    if ( (*it).second->isOnSide(point) ) return true;
+  }
+  return false;
+}
+
+/** tries to find a point that lies on or within the first detector in the storage
+* found in the storage map
+*  @param point if a point is found its coordinates will be stored in this varible
+*  @return 1 if point found, 0 otherwise
+*/
+int  DetectorGroup::getPointInObject(V3D& point) const
+{
+  DetCollection::const_iterator it;
+  it = m_detectors.begin();
+  if ( it == m_detectors.end() ) return 0;
+  return ( *m_detectors.begin() ).second->getPointInObject(point);
 }
 
 } // namespace Geometry

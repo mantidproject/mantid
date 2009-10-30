@@ -15,9 +15,10 @@ DataFN = InSettings.getPropertyValue("RawFile")
   
 try:
   LoadRaw(InputFN, inOutWS)
+  LoadDetectorInfo(inOutWS, InputFN)
   
   IncidentE = getEi(InputFN)
-  #add in the detector delay
+
   ConvertUnits(inOutWS, inOutWS, "DeltaE", "Direct", IncidentE, false)
   
   rebin(inOutWS, inOutWS, RebinBoundaries)

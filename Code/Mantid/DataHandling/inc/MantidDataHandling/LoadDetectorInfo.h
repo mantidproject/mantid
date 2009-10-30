@@ -16,14 +16,13 @@ namespace Mantid
 {
 namespace DataHandling
 {
-  using DataObjects::Workspace2D_const_sptr;
-  using API::MatrixWorkspace_sptr;
-/** Adds or modifies values for "time offset (micro seconds)", "gas pressure (atm)" and
-   "wall thickness (m)" in the parameter map of a workspace using values read in from a
-   DAT file or RAW file. The RAW file or DAT file that is loaded should corrospond to
-   the same run or series of experimental runs that created the workspace.
+  using namespace DataObjects;
+/** Adjusts TOF X-values for offset times and adds or modifies values for "3He(atm)" and
+   "wallT(m)" in the workspace's parameter map using values read in from a DAT or RAW file.
+   The RAW file or DAT file that is loaded should corrospond to the same run or series of
+   experimental runs that created the workspace and no checking of units is done here.
 
-  Depends on the document "DETECTOR.DAT format" data specified by Prof G Toby Perring ("detector format.doc")
+  Depends on the format described in "DETECTOR.DAT format" data specified by Prof G Toby Perring ("detector format.doc")
 
     Required Properties:
     <UL>
@@ -67,6 +66,22 @@ public:
   virtual const std::string category() const{return "DataHandling\\Detectors";}
 
 private:
+  /// will store a pointer to the user selected workspace
+  Workspace2D_sptr m_workspace;
+  /// the instrument with in the user selected workspace
+  API::IInstrument_sptr m_instrument;
+  /// the map that stores additional properties for detectors
+  Geometry::ParameterMap *m_paraMap;
+  /// number of histograms in the workspace
+  int m_numHists;
+  /// the detector IDs that are monitors, according to the raw file
+  std::set<int> m_monitors;
+  /// Xbin boundaries for the monitors, normally monitors have a different time delay and hence a different offset
+  Histogram1D::RCtype m_monitorXs;
+  /// stores if the bin boundary values, X arrays, we initially common, because if that is we'll work to maximise sharing
+  bool m_commonXs;
+  /// the delay time for monitors, this algorithm requires all monitors have the same delay. Normally the delay is zero
+  float m_monitOffset;
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;
 
@@ -77,6 +92,14 @@ private:
   void readDAT(const std::string& fName);
   void readRAW(const std::string& fName);
 
+  void adjustXs(const std::vector<int> &detIDs, const std::vector<float> &offsets);
+  void adjustXs(const float detectorOffset);
+  void noteMonitorOffset(const float offSet, const int detID);
+  void setUpXArray(Histogram1D::RCtype &theXValuesArray, int specInd, float offset);
+
+  /// used to check that all the monitors have the same offset time
+  static const float UNSETOFFSET;
+  
   /// flag values
   enum {
     USED = 1000-INT_MAX,                                 ///< goes in the unGrouped spectra list to say that a spectrum will be included in a group, any other value and it isn't. Spectra numbers should always be positive so we shouldn't accidientally set a spectrum number to the this
@@ -93,6 +116,7 @@ private:
 
   /// Apparently undocumented constants for excitations RAW files (assumed by Steve Williams)
   enum {
+    OUR_TOTAL_NUM_TAB = 10,
     OUR_USER_TABLE_FORM = 2,
     USER_TABLE_MONITOR = 1,
     PRESSURE_TAB_NUM = 7,

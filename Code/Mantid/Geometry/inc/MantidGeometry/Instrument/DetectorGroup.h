@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ObjComponent.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include <map>
@@ -45,7 +46,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport DetectorGroup : public IDetector
+class DLLExport DetectorGroup : public virtual IDetector
 {
 public:
   DetectorGroup(const std::vector<IDetector_sptr>& dets);
@@ -62,6 +63,11 @@ public:
   double solidAngle(const V3D& observer) const; 
 	bool isMasked() const;
 	bool isMonitor() const;
+  bool isValid(const V3D& point) const;
+  virtual bool isOnSide(const V3D& point) const;
+  ///Try to find a point that lies within (or on) the object
+  int getPointInObject(V3D& point) const;
+
 
 private:
   /// Private, unimplemented copy constructor
@@ -78,8 +84,52 @@ private:
   /// The collection of grouped detectors
   DetCollection m_detectors;
 
+  /// required to for the function getRelativeRot() in IComponent interface, left at the default value
+  const Quat m_unImplementedForInterface;
+
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
+  
+	// functions inherited from IComponent
+  Component* clone() const{ return NULL; }
+  const ComponentID getComponentID(void) const{ return NULL; }
+  boost::shared_ptr<const IComponent> getParent() const
+  {
+    return boost::shared_ptr<const IComponent>();
+  }
+  std::string getName() const{return "";}
+  void setParent(IComponent*){}
+  void setName(const std::string&){}
+
+  void setPos(double, double, double){}
+  void setPos(const V3D&){}
+  void setRot(const Quat&){}
+  void copyRot(const IComponent&){}
+  int interceptSurface(Track&) const{ return -10; }
+  void translate(const V3D&){}
+  void translate(double, double, double){}
+  void rotate(const Quat&){}
+  void rotate(double,const V3D&){}
+  V3D getRelativePos() const{ return V3D(); }
+  const Quat& getRelativeRot() const{ return m_unImplementedForInterface; }
+  const Quat getRotation() const{ return Quat(); }
+  void printSelf(std::ostream&) const{}
+
+  // functions inherited from IObjComponent
+
+  void getBoundingBox(double &, double &, double &, double &, double &, double &) const{};
+
+  void draw() const{};
+  void drawObject() const{};
+  void initDraw() const{};
+
+  /// Returns the shape of the Object
+  const boost::shared_ptr<const Object> Shape() const
+  {
+    return boost::shared_ptr<const Object>();
+  }
+
+  void setScaleFactor(double,double, double);
 };
 
 } // namespace Geometry

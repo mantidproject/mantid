@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IObjComponent.h"
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
 
@@ -46,14 +47,11 @@ class Quat;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IDetector
+class DLLExport IDetector : public virtual IObjComponent
 {
 public:
   /// Get the detector ID
   virtual int getID() const = 0;
-
-  /// Get the absolute position of this detector
-  virtual V3D getPos() const = 0;
 
   /** Get the distance of this detector object from another Component
    *  @param comp The component to give the distance to
@@ -70,13 +68,6 @@ public:
 
   /// Gives the phi of this detector object in radians
   virtual double getPhi() const = 0;
-  
-  /** Gives the approximate angle subtended by the detector
-   *  @param observer The point from which the detector is being viewed
-   *  @return The solid angle in steradians
-   *  @throw NullPointerException If geometrical form of the detector has not been provided in the instrument definition file
-   */
-  virtual double solidAngle(const V3D& observer) const = 0;
 
   /// Indicates whether the detector has been masked
   virtual bool isMasked() const = 0;

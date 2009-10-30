@@ -40,7 +40,7 @@ namespace Geometry
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Detector : public ObjComponent, public IDetector
+class DLLExport Detector : public virtual IDetector, public ObjComponent
 {
 public:
   ///A string representation of the component type
@@ -48,12 +48,13 @@ public:
 	Detector(const std::string& name, Component* parent);
   Detector(const std::string& name, boost::shared_ptr<Object> shape, Component* parent);
 	virtual ~Detector();
-	virtual Component* clone() const {return new Detector(*this);}
+	//empty functions inherited from IObjectComponent
+  virtual Component* clone() const {return new Detector(*this);}
 	void setID(int);
+    V3D getPos() const;
 
     // IDetector methods
     int getID() const;
-    V3D getPos() const;
     double getDistance(const IComponent& comp) const;
     double getTwoTheta(const V3D& observer, const V3D& axis) const;
     double getPhi() const;

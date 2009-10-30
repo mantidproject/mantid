@@ -41,7 +41,7 @@ class Detector;
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport ParDetector : public ParObjComponent, public IDetector
+class DLLExport ParDetector : public ParObjComponent, public virtual IDetector
 {
 public:
   ///A string representation of the component type

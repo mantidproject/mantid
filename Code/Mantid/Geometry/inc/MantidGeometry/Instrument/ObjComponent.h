@@ -50,7 +50,7 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ObjComponent : public IObjComponent, public Component
+class DLLExport ObjComponent : public virtual IObjComponent, public Component
 {
 public:
   ///type string

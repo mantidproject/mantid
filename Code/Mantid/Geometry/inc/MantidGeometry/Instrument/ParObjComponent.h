@@ -52,7 +52,7 @@ class GeometryHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ParObjComponent : public ParametrizedComponent, public IObjComponent
+class DLLExport ParObjComponent : public ParametrizedComponent, public virtual IObjComponent
 {
 public:
   ///type string
