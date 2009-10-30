@@ -232,8 +232,8 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
     MantidVec & E = result->dataE(0);
     for (unsigned int i = 0; i < Y.size(); ++i)
     {
-      E[i] = std::abs(E[i]*Y[i]);
       Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
+      E[i] = std::abs(E[i]*Y[i]);
     }
   }
 

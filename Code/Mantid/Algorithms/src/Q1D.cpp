@@ -53,6 +53,7 @@ void Q1D::exec()
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D",1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
+  outputWS->YUnit() = "I(Q)";
   setProperty("OutputWorkspace",outputWS);
   // Set the X vector for the output workspace
   boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWS)->setX(0,XOut);
@@ -124,9 +125,11 @@ void Q1D::exec()
       // Get a reference to the list of masked bins
       const MatrixWorkspace::MaskList& mask = inputWS->maskedBins(i);
       // Now iterate over the list, adjusting the weights for the affected bins
-      for (MatrixWorkspace::MaskList::const_iterator it = mask.begin(); it!= mask.end(); ++it)
+      // Since we've reversed Qx, we need to reverse the list too
+      MatrixWorkspace::MaskList::const_reverse_iterator it;
+      for (it = mask.rbegin(); it!= mask.rend(); ++it)
       {
-        const double currentX = Qx[(*it).first];
+        const double currentX = Qx[xLength-1-(*it).first];
         // Add an intermediate bin with full weight if masked bins aren't consecutive
         if (included_bins.back() != currentX) 
         {
@@ -135,7 +138,7 @@ void Q1D::exec()
         }
         // The weight for this masked bin is 1 - the degree to which this bin is masked
         solidAngleVec.push_back( solidAngle * (1.0-(*it).second) );
-        included_bins.push_back(Qx[(*it).first + 1]);
+        included_bins.push_back(Qx[xLength-(*it).first]);
       }
       // Add on a final bin with full weight if masking doesn't go up to the end
       if (included_bins.back() != Qx.back()) 
