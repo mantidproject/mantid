@@ -22,12 +22,8 @@ namespace Kernel
 
 namespace API
 {
-  class IFunction;
-}
-	
-namespace API
-{
 
+  class IFunction;
 /** @class FunctionFactoryImpl
 
     The FunctionFactory class is in charge of the creation of concrete

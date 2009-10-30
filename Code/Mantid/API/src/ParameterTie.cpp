@@ -1,6 +1,6 @@
 #include <muParser.h>
-#include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ParameterTie.h"
 
 namespace Mantid
 {
@@ -11,7 +11,7 @@ namespace API
    * @param funct A pointer to the function which parameter will be tied
    * @param parName The name of the parameter to be tied
    */
-  ParameterTie::ParameterTie(API::IFunction* funct,const std::string& parName)
+  ParameterTie::ParameterTie(IFunction* funct,const std::string& parName)
     :m_parser(new mu::Parser()),m_function(funct)
   {
     m_parser->DefineNameChars("0123456789_."

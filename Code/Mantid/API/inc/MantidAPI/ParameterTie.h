@@ -15,7 +15,7 @@ namespace Mantid
 {
 namespace API
 {
-  class DLLExport IFunction;
+  class IFunction;
 /** Ties fitting parameters.
 
     @author Roman Tolchenov, Tessella Support Services plc

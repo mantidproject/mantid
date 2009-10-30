@@ -161,7 +161,7 @@ int CompositeFunction::nParams()const
 }
 
 /**
- * This method is undefined for CompositeFunction
+ * 
  * @param name The name of a parameter
  */
 int CompositeFunction::parameterIndex(const std::string& name)const
