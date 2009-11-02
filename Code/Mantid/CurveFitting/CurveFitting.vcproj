@@ -219,6 +219,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\IkedaCarpenterPV.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\IkedaCarpenterPV1D.cpp"
 				>
 			</File>
@@ -297,11 +301,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidCurveFitting\IkedaCarpenterPV.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\IkedaCarpenterPV1D.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\IkedaCarpenterPV1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\IkedaCarpenterPVTest.h"
 				>
 			</File>
 			<File

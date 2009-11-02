@@ -1,20 +1,20 @@
-#ifndef MANTID_API_IPEAKFUNCTION_H_
-#define MANTID_API_IPEAKFUNCTION_H_
+#ifndef MANTID_API_IBACKGROUNDFUNCTION_H_
+#define MANTID_API_IBACKGROUNDFUNCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunctionWithLocation.h"
+#include "MantidAPI/IBackgroundFunction.h"
 
 namespace Mantid
 {
 namespace API
 {
-/** An interface to a peak function, which extend the interface of 
-    IFunctionWithLocation by adding methods to set and get peak width.
+/** An interface to a background function. This interface is just
+    a copy of the IFunctionWithLocation interface for now.
 
-    @author Roman Tolchenov, Tessella Support Services plc
-    @date 16/10/2009
+    @author Anders Markvardsen, ISIS, RAL
+    @date 2/11/2009
 
     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
@@ -36,17 +36,13 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IPeakFunction : public IFunctionWithLocation
+class DLLExport IBackgroundFunction : public IFunctionWithLocation
 {
 public:
-  /// Returns the peak FWHM
-  virtual double width()const = 0;
 
-  /// Sets the parameters such that FWHM = w
-  virtual void setWidth(const double w) = 0;
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_IPEAKFUNCTION_H_*/
+#endif /*MANTID_API_IBACKGROUNDFUNCTION_H_*/

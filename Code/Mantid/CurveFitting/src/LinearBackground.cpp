@@ -26,7 +26,7 @@ void LinearBackground::function(double* out, const double* xValues, const int& n
     const double& a1 = getParameter("A1");
 
     for (int i = 0; i < nData; i++) {
-        out[i] = a0+a1*(xValues[i] - xValues[0]);
+        out[i] = a0+a1*xValues[i];
     }
 }
 
@@ -34,7 +34,7 @@ void LinearBackground::functionDeriv(Jacobian* out, const double* xValues, const
 {
     for (int i = 0; i < nData; i++) {
         out->set(i,0, 1);
-        out->set(i,1, xValues[i] - xValues[0]);
+        out->set(i,1, xValues[i]);
     }
 }
 

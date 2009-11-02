@@ -423,11 +423,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\IBackgroundFunction.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IDataItem.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\IFunction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\IFunctionWithLocation.h"
 				>
 			</File>
 			<File

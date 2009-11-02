@@ -16,7 +16,6 @@ namespace CurveFitting
 DECLARE_ALGORITHM(IkedaCarpenterPV1D)
 
 using namespace Kernel;
-//using API::MatrixWorkspace_const_sptr;
 using namespace SpecialFunctionSupport;
 
 void IkedaCarpenterPV1D::declareParameters()
@@ -67,10 +66,6 @@ void IkedaCarpenterPV1D::afterDataRangedDetermined(const int& m_minX, const int&
     
     mWaveLength.resize(m_maxX - m_minX);
   }
-
-
-
-
 }
 
 void IkedaCarpenterPV1D::function(const double* in, double* out, const double* xValues, const int& nData)

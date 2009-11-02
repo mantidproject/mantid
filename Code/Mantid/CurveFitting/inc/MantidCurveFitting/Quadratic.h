@@ -12,9 +12,7 @@ namespace Mantid
   {
     /**
     Provide quadratic function interface to IFunction.
-    I.e. the function: A0+A1*(x-x_min)+A2*(x-x_min)^2, 
-    where x_min is the lowest x-value of the x-interval
-    fitting x-range specified by the user.
+    I.e. the function: A0+A1*x+A2*x^2
 
     Quadratic parameters:
     <UL>

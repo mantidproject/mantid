@@ -12,9 +12,7 @@ namespace Mantid
   {
     /**
     Provide linear function interface to IFunction.
-    I.e. the function: A0+A1*(x-x_min), 
-    where x_min is the lowest x-value of the x-interval
-    fitting x-range specified by the user.
+    I.e. the function: A0+A1*x.
 
     LinearBackground parameters:
     <UL>

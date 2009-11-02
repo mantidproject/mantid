@@ -71,7 +71,7 @@ public:
     //std::string str = alg2.getProperty("Output Status");
     //std::cout << std::endl << str << std::endl;
     TS_ASSERT_DELTA( dummy, 2.7,0.1);
-    TS_ASSERT_DELTA( quad->getParameter("A0"),2.5183, 0.0001);
+    TS_ASSERT_DELTA( quad->getParameter("A0"),10.15, 0.01);
     TS_ASSERT_DELTA( quad->getParameter("A1"),-0.0001, 0.0001);
 
 
