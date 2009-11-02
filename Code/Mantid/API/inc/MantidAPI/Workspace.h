@@ -57,16 +57,18 @@ public:
     virtual ~Workspace() {}
     void setTitle(const std::string&);
     void setComment(const std::string&);
+    void setName(const std::string&);
     const std::string& getTitle() const;
     const std::string& getComment() const;
+    const std::string& getName() const;
     /// Get the footprint in memory in KB.
     virtual long int getMemorySize() const = 0;
 
-		/** Marks the workspace as safe for multiple threads to edit data simutaneously.
-		* Workspace creation is always considered to be a single threaded operation.
-		* @return true if the workspace is suitable for multithreaded operations, otherwise false.
-		*/
-		virtual bool threadSafe() const { return true; }
+    /** Marks the workspace as safe for multiple threads to edit data simutaneously.
+     * Workspace creation is always considered to be a single threaded operation.
+     * @return true if the workspace is suitable for multithreaded operations, otherwise false.
+     */
+    virtual bool threadSafe() const { return true; }
 
     /// Returns a reference to the WorkspaceHistory
     WorkspaceHistory& history() { return m_history; }
@@ -78,7 +80,8 @@ private:
     std::string m_title;
     /// A user-provided comment that is attached to the workspace
     std::string m_comment;
-
+    /// The name associated with the object within the ADS (This is required for workspace algebra
+    std::string m_name;
     /// The history of the workspace, algorithm and environment
     WorkspaceHistory m_history;
 

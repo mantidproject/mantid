@@ -7,7 +7,7 @@ namespace API
 {
 
 /// Default constructor
-Workspace::Workspace() : m_title(), m_comment(), m_history()
+  Workspace::Workspace() : m_title(), m_comment(), m_name(), m_history()
 {}
 
 /** Set the title of the workspace
@@ -28,6 +28,15 @@ void Workspace::setComment(const std::string& c)
   m_comment=c;
 }
 
+/** Set the name field of the workspace
+ *
+ *  @param name The name
+ */
+void Workspace::setName(const std::string& name)
+{
+  m_name = name;
+}
+
 /** Get the workspace title
  *
  *  @return The title
@@ -44,6 +53,15 @@ const std::string& Workspace::getTitle() const
 const std::string& Workspace::getComment() const
 {
   return m_comment;
+}
+
+/** Get the workspace name
+ *
+ *  @return The name
+ */
+const std::string& Workspace::getName() const
+{
+  return m_name;
 }
 
 

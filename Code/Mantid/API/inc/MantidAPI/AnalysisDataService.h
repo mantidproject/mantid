@@ -13,6 +13,7 @@
 
 namespace Mantid
 {
+
 namespace API
 {
 /** The Analysis data service stores instances of the Workspace objects and
@@ -50,6 +51,15 @@ namespace API
 */
 class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
+
+ public:
+  /// Overwridden add member to attach the name to the workspace when a workspace object is added to the service
+  virtual void add( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
+  {
+    Kernel::DataService<API::Workspace>::add(name, workspace);
+    workspace->setName(name);
+  }
+
 private:
   friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
   // Constructors

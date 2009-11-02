@@ -128,7 +128,7 @@ public:
 
 
   /// Add an object to the service
-  void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
+  virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
   // Don't permit an empty name for the workspace
     if (name.empty())
