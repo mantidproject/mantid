@@ -57,7 +57,8 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
   virtual void add( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
   {
     Kernel::DataService<API::Workspace>::add(name, workspace);
-    workspace->setName(name);
+    //Attach the name to the workspace
+    if( workspace.get() ) workspace->setName(name);
   }
 
 private:
