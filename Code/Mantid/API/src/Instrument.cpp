@@ -217,14 +217,14 @@ const std::vector<int> Instrument::getMonitors()const
 
 IInstrument::plottables_const_sptr Instrument::getPlottable() const
 {
-  boost::shared_ptr<std::vector<Geometry::IObjComponent_sptr> > res(
-    new std::vector<Geometry::IObjComponent_sptr> );
+  boost::shared_ptr<std::vector<Geometry::IObjComponent_const_sptr> > res(
+    new std::vector<Geometry::IObjComponent_const_sptr> );
   res->reserve(_detectorCache.size()+10);
   appendPlottable(*this,*res);
   return res;
 }
 
-void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_sptr>& lst) const
+void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst) const
 {
   for(int i=0;i<ca.nelements();i++)
   {
@@ -236,9 +236,9 @@ void Instrument::appendPlottable(const Geometry::CompAssembly& ca,std::vector<Ge
       Geometry::Detector* d = dynamic_cast<Geometry::Detector*>(c);
       Geometry::ObjComponent* o = dynamic_cast<Geometry::ObjComponent*>(c);
       if (d)
-        lst.push_back(Geometry::IObjComponent_sptr(d,NoDeleting()));
+        lst.push_back(Geometry::IObjComponent_const_sptr(d,NoDeleting()));
       else if (o)
-        lst.push_back(Geometry::IObjComponent_sptr(o,NoDeleting()));
+        lst.push_back(Geometry::IObjComponent_const_sptr(o,NoDeleting()));
       else
         g_log.error()<<"Unknown comp type\n";
     }

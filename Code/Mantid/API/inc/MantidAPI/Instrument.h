@@ -117,7 +117,7 @@ private:
   Geometry::IComponent* getChild(const std::string& name) const;
 
   /// Add a plottable component
-  void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_sptr>& lst)const;
+  void appendPlottable(const Geometry::CompAssembly& ca,std::vector<Geometry::IObjComponent_const_sptr>& lst)const;
 
   /// Map which holds detector-IDs and pointers to detector components
   std::map<int, Geometry::IDetector*> _detectorCache;

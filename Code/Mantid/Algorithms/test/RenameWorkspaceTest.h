@@ -67,7 +67,7 @@ public:
 
 		TS_ASSERT_THROWS_ANYTHING( result = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve("InputWS")) );
 
-		AnalysisDataService::Instance().remove("WSRenamed");
+    AnalysisDataService::Instance().remove("WSRenamed");
 	}
 	
 	void testExecSameNames()

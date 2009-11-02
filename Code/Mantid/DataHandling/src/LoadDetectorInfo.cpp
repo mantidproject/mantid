@@ -22,10 +22,9 @@ using namespace DataObjects;
 
 const float LoadDetectorInfo::UNSETOFFSET = float(-1e12);
 /// Empty default constructor
-LoadDetectorInfo::LoadDetectorInfo() :
+LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
   m_workspace(), m_instrument(), m_paraMap(NULL), m_numHists(-1), m_monitors(),
-  m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_FracCompl(0.0),
-  Algorithm()                                                //call the base class constructor
+  m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_FracCompl(0.0)
 {
 }
 
@@ -342,7 +341,7 @@ void LoadDetectorInfo::adjustXs(const std::vector<int> &detIDs, const std::vecto
     float cachedOffSet = UNSETOFFSET;
     Histogram1D::RCtype cachedXs;
 
-    for ( int j = 0; j < detIDs.size(); ++j )
+    for ( std::vector<int>::size_type j = 0; j < detIDs.size(); ++j )
     {// check if we dealing with a monitor as these are dealt by a different function
       const int specNum = m_workspace->getAxis(1)->spectraNo(specInds[j]);
       const std::vector<int> dets =
@@ -372,7 +371,7 @@ void LoadDetectorInfo::adjustXs(const std::vector<int> &detIDs, const std::vecto
   }//end shared X-values arrays
   else
   {// simplist case to code, adjust the bins in each spectrum
-    for ( int j = 0; j < detIDs.size(); ++j )
+    for ( std::vector<int>::size_type j = 0; j < detIDs.size(); ++j )
     {// check if we dealing with a monitor as these are dealt by a different function
       const int specNum = m_workspace->getAxis(1)->spectraNo(specInds[j]);
       const std::vector<int> dets =
@@ -452,7 +451,7 @@ void LoadDetectorInfo::adjustXs(const float detectorOffset)
     else
     { //  The detector is not in the instrument definition file
       // we don't have any information on the spectrum and so we can't correct it
-      for ( int j = 0; j < m_workspace->dataY(specInd).size(); j++ )
+      for ( MantidVec::size_type j = 0; j < m_workspace->dataY(specInd).size(); j++ )
       {//as this algorithm is about obtaining corrected data I'll mark this this uncorrectable data as bad by setting it to zero
         m_workspace->dataY(specInd)[j] = 0;
         m_workspace->dataE(specInd)[j] = 0;

@@ -181,7 +181,7 @@ void GroupDetectors2::getGroups(Workspace2D_const_sptr workspace,
   }
 
   // up date unUsedSpec, this is used to find duplicates and when the user has set KeepUngroupedSpectra
-  for ( int i = 0 ; i < m_GroupSpecInds[0].size(); i++ )
+  for ( storage_map::size_type i = 0 ; i < m_GroupSpecInds[0].size(); i++ )
   {
     if ( unUsedSpec[m_GroupSpecInds[0][i]] != USED )
     {
@@ -352,8 +352,8 @@ void GroupDetectors2::readFile(std::map<int,int> &specs2index, std::ifstream &Fi
       readSpectraIndexes(
         thisLine, specs2index, m_GroupSpecInds[arbitaryMapKey], unUsedSpec);
     }
-    while (m_GroupSpecInds[arbitaryMapKey].size() < numberOfSpectra);
-    if ( m_GroupSpecInds[arbitaryMapKey].size() != numberOfSpectra )
+    while (static_cast<int>(m_GroupSpecInds[arbitaryMapKey].size()) < numberOfSpectra);
+    if ( static_cast<int>(m_GroupSpecInds[arbitaryMapKey].size()) != numberOfSpectra )
     {// it makes no sense to continue reading the file, we'll stop here
       throw std::invalid_argument(std::string("Bad number of spectra specification or spectra list near line number ") + boost::lexical_cast<std::string>(lineNum));
     }
@@ -384,7 +384,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
 
     RangeHelper::getList(*dataComment.begin(), specNumbers);
 
-    for ( int i = 0; i < specNumbers.size(); ++i )
+    for ( std::vector<int>::size_type i = 0; i < specNumbers.size(); ++i )
     {
       std::map<int, int>::const_iterator ind = specs2index.find(specNumbers[i]);
       if ( ind == specs2index.end() )

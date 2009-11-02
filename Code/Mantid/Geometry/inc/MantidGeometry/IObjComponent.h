@@ -136,10 +136,10 @@ private:
   friend class GeometryHandler;
 };
 
-/// Shared pointer to IInstrument
+/// Shared pointer to IObjComponent
 typedef boost::shared_ptr<IObjComponent> IObjComponent_sptr;
-/// Shared pointer to IInstrument (const version)
-typedef const boost::shared_ptr<const IObjComponent> IObjComponent_const_sptr;
+/// Shared pointer to IObjComponent (const version)
+typedef boost::shared_ptr<const IObjComponent> IObjComponent_const_sptr;
 
 } // namespace Geometry
 } // namespace Mantid

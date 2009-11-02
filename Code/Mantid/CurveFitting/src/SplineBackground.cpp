@@ -59,7 +59,7 @@ void SplineBackground::exec()
   gsl_vector *x, *y;
   gsl_matrix *Z, *cov;
   gsl_multifit_linear_workspace *mw;
-  double chisq, Rsq, dof, tss;
+  double chisq;
 
   int n = Y.size();
   bool isMasked = inWS->hasMaskedBins(spec);
@@ -85,7 +85,7 @@ void SplineBackground::exec()
 
   /* this is the data to be fitted */
   int j = 0;
-  for (int i = 0; i < Y.size(); ++i)
+  for (MantidVec::size_type i = 0; i < Y.size(); ++i)
   {
     if (isMasked && masked[i]) continue;
 
@@ -146,7 +146,7 @@ void SplineBackground::exec()
   API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,1,X.size(),Y.size());
   {
     double xi, yi, yerr;
-    for (int i=0;i<Y.size();i++)
+    for (MantidVec::size_type i=0;i<Y.size();i++)
     {
       xi = X[i];
       gsl_bspline_eval(xi, B, bw);

@@ -64,7 +64,6 @@ void RealFFT::exec()
 
     const MantidVec& X = inWS->readX(spec);
     int ySize = inWS->blocksize();
-    int xSize = X.size();
 
     if (spec >= ySize) throw std::invalid_argument("Property WorkspaceIndex is out of range");
 
@@ -72,9 +71,6 @@ void RealFFT::exec()
     double dx = (X.back() - X.front()) / (X.size() - 1);
     for(size_t i=0;i<X.size()-2;i++)
         if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
-
-    // The number of spectra in the output workspace
-    int nOut = (transform == "Forward") ? 2 : 1;
 
     API::MatrixWorkspace_sptr outWS;
 

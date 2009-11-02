@@ -100,9 +100,9 @@ IInstrument::plottables_const_sptr ParInstrument::getPlottable() const
   for(plottables::size_type i = 0; i < total; ++i)
   {
     if ( boost::dynamic_pointer_cast<const Detector>(objs->at(i)) )
-      res[i] = IObjComponent_sptr(new ParDetector(dynamic_cast<Detector*>(objs->at(i).get()),m_map));
+      res[i] = IObjComponent_const_sptr(new ParDetector(dynamic_cast<const Detector*>(objs->at(i).get()),m_map));
     else
-      res[i] = IObjComponent_sptr(new ParObjComponent(dynamic_cast<ObjComponent*>(objs->at(i).get()),m_map));
+      res[i] = IObjComponent_const_sptr(new ParObjComponent(dynamic_cast<const ObjComponent*>(objs->at(i).get()),m_map));
   }
   return objs;
 }

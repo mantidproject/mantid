@@ -166,7 +166,6 @@ void FFTSmooth::exec()
 void FFTSmooth::truncate(int n)
 {
   int my = m_unfilteredWS->readY(0).size();
-  int my2 = my / 2;
   int ny = my / n;
 
   double f = double(ny)/my;
@@ -175,7 +174,6 @@ void FFTSmooth::truncate(int n)
   int nx = m_unfilteredWS->isHistogramData() ? ny + 1 : ny;
   m_filteredWS = API::WorkspaceFactory::Instance().create(m_unfilteredWS,2,nx,ny);
 
-  int ny2 = ny / 2;
   const Mantid::MantidVec& Yr = m_unfilteredWS->readY(0);
   const Mantid::MantidVec& Yi = m_unfilteredWS->readY(1);
   const Mantid::MantidVec& X = m_unfilteredWS->readX(0);
@@ -229,14 +227,12 @@ void FFTSmooth::zero(int n)
 {
   int mx = m_unfilteredWS->readX(0).size();
   int my = m_unfilteredWS->readY(0).size();
-  int my2 = my / 2;
   int ny = my / n;
 
   if (ny == 0) ny = 1;
 
   m_filteredWS = API::WorkspaceFactory::Instance().create(m_unfilteredWS,2,mx,my);
 
-  int ny2 = ny / 2;
   const Mantid::MantidVec& Yr = m_unfilteredWS->readY(0);
   const Mantid::MantidVec& Yi = m_unfilteredWS->readY(1);
   const Mantid::MantidVec& X = m_unfilteredWS->readX(0);

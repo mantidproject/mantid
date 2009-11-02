@@ -439,9 +439,6 @@ namespace CurveFitting
       double chi = gsl_blas_dnrm2(s->f);
       finalCostFuncVal = chi*chi / dof;
 
-
-      int j = GSL_ETOLF;
-
       // put final converged fitting values back into m_fittedParameter
       for (size_t i = 0; i < nParams(); i++)
           m_function->setActiveParameter(i,gsl_vector_get(s->x,i));
@@ -477,7 +474,7 @@ namespace CurveFitting
     g_log.information() << "Iteration = " << iter << "\n" <<
       "Status = " << reportOfFit << "\n" <<
       "Chi^2/DoF = " << finalCostFuncVal << "\n";
-    for (size_t i = 0; i < m_function->nParams(); i++)
+    for (int i = 0; i < m_function->nParams(); i++)
       g_log.information() << m_function->parameterName(i) << " = " << m_function->parameter(i) << "  \n";
 
 

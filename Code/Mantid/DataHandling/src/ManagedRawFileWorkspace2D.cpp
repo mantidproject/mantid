@@ -188,7 +188,7 @@ namespace Mantid
 			  {
 				  isisRaw->readData(m_fileRaw,m_readIndex+1);
 				  //g_log.error()<<"readData called for spectrum index"<<m_readIndex<< " and wsIndex is "<<index<< std::endl;
-				  if(m_readIndex==(m_noVectors+m_monitorList.size()))
+				  if( m_readIndex == ( m_noVectors+static_cast<int>(m_monitorList.size()) ) )
 					  break;
 				  MantidVec& y = newBlock->dataY(index);
 				  y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);  
@@ -243,7 +243,6 @@ namespace Mantid
 		  }
 		  int endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
 		  if (endIndex >= m_noVectors) endIndex = m_noVectors;
-		  int index=startIndex;
 		  for(int index = startIndex;index<endIndex;index++,m_readIndex++)
 		  {
 			  isisRaw->readData(m_fileRaw,m_readIndex+1);
