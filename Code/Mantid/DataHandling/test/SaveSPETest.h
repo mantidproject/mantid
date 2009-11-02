@@ -39,7 +39,7 @@ public:
   {
     using namespace Mantid::API;
     // Create a small test workspace
-    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspace154(10,2);
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,10,1.0);
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     const std::string input("input");
     AnalysisDataService::Instance().add(input,inputWS);
@@ -70,39 +70,39 @@ public:
     TS_ASSERT_EQUALS( tmp2, 1 )
     getline(file,tmp);
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 1 )
+    TS_ASSERT_EQUALS( tmp2, 9 )
     getline(file,tmp);
     getline(file,tmp);
     TS_ASSERT_EQUALS( tmp, "### S(Phi,w)" )
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 5 )
+    TS_ASSERT_EQUALS( tmp2, 2 )
     getline(file,tmp);
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 5 )
+    TS_ASSERT_EQUALS( tmp2, 2 )
     getline(file,tmp);
     getline(file,tmp);
     TS_ASSERT_EQUALS( tmp, "### Errors" )
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 4 )
+    TS_ASSERT_DELTA( tmp2, 1.414, 0.001 )
     getline(file,tmp);
-    file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 4 )
+    file >> tmp2;
+    TS_ASSERT_DELTA( tmp2, 1.414, 0.001 )
     getline(file,tmp);
     getline(file,tmp);
     TS_ASSERT_EQUALS( tmp, "### S(Phi,w)" )
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 5 )
+    TS_ASSERT_EQUALS( tmp2, 2 )
     getline(file,tmp);
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 5 )
+    TS_ASSERT_EQUALS( tmp2, 2 )
     getline(file,tmp);
     getline(file,tmp);
     TS_ASSERT_EQUALS( tmp, "### Errors" )
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 4 )
+    TS_ASSERT_DELTA( tmp2, 1.414, 0.001 )
     getline(file,tmp);
     file >> tmp2;    
-    TS_ASSERT_EQUALS( tmp2, 4 )
+    TS_ASSERT_DELTA( tmp2, 1.414, 0.001 )
     getline(file,tmp);
     TS_ASSERT( file.good() )
     // That should be the end of the file
@@ -112,7 +112,7 @@ public:
     file.close();
     
     AnalysisDataService::Instance().remove(input);
-    Poco::File(outputFile).remove();
+    //Poco::File(outputFile).remove();
   }
   
 private:
