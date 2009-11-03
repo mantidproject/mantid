@@ -19,15 +19,19 @@
 
 namespace Mantid
 {
+
+namespace DataObjects
+{
+  class Workspace2D;
+}
+
 namespace API
 {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-class MatrixWorkspace;
 class Jacobian;
 class ParameterTie;
-
 /** An interface to a function.
 
     @author Roman Tolchenov, Tessella Support Services plc
@@ -65,8 +69,9 @@ public:
   /// Virtual destructor
   virtual ~IFunction();
 
-  /// Function initialization. Declare function parameters in this method.
-  virtual void init() = 0;
+  /// Initialize the function providing it the workspace
+  virtual void initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
+
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
   /// Derivatives of function with respect to active parameters
@@ -116,6 +121,8 @@ public:
   virtual void applyTies();
 
 protected:
+  /// Function initialization. Declare function parameters in this method.
+  virtual void init(){};
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name,double initValue = 0);
 
@@ -128,6 +135,14 @@ private:
   std::vector<double> m_parameters;
   /// Holds parameter ties
   std::map<int,ParameterTie*> m_ties;
+  /// Shared pointer to the workspace
+  boost::shared_ptr<const DataObjects::Workspace2D> m_workspace;
+  /// Spectrum index
+  int m_specIndex;
+  /// Lower bin index
+  int m_xMinIndex;
+  /// Upper bin index
+  int m_xMaxIndex;
 };
 
 /** Represents the Jacobian in functionDeriv. 

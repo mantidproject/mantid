@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <sstream>
 #include <iostream>
@@ -37,6 +38,17 @@ IFunction::~IFunction()
       delete it->second;
   m_ties.clear();
 }
+
+/// Initialize the function providing it the workspace
+void IFunction::initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
+{
+  m_workspace = workspace;
+  m_specIndex = spec;
+  m_xMinIndex = xMin;
+  m_xMaxIndex = xMax;
+  this->init();
+}
+
 
 /** Update active parameters. Ties are applied.
  *  @param in Pointer to an array with active parameters values.

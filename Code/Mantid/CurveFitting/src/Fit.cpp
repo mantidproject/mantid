@@ -29,11 +29,11 @@ namespace CurveFitting
   using namespace Kernel;
   using API::WorkspaceProperty;
   using API::Axis;
-  using API::MatrixWorkspace_const_sptr;
   using API::MatrixWorkspace;
   using API::Algorithm;
   using API::Progress;
   using API::Jacobian;
+  using DataObjects::Workspace2D_const_sptr;
 
   /// The implementation of Jacobian
   class JacobianImpl1: public Jacobian
@@ -181,7 +181,7 @@ namespace CurveFitting
   */
   void Fit::init()
   {
-    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
+    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
@@ -216,35 +216,12 @@ namespace CurveFitting
   void Fit::exec()
   {
 
-    processParameters();
-
-    if (m_function == NULL)
-      throw std::runtime_error("Function has not been set.");
-
-    // check if derivative defined in derived class
-    bool isDerivDefined = true;
-    try
-    {
-      const std::vector<double> inTest(nParams(),1.0);
-      std::vector<double> outTest(nParams());
-      const double xValuesTest = 0;
-      JacobianImpl1 J;
-      boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(nParams(),1) );
-      J.setJ(M.get());
-      // note nData set to zero (last argument) hence this should avoid further memory problems
-      functionDeriv(NULL, &J, &xValuesTest, 0);  
-    }
-    catch (Exception::NotImplementedError&)
-    {
-      isDerivDefined = false;
-    }
-
     // Try to retrieve optional properties
     int histNumber = getProperty("WorkspaceIndex");
     const int maxInterations = getProperty("MaxIterations");
 
     // Get the input workspace
-    MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
+    DataObjects::Workspace2D_const_sptr localworkspace = getProperty("InputWorkspace");
 
     // number of histogram is equal to the number of spectra
     const int numberOfSpectra = localworkspace->getNumberHistograms();
@@ -300,6 +277,29 @@ namespace CurveFitting
     }
 
     afterDataRangedDetermined(m_minX, m_maxX);
+
+    processParameters(localworkspace,histNumber,m_minX, m_maxX);
+
+    if (m_function == NULL)
+      throw std::runtime_error("Function has not been set.");
+
+    // check if derivative defined in derived class
+    bool isDerivDefined = true;
+    try
+    {
+      const std::vector<double> inTest(nParams(),1.0);
+      std::vector<double> outTest(nParams());
+      const double xValuesTest = 0;
+      JacobianImpl1 J;
+      boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(nParams(),1) );
+      J.setJ(M.get());
+      // note nData set to zero (last argument) hence this should avoid further memory problems
+      functionDeriv(NULL, &J, &xValuesTest, 0);  
+    }
+    catch (Exception::NotImplementedError&)
+    {
+      isDerivDefined = false;
+    }
 
     // create and populate GSL data container warn user if l_data.n < l_data.p 
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
@@ -499,7 +499,7 @@ namespace CurveFitting
       declareProperty(
         new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
         "The name of the TableWorkspace in which to store the final fit parameters" );
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), 
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output), 
         "Name of the output Workspace holding resulting simlated spectrum");
 
       setPropertyValue("OutputParameters",output+"_Parameters");
@@ -517,7 +517,7 @@ namespace CurveFitting
       setProperty("OutputParameters",m_result);
 
       // Save the fitted and simulated spectra in the output workspace
-      MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
+      Workspace2D_const_sptr inputWorkspace = getProperty("InputWorkspace");
       int iSpec = getProperty("WorkspaceIndex");
       const MantidVec& inputX = inputWorkspace->readX(iSpec);
       const MantidVec& inputY = inputWorkspace->readY(iSpec);
@@ -554,7 +554,7 @@ namespace CurveFitting
 
       delete [] lOut; 
 
-      setProperty("OutputWorkspace",boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+      setProperty("OutputWorkspace",ws);
 
     }
 
@@ -610,7 +610,7 @@ namespace CurveFitting
   /**
    * Process input parameters and create the fitting function.
    */
-  void Fit::processParameters()
+  void Fit::processParameters(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
   {
 
     // Parameters of different functions are separated by ';'. Parameters of the same function
@@ -652,7 +652,7 @@ namespace CurveFitting
         throw std::runtime_error("Function is not defined");
 
       API::IFunction* fun = API::FunctionFactory::Instance().createFunction(functionName);
-      fun->init();
+      fun->initialize(workspace,spec,xMin,xMax);
 
       if (isComposite)
         static_cast<API::CompositeFunction*>(function)->addFunction(fun);

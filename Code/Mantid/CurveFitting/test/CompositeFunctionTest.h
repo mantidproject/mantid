@@ -21,7 +21,7 @@ typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 class Gauss: public IPeakFunction
 {
 public:
-  void init()
+  Gauss()
   {
     declareParameter("c");
     declareParameter("h",1.);
@@ -88,7 +88,7 @@ public:
 class Linear: public IFunction
 {
 public:
-  void init()
+  Linear()
   {
     declareParameter("a");
     declareParameter("b");
@@ -126,10 +126,6 @@ public:
     CompositeFunction *mfun = new CompositeFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
-
-    g1->init();
-    g2->init();
-    bk->init();
 
     mfun->addFunction(bk);
     mfun->addFunction(g1);

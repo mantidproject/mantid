@@ -9,6 +9,10 @@
 
 namespace Mantid
 {
+  namespace DtaaObjects
+  {
+    class Workspace2D;
+  }
   namespace CurveFitting
   {
     /**
@@ -94,7 +98,7 @@ namespace Mantid
       virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
 
       // Process input parameters and create the fitting function.
-      void processParameters();
+      void processParameters(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
 
       /// Number of parameters.
       size_t nParams()const{return m_function->nActive();}
