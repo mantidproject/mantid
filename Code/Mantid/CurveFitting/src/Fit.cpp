@@ -41,6 +41,7 @@ namespace CurveFitting
   public:
     /// The pointer to the GSL's internal jacobian matrix
     gsl_matrix * m_J;
+    /// Maps declared indeces to active. For fixed (tied) parameters holds -1
     std::vector<int> m_index;
     /**  Set a value to a Jacobian matrix element.
     *   @param iY The index of the data point.

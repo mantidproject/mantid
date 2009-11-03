@@ -47,8 +47,9 @@ public:
   ///Destructor
   virtual ~CompositeFunction();
 
-  /// Function initialization. Declare function parameters in this method.
-  void init();
+  /// Initialize the function providing it the workspace
+  virtual void initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
+
   /// Function you want to fit to.
   void function(double* out, const double* xValues, const int& nData);
   /// Derivatives of function with respect to active parameters
@@ -98,8 +99,12 @@ public:
   /// Number of functions
   int nFunctions()const{return m_functions.size();}
 
+protected:
+  /// Function initialization. Declare function parameters in this method.
+  void init();
+
 private:
-  double m_tst;
+
   /// Get the function index
   int functionIndex(int i)const;
   /// Get the function index

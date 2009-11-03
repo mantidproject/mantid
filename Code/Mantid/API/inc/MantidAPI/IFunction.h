@@ -126,6 +126,15 @@ protected:
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name,double initValue = 0);
 
+  /// Shared pointer to the workspace
+  boost::shared_ptr<const DataObjects::Workspace2D> m_workspace;
+  /// Spectrum index
+  int m_specIndex;
+  /// Lower bin index
+  int m_xMinIndex;
+  /// Upper bin index
+  int m_xMaxIndex;
+
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i
   std::vector<int> m_indexMap;
@@ -135,14 +144,6 @@ private:
   std::vector<double> m_parameters;
   /// Holds parameter ties
   std::map<int,ParameterTie*> m_ties;
-  /// Shared pointer to the workspace
-  boost::shared_ptr<const DataObjects::Workspace2D> m_workspace;
-  /// Spectrum index
-  int m_specIndex;
-  /// Lower bin index
-  int m_xMinIndex;
-  /// Upper bin index
-  int m_xMaxIndex;
 };
 
 /** Represents the Jacobian in functionDeriv. 

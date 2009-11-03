@@ -75,6 +75,7 @@ class PartialJacobian: public Jacobian
 public:
   /** Constructor
    * @param J A pointer to the overall Jacobian
+   * @param iP0 The parameter index (declared) offset for a particular function
    */
   PartialJacobian(Jacobian* J,int iP0):m_J(J),m_iP0(iP0)
   {}
@@ -82,6 +83,7 @@ public:
    * Overridden Jacobian::set(...).
    * @param iY The index of the data point
    * @param iP The parameter index of an individual function.
+   * @param value The derivative value
    */
   void set(int iY, int iP, double value)
   {
@@ -348,6 +350,20 @@ void CompositeFunction::parseName(const std::string& varName,int& index, std::st
     name = varName.substr(i+1);
   }
 }
+
+/** Initialize the function providing it the workspace
+ * @param workspace The shared pointer to a workspace to which the function will be fitted
+ * @param spec The number of a spectrum for fitting
+ * @param xMin The minimum bin index of spectrum spec that will be used in fitting
+ * @param xMax The maximum bin index of spectrum spec that will be used in fitting
+ */
+void CompositeFunction::initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
+{
+  IFunction::initialize(workspace,spec,xMin,xMax);
+  for(int i=0;i<nFunctions();i++)
+    getFunction(i)->initialize(workspace,spec,xMin,xMax);
+}
+
 
 } // namespace API
 } // namespace Mantid

@@ -65,6 +65,8 @@ void IFunction::updateActive(const double* in)
 
 /**
  * Sets active parameter i to value. Ties are not applied.
+ * @param i The index of active parameter to set
+ * @param value The new value for the parameter
  */
 void IFunction::setActiveParameter(int i,double value)
 {

@@ -18,7 +18,13 @@ using namespace Mantid::CurveFitting;
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 
-class Gauss: public IPeakFunction
+class ITestFunction
+{
+public:
+  virtual void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax) = 0;
+};
+
+class Gauss: public IPeakFunction, public ITestFunction
 {
 public:
   Gauss()
@@ -82,10 +88,18 @@ public:
   {
     parameter(2) = w;
   }
+
+  void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax)
+  {
+    TS_ASSERT_EQUALS(ws.get(),m_workspace.get());
+    TS_ASSERT_EQUALS(spec,m_specIndex);
+    TS_ASSERT_EQUALS(xMin,m_xMinIndex);
+    TS_ASSERT_EQUALS(xMax,m_xMaxIndex);
+  }
 };
 
 
-class Linear: public IFunction
+class Linear: public IFunction, public ITestFunction
 {
 public:
   Linear()
@@ -111,6 +125,31 @@ public:
       out->set(i,1,xValues[i]);
     }
   }
+
+  void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax)
+  {
+    TS_ASSERT_EQUALS(ws.get(),m_workspace.get());
+    TS_ASSERT_EQUALS(spec,m_specIndex);
+    TS_ASSERT_EQUALS(xMin,m_xMinIndex);
+    TS_ASSERT_EQUALS(xMax,m_xMaxIndex);
+  }
+};
+
+class CompFunction : public CompositeFunction
+{
+public:
+
+  void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax)
+  {
+    TS_ASSERT_EQUALS(ws.get(),m_workspace.get());
+    TS_ASSERT_EQUALS(spec,m_specIndex);
+    TS_ASSERT_EQUALS(xMin,m_xMinIndex);
+    TS_ASSERT_EQUALS(xMax,m_xMaxIndex);
+
+    for(int i=0;i<nFunctions();i++)
+      dynamic_cast<ITestFunction*>(getFunction(i))->testInit(ws,spec,xMin,xMax);
+  }
+
 };
 
 class CompositeFunctionTest : public CxxTest::TestSuite
@@ -123,7 +162,7 @@ public:
 
   void testFit()
   {
-    CompositeFunction *mfun = new CompositeFunction();
+    CompFunction *mfun = new CompFunction();
     Gauss *g1 = new Gauss(),*g2 = new Gauss();
     Linear *bk = new Linear();
 
@@ -156,6 +195,9 @@ public:
     WS_type ws = mkWS(1,0,10,0.1);
     addNoise(ws,0.1);
     storeWS("mfun",ws);
+
+    mfun->initialize(ws,7,12,3);
+    mfun->testInit(ws,7,12,3);
 
     Fit alg;
     alg.initialize();
@@ -248,7 +290,7 @@ public:
 private:
   WS_type mkWS(int nSpec,double x0,double x1,double dx,bool isHist=false)
   {
-    int nX = int(x1 - x0)/dx + 1;
+    int nX = int((x1 - x0)/dx) + 1;
     int nY = nX - (isHist?1:0);
     if (nY <= 0)
       throw std::invalid_argument("Cannot create an empty workspace");
