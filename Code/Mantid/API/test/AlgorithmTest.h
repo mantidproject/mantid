@@ -93,12 +93,6 @@ public:
     TS_ASSERT( myAlg.isExecuted() );
   }
 
-
-//	void testCreateSubAlgorithm()
-//	{
-//	  // Method not implemented yet in Algorithm.cpp (need algorithm factory)
-//	}
-
 	
   void testSetPropertyValue()
   {

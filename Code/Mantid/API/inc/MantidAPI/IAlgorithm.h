@@ -65,8 +65,6 @@ typedef void* AlgorithmID;
 class DLLExport IAlgorithm : virtual public Kernel::INamedInterface, virtual public Kernel::IPropertyManager
 {
 public:
-  // Retrieve interface ID
-  //    static const InterfaceID& interfaceID() { return IID_IAlgorithm; }
 
   /// Virtual destructor (always needed for abstract classes)
   virtual ~IAlgorithm() {}
