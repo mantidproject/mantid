@@ -15,11 +15,11 @@ sp.call("svn up", shell=True)
 sp.call("python release_date.py",shell=True)
 
 # If the dependent Mantid framework headers have changed, clean first
-frameworkLog = sp.Popen("svn log -qv -rCOMMITTED",stdout=sp.PIPE,shell=True,cwd="../Mantid").communicate()[0]
-mantidQtLog = sp.Popen("svn log -qv -rCOMMITTED",stdout=sp.PIPE,shell=True).communicate()[0]
-if ("MantidKernel" in frameworkLog) or ("MantidGeometry" in frameworkLog) or ("MantidAPI" in frameworkLog) or ("MantidQt" in mantidQtLog):
-    sp.call(make+" clean",shell=True,cwd="MantidQt")
-    sp.call(make+" clean",shell=True,cwd="qtiplot")
+#frameworkLog = sp.Popen("svn log -qv -rCOMMITTED",stdout=sp.PIPE,shell=True,cwd="../Mantid").communicate()[0]
+#mantidQtLog = sp.Popen("svn log -qv -rCOMMITTED",stdout=sp.PIPE,shell=True).communicate()[0]
+#if ("MantidKernel" in frameworkLog) or ("MantidGeometry" in frameworkLog) or ("MantidAPI" in frameworkLog) or ("MantidQt" in mantidQtLog):
+#    sp.call(make+" clean",shell=True,cwd="MantidQt")
+#    sp.call(make+" clean",shell=True,cwd="qtiplot")
 
 
 buildlog = open("../../../../logs/qtiplot/build.log","w") 
