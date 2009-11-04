@@ -29,7 +29,7 @@ namespace API
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
 
     Modified to inherit from DataService
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -69,7 +69,7 @@ private:
   AnalysisDataServiceImpl(const AnalysisDataServiceImpl&);
   /// Private, unimplemented copy assignment operator
   AnalysisDataServiceImpl& operator=(const AnalysisDataServiceImpl&);
-  ~AnalysisDataServiceImpl();
+  virtual ~AnalysisDataServiceImpl();
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AnalysisDataServiceImpl (needed for dllexport/dllimport) and a typedef for it.

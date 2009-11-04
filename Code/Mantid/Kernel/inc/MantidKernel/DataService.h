@@ -35,7 +35,7 @@ namespace Kernel
     @author Laurent C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 30/05/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -130,7 +130,7 @@ public:
   /// Add an object to the service
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
-  // Don't permit an empty name for the workspace
+    // Don't permit an empty name for the workspace
     if (name.empty())
     {
       std::string error=" add Data Object with empty name";
@@ -187,7 +187,6 @@ public:
     }
 
     notificationCenter.postNotification(new DeleteNotification(name,it->second));
-//    notificationCenter.postNotification(new DeleteNotification(name,boost::shared_ptr<T>()));
     g_log.information("Data Object '"+ name +"' deleted from data service.");
     datamap.erase(it);
 
@@ -248,7 +247,7 @@ public:
 protected:
   /// Protected constructor (singleton)
   DataService(const std::string& name):svc_name(name),g_log(Kernel::Logger::get(svc_name)){}
-  ~DataService(){}
+  virtual ~DataService(){}
 
 private:
 	/// Private, unimplemented copy constructor
