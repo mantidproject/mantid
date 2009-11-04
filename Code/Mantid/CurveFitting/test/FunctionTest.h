@@ -85,7 +85,7 @@ public:
   void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax)
   {
     TS_ASSERT_EQUALS(ws.get(),m_workspace.get());
-    TS_ASSERT_EQUALS(spec,m_specIndex);
+    TS_ASSERT_EQUALS(spec,m_workspaceIndex);
     TS_ASSERT_EQUALS(xMin,m_xMinIndex);
     TS_ASSERT_EQUALS(xMax,m_xMaxIndex);
   }
