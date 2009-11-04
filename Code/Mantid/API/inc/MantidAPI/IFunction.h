@@ -70,7 +70,7 @@ public:
   virtual ~IFunction();
 
   /// Initialize the function providing it the workspace
-  virtual void initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
+  virtual void initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax);
 
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
@@ -129,7 +129,7 @@ protected:
   /// Shared pointer to the workspace
   boost::shared_ptr<const DataObjects::Workspace2D> m_workspace;
   /// Spectrum index
-  int m_specIndex;
+  int m_workspaceIndex;
   /// Lower bin index
   int m_xMinIndex;
   /// Upper bin index

@@ -40,10 +40,10 @@ IFunction::~IFunction()
 }
 
 /// Initialize the function providing it the workspace
-void IFunction::initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
+void IFunction::initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax)
 {
   m_workspace = workspace;
-  m_specIndex = spec;
+  m_workspaceIndex = spec;
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
   this->init();
