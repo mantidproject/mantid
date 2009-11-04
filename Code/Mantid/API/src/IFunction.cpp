@@ -39,11 +39,25 @@ IFunction::~IFunction()
   m_ties.clear();
 }
 
+/** Base class implementation of derivative function throws error. This is to check if such a function is provided
+    by derivative class. In the derived classes this method must return the derivatives of the resuduals function
+    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
+    with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
+    algorithm is used.
+* @param out Derivatives
+* @param xValues X values for data points
+* @param nData Number of data points
+ */
+void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+{
+  throw Kernel::Exception::NotImplementedError("No derivative function provided");
+}
+
 /// Initialize the function providing it the workspace
 void IFunction::initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax)
 {
   m_workspace = workspace;
-  m_workspaceIndex = spec;
+  m_workspaceIndex = wi;
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
   this->init();

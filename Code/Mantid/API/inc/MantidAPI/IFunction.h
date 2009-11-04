@@ -75,7 +75,7 @@ public:
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
   /// Derivatives of function with respect to active parameters
-  virtual void functionDeriv(Jacobian* out, const double* xValues, const int& nData) = 0;
+  virtual void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
   /// Derivatives to be used in covariance matrix calculation. Override this method some of the fitted parameters
   /// are different form the declared ones.
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
