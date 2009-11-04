@@ -166,14 +166,14 @@ struct	vax_single {
 
 #else
 
-/* What IEEE single precision floating point looks like on local machine */
+/** What IEEE single precision floating point looks like on local machine */
 struct	ieee_single {
 	unsigned int	mantissa: 23;
 	unsigned int	exp     : 8;
 	unsigned int	sign    : 1;
 };
 
-/* Vax single precision floating point */
+/** Vax single precision floating point */
 struct	vax_single {
 	unsigned int	mantissa1 : 7;
 	unsigned int	exp       : 8;
@@ -186,6 +186,7 @@ struct	vax_single {
 #define VAX_SNG_BIAS	0x81
 #define IEEE_SNG_BIAS	0x7f
 
+/// Structure holding the limits of s single
 static const struct sgl_limits_struct {
 	struct vax_single s;
 	struct ieee_single ieee;
@@ -221,7 +222,7 @@ struct  vax_double {
 
 #else
 
-/* What IEEE double precision floating point looks like */
+/** What IEEE double precision floating point looks like */
 struct	ieee_double {
 	unsigned int	mantissa1 : 20;
 	unsigned int	exp       : 11;
@@ -229,7 +230,7 @@ struct	ieee_double {
 	unsigned int	mantissa2 : 32;
 };
 
-/* Vax double precision floating point */
+/** Vax double precision floating point */
 struct  vax_double {
 	unsigned int	mantissa1 : 7;
 	unsigned int	exp       : 8;

@@ -75,6 +75,7 @@ public:
 
   /// The type used to deliver the set of plottable components
   typedef std::vector<Geometry::IObjComponent_const_sptr> plottables;
+  /// A constant shared pointer to a vector of plotables
   typedef const boost::shared_ptr<const plottables> plottables_const_sptr;
   /// Get pointers to plottable components
   virtual plottables_const_sptr getPlottable() const = 0;

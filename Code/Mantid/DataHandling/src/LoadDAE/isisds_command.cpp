@@ -42,8 +42,7 @@
 #include <sys/select.h>
 #endif
 
-/* 
- * try to align to 64 bit (8 bytes) boundaries
+/** Try to align to 64 bit (8 bytes) boundaries
  */
 typedef struct
 {
@@ -57,8 +56,7 @@ typedef struct
 	char host[64];
 }  isisds_open_t;
 
-/*
- * used for sends and replies once a connection open
+/** used for sends and replies once a connection open
  * try to align to 64 bits (8 bytes) boundaries 
  */
 typedef struct 

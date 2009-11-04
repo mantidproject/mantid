@@ -134,7 +134,7 @@ private:
 	/// Assignment operator
 	FrameworkManager& operator = (const FrameworkManager&);
 
-	// A Python logger
+	/// A Python logger
 	static Mantid::Kernel::Logger& g_log;
 };
 

@@ -344,6 +344,6 @@ namespace PythonAPI
     export_instrument();
   }
   //@}
- 
+  //@endcond
 }
 }

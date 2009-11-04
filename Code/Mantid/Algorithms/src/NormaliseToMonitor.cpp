@@ -229,6 +229,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::Matrix
 }
 
 /** Sets the maximum and minimum X values of the monitor spectrum to use for integration
+ *  @param inputWorkspace A constant shared pointer to the input workspace
  *  @return True if the maximum or minimum values are set
  *  @throw std::runtime_error If the minimum was set higher than the maximum
  */

@@ -12,13 +12,15 @@ namespace Mantid
 {
 namespace PythonAPI
 {
-
+//@cond Disable Doxygen for Python bindings
   /// std::vector wrapper
   template <typename ElementType>
   struct vector_proxy
   {
+    ///A typedef of a vector of tempolate ElementTypes
     typedef std::vector<ElementType> w_t;
 
+    ///a python wrapper
     static void
     wrap(std::string const& python_name)
     {
@@ -92,7 +94,7 @@ namespace PythonAPI
       ;
     }
   };
-
+//@endcond
 }
 }
 

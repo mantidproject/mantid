@@ -37,7 +37,9 @@ void FFTSmooth::init()
 
 }
 
+/// Binary function struct for performing sqrt(x2 * y2) returning a double
 struct toReal : std::binary_function <double,double,double> {
+  ///Binary function performing sqrt(x2 * y2) returning a double
   double operator() (const double& x, const double& y) const
     {return sqrt(x*x+y*y);}
 };

@@ -9,6 +9,7 @@ template <typename T>
 class item_struct
 {
 public:
+  /// structure to hold a dae item
 	struct item_t
 	{
 		const T* value;

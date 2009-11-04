@@ -71,7 +71,7 @@ int IDCopen(const char* host, int mode, int options, idc_handle_t* pfh)
 	(*pfh)->s = s;
 	return 0;
 }
-
+ ///Close the IDC
 int IDCclose(idc_handle_t* pfh)
 {
 	isisds_send_close((*pfh)->s);
@@ -129,6 +129,7 @@ int IDCAgetdat(idc_handle_t fh, int ifsn, int nos, int** value, int dims_array[]
 }
 
 
+///Get a parameter
 static int IDCgetpar(idc_handle_t fh, const char* name, void** value, ISISDSDataType type,
 					 int dims_array[], int* ndims, int do_alloc)
 {
@@ -166,6 +167,7 @@ static int IDCgetpar(idc_handle_t fh, const char* name, void** value, ISISDSData
 	return 0;
 }
 
+///Get a parameter
 int IDCAgetpari(idc_handle_t fh, const char* name, int** value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -174,6 +176,7 @@ int IDCAgetpari(idc_handle_t fh, const char* name, int** value, int dims_array[]
 	return stat;
 }
 
+///Get a parameter
 int IDCgetpari(idc_handle_t fh, const char* name, int* value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -182,6 +185,7 @@ int IDCgetpari(idc_handle_t fh, const char* name, int* value, int dims_array[], 
 	return stat;
 }
 
+///Get a parameter
 int IDCgetparr(idc_handle_t fh, const char* name, float* value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -190,6 +194,7 @@ int IDCgetparr(idc_handle_t fh, const char* name, float* value, int dims_array[]
 	return stat;
 }
 
+///Get a parameter
 int IDCAgetparr(idc_handle_t fh, const char* name, float** value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -198,6 +203,7 @@ int IDCAgetparr(idc_handle_t fh, const char* name, float** value, int dims_array
 	return stat;
 }
 
+///Get a parameter
 int IDCgetpard(idc_handle_t fh, const char* name, double* value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -206,6 +212,7 @@ int IDCgetpard(idc_handle_t fh, const char* name, double* value, int dims_array[
 	return stat;
 }
 
+///Get a parameter
 int IDCAgetpard(idc_handle_t fh, const char* name, double** value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -214,6 +221,7 @@ int IDCAgetpard(idc_handle_t fh, const char* name, double** value, int dims_arra
 	return stat;
 }
 
+///Get a parameter
 int IDCgetparc(idc_handle_t fh, const char* name, char* value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -222,6 +230,7 @@ int IDCgetparc(idc_handle_t fh, const char* name, char* value, int dims_array[],
 	return stat;
 }
 
+///Get a parameter
 int IDCAgetparc(idc_handle_t fh, const char* name, char** value, int dims_array[], int* ndims)
 {
 	int stat;
@@ -230,9 +239,7 @@ int IDCAgetparc(idc_handle_t fh, const char* name, char** value, int dims_array[
 	return stat;
 }
 
-/*
- * fortran helpers
- */
+
 #ifdef _WIN32
 void __stdcall IDCFOPEN(const char* host, unsigned len_host, int* mode, int* options, int fh[], int* errcode)
 #else

@@ -128,7 +128,7 @@ namespace Mantid
             /// Monitors
             std::map<int,std::string> m_monitors;
 
-	    //Progress reporting object
+	    ///Progress reporting object
 	    boost::shared_ptr<API::Progress> m_progress;
 
             /// Personal wrapper for sqrt to allow msvs to compile
