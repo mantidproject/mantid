@@ -11,6 +11,9 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
+/*! \relates Quadratic 
+ *Initialise function to define parameters
+ */
 void Quadratic::init()
 {
   declareParameter("A0", 0.0);
@@ -18,7 +21,9 @@ void Quadratic::init()
   declareParameter("A2", 0.0);
 }
 
-
+/*! \relates Quadratic 
+ * Implements the quadratic function
+ */
 void Quadratic::function(double* out, const double* xValues, const int& nData)
 {
     const double& a0 = getParameter("A0");
@@ -31,6 +36,9 @@ void Quadratic::function(double* out, const double* xValues, const int& nData)
     }
 }
 
+/*! \relates Quadratic 
+ * Calculates the derivatives of the quadratic
+ */
 void Quadratic::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
     for (int i = 0; i < nData; i++) {
