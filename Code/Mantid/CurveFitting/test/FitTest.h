@@ -73,35 +73,35 @@ public:
     TS_ASSERT_EQUALS(outParams->columnCount(),2);
 
     TableRow row = outParams->getFirstRow();
-    TS_ASSERT_EQUALS(row.String(0),"A0");
+    TS_ASSERT_EQUALS(row.String(0),"f0.A0");
     TS_ASSERT_DELTA(row.Double(1),1,0.00001);
 
     row = outParams->getRow(1);
-    TS_ASSERT_EQUALS(row.String(0),"A1");
+    TS_ASSERT_EQUALS(row.String(0),"f0.A1");
     TS_ASSERT_DELTA(row.Double(1),0.3,0.00001);
 
     row = outParams->getRow(2);
-    TS_ASSERT_EQUALS(row.String(0),"Height");
+    TS_ASSERT_EQUALS(row.String(0),"f1.Height");
     TS_ASSERT_DELTA(row.Double(1),1,0.00001);
 
     row = outParams->getRow(3);
-    TS_ASSERT_EQUALS(row.String(0),"PeakCentre");
+    TS_ASSERT_EQUALS(row.String(0),"f1.PeakCentre");
     TS_ASSERT_DELTA(row.Double(1),4,0.00001);
 
     row = outParams->getRow(4);
-    TS_ASSERT_EQUALS(row.String(0),"Sigma");
+    TS_ASSERT_EQUALS(row.String(0),"f1.Sigma");
     TS_ASSERT_DELTA(row.Double(1),0.7071,0.00001);
 
     row = outParams->getRow(5);
-    TS_ASSERT_EQUALS(row.String(0),"Height");
+    TS_ASSERT_EQUALS(row.String(0),"f2.Height");
     TS_ASSERT_DELTA(row.Double(1),2,0.00001);
 
     row = outParams->getRow(6);
-    TS_ASSERT_EQUALS(row.String(0),"PeakCentre");
+    TS_ASSERT_EQUALS(row.String(0),"f2.PeakCentre");
     TS_ASSERT_DELTA(row.Double(1),6,0.00001);
 
     row = outParams->getRow(7);
-    TS_ASSERT_EQUALS(row.String(0),"Sigma");
+    TS_ASSERT_EQUALS(row.String(0),"f2.Sigma");
     TS_ASSERT_DELTA(row.Double(1),0.57735,0.00001);
 
     removeWS("Exp");
@@ -135,35 +135,39 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),7);
+    TS_ASSERT_EQUALS(outParams->rowCount(),8);
     TS_ASSERT_EQUALS(outParams->columnCount(),2);
 
     TableRow row = outParams->getFirstRow();
-    TS_ASSERT_EQUALS(row.String(0),"A0");
+    TS_ASSERT_EQUALS(row.String(0),"f0.A0");
     TS_ASSERT_DELTA(row.Double(1),1.11869,0.00001);
 
     row = outParams->getRow(1);
-    TS_ASSERT_EQUALS(row.String(0),"A1");
+    TS_ASSERT_EQUALS(row.String(0),"f0.A1");
     TS_ASSERT_DELTA(row.Double(1),0.287874,0.00001);
 
     row = outParams->getRow(2);
-    TS_ASSERT_EQUALS(row.String(0),"Height");
+    TS_ASSERT_EQUALS(row.String(0),"f1.Height");
     TS_ASSERT_DELTA(row.Double(1),1.1314,0.00001);
 
     row = outParams->getRow(3);
-    TS_ASSERT_EQUALS(row.String(0),"PeakCentre");
+    TS_ASSERT_EQUALS(row.String(0),"f1.PeakCentre");
     TS_ASSERT_DELTA(row.Double(1),3.88745,0.00001);
 
     row = outParams->getRow(4);
-    TS_ASSERT_EQUALS(row.String(0),"Height");
-    TS_ASSERT_DELTA(row.Double(1),1.81892,0.00001);
+    TS_ASSERT_EQUALS(row.String(0),"f1.Sigma");
+    TS_ASSERT_DELTA(row.Double(1),0.247012,0.00001);
 
     row = outParams->getRow(5);
-    TS_ASSERT_EQUALS(row.String(0),"PeakCentre");
-    TS_ASSERT_DELTA(row.Double(1),5.87412,0.00001);
+    TS_ASSERT_EQUALS(row.String(0),"f2.Height");
+    TS_ASSERT_DELTA(row.Double(1),1.81892,0.00001);
 
     row = outParams->getRow(6);
-    TS_ASSERT_EQUALS(row.String(0),"Sigma");
+    TS_ASSERT_EQUALS(row.String(0),"f2.PeakCentre");
+    TS_ASSERT_DELTA(row.Double(1),5.87412,0.00001);
+
+    row = outParams->getRow(7);
+    TS_ASSERT_EQUALS(row.String(0),"f2.Sigma");
     TS_ASSERT_DELTA(row.Double(1),0.741036,0.00001);
 
     removeWS("Exp");
