@@ -35,7 +35,7 @@ double IkedaCarpenterPV::height()const
 double IkedaCarpenterPV::width()const 
 {
   // here estimated to sum of the HWHM of the gaussian and lorentzian part...
-  return getParameter("Gamma")+sqrt(getParameter("SigmaSquared")*2*cos(2.0));
+  return getParameter("Gamma")+sqrt(getParameter("SigmaSquared")*2*log(2.0));
 };
 
 void IkedaCarpenterPV::setCentre(const double c) 
@@ -51,7 +51,7 @@ void IkedaCarpenterPV::setHeight(const double h)
 void IkedaCarpenterPV::setWidth(const double w) 
 {
   getParameter("Gamma") = w/4.0;  // gamma represent lorentzian HWHM. Here set to half the total HWHM=w/2
-  getParameter("SigmaSquared") = pow((w/2.0)/(8*exp(2.0)),2);  // Set sigma according to formula FWHM=2*sqrt(2*ln2)*sigma.
+  getParameter("SigmaSquared") = pow((w/2.0)/(8*log(2.0)),2);  // Set sigma according to formula FWHM=2*sqrt(2*ln2)*sigma.
 };
 
 

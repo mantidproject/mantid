@@ -113,8 +113,6 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(wsName));
-
 
     // Set general Fit parameters
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -124,7 +122,7 @@ public:
 
     // set up fitting function and pass to Fit
     IkedaCarpenterPV* icpv = new IkedaCarpenterPV(1.0);
-    icpv->initialize(wsToPass, 1,0,1);
+    icpv->initialize(ws2D, 1,0,1);
 
     icpv->getParameter("I") = 95000;
     icpv->tie("Alpha0", "1.597107");

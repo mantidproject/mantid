@@ -124,7 +124,7 @@ public:
 
     TS_ASSERT_DELTA( gaus->height(), 97.804 ,0.001);
     TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.0001);
-    TS_ASSERT_DELTA( gaus->width(), 2.2284 ,0.0001);
+    TS_ASSERT_DELTA( gaus->width(), 2.6237 ,0.0001);
 
   }
 
