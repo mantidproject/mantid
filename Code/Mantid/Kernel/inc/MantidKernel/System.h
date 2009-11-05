@@ -27,10 +27,6 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-// The documentation block below is for the main page of the doxygen documentation
-/** @mainpage Mantid
- * 
- */
 
 /**
  * Definitions of the DLLImport and DLLExport compiler directives for MSVC
