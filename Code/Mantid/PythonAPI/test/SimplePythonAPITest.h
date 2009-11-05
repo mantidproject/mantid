@@ -51,6 +51,9 @@ public:
 #endif
         
     TS_ASSERT_EQUALS(line, modline);
+    //next line should be MantidFramework import
+    getline( is, line );
+    TS_ASSERT_EQUALS(line, std::string("from MantidFramework import *"));
     
     //next line should be os import
     getline( is, line );
@@ -71,7 +74,7 @@ public:
     {
     }
     
-    TS_ASSERT_EQUALS(line, "mantid = FrameworkManager()");
+    TS_ASSERT_EQUALS(line, "mantid = MantidPyFramework()");
     getline(is, line);
     getline(is, line);
     TS_ASSERT_EQUALS(line, "Mantid = mantid");
