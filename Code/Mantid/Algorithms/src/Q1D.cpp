@@ -147,10 +147,14 @@ void Q1D::exec()
         included_bins.push_back(Qx.back());
       }
       
+      // Create a temporary vector for the rebinned angles
+      MantidVec anglesTemp(anglesSum.size(),0.0);
       // Create a zero vector for the errors because we don't care about them here
       const MantidVec zeroes(solidAngleVec.size(),0.0);
+      // Rebin the solid angles - note that this is a distribution
+      VectorHelper::rebin(included_bins,solidAngleVec,zeroes,*XOut,anglesTemp,EOutDummy,true);
       // Add weights for this spectrum to the output weights vector
-      VectorHelper::rebinNonDispersive(included_bins,solidAngleVec,zeroes,*XOut,anglesSum,EOutDummy,true);
+      std::transform(anglesSum.begin(),anglesSum.end(),anglesTemp.begin(),anglesSum.begin(),std::plus<double>());
     }
     else // No masked bins
     {
@@ -166,7 +170,7 @@ void Q1D::exec()
 
     progress.report();
   }
-  
+
   // Now need to loop over resulting vectors dividing by solid angle and bin width
   // and setting fractional error to match that in the 'errors' workspace
   MantidVec& EOut = outputWS->dataE(0);

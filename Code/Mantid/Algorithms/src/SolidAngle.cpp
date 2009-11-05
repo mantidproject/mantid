@@ -79,6 +79,8 @@ namespace Mantid
 			}
 
 			API::MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,m_MaxSpec-m_MinSpec+1,2,1);
+      // The result of this will be a distribution
+      outputWS->isDistribution(true);
 			setProperty("OutputWorkspace",outputWS);
 
 			// Get a pointer to the instrument contained in the workspace
