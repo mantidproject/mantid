@@ -143,7 +143,7 @@ private:
   /// Keeps parameter values
   std::vector<double> m_parameters;
   /// Holds parameter ties
-  std::map<int,ParameterTie*> m_ties;
+  std::vector<std::pair<int,ParameterTie*> > m_ties;
 };
 
 /** Represents the Jacobian in functionDeriv. 

@@ -181,7 +181,9 @@ int CompositeFunction::parameterIndex(const std::string& name)const
 std::string CompositeFunction::parameterName(int i)const
 {
   int iFun = functionIndex(i);
-  return m_functions[ iFun ]->parameterName(i - m_paramOffsets[iFun]);
+  std::ostringstream ostr;
+  ostr << 'f' << iFun << '.' << m_functions[ iFun ]->parameterName(i - m_paramOffsets[iFun]);
+  return ostr.str();
 }
 
 /// Number of active (in terms of fitting) parameters
@@ -225,7 +227,9 @@ int CompositeFunction::indexOfActive(int i)const
 std::string CompositeFunction::nameOfActive(int i)const
 {
   int iFun = functionIndexActive(i);
-  return m_functions[ iFun ]->nameOfActive(i - m_activeOffsets[iFun]);
+  std::ostringstream ostr;
+  ostr << 'f' << iFun << '.' << m_functions[ iFun ]->nameOfActive(i - m_activeOffsets[iFun]);
+  return ostr.str();
 }
 
 /**

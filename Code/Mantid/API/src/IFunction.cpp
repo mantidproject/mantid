@@ -34,7 +34,7 @@ IFunction& IFunction::operator=(const IFunction& f)
 /// Destructor
 IFunction::~IFunction()
 {
-  for(std::map<int,ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
+  for(std::vector<std::pair<int,ParameterTie*> >::iterator it = m_ties.begin();it != m_ties.end(); it++)
       delete it->second;
   m_ties.clear();
 }
@@ -282,7 +282,7 @@ void IFunction::tie(const std::string& parName,const std::string& expr)
     throw std::logic_error("Parameter "+parName+" is already tied.");
   }
   tie->set(expr);
-  m_ties[i] = tie;
+  m_ties.push_back(std::pair<int,ParameterTie*>(i,tie));
   this->removeActive(i);
 }
 
@@ -291,7 +291,7 @@ void IFunction::tie(const std::string& parName,const std::string& expr)
  */
 void IFunction::applyTies()
 {
-  for(std::map<int,ParameterTie*>::iterator tie=m_ties.begin();tie!=m_ties.end();++tie)
+  for(std::vector<std::pair<int,ParameterTie*> >::iterator tie=m_ties.begin();tie!=m_ties.end();++tie)
   {
     this->parameter(tie->first) = tie->second->eval();
   }

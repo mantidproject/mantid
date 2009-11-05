@@ -510,10 +510,10 @@ namespace CurveFitting
       Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       m_result->addColumn("str","Name");
       m_result->addColumn("double","Value");
-      for(size_t i=0;i<nParams();i++)
+      for(size_t i=0;i<m_function->nParams();i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
-        row << m_function->nameOfActive(i) << m_function->activeParameter(i);
+        row << m_function->parameterName(i) << m_function->parameter(i);
       }
       setProperty("OutputParameters",m_result);
 
