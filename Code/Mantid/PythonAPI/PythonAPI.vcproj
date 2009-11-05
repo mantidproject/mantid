@@ -173,17 +173,19 @@
 			<File
 				RelativePath=".\src\api_exports.cpp"
 				>
+			</File>
 			<File
-				RelativePath=".\src\FrameworkManager.cpp"
+				RelativePath=".\src\FrameworkManagerProxy.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\geometry_exports.cpp"
 				>
-
+			</File>
 			<File
 				RelativePath=".\src\kernel_exports.cpp"
 				>
+			</File>
 			<File
 				RelativePath=".\src\PyAlgorithm.cpp"
 				>
@@ -205,6 +207,7 @@
 			<File
 				RelativePath=".\inc\MantidPythonAPI\api_exports.h"
 				>
+			</File>	
 			<File
 				RelativePath=".\inc\MantidPythonAPI\FrameworkManagerProxy.h"
 				>
@@ -221,7 +224,6 @@
 				RelativePath=".\inc\MantidPythonAPI\stl_proxies.h"
 				>
 			</File>
-
 		</Filter>
 		<Filter
 			Name="Resource Files"
