@@ -152,10 +152,15 @@ void DiffractionFocussing2::exec()
         weight_bins.push_back(Xin.back());
       }
       
+      // Create a temporary vector for the rebinned angles
+      MantidVec weightsTemp(groupWgt.size(),0.0);
+      MantidVec zeroesTemp(groupWgt.size(),0.0);
       // Create a zero vector for the errors because we don't care about them here
       const MantidVec zeroes(weights.size(),0.0);
+      // Rebin the weights - note that this is a distribution
+      VectorHelper::rebin(weight_bins,weights,zeroes,Xout,weightsTemp,zeroesTemp,true);
       // Add weights for this spectrum to the output weights vector
-      VectorHelper::rebinNonDispersive(weight_bins,weights,zeroes,Xout,groupWgt,groupWgt,true);
+      std::transform(groupWgt.begin(),groupWgt.end(),weightsTemp.begin(),groupWgt.begin(),std::plus<double>());
     }
     else // If no masked bins we want to add 1 to the weight of the output bins that this input covers
     {

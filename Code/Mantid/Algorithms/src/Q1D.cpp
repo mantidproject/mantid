@@ -53,7 +53,7 @@ void Q1D::exec()
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D",1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  outputWS->YUnit() = "I(Q)";
+  outputWS->setYUnit("I(Q)");
   setProperty("OutputWorkspace",outputWS);
   // Set the X vector for the output workspace
   boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWS)->setX(0,XOut);
@@ -153,7 +153,7 @@ void Q1D::exec()
       const MantidVec zeroes(solidAngleVec.size(),0.0);
       // Rebin the solid angles - note that this is a distribution
       VectorHelper::rebin(included_bins,solidAngleVec,zeroes,*XOut,anglesTemp,EOutDummy,true);
-      // Add weights for this spectrum to the output weights vector
+      // Add solid angles for this spectrum to the output solid angles vector
       std::transform(anglesSum.begin(),anglesSum.end(),anglesTemp.begin(),anglesSum.begin(),std::plus<double>());
     }
     else // No masked bins
