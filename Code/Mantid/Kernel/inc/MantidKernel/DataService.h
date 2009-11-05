@@ -158,7 +158,7 @@ public:
   }
 
   /// Add or replace an object
-  void addOrReplace( const std::string& name, const boost::shared_ptr<T>& Tobject)
+  virtual void addOrReplace( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
     //find if the Tobject already exists
     svc_it it = datamap.find(name);

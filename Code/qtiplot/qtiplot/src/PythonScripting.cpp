@@ -248,6 +248,8 @@ PythonScripting::~PythonScripting()
 	Py_XDECREF(globals);
 	Py_XDECREF(math);
 	Py_XDECREF(sys);
+
+	Py_Finalize();
 }
 
 bool PythonScripting::loadInitFile(const QString &path)

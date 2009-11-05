@@ -56,9 +56,16 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
   /// Overwridden add member to attach the name to the workspace when a workspace object is added to the service
   virtual void add( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
   {
-    Kernel::DataService<API::Workspace>::add(name, workspace);
     //Attach the name to the workspace
     if( workspace.get() ) workspace->setName(name);
+    Kernel::DataService<API::Workspace>::add(name, workspace);
+  }
+  /// Overwridden addOrReplace member to attach the name to the workspace when a workspace object is added to the service
+  virtual void addOrReplace( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
+  {
+    //Attach the name to the workspace
+    if( workspace.get() ) workspace->setName(name);
+    Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
   }
 
 private:

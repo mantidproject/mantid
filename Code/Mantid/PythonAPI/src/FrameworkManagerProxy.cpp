@@ -1,7 +1,7 @@
 //---------------------------------------
 // Includes
 //------------------------------------
-#include "MantidPythonAPI/FrameworkManager.h"
+#include "MantidPythonAPI/FrameworkManagerProxy.h"
 
 #include <boost/python/handle.hpp>
 #include <boost/python/extract.hpp>
@@ -24,24 +24,31 @@ namespace PythonAPI
 {
 
 // Initialize the logger
-Mantid::Kernel::Logger& FrameworkManager::g_log = Mantid::Kernel::Logger::get("MantidPython");
+Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
 
 /// Default constructor
-FrameworkManager::FrameworkManager()
+FrameworkManagerProxy::FrameworkManagerProxy() : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived)
 {
-	API::FrameworkManager::Instance();
+  API::FrameworkManager::Instance();
+  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+}
+
+///Destructor
+FrameworkManagerProxy::~FrameworkManagerProxy()
+{
+  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
 }
 
 /// Clear the FrameworkManager	
-void FrameworkManager::clear()
+void FrameworkManagerProxy::clear()
 {
-	API::FrameworkManager::Instance().clear();
+  API::FrameworkManager::Instance().clear();
 }
 
 /**
  * Clear memory associated with the AlgorithmManager
  */
-void FrameworkManager::clearAlgorithms()
+void FrameworkManagerProxy::clearAlgorithms()
 {
   API::FrameworkManager::Instance().clearAlgorithms();
 }
@@ -49,7 +56,7 @@ void FrameworkManager::clearAlgorithms()
 /**
  * Clear memory associated with the ADS
  */
-void FrameworkManager::clearData()
+void FrameworkManagerProxy::clearData()
 {
   API::FrameworkManager::Instance().clearData();
 }
@@ -57,7 +64,7 @@ void FrameworkManager::clearData()
 /**
  * Clear memory associated with the IDS
  */
-void FrameworkManager::clearInstruments()
+void FrameworkManagerProxy::clearInstruments()
 {
   API::FrameworkManager::Instance().clearInstruments();
 }
@@ -67,7 +74,7 @@ void FrameworkManager::clearInstruments()
  * \param algName :: The name of the algorithm to execute.
   * \return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
+API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName)
 {
 	return API::FrameworkManager::Instance().createAlgorithm(algName);
 }
@@ -78,7 +85,7 @@ API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName)
  * \param version :: The version of the algorithm to use.
  * \return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const int& version)
+API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const int& version)
 {
 	return API::FrameworkManager::Instance().createAlgorithm(algName, version);
 }
@@ -89,7 +96,7 @@ API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, c
  * \param propertiesArray :: A separated string containing the properties and their values.
   * \return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
+API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
 {
 	return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray);
 }
@@ -101,7 +108,7 @@ API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, c
  * \param version :: The version of the algorithm to use.
  * \return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version)
+API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version)
 {
 	return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray, version);
 }
@@ -113,7 +120,7 @@ API::IAlgorithm* FrameworkManager::createAlgorithm(const std::string& algName, c
  * \param version :: The version of the algorithm to use.
  * \return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManager::execute(const std::string& algName, const std::string& propertiesArray,const int& version)
+API::IAlgorithm* FrameworkManagerProxy::execute(const std::string& algName, const std::string& propertiesArray,const int& version)
 {
 	return API::FrameworkManager::Instance().exec(algName, propertiesArray, version);
 }
@@ -124,7 +131,7 @@ API::IAlgorithm* FrameworkManager::execute(const std::string& algName, const std
  * \param propertiesArray :: A separated string containing the properties and their values.
  * \return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManager::execute(const std::string& algName, const std::string& propertiesArray)
+API::IAlgorithm* FrameworkManagerProxy::execute(const std::string& algName, const std::string& propertiesArray)
 {
 	return API::FrameworkManager::Instance().exec(algName, propertiesArray);
 }
@@ -134,15 +141,18 @@ API::IAlgorithm* FrameworkManager::execute(const std::string& algName, const std
  * \param wsName :: The name of the workspace to retrieve.
  * \return Shared pointer to workspace.
  **/
-API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& wsName)
+boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWorkspace(const std::string& wsName)
 {
-  API::MatrixWorkspace *mtx_wksp = dynamic_cast<API::MatrixWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
-  if( !mtx_wksp )
+  API::MatrixWorkspace_sptr matrix_wksp =  boost::dynamic_pointer_cast<API::MatrixWorkspace>(retrieveWorkspace(wsName));
+  if( matrix_wksp.get() )
   {
-    throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. This may be a table workspace, try getTableWorkspace().");
+    return matrix_wksp;
   }
-  //Normal path
-  return mtx_wksp;
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. "
+			     "This may be a table workspace, try getTableWorkspace().");
+  }
 }
 
 /**
@@ -150,39 +160,37 @@ API::MatrixWorkspace* FrameworkManager::getMatrixWorkspace(const std::string& ws
 * @param wsName :: The name of the workspace to retrieve.
 * @return Shared pointer to workspace.
 **/
-API::ITableWorkspace* FrameworkManager::getTableWorkspace(const std::string& wsName)
+boost::shared_ptr<API::ITableWorkspace> FrameworkManagerProxy::retrieveTableWorkspace(const std::string& wsName)
 {
-  API::ITableWorkspace *tbl_wksp = dynamic_cast<API::ITableWorkspace*>( API::FrameworkManager::Instance().getWorkspace(wsName) );
-  if( !tbl_wksp )
+  API::ITableWorkspace_sptr table_wksp =  boost::dynamic_pointer_cast<API::ITableWorkspace>(retrieveWorkspace(wsName));
+  if( table_wksp.get() )
   {
-    throw std::runtime_error("\"" + wsName + "\" is not a table workspace. This may be a matrix workspace, try getMatrixWorkspace().");
+    return table_wksp;
   }
-  return tbl_wksp;
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. "
+			     "This may be a table workspace, try getTableWorkspace().");
+  }
 }
 
 /**
- * Return a list of pointers to all of the workspaces in a specified workspace group
+ * Return a pointer to a WorkspaceGroup
  * @param group_name The name of the group
- * @return A vector of pointers to API::Workspace objects
+ * @return A pointer to API::WorkspaceGroup object
  */
-std::vector<API::MatrixWorkspace*> FrameworkManager::getMatrixWorkspaceGroup(const std::string& group_name)
+boost::shared_ptr<API::WorkspaceGroup> FrameworkManagerProxy::retrieveWorkspaceGroup(const std::string& group_name)
 {
-  API::WorkspaceGroup* ws_group = 
-    dynamic_cast<API::WorkspaceGroup*>( API::FrameworkManager::Instance().getWorkspace(group_name) );
-  std::vector<API::MatrixWorkspace*> group_ptrs; 
-  if( ws_group )
+  API::WorkspaceGroup_sptr wksp_group = boost::dynamic_pointer_cast<API::WorkspaceGroup>(retrieveWorkspace(group_name));
+  if( wksp_group.get() )
   {
-    const std::vector<std::string> & ws_names = ws_group->getNames();
-    std::vector<std::string>::const_iterator iend = ws_names.end();
-    for( std::vector<std::string>::const_iterator itr = ws_names.begin(); itr != iend;
-	 ++itr )
-    {
-      API::MatrixWorkspace *mtx_wksp = 
-	dynamic_cast<API::MatrixWorkspace*>(API::FrameworkManager::Instance().getWorkspace(*itr));
-      if( mtx_wksp ) group_ptrs.push_back(mtx_wksp);
-    }
+    return wksp_group;
   }
-  return group_ptrs;
+  else
+  {
+    throw std::runtime_error("\"" + group_name + "\" is not a group workspace. "
+			     "This may be a matrix workspace, try getMatrixWorkspace().");
+  }
 }
 
 /**
@@ -190,16 +198,16 @@ std::vector<API::MatrixWorkspace*> FrameworkManager::getMatrixWorkspaceGroup(con
  * \param wsName :: The name of the workspace to delete.
  * \return Boolean result.
  **/
-bool FrameworkManager::deleteWorkspace(const std::string& wsName)
+bool FrameworkManagerProxy::deleteWorkspace(const std::string& wsName)
 {
-	return API::FrameworkManager::Instance().deleteWorkspace(wsName);
+  return API::FrameworkManager::Instance().deleteWorkspace(wsName);
 }
 
 /**
  * Returns the name of all the workspaces.
  * \return Vector of strings.
  **/
-std::set<std::string> FrameworkManager::getWorkspaceNames() const
+std::set<std::string> FrameworkManagerProxy::getWorkspaceNames() const
 {
   return API::AnalysisDataService::Instance().getObjectNames();
 }
@@ -208,7 +216,7 @@ std::set<std::string> FrameworkManager::getWorkspaceNames() const
  * Returns the names of all the workspace groups
  * \return A vector of strings.
  **/
-std::set<std::string> FrameworkManager::getWorkspaceGroupNames() const
+std::set<std::string> FrameworkManagerProxy::getWorkspaceGroupNames() const
 {
   std::set<std::string> ws_names = getWorkspaceNames();
   std::set<std::string> grp_names;
@@ -230,7 +238,7 @@ std::set<std::string> FrameworkManager::getWorkspaceGroupNames() const
  * Get the names within a workspace group
  * @param group_name The name of the group
  */
-std::vector<std::string> FrameworkManager::getWorkspaceGroupEntries(const std::string & group_name) const
+std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const std::string & group_name) const
 {
   API::WorkspaceGroup* ws_group = 
     dynamic_cast<API::WorkspaceGroup*>( API::FrameworkManager::Instance().getWorkspace(group_name) );
@@ -246,7 +254,7 @@ std::vector<std::string> FrameworkManager::getWorkspaceGroupEntries(const std::s
  * Returns the name of all the algorithms.
  * \return Vector of strings.
  **/
-std::vector<std::string> FrameworkManager::getAlgorithmNames() const
+std::vector<std::string> FrameworkManagerProxy::getAlgorithmNames() const
 {
   return API::AlgorithmFactory::Instance().getKeys();
 }
@@ -255,7 +263,7 @@ std::vector<std::string> FrameworkManager::getAlgorithmNames() const
   * Create the simple Python API module
   * @param gui Whether the module is being made for use with qtiplot or not
   **/
-void FrameworkManager::createPythonSimpleAPI(bool gui)
+void FrameworkManagerProxy::createPythonSimpleAPI(bool gui)
 {
   //Redirect to static helper class
   SimplePythonAPI::createModule(gui);
@@ -265,7 +273,7 @@ void FrameworkManager::createPythonSimpleAPI(bool gui)
  * Send a log message to Mantid
  * @param msg The log message
  */
-void FrameworkManager::sendLogMessage(const std::string & msg) 
+void FrameworkManagerProxy::sendLogMessage(const std::string & msg) 
 {
   g_log.notice(msg); 
 }
@@ -274,9 +282,14 @@ void FrameworkManager::sendLogMessage(const std::string & msg)
  * Check if a given workspace name exists in the ADS 
  * @param name A string specifying a name to check
  */
-bool FrameworkManager::workspaceExists(const std::string & name) const
+bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
 {
   return API::AnalysisDataService::Instance().doesExist(name);
+}
+
+/// Called when a workspace is removed. To be overridden in Python
+void FrameworkManagerProxy::workspaceRemoved(const std::string &)
+{
 }
 
 /**
@@ -285,12 +298,12 @@ bool FrameworkManager::workspaceExists(const std::string & name) const
  * \param pyAlg :: The Python based algorithm to add.
  * \returns The number of Python algorithms in Mantid
  **/
-int FrameworkManager::addPythonAlgorithm(PyObject* pyAlg)
+int FrameworkManagerProxy::addPythonAlgorithm(PyObject* pyAlg)
 {
-	boost::python::handle<> ph(boost::python::borrowed(pyAlg));
-	PyAlgorithm* alg = boost::python::extract<PyAlgorithm*>(boost::python::object(ph));
-	API::AlgorithmFactory::Instance().addPyAlgorithm(alg);
-	return API::AlgorithmFactory::Instance().numPythonAlgs();
+  boost::python::handle<> ph(boost::python::borrowed(pyAlg));
+  PyAlgorithm* alg = boost::python::extract<PyAlgorithm*>(boost::python::object(ph));
+  API::AlgorithmFactory::Instance().addPyAlgorithm(alg);
+  return API::AlgorithmFactory::Instance().numPythonAlgs();
 }
 
 
@@ -298,11 +311,42 @@ int FrameworkManager::addPythonAlgorithm(PyObject* pyAlg)
  * Execute one of the Python algorithms that has been added to Mantid.
  * \param algName :: The name of the algorithm to run.
  **/
-void FrameworkManager::executePythonAlgorithm(std::string algName)
+void FrameworkManagerProxy::executePythonAlgorithm(std::string algName)
 {
-	API::AlgorithmFactory::Instance().executePythonAlg(algName);
+  API::AlgorithmFactory::Instance().executePythonAlg(algName);
 }
 
+
+//--------------------------------------------------------------------------
+//
+// Private member functions
+//
+//--------------------------------------------------------------------------
+/**
+ * Get a workspace pointer from the ADS
+ * @param wsName The name of the workspace to retrieve, throws if the pointer is invalid
+ */
+boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspace(const std::string & wsName)
+{
+  try
+  {
+    API::Workspace_sptr wksp = API::AnalysisDataService::Instance().retrieve(wsName);
+    return wksp;
+  }
+  catch(Mantid::Kernel::Exception::NotFoundError &)
+  {
+    throw std::runtime_error("Workspace \"" + wsName + "\" not found.");
+  }
+}
+
+/**
+ * Utility function called when a workspace is deleted within the service
+ * @param notice A pointer to a WorkspaceDeleteNotification object
+ */
+void FrameworkManagerProxy::deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
+{
+  workspaceRemoved(notice->object_name());  
+}
 
 }
 }

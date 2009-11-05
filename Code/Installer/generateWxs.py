@@ -491,6 +491,7 @@ Sip = addComponent('Sip','{A051F48C-CA96-4cd5-B936-D446CBF67588}',SitePackagesDi
 addAllFiles('toget/sip','sip',Sip)
 PyQt = addComponent('PyQt','{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}',PyQtDir)
 addAllFiles('toget/PyQt4','PyQt',PyQt)
+addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', '../Mantid/PythonAPI/MantidFramework.py', InstallDir)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
 scriptsList = addCompList("ScriptsDir","../Mantid/PythonAPI/scripts","scripts",InstallDir)

@@ -55,6 +55,8 @@ namespace Mantid
 	"import sys\n"
 	"if '.' in sys.path == False:\n"
 	"\tsys.path.append('.')\n";
+      // Add the directory for MantidFramework.py which is the location of the executable
+      module << "sys.path.append('" << convertPathToUnix(Mantid::Kernel::getDirectoryOfExecutable()) << "')\n";
 
       std::string scripts_dir = Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory");
       //If there isn't one assume one relative to the executable directory
@@ -97,6 +99,8 @@ namespace Mantid
       module << "from libMantidPythonAPI import *\n";
 #endif
 
+      module << "from MantidFramework import *\n";
+
       //If in gui mode also need sys and qti module
       if( gui )
       {
@@ -112,7 +116,7 @@ namespace Mantid
 
       //Make the FrameworkManager object available with case variations
       module << "# The main API object\n"
-	     << "mantid = FrameworkManager()\n"
+	     << "mantid = MantidPyFramework()\n"
 	     << "# Aliases\n"
 	     << "Mantid = mantid\n"
 	     << "mtd = mantid\n"
@@ -351,7 +355,7 @@ namespace Mantid
 
       //end of function parameters
       os << "):\n"
-	 << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n";
+	 << "\talgm = mantid.createAlgorithm(\"" << algm << "\")\n";
 
       // Redo loop for setting values
       pIter = properties.begin();
@@ -412,7 +416,7 @@ namespace Mantid
       }
       //end of algorithm function parameters but add other arguments
       os << "Message = \"\", Enable=\"\", Disable=\"\"):\n"
-	 << "\talgm = FrameworkManager().createAlgorithm(\"" << algm << "\")\n"
+	 << "\talgm = mantid.createAlgorithm(\"" << algm << "\")\n"
 	 << "\tenabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
 	 << "\tdisabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"
 	 << "\tvalues = '|'\n"

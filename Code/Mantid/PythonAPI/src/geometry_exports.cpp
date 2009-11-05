@@ -21,7 +21,8 @@ namespace Mantid
 namespace PythonAPI
 {
   using namespace boost::python;
-
+  
+  //@cond
   void export_utils()
   {
     //V3D class
@@ -148,5 +149,6 @@ namespace PythonAPI
     export_components();
   }
 
+  //@endcond
 }
 }

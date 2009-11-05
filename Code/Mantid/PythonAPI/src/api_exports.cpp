@@ -1,23 +1,19 @@
 //
 // Wrappers for classes in the Mantid::API namespace
 //
-
-#include <boost/python.hpp>
+#include <MantidPythonAPI/api_exports.h>
+#include <MantidPythonAPI/stl_proxies.h>
 #include <string>
+#include <ostream>
 
 // API
-#include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/ITableWorkspace.h>
 #include <MantidAPI/WorkspaceGroup.h>
-#include <MantidAPI/WorkspaceOpOverloads.h>
-#include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/IAlgorithm.h>
 #include <MantidAPI/Instrument.h>
 #include <MantidAPI/ParInstrument.h>
 #include <MantidAPI/Sample.h>
 
-#include <MantidPythonAPI/FrameworkManager.h>
-#include <MantidPythonAPI/stl_proxies.h>
+
 
 namespace Mantid
 {
@@ -25,57 +21,46 @@ namespace PythonAPI
 {
   using namespace Mantid::API;
   using namespace boost::python;
-  //@cond
-  //@{
 
+  //@cond
   //---------------------------------------------------------------------------
   // Class export functions
   //---------------------------------------------------------------------------
-  Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*createAlg_ptr1)(const std::string&) = &Mantid::PythonAPI::FrameworkManager::createAlgorithm;
-  Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*createAlg_ptr2)(const std::string&, const int &) = 
-    &Mantid::PythonAPI::FrameworkManager::createAlgorithm;
-  Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*createAlg_ptr3)(const std::string&, const std::string&) = 
-    &Mantid::PythonAPI::FrameworkManager::createAlgorithm;
-  Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*createAlg_ptr4)(const std::string&, const std::string&, const int &) = 
-    &Mantid::PythonAPI::FrameworkManager::createAlgorithm;
-
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FrameworkManager_execute_overloads, execute, 2, 3)
-  Mantid::API::IAlgorithm* (Mantid::PythonAPI::FrameworkManager::*exec_ptr)(const std::string&, const std::string&, const int&) =
-    &Mantid::PythonAPI::FrameworkManager::execute;
 
   void export_frameworkmanager()
   {
     /** 
-     * Python Framework class (note that this is not the Mantid::API::FrameworkManager, there is another in PythonAPI::FrameworkManager)
-     * This is the main class through which Python interacts with Mantid and with the exception of PyAlgorithm and V3D, is the only
-     * one directly instantiable in Python
+     * Python Framework class (note that this is not the Mantid::API::FrameworkManager, there is another in 
+     * PythonAPI::FrameworkManager)
+     * This is the main class through which Python interacts with Mantid and with the exception of PyAlgorithm and V3D, 
+     * is the only one directly instantiable in Python
      */
-    
-
-    class_<Mantid::PythonAPI::FrameworkManager, boost::noncopyable>("FrameworkManager", init<>())
-      .def("clear", &Mantid::PythonAPI::FrameworkManager::clear)
-      .def("clearAlgorithms", &Mantid::PythonAPI::FrameworkManager::clearAlgorithms)
-      .def("clearData", &Mantid::PythonAPI::FrameworkManager::clearData)
-      .def("clearInstruments", &Mantid::PythonAPI::FrameworkManager::clearInstruments)
-      .def("createAlgorithm", createAlg_ptr1, return_value_policy< reference_existing_object >())
-      .def("createAlgorithm", createAlg_ptr2, return_value_policy< reference_existing_object >())
-      .def("createAlgorithm", createAlg_ptr3, return_value_policy< reference_existing_object >())
-      .def("createAlgorithm", createAlg_ptr4, return_value_policy< reference_existing_object >())
-      .def("execute", exec_ptr, return_value_policy< reference_existing_object >(), FrameworkManager_execute_overloads())
-      .def("getMatrixWorkspace", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspace, 
+    class_<FrameworkManagerWrapper, boost::noncopyable>("FrameworkManager", init<>())
+      .def("clear", &FrameworkManagerProxy::clear)
+      .def("clearAlgorithms", &FrameworkManagerProxy::clearAlgorithms)
+      .def("clearData", &FrameworkManagerProxy::clearData)
+      .def("clearInstruments", &FrameworkManagerProxy::clearInstruments)
+      .def("createAlgorithm", (createAlg_overload1)&FrameworkManagerProxy::createAlgorithm, 
 	   return_value_policy< reference_existing_object >())
-      .def("getTableWorkspace", &Mantid::PythonAPI::FrameworkManager::getTableWorkspace, 
+      .def("createAlgorithm", (createAlg_overload2)&FrameworkManagerProxy::createAlgorithm, 
 	   return_value_policy< reference_existing_object >())
-      .def("getMatrixWorkspaceGroup", &Mantid::PythonAPI::FrameworkManager::getMatrixWorkspaceGroup)
-      .def("deleteWorkspace", &Mantid::PythonAPI::FrameworkManager::deleteWorkspace)
-      .def("getWorkspaceNames", &Mantid::PythonAPI::FrameworkManager::getWorkspaceNames)
-      .def("getWorkspaceGroupNames", &Mantid::PythonAPI::FrameworkManager::getWorkspaceGroupNames)
-      .def("getWorkspaceGroupEntries", &Mantid::PythonAPI::FrameworkManager::getWorkspaceGroupEntries)
-      .def("createPythonSimpleAPI", &Mantid::PythonAPI::FrameworkManager::createPythonSimpleAPI)
-      .def("sendLogMessage", &Mantid::PythonAPI::FrameworkManager::sendLogMessage)
-      .def("workspaceExists", &Mantid::PythonAPI::FrameworkManager::workspaceExists)
-      .def("addPythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::addPythonAlgorithm)
-      .def("executePythonAlgorithm", &Mantid::PythonAPI::FrameworkManager::executePythonAlgorithm)
+      .def("createAlgorithm", (createAlg_overload3)&FrameworkManagerProxy::createAlgorithm, 
+	   return_value_policy< reference_existing_object >())
+      .def("createAlgorithm", (createAlg_overload4)&FrameworkManagerProxy::createAlgorithm, 
+	   return_value_policy< reference_existing_object >())
+      .def("execute", (exec_ptr)&FrameworkManagerProxy::execute, 
+	   return_value_policy< reference_existing_object >(), FrameworkManager_execute_overloads())
+      .def("retrieveMatrixWorkspace", &FrameworkManagerProxy::retrieveMatrixWorkspace)
+      .def("retrieveTableWorkspace", &FrameworkManagerProxy::retrieveTableWorkspace)
+      .def("retrieveWorkspaceGroup", &FrameworkManagerProxy::retrieveWorkspaceGroup)
+      .def("deleteWorkspace", &FrameworkManagerProxy::deleteWorkspace)
+      .def("getWorkspaceNames", &FrameworkManagerProxy::getWorkspaceNames)
+      .def("getWorkspaceGroupNames", &FrameworkManagerProxy::getWorkspaceGroupNames)
+      .def("getWorkspaceGroupEntries", &FrameworkManagerProxy::getWorkspaceGroupEntries)
+      .def("createPythonSimpleAPI", &FrameworkManagerProxy::createPythonSimpleAPI)
+      .def("sendLogMessage", &FrameworkManagerProxy::sendLogMessage)
+      .def("workspaceExists", &FrameworkManagerProxy::workspaceExists)
+      .def("workspaceRemoved", &FrameworkManagerProxy::workspaceRemoved, &FrameworkManagerWrapper::default_workspaceRemoved);
      ;
   }
 
@@ -96,130 +81,31 @@ namespace PythonAPI
 
   void export_workspace()
   {
+    /// Shared pointer registration
+    register_ptr_to_python<boost::shared_ptr<Workspace> >();
+    
     class_<Mantid::API::Workspace, boost::noncopyable>("Workspace", no_init)
       .def("getTitle", &Mantid::API::Workspace::getTitle, 
 	   return_value_policy< copy_const_reference >())
       .def("getComment", &Mantid::API::MatrixWorkspace::getComment, 
 	   return_value_policy< copy_const_reference >() )
       .def("getMemorySize", &Mantid::API::Workspace::getMemorySize)
+      .def("getName", &Mantid::API::Workspace::getName, return_value_policy< copy_const_reference >())
+      .def("__str__", &Mantid::API::Workspace::getName, return_value_policy< copy_const_reference >())
       ;
   }
 
-  /**
-   *  A proxy struct for implementing workspace algebra operator overloads
-   */
-  struct MatrixWorkspaceProxy
-  {
-    typedef API::MatrixWorkspace wraptype;
-    typedef boost::shared_ptr<wraptype> wraptype_ptr;
-    
-    /// Binary operation for 2 workspaces
-    static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op)
-    {
-      wraptype_ptr result;
-      switch( op )
-      {
-      case 'p':
-	result = lhs + rhs;
-	break;
-      case 'm':
-	result = lhs - rhs;
-	break;
-      case 't':
-	result = lhs * rhs;
-	break;
-      case 'd':
-	result = lhs / rhs;
-      }
-      std::string name = lhs->getName() +  std::string("_") + op
-	+ std::string("_") +  rhs->getName();
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
-      return result;
-    }
-    /// Plus workspace
-    static wraptype_ptr plus(const wraptype_ptr lhs, const wraptype_ptr rhs)
-    {
-      return performBinaryOp(lhs, rhs, 'p');
-    }
-    /// Minus workspace
-    static wraptype_ptr minus(const wraptype_ptr lhs, const wraptype_ptr rhs)
-    {
-      return performBinaryOp(lhs, rhs, 'm');
-    }
-    /// Multiply workspace
-    static wraptype_ptr times(const wraptype_ptr lhs, const wraptype_ptr rhs)
-    {
-      return performBinaryOp(lhs, rhs, 't');
-    }
-    /// Divide workspace
-    static wraptype_ptr divide(const wraptype_ptr lhs, const wraptype_ptr rhs)
-    {
-      return performBinaryOp(lhs, rhs, 'd');
-    }
-    /// Binary operation for a workspace and a double
-    static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, double rhs, char op)
-    {
-      wraptype_ptr result;
-      switch( op )
-      {
-      case 'p':
-	result = lhs + rhs;
-	break;
-      case 'm':
-	result = lhs - rhs;
-	break;
-      case 't':
-	result = lhs * rhs;
-	break;
-      case 'd':
-	result = lhs / rhs;
-      }
-      std::string name = lhs->getName() +  std::string("_") + op
-	+ std::string("_");
-      std::ostringstream os;
-      os << rhs;
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(name + os.str(), result);
-      return result;
-    }
-    /// Plus
-    static wraptype_ptr plus(const wraptype_ptr lhs, double rhs)
-    {
-      return performBinaryOp(lhs, rhs, 'p');
-    }
-    /// Minus
-    static wraptype_ptr minus(const wraptype_ptr lhs, double rhs)
-    {
-      return performBinaryOp(lhs, rhs, 'm');
-    }
-    /// Multiply
-    static wraptype_ptr times(const wraptype_ptr lhs, double rhs)
-    {
-      return performBinaryOp(lhs, rhs, 't');
-    }
-    /// Divide
-    static wraptype_ptr divide(const wraptype_ptr lhs, double rhs)
-    {
-      return performBinaryOp(lhs, rhs, 'd');
-    }
-  };
-
-  //Overload get and set members
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_isDistribution_overloads_1, isDistribution, 0, 0)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_isDistribution_overloads_2, isDistribution, 1, 1)
-  
   void export_matrixworkspace()
   {
-    /// Pointer registration
-    register_ptr_to_python<MatrixWorkspace*>();
     /// Shared pointer registration
     register_ptr_to_python<boost::shared_ptr<MatrixWorkspace> >();
 
     // A vector of MatrixWorkspace pointers
-    Mantid::PythonAPI::vector_proxy<MatrixWorkspace*>::wrap("stl_vector_matrixworkspace");
+    vector_proxy<MatrixWorkspace*>::wrap("stl_vector_matrixworkspace");
  
     //Operator overloads dispatch through the above structure. The typedefs save some typing
-    typedef Mantid::API::MatrixWorkspace_sptr(*binary_fn1)(const Mantid::API::MatrixWorkspace_sptr, const Mantid::API::MatrixWorkspace_sptr);
-    typedef Mantid::API::MatrixWorkspace_sptr(*binary_fn2)(const Mantid::API::MatrixWorkspace_sptr, double);
+    typedef MatrixWorkspaceProxy::wraptype_ptr(*binary_fn1)(const MatrixWorkspaceProxy::wraptype_ptr, const MatrixWorkspaceProxy::wraptype_ptr);
+    typedef MatrixWorkspaceProxy::wraptype_ptr(*binary_fn2)(const MatrixWorkspaceProxy::wraptype_ptr, double);
 
     //MatrixWorkspace class
     class_< Mantid::API::MatrixWorkspace, bases<Mantid::API::Workspace>, boost::noncopyable >("MatrixWorkspace", no_init)
@@ -238,43 +124,47 @@ namespace PythonAPI
       .def("__add__", (binary_fn1)&MatrixWorkspaceProxy::plus)
       .def("__add__", (binary_fn2)&MatrixWorkspaceProxy::plus)
       .def("__radd__",(binary_fn2)&MatrixWorkspaceProxy::plus)
+      .def("__iadd__",(binary_fn1)&MatrixWorkspaceProxy::inplace_plus)
+      .def("__iadd__",(binary_fn2)&MatrixWorkspaceProxy::inplace_plus)
       .def("__sub__", (binary_fn1)&MatrixWorkspaceProxy::minus)
       .def("__sub__", (binary_fn2)&MatrixWorkspaceProxy::minus)
       .def("__rsub__",(binary_fn2)&MatrixWorkspaceProxy::minus)
+      .def("__isub__",(binary_fn1)&MatrixWorkspaceProxy::inplace_minus)
+      .def("__isub__",(binary_fn2)&MatrixWorkspaceProxy::inplace_minus)
       .def("__mul__", (binary_fn1)&MatrixWorkspaceProxy::times)
       .def("__mul__", (binary_fn2)&MatrixWorkspaceProxy::times)
       .def("__rmul__",(binary_fn2)&MatrixWorkspaceProxy::times)
+      .def("__imul__",(binary_fn1)&MatrixWorkspaceProxy::inplace_times)
+      .def("__imul__",(binary_fn2)&MatrixWorkspaceProxy::inplace_times)
       .def("__div__", (binary_fn1)&MatrixWorkspaceProxy::divide)
       .def("__div__", (binary_fn2)&MatrixWorkspaceProxy::divide)
       .def("__rdiv__",(binary_fn2)&MatrixWorkspaceProxy::divide)
+      .def("__idiv__",(binary_fn1)&MatrixWorkspaceProxy::inplace_divide)
+      .def("__idiv__",(binary_fn2)&MatrixWorkspaceProxy::inplace_divide)
       ;
   }
 
-  // Table workspace
-  // Some function pointers since MSVC can't figure out the function to call when placing this directly in the .def functions below
-  /// A function pointer to retrieve a integer from a name column and index
-  int& (Mantid::API::ITableWorkspace::*ITableWorkspace_GetInteger)(const std::string &, int) = 
-    &Mantid::API::ITableWorkspace::getRef<int>;
-  /// A function pointer to retrieve a double from a name column and index
-  double& (Mantid::API::ITableWorkspace::*ITableWorkspace_GetDouble)(const std::string &, int) = 
-    &Mantid::API::ITableWorkspace::getRef<double>;
-  /// A function pointer to retrieve a string from a name column and index
-  std::string& (Mantid::API::ITableWorkspace::*ITableWorkspace_GetString)(const std::string &, int) = 
-    &Mantid::API::ITableWorkspace::getRef<std::string>;
+
   void export_tableworkspace()
   {
-    
     // Declare the pointer
-    register_ptr_to_python<Mantid::API::ITableWorkspace*>();
+    register_ptr_to_python<Mantid::API::ITableWorkspace_sptr>();
+    
+    // Table workspace
+    // Some function pointers since MSVC can't figure out the function to call when 
+    // placing this directly in the .def functions below
+    typedef int&(ITableWorkspace::*get_integer_ptr)(const std::string &, int);
+    typedef double&(ITableWorkspace::*get_double_ptr)(const std::string &, int);
+    typedef std::string&(ITableWorkspace::*get_string_ptr)(const std::string &, int);
 
     // TableWorkspace class
-    class_< Mantid::API::ITableWorkspace, bases<Mantid::API::Workspace>, boost::noncopyable >("ITableWorkspace", no_init)
-      .def("getColumnCount", &Mantid::API::ITableWorkspace::columnCount)
-      .def("getRowCount", &Mantid::API::ITableWorkspace::rowCount)
-      .def("getColumnNames",&Mantid::API::ITableWorkspace::getColumnNames)
-      .def("getInt", ITableWorkspace_GetInteger, return_value_policy< copy_non_const_reference >())
-      .def("getDouble", ITableWorkspace_GetDouble, return_value_policy< copy_non_const_reference >())
-      .def("getString", ITableWorkspace_GetString, return_value_policy< copy_non_const_reference >())
+    class_< ITableWorkspace, bases<Mantid::API::Workspace>, boost::noncopyable >("ITableWorkspace", no_init)
+      .def("getColumnCount", &ITableWorkspace::columnCount)
+      .def("getRowCount", &ITableWorkspace::rowCount)
+      .def("getColumnNames",&ITableWorkspace::getColumnNames)
+      .def("getInt", (get_integer_ptr)&ITableWorkspace::getRef<int>, return_value_policy<copy_non_const_reference>())
+      .def("getDouble", (get_double_ptr)&ITableWorkspace::getRef<double>, return_value_policy<copy_non_const_reference>())
+      .def("getString", (get_string_ptr)&ITableWorkspace::getRef<std::string>, return_value_policy<copy_non_const_reference>())
      ;
   }
 
@@ -282,7 +172,7 @@ namespace PythonAPI
   void export_workspacegroup()
   {
     // Pointer
-    register_ptr_to_python<Mantid::API::WorkspaceGroup*>();
+    register_ptr_to_python<Mantid::API::WorkspaceGroup_sptr>();
     
     class_< Mantid::API::WorkspaceGroup, boost::noncopyable >("WorkspaceGroup", no_init)
       .def("size", &Mantid::API::WorkspaceGroup::getNumberOfEntries)
@@ -315,7 +205,8 @@ namespace PythonAPI
     register_ptr_to_python<boost::shared_ptr<Mantid::API::IInstrument> >();
     
     //IInstrument class
-    class_< Mantid::API::IInstrument, boost::python::bases<Mantid::Geometry::ICompAssembly>, boost::noncopyable>("IInstrument", no_init)
+    class_< Mantid::API::IInstrument, boost::python::bases<Mantid::Geometry::ICompAssembly>, 
+      boost::noncopyable>("IInstrument", no_init)
       .def("getSample", &Mantid::API::IInstrument::getSample)
       .def("getSource", &Mantid::API::IInstrument::getSource)
       .def("getComponentByName", &Mantid::API::IInstrument::getComponentByName)
@@ -324,12 +215,13 @@ namespace PythonAPI
     /** Concrete implementations so that Python knows about them */
     
     //Instrument class
-    class_< Mantid::API::Instrument, boost::python::bases<Mantid::API::IInstrument>, boost::noncopyable>("Instrument", no_init)
+    class_< Mantid::API::Instrument, boost::python::bases<Mantid::API::IInstrument>, 
+	    boost::noncopyable>("Instrument", no_init)
       ;
     //Instrument class
-    class_< Mantid::API::ParInstrument, boost::python::bases<Mantid::API::IInstrument>, boost::noncopyable>("ParInstrument", no_init)
-     ;
-
+    class_< Mantid::API::ParInstrument, boost::python::bases<Mantid::API::IInstrument>, 
+	    boost::noncopyable>("ParInstrument", no_init)
+      ;
   }
 
   void export_api_namespace()
@@ -343,7 +235,6 @@ namespace PythonAPI
     export_sample();
     export_instrument();
   }
-  //@}
   //@endcond
 }
 }

@@ -171,9 +171,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\api_exports.cpp"
+				>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\geometry_exports.cpp"
+				>
+
+			<File
+				RelativePath=".\src\kernel_exports.cpp"
+				>
 			<File
 				RelativePath=".\src\PyAlgorithm.cpp"
 				>
@@ -193,7 +203,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\inc\MantidPythonAPI\FrameworkManager.h"
+				RelativePath=".\inc\MantidPythonAPI\api_exports.h"
+				>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\FrameworkManagerProxy.h"
 				>
 			</File>
 			<File
@@ -204,6 +217,11 @@
 				RelativePath=".\inc\MantidPythonAPI\SimplePythonAPI.h"
 				>
 			</File>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\stl_proxies.h"
+				>
+			</File>
+
 		</Filter>
 		<Filter
 			Name="Resource Files"

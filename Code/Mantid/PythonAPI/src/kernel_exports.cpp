@@ -13,6 +13,8 @@ namespace Mantid
 namespace PythonAPI
 {
   using namespace boost::python;
+  
+  //@cond
 
   void export_property()
   {
@@ -34,5 +36,7 @@ namespace PythonAPI
     export_property();
   }
   
+  //@endcond
+
 }
 }
