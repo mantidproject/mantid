@@ -27,15 +27,22 @@ namespace PythonAPI
 Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
 
 /// Default constructor
-FrameworkManagerProxy::FrameworkManagerProxy() : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived)
+FrameworkManagerProxy::FrameworkManagerProxy() 
+  : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived),
+    m_add_observer(*this, &FrameworkManagerProxy::addNotificationReceived),
+    m_replace_observer(*this, &FrameworkManagerProxy::replaceNotificationReceived)
 {
   API::FrameworkManager::Instance();
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
+  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
 }
 
 ///Destructor
 FrameworkManagerProxy::~FrameworkManagerProxy()
 {
+  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
+  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
 }
 
@@ -287,8 +294,18 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
   return API::AnalysisDataService::Instance().doesExist(name);
 }
 
-/// Called when a workspace is removed. To be overridden in Python
+/// Called when a workspace is removed.
 void FrameworkManagerProxy::workspaceRemoved(const std::string &)
+{
+}
+
+/// Called when a workspace is added.
+void FrameworkManagerProxy::workspaceAdded(const std::string &)
+{
+}
+
+/// Called when a workspace is replaced.
+void FrameworkManagerProxy::workspaceReplaced(const std::string &)
 {
 }
 
@@ -345,7 +362,27 @@ boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspa
  */
 void FrameworkManagerProxy::deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
 {
+  /// This function may be overridden in Python
   workspaceRemoved(notice->object_name());  
+}
+
+/**
+ * Utility function called when a workspace is added within the service
+ * @param notice A pointer to a WorkspaceDeleteNotification object
+ */
+void FrameworkManagerProxy::addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
+{  
+}
+
+/**
+ * Utility function called when a workspace is replaced within the service
+ * @param notice A pointer to a WorkspaceAfterReplaceNotification object
+ */
+void FrameworkManagerProxy::replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
+
+{  
+  /// This function may be overridden in Python
+  workspaceReplaced(notice->object_name());
 }
 
 }

@@ -120,6 +120,16 @@ public:
    * @param name The name of the workspace
    */
   virtual void workspaceRemoved(const std::string & name);
+  /** 
+   * A function that can be overridden in Python to handle the adding a workspace to the ADS
+   * @param name The name of the workspace
+   */
+  virtual void workspaceAdded(const std::string & name);
+  /** 
+   * A function that can be overridden in Python to handle the replacing a workspace to the ADS
+   * @param name The name of the workspace
+   */
+  virtual void workspaceReplaced(const std::string & name);
   //@}
 
   /// Return the list of currently registered algorithm names
@@ -147,8 +157,16 @@ public:
   boost::shared_ptr<Mantid::API::Workspace> retrieveWorkspace(const std::string & wsName);
   /// Function called when observer objects recieves a notification
   void deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice);
-  /// Poco observer object
+  /// Poco delete notification observer object
   Poco::NObserver<FrameworkManagerProxy, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
+  /// Function called when observer objects recieve an add notification
+  void addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice);
+  /// Poco add notification observer object
+  Poco::NObserver<FrameworkManagerProxy, Mantid::API::WorkspaceAddNotification> m_add_observer;
+  /// Function called when observer objects recieves a replace notification
+  void replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice);
+  /// Poco delete notification observer object
+  Poco::NObserver<FrameworkManagerProxy, Mantid::API::WorkspaceAfterReplaceNotification> m_replace_observer;
   // A Python logger
   static Mantid::Kernel::Logger& g_log;
 };

@@ -12,6 +12,8 @@
 #include <MantidAPI/IAlgorithm.h>
 #include <boost/python.hpp>
 
+#include <iostream>
+
 namespace Mantid
 {
   
@@ -23,11 +25,26 @@ namespace PythonAPI
    */
   struct FrameworkManagerWrapper : FrameworkManagerProxy, boost::python::wrapper<FrameworkManagerProxy>
   {
+    // Yet again we have some magic to perform due to threading issues.  If an algorithm is running in 
+    // a separate thread then the notifications will come in on that thread and then this call to
+    // Python will causes problems, i.e. segfaults,  unless we ensure that global interpreter lock(GIL)
+    // is held by the current thread.
+    // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock
+    // for the gory details
+    
     void workspaceRemoved(const std::string & name)
     {
-      if( boost::python::override dispatcher = this->get_override("workspaceRemoved") )
+      if( boost::python::override dispatcher = this->get_override("_workspaceRemoved") )
       {
+	// Acquire the lock
+	PyGILState_STATE gstate;
+	gstate = PyGILState_Ensure();
+
+ 	// Call up to Python
 	dispatcher(name);
+
+ 	// Release it
+ 	PyGILState_Release(gstate);
       }
       else
       {
@@ -39,7 +56,61 @@ namespace PythonAPI
     {
       this->FrameworkManagerProxy::workspaceRemoved(name);
     }
+
+    void workspaceReplaced(const std::string & name)
+    {
+      if( boost::python::override dispatcher = this->get_override("_workspaceReplaced") )
+
+      {
+	// Acquire the lock
+	PyGILState_STATE gstate;
+	gstate = PyGILState_Ensure();
+	
+ 	// Call up to Python
+ 	dispatcher(name);
+	
+ 	// Release it
+ 	PyGILState_Release(gstate);
+      }
+      else
+      {
+	default_workspaceReplaced(name);
+      }
+    }
+
+    void default_workspaceReplaced(const std::string & name)
+    {
+      this->FrameworkManagerProxy::workspaceReplaced(name);
+    }
+
+    void workspaceAdded(const std::string & name)
+    {
+      if( boost::python::override dispatcher = this->get_override("_workspaceAdded") )
+
+      {
+	// Acquire the lock
+	PyGILState_STATE gstate;
+	gstate = PyGILState_Ensure();
+	
+ 	// Call up to Python
+ 	dispatcher(name);
+	
+ 	// Release it
+ 	PyGILState_Release(gstate);
+      }
+      else
+      {
+	default_workspaceAdded(name);
+      }
+    }
+
+    void default_workspaceAdded(const std::string & name)
+    {
+      this->FrameworkManagerProxy::workspaceAdded(name);
+    }
+
   };
+
 
   /**
    *Some helpful function pointers typedefs

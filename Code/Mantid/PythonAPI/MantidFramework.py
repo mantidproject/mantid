@@ -38,6 +38,12 @@ class WorkspaceProxy(object):
         '''
         self.__obj = None
 
+    def _swap(self, obj):
+        '''
+        Swap an object so that the proxy now refers to this object
+        '''
+        self.__obj = obj
+
     def __str__(self):
         '''
         Return a string representation of the proxied object
@@ -49,7 +55,6 @@ class WorkspaceProxy(object):
         Return a string representation of the proxied object
         '''
         return `self.__obj`
-
 
     def __add__(self, rhs):
         '''
@@ -173,11 +178,18 @@ class WorkspaceGarbageCollector(object):
     def __init__(self):
         self._refs = {}
 
-    def register(self, name, ref):
+    def register(self, name, proxy):
         '''
         Register a name and reference to the store
         '''
-        self._refs[name] = ref
+        self._refs[name] = proxy
+
+    def replace(self, name, wksp):
+        '''
+        Replace an object reference within a proxy
+        '''
+        if name in self._refs:
+            self._refs[name]._swap(wksp)
 
     def kill_object(self, name):
         '''
@@ -188,7 +200,7 @@ class WorkspaceGarbageCollector(object):
             # Remove the key as we don't want to keep the reference around
             del self._refs[name]
 
-#-------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------
 
 class MantidPyFramework(FrameworkManager):
     '''
@@ -204,32 +216,64 @@ class MantidPyFramework(FrameworkManager):
 
     def getMatrixWorkspace(self, name):
         '''
-        Get a matrix workspace by name
+        Get a matrix workspace by name. Returns a proxy object
         '''
-        wksp = self.retrieveMatrixWorkspace(name)
+        wksp = self._getRawMatrixWorkspacePointer(name)
         return self._proxyfactory.create(wksp)
 
     def getTableWorkspace(self, name):
         '''
-        Get a table workspace by name
+        Get a table workspace by name. Returns a proxy object
         '''
-        wksp = self.retrieveTableWorkspace(name)
+        wksp = self._getRawTableWorkspacePointer(name)
         return self._proxyfactory.create(wksp)
 
     def getMatrixWorkspaceGroup(self, name):
         '''
         Get a list of matrix workspaces
         '''
-        wksp_grp = self.retrieveWorkspaceGroup(name)
+        wksp_grp = self._getRawWorkspaceGroupPointer(name)
         # Build a list of proxy objects
         names = wksp_grp.getNames()
         return [ self.getMatrixWorkspace(w) for w in names[1:] ]        
 
-    def workspaceRemoved(self, name):
+    def _workspaceRemoved(self, name):
         '''
         Called when a workspace has been removed from the Mantid ADS
         '''
         self._garbage_collector.kill_object(name);
+
+    def _workspaceReplaced(self, name):
+        '''
+        Called when a workspace has been removed from the Mantid ADS
+        '''
+        # 99% of the time people are using matrix workspaces but we still need to check
+        try:
+            wksp = self._getRawMatrixWorkspacePointer(name)
+        except(RuntimeError):
+            try:
+                wksp = self._getTableWorkspacePointer(name)
+            except(RuntimeError):
+                return
+        
+        # If we get here we will have a valid wksp object reference
+        self._garbage_collector.replace(name, wksp)
+
+    def _workspaceRemoved(self, name):
+        '''
+        Called when a workspace has been removed from the Mantid ADS
+        '''
+        self._garbage_collector.kill_object(name);
+
+    def _workspaceAdded(self, name):
+        '''
+        Called when a workspace has been added to the Mantid ADS.
+        '''
+        return
+    
+
+
+#-------------------------------------------------------------------------------------------
 
     
     

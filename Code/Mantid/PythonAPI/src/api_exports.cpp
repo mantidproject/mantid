@@ -50,9 +50,6 @@ namespace PythonAPI
 	   return_value_policy< reference_existing_object >())
       .def("execute", (exec_ptr)&FrameworkManagerProxy::execute, 
 	   return_value_policy< reference_existing_object >(), FrameworkManager_execute_overloads())
-      .def("retrieveMatrixWorkspace", &FrameworkManagerProxy::retrieveMatrixWorkspace)
-      .def("retrieveTableWorkspace", &FrameworkManagerProxy::retrieveTableWorkspace)
-      .def("retrieveWorkspaceGroup", &FrameworkManagerProxy::retrieveWorkspaceGroup)
       .def("deleteWorkspace", &FrameworkManagerProxy::deleteWorkspace)
       .def("getWorkspaceNames", &FrameworkManagerProxy::getWorkspaceNames)
       .def("getWorkspaceGroupNames", &FrameworkManagerProxy::getWorkspaceGroupNames)
@@ -60,8 +57,16 @@ namespace PythonAPI
       .def("createPythonSimpleAPI", &FrameworkManagerProxy::createPythonSimpleAPI)
       .def("sendLogMessage", &FrameworkManagerProxy::sendLogMessage)
       .def("workspaceExists", &FrameworkManagerProxy::workspaceExists)
-      .def("workspaceRemoved", &FrameworkManagerProxy::workspaceRemoved, &FrameworkManagerWrapper::default_workspaceRemoved);
-     ;
+      .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
+      .def("_getRawTableWorkspacePointer", &FrameworkManagerProxy::retrieveTableWorkspace)
+      .def("_getRawWorkspaceGroupPointer", &FrameworkManagerProxy::retrieveWorkspaceGroup)
+      .def("_workspaceRemoved", &FrameworkManagerProxy::workspaceRemoved, 
+	   &FrameworkManagerWrapper::default_workspaceRemoved)
+      .def("_workspaceReplaced", &FrameworkManagerProxy::workspaceReplaced, 
+	   &FrameworkManagerWrapper::default_workspaceReplaced)
+      .def("_workspaceAdded", &FrameworkManagerProxy::workspaceAdded, 
+	   &FrameworkManagerWrapper::default_workspaceAdded);
+    ;
   }
 
   void export_ialgorithm()
