@@ -40,12 +40,15 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
  */
 MantidCurve::MantidCurve(const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
- :PlotCurve(createCurveName(wsName,type,index)),m_drawErrorBars(err),m_wsName(wsName)
+ :PlotCurve(),m_drawErrorBars(err),m_wsName(wsName)
 {
   Mantid::API::MatrixWorkspace_sptr ws = 
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
        Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
     );
+  // If there's only one spectrum in the workspace, title is simply workspace name
+  if (ws->getNumberHistograms() == 1) this->setTitle(wsName);
+  else this->setTitle(createCurveName(wsName,type,index));
   init(ws,g,type,index);
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
@@ -161,12 +164,12 @@ QString MantidCurve::createCurveName(const QString& wsName,const QString& type,i
  */
 QString MantidCurve::createCopyName(const QString& curveName)
 {
-  int i = curveName.lastIndexOf("(copy");
-  if (i < 0) return curveName+"(copy)";
+  int i = curveName.lastIndexOf(" (copy");
+  if (i < 0) return curveName+" (copy)";
   int j = curveName.lastIndexOf(")");
-  if (j == i + 5) return curveName.mid(0,i)+"(copy2)";
+  if (j == i + 5) return curveName.mid(0,i)+" (copy2)";
   int k = curveName.mid(i+5,j-i-5).toInt();
-  return curveName.mid(0,i)+"(copy"+QString::number(k+1)+")";
+  return curveName.mid(0,i)+" (copy"+QString::number(k+1)+")";
 }
 
 /**  Resets the data if wsName is the name of this workspace
@@ -175,15 +178,23 @@ QString MantidCurve::createCopyName(const QString& curveName)
 void MantidCurve::dataReset(const QString& wsName)
 {
   if (m_wsName != wsName) return;
+  const std::string wsNameStd = wsName.toStdString();
   Mantid::API::MatrixWorkspace_sptr mws = 
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-       Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
+       Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd)
     );
   if (!mws) return;
-  const MantidQwtData * new_mantidData = mantidData()->copy(mws);
-  setData(*new_mantidData);
+  const MantidQwtData * new_mantidData(NULL);
+  try {
+    new_mantidData = mantidData()->copy(mws);
+    setData(*new_mantidData);
+  } catch(std::range_error) {
+    // Get here if the new workspace has fewer spectra and the plotted one no longer exists
+    Mantid::Kernel::Logger::get("MantidCurve").information() << "Workspace " << wsNameStd
+        << " now has fewer spectra - plotted curve(s) deleted\n";
+    deleteHandle(wsNameStd,mws);
+  }
   delete new_mantidData;
-  //emit dataUpdated();
 }
 
 void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)

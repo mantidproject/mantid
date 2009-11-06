@@ -284,63 +284,24 @@ bool MantidUI::deleteWorkspace(const QString& workspaceName)
 
 /**
        getSelectedWorkspaceName
-
-
 */
 QString MantidUI::getSelectedWorkspaceName()
 {
-    QList<QTreeWidgetItem*> items = m_exploreMantid->m_tree->selectedItems();
-    QString str("");
-    if( !items.empty() )
-    {
-      QTreeWidgetItem *item = items[0];
-	  //commented below if loop as it was pointing to the parent item in the tree
-	  //this will fail incase of  workspace groups as right click on child item always points to parent item
-     /* if( item->parent() )
-      {
-		item = item->parent();
-      }*/
-	  if(item) str = item->text(0);
-    }
-    if( !str.isEmpty() ) return str;
-
+  QString str = m_exploreMantid->getSelectedWorkspaceName();
+  if ( str.isEmpty() )
+  {
     //Check if a mantid matrix is selected
     MantidMatrix *m = qobject_cast<MantidMatrix*>(appWindow()->activeWindow());
     if( !m ) return "";
 
-    return m->workspaceName();
+    str = m->workspaceName();
+  }
+  return str;
 }
-/*void MantidUI::removeFromWSGroupNames(const QString& wsName)
-{
-	//std::vector<std::string> wsGrpNames=getWorkspaceGroupNames();
-	std::vector<std::string>::iterator it;
-	if(!m_wsGroupNames.empty())
-	{
-		for (it=m_wsGroupNames.begin();it!=m_wsGroupNames.end();it++)
-		{
-			//logObject.error()<<"comparison string "<<pchild->text(0).toStdString()<<endl;;
-			if((*it)==(wsName.toStdString()))
-			{
-				//logObject.error()<<"name erased from vector=  "<<(*it)<<endl;
-				m_wsGroupNames.erase(it);
-				return;
-			}
-		}
-	}
-
-}*/
 
 Mantid::API::Workspace_sptr MantidUI::getSelectedWorkspace()
 {
-    QString workspaceName = getSelectedWorkspaceName();
-	if (AnalysisDataService::Instance().doesExist(workspaceName.toStdString()))
-	{
-		return AnalysisDataService::Instance().retrieve(workspaceName.toStdString());
-	}
-
-	Workspace_sptr empty;
-
-	return empty;//??
+  return m_exploreMantid->getSelectedWorkspace();
 }
 
 Mantid::API::Workspace_sptr MantidUI::getWorkspace(const QString& workspaceName)
@@ -530,12 +491,6 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
         }
     }
     return t;
-}
-
-void MantidUI::plotFirstSpectrum()
-{
-    QString wsName = getSelectedWorkspaceName();
-    plotSpectrum(wsName,0);
 }
 
 void MantidUI::removeWindowFromLists(MdiSubWindow* m)
@@ -867,41 +822,7 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 
 		}//end of for loop for input workspaces
 }
-void MantidUI::PopulateData(Workspace_sptr workspace,QTreeWidgetItem*  ws_item)
-{
-	Mantid::API::MatrixWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-	if( ws_ptr )
-	{
-		ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-		ws_item->addChild(new QTreeWidgetItem(QStringList("Histograms: "+QString::number(ws_ptr->getNumberHistograms()))));
-		ws_item->addChild(new QTreeWidgetItem(QStringList("Bins: "+QString::number(ws_ptr->blocksize()))));
-		bool isHistogram = ws_ptr->blocksize() && ws_ptr->isHistogramData();
-		ws_item->addChild(new QTreeWidgetItem(QStringList(isHistogram?"Histogram":"Data points")));
-		std::string s = "X axis: ";
-		if (ws_ptr->axes() > 0 )
-		{
-			Mantid::API::Axis *ax = ws_ptr->getAxis(0);
-			if ( ax && ax->unit() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
-			else s += "Not set";
-		}
-		else
-		{
-			s += "N/A";
-		}
-		ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
-		s = "Y axis: " + ws_ptr->YUnit();
-		ws_item->addChild(new QTreeWidgetItem(QStringList(QString::fromStdString(s))));
-		ws_item->addChild(new QTreeWidgetItem(QStringList("Memory used: "+QString::number(ws_ptr->getMemorySize())+" KB")));
-	}
-	else
-	{
-		Mantid::API::ITableWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<ITableWorkspace>(workspace);
-		if( ws_ptr )
-		{
-			ws_item->setIcon(0,QIcon(QPixmap(worksheet_xpm)));
-		}
-	}
-}
+
 void MantidUI::renameWorkspace()
 { //get selected workspace
 	QList<QTreeWidgetItem*>selectedItems=m_exploreMantid->m_tree->selectedItems();
@@ -995,7 +916,7 @@ void MantidUI::moveSelctedWSChildrentoRenamedWS(const std::string & renamedWSNam
 							  Workspace_sptr ws_ptr=Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
 							  if(ws_ptr)
 							  {	//call function to add code for each workspace populating with histograms,bins etc
-								  PopulateData(ws_ptr,ws_item);
+                  m_exploreMantid->populateWorkspaceData(ws_ptr,ws_item);
 							  }
 							  ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
 							  QList<QTreeWidgetItem *> name_matches = m_exploreMantid->m_tree->findItems(QString::fromStdString(renamedWSName),Qt::MatchExactly);
@@ -1120,7 +1041,7 @@ void MantidUI::groupWorkspaces()
 					if(ws_ptr)
 					{
 						//call function to add code for each workspace populating with histograms,bins etc
-						PopulateData(ws_ptr,wsid_item);
+            m_exploreMantid->populateWorkspaceData(ws_ptr,wsid_item);
 					}
 
 					newGroup->addChild(wsid_item);
@@ -1208,7 +1129,7 @@ void MantidUI::ungroupWorkspaces()
 							//Mantid::API::MatrixWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
 							if(ws_ptr)
 							{	//call function to add code for each workspace populating with histograms,bins etc
-								PopulateData(ws_ptr,ws_item);
+                m_exploreMantid->populateWorkspaceData(ws_ptr,ws_item);
 							}
 							ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
 							m_exploreMantid->m_tree->addTopLevelItem(ws_item);
@@ -1546,17 +1467,12 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool showMatrix)
 // the requested spectrum
 MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool errorbars, bool showPlot, bool showMatrix)
 {
-//   MantidMatrix* m = getMantidMatrix(wsName);
-//   if( !m )
-//   {
-//     m = importMatrixWorkspace(wsName, -1, -1, false, showMatrix);
-//   }
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
   {
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   }
-  if (!ws.get()) return NULL;
+  if (!ws) return NULL;
 
   std::set<int> indexList;
   indexList.insert(spec);

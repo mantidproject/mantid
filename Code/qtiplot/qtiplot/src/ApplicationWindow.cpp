@@ -293,9 +293,10 @@ void ApplicationWindow::init(bool factorySettings)
 	// this has to be done after connecting scriptEnv
 	scriptEnv->initialize();
 	
-	m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
-	m_interpreterDock->setWidget(m_scriptInterpreter);
-	m_interpreterDock->hide();
+  //m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+  //m_interpreterDock->setWidget(m_scriptInterpreter);
+  m_interpreterDock->setWidget(new QLineEdit);
+  m_interpreterDock->hide();
 
 	undoStackWindow = new QDockWidget(this);
 	undoStackWindow->setObjectName("undoStackWindow"); // this is needed for QMainWindow::restoreState()

@@ -17,40 +17,42 @@ class QPushButton;
 
 class MantidDockWidget: public QDockWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    MantidDockWidget(QWidget*w):QDockWidget(w){}
-    MantidDockWidget(MantidUI *mui, ApplicationWindow *w);
+  MantidDockWidget(MantidUI *mui, ApplicationWindow *parent);
+  QString getSelectedWorkspaceName() const;
+  Mantid::API::Workspace_sptr getSelectedWorkspace() const;
 private:
-	const std::vector<std::string>& getWSGroupNamesFromFW();
-	bool isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString & ws_name); //std::vector<std::string> wsGroupNames,const QString & ws_name);
-	bool isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace);
-	void removeFromWSGroupNames(const QString& wsName);
+  QList<QString> getSelectedWorkspaceNames() const;
+  bool isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString & ws_name); //std::vector<std::string> wsGroupNames,const QString & ws_name);
+  bool isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace);
+  void removeFromWSGroupNames(const QString& wsName);
 public slots:
-    void clickedWorkspace(QTreeWidgetItem*, int);
-    void deleteWorkspaces();
-    void clearWorkspaceTree();	
+  void clickedWorkspace(QTreeWidgetItem*, int);
+  void deleteWorkspaces();
+  void clearWorkspaceTree();
 protected slots:
-    void popupMenu(const QPoint & pos);
+  void popupMenu(const QPoint & pos);
 private slots:
+  void populateWorkspaceData(Mantid::API::Workspace_sptr workspace, QTreeWidgetItem* ws_item);
   void updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr);
   void removeWorkspaceEntry(const QString &);
   void populateWorkspaceTree(const QString & ws_name, Mantid::API::Workspace_sptr,bool isitParent);
- void treeSelectionChanged();
- void groupOrungroupWorkspaces();
-  
-  
-  
+  void treeSelectionChanged();
+  void groupOrungroupWorkspaces();
+  void plotSpectra();
 protected:
-    QTreeWidget *m_tree;
-    friend class MantidUI;
+  QTreeWidget *m_tree;
+  friend class MantidUI;
 private:
-    QPushButton *m_loadButton;
-    QPushButton *m_deleteButton;
-    MantidUI *m_mantidUI;
-	static Mantid::Kernel::Logger& logObject;
-	std::vector<std::string> m_wsGroupNames;
-	QPushButton *m_groupButton;
+  MantidUI * const m_mantidUI;
+  QPushButton *m_loadButton;
+  QPushButton *m_deleteButton;
+  QPushButton *m_groupButton;
+
+  std::vector<std::string> m_wsGroupNames;
+
+  static Mantid::Kernel::Logger& logObject;
 };
 
 

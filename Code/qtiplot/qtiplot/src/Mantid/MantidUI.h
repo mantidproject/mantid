@@ -261,9 +261,6 @@ public slots:
     // Create a MantidMatrix from workspace wsName
     Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
 
-    // Plot the first spectrum from the workspace selected in the workspace dock window
-    void plotFirstSpectrum();
-
     void createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
 
     // Slots responding to MantidMatrix context menu commands
@@ -359,7 +356,6 @@ private:
 	void executeSaveNexus(QString algName,int version);
 
     void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
-	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
 	void moveSelctedWSChildrentoRenamedWS(const std::string & renamedWSName,QList<QTreeWidgetItem*>& selectedItems);
 
 
@@ -380,7 +376,7 @@ private:
     QAction *actionCopyDetectorsToTable;
     QAction *actionCopyValues;
 
-	QMenu *mantidMenu;
+    QMenu *mantidMenu;
     QMenu *menuMantidMatrix;             //  MantidMatrix specific menu
     AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
 
@@ -392,9 +388,7 @@ private:
 
     // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
     std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
-	static Mantid::Kernel::Logger& logObject;
-   // std::vector<std::string> m_wsGroupNames;
-
+    static Mantid::Kernel::Logger& logObject;
 };
 
 static const char * mantid_matrix_xpm[] = {

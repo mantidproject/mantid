@@ -164,7 +164,7 @@ public:
     svc_it it = datamap.find(name);
     if (it!=datamap.end())
     {
-      g_log.warning("Data Object '"+ name +"' replaced in data service.");
+      g_log.information("Data Object '"+ name +"' replaced in data service.");
       notificationCenter.postNotification(new BeforeReplaceNotification(name,it->second,Tobject));
       datamap[name] = Tobject;
       notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));

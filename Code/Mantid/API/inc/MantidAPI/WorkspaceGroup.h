@@ -5,11 +5,18 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/DataService.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid
 {
+
+//----------------------------------------------------------------------
+// Forward Declarations
+//----------------------------------------------------------------------
+namespace Kernel
+{
+  class Logger;
+}
+
 namespace API
 {
 /** Class to hold a set of workspaces.
@@ -53,18 +60,17 @@ public:
   const std::vector<std::string>& getNames() const { return m_wsNames; }
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(m_wsNames.size()); }
-  void print();
+  void print() const;
+  void remove(const std::string& name);
   void removeAll();
-  void remove(const std::string& name); 
+  void deepRemoveAll();
  
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
- 
- 
-  
+
   std::vector<std::string> m_wsNames; ///< The list of workspace names in the group
   static Kernel::Logger& g_log;       ///< Static reference to the logger
 };
