@@ -33,17 +33,17 @@ FrameworkManagerProxy::FrameworkManagerProxy()
     m_replace_observer(*this, &FrameworkManagerProxy::replaceNotificationReceived)
 {
   API::FrameworkManager::Instance();
-  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
-  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
-  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
+  //API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+  //API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
+  //API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
 }
 
 ///Destructor
 FrameworkManagerProxy::~FrameworkManagerProxy()
 {
-  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
-  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
-  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+  //API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
+  //API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
+  //API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
 }
 
 /// Clear the FrameworkManager	
