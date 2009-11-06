@@ -69,9 +69,17 @@ public:
   /// Virtual destructor
   virtual ~IFunction();
 
-  /// Initialize the function providing it the workspace
-  virtual void initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax);
+  /// Writes itself into a string
+  virtual std::string asString()const;
+  /// The string operator
+  virtual operator std::string()const{return asString();}
+  /// Set the workspace
+  virtual void setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax);
+  /// Iinialize the function
+  virtual void initialize(){this->init();}
 
+  /// Returns the function's name
+  virtual std::string name()const = 0;
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
   /// Derivatives of function with respect to active parameters
@@ -89,7 +97,7 @@ public:
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const;
   /// Total number of parameters
-  virtual int nParams()const{return m_parameters.size();};
+  virtual int nParams()const{return m_parameters.size();}
   /// Returns the index of parameter name
   virtual int parameterIndex(const std::string& name)const;
   /// Returns the name of parameter i
@@ -162,6 +170,9 @@ public:
   virtual ~Jacobian() {};
 protected:
 };
+
+/// Overload operator <<
+DLLExport std::ostream& operator<<(std::ostream& ostr,const IFunction& f);
 
 } // namespace API
 } // namespace Mantid

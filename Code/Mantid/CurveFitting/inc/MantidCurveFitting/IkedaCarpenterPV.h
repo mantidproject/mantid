@@ -58,6 +58,7 @@ namespace Mantid
       virtual void setWidth(const double w);
 
       /// overwrite IFunction base class methods
+      std::string name()const{return "IkedaCarpenterPV";}
       virtual void init();
       virtual void function(double* out, const double* xValues, const int& nData);
 

@@ -122,7 +122,8 @@ public:
 
     // set up fitting function and pass to Fit
     IkedaCarpenterPV* icpv = new IkedaCarpenterPV(1.0);
-    icpv->initialize(ws2D, 1,0,1);
+    icpv->initialize();
+    icpv->setWorkspace(ws2D, 1,0,1);
 
     icpv->getParameter("I") = 95000;
     icpv->tie("Alpha0", "1.597107");
@@ -186,7 +187,8 @@ public:
 
     // set up fitting function and pass to Fit
     IkedaCarpenterPV* icpv = new IkedaCarpenterPV();
-    icpv->initialize(wsToPass, 3,0,1);
+    icpv->initialize();
+    icpv->setWorkspace(wsToPass, 3,0,1);
 
     icpv->getParameter("I") = 9500;
     icpv->tie("Alpha0", "1.597107");

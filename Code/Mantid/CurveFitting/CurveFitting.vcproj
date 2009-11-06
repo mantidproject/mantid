@@ -277,11 +277,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CompositeFunctionTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\Fit.h"
 				>
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\Fit1D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FitTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FunctionTest.h"
 				>
 			</File>
 			<File

@@ -33,6 +33,9 @@ public:
     declareParameter("h",1.);
     declareParameter("s",1.);
   }
+
+  std::string name()const{return "Gauss";}
+
   void function(double* out, const double* xValues, const int& nData)
   {
     double c = getParameter("c");
@@ -107,6 +110,9 @@ public:
     declareParameter("a");
     declareParameter("b");
   }
+
+  std::string name()const{return "Linear";}
+
   void function(double* out, const double* xValues, const int& nData)
   {
     double a = getParameter("a");
@@ -196,7 +202,7 @@ public:
     addNoise(ws,0.1);
     storeWS("mfun",ws);
 
-    mfun->initialize(ws,7,12,3);
+    mfun->setWorkspace(ws,7,12,3);
     mfun->testInit(ws,7,12,3);
 
     Fit alg;
@@ -206,7 +212,8 @@ public:
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
     alg.setFunction(mfun);
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
     WS_type outWS = getWS("out_Workspace");
 
     const Mantid::MantidVec& Y00 = ws->readY(0);

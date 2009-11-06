@@ -14,5 +14,12 @@ namespace Mantid
     {
     }
 
-  } // namespace DataObjects
+    IFunction* FunctionFactoryImpl::createFunction(const std::string& type) const
+    {
+      IFunction* fun = createUnwrapped(type);
+      fun->initialize();
+      return fun;
+    }
+
+  } // namespace API
 } // namespace Mantid

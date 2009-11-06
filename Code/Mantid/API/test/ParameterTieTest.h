@@ -10,15 +10,16 @@
 using namespace Mantid;
 using namespace Mantid::API;
 
-class Gauss: public IPeakFunction
+class ParameterTieTest_Gauss: public IPeakFunction
 {
 public:
-  void init()
+  ParameterTieTest_Gauss()
   {
     declareParameter("c");
     declareParameter("h",1.);
     declareParameter("s",1.);
   }
+  std::string name()const{return "ParameterTieTest_Gauss";}
   void function(double* out, const double* xValues, const int& nData)
   {
     double c = getParameter("c");
@@ -77,14 +78,15 @@ public:
 };
 
 
-class Linear: public IFunction
+class ParameterTieTest_Linear: public IFunction
 {
 public:
-  void init()
+  ParameterTieTest_Linear()
   {
     declareParameter("a");
     declareParameter("b");
   }
+  std::string name()const{return "ParameterTieTest_Linear";}
   void function(double* out, const double* xValues, const int& nData)
   {
     double a = getParameter("a");
@@ -112,12 +114,8 @@ public:
   void testComposite()
   {
     CompositeFunction mfun;
-    Gauss *g1 = new Gauss(),*g2 = new Gauss();
-    Linear *bk = new Linear();
-
-    g1->init();
-    g2->init();
-    bk->init();
+    ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
+    ParameterTieTest_Linear *bk = new ParameterTieTest_Linear();
 
     mfun.addFunction(bk);
     mfun.addFunction(g1);
@@ -148,8 +146,7 @@ public:
 
   void testSimple()
   {
-    Linear bk;
-    bk.init();
+    ParameterTieTest_Linear bk;
 
     bk.getParameter("a") = 0.8;
     bk.getParameter("b") = 0.;

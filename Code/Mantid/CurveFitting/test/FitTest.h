@@ -45,14 +45,16 @@ public:
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
     std::string params = "";
-    params += "function=LinearBackground,A0=1,A1=0;";
-    params += "function=Gaussian, PeakCentre=4.1,Height=1.1,Sigma=0.5;";
-    params += "function=Gaussian, PeakCentre=6.1,Height=3.1,Sigma=0.5;";
+    params += "name=LinearBackground,A0=1,A1=0;";
+    params += "name=Gaussian, PeakCentre=4.1,Height=1.1,Sigma=0.5;";
+    params += "name=Gaussian, PeakCentre=6.1,Height=3.1,Sigma=0.5;";
 
-    alg.setPropertyValue("InputParameters",params);
+    alg.setPropertyValue("Function",params);
     //alg.setPropertyValue("Ties","f1.Sigma=f2.Sigma/3");
 
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
     WS_type outWS = getWS("out_Workspace");
 
     const Mantid::MantidVec& Y00 = ws->readY(0);
@@ -122,14 +124,16 @@ public:
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
     std::string params = "";
-    params += "function=LinearBackground,A0=1,A1=0;";
-    params += "function=Gaussian, PeakCentre=4.1,Height=1.1,Sigma=0.5;";
-    params += "function=Gaussian, PeakCentre=6.1,Height=3.1,Sigma=0.5;";
+    params += "name=LinearBackground,A0=1,A1=0;";
+    params += "name=Gaussian, PeakCentre=4.1,Height=1.1,Sigma=0.5;";
+    params += "name=Gaussian, PeakCentre=6.1,Height=3.1,Sigma=0.5;";
 
-    alg.setPropertyValue("InputParameters",params);
+    alg.setPropertyValue("Function",params);
     alg.setPropertyValue("Ties","f1.Sigma=f2.Sigma/3");
 
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
     WS_type outWS = getWS("out_Workspace");
 
     TWS_type outParams = getTWS("out_Parameters");

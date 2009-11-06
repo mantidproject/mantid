@@ -60,10 +60,7 @@ namespace API
     /**Creates an instance of a function
      * @param type The function's type
      */
-    IFunction* createFunction(const std::string& type) const
-    {
-      return createUnwrapped(type);
-    }
+    IFunction* createFunction(const std::string& type) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<FunctionFactoryImpl>;

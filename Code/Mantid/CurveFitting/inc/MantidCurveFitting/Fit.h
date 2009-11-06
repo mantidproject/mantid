@@ -9,10 +9,6 @@
 
 namespace Mantid
 {
-  namespace DtaaObjects
-  {
-    class Workspace2D;
-  }
   namespace CurveFitting
   {
     /**
@@ -26,7 +22,7 @@ namespace Mantid
     <LI> StartX - Lowest value of x data array </LI>
     <LI> EndX - Highest value of x data array </LI>
 
-    <LI> InputParameters - 
+    <LI> Function - 
 
     <LI> MaxIterations - The spectrum to fit (default 500)</LI>
     <LI> Output Status - whether the fit was successful. Direction::Output</LI>
@@ -98,7 +94,7 @@ namespace Mantid
       virtual void afterDataRangedDetermined(const int& m_minX, const int& m_maxX){};
 
       // Process input parameters and create the fitting function.
-      void processParameters(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
+      void processParameters();
 
       /// Number of parameters.
       size_t nParams()const{return m_function->nActive();}

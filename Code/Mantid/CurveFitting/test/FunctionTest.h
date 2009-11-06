@@ -26,6 +26,7 @@ public:
     declareParameter("h",1.);
     declareParameter("s",1.);
   }
+  std::string name()const{return "FunctionTestGauss";}
   void function(double* out, const double* xValues, const int& nData)
   {
     double c = getParameter("c");
@@ -91,6 +92,7 @@ public:
   }
 };
 
+DECLARE_FUNCTION(FunctionTestGauss);
 
 class Exp
 {
@@ -124,7 +126,7 @@ public:
     WS_type ws = mkWS(Exp(),1,0,10,0.1);
     storeWS("Exp",ws);
 
-    g->initialize(ws,12,7,9);
+    g->setWorkspace(ws,12,7,9);
     g->testInit(ws,12,7,9);
 
     Fit alg;
@@ -134,7 +136,8 @@ public:
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
     alg.setFunction(g);
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
     WS_type outWS = getWS("out_Workspace");
 
     const Mantid::MantidVec& Y00 = ws->readY(0);
@@ -208,13 +211,88 @@ public:
     alg.setPropertyValue("InputWorkspace","Exp");
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setFunction(g);
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
 
     TS_ASSERT_DELTA(g->parameter(0),5,0.0001);
     TS_ASSERT_DELTA(g->parameter(1),0.8944,0.0001);
     TS_ASSERT_DELTA(g->parameter(2),2,0.00001);
 
     removeWS("Exp");
+  }
+
+  void testFitString()
+  {
+    FunctionTestGauss g;
+
+    g.getParameter("c") = 5.5;
+    g.getParameter("h") = 1.2;
+    g.getParameter("s") = 1.;
+
+    TS_ASSERT_EQUALS(g.nParams(),3);
+    TS_ASSERT_EQUALS(g.nActive(),3);
+
+    TS_ASSERT_EQUALS(g.parameter(0),5.5);
+    TS_ASSERT_EQUALS(g.parameter(1),1.2);
+    TS_ASSERT_EQUALS(g.parameter(2),1.);
+
+    WS_type ws = mkWS(Exp(),1,0,10,0.1);
+    storeWS("Exp",ws);
+
+    Fit alg;
+    alg.initialize();
+
+    alg.setPropertyValue("InputWorkspace","Exp");
+    alg.setPropertyValue("WorkspaceIndex","0");
+    alg.setPropertyValue("Output","out");
+    alg.setPropertyValue("Function",g);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    WS_type outWS = getWS("out_Workspace");
+
+    const Mantid::MantidVec& Y00 = ws->readY(0);
+    const Mantid::MantidVec& Y0 = outWS->readY(0);
+    const Mantid::MantidVec& Y = outWS->readY(1);
+    const Mantid::MantidVec& R = outWS->readY(2);
+    for(int i=0;i<Y.size();i++)
+    {
+      TS_ASSERT_EQUALS(Y00[i],Y0[i]);
+      TS_ASSERT_DELTA(Y0[i],Y[i],0.001);
+      TS_ASSERT_DIFFERS(R[i],0);
+    }
+
+    TS_ASSERT_EQUALS(g.parameterName(0),"c");
+    TS_ASSERT_DELTA(g.parameter(0),5.5,0.00001);
+
+    TS_ASSERT_EQUALS(g.parameterName(1),"h");
+    TS_ASSERT_DELTA(g.parameter(1),1.2,0.00001);
+
+    TS_ASSERT_EQUALS(g.parameterName(2),"s");
+    TS_ASSERT_DELTA(g.parameter(2),1.,0.00001);
+
+
+    TWS_type outParams = getTWS("out_Parameters");
+    TS_ASSERT(outParams);
+
+    TS_ASSERT_EQUALS(outParams->rowCount(),3);
+    TS_ASSERT_EQUALS(outParams->columnCount(),2);
+
+    TableRow row = outParams->getFirstRow();
+
+    TS_ASSERT_EQUALS(row.String(0),"c");
+    TS_ASSERT_DELTA(row.Double(1),5,0.00001);
+
+    row = outParams->getRow(1);
+    TS_ASSERT_EQUALS(row.String(0),"h");
+    TS_ASSERT_DELTA(row.Double(1),1,0.000001);
+
+    row = outParams->getRow(2);
+    TS_ASSERT_EQUALS(row.String(0),"s");
+    TS_ASSERT_DELTA(row.Double(1),3,0.00001);
+
+    removeWS("Exp");
+    removeWS("out_Workspace");
+    removeWS("out_Parameters");
   }
 
 private:

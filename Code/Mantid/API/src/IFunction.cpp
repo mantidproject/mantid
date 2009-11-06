@@ -54,13 +54,12 @@ void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& n
 }
 
 /// Initialize the function providing it the workspace
-void IFunction::initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax)
+void IFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax)
 {
   m_workspace = workspace;
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
-  this->init();
 }
 
 
@@ -306,6 +305,29 @@ void IFunction::applyTies()
 void IFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
 {
   this->functionDeriv(out,xValues,nData);
+}
+
+/**
+ * Writes a string that can be used in Fit.Function to create a copy of this function
+ */
+std::string IFunction::asString()const
+{
+  std::ostringstream ostr;
+  ostr << "name="<<this->name();
+  for(int i=0;i<nParams();i++)
+    ostr<<','<<parameterName(i)<<'='<<parameter(i);
+  return ostr.str();
+}
+
+/**
+ * Operator <<
+ * @param ostr The output stream
+ * @param f The function
+ */
+std::ostream& operator<<(std::ostream& ostr,const IFunction& f)
+{
+  ostr << f.asString();
+  return ostr;
 }
 
 } // namespace API

@@ -49,6 +49,17 @@ void CompositeFunction::init()
 {
 }
 
+/// Writes itself into a string
+std::string CompositeFunction::asString()const
+{
+  std::ostringstream ostr;
+  for(int i=0;i<nFunctions();i++)
+  {
+    ostr << getFunction(i)->asString() << ';';
+  }
+  return ostr.str();
+}
+
 /// Function you want to fit to.
 void CompositeFunction::function(double* out, const double* xValues, const int& nData)
 {
@@ -361,11 +372,11 @@ void CompositeFunction::parseName(const std::string& varName,int& index, std::st
  * @param xMin The minimum bin index of spectrum spec that will be used in fitting
  * @param xMax The maximum bin index of spectrum spec that will be used in fitting
  */
-void CompositeFunction::initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
+void CompositeFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
 {
-  IFunction::initialize(workspace,spec,xMin,xMax);
+  IFunction::setWorkspace(workspace,spec,xMin,xMax);
   for(int i=0;i<nFunctions();i++)
-    getFunction(i)->initialize(workspace,spec,xMin,xMax);
+    getFunction(i)->setWorkspace(workspace,spec,xMin,xMax);
 }
 
 

@@ -195,8 +195,8 @@ namespace CurveFitting
       "A value in, or on the high x boundary of, the last bin the fitting range\n"
       "(default the highest value of x)" );
 
-    declareProperty("InputParameters","","Parameters defining the fitting function and its initial values" );
-    declareProperty("Ties","","Math expressions that tie paraemters to other parameters or to constants" );
+    declareProperty("Function","","Parameters defining the fitting function and its initial values" );
+    declareProperty("Ties","","Math expressions that tie parameters to other parameters or to constants" );
 
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
@@ -279,10 +279,13 @@ namespace CurveFitting
 
     afterDataRangedDetermined(m_minX, m_maxX);
 
-    processParameters(localworkspace,histNumber,m_minX, m_maxX);
+    // Process the Function property and create the function using FunctionFactory
+    processParameters();
 
     if (m_function == NULL)
-      throw std::runtime_error("Function has not been set.");
+      throw std::runtime_error("Function was not set.");
+
+    m_function->setWorkspace(localworkspace,histNumber,m_minX, m_maxX);
 
     // check if derivative defined in derived class
     bool isDerivDefined = true;
@@ -611,14 +614,14 @@ namespace CurveFitting
   /**
    * Process input parameters and create the fitting function.
    */
-  void Fit::processParameters(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
+  void Fit::processParameters()
   {
 
     // Parameters of different functions are separated by ';'. Parameters of the same function
     // are separated by ','. parameterName=value pairs are used to set a parameter value. For each function
     // "function" parameter must be set to a function name. E.g.
-    // InputParameters = "function=LinearBackground,A0=0,A1=1; function = Gaussian, PeakCentre=10.,Sigma=1"
-    std::string input = getProperty("InputParameters");
+    // Function = "name=LinearBackground,A0=0,A1=1; function = Gaussian, PeakCentre=10.,Sigma=1"
+    std::string input = getProperty("Function");
     if (input.empty()) return;
 
     typedef Poco::StringTokenizer tokenizer;
@@ -648,12 +651,11 @@ namespace CurveFitting
         }
       }
 
-      std::string functionName = param["function"];
+      std::string functionName = param["name"];
       if (functionName.empty())
         throw std::runtime_error("Function is not defined");
 
       API::IFunction* fun = API::FunctionFactory::Instance().createFunction(functionName);
-      fun->initialize(workspace,spec,xMin,xMax);
 
       if (isComposite)
         static_cast<API::CompositeFunction*>(function)->addFunction(fun);
@@ -663,7 +665,7 @@ namespace CurveFitting
       std::map<std::string,std::string>::const_iterator par = param.begin();
       for(;par!=param.end();++par)
       {
-        if (par->first != "function")
+        if (par->first != "name")
         {
           //fun->getParameter(par->first) = boost::lexical_cast<double>(par->second);
           fun->getParameter(par->first) = atof(par->second.c_str());

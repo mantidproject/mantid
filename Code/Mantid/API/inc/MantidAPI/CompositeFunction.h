@@ -47,8 +47,12 @@ public:
   ///Destructor
   virtual ~CompositeFunction();
 
-  /// Initialize the function providing it the workspace
-  virtual void initialize(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
+  /// Set the workspace
+  void setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
+  /// Returns the function's name
+  std::string name()const{return "CompositeFunction";}
+  /// Writes itself into a string
+  std::string asString()const;
 
   /// Function you want to fit to.
   void function(double* out, const double* xValues, const int& nData);
