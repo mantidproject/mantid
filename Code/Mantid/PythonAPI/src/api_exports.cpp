@@ -12,8 +12,7 @@
 #include <MantidAPI/Instrument.h>
 #include <MantidAPI/ParInstrument.h>
 #include <MantidAPI/Sample.h>
-
-
+#include <MantidAPI/WorkspaceProperty.h>
 
 namespace Mantid
 {
@@ -82,6 +81,7 @@ namespace PythonAPI
       .def("getPropertyValue", &Mantid::API::IAlgorithm::getPropertyValue)
       .def("getProperties", &Mantid::API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
       ;
+    
   }
 
   void export_workspace()
@@ -229,6 +229,13 @@ namespace PythonAPI
       ;
   }
 
+  void export_workspace_property()
+  {
+    // Tell python about this so I can check if a property is a workspace
+    class_< WorkspaceProperty<Workspace>, bases<Mantid::Kernel::Property>, boost::noncopyable>("WorkspaceProperty", no_init)
+      ;
+  }
+
   void export_api_namespace()
   {
     export_frameworkmanager();
@@ -239,6 +246,7 @@ namespace PythonAPI
     export_workspacegroup();
     export_sample();
     export_instrument();
+    export_workspace_property();
   }
   //@endcond
 }

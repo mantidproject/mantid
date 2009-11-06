@@ -176,8 +176,8 @@ boost::shared_ptr<API::ITableWorkspace> FrameworkManagerProxy::retrieveTableWork
   }
   else
   {
-    throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. "
-			     "This may be a table workspace, try getTableWorkspace().");
+    throw std::runtime_error("\"" + wsName + "\" is not a table workspace. "
+			     "This may be a matrix workspace, try getMatrixWorkspace().");
   }
 }
 
@@ -371,7 +371,8 @@ void FrameworkManagerProxy::deleteNotificationReceived(Mantid::API::WorkspaceDel
  * @param notice A pointer to a WorkspaceDeleteNotification object
  */
 void FrameworkManagerProxy::addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
-{  
+{
+  
 }
 
 /**

@@ -28,6 +28,7 @@ namespace PythonAPI
       .def("isValid", &Mantid::Kernel::Property::isValid)
       .def("value", &Mantid::Kernel::Property::value)
       .def("allowedValues", &Mantid::Kernel::Property::allowedValues)
+      .def("direction", &Mantid::Kernel::Property::direction)
       ;
   }
 

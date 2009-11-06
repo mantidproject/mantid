@@ -388,7 +388,7 @@ namespace Mantid
       }
 
       // Return the IAlgorithm object
-      os << "\treturn algm\n\n";
+      os << "\treturn mtd._createAlgProxy(algm)\n\n";
     }
 
     /**
@@ -439,7 +439,7 @@ namespace Mantid
 	 << "\t\tsys.exit('Information: Script execution cancelled')\n"
 	 << "\tif result == False:\n"
 	 << "\t\tsys.exit('An error occurred while running " << algm << "')\n"
-	 << "\treturn algm\n\n";
+	 << "\treturn mtd._createAlgProxy(algm)\n\n";
     }
 
     /**

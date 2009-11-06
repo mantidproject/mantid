@@ -307,11 +307,9 @@ namespace PythonAPI
 
   };
 
-  //Overload get and set members for isDistribution
+  // Overload get and set members for isDistribution
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_isDistribution_overloads_1, isDistribution, 0, 0)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_isDistribution_overloads_2, isDistribution, 1, 1)
-
-
   //@endcond
 }
 }

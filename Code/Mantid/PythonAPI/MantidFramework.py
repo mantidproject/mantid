@@ -1,8 +1,8 @@
 import os 
 if os.name == 'nt':
-    from MantidPythonAPI import FrameworkManager
+    from MantidPythonAPI import FrameworkManager, WorkspaceProperty
 else:
-    from libMantidPythonAPI import FrameworkManager
+    from libMantidPythonAPI import FrameworkManager, WorkspaceProperty
 
 """
 Top-level interface classes for Mantid.
@@ -202,6 +202,45 @@ class WorkspaceGarbageCollector(object):
 
 #---------------------------------------------------------------------------------------
 
+class IAlgorithmProxy(object):
+    '''
+    A proxy object for IAlgorithm returns
+    '''
+    
+    def __init__(self, ialg, framework):
+        self.__alg = ialg
+        self.__framework = framework
+        self.__havelist = False
+        self.__wkspnames = []
+        
+    def workspace(self):
+        return self._retrieveWorkspaceByIndex(0)
+        
+    def __getattr__(self, attr):
+        """
+        Reroute a method call to the the stored object
+        """
+        return getattr(self.__alg, attr)
+
+    def __getitem__(self, index):
+        return self._retrieveWorkspaceByIndex(index)
+
+    def _retrieveWorkspaceByIndex(self, index):
+        if self.__havelist == False:
+            self._createWorkspaceList()
+        return self.__framework[self.__wkspnames[index]]
+
+    def _createWorkspaceList(self):
+        # Create a list for the output workspaces
+        props = self.__alg.getProperties()
+  
+        for p in props:
+            if isinstance(p, WorkspaceProperty) and p.direction() == 1:
+                self.__wkspnames.append(p.value())
+        self.__havelist = True
+
+#---------------------------------------------------------------------------------------
+
 class MantidPyFramework(FrameworkManager):
     '''
     The main Mantid Framework object. It mostly forwards its calls to the 
@@ -214,28 +253,30 @@ class MantidPyFramework(FrameworkManager):
         self._garbage_collector = WorkspaceGarbageCollector()
         self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector)
 
-    def getMatrixWorkspace(self, name):
+    # Enables mtd['name'] syntax
+    def __getitem__(self, key):
         '''
-        Get a matrix workspace by name. Returns a proxy object
+        Enables the framework to be used in a dictionary like manner.
+        It returns the MatrixWorkspace proxy for the given name
         '''
-        wksp = self._getRawMatrixWorkspacePointer(name)
-        return self._proxyfactory.create(wksp)
+        return self._proxyfactory.create(self._retrieveWorkspace(key))
 
-    def getTableWorkspace(self, name):
+# *** "Private" functions
+    def _retrieveWorkspace(self, name):
         '''
-        Get a table workspace by name. Returns a proxy object
+        Use the appropriate function to return the workspace that has that name
         '''
-        wksp = self._getRawTableWorkspacePointer(name)
-        return self._proxyfactory.create(wksp)
-
-    def getMatrixWorkspaceGroup(self, name):
-        '''
-        Get a list of matrix workspaces
-        '''
-        wksp_grp = self._getRawWorkspaceGroupPointer(name)
-        # Build a list of proxy objects
-        names = wksp_grp.getNames()
-        return [ self.getMatrixWorkspace(w) for w in names[1:] ]        
+        # 99% of the time people are using matrix workspaces but we still need to check
+        try:
+            return self._getRawMatrixWorkspacePointer(name)
+        except(RuntimeError):
+            try:
+                return self._getRawWorkspaceGroupPointer(name)
+            except RuntimeError:
+                try:
+                    return self._getTableWorkspacePointer(name)
+                except RuntimeError:
+                    return None
 
     def _workspaceRemoved(self, name):
         '''
@@ -247,33 +288,41 @@ class MantidPyFramework(FrameworkManager):
         '''
         Called when a workspace has been removed from the Mantid ADS
         '''
-        # 99% of the time people are using matrix workspaces but we still need to check
-        try:
-            wksp = self._getRawMatrixWorkspacePointer(name)
-        except(RuntimeError):
-            try:
-                wksp = self._getTableWorkspacePointer(name)
-            except(RuntimeError):
-                return
-        
-        # If we get here we will have a valid wksp object reference
-        self._garbage_collector.replace(name, wksp)
+        wksp = self._retrieveWorkspace(name)
+        if wksp != None:
+            self._garbage_collector.replace(name, wksp)
 
     def _workspaceRemoved(self, name):
         '''
         Called when a workspace has been removed from the Mantid ADS
         '''
-        self._garbage_collector.kill_object(name);
+        self._garbage_collector.kill_object(name)
 
-    def _workspaceAdded(self, name):
+    def _createAlgProxy(self, ialg):
+        return IAlgorithmProxy(ialg, self)
+
+# *** Legacy functions ***
+
+    def getMatrixWorkspace(self, name):
         '''
-        Called when a workspace has been added to the Mantid ADS.
+        Get a matrix workspace by name. Returns a proxy object
         '''
-        return
+        return self._proxyfactory.create(self._getRawMatrixWorkspacePointer(name))
     
+    def getTableWorkspace(self, name):
+        '''
+        Get a table workspace by name. Returns a proxy object
+        '''
+        return self._proxyfactory.create(self._getRawTableWorkspacePointer(name))
+        
+    def getMatrixWorkspaceGroup(self, name):
+        '''
+        Get a list of matrix workspaces
+        '''
+        wksp_grp = self._getRawWorkspaceGroupPointer(name)
+        # Build a list of proxy objects
+        names = wksp_grp.getNames()
+        return [ self.getMatrixWorkspace(w) for w in names[1:] ]
 
 
 #-------------------------------------------------------------------------------------------
-
-    
-    
