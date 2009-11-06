@@ -97,8 +97,8 @@ long int CompressedWorkspace2D::getMemorySize() const
   double sz = 0.;
   for(CompressedMap::const_iterator it=m_compressedData.begin();it!= m_compressedData.end();it++)
     sz += it->second.second;
-  std::cerr<<"Memory: "<<sz/1e6<<" + "<<double(getNumberBlocks()) * double(m_blockSize)/1e6
-    << " + " << double(m_inBuffer.size())*sizeof(double)/1e6<< " + " << double(m_outBuffer.size())/1e6<<'\n';
+  //std::cerr<<"Memory: "<<sz/1e6<<" + "<<double(getNumberBlocks()) * double(m_blockSize)/1e6
+  //  << " + " << double(m_inBuffer.size())*sizeof(double)/1e6<< " + " << double(m_outBuffer.size())/1e6<<'\n';
   sz += double(getNumberBlocks()) * m_blockSize + double(m_inBuffer.size())*sizeof(double) + double(m_outBuffer.size());
   return (long int)(sz/1024);
 }
