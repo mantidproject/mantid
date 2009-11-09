@@ -4,6 +4,7 @@
 #include "ScriptEditor.h"
 
 // Qt
+#include <QApplication>
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
@@ -13,6 +14,8 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include <QClipboard>
+#include <QShortcut>
 
 // std
 #include <cmath>
@@ -156,6 +159,8 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode) :
     // Need to disable some default key bindings that Scintilla provides as they don't really
     // fit here
     remapWindowEditingKeys();
+    QShortcut *shortcut = new QShortcut(m_paste->shortcut(), this);
+    connect(shortcut, SIGNAL(activated()), this, SLOT(paste()));
   }
   else
   {
@@ -247,21 +252,14 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
   {
     return QsciScintilla::keyPressEvent(event);
   }
-
-  // Check if we have flagged to mark the line as read only
+   // Check if we have flagged to mark the line as read only
   if( m_read_only ) return;
 
   int key = event->key();
   int last_line = lines() - 1;
   if( key == Qt::Key_Return || key == Qt::Key_Enter )
   {
-    QString cmd = text(last_line);
-    if( cmd.isEmpty() ) return;
-    m_history.add(cmd);
-    // I was seeing strange behaviour with the first line marker disappearing after
-    // entering some text, removing it and retyping then pressing enter
-    if( last_line == 0 ) markerAdd(last_line, m_marker_handle); 
-    emit executeLine(cmd);
+    executeCodeAtLine(last_line);
     return;
   }
   else if( key == Qt::Key_Up )
@@ -399,9 +397,57 @@ void ScriptEditor::displayOutput(const QString& msg, bool error)
   }
 }
 
+/// Overrride the paste command when in interpreter mode
+void ScriptEditor::paste()
+{
+  if( m_interpreter_mode )
+  {
+    QString txt = QApplication::clipboard()->text();
+    if( txt.isEmpty() )
+    {
+      return;
+    }
+    // Split by line and send each line that requires executing separately to the console
+    QStringList code_lines = txt.split('\n');
+    QStringListIterator itr(code_lines);
+    while( itr.hasNext() )
+    {
+      int line_index = this->lines() - 1;
+      QString txt = itr.next();
+      this->setText(line_index, txt.remove('\r').remove('\n'));
+      executeCodeAtLine(line_index);
+    }
+  }
+  else
+  {
+    QsciScintilla::paste();
+  }
+  std::cerr << "called paste";
+}
+
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
+/**
+* Execute a line of code
+* @param lineno The line number of the code to execute
+*/
+void ScriptEditor::executeCodeAtLine(int lineno)
+{
+  QString cmd = text(lineno).remove('\r').remove('\n');
+  // I was seeing strange behaviour with the first line marker disappearing after
+  // entering some text, removing it and retyping then pressing enter
+  
+  if( cmd.isEmpty() )
+  {
+    return;
+  }
+
+  m_history.add(cmd);
+  if( lineno == 0 ) markerAdd(lineno, m_marker_handle); 
+  emit executeLine(cmd);
+}
+
 /**
  * Disable several default key bindings, such as Ctrl+A, that Scintilla provides.
  */
@@ -424,6 +470,9 @@ void ScriptEditor::remapWindowEditingKeys()
   SendScintilla(SCI_CLEARCMDKEY, keyDef);
   //Redo
   keyDef = 'Y' + (SCMOD_CTRL << 16);
+  SendScintilla(SCI_CLEARCMDKEY, keyDef);
+  //Paste
+  keyDef = 'V' + (SCMOD_CTRL << 16);
   SendScintilla(SCI_CLEARCMDKEY, keyDef);
   
 }

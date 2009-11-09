@@ -150,6 +150,8 @@ public slots:
   void print();
   ///Display the output from a script that has been run in interpeter mode
   void displayOutput(const QString& msg, bool error);
+  /// Overrride the paste command when in interpreter mode
+  void paste();
 
 signals:
   /// Inform observers that undo information is available
@@ -162,6 +164,8 @@ signals:
 private:
   /// Disable window editing keys when we are in interpreter mode
   void remapWindowEditingKeys();
+  ///Execute the code at a given line
+  void executeCodeAtLine(int line);
   /// The file name associated with this editor
   QString m_filename;
 
