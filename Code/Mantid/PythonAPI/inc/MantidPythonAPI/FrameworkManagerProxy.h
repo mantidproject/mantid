@@ -132,6 +132,9 @@ public:
   virtual void workspaceReplaced(const std::string & name);
   //@}
 
+  /// Set GIL state
+  void setGILRequired(bool state) { m_gil_required = state; }
+
   /// Return the list of currently registered algorithm names
   std::vector<std::string> getAlgorithmNames() const;
   //Send a log message to the Mantid Framework with a specified priority
@@ -146,6 +149,13 @@ public:
   /// Execute a Python algorithm
   void executePythonAlgorithm(std::string algName);
   //@}
+
+ protected:
+  /** A flag indicating whether code has been executed from within Python. This is a bit of a hack
+   * so that the notification signals don't cause deadlocks if they happen to get called from
+   * a thread that did not originate from within Python
+   */
+  static bool m_gil_required;
 
  private:
   /// Copy constructor
@@ -167,8 +177,9 @@ public:
   void replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice);
   /// Poco delete notification observer object
   Poco::NObserver<FrameworkManagerProxy, Mantid::API::WorkspaceAfterReplaceNotification> m_replace_observer;
-  // A Python logger
+  /// A Python logger
   static Mantid::Kernel::Logger& g_log;
+ 
 };
 
 }

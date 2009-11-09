@@ -11,7 +11,6 @@
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/IAlgorithm.h>
 #include <boost/python.hpp>
-
 #include <iostream>
 
 namespace Mantid
@@ -25,31 +24,20 @@ namespace PythonAPI
    */
   struct FrameworkManagerWrapper : FrameworkManagerProxy, boost::python::wrapper<FrameworkManagerProxy>
   {
-    // Yet again we have some magic to perform due to threading issues.  If an algorithm is running in 
-    // a separate thread then the notifications will come in on that thread and then this call to
-    // Python will causes problems, i.e. segfaults,  unless we ensure that global interpreter lock(GIL)
-    // is held by the current thread.
-    // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock
-    // for the gory details
+    // Yet again we have some magic to perform due to threading issues.  There are 2 scenarios:
+    // 1) If an algorithm is running asynchronously and the algoirthm is being requested to execute from Python then 
+    //    the notifications will come in on a separate thread and we must acquire the global interpreter lock so that
+    //    the callback to Python from here doesn't crash the interpreter;
+    // 2) An algorithm is running but it was not requested to execute from Python. In that case when the Poco signals trigger
+    //    observers below we don't have an interpeter running trying to acquire the GIL will cause a deadlock so we don't it
+
+    // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock for more information 
+    // on the GIL
     
     void workspaceRemoved(const std::string & name)
     {
-      if( boost::python::override dispatcher = this->get_override("_workspaceRemoved") )
-      {
-	// Acquire the lock
-	PyGILState_STATE gstate;
-	gstate = PyGILState_Ensure();
-
- 	// Call up to Python
-	dispatcher(name);
-
- 	// Release it
- 	PyGILState_Release(gstate);
-      }
-      else
-      {
-	default_workspaceRemoved(name);
-      }
+      dispatch_python_call("_workspaceRemoved", name, 
+			   &FrameworkManagerWrapper::default_workspaceRemoved);
     }
 
     void default_workspaceRemoved(const std::string & name)
@@ -59,23 +47,8 @@ namespace PythonAPI
 
     void workspaceReplaced(const std::string & name)
     {
-      if( boost::python::override dispatcher = this->get_override("_workspaceReplaced") )
-
-      {
-	// Acquire the lock
-	PyGILState_STATE gstate;
-	gstate = PyGILState_Ensure();
-	
- 	// Call up to Python
- 	dispatcher(name);
-	
- 	// Release it
- 	PyGILState_Release(gstate);
-      }
-      else
-      {
-	default_workspaceReplaced(name);
-      }
+      dispatch_python_call("_workspaceReplaced", name, 
+			   &FrameworkManagerWrapper::default_workspaceReplaced);
     }
 
     void default_workspaceReplaced(const std::string & name)
@@ -85,28 +58,45 @@ namespace PythonAPI
 
     void workspaceAdded(const std::string & name)
     {
-      if( boost::python::override dispatcher = this->get_override("_workspaceAdded") )
-
-      {
-	// Acquire the lock
-	PyGILState_STATE gstate;
-	gstate = PyGILState_Ensure();
-	
- 	// Call up to Python
- 	dispatcher(name);
-	
- 	// Release it
- 	PyGILState_Release(gstate);
-      }
-      else
-      {
-	default_workspaceAdded(name);
-      }
+      dispatch_python_call("_workspaceAdded", name, 
+			   &FrameworkManagerWrapper::default_workspaceAdded);
     }
 
     void default_workspaceAdded(const std::string & name)
     {
       this->FrameworkManagerProxy::workspaceAdded(name);
+    }
+
+  private:
+    /// Function pointer typedef for default function implementations
+    typedef void(FrameworkManagerWrapper::*default_function)(const std::string &);
+    
+    /** Dispatch a single string argument python function call
+     * @param name pyfunction_name The name of the (possibly) overloaded python function
+     * @param arg The string argument
+     * @returns True if an overloaded function was found
+     */
+    void dispatch_python_call(const std::string & pyfunction_name, const std::string & arg,
+			      default_function def_fn)
+    {
+      if( boost::python::override dispatcher = this->get_override(pyfunction_name.c_str()) )
+      {
+	if( m_gil_required )
+	{
+	  PyGILState_STATE gstate = PyGILState_Ensure();
+	  dispatcher(arg);
+	  PyGILState_Release(gstate);
+	}
+	else 
+	{
+	  dispatcher(arg);
+	}
+      }
+      else 
+      {
+	// If no override is present then call our default implementation
+	(this->*def_fn)(arg);
+      }
     }
 
   };

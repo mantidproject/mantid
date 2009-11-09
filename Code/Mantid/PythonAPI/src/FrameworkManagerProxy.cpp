@@ -26,6 +26,9 @@ namespace PythonAPI
 // Initialize the logger
 Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
 
+// Set the flag corresponding to the execution state
+bool FrameworkManagerProxy::m_gil_required = false;
+
 /// Default constructor
 FrameworkManagerProxy::FrameworkManagerProxy() 
   : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived),
@@ -33,17 +36,18 @@ FrameworkManagerProxy::FrameworkManagerProxy()
     m_replace_observer(*this, &FrameworkManagerProxy::replaceNotificationReceived)
 {
   API::FrameworkManager::Instance();
-  //API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
-  //API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
-  //API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
+  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
+  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
+
 }
 
 ///Destructor
 FrameworkManagerProxy::~FrameworkManagerProxy()
 {
-  //API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
-  //API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
-  //API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
+  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
+  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
 }
 
 /// Clear the FrameworkManager	
@@ -380,7 +384,6 @@ void FrameworkManagerProxy::addNotificationReceived(Mantid::API::WorkspaceAddNot
  * @param notice A pointer to a WorkspaceAfterReplaceNotification object
  */
 void FrameworkManagerProxy::replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
-
 {  
   /// This function may be overridden in Python
   workspaceReplaced(notice->object_name());

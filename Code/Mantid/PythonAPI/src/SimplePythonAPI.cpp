@@ -378,7 +378,9 @@ namespace Mantid
     
       if( async )
       {
-	os << "\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
+	os << "\tmtd._setGILRequired(True)\n" 
+	   << "\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
+	   << "\tmtd._setGILRequired(False)\n"
 	   << "\tif result == False:\n"
 	   << "\t\tsys.exit('An error occurred while running " << algm << "')\n";
       }
