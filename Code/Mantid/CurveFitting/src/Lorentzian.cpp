@@ -12,6 +12,8 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
+DECLARE_FUNCTION(Lorentzian)
+
 void Lorentzian::init()
 {
   declareParameter("Height", 0.0);

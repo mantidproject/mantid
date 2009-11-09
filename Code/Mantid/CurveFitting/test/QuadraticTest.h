@@ -46,7 +46,7 @@ public:
 
     // set up gaussian fitting function
     Quadratic* quad = new Quadratic();
-    quad->init();
+    quad->initialize();
 
     quad->getParameter("A0") = 3.0;
 
@@ -68,8 +68,6 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    //std::string str = alg2.getProperty("Output Status");
-    //std::cout << std::endl << str << std::endl;
     TS_ASSERT_DELTA( dummy, 2.71,0.1);
     TS_ASSERT_DELTA( quad->getParameter("A0"),6322.29, 0.01);
     TS_ASSERT_DELTA( quad->getParameter("A1"),-0.19, 0.01);

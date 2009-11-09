@@ -95,12 +95,11 @@ public:
 
     // set up gaussian fitting function
     Gaussian* gaus = new Gaussian();
-    gaus->init();
+    gaus->initialize();
     gaus->setCentre(11.2);
     gaus->setHeight(100.7);
     gaus->setWidth(2.2);
 
-    //void setFunction(API::IFunction* fun);
     alg2.setFunction(gaus);
 
 

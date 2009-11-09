@@ -52,11 +52,12 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "Quadratic";}
-      virtual void init();
       virtual void function(double* out, const double* xValues, const int& nData);
       virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
-
+    protected:
+      /// overwrite IFunction base class method, which declare function parameters
+      virtual void init();
     };
 
   } // namespace CurveFitting

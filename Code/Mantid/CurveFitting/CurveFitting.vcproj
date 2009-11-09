@@ -195,6 +195,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\BackToBackExponential.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\BackToBackExponential1D.cpp"
 				>
 			</File>
@@ -269,11 +273,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\inc\MantidCurveFitting\BackToBackExponential.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\BackToBackExponential1D.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\BackToBackExponential1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\BackToBackExponentialTest.h"
 				>
 			</File>
 			<File

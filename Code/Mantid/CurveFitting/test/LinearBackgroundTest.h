@@ -46,7 +46,7 @@ public:
 
     // set up gaussian fitting function
     LinearBackground* quad = new LinearBackground();
-    quad->init();
+    quad->initialize();
 
     quad->getParameter("A0") = 3.0;
 

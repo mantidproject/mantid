@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_LORENTZIAN_H_
-#define MANTID_CURVEFITTING_LORENTZIAN_H_
+#ifndef MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
+#define MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,19 +11,22 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Provide lorentzian peak shape function interface to IPeakFunction.
-    I.e. the function: Height*( HWHM^2/((x-PeakCentre)^2+HWHM^2) ).
+    Provide BackToBackExponential peak shape function interface to IPeakFunction.
+    That is the function:
 
+      I*(exp(A/2*(A*S^2+2*(x-X0)))*erfc((A*S^2+(x-X0))/sqrt(2*S^2))+exp(B/2*(B*S^2-2*(x-X0)))*erfc((B*S^2-(x-X0))/sqrt(2*S^2))).
 
-    Lorentzian parameters:
+    Function parameters:
     <UL>
-    <LI> Height - height of peak (default 0.0)</LI>
-    <LI> PeakCentre - centre of peak (default 0.0)</LI>
-    <LI> HWHM - half-width half-maximum (default 1.0)</LI>
+    <LI> I - height of peak (default 0.0)</LI>
+    <LI> A - exponential constant of rising part of neutron pulse (default 0.0)</LI>
+    <LI> B - exponential constant of decaying part of neutron pulse (default 0.0)</LI>
+    <LI> X0 - peak position (default 0.0)</LI>
+    <LI> S - standard deviation of gaussian part of peakshape function (default 1.0)</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL
-    @date 27/10/2009
+    @date 9/11/2009
 
     Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
 
@@ -45,24 +48,24 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Lorentzian : public API::IPeakFunction
+    class DLLExport BackToBackExponential : public API::IPeakFunction
     {
     public:
       /// Destructor
-      virtual ~Lorentzian() {};
+      virtual ~BackToBackExponential() {};
 
 
       /// overwrite IPeakFunction base class methods
-      virtual double centre()const {return getParameter("PeakCentre");};
-      virtual double height()const {return getParameter("Height");};
-      virtual double width()const {return 2*getParameter("HWHM");};
-      virtual void setCentre(const double c) {getParameter("PeakCentre") = c;};
-      virtual void setHeight(const double h) {getParameter("Height") = h;};
-      virtual void setWidth(const double w) {getParameter("HWHM") = w/2.0;};
+      virtual double centre()const {return getParameter("X0");};
+      virtual double height()const {return getParameter("I");};  // note height can likely be defined more accurately, here set equal to intensity 
+      virtual double width()const {return 2*getParameter("S");};  // can likely be defined more accurately
+      virtual void setCentre(const double c) {getParameter("X0") = c;};
+      virtual void setHeight(const double h) {getParameter("I") = h;};
+      virtual void setWidth(const double w) {getParameter("S") = w/2.0;};
 
 
       /// overwrite IFunction base class methods
-      std::string name()const{return "Lorentzian";}
+      std::string name()const{return "BackToBackExponential";}
       virtual void function(double* out, const double* xValues, const int& nData);
       virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
@@ -75,4 +78,4 @@ namespace Mantid
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_LORENTZIAN_H_*/
+#endif /*MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_*/
