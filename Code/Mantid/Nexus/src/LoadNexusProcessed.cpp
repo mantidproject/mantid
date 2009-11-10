@@ -7,7 +7,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/FileProperty.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -29,7 +28,8 @@ namespace Mantid
     using namespace API;
 
     /// Default constructor
-    LoadNexusProcessed::LoadNexusProcessed() : Algorithm(), m_shared_bins(false), m_xbins(), m_axis1vals()
+    LoadNexusProcessed::LoadNexusProcessed() : Algorithm(), m_shared_bins(false), m_xbins(), 
+					       m_axis1vals()
     {
       NXMDisableErrorReporting();
     }
@@ -180,7 +180,7 @@ namespace Mantid
       }
       catch( std::runtime_error & )
       {
-	g_log.warning() << "Axis 0 set to unitless quantity \"" << unit1 << "\"\n";
+	g_log.information() << "Axis 0 set to unitless quantity \"" << unit1 << "\"\n";
       }
 
       try 
@@ -189,7 +189,7 @@ namespace Mantid
       }
       catch( std::runtime_error & )
       {
-	g_log.warning() << "Unable set unit for axis 1 to \"" << unit2 << "\"\n";
+	g_log.information() << "Axis 1 set to unitless quantity \"" << unit2 << "\"\n";
       }
       local_workspace->setYUnit(data.attributes("units"));
 
@@ -268,10 +268,23 @@ namespace Mantid
       //Populate the spectra-detector map
       NXDetector detgroup = inst.openNXDetector("detector");
       //Read necessary arrays from the file
-      // Detector list contains a list of all of the detector numbers
-      NXInt det_list = detgroup.openNXInt("detector_list");
-      int ndets = det_list.dim0();
-      det_list.load();
+      // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
+      // map
+      int ndets(-1);
+      boost::shared_array<int> det_list(NULL);
+      try
+      {
+	NXInt detlist_group = detgroup.openNXInt("detector_list");
+	ndets = detlist_group.dim0();
+	detlist_group.load();
+	det_list.swap(detlist_group.sharedBuffer());
+      }
+      catch(std::runtime_error &)
+      {
+	g_log.information() << "detector_list block not found. The workspace will not contain any detector information."
+			    << std::endl;
+	return;
+      }
 
       //Detector count contains the number of detectors associated with each spectra
       NXInt det_count = detgroup.openNXInt("detector_count");
@@ -322,7 +335,7 @@ namespace Mantid
         }
       }
 
-      local_workspace->mutableSpectraMap().populate(spectra_list, det_list(), ndets);
+      local_workspace->mutableSpectraMap().populate(spectra_list, det_list.get(), ndets);
     }
 
     /**
@@ -493,7 +506,8 @@ namespace Mantid
      * @param inst_name The name written in the Nexus file
      * @param localWorkspace The workspace to insert the instrument into
      */
-    void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name, DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name, 
+					       DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Determine the search directory for XML instrument definition files (IDFs)
       std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
@@ -605,7 +619,6 @@ namespace Mantid
 	++hist;
       }
     }
-
 
   } // namespace NeXus
 } // namespace Mantid
