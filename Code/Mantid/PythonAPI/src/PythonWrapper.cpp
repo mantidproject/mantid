@@ -34,13 +34,15 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 {
   using namespace Mantid::PythonAPI;
 
-  //Standard containers first
+  // Standard containers first
   // A vector of ints
   vector_proxy<int>::wrap("stl_vector_integer");
   // A vector of doubles
   vector_proxy<double>::wrap("stl_vector_double");
   // A vector of strings
   vector_proxy<std::string>::wrap("stl_vector_string");
+  // A set of strings
+  set_proxy<std::string>::wrap("stl_set_string");
 
   // Export functions
   export_kernel_namespace();

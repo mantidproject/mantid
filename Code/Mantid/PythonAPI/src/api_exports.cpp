@@ -180,7 +180,8 @@ namespace PythonAPI
     // Pointer
     register_ptr_to_python<Mantid::API::WorkspaceGroup_sptr>();
     
-    class_< Mantid::API::WorkspaceGroup, boost::noncopyable >("WorkspaceGroup", no_init)
+    class_< Mantid::API::WorkspaceGroup, bases<Mantid::API::Workspace>, 
+      boost::noncopyable >("WorkspaceGroup", no_init)
       .def("size", &Mantid::API::WorkspaceGroup::getNumberOfEntries)
       .def("getNames", &Mantid::API::WorkspaceGroup::getNames, return_value_policy< copy_const_reference >())
       .def("add", &Mantid::API::WorkspaceGroup::add)

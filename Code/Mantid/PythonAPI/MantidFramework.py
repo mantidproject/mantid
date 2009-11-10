@@ -1,8 +1,9 @@
-import os 
+import os
+import types
 if os.name == 'nt':
-    from MantidPythonAPI import FrameworkManager, WorkspaceProperty
+    import MantidPythonAPI as Mantid
 else:
-    from libMantidPythonAPI import FrameworkManager, WorkspaceProperty
+    import libMantidPythonAPI as Mantid
 
 """
 Top-level interface classes for Mantid.
@@ -23,14 +24,28 @@ class WorkspaceProxy(object):
         self.__obj = obj
         self.__factory = factory
 
-    def __getattribute__(self, attr):
+    def isGroup(self):
+        '''
+        Is the data object a WorkspaceGroup or not
+        '''
+        if isinstance(self.__obj, Mantid.WorkspaceGroup):
+            return True
+        else:
+            return False
+
+    def __getitem__(self, index):
+        if self.isGroup():
+            return self.__factory.create(self.__obj.getNames()[index])
+        else:
+            return self
+        
+
+    def __getattr__(self, attr):
         """
         Reroute a method call to the the stored object
         """
-        if attr.startswith('_'):
-            return object.__getattribute__(self, attr)
-        else:
-            return getattr(self.__obj, attr)
+        return getattr(self.__obj, attr)
+
 
     def _kill_object(self):
         '''
@@ -160,13 +175,19 @@ class WorkspaceProxy(object):
 
 class WorkspaceProxyFactory(object):
     
-    def __init__(self, garbage_collector):
-        self._gc = garbage_collector
-
+    def __init__(self, garbage_collector, framework):
+        self.__gc = garbage_collector
+        self.__framework = framework
+                                         
     def create(self, obj):
-        proxy = WorkspaceProxy(obj, self)
-        self._gc.register(obj.getName(), proxy)
+        wksp = obj
+        if isinstance(obj, str):
+            wksp = self.__framework._retrieveWorkspace(obj)
+        proxy = WorkspaceProxy(wksp, self)
+        self.__gc.register(wksp.getName(), proxy)
         return proxy
+
+            
 
 #-------------------------------------------------------------------------------
 
@@ -235,13 +256,13 @@ class IAlgorithmProxy(object):
         props = self.__alg.getProperties()
   
         for p in props:
-            if isinstance(p, WorkspaceProperty) and p.direction() == 1:
+            if isinstance(p, Mantid.WorkspaceProperty) and p.direction() == 1:
                 self.__wkspnames.append(p.value())
         self.__havelist = True
 
 #---------------------------------------------------------------------------------------
 
-class MantidPyFramework(FrameworkManager):
+class MantidPyFramework(Mantid.FrameworkManager):
     '''
     The main Mantid Framework object. It mostly forwards its calls to the 
     C++ manager but some workspace related things are captured here first
@@ -251,7 +272,7 @@ class MantidPyFramework(FrameworkManager):
         # Call base class constructor
         super(MantidPyFramework, self).__init__()
         self._garbage_collector = WorkspaceGarbageCollector()
-        self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector)
+        self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector, self)
 
     # Enables mtd['name'] syntax
     def __getitem__(self, key):
@@ -260,6 +281,23 @@ class MantidPyFramework(FrameworkManager):
         It returns the MatrixWorkspace proxy for the given name
         '''
         return self._proxyfactory.create(self._retrieveWorkspace(key))
+
+    def list(self):
+        names = self.getWorkspaceNames()
+        n_names = names.size()
+        output = ''
+        for i in range(0, n_names):
+            wksp = self._retrieveWorkspace(names[i])
+            output += names[i] + '\t-\t'
+            if( isinstance(wksp, Mantid.MatrixWorkspace) ):
+                output += 'MatrixWorkspace'
+            elif( isinstance(wksp, Mantid.ITableWorkspace) ):
+                output += 'TableWorkspace'
+            else:
+                output += 'WorkspaceGroup'
+            output += '\n'
+        print output
+        
 
 # *** "Private" functions
     def _retrieveWorkspace(self, name):
