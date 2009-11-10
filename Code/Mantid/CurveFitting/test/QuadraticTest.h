@@ -68,9 +68,10 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 2.71,0.1);
-    TS_ASSERT_DELTA( quad->getParameter("A0"),6322.29, 0.01);
-    TS_ASSERT_DELTA( quad->getParameter("A1"),-0.19, 0.01);
+    TS_ASSERT_DELTA( dummy, 0.997,0.1);
+
+    TS_ASSERT_DELTA( quad->getParameter("A0"),4244.084, 0.01);
+    TS_ASSERT_DELTA( quad->getParameter("A1"),-0.1271, 0.01);
     TS_ASSERT_DELTA( quad->getParameter("A2"),0.0000, 0.0001);
 
 

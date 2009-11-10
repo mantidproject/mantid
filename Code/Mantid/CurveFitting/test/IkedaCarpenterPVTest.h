@@ -212,7 +212,7 @@ public:
     // test the output from fit is what you expect
     // note this test will never produce good fit because it assumes no background
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 756,1);
+    TS_ASSERT_DELTA( dummy, 11.67,1);
 
     AnalysisDataService::Instance().remove("HRP39182");
   }

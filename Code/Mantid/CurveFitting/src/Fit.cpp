@@ -339,17 +339,16 @@ namespace CurveFitting
     }
 
     l_data.Y = &YValues[m_minX];
-    //l_data.sigmaData = &YErrors[m_minX];
 
 
     // check that no error is negative or zero
 
     for (unsigned int i = 0; i < l_data.n; ++i)
     {
-      if (YErrors[i] <= 0.0)
+      if (YErrors[m_minX+i] <= 0.0)
         l_data.sigmaData[i] = 1.0;
       else
-        l_data.sigmaData[i] = YErrors[i];
+        l_data.sigmaData[i] = YErrors[m_minX+i];
     }
 
 

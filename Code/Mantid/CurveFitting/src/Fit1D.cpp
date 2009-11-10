@@ -65,7 +65,7 @@ struct FitData {
   /// the data to be fitted (ordinates)
   const double * Y;
   /// the standard deviations of the Y data points
-  const double * sigmaData;
+  double * sigmaData;
   /// pointer to instance of Fit1D
   Fit1D* fit1D;
   /// Needed to use the simplex algorithm within the gsl least-squared framework.
@@ -371,6 +371,7 @@ void Fit1D::exec()
     throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
   }
   l_data.X = new double[l_data.n];
+  l_data.sigmaData = new double[l_data.n];
   l_data.forSimplexLSwrap = new double[l_data.n];
   l_data.parameters = new double[nParams()];
 
@@ -386,7 +387,19 @@ void Fit1D::exec()
   }
 
   l_data.Y = &YValues[m_minX];
-  l_data.sigmaData = &YErrors[m_minX];
+
+  // check that no error is negative or zero
+  for (unsigned int i = 0; i < l_data.n; ++i)
+  {
+    if (YErrors[m_minX+i] <= 0.0)
+    {
+      l_data.sigmaData[i] = 1.0;
+
+      std::cout << "\nReset data point because YErrors[i]=" << YErrors[i] << std::endl;
+    }
+    else
+      l_data.sigmaData[i] = YErrors[m_minX+i];
+  }
 
 
   // create array of fitted parameter. Take these to those input by the user. However, for doing the
@@ -694,6 +707,7 @@ void Fit1D::exec()
   }
 
   delete [] l_data.X;
+  delete [] l_data.sigmaData;
   delete [] l_data.forSimplexLSwrap;
   delete [] l_data.parameters;
 

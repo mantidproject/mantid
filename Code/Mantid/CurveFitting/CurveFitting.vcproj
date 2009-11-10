@@ -247,10 +247,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\LorentzianTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\Quadratic.cpp"
 				>
 			</File>
@@ -282,10 +278,6 @@
 			</File>
 			<File
 				RelativePath=".\test\BackToBackExponential1DTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\BackToBackExponentialTest.h"
 				>
 			</File>
 			<File
@@ -366,6 +358,10 @@
 			</File>
 			<File
 				RelativePath=".\test\Lorentzian1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LorentzianTest.h"
 				>
 			</File>
 			<File
