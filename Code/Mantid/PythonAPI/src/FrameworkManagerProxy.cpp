@@ -26,12 +26,10 @@ namespace PythonAPI
 // Initialize the logger
 Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
 
-// Set the flag corresponding to the execution state
-bool FrameworkManagerProxy::m_gil_required = false;
-
 /// Default constructor
 FrameworkManagerProxy::FrameworkManagerProxy() 
-  : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived),
+  : m_gil_required(false),
+    m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived),
     m_add_observer(*this, &FrameworkManagerProxy::addNotificationReceived),
     m_replace_observer(*this, &FrameworkManagerProxy::replaceNotificationReceived)
 {

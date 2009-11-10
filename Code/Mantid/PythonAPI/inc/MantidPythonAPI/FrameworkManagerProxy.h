@@ -155,7 +155,7 @@ public:
    * so that the notification signals don't cause deadlocks if they happen to get called from
    * a thread that did not originate from within Python
    */
-  static bool m_gil_required;
+  bool m_gil_required;
 
  private:
   /// Copy constructor
