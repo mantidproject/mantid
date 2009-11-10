@@ -17,7 +17,7 @@ try:
   LoadRaw(InputFN, inOutWS)
   LoadDetectorInfo(inOutWS, InputFN)
   
-  IncidentE = getEi(InputFN)
+  IncidentE = getEiDialog(InputWorkspace = inOutWS)
 
   ConvertUnits(inOutWS, inOutWS, "DeltaE", "Direct", IncidentE, false)
   

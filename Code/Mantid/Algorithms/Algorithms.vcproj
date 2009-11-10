@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DetectorEfficiencyCor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DetectorEfficiencyVariation.cpp"
 				>
 			</File>
@@ -304,6 +308,10 @@
 			</File>
 			<File
 				RelativePath=".\src\GetDetectorOffsets.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\GetEi.cpp"
 				>
 			</File>
 			<File
@@ -589,6 +597,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\DetectorEfficiencyCor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\DetectorEfficiencyVariation.h"
 				>
 			</File>
@@ -682,6 +694,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\GetDetectorOffsets.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\GetEi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\getEitest.h"
 				>
 			</File>
 			<File

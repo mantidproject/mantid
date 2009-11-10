@@ -6,8 +6,6 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -218,7 +216,6 @@ public:
       TS_ASSERT_DELTA( WS->readX(1)[j] - WS->readX(firstNonMontor)[j] , 3.9, 1e-6 )
     }
 
-    AnalysisDataService::Instance().remove(m_InoutWS);
     AnalysisDataService::Instance().remove(m_MariWS);
   }
 

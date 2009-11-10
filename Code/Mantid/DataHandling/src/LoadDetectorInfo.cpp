@@ -298,7 +298,7 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
       interruption_point();
     }
   }
-  // see if we have to do have to adjust the TOF Xbin boundaries requires knowledge of individual detectors
+  // see if adjusting the TOF Xbin boundaries requires knowledge of individual detectors
   if ( differentOffsets )
   {
     const std::vector<int> detectorList(iraw.udet, iraw.udet + numDetectors);
@@ -319,7 +319,7 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 *  all the X-values share the same storage array then some sharing is maintained
 *  @param detIDs ID list of IDs numbers of all the detectors with offsets
 *  @param offsets an array of values to change the bin boundaries by, these must be listed in the same order as detIDs
-*  @throws MisMatch<int> if not very spectra is associated with exaltly one detector
+*  @throws MisMatch<int> if not every spectra is associated with exaltly one detector
 *  @throw  IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 */
 void LoadDetectorInfo::adjustXs(const std::vector<int> &detIDs, const std::vector<float> &offsets)
@@ -455,15 +455,14 @@ void LoadDetectorInfo::adjustXs(const float detectorOffset)
       {//as this algorithm is about obtaining corrected data I'll mark this this uncorrectable data as bad by setting it to zero
         m_workspace->dataY(specInd)[j] = 0;
         m_workspace->dataE(specInd)[j] = 0;
-        // as this stuff happens a lot don't write much to high log levels but do a full log to debug
-        spuriousSpectra ++;
-        if (spuriousSpectra == 1) g_log.debug() << "Missing detector information cause the following spectra to be set to zero, suspect missing detectors in instrument definition : " << specInd ;
-        else g_log.debug() << "," << specInd;
       }
+      // as this stuff happens a lot don't write much to high log levels but do a full log to debug
+      spuriousSpectra ++;
+      if (spuriousSpectra == 1) g_log.debug() << "Missing detector information cause the following spectra to be set to zero, suspect missing detectors in instrument definition : " << specInd ;
+      else g_log.debug() << "," << specInd;
     }
   }//move on to the next histogram
 
-  // we done it all, just remains to do some log any errors
   if (spuriousSpectra > 0)
   {
     g_log.debug() << std::endl;

@@ -44,7 +44,7 @@ public:
   ///virtual Destructor
   virtual ~IValidator() {}
 
-  /** Calls the validator, logs any messages and then passes them on
+  /** Calls the validator
    *  
    *  @param value The value to be checked
    *  @returns An error message to display to users or an empty string on no error
@@ -52,11 +52,6 @@ public:
   std::string isValid(const TYPE &value) const
   {
     std::string failure = checkValidity(value);
-    if ( failure != "" )
-    {//log any problems, problems in the children of composite validators get logged twice, first as themselves then as a composite validator
-      g_log.debug() << "Validator check failed: " << failure << std::endl;
-      //this error message may be shown to users, it is briefer than in the log because it's in context, users wont see composite validator messages because I think they don't care if the validator is a member of a composite or not
-    }
     return failure;
   }
 
@@ -69,20 +64,13 @@ public:
   virtual IValidator* clone() = 0;
 
 protected:
-  /** Checks the value based on the validator's rules but does no logging
+  /** Checks the value based on the validator's rules
    * 
    *  @returns An error message to display to users or an empty string on no error
    */
   virtual std::string checkValidity(const TYPE &) const = 0;
 
-private:
-  /// Contains the debugging logging stream that validators write errors to
-  static Logger& g_log;
-
 };
-
-template <typename TYPE>
-Logger& IValidator<TYPE>::g_log = Logger::get("IValidator");
 
 } // namespace Kernel
 } // namespace Mantid

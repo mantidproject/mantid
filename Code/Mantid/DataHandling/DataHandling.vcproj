@@ -423,6 +423,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadDetectorInfoTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadEmptyInstrument.h"
 				>
 			</File>
