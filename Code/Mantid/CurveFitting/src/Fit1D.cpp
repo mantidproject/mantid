@@ -394,8 +394,6 @@ void Fit1D::exec()
     if (YErrors[m_minX+i] <= 0.0)
     {
       l_data.sigmaData[i] = 1.0;
-
-      std::cout << "\nReset data point because YErrors[i]=" << YErrors[i] << std::endl;
     }
     else
       l_data.sigmaData[i] = YErrors[m_minX+i];
