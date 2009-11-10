@@ -31,6 +31,8 @@ void Q1D::init()
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 
   declareProperty(new ArrayProperty<double>("OutputBinning", new RebinParamsValidator));
+
+  declareProperty("AccountForGravity",false);
 }
 
 void Q1D::exec()
@@ -73,6 +75,8 @@ void Q1D::exec()
 
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
+  const bool doGravity = getProperty("AccountForGravity");
+
   // A temporary vector to store intermediate Q values
   const int xLength = inputWS->readX(0).size();
   MantidVec Qx(xLength);
@@ -96,12 +100,42 @@ void Q1D::exec()
     MantidVec YIn = inputWS->readY(i);
     MantidVec errYIn = errorsWS->readY(i);
     MantidVec errEIn = errorsWS->readE(i);
-    // Calculate the Q values for the current spectrum
-    const double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
-    const double factor = 4.0*M_PI*sinTheta;
-    for ( int j = 0; j < xLength; ++j)
+
+    if ( doGravity )
     {
-      Qx[xLength-j-1] = factor/XIn[j];
+      g_log.debug("Correcting for gravity");
+      // Get the vector to get at the 3 components of the pixel position
+      V3D detPos = det->getPos();
+      // This is the square of the horizontal distance from sample to pixel
+      const double L2 = std::pow(detPos.Z()-samplePos.Z(),2);
+      for ( int j = 0; j < xLength; ++j)
+      {
+	// Lots more to do in this loop than for the non-gravity case
+	// since we have a number of calculations to do for each bin boundary
+
+	// Calculate the drop (I'm fairly confident that Y is up!)
+	// Using approx. constant prefix - will fix next week
+	const double drop = 3.13e-4 * XIn[j] * XIn[j] * L2;
+	detPos[1] -= drop;
+	// Calculate new 2theta in light of this
+	const V3D sampleDetVec = detPos - samplePos;
+	// Do beamline vector more rigorously later
+	const double twoTheta = sampleDetVec.angle(V3D(0,0,1));
+	const double sinTheta = sin( 0.5 * twoTheta );
+
+	// Now we're ready to go to Q
+	Qx[xLength-j-1] = 4.0*M_PI*sinTheta/XIn[j];
+      }
+    }
+    else
+    {
+      // Calculate the Q values for the current spectrum
+      const double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
+      const double factor = 4.0*M_PI*sinTheta;
+      for ( int j = 0; j < xLength; ++j)
+      {
+        Qx[xLength-j-1] = factor/XIn[j];
+      }
     }
 
     // Unfortunately, have to reverse data vectors for rebin functions to work
