@@ -422,7 +422,6 @@ void ScriptEditor::paste()
   {
     QsciScintilla::paste();
   }
-  std::cerr << "called paste";
 }
 
 //------------------------------------------------

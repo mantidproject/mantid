@@ -17,6 +17,8 @@
 
 using namespace Mantid::PythonAPI;
 
+bool FrameworkManagerProxy::m_gil_required = false;
+
 class FrameworkManagerProxyTest : public CxxTest::TestSuite
 {
 

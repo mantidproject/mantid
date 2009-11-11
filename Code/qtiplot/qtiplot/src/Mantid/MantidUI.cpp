@@ -1447,7 +1447,7 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
   Graph *g = ml->activeGraph();
   appWindow()->polishGraph(g,Graph::Line);
-  m->setBinGraph(ml,t);
+  setUpBinGraph(ml,wsName, ws);
   ml->askOnCloseEvent(false);
   return ml;
 }
@@ -1489,7 +1489,6 @@ MultiLayer* MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
 {
   if( !mlayer_1 ) return NULL;
   if( !mlayer_2 ) return mlayer_1;
-
   int ncurves_on_two = mlayer_2->activeGraph()->visibleCurves();
   for( int c = 0; c < ncurves_on_two; ++c )
   {

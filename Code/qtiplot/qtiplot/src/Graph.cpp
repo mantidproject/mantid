@@ -3052,10 +3052,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c)
 	c_type[n_curves - 1] = User;	
 	c_keys.resize(n_curves);
 	c_keys[n_curves - 1] = d_plot->insertCurve(c);
-
   int colorIndex , symbolIndex;
   guessUniqueCurveLayout(colorIndex, symbolIndex);
   c->setPen(QPen(ColorBox::color(colorIndex), widthLine));
+
   addLegendItem();
   connect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));
   connect(c,SIGNAL(dataUpdated()), this, SLOT(updatePlot()), Qt::BlockingQueuedConnection);
@@ -3065,8 +3065,10 @@ PlotCurve* Graph::insertCurve(PlotCurve* c)
 void Graph::insertCurve(Graph* g, int i)
 {
   if( g == this || !g ) return;
-  PlotCurve *pc = dynamic_cast<PlotCurve*>(g->curve(i));
-  if( pc ) this->insertCurve(pc);
+  if( PlotCurve *pc = dynamic_cast<PlotCurve*>(g->curve(i)) )
+  {
+    this->insertCurve(pc);
+  }
 }
 
 
