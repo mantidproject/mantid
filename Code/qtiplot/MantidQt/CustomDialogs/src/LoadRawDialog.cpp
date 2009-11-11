@@ -122,20 +122,21 @@ void LoadRawDialog::initLayout()
    
   Mantid::Kernel::Property* cacheProp= getAlgorithmProperty("Cache");
   if(cacheProp)
-  {QComboBox *cacheBox = new QComboBox;
-  std::set<std::string> items =cacheProp->allowedValues();
-  std::set<std::string>::const_iterator vend = items.end();
-  for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
-	  ++vitr)
   {
-	  cacheBox->addItem(QString::fromStdString(*vitr));
+    QComboBox *cacheBox = new QComboBox;
+    std::set<std::string> items =cacheProp->allowedValues();
+    std::set<std::string>::const_iterator vend = items.end();
+    for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; 
+	      ++vitr)
+    {
+	    cacheBox->addItem(QString::fromStdString(*vitr));
+    }
+    prop_line = new QHBoxLayout;
+    prop_line->addWidget(new QLabel("Cache file locally:"), 0, Qt::AlignRight);
+    prop_line->addWidget(cacheBox, 0, Qt::AlignLeft);
+    tie(cacheBox, "Cache", prop_line);
   }
-  prop_line = new QHBoxLayout;
-  prop_line->addWidget(new QLabel("Cache file locally:"), 0, Qt::AlignRight);
-  prop_line->addWidget(cacheBox, 0, Qt::AlignLeft);
-  tie(cacheBox, "Cache", prop_line);
-  
-  }
+
   prop_line->addStretch();
   //If the algorithm version supports the LoadLog property add a check box for it
   Mantid::Kernel::Property *loadlogs = getAlgorithmProperty("LoadLogFiles");
@@ -154,7 +155,7 @@ void LoadRawDialog::initLayout()
 	  std::set<std::string> monitoritems =loadMonitors->allowedValues();
 	  std::set<std::string>::const_iterator mend = monitoritems.end();
 	  for(std::set<std::string>::const_iterator mitr = monitoritems.begin(); mitr != mend; 
-		  ++mitr)
+		    ++mitr)
 	  {
 		  monitorsBox->addItem(QString::fromStdString(*mitr));
 	  }

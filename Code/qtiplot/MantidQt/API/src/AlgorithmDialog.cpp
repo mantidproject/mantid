@@ -207,11 +207,11 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
   {
     m_tied_properties.remove(property);
   }
-   Mantid::Kernel::Property * prop=getAlgorithmProperty(property);
+  Mantid::Kernel::Property * prop=getAlgorithmProperty(property);
   if(prop) 
   { //Set a few things on the widget
-  QString docstring = QString::fromStdString(prop->documentation());
-  widget->setToolTip(docstring);
+    QString docstring = QString::fromStdString(prop->documentation());
+    widget->setToolTip(docstring);
   }
   widget->setEnabled(isWidgetEnabled(property));
   setValue(widget, property);
@@ -757,6 +757,10 @@ void AlgorithmDialog::setValue(QWidget *widget, const QString & propName)
   // Do the right thing for the widget type
   if( QComboBox *opts = qobject_cast<QComboBox*>(widget) )
   {
+    if( property && value.isEmpty() )
+    {
+      value = QString::fromStdString(property->value());
+    }
     int index = opts->findText(value);
     if( index >= 0 )
     {
