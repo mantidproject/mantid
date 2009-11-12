@@ -91,7 +91,7 @@ void SplineBackground::exec()
 
     gsl_vector_set(x, j, X[i]);
     gsl_vector_set(y, j, Y[i]);
-    gsl_vector_set(w, j, E[i]);
+    gsl_vector_set(w, j, E[i]>0.?1./(E[i]*E[i]):0.);
 
     ++j;
   }
@@ -136,11 +136,11 @@ void SplineBackground::exec()
   /* do the fit */
   gsl_multifit_wlinear(Z, w, y, c, cov, &chisq, mw);
 
-  //dof = n - ncoeffs;
+  int dof = n - ncoeffs;
   //tss = gsl_stats_wtss(w->data, 1, y->data, 1, y->size);
-  //Rsq = 1.0 - chisq / tss;
+  //double Rsq = 1.0 - chisq / tss;
 
-  //std::cerr<< "chisq/dof = "<<chisq / dof<<"%e, Rsq = "<<Rsq<<"\n";
+  std::cerr<< "chisq/dof = "<<chisq / dof<<"\n";
 
   /* output the smoothed curve */
   API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,1,X.size(),Y.size());
