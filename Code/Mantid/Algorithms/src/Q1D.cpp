@@ -106,8 +106,8 @@ void Q1D::exec()
       g_log.debug("Correcting for gravity");
       // Get the vector to get at the 3 components of the pixel position
       V3D detPos = det->getPos();
-      // This is the square of the horizontal distance from sample to pixel
-      const double L2 = std::pow(detPos.Z()-samplePos.Z(),2);
+      // Want L2 (sample-pixel distance) squared
+      const double L2 = std::pow(detPos.distance(samplePos),2);
       for ( int j = 0; j < xLength; ++j)
       {
 	// Lots more to do in this loop than for the non-gravity case
@@ -119,7 +119,7 @@ void Q1D::exec()
 	
 	// Calculate new 2theta in light of this
 	V3D sampleDetVec = detPos - samplePos;
-  sampleDetVec[1] += drop;
+        sampleDetVec[1] += drop;
 	// Do beamline vector more rigorously later
 	const double twoTheta = sampleDetVec.angle(V3D(0,0,1));
 	const double sinTheta = sin( 0.5 * twoTheta );
