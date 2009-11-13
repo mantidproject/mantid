@@ -53,6 +53,8 @@ ScriptOutputDock::ScriptOutputDock(const QString & title, QWidget * parent,
   connect(m_text_display, SIGNAL(customContextMenuRequested(const QPoint&)), this, 
 	  SLOT(showContextMenu(const QPoint&)));
 
+  initActions();
+
   setWidget(m_text_display);
 }
 
@@ -123,9 +125,8 @@ void ScriptOutputDock::showContextMenu(const QPoint & pos)
   connect(clear, SIGNAL(activated()), this, SLOT(clear()));
   menu.addAction(clear);
 
-  QAction* copy = new QAction(QPixmap(copy_xpm), "Copy", this);
-  connect(copy, SIGNAL(activated()), m_text_display, SLOT(copy()));
-  menu.addAction(copy);
+  //Copy action
+  menu.addAction(m_copy);
 
   if( !m_text_display->document()->isEmpty() )
   {
@@ -147,6 +148,21 @@ void ScriptOutputDock::print()
   QTextDocument document(m_text_display->text());
   document.print(&printer);
 }
+
+//-------------------------------------------
+// Private non-slot member functions
+//-------------------------------------------
+/**
+ * Create the actions associated with this widget
+ */
+void ScriptOutputDock::initActions()
+{
+  // Copy action
+  m_copy = new QAction(QPixmap(copy_xpm), "Copy", this);
+  m_copy->setShortcut(tr("Ctrl+C"));
+  connect(m_copy, SIGNAL(activated()), m_text_display, SLOT(copy()));
+}
+
 
 //***************************************************************************
 //
@@ -190,7 +206,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
 
   QSettings settings;
   settings.beginGroup("/ScriptWindow");
-  QString lastdir = settings.value("LastDirectoryVisted", "").toString();
+  QString lastdir = settings.value("LastDirectoryVisited", "").toString();
   // If nothgin, set the last directory to the Mantid scripts directory (if present)
   if( lastdir.isEmpty() )
   {  lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
@@ -204,6 +220,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
   {
     m_manager->m_toggle_progress->setChecked(false);
   }
+
   settings.endGroup();
 
 

@@ -4987,6 +4987,7 @@ void ApplicationWindow::saveSettings()
 	if( scriptingWindow )
  	{
 	  scriptingWindow->raise();//Mantid
+	  scriptingWindow->show();//Mantid
 	  scriptingWindow->saveSettings(); //Mantid
     scriptingWindow->hide();
 	}
@@ -5369,7 +5370,7 @@ void ApplicationWindow::savetoNexusFile()
 				wsName=((MantidMatrix*)w)->getWorkspaceName();
 		}
 		else
-			wsName=m_nexusInputWSName.toStdString();
+		  wsName=m_nexusInputWSName.toStdString();
 		if(!Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
 		{
 			throw std::runtime_error("Invalid input workspace for SaveNexus");
@@ -12685,9 +12686,9 @@ void ApplicationWindow::translateActionsStrings()
     actionImagePlot->setToolTip(tr("Image Plot"));
 	actionTransposeMatrix->setMenuText(tr("&Transpose"));
 	actionRotateMatrix->setMenuText(tr("R&otate 90"));
-    actionRotateMatrix->setToolTip(tr("Rotate 90° Clockwise"));
+    actionRotateMatrix->setToolTip(tr("Rotate 90Â° Clockwise"));
     actionRotateMatrixMinus->setMenuText(tr("Rotate &-90"));
-    actionRotateMatrixMinus->setToolTip(tr("Rotate 90° Counterclockwise"));
+    actionRotateMatrixMinus->setToolTip(tr("Rotate 90Â° Counterclockwise"));
 	actionFlipMatrixVertically->setMenuText(tr("Flip &V"));
 	actionFlipMatrixVertically->setToolTip(tr("Flip Vertically"));
 	actionFlipMatrixHorizontally->setMenuText(tr("Flip &H"));

@@ -38,6 +38,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QMessageBox>
+#include <QFileInfo>
 
 namespace
 {
@@ -324,69 +325,98 @@ bool PythonScript::exec()
 	Env->setIsRunning(false);
 	return false;
 }
-
+#include <iostream>
 QString PythonScript::constructErrorMsg()
 {
-  QString msg("");
   if ( !PyErr_Occurred() ) 
   {
-    return msg;
+    return QString("");
   }
   PyObject *exception(NULL), *value(NULL), *traceback(NULL);
   PyTracebackObject *excit(NULL);
   PyErr_Fetch(&exception, &value, &traceback);
   PyErr_NormalizeException(&exception, &value, &traceback);
 
-  //----- Mantid - Altered error message formatting -----
-  // There is no stack for a syntax error
-  int errline(-1);
-  if(PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError))
+  // Get the filename of the error. This will be blank if it occurred in the main script
+  QString filename("");
+  int endtrace_line(-1);
+  if( traceback )
   {
-    if( getLineOffset() >= 0 )
+    excit = (PyTracebackObject*)traceback;
+    while (excit && (PyObject*)excit != Py_None)
     {
-      errline = getLineOffset() + 
-	env()->toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
-      // Update the line marker as this will not get done by the tracing function
-      // since we have not begun execution yet
-      msg = QString("Error on line ") + QString::number(errline) + ": " +
-	env()->toString(PyObject_GetAttrString(value, "msg"), true);
+      _frame *frame = excit->tb_frame;
+      endtrace_line = excit->tb_lineno;
+      filename = PyString_AsString(frame->f_code->co_filename);
+      excit = excit->tb_next;
+    }
+    Py_DECREF(traceback);
+  }
+
+
+  //Exception value
+
+  int msg_lineno(-1);
+  int marker_lineno(-1);
+
+  QString message("");
+  QString exception_details("");
+  if( PyErr_GivenExceptionMatches(exception, PyExc_SyntaxError) )
+  {
+    msg_lineno = env()->toString(PyObject_GetAttrString(value, "lineno"), true).toInt();
+    if( traceback )
+    {
+      marker_lineno = endtrace_line;
     }
     else
     {
-      msg = env()->toString(PyObject_GetAttrString(value, "msg"), true);
+      // No traceback here get line from exception value object
+      marker_lineno = msg_lineno;
     }
-    Py_DECREF(exception);
-    Py_DECREF(value);
+
+    message = "SyntaxError";
+    QString except_value(env()->toString(value,true));
+    exception_details = except_value.section('(',0,0);
+    filename = except_value.section('(',1).section(',',0,0);
   }
   else
   {
-    // Marker will already be at this line for an execution error as the line reporting happens
-    // before each line of code is executed
-    errline = getLineOffset();
-    if( errline >= 0 )
+    excit = (PyTracebackObject*)traceback;
+    marker_lineno = excit->tb_lineno;
+    Py_DECREF(traceback);
+
+    if( filename.isEmpty() )
     {
-      if( traceback )
-      {
-	excit = (PyTracebackObject*)traceback;
-	if( excit ) errline += excit->tb_lineno;
-	Py_DECREF(traceback);
-      }
-      //Format the exception in a nicer manner
-      msg = env()->toString(exception,true).section('.',1).remove("'>") + QString(" on line ") + 
-	QString::number(errline) + QString(" : ") + env()->toString(value,true);
+      msg_lineno = marker_lineno;
     }
     else
     {
-      msg = env()->toString(exception,true).section('.',1).remove("'>") + 
-	QString(": ") + env()->toString(value,true);
+      msg_lineno = endtrace_line;
     }
+    message = env()->toString(exception,true).section('.',1).remove("'>");
+    exception_details = env()->toString(value,true) + QString(' ');
   }
-  //----------------------------------------------
+  if( filename.isEmpty() && getLineOffset() >= 0 ) 
+  {
+    marker_lineno += getLineOffset();
+    msg_lineno += getLineOffset();
+  }
+  if( getLineOffset() >= 0 )
+  {
+    message += " on line " + QString::number(marker_lineno);
+  }
+  
+  message += ": " + exception_details;
+  if( !filename.isEmpty() )
+  {
+    message += "in file '" + QFileInfo(filename).fileName() + "' at line " + QString::number(msg_lineno);
+  }
+  
   if( env()->reportProgress() )
   {
-    emit currentLineChanged(errline, false);
+    emit currentLineChanged(marker_lineno, false);
   }
-  return msg;
+  return message;
 }
 
 

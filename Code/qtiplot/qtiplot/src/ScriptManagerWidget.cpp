@@ -267,8 +267,6 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
     connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
 	    this, SLOT(editorContextMenu(const QPoint&)));
     connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
-    connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	    SLOT(updateMarker(int, bool)));
   }
   QString tab_title = "New script";
   setCurrentIndex(insertTab(index, editor, tab_title));
@@ -276,6 +274,9 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
   editor->setLexer(scriptingEnv()->scriptCodeLexer());
   // Set the current editor to focus
   setFocusProxy(editor);
+  editor->setFocus();
+  editor->setCursorPosition(0,0);
+  m_last_active_tab = index;
   return editor;
 }
 
@@ -392,7 +393,11 @@ void ScriptManagerWidget::execute()
 
   //Execute the selection
   m_script_runner->setLineOffset(lineFrom);
+  connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	  SLOT(updateMarker(int, bool)));
   runScriptCode(code);
+  disconnect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	  SLOT(updateMarker(int, bool)));
 }
 
 /**
@@ -410,7 +415,11 @@ void ScriptManagerWidget::executeAll()
   
   //Run the code
   m_script_runner->setLineOffset(0);
+  connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	  SLOT(updateMarker(int, bool)));
   runScriptCode(script_txt);
+  disconnect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	  SLOT(updateMarker(int, bool)));
 }
 
 /**
@@ -442,12 +451,12 @@ bool ScriptManagerWidget::runScriptCode(const QString & code)
 {
   m_script_runner->setCode(code);
   emit ScriptIsActive(true);
-  if( !m_interpreter_mode ) formatMessage("Script execution started.", false);
+  if( !m_interpreter_mode ) formatMessage("Script execution started.", false, true);
   bool success = m_script_runner->exec();
   emit ScriptIsActive(false);
   if( !m_interpreter_mode && success )
   {
-    formatMessage("Script execution completed successfully.", false);
+    formatMessage("Script execution completed successfully.", false, true);
   }
   return success;
 }
@@ -568,17 +577,6 @@ void ScriptManagerWidget::setScriptIsRunning(bool running)
   m_exec->setEnabled(!running);
   m_exec_all->setEnabled(!running);
   if( scriptingEnv()->supportsEvaluation() ) m_eval->setEnabled(!running);
-
-  // Disable tab switching if progress reporting is enabled
-  if( m_toggle_progress->isChecked() )
-  {
-    int ntabs = count();
-    for( int index = 0; index < ntabs; ++index )
-    {
-      setTabEnabled(index, !running);
-    }
-  }
-
 }
 
 /**
@@ -764,6 +762,7 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
   editor->blockSignals(false);
   setTabText(currentIndex(), QFileInfo(file_to_open).fileName());
   editor->setFileName(file_to_open);
+  editor->setCursorPosition(0,0);
 
   // Set last directory
   m_last_dir = QFileInfo(file_to_open).absolutePath();
@@ -773,23 +772,23 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
  * Format a message and emit a signal that it is ready to be printed
  * @param msg The message
  * @param error If this is an error message
+ * @param timestamp Add a time stamp to the message
  */
-void ScriptManagerWidget::formatMessage(const QString & msg, bool error)
+void ScriptManagerWidget::formatMessage(const QString & msg, bool error, bool timestamp)
 {
   // I want to control end of line formatting my self
-  QString  msg_to_print = msg.trimmed();
-  if( msg_to_print.isEmpty() ) return;
-
-  if( m_interpreter_mode )
+  if( m_interpreter_mode || !timestamp )
   {
-    emit MessageToPrint(msg_to_print, error);
+    emit MessageToPrint(msg, error);
   }
   else
   {
-    QString hashes(20, '#');
+    QString msg_to_print = msg.trimmed();
+    if( msg_to_print.isEmpty() ) return;
+    QString separator(75, '-');
     //Signal that the text is ready to print
-    emit MessageToPrint(hashes + " " + QDateTime::currentDateTime().toString() + "  " + 
-			hashes + "\n" + msg_to_print + "\n", error);
+    emit MessageToPrint(separator + "\n" + QDateTime::currentDateTime().toString() + ": " + 
+			msg_to_print + "\n" + separator + '\n', error);
   }
 }
 

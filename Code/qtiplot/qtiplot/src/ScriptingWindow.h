@@ -78,8 +78,14 @@ private slots:
   void displayOutputMessage(const QString &, bool error);
 
 private:
+  /// Create the action pointers
+  void initActions();
+
+private:
   /// The actually widget that displays the text
   QTextEdit *m_text_display;
+  /// Copy action
+  QAction *m_copy;
 };
 
 

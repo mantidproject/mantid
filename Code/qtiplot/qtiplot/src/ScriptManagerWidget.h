@@ -154,7 +154,7 @@ private:
   ///Open a script
   void open(bool newtab, const QString & filename = QString());
   /// Format a message and emit the formatted string to be printed
-  void formatMessage(const QString & msg, bool error);
+  void formatMessage(const QString & msg, bool error, bool timestamp = false);
   /// Create a new Script object and connect up the relevant signals.
   void setNewScriptRunner();
   ///Close a tab with a given index
@@ -176,7 +176,8 @@ private:
   // I need this to ensure that the position of a call to tabBar()->tabAt() is accurate
   // as Qt doesn't provide an action signal parameterized on a position
   QPoint m_cursor_pos;
-
+  /// The index of the last active tab 
+  int m_last_active_tab;
   /// File actions
   QAction *m_new_tab, *m_open_curtab, *m_open_newtab, *m_save, *m_saveas, *m_close_tab;
   ///Edit actions that are necessary for the manager
