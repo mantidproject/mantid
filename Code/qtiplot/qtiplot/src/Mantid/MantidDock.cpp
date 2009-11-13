@@ -72,7 +72,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   m_loadButton->setMenu(loadMenu);
 
   connect(m_deleteButton,SIGNAL(clicked()),this,SLOT(deleteWorkspaces()));
-  connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
+ connect(m_tree,SIGNAL(itemClicked(QTreeWidgetItem*, int)),this,SLOT(clickedWorkspace(QTreeWidgetItem*, int)));
+   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(workspaceSelected()));
 	connect(m_groupButton,SIGNAL(clicked()),this,SLOT(groupOrungroupWorkspaces()));
 
   m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -90,7 +91,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
 
 void MantidDockWidget::clearWorkspaceTree()
 {
-  m_tree->clear();
+ m_tree->clear();
 }
 
 /** Returns the name of the selected workspace
@@ -332,8 +333,17 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
  
 }
 
-void MantidDockWidget::clickedWorkspace(QTreeWidgetItem*, int)
+void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
+	
+	
+}
+void MantidDockWidget::workspaceSelected()
+{ QList<QTreeWidgetItem*> selectedItems=m_tree->selectedItems();
+	if(selectedItems.isEmpty()) return;
+	QString wsName=selectedItems[0]->text(0);
+	if(Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+	m_mantidUI->enableSaveNexus(wsName);
 }
 
 /**

@@ -106,9 +106,10 @@ d_selected_label(NULL),
 d_labels_align(Qt::AlignHCenter),
 mColorMap(),m_nRows(nrows),m_nColumns(ncols),mScaledValues(0),m_bIntensityChanged(false)
 {
+	
 	setTitle("UserHelperFunction");
 	setData(FunctionData(f,nrows,ncols,bRect,minz,maxz));
-	double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
+		double step = fabs(data().range().maxValue() - data().range().minValue())/5.0;
 
 	QwtValueList contourLevels;
 	for ( double level = data().range().minValue() + step;
@@ -466,13 +467,14 @@ bool Spectrogram::selectedLabels(const QPoint& pos)
 QString Spectrogram::saveToString()
 {
 QString s = "<spectrogram>\n";
-s += "\t<matrix>" + QString(d_matrix->objectName()) + "</matrix>\n";
+//s += "\t<matrix>" + QString(d_matrix->objectName()) + "</matrix>\n";
 
 if (color_map_policy != Custom)
 	s += "\t<ColorPolicy>" + QString::number(color_map_policy) + "</ColorPolicy>\n";
 else
 	{
 	s += "\t<ColorMap>\n";
+	if(!mCurrentColorMap.isEmpty())s+="\t\tFileName\t"+mCurrentColorMap+"\n";
 	s += "\t\t<Mode>" + QString::number(color_map.mode()) + "</Mode>\n";
 	s += "\t\t<MinColor>" + color_map.color1().name() + "</MinColor>\n";
 	s += "\t\t<MaxColor>" + color_map.color2().name() + "</MaxColor>\n";
@@ -495,13 +497,17 @@ if (contourLines)
 	{
 	s += "\t\t<Levels>"+QString::number(levels())+"</Levels>\n";
 	bool defaultPen = defaultContourPen().style() != Qt::NoPen;
-	s += "\t\t<DefaultPen>"+QString::number(defaultPen)+"</DefaultPen>\n";
 	if (defaultPen)
-		{
+		{s += "\t\t<DefaultPen>"+QString::number(defaultPen)+"</DefaultPen>\n";
 		s += "\t\t\t<PenColor>"+defaultContourPen().color().name()+"</PenColor>\n";
 		s += "\t\t\t<PenWidth>"+QString::number(defaultContourPen().widthF())+"</PenWidth>\n";
 		s += "\t\t\t<PenStyle>"+QString::number(defaultContourPen().style() - 1)+"</PenStyle>\n";
 		}
+	else if(!d_color_map_pen)
+	{s += "\t\t<CustomPen>"+QString::number(!defaultPen)+"</CustomPen>\n";
+	}
+	else
+		s += "\t\t<ColormapPen>"+QString::number(!defaultPen)+"</ColormapPen>\n";
 	}
 QwtScaleWidget *colorAxis = plot()->axisWidget(color_axis);
 if (colorAxis && colorAxis->isColorBarEnabled())
@@ -511,6 +517,7 @@ if (colorAxis && colorAxis->isColorBarEnabled())
 	s += "\t</ColorBar>\n";
 	}
 s += "\t<Visible>"+ QString::number(isVisible()) + "</Visible>\n";
+s+="\t<IntensityChanged>"+QString::number(isIntensityChanged())+"</IntensityChanged>\n";
 return s+"</spectrogram>\n";
 }
 /**

@@ -164,7 +164,7 @@ static const char *unzoom_xpm[]={
 //Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   : QWidget(parent, f) //QwtPlot(parent)
-{
+{	
 	setWindowFlags(f);
 	n_curves=0;
 	d_active_tool = NULL;
@@ -1183,7 +1183,22 @@ void Graph::setScale(int axis, double start, double end, double step,
 		sc_engine->setLog10ScaleAfterBreak(log10AfterBreak);
 		sc_engine->setAttribute(QwtScaleEngine::Inverted, inverted);
 	//}
-	setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
+
+	setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);	
+	
+	for (int i=0; i<n_curves; i++){
+		QwtPlotItem *it = plotItem(i);
+		if (!it)
+			continue;
+		if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+            Spectrogram *sp = (Spectrogram *)it;
+			if(sp)
+			{	updatedaxis[axis]=1;
+			}
+           
+        }
+	}
+	
 	
 // 	if (type == Graph::Log10)
 // 	{
@@ -1234,7 +1249,6 @@ void Graph::setScale(int axis, double start, double end, double step,
 void Graph::setAxisScale(int axis, double start, double end, int type, double step,
 				  int majorTicks, int minorTicks)
 {
-
   ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
 /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
 	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);*/
@@ -1299,7 +1313,8 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 				  rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
 				  sp->setColorMap(sp->getColorMap());
 				  if(sp->isIntensityChanged())
-					  sp->changeIntensity( start,end);
+						sp->changeIntensity( start,end);
+	
 			  }
 		  }
 	  }
@@ -2001,13 +2016,25 @@ QString Graph::saveScale()
             s += "\t" + QString::number(se->minTicksAfterBreak());
             s += "\t" + QString::number(se->log10ScaleAfterBreak());
 			s += "\t" + QString::number(se->breakWidth());
-            s += "\t" + QString::number(se->hasBreakDecoration()) + "\n";
-        } else
-			 s += "\n";
+            s += "\t" + QString::number(se->hasBreakDecoration());//+ "\n";
+        } /*else
+			 s += "\n";*/
+		//for saving the spectrogram axes number if the axes details like scale is changed
+		//this is useful for saving/loading project.
+		for (int j=0; j<n_curves; j++){
+			QwtPlotItem *it = plotItem(j);
+			if (!it)
+				continue;
+
+			if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+			 s+="\t"+QString::number(updatedaxis[i]);
+			}
 	}
+		s+="\n";
+	
+}
 	return s;
 }
-
 void Graph::setAxisTitleColor(int axis, const QColor& c)
 {
 	QwtScaleWidget *scale = (QwtScaleWidget *)d_plot->axisWidget(axis);
@@ -3794,6 +3821,8 @@ QString Graph::saveToString(bool saveAsTemplate)
 	s+=QString::number(this->frameGeometry().width())+"\t";
 	s+=QString::number(this->frameGeometry().height())+"\n";
 	s+=saveTitle();
+	s+="SpectrumList\t"+getSpectrumIndex()+"\n";
+	s+="Errors\t"+QString::number(getError())+"\n";
 	s+="<Antialiasing>" + QString::number(d_antialiasing) + "</Antialiasing>\n";
 	s+="Background\t" + d_plot->paletteBackgroundColor().name() + "\t";
 	s+=QString::number(d_plot->paletteBackgroundColor().alpha()) + "\n";
@@ -4658,7 +4687,7 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,Q
   		return 0;
 
   	Spectrogram *d_spectrogram = new Spectrogram(f,nrows,ncols,bRect,minz,maxz);
-
+   
     return plotSpectrogram(d_spectrogram,type);
 }
 
@@ -4676,10 +4705,10 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 	    // d_spectrogram->setDefaultColorMap();
 		 d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
   	    }
-  	c_keys.resize(++n_curves);
+	c_keys.resize(++n_curves);
   	c_keys[n_curves-1] = d_plot->insertCurve(d_spectrogram);
 
-  	c_type.resize(n_curves);
+    c_type.resize(n_curves);
   	c_type[n_curves-1] = type; 
 
 	QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
@@ -4692,9 +4721,14 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 	d_plot->setAxisScale(QwtPlot::yRight,
 		d_spectrogram->data().range().minValue(),
 		d_spectrogram->data().range().maxValue());
-	
+   		
 	//setSpectrogram(d_spectrogram);
 	d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
+
+	for (int i=0; i < QwtPlot::axisCnt; i++)
+	{updatedaxis.push_back(0);
+	}
+
 	return d_spectrogram;
 }
 
@@ -5207,4 +5241,28 @@ void Graph::changeIntensity(bool bIntensityChanged)
         }
 	}
 }
+void Graph::setspectrumIndexList(const std::set<int>& spindexlist)
+{
+	m_spindexList=spindexlist;
+}
+std::set<int> Graph::getspectrumIndexList()const
+{
+	return m_spindexList;
+}
+QString Graph::getSpectrumIndex()
+{
+	std::set<int>indexList=getspectrumIndexList();
+	QString spectrumList;
+	 for(std::set<int>::const_iterator it=indexList.begin();it!=indexList.end();++it)
+	 {	 QString temp;
+		 temp.setNum(*it);
+		if( spectrumList.isEmpty())
+			spectrumList=temp;
+		else
+		{	spectrumList+="\t";
+			spectrumList+=temp;
+		}
 
+	 }
+ return spectrumList;
+}

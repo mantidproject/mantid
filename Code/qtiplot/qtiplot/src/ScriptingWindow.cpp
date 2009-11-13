@@ -193,11 +193,9 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
   QString lastdir = settings.value("LastDirectoryVisted", "").toString();
   // If nothgin, set the last directory to the Mantid scripts directory (if present)
   if( lastdir.isEmpty() )
-  {
-    lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
+  {  lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
   }
   m_manager->m_last_dir = lastdir;
-
   if( env->supportsProgressReporting() )
   {
     m_manager->m_toggle_progress->setChecked(settings.value("ProgressArrow", true).toBool());
@@ -425,4 +423,11 @@ void ScriptingWindow::initMenus()
   //Toggle progress
   m_window_menu->addAction(m_manager->m_toggle_progress);
 }
-
+/**
+ * calls ScriptManagerWidget saveToString and  
+ *  saves the currently opened script file names to a string
+ */
+QString ScriptingWindow::saveToString()
+{
+	return m_manager->saveToString();
+}

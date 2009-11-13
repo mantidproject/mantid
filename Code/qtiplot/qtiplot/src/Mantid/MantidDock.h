@@ -33,6 +33,7 @@ public slots:
   void clearWorkspaceTree();
 protected slots:
   void popupMenu(const QPoint & pos);
+  void workspaceSelected();
 private slots:
   void populateWorkspaceData(Mantid::API::Workspace_sptr workspace, QTreeWidgetItem* ws_item);
   void updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr);

@@ -1754,7 +1754,6 @@ void Graph3D::clearData()
 		d_func = 0;
 	}
 	plotAssociation = QString();
-
 	sp->makeCurrent();
 	sp->loadFromData (0, 0, 0, false, false);
 	sp->updateData();
@@ -2278,7 +2277,8 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 
 	sp->makeCurrent();
 	if (d_func)
-		s += d_func->function() + ";" + QString::number(d_func->columns()) + ";" + QString::number(d_func->rows()) + "\t";
+	{ s+="mantidMatrix3D\t";	s += d_func->function() + ";" + QString::number(d_func->columns()) + ";" + QString::number(d_func->rows()) + "\t";
+	}
 	else if (d_surface){
 		s += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";
 		s += QString::number(d_surface->uStart(), 'e', 15) + ",";
@@ -2289,11 +2289,10 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 		s += QString::number(d_surface->rows()) + ",";
 		s += QString::number(d_surface->uPeriodic()) + ",";
 		s += QString::number(d_surface->vPeriodic());
-	} else {
+	} else { 
 		s += plotAssociation;
 		s += "\t";
 	}
-
 	double start,stop;
 	sp->coordinates()->axes[X1].limits(start,stop);
 	s+=QString::number(start)+"\t";
@@ -2304,7 +2303,7 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 	sp->coordinates()->axes[Z1].limits(start,stop);
 	s+=QString::number(start)+"\t";
 	s+=QString::number(stop)+"\n";
-
+    
 	QString st;
 	if (sp->coordinates()->style() == Qwt3D::NOCOORD)
 		st="nocoord";
@@ -2312,7 +2311,9 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 		st="box";
 	else
 		st="frame";
-	s+="Style\t"+st+"\t";
+	QString style;
+	style.setNum(style_);
+	s+="Style\t"+style+"\t"+st+"\t";
 
 	switch(sp->floorStyle ())
 	{

@@ -1989,8 +1989,11 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
         levelsGroupBox->setChecked(sp->testDisplayMode(QwtPlotSpectrogram::ContourMode));
         levelsBox->setValue(sp->levels());
 			
-        autoContourBox->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
-	    defaultContourBox->setChecked(sp->defaultContourPen().style() != Qt::NoPen);
+        //autoContourBox->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
+		autoContourBox->setChecked(sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
+		//customPenBtn->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
+		customPenBtn->setChecked(!sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
+	    defaultContourBox->setChecked((sp->defaultContourPen().style() != Qt::NoPen) && !(sp->useColorMapPen()) );
 		
         levelsColorBox->setColor(sp->defaultContourPen().color());
 		contourWidthBox->setValue(sp->defaultContourPen().widthF());
@@ -2358,7 +2361,8 @@ bool PlotDialog::acceptParams()
 	   //updates the spectrogram,colormap widget with the loaded file
 	   else if (customScaleBox->isChecked()){
 		   sp->mutableColorMap().loadMap(mCurrentColorMap);
-		   sp->setDefaultColorMap();
+		  // sp->setDefaultColorMap();
+		   sp->setCustomColorMap(sp->mutableColorMap());
 		   //sets the selected colormapfile name to spectrogram
 		   sp->setColorMapFileName(mCurrentColorMap);
 		   //saves the settings
@@ -2382,6 +2386,7 @@ bool PlotDialog::acceptParams()
 			QPen pen = QPen(levelsColorBox->color(), contourWidthBox->value(),Graph::getPenStyle(boxContourStyle->currentIndex()));
 		   	pen.setCosmetic(true);
   	    	sp->setDefaultContourPen(pen);
+			sp->setColorMapPen(false);
 		} else if (customPenBtn->isChecked())
 				contourLinesEditor->updateContourPens();
 		else

@@ -693,15 +693,23 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 	connect(g, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
 //#799 fix for  multiple dialog creation on double clicking/ on right click menu scale on  2d plot 
  //   a->connectMultilayerPlot(g);
-    Graph* plot = g->activeGraph();
-	a->setPreferences(plot);
+   Graph* plot = g->activeGraph();
+	ProjectData *prjData=0;
+   plotSpectrogram(plot,a,type,false,prjData);
+   g->askOnCloseEvent(false);
+   QApplication::restoreOverrideCursor();
+   return g;
+}
+void MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData *prjData)
+{
+	app->setPreferences(plot);
     plot->setTitle(tr("Workspace ") + name());
     const Mantid::API::Axis* ax;
     ax = m_workspace->getAxis(0);
     std::string s;
     if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
     else
-        s = "X axis";
+        s = "X Axis";
     plot->setXAxisTitle(tr(s.c_str()));
     if ( m_workspace->axes() > 1 )
     {
@@ -722,18 +730,30 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 	range(&minz,&maxz);
 	Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
 	if( spgrm )
-	{
-		//spgrm->setWorkspace(m_workspace);
-		spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
+	{  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
 		spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+		if(project)
+		{	spgrm->mutableColorMap().loadMap(QString::fromStdString(prjData->getColormapFile()));
+		spgrm->setCustomColorMap(spgrm->mutableColorMap());
+		spgrm->setIntensityChange(prjData->getIntensity());
+		if(!prjData->getGrayScale())spgrm->setGrayScale();
+		if(prjData->getContourMode())
+		{spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
+		spgrm->showContourLineLabels(true);
+		}
+		spgrm->setDefaultContourPen(prjData->getDefaultContourPen());
+		spgrm->setColorMapPen(false);
+		if(prjData->getColorMapPen())spgrm->setColorMapPen(true);
+		ContourLinesEditor* contourEditor=prjData->getContourLinesEditor();
+		if(!contourEditor) return;
+		contourEditor->setSpectrogram(spgrm);
+		contourEditor->updateContents();
+		contourEditor->updateContourLevels();
+	}
+
 	}
 	plot->setAutoScale();
-    g->askOnCloseEvent(false);
-
-	QApplication::restoreOverrideCursor();
-	return g;
 }
-
 void MantidMatrix::setSpectrumGraph(MultiLayer *ml, Table* t)
 {
     MantidUI::setUpSpectrumGraph(ml,name());
@@ -765,9 +785,16 @@ void MantidMatrix::removeWindow()
 {
 	QList<MdiSubWindow *> windows = applicationWindow()->windowsList();
 	foreach(MdiSubWindow *w, windows){
-		if (w->isA("Graph3D") && ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
-			((Graph3D*)w)->clearData();
-		else if (w->isA("MultiLayer")){
+		//if (w->isA("Graph3D") && ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
+		if (w->isA("Graph3D") )//&& ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
+		{ 	UserFunction* fn=((Graph3D*)w)->userFunction();
+			if(fn)
+			{	if(fn->hlpFun() == &m_funct)((Graph3D*)w)->clearData();
+			}
+			
+		}else if (w->isA("Table")){
+		}
+		else if (w->isA("MultiLayer")){ 
 			QList<Graph *> layers = ((MultiLayer*)w)->layersList();
 			foreach(Graph *g, layers){
 				for (int i=0; i<g->curves(); i++){
@@ -777,7 +804,9 @@ void MantidMatrix::removeWindow()
 				}
 			}
 		}
+		
 	}
+	//this->closeDependants();
 }
 
 void MantidMatrix::getSelectedRows(int& i0,int& i1)
@@ -881,11 +910,10 @@ void MantidMatrix::dependantClosed(MdiSubWindow* w)
   }
   else if (w->isA("MultiLayer")) 
   {
-    int i = m_plots2D.indexOf((MultiLayer*)w);
-    if (i >= 0) m_plots2D.remove(i);
+	 int i = m_plots2D.indexOf((MultiLayer*)w);
+	if (i >= 0)m_plots2D.remove(i);
     else
-    {
-      QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find((MultiLayer*)w);
+    {QMap<MultiLayer*,Table*>::iterator i = m_plots1D.find((MultiLayer*)w);
       if (i != m_plots1D.end())
 	{
 	  if (i.value() != 0) 
@@ -1132,6 +1160,20 @@ void MantidMatrix::goToTab(const QString & name)
   }
   else return;
 }
+QString MantidMatrix::saveToString(const QString &geometry, bool saveAsTemplate)
+{
+	QString s="<mantidmatrix>\n";
+	s+="WorkspaceName\t"+QString::fromStdString(m_strName)+"\n";
+	s+=geometry;
+	s+="</mantidmatrix>\n";
+	return s;
+}
+
+/**  returns the workspace name
+  */
+const std::string & MantidMatrix::getWorkspaceName()
+{return m_strName;
+}
 
 // ----------   MantidMatrixModel   ------------------ //
 
@@ -1225,3 +1267,4 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
     double val = data(index.row(),index.column());
     return QVariant(m_locale.toString(val,m_format,m_prec));
 }
+

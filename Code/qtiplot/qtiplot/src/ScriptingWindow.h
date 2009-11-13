@@ -106,6 +106,8 @@ public:
   /// Execute all code. This is here for backwards compatability with the old
   /// ScriptWindow class
   void executeAll();
+  ///saves scripts file names to a string 
+  QString saveToString();
 
 private:
   /// Create menu bar and menu actions

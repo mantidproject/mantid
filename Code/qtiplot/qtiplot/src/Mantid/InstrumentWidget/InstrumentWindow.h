@@ -77,6 +77,8 @@ public:
   void setColorMapRange(double minValue, double maxValue);
   void setDataMappingIntegral(double minValue,double maxValue);
   void selectComponent(const QString & name);
+  /// for saving the instrument window  to mantid project
+	QString saveToString(const QString& geometry, bool saveAsTemplate= false);
 
 public slots:
 	void modeSelectButtonClicked();

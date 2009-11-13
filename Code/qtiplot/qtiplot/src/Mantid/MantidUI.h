@@ -203,7 +203,21 @@ public:
 	void groupWorkspaces();
 	/// UnGroup selected groupworkspace
 	void ungroupWorkspaces();
+   /** save the workspace data to nexus file
+	    This method is useful when a project is saved from mantidplot
+	*/
+	void savedatainNexusFormat(const std::string& fileName,const std::string & wsName);
 
+	/** load data from nexus file.This method is useful 
+	when a project is opened  from mantidplot
+	*/
+	void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
+	void loadadataFromRawFile(const std::string& wsname,const std::string& fileName,bool project=false);
+
+	MantidMatrix* openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper);
+
+	void saveProject(bool save);
+	void enableSaveNexus(const QString & wsName);
 
 public slots:
   void cancelAllRunningAlgorithms();
@@ -324,6 +338,7 @@ public slots:
 	void loadNexusWorkspace();
 	void saveNexusWorkspace();
 	void renameWorkspace();
+	QString saveToString(const std::string &workingDir);
 
 #ifdef _WIN32
 public:
@@ -356,6 +371,7 @@ private:
 	void executeSaveNexus(QString algName,int version);
 
     void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
+	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
 	void moveSelctedWSChildrentoRenamedWS(const std::string & renamedWSName,QList<QTreeWidgetItem*>& selectedItems);
 
 
@@ -376,7 +392,7 @@ private:
     QAction *actionCopyDetectorsToTable;
     QAction *actionCopyValues;
 
-    QMenu *mantidMenu;
+	QMenu *mantidMenu;
     QMenu *menuMantidMatrix;             //  MantidMatrix specific menu
     AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
 
@@ -388,7 +404,7 @@ private:
 
     // Stores dependent mdi windows. If the 'key' window closes, all 'value' ones must be closed as well.
     std::multimap<MdiSubWindow*,MdiSubWindow*> m_mdiDependency;
-    static Mantid::Kernel::Logger& logObject;
+
 };
 
 static const char * mantid_matrix_xpm[] = {

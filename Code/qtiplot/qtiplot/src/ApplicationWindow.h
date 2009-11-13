@@ -45,6 +45,7 @@
 #include "ScriptingEnv.h"
 #include "Script.h"
 
+
 class QPixmap;
 class QCloseEvent;
 class QDropEvent;
@@ -84,6 +85,7 @@ class ArrowMarker;
 class ImageMarker;
 class TextEditor;
 class AssociationsDialog;
+class MantidMatrix;
 
 //Mantid
 class MantidUI;
@@ -173,7 +175,9 @@ public:
 	QString endOfLine();
 	bool autoUpdateTableValues(){return d_auto_update_table_values;};
 	void setAutoUpdateTableValues(bool on = true);
-
+	void enablesaveNexus(const QString& wsName);
+	
+	
 public slots:
 	//! \name Projects and Project Files
 	//@{
@@ -181,6 +185,10 @@ public slots:
 	ApplicationWindow* open(const QString& fn, bool factorySettings = false, bool newProject = true);
 	ApplicationWindow* openProject(const QString& fn, bool factorySettings = false, bool newProject = true);
 	ApplicationWindow* importOPJ(const QString& fn, bool factorySettings = false, bool newProject = true);
+	///Load nexus file from File->Load Menu
+	void loadNexus();
+	///Load Raw File from File->Load Menu
+	void loadRaw();
 
 	/**
 	 * \brief Create a new project from a data file.
@@ -555,12 +563,11 @@ public slots:
 
 	//! \name Reading from a Project File
 	//@{
-	Matrix* openMatrix(ApplicationWindow* app, const QStringList &flist);
+	
 	Table* openTable(ApplicationWindow* app, const QStringList &flist);
 	TableStatistics* openTableStatistics(const QStringList &flist);
 	Graph3D* openSurfacePlot(ApplicationWindow* app, const QStringList &lst);
 	Graph* openGraph(ApplicationWindow* app, MultiLayer *plot, const QStringList &list);
-
 	void openRecentProject(int index);
 	//@}
 
@@ -975,12 +982,24 @@ public slots:
 
 	void showToolBarsMenu();
   void enableMantidPeakFit(bool yes);
+  void savetoNexusFile();
 
 signals:
 	void modified();
 
 private:
 	virtual QMenu * createPopupMenu(){return NULL;};
+	///void open spectrogram plot from project
+	void openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
+	Matrix* openMatrix(ApplicationWindow* app, const QStringList &flist);
+	void openMantidMatrix(const QStringList &lst);
+	MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);
+	void openScriptWindow(const QStringList &list);
+	void populateMantidTreeWdiget(const QString &s);
+	void openInstrumentWindow(const QStringList &list);
+	/// this method saves the data on project save
+	void savedatainNexusFormat(const std::string& wsName,const std::string & fileName);
+
 
 private slots:
     //! \name Initialization
@@ -1212,13 +1231,13 @@ private:
 	QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
 	QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu;
 	QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
-	QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu;
+	QMenu *tableMenu, *fillMenu, *normMenu, *newMenu, *exportPlotMenu, *smoothMenu, *filterMenu, *decayMenu,*saveMenu,*openMenu;
 
 	QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
 	QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
-    QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot;
+    QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
     QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
-    QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage;
+    QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj,*actionOpenRaw,*actionOpenNexus;
     QAction *actionLoad, *actionUndo, *actionRedo;
     QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
     QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
@@ -1293,8 +1312,11 @@ private:
   bool d_user_script_running;
 
     QUndoView *d_undo_view;
+	/// list of mantidmatrix windows opened from project file.
+	QList<MantidMatrix*> m_mantidmatrixWindows;
 
     friend class MantidUI;
+	QString m_nexusInputWSName;
 public:
     MantidUI *mantidUI;
 };

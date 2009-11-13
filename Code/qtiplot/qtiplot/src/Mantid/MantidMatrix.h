@@ -27,6 +27,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidLog.h"
+#include "../ContourLinesEditor.h"
 
 class QLabel;
 class QStackedWidget;
@@ -37,7 +38,8 @@ class ApplicationWindow;
 class Graph3D;
 class MultiLayer;
 class QTabWidget;
-class UpdateDAEThread;
+class UpdateDAEThread;	
+class ProjectData;
 
 class MantidMatrixFunction: public UserHelperFunction
 {
@@ -139,6 +141,14 @@ public:
     // Return number precision of the active model
     int precision();
 
+	/// for saving the matrix workspace  to mantid project
+	QString saveToString(const QString &, bool saveAsTemplate= false);
+   
+    /// returns the workspace name  
+	const std::string & getWorkspaceName();
+
+	void plotSpectrogram(Graph* plot ,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData*prjdata);
+
 signals:
     void needsUpdating();
     void needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
@@ -211,7 +221,7 @@ public slots:
 	bool eventFilter(QObject *object, QEvent *e);
 	//to synchronize the views
 	void viewChanged(int);
-
+    
 
     // Opens modified QtiPlot's MatrixDialog and sets column width and number format
     void setMatrixProperties();
@@ -271,6 +281,47 @@ protected:
   	//index to identify the previous view on tab switch
 	int m_PrevIndex;
 
+	QString m_colormapName;
+
+};
+class ProjectData
+{public:
+		ProjectData():m_grayScale(0),m_intensityChanged(0),m_contourMode(0),m_contourLevels(0),
+			m_customPen(0),m_contourLabels(0),m_colormapPen(0),m_ContourLinesEditor(0)
+		{}
+		~ProjectData(){}
+		bool getGrayScale()const {return m_grayScale;}
+		bool getIntensity()const  {return m_intensityChanged;}
+		bool getContourMode()const{return m_contourMode;}
+		std::string& getColormapFile(){return m_colormapFile;}
+		void  setGrayScale(bool grayscale) {m_grayScale=grayscale;}
+		void setIntensity(bool intensity)  {m_intensityChanged=intensity;}
+		void setColormapFile(std::string & fileName){m_colormapFile=fileName;}
+		void setContourMode(bool contourmode){m_contourMode=contourmode;}
+		void setContourLevels(int levels){m_contourLevels=levels;}
+		int getContourLevels()const{return m_contourLevels;}
+		void setDefaultContourPen(const QPen& defaultpen){m_defaultPen=defaultpen;}
+		QPen getDefaultContourPen()const {return  m_defaultPen;}
+		void setColorMapPen(bool colormappen){m_colormapPen=colormappen;}
+		bool getColorMapPen(){return m_colormapPen;}
+		void setCustomPen(bool custompen){m_customPen=custompen;}
+		bool getcustomPen(){return m_customPen;}
+		void setContourLineLabels(bool contourlabels){m_contourLabels=contourlabels;}
+		bool getContourLineLabels(){return m_contourLabels;}
+		void setCotntourLinesEditor(ContourLinesEditor *ceditor){m_ContourLinesEditor=ceditor;}
+		ContourLinesEditor* getContourLinesEditor(){return m_ContourLinesEditor;}
+
+private:
+	bool m_grayScale;
+	bool m_intensityChanged;
+	bool m_contourMode;
+	std::string m_colormapFile;
+	int m_contourLevels;
+	QPen m_defaultPen;
+	bool m_customPen;
+	bool m_contourLabels;
+	bool m_colormapPen;
+	ContourLinesEditor* m_ContourLinesEditor;
 };
 
 /**

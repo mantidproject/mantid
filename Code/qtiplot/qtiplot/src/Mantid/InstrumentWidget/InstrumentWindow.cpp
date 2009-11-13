@@ -665,3 +665,17 @@ void InstrumentWindow::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel:
       close();
     }
 }
+
+/**
+ * This method saves the workspace name associated with the instrument window 
+ * and geometry to a string.This is useful for loading/saving the project.
+ */
+QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTemplate)
+{
+	QString s="<instrumentwindow>\n";
+	s+="WorkspaceName\t"+QString::fromStdString(mWorkspaceName)+"\n";
+	s+=geometry;
+	s+="</instrumentwindow>\n";
+	return s;
+
+}

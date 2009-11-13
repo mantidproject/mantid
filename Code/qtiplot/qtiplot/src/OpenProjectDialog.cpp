@@ -37,16 +37,19 @@
 OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended, Qt::WFlags flags)
 	: ExtensibleFileDialog(parent, extended, flags)
 {
-	setCaption(tr("QtiPlot - Open Project"));
+	//setCaption(tr("QtiPlot - Open Project"));
+	setCaption(tr("MantidPlot - Open Project"));
 	setFileMode(ExistingFile);
 	QStringList filters;
-	filters << tr("QtiPlot project") + " (*.qti)"
-		<< tr("Compressed QtiPlot project") + " (*.qti.gz)"
+	//filters << tr("QtiPlot project") + " (*.qti)"
+		//<< tr("Compressed QtiPlot project") + " (*.qti.gz)"
+	filters << tr("MantidPlot project") + " (*.mantid)"
+		<< tr("Compressed MantidPlot project") + " (*.mantid.gz)"
 		<< tr("Origin project") + " (*.opj *.OPJ)"
 		<< tr("Origin matrix") + " (*.ogm *.OGM)"
 		<< tr("Origin worksheet") + " (*.ogw *.OGW)"
 		<< tr("Origin graph") + " (*.ogg *.OGG)"
-		<< tr("Backup files") + " (*.qti~)"
+		<< tr("Backup files") + " (*.mantid~)"
 		//<< tr("Python Source") + " (*.py *.PY)"
 		<< tr("All files") + " (*)";
 	setFilters(filters);

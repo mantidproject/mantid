@@ -156,6 +156,8 @@ public:
 	static QString parseAsciiFile(const QString& fname, const QString &commentString, int endLine,
                                   int ignoreFirstLines, int maxRows, int& rows);
 
+	void setconfirmcloseFlag(bool closeflag){d_confirm_close=closeflag;}
+
 public slots:
 	virtual void print(){};
 
@@ -170,7 +172,7 @@ signals:
 	void statusChanged(MdiSubWindow *);
 	//! Show the context menu
 	void showContextMenu();
-
+	
 protected:
 	//! Catches status changes
 	virtual void changeEvent(QEvent *event);

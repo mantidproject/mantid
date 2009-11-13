@@ -50,8 +50,6 @@ using namespace std;
 
 using namespace Mantid::API;
 
-Mantid::Kernel::Logger& MantidUI::logObject=Mantid::Kernel::Logger::get("MantidUI");
-
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 m_addObserver(*this,&MantidUI::handleAddWorkspace),
@@ -337,9 +335,9 @@ bool MantidUI::menuAboutToShow(QMdiSubWindow *w)
 }
 
 Graph3D *MantidUI::plot3DMatrix(int style)
-{
+{	
     QMdiSubWindow *w = appWindow()->activeWindow();
-    if (w->isA("MantidMatrix"))
+	if (w->isA("MantidMatrix"))
     {
         return static_cast<MantidMatrix*>(w)->plotGraph3D(style);
     }
@@ -500,7 +498,9 @@ void MantidUI::removeWindowFromLists(MdiSubWindow* m)
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    if (m->isA("MantidMatrix")) static_cast<MantidMatrix*>(m)->removeWindow();
+    if (m->isA("MantidMatrix")) 
+	{static_cast<MantidMatrix*>(m)->removeWindow();
+	}
 
 	QApplication::restoreOverrideCursor();
 }
@@ -1379,7 +1379,55 @@ void MantidUI::clearAllMemory()
   Mantid::API::FrameworkManager::Instance().clear();
   m_exploreMantid->clearWorkspaceTree();
 }
+void MantidUI::saveProject(bool saved)
+{
+	if( !saved )
+	{
+		QString savemsg = tr("Save changes to project: <p><b> %1 </b> ?").arg("untitled");
+		int result = QMessageBox::information(appWindow(), tr("MantidPlot"), savemsg, tr("Yes"), tr("No"), 0, 2);
+		if( result == 0)
+		    appWindow()->saveProject();
+	}
+	//close all the windows opened
+	foreach( MdiSubWindow* sub_win, appWindow()->windowsList() )
+	{	//if(sub_win->isA("mantidmatrix"))
+	     sub_win->setconfirmcloseFlag(false);
+		sub_win->close();
+	}
+	// Note that this call does not emit delete notifications
+	Mantid::API::FrameworkManager::Instance().clear();
+	m_exploreMantid->clearWorkspaceTree();
+}
+void MantidUI::enableSaveNexus(const QString& wsName)
+{
+	appWindow()->enablesaveNexus(wsName);
+}
 
+/** This method is sueful for saving the currently loaded workspaces to project file on save.
+  *  saves the names of all the workspaces loaded into mantid workspace tree
+  *  into a string and calls save nexus on each workspace to save the data to a nexus file.
+  * @param workingDir -working directory of teh current project
+  */
+QString MantidUI::saveToString(const std::string& workingDir)
+{
+	QString wsNames;
+	wsNames="<mantidworkspaces>\n";
+	wsNames+="WorkspaceNames";
+	QTreeWidget *tree=m_exploreMantid->m_tree;
+	int count=tree->topLevelItemCount();
+	for(int i=0;i<count;++i)
+	{ QTreeWidgetItem* item=tree->topLevelItem(i);
+	QString wsName=item->text(0);
+	wsNames+="\t";
+	wsNames+=wsName;
+	
+	std::string fileName(workingDir+"//"+wsName.toStdString()+".nxs");
+	//saving to  nexus file
+	savedatainNexusFormat(fileName,wsName.toStdString());
+	}
+	wsNames+="\n</mantidworkspaces>\n";
+	return wsNames;
+}
 /**
   *  Prepares the Mantid Menu depending on the state of the active MantidMatrix.
   */
@@ -2075,14 +2123,16 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, std::set<int>& inde
 		return 0;
 
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
-
   appWindow()->setPreferences(g);
   g->newLegend("");
-
   for(std::set<int>::const_iterator it=indexList.begin();it!=indexList.end();it++)
-  {
+  {	
     new MantidCurve(wsName,g,"spectra",*it,errs);
   }
+  // setting the spectrum index and error flag list.
+  //This is useful for loading/saving project file.
+  g->setspectrumIndexList(indexList);
+  g->setError(errs);
   setUpSpectrumGraph(ml,wsName);
   return ml;
 
@@ -2194,6 +2244,65 @@ MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs,
     ml->askOnCloseEvent(false);
 
     return ml;
+}
+/** Saves data to  nexus file
+  * @param wsName Name of the workspace to be saved
+  * @param fileName name of the nexus file to created
+*/
+void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::string & wsName)
+{ 
+	Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("SaveNexusProcessed");
+	alg->setPropertyValue("Filename",fileName);
+	alg->setPropertyValue("InputWorkspace",wsName);
+	alg->execute();
+}
+/** Loads data from nexus file
+  * @param wsName Name of the workspace to be created
+  * @param fileName name of the nexus file 
+*/
+void MantidUI::loaddataFromNexusFile(const std::string& wsName,const std::string& fileName,bool project)
+{
+	if(fileName.empty()) return ;
+	Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadNexus");
+	alg->setPropertyValue("Filename",fileName);
+	alg->setPropertyValue("OutputWorkspace",wsName);
+	if(project)alg->execute();
+	else executeAlgorithmAsync(alg);
+}
+/** Loads data from raw file
+  * @param wsName Name of the workspace to be created
+  * @param fileName name of the raw file 
+*/
+void MantidUI::loadadataFromRawFile(const std::string& wsName,const std::string& fileName,bool project)
+{
+	if(fileName.empty()) return ;
+	Mantid::API::IAlgorithm_sptr alg =CreateAlgorithm("LoadRaw");
+	alg->setPropertyValue("Filename",fileName);
+	alg->setPropertyValue("OutputWorkspace",wsName);
+	if(project)alg->execute();
+	else executeAlgorithmAsync(alg);
+}
+MantidMatrix* MantidUI::openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper)
+{
+	 MatrixWorkspace_sptr ws;
+  	if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+	{
+		ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+	}
+
+	if (!ws.get())return 0 ;
+
+	 MantidMatrix* w = 0;
+	 w = new MantidMatrix(ws, appWindow(), "Mantid",wsName, lower, upper);
+	 if ( !w ) return 0;
+
+    connect(w, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
+    connect(w,SIGNAL(hiddenWindow(MdiSubWindow*)),appWindow(), SLOT(hideWindow(MdiSubWindow*)));
+    connect (w,SIGNAL(showContextMenu()),appWindow(),SLOT(showWindowContextMenu()));
+
+    appWindow()->d_workspace->addSubWindow(w);
+    w->showNormal();
+	return w;
 }
 
 //=========================================================================

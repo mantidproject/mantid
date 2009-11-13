@@ -348,6 +348,29 @@ void ScriptManagerWidget::save(int index)
 }
 
 /**
+    This method is useful for saving the currently opened script files to project file 
+*/
+QString ScriptManagerWidget::saveToString()
+{
+	QString fileNames;
+	fileNames="<scriptwindow>\n";
+	fileNames+="ScriptNames\t";
+	 int ntabs = count();
+	 //get the number of tabs and append  the script file name for each tab
+	 //to a string
+	 for( int index = 0; index < ntabs; ++index )
+    {
+      ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
+      QString s = editor->fileName();
+	  if(!s.isEmpty())
+	  {fileNames+=s;
+	   fileNames+="\t";
+	  }
+	 }
+	 fileNames+="\n</scriptwindow>\n";
+	return fileNames;
+}
+/**
  * Execute the highlighted code from the current tab
  */
 void ScriptManagerWidget::execute()

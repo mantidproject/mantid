@@ -84,6 +84,9 @@ public:
   QAction* pasteAction() const;
   /// Print action for the current editor
   QAction* printAction() const;
+ /// this method appens the file names of scripts
+ ///in different tabs to a string and returns 
+  QString saveToString();
 
 
 signals:
