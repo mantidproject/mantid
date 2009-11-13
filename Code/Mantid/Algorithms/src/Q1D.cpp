@@ -115,7 +115,7 @@ void Q1D::exec()
 
 	// Calculate the drop (I'm fairly confident that Y is up!)
 	// Using approx. constant prefix - will fix next week
-	const double drop = 3.13e-4 * XIn[j] * XIn[j] * L2;
+	const double drop = 3.1336e-7 * XIn[j] * XIn[j] * L2;
 	detPos[1] += drop;
 	// Calculate new 2theta in light of this
 	const V3D sampleDetVec = detPos - samplePos;
