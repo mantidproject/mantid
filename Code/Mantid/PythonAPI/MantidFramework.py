@@ -249,14 +249,23 @@ class IAlgorithmProxy(object):
     def _retrieveWorkspaceByIndex(self, index):
         if self.__havelist == False:
             self._createWorkspaceList()
-        return self.__framework[self.__wkspnames[index]]
+
+        if len(self.__wkspnames[index]) > 0:
+            return self.__framework[self.__wkspnames[index]]
+        else:
+            return None
 
     def _createWorkspaceList(self):
         # Create a list for the output workspaces
         props = self.__alg.getProperties()
   
         for p in props:
-            if isinstance(p, Mantid.WorkspaceProperty) and p.direction() == 1:
+            print str(p) + ' '  + p.value()
+            if p.direction() != 1:
+                continue
+            if isinstance(p, Mantid.MatrixWorkspaceProperty) or \
+                    isinstance(p, Mantid.TableWorkspaceProperty) or \
+                    isinstance(p, Mantid.WorkspaceProperty):
                 self.__wkspnames.append(p.value())
         self.__havelist = True
 
@@ -283,6 +292,9 @@ class MantidPyFramework(Mantid.FrameworkManager):
         return self._proxyfactory.create(self._retrieveWorkspace(key))
 
     def list(self):
+        '''
+        Print a list of the workspaces stored in Mantid along with their type
+        '''
         names = self.getWorkspaceNames()
         n_names = names.size()
         output = ''

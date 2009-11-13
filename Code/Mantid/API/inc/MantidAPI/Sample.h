@@ -60,8 +60,14 @@ public:
   void setGeometryFlag(int geom_id);
   int getGeometryFlag() const;
 
-  void setGeometry(double thick, double height, double width);
-  void getGeometry(double &thick, double &height, double &width) const;
+  void setThickness(double thick);
+  double getThickness() const;
+
+  void setHeight(double height);
+  double getHeight() const;
+
+  void setWidth(double width);
+  double getWidth() const;
 
 private:
   /// Private copy constructor. NO COPY ALLOWED!

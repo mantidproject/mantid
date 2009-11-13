@@ -117,31 +117,58 @@ int Sample::getGeometryFlag() const
 }
 
 /**
- * Set the thickness, width and height values that are pecified in the raw file.
+ * Set the thickness value
  * @param thick The parameter e_thick in the SPB_STRUCT
- * @param height The parameter e_height in the SPB_STRUCT
- * @param width The parameter e_width in the SPB_STRUCT
  */
-void Sample::setGeometry(double thick, double height, double width)
+void Sample::setThickness(double thick)
 {
   m_thick = thick;
+}
+
+/**
+ * Get the thickness value
+ * @returns The parameter thickness parameter
+ */
+double Sample::getThickness() const
+{
+  return m_thick;
+}
+
+/**
+ * Set the height value
+ * @param width The parameter e_height in the SPB_STRUCT
+ */
+void Sample::setHeight(double height)
+{
   m_height = height;
+}
+
+/**
+ * Get the height value
+ * @returns The parameter height parameter
+ */
+double Sample::getHeight() const
+{
+  return m_height;
+}
+
+/**
+ * Set the width value
+ * @param width The parameter e_width in the SPB_STRUCT
+ */
+void Sample::setWidth(double width)
+{
   m_width = width;
 }
 
 /**
- * Get the thickness, width and height values that are specified in the raw file.
- * @param thick An output parameter for e_thick in the SPB_STRUCT
- * @param height An output parameter for e_height in the SPB_STRUCT
- * @param width An output parameter for e_width in the SPB_STRUCT
+ * Get the height value
+ * @returns The parameter height parameter
  */
-void Sample::getGeometry(double &thick, double &height, double &width) const
+double Sample::getWidth() const
 {
-  thick = m_thick;
-  height = m_height;
-  width = m_width;
+  return m_width;
 }
-
 
 } // namespace API
 } // namespace Mantid

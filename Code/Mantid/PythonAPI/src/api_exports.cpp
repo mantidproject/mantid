@@ -34,7 +34,7 @@ namespace PythonAPI
      * This is the main class through which Python interacts with Mantid and with the exception of PyAlgorithm and V3D, 
      * is the only one directly instantiable in Python
      */
-    class_<FrameworkManagerWrapper, boost::noncopyable>("FrameworkManager", init<>())
+    class_<FrameworkManagerWrapper, boost::noncopyable>("FrameworkManager")
       .def("clear", &FrameworkManagerProxy::clear)
       .def("clearAlgorithms", &FrameworkManagerProxy::clearAlgorithms)
       .def("clearData", &FrameworkManagerProxy::clearData)
@@ -201,8 +201,12 @@ namespace PythonAPI
     class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
       .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)0, 
 	   return_value_policy< reference_existing_object>(), Sample_getLogData_overloads())
-     .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
-     .def("getProtonCharge", &Mantid::API::Sample::getProtonCharge, return_value_policy< copy_const_reference>())
+      .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
+      .def("getProtonCharge", &Mantid::API::Sample::getProtonCharge, return_value_policy< copy_const_reference>())
+      .def("getGeometryFlag", &Mantid::API::Sample::getGeometryFlag)
+      .def("getThickness", &Mantid::API::Sample::getThickness)
+      .def("getHeight", &Mantid::API::Sample::getHeight)
+      .def("getWidth", &Mantid::API::Sample::getWidth)
      ;
   }
 
@@ -236,6 +240,13 @@ namespace PythonAPI
     // Tell python about this so I can check if a property is a workspace
     class_< WorkspaceProperty<Workspace>, bases<Mantid::Kernel::Property>, boost::noncopyable>("WorkspaceProperty", no_init)
       ;
+    // Tell python about this so I can check if a property is a workspace
+    class_< WorkspaceProperty<MatrixWorkspace>, bases<Mantid::Kernel::Property>, boost::noncopyable>("MatrixWorkspaceProperty", no_init)
+      ;
+    // Tell python about this so I can check if a property is a workspace
+    class_< WorkspaceProperty<ITableWorkspace>, bases<Mantid::Kernel::Property>, boost::noncopyable>("TableWorkspaceProperty", no_init)
+      ;
+
   }
 
   void export_api_namespace()

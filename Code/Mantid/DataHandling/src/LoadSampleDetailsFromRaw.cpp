@@ -64,15 +64,15 @@ void LoadSampleDetailsFromRaw::exec()
   {  
     // Pick out the geometry information
     ws_sample->setGeometryFlag(isis_raw->spb.e_geom);
-    double thickness = static_cast<double>(isis_raw->spb.e_thick);
-    double height = static_cast<double>(isis_raw->spb.e_height);
-    double width = static_cast<double>(isis_raw->spb.e_width);
-    ws_sample->setGeometry(thickness, height, width);
+    ws_sample->setThickness(static_cast<double>(isis_raw->spb.e_thick));
+    ws_sample->setHeight(static_cast<double>(isis_raw->spb.e_height));
+    ws_sample->setWidth(static_cast<double>(isis_raw->spb.e_width));
+
     g_log.debug() << "Raw file sample details:\n"
 		  << "\tsample geometry flag: " << isis_raw->spb.e_geom << "\n"
-		  << "\tsample thickness: " << thickness << "\n"
-		  << "\tsample height: " << height << "\n"
-		  << "\tsample widths: " << width << std::endl;
+		  << "\tsample thickness: " << ws_sample->getThickness() << "\n"
+		  << "\tsample height: " << ws_sample->getHeight() << "\n"
+		  << "\tsample width: " << ws_sample->getWidth() << std::endl;
   }
   else
   {

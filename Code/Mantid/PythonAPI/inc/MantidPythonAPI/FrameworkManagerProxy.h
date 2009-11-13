@@ -67,7 +67,7 @@ public:
   /// Constructor
   FrameworkManagerProxy();
   /// Destructor
-  ~FrameworkManagerProxy();
+  virtual ~FrameworkManagerProxy();
 
   /** @name Memory functions */
   //@{

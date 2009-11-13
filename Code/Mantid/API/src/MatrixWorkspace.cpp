@@ -214,9 +214,9 @@ void MatrixWorkspace::newSample()
   sptr_sample->setName(old_sample->getName());
   sptr_sample->setShapeObject(old_sample->getShapeObject());
   sptr_sample->setGeometryFlag(old_sample->getGeometryFlag());
-  double thick(0.0), height(0.0), width(0.0);
-  old_sample->getGeometry(thick,height,width);
-  old_sample->setGeometry(thick,height,width);
+  sptr_sample->setThickness(old_sample->getThickness());
+  sptr_sample->setHeight(old_sample->getHeight());
+  sptr_sample->setWidth(old_sample->getWidth());
 }
 
 /** Create new empty instrument parameter map
