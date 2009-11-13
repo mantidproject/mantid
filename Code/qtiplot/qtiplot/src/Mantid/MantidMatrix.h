@@ -293,10 +293,10 @@ class ProjectData
 		bool getGrayScale()const {return m_grayScale;}
 		bool getIntensity()const  {return m_intensityChanged;}
 		bool getContourMode()const{return m_contourMode;}
-		std::string& getColormapFile(){return m_colormapFile;}
+		const QString& getColormapFile() const {return m_colormapFile;}
 		void  setGrayScale(bool grayscale) {m_grayScale=grayscale;}
 		void setIntensity(bool intensity)  {m_intensityChanged=intensity;}
-		void setColormapFile(std::string & fileName){m_colormapFile=fileName;}
+		void setColormapFile(const QString & fileName){m_colormapFile=fileName;}
 		void setContourMode(bool contourmode){m_contourMode=contourmode;}
 		void setContourLevels(int levels){m_contourLevels=levels;}
 		int getContourLevels()const{return m_contourLevels;}
@@ -315,7 +315,7 @@ private:
 	bool m_grayScale;
 	bool m_intensityChanged;
 	bool m_contourMode;
-	std::string m_colormapFile;
+	QString m_colormapFile;
 	int m_contourLevels;
 	QPen m_defaultPen;
 	bool m_customPen;

@@ -77,15 +77,12 @@ ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent)
 
 ScriptingEnv *ScriptingLangManager::newEnv(const char *name, ApplicationWindow *parent)
 {
-    ScriptingEnv * tst = 0;
-	int num=1;
-    //for (ScriptingLang *i = langs; i->constructor; i++){
-	for(int l=0;l<num;++l)
-	{	ScriptingLang i = langs[l];
-		if (!strcmp(name, i.name))
-			tst = i.constructor(parent);
-		//if (tst) QMessageBox::information(0,"Test"," OK "+QString(i->name));
-		return tst;
+	
+	for (ScriptingLang *i = langs; i->constructor; i++)
+	{	if (!strcmp(name, i->name))
+		{
+			return i->constructor(parent);
+		}
 	}
 	return NULL;
 }

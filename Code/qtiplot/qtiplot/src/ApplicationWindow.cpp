@@ -5369,7 +5369,7 @@ void ApplicationWindow::savetoNexusFile()
 				wsName=((MantidMatrix*)w)->getWorkspaceName();
 		}
 		else
-			wsName=m_nexusInputWSName;
+			wsName=m_nexusInputWSName.toStdString();
 		if(!Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
 		{
 			throw std::runtime_error("Invalid input workspace for SaveNexus");
@@ -11091,7 +11091,7 @@ void ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsNa
 		 QString colormapLine=lst[index+1];
 		 QStringList list=colormapLine.split("\t");
 		 QString colormapFile=list[2];
-		 prjData->setColormapFile(colormapFile.toStdString());
+		 prjData->setColormapFile(colormapFile);
 		 }
 		 if(str.contains("<ColorPolicy>"))
 		 { 	//read the colormap policy to set gray scale

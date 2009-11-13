@@ -733,7 +733,8 @@ void MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Graph::Cur
 	{  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
 		spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
 		if(project)
-		{	spgrm->mutableColorMap().loadMap(QString::fromStdString(prjData->getColormapFile()));
+		{	
+		spgrm->mutableColorMap().loadMap(prjData->getColormapFile());
 		spgrm->setCustomColorMap(spgrm->mutableColorMap());
 		spgrm->setIntensityChange(prjData->getIntensity());
 		if(!prjData->getGrayScale())spgrm->setGrayScale();
