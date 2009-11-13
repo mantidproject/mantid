@@ -407,7 +407,7 @@ QString PythonScript::constructErrorMsg()
   }
   
   message += ": " + exception_details;
-  if( !filename.isEmpty() )
+  if( !filename.isEmpty() && !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit))
   {
     message += "in file '" + QFileInfo(filename).fileName() + "' at line " + QString::number(msg_lineno);
   }
@@ -416,7 +416,7 @@ QString PythonScript::constructErrorMsg()
   {
     emit currentLineChanged(marker_lineno, false);
   }
-  return message;
+  return message + QString("\n");
 }
 
 
