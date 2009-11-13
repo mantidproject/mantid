@@ -3875,7 +3875,8 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 	if (newProject)
 	{ 	app = new ApplicationWindow(factorySettings);
 	}
-	   
+	// the matrix window list
+	m_mantidmatrixWindows.clear();
 	app->projectname = fn;
 	app->d_file_version = d_file_version;
 	app->setWindowTitle(tr("MantidPlot") + " - " + fn);
@@ -3903,8 +3904,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 						"Various parts of this file may not be displayed as expected.")\
 					.arg(fn).arg(list[1]).arg(scriptEnv->name()));
 		
-		//app->setScriptingLanguage(list[1], true);
-		s = t.readLine();
+     	s = t.readLine();
 		list=s.split("\t", QString::SkipEmptyParts);
 	}
 	int aux=0,widgets=list[1].toInt();
@@ -4100,7 +4100,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 				s = t.readLine();
 				if (s.left(7)=="<graph>")
 				{	list.clear();
-				 	while ( s!="</graph>" )
+				    while ( s!="</graph>" )
 					{
 						s=t.readLine();
 						list<<s;
@@ -10385,8 +10385,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
           		
 		}
 		else if( s.contains("SpectrumList"))
-		{
-			std::set<int>specIndexList;
+		{   std::set<int>specIndexList;
 			//reading the error flag
 			QString errorline=list[j+1];
 			QStringList errorList=errorline.split("\t");
@@ -10964,7 +10963,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
     ag->blockSignals(false);
     ag->setIgnoreResizeEvents(!app->autoResizeLayers);
     ag->setAutoscaleFonts(app->autoScaleFonts);
-    return ag;
+	return ag;
 }
 
 Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStringList &lst)
@@ -10994,12 +10993,12 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
 		QStringList linefivelst=linefive.split("\t");
 		QString name=linefivelst[1];
 		QStringList qlist=name.split(" ");
-		std::string wsName=qlist[1].toStdString();
+		std::string graph3DwsName=qlist[1].toStdString();
 		MantidMatrix *m=0;
 		QList<MantidMatrix*>::const_iterator matrixItr;;
 		for( matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
-		{ 	std::string  graph3DwsName=(*matrixItr)->getWorkspaceName();;//list[0].trimmed();
-			if(graph3DwsName==wsName) m=*matrixItr; 
+		{ 	
+			if(graph3DwsName==(*matrixItr)->getWorkspaceName()) m=*matrixItr; 
 		}
 		QString linethree=lst[3];
 		qlist.clear();
@@ -11084,94 +11083,94 @@ void ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsNa
 {
 	ProjectData *prjData=new ProjectData;
 	if(!prjData)return;
-	
-     foreach (QString str, lst) {
-		 if(str.contains("<ColorMap>"))
-		 {	  int index=lst.indexOf(str);
-		 //read the colormap file name from project file
-		 QString colormapLine=lst[index+1];
-		 QStringList list=colormapLine.split("\t");
-		 QString colormapFile=list[2];
-		 prjData->setColormapFile(colormapFile);
-		 }
-		 if(str.contains("<ColorPolicy>"))
-		 { 	//read the colormap policy to set gray scale
-			 int index=lst.indexOf(str);
-			 QString colormapPolicy=lst[index];
-			 int index1=colormapPolicy.indexOf(">");
-			 int index2=colormapPolicy.lastIndexOf("<");
-			 bool gray=colormapPolicy.mid(index1+1,index2-index1-1).toInt();
-			 prjData->setGrayScale(gray);
-	
-		 }
-		 if (str.contains("\t<ContourLines>"))
-		 { //setting contour mode
-			 int index=lst.indexOf(str);
-			 QString contourlines=lst[index];
-			 int index1=contourlines.indexOf(">");
-			 int index2=contourlines.lastIndexOf("<");
-			 int bcontour=contourlines.mid(index1+1,index2-index1-1).toInt();
-			 if(bcontour)prjData->setContourMode(true);
 
-			 //setting contour levels
-			 QString contourlevels=lst[index+1];
-			 index1=contourlevels.indexOf(">");
-			 index2=contourlevels.lastIndexOf("<");
-			 int levels=contourlevels.mid(index1+1,index2-index1-1).toInt();
-			 prjData->setContourLevels(levels);
+	foreach (QString str, lst) {
+		if(str.contains("<ColorMap>"))
+		{	int index=lst.indexOf(str);
+		//read the colormap file name from project file
+		QString colormapLine=lst[index+1];
+		QStringList list=colormapLine.split("\t");
+		QString colormapFile=list[2];
+		prjData->setColormapFile(colormapFile);
+		}
+		if(str.contains("<ColorPolicy>"))
+		{ 	//read the colormap policy to set gray scale
+			int index=lst.indexOf(str);
+			QString colormapPolicy=lst[index];
+			int index1=colormapPolicy.indexOf(">");
+			int index2=colormapPolicy.lastIndexOf("<");
+			bool gray=colormapPolicy.mid(index1+1,index2-index1-1).toInt();
+			prjData->setGrayScale(gray);
 
-			 //setting contour default pen
-			 QString pen=lst[index+2];
-			 if(pen.contains("<DefaultPen>"))
-			 {
-				 QString colorstring=lst[index+3];
-				 int index1=colorstring.indexOf(">");
-				 int index2=colorstring.lastIndexOf("<");
-				 QString pencolor=colorstring.mid(index1+1,index2-index1-1);
+		}
+		if (str.contains("\t<ContourLines>"))
+		{ //setting contour mode
+			int index=lst.indexOf(str);
+			QString contourlines=lst[index];
+			int index1=contourlines.indexOf(">");
+			int index2=contourlines.lastIndexOf("<");
+			int bcontour=contourlines.mid(index1+1,index2-index1-1).toInt();
+			if(bcontour)prjData->setContourMode(true);
 
-				 QString widthstring=lst[index+4];
-				 index1=widthstring.indexOf(">");
-				 index2=widthstring.lastIndexOf("<");
-				 QString penwidth=widthstring.mid(index1+1,index2-index1-1);
+			//setting contour levels
+			QString contourlevels=lst[index+1];
+			index1=contourlevels.indexOf(">");
+			index2=contourlevels.lastIndexOf("<");
+			int levels=contourlevels.mid(index1+1,index2-index1-1).toInt();
+			prjData->setContourLevels(levels);
 
-				 QString stylestring=lst[index+4];
-				 index1=stylestring.indexOf(">");
-				 index2=stylestring.lastIndexOf("<");
-				 QString penstyle=stylestring.mid(index1+1,index2-index1-1);
-				 QColor qcolor(pencolor);
-                 QPen pen = QPen(qcolor, penwidth.toDouble(),Graph::getPenStyle(penstyle.toInt()));
-				 prjData->setDefaultContourPen(pen);
-				 prjData->setColorMapPen(false);
-			 }
-			 else if (pen.contains("<CustomPen>"))
-			 {	ContourLinesEditor* contourLinesEditor = new ContourLinesEditor(this->locale());
-				prjData->setCotntourLinesEditor(contourLinesEditor);
-			     prjData->setCustomPen(true);
-			 }
+			//setting contour default pen
+			QString pen=lst[index+2];
+			if(pen.contains("<DefaultPen>"))
+			{				
+				QString colorstring=lst[index+3];
+				int index1=colorstring.indexOf(">");
+				int index2=colorstring.lastIndexOf("<");
+				QString pencolor=colorstring.mid(index1+1,index2-index1-1);
+
+				QString widthstring=lst[index+4];
+				index1=widthstring.indexOf(">");
+				index2=widthstring.lastIndexOf("<");
+				QString penwidth=widthstring.mid(index1+1,index2-index1-1);
+
+				QString stylestring=lst[index+4];
+				index1=stylestring.indexOf(">");
+				index2=stylestring.lastIndexOf("<");
+				QString penstyle=stylestring.mid(index1+1,index2-index1-1);
+				QColor qcolor(pencolor);
+				QPen pen = QPen(qcolor, penwidth.toDouble(),Graph::getPenStyle(penstyle.toInt()));
+				prjData->setDefaultContourPen(pen);
+				prjData->setColorMapPen(false);
+			}
+			else if (pen.contains("<CustomPen>"))
+			{	ContourLinesEditor* contourLinesEditor = new ContourLinesEditor(this->locale());
+			prjData->setCotntourLinesEditor(contourLinesEditor);
+			prjData->setCustomPen(true);
+			}
 			else prjData->setColorMapPen(true);
-				 }
-		 if(str.contains("<IntensityChanged>"))
-		 {	 //read the intensity changed line from file and setting the spectrogram flag for intenisity
-			 int index=lst.indexOf(str);
-			 QString intensity=lst[index];
-			 int index1=intensity.indexOf(">");
-			 int index2=intensity.lastIndexOf("<");
-			 bool bIntensity=intensity.mid(index1+1,index2-index1-1).toInt();
-			 prjData->setIntensity(bIntensity);
-		 }
-	
-     }
+		}
+		if(str.contains("<IntensityChanged>"))
+		{	 //read the intensity changed line from file and setting the spectrogram flag for intenisity
+			
+			int index=lst.indexOf(str);
+			QString intensity=lst[index];
+			int index1=intensity.indexOf(">");
+			int index2=intensity.lastIndexOf("<");
+			bool bIntensity=intensity.mid(index1+1,index2-index1-1).toInt();
+			prjData->setIntensity(bIntensity);
+		}
+
+	}
 	MantidMatrix *m=0;
 	//getting the mantidmatrix object  for the saved spectrogram  inthe project file
 	QList<MantidMatrix*>::const_iterator matrixItr;;
 	for( matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
-	{ std::string wsName=(*matrixItr)->getWorkspaceName();
-	if(specgramwsName==wsName)
-		m=*matrixItr; 
+	{ 
+		if(specgramwsName==(*matrixItr)->getWorkspaceName())
+			m=*matrixItr; 
 	}
 	if(!m) return ;
 	m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
-	
 }
 
 void ApplicationWindow::copyActiveLayer()
@@ -13832,7 +13831,6 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 				QStringList graph=s.split("\t");
 				QString caption=graph[0];
 				plot = multilayerPlot(caption, 0, graph[2].toInt(), graph[1].toInt());
-				//plot=multilayerPlot(generateUniqueName(tr("Graph")));
 				setListViewDate(caption, graph[3]);
 				plot->setBirthDate(graph[3]);
 				plot->blockSignals(true);
