@@ -260,7 +260,6 @@ class IAlgorithmProxy(object):
         props = self.__alg.getProperties()
   
         for p in props:
-            print str(p) + ' '  + p.value()
             if p.direction() != 1:
                 continue
             if isinstance(p, Mantid.MatrixWorkspaceProperty) or \
