@@ -239,10 +239,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\DetectorEfficiencyCor.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\DetectorEfficiencyVariation.cpp"
 				>
 			</File>
@@ -594,10 +590,6 @@
 			</File>
 			<File
 				RelativePath=".\test\CylinderAbsorptionTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\DetectorEfficiencyCor.h"
 				>
 			</File>
 			<File

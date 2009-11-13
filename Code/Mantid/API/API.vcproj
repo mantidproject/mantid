@@ -427,6 +427,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\IConstraint.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\IDataItem.h"
 				>
 			</File>

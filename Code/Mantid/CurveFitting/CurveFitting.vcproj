@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\BoundaryConstraint.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Fit.cpp"
 				>
 			</File>
@@ -278,6 +282,18 @@
 			</File>
 			<File
 				RelativePath=".\test\BackToBackExponential1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\BackToBackExponentialTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\BoundaryConstraint.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\BoundaryConstraintTest.h"
 				>
 			</File>
 			<File

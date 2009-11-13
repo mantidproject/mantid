@@ -44,7 +44,7 @@ public:
     loader.execute();
 
 
-    // set up gaussian fitting function
+    // set up fitting function
     LinearBackground* quad = new LinearBackground();
     quad->initialize();
 
