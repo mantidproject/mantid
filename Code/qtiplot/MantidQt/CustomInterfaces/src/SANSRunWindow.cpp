@@ -1155,15 +1155,14 @@ bool SANSRunWindow::handleLoadButtonClick()
       }
 
       // Set the geometry
-      int geomid  = ws->getSample()->getGeometryFlag();
+      boost::shared_ptr<Mantid::API::Sample> sample_details = ws->getSample();
+      int geomid  = sample_details->getGeometryFlag();
       if( geomid > 0 && geomid < 4 )
       {
 	m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-	double thick(0.0), width(0.0), height(0.0);
-	ws->getSample()->getGeometry(thick, width, height);
-	m_uiForm.sample_thick->setText(QString::number(thick));
-	m_uiForm.sample_width->setText(QString::number(width));
-	m_uiForm.sample_height->setText(QString::number(height));
+	m_uiForm.sample_thick->setText(QString::number(sample_details->getThickness()));
+	m_uiForm.sample_width->setText(QString::number(sample_details->getWidth()));
+	m_uiForm.sample_height->setText(QString::number(sample_details->getHeight()));
       }
       else
       {
@@ -1356,6 +1355,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     "sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_CENTRE, YBEAM_CENTRE], False)\n"
     "can_setup = InitReduction(SCATTER_CAN, [XBEAM_CENTRE, YBEAM_CENTRE], True)\n"
     "WavRangeReduction(sample_setup, can_setup, WAV1, WAV2)";
+
+  std::cerr << py_code.toStdString() << "\n";
 
   //Execute the code
   runPythonCode(py_code, false);

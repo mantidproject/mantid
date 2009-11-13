@@ -136,7 +136,7 @@ double Sample::getThickness() const
 
 /**
  * Set the height value
- * @param width The parameter e_height in the SPB_STRUCT
+ * @param height The parameter e_height in the SPB_STRUCT
  */
 void Sample::setHeight(double height)
 {
