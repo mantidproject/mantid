@@ -77,24 +77,23 @@ namespace NeXus
   void SaveNexusProcessed::exec()
   {
     // Retrieve the filename from the properties
-    m_filename = getPropertyValue("FileName");
+    m_filename = getPropertyValue("Filename");
     //m_entryname = getPropertyValue("EntryName");
     m_title = getPropertyValue("Title");
     m_inputWorkspace = getProperty("InputWorkspace");
-	// If no title's been given, use the workspace title field
+    // If no title's been given, use the workspace title field
     if (m_title.empty()) m_title = m_inputWorkspace->getTitle();
-    bool bAppend=getProperty("Append");
-	//fix for #826
-	bool bChild=isChild();
-	if(!bChild)
-	{	 // if bAppend is false overwrite (delete )the .nxs file 
-		if (!bAppend)
-		{	Poco::File file(m_filename);
-		if (file.exists())
-		{file.remove();
-		}
-		}
-	}
+    // If we don't want to append then remove the file if it already exists
+    bool append_to_file = getProperty("Append");
+    if( !append_to_file )
+    {
+      Poco::File file(m_filename);
+      if( file.exists() )
+      {
+	file.remove();
+      }
+    }
+
     m_spec_list = getProperty("WorkspaceIndexList");
     m_spec_max = getProperty("WorkspaceIndexMax");
     m_list = !m_spec_list.empty();

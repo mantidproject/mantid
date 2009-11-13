@@ -22,8 +22,7 @@ using namespace Mantid::Kernel;
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
 			   const std::vector<std::string> & exts, unsigned int direction) 
-  : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action > FileProperty::NoExistLoad) ), 
-				   direction), 
+  : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action > FileProperty::NoExistLoad) ), direction), 
     m_action(action)
 {
 }
@@ -97,7 +96,20 @@ std::string FileProperty::setValue(const std::string & filename)
     }
     if( Poco::File(save_dir).canWrite() )
     {
-      valid_string = PropertyWithValue<std::string>::setValue(save_dir.resolve(filename).toString());
+      std::string fullpath = save_dir.resolve(filename).toString();
+      // Check if the fullpath exists
+      Poco::Path stempath(fullpath);
+      stempath.makeParent();
+      if( !stempath.toString().empty() )
+      {
+	//Relative directory - Check it exists
+	Poco::File stem(stempath);
+	if( !stem.exists() )
+	{
+	  stem.createDirectory();
+	}
+      }
+      valid_string = PropertyWithValue<std::string>::setValue(fullpath);
     }
     else
     {
