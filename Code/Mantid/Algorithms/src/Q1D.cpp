@@ -116,9 +116,10 @@ void Q1D::exec()
 	// Calculate the drop (I'm fairly confident that Y is up!)
 	// Using approx. constant prefix - will fix next week
 	const double drop = 3.1336e-7 * XIn[j] * XIn[j] * L2;
-	detPos[1] += drop;
+	
 	// Calculate new 2theta in light of this
-	const V3D sampleDetVec = detPos - samplePos;
+	V3D sampleDetVec = detPos - samplePos;
+  sampleDetVec[1] += drop;
 	// Do beamline vector more rigorously later
 	const double twoTheta = sampleDetVec.angle(V3D(0,0,1));
 	const double sinTheta = sin( 0.5 * twoTheta );
