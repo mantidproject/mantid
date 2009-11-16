@@ -79,8 +79,8 @@ private:
   void init();
   void exec();
   
-  void getGeometry(IInstrument_const_sptr geometry, int det0ID, int det1ID, double &monitor0Dist, double &monitor1Dist) const;
-  std::vector<int> getMonitorSpecIndexs(Workspace2D_const_sptr WS, const std::vector<int> &detIDs) const;
+  void getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
+  std::vector<int> getMonitorSpecIndexs(Workspace2D_const_sptr WS, int specNum1, int specNum2) const;
   double timeToFly(double s, double E_KE) const;
   double getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const double peakTime);
   void extractSpec(int specInd, double start, double end);

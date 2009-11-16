@@ -401,7 +401,7 @@ std::string ShapeFactory::parseInfiniteCylinder(Poco::XML::Element* pElem, std::
  */
 std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int, Surface*>& prim, int& l_id)
 {
-  Element* pElemCentre = getShapeElement(pElem, "centre-of-bottom-base"); 
+  Element* pElemBase = getShapeElement(pElem, "centre-of-bottom-base"); 
   Element* pElemAxis = getShapeElement(pElem, "axis"); 
   Element* pElemRadius = getShapeElement(pElem, "radius"); 
   Element* pElemHeight = getShapeElement(pElem, "height"); 
@@ -415,7 +415,8 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
   
   // add infinite cylinder
   Cylinder* pCylinder = new Cylinder();
-  pCylinder->setCentre(parsePosition(pElemCentre));              
+  V3D centreOfBottomBase = parsePosition(pElemBase);
+  pCylinder->setCentre(centreOfBottomBase+normVec*(0.5*height));              
   pCylinder->setNorm(normVec);  
   pCylinder->setRadius(radius);
   prim[l_id] = pCylinder;
@@ -426,8 +427,8 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
 
   // add top plane
   Plane* pPlaneTop = new Plane();
-  V3D pointInPlane = parsePosition(pElemCentre);
-  pointInPlane += (normVec * height); // to get point in top plane
+  // to get point in top plane
+  V3D pointInPlane = centreOfBottomBase + (normVec * height);
   pPlaneTop->setPlane(pointInPlane, normVec); 
   prim[l_id] = pPlaneTop;
   retAlgebraMatch << "-" << l_id << " ";
@@ -435,7 +436,7 @@ std::string ShapeFactory::parseCylinder(Poco::XML::Element* pElem, std::map<int,
 
   // add bottom plane
   Plane* pPlaneBottom = new Plane();
-  pPlaneBottom->setPlane(parsePosition(pElemCentre), normVec); 
+  pPlaneBottom->setPlane(centreOfBottomBase, normVec); 
   prim[l_id] = pPlaneBottom;
   retAlgebraMatch << "" << l_id << ")";
   l_id++;

@@ -48,10 +48,10 @@ void GetEi::init()
     "micro-seconds");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("Monitor1ID", -1, mustBePositive,
-    "The detector ID of the first monitor");
-  declareProperty("Monitor2ID", -1, mustBePositive->clone(),
-    "The detector ID of the second monitor");
+  declareProperty("Monitor1Spec", -1, mustBePositive,
+    "The spectrum number of the output of the first monitor");
+  declareProperty("Monitor2Spec", -1, mustBePositive->clone(),
+    "The spectrum number of the output of the second monitor");
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
   positiveDouble->setLower(0);
   declareProperty("EnergyEstimate", -1.0, positiveDouble,
@@ -64,19 +64,18 @@ void GetEi::init()
 
 /** Executes the algorithm
 *  @throw out_of_range if the peak runs off the edge of the histogram
-*  @throw NotFoundError if no detector is found for the detector ID given
+*  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
-*  @throw runtime_error a sub-algorithm falls over
+*  @throw runtime_error if there is a problem with the SpectraDetectorMap or a sub-algorithm falls over
 */
 void GetEi::exec()
 {
-  Workspace2D_const_sptr WS = getProperty("InputWorkspace");
-  std::vector<int> monIDs;
-  monIDs.push_back(getProperty("Monitor1ID"));
-  monIDs.push_back(getProperty("Monitor2ID"));
+  Workspace2D_const_sptr inWS = getProperty("InputWorkspace");
+  const int mon1Spec = getProperty("Monitor1Spec");
+  const int mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
-  getGeometry(WS->getInstrument(), monIDs[0], monIDs[1],dist2moni0,dist2moni1);
+  getGeometry(inWS, mon1Spec, mon2Spec, dist2moni0, dist2moni1);
 
   // the E_i estimate is used to find (identify) the monitor peaks, checking prior to fitting will throw an exception if this estimate is too big or small
   const double E_est = getProperty("EnergyEstimate");
@@ -87,13 +86,14 @@ void GetEi::exec()
   const double peakLoc1 = 1e6*timeToFly(dist2moni1, E_est);
   g_log.information() << "Based on the user selected energy the second peak will be searched for at TOF " << peakLoc1 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*HALF_WINDOW) << "%" << std::endl;
 
-  // get the histograms created by the monitors
-  std::vector<int> indexes = getMonitorSpecIndexs(WS, monIDs);
+    // get the histograms created by the monitors
+  std::vector<int> indexes = getMonitorSpecIndexs(inWS, mon1Spec, mon2Spec);
+
   g_log.information() << "Looking for a peak in the first monitor spectrum, spectra index " << indexes[0] << std::endl;
-  double t_monitor0 = getPeakCentre(WS, indexes[0], peakLoc0);
+  double t_monitor0 = getPeakCentre(inWS, indexes[0], peakLoc0);
   g_log.information() << "The first peak has been found at TOF = " << t_monitor0 << std::endl;
   g_log.information() << "Looking for a peak in the second monitor spectrum, spectra index " << indexes[1] << std::endl;
-  double t_monitor1 = getPeakCentre(WS, indexes[1], peakLoc1);
+  double t_monitor1 = getPeakCentre(inWS, indexes[1], peakLoc1);
   g_log.information() << "The second peak has been found at TOF = " << t_monitor1 << std::endl;
 
   // assumes that the source and the both mintors lie on one straight line, the 1e-6 converts microseconds to seconds as the mean speed needs to be in m/s
@@ -101,45 +101,62 @@ void GetEi::exec()
 
   // uses 0.5mv^2 to get the kinetic energy in joules which we then convert to meV
   double E_i = neutron_E_At(meanSpeed)/PhysicalConstants::meV;
-  g_log.notice() << "The incident energy is estimated to be " << E_i << " meV" << " (your estimated value was " << E_est << " meV)" << std::endl;
+  g_log.notice() << "The incident energy has been calculated to be " << E_i << " meV" << " (your estimate was " << E_est << " meV)" << std::endl;
 
   setProperty("IncidentEnergy", E_i);
 }
 /** Gets the distances between the source and detectors whose IDs you pass to it
-*  @param geometry the instrument from a workspace
-*  @param det0ID ID number of a detector
-*  @param det1ID ID number of a detector
+*  @param WS the input workspace
+*  @param mon0Spec Spectrum number of the output from the first monitor
+*  @param mon1Spec Spectrum number of the output from the second monitor
 *  @param monitor0Dist the calculated distance to the detector whose ID was passed to this function first
 *  @param monitor1Dist calculated distance to the detector whose ID was passed to this function second
 *  @throw NotFoundError if no detector is found for the detector ID given
+*  @throw runtime_error if there is a problem with the SpectraDetectorMap
 */
-void GetEi::getGeometry(IInstrument_const_sptr geometry, int det0ID, int det1ID, double &monitor0Dist, double &monitor1Dist) const
+void GetEi::getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
-  const IObjComponent_sptr source = geometry->getSource();
+  const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
-  Geometry::IDetector_sptr det = geometry->getDetector(det0ID);
-  const IComponent * const first = det->getComponent();
-  monitor0Dist = source->getDistance(*first);
+  IDetector_sptr dets = WS->getDetector(mon0Spec);
+  monitor0Dist = dets->getDistance(*(source.get()));
 
-  // repeat above for the second detector
-  det = geometry->getDetector(det1ID);
-  const IComponent * const second = det->getComponent();
-  monitor1Dist = source->getDistance(*second);
+  // repeat for the second detector
+  dets = WS->getDetector(mon1Spec);
+  monitor1Dist = dets->getDistance(*(source.get()));
 }
 /** Converts detector IDs to spectra indexes
 *  @param WS the workspace on which the calculations are being performed
-*  @param detIDs the detector IDs to search for
+*  @param specNum1 spectrum number of the output of the first monitor
+*  @param specNum2 spectrum number of the output of the second monitor
 *  @return the indexes of the histograms created by the detector whose ID were passed
-*  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
+*  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 */
-std::vector<int> GetEi::getMonitorSpecIndexs(Workspace2D_const_sptr WS, const std::vector<int> &detIDs) const
+std::vector<int> GetEi::getMonitorSpecIndexs(Workspace2D_const_sptr WS, int specNum1, int specNum2) const
 {// getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
   std::vector<int> specInds;
-  // this function creates a new multimap for detectorIDs to index numbers
-  std::vector<int> spectraList = WS->spectraMap().getSpectra(detIDs);
-  // this creates a new map from spectra numbers to indices
-  WorkspaceHelpers::getIndicesFromSpectra(WS, spectraList, specInds);
+  
+  // get the index number of the histogram for the first monitor
+  std::vector<int> specNumTemp(&specNum1, &specNum1+1);
+  WorkspaceHelpers::getIndicesFromSpectra(WS, specNumTemp, specInds);
+  if ( specInds.size() != 1 )
+  {// the monitor spectrum isn't present in the workspace, we can't continue from here
+    g_log.error() << "Couldn't find the first monitor spectrum, number " << specNum1 << std::endl;
+    throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum1);
+  }
+
+  // nowe the second monitor
+  std::vector<int> specIndexTemp;
+  specNumTemp[0] = specNum2;
+  WorkspaceHelpers::getIndicesFromSpectra(WS, specNumTemp, specIndexTemp);
+  if ( specIndexTemp.size() != 1 )
+  {// the monitor spectrum isn't present in the workspace, we can't continue from here
+    g_log.error() << "Couldn't find the second monitor spectrum, number " << specNum2 << std::endl;
+    throw Exception::NotFoundError("GetEi::getMonitorSpecIndexs()", specNum2);
+  }
+  
+  specInds.push_back(specIndexTemp[0]);
   return specInds;
 }
 /** Uses E_KE = mv^2/2 and s = vt to calculate the time required for a neutron
@@ -189,7 +206,7 @@ double GetEi::getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const 
 
   // find the index of the centre point. The centre can't be at index zero as this is at the edge of the spectrum, so centreIndex = 0 is the error value
   MantidVec::size_type cenGausIn = 0;
-  for ( MantidVec::size_type i = 0; i < m_tempWS->readX(0).size(); ++i )
+  for ( MantidVec::size_type i = 0; i < m_tempWS->readY(0).size(); ++i )
   {// assumes that the bin boundaries are all in order of increasing time
     if ( m_tempWS->readX(0)[i] > centreGaussian )
     {
@@ -197,6 +214,7 @@ double GetEi::getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const 
       break;
     }
   }
+
   // the peak centre is defined as the centre of the two half maximum points as this is better for asymmetric peaks
   // first loop backwards along the histogram to get the first half height point
   MantidVec::size_type lHalf = findHalfLoc(cenGausIn, height, GO_LEFT);
@@ -222,7 +240,7 @@ double GetEi::getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const 
 void GetEi::extractSpec(int specInd, double start, double end)
 {
   IAlgorithm_sptr childAlg =
-    createSubAlgorithm("CropWorkspace", 100*m_fracCompl, 100*m_fracCompl+CROP );
+    createSubAlgorithm("CropWorkspace", 100*m_fracCompl, 100*(m_fracCompl+CROP) );
   m_fracCompl += CROP;
   
   childAlg->setPropertyValue( "InputWorkspace",

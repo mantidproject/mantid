@@ -166,7 +166,7 @@ public:
     grouper.setPropertyValue("Workspace", m_MariWS);
 
     grouper.setPropertyValue("DataFilename", m_RawFile); 
-
+//    grouper.setPropertyValue("DataFilename", "C:/mantid/Test/Data/merlin_detector.sca");
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
 
@@ -176,6 +176,8 @@ public:
     const int numRandom = 7;
     // this arbitary list contains the first listed dectetor, last lowerest detID, largest, and a repeated value
     const int randDetects[] = { 4101, 4804, 1323, 1101, 3805, 1323, 3832 };
+//      /*random detectors in MAP*/       {22608069, 22608073, 22608077, 22608081, 22608085, 22608089, 22608093};
+//      /*random detectors in MERLIN*/    {6470765, 6470769, 6470773, 6470777, 6470781, 6470785, 6470789};
     for ( int i = 0; i < numRandom; ++i)
     {
       int detID = randDetects[i];
@@ -194,10 +196,10 @@ public:
     // compare the arrays that store the X-values for detectors but not the monitors
     int firstNonMontor = 5;
     // all non-monitors should shared the same array
-    const double& first = WS->readX(firstNonMontor)[0];
+    const double *first = &WS->readX(firstNonMontor)[0];
     for (int i = firstNonMontor; i < WS->getNumberHistograms(); ++i)
     {
-      TS_ASSERT_EQUALS( &first, &(WS->readX(i)[0]) )
+      TS_ASSERT_EQUALS( first, &(WS->readX(i)[0]) )
     }/**//*
 // to test Different Bins Same Offsets comment out the code above and uncomment the code below
     for (int j = 0; j < WS->readX(1).size(); j++ )
@@ -210,10 +212,12 @@ public:
     
     // the code above proves that the X-values for each histogram are the same so just check one histogram
     TS_ASSERT( WS->readX(1).size() > 0 )
+    double timeOff = 3.9; //MARI
+//    double timeOff = 5.3; //MERLIN
     // the time of flight values that matter are the differences between the detector values and the monitors
     for (int j = 0; j < WS->readX(1).size(); j++ )
     {// we're assuming here that the second spectrum (index 1) is a monitor
-      TS_ASSERT_DELTA( WS->readX(1)[j] - WS->readX(firstNonMontor)[j] , 3.9, 1e-6 )
+      TS_ASSERT_DELTA( WS->readX(1)[j] - WS->readX(firstNonMontor)[j], timeOff, 1e-6 )
     }
 
     AnalysisDataService::Instance().remove(m_MariWS);
@@ -236,8 +240,9 @@ public:
       m_MariWS("MARfromRaw")
   {
     // a smallish raw file that contains the detailed detector information stored by the excitations group 
-    m_RawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11015.RAW").toString();
-
+  m_RawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11015.RAW").toString();
+//    m_RawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10241.RAW").toString();
+//    m_RawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.RAW").toString();
     // create a .dat file in the current directory that we'll load later
     writeDatFile();
   }

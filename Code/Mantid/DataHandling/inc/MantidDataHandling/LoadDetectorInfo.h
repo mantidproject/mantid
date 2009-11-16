@@ -82,6 +82,8 @@ private:
   bool m_commonXs;
   /// the delay time for monitors, this algorithm requires all monitors have the same delay. Normally the delay is zero
   float m_monitOffset;
+  /// notes if an error was found and the workspace was possibly only partially corrected
+  bool m_error;
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;
 
@@ -92,10 +94,16 @@ private:
   void readDAT(const std::string& fName);
   void readRAW(const std::string& fName);
 
+  void setDetectorParams(int detID, double pressure, double wallThick);
+  void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int> &detectIDs=std::vector<int>(), const std::vector<float> &delays=std::vector<float>());
+  void adjDelayTOFs(double lastOffset, bool &differentDelays, const int * const detectIDs, const float * const delays, int numDetectors);
   void adjustXs(const std::vector<int> &detIDs, const std::vector<float> &offsets);
-  void adjustXs(const float detectorOffset);
+  void adjustXs(const double detectorOffset);
+  void adjustXsCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
+  void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
   void noteMonitorOffset(const float offSet, const int detID);
-  void setUpXArray(Histogram1D::RCtype &theXValuesArray, int specInd, float offset);
+  void setUpXArray(Histogram1D::RCtype &theXValuesArray, int specInd, double offset);
+  void logErrorsFromRead(const std::vector<int> &missingDetectors);
 
   /// used to check that all the monitors have the same offset time
   static const float UNSETOFFSET;
@@ -123,7 +131,7 @@ private:
     WALL_THICK_TAB_NUM = 8,
   };
 
-  static const int INTERVAL = 256;                       ///< update this many detectors before checking for user cancel messages and updating the progress bar
+  static const int INTERVAL = 512;                       ///< update this many detectors before checking for user cancel messages and updating the progress bar
 
 };
 

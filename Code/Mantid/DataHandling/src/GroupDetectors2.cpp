@@ -144,7 +144,7 @@ void GroupDetectors2::getGroups(Workspace2D_const_sptr workspace,
     }
     catch ( std::exception )
     {
-      g_log.error() << name() << "Error reading input file " << filename << std::endl;
+      g_log.error() << name() << ": Error reading input file " << filename << std::endl;
       throw;
     }
     return;
@@ -221,7 +221,6 @@ void GroupDetectors2::processFile( std::string fname,
 
   // allow spectra number to spectra index look ups
   std::map<int,int> specs2index;
-  // if we could use a version of boost with bimap and converted to using it for index-spectra number lookups we wouldn't have to do this
   workspace->getAxis(1)->getSpectraIndexMap(specs2index);
 
   try

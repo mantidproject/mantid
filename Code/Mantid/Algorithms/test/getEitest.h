@@ -35,7 +35,7 @@ public:
     grouper.setPropertyValue("InputWorkspace", m_WS);
     grouper.setPropertyValue("Monitor1ID", "2");
     grouper.setPropertyValue("Monitor2ID", "3");
-    grouper.setPropertyValue("EnergyEstimate", "12");
+    grouper.setPropertyValue("EnergyEstimate", "14");
 
     //MAPS one off test, takes to long to do it every time. To activate uncomment the code below and two sections below that
   // when the MAP workspace that is load in the constructor
@@ -43,13 +43,19 @@ public:
     grouper.setPropertyValue("Monitor1ID", "1000002");
     grouper.setPropertyValue("Monitor2ID", "1000003");
     grouper.setPropertyValue("EnergyEstimate", "400");*/
+    //MERLIN one off test, takes 30 or more seconds. To activate uncomment the code below and two sections below that
+/*    grouper.setPropertyValue("InputWorkspace", m_WS);
+    grouper.setPropertyValue("Monitor1Spec", "69634");
+    grouper.setPropertyValue("Monitor2Spec", "69638");
+    grouper.setPropertyValue("EnergyEstimate", "15");
 
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
-    TS_ASSERT( grouper.isExecuted() );
+    TS_ASSERT( grouper.isExecuted() );*/
 
     double finalAnswer = grouper.getProperty("IncidentEnergy");
     TS_ASSERT_DELTA( finalAnswer, 12.9462875, 1e-6 )
 /*MAPS one off test, takes to long to do it every time. */ //TS_ASSERT_DELTA( finalAnswer, 398.7392468, 1e-6 )
+/*MERLIN one off test, takes to long to do it every time. */ // TS_ASSERT_DELTA( finalAnswer, 15.07969180873369, 1e-6 )
   }
 
   void loadRawFile()
@@ -57,16 +63,17 @@ public:
     LoadRaw3 loader;
     loader.initialize();
 
-    loader.setPropertyValue("Filename", MAR11001);
+    loader.setPropertyValue("Filename", MARI);
     loader.setPropertyValue("OutputWorkspace", m_WS);
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
-  GetEiTest() : m_WS("GetEi_input_workspace"), MAR11001()
+  GetEiTest() : m_WS("GetEi_input_workspace"), MARI()
   {
-    MAR11001 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
-/*MAPS one off test, takes to long to do it every time. */   //    MAR11001 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10266.RAW").toString();
+    MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
+/*MAPS one off test, takes to long to do it every time. */   //    MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10266.RAW").toString();
+/*MERLIN one off test, takes to long to do it every time. */ //      MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.RAW").toString();
     loadRawFile();
   }
   
@@ -77,7 +84,7 @@ public:
 
   private:
     const std::string m_WS;
-    std::string MAR11001;
+    std::string MARI;
 };
 
 #endif /*GETE_ITEST_H_*/
