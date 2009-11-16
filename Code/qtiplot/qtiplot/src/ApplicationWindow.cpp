@@ -10177,6 +10177,7 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
 void ApplicationWindow::openScriptWindow(const QStringList &list)
 {	showScriptWindow();
    	if(!scriptingWindow) return;
+	scriptingWindow->setWindowTitle("MantidPlot: " + scriptEnv->scriptingLanguage() + " Window");
 	QString s=list[0];
 	QStringList scriptnames=s.split("\t");
 	int count=scriptnames.size();
@@ -10197,7 +10198,7 @@ void ApplicationWindow::populateMantidTreeWdiget(const QString &s)
 	for (++line; line!=list.end(); ++line)
 	{	std::string wsName=(*line).toStdString();
 		if(wsName.empty())throw std::runtime_error("Workspace Name not found in project file ");
-		std::string fileName(workingDir.toStdString()+"//"+wsName);
+		std::string fileName(workingDir.toStdString()+"/"+wsName);
 		fileName.append(".nxs");
 		mantidUI->loaddataFromNexusFile(wsName,fileName,true);
 	}
