@@ -475,8 +475,24 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
   {
     // First the easy case of direct instruments, where all spectra will need the
     // same number of bins removed
-    const MantidVec& X0 = workspace->readX(0);
+    // Need to make sure we don't pick a monitor as the 'reference' X spectrum (X0)
+    int i = 0;
+    for ( ; i < numSpec; ++i )
+    {
+      try {
+        Geometry::IDetector_const_sptr det = workspace->getDetector(i);
+        if ( !det->isMonitor() ) break;
+      } catch (Exception::NotFoundError) { /* Do nothing */ }
+    }
+    // Get an X spectrum to search (they're all the same, monitors excepted)
+    const MantidVec& X0 = workspace->readX(i);
     MantidVec::const_iterator start = std::lower_bound(X0.begin(),X0.end(),-1.0e-10*DBL_MAX);
+    if ( start == X0.end() )
+    {
+      const std::string e("Check the input EFixed: the one given leads to all bins being in the physically inaccessible region.");
+      g_log.error(e);
+      throw std::invalid_argument(e);
+    }
     MantidVec::difference_type bins = X0.end() - start;
     MantidVec::difference_type first = start - X0.begin();
 
