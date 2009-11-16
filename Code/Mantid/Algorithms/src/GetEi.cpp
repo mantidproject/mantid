@@ -33,7 +33,7 @@ const double GetEi::FIT_PEAK = 2.0;
 
 /// Empty default constructor algorith() calls the constructor in the base class
 GetEi::GetEi() : Algorithm(),
-  m_fracCompl(0.0), m_tempWS()
+  m_tempWS(), m_fracCompl(0.0)
 {
 }
 
@@ -123,7 +123,8 @@ void GetEi::getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, d
   if ( dets.size() != 1 )
   {
     g_log.error() << "The detector for spectrum number " << mon0Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm" << std::endl;
-    throw std::bad_cast("Error retrieving data for the first monitor");
+    g_log.error() << "Error retrieving data for the first monitor" << std::endl;
+    throw std::bad_cast();
   }
   IDetector_sptr det = WS->getInstrument()->getDetector(dets[0]);
   monitor0Dist = det->getDistance(*(source.get()));
@@ -133,7 +134,8 @@ void GetEi::getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, d
   if ( dets.size() != 1 )
   {
     g_log.error() << "The detector for spectrum number " << mon1Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm" << std::endl;
-    throw std::bad_cast("Error retrieving data for the second monitor");
+    g_log.error() << "Error retrieving data for the second monitor" << std::endl;
+    throw std::bad_cast();
   }
   det = WS->getInstrument()->getDetector(dets[0]);
   monitor1Dist = det->getDistance(*(source.get()));
