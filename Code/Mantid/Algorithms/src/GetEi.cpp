@@ -119,12 +119,24 @@ void GetEi::getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, d
   const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
-  IDetector_sptr dets = WS->getDetector(mon0Spec);
-  monitor0Dist = dets->getDistance(*(source.get()));
+  std::vector<int> dets = WS->spectraMap().getDetectors(mon0Spec);
+  if ( dets.size() != 1 )
+  {
+    g_log.error() << "The detector for spectrum number " << mon0Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm" << std::endl;
+    throw std::bad_cast("Error retrieving data for the first monitor");
+  }
+  IDetector_sptr det = WS->getInstrument()->getDetector(dets[0]);
+  monitor0Dist = det->getDistance(*(source.get()));
 
   // repeat for the second detector
-  dets = WS->getDetector(mon1Spec);
-  monitor1Dist = dets->getDistance(*(source.get()));
+  dets = WS->spectraMap().getDetectors(mon1Spec);
+  if ( dets.size() != 1 )
+  {
+    g_log.error() << "The detector for spectrum number " << mon1Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm" << std::endl;
+    throw std::bad_cast("Error retrieving data for the second monitor");
+  }
+  det = WS->getInstrument()->getDetector(dets[0]);
+  monitor1Dist = det->getDistance(*(source.get()));
 }
 /** Converts detector IDs to spectra indexes
 *  @param WS the workspace on which the calculations are being performed

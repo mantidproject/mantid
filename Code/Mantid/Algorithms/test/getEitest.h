@@ -30,27 +30,26 @@ public:
     TS_ASSERT_EQUALS( grouper.category(), "CorrectionFunctions" )
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
     TS_ASSERT( grouper.isInitialized() )
-    
+
     // the following is for a MARI workspace that is loaded in the constructor and the values I found from experimenting
     grouper.setPropertyValue("InputWorkspace", m_WS);
-    grouper.setPropertyValue("Monitor1ID", "2");
-    grouper.setPropertyValue("Monitor2ID", "3");
+    grouper.setPropertyValue("Monitor1Spec", "2");
+    grouper.setPropertyValue("Monitor2Spec", "3");
     grouper.setPropertyValue("EnergyEstimate", "14");
-
     //MAPS one off test, takes to long to do it every time. To activate uncomment the code below and two sections below that
   // when the MAP workspace that is load in the constructor
 /*    grouper.setPropertyValue("InputWorkspace", m_WS);
-    grouper.setPropertyValue("Monitor1ID", "1000002");
-    grouper.setPropertyValue("Monitor2ID", "1000003");
+    grouper.setPropertyValue("Monitor1Spec", "41474");
+    grouper.setPropertyValue("Monitor2Spec", "41475");
     grouper.setPropertyValue("EnergyEstimate", "400");*/
     //MERLIN one off test, takes 30 or more seconds. To activate uncomment the code below and two sections below that
 /*    grouper.setPropertyValue("InputWorkspace", m_WS);
     grouper.setPropertyValue("Monitor1Spec", "69634");
     grouper.setPropertyValue("Monitor2Spec", "69638");
-    grouper.setPropertyValue("EnergyEstimate", "15");
+    grouper.setPropertyValue("EnergyEstimate", "15");*/
 
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
-    TS_ASSERT( grouper.isExecuted() );*/
+    TS_ASSERT( grouper.isExecuted() );
 
     double finalAnswer = grouper.getProperty("IncidentEnergy");
     TS_ASSERT_DELTA( finalAnswer, 12.9462875, 1e-6 )
