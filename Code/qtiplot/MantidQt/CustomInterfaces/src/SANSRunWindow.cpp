@@ -213,7 +213,7 @@ void SANSRunWindow::saveSettings()
 bool SANSRunWindow::readPyReductionTemplate()
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
-  QString reduce_script = scriptsdir.absoluteFilePath("SANS/SANSReduction.py");
+  QString reduce_script = scriptsdir.absoluteFilePath("SANS/SANSReductionGUI.py");
     
   if( !QFileInfo(reduce_script).exists() ) 
   {
@@ -1310,18 +1310,18 @@ QString SANSRunWindow::constructReductionCode(bool , bool)
   py_code.replace("|SAMPLETHICK|", m_uiForm.sample_thick->text());
   
   // Log information
-  py_code.replace("|ZFRONTDET|", QString::number(m_logvalues["Front_Det_Z"]));
-  py_code.replace("|XFRONTDET|", QString::number(m_logvalues["Front_Det_X"]));
-  py_code.replace("|ROTFRONTDET|", QString::number(m_logvalues["Front_Det_Rot"]));
-  py_code.replace("|ZREARDET|", QString::number(m_logvalues["Rear_Det_Z"]));
-  py_code.replace("|XREARDET|", QString::number(m_logvalues["Rear_Det_X"]));
+  py_code.replace("|ZFRONTDET|", QString::number(m_logvalues["Front_Det_Z"], 'g', 10));
+  py_code.replace("|XFRONTDET|", QString::number(m_logvalues["Front_Det_X"], 'g', 10));
+  py_code.replace("|ROTFRONTDET|", QString::number(m_logvalues["Front_Det_Rot"], 'g', 10));
+  py_code.replace("|ZREARDET|", QString::number(m_logvalues["Rear_Det_Z"], 'g', 10));
+  py_code.replace("|XREARDET|", QString::number(m_logvalues["Rear_Det_X"], 'g', 10));
   //Mask file correction values
-  py_code.replace("|ZCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Z_corr"]));
-  py_code.replace("|YCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Y_corr"]));
-  py_code.replace("|XCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_X_corr"]));
-  py_code.replace("|ROTCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Rot_corr"]));
-  py_code.replace("|ZCORREARDET|", QString::number(m_maskcorrections["Rear_Det_Z_corr"]));
-  py_code.replace("|XCORREARDET|", QString::number(m_maskcorrections["Rear_Det_X_corr"]));
+  py_code.replace("|ZCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Z_corr"], 'g', 10));
+  py_code.replace("|YCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Y_corr"], 'g', 10));
+py_code.replace("|XCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_X_corr"], 'g', 10));
+  py_code.replace("|ROTCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Rot_corr"], 'g', 10));
+  py_code.replace("|ZCORREARDET|", QString::number(m_maskcorrections["Rear_Det_Z_corr"], 'g', 10));
+  py_code.replace("|XCORREARDET|", QString::number(m_maskcorrections["Rear_Det_X_corr"], 'g', 10));
 
   return py_code;
 }
@@ -1355,8 +1355,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     "sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_CENTRE, YBEAM_CENTRE], False)\n"
     "can_setup = InitReduction(SCATTER_CAN, [XBEAM_CENTRE, YBEAM_CENTRE], True)\n"
     "WavRangeReduction(sample_setup, can_setup, WAV1, WAV2)";
-
-  std::cerr << py_code.toStdString() << "\n";
 
   //Execute the code
   runPythonCode(py_code, false);
@@ -1719,16 +1717,16 @@ QHash<QString, double> SANSRunWindow::loadDetectorLogs(const QString& work_dir, 
   
   QTextStream reader(&handle);
   while( !reader.atEnd() )
+  {
+    QString line = reader.readLine();
+    QStringList items = line.split(QRegExp("\\s+"));
+    QString entry = items.value(1);
+    if( logkeys.contains(entry) )
     {
-      QString line = reader.readLine();
-      QStringList items = line.split(QRegExp("\\s+"));
-      QString entry = items.value(1);
-      if( logkeys.contains(entry) )
-	{
-	  // Log values are in mm 
-	  logvalues[entry] = items.value(2).toDouble();
-	}
+      // Log values are in mm 
+      logvalues[entry] = items.value(2).toDouble();
     }
+  }
   handle.close();
   return logvalues;
     

@@ -244,5 +244,51 @@ def StripEndZeroes(workspace, flag_value = 0.0):
         x_vals = result_ws.readX(0)
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
-        endX = 1.001*x_vals[stop+1]
+        endX = 1.001*x_vals[stop + 1]
         CropWorkspace(workspace,workspace,startX,endX)
+
+##
+# A small class to collect together run information, used to save passing tuples around
+##
+class RunDetails(object):
+
+	def __init__(self, raw_ws, final_ws, trans_raw, direct_raw, maskpt_rmin, maskpt_rmax, suffix):
+		self._rawworkspace = raw_ws
+		self._finalws = final_ws
+		self._trans_raw = trans_raw
+		self._direct_raw = direct_raw
+		self._maskrmin = maskpt_rmin
+		self._maskrmax = maskpt_rmax
+		self._suffix = suffix
+
+	def getRawWorkspace(self):
+		return self._rawworkspace
+
+	def getReducedWorkspace(self):
+		return self._finalws
+
+	def setReducedWorkspace(self, final_ws):
+		self._finalws = final_ws
+
+	def getTransRaw(self):
+		return self._trans_raw
+
+	def getDirectRaw(self):
+		return self._direct_raw
+
+ 	def getMaskPtMin(self):
+		return self._maskrmin
+
+ 	def setMaskPtMin(self, rmin):
+		self._maskrmin = rmin
+		
+ 	def getMaskPtMax(self):
+		return self._maskrmax
+
+ 	def setMaskPtMax(self, rmax):
+		self._maskrmax = rmax
+	
+	def getSuffix(self):
+		return self._suffix
+		
+		
