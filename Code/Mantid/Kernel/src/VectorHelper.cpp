@@ -111,7 +111,9 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
       width = xo_high - xo_low;
       if ((delta <= 0.0) || (width <= 0.0))
       {
-        throw std::runtime_error("rebin: no bin overlap detected");
+        // No need to throw here, just return (ynew & enew will be empty)
+        //throw std::runtime_error("rebin: no bin overlap detected");
+        return;
       }
       /*
        *        yoldp contains counts/unit time, ynew contains counts

@@ -958,8 +958,7 @@ void LoadRaw3::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     std::vector<int>::const_iterator itr;
     for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
     {
-      g_log.debug() << "Monitor dtector id is " << (*itr) << std::endl;
-      ;
+      g_log.debug() << "Monitor detector id is " << (*itr) << std::endl;
     }
   }
 }
