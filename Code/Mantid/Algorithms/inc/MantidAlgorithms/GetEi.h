@@ -84,8 +84,8 @@ private:
   double timeToFly(double s, double E_KE) const;
   double getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const double peakTime);
   void extractSpec(int specInd, double start, double end);
-  void getPeakEstimates(double &height, double &centre) const;
-  int findHalfLoc(MantidVec::size_type startInd, double halfHeight, direction go) const;
+  void getPeakEstimates(double &height, int &centreInd, double &background) const;
+  double findHalfLoc(MantidVec::size_type startInd, double height, const double noise, const direction go) const;
   double neutron_E_At(double speed) const;
   void advanceProgress(double toAdd);
 
@@ -93,8 +93,11 @@ private:
   static const double HALF_WINDOW;
   /// ignore an peaks that are less than this factor of the background
   static const double PEAK_THRESH_H;
-  /// ignore an peaks with where the distance to the half heigth is less than this number of bins in either direction e.g. the FWHM is less than twice this number
+  /// ignore peaks where the half width times the ratio of the peak height to the background is less this 
+  static const double PEAK_THRESH_A;
+  /// for peaks where the distance to the half heigth is less than this number of bins in either direction e.g. the FWHM is less than twice this number
   static const int PEAK_THRESH_W;
+
   // for estimating algorithm progress
   static const double CROP;                                ///< fraction of algorithm time taken up with running CropWorkspace
   static const double GET_COUNT_RATE;                      ///< fraction of algorithm taken by a single call to ConvertToDistribution

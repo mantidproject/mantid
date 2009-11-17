@@ -35,11 +35,8 @@ try:
   
   GroupDetectors( inOutWS, inOutWS, InSettings.getPropertyValue("MapFile") )
   
-  #does solid angle work OK with the masked?
   SA = SolidAngle(inOutWS, "Angles")
-  ####################
   Divide(inOutWS, SA.getPropertyValue("OutputWorkspace"), inOutWS)
-  ####################
   
   # do we do a normalisation agains the monitors?
   

@@ -286,11 +286,11 @@ public:
     void writeFileList()
     {
       std::ofstream file(inputFile.c_str());
-      file << "2		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
+      file << " 2		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
         << "888 "            << std::endl
         << "2"              << std::endl
         << "1   3"          << std::endl
-        << "888"             << std::endl
+        << "  888"             << std::endl
         << std::endl
         << "1"              << std::endl
         << "4";
@@ -302,11 +302,11 @@ public:
       file << "3		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
         << "0 "            << std::endl
         << "3"              << std::endl
-        << "1-  3"          << std::endl
+        << "  1-  3"          << std::endl
         << "0"             << std::endl
         << "1"              << std::endl
         << std::endl
-        << "4"              << std::endl
+        << "  4"              << std::endl
         << "0"              << std::endl
         << "2"              << std::endl
         << "5-6";

@@ -30,7 +30,6 @@ public:
     TS_ASSERT_EQUALS( grouper.category(), "CorrectionFunctions" )
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
     TS_ASSERT( grouper.isInitialized() )
-
     // the following is for a MARI workspace that is loaded in the constructor and the values I found from experimenting
     grouper.setPropertyValue("InputWorkspace", m_WS);
     grouper.setPropertyValue("Monitor1Spec", "2");
@@ -52,9 +51,8 @@ public:
     TS_ASSERT( grouper.isExecuted() );
 
     double finalAnswer = grouper.getProperty("IncidentEnergy");
-    TS_ASSERT_DELTA( finalAnswer, 12.9462875, 1e-6 )
-/*MAPS one off test, takes to long to do it every time. */ //TS_ASSERT_DELTA( finalAnswer, 398.7392468, 1e-6 )
-/*MERLIN one off test, takes to long to do it every time. */ // TS_ASSERT_DELTA( finalAnswer, 15.07969180873369, 1e-6 )
+    TS_ASSERT_DELTA( finalAnswer, 12.9739, 1e-4 )
+/*MERLIN one off test, takes to long to do it every time. */ // TS_ASSERT_DELTA( finalAnswer, 15.0751, 1e-6 )
   }
 
   void loadRawFile()

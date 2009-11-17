@@ -298,7 +298,12 @@ int GroupDetectors2::readInt(std::string line)
     }
     else
     {
+      if ( data.count() == 0 )
+      {
+        return EMPTY_LINE;
+      }
       // we expected an integer but there were more things on the line, before any #
+      g_log.debug() << "Error: found " << data.count() << " strings the first string is " << data[0] << std::endl;
       throw std::invalid_argument("Problem reading file, a singe integer expected");
     }
   }

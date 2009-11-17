@@ -21,15 +21,17 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
+// adjustable fit criteria, increase the first number or reduce any of the last three for more promiscuous peak fitting
 // from the estimated location of the peak search forward by the following fraction and backward by the same fraction
 const double GetEi::HALF_WINDOW = 4.0/100;
 const double GetEi::PEAK_THRESH_H = 3.0;
+const double GetEi::PEAK_THRESH_A = 10.0;
 const int GetEi::PEAK_THRESH_W = 3;
 
 // progress estimates
 const double GetEi::CROP = 0.15;
 const double GetEi::GET_COUNT_RATE = 0.15;
-const double GetEi::FIT_PEAK = 2.0;
+const double GetEi::FIT_PEAK = 0.2;
 
 /// Empty default constructor algorith() calls the constructor in the base class
 GetEi::GetEi() : Algorithm(),
@@ -196,7 +198,7 @@ double GetEi::timeToFly(double s, double E_KE) const
 *  @param WS the workspace containing the monitor spectrum
 *  @param monitIn the index of the histogram that contains the monitor spectrum
 *  @param peakTime the estimated TOF of the monitor peak in the time units of the workspace
-*  @return a time half way between the two half height locations on the peak
+*  @return a time of flight value in the peak in microseconds
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
 *  @throw out_of_range if the peak runs off the edge of the histogram
 *  @throw runtime_error a sub-algorithm just falls over
@@ -213,35 +215,19 @@ double GetEi::getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const 
   advanceProgress(GET_COUNT_RATE);
 
   // to store fit results
-  double height, centreGaussian;
-  getPeakEstimates(height, centreGaussian);
+  int centreGausInd;
+  double height, backGroundlev;
+  getPeakEstimates(height, centreGausInd, backGroundlev);
   // look out for user cancel messgages
   advanceProgress(FIT_PEAK);
 
-  // find the index of the centre point. The centre can't be at index zero as this is at the edge of the spectrum, so centreIndex = 0 is the error value
-  MantidVec::size_type cenGausIn = 0;
-  for ( MantidVec::size_type i = 0; i < m_tempWS->readY(0).size(); ++i )
-  {// assumes that the bin boundaries are all in order of increasing time
-    if ( m_tempWS->readX(0)[i] > centreGaussian )
-    {
-      cenGausIn = i;
-      break;
-    }
-  }
-
   // the peak centre is defined as the centre of the two half maximum points as this is better for asymmetric peaks
   // first loop backwards along the histogram to get the first half height point
-  MantidVec::size_type lHalf = findHalfLoc(cenGausIn, height, GO_LEFT);
+  const double lHalf = findHalfLoc(centreGausInd, height, backGroundlev, GO_LEFT);
   // go forewards to get the half height on the otherside of the peak
-  MantidVec::size_type rHalf = findHalfLoc(cenGausIn, height, GO_RIGHT);
-  
-  // the centre is the mean of the two end values
-  double centreInd = static_cast<double>(lHalf + rHalf)/2.0;
-  // convert the index into a time of flight value
-  double tCalcu = m_tempWS->readX(0)[static_cast<int>(floor(centreInd))];
-  // centreInd could be an integer or a half integer so return the value of the bin boundry or the mean of two bin boundaries
-  tCalcu += m_tempWS->readX(0)[static_cast<int>(ceil(centreInd))];
-  return tCalcu/2;
+  const double rHalf = findHalfLoc(centreGausInd, height, backGroundlev, GO_RIGHT);
+  // the peak centre is defined as the mean of the two half height times 
+  return (lHalf + rHalf)/2;
 }
 /** Calls CropWorkspace as a sub-algorithm and passes to it the InputWorkspace property
 *  @param specInd the index number of the histogram to extract
@@ -283,69 +269,94 @@ void GetEi::extractSpec(int specInd, double start, double end)
 
 //DEBUGGING CODE uncomment out the line below if you want to see the TOF window that was analysed
 //AnalysisDataService::Instance().addOrReplace("croped_dist_del", m_tempWS);
+  progress(m_fracCompl);
+  interruption_point();
 }
 
 /** Finds the largest peak by looping through the histogram and finding the maximum
 *  value 
-* @param height this will became the peak height found by the fit
-* @param centre will be set to the location of the peak center
-* @throw invalid_argument if the peak is not much above the background
+* @param height its passed value ignored it is set to the peak height
+* @param centreInd passed value is ignored it will be set to the bin index of the peak center
+* @param background passed value ignored set mean number of counts per bin in the spectrum
+* @throw invalid_argument if the peak is not clearly above the background
 */
-void GetEi::getPeakEstimates(double &height, double &centre) const
+void GetEi::getPeakEstimates(double &height, int &centreInd, double &background) const
 {
   // take note of the number of background counts as error checking, do we have a peak or just a bump in the background
-  double backgroundCounts = 0;
+  background = 0;
   // start at the first Y value
   height = m_tempWS->readY(0)[0];
-  centre = m_tempWS->readX(0)[0];
+  centreInd = 0;
   // then loop through all the Y values and find the tallest peak
-  for ( MantidVec::size_type i = 1; i < m_tempWS->readY(0).size(); ++i )
+  for ( MantidVec::size_type i = 1; i < m_tempWS->readY(0).size()-1; ++i )
   {
-    backgroundCounts += m_tempWS->readY(0)[i];
+    background += m_tempWS->readY(0)[i];
     if ( m_tempWS->readY(0)[i] > height )
     {
-      height = m_tempWS->readY(0)[i];
-      centre = m_tempWS->readX(0)[i];
+      centreInd = i;
+      height = m_tempWS->readY(0)[centreInd];
     }
   }
-  if ( height < PEAK_THRESH_H*backgroundCounts/m_tempWS->readY(0).size() )
+  
+  background = background/m_tempWS->readY(0).size();
+  if ( height < PEAK_THRESH_H*background )
   {
     throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background");
   }
-  g_log.debug() << "Initial guess of peak position, based on the maximum Y value in the monitor spectrum, is at TOF " << centre << " (peak height " << height << " counts/microsecond)" << std::endl;
+
+  g_log.debug() << "Initial guess of peak position, based on the maximum Y value in the monitor spectrum, is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)" << std::endl;
+
 }
-/** Gets the index of the bin that is closest to the bin given and contains a number of
-*  counts less half of the number passed to this function, bin indexes start at zero
+/** Estimates the closest time, looking either or back, when the number of counts is
+*  half that in the bin whose index that passed
 *  @param startInd index of the bin to search around, e.g. the index of the peak centre
 *  @param height the number of counts (or count rate) to compare against e.g. a peak height
+*  @param noise mean number of counts in each bin in the workspace
 *  @param go either GetEi::GO_LEFT or GetEi::GO_RIGHT
-*  @return the index number of the first bin found where the counts are less than half
+*  @return estimated TOF of the half maximum point
 *  @throw out_of_range if the end of the histogram is reached before the point is found
 *  @throw invalid_argument if the peak is too thin
 */
-int GetEi::findHalfLoc(MantidVec::size_type startInd, double height, direction go) const
+double GetEi::findHalfLoc(MantidVec::size_type startInd, double height, const double noise, const direction go) const
 {
   MantidVec::size_type endInd = startInd;
+
   while ( m_tempWS->readY(0)[endInd] >  height/2.0 )
   {
     endInd += go;
-    if ( endInd < 0 )
+    if ( endInd < 1 )
     {
       throw std::out_of_range("Can't analyse peak, some of the peak is outside the " + boost::lexical_cast<std::string>(HALF_WINDOW*100) + "% window, at TOF values that are too low");
     }
-    if ( endInd >= m_tempWS->readY(0).size())
+    if ( endInd > m_tempWS->readY(0).size()-2)
     {
       throw std::out_of_range("Can't analyse peak, some of the peak is outside the " + boost::lexical_cast<std::string>(HALF_WINDOW*100) + "% window, at TOF values that are too high");
     }
   }
+
   if ( std::abs(static_cast<int>(endInd - startInd)) < PEAK_THRESH_W )
   {// we didn't find a insignificant peak
-    throw std::invalid_argument("No peak was found or its width is less than the threshold 2x" + boost::lexical_cast<std::string>(PEAK_THRESH_W) + " bins");
+    g_log.warning() << "Potential precision problem, one half height distance is less than the threshold number of bins: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << std::endl;
   }
-  g_log.debug() << "One half height point found at TOF = " << m_tempWS->readX(0)[endInd] << " microseconds" << std::endl;
-  return static_cast<int>(endInd);
-}
+  // we have a peak in range, do an area check to see if the peak has any significance
+  height = (height-noise)/noise;
+  if ( height < PEAK_THRESH_A && std::abs(height*(endInd - startInd)) < PEAK_THRESH_A )
+  {// the peak could just be noise on the background, ignore it
+    throw std::invalid_argument("No good peak was found. The ratio of the height to the background multiplied either half widths must be above the threshold (>" + boost::lexical_cast<std::string>(PEAK_THRESH_A) + " bins)");
+  }
+  // get the TOF value in the middle of the bin
+  double halfTime = (m_tempWS->readX(0)[endInd]+m_tempWS->readX(0)[endInd+go])/2;
+  // interpolate between the first bin with less than half the counts to the bin before it
+  if ( endInd != startInd )
+  {// let the bin that we found have coordinates (x_1, y_1) the distance of the half point (x_2, y_2) from this is (y_1-y_2)/gradient. Gradient = (y_3-y_1)/(x_3-x_1) where (x_3, y_3) are the coordinates of the other bin we are using
+    halfTime -= ( (height/2.0)-m_tempWS->readY(0)[endInd] ) *
+                ( m_tempWS->readX(0)[endInd] - m_tempWS->readX(0)[endInd-go] ) /
+                ( m_tempWS->readY(0)[endInd] - m_tempWS->readY(0)[endInd-go] );
+  }
 
+  g_log.debug() << "One half height point found at TOF = " << halfTime << " microseconds" << std::endl;
+  return halfTime;
+}
 /** Get the kinetic energy of a neuton in joules given it speed using E=mv^2/2
 *  @param speed the instantanious speed of a neutron in metres per second
 *  @return the energy in joules

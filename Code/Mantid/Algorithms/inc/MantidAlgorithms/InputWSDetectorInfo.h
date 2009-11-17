@@ -1,3 +1,6 @@
+#ifndef MANTID_ALGORITHM_INPUTWSDETECTORINFO_H_
+#define MANTID_ALGORITHM_INPUTWSDETECTORINFO_H_
+
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -62,3 +65,5 @@ namespace Mantid
     };
   }
 }
+
+#endif /*MANTID_ALGORITHM_INPUTWSDETECTORINFO_H*/

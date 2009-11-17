@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\DetectorEfficiencyCor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\DetectorEfficiencyVariation.cpp"
 				>
 			</File>
@@ -256,6 +260,10 @@
 			</File>
 			<File
 				RelativePath=".\src\Divide.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\EfficiencyScriptInput.cpp"
 				>
 			</File>
 			<File
@@ -593,6 +601,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\DetectorEfficiencyCor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\DetectorEfficiencyCorTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\DetectorEfficiencyVariation.h"
 				>
 			</File>
@@ -622,6 +638,10 @@
 			</File>
 			<File
 				RelativePath=".\test\DivideTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\EfficiencyScriptInput.h"
 				>
 			</File>
 			<File
