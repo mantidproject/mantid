@@ -17,6 +17,7 @@
 #include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/ConfigService.h"
 
 namespace Mantid
 {
@@ -78,6 +79,14 @@ void FrameworkManagerProxy::clearData()
 void FrameworkManagerProxy::clearInstruments()
 {
   API::FrameworkManager::Instance().clearInstruments();
+}
+
+/**
+ * Return a string property from the ConfigService
+ */
+std::string FrameworkManagerProxy::getConfigProperty(const std::string & key) const
+{
+  return Kernel::ConfigService::Instance().getString(key);
 }
 
 /**

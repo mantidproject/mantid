@@ -81,6 +81,12 @@ public:
   void clearInstruments();	
   //@}
 
+  /** @name Config access */
+  //@{
+  /// Access a property from the .properties file
+  std::string getConfigProperty(const std::string & key) const;
+  //@}
+
   /** @name Algorithm control */
   //@{
   /// Creates and instance of an algorithm

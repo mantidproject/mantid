@@ -56,6 +56,7 @@ namespace PythonAPI
       .def("createPythonSimpleAPI", &FrameworkManagerProxy::createPythonSimpleAPI)
       .def("sendLogMessage", &FrameworkManagerProxy::sendLogMessage)
       .def("workspaceExists", &FrameworkManagerProxy::workspaceExists)
+      .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
       .def("_getRawTableWorkspacePointer", &FrameworkManagerProxy::retrieveTableWorkspace)
       .def("_getRawWorkspaceGroupPointer", &FrameworkManagerProxy::retrieveWorkspaceGroup)
