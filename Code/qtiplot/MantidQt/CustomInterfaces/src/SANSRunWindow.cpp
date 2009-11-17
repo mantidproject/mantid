@@ -1642,7 +1642,12 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
   {
     py_code = "LoadNexus";
   }
-  py_code += "(Filename='" + filepath + "', OutputWorkspace='" + workspace + "')"; 
+  py_code += "(Filename='" + filepath + "', OutputWorkspace='" + workspace + "'";
+  if( workspace.contains("trans") )
+  {
+    py_code += ", SpectrumMax=8";
+  }
+  py_code += ")"; 
   QString results = runPythonCode(py_code);
   if( !results.isEmpty() )
   {

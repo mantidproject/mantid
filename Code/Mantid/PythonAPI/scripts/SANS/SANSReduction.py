@@ -65,7 +65,7 @@ DIRECT_BEAM_FILE = None
 # This indicates whether a 1D or a 2D analysis is performed
 CORRECTION_TYPE = '1D'
 # Component positions
-SAMPLE_Z_CORR = None
+SAMPLE_Z_CORR = 0.0
 
 # Scaling values
 RESCALE = 1.0*100.0
@@ -291,16 +291,22 @@ def _assignHelper(run_string, is_trans):
     else:
         wkspname =  run_no + '_sans_' + ext.lower()
 
-    filename = INSTR_NAME + run_no.rjust(8, '0')
-    _loadRawData(filename, wkspname, ext)
+    filename = os.path.join(DATA_PATH,INSTR_NAME + run_no.rjust(8, '0'))
+    if is_trans:
+        _loadRawData(filename, wkspname, ext, spec_max = 8)
+    else:
+        _loadRawData(filename, wkspname, ext)
     return wkspname
 
 ##########################
 # Loader function
 ##########################
-def _loadRawData(filename, workspace, ext):
+def _loadRawData(filename, workspace, ext, spec_max = None):
     if ext.lower() == 'raw':
-        LoadRaw(filename + '.' + ext, workspace)
+        if spec_max == None:
+            LoadRaw(filename + '.' + ext, workspace)
+        else:
+            LoadRaw(filename + '.' + ext, workspace, SpectrumMax=spec_max)
         LoadSampleDetailsFromRaw(workspace, filename + '.' + ext)
         sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
         SampleGeometry(sample_details.getGeometryFlag())
@@ -308,7 +314,10 @@ def _loadRawData(filename, workspace, ext):
         SampleHeight(sample_details.getHeight())
         SampleWidth(sample_details.getWidth())
     else:
-        LoadNexus(filename + '.' + ext, workspace)
+        if spec_max == None:
+            LoadNexus(filename + '.' + ext, workspace)
+        else:
+            LoadNexus(filename + '.' + ext, workspace, SpectrumMax=spec_max)
 
 
 # Load the detector logs
