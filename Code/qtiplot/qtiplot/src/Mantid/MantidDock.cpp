@@ -499,7 +499,8 @@ void MantidDockWidget::groupOrungroupWorkspaces()
 void MantidDockWidget::plotSpectra()
 {
   // Get hold of the names of all the selected workspaces
-  const QList<QString> wsNames = getSelectedWorkspaceNames();
+  QList<QString> wsNames = getSelectedWorkspaceNames();
+  QList<int> wsSizes;
 
   // Find out if they are all single-spectrum workspaces
   QList<QString>::const_iterator it = wsNames.constBegin();
@@ -509,6 +510,7 @@ void MantidDockWidget::plotSpectra()
     MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*it).toStdString()));
     if ( !ws ) continue;
     const int currentHists = ws->getNumberHistograms();
+    wsSizes.append(currentHists);
     if ( currentHists > maxHists ) maxHists = currentHists;
   }
   // If not all single spectrum, ask which one to plot
@@ -518,6 +520,16 @@ void MantidDockWidget::plotSpectra()
     bool goAhead;
     spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,maxHists-1,1,&goAhead);
     if (!goAhead) return;
+  }
+  // Now need to go around checking whether the requested spectrum is too large for any workspaces
+  for ( int i = wsNames.size()-1; i >= 0; --i )
+  {
+    if (spec >= wsSizes[i])
+    {
+      logObject.warning() << wsNames[i].toStdString() << " has only "
+          << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";
+      wsNames.removeAt(i);
+    }
   }
 
   // Create the graph for the first workspace
