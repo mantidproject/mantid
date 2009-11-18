@@ -179,11 +179,11 @@ class Graph: public QWidget
 		///seeting a boolean flag to when the intensity(start and end values) changed
 		void changeIntensity(bool bIntensityChanged);
 
-		void setspectrumIndexList(const std::set<int>& indexList);
+    void setspectrumIndexList(const std::multimap<QString,int>& indexList);
 		bool getError()const {return m_errors;}
 		void setError(bool errors){m_errors=errors;}
 
-		std::set<int> getspectrumIndexList()const;
+    std::multimap<QString,int> getspectrumIndexList() const;
 		QString getSpectrumIndex();
 	
 	public slots:
@@ -770,16 +770,17 @@ signals:
         //! Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
 		bool d_auto_scale;
 		//static Mantid::Kernel::Logger &g_log;
-		 QString mCurrentColorMap;
-		 QwtPlotMagnifier *d_magnifier;
-		 QwtPlotPanner *d_panner;
-		 //for saving the spectrogram axes number if the axes details like scale is changed
+    QString mCurrentColorMap;
+    QwtPlotMagnifier *d_magnifier;
+    QwtPlotPanner *d_panner;
+    //for saving the spectrogram axes number if the axes details like scale is changed
 		//this is useful for saving/loading project.
-		 std::vector<int> updatedaxis;
+    std::vector<int> updatedaxis;
 
-                 QMutex *m_mutex;
-				 std::set<int> m_spindexList;
-				 // to save error flag to project file for 1 PD plot
-				 bool m_errors;
+    QMutex *m_mutex;
+    /// The set of workpace-index pairs plotted in this graph
+    std::multimap<QString,int> m_spindexList;
+    // to save error flag to project file for 1 PD plot
+    bool m_errors;
 };
 #endif // GRAPH_H

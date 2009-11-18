@@ -5241,28 +5241,34 @@ void Graph::changeIntensity(bool bIntensityChanged)
         }
 	}
 }
-void Graph::setspectrumIndexList(const std::set<int>& spindexlist)
+
+void Graph::setspectrumIndexList(const std::multimap<QString,int>& spindexlist)
 {
-	m_spindexList=spindexlist;
+  m_spindexList=spindexlist;
 }
-std::set<int> Graph::getspectrumIndexList()const
+
+std::multimap<QString,int> Graph::getspectrumIndexList() const
 {
-	return m_spindexList;
+  return m_spindexList;
 }
+
 QString Graph::getSpectrumIndex()
 {
-	std::set<int>indexList=getspectrumIndexList();
-	QString spectrumList;
-	 for(std::set<int>::const_iterator it=indexList.begin();it!=indexList.end();++it)
-	 {	 QString temp;
-		 temp.setNum(*it);
-		if( spectrumList.isEmpty())
-			spectrumList=temp;
-		else
-		{	spectrumList+="\t";
-			spectrumList+=temp;
-		}
-
-	 }
- return spectrumList;
+  std::multimap<QString,int> indexList=getspectrumIndexList();
+  QString spectrumList;
+  for(std::multimap<QString,int>::const_iterator it=indexList.begin();it!=indexList.end();++it)
+  {
+    QString temp;
+    temp.setNum(it->second);
+    if( spectrumList.isEmpty())
+    {
+      spectrumList=temp;
+    }
+    else
+    {
+      spectrumList+="\t";
+      spectrumList+=temp;
+    }
+  }
+  return spectrumList;
 }
