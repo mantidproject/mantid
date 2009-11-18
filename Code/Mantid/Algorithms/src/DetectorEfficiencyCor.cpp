@@ -1,5 +1,4 @@
 #include "MantidAlgorithms/DetectorEfficiencyCor.h"
-#include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidKernel/Exception.h"
@@ -58,9 +57,10 @@ const double DIST_TO_UNIVERSE_EDGE = 1e3;
 
 // this default constructor calls default constructors and sets other member data to imposible values 
 DetectorEfficiencyCor::DetectorEfficiencyCor() : Algorithm(), m_inputWS(),
-  m_outputWS(), m_paraMap(NULL), m_Ei(-1), m_shapeCache(NULL), m_radCache(-1),
-  m_sinThetaCache(-1e3), m_baseAxisCache(), m_detAxisCache(), m_1_t2rad(-1),
-  m_CONST_rad_sintheta_1_t2rad_atms(-1), m_1_wvec(), m_XsCache(NULL)
+  m_outputWS(), m_paraMap(NULL), m_detMasking(), m_Ei(-1),
+  m_shapeCache(NULL), m_radCache(-1), m_sinThetaCache(-1e3), m_baseAxisCache(),
+  m_1_t2rad(-1), m_CONST_rad_sintheta_1_t2rad_atms(-1), m_1_wvec(),
+  m_XsCache(NULL)
   {
   }
 
@@ -90,6 +90,17 @@ void DetectorEfficiencyCor::exec()
 {
   //gets and checks the values passed to the algorithm
   retrieveProperties();
+  
+  try
+  {// load a helper object that will allow masking detectors and checking the masking status
+    m_detMasking.reset( new InputWSDetectorInfo(m_inputWS) );
+  }
+  catch (std::invalid_argument &e)
+  {
+    g_log.debug() << "InputWSDetectorInfo::InputWSDetectorInfo() threw invalid_argument " << e.what();
+    g_log.warning() << "Checking detector masking and masking detectors is disabled because of a problem loading the maksing map" << std::endl;
+    m_detMasking.reset();
+  }
 
   // save error logging information, we'll send it out as one block at the end because there could be a lottt
   std::vector<int> spuriousSpectra;
@@ -99,22 +110,26 @@ void DetectorEfficiencyCor::exec()
   for (int i = 0; i < numHists; ++i )
   {
     try
-    {
-      detectorEfficiency(i);
+    {// check if a detector is masked, if so do nothing and the output workspace Y and E values will remain untouched as either zeros or the values in the input workspace
+      if ( (! m_detMasking.get()) || (! m_detMasking->aDetecIsMaskedinSpec(i)))
+      {
+        efficiencyCorrect(i);
+      }
     }
     catch (Exception::NotFoundError &excep)
     {// if we don't have all the data there will be spectra we can't correct, avoid leaving the workspace part corrected 
       MantidVec dud = m_outputWS->dataY(i);
       std::transform(dud.begin(),dud.end(),dud.begin(), std::bind2nd(std::multiplies<double>(),0));
-      // mark the detectors as masked
 
-      //check on the reason for the error, mask the detectors if possible, and log
+      //check on the reason for the error, mask the detectors if possible and log
       std::string error(excep.what());
       bool paramProb = error.find("3He(atm)") != std::string::npos;
       paramProb = paramProb || error.find("wallT(m)") != std::string::npos;
       if (paramProb)
       {// Couldn't get one of the properties for a detector, I don't why that would be but zero the spectra and tell the user
         unsetParams.push_back(i);
+        // mark the detectors as masked
+        m_detMasking->maskAllDetectorsInSpec(i);
       }
       else
       {// couldn't get a pointer to the detector, again blank the spectra and log
@@ -135,7 +150,7 @@ void DetectorEfficiencyCor::exec()
       interruption_point();
     }
   }
-  onErrorsmaskDetectorsAndLog(spuriousSpectra, unsetParams);
+  logErrors(spuriousSpectra, unsetParams);
   setProperty("OutputWorkspace", m_outputWS);
 }
 /** Loads and checks the values passed to the algorithm
@@ -154,9 +169,7 @@ void DetectorEfficiencyCor::retrieveProperties()
   // If input and output workspaces are not the same, create a new workspace for the output
   if (m_outputWS != m_inputWS )
   {
-    m_outputWS = WorkspaceFactory::Instance().create(m_inputWS,
-      m_inputWS->getNumberHistograms(), m_inputWS->readX(0).size(),
-      m_inputWS->blocksize());
+    m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
   }
 }
 /** Corrects a spectra for the detector efficiency calculated from detector information
@@ -167,7 +180,7 @@ Gets the detector information and uses this to calculate its efficiency
 *  @throw runtime_error if the SpectraDetectorMap has not been filled
 *  @throw NotFoundError if the detector or its gas pressure or wall thickness were not found
 */
-void DetectorEfficiencyCor::detectorEfficiency(int spectraIn)
+void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
 {
   // get a pointer to one of the detector that created the spectrum
   const int specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
@@ -199,7 +212,7 @@ void DetectorEfficiencyCor::detectorEfficiency(int spectraIn)
     detComp = detector->getComponent();
   }// deal with exceptions caused by detectors not being listed in the instrument file because this happens a lot
   catch( std::runtime_error &e )
-  {// deal with exceptions thrown here from those thrown below
+  {// deal with exceptions thrown here separately from those thrown below
     throw Exception::NotFoundError(e.what(), spectraIn);
   }
   
@@ -233,8 +246,7 @@ void DetectorEfficiencyCor::detectorEfficiency(int spectraIn)
   for ( MantidVec::size_type i = 0; i < m_inputWS->readY(spectraIn).size(); ++i )
   {
     const double ReceprEFF = 1/EFF(m_1_wvec[i]);
-    // an efficiency of zero shouldn't happen so, to save time, I don't check for divide by zero
-    //    if ( ReceprEFF < 0 ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
+    // an efficiency of zero shouldn't happen so, to save time, I don't check for divide by zero  if ( ReceprEFF < 0 ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
     m_outputWS->dataY(spectraIn)[i] = m_inputWS->readY(spectraIn)[i]*ReceprEFF;
     m_outputWS->dataE(spectraIn)[i] = m_inputWS->readE(spectraIn)[i]*ReceprEFF;
   }
@@ -283,21 +295,25 @@ void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<IDetector> det
   }
 
   // now get the sin of the angle, it's the magnitude of the cross product of unit vector along the detector tube axis and a unit vector directed from the sample to the detector centre
-  V3D vectorFromSample = det->getPos();
-  IObjComponent_sptr source = m_inputWS->getInstrument()->getSource();
-  vectorFromSample = det->getPos() - source->getPos();
+  IObjComponent_sptr origin = m_inputWS->getInstrument()->getSample();
+  V3D vectorFromSample = det->getPos() - origin->getPos();
   vectorFromSample.normalize();
 
   Quat rot = det->getRotation();
   // m_baseAxis was set by the last call to getCylinderAxis() above
-  m_detAxisCache = m_baseAxisCache;
+  V3D detAxis = m_baseAxisCache;
   // rotate the original cylinder object axis to get the detector axis in the actual instrument
-  rot.rotate(m_detAxisCache); 
-  m_detAxisCache.normalize();
+  rot.rotate(detAxis); 
+  detAxis.normalize();
 
-  V3D vectorProd = vectorFromSample.cross_prod(m_detAxisCache);
-  // normalise returns the magnitude of the vector
-  m_sinThetaCache = vectorProd.normalize();
+  // |A X B| = |A||B|sin(theta) i.e. |detAxis X vectorFromSample| = |detAxis||vectorFromSample|sin(theta)
+  V3D vectorProd = vectorFromSample.cross_prod(detAxis);
+  // |detAxis| = |vectorFromSample| = 1 (because normalize() was run on both these vectors before)
+  // so      sin(theta) = |detAxis X vectorFromSample|
+  m_sinThetaCache = vectorProd.norm();
+//  g_log.debug() << "vectorProd = (" << vectorProd.X() << ", " << vectorProd.Y() << ", " << vectorProd.Z() << ")";
+//  g_log.debug() << "   vectorFromSample = (" << vectorFromSample.X() << ", " << vectorFromSample.Y() << ", " << vectorFromSample.Z() << ")";
+//  g_log.debug() << "   detAxis = (" << detAxis.X() << ", " << detAxis.Y() << ", " << detAxis.Z() << ")";
 }
 
 /** Calculates the radius of cylinderical detectors, function assumes that the detector's axis is aligned with
@@ -337,7 +353,7 @@ void DetectorEfficiencyCor::getCylinderAxis()
 *  the direction of the point given
 *  @param start the distance calculated from origin to the surface in a line towards this point. It should be outside the shape
 *  @param shape the object to calculate for, should be centred on the origin
-*  @throw invalid_argument if the is any error finding the distance
+*  @throw invalid_argument if there is any error finding the distance
 */
 double DetectorEfficiencyCor::DistToSurface(const V3D start, const Object *shape) const
 {  
@@ -369,7 +385,7 @@ double DetectorEfficiencyCor::DistToSurface(const V3D start, const Object *shape
 double DetectorEfficiencyCor::EFF(const double oneOverwvec) const//, double rad, double atms,/* double m_1@t2rad,*/ double sintheta)
 {
   //T.G.Perring Aug 2009: replace the following with the one after:  alf = const*rad*(1.0d0-t2rad)*atms/wvec
-  // implements teh equation with a large amount of caching of calculated values in member variables
+  // implements the equation with a large amount of caching of calculated values in member variables
   double alf = m_CONST_rad_sintheta_1_t2rad_atms  *  oneOverwvec;
 
   if ( alf < 9.0 )
@@ -414,7 +430,7 @@ double DetectorEfficiencyCor::EFFCHB(double a, double b, const double exspansion
 *  @param unsetParams list of spectra indexes for histograms where detector information is incomplete, these spectra will be masked
 *  @throw invalid_argument if there is no BaseInstrument in the workspace
 */
-void DetectorEfficiencyCor::onErrorsmaskDetectorsAndLog(std::vector<int> &spuriousSpectra, std::vector<int> &unsetParams) const
+void DetectorEfficiencyCor::logErrors(std::vector<int> &spuriousSpectra, std::vector<int> &unsetParams) const
 {
   if (spuriousSpectra.size() > 0)
   {
@@ -431,22 +447,9 @@ void DetectorEfficiencyCor::onErrorsmaskDetectorsAndLog(std::vector<int> &spurio
     g_log.warning() << "Found " << unsetParams.size() << " spectra where the first detector didn't contain gas pressure or wall thickness. Their detectors have been masked and Y values set to zero" << std::endl;
     g_log.warning() << "The spectrum numbers are: ";
     // try to mask the detector
-    InputWSDetectorInfo *detectorMaskingHelper = NULL;
-    try
-    {
-      InputWSDetectorInfo masker(m_inputWS);
-      detectorMaskingHelper = &masker;
-    }
-    catch (std::exception)
-    {
-      g_log.warning() << std::endl;
-      g_log.error() << "A detector in spectrum number " << m_inputWS->getAxis(1)->spectraNo(spuriousSpectra[0]) << " was not found. Tried to mask the detector but encountered a fatal error" << std::endl;
-      throw;
-    }
     for ( std::vector<int>::size_type k = 0; k < unsetParams.size(); k++ )
     {
       g_log.warning() << " " << m_inputWS->getAxis(1)->spectraNo(unsetParams[k]);
-      detectorMaskingHelper->maskAllDetectorsInSpec(k);
     }
     g_log.warning() << std::endl;
   }

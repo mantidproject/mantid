@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include <Poco/NObserver.h>
 #include <boost/shared_ptr.hpp>
@@ -103,8 +104,10 @@ private:
   MatrixWorkspace_const_sptr m_inputWS;
   /// output workspace, maybe the same as the input one
   MatrixWorkspace_sptr m_outputWS;
-  /// the map that stores additional properties for detectors in that map
+  /// points the map that stores additional properties for detectors in that map
   const Geometry::ParameterMap *m_paraMap;
+  /// points to a detector masking helper object, or NULL if the mask map couldn't be opened
+  boost::shared_ptr<InputWSDetectorInfo> m_detMasking;
 
   /// stores the user selected value for incidient energy of the neutrons
   double m_Ei;
@@ -118,8 +121,6 @@ private:
   double m_sinThetaCache;
   /// cached value for the axis of cylinder that the detectors are based on, last time it was calculated
   V3D m_baseAxisCache;
-    /// cached value for the detector axis, after it had been rotated to be placed in the instrument (calculated value)
-  V3D m_detAxisCache;
   /// cached value a parameter used in the detector efficiency calculation, 1-wallthickness/radius
   double m_1_t2rad;
   /// caches the part of the calculation that is constant for a whole detector
@@ -135,6 +136,8 @@ private:
   /// process this many spectra before checking for user cancel messages and updating the progress bar
   static const int INTERVAL = 128;
 
+  void retrieveProperties();
+  void efficiencyCorrect(int spectraNumber);
   void set1_wvec(int spectraIn);
   double get1OverK(double DeltaE) const;
   void getDetectorGeometry(boost::shared_ptr<IDetector> det);
@@ -142,14 +145,11 @@ private:
   double DistToSurface(const V3D start, const Object *shape) const;
   double EFF(const double oneOverwvec) const;//, double rad, double atms, double t2rad, double sintheta);
   double EFFCHB(double a, double b, const double exspansionCoefs[], double x) const;
-  void onErrorsmaskDetectorsAndLog(std::vector<int> &spuriousSpectra, std::vector<int> &unsetParams) const;
+  void logErrors(std::vector<int> &spuriousSpectra, std::vector<int> &unsetParams) const;
 
   // Implement abstract Algorithm methods
   void init();
   void exec();
-  
-  void retrieveProperties();
-  void detectorEfficiency(int spectraNumber);
 
   /// Links the energy to the wave number, I got this from Prof T.G.Perring 
   static const double PLANCKY_CONST;

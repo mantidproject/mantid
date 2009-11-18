@@ -60,7 +60,8 @@ public:
     // a smallish raw file that contains the detailed detector information stored by the excitations group 
     std::string inName("fromRaw_DetectorEfficiencyCorTest");
     std::string outName("fromAlg_DetectorEfficiencyCorTest");
-
+    std::string s;
+    std::getline(std::cin, s);
     loadRawFile(inName, m_rawFile);
     loadDetInfo(inName, m_rawFile);
 //    loadDetInfo(inName, "C:/mantid/Test/Data/merlin_detector.sca");

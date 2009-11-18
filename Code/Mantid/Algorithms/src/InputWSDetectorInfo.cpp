@@ -23,7 +23,7 @@ InputWSDetectorInfo::InputWSDetectorInfo(MatrixWorkspace_const_sptr input) :
 
   if ( !m_RInstru || !m_WInstru )
   {
-    throw std::invalid_argument("There is no instrument data in the input workspace.");
+    throw std::invalid_argument("Error loading instrument or base instrument data from the input workspace.");
   }
   // the space that contains which are masked
   m_Pmap = &m_Input->instrumentParameters();
