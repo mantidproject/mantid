@@ -22,6 +22,7 @@ void EfficiencyScriptInput::init()
   raw.push_back("raw");
   declareProperty(new FileProperty("RawFile","", FileProperty::Load, raw), "");
   declareProperty(new ArrayProperty<double>("BinBoundaries", new RebinParamsValidator));
+  declareProperty(new FileProperty("WhiteBeamVan", "", FileProperty::Load, raw), "");
   std::vector<std::string> map;
   raw.push_back("map");
   declareProperty(new FileProperty("MapFile","", FileProperty::Load, map), "");

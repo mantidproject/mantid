@@ -98,7 +98,7 @@ void SaveSPE::exec()
   }
 
   // If the number of energies isn't a factor of 8 then we need to add an extra CR/LF
-  if (nBins % 8 != 0)
+//  if (nBins % 8 != 0)
     outSPE_File << std::endl;
 
   for (int i = 0; i < nHist; i++)
