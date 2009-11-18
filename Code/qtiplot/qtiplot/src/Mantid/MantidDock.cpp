@@ -521,30 +521,22 @@ void MantidDockWidget::plotSpectra()
     spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,maxHists-1,1,&goAhead);
     if (!goAhead) return;
   }
-  // Now need to go around checking whether the requested spectrum is too large for any workspaces
-  for ( int i = wsNames.size()-1; i >= 0; --i )
+
+  std::multimap<QString,int> toPlot;
+  // Now need to go around inserting workspace-spectrum pairs into a map
+  // and checking whether the requested spectrum is too large for any workspaces
+  for ( int i = 0; i < wsNames.size(); ++i )
   {
     if (spec >= wsSizes[i])
     {
       logObject.warning() << wsNames[i].toStdString() << " has only "
           << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";
-      wsNames.removeAt(i);
+      continue;
     }
+    toPlot.insert(std::make_pair(wsNames[i],spec));
   }
 
-  // Create the graph for the first workspace
-  MultiLayer* first = m_mantidUI->plotSpectrum(wsNames.front(),spec,false,false);
-
-  // Now merge in all the other ones.
-  // This may not be a particularly efficient way of doing this, but will do for now.
-  for ( it = wsNames.constBegin() + 1 ; it != wsNames.constEnd(); ++it )
-  {
-    MultiLayer* next = m_mantidUI->plotSpectrum(*it,spec,false,false);
-    m_mantidUI->mergePlots(first,next);
-    delete next;
-  }
-
-  first->show();
+  m_mantidUI->plotSpectraList(toPlot,false);
 }
 
 void MantidDockWidget::treeSelectionChanged()

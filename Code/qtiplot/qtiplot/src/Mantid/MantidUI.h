@@ -158,7 +158,8 @@ public:
     MultiLayer* plotSelectedRows(MantidMatrix *m, bool errs = true);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraList(const QString& wsName, std::set<int>& indexList, bool errs=true);
+    MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=true);
+    MultiLayer* plotSpectraList(const std::multimap<QString,int>& toPlot, bool errs=true);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true);

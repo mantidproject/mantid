@@ -1468,7 +1468,6 @@ MultiLayer* MantidUI::plotInstrumentSpectrum(const QString& wsName, int spec)
 /// Catches the signal from InstrumentWindow to plot a spectrum.
 MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set<int> spec)
 {
-//    QMessageBox::information(appWindow(),"OK",wsName+" "+QString::number(spec));
   return plotSpectraList(wsName, spec, false);
 }
 
@@ -2108,14 +2107,33 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
     g->setAntialiasing(false);
 }
 
-/** Create a 1d graph form specified spectra in a MatrixWorkspace
-    @param wsName Graph name
+/** Create a 1d graph from the specified spectra in a MatrixWorkspace
+    @param wsName Workspace name
     @param indexList A list of spectra indices to be shown in the graph
+    @param errs If true include the errors on the graph
+ */
+MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs)
+{
+  // Convert the list into a map (with the same workspace as key in each case)
+  std::multimap<QString,int> pairs;
+  std::set<int>::const_iterator it;
+  for (it = indexList.begin(); it != indexList.end(); ++it)
+  {
+    pairs.insert(std::make_pair(wsName,*it));
+  }
+
+  // Pass over to the overloaded method
+  return plotSpectraList(pairs,errs);
+}
+
+/** Create a 1d graph form a set of workspace-spectrum pairs
+    @param toPlot A list of spectra indices to be shown in the graph
     @param errs If true include the errors to the graph
  */
-MultiLayer* MantidUI::plotSpectraList(const QString& wsName, std::set<int>& indexList, bool errs)
+MultiLayer* MantidUI::plotSpectraList(const std::multimap<QString,int>& toPlot, bool errs)
 {
-	MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(wsName+"-"));
+  const QString firstWorkspace = toPlot.begin()->first;
+  MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
 	ml->askOnCloseEvent(false);
   ml->setCloseOnEmpty(true);
 	Graph *g = ml->activeGraph();
@@ -2125,15 +2143,15 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, std::set<int>& inde
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
   appWindow()->setPreferences(g);
   g->newLegend("");
-  for(std::set<int>::const_iterator it=indexList.begin();it!=indexList.end();it++)
+  for(std::multimap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {	
-    new MantidCurve(wsName,g,"spectra",*it,errs);
+    new MantidCurve(it->first,g,"spectra",it->second,errs);
   }
   // setting the spectrum index and error flag list.
   //This is useful for loading/saving project file.
-  g->setspectrumIndexList(indexList);
+  g->setspectrumIndexList(toPlot);
   g->setError(errs);
-  setUpSpectrumGraph(ml,wsName);
+  setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
 
 }
