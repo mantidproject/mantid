@@ -308,16 +308,17 @@ def _loadRawData(filename, workspace, ext, spec_max = None):
         else:
             LoadRaw(filename + '.' + ext, workspace, SpectrumMax=spec_max)
         LoadSampleDetailsFromRaw(workspace, filename + '.' + ext)
-        sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
-        SampleGeometry(sample_details.getGeometryFlag())
-        SampleThickness(sample_details.getThickness())
-        SampleHeight(sample_details.getHeight())
-        SampleWidth(sample_details.getWidth())
     else:
         if spec_max == None:
             LoadNexus(filename + '.' + ext, workspace)
         else:
             LoadNexus(filename + '.' + ext, workspace, SpectrumMax=spec_max)
+
+    sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
+    SampleGeometry(sample_details.getGeometryFlag())
+    SampleThickness(sample_details.getThickness())
+    SampleHeight(sample_details.getHeight())
+    SampleWidth(sample_details.getWidth())
 
 
 # Load the detector logs

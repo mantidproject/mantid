@@ -366,9 +366,9 @@ namespace Mantid
                     else
                     {
                         if (i >= dim0()) rangeError();
-                        n = 1;
+                        n = 1*blocksize;
                         start[0] = i;
-                        m_size[0] = 1;
+                        m_size[0] = blocksize;
                     }
                 }
                 alloc(n);
