@@ -55,7 +55,7 @@ void SplineBackground::exec()
   gsl_bspline_workspace *bw;
   gsl_vector *B;
 
-  gsl_vector *c, *w, *y;
+  gsl_vector *c, *w, *x, *y;
   gsl_matrix *Z, *cov;
   gsl_multifit_linear_workspace *mw;
   double chisq;
@@ -74,7 +74,7 @@ void SplineBackground::exec()
   bw = gsl_bspline_alloc(k, nbreak);
   B = gsl_vector_alloc(ncoeffs);
 
-  //x = gsl_vector_alloc(n);
+  x = gsl_vector_alloc(n);
   y = gsl_vector_alloc(n);
   Z = gsl_matrix_alloc(n, ncoeffs);
   c = gsl_vector_alloc(ncoeffs);
@@ -87,7 +87,7 @@ void SplineBackground::exec()
   for (MantidVec::size_type i = 0; i < Y.size(); ++i)
   {
     if (isMasked && masked[i]) continue;
-
+    gsl_vector_set(x, j, 0.5*(X[i]+X[i+1])); // Middle of the bins
     gsl_vector_set(y, j, Y[i]);
     gsl_vector_set(w, j, E[i]>0.?1./(E[i]*E[i]):0.);
 
@@ -98,6 +98,7 @@ void SplineBackground::exec()
   {
     gsl_bspline_free(bw);
     gsl_vector_free(B);
+    gsl_vector_free(x);
     gsl_vector_free(y);
     gsl_matrix_free(Z);
     gsl_vector_free(c);
@@ -117,7 +118,7 @@ void SplineBackground::exec()
   /* construct the fit matrix X */
   for (int i = 0; i < n; ++i)
   {
-    double xi = X[i];//gsl_vector_get(x, i);
+    double xi=gsl_vector_get(x, i);
 
     /* compute B_j(xi) for all j */
     gsl_bspline_eval(xi, B, bw);
@@ -151,6 +152,7 @@ void SplineBackground::exec()
 
   gsl_bspline_free(bw);
   gsl_vector_free(B);
+  gsl_vector_free(x);
   gsl_vector_free(y);
   gsl_matrix_free(Z);
   gsl_vector_free(c);
