@@ -44,6 +44,7 @@ void SplineBackground::exec()
   const MantidVec& X = inWS->readX(spec);
   const MantidVec& Y = inWS->readY(spec);
   const MantidVec& E = inWS->readE(spec);
+  const bool isHistogram = inWS->isHistogramData();
 
   const int ncoeffs = getProperty("NCoeff");
   const int k = 4; // order of the spline + 1 (cubic)
@@ -87,7 +88,7 @@ void SplineBackground::exec()
   for (MantidVec::size_type i = 0; i < Y.size(); ++i)
   {
     if (isMasked && masked[i]) continue;
-    gsl_vector_set(x, j, 0.5*(X[i]+X[i+1])); // Middle of the bins
+    gsl_vector_set(x, j, (isHistogram ? (0.5*(X[i]+X[i+1])) : X[i])); // Middle of the bins, if a histogram
     gsl_vector_set(y, j, Y[i]);
     gsl_vector_set(w, j, E[i]>0.?1./(E[i]*E[i]):0.);
 
