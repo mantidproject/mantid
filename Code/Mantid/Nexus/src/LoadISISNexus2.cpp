@@ -150,7 +150,7 @@ namespace Mantid
         if( (!m_spec_list.empty() && std::find(m_spec_list.begin(), m_spec_list.end(), index) == m_spec_list.end()) ||
           (m_range_supplied && (index < m_spec_min || index > m_spec_max)) )
         {
-          m_monitors.erase(itr);
+          itr = m_monitors.erase(itr);
         }
       }
 

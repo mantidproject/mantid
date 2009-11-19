@@ -320,7 +320,7 @@ const bool& MatrixWorkspace::isDistribution() const
 }
 
 /// Set the flag for whether the Y-values are dimensioned
-bool& MatrixWorkspace::isDistribution(bool newValue)
+bool& MatrixWorkspace::isDistribution(bool newValue)const
 {
   m_isDistribution = newValue;
   return m_isDistribution;

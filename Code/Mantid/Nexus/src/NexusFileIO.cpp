@@ -888,7 +888,11 @@ namespace Mantid
 
       const std::string axesNames="axis1,axis2";
       status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
+      // temporarily switch off the distribution flag
+      bool isDistr = localworkspace->isDistribution();
+      localworkspace->isDistribution(false);
       std::string yUnits=localworkspace->YUnit();
+      localworkspace->isDistribution(isDistr);
       status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
       status=NXclosedata(fileID);
       // error

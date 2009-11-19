@@ -140,7 +140,7 @@ public:
 
   /// Are the Y-values dimensioned?
   const bool& isDistribution() const;
-  bool& isDistribution(bool newValue);
+  bool& isDistribution(bool newValue)const;
 
   // Methods to set and access masked bins
   void maskBin(const int& spectrumIndex, const int& binIndex, const double& weight = 1.0);
@@ -177,7 +177,7 @@ private:
   /// The unit for the data values (e.g. Counts)
   std::string m_YUnit;
   /// Flag indicating whether the Y-values are dimensioned. False by default
-  bool m_isDistribution;
+  mutable bool m_isDistribution;
 
   /// Parameters modifying the base instrument
  mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
