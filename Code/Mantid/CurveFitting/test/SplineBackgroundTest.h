@@ -63,6 +63,12 @@ private:
     if (dn > 0)
       X[n] = X[n-1] + dx;
 
+    // Mask some bins out to test that functionality
+    int toMask = static_cast<int>(0.75*n);
+    ws->maskBin(0,toMask-1);
+    ws->maskBin(0,toMask);
+    ws->maskBin(0,toMask+1);
+    
     ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
 
     AnalysisDataService::Instance().add("SplineBackground_"+name,ws);
