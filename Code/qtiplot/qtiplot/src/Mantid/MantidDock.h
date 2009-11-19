@@ -6,10 +6,11 @@
 #include <QComboBox>
 #include <QPoint>
 #include "MantidAPI/Workspace.h"
-#include <MantidAPI/WorkspaceGroup.h>
+#include "MantidAPI/WorkspaceGroup.h"
 
 class MantidUI;
 class ApplicationWindow;
+class MantidTreeWidget;
 class QLabel;
 class QMenu;
 class QPushButton;
@@ -23,7 +24,6 @@ public:
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
 private:
-  QList<QString> getSelectedWorkspaceNames() const;
   bool isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString & ws_name); //std::vector<std::string> wsGroupNames,const QString & ws_name);
   bool isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace);
   void removeFromWSGroupNames(const QString& wsName);
@@ -43,7 +43,7 @@ private slots:
   void groupOrungroupWorkspaces();
   void plotSpectra();
 protected:
-  QTreeWidget *m_tree;
+  MantidTreeWidget * m_tree;
   friend class MantidUI;
 private:
   MantidUI * const m_mantidUI;
@@ -59,21 +59,21 @@ private:
 
 class MantidTreeWidget:public QTreeWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui)
-    {
-      setSelectionMode(QAbstractItemView::ExtendedSelection);
-    }
-    void mousePressEvent (QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
-    void mouseDoubleClickEvent(QMouseEvent *e);
+  MantidTreeWidget(QWidget *w, MantidUI *mui);
+  void mousePressEvent (QMouseEvent *e);
+  void mouseMoveEvent(QMouseEvent *e);
+  void mouseDoubleClickEvent(QMouseEvent *e);
+
+  QList<QString> getSelectedWorkspaceNames() const;
+  QMultiMap<QString,int> chooseSpectrumFromSelected() const;
 
 private:
-    QPoint m_dragStartPosition;
-    MantidUI *m_mantidUI;
-	static Mantid::Kernel::Logger& logObject;
+  QPoint m_dragStartPosition;
+  MantidUI *m_mantidUI;
+  static Mantid::Kernel::Logger& logObject;
 };
 
 class FindAlgComboBox:public QComboBox

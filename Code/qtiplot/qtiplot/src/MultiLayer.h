@@ -190,6 +190,8 @@ private:
 	void releaseLayer();
 	void resizeLayers(QResizeEvent *re);
 	bool focusNextPrevChild ( bool next );
+  void dragEnterEvent( QDragEnterEvent * event );
+  void dropEvent( QDropEvent * event );
 	//@}
 
 	Graph* active_graph;

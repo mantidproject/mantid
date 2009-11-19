@@ -54,6 +54,9 @@
 #include "SelectionMoveResizer.h"
 #include "ApplicationWindow.h"
 
+#include "Mantid/MantidDock.h"
+#include "Mantid/MantidCurve.h"
+
 #include <gsl/gsl_vector.h>
 #include <iostream>
 
@@ -80,25 +83,25 @@ void LayerButton::mouseDoubleClickEvent ( QMouseEvent * )
 }
 
 MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols, 
-			const QString& label, const char* name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f),
-active_graph(NULL),
-d_cols(cols),
-d_rows(rows),
-graph_width(500),
-graph_height(400),
-colsSpace(5),
-rowsSpace(5),
-left_margin(5),
-right_margin(5),
-top_margin(5),
-bottom_margin(5),
-l_canvas_width(400),
-l_canvas_height(300),
-hor_align(HCenter),
-vert_align(VCenter),
-d_scale_on_print(true),
-d_print_cropmarks(false)
+                       const QString& label, const char* name, Qt::WFlags f)
+                         : MdiSubWindow(label, parent, name, f),
+                         active_graph(NULL),
+                         d_cols(cols),
+                         d_rows(rows),
+                         graph_width(500),
+                         graph_height(400),
+                         colsSpace(5),
+                         rowsSpace(5),
+                         left_margin(5),
+                         right_margin(5),
+                         top_margin(5),
+                         bottom_margin(5),
+                         l_canvas_width(400),
+                         l_canvas_height(300),
+                         hor_align(HCenter),
+                         vert_align(VCenter),
+                         d_scale_on_print(true),
+                         d_print_cropmarks(false)
 {
 	layerButtonsBox = new QHBoxLayout();
 	QHBoxLayout *hbox = new QHBoxLayout();
@@ -118,11 +121,11 @@ d_print_cropmarks(false)
 	layout->setSpacing(0);
 	setWidget(mainWidget);
 
-    int canvas_width = graph_width + left_margin + right_margin;
-    int canvas_height = graph_height + top_margin + bottom_margin;
-    setGeometry(QRect(0, 0, canvas_width, canvas_height + LayerButton::btnSize()));
+  int canvas_width = graph_width + left_margin + right_margin;
+  int canvas_height = graph_height + top_margin + bottom_margin;
+  setGeometry(QRect(0, 0, canvas_width, canvas_height + LayerButton::btnSize()));
 
-    canvas->resize(canvas_width, canvas_height);
+  canvas->resize(canvas_width, canvas_height);
 	canvas->installEventFilter(this);
 
 	QPalette pal = palette();
@@ -131,10 +134,13 @@ d_print_cropmarks(false)
 
 	for (int i = 0; i < layers; i++)
 		addLayer();
-		
+
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
+
+  setAcceptDrops(true);
 }
+
 Graph *MultiLayer::layer(int num)
 {
     int index = num - 1;
@@ -1220,6 +1226,32 @@ bool MultiLayer::focusNextPrevChild ( bool next )
 		return true;
 
 	return active_graph->focusNextPrevChild(next);
+}
+
+void MultiLayer::dragEnterEvent( QDragEnterEvent * event )
+{
+  QObject * workspaceTree = this->parent()->parent()->parent()->findChild<QObject*>("WorkspaceTree");
+  if ( event->source() == workspaceTree)
+  {
+    event->acceptProposedAction();
+  }
+}
+
+void MultiLayer::dropEvent( QDropEvent * event )
+{
+  MantidTreeWidget * tree = dynamic_cast<MantidTreeWidget*>(event->source());
+  if ( tree == NULL ) return; // (shouldn't happen)
+
+  QMultiMap<QString,int> toPlot = tree->chooseSpectrumFromSelected();
+  Graph *g = this->activeGraph();
+  if (!g) return; // (shouldn't happen either)
+
+  for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
+  {
+    // Does anything delete this object?
+    new MantidCurve(it.key(),g,"spectra",it.value(),false); // Always without errors for now
+  }
+
 }
 
 bool MultiLayer::swapLayers(int src, int dest)

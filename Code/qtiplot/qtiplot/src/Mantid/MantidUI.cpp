@@ -2115,11 +2115,11 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
 MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs)
 {
   // Convert the list into a map (with the same workspace as key in each case)
-  std::multimap<QString,int> pairs;
+  QMultiMap<QString,int> pairs;
   std::set<int>::const_iterator it;
   for (it = indexList.begin(); it != indexList.end(); ++it)
   {
-    pairs.insert(std::make_pair(wsName,*it));
+    pairs.insert(wsName,*it);
   }
 
   // Pass over to the overloaded method
@@ -2130,9 +2130,9 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
     @param toPlot A list of spectra indices to be shown in the graph
     @param errs If true include the errors to the graph
  */
-MultiLayer* MantidUI::plotSpectraList(const std::multimap<QString,int>& toPlot, bool errs)
+MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs)
 {
-  const QString firstWorkspace = toPlot.begin()->first;
+  const QString& firstWorkspace = toPlot.constBegin().key();
   MultiLayer* ml = appWindow()->multilayerPlot(appWindow()->generateUniqueName(firstWorkspace+"-"));
 	ml->askOnCloseEvent(false);
   ml->setCloseOnEmpty(true);
@@ -2143,9 +2143,9 @@ MultiLayer* MantidUI::plotSpectraList(const std::multimap<QString,int>& toPlot, 
   connect(g,SIGNAL(curveRemoved()),ml,SLOT(maybeNeedToClose()));
   appWindow()->setPreferences(g);
   g->newLegend("");
-  for(std::multimap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
+  for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {	
-    new MantidCurve(it->first,g,"spectra",it->second,errs);
+    new MantidCurve(it.key(),g,"spectra",it.value(),errs);
   }
   // setting the spectrum index and error flag list.
   //This is useful for loading/saving project file.

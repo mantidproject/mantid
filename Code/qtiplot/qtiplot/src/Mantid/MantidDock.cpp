@@ -109,36 +109,6 @@ QString MantidDockWidget::getSelectedWorkspaceName() const
   return str;
 }
 
-/** Returns a list of all selected workspaces 
- *  (including members of groups if appropriate)
- */
-QList<QString> MantidDockWidget::getSelectedWorkspaceNames() const
-{
-  QList<QString> names;
-  const QList<QTreeWidgetItem*> items = m_tree->selectedItems();
-  QList<QTreeWidgetItem*>::const_iterator it;
-  // Need to look for workspace groups and add all children if found
-  for (it = items.constBegin(); it != items.constEnd(); ++it)
-  {
-    // Look for children (workspace groups)
-    if ( (*it)->child(0)->text(0) == "WorkspaceGroup" )
-    {
-      const int count = (*it)->childCount();
-      for ( int i=1; i < count; ++i )
-      {
-        names.append((*it)->child(i)->text(0));
-      }
-    }
-    else
-    {
-      // Add entries that aren't groups
-      if (*it) names.append((*it)->text(0));
-    }
-  }//end of for loop for selected items
-
-  return names;
-}
-
 /// Returns a pointer to the selected workspace (the first if multiple workspaces selected)
 Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
 {
@@ -498,45 +468,10 @@ void MantidDockWidget::groupOrungroupWorkspaces()
 /// Plots a single spectrum from each selected workspace
 void MantidDockWidget::plotSpectra()
 {
-  // Get hold of the names of all the selected workspaces
-  QList<QString> wsNames = getSelectedWorkspaceNames();
-  QList<int> wsSizes;
-
-  // Find out if they are all single-spectrum workspaces
-  QList<QString>::const_iterator it = wsNames.constBegin();
-  int maxHists = -1;
-  for ( ; it != wsNames.constEnd(); ++it )
-  {
-    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*it).toStdString()));
-    if ( !ws ) continue;
-    const int currentHists = ws->getNumberHistograms();
-    wsSizes.append(currentHists);
-    if ( currentHists > maxHists ) maxHists = currentHists;
-  }
-  // If not all single spectrum, ask which one to plot
-  int spec = 0;
-  if ( maxHists > 1 )
-  {
-    bool goAhead;
-    spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,maxHists-1,1,&goAhead);
-    if (!goAhead) return;
-  }
-
-  std::multimap<QString,int> toPlot;
-  // Now need to go around inserting workspace-spectrum pairs into a map
-  // and checking whether the requested spectrum is too large for any workspaces
-  for ( int i = 0; i < wsNames.size(); ++i )
-  {
-    if (spec >= wsSizes[i])
-    {
-      logObject.warning() << wsNames[i].toStdString() << " has only "
-          << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";
-      continue;
-    }
-    toPlot.insert(std::make_pair(wsNames[i],spec));
-  }
-
-  m_mantidUI->plotSpectraList(toPlot,false);
+  const QMultiMap<QString,int> toPlot = m_tree->chooseSpectrumFromSelected();
+  // An empty map will be returned if the user clicks cancel in the spectrum selection
+  if (toPlot.empty()) return;
+  m_mantidUI->plotSpectraList( toPlot, false );
 }
 
 void MantidDockWidget::treeSelectionChanged()
@@ -583,6 +518,12 @@ void MantidDockWidget::treeSelectionChanged()
 
 
 //------------ MantidTreeWidget -----------------------//
+
+MantidTreeWidget::MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui)
+{
+  setObjectName("WorkspaceTree");
+  setSelectionMode(QAbstractItemView::ExtendedSelection);
+}
 
 void MantidTreeWidget::mousePressEvent (QMouseEvent *e)
 {
@@ -636,6 +577,84 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
 	}
     QTreeWidget::mouseDoubleClickEvent(e);
 }
+
+/** Returns a list of all selected workspaces
+ *  (including members of groups if appropriate)
+ */
+QList<QString> MantidTreeWidget::getSelectedWorkspaceNames() const
+{
+  QList<QString> names;
+  const QList<QTreeWidgetItem*> items = this->selectedItems();
+  QList<QTreeWidgetItem*>::const_iterator it;
+  // Need to look for workspace groups and add all children if found
+  for (it = items.constBegin(); it != items.constEnd(); ++it)
+  {
+    // Look for children (workspace groups)
+    if ( (*it)->child(0)->text(0) == "WorkspaceGroup" )
+    {
+      const int count = (*it)->childCount();
+      for ( int i=1; i < count; ++i )
+      {
+        names.append((*it)->child(i)->text(0));
+      }
+    }
+    else
+    {
+      // Add entries that aren't groups
+      if (*it) names.append((*it)->text(0));
+    }
+  }//end of for loop for selected items
+
+  return names;
+}
+
+/** Allows the user to select a spectrum from the selected workspaces.
+ *  Automatically chooses spectrum 0 if all are single-spectrum workspaces.
+ *  @return A map of workspace name - spectrum index pairs
+ */
+QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
+{
+  // Get hold of the names of all the selected workspaces
+  QList<QString> wsNames = this->getSelectedWorkspaceNames();
+  QList<int> wsSizes;
+
+  // Find out if they are all single-spectrum workspaces
+  QList<QString>::const_iterator it = wsNames.constBegin();
+  int maxHists = -1;
+  for ( ; it != wsNames.constEnd(); ++it )
+  {
+    MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*it).toStdString()));
+    if ( !ws ) continue;
+    const int currentHists = ws->getNumberHistograms();
+    wsSizes.append(currentHists);
+    if ( currentHists > maxHists ) maxHists = currentHists;
+  }
+  // If not all single spectrum, ask which one to plot
+  QMultiMap<QString,int> toPlot;
+  int spec = 0;
+  if ( maxHists > 1 )
+  {
+    bool goAhead;
+    spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,maxHists-1,1,&goAhead);
+    if (!goAhead) return toPlot;
+  }
+
+  // Now need to go around inserting workspace-spectrum pairs into a map
+  // and checking whether the requested spectrum is too large for any workspaces
+  for ( int i = 0; i < wsNames.size(); ++i )
+  {
+    if (spec >= wsSizes[i])
+    {
+      logObject.warning() << wsNames[i].toStdString() << " has only "
+          << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";
+      continue;
+    }
+    toPlot.insert(wsNames[i],spec);
+  }
+
+  return toPlot;
+}
+
 //-------------------- AlgorithmDockWidget ----------------------//
 
 void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
