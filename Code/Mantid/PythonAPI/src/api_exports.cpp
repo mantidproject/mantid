@@ -123,7 +123,7 @@ namespace PythonAPI
       .def("blocksize", &Mantid::API::MatrixWorkspace::blocksize)
       .def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, 
 	   return_value_policy< copy_const_reference >(), MatrixWorkspace_isDistribution_overloads_1())
-      .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool))&Mantid::API::MatrixWorkspace::isDistribution, 
+      .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool)const)&Mantid::API::MatrixWorkspace::isDistribution, 
 	   return_value_policy< copy_non_const_reference >(), MatrixWorkspace_isDistribution_overloads_2())
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
       .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
