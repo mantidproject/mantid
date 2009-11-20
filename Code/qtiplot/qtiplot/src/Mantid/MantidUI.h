@@ -137,21 +137,13 @@ public:
     // Creates a 2D plot in QtiPlot if the active window is a MantidMatrix
     MultiLayer *plotSpectrogram(Graph::CurveType type);
 
-    /// Creates a list of spectra indeces corresponding to the selected rows in a MantidMatrix
-    std::set<int> createSpectraIndexList(MantidMatrix *m);
-
     /// Create a Table form specified spectra in a MatrixWorkspace
-    Table* createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs=true, bool binCentres=false);
-
+    Table* createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, QList<int> indexList, bool errs=true, bool binCentres=false);
 
     // Copies selected rows from MantidMatrix to Y and errY columns of a new Table.
     Table* createTableFromSelectedRows(MantidMatrix *m, bool errs = true, bool binCentres=false);
 
-    // Copy to a Table Y-values (and Err-values if errs==true) of spectra with indeces from i0 to i1 (inclusive) from a workspace
-    Table* createTableFromSpectraRange(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs=true, bool binCentres=false);
-
     /// Create a 1d graph form a Table
-    //MultiLayer* createGraphFromTable(Table* t, Graph::CurveType type = Graph::Line);
     MultiLayer* createGraphFromTable(Table* t, int type = 0);
 
     // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
@@ -173,7 +165,7 @@ public:
 
 
     // Copy to a Table Y-values (and Err-values if errs==true) of bins with indeces from i0 to i1 (inclusive) from a workspace
-    Table* createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int c0, int c1, bool errs=true,int fromRow = -1, int toRow = -1);
+    Table* createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, const QList<int>& bins, bool errs=true,int fromRow = -1, int toRow = -1);
 
     // Copies selected columns (time bins) in a MantidMatrix to a Table
     Table* createTableFromSelectedColumns(MantidMatrix *m, bool errs);

@@ -1485,7 +1485,9 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   }
   if( !ws.get() ) return NULL;
 
-  Table *t = createTableFromBins(wsName, ws, bin, bin, false, false);
+  QList<int> binAsList;
+  binAsList.append(bin);
+  Table *t = createTableFromBins(wsName, ws, binAsList, false, false);
   t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_QuitOnClose);
   MultiLayer* ml(NULL);
@@ -1898,14 +1900,14 @@ void MantidUI::showLogFileWindow()
        If false the Y values will be in the same row with the left bin boundaries.
        If the workspace is not a histogram the parameter is ignored.
  */
-Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, std::vector<int> indexList, bool errs, bool binCentres)
+Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, QList<int> indexList, bool errs, bool binCentres)
 {
 	 int nspec = workspace->getNumberHistograms();
 	 //Loop through the list of index and remove all the indexes that are out of range
 
-	 for(std::vector<int>::iterator it=indexList.begin();it!=indexList.end();it++)
+   for(QList<int>::iterator it=indexList.begin();it!=indexList.end();it++)
 	 {
-		if ((*it) > nspec || (*it) < 0) indexList.erase(it);
+     if ((*it) > nspec || (*it) < 0) indexList.erase(it);
 	 }
 	 if ( indexList.empty() ) return 0;
 
@@ -1974,20 +1976,6 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
      return t;
  }
 
-/**  Creates a list of spectra indeces corresponding to the selected rows in a MantidMatrix.
- *  @param m The MantidMatrix
- */
-std::set<int> MantidUI::createSpectraIndexList(MantidMatrix *m)
-{
-  int i0,i1;
-  m->getSelectedRows(i0,i1);
-  if (i0 < 0 || i1 < 0) return std::set<int>();
-  std::set<int> indexList;
-  for(int i=i0;i<=i1;i++)
-    indexList.insert(m->workspaceIndex(i));
-  return indexList;
-}
-
 /** Creates a Qtiplot Table from selected spectra of MantidMatrix m.
     The columns are: 1st column is x-values from the first selected spectrum,
     2nd column is y-values of the first spectrum. Depending on value of errs
@@ -2002,26 +1990,10 @@ std::set<int> MantidUI::createSpectraIndexList(MantidMatrix *m)
 */
 Table* MantidUI::createTableFromSelectedRows(MantidMatrix *m, bool errs, bool binCentres)
 {
-     int i0,i1;
-     m->getSelectedRows(i0,i1);
-     if (i0 < 0 || i1 < 0) return 0;
-     std::vector<int> indexList;
-     for(int i=i0;i<=i1;i++)
-         indexList.push_back(m->workspaceIndex(i));
+     const QList<int>& indexList = m->getSelectedRows();
+     if (indexList.empty()) return NULL;
 
      return createTableFromSpectraList(m->name(), m->workspace(), indexList, errs, binCentres);
- }
-
-Table* MantidUI::createTableFromSpectraRange(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int i0, int i1, bool errs, bool binCentres)
-{
-     if (i0 < 0 || i1 < 0) return 0;
-     int nspec = workspace->getNumberHistograms();
-     if (i0 > nspec || i1 > nspec) return 0;
-     std::vector<int> indexList;
-     for(int i=i0;i<=i1;i++)
-         indexList.push_back(i);
-
-     return createTableFromSpectraList(wsName, workspace, indexList, errs, binCentres);
  }
 
 /**  Create a 1d graph from a Table.
@@ -2116,8 +2088,9 @@ MultiLayer* MantidUI::plotSpectraList(const QString& wsName, const std::set<int>
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
-  std::set<int>::const_iterator it;
-  for (it = indexList.begin(); it != indexList.end(); ++it)
+  // Need to iterate through the set in reverse order
+  std::set<int>::const_reverse_iterator it;
+  for (it = indexList.rbegin(); it != indexList.rend(); ++it)
   {
     pairs.insert(wsName,*it);
   }
@@ -2187,13 +2160,15 @@ MultiLayer* MantidUI::plotSpectraRange(const QString& wsName, int i0, int i1, bo
  */
 MultiLayer* MantidUI::plotSelectedRows(MantidMatrix *m, bool errs)
 {
-  std::set<int> indexList = createSpectraIndexList(m);
-  return plotSpectraList(m->workspaceName(),indexList,errs);
+  const QList<int>& rows = m->getSelectedRows();
+  std::set<int> rowSet(rows.constBegin(),rows.constEnd());
+
+  return plotSpectraList(m->workspaceName(),rowSet,errs);
 }
 
-Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, int c0, int c1, bool errs, int fromRow, int toRow)
+Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixWorkspace_sptr workspace, const QList<int>& bins, bool errs, int fromRow, int toRow)
 {
-  if (c0 < 0 || c1 < 0) return NULL;
+  if (bins.empty()) return NULL;
 
   int c = errs?2:1;
   int numRows = workspace->getNumberHistograms();
@@ -2203,33 +2178,33 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
 
   if (j0 >= numRows || j1 >= numRows) return NULL;
 
-  Table* t = new Table(appWindow()->scriptEnv, numRows, c*(c1 - c0 + 1) + 1, "", appWindow(), 0);
+  Table* t = new Table(appWindow()->scriptEnv, numRows, c*bins.size() + 1, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
   t->askOnCloseEvent(false);
   int kY,kErr;
-  for(int i = c0; i <= c1; i++)
+  for(int i = 0; i < bins.size(); i++)
   {
-    kY = c*(i-c0)+1;
-    t->setColName(kY,"YB"+QString::number(i));
+    kY = c*i+1;
+    t->setColName(kY,"YB"+QString::number(bins[i]));
     if (errs)
     {
-        kErr = 2*(i - c0) + 2;
-        t->setColPlotDesignation(kErr,Table::yErr);
-        t->setColName(kErr,"EB"+QString::number(i));
+      kErr = 2*i + 2;
+      t->setColPlotDesignation(kErr,Table::yErr);
+      t->setColName(kErr,"EB"+QString::number(bins[i]));
     }
     for(int j = j0; j <= j1; j++)
     {
       const Mantid::MantidVec& dataY = workspace->readY(j);
       const Mantid::MantidVec& dataE = workspace->readE(j);
 
-	    if (i == c0)
-	    {
-	      // Get the X axis values from the vertical axis of the workspace
-	      if (workspace->axes() > 1) t->setCell(j,0,(*workspace->getAxis(1))(j));
-	      else t->setCell(j,0,j);
-	    }
-	    t->setCell(j,kY,dataY[i]);
-	    if (errs) t->setCell(j,kErr,dataE[i]);
+      if (i == 0)
+      {
+        // Get the X axis values from the vertical axis of the workspace
+        if (workspace->axes() > 1) t->setCell(j,0,(*workspace->getAxis(1))(j));
+        else t->setCell(j,0,j);
+      }
+      t->setCell(j,kY,dataY[i]);
+      if (errs) t->setCell(j,kErr,dataE[i]);
     }
   }
   return t;
@@ -2237,16 +2212,15 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
 
 Table* MantidUI::createTableFromSelectedColumns(MantidMatrix *m, bool errs)
 {
-     int i0,i1;
-     m->getSelectedColumns(i0,i1);
-     if (i0 < 0 || i1 < 0) return 0;
+  const QList<int>& cols = m->getSelectedColumns();
+  if (cols.empty()) return 0;
 
-     int j0 = m->workspaceIndex(0);
-     int j1 = m->workspaceIndex(m->numRows()-1);
+  int j0 = m->workspaceIndex(0);
+  int j1 = m->workspaceIndex(m->numRows()-1);
 
-     return createTableFromBins(m->name(), m->workspace(), i0, i1, errs, j0, j1);
+  return createTableFromBins(m->name(), m->workspace(), cols, errs, j0, j1);
 
- }
+}
 
 MultiLayer* MantidUI::createGraphFromSelectedColumns(MantidMatrix *m, bool errs, bool tableVisible)
 {
