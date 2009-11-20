@@ -80,7 +80,7 @@ void IFunction::addConstraint(IConstraint* ic)
  */
 void IFunction::functionWithConstraint(double* out, const double* xValues, const int& nData)
 {
-  //function(out, xValues, nData);
+  function(out, xValues, nData);
 
   // Add penalty factor if constraint is violated
 /*
@@ -103,7 +103,7 @@ void IFunction::functionWithConstraint(double* out, const double* xValues, const
  */
 void IFunction::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
 {
-
+  functionDeriv(out, xValues, nData);
 }
 
 
