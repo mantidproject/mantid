@@ -1237,21 +1237,25 @@ void MultiLayer::dragEnterEvent( QDragEnterEvent * event )
   }
 }
 
+/// Accepts drops from the Workspace browser and adds a curve from the selected workspace(s)
 void MultiLayer::dropEvent( QDropEvent * event )
 {
   MantidTreeWidget * tree = dynamic_cast<MantidTreeWidget*>(event->source());
   if ( tree == NULL ) return; // (shouldn't happen)
 
+  // Ask the user which spectrum to plot
   QMultiMap<QString,int> toPlot = tree->chooseSpectrumFromSelected();
   Graph *g = this->activeGraph();
   if (!g) return; // (shouldn't happen either)
 
+  // Iterate through the selected workspaces adding a curve from each
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
     // Does anything delete this object?
     new MantidCurve(it.key(),g,"spectra",it.value(),false); // Always without errors for now
   }
-
+  // Update the axes
+  g->setAutoScale();
 }
 
 bool MultiLayer::swapLayers(int src, int dest)
