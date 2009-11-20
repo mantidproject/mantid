@@ -587,7 +587,7 @@ namespace CurveFitting
   {
 
     if (in) m_function->updateActive(in);
-    m_function->function(out,xValues,nData);
+    m_function->functionWithConstraint(out,xValues,nData);
   }
 
   /** Base class implementation of derivative function throws error. This is to check if such a function is provided

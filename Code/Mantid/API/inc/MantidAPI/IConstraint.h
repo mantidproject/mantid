@@ -50,7 +50,7 @@ public:
   virtual double check(IFunction* fn) = 0;
 
   /// Returns the derivative of the penalty for each parameter
-  //virtual boost::shared_ptr<MantidVec> checkDeriv(IFunction* fn) = 0;
+  virtual boost::shared_ptr<std::vector<double> > checkDeriv(IFunction* fn) = 0;
 
 };
 

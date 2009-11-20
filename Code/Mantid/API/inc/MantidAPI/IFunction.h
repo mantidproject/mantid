@@ -32,6 +32,7 @@ namespace API
 //----------------------------------------------------------------------
 class Jacobian;
 class ParameterTie;
+class IConstraint;
 /** An interface to a function.
 
     @author Roman Tolchenov, Tessella Support Services plc
@@ -128,6 +129,14 @@ public:
   /// Apply the ties
   virtual void applyTies();
 
+  /// Add a constraint to function
+  virtual void addConstraint(IConstraint* ic);
+
+  /// This method calls function() and add any penalty to its output if constraints are violated
+  void functionWithConstraint(double* out, const double* xValues, const int& nData);
+  ///  This method calls functionDeriv() and add any penalty to its output if constraints are violated
+  void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData);
+
 protected:
   /// Function initialization. Declare function parameters in this method.
   virtual void init(){};
@@ -152,6 +161,8 @@ private:
   std::vector<double> m_parameters;
   /// Holds parameter ties
   std::vector<std::pair<int,ParameterTie*> > m_ties;
+  /// Holds the constraints added to function
+  std::vector<IConstraint*> m_constraints;
 };
 
 /** Represents the Jacobian in functionDeriv. 

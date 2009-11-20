@@ -5,6 +5,7 @@
 
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/Lorentzian.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -24,6 +25,8 @@ class BoundaryConstraintTest : public CxxTest::TestSuite
 {
 public:
 
+
+
   void test1()
   {
     // set up fitting function
@@ -37,7 +40,12 @@ public:
 
     TS_ASSERT(!bc->hasLower());
     TS_ASSERT(!bc->hasUpper());
-    TS_ASSERT(bc->isValid(gaus));
+
+    bc->setLower(1.0);
+    bc->setUpper(2.0);
+
+    TS_ASSERT(bc->hasLower());
+    TS_ASSERT(bc->hasUpper());
 
   }
 

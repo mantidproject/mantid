@@ -110,7 +110,7 @@ public:
     alg2.setPropertyValue("EndX","20");
 
     // execute fit
-   TS_ASSERT_THROWS_NOTHING(
+    TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( alg2.execute() )
     )
 
@@ -125,6 +125,7 @@ public:
     TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.0001);
     TS_ASSERT_DELTA( gaus->width(), 2.6237 ,0.0001);
 
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 };

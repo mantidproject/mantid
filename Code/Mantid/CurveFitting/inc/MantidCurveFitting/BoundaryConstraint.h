@@ -78,7 +78,7 @@ namespace Mantid
       /// Check to see if constraint is valid with respect to a given fitting function, this
       /// means for now that the parameter name which have been specified for the constraint
       /// is also one of the active parameters of the fitting function
-      bool isValid(API::IFunction* fn);
+      //bool isValid(API::IFunction* fn);
 
       /// Return if it has a lower bound
       bool        hasLower() const { return m_hasLowerBound; }
@@ -123,7 +123,9 @@ namespace Mantid
       int m_activeParameterIndex;
 
       /// instantiate m_activeParameterIndex if not already instantiated
-      void instantiateParameterIndex(API::IFunction* fn);
+      //void instantiateParameterIndex(API::IFunction* fn);
+
+      int determineParameterIndex(API::IFunction* fn);
 
 
       double m_penaltyFactor;

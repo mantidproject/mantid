@@ -26,7 +26,7 @@ Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstra
  *  @param fn fitting function
  *  @return true if name of constraint is also an active fitting param
  */
-bool BoundaryConstraint::isValid(API::IFunction* fn)
+/*bool BoundaryConstraint::isValid(API::IFunction* fn)
 {
   for (int i = 0; i < fn->nActive(); i++)
   {
@@ -34,7 +34,7 @@ bool BoundaryConstraint::isValid(API::IFunction* fn)
       return true;
   }
   return false;
-}
+}*/
 
 
 /** Set penalty factor
@@ -54,27 +54,47 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
   }
 }
 
-/** instantiate m_activeParameterIndex if not already instantiated
+/** determine which is the active parameter. If constraint name is not amoung
+ *  the active parameter of function then return -1
  *
  *  @param fn fitting function
+ *  @return active parameter index or -1 if no active parameter index found
  */
-void BoundaryConstraint::instantiateParameterIndex(IFunction* fn)
+int BoundaryConstraint::determineParameterIndex(IFunction* fn)
 {
-  if (m_activeParameterIndex < 0)
+  //if (m_activeParameterIndex < 0)
+  //{
+  int retVal = -1;
+  for (int i = 0; i < fn->nActive(); i++)
   {
-    for (int i = 0; i < fn->nActive(); i++)
+    if ( m_parameterName.compare(fn->nameOfActive(i)) == 0 )
     {
-      if ( m_parameterName.compare(fn->nameOfActive(i)) == 0 )
-      {
-        m_activeParameterIndex = i;
-      }
+      retVal = i;
     }
   }
+  return retVal;
+  //}
 }
 
 double BoundaryConstraint::check(IFunction* fn)
 {
-  instantiateParameterIndex(fn);
+  m_activeParameterIndex = determineParameterIndex(fn);
+
+  if (m_activeParameterIndex < 0)
+  {
+    g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
+      << " names of function " << fn->name() << ". Therefore"
+      << " this constraint applied to this funtion serves no purpose";
+    return 0.0;
+  }
+
+  if ( !(m_hasLowerBound || m_hasUpperBound) )
+  {
+    g_log.warning() << "No bounds have been set on BoundaryConstraint for parameter " << m_parameterName << ". Therefore"
+      << " this constraint serves no purpose!"; 
+    return 0.0;
+  }
+
 
   double paramValue = fn->parameter(fn->indexOfActive(m_activeParameterIndex));
 
@@ -93,6 +113,13 @@ double BoundaryConstraint::check(IFunction* fn)
 boost::shared_ptr<std::vector<double> > BoundaryConstraint::checkDeriv(IFunction* fn)
 {
   boost::shared_ptr<std::vector<double> > penalty(new std::vector<double>(fn->nActive(),0.0)); 
+
+  if (m_activeParameterIndex < 0 || !(m_hasLowerBound || m_hasUpperBound))
+  {
+    // no point in logging any warning here since checkDeriv() will always be called after
+    // check() is called 
+    return penalty;
+  } 
 
   double paramValue = fn->parameter(fn->indexOfActive(m_activeParameterIndex));
 

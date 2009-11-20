@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Lorentzian.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -15,8 +16,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using Mantid::CurveFitting::Lorentzian;
-using Mantid::CurveFitting::Fit;
+using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
@@ -126,7 +126,71 @@ public:
     TS_ASSERT_DELTA( fn->centre(), 11.1994 ,0.0001);
     TS_ASSERT_DELTA( fn->width(), 2.1974 ,0.0001);
 
+    AnalysisDataService::Instance().remove(wsName);
+
   }
+
+  void testAgainstMockDataWithConstraint()
+  {
+    Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // create mock data to test against
+    std::string wsName = "GaussMockData";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // set up gaussian fitting function
+    Lorentzian* fn = new Lorentzian();
+    fn->initialize();
+    fn->setCentre(11.2);
+    fn->setHeight(100.7);
+    fn->setWidth(2.2);
+
+    // add constraint to function
+    BoundaryConstraint* bc = new BoundaryConstraint("PeakCentre",11.3, 12.0);
+    fn->addConstraint(bc);
+
+    //void setFunction(API::IFunction* fun);
+    alg2.setFunction(fn);
+
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex","1");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+
+    TS_ASSERT( alg2.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
+
+
+    TS_ASSERT_DELTA( fn->height(), 100.7023 ,0.0001);
+    TS_ASSERT_DELTA( fn->centre(), 11.1994 ,0.0001);
+    TS_ASSERT_DELTA( fn->width(), 2.1974 ,0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
+
+  }
+
 
 };
 

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -61,6 +62,50 @@ void IFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> w
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
 }
+
+/** Add a constraint
+ *  @param ic Pointer to a constraint.
+ */
+void IFunction::addConstraint(IConstraint* ic)
+{
+  m_constraints.push_back(ic);
+}
+
+
+/** This method calls function() and add any penalty to its output if constraints are violated.
+*
+* @param out function values of for the data points
+* @param xValues X values for data points
+* @param nData Number of data points
+ */
+void IFunction::functionWithConstraint(double* out, const double* xValues, const int& nData)
+{
+  //function(out, xValues, nData);
+
+  // Add penalty factor if constraint is violated
+/*
+  double penalty = 0.0;
+
+  for (unsigned i = 0; m_constraints.size(); i++)
+  {
+    penalty += m_constraints[i]->check(*this);
+  }
+*/
+
+}
+
+
+/** This method calls functionDeriv() and add any penalty to its output if constraints are violated.
+*
+* @param out Derivatives
+* @param xValues X values for data points
+* @param nData Number of data points
+ */
+void IFunction::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
+{
+
+}
+
 
 
 /** Update active parameters. Ties are applied.
