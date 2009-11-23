@@ -174,18 +174,20 @@ def UserPath(directory):
 # Instrument
 ########################### 
 def SANS2D():
-    global INSTR_NAME, BACKMON_START, BACKMON_END
+    global INSTR_NAME, BACKMON_START, BACKMON_END, MONITORSPECTRUM
     INSTR_NAME = 'SANS2D'
     BACKMON_START = 85000
     BACKMON_END = 100000
     Detector('rear-detector')
+    MONITORSPECTRUM = 2
 
 def LOQ():
-    global INSTR_NAME, BACKMON_START, BACKMON_END
+    global INSTR_NAME, BACKMON_START, BACKMON_END, MONITORSPECTRUM
     INSTR_NAME = 'LOQ'
     BACKMON_START = 31000
     BACKMON_END = 39000
     Detector('main-detector-bank')
+    MONITORSPECTRUM = 2
 
 def Detector(det_name):
     if INSTR_NAME == 'SANS2D' and (det_name == 'rear-detector' or det_name == 'front_detector') or \
@@ -213,7 +215,7 @@ def AssignSample(sample_run):
     _SAMPLE_RUN = sample_run
     SCATTER_SAMPLE = _assignHelper(sample_run, False)
     _SAMPLE_SETUP = None
-    if sample_run != '':
+    if (INSTR_NAME == 'SANS2D' and sample_run != ''):
         logvalues = _loadDetectorLogs(sample_run)
     else:
         return
@@ -235,7 +237,7 @@ def AssignCan(can_run):
     _CAN_RUN = can_run
     SCATTER_CAN = _assignHelper(can_run, False)
     _CAN_SETUP  = None
-    if can_run != '':
+    if (INSTR_NAME == 'SANS2D' and can_run != ''):
         logvalues = _loadDetectorLogs(can_run)
     else:
         return
@@ -291,7 +293,12 @@ def _assignHelper(run_string, is_trans):
     else:
         wkspname =  run_no + '_sans_' + ext.lower()
 
-    filename = os.path.join(DATA_PATH,INSTR_NAME + run_no.rjust(8, '0'))
+    if INSTR_NAME == 'LOQ':
+        field_width = 5
+    else:
+        field_width = 8
+    
+    filename = os.path.join(DATA_PATH,INSTR_NAME + run_no.rjust(field_width, '0'))
     if is_trans:
         _loadRawData(filename, wkspname, ext, spec_max = 8)
     else:
@@ -427,16 +434,19 @@ def SetCentre(XVAL, YVAL):
 # Add a mask to the correct string
 ###################################
 def Mask(details):
-
+    details = details.lstrip()
+    details_compare = details.upper()
     global TIMEMASKSTRING, SPECMASKSTRING
-    if details.startswith('/CLEAR/TIME'):
+    if details_compare.startswith('/CLEAR/TIME'):
         TIMEMASKSTRING = ''
-    elif details.startswith('/CLEAR'):
+    elif details_compare.startswith('/CLEAR'):
         SPECMASKSTRING = ''
-    elif details.startswith('/T'):
+    elif details_compare.startswith('/T'):
         TIMEMASKSTRING += ';' + details[2:].lstrip()
-    else:
+    elif ( details_compare.startswith('S') or details_compare.startswith('H') or details_compare.startswith('V') ):
         SPECMASKSTRING += ',' + details.lstrip()
+    else:
+        pass
 
 #############################
 # Read a mask file
@@ -711,8 +721,12 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         return None
 
     if use_def_trans == True:
-        fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(TRANS_WAV1) + '_' + str(TRANS_WAV2)
-        wavbin = str(TRANS_WAV1) + ',' + str(DWAV) + ',' + str(TRANS_WAV2)
+        if INSTR_NAME == 'SANS2D':
+            fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(TRANS_WAV1) + '_' + str(TRANS_WAV2)
+            wavbin = str(TRANS_WAV1) + ',' + str(DWAV) + ',' + str(TRANS_WAV2)
+        else:
+            fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_2.2_10'
+            wavbin = str(2.2) + ',' + str(DWAV) + ',' + str(10.0)
     else:
         fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(lambdamin) + '_' + str(lambdamax)
         wavbin = str(lambdamin) + ',' + str(DWAV) + ',' + str(lambdamax)
@@ -735,7 +749,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
 
     if use_def_trans == True:
         tmp_ws = 'trans_' + run_setup.getSuffix() + '_' + str(lambdamin) + '_' + str(lambdamax)
-        CropWorkspace(fulltransws, tmp_ws, XMin = lambdamin, XMax = lambdamax)
+        CropWorkspace(fulltransws, tmp_ws, XMin = str(lambdamin), XMax = str(lambdamax))
         return tmp_ws
     else: 
         return fulltransws
