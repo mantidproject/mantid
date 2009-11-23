@@ -194,6 +194,8 @@ private:
   void dropEvent( QDropEvent * event );
 	//@}
 
+  void removeLayerSelectionFrame();
+
 	Graph* active_graph;
 	//! Used for resizing of layers.
 	int d_cols, d_rows, graph_width, graph_height, colsSpace, rowsSpace;
@@ -204,6 +206,7 @@ private:
     QList<LayerButton *> buttonsList;
     QList<Graph *> graphsList;
 	QHBoxLayout *layerButtonsBox;
+  QHBoxLayout *buttonsLine;
     QWidget *canvas;
 
 	QPointer<SelectionMoveResizer> d_layers_selector;

@@ -58,7 +58,6 @@
 #include "Mantid/MantidCurve.h"
 
 #include <gsl/gsl_vector.h>
-#include <iostream>
 
 LayerButton::LayerButton(const QString& text, QWidget* parent)
 : QPushButton(text, parent)
@@ -104,9 +103,9 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
                          d_print_cropmarks(false)
 {
 	layerButtonsBox = new QHBoxLayout();
-	QHBoxLayout *hbox = new QHBoxLayout();
-	hbox->addLayout(layerButtonsBox);
-	hbox->addStretch();
+	buttonsLine = new QHBoxLayout();
+	buttonsLine->addLayout(layerButtonsBox);
+	buttonsLine->addStretch();
 
 	canvas = new QWidget();
 
@@ -115,7 +114,7 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
 	mainWidget->setBackgroundRole(QPalette::Window);
 
 	QVBoxLayout* layout = new QVBoxLayout(mainWidget);
-	layout->addLayout(hbox);
+	layout->addLayout(buttonsLine);
 	layout->addWidget(canvas, 1);
 	layout->setMargin(0);
 	layout->setSpacing(0);
@@ -212,6 +211,10 @@ void MultiLayer::activateGraph(LayerButton* button)
 			active_graph->setFocus();
 			active_graph->raise();//raise layer on top of the layers stack
 			button->setOn(true);
+      if( d_layers_selector )
+      {
+        removeLayerSelectionFrame();
+      }
 		}
 	}
 }
@@ -225,8 +228,9 @@ void MultiLayer::setActiveGraph(Graph* g)
 	active_graph->setFocus();
 
 	if (d_layers_selector)
-		delete d_layers_selector;
-
+  {
+    removeLayerSelectionFrame();
+  }
 	active_graph->raise();//raise layer on top of the layers stack
 
 	for(int i=0; i<graphsList.count(); i++){
@@ -561,7 +565,9 @@ void MultiLayer::arrangeLayers(bool fit, bool userSize)
 	QApplication::setOverrideCursor(Qt::waitCursor);
 
 	if(d_layers_selector)
-		delete d_layers_selector;
+  {
+    removeLayerSelectionFrame();
+  }
 
 	if (fit)
 		findBestLayout(d_rows, d_cols);
@@ -949,45 +955,44 @@ bool MultiLayer::eventFilter(QObject *object, QEvent *e)
 {
 	if(e->type() == QEvent::Resize && object == (QObject *)canvas)
 		resizeLayers((QResizeEvent *)e);
-	else if (e->type() == QEvent::MouseButtonPress && object == (QObject *)canvas){
-	    const QMouseEvent *me = (const QMouseEvent *)e;
-	    if (me->button() == Qt::RightButton)
-            return QMdiSubWindow::eventFilter(object, e);
+  else if (e->type() == QEvent::MouseButtonPress )
+  {
+    if( object == (QObject *)canvas)
+    {
+      const QMouseEvent *me = (const QMouseEvent *)e;
+      if (me->button() == Qt::RightButton)
+        return QMdiSubWindow::eventFilter(object, e);
 
-        QPoint pos = canvas->mapFromParent(me->pos());
-        // iterate backwards, so layers on top are preferred for selection
-        QList<Graph*>::iterator i = graphsList.end();
-        while (i != graphsList.begin()) {
-            --i;
-            Graph *g = *i;
-            if (g->selectedText() || g->titleSelected() || g->selectedScale()){
-                g->deselect();
-                return true;
-            }
-
-            QRect igeo = (*i)->frameGeometry();
-            if (igeo.contains(pos)) {
-                if (me->modifiers() & Qt::ShiftModifier) {
-                    if (d_layers_selector)
-                        d_layers_selector->add(*i);
-                    else {
-                        d_layers_selector = new SelectionMoveResizer(*i);
-                        connect(d_layers_selector, SIGNAL(targetsChanged()), this, SIGNAL(modifiedPlot()));
-                    }
-                } else {
-                    setActiveGraph(g);
-                    active_graph->raise();
-                    if (!d_layers_selector) {
-                        d_layers_selector = new SelectionMoveResizer(*i);
-                        connect(d_layers_selector, SIGNAL(targetsChanged()), this, SIGNAL(modifiedPlot()));
-                    }
-                }
-                return true;
-            }
+      QPoint pos = canvas->mapFromParent(me->pos());
+      // iterate backwards, so layers on top are preferred for selection
+      QList<Graph*>::iterator i = graphsList.end();
+      while (i != graphsList.begin()) {
+        --i;
+        Graph *g = *i;
+        if (g->selectedText() || g->titleSelected() || g->selectedScale()){
+          g->deselect();
+          return true;
         }
-        if (d_layers_selector)
-            delete d_layers_selector;
-	}
+
+        QRect igeo = (*i)->frameGeometry();
+        if (igeo.contains(pos)) {
+          if (me->modifiers() & Qt::ShiftModifier) {
+            if (d_layers_selector)
+              d_layers_selector->add(*i);
+            else {
+              d_layers_selector = new SelectionMoveResizer(*i);
+              connect(d_layers_selector, SIGNAL(targetsChanged()), this, SIGNAL(modifiedPlot()));
+            }
+          }
+          return true;
+        }
+      }
+    }
+    if (d_layers_selector)
+    {
+      removeLayerSelectionFrame();
+    }
+}
 
 	return MdiSubWindow::eventFilter(object, e);
 }
@@ -995,9 +1000,8 @@ bool MultiLayer::eventFilter(QObject *object, QEvent *e)
 void MultiLayer::keyPressEvent(QKeyEvent * e)
 {
 	if (e->key() == Qt::Key_F12){
-		if (d_layers_selector)
-			delete d_layers_selector;
-		int index = graphsList.indexOf(active_graph) + 1;
+    removeLayerSelectionFrame();
+    int index = graphsList.indexOf(active_graph) + 1;
 		if (index >= graphsList.size())
 			index = 0;
 		Graph *g = (Graph *)graphsList.at(index);
@@ -1007,8 +1011,7 @@ void MultiLayer::keyPressEvent(QKeyEvent * e)
 	}
 
 	if (e->key() == Qt::Key_F10){
-		if (d_layers_selector)
-			delete d_layers_selector;
+    removeLayerSelectionFrame();
 		int index = graphsList.indexOf(active_graph) - 1;
 		if (index < 0)
 			index = graphsList.size() - 1;
@@ -1257,6 +1260,16 @@ void MultiLayer::dropEvent( QDropEvent * event )
   // Update the axes
   g->setAutoScale();
 }
+
+/**
+* Mark the layer selector for deletion and set the pointer to NULL
+*/
+void MultiLayer::removeLayerSelectionFrame()
+{
+  d_layers_selector->deleteLater();
+  d_layers_selector = NULL;
+}
+
 
 bool MultiLayer::swapLayers(int src, int dest)
 {
