@@ -378,11 +378,9 @@ namespace Mantid
     
       if( async )
       {
-	os << "\tmtd._setGILRequired(True)\n" 
-	   << "\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
-	   << "\tmtd._setGILRequired(False)\n"
-	   << "\tif result == False:\n"
-	   << "\t\tsys.exit('An error occurred while running " << algm << "')\n";
+	writeAsyncFunctionCall(os, algm, "\t");
+	os << "\tif result == False:\n"
+	   << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
       }
       else
       {
@@ -435,13 +433,15 @@ namespace Mantid
 
       os << "\tdialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
 	 << "\" , values, Message, final_enabled)\n"
-	 << "\tif dialog == True:\n"
-	 << "\t\tresult = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << algm << "\")\n"
-	 << "\telse:\n"
+	 << "\tif dialog == True:\n";
+
+      writeAsyncFunctionCall(os, algm, "\t\t");
+      
+      os << "\telse:\n"
 	 << "\t\tsys.exit('Information: Script execution cancelled')\n"
 	 << "\tif result == False:\n"
-	 << "\t\tsys.exit('An error occurred while running " << algm << "')\n"
-	 << "\treturn mtd._createAlgProxy(algm)\n\n";
+	 << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n"
+ 	 << "\treturn mtd._createAlgProxy(algm)\n\n";
     }
 
     /**
@@ -611,6 +611,20 @@ namespace Mantid
 	 << "mantidhelp = mtdHelp\n"
 	 << "mantidHelp = mtdHelp\n"
 	 << "MantidHelp = mtdHelp\n";
+    }
+
+    /**
+     * Write out Python code required to execute an algorithm asynchronously, ensuring the GIL is in the correct state
+     * @param output The stream to contain the code
+     * @param alg_name The name of the algorithm
+     * @param prefix A prefix to apply to each line
+     */
+    void SimplePythonAPI::writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, 
+						 const std::string & prefix)
+    {
+      output << prefix << "mtd._setGILRequired(True)\n" 
+	     << prefix << "result = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << alg_name << "\")\n"
+	     << prefix << "mtd._setGILRequired(False)\n";
     }
 
     /**

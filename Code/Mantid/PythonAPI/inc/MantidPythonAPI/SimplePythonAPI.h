@@ -83,6 +83,8 @@ class DLLExport SimplePythonAPI
   /// Writes the given help strings to the Python module
   static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings, 
 				const std::map<std::string, std::set<std::string> >& categories);
+  /// Write string to run algorithm asynchronously
+  static void writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, const std::string & prefix = "");
   /// Convert EOL characters to their string representation
   static std::string convertEOLToString(const std::string & value);
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
@@ -100,9 +102,9 @@ class DLLExport SimplePythonAPI
     bool operator()(const Mantid::Kernel::Property * p1, 
 		    const Mantid::Kernel::Property * p2) const
     {
-  		//this is false, unless p1 is not valid and p2 is valid
-	  	return ( p1->isValid() != "" ) && ( p2->isValid() == "" );
-	  }
+      //this is false, unless p1 is not valid and p2 is valid
+      return ( p1->isValid() != "" ) && ( p2->isValid() == "" );
+    }
   };
   
   /// The name of the module file
