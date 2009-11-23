@@ -1,3 +1,7 @@
+// If you get the message  “This application has failed to start because MSVCR80.dll was not found. Re-installing the application may fix this problem.”
+// when running to run this main.cpp in debug mode then try to uncomment the line below (see also http://blogs.msdn.com/dsvc/archive/2008/08/07/part-2-troubleshooting-vc-side-by-side-problems.aspx for more details)
+//#pragma comment(linker, "\"/manifestdependency:type='Win32' name='Microsoft.VC80.CRT' version='8.0.50608.0' processorArchitecture='X86' publicKeyToken='1fc8b3b9a1e18e3b' \"") 
+
 #include <iostream>
 #include <iomanip>
 #include "Benchmark.h"
