@@ -16,7 +16,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/cow_ptr.h"
 #include <boost/shared_ptr.hpp>
-#include <list>
+#include <set>
 
 namespace Mantid
 {
@@ -145,8 +145,8 @@ public:
   // Methods to set and access masked bins
   void maskBin(const int& spectrumIndex, const int& binIndex, const double& weight = 1.0);
   bool hasMaskedBins(const int& spectrumIndex) const;
-  /// Masked bins for each spectrum are stored as a list of pairs containing <bin index, weight>
-  typedef std::list< std::pair<int,double> > MaskList;
+  /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
+  typedef std::set< std::pair<int,double> > MaskList;
   const MaskList& maskedBins(const int& spectrumIndex) const;
   
 protected:

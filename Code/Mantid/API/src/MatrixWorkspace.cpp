@@ -343,10 +343,8 @@ void MatrixWorkspace::maskBin(const int& spectrumIndex, const int& binIndex, con
   // If a mask for this bin already exists, it would be replaced. But I think that is OK.
   // First get a reference to the list for this spectrum (or create a new list)
   MatrixWorkspace::MaskList& specList = m_masks[spectrumIndex];
-  // Add the new value
-  specList.push_back( std::make_pair(binIndex,weight) );
-  // We want to keep each list in order of ascending bin number
-  specList.sort();
+  // Add the new value. Will automatically be put in the right place (ordered by binIndex)
+  specList.insert( std::make_pair(binIndex,weight) );
   
   this->dataY(spectrumIndex)[binIndex] *= (1-weight);
   // Do we want to scale the error?

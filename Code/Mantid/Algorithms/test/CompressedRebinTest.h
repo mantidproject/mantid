@@ -92,8 +92,8 @@ public:
     TS_ASSERT_THROWS_NOTHING (
       const MatrixWorkspace::MaskList& masks = rebindata->maskedBins(10);
       TS_ASSERT_EQUALS( masks.size(),1 )
-      TS_ASSERT_EQUALS( masks.front().first, 1 )
-      TS_ASSERT_EQUALS( masks.front().second, 0.75 )
+      TS_ASSERT_EQUALS( masks.begin()->first, 1 )
+      TS_ASSERT_EQUALS( masks.begin()->second, 0.75 )
     )
     
     AnalysisDataService::Instance().remove("test_in2D");

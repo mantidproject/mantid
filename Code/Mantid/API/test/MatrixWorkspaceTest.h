@@ -166,8 +166,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,1,0.5) )
     TS_ASSERT( ws2->hasMaskedBins(0) )
     TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 1 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().first, 1 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().second, 0.5 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->first, 1 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 0.5 )
     // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
     TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 )
     
@@ -175,13 +175,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,0) )
     TS_ASSERT( ws2->hasMaskedBins(0) )
     TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 2 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().first, 0 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).front().second, 1.0 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->first, 0 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 1.0 )
     // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
     TS_ASSERT_EQUALS( ws2->dataY(0)[0], 0.0 )
     // Check the previous masking is still OK
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).back().first, 1 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).back().second, 0.5 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->first, 1 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->second, 0.5 )
     TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 )
   }
   
