@@ -19,10 +19,7 @@ vfile.close()
 MantidVersion = '1.0.' + vstr[12:vlen-1]
 print('Mantid version '+MantidVersion)
 
-#product_uuid = '{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}'
-#product_uuid = '{83F7E727-C069-4d45-A3F9-F47797F7970F}'
-#product_uuid='{EC1C2D8E-4214-4776-B07F-FB11F98845D1}'
-product_uuid='{1ba91460-2b2a-11de-8c30-0800200c9a66}'
+product_uuid='{9ca6d0c1-c0e2-4eba-a31c-3db46c76e64c}'
 
 MantidInstallDir = 'MantidInstall'
 
@@ -481,13 +478,9 @@ addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib','../Mantid/Geometr
 addFileV('MantidCurveFitting_lib','MFit.lib','MantidCurveFitting.lib','../Mantid/CurveFitting/lib/MantidCurveFitting.lib',UserAlgorithms)
 addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../Third_Party/lib/win32/PocoFoundation.lib',UserAlgorithms)
 
-#--------------- Python ------------------------------------------------
-
-Python25Dir = addTo(TargetDir,'Directory',{'Id':'PYTHON25DIR'})
-LibDir = addDirectory('LibDir','Lib','Lib',Python25Dir)
-SitePackagesDir = addDirectory('SitePackagesDir','sitepack','site-packages',LibDir)
-PyQtDir = addDirectory('PyQtDir','PyQt4','PyQt4',SitePackagesDir)
-Sip = addComponent('Sip','{A051F48C-CA96-4cd5-B936-D446CBF67588}',SitePackagesDir)
+#--------------- Python ---------------------------------------------------------------------------------
+PyQtDir = addDirectory('PyQtDir','PyQt4','PyQt4',binDir)
+Sip = addComponent('Sip','{A051F48C-CA96-4cd5-B936-D446CBF67588}',binDir)
 addAllFiles('toget/sip','sip',Sip)
 PyQt = addComponent('PyQt','{18028C0B-9DF4-48f6-B8FC-DE195FE994A0}',PyQtDir)
 addAllFiles('toget/PyQt4','PyQt',PyQt)
@@ -509,38 +502,7 @@ ProgramMenuDir = addDirectory('ProgramMenuDir','Mantid','Mantid',ProgramMenuFold
 DesktopFolder = addDirectory('DesktopFolder','Desktop','Desktop',TargetDir)
 
 #-----------------------------------------------------------------------
-sfiles = os.listdir('toget/PyQt4');
-i=1;
-for file in sfiles:
-  if( file == '.svn' ):
-    continue;
-  decomp=file.partition('.')
-  id=decomp[0].upper()
-  id+='EXISTS'
-  PyQtFileExists = addTo(Product,'Property',{'Id':id})
-  DirSearch = addTo(PyQtFileExists, 'DirectorySearch',{'Id':'PyQtDir_' + str(i),'Path':'[PYTHON25DIR]\Lib\site-packages\PyQt4','Depth':'0'})
-  # pyc files treated differenty as they could just have the .py file that has not been compiled yet
-  if( decomp[2] == 'pyc' ):
-    file = decomp[0] + decomp[1] + 'py'
-  addTo(DirSearch,'FileSearch',{'Id':'PyQt_' + str(i),'LongName':file})
-  i += 1;
-  
-sfiles = os.listdir('toget/sip');
-i=1
-for file in sfiles:
-  if( file == '.svn' ):
-    continue;
-  decomp=file.partition('.')
-  id=decomp[0].upper()
-  id+='EXISTS'
-  SipFileExists = addTo(Product,'Property',{'Id':id})
-  DirSearch = addTo(SipFileExists, 'DirectorySearch',{'Id':'SipDirSearch' + str(i),'Path':'[PYTHON25DIR]\Lib\site-packages','Depth':'0'})
-  # pyc files treated differenty as they could just have the .py file that has not been compiled yet
-  if( decomp[2] == 'pyc' ):
-    file = decomp[0] + decomp[1] + 'py'
-  addTo(DirSearch,'FileSearch',{'Id':'SipFileSearch' + str(i),'LongName':file})
-  i += 1;
- 
+
 Complete = addRootFeature('Complete','Mantid','The complete package','1',Product)
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
 addCRef('MantidDLLs',MantidExec)
@@ -555,6 +517,8 @@ addCRef('Data',MantidExec)
 addCRefs(Matlab,MantidExec)
 addCRefs(instrument,MantidExec)
 addCRefs(sconsList,MantidExec)
+addCRef('PyQt',MantidExec)
+addCRef('Sip',MantidExec)
 
 Redist = addHiddenFeature('Redist',Complete)
 addModules('toget/VCRedist',Redist)
@@ -574,54 +538,6 @@ addCRefs(pocoList,Includes)
 
 QTIPlotExec = addFeature('QTIPlotExec','MantidPlot','MantidPlot','1',MantidExec)
 addCRef('QTIPlot',QTIPlotExec)
-
-#Prevent overwriting existing PyQt installation.
-PyQtF = addFeature('PyQtF','PyQt','PyQt4 v4.4.3','1',QTIPlotExec,'disallow','no')
-addCRef('PyQt',PyQtF)
-sfiles = os.listdir('toget/PyQt4');
-PyQtTest='(UILevel <> 3)'
-for file in sfiles:
-  if( file == '.svn' ):
-    continue;
-  id=file.partition('.')[0].upper()
-  id+='EXISTS'
-  PyQtTest += ' AND ' + id
-
-addText(PyQtTest, addTo(PyQtF,'Condition',{'Level':'0'}))
-
-# Prevent overwriting exising sip files
-SipPyd = addFeature('SipPyd','Sip','Sip v4.7.7','1',QTIPlotExec, 'disallow','no')
-addCRef('Sip',SipPyd)
-sfiles = os.listdir('toget/sip');
-SipTest='(UILevel <> 3)'
-for file in sfiles:
-  if( file == '.svn' ):
-    continue;
-  id=file.partition('.')[0].upper()
-  id+='EXISTS'
-  SipTest += ' AND ' + id
-  
-addText(SipTest, addTo(SipPyd,'Condition',{'Level':'0'}))
-
-#------------- Source files ------------------------
-#SourceFiles = addFeature('SourceFiles','SourceFiles','SourceFiles','1',Complete)
-#addCRef('SourceMantidAlgorithms',SourceFiles)
-#addCRef('SourceMantidAPI',SourceFiles)
-# addCRef('SourceMantidDataHandling',SourceFiles)
-# addCRef('SourceMantidDataObjects',SourceFiles)
-# addCRef('SourceMantidGeometry',SourceFiles)
-# addCRef('SourceMantidKernel',SourceFiles)
-# addCRef('SourceMantidNexus',SourceFiles)
-# addCRef('SourceMantidPythonAPI',SourceFiles)
-
-
-
-#tstDir = addDirectory('TstDir','tst','tst',InstallDir)
-#TstTst = addComponent('TSTST','{42AD79C6-8A51-4dcd-8E03-289077D880AA}',tstDir)
-#addAllFilesExt('../Mantid/Algorithms/src','alg','cpp',TstTst)
-#addAllFilesExt('../Mantid/API/src','alg','cpp',TstTst)
-#TstFiles = addFeature('TstFiles1','TstFiles1','TstFiles1','1',Complete)
-#addCRef('TSTST',TstFiles)
 
 
 #addTo(Product,'UIRef',{'Id':'WixUI_Mondo'})
