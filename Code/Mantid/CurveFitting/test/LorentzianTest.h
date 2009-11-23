@@ -159,7 +159,7 @@ public:
 
     // add constraint to function
     BoundaryConstraint* bc = new BoundaryConstraint("PeakCentre",11.3, 12.0);
-    fn->addConstraint(bc);
+    //fn->addConstraint(bc);
 
     //void setFunction(API::IFunction* fun);
     alg2.setFunction(fn);
