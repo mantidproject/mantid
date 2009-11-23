@@ -43,18 +43,30 @@ namespace CurveFitting
     gsl_matrix * m_J;
     /// Maps declared indeces to active. For fixed (tied) parameters holds -1
     std::vector<int> m_index;
-    /**  Set a value to a Jacobian matrix element.
-    *   @param iY The index of the data point.
-    *   @param iP The index of the active parameter.
-    *   @param value The derivative value.
-    */
+
+    /// Set the pointer to the GSL's jacobian
+    void setJ(gsl_matrix * J){m_J = J;}
+
+    /// overwrite base method
+    ///  @throw runtime_error Thrown if column of Jacobian to add number to does not exist
+    void addNumberToColumn(const double& value, const int& iActiveP) 
+    {
+      if (iActiveP < m_J->size2)
+      {
+        for (size_t iY = 0; iY < m_J->size1; iY++) 
+          m_J->data[iY*m_J->size2 + iActiveP] += value;
+      }
+      else
+      {
+        throw std::runtime_error("Try to add number to column of Jacobian matrix which does not exist.");
+      }   
+    }
+    /// overwrite base method
     void set(int iY, int iP, double value)
     {
       int j = m_index[iP];
       if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
-    /// Set the pointer to the GSL's jacobian
-    void setJ(gsl_matrix * J){m_J = J;}
   };
 
   /// Structure to contain least squares data and used by GSL

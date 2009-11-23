@@ -173,10 +173,20 @@ class Jacobian
 public:
   /**  Set a value to a Jacobian matrix element.
   *   @param iY The index of a data point.
-  *   @param iP The index of an active? parameter.
+  *   @param iP The index of a declare parameter.
   *   @param value The derivative value.
   */
   virtual void set(int iY, int iP, double value) = 0;
+
+  /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
+  *   @param value Value to add
+  *   @param iActiveP The index of an active parameter.
+  */
+  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
+  {
+    throw Kernel::Exception::NotImplementedError("No addNumberToColumn() method of Jacobian provided");
+  }
+
   /// Virtual destructor
   virtual ~Jacobian() {};
 protected:

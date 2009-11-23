@@ -49,7 +49,7 @@ public:
   /// is the larger the penalty
   virtual double check(IFunction* fn) = 0;
 
-  /// Returns the derivative of the penalty for each parameter
+  /// Returns the derivative of the penalty for each active parameter
   virtual boost::shared_ptr<std::vector<double> > checkDeriv(IFunction* fn) = 0;
 
 };

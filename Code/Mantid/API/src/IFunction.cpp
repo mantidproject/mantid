@@ -82,16 +82,19 @@ void IFunction::functionWithConstraint(double* out, const double* xValues, const
 {
   function(out, xValues, nData);
 
-  // Add penalty factor if constraint is violated
-/*
-  double penalty = 0.0;
 
+  // Add penalty factor to function if any constraint is violated
+
+  double penalty = 0.0;
   for (unsigned i = 0; m_constraints.size(); i++)
   {
-    penalty += m_constraints[i]->check(*this);
+    penalty += m_constraints[i]->check(this);
   }
-*/
 
+  for (int i = 0; i < nData; i++)
+  {
+    out[i] += penalty;
+  }
 }
 
 
@@ -104,6 +107,16 @@ void IFunction::functionWithConstraint(double* out, const double* xValues, const
 void IFunction::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
 {
   functionDeriv(out, xValues, nData);
+
+  for (unsigned i = 0; m_constraints.size(); i++)
+  {  
+    boost::shared_ptr<std::vector<double> > penalty = m_constraints[i]->checkDeriv(this);
+
+    // for each active paramter check if there is a penalty and if yes add to derivatives
+    for (unsigned int ii = 0; ii<(*penalty).size(); ii++)
+      if ((*penalty)[ii] != 0.0)
+        out->addNumberToColumn((*penalty)[ii], ii);
+  }
 }
 
 
