@@ -28,17 +28,10 @@ void Lorentzian::function(double* out, const double* xValues, const int& nData)
     const double& peakCentre = getParameter("PeakCentre");
     const double& hwhm = getParameter("HWHM");
 
-
-
-
-
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         out[i] = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) );
     }
-
-
-
 }
 
 void Lorentzian::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
@@ -46,7 +39,6 @@ void Lorentzian::functionDeriv(Jacobian* out, const double* xValues, const int& 
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");
     const double& hwhm = getParameter("HWHM");
-
 
     for (int i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;

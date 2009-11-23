@@ -4,6 +4,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Lorentzian.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -80,7 +82,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // create mock data to test against
-    std::string wsName = "GaussMockData";
+    std::string wsName = "LorentzianMockData";
     int histogramNumber = 1;
     int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
@@ -93,14 +95,13 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    // set up gaussian fitting function
+    // set up Lorentzian fitting function
     Lorentzian* fn = new Lorentzian();
     fn->initialize();
     fn->setCentre(11.2);
     fn->setHeight(100.7);
     fn->setWidth(2.2);
 
-    //void setFunction(API::IFunction* fun);
     alg2.setFunction(fn);
 
 
@@ -137,7 +138,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // create mock data to test against
-    std::string wsName = "GaussMockData";
+    std::string wsName = "LorentzianMockData";
     int histogramNumber = 1;
     int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
@@ -150,7 +151,7 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
-    // set up gaussian fitting function
+    // set up Lorentzian fitting function
     Lorentzian* fn = new Lorentzian();
     fn->initialize();
     fn->setCentre(11.2);
@@ -159,10 +160,85 @@ public:
 
     // add constraint to function
     BoundaryConstraint* bc = new BoundaryConstraint("PeakCentre",11.3, 12.0);
-    //fn->addConstraint(bc);
+    fn->addConstraint(bc);
 
     //void setFunction(API::IFunction* fun);
     alg2.setFunction(fn);
+
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex","1");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+
+    TS_ASSERT( alg2.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 0.0782,0.0001);
+
+
+    TS_ASSERT_DELTA( fn->height(), 101.0322 ,0.0001);
+    TS_ASSERT_DELTA( fn->centre(), 11.3 ,0.01);
+    TS_ASSERT_DELTA( fn->width(), 2.1743 ,0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
+
+  }
+
+
+  void xtestAgainstMockDataWithConstraintAndConstBackground()
+  {
+    Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // create mock data to test against
+    std::string wsName = "LorentzianMockData";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    // create function you want to fit against
+    CompositeFunction *fnWithBk = new CompositeFunction();
+
+    LinearBackground *bk = new LinearBackground();
+    bk->initialize();
+
+    bk->getParameter("A0") = 0.0;
+    bk->getParameter("A1") = 0.0;
+    bk->removeActive(1);  
+
+    // set up Lorentzian fitting function
+    Lorentzian* fn = new Lorentzian();
+    fn->initialize();
+    fn->setCentre(11.2);
+    fn->setHeight(100.7);
+    fn->setWidth(2.2);
+
+    // add constraint to function
+    BoundaryConstraint* bc = new BoundaryConstraint("PeakCentre",11.3, 12.0);
+    fn->addConstraint(bc);
+
+    fnWithBk->addFunction(fn);
+    fnWithBk->addFunction(bk);
+
+    //void setFunction(API::IFunction* fun);
+    alg2.setFunction(fnWithBk);
 
 
     // Set which spectrum to fit against and initial starting values
@@ -186,6 +262,7 @@ public:
     TS_ASSERT_DELTA( fn->height(), 100.7023 ,0.0001);
     TS_ASSERT_DELTA( fn->centre(), 11.1994 ,0.0001);
     TS_ASSERT_DELTA( fn->width(), 2.1974 ,0.0001);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 0.0001 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
 

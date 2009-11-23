@@ -615,7 +615,7 @@ namespace CurveFitting
   void Fit::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
   {
     if (in) m_function->updateActive(in);
-    m_function->functionDeriv(out,xValues,nData);
+    m_function->functionDerivWithConstraint(out,xValues,nData);
     //std::cerr<<"-------------- Jacobian ---------------\n";
     //for(int i=0;i<nParams();i++)
     //  for(int j=0;j<nData;j++)
