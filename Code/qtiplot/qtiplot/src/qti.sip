@@ -476,6 +476,17 @@ private:
 	Grid(const Grid&);
 };
 
+namespace GraphOptions 
+{
+%TypeHeaderCode 
+#include "src/GraphOptions.h"
+%End
+
+  enum ScaleType {Linear, Log10};
+
+  enum Axis{Left, Right, Bottom, Top};
+};
+
 class Graph : QWidget /PyName=Layer/
 {
 %TypeHeaderCode
@@ -483,8 +494,6 @@ class Graph : QWidget /PyName=Layer/
 #include "src/LegendWidget.h"
 %End
 public:
-  enum ScaleType{Linear, Log10};
-  enum Axis{Left, Right, Bottom, Top};
   enum TicksStyle{NoTicks = 0, Out = 1, InOut = 2, In = 3};
   enum CurveType{Line, Scatter, LineSymbols, VerticalBars, Area, Pie, VerticalDropLines,
 			Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
@@ -1704,7 +1713,7 @@ public:
   void setColorMapRange(double, double);
   void setDataMappingIntegral(double, double) /PyName = setBinRange/;
   void selectComponent(const QString &);
-
+  void setScaleType(GraphOptions::ScaleType);
 private:
 InstrumentWindow(const InstrumentWindow &);
 };

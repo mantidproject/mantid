@@ -13056,7 +13056,7 @@ MultiLayer* ApplicationWindow::plotImage(Matrix *m)
     s->setAxis(QwtPlot::xTop, QwtPlot::yLeft);
     plot->setScale(QwtPlot::xTop, QMIN(m->xStart(), m->xEnd()), QMAX(m->xStart(), m->xEnd()));
     plot->setScale(QwtPlot::yLeft, QMIN(m->yStart(), m->yEnd()), QMAX(m->yStart(), m->yEnd()),
-		   0.0, 5, 5, Graph::Linear, true);
+		   0.0, 5, 5, GraphOptions::Linear, true);
   }
   else
   {

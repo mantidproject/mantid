@@ -566,7 +566,7 @@ void Spectrogram::loadSettings()
   // Set values from settings
   mutableColorMap().loadMap(mCurrentColorMap);
   
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)settings.value("ScaleType", MantidColorMap::Log10).toUInt();
+  GraphOptions::ScaleType type = (GraphOptions::ScaleType)settings.value("ScaleType", GraphOptions::Log10).toUInt();
   
   mutableColorMap().changeScaleType(type);
   

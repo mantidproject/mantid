@@ -1258,7 +1258,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
   // If not specified, keep the same as now
   if( type < 0 ) type = axisType(axis);
 
-  if (type == Graph::Log10)
+  if (type == GraphOptions::Log10)
   {
     sc_engine->setType(QwtScaleTransformation::Log10);
     if (start <= 0 || end <= 0)
@@ -1302,14 +1302,7 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 			  QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
 			  if(rightAxis)
 			  {
-				  MantidColorMap::ScaleType type1 ;
-				  if(type==0)
-				  {	  type1=MantidColorMap::Linear;
-				  }
-				  else
-				  {	  type1=MantidColorMap::Log10;
-				  }
-				  sp->mutableColorMap().changeScaleType(type1);
+			    sp->mutableColorMap().changeScaleType((GraphOptions::ScaleType)type);
 				  rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
 				  sp->setColorMap(sp->getColorMap());
 				  if(sp->isIntensityChanged())
@@ -4715,7 +4708,7 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 	if(rightAxis==NULL) return 0;
 	rightAxis->setColorBarEnabled(type != Contour);
 	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
-	d_spectrogram->mutableColorMap().changeScaleType(MantidColorMap::Linear);
+	d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
 	d_spectrogram->setDefaultColorMap();
 	rightAxis->setColorMap(d_spectrogram->data().range(),d_spectrogram->mutableColorMap());
 	d_plot->setAxisScale(QwtPlot::yRight,

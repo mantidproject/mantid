@@ -7,6 +7,7 @@
 #include "qwt_color_map.h"
 #include "boost/shared_ptr.hpp"
 #include "MantidKernel/Logger.h"
+#include "../../GraphOptions.h"
 
 //---------------------------------------------
 // Forward declarations
@@ -40,14 +41,11 @@ class MantidColorMap : public QwtColorMap
 {
 
 public:
-  /// A scale type enumeration
-  enum ScaleType { Log10 = 0, Linear = 1};
-
   /// Default constructor
   MantidColorMap();
 
   /// Constructor with a type parameter
-  explicit MantidColorMap(const QString & filename, ScaleType type);
+  explicit MantidColorMap(const QString & filename, GraphOptions::ScaleType type);
 
   /// (virtual) Destructor
   virtual ~MantidColorMap();
@@ -56,13 +54,13 @@ public:
   QwtColorMap* copy() const;
 
   /// Change the scale type
-  void changeScaleType(ScaleType type);
+  void changeScaleType(GraphOptions::ScaleType type);
 
   /** 
    * Retrieve the scale type
    * @returns the current scale type
    */
-  ScaleType getScaleType() const 
+  GraphOptions::ScaleType getScaleType() const 
   {
     return m_scale_type;
   }  
@@ -103,11 +101,11 @@ public:
   {
     return static_cast<unsigned char>(255);
   }
-  void setColors(boost::shared_ptr<GLColor> gl,int index );
+
 private:
 
   /// The scale choice
-  mutable ScaleType m_scale_type;
+  mutable GraphOptions::ScaleType m_scale_type;
 
   /// An array of shared pointers to objects that define how the color should be painted on
   /// an OpenGL surface. QVector objects are implicitly shared so offer better performance than

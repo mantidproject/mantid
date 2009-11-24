@@ -5,12 +5,16 @@
 #include "Instrument3DWidget.h"
 #include "InstrumentTreeWidget.h"
 #include "../../MdiSubWindow.h"
+#include "../../GraphOptions.h"
 #include "BinDialog.h"
+
 #include <string>
 #include <vector>
+
 #include "qwt_scale_widget.h"
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
+
 
 namespace Mantid
 {
@@ -64,12 +68,13 @@ class QComboBox;
 class InstrumentWindow : public MdiSubWindow
 {
 	Q_OBJECT
+
 public:
-	InstrumentWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
-	~InstrumentWindow();
-	void setWorkspaceName(std::string wsName);
-        void updateWindow();
-        void showWindow();
+  InstrumentWindow(const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
+  ~InstrumentWindow();
+  void setWorkspaceName(std::string wsName);
+  void updateWindow();
+  void showWindow();
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -77,8 +82,9 @@ public:
   void setColorMapRange(double minValue, double maxValue);
   void setDataMappingIntegral(double minValue,double maxValue);
   void selectComponent(const QString & name);
+  void setScaleType(GraphOptions::ScaleType type);
   /// for saving the instrument window  to mantid project
-	QString saveToString(const QString& geometry, bool saveAsTemplate= false);
+  QString saveToString(const QString& geometry, bool saveAsTemplate= false);
 
 public slots:
 	void modeSelectButtonClicked();
@@ -101,8 +107,8 @@ public slots:
   void saveImage();
 
 signals:
-    void plotSpectra(const QString&,int);
-	void plotSpectraList(const QString&,const std::set<int>&);
+  void plotSpectra(const QString&,int);
+  void plotSpectraList(const QString&,const std::set<int>&);
 
 private slots:
         void scaleTypeChanged(int);

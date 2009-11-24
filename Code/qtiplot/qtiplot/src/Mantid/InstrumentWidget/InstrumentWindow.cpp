@@ -75,6 +75,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mMaxValueBox->setMaximumWidth(60);
 	mMinValueBox->setValidator(new QDoubleValidator(mMinValueBox));
 	mMaxValueBox->setValidator(new QDoubleValidator(mMaxValueBox));
+	//Ensure the boxes start empty, this is important for checking if values have been set from the scripting side
+	mMinValueBox->setText("");
+	mMaxValueBox->setText("");
 
 	//Axis view buttons
 	QFrame* axisViewFrame = new QFrame();
@@ -103,8 +106,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mColorMapWidget->setLabelAlignment( Qt::AlignRight | Qt::AlignVCenter);
 
 	mScaleOptions = new QComboBox;
-	mScaleOptions->addItem("Log10", QVariant(MantidColorMap::Log10));
-	mScaleOptions->addItem("Linear", QVariant(MantidColorMap::Linear));
+	mScaleOptions->addItem("Log10", QVariant(GraphOptions::Log10));
+	mScaleOptions->addItem("Linear", QVariant(GraphOptions::Linear));
 	connect(mScaleOptions, SIGNAL(currentIndexChanged(int)), this, SLOT(scaleTypeChanged(int)));
 
 	QVBoxLayout* options_layout = new QVBoxLayout;
@@ -238,8 +241,11 @@ void InstrumentWindow::changeColormap(const QString &filename)
 
   mCurrentColorMap = fileselection;
   mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
-  setupColorBarScaling();
-  mInstrumentDisplay->updateColorsForNewMap();
+  if( this->isVisible() )
+  {
+    setupColorBarScaling();
+    mInstrumentDisplay->updateColorsForNewMap();
+  }
 }
 
 /**
@@ -400,14 +406,19 @@ void InstrumentWindow::updateWindow()
 void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
 {
   mInstrumentDisplay->setWorkspace(mWorkspaceName);
-
-  double minValue = mInstrumentDisplay->getDataMinValue();
-  double maxValue = mInstrumentDisplay->getDataMaxValue();
-  mMinValueBox->setText(QString::number(minValue));
-  mMaxValueBox->setText(QString::number(maxValue));
+  // Need to check if the values have already been set for the range
+  if( mMinValueBox->text().isEmpty() )
+  {
+    mMinValueBox->setText(QString::number(mInstrumentDisplay->getDataMinValue()));
+  }
+  if( mMaxValueBox->text().isEmpty() )
+  {
+    mMaxValueBox->setText(QString::number(mInstrumentDisplay->getDataMaxValue()));
+  }
+  
 
   // Setup the colour map details
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
+  GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
   mInstrumentDisplay->mutableColorMap().changeScaleType(type);
   setupColorBarScaling();
   
@@ -446,8 +457,8 @@ void InstrumentWindow::setupColorBarScaling()
   double minValue = mMinValueBox->displayText().toDouble();
   double maxValue = mMaxValueBox->displayText().toDouble();
 
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
-  if( type == MantidColorMap::Linear )
+  GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
+  if( type == GraphOptions::Linear )
   {
     QwtLinearScaleEngine linScaler;
     mColorMapWidget->setScaleDiv(linScaler.transformation(), linScaler.divideScale(minValue, maxValue,  20, 5));
@@ -542,6 +553,15 @@ void InstrumentWindow::selectComponent(const QString & name)
   mInstrumentTree->selectionModel()->select(component, QItemSelectionModel::Select);
 }
 
+/**
+ * Set the scale type programmatically
+ * @param type The scale choice
+ */
+void InstrumentWindow::setScaleType(GraphOptions::ScaleType type)
+{
+  mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));
+}
+
 /// A slot for the mouse selection
 void InstrumentWindow::componentSelected(const QItemSelection & selected, const QItemSelection &)
 {
@@ -610,10 +630,13 @@ void InstrumentWindow::saveImage()
  */
 void InstrumentWindow::scaleTypeChanged(int index)
 {
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)mScaleOptions->itemData(index).toUInt();
-  mInstrumentDisplay->mutableColorMap().changeScaleType(type);
-  setupColorBarScaling();
-  mInstrumentDisplay->recount();
+  if( this->isVisible() )
+  {
+    GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(index).toUInt();
+    mInstrumentDisplay->mutableColorMap().changeScaleType(type);
+    setupColorBarScaling();
+    mInstrumentDisplay->recount();
+  }
 }
 
 /**
@@ -633,7 +656,7 @@ void InstrumentWindow::loadSettings()
   // Set values from settings
   mInstrumentDisplay->mutableColorMap().loadMap(mCurrentColorMap);
   
-  MantidColorMap::ScaleType type = (MantidColorMap::ScaleType)settings.value("ScaleType", MantidColorMap::Log10).toUInt();
+  GraphOptions::ScaleType type = (GraphOptions::ScaleType)settings.value("ScaleType", GraphOptions::Log10).toUInt();
   // Block signal emission temporarily since we have not fully initialized the window
   mScaleOptions->blockSignals(true);
   mScaleOptions->setCurrentIndex(mScaleOptions->findData(type));

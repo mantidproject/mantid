@@ -722,6 +722,7 @@ contains(SCRIPTING_LANGS, Python) {
   SOURCES += $${SIP_DIR}/sipqticmodule.cpp\
              $${SIP_DIR}/sipqtiApplicationWindow.cpp\
              $${SIP_DIR}/sipqtiGraph.cpp\
+             $${SIP_DIR}/sipqtiGraphOptions.cpp\
              $${SIP_DIR}/sipqtiGraph3D.cpp\
              $${SIP_DIR}/sipqtiArrowMarker.cpp\
 			 $${SIP_DIR}/sipqtiImageMarker.cpp\

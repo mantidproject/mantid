@@ -249,6 +249,14 @@ appImports = (
 for name in appImports:
 	setattr(__main__,name,getattr(qti.app,name))
 
+# Set some aliases for Layer enumerations so that old code will still work
+Layer.Log10 = GraphOptions.Log10
+Layer.Linear = GraphOptions.Linear
+Layer.Left = GraphOptions.Left
+Layer.Right = GraphOptions.Right
+Layer.Bottom = GraphOptions.Bottom
+Layer.Top = GraphOptions.Top
+
 # import utility module
 import sys
 sys.path.append(".")

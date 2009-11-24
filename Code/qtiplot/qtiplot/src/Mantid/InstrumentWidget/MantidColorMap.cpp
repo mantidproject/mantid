@@ -18,7 +18,7 @@
 /**
  * Default
  */
-MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_type(MantidColorMap::Log10),
+MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_type(GraphOptions::Log10),
 				     m_colors(0), m_num_colors(0)
 {
   setupDefaultMap();
@@ -27,9 +27,9 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
 /**
  * Constructor with filename and type
  * @param 
- * @param type The scale type, currently Log10 or Linear
+ * @param type The scale type, currently Linear or Log10 
  */
-MantidColorMap::MantidColorMap(const QString & filename, ScaleType type) : 
+MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 
   QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0)
 {
   // Check and load default if this doesn't work
@@ -61,7 +61,7 @@ QwtColorMap* MantidColorMap::copy() const
  * Change the scale type
  * @param type The new scale type
  */
-void MantidColorMap::changeScaleType(MantidColorMap::ScaleType type)
+void MantidColorMap::changeScaleType(GraphOptions::ScaleType type)
 {
     m_scale_type = type;
 }
@@ -186,11 +186,11 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
   double ratio(0.0);
   switch(m_scale_type)
   {
-  case MantidColorMap::Log10:
+  case GraphOptions::Log10:
   default:
    ratio = std::log10(value - interval.minValue()) / std::log10(width);
     break;
-  case MantidColorMap::Linear:
+  case GraphOptions::Linear:
     ratio = (value - interval.minValue()) / width;
   }
   return ratio;
@@ -243,8 +243,8 @@ unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, dou
 QVector<QRgb> MantidColorMap::colorTable(const QwtDoubleInterval & interval) const
 {
   // Swicth to linear scaling when computing the lookup table
-  MantidColorMap::ScaleType current_type = m_scale_type;   
-  m_scale_type = MantidColorMap::Linear;
+  GraphOptions::ScaleType current_type = m_scale_type;   
+  m_scale_type = GraphOptions::Linear;
 
   short table_size = (m_num_colors > 1) ? m_num_colors : 2;
   QVector<QRgb> rgbtable(table_size);
@@ -278,9 +278,3 @@ boost::shared_ptr<GLColor> MantidColorMap::getColor(unsigned char index) const
   // Otherwise return black
   return boost::shared_ptr<GLColor>(new GLColor(0.0f, 0.0f, 0.0f, 1.0f));
 }
-void  MantidColorMap::setColors(boost::shared_ptr<GLColor> gl,int index )
-{	
-	//m_colors.push_back(gl);
-	m_colors.insert(index,gl);
-}
-
