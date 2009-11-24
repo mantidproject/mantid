@@ -520,7 +520,7 @@ namespace Mantid
 
     /**
     * Load data about the sample
-    *   @param ws The workspace to load the logs to.
+    *   @param local_workspace The workspace to load the logs to.
     *   @param entry The Nexus entry
     */
     void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)

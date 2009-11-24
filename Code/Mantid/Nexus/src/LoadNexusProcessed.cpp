@@ -129,6 +129,8 @@ namespace Mantid
      * Load a single entry into a workspace
      * @param root The opened root node
      * @param entry_name The entry name
+     * @param progressStart The percentage value to start the progress reporting for this entry
+     * @param progressRange The percentage range that the progress reporting should cover
      * @returns A 2D workspace containing the loaded data
      */
     DataObjects::Workspace2D_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::string & entry_name,

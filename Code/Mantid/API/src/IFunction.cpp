@@ -5,7 +5,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include <sstream>
 #include <iostream>
