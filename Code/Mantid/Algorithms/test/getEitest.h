@@ -88,7 +88,7 @@ public:
   {
     m_MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
     m_MAPS = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10266.RAW").toString();
-    m_MERLIN = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.RAW").toString();
+    m_MERLIN = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.raw").toString();
   }
   
   ~GetEiTest()
