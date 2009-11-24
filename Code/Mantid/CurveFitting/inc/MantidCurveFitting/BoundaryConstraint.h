@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IConstraint.h"
-//#include <string>
 
 namespace Mantid
 {
@@ -14,7 +13,6 @@ namespace Mantid
     //----------------------------------------------------------------------
     // Forward Declaration
     //----------------------------------------------------------------------
-    class Kernel::Logger;
 
     /**
     A boundary constraint is designed to be used to set either

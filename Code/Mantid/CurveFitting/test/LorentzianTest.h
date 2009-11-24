@@ -93,7 +93,7 @@ public:
     getMockData(y, e);
 
     //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
     // set up Lorentzian fitting function
     Lorentzian* fn = new Lorentzian();

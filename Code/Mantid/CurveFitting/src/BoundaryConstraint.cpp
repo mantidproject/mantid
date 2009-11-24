@@ -4,8 +4,6 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 
 #include "MantidKernel/Logger.h"
-//#include <boost/tokenizer.hpp>
-//#include <algorithm>
 
 namespace Mantid
 {
@@ -17,25 +15,6 @@ using namespace API;
 
 // Get a reference to the logger
 Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstraint");
-
-
-/** Check to see if constraint is valid with respect to a given fitting function, this
- *  means for now that the parameter name which have been specified for the constraint
- *  is also one of the active parameters of the fitting function
- *
- *  @param fn fitting function
- *  @return true if name of constraint is also an active fitting param
- */
-/*bool BoundaryConstraint::isValid(API::IFunction* fn)
-{
-  for (int i = 0; i < fn->nActive(); i++)
-  {
-    if ( m_parameterName.compare(fn->nameOfActive(i)) == 0 )  
-      return true;
-  }
-  return false;
-}*/
-
 
 /** Set penalty factor
  *
