@@ -20,7 +20,8 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
-const double DetectorEfficiencyCor::PLANCKY_CONST = 2.07214;
+// E = KSquaredToE*K^2    KSquaredToE = (hbar^2)/(2*NeutronMass) 
+const double DetectorEfficiencyCor::KSquaredToE = 2.07212466;// units of meV Angsstrom^-2
 
 const short  DetectorEfficiencyCor::NUMCOEFS = 25;
 // series expansion coefficients copied from a fortran source code file
@@ -55,9 +56,9 @@ const double DetectorEfficiencyCor::CONSTA = 2.0*143.23*3.49416/10.0;
 // this should be a big number but not so big that there are rounding errors
 const double DIST_TO_UNIVERSE_EDGE = 1e3;
 
-// this default constructor calls default constructors and sets other member data to imposible values 
+// this default constructor calls default constructors and sets other member data to imposible (flag) values 
 DetectorEfficiencyCor::DetectorEfficiencyCor() : Algorithm(), m_inputWS(),
-  m_outputWS(), m_paraMap(NULL), m_detMasking(), m_Ei(-1),
+  m_outputWS(), m_paraMap(NULL), m_detMasking(), m_Ei(-1.0), m_ki(-1.0),
   m_shapeCache(NULL), m_radCache(-1), m_sinThetaCache(-1e3), m_baseAxisCache(),
   m_1_t2rad(-1), m_CONST_rad_sintheta_1_t2rad_atms(-1), m_1_wvec(),
   m_XsCache(NULL)
@@ -65,20 +66,21 @@ DetectorEfficiencyCor::DetectorEfficiencyCor() : Algorithm(), m_inputWS(),
   }
 
 void DetectorEfficiencyCor::init()
-{
-  WorkspaceUnitValidator<> *unit = new WorkspaceUnitValidator<>("DeltaE");
+{// declare the input data this algorithm requires and declare what the pre-execute validation will be
+  CompositeValidator<> *val = new CompositeValidator<>;
+  val->add(new WorkspaceUnitValidator<>("DeltaE"));
+  val->add(new HistogramValidator<>);
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, unit),
+    new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, val),
     "The workspace to correct for detector efficiency");
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
     "The name of the workspace in which to store the result" );
-
   BoundedValidator<double> *checkEi = new BoundedValidator<double>();
   checkEi->setLower(0.0);
   checkEi->setUpper(1e4);
   declareProperty("IncidentEnergy", -1.0, checkEi,
-    "The energy kinetic the neutrons have before they hit the sample (mev)" );
+    "The energy kinetic the neutrons have before they hit the sample (meV)" );
 }
 
 /** Executes the algorithm
@@ -90,6 +92,9 @@ void DetectorEfficiencyCor::exec()
 {
   //gets and checks the values passed to the algorithm
   retrieveProperties();
+
+  // wave number that the neutrons originally had
+  m_ki = std::sqrt(m_Ei/KSquaredToE);
   
   try
   {// load a helper object that will allow masking detectors and checking the masking status
@@ -107,6 +112,7 @@ void DetectorEfficiencyCor::exec()
   std::vector<int> unsetParams;
 
   int numHists = m_inputWS->getNumberHistograms();
+  const int progStep = static_cast<int>(ceil(numHists/30.0));
   for (int i = 0; i < numHists; ++i )
   {
     try
@@ -144,7 +150,7 @@ void DetectorEfficiencyCor::exec()
 
     
     // make regular progress reports and check for cancelling the algorithm
-    if ( i % INTERVAL == 0 )
+    if ( i % progStep == 0 )
     {
       progress(static_cast<double>(i)/numHists);
       interruption_point();
@@ -185,6 +191,7 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
   // get a pointer to one of the detector that created the spectrum
   const int specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
   const std::vector<int> dets = m_inputWS->spectraMap().getDetectors(specNum);
+  // now test if we have a good detector or not
   // could get rid of this test as the function above should throw rather than return NULL
   if ( dets.size() < 1 )
   {
@@ -245,10 +252,11 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
   // in this loop we go through all the bins in all the spectra and so it takes a lot of time
   for ( MantidVec::size_type i = 0; i < m_inputWS->readY(spectraIn).size(); ++i )
   {
-    const double ReceprEFF = 1/EFF(m_1_wvec[i]);
-    // an efficiency of zero shouldn't happen so, to save time, I don't check for divide by zero  if ( ReceprEFF < 0 ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
-    m_outputWS->dataY(spectraIn)[i] = m_inputWS->readY(spectraIn)[i]*ReceprEFF;
-    m_outputWS->dataE(spectraIn)[i] = m_inputWS->readE(spectraIn)[i]*ReceprEFF;
+    //          correction= (k_i/k_f)        / detector_efficiency
+    const double correcti = m_ki*m_1_wvec[i] / EFF(m_1_wvec[i]);
+    // an efficiency of zero shouldn't happen so, to save processor time, I don't check for divide by zero  if ( correction < 0 || correction == std::numeric_limits<double>::infinity() ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
+    m_outputWS->dataY(spectraIn)[i] = m_inputWS->readY(spectraIn)[i]*correcti;
+    m_outputWS->dataE(spectraIn)[i] = m_inputWS->readE(spectraIn)[i]*correcti;
   }
 }
 /** Calculates the wave vectors from the X-values in the specified histogram
@@ -267,15 +275,14 @@ void DetectorEfficiencyCor::set1_wvec(int spectraIn)
     m_1_wvec[j] = get1OverK((firstBoundary + secondBoundary )/2);
   }
 }
-//STEVES is this correct for the units?
 /** Calculates one over the wave number of a neutron based on deltaE
 *  @param DeltaE the engery the neutron lost in the sample (meV)
-*  @return one over the wavenumber in Angsstrom
+*  @return one over the final neutron wavenumber in Angsstrom
 */
 double DetectorEfficiencyCor::get1OverK(double DeltaE) const
 {
   double E = m_Ei - DeltaE;
-  double oneOverKSquared = PLANCKY_CONST/E;
+  double oneOverKSquared = KSquaredToE/E;
   return std::sqrt(oneOverKSquared);
 }
 /** Sets m_rad and m_sin to the detector radius and the sin of angle between its axis and a
@@ -311,6 +318,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<IDetector> det
   // |detAxis| = |vectorFromSample| = 1 (because normalize() was run on both these vectors before)
   // so      sin(theta) = |detAxis X vectorFromSample|
   m_sinThetaCache = vectorProd.norm();
+
 //  g_log.debug() << "vectorProd = (" << vectorProd.X() << ", " << vectorProd.Y() << ", " << vectorProd.Z() << ")";
 //  g_log.debug() << "   vectorFromSample = (" << vectorFromSample.X() << ", " << vectorFromSample.Y() << ", " << vectorFromSample.Z() << ")";
 //  g_log.debug() << "   detAxis = (" << detAxis.X() << ", " << detAxis.Y() << ", " << detAxis.Z() << ")";
@@ -374,15 +382,11 @@ double DetectorEfficiencyCor::DistToSurface(const V3D start, const Object *shape
   return track.begin()->Length;
 }
 
-/* Calculates detector efficiency, copied from the fortran code in effic_3he_cylinder.for
-*  @param wvec      Final neutron wavevector (Angsstrom^-1)
-*  @returns detector efficiency
+/** Calculates detector efficiency, copied from the fortran code in effic_3he_cylinder.for
+*  @param oneOverwvec Final neutron wavevector (Angsstrom^-1)
+*  @return detector efficiency
 */
-//  @param rad       Outer radius of cylinder (m)
-//  @param atms      Pressure in number of atmospheres of 3He 
-//  @param t2rad     Ratio of thickness of tube wall to the radius
-//  @param sintheta  Sine of the angle between the cylinder axis and the direction of travel of the neutron i.e. sintheta=1 when neutron hits the detector perpendicular to the cylinder axis.
-double DetectorEfficiencyCor::EFF(const double oneOverwvec) const//, double rad, double atms,/* double m_1@t2rad,*/ double sintheta)
+double DetectorEfficiencyCor::EFF(const double oneOverwvec) const
 {
   //T.G.Perring Aug 2009: replace the following with the one after:  alf = const*rad*(1.0d0-t2rad)*atms/wvec
   // implements the equation with a large amount of caching of calculated values in member variables

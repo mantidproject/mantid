@@ -43,8 +43,10 @@ public:
     //these are realistic values that I just made up
     alg.setProperty( "LowThreshold", 0.5 );
     alg.setProperty( "HighThreshold", 1.3333 );
+    // we check file output in the next test, this file is not used, can we remove it?
+    alg.setPropertyValue( "OutputFile", m_OFileName );
     //we are using the defaults on StartSpectrum, EndSpectrum, RangeLower and RangeUpper which is to use the whole spectrum
-    
+
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
@@ -70,9 +72,9 @@ public:
 		const int numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     // the numbers below are threshold values that were found by trail and error running these tests
-    int firstGoodSpec = 37;
-    int lastGoodSpec = 95;
-    int savedBySignific = Nhist-1;
+    const int firstGoodSpec = 37;
+    const int lastGoodSpec = 95;
+    const int savedBySignific = Nhist-1;
     for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
@@ -90,12 +92,12 @@ public:
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), GoodVal )
     }
-    for (int lHist = lastGoodSpec+1; lHist < savedBySignific; lHist++)
+    for (int lHist = lastGoodSpec+1; lHist < SAVEDBYERRORBAR; lHist++)
     {
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), BadVal )
     }
-    for (int lHist = savedBySignific; lHist < Nhist; lHist++)
+    for (int lHist = SAVEDBYERRORBAR; lHist < Nhist; lHist++)
     {
       TS_ASSERT_EQUALS(
         outputMat->readY(lHist).front(), GoodVal )
@@ -105,17 +107,12 @@ public:
     for (int lHist = 0 ; lHist < firstGoodSpec; lHist++ )
     {
       TS_ASSERT_EQUALS( *it, lHist+1 )
-      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
+      ++it;
     }
-    {
-      TS_ASSERT_EQUALS( *it, THEMASKED )
-      TS_ASSERT_THROWS_NOTHING( if ( it != OArray.end() ) ++it )
-    }
-    for (int lHist = lastGoodSpec+1 ; lHist < savedBySignific ; lHist++ )
+    for (int lHist = lastGoodSpec+1 ; lHist < SAVEDBYERRORBAR ; lHist++ )
     {
       TS_ASSERT_EQUALS( *it, lHist+1 )
-      if ( it != OArray.end() ) ++it;
-      else TS_ASSERT_EQUALS( lHist, savedBySignific - 1 );
+      ++it;
     }
     //check that extra entries haven't been written to the array
     TS_ASSERT_EQUALS( it, OArray.end() )
@@ -130,7 +127,7 @@ public:
     // values a little extreme, I just made them up
     alg.setProperty( "LowThreshold", 0.44444 );
     alg.setProperty( "HighThreshold", 5.0 );
-    // this should turn off examining the errors.  This makes things simplier, significance testing was tested in the last test
+    // this should turn off examining the errorbars.  This makes things simplier and significance testing was tested in the last test
     alg.setProperty("SignificanceTest", 0.0);
 
     const int fSpec = 0,  lSpec = Nhist/2;
@@ -140,66 +137,75 @@ public:
     const double lRange = 4000, uRange = 10000;
     alg.setProperty( "RangeLower", lRange );
     alg.setProperty( "RangeUpper", uRange );
+    alg.setPropertyValue( "OutputFile", m_OFileName );
 
-    std::string OFileName("MedianDetectorTestTestFile.txt");  
-    alg.setPropertyValue( "OutputFile", OFileName );
+    // this is a summary of the results, I got these numbers by running the test in the debugger
+    const int firstGoodSpec = 16;
+    // there are no good spectra here
+    const int lastGoodSpec = Nhist;
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
 
     //test file output
-    std::ifstream testFile(OFileName.c_str(), std::ios::in);
-    //the tests here are done as unhandled exceptions cxxtest will handle the exceptions and display a message but only after this function has been abandoned, which leaves the file undeleted so it can be viewed
+    std::ifstream testFile(m_OFileName.c_str(), std::ios::in);
     TS_ASSERT ( testFile )
     
-    // comfirmed these values by following the debugger up to this point
-    int firstGoodSpec = 16;
-    int lastGoodSpec = 360;
-    std::string fileLine = "";
-    for (int iHist = -1 ; iHist < firstGoodSpec; iHist++ )
+    std::string fileLine;
+    std::getline( testFile, fileLine );
+    TS_ASSERT_EQUALS ( fileLine, "---"+alg.name()+"---" )
+    std::getline( testFile, fileLine );
+    TS_ASSERT_EQUALS ( fileLine, std::string("----Low Integral : ")+boost::lexical_cast<std::string>(firstGoodSpec)+std::string("----") )
+      
+    std::string correct;
+    for (int iHist = 0 ; iHist < firstGoodSpec; iHist++ )
     {
-      std::ostringstream correctLine;
-      if ( iHist == -1 )
-        correctLine << "Index Spectrum UDET(S)";
+      correct += boost::lexical_cast<std::string>(m_2DWS->getAxis(1)->spectraNo(iHist));
+      if ( (iHist + 1) % 10 == 0 || iHist == firstGoodSpec-1 ) 
+      {
+        std::getline( testFile, fileLine );
+        TS_ASSERT_EQUALS ( fileLine, correct )
+        correct.clear();
+      }
       else
       {
-        correctLine << " Spectrum number " << iHist+1 << " is too low, ";
-      correctLine << "detector IDs: " << iHist+1;
+        correct += " ";
       }
-        
-      std::getline( testFile, fileLine );
-
-      TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
     }
+
+    std::getline( testFile, fileLine );
+    TS_ASSERT_EQUALS ( fileLine, std::string("----High Integral : ")+boost::lexical_cast<std::string>(Nhist-lastGoodSpec)+std::string("----") )
+      
+    for (int iHist = lastGoodSpec ; iHist < Nhist; iHist++ )
     {
-      std::ostringstream correctLine;
-      correctLine << " Spectrum number " << THEMASKED << " detector already masked, detector IDs: " << THEMASKED;
-      
-      std::getline( testFile, fileLine );
-      
-      TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
+      correct += boost::lexical_cast<std::string>(m_2DWS->getAxis(1)->spectraNo(iHist));
+      if ( (iHist + 1) % 10 == 0 || iHist == firstGoodSpec-1 )
+      {
+        std::getline( testFile, fileLine );
+        TS_ASSERT_EQUALS ( fileLine, correct )
+        correct.clear();
+      }
+      else
+      {
+        correct += " ";
+      }
     }
-    for (int iHist = lastGoodSpec+1 ; iHist < Nhist; iHist++ )
+    if ( ! correct.empty() )
     {
-      std::ostringstream correctLine;
-      correctLine << " Spectrum with number " << iHist+1 << " is too high";
-      correctLine << " detector IDs: " << iHist+1;
-      
       std::getline( testFile, fileLine );
-
-      TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
-
+      TS_ASSERT_EQUALS ( fileLine, correct )
     }
     testFile.close();
-    remove(OFileName.c_str());
+    remove(m_OFileName.c_str());
   }
     
-  MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput"), BadVal(100.0), GoodVal(0.0)
+  MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput"),
+    m_OFileName("MedianDetectorTestTestFile.txt"), BadVal(100.0), GoodVal(0.0)
   {
     using namespace Mantid;
     // Set up a small workspace for testing
     Workspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D",Nhist,11,10);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    m_2DWS = boost::dynamic_pointer_cast<Workspace2D>(space);
     const short specLength = 22;
     boost::shared_ptr<MantidVec> x(new MantidVec(specLength));
     for (int i = 0; i < specLength; ++i)
@@ -223,7 +229,7 @@ public:
     int forSpecDetMap[Nhist];
     for (int j = 0; j < Nhist; ++j)
     {
-      space2D->setX(j, x);
+      m_2DWS->setX(j, x);
       boost::shared_ptr<MantidVec> spectrum( new MantidVec );
       //the spectravalues will be multiples of the random numbers above
       for ( int l = 0; l < specLength-1; ++l )
@@ -232,11 +238,11 @@ public:
       }
       boost::shared_ptr<MantidVec> errors = smallErrors;
       if ( j == Nhist-2 ) errors = almostBigEnough;
-      if ( j == Nhist-1 ) errors = bigEnough;
+      if ( j == SAVEDBYERRORBAR ) errors = bigEnough;
 
-      space2D->setData( j, spectrum, errors );
+      m_2DWS->setData( j, spectrum, errors );
       // Just set the spectrum number to match the index
-      space2D->getAxis(1)->spectraNo(j) = j+1;
+      m_2DWS->getAxis(1)->spectraNo(j) = j+1;
       forSpecDetMap[j] = j+1;
     }
 
@@ -252,13 +258,13 @@ public:
     loader.setPropertyValue("Workspace", m_IWSName);
     loader.execute(); 
 
-    space2D->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist);
+    m_2DWS->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, Nhist);
 
-    space2D->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    m_2DWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
     // mask the detector
-    Geometry::ParameterMap* m_Pmap = &(space2D->instrumentParameters());    
-    boost::shared_ptr<Instrument> instru = space2D->getBaseInstrument();
+    Geometry::ParameterMap* m_Pmap = &(m_2DWS->instrumentParameters());    
+    boost::shared_ptr<Instrument> instru = m_2DWS->getBaseInstrument();
     Geometry::Detector* toMask =
       dynamic_cast<Geometry::Detector*>( instru->getDetector(THEMASKED).get() );
     TS_ASSERT(toMask)
@@ -277,9 +283,10 @@ public:
   }
 
 private:
-  std::string m_IWSName;
+  std::string m_IWSName, m_OFileName;
+  Workspace2D_sptr m_2DWS;
   double m_YSum;
-  enum spectraIndexConsts{ THEMASKED = 40, Nhist = 144 };
+  enum spectraIndexConsts{ THEMASKED = 40, SAVEDBYERRORBAR = 143, Nhist = 144 };
   //these values must match the values in DetectorEfficiencyVariation.h
   const double BadVal;
   const double GoodVal;

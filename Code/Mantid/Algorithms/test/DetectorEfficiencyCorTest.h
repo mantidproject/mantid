@@ -60,8 +60,7 @@ public:
     // a smallish raw file that contains the detailed detector information stored by the excitations group 
     std::string inName("fromRaw_DetectorEfficiencyCorTest");
     std::string outName("fromAlg_DetectorEfficiencyCorTest");
-    std::string s;
-    std::getline(std::cin, s);
+
     loadRawFile(inName, m_rawFile);
     loadDetInfo(inName, m_rawFile);
 //    loadDetInfo(inName, "C:/mantid/Test/Data/merlin_detector.sca");
@@ -80,12 +79,15 @@ public:
     MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outName));
 
     int firstNonMonitor = 5;
-    // the detector efficiency is always > 0 and <= 1 but this test needs to be more ...
     for ( int i = firstNonMonitor; i < input->getNumberHistograms(); i+=10 )
     {
       for ( Mantid::MantidVec::size_type j = 0 ; j < input->readY(i).size(); j+=10 )
       {
-        TS_ASSERT( output->readY(i)[j] >= input->readY(i)[j]*(1-1e-8) )
+        // the detector efficiency is always > 0
+        TS_ASSERT( output->readY(i)[j] > -1e-8 )
+        // the efficiency is always < 1 and the k_i/k_f factor greater than one when k_i > k_f (deltaE > 0) as correction=(k_i/k_f)/detector_efficiency
+        if (output->readX(i)[j] > 0 ) TS_ASSERT( output->readY(i)[j] >= input->readY(i)[j]*(1-1e-8) )
+     //This test needs to be more ... Steve Williams is waiting for data from the Excitations Group
       }
     }
 

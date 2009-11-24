@@ -4,13 +4,28 @@
 # writing zeros to the histograms associated with those detectors
 ########################################################
 from mantidsimple import *
-#-- a workspace that we'll reuse for different things, we're reusing to save memory
 
-def SingleWBV( inputWS, outputWS, HighAbsolute, LowAbsolute, HighMedian, LowMedian, NumErrorBars, MaskFile ) :
-  FDOL = FindDetectorsOutsideLimits( inputWS, outputWS, HighAbsolute, LowAbsolute )	#for usage see www.mantidproject.org/FindDetectorsOutsideLimits
+def appendMaskFile(inFname, outfile) :
+  try:
+    file=open(inFname,'r')
+    data=file.read()
+    file.close()
+    outfile.write(data)
+  finally:
+    if ( os.access(inFname, os.W_OK) ):
+	  os.remove(inFname)
+
+def SingleWBV( inputWS, outputWS, HighAbsolute, LowAbsolute, HighMedian, LowMedian, NumErrorBars, oFile ) :
+  if oFile != "" : tempFile = oFile+'_swbv_fdol'
+  else : tempFile = ''
+  FDOL = FindDetectorsOutsideLimits( inputWS, outputWS, HighAbsolute, LowAbsolute, OutputFile=tempFile )	#for usage see www.mantidproject.org/FindDetectorsOutsideLimits
   MaskDetectors(Workspace=inputWS, DetectorList=FDOL.getPropertyValue("BadDetectorIDs") )					#for usage see www.mantidproject.org/MaskDetectors
-  MDT = MedianDetectorTest( InputWorkspace=inputWS, OutputWorkspace=outputWS, SignificanceTest=NumErrorBars, LowThreshold=LowMedian, HighThreshold=HighMedian, OutputFile=MaskFile )#for usage see www.mantidproject.org/
+  
+  if oFile != "" : tempFile = oFile+'_swbv_mdt'
+  else : tempFile = ''
+  MDT = MedianDetectorTest( InputWorkspace=inputWS, OutputWorkspace=outputWS, SignificanceTest=NumErrorBars, LowThreshold=LowMedian, HighThreshold=HighMedian, OutputFile=tempFile )#for usage see www.mantidproject.org/
   MaskDetectors(Workspace=inputWS, DetectorList=MDT.getPropertyValue("BadDetectorIDs"))						#for usage see www.mantidproject.org/MaskDetectors
+  
   return MDT.getPropertyValue("BadDetectorIDs")
 
 def numberFromCommaSeparated(CommaSeparated) :

@@ -30,48 +30,68 @@ public:
     TS_ASSERT_EQUALS( grouper.category(), "CorrectionFunctions" )
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
     TS_ASSERT( grouper.isInitialized() )
-    // the following is for a MARI workspace that is loaded in the constructor and the values I found from experimenting
+
+    // now test the algorithm on a workspace
+    // we don't need to load much of it, just the monitor spectra
+    loadRawFile(m_MARI, "2, 3");
+
     grouper.setPropertyValue("InputWorkspace", m_WS);
     grouper.setPropertyValue("Monitor1Spec", "2");
     grouper.setPropertyValue("Monitor2Spec", "3");
     grouper.setPropertyValue("EnergyEstimate", "14");
+
+    TS_ASSERT_THROWS_NOTHING( grouper.execute());
+    TS_ASSERT( grouper.isExecuted() );
+
+    double finalAnswer = grouper.getProperty("IncidentEnergy");
+    TS_ASSERT_DELTA( finalAnswer, 12.9448, 1e-4 )//HOMER got 12.973 meV for the IncidentEnergy of MAR11001
+  }
+
+  // this test takes 10 seconds to run on Steve's computer
+  void testOnMERLIN()
+  {
+    loadRawFile(m_MERLIN, "69634, 69638");
+
+    GetEi grouper;
+    grouper.initialize();
+
     //MAPS one off test, takes to long to do it every time. To activate uncomment the code below and two sections below that
   // when the MAP workspace that is load in the constructor
 /*    grouper.setPropertyValue("InputWorkspace", m_WS);
     grouper.setPropertyValue("Monitor1Spec", "41474");
     grouper.setPropertyValue("Monitor2Spec", "41475");
     grouper.setPropertyValue("EnergyEstimate", "400");*/
-    //MERLIN one off test, takes 30 or more seconds. To activate uncomment the code below and two sections below that
-/*    grouper.setPropertyValue("InputWorkspace", m_WS);
+
+    grouper.setPropertyValue("InputWorkspace", m_WS);
     grouper.setPropertyValue("Monitor1Spec", "69634");
     grouper.setPropertyValue("Monitor2Spec", "69638");
-    grouper.setPropertyValue("EnergyEstimate", "15");*/
+    grouper.setPropertyValue("EnergyEstimate", "15");
 
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
 
     double finalAnswer = grouper.getProperty("IncidentEnergy");
-    TS_ASSERT_DELTA( finalAnswer, 12.9739, 1e-4 )
-/*MERLIN one off test, takes to long to do it every time. */ // TS_ASSERT_DELTA( finalAnswer, 15.0751, 1e-6 )
+    TS_ASSERT_DELTA( finalAnswer, 15.1006, 1e-4 )
   }
 
-  void loadRawFile()
+  void loadRawFile(std::string filename, std::string list)
   {
     LoadRaw3 loader;
     loader.initialize();
 
-    loader.setPropertyValue("Filename", MARI);
+    loader.setPropertyValue("Filename", filename);
+    loader.setPropertyValue("OutputWorkspace", m_WS);
+    loader.setPropertyValue("SpectrumList", list);
     loader.setPropertyValue("OutputWorkspace", m_WS);
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
   }
 
-  GetEiTest() : m_WS("GetEi_input_workspace"), MARI()
+  GetEiTest() : m_WS("GetEi_input_workspace")
   {
-    MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
-/*MAPS one off test, takes to long to do it every time. */   //    MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10266.RAW").toString();
-/*MERLIN one off test, takes to long to do it every time. */ //      MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.RAW").toString();
-    loadRawFile();
+    m_MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
+    m_MAPS = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10266.RAW").toString();
+    m_MERLIN = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.RAW").toString();
   }
   
   ~GetEiTest()
@@ -81,7 +101,7 @@ public:
 
   private:
     const std::string m_WS;
-    std::string MARI;
+    std::string m_MARI, m_MAPS, m_MERLIN;
 };
 
 #endif /*GETE_ITEST_H_*/

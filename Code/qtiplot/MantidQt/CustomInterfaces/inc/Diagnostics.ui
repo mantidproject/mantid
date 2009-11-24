@@ -9,7 +9,7 @@
     <x>0</x>
     <y>0</y>
     <width>472</width>
-    <height>544</height>
+    <height>654</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -43,6 +43,19 @@
        </widget>
       </item>
       <item row="0" column="3" >
+       <spacer name="horizontalSpacer_16" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="4" >
        <widget class="QPushButton" name="pbIFile" >
         <property name="enabled" >
          <bool>false</bool>
@@ -63,6 +76,22 @@
        <widget class="QLineEdit" name="leOFile" />
       </item>
       <item row="1" column="3" >
+       <spacer name="horizontalSpacer_14" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType" >
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="4" >
        <widget class="QPushButton" name="pbOFile" >
         <property name="text" >
          <string>Browse</string>
@@ -96,6 +125,22 @@
        </spacer>
       </item>
       <item row="2" column="3" >
+       <spacer name="horizontalSpacer_15" >
+        <property name="orientation" >
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType" >
+         <enum>QSizePolicy::Minimum</enum>
+        </property>
+        <property name="sizeHint" stdset="0" >
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="4" >
        <spacer name="horizontalSpacer_13" >
         <property name="orientation" >
          <enum>Qt::Horizontal</enum>
@@ -196,19 +241,6 @@
       <item row="1" column="6" colspan="2" >
        <widget class="QLineEdit" name="leLowAbs" />
       </item>
-      <item row="1" column="8" >
-       <widget class="QLabel" name="validatorSpace_4" >
-        <property name="minimumSize" >
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0" colspan="2" >
        <widget class="QLabel" name="lbHighMed" >
         <property name="text" >
@@ -235,31 +267,8 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="4" colspan="2" >
-       <widget class="QLabel" name="lbLowMed" >
-        <property name="text" >
-         <string>Low threshold median</string>
-        </property>
-        <property name="wordWrap" >
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="6" colspan="2" >
        <widget class="QLineEdit" name="leLowMed" />
-      </item>
-      <item row="2" column="8" >
-       <widget class="QLabel" name="validatorSpace_3" >
-        <property name="minimumSize" >
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-       </widget>
       </item>
       <item row="0" column="7" >
        <widget class="QLabel" name="validatorSpace_9" >
@@ -274,7 +283,59 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="8" >
+       <widget class="QLabel" name="validatorSpace_3" >
+        <property name="minimumSize" >
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="4" colspan="2" >
+       <widget class="QLabel" name="lbLowMed" >
+        <property name="text" >
+         <string>Low threshold median</string>
+        </property>
+        <property name="wordWrap" >
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="8" >
+       <widget class="QLabel" name="validatorSpace_4" >
+        <property name="minimumSize" >
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
+     <zorder>lbWBV1</zorder>
+     <zorder>leWBV1</zorder>
+     <zorder>pbWBV1</zorder>
+     <zorder>lbHighAbs</zorder>
+     <zorder>leHighAbs</zorder>
+     <zorder>validatorSpace_6</zorder>
+     <zorder>lbLowAbs</zorder>
+     <zorder>leLowAbs</zorder>
+     <zorder>lbHighMed</zorder>
+     <zorder>leHighMed</zorder>
+     <zorder>validatorSpace_5</zorder>
+     <zorder>lbLowMed</zorder>
+     <zorder>leLowMed</zorder>
+     <zorder>validatorSpace_3</zorder>
+     <zorder>validatorSpace_9</zorder>
+     <zorder>validatorSpace_4</zorder>
     </widget>
    </item>
    <item row="2" column="0" colspan="4" >
@@ -441,9 +502,6 @@
         </property>
        </spacer>
       </item>
-      <item rowspan="4" row="1" column="0" colspan="3" >
-       <widget class="QListWidget" name="lwRunFiles" />
-      </item>
       <item row="1" column="3" >
        <widget class="QLabel" name="lbAcceptance" >
         <property name="text" >
@@ -490,9 +548,12 @@
       <item row="4" column="3" colspan="2" >
        <widget class="QCheckBox" name="ckZeroCounts" >
         <property name="text" >
-         <string>Remove spectra with zero counts</string>
+         <string>Mask spectra with zero counts</string>
         </property>
        </widget>
+      </item>
+      <item rowspan="4" row="1" column="0" colspan="3" >
+       <widget class="QListWidget" name="lwRunFiles" />
       </item>
      </layout>
     </widget>
@@ -568,6 +629,15 @@
     </spacer>
    </item>
   </layout>
+  <zorder>gbUniversal</zorder>
+  <zorder>gbIndividual</zorder>
+  <zorder>gbVariation</zorder>
+  <zorder>gbExperiment</zorder>
+  <zorder>pbHelp</zorder>
+  <zorder>pbRun</zorder>
+  <zorder>lwRunFiles</zorder>
+  <zorder>validatorSpace_3</zorder>
+  <zorder>lbLowMed</zorder>
  </widget>
  <resources/>
  <connections/>

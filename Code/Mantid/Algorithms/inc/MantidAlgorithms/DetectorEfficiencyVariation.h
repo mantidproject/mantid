@@ -63,7 +63,7 @@ namespace Mantid
     public:
       /// Default constructor initialises all data members and runs the base class constructor
       DetectorEfficiencyVariation() : Algorithm(),                                   //call the base class constructor
-          m_PercentDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
+          m_fracDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
       {};
       /// Destructor
       virtual ~DetectorEfficiencyVariation() {};
@@ -90,9 +90,9 @@ namespace Mantid
       /// Finds the median of values in single bin histograms
       double getMedian(MatrixWorkspace_const_sptr input) const;
       /// Overwrites the first workspace with bad spectrum information, also outputs an array and a file
-      std::vector<int> markBad( MatrixWorkspace_sptr a,
-        MatrixWorkspace_const_sptr b, double average, double variation,
-        std::string fileName);
+      std::vector<int> findBad( MatrixWorkspace_sptr a, MatrixWorkspace_const_sptr b, const double average, double variation, const std::string &fileName);
+      void createOutputArray(const std::vector<int> &badList, const SpectraDetectorMap& detMap, std::vector<int> &total) const;
+      void writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums) const;
 
       //a lot of data and functions for the progress bar
       /// For the progress bar, estimates of how many additions (and equilivent) member functions will do for each spectrum assuming large spectra where progressing times are likely to be long
@@ -108,11 +108,11 @@ namespace Mantid
       ///a flag int value to indicate that the value wasn't set by users
       static const int UNSETINT = INT_MAX-15;
       /// An estimate of the percentage of the algorithm runtimes that has been completed 
-      float m_PercentDone;
+      double m_fracDone;
       /// An estimate total number of additions or equilivent are require to compute a spectrum 
       int m_TotalTime;
       /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
-      float advanceProgress(int toAdd);
+      double advanceProgress(double toAdd);
     private:
       /// when this is set to false reading and writing to the detector map is disabled, this is done if there is no map in the workspace
       bool m_usableMaskMap;

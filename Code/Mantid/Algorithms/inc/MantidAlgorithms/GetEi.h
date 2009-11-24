@@ -85,7 +85,7 @@ private:
   double getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const double peakTime);
   void extractSpec(int specInd, double start, double end);
   void getPeakEstimates(double &height, int &centreInd, double &background) const;
-  double findHalfLoc(MantidVec::size_type startInd, double height, const double noise, const direction go) const;
+  double findHalfLoc(MantidVec::size_type startInd, const double height, const double noise, const direction go) const;
   double neutron_E_At(double speed) const;
   void advanceProgress(double toAdd);
 

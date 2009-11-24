@@ -18,14 +18,14 @@ using namespace Geometry;
 
 void EfficiencyScriptInput::init()
 {
-  std::vector<std::string> raw;
-  raw.push_back("raw");
-  declareProperty(new FileProperty("RawFile","", FileProperty::Load, raw), "");
+  std::vector<std::string> raw(1, std::string("raw"));
+  declareProperty(new FileProperty("RawFile","", FileProperty::Load, raw),"");
   declareProperty(new ArrayProperty<double>("BinBoundaries", new RebinParamsValidator));
   declareProperty(new FileProperty("WhiteBeamVan", "", FileProperty::Load, raw), "");
-  std::vector<std::string> map;
-  raw.push_back("map");
-  declareProperty(new FileProperty("MapFile","", FileProperty::Load, map), "");
+  std::vector<std::string> mask(1, "mask");
+  declareProperty(new FileProperty("DetectorMask","", FileProperty::NoExistLoad, mask), "");
+  std::vector<std::string> map(1, "map");
+  declareProperty(new FileProperty("MapFile","", FileProperty::NoExistLoad, map), "");
   declareProperty(new FileProperty("OutFile","", FileProperty::Save), "");
 }
 

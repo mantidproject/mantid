@@ -123,32 +123,34 @@ public:
 
     //test file output
     std::fstream testFile(OFileName.c_str(), std::ios::in);
-    //the tests here are done as unhandled exceptions cxxtest will handle the exceptions and display a message but only after this function has been abandoned, which leaves the file undeleted so it can be viewed
+
     TS_ASSERT ( testFile )
     
     std::string fileLine = "";
     std::getline( testFile, fileLine );
-
-    std::ostringstream correctLine;
-    correctLine << "Index Spectrum UDET(S)";
-    
-    TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
-
-    for (int iHist = lastGoodSpec+1 ; iHist < Nhist; iHist++ )
+    std::string correctLine = "---"+alg.name()+"---";
+    TS_ASSERT_EQUALS ( fileLine, correctLine )
+    correctLine.clear();
+    for (int iHist = lastGoodSpec+1, i = 0 ; iHist < Nhist; iHist++, i++ )
     {
-      std::ostringstream correctLine;
-      correctLine << "In spectrum number " << iHist+1 << ", " <<
-        "the number of counts has changed by a factor of " <<
-        std::setprecision(5) << 1.0/m_LargeValue;
-
-      correctLine << " detector IDs: " << iHist+1;
-      
-      std::getline( testFile, fileLine );
-      TS_ASSERT_EQUALS ( fileLine, correctLine.str() )
+      correctLine += boost::lexical_cast<std::string>(iHist+1);
+      if ( (i + 1) % 10 == 0 || iHist == Nhist-1 ) 
+      {
+        std::getline( testFile, fileLine );
+        TS_ASSERT_EQUALS ( fileLine, correctLine )
+        correctLine.clear();
+      }
+      else
+      {
+        correctLine += " ";
+      }
     }
     std::getline( testFile, fileLine );
+    correctLine = "----Spectra not linked to a valid detector in the instrument definition : 0----";
+    TS_ASSERT_EQUALS ( fileLine, correctLine )
+
+    std::getline( testFile, fileLine );
     TS_ASSERT(fileLine.empty())
-    TS_ASSERT( testFile.rdstate() & std::ios::failbit )
     testFile.close();
     remove(OFileName.c_str());
   }

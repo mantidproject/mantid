@@ -1,9 +1,11 @@
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include "LoadRaw/isisraw2.h"
 
 namespace Mantid
@@ -31,8 +33,9 @@ LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
 void LoadDetectorInfo::init()
 {
   // Declare required input parameters for algorithm
-  WorkspaceUnitValidator<Workspace2D> *val =
-    new WorkspaceUnitValidator<Workspace2D>("TOF");
+  CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
+  val->add(new WorkspaceUnitValidator<Workspace2D>("TOF"));
+  val->add(new HistogramValidator<Workspace2D>);
   declareProperty(new WorkspaceProperty<Workspace2D>("Workspace","",Direction::InOut,val),
     "The name of the workspace to that the detector information will be loaded into" );
   std::vector<std::string> exts;

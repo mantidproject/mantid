@@ -2,10 +2,13 @@
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FileProperty.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>
+#include <math.h>
+#include <algorithm>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -64,9 +67,9 @@ void MedianDetectorTest::init()
     "No bin with a boundary at an x value higher than this value will\n"
     "be included in the summation used to decide if a detector is 'bad'\n"
     "(default: the end of each histogram)" );
-  declareProperty("OutputFile","",
-    "The name of a file to write the list of dead detector UDETs (default\n"
-    "no file output)" );
+  declareProperty(new FileProperty("OutputFile","", FileProperty::Save),
+    "The name of a file to write the list spectra that have a bad detector\n"
+    "(default no file output)");
   declareProperty("GoodValue", 0.0,
     "For each input workspace spectrum that passes write this flag value\n"
     "to the equivalent spectrum in the output workspace (default 0.0)");
@@ -76,7 +79,6 @@ void MedianDetectorTest::init()
       // This output property will contain the list of UDETs for the dead detectors
   declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
 }
-
 /** Executes the algorithm that includes calls to SolidAngle and Integration
 *
 *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
@@ -88,9 +90,9 @@ void MedianDetectorTest::exec()
   retrieveProperties();
   //now do the calculations ...  
   //calls subalgorithm SolidAngle to get the total solid angle of the detectors that acquired each spectrum or nul on failure
-  MatrixWorkspace_sptr angles = getSolidAngles( m_InputWS, m_MinSpec, m_MaxSpec);
+  MatrixWorkspace_sptr angles = getSolidAngles(m_MinSpec, m_MaxSpec);// function uses the InputWorkspace property
   //Adds the counts from all the bins and puts them in one total bin, calls subalgorithm Integration
-  MatrixWorkspace_sptr counts = getTotalCounts( m_InputWS, m_MinSpec, m_MaxSpec/*the range properties are also read by this function*/);
+  MatrixWorkspace_sptr counts = getTotalCounts(m_MinSpec, m_MaxSpec/*InputWorkspace and range properties are also read by this function*/);
   //Divides the total number of counts by the number of seconds, calls the ConvertToDistribution algorithm
   counts = getRate(counts);
   //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
@@ -102,13 +104,16 @@ void MedianDetectorTest::exec()
   }
   // An average of the data, the medain is less influenced by a small number of huge values than the mean
   double av = getMedian(counts);
-  // The final piece of the calculation! Remove any detectors whoses signals are outside the threshold range
-  std::vector<int> outArray = FindDetects( counts, av );// function uses reads several properties, the ErrorThreshold, lower and upper thresholds and the outputfile
+  
+  // The final piece of the calculation!
+  std::vector<int> deadList;
+  // Find report and mask any detectors whoses signals are outside the threshold range
+  FindDetects( counts, av, deadList, getPropertyValue("outputfile"));// function reads the properties ErrorThreshold, lower and upper thresholds
 
   // Now the calculation is complete, setting the output property to the workspace will register it in the Analysis Data Service and allow the user to see it
   setProperty("OutputWorkspace", counts);
 
-  setProperty("BadDetectorIDs", outArray);
+  setProperty("BadDetectorIDs", deadList);
 }
 /** Loads and checks the values passed to the algorithm
 *
@@ -162,19 +167,17 @@ void MedianDetectorTest::retrieveProperties()
 /// Calculates the sum of soild angles of detectors for each histogram
 /** Makes a worksapce with the total solid angle all the detectors in each spectrum cover from the sample
 *  note returns an empty shared pointer on failure, uses the SolidAngle algorithm
-* @param input A pointer to a workspace
 * @param firstSpec the index number of the first histogram to analyse
 * @param lastSpec the index number of the last histogram to analyse
 * @return A pointer to the workspace (or an empty pointer)
 */
-API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(
-            API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
+MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastSpec )
 {
   g_log.information("Calculating soild angles");
   // get percentage completed estimates for now, t0 and when we've finished t1
-  double t0 = m_PercentDone, t1 = advanceProgress(RTGetSolidAngle);
+  double t0 = m_fracDone, t1 = advanceProgress(RTGetSolidAngle);
   IAlgorithm_sptr childAlg = createSubAlgorithm("SolidAngle", t0, t1);
-  childAlg->setProperty( "InputWorkspace", input );
+  childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
   childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
   childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
   try
@@ -209,15 +212,14 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(
 * @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
-API::MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(
-                API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
+MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(int firstSpec, int lastSpec )
 {
   g_log.information() << "Integrating input workspace" << std::endl;
   // get percentage completed estimates for now, t0 and when we've finished t1
-  double t0 = m_PercentDone, t1 = advanceProgress(RTGetTotalCounts);
+  double t0 = m_fracDone, t1 = advanceProgress(RTGetTotalCounts);
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
   
-  childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", input );
+  childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
   childAlg->setProperty( "StartWorkspaceIndex", firstSpec );
   childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
   // pass inputed values straight to this integration trusting the checking done there
@@ -247,12 +249,11 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(
 * @param counts A histogram workspace with counts in time bins 
 * @return A workspace of the counts per unit time in each bin
 */
-API::MatrixWorkspace_sptr MedianDetectorTest::getRate
-                                           (API::MatrixWorkspace_sptr counts)
+MatrixWorkspace_sptr MedianDetectorTest::getRate(MatrixWorkspace_sptr counts)
 {
   g_log.information("Calculating time averaged count rates");
   // get percentage completed estimates for now, t0 and when we've finished t1
-  double t0 = m_PercentDone, t1 = advanceProgress(RTGetRate);
+  double t0 = m_fracDone, t1 = advanceProgress(RTGetRate);
   IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertToDistribution", t0, t1);
   try
   {
@@ -281,8 +282,7 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getRate
 * @return The median value of the histograms in the workspace that was passed to it
 * @throw out_of_range if an input value is infinity or negative
 */
-double MedianDetectorTest::getMedian(API::MatrixWorkspace_const_sptr input)
-  const
+double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
 {
   g_log.information("Calculating the median count rate of the spectra");
 
@@ -318,8 +318,8 @@ double MedianDetectorTest::getMedian(API::MatrixWorkspace_const_sptr input)
         {
           g_log.debug() <<
             "numeric_limits<double>::infinity() found" << std::endl;
-          g_log.error() <<
-            "Divide by zero error found in the spectrum with index " << i <<  "The spectrum has a non-zero number of counts but its detectors have zero solid angle. Check your instrument definition file." << std::endl;
+          g_log.warning() <<
+            "Divide by zero error found in the spectrum with index " << i <<  ", the spectrum has a non-zero number of counts but its detectors have zero solid angle. Check your instrument definition file." << std::endl;
           try
           {
             DetectorInfoHelper.maskAllDetectorsInSpec(i);
@@ -370,12 +370,13 @@ double MedianDetectorTest::getMedian(API::MatrixWorkspace_const_sptr input)
 *
 * @param responses a workspace of histograms with one bin
 * @param baseNum The number expected number of counts, spectra near to this number of counts won't fail
+* @param badDets the ID numbers of all the detectors that were found bad will be added to the end of this array
+* @param filename write the list of spectra numbers for failed detectors to a file with this name
 * @return An array that of the index numbers of the histograms that fail
 */
-std::vector<int> MedianDetectorTest::FindDetects(
-                           API::MatrixWorkspace_sptr responses, double baseNum)
+void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, double baseNum, std::vector<int> &badDets, std::string &filename)
 {
-  g_log.information("Apply the criteria to find failing detectors");
+  g_log.information("Applying the criteria to find failing detectors");
   
   // prepare to fail spectra with numbers of counts less than this
   double lowLim = baseNum*m_Low;
@@ -384,143 +385,202 @@ std::vector<int> MedianDetectorTest::FindDetects(
   //but a spectra can't fail if the statistics show its value is consistent with the mean value, check the error and how many errorbars we are away
   double minNumStandDevs = getProperty("SignificanceTest");
 
-  //an array that will store the IDs of bad detectors
-  std::vector<int> badDets;
+  //an array that will store the spectra indexes related to bad detectors
+  std::vector<int> lows, highs, missingDataIndices;
   // get ready to write to the log the number of bad detectors found
-  int cLows = 0, cHighs = 0, cAlreadyMasked = 0;
-  int cUnFoundDects = 0;
+  int cAlreadyMasked = 0;
 
-  // ready to write dead detectors to a file
-  std::ofstream file;
-  bool fileOpen = false;
-  std::string fileName = getProperty("OutputFile");
-  //it is not an error if the name is "", we'll just leave the fileOpen == false to prevent writing
-  if ( !fileName.empty() )
-  {
-    file.open( fileName.c_str() );
-    if ( file.rdstate() & std::ios::failbit )
-    {
-      g_log.error("Could not open file \"" + fileName + "\"");
-    }
-    //file opening ws successful, we'll write to the file
-    else fileOpen = true;
-  }
-  if ( fileOpen ) file << "Index Spectrum UDET(S)" << std::endl;  
-
-  // Main part of the function, iterate over the data values setting the live and dead values
+  // prepare to report progress
   const int numSpec = m_MaxSpec - m_MinSpec;
-  int iprogress_step = numSpec / 10;
-  if (iprogress_step == 0) iprogress_step = 1;
-  // we use the functions in this class to check the detector masking
-  InputWSDetectorInfo DetectorInfoHelper(responses);
-  double GoodVal = getProperty("GoodValue");
-  double BadVal = getProperty("BadValue");
-  for (int i = 0; i <= numSpec; ++i)
-  {
-    // get the address of the value of the first bin the spectra, we'll check it's value and then write a pass or fail to that location
-    double &yInputOutput = responses->dataY(i)[0];
-    // hold information about whether it passes or fails and why
-    std::string problem = "";
-    try
-    {
-      // first look for detectors that have been marked as dead
-      if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
-      {
-        problem = "detector already masked";
-        cAlreadyMasked ++;
-      }
-      else // not already marked dead, check is the value within the acceptance range
-      {
-        if ( yInputOutput <= lowLim )
-        {// compare the difference against the size of the errorbar -statistical significance check
-          if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
-          {
-            problem = "is too low";
-            cLows++;
-          }
-        }
-        if ( yInputOutput >= highLim )
-        {// check that the deviation is not within the errors
-          if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
-          {
-            problem = "is too high";
-            cHighs++;
-          }
-        }
-      } 
-    }
-    catch (Exception::NotFoundError e)
-    {// I believe that detectors missing from the workspace shouldn't cause a problem and as it occurs with most raw files that I have I wont alert the user
-      cUnFoundDects ++;
-      problem = "error finding detector";
-    }
-    if ( problem.empty() )
-    {// it is an acceptable value; just write the good flag to the output workspace and go on to check the next value
-      yInputOutput = GoodVal;
-    }
-    else
-    {//we have a bad spectrum do the reporting
-      //this is all that is need for the output workspace
-      yInputOutput = BadVal;
-      // Write the spectrum number to file
-      if ( fileOpen )
-      {
-        file << " Spectrum number " << DetectorInfoHelper.getSpecNum(i)
-          << " " << problem;
-      }
-        
-      if ( fileOpen ) file << ", detector IDs:"; 
-      // Get the list of detectors for this spectrum and iterate over
-      const std::vector<int> dets = DetectorInfoHelper.getDetectors(i);
-      std::vector<int>::const_iterator it = dets.begin();
-      for ( ; it != dets.end(); ++it)
-      {
-        //write to the vector array that this function returns
-        badDets.push_back(*it);
-        // now record to file
-        if ( fileOpen )
-        {
-          // don't put a comma before the first entry
-          if ( it != dets.begin() ) file << ", ";
-          file << " " << *it;
-        }
-      }
-      if ( fileOpen ) file << std::endl;
-    }
-    // the y values are just aribitary flags, an error value doesn't make sense now
-    responses->dataE(i)[0] = 0;
+  const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
-    // update the progressbar information
-    if (i % iprogress_step == 0)
-    {
-      advanceProgress( int(RTMarkDetects*i/float(numSpec)) );
-      progress( m_PercentDone );
-      interruption_point();
-    }
-  }
-  if ( cUnFoundDects > 0 )
-  {
-    g_log.debug() << "Detectors in " << cUnFoundDects << " spectra couldn't be masked because they were missing" << std::endl;
-  }
-  //output and pass back what we found out about bad detectors
-  if ( fileOpen ) file.close();
-  g_log.information() << "Found " << cLows <<
-    " spectra with low counts and " << cHighs << " spectra with high counts, "<<
-    cAlreadyMasked << " were already marked bad." << std::endl;
+  // we will go through the workspace checking the values and setting them to the flag values
+  const double GoodVal = getProperty("GoodValue");
+  const double BadVal = getProperty("BadValue");
   //set the workspace to have no units
   responses->isDistribution(false);
   responses->setYUnit("");
-  return badDets;
+
+  // we use the functions in this class to check the detector masking
+  const InputWSDetectorInfo DetectorInfoHelper(responses);
+  for (int i = 0; i <= numSpec; ++i)
+  {// update the progressbar information
+    if (i % progStep == 0)
+    {
+      progress(advanceProgress( int(RTMarkDetects*i/float(numSpec)) ));
+    }
+
+    // get the address of the value of the first bin the spectra, we'll check it's value and then write a pass or fail to that location
+    double &yInputOutput = responses->dataY(i)[0];
+    try
+    {
+      if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
+      {// first look for detectors that have been marked as dead
+        cAlreadyMasked ++;
+        yInputOutput = BadVal;
+        continue;
+      }
+      if ( yInputOutput <= lowLim )
+      {// compare the difference against the size of the errorbar -statistical significance check
+        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+        {
+          lows.push_back(responses->getAxis(1)->spectraNo(i));
+          yInputOutput = BadVal;
+          continue;
+        }
+      }
+      if ( yInputOutput >= highLim )
+      {// check that the deviation is not within stastical error
+        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+        {
+          highs.push_back(responses->getAxis(1)->spectraNo(i));
+          yInputOutput = BadVal;
+          continue;
+        }
+      }
+      // if we've got to here there were no problems
+      yInputOutput = GoodVal;
+    }
+    catch (Exception::NotFoundError e)
+    {// I believe that detectors missing from the workspace shouldn't cause a problem and as it occurs with most raw files that I have I wont alert the user
+      yInputOutput = BadVal;
+      // adding entries to this array causes a log to written below
+      missingDataIndices.push_back(i);
+    }
+  }
+
+  // the output array doesn't list missingDataIndices because the array is used for masking detectors and informing users of the numbers of faulty instruments. A log is produced below at warning
+  createOutputArray(lows, highs, responses->spectraMap(), badDets);
+  // arecord is kept in the output file, however
+  writeFile(filename, lows, highs, missingDataIndices);
+  logFinds(missingDataIndices.size(), lows.size(), highs.size(), cAlreadyMasked);
 }
-/// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
-float MedianDetectorTest::advanceProgress(int toAdd)
+/** Create an array of detector IDs from the two arrays of spectra numbers that were passed to it
+*  @param lowList a list of spectra numbers
+*  @param highList another list of spectra numbers
+*  @param detMap the map that contains the list of detectors associated with each spectrum
+*  @param total output property, the array of detector IDs
+*/
+void MedianDetectorTest::createOutputArray(const std::vector<int> &lowList, const std::vector<int> &highList, const SpectraDetectorMap& detMap, std::vector<int> &total) const
 {
-  m_PercentDone += toAdd/float(m_TotalTime);
-  // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value will cause a problem some where
-  m_PercentDone = std::abs(m_PercentDone);
-  return m_PercentDone;
+  // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
+  total.reserve(lowList.size()+highList.size());
+
+  for ( int i = 0; i < lowList.size(); ++i )
+  {
+    std::vector<int> tStore = detMap.getDetectors(lowList[i]);
+    total.resize(total.size()+tStore.size());
+    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
+  }
+
+  for ( int i = 0; i < highList.size(); ++i )
+  {
+    std::vector<int> tStore = detMap.getDetectors(highList[i]);
+    total.resize(total.size()+tStore.size());
+    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
+  }
 }
-/// Update the percentage complete estimate assuming that the algorithm aborted a task with estimated RunTime toAdd
+/** Write a mask file which lists bad spectra in groups saying what the problem is. The file
+* is human readable
+*  @param fname name of file, if omitted no file is written
+*  @param lowList list of spectra numbers for specttra that failed the test on low integral
+*  @param highList list of spectra numbers for spectra with integrals that are too high
+*  @param problemIndices spectrum indices for spectra that lack, this function tries to convert them to spectra numbers adn catches any IndexError exceptions
+*/
+void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &problemIndices) const
+{
+  //it's not an error if the name is "", we just don't write anything
+  if ( fname.empty() )
+  {
+    return;
+  }
+
+  // open the output file for writing, blanking any existing content
+  std::ofstream file( fname.c_str(), std::ios_base::out );
+  if ( file.rdstate() & std::ios::failbit )
+  {
+    g_log.error("Could not open file \"" + fname + "\", file output disabled");
+    return;
+  }
+
+  file << "---"<<name()<<"---" << std::endl;
+  file << "----"<<"Low Integral : "<<lowList.size()<<"----" << std::endl;
+  for ( std::vector<int>::size_type i = 0 ; i < lowList.size(); ++i )
+  {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
+    file << lowList[i];
+    if ( (i + 1) % 10 == 0 || i == lowList.size()-1 )
+    {// write an end of line after every 10 entries or when we have run out of entries
+      file << std::endl;
+    }
+    else
+    {
+      file << " ";
+    }
+  }
+  file << "----" << "High Integral : " << highList.size() << "----" << std::endl;
+  for ( std::vector<int>::size_type i = 0 ; i < highList.size(); ++i )
+  {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
+    file << highList[i];
+    if ( (i + 1) % 10 == 0 || i == highList.size()-1 )
+    {// write an end of line after every 10 entries and when we have run out of entries
+      file << std::endl;
+    }
+    else
+    {
+      file << " ";
+    }
+  }
+  file << std::endl;
+  file << "----" << "Spectra not linked to a valid detector in the instrument definition : " << problemIndices.size() << "----" << std::endl;
+  for ( std::vector<int>::size_type i = 0 ; i < problemIndices.size(); ++i )
+  {
+    try
+    {
+      file << m_InputWS->getAxis(1)->spectraNo(problemIndices[i]);
+    }
+    catch (Exception::IndexError)
+    {
+      file << std::endl << "-Spectrum with index " << i << " does have a spectrum number";
+    }
+    if ( (i + 1) % 10 == 0 || i == problemIndices.size()-1 )
+    {// write an end of line after every 10 entries and when we have run out of entries
+      file << std::endl;
+    }
+    else
+    {
+      file << " ";
+    }
+  }
+  file << std::endl;
+
+  file.close();
+}
+/// called by FindDetects() to write a summary to g_log
+void MedianDetectorTest::logFinds(std::vector<int>::size_type missing, std::vector<int>::size_type low, std::vector<int>::size_type high, int alreadyMasked)
+{
+  if ( missing > 0 )
+  {
+    g_log.warning() << "Detectors in " << missing << " spectra couldn't be masked because they were missing" << std::endl;
+  }  
+  g_log.information() << "Found " << low << " spectra with low counts and " << high << " spectra with high counts, "<< alreadyMasked << " were already marked bad." << std::endl;
+}
+/** Update the percentage complete estimate assuming that the algorithm has completed a task with the
+* given estimated run time
+* @param toAdd the estimated additional run time passed since the last update, where m_TotalTime holds the total algorithm run time
+* @return estimated fraction of algorithm runtime that has passed so far
+*/
+double MedianDetectorTest::advanceProgress(double toAdd)
+{
+  m_fracDone += toAdd/m_TotalTime;
+  // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value will cause a problem some where
+  m_fracDone = std::abs(m_fracDone);
+  interruption_point();
+  return m_fracDone;
+}
+/** Update the percentage complete estimate assuming that the algorithm aborted a task with the given
+*  estimated run time
+*  @param the amount of algorithm run time that was saved by aborting a part of the algorithm, where m_TotalTime holds the total algorithm run time
+*/
 void MedianDetectorTest::failProgress(RunTime aborted)
 {
   advanceProgress(-aborted);

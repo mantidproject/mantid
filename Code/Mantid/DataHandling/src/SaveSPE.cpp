@@ -25,6 +25,7 @@ void SaveSPE::init()
   API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
   wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
   wsValidator->add(new API::CommonBinsValidator<>);
+  wsValidator->add(new API::HistogramValidator<>);
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,wsValidator),
       "The input workspace, which must be in Energy Transfer");
 
@@ -97,8 +98,8 @@ void SaveSPE::exec()
     }
   }
 
-  // If the number of energies isn't a factor of 8 then we need to add an extra CR/LF
-//  if (nBins % 8 != 0)
+  // If the number of energies isn't a factor of 8 then we need to add an extra CR/LF, for histogram workspaces there is one more energy (X-value)
+  if ( (nBins+1) % 8 != 0)
     outSPE_File << std::endl;
 
   for (int i = 0; i < nHist; i++)

@@ -25,7 +25,7 @@ using namespace DataObjects;
 // from the estimated location of the peak search forward by the following fraction and backward by the same fraction
 const double GetEi::HALF_WINDOW = 4.0/100;
 const double GetEi::PEAK_THRESH_H = 3.0;
-const double GetEi::PEAK_THRESH_A = 10.0;
+const double GetEi::PEAK_THRESH_A = 5.0;
 const int GetEi::PEAK_THRESH_W = 3;
 
 // progress estimates
@@ -40,10 +40,10 @@ GetEi::GetEi() : Algorithm(),
 }
 
 void GetEi::init()
-{
-  // Declare required input parameters for algorithm
-  WorkspaceUnitValidator<Workspace2D> *val =
-    new WorkspaceUnitValidator<Workspace2D>("TOF");
+{// Declare required input parameters for algorithm and do some validation here
+  CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
+  val->add(new WorkspaceUnitValidator<Workspace2D>("TOF"));
+  val->add(new HistogramValidator<Workspace2D>);
   declareProperty(new WorkspaceProperty<Workspace2D>(
     "InputWorkspace","",Direction::Input,val),
     "The X units of this workspace must be time of flight with times in\n"
@@ -301,10 +301,10 @@ void GetEi::getPeakEstimates(double &height, int &centreInd, double &background)
   background = background/m_tempWS->readY(0).size();
   if ( height < PEAK_THRESH_H*background )
   {
-    throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background");
+    throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background, was the energy estimate close enough?");
   }
 
-  g_log.debug() << "Initial guess of peak position, based on the maximum Y value in the monitor spectrum, is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)" << std::endl;
+  g_log.debug() << "Guess of peak position, based on the maximum Y value in the monitor spectrum, is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)" << std::endl;
 
 }
 /** Estimates the closest time, looking either or back, when the number of counts is
@@ -317,41 +317,44 @@ void GetEi::getPeakEstimates(double &height, int &centreInd, double &background)
 *  @throw out_of_range if the end of the histogram is reached before the point is found
 *  @throw invalid_argument if the peak is too thin
 */
-double GetEi::findHalfLoc(MantidVec::size_type startInd, double height, const double noise, const direction go) const
+double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height, const double noise, const direction go) const
 {
   MantidVec::size_type endInd = startInd;
 
-  while ( m_tempWS->readY(0)[endInd] >  height/2.0 )
+  while ( m_tempWS->readY(0)[endInd] >  (height+noise)/2.0 )
   {
     endInd += go;
     if ( endInd < 1 )
     {
-      throw std::out_of_range("Can't analyse peak, some of the peak is outside the " + boost::lexical_cast<std::string>(HALF_WINDOW*100) + "% window, at TOF values that are too low");
+      throw std::out_of_range("Can't analyse peak, some of the peak is outside the " + boost::lexical_cast<std::string>(HALF_WINDOW*100) + "% window, at TOF values that are too low. Was the energy estimate close enough?");
     }
     if ( endInd > m_tempWS->readY(0).size()-2)
     {
-      throw std::out_of_range("Can't analyse peak, some of the peak is outside the " + boost::lexical_cast<std::string>(HALF_WINDOW*100) + "% window, at TOF values that are too high");
+      throw std::out_of_range("Can't analyse peak, some of the peak is outside the " + boost::lexical_cast<std::string>(HALF_WINDOW*100) + "% window, at TOF values that are too high. Was the energy estimate close enough?");
     }
   }
 
   if ( std::abs(static_cast<int>(endInd - startInd)) < PEAK_THRESH_W )
   {// we didn't find a insignificant peak
-    g_log.warning() << "Potential precision problem, one half height distance is less than the threshold number of bins: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << std::endl;
+    g_log.warning() << "Potential precision problem, one half height distance is less than the threshold number of bins: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << ". Check the monitor peak" << std::endl;
   }
   // we have a peak in range, do an area check to see if the peak has any significance
-  height = (height-noise)/noise;
-  if ( height < PEAK_THRESH_A && std::abs(height*(endInd - startInd)) < PEAK_THRESH_A )
+  double hOverN = (height-noise)/noise;
+  if ( hOverN < PEAK_THRESH_A && std::abs(hOverN*(endInd - startInd)) < PEAK_THRESH_A )
   {// the peak could just be noise on the background, ignore it
-    throw std::invalid_argument("No good peak was found. The ratio of the height to the background multiplied either half widths must be above the threshold (>" + boost::lexical_cast<std::string>(PEAK_THRESH_A) + " bins)");
+    throw std::invalid_argument("No good peak was found. The ratio of the height to the background multiplied either half widths must be above the threshold (>" + boost::lexical_cast<std::string>(PEAK_THRESH_A) + " bins). Was the energy estimate close enough?");
   }
-  // get the TOF value in the middle of the bin
-  double halfTime = (m_tempWS->readX(0)[endInd]+m_tempWS->readX(0)[endInd+go])/2;
-  // interpolate between the first bin with less than half the counts to the bin before it
+  // get the TOF value in the middle of the bin with the first value below the half height
+  double halfTime = (m_tempWS->readX(0)[endInd]+m_tempWS->readX(0)[endInd+1])/2;
+  // interpolate back between the first bin with less than half the counts to the bin before it
   if ( endInd != startInd )
   {// let the bin that we found have coordinates (x_1, y_1) the distance of the half point (x_2, y_2) from this is (y_1-y_2)/gradient. Gradient = (y_3-y_1)/(x_3-x_1) where (x_3, y_3) are the coordinates of the other bin we are using
-    halfTime -= ( (height/2.0)-m_tempWS->readY(0)[endInd] ) *
-                ( m_tempWS->readX(0)[endInd] - m_tempWS->readX(0)[endInd-go] ) /
-                ( m_tempWS->readY(0)[endInd] - m_tempWS->readY(0)[endInd-go] );
+    double gradient = ( m_tempWS->readY(0)[endInd] - m_tempWS->readY(0)[endInd-go] )/
+      ( m_tempWS->readX(0)[endInd] - m_tempWS->readX(0)[endInd-go] );
+    // we don't need to check for a zero or negative gradient if we assume the endInd bin was found when the Y-value dropped below the threshold
+    double deltaY = m_tempWS->readY(0)[endInd]-(height+noise)/2.0;
+    // correct for the interpolation back in the direction towards the peak centre
+    halfTime -= deltaY/gradient;
   }
 
   g_log.debug() << "One half height point found at TOF = " << halfTime << " microseconds" << std::endl;

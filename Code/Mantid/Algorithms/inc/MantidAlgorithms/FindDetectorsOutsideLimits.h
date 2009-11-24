@@ -5,11 +5,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include <vector>
+#include <string>
 
 namespace Mantid
 {
   namespace Algorithms
   {
+    using API::MatrixWorkspace_sptr;
+    using API::MatrixWorkspace_const_sptr;
+    using API::SpectraDetectorMap;
     /**
     Takes a workspace as input and identifies all spectra were the sum of the 
     counts in all bins is outside a range. This is then used to mark all 'bad'
@@ -76,7 +82,9 @@ namespace Mantid
       void init();
       void exec();
 
-      API::MatrixWorkspace_sptr integrateWorkspace(std::string outputWorkspaceName);
+      MatrixWorkspace_sptr integrateWorkspace();
+      void createOutputArray(const std::vector<int> &lowList, const std::vector<int> &highList, const SpectraDetectorMap &detMap, std::vector<int> &total) const;
+      void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList) const;
       
     };
 

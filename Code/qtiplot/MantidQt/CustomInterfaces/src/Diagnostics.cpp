@@ -33,13 +33,13 @@ namespace CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 // default parameters that are writen to the GUI
-const char Diagnostics::defHighAbsolute[5] = "1e10";
-const char Diagnostics::defLowAbsolute[2] = "0";
-const char Diagnostics::defSignificanceTest[4] = "3.3";
-const char Diagnostics::defHighMedian[4] = "1.5";
-const char Diagnostics::defLowMedian[4] = "0.1";
-const char Diagnostics::defVariation[4] = "1.1";
-const char Diagnostics::defBackground[4] = "0.1";
+const char Diagnostics::defHighAbsolute[] = "1e10";
+const char Diagnostics::defLowAbsolute[] = "0";
+const char Diagnostics::defSignificanceTest[] = "3.3";
+const char Diagnostics::defHighMedian[] = "1.5";
+const char Diagnostics::defLowMedian[] = "0.1";
+const char Diagnostics::defVariation[] = "1.1";
+const char Diagnostics::defBackground[] = "10.0";
 
 //----------------------
 // Public member functions
@@ -79,6 +79,7 @@ void Diagnostics::initLayout()
   m_uiForm.lbOFile->setToolTip(oFileToolTip);
   m_uiForm.leOFile->setToolTip(oFileToolTip);
   m_uiForm.pbOFile->setToolTip(oFileToolTip);
+  m_algorPropList["OutputFile"] = "MedianDetectorTest.OutputFile";
   
   m_uiForm.leSignificance->setText(defSignificanceTest);
   QString significanceToolTip =
@@ -239,7 +240,7 @@ void Diagnostics::run()
     {// return to the dialog box, runWhite calls a function that some displays errors, some other errors will be in the log, we hope this covers everything, but there's not guarantee
       return;
     }
-    // the other two test below are optional dependent on the information supplied by the user
+    // the two tests below are optional dependent on the information supplied by the user
     if ( ! m_userSettingsMap["WBVanadium2"].isEmpty() )
     {
       test2.status = "Analysing white beam vanadium 2 and comparing";
@@ -474,6 +475,9 @@ void Diagnostics::placeValidatorLabels()
   QLabel *validlbl = getValidatorMarker("MedianDetectorTest.SignificanceTest");
   uni->addWidget(validlbl, 2, 2);
 
+  validlbl = getValidatorMarker("MedianDetectorTest.OutputFile");
+  uni->addWidget(validlbl, 1, 3);
+
   // work on the Individual White Beam Tests groupbox
   currentLayout = m_uiForm.gbIndividual->layout();
   QGridLayout *individGrid = qobject_cast<QGridLayout*>(currentLayout);
@@ -581,7 +585,7 @@ QString Diagnostics::constructScript() const
 *  @return executable python code
 */
 QString Diagnostics::constructScript(
-    const ExcitationsDiagResults::TestSummary &foundBad) const
+    const ExcitationsDiagResults::TestSummary &test1FoundBad) const
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
   // this file contains all python script to run, expect the user settings and the results of previous tests
@@ -602,8 +606,8 @@ QString Diagnostics::constructScript(
     m_userSettingsMap.find("HighMedian")->second);
   pythonScript.replace("|LOWMEDIAN|", 
     m_userSettingsMap.find("LowMedian")->second);
-  pythonScript.replace("|INPUTMASK|", foundBad.outputWS);
-  pythonScript.replace("|WBV1|", foundBad.inputWS);
+  pythonScript.replace("|INPUTMASK|", test1FoundBad.outputWS);
+  pythonScript.replace("|WBV1|", test1FoundBad.inputWS);
   pythonScript.replace("|WBVANADIUM2|",
     m_userSettingsMap.find("WBVanadium2")->second);
   pythonScript.replace("|CHANGEBETWEEN|",
@@ -653,7 +657,7 @@ QString Diagnostics::constructScript(
   pythonScript.replace("|BACKGROUNDACCEPT|",
     m_userSettingsMap.find("backgroundAccept")->second);
 
-  // we need to check if the TOF arguments are empty because python doesn't accept an empty string as an argument
+  // we need to check if the TOF arguments are empty because python isn't accepting an empty string as an argument for these
   QString TOFWindowBlock;
   if ( ! m_userSettingsMap.find("TOFStart")->second.isEmpty() )
   {
@@ -662,7 +666,7 @@ QString Diagnostics::constructScript(
   }
   if ( ! m_userSettingsMap.find("TOFEnd")->second.isEmpty() )
   {
-    TOFWindowBlock += QString(", RangeHigher = ") +
+    TOFWindowBlock += QString(", RangeUpper = ") +
       m_userSettingsMap.find("TOFEnd")->second;
   }
   pythonScript.replace("|TOFWINDOWBLOCK|", TOFWindowBlock);
@@ -705,15 +709,16 @@ ExcitationsDiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
   QStringList results = pyhtonOut.split("\n");
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
-    QString Error = "Error \"" + pyhtonOut + "\" found, while executing scripts, more details can be found in the Mantid and python log files.";
+    QString Error = "Error \"" + pyhtonOut + "\" found, while executing scripts, more details may be found in the Mantid and python logs.";
     QMessageBox::critical(this, this->windowTitle(),
       Error);
     ExcitationsDiagResults::TestSummary temp = { Error, "", "", ExcitationsDiagResults::TestSummary::NORESULTS, "" };
     return temp;
   }
-  if ( results.count() < 6 || results[0] != "success" )
+  // each script should return 7 strings
+  if ( results.count() != 7 || results[0] != "success" )
   {// there was an error in the python, disregard these results
-    QString Error = "Error \"" + results[1] + "\" found executing scripts.  More details can be found in the Mantid and python log files.";
+    QString Error = "Error \"" + results[1] + "\" during " + results[2] + ", " + "more details may be found in the Mantid and python logs.";
     QMessageBox::critical(this, this->windowTitle(),
       Error);
     ExcitationsDiagResults::TestSummary temp = { Error, "", "", ExcitationsDiagResults::TestSummary::NORESULTS, "" };
@@ -842,6 +847,7 @@ void Diagnostics::createValidatorLabels()
     m_validators[pitr.key()] = validLbl;
   }
 }
+// is saving old input values important for interfaces
 ///**
 // * Save the property values to the input history
 // */

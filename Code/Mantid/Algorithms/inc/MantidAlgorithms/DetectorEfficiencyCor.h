@@ -111,6 +111,8 @@ private:
 
   /// stores the user selected value for incidient energy of the neutrons
   double m_Ei;
+  /// stores the wave number of incidient neutrons, calculated from the energy
+  double m_ki;
 
   // lots of cached data
   /// a cached pointer to the shape used to save calculation time as most detectors have the same shape
@@ -133,8 +135,6 @@ private:
 
   ///a flag int value to indicate that the value wasn't set by users
   static const int UNSETINT = INT_MAX-15;
-  /// process this many spectra before checking for user cancel messages and updating the progress bar
-  static const int INTERVAL = 128;
 
   void retrieveProperties();
   void efficiencyCorrect(int spectraNumber);
@@ -152,7 +152,7 @@ private:
   void exec();
 
   /// Links the energy to the wave number, I got this from Prof T.G.Perring 
-  static const double PLANCKY_CONST;
+  static const double KSquaredToE;
   /// coefficients for Taylor series/assymptotic expansion used at large wavenumbers and large angle
   static const double c_eff_f[];
   /// coefficients for Taylor series/assymptotic expansion used at low wavenumbers and low angle

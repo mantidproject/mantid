@@ -108,7 +108,7 @@ void DetectorEfficiencyVariation::exec()
   
   // information on bad spectra will be writen to counts1 by this function, it looks for spectra whose number of counts differ in the two workspaces by more than frac
   std::vector<int> outArray =
-    markBad( counts1, counts2, av, vari, getProperty("OutputFile") );
+    findBad( counts1, counts2, av, vari, getProperty("OutputFile") );
 
   // counts1 was overwriten by the last function, now register it with the Analysis Data Service so that users can see it
   setProperty("OutputWorkspace", counts1);
@@ -190,7 +190,7 @@ MatrixWorkspace_sptr DetectorEfficiencyVariation::getTotalCounts(
 {
   g_log.information() << "Integrating input workspace" << std::endl;
   // get percentage completed estimates for now, t0 and when we've finished t1
-  double t0 = m_PercentDone, t1 = advanceProgress(RTGetTotalCounts);
+  double t0 = m_fracDone, t1 = advanceProgress(RTGetTotalCounts);
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
 
   childAlg->setProperty( "InputWorkspace", input );
@@ -289,22 +289,22 @@ double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) 
 /** Overwrites the first workspace with bad spectrum information, bad detector information is writen
 * to the array that is returned and both things are writen to a file
 *
-* @param a this single bin histogram input workspace is overwriten
-* @param b single bin histogram input workspace that is compared to a
+* @param a MUST have the same number of histograms as b, this single bin histogram input workspace is overwriten
+* @param b MUST have the same number of histograms as a, this single bin histogram workspace will be compared to a
 * @param average The median value of the ratio of the total number of counts between equivalent spectra in the two workspaces
 * @param variation The ratio between equivalent spectra can be greater than the median ratio by this factor, if the variation is greater the detector will be marked bad
 * @param fileName name of a file to store the list of failed spectra in (pass "" to aviod writing to file)
 * @return An array that of the index numbers of the histograms that fail
 */
-std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
-  MatrixWorkspace_const_sptr b, double average, double variation,
-  std::string fileName )
+std::vector<int> DetectorEfficiencyVariation::findBad( MatrixWorkspace_sptr a,
+  MatrixWorkspace_const_sptr b, const double average, double variation,
+  const std::string &fileName )
 {
   g_log.information("Apply the criteria to find failing detectors");
 
   // This algorithm will assume that r is more than 1
   if ( variation < 1 )
-  {// diag in libISIS did this.  A variation of less than 1 doesn't make sense in this algorithm
+  {// DIAG in libISIS did this.  A variation of less than 1 doesn't make sense in this algorithm
     variation = 1/variation;
   }
   // criterion for if the the first spectrum is larger than expected
@@ -313,41 +313,30 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   double lowest = average/variation;
 
   // get ready to report the number of bad detectors found to the log
-  int cChanged = 0, cAlreadyMasked = 0;
-  //an array that will store the IDs of bad detectors
-  std::vector<int> badDets;
-
-  // ready to write dead detectors to a file
-  std::ofstream file;
-  bool fileOpen = false;
-  //it is not an error if the name is "", we'll just leave the file marked not open to ignore writing
-  if ( !fileName.empty() )
-  {
-    file.open( fileName.c_str() );
-    if ( file.rdstate() & std::ios::failbit )
-    {
-      g_log.error("Could not open file \"" + fileName + "\"");
-    }
-    //file opening ws successful, we'll write to the file
-    else fileOpen = true;
-  }
-  if ( fileOpen ) file << "Index Spectrum UDET(S)" << std::endl;  
+  int cAlreadyMasked = 0;
+  // arrays that will store information about which spectra were found bad
+  std::vector<int> badDets, badSpecs, missingDataIndices;
 
   // iterate over the data values setting the live and dead values
   // this relies on a and b having the same number of bins
   const int numSpec = a->getNumberHistograms();
-  int iprogress_step = numSpec / 10;
-  if (iprogress_step == 0) iprogress_step = 1;
+  const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
-  InputWSDetectorInfo Detector1Info(a);
-  InputWSDetectorInfo Detector2Info(b);
+  const InputWSDetectorInfo Detector1Info(a);
+  const InputWSDetectorInfo Detector2Info(b);
 
   double GoodVal = getProperty("GoodValue");
   double BadVal = getProperty("BadValue");
   for (int i = 0; i < numSpec; ++i)
   {
-    // hold information about whether the histogram passes or fails and why
-    std::ostringstream problem;
+    // move progress bar
+    if (i % progStep == 0)
+    {
+      advanceProgress( static_cast<double>(RTMarkDetects)*i/numSpec );
+      progress( m_fracDone );
+      interruption_point();
+    }
+
     // first look for detectors that have been marked as dead
     try
     {
@@ -355,72 +344,38 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
         ( Detector1Info.aDetecIsMaskedinSpec(i) ||
         Detector2Info.aDetecIsMaskedinSpec(i) ) )
       {
-        problem << "detector already masked";
         cAlreadyMasked ++;
+        a->dataY(i)[0] = BadVal;
+        // move on to the next spectrum
+        continue;
       }
-      else // not already marked bad, check is the value within the acceptance range
-      {
-        // examine the data, which should all be in the first bin of each histogram
-        double ratio = a->readY(i)[0]/b->readY(i)[0];
-        if ( ( ratio > largest ) || ( ratio < lowest ) ) 
-        {// either v1 or v2 is too big, 
-          problem << "the number of counts has changed by a factor of " <<
-            std::setprecision(5) << ratio;
-          cChanged++;
-        }
+      // not already marked bad, check is the value within the acceptance range
+      // examine the data, which should all be in the first bin of each histogram
+      double ratio = a->readY(i)[0]/b->readY(i)[0];
+      if ( ( ratio > largest ) || ( ratio < lowest ) ) 
+      {// either v1 or v2 is too big
+        a->dataY(i)[0] = BadVal;
+        badSpecs.push_back(a->getAxis(1)->spectraNo(i));
+        // move on to the next spectrum
+        continue;
       }
+      // if we've got to here there were no problems
+      a->dataY(i)[0] = GoodVal;
     }
     catch (Exception::NotFoundError e)
     {// I believe that detectors missing from the workspace shouldn't cause a problem and as it occurs with most raw files that I have I wont alert the user
-      problem << "the spectrium is mapped to a detector that is not in the instrument file";
-    }
-    if ( ! problem.str().empty() )
-    {//we have a bad spectrum, do the reporting
-      // write to the output workput space, which is also an input workspace
       a->dataY(i)[0] = BadVal;
-      // Write the spectrum number to file
-      if ( fileOpen )
-      {
-        file << "In spectrum number " << Detector1Info.getSpecNum(i)
-          << ", " << problem.str();
-      }
-      
-      if ( fileOpen ) file << " detector IDs:"; 
-      // Get the list of detectors for this spectrum and iterate over
-      const std::vector<int> dets = Detector1Info.getDetectors(i);
-      std::vector<int>::const_iterator it = dets.begin();
-      for ( ; it != dets.end(); ++it)
-      {
-        //write to the vector array that this function returns
-        badDets.push_back(*it);
-        // now record to file
-        if ( fileOpen )
-        {
-        // don't put a comma before the first entry
-          if ( it != dets.begin() ) file << ", ";
-          file << " " << *it;
-        }
-      }
-      if ( fileOpen ) file << std::endl;
-    }
-    else// problem is empty
-    {// this is a good spectrum, only need to write to the output workspace
-      a->dataY(i)[0] = GoodVal;
-    }
-    // Y is either the good value or the bad value there isn't a distribution of possible values
-    a->dataE(i)[0] = 0;
-
-    // update the progressbar information
-    if (i % iprogress_step == 0)
-    {
-      advanceProgress( int(RTMarkDetects*i/float(numSpec)) );
-      progress( m_PercentDone );
-      interruption_point();
+      // adding entries to this array causes a log to written below
+      missingDataIndices.push_back(i);
     }
   }
-  //output and pass back what we found out about bad detectors
-  if ( fileOpen ) file.close();
-  g_log.information() << "Marked a total of " << cChanged <<
+
+  // the output array doesn't list missingDataIndices because the array is used for masking detectors and informing users of the numbers of faulty instruments. A log is produced below at warning
+  createOutputArray(badSpecs, a->spectraMap(), badDets);
+  // arecord is kept in the output file, however
+  writeFile(fileName, badSpecs, missingDataIndices, a->getAxis(1));
+
+  g_log.information() << "Found a total of " << badSpecs.size() <<
     " spectra that changed by more than " << 100.0*(variation-1.0) << "% over or "
     "under the median change. " <<
     cAlreadyMasked << " were already marked bad." << std::endl;
@@ -429,15 +384,91 @@ std::vector<int> DetectorEfficiencyVariation::markBad( MatrixWorkspace_sptr a,
   a->setYUnit("");
   return badDets;
 }
+/** Create an array of detector IDs from the two arrays of spectra numbers that were passed to it
+*  @param badList a list of spectra numbers that will be writen to file
+*  @param detMap the map that contains the list of detectors associated with each spectrum
+*  @param total output property, the array of detector IDs
+*/
+void DetectorEfficiencyVariation::createOutputArray(const std::vector<int> &badList, const SpectraDetectorMap& detMap, std::vector<int> &total) const
+{
+  // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
+  total.reserve(badList.size());
 
+  for ( int i = 0; i < badList.size(); ++i )
+  {
+    std::vector<int> tStore = detMap.getDetectors(badList[i]);
+    total.resize(total.size()+tStore.size());
+    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
+  }
+}
+/** Write a mask file which lists bad spectra in groups saying what the problem is. The file
+* is human readable
+*  @param fname name of file, if omitted no file is written
+*  @param badList the list of spectra numbers for spectra that failed the test
+*  @param problemIndices spectrum indices for spectra that lack, this function tries to convert them to spectra numbers adn catches any IndexError exceptions
+*  @param SpecNums contains the spectra numbers for all spectra indices
+*/
+void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums) const
+{
+  //it's not an error if the name is "", we just don't write anything
+  if ( fname.empty() )
+  {
+    return;
+  }
+
+  // open the output file for writing, blanking any existing content
+  std::ofstream file( fname.c_str(), std::ios_base::out );
+  if ( file.rdstate() & std::ios::failbit )
+  {
+    g_log.error("Could not open file \"" + fname + "\", file output disabled");
+    return;
+  }
+
+  file << "---"<<name()<<"---" << std::endl;
+  for ( std::vector<int>::size_type i = 0 ; i < badList.size(); ++i )
+  {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
+    file << badList[i];
+    if ( (i + 1) % 10 == 0 || i == badList.size()-1 )
+    {// write an end of line after every 10 entries or when we have run out of entries
+      file << std::endl;
+    }
+    else
+    {
+      file << " ";
+    }
+  }
+  file << "----" << "Spectra not linked to a valid detector in the instrument definition : " << problemIndices.size() << "----" << std::endl;
+  for ( std::vector<int>::size_type i = 0 ; i < problemIndices.size(); ++i )
+  {
+    try
+    {
+      file << SpecNums->spectraNo(problemIndices[i]);
+    }
+    catch (Exception::IndexError)
+    {
+      file << std::endl << "-Spectrum with index " << i << " does have a spectrum number";
+    }
+    if ( (i + 1) % 10 == 0 || i == problemIndices.size()-1 )
+    {// write an end of line after every 10 entries and when we have run out of entries
+      file << std::endl;
+    }
+    else
+    {
+      file << " ";
+    }
+  }
+  file << std::endl;
+
+  file.close();
+}
 
 /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
-float DetectorEfficiencyVariation::advanceProgress(int toAdd)
+double DetectorEfficiencyVariation::advanceProgress(double toAdd)
 {
-  m_PercentDone += toAdd/float(m_TotalTime);
+  m_fracDone += toAdd/m_TotalTime;
   // it could go negative as sometimes the percentage is re-estimated backwards, this is worrying about if a small negative value could cause an error
-  m_PercentDone = std::abs(m_PercentDone);
-  return m_PercentDone;
+  m_fracDone = std::abs(m_fracDone);
+  return m_fracDone;
 }
 
 } // namespace Algorithm

@@ -36,13 +36,13 @@ private:
   // structures to hold the values entered by the use
 
   // to store default values
-  static const char defHighAbsolute[5];   ///< default value for reject above this number of counts
-  static const char defLowAbsolute[2];    ///< default value for reject at or below this number of counts
-  static const char defSignificanceTest[4];///< default value for the number of errorbars from the median number of counts needs to be before the detector can be rejectedn in a median test
-  static const char defHighMedian[4];     ///< default value for the maximum number of times the median value the total number of counts can be without being rejected
-  static const char defLowMedian[4];      ///< default value for the minimum number of times the median value the total number of counts can be without being rejected
-  static const char defVariation[4];      ///< default value for the maximum allowed variation between white beam vanadium runs over the median
-  static const char defBackground[4];     ///< default value for the maximum allowed variation between white beam vanadium runs over the median
+  static const char defHighAbsolute[];   ///< default value for reject above this number of counts
+  static const char defLowAbsolute[];    ///< default value for reject at or below this number of counts
+  static const char defSignificanceTest[];///< default value for the number of errorbars from the median number of counts needs to be before the detector can be rejectedn in a median test
+  static const char defHighMedian[];     ///< default value for the maximum number of times the median value the total number of counts can be without being rejected
+  static const char defLowMedian[];      ///< default value for the minimum number of times the median value the total number of counts can be without being rejected
+  static const char defVariation[];      ///< default value for the maximum allowed variation between white beam vanadium runs over the median
+  static const char defBackground[];     ///< default value for the maximum allowed variation between white beam vanadium runs over the median
 
   /// a pointer to the results dialog box
   ExcitationsDiagResults *m_dispDialog;
@@ -66,7 +66,7 @@ private:
   /// read in the parameters that users have entered on the form
   QString constructScript() const;
   QString constructScript(
-    const ExcitationsDiagResults::TestSummary &foundBad) const;
+    const ExcitationsDiagResults::TestSummary &test1FoundBad) const;
   QString constructScript(
     const ExcitationsDiagResults::TestSummary &test1,
     const ExcitationsDiagResults::TestSummary &test2) const;

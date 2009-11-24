@@ -247,10 +247,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\DiagScriptInput.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\DiffractionFocussing.cpp"
 				>
 			</File>
@@ -614,10 +610,6 @@
 			</File>
 			<File
 				RelativePath=".\test\DetectorEfficiencyVariationTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\DiagScriptInput.h"
 				>
 			</File>
 			<File
