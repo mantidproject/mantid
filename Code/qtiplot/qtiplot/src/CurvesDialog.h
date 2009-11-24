@@ -42,50 +42,51 @@ class PlotCurve;
 //! Add/remove curves dialog
 class CurvesDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    CurvesDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  CurvesDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  ~CurvesDialog();
 
-	void setGraph(Graph *graph);
+  void setGraph(Graph *graph);
 
 private slots:
-	void addCurves();
-	void removeCurves();
-	int curveStyle();
-	void showCurveRangeDialog();
-	void showPlotAssociations();
-	void showFunctionDialog();
-	void showCurveBtn(int);
-    void enableAddBtn();
-	void enableRemoveBtn();
-	void showCurveRange(bool);
-	void updateCurveRange();
-	void showCurrentFolder(bool);
+  void addCurves();
+  void removeCurves();
+  int curveStyle();
+  void showCurveRangeDialog();
+  void showPlotAssociations();
+  void showFunctionDialog();
+  void showCurveBtn(int);
+  void enableAddBtn();
+  void enableRemoveBtn();
+  void showCurveRange(bool);
+  void updateCurveRange();
+  void showCurrentFolder(bool);
 
 private:
-	void closeEvent(QCloseEvent*);
+  void closeEvent(QCloseEvent*);
 
-    void init();
-    bool addCurve(const QString& name);
-    QSize sizeHint() const;
-    void contextMenuEvent(QContextMenuEvent *);
+  void init();
+  bool addCurve(const QString& name);
+  QSize sizeHint() const;
+  void contextMenuEvent(QContextMenuEvent *);
 
-	Graph *d_graph;
+  Graph *d_graph;
 
-    QPushButton* btnAdd;
-    QPushButton* btnRemove;
-    QPushButton* btnOK;
-    QPushButton* btnCancel;
-	QPushButton* btnAssociations;
-	QPushButton* btnEditFunction;
-	QPushButton* btnRange;
-    QListWidget* available;
-    QListWidget* contents;
-	QComboBox* boxStyle;
-	QComboBox* boxMatrixStyle;
-	QCheckBox* boxShowRange;
-	QCheckBox* boxShowCurrentFolder;
+  QPushButton* btnAdd;
+  QPushButton* btnRemove;
+  QPushButton* btnOK;
+  QPushButton* btnCancel;
+  QPushButton* btnAssociations;
+  QPushButton* btnEditFunction;
+  QPushButton* btnRange;
+  QListWidget* available;
+  QListWidget* contents;
+  QComboBox* boxStyle;
+  QComboBox* boxMatrixStyle;
+  QCheckBox* boxShowRange;
+  QCheckBox* boxShowCurrentFolder;
   QMap<QString,PlotCurve*> d_plotCurves;
 };
 
