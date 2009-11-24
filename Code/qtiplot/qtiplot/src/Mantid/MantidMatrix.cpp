@@ -63,7 +63,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
   m_modelX = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::X);
   m_table_viewX = new QTableView();
   connectTableView(m_table_viewX,m_modelX);
-  // m_table_viewY->setSelectionModel(m_table_viewX->selectionModel());
   setColumnsWidth(1,MantidPreferences::MantidMatrixColumnWidthX());
   setNumberFormat(1,MantidPreferences::MantidMatrixNumberFormatX(),
                   MantidPreferences::MantidMatrixNumberPrecisionX());
@@ -128,29 +127,22 @@ bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
   return MdiSubWindow::eventFilter(object, e);
 }
 
+/** Called when switching between tabs
+ *  @param index The index of the new active tab
+ */
 void MantidMatrix::viewChanged(int index)
 {
-
-  //m_table_viewY->setSelectionModel(m_table_viewX->selectionModel());
-
-  // get the previous view , selection model and selection indexes
+  // get the previous view and selection model
   QTableView* prevView=(QTableView*)m_tabs->widget(m_PrevIndex);
   if(prevView)
   {
     QItemSelectionModel *oldSelModel = prevView->selectionModel();
-    QModelIndexList indexList = oldSelModel->selectedIndexes();
-    if (indexList.size())
-    {
-      //deselect previous view
-      QItemSelection deSelect;
-      deSelect.select(indexList.first(),indexList.last());
-      oldSelModel->select(deSelect, QItemSelectionModel::Deselect);
+    QItemSelectionModel *selModel = activeView()->selectionModel();
+    // Copy the selection from the previous tab into the newly-activated one
+    selModel->select(oldSelModel->selection(),QItemSelectionModel::Select);
+    // Clear the selection on the now-hidden tab
+    oldSelModel->clearSelection();
 
-      //select current view
-      QItemSelection sel(indexList.first(),indexList.last());
-      QItemSelectionModel *selModel = activeView()->selectionModel();
-      if(selModel)selModel->select(sel,QItemSelectionModel::Select);
-    }
     m_PrevIndex=index;
     //get the previous tab scrollbar positions
     int hValue=  prevView->horizontalScrollBar()->value();
@@ -159,7 +151,6 @@ void MantidMatrix::viewChanged(int index)
     //set  the previous view  scrollbar positions to current view
     activeView()->horizontalScrollBar()->setValue(hValue);
     activeView()->verticalScrollBar()->setValue(vValue);
-
   }
 
 }
@@ -209,7 +200,7 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
 void MantidMatrix::connectTableView(QTableView* view,MantidMatrixModel*model)
 {
   view->setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
-  view->setSelectionMode(QAbstractItemView::ExtendedSelection);// only one contiguous selection supported
+  view->setSelectionMode(QAbstractItemView::ExtendedSelection);
   view->setModel(model);
   view->setCornerButtonEnabled(false);
   view->setFocusPolicy(Qt::StrongFocus);
