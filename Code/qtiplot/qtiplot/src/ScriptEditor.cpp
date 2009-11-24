@@ -112,7 +112,7 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  */
 ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode) : 
   QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
-  m_history(), m_read_only(false)
+  m_history(), m_read_only(false), m_need_newline(false)
 {
   // Undo action
   m_undo = new QAction(tr("&Undo"), this);
@@ -322,7 +322,16 @@ void ScriptEditor::mousePressEvent(QMouseEvent *event)
 void ScriptEditor::newInputLine()
 {
   int cursorline = lines();
-  append("\n");
+  // Work out if we need a new line or not
+  if( !text().endsWith('\n') )
+  {
+    append("\n");
+  }
+  else
+  {
+    cursorline -= 1;
+  }
+
   markerAdd(cursorline, m_marker_handle);
   setCursorPosition(cursorline, 0);
 }
@@ -386,14 +395,18 @@ void ScriptEditor::print()
  */
 void ScriptEditor::displayOutput(const QString& msg, bool error)
 {
-  append("\n");
+  if( m_need_newline )
+  { 
+    append("\n");      
+    m_need_newline = false;
+  }
   if( !error )
   {
     append(msg);
   }
   else
   {
-    append("\"" + msg + "\"");
+    append("\"" + msg.trimmed() + "\"");
   }
 }
 
@@ -444,6 +457,7 @@ void ScriptEditor::executeCodeAtLine(int lineno)
 
   m_history.add(cmd);
   if( lineno == 0 ) markerAdd(lineno, m_marker_handle); 
+  m_need_newline = true;
   emit executeLine(cmd);
 }
 

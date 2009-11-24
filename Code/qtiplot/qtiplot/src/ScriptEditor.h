@@ -179,9 +179,11 @@ private:
   CommandHistory m_history;
   /// Flag whether editing is possible (only used in interpreter mode)
   bool m_read_only;
-  // The colour of the marker for a success state
+  /// Flag to indicate we need a new line in the output((only used in interpreter mode)
+  bool m_need_newline;
+  /// The colour of the marker for a success state
   static QColor g_success_colour;
-  // The colour of the marker for an error state
+  /// The colour of the marker for an error state
   static QColor g_error_colour;
 };
 

@@ -75,11 +75,13 @@ private slots:
   /// Context menu slot
   void showContextMenu(const QPoint & pos);
   /// A slot to pass messages to the output dock
-  void displayOutputMessage(const QString &, bool error);
+  void displayOutputMessage(const QString &, bool error, bool timestamp);
 
 private:
   /// Create the action pointers
   void initActions();
+  /// Reset the default font
+  void resetFont();
 
 private:
   /// The actually widget that displays the text

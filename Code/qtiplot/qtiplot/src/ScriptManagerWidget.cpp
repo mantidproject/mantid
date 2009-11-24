@@ -16,7 +16,6 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QDateTime>
 #include <QContextMenuEvent>
 #include <Qsci/qscilexer.h>
 #include <QTabBar>
@@ -66,8 +65,8 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent,
     setContextMenuPolicy(Qt::NoContextMenu);
     ScriptEditor *editor = currentEditor();
     connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
-    connect(this, SIGNAL(MessageToPrint(const QString&, bool)), editor, 
-	    SLOT(displayOutput(const QString&, bool)));
+    connect(this, SIGNAL(MessageToPrint(const QString&, bool,bool)), editor, 
+	    SLOT(displayOutput(const QString&,bool)));
 
   }
 
@@ -451,34 +450,39 @@ bool ScriptManagerWidget::runScriptCode(const QString & code)
 {
   m_script_runner->setCode(code);
   emit ScriptIsActive(true);
-  if( !m_interpreter_mode ) formatMessage("Script execution started.", false, true);
+  if( !m_interpreter_mode ) 
+  {
+    displayOutput("Script execution started.", true);
+  }
   bool success = m_script_runner->exec();
   emit ScriptIsActive(false);
   if( !m_interpreter_mode && success )
   {
-    formatMessage("Script execution completed successfully.", false, true);
+    displayOutput("Script execution completed successfully.", true);
   }
   return success;
 }
 
 /** 
- * Format an output message
+ * Display an output message
  * @param msg The message string
+ * @param timestamp Whether to display a timestamp
  */
-void ScriptManagerWidget::formatOutput(const QString & msg)
+void ScriptManagerWidget::displayOutput(const QString & msg, bool timestamp)
 {
   //Forward to helper
-  formatMessage(msg, false);
+  emit MessageToPrint(msg, false, timestamp);
 }
 
 /**
- * Format an error message
+ * Display an error message
  * @param msg The message string
+ * @param timestamp Whether to display a timestamp
  */
-void ScriptManagerWidget::formatError(const QString & msg)
+void ScriptManagerWidget::displayError(const QString & msg, bool timestamp)
 {
   //Forward to helper
-  formatMessage(msg, true);
+  emit MessageToPrint(msg, true, timestamp);
 }
 
 /**
@@ -769,31 +773,6 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
 }
 
 /**
- * Format a message and emit a signal that it is ready to be printed
- * @param msg The message
- * @param error If this is an error message
- * @param timestamp Add a time stamp to the message
- */
-void ScriptManagerWidget::formatMessage(const QString & msg, bool error, bool timestamp)
-{
-  // I want to control end of line formatting my self
-  if( m_interpreter_mode || !timestamp )
-  {
-    emit MessageToPrint(msg, error);
-  }
-  else
-  {
-    QString msg_to_print = msg.trimmed();
-    if( msg_to_print.isEmpty() ) return;
-    QString separator(75, '-');
-    //Signal that the text is ready to print
-    emit MessageToPrint(separator + "\n" + QDateTime::currentDateTime().toString() + ": " + 
-			msg_to_print + "\n" + separator + '\n', error);
-  }
-}
-
-
-/**
  * Create a new Script object, connect up the relevant signals and store the pointer. Note
  * that this will always delete the current scripting running object
  */
@@ -803,9 +782,9 @@ void ScriptManagerWidget::setNewScriptRunner()
   
   m_script_runner = scriptingEnv()->newScript("", this, "");
   // Connect the signals that print output and error messages to the formatting functions
-  connect(m_script_runner, SIGNAL(print(const QString &)), this, SLOT(formatOutput(const QString &)));
+  connect(m_script_runner, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
   connect(m_script_runner, SIGNAL(error(const QString &, const QString&, int)), this, 
-	  SLOT(formatError(const QString &)));
+	  SLOT(displayError(const QString &)));
   
 }
 

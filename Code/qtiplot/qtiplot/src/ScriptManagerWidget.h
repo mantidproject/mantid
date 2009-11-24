@@ -91,7 +91,7 @@ public:
 
 signals:
   ///A message is ready to be printed
-  void MessageToPrint(const QString & msg, bool error);    
+  void MessageToPrint(const QString & msg, bool error, bool timestamp = false);    
   ///A script has changed execution state
   void ScriptIsActive(bool running);
 
@@ -125,10 +125,10 @@ public slots:
   ///Run script code
   bool runScriptCode(const QString & code);
 
-  ///Format an output message
-  void formatOutput(const QString & msg);
-  ///Format an output message
-  void formatError(const QString & msg);
+  ///Format an output message with an optional timestamp
+  void displayOutput(const QString & msg, bool timestamp = false);
+  ///Format an output message with an optional timestamp
+  void displayError(const QString & msg, bool timestamp = false);
 					
 private slots:
   /// Context menu handler
@@ -153,8 +153,6 @@ private:
   void customEvent(QEvent *event);
   ///Open a script
   void open(bool newtab, const QString & filename = QString());
-  /// Format a message and emit the formatted string to be printed
-  void formatMessage(const QString & msg, bool error, bool timestamp = false);
   /// Create a new Script object and connect up the relevant signals.
   void setNewScriptRunner();
   ///Close a tab with a given index

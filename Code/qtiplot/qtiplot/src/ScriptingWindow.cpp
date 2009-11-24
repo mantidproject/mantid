@@ -17,6 +17,7 @@
 #include <QSettings>
 #include <QPrintDialog>
 #include <QPrinter>
+#include <QDateTime>
 
 //***************************************************************************
 //
@@ -42,13 +43,8 @@ ScriptOutputDock::ScriptOutputDock(const QString & title, QWidget * parent,
   m_text_display->setLineWrapColumnOrWidth(105);
   m_text_display->setAutoFormatting(QTextEdit::AutoNone);
   // Change to fix width font so that table formatting isn't screwed up
-  QFont f("Andale Mono");
-  f.setFixedPitch(true);
-  f.setPointSize(8);
-  m_text_display->setCurrentFont(f);
-  m_text_display->setMinimumWidth(5);
-  m_text_display->setMinimumHeight(5);
-
+  resetFont();
+  
   m_text_display->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_text_display, SIGNAL(customContextMenuRequested(const QPoint&)), this, 
 	  SLOT(showContextMenu(const QPoint&)));
@@ -99,9 +95,15 @@ void ScriptOutputDock::setScriptIsRunning(bool running)
  * Display an output message in the output dock
  * @param msg The msg
  * @param error Indicate that this is an error
+ * @param timestamp Indicates if the message has a timestamp attached to it. In this case the 
+ * message will appear on a new line regardless of the last cursor position
  */
-void ScriptOutputDock::displayOutputMessage(const QString &msg, bool error)
+void ScriptOutputDock::displayOutputMessage(const QString &msg, bool error, bool timestamp)
 {
+  // Ensure the cursor is in the correct position. This affects the font unfortunately
+  m_text_display->moveCursor(QTextCursor::End);
+  resetFont();
+
   if( error )
   {
     m_text_display->setTextColor(Qt::red);
@@ -110,7 +112,26 @@ void ScriptOutputDock::displayOutputMessage(const QString &msg, bool error)
   {
     m_text_display->setTextColor(Qt::black);
   }
-  m_text_display->textCursor().insertText(msg);
+  QString msg_to_print = msg;
+
+  if( error || timestamp )
+  {
+    if( timestamp )
+    {
+      QString separator(75, '-'); 
+      msg_to_print  = separator + "\n" + QDateTime::currentDateTime().toString() 
+	+ ": " + msg.trimmed() + "\n" + separator + '\n';
+    }
+
+    // Check for last character being a new line character unless we are at the start of the 
+    // scroll area
+    if( !m_text_display->text().endsWith('\n') && m_text_display->textCursor().position() != 0 )
+    {
+      m_text_display->textCursor().insertText("\n");    
+    }
+  }
+
+  m_text_display->textCursor().insertText(msg_to_print);    
   m_text_display->moveCursor(QTextCursor::End);
 }
 
@@ -163,6 +184,18 @@ void ScriptOutputDock::initActions()
   connect(m_copy, SIGNAL(activated()), m_text_display, SLOT(copy()));
 }
 
+/**
+ * Rest the font to default
+ */
+void ScriptOutputDock::resetFont()
+{
+  QFont f("Andale Mono");
+  f.setFixedPitch(true);
+  f.setPointSize(8);
+  m_text_display->setCurrentFont(f);
+  m_text_display->setMinimumWidth(5);
+  m_text_display->setMinimumHeight(5);
+}
 
 //***************************************************************************
 //
@@ -192,8 +225,8 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
   int dock_width = m_output_dock->geometry().width();
   m_output_dock->resize(dock_width, this->geometry().height() * 0.01);
   
-  connect(m_manager, SIGNAL(MessageToPrint(const QString&,bool)), m_output_dock, 
-	  SLOT(displayOutputMessage(const QString&, bool)));
+  connect(m_manager, SIGNAL(MessageToPrint(const QString&,bool,bool)), m_output_dock, 
+	  SLOT(displayOutputMessage(const QString&, bool,bool)));
   connect(m_manager, SIGNAL(ScriptIsActive(bool)), m_output_dock, SLOT(setScriptIsRunning(bool)));
 
   // Create menus and actions
