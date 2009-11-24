@@ -5,16 +5,13 @@
 #include "MantidAlgorithms/GetEi.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "Poco/Path.h"
-#include <algorithm>
 #include <vector>
-#include <iostream>
+#include <string>
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;
 
@@ -101,7 +98,9 @@ public:
 
   private:
     const std::string m_WS;
-    std::string m_MARI, m_MAPS, m_MERLIN;
+    std::string m_MARI;
+    std::string m_MAPS;
+    std::string m_MERLIN;
 };
 
 #endif /*GETE_ITEST_H_*/
