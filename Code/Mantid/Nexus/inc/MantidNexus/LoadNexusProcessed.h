@@ -67,7 +67,8 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
       /// Load a single entry
-      DataObjects::Workspace2D_sptr loadEntry(NXRoot & root, const std::string & entry_name);
+      DataObjects::Workspace2D_sptr loadEntry(NXRoot & root, const std::string & entry_name,
+                                              const double& progressStart, const double& progressRange);
       /// Read the data from the sample group
       void readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace);
       /// Read the spectra 
