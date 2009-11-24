@@ -2,6 +2,7 @@
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/FileProperty.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -106,9 +107,10 @@ void MedianDetectorTest::exec()
   double av = getMedian(counts);
   
   // The final piece of the calculation!
+  const std::string outFile = getPropertyValue("outputfile");
   std::vector<int> deadList;
   // Find report and mask any detectors whoses signals are outside the threshold range
-  FindDetects( counts, av, deadList, getPropertyValue("outputfile"));// function reads the properties ErrorThreshold, lower and upper thresholds
+  FindDetects(counts,av,deadList, outFile);// function reads the properties ErrorThreshold, lower and upper thresholds
 
   // Now the calculation is complete, setting the output property to the workspace will register it in the Analysis Data Service and allow the user to see it
   setProperty("OutputWorkspace", counts);
@@ -207,7 +209,6 @@ MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec, int lastS
 /// Calculates the sum counts in each histogram
 /** Runs Integration as a sub-algorithm to get the sum of counts in the 
 * range specfied by the algorithm properties Range_lower and Range_upper
-* @param input points to the workspace to modify
 * @param firstSpec the index number of the first histogram to analyse
 * @param lastSpec the index number of the last histogram to analyse
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
@@ -374,7 +375,7 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
 * @param filename write the list of spectra numbers for failed detectors to a file with this name
 * @return An array that of the index numbers of the histograms that fail
 */
-void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, double baseNum, std::vector<int> &badDets, std::string &filename)
+void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename)
 {
   g_log.information("Applying the criteria to find failing detectors");
   
@@ -466,14 +467,14 @@ void MedianDetectorTest::createOutputArray(const std::vector<int> &lowList, cons
   // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
   total.reserve(lowList.size()+highList.size());
 
-  for ( int i = 0; i < lowList.size(); ++i )
+  for ( std::vector<int>::size_type i = 0; i < lowList.size(); ++i )
   {
     std::vector<int> tStore = detMap.getDetectors(lowList[i]);
     total.resize(total.size()+tStore.size());
     copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
   }
 
-  for ( int i = 0; i < highList.size(); ++i )
+  for ( std::vector<int>::size_type i = 0; i < highList.size(); ++i )
   {
     std::vector<int> tStore = detMap.getDetectors(highList[i]);
     total.resize(total.size()+tStore.size());
@@ -579,7 +580,7 @@ double MedianDetectorTest::advanceProgress(double toAdd)
 }
 /** Update the percentage complete estimate assuming that the algorithm aborted a task with the given
 *  estimated run time
-*  @param the amount of algorithm run time that was saved by aborting a part of the algorithm, where m_TotalTime holds the total algorithm run time
+*  @param aborted the amount of algorithm run time that was saved by aborting a part of the algorithm, where m_TotalTime holds the total algorithm run time
 */
 void MedianDetectorTest::failProgress(RunTime aborted)
 {

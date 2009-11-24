@@ -163,14 +163,14 @@ void FindDetectorsOutsideLimits::createOutputArray(const std::vector<int> &lowLi
   // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
   total.reserve(lowList.size()+highList.size());
 
-  for ( int i = 0; i < lowList.size(); ++i )
+  for ( std::vector<int>::size_type i = 0; i < lowList.size(); ++i )
   {
     std::vector<int> tStore = detMap.getDetectors(lowList[i]);
     total.resize(total.size()+tStore.size());
     copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
   }
 
-  for ( int i = 0; i < highList.size(); ++i )
+  for ( std::vector<int>::size_type i = 0; i < highList.size(); ++i )
   {
     std::vector<int> tStore = detMap.getDetectors(highList[i]);
     total.resize(total.size()+tStore.size());

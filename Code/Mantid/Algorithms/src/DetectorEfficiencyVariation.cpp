@@ -394,7 +394,7 @@ void DetectorEfficiencyVariation::createOutputArray(const std::vector<int> &badL
   // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
   total.reserve(badList.size());
 
-  for ( int i = 0; i < badList.size(); ++i )
+  for ( std::vector<int>::size_type i = 0; i < badList.size(); ++i )
   {
     std::vector<int> tStore = detMap.getDetectors(badList[i]);
     total.resize(total.size()+tStore.size());

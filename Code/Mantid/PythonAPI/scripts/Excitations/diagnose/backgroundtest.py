@@ -1,4 +1,3 @@
-from os import remove
 from mantidsimple import *
 import BadDetectorTestFunctions as functions
 

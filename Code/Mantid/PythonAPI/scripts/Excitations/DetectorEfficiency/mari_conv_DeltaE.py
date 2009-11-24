@@ -2,7 +2,6 @@
 # applies unit conversion, detector efficiency and grouping correction to a
 # raw file and writes the result to a SPE file
 ###########################################
-from os import remove
 from mantidsimple import *
 
 inOutWS = "Last output from mari_conv_DeltaE.py"

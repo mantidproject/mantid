@@ -4,8 +4,9 @@
 # Failures from the first test are writen to the second white beams
 # detector list and histograms are zero but not failure from the comparison
 ########################################################
-from os import remove
+from mantidsimple import *
 import BadDetectorTestFunctions
+
 #--Start with settings
 THISTEST = 'Second white beam test'
 #setup some workspace names (we need that they don't already exist because they will be overwriten) to make things easier to read later on
