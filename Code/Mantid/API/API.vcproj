@@ -221,6 +221,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Function.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FunctionFactory.cpp"
 				>
 			</File>
@@ -395,6 +399,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CompositeFunctionTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\DeclareUserAlg.h"
 				>
 			</File>
@@ -411,7 +419,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\Function.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\FunctionFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FunctionTest.h"
 				>
 			</File>
 			<File
@@ -436,6 +452,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\IFunction.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\IFunctionTest.h"
 				>
 			</File>
 			<File
@@ -504,6 +524,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\ParameterTie.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ParameterTieTest.h"
 				>
 			</File>
 			<File

@@ -16,7 +16,10 @@ namespace Mantid
 namespace API
 {
   class IFunction;
-/** Ties fitting parameters.
+/** Ties fitting parameters. A tie is a formula that is used to 
+    calculate the value of a function parameter based on the values of other parameters.
+    A tied parameter is not considered independent and doesn't take part in fitting.
+    Its value is always calculated with its tie's formula.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 28/10/2009
@@ -47,21 +50,25 @@ public:
   /// Constructor
   ParameterTie(IFunction* funct,const std::string& parName);
   /// Destructor
-  ~ParameterTie();
+  virtual ~ParameterTie();
   /// Set the tie expression
-  void set(const std::string& expr);
+  virtual void set(const std::string& expr);
   /// Evaluate the expression
-  double eval();
-  /// The index of the tied parameter
-  int index()const{return m_iPar;}
+  virtual double eval();
+
+  const double* parameter()const{return m_par;}
+  /// Check if the tie has any references to certain parameters
+  bool findParameters(const std::vector<const double*>& pars)const;
+
+protected:
+  mu::Parser* m_parser;         ///< math parser
+  IFunction* m_function;        ///< Pointer to the function which parameter is to be tied
+  double* m_par;                ///< Pointer to the tied parameter
+  //int m_iPar;                   ///< index of the tied parameter
 
 private:
   /// MuParser callback function
   static double* AddVariable(const char *varName, void *palg);
-
-  mu::Parser* m_parser;         ///< math parser
-  IFunction* m_function;        ///< Pointer to the function which parameter is to be tied
-  int m_iPar;                   ///< index of the tied parameter
 };
 
 } // namespace API

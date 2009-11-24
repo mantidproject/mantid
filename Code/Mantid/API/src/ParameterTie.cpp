@@ -19,20 +19,7 @@ namespace API
                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     m_parser->SetVarFactory(AddVariable, this);
 
-    m_iPar = funct->parameterIndex(parName);
-
-    //std::string name;
-    //int index;
-    //parseName(std::string(parName),index,name);
-    //if (index < 0)
-    //  m_iPar = funct->parameterIndex(parName);
-    //else
-    //{
-    //  CompositeFunction* fun = dynamic_cast<CompositeFunction*>(m_function);
-    //  if (!fun)
-    //    throw std::invalid_argument("CompositeFunction expected");
-    //  m_iPar = fun->m_paramOffsets[index] + fun->getFunction(index)->parameterIndex(name);
-    //}
+    m_par = &funct->getParameter(parName);
   }
 
   /// Destructor
@@ -49,20 +36,6 @@ namespace API
   {
     ParameterTie& tie = *(ParameterTie*)palg;
     return &(tie.m_function->getParameter(std::string(varName)));
-
-    //std::string name;
-    //int index;
-    //parseName(std::string(varName),index,name);
-    //if (index < 0)
-    //  return &(tie.m_function->getParameter(name));
-    //else
-    //{
-    //  CompositeFunction* fun = dynamic_cast<CompositeFunction*>(tie.m_function);
-    //  if (!fun)
-    //    throw std::invalid_argument("CompositeFunction expected");
-    //  return &(fun->getFunction(index)->getParameter(name));
-    //}
-    //return 0;
   }
 
   /**
@@ -72,7 +45,7 @@ namespace API
   void ParameterTie::set(const std::string& expr)
   {
     try
-    {
+    {// Set the expression and initialize the variables
       m_parser->SetExpr(expr);
       m_parser->Eval();
     }
@@ -102,8 +75,30 @@ namespace API
       throw std::runtime_error("Error in expresseion");
     }
 
+    *m_par = res;
+
     return res;
   }
+
+  /** This method takes a list of double pointers and checks if any of them match
+   * to the variables defined in the internal mu::Parser
+   * @param pars A list of pointers to check.
+   * @return True if any of the pars is used as a variable in the mu::Parser
+   */
+  bool ParameterTie::findParameters(const std::vector<const double*>& pars)const
+  {
+    mu::varmap_type vars = m_parser->GetVar();
+    for(mu::varmap_type::const_iterator it=vars.begin();it!=vars.end();it++)
+    {
+      if (std::find(pars.begin(),pars.end(),it->second) != pars.end())
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -5,6 +5,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include <sstream>
 #include <iostream>
@@ -14,32 +15,7 @@ namespace Mantid
 namespace API
 {
 
-/// Copy contructor
-IFunction::IFunction(const IFunction& f)
-{
-  m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
-  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
-  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
-}
-
-///Assignment operator
-IFunction& IFunction::operator=(const IFunction& f)
-{
-  m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
-  m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
-  m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
-  return *this;
-}
-
-/// Destructor
-IFunction::~IFunction()
-{
-  for(std::vector<std::pair<int,ParameterTie*> >::iterator it = m_ties.begin();it != m_ties.end(); it++)
-      delete it->second;
-  m_ties.clear();
-}
-
-/** Base class implementation of derivative function throws error. This is to check if such a function is provided
+/** Base class implementation of derivative IFunction throws error. This is to check if such a function is provided
     by derivative class. In the derived classes this method must return the derivatives of the resuduals function
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
@@ -50,7 +26,7 @@ IFunction::~IFunction()
  */
 void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
-  throw Kernel::Exception::NotImplementedError("No derivative function provided");
+  throw Kernel::Exception::NotImplementedError("No derivative IFunction provided");
 }
 
 /// Initialize the function providing it the workspace
@@ -62,38 +38,26 @@ void IFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> w
   m_xMaxIndex = xMax;
 }
 
-/** Add a constraint
- *  @param ic Pointer to a constraint.
- */
-void IFunction::addConstraint(IConstraint* ic)
-{
-  m_constraints.push_back(ic);
-}
-
-
 /** This method calls function() and add any penalty to its output if constraints are violated.
 *
-* @param out function values of for the data points
+* @param out IFunction values of for the data points
 * @param xValues X values for data points
 * @param nData Number of data points
  */
 void IFunction::functionWithConstraint(double* out, const double* xValues, const int& nData)
 {
-  function(out, xValues, nData);
+  this->function(out, xValues, nData);
 
-
-  // Add penalty factor to function if any constraint is violated
-
+  // Add penalty factor if constraint is violated
+/*
   double penalty = 0.0;
-  for (unsigned i = 0; i < m_constraints.size(); i++)
-  {
-    penalty += m_constraints[i]->check(this);
-  }
 
-  for (int i = 0; i < nData; i++)
+  for (unsigned i = 0; m_constraints.size(); i++)
   {
-    out[i] += penalty;
+    penalty += m_constraints[i]->check(*this);
   }
+*/
+
 }
 
 
@@ -105,23 +69,11 @@ void IFunction::functionWithConstraint(double* out, const double* xValues, const
  */
 void IFunction::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
 {
-  functionDeriv(out, xValues, nData);
-
-  for (unsigned i = 0; i < m_constraints.size(); i++)
-  {  
-    boost::shared_ptr<std::vector<double> > penalty = m_constraints[i]->checkDeriv(this);
-
-    // for each active paramter check if there is a penalty and if yes add to derivatives
-    for (unsigned int ii = 0; ii<(*penalty).size(); ii++)
-      if ((*penalty)[ii] != 0.0)
-        out->addNumberToColumn((*penalty)[ii], ii);
-  }
+  this->functionDeriv(out, xValues, nData);
 }
 
-
-
 /** Update active parameters. Ties are applied.
- *  @param in Pointer to an array with active parameters values.
+ *  @param in Pointer to an array with active parameters values. Must be at least nActive() doubles long.
  */
 void IFunction::updateActive(const double* in)
 {
@@ -150,177 +102,12 @@ double IFunction::activeParameter(int i)const
   return parameter(j);
 }
 
-/** Reference to the i-th parameter.
- *  @param i The parameter index
+/** Create a new tie. IFunctions can have their own types of ties.
+ * @param parName The parameter name for this tie
  */
-double& IFunction::parameter(int i)
+ParameterTie* IFunction::createTie(const std::string& parName)
 {
-  if (i >= nParams())
-    throw std::out_of_range("Function parameter index out of range.");
-  return m_parameters[i];
-}
-
-/** Reference to the i-th parameter.
- *  @param i The parameter index
- */
-double IFunction::parameter(int i)const
-{
-  if (i >= nParams())
-    throw std::out_of_range("Function parameter index out of range.");
-  return m_parameters[i];
-}
-
-/**
- * Parameters by name.
- * @param name The name of the parameter.
- */
-double& IFunction::getParameter(const std::string& name)
-{
-  std::string ucName(name);
-  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it = 
-    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
-  if (it == m_parameterNames.end())
-  {
-    std::ostringstream msg;
-    msg << "Function parameter ("<<ucName<<") does not exist.";
-    throw std::invalid_argument(msg.str());
-  }
-  return m_parameters[it - m_parameterNames.begin()];
-}
-
-/**
- * Parameters by name.
- * @param name The name of the parameter.
- */
-double IFunction::getParameter(const std::string& name)const
-{
-  std::string ucName(name);
-  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it = 
-    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
-  if (it == m_parameterNames.end())
-  {
-    std::ostringstream msg;
-    msg << "Function parameter ("<<ucName<<") does not exist.";
-    throw std::invalid_argument(msg.str());
-  }
-  return m_parameters[it - m_parameterNames.begin()];
-}
-
-/**
- * Returns the index of the parameter named name.
- * @param name The name of the parameter.
- */
-int IFunction::parameterIndex(const std::string& name)const
-{
-  std::string ucName(name);
-  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it = 
-    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
-  if (it == m_parameterNames.end())
-  {
-    std::ostringstream msg;
-    msg << "Function parameter ("<<ucName<<") does not exist.";
-    throw std::invalid_argument(msg.str());
-  }
-  return int(it - m_parameterNames.begin());
-}
-
-/** Returns the name of parameter i
- * @param i The index of a parameter
- */
-std::string IFunction::parameterName(int i)const
-{
-  if (i >= nParams())
-    throw std::out_of_range("Function parameter index out of range.");
-  return m_parameterNames[i];
-}
-/**
- * Declare a new parameter. To used in the implementation'c constructor.
- * @param name The parameter name.
- * @param initValue The initial value for the parameter
- */
-void IFunction::declareParameter(const std::string& name,double initValue )
-{
-  std::string ucName(name);
-  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
-  std::vector<std::string>::const_iterator it = 
-    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
-  if (it != m_parameterNames.end())
-  {
-    std::ostringstream msg;
-    msg << "Function parameter ("<<ucName<<") already exists.";
-    throw std::invalid_argument(msg.str());
-  }
-
-  m_indexMap.push_back(nParams());
-  m_parameterNames.push_back(ucName);
-  m_parameters.push_back(initValue);
-}
-
-/**
- * Returns the "global" index of an active parameter.
- * @param i The index of an active parameter
- */
-int IFunction::indexOfActive(int i)const
-{
-  if (i >= nActive())
-    throw std::out_of_range("Function parameter index out of range.");
-
-  return m_indexMap[i];
-}
-
-/**
- * Returns the name of an active parameter.
- * @param i The index of an active parameter
- */
-std::string IFunction::nameOfActive(int i)const
-{
-  return m_parameterNames[indexOfActive(i)];
-}
-
-/**
- * Returns true if parameter i is active
- * @param i The index of a declared parameter
- */
-bool IFunction::isActive(int i)const
-{
-  return std::find(m_indexMap.begin(),m_indexMap.end(),i) != m_indexMap.end();
-}
-
-/**
- * @param i A declared parameter index to be removed from active
- */
-void IFunction::removeActive(int i)
-{
-  if (i >= nParams())
-    throw std::out_of_range("Function parameter index out of range.");
-
-  if (m_indexMap.size() == 0)
-  {
-    for(int j=0;j<nParams();j++)
-      if (j != i)
-        m_indexMap.push_back(j);
-  }
-  else
-  {
-    std::vector<int>::iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
-    if (it != m_indexMap.end())
-      m_indexMap.erase(it);
-  }
-}
-
-/**
- * @param i The index of a declared parameter
- * @return The index of declared parameter i in the list of active parameters or -1
- *         if the parameter is tied.
- */
-int IFunction::activeIndex(int i)const
-{
-  std::vector<int>::const_iterator it = std::find(m_indexMap.begin(),m_indexMap.end(),i);
-  if (it == m_indexMap.end()) return -1;
-  return int(it - m_indexMap.begin());
+  return new ParameterTie(this,parName);
 }
 
 /**
@@ -330,31 +117,36 @@ int IFunction::activeIndex(int i)const
  */
 void IFunction::tie(const std::string& parName,const std::string& expr)
 {
-  ParameterTie* tie = new ParameterTie(this,parName);
-  int i = tie->index();
+  ParameterTie* tie = this->createTie(parName);
+  int i = parameterIndex(tie->parameter());
+  if (i < 0)
+  {
+    delete tie;
+    throw std::logic_error("Parameter "+parName+" was not found.");
+  }
+
   if (!this->isActive(i))
   {
     delete tie;
     throw std::logic_error("Parameter "+parName+" is already tied.");
   }
   tie->set(expr);
-  m_ties.push_back(std::pair<int,ParameterTie*>(i,tie));
+  addTie(tie);
   this->removeActive(i);
 }
 
-/**
- * Apply the ties.
+/** Removes the tie off a parameter. The parameter becomes active
+ * This method can be used when constructing and editing the IFunction in a GUI
+ * @param parName The name of the paramter which ties will be removed.
  */
-void IFunction::applyTies()
+void IFunction::removeTie(const std::string& parName)
 {
-  for(std::vector<std::pair<int,ParameterTie*> >::iterator tie=m_ties.begin();tie!=m_ties.end();++tie)
-  {
-    this->parameter(tie->first) = tie->second->eval();
-  }
+  int i = parameterIndex(parName);
+  this->removeTie(i);
 }
 
 /**
- * Calculate the Jacobian with respect to parameters actually declared in the function
+ * Calculate the Jacobian with respect to parameters actually declared in the IFunction
  * @param out The output Jacobian
  * @param xValues The x-values
  * @param nData The number of data points (and x-values).
@@ -365,7 +157,7 @@ void IFunction::calJacobianForCovariance(Jacobian* out, const double* xValues, c
 }
 
 /**
- * Writes a string that can be used in Fit.Function to create a copy of this function
+ * Writes a string that can be used in Fit.IFunction to create a copy of this IFunction
  */
 std::string IFunction::asString()const
 {
@@ -379,7 +171,7 @@ std::string IFunction::asString()const
 /**
  * Operator <<
  * @param ostr The output stream
- * @param f The function
+ * @param f The IFunction
  */
 std::ostream& operator<<(std::ostream& ostr,const IFunction& f)
 {

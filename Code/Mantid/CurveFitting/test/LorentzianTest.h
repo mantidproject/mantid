@@ -131,7 +131,7 @@ public:
 
   }
 
-  void testAgainstMockDataWithConstraint()
+  void xtestAgainstMockDataWithConstraint()
   {
     Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());

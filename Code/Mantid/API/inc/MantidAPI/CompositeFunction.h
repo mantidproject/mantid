@@ -47,6 +47,8 @@ public:
   ///Destructor
   virtual ~CompositeFunction();
 
+              /* Overriden methods */
+
   /// Set the workspace
   void setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
   /// Returns the function's name
@@ -73,6 +75,8 @@ public:
   int nParams()const;
   /// Returns the index of parameter name
   int parameterIndex(const std::string& name)const;
+  /// Returns the index of a parameter
+  int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
   std::string parameterName(int i)const;
 
@@ -91,21 +95,45 @@ public:
 
   /// Check if a parameter is active
   bool isActive(int i)const;
-  /// Removes a parameter from the list of active
-  void removeActive(int i);
   /// Get active index for a declared parameter i
   int activeIndex(int i)const;
+  /// Removes a parameter from the list of active
+  void removeActive(int i);
+  /// Restores a declared parameter i to the active status
+  void restoreActive(int i);
 
-  /// Add a function
+  /// Apply the ties
+  void applyTies();
+  /// Remove all ties
+  void clearTies();
+  /// Removes i-th parameter's tie
+  bool removeTie(int i);
+  /// Get the tie of i-th parameter
+  ParameterTie* getTie(int i)const;
+
+  /// Add a constraint to function
+  virtual void addConstraint(IConstraint* ic);
+
+             /* CompositeFunction own methods */
+
+  /// Add a function at the back of the internal function list
   void addFunction(IFunction* f);
   /// Returns the pointer to i-th function
   IFunction* getFunction(int i)const;
   /// Number of functions
   int nFunctions()const{return m_functions.size();}
+  /// Remove a function
+  void removeFunction(int i);
+  /// Replace a function
+  void replaceFunction(int i,IFunction* f);
 
 protected:
   /// Function initialization. Declare function parameters in this method.
   void init();
+  /// Declare a new parameter
+  virtual void declareParameter(const std::string& name,double initValue = 0);
+  /// Add a new tie
+  virtual void addTie(ParameterTie* tie);
 
 private:
 
@@ -118,13 +146,15 @@ private:
 
   /// Pointers to the included funtions
   std::vector<IFunction*> m_functions;
-  /// Individual function parameter offsets
+  /// Individual function parameter offsets <function index in m_functions>
+  /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
   std::vector<int> m_activeOffsets;
-  /// Individual function parameter offsets
+  /// Individual function parameter offsets <function index in m_functions>
+  /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
   std::vector<int> m_paramOffsets;
-  /// Keeps the function number for each declared parameter
+  /// Keeps the function index for each declared parameter  <parameter declared index>
   std::vector<int> m_iFunction;
-  /// Keeps the function number for each active parameter
+  /// Keeps the function index for each active parameter <parameter active index>
   std::vector<int> m_iFunctionActive;
   /// Number of active parameters
   int m_nActive;

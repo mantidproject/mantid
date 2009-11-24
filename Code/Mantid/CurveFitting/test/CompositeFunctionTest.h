@@ -1,5 +1,5 @@
-#ifndef COMPOSITEFUNCTIONTEST_H_
-#define COMPOSITEFUNCTIONTEST_H_
+#ifndef CURVEFITTING_COMPOSITEFUNCTIONTEST_H_
+#define CURVEFITTING_COMPOSITEFUNCTIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -24,10 +24,10 @@ public:
   virtual void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax) = 0;
 };
 
-class Gauss: public IPeakFunction, public ITestFunction
+class CurveFittingGauss: public IPeakFunction, public ITestFunction
 {
 public:
-  Gauss()
+  CurveFittingGauss()
   {
     declareParameter("c");
     declareParameter("h",1.);
@@ -102,10 +102,10 @@ public:
 };
 
 
-class Linear: public IFunction, public ITestFunction
+class CurveFittingLinear: public Function, public ITestFunction
 {
 public:
-  Linear()
+  CurveFittingLinear()
   {
     declareParameter("a");
     declareParameter("b");
@@ -153,15 +153,18 @@ public:
     TS_ASSERT_EQUALS(xMax,m_xMaxIndex);
 
     for(int i=0;i<nFunctions();i++)
-      dynamic_cast<ITestFunction*>(getFunction(i))->testInit(ws,spec,xMin,xMax);
+    {
+      ITestFunction* f = dynamic_cast<ITestFunction*>(getFunction(i));
+      f->testInit(ws,spec,xMin,xMax);
+    }
   }
 
 };
 
-class CompositeFunctionTest : public CxxTest::TestSuite
+class CurveFittingCompositeFunctionTest : public CxxTest::TestSuite
 {
 public:
-  CompositeFunctionTest()
+  CurveFittingCompositeFunctionTest()
   {
     FrameworkManager::Instance();
   }
@@ -169,8 +172,8 @@ public:
   void testFit()
   {
     CompFunction *mfun = new CompFunction();
-    Gauss *g1 = new Gauss(),*g2 = new Gauss();
-    Linear *bk = new Linear();
+    CurveFittingGauss *g1 = new CurveFittingGauss(),*g2 = new CurveFittingGauss();
+    CurveFittingLinear *bk = new CurveFittingLinear();
 
     mfun->addFunction(bk);
     mfun->addFunction(g1);
@@ -363,6 +366,12 @@ private:
     }
   }
 
+  void interrupt()
+  {
+    int iii;
+    std::cerr<<"Enter a number:";
+    std::cin>>iii;
+  }
 };
 
-#endif /*COMPOSITEFUNCTIONTEST_H_*/
+#endif /*CURVEFITTING_COMPOSITEFUNCTIONTEST_H_*/

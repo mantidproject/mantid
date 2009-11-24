@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/Function.h"
 
 namespace Mantid
 {
@@ -43,7 +43,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LinearBackground : public API::IFunction
+    class DLLExport LinearBackground : public API::Function
     {
     public:
       /// Destructor

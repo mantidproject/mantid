@@ -11,12 +11,6 @@
 #include <string>
 #include <vector>
 
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
-
 namespace Mantid
 {
 
@@ -61,15 +55,11 @@ class IConstraint;
 class DLLExport IFunction
 {
 public:
-  /// Default constructor
-  IFunction(){}
-  /// Copy contructor
-  IFunction(const IFunction&);
-  /// Assignment operator
-  IFunction& operator=(const IFunction&);
   /// Virtual destructor
-  virtual ~IFunction();
+  virtual ~IFunction(){}
 
+  /// Returns the function's name
+  virtual std::string name()const = 0;
   /// Writes itself into a string
   virtual std::string asString()const;
   /// The string operator
@@ -79,8 +69,6 @@ public:
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
-  /// Returns the function's name
-  virtual std::string name()const = 0;
   /// Function you want to fit to.
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
   /// Derivatives of function with respect to active parameters
@@ -90,22 +78,24 @@ public:
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
   /// Address of i-th parameter
-  virtual double& parameter(int);
+  virtual double& parameter(int) = 0;
   /// Address of i-th parameter
-  virtual double parameter(int i)const;
+  virtual double parameter(int i)const = 0;
   /// Get parameter by name.
-  virtual double& getParameter(const std::string& name);
+  virtual double& getParameter(const std::string& name) = 0;
   /// Get parameter by name.
-  virtual double getParameter(const std::string& name)const;
+  virtual double getParameter(const std::string& name)const = 0;
   /// Total number of parameters
-  virtual int nParams()const{return m_parameters.size();}
+  virtual int nParams()const = 0;
   /// Returns the index of parameter name
-  virtual int parameterIndex(const std::string& name)const;
+  virtual int parameterIndex(const std::string& name)const = 0;
+  /// Returns the index of a parameter
+  virtual int parameterIndex(const double* p)const = 0;
   /// Returns the name of parameter i
-  virtual std::string parameterName(int i)const;
+  virtual std::string parameterName(int i)const = 0;
 
   /// Number of active (in terms of fitting) parameters
-  virtual int nActive()const{return m_indexMap.size();}
+  virtual int nActive()const = 0;
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
   virtual double activeParameter(int i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
@@ -113,24 +103,30 @@ public:
   /// Update parameters after a fitting iteration
   virtual void updateActive(const double* in);
   /// Returns "global" index of active parameter i
-  virtual int indexOfActive(int i)const;
+  virtual int indexOfActive(int i)const = 0;
   /// Returns the name of active parameter i
-  virtual std::string nameOfActive(int i)const;
+  virtual std::string nameOfActive(int i)const = 0;
 
   /// Check if a declared parameter i is active
-  virtual bool isActive(int i)const;
-  /// Removes a declared parameter i from the list of active
-  virtual void removeActive(int i);
+  virtual bool isActive(int i)const = 0;
   /// Get active index for a declared parameter i
-  virtual int activeIndex(int i)const;
+  virtual int activeIndex(int i)const = 0;
+  /// Removes a declared parameter i from the list of active
+  virtual void removeActive(int i) = 0;
+  /// Restores a declared parameter i to the active status
+  virtual void restoreActive(int i) = 0;
 
   /// Tie a parameter to other parameters (or a constant)
   virtual void tie(const std::string& parName,const std::string& expr);
   /// Apply the ties
-  virtual void applyTies();
+  virtual void applyTies() = 0;
+  /// Removes the tie off a parameter
+  virtual void removeTie(const std::string& parName);
+  /// Remove all ties
+  virtual void clearTies() = 0;
 
   /// Add a constraint to function
-  virtual void addConstraint(IConstraint* ic);
+  virtual void addConstraint(IConstraint* ic) = 0;
 
   /// This method calls function() and add any penalty to its output if constraints are violated
   void functionWithConstraint(double* out, const double* xValues, const int& nData);
@@ -138,10 +134,22 @@ public:
   void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData);
 
 protected:
+
   /// Function initialization. Declare function parameters in this method.
   virtual void init(){};
   /// Declare a new parameter
-  virtual void declareParameter(const std::string& name,double initValue = 0);
+  virtual void declareParameter(const std::string& name,double initValue = 0) = 0;
+
+  /// Create an instance of a tie without actually tying it to anything
+  virtual ParameterTie* createTie(const std::string& parName);
+  /// Add a new tie
+  virtual void addTie(ParameterTie* tie) = 0;
+  /// Removes i-th parameter's tie
+  virtual bool removeTie(int i) = 0;
+  /// Get the tie of i-th parameter
+  virtual ParameterTie* getTie(int i)const = 0;
+
+  friend class CompositeFunction;
 
   /// Shared pointer to the workspace
   boost::shared_ptr<const DataObjects::Workspace2D> m_workspace;
@@ -152,17 +160,6 @@ protected:
   /// Upper bin index
   int m_xMaxIndex;
 
-private:
-  /// The index map. m_indexMap[i] gives the total index for active parameter i
-  std::vector<int> m_indexMap;
-  /// Keeps parameter names
-  std::vector<std::string> m_parameterNames;
-  /// Keeps parameter values
-  std::vector<double> m_parameters;
-  /// Holds parameter ties
-  std::vector<std::pair<int,ParameterTie*> > m_ties;
-  /// Holds the constraints added to function
-  std::vector<IConstraint*> m_constraints;
 };
 
 /** Represents the Jacobian in functionDeriv. 
@@ -173,7 +170,7 @@ class Jacobian
 public:
   /**  Set a value to a Jacobian matrix element.
   *   @param iY The index of a data point.
-  *   @param iP The index of a declare parameter.
+  *   @param iP The index of a declared parameter.
   *   @param value The derivative value.
   */
   virtual void set(int iY, int iP, double value) = 0;
