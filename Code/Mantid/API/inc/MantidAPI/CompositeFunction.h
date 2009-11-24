@@ -146,15 +146,15 @@ private:
 
   /// Pointers to the included funtions
   std::vector<IFunction*> m_functions;
-  /// Individual function parameter offsets <function index in m_functions>
+  /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->activeParameter(m_activeOffsets[i]+1) gives second active parameter of i-th function
   std::vector<int> m_activeOffsets;
-  /// Individual function parameter offsets <function index in m_functions>
+  /// Individual function parameter offsets (function index in m_functions)
   /// e.g. m_functions[i]->parameter(m_paramOffsets[i]+1) gives second declared parameter of i-th function
   std::vector<int> m_paramOffsets;
-  /// Keeps the function index for each declared parameter  <parameter declared index>
+  /// Keeps the function index for each declared parameter  (parameter declared index)
   std::vector<int> m_iFunction;
-  /// Keeps the function index for each active parameter <parameter active index>
+  /// Keeps the function index for each active parameter (parameter active index)
   std::vector<int> m_iFunctionActive;
   /// Number of active parameters
   int m_nActive;

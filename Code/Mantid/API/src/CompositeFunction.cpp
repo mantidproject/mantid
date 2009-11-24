@@ -192,7 +192,7 @@ int CompositeFunction::parameterIndex(const std::string& name)const
 /**
  * Checks that a pointer points to a parameter of this function and returns its index.
  * @param p A pointer to a double variable.
- * @retrun The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
+ * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
  */
 int CompositeFunction::parameterIndex(const double* p)const
 {
@@ -612,7 +612,8 @@ bool CompositeFunction::removeTie(int i)
 }
 
 /** Get the tie of i-th parameter
- * @para i The parameter index
+ * @param i The parameter index
+ * @return A pointer to the tie.
  */
 ParameterTie* CompositeFunction::getTie(int i)const
 {

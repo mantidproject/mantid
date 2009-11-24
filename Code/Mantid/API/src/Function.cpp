@@ -129,7 +129,7 @@ int Function::parameterIndex(const std::string& name)const
 /**
  * Checks that a pointer points to a parameter of this function and returns its index.
  * @param p A pointer to a double variable.
- * @retrun The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
+ * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
  */
 int Function::parameterIndex(const double* p)const
 {
@@ -286,9 +286,15 @@ void Function::applyTies()
  */
 class TieEqual
 {
-  const double* m_par;
+  const double* m_par;///< pointer
 public:
+  /** Constructor
+   * @param par A pointer to the parameter you want to search for
+   */
   TieEqual(const double* par):m_par(par){}
+  /**
+   * @return True if found
+   */
   bool operator()(ParameterTie* p)
   {
     return p->parameter() == m_par;

@@ -56,6 +56,7 @@ public:
   /// Evaluate the expression
   virtual double eval();
 
+  /// Get a pointer to the tied parameter.
   const double* parameter()const{return m_par;}
   /// Check if the tie has any references to certain parameters
   bool findParameters(const std::vector<const double*>& pars)const;

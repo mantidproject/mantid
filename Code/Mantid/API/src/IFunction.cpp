@@ -29,7 +29,12 @@ void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& n
   throw Kernel::Exception::NotImplementedError("No derivative IFunction provided");
 }
 
-/// Initialize the function providing it the workspace
+/** Initialize the function providing it the workspace
+ * @param workspace The workspace to set
+ * @param wi The workspace index
+ * @param xMin The lower bin index
+ * @param xMax The upper bin index
+ */
 void IFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax)
 {
   m_workspace = workspace;
