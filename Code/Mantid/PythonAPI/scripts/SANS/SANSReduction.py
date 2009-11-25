@@ -1106,7 +1106,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 
 # These are to work around for the moment
 def plotSpectrum(name, spec):
-    return qti.app.mantidUI.plotSpectrum(name,spec)
+    return qti.app.mantidUI.pyPlotSpectraList([name],[spec])
 
 def mergePlots(g1, g2):
     return qti.app.mantidUI.mergePlots(g1,g2)
