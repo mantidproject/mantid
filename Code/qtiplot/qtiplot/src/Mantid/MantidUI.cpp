@@ -2129,6 +2129,34 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
 }
 
+/**
+ * This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
+ * argument
+ */
+MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs)
+{
+  // Convert the list into a map (with the same workspace as key in each case)
+  QMultiMap<QString,int> pairs;
+  QListIterator<QString> ws_itr(ws_names);
+  ws_itr.toBack();
+  QListIterator<int> spec_itr(spec_list);
+  spec_itr.toBack();
+
+  // Need to iterate through the set in reverse order to get the curves in the correct order on the plot
+  while( ws_itr.hasPrevious() )
+  {
+    QString workspace_name = ws_itr.previous();
+    while( spec_itr.hasPrevious() )
+    {
+      pairs.insert(workspace_name, spec_itr.previous());
+    }
+  }
+
+  // Pass over to the overloaded method
+  return plotSpectraList(pairs,errs);
+}
+
+
 
 /** Create a 1d graph form specified spectra in a MatrixWorkspace
     @param wsName Workspace name

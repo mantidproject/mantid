@@ -1731,7 +1731,7 @@ sipClass=sipFindClass(sipCpp->className());
 %End
 
 public:  
-  MultiLayer* plotSpectrum(const QString&,int,bool = false, bool = true,bool = false);
+  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   MantidMatrix* getMantidMatrix(const QString &);
   MultiLayer* plotTimeBin(const QString&,int,bool = false);  
@@ -1742,6 +1742,7 @@ public:
   bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QString&);
   QString getSelectedWorkspaceName();
   InstrumentWindow* getInstrumentView(const QString &);
-  private:
-MantidUI(const MantidUI &);
+  
+private:
+  MantidUI(const MantidUI &);
 };

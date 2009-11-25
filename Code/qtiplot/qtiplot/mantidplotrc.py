@@ -12,68 +12,85 @@ from MantidFramework import MantidPyFramework, WorkspaceProxy
 
 #-----------------------------------------------------------------
 
-def plotSpectrum(source, indices, error_bars = False, show_plot= True, show_matrix = False):
-    return __doPlotting(source,indices, False, error_bars, show_plot, show_matrix)
-        
+def plotSpectrum(source, indices, error_bars = False):
+    if isinstance(source, list):
+        workspace_names = __getWorkspaceNames(source)
+        if isinstance(indices, list):
+            return qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars)
+        else:
+            return qti.app.mantidUI.pyPlotSpectraList(workspace_names, [indices], error_bars)
+    else:
+        workspace_name  = __getWorkspaceNames([source])
+        if isinstance(indices, list):
+            return qti.app.mantidUI.pyPlotSpectraList(workspace_name, indices, error_bars)
+        else:
+            return qti.app.mantidUI.pyPlotSpectraList(workspace_name, [indices], error_bars)
+
 def plotBin(source, indices, error_bars = False, show_plot = True, show_matrix = False):
-    return __doPlotting(source,indices, True,error_bars, show_plot, show_matrix)
+    return __doPlotting(source,indices,error_bars, show_plot, show_matrix)
 
 # Legacy function
-def plotTimeBin(source, indices, error_bars = False, show_plot= True, show_matrix = False):
-    return plotBin(source,indices, error_bars, show_plot, show_matrix)
-
+plotTimeBin = plotBin
 #-----------------------------------------------------------------
+# Returns a list of workspace names for the given list that could contain workspace proxies
+def __getWorkspaceNames(source_list):
+    ws_names = []
+    for w in source_list:
+        if isinstance(w,WorkspaceProxy):
+            ws_names.append(w.getName())
+        else:
+            ws_names.append(w)
+    
+    return ws_names
+
 # Refactored functions for common code
-def __doPlotting(source, indices, binplot, error_bars, show_plot, show_matrix):
+def __doPlotting(source, indices, error_bars, show_plot, show_matrix):
     if isinstance(source, list):
-        return __PlotList(source, indices, binplot, error_bars, show_plot, show_matrix)
+        return __PlotList(source, indices, error_bars, show_plot, show_matrix)
     elif isinstance(source, str) or isinstance(source, WorkspaceProxy):
-        return __PlotSingle(source, indices, binplot, error_bars, show_plot, show_matrix)
+        return __PlotSingle(source, indices, error_bars, show_plot, show_matrix)
     else:
         raise TypeError("Source is not a workspace name or a workspace variable")
     
-def __PlotSingle(workspace, indices, binplot, error_bars, show_plot, show_matrix):
+def __PlotSingle(workspace, indices, error_bars, show_plot, show_matrix):
     '''
     Plot several workspace indices for the given workspace
     '''
     if isinstance(indices, list):
-        master_graph = __CallPlotFunction(workspace, indices[0], binplot, error_bars, show_plot, show_matrix)
+        master_graph = __CallPlotFunction(workspace, indices[0], error_bars, show_plot, show_matrix)
         for index in indices[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, index, binplot, error_bars, show_plot, show_matrix))
+            mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars, show_plot, show_matrix))
         return master_graph
     else:
-        return __CallPlotFunction(workspace, indices, binplot, error_bars, show_plot, show_matrix)
+        return __CallPlotFunction(workspace, indices, error_bars, show_plot, show_matrix)
     
-def __PlotList(workspace_list, indices, binplot, error_bars, show_plot, show_matrix):
+def __PlotList(workspace_list, indices, error_bars, show_plot, show_matrix):
     '''
     Plot the given indices across multiple workspaces on the same graph
     '''
     if isinstance(indices, list):
-        master_graph = __CallPlotFunction(workspace_list[0], indices[0], binplot, error_bars, show_plot, show_matrix)
+        master_graph = __CallPlotFunction(workspace_list[0], indices[0], error_bars, show_plot, show_matrix)
         start = 1
         for workspace in workspace_list:
             for index in indices[start:]:
-                mergePlots(master_graph, __CallPlotFunction(workspace, index, binplot, error_bars, show_plot, show_matrix))
+                mergePlots(master_graph, __CallPlotFunction(workspace, index, error_bars, show_plot, show_matrix))
                 start = 0
                 
         return master_graph
     else:
-        master_graph = __CallPlotFunction(workspace_list[0], indices, binplot, error_bars, show_plot, show_matrix)
+        master_graph = __CallPlotFunction(workspace_list[0], indices, error_bars, show_plot, show_matrix)
         for workspace in workspace_list[1:]:
-            mergePlots(master_graph, __CallPlotFunction(workspace, indices, binplot, error_bars, show_plot, show_matrix))
+            mergePlots(master_graph, __CallPlotFunction(workspace, indices, error_bars, show_plot, show_matrix))
         return master_graph
 
-def __CallPlotFunction(workspace, index, binplot, error_bars, show_plot, show_matrix):
+def __CallPlotFunction(workspace, index, error_bars, show_plot, show_matrix):
     '''Perform a call to the MantidPlot plotSpectrum function
     '''
     if isinstance(workspace, str):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    if binplot:
-        return qti.app.mantidUI.plotTimeBin(wkspname, index, error_bars, show_plot, show_matrix)
-    else:
-        return qti.app.mantidUI.plotSpectrum(wkspname, index, error_bars, show_plot, show_matrix)
+    return qti.app.mantidUI.plotTimeBin(wkspname, index, error_bars, show_plot, show_matrix)
 
 #-----------------------------------------------------------------
 

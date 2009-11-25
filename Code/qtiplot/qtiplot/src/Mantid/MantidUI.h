@@ -152,6 +152,9 @@ public:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=true);
     MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=true);
+    // The Python API wouldn't accept a multimap as a type so had to resort to this which is still more efficient than
+    // the old merge plots method
+    MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>& spec_list, bool errs=true); 
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true);
