@@ -217,7 +217,7 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
   }
 
   // Value has not been preset
-  if( (mBinMinValue - DBL_MAX)/DBL_MAX < 1e-08 )
+  if( std::fabs(mBinMinValue - DBL_MAX)/DBL_MAX < 1e-08 )
   {
     mBinMinValue = mWkspBinMin;
   }
