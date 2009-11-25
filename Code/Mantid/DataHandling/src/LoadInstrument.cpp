@@ -57,12 +57,10 @@ void LoadInstrument::init()
   exts.push_back("XML");
   exts.push_back("xml");
   declareProperty(new FileProperty("Filename","", FileProperty::Load, exts),
-		  "The filename (including its full or relative path) of an ISIS instrument\n"
-		  "defintion file");
-   declareProperty(new ArrayProperty<int>("MonitorList"),
-      "List of detector ids of monitors loaded in to the workspace");
-
-
+      "The filename (including its full or relative path) of an instrument\n"
+      "definition file");
+  declareProperty("MonitorList", std::vector<int>(), new NullValidator< std::vector<int> >,
+      "List of detector ids of monitors loaded in to the workspace", Direction::Output);
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
