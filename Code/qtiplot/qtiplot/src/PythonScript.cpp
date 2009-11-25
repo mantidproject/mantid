@@ -398,16 +398,17 @@ QString PythonScript::constructErrorMsg()
   }
   if( filename.isEmpty() && getLineOffset() >= 0 ) 
   {
-    marker_lineno += getLineOffset();
+    
     msg_lineno += getLineOffset();
   }
   if( getLineOffset() >= 0 )
   {
+    marker_lineno += getLineOffset();
     message += " on line " + QString::number(marker_lineno);
   }
   
-  message += ": " + exception_details;
-  if( !filename.isEmpty() && !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit))
+  message += ": \"" + exception_details.trimmed() + "\" ";
+  if( !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) && !filename.isEmpty() && !filename.contains("mantidsimple") )
   {
     message += "in file '" + QFileInfo(filename).fileName() + "' at line " + QString::number(msg_lineno);
   }

@@ -44,6 +44,10 @@ public:
   virtual std::string setValue(const std::string & filename);
 
 private:
+  /// Check that a given directory exists
+  void checkDirectory(const std::string & filepath) const;
+
+private:
   /// The action type of this property, i.e. load/save
   unsigned int m_action;
 };

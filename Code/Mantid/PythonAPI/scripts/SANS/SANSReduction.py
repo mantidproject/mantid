@@ -364,10 +364,10 @@ def LimitsWav(lmin, lmax, step, type):
     _readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type)
 
 def LimitsQ(qmin, qmax, step, type):
-    _readLimitValues('L/Q ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type)
+    _readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
 
 def LimitsQXY(qmin, qmax, step, type):
-    _readLimitValues('L/QXY ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type)
+    _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
 
 ######################### 
 # Sample geometry flag

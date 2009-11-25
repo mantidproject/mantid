@@ -43,9 +43,13 @@ bool FileProperty::isLoadProperty() const
  */
 std::string FileProperty::setValue(const std::string & filename)
 {
-  // If the path is absolute then don't do any searching
+  // If the path is absolute then don't do any searching but make sure the directory exists for a Save property
   if( Poco::Path(filename).isAbsolute() )
   {
+    if( !isLoadProperty() )
+    {
+      checkDirectory(filename);
+    }
     return PropertyWithValue<std::string>::setValue(filename);
   }
 
@@ -64,12 +68,12 @@ std::string FileProperty::setValue(const std::string & filename)
       std::vector<std::string>::const_iterator iend = search_dirs.end();
       for( std::vector<std::string>::const_iterator it = search_dirs.begin(); it != iend; ++it )
       {
-	check_file = Poco::File(Poco::Path(*it).resolve(relative.path()));
-	if( check_file.exists() )
-	{
-	  valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
-	  break;
-	}
+        check_file = Poco::File(Poco::Path(*it).resolve(relative.path()));
+        if( check_file.exists() )
+        {
+          valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
+          break;
+        }
       }
     }
   }
@@ -87,7 +91,7 @@ std::string FileProperty::setValue(const std::string & filename)
       // If we only have a stem filename, parent() will make save_dir empty and then Poco::File throws
       if( save_dir.toString().empty() )
       {
-	save_dir = Poco::Path::current();
+	      save_dir = Poco::Path::current();
       }
     }
     else
@@ -97,18 +101,7 @@ std::string FileProperty::setValue(const std::string & filename)
     if( Poco::File(save_dir).canWrite() )
     {
       std::string fullpath = save_dir.resolve(filename).toString();
-      // Check if the fullpath exists
-      Poco::Path stempath(fullpath);
-      stempath.makeParent();
-      if( !stempath.toString().empty() )
-      {
-	//Relative directory - Check it exists
-	Poco::File stem(stempath);
-	if( !stem.exists() )
-	{
-	  stem.createDirectory();
-	}
-      }
+      checkDirectory(fullpath);
       valid_string = PropertyWithValue<std::string>::setValue(fullpath);
     }
     else
@@ -117,4 +110,25 @@ std::string FileProperty::setValue(const std::string & filename)
     }
   }
   return valid_string;
+}
+
+/**
+ * Check whether a given directory exists and create it if it does not.
+ * @param fullpath The path to the directory, which can include file stem
+ */
+void FileProperty::checkDirectory(const std::string & fullpath) const
+{
+  Poco::Path stempath(fullpath);
+  if( stempath.isFile() )
+  {
+    stempath.makeParent();
+  }
+  if( !stempath.toString().empty() )
+  {
+    Poco::File stem(stempath);
+    if( !stem.exists() )
+    {
+      stem.createDirectories();
+    }
+  }
 }
