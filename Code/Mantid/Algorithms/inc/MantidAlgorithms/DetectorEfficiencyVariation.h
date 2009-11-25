@@ -92,7 +92,10 @@ namespace Mantid
       /// Overwrites the first workspace with bad spectrum information, also outputs an array and a file
       std::vector<int> findBad( MatrixWorkspace_sptr a, MatrixWorkspace_const_sptr b, const double average, double variation, const std::string &fileName);
       void createOutputArray(const std::vector<int> &badList, const SpectraDetectorMap& detMap, std::vector<int> &total) const;
-      void writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums) const;
+      void writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums);
+
+      /// the number of numbers on each line of the output file
+      static const int LINESIZE = 10;
 
       //a lot of data and functions for the progress bar
       /// For the progress bar, estimates of how many additions (and equilivent) member functions will do for each spectrum assuming large spectra where progressing times are likely to be long
@@ -102,6 +105,8 @@ namespace Mantid
         RTGetTotalCounts = 5000,
         /// Time taken to find failing detectors
         RTMarkDetects = 100,
+        /// time estimate for writing the output file
+        RTWriteFile = 200,
         /// The total of all run times
         RTTotal = 2*RTGetTotalCounts + RTMarkDetects
       };

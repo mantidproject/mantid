@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>
+#include <math.h>
 #include <string>
 #include <vector>
 #include <iomanip>
@@ -332,7 +333,7 @@ std::vector<int> DetectorEfficiencyVariation::findBad( MatrixWorkspace_sptr a,
     // move progress bar
     if (i % progStep == 0)
     {
-      advanceProgress( static_cast<double>(RTMarkDetects)*i/numSpec );
+      advanceProgress( progStep*static_cast<double>(RTMarkDetects)/numSpec );
       progress( m_fracDone );
       interruption_point();
     }
@@ -408,7 +409,7 @@ void DetectorEfficiencyVariation::createOutputArray(const std::vector<int> &badL
 *  @param problemIndices spectrum indices for spectra that lack, this function tries to convert them to spectra numbers adn catches any IndexError exceptions
 *  @param SpecNums contains the spectra numbers for all spectra indices
 */
-void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums) const
+void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums)
 {
   //it's not an error if the name is "", we just don't write anything
   if ( fname.empty() )
@@ -424,6 +425,11 @@ void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std:
     return;
   }
 
+  // for the progress bar
+  const double numLines = static_cast<double>(badList.size())/LINESIZE;
+  const int progStep = static_cast<int>(ceil(numLines/30));
+
+
   file << "---"<<name()<<"---" << std::endl;
   for ( std::vector<int>::size_type i = 0 ; i < badList.size(); ++i )
   {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
@@ -431,6 +437,12 @@ void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std:
     if ( (i + 1) % 10 == 0 || i == badList.size()-1 )
     {// write an end of line after every 10 entries or when we have run out of entries
       file << std::endl;
+      if ( i % progStep == 0 )
+      {
+        progress(advanceProgress( progStep*RTWriteFile/numLines) );
+        progress( m_fracDone );
+        interruption_point();
+      }
     }
     else
     {
@@ -451,6 +463,12 @@ void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std:
     if ( (i + 1) % 10 == 0 || i == problemIndices.size()-1 )
     {// write an end of line after every 10 entries and when we have run out of entries
       file << std::endl;
+      if ( i % progStep == 1 )
+      {
+        progress(advanceProgress( progStep*RTWriteFile/numLines) );
+        progress( m_fracDone );
+        interruption_point();
+      }
     }
     else
     {

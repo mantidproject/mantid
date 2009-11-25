@@ -74,7 +74,6 @@ public:
     // the numbers below are threshold values that were found by trail and error running these tests
     const int firstGoodSpec = 37;
     const int lastGoodSpec = 95;
-    const int savedBySignific = Nhist-1;
     for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(

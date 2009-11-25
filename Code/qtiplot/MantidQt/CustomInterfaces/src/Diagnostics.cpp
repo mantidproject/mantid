@@ -289,8 +289,16 @@ void Diagnostics::browseClicked(const QString &buttonDis)
 {
   QLineEdit *editBox;
   QStringList extensions;
-  if ( buttonDis == "InputFile") editBox = m_uiForm.leIFile;
-  if ( buttonDis == "OutputFile") editBox = m_uiForm.leOFile;
+  bool save = false;
+  if ( buttonDis == "InputFile")
+  {
+    editBox = m_uiForm.leIFile;
+  }
+  if ( buttonDis == "OutputFile")
+  {
+    editBox = m_uiForm.leOFile;
+    save = true;
+  }
   if ( buttonDis == "WBVanadium1")
   {
     editBox = m_uiForm.leWBV1;
@@ -305,7 +313,7 @@ void Diagnostics::browseClicked(const QString &buttonDis)
   if( ! editBox->text().isEmpty() )
   {
     QString dir = QFileInfo(editBox->text()).absoluteDir().path();
-    //STEVES I want the line below but I haven't got an algorithm name and so I guess this does make sense
+    //STEVES I want the line below but I haven't got an algorithm name and so I guess this doesn't make sense
 //  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   }  
 

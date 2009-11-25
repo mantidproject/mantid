@@ -5,13 +5,14 @@
 from mantidsimple import *
 
 inOutWS = "Last output from mari_conv_DeltaE.py"
-def NormaliseToWhiteBeam(WBV, MapFile, DataWS):
-    tempWS = "Temp workspace to be deleted soon"
-    LoadRaw(WBV, tempWS)
-    GroupDetectors( tempWS, tempWS, MapFile , KeepUngroupedSpectra=0)
-    Integration(tempWS, tempWS)
-    Divide(inOutWS, tempWS, DataWS)
-    mantid.deleteWorkspace(tempWS)
+
+def NormaliseToWhiteBeam(WBV_RAW, detMask):
+    WBTempWS = "Temp workspace to be deleted soon"
+    LoadRaw(WBV_RAW, WBTempWS)
+    Integration(WBTempWS, WBTempWS)
+    MaskDetectors(Workspace=WBTempWS, SpectraList=badDets)
+    Divide(inOutWS, WBTempWS, DataWS)
+    mantid.deleteWorkspace(WBTempWS)
 
 def loadMask(MaskFilename):
   inFile = open(MaskFilename)
@@ -29,7 +30,7 @@ def loadMask(MaskFilename):
 #--Get user input
 InSettings = EfficiencyScriptInputDialog(Message="Enter input and output file names and settings",\
 						      RawFile = "?c:/Mantid/test/Data/MAR11001.raw",\
-                                                      BinBoundaries = "?-12.0, 0.05, 12.0",\
+                                                      BinBoundaries = "?-10.0, 0.1, 12.9",\
 						      WhiteBeamVan = "?c:/Mantid/test/Data/MAR11060.raw",\
 						      DetectorMask = "?C:/Users/wht13119/Desktop/docs/MAR11001.mask",\
 						      MapFile = "?C:/Users/wht13119/Desktop/docs/Excitations/mari_res.map",\
@@ -43,10 +44,14 @@ try:#-now load the data and do the conversions
 
   LoadDetectorInfo(inOutWS, InSettings.getPropertyValue("RawFile"))
 
+  #--mask detectors that have failed tests run previously
+  badDets = []
   maskFilename = InSettings.getPropertyValue("DetectorMask") 
   if maskFilename != "":
     badDets = loadMask(maskFilename)
     MaskDetectors(Workspace=inOutWS, SpectraList=badDets)
+    
+  NormaliseToWhiteBeam(InSettings.getPropertyValue("WhiteBeamVan"), badDets)
     
   ConvertUnits(inOutWS, inOutWS, "DeltaE", "Direct", IncidentE, 0)
 
@@ -55,8 +60,6 @@ try:#-now load the data and do the conversions
   DetectorEfficiencyCor(inOutWS, inOutWS, IncidentE)  
     
   GroupDetectors( inOutWS, inOutWS, InSettings.getPropertyValue("MapFile") , KeepUngroupedSpectra=0)
-  
-  NormaliseToWhiteBeam(InSettings.getPropertyValue("WhiteBeamVan"), InSettings.getPropertyValue("MapFile"), inOutWS)
   
   # -output to a file in ASCII
   SaveSPE(inOutWS, InSettings.getPropertyValue("OutFile"))

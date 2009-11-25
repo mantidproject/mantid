@@ -408,7 +408,8 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
   {// update the progressbar information
     if (i % progStep == 0)
     {
-      progress(advanceProgress( int(RTMarkDetects*i/float(numSpec)) ));
+      progress(
+        advanceProgress(progStep*static_cast<double>(RTMarkDetects)/numSpec));
     }
 
     // get the address of the value of the first bin the spectra, we'll check it's value and then write a pass or fail to that location
@@ -488,7 +489,7 @@ void MedianDetectorTest::createOutputArray(const std::vector<int> &lowList, cons
 *  @param highList list of spectra numbers for spectra with integrals that are too high
 *  @param problemIndices spectrum indices for spectra that lack, this function tries to convert them to spectra numbers adn catches any IndexError exceptions
 */
-void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &problemIndices) const
+void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &problemIndices)
 {
   //it's not an error if the name is "", we just don't write anything
   if ( fname.empty() )
@@ -504,14 +505,24 @@ void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<i
     return;
   }
 
+  int numEntries = lowList.size() + highList.size() + problemIndices.size();
+  double numLines = static_cast<double>(numEntries)/LINESIZE;
+  int progStep = static_cast<int>(ceil(numLines/30));
+
   file << "---"<<name()<<"---" << std::endl;
   file << "----"<<"Low Integral : "<<lowList.size()<<"----" << std::endl;
   for ( std::vector<int>::size_type i = 0 ; i < lowList.size(); ++i )
   {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
     file << lowList[i];
-    if ( (i + 1) % 10 == 0 || i == lowList.size()-1 )
-    {// write an end of line after every 10 entries or when we have run out of entries
+    if ( (i + 1) % LINESIZE == 0 || i == lowList.size()-1 )
+    {// write an end of line after a lot of numbers have been written or when we have run out of entries
       file << std::endl;
+      if ( i % progStep == 0 )
+      {
+        progress(advanceProgress( progStep*RTWriteFile/numLines) );
+        progress( m_fracDone );
+        interruption_point();
+      }
     }
     else
     {
@@ -522,9 +533,15 @@ void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<i
   for ( std::vector<int>::size_type i = 0 ; i < highList.size(); ++i )
   {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
     file << highList[i];
-    if ( (i + 1) % 10 == 0 || i == highList.size()-1 )
-    {// write an end of line after every 10 entries and when we have run out of entries
+    if ( (i + 1) % LINESIZE == 0 || i == highList.size()-1 )
+    {// write an end of line after  a lot of numbers have been written  and when we have run out of entries
       file << std::endl;
+      if ( i % progStep == 1 )
+      {
+        progress(advanceProgress( progStep*RTWriteFile/numLines) );
+        progress( m_fracDone );
+        interruption_point();
+      }
     }
     else
     {
@@ -546,6 +563,12 @@ void MedianDetectorTest::writeFile(const std::string &fname, const std::vector<i
     if ( (i + 1) % 10 == 0 || i == problemIndices.size()-1 )
     {// write an end of line after every 10 entries and when we have run out of entries
       file << std::endl;
+      if ( i % progStep == 0 )
+      {
+        progress(advanceProgress( progStep*RTWriteFile/numLines) );
+        progress( m_fracDone );
+        interruption_point();
+      }
     }
     else
     {

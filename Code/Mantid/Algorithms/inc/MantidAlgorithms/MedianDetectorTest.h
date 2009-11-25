@@ -120,9 +120,11 @@ namespace Mantid
       /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
       void FindDetects(MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename);
       void createOutputArray(const std::vector<int> &lowList, const std::vector<int> &highList, const SpectraDetectorMap &detMap, std::vector<int> &total) const;
-      void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &notFound) const;
+      void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &notFound);
       void logFinds(std::vector<int>::size_type missing, std::vector<int>::size_type low, std::vector<int>::size_type high, int alreadyMasked);
 
+      /// the number of numbers on each line of the output file
+      static const int LINESIZE = 10;
       ///a flag int value to indicate that the value wasn't set by users
       static const int UNSETINT = INT_MAX-15;
 
@@ -140,8 +142,10 @@ namespace Mantid
         RTGetRate = 100,
         /// Time taken to find failing detectors
         RTMarkDetects = 200,
+        /// Time taken to find failing detectors
+        RTWriteFile = 200,
         /// The total of all run times
-        RTTotal = RTGetSolidAngle + RTGetTotalCounts + RTGetRate + RTMarkDetects
+        RTTotal = RTGetSolidAngle + RTGetTotalCounts + RTGetRate + RTMarkDetects + RTWriteFile
       };
       /// An estimate total number of additions or equilivent required to compute a spectrum 
       int m_TotalTime;

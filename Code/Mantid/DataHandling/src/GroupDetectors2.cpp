@@ -50,8 +50,8 @@ void GroupDetectors2::init()
   declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace","",Direction::Output),
     "The name of the output workspace");
   declareProperty(new FileProperty("MapFile", "", FileProperty::NoExistLoad),
-    "A file that contains lists of spectra to group. See the help for the\n"
-    "file format");
+    "A file that consists of lists of spectra numbers to group. See the help\n"
+    "for the file format");
   declareProperty(new ArrayProperty<int>("SpectraList"),
     "An array containing a list of the indexes of the spectra to combine\n"
     "(DetectorList and WorkspaceIndexList are ignored if this is set)" );
