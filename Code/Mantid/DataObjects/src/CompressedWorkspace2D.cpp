@@ -31,6 +31,8 @@ AbsManagedWorkspace2D<100>()
 */
 void CompressedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
 {
+  g_log.information("Creating a CompressedWorkspace2D");
+
   AbsManagedWorkspace2D<100>::init(NVectors,XLength,YLength);
 
   if (! Kernel::ConfigService::Instance().getValue("CompressedWorkspace.VectorsPerBlock", m_vectorsPerBlock) )
