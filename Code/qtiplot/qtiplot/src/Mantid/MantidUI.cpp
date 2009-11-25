@@ -2150,6 +2150,8 @@ MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QL
     {
       pairs.insert(workspace_name, spec_itr.previous());
     }
+    //Reset spectrum index pointer
+    spec_itr.toBack();
   }
 
   // Pass over to the overloaded method

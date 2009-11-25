@@ -439,6 +439,7 @@ void ScriptManagerWidget::executeInterpreter(const QString & code)
   runScriptCode(code);
   ScriptEditor *editor = currentEditor();
   editor->newInputLine();
+  setFocus();  
 }
 
 
