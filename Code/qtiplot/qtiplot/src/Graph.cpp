@@ -122,6 +122,7 @@ static const char *unzoom_xpm[]={
 #include "ApplicationWindow.h"
 #include "plot2D/ScaleEngine.h"
 #include "UserFunction.h"
+#include "Mantid/MantidCurve.h"
 
 #ifdef EMF_OUTPUT
 #include "EmfEngine.h"
@@ -2232,7 +2233,12 @@ QString Graph::saveCurves()
       QwtPlotItem *it = plotItem(i);
       if (!it)
         continue;
-
+	
+	 if (it->rtti()==QwtPlotItem::Rtti_PlotUserItem){   
+	    s+=((MantidCurve*)it)->saveToString();
+		continue;
+	 }
+	 
       if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
         s += ((Spectrogram *)it)->saveToString();
         continue;
@@ -2240,7 +2246,7 @@ QString Graph::saveCurves()
 
       DataCurve *c = dynamic_cast<DataCurve *>(it);
       if (!c) continue;
-      if (c->type() != ErrorBars){
+	  if (c->type() != ErrorBars){
         if (c->type() == Function){
           s += ((FunctionCurve *)c)->saveToString();
           continue;
@@ -2255,7 +2261,7 @@ QString Graph::saveCurves()
         s += QString::number(c->isVisible())+"\n";
         s += c->saveToString();
       } else if (c->type() == ErrorBars){
-        QwtErrorPlotCurve *er = (QwtErrorPlotCurve *)it;
+	  QwtErrorPlotCurve *er = (QwtErrorPlotCurve *)it;
         s += "ErrorBars\t";
         s += QString::number(er->direction())+"\t";
         s += er->masterCurve()->xColumnName() + "\t";
@@ -3814,8 +3820,8 @@ QString Graph::saveToString(bool saveAsTemplate)
 	s+=QString::number(this->frameGeometry().width())+"\t";
 	s+=QString::number(this->frameGeometry().height())+"\n";
 	s+=saveTitle();
-	s+="SpectrumList\t"+getSpectrumIndex()+"\n";
-	s+="Errors\t"+QString::number(getError())+"\n";
+	//s+="SpectrumList\t"+getSpectrumIndex()+"\n";
+	//s+="Errors\t"+QString::number(getError())+"\n";
 	s+="<Antialiasing>" + QString::number(d_antialiasing) + "</Antialiasing>\n";
 	s+="Background\t" + d_plot->paletteBackgroundColor().name() + "\t";
 	s+=QString::number(d_plot->paletteBackgroundColor().alpha()) + "\n";
@@ -3831,7 +3837,6 @@ QString Graph::saveToString(bool saveAsTemplate)
 	s+=saveAxesColors();
 	s+=saveAxesBaseline();
 	s+=saveCanvas();
-
     if (!saveAsTemplate)
 	   s+=saveCurves();
 
@@ -5233,35 +5238,4 @@ void Graph::changeIntensity(bool bIntensityChanged)
            
         }
 	}
-}
-
-void Graph::setspectrumIndexList(const QMultiMap<QString,int>& spindexlist)
-{
-  m_spindexList = spindexlist;
-}
-
-QMultiMap<QString,int> Graph::getspectrumIndexList() const
-{
-  return m_spindexList;
-}
-
-QString Graph::getSpectrumIndex()
-{
-  QMultiMap<QString,int> indexList=getspectrumIndexList();
-  QString spectrumList;
-  for(QMultiMap<QString,int>::const_iterator it=indexList.constBegin();it!=indexList.constEnd();++it)
-  {
-    QString temp;
-    temp.setNum(it.value());
-    if( spectrumList.isEmpty())
-    {
-      spectrumList=temp;
-    }
-    else
-    {
-      spectrumList+="\t";
-      spectrumList+=temp;
-    }
-  }
-  return spectrumList;
 }

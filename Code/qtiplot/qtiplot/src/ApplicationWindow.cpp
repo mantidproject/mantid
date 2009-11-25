@@ -3868,6 +3868,7 @@ void ApplicationWindow::openRecentProject(int index)
 ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factorySettings, bool newProject)
 {	
 	ApplicationWindow *app = this;
+
 	//if the current project is not saved prompt to save and close all windows opened
 	mantidUI->saveProject(saved);
 	if (newProject)
@@ -8499,7 +8500,6 @@ void ApplicationWindow::savedProject()
 {	QCoreApplication::processEvents();
 	if(actionSaveFile) actionSaveFile->setEnabled(false);
 	if(actionSaveProject)actionSaveProject->setEnabled(false);
-
 	saved = true;
 
 	Folder *f = projectFolder();
@@ -10383,21 +10383,11 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
 			ag->enableAutoscaling(autoscale2DPlots);
           		
 		}
-		else if( s.contains("SpectrumList"))
-		{   std::set<int>specIndexList;
-			//reading the error flag
-			QString errorline=list[j+1];
-			QStringList errorList=errorline.split("\t");
-			bool error =(bool)errorList[1].toInt();
-            //plotting the 1D Graph
-			QStringList fList=s.split("\t");
-			QStringList::const_iterator fListIter=fList.begin();
-			for(++fListIter;fListIter!=fList.end();++fListIter)
-			{  	if(!(*fListIter).isEmpty())specIndexList.insert((*fListIter).toInt());
-			}
-			for(std::set<int>::const_iterator it=specIndexList.begin();it!=specIndexList.end();it++)
-			{	new MantidCurve(wsName,ag,"spectra",*it,error);
-			}
+		else if( s.contains("MantidCurve")) //1D plot curves
+		{ 	QString mantidcurve=list[j];
+			QStringList curvelst=s.split("\t");
+			if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
+			new MantidCurve(curvelst[1],ag,curvelst[2],curvelst[3].toInt(),curvelst[4].toInt());
 		}
 		else if (s.left(10) == "Background"){
 			QStringList fList = s.split("\t");
@@ -13561,7 +13551,10 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 		if (exec)
 		  loadScript(file_name, exec, quit);
 		else
+		{
+		  saved=true;
 		  open(file_name, default_settings, false);
+		}
 	}
 }
 

@@ -90,6 +90,8 @@ public:
 
   /// Overriden virtual method
   void itemChanged();
+  /// saves the mantidcurve details to project file.
+  QString saveToString();
 
 private:
   /// Init the curve
@@ -121,6 +123,10 @@ private:
   static QString createCopyName(const QString& curveName);
   bool m_drawErrorBars;///< True for drawing error bars
   QString m_wsName;///< Workspace name. If empty the ws isn't in the data service
+  /// spectra string
+  QString m_type;
+  /// workspace index
+  int  m_index;
 };
 
 /**  This class implements QwtData with direct access to a MatrixWorkspace.

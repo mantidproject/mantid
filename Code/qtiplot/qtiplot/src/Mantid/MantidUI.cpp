@@ -2117,13 +2117,13 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   appWindow()->setPreferences(g);
   g->newLegend("");
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
-  {	
-    new MantidCurve(it.key(),g,"spectra",it.value(),errs);
+  {	  
+	  new MantidCurve(it.key(),g,"spectra",it.value(),errs);
   }
-  // setting the spectrum index and error flag list.
+   /*// setting the spectrum index and error flag list.
   //This is useful for loading/saving project file.
-  g->setspectrumIndexList(toPlot);
-  g->setError(errs);
+ g->setWorkspaceSpectrumMap(toPlot);
+  g->setError(errs);*/
   setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
 

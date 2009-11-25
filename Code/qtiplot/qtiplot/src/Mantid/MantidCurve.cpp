@@ -18,7 +18,7 @@
  */
 MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
-  :PlotCurve(name),m_drawErrorBars(err),m_wsName(wsName)
+  :PlotCurve(name),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
 {
   Mantid::API::MatrixWorkspace_sptr ws = 
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -40,7 +40,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
  */
 MantidCurve::MantidCurve(const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
- :PlotCurve(),m_drawErrorBars(err),m_wsName(wsName)
+ :PlotCurve(),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
 {
   Mantid::API::MatrixWorkspace_sptr ws = 
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -56,7 +56,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
 }
 
 MantidCurve::MantidCurve(const MantidCurve& c)
-  :PlotCurve(createCopyName(c.title().text())),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName)
+  :PlotCurve(createCopyName(c.title().text())),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName),m_type(c.m_type),m_index(c.m_index)
 {
   setData(c.data());
   observeDelete();
@@ -200,6 +200,15 @@ void MantidCurve::dataReset(const QString& wsName)
 void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
   emit resetData(QString::fromStdString(wsName));
+}
+/* This method saves the curve details to a string.
+ * Useful for loading/saving mantid project.
+*/
+QString MantidCurve::saveToString()
+{
+	QString s;
+	s="MantidCurve\t"+m_wsName+"\t"+m_type+"\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
+	return s;
 }
 
 //==========================================

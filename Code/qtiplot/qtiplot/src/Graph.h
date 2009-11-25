@@ -177,13 +177,6 @@ public:
 
   ///seeting a boolean flag to when the intensity(start and end values) changed
   void changeIntensity(bool bIntensityChanged);
-
-  void setspectrumIndexList(const QMultiMap<QString,int>& indexList);
-  bool getError()const {return m_errors;}
-  void setError(bool errors){m_errors=errors;}
-
-  QMultiMap<QString,int> getspectrumIndexList() const;
-  QString getSpectrumIndex();
 	
 public slots:
   //! Accessor method for #d_plot.
@@ -778,7 +771,7 @@ private:
 
   QMutex *m_mutex;
   /// The set of workpace-index pairs plotted in this graph
-  QMultiMap<QString,int> m_spindexList;
+  QMultiMap<QString,int> m_wsspectrumMap;
   // to save error flag to project file for 1 PD plot
   bool m_errors;
 };
