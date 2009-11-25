@@ -30,18 +30,38 @@ public:
 
     // now test the algorithm on a workspace
     // we don't need to load much of it, just the monitor spectra
-    loadRawFile(m_MARI, "2, 3");
+    loadRawFile(m_MARI1, "2, 3");
 
     grouper.setPropertyValue("InputWorkspace", m_WS);
     grouper.setPropertyValue("Monitor1Spec", "2");
     grouper.setPropertyValue("Monitor2Spec", "3");
     grouper.setPropertyValue("EnergyEstimate", "14");
-
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
+    double answer = grouper.getProperty("IncidentEnergy");
+    TS_ASSERT_DELTA( answer, 12.9448, 1e-4 )//HOMER got 12.973 meV for the IncidentEnergy of MAR11001
+    
+    // test some more MARI runs
+    loadRawFile(m_MARI2, "2, 3");
 
-    double finalAnswer = grouper.getProperty("IncidentEnergy");
-    TS_ASSERT_DELTA( finalAnswer, 12.9448, 1e-4 )//HOMER got 12.973 meV for the IncidentEnergy of MAR11001
+    grouper.setPropertyValue("InputWorkspace", m_WS);
+    grouper.setPropertyValue("Monitor1Spec", "2");
+    grouper.setPropertyValue("Monitor2Spec", "3");
+    grouper.setPropertyValue("EnergyEstimate", "7");
+    TS_ASSERT_THROWS_NOTHING( grouper.execute());
+    TS_ASSERT( grouper.isExecuted() );
+    answer = grouper.getProperty("IncidentEnergy");
+    TS_ASSERT_DELTA( answer, 6.82198, 1e-4 )//HOMER got 6.518 meV for the IncidentEnergy of MAR11001
+    
+    loadRawFile(m_MARI3, "2, 3");
+    grouper.setPropertyValue("InputWorkspace", m_WS);
+    grouper.setPropertyValue("Monitor1Spec", "2");
+    grouper.setPropertyValue("Monitor2Spec", "3");
+    grouper.setPropertyValue("EnergyEstimate", "680");
+    TS_ASSERT_THROWS_NOTHING( grouper.execute());
+    TS_ASSERT( grouper.isExecuted() );
+    answer = grouper.getProperty("IncidentEnergy");
+    TS_ASSERT_DELTA( answer, 717.9795, 1e-4 )//HOMER got 718.716 meV for the IncidentEnergy of MAR11001
   }
 
   // this test takes 10 seconds to run on Steve's computer
@@ -69,6 +89,7 @@ public:
 
     double finalAnswer = grouper.getProperty("IncidentEnergy");
     TS_ASSERT_DELTA( finalAnswer, 15.1006, 1e-4 )
+    AnalysisDataService::Instance().remove(m_WS);
   }
 
   void loadRawFile(std::string filename, std::string list)
@@ -86,21 +107,17 @@ public:
 
   GetEiTest() : m_WS("GetEi_input_workspace")
   {
-    m_MARI = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
+    m_MARI1 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
+    m_MARI2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR15306.raw").toString();
+    m_MARI3 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR15317.raw").toString();
     m_MAPS = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10266.RAW").toString();
     m_MERLIN = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.raw").toString();
-  }
-  
-  ~GetEiTest()
-  {
-    AnalysisDataService::Instance().remove(m_WS);
   }
 
   private:
     const std::string m_WS;
-    std::string m_MARI;
-    std::string m_MAPS;
-    std::string m_MERLIN;
+    std::string m_MARI1, m_MARI2, m_MARI3;
+    std::string m_MAPS, m_MERLIN;
 };
 
 #endif /*GETE_ITEST_H_*/
