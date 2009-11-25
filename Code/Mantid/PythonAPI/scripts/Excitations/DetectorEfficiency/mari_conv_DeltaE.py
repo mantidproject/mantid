@@ -11,8 +11,9 @@ def NormaliseToWhiteBeam(WBV_RAW, detMask):
     LoadRaw(WBV_RAW, WBTempWS)
     Integration(WBTempWS, WBTempWS)
     MaskDetectors(Workspace=WBTempWS, SpectraList=badDets)
-    Divide(inOutWS, WBTempWS, DataWS)
+    Divide(inOutWS, WBTempWS, inOutWS)
     mantid.deleteWorkspace(WBTempWS)
+    ReplaceSpecialValues(inOutWS, inOutWS, 0, 0, 0)
 
 def loadMask(MaskFilename):
   inFile = open(MaskFilename)
@@ -23,7 +24,7 @@ def loadMask(MaskFilename):
         numbers = line.split()
         for specNumber in numbers:
           spectraList = spectraList + ", " + specNumber
-  #get rid of the inital coma and space
+  #get rid of the first coma and space
   return spectraList[2:]
 
 #----Start here------------------
@@ -35,7 +36,7 @@ InSettings = EfficiencyScriptInputDialog(Message="Enter input and output file na
 						      DetectorMask = "?C:/Users/wht13119/Desktop/docs/MAR11001.mask",\
 						      MapFile = "?C:/Users/wht13119/Desktop/docs/Excitations/mari_res.map",\
 						      OutFile = "?C:/Users/wht13119/Desktop/docs/MAR11001_MANTID.spe"
-						      )  
+						      )
 try:#-now load the data and do the conversions
   LoadRaw(InSettings.getPropertyValue("RawFile"), inOutWS)
     
@@ -50,13 +51,13 @@ try:#-now load the data and do the conversions
   if maskFilename != "":
     badDets = loadMask(maskFilename)
     MaskDetectors(Workspace=inOutWS, SpectraList=badDets)
-    
-  NormaliseToWhiteBeam(InSettings.getPropertyValue("WhiteBeamVan"), badDets)
-    
+      
   ConvertUnits(inOutWS, inOutWS, "DeltaE", "Direct", IncidentE, 0)
 
   Rebin(inOutWS, inOutWS, InSettings.getPropertyValue("BinBoundaries"))
-
+  
+  NormaliseToWhiteBeam(InSettings.getPropertyValue("WhiteBeamVan"), badDets)
+  
   DetectorEfficiencyCor(inOutWS, inOutWS, IncidentE)  
     
   GroupDetectors( inOutWS, inOutWS, InSettings.getPropertyValue("MapFile") , KeepUngroupedSpectra=0)
