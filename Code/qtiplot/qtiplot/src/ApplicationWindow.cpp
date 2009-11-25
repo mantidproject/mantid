@@ -288,19 +288,13 @@ void ApplicationWindow::init(bool factorySettings)
 	consoleWindow->setWidget(console);
 	consoleWindow->hide();
 #endif
-	connect(scriptEnv, SIGNAL(error(const QString&,const QString&,int)),
-			this, SLOT(scriptError(const QString&,const QString&,int)));
-	connect(scriptEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
-
 	m_interpreterDock = new QDockWidget(this);
 	m_interpreterDock->setObjectName("interpreterDock"); // this is needed for QMainWindow::restoreState()
 	m_interpreterDock->setWindowTitle("Script Interpreter");
 	addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
-	// this has to be done after connecting scriptEnv
-	scriptEnv->initialize();
-	
-  m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
-  m_interpreterDock->setWidget(m_scriptInterpreter);
+  // This is a temporary widget so that when the settings are read the dock's visible state is correct.
+  // It gets replaced with the script widget after the scripting language has been read and set
+	m_interpreterDock->setWidget(new QTextEdit);
   m_interpreterDock->hide();
 
 	undoStackWindow = new QDockWidget(this);
@@ -377,13 +371,17 @@ void ApplicationWindow::init(bool factorySettings)
 
     //apply user settings
     updateAppFonts();
-    setScriptingLanguage(defaultScriptingLang);
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
+    // Scripting
+    setScriptingLanguage(defaultScriptingLang);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+    delete m_interpreterDock->widget();
+    m_interpreterDock->setWidget(m_scriptInterpreter);
     loadCustomActions();
 
-    //Mantid
-    mantidUI->init();
+  //Mantid
+  mantidUI->init();
 }
 
 void ApplicationWindow::initWindow()
