@@ -73,6 +73,7 @@ void AlgorithmDialog::initializeLayout()
   this->initLayout();
   // Check if there is any default input 
   this->parse();
+
   // Try to set these values. This will validate the defaults and mark those that are invalid, if any.
   setPropertyValues();
 
@@ -578,11 +579,25 @@ bool AlgorithmDialog::setPropertyValues()
     std::string error = "";
     if ( !value.isEmpty() )
     {//if there something in the box then use it
-      error = prop->setValue(value.toStdString());
+      try
+      {
+        error = prop->setValue(value.toStdString());
+      }
+      catch(std::exception & err_details)
+      {
+        error = err_details.what();
+      }
     }
     else
     {//else use the default which may or may not be a valid property value
-      error = prop->setValue(prop->getDefault());
+      try
+      {
+        error = prop->setValue(prop->getDefault());
+      }
+      catch(std::exception& err_details)
+      {
+        error = err_details.what();
+      }
     }
 
     if( error.empty() )
@@ -640,7 +655,6 @@ void AlgorithmDialog::setPresetValues(const QString & presetValues)
     storePropertyValue(name, value.trimmed());
   }
   setPropertyValues();
-  m_propertyValueMap.clear();
 }
 
 /** 
@@ -750,8 +764,7 @@ void AlgorithmDialog::setValue(QWidget *widget, const QString & propName)
   else
   {
     if( !property ) return;
-    if( !property->isValid().empty() ) return;
-    value = QString::fromStdString(property->value());
+    value = m_propertyValueMap.value(propName);
   }
 
   // Do the right thing for the widget type
@@ -778,7 +791,7 @@ void AlgorithmDialog::setValue(QWidget *widget, const QString & propName)
       //Need to check if this is the default value as we don't fill them in if they are
       if( m_python_arguments.contains(propName) || !property->isDefault() )
       {
-	textfield->setText(value);
+	      textfield->setText(value);
       }
     }
   }
