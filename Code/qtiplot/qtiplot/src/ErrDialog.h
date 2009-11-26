@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Add error bars dialog
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -39,54 +39,56 @@ class QPushButton;
 class QGroupBox;
 class QButtonGroup;
 class MdiSubWindow;
-	
+
 //! Add error bars dialog
 class ErrDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-	//! Constructor
-	/**
-	 * \param parent parent widget
-	 * \param fl window flags
-	 */
-    ErrDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
+  //! Constructor
+  /**
+   * \param parent parent widget
+   * \param fl window flags
+   */
+  ErrDialog( QWidget* parent = 0, Qt::WFlags fl = 0 );
 
 private:
-    QLabel* textLabel1;
-    QComboBox* nameLabel, *tableNamesBox, *colNamesBox;
-    QGroupBox *groupBox2;
-	QGroupBox *groupBox1, *groupBox3;
-	QButtonGroup *buttonGroup1, *buttonGroup2;
-    QRadioButton* standardBox, *columnBox;
-    QRadioButton* percentBox;
-    QLineEdit* valueBox;
-    QRadioButton* xErrBox;
-    QRadioButton* yErrBox;
-	QPushButton* buttonAdd;
-    QPushButton* buttonCancel;
-	QList<MdiSubWindow*> srcTables;
+  QLabel* textLabel1;
+  QComboBox* nameLabel, *tableNamesBox, *colNamesBox;
+  QGroupBox *groupBox2;
+  QGroupBox *groupBox1, *groupBox3;
+  QButtonGroup *buttonGroup1, *buttonGroup2;
+  QRadioButton* standardBox, *columnBox;
+  QRadioButton* percentBox;
+  QLineEdit* valueBox;
+  QRadioButton* xErrBox;
+  QRadioButton* yErrBox;
+  QPushButton* buttonAdd;
+  QPushButton* buttonCancel;
+  QList<MdiSubWindow*> srcTables;
+
+  QRadioButton* mantidBox;
 
 protected slots:
-	//! Set all string in the current language
-    virtual void languageChange();
+  //! Set all string in the current language
+  virtual void languageChange();
 
 public slots:
-	//! Add a plot definition
-	void add();
-	//! Supply the dialog with a curves list
-	void setCurveNames(const QStringList& names);
-	//! Supply the dialog with a tables list
-	void setSrcTables(QList<MdiSubWindow *> tables);
-	//! Select a table
-	void selectSrcTable(int tabnr);
+  //! Add a plot definition
+  void add();
+  //! Supply the dialog with a curves list
+  void setCurveNames(const QStringList& names);
+  //! Supply the dialog with a tables list
+  void setSrcTables(QList<MdiSubWindow *> tables);
+  //! Select a table
+  void selectSrcTable(int tabnr);
 
 signals:
-	//! This is usually connected to the main window's defineErrorBars() slot
-	void options(const QString& curveName, int type, const QString& percent,int direction);
-	//! This is usually connected to the main window's defineErrorBars() slot
-	void options(const QString& curveName, const QString& errColumnName, int direction);
+  //! This is usually connected to the main window's defineErrorBars() slot
+  void options(const QString& curveName, int type, const QString& percent,int direction);
+  //! This is usually connected to the main window's defineErrorBars() slot
+  void options(const QString& curveName, const QString& errColumnName, int direction);
 };
 
 #endif // ERRDIALOG_H

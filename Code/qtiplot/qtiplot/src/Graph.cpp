@@ -2785,6 +2785,19 @@ QwtErrorPlotCurve* Graph::addErrorBars(const QString& xColName, const QString& y
 	return er;
 }
 
+/** Adds the display of error to an existing MantidCurve
+ *  @param curveName The name of the curve
+ */
+void Graph::addMantidErrorBars(const QString& curveName)
+{
+  MantidCurve * c = dynamic_cast<MantidCurve*>(curve(curveName));
+  if (!c) return;
+
+  c->setErrorBars(true);
+  updatePlot();
+  return;
+}
+
 QwtPieCurve* Graph::plotPie(Table* w, const QString& name, const QPen& pen, int brush,
 					int size, int firstColor, int startRow, int endRow, bool visible,
 					double d_start_azimuth, double d_view_angle, double d_thickness,

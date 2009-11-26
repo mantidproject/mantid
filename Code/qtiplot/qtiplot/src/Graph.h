@@ -294,6 +294,9 @@ public slots:
                                   int type = 1, double width = 1, int cap = 8, const QColor& color = QColor(Qt::black),
                                   bool through = true, bool minus = true, bool plus = true);
 
+  /// Adds the errors to an existing MantidCurve
+  void addMantidErrorBars(const QString& curveName);
+
   void updateErrorBars(QwtErrorPlotCurve *er, bool xErr, double width, int cap, const QColor& c, bool plus, bool minus, bool through);
 
   //! Returns a valid master curve for the error bars curve.

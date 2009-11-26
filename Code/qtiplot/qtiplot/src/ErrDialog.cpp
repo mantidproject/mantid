@@ -5,7 +5,7 @@
     Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
     Description          : Add error bars dialog
-                           
+
  ***************************************************************************/
 
 /***************************************************************************
@@ -45,158 +45,178 @@
 
 
 ErrDialog::ErrDialog( QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+  : QDialog( parent, fl )
 {
-    setFocusPolicy( Qt::StrongFocus );
-    setSizeGripEnabled( true );
+  setFocusPolicy( Qt::StrongFocus );
+  setSizeGripEnabled( true );
 
-	QVBoxLayout *vbox1 = new QVBoxLayout();
-	vbox1->setSpacing (5);
-	
-	QHBoxLayout *hbox1 = new QHBoxLayout();
-	vbox1->addLayout(hbox1);
+  QVBoxLayout *vbox1 = new QVBoxLayout();
+  vbox1->setSpacing (5);
 
-    textLabel1 = new QLabel();
-	hbox1->addWidget(textLabel1);
+  QHBoxLayout *hbox1 = new QHBoxLayout();
+  vbox1->addLayout(hbox1);
 
-    nameLabel = new QComboBox();
-	hbox1->addWidget(nameLabel);
+  textLabel1 = new QLabel();
+  hbox1->addWidget(textLabel1);
 
-    groupBox1 = new QGroupBox(QString(tr("Source of errors")));
-	QGridLayout * gridLayout = new QGridLayout(groupBox1);
-	vbox1->addWidget(groupBox1);
+  nameLabel = new QComboBox();
+  hbox1->addWidget(nameLabel);
 
-	buttonGroup1 = new QButtonGroup();
-	buttonGroup1->setExclusive( true );
-	
-	columnBox = new QRadioButton();
-    columnBox->setChecked( true );
-	buttonGroup1->addButton(columnBox);
-	gridLayout->addWidget(columnBox, 0, 0 );
-	
-	colNamesBox = new QComboBox();
-    tableNamesBox = new QComboBox();
-	
-    QHBoxLayout * comboBoxes = new QHBoxLayout();
-	comboBoxes->addWidget(tableNamesBox);
-	comboBoxes->addWidget(colNamesBox);
+  groupBox1 = new QGroupBox(QString(tr("Source of errors")));
+  QGridLayout * gridLayout = new QGridLayout(groupBox1);
+  vbox1->addWidget(groupBox1);
 
-	gridLayout->addLayout(comboBoxes, 0, 1);
+  buttonGroup1 = new QButtonGroup();
+  buttonGroup1->setExclusive( true );
 
-    percentBox = new QRadioButton();
-	buttonGroup1->addButton(percentBox);
-	gridLayout->addWidget(percentBox, 1, 0 );
+  // Add option to use Mantid workspace errors
+  mantidBox = new QRadioButton();
+  // Since Mantid is only in English, just set this here instead of in languageChange()
+  mantidBox->setText("Mantid Workspace");
+  mantidBox->setChecked( true );
+  buttonGroup1->addButton(mantidBox);
+  gridLayout->addWidget(mantidBox, 0, 0);
 
-    valueBox = new QLineEdit();
-	valueBox->setText("5");
-    valueBox->setAlignment( Qt::AlignHCenter );
-	valueBox->setEnabled(false);
-	gridLayout->addWidget(valueBox, 1, 1);
-	
-	standardBox = new QRadioButton();
-	buttonGroup1->addButton(standardBox);
-	gridLayout->addWidget(standardBox, 2, 0 );
+  columnBox = new QRadioButton();
+  //columnBox->setChecked( true );  // Mantid button now takes this
+  buttonGroup1->addButton(columnBox);
+  gridLayout->addWidget(columnBox, 1, 0 );
 
-	groupBox3 = new QGroupBox(QString());
-	vbox1->addWidget(groupBox3);
-	QHBoxLayout * hbox2 = new QHBoxLayout(groupBox3);
+  colNamesBox = new QComboBox();
+  tableNamesBox = new QComboBox();
+  // Disable initially because Mantid button will be selected
+  colNamesBox->setEnabled(false);
+  tableNamesBox->setEnabled(false);
 
-	buttonGroup2 = new QButtonGroup();
-	buttonGroup2->setExclusive( true );
-	
-    xErrBox = new QRadioButton();
-	buttonGroup2->addButton(xErrBox);
-	hbox2->addWidget(xErrBox );
+  QHBoxLayout * comboBoxes = new QHBoxLayout();
+  comboBoxes->addWidget(tableNamesBox);
+  comboBoxes->addWidget(colNamesBox);
 
-    yErrBox = new QRadioButton();
-	buttonGroup2->addButton(yErrBox);
-	hbox2->addWidget(yErrBox );
-    yErrBox->setChecked( true );
-	
-	QVBoxLayout * vbox2 = new QVBoxLayout();
-	buttonAdd = new QPushButton();
-    buttonAdd->setDefault( true );
-	vbox2->addWidget(buttonAdd);
+  gridLayout->addLayout(comboBoxes, 1, 1);
 
-    buttonCancel = new QPushButton();
-	vbox2->addWidget(buttonCancel);
+  percentBox = new QRadioButton();
+  buttonGroup1->addButton(percentBox);
+  gridLayout->addWidget(percentBox, 2, 0 );
 
-	vbox2->addStretch(1);
-	
-	QHBoxLayout * hlayout1 = new QHBoxLayout(this);
-	hlayout1->addLayout(vbox1);
-    hlayout1->addLayout(vbox2);
-	
-    languageChange();
+  valueBox = new QLineEdit();
+  valueBox->setText("5");
+  valueBox->setAlignment( Qt::AlignHCenter );
+  valueBox->setEnabled(false);
+  gridLayout->addWidget(valueBox, 2, 1);
+
+  standardBox = new QRadioButton();
+  buttonGroup1->addButton(standardBox);
+  gridLayout->addWidget(standardBox, 3, 0 );
+
+  groupBox3 = new QGroupBox(QString());
+  vbox1->addWidget(groupBox3);
+  QHBoxLayout * hbox2 = new QHBoxLayout(groupBox3);
+
+  buttonGroup2 = new QButtonGroup();
+  buttonGroup2->setExclusive( true );
+
+  xErrBox = new QRadioButton();
+  // Disable initially because Mantid button will be selected
+  xErrBox->setEnabled(false);
+  buttonGroup2->addButton(xErrBox);
+  hbox2->addWidget(xErrBox );
+
+  yErrBox = new QRadioButton();
+  buttonGroup2->addButton(yErrBox);
+  hbox2->addWidget(yErrBox );
+  yErrBox->setChecked( true );
+
+  QVBoxLayout * vbox2 = new QVBoxLayout();
+  buttonAdd = new QPushButton();
+  buttonAdd->setDefault( true );
+  vbox2->addWidget(buttonAdd);
+
+  buttonCancel = new QPushButton();
+  vbox2->addWidget(buttonCancel);
+
+  vbox2->addStretch(1);
+
+  QHBoxLayout * hlayout1 = new QHBoxLayout(this);
+  hlayout1->addLayout(vbox1);
+  hlayout1->addLayout(vbox2);
+
+  languageChange();
 
   // signals and slots connections
-	connect( buttonAdd, SIGNAL( clicked() ), this, SLOT( add() ) );
-    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
-	connect( percentBox, SIGNAL( toggled(bool) ), valueBox, SLOT( setEnabled(bool) ) );
-	connect( columnBox, SIGNAL( toggled(bool) ), tableNamesBox, SLOT( setEnabled(bool) ) );
- 	connect( columnBox, SIGNAL( toggled(bool) ), colNamesBox, SLOT( setEnabled(bool) ) );
-	connect( tableNamesBox, SIGNAL( activated(int) ), this, SLOT( selectSrcTable(int) ));
+  connect( buttonAdd, SIGNAL( clicked() ), this, SLOT( add() ) );
+  connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+  connect( percentBox, SIGNAL( toggled(bool) ), valueBox, SLOT( setEnabled(bool) ) );
+  connect( columnBox, SIGNAL( toggled(bool) ), tableNamesBox, SLOT( setEnabled(bool) ) );
+  connect( columnBox, SIGNAL( toggled(bool) ), colNamesBox, SLOT( setEnabled(bool) ) );
+  connect( tableNamesBox, SIGNAL( activated(int) ), this, SLOT( selectSrcTable(int) ));
+  // Don't allow X errors to be asked for if choosing Mantid errors
+  connect( mantidBox, SIGNAL( toggled(bool) ), xErrBox, SLOT( setDisabled(bool) ) );
 }
 
 void ErrDialog::setCurveNames(const QStringList& names)
 {
-	nameLabel->addItems(names);
+  nameLabel->addItems(names);
 }
 
 void ErrDialog::setSrcTables(QList<MdiSubWindow *> tables)
 {
-	if (tables.isEmpty())
-		return;
-	
-	srcTables = tables;
-	tableNamesBox->clear();
+  if (tables.isEmpty())
+    return;
 
-    foreach(MdiSubWindow *w, tables)
-		tableNamesBox->insertItem(w->objectName());
+  srcTables = tables;
+  tableNamesBox->clear();
 
-	if (!nameLabel->currentText().contains("="))
-		tableNamesBox->setCurrentIndex(tableNamesBox->findText(nameLabel->currentText().split("_", QString::SkipEmptyParts)[0]));
-	selectSrcTable(tableNamesBox->currentIndex());
+  foreach(MdiSubWindow *w, tables)
+    tableNamesBox->insertItem(w->objectName());
+
+  if (!nameLabel->currentText().contains("="))
+    tableNamesBox->setCurrentIndex(tableNamesBox->findText(nameLabel->currentText().split("_", QString::SkipEmptyParts)[0]));
+  selectSrcTable(tableNamesBox->currentIndex());
 }
 
 void ErrDialog::selectSrcTable(int tabnr)
 {
-	colNamesBox->clear();
-	colNamesBox->addItems(((Table*)srcTables.at(tabnr))->colNames());
+  colNamesBox->clear();
+  colNamesBox->addItems(((Table*)srcTables.at(tabnr))->colNames());
 }
 
 void ErrDialog::add()
 {
-	int direction=-1;
-	if (xErrBox->isChecked()) 
-		direction = 0; 
-	else 
-		direction = 1;
+  int direction=-1;
+  if (xErrBox->isChecked())
+    direction = 0;
+  else
+    direction = 1;
 
-	if (columnBox->isChecked())
-		emit options(nameLabel->currentText(), tableNamesBox->currentText()+"_"+colNamesBox->currentText(), direction);	
-	else
-	{
-		int type;
-		if (percentBox->isChecked()) 
-			type = 0; 
-		else 
-			type = 1;
+  if (columnBox->isChecked())
+    emit options(nameLabel->currentText(), tableNamesBox->currentText()+"_"+colNamesBox->currentText(), direction);
+  else
+  {
+    int type;
+    if (percentBox->isChecked())
+      type = 0;
+    else if (standardBox->isChecked())
+      type = 1;
+    else // Use this if the Mantid box is checked
+      type = 2;
 
-		emit options(nameLabel->currentText(),type, valueBox->text(), direction);
-	}
+    emit options(nameLabel->currentText(),type, valueBox->text(), direction);
+  }
+
+  // If there's only one curve, close the dialog now
+  if ( nameLabel->count() == 1 ) reject();
 }
 
 void ErrDialog::languageChange()
 {
-    setWindowTitle( tr( "QtiPlot - Error Bars" ) );
-    xErrBox->setText( tr( "&X Error Bars" ) );
-	buttonAdd->setText( tr( "&Add" ) );
-    textLabel1->setText( tr( "Add Error Bars to" ) );
-    groupBox1->setTitle( tr( "Source of errors" ) );
-    percentBox->setText( tr( "Percent of data (%)" ) );
-    standardBox->setText( tr( "Standard Deviation of Data" ) );
-    yErrBox->setText( tr( "&Y Error Bars" ) );
-    buttonCancel->setText( tr( "&Close" ) );
-	columnBox->setText(tr("Existing column"));
+  setWindowTitle( tr( "QtiPlot - Error Bars" ) );
+  xErrBox->setText( tr( "&X Error Bars" ) );
+  buttonAdd->setText( tr( "&Add" ) );
+  textLabel1->setText( tr( "Add Error Bars to" ) );
+  groupBox1->setTitle( tr( "Source of errors" ) );
+  percentBox->setText( tr( "Percent of data (%)" ) );
+  standardBox->setText( tr( "Standard Deviation of Data" ) );
+  yErrBox->setText( tr( "&Y Error Bars" ) );
+  buttonCancel->setText( tr( "&Close" ) );
+  columnBox->setText(tr("Existing column"));
 }

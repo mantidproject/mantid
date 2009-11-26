@@ -3239,63 +3239,69 @@ void ApplicationWindow::addErrorBars()
 
 void ApplicationWindow::defineErrorBars(const QString& name, int type, const QString& percent, int direction)
 {
-    MdiSubWindow *w = activeWindow(MultiLayerWindow);
-    if (!w)
-		return;
+  MdiSubWindow *w = activeWindow(MultiLayerWindow);
+  if (!w)
+    return;
 
-	Graph* g = ((MultiLayer*)w)->activeGraph();
-	if (!g)
-		return;
+  Graph* g = ((MultiLayer*)w)->activeGraph();
+  if (!g)
+    return;
 
-	Table *t = table(name);
-	if (!t){//user defined function
-		QMessageBox::critical(this,tr("MantidPlot - Error bars error"),//Mantid
-				tr("This feature is not available for user defined function curves!"));
-		return;
-	}
+  if (type == 2) // A MantidCurve - do all the work in the Graph method
+  {
+    g->addMantidErrorBars(name);
+    return;
+  }
 
-	DataCurve *master_curve = (DataCurve *)g->curve(name);
-	QString xColName = master_curve->xColumnName();
-	if (xColName.isEmpty())
-		return;
+  Table *t = table(name);
+  if (!t){//user defined function
+    QMessageBox::critical(this,tr("MantidPlot - Error bars error"),//Mantid
+                          tr("This feature is not available for user defined function curves!"));
+    return;
+  }
 
-	if (direction == QwtErrorPlotCurve::Horizontal)
-		t->addCol(Table::xErr);
-	else
-		t->addCol(Table::yErr);
+  DataCurve *master_curve = (DataCurve *)g->curve(name);
+  QString xColName = master_curve->xColumnName();
+  if (xColName.isEmpty())
+    return;
 
-	int r=t->numRows();
-	int c=t->numCols()-1;
-	int ycol=t->colIndex(name);
-	if (!direction)
-		ycol=t->colIndex(xColName);
+  if (direction == QwtErrorPlotCurve::Horizontal)
+    t->addCol(Table::xErr);
+  else
+    t->addCol(Table::yErr);
 
-	QVarLengthArray<double> Y(r);
-	Y=t->col(ycol);
-	QString errColName=t->colName(c);
+  int r=t->numRows();
+  int c=t->numCols()-1;
+  int ycol=t->colIndex(name);
+  if (!direction)
+    ycol=t->colIndex(xColName);
 
-	double prc=percent.toDouble();
-	double moyenne=0.0;
-	if (type==0){
-		for (int i=0;i<r;i++){
-			if (!t->text(i,ycol).isEmpty())
-				t->setText(i, c, QString::number(Y[i]*prc/100.0,'g',15));
-		}
-	} else if (type==1) {
-		int i;
-		double dev=0.0;
-		for (i=0;i<r;i++)
-			moyenne+=Y[i];
-		moyenne/=r;
-		for (i=0;i<r;i++)
-			dev+=(Y[i]-moyenne)*(Y[i]-moyenne);
-		dev=sqrt(dev/(r-1));
-		for (i=0;i<r;i++){
-			if (!t->table()->item(i,ycol)->text().isEmpty())
-				t->setText(i, c, QString::number(dev, 'g', 15));
-		}
-	}
-	g->addErrorBars(xColName, name, t, errColName, direction);
+  QVarLengthArray<double> Y(r);
+  Y=t->col(ycol);
+  QString errColName=t->colName(c);
+
+  double prc=percent.toDouble();
+  double moyenne=0.0;
+  if (type==0){
+    for (int i=0;i<r;i++){
+      if (!t->text(i,ycol).isEmpty())
+        t->setText(i, c, QString::number(Y[i]*prc/100.0,'g',15));
+    }
+  } else if (type==1) {
+    int i;
+    double dev=0.0;
+    for (i=0;i<r;i++)
+      moyenne+=Y[i];
+    moyenne/=r;
+    for (i=0;i<r;i++)
+      dev+=(Y[i]-moyenne)*(Y[i]-moyenne);
+    dev=sqrt(dev/(r-1));
+    for (i=0;i<r;i++){
+      if (!t->table()->item(i,ycol)->text().isEmpty())
+        t->setText(i, c, QString::number(dev, 'g', 15));
+    }
+  }
+  g->addErrorBars(xColName, name, t, errColName, direction);
 }
 
 void ApplicationWindow::defineErrorBars(const QString& curveName, const QString& errColumnName, int direction)
