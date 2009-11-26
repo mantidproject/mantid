@@ -2791,7 +2791,12 @@ QwtErrorPlotCurve* Graph::addErrorBars(const QString& xColName, const QString& y
 void Graph::addMantidErrorBars(const QString& curveName)
 {
   MantidCurve * c = dynamic_cast<MantidCurve*>(curve(curveName));
-  if (!c) return;
+  // Give a message if this isn't a MantidCurve
+  if (!c)
+  {
+    QMessageBox::critical(0,"MantidPlot","The selected curve is not Mantid workspace data");
+    return;
+  }
 
   c->setErrorBars(true);
   updatePlot();

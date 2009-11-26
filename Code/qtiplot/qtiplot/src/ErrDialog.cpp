@@ -171,7 +171,7 @@ void ErrDialog::setSrcTables(QList<MdiSubWindow *> tables)
 
   if (!nameLabel->currentText().contains("="))
     tableNamesBox->setCurrentIndex(tableNamesBox->findText(nameLabel->currentText().split("_", QString::SkipEmptyParts)[0]));
-  selectSrcTable(tableNamesBox->currentIndex());
+  if (tableNamesBox->currentIndex() != -1) selectSrcTable(tableNamesBox->currentIndex());
 }
 
 void ErrDialog::selectSrcTable(int tabnr)
