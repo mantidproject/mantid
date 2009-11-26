@@ -10367,592 +10367,600 @@ TableStatistics* ApplicationWindow::openTableStatistics(const QStringList &flist
 }
 
 Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
-		const QStringList &list)
+                                    const QStringList &list)
 {
-	Graph* ag = 0;
-	int curveID = 0;
-	QString wsName;
-	for (int j=0;j<(int)list.count()-1;j++){
-		QString s=list[j];
-		if (s.contains ("ggeometry")){
-			QStringList fList=s.split("\t");
-			ag =(Graph*)plot->addLayer(fList[1].toInt(), fList[2].toInt(),
-					fList[3].toInt(), fList[4].toInt());
-			
-            ag->blockSignals(true);
-			ag->enableAutoscaling(autoscale2DPlots);
-          		
-		}
-		else if( s.contains("MantidCurve")) //1D plot curves
-		{ 	QString mantidcurve=list[j];
-			QStringList curvelst=s.split("\t");
-			if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
-			new MantidCurve(curvelst[1],ag,curvelst[2],curvelst[3].toInt(),curvelst[4].toInt());
-		}
-		else if (s.left(10) == "Background"){
-			QStringList fList = s.split("\t");
-			QColor c = QColor(fList[1]);
-			if (fList.count() == 3)
-				c.setAlpha(fList[2].toInt());
-			ag->setBackgroundColor(c);
-		}
-		else if (s.contains ("Margin")){
-			QStringList fList=s.split("\t");
-			ag->plotWidget()->setMargin(fList[1].toInt());
-		}
-		else if (s.contains ("Border")){
-			QStringList fList=s.split("\t");
-			ag->setFrame(fList[1].toInt(), QColor(fList[2]));
-		}
-		else if (s.contains ("EnabledAxes")){
-			QStringList fList=s.split("\t");
-			fList.pop_front();
-			for (int i=0; i<(int)fList.count(); i++)
-				ag->enableAxis(i, fList[i].toInt());
-		}
-		else if (s.contains ("AxesBaseline")){ 
-			QStringList fList = s.split("\t", QString::SkipEmptyParts);
-			fList.pop_front();
-			for (int i=0; i<(int)fList.count(); i++)
-				ag->setAxisMargin(i, fList[i].toInt());
-		}
-		else if (s.contains ("EnabledTicks"))
-		{//version < 0.8.6
-			QStringList fList=s.split("\t");
-			fList.pop_front();
-			fList.replaceInStrings("-1", "3");
-			ag->setMajorTicksType(fList);
-			ag->setMinorTicksType(fList);
-		}
-		else if (s.contains ("MajorTicks"))
-		{//version >= 0.8.6
-			QStringList fList=s.split("\t");
-			fList.pop_front();
-			ag->setMajorTicksType(fList);
-		}
-		else if (s.contains ("MinorTicks"))
-		{//version >= 0.8.6
-			QStringList fList=s.split("\t");
-			fList.pop_front();
-			ag->setMinorTicksType(fList);
-		}
-		else if (s.contains ("TicksLength")){
-			QStringList fList=s.split("\t");
-			ag->setTicksLength(fList[1].toInt(), fList[2].toInt());
-		}
-		else if (s.contains ("EnabledTickLabels")){
-			QStringList fList=s.split("\t");
-			fList.pop_front();
-			for (int i=0; i<int(fList.count()); i++)
-				ag->enableAxisLabels(i, fList[i].toInt());
-		}
-		else if (s.contains ("AxesColors")){
-			QStringList fList = s.split("\t");
-			fList.pop_front();
-			for (int i=0; i<int(fList.count()); i++)
-				ag->setAxisColor(i, QColor(fList[i]));
-		}
-		else if (s.contains ("AxesNumberColors")){
-			QStringList fList=QStringList::split ("\t",s,TRUE);
-			fList.pop_front();
-			for (int i=0; i<int(fList.count()); i++)
-				ag->setAxisLabelsColor(i, QColor(fList[i]));
-		}
-		else if (s.left(5)=="grid\t"){
-			ag->plotWidget()->grid()->load(s.split("\t"));
-		}
-		else if (s.startsWith ("<Antialiasing>") && s.endsWith ("</Antialiasing>")){
-			bool antialiasing = s.remove("<Antialiasing>").remove("</Antialiasing>").toInt();
-			ag->setAntialiasing(antialiasing);
-		}
-		else if (s.contains ("PieCurve")){
-			QStringList curve=s.split("\t");
-			if (!app->renamedTables.isEmpty()){
-				QString caption = (curve[1]).left((curve[1]).find("_",0));
-				if (app->renamedTables.contains(caption))
-				{//modify the name of the curve according to the new table name
-					int index = app->renamedTables.findIndex(caption);
-					QString newCaption = app->renamedTables[++index];
-					curve.replaceInStrings(caption+"_", newCaption+"_");
-				}
-			}
-			QPen pen = QPen(QColor(curve[3]), curve[2].toDouble(),Graph::getPenStyle(curve[4]));
+  Graph* ag = 0;
+  int curveID = 0;
+  QString wsName;
+  for (int j=0;j<(int)list.count()-1;j++){
+    QString s=list[j];
+    if (s.contains ("ggeometry")){
+      QStringList fList=s.split("\t");
+      ag =(Graph*)plot->addLayer(fList[1].toInt(), fList[2].toInt(),
+                                 fList[3].toInt(), fList[4].toInt());
 
-			Table *table = app->table(curve[1]);
-			if (table){
-				int startRow = 0;
-				int endRow = table->numRows() - 1;
-				int first_color = curve[7].toInt();
-				bool visible = true;
-				if (d_file_version >= 90)
-				{
-					startRow = curve[8].toInt();
-					endRow = curve[9].toInt();
-					visible = curve[10].toInt();
-				}
+      ag->blockSignals(true);
+      ag->enableAutoscaling(autoscale2DPlots);
 
-				if (d_file_version <= 89)
-					first_color = convertOldToNewColorIndex(first_color);
+    }
+    else if( s.contains("MantidCurve")) //1D plot curves
+    {
+      QStringList curvelst=s.split("\t");
+      if( !curvelst[1].isEmpty()&& !curvelst[2].isEmpty())
+      {
+        try {
+          new MantidCurve(curvelst[1],ag,curvelst[2],curvelst[3].toInt(),curvelst[4].toInt());
+        } catch (Mantid::Kernel::Exception::NotFoundError) {
+          // Get here if workspace name is invalid - shouldn't be possible, but just in case
+        } catch (std::invalid_argument& ex) {
+          // Get here if invalid spectrum number given - shouldn't be possible, but just in case
+        }
+      }
+    }
+    else if (s.left(10) == "Background"){
+      QStringList fList = s.split("\t");
+      QColor c = QColor(fList[1]);
+      if (fList.count() == 3)
+        c.setAlpha(fList[2].toInt());
+      ag->setBackgroundColor(c);
+    }
+    else if (s.contains ("Margin")){
+      QStringList fList=s.split("\t");
+      ag->plotWidget()->setMargin(fList[1].toInt());
+    }
+    else if (s.contains ("Border")){
+      QStringList fList=s.split("\t");
+      ag->setFrame(fList[1].toInt(), QColor(fList[2]));
+    }
+    else if (s.contains ("EnabledAxes")){
+      QStringList fList=s.split("\t");
+      fList.pop_front();
+      for (int i=0; i<(int)fList.count(); i++)
+        ag->enableAxis(i, fList[i].toInt());
+    }
+    else if (s.contains ("AxesBaseline")){
+      QStringList fList = s.split("\t", QString::SkipEmptyParts);
+      fList.pop_front();
+      for (int i=0; i<(int)fList.count(); i++)
+        ag->setAxisMargin(i, fList[i].toInt());
+    }
+    else if (s.contains ("EnabledTicks"))
+    {//version < 0.8.6
+      QStringList fList=s.split("\t");
+      fList.pop_front();
+      fList.replaceInStrings("-1", "3");
+      ag->setMajorTicksType(fList);
+      ag->setMinorTicksType(fList);
+    }
+    else if (s.contains ("MajorTicks"))
+    {//version >= 0.8.6
+      QStringList fList=s.split("\t");
+      fList.pop_front();
+      ag->setMajorTicksType(fList);
+    }
+    else if (s.contains ("MinorTicks"))
+    {//version >= 0.8.6
+      QStringList fList=s.split("\t");
+      fList.pop_front();
+      ag->setMinorTicksType(fList);
+    }
+    else if (s.contains ("TicksLength")){
+      QStringList fList=s.split("\t");
+      ag->setTicksLength(fList[1].toInt(), fList[2].toInt());
+    }
+    else if (s.contains ("EnabledTickLabels")){
+      QStringList fList=s.split("\t");
+      fList.pop_front();
+      for (int i=0; i<int(fList.count()); i++)
+        ag->enableAxisLabels(i, fList[i].toInt());
+    }
+    else if (s.contains ("AxesColors")){
+      QStringList fList = s.split("\t");
+      fList.pop_front();
+      for (int i=0; i<int(fList.count()); i++)
+        ag->setAxisColor(i, QColor(fList[i]));
+    }
+    else if (s.contains ("AxesNumberColors")){
+      QStringList fList=QStringList::split ("\t",s,TRUE);
+      fList.pop_front();
+      for (int i=0; i<int(fList.count()); i++)
+        ag->setAxisLabelsColor(i, QColor(fList[i]));
+    }
+    else if (s.left(5)=="grid\t"){
+      ag->plotWidget()->grid()->load(s.split("\t"));
+    }
+    else if (s.startsWith ("<Antialiasing>") && s.endsWith ("</Antialiasing>")){
+      bool antialiasing = s.remove("<Antialiasing>").remove("</Antialiasing>").toInt();
+      ag->setAntialiasing(antialiasing);
+    }
+    else if (s.contains ("PieCurve")){
+      QStringList curve=s.split("\t");
+      if (!app->renamedTables.isEmpty()){
+        QString caption = (curve[1]).left((curve[1]).find("_",0));
+        if (app->renamedTables.contains(caption))
+        {//modify the name of the curve according to the new table name
+          int index = app->renamedTables.findIndex(caption);
+          QString newCaption = app->renamedTables[++index];
+          curve.replaceInStrings(caption+"_", newCaption+"_");
+        }
+      }
+      QPen pen = QPen(QColor(curve[3]), curve[2].toDouble(),Graph::getPenStyle(curve[4]));
 
-				if (curve.size() >= 22){//version 0.9.3-rc3
-					ag->plotPie(table, curve[1], pen, curve[5].toInt(),
-						curve[6].toInt(), first_color, startRow, endRow, visible,
-						curve[11].toDouble(), curve[12].toDouble(), curve[13].toDouble(),
-						curve[14].toDouble(), curve[15].toDouble(), curve[16].toInt(),
-						curve[17].toInt(), curve[18].toInt(), curve[19].toInt(),
-						curve[20].toInt(), curve[21].toInt());
-				} else
-					ag->plotPie(table, curve[1], pen, curve[5].toInt(),
-						curve[6].toInt(), first_color, startRow, endRow, visible);
-			}
-		}else if (s.left(6)=="curve\t"){
-			QStringList curve = s.split("\t", QString::SkipEmptyParts);
-			if (!app->renamedTables.isEmpty()){
-				QString caption = (curve[2]).left((curve[2]).find("_",0));
-				if (app->renamedTables.contains(caption))
-				{//modify the name of the curve according to the new table name
-					int index = app->renamedTables.findIndex (caption);
-					QString newCaption = app->renamedTables[++index];
-					curve.replaceInStrings(caption+"_", newCaption+"_");
-				}
-			}
+      Table *table = app->table(curve[1]);
+      if (table){
+        int startRow = 0;
+        int endRow = table->numRows() - 1;
+        int first_color = curve[7].toInt();
+        bool visible = true;
+        if (d_file_version >= 90)
+        {
+          startRow = curve[8].toInt();
+          endRow = curve[9].toInt();
+          visible = curve[10].toInt();
+        }
 
-			CurveLayout cl;
-			cl.connectType=curve[4].toInt();
-			cl.lCol=curve[5].toInt();
-			if (d_file_version <= 89)
-				cl.lCol = convertOldToNewColorIndex(cl.lCol);
-			cl.lStyle=curve[6].toInt();
-			cl.lWidth=curve[7].toDouble();
-			cl.sSize=curve[8].toInt();
-			if (d_file_version <= 78)
-				cl.sType=Graph::obsoleteSymbolStyle(curve[9].toInt());
-			else
-				cl.sType=curve[9].toInt();
+        if (d_file_version <= 89)
+          first_color = convertOldToNewColorIndex(first_color);
 
-			cl.symCol=curve[10].toInt();
-			if (d_file_version <= 89)
-				cl.symCol = convertOldToNewColorIndex(cl.symCol);
-			cl.fillCol=curve[11].toInt();
-			if (d_file_version <= 89)
-				cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
-			cl.filledArea=curve[12].toInt();
-			cl.aCol=curve[13].toInt();
-			if (d_file_version <= 89)
-				cl.aCol = convertOldToNewColorIndex(cl.aCol);
-			cl.aStyle=curve[14].toInt();
-			if(curve.count() < 16)
-				cl.penWidth = cl.lWidth;
-			else if ((d_file_version >= 79) && (curve[3].toInt() == Graph::Box))
-				cl.penWidth = curve[15].toDouble();
-			else if ((d_file_version >= 78) && (curve[3].toInt() <= Graph::LineSymbols))
-				cl.penWidth = curve[15].toDouble();
-			else
-				cl.penWidth = cl.lWidth;
+        if (curve.size() >= 22){//version 0.9.3-rc3
+          ag->plotPie(table, curve[1], pen, curve[5].toInt(),
+                      curve[6].toInt(), first_color, startRow, endRow, visible,
+                      curve[11].toDouble(), curve[12].toDouble(), curve[13].toDouble(),
+                      curve[14].toDouble(), curve[15].toDouble(), curve[16].toInt(),
+                      curve[17].toInt(), curve[18].toInt(), curve[19].toInt(),
+                      curve[20].toInt(), curve[21].toInt());
+        } else
+          ag->plotPie(table, curve[1], pen, curve[5].toInt(),
+                      curve[6].toInt(), first_color, startRow, endRow, visible);
+      }
+    }else if (s.left(6)=="curve\t"){
+      QStringList curve = s.split("\t", QString::SkipEmptyParts);
+      if (!app->renamedTables.isEmpty()){
+        QString caption = (curve[2]).left((curve[2]).find("_",0));
+        if (app->renamedTables.contains(caption))
+        {//modify the name of the curve according to the new table name
+          int index = app->renamedTables.findIndex (caption);
+          QString newCaption = app->renamedTables[++index];
+          curve.replaceInStrings(caption+"_", newCaption+"_");
+        }
+      }
 
-            int plotType = curve[3].toInt();
-			Table *w = app->table(curve[2]);
-			PlotCurve *c = NULL;
-			if (w){
-				if(plotType == Graph::VectXYXY || plotType == Graph::VectXYAM){
-					QStringList colsList;
-					colsList<<curve[2]; colsList<<curve[20]; colsList<<curve[21];
-					if (d_file_version < 72)
-						colsList.prepend(w->colName(curve[1].toInt()));
-					else
-                        colsList.prepend(curve[1]);
+      CurveLayout cl;
+      cl.connectType=curve[4].toInt();
+      cl.lCol=curve[5].toInt();
+      if (d_file_version <= 89)
+        cl.lCol = convertOldToNewColorIndex(cl.lCol);
+      cl.lStyle=curve[6].toInt();
+      cl.lWidth=curve[7].toDouble();
+      cl.sSize=curve[8].toInt();
+      if (d_file_version <= 78)
+        cl.sType=Graph::obsoleteSymbolStyle(curve[9].toInt());
+      else
+        cl.sType=curve[9].toInt();
 
-					int startRow = 0;
-					int endRow = -1;
-					if (d_file_version >= 90){
-						startRow = curve[curve.count()-3].toInt();
-						endRow = curve[curve.count()-2].toInt();
-					}
+      cl.symCol=curve[10].toInt();
+      if (d_file_version <= 89)
+        cl.symCol = convertOldToNewColorIndex(cl.symCol);
+      cl.fillCol=curve[11].toInt();
+      if (d_file_version <= 89)
+        cl.fillCol = convertOldToNewColorIndex(cl.fillCol);
+      cl.filledArea=curve[12].toInt();
+      cl.aCol=curve[13].toInt();
+      if (d_file_version <= 89)
+        cl.aCol = convertOldToNewColorIndex(cl.aCol);
+      cl.aStyle=curve[14].toInt();
+      if(curve.count() < 16)
+        cl.penWidth = cl.lWidth;
+      else if ((d_file_version >= 79) && (curve[3].toInt() == Graph::Box))
+        cl.penWidth = curve[15].toDouble();
+      else if ((d_file_version >= 78) && (curve[3].toInt() <= Graph::LineSymbols))
+        cl.penWidth = curve[15].toDouble();
+      else
+        cl.penWidth = cl.lWidth;
 
-					c = (PlotCurve *)ag->plotVectorCurve(w, colsList, plotType, startRow, endRow);
+      int plotType = curve[3].toInt();
+      Table *w = app->table(curve[2]);
+      PlotCurve *c = NULL;
+      if (w){
+        if(plotType == Graph::VectXYXY || plotType == Graph::VectXYAM){
+          QStringList colsList;
+          colsList<<curve[2]; colsList<<curve[20]; colsList<<curve[21];
+          if (d_file_version < 72)
+            colsList.prepend(w->colName(curve[1].toInt()));
+          else
+            colsList.prepend(curve[1]);
 
-					if (d_file_version <= 77){
-						int temp_index = convertOldToNewColorIndex(curve[15].toInt());
-						ag->updateVectorsLayout(curveID, ColorBox::color(temp_index), curve[16].toDouble(), curve[17].toInt(),
-								curve[18].toInt(), curve[19].toInt(), 0, curve[20], curve[21]);
-					} else {
-						if(plotType == Graph::VectXYXY)
-							ag->updateVectorsLayout(curveID, curve[15], curve[16].toDouble(),
-								curve[17].toInt(), curve[18].toInt(), curve[19].toInt(), 0);
-						else
-							ag->updateVectorsLayout(curveID, curve[15], curve[16].toDouble(), curve[17].toInt(),
-									curve[18].toInt(), curve[19].toInt(), curve[22].toInt());
-					}
-				} else if (plotType == Graph::Box)
-					c = (PlotCurve *)ag->openBoxDiagram(w, curve, d_file_version);
-				else {
-					if (d_file_version < 72)
-						c = (PlotCurve *)ag->insertCurve(w, curve[1].toInt(), curve[2], plotType);
-					else if (d_file_version < 90)
-						c = (PlotCurve *)ag->insertCurve(w, curve[1], curve[2], plotType);
-					else{
-						int startRow = curve[curve.count()-3].toInt();
-						int endRow = curve[curve.count()-2].toInt();
-						c = (PlotCurve *)ag->insertCurve(w, curve[1], curve[2], plotType, startRow, endRow);
-					}
-				}
+          int startRow = 0;
+          int endRow = -1;
+          if (d_file_version >= 90){
+            startRow = curve[curve.count()-3].toInt();
+            endRow = curve[curve.count()-2].toInt();
+          }
 
-				if(plotType == Graph::Histogram){
-				    QwtHistogram *h = (QwtHistogram *)ag->curve(curveID);
-					if (d_file_version <= 76)
-                        h->setBinning(curve[16].toInt(),curve[17].toDouble(),curve[18].toDouble(),curve[19].toDouble());
-					else
-						h->setBinning(curve[17].toInt(),curve[18].toDouble(),curve[19].toDouble(),curve[20].toDouble());
-                    h->loadData();
-				}
+          c = (PlotCurve *)ag->plotVectorCurve(w, colsList, plotType, startRow, endRow);
 
-				if(plotType == Graph::VerticalBars || plotType == Graph::HorizontalBars ||
-						plotType == Graph::Histogram){
-					if (d_file_version <= 76)
-						ag->setBarsGap(curveID, curve[15].toInt(), 0);
-					else
-						ag->setBarsGap(curveID, curve[15].toInt(), curve[16].toInt());
-				}
-				ag->updateCurveLayout(c, &cl);
-				if (d_file_version >= 88){
-					if (c && c->rtti() == QwtPlotItem::Rtti_PlotCurve){
-						if (d_file_version < 90)
-							c->setAxis(curve[curve.count()-2].toInt(), curve[curve.count()-1].toInt());
-						else {
-							c->setAxis(curve[curve.count()-5].toInt(), curve[curve.count()-4].toInt());
-							c->setVisible(curve.last().toInt());
-						}
-					}
-				}
-			} else if(plotType == Graph::Histogram){//histograms from matrices
-                Matrix *m = app->matrix(curve[2]);
-                QwtHistogram *h = ag->restoreHistogram(m, curve);
-                ag->updateCurveLayout(h, &cl);
-			}
-			curveID++;
-		} else if (s == "<CurveLabels>"){
-			QStringList lst;
-			while ( s!="</CurveLabels>" ){
-				s = list[++j];
-				lst << s;
-			}
-			lst.pop_back();
-			ag->restoreCurveLabels(curveID - 1, lst);
-		} else if (s == "<Function>"){//version 0.9.5 
-			curveID++;
-			QStringList lst;
-			while ( s != "</Function>" ){
-				s = list[++j];
-				lst << s;
-			}
-			lst.pop_back();
-			ag->restoreFunction(lst);
-		} else if (s.contains ("FunctionCurve")){
-			QStringList curve = s.split("\t");
-			CurveLayout cl;
-			cl.connectType=curve[6].toInt();
-			cl.lCol=curve[7].toInt();
-			cl.lStyle=curve[8].toInt();
-			cl.lWidth=curve[9].toDouble();
-			cl.sSize=curve[10].toInt();
-			cl.sType=curve[11].toInt();
-			cl.symCol=curve[12].toInt();
-			cl.fillCol=curve[13].toInt();
-			cl.filledArea=curve[14].toInt();
-			cl.aCol=curve[15].toInt();
-			cl.aStyle=curve[16].toInt();
-			int current_index = 17;
-			if(curve.count() < 16)
-				cl.penWidth = cl.lWidth;
-			else if ((d_file_version >= 79) && (curve[5].toInt() == Graph::Box))
-				{
-					cl.penWidth = curve[17].toDouble();
-					current_index++;
-				}
-			else if ((d_file_version >= 78) && (curve[5].toInt() <= Graph::LineSymbols))
-				{
-					cl.penWidth = curve[17].toDouble();
-					current_index++;
-				}
-			else
-				cl.penWidth = cl.lWidth;
+          if (d_file_version <= 77){
+            int temp_index = convertOldToNewColorIndex(curve[15].toInt());
+            ag->updateVectorsLayout(curveID, ColorBox::color(temp_index), curve[16].toDouble(), curve[17].toInt(),
+                                    curve[18].toInt(), curve[19].toInt(), 0, curve[20], curve[21]);
+          } else {
+            if(plotType == Graph::VectXYXY)
+              ag->updateVectorsLayout(curveID, curve[15], curve[16].toDouble(),
+                                      curve[17].toInt(), curve[18].toInt(), curve[19].toInt(), 0);
+            else
+              ag->updateVectorsLayout(curveID, curve[15], curve[16].toDouble(), curve[17].toInt(),
+                                      curve[18].toInt(), curve[19].toInt(), curve[22].toInt());
+          }
+        } else if (plotType == Graph::Box)
+          c = (PlotCurve *)ag->openBoxDiagram(w, curve, d_file_version);
+        else {
+          if (d_file_version < 72)
+            c = (PlotCurve *)ag->insertCurve(w, curve[1].toInt(), curve[2], plotType);
+          else if (d_file_version < 90)
+            c = (PlotCurve *)ag->insertCurve(w, curve[1], curve[2], plotType);
+          else{
+            int startRow = curve[curve.count()-3].toInt();
+            int endRow = curve[curve.count()-2].toInt();
+            c = (PlotCurve *)ag->insertCurve(w, curve[1], curve[2], plotType, startRow, endRow);
+          }
+        }
 
-			PlotCurve *c = (PlotCurve *)ag->insertFunctionCurve(curve[1], curve[2].toInt(), d_file_version);
-			ag->setCurveType(curveID, curve[5].toInt());
-			ag->updateCurveLayout(c, &cl);
-			if (d_file_version >= 88){
-				QwtPlotCurve *c = ag->curve(curveID);
-				if (c){
-                    if(current_index + 1 < curve.size())
-                        c->setAxis(curve[current_index].toInt(), curve[current_index+1].toInt());
-					if (d_file_version >= 90 && current_index+2 < curve.size())
-						c->setVisible(curve.last().toInt());
-                    else
-                        c->setVisible(true);
-				}
+        if(plotType == Graph::Histogram){
+          QwtHistogram *h = (QwtHistogram *)ag->curve(curveID);
+          if (d_file_version <= 76)
+            h->setBinning(curve[16].toInt(),curve[17].toDouble(),curve[18].toDouble(),curve[19].toDouble());
+          else
+            h->setBinning(curve[17].toInt(),curve[18].toDouble(),curve[19].toDouble(),curve[20].toDouble());
+          h->loadData();
+        }
 
-			}
-			curveID++;
-		}
-		else if (s.contains ("ErrorBars")){
-			QStringList curve = s.split("\t", QString::SkipEmptyParts);
-			if (!app->renamedTables.isEmpty()){
-				QString caption = (curve[4]).left((curve[4]).find("_",0));
-				if (app->renamedTables.contains(caption))
-				{//modify the name of the curve according to the new table name
-					int index = app->renamedTables.findIndex (caption);
-					QString newCaption = app->renamedTables[++index];
-					curve.replaceInStrings(caption+"_", newCaption+"_");
-				}
-			}
-			Table *w = app->table(curve[3]);
-			Table *errTable = app->table(curve[4]);
-			if (w && errTable){
-				ag->addErrorBars(curve[2], curve[3], errTable, curve[4], curve[1].toInt(),
-						curve[5].toDouble(), curve[6].toInt(), QColor(curve[7]),
-						curve[8].toInt(), curve[10].toInt(), curve[9].toInt());
-			}
-			curveID++;
-		}
-		else if (s == "<spectrogram>"){
-			QStringList lst;
-			lst<<list[0];
-			lst<<list[1];
-       		QString lineone=lst[1];
-			QStringList lineonelst=lineone.split("\t");
-			QString name=lineonelst[1];
-			QStringList qlist=name.split(" ");
-			std::string specgramwsName =qlist[1].toStdString();
-		
-			lst.clear();
-			while ( s!="</spectrogram>" ){
-				s = list[++j];
-				lst << s;
-			}
-			lst.pop_back();
-			openSpectrogram(ag,specgramwsName,lst);
-			curveID++;
-		}
-		else if (s.left(6) == "scale\t"){
-			QStringList scl = s.split("\t");
-			scl.pop_front();
-			int size = scl.count();
-			if (d_file_version < 88){ 
-				double step = scl[2].toDouble();
-				if (scl[5] == "0")
-					step = 0.0;
-				ag->setScale(QwtPlot::xBottom, scl[0].toDouble(), scl[1].toDouble(), step,
-						scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
-				ag->setScale(QwtPlot::xTop, scl[0].toDouble(), scl[1].toDouble(), step,
-						scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
+        if(plotType == Graph::VerticalBars || plotType == Graph::HorizontalBars ||
+           plotType == Graph::Histogram){
+          if (d_file_version <= 76)
+            ag->setBarsGap(curveID, curve[15].toInt(), 0);
+          else
+            ag->setBarsGap(curveID, curve[15].toInt(), curve[16].toInt());
+        }
+        ag->updateCurveLayout(c, &cl);
+        if (d_file_version >= 88){
+          if (c && c->rtti() == QwtPlotItem::Rtti_PlotCurve){
+            if (d_file_version < 90)
+              c->setAxis(curve[curve.count()-2].toInt(), curve[curve.count()-1].toInt());
+            else {
+              c->setAxis(curve[curve.count()-5].toInt(), curve[curve.count()-4].toInt());
+              c->setVisible(curve.last().toInt());
+            }
+          }
+        }
+      } else if(plotType == Graph::Histogram){//histograms from matrices
+        Matrix *m = app->matrix(curve[2]);
+        QwtHistogram *h = ag->restoreHistogram(m, curve);
+        ag->updateCurveLayout(h, &cl);
+      }
+      curveID++;
+    } else if (s == "<CurveLabels>"){
+      QStringList lst;
+      while ( s!="</CurveLabels>" ){
+        s = list[++j];
+        lst << s;
+      }
+      lst.pop_back();
+      ag->restoreCurveLabels(curveID - 1, lst);
+    } else if (s == "<Function>"){//version 0.9.5
+      curveID++;
+      QStringList lst;
+      while ( s != "</Function>" ){
+        s = list[++j];
+        lst << s;
+      }
+      lst.pop_back();
+      ag->restoreFunction(lst);
+    } else if (s.contains ("FunctionCurve")){
+      QStringList curve = s.split("\t");
+      CurveLayout cl;
+      cl.connectType=curve[6].toInt();
+      cl.lCol=curve[7].toInt();
+      cl.lStyle=curve[8].toInt();
+      cl.lWidth=curve[9].toDouble();
+      cl.sSize=curve[10].toInt();
+      cl.sType=curve[11].toInt();
+      cl.symCol=curve[12].toInt();
+      cl.fillCol=curve[13].toInt();
+      cl.filledArea=curve[14].toInt();
+      cl.aCol=curve[15].toInt();
+      cl.aStyle=curve[16].toInt();
+      int current_index = 17;
+      if(curve.count() < 16)
+        cl.penWidth = cl.lWidth;
+      else if ((d_file_version >= 79) && (curve[5].toInt() == Graph::Box))
+      {
+        cl.penWidth = curve[17].toDouble();
+        current_index++;
+      }
+      else if ((d_file_version >= 78) && (curve[5].toInt() <= Graph::LineSymbols))
+      {
+        cl.penWidth = curve[17].toDouble();
+        current_index++;
+      }
+      else
+        cl.penWidth = cl.lWidth;
 
-				step = scl[10].toDouble();
-				if (scl[13] == "0")
-					step = 0.0;
-				ag->setScale(QwtPlot::yLeft, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
-						scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
-				ag->setScale(QwtPlot::yRight, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
-						scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
-			}
-			else if (size == 8){ 
-			ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
-						scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
-			}
-			else if (size == 9){ 
+      PlotCurve *c = (PlotCurve *)ag->insertFunctionCurve(curve[1], curve[2].toInt(), d_file_version);
+      ag->setCurveType(curveID, curve[5].toInt());
+      ag->updateCurveLayout(c, &cl);
+      if (d_file_version >= 88){
+        QwtPlotCurve *c = ag->curve(curveID);
+        if (c){
+          if(current_index + 1 < curve.size())
+            c->setAxis(curve[current_index].toInt(), curve[current_index+1].toInt());
+          if (d_file_version >= 90 && current_index+2 < curve.size())
+            c->setVisible(curve.last().toInt());
+          else
+            c->setVisible(true);
+        }
 
-			if(scl[8].toInt()==1)
-			{	//if axis details like scale,majortick,minor tick changed
-			ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
-						scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
-			}
-			}
-			else if (size == 18){ 
-					ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
-					scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
-					scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
-					scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
-			}
-			else if (size == 19){ 
-			//if axis details scale,majortick,minor tick changed
-			if(scl[8].toInt()==1)
-				ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
-					scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
-					scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
-					scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
-			}
-		}
-		else if (s.contains ("PlotTitle")){
-			QStringList fList=s.split("\t");
-			wsName=fList[1].split(" ")[1];
-			ag->setTitle(fList[1]);
-			ag->setTitleColor(QColor(fList[2]));
-			ag->setTitleAlignment(fList[3].toInt());
-		}
-		else if (s.contains ("TitleFont")){
-			QStringList fList=s.split("\t");
-			QFont fnt=QFont (fList[1],fList[2].toInt(),fList[3].toInt(),fList[4].toInt());
-			fnt.setUnderline(fList[5].toInt());
-			fnt.setStrikeOut(fList[6].toInt());
-			ag->setTitleFont(fnt);
-		}
-		else if (s.contains ("AxesTitles")){
-			QStringList lst=s.split("\t");
-			lst.pop_front();
-			for (int i=0; i<4; i++){
-			    if (lst.count() > i)
-                    ag->setScaleTitle(i, lst[i]);
-			}
-		}
-		else if (s.contains ("AxesTitleColors")){
-			QStringList colors = s.split("\t", QString::SkipEmptyParts);
-			colors.pop_front();
-			for (int i=0; i<int(colors.count()); i++)
-				ag->setAxisTitleColor(i, colors[i]);
-		}else if (s.contains ("AxesTitleAlignment")){
-			QStringList align=s.split("\t", QString::SkipEmptyParts);
-			align.pop_front();
-			for (int i=0; i<(int)align.count(); i++)
-				ag->setAxisTitleAlignment(i, align[i].toInt());
-		}else if (s.contains ("ScaleFont")){
-			QStringList fList=s.split("\t");
-			QFont fnt=QFont (fList[1],fList[2].toInt(),fList[3].toInt(),fList[4].toInt());
-			fnt.setUnderline(fList[5].toInt());
-			fnt.setStrikeOut(fList[6].toInt());
+      }
+      curveID++;
+    }
+    else if (s.contains ("ErrorBars")){
+      QStringList curve = s.split("\t", QString::SkipEmptyParts);
+      if (!app->renamedTables.isEmpty()){
+        QString caption = (curve[4]).left((curve[4]).find("_",0));
+        if (app->renamedTables.contains(caption))
+        {//modify the name of the curve according to the new table name
+          int index = app->renamedTables.findIndex (caption);
+          QString newCaption = app->renamedTables[++index];
+          curve.replaceInStrings(caption+"_", newCaption+"_");
+        }
+      }
+      Table *w = app->table(curve[3]);
+      Table *errTable = app->table(curve[4]);
+      if (w && errTable){
+        ag->addErrorBars(curve[2], curve[3], errTable, curve[4], curve[1].toInt(),
+                         curve[5].toDouble(), curve[6].toInt(), QColor(curve[7]),
+                         curve[8].toInt(), curve[10].toInt(), curve[9].toInt());
+      }
+      curveID++;
+    }
+    else if (s == "<spectrogram>"){
+      QStringList lst;
+      lst<<list[0];
+      lst<<list[1];
+      QString lineone=lst[1];
+      QStringList lineonelst=lineone.split("\t");
+      QString name=lineonelst[1];
+      QStringList qlist=name.split(" ");
+      std::string specgramwsName =qlist[1].toStdString();
 
-			int axis=(fList[0].right(1)).toInt();
-			ag->setAxisTitleFont(axis,fnt);
-		}else if (s.contains ("AxisFont")){
-			QStringList fList=s.split("\t");
-			QFont fnt=QFont (fList[1],fList[2].toInt(),fList[3].toInt(),fList[4].toInt());
-			fnt.setUnderline(fList[5].toInt());
-			fnt.setStrikeOut(fList[6].toInt());
+      lst.clear();
+      while ( s!="</spectrogram>" ){
+        s = list[++j];
+        lst << s;
+      }
+      lst.pop_back();
+      openSpectrogram(ag,specgramwsName,lst);
+      curveID++;
+    }
+    else if (s.left(6) == "scale\t"){
+      QStringList scl = s.split("\t");
+      scl.pop_front();
+      int size = scl.count();
+      if (d_file_version < 88){
+        double step = scl[2].toDouble();
+        if (scl[5] == "0")
+          step = 0.0;
+        ag->setScale(QwtPlot::xBottom, scl[0].toDouble(), scl[1].toDouble(), step,
+                     scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
+        ag->setScale(QwtPlot::xTop, scl[0].toDouble(), scl[1].toDouble(), step,
+                     scl[3].toInt(), scl[4].toInt(), scl[6].toInt(), bool(scl[7].toInt()));
 
-			int axis=(fList[0].right(1)).toInt();
-			ag->setAxisFont(axis,fnt);
-		}
-		else if (s.contains ("AxesFormulas"))
-		{	QStringList fList=s.split("\t");
-			fList.remove(fList.first());
-			for (int i=0; i<(int)fList.count(); i++)
-				ag->setAxisFormula(i, fList[i]);
-		}
-		else if (s.startsWith("<AxisFormula "))
-		{
-			int axis = s.mid(18,s.length()-20).toInt();
-			QString formula;
-			for (j++; j<(int)list.count() && list[j] != "</AxisFormula>"; j++)
-				formula += list[j] + "\n";
-			formula.truncate(formula.length()-1);
-			ag->setAxisFormula(axis, formula);
-		}
-		else if (s.contains ("LabelsFormat"))
-		{
-			QStringList fList=s.split("\t");
-			fList.pop_front();
-			ag->setLabelsNumericFormat(fList);
-		}
-		else if (s.contains ("LabelsRotation"))
-		{
-			QStringList fList=s.split("\t");
-			ag->setAxisLabelRotation(QwtPlot::xBottom, fList[1].toInt());
-			ag->setAxisLabelRotation(QwtPlot::xTop, fList[2].toInt());
-		}
-		else if (s.contains ("DrawAxesBackbone"))
-		{
-			QStringList fList=s.split("\t");
-			ag->loadAxesOptions(fList[1]);
-		}
-		else if (s.contains ("AxesLineWidth"))
-		{
-			QStringList fList=s.split("\t");
-			ag->loadAxesLinewidth(fList[1].toInt());
-		}
-		else if (s.contains ("CanvasFrame")){
-			QStringList lst = s.split("\t");
-			ag->setCanvasFrame(lst[1].toInt(), QColor(lst[2]));
-		}
-		else if (s.contains ("CanvasBackground"))
-		{
-			QStringList list = s.split("\t");
-			QColor c = QColor(list[1]);
-			if (list.count() == 3)
-				c.setAlpha(list[2].toInt());
-			ag->setCanvasBackground(c);
-		}
-		else if (s.contains ("Legend"))
-		{// version <= 0.8.9
-			QStringList fList = QStringList::split ("\t",s, true);
-			ag->insertLegend(fList, d_file_version);
-		}
-		else if (s.startsWith ("<legend>") && s.endsWith ("</legend>"))
-		{
-			QStringList fList = QStringList::split ("\t", s.remove("</legend>"), true);
-			ag->insertLegend(fList, d_file_version);
-		}
-		else if (s.contains ("textMarker"))
-		{// version <= 0.8.9
-			QStringList fList = QStringList::split ("\t",s, true);
-			ag->insertText(fList, d_file_version);
-		}
-		else if (s.startsWith ("<text>") && s.endsWith ("</text>"))
-		{
-			QStringList fList = QStringList::split ("\t", s.remove("</text>"), true);
-			ag->insertText(fList, d_file_version);
-		}
-		else if (s.startsWith ("<PieLabel>") && s.endsWith ("</PieLabel>"))
-		{
-			QStringList fList = QStringList::split ("\t", s.remove("</PieLabel>"), true);
-			ag->insertText(fList, d_file_version);
-		}
-		else if (s.contains ("lineMarker"))
-		{// version <= 0.8.9
-			QStringList fList=s.split("\t");
-			ag->addArrow(fList, d_file_version);
-		}
-		else if (s.startsWith ("<line>") && s.endsWith ("</line>"))
-		{
-			QStringList fList=s.remove("</line>").split("\t");
-			ag->addArrow(fList, d_file_version);
-		}
-		else if (s.contains ("ImageMarker") || (s.startsWith ("<image>") && s.endsWith ("</image>")))
-		{
-			QStringList fList=s.remove("</image>").split("\t");
-			ag->insertImageMarker(fList, d_file_version);
-		}
-		else if (s.contains("AxisType"))
-		{
-			QStringList fList = s.split("\t");
-			for (int i=0; i<4; i++){
-				QStringList lst = fList[i+1].split(";", QString::SkipEmptyParts);
-				int format = lst[0].toInt();
-				if (format == ScaleDraw::Numeric)
-                    continue;
-				if (format == ScaleDraw::Day)
-					ag->setLabelsDayFormat(i, lst[1].toInt());
-				else if (format == ScaleDraw::Month)
-					ag->setLabelsMonthFormat(i, lst[1].toInt());
-				else if (format == ScaleDraw::Time || format == ScaleDraw::Date)
-					ag->setLabelsDateTimeFormat(i, format, lst[1]+";"+lst[2]);
-				else if (lst.size() > 1)
-					ag->setLabelsTextFormat(i, format, lst[1], app->table(lst[1]));
-			}
-		}
-		else if (d_file_version < 69 && s.contains ("AxesTickLabelsCol"))
-		{
-			QStringList fList = s.split("\t");
-			for (int i=0; i<4; i++){
-				QString colName = fList[i+1];
-				Table *nw = app->table(colName);
-				ag->setLabelsTextFormat(i, ag->axisType(i), colName, nw);
-			}
-		}
-	}
-	ag->replot();
+        step = scl[10].toDouble();
+        if (scl[13] == "0")
+          step = 0.0;
+        ag->setScale(QwtPlot::yLeft, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
+                     scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
+        ag->setScale(QwtPlot::yRight, scl[8].toDouble(), scl[9].toDouble(), step, scl[11].toInt(),
+                     scl[12].toInt(), scl[14].toInt(), bool(scl[15].toInt()));
+      }
+      else if (size == 8){
+        ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+                     scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
+      }
+      else if (size == 9){
 
-    ag->blockSignals(false);
-    ag->setIgnoreResizeEvents(!app->autoResizeLayers);
-    ag->setAutoscaleFonts(app->autoScaleFonts);
-	return ag;
+        if(scl[8].toInt()==1)
+        {	//if axis details like scale,majortick,minor tick changed
+          ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+                       scl[4].toInt(), scl[5].toInt(),  scl[6].toInt(), bool(scl[7].toInt()));
+        }
+      }
+      else if (size == 18){
+        ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+                     scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
+                     scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
+                     scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
+      }
+      else if (size == 19){
+        //if axis details scale,majortick,minor tick changed
+        if(scl[8].toInt()==1)
+          ag->setScale(scl[0].toInt(), scl[1].toDouble(), scl[2].toDouble(), scl[3].toDouble(),
+                       scl[4].toInt(), scl[5].toInt(), scl[6].toInt(), bool(scl[7].toInt()), scl[8].toDouble(),
+                       scl[9].toDouble(), scl[10].toInt(), scl[11].toDouble(), scl[12].toDouble(), scl[13].toInt(),
+                       scl[14].toInt(), bool(scl[15].toInt()), scl[16].toInt(), bool(scl[17].toInt()));
+      }
+    }
+    else if (s.contains ("PlotTitle")){
+      QStringList fList=s.split("\t");
+      wsName=fList[1].split(" ")[1];
+      ag->setTitle(fList[1]);
+      ag->setTitleColor(QColor(fList[2]));
+      ag->setTitleAlignment(fList[3].toInt());
+    }
+    else if (s.contains ("TitleFont")){
+      QStringList fList=s.split("\t");
+      QFont fnt=QFont (fList[1],fList[2].toInt(),fList[3].toInt(),fList[4].toInt());
+      fnt.setUnderline(fList[5].toInt());
+      fnt.setStrikeOut(fList[6].toInt());
+      ag->setTitleFont(fnt);
+    }
+    else if (s.contains ("AxesTitles")){
+      QStringList lst=s.split("\t");
+      lst.pop_front();
+      for (int i=0; i<4; i++){
+        if (lst.count() > i)
+          ag->setScaleTitle(i, lst[i]);
+      }
+    }
+    else if (s.contains ("AxesTitleColors")){
+      QStringList colors = s.split("\t", QString::SkipEmptyParts);
+      colors.pop_front();
+      for (int i=0; i<int(colors.count()); i++)
+        ag->setAxisTitleColor(i, colors[i]);
+    }else if (s.contains ("AxesTitleAlignment")){
+      QStringList align=s.split("\t", QString::SkipEmptyParts);
+      align.pop_front();
+      for (int i=0; i<(int)align.count(); i++)
+        ag->setAxisTitleAlignment(i, align[i].toInt());
+    }else if (s.contains ("ScaleFont")){
+      QStringList fList=s.split("\t");
+      QFont fnt=QFont (fList[1],fList[2].toInt(),fList[3].toInt(),fList[4].toInt());
+      fnt.setUnderline(fList[5].toInt());
+      fnt.setStrikeOut(fList[6].toInt());
+
+      int axis=(fList[0].right(1)).toInt();
+      ag->setAxisTitleFont(axis,fnt);
+    }else if (s.contains ("AxisFont")){
+      QStringList fList=s.split("\t");
+      QFont fnt=QFont (fList[1],fList[2].toInt(),fList[3].toInt(),fList[4].toInt());
+      fnt.setUnderline(fList[5].toInt());
+      fnt.setStrikeOut(fList[6].toInt());
+
+      int axis=(fList[0].right(1)).toInt();
+      ag->setAxisFont(axis,fnt);
+    }
+    else if (s.contains ("AxesFormulas"))
+    {	QStringList fList=s.split("\t");
+      fList.remove(fList.first());
+      for (int i=0; i<(int)fList.count(); i++)
+        ag->setAxisFormula(i, fList[i]);
+    }
+    else if (s.startsWith("<AxisFormula "))
+    {
+      int axis = s.mid(18,s.length()-20).toInt();
+      QString formula;
+      for (j++; j<(int)list.count() && list[j] != "</AxisFormula>"; j++)
+        formula += list[j] + "\n";
+      formula.truncate(formula.length()-1);
+      ag->setAxisFormula(axis, formula);
+    }
+    else if (s.contains ("LabelsFormat"))
+    {
+      QStringList fList=s.split("\t");
+      fList.pop_front();
+      ag->setLabelsNumericFormat(fList);
+    }
+    else if (s.contains ("LabelsRotation"))
+    {
+      QStringList fList=s.split("\t");
+      ag->setAxisLabelRotation(QwtPlot::xBottom, fList[1].toInt());
+      ag->setAxisLabelRotation(QwtPlot::xTop, fList[2].toInt());
+    }
+    else if (s.contains ("DrawAxesBackbone"))
+    {
+      QStringList fList=s.split("\t");
+      ag->loadAxesOptions(fList[1]);
+    }
+    else if (s.contains ("AxesLineWidth"))
+    {
+      QStringList fList=s.split("\t");
+      ag->loadAxesLinewidth(fList[1].toInt());
+    }
+    else if (s.contains ("CanvasFrame")){
+      QStringList lst = s.split("\t");
+      ag->setCanvasFrame(lst[1].toInt(), QColor(lst[2]));
+    }
+    else if (s.contains ("CanvasBackground"))
+    {
+      QStringList list = s.split("\t");
+      QColor c = QColor(list[1]);
+      if (list.count() == 3)
+        c.setAlpha(list[2].toInt());
+      ag->setCanvasBackground(c);
+    }
+    else if (s.contains ("Legend"))
+    {// version <= 0.8.9
+      QStringList fList = QStringList::split ("\t",s, true);
+      ag->insertLegend(fList, d_file_version);
+    }
+    else if (s.startsWith ("<legend>") && s.endsWith ("</legend>"))
+    {
+      QStringList fList = QStringList::split ("\t", s.remove("</legend>"), true);
+      ag->insertLegend(fList, d_file_version);
+    }
+    else if (s.contains ("textMarker"))
+    {// version <= 0.8.9
+      QStringList fList = QStringList::split ("\t",s, true);
+      ag->insertText(fList, d_file_version);
+    }
+    else if (s.startsWith ("<text>") && s.endsWith ("</text>"))
+    {
+      QStringList fList = QStringList::split ("\t", s.remove("</text>"), true);
+      ag->insertText(fList, d_file_version);
+    }
+    else if (s.startsWith ("<PieLabel>") && s.endsWith ("</PieLabel>"))
+    {
+      QStringList fList = QStringList::split ("\t", s.remove("</PieLabel>"), true);
+      ag->insertText(fList, d_file_version);
+    }
+    else if (s.contains ("lineMarker"))
+    {// version <= 0.8.9
+      QStringList fList=s.split("\t");
+      ag->addArrow(fList, d_file_version);
+    }
+    else if (s.startsWith ("<line>") && s.endsWith ("</line>"))
+    {
+      QStringList fList=s.remove("</line>").split("\t");
+      ag->addArrow(fList, d_file_version);
+    }
+    else if (s.contains ("ImageMarker") || (s.startsWith ("<image>") && s.endsWith ("</image>")))
+    {
+      QStringList fList=s.remove("</image>").split("\t");
+      ag->insertImageMarker(fList, d_file_version);
+    }
+    else if (s.contains("AxisType"))
+    {
+      QStringList fList = s.split("\t");
+      for (int i=0; i<4; i++){
+        QStringList lst = fList[i+1].split(";", QString::SkipEmptyParts);
+        int format = lst[0].toInt();
+        if (format == ScaleDraw::Numeric)
+          continue;
+        if (format == ScaleDraw::Day)
+          ag->setLabelsDayFormat(i, lst[1].toInt());
+        else if (format == ScaleDraw::Month)
+          ag->setLabelsMonthFormat(i, lst[1].toInt());
+        else if (format == ScaleDraw::Time || format == ScaleDraw::Date)
+          ag->setLabelsDateTimeFormat(i, format, lst[1]+";"+lst[2]);
+        else if (lst.size() > 1)
+          ag->setLabelsTextFormat(i, format, lst[1], app->table(lst[1]));
+      }
+    }
+    else if (d_file_version < 69 && s.contains ("AxesTickLabelsCol"))
+    {
+      QStringList fList = s.split("\t");
+      for (int i=0; i<4; i++){
+        QString colName = fList[i+1];
+        Table *nw = app->table(colName);
+        ag->setLabelsTextFormat(i, ag->axisType(i), colName, nw);
+      }
+    }
+  }
+  ag->replot();
+
+  ag->blockSignals(false);
+  ag->setIgnoreResizeEvents(!app->autoResizeLayers);
+  ag->setAutoscaleFonts(app->autoScaleFonts);
+  return ag;
 }
 
 Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStringList &lst)

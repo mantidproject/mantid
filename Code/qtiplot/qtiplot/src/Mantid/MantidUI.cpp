@@ -2117,13 +2117,26 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   appWindow()->setPreferences(g);
   g->newLegend("");
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
-  {	  
-	  new MantidCurve(it.key(),g,"spectra",it.value(),errs);
+  {
+    try {
+      new MantidCurve(it.key(),g,"spectra",it.value(),errs);
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      // Get here if workspace name is invalid
+      const std::string message("Workspace "+it.key().toStdString()+" not found");
+      logMessage(Poco::Message("MantidPlot",message,Poco::Message::PRIO_WARNING));
+    } catch (std::invalid_argument& ex) {
+      // Get here if invalid spectrum number given
+      logMessage(Poco::Message("MantidPlot",ex.what(),Poco::Message::PRIO_WARNING));
+    }
   }
-   /*// setting the spectrum index and error flag list.
-  //This is useful for loading/saving project file.
- g->setWorkspaceSpectrumMap(toPlot);
-  g->setError(errs);*/
+
+  // If no spectra have been plotted, close the window (unfortunately it will flash up briefly)
+  if ( g->curves() == 0 )
+  {
+    ml->close();
+    return NULL;
+  }
+
   setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
 

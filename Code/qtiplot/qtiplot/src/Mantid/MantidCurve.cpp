@@ -7,23 +7,34 @@
 #include <qpainter.h>
 #include <stdexcept>
 
+using namespace Mantid::API;
+
 /**
  *  @param name The curve's name - shown in the legend
  *  @param wsName The workspace name.
  *  @param g The Graph widget which will display the curve
  *  @param type The type of the QwtData: "spectra" for MantidQwtDataSpectra or
- *              "bin" for MantidQwtDataBin
+ *              "bin" for MantidQwtDataBin (N.B. "bin" is not yet implemented)
  *  @param index The index of the spectrum or bin in the workspace
  *  @param err True if the errors are to be plotted
+ *..@throw std::runtime_error if an invalid string is given in the type argument
+ *..@throw Mantid::Kernel::Exception::NotFoundError if the workspace cannot be found
+ *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
   :PlotCurve(name),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
 {
-  Mantid::API::MatrixWorkspace_sptr ws = 
-    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-       Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
-    );
+  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+              AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
+
+  if ( !ws || index >= ws->getNumberHistograms() )
+  {
+    std::stringstream ss;
+    ss << index << " is an invalid spectrum index for workspace " << ws->getName()
+       << " - not plotted";
+    throw std::invalid_argument(ss.str());
+  }
   init(ws,g,type,index);
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
@@ -34,18 +45,26 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
  *  @param wsName The workspace name.
  *  @param g The Graph widget which will display the curve
  *  @param type The type of the QwtData: "spectra" for MantidQwtDataSpectra or
- *              "bin" for MantidQwtDataBin
+ *              "bin" for MantidQwtDataBin (N.B. "bin" is not yet implemented)
  *  @param index The index of the spectrum or bin in the workspace
  *  @param err True if the errors are to be plotted
+ *..@throw std::runtime_error if an invalid string is given in the type argument
+ *  @throw std::invalid_argument if the index is out of range for the given workspace
  */
 MantidCurve::MantidCurve(const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
  :PlotCurve(),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
 {
-  Mantid::API::MatrixWorkspace_sptr ws = 
-    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-       Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString())
-    );
+  MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+              AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
+
+  if ( !ws || index >= ws->getNumberHistograms() )
+  {
+    std::stringstream ss;
+    ss << index << " is an invalid spectrum index for workspace " << ws->getName()
+       << " - not plotted";
+    throw std::invalid_argument(ss.str());
+  }
   // If there's only one spectrum in the workspace, title is simply workspace name
   if (ws->getNumberHistograms() == 1) this->setTitle(wsName);
   else this->setTitle(createCurveName(wsName,type,index));
@@ -68,8 +87,9 @@ MantidCurve::MantidCurve(const MantidCurve& c)
  *  @param workspace The source workspace for the curve's data
  *  @param g The Graph widget which will display the curve
  *  @param type The type of the QwtData: "spectra" for MantidQwtDataSpectra or
- *              "bin" for MantidQwtDataBin
+ *              "bin" for MantidQwtDataBin (N.B. "bin" is not yet implemented)
  *  @param index The index of the spectrum or bin in the workspace
+ *..@throw std::runtime_error if an invalid string is given in the type argument
  */
 void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,
                          const QString& type,int index)

@@ -1254,8 +1254,13 @@ void MultiLayer::dropEvent( QDropEvent * event )
   // Iterate through the selected workspaces adding a curve from each
   for(QMultiMap<QString,int>::const_iterator it=toPlot.begin();it!=toPlot.end();it++)
   {
-    // Does anything delete this object?
-    new MantidCurve(it.key(),g,"spectra",it.value(),false); // Always without errors for now
+    try {
+      new MantidCurve(it.key(),g,"spectra",it.value(),false); // Always without errors for now
+    } catch (Mantid::Kernel::Exception::NotFoundError) {
+      // Get here if workspace name is invalid - shouldn't be possible, but just in case
+    } catch (std::invalid_argument& ex) {
+      // Get here if invalid spectrum number given - shouldn't be possible, but just in case
+    }
   }
   // Update the axes
   g->setAutoScale();
