@@ -219,7 +219,9 @@ bool ScriptEditor::saveScript(const QString & filename)
 
   QTextStream writer(&file);
   writer.setEncoding(QTextStream::UnicodeUTF8);
+  QApplication::setOverrideCursor(Qt::WaitCursor);
   writer << text();
+  QApplication::restoreOverrideCursor();
   file.close();
 
   return true;
@@ -351,15 +353,29 @@ void ScriptEditor::update()
 }
 
 /**
+ * Set the marker state
+ * @param enable If true then the progress arrow is enabled
+ */
+void ScriptEditor::setMarkerState(bool enabled)
+{
+  if( enabled )
+  {
+    setMarkerBackgroundColor(QColor("gray"), m_marker_handle);
+    markerAdd(0, m_marker_handle);
+  }
+  else
+  {
+    markerDeleteAll(); 
+  }
+}
+
+/**
  * Update the arrow marker to point to the correct line and colour it depending on the error state
  * @param lineno The line to place the marker at. A negative number will clear all markers
  * @param success If false, the marker will turn red
  */
 void ScriptEditor::updateMarker(int lineno, bool success)
 {
-  markerDeleteAll();
-  if( lineno < 0 ) return;
-
   if( success )
   {
     setMarkerBackgroundColor(g_success_colour, m_marker_handle);
@@ -368,6 +384,10 @@ void ScriptEditor::updateMarker(int lineno, bool success)
   {
     setMarkerBackgroundColor(g_error_colour, m_marker_handle);
   }
+
+  if( lineno < 0 ) return;
+  markerDeleteAll();
+
   ensureLineVisible(lineno);
   markerAdd(lineno - 1, m_marker_handle);
 }

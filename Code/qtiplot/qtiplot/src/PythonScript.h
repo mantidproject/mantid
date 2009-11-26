@@ -68,6 +68,8 @@ public slots:
   QVariant eval();
   /// Excute the current code
   bool exec();
+  /// Perform a call to the Python eval function with the necessary wrapping
+  PyObject* callExec(PyObject* return_tuple);  
   /// Construct the error message from the stack trace (if one exists)
   QString constructErrorMsg();
   /// Set the name of the passed object so that Python can refer to it

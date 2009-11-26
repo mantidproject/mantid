@@ -57,7 +57,7 @@ class ScriptOutputDock : public QDockWidget
   
 public:
   /// Constructor
-  ScriptOutputDock(const QString & title, QWidget *parent = 0, 
+  ScriptOutputDock(const QString & title, ScriptManagerWidget *manager, QWidget *parent = 0, 
 		   Qt::WindowFlags flags = 0);
 
   //Is there anything here
@@ -68,6 +68,8 @@ public slots:
   void clear();
   /// Print the text within the window
   void print();
+  /// Save the output to a file
+  void saveToFile();
   /// Change the title based on the script's execution state
   void setScriptIsRunning(bool running);    
 	      
@@ -84,6 +86,8 @@ private:
   void resetFont();
 
 private:
+  /// The script manager
+  ScriptManagerWidget *m_manager;
   /// The actually widget that displays the text
   QTextEdit *m_text_display;
   /// Copy action
@@ -134,7 +138,7 @@ private slots:
   void tabSelectionChanged();
 
 private:
-  /// The script editors manager
+  /// The script editors' manager
   ScriptManagerWidget *m_manager;
   /// Output display dock
   ScriptOutputDock *m_output_dock;

@@ -16,15 +16,15 @@ def plotSpectrum(source, indices, error_bars = False):
     if isinstance(source, list):
         workspace_names = __getWorkspaceNames(source)
         if isinstance(indices, list):
-            return qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars)
+            return __tryPlot(workspace_names, indices, error_bars)
         else:
-            return qti.app.mantidUI.pyPlotSpectraList(workspace_names, [indices], error_bars)
+            return __tryPlot(workspace_names, [indices], error_bars)
     else:
         workspace_name  = __getWorkspaceNames([source])
         if isinstance(indices, list):
-            return qti.app.mantidUI.pyPlotSpectraList(workspace_name, indices, error_bars)
+            return __tryPlot(workspace_name, indices, error_bars)
         else:
-            return qti.app.mantidUI.pyPlotSpectraList(workspace_name, [indices], error_bars)
+            return __tryPlot(workspace_name, [indices], error_bars)
 
 def plotBin(source, indices, error_bars = False):
     return __doPlotting(source,indices,error_bars)
@@ -42,6 +42,15 @@ def __getWorkspaceNames(source_list):
             ws_names.append(w)
     
     return ws_names
+
+# Try plotting, raising an error if no plot object is created
+def __tryPlot(workspace_names, indices, error_bars):
+    graph = qti.app.mantidUI.pyPlotSpectraList(workspace_names, indices, error_bars)
+    if graph == None:
+        raise RuntimeError("Cannot create graph, see log for details.")
+    else:
+        return graph
+        
 
 # Refactored functions for common code
 def __doPlotting(source, indices, error_bars):
@@ -90,7 +99,7 @@ def __CallPlotFunction(workspace, index, error_bars):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    return qti.app.mantidUI.plotTimeBin(wkspname, index, error_bars)
+    return qti.app.mantidUI.plotBin(wkspname, index, error_bars)
 
 #-----------------------------------------------------------------
 

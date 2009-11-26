@@ -152,9 +152,6 @@ public:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=true);
     MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=true);
-    // The Python API wouldn't accept a multimap as a type so had to resort to this which is still more efficient than
-    // the old merge plots method
-    MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>& spec_list, bool errs=true); 
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true);
@@ -185,13 +182,13 @@ public:
   /** ---------------------------------
    * Commands purely for python interaction
    */
-  MultiLayer* plotSpectrum(const QString& wsName, int spec, bool errorbars = false, bool showPlot = true, bool showMatrix = false);
+    // The Python API wouldn't accept a multimap as a type so had to resort to this which is still more efficient than
+    // the old merge plots method
+  MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>& spec_list, bool errs=true); 
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
-  MultiLayer* plotTimeBin(const QString& wsName, int bin, bool showMatrix = false);
-  // An alias for plotTimeBin
-  MultiLayer* plotBin(const QString& wsName, int bin, bool showMatrix = false);
+  MultiLayer* plotBin(const QString& wsName, int bin, bool errors = false);
   bool runAlgorithmAsynchronously(const QString & algName);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QString & enabled_names);

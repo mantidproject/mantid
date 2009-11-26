@@ -1734,7 +1734,6 @@ public:
   MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   MantidMatrix* getMantidMatrix(const QString &);
-  MultiLayer* plotTimeBin(const QString&,int,bool = false);  
   MultiLayer* plotBin(const QString&,int,bool = false);  
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);
   Table* importTableWorkspace(const QString&, bool = false, bool = false);	

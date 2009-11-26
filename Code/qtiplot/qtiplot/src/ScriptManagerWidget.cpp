@@ -44,7 +44,7 @@
 ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, 
 					 bool interpreter_mode)
   : QTabWidget(parent), scripted(env), m_last_dir(""), m_script_runner(NULL), 
-    m_script_executing(false), m_cursor_pos(), m_findrep_dlg(NULL), 
+    m_cursor_pos(), m_findrep_dlg(NULL), 
     m_interpreter_mode(interpreter_mode)
 {
   //Create actions for this widget
@@ -455,6 +455,17 @@ bool ScriptManagerWidget::runScriptCode(const QString & code)
   {
     displayOutput("Script execution started.", true);
   }
+
+//   bool success(false);
+//   try
+//   {
+//     success = m_script_runner->exec();
+//   }
+//   catch(std::exception & details)
+//   {
+//     success = false;
+//     displayError(QString("Error: ") + QString::fromStdString(details.what()));
+//   }
   bool success = m_script_runner->exec();
   emit ScriptIsActive(false);
   if( !m_interpreter_mode && success )
@@ -577,7 +588,7 @@ void ScriptManagerWidget::markCurrentAsChanged()
  */
 void ScriptManagerWidget::setScriptIsRunning(bool running)
 {
-  m_script_executing = running;
+  scriptingEnv()->setIsRunning(running);
   // Enable/disable execute actions
   m_exec->setEnabled(!running);
   m_exec_all->setEnabled(!running);
@@ -597,7 +608,7 @@ void ScriptManagerWidget::toggleProgressArrow(bool state)
     for( int index = index_end; index >= 0; --index )
     {
       ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-      if( editor ) editor->updateMarker(-1, true);
+      if( editor ) editor->setMarkerState(state);
     }
   }
 }

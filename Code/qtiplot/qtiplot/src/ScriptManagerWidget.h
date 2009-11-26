@@ -14,6 +14,7 @@
 class QTabWidget;
 class QPoint;
 class ScriptingWindow;
+class ScriptOutputDock;
 class ScriptEditor;
 class QAction;
 class QPushButton;
@@ -68,7 +69,11 @@ public:
   /// Is a script running?
   inline bool isScriptRunning() const
   {
-    return m_script_executing;
+    if( m_script_runner )
+    {
+      return m_script_runner->scriptIsRunning();
+    }
+    else return false;
   }
   /// Return the current editor
   ScriptEditor *currentEditor() const;
@@ -163,13 +168,12 @@ private:
  private:
   /// So that the window can access the actions that are relevant
   friend class ScriptingWindow;
+  friend class ScriptOutputDock;
 
   /// The last directory visted with a file dialog
   QString m_last_dir;
   /// The script object that will execute the code
   Script *m_script_runner;
-  // A flag to store if a script is being executed
-  bool m_script_executing;
   // The cursor position within the tab bar when the right-mouse button was last clicked
   // I need this to ensure that the position of a call to tabBar()->tabAt() is accurate
   // as Qt doesn't provide an action signal parameterized on a position

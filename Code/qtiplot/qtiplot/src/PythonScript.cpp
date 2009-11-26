@@ -39,6 +39,8 @@
 #include <QVariant>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <iostream>
+#include <stdexcept>
 
 namespace
 {
@@ -133,7 +135,7 @@ bool PythonScript::compile(bool for_eval)
   bool success(false);
   Py_XDECREF(PyCode);
   // Simplest case: Code is a single expression
-  PyCode = Py_CompileString(Code, Name, Py_eval_input);
+  PyCode = Py_CompileString(Code, Name, Py_file_input);
 	
   if( PyCode )
   {
@@ -275,57 +277,115 @@ QVariant PythonScript::eval()
 
 bool PythonScript::exec()
 {
-  Env->setIsRunning(true);
-	if (isFunction) compiled = notCompiled;
-	if (compiled != Script::isCompiled && !compile(false))
-	{
-	  Env->setIsRunning(false);
-	  return false;
-	}
-	
-	PyObject *pyret(NULL);
-	// Redirect the output
-	beginStdoutRedirect();
-	// This stores the address of the main file that is being executed so that
-	// we can track line numbers from the main code only
-	ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
-	if( env()->reportProgress() )
-	{
-	  PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
-	}
+  if (isFunction) compiled = notCompiled;
+  if (compiled != Script::isCompiled && !compile(false))
+  {
+    return false;
+  }
 
-	if (PyCallable_Check(PyCode))
-	{
-	  PyObject *empty_tuple = PyTuple_New(0);
-	  if (!empty_tuple) 
-	  {
-	    emit_error(constructErrorMsg(), 0);
-	    Env->setIsRunning(false);
-	    return false;
-	  }
-	  pyret = PyObject_Call(PyCode,empty_tuple,localDict);
-	  Py_DECREF(empty_tuple);
-	} 
-	else 
-	{
-	  pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), env()->globalDict());
-	}
-	endStdoutRedirect();
-	
-	//Disable trace
-	PyEval_SetTrace(NULL, NULL);
+  // Redirect the output
+  beginStdoutRedirect();
+  // This stores the address of the main file that is being executed so that
+  // we can track line numbers from the main code only
+  ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
+  if( env()->reportProgress() )
+  {
+    PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
+  }
 
-	if(pyret) 
-	{
-	  Py_DECREF(pyret);
-	  Env->setIsRunning(false);
-	  return true;
-	}
-	emit_error(constructErrorMsg(), 0);
-	Env->setIsRunning(false);
-	return false;
+  PyObject *pyret(NULL);
+  if (PyCallable_Check(PyCode))
+  {
+    PyObject *empty_tuple = PyTuple_New(0);
+    if (!empty_tuple) 
+    {
+      emit_error(constructErrorMsg(), 0);
+      return false;
+    }
+    pyret = callExec(empty_tuple);
+  }
+  else
+  {
+    pyret = callExec(NULL);
+  }
+
+  // Restore output
+  endStdoutRedirect();
+	
+  //Disable trace
+  PyEval_SetTrace(NULL, NULL);
+
+  if(pyret) 
+  {
+    Py_DECREF(pyret);
+    return true;
+  }
+  emit_error(constructErrorMsg(), 0);
+  return false;
 }
-#include <iostream>
+
+/**
+ * Perform the appropriate call to a Python eval command.
+ * @param return_tuple If this is a valid pointer then the code object is called rather than executed and the return values are placed into this tuple
+ * @returns A pointer to an object indicating the success/failure of the code execution
+ */
+PyObject* PythonScript::callExec(PyObject* return_tuple)
+{
+  PyObject* pyret(NULL);
+  //If an exception is thrown the thread state needs resetting so we need to save it
+  PyThreadState *saved_tstate = PyThreadState_GET();
+  try
+  {
+    if( return_tuple )
+    {
+      pyret = PyObject_Call(PyCode, return_tuple,localDict);
+    }
+    else
+    {
+      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), env()->globalDict());
+    }
+  }
+  // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to
+  // be repeated here 
+  catch(const std::bad_alloc&)
+  {
+    PyThreadState_Swap(saved_tstate);// VERY VERY important. Bad things happen if this state is not reset after a throw
+    pyret = NULL;
+    PyErr_NoMemory();
+  }
+  catch(const std::out_of_range& x)
+  {
+    PyThreadState_Swap(saved_tstate);
+    pyret = NULL;
+    PyErr_SetString(PyExc_IndexError, x.what());
+  }
+  catch(const std::invalid_argument& x)
+  {
+    PyThreadState_Swap(saved_tstate);
+    pyret = NULL;
+    PyErr_SetString(PyExc_ValueError, x.what());
+  }
+  catch(const std::exception& x)
+  {
+    PyThreadState_Swap(saved_tstate);
+    pyret = NULL;
+    PyErr_SetString(PyExc_RuntimeError, x.what());
+  }
+  catch(...)
+  {
+    PyThreadState_Swap(saved_tstate);
+    pyret = NULL;
+    PyErr_SetString(PyExc_RuntimeError, "unidentifiable C++ exception");
+  }
+  
+  // If we stole a reference, return it
+  if( return_tuple )
+  {
+    Py_DECREF(return_tuple);
+  }
+  return pyret;
+}
+
 QString PythonScript::constructErrorMsg()
 {
   if ( !PyErr_Occurred() ) 
@@ -381,9 +441,16 @@ QString PythonScript::constructErrorMsg()
   }
   else
   {
-    excit = (PyTracebackObject*)traceback;
-    marker_lineno = excit->tb_lineno;
-    Py_DECREF(traceback);
+    if( traceback )
+    {
+      excit = (PyTracebackObject*)traceback;
+      marker_lineno = excit->tb_lineno;
+      Py_DECREF(traceback);
+    }
+    else
+    {
+      marker_lineno = -10000;
+    }
 
     if( filename.isEmpty() )
     {
@@ -401,16 +468,22 @@ QString PythonScript::constructErrorMsg()
     
     msg_lineno += getLineOffset();
   }
-  if( getLineOffset() >= 0 )
+  if( getLineOffset() >= 0 && marker_lineno >= 0 )
   {
     marker_lineno += getLineOffset();
     message += " on line " + QString::number(marker_lineno);
   }
   
   message += ": \"" + exception_details.trimmed() + "\" ";
-  if( !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) && !filename.isEmpty() && !filename.contains("mantidsimple") )
+  if( marker_lineno >=0 
+      && !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) 
+      && !filename.isEmpty() 
+      && !filename.contains("mantidsimple") 
+      && !filename.contains("mantidplotrc") 
+      && !filename.contains("qtiplotrc") )
   {
-    message += "in file '" + QFileInfo(filename).fileName() + "' at line " + QString::number(msg_lineno);
+    message += "in file '" + QFileInfo(filename).fileName() 
+      + "' at line " + QString::number(msg_lineno);
   }
   
   if( env()->reportProgress() )

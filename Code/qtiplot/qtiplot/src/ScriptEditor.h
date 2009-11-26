@@ -144,6 +144,8 @@ public:
 public slots:
   /// Update the editor
   void update();
+  /// Set the marker state
+  void setMarkerState(bool enabled);
   /// Update the marker on this widget
   void updateMarker(int lineno, bool success);
   /// Print the text within the widget

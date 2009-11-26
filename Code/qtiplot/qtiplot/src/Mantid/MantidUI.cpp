@@ -1471,12 +1471,12 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set
   return plotSpectraList(wsName, spec, false);
 }
 
-MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatrix)
+MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
 {
   MantidMatrix* m = getMantidMatrix(wsName);
   if( !m )
   {
-    m = importMatrixWorkspace(wsName, -1, -1, false, showMatrix);
+    m = importMatrixWorkspace(wsName, -1, -1, false, false);
   }
   MatrixWorkspace_sptr ws;
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
@@ -1487,7 +1487,7 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
 
   QList<int> binAsList;
   binAsList.append(bin);
-  Table *t = createTableFromBins(wsName, ws, binAsList, false, false);
+  Table *t = createTableFromBins(wsName, ws, binAsList, errors);
   t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_QuitOnClose);
   MultiLayer* ml(NULL);
@@ -1501,34 +1501,37 @@ MultiLayer* MantidUI::plotTimeBin(const QString& wsName, int bin, bool showMatri
   return ml;
 }
 
-MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool showMatrix)
-{
-  return plotTimeBin(wsName, bin, showMatrix);
-}
-
 //-------------------------------------------------
 // The following commands are purely for the Python
 // interface
 //-------------------------------------------------
-
-// In Python scripts we don't click and import a matrix so that we can plot
-// spectra from it so this command does an import of a workspace and then plots
-// the requested spectrum
-MultiLayer* MantidUI::plotSpectrum(const QString& wsName, int spec, bool errorbars, bool showPlot, bool showMatrix)
+/**
+ * This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
+ * argument
+ */
+MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs)
 {
-  MatrixWorkspace_sptr ws;
-  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  // Convert the list into a map (with the same workspace as key in each case)
+  QMultiMap<QString,int> pairs;
+  QListIterator<QString> ws_itr(ws_names);
+  ws_itr.toBack();
+  QListIterator<int> spec_itr(spec_list);
+  spec_itr.toBack();
+
+  // Need to iterate through the set in reverse order to get the curves in the correct order on the plot
+  while( ws_itr.hasPrevious() )
   {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    QString workspace_name = ws_itr.previous();
+    while( spec_itr.hasPrevious() )
+    {
+      pairs.insert(workspace_name, spec_itr.previous());
+    }
+    //Reset spectrum index pointer
+    spec_itr.toBack();
   }
-  if (!ws) return NULL;
 
-  std::set<int> indexList;
-  indexList.insert(spec);
-  MultiLayer* ml = plotSpectraList(wsName, indexList, errorbars);
-
-  if( !showPlot ) ml->setVisible(false);
-  return ml;
+  // Pass over to the overloaded method
+  return plotSpectraList(pairs,errs);
 }
 
 /**
@@ -2142,34 +2145,6 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
 
 }
 
-/**
- * This is for the Python API to be able to call the method that takes a map as SIP didn't like accepting a multimap as an 
- * argument
- */
-MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QList<int>& spec_list, bool errs)
-{
-  // Convert the list into a map (with the same workspace as key in each case)
-  QMultiMap<QString,int> pairs;
-  QListIterator<QString> ws_itr(ws_names);
-  ws_itr.toBack();
-  QListIterator<int> spec_itr(spec_list);
-  spec_itr.toBack();
-
-  // Need to iterate through the set in reverse order to get the curves in the correct order on the plot
-  while( ws_itr.hasPrevious() )
-  {
-    QString workspace_name = ws_itr.previous();
-    while( spec_itr.hasPrevious() )
-    {
-      pairs.insert(workspace_name, spec_itr.previous());
-    }
-    //Reset spectrum index pointer
-    spec_itr.toBack();
-  }
-
-  // Pass over to the overloaded method
-  return plotSpectraList(pairs,errs);
-}
 
 
 

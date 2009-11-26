@@ -18,6 +18,10 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QDateTime>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QApplication>
+#include <QTextStream>
 
 //***************************************************************************
 //
@@ -30,9 +34,9 @@
  * @param parent The parent widget
  * @param flags Window flags
  */
-ScriptOutputDock::ScriptOutputDock(const QString & title, QWidget * parent, 
+ScriptOutputDock::ScriptOutputDock(const QString & title, ScriptManagerWidget* manager, QWidget * parent, 
 				   Qt::WindowFlags flags ) : 
-  QDockWidget(title, parent, flags)
+  QDockWidget(title, parent, flags), m_manager(manager)
 {
   setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
   
@@ -149,6 +153,11 @@ void ScriptOutputDock::showContextMenu(const QPoint & pos)
   //Copy action
   menu.addAction(m_copy);
 
+  //Save to file
+  QAction* save_to_file = new QAction("Save to file", this);
+  connect(save_to_file, SIGNAL(activated()), this, SLOT(saveToFile()));
+  menu.addAction(save_to_file);
+
   if( !m_text_display->document()->isEmpty() )
   {
     QAction* print = new QAction(QPixmap(fileprint_xpm), "&Print", this);
@@ -159,6 +168,9 @@ void ScriptOutputDock::showContextMenu(const QPoint & pos)
   menu.exec(m_text_display->mapToGlobal(pos));
 }
 
+/**
+ * Print the window output
+ */
 void ScriptOutputDock::print()
 {
   QPrinter printer;
@@ -168,6 +180,40 @@ void ScriptOutputDock::print()
     return;
   QTextDocument document(m_text_display->text());
   document.print(&printer);
+}
+
+/**
+ * Save script output to a file
+ */
+void ScriptOutputDock::saveToFile()
+{
+  QString filter = tr("Text") + " (*.txt *.TXT);;";
+  filter += tr("All Files")+" (*)";
+  QString selected_filter;
+  QString filename = QFileDialog::getSaveFileName(this, tr("MantidPlot - Save script"), 
+						  m_manager->m_last_dir, filter, &selected_filter);
+  if( filename.isEmpty() ) return;
+
+  if( QFileInfo(filename).suffix().isEmpty() )
+  {
+    QString ext = selected_filter.section('(',1).section(' ', 0, 0);
+    ext.remove(0,1);
+    if( ext != ")" ) filename += ext;
+  }
+
+  QFile file(filename);
+  if( !file.open(QIODevice::WriteOnly) )
+  {
+    QMessageBox::critical(this, tr("MantidPlot - File error"), 
+			  tr("Could not open file \"%1\" for writing.").arg(filename));
+    return;
+  }
+
+  QTextStream writer(&file);
+  QApplication::setOverrideCursor(Qt::WaitCursor);
+  writer << m_text_display->toPlainText();
+  QApplication::restoreOverrideCursor();
+  file.close();
 }
 
 //-------------------------------------------
@@ -218,7 +264,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowF
   // Sub-widgets
   m_manager = new ScriptManagerWidget(env, this);
   setCentralWidget(m_manager);
-  m_output_dock = new ScriptOutputDock(QString(), this);
+  m_output_dock = new ScriptOutputDock(QString(), m_manager, this);
   m_output_dock->setScriptIsRunning(false);
   //Set the height to 10% of the height of the window
   addDockWidget(Qt::BottomDockWidgetArea, m_output_dock);
