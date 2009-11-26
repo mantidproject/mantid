@@ -81,21 +81,21 @@ namespace PythonAPI
     {
       if( boost::python::override dispatcher = this->get_override(pyfunction_name.c_str()) )
       {
-	if( m_gil_required )
-	{
-	  PyGILState_STATE gstate = PyGILState_Ensure();
-	  dispatcher(arg);
-	  PyGILState_Release(gstate);
-	}
-	else 
-	{
-	  dispatcher(arg);
-	}
+        if( m_gil_required )
+        {
+          PyGILState_STATE gstate = PyGILState_Ensure();
+          dispatcher(arg);
+          PyGILState_Release(gstate);
+        }
+        else 
+        {
+          dispatcher(arg);
+        }
       }
       else 
       {
-	// If no override is present then call our default implementation
-	(this->*def_fn)(arg);
+        // If no override is present then call our default implementation
+        (this->*def_fn)(arg);
       }
     }
 
@@ -129,39 +129,39 @@ namespace PythonAPI
       std::string name(lhs->getName());
       if( inplace )
       {
-	switch( op )
-	{
-	case 'p':
-	  lhs += rhs;
-	  break;
-	case 'm':
-	  lhs -= rhs;
-	  break;
-	case 't':
-	  lhs *= rhs;
-	  break;
-	case 'd':
-	  lhs /= rhs;
-	}
-	result = lhs;
+        switch( op )
+        {
+        case 'p':
+          lhs += rhs;
+          break;
+        case 'm':
+          lhs -= rhs;
+          break;
+        case 't':
+          lhs *= rhs;
+          break;
+        case 'd':
+          lhs /= rhs;
+        }
+        result = lhs;
       }
       else
       {
-	switch( op )
-	{
-	case 'p':
-	  result = lhs + rhs;
-	  break;
-	case 'm':
-	  result = lhs - rhs;
-	  break;
-	case 't':
-	  result = lhs * rhs;
-	  break;
-	case 'd':
-	  result = lhs / rhs;
-	}
-	name += std::string("_") + op + std::string("_") + rhs->getName();
+        switch( op )
+        {
+        case 'p':
+          result = lhs + rhs;
+          break;
+        case 'm':
+          result = lhs - rhs;
+          break;
+        case 't':
+          result = lhs * rhs;
+          break;
+        case 'd':
+          result = lhs / rhs;
+        }
+        name += std::string("_") + op + std::string("_") + rhs->getName();
       }
       Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
       return result;
@@ -214,43 +214,68 @@ namespace PythonAPI
       std::string name(lhs->getName());
       if( inplace )
       {
-	switch( op )
-	{
-	case 'p':
-	  lhs += rhs;
-	  break;
-	case 'm':
-	  lhs -= rhs;
-	  break;
-	case 't':
-	  lhs *= rhs;
-	  break;
-	case 'd':
-	  lhs /= rhs;
-	  break;
-	}
-	result = lhs;
+        switch( op )
+        {
+        case 'p':
+          lhs += rhs;
+          break;
+        case 'm':
+          lhs -= rhs;
+          break;
+        case 't':
+          lhs *= rhs;
+          break;
+        case 'd':
+          lhs /= rhs;
+          break;
+        }
+        result = lhs;
       }
       else
       {
-	switch( op )
-	{
-	case 'p':
-	  result = lhs + rhs;
-	  break;
-	case 'm':
-	  result = lhs - rhs;
-	  break;
-	case 't':
-	  result = lhs * rhs;
-	  break;
-	case 'd':
-	  result = lhs / rhs;
-	}
-	std::ostringstream os;
-	os << rhs;
-	name += std::string("_") + op + std::string("_") + os.str();
+        switch( op )
+        {
+        case 'p':
+          result = lhs + rhs;
+          break;
+        case 'm':
+          result = lhs - rhs;
+          break;
+        case 't':
+          result = lhs * rhs;
+          break;
+        case 'd':
+          result = lhs / rhs;
+        }
+        std::ostringstream os;
+        os << rhs;
+        name += std::string("_") + op + std::string("_") + os.str();
       }
+      Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
+      return result;
+    }
+    /// Binary operation for a double and a workspace
+    static wraptype_ptr performBinaryOp(double lhs, const wraptype_ptr rhs, char op)
+    {
+      wraptype_ptr result;
+      std::ostringstream os;
+      os << lhs;
+      std::string name(os.str());
+      switch( op )
+      {
+        case 'p':
+          result = rhs + lhs;
+          break;
+        case 'm':
+          result = lhs - rhs;
+          break;
+        case 't':
+          result = lhs * rhs;
+          break;
+        case 'd':
+          result = lhs / rhs;
+      }
+      name += std::string("_") + op + std::string("_") + rhs->getName();
       Mantid::API::AnalysisDataService::Instance().addOrReplace(name, result);
       return result;
     }
@@ -264,6 +289,11 @@ namespace PythonAPI
     {
       return performBinaryOp(lhs, rhs, 'p', true);
     }
+    /// Reverse Plus
+    static wraptype_ptr rplus(const wraptype_ptr rhs, double lhs)
+    {
+      return performBinaryOp(lhs, rhs, 'p');
+    }
     /// Minus
     static wraptype_ptr minus(const wraptype_ptr lhs, double rhs)
     {
@@ -273,6 +303,11 @@ namespace PythonAPI
     static wraptype_ptr inplace_minus(const wraptype_ptr lhs, double rhs)
     {
       return performBinaryOp(lhs, rhs, 'm', true);
+    }
+    /// Reverse Minus
+    static wraptype_ptr rminus(const wraptype_ptr rhs, double lhs)
+    {
+      return performBinaryOp(lhs, rhs, 'm');
     }
     /// Multiply
     static wraptype_ptr times(const wraptype_ptr lhs, double rhs)
@@ -284,10 +319,20 @@ namespace PythonAPI
     {
       return performBinaryOp(lhs, rhs, 't', true);
     }
+    /// Multiply
+    static wraptype_ptr rtimes(const wraptype_ptr rhs, double lhs)
+    {
+      return performBinaryOp(lhs, rhs, 't');
+    }
     /// Divide
     static wraptype_ptr divide(const wraptype_ptr lhs, double rhs)
     {
       return performBinaryOp(lhs, rhs, 'd', false);
+    }
+    /// Reverse Divide
+    static wraptype_ptr rdivide(const wraptype_ptr rhs, double lhs)
+    {
+      return performBinaryOp(lhs, rhs, 'd');
     }
     /// Inplace Divide
     static wraptype_ptr inplace_divide(const wraptype_ptr lhs, double rhs)

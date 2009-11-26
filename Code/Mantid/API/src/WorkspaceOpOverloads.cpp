@@ -108,6 +108,15 @@ MatrixWorkspace_sptr operator-(const MatrixWorkspace_sptr lhs, const double& rhs
   return executeBinaryOperation("Minus",lhs,createWorkspaceSingleValue(rhsValue));
 }
 
+/** Subtracts a workspace from a single value
+ *  @param lhsValue the single value
+ *  @param rhs right-hand side workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+MatrixWorkspace_sptr operator-(const double& lhsValue, const MatrixWorkspace_sptr rhs)
+{
+  return executeBinaryOperation("Minus",createWorkspaceSingleValue(lhsValue),rhs);
+}
 /** Multiply two workspaces
  *  @param lhs left hand side workspace shared pointer
  *  @param rhs left hand side workspace shared pointer
@@ -156,6 +165,16 @@ MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const MatrixWorks
 MatrixWorkspace_sptr operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue)
 {
   return executeBinaryOperation("Divide",lhs,createWorkspaceSingleValue(rhsValue));
+}
+
+/** Divide a single value and a workspace. Allows you to write, e.g., 2/workspace.
+ *  @param lhsValue the single value
+ *  @param rhs      workspace shared pointer
+ *  @returns The result in a workspace shared pointer
+ */
+MatrixWorkspace_sptr operator/(const double& lhsValue, const MatrixWorkspace_sptr rhs)
+{
+  return executeBinaryOperation("Divide",createWorkspaceSingleValue(lhsValue),rhs);
 }
 
 /** Adds two workspaces

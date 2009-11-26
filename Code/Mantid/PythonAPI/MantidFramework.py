@@ -84,7 +84,7 @@ class WorkspaceProxy(object):
         '''
         Sum the proxied objects and return a new proxy managing that object
         '''
-        return self.__add__(rhs)
+        return self.__factory.create(rhs + self.__obj)
 
     def __iadd__(self, rhs):
         '''
@@ -109,7 +109,7 @@ class WorkspaceProxy(object):
         '''
         Subtract the proxied objects and return a new proxy managing that object
         '''
-        return self.__sub__(rhs)
+        return self.__factory.create(rhs - self.__obj)
 
     def __isub__(self, rhs):
         '''
@@ -134,7 +134,7 @@ class WorkspaceProxy(object):
         '''
         Multiply the proxied objects and return a new proxy managing that object
         '''
-        return self.__mul__(rhs)
+        return self.__factory.create(rhs * self.__obj)
 
     def __imul__(self, rhs):
         '''
@@ -159,7 +159,7 @@ class WorkspaceProxy(object):
         '''
         Divide the proxied objects and return a new proxy managing that object
         '''
-        return self.__div__(rhs)
+        return self.__factory.create(rhs / self.__obj)
 
     def __idiv__(self, rhs):
         '''

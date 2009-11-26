@@ -17,9 +17,11 @@ MatrixWorkspace_sptr DLLExport operator/(const MatrixWorkspace_sptr lhs, const M
 
 MatrixWorkspace_sptr DLLExport operator+(const MatrixWorkspace_sptr lhs, const double& rhsValue);
 MatrixWorkspace_sptr DLLExport operator-(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator-(const double& lhsValue, const MatrixWorkspace_sptr rhs);
 MatrixWorkspace_sptr DLLExport operator*(const MatrixWorkspace_sptr lhs, const double& rhsValue);
 MatrixWorkspace_sptr DLLExport operator*(const double& lhsValue, const MatrixWorkspace_sptr rhs);
 MatrixWorkspace_sptr DLLExport operator/(const MatrixWorkspace_sptr lhs, const double& rhsValue);
+MatrixWorkspace_sptr DLLExport operator/(const double& lhsValue, const MatrixWorkspace_sptr rhs);
 
 MatrixWorkspace_sptr DLLExport operator+=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
 MatrixWorkspace_sptr DLLExport operator-=(const MatrixWorkspace_sptr lhs, const MatrixWorkspace_sptr rhs);
