@@ -90,7 +90,6 @@ def __CallPlotFunction(workspace, index, error_bars):
         wkspname = workspace
     else:
         wkspname = workspace.getName()
-    print  'testing'
     return qti.app.mantidUI.plotTimeBin(wkspname, index, error_bars)
 
 #-----------------------------------------------------------------
