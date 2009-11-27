@@ -309,6 +309,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SaveDASC.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SaveFocusedXYE.cpp"
 				>
 			</File>
@@ -564,6 +568,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SaveCSVTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveDASC.h"
 				>
 			</File>
 			<File

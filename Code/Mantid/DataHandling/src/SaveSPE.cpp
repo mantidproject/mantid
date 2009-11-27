@@ -4,11 +4,13 @@
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/WorkspaceValidators.h"
-
 #include <fstream>
 #include <iomanip>
 
-using namespace Mantid::DataHandling;
+namespace Mantid
+{
+namespace DataHandling
+{
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveSPE)
@@ -72,7 +74,7 @@ void SaveSPE::exec()
 
   for (int i = 0; i < nHist+1; i++)
   {
-    double value = (i + 1) * 0.5;
+    double value = i + 0.5;
     outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << value;
     if ( (i > 0) && ((i + 1) % 8 == 0) )
     {
@@ -92,7 +94,7 @@ void SaveSPE::exec()
   for (MantidVec::size_type i = 0; i < X.size(); i++) // needs to be better!
   {
     outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << X[i];
-    if ( (i > 0) && ((i + 1) % 8 == 0) )
+    if ( (i + 1) % 8 == 0 )
     {
       outSPE_File << std::endl;
     }
@@ -133,4 +135,7 @@ void SaveSPE::exec()
     if (nBins % 8 != 0)
       outSPE_File << std::endl;
   }
+}
+
+}
 }
