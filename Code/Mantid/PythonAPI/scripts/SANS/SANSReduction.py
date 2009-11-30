@@ -316,10 +316,10 @@ def _loadRawData(filename, workspace, ext, spec_max = None):
             LoadRaw(filename + '.' + ext, workspace, SpectrumMax=spec_max)
         LoadSampleDetailsFromRaw(workspace, filename + '.' + ext)
     else:
-        if spec_max == None:
+#        if spec_max == None:
             LoadNexus(filename + '.' + ext, workspace)
-        else:
-            LoadNexus(filename + '.' + ext, workspace, SpectrumMax=spec_max)
+#        else:
+#            LoadNexus(filename + '.' + ext, workspace, SpectrumMax=spec_max)
 
     sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
     SampleGeometry(sample_details.getGeometryFlag())
