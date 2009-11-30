@@ -13,6 +13,13 @@ nmake clean
 nmake
 IF %ERRORLEVEL% NEQ 0 goto mantidqterr
 
+:: Now build QtPropertyBrowser
+cd "%ROOTDIR%\QtPropertyBrowser"
+qmake
+nmake clean
+nmake
+IF %ERRORLEVEL% NEQ 0 goto qtpropertyerr
+
 :: Now build qtiplot
 cd "%ROOTDIR%\qtiplot"
 nmake clean
@@ -24,6 +31,10 @@ EXIT 0
 
 :mantidqterr
 echo "MantidQt build failed."
+EXIT 1
+
+:qtpropertyerr
+echo "QtPropertyBrowser build failed."
 EXIT 1
 
 :qtiploterr
