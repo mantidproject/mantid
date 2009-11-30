@@ -32,6 +32,13 @@ if ret != 0:
     buildlog.write(outcome)
     sys.exit(0)
 
+# Build QtPropertyBrowser
+ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
+if ret != 0:
+    outcome = "QtPropertyBrowser build failed"
+    buildlog.write(outcome)
+    sys.exit(0)
+
 # Now build MantidPlot
 sp.call("qmake",stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
 ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
