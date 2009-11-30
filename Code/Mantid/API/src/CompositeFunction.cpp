@@ -102,12 +102,14 @@ class PartialJacobian: public Jacobian
 {
   Jacobian* m_J;  ///< pointer to the overall Jacobian
   int m_iP0;      ///< offset in the overall Jacobian for a particular function
+  int m_iaP0;      ///< offset in the active Jacobian for a particular function
 public:
   /** Constructor
    * @param J A pointer to the overall Jacobian
    * @param iP0 The parameter index (declared) offset for a particular function
+   * @param iap0 The active parameter index (declared) offset for a particular function
    */
-  PartialJacobian(Jacobian* J,int iP0):m_J(J),m_iP0(iP0)
+  PartialJacobian(Jacobian* J,int iP0, int iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
   {}
   /**
    * Overridden Jacobian::set(...).
@@ -119,6 +121,14 @@ public:
   {
       m_J->set(iY,m_iP0 + iP,value);
   }
+ /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
+  *   @param value Value to add
+  *   @param iActiveP The index of an active parameter.
+  */
+  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
+  {
+    m_J->addNumberToColumn(value,m_iaP0+iActiveP);
+  }
 };
 
 /// Derivatives of function with respect to active parameters
@@ -127,7 +137,7 @@ void CompositeFunction::functionDeriv(Jacobian* out, const double* xValues, cons
   if (nData <= 0) return;
   for(int i=0;i<nFunctions();i++)
   {
-    PartialJacobian J(out,m_paramOffsets[i]);
+    PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
     m_functions[i]->functionDeriv(&J,xValues,nData);
   }
 }
@@ -138,7 +148,7 @@ void CompositeFunction::functionDerivWithConstraint(Jacobian* out, const double*
   if (nData <= 0) return;
   for(int i=0;i<nFunctions();i++)
   {
-    PartialJacobian J(out,m_paramOffsets[i]);
+    PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
     m_functions[i]->functionDerivWithConstraint(&J,xValues,nData);
   }
 }
@@ -149,7 +159,7 @@ void CompositeFunction::calJacobianForCovariance(Jacobian* out, const double* xV
   if (nData <= 0) return;
   for(int i=0;i<nFunctions();i++)
   {
-    PartialJacobian J(out,m_paramOffsets[i]);
+    PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
     m_functions[i]->calJacobianForCovariance(&J,xValues,nData);
   }
 }
