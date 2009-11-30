@@ -1643,9 +1643,8 @@ int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no,
     py_code = "LoadNexus";
   }
   py_code += "(Filename='" + filepath + "', OutputWorkspace='" + workspace + "'";
-  if( workspace.contains("trans") && ext == ".raw")
+  if( workspace.contains("trans") )
   {
-    // Only for raw files for now - SpectrumMax missing for LoadNexusProcessed
     py_code += ", SpectrumMax=8";
   }
   py_code += ")"; 
