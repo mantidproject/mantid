@@ -7,6 +7,11 @@ qmake-qt4
 make clean
 make
 cd ..
+cd QtPropertyBrowser
+qmake-qt4
+make clean
+make
+cd ..
 cd qtiplot/
 qmake-qt4
 make clean
