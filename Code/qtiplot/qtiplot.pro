@@ -6,4 +6,4 @@ TEMPLATE = subdirs
 #		  manual\
 #          qtiplot
 
-SUBDIRS = MantidQt qtiplot 
+SUBDIRS = MantidQt QtPropertyBrowser qtiplot 

@@ -15,7 +15,7 @@
 //   Forward declarations
 //----------------------------
 
-class PeakPickerTool;
+class PeakPickerTool1D;
 class MantidUI;
 namespace Mantid
 {
@@ -58,7 +58,7 @@ class PeakFitDialog : public QDialog
 public:
   
   /// Default constructor
-  PeakFitDialog(QWidget *parent,PeakPickerTool* peakTool);
+  PeakFitDialog(QWidget *parent,PeakPickerTool1D* peakTool);
 
 private slots:
 
@@ -110,7 +110,7 @@ private:
   // Ready for fitting
   bool m_ready;
   // The peak picking tool
-  PeakPickerTool* m_peakTool;
+  PeakPickerTool1D* m_peakTool;
   // set when return is pressed inside ui.leExpression
   bool m_pressedReturnInExpression;
   // Mantid UI

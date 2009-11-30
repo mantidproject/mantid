@@ -9,6 +9,7 @@
 #include "AlgorithmHistoryWindow.h"
 //#include "MemoryImage.h"
 #include "MantidCurve.h"
+#include "FitPropertyBrowser.h"
 
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -60,6 +61,7 @@ m_progressDialog(0)
 {
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
+    m_fitFunction = new FitPropertyBrowser(aw);
 
   	actionCopyRowToTable = new QAction(tr("Copy spectra to table"), this);
 	actionCopyRowToTable->setIcon(QIcon(QPixmap(table_xpm)));
@@ -140,8 +142,14 @@ void MantidUI::init()
     actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
     appWindow()->view->addAction(actionToggleAlgorithms);
 
+    actionToggleFitFunction = m_fitFunction->toggleViewAction();
+    appWindow()->view->addAction(actionToggleFitFunction);
+    
+
     // Now that the framework is initialized we need to populate the algorithm tree
     m_exploreAlgorithms->update();
+    m_fitFunction->init();
+    m_fitFunction->hide();
 
 }
 
@@ -1222,6 +1230,7 @@ void MantidUI::showAlgMonitor()
 
 void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
 {
+  // workspace_added ?
   emit workspace_replaced(QString::fromStdString(pNf->object_name()), pNf->object());
 }
 
@@ -2050,11 +2059,18 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
     Mantid::API::Axis* ax;
     ax = workspace->getAxis(0);
     std::string s;
-    if (ax->unit().get()) s = ax->unit()->caption() + " / " + ax->unit()->label();
+    if (ax->unit().get())
+    {
+      s = ax->unit()->caption() + " / " + ax->unit()->label();
+    }
     else if (!ax->title().empty())
+    {
         s = ax->title();
+    }
     else
+    {
         s = "X axis";
+    }
     g->setXAxisTitle(tr(s.c_str()));
     g->setYAxisTitle(tr(workspace->YUnit().c_str()));
     g->setAntialiasing(false);
@@ -2393,14 +2409,14 @@ void countVirtual(vector<mem_block>& mem, int& total)
     while(size < GB2);
 
 
-    cerr<<"count FREE = "<<dec<<free/1024<<'\n';
-    cerr<<"count RESERVED = "<<reserved/1024<<'\n';
-    cerr<<"count COMMITTED = "<<committed/1024<<'\n';
+    std::cerr<<"count FREE = "<<std::dec<<double(free)/1024/1024<<'\n';
+    std::cerr<<"count RESERVED = "<<double(reserved)/1024/1024<<'\n';
+    std::cerr<<"count COMMITTED = "<<double(committed)/1024/1024<<'\n';
 
-    cerr<<"max FREE = "<<dec<<free_max<<'\n';
-    cerr<<"max RESERVED = "<<reserved_max<<'\n';
-    cerr<<"max COMMITTED = "<<committed_max<<'\n';
-    cerr<<'\n';
+    std::cerr<<"max FREE = "<<std::dec<<double(free_max)/1024/1024<<'\n';
+    std::cerr<<"max RESERVED = "<<double(reserved_max)/1024/1024<<'\n';
+    std::cerr<<"max COMMITTED = "<<double(committed_max)/1024/1024<<'\n';
+    std::cerr<<'\n';
 }
 
 /// Shows 2D plot of current memory usage.

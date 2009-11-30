@@ -53,6 +53,7 @@ INCLUDEPATH  += ../../Mantid/Geometry/inc/
 INCLUDEPATH  += ../../Mantid/API/inc/
 INCLUDEPATH  += ../MantidQt/includes
 INCLUDEPATH  += ../3rdparty/liborigin
+INCLUDEPATH  += ../QtPropertyBrowser/src
 
 win32 {
   INCLUDEPATH       += ../../Third_Party/include/
@@ -121,11 +122,13 @@ win32 {
     LIBS += $${THIRD_PARTY}/PocoUtild.lib
     LIBS += $${THIRD_PARTY}/PocoFoundationd.lib
     LIBS += $${THIRD_PARTY}/libboost_signals-vc80-mt-gd-1_34_1.lib
+    LIBS += QtPropertyBrowserd.lib
   } else {
     LIBS += $${THIRD_PARTY}/muparser.lib
     LIBS += $${THIRD_PARTY}/PocoUtil.lib
     LIBS += $${THIRD_PARTY}/PocoFoundation.lib
     LIBS += $${THIRD_PARTY}/libboost_signals-vc80-mt-1_34_1.lib
+    LIBS += QtPropertyBrowser.lib
   }
   
   build_pass:CONFIG(debug, debug|release) {
@@ -136,6 +139,7 @@ win32 {
     LIBPATH += ../../Mantid/Bin/Shared
     LIBPATH += ../../Mantid/release
     LIBPATH += ../MantidQt/lib
+    LIBPATH += ../QtPropertyBrowser/lib
   } 
 
   LIBS += MantidAPI.lib
@@ -384,11 +388,14 @@ HEADERS  += src/ApplicationWindow.h \
         src/Mantid/MantidSampleLogDialog.h \
         src/Mantid/AlgorithmHistoryWindow.h\
         src/Mantid/MantidMatrixDialog.h \
+	    src/Mantid/PeakPickerTool1D.h \
 	    src/Mantid/PeakPickerTool.h \
 	    src/Mantid/PeakFitDialog.h \
 	    src/Mantid/MantidCurve.h \
 	    src/Mantid/WorkspaceObserver.h \
 	    src/Mantid/UserFitFunctionDialog.h \
+	    src/Mantid/FitPropertyBrowser.h \
+	    src/Mantid/IFunctionWrapper.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
 	    src/Mantid/InstrumentWidget/GLTrackball.h \
@@ -556,10 +563,13 @@ SOURCES  += src/ApplicationWindow.cpp \
         src/Mantid/MantidSampleLogDialog.cpp \
         src/Mantid/AlgorithmHistoryWindow.cpp\
         src/Mantid/MantidMatrixDialog.cpp \
+	    src/Mantid/PeakPickerTool1D.cpp \
 	    src/Mantid/PeakPickerTool.cpp \
 	    src/Mantid/PeakFitDialog.cpp \
 	    src/Mantid/MantidCurve.cpp \
 	    src/Mantid/UserFitFunctionDialog.cpp \
+	    src/Mantid/FitPropertyBrowser.cpp \
+	    src/Mantid/IFunctionWrapper.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \
 	    src/Mantid/InstrumentWidget/GLTrackball.cpp \

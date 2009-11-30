@@ -390,8 +390,9 @@ void CompositeFunction::addFunction(IFunction* f)
 
 /** Remove a function
  * @param i The index of the function to remove
+ * @param del The deletion flag. If true the function will be deleted otherwise - simply detached
  */
-void CompositeFunction::removeFunction(int i)
+void CompositeFunction::removeFunction(int i, bool del)
 {
   if ( i >= nFunctions() )
     throw std::out_of_range("Function index out of range.");
@@ -428,6 +429,9 @@ void CompositeFunction::removeFunction(int i)
     {
       it = m_iFunction.erase(it);
     }
+
+    if (it == m_iFunction.end()) break;
+
     if (*it > i)
     {
       *it -= 1;
@@ -441,6 +445,9 @@ void CompositeFunction::removeFunction(int i)
     {
       it = m_iFunctionActive.erase(it);
     }
+
+    if (it == m_iFunctionActive.end()) break;
+
     if (*it > i)
     {
       *it -= 1;
@@ -464,7 +471,10 @@ void CompositeFunction::removeFunction(int i)
   m_paramOffsets.erase(m_paramOffsets.begin()+i);
 
   m_functions.erase(m_functions.begin()+i);
-  delete fun;
+  if (del)
+  {
+    delete fun;
+  }
 }
 
 /** Replace a function with a new one. The old function is deleted.

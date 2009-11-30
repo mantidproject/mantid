@@ -313,6 +313,9 @@ addFileV('MantidPythonAPI','MPAPI.dll','MantidPythonAPI.dll','../Mantid/Bin/Shar
 # Add qt API  library
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll','../qtiplot/MantidQt/lib/MantidQtAPI.dll',MantidDlls)
 
+# Add Qt Property Browser
+addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll','../qtiplot/QtPropertyBrowser/lib/QtPropertyBrowser.dll',MantidDlls)
+
 addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
 addDlls('../Third_Party/lib/win32','3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
 

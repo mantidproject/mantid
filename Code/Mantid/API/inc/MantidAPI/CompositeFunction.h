@@ -127,7 +127,7 @@ public:
   /// Number of functions
   int nFunctions()const{return m_functions.size();}
   /// Remove a function
-  void removeFunction(int i);
+  void removeFunction(int i, bool del=true);
   /// Replace a function
   void replaceFunction(int i,IFunction* f);
 

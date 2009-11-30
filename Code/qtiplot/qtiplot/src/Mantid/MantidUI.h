@@ -35,7 +35,7 @@ class MantidDockWidget;
 class AlgorithmDockWidget;
 class AlgorithmMonitor;
 class InstrumentWindow;
-
+class FitPropertyBrowser;
 
 /**
     MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid framework.
@@ -178,6 +178,9 @@ public:
     Table* createTableDetectors(MantidMatrix *m);
 
     //  *****                            *****  //
+
+    // Return pointer to the fit function property browser
+    FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
 
   /** ---------------------------------
    * Commands purely for python interaction
@@ -374,6 +377,8 @@ private:
     ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
     MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
     AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
+    FitPropertyBrowser *m_fitFunction;        // Dock window to set fit function properties
+
     QAction *actionCopyRowToTable;
     QAction *actionCopyRowToGraph;
     QAction *actionCopyRowToGraphErr;
@@ -382,10 +387,11 @@ private:
     QAction *actionCopyColumnToGraphErr;
     QAction *actionToggleMantid;
     QAction *actionToggleAlgorithms;
+    QAction *actionToggleFitFunction;
     QAction *actionCopyDetectorsToTable;
     QAction *actionCopyValues;
 
-	QMenu *mantidMenu;
+	  QMenu *mantidMenu;
     QMenu *menuMantidMatrix;             //  MantidMatrix specific menu
     AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
 

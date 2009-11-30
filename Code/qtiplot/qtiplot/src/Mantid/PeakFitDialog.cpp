@@ -3,13 +3,14 @@
 //---------------------------------------
 
 #include "PeakFitDialog.h"
-#include "PeakPickerTool.h"
+#include "PeakPickerTool1D.h"
 #include "../ApplicationWindow.h"
 #include "MantidUI.h"
 #include "MantidCurve.h"
 #include "UserFitFunctionDialog.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include <muParser.h>
 #include <qcheckbox.h>
 #include <qmessagebox.h>
@@ -21,7 +22,7 @@
 //---------------------------------------
 
 /// Constructor
-PeakFitDialog::PeakFitDialog(QWidget* parent,PeakPickerTool* peakTool) :
+PeakFitDialog::PeakFitDialog(QWidget* parent,PeakPickerTool1D* peakTool) :
   QDialog(parent),m_ready(false),m_peakTool(peakTool),m_pressedReturnInExpression(false),
     m_mantidUI(((ApplicationWindow*)parent)->mantidUI)
 {
@@ -61,6 +62,18 @@ PeakFitDialog::PeakFitDialog(QWidget* parent,PeakPickerTool* peakTool) :
   setLayout(ui.cbFunction->currentText());
   editIOParams(Qt::Unchecked);
 
+  //typedef std::vector<Mantid::API::Algorithm_descriptor> AlgNamesType;
+  //AlgNamesType algs = Mantid::API::AlgorithmFactory::Instance().getDescriptors();
+  //for(AlgNamesType::const_iterator a = algs.begin();a != algs.end(); a++)
+  //{
+  //  std::cerr<<a->category<<':'<<a->name<<'\n';
+  //  if (a->category == "CurveFitting")
+  //  {
+  //    ui.cbFunction->addItem(QString::fromStdString(a->name));
+  //  }
+  //}
+
+
 }
 
 // Checks if everything is ok and starts fitting
@@ -75,23 +88,8 @@ void PeakFitDialog::fit()
 
   if (m_ready)
   {
-    //Mantid::API::IAlgorithm_sptr alg = createAlgorithm();
-    QString function = ui.cbFunction->currentText();
-    if (function == "Gaussian")
-    {
-      fitPeaks();
-      close();
-    }
-    else if (function == "Lorentzian")
-    {
-      fitPeaks();
-      close();
-    }
-    else if (function == "User")
-    {
-      fitPeaks();
-      close();
-    }
+    fitPeaks();
+    close();
   }
   else
     std::cerr<<"Not ready!\n";
@@ -110,7 +108,7 @@ void PeakFitDialog::setLayout(const QString& functName)
   ui.cbPTWidth->clear();
   m_ready = false;
   QStringList params;
-  if (functName == "User")
+  if (functName == "User" || functName == "UserFunction1D")
   {
     ui.lblExpression->show();
     ui.leExpression->show();
@@ -145,6 +143,10 @@ void PeakFitDialog::setLayout(const QString& functName)
       m_backgroundFormula = "BG0+BG1*x";
       m_profileFormula = "Height*(HWHM^2/((x-PeakCentre)^2+HWHM^2))";
     }
+    else
+    {
+    }
+
     m_ready = true;
     ui.lblExpression->hide();
     ui.leExpression->hide();
@@ -188,18 +190,20 @@ Mantid::API::IAlgorithm_sptr PeakFitDialog::createAlgorithm()
   if (function == "Gaussian")
   {
     alg = m_mantidUI->CreateAlgorithm("Gaussian1D");
-    alg->initialize();
   }
   else if (function == "Lorentzian")
   {
     alg = m_mantidUI->CreateAlgorithm("Lorentzian1D");
-    alg->initialize();
   }
   else if (function == "User")
   {
     alg = m_mantidUI->CreateAlgorithm("UserFunction1D");
-    alg->initialize();
   }
+  else
+  {
+    alg = m_mantidUI->CreateAlgorithm(function);
+  }
+  alg->initialize();
   return alg;
 }
 
@@ -457,7 +461,7 @@ QString PeakFitDialog::getFixedList()const
 // Fit peaks 
 void PeakFitDialog::fitPeaks()
 {
-    const QList<PeakRangeMarker::PeakParams>& peaks = m_peakTool->marker()->params();
+    const QList<PeakRangeMarker1D::PeakParams>& peaks = m_peakTool->marker()->params();
     if ( peaks.size() == 0 )
     {
       QMessageBox::critical(this,tr("MantidPlot - Error"),

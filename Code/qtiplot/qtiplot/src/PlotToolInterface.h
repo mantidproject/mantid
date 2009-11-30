@@ -77,7 +77,8 @@ class PlotToolInterface
 		PlotToolInterface(Graph *graph) { d_graph = graph; }
 		virtual ~PlotToolInterface() {};
 
-        virtual int rtti() const { return Rtti_PlotTool;};
+    virtual int rtti() const { return Rtti_PlotTool;};
+    Graph* graph()const{return d_graph;}
 
 	protected:
 		Graph *d_graph;

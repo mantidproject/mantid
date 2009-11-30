@@ -173,7 +173,7 @@
 #include "Mantid/MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
 #include "Mantid/MantidCustomActionDialog.h"
-#include "Mantid/PeakPickerTool.h"
+#include "Mantid/PeakPickerTool1D.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -7291,7 +7291,7 @@ void ApplicationWindow::selectPeak()
     }
     if (g->validCurvesDataSize())
     {
-      PeakPickerTool* ppicker = new PeakPickerTool(g, this);
+      PeakPickerTool1D* ppicker = new PeakPickerTool1D(g, this);
       g->setActiveTool(ppicker);
       connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
       mantidPeakFitTools->show();
@@ -16023,7 +16023,7 @@ void ApplicationWindow::showPeakFitDialog()
   Graph* g = w->activeGraph();
   if (!g) return;
 
-  PeakPickerTool* ppicker = dynamic_cast<PeakPickerTool*>(g->activeTool());
+  PeakPickerTool1D* ppicker = dynamic_cast<PeakPickerTool1D*>(g->activeTool());
   if (!ppicker) return;
 
   PeakFitDialog* dlg = new PeakFitDialog(this,ppicker);
@@ -16054,7 +16054,7 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
       btnZoomIn->setOn(true);
     else if (g->areRangeSelectorsOn())
       btnSelect->setOn(true);
-    else if (dynamic_cast<PeakPickerTool*>(tool))
+    else if (dynamic_cast<PeakPickerTool1D*>(tool))
       btnPeakPick->setOn(true);
     else if (dynamic_cast<DataPickerTool*>(tool))
     {
