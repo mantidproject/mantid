@@ -73,6 +73,10 @@ public:
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
+  /// This method returns same as function() plus any penalty if constraints are violated
+  virtual void functionWithConstraint(double* out, const double* xValues, const int& nData) = 0;
+  ///  This method returns same as functionDeriv() plus any penalty if constraints are violated
+  virtual void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData) = 0;
   /// Derivatives to be used in covariance matrix calculation. Override this method some of the fitted parameters
   /// are different form the declared ones.
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
@@ -127,11 +131,6 @@ public:
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
-
-  /// This method calls function() and add any penalty to its output if constraints are violated
-  void functionWithConstraint(double* out, const double* xValues, const int& nData);
-  ///  This method calls functionDeriv() and add any penalty to its output if constraints are violated
-  void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData);
 
 protected:
 

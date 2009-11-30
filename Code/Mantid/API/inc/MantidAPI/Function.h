@@ -70,6 +70,11 @@ public:
   /// Virtual destructor
   virtual ~Function();
 
+  /// This method returns same as function() plus any penalty if constraints are violated
+  void functionWithConstraint(double* out, const double* xValues, const int& nData);
+  ///  This method returns same as functionDeriv() plus any penalty if constraints are violated
+  void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData);
+
   /// Address of i-th parameter
   virtual double& parameter(int);
   /// Address of i-th parameter

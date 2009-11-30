@@ -43,40 +43,6 @@ void IFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> w
   m_xMaxIndex = xMax;
 }
 
-/** This method calls function() and add any penalty to its output if constraints are violated.
-*
-* @param out IFunction values of for the data points
-* @param xValues X values for data points
-* @param nData Number of data points
- */
-void IFunction::functionWithConstraint(double* out, const double* xValues, const int& nData)
-{
-  this->function(out, xValues, nData);
-
-  // Add penalty factor if constraint is violated
-/*
-  double penalty = 0.0;
-
-  for (unsigned i = 0; m_constraints.size(); i++)
-  {
-    penalty += m_constraints[i]->check(*this);
-  }
-*/
-
-}
-
-
-/** This method calls functionDeriv() and add any penalty to its output if constraints are violated.
-*
-* @param out Derivatives
-* @param xValues X values for data points
-* @param nData Number of data points
- */
-void IFunction::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
-{
-  this->functionDeriv(out, xValues, nData);
-}
-
 /** Update active parameters. Ties are applied.
  *  @param in Pointer to an array with active parameters values. Must be at least nActive() doubles long.
  */

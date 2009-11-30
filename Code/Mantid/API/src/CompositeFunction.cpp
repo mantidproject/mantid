@@ -78,6 +78,24 @@ void CompositeFunction::function(double* out, const double* xValues, const int& 
   }
 }
 
+/// Function with constraint you want to fit to.
+void CompositeFunction::functionWithConstraint(double* out, const double* xValues, const int& nData)
+{
+  if (nData <= 0) return;
+  boost::shared_array<double> tmpOut(new double[nData]);
+  for(int i=0;i<nFunctions();i++)
+  {
+    if (i == 0)
+      m_functions[i]->functionWithConstraint(out,xValues,nData);
+    else
+    {
+      m_functions[i]->functionWithConstraint(tmpOut.get(),xValues,nData);
+      std::transform(out,out+nData,tmpOut.get(),out,std::plus<double>());
+    }
+  }
+}
+
+
 /** A Jacobian for individual functions
  */
 class PartialJacobian: public Jacobian
@@ -111,6 +129,17 @@ void CompositeFunction::functionDeriv(Jacobian* out, const double* xValues, cons
   {
     PartialJacobian J(out,m_paramOffsets[i]);
     m_functions[i]->functionDeriv(&J,xValues,nData);
+  }
+}
+
+/// Derivatives of function with respect to active parameters
+void CompositeFunction::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
+{
+  if (nData <= 0) return;
+  for(int i=0;i<nFunctions();i++)
+  {
+    PartialJacobian J(out,m_paramOffsets[i]);
+    m_functions[i]->functionDerivWithConstraint(&J,xValues,nData);
   }
 }
 

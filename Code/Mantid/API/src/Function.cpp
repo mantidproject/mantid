@@ -174,6 +174,54 @@ void Function::declareParameter(const std::string& name,double initValue )
   m_parameters.push_back(initValue);
 }
 
+/** This method calls function() and add any penalty to its output if constraints are violated.
+*
+* @param out function values of for the data points
+* @param xValues X values for data points
+* @param nData Number of data points
+ */
+void Function::functionWithConstraint(double* out, const double* xValues, const int& nData)
+{
+  function(out, xValues, nData);
+
+
+  // Add penalty factor to function if any constraint is violated
+
+ /* double penalty = 0.0;
+  for (unsigned i = 0; i < m_constraints.size(); i++)
+  {
+    penalty += m_constraints[i]->check(this);
+  }
+
+  for (int i = 0; i < nData; i++)
+  {
+    out[i] += penalty;
+  }*/
+}
+
+
+/** This method calls functionDeriv() and add any penalty to its output if constraints are violated.
+*
+* @param out Derivatives
+* @param xValues X values for data points
+* @param nData Number of data points
+ */
+void Function::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
+{
+  functionDeriv(out, xValues, nData);
+
+ /* for (unsigned i = 0; i < m_constraints.size(); i++)
+  {  
+    boost::shared_ptr<std::vector<double> > penalty = m_constraints[i]->checkDeriv(this);
+
+    // for each active paramter check if there is a penalty and if yes add to derivatives
+    for (unsigned int ii = 0; ii<(*penalty).size(); ii++)
+      if ((*penalty)[ii] != 0.0)
+        out->addNumberToColumn((*penalty)[ii], ii);
+  }*/
+}
+
+
 /**
  * Returns the "global" index of an active parameter.
  * @param i The index of an active parameter
