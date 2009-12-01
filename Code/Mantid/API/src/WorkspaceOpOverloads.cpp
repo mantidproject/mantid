@@ -273,10 +273,15 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
 
   // But even if they're not they could still match...
   const double commonSum = std::accumulate(WS->readX(0).begin(),WS->readX(0).end(),0.);
+  // If this results in infinity or NaN, then we can't tell - return false
+  if ( commonSum == std::numeric_limits<double>::infinity() || commonSum != commonSum ) return false;
   const int numHist = WS->getNumberHistograms();
   for (int j = 1; j < numHist; ++j)
   {
     const double sum = std::accumulate(WS->readX(j).begin(),WS->readX(j).end(),0.);
+    // If this results in infinity or NaN, then we can't tell - return false
+    if ( sum == std::numeric_limits<double>::infinity() || sum != sum ) return false;
+
     if ( std::abs(commonSum-sum)/std::max<double>(commonSum,sum) > 1.0E-7 ) return false;
   }
   return true;
