@@ -5,7 +5,6 @@ CONFIG += release_and_debug
 INCLUDEPATH += src
 DEPENDPATH += src
 
-
 SOURCES += src/qtpropertybrowser.cpp \
         src/qtpropertymanager.cpp \
         src/qteditorfactory.cpp \
@@ -35,6 +34,7 @@ win32:build_pass:CONFIG(debug, debug|release) {
 } else {
   # Put in local output directory
   DESTDIR = lib
+  TARGET = QtPropertyBrowser
 }
 
 CONFIG += release

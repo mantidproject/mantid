@@ -86,7 +86,7 @@ unix {
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
-  LIBS          += -L ../QtPropertyBrowser/lib -lqtpropertybrowser
+  LIBS          += -L../QtPropertyBrowser/lib -lQtPropertyBrowser
 
   LIBS   += -L../MantidQt/lib -lMantidQtAPI
 
