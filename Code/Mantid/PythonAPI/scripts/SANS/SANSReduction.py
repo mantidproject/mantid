@@ -297,8 +297,12 @@ def _assignHelper(run_string, is_trans):
         field_width = 5
     else:
         field_width = 8
+        
+    basename = INSTR_NAME + run_no.rjust(field_width, '0')
+    if basename == INSTR_NAME + ''.rjust(field_width, '0'):
+        return ''
     
-    filename = os.path.join(DATA_PATH,INSTR_NAME + run_no.rjust(field_width, '0'))
+    filename = os.path.join(DATA_PATH,basename)
     if is_trans:
         _loadRawData(filename, wkspname, ext, spec_max = 8)
     else:
