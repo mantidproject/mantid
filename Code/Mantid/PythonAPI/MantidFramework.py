@@ -323,7 +323,7 @@ class MantidPyFramework(Mantid.FrameworkManager):
                 return self._getRawWorkspaceGroupPointer(name)
             except RuntimeError:
                 try:
-                    return self._getTableWorkspacePointer(name)
+                    return self._getRawTableWorkspacePointer(name)
                 except RuntimeError:
                     return None
 
