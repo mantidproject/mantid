@@ -107,7 +107,7 @@ namespace Mantid
       }
 
       // Check the workspaces have the same units and distribution flag
-      if ( lhs_unit != rhs_unit && lhs->blocksize() > 1 && rhs->blocksize() > 1 )
+      if ( lhs_unit->unitID() != rhs_unit->unitID() && lhs->blocksize() > 1 && rhs->blocksize() > 1 )
       {
         g_log.error("The two workspace are not compatible because they have different units on the X axis.");
         return false;
