@@ -75,7 +75,7 @@ public:
     e[19] =      2.1220;
   }
 
-  void testAgainstMockData()
+  void testAgainstMockDataConstBackground()
   {
     Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
@@ -95,6 +95,16 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace(wsName, ws2D));
 
+    // create function you want to fit against
+    CompositeFunction *fnWithBk = new CompositeFunction();
+
+    LinearBackground *bk = new LinearBackground();
+    bk->initialize();
+
+    bk->getParameter("A0") = 0.0;
+    bk->getParameter("A1") = 0.0;
+    bk->removeActive(1);  
+
     // set up Lorentzian fitting function
     Lorentzian* fn = new Lorentzian();
     fn->initialize();
@@ -102,7 +112,10 @@ public:
     fn->setHeight(100.7);
     fn->setWidth(2.2);
 
-    alg2.setFunction(fn);
+    fnWithBk->addFunction(fn);
+    fnWithBk->addFunction(bk);
+
+    alg2.setFunction(fnWithBk);    
 
 
     // Set which spectrum to fit against and initial starting values
@@ -123,9 +136,11 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
 
 
-    TS_ASSERT_DELTA( fn->height(), 100.7023 ,0.0001);
+    TS_ASSERT_DELTA( fn->height(), 100.6902 ,0.0001);
     TS_ASSERT_DELTA( fn->centre(), 11.1994 ,0.0001);
-    TS_ASSERT_DELTA( fn->width(), 2.1974 ,0.0001);
+    TS_ASSERT_DELTA( fn->width(), 2.1986 ,0.0001);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), -0.0071 ,0.0001);
+    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
 
@@ -181,12 +196,12 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.0782,0.0001);
+    TS_ASSERT_DELTA( dummy, 0.0782,0.01);
 
 
-    TS_ASSERT_DELTA( fn->height(), 101.0322 ,0.0001);
+    TS_ASSERT_DELTA( fn->height(), 100.8921 ,0.0001);
     TS_ASSERT_DELTA( fn->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( fn->width(), 2.1743 ,0.0001);
+    TS_ASSERT_DELTA( fn->width(), 2.1919 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -219,7 +234,7 @@ public:
 
     bk->getParameter("A0") = 0.0;
     bk->getParameter("A1") = 0.0;
-    bk->removeActive(0);  
+    //bk->removeActive(0);  
     bk->removeActive(1);
 
     // set up Lorentzian fitting function
@@ -236,7 +251,6 @@ public:
     fnWithBk->addFunction(fn);
     fnWithBk->addFunction(bk);
 
-    //void setFunction(API::IFunction* fun);
     alg2.setFunction(fnWithBk);
 
 
@@ -255,13 +269,13 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    //TS_ASSERT_DELTA( dummy, 0.0001,0.0001);
+    TS_ASSERT_DELTA( dummy, 0.0827,0.0001);
 
 
-    TS_ASSERT_DELTA( fn->height(), 101.0322 ,0.0001);
+    TS_ASSERT_DELTA( fn->height(), 100.96 ,0.0001);
     TS_ASSERT_DELTA( fn->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( fn->width(), 2.1743 ,0.0001);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 0.0 ,0.0001);
+    TS_ASSERT_DELTA( fn->width(), 2.1765 ,0.0001);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 0.0604 ,0.0001);
     TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);

@@ -193,9 +193,13 @@ void Function::functionWithConstraint(double* out, const double* xValues, const 
     penalty += m_constraints[i]->check(this);
   }
 
+  // add penalty to first and last point and every 10th point in between
   if ( penalty != 0.0 )
   {
-    for (int i = 0; i < nData; i++)
+    out[0] += penalty;
+    out[nData-1] += penalty;
+
+    for (int i = 9; i < nData-1; i+=10)
     {
       out[i] += penalty;
     }
