@@ -1,4 +1,6 @@
-setWorkingDirectory("../../../Test/Data/")
+#
+# Example: Basic Mantid commands
+#
 
 # Print the available algorithms
 mtdHelp()
@@ -16,8 +18,7 @@ mtd.deleteWorkspace("test")
 mtd.deleteWorkspace("converted")
 
 # extract the one we want
-w = mtd.getMatrixWorkspace('rebinned')
+wksp = mtd['rebinned']
 
-print "Rebinned workspace has " + str(w.getNumberHistograms()) + " histograms"
-print "Rebinned workspace, spectrum 450's X data size " + str(w.readX(450).size()) + " bin boundaries"
-
+print "Rebinned workspace has " + str(wksp.getNumberHistograms()) + " histograms"
+print "Spectrum 450's X data size = " + str(len(wksp.readX(450))) + " bin boundaries"
