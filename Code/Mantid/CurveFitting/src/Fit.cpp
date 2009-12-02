@@ -374,7 +374,6 @@ namespace CurveFitting
 
     for (size_t i = 0; i < nParams(); i++)
     {
-        //gsl_vector_set(initFuncArg, i, m_fittedParameter[i]);
         gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
     }
 

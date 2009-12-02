@@ -104,7 +104,7 @@ boost::shared_ptr<std::vector<double> > BoundaryConstraint::checkDeriv(IFunction
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      (*penalty)[m_activeParameterIndex] = - m_penaltyFactor;
+      (*penalty)[m_activeParameterIndex] = -m_penaltyFactor;
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
       (*penalty)[m_activeParameterIndex] = m_penaltyFactor;

@@ -68,7 +68,7 @@ namespace Mantid
       std::string name()const{return "Gaussian";}
       virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const int& nData);
       virtual void setActiveParameter(int i,double value);
-      virtual double activeParameter(int i);
+      virtual double activeParameter(int i)const;
       virtual void function(double* out, const double* xValues, const int& nData);
       virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 

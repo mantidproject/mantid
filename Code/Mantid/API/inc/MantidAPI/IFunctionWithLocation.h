@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-//#include "MantidAPI/IFunction.h"
+#include "MantidAPI/Function.h"
 
 namespace Mantid
 {
@@ -39,7 +39,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFunctionWithLocation //: public IFunction
+class DLLExport IFunctionWithLocation : public Function
 {
 public:
   /// Returns the centre of the function, which may be something as simple as the centre of
