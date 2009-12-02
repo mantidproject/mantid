@@ -117,6 +117,7 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
 
 MantidCurve::~MantidCurve()
 {
+  std::cerr<<"MantidCurve deleted...\n";
 }
 
 void MantidCurve::setData(const QwtData &data)
@@ -229,6 +230,16 @@ QString MantidCurve::saveToString()
 	QString s;
 	s="MantidCurve\t"+m_wsName+"\t"+m_type+"\t"+QString::number(m_index)+"\t"+QString::number(m_drawErrorBars)+"\n";
 	return s;
+}
+
+/// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
+int MantidCurve::workspaceIndex()const
+{
+  if (dynamic_cast<const MantidQwtDataSpectra*>(mantidData()) != 0)
+  {
+    return m_index;
+  }
+  return -1;
 }
 
 //==========================================

@@ -320,6 +320,9 @@ public slots:
     // Customize MantidMatrix menu.
     void menuMantidMatrixAboutToShow();
 
+    // Show / hide the FitPropertyBrowser
+    void showFitPropertyBrowser(bool on = true);
+
     // Plot a spectrum in response from a InstrumentWindow signal
     MultiLayer* plotInstrumentSpectrum(const QString&,int);
 	MultiLayer* plotInstrumentSpectrumList(const QString&,std::set<int>);

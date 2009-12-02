@@ -22,7 +22,8 @@
  * @param parent The parent widget - must be an ApplicationWindow
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
-:QDockWidget("Fit Function",parent),m_function(0),m_defaultFunction("Gaussian"),m_appWindow((ApplicationWindow*)parent)
+:QDockWidget("Fit Function",parent),m_function(0),m_defaultFunction("Gaussian"),m_default_width(0),
+m_appWindow((ApplicationWindow*)parent)
 {
   setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -177,13 +178,30 @@ void FitPropertyBrowser::addFunction(const std::string& fnName)
     f->initialize();
     if (isComposite())
     {
+      Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
+      if (pf)
+      {
+        if (m_default_width != 0.0)
+        {
+          pf->setWidth(m_default_width);
+        }
+        else
+        {
+          m_default_width = pf->width();
+        }
+      }
       m_compositeFunction->addFunction(f);
+      setCount();
+      setIndex(m_compositeFunction->nFunctions()-1);
+      m_defaultFunction = fnName;
     }
     else if (m_function)
     {
       delete m_function;
     }
     setFunction(f);
+    displayFunctionName();
+    setFocus();
 }
 
 /** Replace the current function with a new one
@@ -217,9 +235,11 @@ void FitPropertyBrowser::removeFunction()
 {
   if (isComposite() && count() > 1)
   {
-    m_compositeFunction->removeFunction(index());
+    int i = index();
+    m_compositeFunction->removeFunction(i);
     setCount();
     m_function = m_compositeFunction->getFunction(index());
+    emit functionRemoved(i);
   }
   displayFunctionName();
   displayParameters();
@@ -236,6 +256,12 @@ std::string FitPropertyBrowser::functionName()const
     return "";
   }
   return m_function->name();
+}
+
+// Get the default function name
+std::string FitPropertyBrowser::defaultFunctionName()const
+{
+  return m_defaultFunction;
 }
 
 /// Get the input workspace name
@@ -268,6 +294,10 @@ void FitPropertyBrowser::functionChanged(QtProperty* prop)
     if (fnName == "<Delete>")
     {
       removeFunction();
+    }
+    else if (fnName == "<New>")
+    {
+      addFunction(m_defaultFunction);
     }
     else if (fnName != functionName())
     {
@@ -312,16 +342,11 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
   {
     if (!isComposite()) return;
     int i = index();
-    if (i == count())// add new function
-    {
-      addFunction(functionName());
-      setCount();
-    }
-    else if (i >= 0 && i < count())
+    if (i >= 0 && i < count())
     {
       setFunction(m_compositeFunction->getFunction(i));
     }
-    else if (i > count())
+    else if (i >= count())
     {
       setIndex(count()-1);
     }
@@ -330,6 +355,7 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
       setIndex(0);
     }
     displayFunctionName();
+    emit indexChanged(index());
   }
 }
 
@@ -355,6 +381,10 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   {
     pf->setWidth(value);
     displayParameters();
+    if (value > 0)
+    {
+      m_default_width = value;
+    }
   }
   else
   {
@@ -420,6 +450,7 @@ void FitPropertyBrowser::populateFunctionNames()
       m_registeredFunctions << QString::fromStdString(names[i]);
     }
   }
+  m_registeredFunctions.append("<New>");
   m_registeredFunctions.append("<Delete>");
   m_enumManager->setEnumNames(m_functionName, m_registeredFunctions);
   addFunction(m_defaultFunction);
@@ -577,6 +608,7 @@ void FitPropertyBrowser::fit()
   {
     alg->setPropertyValue("Function",*m_function);
   }
+  observeFinish(alg);
   alg->executeAsync();
   }
   catch(std::exception& e)
@@ -585,6 +617,12 @@ void FitPropertyBrowser::fit()
     m_appWindow->mantidUI->showCritical(msg);
   }
 
+}
+
+void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
+{
+  std::string out = alg->getProperty("OutputWorkspace");
+  emit algorithmFinished(QString::fromStdString(out));
 }
 
 /// Get and store available workspace names
@@ -653,4 +691,16 @@ void FitPropertyBrowser::init()
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
 {
   return dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0;
+}
+
+/// Creates Composite Function
+void FitPropertyBrowser::setComposite()
+{
+  m_boolManager->setValue(m_composite,true);
+}
+
+/// Is the current function a peak?
+bool FitPropertyBrowser::isPeak()const
+{
+  return dynamic_cast<Mantid::API::IPeakFunction*>(m_function) != 0;
 }

@@ -174,6 +174,7 @@
 #include "Mantid/MantidAbout.h"
 #include "Mantid/MantidCustomActionDialog.h"
 #include "Mantid/PeakPickerTool1D.h"
+#include "Mantid/PeakPickerTool.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -767,13 +768,6 @@ void ApplicationWindow::initToolBars()
 	btnRemovePoints->setIcon(QIcon(QPixmap(gomme_xpm)));
 	plotTools->addAction(btnRemovePoints);
 
-	//btnPeakPick = new QAction(tr("Select Peak..."), this);
-	////btnPeakPick->setShortcut( tr("Alt+B") );
-	//btnPeakPick->setActionGroup(dataTools);
-	//btnPeakPick->setCheckable( true );
-	//btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
-	//plotTools->addAction(btnPeakPick);
-
 	connect( dataTools, SIGNAL( triggered( QAction* ) ), this, SLOT( pickDataTool( QAction* ) ) );
 	plotTools->addSeparator ();
 
@@ -943,7 +937,11 @@ void ApplicationWindow::initToolBars()
 	connect(actionFitPeaks, SIGNAL(activated()), this, SLOT(showPeakFitDialog()));
   mantidPeakFitTools->addAction(actionFitPeaks);
 
-  //connect(btnPeakPick,SIGNAL(toggled(bool)),mantidPeakFitTools,SLOT(setVisible(bool)));
+	btnMultiPeakPick = new QAction(tr("Select Multiple Peaks..."), this);
+	btnMultiPeakPick->setActionGroup(dataTools);
+	btnMultiPeakPick->setCheckable( true );
+	btnMultiPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
+	mantidPeakFitTools->addAction(btnMultiPeakPick);
 
   // ---------------------------------- //
 
@@ -7301,6 +7299,47 @@ void ApplicationWindow::selectPeak()
 
 }
 
+/**  Switch on the multi-peak selecting tool for fitting
+ * with the Fit algorithm of multiple peaks on a single background
+ */
+void ApplicationWindow::selectMultiPeak()
+{
+	MultiLayer *plot = (MultiLayer *)activeWindow(MultiLayerWindow);
+	if (!plot)
+		return;
+	if (plot->isEmpty()){
+		QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
+				tr("<h4>There are no plot layers available in this window.</h4>"
+					"<p><h4>Please add a layer and try again!</h4>"));
+		btnPointer->setChecked(true);
+		return;
+	}
+
+	if ((Graph*)plot->activeGraph()->isPiePlot()){
+		QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
+				tr("This functionality is not available for pie plots!"));
+		btnPointer->setChecked(true);
+		return;
+	}
+
+  QList<Graph *> layers = plot->layersList();
+  foreach(Graph *g, layers){
+    if (g->isPiePlot() || !g->curves())
+    {
+      continue;
+    }
+    if (g->validCurvesDataSize())
+    {
+      PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI);
+      g->setActiveTool(ppicker);
+      connect(plot,SIGNAL(windowStateChanged(Qt::WindowStates, Qt::WindowStates)),ppicker,SLOT(windowStateChanged(Qt::WindowStates, Qt::WindowStates)));
+      mantidPeakFitTools->show();
+      mantidPeakFitTools->setEnabled(true);
+    }
+  }
+
+}
+
 void ApplicationWindow::newLegend()
 {
 	MultiLayer *plot = (MultiLayer *)activeWindow(MultiLayerWindow);
@@ -11389,6 +11428,8 @@ void ApplicationWindow::pickDataTool( QAction* action )
 		drawLine();
 	else if (action == btnPeakPick)
 		selectPeak();
+	else if (action == btnMultiPeakPick)
+		selectMultiPeak();
 }
 
 void ApplicationWindow::connectSurfacePlot(Graph3D *plot)
@@ -16056,6 +16097,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
       btnSelect->setOn(true);
     else if (dynamic_cast<PeakPickerTool1D*>(tool))
       btnPeakPick->setOn(true);
+    else if (dynamic_cast<PeakPickerTool*>(tool))
+      btnMultiPeakPick->setOn(true);
     else if (dynamic_cast<DataPickerTool*>(tool))
     {
       switch(((DataPickerTool*)tool)->getMode())

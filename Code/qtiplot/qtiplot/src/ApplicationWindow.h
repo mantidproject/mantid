@@ -605,6 +605,7 @@ public slots:
 	void pickPointerCursor();
 	void disableTools();
 	void selectPeak();
+	void selectMultiPeak();
 	void pickDataTool( QAction* action );
 
 	void updateLog(const QString& result);
@@ -1291,7 +1292,7 @@ private:
   QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
 	QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
     QAction *actionDeleteRows, *actionDrawPoints;
-	QAction *btnCursor, *btnSelect, *btnPicker, *btnRemovePoints, *btnMovePoints, *btnPeakPick;
+	QAction *btnCursor, *btnSelect, *btnPicker, *btnRemovePoints, *btnMovePoints, *btnPeakPick, *btnMultiPeakPick;
 	QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow;
 	QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
 	QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;

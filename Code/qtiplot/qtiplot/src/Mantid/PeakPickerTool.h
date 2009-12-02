@@ -25,6 +25,14 @@ class QToolBar;
 class PeakRangeMarker;
 class FitPropertyBrowser;
 
+namespace Mantid
+{
+  namespace API
+  {
+    class CompositeFunction;
+  }
+}
+
 /** 
     This class is for selecting peaks on a graph for subsequent fitting.
     As a QwtPlotPicker it uses its eventFilter method to intercept mouse 
@@ -53,7 +61,7 @@ class FitPropertyBrowser;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface
+class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface, public QwtPlotItem
 {
 	Q_OBJECT
 	public:
@@ -65,54 +73,31 @@ class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface
     int rtti() const { return Rtti_SelectPeakTool;};
     /// Receives and processes mouse and keyboard events
     bool eventFilter(QObject *obj, QEvent *event);
-    /// Returns the marker object
-    PeakRangeMarker* marker()const{return m_range;}
     /// Workspace name
     const QString& workspaceName()const{return m_wsName;}
     /// Spectrum index
     int spec()const{return m_spec;}
     /// The parent graph
     Graph* graph()const{return d_graph;}
+    /// Set the default peak function
+    void setDefaultPeakName(const std::string& fnName);
+
   public slots:
     void windowStateChanged( Qt::WindowStates oldState, Qt::WindowStates newState );
+
   signals:
     void peakChanged();
+
 	private slots:
     void functionChanged();
+    void indexChanged(int);
+    void functionRemoved(int);
+    void algorithmFinished(const QString&);
 	private:
-    FitPropertyBrowser* fitBrowser();
-    /// The parent application window
-		MantidUI* m_mantidUI;
-    /// Marks on the graph the fitting range
-    PeakRangeMarker* m_range;
-    /// Workspace name
-    QString m_wsName;
-    /// Spectrum index
-    int m_spec;
-};
 
-/**  This class stores the selected peaks parameters and displays
- *   peak markers. Derived from QwtPlotItem it overrides its virtual
- *   draw(..) method.
- */
-class PeakRangeMarker: public QwtPlotItem, public IFunctionWrapper
-{
-public:
-  // Peak parameter type
-  //struct PeakParams
-  //{
-  //  std::string fnName;
-  //  double centre;
-  //  double height;
-  //  double width;
-  //  PeakParams(double c,double h,double w):fnName("Gaussian"),centre(c),height(h),width(w){}
-  //};
-  // Constructor
-  PeakRangeMarker();
-  // Drawing method
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
-  void add(double c,double h);
+  void addPeak(double c,double h);
   // Return the centre of the currently selected peak
   double centre()const;
   // Return the width of the currently selected peak
@@ -120,93 +105,57 @@ public:
   // Return the height of the currently selected peak
   double height()const;
   // Check if the width is been set
-  bool isWidthSet()const;
+  bool isWidthSet()const{return m_width_set;}
   // Set the width set flag
-  void widthIsSet(bool yes=true);
+  void widthIsSet(bool yes=true) {m_width_set = yes;}
   // Change the width of the currently selected peak
   void setWidth(double x);
   // Return current function name
   std::string fnName()const;
   // Set new function name
   void fnName(const std::string& name);
+  // The number of peaks
+  int peakCount()const;
 
   // Check if x is near the xMin marker (+-dx)
-  bool clickedOnXMin(double x,double dx)
-  {
-    double c = xMin();
-    return (fabs(x - c) <= dx);
-  }
+  bool clickedOnXMin(double x,double dx);
   // Check if x is near the xMax marker (+-dx)
-  bool clickedOnXMax(double x,double dx)
-  {
-    double c = xMax();
-    return (fabs(x - c) <= dx);
-  }
+  bool clickedOnXMax(double x,double dx);
   // Check if x is near a width marker (+-dx)
-  bool clickedOnWidthMarker(double x,double dx)
-  {
-    double c = centre();
-    double w = width()/2;
-    return (fabs(x - c - w) <= dx) || (fabs(x - c + w) <= dx);
-  }
+  bool clickedOnWidthMarker(double x,double dx);
   // Check if x is near a peak centre marker (+-dx). If true returns the peak's index or -1 otherwise.
-  int clickedOnCentreMarker(double x,double dx)
-  {
-    //for(int i=0;i<m_params.size();i++)
-    //  if (fabs(x - m_params[i].centre) <= dx) return i;
-    return -1;
-  }
+  int clickedOnCentreMarker(double x,double dx);
   // Change current peak
-  void setCurrent(int i)
-  {
-    //if (i >= 0 && i < m_params.size())
-    //  m_current = i;
-  }
+  void setCurrent(int i);
   // Give new centre and height to the current peak
-  void reset(double c,double h)
-  {
-    if (m_current < 0)
-    {
-      add(c,h);
-      return;
-    }
-
-    //m_params[m_current].centre = c;
-    //m_params[m_current].height = h;
-  }
+  void setPeak(double c,double h);
   // Indicates that the marker (and peak tool) is in a process of resetting a peak (changing centre and height)
   bool resetting()const{return m_resetting;}
   // Switch on/off the resetting flag
   void resetting(bool ok){m_resetting = ok;}
   // Lower fit boundary
   double xMin()const{return m_xMin;}
-  void xMin(double x)
-  {
-    m_xMin = x;
-    if (x > m_xMax) 
-    {
-      m_xMax = x;
-    }
-  }
+  void xMin(double x);
   bool changingXMin()const{return m_changingXMin;}
   void changingXMin(bool ok){m_changingXMin = ok;}
   // Upper fit boundary
   double xMax()const  {return m_xMax;}
-  void xMax(double x) 
-  {
-    m_xMax = x;
-    if (x < m_xMin)
-    {
-      m_xMin = x;
-    }
-  }
+  void xMax(double x) ;
   bool changingXMax()const{return m_changingXMax;}
   void changingXMax(bool ok){m_changingXMax = ok;}
-private:
-  
-  //QList<PeakParams> m_params;// The parameter storage
-  std::string m_fnName; // Last changed function name
-  double m_width;   // Last changed width
+
+    FitPropertyBrowser* fitBrowser()const;
+    /// The parent application window
+		MantidUI* m_mantidUI;
+    /// the fitting function
+    boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+    /// Workspace name
+    QString m_wsName;
+    /// Spectrum index
+    int m_spec;
+
+  bool m_init;      // Is the tool initialized?
+  bool m_peakInit;  // Has the first peak been added?
   int m_current;    // Index of the current peak
   bool m_width_set; // The width set flag
   bool m_resetting; // The resetting flag
@@ -214,9 +163,7 @@ private:
   double m_xMax;    // Upper fit boundary
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
-
-  //virtual QwtDoubleRect boundingRect() const{return QwtDoubleRect(p0, p1);}
-
+  std::string m_defaultPeakName; // The default peak function name
 };
 
 

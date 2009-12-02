@@ -2,6 +2,7 @@
 #define FITPROPERTYBROWSER_H_
 
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/AlgorithmObserver.h"
 #include <boost/shared_ptr.hpp>
 #include <QDockWidget>
 #include <QMap>
@@ -37,7 +38,7 @@ namespace Mantid
  * @date 13/11/2009
  */
 
-class FitPropertyBrowser: public QDockWidget
+class FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObserver
 {
   Q_OBJECT
 public:
@@ -63,6 +64,10 @@ public:
   int index()const;
   /// Set index
   void setIndex(int i);
+  /// Creates Composite Function
+  void setComposite();
+  /// Is the current function a peak?
+  bool isPeak()const;
 
   /// Create a new function
   void addFunction(const std::string& fnName);
@@ -72,14 +77,25 @@ public:
   void removeFunction();
   /// Set the current function
   void setFunction(Mantid::API::IFunction* fun);
+  /// Get Composite Function
+  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
   /// Get the current function name
   std::string functionName()const;
+  /// Get the default function name
+  std::string defaultFunctionName()const;
+
+
   /// Get the input workspace name
   std::string workspaceName()const;
   /// Get the output name
   std::string outputName()const;
 
   void init();
+
+signals:
+  void indexChanged(int i);
+  void functionRemoved(int i);
+  void algorithmFinished(const QString&);
 
 private slots:
   void functionChanged(QtProperty* prop);
@@ -111,6 +127,7 @@ private:
   void populateFunctionNames();
   /// Check if the workspace can be used in the fit
   bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
+  void finishHandle(const Mantid::API::IAlgorithm* alg);
 
   QtTreePropertyBrowser* m_browser;
   /// Property managers:
@@ -151,6 +168,9 @@ private:
 
   /// Default function name
   std::string m_defaultFunction;
+
+  /// Default width for added peaks
+  double m_default_width;
 
   ApplicationWindow* m_appWindow;
 

@@ -93,6 +93,11 @@ public:
   /// saves the mantidcurve details to project file.
   QString saveToString();
 
+  /// The workspace name
+  QString workspaceName()const{return m_wsName;}
+  /// Returns the workspace index if a spectrum is plotted and -1 if it is a bin.
+  int workspaceIndex()const;
+
 private:
   /// Init the curve
   void init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,

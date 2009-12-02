@@ -1,5 +1,5 @@
-#ifndef PEAK_PICKER_TOOL_H
-#define PEAK_PICKER_TOOL_H
+#ifndef PEAK_PICKER_TOOL1D_H
+#define PEAK_PICKER_TOOL1D_H
 
 //---------------------------
 // Includes
@@ -172,4 +172,4 @@ private:
 };
 
 
-#endif /* PEAK_PICKER_TOOL_H */
+#endif /* PEAK_PICKER_TOOL1D_H */

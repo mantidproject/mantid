@@ -153,6 +153,19 @@ void MantidUI::init()
 
 }
 
+// Show / hide the FitPropertyBrowser
+void MantidUI::showFitPropertyBrowser(bool on)
+{
+  if (on)
+  {
+    m_fitFunction->show();
+  }
+  else
+  {
+    m_fitFunction->hide();
+  }
+}
+
 MantidUI::~MantidUI()
 {
   if( m_algMonitor ) delete m_algMonitor;
