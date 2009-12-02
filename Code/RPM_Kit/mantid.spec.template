@@ -78,6 +78,9 @@ python release_date.py %{version} SVN_VERSION
 cd MantidQt
 qmake-qt4
 make
+cd ../QtPropertyBrowser
+qmake-qt4
+make
 cd ../qtiplot
 qmake-qt4
 make
@@ -96,6 +99,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 install -m755 Code/qtiplot/MantidQt/lib/libMantidQtAPI.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/qtiplot/MantidQt/lib/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
 install -m755 Code/qtiplot/MantidQt/lib/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
+install -m755 Code/qtiplot/QtPropertyBrowser/lib/libQtPropertyBrowser.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/Mantid/Bin/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
 for i in Code/Mantid/Bin/Shared/*.so; do
     case `basename $i` in
