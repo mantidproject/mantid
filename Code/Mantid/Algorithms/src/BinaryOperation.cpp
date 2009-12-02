@@ -106,8 +106,11 @@ namespace Mantid
         rhs_unit = rhs->getAxis(0)->unit();
       }
 
+      const std::string lhs_unitID = ( lhs_unit ? lhs_unit->unitID() : "" );
+      const std::string rhs_unitID = ( rhs_unit ? rhs_unit->unitID() : "" );
+
       // Check the workspaces have the same units and distribution flag
-      if ( lhs_unit->unitID() != rhs_unit->unitID() && lhs->blocksize() > 1 && rhs->blocksize() > 1 )
+      if ( lhs_unitID != rhs_unitID && lhs->blocksize() > 1 && rhs->blocksize() > 1 )
       {
         g_log.error("The two workspace are not compatible because they have different units on the X axis.");
         return false;
