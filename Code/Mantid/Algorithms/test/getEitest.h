@@ -39,7 +39,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
     double answer = grouper.getProperty("IncidentEnergy");
-    TS_ASSERT_DELTA( answer, 12.9448, 1e-4 )//HOMER got 12.973 meV for the IncidentEnergy of MAR11001
+    TS_ASSERT_DELTA( answer, 12.9444, 1e-4 )//HOMER got 12.973 meV for the IncidentEnergy of MAR11001
     
     // test some more MARI runs
     loadRawFile(m_MARI2, "2, 3");
@@ -51,7 +51,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
     answer = grouper.getProperty("IncidentEnergy");
-    TS_ASSERT_DELTA( answer, 6.82198, 1e-4 )//HOMER got 6.518 meV for the IncidentEnergy of MAR11001
+    TS_ASSERT_DELTA( answer, 6.8222, 1e-4 )//HOMER errorously got 6.518 meV for the IncidentEnergy of MAR15306
     
     loadRawFile(m_MARI3, "2, 3");
     grouper.setPropertyValue("InputWorkspace", m_WS);
@@ -61,7 +61,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
     answer = grouper.getProperty("IncidentEnergy");
-    TS_ASSERT_DELTA( answer, 717.9795, 1e-4 )//HOMER got 718.716 meV for the IncidentEnergy of MAR11001
+    TS_ASSERT_DELTA( answer, 717.9787, 1e-4 )//HOMER got 718.716 meV for the IncidentEnergy of MAR15317
   }
 
   // this test takes 10 seconds to run on Steve's computer
@@ -88,7 +88,7 @@ public:
     TS_ASSERT( grouper.isExecuted() );
 
     double finalAnswer = grouper.getProperty("IncidentEnergy");
-    TS_ASSERT_DELTA( finalAnswer, 15.1006, 1e-4 )
+    TS_ASSERT_DELTA( finalAnswer, 15.1140, 1e-4 )
     AnalysisDataService::Instance().remove(m_WS);
   }
 

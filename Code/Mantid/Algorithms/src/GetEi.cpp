@@ -23,7 +23,7 @@ using namespace DataObjects;
 
 // adjustable fit criteria, increase the first number or reduce any of the last three for more promiscuous peak fitting
 // from the estimated location of the peak search forward by the following fraction and backward by the same fraction
-const double GetEi::HALF_WINDOW = 4.0/100;
+const double GetEi::HALF_WINDOW = 8.0/100;
 const double GetEi::PEAK_THRESH_H = 3.0;
 const double GetEi::PEAK_THRESH_A = 5.0;
 const int GetEi::PEAK_THRESH_W = 3;
@@ -51,9 +51,11 @@ void GetEi::init()
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
   declareProperty("Monitor1Spec", -1, mustBePositive,
-    "The spectrum number of the output of the first monitor");
+    "The spectrum number of the output of the first monitor, e.g. MAPS\n"
+    "41474, MARI 2, MERLIN 69634");
   declareProperty("Monitor2Spec", -1, mustBePositive->clone(),
-    "The spectrum number of the output of the second monitor");
+    "The spectrum number of the output of the second monitor e.g. MAPS\n"
+    "41475, MARI 3, MERLIN 69638");
   BoundedValidator<double> *positiveDouble = new BoundedValidator<double>();
   positiveDouble->setLower(0);
   declareProperty("EnergyEstimate", -1.0, positiveDouble,
@@ -205,8 +207,9 @@ double GetEi::timeToFly(double s, double E_KE) const
 */
 double GetEi::getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const double peakTime)
 {
+  const MantidVec& timesArray = WS->readX(monitIn);
   // we search for the peak only inside some window because there are often more peaks in the monitor histogram
-  double halfWin = WS->readX(monitIn).back()*HALF_WINDOW;
+  double halfWin = ( timesArray.back() - timesArray.front() )*HALF_WINDOW;
   // runs CropWorkspace as a sub-algorithm to and puts the result in a new temporary workspace that will be deleted when this algorithm has finished
   extractSpec(monitIn, peakTime-halfWin, peakTime+halfWin);
   // converting the workspace to count rate is required by the fitting algorithm if the bin widths are not all the same
@@ -304,7 +307,7 @@ void GetEi::getPeakEstimates(double &height, int &centreInd, double &background)
     throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background, was the energy estimate close enough?");
   }
 
-  g_log.debug() << "Guess of peak position, based on the maximum Y value in the monitor spectrum, is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)" << std::endl;
+  g_log.debug() << "Peak position is the bin that has the maximum Y value in the monitor spectrum, which is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)" << std::endl;
 
 }
 /** Estimates the closest time, looking either or back, when the number of counts is
