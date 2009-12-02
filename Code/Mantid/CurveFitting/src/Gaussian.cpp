@@ -75,7 +75,7 @@ void Gaussian::setActiveParameter(int i,double value)
     parameter(j) = value;
 }
 
-double Gaussian::activeParameter(int i)
+double Gaussian::activeParameter(int i)const
 {
   int j = indexOfActive(i);
 
