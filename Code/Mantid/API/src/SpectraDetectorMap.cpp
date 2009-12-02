@@ -138,6 +138,23 @@ namespace Mantid
       return spectraList;
     }
 
+    /** Tests whether the present map matches another
+     *  @param  other The other map against which to test
+     *  @return True if the maps match
+     */
+    bool SpectraDetectorMap::operator==(const SpectraDetectorMap& other) const
+    {
+      return ( m_s2dmap == other.m_s2dmap );
+    }
+
+    /** Tests whether the present map does not match another
+     *  @param  other The other map against which to test
+     *  @return True if the maps do not match
+     */
+    bool SpectraDetectorMap::operator!=(const SpectraDetectorMap& other) const
+    {
+      return !(*this == other);
+    }
 
   } // Namespace API 
 } // Namespace Mantid

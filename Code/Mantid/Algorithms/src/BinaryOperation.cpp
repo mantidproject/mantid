@@ -98,8 +98,8 @@ namespace Mantid
 
     bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
-      Unit_sptr lhs_unit = Unit_sptr();
-      Unit_sptr rhs_unit = Unit_sptr();
+      Unit_const_sptr lhs_unit = Unit_sptr();
+      Unit_const_sptr rhs_unit = Unit_sptr();
       if ( lhs->axes() && rhs->axes() ) // If one of these is a WorkspaceSingleValue then we don't want to check units match
       {
         lhs_unit = lhs->getAxis(0)->unit();

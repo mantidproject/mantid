@@ -82,6 +82,10 @@ public:
   std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
   /// Return the size of the map
   int nElements() const {return m_s2dmap.size();}
+  /// Tests two maps for equality
+  bool operator==(const SpectraDetectorMap& other) const;
+  /// Tests two maps for inequality
+  bool operator!=(const SpectraDetectorMap& other) const;
   
 private:
   /// Copy Contructor

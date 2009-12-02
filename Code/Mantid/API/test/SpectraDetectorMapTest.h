@@ -106,7 +106,17 @@ public:
     {
       TS_ASSERT_EQUALS(spectra[i],dets[i]+offset);
     }
+  }
 
+  void testOperatorEquals()
+  {
+    TS_ASSERT( sdMap == sdMap )
+  }
+
+  void testOperatorNotEquals()
+  {
+    SpectraDetectorMap sdMapLocal;
+    TS_ASSERT( sdMap != sdMapLocal )
   }
 
 private:

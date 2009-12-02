@@ -137,20 +137,51 @@ void ConjoinWorkspaces::exec()
  */
 void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2) const
 {
+  // This is the full check for common binning
   if ( !WorkspaceHelpers::commonBoundaries(ws1) || !WorkspaceHelpers::commonBoundaries(ws2) )
   {
     g_log.error("Both input workspaces must have common binning for all their spectra");
     throw std::invalid_argument("Both input workspaces must have common binning for all their spectra");
   }
 
-  if ( ws1->getInstrument()->getName() != ws2->getInstrument()->getName()
-       || ws1->getAxis(0)->unit() != ws2->getAxis(0)->unit()
-       || ws1->isDistribution()   != ws2->isDistribution()
-       || !WorkspaceHelpers::matchingBins(ws1,ws2,true)  )
-  // Would be good to also check the spectra-detector maps are the same
+  if ( ws1->getInstrument()->getName() != ws2->getInstrument()->getName() )
   {
-    g_log.error("The input workspaces are not compatible");
-    throw std::invalid_argument("The input workspaces are not compatible");
+    const std::string message("The input workspaces are not compatible because they come from different instruments");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  Unit_const_sptr ws1_unit = ws1->getAxis(0)->unit();
+  Unit_const_sptr ws2_unit = ws2->getAxis(0)->unit();
+  const std::string ws1_unitID = ( ws1_unit ? ws1_unit->unitID() : "" );
+  const std::string ws2_unitID = ( ws2_unit ? ws2_unit->unitID() : "" );
+
+  if ( ws1_unitID != ws2_unitID )
+  {
+    const std::string message("The input workspaces are not compatible because they have different units on the X axis");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  if ( ws1->isDistribution()   != ws2->isDistribution() )
+  {
+    const std::string message("The input workspaces have inconsistent distribution flags");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  if ( !WorkspaceHelpers::matchingBins(ws1,ws2,true) )
+  {
+    const std::string message("The input workspaces are not compatible because they have different binning");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+
+  if ( ws1->spectraMap() != ws2->spectraMap() )
+  {
+    const std::string message("The input workspaces are not compatible because they have different spectrum-detector maps");
+    g_log.error(message);
+    throw std::invalid_argument(message);
   }
 
   this->checkForOverlap(ws1,ws2);
