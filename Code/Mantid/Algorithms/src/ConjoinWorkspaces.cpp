@@ -177,13 +177,6 @@ void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API:
     throw std::invalid_argument(message);
   }
 
-  if ( ws1->spectraMap() != ws2->spectraMap() )
-  {
-    const std::string message("The input workspaces are not compatible because they have different spectrum-detector maps");
-    g_log.error(message);
-    throw std::invalid_argument(message);
-  }
-
   this->checkForOverlap(ws1,ws2);
 }
 
