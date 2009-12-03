@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CheckWorkspacesMatch.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CommutativeBinaryOperation.cpp"
 				>
 			</File>

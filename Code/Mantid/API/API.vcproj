@@ -437,10 +437,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\test\GaussianErrorHelperTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\IAlgorithm.h"
 				>
 			</File>
@@ -458,10 +454,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\IFunction.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\IFunctionTest.h"
 				>
 			</File>
 			<File

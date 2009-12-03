@@ -58,10 +58,10 @@ void CheckWorkspacesMatch::doComparison()
   if ( ! checkData(ws1,ws2) ) return;
   
   // Now do the other ones if requested. Bail out as soon as we see a failure.
-  if ( getProperty("CheckAxes") && ! checkAxes(ws1,ws2) ) return;
-  if ( getProperty("CheckSpectraMap") && ! checkSpectraMap(ws1,ws2) ) return;
-  if ( getProperty("CheckInstrument") && ! checkInstrument(ws1,ws2) ) return;
-  if ( getProperty("CheckMasking") && ! checkMasking(ws1,ws2) ) return;
+  if ( static_cast<bool>(getProperty("CheckAxes")) && ! checkAxes(ws1,ws2) ) return;
+  if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1,ws2) ) return;
+  if ( static_cast<bool>(getProperty("CheckInstrument")) && ! checkInstrument(ws1,ws2) ) return;
+  if ( static_cast<bool>(getProperty("CheckMasking")) && ! checkMasking(ws1,ws2) ) return;
   
   return;
 }
