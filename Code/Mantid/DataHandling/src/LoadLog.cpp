@@ -304,7 +304,7 @@ std::string LoadLog::stringToLower(std::string strToConvert)
 }
 
 /** Checks whether filename is a simple text file
-* @param filenamePart The filename to inspect
+* @param filename The filename to inspect
 * @returns true if the filename has the .txt extension
 */
 bool LoadLog::isAscii(const std::string& filename)
