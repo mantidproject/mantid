@@ -38,6 +38,11 @@ namespace Mantid
       return;
     }
 
+    /** Links a list of UDETs to the given spectrum.
+     *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
+     *  @param spectrum The spectrum number to which detectors should be added
+     *  @param udetList The list of detectors id's to add to the map
+     */
     void SpectraDetectorMap::addSpectrumEntries(const int spectrum, const std::vector<int>& udetList)
     {
       std::vector<int>::const_iterator it;
@@ -48,10 +53,10 @@ namespace Mantid
     }
     
     /** Moves all detectors assigned to a particular spectrum number to a different one.
-    *  Does nothing if the oldSpectrum number does not exist in the map.
-    *  @param oldSpectrum The spectrum number to be removed and have its detectors reassigned
-    *  @param newSpectrum The spectrum number to map the detectors to
-    */
+     *  Does nothing if the oldSpectrum number does not exist in the map.
+     *  @param oldSpectrum The spectrum number to be removed and have its detectors reassigned
+     *  @param newSpectrum The spectrum number to map the detectors to
+     */
     void SpectraDetectorMap::remap(const int oldSpectrum, const int newSpectrum)
     {
       // Do nothing if the two spectrum numbers given are the same

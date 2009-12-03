@@ -517,6 +517,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\CheckWorkspacesMatch.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\CommutativeBinaryOperation.h"
 				>
 			</File>

@@ -46,7 +46,6 @@ void SumSpectra::init()
 
 /** Executes the algorithm
  *
- *  @throw runtime_error Thrown if algorithm cannot execute
  */
 void SumSpectra::exec()
 {
@@ -86,6 +85,12 @@ void SumSpectra::exec()
   // Get a reference to the spectra-detector map
   SpectraDetectorMap& specMap = outputWorkspace->mutableSpectraMap();
   const Axis* const spectraAxis = localworkspace->getAxis(1);
+  int newSpectrumNo = 0;
+  if ( spectraAxis->isSpectra() ) 
+  {
+    newSpectrumNo = spectraAxis->spectraNo(m_MinSpec);
+    outputWorkspace->getAxis(1)->spectraNo(0) = newSpectrumNo;
+  }
 
   // Loop over spectra
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
@@ -100,8 +105,8 @@ void SumSpectra::exec()
       YError[k] += YErrors[k]*YErrors[k];
     }
    
-    // Map all the detectors onto the spectrum of the output (which is 0)
-    specMap.addSpectrumEntries(0,specMap.getDetectors(spectraAxis->spectraNo(i)));
+    // Map all the detectors onto the spectrum of the output
+    if (spectraAxis->isSpectra()) specMap.remap(spectraAxis->spectraNo(i),newSpectrumNo);
 
     progress.report();
   }
