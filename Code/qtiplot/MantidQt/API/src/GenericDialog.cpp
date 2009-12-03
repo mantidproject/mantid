@@ -151,17 +151,19 @@ void GenericDialog::initLayout()
 	  //Add the widgets to the grid
 	  m_inputGrid->addWidget(nameLbl, row, 0, 0);
 	  m_inputGrid->addWidget(textBox, row, 1, 0);
-	  tie(textBox, propName, m_inputGrid);	  
+	  QWidget* validator = tie(textBox, propName, m_inputGrid);	  
 	  
 	  // If this is an output workspace property and there is an input workspace property
 	  // add a button that replaces the input workspace
+	  int row_pos(0), col_pos(0), span(0);
+	  m_inputGrid->getItemPosition(m_inputGrid->indexOf(validator), &row_pos, &col_pos, &span, &span);
 	  if( isWorkspaceProp && haveInputWS )
 	  {
 	    QPushButton *inputWSReplace = this->createReplaceWSButton(textBox);
 	    if( inputWSReplace )
 	    {
 	      inputWSReplace->setEnabled(isEnabled);
-	      m_inputGrid->addWidget(inputWSReplace, row, m_inputGrid->columnCount(), 0);
+	      m_inputGrid->addWidget(inputWSReplace, row, col_pos + 1, 0);
 	    }
 	  }
 	  
@@ -170,7 +172,7 @@ void GenericDialog::initLayout()
 	    QPushButton *browseBtn = new QPushButton(tr("Browse"));
 	    connect(browseBtn, SIGNAL(clicked()), m_signalMapper, SLOT(map()));
 	    m_signalMapper->setMapping(browseBtn, textBox);
-	    m_inputGrid->addWidget(browseBtn, row, m_inputGrid->columnCount(), 0);
+	    m_inputGrid->addWidget(browseBtn, row, col_pos + 1, 0);
 	    browseBtn->setEnabled(isEnabled);
 	  }
 	}//end combo box/dialog box decision

@@ -218,7 +218,7 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
   setValue(widget, property);
   m_tied_properties.insert(property, widget);
   QLabel *validlbl = getValidatorMarker(property);
-  if( !parent_layout ) return validlbl;
+  //  if( !parent_layout ) return validlbl;
   
   int item_index = parent_layout->indexOf(widget);
   if( QBoxLayout *box = qobject_cast<QBoxLayout*>(parent_layout) )
@@ -235,7 +235,7 @@ QWidget* AlgorithmDialog::tie(QWidget* widget, const QString & property, QLayout
   {
   }
 
-  return NULL;
+  return validlbl;
 }
 
 /**
@@ -252,24 +252,6 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
 
   //The allowed values in this context are file extensions
   std::set<std::string> exts = prop->allowedValues();
-  QString filter;
-  if( !exts.empty() )
-  {
-    filter = "Files (";
-		
-    std::set<std::string>::const_iterator iend = exts.end();
-    for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
-    {
-  	  filter.append("*." + QString::fromStdString(*itr) + " ");
-    }
-		
-    filter.trimmed();
-    filter.append(QString::fromStdString(")"));
-  }
-  else
-  {
-    filter = "All Files (*.*)";
-  }
   
   /* MG 20/07/09: Static functions such as these that use native Windows and MAC dialogs 
      in those environments are alot faster. This is unforunately at the expense of 
@@ -278,12 +260,44 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
   QString filename;
   if( prop->isLoadProperty() )
   {
+    QString filter;
+    if( !exts.empty() )
+    {
+      filter = "Files (";
+      
+      std::set<std::string>::const_iterator iend = exts.end();
+      for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
+      {
+  	  filter.append("*." + QString::fromStdString(*itr) + " ");
+      }
+      
+      filter.trimmed();
+      filter.append(QString::fromStdString(")"));
+    }
+    filter.append(";;All Files (*.*)");
+
     filename = QFileDialog::getOpenFileName(this, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
-    
   }
   else
   {
-    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
+    //Have each filter on a separate line
+    QString filter("");
+    std::set<std::string>::const_iterator iend = exts.end();
+    for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
+    {
+      filter.append("." + QString::fromStdString(*itr) + ";;");
+    }
+    //Remove last two semi-colons or else we get an extra empty option in the box
+    filter.chop(2);
+    QString selectedFilter;
+    filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter, &selectedFilter);
+    
+    //Check the filename and append the selected filter if necessary
+    if( QFileInfo(filename).completeSuffix().isEmpty() )
+    {
+      filename += selectedFilter;
+    }
+
   }
 
   if( !filename.isEmpty() ) 
