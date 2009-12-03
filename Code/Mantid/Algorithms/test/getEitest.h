@@ -100,7 +100,6 @@ public:
     loader.setPropertyValue("Filename", filename);
     loader.setPropertyValue("OutputWorkspace", m_WS);
     loader.setPropertyValue("SpectrumList", list);
-    loader.setPropertyValue("OutputWorkspace", m_WS);
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
   }

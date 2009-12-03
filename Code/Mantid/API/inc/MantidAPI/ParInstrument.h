@@ -65,12 +65,12 @@ public:
   /// Returns a pointer to the geometrical object representing the monitor with the given ID
   virtual Geometry::IDetector_sptr getMonitor(const int &detector_id) const;
   /// returns a list containing  detector ids of monitors
-  virtual const std::vector<int> getMonitors()const ;
+  virtual const std::vector<int> getMonitors() const ;
 
   /// Pointer to the 'real' instrument
-  boost::shared_ptr<Instrument> baseInstrument()const{return m_instr;}
+  boost::shared_ptr<Instrument> baseInstrument() const {return m_instr;}
   /// Pointer to the ParameterMap holding the parameters of the modified instrument components.
-  Kernel::cow_ptr<Geometry::ParameterMap> getParameterMap(){return m_parmap;}
+  Kernel::cow_ptr<Geometry::ParameterMap> getParameterMap() const {return m_parmap;}
 
   /// return reference to detector cache 
   std::map<int, Geometry::IDetector_sptr> getDetectors() const;
