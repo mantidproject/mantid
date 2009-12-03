@@ -199,9 +199,9 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0782,0.01);
 
 
-    TS_ASSERT_DELTA( fn->height(), 100.8921 ,0.0001);
+    TS_ASSERT_DELTA( fn->height(), 100.6995 ,0.0001);
     TS_ASSERT_DELTA( fn->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( fn->width(), 2.1919 ,0.0001);
+    TS_ASSERT_DELTA( fn->width(), 2.1999 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -269,14 +269,14 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.0827,0.0001);
+    TS_ASSERT_DELTA( dummy, 0.0834,0.0001);
 
 
-    TS_ASSERT_DELTA( fn->height(), 100.96 ,0.0001);
+    TS_ASSERT_DELTA( fn->height(), 100.6996 ,0.0001);
     TS_ASSERT_DELTA( fn->centre(), 11.3 ,0.01);
-    TS_ASSERT_DELTA( fn->width(), 2.1765 ,0.0001);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 0.0604 ,0.0001);
-    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.0001);
+    TS_ASSERT_DELTA( fn->width(), 2.1999 ,0.0001);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 0.0 ,0.01);
+    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01);
 
     AnalysisDataService::Instance().remove(wsName);
 

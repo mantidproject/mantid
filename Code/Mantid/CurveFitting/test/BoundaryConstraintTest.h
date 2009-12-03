@@ -34,7 +34,7 @@ public:
     gaus->initialize();
     gaus->setCentre(11.2);
     gaus->setHeight(100.7);
-    gaus->setWidth(2.2);
+    gaus->getParameter("Sigma") = 1.1;
 
     BoundaryConstraint* bc = new BoundaryConstraint("Sigma");
 
@@ -46,6 +46,17 @@ public:
 
     TS_ASSERT(bc->hasLower());
     TS_ASSERT(bc->hasUpper());
+
+    BoundaryConstraint* bc2 = new BoundaryConstraint("Sigma",10,20);
+
+    TS_ASSERT_DELTA( bc2->lower(), 10 ,0.0001);
+    TS_ASSERT_DELTA( bc2->upper(), 20 ,0.0001);
+
+    TS_ASSERT_DELTA( gaus->getParameter("Sigma"), 1.1 ,0.0001);
+    bc2->setParamToSatisfyConstraint(gaus);
+    TS_ASSERT_DELTA( gaus->getParameter("Sigma"), 10.0 ,0.0001);
+
+
 
   }
 

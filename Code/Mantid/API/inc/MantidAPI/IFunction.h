@@ -132,6 +132,13 @@ public:
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
 
+  /// Set the parameters of the function to satisfy the constraints of
+  /// of the function. For example
+  /// for a BoundaryConstraint this if param value less than lower boundary
+  /// it is set to that value and vice versa for if the param value is larger
+  /// than the upper boundary value.
+  virtual void setParametersToSatisfyConstraints() {};
+
 protected:
 
   /// Function initialization. Declare function parameters in this method.

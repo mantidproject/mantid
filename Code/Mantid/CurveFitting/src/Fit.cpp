@@ -302,6 +302,9 @@ namespace CurveFitting
 
     m_function->setWorkspace(localworkspace,histNumber,m_minX, m_maxX);
 
+    // force initial parameters to satisfy constraints of function
+    m_function->setParametersToSatisfyConstraints();
+
     // check if derivative defined in derived class
     bool isDerivDefined = true;
     try

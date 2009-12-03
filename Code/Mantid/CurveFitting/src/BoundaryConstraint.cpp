@@ -55,6 +55,36 @@ int BoundaryConstraint::determineParameterIndex(IFunction* fn)
   //}
 }
 
+void BoundaryConstraint::setParamToSatisfyConstraint(API::IFunction* fn)
+{
+  m_activeParameterIndex = determineParameterIndex(fn);
+
+  if (m_activeParameterIndex < 0)
+  {
+    g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
+      << " names of function " << fn->name() << ". Therefore"
+      << " this constraint applied to this funtion serves no purpose";
+    return;
+  }
+
+  if ( !(m_hasLowerBound || m_hasUpperBound) )
+  {
+    g_log.warning() << "No bounds have been set on BoundaryConstraint for parameter " << m_parameterName << ". Therefore"
+      << " this constraint serves no purpose!"; 
+    return;
+  }
+
+  double paramValue = fn->parameter(fn->indexOfActive(m_activeParameterIndex));
+
+  if (m_hasLowerBound)
+    if ( paramValue < m_lowerBound )
+      fn->getParameter(fn->nameOfActive(m_activeParameterIndex)) = m_lowerBound;
+  if (m_hasUpperBound)
+    if ( paramValue > m_upperBound )
+      fn->getParameter(fn->nameOfActive(m_activeParameterIndex)) = m_upperBound;
+}
+
+
 double BoundaryConstraint::check(IFunction* fn)
 {
   m_activeParameterIndex = determineParameterIndex(fn);

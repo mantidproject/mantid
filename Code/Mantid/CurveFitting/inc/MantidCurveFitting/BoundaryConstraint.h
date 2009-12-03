@@ -113,6 +113,7 @@ namespace Mantid
       /// overwrite IConstraint base class methods
       virtual double check(API::IFunction* fn);
       virtual boost::shared_ptr<std::vector<double> > checkDeriv(API::IFunction* fn);
+      virtual void setParamToSatisfyConstraint(API::IFunction* fn);
 
     private:
 

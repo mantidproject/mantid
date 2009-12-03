@@ -115,6 +115,8 @@ public:
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic);
+ 
+  void setParametersToSatisfyConstraints();
 
   using IFunction::removeTie;
 

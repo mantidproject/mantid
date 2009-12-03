@@ -49,6 +49,14 @@ void Function::addConstraint(IConstraint* ic)
   m_constraints.push_back(ic);
 }
 
+void Function::setParametersToSatisfyConstraints()
+{
+  for (unsigned int i = 0; i < m_constraints.size(); i++)
+  {
+    m_constraints[i]->setParamToSatisfyConstraint(this);
+  }
+}
+
 /** Reference to the i-th parameter.
  *  @param i The parameter index
  */

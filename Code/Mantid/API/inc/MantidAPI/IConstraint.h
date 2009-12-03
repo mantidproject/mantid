@@ -52,6 +52,11 @@ public:
   /// Returns the derivative of the penalty for each active parameter
   virtual boost::shared_ptr<std::vector<double> > checkDeriv(IFunction* fn) = 0;
 
+  /// Set the parameters of IFunction to satisfy constraint. For example
+  /// for a BoundaryConstraint this if param value less than lower boundary
+  /// it is set to that value and vice versa for if the param value is larger
+  /// than the upper boundary value. 
+  virtual void setParamToSatisfyConstraint(IFunction* fn) = 0;
 };
 
 

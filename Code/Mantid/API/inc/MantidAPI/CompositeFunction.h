@@ -115,8 +115,9 @@ public:
   /// Get the tie of i-th parameter
   ParameterTie* getTie(int i)const;
 
-  /// Add a constraint to function
-  virtual void addConstraint(IConstraint* ic);
+  /// Overwrite IFunction methods
+  void addConstraint(IConstraint* ic);
+  void setParametersToSatisfyConstraints();
 
              /* CompositeFunction own methods */
 

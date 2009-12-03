@@ -703,6 +703,14 @@ void CompositeFunction::addConstraint(IConstraint* ic)
   throw Kernel::Exception::NotImplementedError("addConstraint is not implemented for CompositeFunction yet.");
 }
 
+void CompositeFunction::setParametersToSatisfyConstraints()
+{
+  for(int i=0;i<nFunctions();i++)
+  {
+    getFunction(i)->setParametersToSatisfyConstraints();
+  }
+}
+
 
 } // namespace API
 } // namespace Mantid
