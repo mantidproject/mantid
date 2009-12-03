@@ -68,7 +68,7 @@ void MedianDetectorTest::init()
     "No bin with a boundary at an x value higher than this value will\n"
     "be included in the summation used to decide if a detector is 'bad'\n"
     "(default: the end of each histogram)" );
-  declareProperty(new FileProperty("OutputFile","", FileProperty::Save),
+  declareProperty(new FileProperty("OutputFile","",FileProperty::OptionalSave),
     "The name of a file to write the list spectra that have a bad detector\n"
     "(default no file output)");
   declareProperty("GoodValue", 0.0,

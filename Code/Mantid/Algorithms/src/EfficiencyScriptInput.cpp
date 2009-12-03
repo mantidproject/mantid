@@ -22,7 +22,7 @@ void EfficiencyScriptInput::init()
   declareProperty(new FileProperty("RawFile","", FileProperty::Load, raw),"");
   declareProperty(new ArrayProperty<double>("BinBoundaries", new RebinParamsValidator));
   declareProperty(new FileProperty("WhiteBeamVan", "", FileProperty::Load, raw), "");
-  std::vector<std::string> mask(1, "mask");
+  std::vector<std::string> mask(1, "msk");
   declareProperty(new FileProperty("DetectorMask","", FileProperty::NoExistLoad, mask), "");
   std::vector<std::string> map(1, "map");
   declareProperty(new FileProperty("MapFile","", FileProperty::NoExistLoad, map), "");

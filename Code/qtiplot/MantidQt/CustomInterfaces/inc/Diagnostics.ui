@@ -16,6 +16,32 @@
    <string>Detector Efficiency Tests</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3" >
+   <item row="4" column="1" >
+    <spacer name="horizontalSpacer_10" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0" >
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="3" >
+    <spacer name="horizontalSpacer_11" >
+     <property name="orientation" >
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0" >
+      <size>
+       <width>254</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item row="0" column="0" colspan="4" >
     <widget class="QGroupBox" name="gbUniversal" >
      <property name="title" >
@@ -25,20 +51,10 @@
       <item row="0" column="0" >
        <widget class="QLabel" name="lbIFile" >
         <property name="enabled" >
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text" >
          <string>Input mask file</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="2" >
-       <widget class="QLineEdit" name="leIFile" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="text" >
-         <string>not implemented yet</string>
         </property>
        </widget>
       </item>
@@ -58,7 +74,7 @@
       <item row="0" column="4" >
        <widget class="QPushButton" name="pbIFile" >
         <property name="enabled" >
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="text" >
          <string>Browse</string>
@@ -156,7 +172,25 @@
         </property>
        </spacer>
       </item>
+      <item row="0" column="1" colspan="2" >
+       <widget class="QLineEdit" name="leIFile" >
+        <property name="enabled" >
+         <bool>true</bool>
+        </property>
+        <property name="text" >
+         <string/>
+        </property>
+       </widget>
+      </item>
      </layout>
+     <zorder>lbIFile</zorder>
+     <zorder>pbIFile</zorder>
+     <zorder>lbOFile</zorder>
+     <zorder>leOFile</zorder>
+     <zorder>pbOFile</zorder>
+     <zorder>lbError</zorder>
+     <zorder>leSignificance</zorder>
+     <zorder>leIFile</zorder>
     </widget>
    </item>
    <item row="1" column="0" colspan="4" >
@@ -267,21 +301,18 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="6" colspan="2" >
-       <widget class="QLineEdit" name="leLowMed" />
-      </item>
-      <item row="0" column="7" >
-       <widget class="QLabel" name="validatorSpace_9" >
-        <property name="minimumSize" >
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
+      <item row="2" column="4" colspan="2" >
+       <widget class="QLabel" name="lbLowMed" >
         <property name="text" >
-         <string/>
+         <string>Low threshold median</string>
+        </property>
+        <property name="wordWrap" >
+         <bool>true</bool>
         </property>
        </widget>
+      </item>
+      <item row="2" column="6" colspan="2" >
+       <widget class="QLineEdit" name="leLowMed" />
       </item>
       <item row="2" column="8" >
        <widget class="QLabel" name="validatorSpace_3" >
@@ -296,13 +327,16 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="4" colspan="2" >
-       <widget class="QLabel" name="lbLowMed" >
-        <property name="text" >
-         <string>Low threshold median</string>
+      <item row="0" column="7" >
+       <widget class="QLabel" name="validatorSpace_9" >
+        <property name="minimumSize" >
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
         </property>
-        <property name="wordWrap" >
-         <bool>true</bool>
+        <property name="text" >
+         <string/>
         </property>
        </widget>
       </item>
@@ -595,19 +629,6 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="1" >
-    <spacer name="horizontalSpacer_10" >
-     <property name="orientation" >
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0" >
-      <size>
-       <width>40</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
    <item row="4" column="2" >
     <widget class="QPushButton" name="pbRun" >
      <property name="text" >
@@ -615,29 +636,7 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="3" >
-    <spacer name="horizontalSpacer_11" >
-     <property name="orientation" >
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0" >
-      <size>
-       <width>254</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
   </layout>
-  <zorder>gbUniversal</zorder>
-  <zorder>gbIndividual</zorder>
-  <zorder>gbVariation</zorder>
-  <zorder>gbExperiment</zorder>
-  <zorder>pbHelp</zorder>
-  <zorder>pbRun</zorder>
-  <zorder>lwRunFiles</zorder>
-  <zorder>validatorSpace_3</zorder>
-  <zorder>lbLowMed</zorder>
  </widget>
  <resources/>
  <connections/>

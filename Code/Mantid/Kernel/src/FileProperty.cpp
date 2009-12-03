@@ -22,7 +22,7 @@ using namespace Mantid::Kernel;
  */
 FileProperty::FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
 			   const std::vector<std::string> & exts, unsigned int direction) 
-  : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action > FileProperty::NoExistLoad) ), direction), 
+  : PropertyWithValue<std::string>(name, default_value, new FileValidator(exts, (action == FileProperty::Load) ), direction), 
     m_action(action)
 {
 }
@@ -33,7 +33,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
  */
 bool FileProperty::isLoadProperty() const
 {
-  return (m_action != FileProperty::Save);
+  return m_action == NoExistLoad || m_action == Load;
 }
 
 /**
@@ -79,7 +79,14 @@ std::string FileProperty::setValue(const std::string & filename)
   }
   else
   {
-    if( filename.empty() ) return "Empty filename not allowed.";
+    if( filename.empty() )
+    {
+      if ( m_action == OptionalSave )
+      {
+        return PropertyWithValue<std::string>::setValue("");
+      }
+      else return "Empty filename not allowed.";
+    }
 
     // We have a relative save path so just prepend the path that is in the 'defaultsave.directory'
     // Note that this catches the Poco::NotFoundException and returns an empty string in that case

@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidAlgorithms/InputWSDetectorInfo.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/FileProperty.h"
 #include <boost/shared_ptr.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>
@@ -66,9 +67,9 @@ void DetectorEfficiencyVariation::init()
     "No bin with a boundary at an x value higher than this value will\n"
     "be included in the summation used to decide if a detector is 'bad'\n"
     "(default: the end of each histogram)" );
-  declareProperty("OutputFile","",
-    "The name of a file to write the list of dead detector UDETs (default:\n"
-    "no file output)" );
+  declareProperty(new FileProperty("OutputFile","",FileProperty::OptionalSave),
+    "The name of a file to write the list spectra that have a bad detector\n"
+    "(default no file output)");
       // This output property will contain the list of UDETs for the dead detectors
   declareProperty("GoodValue", 0.0,
     "For each input workspace spectrum that passes write this flag value\n"

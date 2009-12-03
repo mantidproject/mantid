@@ -65,15 +65,20 @@ void Diagnostics::initLayout()
 {
   m_uiForm.setupUi(this);
 
+  // use something from http://doc.trolltech.com/4.5/qsettings.html
+  /*  QSettings value_store;
+  value_store.beginGroup("CustomInterfaces/SANSRunWindow");
+  m_uiForm.datadir_edit->setText(value_store.value("data_dir").toString());*/
+ 
   // deal with each input control in turn doing,
   //   go through each control and add (??previous?? or) default values
   //   add tool tips
   //   store any relation to algorthim properties as this will be used for validation
-  QString iFileToolTip = "NOT IMPLEMENTED YET A file containing a list of spectra numbers which we aleady know should be masked";
+  QString iFileToolTip = "A file containing a list of spectra numbers which we aleady know should be masked";
   m_uiForm.lbIFile->setToolTip(iFileToolTip);
   m_uiForm.leIFile->setToolTip(iFileToolTip);
   m_uiForm.pbIFile->setToolTip(iFileToolTip);
-
+  
   QString oFileToolTip =
     "The name of a file to write the spectra numbers of those that fail a test";
   m_uiForm.lbOFile->setToolTip(oFileToolTip);
@@ -289,7 +294,7 @@ void Diagnostics::browseClicked(const QString &buttonDis)
 {
   QLineEdit *editBox;
   QStringList extensions;
-  bool save = false;
+  bool toSave = false;
   if ( buttonDis == "InputFile")
   {
     editBox = m_uiForm.leIFile;
@@ -297,7 +302,7 @@ void Diagnostics::browseClicked(const QString &buttonDis)
   if ( buttonDis == "OutputFile")
   {
     editBox = m_uiForm.leOFile;
-    save = true;
+    toSave = true;
   }
   if ( buttonDis == "WBVanadium1")
   {
@@ -313,11 +318,11 @@ void Diagnostics::browseClicked(const QString &buttonDis)
   if( ! editBox->text().isEmpty() )
   {
     QString dir = QFileInfo(editBox->text()).absoluteDir().path();
-    //STEVES I want the line below but I haven't got an algorithm name and so I guess this doesn't make sense
+    //STEVES use QSettings to store the last entry instead of the line below
 //  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   }  
 
-  QString filepath = this->openFileDialog(false, extensions);
+  QString filepath = this->openFileDialog(toSave, extensions);
   if( !filepath.isEmpty() ) editBox->setText(filepath);
 }
 /**
@@ -347,7 +352,7 @@ void Diagnostics::addFile()
   if( m_uiForm.lwRunFiles->count() > 0 )
   {
     QString dir = QFileInfo(m_uiForm.lwRunFiles->item(0)->text()).absoluteDir().path();
-    //STEVES I want the line below but I haven't got an algorithm name and so I guess this does make sense
+    //STEVES use QSettings to store the last entry instead of the line below
 //  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(dir);
   }  
 
@@ -717,7 +722,7 @@ ExcitationsDiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
   QStringList results = pyhtonOut.split("\n");
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
-    QString Error = "Error \"" + pyhtonOut + "\" found, while executing scripts, more details may be found in the Mantid and python logs.";
+    QString Error = "Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
     QMessageBox::critical(this, this->windowTitle(),
       Error);
     ExcitationsDiagResults::TestSummary temp = { Error, "", "", ExcitationsDiagResults::TestSummary::NORESULTS, "" };

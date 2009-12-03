@@ -5,7 +5,8 @@
 ########################################################
 from os import remove
 from mantidsimple import *
-import BadDetectorTestFunctions as functions
+import CommonFunctions as common
+import BadDetectorTestFunctions as detectorTest
 
 #--Start with settings
 THISTEST = 'First white beam test'
@@ -30,24 +31,23 @@ try:#--Calculations Start---
   #--the integrated workspace will be much smaller so do this as soon as possible
   Integration('_FindBadDetects WBV1', '_FindBadDetects WBV1')
   
-  if ( IMASKFILE != "" ) :
-	IMASKFILE = ""   # NOT IMPLEMENTED load the spectra numbers that have already been masked as the sequencies of numbers and ranges
+  if ( IMASKFILE != '' ) :
+    hardMask = common.loadMask(IMASKFILE)
+    MaskDetectors(Workspace='_FindBadDetects WBV1', SpectraList=hardMask)
 
-#  try :
-  DeadList = functions.SingleWBV( '_FindBadDetects WBV1', OUTPUTWS, \
+  DeadList = detectorTest.SingleWBV( '_FindBadDetects WBV1', OUTPUTWS, \
     HIGHABSOLUTE, LOWABSOLUTE, HIGHMEDIAN, LOWMEDIAN, NUMBERRORBARS, OMASKFILE )
-#  finally :
 
   #--Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
  
 
   #--DeadList is a string of comma separated integers, this gets the number of integers
-  numFound = functions.numberFromCommaSeparated(DeadList)
+  numFound = detectorTest.numberFromCommaSeparated(DeadList)
   
   #--SingleWBV writes one file for each of its two tests, merge these into our main output file
   if OMASKFILE != "" :
-    functions.appendMaskFile(OMASKFILE+'_swbv_fdol', outfile)
-    functions.appendMaskFile(OMASKFILE+'_swbv_mdt', outfile)
+    detectorTest.appendMaskFile(OMASKFILE+'_swbv_fdol', outfile)
+    detectorTest.appendMaskFile(OMASKFILE+'_swbv_mdt', outfile)
     outfile.close()
 
   #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
@@ -66,9 +66,6 @@ except Exception, reason:
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == "_FindBadDetects WBV1") : mantid.deleteWorkspace("_FindBadDetects WBV1")
 #finally:
-#  if OMASKFILE != "" :
-  # check if it exists and os.remove(OMASKFILE+'.swbv_mdt')
-  # check if it exists and os.remove(OMASKFILE+'.swbv_fdol')
 #
 #  for workspace in mantid.getWorkspaceNames() :
 #    if (workspace == '_FindBadDetects Normaliser') : mantid.deleteWorkspace('_FindBadDetects Normaliser')

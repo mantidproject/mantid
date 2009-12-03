@@ -26,9 +26,10 @@ public:
   enum
   {
     // Note that the order here ensures that the correct boolean gets passed to the FileValidator.
-    Save = 0,
-    NoExistLoad = 1,
-    Load = 2
+    Save = 0,              ///< to specify a file to write to, the file may or may not exist
+    OptionalSave = 1,      ///< to specify a file to write to but an empty string is allowed here which will be passed to the algorithm
+    Load = 2,              ///< to specify a file to open for reading, the file must exist
+    NoExistLoad = 3        ///< to specify a file to read but an empty string is allowed here which will be passed to the algorithm
   };
 
 public:

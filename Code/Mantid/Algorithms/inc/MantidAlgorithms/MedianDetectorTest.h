@@ -128,7 +128,7 @@ namespace Mantid
       ///a flag int value to indicate that the value wasn't set by users
       static const int UNSETINT = INT_MAX-15;
 
-      //a lot of data and functions for the progress bar 
+      //data and functions for the progress bar 
       /// An estimate of the percentage of the algorithm runtimes that has been completed 
       double m_fracDone;
       /// For the progress bar, estimates of how many additions, or equilivent, member functions will do for each spectrum

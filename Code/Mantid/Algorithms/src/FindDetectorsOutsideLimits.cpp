@@ -48,7 +48,7 @@ void FindDetectorsOutsideLimits::init()
     "No bin with a boundary at an x value higher than this value will\n"
     "be used in the summation that decides if a detector is 'bad'\n"
     "(default: the end of each histogram)" );
-  declareProperty(new FileProperty("OutputFile","", FileProperty::Save),
+  declareProperty(new FileProperty("OutputFile","", FileProperty::OptionalSave),
     "The name of a file to write the list spectra that have a bad detector\n"
     "(default no file output)");
     // This output property will contain the list of UDETs for the dead detectors

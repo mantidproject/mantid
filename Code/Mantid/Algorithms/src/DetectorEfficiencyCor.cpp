@@ -124,7 +124,7 @@ void DetectorEfficiencyCor::exec()
     }
     catch (Exception::NotFoundError &excep)
     {// if we don't have all the data there will be spectra we can't correct, avoid leaving the workspace part corrected 
-      MantidVec dud = m_outputWS->dataY(i);
+      MantidVec& dud = m_outputWS->dataY(i);
       std::transform(dud.begin(),dud.end(),dud.begin(), std::bind2nd(std::multiplies<double>(),0));
 
       //check on the reason for the error, mask the detectors if possible and log
@@ -144,9 +144,10 @@ void DetectorEfficiencyCor::exec()
     }
     
     // this algorithm doesn't change any of the bin boundaries
-    // it is possible that m_outputWS == m_inputWS but I don't believe that is a problem
-    //??STEVES?? check what this does in bebug
-    m_outputWS->dataX(i) = m_inputWS->readX(i);
+    if ( m_outputWS != m_inputWS )
+    {
+      m_outputWS->dataX(i) = m_inputWS->readX(i);
+    }
 
     
     // make regular progress reports and check for cancelling the algorithm

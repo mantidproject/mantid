@@ -16,10 +16,10 @@ def appendMaskFile(inFname, outfile) :
 	  os.remove(inFname)
 
 def SingleWBV( inputWS, outputWS, HighAbsolute, LowAbsolute, HighMedian, LowMedian, NumErrorBars, oFile ) :
-  if oFile != "" : tempFile = oFile+'_swbv_fdol'
+  if oFile != '' : tempFile = oFile+'_swbv_fdol'
   else : tempFile = ''
   FDOL = FindDetectorsOutsideLimits( inputWS, outputWS, HighAbsolute, LowAbsolute, OutputFile=tempFile )	#for usage see www.mantidproject.org/FindDetectorsOutsideLimits
-  MaskDetectors(Workspace=inputWS, DetectorList=FDOL.getPropertyValue("BadDetectorIDs") )					#for usage see www.mantidproject.org/MaskDetectors
+  MaskDetectors(Workspace=inputWS, DetectorList=FDOL.getPropertyValue("BadDetectorIDs") )			#for usage see www.mantidproject.org/MaskDetectors
   
   if oFile != "" : tempFile = oFile+'_swbv_mdt'
   else : tempFile = ''
