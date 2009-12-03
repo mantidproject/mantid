@@ -86,7 +86,6 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-
       /// The name and path of an input file. This may be the filename of a
       /// raw datafile or the name of a specific log file. 
       std::string m_filename;
@@ -100,8 +99,8 @@ namespace Mantid
       /// convert string to lower case
       std::string stringToLower(std::string strToConvert);
 
-      /// look at whether filename has the .txt extension and contain a '_'
-      bool isLogFile(const std::string& filenamePart);
+      /// Checks if the file is an ASCII file
+      bool isAscii(const std::string& filenamePart);
 
       /// check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
       bool isDateTimeString(const std::string& str);

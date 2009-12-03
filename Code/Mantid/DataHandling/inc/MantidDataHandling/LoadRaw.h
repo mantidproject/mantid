@@ -80,6 +80,7 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
+      bool isAscii(const std::string & filename) const;
       void checkOptionalProperties();
       void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, ISISRAW& , const int& , int*, DataObjects::Workspace2D_sptr );
       void runLoadInstrument(DataObjects::Workspace2D_sptr);

@@ -48,12 +48,13 @@ public:
 private:
   /// The list of permitted extensions
   const std::set<std::string> m_extensions;
-  /// An internal list of extensions that, if necessary, have been transformed into regular expressions
-  std::set<std::string> m_regex_exts; 
   /// Flag indicating whether to test for existence of filename
   const bool m_fullTest;
   
   std::string checkValidity(const std::string &value) const;
+
+  /// A reference to the logger
+  static Logger & g_log;
 };
 
 } // namespace Kernel

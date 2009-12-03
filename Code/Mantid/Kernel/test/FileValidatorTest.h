@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/FileValidator.h"
+#include "Poco/File.h"
 
 using namespace Mantid::Kernel;
 
@@ -20,32 +21,37 @@ void testVectorConstructor()
   TS_ASSERT_EQUALS  ( v.allowedValues().size(), 2 )
 }
 
-void testFailsOnWrongExtension()
+void testPassesOnExistentFile()
 {
-  //You can't find this file?  It just has to be a file that is in the test directory of all build servers, with the same, case.  Any ideas?  If you change the extension then also change the file extension test below ... Steve Williams
-  std::string testFile("RunTests.bat");
+  //Create two files, one with the extension within the validator and one without
 
-  std::vector<std::string> vec;
-  vec.push_back("raw");
-
+  const std::string file_stub = "scratch.";
+  const std::string ext1 = "txt";
+  const std::string ext2 = "raw";
+  Poco::File txt_file(file_stub + ext1);
+  Poco::File raw_file(file_stub + ext2);
+    
+  try
+  {
+    txt_file.createFile();
+    raw_file.createFile();
+  }
+  catch(std::exception & )
+  {
+    TS_FAIL("Error creating test file for \"testPassesOnExistentFile\" test.");
+  }
+  
+  //FileValidator will suggest txt files as correct extension
+  std::vector<std::string> vec(1, "txt");
   FileValidator v1(vec);
-  TS_ASSERT_EQUALS( v1.isValid(testFile),
-      "The file must have extension raw" )
 
-  vec.push_back("RAW");
-  FileValidator v2(vec);
-  TS_ASSERT_EQUALS( v2.isValid(testFile),
-      "The file must have one of these extensions: RAW, raw" )
-}
+  
+  TS_ASSERT_EQUALS( v1.isValid(txt_file.path()), "" );
+  // Not correct extension but the file exists so we allow it
+  TS_ASSERT_EQUALS( v1.isValid(raw_file.path()), "" );
 
-void testPassesOnRightExtension()
-{
-  std::string testFile("runTests.bat");
-
-  std::vector<std::string> vec;
-  vec.push_back("bat");
-  FileValidator v(vec);
-  TS_ASSERT_EQUALS( v.isValid(testFile), "" )
+  txt_file.remove();
+  raw_file.remove();
 }
 
 void testFailsOnNonexistentFile()
@@ -58,29 +64,19 @@ void testFailsOnNonexistentFile()
       "File \"" + NoFile + "\" not found" )
 }
 
+void testPassesOnNonexistentFile()
+{
+  std::string NoFile("myJunkFile_hgfvj.cpp");
+  std::vector<std::string> vec;
+  vec.push_back("cpp");
+  FileValidator v(vec, false);
+  TS_ASSERT_EQUALS( v.isValid(NoFile), "" );
+}
+
 void testFailsOnEmptyFileString()
 {
   FileValidator file_val;
-  TS_ASSERT_EQUALS( file_val.isValid(""),
-      "File \"\" not found" )
-}
-
-void testPassesOnWildcardExtensions()
-{
-  std::vector<std::string> exts;
-  exts.push_back("c[a-z][a-z]");
-  exts.push_back("h??");
-  exts.push_back("h*");
-  FileValidator validator(exts, false);
-  TS_ASSERT_EQUALS( validator.isValid("fli.cpp"), "" )
-  const std::string outputString("The file must have one of these extensions: c[a-z][a-z], h*, h??");
-  TS_ASSERT_EQUALS( validator.isValid("fli.cp"), outputString )
-  TS_ASSERT_EQUALS( validator.isValid("fli.c01"), outputString )
-  TS_ASSERT_EQUALS( validator.isValid("fli.cxx"), "" )
-  TS_ASSERT_EQUALS( validator.isValid("fli.hxx"), "" )
-  TS_ASSERT_EQUALS( validator.isValid("fli.habc"), "" )
-  TS_ASSERT_EQUALS( validator.isValid("fli.z"), outputString )
-  TS_ASSERT_EQUALS( validator.isValid("fli.bpp"), outputString )
+  TS_ASSERT_EQUALS( file_val.isValid(""), "File \"\" not found" )
 }
 
 };

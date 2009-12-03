@@ -19,6 +19,7 @@
 #include "Poco/Path.h"
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+
 namespace Mantid
 {
 namespace DataHandling
@@ -50,6 +51,7 @@ void LoadRaw3::init()
   std::vector<std::string> exts;
   exts.push_back("raw");
   exts.push_back("s*");
+  exts.push_back("add");
 
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
       "The name of the RAW file to read, including its full or relative\n"
@@ -102,6 +104,14 @@ void LoadRaw3::exec()
 {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
+  // Need to check that the file is not a text file as the ISISRAW routines don't deal with these very well, i.e 
+  // reading continues until a bad_alloc is encountered.
+  if( isAscii(m_filename) )
+  {
+    g_log.error() << "File \"" << m_filename << "\" is not a valid RAW file.\n";
+    throw std::invalid_argument("Incorrect file type encountered.");
+  }
+
   bool bLoadlogFiles = getProperty("LoadLogFiles");
   bool bincludeMonitors = true;
   bool bseparateMonitors = false;
@@ -636,6 +646,33 @@ void LoadRaw3::setWorkspaceProperty(const std::string & propertyName, const std:
   {
     setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(workspace));
   }
+}
+
+/**
+ * Check if a file is a text file
+ * @param filename The file path to check
+ * @returns true if the file an ascii text file, false otherwise
+ */
+bool LoadRaw3::isAscii(const std::string & filename) const
+{
+  FILE* file = fopen(filename.c_str(), "rb");
+  char data[256];
+  int n = fread(data, 1, sizeof(data), file);
+  char *pend = &data[n];
+  /*
+   * Call it a binary file if we find a non-ascii character in the 
+   * first 256 bytes of the file.
+   */
+  for( char *p = data;  p < pend; ++p )
+  {
+    unsigned long ch = (unsigned long)*p;
+    if( !(ch <= 0x7F) )
+    {
+      return false;
+    }
+    
+  }
+  return true;
 }
 
 /// Validates the optional 'spectra to read' properties, if they have been set

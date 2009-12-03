@@ -81,6 +81,8 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
+      /// Check if this actually is a binary file
+	bool isAscii(const std::string& filename) const;
       void checkOptionalProperties();
       int calculateWorkspaceSize();
       void goManagedRaw(bool bincludeMonitors,bool bexcludeMonitors,bool bseparateMonitors );

@@ -82,6 +82,8 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
+      /// Check if this actually is a binary file
+      bool isAscii(const std::string& filename) const;
       void checkOptionalProperties();
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);

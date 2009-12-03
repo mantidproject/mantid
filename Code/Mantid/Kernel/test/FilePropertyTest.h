@@ -12,6 +12,9 @@ public:
 
   void testSearchDirs()
   {
+    // It wasn't happy having this in the constructor as I think all of the objects in the test
+    //get created first and then all of the tests run
+    Mantid::Kernel::ConfigService::Instance().loadConfig("Mantid.properties");
     TS_ASSERT_DIFFERS(Mantid::Kernel::ConfigService::Instance().getDataSearchDirs().size(), 0);
   }
   
@@ -45,9 +48,9 @@ public:
     msg = fp->setValue("ALF15739.RAW");
     TS_ASSERT_EQUALS(msg, "")    
 
-    //Check incorrect extension
+    //Check different extension
     msg = fp->setValue("48098.Q");
-    TS_ASSERT_EQUALS(msg, "The file must have extension raw"); 
+    TS_ASSERT_EQUALS(msg, ""); 
 
     delete fp;
   }
