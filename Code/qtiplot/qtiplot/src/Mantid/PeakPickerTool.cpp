@@ -47,10 +47,17 @@ m_defaultPeakName("Gaussian")
     }
   }
   fitBrowser()->setComposite();
+  fitBrowser()->setWorkspaceName(m_wsName);
+  fitBrowser()->setWorkspaceIndex(m_spec);
   m_compositeFunction = fitBrowser()->compositeFunction();
   connect(fitBrowser(),SIGNAL(indexChanged(int)),this,SLOT(indexChanged(int)));
+  connect(fitBrowser(),SIGNAL(workspaceIndexChanged(int)),this,SLOT(workspaceIndexChanged(int)));
+  connect(fitBrowser(),SIGNAL(workspaceNameChanged(const QString&)),this,SLOT(workspaceNameChanged(const QString&)));
   connect(fitBrowser(),SIGNAL(functionRemoved(int)),this,SLOT(functionRemoved(int)));
+  connect(fitBrowser(),SIGNAL(functionChanged(const QString&)),this,SLOT(functionChanged(const QString&)));
   connect(fitBrowser(),SIGNAL(algorithmFinished(const QString&)),this,SLOT(algorithmFinished(const QString&)));
+  connect(fitBrowser(),SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
+  connect(fitBrowser(),SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
   m_mantidUI->showFitPropertyBrowser();
 }
 
@@ -59,6 +66,7 @@ PeakPickerTool::~PeakPickerTool()
   detach();
   d_graph->plotWidget()->canvas()->unsetCursor();
   d_graph->plotWidget()->replot();
+  fitBrowser()->reinit();
 }
 
 /**
@@ -122,16 +130,20 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
           }
           xMin(xmin);
           xMax(xmax);
+          fitBrowser()->setStartX(xMin());
+          fitBrowser()->setEndX(xMax());
         }
         else if (changingXMin())
         {
           double x = d_graph->plotWidget()->invTransform(2,pnt.x());
           xMin(x);
+          fitBrowser()->setStartX(xMin());
         }
         else if (changingXMax())
         {
           double x = d_graph->plotWidget()->invTransform(2,pnt.x());
           xMax(x);
+          fitBrowser()->setEndX(xMax());
         }
         d_graph->plotWidget()->replot();
         //}
@@ -152,6 +164,8 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             // when PeakRangeMarker is created chngingxMin() and changingXMax are both true
             xMin(x);
             xMax(x);
+            fitBrowser()->setStartX(xMin());
+            fitBrowser()->setEndX(xMax());
             d_graph->plotWidget()->replot();
           }
           else if ( mod.testFlag(Qt::ShiftModifier) )// Shift button was pressed
@@ -184,14 +198,14 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
               changingXMax(true);
               d_graph->plotWidget()->canvas()->setCursor(Qt::SizeHorCursor);
               d_graph->plotWidget()->replot();
-              emit peakChanged();
+              fitBrowser()->setStartX(xMin());
             }
             if (clickedOnXMin(x,fabs(x1-x)))
             {// begin changing xMin
               changingXMin(true);
               d_graph->plotWidget()->canvas()->setCursor(Qt::SizeHorCursor);
               d_graph->plotWidget()->replot();
-              emit peakChanged();
+              fitBrowser()->setEndX(xMax());
             }
             if (clickedOnWidthMarker(x,fabs(x1-x)))
             {// begin changing width
@@ -219,6 +233,8 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
       resetting(false);
       changingXMin(false);
       changingXMax(false);
+      fitBrowser()->setStartX(xMin());
+      fitBrowser()->setEndX(xMax());
       break;
 
     case QEvent::KeyPress:
@@ -492,5 +508,57 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   MantidCurve* c1 = new MantidCurve(curveFitName,out,graph(),"spectra",1,false);
   MantidCurve* c2 = new MantidCurve(curveResName,out,graph(),"spectra",2,false);
 
+  graph()->replot();
+}
+
+/**
+ * Slot. Called when the workspace index is changed in the FitBrowser
+ * @param i The new workspace index.
+ */
+void PeakPickerTool::workspaceIndexChanged(int i)
+{
+  if (i != m_spec)
+  {
+    fitBrowser()->setWorkspaceIndex(m_spec);
+  }
+}
+
+/**
+ * Slot. Called when the workspace name is changed in the FitBrowser
+ * @param wsName The new workspace name.
+ */
+void PeakPickerTool::workspaceNameChanged(const QString& wsName)
+{
+  if (wsName != m_wsName)
+  {
+    fitBrowser()->setWorkspaceName(m_wsName);
+  }
+}
+
+/**
+ * Slot. Called when the startX changed in the FitBrowser
+ * @param sX The new startX
+ */
+void PeakPickerTool::startXChanged(double sX)
+{
+  xMin(sX);
+  graph()->replot();
+}
+
+/**
+ * Slot. Called when the endX changed in the FitBrowser
+ * @param eX The new endX
+ */
+void PeakPickerTool::endXChanged(double eX)
+{
+  xMax(eX);
+  graph()->replot();
+}
+
+/**
+ * Slot. Called in response to functionChanged signal from FitBrowser
+ */
+void PeakPickerTool::functionChanged(const QString&)
+{
   graph()->replot();
 }

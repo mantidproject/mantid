@@ -63,38 +63,43 @@ namespace Mantid
 */
 class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface, public QwtPlotItem
 {
-	Q_OBJECT
-	public:
-    /// Constructor
-		PeakPickerTool(Graph *graph, MantidUI *mantidUI);
-    /// Destructor
-    ~PeakPickerTool();
-    /// Runtime type identifier
-    int rtti() const { return Rtti_SelectPeakTool;};
-    /// Receives and processes mouse and keyboard events
-    bool eventFilter(QObject *obj, QEvent *event);
-    /// Workspace name
-    const QString& workspaceName()const{return m_wsName;}
-    /// Spectrum index
-    int spec()const{return m_spec;}
-    /// The parent graph
-    Graph* graph()const{return d_graph;}
-    /// Set the default peak function
-    void setDefaultPeakName(const std::string& fnName);
+  Q_OBJECT
+public:
+  /// Constructor
+  PeakPickerTool(Graph *graph, MantidUI *mantidUI);
+  /// Destructor
+  ~PeakPickerTool();
+  /// Runtime type identifier
+  int rtti() const { return Rtti_SelectPeakTool;};
+  /// Receives and processes mouse and keyboard events
+  bool eventFilter(QObject *obj, QEvent *event);
+  /// Workspace name
+  const QString& workspaceName()const{return m_wsName;}
+  /// Spectrum index
+  int spec()const{return m_spec;}
+  /// The parent graph
+  Graph* graph()const{return d_graph;}
+  /// Set the default peak function
+  void setDefaultPeakName(const std::string& fnName);
 
-  public slots:
-    void windowStateChanged( Qt::WindowStates oldState, Qt::WindowStates newState );
+public slots:
+  void windowStateChanged( Qt::WindowStates oldState, Qt::WindowStates newState );
 
-  signals:
-    void peakChanged();
+signals:
+  void peakChanged();
 
-	private slots:
-    void functionChanged();
-    void indexChanged(int);
-    void functionRemoved(int);
-    void algorithmFinished(const QString&);
-	private:
+private slots:
+  void functionChanged();
+  void indexChanged(int);
+  void functionRemoved(int);
+  void algorithmFinished(const QString&);
+  void workspaceIndexChanged(int i);
+  void workspaceNameChanged(const QString&);
+  void functionChanged(const QString&);
+  void startXChanged(double);
+  void endXChanged(double);
 
+private:
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
   void addPeak(double c,double h);
@@ -144,15 +149,15 @@ class PeakPickerTool : public QwtPlotPicker, public PlotToolInterface, public Qw
   bool changingXMax()const{return m_changingXMax;}
   void changingXMax(bool ok){m_changingXMax = ok;}
 
-    FitPropertyBrowser* fitBrowser()const;
-    /// The parent application window
-		MantidUI* m_mantidUI;
-    /// the fitting function
-    boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
-    /// Workspace name
-    QString m_wsName;
-    /// Spectrum index
-    int m_spec;
+  FitPropertyBrowser* fitBrowser()const;
+  /// The parent application window
+  MantidUI* m_mantidUI;
+  /// the fitting function
+  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  /// Workspace name
+  QString m_wsName;
+  /// Spectrum index
+  int m_spec;
 
   bool m_init;      // Is the tool initialized?
   bool m_peakInit;  // Has the first peak been added?

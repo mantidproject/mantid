@@ -23,7 +23,7 @@
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
 :QDockWidget("Fit Function",parent),m_function(0),m_defaultFunction("Gaussian"),m_default_width(0),
-m_appWindow((ApplicationWindow*)parent)
+m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true)
 {
   setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -45,6 +45,7 @@ m_appWindow((ApplicationWindow*)parent)
   connect(m_boolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(boolChanged(QtProperty*)));
   connect(m_intManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(intChanged(QtProperty*)));
   connect(m_doubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(doubleChanged(QtProperty*)));
+  connect(m_stringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
     /* Create composite function group */
 
@@ -62,7 +63,7 @@ m_appWindow((ApplicationWindow*)parent)
 
   m_functionName = m_enumManager->addProperty("Name");
   m_functionGroup->addSubProperty(m_functionName);
-  connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(functionChanged(QtProperty*)));
+  connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(enumChanged(QtProperty*)));
   
   m_peakGroup = m_groupManager->addProperty("Peak");
 
@@ -276,16 +277,44 @@ std::string FitPropertyBrowser::workspaceName()const
   return res;
 }
 
+/// Set the input workspace name
+void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
+{
+  int i = m_workspaceNames.indexOf(wsName);
+  if (i >= 0)
+  {
+    m_enumManager->setValue(m_workspace,i);
+  }
+}
+
+/// Get workspace index
+int FitPropertyBrowser::workspaceIndex()const
+{
+  return m_intManager->value(m_workspaceIndex);
+}
+
+/// Set workspace index
+void FitPropertyBrowser::setWorkspaceIndex(int i)
+{
+  m_intManager->setValue(m_workspaceIndex,i);
+}
+
 /// Get the output name
 std::string FitPropertyBrowser::outputName()const
 {
   return m_stringManager->value(m_output).toStdString();
 }
 
+/// Get the output name
+void FitPropertyBrowser::setOutputName(const std::string& name)
+{
+  m_stringManager->setValue(m_output,QString::fromStdString(name));
+}
+
 /** Called when the function name property changed
  * @param prop A pointer to the function name property m_functionName
  */
-void FitPropertyBrowser::functionChanged(QtProperty* prop)
+void FitPropertyBrowser::enumChanged(QtProperty* prop)
 {
   if (prop == m_functionName)
   {
@@ -310,6 +339,15 @@ void FitPropertyBrowser::functionChanged(QtProperty* prop)
         addFunction(fnName);
       }
     }
+    emit functionChanged(QString::fromStdString(functionName()));
+  }
+  else if (prop == m_workspace)
+  {
+    if (m_guessOutputName)
+    {
+      m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()));
+    }
+    emit workspaceNameChanged(QString::fromStdString(workspaceName()));
   }
 }
 
@@ -357,6 +395,29 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
     displayFunctionName();
     emit indexChanged(index());
   }
+  else if (prop == m_workspaceIndex)
+  {
+    Mantid::API::MatrixWorkspace_sptr ws = 
+      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      m_appWindow->mantidUI->getWorkspace(QString::fromStdString(workspaceName()))
+      );
+    if (!ws)
+    {
+      setWorkspaceIndex(0);
+      return;
+    }
+    int n = ws->getNumberHistograms();
+    int wi = workspaceIndex();
+    if (wi < 0)
+    {
+      setWorkspaceIndex(0);
+    }
+    else if (wi >= n)
+    {
+      setWorkspaceIndex(n-1);
+    }
+    emit workspaceIndexChanged(wi);
+  }
 }
 
 /** Called when a double property changed
@@ -386,6 +447,14 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
       m_default_width = value;
     }
   }
+  else if (prop == m_startX )
+  {
+    emit startXChanged(startX());
+  }
+  else if (prop == m_endX )
+  {
+    emit endXChanged(endX());
+  }
   else
   {
     std::string parName = prop->propertyName().toStdString();
@@ -396,6 +465,29 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     }
   }
 }
+/** Called when a string property changed
+ * @param prop A pointer to the property 
+ */
+void FitPropertyBrowser::stringChanged(QtProperty* prop)
+{
+  if (prop == m_output)
+  {
+    std::string oName = outputName();
+    if (oName.find_first_not_of(' ') == std::string::npos)
+    {
+      setOutputName("");
+    }
+    else if (workspaceName() == oName || oName.empty())
+    {
+      m_guessOutputName = true;
+    }
+    else
+    {
+      m_guessOutputName = false;
+    }
+  }
+}
+
 // Centre of the current peak
 double FitPropertyBrowser::centre()const
 {
@@ -598,7 +690,9 @@ void FitPropertyBrowser::fit()
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
   alg->setPropertyValue("InputWorkspace",wsName);
-  alg->setProperty("WorkspaceIndex",m_intManager->value(m_workspaceIndex));
+  alg->setProperty("WorkspaceIndex",workspaceIndex());
+  alg->setProperty("StartX",startX());
+  alg->setProperty("EndX",endX());
   alg->setPropertyValue("Output",outputName());
   if (isComposite())
   {
@@ -685,6 +779,12 @@ void FitPropertyBrowser::init()
     this,SLOT(workspace_removed(const QString &)));
 }
 
+void FitPropertyBrowser::reinit()
+{
+  setComposite(false);
+  addFunction(m_defaultFunction);
+}
+
 /** Check if the workspace can be used in the fit
  * @param ws The workspace
  */
@@ -693,14 +793,38 @@ bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
   return dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0;
 }
 
-/// Creates Composite Function
-void FitPropertyBrowser::setComposite()
+/// Creates Composite Function if on is true
+void FitPropertyBrowser::setComposite(bool on)
 {
-  m_boolManager->setValue(m_composite,true);
+  m_boolManager->setValue(m_composite,on);
 }
 
 /// Is the current function a peak?
 bool FitPropertyBrowser::isPeak()const
 {
   return dynamic_cast<Mantid::API::IPeakFunction*>(m_function) != 0;
+}
+
+/// Get the start X
+double FitPropertyBrowser::startX()const
+{
+  return m_doubleManager->value(m_startX);
+}
+
+/// Set the start X
+void FitPropertyBrowser::setStartX(double value)
+{
+  m_doubleManager->setValue(m_startX,value);
+}
+
+/// Get the end X
+double FitPropertyBrowser::endX()const
+{
+  return m_doubleManager->value(m_endX);
+}
+
+/// Set the end X
+void FitPropertyBrowser::setEndX(double value)
+{
+  m_doubleManager->setValue(m_endX,value);
 }

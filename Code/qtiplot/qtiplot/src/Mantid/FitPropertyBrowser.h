@@ -65,7 +65,7 @@ public:
   /// Set index
   void setIndex(int i);
   /// Creates Composite Function
-  void setComposite();
+  void setComposite(bool on=true);
   /// Is the current function a peak?
   bool isPeak()const;
 
@@ -84,24 +84,47 @@ public:
   /// Get the default function name
   std::string defaultFunctionName()const;
 
-
   /// Get the input workspace name
   std::string workspaceName()const;
+  /// Set the input workspace name
+  void setWorkspaceName(const QString& wsName);
+  /// Get workspace index
+  int workspaceIndex()const;
+  /// Set workspace index
+  void setWorkspaceIndex(int i);
   /// Get the output name
   std::string outputName()const;
+  /// Set the output name
+  void setOutputName(const std::string&);
+
+  /// Get the start X
+  double startX()const;
+  /// Set the start X
+  void setStartX(double);
+  /// Get the end X
+  double endX()const;
+  /// Set the end X
+  void setEndX(double);
 
   void init();
+  void reinit();
 
 signals:
   void indexChanged(int i);
   void functionRemoved(int i);
   void algorithmFinished(const QString&);
+  void workspaceIndexChanged(int i);
+  void workspaceNameChanged(const QString&);
+  void functionChanged(const QString&);
+  void startXChanged(double);
+  void endXChanged(double);
 
 private slots:
-  void functionChanged(QtProperty* prop);
+  void enumChanged(QtProperty* prop);
   void boolChanged(QtProperty* prop);
   void intChanged(QtProperty* prop);
   void doubleChanged(QtProperty* prop);
+  void stringChanged(QtProperty* prop);
   void fit();
   void workspace_added(const QString &, Mantid::API::Workspace_sptr);
   void workspace_removed(const QString &);
@@ -171,6 +194,9 @@ private:
 
   /// Default width for added peaks
   double m_default_width;
+
+  /// if true the output name will be guessed every time workspace name is changeed
+  bool m_guessOutputName;
 
   ApplicationWindow* m_appWindow;
 
