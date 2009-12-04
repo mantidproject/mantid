@@ -13,6 +13,7 @@
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 #include "LoadRaw/isisraw.h"
+#include <cstdio> // Required for gcc 4.4
 
 namespace Mantid
 {
