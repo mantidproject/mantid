@@ -195,6 +195,63 @@ public:
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
   }
 
+void testExecWiththreecolumnLogfile()
+  {
+      FrameworkManager::Instance();
+    //if ( !loader.isInitialized() ) loader.initialize();
+
+    LoadLog loaderRawFile;
+    loaderRawFile.initialize();
+
+	  // Path to test input file assumes Test directory checked out from SVN
+    loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/NIMROD00001097.raw");
+    inputFile = loaderRawFile.getPropertyValue("Filename");
+    
+    outputSpace = "threecoulmlog_datafile";
+    // Create an empty workspace and put it in the AnalysisDataService
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
+    loaderRawFile.setPropertyValue("Workspace", outputSpace);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
+
+    TS_ASSERT( ! result.compare(outputSpace));
+
+
+	  TS_ASSERT_THROWS_NOTHING(loaderRawFile.execute());    
+
+    TS_ASSERT( loaderRawFile.isExecuted() );    
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+   
+    boost::shared_ptr<Sample> sample = output->getSample(); 
+
+    // obtain the expected log files which should be in the same directory as the raw datafile
+
+    Property *l_property = sample->getLogData( std::string("ICPevent") );
+    TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
+    std::string timeSeriesString = l_timeSeriesString->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,36), "2009-Nov-10 17:22:13   CHANGE_PERIOD" );
+
+    l_property = sample->getLogData( std::string("J6CX") );
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
+    timeSeriesString = l_timeSeriesDouble->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,20), "2009-Nov-10 17:22:14" );
+
+	l_property = sample->getLogData( std::string("BeamCurrent") );
+    l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
+    timeSeriesString = l_timeSeriesDouble->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,20), "2009-Nov-10 10:14:03" );
+	
+	    
+  }
   
 private:
   LoadLog loader;

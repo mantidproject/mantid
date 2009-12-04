@@ -104,6 +104,21 @@ namespace Mantid
 
       /// check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
       bool isDateTimeString(const std::string& str);
+
+	  /// if three column format(.log )file exists
+	  bool threeColumnFormatLogFileExists();
+
+	  /// returns the file name of the .log file
+	  std::string getThreecolumnFormatLogFile();
+
+	 /// create timeseries property from .log file and adds taht to sample object
+	  std::set<std::string> createthreecolumnFileLogProperty(const std::string& logfile,
+		  boost::shared_ptr<API::Sample> sample);
+
+	  /// if a file with the second column(block column) name in .log file exists
+	  /// in the raw file directory
+	  bool blockcolumnFileNameExists(const std::string& fileName);
+
     };
 
   } // namespace DataHandling
