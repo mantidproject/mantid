@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Support.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
@@ -87,6 +88,7 @@ namespace Mantid
 
     g_log.debug() << "ConfigService created." << std::endl;
     g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
+    g_log.notice() << "This is Mantid Version " << MANTID_VERSION << std::endl;
   }
 
   /// Private copy constructor for singleton class
