@@ -1718,7 +1718,6 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
  */
 void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname, int filter)
 {
-//#define DBG
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
     if (!ws) return;
 
@@ -1737,10 +1736,8 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
 
     appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
     t->setColName(0, "Time");
-#ifndef DBG
     t->setColumnType(0, Table::Date);
     t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 0, false);
-#endif
     t->setColName(1, label.section("-",1));
 
     int iValueCurve = 0;
@@ -1795,14 +1792,10 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
                 }
         }
 
-        //std::cerr<<flt.filter()->value()<<'\n';
-
         t->addColumns(2);
         t->setColName(2, "FTime");
-#ifndef DBG
         t->setColumnType(2, Table::Date);
         t->setDateFormat("yyyy-MMM-dd HH:mm:ss", 2, false);
-#endif
         t->setColPlotDesignation(2,Table::X);
         t->setColName(3, "Filter");
 
@@ -1811,13 +1804,14 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
             t->addRows(flt.filter()->size() - rowcount);
         }
 
+        if (flt.data()->size() > rowcount)
+        {
+            t->addRows(flt.data()->size() - rowcount);
+        }
+
         for(int i=0;i<flt.filter()->size();i++)
         {
-#ifdef DBG
-            t->setCell(i,2,int(flt.filter()->nthInterval(i).begin())-1223815000);
-#else
             t->setText(i,2,QString::fromStdString(flt.filter()->nthInterval(i).begin_str()));
-#endif
             t->setCell(i,3,!flt.filter()->nthValue(i));
         }
 
@@ -1825,20 +1819,13 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
         iFilterCurve = 0;
     }
 
-    // Show unfiltered data
-    //flt.clear();
-
     Mantid::Kernel::dateAndTime lastTime;
     double lastValue;
     for(int i=0;i<flt.data()->size();i++)
     {
         lastTime = flt.data()->nthInterval(i).begin();
         lastValue = flt.data()->nthValue(i);
-#ifdef DBG
-        t->setCell(i,0,int(flt.data()->nthInterval(i).begin())-1223815000);
-#else
         t->setText(i,0,QString::fromStdString(flt.data()->nthInterval(i).begin_str()));
-#endif
         t->setCell(i,1,lastValue);
     }
 
@@ -1860,19 +1847,21 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
   t->showNormal();
 
   QStringList colNames;
-  colNames << t->colName(3)<<t->colName(1);
+  if (filter)
+  {
+    colNames <<t->colName(3);
+  }
+  colNames << t->colName(1);
   MultiLayer *ml = appWindow()->multilayerPlot(t,colNames,Graph::Line);
   ml->askOnCloseEvent(false);
   ml->setAttribute(Qt::WA_DeleteOnClose);
 
   Graph* g = ml->activeGraph();
 
-#ifndef DBG
   // Set x-axis label format
   QDateTime dt = QDateTime::fromTime_t(flt.data()->nthInterval(0).begin());
   QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
   g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
-#endif
 
   // Set style #3 (HorizontalSteps) for curve iValueCurve
   g->setCurveStyle(iValueCurve,3);

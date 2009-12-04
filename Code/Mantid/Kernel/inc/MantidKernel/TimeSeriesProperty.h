@@ -282,7 +282,7 @@ public:
           dateAndTime endTime = it->first + d;
           return TimeInterval(it->first, endTime);
         }
-        if (it1->first == it->first)
+        if (it1 != m_propertySeries.end() && it1->first == it->first)
           continue;
       }
       t = it->first;
