@@ -22,6 +22,19 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
+// Algorithm to force Gaussian1D to be run by simplex algorithm
+class SimplexGaussian : public Gaussian
+{
+public:
+  virtual ~SimplexGaussian() {}
+
+protected:
+  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  {
+    throw Exception::NotImplementedError("No derivative function provided");
+  }
+};
+
 
 class GaussianTest : public CxxTest::TestSuite
 {
@@ -75,6 +88,11 @@ public:
     e[19] =   1.72734254;
   }
 
+
+  // here we have an example where an upper constraint on Sigma <= 100 makes
+  // the Gaussian fit below success. The starting value of Sigma is here 300. 
+  // Note that the fit is equally successful if we had no constraint on Sigma
+  // and used a starting of Sigma = 100.
   void testAgainstHRPD_DatasetWithConstraints()
   {
     // load dataset to test against
@@ -103,13 +121,13 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 8.0;
+    bk->getParameter("A0") = 0.0;
     bk->getParameter("A1") = 0.0;
     bk->removeActive(1);  
     //bk->removeActive(1);
 
     BoundaryConstraint* bc_b = new BoundaryConstraint("A0",0, 20.0);
-    bk->addConstraint(bc_b);
+    //bk->addConstraint(bc_b);
 
     // set up Lorentzian fitting function
     Gaussian* fn = new Gaussian();
@@ -117,14 +135,14 @@ public:
 
     fn->getParameter("Height") = 200.0;
     fn->getParameter("PeakCentre") = 79450.0;
-    fn->getParameter("Sigma") = 100.0;
+    fn->getParameter("Sigma") = 300.0;
 
     // add constraint to function
     BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
     BoundaryConstraint* bc2 = new BoundaryConstraint("PeakCentre",79200, 79700.0);
     BoundaryConstraint* bc3 = new BoundaryConstraint("Sigma",20, 100.0);
-    fn->addConstraint(bc1);
-    fn->addConstraint(bc2);
+    //fn->addConstraint(bc1);
+    //fn->addConstraint(bc2);
     fn->addConstraint(bc3);
 
     fnWithBk->addFunction(bk);
@@ -136,32 +154,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( alg.execute() )
     )
-
     TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
     double dummy = alg.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 527.4,1);
+    TS_ASSERT_DELTA( dummy, 5.1604,1);
 
-    TS_ASSERT_DELTA( fn->height(), 185.4 ,1);
-    TS_ASSERT_DELTA( fn->centre(), 79450.1 ,1);
-    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 94.96 ,0.1);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 0.1 ,0.1);
+    TS_ASSERT_DELTA( fn->height(), 232.1146 ,1);
+    TS_ASSERT_DELTA( fn->centre(), 79430.1 ,1);
+    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 26.14 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 8.0575 ,0.1);
     TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
 
-
     AnalysisDataService::Instance().remove(outputSpace);
-
   }
-
-
 
   void testAgainstMockData()
   {
-    Fit alg2;
-    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
-    TS_ASSERT( alg2.isInitialized() );
-
     // create mock data to test against
     std::string wsName = "GaussMockData";
     int histogramNumber = 1;
@@ -176,6 +185,10 @@ public:
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
+    Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
     // set up gaussian fitting function
     Gaussian* gaus = new Gaussian();
     gaus->initialize();
@@ -184,7 +197,6 @@ public:
     gaus->setWidth(2.2);
 
     alg2.setFunction(gaus);
-
 
     // Set which spectrum to fit against and initial starting values
     alg2.setPropertyValue("InputWorkspace", wsName);
@@ -196,7 +208,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( alg2.execute() )
     )
-
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
@@ -210,6 +221,143 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
+  void testAgainstMockDataSimplex()
+  {
+    // create mock data to test against
+    std::string wsName = "GaussMockDataSimplex";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // set up gaussian fitting function
+    SimplexGaussian* gaus = new SimplexGaussian();
+    gaus->initialize();
+    gaus->setCentre(11.2);
+    gaus->setHeight(100.7);
+    gaus->setWidth(2.2);
+
+    alg2.setFunction(gaus);
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex","0");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+    TS_ASSERT( alg2.isExecuted() );
+
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
+
+
+    TS_ASSERT_DELTA( gaus->height(), 97.7836 ,0.001);
+    TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.0001);
+    TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  // here we have an example where an upper constraint on Sigma <= 100 makes
+  // the Gaussian fit below success. The starting value of Sigma is here 300. 
+  // Note that the fit is equally successful if we had no constraint on Sigma
+  // and used a starting of Sigma = 100.
+  // Note that the no constraint simplex with Sigma = 300 also does not locate
+  // the correct minimum but not as badly as levenberg-marquardt
+  void testAgainstHRPD_DatasetWithConstraintsSimplex()
+  {
+    // load dataset to test against
+    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", inputFile);
+    std::string outputSpace = "MAR_Dataset";
+    loader.setPropertyValue("OutputWorkspace", outputSpace);
+    loader.execute();
+
+
+    Fit alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace",outputSpace);
+    alg.setPropertyValue("WorkspaceIndex","2");
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
+
+    // create function you want to fit against
+    CompositeFunction *fnWithBk = new CompositeFunction();
+
+    LinearBackground *bk = new LinearBackground();
+    bk->initialize();
+
+    bk->getParameter("A0") = 0.0;
+    bk->getParameter("A1") = 0.0;
+    bk->removeActive(1);  
+    //bk->removeActive(1);
+
+    BoundaryConstraint* bc_b = new BoundaryConstraint("A0",0, 20.0);
+    //bk->addConstraint(bc_b);
+
+    // set up Lorentzian fitting function
+    SimplexGaussian* fn = new SimplexGaussian();
+    fn->initialize();
+
+    fn->getParameter("Height") = 200.0;
+    fn->getParameter("PeakCentre") = 79450.0;
+    fn->getParameter("Sigma") = 300.0;
+
+    // add constraint to function
+    BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
+    BoundaryConstraint* bc2 = new BoundaryConstraint("PeakCentre",79200, 79700.0);
+    BoundaryConstraint* bc3 = new BoundaryConstraint("Sigma",20, 100.0);
+    //fn->addConstraint(bc1);
+    //fn->addConstraint(bc2);
+    fn->addConstraint(bc3);
+
+    fnWithBk->addFunction(bk);
+    fnWithBk->addFunction(fn);
+
+    alg.setFunction(fnWithBk);
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg.execute() )
+    )
+    TS_ASSERT( alg.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 5.1604,1);
+
+    TS_ASSERT_DELTA( fn->height(), 232.1146 ,1);
+    TS_ASSERT_DELTA( fn->centre(), 79430.1 ,1);
+    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 26.14 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 8.0575 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
+
+    AnalysisDataService::Instance().remove(outputSpace);
+  }
+
 
 };
 

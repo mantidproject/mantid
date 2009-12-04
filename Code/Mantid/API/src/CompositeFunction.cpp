@@ -134,7 +134,6 @@ public:
 /// Derivatives of function with respect to active parameters
 void CompositeFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
-  if (nData <= 0) return;
   for(int i=0;i<nFunctions();i++)
   {
     PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
@@ -145,7 +144,6 @@ void CompositeFunction::functionDeriv(Jacobian* out, const double* xValues, cons
 /// Derivatives of function with respect to active parameters
 void CompositeFunction::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
 {
-  if (nData <= 0) return;
   for(int i=0;i<nFunctions();i++)
   {
     PartialJacobian J(out,m_paramOffsets[i],m_activeOffsets[i]);
