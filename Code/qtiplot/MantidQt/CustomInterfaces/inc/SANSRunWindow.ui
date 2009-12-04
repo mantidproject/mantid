@@ -34,7 +34,7 @@
       <string notr="true" />
      </property>
      <property name="currentIndex" >
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="elideMode" >
       <enum>Qt::ElideNone</enum>
@@ -940,7 +940,7 @@
       <widget class="QGroupBox" name="groupBox_4" >
        <property name="geometry" >
         <rect>
-         <x>11</x>
+         <x>42</x>
          <y>9</y>
          <width>465</width>
          <height>201</height>
@@ -1178,17 +1178,31 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </item>
-        <item row="5" column="1" >
+        <item row="6" column="1" >
          <widget class="QCheckBox" name="prev_trans" >
           <property name="text" >
            <string/>
           </property>
          </widget>
         </item>
-        <item row="5" column="0" >
+        <item row="6" column="0" >
          <widget class="QLabel" name="label_36" >
           <property name="text" >
-           <string>Use previous transmission</string>
+           <string>Use default transmission</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0" >
+         <widget class="QLabel" name="label_37" >
+          <property name="text" >
+           <string>Account for gravity</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1" >
+         <widget class="QCheckBox" name="gravity_check" >
+          <property name="text" >
+           <string/>
           </property>
          </widget>
         </item>
@@ -1345,8 +1359,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_14" >
        <property name="geometry" >
         <rect>
-         <x>483</x>
-         <y>9</y>
+         <x>517</x>
+         <y>7</y>
          <width>261</width>
          <height>96</height>
         </rect>
@@ -1404,8 +1418,8 @@ p, li { white-space: pre-wrap; }
       <widget class="QGroupBox" name="groupBox_15" >
        <property name="geometry" >
         <rect>
-         <x>483</x>
-         <y>113</y>
+         <x>524</x>
+         <y>112</y>
          <width>234</width>
          <height>80</height>
         </rect>

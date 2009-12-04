@@ -118,6 +118,7 @@ REAR_DET_X_CORR = |XCORREARDET|
 
 # Previous transmission
 USE_PREV_TRANS = |USEPREVTRANS|
+GRAVITY = |ACCOUNTFORGRAVITY|
 #------------------------------- End of input section --------------------------------------------------
 
 # Transmission variables for SANS2D. The CalculateTransmission algorithm contains the defaults
@@ -306,7 +307,7 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
 			GroupIntoQuadrants(tmpWS, final_result, solidangle_ws, maskpt_rmin[0], maskpt_rmin[1])
 			return
 		else:
-			Q1D(tmpWS,final_result,final_result,q_bins)
+			Q1D(tmpWS,final_result,final_result,q_bins,AccountForGravity=GRAVITY)
         # 2D    
         else:
 		# Run 2D algorithm

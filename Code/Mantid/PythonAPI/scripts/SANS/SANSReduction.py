@@ -62,6 +62,7 @@ DQ = None
 QXY2 = None
 DQXY = None
 DIRECT_BEAM_FILE = None
+GRAVITY = False
 # This indicates whether a 1D or a 2D analysis is performed
 CORRECTION_TYPE = '1D'
 # Component positions
@@ -372,6 +373,13 @@ def LimitsQ(qmin, qmax, step, type):
 
 def LimitsQXY(qmin, qmax, step, type):
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
+    
+def Gravity(flag):
+    if isinstance(flag, bool) or elif isinstance(flag, int):
+        global GRAVITY
+        GRAVITY = flag
+    else:
+        _warnUser("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(GRAVITY))
 
 ######################### 
 # Sample geometry flag
@@ -905,7 +913,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
             GroupIntoQuadrants(tmpWS, final_result, solidangle_ws, maskpt_rmin[0], maskpt_rmin[1])
             return
         else:
-            Q1D(tmpWS,final_result,final_result,q_bins)
+            Q1D(tmpWS,final_result,final_result,q_bins, AccountForGravity=GRAVITY)
     # 2D    
     else:
         # Run 2D algorithm

@@ -1275,6 +1275,16 @@ QString SANSRunWindow::constructReductionCode(bool , bool)
     py_code.replace("|USEPREVTRANS|", "False");
   }
 
+  //Gravity
+  if( m_uiForm.gravity_check->isChecked() )
+  {
+    py_code.replace("|ACCOUNTFORGRAVITY|", "True");
+  }
+  else
+  {
+    py_code.replace("|ACCOUNTFORGRAVITY|", "False");
+  }
+
   // Efficiency
   py_code.replace("|DIRECTFILE|", m_uiForm.direct_file->text());
   py_code.replace("|FLATFILE|", m_uiForm.flat_file->text());
