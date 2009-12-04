@@ -188,7 +188,7 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // create mock data to test against
-    std::string wsName = "GaussMockDataSimplex";
+    std::string wsName = "GaussMockDataSimplex1D";
     int histogramNumber = 1;
     int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
@@ -230,6 +230,7 @@ public:
     dummy = alg2.getProperty("Sigma");
     TS_ASSERT_DELTA( dummy, 1.1142 ,0.0001);
 
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testFixedParameters()
@@ -282,6 +283,7 @@ public:
     dummy = alg2.getProperty("Sigma");
     TS_ASSERT_DELTA( dummy, 1.1 ,0.0001);
 
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 
