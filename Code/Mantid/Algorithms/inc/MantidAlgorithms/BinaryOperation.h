@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/PairedGroupAlgorithm.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -45,7 +45,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport BinaryOperation : public API::Algorithm
+    class DLLExport BinaryOperation : public API::PairedGroupAlgorithm
     {
     public:
       /// Default constructor
@@ -96,9 +96,6 @@ namespace Mantid
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
-
-      bool processGroups(API::WorkspaceGroup_sptr inputWSGrp,const std::vector<Mantid::Kernel::Property*>&prop);
-
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
@@ -106,12 +103,6 @@ namespace Mantid
       void do2D(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
 
       void propagateMasking(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out);
-
-      bool isCompatibleSizes(const std::vector<std::string> &lhsWSGrpNames, const std::vector<std::string> &rhsWSGrpNames) const;
-      void getGroupNames(const std::vector<Kernel::Property*>&prop, 
-        std::vector<std::string> &lhsWSGrpNames, std::vector<std::string> &rhsWSGrpNames) const;
-      void setProperties(IAlgorithm* alg,const std::vector<Kernel::Property*>&prop,
-        const std::string& lhsWSName,const std::string& rhsWSName,int nPeriod,API::WorkspaceGroup_sptr outWSGrp);
 
       API::Progress* m_progress;  ///< Progress reporting
     };
