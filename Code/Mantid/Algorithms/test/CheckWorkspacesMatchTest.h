@@ -245,6 +245,7 @@ public:
   void testDifferentSampleName()
   {
     if ( !checker.isInitialized() ) checker.initialize();
+    checker.setProperty("CheckSample",true);
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
     ws2->getSample()->setName("different");
@@ -259,6 +260,7 @@ public:
   void testDifferentProtonCharge()
   {
     if ( !checker.isInitialized() ) checker.initialize();
+    checker.setProperty("CheckSample",true);
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
     ws2->getSample()->setProtonCharge(99.99);
@@ -273,7 +275,8 @@ public:
   void testDifferentLogs()
   {
     if ( !checker.isInitialized() ) checker.initialize();
-
+    checker.setProperty("CheckSample",true);
+    
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
     ws2->getSample()->addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",99));
     
