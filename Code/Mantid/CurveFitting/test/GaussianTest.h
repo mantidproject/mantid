@@ -269,9 +269,9 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
 
 
-    TS_ASSERT_DELTA( gaus->height(), 97.7836 ,0.001);
-    TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.0001);
-    TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.0001);
+    TS_ASSERT_DELTA( gaus->height(), 97.7836 ,0.2);
+    TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.1);
+    TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.1);
 
     AnalysisDataService::Instance().remove(wsName);
   }
