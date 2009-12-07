@@ -6,7 +6,7 @@ from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-localServerName = 'http://130.246.49.183/'
+localServerName = 'http://NDW714/'
 #localServerName = 'file://c|/Program Files/CruiseControl/'
 
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
