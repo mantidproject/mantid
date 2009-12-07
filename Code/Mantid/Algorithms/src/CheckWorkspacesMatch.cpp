@@ -26,8 +26,8 @@ void CheckWorkspacesMatch::init()
   declareProperty("CheckAxes",true);
   declareProperty("CheckSpectraMap",true);
   declareProperty("CheckInstrument",true);
-  declareProperty("CheckSample",true);
   declareProperty("CheckMasking",true);
+  declareProperty("CheckSample",false);    // Have this one false by default - the logs are brittle
   
   declareProperty("Result","",Direction::Output);
 }
@@ -62,8 +62,8 @@ void CheckWorkspacesMatch::doComparison()
   if ( static_cast<bool>(getProperty("CheckAxes")) && ! checkAxes(ws1,ws2) ) return;
   if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1->spectraMap(),ws2->spectraMap()) ) return;
   if ( static_cast<bool>(getProperty("CheckInstrument")) && ! checkInstrument(ws1,ws2) ) return;
-  if ( static_cast<bool>(getProperty("CheckSample")) && ! checkSample( *(ws1->getSample()), *(ws2->getSample()) ) ) return;
   if ( static_cast<bool>(getProperty("CheckMasking")) && ! checkMasking(ws1,ws2) ) return;
+  if ( static_cast<bool>(getProperty("CheckSample")) && ! checkSample( *(ws1->getSample()), *(ws2->getSample()) ) ) return;
   
   return;
 }
