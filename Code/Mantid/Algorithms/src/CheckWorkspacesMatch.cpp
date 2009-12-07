@@ -26,6 +26,7 @@ void CheckWorkspacesMatch::init()
   declareProperty("CheckAxes",true);
   declareProperty("CheckSpectraMap",true);
   declareProperty("CheckInstrument",true);
+  declareProperty("CheckSample",true);
   declareProperty("CheckMasking",true);
   
   declareProperty("Result","",Direction::Output);
@@ -59,8 +60,9 @@ void CheckWorkspacesMatch::doComparison()
   
   // Now do the other ones if requested. Bail out as soon as we see a failure.
   if ( static_cast<bool>(getProperty("CheckAxes")) && ! checkAxes(ws1,ws2) ) return;
-  if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1,ws2) ) return;
+  if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1->spectraMap(),ws2->spectraMap()) ) return;
   if ( static_cast<bool>(getProperty("CheckInstrument")) && ! checkInstrument(ws1,ws2) ) return;
+  if ( static_cast<bool>(getProperty("CheckSample")) && ! checkSample( *(ws1->getSample()), *(ws2->getSample()) ) ) return;
   if ( static_cast<bool>(getProperty("CheckMasking")) && ! checkMasking(ws1,ws2) ) return;
   
   return;
@@ -184,11 +186,10 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
   return true;
 }
 
-bool CheckWorkspacesMatch::checkSpectraMap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
+bool CheckWorkspacesMatch::checkSpectraMap(const API::SpectraDetectorMap& map1, const API::SpectraDetectorMap& map2)
 {
-  // Use the SpectraDetectorMap::operator== to check the maps
-//  if ( ! ws1->spectraMap().operator==(ws2->spectraMap()) )
-  if ( ws1->spectraMap() != ws2->spectraMap() )
+  // Use the SpectraDetectorMap::operator!= to check the maps
+  if ( map1 != map2 )
   {
     result = "SpectraDetectorMap mismatch";
     return false;
@@ -247,6 +248,63 @@ bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API
       return false;     
     }
   }
+  
+  // All OK if here
+  return true;
+}
+
+bool CheckWorkspacesMatch::checkSample(const API::Sample& sample1, const API::Sample& sample2)
+{
+  if ( sample1.getName() != sample2.getName() )
+  {
+    g_log.debug() << "WS1 sample name: " << sample1.getName() << "\n";
+    g_log.debug() << "WS2 sample name: " << sample2.getName() << "\n";
+    result = "Sample name mismatch";
+    return false;
+  }
+  
+  if ( sample1.getProtonCharge() != sample2.getProtonCharge() )
+  {
+    g_log.debug() << "WS1 proton charge: " << sample1.getProtonCharge() << "\n";
+    g_log.debug() << "WS2 proton charge: " << sample2.getProtonCharge() << "\n";
+    result = "Proton charge mismatch";
+    return false;
+  }
+  
+  const std::vector<Kernel::Property*>& ws1logs = sample1.getLogData();
+  const std::vector<Kernel::Property*>& ws2logs = sample2.getLogData();
+  // Check that the number of separate logs is the same
+  if ( ws1logs.size() != ws2logs.size() )
+  {
+    g_log.debug() << "WS1 number of logs: " << ws1logs.size() << "\n";
+    g_log.debug() << "WS2 number of logs: " << ws2logs.size() << "\n";
+    result = "Different numbers of logs";
+    return false;
+  }
+  
+  // Now loop over the individual logs
+  for ( std::vector<Kernel::Property*>::size_type i = 0; i < ws1logs.size(); ++i )
+  {
+    // Check the log name
+    if ( ws1logs[i]->name() != ws2logs[i]->name() )
+    {
+      g_log.debug() << "WS1 log " << i << " name: " << ws1logs[i]->name() << "\n";
+      g_log.debug() << "WS2 log " << i << " name: " << ws2logs[i]->name() << "\n";
+      result = "Log name mismatch";
+      return false;
+    }
+    
+    // Now check the log entry itself, using the method that gives it back as a string
+    if ( ws1logs[i]->value() != ws2logs[i]->value() )
+    {
+      g_log.debug() << "WS1 log " << ws1logs[i]->name() << ": " << ws1logs[i]->value() << "\n";
+      g_log.debug() << "WS2 log " << ws2logs[i]->name() << ": " << ws2logs[i]->value() << "\n";
+      result = "Log value mismatch";
+      return false;
+    }
+  }
+  
+  // N.B. Sample shape properties are not currently written out to nexus processed files, so omit here
   
   // All OK if here
   return true;

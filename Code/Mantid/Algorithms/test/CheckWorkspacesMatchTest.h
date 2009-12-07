@@ -241,6 +241,67 @@ public:
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Masking mismatch" )    
   }
+  
+  void testDifferentSampleName()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    ws2->getSample()->setName("different");
+    
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) )
+    
+    TS_ASSERT( checker.execute() )
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Sample name mismatch" )
+  }
+
+  void testDifferentProtonCharge()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    ws2->getSample()->setProtonCharge(99.99);
+    
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) )
+    
+    TS_ASSERT( checker.execute() )
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Proton charge mismatch" )
+  }
+
+  void testDifferentLogs()
+  {
+    if ( !checker.isInitialized() ) checker.initialize();
+
+    Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    ws2->getSample()->addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",99));
+    
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) )
+    
+    TS_ASSERT( checker.execute() )
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Different numbers of logs" )
+    
+    Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    ws3->getSample()->addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop2",99));
+    
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws2) )
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws3) )
+    
+    TS_ASSERT( checker.execute() )
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log name mismatch" )
+    
+    Mantid::API::MatrixWorkspace_sptr ws4 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
+    ws4->getSample()->addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",100));
+    
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws2) )
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws4) )
+    
+    TS_ASSERT( checker.execute() )
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log value mismatch" )
+    
+  }
 
 private:
   Mantid::Algorithms::CheckWorkspacesMatch checker;
