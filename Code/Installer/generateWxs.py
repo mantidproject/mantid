@@ -16,7 +16,7 @@ vstr = vfile.read()
 vlen = len(vstr)
 vfile.close()
 
-MantidVersion = '1.0.' + vstr[12:vlen-1]
+MantidVersion = '1.0.' + vstr[12:vlen-2]
 print('Mantid version '+MantidVersion)
 
 product_uuid='{9ca6d0c1-c0e2-4eba-a31c-3db46c76e64c}'
