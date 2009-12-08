@@ -44,7 +44,8 @@ namespace VectorHelper
   int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew);
 
   void DLLExport rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-        const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution);
+        const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, 
+        bool distribution, bool addition = false);
 
   // New method to rebin Histogram data, should be faster than previous one
   void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,

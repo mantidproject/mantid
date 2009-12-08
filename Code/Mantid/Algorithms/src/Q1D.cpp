@@ -55,7 +55,9 @@ void Q1D::exec()
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D",1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  outputWS->setYUnit("I(Q)");
+  outputWS->setYUnit("I(q)");
+  // The final output is a distribution, but that messes up the label on the vertical axis
+  //outputWS->isDistribution(true); 
   setProperty("OutputWorkspace",outputWS);
   // Set the X vector for the output workspace
   boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWS)->setX(0,XOut);
@@ -76,11 +78,12 @@ void Q1D::exec()
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
   const bool doGravity = getProperty("AccountForGravity");
+  if (doGravity) g_log.debug("Correcting for gravity");
 
   // A temporary vector to store intermediate Q values
   const int xLength = inputWS->readX(0).size();
   MantidVec Qx(xLength);
-  std::vector<double> widths(xLength);
+  std::vector<double> widthsIn(xLength), widthsOut(sizeOut);
 
   for (int i = 0; i < numSpec; ++i)
   {
@@ -103,29 +106,28 @@ void Q1D::exec()
 
     if ( doGravity )
     {
-      g_log.debug("Correcting for gravity");
       // Get the vector to get at the 3 components of the pixel position
       V3D detPos = det->getPos();
       // Want L2 (sample-pixel distance) squared
       const double L2 = std::pow(detPos.distance(samplePos),2);
       for ( int j = 0; j < xLength; ++j)
       {
-	// Lots more to do in this loop than for the non-gravity case
-	// since we have a number of calculations to do for each bin boundary
+        // Lots more to do in this loop than for the non-gravity case
+        // since we have a number of calculations to do for each bin boundary
 
-	// Calculate the drop (I'm fairly confident that Y is up!)
-	// Using approx. constant prefix - will fix next week
-	const double drop = 3.1336e-7 * XIn[j] * XIn[j] * L2;
+        // Calculate the drop (I'm fairly confident that Y is up!)
+        // Using approx. constant prefix - will fix next week
+        const double drop = 3.1336e-7 * XIn[j] * XIn[j] * L2;
 	
-	// Calculate new 2theta in light of this
-	V3D sampleDetVec = detPos - samplePos;
+        // Calculate new 2theta in light of this
+        V3D sampleDetVec = detPos - samplePos;
         sampleDetVec[1] += drop;
-	// Do beamline vector more rigorously later
-	const double twoTheta = sampleDetVec.angle(V3D(0,0,1));
-	const double sinTheta = sin( 0.5 * twoTheta );
+        // Do beamline vector more rigorously later
+        const double twoTheta = sampleDetVec.angle(V3D(0,0,1));
+        const double sinTheta = sin( 0.5 * twoTheta );
 
-	// Now we're ready to go to Q
-	Qx[xLength-j-1] = 4.0*M_PI*sinTheta/XIn[j];
+        // Now we're ready to go to Q
+        Qx[xLength-j-1] = 4.0*M_PI*sinTheta/XIn[j];
       }
     }
     else
@@ -143,12 +145,9 @@ void Q1D::exec()
     std::reverse(YIn.begin(),YIn.end());
     std::reverse(errYIn.begin(),errYIn.end());
     std::reverse(errEIn.begin(),errEIn.end());
-    // Now the fudge that acts as though we've turned this into a distribution at some point
-    std::adjacent_difference(Qx.begin(),Qx.end(),widths.begin());
-    std::transform(YIn.begin(),YIn.end(),widths.begin()+1,YIn.begin(),std::multiplies<double>());
-
-    VectorHelper::rebinHistogram(Qx,YIn,EIn,*XOut,YOut,EOutDummy,true);
-    VectorHelper::rebinHistogram(Qx,errYIn,errEIn,*XOut,errY,errE,true);
+    // Pass to rebin, flagging as a distribution
+    VectorHelper::rebin(Qx,YIn,EIn,*XOut,YOut,EOutDummy,true,true);
+    VectorHelper::rebin(Qx,errYIn,errEIn,*XOut,errY,errE,true,true);
 
     // Now summing the solid angle across the appropriate range
     const double solidAngle = det->solidAngle(samplePos);
@@ -182,14 +181,11 @@ void Q1D::exec()
         included_bins.push_back(Qx.back());
       }
       
-      // Create a temporary vector for the rebinned angles
-      MantidVec anglesTemp(anglesSum.size(),0.0);
       // Create a zero vector for the errors because we don't care about them here
       const MantidVec zeroes(solidAngleVec.size(),0.0);
       // Rebin the solid angles - note that this is a distribution
-      VectorHelper::rebin(included_bins,solidAngleVec,zeroes,*XOut,anglesTemp,EOutDummy,true);
-      // Add solid angles for this spectrum to the output solid angles vector
-      std::transform(anglesSum.begin(),anglesSum.end(),anglesTemp.begin(),anglesSum.begin(),std::plus<double>());
+      VectorHelper::rebin(included_bins,solidAngleVec,zeroes,*XOut,anglesSum,EOutDummy,true,true);
+
     }
     else // No masked bins
     {
@@ -199,19 +195,23 @@ void Q1D::exec()
       xRange[1] = Qx.back();
       // Single element vector containing the solid angle
       MantidVec solidAngleVec(1, solidAngle);
+      // Create a temporary vector for the rebinned angles
+      MantidVec anglesTemp(anglesSum.size(),0.0);
 
-      VectorHelper::rebinNonDispersive(xRange,solidAngleVec,emptyVec,*XOut,anglesSum,EOutDummy,true);
+      // Rebin the solid angles - note that this is a distribution
+      VectorHelper::rebin(xRange,solidAngleVec,emptyVec,*XOut,anglesSum,EOutDummy,true,true);
+
     }
 
     progress.report();
   }
 
-  // Now need to loop over resulting vectors dividing by solid angle and bin width
+  // Now need to loop over resulting vectors dividing by solid angle
   // and setting fractional error to match that in the 'errors' workspace
   MantidVec& EOut = outputWS->dataE(0);
   for (int k = 0; k < sizeOut-1; ++k)
   {
-    YOut[k] /= anglesSum[k]*((*XOut)[k+1]-(*XOut)[k]);
+    YOut[k] /= anglesSum[k];
     const double fractional = errY[k] ? std::sqrt(errE[k])/errY[k] : 0.0;
     EOut[k] = fractional*YOut[k];
   }

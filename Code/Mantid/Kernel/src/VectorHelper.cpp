@@ -69,11 +69,15 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
  *  @param ynew Rebinned data. Must be 1 element shorter than xnew.
  *  @param enew Rebinned errors. Must be same length as ynew.
  *  @param distribution Flag defining if distribution data (true) or not (false).
+ *  @param addition If true, rebinned values are added to the existing ynew/enew vectors.
+ *                  NOTE THAT, IN THIS CASE THE RESULTING enew WILL BE THE SQUARED ERRORS
+ *                  AND THE ynew WILL NOT HAVE THE BIN WIDTH DIVISION PUT IN!
  *  @throw runtime_error Thrown if algorithm cannot execute.
  *  @throw invalid_argument Thrown if input to function is incorrect.
  **/
 void rebin(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-      const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, bool distribution)
+      const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, 
+      bool distribution, bool addition)
 {
   // Make sure y and e vectors are of correct sizes
   const size_t size_xold = xold.size();
@@ -83,14 +87,18 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
   if (size_xnew != (ynew.size() + 1) || size_xnew != (enew.size() + 1))
     throw std::runtime_error("rebin: y and error vectors should be of same size & 1 shorter than x");
 
-  // Make sure ynew & enew contain zeroes
-  ynew.assign(size_xnew - 1, 0.0);
-  enew.assign(size_xnew - 1, 0.0);
+  int size_yold = yold.size();
+  int size_ynew = ynew.size();
+
+  if (!addition)
+  {
+    // Make sure ynew & enew contain zeroes
+    ynew.assign(size_ynew, 0.0);
+    enew.assign(size_ynew, 0.0);
+  }
 
   int iold = 0, inew = 0;
   double xo_low, xo_high, xn_low, xn_high, delta(0.0), width;
-  int size_yold = yold.size();
-  int size_ynew = ynew.size();
 
   while ((inew < size_ynew) && (iold < size_yold))
   {
@@ -147,33 +155,38 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
     }
   }
 
-  if (distribution)
+  if (!addition) // If using the addition facility, have to do bin width and sqrt errors externally
   {
-    /*
-     * convert back to counts/unit time
-     */
-    for (int i = 0; i < size_ynew; ++i)
+    if (distribution)
     {
+      /*
+       * convert back to counts/unit time
+       */
+      for (int i = 0; i < size_ynew; ++i)
       {
-        width = xnew[i + 1] - xnew[i];
-        if (width != 0.0)
         {
-          ynew[i] /= width;
-          enew[i] = sqrt(enew[i]) / width;
-        }
-        else
-        {
-          throw std::invalid_argument("rebin: Invalid output X array, contains consecutive X values");
+          width = xnew[i + 1] - xnew[i];
+          if (width != 0.0)
+          {
+            ynew[i] /= width;
+            enew[i] = sqrt(enew[i]) / width;
+          }
+          else
+          {
+            throw std::invalid_argument("rebin: Invalid output X array, contains consecutive X values");
+          }
         }
       }
     }
+    else
+    {
+      // non-distribution, just square root final error value
+      typedef double (*pf)(double);
+      pf uf = std::sqrt;
+      std::transform(enew.begin(), enew.end(), enew.begin(), uf);
+    }
   }
-  else
-  {
-    //non distribution , just square root final error value
-    for (int i = 0; i < size_ynew; ++i)
-      enew[i] = sqrt(enew[i]);
-  }
+
   return; //without problems
 }
 
