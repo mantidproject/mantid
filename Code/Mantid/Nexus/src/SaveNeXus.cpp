@@ -152,6 +152,9 @@ void SaveNexus::runSaveNexusProcessed()
   if (!title.empty())
     saveNexusPro->setPropertyValue("Title", getPropertyValue("Title"));
  
+  // Pass through the append property
+  saveNexusPro->setProperty<bool>("Append",getProperty("Append"));
+
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
   try
   {
