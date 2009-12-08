@@ -74,7 +74,7 @@ public:
   /// Get the current function if it is a peak
   Mantid::API::IPeakFunction* peakFunction()const{return peakFunction(index());}
   /// Select a function
-  void FitPropertyBrowser::selectFunction(int i)const;
+  void selectFunction(int i)const;
 
   /// Create a new function
   void addFunction(const std::string& fnName);
