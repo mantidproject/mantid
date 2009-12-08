@@ -46,7 +46,6 @@ m_defaultPeakName("Gaussian")
       }
     }
   }
-  fitBrowser()->setComposite();
   fitBrowser()->setWorkspaceName(m_wsName);
   fitBrowser()->setWorkspaceIndex(m_spec);
   m_compositeFunction = fitBrowser()->compositeFunction();
@@ -332,7 +331,7 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
 void PeakPickerTool::addPeak(double c,double h)
 {
   std::string fnName = fitBrowser()->isPeak()? 
-    fitBrowser()->functionName() : m_defaultPeakName;
+    fitBrowser()->defaultFunctionType() : m_defaultPeakName;
   fitBrowser()->addFunction(fnName);
   fitBrowser()->setCentre(c);
   fitBrowser()->setHeight(h);

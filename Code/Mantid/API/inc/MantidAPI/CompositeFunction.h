@@ -122,7 +122,7 @@ public:
              /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
-  void addFunction(IFunction* f);
+  int addFunction(IFunction* f);
   /// Returns the pointer to i-th function
   IFunction* getFunction(int i)const;
   /// Number of functions

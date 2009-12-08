@@ -363,8 +363,9 @@ int CompositeFunction::activeIndex(int i)const
 
 /** Add a function
  * @param f A pointer to the added function
+ * @return The function index
  */
-void CompositeFunction::addFunction(IFunction* f)
+int CompositeFunction::addFunction(IFunction* f)
 {
   m_iFunction.insert(m_iFunction.end(),f->nParams(),m_functions.size());
   m_iFunctionActive.insert(m_iFunctionActive.end(),f->nActive(),m_functions.size());
@@ -384,6 +385,7 @@ void CompositeFunction::addFunction(IFunction* f)
     m_nParams += f->nParams();
     m_nActive += f->nActive();
   }
+  return m_functions.size()-1;
 }
 
 /** Remove a function

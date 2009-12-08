@@ -7,7 +7,7 @@
 #include <QDockWidget>
 #include <QMap>
 
-    /* Forward definitions */
+    /* Forward declarations */
 
 class QtTreePropertyBrowser;
 class QtGroupPropertyManager;
@@ -17,6 +17,7 @@ class QtBoolPropertyManager;
 class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtProperty;
+class QtBrowserItem;
 
 class ApplicationWindow;
 
@@ -58,31 +59,39 @@ public:
   void setWidth(double value);
   /// Get count
   int count()const;
-  /// Set count
-  void setCount();
   /// Get index
   int index()const;
   /// Set index
-  void setIndex(int i);
-  /// Creates Composite Function
-  void setComposite(bool on=true);
+  void setIndex(int i)const;
   /// Is the current function a peak?
   bool isPeak()const;
+  /// Get the i-th function
+  Mantid::API::IFunction* function(int i)const;
+  /// Get the current function
+  Mantid::API::IFunction* function()const{return function(index());}
+  /// Get the i-th function if it is a peak
+  Mantid::API::IPeakFunction* peakFunction(int i)const;
+  /// Get the current function if it is a peak
+  Mantid::API::IPeakFunction* peakFunction()const{return peakFunction(index());}
+  /// Select a function
+  void FitPropertyBrowser::selectFunction(int i)const;
 
   /// Create a new function
   void addFunction(const std::string& fnName);
   /// Replace function
-  void replaceFunction(const std::string& fnName);
+  void replaceFunction(int i,const std::string& fnName);
   /// Remove function
-  void removeFunction();
-  /// Set the current function
-  void setFunction(Mantid::API::IFunction* fun);
+  void removeFunction(int i);
   /// Get Composite Function
   boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
+  /// Get the current function type
+  std::string functionType(int i)const;
+  std::string functionType()const{return functionType(index());}
   /// Get the current function name
-  std::string functionName()const;
+  QString functionName(int i)const;
+  QString functionName()const{return functionName(index());}
   /// Get the default function name
-  std::string defaultFunctionName()const;
+  std::string defaultFunctionType()const;
 
   /// Get the input workspace name
   std::string workspaceName()const;
@@ -110,7 +119,7 @@ public:
   void reinit();
 
 signals:
-  void indexChanged(int i);
+  void indexChanged(int i)const;
   void functionRemoved(int i);
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
@@ -128,29 +137,26 @@ private slots:
   void fit();
   void workspace_added(const QString &, Mantid::API::Workspace_sptr);
   void workspace_removed(const QString &);
+  void currentItemChanged(QtBrowserItem*);
+
+  void popupMenu(const QPoint &);
+  /* Context menu slots */
+  void addFunction();
+  void deleteFunction();
 private:
 
-  /// Is this function composite
-  bool isComposite()const;
-  /// Index of member function
-  int functionIndex()const;
   /// Create CompositeFunction
   void createCompositeFunction();
-  /// Remove CompositeFunction
-  void removeCompositeFunction();
-  /// Makes sure m_functionName property shows the right function name
-  void displayFunctionName();
-  /// Makes sure the parameters are displayed correctly
-  void displayParameters();
-  /// Makes sure the peak parameters (centre,height,width) are displayed correctly
-  void displayPeak();
   /// Get and store available workspace names
   void populateWorkspaceNames();
   /// Get the registered function names
   void populateFunctionNames();
   /// Check if the workspace can be used in the fit
   bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
+  /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm* alg);
+  /// Find QtBrowserItem for a property prop among the chidren of 
+  QtBrowserItem* findItem(QtBrowserItem* parent,QtProperty* prop)const;
 
   QtTreePropertyBrowser* m_browser;
   /// Property managers:
@@ -161,18 +167,17 @@ private:
   QtIntPropertyManager *m_intManager;
   QtBoolPropertyManager *m_boolManager;
   /// Properties:
-  QtProperty *m_functionGroup;
-  QtProperty *m_functionName;
-  QtProperty *m_peakGroup;
-  QtProperty *m_height;
-  QtProperty *m_centre;
-  QtProperty *m_width;
-  QtProperty *m_parametersGroup;
-  QMap<std::string,QtProperty*> m_parameters;
-  QtProperty *m_composite;
-  QtProperty *m_compositeGroup;
-  QtProperty *m_count;
-  QtProperty *m_index;
+
+  mutable int m_index;
+
+  /// The top level group
+  QtBrowserItem* m_fitGroup;
+  /// Group for functions
+  QtProperty* m_functionsGroup;
+  /// Group for input/output settings
+  QtProperty* m_settingsGroup;
+  /// Browser items for functions
+  QList<QtBrowserItem*> m_functionItems;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
@@ -186,7 +191,7 @@ private:
   mutable QStringList m_workspaceNames;
 
   /// A copy of the edited function
-  Mantid::API::IFunction* m_function;
+  //Mantid::API::IFunction* m_function;
   boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
 
   /// Default function name
@@ -194,6 +199,9 @@ private:
 
   /// Default width for added peaks
   double m_default_width;
+
+  /// The current function index
+  int m_index_;
 
   /// if true the output name will be guessed every time workspace name is changeed
   bool m_guessOutputName;

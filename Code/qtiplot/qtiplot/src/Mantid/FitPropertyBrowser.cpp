@@ -15,20 +15,23 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
-
+#include <QMenu>
+#include <QInputDialog>
 
 /**
  * Constructor
  * @param parent The parent widget - must be an ApplicationWindow
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
-:QDockWidget("Fit Function",parent),m_function(0),m_defaultFunction("Gaussian"),m_default_width(0),
+:QDockWidget("Fit Function",parent)/*,m_function(0)*/,m_defaultFunction("Gaussian"),m_default_width(0),
 m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true)
 {
   setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);
   m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, this );
+
+  createCompositeFunction();
 
   QWidget* w = new QWidget(parent);
 
@@ -41,52 +44,37 @@ m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true)
   m_intManager =    new QtIntPropertyManager(w);
   m_boolManager = new QtBoolPropertyManager(w);
 
-  m_composite = m_boolManager->addProperty("IsComposite");
+    /* Create the top level group */
+
+  QtProperty* fitGroup = m_groupManager->addProperty("Fit");
+
+  connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(enumChanged(QtProperty*)));
   connect(m_boolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(boolChanged(QtProperty*)));
   connect(m_intManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(intChanged(QtProperty*)));
   connect(m_doubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(doubleChanged(QtProperty*)));
   connect(m_stringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
 
-    /* Create composite function group */
-
-  m_compositeGroup = m_groupManager->addProperty("Composite Function");
-  m_count = m_intManager->addProperty("Count");
-  m_count->setEnabled(false);
-  m_compositeGroup->addSubProperty(m_count);
-
-  m_index = m_intManager->addProperty("Index");
-  m_compositeGroup->addSubProperty(m_index);
-
     /* Create function group */
 
-  m_functionGroup = m_groupManager->addProperty("Function");
-
-  m_functionName = m_enumManager->addProperty("Name");
-  m_functionGroup->addSubProperty(m_functionName);
-  connect(m_enumManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(enumChanged(QtProperty*)));
-  
-  m_peakGroup = m_groupManager->addProperty("Peak");
-
-  m_height = m_doubleManager->addProperty("Height");
-  m_peakGroup->addSubProperty(m_height);
-
-  m_centre = m_doubleManager->addProperty("Centre");
-  m_peakGroup->addSubProperty(m_centre);
-
-  m_width = m_doubleManager->addProperty("Width");
-  m_peakGroup->addSubProperty(m_width);
-
-
-  m_parametersGroup = m_groupManager->addProperty("Parameters");
-  m_functionGroup->addSubProperty(m_parametersGroup);
+  m_functionsGroup = m_groupManager->addProperty("Functions");
+  fitGroup->addSubProperty(m_functionsGroup);
 
      /* Create input - output properties */
+
+  m_settingsGroup = m_groupManager->addProperty("Settings");
+  fitGroup->addSubProperty(m_settingsGroup);
 
   m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
   m_startX = m_doubleManager->addProperty("StartX");
   m_endX = m_doubleManager->addProperty("EndX");
   m_output = m_stringManager->addProperty("Output");
+
+  m_settingsGroup->addSubProperty(m_workspace);
+  m_settingsGroup->addSubProperty(m_workspaceIndex);
+  m_settingsGroup->addSubProperty(m_startX);
+  m_settingsGroup->addSubProperty(m_endX);
+  m_settingsGroup->addSubProperty(m_output);
 
      /* Create editors and assign them to the managers */
 
@@ -103,13 +91,7 @@ m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true)
   m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
 
-  m_browser->addProperty(m_composite);
-  m_browser->addProperty(m_functionGroup);
-  m_browser->addProperty(m_workspace);
-  m_browser->addProperty(m_workspaceIndex);
-  m_browser->addProperty(m_startX);
-  m_browser->addProperty(m_endX);
-  m_browser->addProperty(m_output);
+  m_fitGroup = m_browser->addProperty(fitGroup);
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QHBoxLayout* buttonsLayout = new QHBoxLayout();
@@ -124,49 +106,30 @@ m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true)
 
   setWidget(w);
 
+  m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
+  connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), this, SLOT(currentItemChanged(QtBrowserItem*)));
 
 }
 
-/** Set the current function
- * @param fun A pointer to the function which will become current
- */
-void FitPropertyBrowser::setFunction(Mantid::API::IFunction* fun)
+void FitPropertyBrowser::popupMenu(const QPoint &pos)
 {
-  try
+  QtBrowserItem * ci = m_browser->currentItem();
+  QMenu *menu = new QMenu(m_appWindow);
+  if (ci->property() == m_functionsGroup)
   {
-    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(fun);
-    m_function = fun;
-    m_parameters.clear();
-    QList<QtProperty*> props = m_parametersGroup->subProperties();
-    for(int i=0;i<props.size();i++)
-    {
-      m_parametersGroup->removeSubProperty(props[i]);
-    }
-    for(int i=0;i<fun->nParams();i++)
-    {
-      std::string parName = fun->parameterName(i);
-      double parValue = fun->parameter(i);
-      QtProperty* prop = m_doubleManager->addProperty(QString::fromStdString(parName));
-      m_doubleManager->setValue(prop,parValue);
-      m_parameters.insert(parName,prop);
-      m_parametersGroup->addSubProperty(prop);
-    }
-    if (pf)
-    {
-      setCentre(pf->centre());
-      setHeight(pf->height());
-      setWidth(pf->width());
-      m_functionGroup->addSubProperty(m_peakGroup);
-    }
-    else
-    {
-      m_functionGroup->removeSubProperty(m_peakGroup);
-    }
+    QAction *action = new QAction("Add new function",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(addFunction()));
+    menu->addAction(action);
   }
-  catch(...)
+  else if (m_functionItems.contains(ci))
   {
-    m_functionGroup->removeSubProperty(m_peakGroup);
+    QAction *action = new QAction("Delete",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(deleteFunction()));
+    menu->addAction(action);
   }
+  menu->addSeparator();
+  menu->popup(QCursor::pos());
 }
 
 /**
@@ -175,92 +138,103 @@ void FitPropertyBrowser::setFunction(Mantid::API::IFunction* fun)
  */
 void FitPropertyBrowser::addFunction(const std::string& fnName)
 {
-    Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
-    f->initialize();
-    if (isComposite())
+  Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
+  f->initialize();
+  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
+  if (pf)
+  {
+    if (m_default_width != 0.0)
     {
-      Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
-      if (pf)
-      {
-        if (m_default_width != 0.0)
-        {
-          pf->setWidth(m_default_width);
-        }
-        else
-        {
-          m_default_width = pf->width();
-        }
-      }
-      m_compositeFunction->addFunction(f);
-      setCount();
-      setIndex(m_compositeFunction->nFunctions()-1);
-      m_defaultFunction = fnName;
+      pf->setWidth(m_default_width);
     }
-    else if (m_function)
+    else
     {
-      delete m_function;
+      m_default_width = pf->width();
     }
-    setFunction(f);
-    displayFunctionName();
-    setFocus();
+  }
+  m_compositeFunction->addFunction(f);
+  setIndex(m_compositeFunction->nFunctions()-1);
+  m_defaultFunction = fnName;
+  setFocus();
+
+  // Add a group property named after the function: f<index>-<type>, where <type> is the function's class name
+  QtProperty* fnProp = m_groupManager->addProperty(functionName(index()));
+  m_functionsGroup->addSubProperty(fnProp);
+
+  QtProperty* typeProp = m_enumManager->addProperty("Type");
+  fnProp->addSubProperty(typeProp);
+  int itype = m_registeredFunctions.indexOf(QString::fromStdString(functionType()));
+  m_enumManager->setEnumNames(typeProp, m_registeredFunctions);
+  m_enumManager->setValue(typeProp,itype);
+
+  // Add properties for the function's parameters
+  for(int i=0;i<f->nParams();i++)
+  {
+    QtProperty* parProp = m_doubleManager->addProperty(QString::fromStdString(f->parameterName(i)));
+    fnProp->addSubProperty(parProp);
+    m_doubleManager->setValue(parProp,f->parameter(i));
+  }
+
+  QtBrowserItem* fnGroupItem = findItem(m_fitGroup,m_functionsGroup);
+  QtBrowserItem* fnItem = findItem(fnGroupItem,fnProp);
+  m_browser->setExpanded(fnItem,false);
+  m_functionItems.append(fnItem);
+  selectFunction(index());
 }
 
 /** Replace the current function with a new one
+ * @param i The function index
  * @param fnName A registered function name
  */
-void FitPropertyBrowser::replaceFunction(const std::string& fnName)
+void FitPropertyBrowser::replaceFunction(int i,const std::string& fnName)
 {
+  if (i < 0 || i >= count()) return;
   Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
   f->initialize();
-  if (isComposite())
+  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
+  if (pf)
   {
-    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
-    if (pf)
-    {
-      pf->setCentre(centre());
-      pf->setHeight(height());
-      pf->setWidth(width());
-    }
-    m_compositeFunction->replaceFunction(index(),f);
+    pf->setCentre(centre());
+    pf->setHeight(height());
+    pf->setWidth(width());
   }
-  else if (m_function)
-  {
-    delete m_function;
-  }
-  setFunction(f);
+  m_compositeFunction->replaceFunction(i,f);
 }
 
-/** Remove the current function
+/** Remove a function
+ * @param i The function index
  */
-void FitPropertyBrowser::removeFunction()
+void FitPropertyBrowser::removeFunction(int i)
 {
-  if (isComposite() && count() > 1)
-  {
-    int i = index();
-    m_compositeFunction->removeFunction(i);
-    setCount();
-    m_function = m_compositeFunction->getFunction(index());
-    emit functionRemoved(i);
-  }
-  displayFunctionName();
-  displayParameters();
-  displayPeak();
+  if (i < 0 || i >= count()) return;
+  m_compositeFunction->removeFunction(i);
+  setIndex(index());
+  emit functionRemoved(i);
   setFocus();
 }
 
 
-// Get the current function name
-std::string FitPropertyBrowser::functionName()const
+/** Get function type
+ * @param i The function index
+ */
+std::string FitPropertyBrowser::functionType(int i)const
 {
-  if (!m_function)
-  {
-    return "";
-  }
-  return m_function->name();
+  Mantid::API::IFunction* f = function(i);
+  return f!=0?f->name():m_defaultFunction;
+}
+
+/** Get function name
+ * @param i The function index
+ */
+QString FitPropertyBrowser::functionName(int i)const
+{
+  if (count() <= 0 || i >= count()) return "";
+  QString qname = "f" + QString::number(i)+ "-"+QString::fromStdString(functionType(i));
+  return qname;
 }
 
 // Get the default function name
-std::string FitPropertyBrowser::defaultFunctionName()const
+std::string FitPropertyBrowser::defaultFunctionType()const
 {
   return m_defaultFunction;
 }
@@ -316,32 +290,7 @@ void FitPropertyBrowser::setOutputName(const std::string& name)
  */
 void FitPropertyBrowser::enumChanged(QtProperty* prop)
 {
-  if (prop == m_functionName)
-  {
-    int i = m_enumManager->value(m_functionName);
-    std::string fnName = m_registeredFunctions[i].toStdString();
-    if (fnName == "<Delete>")
-    {
-      removeFunction();
-    }
-    else if (fnName == "<New>")
-    {
-      addFunction(m_defaultFunction);
-    }
-    else if (fnName != functionName())
-    {
-      if (isComposite())
-      {
-        replaceFunction(fnName);
-      }
-      else
-      {
-        addFunction(fnName);
-      }
-    }
-    emit functionChanged(QString::fromStdString(functionName()));
-  }
-  else if (prop == m_workspace)
+  if (prop == m_workspace)
   {
     if (m_guessOutputName)
     {
@@ -356,19 +305,6 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
  */
 void FitPropertyBrowser::boolChanged(QtProperty* prop)
 {
-  if (prop == m_composite)
-  {
-    bool was_composite = isComposite();
-    bool now_composite = m_boolManager->value(m_composite);
-    if (now_composite && !was_composite)
-    {
-      createCompositeFunction();
-    }
-    else if (!now_composite && was_composite)
-    {
-      removeCompositeFunction();
-    }
-  }
 }
 
 /** Called when an int property changed
@@ -376,26 +312,7 @@ void FitPropertyBrowser::boolChanged(QtProperty* prop)
  */
 void FitPropertyBrowser::intChanged(QtProperty* prop)
 {
-  if (prop == m_index)
-  {
-    if (!isComposite()) return;
-    int i = index();
-    if (i >= 0 && i < count())
-    {
-      setFunction(m_compositeFunction->getFunction(i));
-    }
-    else if (i >= count())
-    {
-      setIndex(count()-1);
-    }
-    else if (i < 0)
-    {
-      setIndex(0);
-    }
-    displayFunctionName();
-    emit indexChanged(index());
-  }
-  else if (prop == m_workspaceIndex)
+  if (prop == m_workspaceIndex)
   {
     Mantid::API::MatrixWorkspace_sptr ws = 
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -425,44 +342,16 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
  */
 void FitPropertyBrowser::doubleChanged(QtProperty* prop)
 {
-  if (!m_function) return;
-  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(m_function);
+  Mantid::API::IFunction* f = function();
+  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
   double value = m_doubleManager->value(prop);
-  if (pf && prop == m_centre)
-  {
-    pf->setCentre(value);
-    displayParameters();
-  }
-  else if (pf && prop == m_height)
-  {
-    pf->setHeight(value);
-    displayParameters();
-  }
-  else if (pf && prop == m_width)
-  {
-    pf->setWidth(value);
-    displayParameters();
-    if (value > 0)
-    {
-      m_default_width = value;
-    }
-  }
-  else if (prop == m_startX )
+  if (prop == m_startX )
   {
     emit startXChanged(startX());
   }
   else if (prop == m_endX )
   {
     emit endXChanged(endX());
-  }
-  else
-  {
-    std::string parName = prop->propertyName().toStdString();
-    m_function->getParameter(parName) = value;
-    if (pf)
-    {
-      displayPeak();
-    }
   }
 }
 /** Called when a string property changed
@@ -491,7 +380,11 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
 // Centre of the current peak
 double FitPropertyBrowser::centre()const
 {
-  return m_doubleManager->value(m_centre);
+  if (isPeak())
+  {
+    return peakFunction()->centre();
+  }
+  return 0;
 }
 
 /** Set centre of the current peak
@@ -499,13 +392,20 @@ double FitPropertyBrowser::centre()const
  */
 void FitPropertyBrowser::setCentre(double value)
 {
-  m_doubleManager->setValue(m_centre,value);
+  if (isPeak())
+  {
+    peakFunction()->setCentre(value);
+  }
 }
 
 // Height of the current peak
 double FitPropertyBrowser::height()const
 {
-  return m_doubleManager->value(m_height);
+  if (isPeak())
+  {
+    return peakFunction()->height();
+  }
+  return 0.;
 }
 
 /** Set height of the current peak
@@ -513,13 +413,20 @@ double FitPropertyBrowser::height()const
  */
 void FitPropertyBrowser::setHeight(double value)
 {
-  m_doubleManager->setValue(m_height,value);
+  if (isPeak())
+  {
+    peakFunction()->setHeight(value);
+  }
 }
 
 // Width of the current peak
 double FitPropertyBrowser::width()const
 {
-  return m_doubleManager->value(m_width);
+  if (isPeak())
+  {
+    return peakFunction()->width();
+  }
+  return 0;
 }
 
 /** Set width of the current peak
@@ -527,7 +434,10 @@ double FitPropertyBrowser::width()const
  */
 void FitPropertyBrowser::setWidth(double value)
 {
-  m_doubleManager->setValue(m_width,value);
+  if (isPeak())
+  {
+    peakFunction()->setWidth(value);
+  }
 }
 
 /// Get the registered function names
@@ -544,135 +454,53 @@ void FitPropertyBrowser::populateFunctionNames()
   }
   m_registeredFunctions.append("<New>");
   m_registeredFunctions.append("<Delete>");
-  m_enumManager->setEnumNames(m_functionName, m_registeredFunctions);
-  addFunction(m_defaultFunction);
+  //m_enumManager->setEnumNames(m_functionName, m_registeredFunctions);
   int j = m_registeredFunctions.indexOf(QString::fromStdString(m_defaultFunction));
-  if (j >= 0)
-  {
-    m_enumManager->setValue(m_functionName,j);
-  }
-}
-
-/// Is this function composite
-bool FitPropertyBrowser::isComposite()const
-{
-  return m_compositeFunction.get() != 0;
-}
-
-/// Index of member function
-int FitPropertyBrowser::functionIndex()const
-{
-  if (isComposite())
-  {
-    return m_intManager->value(m_index);
-  }
-  return -1;
+  //if (j >= 0)
+  //{
+  //  m_enumManager->setValue(m_functionName,j);
+  //}
 }
 
 /// Create CompositeFunction
 void FitPropertyBrowser::createCompositeFunction()
 {
   m_compositeFunction.reset(new Mantid::API::CompositeFunction());
-  if (m_function)
-  {
-    m_compositeFunction->addFunction(m_function);
-  }
-  m_browser->insertProperty(m_compositeGroup,m_composite);
-  displayFunctionName();
-  setCount();
-  setIndex(0);
-}
-
-/// Remove CompositeFunction
-void FitPropertyBrowser::removeCompositeFunction()
-{
-  int i = functionIndex();
-  if (m_function && i >= 0 && i < m_compositeFunction->nFunctions())
-  {
-    m_compositeFunction->removeFunction(i,false);
-  }
-  m_compositeFunction.reset();
-  m_browser->removeProperty(m_compositeGroup);
-  displayFunctionName();
-  setCount();
-  setIndex(0);
-}
-
-/// Makes sure m_functionName property shows the right function name
-void FitPropertyBrowser::displayFunctionName()
-{
-  int i = m_registeredFunctions.indexOf(QString::fromStdString(functionName()));
-  if (i >= 0)
-  {
-    m_enumManager->setValue(m_functionName,i);
-  }
+  //setCount();
+  //setIndex(-1);
 }
 
 /// Get number of functions in CompositeFunction
 int FitPropertyBrowser::count()const
 {
-  return m_intManager->value(m_count);
-}
-
-/** Set number of functions in CompositeFunction
- */
-void FitPropertyBrowser::setCount()
-{
-  int n = 0;
-  if (m_compositeFunction)
-  {
-    n = m_compositeFunction->nFunctions();
-  }
-  m_intManager->setValue(m_count,n);
-  if (index() > n - 1) 
-  {
-    setIndex(n-1);
-  }
+  return m_compositeFunction->nFunctions();
 }
 
 /// Get index
 int FitPropertyBrowser::index()const
 {
-  return m_intManager->value(m_index);
+  return m_index;
 }
 
 /** Set index of the current function in the CompositeFunction
  * @param i The new index
  */
-void FitPropertyBrowser::setIndex(int i)
+void FitPropertyBrowser::setIndex(int i)const
 {
-  m_intManager->setValue(m_index,i);
+  if (i < 0 || i >= count()) return;
+  m_index = i;
+  emit indexChanged(i);
 }
 
-/// Makes sure the parameters are displayed correctly
-void FitPropertyBrowser::displayParameters()
+/**
+ * Select i-th function item in the browser
+ * int i The function index
+ */
+void FitPropertyBrowser::selectFunction(int i)const
 {
-  QMap<std::string,QtProperty*>::iterator it=m_parameters.begin();
-  for(;it!=m_parameters.end();it++)
-  {
-    try
-    {
-      double value = m_function->getParameter(it.key());
-      m_doubleManager->setValue(it.value(),value);
-    }
-    catch(...)
-    {
-      // Parameters don't match the function
-    }
-  }
+  m_browser->setCurrentItem(m_functionItems[index()]);
 }
 
-/// Makes sure the peak parameters (centre,height,width) are displayed correctly
-void FitPropertyBrowser::displayPeak()
-{
-  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(m_function);
-  if (pf)
-  {
-    setCentre(pf->centre());
-    setHeight(pf->height());
-    setWidth(pf->width());
-  }
-}
 
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
@@ -694,14 +522,7 @@ void FitPropertyBrowser::fit()
   alg->setProperty("StartX",startX());
   alg->setProperty("EndX",endX());
   alg->setPropertyValue("Output",outputName());
-  if (isComposite())
-  {
-    alg->setPropertyValue("Function",*m_compositeFunction);
-  }
-  else
-  {
-    alg->setPropertyValue("Function",*m_function);
-  }
+  alg->setPropertyValue("Function",*m_compositeFunction);
   observeFinish(alg);
   alg->executeAsync();
   }
@@ -781,8 +602,6 @@ void FitPropertyBrowser::init()
 
 void FitPropertyBrowser::reinit()
 {
-  setComposite(false);
-  addFunction(m_defaultFunction);
 }
 
 /** Check if the workspace can be used in the fit
@@ -793,16 +612,14 @@ bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
   return dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0;
 }
 
-/// Creates Composite Function if on is true
-void FitPropertyBrowser::setComposite(bool on)
-{
-  m_boolManager->setValue(m_composite,on);
-}
-
 /// Is the current function a peak?
 bool FitPropertyBrowser::isPeak()const
 {
-  return dynamic_cast<Mantid::API::IPeakFunction*>(m_function) != 0;
+  if (count() == 0)
+  {
+    return false;
+  }
+  return peakFunction() != 0;
 }
 
 /// Get the start X
@@ -827,4 +644,84 @@ double FitPropertyBrowser::endX()const
 void FitPropertyBrowser::setEndX(double value)
 {
   m_doubleManager->setValue(m_endX,value);
+}
+
+/** Get a function 
+ * @param i The function index
+ */
+Mantid::API::IFunction* FitPropertyBrowser::function(int i)const
+{
+  if (count() <= 0 || i < 0 || i >= count()) return 0;
+  return m_compositeFunction->getFunction(i);
+}
+
+/** Get a function if it's a peak
+ * @param i The function index
+ */
+Mantid::API::IPeakFunction* FitPropertyBrowser::peakFunction(int i)const
+{
+  if (count() <= 0 || i < 0 || i >= count()) return 0;
+  return dynamic_cast<Mantid::API::IPeakFunction*>(function());
+}
+
+/** Slot. Called to add a new function
+ */
+void FitPropertyBrowser::addFunction()
+{
+  int i = m_registeredFunctions.indexOf(QString::fromStdString(m_defaultFunction));
+  bool ok = false;
+  QString fnName = 
+    QInputDialog::getItem(this, "MantidPlot - Fit", "Select function type", m_registeredFunctions,i,false,&ok);
+  if (ok)
+  {
+    addFunction(fnName.toStdString());
+  }
+}
+
+/** Slot. Called to remove a function
+ */
+void FitPropertyBrowser::deleteFunction()
+{
+  int i = index();
+  removeFunction(i);
+  QtBrowserItem* fnItem = m_functionItems[i];
+  QList<QtProperty*> subs = fnItem->property()->subProperties();
+  for(int i=0;i<subs.size();i++)
+  {
+    fnItem->property()->removeSubProperty(subs[i]);
+    delete subs[i];
+  }
+  QtProperty* fnGroup = fnItem->parent()->property();
+  fnGroup->removeSubProperty(fnItem->property());
+  QList<QtProperty*> fns = fnGroup->subProperties();
+  for(int i = 0;i<fns.size();i++)
+  {
+    fns[i]->setPropertyName(functionName(i));
+  }
+}
+
+QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* prop)const
+{
+  QList<QtBrowserItem*> children = parent->children();
+  QtBrowserItem* res = 0;
+  for(int i=0;i<children.size();i++)
+  {
+    if (children[i]->property() == prop)
+    {
+      res = children[i];
+    }
+  }
+  return res;
+}
+
+/**
+ * Slot. Responds to changing the current item
+ */
+void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
+{
+  int i = m_functionItems.indexOf(current);
+  if (i >= 0)
+  {
+    setIndex(i);
+  }
 }

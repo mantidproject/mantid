@@ -82,7 +82,7 @@ void RealFFT::exec()
         int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
         bool odd = ySize % 2 != 0;
 
-        outWS = WorkspaceFactory::Instance().create("Workspace2D",2,xOutSize,yOutSize);
+        outWS = WorkspaceFactory::Instance().create(inWS,2,xOutSize,yOutSize);
 
         gsl_fft_real_workspace * workspace = gsl_fft_real_workspace_alloc(ySize);
         boost::shared_array<double> data(new double[2*ySize]);
@@ -111,6 +111,8 @@ void RealFFT::exec()
             outWS->dataX(0)[yOutSize] = outWS->dataX(0)[yOutSize - 1] + df;
         }
         outWS->dataX(1) = outWS->dataX(0);
+        outWS->getAxis(1)->spectraNo(0)=inWS->getAxis(1)->spectraNo(spec);
+        outWS->getAxis(1)->spectraNo(1)=inWS->getAxis(1)->spectraNo(spec);
     }
     else // Backward
     {
@@ -125,7 +127,7 @@ void RealFFT::exec()
 
       df = 1.0 / (dx * (yOutSize));
 
-      outWS = WorkspaceFactory::Instance().create("Workspace2D",1,xOutSize,yOutSize);
+      outWS = WorkspaceFactory::Instance().create(inWS,1,xOutSize,yOutSize);
 
       gsl_fft_real_workspace * workspace = gsl_fft_real_workspace_alloc(yOutSize);
       boost::shared_array<double> data(new double[yOutSize]);
@@ -160,6 +162,7 @@ void RealFFT::exec()
         outWS->dataY(0)[i] = data[i]/df; 
       }
       if (outWS->isHistogramData()) outWS->dataX(0)[yOutSize] = outWS->dataX(0)[yOutSize - 1] + df;
+      outWS->getAxis(1)->spectraNo(0)=inWS->getAxis(1)->spectraNo(spec);
     }
 
     outWS->getAxis(0)->unit() = boost::shared_ptr<Kernel::Unit>(new LabelUnit());
