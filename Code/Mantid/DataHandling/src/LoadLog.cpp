@@ -181,7 +181,7 @@ void LoadLog::exec()
 		}
 	}
   }
-
+ 
   //If there are no log files by now, we have nothing else to do
   if( potentialLogFiles.empty() ) return;
 
@@ -288,6 +288,7 @@ bool LoadLog::threeColumnFormatLogFileExists()
     std::string rawID =m_filename.substr(0,pos);
 	// append .log to get the .log file name
 	 std::string logfileName=rawID+".log";	
+	 int count=0;
 	 if (Poco::File(logfileName).exists())
 	 {
 		 //validate the file
@@ -298,10 +299,13 @@ bool LoadLog::threeColumnFormatLogFileExists()
 //check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
 		 std::string aLine;
 		 kind l_kind(LoadLog::empty);
-		 if( std::getline(inLogFile, aLine, '\n') )
+		 //if( std::getline(inLogFile, aLine, '\n') )
+		 while(Mantid::API::extractToEOL(inLogFile,aLine))
 		 {
+			 
 			 if ( !isDateTimeString(aLine) )
 			 { g_log.warning("File" + logfileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
+				 return false;
 				 inLogFile.close();
 			 }
 
@@ -316,6 +320,7 @@ bool LoadLog::threeColumnFormatLogFileExists()
 			 if ( LoadLog::string != l_kind )
 			 {
 				 g_log.warning("ISIS log file contains unrecognised second column entries: " + logfileName);
+				 return false;
 				 inLogFile.close();
 			 }
 
@@ -324,9 +329,13 @@ bool LoadLog::threeColumnFormatLogFileExists()
 			 l_kind = classify(thirdcolumn);
 			 if ( LoadLog::string != l_kind && LoadLog::number!=l_kind)
 			 {
-				 g_log.warning("ISIS log file contains unrecognised second column entries: " + logfileName);
+				 g_log.warning("ISIS log file contains unrecognised third column entries: " + logfileName);
+				 return false;
 				 inLogFile.close();
 			 }
+			 ++count;
+			 if(count==2) ///reading first two lines from file for validation purpose.
+				 break;
 
 		 }
 		return true;
@@ -437,15 +446,26 @@ std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::stri
 				sMap[propname]=logs;}
 		}
 	}
-	std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr=dMap.begin();
-	for(;itr!=dMap.end();++itr)
+	try
 	{
-		sample->addLogData(itr->second);
+		std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr=dMap.begin();
+		for(;itr!=dMap.end();++itr)
+		{
+			sample->addLogData(itr->second);
+		}
+		std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr=sMap.begin();
+		for(;sitr!=sMap.end();++sitr)
+		{
+			sample->addLogData(sitr->second);
+		}
 	}
-	std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr=sMap.begin();
-	for(;sitr!=sMap.end();++sitr)
+	catch(std::invalid_argument &e)
 	{
-		sample->addLogData(sitr->second);
+		g_log.warning()<<e.what();
+	}
+	catch(Exception::ExistsError&e)
+	{
+		g_log.warning()<<e.what();
 	}
 	
    return blockFileNameList;
