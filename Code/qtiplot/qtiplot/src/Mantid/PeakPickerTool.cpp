@@ -377,22 +377,6 @@ void PeakPickerTool::setWidth(double x)
     fitBrowser()->setWidth(x);
 }
 
-// Return current function name
-std::string PeakPickerTool::fnName()const
-{
-  return fitBrowser()->functionName();
-}
-
-// Set new function name
-void PeakPickerTool::fnName(const std::string& name)
-{
-  if (m_current>=0) 
-  {
-    //m_params[m_current].fnName = name;
-    //m_fnName = name;
-  }
-}
-
 // Check if x is near the xMin marker (+-dx)
 bool PeakPickerTool::clickedOnXMin(double x,double dx)
 {
@@ -448,12 +432,6 @@ void PeakPickerTool::xMax(double x)
   {
     m_xMin = x;
   }
-}
-
-// The number of peaks
-int PeakPickerTool::peakCount()const
-{
-  return fitBrowser()->count();
 }
 
 /** Set the default peak function

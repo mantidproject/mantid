@@ -115,12 +115,6 @@ private:
   void widthIsSet(bool yes=true) {m_width_set = yes;}
   // Change the width of the currently selected peak
   void setWidth(double x);
-  // Return current function name
-  std::string fnName()const;
-  // Set new function name
-  void fnName(const std::string& name);
-  // The number of peaks
-  int peakCount()const;
 
   // Check if x is near the xMin marker (+-dx)
   bool clickedOnXMin(double x,double dx);
