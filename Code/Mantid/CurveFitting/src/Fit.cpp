@@ -76,7 +76,7 @@ namespace CurveFitting
   struct FitData1 {
     /// Constructor
     FitData1(Fit* f);
-    /// number of points to be fitted (size of X, Y and sigmaData arrays)
+    /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
     size_t n;
     /// number of (active) fit parameters
     size_t p;
@@ -85,7 +85,7 @@ namespace CurveFitting
     /// the data to be fitted (ordinates)
     const double * Y;
     /// the standard deviations of the Y data points
-    double * sigmaData;
+    double * sqrtWeightData;
     /// pointer to instance of Fit
     Fit* fit;
     /// Needed to use the simplex algorithm within the gsl least-squared framework.
@@ -111,7 +111,7 @@ namespace CurveFitting
 
     for (size_t i = 0; i<p->n; i++)
       f->data[i] = 
-      ( f->data[i] - p->Y[i] ) / p->sigmaData[i];
+      ( f->data[i] - p->Y[i] ) * p->sqrtWeightData[i];
 
     return GSL_SUCCESS;
   }
@@ -135,7 +135,7 @@ namespace CurveFitting
 
     for (size_t iY = 0; iY < p->n; iY++) 
       for (size_t iP = 0; iP < p->p; iP++) 
-        J->data[iY*p->p + iP] /= p->sigmaData[iY];
+        J->data[iY*p->p + iP] *= p->sqrtWeightData[iY];
 
     return GSL_SUCCESS;
   }
@@ -176,7 +176,7 @@ namespace CurveFitting
     // calculated-observed devided by error values used by GSL
     for (size_t i = 0; i<p->n; i++)
       l_forSimplexLSwrap[i] = 
-      (  l_forSimplexLSwrap[i] - p->Y[i] ) / p->sigmaData[i];
+      (  l_forSimplexLSwrap[i] - p->Y[i] ) * p->sqrtWeightData[i];
 
     double retVal = 0.0;
 
@@ -342,7 +342,7 @@ namespace CurveFitting
       throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
     }
     l_data.X = new double[l_data.n];
-    l_data.sigmaData = new double[l_data.n];
+    l_data.sqrtWeightData = new double[l_data.n];
     l_data.forSimplexLSwrap = new double[l_data.n];
 
     // check if histogram data in which case use mid points of histogram bins
@@ -364,9 +364,19 @@ namespace CurveFitting
     for (unsigned int i = 0; i < l_data.n; ++i)
     {
       if (YErrors[m_minX+i] <= 0.0)
-        l_data.sigmaData[i] = 1.0;
+        l_data.sqrtWeightData[i] = 1.0;
       else
-        l_data.sigmaData[i] = YErrors[m_minX+i];
+        l_data.sqrtWeightData[i] = 1./YErrors[m_minX+i];
+    }
+
+    if (localworkspace->hasMaskedBins(histNumber))
+    {
+      Mantid::API::MatrixWorkspace::MaskList mlist = localworkspace->maskedBins(histNumber);
+      Mantid::API::MatrixWorkspace::MaskList::iterator it = mlist.begin();
+      for(;it!=mlist.end();it++)
+      {
+        l_data.sqrtWeightData[it->first] = 0.;
+      }
     }
 
 
@@ -581,7 +591,7 @@ namespace CurveFitting
     // clean up dynamically allocated gsl stuff
 
     delete [] l_data.X;
-    delete [] l_data.sigmaData;
+    delete [] l_data.sqrtWeightData;
     delete [] l_data.forSimplexLSwrap;
 
     return;

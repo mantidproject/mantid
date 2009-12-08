@@ -288,6 +288,111 @@ public:
     removeWS("out_Parameters");
   }
 
+  void testNotMasked()
+  {
+
+    WS_type ws = mkWS(FitExpression(),1,0,10,0.1,1);
+    storeWS("Exp",ws);
+
+    Fit alg;
+    alg.initialize();
+
+    alg.setPropertyValue("InputWorkspace","Exp");
+    alg.setPropertyValue("WorkspaceIndex","0");
+    alg.setPropertyValue("Output","out");
+    std::string params = "";
+    params += "name=FitTest_Linear,a=1,b=0;";
+
+    alg.setPropertyValue("Function",params);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    WS_type outWS = getWS("out_Workspace");
+
+    const Mantid::MantidVec& Y00 = ws->readY(0);
+    const Mantid::MantidVec& Y0 = outWS->readY(0);
+    const Mantid::MantidVec& Y = outWS->readY(1);
+    const Mantid::MantidVec& R = outWS->readY(2);
+
+    TWS_type outParams = getTWS("out_Parameters");
+    TS_ASSERT(outParams);
+
+    TS_ASSERT_EQUALS(outParams->rowCount(),2);
+    TS_ASSERT_EQUALS(outParams->columnCount(),2);
+
+    TableRow row = outParams->getFirstRow();
+    TS_ASSERT_EQUALS(row.String(0),"a");
+    TS_ASSERT_DELTA(row.Double(1),1.3703,0.0001);
+
+    row = outParams->getRow(1);
+    TS_ASSERT_EQUALS(row.String(0),"b");
+    TS_ASSERT_DELTA(row.Double(1),0.3162,0.0001);
+
+
+
+    removeWS("Exp");
+    removeWS("out_Workspace");
+    removeWS("out_Parameters");
+  }
+
+  void testMasked()
+  {
+
+    WS_type ws = mkWS(FitExpression(),1,0,10,0.1,1);
+
+    // Mask some bins
+    for(int i=0;i<ws->blocksize();i++)
+    {
+      double x = ws->readX(0)[i];
+      if (x > 2.5 && x < 8)
+      {
+        ws->maskBin(0,i,1.0);
+      }
+    }
+    storeWS("Exp",ws);
+
+    Fit alg;
+    alg.initialize();
+
+    alg.setPropertyValue("InputWorkspace","Exp");
+    alg.setPropertyValue("WorkspaceIndex","0");
+    alg.setPropertyValue("Output","out");
+    std::string params = "";
+    params += "name=FitTest_Linear,a=1,b=0;";
+
+    alg.setPropertyValue("Function",params);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    WS_type outWS = getWS("out_Workspace");
+
+    const Mantid::MantidVec& Y00 = ws->readY(0);
+    const Mantid::MantidVec& Y0 = outWS->readY(0);
+    const Mantid::MantidVec& Y = outWS->readY(1);
+    const Mantid::MantidVec& R = outWS->readY(2);
+
+    TWS_type outParams = getTWS("out_Parameters");
+    TS_ASSERT(outParams);
+
+    TS_ASSERT_EQUALS(outParams->rowCount(),2);
+    TS_ASSERT_EQUALS(outParams->columnCount(),2);
+
+    TableRow row = outParams->getFirstRow();
+    TS_ASSERT_EQUALS(row.String(0),"a");
+    TS_ASSERT_DELTA(row.Double(1),0.9982,0.0001);
+
+    row = outParams->getRow(1);
+    TS_ASSERT_EQUALS(row.String(0),"b");
+    TS_ASSERT_DELTA(row.Double(1),0.2988,0.0001);
+
+
+
+    removeWS("Exp");
+    removeWS("out_Workspace");
+    removeWS("out_Parameters");
+  }
 
 private:
 
