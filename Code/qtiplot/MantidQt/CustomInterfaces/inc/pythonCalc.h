@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <string>
+#include <climits>
 
 class pythonCalc
 {
