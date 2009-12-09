@@ -288,7 +288,7 @@ public:
     removeWS("out_Parameters");
   }
 
-  void testNotMasked()
+  void t1estNotMasked()
   {
 
     WS_type ws = mkWS(FitExpression(),1,0,10,0.1,1);
