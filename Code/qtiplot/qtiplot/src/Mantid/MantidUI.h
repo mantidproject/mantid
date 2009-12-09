@@ -289,6 +289,9 @@ public slots:
     // Execute algorithm given name and version
     void executeAlgorithm(QString algName, int version);
 
+    // Find the name of the first input workspace for an algorithm
+    QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
+
     // Show Qt critical error message box
     void showCritical(const QString&);
 

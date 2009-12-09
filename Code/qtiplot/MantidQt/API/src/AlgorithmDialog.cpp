@@ -773,7 +773,11 @@ void AlgorithmDialog::setValue(QWidget *widget, const QString & propName)
 
   if( !isForScript() )
   {
-    value = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+    value = m_propertyValueMap.value(propName);
+    if( value.isEmpty() )
+    {
+      value = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+    }
   }
   else
   {

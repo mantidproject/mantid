@@ -786,32 +786,69 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 void MantidUI::executeAlgorithm(QString algName, int version)
 {
 
-    Mantid::API::IAlgorithm_sptr alg;
-    try
-    {
-        alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+  Mantid::API::IAlgorithm_sptr alg;
+  try
+  {
+    alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
 
-    }
-    catch(...)
+  }
+  catch(...)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
+    return;
+  }
+  if (alg)
+  {
+    QString presets(""), enabled("");
+    //If a workspace is selected in the dock then set this as a preset for the dialog
+    QString selected = getSelectedWorkspaceName();
+    if( !selected.isEmpty() )
     {
-        QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
-        return;
+      QString property_name = findInputWorkspaceProperty(alg);
+      presets = "|" + property_name + "=" + selected + "|";
+      enabled = property_name + ",";
     }
-    if (alg)
+    //Check if a workspace is selected in the dock and set this as a preference for the input workspace
+    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
+
+    if( !dlg ) return;
+    if ( dlg->exec() == QDialog::Accepted)
     {
-      MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
-      if( !dlg ) return;
-      if ( dlg->exec() == QDialog::Accepted)
-      {
-	delete dlg;
-	executeAlgorithmAsync(alg);
-      }
-      else
-      {
-	delete dlg;
-      }
+      delete dlg;
+      executeAlgorithmAsync(alg);
     }
+    else
+    {
+      delete dlg;
+    }
+  }
 }
+
+/**
+ * Find the first input workspace for an algorithm
+ * @param algorithm A pointer to the algorithm instance
+ */
+QString MantidUI::findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const
+{
+  //Iterate through the properties and find the first input one
+  std::vector<Mantid::Kernel::Property*> props = algorithm->getProperties();
+  std::vector<Mantid::Kernel::Property*>::const_iterator pend = props.end();
+  for(std::vector<Mantid::Kernel::Property*>::const_iterator pitr = props.begin(); pitr != props.end(); ++pitr)
+  {
+    Mantid::Kernel::Property *base_prop = *pitr;
+    const Mantid::API::IWorkspaceProperty *ws_prop = dynamic_cast<Mantid::API::IWorkspaceProperty*>(base_prop);
+	  if(ws_prop)
+	  { 
+      unsigned int direction = base_prop->direction();
+      if (direction == Mantid::Kernel::Direction::Input || direction == Mantid::Kernel::Direction::InOut)
+      {
+        return QString::fromStdString(base_prop->name());
+      }
+    }
+  }
+  return QString();
+}
+
 void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedItems,std::vector<std::string> &inputWSVec)
 {
 	//iterate through each of the selected workspaces
