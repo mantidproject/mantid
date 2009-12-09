@@ -55,9 +55,6 @@ namespace Mantid
 		class EXPORT_OPT_MANTID_API FrameworkManagerImpl
 		{
 		public:
-			/// Creates all of the required services
-			//void initialize();
-
 			/// Clears all memory associated with the AlgorithmManager, ADS & IDS 
 			void clear();
 
@@ -67,7 +64,7 @@ namespace Mantid
 			/// Clear memory associated with the ADS
 			void clearData();
 
-			/// Clear memory associated with the ADS
+			/// Clear memory associated with the IDS
 			void clearInstruments();			
 
 			/// Creates and instance of an algorithm

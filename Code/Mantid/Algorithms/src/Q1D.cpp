@@ -83,7 +83,6 @@ void Q1D::exec()
   // A temporary vector to store intermediate Q values
   const int xLength = inputWS->readX(0).size();
   MantidVec Qx(xLength);
-  std::vector<double> widthsIn(xLength), widthsOut(sizeOut);
 
   for (int i = 0; i < numSpec; ++i)
   {
@@ -195,8 +194,6 @@ void Q1D::exec()
       xRange[1] = Qx.back();
       // Single element vector containing the solid angle
       MantidVec solidAngleVec(1, solidAngle);
-      // Create a temporary vector for the rebinned angles
-      MantidVec anglesTemp(anglesSum.size(),0.0);
 
       // Rebin the solid angles - note that this is a distribution
       VectorHelper::rebin(xRange,solidAngleVec,emptyVec,*XOut,anglesSum,EOutDummy,true,true);

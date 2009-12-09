@@ -415,10 +415,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\RebinPreserveValue.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\RebinToWorkspace.cpp"
 				>
 			</File>
@@ -866,14 +862,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\RealFFT.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\RebinPreserveValue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\RebinPreserveValueTest.h"
 				>
 			</File>
 			<File
