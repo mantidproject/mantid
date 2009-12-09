@@ -420,22 +420,23 @@ namespace CurveFitting
     }
 
     // set-up remaining GSL machinery to use simplex algorithm
+    // always set this algorithm up since in case levenberg-marquardt fail 
+    // then simplex is used as fall-back algorithm
 
     const gsl_multimin_fminimizer_type *simplexType = gsl_multimin_fminimizer_nmsimplex;
     gsl_multimin_fminimizer *simplexMinimizer = NULL;
     gsl_vector *simplexStepSize = NULL;
-    if (!isDerivDefined)
-    {
-      simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);
-      simplexStepSize = gsl_vector_alloc(l_data.p);
-      gsl_vector_set_all (simplexStepSize, 1.0);  // is this always a sensible starting step size?
-      gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
-    }
+    simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);
+    simplexStepSize = gsl_vector_alloc(l_data.p);
+    gsl_vector_set_all (simplexStepSize, 1.0);  // is this always a sensible starting step size?
+    gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
+    
 
     // finally do the fitting
 
     int iter = 0;
     int status;
+    bool simplexFallBack = false; // set to true if levenberg-marquardt fails
     double size; // for simplex algorithm
     double finalCostFuncVal;
     double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
@@ -459,7 +460,13 @@ namespace CurveFitting
         // status = GSL_ETOLF, which means cannot reach the specified tolerance in function value
         // We might interpret this as a success convergence for the linear case
         if (status)  
+        { 
+          simplexFallBack = true;
+          g_log.warning() << "Fit algorithm using Levenberg-Marquardt failed "
+            << "reporting the following: " << gsl_strerror(status) << "\n"
+            << "Try using Simplex method instead\n";
           break;
+        }
 
         status = gsl_multifit_test_delta(s->dx, s->x, 1e-4, 1e-4);
         //std::cout << "chi-out " << gsl_blas_dnrm2(s->f) << std::endl;
@@ -473,7 +480,7 @@ namespace CurveFitting
       for (size_t i = 0; i < nParams(); i++)
           m_function->setActiveParameter(i,gsl_vector_get(s->x,i));
     }
-    else
+    if (!isDerivDefined || simplexFallBack == true)
     {
       status = GSL_CONTINUE;
       while (status == GSL_CONTINUE && iter < maxInterations)
@@ -501,7 +508,15 @@ namespace CurveFitting
 
     std::string reportOfFit = gsl_strerror(status);
 
-    g_log.information() << "Iteration = " << iter << "\n" <<
+    std::string methodUsed;
+
+    if (isDerivDefined && simplexFallBack == false)
+      methodUsed = "Levenberg-Marquardt";
+    else
+      methodUsed = "Simplex";
+
+    g_log.information() << "Method used = " << methodUsed << "\n" <<
+      "Iteration = " << iter << "\n" <<
       "Status = " << reportOfFit << "\n" <<
       "Chi^2/DoF = " << finalCostFuncVal << "\n";
     for (int i = 0; i < m_function->nParams(); i++)
@@ -514,13 +529,16 @@ namespace CurveFitting
     setProperty("Output Chi^2/DoF", finalCostFuncVal);
 
 
+    // cleanup memory allocated for solvers
+
     if (isDerivDefined)
       gsl_multifit_fdfsolver_free(s);
-    else
-    {
-      gsl_vector_free(simplexStepSize);
-      gsl_multimin_fminimizer_free(simplexMinimizer);
-    }
+    
+    gsl_vector_free(simplexStepSize);
+    gsl_multimin_fminimizer_free(simplexMinimizer);
+    
+
+    // if Output property is specified output additional workspaces
 
     std::string output = getProperty("Output");
     if (!output.empty())

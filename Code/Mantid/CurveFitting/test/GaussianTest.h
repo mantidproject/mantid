@@ -169,6 +169,83 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 
+  void testAgainstHRPD_FallbackToSimplex()
+  {
+    // load dataset to test against
+    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", inputFile);
+    std::string outputSpace = "MAR_Dataset";
+    loader.setPropertyValue("OutputWorkspace", outputSpace);
+    loader.execute();
+
+
+    Fit alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace",outputSpace);
+    alg.setPropertyValue("WorkspaceIndex","2");
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
+
+    // create function you want to fit against
+    CompositeFunction *fnWithBk = new CompositeFunction();
+
+    LinearBackground *bk = new LinearBackground();
+    bk->initialize();
+
+    bk->getParameter("A0") = 0.0;
+    bk->getParameter("A1") = 0.0;
+    bk->removeActive(1);  
+    //bk->removeActive(1);
+
+    BoundaryConstraint* bc_b = new BoundaryConstraint("A0",0, 20.0);
+    bk->addConstraint(bc_b);
+
+    // set up Lorentzian fitting function
+    Gaussian* fn = new Gaussian();
+    fn->initialize();
+
+    fn->getParameter("Height") = 200.0;
+    fn->getParameter("PeakCentre") = 79450.0;
+    fn->getParameter("Sigma") = 300.0;
+
+    // add constraint to function
+    BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
+    BoundaryConstraint* bc2 = new BoundaryConstraint("PeakCentre",79200, 79700.0);
+    BoundaryConstraint* bc3 = new BoundaryConstraint("Sigma",20, 100.0);
+    fn->addConstraint(bc1);
+    //fn->addConstraint(bc2);
+    //fn->addConstraint(bc3);
+
+    fnWithBk->addFunction(bk);
+    fnWithBk->addFunction(fn);
+
+    alg.setFunction(fnWithBk);
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg.execute() )
+    )
+    TS_ASSERT( alg.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 5.1604,1);
+
+    TS_ASSERT_DELTA( fn->height(), 249.306 ,0.01);
+    TS_ASSERT_DELTA( fn->centre(), 79430 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 25.3066 ,0.01);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 7.86034 ,0.001);
+    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
+
+    AnalysisDataService::Instance().remove(outputSpace);
+  }
+
+
   void testAgainstMockData()
   {
     // create mock data to test against
