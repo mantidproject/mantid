@@ -4,7 +4,6 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "DllOption.h"
 #include "AlgorithmDialog.h"
 
 #include <QHash>
@@ -49,7 +48,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class EXPORT_OPT_MANTIDQT_API GenericDialog : public AlgorithmDialog
+class GenericDialog : public AlgorithmDialog
 {
   
   Q_OBJECT
