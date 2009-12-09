@@ -281,7 +281,6 @@ void Diagnostics::run()
   {// any exception that works its way passed here would cause QTiplot to suggest that it's shutdown, which I think would be uneccessary
     QMessageBox::critical(this, "", 
       QString("Exception \"") + QString(e.what()) + QString("\" encountered during execution"));
-    // the following commands 
   }
   Mantid::API::FrameworkManager::Instance().deleteWorkspace(test1.inputWS.toStdString());
   Mantid::API::FrameworkManager::Instance().deleteWorkspace(test2.inputWS.toStdString());
@@ -333,7 +332,7 @@ void Diagnostics::helpClicked()
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
     "Detector Efficiency Tests"));
 }
-/** Remove as file from the list, the file is specified using the QListWidgetItem
+/** Remove a file from the list, the file is specified using the QListWidgetItem
 * agruement or if no agruements are passed the file in the current row
 *  @param item an item in the lwRunFiles to remove
 */
@@ -719,30 +718,34 @@ void Diagnostics::readFile(const QString &pythonFile, QString &scriptText) const
 */
 ExcitationsDiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
 {
+  ExcitationsDiagResults::TestSummary returnVal;
+  returnVal.numBad = ExcitationsDiagResults::TestSummary::NORESULTS;
+
   QStringList results = pyhtonOut.split("\n");
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
-    QString Error = "Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
-    QMessageBox::critical(this, this->windowTitle(),
-      Error);
-    ExcitationsDiagResults::TestSummary temp = { Error, "", "", ExcitationsDiagResults::TestSummary::NORESULTS, "" };
-    return temp;
+    returnVal.test = "Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
+    QMessageBox::critical(this, this->windowTitle(), returnVal.test);
+    returnVal.status = "", returnVal.outputWS = "", returnVal.inputWS = "";
+    return returnVal;
   }
   // each script should return 7 strings
   if ( results.count() != 7 || results[0] != "success" )
   {// there was an error in the python, disregard these results
-    QString Error = "Error \"" + results[1] + "\" during " + results[2] + ", " + "more details may be found in the Mantid and python logs.";
-    QMessageBox::critical(this, this->windowTitle(),
-      Error);
-    ExcitationsDiagResults::TestSummary temp = { Error, "", "", ExcitationsDiagResults::TestSummary::NORESULTS, "" };
-    return temp;
+    returnVal.test = "Error \"" + results[1] + "\" during " + results[2] + ", " + "more details may be found in the Mantid and python logs.";
+    QMessageBox::critical(this, this->windowTitle(), returnVal.test);
+    returnVal.status = "", returnVal.outputWS = "", returnVal.inputWS = "";
+    return returnVal;
   }
+  //no errors, return the results
   std::string theBad = results[4].toStdString();
   
-  int numBad = boost::lexical_cast<int>(theBad);
-      // the format of the struct TestSummary { QString test; QString status; QString outputWS;  int numBad; QString inputWS;};
-  ExcitationsDiagResults::TestSummary temp = { results[1], results[2], results[3], numBad, results[5] };
-  return temp;
+  returnVal.test = results[1];
+  returnVal.status = results[2];
+  returnVal.outputWS = results[3];
+  returnVal.numBad = boost::lexical_cast<int>(theBad);
+  returnVal.inputWS = results[5];
+  return returnVal;
 }
 
 /** create and show a dialog box that reports the number of bad

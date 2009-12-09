@@ -38,7 +38,7 @@ try:#--Calculations Start---
   DeadList = detectorTest.SingleWBV( '_FindBadDetects WBV1', OUTPUTWS, \
     HIGHABSOLUTE, LOWABSOLUTE, HIGHMEDIAN, LOWMEDIAN, NUMBERRORBARS, OMASKFILE )
 
-  #--Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
+  #--Calculations End---the rest of this script is about outputing the data and dealing with errors and clearing up
  
 
   #--DeadList is a string of comma separated integers, this gets the number of integers

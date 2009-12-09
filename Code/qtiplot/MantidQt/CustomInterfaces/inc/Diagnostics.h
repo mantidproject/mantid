@@ -83,6 +83,7 @@ private slots:
   void browseClicked(const QString &buttonDis);
   void addFile();
   void removeName(QListWidgetItem *item = 0);
+  /// open the wiki page for this interface in their browser
   void helpClicked();
 
 protected:
