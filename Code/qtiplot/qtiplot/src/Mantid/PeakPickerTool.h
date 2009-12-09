@@ -154,9 +154,9 @@ private:
   int m_spec;
 
   bool m_init;      // Is the tool initialized?
-  bool m_peakInit;  // Has the first peak been added?
   int m_current;    // Index of the current peak
   bool m_width_set; // The width set flag
+  double m_width;   // The default width
   bool m_resetting; // The resetting flag
   double m_xMin;    // Lower fit boundary
   double m_xMax;    // Upper fit boundary

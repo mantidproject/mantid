@@ -423,34 +423,37 @@ void CompositeFunction::removeFunction(int i, bool del)
   }
 
   // Shift down the function indeces for parameters
-  for(std::vector<int>::iterator it=m_iFunction.begin();it!=m_iFunction.end();it++)
+  for(std::vector<int>::iterator it=m_iFunction.begin();it!=m_iFunction.end();)
   {
+
     if (*it == i)
     {
       it = m_iFunction.erase(it);
     }
-
-    if (it == m_iFunction.end()) break;
-
-    if (*it > i)
+    else
     {
-      *it -= 1;
+      if (*it > i)
+      {
+        *it -= 1;
+      }
+      it++;
     }
   }
 
   // Shift down the function indeces for active parameters
-  for(std::vector<int>::iterator it=m_iFunctionActive.begin();it!=m_iFunctionActive.end();it++)
+  for(std::vector<int>::iterator it=m_iFunctionActive.begin();it!=m_iFunctionActive.end();)
   {
     if (*it == i)
     {
       it = m_iFunctionActive.erase(it);
     }
-
-    if (it == m_iFunctionActive.end()) break;
-
-    if (*it > i)
+    else
     {
-      *it -= 1;
+      if (*it > i)
+      {
+        *it -= 1;
+      }
+      it++;
     }
   }
 

@@ -207,10 +207,25 @@ void FitPropertyBrowser::replaceFunction(int i,const std::string& fnName)
 void FitPropertyBrowser::removeFunction(int i)
 {
   if (i < 0 || i >= count()) return;
+  QtBrowserItem* fnItem = m_functionItems[i];
+  QList<QtProperty*> subs = fnItem->property()->subProperties();
+  for(int j=0;j<subs.size();j++)
+  {
+    fnItem->property()->removeSubProperty(subs[i]);
+    delete subs[j];
+  }
+  QtProperty* fnGroup = fnItem->parent()->property();
+  fnGroup->removeSubProperty(fnItem->property());
+  QList<QtProperty*> fns = fnGroup->subProperties();
+  for(int j = 0;j<fns.size();j++)
+  {
+    fns[j]->setPropertyName(functionName(j));
+  }
   m_compositeFunction->removeFunction(i);
   setIndex(index());
-  emit functionRemoved(i);
   setFocus();
+  m_functionItems.removeAt(i);
+  emit functionRemoved(i);
 }
 
 
@@ -342,8 +357,6 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
  */
 void FitPropertyBrowser::doubleChanged(QtProperty* prop)
 {
-  Mantid::API::IFunction* f = function();
-  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
   double value = m_doubleManager->value(prop);
   if (prop == m_startX )
   {
@@ -352,6 +365,27 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   else if (prop == m_endX )
   {
     emit endXChanged(endX());
+  }
+  else if(m_functionItems.size() > 0)
+  {
+    for(int i=0;i<m_functionItems.size();i++)
+    {
+      QtBrowserItem* fnItem = m_functionItems[i];
+      QList<QtProperty*> subs = fnItem->property()->subProperties();
+      Mantid::API::IFunction* f = m_compositeFunction->getFunction(i);
+      bool done = false;
+      for(int j=1;j<subs.size();j++)
+      {
+        if (subs[j] == prop)
+        {
+          f->parameter(j-1) = value;
+          done = true;
+          break;
+        }
+      }
+      if (done) break;
+    }
+    emit parameterChanged();
   }
 }
 /** Called when a string property changed
@@ -487,6 +521,11 @@ int FitPropertyBrowser::index()const
  */
 void FitPropertyBrowser::setIndex(int i)const
 {
+  if (count() == 0)
+  {
+    m_index = -1;
+    return;
+  }
   if (i < 0 || i >= count()) return;
   m_index = i;
   emit indexChanged(i);
@@ -498,6 +537,7 @@ void FitPropertyBrowser::setIndex(int i)const
  */
 void FitPropertyBrowser::selectFunction(int i)const
 {
+  setIndex(i);
   m_browser->setCurrentItem(m_functionItems[index()]);
 }
 
@@ -661,7 +701,7 @@ Mantid::API::IFunction* FitPropertyBrowser::function(int i)const
 Mantid::API::IPeakFunction* FitPropertyBrowser::peakFunction(int i)const
 {
   if (count() <= 0 || i < 0 || i >= count()) return 0;
-  return dynamic_cast<Mantid::API::IPeakFunction*>(function());
+  return dynamic_cast<Mantid::API::IPeakFunction*>(function(i));
 }
 
 /** Slot. Called to add a new function
@@ -684,20 +724,6 @@ void FitPropertyBrowser::deleteFunction()
 {
   int i = index();
   removeFunction(i);
-  QtBrowserItem* fnItem = m_functionItems[i];
-  QList<QtProperty*> subs = fnItem->property()->subProperties();
-  for(int i=0;i<subs.size();i++)
-  {
-    fnItem->property()->removeSubProperty(subs[i]);
-    delete subs[i];
-  }
-  QtProperty* fnGroup = fnItem->parent()->property();
-  fnGroup->removeSubProperty(fnItem->property());
-  QList<QtProperty*> fns = fnGroup->subProperties();
-  for(int i = 0;i<fns.size();i++)
-  {
-    fns[i]->setPropertyName(functionName(i));
-  }
 }
 
 QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* prop)const
@@ -723,5 +749,21 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
   if (i >= 0)
   {
     setIndex(i);
+  }
+}
+
+/// Update the function parameter properties
+void FitPropertyBrowser::updateParameters()
+{
+  for(int i=0;i<m_functionItems.size();i++)
+  {
+    QtBrowserItem* fnItem = m_functionItems[i];
+    QList<QtProperty*> subs = fnItem->property()->subProperties();
+    Mantid::API::IFunction* f = m_compositeFunction->getFunction(i);
+    for(int j=1;j<subs.size();j++)
+    {
+      double v = f->parameter(j-1);
+      m_doubleManager->setValue(subs[j],v);
+    }
   }
 }

@@ -75,6 +75,8 @@ public:
   Mantid::API::IPeakFunction* peakFunction()const{return peakFunction(index());}
   /// Select a function
   void selectFunction(int i)const;
+  /// Update the function parameters
+  void updateParameters();
 
   /// Create a new function
   void addFunction(const std::string& fnName);
@@ -127,6 +129,7 @@ signals:
   void functionChanged(const QString&);
   void startXChanged(double);
   void endXChanged(double);
+  void parameterChanged();
 
 private slots:
   void enumChanged(QtProperty* prop);

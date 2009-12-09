@@ -16,9 +16,8 @@
 PeakPickerTool::PeakPickerTool(Graph *graph, MantidUI *mantidUI) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
-m_mantidUI(mantidUI),m_wsName(),m_spec(),m_init(false),m_peakInit(false),m_current(-1),
-m_width_set(true),m_resetting(false),
-m_changingXMin(true),m_changingXMax(true),
+m_mantidUI(mantidUI),m_wsName(),m_spec(),m_init(false),m_current(-1),
+m_width_set(true),m_width(0),m_resetting(false),
 m_defaultPeakName("Gaussian")
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
@@ -57,7 +56,25 @@ m_defaultPeakName("Gaussian")
   connect(fitBrowser(),SIGNAL(algorithmFinished(const QString&)),this,SLOT(algorithmFinished(const QString&)));
   connect(fitBrowser(),SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
   connect(fitBrowser(),SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
+  connect(fitBrowser(),SIGNAL(parameterChanged()),d_graph->plotWidget(),SLOT(replot()));
   m_mantidUI->showFitPropertyBrowser();
+  if (fitBrowser()->count() == 0)
+  {
+    d_graph->setToolTip("Click and drag to set the fitting region");
+    m_changingXMin = true;
+    m_changingXMax = true;
+  }
+  else
+  {
+    m_init = true;
+    xMin(fitBrowser()->startX());
+    xMax(fitBrowser()->endX());
+    m_changingXMin = false;
+    m_changingXMax = false;
+    setCurrent(fitBrowser()->index());
+    attach(d_graph->plotWidget());
+    d_graph->plotWidget()->replot();
+  }
 }
 
 PeakPickerTool::~PeakPickerTool()
@@ -103,6 +120,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
           double c = centre();
           double w = d_graph->plotWidget()->invTransform(2,pnt.x()) - c;
           setWidth(2*fabs(w));
+          fitBrowser()->updateParameters();
           emit peakChanged();
         }
         else if (resetting())
@@ -110,10 +128,12 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
           double c = d_graph->plotWidget()->invTransform(2,pnt.x());
           double h = d_graph->plotWidget()->invTransform(0,pnt.y());
           setPeak(c,h);
+          fitBrowser()->updateParameters();
           emit peakChanged();
         }
         else if (changingXMin() && changingXMax())
         {// modify xMin and xMax at the same time 
+          d_graph->setToolTip("");
           double x = d_graph->plotWidget()->invTransform(2,pnt.x());
           double x0 = (xMin() + xMax())/2;
           double xmin,xmax;
@@ -173,18 +193,10 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             // x - axis is #2, y - is #0
             double c = d_graph->plotWidget()->invTransform(2,p.x());
             double h = d_graph->plotWidget()->invTransform(0,p.y());
-            if (m_peakInit)
-            {
-              addPeak(c,h);
-            }
-            else
-            {
-              setPeak(c,h);
-              setCurrent(0);
-              m_peakInit = true;
-            }
+            addPeak(c,h);
             emit peakChanged();
             d_graph->plotWidget()->replot();
+            fitBrowser()->updateParameters();
           }
           else // No shift button
           {
@@ -215,8 +227,9 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             }
             else if (ic >= 0)
             {// select current, begin changing centre and height
-              setCurrent(ic);
-              d_graph->plotWidget()->replot();
+              //setCurrent(ic);
+              fitBrowser()->selectFunction(ic);
+              //d_graph->plotWidget()->replot();
               resetting(true);
               emit peakChanged();
             }
@@ -224,6 +237,8 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
         }
         return true;
       }
+
+//d_graph->plotWidget()->replot();
 
       // Mouse button up - stop all changes
     case QEvent::MouseButtonRelease:
@@ -267,7 +282,7 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
 {
   try
   {
-    if (m_compositeFunction && m_peakInit)
+    if (m_compositeFunction)
     {
       for(int iFun=0;iFun < m_compositeFunction->nFunctions();iFun++)
       {
@@ -335,6 +350,7 @@ void PeakPickerTool::addPeak(double c,double h)
   fitBrowser()->addFunction(fnName);
   fitBrowser()->setCentre(c);
   fitBrowser()->setHeight(h);
+  fitBrowser()->setWidth(m_width);
   setCurrent(fitBrowser()->index());
 }
 
@@ -372,7 +388,7 @@ double PeakPickerTool::height()const
 // Change the width of the currently selected peak
 void PeakPickerTool::setWidth(double x)
 {
-  //  m_width = x;
+    m_width = x;
   if (m_current>=0)
     fitBrowser()->setWidth(x);
 }
@@ -403,8 +419,14 @@ bool PeakPickerTool::clickedOnWidthMarker(double x,double dx)
 // Check if x is near a peak centre marker (+-dx). If true returns the peak's index or -1 otherwise.
 int PeakPickerTool::clickedOnCentreMarker(double x,double dx)
 {
-  //for(int i=0;i<m_params.size();i++)
-  //  if (fabs(x - m_params[i].centre) <= dx) return i;
+  for(int i=0;i<fitBrowser()->count();i++)
+  {
+    Mantid::API::IPeakFunction* pf = fitBrowser()->peakFunction(i);
+    if (pf && fabs(x - pf->centre()) <= dx)
+    {
+      return i;
+    }
+  }
   return -1;
 }
 
