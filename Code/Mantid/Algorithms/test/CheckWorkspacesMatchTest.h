@@ -20,8 +20,6 @@ public:
     loader.setPropertyValue("Filename", "../../../../Test/Data/LOQ48127.raw");
     loader.setPropertyValue("OutputWorkspace", loq);
     loader.execute();
-    
-//    ws1 = WorkspaceCreationHelper::Create2DWorkspace(2,2);    
   }
   
   void testName()

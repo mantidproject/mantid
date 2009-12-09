@@ -65,7 +65,8 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
 
   // Copy over certain parent data members
   ws->setTitle(parent->getTitle());
-  ws->setInstrument(parent->getInstrument());
+  ws->setComment(parent->getComment());
+  ws->setInstrument(parent->getInstrument());  // This call also copies the parameter map
   ws->m_spectramap = parent->m_spectramap;
   ws->setSample(parent->getSample());
   ws->setYUnit(parent->m_YUnit);

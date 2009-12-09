@@ -109,8 +109,7 @@ void CropWorkspace::exec()
           outputWorkspace->maskBin(j,maskIndex-m_minX,(*it).second);
       }
     }
-	//progress(double(i/(m_maxSpec+1)));
-	prog.report();
+    prog.report();
   }
 
   setProperty("OutputWorkspace", outputWorkspace);
