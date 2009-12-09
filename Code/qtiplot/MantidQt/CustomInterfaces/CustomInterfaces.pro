@@ -11,8 +11,10 @@ unix:system(mkdir '"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"')
 win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtCustomInterfaces"')
 
 # Need to link with the API
-unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI -lMantidWidgets
-win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib" 
+unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI
+#-lMantidWidgets
+win32:LIBS += "$$DESTDIR\MantidQtAPI.lib"
+# "$$DESTDIR\MantidWidgets.lib" 
 
 #------------------------
 # Source fies
