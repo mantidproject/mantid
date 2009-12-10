@@ -45,7 +45,7 @@ void Gaussian::functionDeriv(Jacobian* out, const double* xValues, const int& nD
         double e = exp(-0.5*diff*diff*weight);
         out->set(i,0, e);
         out->set(i,1, diff*height*e*weight);
-        out->set(i,2, -0.5*diff*diff*height*e);
+        out->set(i,2, -0.5*diff*diff*height*e);  // derivative with respect to weight not sigma
     }
 }
 
@@ -55,13 +55,14 @@ void Gaussian::calJacobianForCovariance(Jacobian* out, const double* xValues, co
     const double& peakCentre = getParameter("PeakCentre");
     const double& sigma = getParameter("Sigma");
 
+    double weight = 1/(sigma*sigma);
+
     for (int i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;
-        double weight = 1/(sigma*sigma);
         double e = exp(-0.5*diff*diff*weight);
         out->set(i,0, e);
         out->set(i,1, diff*height*e*weight);
-        out->set(i,2, diff*diff*height*e/(sigma*sigma*sigma));
+        out->set(i,2, diff*diff*height*e/(sigma*sigma*sigma));  // note this is derivative with respect to sigma not weight
     }
 }
 

@@ -428,7 +428,7 @@ namespace CurveFitting
     gsl_vector *simplexStepSize = NULL;
     simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);
     simplexStepSize = gsl_vector_alloc(l_data.p);
-    gsl_vector_set_all (simplexStepSize, 1.0);  // is this always a sensible starting step size?
+    gsl_vector_set_all (simplexStepSize, 1);  // is this always a sensible starting step size?
     gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
     
 
@@ -451,25 +451,25 @@ namespace CurveFitting
         iter++;
         status = gsl_multifit_fdfsolver_iterate(s);
 
-        //std::cout << "status " << gsl_strerror(status) << " number " << status << std::endl;
-        //for (size_t i = 0; i < m_fittedParameter.size(); i++)
-        //  std::cout << m_function->nameOfActive(i) << " = " << gsl_vector_get(s->x,i) << "  \n";
-
-        // break if not status success
-        // Note that if fitting to linear function you might get that
-        // status = GSL_ETOLF, which means cannot reach the specified tolerance in function value
-        // We might interpret this as a success convergence for the linear case
+        // break if status is not success
         if (status)  
         { 
-          simplexFallBack = true;
-          g_log.warning() << "Fit algorithm using Levenberg-Marquardt failed "
-            << "reporting the following: " << gsl_strerror(status) << "\n"
-            << "Try using Simplex method instead\n";
+          // From experience it is found that gsl_multifit_fdfsolver_iterate occasionally get
+          // stock - even after having achieved a sensible fit. This seem in particular to be a
+          // problem on Linux. For now only fall back to Simplex if iter = 1 or 2, i.e.   
+          // gsl_multifit_fdfsolver_iterate has failed on the first or second hurdle
+          if (iter < 3)
+          {
+            simplexFallBack = true;
+            iter = 0;
+            g_log.warning() << "Fit algorithm using Levenberg-Marquardt failed "
+              << "reporting the following: " << gsl_strerror(status) << "\n"
+              << "Try using Simplex method instead\n";
+          }
           break;
         }
 
         status = gsl_multifit_test_delta(s->dx, s->x, 1e-4, 1e-4);
-        //std::cout << "chi-out " << gsl_blas_dnrm2(s->f) << std::endl;
         prog.report();
       }
 
@@ -489,7 +489,19 @@ namespace CurveFitting
         status = gsl_multimin_fminimizer_iterate(simplexMinimizer);
 
         if (status)  // break if error
+        {
+          // if failed at first iteration try reducing the initial step size
+          if (iter == 1)
+          { 
+            g_log.information() << "Simplex step size reduced to 0.1\n";
+            gsl_vector_set_all (simplexStepSize, 0.1);
+            gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
+            //iter = 0;
+            status = GSL_CONTINUE;
+            continue;
+          }
           break;
+        }
 
         size = gsl_multimin_fminimizer_size(simplexMinimizer);
         status = gsl_multimin_test_size(size, 1e-2);

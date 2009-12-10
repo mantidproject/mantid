@@ -20,6 +20,20 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
 
+// Algorithm to force Simplex to run
+class SimplexBackToBackExponential : public BackToBackExponential
+{
+public:
+  virtual ~SimplexBackToBackExponential() {}
+
+protected:
+  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  {
+    throw Exception::NotImplementedError("No derivative function provided");
+  }
+};
+
+
 
 class BackToBackExponentialTest : public CxxTest::TestSuite
 {
@@ -29,7 +43,7 @@ public:
   {
   }
 
-  void xtestAgainstHRPDdataPeak()
+  void testAgainstHRPDdataPeak()
   {
     // load dataset
     std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
@@ -90,6 +104,70 @@ public:
 
     TS_ASSERT_DELTA( bk->getParameter("A0"), 7.88 ,0.1);
   }
+
+
+  void testAgainstHRPDdataPeakSimplex()
+  {
+    // load dataset
+    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", inputFile);
+    std::string outputSpace = "HRP38692";
+    loader.setPropertyValue("OutputWorkspace", outputSpace);
+    loader.execute();
+
+    // Setup Fit algorithm
+    Fit alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
+    alg.setPropertyValue("InputWorkspace",outputSpace);
+    alg.setPropertyValue("WorkspaceIndex","2");
+    alg.setPropertyValue("StartX","79280"); 
+    alg.setPropertyValue("EndX","79615");   
+
+    // create function you want to fit against
+    CompositeFunction *fnWithBk = new CompositeFunction();
+
+    LinearBackground *bk = new LinearBackground();
+    bk->initialize();
+
+    bk->getParameter("A0") = 8.0;
+    bk->getParameter("A1") = 0.0;
+    bk->removeActive(1);    
+
+    SimplexBackToBackExponential* fn = new SimplexBackToBackExponential();
+    fn->initialize();
+
+    fn->getParameter("I") = 297.0;
+    fn->getParameter("A") = 2.0;
+    fn->getParameter("B") = 0.03;
+    fn->getParameter("X0") = 79400.0;
+    fn->getParameter("S") = 8.0;
+
+    fnWithBk->addFunction(fn);
+    fnWithBk->addFunction(bk);
+
+    alg.setFunction(fnWithBk);
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING( alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    // did you get what you expected
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 1.523,0.1);
+
+    TS_ASSERT_DELTA( fn->getParameter("I"), 291.481 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("A"), 1.5856 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("B"), 0.03 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("X0"), 79404.77 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("S"), 17.4257 ,0.1);
+
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 6.08 ,0.1);
+  }
+
 
 };
 
