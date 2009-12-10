@@ -620,7 +620,7 @@ void PeakPickerTool::addPeak()
   int i = fitBrowser()->registeredPeaks().indexOf(QString::fromStdString(m_defaultPeakName));
   bool ok = false;
   QString fnName = 
-    QInputDialog::getItem(m_mantidUI->appWindow(), "MantidPlot - Fit", "Select function type", fitBrowser()->registeredPeaks(),i,false,&ok);
+    QInputDialog::getItem(m_mantidUI->appWindow(), "MantidPlot - Fit", "Select peak type", fitBrowser()->registeredPeaks(),i,false,&ok);
   if (ok)
   {
     m_defaultPeakName = fnName.toStdString();
@@ -667,6 +667,14 @@ void PeakPickerTool::fit()
  */
 void PeakPickerTool::addBackground()
 {
+  bool ok = false;
+  QString fnName = 
+    QInputDialog::getItem(m_mantidUI->appWindow(), "MantidPlot - Fit", "Select background type", 
+         fitBrowser()->registeredBackgrounds(),0,false,&ok);
+  if (ok)
+  {
+    fitBrowser()->addFunction(fnName.toStdString());
+  }
 }
 
 /**

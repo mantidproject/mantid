@@ -113,7 +113,7 @@ private:
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
   void addPeak(double c,double h);
-  void PeakPickerTool::addPeakAt(int x,int y);
+  void addPeakAt(int x,int y);
   // Return the centre of the currently selected peak
   double centre()const;
   // Return the width of the currently selected peak

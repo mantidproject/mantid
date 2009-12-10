@@ -927,6 +927,11 @@ void FitPropertyBrowser::getFitResults()
         std::string name;
         double value;
         row >> name >> value;
+        // In case of a single function Fit doesn't create a CompositeFunction
+        if (count() == 1)
+        {
+          name.insert(0,"f0.");
+        }
         compositeFunction()->getParameter(name) = value;
       }
       while(row.next());
