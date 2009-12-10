@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CloneWorkspace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\CommutativeBinaryOperation.cpp"
 				>
 			</File>
@@ -514,6 +518,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\CheckWorkspacesMatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\CloneWorkspace.h"
 				>
 			</File>
 			<File
