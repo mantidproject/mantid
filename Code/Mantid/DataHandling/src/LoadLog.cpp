@@ -138,11 +138,10 @@ void LoadLog::exec()
     }
 	/// check for alternate data stream exists for raw file
 	/// if exists open the stream and read  log files name  from ADS
-	if(adsExists())
-		potentialLogFiles=getLogfilenamesfromADS();
+	if(adsExists())potentialLogFiles=getLogfilenamesfromADS();
+
 	else
 	{
-
 		// look for log files in the directory of the raw datafile
 		std::string pattern(l_rawID + "_*.txt");
 		Poco::Path dir(m_filename);
@@ -359,7 +358,6 @@ bool LoadLog::adsExists()
 	if(!adstream)
 	{return false;
 	}
-	g_log.debug()<<"alternate data stream exists for this raw file "<<std::endl;
 	return true;
 }
 /* this method reads  the checksum ADS associated with the
@@ -396,6 +394,8 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
 		if(pos==std::string::npos)
 			continue;
         logFile=path+"\\"+fileName;
+		if(logFile.empty())
+			continue;
 		logfilesList.insert(logFile);
 	}
 	return logfilesList;
