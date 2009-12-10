@@ -190,6 +190,8 @@ Kernel::Property* LogParser::createLogProperty(const std::string& logFName, cons
     // extracts all EOL characters
     while(Mantid::API::extractToEOL(file,str))
     {
+		if(str[0]=='#')
+		{continue;}
       if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) 
       {
             //if the line doesn't start with a time treat it as a continuation of the previous data

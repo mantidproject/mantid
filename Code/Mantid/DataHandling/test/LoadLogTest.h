@@ -197,7 +197,7 @@ public:
 
 void testExecWiththreecolumnLogfile()
   {
-      FrameworkManager::Instance();
+	 FrameworkManager::Instance();
     //if ( !loader.isInitialized() ) loader.initialize();
 
     LoadLog loaderRawFile;
@@ -252,6 +252,76 @@ void testExecWiththreecolumnLogfile()
 	
 	    
   }
+void testloadlogwithalternatedatastream()
+  {
+      FrameworkManager::Instance();
+    //if ( !loader.isInitialized() ) loader.initialize();
+
+    LoadLog loaderRawFile;
+    loaderRawFile.initialize();
+
+	  // Path to test input file assumes Test directory checked out from SVN
+    loaderRawFile.setPropertyValue("Filename", "../../../../Test/Data/OFFSPEC00004622.raw");
+    inputFile = loaderRawFile.getPropertyValue("Filename");
+    
+    outputSpace = "ads_datafile";
+    // Create an empty workspace and put it in the AnalysisDataService
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(outputSpace, ws));    
+    loaderRawFile.setPropertyValue("Workspace", outputSpace);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderRawFile.getPropertyValue("Workspace") )
+
+    TS_ASSERT( ! result.compare(outputSpace));
+
+
+	  TS_ASSERT_THROWS_NOTHING(loaderRawFile.execute());    
+
+    TS_ASSERT( loaderRawFile.isExecuted() );    
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
+   
+    boost::shared_ptr<Sample> sample = output->getSample(); 
+
+    // obtain the expected log files which should be in the same directory as the raw datafile
+
+    Property *l_property = sample->getLogData( std::string("ICPevent") );
+    TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
+    std::string timeSeriesString = l_timeSeriesString->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,36), "2009-Nov-11 11:25:57   CHANGE_PERIOD" );
+
+    Property* string_property = sample->getLogData( std::string("RF1Ampon") );
+	TimeSeriesProperty<std::string> *l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
+	std::map<dateAndTime, std::string> vmap=l_timeSeriesString1->valueAsMap();
+	std::map<dateAndTime, std::string>::const_iterator itr;
+	for(itr=vmap.begin();itr!=vmap.end();++itr)
+	{TS_ASSERT_EQUALS( itr->second, "False" );
+	}
+
+	string_property = sample->getLogData( std::string("ShutterStatus") );
+	l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
+	std::map<dateAndTime, std::string> vmap1=l_timeSeriesString1->valueAsMap();
+	for(itr=vmap1.begin();itr!=vmap1.end();++itr)
+	{TS_ASSERT_EQUALS( itr->second, "OPEN" );
+	}
+    
+	 Property* double_property = sample->getLogData( std::string("b2v2") );
+	TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(double_property);
+	std::map<dateAndTime,double> vmapb2v2=l_timeSeriesDouble1->valueAsMap();
+	std::map<dateAndTime,double>::const_iterator vmapb2v2itr;
+	for(vmapb2v2itr=vmapb2v2.begin();vmapb2v2itr!=vmapb2v2.end();++vmapb2v2itr)
+	{TS_ASSERT_EQUALS( vmapb2v2itr->second, -0.004 );}
+
+    
+  }
+
   
 private:
   LoadLog loader;
