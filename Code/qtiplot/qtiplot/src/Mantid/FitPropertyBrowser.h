@@ -19,6 +19,8 @@ class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 
+class QPushButton;
+
 class ApplicationWindow;
 
 namespace Mantid
@@ -45,6 +47,8 @@ class FitPropertyBrowser: public QDockWidget, public Mantid::API::AlgorithmObser
 public:
   /// Constructor
   FitPropertyBrowser(QWidget* parent);
+  /// Destructor
+  ~FitPropertyBrowser();
   /// Centre of the current peak
   double centre()const;
   /// Set centre of the current peak
@@ -94,6 +98,8 @@ public:
   QString functionName()const{return functionName(index());}
   /// Get the default function name
   std::string defaultFunctionType()const;
+  /// Set the default function name
+  void setDefaultFunctionType(const std::string& fnType);
 
   /// Get the input workspace name
   std::string workspaceName()const;
@@ -117,8 +123,25 @@ public:
   /// Set the end X
   void setEndX(double);
 
+  /// Return a list of registered functions
+  const QStringList& registeredFunctions()const{return m_registeredFunctions;}
+  /// Return a list of registered peaks
+  const QStringList& registeredPeaks()const{return m_registeredPeaks;}
+  /// Return a list of registered backgrounds
+  const QStringList& registeredBackgrounds()const{return m_registeredBackgrounds;}
+
+  /// Tells if undo can be done
+  bool isUndoEnabled()const;
+  /// Returns true if the function is ready for a fit
+  bool isFitEnabled()const;
+
   void init();
   void reinit();
+
+public slots:
+  void fit();
+  void undoFit();
+  void clear();
 
 signals:
   void indexChanged(int i)const;
@@ -130,6 +153,7 @@ signals:
   void startXChanged(double);
   void endXChanged(double);
   void parameterChanged();
+  void functionCleared();
 
 private slots:
   void enumChanged(QtProperty* prop);
@@ -137,7 +161,6 @@ private slots:
   void intChanged(QtProperty* prop);
   void doubleChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
-  void fit();
   void workspace_added(const QString &, Mantid::API::Workspace_sptr);
   void workspace_removed(const QString &);
   void currentItemChanged(QtBrowserItem*);
@@ -160,6 +183,17 @@ private:
   void finishHandle(const Mantid::API::IAlgorithm* alg);
   /// Find QtBrowserItem for a property prop among the chidren of 
   QtBrowserItem* findItem(QtBrowserItem* parent,QtProperty* prop)const;
+  /// Set the parameters to the fit outcome
+  void getFitResults();
+  /// disable undo when the function changes
+  void disableUndo();
+  /// Enable/disable the Fit button;
+  void setFitEnabled(bool yes);
+
+  /// Button for doing fit
+  QPushButton* m_btnFit;
+  /// Button for undoing fit
+  QPushButton* m_btnUnFit;
 
   QtTreePropertyBrowser* m_browser;
   /// Property managers:
@@ -190,12 +224,17 @@ private:
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
+  /// A list of registered peaks
+  mutable QStringList m_registeredPeaks;
+  /// A list of registered backgrounds
+  mutable QStringList m_registeredBackgrounds;
   /// A list of available workspaces
   mutable QStringList m_workspaceNames;
 
   /// A copy of the edited function
-  //Mantid::API::IFunction* m_function;
   boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  /// To keep a copy of the initial parameters in case for undo fit
+  std::vector<double> m_initialParameters;
 
   /// Default function name
   std::string m_defaultFunction;
@@ -208,6 +247,9 @@ private:
 
   /// if true the output name will be guessed every time workspace name is changeed
   bool m_guessOutputName;
+
+  /// If false the change-slots (such as enumChanged(), doubleChanged()) are disabled
+  bool m_changeSlotsEnabled;
 
   ApplicationWindow* m_appWindow;
 

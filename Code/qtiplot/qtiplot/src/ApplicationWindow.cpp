@@ -8922,10 +8922,18 @@ void ApplicationWindow::showGraphContextMenu()
 		return;
 
 	QMenu cm(this);
+	Graph* ag = (Graph*)plot->activeGraph();
+  PlotToolInterface* tool = ag->activeTool();
+  if (dynamic_cast<PeakPickerTool*>(tool))
+  {
+    dynamic_cast<PeakPickerTool*>(tool)->prepareContextMenu(cm);
+    cm.exec(QCursor::pos());
+    return;
+  }
+
 	QMenu exports(this);
 	QMenu copy(this);
 	QMenu prints(this);
-	Graph* ag = (Graph*)plot->activeGraph();
 
 	if (ag->isPiePlot())
 		cm.insertItem(tr("Re&move Pie Curve"),ag, SLOT(removePie()));

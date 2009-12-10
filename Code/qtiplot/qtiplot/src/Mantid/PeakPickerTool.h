@@ -81,6 +81,8 @@ public:
   Graph* graph()const{return d_graph;}
   /// Set the default peak function
   void setDefaultPeakName(const std::string& fnName);
+  /// Prepare a context menu
+  void prepareContextMenu(QMenu& menu);
 
 public slots:
   void windowStateChanged( Qt::WindowStates oldState, Qt::WindowStates newState );
@@ -89,7 +91,7 @@ signals:
   void peakChanged();
 
 private slots:
-  void functionChanged();
+  void functionCleared();
   void indexChanged(int);
   void functionRemoved(int);
   void algorithmFinished(const QString&);
@@ -99,10 +101,19 @@ private slots:
   void startXChanged(double);
   void endXChanged(double);
 
+  void addPeak();
+  void addBackground();
+  void deletePeak();
+  void deleteFunction();
+  void fit();
+  void undoFit();
+  void clear();
+
 private:
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
   void addPeak(double c,double h);
+  void PeakPickerTool::addPeakAt(int x,int y);
   // Return the centre of the currently selected peak
   double centre()const;
   // Return the width of the currently selected peak
@@ -124,6 +135,8 @@ private:
   bool clickedOnWidthMarker(double x,double dx);
   // Check if x is near a peak centre marker (+-dx). If true returns the peak's index or -1 otherwise.
   int clickedOnCentreMarker(double x,double dx);
+  // Get the current peak index
+  int current()const{return m_current;}
   // Change current peak
   void setCurrent(int i);
   // Give new centre and height to the current peak
@@ -146,8 +159,6 @@ private:
   FitPropertyBrowser* fitBrowser()const;
   /// The parent application window
   MantidUI* m_mantidUI;
-  /// the fitting function
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
   /// Workspace name
   QString m_wsName;
   /// Spectrum index
@@ -157,7 +168,8 @@ private:
   int m_current;    // Index of the current peak
   bool m_width_set; // The width set flag
   double m_width;   // The default width
-  bool m_resetting; // The resetting flag
+  bool m_addingPeak;// The adding peak state flag
+  bool m_resetting; // The resetting state flag
   double m_xMin;    // Lower fit boundary
   double m_xMax;    // Upper fit boundary
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
