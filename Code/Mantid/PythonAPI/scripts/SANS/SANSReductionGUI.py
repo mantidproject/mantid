@@ -287,31 +287,17 @@ def Correct(sample_raw, trans_final, final_result, wav_start, wav_end, maskpt_rm
         
         ################################ Correction in Q space ############################
         # 1D
-	if CORRECTION_TYPE == '1D':
-		q_bins = str(Q1) + "," + str(DQ) + "," + str(Q2)
-		if FindingCentre == True:
-			# Convert to Q
-			ConvertUnits(tmpWS,tmpWS,"MomentumTransfer")
-			ConvertUnits(final_result,final_result,"MomentumTransfer")
-			# Need to mark the workspace as a distribution at this point to get next rebin right
-			ws = mantid.getMatrixWorkspace(tmpWS)
-			ws.isDistribution(True)
-			
-			# Rebin to desired Q bins
-			Rebin(final_result, final_result, q_bins)
-			# Calculate the solid angle corrections
-			solidangle_ws ="solidangle" 
-			SolidAngle(tmpWS,solidangle_ws)
-			RebinPreserveValue(solidangle_ws, solidangle_ws, q_bins)
-			Rebin(tmpWS, tmpWS, q_bins)
-			GroupIntoQuadrants(tmpWS, final_result, solidangle_ws, maskpt_rmin[0], maskpt_rmin[1])
-			return
-		else:
-			Q1D(tmpWS,final_result,final_result,q_bins,AccountForGravity=GRAVITY)
-        # 2D    
+        if CORRECTION_TYPE == '1D':
+            q_bins = str(Q1) + "," + str(DQ) + "," + str(Q2)
+            if FindingCentre == True:
+                GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], q_bins)
+                return
+            else:
+                Q1D(tmpWS,final_result,final_result,q_bins,AccountForGravity=GRAVITY)
+        # 2D
         else:
-		# Run 2D algorithm
-		Qxy(tmpWS, final_result, QXY2, DQXY)
+            # Run 2D algorithm
+            Qxy(tmpWS, final_result, QXY2, DQXY)
 
         mantid.deleteWorkspace(tmpWS)
         return
@@ -397,8 +383,8 @@ def WavRangeReduction(sample_setup, can_setup, wav_start, wav_end, FindingCentre
                 RenameWorkspace(final_workspace + '_3', 'Up')
                 RenameWorkspace(final_workspace + '_4', 'Down')
                 UnGroupWorkspace(final_workspace)
-                for i in range(1, 5):
-                        mantid.deleteWorkspace(can_setup[1] + '_' + str(i))
+                #for i in range(1, 5):
+                #        mantid.deleteWorkspace(can_setup[1] + '_' + str(i))
                 final_workspace = ''
                                 
         return final_workspace
@@ -415,40 +401,36 @@ ITER_NUM = 0
 RESIDUE_GRAPH = None
                 
 # Create a workspace with a quadrant value in it 
-def CreateQuadrant(reduced_ws, rawcount_ws, solidangle_ws, quadrant, xcentre, ycentre, output):
-	objxml = SANSUtility.QuadrantXML([xcentre, ycentre, 0.0], RMIN, RMAX, quadrant)
-	finddet = FindDetectorsInShape(reduced_ws, ShapeXML=objxml)
-	
-	GroupDetectors(reduced_ws, output, DetectorList = finddet.getPropertyValue("DetectorList"))
-	tmp = 'group_temp_workspace'
-	GroupDetectors(solidangle_ws, tmp, DetectorList = finddet.getPropertyValue("DetectorList"))
-	Divide(output, tmp, output)
-	GroupDetectors(rawcount_ws, tmp, DetectorList = finddet.getPropertyValue("DetectorList"))
-	PoissonErrors(output, tmp, output)
-	mtd.deleteWorkspace(tmp)
-	flag_value = -10.0
-	ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
-	if CORRECTION_TYPE == '1D':
-		SANSUtility.StripEndZeroes(output, flag_value)
-		
-		
-# Create 4 quadrants for the centre finding algorithm and return their names
-def GroupIntoQuadrants(reduced_ws, final_result, solidangle_ws, xcentre, ycentre):
-	tmp = 'quad_temp_holder'
-	pieces = ['Left', 'Right', 'Up', 'Down']
-	to_group = ''
-	counter = 0
-	for q in pieces:
-		counter += 1
-		to_group += final_result + '_' + str(counter) + ','
-		CreateQuadrant(reduced_ws, final_result, solidangle_ws, q, xcentre, ycentre, final_result + '_' + str(counter))
+def CreateQuadrant(reduced_ws, rawcount_ws, quadrant, xcentre, ycentre, q_bins, output):
+  # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
+  CloneWorkspace(reduced_ws,output)
+  objxml = SANSUtility.QuadrantXML([xcentre, ycentre, 0.0], RMIN, RMAX, quadrant)
+  # Mask out everything outside the quadrant of interest
+  MaskDetectorsInShape(output,objxml)
+  # Q1D ignores masked spectra/detectors. This is on the InputWorkspace, so we don't need masking of the InputForErrors workspace
+  Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=GRAVITY)
 
-	# We don't need these now 
-	mantid.deleteWorkspace(final_result)                    
-	mantid.deleteWorkspace(reduced_ws)
-	mantid.deleteWorkspace(solidangle_ws)
-	GroupWorkspaces(final_result, to_group.strip(','))
-		
+  flag_value = -10.0
+  ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
+  if CORRECTION_TYPE == '1D':
+    SANSUtility.StripEndZeroes(output, flag_value)
+
+# Create 4 quadrants for the centre finding algorithm and return their names
+def GroupIntoQuadrants(reduced_ws, final_result, xcentre, ycentre, q_bins):
+  tmp = 'quad_temp_holder'
+  pieces = ['Left', 'Right', 'Up', 'Down']
+  to_group = ''
+  counter = 0
+  for q in pieces:
+    counter += 1
+    to_group += final_result + '_' + str(counter) + ','
+    CreateQuadrant(reduced_ws, final_result, q, xcentre, ycentre, q_bins, final_result + '_' + str(counter))
+
+  # We don't need these now 
+  mantid.deleteWorkspace(final_result)                    
+  mantid.deleteWorkspace(reduced_ws)
+  GroupWorkspaces(final_result, to_group.strip(','))
+    
 # Calcluate the sum squared difference of the given workspaces. This assumes that a workspace with
 # one spectrum for each of the quadrants. The order should be L,R,U,D.
 def CalculateResidue():

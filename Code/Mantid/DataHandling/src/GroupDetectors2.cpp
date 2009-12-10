@@ -53,13 +53,13 @@ void GroupDetectors2::init()
     "A file that consists of lists of spectra numbers to group. See the help\n"
     "for the file format");
   declareProperty(new ArrayProperty<int>("SpectraList"),
-    "An array containing a list of the indexes of the spectra to combine\n"
+    "An array containing a list of the spectrum numbers to combine\n"
     "(DetectorList and WorkspaceIndexList are ignored if this is set)" );
   declareProperty(new ArrayProperty<int>("DetectorList"), 
-    "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
+    "An array of detector IDs to combine (WorkspaceIndexList is ignored if this is\n"
     "set)" );
   declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-    "An array of spectra indices to combine" );
+    "An array of workspace indices to combine" );
   declareProperty("KeepUngroupedSpectra",false,
     "If true ungrouped spectra will be copied to the output workspace\n"
     "and placed after the groups");

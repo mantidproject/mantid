@@ -81,7 +81,7 @@ namespace Mantid
 	  {
 	    is_dir = entry.isDirectory();
 	  }
-	  catch( Poco::FileNotFoundException &e)
+	  catch( Poco::FileNotFoundException )
 	  {
 	    continue;
 	  }

@@ -220,7 +220,7 @@ def QuadrantXML(centre,rmin,rmax,quadrant):
 	xmlstring += InfinitePlaneXML(p1id, centre, plane1Axis)
 	p2id = 'pl-b'
 	xmlstring += InfinitePlaneXML(p2id, centre, plane2Axis)
-	xmlstring += '<algebra val="(#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '"/>\n' 
+	xmlstring += '<algebra val="(#((#(' + cout_id + ':(#' + cin_id  + '))) ' + p1id + ' ' + p2id + '))"/>\n' 
 	return xmlstring
 
 def StripEndZeroes(workspace, flag_value = 0.0):
