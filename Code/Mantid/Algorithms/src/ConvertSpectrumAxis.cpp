@@ -68,7 +68,7 @@ void ConvertSpectrumAxis::exec()
   {
     try {
       IDetector_const_sptr det = inputWS->getDetector(i);
-      theta2indexMap.insert( std::make_pair( inputWS->detectorTwoTheta(det)*180.0/M_PI/2.0 , i ) );
+      theta2indexMap.insert( std::make_pair( inputWS->detectorTwoTheta(det)*180.0/M_PI , i ) );
     } catch(Exception::NotFoundError) {
       if (!warningGiven) g_log.warning("The instrument definition is incomplete - spectra dropped from output");
       warningGiven = true;

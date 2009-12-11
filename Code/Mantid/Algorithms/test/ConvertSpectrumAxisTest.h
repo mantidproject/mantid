@@ -73,8 +73,8 @@ public:
     TS_ASSERT( thetaAxis->isNumeric() )
     TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" )
     TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" )
-    TS_ASSERT_DELTA( (*thetaAxis)(0), 3.0875, 0.0001 )
-    TS_ASSERT_DELTA( (*thetaAxis)(1), 90.0, 0.0001 )
+    TS_ASSERT_DELTA( (*thetaAxis)(0), 6.1751, 0.0001 )
+    TS_ASSERT_DELTA( (*thetaAxis)(1), 180.0, 0.0001 )
     // Check axis is correct length
     TS_ASSERT_THROWS( (*thetaAxis)(2), Mantid::Kernel::Exception::IndexError )
 
