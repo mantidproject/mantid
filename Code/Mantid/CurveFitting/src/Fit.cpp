@@ -222,6 +222,7 @@ namespace CurveFitting
     gsl_set_error_handler_off();
 
     declareProperty("Output","","If not empty OutputParameters TableWorksace and OutputWorkspace will be created.");
+    declareProperty("Minimizer", "Levenberg-Marquardt", Direction::Input);
   }
 
 
@@ -231,7 +232,6 @@ namespace CurveFitting
   */
   void Fit::exec()
   {
-
     // Try to retrieve optional properties
     int histNumber = getProperty("WorkspaceIndex");
     const int maxInterations = getProperty("MaxIterations");
@@ -322,6 +322,20 @@ namespace CurveFitting
     {
       isDerivDefined = false;
     }
+
+    // For now only two minimizers allowed
+    std::string methodUsed = getProperty("Minimizer");
+    if ( methodUsed.compare("Levenberg-Marquardt") != 0 &&  
+      methodUsed.compare("Simplex") != 0 )
+    {
+      methodUsed = "Levenberg-Marquardt";
+      g_log.warning() << "Minimizer not recognised. Default to Levenberg-Marquardt\n";
+    }
+    if ( methodUsed.compare("Simplex") == 0)
+    {
+      isDerivDefined = false;
+    }
+
 
     // create and populate GSL data container warn user if l_data.n < l_data.p 
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
@@ -512,20 +526,16 @@ namespace CurveFitting
 
       // put final converged fitting values back into m_fittedParameter
       for (unsigned int i = 0; i < nParams(); i++)
-          //m_fittedParameter[i] = gsl_vector_get(simplexMinimizer->x,i);
-          m_function->setActiveParameter(i, gsl_vector_get(simplexMinimizer->x,i));
+        m_function->setActiveParameter(i, gsl_vector_get(simplexMinimizer->x,i));
     }
 
     // Output summary to log file
 
     std::string reportOfFit = gsl_strerror(status);
 
-    std::string methodUsed;
-
+    // if minimizer has been changed
     if (isDerivDefined && simplexFallBack == false)
       methodUsed = "Levenberg-Marquardt";
-    else
-      methodUsed = "Simplex";
 
     g_log.information() << "Method used = " << methodUsed << "\n" <<
       "Iteration = " << iter << "\n" <<
