@@ -222,7 +222,12 @@ namespace CurveFitting
     gsl_set_error_handler_off();
 
     declareProperty("Output","","If not empty OutputParameters TableWorksace and OutputWorkspace will be created.");
-    declareProperty("Minimizer", "Levenberg-Marquardt", Direction::Input);
+
+    std::vector<std::string> propOptions;
+    propOptions.push_back("Levenberg-Marquardt");
+    propOptions.push_back("Simplex");
+    declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(propOptions),
+      "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::Input);
   }
 
 
