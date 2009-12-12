@@ -235,6 +235,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LevenbergMarquardtMinimizer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Linear.cpp"
 				>
 			</File>
@@ -337,6 +341,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidCurveFitting\IFuncMinimizer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\IkedaCarpenterPV.h"
 				>
 			</File>
@@ -350,6 +358,10 @@
 			</File>
 			<File
 				RelativePath=".\test\IkedaCarpenterPVTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\LevenbergMarquardtMinimizer.h"
 				>
 			</File>
 			<File

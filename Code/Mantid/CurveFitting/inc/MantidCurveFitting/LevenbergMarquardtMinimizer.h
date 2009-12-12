@@ -1,21 +1,20 @@
-#ifndef MANTID_API_IPEAKFUNCTION_H_
-#define MANTID_API_IPEAKFUNCTION_H_
+#ifndef MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_
+#define MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/Function.h"
+#include "MantidCurveFitting/IFuncMinimizer.h"
 
 namespace Mantid
 {
-namespace API
+namespace CurveFitting
 {
-/** An interface to a peak function, which extend the interface of 
-    IFunctionWithLocation by adding methods to set and get peak width.
+/** Implementing Levenberg-Marquardt. Wrap the GSL implementation of this 
+    algorithm into using IFuncMinimizer interface.
 
-    @author Roman Tolchenov, Tessella Support Services plc
-    @date 16/10/2009
+    @author Anders Markvardsen, ISIS, RAL
+    @date 11/12/2009
 
     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
@@ -37,17 +36,20 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IPeakFunction : public IFunctionWithLocation
+class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 {
 public:
-  /// Returns the peak FWHM
-  virtual double width()const = 0;
+  /// Virtual destructor
+  virtual ~LevenbergMarquardtMinimizer(){}
 
-  /// Sets the parameters such that FWHM = w
-  virtual void setWidth(const double w) = 0;
+  /// Get name of minimizer
+  virtual std::string name()const;
+
+  /// Perform iteration with minimizer
+  virtual void iterate();
 };
 
-} // namespace API
+} // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_API_IPEAKFUNCTION_H_*/
+#endif /*MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_*/

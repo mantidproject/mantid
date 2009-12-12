@@ -1,21 +1,20 @@
-#ifndef MANTID_API_IPEAKFUNCTION_H_
-#define MANTID_API_IPEAKFUNCTION_H_
+#ifndef MANTID_CURVEFITTING_IFUNCMINIMIZER_H_
+#define MANTID_CURVEFITTING_IFUNCMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/Function.h"
+#include "MantidKernel/System.h"
+#include <string>
 
 namespace Mantid
 {
-namespace API
+namespace CurveFitting
 {
-/** An interface to a peak function, which extend the interface of 
-    IFunctionWithLocation by adding methods to set and get peak width.
+/** An interface for function minimizers.
 
-    @author Roman Tolchenov, Tessella Support Services plc
-    @date 16/10/2009
+    @author Anders Markvardsen, ISIS, RAL
+    @date 11/12/2009
 
     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
@@ -37,17 +36,17 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IPeakFunction : public IFunctionWithLocation
+class DLLExport IFuncMinimizer 
 {
 public:
-  /// Returns the peak FWHM
-  virtual double width()const = 0;
+  /// Get name of minimizer
+  virtual std::string name()const = 0;
 
-  /// Sets the parameters such that FWHM = w
-  virtual void setWidth(const double w) = 0;
+  /// Perform iteration with minimizer
+  virtual void iterate() = 0;
 };
 
-} // namespace API
+} // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_API_IPEAKFUNCTION_H_*/
+#endif /*MANTID_CURVEFITTING_IFUNCMINIMIZER_H_*/
