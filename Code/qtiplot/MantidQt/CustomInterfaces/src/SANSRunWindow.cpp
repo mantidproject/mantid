@@ -1268,8 +1268,6 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     "SampleThickness(" + m_uiForm.sample_thick->text() + ")\n"
     "SampleGeometry(" + m_uiForm.sample_geomid->currentText().at(0) + ")\n";
   
-  showInformationBox(exec_reduce);
-
   return exec_reduce;
 }
 
@@ -1660,7 +1658,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     {
       assign_fn = "AssignSample";
     }
-    assign_fn += "('" + run_number + "', reload=True)";
+    assign_fn += "('" + run_number + "')";
     QString run_info = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
     QString base_workspace = run_info.section(" ",0,0);
     logs = run_info.section(" ", 1);

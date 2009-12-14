@@ -230,8 +230,9 @@ _SAMPLE_RUN = ''
 def AssignSample(sample_run, reload = False):
     global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN
     _SAMPLE_RUN = sample_run
-    SCATTER_SAMPLE = _assignHelper(sample_run, False, reload)
-    _SAMPLE_SETUP = None
+    SCATTER_SAMPLE,reset = _assignHelper(sample_run, False, reload)
+    if reset == True:
+        _SAMPLE_SETUP = None
     if (INSTR_NAME == 'SANS2D' and sample_run != ''):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
@@ -259,8 +260,9 @@ _CAN_RUN = ''
 def AssignCan(can_run, reload = False):
     global SCATTER_CAN, _CAN_SETUP, _CAN_RUN
     _CAN_RUN = can_run
-    SCATTER_CAN = _assignHelper(can_run, False, reload)
-    _CAN_SETUP  = None
+    SCATTER_CAN ,reset= _assignHelper(can_run, False, reload)
+    if reset == True:
+        _CAN_SETUP  = None
     if (INSTR_NAME == 'SANS2D' and can_run != ''):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
@@ -304,8 +306,8 @@ def AssignCan(can_run, reload = False):
 ########################### 
 def TransmissionSample(sample, direct, reload = False):
     global TRANS_SAMPLE, DIRECT_SAMPLE
-    TRANS_SAMPLE = _assignHelper(sample, True, reload)
-    DIRECT_SAMPLE = _assignHelper(direct, True, reload)
+    TRANS_SAMPLE = _assignHelper(sample, True, reload)[0]
+    DIRECT_SAMPLE = _assignHelper(direct, True, reload)[0]
     return TRANS_SAMPLE, DIRECT_SAMPLE
 
 ########################## 
@@ -313,17 +315,17 @@ def TransmissionSample(sample, direct, reload = False):
 ########################## 
 def TransmissionCan(can, direct, reload = False):
     global TRANS_CAN, DIRECT_CAN
-    TRANS_CAN = _assignHelper(can, True, reload)
+    TRANS_CAN = _assignHelper(can, True, reload)[0]
     if direct == '' or direct == None:
         DIRECT_CAN = DIRECT_SAMPLE 
     else:
-        DIRECT_CAN = _assignHelper(direct, True, reload)
+        DIRECT_CAN = _assignHelper(direct, True, reload)[0]
     return TRANS_CAN, DIRECT_CAN
 
 # Helper function
 def _assignHelper(run_string, is_trans, reload = False):
     if run_string == '':
-        return ''
+        return '',True
     pieces = run_string.split('.')
     if len(pieces) != 2 :
          _fatalError("Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format")
@@ -336,7 +338,7 @@ def _assignHelper(run_string, is_trans, reload = False):
         wkspname =  run_no + '_sans_' + ext.lower()
 
     if reload == False and mtd.workspaceExists(wkspname):
-        return wkspname
+        return wkspname,False
 
     if INSTR_NAME == 'LOQ':
         field_width = 5
@@ -345,14 +347,14 @@ def _assignHelper(run_string, is_trans, reload = False):
         
     basename = INSTR_NAME + run_no.rjust(field_width, '0')
     if basename == INSTR_NAME + ''.rjust(field_width, '0'):
-        return ''
+        return '',True
     
     filename = os.path.join(DATA_PATH,basename)
     if is_trans:
         _loadRawData(filename, wkspname, ext, spec_max = 8)
     else:
         _loadRawData(filename, wkspname, ext)
-    return wkspname
+    return wkspname,True
 
 ##########################
 # Loader function
