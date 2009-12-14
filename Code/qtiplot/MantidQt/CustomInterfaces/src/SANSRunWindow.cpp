@@ -785,18 +785,15 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   }
 
   //LOQ
-  if( m_uiForm.inst_opt->currentIndex() == 0 )
+  if( m_uiForm.dist_mod_mon->text() != "-" )
   {
-    if( m_uiForm.dist_mod_mon->text() != "-" )
+    if( colour == "red" )
     {
-      if( colour == "red" )
-      {
-       m_uiForm.dist_mod_mon->setText("<font color='red'>error<font>");
-      }
-      else
-      {
+      m_uiForm.dist_mod_mon->setText("<font color='red'>error<font>");
+    }
+    else
+    {
       m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
-      }
     }
     setLOQGeometry(sample_workspace, 0);
     QString can = getWorkspaceName(1);
@@ -815,17 +812,15 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   }
   else
   {
-    if( m_uiForm.dist_mon_s2d->text() != "-" )
+    if( colour == "red" )
     {
-      if( colour == "red" )
-      {
-        m_uiForm.dist_mon_s2d->setText("<font color='red'>error<font>");
-      }
-      else
-      {
-        m_uiForm.dist_mon_s2d->setText(formatDouble(dist_mm, colour));
-      }
+      m_uiForm.dist_mon_s2d->setText("<font color='red'>error<font>");
     }
+    else
+    {
+      m_uiForm.dist_mon_s2d->setText(formatDouble(dist_mm, colour));
+    }
+
     //SANS2D - Sample
     setSANS2DGeometry(sample_workspace, sample_logs, 0);
     //Get the can workspace if there is one
@@ -1052,7 +1047,7 @@ void SANSRunWindow::forceDataReload(bool force)
  */
 bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_field)
 {
-  QString box_text = m_uiForm.userfile_edit->text();
+  QString box_text = file_field->text();
   QString start_path = box_text;
   if( box_text.isEmpty() )
   {
@@ -1060,7 +1055,7 @@ bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_fie
   }
   QString file_path = QFileDialog::getOpenFileName(this, box_title, start_path, "AllFiles (*.*)");    
   if( file_path.isEmpty() || QFileInfo(file_path).isDir() ) return false;
-  m_uiForm.csv_filename->setText(file_path);
+  file_field->setText(file_path);
   return true;
 }
 
