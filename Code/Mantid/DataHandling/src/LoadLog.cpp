@@ -460,19 +460,14 @@ std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::stri
 		line>>valuecolumn;
 		sdata=valuecolumn;
 
-		///column two in .log file is called block column
-		///if any .txt file with rawfilename_blockcolumn.txt exists
-		/// donot load that txt  files
-		/// blockFileNameList conatins the file names to be removed from potentiallogfiles list.
-		std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
-		/*pos=blockcolumnFileName.find("/");
-		while (pos!=std::string::npos)
-		{	blockcolumnFileName.replace(pos,1,"\\");
-		pos=blockcolumnFileName.find("/");
-		}*/
-		if(blockcolumnFileExists(blockcolumnFileName))
-		{	  blockFileNameList.insert(blockcolumnFileName);
-		}
+		/////column two in .log file is called block column
+		/////if any .txt file with rawfilename_blockcolumn.txt exists
+		///// donot load that txt  files
+		///// blockFileNameList conatins the file names to be removed from potentiallogfiles list.
+		//std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
+		//if(blockcolumnFileExists(blockcolumnFileName))
+		//{	  blockFileNameList.insert(blockcolumnFileName);
+		//}
 		propname=stringToLower(blockcolumn);
 		//check if the data is numeric
 		std::istringstream istr(valuecolumn);
@@ -480,18 +475,23 @@ std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::stri
 		istr >> dvalue;
 		isNumeric = !istr.fail();
 
+
 		if (isNumeric)
 		{				
 			std::map<std::string,Kernel::TimeSeriesProperty<double>*>::iterator ditr=dMap.find(propname);
 			if(ditr!=dMap.end())
 			{	Kernel::TimeSeriesProperty<double>* p=ditr->second;
 				if(p)p->addValue(timecolumn,dvalue);
-				dMap[propname]=p;
 			}
 			else
 			{	logd = new Kernel::TimeSeriesProperty<double>(propname);
 				logd->addValue(timecolumn,dvalue);
 				dMap[propname]=logd;
+				std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
+				if(blockcolumnFileExists(blockcolumnFileName))
+				{
+          blockFileNameList.insert(blockcolumnFileName);
+				}
 			}
 		}
 		else
@@ -500,13 +500,17 @@ std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::stri
 			if(sitr!=sMap.end())
 			{	Kernel::TimeSeriesProperty<std::string>* prop=sitr->second;
 			if(prop) prop->addValue(timecolumn,valuecolumn);
-		    	sMap[propname]=prop;
 			}
 			else
 			{	logs = new Kernel::TimeSeriesProperty<std::string>(propname);
 				logs->addValue(timecolumn,valuecolumn);
 				sMap[propname]=logs;}
-		}
+				std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
+				if(blockcolumnFileExists(blockcolumnFileName))
+				{
+          blockFileNameList.insert(blockcolumnFileName);
+				}
+    }
 	}
 	try
 	{
