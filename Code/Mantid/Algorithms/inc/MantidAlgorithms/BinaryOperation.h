@@ -7,6 +7,7 @@
 #include "MantidAPI/PairedGroupAlgorithm.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid
 {
@@ -45,6 +46,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
+    using API::Sample;
     class DLLExport BinaryOperation : public API::PairedGroupAlgorithm
     {
     public:
@@ -96,6 +98,14 @@ namespace Mantid
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
+      /** Only overridden by operations that affect the properties of the sample (e.g. Plus
+      *  where the proton currents (charges) are added). Otherwise it does nothing
+      *  @param lhs one of the workspaces to operate on
+      *  @param rhs the other workspace
+      *  @param ans the output workspace
+      */
+      virtual void operateOnSample(const boost::shared_ptr<Sample> lhs, const boost::shared_ptr<Sample> rhs, boost::shared_ptr<Sample> ans) const {};
+
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
       void doSingleSpectrum(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);

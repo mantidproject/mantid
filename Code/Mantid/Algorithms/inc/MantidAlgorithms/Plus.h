@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
+#include "MantidAPI/Sample.h"
 
 namespace Mantid
 {
@@ -63,6 +64,7 @@ namespace Mantid
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
       bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+      void operateOnSample(const boost::shared_ptr<Sample> lhs, const boost::shared_ptr<Sample> rhs, boost::shared_ptr<Sample> ans) const;
     };
 
   } // namespace Algorithm

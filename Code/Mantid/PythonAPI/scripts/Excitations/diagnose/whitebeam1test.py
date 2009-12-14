@@ -21,24 +21,31 @@ NUMBERRORBARS = '|SIGNIFICANCETEST|'
 OMASKFILE = '|OUTPUTFILE|'
 IMASKFILE = '|INPUTFILE|'
 
-if ( OMASKFILE != '' ) :
-    outfile=open(OMASKFILE, 'w')
-    outfile.write('--'+THISTEST+'--\n')
+hardMask = []
+try:
+  if ( IMASKFILE != '' ) :
+    hardMask = common.loadMask(IMASKFILE)
 	
-try:#--Calculations Start---
+  if ( OMASKFILE != '' ) :
+    outfile=open(OMASKFILE, 'w')
+    if hardMask.len() > 0:
+      outfile.write('--Hard Mask File List--\n')
+	  outfile.write(hardMask)
+    outfile.write('--'+THISTEST+'--\n')
+
+ #--Calculations Start---
+  if hardMask.len() > 0:
+    MaskDetectors(Workspace='_FindBadDetects WBV1', SpectraList=hardMask)
+
   #--Import the file and give it an obsure workspace name because we require that a workspace with that name doesn't exist and we'll remove it at the end
   LoadRaw(WBV1FILE, '_FindBadDetects WBV1')
   #--the integrated workspace will be much smaller so do this as soon as possible
   Integration('_FindBadDetects WBV1', '_FindBadDetects WBV1')
-  
-  if ( IMASKFILE != '' ) :
-    hardMask = common.loadMask(IMASKFILE)
-    MaskDetectors(Workspace='_FindBadDetects WBV1', SpectraList=hardMask)
-
+    
   DeadList = detectorTest.SingleWBV( '_FindBadDetects WBV1', OUTPUTWS, \
     HIGHABSOLUTE, LOWABSOLUTE, HIGHMEDIAN, LOWMEDIAN, NUMBERRORBARS, OMASKFILE )
 
-  #--Calculations End---the rest of this script is about outputing the data and dealing with errors and clearing up
+#--Calculations End---the rest of this script is about outputing the data and dealing with errors and clearing up
  
 
   #--DeadList is a string of comma separated integers, this gets the number of integers
@@ -58,13 +65,15 @@ try:#--Calculations Start---
   print numFound
   print '_FindBadDetects WBV1'
  
-#--Make sure that our tempory workspaces aren't left hanging around
+# Make sure that our tempory workspaces aren't left hanging around
 except Exception, reason:
   print 'Error'
   print 'Exception ', reason, ' caught'
   print THISTEST	
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == "_FindBadDetects WBV1") : mantid.deleteWorkspace("_FindBadDetects WBV1")
+  # the C++ that called this needs to look at the output from the print statements and deal with the fact that there was a problem
+
 #finally:
 #
 #  for workspace in mantid.getWorkspaceNames() :

@@ -48,5 +48,16 @@ namespace Mantid
       return BinaryOperation::checkCompatibility(lhs,rhs);
     }
 
+    /** Adds the integrated proton currents, proton charges, of the two input
+    *  workspaces together
+    *  @param lhs one of the workspace samples to be summed
+    *  @param rhs the other workspace sample to be summed
+    *  @param ans the sample in the output workspace
+    */
+    void Plus::operateOnSample(const boost::shared_ptr<Sample> lhs, const boost::shared_ptr<Sample> rhs, boost::shared_ptr<Sample> ans) const
+    {
+      ans->setProtonCharge( lhs->getProtonCharge() + rhs->getProtonCharge() );
+    }
+
   }
 }

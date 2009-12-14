@@ -1,3 +1,5 @@
+# Used by MantidPlot if the script in is in Code\Mantid\PythonAPI\scripts\Excitations make a
+# copy of the script if you want to change it or risk the MantidPlot interface not working
 ###########################################
 # applies unit conversion, detector efficiency and grouping correction to a
 # raw file and writes the result to a SPE file
@@ -27,7 +29,7 @@ try:#-now load the data and do the conversions
   LoadDetectorInfo(inOutWS, InSettings.getPropertyValue("RawFile"))
     
   ##this needs to depend on what the user selects
-  efficiency.NormaliseTo('monitor')
+  efficiency.NormaliseTo('monitor', inOutWS)
   
   #--mask detectors that have failed tests run previously
   badDets = []
@@ -39,8 +41,6 @@ try:#-now load the data and do the conversions
   ConvertUnits(inOutWS, inOutWS, "DeltaE", "Direct", IncidentE, 0)
 
   Rebin(inOutWS, inOutWS, InSettings.getPropertyValue("BinBoundaries"))
-  
-  efficiency.NormaliseToWhiteBeam(inOutWS, InSettings.getPropertyValue("WhiteBeamVan"), badDets)
   
   DetectorEfficiencyCor(inOutWS, inOutWS, IncidentE)  
     

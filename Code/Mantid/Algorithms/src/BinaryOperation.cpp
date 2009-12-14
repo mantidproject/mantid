@@ -65,6 +65,10 @@ namespace Mantid
       {
         out_work = WorkspaceFactory::Instance().create(lhs);
       }
+
+      // only overridden for some operations (plus and minus at the time of writing)
+      operateOnSample(lhs->getSample(), rhs->getSample(), out_work->getSample());
+
       // Initialise the progress reporting object
       m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms());
       

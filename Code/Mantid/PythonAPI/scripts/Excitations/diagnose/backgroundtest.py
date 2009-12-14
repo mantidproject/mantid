@@ -100,7 +100,7 @@ except Exception, reason:
   print THISTEST	
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == NORMA) : mantid.deleteWorkspace(NORMA)
-  raise
+  # the C++ that called this needs to look at the output from the print statements and deal with the fact that there was a problem
 finally:
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == TEMPBIG) : mantid.deleteWorkspace(TEMPBIG)
