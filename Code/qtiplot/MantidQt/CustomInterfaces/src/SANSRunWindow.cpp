@@ -240,9 +240,10 @@ void SANSRunWindow::readSettings()
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
   m_uiForm.datadir_edit->setText(value_store.value("data_dir").toString());
   m_uiForm.userfile_edit->setText(value_store.value("user_file").toString());
+  m_last_dir = value_store.value("last_dir", "").toString();
+
   m_uiForm.inst_opt->setCurrentIndex(value_store.value("instrument", 0).toInt());
   
-
   int mode_flag = value_store.value("runmode", 0).toInt();
   if( mode_flag == SANSRunWindow::SingleMode )
   {
@@ -282,6 +283,9 @@ void SANSRunWindow::saveSettings()
   {
     value_store.setValue("user_file", m_uiForm.userfile_edit->text());
   }
+
+  value_store.setValue("last_dir", m_last_dir);
+
   value_store.setValue("instrument", m_uiForm.inst_opt->currentIndex());
   value_store.setValue("fileextension", m_uiForm.file_opt->currentIndex());
   unsigned int mode_id(0);
@@ -324,73 +328,6 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
  txt.remove(0,1);
  txt.chop(1);
 }
-
-/**
- * Load the data reduction template for the LOQ analysis. It is
- * currently assumed that this resides in the SANS subdirectory
- * pointed to by the pythonscripts.directory config varibale in
- * Mantid.properties
- */
-bool SANSRunWindow::readPyReductionTemplate()
-{
-  /*QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
-  QString reduce_script = scriptsdir.absoluteFilePath("SANS/SANSReduction.py");
-    
-  if( !QFileInfo(reduce_script).exists() ) 
-  {
-    showInformationBox("Error: Unable to load template script, " + reduce_script + " does not exist");
-    return false;
-  }
-  
-  QFile py_script(reduce_script);
-  if( !py_script.open(QIODevice::ReadOnly) ) 
-  {
-    showInformationBox("Error: Unable to access template script, " + reduce_script);
-    return false;
-  }
-  QTextStream stream(&py_script);
-  m_pycode_loqreduce.clear();
-  while( !stream.atEnd() )
-  {
-    m_pycode_loqreduce.append(stream.readLine() + "\n");
-  }
-  py_script.close();*/
-  return true;
-}
-
-/**
- * Load the mask template script for LOQ. It is
- * currently assumed that this resides in the SANS subdirectory
- * pointed to by the pythonscripts.directory config varibale in
- * Mantid.properties
- */
-bool SANSRunWindow::readPyViewMaskTemplate()
-{
-  QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
-  QString mask_script = scriptsdir.absoluteFilePath("SANS/SANSViewMask.py");
-    
-  if( !QFileInfo(mask_script).exists() ) 
-  {
-    showInformationBox("Error: Unable to load template script, " + mask_script + " does not exist");
-    return false;
-  }
-  
-  QFile py_script(mask_script);
-  if( !py_script.open(QIODevice::ReadOnly) ) 
-  {
-    showInformationBox("Error: Unable to access template script, " + mask_script);
-    return false;
-  }
-  QTextStream stream(&py_script);
-  m_pycode_viewmask.clear();
-  while( !stream.atEnd() )
-  {
-    m_pycode_viewmask.append(stream.readLine() + "\n");
-  }
-  py_script.close();
-  return true;
-}
-
 
 /**
  * Load the user file specified in the text field
@@ -470,6 +407,27 @@ bool SANSRunWindow::loadUserFile()
   m_cfg_loaded = true;
   m_uiForm.userfileBtn->setText("Reload");
   m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
+  return true;
+}
+
+/**
+ * Load a CSV file specifying information run numbers and populate the batch mode grid
+ */
+bool SANSRunWindow::loadCSVFile()
+{
+  QString filename = m_uiForm.csv_filename->text(); 
+  QFile csv_file(filename);
+  if( !csv_file.open(QIODevice::ReadOnly | QIODevice::Text) )
+  {
+    showInformationBox("Error: Cannot open CSV file \"" + filename + "\"");
+    return false;
+  }
+  
+  QTextStream file_in(&csv_file);
+  while(!file_in.atEnd())
+  {
+    addBatchLine(file_in.readLine());
+  }
   return true;
 }
 
@@ -1017,10 +975,17 @@ void SANSRunWindow::selectUserFile()
  */
 void SANSRunWindow::selectCSVFile()
 {
-  if( !browseForFile("Select CSV file",m_uiForm.csv_filename) ) 
+  if( !browseForFile("Select CSV file",m_uiForm.csv_filename, "CSV files (*.csv)") )
   {
     return;
   }
+
+  if( !loadCSVFile() )
+  {
+    return;
+  }
+  //path() returns the directory
+  m_last_dir = QFileInfo(m_uiForm.csv_filename->text()).path();
 }
 
 /**
@@ -1044,9 +1009,10 @@ void SANSRunWindow::forceDataReload(bool force)
 /**
  * Browse for a file and set the text of the given edit box
  * @param box_title The title field for the display box
- * @param A QLineEdit box to use for the file path 
+ * @param A QLineEdit box to use for the file path
+ * @param file_filter An optional file filter
  */
-bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_field)
+bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_field, QString file_filter)
 {
   QString box_text = file_field->text();
   QString start_path = box_text;
@@ -1054,7 +1020,8 @@ bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_fie
   {
     start_path = m_last_dir;
   }
-  QString file_path = QFileDialog::getOpenFileName(this, box_title, start_path, "AllFiles (*.*)");    
+  file_filter += ";;AllFiles (*.*)";
+  QString file_path = QFileDialog::getOpenFileName(this, box_title, start_path, file_filter);    
   if( file_path.isEmpty() || QFileInfo(file_path).isDir() ) return false;
   file_field->setText(file_path);
   return true;
@@ -1658,7 +1625,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     {
       assign_fn = "AssignSample";
     }
-    assign_fn += "('" + run_number + "')";
+    assign_fn += "('" + run_number + "', reload = True)";
     QString run_info = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
     QString base_workspace = run_info.section(" ",0,0);
     logs = run_info.section(" ", 1);
@@ -1816,9 +1783,49 @@ void SANSRunWindow::cleanup()
   for( std::set<std::string>::const_iterator itr = workspaces.begin(); itr != iend; ++itr )
   {
     QString name = QString::fromStdString(*itr);
-    if( name.endsWith("_raw") || name.endsWith("_nexus"))
+    if( name.endsWith("_raw") || name.endsWith("_nxs"))
     {
       ads.remove(*itr);
     }
   }
+}
+
+/**
+ * Add a csv line to the batch grid
+ * @param csv_line Add a line of csv text to the grid 
+*/
+QString SANSRunWindow::addBatchLine(const QString & csv_line)
+{
+  //Insert new row
+  int row = m_uiForm.batch_table->rowCount();
+  m_uiForm.batch_table->insertRow(row);
+  QStringList elements = csv_line.split(",");
+  switch(elements.count())
+  {
+  case 20:
+  case 14:
+  case 8:
+  case 2:
+    break;
+  default:
+    return "Warning: Encountered line with " + QString::number(elements.count())  + " elements when batch line, skipping.";
+  }
+  QStringListIterator sitr(elements);
+  int column(0);
+  while( sitr.hasNext() )
+  {
+    //Skip the name column as we'll do it based on an order
+    sitr.next();
+    m_uiForm.batch_table->setItem(row, column, new QTableWidgetItem(sitr.next()));
+    ++column;
+    //Skip backgrounds for now
+    if( column == 6 )
+    {
+      for( int i = 0; i < 4; ++i )
+      {
+        sitr.next();
+      }
+    }
+  }
+  return QString();
 }
