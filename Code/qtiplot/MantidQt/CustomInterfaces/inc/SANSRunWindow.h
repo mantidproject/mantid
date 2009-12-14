@@ -71,12 +71,10 @@ private:
   QString runReduceScriptFunction(const QString & pycode);
   /// Trim python print markers
   void trimPyMarkers(QString & txt);
-  /// Read the Python template that will perform the data reduction
-  bool readPyReductionTemplate();
-  /// Read the Python template that allows a view of the current mask
-  bool readPyViewMaskTemplate();
   /// Load the user file specified in the text field
   bool loadUserFile();
+  /// Load a CSV file
+  bool loadCSVFile();
   /// Set limits step and type options
   void setLimitStepParameter(const QString & pname, QString param, QLineEdit* step_value,  QComboBox* step_type);
   ///Construct mask table
@@ -122,7 +120,9 @@ private:
   /// Flip the reload flag
   void forceDataReload(bool force = true);
   /// Browse for a file
-  bool browseForFile(const QString & box_title, QLineEdit* file_field);
+  bool browseForFile(const QString & box_title, QLineEdit* file_field, QString file_filter = QString());
+  /// Add a csv line to the batch grid
+  QString addBatchLine(const QString & csv_line);
   //@}
 
 private slots:

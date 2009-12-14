@@ -86,7 +86,7 @@
          <item>
           <widget class="QRadioButton" name="batch_mode_btn" >
            <property name="enabled" >
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text" >
             <string>Batch mode</string>
@@ -166,7 +166,7 @@
        <item>
         <widget class="QStackedWidget" name="mode_stack" >
          <property name="currentIndex" >
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page_5" >
           <layout class="QVBoxLayout" name="verticalLayout_9" >
@@ -879,7 +879,13 @@
             </spacer>
            </item>
            <item>
-            <widget class="QTableWidget" name="tableWidget" >
+            <widget class="QTableWidget" name="batch_table" >
+             <property name="editTriggers" >
+              <set>QAbstractItemView::NoEditTriggers</set>
+             </property>
+             <property name="selectionMode" >
+              <enum>QAbstractItemView::NoSelection</enum>
+             </property>
              <column>
               <property name="text" >
                <string>Sans Sample</string>
