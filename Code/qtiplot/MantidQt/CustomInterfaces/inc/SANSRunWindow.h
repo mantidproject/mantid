@@ -7,11 +7,8 @@
 #include "MantidQtCustomInterfaces/ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
-#include <QMap>
 #include <QHash>
-
 #include "Poco/NObserver.h"
-
 #include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid
@@ -20,6 +17,10 @@ namespace Mantid
   {
     class Logger;
   }
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
 }
 
 //---------------------------
@@ -27,6 +28,7 @@ namespace Mantid
 //---------------------------
 class QLineEdit;
 class QSignalMapper;
+class QLabel;
 
 namespace MantidQt
 {
@@ -52,27 +54,37 @@ signals:
   void dataReadyToProcess(bool state);
 
 private:
+  ///Mode enumeration
+  enum RunMode { SingleMode = 0, BatchMode };
   /// Initialize the layout
   virtual void initLayout();
 
   /**@name Utility functions */
   //@{
+  /// Create the necessary widget maps
+  void initWidgetMaps();
   ///Read previous settings
   void readSettings();
   ///Save settings
   void saveSettings();
+  /// Run a reduce function
+  QString runReduceScriptFunction(const QString & pycode);
+  /// Trim python print markers
+  void trimPyMarkers(QString & txt);
   /// Read the Python template that will perform the data reduction
   bool readPyReductionTemplate();
   /// Read the Python template that allows a view of the current mask
   bool readPyViewMaskTemplate();
   /// Load the user file specified in the text field
   bool loadUserFile();
+  /// Set limits step and type options
+  void setLimitStepParameter(const QString & pname, QString param, QLineEdit* step_value,  QComboBox* step_type);
+  ///Construct mask table
+  void updateMaskTable();
   /// Construct the reduction code from the Python script template
-  QString constructReductionCode(bool replacewsnames = true, bool checkchanges = true);
-  /// Read a limit line from the user file
-  void readLimits(const QString & com_line);
+  QString createAnalysisDetailsScript(const QString & type);
   /// Get the component distances
-  void componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb, double & lmm);
+  void componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb);
   /// Enable/disable user interaction
   void setProcessingState(bool running, int type);
   ///Check for workspace name in the AnalysisDataService
@@ -81,24 +93,36 @@ private:
   QStringList currentWorkspaceList() const;
   ///Is the user file loaded
   bool isUserFileLoaded() const;
-  ///Does the raw file exist
-  QString getRawFilePath(const QString & data_dir, const QString & run_no, const QString & ext) const;
   /// Create a mask string
-  void createMaskStrings(QString & spectramask, QString & timemask) const;
-  /// Setup the geometry details tab
-  void setupGeometryDetails();
-  /// Load the data by running the required Mantid algorithm
-  int runLoadData(const QString & work_dir, const QString & run_no, const QString & ext, const QString & workspace);
-  /// Parse a log information
-  QHash<QString, double> loadDetectorLogs(const QString & work_dir, const QString & run_no);
+  void addUserMaskStrings(QString & exec_script);
+  /// Set geometry details
+  void setGeometryDetails(const QString & sample_logs, const QString & can_logs);
+  /// Set the SANS2D geometry
+  void setSANS2DGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, const QString & logs, int wscode);
+  /// Set LOQ geometry
+  void setLOQGeometry(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, int wscode);
+  /// Mark an error on a label
+  void markError(QLabel* label);
+  /// Run an assign command
+  bool runAssign(int key, QString & logs);
+  /// Get number of periods
+  bool setNumberPeriods(int key, const QString & workspace_name);
+  /// Get the workspace name for the given lineedit's key
+  QString getWorkspaceName(int key);
   /// Handle a delete notification from Mantid
   void handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf);
   // Format a double in a string with a specfied colour, format and precision
-  QString formatDouble(double value, char format, int precision, const QString & colour);
+  QString formatDouble(double value, const QString & colour = "black", char format = 'f', int precision = 3);
+  /// Issue a warning 
+  void raiseOneTimeMessage(const QString & msg);
   /// Reset the geometry box to blank
   void resetGeometryDetailsBox();
   ///Cleanup old raw files
   void cleanup();
+  /// Flip the reload flag
+  void forceDataReload(bool force = true);
+  /// Browse for a file
+  bool browseForFile(const QString & box_title, QLineEdit* file_field);
   //@}
 
 private slots:
@@ -107,9 +131,12 @@ private slots:
 
   /// Select the user file
   void selectUserFile();
+  
+  /// Select a CSV file
+  void selectCSVFile();
 
-  /// Flip the reload flag
-  void forceDataReload(bool force = true);
+  /// A run number has changed
+  void runChanged();
   
   /// Receive a load button click
   bool handleLoadButtonClick();
@@ -141,6 +168,9 @@ private slots:
   /// Update the centre finding progress
   void updateCentreFindingStatus(const QString & msg);
 
+  /// Switch mode
+  void switchMode(int mode_id);
+
 private:
   /// The form generated by Qt Designer
   Ui::SANSRunWindow m_uiForm;
@@ -158,7 +188,7 @@ private:
   bool m_cfg_loaded;
   
   /// A map for quickly retrieving the different line edits
-  QMap<int, QLineEdit*> m_run_no_boxes;
+  QHash<int, QLineEdit*> m_run_no_boxes;
 
   /// A hash for quickly retrieving the different label fields
   QHash<int, QLabel*> m_period_lbls;
@@ -166,17 +196,14 @@ private:
   /// A list of the full workspace names
   QHash<int, QString> m_workspace_names;
 
-  /// The template to perform the LOQ data reduction
-  QString m_pycode_loqreduce;
-
   // The template to view the current mask
   QString m_pycode_viewmask;
 
   // A signal mapper to pick up various button clicks
   QSignalMapper *m_reducemapper;
 
-  // A flag to mark that a data reload is necessary
-  bool m_run_changed;
+  // A flag to mark that warnings have been issued
+  bool m_warnings_issued;
 
   // A flag that causes the reload of the data
   bool m_force_reload;
@@ -184,14 +211,19 @@ private:
   // An observer for a delete notification from Mantid
   Poco::NObserver<SANSRunWindow, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
 
-  // A store of the log values for the sample run
-  QHash<QString, double> m_logvalues;
-
-  // A store of the mask file correction values for the sample run
-  QHash<QString, double> m_maskcorrections;
+  /// A map of S2D detector names to QLabel pointers
+  QList<QHash<QString, QLabel*> > m_s2d_detlabels;
+  /// A map of LOQ detector names to QLabel pointers
+  QList<QHash<QString, QLabel*> > m_loq_detlabels;
 
   // An integer to save the last run reduction type
   int m_lastreducetype;
+
+  // A signal mapper for the mode switches
+  QSignalMapper *m_mode_mapper;
+
+  /// Indicate if the reduce module has been loaded?
+  bool m_have_reducemodule;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

@@ -14,7 +14,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IInstrument.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/V3D.h"
 
 #include <QLineEdit>
@@ -23,11 +23,10 @@
 #include <QTextStream>
 #include <QTreeWidgetItem>
 #include <QSettings>
-#include <QHBoxLayout>
 #include <QMessageBox>
 #include <QInputDialog>
-#include <QRegExp>
 #include <QSignalMapper>
+#include <QHeaderView>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -49,11 +48,12 @@ Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANS
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
-  m_period_lbls(), m_pycode_loqreduce(""), m_pycode_viewmask(""), m_run_changed(false), m_force_reload(false),
-  m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace),
-  m_logvalues(), m_maskcorrections(), m_lastreducetype(-1)
+  m_period_lbls(), m_pycode_viewmask(""), m_warnings_issued(false), m_force_reload(false),
+  m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(), 
+  m_loq_detlabels(), m_lastreducetype(-1), m_have_reducemodule(false)
 {
   m_reducemapper = new QSignalMapper(this);
+  m_mode_mapper = new QSignalMapper(this);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 }
 
@@ -76,15 +76,20 @@ void SANSRunWindow::initLayout()
     g_log.debug("Initializing interface layout");
     m_uiForm.setupUi(this);
 
+    //Set column stretch on the mask table
+    m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
+
     //Button connections
     connect(m_uiForm.data_dirBtn, SIGNAL(clicked()), this, SLOT(selectDataDir()));
     connect(m_uiForm.userfileBtn, SIGNAL(clicked()), this, SLOT(selectUserFile()));
+    connect(m_uiForm.csv_browse_btn,SIGNAL(clicked()), this, SLOT(selectCSVFile()));
 
     connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
     connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
     connect(m_uiForm.runcentreBtn, SIGNAL(clicked()), this, SLOT(handleRunFindCentre()));
     connect(m_uiForm.saveBtn, SIGNAL(clicked()), this, SLOT(handleSaveButtonClick()));
- 
+
+
     // Disable most things so that load is the only thing that can be done
     m_uiForm.oneDBtn->setEnabled(false);
     m_uiForm.twoDBtn->setEnabled(false);
@@ -106,38 +111,23 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.showMaskBtn, SIGNAL(clicked()), this, SLOT(handleShowMaskButtonClick()));
     connect(m_uiForm.clear_log, SIGNAL(clicked()), m_uiForm.centre_logging, SLOT(clear()));
 
-    //Text edit map
-    m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
-    m_run_no_boxes.insert(1, m_uiForm.sct_can_edit);
-    m_run_no_boxes.insert(2, m_uiForm.sct_bkgd_edit);
-    m_run_no_boxes.insert(3, m_uiForm.tra_sample_edit);
-    m_run_no_boxes.insert(4, m_uiForm.tra_can_edit);
-    m_run_no_boxes.insert(5, m_uiForm.tra_bkgd_edit);
-    m_run_no_boxes.insert(6, m_uiForm.direct_sample_edit);
-    m_run_no_boxes.insert(7, m_uiForm.direct_can_edit);
-    m_run_no_boxes.insert(8, m_uiForm.direct_bkgd_edit);
+    //Mode switches
+    connect(m_uiForm.single_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
+    m_mode_mapper->setMapping(m_uiForm.single_mode_btn, SANSRunWindow::SingleMode);
+    connect(m_uiForm.batch_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
+    m_mode_mapper->setMapping(m_uiForm.batch_mode_btn, SANSRunWindow::BatchMode);
+    connect(m_mode_mapper, SIGNAL(mapped(int)), this, SLOT(switchMode(int)));
+
+    //Create the widget hash maps
+    initWidgetMaps();
 
     //Connect each box's edited signal to flag if the box's text has changed
     for( int idx = 0; idx < 9; ++idx )
     {
-      connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(forceDataReload()));
+      connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
     }
     
-    connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(forceDataReload()));
-
-    //Period label hash. Each label has a buddy set to its corresponding text edit field
-    m_period_lbls.insert(0, m_uiForm.sct_prd_tot1);
-    m_period_lbls.insert(1, m_uiForm.sct_prd_tot2);
-    m_period_lbls.insert(2, m_uiForm.sct_prd_tot3);
-    m_period_lbls.insert(3, m_uiForm.tra_prd_tot1);
-    m_period_lbls.insert(4, m_uiForm.tra_prd_tot2);
-    m_period_lbls.insert(5, m_uiForm.tra_prd_tot3);
-    m_period_lbls.insert(6, m_uiForm.direct_prd_tot1);
-    m_period_lbls.insert(7, m_uiForm.direct_prd_tot2);   
-    m_period_lbls.insert(8, m_uiForm.direct_prd_tot3);
-
-    // Full workspace names as they appear in the service
-    m_workspace_names.clear();
+    connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
 
     // Combo boxes
     connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
@@ -150,12 +140,95 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
 	    SLOT(handleInstrumentChange(int)));
 
-    // file extensions
-    m_uiForm.file_opt->setItemData(0, ".raw");
-    m_uiForm.file_opt->setItemData(1, ".nxs");
+    // Add Python set functions as underlying data 
+    m_uiForm.inst_opt->setItemData(0, "LOQ()");
+    m_uiForm.inst_opt->setItemData(1, "SANS2D()");
+
+    //Add shortened forms of step types to step boxes
+    m_uiForm.wav_dw_opt->setItemData(0, "LIN");
+    m_uiForm.wav_dw_opt->setItemData(1, "LOG");
+    m_uiForm.q_dq_opt->setItemData(0, "LIN");
+    m_uiForm.q_dq_opt->setItemData(1, "LOG");
+    m_uiForm.qy_dqy_opt->setItemData(0, "LIN");
 
     readSettings();
 }    
+
+/**
+ * Initialize the widget maps
+ */
+void SANSRunWindow::initWidgetMaps()
+{
+    //Text edit map
+    m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
+    m_run_no_boxes.insert(1, m_uiForm.sct_can_edit);
+    m_run_no_boxes.insert(2, m_uiForm.sct_bkgd_edit);
+    m_run_no_boxes.insert(3, m_uiForm.tra_sample_edit);
+    m_run_no_boxes.insert(4, m_uiForm.tra_can_edit);
+    m_run_no_boxes.insert(5, m_uiForm.tra_bkgd_edit);
+    m_run_no_boxes.insert(6, m_uiForm.direct_sample_edit);
+    m_run_no_boxes.insert(7, m_uiForm.direct_can_edit);
+    m_run_no_boxes.insert(8, m_uiForm.direct_bkgd_edit);
+
+        //Period label hash. Each label has a buddy set to its corresponding text edit field
+    m_period_lbls.insert(0, m_uiForm.sct_prd_tot1);
+    m_period_lbls.insert(1, m_uiForm.sct_prd_tot2);
+    m_period_lbls.insert(2, m_uiForm.sct_prd_tot3);
+    m_period_lbls.insert(3, m_uiForm.tra_prd_tot1);
+    m_period_lbls.insert(4, m_uiForm.tra_prd_tot2);
+    m_period_lbls.insert(5, m_uiForm.tra_prd_tot3);
+    m_period_lbls.insert(6, m_uiForm.direct_prd_tot1);
+    m_period_lbls.insert(7, m_uiForm.direct_prd_tot2);   
+    m_period_lbls.insert(8, m_uiForm.direct_prd_tot3);
+
+    // SANS2D det names/label map
+    QHash<QString, QLabel*> labelsmap;
+    labelsmap.insert("Front_Det_Z", m_uiForm.dist_smp_frontZ);
+    labelsmap.insert("Front_Det_X", m_uiForm.dist_smp_frontX);
+    labelsmap.insert("Front_Det_Rot", m_uiForm.smp_rot);
+    labelsmap.insert("Rear_Det_X", m_uiForm.dist_smp_rearX);
+    labelsmap.insert("Rear_Det_Z", m_uiForm.dist_smp_rearZ);
+    m_s2d_detlabels.append(labelsmap);
+  
+    labelsmap.clear();
+    labelsmap.insert("Front_Det_Z", m_uiForm.dist_can_frontZ);
+    labelsmap.insert("Front_Det_X", m_uiForm.dist_can_frontX);
+    labelsmap.insert("Front_Det_Rot", m_uiForm.can_rot);
+    labelsmap.insert("Rear_Det_X", m_uiForm.dist_can_rearX);
+    labelsmap.insert("Rear_Det_Z", m_uiForm.dist_can_rearZ);
+    m_s2d_detlabels.append(labelsmap);
+
+    labelsmap.clear();
+    labelsmap.insert("Front_Det_Z", m_uiForm.dist_bkgd_frontZ);
+    labelsmap.insert("Front_Det_X", m_uiForm.dist_bkgd_frontX);
+    labelsmap.insert("Front_Det_Rot", m_uiForm.bkgd_rot);
+    labelsmap.insert("Rear_Det_X", m_uiForm.dist_bkgd_rearX);
+    labelsmap.insert("Rear_Det_Z", m_uiForm.dist_bkgd_rearZ);
+    m_s2d_detlabels.append(labelsmap);
+
+    //LOQ labels
+    labelsmap.clear();
+    labelsmap.insert("moderator-sample", m_uiForm.dist_sample_ms);
+    labelsmap.insert("sample-main-detector-bank", m_uiForm.dist_smp_mdb);
+    labelsmap.insert("sample-HAB",m_uiForm.dist_smp_hab);
+    m_loq_detlabels.append(labelsmap);
+  
+    labelsmap.clear();
+    labelsmap.insert("moderator-sample", m_uiForm.dist_can_ms);
+    labelsmap.insert("sample-main-detector-bank", m_uiForm.dist_can_mdb);
+    labelsmap.insert("sample-HAB",m_uiForm.dist_can_hab);
+    m_loq_detlabels.append(labelsmap);
+
+    labelsmap.clear();
+    labelsmap.insert("moderator-sample", m_uiForm.dist_bkgd_ms);
+    labelsmap.insert("sample-main-detector-bank", m_uiForm.dist_bkgd_mdb);
+    labelsmap.insert("sample-HAB", m_uiForm.dist_bkgd_hab);
+    m_loq_detlabels.append(labelsmap);
+
+    // Full workspace names as they appear in the service
+    m_workspace_names.clear();
+
+}
 
 /**
  * Restore previous input
@@ -167,9 +240,19 @@ void SANSRunWindow::readSettings()
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
   m_uiForm.datadir_edit->setText(value_store.value("data_dir").toString());
   m_uiForm.userfile_edit->setText(value_store.value("user_file").toString());
-  
   m_uiForm.inst_opt->setCurrentIndex(value_store.value("instrument", 0).toInt());
   m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
+
+  int mode_flag = value_store.value("runmode", 0).toInt();
+  if( mode_flag == SANSRunWindow::SingleMode )
+  {
+    m_uiForm.single_mode_btn->click();
+  }
+  else
+  {
+    m_uiForm.batch_mode_btn->click();
+  }
+
   value_store.endGroup();
 
   //The instrument definition directory
@@ -200,8 +283,45 @@ void SANSRunWindow::saveSettings()
   }
   value_store.setValue("instrument", m_uiForm.inst_opt->currentIndex());
   value_store.setValue("fileextension", m_uiForm.file_opt->currentIndex());
-  
+  unsigned int mode_id(0);
+  if( m_uiForm.single_mode_btn->isChecked() )
+  {
+    mode_id = SANSRunWindow::SingleMode;
+  }
+  else
+  {
+    mode_id = SANSRunWindow::BatchMode;
+  }
+  value_store.setValue("runmode",mode_id);
   value_store.endGroup();
+}
+
+/**
+ * Run a function from the SANS reduction script, ensuring that the first call imports the module
+ * @param pycode The code to execute
+ * @returns A trimmed string containing the output of the code execution
+ */
+QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
+{
+  if( !m_have_reducemodule )
+  {
+    runPythonCode("from SANSReduction import *", false);
+    m_have_reducemodule = true;
+  }
+  //Ensure the correct instrument is set
+  QString code_torun =  "SetQuietMode(True)\n" + m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString() 
+      + "\n" + pycode + "\nSetQuietMode(False)";
+  return runPythonCode(code_torun).trimmed();
+}
+
+/**
+ * Trim off Python markers surrounding things like strings or lists that have been 
+ * printed by Python
+ */
+void SANSRunWindow::trimPyMarkers(QString & txt)
+{
+ txt.remove(0,1);
+ txt.chop(1);
 }
 
 /**
@@ -212,8 +332,8 @@ void SANSRunWindow::saveSettings()
  */
 bool SANSRunWindow::readPyReductionTemplate()
 {
-  QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
-  QString reduce_script = scriptsdir.absoluteFilePath("SANS/SANSReductionGUI.py");
+  /*QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
+  QString reduce_script = scriptsdir.absoluteFilePath("SANS/SANSReduction.py");
     
   if( !QFileInfo(reduce_script).exists() ) 
   {
@@ -233,7 +353,7 @@ bool SANSRunWindow::readPyReductionTemplate()
   {
     m_pycode_loqreduce.append(stream.readLine() + "\n");
   }
-  py_script.close();
+  py_script.close();*/
   return true;
 }
 
@@ -288,6 +408,8 @@ bool SANSRunWindow::loadUserFile()
   
   QFile user_file(filetext);
   if( !user_file.open(QIODevice::ReadOnly) ) return false;
+
+  user_file.close();
   
   //Clear the def masking info table.
   int mask_table_count = m_uiForm.mask_table->rowCount();
@@ -296,174 +418,50 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.mask_table->removeRow(i);
   }
 
-  //Set a couple of things to default values that will get overwritten if present in the file
-  handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
+  // Use python function to read the file and then extract the fields
+  runReduceScriptFunction("MaskFile(r'" + filetext + "')");
 
-  m_uiForm.dist_mod_mon->setText("-");
-  m_uiForm.smpl_offset->setText("0.0");
+  double unit_conv(1000.);
+  // Radius
+  double dbl_param = runReduceScriptFunction("printParameter('RMIN'),").toDouble();
+  m_uiForm.rad_min->setText(QString::number(dbl_param*unit_conv));
+  dbl_param = runReduceScriptFunction("printParameter('RMAX'),").toDouble();
+  m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
+  //Wavelength
+  m_uiForm.wav_min->setText(runReduceScriptFunction("printParameter('WAV1'),"));
+  m_uiForm.wav_max->setText(runReduceScriptFunction("printParameter('WAV2'),"));
+  setLimitStepParameter("wavelength", runReduceScriptFunction("printParameter('DWAV'),"), m_uiForm.wav_dw, m_uiForm.wav_dw_opt);
+  //Q
+  m_uiForm.q_min->setText(runReduceScriptFunction("printParameter('Q1'),"));
+  m_uiForm.q_max->setText(runReduceScriptFunction("printParameter('Q2'),"));
+  setLimitStepParameter("Q", runReduceScriptFunction("printParameter('DQ'),"), m_uiForm.q_dq, m_uiForm.q_dq_opt);
+  //Qxy
+  m_uiForm.qy_max->setText(runReduceScriptFunction("printParameter('QXY2'),"));
+  setLimitStepParameter("Qxy", runReduceScriptFunction("printParameter('DQXY'),"), m_uiForm.qy_dqy, m_uiForm.qy_dqy_opt);
 
-  //Setup mask file detector corrections
-  m_maskcorrections.clear();
-  m_maskcorrections["Front_Det_Z_corr"] = 0.0;
-  m_maskcorrections["Front_Det_Y_corr"] = 0.0;
-  m_maskcorrections["Front_Det_X_corr"] = 0.0;
-  m_maskcorrections["Front_Det_Rot_corr"] = 0.0;
-  m_maskcorrections["Rear_Det_Z_corr"] = 0.0;
-  m_maskcorrections["Rear_Det_X_corr"] = 0.0;
+  //Monitor spectrum
+  m_uiForm.monitor_spec->setText(runReduceScriptFunction("printParameter('MONITORSPECTRUM'),"));
+
+  //Direct efficiency correction
+  m_uiForm.direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE'),"));
+
+  //Scale factor
+  dbl_param = runReduceScriptFunction("printParameter('RESCALE'),").toDouble();
+  m_uiForm.scale_factor->setText(QString::number(dbl_param/100.));
+
+  //Sample offset if one has been specified
+  dbl_param = runReduceScriptFunction("printParameter('SAMPLE_Z_CORR'),").toDouble();
+  m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
+
+  //Centre coordinates
+  dbl_param = runReduceScriptFunction("printParameter('XBEAM_CENTRE'),").toDouble();
+  m_uiForm.beam_x->setText(QString::number(dbl_param*1000.0));
+  dbl_param = runReduceScriptFunction("printParameter('YBEAM_CENTRE'),").toDouble();
+  m_uiForm.beam_y->setText(QString::number(dbl_param*1000.0));
+
+  //Masking table
+  updateMaskTable();
  
-  QDir work_dir = QDir(m_uiForm.datadir_edit->text());
-
-  QTextStream stream(&user_file);
-  QString data;
-  while( !stream.atEnd() )
-  {
-    QString com_line = stream.readLine();
-    //Skip comments lines
-    if( com_line.startsWith("!") ) continue;
-    
-    if( com_line.startsWith("L/") )
-    {
-      readLimits(com_line.section("/", 1));
-    }
-    else if( com_line.startsWith("MON") )
-    {
-      //Line has the form MON/FIELD=...
-      QString field = com_line.section("/", 1).section("=", 0, 0);
-      if( field.compare("length", Qt::CaseInsensitive) == 0 )
-      {
-        QStringList line_items = com_line.section('=',1).split(' ');
-        if( line_items.count() == 2 )
-        {
-          m_uiForm.dist_mod_mon->setText(line_items[0]);
-          m_uiForm.monitor_spec->setText(line_items[1]);
-        }
-      }
-      else
-      {
-        QString filepath;
-        if( com_line.contains(']') ) filepath = com_line.section("]", 1);
-        else filepath = com_line.section('=',1);
-
-        //Check for relative or absolute path
-        if( QFileInfo(filepath).isRelative() )
-        {
-          filepath = QFileInfo(user_file).absoluteDir().absoluteFilePath(filepath);
-        }
-
-        if( field.compare("direct", Qt::CaseInsensitive) == 0 )
-        {
-      	  m_uiForm.direct_file->setText(filepath);
-        }
-        else if( field.compare("hab", Qt::CaseInsensitive) == 0 )
-        {
-	        m_uiForm.hab_file->setText(filepath);
-        }
-        else if( field.compare("flat", Qt::CaseInsensitive) == 0 )
-        {
-	        m_uiForm.flat_file->setText(filepath);
-        }
-        else {}
-      }
-    }
-    else if( com_line.startsWith("set centre") )
-    {
-      m_uiForm.beam_x->setText(com_line.section(' ', 2, 2));
-      m_uiForm.beam_y->setText(com_line.section(' ', 3, 3));
-    }
-    else if( com_line.startsWith("set scales") )
-    {
-      m_uiForm.scale_factor->setText(com_line.section(' ', 2, 2));
-    }
-    else if( com_line.startsWith("mask", Qt::CaseInsensitive) )
-    {
-      QString col1_txt(""), col2_txt("");
-      QString type = com_line.section(' ',1);
-      //TIME mask - MASK/T start end
-      if( com_line.startsWith("mask/t", Qt::CaseInsensitive) )
-      {
-	col1_txt = "Time";
-	col2_txt = type;
-      }
-      else 
-      {
-	if( type.startsWith('s', Qt::CaseInsensitive) )
-	{
-	  col1_txt = "Spectrum";
-	  col2_txt = type;
-	}
-	else if( type.startsWith('h', Qt::CaseInsensitive) || type.startsWith('v', Qt::CaseInsensitive) )
-	{
-	  if( type.contains('+') )
-	  {
-	    col1_txt = "Box";
-	  }
-	  else
-	  {
-	    col1_txt = "Strip";
-	  }
-	  col2_txt = type;
-	}
-	else continue;
-      }
-
-      int row = m_uiForm.mask_table->rowCount();
-      //Insert line after last row
-      m_uiForm.mask_table->insertRow(row);
-      QTableWidgetItem *item1 = new QTableWidgetItem(col1_txt);
-      QTableWidgetItem *item2 = new QTableWidgetItem(col2_txt);
-      m_uiForm.mask_table->setItem(row, 0, item1);
-      m_uiForm.mask_table->setItem(row, 1, item2);
-    }
-    else if( com_line.startsWith("DET/CORR", Qt::CaseInsensitive) )
-    {
-      QString det = com_line.section(' ',1, 1);
-      QString axis = com_line.section(' ',2, 2);
-      double value = com_line.section(' ',3, 3).toDouble();
-      QString key;
-
-
-      if( det.compare("rear", Qt::CaseInsensitive) == 0 )
-      {
-	if( axis.compare("x", Qt::CaseInsensitive) == 0 )
-	{
-	  key = "Rear_Det_X_corr";
-	}
-	else
-	{
-	  key = "Rear_Det_Z_corr";
-	}
-      }
-      else
-      {
-	if( axis.compare("x", Qt::CaseInsensitive) == 0 )
-	{
-	  key = "Front_Det_X_corr";
-	}
-	else if( axis.compare("y", Qt::CaseInsensitive) == 0 )
-	{
-	  key = "Front_Det_Y_corr";
-	}
-	else if( axis.compare("z", Qt::CaseInsensitive) == 0 )
-	{
-	  key = "Front_Det_Z_corr";
-	}
-	else
-	{
-	  key = "Front_Det_Rot_corr";
-	}
-      }
-      m_maskcorrections[key] = value;
-    }
-    else if(com_line.startsWith("SAMPLE/OFFSET"))
-    {
-      QString txt = com_line.section(' ', 1, 1);
-      m_uiForm.smpl_offset->setText(txt);
-    }
-    else {}
-       
-  }
-  user_file.close();
-
   // Phi values default to -90 and 90
   m_uiForm.phi_min->setText("-90");
   m_uiForm.phi_max->setText("90");
@@ -471,103 +469,123 @@ bool SANSRunWindow::loadUserFile()
   m_cfg_loaded = true;
   m_uiForm.userfileBtn->setText("Reload");
   m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
-  //  m_uiForm.tabWidget->setTabEnabled(1, true);
   return true;
 }
 
 /**
- * Read a limit line from the user file
- * @param com_line A line from the LOQ user file that started with "L/" (note that the tag has been removed)
+ * Set a pair of an QLineEdit field and type QComboBox using the parameter given
+ * @param pname The name of the parameter
+ * @param param A string representing a value that maybe prefixed with a minus to indicate a different step type
+ * @param step_value The field to store the actual value
+ * @param step_type The combo box with the type options
  */
-void SANSRunWindow::readLimits(const QString & com_line)
+void SANSRunWindow::setLimitStepParameter(const QString& pname, QString param, QLineEdit* step_value,  QComboBox* step_type)
 {
-  QStringList pieces = com_line.split('/');
-  QString quantity = pieces[0].section(' ', 0, 0);
-  QString min = pieces[0].section(' ', 1, 1);
-  QString max = pieces[0].section(' ', 2, 2);
-  QString step = pieces[0].section(' ', 3, 3);
-
-  //Ensure all doubles come out with a '0.' not just '.' prefix
-  if( min.startsWith('.') ) min.prepend('0');
-  if( max.startsWith('.') ) max.prepend('0');
-  if( step.startsWith('.') ) step.prepend('0');
-
-  if( quantity == "R" )
+  if( param.startsWith("-") )
   {
-    m_uiForm.rad_min->setText(min);
-    m_uiForm.rad_max->setText(max);
-    m_uiForm.rad_dr->setText(step);
-    //Add mask values to table
-    int row = m_uiForm.mask_table->rowCount();
-    //Insert line after last row
-    m_uiForm.mask_table->insertRow(row);
-    QTableWidgetItem *item1 = new QTableWidgetItem("Beam stop");
-    QTableWidgetItem *item2 = new QTableWidgetItem("infinite-cylinder");
-    m_uiForm.mask_table->setItem(row, 0, item1);
-    m_uiForm.mask_table->setItem(row, 1, item2);
-    m_uiForm.mask_table->insertRow(++row);
-    item1 = new QTableWidgetItem("Corners");
-    item2 = new QTableWidgetItem("infinite-cylinder");
-    m_uiForm.mask_table->setItem(row, 0, item1);
-    m_uiForm.mask_table->setItem(row, 1, item2);
-  }
-  else if( quantity == "SP" )
-  {
-    m_uiForm.all_spec_min->setText(min);
-    m_uiForm.all_spec_max->setText(max);
+    int index = step_type->findText("Logarithmic");
+    if( index < 0 )
+    {
+     m_uiForm.tabWidget->setCurrentIndex(1);
+     raiseOneTimeMessage("Warning: Unable to find logarithmic scale option for " + pname + ", setting as linear.");
+     index = step_type->findText("Linear");
+    }
+    step_type->setCurrentIndex(index);
+    step_value->setText(param.remove(0,1));
   }
   else
   {
-    int opt_index(0);
-    if( pieces[1].compare("log", Qt::CaseInsensitive) == 0 ) 
-    { 
-      opt_index = 1;
-    }
-    if( quantity == "WAV" )
+    step_type->setCurrentIndex(step_type->findText("Linear"));
+    step_value->setText(param);
+  }
+}
+
+/**
+ * Construct the mask table on the Mask tab 
+ */
+void SANSRunWindow::updateMaskTable()
+{
+  //Clear the current contents
+  for( int i = m_uiForm.mask_table->rowCount() - 1; i >= 0; --i )
+  {
+	  m_uiForm.mask_table->removeRow(i);
+	}
+  
+  // First create 2 default mask cylinders at min and max radius for the beam stop and 
+  // corners
+  m_uiForm.mask_table->insertRow(0);
+  QTableWidgetItem *item1 = new QTableWidgetItem("beam stop");
+  QTableWidgetItem *item2 = new QTableWidgetItem("infinite-cylinder, r = rmin");
+  m_uiForm.mask_table->setItem(0, 0, item1);
+  m_uiForm.mask_table->setItem(0, 1, item2);
+  if( m_uiForm.rad_max->text() != "-1" )
+  {  
+    m_uiForm.mask_table->insertRow(1);
+    item1 = new QTableWidgetItem("corners");
+    item2 = new QTableWidgetItem("infinite-cylinder, r = rmax");
+    m_uiForm.mask_table->setItem(1, 0, item1);
+    m_uiForm.mask_table->setItem(1, 1, item2);
+  }
+
+  //Now add information from the mask file
+  //Spectrum mask
+  QString mask_string = runReduceScriptFunction("printParameter('SPECMASKSTRING')");
+  QStringList elements = mask_string.split(",", QString::SkipEmptyParts);
+  QStringListIterator sitr(elements);
+  while(sitr.hasNext())
+  {
+    QString item = sitr.next();
+    QString col1_txt;
+    if( item.startsWith('s', Qt::CaseInsensitive) )
     {
-      m_uiForm.wav_min->setText(min);
-      m_uiForm.wav_max->setText(max);
-      m_uiForm.wav_dw->setText(step);
-      m_uiForm.wav_dw_opt->setCurrentIndex(opt_index);
-      if( opt_index == 0 ) m_uiForm.wav_step_lbl->setText("stepping");
-      else  m_uiForm.wav_step_lbl->setText("dW / W");
+      col1_txt = "Spectrum";
     }
-    else if( quantity == "Q" )
+    else if( item.startsWith('h', Qt::CaseInsensitive) || item.startsWith('v', Qt::CaseInsensitive) )
     {
-      m_uiForm.q_min->setText(min);
-      m_uiForm.q_max->setText(max);
-      m_uiForm.q_dq->setText(step);
-      m_uiForm.q_dq_opt->setCurrentIndex(opt_index);
-      if( opt_index == 0 ) m_uiForm.q_step_lbl->setText("stepping");
-      else  m_uiForm.q_step_lbl->setText("dQ / Q");
+      if( item.contains('+') )
+      {
+        col1_txt = "Box";
+      }
+      else
+      {
+        col1_txt = "Strip";
+      }
     }
-    else if( quantity == "QXY" )
-    {
-      m_uiForm.qy_max->setText(max);
-      m_uiForm.qy_dqy->setText(step);
-      m_uiForm.qy_dqy_opt->setCurrentIndex(opt_index);
-      if( opt_index == 0 ) m_uiForm.qy_step_lbl->setText("stepping");
-      else  m_uiForm.qy_step_lbl->setText("dQy / Qy");
-    }
-    else return;
+    else continue;
+
+    int row = m_uiForm.mask_table->rowCount();
+    //Insert line after last row
+    m_uiForm.mask_table->insertRow(row);
+    QTableWidgetItem *col1 = new QTableWidgetItem(col1_txt);
+    QTableWidgetItem *col2 = new QTableWidgetItem(item);
+    m_uiForm.mask_table->setItem(row, 0, col1);
+    m_uiForm.mask_table->setItem(row, 1, col2);
+  }
+
+  mask_string = runReduceScriptFunction("printParameter('TIMEMASKSTRING')");
+  elements = mask_string.split(";",QString::SkipEmptyParts);
+  sitr = QStringListIterator(elements);
+  while(sitr.hasNext())
+  {
+    int row = m_uiForm.mask_table->rowCount();
+    m_uiForm.mask_table->insertRow(row);
+    QTableWidgetItem *item1 = new QTableWidgetItem("time");
+    QTableWidgetItem *item2 = new QTableWidgetItem(sitr.next());
+    m_uiForm.mask_table->setItem(row, 0, item1);
+    m_uiForm.mask_table->setItem(row, 1, item2);
   }
 }
 
 /**
  * Retrieve and set the component distances
- * @param wsname The name of the workspace
+ * @param workspace The workspace pointer
  * @param lms The result of the moderator-sample distance
  * @param lsda The result of the sample-detector bank 1 distance
  * @param lsdb The result of the sample-detector bank 2 distance
- * @param lmm The moderator-monitor distance
  */
-void SANSRunWindow::componentDistances(const QString & wsname, double & lms, double & lsda, double & lsdb, double & lmm)
+void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr workspace, double & lms, double & lsda, double & lsdb)
 {
-  if( !workspaceExists(wsname) ) return;
-  Mantid::API::MatrixWorkspace_sptr workspace_ptr = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-    (Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
-
-  Mantid::API::IInstrument_sptr instr = workspace_ptr->getInstrument();
+  Mantid::API::IInstrument_sptr instr = workspace->getInstrument();
   if( instr == boost::shared_ptr<Mantid::API::IInstrument>() ) return;
 
   Mantid::Geometry::IObjComponent_sptr source = instr->getSource();
@@ -578,33 +596,17 @@ void SANSRunWindow::componentDistances(const QString & wsname, double & lms, dou
   lms = source->getPos().distance(sample->getPos()) * 1000.;
    
   //Find the main detector bank
-  std::string comp_name("main-detector-bank");
-  bool isS2D(false);
-  if( m_uiForm.inst_opt->currentIndex() == 1 ) 
-  {
-    isS2D = true;
-    comp_name = "rear-detector";
-  }
-  boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName(comp_name);
+  boost::shared_ptr<Mantid::Geometry::IComponent> comp = instr->getComponentByName("main-detector-bank");
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
     lsda = sample->getPos().distance(comp->getPos()) * 1000.;
   }
 
-  comp_name = "HAB";
-  if( isS2D ) comp_name = "front-detector";
-  comp = instr->getComponentByName(comp_name);
+  comp = instr->getComponentByName("HAB");
   if( comp != boost::shared_ptr<Mantid::Geometry::IComponent>() )
   {
     lsdb = sample->getPos().distance(comp->getPos()) * 1000.;
   }
-  if( lmm < 0.0 ) return;
-
-  int monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
-  std::vector<int> dets = workspace_ptr->spectraMap().getDetectors(monitor_spectrum);
-  if( dets.empty() ) return;
-  Mantid::Geometry::IDetector_sptr detector = instr->getDetector(dets[0]);
-  lmm = detector->getDistance(*source) * 1000.;
 
 }
 
@@ -683,331 +685,288 @@ bool SANSRunWindow::isUserFileLoaded() const
   return m_cfg_loaded;
 }
 
-/**
- * Get the path the the raw file indicated by the run number.This checks the given directory for the number 
- * given. Left-padding of zeroes is done as required.
- * @param data_dir The data directory
- * @param run_no The run number to search for
- * @param ext The file extension
- */
-QString SANSRunWindow::getRawFilePath(const QString & data_dir, const QString & run_no, const QString & ext) const
-{
-  //Do a quick check for the existence of the file with these exact credentials
-  QDir directory(data_dir);
-  QString prefix = m_uiForm.inst_opt->currentText();
-  QString filename = directory.absoluteFilePath(prefix + run_no + ext);
-  g_log.debug("Checking for run " + run_no.toStdString());
-  if( QFileInfo(filename).exists() ) return filename;
 
-  // If nothing pad the number and check
-  QString padded_no = run_no.rightJustified(8, '0', true);
-  filename = directory.absoluteFilePath(prefix + padded_no + ext);
-  g_log.debug("Not found. Checking padded name " + filename.toStdString());
-  if( QFileInfo(filename).exists() ) return filename;
-  else return QString();
-}
- 
 /**
  * Create the mask strings for spectra and times
  */
-void SANSRunWindow::createMaskStrings(QString & spectramask, QString & timemask) const
+void SANSRunWindow::addUserMaskStrings(QString & exec_script)
 {
-  spectramask = "";
-  timemask = "";
+  //Clear current
+  exec_script += "Mask('/CLEAR')\nMask('/CLEAR/TIME')\n";
+
+  //Pull in the table details first, skipping the first two rows
   int nrows = m_uiForm.mask_table->rowCount();
-  for( int r = 0; r < nrows; ++r )
+  for(int row = 2; row <  nrows; ++row)
   {
-    QString detail = m_uiForm.mask_table->item(r, 1)->text();
-    if( detail == "infinite-cylinder" ) continue;
-    QString type = m_uiForm.mask_table->item(r, 0)->text();
-    if( type == "Time" )
+    //Details are in the second column
+    exec_script += "Mask('" + m_uiForm.mask_table->item(row, 1)->text() + "')\n";
+  }
+
+
+  //Spectra mask first
+  QStringList mask_params = m_uiForm.user_spec_mask->text().split(",", QString::SkipEmptyParts);
+  QStringListIterator sitr(mask_params);
+  QString bad_masks;
+  while(sitr.hasNext())
+  {
+    QString item = sitr.next();
+    if( item.startsWith('S', Qt::CaseInsensitive) || item.startsWith('H', Qt::CaseInsensitive) || 
+        item.startsWith('V', Qt::CaseInsensitive) )
     {
-      timemask += detail + ";";
+      exec_script += "Mask('" + item + "')\n";
     }
     else
     {
-      spectramask += detail + ",";
+      bad_masks += item + ",";
     }
+  }
+  if( !bad_masks.isEmpty() )
+  {
+    m_uiForm.tabWidget->setCurrentIndex(3);
+    showInformationBox(QString("Warning: Could not parse the following spectrum masks: ") + bad_masks + ". Values skipped.");
   }
   
-  QStringList guimask = m_uiForm.user_maskEdit->text().split(',');
-  QStringListIterator itr(guimask);
-  while(itr.hasNext())
+  //Time masks
+  mask_params = m_uiForm.user_time_mask->text().split(",", QString::SkipEmptyParts);
+  sitr = QStringListIterator(mask_params);
+  bad_masks = "";
+  while(sitr.hasNext())
   {
-    QString item = itr.next();
-    if( item.startsWith('t', Qt::CaseInsensitive) )
+    QString item = sitr.next();
+    if( item.split(" ").count() == 2 )
     {
-      timemask += item.section('t',1) + ";";
+      exec_script += "Mask('/T" + item + "')\n";
     }
     else
     {
-      spectramask += item + ",";
+      bad_masks += item + ",";
     }
   }
-    
+  if( !bad_masks.isEmpty() )
+  {
+    m_uiForm.tabWidget->setCurrentIndex(3);
+    showInformationBox(QString("Warning: Could not parse the following time masks: ") + bad_masks + ". Values skipped.");
+  }
 }
 
-
-void SANSRunWindow::setupGeometryDetails()
+/**
+ * Set the information about component distances on the geometry tab
+ */
+void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QString & can_logs)
 {
-  // Reset the geometry box
   resetGeometryDetailsBox();
 
   const char format('f');
   const int prec(3);
-  bool warn_user(false);  
+  double unit_conv(1000.);
   
+  QString workspace_name = getWorkspaceName(0);
+  if( workspace_name.isEmpty() ) return;
 
-  // LOQ
+  Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
+  Mantid::API::MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+  Mantid::API::IInstrument_sptr instr = sample_workspace->getInstrument();
+  boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
+
+  // Moderator-monitor distance is common to LOQ and S2D
+  int monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
+  std::vector<int> dets = sample_workspace->spectraMap().getDetectors(monitor_spectrum);
+  if( dets.empty() ) return;
+  double dist_mm(0.0);
+  QString colour("black");
+  try
+  {
+    Mantid::Geometry::IDetector_sptr detector = instr->getDetector(dets[0]);  
+    dist_mm = detector->getDistance(*source) * unit_conv;
+  }
+  catch(std::runtime_error&)
+  {
+    colour = "red";
+  }
+
+  //LOQ
   if( m_uiForm.inst_opt->currentIndex() == 0 )
   {
-    QString wsname = m_workspace_names.value(0);
-    if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
-
-    // Set up distance information
-    double dist_ms_smp(0.0), dist_sample_mdb(0.0), dist_smp_hab(0.0), dist_mm(-1.0);
-    if( m_uiForm.dist_mod_mon->text() == "-" ) dist_mm = 0.0;
-    componentDistances(wsname, dist_ms_smp, dist_sample_mdb, dist_smp_hab, dist_mm);
-    m_uiForm.dist_sample_ms->setText(QString::number(dist_ms_smp, format, prec));
-    m_uiForm.dist_smp_mdb->setText(QString::number(dist_sample_mdb, format, prec));
-    m_uiForm.dist_smp_hab->setText(QString::number(dist_smp_hab, format, prec));
-
-    if( dist_mm > 0.0 ) 
+    if( m_uiForm.dist_mod_mon->text() != "-" )
     {
-      m_uiForm.dist_mod_mon->setText(QString::number(dist_mm, format, prec));
+      if( colour == "red" )
+      {
+       m_uiForm.dist_mod_mon->setText("<font color='red'>error<font>");
+      }
+      else
+      {
+      m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
+      }
     }
-    
-    wsname = m_workspace_names.value(1);
-    if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
-    
-    double dist_ms_can(0.0), dist_can_mdb(0.0), dist_sd2_can(0.0);
-    // We only need the moderator-monitor from the sample so -1.0 flags not to calculate it
-    dist_mm = -1.0;
-    componentDistances(wsname, dist_ms_can, dist_can_mdb, dist_sd2_can, dist_mm);
-  
-    m_uiForm.dist_can_ms->setText(QString::number(dist_ms_can, format, prec));
-    m_uiForm.dist_can_mdb->setText(QString::number(dist_can_mdb, format, prec));
-    m_uiForm.dist_can_hab->setText(QString::number(dist_sd2_can, format, prec));
-
-    if( dist_ms_can > 0.0 && abs(dist_ms_can - dist_ms_smp) > 5e-3 )
+    setLOQGeometry(sample_workspace, 0);
+    QString can = getWorkspaceName(1);
+    if( !can.isEmpty() )
     {
-      warn_user = true;
-      m_uiForm.dist_sample_ms->setText("<font color='red'>" + m_uiForm.dist_sample_ms->text() + "</font>");
-      m_uiForm.dist_can_ms->setText("<font color='red'>" + m_uiForm.dist_can_ms->text() + "</font>");
+      Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
+      Mantid::API::MatrixWorkspace_sptr can_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+      setLOQGeometry(can_workspace, 1);
     }
-    if( dist_can_mdb > 0.0  && abs(dist_can_mdb - dist_sample_mdb) > 5e-3 )
+    //Check for mismatches
+    QGridLayout *grid = qobject_cast<QGridLayout*>(m_uiForm.loq_geometry->layout());
+    for( int row = 2; row < 5; ++row )
     {
-      warn_user = true;
-      m_uiForm.dist_smp_mdb->setText("<font color='red'>" + m_uiForm.dist_smp_mdb->text() + "</font>");
-      m_uiForm.dist_can_mdb->setText("<font color='red'>" + m_uiForm.dist_can_mdb->text() + "</font>");
+      QLabel *sample = qobject_cast<QLabel*>(grid->itemAtPosition(row,1)->widget()); 
     }
-    if( dist_sd2_can > 0.0 && abs(dist_sd2_can - dist_smp_hab) > 5e-3 )
-    {
-      warn_user = true;
-      m_uiForm.dist_smp_hab->setText("<font color='red'>" + m_uiForm.dist_smp_hab->text() + "</font>");
-      m_uiForm.dist_can_hab->setText("<font color='red'>" + m_uiForm.dist_can_hab->text() + "</font>");
-    }
-  
-    wsname = m_workspace_names.value(2);
-    if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
-    
-    double dist_ms_bckd(0.0), dist_sd1_bckd(0.0), dist_sd2_bckd(0.0);
-    componentDistances(wsname, dist_ms_bckd, dist_sd1_bckd, dist_sd2_bckd, dist_mm);
-    m_uiForm.dist_bkgd_ms->setText(QString::number(dist_ms_bckd, format, prec));
-    m_uiForm.dist_bkgd_mdb->setText(QString::number(dist_sd1_bckd, format, prec));
-    m_uiForm.dist_bkgd_hab->setText(QString::number(dist_sd2_bckd, format, prec));
   }
-  //SANS2D
   else
   {
-    QString wsname = m_workspace_names.value(0);
-    if( m_uiForm.sct_smp_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_smp_prd->text();
-    double dummy(0.0), dist_ms_smp(0.0), dist_mm(-1.0);
-    if( m_uiForm.dist_mon_s2d->text() == "-" ) dist_mm = 0.0;
-    componentDistances(wsname, dist_ms_smp, dummy, dummy, dist_mm);
-    m_uiForm.dist_sample_ms_s2d->setText(QString::number(dist_ms_smp, format, prec));
-
-    if( dist_mm > 0.0 ) 
+    if( m_uiForm.dist_mon_s2d->text() != "-" )
     {
-      m_uiForm.dist_mon_s2d->setText(QString::number(dist_mm, format, prec));
+      if( colour == "red" )
+      {
+        m_uiForm.dist_mon_s2d->setText("<font color='red'>error<font>");
+      }
+      else
+      {
+        m_uiForm.dist_mon_s2d->setText(formatDouble(dist_mm, colour));
+      }
+    }
+    //SANS2D - Sample
+    setSANS2DGeometry(sample_workspace, sample_logs, 0);
+    //Get the can workspace if there is one
+    QString can = getWorkspaceName(1);
+    if( can.isEmpty() ) 
+    {
+      return;
+    }
+    Mantid::API::Workspace_sptr workspace_ptr;
+    try 
+    { 
+      workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
+    }
+    catch(std::runtime_error&)
+    {
+      return;
+    }
+    Mantid::API::MatrixWorkspace_sptr can_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+    setSANS2DGeometry(can_workspace, can_logs, 1);
+
+    //Check for discrepancies
+    bool warn_user(false);
+    double lms_sample(m_uiForm.dist_sample_ms_s2d->text().toDouble()), lms_can(m_uiForm.dist_can_ms_s2d->text().toDouble());
+    if( std::fabs(lms_sample - lms_can) > 5e-03 )
+    {
+      warn_user = true;
+      markError(m_uiForm.dist_sample_ms_s2d);
+      markError(m_uiForm.dist_can_ms_s2d);
     }
 
-
-    //Sample run
-    //rear X
-    double smp_rearX = m_logvalues.value("Rear_Det_X") + m_maskcorrections.value("Rear_Det_X_corr");
-    m_uiForm.dist_smp_rearX->setText(formatDouble(smp_rearX, format, prec, "black"));
-    //rear Z
-    double smp_rearZ  = m_logvalues.value("Rear_Det_Z") + m_maskcorrections.value("Rear_Det_Z_corr");
-    m_uiForm.dist_smp_rearZ->setText(formatDouble(smp_rearZ, format, prec, "black"));
-    //front X
-    double smp_frontX = m_logvalues.value("Front_Det_X") + m_maskcorrections.value("Front_Det_X_corr");
-    m_uiForm.dist_smp_frontX->setText(QString::number(smp_frontX, format, prec));
-    //front Z
-    double smp_frontZ = m_logvalues.value("Front_Det_Z") + m_maskcorrections.value("Front_Det_Z_corr");
-    m_uiForm.dist_smp_frontZ->setText(QString::number(smp_frontZ, format, prec));
-    //front rot
-    double smp_rot = m_logvalues.value("Front_Det_Rot") + m_maskcorrections.value("Front_Det_Rot_corr");
-    m_uiForm.smp_rot->setText(QString::number(smp_rot, format, prec));
-    
-    //Can
-    wsname = m_workspace_names.value(1);
-    if( !wsname.isEmpty() )
+    QString marked_dets = runReduceScriptFunction("print GetMismatchedDetList(),").trimmed();
+    if( !marked_dets.isEmpty() )
     {
-      if( m_uiForm.sct_can_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_can_prd->text();
-      dist_ms_smp = 0.0;
-      dummy = -1.0;
-      componentDistances(wsname, dist_ms_smp, dummy, dummy, dummy);
-      m_uiForm.dist_can_ms_s2d->setText(QString::number(dist_ms_smp, format, prec));
-
-      //Get log values for this workspace
-      QHash<QString, double> logs = loadDetectorLogs(QDir(m_uiForm.datadir_edit->text()).absolutePath(), m_uiForm.sct_can_edit->text());
-      //rear X
-      double can_rearX = logs.value("Rear_Det_X") + m_maskcorrections.value("Rear_Det_X_corr");
-      //Check for differences above 5mm with sample
-      if( std::fabs(smp_rearX - can_rearX) > 5e-3 )
+      trimPyMarkers(marked_dets);
+      QStringList detnames = marked_dets.split(",");
+      QStringListIterator itr(detnames);
+      while( itr.hasNext() )
       {
-	warn_user = true;
-	m_uiForm.dist_can_rearX->setText(formatDouble(can_rearX, format, prec, "red"));
-	m_uiForm.dist_smp_rearX->setText(formatDouble(smp_rearX, format, prec, "red"));
+        QString name = itr.next().trimmed();
+        trimPyMarkers(name);
+        for( int i = 0; i < 2; ++i )
+        {
+          markError(m_s2d_detlabels[i].value(name));
+          warn_user = true;
+        }
       }
-      else
-      {
-	m_uiForm.dist_can_rearX->setText(formatDouble(can_rearX, format, prec, "black"));
-      }
-
-      //rear Z
-      double can_rearZ = logs.value("Rear_Det_Z") + m_maskcorrections.value("Rear_Det_Z_corr");
-      if( std::fabs(smp_rearZ - can_rearZ) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.dist_can_rearZ->setText(formatDouble(can_rearZ, format, prec, "red"));
-	m_uiForm.dist_smp_rearZ->setText(formatDouble(smp_rearZ, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.dist_can_rearZ->setText(formatDouble(can_rearZ, format, prec, "black"));
-      }
-      //front X
-      double can_frontX = logs.value("Front_Det_X") + m_maskcorrections.value("Front_Det_X_corr");
-      if( std::fabs(smp_frontX - can_frontX) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.dist_can_frontX->setText(formatDouble(can_frontX, format, prec, "red"));
-	m_uiForm.dist_smp_frontX->setText(formatDouble(smp_frontX, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.dist_can_frontX->setText(formatDouble(can_frontX, format, prec, "black"));
-      }
-      //front Z
-      double can_frontZ = logs.value("Front_Det_Z") + m_maskcorrections.value("Front_Det_Z_corr");
-      if( std::fabs(smp_frontZ - can_frontZ) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.dist_can_frontZ->setText(formatDouble(can_frontZ, format, prec, "red"));
-	m_uiForm.dist_smp_frontZ->setText(formatDouble(smp_frontZ, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.dist_can_frontZ->setText(formatDouble(can_frontZ, format, prec, "black"));
-      }
-      //front rot
-      double can_rot = logs.value("Front_Det_Rot") + m_maskcorrections.value("Front_Det_Rot_corr");
-      if( std::fabs(smp_rot - can_rot) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.can_rot->setText(formatDouble(can_rot, format, prec, "red"));
-	m_uiForm.smp_rot->setText(formatDouble(smp_rot, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.can_rot->setText(formatDouble(can_rot, format, prec, "black"));
-      }
-
     }
-    // Background
-    wsname = m_workspace_names.value(2);
-    if( !wsname.isEmpty() )
+    if( warn_user )
     {
-      if( m_uiForm.sct_bkgd_prd->text() != "1" ) wsname += "_" + m_uiForm.sct_bkgd_prd->text();
-      dist_ms_smp = 0.0;
-      componentDistances(wsname, dist_ms_smp, dummy, dummy, dummy);
-      m_uiForm.dist_bkgd_ms_s2d->setText(QString::number(dist_ms_smp, format, prec));
-
-      //Get log values for this workspace
-      QHash<QString, double> logs = loadDetectorLogs(QDir(m_uiForm.datadir_edit->text()).absolutePath(), m_uiForm.sct_bkgd_edit->text());
-      //rear X
-      double bkgd_rearX = logs.value("Rear_Det_X") + m_maskcorrections.value("Rear_Det_X_corr");
-      //Check for differences above 5mm with sample
-      if( std::fabs(smp_rearX - bkgd_rearX) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.dist_bkgd_rearX->setText(formatDouble(bkgd_rearX, format, prec, "red"));
-	m_uiForm.dist_smp_rearX->setText(formatDouble(smp_rearX, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.dist_bkgd_rearX->setText(formatDouble(bkgd_rearX, format, prec, "black"));
-      }
-
-      //rear Z
-      double bkgd_rearZ = logs.value("Rear_Det_Z") + m_maskcorrections.value("Rear_Det_Z_corr");
-      if( std::fabs(smp_rearZ - bkgd_rearZ) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.dist_bkgd_rearZ->setText(formatDouble(bkgd_rearZ, format, prec, "red"));
-	m_uiForm.dist_smp_rearZ->setText(formatDouble(smp_rearZ, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.dist_bkgd_rearZ->setText(formatDouble(bkgd_rearZ, format, prec, "black"));
-      }
-      //front X
-      double bkgd_frontX = logs.value("Front_Det_X") + m_maskcorrections.value("Front_Det_X_corr");
-      if( std::fabs(smp_frontX - bkgd_frontX) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.dist_bkgd_frontX->setText(formatDouble(bkgd_frontX, format, prec, "red"));
-	m_uiForm.dist_smp_frontX->setText(formatDouble(smp_frontX, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.dist_bkgd_frontX->setText(formatDouble(bkgd_frontX, format, prec, "black"));
-      }
-      //front Z
-      double bkgd_frontZ = logs.value("Front_Det_Z") + m_maskcorrections.value("Front_Det_Z_corr");
-      if( std::fabs(smp_frontZ - bkgd_frontZ) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.dist_bkgd_frontZ->setText(formatDouble(bkgd_frontZ, format, prec, "red"));
-	m_uiForm.dist_smp_frontZ->setText(formatDouble(smp_frontZ, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.dist_bkgd_frontZ->setText(formatDouble(bkgd_frontZ, format, prec, "black"));
-      }
-      //front rot
-      double bkgd_rot = logs.value("Front_Det_Rot") + m_maskcorrections.value("Front_Det_Rot_corr");
-      if( std::fabs(smp_rot - bkgd_rot) > 5e-3 )
-      {
-	warn_user = true;
-	m_uiForm.bkgd_rot->setText(formatDouble(bkgd_rot, format, prec, "red"));
-	m_uiForm.smp_rot->setText(formatDouble(smp_rot, format, prec, "red"));
-      }
-      else
-      {
-	m_uiForm.bkgd_rot->setText(formatDouble(bkgd_rot, format, prec, "black"));
-      }
-
+      raiseOneTimeMessage("Warning: Some detector distances do not match for the assigned Sample/Can runs, see Geometry tab for details.");
     }
   }
+}
 
-  if( warn_user )
+/**
+ * Set SANS2D geometry info
+ * @param workspace The workspace
+ * @param logs The log information
+*/
+void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspace, const QString & logs, int wscode)
+{
+  double unitconv = 1000.;
+
+  Mantid::API::IInstrument_sptr instr = workspace->getInstrument();
+  boost::shared_ptr<Mantid::Geometry::IComponent> sample = instr->getSample();
+  boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
+  double distance = source->getDistance(*sample) * unitconv;
+  //Moderator-sample
+  QLabel *dist_label(NULL); 
+  if( wscode == 0 )
   {
-    showInformationBox("Warning: Some component distances are inconsistent for the sample and can/background runs.\nSee the Geometry tab for details.");
+    dist_label = m_uiForm.dist_sample_ms_s2d;
   }
-  return;
+  else if( wscode == 1 )
+  {
+    dist_label = m_uiForm.dist_can_ms_s2d;
+  }
+  else
+  {
+    dist_label = m_uiForm.dist_bkgd_ms_s2d;
+  }
+  dist_label->setText(formatDouble(distance, "black"));
+
+  //Detectors
+  QStringList det_info = logs.split(",");
+  QStringListIterator itr(det_info);
+  while( itr.hasNext() )
+  {
+    QString line = itr.next();
+    QStringList values = line.split(":");
+    QString detname = values[0].trimmed();
+    QString distance = values[1].trimmed();
+    trimPyMarkers(detname);
+    trimPyMarkers(distance);
+  
+    QLabel *lbl = m_s2d_detlabels[wscode].value(detname);
+    if( lbl ) lbl->setText(distance);
+  }
+}
+
+/**
+ * Set LOQ geometry information
+ * @param workspace The workspace to operate on
+ */
+void SANSRunWindow::setLOQGeometry(Mantid::API::MatrixWorkspace_sptr workspace, int wscode)
+{
+  double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
+  //Sample
+  componentLOQDistances(workspace, dist_ms, dist_mdb, dist_hab);
+  
+  QHash<QString, QLabel*> & labels = m_loq_detlabels[wscode];
+  QLabel *detlabel = labels.value("moderator-sample");
+  if( detlabel )
+  {
+    detlabel->setText(QString::number(dist_ms));
+  }
+
+  detlabel = labels.value("sample-main-detector-bank");
+  if( detlabel )
+  {
+    detlabel->setText(QString::number(dist_mdb));
+  }
+
+  detlabel = labels.value("sample-HAB");
+  if( detlabel )
+  {
+    detlabel->setText(QString::number(dist_hab));
+  }
+
+}
+
+/**
+ * Mark an error on a label
+ * @param label A pointer to a QLabel instance
+ */
+void SANSRunWindow::markError(QLabel* label)
+{
+  if( label )
+  {
+    label->setText("<font color=\"red\">" + label->text() + "</font>");
+  }
 }
 
 //-------------------------------------
@@ -1033,17 +992,13 @@ void SANSRunWindow::selectDataDir()
  */
 void SANSRunWindow::selectUserFile()
 {
-  QString box_text = m_uiForm.userfile_edit->text();
-  QString start_path = box_text;
-  if( box_text.isEmpty() )
+  if( !browseForFile("Select a user file", m_uiForm.userfile_edit) )
   {
-    start_path = m_last_dir;
+    return;
   }
   
-  QString file_path = QFileDialog::getOpenFileName(this, "Select a user file", start_path, "AllFiles (*.*)");    
-  if( file_path.isEmpty() || QFileInfo(file_path).isDir() ) return;
-  m_uiForm.userfile_edit->setText(file_path);
-  
+  runReduceScriptFunction("UserPath('" + QFileInfo(m_uiForm.userfile_edit->text()).path() + "')");
+
   if( !loadUserFile() )
   {
     m_cfg_loaded = false;
@@ -1057,7 +1012,28 @@ void SANSRunWindow::selectUserFile()
   
 
   //path() returns the directory
-  m_last_dir = QFileInfo(file_path).path();
+  m_last_dir = QFileInfo(m_uiForm.userfile_edit->text()).path();
+
+}
+
+/**
+ * Select and load a CSV file
+ */
+void SANSRunWindow::selectCSVFile()
+{
+  if( !browseForFile("Select CSV file",m_uiForm.csv_filename) ) 
+  {
+    return;
+  }
+}
+
+/**
+ * Mark that a run number has changed
+*/
+void SANSRunWindow::runChanged()
+{
+  m_warnings_issued = false;
+  forceDataReload(true);
 }
 
 /**
@@ -1067,6 +1043,25 @@ void SANSRunWindow::selectUserFile()
 void SANSRunWindow::forceDataReload(bool force)
 {
   m_force_reload = force;
+}
+
+/**
+ * Browse for a file and set the text of the given edit box
+ * @param box_title The title field for the display box
+ * @param A QLineEdit box to use for the file path 
+ */
+bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_field)
+{
+  QString box_text = m_uiForm.userfile_edit->text();
+  QString start_path = box_text;
+  if( box_text.isEmpty() )
+  {
+    start_path = m_last_dir;
+  }
+  QString file_path = QFileDialog::getOpenFileName(this, box_title, start_path, "AllFiles (*.*)");    
+  if( file_path.isEmpty() || QFileInfo(file_path).isDir() ) return false;
+  m_uiForm.csv_filename->setText(file_path);
+  return true;
 }
 
 /**
@@ -1083,6 +1078,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
   if( !work_dir.endsWith('/') ) work_dir += "/";
   m_data_dir = work_dir;
+  runReduceScriptFunction("DataPath('" + m_data_dir + "')");
 
   // Check if we have loaded the data_file
   if( !isUserFileLoaded() )
@@ -1094,103 +1090,124 @@ bool SANSRunWindow::handleLoadButtonClick()
 
   if( m_force_reload ) cleanup();
 
-  //A load command for each box if there is anything in it and it has not already been loaded
-  QMapIterator<int, QLineEdit*> itr(m_run_no_boxes);
-  bool load_success(false);
+  QString run_number = m_run_no_boxes.value(0)->text();
+  if( run_number.isEmpty() )
+  {
+    showInformationBox("Error: No sample run given, cannot continue.");
+    setProcessingState(false, -1);
+    return false;
+  }
+
+  if(!m_run_no_boxes.value(3)->text().isEmpty() && m_run_no_boxes.value(6)->text().isEmpty() )
+  {
+    showInformationBox("Error: Can run supplied without direct run, cannot continue.");
+    setProcessingState(false, -1);
+    return false;
+  }
+
+  QString sample_logs, can_logs;
+  bool is_loaded(true);  
+  //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
+  if( !m_run_no_boxes.value(4)->text().isEmpty() && m_run_no_boxes.value(7)->text().isEmpty() )
+  {
+    m_run_no_boxes.value(7)->setText(m_run_no_boxes.value(6)->text());
+  }
+
+  QHashIterator<int, QLineEdit*> itr(m_run_no_boxes);
   while( itr.hasNext() )
   {
     itr.next();
     int key = itr.key();
+    // Skip background as we are not using those at the moment.
+    if( key == 2 ) continue;
+    if( key == 5 ) break;
     QString run_no = itr.value()->text();
+    QString logs;
     if( run_no.isEmpty() ) 
     {
       m_workspace_names.insert(key, "");
+      //Clear any that are assigned
+      runAssign(key, logs);
       continue;
     }
-    //Construct a workspace name that will go into the ADS
-    QString ws_name;
-    if( key < 3 ) ws_name = run_no + "_sans_" + m_uiForm.file_opt->currentText();
-    else ws_name = run_no + "_trans_" + m_uiForm.file_opt->currentText();
-
-    //Check if we already have it and do nothing if that is so
-    if( workspaceExists(ws_name) && !m_force_reload ) 
+    is_loaded &= runAssign(key, logs);
+    if( !is_loaded )
     {
-      load_success = true;
-      continue;
+      showInformationBox("Error: Problem loading run \"" + run_no + "\", please check log window for details.");
+      break;
     }
-    //Load the file. This checks for required padding of zeros etc
-    int n_periods = runLoadData(work_dir, run_no, 
-				m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString(), ws_name);
-    // If this is zero then something went wrong with trying to load a file
-    if( n_periods == 0 ) 
-    {
-      m_workspace_names.insert(key, "");
-      showInformationBox("Error: Cannot load run " + run_no 
-			 + ".\nPlease check that the correct instrument and file extension are selected");
-      //Bail out completely now and make sure that future load will try to reload
-      forceDataReload();
-      setProcessingState(false, -1);
-      return false;
-    }
-
-    //At this point we know the workspace exists
-    m_workspace_names.insert(key, ws_name);
-    if( key == 0 )
-    {
-      // Load log information first
-      m_logvalues = loadDetectorLogs(work_dir, run_no);
-      if( m_uiForm.inst_opt->currentIndex() == 1 && m_logvalues.empty() )
+    if( key == 0 ) 
+    { 
+      sample_logs = logs;
+      if( m_uiForm.inst_opt->currentIndex() == 1 && sample_logs.isEmpty() )
       {
-	showInformationBox("Error: Cannot find log file for run " + run_no + ". \nReduction cannot continue.");
-	m_uiForm.load_dataBtn->setEnabled(true);
-	return false;
-      }
-
-      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-        (Mantid::API::AnalysisDataService::Instance().retrieve(ws_name.toStdString()));
-      if( ws != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !ws->readX(0).empty() )
-      {
-        m_uiForm.tof_min->setText(QString::number(ws->readX(0).front())); 
-        m_uiForm.tof_max->setText(QString::number(ws->readX(0).back()));
-      }
-
-      // Set the geometry
-      boost::shared_ptr<Mantid::API::Sample> sample_details = ws->getSample();
-      int geomid  = sample_details->getGeometryFlag();
-      if( geomid > 0 && geomid < 4 )
-      {
-	m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-	m_uiForm.sample_thick->setText(QString::number(sample_details->getThickness()));
-	m_uiForm.sample_width->setText(QString::number(sample_details->getWidth()));
-	m_uiForm.sample_height->setText(QString::number(sample_details->getHeight()));
-      }
-      else
-      {
-	m_uiForm.sample_geomid->setCurrentIndex(2);
-	m_uiForm.sample_thick->setText("1");
-	m_uiForm.sample_width->setText("8");
-	m_uiForm.sample_height->setText("8");
+        is_loaded = false;
+        showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
+        break;
       }
     }
-
-    QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
-    label->setText("/ " + QString::number(n_periods));
-    QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
-    userentry->setText("1");
-
-    load_success = true;
+    if( key == 1 ) 
+    { 
+      can_logs = logs;
+      if( m_uiForm.inst_opt->currentIndex() == 1 && can_logs.isEmpty() )
+      {
+        can_logs = sample_logs;
+        showInformationBox("Warning: Cannot find log file for can run, using sample values.");
+      }
+    }
+  }
+  if (!is_loaded) 
+  {
+    setProcessingState(false, -1);
+    return false;
   }
 
-  // Cannot do anything if nothing was loaded
-  if( !load_success ) 
+  // Sort out the log information
+  setGeometryDetails(sample_logs, can_logs);
+  
+  // Enter information from sample workspace on to analysis and geometry tab
+  Mantid::API::MatrixWorkspace_sptr sample_workspace;
+  try
   {
-   setProcessingState(false, -1);
-   return false;
+    sample_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+     (Mantid::API::AnalysisDataService::Instance().retrieve(getWorkspaceName(0).toStdString()));
+  }
+  catch(std::runtime_error &)
+  {
+    setProcessingState(false, -1);
+    showInformationBox("Error: Could not retrieve sample workspace from Mantid");
+    return false;
+  }
+  
+  if( sample_workspace != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !sample_workspace->readX(0).empty() )
+  {
+    m_uiForm.tof_min->setText(QString::number(sample_workspace->readX(0).front())); 
+    m_uiForm.tof_max->setText(QString::number(sample_workspace->readX(0).back()));
+  }
+
+  // Set the geometry
+  boost::shared_ptr<Mantid::API::Sample> sample_details = sample_workspace->getSample();
+  int geomid  = sample_details->getGeometryFlag();
+  if( geomid > 0 && geomid < 4 )
+  {
+    m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
+    m_uiForm.sample_thick->setText(QString::number(sample_details->getThickness()));
+    m_uiForm.sample_width->setText(QString::number(sample_details->getWidth()));
+    m_uiForm.sample_height->setText(QString::number(sample_details->getHeight()));
+  }
+  else
+  {
+    m_uiForm.sample_geomid->setCurrentIndex(2);
+    m_uiForm.sample_thick->setText("1");
+    m_uiForm.sample_width->setText("8");
+    m_uiForm.sample_height->setText("8");
+    //Warn user
+    m_uiForm.tabWidget->setCurrentIndex(2);
+    raiseOneTimeMessage("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.");
   }
 
   forceDataReload(false);
-  //Fill in the information on the geometry tab
-  setupGeometryDetails();
+
 
   for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
   {
@@ -1204,136 +1221,58 @@ bool SANSRunWindow::handleLoadButtonClick()
 /** 
  * Construct the python code to perform the analysis based on the 
  * current settings
- * @ replacewsnames Whether to replace the data workspace names
- * @param checkchanges Whether to check that a data reload is necessary
+ * @param type The reduction type: 1D or 2D
  */
-QString SANSRunWindow::constructReductionCode(bool , bool)
+QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
 {
-  if( !readPyReductionTemplate() ) return QString();
-  if( m_ins_defdir.isEmpty() ) m_ins_defdir = m_data_dir;
-  // Quick check that scattering sample number has been entered
-  if( m_uiForm.sct_sample_edit->text().isEmpty() )
+  //Construct a run script based upon the current values within the various widgets
+  QString exec_reduce = m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString() + 
+      "\nDetector('" + m_uiForm.detbank_sel->currentText() + "')\n";
+  if( type.startsWith("1D") )
   {
-    showInformationBox("Error: A scattering sample run number is required to continue.");
-    return QString();
-  } 
-
-  //Construct the code to execute
-  QString py_code = m_pycode_loqreduce;
-  py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
-  py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
-  py_code.replace("|DETBANK|", m_uiForm.detbank_sel->currentText());
-  
-  py_code.replace("|SCATTERSAMPLE|", m_workspace_names.value(0));
-  py_code.replace("|SCATTERCAN|", m_workspace_names.value(1));
-  py_code.replace("|TRANSMISSIONSAMPLE|", m_workspace_names.value(3));
-  py_code.replace("|TRANSMISSIONCAN|", m_workspace_names.value(4));
-  py_code.replace("|DIRECTSAMPLE|", m_workspace_names.value(6));
-
-  // Limit replacement
-  QString radius = m_uiForm.rad_min->text();
-  if( radius.isEmpty() ) radius = "-1.0";
-  py_code.replace("|RADIUSMIN|", radius);
-
-  radius = m_uiForm.rad_max->text();
-  if( radius.isEmpty() ) radius = "-1.0";
-  py_code.replace("|RADIUSMAX|", radius);
-
-  py_code.replace("|XBEAM|", m_uiForm.beam_x->text());
-  py_code.replace("|YBEAM|", m_uiForm.beam_y->text());
-  py_code.replace("|WAVMIN|", m_uiForm.wav_min->text());
-  py_code.replace("|WAVMAX|", m_uiForm.wav_max->text());
-  //Need to check for linear/log steps. If log then need to prepend a '-' to 
-  //the front so that the Rebin algorithm recognises this
-  QString step_prefix("");
-  if( m_uiForm.wav_dw_opt->currentIndex() == 1 ) 
-  {
-    step_prefix = "-";
-  }
-  py_code.replace("|WAVDELTA|", step_prefix + m_uiForm.wav_dw->text());
-
-  //dQ
-  step_prefix = "";
-  py_code.replace("|QMIN|", m_uiForm.q_min->text());
-  py_code.replace("|QMAX|", m_uiForm.q_max->text());
-  if( m_uiForm.q_dq_opt->currentIndex() == 1 ) step_prefix = "-";
-  py_code.replace("|QDELTA|", step_prefix  + m_uiForm.q_dq->text());
-
-  // Qxy
-  py_code.replace("|QXYMAX|", m_uiForm.qy_max->text());
-  step_prefix = "";
-  if( m_uiForm.qy_dqy_opt->currentIndex() == 1 ) step_prefix = "-";
-  py_code.replace("|QXYDELTA|", step_prefix  + m_uiForm.qy_dqy->text());
-
-  // Transmission behaviour
-  if( m_uiForm.prev_trans->isChecked() )
-  {
-    py_code.replace("|USEPREVTRANS|", "True");
+    exec_reduce += "Set1D()\n";
   }
   else
   {
-    py_code.replace("|USEPREVTRANS|", "False");
+    exec_reduce += "Set2D()\n";
   }
+  //Analysis details
+  exec_reduce += 
+    "LimitsR(" + m_uiForm.rad_min->text() + "," + m_uiForm.rad_max->text() + ")\n" +
+    "LimitsWav(" + m_uiForm.wav_min->text() + "," + m_uiForm.wav_max->text() + "," + 
+        m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() + "')\n" +
+    "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
+        m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n" +
+    "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
+        m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n"; 
 
-  //Gravity
+  //Centre values
+  exec_reduce += "SetCentre(" + m_uiForm.beam_x->text() + "," + m_uiForm.beam_y->text() + ")\n";
+  //Gravity correction
+  exec_reduce += "Gravity(";
   if( m_uiForm.gravity_check->isChecked() )
   {
-    py_code.replace("|ACCOUNTFORGRAVITY|", "True");
+    exec_reduce += "True)\n";
   }
   else
   {
-    py_code.replace("|ACCOUNTFORGRAVITY|", "False");
+    exec_reduce += "False)\n";
   }
+  //Sample offset
+  exec_reduce += "SetSampleOffset(" + m_uiForm.smpl_offset->text() + ")\n";
+  //Monitor spectrum
+  exec_reduce += "SetMonitorSpectrum(" + m_uiForm.monitor_spec->text() + ")\n";
+  //Extra mask information
+  addUserMaskStrings(exec_reduce);
 
-  // Efficiency
-  py_code.replace("|DIRECTFILE|", m_uiForm.direct_file->text());
-  py_code.replace("|FLATFILE|", m_uiForm.flat_file->text());
-
+  //Set geometry info
+  exec_reduce += 
+    "SampleHeight(" + m_uiForm.sample_height->text() + ")\n" + 
+    "SampleWidth(" + m_uiForm.sample_width->text() + ")\n" + 
+    "SampleThickness(" + m_uiForm.sample_thick->text() + ")\n"
+    "SampleGeometry(" + m_uiForm.sample_geomid->currentText().at(0) + ")\n";
   
-  py_code.replace("|SAMPLEZOFFSET|", m_uiForm.smpl_offset->text());
-  QString spectramask("");
-  QString timemask("");
-  createMaskStrings(spectramask, timemask);
-  py_code.replace("|SPECMASKSTRING|", spectramask);
-  py_code.replace("|TIMEMASKSTRING|", timemask);
-
-  py_code.replace("|MONSPEC|", m_uiForm.monitor_spec->text());
- 
-  QString backmonstart(""), backmonend("");
-  if( m_uiForm.inst_opt->currentText().startsWith("l", Qt::CaseInsensitive) )
-  {
-    backmonstart = "31000";
-    backmonend = "39000";
-  }
-  else
-  {
-    backmonstart = "85000";
-    backmonend = "100000";
-  }
-  py_code.replace("|BACKMONSTART|", backmonstart);
-  py_code.replace("|BACKMONEND|", backmonend);
-
-  py_code.replace("|SCALEFACTOR|", m_uiForm.scale_factor->text());
-  py_code.replace("|GEOMID|", m_uiForm.sample_geomid->currentText().at(0));
-  py_code.replace("|SAMPLEWIDTH|", m_uiForm.sample_width->text());
-  py_code.replace("|SAMPLEHEIGHT|", m_uiForm.sample_height->text());
-  py_code.replace("|SAMPLETHICK|", m_uiForm.sample_thick->text());
-  
-  // Log information
-  py_code.replace("|ZFRONTDET|", QString::number(m_logvalues["Front_Det_Z"], 'g', 10));
-  py_code.replace("|XFRONTDET|", QString::number(m_logvalues["Front_Det_X"], 'g', 10));
-  py_code.replace("|ROTFRONTDET|", QString::number(m_logvalues["Front_Det_Rot"], 'g', 10));
-  py_code.replace("|ZREARDET|", QString::number(m_logvalues["Rear_Det_Z"], 'g', 10));
-  py_code.replace("|XREARDET|", QString::number(m_logvalues["Rear_Det_X"], 'g', 10));
-  //Mask file correction values
-  py_code.replace("|ZCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Z_corr"], 'g', 10));
-  py_code.replace("|YCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Y_corr"], 'g', 10));
-py_code.replace("|XCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_X_corr"], 'g', 10));
-  py_code.replace("|ROTCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_Rot_corr"], 'g', 10));
-  py_code.replace("|ZCORREARDET|", QString::number(m_maskcorrections["Rear_Det_Z_corr"], 'g', 10));
-  py_code.replace("|XCORREARDET|", QString::number(m_maskcorrections["Rear_Det_X_corr"], 'g', 10));
-
-  return py_code;
+  return exec_reduce;
 }
 
 
@@ -1343,28 +1282,33 @@ py_code.replace("|XCORRFRONTDET|", QString::number(m_maskcorrections["Front_Det_
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
-    
+  
   //Currently the components are moved with each reduce click. Check if a load is necessary
   handleLoadButtonClick();
 
   int idtype(0);
   if( type.startsWith("2") ) idtype = 1;
 
-  QString py_code = constructReductionCode();
+  QString py_code = createAnalysisDetailsScript(type);
   if( py_code.isEmpty() )
   {
+    showInformationBox("Error: An error occurred while constructing the reduction code, please check installation.");
     return;
+  }
+
+  py_code += "\nWavRangeReduction(use_def_trans=";
+  if( m_uiForm.def_trans->isChecked() )
+  {
+    py_code += "DefaultTrans)\n";
+  }
+  else
+  {
+    py_code += "NewTrans)\n";
   }
 
   //Disable buttons so that interaction is limited while processing data
   setProcessingState(true, idtype);
   m_lastreducetype = idtype;
-
-  py_code.replace("|ANALYSISTYPE|", type);
-  py_code += 
-    "sample_setup = InitReduction(SCATTER_SAMPLE, [XBEAM_CENTRE, YBEAM_CENTRE], False)\n"
-    "can_setup = InitReduction(SCATTER_CAN, [XBEAM_CENTRE, YBEAM_CENTRE], True)\n"
-    "WavRangeReduction(sample_setup, can_setup, WAV1, WAV2)";
 
   //Execute the code
   runPythonCode(py_code, false);
@@ -1387,6 +1331,11 @@ void SANSRunWindow::handlePlotButtonClick()
 
 void SANSRunWindow::handleRunFindCentre()
 {
+  if( m_uiForm.beamstart_box->currentIndex() == 1 && (m_uiForm.beam_x->text().isEmpty() || m_uiForm.beam_y->text().isEmpty()) )
+  {
+    showInformationBox("Current centre postion is invalid, please check input.");
+    return;
+  }
 
   // Start iteration
   updateCentreFindingStatus("::SANS::Loading data");
@@ -1396,14 +1345,13 @@ void SANSRunWindow::handleRunFindCentre()
   setProcessingState(true, 0);
 
   // This checks whether we have a sample run and that it has been loaded
-  QString py_code = constructReductionCode(false, false);
+  QString py_code = createAnalysisDetailsScript("1D");
   if( py_code.isEmpty() )
   {
     setProcessingState(false, 0);
     return;
   }
 
-  py_code.replace("|ANALYSISTYPE|", "1D");
   if( m_uiForm.beam_rmin->text().isEmpty() )
   {
     m_uiForm.beam_rmin->setText("60");
@@ -1420,35 +1368,24 @@ void SANSRunWindow::handleRunFindCentre()
       m_uiForm.beam_rmax->setText("280");
     }
   }
-
   if( m_uiForm.beam_iter->text().isEmpty() )
   {
     m_uiForm.beam_iter->setText("15");
   }
 
+  //Find centre function
+  py_code += "FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" + m_uiForm.beam_rmax->text() + 
+      ",MaxIter=" + m_uiForm.beam_iter->text() + ",";
+
+
   if( m_uiForm.beamstart_box->currentIndex() == 0 )
   {
-    py_code += "Xstart = None; Ystart = None\n";
+    py_code += "xstart = None, ystart = None)\n";
   }
   else
   {
-    //
-    if( m_uiForm.beam_x->text().isEmpty() || m_uiForm.beam_y->text().isEmpty() )
-    {
-      showInformationBox("Current centre postion is invalid.");
-      return;
-    }
-    else
-    {
-      py_code += "Xstart = float(" + m_uiForm.beam_x->text() + "/1000.); Ystart = float(" + m_uiForm.beam_y->text() + "/1000.)\n";
-    }
+    py_code += "xstart=float(" + m_uiForm.beam_x->text() + ")/1000.,ystart=float(" + m_uiForm.beam_y->text() + ")/1000.),\n";
   }
-
-  py_code += "\nbeamcoords = FindBeamCentre(";
-  py_code += "rlow = float(" + m_uiForm.beam_rmin->text() + "/1000.), rupp = float(" 
-    + m_uiForm.beam_rmax->text() + "/1000.), MaxIter = " + m_uiForm.beam_iter->text() 
-    + ", xstart = Xstart, ystart = Ystart)\n"
-    + "print '|' + str(beamcoords[0]) + '|' + str(beamcoords[1])\n";
 
   updateCentreFindingStatus("::SANS::Iteration 1");
   m_uiForm.beamstart_box->setFocus();
@@ -1457,41 +1394,40 @@ void SANSRunWindow::handleRunFindCentre()
   //Connect up the logger to handle updating the centre finding status box
   connect(this, SIGNAL(logMessageReceived(const QString&)), this, 
 	  SLOT(updateCentreFindingStatus(const QString&)));
-
-  QString result = runPythonCode(py_code);
+  
+  runReduceScriptFunction(py_code);
   
   disconnect(this, SIGNAL(logMessageReceived(const QString&)), this, 
 	     SLOT(updateCentreFindingStatus(const QString&)));
-  
-  QTextStream reader(&result, QIODevice::ReadOnly);
-  double x(0.0), y(0.0);
-  bool found(false);
-  while( !reader.atEnd() )
-  {
-    QString line = reader.readLine();
-    if( line.startsWith('|') )
-    {
-      QStringList xycoords = result.split("|");
-      if( xycoords.size() == 3 )
-      {
-        x = xycoords[1].toDouble();
-        y = xycoords[2].toDouble();
-        found = true;
-      }
-    }
-  }
 
-  if( found )
+  QString coordstr = runReduceScriptFunction("printParameter('XBEAM_CENTRE');printParameter('YBEAM_CENTRE')\n");
+  
+  QString result("");
+  if( coordstr.isEmpty() )
   {
-    m_uiForm.beam_x->setText(QString::number(x*1000));
-    m_uiForm.beam_y->setText(QString::number(y*1000));
-    updateCentreFindingStatus("::SANS::Coordinates updated");
+    result = "::SANS::No coordinates returned!";
   }
   else
   {
-    updateCentreFindingStatus("::SANS::Error with search");
+    //Remove all internal whitespace characters and replace with single space
+    coordstr = coordstr.simplified();
+    QStringList xycoords = coordstr.split(" ");
+    if( xycoords.count() == 2 )
+    {
+      double coord = xycoords[0].toDouble();
+      m_uiForm.beam_x->setText(QString::number(coord*1000.));
+      coord = xycoords[1].toDouble();
+      m_uiForm.beam_y->setText(QString::number(coord*1000.));
+      result = "::SANS::Coordinates updated";
+    }
+    else
+    {
+      result = "::SANS::Incorrect number of parameters returned from function, check script.";
+
+    }
   }
-  forceDataReload();
+  updateCentreFindingStatus(result);
+  
   //Reenable stuff
   setProcessingState(false, 0);
 }
@@ -1536,31 +1472,41 @@ void SANSRunWindow::handleStepComboChange(int new_index)
  */
 void SANSRunWindow::handleShowMaskButtonClick()
 {
-  if( !readPyViewMaskTemplate() ) return;
+  QString analysis_script = createAnalysisDetailsScript("1D");
+  analysis_script += "\nViewCurrentMask()";
 
-  QString py_code = m_pycode_viewmask;
-  py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
-  py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
+  m_uiForm.showMaskBtn->setEnabled(false);
+  m_uiForm.showMaskBtn->setText("Working...");
 
-  py_code.replace("|XCENTRE|", m_uiForm.beam_x->text());
-  py_code.replace("|YCENTRE|", m_uiForm.beam_y->text());
+  runReduceScriptFunction(analysis_script);
 
-  // Shape mask if applicable
-  QString radius = m_uiForm.rad_min->text();
-  if( radius.isEmpty() ) radius = "-1.0";
-  g_log.debug("Min radius " + radius.toStdString());
-  py_code.replace("|RADIUSMIN|", radius);
+  m_uiForm.showMaskBtn->setEnabled(true);
+  m_uiForm.showMaskBtn->setText("Display mask");
 
-  radius = m_uiForm.rad_max->text();
-  if( radius.isEmpty() ) radius = "-1.0";
-  g_log.debug("Max radius " + radius.toStdString());
-  py_code.replace("|RADIUSMAX|", radius);
-  
-  //Other masks
-  QString spectramask, dummy;
-  createMaskStrings(spectramask, dummy);
-  py_code.replace("|MASKLIST|", spectramask);
-  runPythonCode(py_code);
+
+  //QString py_code = m_pycode_viewmask;
+  //py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
+  //py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
+
+  //py_code.replace("|XCENTRE|", m_uiForm.beam_x->text());
+  //py_code.replace("|YCENTRE|", m_uiForm.beam_y->text());
+
+  //// Shape mask if applicable
+  //QString radius = m_uiForm.rad_min->text();
+  //if( radius.isEmpty() ) radius = "-1.0";
+  //g_log.debug("Min radius " + radius.toStdString());
+  //py_code.replace("|RADIUSMIN|", radius);
+
+  //radius = m_uiForm.rad_max->text();
+  //if( radius.isEmpty() ) radius = "-1.0";
+  //g_log.debug("Max radius " + radius.toStdString());
+  //py_code.replace("|RADIUSMAX|", radius);
+  //
+  ////Other masks
+  //QString spectramask, dummy;
+  //createMaskStrings(spectramask, dummy);
+  //py_code.replace("|MASKLIST|", spectramask);
+  //runPythonCode(py_code);
 }
 
 /**
@@ -1570,23 +1516,30 @@ void SANSRunWindow::handleInstrumentChange(int index)
 {
   if( index == 0 ) 
   {
-    m_uiForm.monitor_spec->setText("2");
     m_uiForm.detbank_sel->setItemText(0, "main-detector-bank");
     m_uiForm.detbank_sel->setItemText(1, "HAB");
     m_uiForm.beam_rmin->setText("60");
     m_uiForm.beam_rmax->setText("200");
     
     m_uiForm.geom_stack->setCurrentIndex(0);
+
+    // Set allowed extensions
+    m_uiForm.file_opt->clear();
+    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   }
   else
   { 
-    m_uiForm.monitor_spec->setText("2");
     m_uiForm.detbank_sel->setItemText(0, "rear-detector");
     m_uiForm.detbank_sel->setItemText(1, "front-detector");
     m_uiForm.beam_rmin->setText("60");
     m_uiForm.beam_rmax->setText("280");
 
     m_uiForm.geom_stack->setCurrentIndex(1);
+
+    //File extensions
+    m_uiForm.file_opt->clear();
+    m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
+    m_uiForm.file_opt->addItem("nexus", QVariant(".nxs"));
   }
   m_cfg_loaded = false;
 }
@@ -1619,132 +1572,165 @@ void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
 }
 
 /**
- * Run the appropriate command to load the data
- * @param work_dir The directory
- * @param run_no The run number
- * @param ext The file extension
- * @param workspace The OutputWorkspace
- * @returns The number of periods in the workspace. Returns zero on failure
- */
-int SANSRunWindow::runLoadData(const QString & work_dir, const QString & run_no, const QString & ext, const QString & workspace)  
+* Switch between run modes
+* @param mode_id Indicates which toggle has been pressed
+*/
+void SANSRunWindow::switchMode(int mode_id)
 {
-  if( workspace.isEmpty() )
+  if( mode_id == SANSRunWindow::SingleMode )
   {
-    return 0;
+    m_uiForm.mode_stack->setCurrentIndex(0);
   }
-  QString filepath = getRawFilePath(work_dir, run_no, ext);
-  if( filepath.isEmpty() )
-  {   
-    return 0;
-  }
-  if( workspaceExists(workspace) )
+  else if( mode_id == SANSRunWindow::BatchMode )
   {
-    runPythonCode(QString("mtd.deleteWorkspace('") + workspace + QString("')"),false);
+    m_uiForm.mode_stack->setCurrentIndex(1);
   }
+  else {}
+}
 
-  g_log.debug("Attempting to load " + filepath.toStdString());
-  QString py_code("");
-  if( ext == ".raw" )
+/** 
+ * Run a SANS assign command
+ * @param key The key of the edit box to assign from
+ * @param logs An output parameter specifying the log data
+ */
+bool SANSRunWindow::runAssign(int key, QString & logs)
+{
+  //Work out if sans/trans and sample/can
+  bool is_trans(false);
+  if( key > 2 && key < 6 )
   {
-    py_code = "LoadRaw";
+    is_trans = true;
+  }
+  bool is_can(false);
+  if( key == 1 || key == 4 )
+  {
+    is_can = true;
+  }
+  
+  // Default extension if the box run number does not contain one
+  QString extension = m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString();
+  QString run_number = m_run_no_boxes.value(key)->text();
+  if( QFileInfo(run_number).completeSuffix().isEmpty() )
+  {
+    if( run_number.endsWith(".") ) 
+    {
+      run_number.chop(1);
+    }
+    run_number += extension;
+  }
+  bool status(true);
+  if( is_trans )
+  {
+    QString direct_run = m_run_no_boxes.value(key + 3)->text();
+    if( !direct_run.isEmpty() && QFileInfo(direct_run).completeSuffix().isEmpty() )
+    {
+      if( direct_run.endsWith(".") ) 
+      {
+        direct_run.chop(1);
+      }
+      direct_run += extension;
+    }
+    QString assign_fn;
+    if( is_can )
+    {
+      assign_fn = "TransmissionCan";
+    }
+    else
+    {
+      assign_fn = "TransmissionSample";
+    }
+    assign_fn += "('" + run_number + "','" + direct_run + "')";
+    QString ws_names = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
+    QString trans_ws = ws_names.section(" ", 0,0);
+    QString direct_ws = ws_names.section(" ", 1);
+    status = setNumberPeriods(key, trans_ws);
+    status &= setNumberPeriods(key + 3, direct_ws);
+    if( status )
+    {
+      m_workspace_names.insert(key, trans_ws);
+      m_workspace_names.insert(key + 3, direct_ws);
+    }
   }
   else
   {
-    py_code = "LoadNexus";
+    QString assign_fn;
+    if( is_can )
+    {
+      assign_fn = "AssignCan";
+    }
+    else
+    {
+      assign_fn = "AssignSample";
+    }
+    assign_fn += "('" + run_number + "')";
+    QString run_info = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
+    QString base_workspace = run_info.section(" ",0,0);
+    logs = run_info.section(" ", 1);
+    if( !logs.isEmpty() )
+    {
+      trimPyMarkers(logs);
+    }
+    status = setNumberPeriods(key, base_workspace);
+    if( status )
+    {
+      m_workspace_names.insert(key, base_workspace);
+    }
   }
-  py_code += "(Filename='" + filepath + "', OutputWorkspace='" + workspace + "'";
-  if( workspace.contains("trans") )
-  {
-    py_code += ", SpectrumMax=8";
-  }
-  py_code += ")"; 
-  QString results = runPythonCode(py_code);
-  if( !results.isEmpty() )
-  {
-    return 0;
-  }
-  g_log.debug("Loading algorithm succeeded.");
+  return status;
+}
 
-  if( ext == ".raw" )
+ /** 
+  * Set number of periods for the given workspace
+  * @param key The box this applies to
+  * @param workspace_name The name of the workspace to check
+  * @returns A boolean indicating success/failure
+  */
+bool SANSRunWindow::setNumberPeriods(int key, const QString & workspace_name)
+{
+  int nperiods(0);
+  QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
+  QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
+  bool is_loaded(true);
+  using namespace Mantid::API;
+  if( workspaceExists(workspace_name) )
   {
-    py_code = "LoadSampleDetailsFromRaw(InputWorkspace='" + workspace 
-      + "', Filename='" + filepath + "')";
-    runPythonCode(py_code, false);
-  }
-
-  //Load succeeded so find the number of periods. (Here the number of workspaces in the group)
-  //Retrieve shoudn't throw but lets wrap it just in case
-  Mantid::API::Workspace_sptr wksp_ptr;
-  try
-  {
-    wksp_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace.toStdString());
-  }
-  catch(Mantid::Kernel::Exception::NotFoundError &)
-  {
-    g_log.error("Couldn't find workspace " + workspace.toStdString() + " in ADS.");
-    return 0;
-  }
-
-  // Find the number of periods
-  Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp_ptr);
-  if( ws_group )
-  {
-    return ws_group->getNames().size();
+    Mantid::API::Workspace_sptr wksp = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name.toStdString()); 
+    if( boost::shared_ptr<WorkspaceGroup> ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(wksp) )
+    {
+      nperiods = ws_group->getNames().size();
+    }
+    else
+    {
+      nperiods = 1;
+    }
+    label->setText("/ " + QString::number(nperiods));
+    userentry->setText("1");
   }
   else
   {
-    return 1;
+    nperiods = 0;
+    userentry->clear();
+    label->setText("/ ??");
+    is_loaded = false;
   }
-
+  return is_loaded;
 }
 
 /**
- * Load log information. If the file has a raw extension then a log file with the same stem but .log is used
- * @param work_dir The directory
- * @param run_no The run number
- * @returns A map of log name to value
+ *
  */
-QHash<QString, double> SANSRunWindow::loadDetectorLogs(const QString& work_dir, const QString & run_no)
+QString SANSRunWindow::getWorkspaceName(int key)
 {
-  //Not necesary for LOQ for
-  if( m_uiForm.inst_opt->currentIndex() == 0 ) return QHash<QString, double>();
-
-  QString filepath = getRawFilePath(work_dir, run_no, m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString());
-  // Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the run file name for now
-  QString logname = QFileInfo(filepath).baseName();
-  logname[6] = '0';
-  QString suffix = ".log";
-  QString logpath = QFileInfo(filepath).path() + "/" + logname + suffix;
-  QFile handle(logpath);
-  
-  if( !handle.open(QIODevice::ReadOnly | QIODevice::Text) )
+  QString name = m_workspace_names.value(key);
+  if( !name.isEmpty() )
   {
-    return QHash<QString, double>();
-  }
-    
-  QHash<QString, double> logvalues;
-  logvalues["Rear_Det_X"] = 0.0;
-  logvalues["Rear_Det_Z"] = 0.0;
-  logvalues["Front_Det_X"] = 0.0;
-  logvalues["Front_Det_Z"] = 0.0;
-  logvalues["Front_Det_Rot"] = 0.0;
-  QList<QString> logkeys = logvalues.keys();
-  
-  QTextStream reader(&handle);
-  while( !reader.atEnd() )
-  {
-    QString line = reader.readLine();
-    QStringList items = line.split(QRegExp("\\s+"));
-    QString entry = items.value(1);
-    if( logkeys.contains(entry) )
+    QString period = qobject_cast<QLineEdit*>(m_period_lbls.value(key)->buddy())->text();
+    if( period != "1" )
     {
-      // Log values are in mm 
-      logvalues[entry] = items.value(2).toDouble();
+      name += "_" + period;
     }
   }
-  handle.close();
-  return logvalues;
-    
+  return name;
 }
 
 /**
@@ -1760,7 +1746,7 @@ void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNoti
   {
     if( wksp_name == m_workspace_names.value(key) )
     {
-      m_run_changed = true;
+      forceDataReload();
       return;
     }
   }
@@ -1769,14 +1755,27 @@ void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNoti
 /**
  * Format a double as a string
  * @param value The double to convert to a string
+ * @param colour The colour
  * @param format The format char
  * @param precision The precision
- * @param colour The colour
  */
-QString SANSRunWindow::formatDouble(double value, char format, int precision, const QString & colour)
+QString SANSRunWindow::formatDouble(double value, const QString & colour, char format, int precision)
 {
   return QString("<font color='") + colour + QString("'>") + QString::number(value, format, precision)  + QString("</font>");
 }
+
+/**
+ * Raise a message if current status allows
+ * @param msg The message to include in the box
+*/
+void SANSRunWindow::raiseOneTimeMessage(const QString & msg)
+{
+  if( m_warnings_issued ) return;
+  
+  showInformationBox(msg);
+  m_warnings_issued = true;
+}
+
 
 /**
  * Rest the geometry details box 
@@ -1786,18 +1785,6 @@ void SANSRunWindow::resetGeometryDetailsBox()
   QString blank("-");
   //LOQ
   m_uiForm.dist_mod_mon->setText(blank);
-  m_uiForm.dist_sample_ms->setText(blank);
-  m_uiForm.dist_smp_mdb->setText(blank);
-  m_uiForm.dist_smp_hab->setText(blank);
-
-  m_uiForm.dist_can_ms->setText(blank);
-  m_uiForm.dist_can_mdb->setText(blank);
-  m_uiForm.dist_can_hab->setText(blank);
-
-  m_uiForm.dist_bkgd_ms->setText(blank);
-  m_uiForm.dist_bkgd_mdb->setText(blank);
-  m_uiForm.dist_bkgd_hab->setText(blank);
-  
 
   //SANS2D
   m_uiForm.dist_mon_s2d->setText(blank);
@@ -1805,24 +1792,24 @@ void SANSRunWindow::resetGeometryDetailsBox()
   m_uiForm.dist_can_ms_s2d->setText(blank);
   m_uiForm.dist_bkgd_ms_s2d->setText(blank);
 
-  m_uiForm.dist_smp_rearX->setText(blank);
-  m_uiForm.dist_smp_rearZ->setText(blank);
-  m_uiForm.dist_smp_frontX->setText(blank);
-  m_uiForm.dist_smp_frontZ->setText(blank);
-  m_uiForm.smp_rot->setText(blank);
-
-  m_uiForm.dist_can_rearX->setText(blank);
-  m_uiForm.dist_can_rearZ->setText(blank);
-  m_uiForm.dist_can_frontX->setText(blank);
-  m_uiForm.dist_can_frontZ->setText(blank);
-  m_uiForm.can_rot->setText(blank);
-
-  m_uiForm.dist_bkgd_rearX->setText(blank);
-  m_uiForm.dist_bkgd_rearZ->setText(blank);
-  m_uiForm.dist_bkgd_frontX->setText(blank);
-  m_uiForm.dist_bkgd_frontZ->setText(blank);
-  m_uiForm.bkgd_rot->setText(blank);
-
+  for(int i = 0; i < 3; ++i )
+  {
+    //LOQ
+    QMutableHashIterator<QString,QLabel*> litr(m_loq_detlabels[i]);
+    while(litr.hasNext())
+    {
+      litr.next();
+      litr.value()->setText(blank);
+    }
+    //SANS2D
+    QMutableHashIterator<QString,QLabel*> sitr(m_s2d_detlabels[i]);
+    while(sitr.hasNext())
+    {
+      sitr.next();
+      sitr.value()->setText(blank);
+    }
+  }
+  
 }
 
 void SANSRunWindow::cleanup()

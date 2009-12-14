@@ -69,7 +69,7 @@ CORRECTION_TYPE = '1D'
 SAMPLE_Z_CORR = 0.0
 
 # Scaling values
-RESCALE = 1.0*100.0
+RESCALE = 100.  # percent
 SAMPLE_GEOM = 3
 SAMPLE_WIDTH = 1.0
 SAMPLE_HEIGHT = 1.0
@@ -134,18 +134,29 @@ TRANS_UDET_DET = 3
 #                              Interface functions (to be called from scripts or the GUI)
 #
 ###################################################################################################################
+_QUIET_ = False
 # "Enumerations"
 DefaultTrans = True
 NewTrans = False
+# Mismatched detectors
+_MARKED_DETS_ = []
+
+def SetQuietMode(quiet = True):
+    global _QUIET_
+    _QUIET_ = quiet
 
 # Print a message and log it if the 
 def _printMessage(msg, log = True):
+    if _QUIET_: 
+        return
     print msg
     if log == True:
         mantid.sendLogMessage(msg)
 
 # Warn the user
 def _issueWarning(msg):
+    if _QUIET_:
+        return
     print 'WARNING: ' + msg
 
 # Fatal error
@@ -170,6 +181,11 @@ def UserPath(directory):
     global USER_PATH
     USER_PATH = directory
 
+##################################################### 
+# Access function for retrieving parameters
+#####################################################
+def printParameter(var):
+    exec('print ' + var)
 
 ########################### 
 # Instrument
@@ -211,45 +227,50 @@ def Set2D():
 ########################### 
 _SAMPLE_SETUP = None
 _SAMPLE_RUN = ''
-def AssignSample(sample_run):
+def AssignSample(sample_run, reload = False):
     global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN
     _SAMPLE_RUN = sample_run
-    SCATTER_SAMPLE = _assignHelper(sample_run, False)
+    SCATTER_SAMPLE = _assignHelper(sample_run, False, reload)
     _SAMPLE_SETUP = None
     if (INSTR_NAME == 'SANS2D' and sample_run != ''):
+        global _MARKED_DETS_
+        _MARKED_DETS_ = []
         logvalues = _loadDetectorLogs(sample_run)
+        if logvalues == None:
+            mtd.deleteWorkspace(SCATTER_SAMPLE)
+            fatalError("Sample logs cannot be loaded, cannot continue")
     else:
-        return
+        return SCATTER_SAMPLE, None
         
     global FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X
-    FRONT_DET_Z = logvalues['Front_Det_Z']
-    FRONT_DET_X = logvalues['Front_Det_X']
-    FRONT_DET_ROT = logvalues['Front_Det_Rot']
-    REAR_DET_Z = logvalues['Rear_Det_Z']
-    REAR_DET_X = logvalues['Rear_Det_X']
+    FRONT_DET_Z = float(logvalues['Front_Det_Z'])
+    FRONT_DET_X = float(logvalues['Front_Det_X'])
+    FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
+    REAR_DET_Z = float(logvalues['Rear_Det_Z'])
+    REAR_DET_X = float(logvalues['Rear_Det_X'])
+    
+    return SCATTER_SAMPLE, logvalues
 
 ########################### 
 # Set the scattering can raw workspace
 ########################### 
 _CAN_SETUP = None
 _CAN_RUN = ''
-def AssignCan(can_run):
+def AssignCan(can_run, reload = False):
     global SCATTER_CAN, _CAN_SETUP, _CAN_RUN
     _CAN_RUN = can_run
-    SCATTER_CAN = _assignHelper(can_run, False)
+    SCATTER_CAN = _assignHelper(can_run, False, reload)
     _CAN_SETUP  = None
     if (INSTR_NAME == 'SANS2D' and can_run != ''):
+        global _MARKED_DETS_
+        _MARKED_DETS_ = []
         logvalues = _loadDetectorLogs(can_run)
+        if logvalues == None:
+            _issueWarning("Can logs could not be loaded, using sample values.")
+            return SCATTER_CAN, "()"
     else:
-        return
-    # Check against sample values and warn if they are not the same but still continue reduction
-    can_values = []
-    can_values.append(logvalues['Front_Det_Z'] + FRONT_DET_Z_CORR)
-    can_values.append(logvalues['Front_Det_X'] + FRONT_DET_X_CORR)
-    can_values.append(logvalues['Front_Det_Rot'] + FRONT_DET_ROT_CORR)
-    can_values.append(logvalues['Rear_Det_Z'] + REAR_DET_Z_CORR)
-    can_values.append(logvalues['Rear_Det_X'] + REAR_DET_X_CORR)
-
+        return SCATTER_CAN, ""
+    
     smp_values = []
     smp_values.append(FRONT_DET_Z + FRONT_DET_Z_CORR)
     smp_values.append(FRONT_DET_X + FRONT_DET_X_CORR)
@@ -257,30 +278,50 @@ def AssignCan(can_run):
     smp_values.append(REAR_DET_Z + REAR_DET_Z_CORR)
     smp_values.append(REAR_DET_X + REAR_DET_X_CORR)
 
+    # Check against sample values and warn if they are not the same but still continue reduction
+    if len(logvalues) == 0:
+        return  SCATTER_CAN, logvalues
+    
+    can_values = []
+    can_values.append(float(logvalues['Front_Det_Z']) + FRONT_DET_Z_CORR)
+    can_values.append(float(logvalues['Front_Det_X']) + FRONT_DET_X_CORR)
+    can_values.append(float(logvalues['Front_Det_Rot']) + FRONT_DET_ROT_CORR)
+    can_values.append(float(logvalues['Rear_Det_Z']) + REAR_DET_Z_CORR)
+    can_values.append(float(logvalues['Rear_Det_X']) + REAR_DET_X_CORR)
+
+
     det_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
     for i in range(0, 5):
         if math.fabs(smp_values[i] - can_values[i]) > 5e-03:
             _issueWarning(det_names[i] + " values differ between sample and can runs. Sample = " + str(smp_values[i]) + \
                               ' , Can = ' + str(can_values[i]))
+            _MARKED_DETS_.append(det_names[i])
+    
+    return SCATTER_CAN, logvalues
 
 ########################### 
 # Set the trans sample and measured raw workspaces
 ########################### 
-def TransmissionSample(sample, direct):
+def TransmissionSample(sample, direct, reload = False):
     global TRANS_SAMPLE, DIRECT_SAMPLE
-    TRANS_SAMPLE = _assignHelper(sample, True)
-    DIRECT_SAMPLE = _assignHelper(direct, True)
+    TRANS_SAMPLE = _assignHelper(sample, True, reload)
+    DIRECT_SAMPLE = _assignHelper(direct, True, reload)
+    return TRANS_SAMPLE, DIRECT_SAMPLE
 
 ########################## 
 # Set the trans sample and measured raw workspaces
 ########################## 
-def TransmissionCan(can, direct):
+def TransmissionCan(can, direct, reload = False):
     global TRANS_CAN, DIRECT_CAN
-    TRANS_CAN = _assignHelper(can, True)
-    DIRECT_CAN = _assignHelper(direct, True)
+    TRANS_CAN = _assignHelper(can, True, reload)
+    if direct == '' or direct == None:
+        DIRECT_CAN = DIRECT_SAMPLE 
+    else:
+        DIRECT_CAN = _assignHelper(direct, True, reload)
+    return TRANS_CAN, DIRECT_CAN
 
 # Helper function
-def _assignHelper(run_string, is_trans):
+def _assignHelper(run_string, is_trans, reload = False):
     if run_string == '':
         return ''
     pieces = run_string.split('.')
@@ -293,6 +334,9 @@ def _assignHelper(run_string, is_trans):
         wkspname =  run_no + '_trans_' + ext.lower()
     else:
         wkspname =  run_no + '_sans_' + ext.lower()
+
+    if reload == False and mtd.workspaceExists(wkspname):
+        return wkspname
 
     if INSTR_NAME == 'LOQ':
         field_width = 5
@@ -343,22 +387,31 @@ def _loadDetectorLogs(run_string):
 
     # Build a dictionary of log data 
     logvalues = {}
-    logvalues['Rear_Det_X'] = 0.0
-    logvalues['Rear_Det_Z'] = 0.0
-    logvalues['Front_Det_X'] = 0.0
-    logvalues['Front_Det_Z'] = 0.0
-    logvalues['Front_Det_Rot'] = 0.0
-    file_handle = open(filename, 'r')
+    logvalues['Rear_Det_X'] = '0.0'
+    logvalues['Rear_Det_Z'] = '0.0'
+    logvalues['Front_Det_X'] = '0.0'
+    logvalues['Front_Det_Z'] = '0.0'
+    logvalues['Front_Det_Rot'] = '0.0'
+    try:
+        file_handle = open(filename, 'r')
+    except IOError:
+        _issueWarning("Log file \"" + filename + "\" could not be loaded.")
+        return None
+        
     for line in file_handle:
         parts = line.split()
         if len(parts) != 3:
             _issueWarning('Incorrect structure detected in logfile "' + filename + '" for line \n"' + line + '"\nEntry skipped')
         component = parts[1]
         if component in logvalues.keys():
-            logvalues[component] = float(parts[2])
+            logvalues[component] = parts[2]
     
     file_handle.close()
     return logvalues
+
+# Return the list of mismatched detector names
+def GetMismatchedDetList():
+    return _MARKED_DETS_
 
 #########################
 # Limits 
@@ -375,11 +428,18 @@ def LimitsQXY(qmin, qmax, step, type):
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
     
 def Gravity(flag):
-    if isinstance(flag, bool) or elif isinstance(flag, int):
+    if isinstance(flag, bool) or isinstance(flag, int):
         global GRAVITY
         GRAVITY = flag
     else:
         _warnUser("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(GRAVITY))
+        
+###################################
+# Scaling value
+###################################
+def _SetScales(scalefactor):
+    global RESCALE
+    RESCALE = scalefactor * 100.0
 
 ######################### 
 # Sample geometry flag
@@ -483,8 +543,7 @@ def MaskFile(filename):
         elif upper_line.startswith('MON/'):
             details = line[4:]
             if details.upper().startswith('LENGTH'):
-                global MONITORSPECTRUM
-                MONITORSPECTRUM = int(details.partition(' ')[2])
+                SetMonitorSpectrum(int(details.split()[1]))
             else:
                 filepath = details[7:].rstrip()
                 if '[' in filepath:
@@ -492,7 +551,6 @@ def MaskFile(filename):
                     filepath = filepath[idx + 1:]
                 if not os.path.isabs(filepath):
                     filepath = os.path.join(USER_PATH, filepath)
-
                 type = details[0:6]
                 if type.upper() == 'DIRECT':
                     global DIRECT_BEAM_FILE
@@ -504,12 +562,10 @@ def MaskFile(filename):
             SetCentre(float(values[2]), float(values[3]))
         elif upper_line.startswith('SET SCALES'):
             values = upper_line.split()
-            global RESCALE
-            RESCALE = float(values[2])*100.0
+            _SetScales(float(values[2]))
         elif upper_line.startswith('SAMPLE/OFFSET'):
             values = upper_line.split()
-            global SAMPLE_Z_CORR
-            SAMPLE_Z_CORR = float(values[1])/1000.
+            SetSampleOffset(values[1])
         elif upper_line.startswith('DET/CORR'):
             _readDetectorCorrections(upper_line[8:])
         else:
@@ -592,6 +648,14 @@ def _readDetectorCorrections(details):
         else:
             pass    
 
+def SetSampleOffset(value):
+    global SAMPLE_Z_CORR
+    SAMPLE_Z_CORR = float(value)/1000.
+
+def SetMonitorSpectrum(spec):
+    global MONITORSPECTRUM
+    MONITORSPECTRUM = spec
+
 def displayMaskFile():
     print '-- Mask file defaults --'
     print '    Wavelength range: ',WAV1, WAV2, DWAV
@@ -633,7 +697,12 @@ def _initReduction(xcentre = None, ycentre = None):
 ##
 # Run the reduction for a given wavelength range
 ##
-def WavRangeReduction(wav_start, wav_end, use_def_trans = DefaultTrans, finding_centre = False):
+def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultTrans, finding_centre = False):
+    if wav_start == None:
+        wav_start = WAV1
+    if wav_end == None:
+        wav_end = WAV2
+
     if finding_centre == False:
         _printMessage("Running reduction for wavelength range " + str(wav_start) + '-' + str(wav_end))
     # This only performs the init if it needs to
@@ -840,7 +909,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     ########################## Masking  ################################################
     # Mask the corners and beam stop if radius parameters are given
     maskpt_rmin = run_setup.getMaskPtMin()
-    maskpt_rmax = run_setup.getMaskPtMax()	
+    maskpt_rmax = run_setup.getMaskPtMax()
     if finding_centre == True:
         if RMIN > 0.0: 
             SANSUtility.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
@@ -851,7 +920,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
             SANSUtility.MaskInsideCylinder(final_result, RMIN, maskpt_rmin[0], maskpt_rmin[1])
         if RMAX > 0.0:
             SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
-            
+
     # Mask other requested spectra that are given in the GUI
     speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, SPECMIN, DIMENSION)
     # Spectrum mask
@@ -1095,7 +1164,38 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         _CAN_SETUP = None
     
     RMIN = DEF_RMIN
-    RMAX = DEF_RMAX    
+    RMAX = DEF_RMAX
+
+
+##################### View mask details #####################################################
+
+def ViewCurrentMask():
+    top_layer = 'CurrentMask'
+    LoadEmptyInstrument(INSTR_DIR + '/' + INSTR_NAME + "_Definition.xml",top_layer)
+    maskpt_rmin, maskpt_rmax = SetupComponentPositions(DETBANK, top_layer, XBEAM_CENTRE, YBEAM_CENTRE)
+    if RMIN > 0.0: 
+        SANSUtility.MaskInsideCylinder(top_layer, RMIN, maskpt_rmin[0], maskpt_rmin[1])
+    if RMAX > 0.0:
+        SANSUtility.MaskOutsideCylinder(top_layer, RMAX, maskpt_rmax[0], maskpt_rmax[1])
+    
+    inst_details = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)
+    
+    firstspec = 3
+    if INSTR_NAME == "SANS2D":
+        firstspec += 2
+    
+    # Spectra masks
+    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, inst_details[0])
+    # Spectrum mask
+    SANSUtility.MaskBySpecNumber(top_layer, speclist)
+    
+    # Mark up "dead" detectors with error value 
+    FindDeadDetectors(top_layer, top_layer, DeadValue=500)
+
+    # Visualise the result
+    instrument_win = qti.app.mantidUI.getInstrumentView(top_layer)
+    instrument_win.showWindow()
+
 ############################################################################################################################
 
 # These are to work around for the moment

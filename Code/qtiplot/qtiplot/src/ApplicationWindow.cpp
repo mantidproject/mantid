@@ -15828,8 +15828,11 @@ void ApplicationWindow::performCustomAction(QAction *action)
     usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
     MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
     if( user_interface )
-    {
+    { 
+      QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(), usr_win->frameGeometry().bottomRight() - usr_win->geometry().bottomRight());
       usr_win->setWidget(user_interface);
+      QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(), frame.bottomRight() + user_interface->geometry().bottomRight());
+      usr_win->setGeometry(iface_geom);
       connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, SLOT(runPythonScript(const QString&)));
       d_workspace->addSubWindow(usr_win);
       usr_win->show();
