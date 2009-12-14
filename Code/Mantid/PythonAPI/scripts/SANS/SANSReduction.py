@@ -44,7 +44,7 @@ TIMEMASKSTRING = ''
 # Instrument information
 INSTR_DIR = mtd.getConfigProperty('instrumentDefinition.directory')
 INSTR_NAME = 'SANS2D'
-# Beam centre in mm
+# Beam centre in metres
 XBEAM_CENTRE = None
 YBEAM_CENTRE = None
 
@@ -207,7 +207,7 @@ def LOQ():
     MONITORSPECTRUM = 2
 
 def Detector(det_name):
-    if INSTR_NAME == 'SANS2D' and (det_name == 'rear-detector' or det_name == 'front_detector') or \
+    if INSTR_NAME == 'SANS2D' and (det_name == 'rear-detector' or det_name == 'front-detector') or \
             INSTR_NAME == 'LOQ' and (det_name == 'main-detector-bank' or det_name == 'HAB'):
         global DETBANK
         DETBANK = det_name
@@ -837,7 +837,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         return fulltransws
 
 ##
-# Setup component positions
+# Setup component positions, xbeam and ybeam in metres
 ##
 def SetupComponentPositions(detector, dataws, xbeam, ybeam):
     # Put the components in the correct place

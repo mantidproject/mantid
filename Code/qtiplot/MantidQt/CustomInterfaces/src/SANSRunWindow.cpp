@@ -241,7 +241,7 @@ void SANSRunWindow::readSettings()
   m_uiForm.datadir_edit->setText(value_store.value("data_dir").toString());
   m_uiForm.userfile_edit->setText(value_store.value("user_file").toString());
   m_uiForm.inst_opt->setCurrentIndex(value_store.value("instrument", 0).toInt());
-  m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
+  
 
   int mode_flag = value_store.value("runmode", 0).toInt();
   if( mode_flag == SANSRunWindow::SingleMode )
@@ -253,17 +253,18 @@ void SANSRunWindow::readSettings()
     m_uiForm.batch_mode_btn->click();
   }
 
-  value_store.endGroup();
-
   //The instrument definition directory
   m_ins_defdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory"));
-  
-  g_log.debug() << "Found previous data directory " << m_uiForm.datadir_edit->text().toStdString()
-    << "\nFound previous user mask file" << m_uiForm.userfile_edit->text().toStdString() 
-    << "\nFound instrument definition directory " << m_ins_defdir.toStdString() << std::endl;
 
   // Setup for instrument
   handleInstrumentChange(m_uiForm.inst_opt->currentIndex());
+  //Set old file extension
+  m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
+  value_store.endGroup();
+
+  g_log.debug() << "Found previous data directory " << m_uiForm.datadir_edit->text().toStdString()
+    << "\nFound previous user mask file" << m_uiForm.userfile_edit->text().toStdString() 
+    << "\nFound instrument definition directory " << m_ins_defdir.toStdString() << std::endl;
 }
 
 /**
@@ -852,9 +853,9 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     }
 
     QString marked_dets = runReduceScriptFunction("print GetMismatchedDetList(),").trimmed();
+    trimPyMarkers(marked_dets);
     if( !marked_dets.isEmpty() )
     {
-      trimPyMarkers(marked_dets);
       QStringList detnames = marked_dets.split(",");
       QStringListIterator itr(detnames);
       while( itr.hasNext() )
@@ -1267,6 +1268,8 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     "SampleThickness(" + m_uiForm.sample_thick->text() + ")\n"
     "SampleGeometry(" + m_uiForm.sample_geomid->currentText().at(0) + ")\n";
   
+  showInformationBox(exec_reduce);
+
   return exec_reduce;
 }
 
@@ -1657,7 +1660,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     {
       assign_fn = "AssignSample";
     }
-    assign_fn += "('" + run_number + "')";
+    assign_fn += "('" + run_number + "', reload=True)";
     QString run_info = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
     QString base_workspace = run_info.section(" ",0,0);
     logs = run_info.section(" ", 1);
