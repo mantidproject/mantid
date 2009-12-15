@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>771</width>
-    <height>427</height>
+    <height>415</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -166,7 +166,7 @@
        <item>
         <widget class="QStackedWidget" name="mode_stack" >
          <property name="currentIndex" >
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="page_5" >
           <layout class="QVBoxLayout" name="verticalLayout_9" >
@@ -884,7 +884,13 @@
               <set>QAbstractItemView::NoEditTriggers</set>
              </property>
              <property name="selectionMode" >
-              <enum>QAbstractItemView::NoSelection</enum>
+              <enum>QAbstractItemView::MultiSelection</enum>
+             </property>
+             <property name="selectionBehavior" >
+              <enum>QAbstractItemView::SelectRows</enum>
+             </property>
+             <property name="textElideMode" >
+              <enum>Qt::ElideRight</enum>
              </property>
              <column>
               <property name="text" >
@@ -922,37 +928,6 @@
               </property>
              </column>
             </widget>
-           </item>
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_10" >
-             <item>
-              <widget class="QCheckBox" name="plotngo_check" >
-               <property name="text" >
-                <string>Plot output</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="verbose_check" >
-               <property name="text" >
-                <string>Verbose</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_18" >
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0" >
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
            </item>
           </layout>
          </widget>
@@ -1731,6 +1706,19 @@ p, li { white-space: pre-wrap; }
           </item>
          </layout>
         </widget>
+       </item>
+       <item row="4" column="1" >
+        <spacer name="verticalSpacer_2" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

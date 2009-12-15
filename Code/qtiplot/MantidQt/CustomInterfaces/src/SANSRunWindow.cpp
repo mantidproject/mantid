@@ -54,7 +54,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_period_lbls(), m_pycode_viewmask(""), m_warnings_issued(false), m_force_reload(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(), 
   m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1), m_have_reducemodule(false), 
-  m_dirty_batch_grid(false)
+  m_dirty_batch_grid(false), m_tmp_batchfile("")
 {
   m_reducemapper = new QSignalMapper(this);
   m_mode_mapper = new QSignalMapper(this);
@@ -66,7 +66,11 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_allowed_batchtags.insert("can_sans",3);
   m_allowed_batchtags.insert("can_trans",4);
   m_allowed_batchtags.insert("can_direct_beam",5);
+  m_allowed_batchtags.insert("background_sans",-1);
+  m_allowed_batchtags.insert("background_trans",-1);
+  m_allowed_batchtags.insert("background_direct_beam",-1);
   m_allowed_batchtags.insert("output_as",6);
+
 }
 
 ///Destructor
@@ -1021,6 +1025,12 @@ void SANSRunWindow::selectUserFile()
  */
 void SANSRunWindow::selectCSVFile()
 {
+  if( !m_cfg_loaded )
+  {
+    showInformationBox("Please load the relevant user file.");
+    return;
+  }
+
   if( !browseForFile("Select CSV file",m_uiForm.csv_filename, "CSV files (*.csv)") )
   {
     return;
@@ -1032,7 +1042,7 @@ void SANSRunWindow::selectCSVFile()
   }
   //path() returns the directory
   m_last_dir = QFileInfo(m_uiForm.csv_filename->text()).path();
-  setProcessingState(false, -1);
+  if( m_cfg_loaded ) setProcessingState(false, -1);
 }
 
 /**
@@ -1327,12 +1337,13 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     QString csv_file(m_uiForm.csv_filename->text());
     if( m_dirty_batch_grid )
     {
-      csv_file = saveBatchGrid();
+      QString selected_file = QFileDialog::getSaveFileName(this, "Save as CSV", m_last_dir);
+      csv_file = saveBatchGrid(selected_file);
     }
-
     py_code = "import SANSBatchMode as batch\n" + py_code;
     py_code += "\nbatch.BatchReduce('" + csv_file + "','" + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() + "',"
       + trans_behav + ")";
+    showInformationBox(py_code);
   }
 
   int idtype(0);
@@ -1347,6 +1358,13 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   forceDataReload();
   //Reenable stuff
   setProcessingState(false, idtype);
+
+  //If we used a temporary file in batch mode, remove it
+  if( m_uiForm.batch_mode_btn->isChecked() && !m_tmp_batchfile.isEmpty() )
+  {
+    QFile tmp_file(m_tmp_batchfile);
+    tmp_file.remove();
+  }
 }
 
 /**
@@ -1626,8 +1644,15 @@ void SANSRunWindow::switchMode(int mode_id)
  */
 void SANSRunWindow::pasteToBatchTable()
 {
+  if( !m_cfg_loaded )
+  {
+    showInformationBox("Please load the relevant user file before continuing.");
+    return;
+  }
+
   QClipboard *clipboard = QApplication::clipboard();
   QString copied_text = clipboard->text();
+  if( copied_text.isEmpty() ) return;
   
   QStringList runlines = copied_text.split("\n");
   QStringListIterator sitr(runlines);
@@ -1647,6 +1672,7 @@ void SANSRunWindow::pasteToBatchTable()
   if( m_uiForm.batch_table->rowCount() > 0 )
   {
     m_dirty_batch_grid = true;
+    setProcessingState(false, -1);
   }
 }
 
@@ -1661,6 +1687,7 @@ void SANSRunWindow::clearBatchTable()
     m_uiForm.batch_table->removeRow(i);
   }
   m_dirty_batch_grid = false;
+  m_tmp_batchfile = "";
 }
 
 /** 
@@ -1922,39 +1949,41 @@ int SANSRunWindow::addBatchLine(QString csv_line, QString separator)
     }
   }
   QStringList elements = csv_line.split(separator);
-  switch(elements.count())
-  {
-  case 20:
-  case 14:
-  case 8:
-  case 6:
-  case 4:
-    break;
-  default:
-    return 1;
-  }
   //Insert new row
   int row = m_uiForm.batch_table->rowCount();
   m_uiForm.batch_table->insertRow(row);
 
   int nelements = elements.count() - 1;
+  bool error(false);
   for( int i = 0; i < nelements; )
   {
     QString cola = elements.value(i);
     QString colb = elements.value(i+1);
-    
-    if( m_allowed_batchtags.contains(cola) && !m_allowed_batchtags.contains(colb) )
+    if( m_allowed_batchtags.contains(cola) )
     {
-      if( !colb.isEmpty() )
+      if( !m_allowed_batchtags.contains(colb) )
       {
-        m_uiForm.batch_table->setItem(row, m_allowed_batchtags.value(cola), new QTableWidgetItem(colb));
+        if( !colb.isEmpty() && !cola.contains("background") )
+        {
+          m_uiForm.batch_table->setItem(row, m_allowed_batchtags.value(cola), new QTableWidgetItem(colb));
+        }
+        i += 2;        
       }
-      i += 2;
+      else
+      {
+        ++i;
+      }
     }
     else
     {
-      ++i;
+      error = true;
+      break;
     }
+  }
+  if( error ) 
+  {
+    m_uiForm.batch_table->removeRow(row);
+    return 1;
   }
   return 0;
 }
@@ -1965,16 +1994,50 @@ int SANSRunWindow::addBatchLine(QString csv_line, QString separator)
 */
 QString SANSRunWindow::saveBatchGrid(const QString & filename)
 {
-  QString csv_file = filename;
-  if( csv_file.isEmpty() )
+  QString csv_filename = filename;
+  if( csv_filename.isEmpty() )
   {
     //Generate a temporary filename
     QTemporaryFile tmp;
     tmp.open();
-    csv_file = tmp.fileName();
+    csv_filename = tmp.fileName();
     tmp.close();
+    m_tmp_batchfile = csv_filename;
   }
-  showInformationBox(csv_file);
 
-  return filename;
+  QFile csv_file(csv_filename);
+  if( !csv_file.open(QIODevice::WriteOnly|QIODevice::Text) )
+  {
+    showInformationBox("Error: Cannot write to CSV file \"" + csv_filename + "\".");
+    return "";
+  }
+  
+  QTextStream out_strm(&csv_file);
+  int nrows = m_uiForm.batch_table->rowCount();
+  const QString separator(",");
+  for( int r = 0; r < nrows; ++r )
+  {
+    for( int c = 0; c < 7; ++c )
+    {
+      out_strm << m_allowed_batchtags.key(c) << separator;
+      if( QTableWidgetItem* item = m_uiForm.batch_table->item(r, c) )
+      {
+        out_strm << item->text();
+      }
+      if( c < 6 ) out_strm << separator; 
+    }
+    out_strm << "\n";
+  }
+  csv_file.close();
+  if( !filename.isEmpty() )
+  {
+    m_tmp_batchfile = "";
+    m_dirty_batch_grid = false;
+    m_uiForm.csv_filename->setText(csv_filename);
+  }
+  else
+  {
+     m_uiForm.csv_filename->clear();
+  }
+  return csv_filename;
 }

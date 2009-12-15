@@ -227,7 +227,7 @@ def Set2D():
 ########################### 
 _SAMPLE_SETUP = None
 _SAMPLE_RUN = ''
-def AssignSample(sample_run, reload = False):
+def AssignSample(sample_run, reload = True):
     global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN
     _SAMPLE_RUN = sample_run
     SCATTER_SAMPLE,reset = _assignHelper(sample_run, False, reload)
@@ -258,7 +258,7 @@ def AssignSample(sample_run, reload = False):
 ########################### 
 _CAN_SETUP = None
 _CAN_RUN = ''
-def AssignCan(can_run, reload = False):
+def AssignCan(can_run, reload = True):
     global SCATTER_CAN, _CAN_SETUP, _CAN_RUN
     _CAN_RUN = can_run
     SCATTER_CAN ,reset= _assignHelper(can_run, False, reload)
@@ -305,7 +305,7 @@ def AssignCan(can_run, reload = False):
 ########################### 
 # Set the trans sample and measured raw workspaces
 ########################### 
-def TransmissionSample(sample, direct, reload = False):
+def TransmissionSample(sample, direct, reload = True):
     global TRANS_SAMPLE, DIRECT_SAMPLE
     TRANS_SAMPLE = _assignHelper(sample, True, reload)[0]
     DIRECT_SAMPLE = _assignHelper(direct, True, reload)[0]
@@ -314,7 +314,7 @@ def TransmissionSample(sample, direct, reload = False):
 ########################## 
 # Set the trans sample and measured raw workspaces
 ########################## 
-def TransmissionCan(can, direct, reload = False):
+def TransmissionCan(can, direct, reload = True):
     global TRANS_CAN, DIRECT_CAN
     TRANS_CAN = _assignHelper(can, True, reload)[0]
     if direct == '' or direct == None:
@@ -324,7 +324,7 @@ def TransmissionCan(can, direct, reload = False):
     return TRANS_CAN, DIRECT_CAN
 
 # Helper function
-def _assignHelper(run_string, is_trans, reload = False):
+def _assignHelper(run_string, is_trans, reload = True):
     if run_string == '':
         return '',True
     pieces = run_string.split('.')
@@ -806,7 +806,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
     if trans_raw == '' or direct_raw == '':
         return None
 
-    if use_def_trans == True:
+    if use_def_trans == DefaultTrans:
         if INSTR_NAME == 'SANS2D':
             fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(TRANS_WAV1) + '_' + str(TRANS_WAV2)
             wavbin = str(TRANS_WAV1) + ',' + str(DWAV) + ',' + str(TRANS_WAV2)
@@ -833,7 +833,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         mantid.deleteWorkspace(trans_tmp_out)
         mantid.deleteWorkspace(direct_tmp_out)
 
-    if use_def_trans == True:
+    if use_def_trans == DefaultTrans:
         tmp_ws = 'trans_' + run_setup.getSuffix() + '_' + str(lambdamin) + '_' + str(lambdamax)
         CropWorkspace(fulltransws, tmp_ws, XMin = str(lambdamin), XMax = str(lambdamax))
         return tmp_ws
@@ -1073,10 +1073,6 @@ def CalculateResidue():
         mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
         mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
         mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
-        RESIDUE_GRAPH.activeLayer().setCurveTitle(0, 'Left')
-        RESIDUE_GRAPH.activeLayer().setCurveTitle(1, 'Right')
-        RESIDUE_GRAPH.activeLayer().setCurveTitle(3, 'Up')
-        RESIDUE_GRAPH.activeLayer().setCurveTitle(2, 'Down')
 	
     RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              

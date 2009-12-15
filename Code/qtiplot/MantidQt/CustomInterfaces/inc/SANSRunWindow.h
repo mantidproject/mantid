@@ -205,6 +205,8 @@ private:
   bool m_have_reducemodule;
   /// A flag marking if the batch grid has been changed
   bool m_dirty_batch_grid;
+  /// If set, the filename specified is removed after a batch run
+  QString m_tmp_batchfile;
   /// A paste action for the batch table
   QAction *m_batch_paste;
   ///A clear action for the batch table
