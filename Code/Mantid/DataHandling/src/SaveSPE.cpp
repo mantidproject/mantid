@@ -4,8 +4,7 @@
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidKernel/FileValidator.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include <fstream>
-#include <iomanip>
+#include <cstdio>
 
 namespace Mantid
 {
@@ -57,7 +56,8 @@ void SaveSPE::exec()
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
 
-  std::ofstream outSPE_File(filename.c_str());
+  FILE * outSPE_File;
+  outSPE_File = fopen(filename.c_str(),"w");
   if (!outSPE_File)
   {
     g_log.error("Failed to open file:" + filename);
@@ -65,76 +65,87 @@ void SaveSPE::exec()
   }
 
   // Number of Workspaces and Number of Energy Bins
-  outSPE_File << std::fixed << std::setw(8) << nHist;
-  outSPE_File << std::fixed << std::setw(8) << nBins;
-  outSPE_File << std::endl;
+  fprintf(outSPE_File,"%8u%8u\n",nHist,nBins);
 
   // Write the dummy angle grid
-  outSPE_File << "### Phi Grid" << std::endl;
-
-  for (int i = 0; i < nHist+1; i++)
+  fprintf(outSPE_File,"### Phi Grid\n");
+  const int phiPoints = nHist + 1; // Pretend this is binned
+  for (int i = 0; i < phiPoints; i++)
   {
-    double value = i + 0.5;
-    outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << value;
+    const double value = i + 0.5;
+    fprintf(outSPE_File,"%11.3e",value);
     if ( (i > 0) && ((i + 1) % 8 == 0) )
     {
-      outSPE_File << std::endl;
+      fprintf(outSPE_File,"\n");
     }
   }
 
   // If the number of angles isn't a factor of 8 then we need to add an extra CR/LF
-  if (nHist % 8 != 0)
-    outSPE_File << std::endl;
+  if (nHist % 8 != 0) fprintf(outSPE_File,"\n");
 
   // Get the Energy Axis (X) of the first spectra (they are all the same - checked above)
   const MantidVec& X = inputWS->readX(0);
 
   // Write the energy grid
-  outSPE_File << "### Energy Grid" << std::endl;
-  for (MantidVec::size_type i = 0; i < X.size(); i++) // needs to be better!
+  fprintf(outSPE_File,"### Energy Grid\n");
+  const int energyPoints = nBins + 1; // Validator enforces binned data
+  int i = 7;
+  for (; i < energyPoints; i+=8)
   {
-    outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << X[i];
-    if ( (i + 1) % 8 == 0 )
+    fprintf(outSPE_File,"%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e\n",
+                        X[i-7],X[i-6],X[i-5],X[i-4],X[i-3],X[i-2],X[i-1],X[i]);
+  }
+  if ( i != energyPoints )
+  {
+    for (i-=7; i < energyPoints; ++i)
     {
-      outSPE_File << std::endl;
+      fprintf(outSPE_File,"%11.3e",X[i]);
     }
+    fprintf(outSPE_File,"\n");
   }
 
-  // If the number of energies isn't a factor of 8 then we need to add an extra CR/LF, for histogram workspaces there is one more energy (X-value)
-  if ( (nBins+1) % 8 != 0)
-    outSPE_File << std::endl;
+  // We write out values 8 at a time, so will need to do extra work if nBins isn't a factor of 8
+  const int remainder = nBins % 8;
 
+  // Loop over the spectra, writing out Y and then E values for each
   for (int i = 0; i < nHist; i++)
   {
     const MantidVec& Y = inputWS->readY(i);
     const MantidVec& E = inputWS->readE(i);
 
-    outSPE_File << "### S(Phi,w)" << std::endl;
-    for (int j = 0; j < nBins; j++)
+    fprintf(outSPE_File,"### S(Phi,w)\n");
+    for (int j = 7; j < nBins; j+=8)
     {
-      outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << Y[j];
-      if ( (j > 0) && ((j + 1) % 8 == 0) )
-      {
-        outSPE_File << std::endl;
-      }
+      fprintf(outSPE_File,"%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e\n",
+                          Y[j-7],Y[j-6],Y[j-5],Y[j-4],Y[j-3],Y[j-2],Y[j-1],Y[j]);
     }
-    // If the number of points isn't a factor of 8 then we need to add an extra CR/LF
-    if (nBins % 8 != 0)
-      outSPE_File << std::endl;
+    if ( remainder )
+    {
+      for ( int l = nBins - remainder; l < nBins; ++l)
+      {
+        fprintf(outSPE_File,"%11.3e",Y[l]);
+      }
+      fprintf(outSPE_File,"\n");
+    }
 
-    outSPE_File << "### Errors" << std::endl;
-    for (int j = 0; j < nBins; j++)
+    fprintf(outSPE_File,"### Errors\n");
+    for ( int k = 7; k < nBins; k+=8)
     {
-      outSPE_File << std::fixed << std::scientific << std::setprecision(3) << std::setw(11) << E[j];
-      if ( (j > 0) && ((j + 1) % 8 == 0) )
-      {
-        outSPE_File << std::endl;
-      }
+      fprintf(outSPE_File,"%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e\n",
+                          E[k-7],E[k-6],E[k-5],E[k-4],E[k-3],E[k-2],E[k-1],E[k]);
     }
-    // If the number of points isn't a factor of 8 then we need to add an extra CR/LF
-    if (nBins % 8 != 0)
-      outSPE_File << std::endl;
+    if ( remainder )
+    {
+      for ( int l = nBins - remainder; l < nBins; ++l)
+      {
+        fprintf(outSPE_File,"%11.3e",E[l]);
+      }
+      fprintf(outSPE_File,"\n");
+    }
   }
+
+  // Close the file
+  fclose(outSPE_File);
 }
 
 }
