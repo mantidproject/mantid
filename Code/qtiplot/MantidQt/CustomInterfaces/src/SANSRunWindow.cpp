@@ -27,6 +27,9 @@
 #include <QInputDialog>
 #include <QSignalMapper>
 #include <QHeaderView>
+#include <QApplication>
+#include <QClipboard>
+#include <QTemporaryFile>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -50,11 +53,20 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
   m_period_lbls(), m_pycode_viewmask(""), m_warnings_issued(false), m_force_reload(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(), 
-  m_loq_detlabels(), m_lastreducetype(-1), m_have_reducemodule(false)
+  m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1), m_have_reducemodule(false), 
+  m_dirty_batch_grid(false)
 {
   m_reducemapper = new QSignalMapper(this);
   m_mode_mapper = new QSignalMapper(this);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+  
+  m_allowed_batchtags.insert("sample_sans",0);
+  m_allowed_batchtags.insert("sample_trans",1);
+  m_allowed_batchtags.insert("sample_direct_beam",2);
+  m_allowed_batchtags.insert("can_sans",3);
+  m_allowed_batchtags.insert("can_trans",4);
+  m_allowed_batchtags.insert("can_direct_beam",5);
+  m_allowed_batchtags.insert("output_as",6);
 }
 
 ///Destructor
@@ -117,6 +129,17 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.batch_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
     m_mode_mapper->setMapping(m_uiForm.batch_mode_btn, SANSRunWindow::BatchMode);
     connect(m_mode_mapper, SIGNAL(mapped(int)), this, SLOT(switchMode(int)));
+
+    //Set a custom context for the batch table
+    m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
+    m_batch_paste = new QAction(tr("&Paste"),m_uiForm.batch_table);
+    m_batch_paste->setShortcut(tr("Ctrl+P"));
+    connect(m_batch_paste, SIGNAL(activated()), this, SLOT(pasteToBatchTable()));
+    m_uiForm.batch_table->addAction(m_batch_paste);
+
+    m_batch_clear = new QAction(tr("&Clear"),m_uiForm.batch_table);    
+    m_uiForm.batch_table->addAction(m_batch_clear);
+    connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
 
     //Create the widget hash maps
     initWidgetMaps();
@@ -423,10 +446,21 @@ bool SANSRunWindow::loadCSVFile()
     return false;
   }
   
+  //Clear the current table
+  clearBatchTable();
   QTextStream file_in(&csv_file);
-  while(!file_in.atEnd())
+  int errors(0);
+  while( !file_in.atEnd() )
   {
-    addBatchLine(file_in.readLine());
+    QString line = file_in.readLine().simplified();
+    if( !line.isEmpty() )
+    {
+      errors += addBatchLine(line, ",");
+    }
+  }
+  if( errors > 0 )
+  {
+    showInformationBox("Warning: " + QString::number(errors) + " malformed lines detected in \"" + filename + "\". Lines skipped.");
   }
   return true;
 }
@@ -576,7 +610,15 @@ void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr work
  */
 void SANSRunWindow::setProcessingState(bool running, int type)
 {
-  m_uiForm.load_dataBtn->setEnabled(!running);
+  if( m_uiForm.single_mode_btn->isChecked() )
+  {
+    m_uiForm.load_dataBtn->setEnabled(!running);
+  }
+  else
+  {
+    m_uiForm.load_dataBtn->setEnabled(false);
+  }
+
   m_uiForm.oneDBtn->setEnabled(!running);
   m_uiForm.twoDBtn->setEnabled(!running);
   m_uiForm.plotBtn->setEnabled(!running);
@@ -744,7 +786,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   }
 
   //LOQ
-  if( m_uiForm.dist_mod_mon->text() != "-" )
+  if( m_uiForm.inst_opt->currentIndex() == 0 )
   {
     if( colour == "red" )
     {
@@ -754,6 +796,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     {
       m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
     }
+    std::cerr << "checking sample workspace\n";
     setLOQGeometry(sample_workspace, 0);
     QString can = getWorkspaceName(1);
     if( !can.isEmpty() )
@@ -841,6 +884,8 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
 */
 void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspace, const QString & logs, int wscode)
 {
+  if( m_uiForm.inst_opt->currentIndex() == 0 ) return;
+  
   double unitconv = 1000.;
 
   Mantid::API::IInstrument_sptr instr = workspace->getInstrument();
@@ -886,6 +931,8 @@ void SANSRunWindow::setSANS2DGeometry(Mantid::API::MatrixWorkspace_sptr workspac
  */
 void SANSRunWindow::setLOQGeometry(Mantid::API::MatrixWorkspace_sptr workspace, int wscode)
 {
+  if( m_uiForm.inst_opt->currentIndex() == 1 ) return;
+
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   //Sample
   componentLOQDistances(workspace, dist_ms, dist_mdb, dist_hab);
@@ -967,7 +1014,6 @@ void SANSRunWindow::selectUserFile()
 
   //path() returns the directory
   m_last_dir = QFileInfo(m_uiForm.userfile_edit->text()).path();
-
 }
 
 /**
@@ -986,6 +1032,7 @@ void SANSRunWindow::selectCSVFile()
   }
   //path() returns the directory
   m_last_dir = QFileInfo(m_uiForm.csv_filename->text()).path();
+  setProcessingState(false, -1);
 }
 
 /**
@@ -1245,30 +1292,51 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
-  
-  //Currently the components are moved with each reduce click. Check if a load is necessary
-  handleLoadButtonClick();
-
-  int idtype(0);
-  if( type.startsWith("2") ) idtype = 1;
-
   QString py_code = createAnalysisDetailsScript(type);
   if( py_code.isEmpty() )
   {
     showInformationBox("Error: An error occurred while constructing the reduction code, please check installation.");
     return;
   }
-
-  py_code += "\nWavRangeReduction(use_def_trans=";
+  QString trans_behav;
   if( m_uiForm.def_trans->isChecked() )
   {
-    py_code += "DefaultTrans)\n";
+    trans_behav += "DefaultTrans";
   }
   else
   {
-    py_code += "NewTrans)\n";
+    trans_behav += "NewTrans";
   }
 
+  //Need to check which mode we're in
+  if( m_uiForm.single_mode_btn->isChecked() )
+  {
+    //Currently the components are moved with each reduce click. Check if a load is necessary
+    handleLoadButtonClick();
+    py_code += "\nWavRangeReduction(use_def_trans=" + trans_behav + ")\n";
+  }
+  else
+  {
+    //Have we got anything to reduce?
+    if( m_uiForm.batch_table->rowCount() == 0 )
+    {
+      showInformationBox("Error: No run information specified.");
+      return;
+    }
+      
+    QString csv_file(m_uiForm.csv_filename->text());
+    if( m_dirty_batch_grid )
+    {
+      csv_file = saveBatchGrid();
+    }
+
+    py_code = "import SANSBatchMode as batch\n" + py_code;
+    py_code += "\nbatch.BatchReduce('" + csv_file + "','" + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() + "',"
+      + trans_behav + ")";
+  }
+
+  int idtype(0);
+  if( type.startsWith("2") ) idtype = 1;
   //Disable buttons so that interaction is limited while processing data
   setProcessingState(true, idtype);
   m_lastreducetype = idtype;
@@ -1543,12 +1611,56 @@ void SANSRunWindow::switchMode(int mode_id)
   if( mode_id == SANSRunWindow::SingleMode )
   {
     m_uiForm.mode_stack->setCurrentIndex(0);
+    m_uiForm.load_dataBtn->setEnabled(true);
   }
   else if( mode_id == SANSRunWindow::BatchMode )
   {
     m_uiForm.mode_stack->setCurrentIndex(1);
+    m_uiForm.load_dataBtn->setEnabled(false);
   }
   else {}
+}
+
+/**
+ * Paste to the batch table
+ */
+void SANSRunWindow::pasteToBatchTable()
+{
+  QClipboard *clipboard = QApplication::clipboard();
+  QString copied_text = clipboard->text();
+  
+  QStringList runlines = copied_text.split("\n");
+  QStringListIterator sitr(runlines);
+  int errors(0);
+  while( sitr.hasNext() )
+  {
+    QString line = sitr.next().simplified();
+    if( !line.isEmpty() )
+    {
+      errors += addBatchLine(line);
+    }
+  }
+  if( errors > 0 )
+  {
+    showInformationBox("Warning: " + QString::number(errors) + " malformed lines detected in pasted text. Lines skipped.");
+  }
+  if( m_uiForm.batch_table->rowCount() > 0 )
+  {
+    m_dirty_batch_grid = true;
+  }
+}
+
+/**
+ * Clear the batch table
+ */
+void SANSRunWindow::clearBatchTable()
+{
+  int row_count = m_uiForm.batch_table->rowCount();
+  for( int i = row_count - 1; i >= 0; --i )
+  {
+    m_uiForm.batch_table->removeRow(i);
+  }
+  m_dirty_batch_grid = false;
 }
 
 /** 
@@ -1680,7 +1792,7 @@ bool SANSRunWindow::setNumberPeriods(int key, const QString & workspace_name)
 }
 
 /**
- *
+ * Get a properly qualified workspace name for the given key
  */
 QString SANSRunWindow::getWorkspaceName(int key)
 {
@@ -1793,39 +1905,76 @@ void SANSRunWindow::cleanup()
 /**
  * Add a csv line to the batch grid
  * @param csv_line Add a line of csv text to the grid 
+ * @param separator An optional separator, default = ","
 */
-QString SANSRunWindow::addBatchLine(const QString & csv_line)
+int SANSRunWindow::addBatchLine(QString csv_line, QString separator)
 {
-  //Insert new row
-  int row = m_uiForm.batch_table->rowCount();
-  m_uiForm.batch_table->insertRow(row);
-  QStringList elements = csv_line.split(",");
+  //Try to detect separator if one is not specified
+  if( separator.isEmpty() )
+  {
+    if( csv_line.contains(",") )
+    {
+      separator = ",";
+    }
+    else
+    {
+      separator = " ";
+    }
+  }
+  QStringList elements = csv_line.split(separator);
   switch(elements.count())
   {
   case 20:
   case 14:
   case 8:
-  case 2:
+  case 6:
+  case 4:
     break;
   default:
-    return "Warning: Encountered line with " + QString::number(elements.count())  + " elements when batch line, skipping.";
+    return 1;
   }
-  QStringListIterator sitr(elements);
-  int column(0);
-  while( sitr.hasNext() )
+  //Insert new row
+  int row = m_uiForm.batch_table->rowCount();
+  m_uiForm.batch_table->insertRow(row);
+
+  int nelements = elements.count() - 1;
+  for( int i = 0; i < nelements; )
   {
-    //Skip the name column as we'll do it based on an order
-    sitr.next();
-    m_uiForm.batch_table->setItem(row, column, new QTableWidgetItem(sitr.next()));
-    ++column;
-    //Skip backgrounds for now
-    if( column == 6 )
+    QString cola = elements.value(i);
+    QString colb = elements.value(i+1);
+    
+    if( m_allowed_batchtags.contains(cola) && !m_allowed_batchtags.contains(colb) )
     {
-      for( int i = 0; i < 4; ++i )
+      if( !colb.isEmpty() )
       {
-        sitr.next();
+        m_uiForm.batch_table->setItem(row, m_allowed_batchtags.value(cola), new QTableWidgetItem(colb));
       }
+      i += 2;
+    }
+    else
+    {
+      ++i;
     }
   }
-  return QString();
+  return 0;
+}
+
+/**
+ * Save the batch file to a CSV file.
+ * @param filename An optional filename. If none is given then a temporary file is used and its name returned 
+*/
+QString SANSRunWindow::saveBatchGrid(const QString & filename)
+{
+  QString csv_file = filename;
+  if( csv_file.isEmpty() )
+  {
+    //Generate a temporary filename
+    QTemporaryFile tmp;
+    tmp.open();
+    csv_file = tmp.fileName();
+    tmp.close();
+  }
+  showInformationBox(csv_file);
+
+  return filename;
 }
