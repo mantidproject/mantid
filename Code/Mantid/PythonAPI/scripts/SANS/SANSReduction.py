@@ -239,7 +239,8 @@ def AssignSample(sample_run, reload = False):
         logvalues = _loadDetectorLogs(sample_run)
         if logvalues == None:
             mtd.deleteWorkspace(SCATTER_SAMPLE)
-            fatalError("Sample logs cannot be loaded, cannot continue")
+            _issueWarning("Sample logs cannot be loaded, cannot continue")
+            return '','()'
     else:
         return SCATTER_SAMPLE, None
         
@@ -448,7 +449,8 @@ def _SetScales(scalefactor):
 ######################### 
 def SampleGeometry(geom_id):
     if geom_id > 3 or geom_id < 1:
-        _fatalError("Invalid geometry type for sample: " + str(geom_id))
+        _issueWarning("Invalid geometry type for sample: " + str(geom_id) + ". Setting default to 3.")
+        geom_id = 3
     global SAMPLE_GEOM
     SAMPLE_GEOM = geom_id
 
