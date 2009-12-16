@@ -1069,7 +1069,7 @@ void LoadRaw3::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int peri
   try
   {
     loadLog->execute();
-  } catch (std::runtime_error&)
+  } catch (std::exception&)
   {
     g_log.error("Unable to successfully run LoadLog sub-algorithm");
   }
