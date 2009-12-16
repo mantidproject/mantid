@@ -80,6 +80,10 @@ private:
   void setLimitStepParameter(const QString & pname, QString param, QLineEdit* step_value,  QComboBox* step_type);
   ///Construct mask table
   void updateMaskTable();
+  /// Add spectrum masks to table
+  void addSpectrumMasksToTable(const QString & mask_string, const QString & det_name);
+  /// Add a time mask string to the mask table
+  void addTimeMasksToTable(const QString & mask_string, const QString & det_name);
   /// Construct the reduction code from the Python script template
   QString createAnalysisDetailsScript(const QString & type);
   /// Get the component distances
@@ -181,8 +185,6 @@ private:
   QHash<int, QLabel*> m_period_lbls;
   /// A list of the full workspace names
   QHash<int, QString> m_workspace_names;
-  // The template to view the current mask
-  QString m_pycode_viewmask;
   // A signal mapper to pick up various button clicks
   QSignalMapper *m_reducemapper;
   // A flag to mark that warnings have been issued

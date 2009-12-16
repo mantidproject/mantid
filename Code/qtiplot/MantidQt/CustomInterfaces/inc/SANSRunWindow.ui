@@ -2942,7 +2942,7 @@ p, li { white-space: pre-wrap; }
               </property>
               <property name="minimumSize" >
                <size>
-                <width>275</width>
+                <width>315</width>
                 <height>0</height>
                </size>
               </property>
@@ -2961,6 +2961,11 @@ p, li { white-space: pre-wrap; }
               <column>
                <property name="text" >
                 <string>Type</string>
+               </property>
+              </column>
+              <column>
+               <property name="text" >
+                <string>Detector</string>
                </property>
               </column>
               <column>
@@ -3131,6 +3136,7 @@ p, li { white-space: pre-wrap; }
         </spacer>
        </item>
       </layout>
+      <zorder>mask_table</zorder>
      </widget>
     </widget>
    </item>

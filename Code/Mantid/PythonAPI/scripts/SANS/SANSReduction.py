@@ -38,8 +38,14 @@ DIRECT_SAMPLE = ''
 DIRECT_CAN = ''
 
 # Now the mask string (can be empty)
+# These apply to both detectors
 SPECMASKSTRING = ''
 TIMEMASKSTRING = ''
+# These are for the separate detectors (R = main & F = HAB for LOQ)
+SPECMASKSTRING_R = ''
+SPECMASKSTRING_F = ''
+TIMEMASKSTRING_R = ''
+TIMEMASKSTRING_F = ''
 
 # Instrument information
 INSTR_DIR = mtd.getConfigProperty('instrumentDefinition.directory')
@@ -141,21 +147,24 @@ NewTrans = False
 # Mismatched detectors
 _MARKED_DETS_ = []
 
+_DET_ABBREV = {'FRONT' : 'front-detector', 'REAR' : 'rear-detector', 'MAIN' : 'main-detector-bank', 'HAB' : 'HAB' }
+
 def SetQuietMode(quiet = True):
     global _QUIET_
     _QUIET_ = quiet
 
 # Print a message and log it if the 
 def _printMessage(msg, log = True):
-    if _QUIET_: 
+    if log == True:
+        mantid.sendLogMessage('::SANS::' + msg)
+    if _QUIET_ == True: 
         return
     print msg
-    if log == True:
-        mantid.sendLogMessage(msg)
 
 # Warn the user
 def _issueWarning(msg):
-    if _QUIET_:
+    mantid.sendLogMessage('::SANS::Warning: ' + msg)
+    if _QUIET_ == True:
         return
     print 'WARNING: ' + msg
 
@@ -195,24 +204,43 @@ def SANS2D():
     INSTR_NAME = 'SANS2D'
     BACKMON_START = 85000
     BACKMON_END = 100000
-    Detector('rear-detector')
     MONITORSPECTRUM = 2
+    Detector('rear-detector')
 
 def LOQ():
     global INSTR_NAME, BACKMON_START, BACKMON_END, MONITORSPECTRUM
     INSTR_NAME = 'LOQ'
     BACKMON_START = 31000
     BACKMON_END = 39000
-    Detector('main-detector-bank')
     MONITORSPECTRUM = 2
+    Detector('main-detector-bank')
 
 def Detector(det_name):
+    # Deal with abbreviations
+    lname = det_name.lower()
+    if lname == 'front':
+        det_name = 'front-detector'
+    elif lname == 'rear':
+        det_name = 'rear-detector'
+    elif lname == 'main':
+        det_name = 'main-detector-bank'
+    elif lname == 'hab':
+        det_name = 'HAB'
+    else:
+        pass
+    global DETBANK
+
     if INSTR_NAME == 'SANS2D' and (det_name == 'rear-detector' or det_name == 'front-detector') or \
-            INSTR_NAME == 'LOQ' and (det_name == 'main-detector-bank' or det_name == 'HAB'):
-        global DETBANK
+       INSTR_NAME == 'LOQ' and (det_name == 'main-detector-bank' or det_name == 'HAB'):
         DETBANK = det_name
     else:
-        _fatalError('Attempting to set invalid detector name: "' + det_name + '"')
+        _issueWarning('Attempting to set invalid detector name "' + det_name + '" for instrument ' + INSTR_NAME)
+        if INSTR_NAME == 'LOQ':
+            _issueWarning('Setting default as main-detector-bank')
+            DETBANK = 'main-detector-bank'
+        else:
+            _issueWarning('Setting default as rear-detector')
+            DETBANK = 'rear-detector'
 
 def Set1D():
     global CORRECTION_TYPE
@@ -229,14 +257,20 @@ _SAMPLE_SETUP = None
 _SAMPLE_RUN = ''
 def AssignSample(sample_run, reload = True):
     global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN
+    if( sample_run.startswith('.') or sample_run == '' or sample_run == None):
+        _SAMPLE_SETUP = None
+        _SAMPLE_RUN = ''
+        SCATTER_SAMPLE = ''
+        return '', '()'
+    
     _SAMPLE_RUN = sample_run
-    SCATTER_SAMPLE,reset = _assignHelper(sample_run, False, reload)
+    SCATTER_SAMPLE,reset,logname = _assignHelper(sample_run, False, reload)
     if reset == True:
         _SAMPLE_SETUP = None
-    if (INSTR_NAME == 'SANS2D' and sample_run != ''):
+    if (INSTR_NAME == 'SANS2D'):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
-        logvalues = _loadDetectorLogs(sample_run)
+        logvalues = _loadDetectorLogs(logname)
         if logvalues == None:
             mtd.deleteWorkspace(SCATTER_SAMPLE)
             _issueWarning("Sample logs cannot be loaded, cannot continue")
@@ -260,14 +294,20 @@ _CAN_SETUP = None
 _CAN_RUN = ''
 def AssignCan(can_run, reload = True):
     global SCATTER_CAN, _CAN_SETUP, _CAN_RUN
+    if( can_run.startswith('.') or can_run == '' or can_run == None):
+        SCATTER_CAN = ''
+        _CAN_RUN = ''
+        _CAN_SETUP = None
+        return '', '()'
+
     _CAN_RUN = can_run
-    SCATTER_CAN ,reset= _assignHelper(can_run, False, reload)
+    SCATTER_CAN ,reset, logname = _assignHelper(can_run, False, reload)
     if reset == True:
         _CAN_SETUP  = None
-    if (INSTR_NAME == 'SANS2D' and can_run != ''):
+    if (INSTR_NAME == 'SANS2D'):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
-        logvalues = _loadDetectorLogs(can_run)
+        logvalues = _loadDetectorLogs(logname)
         if logvalues == None:
             _issueWarning("Can logs could not be loaded, using sample values.")
             return SCATTER_CAN, "()"
@@ -326,36 +366,54 @@ def TransmissionCan(can, direct, reload = True):
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True):
     if run_string == '':
-        return '',True
+        return '',True,''
     pieces = run_string.split('.')
     if len(pieces) != 2 :
          _fatalError("Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format")
     else:
         run_no = pieces[0]
         ext = pieces[1]
-    if is_trans:
-        wkspname =  run_no + '_trans_' + ext.lower()
-    else:
-        wkspname =  run_no + '_sans_' + ext.lower()
-
-    if reload == False and mtd.workspaceExists(wkspname):
-        return wkspname,False
-
+    if run_no == '':
+        return '',True,''
+        
     if INSTR_NAME == 'LOQ':
         field_width = 5
     else:
         field_width = 8
         
-    basename = INSTR_NAME + run_no.rjust(field_width, '0')
-    if basename == INSTR_NAME + ''.rjust(field_width, '0'):
-        return '',True
+    fullrun_no,logname,shortrun_no = padRunNumber(run_no, field_width)
     
+    if is_trans:
+        wkspname =  shortrun_no + '_trans_' + ext.lower()
+    else:
+        wkspname =  shortrun_no + '_sans_' + ext.lower()
+
+    if reload == False and mtd.workspaceExists(wkspname):
+        return wkspname,False,''
+
+    basename = INSTR_NAME + fullrun_no
     filename = os.path.join(DATA_PATH,basename)
     if is_trans:
         _loadRawData(filename, wkspname, ext, spec_max = 8)
     else:
         _loadRawData(filename, wkspname, ext)
-    return wkspname,True
+    return wkspname,True, INSTR_NAME + logname
+
+def padRunNumber(run_no, field_width):
+    nchars = len(run_no)
+    digit_end = 0
+    for i in range(0, nchars):
+        if run_no[i].isdigit():
+            digit_end += 1
+        else:
+            break
+    
+    if digit_end == nchars:
+        filebase = run_no.rjust(field_width, '0')
+        return filebase, filebase, run_no
+    else:
+        filebase = run_no[:digit_end].rjust(field_width, '0')
+        return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
 
 ##########################
 # Loader function
@@ -381,9 +439,7 @@ def _loadRawData(filename, workspace, ext, spec_max = None):
 
 
 # Load the detector logs
-def _loadDetectorLogs(run_string):
-    run_no = run_string[:run_string.rfind('.')]
-    logname = INSTR_NAME + run_no.rjust(8, '0')
+def _loadDetectorLogs(logname):
     # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
     logname = logname[0:6] + '0' + logname[7:]
     filename = os.path.join(DATA_PATH, logname + '.log')
@@ -511,17 +567,59 @@ def SetCentre(XVAL, YVAL):
 # Add a mask to the correct string
 ###################################
 def Mask(details):
+    if not details.startswith('MASK'):
+        _issueWarning('Ignoring malformed mask line ' + details)
+        return
     details = details.lstrip()
     details_compare = details.upper()
-    global TIMEMASKSTRING, SPECMASKSTRING
-    if details_compare.startswith('/CLEAR/TIME'):
-        TIMEMASKSTRING = ''
-    elif details_compare.startswith('/CLEAR'):
-        SPECMASKSTRING = ''
-    elif details_compare.startswith('/T'):
-        TIMEMASKSTRING += ';' + details[2:].lstrip()
-    elif ( details_compare.startswith('S') or details_compare.startswith('H') or details_compare.startswith('V') ):
-        SPECMASKSTRING += ',' + details.lstrip()
+    global TIMEMASKSTRING, TIMEMASKSTRING_R, TIMEMASKSTRING_F,SPECMASKSTRING, SPECMASKSTRING_R, SPECMASKSTRING_F
+    parts = details_compare.split('/')
+    # A spectrum mask or mask range applied to both detectors
+    if len(parts) == 1:
+        spectra = details[4:].lstrip()
+        if len(spectra.split()) == 1:
+            SPECMASKSTRING += ',' + spectra
+    elif len(parts) == 2:
+        type = parts[1]
+        detname = type.split()
+        if type == 'CLEAR':
+            SPECMASKSTRING = ''
+            SPECMASKSTRING_R = ''
+            SPECMASKSTRING_F = ''
+        elif type.startswith('T'):
+            if type.startswith('TIME'):
+                bin_range = type[4:].lstrip()
+            else:
+                bin_range = type[1:].lstrip()
+            TIMEMASKSTRING += ';' + bin_range
+        elif len(detname) == 2:
+            type = detname[0]
+            if type in _DET_ABBREV.keys():
+                spectra = detname[1]
+                if type == 'FRONT' or type == 'HAB':
+                    SPECMASKSTRING_F += ',' + spectra
+                else:
+                    SPECMASKSTRING_R += ',' + spectra
+        else:
+            _issueWarning('Unrecognized masking option "' + details + '"')
+    elif len(parts) == 3:
+        type = parts[1]
+        if type == 'CLEAR':
+            TIMEMASKSTRING = ''
+            TIMEMASKSTRING_R = ''
+            TIMEMASKSTRING_F = ''
+        elif (type == 'TIME' or type == 'T'):
+            parts = parts[2].split()
+            if len(parts) == 3:
+                detname = parts[0].rstrip()
+                bin_range = parts[1].rstrip() + ' ' + parts[2].lstrip() 
+                if detname in _DET_ABBREV.keys():
+                    if detname == 'FRONT' or detname == 'HAB':
+                        TIMEMASKSTRING_F += ';' + bin_range
+                    else:
+                        TIMEMASKSTRING_R += ';' + bin_range
+            else:
+                _issueWarning('Unrecognized masking option "' + details + '"')
     else:
         pass
 
@@ -560,7 +658,7 @@ def MaskFile(filename):
                     global DIRECT_BEAM_FILE
                     DIRECT_BEAM_FILE = filepath
         elif upper_line.startswith('MASK'):
-            Mask(upper_line[4:])
+            Mask(upper_line)
         elif upper_line.startswith('SET CENTRE'):
             values = upper_line.split()
             SetCentre(float(values[2]), float(values[3]))
@@ -570,8 +668,22 @@ def MaskFile(filename):
         elif upper_line.startswith('SAMPLE/OFFSET'):
             values = upper_line.split()
             SetSampleOffset(values[1])
-        elif upper_line.startswith('DET/CORR'):
-            _readDetectorCorrections(upper_line[8:])
+        elif upper_line.startswith('DET/'):
+            type = upper_line[4:]
+            if type.startswith('CORR'):
+                _readDetectorCorrections(upper_line[8:])
+            else:
+                # This checks whether the type is correct and issues warnings if it is not
+                Detector(type)
+        elif upper_line.startswith('GRAVITY'):
+            flag = upper_line[8:]
+            if flag == 'ON':
+                Gravity(True)
+            elif flag == 'OFF':
+                Gravity(False)
+            else:
+                _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
+                Gravity(False)
         else:
             continue
 
@@ -871,10 +983,29 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
             xshift = -xbeam
             yshift = -ybeam
             zshift = (REAR_DET_Z + REAR_DET_Z_CORR)/1000. - REAR_DET_DEFAULT_SD_M
-            mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))              
+            mantid.sendLogMessage("::SANS:: Setup move "+str(xshift*1000.)+" "+str(yshift*1000.))
             MoveInstrumentComponent(dataws, detector, X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
             return [0.0,0.0], [xshift, yshift]
 
+##
+# Apply the spectrum and time masks to a given workspace
+##
+def applyMasking(workspace, firstspec, dimension):
+    # Spectra masks
+    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, dimension)
+    # Spectrum mask
+    SANSUtility.MaskBySpecNumber(workspace, speclist)
+    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec + dimension*dimension, dimension)
+    #This applies to both detectors
+    SANSUtility.MaskBySpecNumber(workspace, speclist)
+    
+    # Separate mask parameters for each detector
+    #Front
+    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING_F, firstspec + dimension*dimension, dimension) 
+    SANSUtility.MaskBySpecNumber(workspace, speclist)
+    #Rear
+    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING_R, firstspec, dimension) 
+    SANSUtility.MaskBySpecNumber(workspace, speclist)
 #----------------------------------------------------------------------------------------------------------------------------
 ##
 # Main correction routine
@@ -925,12 +1056,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         if RMAX > 0.0:
             SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
-    # Mask other requested spectra that are given in the GUI
-    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, SPECMIN, DIMENSION)
-    # Spectrum mask
-    SANSUtility.MaskBySpecNumber(final_result, speclist)
-    # Time mask
-    SANSUtility.MaskByBinRange(final_result, TIMEMASKSTRING)
+    applyMasking(final_result, SPECMIN, DIMENSION)
     ####################################################################################
         
     ######################## Unit change and rebin #####################################
@@ -1172,22 +1298,18 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 def ViewCurrentMask():
     top_layer = 'CurrentMask'
     LoadEmptyInstrument(INSTR_DIR + '/' + INSTR_NAME + "_Definition.xml",top_layer)
-    maskpt_rmin, maskpt_rmax = SetupComponentPositions(DETBANK, top_layer, XBEAM_CENTRE, YBEAM_CENTRE)
     if RMIN > 0.0: 
-        SANSUtility.MaskInsideCylinder(top_layer, RMIN, maskpt_rmin[0], maskpt_rmin[1])
+        SANSUtility.MaskInsideCylinder(top_layer, RMIN, XBEAM_CENTRE, YBEAM_CENTRE)
     if RMAX > 0.0:
-        SANSUtility.MaskOutsideCylinder(top_layer, RMAX, maskpt_rmax[0], maskpt_rmax[1])
+        SANSUtility.MaskOutsideCylinder(top_layer, RMAX, 0.0, 0.0)
     
-    inst_details = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)
-    
-    firstspec = 3
     if INSTR_NAME == "SANS2D":
-        firstspec += 2
-    
-    # Spectra masks
-    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, inst_details[0])
-    # Spectrum mask
-    SANSUtility.MaskBySpecNumber(top_layer, speclist)
+        firstspec = 5
+    else:
+        firstspec = 3
+
+    dimension = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)[0]
+    applyMasking(top_layer, firstspec, dimension)
     
     # Mark up "dead" detectors with error value 
     FindDeadDetectors(top_layer, top_layer, DeadValue=500)

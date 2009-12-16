@@ -51,7 +51,7 @@ Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANS
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
-  m_period_lbls(), m_pycode_viewmask(""), m_warnings_issued(false), m_force_reload(false),
+  m_period_lbls(), m_warnings_issued(false), m_force_reload(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(), 
   m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1), m_have_reducemodule(false), 
   m_dirty_batch_grid(false), m_tmp_batchfile("")
@@ -337,12 +337,12 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 {
   if( !m_have_reducemodule )
   {
-    runPythonCode("from SANSReduction import *", false);
+    // Imoprt the SANS module and set the correct instrument
+    runPythonCode("from SANSReduction import *\n" , false);
     m_have_reducemodule = true;
   }
   //Ensure the correct instrument is set
-  QString code_torun =  "SetQuietMode(True)\n" + m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString() 
-      + "\n" + pycode + "\nSetQuietMode(False)";
+  QString code_torun =  "SetQuietMode(True)\n" + pycode + "\nSetQuietMode(False)";
   return runPythonCode(code_torun).trimmed();
 }
 
@@ -423,6 +423,25 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.beam_x->setText(QString::number(dbl_param*1000.0));
   dbl_param = runReduceScriptFunction("printParameter('YBEAM_CENTRE'),").toDouble();
   m_uiForm.beam_y->setText(QString::number(dbl_param*1000.0));
+
+  //Gravity switch
+  QString param = runReduceScriptFunction("printParameter('GRAVITY')");
+  if( param == "True" )
+  {
+    m_uiForm.gravity_check->setChecked(true);
+  }
+  else
+  {
+    m_uiForm.gravity_check->setChecked(false);
+  }
+  
+  ////Detector bank
+  param = runReduceScriptFunction("printParameter('DETBANK')");
+  int index = m_uiForm.detbank_sel->findText(param);  
+  if( index >= 0 && index < 2 )
+  {
+    m_uiForm.detbank_sel->setCurrentIndex(index);
+  }
 
   //Masking table
   updateMaskTable();
@@ -507,26 +526,57 @@ void SANSRunWindow::updateMaskTable()
   {
 	  m_uiForm.mask_table->removeRow(i);
 	}
+
+  QString reardet_name("rear-detector"), frontdet_name("front-detector");
+  if( m_uiForm.inst_opt->currentIndex() == 0 )
+  {
+    reardet_name = "main-detector-bank";
+    frontdet_name = "HAB";
+  }
   
   // First create 2 default mask cylinders at min and max radius for the beam stop and 
   // corners
   m_uiForm.mask_table->insertRow(0);
-  QTableWidgetItem *item1 = new QTableWidgetItem("beam stop");
-  QTableWidgetItem *item2 = new QTableWidgetItem("infinite-cylinder, r = rmin");
-  m_uiForm.mask_table->setItem(0, 0, item1);
-  m_uiForm.mask_table->setItem(0, 1, item2);
+  m_uiForm.mask_table->setItem(0, 0, new QTableWidgetItem("beam stop"));
+  m_uiForm.mask_table->setItem(0, 1, new QTableWidgetItem(reardet_name));
+  m_uiForm.mask_table->setItem(0, 2, new QTableWidgetItem("infinite-cylinder, r = rmin"));
   if( m_uiForm.rad_max->text() != "-1" )
   {  
     m_uiForm.mask_table->insertRow(1);
-    item1 = new QTableWidgetItem("corners");
-    item2 = new QTableWidgetItem("infinite-cylinder, r = rmax");
-    m_uiForm.mask_table->setItem(1, 0, item1);
-    m_uiForm.mask_table->setItem(1, 1, item2);
+    m_uiForm.mask_table->setItem(1, 0, new QTableWidgetItem("corners"));
+    m_uiForm.mask_table->setItem(1, 1, new QTableWidgetItem(reardet_name));
+    m_uiForm.mask_table->setItem(1, 2, new QTableWidgetItem("infinite-cylinder, r = rmax"));
   }
 
   //Now add information from the mask file
   //Spectrum mask
   QString mask_string = runReduceScriptFunction("printParameter('SPECMASKSTRING')");
+  addSpectrumMasksToTable(mask_string, "-");
+  //"Rear" det
+  mask_string = runReduceScriptFunction("printParameter('SPECMASKSTRING_R')");
+  addSpectrumMasksToTable(mask_string, reardet_name);
+  //"Front" det
+  mask_string = runReduceScriptFunction("printParameter('SPECMASKSTRING_F')");
+  addSpectrumMasksToTable(mask_string, frontdet_name);
+
+  //Time masks
+  mask_string = runReduceScriptFunction("printParameter('TIMEMASKSTRING')");
+  addTimeMasksToTable(mask_string, "-");
+  //Rear detector
+  mask_string = runReduceScriptFunction("printParameter('TIMEMASKSTRING_R')");
+  addTimeMasksToTable(mask_string, reardet_name);
+  //Front detectors
+  mask_string = runReduceScriptFunction("printParameter('TIMEMASKSTRING_F')");
+  addTimeMasksToTable(mask_string, frontdet_name);
+}
+
+/**
+ * Add a spectrum mask string to the mask table
+ * @param mask_string The string of mask information
+ * @param det_name The detector it relates to 
+ */
+void SANSRunWindow::addSpectrumMasksToTable(const QString & mask_string, const QString & det_name)
+{
   QStringList elements = mask_string.split(",", QString::SkipEmptyParts);
   QStringListIterator sitr(elements);
   while(sitr.hasNext())
@@ -553,23 +603,28 @@ void SANSRunWindow::updateMaskTable()
     int row = m_uiForm.mask_table->rowCount();
     //Insert line after last row
     m_uiForm.mask_table->insertRow(row);
-    QTableWidgetItem *col1 = new QTableWidgetItem(col1_txt);
-    QTableWidgetItem *col2 = new QTableWidgetItem(item);
-    m_uiForm.mask_table->setItem(row, 0, col1);
-    m_uiForm.mask_table->setItem(row, 1, col2);
+    m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem(col1_txt));
+    m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(det_name));
+    m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(item));
   }
+}
 
-  mask_string = runReduceScriptFunction("printParameter('TIMEMASKSTRING')");
-  elements = mask_string.split(";",QString::SkipEmptyParts);
-  sitr = QStringListIterator(elements);
+/**
+ * Add a time mask string to the mask table
+ * @param mask_string The string of mask information
+ * @param det_name The detector it relates to 
+ */
+void SANSRunWindow::addTimeMasksToTable(const QString & mask_string, const QString & det_name)
+{
+  QStringList elements = mask_string.split(";",QString::SkipEmptyParts);
+  QStringListIterator sitr(elements);
   while(sitr.hasNext())
   {
     int row = m_uiForm.mask_table->rowCount();
     m_uiForm.mask_table->insertRow(row);
-    QTableWidgetItem *item1 = new QTableWidgetItem("time");
-    QTableWidgetItem *item2 = new QTableWidgetItem(sitr.next());
-    m_uiForm.mask_table->setItem(row, 0, item1);
-    m_uiForm.mask_table->setItem(row, 1, item2);
+    m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("time"));
+    m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(det_name));
+    m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem(sitr.next()));
   }
 }
 
@@ -697,16 +752,34 @@ bool SANSRunWindow::isUserFileLoaded() const
 void SANSRunWindow::addUserMaskStrings(QString & exec_script)
 {
   //Clear current
-  exec_script += "Mask('/CLEAR')\nMask('/CLEAR/TIME')\n";
+  exec_script += "Mask('MASK/CLEAR')\nMask('MASK/CLEAR/TIME')\n";
 
   //Pull in the table details first, skipping the first two rows
   int nrows = m_uiForm.mask_table->rowCount();
   for(int row = 2; row <  nrows; ++row)
   {
-    //Details are in the second column
-    exec_script += "Mask('" + m_uiForm.mask_table->item(row, 1)->text() + "')\n";
+    //Details are in the third column
+    exec_script += "Mask('MASK";
+    if( m_uiForm.mask_table->item(row, 0)->text() == "time")
+    {
+      exec_script += "/TIME";
+    }
+    QString details = m_uiForm.mask_table->item(row, 2)->text();
+    QString detname = m_uiForm.mask_table->item(row, 1)->text();
+    if( detname == "-" )
+    {
+      exec_script += " " + details;
+    }
+    else if( detname == "rear-detector" || detname == "main-detector-bank" )
+    {
+      exec_script += "/REAR " + details;
+    }
+    else
+    {
+      exec_script += "/FRONT " + details;
+    }
+    exec_script += "')\n";    
   }
-
 
   //Spectra mask first
   QStringList mask_params = m_uiForm.user_spec_mask->text().split(",", QString::SkipEmptyParts);
@@ -714,11 +787,15 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
   QString bad_masks;
   while(sitr.hasNext())
   {
-    QString item = sitr.next();
-    if( item.startsWith('S', Qt::CaseInsensitive) || item.startsWith('H', Qt::CaseInsensitive) || 
+    QString item = sitr.next().trimmed();
+    if( item.startsWith("REAR", Qt::CaseInsensitive) || item.startsWith("FRONT", Qt::CaseInsensitive) )
+    {
+      exec_script += "Mask('MASK/" + item + "')\n";
+    }
+    else if( item.startsWith('S', Qt::CaseInsensitive) || item.startsWith('H', Qt::CaseInsensitive) || 
         item.startsWith('V', Qt::CaseInsensitive) )
     {
-      exec_script += "Mask('" + item + "')\n";
+      exec_script += "Mask('MASK " + item + "')\n";
     }
     else
     {
@@ -737,14 +814,18 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
   bad_masks = "";
   while(sitr.hasNext())
   {
-    QString item = sitr.next();
-    if( item.split(" ").count() == 2 )
+    QString item = sitr.next().trimmed();
+    if( item.startsWith("REAR", Qt::CaseInsensitive) || item.startsWith("FRONT", Qt::CaseInsensitive) )
     {
-      exec_script += "Mask('/T" + item + "')\n";
-    }
-    else
-    {
-      bad_masks += item + ",";
+      int ndetails = item.split(" ").count();
+      if( ndetails == 3 || ndetails == 2 )
+      {
+        exec_script += "Mask('/TIME" + item + "')\n";
+      }
+      else
+      {
+        bad_masks += item + ",";
+      }
     }
   }
   if( !bad_masks.isEmpty() )
@@ -800,7 +881,6 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     {
       m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
     }
-    std::cerr << "checking sample workspace\n";
     setLOQGeometry(sample_workspace, 0);
     QString can = getWorkspaceName(1);
     if( !can.isEmpty() )
@@ -1003,6 +1083,8 @@ void SANSRunWindow::selectUserFile()
   }
   
   runReduceScriptFunction("UserPath('" + QFileInfo(m_uiForm.userfile_edit->text()).path() + "')");
+  //Set the correct instrument
+  runReduceScriptFunction(m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString());
 
   if( !loadUserFile() )
   {
@@ -1291,7 +1373,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     "SampleWidth(" + m_uiForm.sample_width->text() + ")\n" + 
     "SampleThickness(" + m_uiForm.sample_thick->text() + ")\n"
     "SampleGeometry(" + m_uiForm.sample_geomid->currentText().at(0) + ")\n";
-  
+ 
   return exec_reduce;
 }
 
@@ -1532,30 +1614,6 @@ void SANSRunWindow::handleShowMaskButtonClick()
   m_uiForm.showMaskBtn->setEnabled(true);
   m_uiForm.showMaskBtn->setText("Display mask");
 
-
-  //QString py_code = m_pycode_viewmask;
-  //py_code.replace("|INSTRUMENTPATH|", m_ins_defdir);
-  //py_code.replace("|INSTRUMENTNAME|", m_uiForm.inst_opt->currentText());
-
-  //py_code.replace("|XCENTRE|", m_uiForm.beam_x->text());
-  //py_code.replace("|YCENTRE|", m_uiForm.beam_y->text());
-
-  //// Shape mask if applicable
-  //QString radius = m_uiForm.rad_min->text();
-  //if( radius.isEmpty() ) radius = "-1.0";
-  //g_log.debug("Min radius " + radius.toStdString());
-  //py_code.replace("|RADIUSMIN|", radius);
-
-  //radius = m_uiForm.rad_max->text();
-  //if( radius.isEmpty() ) radius = "-1.0";
-  //g_log.debug("Max radius " + radius.toStdString());
-  //py_code.replace("|RADIUSMAX|", radius);
-  //
-  ////Other masks
-  //QString spectramask, dummy;
-  //createMaskStrings(spectramask, dummy);
-  //py_code.replace("|MASKLIST|", spectramask);
-  //runPythonCode(py_code);
 }
 
 /**
