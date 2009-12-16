@@ -613,6 +613,16 @@ void CompositeFunction::parseName(const std::string& varName,int& index, std::st
   }
 }
 
+/** Returns the name of parameter i as it declared in its function
+ * @param i The parameter index
+ * @return The pure parameter name (without the function identifier f#.)
+ */
+std::string CompositeFunction::parameterLocalName(int i)const
+{
+  int iFun = functionIndex(i);
+  return m_functions[ iFun ]->parameterName(i - m_paramOffsets[iFun]);
+}
+
 /** Initialize the function providing it the workspace
  * @param workspace The shared pointer to a workspace to which the function will be fitted
  * @param spec The number of a spectrum for fitting

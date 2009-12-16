@@ -156,6 +156,9 @@ private:
   bool changingXMax()const{return m_changingXMax;}
   void changingXMax(bool ok){m_changingXMax = ok;}
 
+  // Set the tool tip text
+  void setToolTip(const QString& txt);
+
   FitPropertyBrowser* fitBrowser()const;
   /// The parent application window
   MantidUI* m_mantidUI;

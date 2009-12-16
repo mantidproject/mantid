@@ -104,12 +104,15 @@ m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true),m_changeSlotsEna
   QPushButton* btnClear = new QPushButton("Clear all");
   connect(btnClear,SIGNAL(clicked()),this,SLOT(clear()));
 
+  m_tip = new QLabel("",w);
+
   buttonsLayout->addWidget(m_btnFit);
   buttonsLayout->addWidget(m_btnUnFit);
   buttonsLayout->addWidget(btnClear);
   buttonsLayout->addStretch();
 
   layout->addLayout(buttonsLayout);
+  layout->addWidget(m_tip);
   layout->addWidget(m_browser);
 
   setWidget(w);
@@ -134,7 +137,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &pos)
   QMenu *menu = new QMenu(m_appWindow);
   if (ci->property() == m_functionsGroup)
   {
-    QAction *action = new QAction("Add new function",this);
+    QAction *action = new QAction("Add function",this);
     connect(action,SIGNAL(triggered()),this,SLOT(addFunction()));
     menu->addAction(action);
     menu->addSeparator();
@@ -164,6 +167,29 @@ void FitPropertyBrowser::popupMenu(const QPoint &pos)
   QAction *action = new QAction("Clear all",this);
   connect(action,SIGNAL(triggered()),this,SLOT(clear()));
   menu->addAction(action);
+
+  if (ci->property()->propertyName() == "Tie")
+  {
+    menu->addSeparator();
+    action = new QAction("Delete",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
+    menu->addAction(action);
+  }
+  else if (count() > 0 && !hasTie(ci->property()))
+  {
+    menu->addSeparator();
+    action = new QAction("Add tie",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(addTie()));
+    menu->addAction(action);
+  }
+  else if (hasTie(ci->property()))
+  {
+    menu->addSeparator();
+    action = new QAction("Delete tie",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
+    menu->addAction(action);
+  }
+
 
   menu->popup(QCursor::pos());
 }
@@ -220,6 +246,8 @@ void FitPropertyBrowser::addFunction(const std::string& fnName)
   m_functionItems.append(fnItem);
   selectFunction(index());
 
+  updateParameters();
+
   m_changeSlotsEnabled = true;
 
   setFitEnabled(true);
@@ -242,6 +270,7 @@ void FitPropertyBrowser::replaceFunction(int i,const std::string& fnName)
     pf->setHeight(peakFunction(i)->height());
     pf->setWidth(peakFunction(i)->width());
   }
+  removeTiesWithFunction(i);// do it before replaceFunction
   m_compositeFunction->replaceFunction(i,f);
   QtBrowserItem* fnItem = m_functionItems[i];
   fnItem->property()->setPropertyName(functionName(i));
@@ -252,7 +281,7 @@ void FitPropertyBrowser::replaceFunction(int i,const std::string& fnName)
     for(int j=f->nParams()+1;j<subs.size();j++)
     {
       fnItem->property()->removeSubProperty(subs[j]);
-      delete subs[j];
+      delete subs[j]; // ?
     }
   }
   else if (subs.size()-1 < f->nParams())
@@ -270,6 +299,7 @@ void FitPropertyBrowser::replaceFunction(int i,const std::string& fnName)
     m_doubleManager->setValue(subs[j+1],f->parameter(j));
   }
 
+  updateParameters();
 }
 
 /** Remove a function
@@ -279,12 +309,13 @@ void FitPropertyBrowser::removeFunction(int i)
 {
   if (i < 0 || i >= count()) return;
   disableUndo();
+  removeTiesWithFunction(i);// do it before removeFunction
   QtBrowserItem* fnItem = m_functionItems[i];
   QList<QtProperty*> subs = fnItem->property()->subProperties();
   for(int j=0;j<subs.size();j++)
   {
-    fnItem->property()->removeSubProperty(subs[i]);
-    delete subs[j];
+    fnItem->property()->removeSubProperty(subs[j]);
+    delete subs[j]; // ?
   }
   QtProperty* fnGroup = fnItem->parent()->property();
   fnGroup->removeSubProperty(fnItem->property());
@@ -301,6 +332,7 @@ void FitPropertyBrowser::removeFunction(int i)
   {
     setFitEnabled(false);
   }
+  updateParameters();
   emit functionRemoved(i);
 }
 
@@ -514,6 +546,40 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
       m_guessOutputName = false;
     }
   }
+  else if (prop->propertyName() == "Tie")
+  {
+    for(int i=0;i<m_ties.size();i++)
+    {
+      if (prop == m_ties[i].getProperty())
+      {
+        QString estr = m_stringManager->value(prop);
+        // Make sure the tied parameter is right and the property keeps only the right-hand side formula
+        int j = estr.indexOf('=');
+        if (j == estr.size())
+        {
+          m_appWindow->mantidUI->showCritical("Tie expression is missing");
+          m_stringManager->setValue(prop,"");
+          return;
+        }
+        if (j >= 0)
+        {
+          estr.remove(0,j+1);
+          m_stringManager->setValue(prop,estr);
+          return;
+        }
+        try
+        {
+          estr.prepend(m_ties[i].parName()+"=");
+          m_ties[i].set(estr);
+        }
+        catch(std::exception& e)
+        {
+          //QString msg = "Error in tie \""+estr+"\":\n\n"+QString::fromAscii(e.what());
+          //m_stringManager->setValue(prop,"");
+        }
+      }
+    }
+  }
 }
 
 // Centre of the current peak
@@ -636,7 +702,7 @@ void FitPropertyBrowser::setIndex(int i)const
     m_index = -1;
     return;
   }
-  if (i < 0 || i >= count()) return;
+  if (i < -1 || i >= count()) return;
   m_index = i;
   emit indexChanged(i);
 }
@@ -680,6 +746,16 @@ void FitPropertyBrowser::fit()
     alg->setProperty("EndX",endX());
     alg->setPropertyValue("Output",outputName());
     alg->setPropertyValue("Function",*m_compositeFunction);
+    QString tiesStr;
+    for(int i=0;i<m_ties.size();i++)
+    {
+      tiesStr += m_ties[i].expr();
+      if (i!=m_ties.size()-1)
+      {
+        tiesStr += ",";
+      }
+    }
+    alg->setPropertyValue("Ties",tiesStr.toStdString());
     observeFinish(alg);
     alg->executeAsync();
   }
@@ -863,10 +939,40 @@ QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* pr
  */
 void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
 {
+  if (!current) return;
+  bool ok = false;
   int i = m_functionItems.indexOf(current);
   if (i >= 0)
   {
+    ok = true;
+  }
+  else if (current == m_fitGroup || current->parent() == m_fitGroup || current->parent()->property() == m_settingsGroup)
+  {
+  }
+  else
+  {
+    i = m_functionItems.indexOf(current->parent());
+    if (i >= 0)
+    {
+      ok = true;
+    }
+    else
+    {
+      i = m_functionItems.indexOf(current->parent()->parent());
+      if (i >= 0)
+      {
+        ok = true;
+      }
+    }
+  }
+
+  if (ok)
+  {
     setIndex(i);
+  }
+  else
+  {
+    setIndex(-1);
   }
 }
 
@@ -876,12 +982,24 @@ void FitPropertyBrowser::updateParameters()
   for(int i=0;i<m_functionItems.size();i++)
   {
     QtBrowserItem* fnItem = m_functionItems[i];
-    QList<QtProperty*> subs = fnItem->property()->subProperties();
+    QList<QtProperty*> paramProps = fnItem->property()->subProperties();
     Mantid::API::IFunction* f = m_compositeFunction->getFunction(i);
-    for(int j=1;j<subs.size();j++)
+    for(int j=1;j<paramProps.size();j++)
     {
       double v = f->parameter(j-1);
-      m_doubleManager->setValue(subs[j],v);
+      m_doubleManager->setValue(paramProps[j],v);
+      QList<QtProperty*> tieProps = paramProps[j]->subProperties();
+      for(int k=0;k<tieProps.size();k++)
+      {
+        if (tieProps[k]->propertyName() == "Tie")
+        {
+          int it = indexOfTie(tieProps[k]);
+          if (it >= 0)
+          {
+            m_stringManager->setValue(tieProps[k],m_ties[it].exprRHS());
+          }
+        }
+      }
     }
   }
 }
@@ -900,12 +1018,13 @@ void FitPropertyBrowser::clear()
     for(int j=0;j<subs.size();j++)
     {
       fnProp->removeSubProperty(subs[j]);
-      delete subs[j];
+      delete subs[j]; // ?
     }
     m_functionsGroup->removeSubProperty(fnProp);
-    delete fnProp;
+    delete fnProp; // ?
   }
   m_functionItems.clear();
+  m_ties.clear();
   createCompositeFunction();
   emit functionCleared();
 }
@@ -983,4 +1102,198 @@ void FitPropertyBrowser::setFitEnabled(bool yes)
 bool FitPropertyBrowser::isFitEnabled()const
 {
   return m_btnFit->isEnabled();
+}
+
+/** Adds a tie
+ * @param tstr The expression, e.g. "f1.Sigma= f0.Height/2"
+ */
+void FitPropertyBrowser::addTie(const QString& tstr)
+{
+  m_ties.push_back(FitParameterTie(m_compositeFunction));
+  FitParameterTie& tie = m_ties.back();
+  try
+  {
+    tie.set(tstr);
+    int iPar = compositeFunction()->parameterIndex(tie.parName().toStdString());
+    int iFun = compositeFunction()->functionIndex(iPar);
+    QtBrowserItem* fnItem = m_functionItems[iFun];
+    QtProperty* fnProp = fnItem->property();
+    std::string parName = compositeFunction()->parameterLocalName(iPar);
+    QtProperty* tieProp = m_stringManager->addProperty( "Tie" );
+    tie.setProperty(tieProp);
+    m_stringManager->setValue(tieProp,tie.expr());
+    int iPar1 = function(iFun)->parameterIndex(parName)+1;
+    QtProperty* parProp = fnProp->subProperties()[iPar1];
+    parProp->addSubProperty(tieProp);
+    m_browser->setExpanded(fnItem->children()[iPar1],false);
+  }
+  catch(std::exception& e)
+  {
+    QString msg = "Error in a tie:\n\n"+QString(e.what())+"\n";
+    m_appWindow->mantidUI->showCritical(msg);
+  }
+}
+
+/** Adds a tie
+ * @param i The function index
+ * @param parProp The property of the tied parameter
+ */
+void FitPropertyBrowser::addTie(int i,QtProperty* parProp,const QString& tieExpr)
+{
+  m_ties.push_back(FitParameterTie(m_compositeFunction));
+  FitParameterTie& tie = m_ties.back();
+  QtProperty* tieProp = m_stringManager->addProperty( "Tie" );
+  tie.setProperty(tieProp);
+  double value = m_doubleManager->value(parProp);
+  tie.set(tieExpr);
+  parProp->addSubProperty(tieProp);
+  //m_browser->setBackgroundColor(findItem(m_functionItems[i],parProp),QColor(Qt::yellow));
+}
+
+
+/** 
+ * Slot. Adds a tie. Full expression to be entered <name>=<formula>
+ */
+void FitPropertyBrowser::addTie()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  int i = m_functionItems.indexOf(ci->parent());
+  if (i >= 0 && ci->property()->propertyName() != "Type")
+  {
+    QtProperty* parProp = ci->property();
+    double value = m_doubleManager->value(parProp);
+    addTie(i,parProp,"f"+QString::number(i)+"."+parProp->propertyName()+"="+QString::number(value));
+  }
+  else
+  {
+    bool ok = false;
+    QString tieStr = 
+      QInputDialog::getText(this, "MantidPlot - Fit", "Enter tie expression", QLineEdit::Normal,"",&ok);
+    if (ok)
+    {
+      addTie(tieStr);
+    }
+  }
+}
+
+/** 
+ * Slot. Deletes a tie. 
+ */
+void FitPropertyBrowser::deleteTie()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  QtProperty* parProp;
+  QtProperty* tieProp;
+  int iFun;
+  if (ci->property()->propertyName() != "Tie") 
+  {
+    parProp = ci->property();
+    tieProp = getTieProperty(parProp);
+    if (!tieProp) return;
+    iFun = m_functionItems.indexOf(ci->parent());
+  }
+  else
+  {
+    tieProp = ci->property();
+    parProp = ci->parent()->property();
+    iFun = m_functionItems.indexOf(ci->parent()->parent());
+  }
+  QString parName = "f"+QString::number(iFun)+"."+parProp->propertyName();
+  for(int i=0;i<m_ties.size();i++)
+  {
+    if (m_ties[i].parName() == parName)
+    {
+      m_ties.removeAt(i);
+      parProp->removeSubProperty(tieProp);
+      break;
+    }
+  }
+}
+
+/** Check ties' validity. Removes invalid ties.
+ * @param iFun The deleted function index
+ */
+void FitPropertyBrowser::removeTiesWithFunction(int iFun)
+{
+  for(int i=0;i<m_ties.size();)
+  {
+    std::string parName = m_ties[i].parName().toStdString();
+    if (!m_ties[i].functionDeleted(iFun))// the tie is invalid
+    {
+      int iPar = compositeFunction()->parameterIndex(parName);
+      int iFun1 = compositeFunction()->functionIndex(iPar);
+      QtBrowserItem* fnItem = m_functionItems[iFun1];
+      QList<QtBrowserItem*> subs = fnItem->children();
+      for(int j=1;j!=subs.size();j++)
+      {
+        QList<QtProperty*> ts = subs[j]->property()->subProperties();
+        int k = ts.indexOf(m_ties[i].getProperty());
+        if (k >= 0)
+        {
+          subs[j]->property()->removeSubProperty(ts[k]);
+        }
+      }
+      m_ties.removeAt(i);
+    }
+    else
+    {
+      i++;
+    }
+  }
+}
+
+/** Find the tie index for a property. 
+ * @param tieProp The property which displays and sets a tie.
+ * @return The index of the tie if successful or -1 if failed.
+ */
+int FitPropertyBrowser::indexOfTie(QtProperty* tieProp)
+{
+  for(int i=0;i<m_ties.size();i++)
+  {
+    if (m_ties[i].getProperty() == tieProp)
+    {
+      return i;
+    }
+  }
+  return -1;
+}
+
+/** Does a parameter have a tie
+ * @param parProp The property for a function parameter
+ */
+bool FitPropertyBrowser::hasTie(QtProperty* parProp)const
+{
+  QList<QtProperty*> subs = parProp->subProperties();
+  for(int i=0;i<subs.size();i++)
+  {
+    if (subs[i]->propertyName() == "Tie")
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Returns the tie property for a parameter property, or NULL
+ * @param The parameter property
+ */
+QtProperty* FitPropertyBrowser::getTieProperty(QtProperty* parProp)const
+{
+  QList<QtProperty*> subs = parProp->subProperties();
+  for(int i=0;i<subs.size();i++)
+  {
+    if (subs[i]->propertyName() == "Tie")
+    {
+      return subs[i];
+    }
+  }
+  return NULL;
+}
+
+/** Display a tip
+ * @param txt The text to display
+ */
+void FitPropertyBrowser::setTip(const QString& txt)
+{
+  m_tip->setText(txt);
 }

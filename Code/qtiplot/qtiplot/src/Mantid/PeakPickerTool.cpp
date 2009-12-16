@@ -60,7 +60,7 @@ m_defaultPeakName("Gaussian")
   m_mantidUI->showFitPropertyBrowser();
   if (fitBrowser()->count() == 0)
   {
-    d_graph->setToolTip("Click and drag to set the fitting region");
+    setToolTip("Click and drag to set the fitting region");
     m_changingXMin = true;
     m_changingXMax = true;
   }
@@ -133,7 +133,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
         }
         else if (changingXMin() && changingXMax())
         {// modify xMin and xMax at the same time 
-          d_graph->setToolTip("");
+          setToolTip("");
           double x = d_graph->plotWidget()->invTransform(2,pnt.x());
           double x0 = (xMin() + xMax())/2;
           double xmin,xmax;
@@ -192,7 +192,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             addPeakAt(p.x(),p.y());
             m_addingPeak = false;
             d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
-            d_graph->setToolTip("");
+            setToolTip("");
           }
           else if ( mod.testFlag(Qt::ShiftModifier) )// Shift button was pressed
           {
@@ -251,7 +251,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
       fitBrowser()->setEndX(xMax());
       if (current() >= 0 && m_width == 0.)
       {
-        d_graph->setToolTip("Click and drag the red line to set the peak width");
+        setToolTip("Click and drag the red line to set the peak width");
       }
       break;
 
@@ -397,7 +397,7 @@ void PeakPickerTool::setWidth(double x)
     m_width = x;
   if (m_current>=0)
     fitBrowser()->setWidth(x);
-  d_graph->setToolTip("");
+  setToolTip("");
 }
 
 // Check if x is near the xMin marker (+-dx)
@@ -575,18 +575,25 @@ void PeakPickerTool::functionChanged(const QString&)
  */
 void PeakPickerTool::prepareContextMenu(QMenu& menu)
 {
-  QAction *action = new QAction("Add peak",this);
+  QAction *action = new QAction("Add peak...",this);
   connect(action,SIGNAL(triggered()),this,SLOT(addPeak()));
   menu.addAction(action);
 
-  action = new QAction("Add background",this);
+  action = new QAction("Add background...",this);
   connect(action,SIGNAL(triggered()),this,SLOT(addBackground()));
   menu.addAction(action);
 
-  if (current()>=0)
+  if (fitBrowser()->count()>0)
   {
-    action = new QAction("Delete peak",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(deletePeak()));
+    if (current()>=0)
+    {
+      action = new QAction("Delete peak",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(deletePeak()));
+      menu.addAction(action);
+
+    }
+    action = new QAction("Delete function...",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(deleteFunction()));
     menu.addAction(action);
   }
 
@@ -627,7 +634,7 @@ void PeakPickerTool::addPeak()
     fitBrowser()->setDefaultFunctionType(m_defaultPeakName);
     m_addingPeak = true;
     d_graph->plotWidget()->canvas()->setCursor(Qt::CrossCursor);
-    d_graph->setToolTip("Click to add the peak");
+    setToolTip("Click to add the peak");
   }
 }
 
@@ -682,6 +689,22 @@ void PeakPickerTool::addBackground()
  */
 void PeakPickerTool::deleteFunction()
 {
+  QStringList names;
+  for(int i=0;i<fitBrowser()->count();i++)
+  {
+    names << fitBrowser()->functionName(i);
+  }
+  bool ok;
+  QString fnName = 
+    QInputDialog::getItem(m_mantidUI->appWindow(), "MantidPlot - Fit", 
+    "Select function to delete", names,0,false,&ok);
+  if (ok)
+  {
+    QRegExp rx("^f(\\d+)-");
+    int i = rx.indexIn(fnName);
+    int j = rx.cap(1).toInt();
+    fitBrowser()->removeFunction(j);
+  }
 }
 
 /**
@@ -700,3 +723,11 @@ void PeakPickerTool::clear()
   fitBrowser()->clear();
 }
 
+/** Set the tool tip text
+ * @param tst The tip text
+ */
+void PeakPickerTool::setToolTip(const QString& txt)
+{
+  d_graph->setToolTip(txt);
+  fitBrowser()->setTip(txt);
+}

@@ -3,6 +3,9 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AlgorithmObserver.h"
+
+#include "FitParameterTie.h"
+
 #include <boost/shared_ptr.hpp>
 #include <QDockWidget>
 #include <QMap>
@@ -20,6 +23,7 @@ class QtProperty;
 class QtBrowserItem;
 
 class QPushButton;
+class QLabel;
 
 class ApplicationWindow;
 
@@ -135,6 +139,14 @@ public:
   /// Returns true if the function is ready for a fit
   bool isFitEnabled()const;
 
+  /// Adds a tie
+  void addTie(const QString& tstr);
+  /// Check ties' validity. Removes invalid ties.
+  void removeTiesWithFunction(int);
+
+  /// Display a tip
+  void setTip(const QString& txt);
+
   void init();
   void reinit();
 
@@ -164,6 +176,8 @@ private slots:
   void workspace_added(const QString &, Mantid::API::Workspace_sptr);
   void workspace_removed(const QString &);
   void currentItemChanged(QtBrowserItem*);
+  void addTie();
+  void deleteTie();
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -189,11 +203,21 @@ private:
   void disableUndo();
   /// Enable/disable the Fit button;
   void setFitEnabled(bool yes);
+  /// Adds a tie
+  void addTie(int i,QtProperty* parProp,const QString& tieExpr);
+  /// Find the tie index for a property. 
+  int indexOfTie(QtProperty* tieProp);
+  /// Does a parameter have a tie
+  bool hasTie(QtProperty* parProp)const;
+  /// Returns the tie property for a parameter property, or NULL
+  QtProperty* getTieProperty(QtProperty* parProp)const;
 
   /// Button for doing fit
   QPushButton* m_btnFit;
   /// Button for undoing fit
   QPushButton* m_btnUnFit;
+  /// To display a tip text
+  QLabel* m_tip;
 
   QtTreePropertyBrowser* m_browser;
   /// Property managers:
@@ -250,6 +274,9 @@ private:
 
   /// If false the change-slots (such as enumChanged(), doubleChanged()) are disabled
   bool m_changeSlotsEnabled;
+
+  /// Ties
+  QList<FitParameterTie> m_ties;
 
   ApplicationWindow* m_appWindow;
 

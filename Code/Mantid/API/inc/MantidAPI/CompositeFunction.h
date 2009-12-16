@@ -131,6 +131,12 @@ public:
   void removeFunction(int i, bool del=true);
   /// Replace a function
   void replaceFunction(int i,IFunction* f);
+  /// Get the function index
+  int functionIndex(int i)const;
+  /// Get the function index
+  int functionIndexActive(int i)const;
+  /// Returns the name of parameter i as it declared in its function
+  std::string parameterLocalName(int i)const;
 
 protected:
   /// Function initialization. Declare function parameters in this method.
@@ -142,10 +148,6 @@ protected:
 
 private:
 
-  /// Get the function index
-  int functionIndex(int i)const;
-  /// Get the function index
-  int functionIndexActive(int i)const;
   /// Extract function index and parameter name from a variable name
   static void parseName(const std::string& varName,int& index, std::string& name);
 

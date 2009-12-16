@@ -397,6 +397,7 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/UserFitFunctionDialog.h \
 	    src/Mantid/FitPropertyBrowser.h \
 	    src/Mantid/IFunctionWrapper.h \
+	    src/Mantid/FitParameterTie.h \
 	    src/Mantid/InstrumentWidget/GLColor.h \
 	    src/Mantid/InstrumentWidget/GLObject.h \
 	    src/Mantid/InstrumentWidget/GLTrackball.h \
@@ -571,6 +572,7 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/UserFitFunctionDialog.cpp \
 	    src/Mantid/FitPropertyBrowser.cpp \
 	    src/Mantid/IFunctionWrapper.cpp \
+	    src/Mantid/FitParameterTie.cpp \
 	    src/Mantid/InstrumentWidget/GLColor.cpp \
 	    src/Mantid/InstrumentWidget/GLObject.cpp \
 	    src/Mantid/InstrumentWidget/GLTrackball.cpp \
