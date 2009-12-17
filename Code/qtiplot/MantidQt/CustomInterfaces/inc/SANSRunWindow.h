@@ -197,8 +197,6 @@ private:
   bool m_force_reload;
   /// A flag indicating there were warning messsages in the log
   bool m_log_warnings;
-  /// A flag indicating there were error messsages in the log
-  bool m_log_errors;
   // An observer for a delete notification from Mantid
   Poco::NObserver<SANSRunWindow, Mantid::API::WorkspaceDeleteNotification> m_delete_observer;
   /// A map of S2D detector names to QLabel pointers

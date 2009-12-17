@@ -414,13 +414,19 @@ def _assignHelper(run_string, is_trans, reload = True):
     basename = INSTR_NAME + fullrun_no
     filename = os.path.join(DATA_PATH,basename)
     # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
-    if not os.path.exists(filename):
+    if not os.path.exists(filename + '.' + ext):
         filename = basename
 
     if is_trans:
-        _loadRawData(filename, wkspname, ext, spec_max = 8)
+        try:
+            _loadRawData(filename, wkspname, ext, spec_max = 8)
+        except RuntimeError:
+            return '',True,''
     else:
-        _loadRawData(filename, wkspname, ext)
+        try:
+            _loadRawData(filename, wkspname, ext)
+        except RuntimeError:
+            return '',True,''
     return wkspname,True, INSTR_NAME + logname
 
 def padRunNumber(run_no, field_width):

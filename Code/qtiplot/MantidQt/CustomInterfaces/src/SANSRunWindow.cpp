@@ -52,7 +52,7 @@ Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANS
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
-  m_period_lbls(), m_warnings_issued(false), m_force_reload(false),
+  m_period_lbls(), m_warnings_issued(false), m_force_reload(false), m_log_warnings(false),
   m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(), 
   m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1), m_have_reducemodule(false), 
   m_dirty_batch_grid(false), m_tmp_batchfile("")
@@ -146,6 +146,7 @@ void SANSRunWindow::initLayout()
     //Logging
     connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
     connect(m_uiForm.logger_clear, SIGNAL(clicked()), m_uiForm.logging_field, SLOT(clear()));
+    m_uiForm.logging_field->ensureCursorVisible();
 
     connect(m_uiForm.verbose_check, SIGNAL(stateChanged(int)), this, SLOT(verboseMode(int)));
 
@@ -847,8 +848,6 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
 {
   resetGeometryDetailsBox();
 
-  const char format('f');
-  const int prec(3);
   double unit_conv(1000.);
   
   QString workspace_name = getWorkspaceName(0);
@@ -893,12 +892,6 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
       Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
       Mantid::API::MatrixWorkspace_sptr can_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
       setLOQGeometry(can_workspace, 1);
-    }
-    //Check for mismatches
-    QGridLayout *grid = qobject_cast<QGridLayout*>(m_uiForm.loq_geometry->layout());
-    for( int row = 2; row < 5; ++row )
-    {
-      QLabel *sample = qobject_cast<QLabel*>(grid->itemAtPosition(row,1)->widget()); 
     }
   }
   else
@@ -1338,6 +1331,14 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   //Construct a run script based upon the current values within the various widgets
   QString exec_reduce = m_uiForm.inst_opt->itemData(m_uiForm.inst_opt->currentIndex()).toString() + 
       "\nDetector('" + m_uiForm.detbank_sel->currentText() + "')\n";
+
+  //Add the path in the single mode data box if it is not empty
+  QString data_path = m_uiForm.datadir_edit->text();
+  if( !data_path.isEmpty() )
+  {
+    exec_reduce += "DataPath('" + data_path + "')\n";
+  }
+
   if( type.startsWith("1D") )
   {
     exec_reduce += "Set1D()\n";
@@ -1427,7 +1428,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
       showInformationBox("Error: No run information specified.");
       return;
     }
-      
+
     QString csv_file(m_uiForm.csv_filename->text());
     if( m_dirty_batch_grid )
     {
@@ -1467,6 +1468,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     QFile tmp_file(m_tmp_batchfile);
     tmp_file.remove();
   }
+  checkLogFlags();
 }
 
 /**
@@ -1702,9 +1704,18 @@ void SANSRunWindow::updateLogWindow(const QString & msg)
   if( msg.startsWith(prefix) )
   {
     QString txt = msg.section("::",2);
-    m_log_warnings = txt.contains("warning", Qt::CaseInsensitive);
-    if( m_uiForm.verbose_check->isChecked() || m_log_warnings || m_uiForm.log_colette->isChecked() )
+    bool logwarnings = txt.contains("warning", Qt::CaseInsensitive);
+    if( m_uiForm.verbose_check->isChecked() || logwarnings || m_uiForm.log_colette->isChecked() )
     {
+      if( logwarnings )
+      {
+	m_log_warnings = true;
+	m_uiForm.logging_field->setTextColor(Qt::red);
+      }
+      else
+      {
+	m_uiForm.logging_field->setTextColor(Qt::black);
+      }
       m_uiForm.logging_field->append(txt);
     }
   }

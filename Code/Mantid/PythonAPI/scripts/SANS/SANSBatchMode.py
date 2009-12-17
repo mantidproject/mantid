@@ -85,20 +85,41 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
             _issueWarning('No sample run given, skipping entry.')
             continue
         run_file += format
-        AssignSample(run_file)
+        sample_ws = AssignSample(run_file)[0]
+        if len(sample_ws) == 0:
+            _issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
+            continue
         
         #Sample trans
         run_file = run['sample_trans']
         run_file2 = run['sample_direct_beam']
-        TransmissionSample(run_file + format, run_file2 + format)
+        ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
+        if len(run_file) > 0 and len(ws1) == 0:
+            _issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
+            continue
+        if len(run_file2) > 0 and len(ws2) == 0: 
+            _issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
+            continue
         
         # Sans Can 
-        AssignCan(run['can_sans'] + format)
+        run_file = run['can_sans'] + format
+        can_ws = AssignCan(run_file)[0]
+        if len(can_ws) == 0:
+            _issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
+            continue
+
 
         #Can trans
         run_file = run['can_trans']
         run_file2 = run['can_direct_beam']
-        TransmissionCan(run_file + format, run_file2+ format)
+        ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
+        if len(run_file) > 0 and len(ws1) == 0:
+            _issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
+            continue
+        if len(run_file2) > 0 and len(ws2) == 0: 
+            _issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
+            continue
+
 
         if centreit == 1:
             if verbose == 1:
