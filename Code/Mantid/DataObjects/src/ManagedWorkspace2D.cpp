@@ -320,6 +320,14 @@ const MantidVec& ManagedWorkspace2D::dataE(const int index) const
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
 }
 
+Kernel::cow_ptr<MantidVec> ManagedWorkspace2D::refX(const int index) const
+{
+  if ( index<0 || index>=m_noVectors )
+    throw std::range_error("ManagedWorkspace2D::dataX, histogram number out of range");
+
+  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->refX(index);
+}
+
 /** Returns the number of histograms.
     For some reason Visual Studio couldn't deal with the main getHistogramNumber() method
 	  being virtual so it now just calls this private (and virtual) method which does the work.

@@ -87,6 +87,11 @@ public:
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const {return _E;}
   
+  /// Returns a pointer to the x data
+  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
+  /// Set the specified X array to point to the given existing array
+  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { _X = *X; }
+
   ///Returns non-const vector of the x data
   virtual MantidVec& dataX() { return _X; }
   ///Returns non-const vector of the y data

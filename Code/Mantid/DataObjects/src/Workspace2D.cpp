@@ -218,6 +218,15 @@ namespace Mantid
 
       return data[index].dataE();
     }
+    
+    /// Returns a pointer to the x data
+    Kernel::cow_ptr<MantidVec> Workspace2D::refX(const int index) const
+    {
+      if (index<0 || index>=m_noVectors)
+        throw std::range_error("Workspace2D::refX, histogram number out of range");
+
+      return data[index].ptrX();      
+    }
 
     /** Returns the number of histograms.
     For some reason Visual Studio couldn't deal with the main getHistogramNumber() method

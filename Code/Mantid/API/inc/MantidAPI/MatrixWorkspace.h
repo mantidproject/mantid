@@ -126,6 +126,11 @@ public:
   virtual const MantidVec& dataY(int const index) const = 0;
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const = 0;
+  
+  /// Returns a pointer to the x data
+  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const = 0;
+  /// Set the specified X array to point to the given existing array
+  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) = 0;
   //----------------------------------------------------------------------
 
   const int axes() const;

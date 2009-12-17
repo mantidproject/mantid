@@ -129,6 +129,7 @@ public:
   virtual const MantidVec& dataX(int const index) const;
   virtual const MantidVec& dataY(int const index) const;
   virtual const MantidVec& dataE(int const index) const;
+  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
 
   long int getMemorySize() const;
 	virtual bool threadSafe() const { return false; }

@@ -33,6 +33,13 @@ namespace Mantid
     void WorkspaceSingleValue::init(const int &NVectors, const int &XLength, const int &YLength)
     {}
 
+    Kernel::cow_ptr<MantidVec> WorkspaceSingleValue::refX(const int index) const
+    {
+      Kernel::cow_ptr<MantidVec> ret;
+      ret.access() = _X;
+      return ret;
+    }
+    
   } // namespace DataObjects
 } // namespace Mantid
 

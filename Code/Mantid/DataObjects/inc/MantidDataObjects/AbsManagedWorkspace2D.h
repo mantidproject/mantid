@@ -131,6 +131,7 @@ namespace DataObjects
     virtual const MantidVec& dataX(int const index) const;
     virtual const MantidVec& dataY(int const index) const;
     virtual const MantidVec& dataE(int const index) const;
+    virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
 
     /// Returns the size of physical memory the workspace takes
     long int getMemorySize() const = 0;
@@ -382,6 +383,15 @@ const MantidVec& AbsManagedWorkspace2D<NBlocks>::dataE(const int index) const
     throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
+}
+
+template<int NBlocks>
+Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D<NBlocks>::refX(const int index) const
+{
+  if ( index<0 || index>=m_noVectors )
+    throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
+
+  return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->refX(index);
 }
 
 /** Returns the number of histograms.

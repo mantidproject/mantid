@@ -178,7 +178,7 @@ namespace Mantid
       for (int i = 0; i < numHists; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
-        out->dataX(i) = lhs->readX(i);
+        out->setX(i,lhs->refX(i));
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION
@@ -207,7 +207,7 @@ namespace Mantid
       for (int i = 0; i < numHists; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
-        out->dataX(i) = lhs->readX(i);
+        out->setX(i,lhs->refX(i));
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION
@@ -235,7 +235,7 @@ namespace Mantid
         const double rhsY = rhs->readY(i)[0];
         const double rhsE = rhs->readE(i)[0];        
         
-        out->dataX(i) = lhs->readX(i);
+        out->setX(i,lhs->refX(i));
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhsY,rhsE,out->dataY(i),out->dataE(i));
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION
@@ -259,7 +259,7 @@ namespace Mantid
       for (int i = 0; i < numHists; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
-        out->dataX(i) = lhs->readX(i);
+        out->setX(i,lhs->refX(i));
         performBinaryOperation(lhs->readX(i),lhs->readY(i),lhs->readE(i),rhs->readY(i),rhs->readE(i),out->dataY(i),out->dataE(i));
         m_progress->report();
         PARALLEL_END_INTERUPT_REGION

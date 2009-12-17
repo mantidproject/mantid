@@ -92,6 +92,9 @@ public:
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const;
 
+  /// Returns a pointer to the x data
+  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
+
   /* sets the monitorWorkspace indexlist
 	@param mList a vector holding the monitor workspace indexes
   */

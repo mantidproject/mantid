@@ -39,16 +39,10 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     virtual const MantidVec& dataY(int const index)const {return data;}
     ///Returns the error data
     virtual const MantidVec& dataE(int const index)const {return data;}
-    void setX(const cow_ptr<Mantid::MantidVec>&) {}
+    Kernel::cow_ptr<MantidVec> refX(const int index) const {return Kernel::cow_ptr<MantidVec>();}
+    void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) {}
+    
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
-
-    //Methods for getting data via python. Do not use for anything else!
-    ///Returns the x data const
-    virtual const MantidVec& getX(int const index) const {return data;}
-    ///Returns the y data const
-    virtual const MantidVec& getY(int const index) const {return data;}
-    ///Returns the error const
-    virtual const MantidVec& getE(int const index) const {return data;}
 
   private:
     MantidVec data;

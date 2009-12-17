@@ -77,6 +77,7 @@ public:
   const Histogram1D::StorageType& dataX(const int index) const;
   const Histogram1D::StorageType& dataY(const int index) const;
   const Histogram1D::StorageType& dataE(const int index) const;
+  Histogram1D::RCtype refX(const int index) const;
   
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

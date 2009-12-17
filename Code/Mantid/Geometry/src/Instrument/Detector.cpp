@@ -13,7 +13,7 @@ Kernel::Logger& Detector::g_log = Kernel::Logger::get("Detector");
  *  @param parent The parent component
  */
 Detector::Detector(const std::string& name, Component* parent) :
-  ObjComponent(name,parent), IDetector(), m_id(0), m_isMonitor(false)
+  IDetector(), ObjComponent(name,parent), m_id(0), m_isMonitor(false)
 {
 }
 
@@ -23,7 +23,7 @@ Detector::Detector(const std::string& name, Component* parent) :
  *  @param parent The parent component
  */
 Detector::Detector(const std::string& name, boost::shared_ptr<Object> shape, Component* parent) :
-  ObjComponent(name,shape,parent), IDetector(), m_id(0), m_isMonitor(false)
+  IDetector(), ObjComponent(name,shape,parent), m_id(0), m_isMonitor(false)
 {
 }
 

@@ -238,6 +238,15 @@ const Histogram1D::StorageType& ManagedDataBlock2D::dataE(const int index) const
   return m_data[index-m_minIndex].dataE();
 }
 
+Histogram1D::RCtype ManagedDataBlock2D::refX(const int index) const
+{
+  if ( ( index < m_minIndex ) 
+      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+    throw std::range_error("ManagedDataBlock2D::refX, histogram number out of range");
+
+  return m_data[index-m_minIndex].ptrX();
+}
+
 /** Output file stream operator.
  *  @param fs The stream to write to
  *  @param data The object to write to file

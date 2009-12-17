@@ -39,8 +39,11 @@ namespace CurveFitting
 class DLLExport IFuncMinimizer 
 {
 public:
+  /// Virtual destructor
+  virtual ~IFuncMinimizer() {}
+
   /// Get name of minimizer
-  virtual std::string name()const = 0;
+  virtual std::string name() const = 0;
 
   /// Perform iteration with minimizer
   virtual void iterate() = 0;

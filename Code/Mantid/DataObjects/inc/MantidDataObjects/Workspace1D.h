@@ -90,6 +90,11 @@ public:
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const {return dataE();}
 
+  /// Returns a pointer to the x data
+  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const {return Histogram1D::ptrX(); }
+  /// Set the specified X array to point to the given existing array
+  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { setX(X); }
+
   ///Returns non-const vector of the x data
   virtual MantidVec& dataX() { return Histogram1D::dataX(); }
   ///Returns non-const vector of the y data

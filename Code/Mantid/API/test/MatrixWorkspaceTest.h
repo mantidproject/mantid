@@ -35,7 +35,8 @@ public:
   const MantidVec& dataX(int const index) const {return vec;}
   const MantidVec& dataY(int const index) const {return vec;}
   const MantidVec& dataE(int const index) const {return vec;}
-  void setX(const Kernel::cow_ptr<MantidVec>&) {}
+  Kernel::cow_ptr<MantidVec> refX(const int index) const {return Kernel::cow_ptr<MantidVec>();}
+  void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) {}
 
 private:
   MantidVec vec;

@@ -93,6 +93,9 @@ public:
   ///Returns the error data
   virtual StorageType& dataE() { return refE.access(); }
 
+  /// Returns a pointer to the x data
+  virtual RCtype ptrX() const { return refX; }  
+  
   ///Clear the x data
   StorageType& emptyX() { refX.access().clear(); return refX.access(); }
   ///Clear the y data
