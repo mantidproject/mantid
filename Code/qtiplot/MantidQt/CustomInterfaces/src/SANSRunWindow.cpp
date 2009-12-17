@@ -1446,7 +1446,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
       py_code += ", verbose = True";
     }
     py_code += ")";
-    showInformationBox(py_code);
   }
 
   int idtype(0);
