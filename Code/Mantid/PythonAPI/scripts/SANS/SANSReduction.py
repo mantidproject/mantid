@@ -413,6 +413,10 @@ def _assignHelper(run_string, is_trans, reload = True):
 
     basename = INSTR_NAME + fullrun_no
     filename = os.path.join(DATA_PATH,basename)
+    # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
+    if not os.path.exists(filename):
+        filename = basename
+
     if is_trans:
         _loadRawData(filename, wkspname, ext, spec_max = 8)
     else:
