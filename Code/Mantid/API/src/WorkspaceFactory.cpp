@@ -152,7 +152,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
   else
   {
       // No need for a Managed Workspace
-      if ( is2D && className.substr(0,7) == "Managed" )
+      if ( is2D && ( className.substr(0,7) == "Managed" || className.substr(0,10) == "Compressed"))
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create("Workspace2D"));
       else
           ws = boost::dynamic_pointer_cast<MatrixWorkspace>(this->create(className));
