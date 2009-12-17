@@ -35,8 +35,8 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual const MantidVec& dataY(int const index)const {return data;}
     ///Returns the error data
     virtual const MantidVec& dataE(int const index)const {return data;}
-    Kernel::cow_ptr<MantidVec> refX(const int index) const {return Kernel::cow_ptr<MantidVec>();}
-    void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) {}
+    cow_ptr<MantidVec> refX(const int index) const {return cow_ptr<MantidVec>();}
+    void setX(const int index, const cow_ptr<MantidVec>& X) {}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
   private:
@@ -65,8 +65,8 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
     virtual const MantidVec& dataY(int const index)const {return data;}
     ///Returns the error data
     virtual const MantidVec& dataE(int const index)const {return data;}
-    Kernel::cow_ptr<MantidVec> refX(const int index) const {return Kernel::cow_ptr<MantidVec>();}
-    void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) {}
+    cow_ptr<MantidVec> refX(const int index) const {return cow_ptr<MantidVec>();}
+    void setX(const int index, const cow_ptr<MantidVec>& X) {}
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
   private:

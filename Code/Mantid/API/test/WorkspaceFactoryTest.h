@@ -39,8 +39,8 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     virtual const MantidVec& dataY(int const index)const {return data;}
     ///Returns the error data
     virtual const MantidVec& dataE(int const index)const {return data;}
-    Kernel::cow_ptr<MantidVec> refX(const int index) const {return Kernel::cow_ptr<MantidVec>();}
-    void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) {}
+    cow_ptr<MantidVec> refX(const int index) const {return cow_ptr<MantidVec>();}
+    void setX(const int index, const cow_ptr<MantidVec>& X) {}
     
     virtual void init(const int &NVectors, const int &XLength, const int &YLength){};
 
@@ -106,12 +106,6 @@ public:
       // in reality we do so need catch the error from trying to subscribe again
     }
   }
-
-  //std::string WorkspaceTest::WSTYPE = "WorkspaceTest";
-  //std::string NotInFactory::WSTYPE = "NotInFactory";
-  //std::string Workspace1DTest::WSTYPE = "Workspace1DTest";
-  //std::string Workspace2DTest::WSTYPE = "Workspace2DTest";
-  //std::string Workspace2DTest::WSTYPE = "ManagedWorkspace2D";
 
   void testReturnType()
   {
