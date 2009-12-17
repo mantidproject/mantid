@@ -11,7 +11,7 @@ namespace Mantid
   namespace Algorithms
   {
     /** 
-    Corrects the data and error values on a workspace by one minums the value of an exponential function
+    Corrects the data and error values on a workspace by one minus the value of an exponential function
     which is evaluated at the X value of each data point: c1(1-exp(-c*x)). 
     The data and error values are either divided or multiplied by the value of this function.
 

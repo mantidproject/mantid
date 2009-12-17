@@ -92,7 +92,7 @@ void SmoothData::exec()
     // First push the values ahead of the current point onto total
     for (int i = 0; i < halfWidth; ++i)
     {
-      total += Y[i];
+      if ( Y[i] == Y[i] ) total += Y[i];
       totalE += E[i]*E[i];
     }
     // Now calculate the smoothed values for the 'end' points, where the number contributing
@@ -100,7 +100,7 @@ void SmoothData::exec()
     for (int j = 0; j <= halfWidth; ++j)
     {
       const int index = j+halfWidth;
-      total += Y[index];
+      if ( Y[index] == Y[index] ) total += Y[index];
       newY[j] = total/(index+1);
       totalE += E[index]*E[index];
       newE[j] = sqrt(totalE)/(index+1);
@@ -112,7 +112,7 @@ void SmoothData::exec()
     {
       const int kp = k+halfWidth;
       const int km = k-halfWidth-1;
-      total += Y[kp] - Y[km];
+      total += (Y[kp]!=Y[kp] ? 0.0 : Y[kp]) - (Y[km]!=Y[km] ? 0.0 : Y[km]);
       newY[k] = total/npts;
       totalE += E[kp]*E[kp] - E[km]*E[km];
       // Use of a moving average can lead to rounding error where what should be 
@@ -123,7 +123,7 @@ void SmoothData::exec()
     for (int l = vecSize-halfWidth; l < vecSize; ++l)
     {
       const int index = l-halfWidth;
-      total -= Y[index-1];
+      total -= (Y[index-1]!=Y[index-1] ? 0.0 : Y[index-1]);
       newY[l] = total/(vecSize-index);
       totalE -= E[index-1]*E[index-1];
       newE[l] = std::sqrt(std::abs(totalE))/(vecSize-index);
