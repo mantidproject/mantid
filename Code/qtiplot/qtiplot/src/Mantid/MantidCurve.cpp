@@ -117,7 +117,7 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
 
 MantidCurve::~MantidCurve()
 {
-  std::cerr<<"MantidCurve deleted...\n";
+  //std::cerr<<"MantidCurve deleted...\n";
 }
 
 void MantidCurve::setData(const QwtData &data)
@@ -138,18 +138,28 @@ void MantidCurve::draw(QPainter *p,
     const MantidQwtData* d = dynamic_cast<const MantidQwtData*>(&data());
     if (!d)
       throw std::runtime_error("Only MantidQwtData can be set to a MantidCurve");
+    int xi0;
+    p->setPen(pen());
+    const int dx = 3;
+    const int dx2 = 2*dx;
+    int x1 = xMap.p1();
+    int x2 = xMap.p2();
     for (int i = 0; i < dataSize(); i++)
     {
       const int xi = xMap.transform(d->ex(i));
-      const double Y = y(i);
-      const double E = d->e(i);
-      const int ei1 = yMap.transform(Y - E);
-      const int ei2 = yMap.transform(Y + E);
+      if (xi > x1 && xi < x2 && abs(xi - xi0) > dx2)
+      {
+        const double Y = y(i);
+        const double E = d->e(i);
+        const int ei1 = yMap.transform(Y - E);
+        const int ei2 = yMap.transform(Y + E);
 
-      p->setPen(pen());
-      p->drawLine(xi,ei1,xi,ei2);
-      p->drawLine(xi-5,ei1,xi+5,ei1);
-      p->drawLine(xi-5,ei2,xi+5,ei2);
+        p->drawLine(xi,ei1,xi,ei2);
+        p->drawLine(xi-dx,ei1,xi+dx,ei1);
+        p->drawLine(xi-dx,ei2,xi+dx,ei2);
+
+        xi0 = xi;
+      }
     }
   }
 }
