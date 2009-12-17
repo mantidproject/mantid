@@ -28,7 +28,7 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 #Make the reduction module available
-from SANSReduction import _printMessage,AssignSample, AssignCan,TransmissionSample,TransmissionCan,FindBeamCentre,plotSpectrum,WavRangeReduction,NewTrans,DefaultTrans
+from SANSReduction import _printMessage,_issueWarning,AssignSample, AssignCan,TransmissionSample,TransmissionCan,FindBeamCentre,plotSpectrum,WavRangeReduction,NewTrans,DefaultTrans,createColetteScript, PlotResult
 from mantidsimple import *
 
 # Add a CSV line to the input data store
@@ -58,7 +58,7 @@ def addRunToStore(parts, run_store):
         if type in inputdata.keys():
             inputdata[parts[i]] = parts[i+1]
         if 'background' in type:
-            _printMessage('WARNING! Background runs are not yet implemented in SANSReduction.py! Will process Sample & Can only')
+            _issueWarning('Background runs are not yet implemented in SANSReduction.py! Will process Sample & Can only')
         
     run_store.append(inputdata)
     return 0
@@ -68,17 +68,12 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         format = '.' + format
         
     file_handle = open(filename, 'r')
-    if verbose == 1:
-        _printMessage('[COLETTE]  @',filename)
     runinfo = []
     for line in file_handle:
         # See how many pieces of information have been provided; brackets delineate the field seperator (nothing for space-delimited, ',' for comma-seperated)
         parts = line.rstrip().split(',')
-        if verbose == 1:
-            _printMessage('Number of parts to the input line is:' + str(len(parts)))
-        
         if addRunToStore(parts, runinfo) > 0:
-            _printMessage('WARNING! Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
+            _issueWarning('Incorrect structure detected in input file "' + filename + '" at line \n"' + line + '"\nEntry skipped\n')
     # End of file reading
     file_handle.close()
 
@@ -87,7 +82,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         # Sample run
         run_file = run['sample_sans']
         if len(run_file) == 0:
-            _printMessage('Warning! No sample run given, skipping entry.')
+            _issueWarning('No sample run given, skipping entry.')
             continue
         run_file += format
         AssignSample(run_file)
@@ -107,22 +102,20 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
 
         if centreit == 1:
             if verbose == 1:
-                _printMessage('[COLETTE]  FIT/MIDDLE')
                 FindBeamCentre(50.,170.,12)
         # WavRangeReduction runs the reduction for the specfied wavelength range where the final argument can either be DefaultTrans or CalcTrans:
         # Parameter DefaultTrans specifies the transmission should be calculated for the whole range specified by L/WAV and then cropped it to the current wavelength range
         # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
-        if verbose == 1:
-            _printMessage('[COLETTE]  CORRECT/SC')
         reduced = WavRangeReduction(use_def_trans=deftrans)
-        if plotresults == 1:
-            if verbose == 1:
-                _printMessage('[COLETTE]  DISPLAY/HISTOGRAM ' + reduced)
-            plotSpectrum(reduced,0)
         file_1 = run['output_as'] + '.txt'
         if file_1 != '.txt':
             SaveRKH(reduced,file_1,'0')
-        if verbose == 1:
-            _printMessage('[COLETTE]  WRITE/LOQ ' + reduced + ' ' + file_1)
+        if verbose:
+            mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, file_1))
         # Rename the final workspace
-        RenameWorkspace(reduced,run['output_as'])
+        final_name = run['output_as']
+        if final_name == '':
+            final_name = reduced
+        RenameWorkspace(reduced,final_name)
+        if plotresults == 1:
+            PlotResult(final_name)

@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>771</width>
-    <height>415</height>
+    <height>428</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -33,6 +33,9 @@
   <layout class="QVBoxLayout" name="verticalLayout_3" >
    <item>
     <widget class="QTabWidget" name="tabWidget" >
+     <property name="enabled" >
+      <bool>true</bool>
+     </property>
      <property name="sizePolicy" >
       <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
        <horstretch>0</horstretch>
@@ -947,11 +950,63 @@
         </spacer>
        </item>
        <item>
+        <widget class="QGroupBox" name="groupBox_4" >
+         <property name="title" >
+          <string>Options</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" >
+          <property name="topMargin" >
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="plot_check" >
+            <property name="text" >
+             <string>Plot result</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="verbose_check" >
+            <property name="text" >
+             <string>Verbose</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="log_colette" >
+            <property name="text" >
+             <string>Log Colette cmds</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_15" >
+         <property name="spacing" >
+          <number>6</number>
+         </property>
+         <property name="topMargin" >
+          <number>0</number>
+         </property>
          <item>
           <widget class="QGroupBox" name="groupBox_7" >
            <property name="title" >
-            <string/>
+            <string>Reduce</string>
            </property>
            <property name="flat" >
             <bool>false</bool>
@@ -978,14 +1033,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0" >
-             <widget class="QPushButton" name="plotBtn" >
-              <property name="text" >
-               <string>Plot</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1" colspan="2" >
+            <item row="0" column="4" >
              <widget class="QPushButton" name="saveBtn" >
               <property name="text" >
                <string>Save</string>
@@ -1060,497 +1108,401 @@
        <string>Analysis Details</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_13" >
-       <item rowspan="2" row="0" column="0" colspan="2" >
-        <widget class="QGroupBox" name="limits_group" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="title" >
-          <string>Limits</string>
-         </property>
-         <property name="checkable" >
-          <bool>false</bool>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_4" >
-          <item row="0" column="0" >
-           <spacer name="horizontalSpacer_2" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
+       <item row="0" column="0" colspan="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_4" >
+         <item>
+          <widget class="QGroupBox" name="limits_group" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title" >
+            <string>Limits</string>
+           </property>
+           <property name="checkable" >
+            <bool>false</bool>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_4" >
+            <property name="verticalSpacing" >
+             <number>5</number>
             </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label_3" >
-            <property name="text" >
-             <string>Radius (mm)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" >
-           <widget class="QLabel" name="label_16" >
-            <property name="text" >
-             <string>Wavelength (Angstroms)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" >
-           <widget class="QLabel" name="label_19" >
-            <property name="text" >
-             <string>Qx (Angstroms^-1)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" >
-           <widget class="QLabel" name="label_21" >
-            <property name="text" >
-             <string>Qxy (Angstroms^-1)</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" >
-           <widget class="QLineEdit" name="rad_min" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1" >
-           <widget class="QLineEdit" name="wav_min" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1" >
-           <widget class="QLineEdit" name="q_min" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2" >
-           <widget class="QLineEdit" name="rad_max" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" >
-           <widget class="QLabel" name="limits_max_lbl" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text" >
-             <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+            <item row="0" column="0" >
+             <spacer name="horizontalSpacer_2" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_3" >
+              <property name="text" >
+               <string>Radius (mm)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_16" >
+              <property name="text" >
+               <string>Wavelength (Angstroms)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0" >
+             <widget class="QLabel" name="label_19" >
+              <property name="text" >
+               <string>Qx (Angstroms^-1)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="0" >
+             <widget class="QLabel" name="label_21" >
+              <property name="text" >
+               <string>Qxy (Angstroms^-1)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" >
+             <widget class="QLineEdit" name="rad_min" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1" >
+             <widget class="QLineEdit" name="wav_min" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1" >
+             <widget class="QLineEdit" name="q_min" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" >
+             <widget class="QLineEdit" name="rad_max" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QLabel" name="limits_max_lbl" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-weight:600;">Max&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="alignment" >
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2" >
-           <widget class="QLineEdit" name="wav_max" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="2" >
-           <widget class="QLineEdit" name="q_max" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2" >
-           <widget class="QLineEdit" name="qy_max" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3" >
-           <widget class="QLabel" name="wav_step_lbl" >
-            <property name="text" >
-             <string>stepping</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3" >
-           <widget class="QLabel" name="q_step_lbl" >
-            <property name="text" >
-             <string>stepping</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3" >
-           <widget class="QLabel" name="qy_step_lbl" >
-            <property name="text" >
-             <string>stepping</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4" >
-           <widget class="QLineEdit" name="wav_dw" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="4" >
-           <widget class="QLineEdit" name="q_dq" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="4" >
-           <widget class="QLineEdit" name="qy_dqy" >
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="5" >
-           <widget class="QComboBox" name="wav_dw_opt" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize" >
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <item>
-             <property name="text" >
-              <string>Linear</string>
-             </property>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
             </item>
-            <item>
-             <property name="text" >
-              <string>Logarithmic</string>
-             </property>
+            <item row="2" column="2" >
+             <widget class="QLineEdit" name="wav_max" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
-           </widget>
-          </item>
-          <item row="3" column="5" >
-           <widget class="QComboBox" name="q_dq_opt" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize" >
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>95</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="currentIndex" >
-             <number>0</number>
-            </property>
-            <item>
-             <property name="text" >
-              <string>Linear</string>
-             </property>
+            <item row="3" column="2" >
+             <widget class="QLineEdit" name="q_max" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
-            <item>
-             <property name="text" >
-              <string>Logarithmic</string>
-             </property>
+            <item row="4" column="2" >
+             <widget class="QLineEdit" name="qy_max" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
-           </widget>
-          </item>
-          <item row="4" column="5" >
-           <widget class="QComboBox" name="qy_dqy_opt" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <item>
-             <property name="text" >
-              <string>Linear</string>
-             </property>
+            <item row="2" column="3" >
+             <widget class="QLabel" name="wav_step_lbl" >
+              <property name="text" >
+               <string>stepping</string>
+              </property>
+             </widget>
             </item>
-           </widget>
-          </item>
-          <item row="0" column="1" >
-           <widget class="QLabel" name="limits_min_lbl" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text" >
-             <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+            <item row="3" column="3" >
+             <widget class="QLabel" name="q_step_lbl" >
+              <property name="text" >
+               <string>stepping</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="3" >
+             <widget class="QLabel" name="qy_step_lbl" >
+              <property name="text" >
+               <string>stepping</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="4" >
+             <widget class="QLineEdit" name="wav_dw" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="4" >
+             <widget class="QLineEdit" name="q_dq" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="4" >
+             <widget class="QLineEdit" name="qy_dqy" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="5" >
+             <widget class="QComboBox" name="wav_dw_opt" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize" >
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <item>
+               <property name="text" >
+                <string>Linear</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Logarithmic</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="3" column="5" >
+             <widget class="QComboBox" name="q_dq_opt" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize" >
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>95</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="currentIndex" >
+               <number>0</number>
+              </property>
+              <item>
+               <property name="text" >
+                <string>Linear</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Logarithmic</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="4" column="5" >
+             <widget class="QComboBox" name="qy_dqy_opt" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <item>
+               <property name="text" >
+                <string>Linear</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QLabel" name="limits_min_lbl" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text" >
+               <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">&lt;span style=" font-weight:600;">Min&lt;/span>&lt;/p>&lt;/body>&lt;/html></string>
-            </property>
-            <property name="alignment" >
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1" >
-           <widget class="QCheckBox" name="def_trans" >
-            <property name="text" >
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0" >
-           <widget class="QLabel" name="label_36" >
-            <property name="text" >
-             <string>Use default transmission</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="2" colspan="2" >
-           <widget class="QLabel" name="label_23" >
-            <property name="text" >
-             <string>Account for gravity</string>
-            </property>
-            <property name="alignment" >
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="4" >
-           <widget class="QCheckBox" name="gravity_check" >
-            <property name="text" >
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="2" colspan="2" >
-        <widget class="QGroupBox" name="groupBox_14" >
-         <property name="title" >
-          <string>Bank Selection</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_9" >
-          <item row="0" column="0" >
-           <widget class="QLabel" name="label_41" >
-            <property name="text" >
-             <string>Monitor Spectrum</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" >
-           <widget class="QLineEdit" name="monitor_spec" >
-            <property name="maximumSize" >
-             <size>
-              <width>40</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label_43" >
-            <property name="text" >
-             <string>Detector</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" colspan="2" >
-           <widget class="QComboBox" name="detbank_sel" >
-            <item>
-             <property name="text" >
-              <string>main-detector-bank</string>
-             </property>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
             </item>
-            <item>
-             <property name="text" >
-              <string>HAB</string>
-             </property>
+            <item row="5" column="1" >
+             <widget class="QCheckBox" name="def_trans" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
             </item>
-           </widget>
-          </item>
-          <item row="0" column="2" >
-           <spacer name="horizontalSpacer_6" >
-            <property name="orientation" >
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
+            <item row="5" column="0" >
+             <widget class="QLabel" name="label_36" >
+              <property name="text" >
+               <string>Use default transmission</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="2" colspan="2" >
+             <widget class="QLabel" name="label_23" >
+              <property name="text" >
+               <string>Account for gravity</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="4" >
+             <widget class="QCheckBox" name="gravity_check" >
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="1" column="2" colspan="2" >
-        <widget class="QGroupBox" name="groupBox_15" >
-         <property name="title" >
-          <string>Phi range</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout" >
-          <item>
-           <widget class="QLabel" name="label_45" >
-            <property name="text" >
-             <string>Limit Phi (degrees)</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="phi_min" >
-            <property name="enabled" >
-             <bool>false</bool>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>50</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_33" >
-            <property name="text" >
-             <string>to</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="phi_max" >
-            <property name="enabled" >
-             <bool>false</bool>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>50</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0" >
+       <item row="1" column="0" >
         <widget class="QGroupBox" name="groupBox_6" >
          <property name="title" >
           <string>Efficiency correction</string>
@@ -1581,19 +1533,19 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="1" >
            <widget class="QLabel" name="label_27" >
             <property name="text" >
-             <string>Direct</string>
+             <string>Rear</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1" >
            <widget class="QLabel" name="label_28" >
             <property name="text" >
-             <string>HAB</string>
+             <string>Front</string>
             </property>
            </widget>
           </item>
           <item row="1" column="2" >
-           <widget class="QLineEdit" name="hab_file" >
+           <widget class="QLineEdit" name="front_direct_file" >
             <property name="enabled" >
              <bool>false</bool>
             </property>
@@ -1611,103 +1563,265 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="2" column="1" colspan="2" >
-        <widget class="QGroupBox" name="groupBox_3" >
-         <property name="title" >
-          <string>Data range</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_3" >
-          <property name="horizontalSpacing" >
-           <number>9</number>
-          </property>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="label_5" >
-            <property name="text" >
-             <string>Time of flight</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1" >
-           <widget class="QLineEdit" name="tof_min" >
-            <property name="enabled" >
-             <bool>false</bool>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text" >
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2" >
-           <widget class="QLineEdit" name="tof_max" >
-            <property name="enabled" >
-             <bool>false</bool>
-            </property>
-            <property name="maximumSize" >
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" >
-           <widget class="QLabel" name="label_22" >
-            <property name="text" >
-             <string>Min</string>
-            </property>
-            <property name="alignment" >
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" >
-           <widget class="QLabel" name="label_24" >
-            <property name="text" >
-             <string>Max</string>
-            </property>
-            <property name="alignment" >
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+       <item row="0" column="2" >
+        <layout class="QVBoxLayout" name="verticalLayout_8" >
+         <item>
+          <widget class="QGroupBox" name="groupBox_14" >
+           <property name="title" >
+            <string>Bank Selection</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_9" >
+            <item row="0" column="0" >
+             <widget class="QLabel" name="label_41" >
+              <property name="text" >
+               <string>Monitor Spectrum</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QLineEdit" name="monitor_spec" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>40</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_43" >
+              <property name="text" >
+               <string>Detector</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" colspan="2" >
+             <widget class="QComboBox" name="detbank_sel" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <item>
+               <property name="text" >
+                <string>main-detector-bank</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>HAB</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <spacer name="horizontalSpacer_6" >
+              <property name="orientation" >
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0" >
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_15" >
+           <property name="title" >
+            <string>Phi range</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout" >
+            <item>
+             <widget class="QLabel" name="label_45" >
+              <property name="text" >
+               <string>Limit Phi (degrees)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="phi_min" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>50</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_33" >
+              <property name="text" >
+               <string>to</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="phi_max" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>50</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="3" column="1" >
-        <widget class="QGroupBox" name="groupBox_9" >
-         <property name="title" >
-          <string>Scale Factor</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_13" >
-          <item>
-           <widget class="QLineEdit" name="scale_factor" >
-            <property name="enabled" >
-             <bool>false</bool>
+       <item row="1" column="2" >
+        <layout class="QHBoxLayout" name="horizontalLayout_6" >
+         <item>
+          <widget class="QGroupBox" name="groupBox_3" >
+           <property name="title" >
+            <string>Data range</string>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_3" >
+            <property name="topMargin" >
+             <number>0</number>
             </property>
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+            <property name="bottomMargin" >
+             <number>9</number>
             </property>
-            <property name="maximumSize" >
-             <size>
-              <width>70</width>
-              <height>16777215</height>
-             </size>
+            <property name="horizontalSpacing" >
+             <number>8</number>
             </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
+            <property name="verticalSpacing" >
+             <number>6</number>
+            </property>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_5" >
+              <property name="text" >
+               <string>Time of flight</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" >
+             <widget class="QLineEdit" name="tof_min" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text" >
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" >
+             <widget class="QLineEdit" name="tof_max" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Expanding" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QLabel" name="label_22" >
+              <property name="text" >
+               <string>Min</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QLabel" name="label_24" >
+              <property name="text" >
+               <string>Max</string>
+              </property>
+              <property name="alignment" >
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_9" >
+           <property name="title" >
+            <string>Scale Factor</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_13" >
+            <item>
+             <widget class="QLineEdit" name="scale_factor" >
+              <property name="enabled" >
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>70</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="4" column="1" >
+       <item row="2" column="2" >
         <spacer name="verticalSpacer_2" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
@@ -3136,7 +3250,80 @@ p, li { white-space: pre-wrap; }
         </spacer>
        </item>
       </layout>
-      <zorder>mask_table</zorder>
+     </widget>
+     <widget class="QWidget" name="tab_5" >
+      <attribute name="title" >
+       <string>Logging</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_15" >
+       <item row="1" column="0" >
+        <widget class="QTextEdit" name="logging_field" >
+         <property name="frameShape" >
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow" >
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="lineWidth" >
+          <number>10</number>
+         </property>
+         <property name="midLineWidth" >
+          <number>0</number>
+         </property>
+         <property name="textInteractionFlags" >
+          <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <layout class="QVBoxLayout" name="verticalLayout_10" >
+         <item>
+          <spacer name="verticalSpacer_3" >
+           <property name="orientation" >
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="2" column="0" >
+        <layout class="QHBoxLayout" name="horizontalLayout_5" >
+         <item>
+          <widget class="QPushButton" name="logger_clear" >
+           <property name="text" >
+            <string>Clear</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="0" column="0" >
+        <widget class="QLabel" name="label_29" >
+         <property name="text" >
+          <string>Log messages:</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>
@@ -3159,7 +3346,7 @@ p, li { white-space: pre-wrap; }
   <tabstop>qy_dqy</tabstop>
   <tabstop>qy_dqy_opt</tabstop>
   <tabstop>direct_file</tabstop>
-  <tabstop>hab_file</tabstop>
+  <tabstop>front_direct_file</tabstop>
   <tabstop>mask_table</tabstop>
  </tabstops>
  <resources/>

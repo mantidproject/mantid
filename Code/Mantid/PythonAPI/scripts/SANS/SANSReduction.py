@@ -36,6 +36,7 @@ TRANS_SAMPLE = ''
 TRANS_CAN = ''
 DIRECT_SAMPLE = ''
 DIRECT_CAN = ''
+DIRECT_CAN = ''
 
 # Now the mask string (can be empty)
 # These apply to both detectors
@@ -67,7 +68,8 @@ Q2 = None
 DQ = None
 QXY2 = None
 DQXY = None
-DIRECT_BEAM_FILE = None
+DIRECT_BEAM_FILE_R = None
+DIRECT_BEAM_FILE_F = None
 GRAVITY = False
 # This indicates whether a 1D or a 2D analysis is performed
 CORRECTION_TYPE = '1D'
@@ -140,7 +142,8 @@ TRANS_UDET_DET = 3
 #                              Interface functions (to be called from scripts or the GUI)
 #
 ###################################################################################################################
-_QUIET_ = False
+_NOPRINT_ = False
+_VERBOSE_ = False
 # "Enumerations"
 DefaultTrans = True
 NewTrans = False
@@ -149,22 +152,26 @@ _MARKED_DETS_ = []
 
 _DET_ABBREV = {'FRONT' : 'front-detector', 'REAR' : 'rear-detector', 'MAIN' : 'main-detector-bank', 'HAB' : 'HAB' }
 
-def SetQuietMode(quiet = True):
-    global _QUIET_
-    _QUIET_ = quiet
+def SetNoPrintMode(quiet = True):
+    global _NOPRINT_
+    _NOPRINT_ = quiet
+
+def SetVerboseMode(state):
+    global _VERBOSE_
+    _VERBOSE_ = state
 
 # Print a message and log it if the 
 def _printMessage(msg, log = True):
-    if log == True:
+    if log == True and _VERBOSE_ == True:
         mantid.sendLogMessage('::SANS::' + msg)
-    if _QUIET_ == True: 
+    if _NOPRINT_ == True: 
         return
     print msg
 
 # Warn the user
 def _issueWarning(msg):
     mantid.sendLogMessage('::SANS::Warning: ' + msg)
-    if _QUIET_ == True:
+    if _NOPRINT_ == True:
         return
     print 'WARNING: ' + msg
 
@@ -175,6 +182,7 @@ def _fatalError(msg):
 DATA_PATH = ''
 # Set the data directory
 def DataPath(directory):
+    _printMessage('DataPath("' + directory + '") - Will look for raw data here')
     if os.path.exists(directory) == False:
         _issueWarning("Data directory does not exist")
         return
@@ -184,6 +192,7 @@ def DataPath(directory):
 USER_PATH = ''
 # Set the user directory
 def UserPath(directory):
+    _printMessage('UserPath("' + directory + '") - Will look for mask file here')
     if os.path.exists(directory) == False:
         _issueWarning("Data directory does not exist")
         return
@@ -200,22 +209,27 @@ def printParameter(var):
 # Instrument
 ########################### 
 def SANS2D():
+    _printMessage('SANS2D()')
     global INSTR_NAME, BACKMON_START, BACKMON_END, MONITORSPECTRUM
     INSTR_NAME = 'SANS2D'
     BACKMON_START = 85000
     BACKMON_END = 100000
     MONITORSPECTRUM = 2
-    Detector('rear-detector')
+    if DETBANK != 'rear-detector':
+        Detector('rear-detector')
 
 def LOQ():
+    _printMessage('LOQ()')
     global INSTR_NAME, BACKMON_START, BACKMON_END, MONITORSPECTRUM
     INSTR_NAME = 'LOQ'
     BACKMON_START = 31000
     BACKMON_END = 39000
     MONITORSPECTRUM = 2
-    Detector('main-detector-bank')
+    if DETBANK != 'main-detector-bank':
+        Detector('main-detector-bank')
 
 def Detector(det_name):
+    _printMessage('Detector("' + det_name + '")')
     # Deal with abbreviations
     lname = det_name.lower()
     if lname == 'front':
@@ -243,10 +257,12 @@ def Detector(det_name):
             DETBANK = 'rear-detector'
 
 def Set1D():
+    _printMessage('Set1D()')
     global CORRECTION_TYPE
     CORRECTION_TYPE = '1D'
 
 def Set2D():
+    _printMessage('Set2D()')
     global CORRECTION_TYPE
     CORRECTION_TYPE = '2D'
 
@@ -256,6 +272,7 @@ def Set2D():
 _SAMPLE_SETUP = None
 _SAMPLE_RUN = ''
 def AssignSample(sample_run, reload = True):
+    _printMessage('AssignSample("' + sample_run + '")')
     global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN
     if( sample_run.startswith('.') or sample_run == '' or sample_run == None):
         _SAMPLE_SETUP = None
@@ -293,6 +310,7 @@ def AssignSample(sample_run, reload = True):
 _CAN_SETUP = None
 _CAN_RUN = ''
 def AssignCan(can_run, reload = True):
+    _printMessage('AssignCan("' + can_run + '")')
     global SCATTER_CAN, _CAN_SETUP, _CAN_RUN
     if( can_run.startswith('.') or can_run == '' or can_run == None):
         SCATTER_CAN = ''
@@ -346,6 +364,7 @@ def AssignCan(can_run, reload = True):
 # Set the trans sample and measured raw workspaces
 ########################### 
 def TransmissionSample(sample, direct, reload = True):
+    _printMessage('TransmissionSample("' + sample + '","' + direct + '")')
     global TRANS_SAMPLE, DIRECT_SAMPLE
     TRANS_SAMPLE = _assignHelper(sample, True, reload)[0]
     DIRECT_SAMPLE = _assignHelper(direct, True, reload)[0]
@@ -355,6 +374,7 @@ def TransmissionSample(sample, direct, reload = True):
 # Set the trans sample and measured raw workspaces
 ########################## 
 def TransmissionCan(can, direct, reload = True):
+    _printMessage('TransmissionCan("' + can + '","' + direct + '")')
     global TRANS_CAN, DIRECT_CAN
     TRANS_CAN = _assignHelper(can, True, reload)[0]
     if direct == '' or direct == None:
@@ -365,7 +385,7 @@ def TransmissionCan(can, direct, reload = True):
 
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True):
-    if run_string == '':
+    if run_string == '' or run_string.startswith('.'):
         return '',True,''
     pieces = run_string.split('.')
     if len(pieces) != 2 :
@@ -475,18 +495,23 @@ def GetMismatchedDetList():
 #########################
 # Limits 
 def LimitsR(rmin, rmax):
+    _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')')
     _readLimitValues('L/R ' + str(rmin) + ' ' + str(rmax) + ' 1')
 
 def LimitsWav(lmin, lmax, step, type):
+    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + type + ')')
     _readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type)
 
 def LimitsQ(qmin, qmax, step, type):
+    _printMessage('LimitsQ(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type))
     _readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
 
 def LimitsQXY(qmin, qmax, step, type):
+    _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type))
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
     
 def Gravity(flag):
+    _printMessage('Gravity(' + str(flag) + ')')
     if isinstance(flag, bool) or isinstance(flag, int):
         global GRAVITY
         GRAVITY = flag
@@ -559,9 +584,35 @@ def displayGeometry():
 # Set the centre in mm
 ####################################
 def SetCentre(XVAL, YVAL):
+    _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
     global XBEAM_CENTRE, YBEAM_CENTRE
     XBEAM_CENTRE = XVAL/1000.
     YBEAM_CENTRE = YVAL/1000.
+
+#####################################
+# Clear current mask defaults
+#####################################
+def clearCurrentMaskDefaults():
+
+    Mask('MASK/CLEAR')
+    Mask('MASK/CLEAR/TIME')
+    SetRearEfficiencyFile(None)
+    SetFrontEfficiencyFile(None)
+    global RMIN,RMAX, DEF_RMIN, DEF_RMAX
+    RMIN = RMAX = DEF_RMIN = DEF_RMAX = None
+    global WAV1, WAV2, DWAV, Q1, Q2, DQ, QXY2, DQY
+    WAV1 = WAV2 = DWAV = Q1 = Q2 = DQ = QXY = DQY = None
+    global SAMPLE_Z_CORR
+    SAMPLE_Z_CORR = 0.0
+    global RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS
+    # Scaling values
+    RESCALE = 100.  # percent
+    SAMPLE_GEOM = 3
+    SAMPLE_WIDTH = SAMPLE_HEIGHT = SAMPLE_THICKNESS = 1.0
+    global FRONT_DET_Z_CORR, FRONT_DET_Y_CORR, FRONT_DET_X_CORR, FRONT_DET_ROT_CORR 
+    FRONT_DET_Z_CORR = FRONT_DET_Y_CORR = FRONT_DET_X_CORR = FRONT_DET_ROT_CORR = 0.0
+    global REAR_DET_Z_CORR, REAR_DET_X_CORR
+    REAR_DET_Z_CORR = REAR_DET_X_CORR = 0.0
 
 ####################################
 # Add a mask to the correct string
@@ -570,6 +621,7 @@ def Mask(details):
     if not details.startswith('MASK'):
         _issueWarning('Ignoring malformed mask line ' + details)
         return
+    _printMessage('Mask("' + details + '")')
     details = details.lstrip()
     details_compare = details.upper()
     global TIMEMASKSTRING, TIMEMASKSTRING_R, TIMEMASKSTRING_F,SPECMASKSTRING, SPECMASKSTRING_R, SPECMASKSTRING_F
@@ -600,6 +652,8 @@ def Mask(details):
                     SPECMASKSTRING_F += ',' + spectra
                 else:
                     SPECMASKSTRING_R += ',' + spectra
+            else:
+                _issueWarning('Unrecognized detector on mask line "' + details + '". Skipping line.')
         else:
             _issueWarning('Unrecognized masking option "' + details + '"')
     elif len(parts) == 3:
@@ -618,6 +672,8 @@ def Mask(details):
                         TIMEMASKSTRING_F += ';' + bin_range
                     else:
                         TIMEMASKSTRING_R += ';' + bin_range
+                else:
+                    _issueWarning('Unrecognized detector on mask line "' + details + '". Skipping line.')
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
     else:
@@ -627,11 +683,14 @@ def Mask(details):
 # Read a mask file
 #############################
 def MaskFile(filename):
+    _printMessage('MaskFile("' + filename + '")')
     if os.path.isabs(filename) == False:
         filename = os.path.join(USER_PATH, filename)
 
     if os.path.exists(filename) == False:
         _fatalError("Cannot read mask file '" + filename + "', path does not exist.")
+        
+    #clearCurrentMaskDefaults()
 
     file_handle = open(filename, 'r')
     for line in file_handle:
@@ -646,17 +705,39 @@ def MaskFile(filename):
             details = line[4:]
             if details.upper().startswith('LENGTH'):
                 SetMonitorSpectrum(int(details.split()[1]))
+            elif 'DIRECT' in details.upper():
+                parts = details.split("=")
+                if len(parts) == 2:
+                    filepath = parts[1].rstrip()
+                    if '[' in filepath:
+                        idx = filepath.rfind(']')
+                        filepath = filepath[idx + 1:]
+                    if not os.path.isabs(filepath):
+                        filepath = os.path.join(USER_PATH, filepath)
+                    type = parts[0]
+                    parts = type.split("/")
+                    if len(parts) == 1:
+                        if parts[0] == 'DIRECT':
+                            SetRearEfficiencyFile(filepath)
+                            SetFrontEfficiencyFile(filepath)
+                        elif parts[0] == 'HAB':
+                            SetFrontEfficiencyFile(filepath)
+                        else:
+                            pass
+                    elif len(parts) == 2:
+                        detname = parts[1]
+                        if detname == 'REAR':
+                            SetRearEfficiencyFile(filepath)
+                        elif detname == 'FRONT' or detname == 'HAB':
+                            SetFrontEfficiencyFile(filepath)
+                        else:
+                            _issueWarning('Incorrect detector specified for efficiency file "' + line + '"')
+                    else:
+                        _issueWarning('Unable to parse monitor line "' + line + '"')
+                else:
+                    _issueWarning('Unable to parse monitor line "' + line + '"')
             else:
-                filepath = details[7:].rstrip()
-                if '[' in filepath:
-                    idx = filepath.rfind(']')
-                    filepath = filepath[idx + 1:]
-                if not os.path.isabs(filepath):
-                    filepath = os.path.join(USER_PATH, filepath)
-                type = details[0:6]
-                if type.upper() == 'DIRECT':
-                    global DIRECT_BEAM_FILE
-                    DIRECT_BEAM_FILE = filepath
+                continue
         elif upper_line.startswith('MASK'):
             Mask(upper_line)
         elif upper_line.startswith('SET CENTRE'):
@@ -689,6 +770,11 @@ def MaskFile(filename):
 
     # Close the handle
     file_handle.close()
+    # Check if one of the efficency files hasn't been set and assume the other is to be used
+    if DIRECT_BEAM_FILE_R == None and DIRECT_BEAM_FILE_F != None:
+        SetRearEfficiencyFile(DIRECT_BEAM_FILE_F)
+    if DIRECT_BEAM_FILE_F == None and DIRECT_BEAM_FILE_R != None:
+        SetFrontEfficiencyFile(DIRECT_BEAM_FILE_R)
 
 # Read a limit line of a mask file
 def _readLimitValues(limit_line):
@@ -771,6 +857,14 @@ def SetSampleOffset(value):
 def SetMonitorSpectrum(spec):
     global MONITORSPECTRUM
     MONITORSPECTRUM = spec
+    
+def SetRearEfficiencyFile(filename):
+    global DIRECT_BEAM_FILE_R
+    DIRECT_BEAM_FILE_R = filename
+    
+def SetFrontEfficiencyFile(filename):
+    global DIRECT_BEAM_FILE_F
+    DIRECT_BEAM_FILE_F = filename
 
 def displayMaskFile():
     print '-- Mask file defaults --'
@@ -778,9 +872,14 @@ def displayMaskFile():
     print '    Q range: ',Q1, Q2, DQ
     print '    QXY range: ', QXY2, DQXY
     print '    radius', RMIN, RMAX
-    print '    direct beam file:', DIRECT_BEAM_FILE
-    print '    spectrum mask: ', SPECMASKSTRING
-    print '    time mask: ', TIMEMASKSTRING
+    print '    direct beam file rear:', DIRECT_BEAM_FILE_R
+    print '    direct beam file front:', DIRECT_BEAM_FILE_F
+    print '    global spectrum mask: ', SPECMASKSTRING
+    print '    rear spectrum mask: ', SPECMASKSTRING_R
+    print '    front spectrum mask: ', SPECMASKSTRING_F
+    print '    global time mask: ', TIMEMASKSTRING
+    print '    rear time mask: ', TIMEMASKSTRING_R
+    print '    front time mask: ', TIMEMASKSTRING_F
 
 # ---------------------------------------------------------------------------------------
 
@@ -820,6 +919,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
         wav_end = WAV2
 
     if finding_centre == False:
+        _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_start) + ',' + str(use_def_trans) + ',' + str(finding_centre) + ')')
         _printMessage("Running reduction for wavelength range " + str(wav_start) + '-' + str(wav_end))
     # This only performs the init if it needs to
     sample_setup, can_setup = _initReduction(XBEAM_CENTRE, YBEAM_CENTRE)
@@ -1083,7 +1183,10 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     ##################################################################################   
         
     ############################ Efficiency correction ################################
-    CorrectToFile(tmpWS, DIRECT_BEAM_FILE, tmpWS, "Wavelength", "Divide")
+    if DETBANK == 'rear-detector' or 'main-detector-bank':
+        CorrectToFile(tmpWS, DIRECT_BEAM_FILE_R, tmpWS, "Wavelength", "Divide")
+    else:
+        CorrectToFile(tmpWS, DIRECT_BEAM_FILE_F, tmpWS, "Wavelength", "Divide")
     ###################################################################################
         
     ############################# Scale by volume #####################################
@@ -1292,6 +1395,14 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     RMIN = DEF_RMIN
     RMAX = DEF_RMAX
 
+##
+# Plot the results on the correct type of plot
+##
+def PlotResult(workspace):
+    if CORRECTION_TYPE == '1D':
+        plotSpectrum(workspace,0)
+    else:
+        qti.app.mantidUI.importMatrixWorkspace(workspace).plotGraph2D()
 
 ##################### View mask details #####################################################
 
@@ -1319,6 +1430,55 @@ def ViewCurrentMask():
     instrument_win.showWindow()
 
 ############################################################################################################################
+
+############################################################################################
+# Print a test script for Colette if asked
+def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvfile = '', savepath = ''):
+    script = ''
+    if csvfile != '':
+        script += '[COLETTE]  @ ' + csvfile + '\n'
+    file_1 = inputdata['sample_sans'] + format
+    script += '[COLETTE]  ASSIGN/SAMPLE ' + file_1 + '\n'
+    file_1 = inputdata['sample_trans'] + format
+    file_2 = inputdata['sample_direct_beam'] + format
+    script += '[COLETTE]  TRANSMISSION/SAMPLE/MEASURED ' + file_1 + ' ' + file_2 + '\n'
+    file_1 = inputdata['can_sans'] + format
+    script +='[COLETTE]  ASSIGN/CAN ' + file_1 + '\n'
+    file_1 = inputdata['can_trans'] + format
+    file_2 = inputdata['can_direct_beam'] + format
+    script += '[COLETTE]  TRANSMISSION/CAN/MEASURED ' + file_1 + ' ' + file_2 + '\n'
+    if centreit:
+        script += '[COLETTE]  FIT/MIDDLE'
+    # Parameters
+    script += '[COLETTE]  LIMIT/RADIUS ' + str(RMIN) + ' ' + str(RMAX) + '\n'
+    script += '[COLETTE]  LIMIT/WAVELENGTH ' + str(WAV1) + ' ' + str(WAV2) + '\n'
+    if DWAV <  0:
+        script += '[COLETTE]  STEP/WAVELENGTH/LOGARITHMIC ' + str(DWAV)[1:] + '\n'
+    else:
+        script += '[COLETTE]  STEP/WAVELENGTH/LINEAR ' + str(DWAV) + '\n'
+    if CORRECTION_TYPE == '1D':
+        script += '[COLETTE]  LIMIT/Q ' + str(Q1) + ' ' + str(Q2) + '\n'
+        if DQ <  0:
+            script += '[COLETTE]  STEP/Q/LOGARITHMIC ' + str(DQ)[1:] + '\n'
+        else:
+            script += '[COLETTE]  STEP/Q/LINEAR ' + str(DQ) + '\n'
+    else:
+        script += '[COLETTE]  LIMIT/QXY ' + str(0.0) + ' ' + str(QXY2) + '\n'
+        if DQXY <  0:
+            script += '[COLETTE]  STEP/QXY/LOGARITHMIC ' + str(DQXY)[1:] + '\n'
+        else:
+            script += '[COLETTE]  STEP/QXY/LINEAR ' + str(DQXY) + '\n'
+    
+    # Correct
+    script += '[COLETTE] CORRECT/SCNB'
+    if plotresults:
+        script += '[COLETTE]  DISPLAY/HISTOGRAM ' + reduced
+    if savepath != '':
+        script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath
+        
+    return script
+
+############################################################################################
 
 # These are to work around for the moment
 def plotSpectrum(name, spec):

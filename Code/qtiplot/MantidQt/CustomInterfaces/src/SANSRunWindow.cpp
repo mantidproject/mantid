@@ -30,6 +30,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QTemporaryFile>
+#include <QDateTime>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -101,7 +102,7 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.csv_browse_btn,SIGNAL(clicked()), this, SLOT(selectCSVFile()));
 
     connect(m_uiForm.load_dataBtn, SIGNAL(clicked()), this, SLOT(handleLoadButtonClick()));
-    connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
+    //connect(m_uiForm.plotBtn, SIGNAL(clicked()), this, SLOT(handlePlotButtonClick()));
     connect(m_uiForm.runcentreBtn, SIGNAL(clicked()), this, SLOT(handleRunFindCentre()));
     connect(m_uiForm.saveBtn, SIGNAL(clicked()), this, SLOT(handleSaveButtonClick()));
 
@@ -113,9 +114,6 @@ void SANSRunWindow::initLayout()
     {
       m_uiForm.tabWidget->setTabEnabled(i, false);
     }
-
-    // Connect
-    connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(handleTabChange(int)));
 
     // Reduction buttons
     connect(m_uiForm.oneDBtn, SIGNAL(clicked()), m_reducemapper, SLOT(map()));
@@ -144,6 +142,12 @@ void SANSRunWindow::initLayout()
     m_batch_clear = new QAction(tr("&Clear"),m_uiForm.batch_table);    
     m_uiForm.batch_table->addAction(m_batch_clear);
     connect(m_batch_clear, SIGNAL(activated()), this, SLOT(clearBatchTable()));
+
+    //Logging
+    connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
+    connect(m_uiForm.logger_clear, SIGNAL(clicked()), m_uiForm.logging_field, SLOT(clear()));
+
+    connect(m_uiForm.verbose_check, SIGNAL(stateChanged(int)), this, SLOT(verboseMode(int)));
 
     //Create the widget hash maps
     initWidgetMaps();
@@ -342,7 +346,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
     m_have_reducemodule = true;
   }
   //Ensure the correct instrument is set
-  QString code_torun =  "SetQuietMode(True)\n" + pycode + "\nSetQuietMode(False)";
+  QString code_torun =  "SetNoPrintMode(True)\n" + pycode + "\nSetNoPrintMode(False)";
   return runPythonCode(code_torun).trimmed();
 }
 
@@ -408,7 +412,8 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.monitor_spec->setText(runReduceScriptFunction("printParameter('MONITORSPECTRUM'),"));
 
   //Direct efficiency correction
-  m_uiForm.direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE'),"));
+  m_uiForm.direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE_R'),"));
+  m_uiForm.front_direct_file->setText(runReduceScriptFunction("printParameter('DIRECT_BEAM_FILE_F'),"));
 
   //Scale factor
   dbl_param = runReduceScriptFunction("printParameter('RESCALE'),").toDouble();
@@ -680,7 +685,7 @@ void SANSRunWindow::setProcessingState(bool running, int type)
 
   m_uiForm.oneDBtn->setEnabled(!running);
   m_uiForm.twoDBtn->setEnabled(!running);
-  m_uiForm.plotBtn->setEnabled(!running);
+  //m_uiForm.plotBtn->setEnabled(!running);
   m_uiForm.saveBtn->setEnabled(!running);
   m_uiForm.runcentreBtn->setEnabled(!running);
 
@@ -1092,6 +1097,9 @@ void SANSRunWindow::selectUserFile()
     showInformationBox("Error loading user file '" + m_uiForm.userfile_edit->text() + "',  cannot continue.");
     return;
   }
+  //Check for warnings
+  checkLogFlags();
+
   m_cfg_loaded = true;
   m_uiForm.tabWidget->setTabEnabled(1, true);
   m_uiForm.tabWidget->setTabEnabled(2, true);
@@ -1405,7 +1413,11 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   {
     //Currently the components are moved with each reduce click. Check if a load is necessary
     handleLoadButtonClick();
-    py_code += "\nWavRangeReduction(use_def_trans=" + trans_behav + ")\n";
+    py_code += "\nreduced = WavRangeReduction(use_def_trans=" + trans_behav + ")\n";
+    if( m_uiForm.plot_check->isChecked() )
+    {
+      py_code += "PlotResult(reduced)\n";
+    }
   }
   else
   {
@@ -1424,7 +1436,16 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     }
     py_code = "import SANSBatchMode as batch\n" + py_code;
     py_code += "\nbatch.BatchReduce('" + csv_file + "','" + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() + "',"
-      + trans_behav + ")";
+      + trans_behav;
+    if( m_uiForm.plot_check->isChecked() )
+    {
+      py_code += ", plotresults = True";
+    }
+    if( m_uiForm.log_colette->isChecked() )
+    {
+      py_code += ", verbose = True";
+    }
+    py_code += ")";
     showInformationBox(py_code);
   }
 
@@ -1450,7 +1471,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
 }
 
 /**
- * Plot button slot
+ * Plot button slot (deprecated)
  */
 void SANSRunWindow::handlePlotButtonClick()
 {
@@ -1525,11 +1546,13 @@ void SANSRunWindow::handleRunFindCentre()
   //Connect up the logger to handle updating the centre finding status box
   connect(this, SIGNAL(logMessageReceived(const QString&)), this, 
 	  SLOT(updateCentreFindingStatus(const QString&)));
+  disconnect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
   
   runReduceScriptFunction(py_code);
   
   disconnect(this, SIGNAL(logMessageReceived(const QString&)), this, 
 	     SLOT(updateCentreFindingStatus(const QString&)));
+  connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
 
   QString coordstr = runReduceScriptFunction("printParameter('XBEAM_CENTRE');printParameter('YBEAM_CENTRE')\n");
   
@@ -1652,14 +1675,6 @@ void SANSRunWindow::handleInstrumentChange(int index)
 }
 
 /**
- * Handles the change of current tab
- * @param index The new index
- */
-void SANSRunWindow::handleTabChange(int)
-{
-}
-
-/**
  * Update the centre finding status label
  * @param msg The message string
  */
@@ -1676,6 +1691,24 @@ void SANSRunWindow::updateCentreFindingStatus(const QString & msg)
       m_uiForm.centre_stat->setText(txt);
     }
   }  
+}
+
+/**
+ * Update the logging window with status messages
+ * @param msg The message received
+ */
+void SANSRunWindow::updateLogWindow(const QString & msg)
+{
+  static QString prefix = "::SANS";
+  if( msg.startsWith(prefix) )
+  {
+    QString txt = msg.section("::",2);
+    m_log_warnings = txt.contains("warning", Qt::CaseInsensitive);
+    if( m_uiForm.verbose_check->isChecked() || m_log_warnings || m_uiForm.log_colette->isChecked() )
+    {
+      m_uiForm.logging_field->append(txt);
+    }
+  }
 }
 
 /**
@@ -1748,6 +1781,23 @@ void SANSRunWindow::clearBatchTable()
   m_tmp_batchfile = "";
 }
 
+/**
+ * Handle a verbose mode check box state change
+ * state The new state
+ */
+void SANSRunWindow::verboseMode(int state)
+{
+  if( state == Qt::Checked )
+  {
+    runReduceScriptFunction("SetVerboseMode(True)");
+  }
+  else if( state == Qt::Unchecked )
+  {
+    runReduceScriptFunction("SetVerboseMode(False)");
+  }
+  else {}
+}
+
 /** 
  * Run a SANS assign command
  * @param key The key of the edit box to assign from
@@ -1782,7 +1832,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
   if( is_trans )
   {
     QString direct_run = m_run_no_boxes.value(key + 3)->text();
-    if( !direct_run.isEmpty() && QFileInfo(direct_run).completeSuffix().isEmpty() )
+    if( QFileInfo(direct_run).completeSuffix().isEmpty() )
     {
       if( direct_run.endsWith(".") ) 
       {
@@ -2098,4 +2148,13 @@ QString SANSRunWindow::saveBatchGrid(const QString & filename)
      m_uiForm.csv_filename->clear();
   }
   return csv_filename;
+}
+
+void SANSRunWindow::checkLogFlags()
+{
+  if( m_log_warnings )
+  {
+    showInformationBox("Warning messages occurred during previous operation, see log for details.");
+  }
+  m_log_warnings = false;
 }
