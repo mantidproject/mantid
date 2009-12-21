@@ -210,10 +210,19 @@ void MantidCurve::dataReset(const QString& wsName)
 {
   if (m_wsName != wsName) return;
   const std::string wsNameStd = wsName.toStdString();
-  Mantid::API::MatrixWorkspace_sptr mws = 
-    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-       Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd)
-    );
+  Mantid::API::MatrixWorkspace_sptr mws;
+  try
+  {
+    Mantid::API::Workspace_sptr base =  Mantid::API::AnalysisDataService::Instance().retrieve(wsNameStd);
+    mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
+  }
+  catch(std::runtime_error&)
+  {
+    Mantid::Kernel::Logger::get("MantidCurve").information() << "Workspace " << wsNameStd
+        << " could not be found - plotted curve(s) deleted\n";
+    mws = Mantid::API::MatrixWorkspace_sptr();
+  }
+
   if (!mws) return;
   const MantidQwtData * new_mantidData(NULL);
   try {
