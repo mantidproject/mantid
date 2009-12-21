@@ -508,8 +508,7 @@ void SANSRunWindow::setLimitStepParameter(const QString& pname, QString param, Q
     int index = step_type->findText("Logarithmic");
     if( index < 0 )
     {
-     m_uiForm.tabWidget->setCurrentIndex(1);
-     raiseOneTimeMessage("Warning: Unable to find logarithmic scale option for " + pname + ", setting as linear.");
+     raiseOneTimeMessage("Warning: Unable to find logarithmic scale option for " + pname + ", setting as linear.", 1);
      index = step_type->findText("Linear");
     }
     step_type->setCurrentIndex(index);
@@ -1305,8 +1304,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     m_uiForm.sample_width->setText("8");
     m_uiForm.sample_height->setText("8");
     //Warn user
-    m_uiForm.tabWidget->setCurrentIndex(2);
-    raiseOneTimeMessage("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.");
+    raiseOneTimeMessage("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.", 2);
   }
 
   forceDataReload(false);
@@ -1987,11 +1985,15 @@ QString SANSRunWindow::formatDouble(double value, const QString & colour, char f
 /**
  * Raise a message if current status allows
  * @param msg The message to include in the box
+ * @param index The tab index to set as current
 */
-void SANSRunWindow::raiseOneTimeMessage(const QString & msg)
+void SANSRunWindow::raiseOneTimeMessage(const QString & msg, int index)
 {
   if( m_warnings_issued ) return;
-  
+  if( index >= 0 )
+  {
+    m_uiForm.tabWidget->setCurrentIndex(index);
+  }
   showInformationBox(msg);
   m_warnings_issued = true;
 }

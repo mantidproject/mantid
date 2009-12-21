@@ -117,7 +117,7 @@ private:
   // Format a double in a string with a specfied colour, format and precision
   QString formatDouble(double value, const QString & colour = "black", char format = 'f', int precision = 3);
   /// Issue a warning 
-  void raiseOneTimeMessage(const QString & msg);
+  void raiseOneTimeMessage(const QString & msg, int index = -1);
   /// Reset the geometry box to blank
   void resetGeometryDetailsBox();
   ///Cleanup old raw files

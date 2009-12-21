@@ -277,11 +277,14 @@ def AssignSample(sample_run, reload = True):
     if( sample_run.startswith('.') or sample_run == '' or sample_run == None):
         _SAMPLE_SETUP = None
         _SAMPLE_RUN = ''
-        SCATTER_SAMPLE = ''
+        SCATTER_SAMPLE = None
         return '', '()'
     
     _SAMPLE_RUN = sample_run
     SCATTER_SAMPLE,reset,logname = _assignHelper(sample_run, False, reload)
+    if SCATTER_SAMPLE == '':
+        _issueWarning('Unable to load sans sample run, cannot continue.')
+        return '','()'
     if reset == True:
         _SAMPLE_SETUP = None
     if (INSTR_NAME == 'SANS2D'):
@@ -301,7 +304,7 @@ def AssignSample(sample_run, reload = True):
     FRONT_DET_ROT = float(logvalues['Front_Det_Rot'])
     REAR_DET_Z = float(logvalues['Rear_Det_Z'])
     REAR_DET_X = float(logvalues['Rear_Det_X'])
-    
+
     return SCATTER_SAMPLE, logvalues
 
 ########################### 
@@ -320,6 +323,9 @@ def AssignCan(can_run, reload = True):
 
     _CAN_RUN = can_run
     SCATTER_CAN ,reset, logname = _assignHelper(can_run, False, reload)
+    if SCATTER_CAN == '':
+        _issueWarning('Unable to load sans can run, cannot continue.')
+        return '','()'
     if reset == True:
         _CAN_SETUP  = None
     if (INSTR_NAME == 'SANS2D'):
@@ -449,17 +455,17 @@ def padRunNumber(run_no, field_width):
 # Loader function
 ##########################
 def _loadRawData(filename, workspace, ext, spec_max = None):
-    if ext.lower() == 'raw':
+    if ext.lower().startswith('n'):
+        if spec_max == None:
+            LoadNexus(filename + '.' + ext, workspace)
+        else:
+            LoadNexus(filename + '.' + ext, workspace, SpectrumMax=spec_max)
+    else:
         if spec_max == None:
             LoadRaw(filename + '.' + ext, workspace)
         else:
             LoadRaw(filename + '.' + ext, workspace, SpectrumMax=spec_max)
         LoadSampleDetailsFromRaw(workspace, filename + '.' + ext)
-    else:
-        if spec_max == None:
-            LoadNexus(filename + '.' + ext, workspace)
-        else:
-            LoadNexus(filename + '.' + ext, workspace, SpectrumMax=spec_max)
 
     sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
     SampleGeometry(sample_details.getGeometryFlag())
@@ -700,7 +706,7 @@ def MaskFile(filename):
     if os.path.exists(filename) == False:
         _fatalError("Cannot read mask file '" + filename + "', path does not exist.")
         
-    #clearCurrentMaskDefaults()
+    clearCurrentMaskDefaults()
 
     file_handle = open(filename, 'r')
     for line in file_handle:
@@ -929,7 +935,7 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
         wav_end = WAV2
 
     if finding_centre == False:
-        _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_start) + ',' + str(use_def_trans) + ',' + str(finding_centre) + ')')
+        _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ',' + str(use_def_trans) + ',' + str(finding_centre) + ')')
         _printMessage("Running reduction for wavelength range " + str(wav_start) + '-' + str(wav_end))
     # This only performs the init if it needs to
     sample_setup, can_setup = _initReduction(XBEAM_CENTRE, YBEAM_CENTRE)
