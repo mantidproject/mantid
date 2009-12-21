@@ -453,9 +453,9 @@ namespace Mantid
             template<class NX>
             NX openNXClass(const std::string& name)const
             {
-	      NX nxc(*this,name);
-	      nxc.open();
-	      return nxc;
+              NX nxc(*this,name);
+              nxc.open();
+              return nxc;
             }
 
             /**  Creates and opens an arbitrary (non-standard) class (group).
@@ -471,9 +471,9 @@ namespace Mantid
             template<class T>
             NXDataSetTyped<T> openNXDataSet(const std::string& name)const
             {
-	      NXDataSetTyped<T> data(*this,name);
-	      data.open();
-	      return data;
+              NXDataSetTyped<T> data(*this,name);
+              data.open();
+              return data;
             }
 
             /**  Creates and opens an integer dataset
@@ -518,12 +518,14 @@ namespace Mantid
              *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
              */
             NXInfo getDataSetInfo(const std::string& name)const;
+            void close();///< Close this class 
+            void open();         ///< Opens this NXClass
+            void openLocal();         ///< Opens this NXClass
 
         protected:
             boost::shared_ptr<std::vector<NXClassInfo> > m_groups; ///< Holds info about the child NXClasses
             boost::shared_ptr<std::vector<NXInfo> > m_datasets;    ///< Holds info about the datasets in this NXClass
             void readAllInfo();  ///< Fills in m_groups and m_datasets.
-            void open();         ///< Opens this NXClass
             void clear();        ///< Deletes content of m_groups and m_datasets
         private:
             /// Pricate constructor.

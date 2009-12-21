@@ -189,12 +189,37 @@ bool NXClass::isValid(const std::string & path) const
 
 void NXClass::open()
 {
+  //if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),NX_class().c_str())) 
+  //{
     if (NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str())) 
     {
-        throw std::runtime_error("Cannot open group "+m_path+" of class "+NX_class());
+      throw std::runtime_error("Cannot open group "+m_path+" of class "+NX_class());
     }
-    m_open = true;
-    readAllInfo();
+  //}
+  m_open = true;
+  readAllInfo();
+}
+
+void NXClass::openLocal()
+{
+  if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),NX_class().c_str())) 
+  {
+    if (NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str())) 
+    {
+      throw std::runtime_error("Cannot open group "+m_path+" of class "+NX_class());
+    }
+  }
+  m_open = true;
+  readAllInfo();
+}
+
+void NXClass::close()
+{
+    if (NX_ERROR == NXclosegroup(m_fileID)) 
+    {
+        throw std::runtime_error("Cannot close group "+m_path+" of class "+NX_class());
+    }
+    m_open = false;
 }
 
 void NXClass::reset()
@@ -267,16 +292,33 @@ std::vector< std::string >& NXNote::data()
 {
     if (!m_data_ok)
     {
-      NXChar str = openNXChar("data");
-      str.load();
+      /* old code */
+      //NXChar str = openNXChar("data");
+      //str.load();
+      //if( str.size() == 0 ) return m_data;
+      //std::istringstream istr(std::string(str(),str.dim0()));
+
+      /* new code */
+      int rank;
+      int dims[4];
+      int type;
+      NXopendata (m_fileID, "data");
+      NXgetinfo(m_fileID, &rank, dims, &type);
+      int n = dims[0];
+      char* buffer = new char[n];
+      NXgetdata(m_fileID,buffer);
+      NXclosedata(m_fileID);
+      std::istringstream istr(std::string(buffer,n));
+      delete buffer;
+      /* end of new code */
+
       m_data.clear();
-      if( str.size() == 0 ) return m_data;
-      std::istringstream istr(std::string(str(),str.dim0()));
       std::string line;
       while(getline(istr,line))
       {
-	m_data.push_back(line);
+        m_data.push_back(line);
       }
+
       m_data_ok = true;
     }
     return m_data;

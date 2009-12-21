@@ -78,6 +78,7 @@ namespace Mantid
       int ndets(0);
       try
       {
+
         NXClass det_class = entry.openNXGroup("detector_1");
         NXInt spectrum_index = det_class.openNXInt("spectrum_index");
         spectrum_index.load();

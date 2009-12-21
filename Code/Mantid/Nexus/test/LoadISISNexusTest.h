@@ -22,9 +22,6 @@ class LoadISISNexusTest : public CxxTest::TestSuite
 public:
     void testExec()
     {
-	//	std::string s;
-	//	std::getline(std::cin,s);
-
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();
@@ -105,6 +102,9 @@ public:
 	 void testMultiPeriodEntryNumberZero()
     {
 		
+		//std::string s;
+		//std::getline(std::cin,s);
+
         Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();

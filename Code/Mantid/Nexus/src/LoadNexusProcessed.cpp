@@ -412,12 +412,14 @@ namespace Mantid
       {
         if( itr->nxname.find("MantidAlgorithm") != std::string::npos )
         {
-          NXNote entry = history.openNXNote(itr->nxname);
+          //NXNote entry = history.openNXNote(itr->nxname);
+          NXNote entry(history,itr->nxname);
+          entry.openLocal();
           const std::vector<std::string> & info = entry.data();
           const int nlines = info.size();
           if( nlines < 4 )
           {
-            return;
+            continue;
           }
           //First get name and version
           std::string algname(""), holder("");
@@ -477,6 +479,7 @@ namespace Mantid
             alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
           }
           local_workspace->history().addAlgorithmHistory(alg_hist);
+          entry.close();
         }
       }
 
