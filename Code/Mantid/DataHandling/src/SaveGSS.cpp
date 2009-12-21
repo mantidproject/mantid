@@ -59,7 +59,7 @@ void SaveGSS::exec()
     filename=filename.substr(0,pos);
   }
 
-  int bank=getProperty("Bank");
+  const int bank=getProperty("Bank");
   std::string split=getProperty("SplitFiles");
 
   std::ostringstream number;
@@ -78,9 +78,9 @@ void SaveGSS::exec()
     if (split=="False" && i==0) // Assign only one file
     {
       const std::string file(filename+'.'+ext);
-	  Poco::File fileobj(file);
+      Poco::File fileobj(file);
       const bool exists = fileobj.exists();
-	  out.open(file.c_str(),mode);
+      out.open(file.c_str(),mode);
       if ( !exists || !append )  writeHeaders(out,inputWS);
 
     }
@@ -88,9 +88,9 @@ void SaveGSS::exec()
     {
       number << "-" << i;
       const std::string file(filename+number.str()+"."+ext);
-	  Poco::File fileobj(file);
+      Poco::File fileobj(file);
       const bool exists = fileobj.exists();
-	  out.open(file.c_str(),mode);
+      out.open(file.c_str(),mode);
       number.str("");
       if ( !exists || !append ) writeHeaders(out,inputWS);
     }
@@ -108,7 +108,7 @@ void SaveGSS::exec()
       double bc4=(X[1]-X[0])/X[0];
       out << "# Data for spectrum :"<< i << std::endl;
       out << "BANK "
-        << std::fixed << std::setprecision(0) << bank // First bank should be 1 for GSAS
+        << std::fixed << std::setprecision(0) << bank+i // First bank should be 1 for GSAS
         << std::fixed << " " << datasize
         << std::fixed << " " << datasize
         << std::fixed << " " << "RALF"
@@ -139,6 +139,7 @@ void SaveGSS::exec()
   }
   return;
 }
+
 /** virtual method to set the non workspace properties for this algorithm
  *  @param alg pointer to the algorithm
  *  @param propertyName name of the property
@@ -146,16 +147,18 @@ void SaveGSS::exec()
  *  @param perioidNum period number
  */
 void SaveGSS::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int perioidNum)
-{	
-	if(!propertyName.compare("Append"))
-	{	if(perioidNum!=1)
-		{ alg->setPropertyValue(propertyName,"1");
-		}
-		else alg->setPropertyValue(propertyName,propertyValue);
-	}
-	else
-		Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
- }
+{
+  if(!propertyName.compare("Append"))
+  {
+    if(perioidNum!=1)
+    {
+      alg->setPropertyValue(propertyName,"1");
+    }
+    else alg->setPropertyValue(propertyName,propertyValue);
+  }
+  else Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
+}
+
 /**
  * Write the header information for the given workspace
  * @param os The stream to use to write the information
@@ -169,5 +172,3 @@ void SaveGSS::writeHeaders(std::ostream& os, Mantid::API::MatrixWorkspace_const_
 
   return;
 }
-
-
