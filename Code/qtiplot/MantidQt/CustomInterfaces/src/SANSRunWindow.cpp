@@ -452,9 +452,9 @@ bool SANSRunWindow::loadUserFile()
   //Masking table
   updateMaskTable();
  
-  // Phi values default to -90 and 90
-  m_uiForm.phi_min->setText("-90");
-  m_uiForm.phi_max->setText("90");
+  // Phi values 
+  m_uiForm.phi_min->setText(runReduceScriptFunction("printParameter('PHIMIN')"));
+  m_uiForm.phi_max->setText(runReduceScriptFunction("printParameter('PHIMAX')"));
   
   m_cfg_loaded = true;
   m_uiForm.userfileBtn->setText("Reload");
@@ -1353,7 +1353,8 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
         m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n" +
     "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
-        m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n"; 
+        m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n" +
+    "LimitsPhi(" + m_uiForm.phi_min->text() + "," + m_uiForm.phi_max->text() + ")\n";  
 
   //Centre values
   exec_reduce += "SetCentre(" + m_uiForm.beam_x->text() + "," + m_uiForm.beam_y->text() + ")\n";

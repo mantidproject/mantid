@@ -75,6 +75,8 @@ GRAVITY = False
 CORRECTION_TYPE = '1D'
 # Component positions
 SAMPLE_Z_CORR = 0.0
+PHIMIN=-90.0
+PHIMAX=90.0
 
 # Scaling values
 RESCALE = 100.  # percent
@@ -526,6 +528,10 @@ def LimitsQXY(qmin, qmax, step, type):
     _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type))
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
     
+def LimitsPhi(phimin, phimax):
+    _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax))
+    _readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax))
+	
 def Gravity(flag):
     _printMessage('Gravity(' + str(flag) + ')')
     if isinstance(flag, bool) or isinstance(flag, int):
@@ -604,6 +610,28 @@ def SetCentre(XVAL, YVAL):
     global XBEAM_CENTRE, YBEAM_CENTRE
     XBEAM_CENTRE = XVAL/1000.
     YBEAM_CENTRE = YVAL/1000.
+
+#####################################
+# Set the phi limit
+#####################################
+def SetPhiLimit(phimin,phimax):
+    if phimin > phimax:
+        phimin, phimax = phimax, phimin
+    if abs(phimin) > 180.0:
+        phimin = -90.0
+    if abs(phimax) > 180.0:
+        phimax = 90.0
+	
+    if phimax - phimin == 180.0:
+        phimin = -90.0
+        phimax = 90.0
+    else:
+        phimin = SANSUtility.normalizePhi(phimin)
+        phimax = SANSUtility.normalizePhi(phimax)
+  	
+    global PHIMIN, PHIMAX
+    PHIMIN = phimin
+    PHIMAX = phimax
 
 #####################################
 # Clear current mask defaults
@@ -832,6 +860,8 @@ def _readLimitValues(limit_line):
         RMAX = float(maxval)/1000.
         DEF_RMIN = RMIN
         DEF_RMAX = RMAX
+    elif type.upper() == 'PHI':
+    	SetPhiLimit(float(minval), float(maxval))
     else:
         pass
 
@@ -1106,7 +1136,7 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
 ##
 # Apply the spectrum and time masks to a given workspace
 ##
-def applyMasking(workspace, firstspec, dimension):
+def applyMasking(workspace, firstspec, dimension, limitphi = True):
     # Spectra masks
     speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, dimension)
     # Spectrum mask
@@ -1122,6 +1152,12 @@ def applyMasking(workspace, firstspec, dimension):
     #Rear
     speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING_R, firstspec, dimension) 
     SANSUtility.MaskBySpecNumber(workspace, speclist)
+
+    # Finally apply masking to get the correct phi range
+    if (limitphi == True and PHIMAX - PHIMIN < 180):
+        centre = mtd[workspace].getInstrument().getComponentByName(DETBANK).getPos()
+        centre_pt = [centre.getX(), centre.getY(), centre.getZ()]
+        SANSUtility.LimitPhi(workspace, centre_pt, PHIMIN,PHIMAX)
 #----------------------------------------------------------------------------------------------------------------------------
 ##
 # Main correction routine
@@ -1172,7 +1208,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         if RMAX > 0.0:
             SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
-    applyMasking(final_result, SPECMIN, DIMENSION)
+    applyMasking(final_result, SPECMIN, DIMENSION, True)
     ####################################################################################
         
     ######################## Unit change and rebin #####################################
@@ -1436,7 +1472,7 @@ def ViewCurrentMask():
         firstspec = 3
 
     dimension = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)[0]
-    applyMasking(top_layer, firstspec, dimension)
+    applyMasking(top_layer, firstspec, dimension, False)
     
     # Mark up "dead" detectors with error value 
     FindDeadDetectors(top_layer, top_layer, DeadValue=500)

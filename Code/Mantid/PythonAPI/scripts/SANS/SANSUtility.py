@@ -44,7 +44,22 @@ def parseLogFile(logfile):
 			logkeywords[entry] = float(line.split()[2])
 	
 	return tuple(logkeywords.values())
-			
+
+def normalizePhi(phi):
+	if phi > 90.0:
+		phi -= 180.0
+	elif phi < -90.0:
+		phi += 180.0
+	else:
+		pass
+	return phi
+
+def InfinitePlaneXML(id, plane_pt, normal_pt):
+	return '<infinite-plane id="' + str(id) + '">' + \
+	    '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
+	    '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
+	    '</infinite-plane>\n'			
+
 def InfiniteCylinderXML(id, centre, radius, axis):
 	return  '<infinite-cylinder id="' + str(id) + '">' + \
 	'<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
@@ -69,6 +84,19 @@ def MaskInsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
 def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
     '''Mask out the outside of a cylinder or specified radius'''
     MaskWithCylinder(workspace, radius, xcentre, ycentre, '#')
+
+# Mask such that the remainder is that specified by the phi range
+def LimitPhi(workspace, centre, phimin, phimax):
+	#Convert to radians
+	phimin = math.pi*phimin/180.0
+	phimax = math.pi*phimax/180.0
+	xmldef =  InfinitePlaneXML('pla',centre, [math.cos(phimin + math.pi/2.0),math.sin(phimin + math.pi/2.0),0]) + \
+	InfinitePlaneXML('pla2',centre, [-math.cos(phimax + math.pi/2.0),-math.sin(phimax + math.pi/2.0),0]) + \
+	InfinitePlaneXML('pla3',centre, [math.cos(phimax + math.pi/2.0),math.sin(phimax + math.pi/2.0),0]) + \
+	InfinitePlaneXML('pla4',centre, [-math.cos(phimin + math.pi/2.0),-math.sin(phimin + math.pi/2.0),0]) + \
+	'<algebra val="#((pla pla2):(pla3 pla4))" />'
+	
+	MaskDetectorsInShape(workspace, xmldef)	
 
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(start_spec, ydim, xdim, strip_dim):
