@@ -15,7 +15,7 @@ Sample::Sample() :
 {
 }
 /**  copy constructor 
-  *  @param const reference to the sample object
+  *  @param copy const reference to the sample object
 */
   Sample::Sample(const Sample& copy):m_name(copy.m_name),m_protonCharge(copy.m_protonCharge),
 	  m_geom_id(copy.m_geom_id),m_thick(copy.m_thick),m_height(copy.m_height),m_width(copy.m_width),m_manager(copy.m_manager)
@@ -23,7 +23,7 @@ Sample::Sample() :
 
   }
 /**  assignment operator 
-  * @param const reference to the sample object
+  * @param rhs const reference to the sample object
 */
   const Sample& Sample::operator=(const Sample&rhs)
   {
