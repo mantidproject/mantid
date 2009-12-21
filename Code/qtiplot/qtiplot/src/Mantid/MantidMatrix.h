@@ -147,7 +147,7 @@ public:
   /// returns the workspace name
   const std::string & getWorkspaceName();
 
-  void plotSpectrogram(Graph* plot ,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData*prjdata);
+  Spectrogram* plotSpectrogram(Graph* plot ,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData*prjdata);
 
 signals:
 

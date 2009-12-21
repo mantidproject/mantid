@@ -43,32 +43,32 @@ public:
 
         TS_ASSERT_EQUALS(ws->spectraMap().nElements(),17792);
 
-        const std::vector< Property* >& logs = ws->getSample()->getLogData();
+        const std::vector< Property* >& logs = ws->sample().getLogData();
         TS_ASSERT_EQUALS(logs.size(),18);
 
-        TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->getSample()->getLogData("icp_event"));
+        TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_event"));
         TS_ASSERT(slog);
         std::string str = slog->value();
         TS_ASSERT_EQUALS(str.size(),1023);
         TS_ASSERT_EQUALS(str.substr(0,37),"2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
 
-        slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->getSample()->getLogData("icp_debug"));
+        slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_debug"));
         TS_ASSERT(slog);
         TS_ASSERT_EQUALS(slog->size(),50);
 
-        TimeSeriesProperty<double>* dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->getSample()->getLogData("total_counts"));
+        TimeSeriesProperty<double>* dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->sample().getLogData("total_counts"));
         TS_ASSERT(dlog);
         TS_ASSERT_EQUALS(dlog->size(),172);
 
-        dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->getSample()->getLogData("period"));
+        dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->sample().getLogData("period"));
         TS_ASSERT(dlog);
         TS_ASSERT_EQUALS(dlog->size(),172);
 
-        TimeSeriesProperty<bool>* blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->getSample()->getLogData("period 1"));
+        TimeSeriesProperty<bool>* blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->sample().getLogData("period 1"));
         TS_ASSERT(blog);
         TS_ASSERT_EQUALS(blog->size(),1);
 
-        TS_ASSERT_EQUALS(ws->getSample()->getName(),"");
+        TS_ASSERT_EQUALS(ws->sample().getName(),"");
     }
     void testExec2()
     {
@@ -101,11 +101,7 @@ public:
     }
 	 void testMultiPeriodEntryNumberZero()
     {
-		
-		//std::string s;
-		//std::getline(std::cin,s);
-
-        Mantid::API::FrameworkManager::Instance();
+		Mantid::API::FrameworkManager::Instance();
         LoadISISNexus2 ld;
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/TEST00000008.nxs");

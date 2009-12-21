@@ -991,7 +991,7 @@ signals:
 private:
 	virtual QMenu * createPopupMenu(){return NULL;};
 	///void open spectrogram plot from project
-	void openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
+	Spectrogram*  openSpectrogram(Graph*ag,const std::string &wsName,const QStringList &lst);
 	Matrix* openMatrix(ApplicationWindow* app, const QStringList &flist);
 	void openMantidMatrix(const QStringList &lst);
 	MantidMatrix* newMantidMatrix(const QString& wsName,int lower,int upper);

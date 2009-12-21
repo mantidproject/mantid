@@ -374,11 +374,11 @@ void ApplicationWindow::init(bool factorySettings)
     updateAppFonts();
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
-    // Scripting
-    setScriptingLanguage(defaultScriptingLang);
-    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
-    delete m_interpreterDock->widget();
-    m_interpreterDock->setWidget(m_scriptInterpreter);
+    //// Scripting
+    //setScriptingLanguage(defaultScriptingLang);
+    //m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+    //delete m_interpreterDock->widget();
+    //m_interpreterDock->setWidget(m_scriptInterpreter);
     loadCustomActions();
 
   //Mantid
@@ -4011,7 +4011,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 				lst<<s;
 			}
 			lst.pop_back();
-			openMantidMatrix( lst);
+			openMantidMatrix(lst);
 			progress.setValue(aux);
 		}
 		else if(s=="<mantidworkspaces>"){
@@ -4111,7 +4111,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 					openGraph(app, plot, list);
 				}
 			}
-			plot->blockSignals(false);
+			if(plot) plot->blockSignals(false);
 	   		progress.setValue(aux);
 		}
 		else if  (s == "<SurfacePlot>")
@@ -10196,7 +10196,8 @@ void ApplicationWindow::openMantidMatrix(const QStringList &list)
 	QStringList qlist=s.split("\t");
 	QString wsName=qlist[1];
 	MantidMatrix *m=newMantidMatrix(wsName,-1,-1);//mantidUI->importMatrixWorkspace(wsName,-1,-1,false,false);
-	if(!m)throw std::runtime_error("Error on opening matrixworkspace ");
+	//if(!m)throw std::runtime_error("Error on opening matrixworkspace ");
+	if(!m) return;
 	//adding the mantid matrix windows opened to a list.
 	//this list is used for find the MantidMatrix window pointer to open a 3D/2DGraph
 	m_mantidmatrixWindows<<m;
@@ -10214,6 +10215,7 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
 	QStringList qlist=s.split("\t");
 	QString wsName=qlist[1];
 	InstrumentWindow *insWin = mantidUI->getInstrumentView(wsName);
+	if(!insWin) return;
 	insWin->showWindow();
 	QStringList::const_iterator line = list.begin();
 	for (line++; line!=list.end(); line++)
@@ -10251,7 +10253,13 @@ void ApplicationWindow::populateMantidTreeWdiget(const QString &s)
 		if(wsName.empty())throw std::runtime_error("Workspace Name not found in project file ");
 		std::string fileName(workingDir.toStdString()+"/"+wsName);
 		fileName.append(".nxs");
+		try
+		{
 		mantidUI->loaddataFromNexusFile(wsName,fileName,true);
+		}
+		catch(...)
+		{
+		}
 	}
 }
 /** This method opens mantid matrix window when  project file is loaded 
@@ -10444,9 +10452,16 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         try {
           new MantidCurve(curvelst[1],ag,curvelst[2],curvelst[3].toInt(),curvelst[4].toInt());
         } catch (Mantid::Kernel::Exception::NotFoundError) {
-          // Get here if workspace name is invalid - shouldn't be possible, but just in case
+			// Get here if workspace name is invalid - shouldn't be possible, but just in case
+		    closeWindow(plot);
+			return 0;
+  
         } catch (std::invalid_argument& ex) {
           // Get here if invalid spectrum number given - shouldn't be possible, but just in case
+		   // plot->askOnCloseEvent(false);
+			//plot->close();
+			 closeWindow(plot);
+			 return 0;
         }
       }
     }
@@ -10791,8 +10806,12 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         lst << s;
       }
       lst.pop_back();
-      openSpectrogram(ag,specgramwsName,lst);
-      curveID++;
+	  Spectrogram* sp=openSpectrogram(ag,specgramwsName,lst);
+	  if(!sp)
+	  {	  closeWindow(plot);
+		  return 0;
+	  }
+	  curveID++;
     }
     else if (s.left(6) == "scale\t"){
       QStringList scl = s.split("\t");
@@ -11055,6 +11074,11 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
 		qlist=linethree.split("\t");
 		int style=qlist[1].toInt();
 		if(m)plot=m->plotGraph3D(style);
+		if(!plot)
+		{	
+			 closeWindow(plot);
+			 return 0;
+		}
 	}
 	else if (fList[1].contains(",")){
 		QStringList l = fList[1].split(",", QString::SkipEmptyParts);
@@ -11129,10 +11153,10 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
 	plot->update();
 	return plot;
 }
-void ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsName,const QStringList &lst)
+Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsName,const QStringList &lst)
 {
 	ProjectData *prjData=new ProjectData;
-	if(!prjData)return;
+	if(!prjData)return 0;
 
 	foreach (QString str, lst) {
 		if(str.contains("<ColorMap>"))
@@ -11219,8 +11243,9 @@ void ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsNa
 		if(specgramwsName==(*matrixItr)->getWorkspaceName())
 			m=*matrixItr; 
 	}
-	if(!m) return ;
-	m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
+	if(!m) return 0 ;
+	Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
+	return sp;
 }
 
 void ApplicationWindow::copyActiveLayer()
@@ -13920,7 +13945,9 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 						openGraph(this, plot, lst);
 					}
 				}
-				plot->blockSignals(false);
+				if(plot) 
+				{ plot->blockSignals(false);
+				}
 			}else if  (s == "<SurfacePlot>"){//process 3D plots information
 				lst.clear();
 				while ( s!="</SurfacePlot>" ){

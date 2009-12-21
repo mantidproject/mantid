@@ -77,16 +77,16 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
 
-    boost::shared_ptr<Sample> sample = output->getSample();
+   // boost::shared_ptr<Sample> sample = output->getSample();
 
     // obtain the expected log data which was read from the Nexus file (NXlog)
 
-    Property *l_property = sample->getLogData( std::string("BEAMLOG_CURRENT") );
+    Property *l_property = output->sample().getLogData( std::string("BEAMLOG_CURRENT") );
     TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble1->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );
 
-    l_property = sample->getLogData( std::string("BEAMLOG_FREQ") );
+    l_property = output->sample().getLogData( std::string("BEAMLOG_FREQ") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
 	TS_ASSERT_EQUALS( timeSeriesString.substr(0,24), "2006-Nov-21 07:03:08  50" );

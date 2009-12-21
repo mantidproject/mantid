@@ -45,7 +45,7 @@ public:
   
   void testMatches()
   {
-    if ( !checker.isInitialized() ) checker.initialize();
+	 if ( !checker.isInitialized() ) checker.initialize();
     
     // A workspace had better match itself!
     TS_ASSERT_THROWS_NOTHING( checker.setPropertyValue("Workspace1",loq) )
@@ -246,7 +246,7 @@ public:
     checker.setProperty("CheckSample",true);
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
-    ws2->getSample()->setName("different");
+    ws2->mutableSample().setName("different");
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) )
@@ -261,7 +261,7 @@ public:
     checker.setProperty("CheckSample",true);
 
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
-    ws2->getSample()->setProtonCharge(99.99);
+    ws2->mutableSample().setProtonCharge(99.99);
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) )
@@ -276,7 +276,7 @@ public:
     checker.setProperty("CheckSample",true);
     
     Mantid::API::MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
-    ws2->getSample()->addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",99));
+    ws2->mutableSample().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",99));
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) )
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) )
@@ -285,7 +285,7 @@ public:
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Different numbers of logs" )
     
     Mantid::API::MatrixWorkspace_sptr ws3 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
-    ws3->getSample()->addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop2",99));
+    ws3->mutableSample().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop2",99));
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws2) )
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws3) )
@@ -294,7 +294,7 @@ public:
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Log name mismatch" )
     
     Mantid::API::MatrixWorkspace_sptr ws4 = WorkspaceCreationHelper::Create2DWorkspace(2,2);
-    ws4->getSample()->addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",100));
+    ws4->mutableSample().addLogData(new Mantid::Kernel::PropertyWithValue<int>("Prop1",100));
     
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws2) )
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws4) )

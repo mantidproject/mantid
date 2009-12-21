@@ -585,7 +585,7 @@ namespace Mantid
       {
         Kernel::TimeSeriesProperty<double>* p = new Kernel::TimeSeriesProperty<double>("fromNexus");
         p->addValue(start_time(),-90.);
-        localWorkspace->getSample()->addLogData(p);
+        localWorkspace->mutableSample().addLogData(p);
       }
 
 

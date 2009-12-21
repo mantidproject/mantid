@@ -145,14 +145,20 @@ namespace Mantid
       checkOptionalProperties();
 
       // Check which monitors need loading
-      for( std::map<int, std::string>::iterator itr = m_monitors.begin(); itr != m_monitors.end(); ++itr )
+      for( std::map<int, std::string>::iterator itr = m_monitors.begin(); itr != m_monitors.end(); )
       {
         int index = itr->first;
         if( (!m_spec_list.empty() && std::find(m_spec_list.begin(), m_spec_list.end(), index) == m_spec_list.end()) ||
           (m_range_supplied && (index < m_spec_min || index > m_spec_max)) )
         {
-          m_monitors.erase(itr);
+			std::map<int, std::string>::iterator itr1 = itr;
+			itr++;
+            m_monitors.erase(itr1);
         }
+		else
+		{
+			++itr ;
+		}
       }
 
 
@@ -527,23 +533,23 @@ namespace Mantid
     void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
       /// The proton charge
-      boost::shared_ptr<API::Sample> sample_details = local_workspace->getSample();
-      sample_details->setProtonCharge(entry.getFloat("proton_charge"));
+     // boost::shared_ptr<API::Sample> sample_details = local_workspace->getSample();
+      local_workspace->mutableSample().setProtonCharge(entry.getFloat("proton_charge"));
 
       /// Sample geometry
       NXInt spb = entry.openNXInt("isis_vms_compat/SPB");
       // Just load the index we need, not the whole block. The flag is the third value in
       spb.load(1, 2);
       int geom_id = spb[0];
-      sample_details->setGeometryFlag(spb[0]);
+      local_workspace->mutableSample().setGeometryFlag(spb[0]);
 
       NXFloat rspb = entry.openNXFloat("isis_vms_compat/RSPB");
       // Just load the indices we need, not the whole block. The values start from the 4th onward
       rspb.load(3, 3);
       double thick(rspb[0]), height(rspb[1]), width(rspb[2]);
-      sample_details->setThickness(thick);
-      sample_details->setHeight(height);
-      sample_details->setWidth(width);
+      local_workspace->mutableSample().setThickness(thick);
+      local_workspace->mutableSample().setHeight(height);
+      local_workspace->mutableSample().setWidth(width);
 
       g_log.debug() << "Sample geometry -  ID: " << geom_id << ", thickness: " << thick << ", height: " << height << ", width: " << width << "\n";
     }
@@ -568,13 +574,13 @@ namespace Mantid
           NXLog nxLog = runlogs.openNXLog(it->nxname);
           Kernel::Property* logv = nxLog.createTimeSeries();
           if (!logv) continue;
-          ws->getSample()->addLogData(logv);
+          ws->mutableSample().addLogData(logv);
           if (it->nxname == "icp_event")
           {
             LogParser parser(logv);
-            ws->getSample()->addLogData(parser.createPeriodLog(period));
-            ws->getSample()->addLogData(parser.createAllPeriodsLog());
-            ws->getSample()->addLogData(parser.createRunningLog());
+            ws->mutableSample().addLogData(parser.createPeriodLog(period));
+            ws->mutableSample().addLogData(parser.createAllPeriodsLog());
+            ws->mutableSample().addLogData(parser.createRunningLog());
           }
         }
 

@@ -7,7 +7,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
-
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/Path.h"
 
 #include <cmath>
@@ -175,9 +176,12 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
+		  Property* log=createPeriodLog(1);
+		  if(log)localWorkspace->mutableSample().addLogData(log);
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
-          localWorkspace->getSample()->setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
+         // localWorkspace->getSample()->setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
+		  localWorkspace->mutableSample().setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -201,6 +205,27 @@ namespace Mantid
       delete[] timeChannels;
       delete[] spectrum;
     }
+
+	/** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
+ *  @param period The data period
+ */
+Kernel::Property*  LoadRaw::createPeriodLog(int period)const
+{
+    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
+	if(!periods) return 0;
+    std::ostringstream ostr;
+    ostr<<period;
+    Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
+    std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
+    std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
+    if (it->second != period)
+        p->addValue(it->first,false);
+    for(;it!=pMap.end();it++)
+        p->addValue(it->first, (it->second == period) );
+
+    return p;
+}
+
 
     /**
      * Check if a file is a text file
@@ -403,6 +428,8 @@ namespace Mantid
       }
 
       if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
+	   LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
+	  if(plog) m_perioids=plog->getPeriodsProperty();
     }
 
     double LoadRaw::dblSqrt(double in)

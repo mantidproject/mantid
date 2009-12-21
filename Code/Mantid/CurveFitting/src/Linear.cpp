@@ -174,7 +174,8 @@ void Linear::exec()
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create("Workspace2D",1,X.size(),YSize);
   // Copy over various data members from the input workspace
   outputWorkspace->setInstrument(inputWorkspace->getInstrument());
-  outputWorkspace->setSample(inputWorkspace->getSample());
+  //outputWorkspace->setSample(inputWorkspace->getSample());
+  outputWorkspace->setSample(inputWorkspace->sample());
   outputWorkspace->setYUnit(inputWorkspace->YUnit());
   outputWorkspace->isDistribution(inputWorkspace->isDistribution());
   outputWorkspace->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();

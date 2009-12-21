@@ -9,6 +9,7 @@
 
 //#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
+//#include "MantidAPI/Sample.h"
 
 namespace Mantid
 {
@@ -55,6 +56,7 @@ class Logger;
  */
 class DLLExport PropertyManager: virtual public IPropertyManager
 {
+	
 public:
   PropertyManager();
   virtual ~PropertyManager();
@@ -75,7 +77,6 @@ public:
 
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const;
-
 protected:
 
     using IPropertyManager::declareProperty;
@@ -84,12 +85,12 @@ protected:
 
     Property* getPointerToProperty(const std::string &name) const;
     Property* getPointerToPropertyOrdinal(const int &index) const;
-
+	
 private:
-  /// Private copy constructor.
-  PropertyManager(const PropertyManager&);
+  	/// Private copy constructor.
+  //PropertyManager(PropertyManager&);
   /// Private copy assignment operator.
-  PropertyManager& operator=(const PropertyManager&);
+ // PropertyManager& operator=(const PropertyManager&);
 
   /// typedef for the map holding the properties
   typedef std::map<std::string, Property*> PropertyMap;

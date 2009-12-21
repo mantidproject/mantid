@@ -75,7 +75,7 @@ public:
     //Get the created object
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("TestWorkspace"));
     
-    boost::shared_ptr<Mantid::Geometry::Object> sample = ws->getSample()->getShapeObject();
+    boost::shared_ptr<Mantid::Geometry::Object> sample = ws->sample().getShapeObject();
     Mantid::Geometry::V3D point(x,y,z);
     
     if( inside )

@@ -301,6 +301,7 @@ public:
   {
     std::map<dateAndTime, bool> fmap = filter->valueAsMap();
     std::map<dateAndTime, bool>::const_iterator f = fmap.begin();
+	if(fmap.empty()) return;
     typename timeMap::iterator it = m_propertySeries.begin();
     if (f->first < it->first)// expand this series
     {

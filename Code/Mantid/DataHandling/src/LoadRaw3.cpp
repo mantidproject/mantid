@@ -14,6 +14,7 @@
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "LoadRaw/isisraw2.h"
+#include "MantidDataHandling/LoadLog.h"
 
 #include <boost/shared_ptr.hpp>
 #include "Poco/Path.h"
@@ -173,7 +174,8 @@ void LoadRaw3::exec()
 
   int histTotal = total_specs * m_numberOfPeriods;
   int histCurrent = -1;
-
+  std::vector<Kernel::Property*> period1logProp;
+ 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
       WorkspaceFactory::Instance().create("Workspace2D", total_specs, m_lengthIn, m_lengthIn - 1));
@@ -319,39 +321,51 @@ void LoadRaw3::exec()
     {
       // Only run the sub-algorithms once
       if (bLoadlogFiles)
+	  {
         runLoadLog(localWorkspace);
+		period1logProp=localWorkspace->sample().getLogData();
+		Property* log=createPeriodLog(period+1);
+		if(log)localWorkspace->mutableSample().addLogData(log);
+	  }
 
       if (bseparateMonitors || bexcludeMonitors)
       {
-        if (monitorWorkspace)
-          runLoadLog(monitorWorkspace);
         runLoadInstrument(localWorkspace);
         runLoadMappingTable(localWorkspace);
         if (monitorWorkspace)
-          runLoadInstrument(monitorWorkspace);
-        if (monitorWorkspace)
-          runLoadMappingTable(monitorWorkspace);
-        if (monitorWorkspace)
-          monitorWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+		{ 
+			runLoadInstrument(monitorWorkspace);
+			runLoadMappingTable(monitorWorkspace);
+			if (bLoadlogFiles)monitorWorkspace->setSample(localWorkspace->sample());
+         	  monitorWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+		 }
       }
       // Set the total proton charge for this run
       // (not sure how this works for multi_period files)
-      localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+//      localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+	  localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
     }
     else // We are working on a higher period of a multiperiod raw file
     {
       if (bLoadlogFiles)
       {
-        runLoadLog(localWorkspace, period + 1);
-        if (monitorWorkspace)
-          runLoadLog(monitorWorkspace, period + 1);
+     	  std::vector<Kernel::Property*>::const_iterator itr;
+		  for(itr=period1logProp.begin();itr!=period1logProp.end();++itr)
+		  {
+			  localWorkspace->mutableSample().addLogData(*itr);
+		  }
+		  Property* log=createPeriodLog(period+1);
+		  if(log)localWorkspace->mutableSample().addLogData(log);
+
+          if(monitorWorkspace)monitorWorkspace->setSample(localWorkspace->sample());
+		 
+		 
       }
     }
 
     // check if values stored in logfiles should be used to define parameters of the instrument
     populateInstrumentParameters(localWorkspace);
-    if (monitorWorkspace)
-      populateInstrumentParameters(monitorWorkspace);
+    if (monitorWorkspace)populateInstrumentParameters(monitorWorkspace);
 
     // Assign the result to the output workspace property
 
@@ -380,6 +394,25 @@ void LoadRaw3::exec()
   // Clean up
   isisRaw.reset();
   fclose(file);
+}
+/** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
+ *  @param period The data period
+ */
+Kernel::Property*  LoadRaw3::createPeriodLog(int period)const
+{
+    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
+	if(!periods) return 0;
+    std::ostringstream ostr;
+    ostr<<period;
+    Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
+    std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
+    std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
+    if (it->second != period)
+        p->addValue(it->first,false);
+    for(;it!=pMap.end();it++)
+        p->addValue(it->first, (it->second == period) );
+
+    return p;
 }
 /** sets the workspace properties
  *  @param wsPtr  shared pointer to  workspace
@@ -786,9 +819,10 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
   if (bLoadlogFiles)
   {
     runLoadLog(localWorkspace);
-    //if(monitorWorkspace)runLoadLog(monitorWorkspace);
+	Property* log=createPeriodLog(1);
+	if(log)localWorkspace->mutableSample().addLogData(log);
   }
-  localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+  localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
   m_prog = 0.7;
   progress(m_prog);
   for (int i = 0; i < m_numberOfSpectra; ++i)
@@ -881,12 +915,13 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     if (bseparateMonitors)
     {
       fclose(file);
-      monitorWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+     // monitorWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+	  monitorWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
       if (monitorWorkspace)
       {
         runLoadInstrument(monitorWorkspace);
         runLoadMappingTable(monitorWorkspace);
-        runLoadLog(monitorWorkspace);
+        localWorkspace->setSample(localWorkspace->sample());
         populateInstrumentParameters(monitorWorkspace);
       }
     }
@@ -1063,7 +1098,7 @@ void LoadRaw3::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int peri
   loadLog->setPropertyValue("Filename", m_filename);
   // Set the workspace property to be the same one filled above
   loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-  loadLog->setProperty("Period", period);
+  //loadLog->setProperty("Period", period);
 
   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
   try
@@ -1076,6 +1111,8 @@ void LoadRaw3::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int peri
 
   if (!loadLog->isExecuted())
     g_log.error("Unable to successfully run LoadLog sub-algorithm");
+  LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
+  if(plog) m_perioids=plog->getPeriodsProperty();
 }
 
 /** Add parameters to the instrument parameter map that are defined in instrument
@@ -1091,10 +1128,10 @@ void LoadRaw3::populateInstrumentParameters(DataObjects::Workspace2D_sptr localW
   boost::shared_ptr<Instrument> instrument;
   boost::shared_ptr<Sample> sample;
   instrument = localWorkspace->getBaseInstrument();
-  sample = localWorkspace->getSample();
+  //sample = localWorkspace->getSample();
 
   // Get the data in the logfiles associated with the raw data
-  const std::vector<Kernel::Property*>& logfileProp = sample->getLogData();
+  const std::vector<Kernel::Property*>& logfileProp =localWorkspace->sample().getLogData(); //sample->getLogData();
 
   // Get pointer to parameter map that we may add parameters to and information about
   // the parameters that my be specified in the instrument definition file (IDF)

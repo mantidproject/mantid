@@ -651,7 +651,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
   return g;
 }
 
-void MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData *prjData)
+Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData *prjData)
 {
   app->setPreferences(plot);
   plot->setTitle(tr("Workspace ") + name());
@@ -697,14 +697,17 @@ void MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Graph::Cur
       spgrm->setColorMapPen(false);
       if(prjData->getColorMapPen())spgrm->setColorMapPen(true);
       ContourLinesEditor* contourEditor=prjData->getContourLinesEditor();
-      if(!contourEditor) return;
+      if(contourEditor) 
+	  {
       contourEditor->setSpectrogram(spgrm);
       contourEditor->updateContents();
       contourEditor->updateContourLevels();
+	  }
     }
 
   }
   plot->setAutoScale();
+  return spgrm;
 }
 void MantidMatrix::setSpectrumGraph(MultiLayer *ml, Table* t)
 {

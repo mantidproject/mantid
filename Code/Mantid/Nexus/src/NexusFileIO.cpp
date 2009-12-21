@@ -478,8 +478,7 @@ namespace Mantid
     // Write sample related information to the nexus file
     //}
 
-    int NexusFileIO::writeNexusProcessedSample( const std::string& name,
-      const boost::shared_ptr<Mantid::API::Sample>& sample)
+	int NexusFileIO::writeNexusProcessedSample( const std::string& name,const Mantid::API::Sample& sample)
     {
       NXstatus status;
 
@@ -496,7 +495,7 @@ namespace Mantid
           return(3);
       // Write proton_charge here, if available. Note that TOFRaw has this at the NXentry level, though there is
       // some debate if this is appropriate. Hence for Mantid write it to the NXsample section as it is stored in Sample.
-      const double totalProtonCharge=sample->getProtonCharge();
+      const double totalProtonCharge=sample.getProtonCharge();
       if( totalProtonCharge>0 )
       {
         attributes.push_back("units");
@@ -505,7 +504,7 @@ namespace Mantid
           return(4);
       }
       // Examine TimeSeries (Log) data and call function to write double or string data
-      std::vector<Kernel::Property*> sampleProps=sample->getLogData();
+      std::vector<Kernel::Property*> sampleProps=sample.getLogData();
       for(unsigned int i=0;i<sampleProps.size();i++)
       {
 
@@ -542,11 +541,10 @@ namespace Mantid
       return(0);
     }
 
-    //
+   // 
     // Read sample related information from the nexus file
-    //}
-
-    int NexusFileIO::readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample)
+    
+	int NexusFileIO::readNexusProcessedSample( Mantid::API::Sample& sample)
     {
       /*!
       Read Nexus Sample section
@@ -568,7 +566,7 @@ namespace Mantid
       else
         name="";  // Missing name entry, set null
 
-      sample->setName(name);
+      sample.setName(name);
       // Read proton_charge, if available. Note that TOFRaw has this at the NXentry level, though there is
       // some debate if this is appropriate. Hence for Mantid read it from the NXsample section as it is stored in Sample.
       double totalProtonCharge;
@@ -576,7 +574,7 @@ namespace Mantid
       {
         if( readNxFloat( "proton_charge", totalProtonCharge, attributes, avalues) )
         {
-          sample->setProtonCharge(totalProtonCharge);
+          sample.setProtonCharge(totalProtonCharge);
           if(attributes.size()==1) // check units if present
             if(attributes[0].compare("units")==0 && avalues[0].compare("microAmps*hour")!=0)
               g_log.warning("Unexpected units of Proton charge ignored: " + avalues[0]);
@@ -725,7 +723,7 @@ namespace Mantid
       //
     }
 
-    void NexusFileIO::readNXlog(const char* nxname, boost::shared_ptr<Mantid::API::Sample>& sample)
+    void NexusFileIO::readNXlog(const char* nxname, Mantid::API::Sample& sample)
     {
       // read an NXlog section and save the timeseries data within the sample
       NXstatus status;
@@ -794,7 +792,7 @@ namespace Mantid
             l_Property->addValue(p->first,int(p->second));
           }
           delete l_PropertyDouble;
-          sample->addLogData(l_Property);
+          sample.addLogData(l_Property);
         }
         else if (logType == "bool")
         {
@@ -805,11 +803,11 @@ namespace Mantid
             l_Property->addValue(p->first,p->second != 0.0);
           }
           delete l_PropertyDouble;
-          sample->addLogData(l_Property);
+          sample.addLogData(l_Property);
         }
         else
         {
-          sample->addLogData(l_PropertyDouble);
+          sample.addLogData(l_PropertyDouble);
         }
       }
       else if(type==NX_CHAR)
@@ -825,7 +823,7 @@ namespace Mantid
           l_PropertyString->addValue(startTime+static_cast<time_t>(timeVals[j]), value);
         }
         delete[] value;
-        sample->addLogData(l_PropertyString);
+        sample.addLogData(l_PropertyString);
       }
       status=NXclosedata(fileID);
       status=NXclosegroup(fileID);

@@ -105,7 +105,7 @@ namespace Mantid
        *  @param rhs the other workspace
        *  @param ans the output workspace
        */
-      virtual void operateOnSample(const boost::shared_ptr<Sample> lhs, const boost::shared_ptr<Sample> rhs, boost::shared_ptr<Sample> ans) const {};
+      virtual void operateOnSample(const Sample& lhs, const Sample& rhs, Sample& ans) const {};
 
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);

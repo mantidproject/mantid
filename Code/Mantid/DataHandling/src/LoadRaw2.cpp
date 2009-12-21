@@ -14,7 +14,7 @@
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "LoadRaw/isisraw2.h"
-
+#include "MantidDataHandling/LoadLog.h"
 #include <boost/shared_ptr.hpp>
 #include "Poco/Path.h"
 #include <cmath>
@@ -114,6 +114,7 @@ namespace Mantid
 
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
+	   std::vector<Kernel::Property*> period1logProp;
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       int total_specs;
@@ -164,7 +165,9 @@ namespace Mantid
         runLoadInstrument(localWorkspace );
         runLoadMappingTable(localWorkspace );
         runLoadLog(localWorkspace );
-        localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+		Property* log=createPeriodLog(1);
+		if(log)localWorkspace->mutableSample().addLogData(log);
+		localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         for (int i = 0; i < m_numberOfSpectra; ++i)
           localWorkspace->getAxis(1)->spectraNo(i)= i+1;
         populateInstrumentParameters(localWorkspace);
@@ -242,9 +245,12 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
+		  period1logProp=localWorkspace->sample().getLogData();
+		  Property* log=createPeriodLog(period+1);
+		  if(log)localWorkspace->mutableSample().addLogData(log);
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
-          localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+          localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -257,7 +263,15 @@ namespace Mantid
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
-          runLoadLog(localWorkspace,period+1);
+          //runLoadLog(localWorkspace,period+1);
+		
+		  std::vector<Kernel::Property*>::const_iterator itr;
+		  for(itr=period1logProp.begin();itr!=period1logProp.end();++itr)
+		  {
+			  localWorkspace->mutableSample().addLogData(*itr);
+		  }
+		  Property* log=createPeriodLog(period+1);
+		  if(log)localWorkspace->mutableSample().addLogData(log);
         }
 
         // check if values stored in logfiles should be used to define parameters of the instrument
@@ -273,6 +287,26 @@ namespace Mantid
       //delete[] spectrum;
       fclose(file);
     }
+
+	/** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
+ *  @param period The data period
+ */
+Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
+{
+    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
+	if(!periods) return 0;
+    std::ostringstream ostr;
+    ostr<<period;
+    Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
+    std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
+    std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
+    if (it->second != period)
+        p->addValue(it->first,false);
+    for(;it!=pMap.end();it++)
+        p->addValue(it->first, (it->second == period) );
+
+    return p;
+}
 
     /**
      * Check if a file is a text file
@@ -446,7 +480,7 @@ namespace Mantid
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above
       loadLog->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
-      loadLog->setProperty("Period",period);
+      //loadLog->setProperty("Period",period);
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -459,6 +493,8 @@ namespace Mantid
       }
 
       if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
+	  LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
+	  if(plog) m_perioids=plog->getPeriodsProperty();
     }
 
     double LoadRaw2::dblSqrt(double in)
@@ -478,12 +514,12 @@ namespace Mantid
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<Sample> sample;
       instrument = localWorkspace->getBaseInstrument();
-      sample = localWorkspace->getSample();
+//      sample = localWorkspace->getSample();
 
 
       // Get the data in the logfiles associated with the raw data
 
-      const std::vector<Kernel::Property*>& logfileProp = sample->getLogData();
+      const std::vector<Kernel::Property*>& logfileProp =localWorkspace->sample().getLogData(); //sample->getLogData();
 
 
       // Get pointer to parameter map that we may add parameters to and information about

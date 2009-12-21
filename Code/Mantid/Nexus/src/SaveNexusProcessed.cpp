@@ -155,8 +155,8 @@ namespace NeXus
        nexusFile->writeNexusInstrumentXmlName("NoNameAvailable","","");
 
     progress(0.7);
-    boost::shared_ptr<Mantid::API::Sample> sample=m_inputWorkspace->getSample();
-    if( nexusFile->writeNexusProcessedSample( sample->getName(), sample) != 0 )
+//    boost::shared_ptr<Mantid::API::Sample> sample=m_inputWorkspace->getSample();
+    if( nexusFile->writeNexusProcessedSample(m_inputWorkspace->sample().getName(), m_inputWorkspace->sample()) != 0 )
     {
        g_log.error("Failed to write NXsample");
        throw Exception::FileError("Failed to write NXsample", m_filename);

@@ -106,13 +106,13 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Sample> sample = output->getSample();
-    Property *l_property = sample->getLogData( std::string("beamlog_current") );
+    //boost::shared_ptr<Sample> sample = output->getSample();
+    Property *l_property = output->sample().getLogData( std::string("beamlog_current") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );
     //check that sample name has been set correctly
-    TS_ASSERT_EQUALS(sample->getName(), "Cr2.7Co0.3Si")
+    TS_ASSERT_EQUALS(output->sample().getName(), "Cr2.7Co0.3Si")
     
 	/*
     //----------------------------------------------------------------------
@@ -212,11 +212,11 @@ public:
 			TS_ASSERT( ! output-> isDistribution() )
 
 			//check that sample name has been set correctly
-			boost::shared_ptr<Sample> sample,sample2;
-		sample = output->getSample();
+			//boost::shared_ptr<Sample> sample,sample2;
+		//sample = output->getSample();
 		//sample2 = output2->getSample();
 		//TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
-		TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
+		TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
 
 	}
     MatrixWorkspace_sptr output,output2,output3,output4;
@@ -251,11 +251,11 @@ public:
     TS_ASSERT( ! output-> isDistribution() )
 
     //check that sample name has been set correctly
-    boost::shared_ptr<Sample> sample,sample2;
-    sample = output->getSample();
-    sample2 = output2->getSample();
-    TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
-    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
+   // boost::shared_ptr<Sample> sample,sample2;
+    //sample = output->getSample();
+   // sample2 = output2->getSample();
+    TS_ASSERT_EQUALS(output->sample().getName(), output2->sample().getName());
+    TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
 	
 	}  
   }
@@ -317,11 +317,11 @@ public:
     TS_ASSERT( ! output-> isDistribution() )
 
     //check that sample name has been set correctly
-    boost::shared_ptr<Sample> sample,sample2;
-    sample = output->getSample();
-    sample2 = output2->getSample();
-    TS_ASSERT_EQUALS(sample->getName(), sample2->getName());
-    TS_ASSERT_EQUALS(sample->getName(), "ptfe test")
+    //boost::shared_ptr<Sample> sample,sample2;
+  //  sample = output->getSample();
+  //  sample2 = output2->getSample();
+    TS_ASSERT_EQUALS(output->sample().getName(), output2->sample().getName());
+    TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
 	
 	}  
   }

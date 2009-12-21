@@ -128,6 +128,9 @@ namespace Mantid
 	 /// This method is useful for separating  or excluding   monitors from the output workspace
 	 void  separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,bool bincludeMonitors,bool bexcludeMonitors,bool bseparateMonitors);
 
+	 /// creates time series property showing times when when a particular period was active.
+	 Kernel::Property* createPeriodLog(int period)const;
+
       /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
       boost::shared_ptr<ISISRAW2> isisRaw;
       /// The name and path of the input file
@@ -164,6 +167,8 @@ namespace Mantid
 	 int m_lengthIn;
 	 /// boolean for list spectra options
 	 bool m_bmspeclist;
+	 /// TimeSeriesProperty<int> containing data periods.
+	 boost::shared_ptr<Kernel::Property> m_perioids;
     };
 
   } // namespace DataHandling

@@ -361,10 +361,10 @@ namespace Mantid
     void LoadNexusProcessed::readSampleGroup(NXEntry & mtd_entry, DataObjects::Workspace2D_sptr local_workspace)
     {
       NXMainClass sample = mtd_entry.openNXClass<NXMainClass>("sample");
-      boost::shared_ptr<Mantid::API::Sample> sample_details = local_workspace->getSample();
+      //boost::shared_ptr<Mantid::API::Sample> sample_details = local_workspace->getSample();
       try
       {
-        sample_details->setProtonCharge(sample.getDouble("proton_charge"));
+        local_workspace->mutableSample().setProtonCharge(sample.getDouble("proton_charge"));
       }
       catch(std::runtime_error & )
       {
@@ -372,14 +372,14 @@ namespace Mantid
       }
       try
       {
-        sample_details->setName(sample.getString("name"));
+        local_workspace->mutableSample().setName(sample.getString("name"));
       }
       catch(std::runtime_error & )
       {
       }
 
       //Log data is stored as multiple NXlog classes, each with a time and value attribute
-      boost::shared_ptr<API::Sample> run_details = local_workspace->getSample();
+     // boost::shared_ptr<API::Sample> run_details = local_workspace->getSample();
       const std::vector<NXClassInfo> & logs = sample.groups();
       std::vector<NXClassInfo>::const_iterator iend = logs.end();
       for( std::vector<NXClassInfo>::const_iterator itr = logs.begin(); itr != iend; ++itr )
@@ -390,7 +390,7 @@ namespace Mantid
           Kernel::Property *p = log_entry.createTimeSeries();
           if( p ) 
           {
-            run_details->addLogData(p);
+            local_workspace->mutableSample().addLogData(p);
           }
         }
       }

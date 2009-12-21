@@ -90,6 +90,8 @@ namespace Mantid
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr,int period=1);
       void populateInstrumentParameters(DataObjects::Workspace2D_sptr);
+	   /// creates time series property showing times when when a particular period was active.
+	  Kernel::Property* createPeriodLog(int period)const;
 
       /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
       boost::shared_ptr<ISISRAW2> isisRaw;
@@ -118,6 +120,8 @@ namespace Mantid
 
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
+	   /// TimeSeriesProperty<int> containing data periods.
+	 boost::shared_ptr<Kernel::Property> m_perioids;
     };
 
   } // namespace DataHandling

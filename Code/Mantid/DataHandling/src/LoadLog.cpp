@@ -58,7 +58,7 @@ void LoadLog::init()
 		  "that raw file are loaded into the specified workspace. The file extension must\n"
 		  "either be .raw or .s when specifying a raw file");
 
-  declareProperty("Period",1);
+  //declareProperty("Period",1);
 }
 
   //@cond NODOC
@@ -104,7 +104,7 @@ void LoadLog::exec()
   // the log file(s) will be loaded into the Sample container of the workspace 
 
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-  boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
+  //boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
 
   // If m_filename is the filename of a raw datafile then search for potential log files
   // in the directory of this raw datafile. Otherwise check if m_filename is a potential
@@ -176,7 +176,7 @@ void LoadLog::exec()
 	if (threeColumnFormatLogFileExists())
 	{	
 		threecolumnLogfile=getThreecolumnFormatLogFile();
-		std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,sample);
+		std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableSample());
 		//remove the file name from potential logfiles list if it's there in the .log file.
 		std::set<std::string>::const_iterator itr;
 		for(itr=blockFileNameList.begin();itr!=blockFileNameList.end();++itr)
@@ -201,14 +201,16 @@ void LoadLog::exec()
 
   API::LogParser parser(icpevent_file_name);
   // Add mantid-created logs
-  int period = getProperty("Period");
-  Property* log = parser.createPeriodLog(period);
+  /*int period = getproperty("period");
+  property* log = parser.createperiodlog(period);
   if (log)
   {
-    sample->addLogData(log);
-  }
-  sample->addLogData(parser.createAllPeriodsLog());
-  sample->addLogData(parser.createRunningLog());
+    sample->addlogdata(log);
+  }*/
+  
+  m_periods=parser.getPeriodsProperty();
+  localWorkspace->mutableSample().addLogData(parser.createAllPeriodsLog());
+  localWorkspace->mutableSample().addLogData(parser.createRunningLog());
 
   // Extract the common part of log file names (the workspace name)
   std::string ws_name = Poco::Path(m_filename).getFileName();
@@ -269,7 +271,8 @@ void LoadLog::exec()
 	Property* log = parser.createLogProperty(*logs_itr,stringToLower(log_name));
 	if (log)
 	{
-	  sample->addLogData(log);
+	  //sample->addLogData(log);
+		localWorkspace->mutableSample().addLogData(log);
 	}
       }
       catch(std::exception&)
@@ -422,32 +425,30 @@ This method reads the.log file and creates timeseries property and sets that to 
 *@param sample sample object
 @returns list of logfiles which exists as blockname in the .log file
 */
-std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,boost::shared_ptr<API::Sample> sample)
-{    
-	std::basic_string <char>::size_type pos=m_filename.find(".");
-	std::string path =m_filename.substr(0,pos);
+std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,API::Sample& sample)
+ {    
+	
 	std::set<std::string> blockFileNameList;
-
-	std::ifstream file(logfile.c_str());
-	if (!file)
-	{	g_log.warning()<<"Cannot open log file "<<logfile<<"\n";
-		return std::set<std::string>();
-	}
-    // Read in the data and determin if it is numeric
-	std::string str,old_data,old_blockcolumn;
-    bool isNumeric(false);
-    std::string sdata;
+     std::string sdata,str;
 	std::string propname;
 	Mantid::Kernel::TimeSeriesProperty<double>* logd=0;
 	Mantid::Kernel::TimeSeriesProperty<std::string>* logs=0;
 	std::map<std::string,Kernel::TimeSeriesProperty<double>*> dMap;
 	std::map<std::string,Kernel::TimeSeriesProperty<std::string>*> sMap;
-    // MG 22/09/09: If the log file was written on a Windows machine and then read on a Linux machine, std::getline will
-    // leave CR at the end of the string and this causes problems when reading out the log values. Mantid::extractTOEOL
-    // extracts all EOL characters
+	typedef std::pair<std::string,Kernel::TimeSeriesProperty<double>* > dpair;
+	typedef std::pair<std::string,Kernel::TimeSeriesProperty<std::string>* > spair;
+
+	std::basic_string <char>::size_type pos=m_filename.find(".");
+	bool isNumeric(false);
+	std::string path =m_filename.substr(0,pos);
+	std::ifstream file(logfile.c_str());
+	if (!file)
+	{	g_log.warning()<<"Cannot open log file "<<logfile<<"\n";
+		return std::set<std::string>();
+	}
 	while(Mantid::API::extractToEOL(file,str))
 	{
-		if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) 
+		if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str[0]=='#')) 
 		{    //if the line doesn't start with a time read the next line
 			continue;
 		}
@@ -475,24 +476,26 @@ std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::stri
 		istr >> dvalue;
 		isNumeric = !istr.fail();
 
-
 		if (isNumeric)
 		{				
 			std::map<std::string,Kernel::TimeSeriesProperty<double>*>::iterator ditr=dMap.find(propname);
 			if(ditr!=dMap.end())
 			{	Kernel::TimeSeriesProperty<double>* p=ditr->second;
 				if(p)p->addValue(timecolumn,dvalue);
+					dMap.insert(dpair(propname,p));
+
 			}
 			else
 			{	logd = new Kernel::TimeSeriesProperty<double>(propname);
 				logd->addValue(timecolumn,dvalue);
-				dMap[propname]=logd;
+				dMap.insert(dpair(propname,logd));
 				std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
 				if(blockcolumnFileExists(blockcolumnFileName))
 				{
           blockFileNameList.insert(blockcolumnFileName);
 				}
 			}
+			
 		}
 		else
 		{		
@@ -500,11 +503,13 @@ std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::stri
 			if(sitr!=sMap.end())
 			{	Kernel::TimeSeriesProperty<std::string>* prop=sitr->second;
 			if(prop) prop->addValue(timecolumn,valuecolumn);
+				sMap.insert(spair(propname,prop));
 			}
 			else
 			{	logs = new Kernel::TimeSeriesProperty<std::string>(propname);
 				logs->addValue(timecolumn,valuecolumn);
-				sMap[propname]=logs;}
+				sMap.insert(spair(propname,logs)); //sMap[propname]=logs;
+			}
 				std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
 				if(blockcolumnFileExists(blockcolumnFileName))
 				{
@@ -516,13 +521,12 @@ std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::stri
 	{
 		std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr=dMap.begin();
 		for(;itr!=dMap.end();++itr)
-		{
-			sample->addLogData(itr->second);
-		}
+		{sample.addLogData(itr->second);
+		}	
 		std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr=sMap.begin();
 		for(;sitr!=sMap.end();++sitr)
 		{
-			sample->addLogData(sitr->second);
+			sample.addLogData(sitr->second);
 		}
 	}
 	catch(std::invalid_argument &e)

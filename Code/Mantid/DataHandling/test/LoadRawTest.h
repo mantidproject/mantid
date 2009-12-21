@@ -77,7 +77,7 @@ public:
     TS_ASSERT( ! output2D-> isDistribution() )
 
     // Check the proton charge has been set correctly
-    TS_ASSERT_DELTA( output2D->getSample()->getProtonCharge(), 171.0353, 0.0001 )
+    TS_ASSERT_DELTA( output2D->sample().getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
@@ -101,8 +101,8 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    boost::shared_ptr<Sample> sample = output2D->getSample();
-    Property *l_property = sample->getLogData( std::string("TEMP1") );
+    //boost::shared_ptr<Sample> sample = output2D->getSample();
+    Property *l_property = output2D->sample().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
@@ -224,7 +224,7 @@ public:
 
   void testMultiPeriod()
   {
-    LoadRaw loader5;
+	 LoadRaw loader5;
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/Data/CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
@@ -301,14 +301,36 @@ public:
 
     // Check these are the same
     TS_ASSERT_EQUALS( output1->getInstrument(), output2->getInstrument() )
-    TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output2->spectraMap()) )
-    TS_ASSERT_EQUALS( output1->getSample(), output2->getSample() )
+	TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output2->spectraMap()) )
+    //TS_ASSERT_EQUALS( &(output1->sample()), &(output2->sample()) )
+	TS_ASSERT_EQUALS( output1->sample().getProtonCharge(), output2->sample().getProtonCharge() )
+	TS_ASSERT_EQUALS( output1->sample().getShapeObject(), output2->sample().getShapeObject() )
+	TS_ASSERT_EQUALS( output1->sample().getGeometryFlag(), output2->sample().getGeometryFlag() )
+	TS_ASSERT_EQUALS( output1->sample().getThickness(), output2->sample().getThickness() )
+	TS_ASSERT_EQUALS( output1->sample().getHeight(), output2->sample().getHeight() )
+	TS_ASSERT_EQUALS( output1->sample().getWidth(), output2->sample().getWidth() )
+
+
     TS_ASSERT_EQUALS( output1->getInstrument(), output6->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output6->spectraMap()) )
-    TS_ASSERT_EQUALS( output1->getSample(), output6->getSample() )
+   // TS_ASSERT_EQUALS(  &(output1->sample()), &(output6->sample()) )
+   TS_ASSERT_EQUALS( output1->sample().getProtonCharge(), output6->sample().getProtonCharge() )
+	TS_ASSERT_EQUALS( output1->sample().getShapeObject(), output6->sample().getShapeObject() )
+	TS_ASSERT_EQUALS( output1->sample().getGeometryFlag(), output6->sample().getGeometryFlag() )
+	TS_ASSERT_EQUALS( output1->sample().getThickness(), output6->sample().getThickness() )
+	TS_ASSERT_EQUALS( output1->sample().getHeight(), output6->sample().getHeight() )
+	TS_ASSERT_EQUALS( output1->sample().getWidth(), output6->sample().getWidth() )
+
     TS_ASSERT_EQUALS( output1->getInstrument(), output12->getInstrument() )
     TS_ASSERT_EQUALS( &(output1->spectraMap()), &(output12->spectraMap()) )
-    TS_ASSERT_EQUALS( output1->getSample(), output12->getSample() )
+    //TS_ASSERT_EQUALS(  &(output1->sample()), &(output12->sample()) )
+	TS_ASSERT_EQUALS( output1->sample().getProtonCharge(), output12->sample().getProtonCharge() )
+	TS_ASSERT_EQUALS( output1->sample().getShapeObject(), output12->sample().getShapeObject() )
+	TS_ASSERT_EQUALS( output1->sample().getGeometryFlag(), output12->sample().getGeometryFlag() )
+	TS_ASSERT_EQUALS( output1->sample().getThickness(), output12->sample().getThickness() )
+	TS_ASSERT_EQUALS( output1->sample().getHeight(), output12->sample().getHeight() )
+	TS_ASSERT_EQUALS( output1->sample().getWidth(), output12->sample().getWidth() )
+
     
     AnalysisDataService::Instance().remove("multiperiod");
   }

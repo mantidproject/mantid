@@ -69,15 +69,21 @@ public:
   virtual ~MatrixWorkspace();
 
   void setInstrument(const IInstrument_sptr&);
-  void setSample(const boost::shared_ptr<Sample>& sample);
+  /// setting the sample object
+  void setSample(const Sample& sample);
   IInstrument_sptr getInstrument() const;
   boost::shared_ptr<Instrument> getBaseInstrument()const;
-  boost::shared_ptr<Sample> getSample() const;
   void newSample();
 
   // SpectraDetectorMap accessors
   const SpectraDetectorMap& spectraMap() const;
   SpectraDetectorMap& mutableSpectraMap();
+
+  /// Sample accessors  
+  const  Sample& sample() const;
+  ///  mutable accessor
+  Sample& mutableSample();
+ 
   
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
   Geometry::IDetector_sptr getDetector(const int index) const;
@@ -177,7 +183,7 @@ private:
   /// The SpectraDetector table used for this experiment. Inside a copy-on-write pointer.
   Kernel::cow_ptr<SpectraDetectorMap> m_spectramap;
   /// The information on the sample environment
-  boost::shared_ptr<Sample> sptr_sample;
+  Kernel::cow_ptr<Sample> m_sample;
 
   /// The unit for the data values (e.g. Counts)
   std::string m_YUnit;

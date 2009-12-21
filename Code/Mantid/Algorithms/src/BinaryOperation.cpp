@@ -67,7 +67,7 @@ namespace Mantid
       }
 
       // only overridden for some operations (plus and minus at the time of writing)
-      operateOnSample(lhs->getSample(), rhs->getSample(), out_work->getSample());
+      operateOnSample(lhs->sample(), rhs->sample(), out_work->mutableSample());
 
       // Initialise the progress reporting object
       m_progress = new Progress(this,0.0,1.0,lhs->getNumberHistograms());

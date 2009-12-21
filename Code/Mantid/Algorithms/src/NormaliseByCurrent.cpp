@@ -37,7 +37,8 @@ void NormaliseByCurrent::exec()
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Get the good proton charge and check it's valid
-  double charge = inputWS->getSample()->getProtonCharge();
+  //double charge = inputWS->getSample()->getProtonCharge();
+  double charge = inputWS->sample().getProtonCharge();
   if ( charge < 1.0E-6 )
   {
     g_log.error() << "The proton charge is not set to a valid value. Charge = " << charge << std::endl;

@@ -291,7 +291,8 @@ namespace Mantid
           runLoadInstrument(localWorkspace, iName);
           //runLoadLog(localWorkspace );
           // Set the total proton charge for this run
-          localWorkspace->getSample()->setProtonCharge(m_proton_charge);
+          //localWorkspace->getSample()->setProtonCharge(m_proton_charge);
+		  localWorkspace->mutableSample().setProtonCharge(m_proton_charge);
         }
         if (period != 0)
         {

@@ -1288,14 +1288,14 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
 
   // Set the geometry
-  boost::shared_ptr<Mantid::API::Sample> sample_details = sample_workspace->getSample();
-  int geomid  = sample_details->getGeometryFlag();
+  //boost::shared_ptr<Mantid::API::Sample> sample_details = sample_workspace->getSample();
+  int geomid  = sample_workspace->sample().getGeometryFlag();
   if( geomid > 0 && geomid < 4 )
   {
     m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-    m_uiForm.sample_thick->setText(QString::number(sample_details->getThickness()));
-    m_uiForm.sample_width->setText(QString::number(sample_details->getWidth()));
-    m_uiForm.sample_height->setText(QString::number(sample_details->getHeight()));
+    m_uiForm.sample_thick->setText(QString::number(sample_workspace->sample().getThickness()));
+    m_uiForm.sample_width->setText(QString::number(sample_workspace->sample().getWidth()));
+    m_uiForm.sample_height->setText(QString::number(sample_workspace->sample().getHeight()));
   }
   else
   {

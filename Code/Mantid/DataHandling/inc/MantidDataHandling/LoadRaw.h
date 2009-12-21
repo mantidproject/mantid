@@ -87,6 +87,8 @@ namespace Mantid
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);
+	     /// creates time series property showing times when when a particular period was active.
+	  Kernel::Property* createPeriodLog(int period)const;
 
       /// The name and path of the input file
       std::string m_filename;
@@ -111,6 +113,9 @@ namespace Mantid
 
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
+
+	 /// TimeSeriesProperty<int> containing data periods.
+	 boost::shared_ptr<Kernel::Property> m_perioids;
     };
 
   } // namespace DataHandling

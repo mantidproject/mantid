@@ -205,7 +205,8 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
 
     NXFloat proton_charge = entry.openNXFloat("proton_charge");
     proton_charge.load();
-    ws->getSample()->setProtonCharge(*proton_charge());
+    //ws->getSample()->setProtonCharge(*proton_charge());
+	ws->mutableSample().setProtonCharge(*proton_charge());
 
     loadInstrument(ws,entry,banks,monitors);
 

@@ -51,7 +51,7 @@ public:
 
 
     // Test proton charge from the sample block
-    TS_ASSERT_DELTA(matrix_ws->getSample()->getProtonCharge(), 30.14816, 1e-5)
+    TS_ASSERT_DELTA(matrix_ws->sample().getProtonCharge(), 30.14816, 1e-5)
 
     //Test history
     const std::vector<AlgorithmHistory>& alghist = matrix_ws->getHistory().getAlgorithmHistories();

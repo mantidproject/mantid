@@ -55,10 +55,13 @@ namespace Mantid
       /// write the header ifon for the Mantid workspace format
       int writeNexusProcessedHeader( const std::string& title);
       /// write sample related data
-      int writeNexusProcessedSample( const std::string& title,
-							  const boost::shared_ptr<Mantid::API::Sample>& sample);
+      /*int writeNexusProcessedSample( const std::string& title,
+							  const boost::shared_ptr<Mantid::API::Sample>& sample);*/
+
+	  int writeNexusProcessedSample( const std::string& title,const Mantid::API::Sample& sample);
       /// read sample data
-      int readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample);
+      //int readNexusProcessedSample( boost::shared_ptr<Mantid::API::Sample>& sample);
+	  int readNexusProcessedSample(Mantid::API::Sample& sample);
       /// write the workspace data
       int writeNexusProcessedData( const API::MatrixWorkspace_const_sptr& localworkspace,
 							const bool& uniformSpectra, const std::vector<int>& spec);
@@ -128,7 +131,7 @@ namespace Mantid
       /// Write NXlog data for given string TimeSeriesProperty
       void writeNexusStringLog(const Kernel::TimeSeriesProperty<std::string> *s_timeSeries);
       /// read the named NXlog and create TimeSeriesProp in sample
-      void readNXlog(const char* nxname, boost::shared_ptr<Mantid::API::Sample>& sample);
+      void readNXlog(const char* nxname, Mantid::API::Sample& sample);
       /// check if the gievn item exists in the current level
       bool checkEntryAtLevel(const std::string& item) const;
       /// check if given attribute name is in currently opened entry

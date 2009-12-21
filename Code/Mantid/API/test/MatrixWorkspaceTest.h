@@ -87,12 +87,14 @@ public:
 
   void testGetSetSample()
   {
-    TS_ASSERT( ws->getSample() )
-    boost::shared_ptr<Sample> s(new Sample);
-    TS_ASSERT_THROWS_NOTHING( ws->setSample(s) )
-    TS_ASSERT_EQUALS( ws->getSample(), s )
-    ws->getSample()->setName("test");
-    TS_ASSERT_EQUALS( ws->getSample()->getName(), "test" )
+	TS_ASSERT( &ws->sample() )
+    //boost::shared_ptr<Sample> s(new Sample);
+	Sample s;
+	TS_ASSERT_THROWS_NOTHING( ws->setSample(s) )
+	//TS_ASSERT_EQUALS( &ws->sample(), &s )
+ 
+    ws->mutableSample().setName("test");
+    TS_ASSERT_EQUALS( ws->sample().getName(), "test" )
   }
 
   void testGetMemorySize()

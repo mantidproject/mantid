@@ -78,6 +78,9 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Logs";}
 
+      /// this method returns data periods property and useful for loading log data for multi period files
+	  const boost::shared_ptr<Kernel::Property> getPeriodsProperty() const {return m_periods;}
+
     private:
 
       /// Overwrites Algorithm method.
@@ -113,8 +116,8 @@ namespace Mantid
 
 	 /// create timeseries property from .log file and adds taht to sample object
 	  std::set<std::string> createthreecolumnFileLogProperty(const std::string& logfile,
-		  boost::shared_ptr<API::Sample> sample);
-
+		 API::Sample& sample);
+	 
 	  /// if a file with the second column(block column) name in .log file exists
 	  /// in the raw file directory
 	  bool blockcolumnFileExists(const std::string& fileName);
@@ -122,6 +125,9 @@ namespace Mantid
       bool adsExists();
 	  /// returns the list of log files from ADS checksum
 	  std::set<std::string> getLogfilenamesfromADS();
+
+	  /// TimeSeriesProperty<int> containing data periods. Created by LogParser
+	  boost::shared_ptr<Kernel::Property> m_periods;
     };
 
   } // namespace DataHandling

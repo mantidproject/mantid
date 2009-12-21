@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Objects/Object.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid
 {
@@ -40,6 +41,7 @@ namespace API
 */
 class DLLExport Sample
 {
+	
 public:
   Sample();
   virtual ~Sample();
@@ -68,12 +70,14 @@ public:
 
   void setWidth(double width);
   double getWidth() const;
+  
+///// copy constructor. 
+  Sample(const Sample& copy);
+	///// copy assignment operator. 
+  const Sample& operator=(const Sample& rhs);
 
-private:
-  /// Private copy constructor. NO COPY ALLOWED!
-  Sample(const Sample&);
-  /// Private copy assignment operator. NO COPY ASSIGNMENT ALLOWED!
-  Sample& operator=(const Sample&);
+private: 
+	
 
   /// The name for the sample
   std::string m_name;

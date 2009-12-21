@@ -580,13 +580,13 @@ void LoadISISNexus::loadProtonCharge(DataObjects::Workspace2D_sptr ws)
     openNexusData("proton_charge");
     {
         getNexusData(&m_proton_charge);
-        ws->getSample()->setProtonCharge(m_proton_charge);
+        ws->mutableSample().setProtonCharge(m_proton_charge);
     }
     closeNexusData();
 
     openNexusGroup("sample","NXsample");
     std::string sample_name = getNexusString("name");
-    ws->getSample()->setName(sample_name);
+    ws->mutableSample().setName(sample_name);
     closeNexusGroup();
 }
 
@@ -650,13 +650,13 @@ void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,int period)
                             *(value.get()+(i+1)*vinfo.dims[1]-1) = 0; // ensure the terminating zero
                             logv->addValue(t,std::string(value.get()+i*vinfo.dims[1]));
                         }
-                        ws->getSample()->addLogData(logv);
+                        ws->mutableSample().addLogData(logv);
                         if (std::string(nxname.get()) == "icp_event")
                         {
                             LogParser parser(logv);
-                            ws->getSample()->addLogData(parser.createPeriodLog(period));
-                            ws->getSample()->addLogData(parser.createAllPeriodsLog());
-                            ws->getSample()->addLogData(parser.createRunningLog());
+                            ws->mutableSample().addLogData(parser.createPeriodLog(period));
+                            ws->mutableSample().addLogData(parser.createAllPeriodsLog());
+                            ws->mutableSample().addLogData(parser.createRunningLog());
                         }
                     }
                     else if (vinfo.type == NX_FLOAT32)
@@ -669,7 +669,7 @@ void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,int period)
                             time_t t = start_t + int(times[i]);
                             logv->addValue(t,value[i]);
                         }
-                        ws->getSample()->addLogData(logv);
+                        ws->mutableSample().addLogData(logv);
                     }
                     else if (vinfo.type == NX_INT32)
                     {
@@ -681,7 +681,7 @@ void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,int period)
                             time_t t = start_t + int(times[i]);
                             logv->addValue(t,value[i]);
                         }
-                        ws->getSample()->addLogData(logv);
+                        ws->mutableSample().addLogData(logv);
                     }
                     else
                     {

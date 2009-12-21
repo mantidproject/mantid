@@ -96,6 +96,9 @@ public:
     /// Ctreates a TimeSeriesProperty<bool> with running status
     Kernel::Property* createRunningLog()const;
 
+	/// this method returns data periods property and useful for loading log data for multi period files
+	const boost::shared_ptr<Kernel::Property> getPeriodsProperty() const {return m_periods;}
+
 private:
 
     /// TimeSeriesProperty<int> containing data periods. Created by LogParser

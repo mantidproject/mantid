@@ -54,9 +54,9 @@ namespace Mantid
     *  @param rhs the other workspace sample to be summed
     *  @param ans the sample in the output workspace
     */
-    void Plus::operateOnSample(const boost::shared_ptr<Sample> lhs, const boost::shared_ptr<Sample> rhs, boost::shared_ptr<Sample> ans) const
+    void Plus::operateOnSample(const Sample& lhs, const Sample& rhs, Sample& ans) const
     {
-      ans->setProtonCharge( lhs->getProtonCharge() + rhs->getProtonCharge() );
+      ans.setProtonCharge( lhs.getProtonCharge() + rhs.getProtonCharge() );
     }
 
   }

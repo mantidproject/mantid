@@ -20,14 +20,14 @@ namespace Mantid
       m_orderedProperties()
     {
     }
-
-    /// Virtual destructor
+	/// Virtual destructor
     PropertyManager::~PropertyManager()
     {
-      for ( PropertyMap::iterator it = m_properties.begin(); it != m_properties.end(); ++it )
+      /*for ( PropertyMap::iterator it = m_properties.begin(); it != m_properties.end(); ++it )
       {
         delete it->second;
-      }
+      }*/
+		m_properties.clear();
     }
 
     /** Add a property to the list of managed properties

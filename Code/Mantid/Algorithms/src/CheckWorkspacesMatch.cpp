@@ -63,7 +63,7 @@ void CheckWorkspacesMatch::doComparison()
   if ( static_cast<bool>(getProperty("CheckSpectraMap")) && ! checkSpectraMap(ws1->spectraMap(),ws2->spectraMap()) ) return;
   if ( static_cast<bool>(getProperty("CheckInstrument")) && ! checkInstrument(ws1,ws2) ) return;
   if ( static_cast<bool>(getProperty("CheckMasking")) && ! checkMasking(ws1,ws2) ) return;
-  if ( static_cast<bool>(getProperty("CheckSample")) && ! checkSample( *(ws1->getSample()), *(ws2->getSample()) ) ) return;
+  if ( static_cast<bool>(getProperty("CheckSample")) && ! checkSample( ws1->sample(), ws2->sample() ) ) return;
   
   return;
 }

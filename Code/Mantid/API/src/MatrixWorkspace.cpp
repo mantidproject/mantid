@@ -18,8 +18,8 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
 
 /// Default constructor
 MatrixWorkspace::MatrixWorkspace() : Workspace(), m_axes(), m_isInitialized(false),
-  sptr_instrument(new Instrument), m_spectramap(), sptr_sample(new Sample),
-  m_YUnit("Counts"), m_isDistribution(false), m_parmap(), m_masks()
+  sptr_instrument(new Instrument), m_spectramap(), //sptr_sample(new Sample),
+  m_YUnit("Counts"), m_isDistribution(false), m_parmap(), m_masks(),m_sample()
 {}
 
 /// Destructor
@@ -86,14 +86,12 @@ void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
     }
   }
 }
-
 /** Set the sample
- *
- *  @param sample A shared pointer to the sample
+ *  @param sample constant reference to the sample object
  */
-void MatrixWorkspace::setSample(const boost::shared_ptr<Sample>& sample)
-{
-  sptr_sample = sample;
+void MatrixWorkspace::setSample(const Sample& sample)
+{ 
+  m_sample.access()=sample;
 }
 
 /** Get a const reference to the SpectraDetectorMap associated with this workspace.
@@ -118,6 +116,20 @@ SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
   return m_spectramap.access();
 }
 
+/** Get a constant reference to the Sample associated with this workspace.
+
+*/
+const  Sample& MatrixWorkspace::sample() const
+{
+	return *m_sample;
+}
+/** Get a reference to the Sample associated with this workspace.
+
+*/
+Sample& MatrixWorkspace::mutableSample()
+{
+	return m_sample.access();
+}
 /** Get the effective detector for the given spectrum
  *  @param  index The workspace index for which the detector is required
  *  @return A single detector object representing the detector(s) contributing
@@ -192,15 +204,6 @@ boost::shared_ptr<Instrument> MatrixWorkspace::getBaseInstrument()const
     return sptr_instrument;
 }
 
-/** Get the sample associated with this workspace
- *
- *  @return The sample class
- */
-boost::shared_ptr<Sample> MatrixWorkspace::getSample() const
-{
-  return sptr_sample;
-}
-
 /** Replace the sample with a new one. 
  *  The new sample copies the name and proton charge from the old one.
  *  Used when creating workspaces for multiple period data: each period must have
@@ -208,15 +211,17 @@ boost::shared_ptr<Sample> MatrixWorkspace::getSample() const
  */
 void MatrixWorkspace::newSample() 
 {
-  boost::shared_ptr<Sample> old_sample = sptr_sample;
-  sptr_sample.reset(new Sample);
-  sptr_sample->setProtonCharge(old_sample->getProtonCharge());
-  sptr_sample->setName(old_sample->getName());
-  sptr_sample->setShapeObject(old_sample->getShapeObject());
-  sptr_sample->setGeometryFlag(old_sample->getGeometryFlag());
-  sptr_sample->setThickness(old_sample->getThickness());
-  sptr_sample->setHeight(old_sample->getHeight());
-  sptr_sample->setWidth(old_sample->getWidth());
+ 	Kernel::cow_ptr<Sample> old_sample=m_sample;
+	Kernel::cow_ptr<Sample> newsample;
+	m_sample=newsample;
+	m_sample.access().setProtonCharge(old_sample->getProtonCharge());
+	m_sample.access().setName(old_sample->getName());
+	m_sample.access().setShapeObject(old_sample->getShapeObject());
+	m_sample.access().setGeometryFlag(old_sample->getGeometryFlag());
+	m_sample.access().setThickness(old_sample->getThickness());
+	m_sample.access().setHeight(old_sample->getHeight());
+	m_sample.access().setWidth(old_sample->getWidth());
+	
 }
 
 /** Create new empty instrument parameter map
@@ -394,11 +399,11 @@ void MatrixWorkspace::populateInstrumentParameters()
     // Get instrument and sample
 
     boost::shared_ptr<Instrument> instrument = getBaseInstrument();
-    boost::shared_ptr<Sample> sample = getSample();
+//    boost::shared_ptr<Sample> sample = getSample();
 
     // Get the data in the logfiles associated with the raw data
 
-    const std::vector<Kernel::Property*>& logfileProp = sample->getLogData();
+    const std::vector<Kernel::Property*>& logfileProp = sample().getLogData();
 
 
     // Get pointer to parameter map that we may add parameters to and information about

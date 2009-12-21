@@ -413,7 +413,7 @@ namespace Mantid
         typedef NXDataSetTyped<double> NXDouble;
         /// The char dataset type
         typedef NXDataSetTyped<char> NXChar;
-        
+		        
         //-------------------- classes --------------------------//
 
         /**  The base class for a Nexus class (group). A Nexus class can contain datasets and other Nexus classes.
@@ -492,7 +492,7 @@ namespace Mantid
              *   @param name The name of the dataset
              */
             NXChar openNXChar(const std::string& name)const{return openNXDataSet<char>(name);}
-            /**  Returns a string 
+	         /**  Returns a string 
              *   @param name The name of the NXChar dataset
              */
             std::string getString(const std::string& name)const;
@@ -554,11 +554,12 @@ namespace Mantid
 	      Kernel::Property* parseTimeSeries(const std::string & logName, TYPE times)
 	    {
 	      time_t start_t = Kernel::TimeSeriesProperty<std::string>::createTime_t_FromString(times.attributes("start"));
-	      NXInfo vinfo = getDataSetInfo("value");
+	  	  NXInfo vinfo = getDataSetInfo("value");
 	      if (!vinfo) return NULL;
 	      
 	      if (vinfo.dims[0] != times.dim0()) return NULL;
   
+		  
 	      if (vinfo.type == NX_CHAR)
 	      {
 		Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(logName);
@@ -577,7 +578,20 @@ namespace Mantid
 		return logv;
 	      }
 	      else if (vinfo.type == NX_FLOAT64 )
-	      {
+		  {
+			  if(logName.find("running")!=std::string::npos || logName.find("period ")!=std::string::npos )
+			  {
+			  Kernel::TimeSeriesProperty<bool>* logv = new Kernel::TimeSeriesProperty<bool>(logName);
+			 // NXBool value = openNXBool("value");
+			  NXDouble value = openNXDouble("value");
+			  value.load();
+			  for(int i = 0; i < value.dim0(); i++)
+			  {
+			  time_t t = start_t + int(times[i]);
+			  logv->addValue(t,value[i]);
+			  }
+			  return logv;
+			  }
 		Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
 		NXDouble value = openNXDouble("value");
 		value.load();
@@ -588,7 +602,7 @@ namespace Mantid
 		}
 		return logv;
 	      }
-	      else if (vinfo.type == NX_FLOAT32 )
+		     else if (vinfo.type == NX_FLOAT32 )
 	      {
 		Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
 		NXFloat value = openNXFloat("value");
