@@ -127,7 +127,7 @@ namespace PythonAPI
 	   return_value_policy< copy_non_const_reference >(), MatrixWorkspace_isDistribution_overloads_2())
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
       .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
-      .def("getSampleDetails", &Mantid::API::MatrixWorkspace::getSample)
+      .def("getSampleDetails", &Mantid::API::MatrixWorkspace::sample, return_value_policy< copy_const_reference >() )
       .def("__add__", (binary_fn1)&MatrixWorkspaceProxy::plus)
       .def("__add__", (binary_fn2)&MatrixWorkspaceProxy::plus)
       .def("__radd__",(binary_fn2)&MatrixWorkspaceProxy::rplus)
@@ -199,7 +199,7 @@ namespace PythonAPI
     register_ptr_to_python<boost::shared_ptr<Mantid::API::Sample> >();
 
     //Sample class
-    class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
+    class_< Mantid::API::Sample >("Sample", no_init)
       .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)0, 
 	   return_value_policy< reference_existing_object>(), Sample_getLogData_overloads())
       .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())

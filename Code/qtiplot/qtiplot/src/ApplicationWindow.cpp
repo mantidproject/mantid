@@ -374,11 +374,11 @@ void ApplicationWindow::init(bool factorySettings)
     updateAppFonts();
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
-    //// Scripting
-    //setScriptingLanguage(defaultScriptingLang);
-    //m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
-    //delete m_interpreterDock->widget();
-    //m_interpreterDock->setWidget(m_scriptInterpreter);
+    //Scripting
+    setScriptingLanguage(defaultScriptingLang);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+    delete m_interpreterDock->widget();
+    m_interpreterDock->setWidget(m_scriptInterpreter);
     loadCustomActions();
 
   //Mantid
