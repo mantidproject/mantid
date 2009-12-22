@@ -301,7 +301,7 @@ m_uiForm.leRMMMass->setText("1");
   m_uiForm.lbVanEHigh1->setToolTip("Highest energy to include in the integration");
   m_uiForm.lbVanEHigh2->setToolTip("Highest energy to include in the integration");
   // disables or enable this page depending on the clicked state of the check at the top of the form
-  disenableAbsolute()
+  disenableAbsolute();
 }
 /** Runnings everything, depending on what was entered on to the form
 */
