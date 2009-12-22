@@ -62,7 +62,7 @@ std::string FileProperty::setValue(const std::string & filename)
     Poco::File relative(filename);
     Poco::File check_file(Poco::Path(Poco::Path::current()).resolve(relative.path()));
     valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
-    if( !valid_string.empty() )
+    if( !valid_string.empty() || !check_file.exists() )
     {
       const std::vector<std::string>& search_dirs = ConfigService::Instance().getDataSearchDirs();
       std::vector<std::string>::const_iterator iend = search_dirs.end();

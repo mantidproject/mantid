@@ -100,6 +100,7 @@ void Diagnostics::initLayout()
   m_uiForm.lbWBV1->setToolTip(WBV1ToolTip);
   m_uiForm.leWBV1->setToolTip(WBV1ToolTip);
   m_uiForm.pbWBV1->setToolTip(WBV1ToolTip);
+// make it so that they need either an input mask OR this 
   m_algorPropList["WBVanadium1"] = "LoadRaw.Filename";
 
   m_uiForm.leHighAbs->setText(defHighAbsolute);
@@ -689,7 +690,10 @@ QString Diagnostics::constructScript(
   
   return pythonScript;
 }
-
+/** Read a text file and its contents in a string
+* @param pythonFile the name of the file to read
+* @param scriptText will contain the contents of the file
+*/
 void Diagnostics::readFile(const QString &pythonFile, QString &scriptText) const
 {
   QFile py_script(pythonFile);

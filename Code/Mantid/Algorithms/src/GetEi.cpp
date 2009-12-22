@@ -304,7 +304,7 @@ void GetEi::getPeakEstimates(double &height, int &centreInd, double &background)
   background = background/m_tempWS->readY(0).size();
   if ( height < PEAK_THRESH_H*background )
   {
-    throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background, was the energy estimate close enough?");
+    throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background, was the energy estimate (" + getPropertyValue("EnergyEstimate") + " meV) close enough?");
   }
 
   g_log.debug() << "Peak position is the bin that has the maximum Y value in the monitor spectrum, which is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)" << std::endl;
@@ -338,8 +338,8 @@ double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height, co
   }
 
   if ( std::abs(static_cast<int>(endInd - startInd)) < PEAK_THRESH_W )
-  {// we didn't find a insignificant peak
-    g_log.warning() << "Potential precision problem, one half height distance is less than the threshold number of bins: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << ". Check the monitor peak" << std::endl;
+  {// we didn't find a significant peak
+    g_log.error() << "Likely precision problem or error, one half height distance is less than the threshold number of bins from the central peak: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << ". Check the monitor peak" << std::endl;
   }
   // we have a peak in range, do an area check to see if the peak has any significance
   double hOverN = (height-noise)/noise;

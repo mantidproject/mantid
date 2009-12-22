@@ -40,7 +40,7 @@ GroupDetectors2::~GroupDetectors2() {}
 // progress estimates
 const double GroupDetectors2::CHECKBINS = 0.10;  
 const double GroupDetectors2::OPENINGFILE = 0.03;
-// if CHECKBINS+OPENINGFILE+2*READFILE > 1 then the algorithm might report progress that is greater than 1
+// if CHECKBINS+OPENINGFILE+2*READFILE > 1 then the algorithm might report progress > 100%
 const double GroupDetectors2::READFILE = 0.15;
 
 void GroupDetectors2::init()
@@ -538,7 +538,7 @@ void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, Workspace2D_
 void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<int> &outList)
 {
   if ( line.empty() )
-  {// it is not an error to have an empty line but it would cause problems with an error check a the end
+  {// it is not an error to have an empty line but it would cause problems with an error check a the end of this function
     return;
   }
   Poco::StringTokenizer ranges(line, "-");
