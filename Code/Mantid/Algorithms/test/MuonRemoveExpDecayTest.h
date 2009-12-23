@@ -1,6 +1,9 @@
 #ifndef MUONREMOVEEXPDECAYTEST_H_
 #define MUONREMOVEEXPDECAYTEST_H_
 
+//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadInstrument.h"
@@ -71,5 +74,5 @@ private:
   Mantid::NeXus::LoadMuonNexus loader;
 
 };
-
+#endif /*_WIN64*/
 #endif /*MUONREMOVEEXPDECAYTEST_H_*/

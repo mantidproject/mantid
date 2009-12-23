@@ -1,6 +1,9 @@
 #ifndef LOADMUONNEXUSTEST_H_
 #define LOADMUONNEXUSTEST_H_
 
+//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
+
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
 #include "MantidDataObjects/WorkspaceSingleValue.h" 
@@ -370,5 +373,5 @@ private:
   std::string inputFile2;
   boost::shared_ptr<SpectraDetectorMap> map;
 };
-  
+#endif /*_WIN64*/  
 #endif /*LOADMUONNEXUSTEST_H_*/

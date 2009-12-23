@@ -1,6 +1,9 @@
 #ifndef LOADRSAVENLOADNTEST_H_
 #define LOADRSAVENLOADNTEST_H_
 
+//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
+
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
@@ -244,5 +247,5 @@ private:
   std::string outputSpace;
   std::string outputFile;
 };
-
+#endif /*_WIN64*/
 #endif /*LOADRSAVENLOADNTEST_H_*/

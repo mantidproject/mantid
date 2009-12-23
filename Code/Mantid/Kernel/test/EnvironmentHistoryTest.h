@@ -13,7 +13,7 @@ class EnvironmentHistoryTest : public CxxTest::TestSuite
 {
 public:
 
- void testframeworkVersion()
+ void xtestframeworkVersion()
  {
 	 EnvironmentHistory EH;
 	 TS_ASSERT_EQUALS(EH.frameworkVersion(),MANTID_VERSION);
@@ -29,7 +29,7 @@ void testosName()
 	 TS_ASSERT_EQUALS(EH.osVersion(),ConfigService::Instance().getOSVersion());
  }
   
-  void testPopulate()
+  void xtestPopulate()
   {
     std::string correctOutput = "Framework Version: "+std::string(MANTID_VERSION)+"\n";
     correctOutput = correctOutput + "OS name: " + ConfigService::Instance().getOSName() + "\n";

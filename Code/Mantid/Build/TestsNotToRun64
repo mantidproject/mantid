@@ -1,11 +1,2 @@
-../Algorithms/test/MuonAsymmetryCalcTest.h
-../Algorithms/test/MuonRemoveExpDecayTest.h
-../Algorithms/test/RemoveBinsTest.h
-../Nexus/test/LoadMuonLogTest.h
-../Nexus/test/LoadMuonNexusTest.h
 ../Nexus/test/LoadNexusProcessedRaw.h
-../Nexus/test/LoadNexusTest.h
-../Nexus/test/LoadRSaveNLoadNcspTest.h
-../Nexus/test/SaveNexusProcessedTest.h
-../Nexus/test/SaveNeXusTest.h
 

@@ -1,6 +1,9 @@
 #ifndef SAVENEXUSPROCESSEDTEST_H_
 #define SAVENEXUSPROCESSEDTEST_H_
 
+//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
+
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
@@ -272,5 +275,5 @@ private:
   bool clearfiles;
 
 };
-
+#endif /*_WIN64*/
 #endif /*SAVENEXUSPROCESSEDTEST_H_*/

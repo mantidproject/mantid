@@ -1,6 +1,9 @@
 #ifndef MUONASYMMETRYCALCTEST_H_
 #define MUONASYMMETRYCALCTEST_H_
 
+//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidNexus/LoadMuonNexus.h"
@@ -95,5 +98,5 @@ private:
   Mantid::DataHandling::GroupDetectors group2;
 
 };
-
+#endif /*_WIN64*/
 #endif /*MUONASYMMETRYCALCTEST_H_*/
