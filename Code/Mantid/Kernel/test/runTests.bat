@@ -13,12 +13,12 @@ echo "Generating the source from the test header files..."
 IF "%1" == "" GOTO BUILD_ALL ELSE GOTO BUILD_ONE
 :BUILD_ONE 
 ECHO Building only %1
-python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py  --error-printer -o runner.cpp %1
+python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py  --runner=MantidPrinter -o runner.cpp %1
 GOTO COMPILE
 
 :BUILD_ALL 
 ECHO Building all .h files
-python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --error-printer -o runner.cpp *.h
+python ..\..\..\Third_Party\src\cxxtest\cxxtestgen.py --runner=MantidPrinter -o runner.cpp *.h
 GOTO COMPILE
 
 :COMPILE
@@ -31,25 +31,7 @@ echo "Copying in properties files..."
 copy /Y ..\..\Build\Tests\*properties
 echo "Running the tests..."
 
-SETLOCAL ENABLEEXTENSIONS
-:: Store start time
-FOR /f "tokens=1-4 delims=:.," %%T IN ("%TIME%") DO (
-SET StartTIME=%TIME%
-SET /a Start100S=%%T*360000+%%U*6000+%%V*100+%%W
-)
-
 runner.exe
-
-:: Retrieve Stop time
-FOR /f "tokens=1-4 delims=:.," %%T IN ("%TIME%") DO (
-SET StopTIME=%TIME%
-SET /a Stop100S=%%T*360000+%%U*6000+%%V*100+%%W
-)
-:: Test midnight rollover. If so, add 1 day=8640000 1/100ths secs
-IF %Stop100S% LSS %Start100S% SET /a Stop100S+=8640000
-SET /a TookTime=%Stop100S%-%Start100S%
-
-ECHO Elapsed: %TookTime:~0,-2%.%TookTime:~-2% seconds
 
 REM Remove the generated files to ensure that they're not inadvertently run
 REM   when something in the chain has failed.

@@ -320,7 +320,7 @@ addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','
 
 # ---------------------- Matlab bindings -------------------------
 #addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll','../Mantid/Bin/Shared/MantidMatlabAPI.dll',MantidDlls)
-#Matlab=addCompList('MatlabMFiles','toget/Matlab','Matlab',binDir)
+#Matlab=addCompList('MatlabMFiles','../Mantid/MatlabAPI/mfiles','Matlab',binDir)
 
 #Add mantid_setup file
 #setupfile = open('mantid_setup.m','w')
@@ -330,7 +330,7 @@ addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','
 #setupfile.write('addpath(strcat(mantid,\'Matlab/MantidSimpleAPI\'));\n')
 #setupfile.close()
 
-#ddFileV('Matlabsetup','mtd_set','mantid_setup.m','mantid_setup.m',MantidDlls)
+#addFileV('Matlabsetup','mtd_set','mantid_setup.m','mantid_setup.m',MantidDlls)
 #---------------------------------------------------------------
 
 QTIPlot = addComponent('QTIPlot','{03ABDE5C-9084-4ebd-9CF8-31648BEFDEB7}',binDir)

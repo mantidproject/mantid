@@ -26,36 +26,29 @@ testsToRun = []
 #get list of directories in trunk
 dirList = os.listdir(path)
 
+#Find Cxxtestgen
+cxxtestgen = env.WhereIs('cxxtestgen.py')
+if cxxtestgen == None :
+    cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
+
 for fname in dirList:
   if os.path.isdir(path + fname):
     if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
       #does folder contain /test?
       if os.path.exists(path + fname + testfolder):
-        files = os.listdir(path + fname + testfolder)
-        for file in files:
-          if file.endswith('.h'):
-              testsToRun.append('../' + fname + testfolder + '/' +  file + '\n')	
+        #generate the test cpp file
+        os.popen(cxxtestgen + ' --runner=MantidPrinter -o ' + fname + '.cpp '+ path + fname + testfolder +'/*.h')
+        #If there are not tests then there will be no cpp file created
+        if os.path.exists(fname + ".cpp"):
+          testsToRun.append(fname)
 
-f=open('../TestsToRun', 'w')
-f.writelines(testsToRun)
-f.close()
-
-#BUILD
-cxxtestgen = env.WhereIs('cxxtestgen.py')
-if cxxtestgen == None :
-    cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
-
-f=open('../TestsToRun', 'r')
-
-for test in f:
-  doth = '../' + test.strip() 
+#BUILD the tests
+for test in testsToRun:
   temp= test.split('/')
-  dotcpp = temp[-1].strip().rstrip('.h') + '.cpp'
-  dotpdb = temp[-1].strip().rstrip('.h') + '.pdb'
-  os.popen(cxxtestgen + ' --error-printer -o ' + dotcpp + ' ' + doth)
+  dotcpp = test + '.cpp'
+  dotpdb = test + '.pdb'
   if os.name == 'nt':
 	myenv.Program([dotcpp],LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB=dotpdb)
   else:
 	myenv.Program([dotcpp])
 
-f.close()

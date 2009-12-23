@@ -323,7 +323,7 @@ addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','
 
 # ---------------------- Matlab bindings -------------------------
 addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll','../Mantid/Bin/Shared/MantidMatlabAPI.dll',MantidDlls)
-Matlab=addCompList('MatlabMFiles','toget/Matlab','Matlab',binDir)
+Matlab=addCompList('MatlabMFiles','../Mantid/MatlabAPI/mfiles','Matlab',binDir)
 
 #Add mantid_setup file
 setupfile = open('mantid_setup.m','w')
