@@ -39,6 +39,11 @@ Function::~Function()
     delete *it;
   }
   m_ties.clear();
+  for(std::vector<IConstraint*>::iterator it = m_constraints.begin();it!= m_constraints.end();it++)
+  {
+    delete *it;
+  }
+  m_constraints.clear();
 }
 
 /** Add a constraint

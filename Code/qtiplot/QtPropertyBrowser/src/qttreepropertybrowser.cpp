@@ -98,6 +98,8 @@
 #include <QtGui/QStyle>
 #include <QtGui/QPalette>
 
+#include <iostream>
+
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
@@ -204,8 +206,13 @@ void QtPropertyEditorView::drawRow(QPainter *painter, const QStyleOptionViewItem
         painter->fillRect(option.rect, c);
         opt.palette.setColor(QPalette::AlternateBase, c);
     } else {
-        const QColor c = m_editorPrivate->calculatedBackgroundColor(m_editorPrivate->indexToBrowserItem(index));
+        QColor c = m_editorPrivate->calculatedBackgroundColor(m_editorPrivate->indexToBrowserItem(index));
+        if (index.parent() == QModelIndex())
+        {
+          c = option.palette.color(QPalette::Mid);
+        }
         if (c.isValid()) {
+          
             painter->fillRect(option.rect, c);
             opt.palette.setColor(QPalette::AlternateBase, c.lighter(112));
         }

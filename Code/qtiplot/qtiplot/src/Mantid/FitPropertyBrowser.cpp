@@ -17,6 +17,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QMenu>
+#include <QMessageBox>
 #include <QInputDialog>
 
 /**
@@ -55,13 +56,11 @@ m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true),m_changeSlotsEna
 
     /* Create function group */
 
-  m_functionsGroup = m_groupManager->addProperty("Functions");
-  fitGroup->addSubProperty(m_functionsGroup);
+  QtProperty* functionsGroup = m_groupManager->addProperty("Functions");
 
      /* Create input - output properties */
 
-  m_settingsGroup = m_groupManager->addProperty("Settings");
-  fitGroup->addSubProperty(m_settingsGroup);
+  QtProperty* settingsGroup = m_groupManager->addProperty("Settings");
 
   m_workspace = m_enumManager->addProperty("Workspace");
   m_workspaceIndex = m_intManager->addProperty("Workspace Index");
@@ -69,11 +68,11 @@ m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true),m_changeSlotsEna
   m_endX = m_doubleManager->addProperty("EndX");
   m_output = m_stringManager->addProperty("Output");
 
-  m_settingsGroup->addSubProperty(m_workspace);
-  m_settingsGroup->addSubProperty(m_workspaceIndex);
-  m_settingsGroup->addSubProperty(m_startX);
-  m_settingsGroup->addSubProperty(m_endX);
-  m_settingsGroup->addSubProperty(m_output);
+  settingsGroup->addSubProperty(m_workspace);
+  settingsGroup->addSubProperty(m_workspaceIndex);
+  settingsGroup->addSubProperty(m_startX);
+  settingsGroup->addSubProperty(m_endX);
+  settingsGroup->addSubProperty(m_output);
 
      /* Create editors and assign them to the managers */
 
@@ -90,7 +89,8 @@ m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true),m_changeSlotsEna
   m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
 
-  m_fitGroup = m_browser->addProperty(fitGroup);
+  m_functionsGroup = m_browser->addProperty(functionsGroup);
+  m_settingsGroup = m_browser->addProperty(settingsGroup);
 
   QVBoxLayout* layout = new QVBoxLayout(w);
   QHBoxLayout* buttonsLayout = new QHBoxLayout();
@@ -135,61 +135,193 @@ void FitPropertyBrowser::popupMenu(const QPoint &pos)
 {
   QtBrowserItem * ci = m_browser->currentItem();
   QMenu *menu = new QMenu(m_appWindow);
-  if (ci->property() == m_functionsGroup)
+  QAction *action;
+
+  bool isFunctionsGroup = ci == m_functionsGroup;
+  bool isSettingsGroup = ci == m_settingsGroup;
+  bool isASetting = ci->parent() == m_settingsGroup;
+  bool isFunction = m_functionItems.contains(ci);
+
+  if (isFunctionsGroup)
   {
-    QAction *action = new QAction("Add function",this);
+    action = new QAction("Add function",this);
     connect(action,SIGNAL(triggered()),this,SLOT(addFunction()));
     menu->addAction(action);
     menu->addSeparator();
   }
-  else if (m_functionItems.contains(ci))
+  else if (isFunctionsGroup || isSettingsGroup || isASetting)
   {
-    QAction *action = new QAction("Delete",this);
+    if (isFitEnabled())
+    {
+      action = new QAction("Fit",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(fit()));
+      menu->addAction(action);
+    }
+
+    if (isUndoEnabled())
+    {
+      action = new QAction("Undo Fit",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(undoFit()));
+      menu->addAction(action);
+    }
+
+    action = new QAction("Clear all",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(clear()));
+    menu->addAction(action);
+
+  }
+  else if (isFunction)
+  {
+    action = new QAction("Delete",this);
     connect(action,SIGNAL(triggered()),this,SLOT(deleteFunction()));
     menu->addAction(action);
     menu->addSeparator();
   }
-
-  if (isFitEnabled())
+  else
   {
-    QAction *action = new QAction("Fit",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(fit()));
-    menu->addAction(action);
-  }
 
-  if (isUndoEnabled())
-  {
-    QAction *action = new QAction("Undo Fit",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(undoFit()));
-    menu->addAction(action);
-  }
+    bool isParameter = m_functionItems.contains(ci->parent());
+    bool isTie = !isParameter && ci->property()->propertyName() == "Tie";
+    bool isLowerBound = !isParameter && ci->property()->propertyName() == "Lower Bound";
+    bool isUpperBound = !isParameter && ci->property()->propertyName() == "Upper Bound";
+    bool isType = isParameter && ci->property()->propertyName() == "Type";
+    if (isType)
+    {
+      isParameter = false;
+    }
 
-  QAction *action = new QAction("Clear all",this);
-  connect(action,SIGNAL(triggered()),this,SLOT(clear()));
-  menu->addAction(action);
+    if (isTie)
+    {
+      //menu->addSeparator();
+      action = new QAction("Remove",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
+      menu->addAction(action);
+    }
+    else if (isLowerBound)
+    {
+      action = new QAction("Remove",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(removeLowerBound()));
+      menu->addAction(action);
+    }
+    else if (isUpperBound)
+    {
+      action = new QAction("Remove",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(removeUpperBound()));
+      menu->addAction(action);
+    }
+    else if (count() > 0 && isParameter)
+    {
+      bool noTies =  !hasTie(ci->property());
+      bool hasLower = false;
+      bool hasUpper = false;
 
-  if (ci->property()->propertyName() == "Tie")
-  {
-    menu->addSeparator();
-    action = new QAction("Delete",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
-    menu->addAction(action);
-  }
-  else if (count() > 0 && !hasTie(ci->property()))
-  {
-    menu->addSeparator();
-    action = new QAction("Add tie",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(addTie()));
-    menu->addAction(action);
-  }
-  else if (hasTie(ci->property()))
-  {
-    menu->addSeparator();
-    action = new QAction("Delete tie",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
-    menu->addAction(action);
-  }
+      QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator c = m_constraints.find(ci->property());
+      if (c != m_constraints.end())
+      {
+        hasLower = c.value().first != 0;
+        hasUpper = c.value().second != 0;
+      }
+      bool hasBounds = hasLower || hasUpper;
 
+      if (noTies && !hasBounds)
+      {
+        action = new QAction("Fix",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addFixTie()));
+        menu->addAction(action);
+      }
+
+      if (noTies && (!hasLower || !hasUpper))
+      {
+        QMenu *constraintMenu = menu->addMenu("Constraint");
+
+        if (!hasLower)
+        {
+          QMenu* detailMenu = constraintMenu->addMenu("Lower Bound");
+
+          action = new QAction("10%",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound10()));
+          detailMenu->addAction(action);
+
+          action = new QAction("50%",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound50()));
+          detailMenu->addAction(action);
+
+          action = new QAction("Custom",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound()));
+          detailMenu->addAction(action);
+        }
+
+        if (!hasUpper)
+        {
+          QMenu* detailMenu = constraintMenu->addMenu("Upper Bound");
+
+          action = new QAction("10%",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound10()));
+          detailMenu->addAction(action);
+
+          action = new QAction("50%",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound50()));
+          detailMenu->addAction(action);
+
+          action = new QAction("Custom",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound()));
+          detailMenu->addAction(action);
+        }
+
+        if (!hasLower && !hasUpper)
+        {
+          QMenu* detailMenu = constraintMenu->addMenu("Both Bound");
+
+          action = new QAction("10%",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds10()));
+          detailMenu->addAction(action);
+
+          action = new QAction("50%",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds50()));
+          detailMenu->addAction(action);
+
+          action = new QAction("Custom",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds()));
+          detailMenu->addAction(action);
+        }
+      }
+
+      if (hasBounds)
+      {
+        action = new QAction("Remove constraints",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(removeBounds()));
+        menu->addAction(action);
+      }
+
+      if (noTies && !hasBounds)
+      {
+        if (count() == 1)
+        {
+          action = new QAction("Tie",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addTie()));
+          menu->addAction(action);
+        }
+        else
+        {
+          QMenu* detail = menu->addMenu("Tie");
+
+          action = new QAction("To function",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addTieToFunction()));
+          detail->addAction(action);
+
+          action = new QAction("Custom Tie",this);
+          connect(action,SIGNAL(triggered()),this,SLOT(addTie()));
+          detail->addAction(action);
+        }
+      }
+      else if (!noTies)
+      {
+        action = new QAction("Remove tie",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
+        menu->addAction(action);
+      }
+    }
+  }
 
   menu->popup(QCursor::pos());
 }
@@ -224,7 +356,7 @@ void FitPropertyBrowser::addFunction(const std::string& fnName)
 
   // Add a group property named after the function: f<index>-<type>, where <type> is the function's class name
   QtProperty* fnProp = m_groupManager->addProperty(functionName(index()));
-  m_functionsGroup->addSubProperty(fnProp);
+  m_functionsGroup->property()->addSubProperty(fnProp);
 
   QtProperty* typeProp = m_enumManager->addProperty("Type");
   fnProp->addSubProperty(typeProp);
@@ -240,8 +372,7 @@ void FitPropertyBrowser::addFunction(const std::string& fnName)
     m_doubleManager->setValue(parProp,f->parameter(i));
   }
 
-  QtBrowserItem* fnGroupItem = findItem(m_fitGroup,m_functionsGroup);
-  QtBrowserItem* fnItem = findItem(fnGroupItem,fnProp);
+  QtBrowserItem* fnItem = findItem(m_functionsGroup,fnProp);
   m_browser->setExpanded(fnItem,false);
   m_functionItems.append(fnItem);
   selectFunction(index());
@@ -756,6 +887,46 @@ void FitPropertyBrowser::fit()
       }
     }
     alg->setPropertyValue("Ties",tiesStr.toStdString());
+
+    QString constraintsStr;
+    for(int i=0;i<m_functionItems.size();i++)
+    {
+      QList<QtProperty*> parProps = m_functionItems[i]->property()->subProperties();
+      for(int j=1;j<parProps.size();j++)
+      {
+        QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator it = m_constraints.find(parProps[j]);
+        if (it != m_constraints.end())
+        {
+          QString lowerStr;
+          QString upperStr;
+          QList<QtProperty*> subs = parProps[j]->subProperties();
+          for(int k = 0;k != subs.size(); k++)
+          {
+            QtProperty* sub = subs[k];
+            if (sub->propertyName() == "Lower Bound")
+            {
+              lowerStr = QString::number(m_doubleManager->value(sub));
+            }
+            else if (sub->propertyName() == "Upper Bound")
+            {
+              upperStr = QString::number(m_doubleManager->value(sub));
+            }
+          }
+          if (!lowerStr.isEmpty() || !upperStr.isEmpty())
+          {
+            if (m_functionItems.size() > 1)
+            {
+              constraintsStr += "f" + QString::number(i) + ".";
+            }
+            constraintsStr += parProps[j]->propertyName() + "=" + lowerStr + ":" + upperStr + ",";
+          }
+        }
+      }
+
+      alg->setPropertyValue("Constraints",constraintsStr.toStdString());
+
+    }
+
     observeFinish(alg);
     alg->executeAsync();
   }
@@ -946,7 +1117,7 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
   {
     ok = true;
   }
-  else if (current == m_fitGroup || current->parent() == m_fitGroup || current->parent()->property() == m_settingsGroup)
+  else if (current == m_functionsGroup || current == m_settingsGroup || current->parent() == m_settingsGroup)
   {
   }
   else
@@ -1020,7 +1191,7 @@ void FitPropertyBrowser::clear()
       fnProp->removeSubProperty(subs[j]);
       delete subs[j]; // ?
     }
-    m_functionsGroup->removeSubProperty(fnProp);
+    m_functionsGroup->property()->removeSubProperty(fnProp);
     delete fnProp; // ?
   }
   m_functionItems.clear();
@@ -1147,6 +1318,7 @@ void FitPropertyBrowser::addTie(int i,QtProperty* parProp,const QString& tieExpr
   double value = m_doubleManager->value(parProp);
   tie.set(tieExpr);
   parProp->addSubProperty(tieProp);
+  m_stringManager->setValue(tieProp,tie.exprRHS());
   //m_browser->setBackgroundColor(findItem(m_functionItems[i],parProp),QColor(Qt::yellow));
 }
 
@@ -1173,6 +1345,65 @@ void FitPropertyBrowser::addTie()
     {
       addTie(tieStr);
     }
+  }
+}
+
+/** 
+ * Slot. Ties a parameter to a parameter with the same name of a different function
+ */
+void FitPropertyBrowser::addTieToFunction()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  std::string parName = ci->property()->propertyName().toStdString();
+  bool ok;
+  QStringList fnNames;
+  for(int i=0;i<count();i++)
+  {
+    if (i == index()) continue;
+    Mantid::API::IFunction* fun = m_compositeFunction->getFunction(i);
+    for(int j=0;j<fun->nParams();j++)
+    {
+      if (fun->parameterName(j) == parName)
+      {
+        fnNames << m_functionItems[i]->property()->propertyName();
+      }
+    }
+  }
+  if (fnNames.empty())
+  {
+    QMessageBox::information(m_appWindow,"Mantid - information","Cannot tie this parameter to any function");
+    return;
+  }
+
+  QString fnName = 
+    QInputDialog::getItem(this, "MantidPlot - Fit", "Select function", fnNames,0,false,&ok);
+
+  if (!ok) return;
+
+  for(int i=0;i<count();i++)
+  {
+    if (m_functionItems[i]->property()->propertyName() == fnName)
+    {
+      QString expr = "f"+QString::number(index())+"."+QString::fromStdString(parName)
+        +"=f"+QString::number(i)+"."+QString::fromStdString(parName);
+      addTie(index(),ci->property(),expr);
+    }
+  }
+}
+
+/** 
+ * Slot. Adds a tie. Full expression to be entered <name>=<formula>
+ */
+void FitPropertyBrowser::addFixTie()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  int i = m_functionItems.indexOf(ci->parent());
+  if (i >= 0 && ci->property()->propertyName() != "Type")
+  {
+    QtProperty* parProp = ci->property();
+    double value = m_doubleManager->value(parProp);
+    addTie("f"+QString::number(i)+"."+parProp->propertyName()+"="+QString::number(value));
+    parProp->setEnabled(false);
   }
 }
 
@@ -1208,6 +1439,7 @@ void FitPropertyBrowser::deleteTie()
       break;
     }
   }
+  parProp->setEnabled(true);
 }
 
 /** Check ties' validity. Removes invalid ties.
@@ -1297,3 +1529,186 @@ void FitPropertyBrowser::setTip(const QString& txt)
 {
   m_tip->setText(txt);
 }
+
+/**
+ * Slot. Adds lower bound to the selected parameter property
+ * and sets it f % below parameter's current value
+ */
+void FitPropertyBrowser::addLowerBound(int f)
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  QtProperty* parProp = ci->property();
+  std::pair<QtProperty*,QtProperty*>& c = m_constraints[parProp];
+  QtProperty* lower = c.first;
+  if (lower != NULL) return;
+  lower = m_doubleManager->addProperty("Lower Bound");
+  parProp->addSubProperty(lower);
+  c.first = lower;
+  double value = m_doubleManager->value(parProp)*(1.-0.01*f);
+  m_doubleManager->setValue(lower,value);
+}
+
+/**
+ * Slot. Adds lower bound to the selected parameter property
+ */
+void FitPropertyBrowser::addLowerBound()
+{
+  addLowerBound(0);
+}
+
+/**
+ * Slot. Adds lower bound to the selected parameter property
+ */
+void FitPropertyBrowser::addLowerBound10()
+{
+  addLowerBound(10);
+}
+
+/**
+ * Slot. Adds lower bound to the selected parameter property
+ */
+void FitPropertyBrowser::addLowerBound50()
+{
+  addLowerBound(50);
+}
+
+/**
+ * Slot.Adds upper bound to the selected parameter property
+ */
+void FitPropertyBrowser::addUpperBound(int f)
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  QtProperty* parProp = ci->property();
+  std::pair<QtProperty*,QtProperty*>& c = m_constraints[parProp];
+  QtProperty* upper = c.second;
+  if (upper != NULL) return;
+  upper = m_doubleManager->addProperty("Upper Bound");
+  parProp->addSubProperty(upper);
+  c.second = upper;
+  double value = m_doubleManager->value(parProp)*(1.+0.01*f);
+  m_doubleManager->setValue(upper,value);
+}
+
+/**
+ * Slot.Adds upper bound to the selected parameter property
+ */
+void FitPropertyBrowser::addUpperBound10()
+{
+  addUpperBound(10);
+}
+
+/**
+ * Slot.Adds upper bound to the selected parameter property
+ */
+void FitPropertyBrowser::addUpperBound50()
+{
+  addUpperBound(50);
+}
+
+/**
+ * Slot.Adds upper bound to the selected parameter property
+ */
+void FitPropertyBrowser::addUpperBound()
+{
+  addUpperBound(0);
+}
+
+/**
+ * Slot.Sets the lower and upper bounds of the selected parameter to 10% of its value
+ */
+void FitPropertyBrowser::addBothBounds10()
+{
+  addLowerBound10();
+  addUpperBound10();
+}
+
+/**
+ * Slot.Sets the lower and upper bounds of the selected parameter to 50% of its value
+ */
+void FitPropertyBrowser::addBothBounds50()
+{
+  addLowerBound50();
+  addUpperBound50();
+}
+
+/**
+ * Slot.Adds lower and upper bounds to the selected parameter property
+ */
+void FitPropertyBrowser::addBothBounds()
+{
+  addLowerBound();
+  addUpperBound();
+}
+
+/**
+ * Slot.Removes lower bound from the selected parameter property
+ */
+void FitPropertyBrowser::removeLowerBound()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  QtProperty* parProp = ci->parent()->property();
+  QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator c = m_constraints.find(parProp);
+  if (c != m_constraints.end())
+  {
+    if (c.value().first)
+    {
+      parProp->removeSubProperty(c.value().first);
+    }
+    if (c.value().second)
+    {
+      c.value().first = 0;
+    }
+    else
+    {
+      m_constraints.erase(c);
+    }
+  }
+}
+
+/**
+ * Slot.Removes upper bound from the selected parameter property
+ */
+void FitPropertyBrowser::removeUpperBound()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  QtProperty* parProp = ci->parent()->property();
+  QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator c = m_constraints.find(parProp);
+  if (c != m_constraints.end())
+  {
+    if (c.value().second)
+    {
+      parProp->removeSubProperty(c.value().second);
+    }
+    if (c.value().first)
+    {
+      c.value().second = 0;
+    }
+    else
+    {
+      m_constraints.erase(c);
+    }
+  }
+}
+
+/**
+ * Slot.Removes lower and upper bounds from the selected parameter property
+ */
+void FitPropertyBrowser::removeBounds()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  QtProperty* parProp = ci->property();
+  QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator c = m_constraints.find(parProp);
+  if (c != m_constraints.end())
+  {
+    if (c.value().first)
+    {
+      parProp->removeSubProperty(c.value().first);
+    }
+    if (c.value().second)
+    {
+      parProp->removeSubProperty(c.value().second);
+    }
+    m_constraints.erase(c);
+  }
+}
+

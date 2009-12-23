@@ -177,7 +177,23 @@ private slots:
   void workspace_removed(const QString &);
   void currentItemChanged(QtBrowserItem*);
   void addTie();
+  void addTieToFunction();
+  void addFixTie();
   void deleteTie();
+  void addLowerBound10();
+  void addLowerBound50();
+  void addLowerBound();
+  void addLowerBound(int f);
+  void addUpperBound10();
+  void addUpperBound50();
+  void addUpperBound();
+  void addUpperBound(int f);
+  void addBothBounds10();
+  void addBothBounds50();
+  void addBothBounds();
+  void removeLowerBound();
+  void removeUpperBound();
+  void removeBounds();
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -232,11 +248,11 @@ private:
   mutable int m_index;
 
   /// The top level group
-  QtBrowserItem* m_fitGroup;
+  //QtBrowserItem* m_fitGroup;
   /// Group for functions
-  QtProperty* m_functionsGroup;
+  QtBrowserItem* m_functionsGroup;
   /// Group for input/output settings
-  QtProperty* m_settingsGroup;
+  QtBrowserItem* m_settingsGroup;
   /// Browser items for functions
   QList<QtBrowserItem*> m_functionItems;
 
@@ -277,6 +293,9 @@ private:
 
   /// Ties
   QList<FitParameterTie> m_ties;
+
+  /// Constraints <parameter property, <lower bound property, upper bound property> >
+  QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> > m_constraints;
 
   ApplicationWindow* m_appWindow;
 

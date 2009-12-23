@@ -11,6 +11,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -212,6 +213,7 @@ namespace CurveFitting
 
     declareProperty("Function","","Parameters defining the fitting function and its initial values" );
     declareProperty("Ties","","Math expressions that tie parameters to other parameters or to constants" );
+    declareProperty("Constraints","","List of constraints" );
 
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
@@ -707,10 +709,12 @@ namespace CurveFitting
       setFunction(function);
     }
 
+    // Loop over functions. 
     for (tokenizer::Iterator ifun = functions.begin(); ifun != functions.end(); ++ifun)
     {
       tokenizer params(*ifun, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
       std::map<std::string,std::string> param;
+      // Loop over function parameters to fill in param map: param[<name>]=<init_value>
       for (tokenizer::Iterator par = params.begin(); par != params.end(); ++par)
       {
         tokenizer name_value(*par, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
@@ -722,6 +726,7 @@ namespace CurveFitting
         }
       }
 
+      // param["name"] gives the name(type) of the function
       std::string functionName = param["name"];
       if (functionName.empty())
         throw std::runtime_error("Function is not defined");
@@ -733,13 +738,39 @@ namespace CurveFitting
       else
         setFunction(fun);
 
+      // Loop over param to set the initial values and constraints
       std::map<std::string,std::string>::const_iterator par = param.begin();
       for(;par!=param.end();++par)
       {
-        if (par->first != "name")
+        const std::string& parName(par->first);
+        if (parName != "name")
         {
-          //fun->getParameter(par->first) = boost::lexical_cast<double>(par->second);
-          fun->getParameter(par->first) = atof(par->second.c_str());
+          // The init value part may contain a constraint setting string in brackets 
+          std::string parValue = par->second;
+          size_t i = parValue.find_first_of('(');
+          if (i != std::string::npos)
+          {
+            size_t j = parValue.find_last_of(')');
+            if (j != std::string::npos && j > i+1)
+            {
+              tokenizer constraint(parValue.substr(i+1,j-i-1), ":", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+              if (constraint.count()>0)
+              {
+                BoundaryConstraint* con = new BoundaryConstraint(parName);
+                if (constraint.count() >= 1)
+                {
+                  con->setLower(atof(constraint[0].c_str()));
+                }
+                if (constraint.count() > 1)
+                {
+                  con->setUpper(atof(constraint[1].c_str()));
+                }
+                fun->addConstraint(con);
+              }
+            }
+            parValue.erase(i);
+          }
+          fun->getParameter(parName) = atof(parValue.c_str());
         }
       }
     }
@@ -751,15 +782,74 @@ namespace CurveFitting
     // in the CompositeFunction and a period '.' which is followed by the parameter name. e.g.
     // "f2.A = 2*f1.B + f5.C, f1.A=10"
     std::string inputTies = getProperty("Ties");
-    if (inputTies.empty()) return;
-
-    tokenizer ties(inputTies, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-    for (tokenizer::Iterator tie = ties.begin(); tie != ties.end(); ++tie)
+    if (!inputTies.empty())
     {
-      tokenizer name_value(*tie, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-      if (name_value.count() > 1)
+      tokenizer ties(inputTies, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+      for (tokenizer::Iterator tie = ties.begin(); tie != ties.end(); ++tie)
       {
-        m_function->tie(name_value[0],name_value[1]);
+        tokenizer name_value(*tie, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+        if (name_value.count() > 1)
+        {
+          m_function->tie(name_value[0],name_value[1]);
+        }
+      }
+    }
+
+    std::string inputConstraints = getProperty("Constraints");
+    if (!inputConstraints.empty())
+    {
+      tokenizer cons(inputConstraints, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+      for (tokenizer::Iterator con = cons.begin(); con != cons.end(); ++con)
+      {
+        tokenizer name_value(*con, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+        if (name_value.count() > 1)
+        {
+          std::string conValue = name_value[1];
+          // constraint value may be wrapped in brackets
+          size_t i = conValue.find_first_of('(');
+          if (i != std::string::npos)
+          {
+            size_t j = conValue.find_last_of(')');
+            if (j != std::string::npos)
+            {
+              conValue = conValue.substr(i+1,j-i-1);
+            }
+            else
+            {
+              conValue.erase(i,1);
+            }
+          }
+          
+          tokenizer constraint(conValue, ":", tokenizer::TOK_TRIM);
+          if (constraint.count()>0)
+          {
+            std::string parName = name_value[0];
+            BoundaryConstraint* con = 0;
+            API::CompositeFunction* cf = dynamic_cast<API::CompositeFunction*>(m_function);
+            if (cf)
+            {
+              int iPar = cf->parameterIndex(parName);
+              int iFun = cf->functionIndex(iPar);
+              parName = cf->parameterLocalName(iPar);
+              con = new BoundaryConstraint(parName);
+              cf->getFunction(iFun)->addConstraint(con);
+            }
+            else
+            {
+              con = new BoundaryConstraint(parName);
+              m_function->addConstraint(con);
+            }
+
+            if (constraint.count() >= 1 && !constraint[0].empty())
+            {
+              con->setLower(atof(constraint[0].c_str()));
+            }
+            if (constraint.count() > 1 && !constraint[1].empty())
+            {
+              con->setUpper(atof(constraint[1].c_str()));
+            }
+          }
+        }
       }
     }
 
