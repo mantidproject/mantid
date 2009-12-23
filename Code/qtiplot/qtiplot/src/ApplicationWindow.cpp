@@ -12425,7 +12425,7 @@ void ApplicationWindow::translateActionsStrings()
 	actionOpen->setToolTip(tr("Open project"));*/
 
 	actionOpenProj->setMenuText(tr("&Project"));
-	actionOpenProj->setShortcut(tr("Ctrl+Shift+L"));
+	actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
 	actionOpenProj->setToolTip(tr("Load Mantid project"));
 
 	actionOpenRaw->setMenuText(tr("&Raw"));
