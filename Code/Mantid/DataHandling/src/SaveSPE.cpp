@@ -2,7 +2,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidDataHandling/SaveSPE.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cstdio>
 
@@ -14,6 +14,9 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveSPE)
 
+using namespace Kernel;
+const char SaveSPE::NUM_FORM[] = "%10.3E";
+const char SaveSPE::NUMS_FORM[] = "%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E\n";
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -27,11 +30,10 @@ void SaveSPE::init()
   wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));
   wsValidator->add(new API::CommonBinsValidator<>);
   wsValidator->add(new API::HistogramValidator<>);
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,wsValidator),
+  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsValidator),
       "The input workspace, which must be in Energy Transfer");
-
-  declareProperty("Filename", "", new Mantid::Kernel::FileValidator(std::vector<std::string>(), false),
-      "The filename to use for the saved data", Kernel::Direction::Input);
+  declareProperty(new FileProperty("Filename","", FileProperty::Save),
+    "The filename to use for the saved data");
 }
 
 /**
@@ -73,7 +75,7 @@ void SaveSPE::exec()
   for (int i = 0; i < phiPoints; i++)
   {
     const double value = i + 0.5;
-    fprintf(outSPE_File,"%11.3e",value);
+    fprintf(outSPE_File,NUM_FORM,value);
     if ( (i > 0) && ((i + 1) % 8 == 0) )
     {
       fprintf(outSPE_File,"\n");
@@ -91,15 +93,16 @@ void SaveSPE::exec()
   const int energyPoints = nBins + 1; // Validator enforces binned data
   int i = 7;
   for (; i < energyPoints; i+=8)
-  {
-    fprintf(outSPE_File,"%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e\n",
-                        X[i-7],X[i-6],X[i-5],X[i-4],X[i-3],X[i-2],X[i-1],X[i]);
+  {// output a whole line of numbers at once
+    fprintf(outSPE_File,NUMS_FORM,
+            X[i-7],X[i-6],X[i-5],X[i-4],X[i-3],X[i-2],X[i-1],X[i]);
   }
-  if ( i != energyPoints )
-  {
+  // if the last line is not a full line enter them individually
+  if ( i != energyPoints-1 )
+  {// the condition above means that the last line has fewer characters than the usual
     for (i-=7; i < energyPoints; ++i)
     {
-      fprintf(outSPE_File,"%11.3e",X[i]);
+      fprintf(outSPE_File,NUM_FORM,X[i]);
     }
     fprintf(outSPE_File,"\n");
   }
@@ -115,30 +118,30 @@ void SaveSPE::exec()
 
     fprintf(outSPE_File,"### S(Phi,w)\n");
     for (int j = 7; j < nBins; j+=8)
-    {
-      fprintf(outSPE_File,"%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e\n",
+    {// output a whole line of numbers at once
+      fprintf(outSPE_File,NUMS_FORM,
                           Y[j-7],Y[j-6],Y[j-5],Y[j-4],Y[j-3],Y[j-2],Y[j-1],Y[j]);
     }
     if ( remainder )
     {
       for ( int l = nBins - remainder; l < nBins; ++l)
       {
-        fprintf(outSPE_File,"%11.3e",Y[l]);
+        fprintf(outSPE_File,NUM_FORM,Y[l]);
       }
       fprintf(outSPE_File,"\n");
     }
 
     fprintf(outSPE_File,"### Errors\n");
     for ( int k = 7; k < nBins; k+=8)
-    {
-      fprintf(outSPE_File,"%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e%11.3e\n",
+    {// output a whole line of numbers at once
+      fprintf(outSPE_File,NUMS_FORM,
                           E[k-7],E[k-6],E[k-5],E[k-4],E[k-3],E[k-2],E[k-1],E[k]);
     }
     if ( remainder )
     {
       for ( int l = nBins - remainder; l < nBins; ++l)
       {
-        fprintf(outSPE_File,"%11.3e",E[l]);
+        fprintf(outSPE_File,NUM_FORM,E[l]);
       }
       fprintf(outSPE_File,"\n");
     }

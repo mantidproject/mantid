@@ -34,6 +34,11 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
     WSAStartup(MAKEWORD(2,2), &wsaData);
 #endif
 
+#ifdef _MSC_VER
+  // This causes the exponent to consist of two digits (Windows Visual Studio normally 3, Linux default 2), where two digits are not sufficient I presume it uses more
+  _set_output_format(_TWO_DIGIT_EXPONENT);
+#endif
+
   std::string pluginDir = Kernel::ConfigService::Instance().getString("plugins.directory");
   if (pluginDir.length() > 0)
   {
