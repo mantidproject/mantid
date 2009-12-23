@@ -144,7 +144,7 @@ void MantidCurve::draw(QPainter *p,
     const int dx2 = 2*dx;
     int x1 = xMap.p1();
     int x2 = xMap.p2();
-    for (int i = 0; i < dataSize(); i++)
+    for (int i = 0; i < d->esize(); i++)
     {
       const int xi = xMap.transform(d->ex(i));
       if (xi > x1 && xi < x2 && abs(xi - xi0) > dx2)
@@ -312,7 +312,12 @@ MantidQwtData::~MantidQwtData()
  */
 size_t MantidQwtDataSpectra::size() const
 {
-  return m_Y.size();
+  if (m_binCentres || !m_isHistogram)
+  {
+    return m_Y.size();
+  }
+
+  return m_X.size();
 }
 
 /**
@@ -332,7 +337,7 @@ Return the y value of data point i
 */
 double MantidQwtDataSpectra::y(size_t i) const
 {
-  return m_Y[i];
+  return i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size()-1];
 }
 
 double MantidQwtDataSpectra::ex(size_t i) const
@@ -343,5 +348,10 @@ double MantidQwtDataSpectra::ex(size_t i) const
 double MantidQwtDataSpectra::e(size_t i) const
 {
   return m_E[i];
+}
+
+int MantidQwtDataSpectra::esize() const
+{
+  return m_E.size();
 }
 

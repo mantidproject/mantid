@@ -157,6 +157,8 @@ public:
   virtual double e(size_t i)const = 0;
   /// Returns the x position of the error bar for the i-th data point (bin)
   virtual double ex(size_t i)const = 0;
+  /// Number of error bars to plot
+  virtual int esize()const = 0;
 protected:
   /// Pointer to the Mantid workspace
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
@@ -201,6 +203,10 @@ public:
   double e(size_t i)const;
   /// Returns the x position of the error bar for the i-th data point (bin)
   double ex(size_t i)const;
+  /// Number of error bars to plot
+  int esize()const;
+
+  bool isHistogram()const{return m_isHistogram;}
 
 private:
 
