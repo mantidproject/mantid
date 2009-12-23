@@ -30,7 +30,7 @@ namespace Mantid
 		m_properties.clear();
     }
 
-    /** Add a property to the list of managed properties
+	 /** Add a property to the list of managed properties
     *  @param p The property object to add
     *  @param doc A description of the property that may be displayed to users
     *  @throw Exception::ExistsError if a property with the given name already exists
@@ -243,6 +243,22 @@ namespace Mantid
     {
       return TypedValue(*this, name);
     }
+
+	/** Removes teh property from properties map.
+    *  @param name  name of the property to be removed.
+    */
+	 void PropertyManager::removeProperty(const std::string &name)
+	 {
+		 if(existsProperty(name))
+		 {		 //remove it
+			 Property* prop=getPointerToProperty(name);
+			 m_properties.erase(name);
+			 std::vector<Property*>::iterator itr;
+			 itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);
+			 m_orderedProperties.erase(itr);
+
+		 }
+	 }
 
   } // namespace Kernel
 } // namespace Mantid

@@ -223,16 +223,6 @@ void MatrixWorkspace::newSample()
 	m_sample.access().setWidth(old_sample->getWidth());
 	
 }
-
-/** Create new empty instrument parameter map
- *  Used when creating workspaces for multiple period data: each period must have
- *  instrumet parameters of its own.
- */
-//void MatrixWorkspace::newInstrumentParameters() 
-//{
-//    sptr_parmap.reset(new Geometry::ParameterMap);
-//}
-
 /**  Returns a new copy of the instrument parameters
  */
 Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const

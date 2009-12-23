@@ -174,7 +174,6 @@ void LoadRaw3::exec()
 
   int histTotal = total_specs * m_numberOfPeriods;
   int histCurrent = -1;
-  std::vector<Kernel::Property*> period1logProp;
  
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -244,13 +243,13 @@ void LoadRaw3::exec()
     {
       localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
-      localWorkspace->newSample();
+      //localWorkspace->newSample();
 
       if (bseparateMonitors && monitorwsSpecs > 0)
       {
         monitorWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create(monitorWorkspace));
-        monitorWorkspace->newSample();
+        //monitorWorkspace->newSample();
       }
       //localWorkspace->newInstrumentParameters(); ????
     }
@@ -323,8 +322,7 @@ void LoadRaw3::exec()
       if (bLoadlogFiles)
 	  {
         runLoadLog(localWorkspace);
-		period1logProp=localWorkspace->sample().getLogData();
-		Property* log=createPeriodLog(period+1);
+ 	    Property* log=createPeriodLog(period+1);
 		if(log)localWorkspace->mutableSample().addLogData(log);
 	  }
 
@@ -342,25 +340,22 @@ void LoadRaw3::exec()
       }
       // Set the total proton charge for this run
       // (not sure how this works for multi_period files)
-//      localWorkspace->getSample()->setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
 	  localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
     }
     else // We are working on a higher period of a multiperiod raw file
     {
       if (bLoadlogFiles)
       {
-     	  std::vector<Kernel::Property*>::const_iterator itr;
-		  for(itr=period1logProp.begin();itr!=period1logProp.end();++itr)
-		  {
-			  localWorkspace->mutableSample().addLogData(*itr);
-		  }
+		  //remove previous period data
+     	   std::stringstream suffix;
+		   suffix << (period);
+		   std::string prevPeriod="PERIOD "+suffix.str();
+		  localWorkspace->mutableSample().removeLogData(prevPeriod);
+		  //add current period data
 		  Property* log=createPeriodLog(period+1);
 		  if(log)localWorkspace->mutableSample().addLogData(log);
-
           if(monitorWorkspace)monitorWorkspace->setSample(localWorkspace->sample());
-		 
-		 
-      }
+	  }
     }
 
     // check if values stored in logfiles should be used to define parameters of the instrument
@@ -395,6 +390,7 @@ void LoadRaw3::exec()
   isisRaw.reset();
   fclose(file);
 }
+
 /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
  *  @param period The data period
  */

@@ -191,6 +191,10 @@ double Sample::getWidth() const
 {
   return m_width;
 }
+void Sample::removeLogData(const std::string &name)
+ {
+	 m_manager.removeProperty(name);
+ }
 
 } // namespace API
 } // namespace Mantid

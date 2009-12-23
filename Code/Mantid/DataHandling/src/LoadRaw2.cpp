@@ -201,7 +201,6 @@ namespace Mantid
         {
             localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                 (WorkspaceFactory::Instance().create(localWorkspace));
-            localWorkspace->newSample();
             //localWorkspace->newInstrumentParameters(); ????
         }
 
@@ -245,7 +244,6 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
-		  period1logProp=localWorkspace->sample().getLogData();
 		  Property* log=createPeriodLog(period+1);
 		  if(log)localWorkspace->mutableSample().addLogData(log);
           // Set the total proton charge for this run
@@ -263,13 +261,13 @@ namespace Mantid
           std::string WSName = localWSName + "_" + suffix.str();
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
           g_log.information() << "Workspace " << WSName << " created. \n";
-          //runLoadLog(localWorkspace,period+1);
-		
-		  std::vector<Kernel::Property*>::const_iterator itr;
-		  for(itr=period1logProp.begin();itr!=period1logProp.end();++itr)
-		  {
-			  localWorkspace->mutableSample().addLogData(*itr);
-		  }
+         		 
+		   //remove previous period data
+		   std::stringstream index;
+		   index << (period);
+		   std::string prevPeriod="PERIOD "+index.str();
+		  localWorkspace->mutableSample().removeLogData(prevPeriod);
+		  //add current period data
 		  Property* log=createPeriodLog(period+1);
 		  if(log)localWorkspace->mutableSample().addLogData(log);
         }

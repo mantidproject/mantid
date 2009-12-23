@@ -75,6 +75,9 @@ public:
   std::string getPropertyValue(const std::string &name) const;
   const std::vector< Property*>& getProperties() const;
 
+  /// removes the property from properties map 
+  void removeProperty(const std::string &name);
+
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const;
 protected:

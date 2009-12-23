@@ -52,6 +52,7 @@ public:
   void addLogData( Kernel::Property *p );
   Kernel::Property* getLogData( const std::string &name ) const;
   const std::vector< Kernel::Property* >& getLogData() const;
+  void removeLogData(const std::string &name);
 
   void setProtonCharge( const double &charge);
   const double& getProtonCharge() const;
