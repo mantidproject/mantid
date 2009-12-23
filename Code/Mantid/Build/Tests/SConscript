@@ -51,4 +51,10 @@ for test in testsToRun:
 	myenv.Program([dotcpp],LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB=dotpdb)
   else:
 	myenv.Program([dotcpp])
+	
+#write out the testsToRun file.  This is currently used by the linux build only and should be removed
+seperator="\n"
+f=open('../TestsToRun', 'w')
+f.write(seperator.join(testsToRun))
+f.close()
 
