@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_PYTHONCALC_H_
 
 #include "MantidQtCustomInterfaces/ui_Excitations.h"
-#include "poco/Path.h"
+#include "Poco/Path.h"
 #include <QString>
 #include <string>
 #include <vector>
