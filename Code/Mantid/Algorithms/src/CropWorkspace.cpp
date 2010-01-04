@@ -174,7 +174,7 @@ void CropWorkspace::checkProperties()
 
 /** Find the X index corresponding to (or just within) the value given in the XMin property.
  *  Sets the default if the property has not been set.
- *  @param  The workspace index to check (default 0).
+ *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMin value.
  */
 int CropWorkspace::getXMin(const int wsIndex)
@@ -198,12 +198,11 @@ int CropWorkspace::getXMin(const int wsIndex)
 
 /** Find the X index corresponding to (or just within) the value given in the XMax property.
  *  Sets the default if the property has not been set.
- *  @param  The workspace index to check (default 0).
+ *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMax value.
  */
 int CropWorkspace::getXMax(const int wsIndex)
 {
-  bool def = true;
   const MantidVec& X = m_inputWorkspace->readX(wsIndex);
   int xIndex = X.size();
   //get the value that the user entered if they entered one at all
