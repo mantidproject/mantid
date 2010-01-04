@@ -18,11 +18,13 @@ using DataObjects::Workspace2D;
 
 /// Default constructor
 CropWorkspace::CropWorkspace() : 
-  Algorithm(), m_minX(0), m_maxX(0), m_minSpec(0), m_maxSpec(0), m_commonBoundaries(false)
+  Algorithm(), m_minX(0), m_maxX(0), m_minSpec(-1), m_maxSpec(-1),
+  m_commonBoundaries(false), m_histogram(false), m_croppingInX(false)
 {}
 
 /// Destructor
 CropWorkspace::~CropWorkspace() {}
+
 void CropWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace","",Direction::Input),
@@ -54,7 +56,7 @@ void CropWorkspace::exec()
 {
   // Get the input workspace
   m_inputWorkspace = getProperty("InputWorkspace");
-  const bool histogram = m_inputWorkspace->isHistogramData();
+  m_histogram = m_inputWorkspace->isHistogramData();
   // Check for common boundaries in input workspace
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
 
@@ -63,8 +65,7 @@ void CropWorkspace::exec()
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace =
-    WorkspaceFactory::Instance().create(m_inputWorkspace,m_maxSpec-m_minSpec+1,m_maxX-m_minX,m_maxX-m_minX-histogram);
-  DataObjects::Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(outputWorkspace);
+    WorkspaceFactory::Instance().create(m_inputWorkspace,m_maxSpec-m_minSpec+1,m_maxX-m_minX,m_maxX-m_minX-m_histogram);
 
   // If this is a Workspace2D, get the spectra axes for copying in the spectraNo later
   Axis *specAxis = NULL, *outAxis = NULL;
@@ -86,16 +87,22 @@ void CropWorkspace::exec()
   {
     // Preserve/restore sharing if X vectors are the same
     if ( m_commonBoundaries )
-      output2D->setX(j,newX);
+    {
+      outputWorkspace->setX(j,newX);
+    }
     else
+    {
       // Safe to just copy whole vector 'cos can't be cropping in X if not common
-      outputWorkspace->dataX(j) = m_inputWorkspace->readX(i);
+      outputWorkspace->setX(j,m_inputWorkspace->refX(i));
+    }
 
     const MantidVec& oldY = m_inputWorkspace->readY(i);
-    outputWorkspace->dataY(j).assign(oldY.begin()+m_minX,oldY.begin()+(m_maxX-histogram));
+    outputWorkspace->dataY(j).assign(oldY.begin()+m_minX,oldY.begin()+(m_maxX-m_histogram));
     const MantidVec& oldE = m_inputWorkspace->readE(i);
-    outputWorkspace->dataE(j).assign(oldE.begin()+m_minX,oldE.begin()+(m_maxX-histogram));
+    outputWorkspace->dataE(j).assign(oldE.begin()+m_minX,oldE.begin()+(m_maxX-m_histogram));
     if (specAxis) outAxis->spectraNo(j) = specAxis->spectraNo(i);
+
+    if ( !m_commonBoundaries ) this->cropRagged(outputWorkspace,i,j);
     
     // Propagate bin masking if there is any
     if ( m_inputWorkspace->hasMaskedBins(i) )
@@ -105,7 +112,7 @@ void CropWorkspace::exec()
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
         const int maskIndex = (*it).first;
-        if ( maskIndex >= m_minX && maskIndex < m_maxX-histogram )
+        if ( maskIndex >= m_minX && maskIndex < m_maxX-m_histogram )
           outputWorkspace->maskBin(j,maskIndex-m_minX,(*it).second);
       }
     }
@@ -122,27 +129,25 @@ void CropWorkspace::exec()
  */
 void CropWorkspace::checkProperties()
 {
-  const bool xmaxSet = this->getXMax();
-  if ( ! this->getXMin() || ! xmaxSet )
+  m_minX = this->getXMin();
+  m_maxX = this->getXMax();
+  const int xSize = m_inputWorkspace->readX(0).size();
+  if ( m_minX > 0 || m_maxX < xSize )
   {
-    // If not using full X range, do a check on common workspace binning
-    if ( ! m_commonBoundaries )
-    {
-      const std::string mess("If cropping in X, the input workspace must have common X values across all spectra");
-      g_log.error(mess);
-      throw std::invalid_argument(mess);
-    }
     if ( m_minX > m_maxX )
     {
       g_log.error("XMin must be less than XMax");
       throw std::out_of_range("XMin must be less than XMax");
     }
-    if ( m_minX == m_maxX )
+    if ( m_minX == m_maxX && m_commonBoundaries )
     {
       g_log.error("The X range given lies entirely within a single bin");
-     throw std::out_of_range("The X range given lies entirely within a single bin");
+      throw std::out_of_range("The X range given lies entirely within a single bin");
     }
+    m_croppingInX = true;
   }
+  if ( m_minX < 0 || !m_commonBoundaries ) m_minX = 0;
+  if ( !m_commonBoundaries ) m_maxX = m_inputWorkspace->readX(0).size();
 
   m_minSpec = getProperty("StartWorkspaceIndex");
   const int numberOfSpectra = m_inputWorkspace->getNumberHistograms();
@@ -169,51 +174,76 @@ void CropWorkspace::checkProperties()
 
 /** Find the X index corresponding to (or just within) the value given in the XMin property.
  *  Sets the default if the property has not been set.
- *  @return True if the XMin property has been set.
+ *  @param  The workspace index to check (default 0).
+ *  @return The X index corresponding to the XMin value.
  */
-bool CropWorkspace::getXMin()
+int CropWorkspace::getXMin(const int wsIndex)
 {
   Property *minX = getProperty("XMin");
   const bool def = minX->isDefault();
+  int xIndex = -1;
   if ( !def )
   {//A value has been passed to the algorithm, check it and maybe store it
     const double minX_val = getProperty("XMin");
-    const MantidVec& X = m_inputWorkspace->readX(0);
+    const MantidVec& X = m_inputWorkspace->readX(wsIndex);
     if ( m_commonBoundaries && minX_val > X.back() )
     {
       g_log.error("XMin is greater than the largest X value");
       throw std::out_of_range("XMin is greater than the largest X value");
     }
-    m_minX = std::lower_bound(X.begin(),X.end(),minX_val) - X.begin();
+    xIndex = std::lower_bound(X.begin(),X.end(),minX_val) - X.begin();
   }
-  return def;
+  return xIndex;
 }
 
 /** Find the X index corresponding to (or just within) the value given in the XMax property.
  *  Sets the default if the property has not been set.
- *  @return True if the Xmin property has been set.
+ *  @param  The workspace index to check (default 0).
+ *  @return The X index corresponding to the XMax value.
  */
-bool CropWorkspace::getXMax()
+int CropWorkspace::getXMax(const int wsIndex)
 {
   bool def = true;
-  const MantidVec& X = m_inputWorkspace->readX(0);
+  const MantidVec& X = m_inputWorkspace->readX(wsIndex);
+  int xIndex = X.size();
   //get the value that the user entered if they entered one at all
   const double maxX_val = getProperty("XMax");
-  if ( isEmpty(maxX_val) )
-  {//A user value wasn't picked up so lets use the default
-    m_maxX = X.size();
-  }
-  else
+  if ( ! isEmpty(maxX_val) )
   {//we have a user value, check it and maybe store it
     if ( m_commonBoundaries && maxX_val < X.front() )
     {
       g_log.error("XMax is less than the smallest X value");
       throw std::out_of_range("XMax is less than the smallest X value");
     }
-    m_maxX = std::upper_bound(X.begin(),X.end(),maxX_val) - X.begin();
-    def = false;
+    xIndex = std::upper_bound(X.begin(),X.end(),maxX_val) - X.begin();
   }
-  return def;
+  return xIndex;
+}
+
+/** Zeroes all data points outside the X values given
+ *  @param outputWorkspace The output workspace - data has already been copied
+ *  @param inIndex         The workspace index of the spectrum in the input workspace
+ *  @param outIndex        The workspace index of the spectrum in the output workspace
+ */
+void CropWorkspace::cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex)
+{
+  MantidVec& Y = outputWorkspace->dataY(outIndex);
+  MantidVec& E = outputWorkspace->dataE(outIndex);
+  const int size = Y.size();
+  int startX = this->getXMin(inIndex);
+  if (startX > size) startX = size;
+  for (int i = 0; i < startX; ++i)
+  {
+    Y[i] = 0.0;
+    E[i] = 0.0;
+  }
+  int endX = this->getXMax(inIndex);
+  if ( endX > 0 ) endX -= m_histogram;
+  for (int i = endX; i < size; ++i)
+  {
+    Y[i] = 0.0;
+    E[i] = 0.0;
+  }
 }
 
 } // namespace Algorithms

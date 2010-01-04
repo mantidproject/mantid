@@ -29,7 +29,10 @@ namespace Algorithms
     <LI> EndSpectrum - The workspace index number to end the cropped workspace at (default max)</LI>
     </UL>
 
-    If cropping in X, then the input workspace must have common bin boundaries/X values.
+    If the input workspace must has common bin boundaries/X values then cropping in X will
+    lead to an output workspace with fewer bins than the input one. If the boundaries are
+    not common then the output workspace will have the same number of bins as the input one,
+    but with data values outside the X range given set to zero.
     If an X value given does not exactly match a bin boundary, then the closest bin boundary
     within the range will be used.
     Note that if none of the optional properties are given, then the output workspace will be
@@ -38,7 +41,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 15/10/2008
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -77,8 +80,9 @@ private:
   void exec();
 
   void checkProperties();
-  bool getXMin();
-  bool getXMax();
+  int getXMin(const int wsIndex = 0);
+  int getXMax(const int wsIndex = 0);
+  void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex);
 
   /// The input workspace
   DataObjects::Workspace2D_const_sptr m_inputWorkspace;
@@ -92,6 +96,10 @@ private:
   int m_maxSpec;
   /// Flag indicating whether the input workspace has common boundaries
   bool m_commonBoundaries;
+  /// Flag indicating whether we're dealing with histogram data
+  bool m_histogram;
+  /// Flag indicating whether XMin and/or XMax has been set
+  bool m_croppingInX;
   
   ///a flag int value to indicate that the value wasn't set by users
   static const int unSetInt = INT_MAX-15;

@@ -173,6 +173,45 @@ public:
     }
   }
 
+  void testRagged()
+  {
+    MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("toCrop"));
+    // Change the first X vector
+    for (int k = 0; k < 6; ++k) {
+      input->dataX(0)[k] = k+3;
+    }
+
+    CropWorkspace crop4;
+    TS_ASSERT_THROWS_NOTHING( crop4.initialize() )
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("InputWorkspace","toCrop") )
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("OutputWorkspace","raggedOut") )
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMin","2.9") )
+    TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMax","4.1") )
+    TS_ASSERT_THROWS_NOTHING( crop4.execute() )
+    TS_ASSERT( crop4.isExecuted() )
+    
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("raggedOut")) )
+
+    TS_ASSERT_EQUALS( output->size(), input->size() )
+
+    for (int i = 0; i < 5; ++i)
+    {
+      for (int j = 0; j < 5; ++j)
+      {
+        if ( (i == 0 && j == 0) || (i != 0 && j == 3) )
+        {
+          TS_ASSERT_EQUALS( output->readY(i)[j], input->readY(i)[j] )
+        }
+        else
+        {
+          TS_ASSERT_EQUALS( output->readY(i)[j], 0.0 )
+        }
+      }
+    }
+
+  }
+
 private:
   CropWorkspace crop;
 };
