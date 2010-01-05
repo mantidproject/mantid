@@ -13,17 +13,12 @@
 
 namespace Mantid
 {
-
-namespace DataObjects
-{
-  class Workspace2D;
-}
-
 namespace API
 {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
+class MatrixWorkspace;
 class Jacobian;
 class ParameterTie;
 class IConstraint;
@@ -65,7 +60,7 @@ public:
   /// The string operator
   virtual operator std::string()const{return asString();}
   /// Set the workspace
-  virtual void setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax);
+  virtual void setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax);
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
@@ -158,7 +153,7 @@ protected:
   friend class CompositeFunction;
 
   /// Shared pointer to the workspace
-  boost::shared_ptr<const DataObjects::Workspace2D> m_workspace;
+  boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
   /// Spectrum index
   int m_workspaceIndex;
   /// Lower bin index

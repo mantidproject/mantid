@@ -19,12 +19,6 @@
 
 namespace Mantid
 {
-
-namespace DataObjects
-{
-  class Workspace2D;
-}
-
 namespace API
 {
 //----------------------------------------------------------------------

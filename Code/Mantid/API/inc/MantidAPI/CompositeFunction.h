@@ -50,7 +50,7 @@ public:
               /* Overriden methods */
 
   /// Set the workspace
-  void setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax);
+  void setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax);
   /// Returns the function's name
   std::string name()const{return "CompositeFunction";}
   /// Writes itself into a string

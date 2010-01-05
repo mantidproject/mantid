@@ -26,7 +26,7 @@
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
 :QDockWidget("Fit Function",parent)/*,m_function(0)*/,m_defaultFunction("Gaussian"),m_default_width(0),
-m_appWindow((ApplicationWindow*)parent),m_guessOutputName(true),m_changeSlotsEnabled(true)
+m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWindow((ApplicationWindow*)parent)
 {
   setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -172,9 +172,17 @@ void FitPropertyBrowser::popupMenu(const QPoint &pos)
   }
   else if (isFunction)
   {
-    action = new QAction("Delete",this);
+    action = new QAction("Remove",this);
     connect(action,SIGNAL(triggered()),this,SLOT(deleteFunction()));
     menu->addAction(action);
+
+    if (m_peakToolOn)
+    {
+      action = new QAction("Plot",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(plotGuessCurrent()));
+      menu->addAction(action);
+    }
+
     menu->addSeparator();
   }
   else
@@ -270,7 +278,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &pos)
 
         if (!hasLower && !hasUpper)
         {
-          QMenu* detailMenu = constraintMenu->addMenu("Both Bound");
+          QMenu* detailMenu = constraintMenu->addMenu("Both Bounds");
 
           action = new QAction("10%",this);
           connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds10()));
@@ -450,11 +458,6 @@ void FitPropertyBrowser::removeFunction(int i)
   }
   QtProperty* fnGroup = fnItem->parent()->property();
   fnGroup->removeSubProperty(fnItem->property());
-  QList<QtProperty*> fns = fnGroup->subProperties();
-  for(int j = 0;j<fns.size();j++)
-  {
-    fns[j]->setPropertyName(functionName(j));
-  }
   m_compositeFunction->removeFunction(i);
   setIndex(index());
   setFocus();
@@ -464,6 +467,11 @@ void FitPropertyBrowser::removeFunction(int i)
     setFitEnabled(false);
   }
   updateParameters();
+  QList<QtProperty*> fns = fnGroup->subProperties();
+  for(int j = 0;j<fns.size();j++)
+  {
+    fns[j]->setPropertyName(functionName(j));
+  }
   emit functionRemoved(i);
 }
 
@@ -651,7 +659,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
       }
       if (done) break;
     }
-    emit parameterChanged();
+    emit parameterChanged(i);
   }
 }
 /** Called when a string property changed
@@ -1712,3 +1720,10 @@ void FitPropertyBrowser::removeBounds()
   }
 }
 
+/**
+ * Slot. Sends a signal to plot the guess for the current (selected) function
+ */
+void FitPropertyBrowser::plotGuessCurrent()
+{
+  emit plotGuess(index());
+}

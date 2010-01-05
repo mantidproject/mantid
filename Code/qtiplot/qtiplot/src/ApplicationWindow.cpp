@@ -15211,8 +15211,10 @@ ApplicationWindow::~ApplicationWindow()
 
 	QApplication::clipboard()->clear(QClipboard::Clipboard);
 
-    //Mantid
-    if (mantidUI) delete mantidUI;
+  btnPointer->setChecked(true);
+
+  //Mantid
+  if (mantidUI) delete mantidUI;
 }
 
 QString ApplicationWindow::versionString()

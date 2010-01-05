@@ -17,7 +17,6 @@
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_blas.h>
-#include <boost/tokenizer.hpp>
 
 namespace Mantid
 {
@@ -684,8 +683,8 @@ namespace CurveFitting
 
     // Parameters of different functions are separated by ';'. Parameters of the same function
     // are separated by ','. parameterName=value pairs are used to set a parameter value. For each function
-    // "function" parameter must be set to a function name. E.g.
-    // Function = "name=LinearBackground,A0=0,A1=1; function = Gaussian, PeakCentre=10.,Sigma=1"
+    // "name" parameter must be set to a function name. E.g.
+    // Function = "name=LinearBackground,A0=0,A1=1; name = Gaussian, PeakCentre=10.,Sigma=1"
     std::string input = getProperty("Function");
     if (input.empty()) return;
 

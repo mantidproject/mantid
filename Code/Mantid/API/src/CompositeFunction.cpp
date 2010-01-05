@@ -629,7 +629,7 @@ std::string CompositeFunction::parameterLocalName(int i)const
  * @param xMin The minimum bin index of spectrum spec that will be used in fitting
  * @param xMax The maximum bin index of spectrum spec that will be used in fitting
  */
-void CompositeFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int spec,int xMin,int xMax)
+void CompositeFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
 {
   IFunction::setWorkspace(workspace,spec,xMin,xMax);
   for(int i=0;i<nFunctions();i++)

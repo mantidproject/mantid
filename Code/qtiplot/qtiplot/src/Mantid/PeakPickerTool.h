@@ -24,6 +24,7 @@ class QPoint;
 class QToolBar;
 class PeakRangeMarker;
 class FitPropertyBrowser;
+class FunctionCurve;
 
 namespace Mantid
 {
@@ -89,6 +90,7 @@ public slots:
 
 signals:
   void peakChanged();
+  void isOn(bool);
 
 private slots:
   void functionCleared();
@@ -97,7 +99,7 @@ private slots:
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
-  void functionChanged(const QString&);
+  void parameterChanged(int);
   void startXChanged(double);
   void endXChanged(double);
 
@@ -108,6 +110,12 @@ private slots:
   void fit();
   void undoFit();
   void clear();
+
+  void plotGuess(int i);
+  void removeGuess(int i);
+
+  void plotCurrentGuess();
+  void removeCurrentGuess();
 
 private:
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
@@ -159,6 +167,9 @@ private:
   // Set the tool tip text
   void setToolTip(const QString& txt);
 
+  // Shows if a function i is plotted
+  bool hasGuessPlotted(int i);
+
   FitPropertyBrowser* fitBrowser()const;
   /// The parent application window
   MantidUI* m_mantidUI;
@@ -178,6 +189,7 @@ private:
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
   std::string m_defaultPeakName; // The default peak function name
+  QMap<int,FunctionCurve*> m_guessCurves; // Pointers to the guess curves
 };
 
 

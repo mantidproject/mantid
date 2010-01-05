@@ -34,7 +34,7 @@ void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& n
  * @param xMin The lower bin index
  * @param xMax The upper bin index
  */
-void IFunction::setWorkspace(boost::shared_ptr<const DataObjects::Workspace2D> workspace,int wi,int xMin,int xMax)
+void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
 {
   m_workspace = workspace;
   m_workspaceIndex = wi;

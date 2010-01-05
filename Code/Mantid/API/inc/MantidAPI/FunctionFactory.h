@@ -59,8 +59,12 @@ namespace API
   public:
     /**Creates an instance of a function
      * @param type The function's type
+     * @return A pointer to the created function
      */
     IFunction* createFunction(const std::string& type) const;
+
+    ///Creates an instance of a function
+    IFunction* createInitialized(const std::string& input) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<FunctionFactoryImpl>;

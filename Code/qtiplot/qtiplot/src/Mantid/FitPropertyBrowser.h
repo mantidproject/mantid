@@ -147,6 +147,12 @@ public:
   /// Display a tip
   void setTip(const QString& txt);
 
+  /// Creates the "Ties" property value for the Fit algorithm
+  QString getTieString()const;
+
+  /// Creates the "Constraints" property value for the Fit algorithm
+  QString getConstraintsString()const;
+
   void init();
   void reinit();
 
@@ -154,6 +160,7 @@ public slots:
   void fit();
   void undoFit();
   void clear();
+  void setPeakToolOn(bool on){m_peakToolOn = on;}
 
 signals:
   void indexChanged(int i)const;
@@ -161,11 +168,13 @@ signals:
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
-  void functionChanged(const QString&);
+  void functionChanged(int);
   void startXChanged(double);
   void endXChanged(double);
-  void parameterChanged();
+  void parameterChanged(int);
   void functionCleared();
+  void plotGuess(int i);
+  //void removeGuesses();
 
 private slots:
   void enumChanged(QtProperty* prop);
@@ -194,6 +203,7 @@ private slots:
   void removeLowerBound();
   void removeUpperBound();
   void removeBounds();
+  void plotGuessCurrent();
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -296,6 +306,9 @@ private:
 
   /// Constraints <parameter property, <lower bound property, upper bound property> >
   QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> > m_constraints;
+
+  /// Shows if the PeakPickerTool is on
+  bool m_peakToolOn;
 
   ApplicationWindow* m_appWindow;
 

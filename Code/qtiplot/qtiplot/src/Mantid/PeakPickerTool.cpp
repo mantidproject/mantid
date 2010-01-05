@@ -2,6 +2,8 @@
 #include "MantidCurve.h"
 #include "MantidUI.h"
 #include "FitPropertyBrowser.h"
+#include "../FunctionCurve.h"
+
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -56,8 +58,13 @@ m_defaultPeakName("Gaussian")
   connect(fitBrowser(),SIGNAL(algorithmFinished(const QString&)),this,SLOT(algorithmFinished(const QString&)));
   connect(fitBrowser(),SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
   connect(fitBrowser(),SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
-  connect(fitBrowser(),SIGNAL(parameterChanged()),d_graph->plotWidget(),SLOT(replot()));
+  connect(fitBrowser(),SIGNAL(parameterChanged(int)),this,SLOT(parameterChanged(int)));
+  connect(fitBrowser(),SIGNAL(plotGuess(int)),this,SLOT(plotGuess(int)));
+
   m_mantidUI->showFitPropertyBrowser();
+  connect(this,SIGNAL(isOn(bool)),fitBrowser(),SLOT(setPeakToolOn(bool)));
+  
+  emit isOn(true);
   if (fitBrowser()->count() == 0)
   {
     setToolTip("Click and drag to set the fitting region");
@@ -79,10 +86,15 @@ m_defaultPeakName("Gaussian")
 
 PeakPickerTool::~PeakPickerTool()
 {
+  QMap<int,FunctionCurve*>::iterator it = m_guessCurves.begin();
+  for(;it!=m_guessCurves.end();it++)
+  {
+    d_graph->removeCurve(it.value());
+  }
   detach();
   d_graph->plotWidget()->canvas()->unsetCursor();
   d_graph->plotWidget()->replot();
-  fitBrowser()->reinit();
+  emit isOn(false);
 }
 
 /**
@@ -494,6 +506,12 @@ void PeakPickerTool::indexChanged(int i)
  */
 void PeakPickerTool::functionRemoved(int i)
 {
+  QMap<int,FunctionCurve*>::iterator it = m_guessCurves.find(i);
+  if (it != m_guessCurves.end())
+  {
+    d_graph->removeCurve(it.value());
+    m_guessCurves.erase(it);
+  }
   int j = fitBrowser()->isPeak() ? fitBrowser()->index() : -1;
   setCurrent(j);
   d_graph->plotWidget()->replot();
@@ -562,10 +580,26 @@ void PeakPickerTool::endXChanged(double eX)
 }
 
 /**
- * Slot. Called in response to functionChanged signal from FitBrowser
+ * Slot. Called in response to parameterChanged signal from FitBrowser
+ * @param i The index of the function with the changed parameter
  */
-void PeakPickerTool::functionChanged(const QString&)
+void PeakPickerTool::parameterChanged(int i)
 {
+  QMap<int,FunctionCurve*>::iterator it = m_guessCurves.find(i);
+  if (it != m_guessCurves.end())
+  {
+    if (it.value()->title().text() != fitBrowser()->functionName(i))
+    {
+      removeGuess(i);
+    }
+    else
+    {
+      QStringList formulas = it.value()->formulas();
+      formulas[1] = QString::fromStdString(*fitBrowser()->function(i));
+      it.value()->setFormulas(formulas);
+      it.value()->loadData();
+    }
+  }
   graph()->replot();
 }
 
@@ -582,17 +616,33 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
   action = new QAction("Add background...",this);
   connect(action,SIGNAL(triggered()),this,SLOT(addBackground()));
   menu.addAction(action);
+  menu.addSeparator();
 
   if (fitBrowser()->count()>0)
   {
     if (current()>=0)
     {
-      action = new QAction("Delete peak",this);
+      if (hasGuessPlotted(current()))
+      {
+        action = new QAction("Remove guess",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(removeCurrentGuess()));
+        menu.addAction(action);
+      }
+      else
+      {
+        action = new QAction("Plot guess",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(plotCurrentGuess()));
+        menu.addAction(action);
+      }
+
+      menu.addSeparator();
+
+      action = new QAction("Remove peak",this);
       connect(action,SIGNAL(triggered()),this,SLOT(deletePeak()));
       menu.addAction(action);
 
     }
-    action = new QAction("Delete function...",this);
+    action = new QAction("Remove function...",this);
     connect(action,SIGNAL(triggered()),this,SLOT(deleteFunction()));
     menu.addAction(action);
   }
@@ -730,4 +780,61 @@ void PeakPickerTool::setToolTip(const QString& txt)
 {
   d_graph->setToolTip(txt);
   fitBrowser()->setTip(txt);
+}
+
+/**
+ * Slot. Plot the initial guess for the i-th function
+ */
+void PeakPickerTool::plotGuess(int i)
+{
+  if (i >= 0)
+  {
+    removeGuess(i);
+
+    FunctionCurve* curve = new FunctionCurve(fitBrowser()->compositeFunction()->getFunction(i),
+      QString::fromStdString(fitBrowser()->workspaceName()),
+      fitBrowser()->workspaceIndex(),fitBrowser()->functionName());
+
+    curve->setRange(fitBrowser()->startX(), fitBrowser()->endX());
+    curve->loadData();
+
+    d_graph->insertCurve(curve);
+    d_graph->replot();
+
+    m_guessCurves[i] = curve;
+  }
+}
+
+/**
+ * Slot. Remove the plot of the i-th function
+ */
+void PeakPickerTool::removeGuess(int i)
+{
+  QMap<int,FunctionCurve*>::iterator oldCurve = m_guessCurves.find(i);
+  if (oldCurve != m_guessCurves.end())
+  {
+    d_graph->removeCurve(oldCurve.value());
+    m_guessCurves.erase(oldCurve);
+  }
+}
+
+/**
+ * Slot. Plot the initial guess for the currently selected function
+ */
+void PeakPickerTool::plotCurrentGuess()
+{
+  plotGuess(current());
+}
+
+/**
+ * Slot. Remove the plot of the current function
+ */
+void PeakPickerTool::removeCurrentGuess()
+{
+  removeGuess(current());
+}
+
+bool PeakPickerTool::hasGuessPlotted(int i)
+{
+  return m_guessCurves.find(i) != m_guessCurves.end();
 }

@@ -31,6 +31,14 @@
 
 #include "PlotCurve.h"
 
+namespace Mantid
+{
+  namespace API
+  {
+    class IFunction;
+  }
+}
+
 // Function curve class
 class FunctionCurve: public PlotCurve
 {
@@ -39,6 +47,8 @@ public:
 
 	FunctionCurve(const FunctionType& t, const QString& name = QString());
 	FunctionCurve(const QString& name = QString());
+  FunctionCurve(const Mantid::API::IFunction* fun, 
+    const QString& wsName, int wsIndex = 0, const QString& name = QString());
 	FunctionCurve(const FunctionCurve& c);
 
   PlotCurve* clone()const{return new FunctionCurve(*this);}
