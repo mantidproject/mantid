@@ -97,7 +97,7 @@ namespace Mantid
       void processParameters();
 
       /// Number of parameters.
-      size_t nParams()const{return m_function->nActive();}
+      size_t nActive()const{return m_function->nActive();}
 
       /// Pointer to the fitting function
       API::IFunction* m_function;

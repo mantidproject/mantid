@@ -316,11 +316,11 @@ namespace CurveFitting
     bool isDerivDefined = true;
     try
     {
-      const std::vector<double> inTest(nParams(),1.0);
-      std::vector<double> outTest(nParams());
+      const std::vector<double> inTest(nActive(),1.0);
+      std::vector<double> outTest(nActive());
       const double xValuesTest = 0;
       JacobianImpl1 J;
-      boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(nParams(),1) );
+      boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(nActive(),1) );
       J.setJ(M.get());
       // note nData set to zero (last argument) hence this should avoid further memory problems
       functionDeriv(NULL, &J, &xValuesTest, 0);  
@@ -406,7 +406,7 @@ namespace CurveFitting
     gsl_vector *initFuncArg;
     initFuncArg = gsl_vector_alloc(l_data.p);
 
-    for (size_t i = 0; i < nParams(); i++)
+    for (size_t i = 0; i < nActive(); i++)
     {
         gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
     }
@@ -496,10 +496,6 @@ namespace CurveFitting
 
       double chi = gsl_blas_dnrm2(s->f);
       finalCostFuncVal = chi*chi / dof;
-
-      // put final converged fitting values back into m_fittedParameter
-      for (size_t i = 0; i < nParams(); i++)
-          m_function->setActiveParameter(i,gsl_vector_get(s->x,i));
     }
     if (!isDerivDefined || simplexFallBack == true)
     {
@@ -530,10 +526,6 @@ namespace CurveFitting
       }
 
       finalCostFuncVal = simplexMinimizer->fval / dof;
-
-      // put final converged fitting values back into m_fittedParameter
-      for (unsigned int i = 0; i < nParams(); i++)
-        m_function->setActiveParameter(i, gsl_vector_get(simplexMinimizer->x,i));
     }
 
     // Output summary to log file
@@ -679,7 +671,7 @@ namespace CurveFitting
     if (in) m_function->updateActive(in);
     m_function->functionDerivWithConstraint(out,xValues,nData);
     //std::cerr<<"-------------- Jacobian ---------------\n";
-    //for(int i=0;i<nParams();i++)
+    //for(int i=0;i<nActive();i++)
     //  for(int j=0;j<nData;j++)
     //    std::cerr<<i<<' '<<j<<' '<<gsl_matrix_get(((JacobianImpl1*)out)->m_J,j,i)<<'\n';
   }

@@ -236,10 +236,10 @@ public:
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 5.1604,1);
 
-    TS_ASSERT_DELTA( fn->height(), 249.306 ,0.01);
+    TS_ASSERT_DELTA( fn->height(), 249.3187 ,0.01);
     TS_ASSERT_DELTA( fn->centre(), 79430 ,0.1);
     TS_ASSERT_DELTA( fn->getParameter("Sigma"), 25.3066 ,0.01);
-    TS_ASSERT_DELTA( bk->getParameter("A0"), 7.86034 ,0.001);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 7.8643 ,0.001);
     TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
 
     AnalysisDataService::Instance().remove(outputSpace);
