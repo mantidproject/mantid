@@ -43,7 +43,7 @@ public:
   {
   }
 
-  void testAgainstHRPDdataPeak()
+  void xtestAgainstHRPDdataPeak()
   {
     // load dataset
     std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
