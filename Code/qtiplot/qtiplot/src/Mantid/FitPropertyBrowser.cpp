@@ -657,9 +657,12 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
           break;
         }
       }
-      if (done) break;
+      if (done) 
+      {
+        emit parameterChanged(i);
+        break;
+      }
     }
-    emit parameterChanged(i);
   }
 }
 /** Called when a string property changed
