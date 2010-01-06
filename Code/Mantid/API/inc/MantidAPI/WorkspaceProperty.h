@@ -34,7 +34,7 @@ namespace Mantid
     @author Russell Taylor, Tessella Support Services plc
     @date 10/12/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -93,6 +93,9 @@ namespace Mantid
       {
         return Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >::operator=( value );
       }
+
+      /// 'Virtual copy constructor'
+      Kernel::Property* clone() { return new WorkspaceProperty<TYPE>(*this); }
 
       /// Virtual destructor
       virtual ~WorkspaceProperty()

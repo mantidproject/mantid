@@ -38,6 +38,9 @@ public:
 	       const std::vector<std::string> & exts = std::vector<std::string>(), 
 	       unsigned int direction = Direction::Input);
 
+  /// 'Virtual copy constructor
+  Property* clone() { return new FileProperty(*this); }
+
   /// Check if this is a load type property.
   bool isLoadProperty() const;
 

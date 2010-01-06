@@ -79,6 +79,8 @@ struct Direction
 class DLLExport Property
 {
 public:
+  /// 'Virtual copy constructor'
+  virtual Property* clone() = 0;
   /// Virtual destructor
 	virtual ~Property();
 
@@ -122,7 +124,6 @@ protected:
   Property( const Property& right );
   /// Copy assignment operator
   virtual Property& operator=( const Property& right );
-
 
 private:
   /// The name of the property

@@ -28,7 +28,7 @@ namespace Kernel
  @author Anders Markvardsen, ISIS, RAL
  @date 12/12/2007
 
- Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+ Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
 
@@ -73,6 +73,9 @@ public:
   virtual ~TimeSeriesProperty()
   {
   }
+
+  /// 'Virtual copy constructor'
+  Property* clone() { return new TimeSeriesProperty<TYPE>(*this); }
 
   /* Overwrite Property method
    *

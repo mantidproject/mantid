@@ -28,7 +28,7 @@ namespace Kernel
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 14/11/2007
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -181,6 +181,9 @@ public:
     m_validator( right.m_validator->clone() )
   {
   }
+
+  /// 'Virtual copy constructor'
+  Property* clone() { return new PropertyWithValue<TYPE>(*this); }
 
   /// Virtual destructor
   virtual ~PropertyWithValue()

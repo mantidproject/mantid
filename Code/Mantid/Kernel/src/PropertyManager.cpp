@@ -16,9 +16,37 @@ namespace Mantid
 
     /// Default constructor
     PropertyManager::PropertyManager() :
-    m_properties(),
-      m_orderedProperties()
+      m_properties(), m_orderedProperties()
     {
+    }
+
+    PropertyManager::PropertyManager(const PropertyManager& other) :
+      m_properties(), m_orderedProperties(other.m_orderedProperties.size())
+    {
+      // We need to do a deep copy of the property pointers here
+      for (unsigned int i = 0; i < m_orderedProperties.size(); ++i)
+      {
+	Property * p = other.m_orderedProperties[i]->clone();
+	this->m_orderedProperties[i] = p;
+	this->m_properties[p->name()] = p;
+      }
+    }
+
+    PropertyManager& PropertyManager::operator=(const PropertyManager& other)
+    {
+      // We need to do a deep copy here
+      if ( this != &other )
+      {
+	this->m_properties.clear();
+	this->m_orderedProperties.resize(other.m_orderedProperties.size());
+        for (unsigned int i = 0; i < m_orderedProperties.size(); ++i)
+        {
+	  Property * p = other.m_orderedProperties[i]->clone();
+	  this->m_orderedProperties[i] = p;
+	  this->m_properties[p->name()] = p;
+        }
+      }
+      return *this;
     }
 
     /// Virtual destructor
@@ -244,11 +272,11 @@ namespace Mantid
       return TypedValue(*this, name);
     }
 
-	/** Removes teh property from properties map.
-    *  @param name  name of the property to be removed.
-    */
-	 void PropertyManager::removeProperty(const std::string &name)
-	 {
+    /** Removes the property from properties map.
+     *  @param name  name of the property to be removed.
+     */
+    void PropertyManager::removeProperty(const std::string &name)
+    {
 		 if(existsProperty(name))
 		 {		 //remove it
 			 Property* prop=getPointerToProperty(name);
@@ -256,7 +284,7 @@ namespace Mantid
 			 std::vector<Property*>::iterator itr;
 			 itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);
 			 m_orderedProperties.erase(itr);
-
+			 delete prop;
 		 }
 	 }
 

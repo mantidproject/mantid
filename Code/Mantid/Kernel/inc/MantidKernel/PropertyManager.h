@@ -7,9 +7,7 @@
 #include <vector>
 #include <map>
 
-//#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
-//#include "MantidAPI/Sample.h"
 
 namespace Mantid
 {
@@ -20,8 +18,7 @@ namespace Kernel
 //----------------------------------------------------------------------
 class Logger;
 
-/** @class PropertyManager PropertyManager.h Kernel/PropertyManager.h
-
+/** 
  Property manager helper class.
  This class is used by algorithms and services for helping to manage their own set of properties.
 
@@ -34,7 +31,7 @@ class Logger;
  @author Based on the Gaudi class PropertyMgr (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
  @date 20/11/2007
 
- Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+ Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
 
@@ -56,9 +53,10 @@ class Logger;
  */
 class DLLExport PropertyManager: virtual public IPropertyManager
 {
-	
 public:
   PropertyManager();
+  PropertyManager(const PropertyManager&);
+  PropertyManager& operator=(const PropertyManager&);
   virtual ~PropertyManager();
 
   // Function to declare properties (i.e. store them)
@@ -80,21 +78,16 @@ public:
 
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const;
+
 protected:
+  using IPropertyManager::declareProperty;
 
-    using IPropertyManager::declareProperty;
+  friend class PropertyManagerOwner;
 
-    friend class PropertyManagerOwner;
-
-    Property* getPointerToProperty(const std::string &name) const;
-    Property* getPointerToPropertyOrdinal(const int &index) const;
+  Property* getPointerToProperty(const std::string &name) const;
+  Property* getPointerToPropertyOrdinal(const int &index) const;
 	
 private:
-  	/// Private copy constructor.
-  //PropertyManager(PropertyManager&);
-  /// Private copy assignment operator.
- // PropertyManager& operator=(const PropertyManager&);
-
   /// typedef for the map holding the properties
   typedef std::map<std::string, Property*> PropertyMap;
   /// The properties under management
@@ -104,7 +97,6 @@ private:
 
   /// Static reference to the logger class
   static Logger& g_log;
-
 };
 
 } // namespace Kernel

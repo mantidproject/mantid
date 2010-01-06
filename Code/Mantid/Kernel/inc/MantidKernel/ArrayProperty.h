@@ -18,7 +18,7 @@ namespace Kernel
     @author Russell Taylor, Tessella Support Services plc
     @date 27/02/2008
 
-    Copyright &copy; 2008 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -86,6 +86,9 @@ public:
     PropertyWithValue< std::vector<T> >( right )
   {
   }
+
+  /// 'Virtual copy constructor'
+  Property* clone() { return new ArrayProperty<T>(*this); }
 
   /// Virtual destructor
   virtual ~ArrayProperty()
