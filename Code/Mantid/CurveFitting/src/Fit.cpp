@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -431,12 +432,11 @@ namespace CurveFitting
 
     // set-up remaining GSL machinery for least squared
 
-    const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
-    gsl_multifit_fdfsolver *s = NULL;
+    IFuncMinimizer* minimizer;
+
     if (isDerivDefined)
     {
-      s = gsl_multifit_fdfsolver_alloc(T, l_data.n, l_data.p);
-      gsl_multifit_fdfsolver_set(s, &f, initFuncArg);
+      minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg);
     }
 
     // set-up remaining GSL machinery to use simplex algorithm
@@ -469,7 +469,7 @@ namespace CurveFitting
       while (status == GSL_CONTINUE && iter < maxInterations)
       {
         iter++;
-        status = gsl_multifit_fdfsolver_iterate(s);
+        status = minimizer->iterate();
 
         // break if status is not success
         if (status)  
@@ -489,11 +489,11 @@ namespace CurveFitting
           break;
         }
 
-        status = gsl_multifit_test_delta(s->dx, s->x, 1e-4, 1e-4);
+        status = minimizer->hasConverged();
         prog.report();
       }
 
-      double chi = gsl_blas_dnrm2(s->f);
+      double chi = minimizer->costFunctionVal();
       finalCostFuncVal = chi*chi / dof;
     }
     if (!isDerivDefined || simplexFallBack == true)
@@ -550,9 +550,6 @@ namespace CurveFitting
 
 
     // cleanup memory allocated for solvers
-
-    if (isDerivDefined)
-      gsl_multifit_fdfsolver_free(s);
     
     gsl_vector_free(simplexStepSize);
     gsl_multimin_fminimizer_free(simplexMinimizer);

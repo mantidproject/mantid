@@ -45,8 +45,18 @@ public:
   /// Get name of minimizer
   virtual std::string name() const = 0;
 
-  /// Perform iteration with minimizer
-  virtual void iterate() = 0;
+  /// Perform iteration with minimizer and return info about how well this went
+  /// using the GSL status integer system. See gsl_errno.h for details.
+  virtual int iterate() = 0;
+
+  /// Has fit converged. Status is returned using the GSL status flags listed 
+  /// in the header file gsl_errno.h. E.g. GSL_SUCCESS  = 0, GSL_FAILURE  = -1,
+  /// GSL_CONTINUE = -2 where the latter means the minimizer has not quite 
+  /// converged yet and need another iteration
+  virtual int hasConverged() = 0;
+
+  /// Get value of cost function 
+  virtual double costFunctionVal() = 0;
 };
 
 } // namespace CurveFitting

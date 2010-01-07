@@ -5,13 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
+#include <gsl/gsl_multifit_nlin.h>
 
 namespace Mantid
 {
 namespace CurveFitting
 {
-/** Implementing Levenberg-Marquardt. Wrap the GSL implementation of this 
-    algorithm into using IFuncMinimizer interface.
+/** Implementing Levenberg-Marquardt by wrapping the IFuncMinimizer interface
+    around the GSL implementation of this algorithm.
 
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
@@ -39,15 +40,24 @@ namespace CurveFitting
 class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 {
 public:
-  /// Virtual destructor
-  virtual ~LevenbergMarquardtMinimizer(){}
+  /// constructor and destructor
+  ~LevenbergMarquardtMinimizer();
+  LevenbergMarquardtMinimizer(gsl_multifit_function_fdf& gslContainer, gsl_vector* startGuess);
 
-  /// Get name of minimizer
-  virtual std::string name()const;
+  /// Overloading base class methods
+  std::string name()const;
+  int iterate();
+  int hasConverged();
+  double costFunctionVal();
 
-  /// Perform iteration with minimizer
-  virtual void iterate();
+private:
+  /// name of this minimizer
+  const std::string m_name;
+
+  /// pointer to the GSL solver doing the work
+  gsl_multifit_fdfsolver *m_gslSolver;
 };
+
 
 } // namespace CurveFitting
 } // namespace Mantid
