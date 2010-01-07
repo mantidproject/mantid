@@ -2,6 +2,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/LibraryManager.h"
 #include <Poco/StringTokenizer.h>
 
 namespace Mantid
@@ -11,6 +12,11 @@ namespace Mantid
 
     FunctionFactoryImpl::FunctionFactoryImpl() : Kernel::DynamicFactory<IFunction>(), g_log(Kernel::Logger::get("FunctionFactory"))
     {
+      // we need to make sure the library manager has been loaded before we 
+      // are constructed so that it is destroyed after us and thus does
+      // not close any loaded DLLs with loaded algorithms in them
+      Mantid::Kernel::LibraryManager::Instance();
+      g_log.debug() << "FunctionFactory created." << std::endl;
     }
 
     FunctionFactoryImpl::~FunctionFactoryImpl()
