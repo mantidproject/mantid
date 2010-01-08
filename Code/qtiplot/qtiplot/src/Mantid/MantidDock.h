@@ -30,7 +30,6 @@ private:
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
   void deleteWorkspaces();
-  void clearWorkspaceTree();
 protected slots:
   void popupMenu(const QPoint & pos);
   void workspaceSelected();

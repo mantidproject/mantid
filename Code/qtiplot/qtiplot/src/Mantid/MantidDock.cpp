@@ -85,13 +85,9 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
           this, SLOT(updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr)));
   connect(m_mantidUI, SIGNAL(workspace_removed(const QString &)),
           this, SLOT(removeWorkspaceEntry(const QString &)));
+  connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()));
 
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
-}
-
-void MantidDockWidget::clearWorkspaceTree()
-{
-  m_tree->clear();
 }
 
 /** Returns the name of the selected workspace

@@ -33,7 +33,7 @@ using namespace Mantid::API;
  * Constructor.
  */
 InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
-  MdiSubWindow(label, app, name, f), m_deleteObserver(*this,&InstrumentWindow::handleDeleteWorkspace)
+  MdiSubWindow(label, app, name, f), WorkspaceObserver()
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
@@ -187,7 +187,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	setAttribute(Qt::WA_DeleteOnClose);
 	
 	// Watch for the deletion of the associated workspace
-	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+	observeDelete();
+	observeADSClear();
 }
 
 /**
@@ -339,7 +340,6 @@ void InstrumentWindow::sendPlotSpectraGroupSignal()
  */
 InstrumentWindow::~InstrumentWindow()
 {
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   saveSettings();
   delete mInstrumentDisplay;
 }
@@ -680,14 +680,21 @@ void InstrumentWindow::saveSettings()
 }
 
 /// Closes the window if the associated workspace is deleted
-void InstrumentWindow::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& pNf)
+void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_ptr<Mantid::API::Workspace>)
 {
-    if (pNf->object_name() == mWorkspaceName)
-    {
-      askOnCloseEvent(false);
-      close();
-    }
+  if (ws_name == mWorkspaceName)
+  {
+    askOnCloseEvent(false);
+    close();
+  }
 }
+
+void InstrumentWindow::clearADSHandle()
+{
+  askOnCloseEvent(false);
+  close();
+}
+
 
 /**
  * This method saves the workspace name associated with the instrument window 

@@ -7,6 +7,7 @@
 #include "../../MdiSubWindow.h"
 #include "../../GraphOptions.h"
 #include "BinDialog.h"
+#include "../WorkspaceObserver.h"
 
 #include <string>
 #include <vector>
@@ -65,7 +66,7 @@ class QComboBox;
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class InstrumentWindow : public MdiSubWindow
+class InstrumentWindow : public MdiSubWindow, WorkspaceObserver
 {
 	Q_OBJECT
 
@@ -145,9 +146,8 @@ private:
         QString mCurrentColorMap;
         QString m_savedialog_dir; /// The last used dialog directory
 
-  void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
-  /// Watches for the deletion of the associated workspace
-  const Poco::NObserver<InstrumentWindow, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
+  virtual void deleteHandle(const std::string & ws_name, boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
+  virtual void clearADSHandle();
 };
 
 #endif /*INSTRUMENTWINDOW_H_*/

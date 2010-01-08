@@ -23,7 +23,7 @@ using namespace Mantid::API;
  */
 MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
-  :PlotCurve(name),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
+  :PlotCurve(name), WorkspaceObserver(),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
 {
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
@@ -39,6 +39,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
+  observeADSClear();
 }
 
 /**
@@ -53,7 +54,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,
  */
 MantidCurve::MantidCurve(const QString& wsName,Graph* g,
                          const QString& type,int index,bool err)
- :PlotCurve(),m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
+  :PlotCurve(), WorkspaceObserver(), m_drawErrorBars(err),m_wsName(wsName),m_type(type),m_index(index)
 {
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
@@ -72,15 +73,17 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
+  observeADSClear();
 }
 
 MantidCurve::MantidCurve(const MantidCurve& c)
-  :PlotCurve(createCopyName(c.title().text())),m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName),m_type(c.m_type),m_index(c.m_index)
+  :PlotCurve(createCopyName(c.title().text())), WorkspaceObserver(), m_drawErrorBars(c.m_drawErrorBars),m_wsName(c.m_wsName),m_type(c.m_type),m_index(c.m_index)
 {
   setData(c.data());
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
   observeAfterReplace();
+  observeADSClear();
 }
 
 /**
@@ -100,7 +103,7 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
     setData(data);
   }
   else
-    throw std::runtime_error("Unrecognized MuntidCurve type " + type.toStdString());
+    throw std::runtime_error("Unrecognized MantidCurve type " + type.toStdString());
   if (workspace->isHistogramData())
   {
     setStyle(QwtPlotCurve::Steps);

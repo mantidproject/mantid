@@ -39,10 +39,8 @@ using namespace Mantid::API;
 
 //Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
-  : MdiSubWindow(label, parent, name, 0),m_funct(this),m_histogram(false),
+  : MdiSubWindow(label, parent, name, 0), WorkspaceObserver(), m_funct(this),m_histogram(false),
   y_start(0.0),y_end(0.0),m_min(0),m_max(0),m_are_min_max_set(false),
-  m_replaceObserver(*this,&MantidMatrix::handleReplaceWorkspace),
-  m_deleteObserver(*this,&MantidMatrix::handleDeleteWorkspace),
   m_selectedRows(),m_selectedCols()
 {
   m_appWindow = parent;
@@ -97,11 +95,10 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
   setGeometry(50, 50, QMIN(5, numCols())*m_table_viewY->horizontalHeader()->sectionSize(0) + 55,
               (QMIN(10,numRows())+1)*m_table_viewY->verticalHeader()->sectionSize(0)+100);
 
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+  observeAfterReplace();
+  observeDelete();
+  observeADSClear();
 
-  connect(this,SIGNAL(needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::MatrixWorkspace_sptr)));
-  connect(this,SIGNAL(needDeleteWorkspace()),this,SLOT(deleteWorkspace()));
   connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
 
@@ -110,8 +107,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
 
 MantidMatrix::~MantidMatrix()
 {
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   delete m_modelY;
   delete m_modelX;
   delete m_modelE;
@@ -911,12 +906,12 @@ void MantidMatrix::repaintAll()
   }
 }
 
-void MantidMatrix::handleReplaceWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::AfterReplaceNotification>& pNf)
+void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if( pNf->object_name() != m_strName || !pNf->object().get() ) return;
+  if( wsName != m_strName || !ws.get() ) return;
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
-  emit needChangeWorkspace( new_workspace );
+  changeWorkspace(new_workspace);
 
 }
 
@@ -1043,15 +1038,21 @@ void MantidMatrix::setMatrixProperties()
   dlg->exec();
 }
 
-void MantidMatrix::handleDeleteWorkspace(const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& pNf)
+void MantidMatrix::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if (pNf->object() == m_workspace)
+  if (m_workspace.get() == ws.get())
   {
-    emit needDeleteWorkspace();
+    closeMatrix();
   }
 }
 
-void MantidMatrix::deleteWorkspace()
+void MantidMatrix::clearADSHandle()
+{
+  closeMatrix();
+}
+
+
+void MantidMatrix::closeMatrix()
 {
   askOnCloseEvent(false);
   close();

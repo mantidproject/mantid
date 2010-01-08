@@ -24,7 +24,6 @@
 #include <QMap>
 #include <QMutex>
 
-
 //----------------------------------
 // Forward declarations
 //----------------------------------
@@ -237,6 +236,7 @@ signals:
     void workspace_added(const QString &, Mantid::API::Workspace_sptr);
     void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
     void workspace_removed(const QString &);
+    void workspaces_cleared();
 
     void needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
 
@@ -366,6 +366,9 @@ private:
 
     void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
     Poco::NObserver<MantidUI, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
+
+  void handleClearADS(Mantid::API::ClearADSNotification_ptr pNf);
+  Poco::NObserver<MantidUI, Mantid::API::ClearADSNotification> m_clearADSObserver;
 
 
 	//#678

@@ -36,15 +36,17 @@
 class WorkspaceObserver
 {
 public:
-  WorkspaceObserver()
-    :m_deleteObserver(*this,&WorkspaceObserver::_deleteHandle),
-    m_afterReplaceObserver(*this,&WorkspaceObserver::_afterReplaceHandle)
+  WorkspaceObserver() :
+    m_deleteObserver(*this,&WorkspaceObserver::_deleteHandle),
+    m_afterReplaceObserver(*this,&WorkspaceObserver::_afterReplaceHandle),
+    m_clearADSObserver(*this,&WorkspaceObserver::_clearADSHandle)
   {}
 
   virtual ~WorkspaceObserver()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_afterReplaceObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
   }
 
   void observeDelete()
@@ -55,6 +57,11 @@ public:
   void observeAfterReplace()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_afterReplaceObserver);
+  }
+
+  void observeADSClear()
+  {
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
   }
 
 protected:
@@ -74,6 +81,13 @@ protected:
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
   }
+  /** Handle an ADS clear notification
+   * 
+   */
+  virtual void clearADSHandle()
+  {
+  }
+  
 private:
 
   /** Poco notification handler for DataService::DeleteNotification.
@@ -95,6 +109,16 @@ private:
   }
   /// Poco::NObserver for DataServise::DeleteNotification.
   Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAfterReplaceNotification> m_afterReplaceObserver;
+  
+  ///Clear notification observer
+  Poco::NObserver<WorkspaceObserver, Mantid::API::ClearADSNotification> m_clearADSObserver;
+  /// ADS clear notification
+  void _clearADSHandle(Mantid::API::ClearADSNotification_ptr)
+  {
+    this->clearADSHandle();
+  }
+
+  
 
 };
 

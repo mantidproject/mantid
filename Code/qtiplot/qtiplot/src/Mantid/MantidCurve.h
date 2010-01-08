@@ -112,6 +112,12 @@ private:
   /// Handles afterReplace notification
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
+  /// Handle an ADS clear notificiation
+  void clearADSHandle()
+  {
+    emit removeMe(this);
+  }
+
 signals:
 
   void resetData(const QString&);

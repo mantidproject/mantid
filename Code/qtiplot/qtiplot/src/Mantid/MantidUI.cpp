@@ -56,6 +56,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 m_addObserver(*this,&MantidUI::handleAddWorkspace),
 m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
+m_clearADSObserver(*this,&MantidUI::handleClearADS),
 m_appWindow(aw),
 m_progressDialog(0)
 {
@@ -105,6 +106,8 @@ m_progressDialog(0)
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
+
 
     mantidMenu = new QMenu(m_appWindow);
     mantidMenu->setObjectName("mantidMenu");
@@ -172,6 +175,7 @@ MantidUI::~MantidUI()
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
 
   Mantid::API::AnalysisDataService::Instance().clear();
 }
@@ -1294,6 +1298,11 @@ void MantidUI::handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf)
   emit workspace_removed(QString::fromStdString(pNf->object_name()));
 }
 
+void MantidUI::handleClearADS(ClearADSNotification_ptr)
+{
+  emit workspaces_cleared();
+}
+
 void MantidUI::logMessage(const Poco::Message& msg)
 {
     if (!appWindow()->results) return;
@@ -1425,18 +1434,9 @@ void MantidUI::clearAllMemory()
 
   if( pressed != QMessageBox::Ok ) return;
 
-
-  foreach( MdiSubWindow* sub_win, m_appWindow->windowsList() )
-  {
-    if( qobject_cast<MantidMatrix*>(sub_win) || qobject_cast<InstrumentWindow*>(sub_win))
-    {
-      sub_win->close();
-    }
-  }
-
-  // Note that this call does not emit delete notifications
+  // Relevant notifications are connected to signals that will close all dependent windows
   Mantid::API::FrameworkManager::Instance().clear();
-  m_exploreMantid->clearWorkspaceTree();
+
 }
 void MantidUI::saveProject(bool saved)
 {
@@ -1449,13 +1449,11 @@ void MantidUI::saveProject(bool saved)
 	}
 	//close all the windows opened
 	foreach( MdiSubWindow* sub_win, appWindow()->windowsList() )
-	{	//if(sub_win->isA("mantidmatrix"))
+	{
 	     sub_win->setconfirmcloseFlag(false);
-		sub_win->close();
+	     sub_win->close();
 	}
-	// Note that this call does not emit delete notifications
 	Mantid::API::FrameworkManager::Instance().clear();
-	m_exploreMantid->clearWorkspaceTree();
 }
 void MantidUI::enableSaveNexus(const QString& wsName)
 {

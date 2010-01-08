@@ -17,6 +17,7 @@
 #include "../UserFunction.h"
 #include "../MdiSubWindow.h"
 #include "../Graph.h"
+#include "WorkspaceObserver.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
@@ -78,7 +79,7 @@ private:
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 */
-class MantidMatrix : public MdiSubWindow
+class MantidMatrix : public MdiSubWindow, WorkspaceObserver
 {
   Q_OBJECT
 
@@ -149,17 +150,19 @@ public:
 
   Spectrogram* plotSpectrogram(Graph* plot ,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData*prjdata);
 
+  void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
+  void clearADSHandle();
+
 signals:
 
   void needsUpdating();
-  void needChangeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
-  void needDeleteWorkspace();
   void showContextMenu();
 
 public slots:
 
   void changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
-  void deleteWorkspace();
+  void closeMatrix();
 
   //! Return the width of all columns
   int columnsWidth(int i=-1);
@@ -229,12 +232,6 @@ public slots:
 protected:
 
   void setup(Mantid::API::MatrixWorkspace_sptr ws, int start=-1, int end=-1);
-
-  void handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
-  Poco::NObserver<MantidMatrix, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
-
-  void handleDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr pNf);
-  Poco::NObserver<MantidMatrix, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
 
   ApplicationWindow *m_appWindow;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
