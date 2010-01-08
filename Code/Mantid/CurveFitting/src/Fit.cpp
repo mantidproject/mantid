@@ -13,6 +13,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
+#include "MantidCurveFitting/SimplexMinimizer.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -430,26 +431,18 @@ namespace CurveFitting
     f.p = l_data.p;
     f.params = &l_data;
 
-    // set-up remaining GSL machinery for least squared
+    // set-up minimizer
 
-    IFuncMinimizer* minimizer;
+    IFuncMinimizer* minimizer = NULL;
 
     if (isDerivDefined)
     {
       minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg);
     }
-
-    // set-up remaining GSL machinery to use simplex algorithm
-    // always set this algorithm up since in case levenberg-marquardt fail 
-    // then simplex is used as fall-back algorithm
-
-    const gsl_multimin_fminimizer_type *simplexType = gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *simplexMinimizer = NULL;
-    gsl_vector *simplexStepSize = NULL;
-    simplexMinimizer = gsl_multimin_fminimizer_alloc(simplexType, l_data.p);
-    simplexStepSize = gsl_vector_alloc(l_data.p);
-    gsl_vector_set_all (simplexStepSize, 1);  // is this always a sensible starting step size?
-    gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
+    else
+    {
+      minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
+    }
     
 
     // finally do the fitting
@@ -457,7 +450,6 @@ namespace CurveFitting
     int iter = 0;
     int status;
     bool simplexFallBack = false; // set to true if levenberg-marquardt fails
-    double size; // for simplex algorithm
     double finalCostFuncVal;
     double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
 
@@ -481,6 +473,8 @@ namespace CurveFitting
           if (iter < 3)
           {
             simplexFallBack = true;
+            delete minimizer;
+            minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
             iter = 0;
             g_log.warning() << "Fit algorithm using Levenberg-Marquardt failed "
               << "reporting the following: " << gsl_strerror(status) << "\n"
@@ -502,7 +496,7 @@ namespace CurveFitting
       while (status == GSL_CONTINUE && iter < maxInterations)
       {
         iter++;
-        status = gsl_multimin_fminimizer_iterate(simplexMinimizer);
+        status = minimizer->iterate();
 
         if (status)  // break if error
         {
@@ -510,8 +504,8 @@ namespace CurveFitting
           if (iter == 1)
           { 
             g_log.information() << "Simplex step size reduced to 0.1\n";
-            gsl_vector_set_all (simplexStepSize, 0.1);
-            gsl_multimin_fminimizer_set(simplexMinimizer, &gslSimplexContainer, initFuncArg, simplexStepSize);
+            delete minimizer;
+            minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 0.1);
             //iter = 0;
             status = GSL_CONTINUE;
             continue;
@@ -519,12 +513,11 @@ namespace CurveFitting
           break;
         }
 
-        size = gsl_multimin_fminimizer_size(simplexMinimizer);
-        status = gsl_multimin_test_size(size, 1e-2);
+        status = minimizer->hasConverged();
         prog.report();
       }
 
-      finalCostFuncVal = simplexMinimizer->fval / dof;
+      finalCostFuncVal = minimizer->costFunctionVal() / dof;
     }
 
     // Output summary to log file
@@ -547,12 +540,6 @@ namespace CurveFitting
 
     setProperty("Output Status", reportOfFit);
     setProperty("Output Chi^2/DoF", finalCostFuncVal);
-
-
-    // cleanup memory allocated for solvers
-    
-    gsl_vector_free(simplexStepSize);
-    gsl_multimin_fminimizer_free(simplexMinimizer);
     
 
     // if Output property is specified output additional workspaces
@@ -622,6 +609,10 @@ namespace CurveFitting
       setProperty("OutputWorkspace",ws);
 
     }
+
+    // minimizer may have dynamically allocated memory hence make sure this memory is freed up
+
+    delete minimizer;
 
     // clean up dynamically allocated gsl stuff
 

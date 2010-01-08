@@ -259,6 +259,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SimplexMinimizer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SpecialFunctionHelper.cpp"
 				>
 			</File>
@@ -398,6 +402,10 @@
 			</File>
 			<File
 				RelativePath=".\test\QuadraticTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\SimplexMinimizer.h"
 				>
 			</File>
 			<File

@@ -2,8 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_fit.h>
 #include <gsl/gsl_blas.h>
 #include "MantidKernel/Exception.h"
 
