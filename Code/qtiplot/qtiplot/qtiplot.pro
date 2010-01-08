@@ -34,9 +34,9 @@ win32:build_pass:CONFIG(debug, debug|release) {
 
 build_pass:CONFIG(debug, debug|release) {
   # Put the debug version alongside the Mantid debug dlls to make sure it picks them up
-  DESTDIR = ../../Mantid/Bin/Shared
+  DESTDIR = ../../Mantid/debug
 } else {
-  DESTDIR =  ../../Mantid/Bin/Shared
+  DESTDIR = ./
 }
 
 ##################### 3rd PARTY HEADER FILES SECTION ########################
@@ -66,9 +66,8 @@ win32 {
 
 unix {
   INCLUDEPATH       += /usr/include/
-  INCLUDEPATH       += /usr/include/muParser
-  INCLUDEPATH       += /usr/include/qwt-qt4
-  INCLUDEPATH       += /usr/include/qwtplot3d-qt4
+  INCLUDEPATH       += /usr/include/qwt/
+  INCLUDEPATH       += /usr/include/qwtplot3d/
 }
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
@@ -78,21 +77,26 @@ unix {
 
 # dynamically link against dependencies if they are installed system-wide
 unix {
-  LIBS		+= -lPocoUtil
-  LIBS		+= -lPocoFoundation
-  LIBS         += -lgsl -lgslcblas
-  LIBS         += -lmuparser
-  LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
-  LIBS		+= -lMantidGeometry
-  LIBS		+= -lMantidAPI
-
-#  LIBS += -lMantidCurveFitting
-
-  LIBS         += -lqwtplot3d-qt4
-  LIBS         += -lqwt-qt4
-  LIBS   += -L../MantidQt/lib -lMantidQtAPI
-  LIBS          += -L../QtPropertyBrowser/lib -lQtPropertyBrowser
   LIBS         += -lqscintilla2
+  LIBS         += -lmuparser
+  LIBS         += -L/usr/lib -lqwtplot3d-qt4
+  LIBS         += -L/usr/lib/ -lqwt
+  LIBS         += -lgsl -lgslcblas
+
+  LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
+  LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
+  LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
+  LIBS          += -L../QtPropertyBrowser/lib -lQtPropertyBrowser
+
+  LIBS   += -L../MantidQt/lib -lMantidQtAPI
+
+  LIBS		+= -L/usr/lib/ -lPocoUtil
+  LIBS		+= -L/usr/lib/ -lPocoFoundation
+
+  LIBS 		+= -Wl,-rpath,/opt/Mantid/bin
+  LIBS 		+= -Wl,-rpath,/opt/Mantid/plugins
+  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib64
+  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib
 }
 ##################### Windows ###############################################
 win32 {
@@ -147,8 +151,6 @@ win32 {
   # This makes release the default build on running nmake. Must be here - after the config dependent parts above
   CONFIG += release
 }
-
-CONFIG += debug
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
 #############################################################################
