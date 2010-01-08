@@ -186,7 +186,6 @@ class WorkspaceProxyFactory(object):
         proxy = WorkspaceProxy(wksp, self)
         self.__gc.register(wksp.getName(), proxy)
         return proxy
-
             
 
 #-------------------------------------------------------------------------------
@@ -220,6 +219,12 @@ class WorkspaceGarbageCollector(object):
             self._refs[name]._kill_object()
             # Remove the key as we don't want to keep the reference around
             del self._refs[name]
+
+    def kill_all(self):
+        '''
+        Kill all references to data objects
+        '''
+        self._refs.clear()
 
 #---------------------------------------------------------------------------------------
 
@@ -341,11 +346,12 @@ class MantidPyFramework(Mantid.FrameworkManager):
         if wksp != None:
             self._garbage_collector.replace(name, wksp)
 
-    def _workspaceRemoved(self, name):
+    def _workspaceStoreCleared(self):
         '''
-        Called when a workspace has been removed from the Mantid ADS
+        Called when the ADS is cleared
         '''
-        self._garbage_collector.kill_object(name)
+        self._garbage_collector.kill_all()
+
 
     def _createAlgProxy(self, ialg):
         return IAlgorithmProxy(ialg, self)

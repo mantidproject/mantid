@@ -66,6 +66,8 @@ namespace PythonAPI
 	   &FrameworkManagerWrapper::default_workspaceReplaced)
       .def("_workspaceAdded", &FrameworkManagerProxy::workspaceAdded, 
 	   &FrameworkManagerWrapper::default_workspaceAdded)
+      .def("_workspaceStoreCleared", &FrameworkManagerProxy::workspaceStoreCleared, 
+	   &FrameworkManagerWrapper::default_workspaceStoreCleared)
       .def("_setGILRequired", &FrameworkManagerProxy::setGILRequired)
     ;
   }

@@ -17,9 +17,10 @@ namespace API
 Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
 
 /// Default constructor
-MatrixWorkspace::MatrixWorkspace() : Workspace(), m_axes(), m_isInitialized(false),
-  sptr_instrument(new Instrument), m_spectramap(), //sptr_sample(new Sample),
-  m_YUnit("Counts"), m_isDistribution(false), m_parmap(), m_masks(),m_sample()
+MatrixWorkspace::MatrixWorkspace() : 
+  Workspace(), m_axes(), m_isInitialized(false),
+  sptr_instrument(new Instrument), m_spectramap(), m_sample(),
+  m_YUnit("Counts"), m_isDistribution(false), m_parmap(), m_masks()
 {}
 
 /// Destructor

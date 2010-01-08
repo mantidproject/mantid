@@ -126,6 +126,14 @@ public:
         DeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
     };
 
+    /// Clear notification is sent when the service is cleared
+    class ClearNotification: public DataServiceNotification
+    {
+    public:
+      ///Constructor
+      ClearNotification() :  DataServiceNotification("", boost::shared_ptr<T>()) {}
+    };
+
 
   /// Add an object to the service
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
@@ -197,6 +205,8 @@ public:
   void clear()
   {
     datamap.clear();
+    notificationCenter.postNotification(new ClearNotification());
+    g_log.debug() << typeid(this).name() << " cleared.";
   }
 
   /// Get a shared pointer to a stored data object

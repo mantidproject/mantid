@@ -67,7 +67,48 @@ namespace PythonAPI
       this->FrameworkManagerProxy::workspaceAdded(name);
     }
 
+    void workspaceStoreCleared()
+    {
+      dispatch_python_call_noarg("_workspaceStoreCleared", 
+				 &FrameworkManagerWrapper::default_workspaceStoreCleared);
+    }
+
+    void default_workspaceStoreCleared()
+    {
+      this->FrameworkManagerProxy::workspaceStoreCleared();
+    }
+
   private:
+    /// Function pointer typedef for default function implementations with no arguments
+    typedef void(FrameworkManagerWrapper::*default_function_noarg)();
+    
+    /** Dispatch a single string argument python function call
+     * @param name pyfunction_name The name of the (possibly) overloaded python function
+     * @param arg The string argument
+     * @returns True if an overloaded function was found
+     */
+    void dispatch_python_call_noarg(const std::string & pyfunction_name, default_function_noarg def_fn)
+    {
+      if( boost::python::override dispatcher = this->get_override(pyfunction_name.c_str()) )
+      {
+        if( m_gil_required )
+        {
+          PyGILState_STATE gstate = PyGILState_Ensure();
+          dispatcher();
+          PyGILState_Release(gstate);
+        }
+        else 
+        {
+          dispatcher();
+        }
+      }
+      else 
+      {
+        // If no override is present then call our default implementation
+        (this->*def_fn)();
+      }
+    }
+
     /// Function pointer typedef for default function implementations
     typedef void(FrameworkManagerWrapper::*default_function)(const std::string &);
     

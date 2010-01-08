@@ -125,17 +125,21 @@ public:
    * A function that can be overridden in Python to handle the removal of a workspace from the ADS
    * @param name The name of the workspace
    */
-  virtual void workspaceRemoved(const std::string & name);
+  virtual void workspaceRemoved(const std::string & name) {}
   /** 
    * A function that can be overridden in Python to handle the adding a workspace to the ADS
    * @param name The name of the workspace
    */
-  virtual void workspaceAdded(const std::string & name);
+  virtual void workspaceAdded(const std::string & name) {}
   /** 
    * A function that can be overridden in Python to handle the replacing a workspace to the ADS
    * @param name The name of the workspace
    */
-  virtual void workspaceReplaced(const std::string & name);
+  virtual void workspaceReplaced(const std::string & name) {}
+  /**
+   * A function that notifies Python that that the workspace store has been cleared
+   */
+  virtual void workspaceStoreCleared() {}
   //@}
 
   /// Set GIL state
@@ -183,6 +187,11 @@ public:
   void replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice);
   /// Poco delete notification observer object
   Poco::NObserver<FrameworkManagerProxy, Mantid::API::WorkspaceAfterReplaceNotification> m_replace_observer;
+  /// Function called when observer objects recieves a replace notification
+  void clearNotificationReceived(Mantid::API::ClearADSNotification_ptr notice);
+  /// Poco clear notification observer object
+  Poco::NObserver<FrameworkManagerProxy, Mantid::API::ClearADSNotification> m_clear_observer;
+
   /// A Python logger
   static Mantid::Kernel::Logger& g_log;
  

@@ -98,6 +98,10 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>:
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification WorkspaceDeleteNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::DeleteNotification>& WorkspaceDeleteNotification_ptr;
 
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification ClearADSNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification>& ClearADSNotification_ptr;
+
+
 } // Namespace API
 } // Namespace Mantid
 

@@ -34,21 +34,25 @@ bool FrameworkManagerProxy::m_gil_required = false;
 FrameworkManagerProxy::FrameworkManagerProxy() 
   : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived),
     m_add_observer(*this, &FrameworkManagerProxy::addNotificationReceived),
-    m_replace_observer(*this, &FrameworkManagerProxy::replaceNotificationReceived)
+    m_replace_observer(*this, &FrameworkManagerProxy::replaceNotificationReceived),
+    m_clear_observer(*this, &FrameworkManagerProxy::clearNotificationReceived)
 {
   API::FrameworkManager::Instance();
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
+  API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clear_observer);
 
 }
 
 ///Destructor
 FrameworkManagerProxy::~FrameworkManagerProxy()
 {
+  API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clear_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+
 }
 
 /// Clear the FrameworkManager	
@@ -307,21 +311,6 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
   return API::AnalysisDataService::Instance().doesExist(name);
 }
 
-/// Called when a workspace is removed.
-void FrameworkManagerProxy::workspaceRemoved(const std::string &)
-{
-}
-
-/// Called when a workspace is added.
-void FrameworkManagerProxy::workspaceAdded(const std::string &)
-{
-}
-
-/// Called when a workspace is replaced.
-void FrameworkManagerProxy::workspaceReplaced(const std::string &)
-{
-}
-
 /**
  * Adds a algorithm created in Python to Mantid's algorithms.
  * Converts the Python object to a C++ object - not sure how, will find out.
@@ -396,6 +385,16 @@ void FrameworkManagerProxy::replaceNotificationReceived(Mantid::API::WorkspaceAf
 {  
   /// This function may be overridden in Python
   workspaceReplaced(notice->object_name());
+}
+
+/**
+ * Utility function called when a workspace is replaced within the service
+ * @param notice A pointer to a ClearADSNotification object
+ */
+void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotification_ptr notice)
+{
+  /// This function may be overridden in Python
+  workspaceStoreCleared();
 }
 
 }
