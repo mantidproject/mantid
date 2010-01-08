@@ -119,7 +119,7 @@ public:
     file.close();
     
     AnalysisDataService::Instance().remove(input);
-    //Poco::File(outputFile).remove();
+    Poco::File(outputFile).remove();
   }
   
 private:

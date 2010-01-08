@@ -56,7 +56,7 @@ struct Direction
     @author Based on the Gaudi class of the same name (see http://proj-gaudi.web.cern.ch/proj-gaudi/)
     @date 13/11/2007
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -82,40 +82,40 @@ public:
   /// 'Virtual copy constructor'
   virtual Property* clone() = 0;
   /// Virtual destructor
-	virtual ~Property();
+  virtual ~Property();
 
-	// Getters
-	const std::string& name() const;
-	const std::string& documentation() const;
-	const std::type_info* type_info() const;
-	const std::string type() const;
-	
-	///Overridden function that checks whether the property, if not overriden returns ""
-	virtual std::string isValid() const;
+  // Getters
+  const std::string& name() const;
+  const std::string& documentation() const;
+  const std::type_info* type_info() const;
+  const std::string type() const;
+
+  ///Overridden function that checks whether the property, if not overriden returns ""
+  virtual std::string isValid() const;
   ///Overriden function that returns if property has the same value that it was initialised with, if applicable
   virtual bool isDefault() const = 0;
 
   /**Sets the user level description of the property
-  *  @param documentation The string that the user will see
-  */
-	void setDocumentation( const std::string& documentation );
+   *  @param documentation The string that the user will see
+   */
+  void setDocumentation(const std::string& documentation);
 
-	/// Returns the value of the property as a string
-	virtual std::string value() const = 0;
-	/// Set the value of the property via a string.  If the value is unacceptable the value is not changed but a string is returned
-  virtual std::string setValue( const std::string& ) = 0;
+  /// Returns the value of the property as a string
+  virtual std::string value() const = 0;
+  /// Set the value of the property via a string.  If the value is unacceptable the value is not changed but a string is returned
+  virtual std::string setValue(const std::string&) = 0;
   /// Get the default value for the property which is the value the property was initialised with
-  virtual std::string getDefault() const = 0; 
+  virtual std::string getDefault() const = 0;
 
-	virtual std::set<std::string> allowedValues() const;
+  virtual std::set<std::string> allowedValues() const;
 
-	virtual const PropertyHistory createHistory() const;
+  virtual const PropertyHistory createHistory() const;
 
-    /// returns the direction of the property
-    const unsigned int direction() const
-    {
-      return m_direction;
-    }
+  /// returns the direction of the property
+  const unsigned int direction() const
+  {
+    return m_direction;
+  }
 
 protected:
   /// Constructor

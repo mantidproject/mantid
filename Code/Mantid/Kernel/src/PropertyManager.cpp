@@ -26,9 +26,9 @@ namespace Mantid
       // We need to do a deep copy of the property pointers here
       for (unsigned int i = 0; i < m_orderedProperties.size(); ++i)
       {
-	Property * p = other.m_orderedProperties[i]->clone();
-	this->m_orderedProperties[i] = p;
-	this->m_properties[p->name()] = p;
+        Property * p = other.m_orderedProperties[i]->clone();
+        this->m_orderedProperties[i] = p;
+        this->m_properties[p->name()] = p;
       }
     }
 
@@ -37,13 +37,13 @@ namespace Mantid
       // We need to do a deep copy here
       if ( this != &other )
       {
-	this->m_properties.clear();
-	this->m_orderedProperties.resize(other.m_orderedProperties.size());
+        this->m_properties.clear();
+        this->m_orderedProperties.resize(other.m_orderedProperties.size());
         for (unsigned int i = 0; i < m_orderedProperties.size(); ++i)
         {
-	  Property * p = other.m_orderedProperties[i]->clone();
-	  this->m_orderedProperties[i] = p;
-	  this->m_properties[p->name()] = p;
+          Property * p = other.m_orderedProperties[i]->clone();
+          this->m_orderedProperties[i] = p;
+          this->m_properties[p->name()] = p;
         }
       }
       return *this;
@@ -58,12 +58,12 @@ namespace Mantid
       }
     }
 
-	 /** Add a property to the list of managed properties
-    *  @param p The property object to add
-    *  @param doc A description of the property that may be displayed to users
-    *  @throw Exception::ExistsError if a property with the given name already exists
-    *  @throw std::invalid_argument  if the property declared has an empty name.
-    */
+    /** Add a property to the list of managed properties
+     *  @param p The property object to add
+     *  @param doc A description of the property that may be displayed to users
+     *  @throw Exception::ExistsError if a property with the given name already exists
+     *  @throw std::invalid_argument  if the property declared has an empty name.
+     */
     void PropertyManager::declareProperty( Property *p, const std::string &doc )
     {
       // Get the name of the property and don't permit empty names
@@ -89,50 +89,50 @@ namespace Mantid
     }
 
     /** Set the ordered list of properties by one string of values.
-    *  @param propertiesArray The list of property values
-    *  @throws invalid_argument if error in parameters
-    */
+     *  @param propertiesArray The list of property values
+     *  @throws invalid_argument if error in parameters
+     */
     // Care will certainly be required in the calling of this function or it could all go horribly wrong!
     void PropertyManager::setProperties( const std::string &propertiesArray )
     {
-        // Split up comma-separated properties
-		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	
-		boost::char_separator<char> sep(";");
-		tokenizer propPairs(propertiesArray, sep);
-		int index=0;
-		// Iterate over the properties
-		for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end(); ++it)
-		{
-			boost::char_separator<char> sep2("=");
-			tokenizer properties(*it,sep2);
-			std::vector<std::string> property(properties.begin(), properties.end());
-			// Call the appropriate setProperty method on the algorithm
-			if ( property.size() == 2)
-			{
-				setPropertyValue(property[0],property[1]);
-			}
-			else if ( property.size() == 1)
-			{
-			// This is for a property with no value. Not clear that we will want such a thing.
-				setPropertyOrdinal(index,property[0]);
-			}
-			// Throw if there's a problem with the string
-			else
-			{
-				throw std::invalid_argument("Misformed properties string");
-			}
-			index++;
-		}  
+      // Split up comma-separated properties
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+
+      boost::char_separator<char> sep(";");
+      tokenizer propPairs(propertiesArray, sep);
+      int index=0;
+      // Iterate over the properties
+      for (tokenizer::iterator it = propPairs.begin(); it != propPairs.end(); ++it)
+      {
+        boost::char_separator<char> sep2("=");
+        tokenizer properties(*it,sep2);
+        std::vector<std::string> property(properties.begin(), properties.end());
+        // Call the appropriate setProperty method on the algorithm
+        if ( property.size() == 2)
+        {
+          setPropertyValue(property[0],property[1]);
+        }
+        else if ( property.size() == 1)
+        {
+          // This is for a property with no value. Not clear that we will want such a thing.
+          setPropertyOrdinal(index,property[0]);
+        }
+        // Throw if there's a problem with the string
+        else
+        {
+          throw std::invalid_argument("Misformed properties string");
+        }
+        index++;
+      }  
     }
 
     /** Set the value of a property by string
-    *  N.B. bool properties must be set using 1/0 rather than true/false
-    *  @param name The name of the property (case insensitive)
-    *  @param value The value to assign to the property
-    *  @throw Exception::NotFoundError if the named property is unknown
-    *  @throw std::invalid_argument If the value is not valid for the property given
-    */
+     *  N.B. bool properties must be set using 1/0 rather than true/false
+     *  @param name The name of the property (case insensitive)
+     *  @param value The value to assign to the property
+     *  @throw Exception::NotFoundError if the named property is unknown
+     *  @throw std::invalid_argument If the value is not valid for the property given
+     */
     void PropertyManager::setPropertyValue( const std::string &name, const std::string &value )
     {
       Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
@@ -146,12 +146,12 @@ namespace Mantid
     }
 
     /** Set the value of a property by an index
-    *  N.B. bool properties must be set using 1/0 rather than true/false
-    *  @param index The index of the property to assign
-    *  @param value The value to assign to the property
-    *  @throw std::runtime_error if the property index is too high
-    *  @throw std::invalid_argument If the value is not valid for the property given
-    */
+     *  N.B. bool properties must be set using 1/0 rather than true/false
+     *  @param index The index of the property to assign
+     *  @param value The value to assign to the property
+     *  @throw std::runtime_error if the property index is too high
+     *  @throw std::invalid_argument If the value is not valid for the property given
+     */
     void PropertyManager::setPropertyOrdinal( const int& index, const std::string &value )
     {
       Property *p = getPointerToPropertyOrdinal(index);   // throws runtime_error if property not in vector
@@ -165,9 +165,9 @@ namespace Mantid
     }
 
     /** Checks whether the named property is already in the list of managed property.
-    *  @param name The name of the property (case insensitive)
-    *  @return True if the property is already stored
-    */
+     *  @param name The name of the property (case insensitive)
+     *  @return True if the property is already stored
+     */
     bool PropertyManager::existsProperty( const std::string& name ) const
     {
       try
@@ -182,8 +182,8 @@ namespace Mantid
     }
 
     /** Validates all the properties in the collection
-    *  @return True if all properties have a valid value
-    */
+     *  @return True if all properties have a valid value
+     */
     bool PropertyManager::validateProperties() const
     {
       bool allValid = true;
@@ -203,10 +203,10 @@ namespace Mantid
     }
 
     /** Get the value of a property as a string
-    *  @param name The name of the property (case insensitive)
-    *  @return The value of the named property
-    *  @throw Exception::NotFoundError if the named property is unknown
-    */
+     *  @param name The name of the property (case insensitive)
+     *  @return The value of the named property
+     *  @throw Exception::NotFoundError if the named property is unknown
+     */
     std::string PropertyManager::getPropertyValue( const std::string &name ) const
     {
       Property *p = getPointerToProperty(name);   // throws NotFoundError if property not in vector
@@ -214,10 +214,10 @@ namespace Mantid
     }
 
     /** Get a property by name
-    *  @param name The name of the property (case insensitive)
-    *  @return A pointer to the named property
-    *  @throw Exception::NotFoundError if the named property is unknown
-    */
+     *  @param name The name of the property (case insensitive)
+     *  @return A pointer to the named property
+     *  @throw Exception::NotFoundError if the named property is unknown
+     */
     Property* PropertyManager::getPointerToProperty( const std::string &name ) const
     {
       std::string ucName = name;
@@ -231,10 +231,10 @@ namespace Mantid
     }
 
     /** Get a property by an index
-    *  @param index The name of the property (case insensitive)
-    *  @return A pointer to the named property
-    *  @throw std::runtime_error if the property index is too high
-    */
+     *  @param index The name of the property (case insensitive)
+     *  @return A pointer to the named property
+     *  @throw std::runtime_error if the property index is too high
+     */
     Property* PropertyManager::getPointerToPropertyOrdinal( const int& index) const
     {
 
@@ -246,27 +246,27 @@ namespace Mantid
     }
 
     /** Get the list of managed properties.
-    *  The properties will be stored in the order that they were declared.
-    *  @return A vector holding pointers to the list of properties
-    */
+     *  The properties will be stored in the order that they were declared.
+     *  @return A vector holding pointers to the list of properties
+     */
     const std::vector< Property* >& PropertyManager::getProperties() const
     {
       return m_orderedProperties;
     }
 
     /** Get the value of a property. Allows you to assign directly to a variable of the property's type
-    *  (if a supported type).
-    *
-    *  *** This method does NOT work for assigning to an existing std::string.
-    *      In this case you have to use getPropertyValue() instead.
-    *      Note that you can, though, construct a local string variable by writing,
-    *      e.g. std::string s = getProperty("myProperty"). ***
-    *
-    *  @param name The name of the property
-    *  @return The value of the property. Will be cast to the desired type (if a supported type).
-    *  @throw std::runtime_error If an attempt is made to assign a property to a different type
-    *  @throw Exception::NotFoundError If the property requested does not exist
-    */
+     *  (if a supported type).
+     *
+     *  *** This method does NOT work for assigning to an existing std::string.
+     *      In this case you have to use getPropertyValue() instead.
+     *      Note that you can, though, construct a local string variable by writing,
+     *      e.g. std::string s = getProperty("myProperty"). ***
+     *
+     *  @param name The name of the property
+     *  @return The value of the property. Will be cast to the desired type (if a supported type).
+     *  @throw std::runtime_error If an attempt is made to assign a property to a different type
+     *  @throw Exception::NotFoundError If the property requested does not exist
+     */
     PropertyManager::TypedValue PropertyManager::getProperty( const std::string &name ) const
     {
       return TypedValue(*this, name);
@@ -277,16 +277,16 @@ namespace Mantid
      */
     void PropertyManager::removeProperty(const std::string &name)
     {
-		 if(existsProperty(name))
-		 {		 //remove it
-			 Property* prop=getPointerToProperty(name);
-			 m_properties.erase(name);
-			 std::vector<Property*>::iterator itr;
-			 itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);
-			 m_orderedProperties.erase(itr);
-			 delete prop;
-		 }
-	 }
+      if(existsProperty(name))
+      {		 //remove it
+        Property* prop=getPointerToProperty(name);
+        m_properties.erase(name);
+        std::vector<Property*>::iterator itr;
+        itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);
+        m_orderedProperties.erase(itr);
+        delete prop;
+      }
+    }
 
   } // namespace Kernel
 } // namespace Mantid

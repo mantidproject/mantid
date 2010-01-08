@@ -32,11 +32,10 @@ public:
     NoExistLoad = 3        ///< to specify a file to read but the file doesn't have to exist
   };
 
-public:
   ///Constructor
   FileProperty(const std::string & name, const std::string& default_value, unsigned int action,
-	       const std::vector<std::string> & exts = std::vector<std::string>(), 
-	       unsigned int direction = Direction::Input);
+      const std::vector<std::string> & exts = std::vector<std::string>(), 
+      unsigned int direction = Direction::Input);
 
   /// 'Virtual copy constructor
   Property* clone() { return new FileProperty(*this); }
@@ -51,7 +50,6 @@ private:
   /// Check that a given directory exists
   void checkDirectory(const std::string & filepath) const;
 
-private:
   /// The action type of this property, i.e. load/save
   unsigned int m_action;
 };

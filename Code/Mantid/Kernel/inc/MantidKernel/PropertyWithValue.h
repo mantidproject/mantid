@@ -296,7 +296,7 @@ public:
    */
   virtual std::string isValid() const
   {
-	  return m_validator->isValid(m_value);
+    return m_validator->isValid(m_value);
   }
 
   /** Indicates if the property's value is the same as it was when it was set
@@ -337,13 +337,11 @@ private:
 template <typename TYPE>
 Logger& PropertyWithValue<TYPE>::g_log = Logger::get("PropertyWithValue");
 
-/// Takes a comma-separated string of values and stores them as the vector of values
-//template <> std::string PropertyWithValue<std::vector<int> >::setValue(const std::string& value);
 /** Takes a comma-separated string of values and stores them as the vector of values.
  *  @param value The new value. Allows ranges of integers, e.g. "1-5,7,9-12"
  */
 template <>
- inline std::string PropertyWithValue<std::vector<int> >::setValue(const std::string& value)
+inline std::string PropertyWithValue<std::vector<int> >::setValue(const std::string& value)
 {
   try{
     // Split up comma-separated properties
