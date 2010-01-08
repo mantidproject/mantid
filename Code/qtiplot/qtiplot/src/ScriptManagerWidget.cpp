@@ -456,16 +456,6 @@ bool ScriptManagerWidget::runScriptCode(const QString & code)
     displayOutput("Script execution started.", true);
   }
 
-//   bool success(false);
-//   try
-//   {
-//     success = m_script_runner->exec();
-//   }
-//   catch(std::exception & details)
-//   {
-//     success = false;
-//     displayError(QString("Error: ") + QString::fromStdString(details.what()));
-//   }
   bool success = m_script_runner->exec();
   emit ScriptIsActive(false);
   if( !m_interpreter_mode && success )

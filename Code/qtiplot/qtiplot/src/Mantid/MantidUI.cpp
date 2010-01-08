@@ -169,6 +169,15 @@ void MantidUI::showFitPropertyBrowser(bool on)
   }
 }
 
+/**
+ * Be careful where this is called, if it is a called too late in the Qt shutdown the application
+ * crashes
+ */
+void MantidUI::shutdown()
+{
+  Mantid::API::FrameworkManager::Instance().clear();
+}
+
 MantidUI::~MantidUI()
 {
   if( m_algMonitor ) delete m_algMonitor;
@@ -177,7 +186,6 @@ MantidUI::~MantidUI()
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
 
-  Mantid::API::AnalysisDataService::Instance().clear();
 }
 
 void MantidUI::saveSettings() const

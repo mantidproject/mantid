@@ -69,64 +69,70 @@ void Script::setCode(const QString &code)
 
 ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent)
 {
-	if (!langs[0].constructor)
-		return NULL;
-	else
-		return langs[0].constructor(parent);
+  if (!langs[0].constructor)
+  {
+    return NULL;
+  }
+  else 
+  {
+    return langs[0].constructor(parent);
+  }
 }
 
 ScriptingEnv *ScriptingLangManager::newEnv(const char *name, ApplicationWindow *parent)
 {
-	
-	for (ScriptingLang *i = langs; i->constructor; i++)
-	{	if (!strcmp(name, i->name))
-		{
-			return i->constructor(parent);
-		}
-	}
-	return NULL;
+  for(ScriptingLang *i = langs; i->constructor; i++)
+  {	
+    if (!strcmp(name, i->name))
+    {
+      return i->constructor(parent);
+    }
+  }
+  return NULL;
 }
 
 QStringList ScriptingLangManager::languages()
 {
-	QStringList l;
-	for (ScriptingLang *i = langs; i->constructor; i++)
-		l << i->name;
-	return l;
+  QStringList l;
+  for (ScriptingLang *i = langs; i->constructor; i++)
+  {
+    l << i->name;
+  }
+  return l;
 }
 
 bool Script::compile(bool)
 {
-	emit_error("Script::compile called!", 0);
-	return false;
+  emit_error("Script::compile called!", 0);
+  return false;
 }
 
 QVariant Script::eval()
 {
-	emit_error("Script::eval called!",0);
-	return QVariant();
+  emit_error("Script::eval called!",0);
+  return QVariant();
 }
 
 bool Script::exec()
 {
-	emit_error("Script::exec called!",0);
-	return false;
+  emit_error("Script::exec called!",0);
+  return false;
 }
 
 scripted::scripted(ScriptingEnv *env)
 {
-	env->incref();
-	scriptEnv = env;
+  env->incref();
+  scriptEnv = env;
 }
 
 scripted::~scripted()
 {
-	scriptEnv->decref();
+  scriptEnv->decref();
 }
 
 void scripted::scriptingChangeEvent(ScriptingChangeEvent *sce)
 {
-	scriptEnv->decref();
-	sce->scriptingEnv()->incref();
-	scriptEnv = sce->scriptingEnv();
+  scriptEnv->decref();
+  sce->scriptingEnv()->incref();
+  scriptEnv = sce->scriptingEnv();
 }

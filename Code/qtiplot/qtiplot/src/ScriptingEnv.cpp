@@ -44,8 +44,19 @@ ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
   : QObject(0, langName), d_parent(parent), languageName(langName), m_report_progress(false), 
   m_is_running(false)
 {
-	d_initialized=false;
-	d_refcount=0;
+  d_initialized=false;
+  d_refcount=0;
+}
+
+bool ScriptingEnv::initialize()
+{
+  static bool is_initialized(false);
+  if( !is_initialized )
+  {
+    is_initialized = true;
+    return start();
+  }
+  return true;
 }
 
 //Mantid
@@ -56,11 +67,11 @@ const QString ScriptingEnv::scriptingLanguage() const
 
 const QString ScriptingEnv::fileFilter() const
 {
-	QStringList extensions = fileExtensions();
-	if (extensions.isEmpty())
-		return "";
-	else
-		return tr("%1 Source (*.%2);;").arg(name()).arg(extensions.join(" *."));
+  QStringList extensions = fileExtensions();
+  if (extensions.isEmpty())
+    return "";
+  else
+    return tr("%1 Source (*.%2);;").arg(name()).arg(extensions.join(" *."));
 }
 
 void ScriptingEnv::incref()

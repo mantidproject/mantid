@@ -7,7 +7,7 @@
 	Description          : Dialog for changing the current scripting
 	                       language
 
- ***************************************************************************/
+***************************************************************************/
 
 /***************************************************************************
  *                                                                         *
@@ -36,47 +36,44 @@
 #include <QMessageBox>
 
 ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent, Qt::WFlags fl )
-: QDialog(parent, fl), scripted(env)
+  : QDialog(parent, fl), scripted(env)
 {
-	setCaption(tr("QtiPlot - Select scripting language"));
+  setCaption(tr("QtiPlot - Select scripting language"));
 
-	langList = new QListWidget(this);
+  langList = new QListWidget(this);
 
-	btnOK = new QPushButton(tr("OK"));
-	btnCancel = new QPushButton(tr("Cancel"));
+  btnOK = new QPushButton(tr("OK"));
+  btnCancel = new QPushButton(tr("Cancel"));
 
-	QHBoxLayout *hbox1 = new QHBoxLayout();
-    hbox1->addStretch();
-	hbox1->addWidget(btnOK);
-	hbox1->addWidget(btnCancel);
+  QHBoxLayout *hbox1 = new QHBoxLayout();
+  hbox1->addStretch();
+  hbox1->addWidget(btnOK);
+  hbox1->addWidget(btnCancel);
 
-	QVBoxLayout *vl = new QVBoxLayout(this);
-	vl->addWidget(langList);
-	vl->addLayout(hbox1);
+  QVBoxLayout *vl = new QVBoxLayout(this);
+  vl->addWidget(langList);
+  vl->addLayout(hbox1);
 
-	connect(btnOK, SIGNAL(clicked()), this, SLOT(accept()));
-	connect(btnCancel, SIGNAL(clicked()), this, SLOT(close()));
-	connect(langList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(accept()));
+  connect(btnOK, SIGNAL(clicked()), this, SLOT(accept()));
+  connect(btnCancel, SIGNAL(clicked()), this, SLOT(close()));
+  connect(langList, SIGNAL(itemActivated(QListWidgetItem*)), this, SLOT(accept()));
 
-	updateLangList();
+  updateLangList();
 }
 
 void ScriptingLangDialog::updateLangList()
 {
-	langList->clear();
-	langList->insertItems(0, ScriptingLangManager::languages());
-	QListWidgetItem *current = langList->findItems(scriptEnv->name(), Qt::MatchExactly).first();
-	if (current)
-		langList->setCurrentItem(current);
+  langList->clear();
+  langList->insertItems(0, ScriptingLangManager::languages());
+  QListWidgetItem *current = langList->findItems(scriptEnv->name(), Qt::MatchExactly).first();
+  if (current)
+    langList->setCurrentItem(current);
 }
 
 void ScriptingLangDialog::accept()
 {
-	ApplicationWindow *app = (ApplicationWindow*) parent();
-	if (app->setScriptingLanguage(langList->currentItem()->text()))
-		close();
-	else
-		QMessageBox::critical(this, tr("QtiPlot - Scripting Error"),
-				tr("Scripting language \"%1\" failed to initialize.").arg(langList->currentItem()->text()));
+  ApplicationWindow *app = (ApplicationWindow*) parent();
+  if (app->setScriptingLanguage(langList->currentItem()->text()))
+    close();
 }
 

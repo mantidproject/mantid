@@ -31,28 +31,29 @@
 
 #include "ScriptingEnv.h"
 #include "PythonScript.h"
+#include <Qsci/qscilexerpython.h> //Mantid
 
 class QObject;
 class QString;
-class QsciLexer; //Mantid
-
-//typedef struct _object PyObject;
 
 class PythonScripting: public ScriptingEnv
 {
   Q_OBJECT
   
   public:
+  /// The langauge name
   static const char *langName;
-  PythonScripting(ApplicationWindow *parent);
-  ~PythonScripting();
+  //Factory function
   static ScriptingEnv *constructor(ApplicationWindow *parent);
-  bool initialize();
-  
+  /// Default constructor
+  PythonScripting(ApplicationWindow *parent);
+  ///Destructor
+  ~PythonScripting();
+
   void write(const QString &text) { emit print(text); }
   
   //Mantid. To ensure the correct code lexer for Python 
-  virtual QsciLexer* scriptCodeLexer() const;
+  virtual QsciLexer* scriptCodeLexer() const { return new QsciLexerPython; }
 
   // Python supports progress monitoring
   virtual bool supportsProgressReporting() const { return true; }
@@ -80,7 +81,6 @@ class PythonScripting: public ScriptingEnv
    */
   bool exec(const QString &code, PyObject *argDict=NULL, const char *name="<qtiplot>");
 
-  bool isRunning() const;
   Script *newScript(const QString &code, QObject *context, const QString &name="<input>")
   {
     return new PythonScript(this, code, context, name);
@@ -95,16 +95,19 @@ class PythonScripting: public ScriptingEnv
   const QString mathFunctionDoc (const QString &name) const;
   const QStringList fileExtensions() const;
 
-  PyObject *globalDict() { return globals; }
-  PyObject *sysDict() { return sys; }
-
+  PyObject *globalDict() { return m_globals; }
+  PyObject *sysDict() { return m_sys; }
 
 private:
+  //Start the environment
+  bool start();
+  //Shutdown the environment
+  void shutdown();
   bool loadInitFile(const QString &path);
 
-  PyObject *globals;		// PyDict of global environment
-  PyObject *math;		// PyDict of math functions
-  PyObject *sys;		// PyDict of sys module
+  PyObject *m_globals;		// PyDict of global environment
+  PyObject *m_math;		// PyDict of math functions
+  PyObject *m_sys;		// PyDict of sys module
 };
 
 #endif

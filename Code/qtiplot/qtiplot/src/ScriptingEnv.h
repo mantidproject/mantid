@@ -56,33 +56,30 @@ class ScriptingEnv : public QObject
   Q_OBJECT
 
   public:
-    ScriptingEnv(ApplicationWindow *parent, const char *langName);
-    //! Part of the initialization is deferred from the constructor until after the signals have been connected.
-    virtual bool initialize() { return true; };
-    //! initialization of the interpreter may fail; or there could be other errors setting up the environment
-    bool initialized() const { return d_initialized; }
-    //! whether asynchronuous execution is enabled (if supported by the implementation)
-    bool isRunning() const { return m_is_running; }
-    void setIsRunning(bool running) { m_is_running = running; }
-    
-    //! Instantiate the Script subclass matching the ScriptEnv subclass.
-    virtual Script *newScript(const QString&, QObject*, const QString&) { return 0; }
+  ScriptingEnv(ApplicationWindow *parent, const char *langName);
+  //! Initialize the environment
+  bool initialize();
+  bool isRunning() const { return m_is_running; }
+  void setIsRunning(bool running) { m_is_running = running; }
+
+  //! Instantiate the Script subclass matching the ScriptEnv subclass.
+  virtual Script *newScript(const QString&, QObject*, const QString&) { return 0; }
       
-    //! If an exception / error occured, return a nicely formated stack backtrace.
-    virtual QString stackTraceString() { return QString::null; }
+  //! If an exception / error occured, return a nicely formated stack backtrace.
+  virtual QString stackTraceString() { return QString::null; }
 
-    //! Return a list of supported mathematical functions. These should be imported into the global namespace.
-    virtual const QStringList mathFunctions() const { return QStringList(); }
-    //! Return a documentation string for the given mathematical function.
-    virtual const QString mathFunctionDoc(const QString&) const { return QString::null; }
-    //! Return a list of file extensions commonly used for this language.
-    virtual const QStringList fileExtensions() const { return QStringList(); };
-    //! Construct a filter expression from fileExtension(), suitable for QFileDialog.
-    const QString fileFilter() const;
+  //! Return a list of supported mathematical functions. These should be imported into the global namespace.
+  virtual const QStringList mathFunctions() const { return QStringList(); }
+  //! Return a documentation string for the given mathematical function.
+  virtual const QString mathFunctionDoc(const QString&) const { return QString::null; }
+  //! Return a list of file extensions commonly used for this language.
+  virtual const QStringList fileExtensions() const { return QStringList(); };
+  //! Construct a filter expression from fileExtension(), suitable for QFileDialog.
+  const QString fileFilter() const;
 
-    const QString scriptingLanguage() const;
-    //If the environment supports evaluation as well as execution then override and return true
-    virtual bool supportsEvaluation() { return false; }
+  const QString scriptingLanguage() const;
+  //If the environment supports evaluation as well as execution then override and return true
+  virtual bool supportsEvaluation() { return false; }
   //! Is progress reporting supported
   virtual bool supportsProgressReporting() const { return false; }
   //!Whether we should be reporting progress  
@@ -90,10 +87,9 @@ class ScriptingEnv : public QObject
   //!Set whether we should be reporting progress
   void reportProgress(bool on) { m_report_progress = on; }
 
-    // Mantid - For QScintilla. This is overridden in the concrete implementation 
-  //to return the appropriate
-    // code lexer if one is required
-    virtual QsciLexer* scriptCodeLexer() const = 0;
+  // Mantid - For QScintilla. This is overridden in the concrete implementation 
+  //to return the appropriate code lexer if one is required
+  virtual QsciLexer* scriptCodeLexer() const = 0;
 
   public slots:
     // global variables
@@ -103,10 +99,6 @@ class ScriptingEnv : public QObject
 
     //! Clear the global environment. What exactly happens depends on the implementation.
     virtual void clear() {}
-    //! If the implementation supports asynchronuos execution, deactivate it.
-    virtual void stopExecution() {}
-    //! If the implementation supports asynchronuos execution, activate it.
-    virtual void startExecution() {}
 
     //! Increase the reference count. This should only be called by scripted and Script to avoid memory leaks.
     void incref();
@@ -124,6 +116,12 @@ class ScriptingEnv : public QObject
     bool d_initialized;
     //! the context in which we are running
     ApplicationWindow *d_parent;
+
+private:
+  /** Override to perform some initialisation code */
+  virtual bool start() { return true; }
+  /** Override to perform some finalisation code */
+  virtual void shutdown() {}
 
   private:
     //! the reference counter

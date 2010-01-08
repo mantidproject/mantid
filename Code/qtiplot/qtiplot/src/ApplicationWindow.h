@@ -40,7 +40,7 @@
 #include <QDesktopServices>
 #include <QBuffer>
 #include <QLocale>
-
+#include <QSet>
 #include "Table.h"
 #include "ScriptingEnv.h"
 #include "Script.h"
@@ -971,12 +971,10 @@ public slots:
 	void executeNotes();
 	//! show scripting language selection dialog
 	void showScriptingLangDialog();
-	//! create a new environment for the current scripting language
-	void restartScriptingEnv();
 	//! print to scripting console (if available) or to stdout
 	void scriptPrint(const QString &text);
-	//! switches to the given scripting language; if this is the same as the current one and force is true, restart it
-	bool setScriptingLanguage(const QString &lang, bool force=false);
+	//! switches to the given scripting language; 
+	bool setScriptingLanguage(const QString &lang);
 
 	void scriptsDirPathChanged(const QString& path);
 	//@}
@@ -1287,7 +1285,7 @@ private:
 	QAction *actionHelpForums, *actionHelpBugReports;
 	QAction *actionShowPlotDialog, *actionShowScaleDialog, *actionOpenTemplate, *actionSaveTemplate;
 	QAction *actionNextWindow, *actionPrevWindow;
-	QAction *actionScriptingLang, *actionRestartScripting, *actionClearTable, *actionGoToRow, *actionGoToColumn;
+	QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
 	QAction *actionNoteExecute, *actionNoteExecuteAll, *actionNoteEvaluate, *actionSaveNote;
   QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
 	QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
@@ -1313,11 +1311,17 @@ private:
   bool d_user_script_running;
 
     QUndoView *d_undo_view;
-	/// list of mantidmatrix windows opened from project file.
-	QList<MantidMatrix*> m_mantidmatrixWindows;
+    /// list of mantidmatrix windows opened from project file.
+    QList<MantidMatrix*> m_mantidmatrixWindows;
 
     friend class MantidUI;
-	QString m_nexusInputWSName;
+    QString m_nexusInputWSName;
+
+    // Store initialized script environments
+    QHash<QString, ScriptingEnv*> m_script_envs;
+  /// Store a list of environments that cannot be used
+  QSet<QString> m_bad_script_envs;
+
 public:
     MantidUI *mantidUI;
 };

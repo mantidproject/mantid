@@ -39,256 +39,199 @@
 #include <QDir>
 #include <QCoreApplication>
 
-#include <Qsci/qscilexerpython.h> //Mantid
 #include "MantidKernel/ConfigService.h" //Mantid
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
 #include "../sipAPIqti.h"
+// Function is defined in a sip object file that is linked in later. There is no header file
+// so this is necessary
 extern "C" void initqti();
 
 // Language name
 const char* PythonScripting::langName = "Python";
 
+//Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
 { 
   return new PythonScripting(parent); 
 }
 
-//Mantid - Creates the correct code lexer for syntax highlighting
-QsciLexer* PythonScripting::scriptCodeLexer() const
-{
-  QsciLexer* lexer = new QsciLexerPython;
-  return lexer;
-}
-
-QString PythonScripting::toString(PyObject *object, bool decref)
-{
-	QString ret;
-	if (!object) return "";
-	PyObject *repr = PyObject_Str(object);
-	if (decref) 
-	{
-	  Py_DECREF(object);
-	}
-	if (!repr) return "";
-	ret = PyString_AsString(repr);
-	Py_DECREF(repr);
-	return ret;
-}
-
-PyObject *PythonScripting::eval(const QString &code, PyObject *argDict, const char *name)
-{
-	PyObject *args;
-	if (argDict)
-	{
-		Py_INCREF(argDict);
-		args = argDict;
-	} else
-		args = PyDict_New();
-	PyObject *ret=NULL;
-	PyObject *co = Py_CompileString(code.ascii(), name, Py_eval_input);
-	if (co)
-	{
-		ret = PyEval_EvalCode((PyCodeObject*)co, globals, args);
-		Py_DECREF(co);
-	}
-	Py_DECREF(args);
-	return ret;
-}
-
-bool PythonScripting::exec (const QString &code, PyObject *argDict, const char *name)
-{
-	PyObject *args;
-	if (argDict)
-	{
-		Py_INCREF(argDict);
-		args = argDict;
-	} else
-		args = PyDict_New();
-	PyObject *tmp = NULL;
-	PyObject *co = Py_CompileString(code.ascii(), name, Py_file_input);
-	if (co)
-	{
-	  tmp = PyEval_EvalCode((PyCodeObject*)co, globals, args);
-	  Py_DECREF(co);
-	}
-	Py_DECREF(args);
-	if (!tmp) return false;
-	Py_DECREF(tmp);
-	return true;
-}
-
-
+//Constructor
 PythonScripting::PythonScripting(ApplicationWindow *parent)
-	: ScriptingEnv(parent, langName)
+  : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
+    m_sys(NULL)
 {
-	PyObject *mainmod=NULL, *qtimod=NULL, *sysmod=NULL;
-	math = NULL;
-	sys = NULL;
-	d_initialized = false;
-	if (Py_IsInitialized())
-	{
-		mainmod = PyImport_ImportModule("__main__");
-		if (!mainmod)
-		{
-			PyErr_Print();
-			return;
-		}
-		globals = PyModule_GetDict(mainmod);
-		Py_DECREF(mainmod);
-	} else {
-		Py_Initialize ();
-		if (!Py_IsInitialized ())
-			return;
-		initqti();
-
-		mainmod = PyImport_AddModule("__main__");
-		if (!mainmod)
-		{
-			PyErr_Print();
-			return;
-		}
-		globals = PyModule_GetDict(mainmod);
-	}
-
-	if (!globals)
-	{
-		PyErr_Print();
-		return;
-	}
-	Py_INCREF(globals);
-
-	math = PyDict_New();
-	if (!math)
-		PyErr_Print();
-
-	qtimod = PyImport_ImportModule("qti");
-	if (qtimod)
-	{
-		PyDict_SetItemString(globals, "qti", qtimod);
-		PyObject *qtiDict = PyModule_GetDict(qtimod);
-		setQObject(d_parent, "app", qtiDict);
-		PyDict_SetItemString(qtiDict, "mathFunctions", math);
-		Py_DECREF(qtimod);
-	} else
-		PyErr_Print();
-
-	sysmod = PyImport_ImportModule("sys");
-	if (sysmod)
-	{
-		sys = PyModule_GetDict(sysmod);
-		Py_INCREF(sys);
-	} else
-		PyErr_Print();
-
-	d_initialized = true;
-	
-}
-
-bool PythonScripting::initialize()
-{
-	if (!d_initialized) return false;
-
-	// Redirect output to the print(const QString&) signal.
-	// Also see method write(const QString&) and Python documentation on
-	// sys.stdout and sys.stderr.
-	setQObject(this, "stdout", sys);
-	setQObject(this, "stderr", sys);
-
-	// Add to the module search path the location of mantid output files and bin directory
-  QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
-  QString pycode = 
-	  QString("import sys; sys.path.append('") + mantidbin.absolutePath() + QString("');");
-  QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
-	if( mantidoutput != mantidbin )
-	{
-	  pycode += QString("sys.path.append('") + mantidoutput.absolutePath() + QString("');");
-	}
-	PyRun_SimpleString(pycode.toStdString().c_str());
-
-	// Changed initialization to include a script which also loads the 
-	// MantidPythonAPI - M. Gigg
-	bool initglob = loadInitFile(mantidbin.absoluteFilePath("qtiplotrc"));
-	if( !initglob ) return false;
-
-	bool initmtd = loadInitFile(mantidbin.absoluteFilePath("mantidplotrc"));
-	
-	return initmtd;
-
 }
 
 PythonScripting::~PythonScripting()
 {
-	Py_XDECREF(globals);
-	Py_XDECREF(math);
-	Py_XDECREF(sys);
-
-	Py_Finalize();
+  shutdown();
 }
 
-bool PythonScripting::loadInitFile(const QString &path)
+/**
+ * Start the Python environment
+ */
+bool PythonScripting::start()
 {
-	QFileInfo pyFile(path+".py"), pycFile(path+".pyc");
-	bool success = false;
-	if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) {
-		// if we have a recent pycFile, use it
-		FILE *f = fopen(pycFile.filePath(), "rb");
-    success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
+  if( Py_IsInitialized() ) return true;
+  // Initialize interpreter, disabling signal registration as we don't need it
+  Py_InitializeEx(0);
+  //Keep a hold of the globals, math and sys dictionary objects
+  PyObject *pymodule = PyImport_AddModule("__main__");
+  if( !pymodule )
+  {
+    shutdown();
+    return false;
+  }
+  m_globals = PyModule_GetDict(pymodule);
+  if( !m_globals )
+  {
+    shutdown();
+    return false;
+  }
+  Py_INCREF(m_globals);
+
+  //Create a new dictionary for the math functions
+  m_math = PyDict_New();
+
+  pymodule = PyImport_ImportModule("sys"); 
+  m_sys = PyModule_GetDict(pymodule);
+  if( !m_sys )
+  {
+    shutdown();
+    return false;
+  }
+  Py_INCREF(m_sys);
+  //Embedded qti module needs sip definitions initializing before it can be used
+  initqti();
+
+  pymodule = PyImport_ImportModule("qti");
+  if( pymodule )
+  {
+    PyDict_SetItemString(m_globals, "qti", pymodule);
+    PyObject *qti_dict = PyModule_GetDict(pymodule);
+    setQObject(d_parent, "app", qti_dict);
+    PyDict_SetItemString(qti_dict, "mathFunctions", m_math);
+    Py_DECREF(pymodule);
   } 
-	else if (pyFile.isReadable() && pyFile.exists()) {
-		// try to compile pyFile to pycFile if the current location is writable
-	  QString testfile(QFileInfo(path).absoluteDir().absoluteFilePath("UNLIKELYFILENAME"));
-	  QFile tester(testfile);
-	  if( tester.open(QIODevice::WriteOnly) )
-	  {
-	        PyObject *compileModule = PyImport_ImportModule("py_compile");
-		if (compileModule) {
-			PyObject *compile = PyDict_GetItemString(PyModule_GetDict(compileModule), "compile");
-			if (compile) {
-				PyObject *tmp = PyObject_CallFunctionObjArgs(compile,
-						PyString_FromString(pyFile.filePath()),
-						PyString_FromString(pycFile.filePath()),
-						NULL);
-				if (tmp)
-					Py_DECREF(tmp);
-				else
-					PyErr_Print();
-			} else
-				PyErr_Print();
-			Py_DECREF(compileModule);
-		} else
-			PyErr_Print();
-		pycFile.refresh();
-	  }
-    //Remove the testing file   
-    tester.remove();
-    if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) {
-		// run the newly compiled pycFile
-		FILE *f = fopen(pycFile.filePath(), "rb");
-		success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
-		fclose(f);
-	      } 
-	      else 
-		{
-		  // fallback: just run pyFile
-		  /*FILE *f = fopen(pyFile.filePath(), "r");
-		    success = PyRun_SimpleFileEx(f, pyFile.filePath(), false) == 0;
-		    fclose(f);*/
-		  //TODO: code above crashes on Windows - bug in Python?
-		  QFile f(pyFile.filePath());
-		  if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-		    QByteArray data = f.readAll();
-		    success = (PyRun_SimpleString(data.data()) == 0);
-		    f.close();
-		  }
-		}
-	}
-	return success;
+  else
+  {
+    shutdown();
+    return false;
+  }
+
+  setQObject(this, "stdout", m_sys);
+  setQObject(this, "stderr", m_sys);
+
+  QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
+  QString pycode = 
+    QString("import sys; sys.path.append('") + mantidbin.absolutePath() + QString("');");
+  QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
+  if( mantidoutput != mantidbin )
+  {
+      pycode += QString("sys.path.append('") + mantidoutput.absolutePath() + QString("');");
+  }
+  PyRun_SimpleString(pycode.toStdString().c_str());
+
+  // Changed initialization to include a script which also loads the 
+  // MantidPythonAPI - M. Gigg
+  if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc")) && 
+      loadInitFile(mantidbin.absoluteFilePath("mantidplotrc")) )
+  {
+    d_initialized = true;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
-bool PythonScripting::isRunning() const
+/**
+ * Shutdown the interpreter
+ */
+void PythonScripting::shutdown()
 {
-	return Py_IsInitialized();
+  if( m_globals )
+  {
+    Py_XDECREF(m_globals);
+    m_globals = NULL;
+  }
+  if( m_math )
+  {
+    Py_XDECREF(m_math);
+    m_math = NULL;
+  }
+  if( m_sys )
+  {
+    Py_XDECREF(m_sys);
+
+    m_sys = NULL;
+  }
+  Py_Finalize();
+}
+
+QString PythonScripting::toString(PyObject *object, bool decref)
+{
+  QString ret;
+  if (!object) return "";
+  PyObject *repr = PyObject_Str(object);
+  if (decref) 
+  {
+    Py_DECREF(object);
+  }
+  if (!repr) return "";
+  ret = PyString_AsString(repr);
+  Py_DECREF(repr);
+  return ret;
+}
+
+PyObject *PythonScripting::eval(const QString &code, PyObject *argDict, const char *name)
+{
+  PyObject *args;
+  if (argDict)
+  {
+    Py_INCREF(argDict);
+    args = argDict;
+  } 
+  else
+  {
+    args = PyDict_New();
+  }
+  PyObject *ret=NULL;
+  PyObject *co = Py_CompileString(code.ascii(), name, Py_eval_input);
+  if (co)
+  {
+    ret = PyEval_EvalCode((PyCodeObject*)co, m_globals, args);
+    Py_DECREF(co);
+  }
+  Py_DECREF(args);
+  return ret;
+}
+
+bool PythonScripting::exec (const QString &code, PyObject *argDict, const char *name)
+{
+  PyObject *args;
+  if (argDict)
+  {
+    Py_INCREF(argDict);
+    args = argDict;
+  } 
+  else
+  {
+    args = PyDict_New();
+  }
+  PyObject *tmp = NULL;
+  PyObject *co = Py_CompileString(code.ascii(), name, Py_file_input);
+  if (co)
+  {
+    tmp = PyEval_EvalCode((PyCodeObject*)co, m_globals, args);
+    Py_DECREF(co);
+  }
+  Py_DECREF(args);
+  if (!tmp) return false;
+  Py_DECREF(tmp);
+  return true;
 }
 
 bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
@@ -305,7 +248,7 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
   if (dict)
     PyDict_SetItemString(dict,name,pyobj);
   else
-    PyDict_SetItemString(globals,name,pyobj);
+    PyDict_SetItemString(m_globals,name,pyobj);
   Py_DECREF(pyobj);
   return true;
 }
@@ -317,7 +260,7 @@ bool PythonScripting::setInt(int val, const char *name, PyObject *dict)
 	if (dict)
 		PyDict_SetItemString(dict,name,pyobj);
 	else
-		PyDict_SetItemString(globals,name,pyobj);
+		PyDict_SetItemString(m_globals,name,pyobj);
 	Py_DECREF(pyobj);
 	return true;
 }
@@ -329,7 +272,7 @@ bool PythonScripting::setDouble(double val, const char *name, PyObject *dict)
 	if (dict)
 		PyDict_SetItemString(dict,name,pyobj);
 	else
-		PyDict_SetItemString(globals,name,pyobj);
+		PyDict_SetItemString(m_globals,name,pyobj);
 	Py_DECREF(pyobj);
 	return true;
 }
@@ -343,7 +286,7 @@ const QStringList PythonScripting::mathFunctions() const
 #else
 	int i=0;
 #endif
-	while(PyDict_Next(math, &i, &key, &value))
+	while(PyDict_Next(m_math, &i, &key, &value))
 		if (PyCallable_Check(value))
 			flist << PyString_AsString(key);
 	flist.sort();
@@ -352,7 +295,7 @@ const QStringList PythonScripting::mathFunctions() const
 
 const QString PythonScripting::mathFunctionDoc(const QString &name) const
 {
-	PyObject *mathf = PyDict_GetItemString(math,name); // borrowed
+	PyObject *mathf = PyDict_GetItemString(m_math,name); // borrowed
 	if (!mathf) return "";
 	PyObject *pydocstr = PyObject_GetAttrString(mathf, "__doc__"); // new
 	QString qdocstr = PyString_AsString(pydocstr);
@@ -365,4 +308,81 @@ const QStringList PythonScripting::fileExtensions() const
 	QStringList extensions;
 	extensions << "py" << "PY";
 	return extensions;
+}
+
+
+//------------------------------------------------------------
+// Private member functions
+//------------------------------------------------------------
+
+bool PythonScripting::loadInitFile(const QString &path)
+{
+  QFileInfo pyFile(path+".py"), pycFile(path+".pyc");
+  bool success = false;
+  if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) 
+  {
+    // if we have a recent pycFile, use it
+    FILE *f = fopen(pycFile.filePath(), "rb");
+    success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
+  } 
+  else if (pyFile.isReadable() && pyFile.exists())
+  {
+    // try to compile pyFile to pycFile if the current location is writable
+    QString testfile(QFileInfo(path).absoluteDir().absoluteFilePath("UNLIKELYFILENAME"));
+    QFile tester(testfile);
+    if( tester.open(QIODevice::WriteOnly) )
+    {
+      PyObject *compileModule = PyImport_ImportModule("py_compile");
+      if (compileModule)
+      {
+	PyObject *compile = PyDict_GetItemString(PyModule_GetDict(compileModule), "compile");
+	if (compile) 
+	{
+	  PyObject *tmp = PyObject_CallFunctionObjArgs(compile,
+						       PyString_FromString(pyFile.filePath()),
+						       PyString_FromString(pycFile.filePath()),
+						       NULL);
+	  if (tmp)
+	    Py_DECREF(tmp);
+	  else
+	    PyErr_Print();
+	} 
+	else
+	{
+	  PyErr_Print();
+	}
+	Py_DECREF(compileModule);
+      } 
+      else
+      {
+	PyErr_Print();
+      }
+      pycFile.refresh();
+    }
+    //Remove the testing file   
+    tester.remove();
+    if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) 
+    {
+      // run the newly compiled pycFile
+      FILE *f = fopen(pycFile.filePath(), "rb");
+      success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
+      fclose(f);
+    } 
+    else 
+    {
+      // fallback: just run pyFile
+	/*FILE *f = fopen(pyFile.filePath(), "r");
+	  success = PyRun_SimpleFileEx(f, pyFile.filePath(), false) == 0;
+	  fclose(f);*/
+	//TODO: code above crashes on Windows - bug in Python?
+      QFile f(pyFile.filePath());
+      if (f.open(QIODevice::ReadOnly | QIODevice::Text))
+      {
+	QByteArray data = f.readAll();
+	success = (PyRun_SimpleString(data.data()) == 0);
+	f.close();
+      }
+    }
+  }
+  return success;
 }

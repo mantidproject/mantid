@@ -80,6 +80,9 @@ public:
     // Destructor
     ~MantidUI();
 
+    //Clear the framework
+    void shutdown();
+
     // Save settings to a persistent store
     void saveSettings() const;
 

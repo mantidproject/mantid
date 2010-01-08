@@ -191,15 +191,15 @@ void file_uncompress(char  *file);
 
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-: QMainWindow(), scripted(ScriptingLangManager::newEnv(this))
+  : QMainWindow(), scripted(ScriptingLangManager::newEnv(this))
 {
     QCoreApplication::setOrganizationName("ISIS");
     QCoreApplication::setApplicationName("MantidPlot");
     mantidUI = new MantidUI(this);
-	setAttribute(Qt::WA_DeleteOnClose);
-	init(factorySettings);
-	//Mantid 
-	d_user_script_running = false;
+    setAttribute(Qt::WA_DeleteOnClose);
+    init(factorySettings);
+    //Mantid 
+    d_user_script_running = false;
 }
 
 void ApplicationWindow::init(bool factorySettings)
@@ -375,6 +375,7 @@ void ApplicationWindow::init(bool factorySettings)
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
     //Scripting
+    m_script_envs = QHash<QString, ScriptingEnv*>();
     setScriptingLanguage(defaultScriptingLang);
     m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
     delete m_interpreterDock->widget();
@@ -1271,7 +1272,6 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 #ifdef SCRIPTING_DIALOG
 	scriptingMenu->addAction(actionScriptingLang);
 #endif
-	scriptingMenu->addAction(actionRestartScripting);
 	scriptingMenu->addAction(actionCustomActionDialog);
 
     mantidUI->insertMenu();//Mantid
@@ -3900,7 +3900,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 	QStringList list=s.split("\t", QString::SkipEmptyParts);
 	if (list[0] == "<scripting-lang>")
 	{
-		if (!app->setScriptingLanguage(list[1], true))
+		if (!app->setScriptingLanguage(list[1]))
 			QMessageBox::warning(app, tr("MantidPlot - File opening error"),//Mantid
 					tr("The file \"%1\" was created using \"%2\" as scripting language.\n\n"\
 						"Initializing support for this language FAILED; I'm using \"%3\" instead.\n"\
@@ -4200,43 +4200,60 @@ void ApplicationWindow::scriptPrint(const QString &text)
 #endif
 }
 
-bool ApplicationWindow::setScriptingLanguage(const QString &lang, bool force)
+bool ApplicationWindow::setScriptingLanguage(const QString &lang)
 {
-    if (!force && lang == scriptEnv->name())
-		return true;
-	if (lang.isEmpty())
-		return false;
-	
-	ScriptingEnv *newEnv = ScriptingLangManager::newEnv(lang, this);
-	 if (!newEnv)
-		return false;
+  if ( lang.isEmpty() ) return false;
+  if( scriptEnv && lang == scriptEnv->name() ) return true;
 
-	connect(newEnv, SIGNAL(error(const QString&,const QString&,int)),
-			this, SLOT(scriptError(const QString&,const QString&,int)));
-	connect(newEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
-	if (!newEnv->initialize()){
-		delete newEnv;
-		return false;
-	}
+  if( m_bad_script_envs.contains(lang) ) 
+  {
+    QMessageBox::information(this, "MantidPlot", QString("Previous initialization of ") + lang + QString(" failed, cannot retry."));
+    return false;
+  }
 
-	// notify everyone who might be interested
-	ScriptingChangeEvent *sce = new ScriptingChangeEvent(newEnv);
-	QApplication::sendEvent(this, sce);
-	delete sce;
+  ScriptingEnv* newEnv(NULL);
+  if( m_script_envs.contains(lang) )
+  {
+    newEnv = m_script_envs.value(lang);
+  }
+  else
+  {
+    newEnv = ScriptingLangManager::newEnv(lang, this);
+    connect(newEnv, SIGNAL(error(const QString&,const QString&,int)),
+	    this, SLOT(scriptError(const QString&,const QString&,int)));
+    connect(newEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
+
+    if( newEnv->initialize() )
+    {
+      m_script_envs.insert(lang, newEnv);
+    }
+    else
+    {
+      delete newEnv;
+      m_bad_script_envs.insert(lang);
+      QMessageBox::information(this, "MantidPlot", QString("Failed to initialize ") + lang);
+      return false;
+    }
+  }
+
+  // notify everyone who might be interested
+  ScriptingChangeEvent *sce = new ScriptingChangeEvent(newEnv);
+  QApplication::sendEvent(this, sce);
+  delete sce;
 	
-	foreach(QObject *i, findChildren<QObject*>())
-		QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
+  foreach(QObject *i, findChildren<QObject*>())
+    QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
 	
-	if (scriptingWindow)
-	  {
+  if (scriptingWindow)
+    {
       //Mantid - This is so that the title of the script window reflects the current scripting language
-	    QApplication::postEvent(scriptingWindow, new ScriptingChangeEvent(newEnv)); 
+      QApplication::postEvent(scriptingWindow, new ScriptingChangeEvent(newEnv)); 
 	    
-	    foreach(QObject *i, scriptingWindow->findChildren<QObject*>())
-	      QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
-	 }
+      foreach(QObject *i, scriptingWindow->findChildren<QObject*>())
+	QApplication::postEvent(i, new ScriptingChangeEvent(newEnv));
+    }
 	
-	return true;
+  return true;
 }
 
 void ApplicationWindow::showScriptingLangDialog()
@@ -4251,15 +4268,6 @@ void ApplicationWindow::showScriptingLangDialog()
   }
   ScriptingLangDialog* d = new ScriptingLangDialog(scriptEnv, this);
   d->exec();
-}
-
-void ApplicationWindow::restartScriptingEnv()
-{
-	if (setScriptingLanguage(scriptEnv->name(), true))
-		executeNotes();
-	else
-		QMessageBox::critical(this, tr("MantidPlot - Scripting Error"),//Mantid
-				tr("Scripting language \"%1\" failed to initialize.").arg(scriptEnv->name()));
 }
 
 void ApplicationWindow::openTemplate()
@@ -8667,6 +8675,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
  
   //Save the settings and exit
   saveSettings();
+  mantidUI->shutdown();
   ce->accept();
 }
 
@@ -12268,9 +12277,6 @@ void ApplicationWindow::createActions()
 	connect(actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
 #endif
 
-	actionRestartScripting = new QAction(tr("&Restart scripting"), this);
-	connect(actionRestartScripting, SIGNAL(activated()), this, SLOT(restartScriptingEnv()));
-
 	actionNoteExecute = new QAction(tr("E&xecute"), this);
 	actionNoteExecute->setShortcut(tr("Ctrl+J"));
 
@@ -12835,7 +12841,6 @@ void ApplicationWindow::translateActionsStrings()
 #ifdef SCRIPTING_DIALOG
 	actionScriptingLang->setMenuText(tr("Scripting &language"));
 #endif
-	actionRestartScripting->setMenuText(tr("&Restart scripting"));
 
 	actionNoteExecute->setMenuText(tr("E&xecute"));
 	actionNoteExecute->setShortcut(tr("Ctrl+J"));

@@ -55,7 +55,7 @@ class Script : public QObject
     Script(ScriptingEnv *env, const QString &code, QObject *context=0, const QString &name="<input>")
       : Env(env), Code(code), Name(name), compiled(notCompiled), m_line_offset(-1)
       { Env->incref(); Context = context; EmitErrors=true; }
-    ~Script() { Env->decref(); }
+    virtual ~Script() { Env->decref(); }
 
     //! Return the code that will be executed when calling exec() or eval()
     const QString code() const { return Code; }
