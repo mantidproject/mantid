@@ -152,13 +152,13 @@ public:
   /// Create the simple Python API for Mantid
   void createPythonSimpleAPI(bool);
 
-  /** Python algorithms */
-  //@{
-  /// Add a Python alogirthm
-  int addPythonAlgorithm(PyObject* pyAlg);
-  /// Execute a Python algorithm
-  void executePythonAlgorithm(std::string algName);
-  //@}
+//   /** Python algorithms */
+//   //@{
+//   /// Add a Python alogirthm
+//   int addPythonAlgorithm(PyObject* pyAlg);
+//   /// Execute a Python algorithm
+//   void executePythonAlgorithm(std::string algName);
+//   //@}
 
  protected:
   /** A flag indicating whether code has been executed from within Python. This is a bit of a hack

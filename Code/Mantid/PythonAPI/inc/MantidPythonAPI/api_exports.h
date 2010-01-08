@@ -7,6 +7,7 @@
  */
 #include <MantidPythonAPI/FrameworkManagerProxy.h>
 #include <MantidAPI/MatrixWorkspace.h>
+#include <MantidAPI/WorkspaceFactory.h>
 #include <MantidAPI/WorkspaceOpOverloads.h>
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/IAlgorithm.h>
@@ -387,6 +388,30 @@ namespace PythonAPI
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_isDistribution_overloads_1, isDistribution, 0, 0)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_isDistribution_overloads_2, isDistribution, 1, 1)
   //@endcond
+
+  /**
+   * A proxy struct for the WorkspaceFactory
+   */
+  struct WorkspaceFactoryProxy
+  {
+    /**
+     * Create a MatrixWorkspace object that is initialized to the required size
+     */
+    static API::MatrixWorkspace_sptr createMatrixWorkspace(const int nvectors, const int xlength, const int ylength)
+    {
+      return API::WorkspaceFactory::Instance().create("Workspace2D", nvectors, xlength, ylength);
+    }
+
+    /**
+     * Create a table workspace object
+     */
+    static API::ITableWorkspace_sptr createTableWorkspace()
+    {
+      return API::WorkspaceFactory::Instance().createTable();
+    }
+
+  };
+
 }
 }
 

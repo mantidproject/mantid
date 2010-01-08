@@ -301,20 +301,26 @@ class MantidPyFramework(Mantid.FrameworkManager):
         '''
         names = self.getWorkspaceNames()
         n_names = names.size()
-        output = ''
+        output = []
+        max_width = 0
         for i in range(0, n_names):
             wksp = self._retrieveWorkspace(names[i])
-            output += names[i] + '\t-\t'
+            output.append([names[i],''])
+            max_width = max(max_width, len(names[i]))
             if( isinstance(wksp, Mantid.MatrixWorkspace) ):
-                output += 'MatrixWorkspace'
+                output[i][1] = 'MatrixWorkspace'
             elif( isinstance(wksp, Mantid.ITableWorkspace) ):
-                output += 'TableWorkspace'
+                output[i][1] = 'TableWorkspace'
             else:
-                output += 'WorkspaceGroup'
-            output += '\n'
-        print output
+                output[i][1] = 'WorkspaceGroup'
         
+        max_width += 3
+        output_table = '\nWorkspace list:\n'
+        for row in output:
+            output_table += '\t' + row[0].ljust(max_width, ' ') + '-   ' + row[1]
 
+        print output_table
+        
 # *** "Private" functions
     def _retrieveWorkspace(self, name):
         '''
@@ -381,3 +387,169 @@ class MantidPyFramework(Mantid.FrameworkManager):
 
 
 #-------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
+##
+# PyAlgorithm class
+##
+class PythonAlgorithm(Mantid.PyAlgorithm):
+    '''
+    Base class for all Mantid Python algorithms
+    '''
+    # Dictionary of property names/types
+    _proptypes = {}
+        
+    def name(self):
+        raise NotImplementedError('name() method must be defined for a Python algorithm')
+
+    def version(self):
+        return 1
+        
+    def category(self):
+        return 'PythonAlgorithm'
+
+    def PyInit(self):
+        raise NotImplementedError('PyInit() method must be defined for a Python algorithm')
+
+    def PyExec(self):
+        raise NotImplementedError('PyExec() method must be defined for a Python algorithm')
+
+    # declareProperty "wrapper" function so that we don't need separate named functions for each type
+    def declareProperty(self, Name, DefaultValue, Direction = Mantid.Direction.Input, Description = '', ):
+        '''
+        Declare a property for this algorithm
+        '''
+        # Test default value type and call the relevant function
+        if isinstance(DefaultValue, int) or isinstance(DefaultValue, long):
+            decl_func = self.declareProperty_int
+            type = int
+        elif isinstance(DefaultValue, float):
+            decl_func = self.declareProperty_dbl
+            type = float
+        elif isinstance(DefaultValue, bool) or isinstance(DefaultValue, str):
+            decl_func = self.declareProperty_str
+            type = str
+            if isinstance(DefaultValue, bool):
+                DefaultValue = str(int(DefaultValue))
+                type = bool
+            else:
+                pass
+        else:
+            raise TypeError('Unrecognized type for property "' + Name + '"')
+        
+        decl_func(Name, DefaultValue, Description, Direction)
+        self._mapPropertyToType(Name, type)
+
+    # Specialized version for workspaces
+    def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Description = '', \
+                                     Type = Mantid.MatrixWorkspace):
+        if Type == Mantid.MatrixWorkspace:
+            self._declareMatrixWorkspace(PropertyName, WorkspaceName, Description, Direction)
+        elif Type == Mantid.Tableworkspace:
+            self._declareTableWorkspace(PropertyName, WorkspaceName, Description, Direction)
+        else:
+            raise TypeError('Unrecognized type of workspace specified for property "' + PropertyName + '"')
+        
+        self._mapPropertyToType(PropertyName, Mantid.WorkspaceProperty)
+
+    # Specialized version for FileProperty
+    def declareFileProperty(self, Name, DefaultValue, Type, Exts = [], Direction = Mantid.Direction.Input,\
+                                Description = ''):
+        if not isinstance(DefaultValue, str):
+            raise TypeError('Incorrect default value type for file property "' + Name + '"')
+        try:
+            self._declareFileProperty(Name, DefaultValue, Type, Exts, Description, Direction)
+        except(TypeError):
+            raise TypeError('Invalid type in file extension list for property "' + Name + '"')
+        self._mapPropertyToType(Name, str)
+
+    # getProperty method  wrapper
+    def getProperty(self, Name):
+        '''
+        Retrieve a property value for the given name
+        '''
+        try:
+            prop_type = self._proptypes[Name]
+        except KeyError:
+            raise KeyError('Unknown property name "' + Name + '"')
+
+        if prop_type == type(1):
+            return self.getProperty_int(Name)
+        elif prop_type == type(1.0):
+            return self.getProperty_dbl(Name)
+        elif prop_type == type(bool):
+            return bool(self.getPropertyValue(Name))
+        elif prop_type == type(''):
+            return self.getPropertyValue(Name)
+        elif issubclass(prop_type, Mantid.WorkspaceProperty):
+            return self.getPropertyValue(Name)
+        else:
+            raise TypeError('Unrecognized type for property "' + Name + '"')
+
+    # Wrapper around setPropertyValue
+    def setProperty(self, Name, Value):
+        try:
+            prop_type = self._proptypes[Name]
+        except KeyError:
+            raise KeyError('Attempting to set unknown property "' + Name + '"')
+        
+        if isinstance(Value, str):
+            self.setPropertyValue(Name, Value)
+        elif isinstance(Value, bool):
+            self.setPropertyValue(Name, str(int(Value)))
+        elif issubclass(prop_type, Mantid.WorkspaceProperty):
+            if isinstance(Value, Mantid.MatrixWorkspace):
+                self._setMatrixWorkspaceProperty(Name, Value)
+            elif isinstance(Value, Mantid.TableWorkspace):
+                self._setTableWorkspaceProperty(Name, Value)
+            else:
+                raise TypeError('Attempting to set workspace property with value that is not a workspace.')
+        else:
+            self.setPropertyValue(Name, str(Value))
+            
+    # Execute a string that declares a property and keep track of the registered type
+    def _mapPropertyToType(self, name, prop_type):
+        self._proptypes[name] = prop_type
+
+#------------------------------------------------------------------------------------------------
+
+###
+ # Factory Function
+###
+def BoundedValidator(lower = None, upper = None):
+    if isinstance(lower, None) and isinstance(upper,None):
+        raise TypeError("Cannot create BoundedValidator with both lower and upper limit unset.")
+    
+    if isinstance(lower, None):
+        if isinstance(upper, int):
+            b = IntBoundedValidator()
+        elif isinstance(upper, float):
+            b = DblBoundedValidator()
+        else:
+            raise TypeError("Invalid type for upper bound BoundedValidator")
+        b.setUpper(upper)
+    elif isinstance(upper, None):
+        if isinstance(lower, int):
+            b = IntBoundedValidator()
+        elif isinstance(lower, float):
+            b = DblBoundedValidator()
+        else:
+            raise TypeError("Invalid type for lower bound of BoundedValidator")
+        b.setLower(lower)
+    else:
+        if isinstance(lower, int):
+            if isinstance(upper, int):
+                return BoundedValidator_int(lower,upper)
+            elif isinstance(upper, float):
+                return BoundedValidator_dbl(float(lower),upper)
+            else:
+                raise TypeError("Invalid type for upper value of BoundedValidator")
+        elif isinstance(lower, float):
+            if isinstance(upper, float):
+                return BoundedValidator_dbl(lower,upper)
+            elif isinstance(upper, int):
+                return BoundedValidator_dbl(lower,float(upper))
+            else:
+                raise TypeError("Invalid type for upper value of BoundedValidator")
+        else:
+            raise TypeError("Invalid type for lower value of BoundedValidator")
+        

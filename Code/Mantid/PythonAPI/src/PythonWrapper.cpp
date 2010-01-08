@@ -5,9 +5,6 @@
 #include <boost/python/module.hpp>
 #include "MantidPythonAPI/stl_proxies.h"
 
-// I'll put this back in when we start to do something with it
-//#include "MantidPythonAPI/PyAlgorithm.h"
-
 namespace Mantid 
 {
 namespace PythonAPI
@@ -49,14 +46,5 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   export_geometry_namespace();
   export_api_namespace();
 }   
-
-// //========================================= Python algorithms ======================================
-//    /** I'll put this back in when we start doing something with them */
-//    //    //PyAlgorithm Class
-//    //    class_< Mantid::PythonAPI::PyAlgorithm, boost::noncopyable, Mantid_PythonAPI_PyAlgorithm_Wrapper >("PyAlgorithm", init< std::string >())
-//    //      .def("name", &Mantid::PythonAPI::PyAlgorithm::name, &Mantid_PythonAPI_PyAlgorithm_Wrapper::default_name)
-//    //      .def("PyInit", &Mantid::PythonAPI::PyAlgorithm::PyInit, &Mantid_PythonAPI_PyAlgorithm_Wrapper::default_PyInit)
-//    //      .def("PyExec", &Mantid::PythonAPI::PyAlgorithm::PyExec, &Mantid_PythonAPI_PyAlgorithm_Wrapper::default_PyExec)
-// //      ;
 
 

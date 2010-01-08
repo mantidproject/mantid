@@ -33,7 +33,7 @@ FileProperty::FileProperty(const std::string & name, const std::string& default_
  */
 bool FileProperty::isLoadProperty() const
 {
-  return m_action == NoExistLoad || m_action == Load;
+  return m_action == Load || m_action == OptionalLoad;
 }
 
 /**

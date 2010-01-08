@@ -19,7 +19,7 @@ namespace Kernel
 struct Direction
 {
   /// Enum giving the possible directions
-  enum
+  enum Type
   {
     Input,    ///< An input workspace
     Output,   ///< An output workspace

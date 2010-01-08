@@ -14,7 +14,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidPythonAPI/PyAlgorithm.h"
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
@@ -311,29 +310,29 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
   return API::AnalysisDataService::Instance().doesExist(name);
 }
 
-/**
- * Adds a algorithm created in Python to Mantid's algorithms.
- * Converts the Python object to a C++ object - not sure how, will find out.
- * \param pyAlg :: The Python based algorithm to add.
- * \returns The number of Python algorithms in Mantid
- **/
-int FrameworkManagerProxy::addPythonAlgorithm(PyObject* pyAlg)
-{
-  boost::python::handle<> ph(boost::python::borrowed(pyAlg));
-  PyAlgorithm* alg = boost::python::extract<PyAlgorithm*>(boost::python::object(ph));
-  API::AlgorithmFactory::Instance().addPyAlgorithm(alg);
-  return API::AlgorithmFactory::Instance().numPythonAlgs();
-}
+// /**
+//  * Adds a algorithm created in Python to Mantid's algorithms.
+//  * Converts the Python object to a C++ object - not sure how, will find out.
+//  * \param pyAlg :: The Python based algorithm to add.
+//  * \returns The number of Python algorithms in Mantid
+//  **/
+// int FrameworkManagerProxy::addPythonAlgorithm(PyObject* pyAlg)
+// {
+//   boost::python::handle<> ph(boost::python::borrowed(pyAlg));
+//   PyAlgorithm* alg = boost::python::extract<PyAlgorithm*>(boost::python::object(ph));
+//   API::AlgorithmFactory::Instance().addPyAlgorithm(alg);
+//   return API::AlgorithmFactory::Instance().numPythonAlgs();
+// }
 
 
-/**
- * Execute one of the Python algorithms that has been added to Mantid.
- * \param algName :: The name of the algorithm to run.
- **/
-void FrameworkManagerProxy::executePythonAlgorithm(std::string algName)
-{
-  API::AlgorithmFactory::Instance().executePythonAlg(algName);
-}
+// /**
+//  * Execute one of the Python algorithms that has been added to Mantid.
+//  * \param algName :: The name of the algorithm to run.
+//  **/
+// void FrameworkManagerProxy::executePythonAlgorithm(std::string algName)
+// {
+//   API::AlgorithmFactory::Instance().executePythonAlg(algName);
+// }
 
 
 //--------------------------------------------------------------------------

@@ -48,8 +48,9 @@ public:
    *  @param validator The validator to use for this property, if required.
    */
   ArrayProperty(const std::string &name, const std::vector<T> &vec,
-                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >) :
-    PropertyWithValue< std::vector<T> >(name, vec, validator)
+                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >, 
+		const unsigned int direction = Direction::Input) :
+    PropertyWithValue< std::vector<T> >(name, vec, validator, direction)
   {
   }
 
@@ -60,8 +61,9 @@ public:
    *  @param validator The validator to use for this property, if required
    */
   ArrayProperty(const std::string &name,
-                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >) :
-    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator)
+                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >, 
+		const unsigned int direction = Direction::Input) :
+    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator, direction)
   {
   }
 
@@ -72,8 +74,9 @@ public:
    *  @throws std::invalid_argument if the string passed is not compatible with the array type
    */
   ArrayProperty(const std::string &name, const std::string& values,
-                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >) :
-    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator)
+                IValidator<std::vector<T> > *validator = new NullValidator<std::vector<T> >,
+		const unsigned int direction = Direction::Input) :
+    PropertyWithValue< std::vector<T> >(name, std::vector<T>(), validator, direction)
   {
     if ( !setValue( values ).empty() )
     {

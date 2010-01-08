@@ -13,6 +13,7 @@
 #include <MantidAPI/ParInstrument.h>
 #include <MantidAPI/Sample.h>
 #include <MantidAPI/WorkspaceProperty.h>
+#include <MantidPythonAPI/PyAlgorithmWrapper.h>
 
 namespace Mantid
 {
@@ -86,6 +87,36 @@ namespace PythonAPI
       .def("getProperties", &Mantid::API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
       ;
     
+    //PyAlgorithm
+    //Save some typing for all of the templated declareProperty and getProperty methods
+#define EXPORT_DECLAREPROPERTY(type, pyname)\
+    .def(pyname,(void(PyAlgorithmWrapper::*)(const std::string &, type, const std::string &,const unsigned int))&Mantid::PythonAPI::PyAlgorithmWrapper::_declareProperty<type>)
+    
+#define EXPORT_GETPROPERTY(type, pyname)\
+    .def(pyname,(type(PyAlgorithmWrapper::*)(const std::string &))&Mantid::PythonAPI::PyAlgorithmWrapper::_getProperty<type>)
+    
+    class_< Mantid::PythonAPI::PyAlgorithmWrapper, boost::noncopyable >("PyAlgorithm")
+      .def("initialize", &Mantid::PythonAPI::PyAlgorithmWrapper::initialize)
+      .def("execute", &Mantid::PythonAPI::PyAlgorithmWrapper::execute)
+      .def("setPropertyValue", &Mantid::PythonAPI::PyAlgorithmWrapper::setPropertyValue)
+      .def("getPropertyValue", &Mantid::PythonAPI::PyAlgorithmWrapper::getPropertyValue)
+      .def("getProperties", &Mantid::PythonAPI::PyAlgorithmWrapper::getProperties, return_value_policy< copy_const_reference >())
+      .def("_setMatrixWorkspaceProperty", &Mantid::PythonAPI::PyAlgorithmWrapper::_setMatrixWorkspaceProperty)
+      .def("_setTableWorkspaceProperty", &Mantid::PythonAPI::PyAlgorithmWrapper::_setTableWorkspaceProperty)
+      .def("_declareFileProperty", &Mantid::PythonAPI::PyAlgorithmWrapper::_declareFileProperty)
+      .def("_declareMatrixWorkspace", &Mantid::PythonAPI::PyAlgorithmWrapper::_declareMatrixWorkspace)
+      .def("_declareTableWorkspace", &Mantid::PythonAPI::PyAlgorithmWrapper::_declareTableWorkspace)
+      EXPORT_DECLAREPROPERTY(int, "declareProperty_int")
+      EXPORT_DECLAREPROPERTY(double, "declareProperty_dbl")
+      EXPORT_DECLAREPROPERTY(std::string, "declareProperty_str")
+      EXPORT_GETPROPERTY(int, "getProperty_int")
+      EXPORT_GETPROPERTY(double, "getProperty_dbl")
+      ;
+
+    //Leave the place tidy 
+#undef EXPORT_DECLAREPROPERTY
+#undef EXPORT_GETPROPERTY
+
   }
 
   void export_workspace()
@@ -252,6 +283,14 @@ namespace PythonAPI
 
   }
 
+ void export_workspacefactory()
+  {
+    class_< PythonAPI::WorkspaceFactoryProxy, boost::noncopyable>("WorkspaceFactory", no_init)
+      .def("createMatrixWorkspace", &PythonAPI::WorkspaceFactoryProxy::createMatrixWorkspace)
+      .staticmethod("createMatrixWorkspace")
+      ;
+  }
+
   void export_api_namespace()
   {
     export_frameworkmanager();
@@ -263,6 +302,7 @@ namespace PythonAPI
     export_sample();
     export_instrument();
     export_workspace_property();
+    export_workspacefactory();
   }
   //@endcond
 }
