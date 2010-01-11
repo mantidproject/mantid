@@ -397,7 +397,7 @@ namespace PythonAPI
     /**
      * Create a MatrixWorkspace object that is initialized to the required size
      */
-    static API::MatrixWorkspace_sptr createMatrixWorkspace(const int nvectors, const int xlength, const int ylength)
+    static API::MatrixWorkspace_sptr createMatrixWorkspace(int nvectors, int xlength, int ylength)
     {
       return API::WorkspaceFactory::Instance().create("Workspace2D", nvectors, xlength, ylength);
     }
