@@ -53,7 +53,7 @@ whiteBeam1::whiteBeam1(const Ui::MWDiag &userSettings) : m_settings(userSettings
   LEChkCp("|SIGNIFICANCETEST|", m_settings.leSignificance,
     med->getProperty("SignificanceTest") );
 
-  FileProperty hardMask("Filename", "", FileProperty::NoExistLoad);
+  FileProperty hardMask("Filename", "", FileProperty::OptionalLoad);
   LEChkCp("|INPUTFILE|", m_settings.leIFile, &hardMask);
   
   m_pyScript.replace("|OUTPUTFILE|", "'"+m_settings.leOFile->text()+"'");
@@ -76,7 +76,7 @@ whiteBeam2::whiteBeam2(const Ui::MWDiag &userSettings) : m_settings(userSettings
   std::vector<std::string> exts;
   exts.push_back("raw"); exts.push_back("RAW");
   exts.push_back("NXS"); exts.push_back("nxs");
-  FileProperty loadData("Filename", "", FileProperty::NoExistLoad, exts);
+  FileProperty loadData("Filename", "", FileProperty::OptionalLoad, exts);
   LEChkCp("|WBVANADIUM2|", m_settings.leWBV2, &loadData);
 
   IAlgorithm_sptr var =

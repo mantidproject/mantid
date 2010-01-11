@@ -27,7 +27,7 @@ namespace MantidQt
       };
   
       deltaECalc(const Ui::Excitations &userSettings, FileInput &runFiles);
-	  void maskDetects(QString &maskWS);
+      void maskDetects(const QString &maskWS);
 	  /** removes the path from the filename passed and replaces extensions with .spe
       * @param inputFilename name of the file that the .SPE file is based on
       */

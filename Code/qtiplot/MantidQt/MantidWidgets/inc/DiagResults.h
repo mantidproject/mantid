@@ -24,7 +24,7 @@ namespace MantidQt
       struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS TestSummary
       {
 		TestSummary(QString name);
-	    QString pythonResults(QString &pyhtonOut);
+	    QString pythonResults(const QString &pyhtonOut);
 		void setStatus(QString &info) {status = info;}
 		const QString& getStatus() const {return status;}
 		

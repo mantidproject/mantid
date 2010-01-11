@@ -6,6 +6,7 @@
 #include <QDir>
 #include "boost/lexical_cast.hpp"
 #include "Poco/StringTokenizer.h"
+#include <cmath>
 
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
@@ -18,7 +19,7 @@ const QString deltaECalc::tempWS = "_ConvertToETrans_tempory_workspace_";
 * @throw invalid_argument where problems with user data prevent the calculation from proceeding
 */
 deltaECalc::deltaECalc(const Ui::Excitations &userSettings, deltaECalc::FileInput &runFiles) :
-  m_sets(userSettings), pythonCalc()
+  pythonCalc(), m_sets(userSettings)
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   // load a template for the Python script that we will contain in a string
@@ -96,7 +97,7 @@ QString deltaECalc::getScaling() const
   bool status = false;
   QString exponetial;
   int power = m_sets.leScale->text().toInt(&status);
-  exponetial.setNum(pow(10.0, power));
+  exponetial.setNum(std::pow(10.0, power));
   if ( ! status ) throw std::invalid_argument("leScale");
   return exponetial;
 }
@@ -117,7 +118,7 @@ QString deltaECalc::getNormalization() const
 *  the input workspace/s
 *  @param maskWS name of the workspace whose detector masking will be copied
 */
-void deltaECalc::maskDetects(QString &maskWS)
+void deltaECalc::maskDetects(const QString &maskWS)
 {
   m_pyScript.replace("''#+|MASK_WORKSPACE|", "'"+maskWS+"'");
 }

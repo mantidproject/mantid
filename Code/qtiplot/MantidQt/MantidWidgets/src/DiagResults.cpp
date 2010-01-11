@@ -18,7 +18,7 @@ DiagResults::TestSummary::TestSummary(QString name) :
 *  @param pythonOut string as returned by runPythonCode()
 *  @return either data (or if numBad is set to NORESULTS then diagnositic output, or possibly nothing at all)
 */
-QString DiagResults::TestSummary::pythonResults(QString &pyhtonOut)
+QString DiagResults::TestSummary::pythonResults(const QString &pyhtonOut)
 {// set the number found bad to the not ready state incase there is an error below
   numBad = NORESULTS;
 
