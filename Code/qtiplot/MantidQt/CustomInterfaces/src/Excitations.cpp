@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Excitations.h"
+//??STEVES implement this
 //#include "MantidQtMantidWidgets/FileInput.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -25,23 +26,25 @@ namespace MantidQt
 }
 using namespace MantidQt::CustomInterfaces;
 //using namespace MantidQt::MantidWidgets;
+
 const std::string Excitations::inputExts[] = {"raw", "RAW", "NXS", "nxs"};
 //----------------------
 // Public member functions
 //----------------------
 ///Constructor
 Excitations::Excitations(QWidget *parent) : UserSubWindow(parent),
-  m_saveChanged(false),
-  m_inFiles(NULL)
+  m_diagPage(NULL), m_saveChanged(false), m_inFiles(NULL), m_busy(NULL)
 {
 }
 /// Set up the dialog layout
 void Excitations::initLayout()
 {
+  // standard setting up of all widgets
   m_uiForm.setupUi(this);
   
+  // do the custom setting up like tool tips on each of the three tab pages 
   setUpPage1();
-  setUpPage2(); //  Replace this line with the following m_uiForm.diagSec->initLayout(this);
+  setUpPage2();
   setUpPage3();
   
     // a helper widget for loading the second white beam vanadium run used to find bad detectors
@@ -49,26 +52,15 @@ void Excitations::initLayout()
 //  QLayout *diagTest2Layout = m_uiForm.gbVariation->layout();
 //  QGridLayout *diagTest2 = qobject_cast<QGridLayout*>(diagTest2Layout);
 //  diagTest2->addWidget(WBV2Widget, 0, 0, 1, -1);
-
-  /*****replace the code below with the widget****/
-  // connect all the open file buttons to an open file dialog connected to it's line edit box
-  QSignalMapper *signalMapper = new QSignalMapper(this);
-  signalMapper->setMapping(m_uiForm.pbIFile, QString("InputFile"));
-  signalMapper->setMapping(m_uiForm.pbOFile, QString("OutputFile"));
-  signalMapper->setMapping(m_uiForm.pbWBV1, QString("WBVanadium1"));
-  signalMapper->setMapping(m_uiForm.pbWBV2, QString("WBVanadium2"));
-  connect(m_uiForm.pbIFile, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbOFile, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbWBV0, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbWBV1, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbWBV2, SIGNAL(clicked()), signalMapper, SLOT(map()));
   
+  QSignalMapper *signalMapper = new QSignalMapper(this);
   signalMapper->setMapping(m_uiForm.pbWBV0, QString("pbWBV0"));
   signalMapper->setMapping(m_uiForm.map_fileInput_pbBrowse, QString("map_fileInput_pbBrowse"));
   signalMapper->setMapping(m_uiForm.pbAddMono, QString("pbAddMono"));
   signalMapper->setMapping(m_uiForm.pbAddWhite, QString("pbAddWhite"));
   signalMapper->setMapping(m_uiForm.pbAddMap, QString("pbAddMap"));
   signalMapper->setMapping(m_uiForm.pbBrowseSPE, QString("pbBrowseSPE"));
+  connect(m_uiForm.pbWBV0, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(m_uiForm.loadRun_pbBrowse, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(m_uiForm.map_fileInput_pbBrowse, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(m_uiForm.pbAddMono, SIGNAL(clicked()), signalMapper, SLOT(map()));
@@ -91,7 +83,17 @@ void Excitations::initLayout()
   m_uiForm.pbRun->setToolTip("Process run files");
   m_uiForm.pbHelp->setToolTip("Online documentation (loads in a browser)");
 }
-/// Adds custom widgets, fills in combination boxes and runs setToolTip() on widgets
+/** Disables the form when passed the information that Python is running
+*  and enables it when instructed that Pythons scripts have stopped
+*  @param running if set to false only controls disabled by a previous call to this function will be re-enabled
+*/
+void Excitations::pythonIsRunning(bool running)
+{// the run button was disabled when the results form was shown, as we can only do one analysis at a time, we can enable it now
+  m_busy = running;
+  m_uiForm.tabWidget->setEnabled( ! running );
+  m_uiForm.pbRun->setEnabled( ! running );
+}
+/// For each widgets in the first tab this adds custom widgets, fills in combination boxes and runs setToolTip()
 void Excitations::setUpPage1()
 {
   // insert the file loader helper widget
@@ -107,9 +109,12 @@ void Excitations::setUpPage1()
   m_uiForm.cbNoBack->setChecked(true);
   
   connect(m_uiForm.loadRun_pbBrowse, SIGNAL(clicked()), this, SLOT(addRunFile()));
-  connect(m_uiForm.loadRun_lenumber, SIGNAL(editingFinished()), this, SLOT(updateSaveName()));
 
+  // SIGNALS and SLOTS that deal with coping the text from one edit box to another 
+  connect(m_uiForm.loadRun_lenumber, SIGNAL(editingFinished()), this, SLOT(updateSaveName()));
+  connect(m_uiForm.ckSumSpecs, SIGNAL(stateChanged(int)), this, SLOT(updateSaveName()));
   connect(m_uiForm.leNameSPE, SIGNAL(editingFinished()), this, SLOT(saveNameUpd()));
+  connect(m_uiForm.leWBV0, SIGNAL(editingFinished()), this, SLOT(updateWBV()));
   
   QString runWSMap = "Sum spectra before saving in groups defined by this file (passed to GroupDetectors)";
 /*  m_uiForm.gbrunMap->setToolTip(runWSMap);*/m_uiForm.map_fileInput_leName->setToolTip(runWSMap);
@@ -151,7 +156,7 @@ void Excitations::setUpPage1()
   m_uiForm.lbWBV0Low1->setToolTip("Energy range for the white beam normalisation"); m_uiForm.lbWBV0Low2->setToolTip("Energy range for the white beam normalisation");
   m_uiForm.lbWBV0High1->setToolTip("Energy range for the white beam normalisation"); m_uiForm.lbWBV0High2->setToolTip("Energy range for the white beam normalisation");
   
-  m_uiForm.gbconvUnits->setToolTip("Settings for units conversion to energy transfer");
+  m_uiForm.gbConvUnits->setToolTip("Settings for units conversion to energy transfer");
   m_uiForm.lbEGuess1->setToolTip("Approximate initial neutron energy, is passed to GetEi"), m_uiForm.leEGuess->setToolTip("Approximate initial neutron energy, is passed to GetEi");
   m_uiForm.lbEBins->setToolTip("Settings for units conversion to energy transfer (passed to ReBin)");
   m_uiForm.lbELow->setToolTip("Exclude neutrons with less than this energy (meV)"), m_uiForm.leELow->setToolTip("Exclude neutrons with less than this energy (meV)");
@@ -160,123 +165,26 @@ void Excitations::setUpPage1()
 
   m_uiForm.lbSPE->setToolTip("File name for the converted data"), m_uiForm.leNameSPE->setToolTip("File name for the converted data"), m_uiForm.pbBrowseSPE->setToolTip("File name for the converted data");
 }
-/// Adds custom widgets, fills in combination boxes and runs setToolTip() on widgets
+/// Adds the diag custom widgets and a check box to allow users to enable or disable the widget
 void Excitations::setUpPage2()
-{
-// default parameters that are writen to the GUI
-const char defHighAbsolute[5] = "1e10";
-const char defLowAbsolute[2] = "0";
-const char defSignificanceTest[4] = "3.3";
-const char defHighMedian[4] = "3.0";
-const char defLowMedian[4] = "0.1";
-const char defVariation[4] = "1.1";
-const char defBackground[4] = "5.0";
+{// The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
+  // this second page is largely filled with the diag widget
+  m_diagPage = new MantidWidgets::MWDiag(this);
+  // insert the widgets on to the second page (index = 1)
+  QLayout *mapLayout = m_uiForm.tabWidget->widget(1)->layout();
+  QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout); 
+  if ( mapLay )
+  { // this should always be true because we setup a grid layout in the designer
+    mapLay->addWidget(m_diagPage, 1, 0, 6, 5);
+  }
+  connect(m_diagPage, SIGNAL(runAsPythonScr(const QString&)),
+                this, SIGNAL(runAsPythonScript(const QString&)));
 
-  m_uiForm.leStartTime->setText("18000");
-  m_uiForm.leEndTime->setText("19500");
-  m_uiForm.ckZeroCounts->setChecked(true);
-  
-  m_uiForm.ckRunDiag->setToolTip("Mask bad detectors");
-  
-  // deal with each input control in turn doing,
-  //   go through each control and add (??previous?? or) default values
-  //   add tool tips
-  //   store any relation to algorthim properties as this will be used for validation
-  QString iFileToolTip = "A file containing a list of spectra numbers which we aleady know should be masked";
-  m_uiForm.lbIFile->setToolTip(iFileToolTip);
-  m_uiForm.leIFile->setToolTip(iFileToolTip);
-  m_uiForm.pbIFile->setToolTip(iFileToolTip);
-  
-  QString oFileToolTip =
-    "The name of a file to write the spectra numbers of those that fail a test";
-  m_uiForm.lbOFile->setToolTip(oFileToolTip);
-  m_uiForm.leOFile->setToolTip(oFileToolTip);
-  m_uiForm.pbOFile->setToolTip(oFileToolTip);
-  
-  m_uiForm.leSignificance->setText(defSignificanceTest);
-  QString significanceToolTip =
-    "Spectra with integrated counts within this number of standard deviations from\n"
-    "the median will not be labelled bad (sets property SignificanceTest when\n"
-    "MedianDetectorTest is run)";
-  m_uiForm.leSignificance->setToolTip(significanceToolTip);
-  m_uiForm.lbError->setToolTip(significanceToolTip);
-//-------------------------------------------------------------------------------------------------
-  QString WBV1ToolTip =
-    "The name of a white beam vanadium run from the instrument of interest";
-  m_uiForm.lbWBV1->setToolTip(WBV1ToolTip);
-  m_uiForm.leWBV1->setToolTip(WBV1ToolTip);
-  m_uiForm.pbWBV1->setToolTip(WBV1ToolTip);
-
-  m_uiForm.leHighAbs->setText(defHighAbsolute);
-  QString highAbsSetTool =
-    "Reject any spectrum that contains more than this number of counts in total\n"
-    "(sets property HighThreshold when FindDetectorsOutsideLimits is run)";
-  m_uiForm.leHighAbs->setToolTip(highAbsSetTool);
-  m_uiForm.lbHighAbs->setToolTip(highAbsSetTool);
-  
-  m_uiForm.leLowAbs->setText(defLowAbsolute);
-  QString lowAbsSetTool =
-    "Reject any spectrum that contains less than this number of counts in total\n"
-    "(sets property LowThreshold when FindDetectorsOutsideLimits is run)";
-  m_uiForm.leLowAbs->setToolTip(lowAbsSetTool);
-  m_uiForm.lbLowAbs->setToolTip(lowAbsSetTool);
-
-  m_uiForm.leHighMed->setText(defHighMedian);
-  QString highMedToolTip =
-    "Reject any spectrum whose total number of counts is more than this number of\n"
-    "times the median total for spectra (sets property HighThreshold when\n"
-    "MedianDetectorTest is run)";
-  m_uiForm.leHighMed->setToolTip(highMedToolTip);
-  m_uiForm.lbHighMed->setToolTip(highMedToolTip);
-
-  m_uiForm.leLowMed->setText(defLowMedian);
-  QString lowMedToolTip =
-    "Reject any spectrum whose total number of counts is less than this number of\n"
-    "times the median total for spectra (sets property LowThreshold when\n"
-    "MedianDetectorTest is run)";
-  m_uiForm.leLowMed->setToolTip(lowMedToolTip);
-  m_uiForm.lbLowMed->setToolTip(lowMedToolTip);
-//-------------------------------------------------------------------------------------------------
-  QString WBV2ToolTip =
-    "The name of a white beam vanadium run from the same instrument as the first";
-  m_uiForm.lbWBV2->setToolTip(WBV2ToolTip);
-  m_uiForm.leWBV2->setToolTip(WBV2ToolTip);
-  m_uiForm.pbWBV2->setToolTip(WBV2ToolTip);
-
-  m_uiForm.leVariation->setText(defVariation);
-  QString variationToolTip = 
-    "When comparing equilivient spectra in the two white beam vanadiums reject any\n"
-    "whose the total number of counts varies by more than this multiple of the\n"
-    "medain variation (sets property Variation when DetectorEfficiencyVariation is\n"
-    "is run)";
-  m_uiForm.leVariation->setToolTip(variationToolTip);
-  m_uiForm.lbVariation->setToolTip(variationToolTip);
-
-  m_uiForm.leAcceptance->setText(defBackground);
-  QString acceptToolTip =
-    "Spectra whose total number of counts in the background region is this number\n"
-    "of times the median number of counts would be marked bad (sets property\n"
-    "HighThreshold when MedianDetectorTest is run)";
-  m_uiForm.lbAcceptance->setToolTip(acceptToolTip);
-  m_uiForm.leAcceptance->setToolTip(acceptToolTip);
-
-  QString startTToolTip =
-    "An x-value in the bin marking the start of the background region, the\n"
-    "selection is exclusive (RangeLower in MedianDetectorTest)";
-  m_uiForm.lbStartTime->setToolTip(startTToolTip);
-  m_uiForm.leStartTime->setToolTip(startTToolTip);
-  QString endTToolTip =
-    "An x-value in the bin marking the the background region's end, the selection\n"
-    "is exclusive (RangeUpper in MedianDetectorTest)";
-  m_uiForm.lbEndTime->setToolTip(endTToolTip);
-  m_uiForm.leEndTime->setToolTip(endTToolTip);
-  m_uiForm.ckZeroCounts->setToolTip(
-    "Check this and spectra with zero counts in the background region will be"
-    "considered bad");
-
+  m_uiForm.ckRunDiag->setToolTip("Enable or disable all the controls on this page");
   // either enables or disables the detector diagnostics page depending on if the check box is clicked or not
   disenableDiag();
 }
+
 void Excitations::setUpPage3()
 {
   m_uiForm.leVanMap->setText("mari_res.map");
@@ -307,78 +215,67 @@ m_uiForm.leRMMMass->setText("1");
 */
 void Excitations::run()
 {
+  bool noErrorFound = true;
+  
   try
   {
-    if ( ! parseInput() )
-    {// one or more of the user values is unacceptable return to the dialog box a validator star should already be there
-      return;
+    // constructing this builds the Python script, it is executed below
+    deltaECalc unitsConv( m_uiForm, *m_inFiles );
+	if ( unitsConv.invalid().size() > 0 )
+	{// errors were found, a discription of them should be left on the form, leave the user to correct them
+	  throw std::invalid_argument(unitsConv.invalid().begin()->second);
+	}
+    connect(&unitsConv, SIGNAL(runAsPythonScript(const QString&)),
+                this, SIGNAL(runAsPythonScript(const QString&)));
+
+    // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
+    pythonIsRunning(true);
+    // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
+ 	if (m_uiForm.ckRunDiag->isChecked())
+	{
+      if ( ! m_diagPage->run() )
+	  {
+        noErrorFound = false;
+		//??STEVES?? ensure an error is given at this point
+      }
+	  else
+	  {// pass the bad detector list to the conversion script to enable masking
+	    unitsConv.maskDetects(m_diagPage->getOutputWS());
+	  }
+	}
+
+    if ( unitsConv.python().count('\n') == 0 )
+	{// this means that a script wasn't produced, only a one line error message
+      noErrorFound = false;
     }
-
-	if (m_uiForm.ckRunDiag->isChecked())
-	{// this part of the form is a separate widget, all the work is coded in over there
-	  // m_uiForm.diagSec->run();
-	}
-
-    try
+    //unitsConv always executed, the user can't switch this off, unless there's an error on the form	
+	if (noErrorFound)
 	{
-	  deltaECalc unitsConv( m_uiForm, *m_inFiles );
-	//m_userSettingsMap.find("RunFiles")->second,
-	//                      m_userSettingsMap.find("badDetects,
-	//					  m_userSettingsMap.find("binSpecif,
-	//					  m_userSettingsMap.find("normFile,
-	//					  m_userSettingsMap.find("mapFile,
-	//					  m_userSettingsMap.find("outFile") );
-	  QMessageBox::information(this, "", unitsConv.python());
-
-	  runPythonCode(unitsConv.python());
-	}
-	catch(std::invalid_argument &e)
-	{
-	  QMessageBox::critical(this, "", 
-        QString("Invalid value in control \""+QString(e.what())+"\""));
+    QMessageBox::critical(this, "", unitsConv.python());
+	  unitsConv.run();
 	}
   }
-  catch (std::runtime_error e)
+  catch (std::runtime_error &e)
   {// any exception that works its way passed here would cause QTiplot to suggest that it's shutdown, which I think would be uneccessary
     QMessageBox::critical(this, "", 
       QString("Exception \"") + QString(e.what()) + QString("\" encountered during execution"));
   }
+  catch (std::exception &e)
+  {// any exception that works its way passed here would cause QTiplot to suggest that it's shutdown, which I think would be uneccessary
+    QMessageBox::critical(this, "", 
+      QString("Exception \"") + QString(e.what()) + QString("\" encountered during execution"));
+  }
+  pythonIsRunning(false);
   m_saveChanged = false;
 //  Mantid::API::FrameworkManager::Instance().deleteWorkspace(test1.inputWS.toStdString());
 }
-
 //this function will be replaced a function in a widget
 void Excitations::browseClicked(const QString &buttonDis)
 {
   QLineEdit *editBox;
   QStringList extensions;
   bool toSave = false;
-  if ( buttonDis == "InputFile")
-  {
-    editBox = m_uiForm.leIFile;
-  }
-  if ( buttonDis == "OutputFile")
-  {
-    editBox = m_uiForm.leOFile;
-    extensions << "msk";
-    toSave = true;
-  }
-  if ( buttonDis == "WBVanadium1")
-  {
-    editBox = m_uiForm.leWBV1;
-	for ( int i = 0; i < numInputExts; i++)
-	{
-	  extensions << QString::fromStdString(inputExts[i]);
-	}
-  }
-  if ( buttonDis == "WBVanadium2")
-  {
-    editBox = m_uiForm.leWBV2;
-	for ( int i = 0; i < numInputExts; i++)
-	{
-	  extensions << QString::fromStdString(inputExts[i]);
-	}
-  }
+
   if ( buttonDis == "loadRun_pbBrowse")
   {
     editBox = m_uiForm.loadRun_lenumber;
@@ -387,7 +284,7 @@ void Excitations::browseClicked(const QString &buttonDis)
 	  extensions << QString::fromStdString(inputExts[i]);
 	}
   }
-  if ( buttonDis == "pbWBV0")
+  if (buttonDis == "pbWBV0")
   {
     editBox = m_uiForm.leWBV0;
 	for ( int i = 0; i < numInputExts; i++)
@@ -438,6 +335,12 @@ void Excitations::browseClicked(const QString &buttonDis)
   QString filepath = this->openFileDialog(toSave, extensions);
   if( filepath.isEmpty() ) return;
   editBox->setText(filepath);
+  
+  // the diag widget wants to know if a white beam vanadium file was loaded as its algorithm needs one too
+  if ( buttonDis == "pbWBV0" )
+  {
+    emit MWDiag_updateWBV(m_uiForm.leWBV0->text());
+  }
 }
 //function will be replaced a function in a widget
 void Excitations::addRunFile()
@@ -490,23 +393,10 @@ void Excitations::disenableAbsolute()
 /** Enables or disables the find bad detectors controls based
 *  on whether or not the check box has been checked
 */
- void Excitations::disenableDiag()
- {
-  const bool enabled = m_uiForm.ckRunDiag->isChecked();
-  m_uiForm.lbIFile->setEnabled(enabled);
-  m_uiForm.leIFile->setEnabled(enabled);
-  m_uiForm.pbIFile->setEnabled(enabled);
-  m_uiForm.lbOFile->setEnabled(enabled);
-  m_uiForm.leOFile->setEnabled(enabled);
-  m_uiForm.pbOFile->setEnabled(enabled);
-  m_uiForm.lbError->setEnabled(enabled);
-  m_uiForm.leSignificance->setEnabled(enabled);
-  m_uiForm.ckAngles->setEnabled(enabled);
-
-  m_uiForm.gbIndividual->setEnabled(enabled);
-  m_uiForm.gbVariation->setEnabled(enabled);
-  m_uiForm.gbExperiment->setEnabled(enabled);
- }
+void Excitations::disenableDiag()
+{
+  m_diagPage->setEnabled(m_uiForm.ckRunDiag->isChecked());
+}
 /** Check if the user has specified a name for the output SPE file,
 * if not insert a name based on the name of the input files
 */
@@ -524,6 +414,10 @@ void Excitations::saveNameUpd()
 {// if the user had already altered the contents of the box it has been noted that the save name is under user control so do nothing
   if (m_saveChanged) return;
   m_saveChanged = m_uiForm.leNameSPE->text() != defaultName();
+}
+void Excitations::updateWBV()
+{
+  emit MWDiag_updateWBV(m_uiForm.leWBV0->text());
 }
 /** enables or disables the list of monitors depending on the whether
 * normalise by monitor was selected
@@ -562,28 +456,4 @@ QString Excitations::defaultName()
   // maybe normal operation: the output file name is based on the first input file
   return deltaECalc::SPEFileName(fileList.front());
 }
-/// Parse input when the Run button is pressed
-bool Excitations::parseInput()
-{
-  try
-  {    
-    readTheDialog();
-
-    return true;
-  }
-  catch (Mantid::Kernel::Exception::NotFoundError e)
-  {
-    QMessageBox::critical(this, "", 
-      QString("Error ") + QString(e.what()) + QString(". Make sure that the Mantid (including diagnostic) algorithms libraries are available"));
-    return false;
-  }
-}
-
-/** copies values from the form a map that is passed to the form and a sometimes a map
-that is used in validation
-*/
-void Excitations::readTheDialog()
-{
-}
-
 

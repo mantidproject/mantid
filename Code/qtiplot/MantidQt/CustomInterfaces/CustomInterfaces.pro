@@ -10,11 +10,9 @@ include(../mantidqt.pri)
 unix:system(mkdir '"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"')
 win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtCustomInterfaces"')
 
-# Need to link with the API
-unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI
-#-lMantidWidgets
-win32:LIBS += "$$DESTDIR\MantidQtAPI.lib"
-# "$$DESTDIR\MantidWidgets.lib" 
+# Link with the libraries it is CustomInterfaces uses
+unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI -lMantidWidgets
+win32:LIBS += "$$DESTDIR\MantidQtAPI.lib" "$$DESTDIR\MantidWidgets.lib" 
 
 #------------------------
 # Source fies
@@ -27,16 +25,14 @@ SOURCES = \
   $$SRCDIR/SANSRunWindow.cpp \
   $$SRCDIR/SANSUtilityDialogs.cpp \
   $$SRCDIR/Diagnostics.cpp \
-  $$SRCDIR/ExcitationsDiagResults.cpp \
-  $$SRCDIR/pythonCalc.cpp \
+  $$SRCDIR/deltaECalc.cpp \
   $$SRCDIR/Excitations.cpp
 
 HEADERS = \
   $$HEADERDIR/SANSRunWindow.h \
   $$HEADERDIR/SANSUtilityDialogs.h \
   $$HEADERDIR/Diagnostics.h \
-  $$HEADERDIR/ExcitationsDiagResults.h \
-  $$HEADERDIR/pythonCalc.h \
+  $$HEADERDIR/deltaECalc.h \
   $$HEADERDIR/Excitations.h
   
 UI_DIR = $$HEADERDIR

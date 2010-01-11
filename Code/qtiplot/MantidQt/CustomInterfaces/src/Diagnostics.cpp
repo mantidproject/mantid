@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/Diagnostics.h"
-#include "MantidQtCustomInterfaces/ExcitationsDiagResults.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -25,13 +24,15 @@
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
 {
-namespace CustomInterfaces
-{
-  DECLARE_SUBWINDOW(Diagnostics);
-}
+  namespace CustomInterfaces
+  {
+    DECLARE_SUBWINDOW(Diagnostics);
+  }
 }
 
+using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
+
 // default parameters that are writen to the GUI
 const char Diagnostics::defHighAbsolute[] = "1e10";
 const char Diagnostics::defLowAbsolute[] = "0";
@@ -49,7 +50,7 @@ Diagnostics::Diagnostics(QWidget *parent) : UserSubWindow(parent),
   m_dispDialog(0), m_busy(false)
 {
 }
-/// slot called run by the results form (a ExcitationsDiagResults) to say that it has finished and we can start processing again
+/// slot called run by the results form (a DiagResults) to say that it has finished and we can start processing again
 void Diagnostics::childFormDied()
 {
   // label the dialog as dead so that we don't try to call it's properties
@@ -214,13 +215,8 @@ void Diagnostics::initLayout()
 void Diagnostics::run()
 {
   // these structures are used to report progress and pass results from one test to another, at the moment there is no progress
-  ExcitationsDiagResults::TestSummary test1;
-  test1.test = "First white beam test";
-  test1.numBad = ExcitationsDiagResults::TestSummary::NORESULTS;
-
-  ExcitationsDiagResults::TestSummary test2;
-  test2.test = "Second white beam test";
-  test2.numBad = ExcitationsDiagResults::TestSummary::NORESULTS;
+  DiagResults::TestSummary test1("First white beam test");
+  DiagResults::TestSummary test2("Second white beam test");
 
   try
   {
@@ -264,11 +260,10 @@ void Diagnostics::run()
     
     if ( ! m_userSettingsMap["expFileNames"].isEmpty() )
     {
-      ExcitationsDiagResults::TestSummary test3;
-      test3.test = "Background test";
+      DiagResults::TestSummary test3("Background test");
       test3.status = "Analysing the background regions of experimental runs";
       test3.outputWS = "";
-      test3.numBad = ExcitationsDiagResults::TestSummary::NORESULTS;
+      test3.numBad = DiagResults::TestSummary::NORESULTS;
       test3.inputWS = "";
       if ( ! m_dispDialog ) return;
       m_dispDialog->notifyDialog(test3);
@@ -516,7 +511,7 @@ void Diagnostics::placeValidatorLabels()
 /** Runs python code that implements the tests on the first white beam vanadium
 *  @return a structure containing the status of running the tests, the number of bad detectors found the output workspace, etc.
 */
-ExcitationsDiagResults::TestSummary Diagnostics::runWhite1()
+DiagResults::TestSummary Diagnostics::runWhite1()
 {  
   //run the tests on the first white beam vanadium run
   QString code = constructScript();
@@ -531,8 +526,8 @@ ExcitationsDiagResults::TestSummary Diagnostics::runWhite1()
 *  @param whiteBeam2 user settings for the comparison between white beams
 *  @return a structure containing the status of running the tests, the number of bad detectors found the output workspace, etc.
 */
-ExcitationsDiagResults::TestSummary Diagnostics::runWhite2(
-  const ExcitationsDiagResults::TestSummary &lastResults )
+DiagResults::TestSummary Diagnostics::runWhite2(
+  const DiagResults::TestSummary &lastResults )
 {  
   //run the tests on the first white beam vanadium run
   QString code = constructScript(lastResults);
@@ -544,12 +539,12 @@ ExcitationsDiagResults::TestSummary Diagnostics::runWhite2(
 }
 /** Runs python code that implements the tests on the second white beam vanadium and the comparison with the first
 *  @param test1 results from the first white beam vanadium test
-*  @param test2 results of comparing white beam runs, test2.numBad=ExcitationsDiagResults::TestSummary::NORESULTS to ignore test
+*  @param test2 results of comparing white beam runs, test2.numBad=DiagResults::TestSummary::NORESULTS to ignore test
 *  @return a structure containing the status of running the tests, the number of bad detectors found the output workspace, etc.
 */
-ExcitationsDiagResults::TestSummary Diagnostics::runBack(
-  const ExcitationsDiagResults::TestSummary &test1,
-  const ExcitationsDiagResults::TestSummary &test2 )
+DiagResults::TestSummary Diagnostics::runBack(
+  const DiagResults::TestSummary &test1,
+  const DiagResults::TestSummary &test2 )
 {
   //run the tests on the first white beam vanadium run
   QString code = constructScript(test1, test2);
@@ -573,7 +568,7 @@ QString Diagnostics::constructScript() const
   readFile(pythonFileName, pythonScript);
    
   pythonScript.replace("|WBVANADIUM1|", 
-    m_userSettingsMap.find("WBVanadium1")->second);
+    "'"+m_userSettingsMap.find("WBVanadium1")->second+"'");
   pythonScript.replace("|HIGHABSOLUTE|", 
     m_userSettingsMap.find("HighAbsolute")->second);
   pythonScript.replace("|LOWABSOLUTE|", 
@@ -585,9 +580,9 @@ QString Diagnostics::constructScript() const
   pythonScript.replace("|SIGNIFICANCETEST|",
     m_userSettingsMap.find("Significance")->second);
   pythonScript.replace("|OUTPUTFILE|",
-    m_userSettingsMap.find("OutputFile")->second);
+    "'"+m_userSettingsMap.find("OutputFile")->second+"'");
   pythonScript.replace("|INPUTFILE|",
-    m_userSettingsMap.find("InputFile")->second);
+    "'"+m_userSettingsMap.find("InputFile")->second+"'");
 
   return pythonScript;
 }
@@ -598,7 +593,7 @@ QString Diagnostics::constructScript() const
 *  @return executable python code
 */
 QString Diagnostics::constructScript(
-    const ExcitationsDiagResults::TestSummary &test1FoundBad) const
+    const DiagResults::TestSummary &test1FoundBad) const
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
   // this file contains all python script to run, expect the user settings and the results of previous tests
@@ -610,7 +605,7 @@ QString Diagnostics::constructScript(
   pythonScript.replace("|SIGNIFICANCETEST|",
     m_userSettingsMap.find("Significance")->second);
   pythonScript.replace("|OUTPUTFILE|",
-    m_userSettingsMap.find("OutputFile")->second);
+    "'"+m_userSettingsMap.find("OutputFile")->second+"'");
   pythonScript.replace("|HIGHABSOLUTE|", 
     m_userSettingsMap.find("HighAbsolute")->second);
   pythonScript.replace("|LOWABSOLUTE|",
@@ -619,10 +614,10 @@ QString Diagnostics::constructScript(
     m_userSettingsMap.find("HighMedian")->second);
   pythonScript.replace("|LOWMEDIAN|", 
     m_userSettingsMap.find("LowMedian")->second);
-  pythonScript.replace("|INPUTMASK|", test1FoundBad.outputWS);
-  pythonScript.replace("|WBV1|", test1FoundBad.inputWS);
+  pythonScript.replace("|INPUTMASK|", "'"+test1FoundBad.outputWS+"'");
+  pythonScript.replace("|WBV1|", "'"+test1FoundBad.inputWS+"'");
   pythonScript.replace("|WBVANADIUM2|",
-    m_userSettingsMap.find("WBVanadium2")->second);
+    "'"+m_userSettingsMap.find("WBVanadium2")->second+"'");
   pythonScript.replace("|CHANGEBETWEEN|",
     m_userSettingsMap.find("Variation")->second);
 
@@ -632,12 +627,12 @@ QString Diagnostics::constructScript(
 /** Loads the python code that runs the background tests for badly performing
 *  detectors
 *  @param test1 results from the first white beam vanadium test
-*  @param test2 results of comparing white beam runs, test2.numBad=ExcitationsDiagResults::TestSummary::NORESULTS to ignore test
+*  @param test2 results of comparing white beam runs, test2.numBad=DiagResults::TestSummary::NORESULTS to ignore test
 *  @return executable python code
 */
 QString Diagnostics::constructScript(
-  const ExcitationsDiagResults::TestSummary &test1,
-  const ExcitationsDiagResults::TestSummary &test2) const
+  const DiagResults::TestSummary &test1,
+  const DiagResults::TestSummary &test2) const
 {
   QDir scriptsdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory")));
   // this file contains all python script to run, expect the user settings and the results of previous tests
@@ -649,26 +644,26 @@ QString Diagnostics::constructScript(
   pythonScript.replace("|ERRORBARS|",
     m_userSettingsMap.find("Significance")->second);
   pythonScript.replace("|OUTPUTFILE|",
-    m_userSettingsMap.find("OutputFile")->second);
+    "'"+m_userSettingsMap.find("OutputFile")->second+"'");
   // use results from the first test
-  pythonScript.replace("|WBV1|", test1.inputWS);
-  pythonScript.replace("|MASK1|", test1.outputWS);
+  pythonScript.replace("|WBV1|", "'"+test1.inputWS+"'");
+  pythonScript.replace("|MASK1|", "'"+test1.outputWS+"'");
   // results from the second test, if any
-  if ( test2.numBad != ExcitationsDiagResults::TestSummary::NORESULTS )
+  if ( test2.numBad != DiagResults::TestSummary::NORESULTS )
   {
-    pythonScript.replace("|WBV2|", test2.inputWS);
-  pythonScript.replace("|MASK2|", test2.outputWS);
+    pythonScript.replace("|WBV2|", "'"+test2.inputWS+"'");
+  pythonScript.replace("|MASK2|", "'"+test2.outputWS+"'");
   }
   else
   {
-    pythonScript.replace("|WBV2|", "");
-    pythonScript.replace("|MASK2|", "");
+    pythonScript.replace("|WBV2|", "''");
+    pythonScript.replace("|MASK2|", "''");
   }
   // user settings for our last test
   pythonScript.replace("|EXPFILES|",
-    m_userSettingsMap.find("expFileNames")->second);
+    "'"+m_userSettingsMap.find("expFileNames")->second+"'");
   pythonScript.replace("|BACKGROUNDACCEPT|",
-    m_userSettingsMap.find("backgroundAccept")->second);
+    "'"+m_userSettingsMap.find("backgroundAccept")->second+"'");
 
   // we need to check if the TOF arguments are empty because python isn't accepting an empty string as an argument for these
   QString TOFWindowBlock;
@@ -686,7 +681,7 @@ QString Diagnostics::constructScript(
 
 
   pythonScript.replace("|REMOVEZEROS|",
-    m_userSettingsMap.find("removeZero")->second);
+    "'"+m_userSettingsMap.find("removeZero")->second+"'");
   
   return pythonScript;
 }
@@ -717,18 +712,16 @@ void Diagnostics::readFile(const QString &pythonFile, QString &scriptText) const
   }
 }
 /** Turns the multi-line string returned from python scripts into a struct
-*  @pythonOut string as returned by runPythonCode()
+*  @param pythonOut string as returned by runPythonCode()
 *  @return either data (or if numBad is set to NORESULTS then diagnositic output, or possibly nothing at all)
 */
-ExcitationsDiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
+DiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
 {
-  ExcitationsDiagResults::TestSummary returnVal;
-  returnVal.numBad = ExcitationsDiagResults::TestSummary::NORESULTS;
-
   QStringList results = pyhtonOut.split("\n");
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
-    returnVal.test = "Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
+    DiagResults::TestSummary
+	  returnVal("Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.");
     QMessageBox::critical(this, this->windowTitle(), returnVal.test);
     returnVal.status = "", returnVal.outputWS = "", returnVal.inputWS = "";
     return returnVal;
@@ -736,7 +729,8 @@ ExcitationsDiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
   // each script should return 7 strings
   if ( results.count() != 7 || results[0] != "success" )
   {// there was an error in the python, disregard these results
-    returnVal.test = "Error \"" + results[1] + "\" during " + results[2] + ", " + "more details may be found in the Mantid and python logs.";
+    DiagResults::TestSummary
+      returnVal("Error \"" + results[1] + "\" during " + results[2] + ", " + "more details may be found in the Mantid and python logs.");
     QMessageBox::critical(this, this->windowTitle(), returnVal.test);
     returnVal.status = "", returnVal.outputWS = "", returnVal.inputWS = "";
     return returnVal;
@@ -744,24 +738,23 @@ ExcitationsDiagResults::TestSummary Diagnostics::readRes(QString pyhtonOut)
   //no errors, return the results
   std::string theBad = results[4].toStdString();
   
-  returnVal.test = results[1];
+  DiagResults::TestSummary returnVal(results[1]);
   returnVal.status = results[2];
   returnVal.outputWS = results[3];
   returnVal.numBad = boost::lexical_cast<int>(theBad);
   returnVal.inputWS = results[5];
   return returnVal;
 }
-
 /** create and show a dialog box that reports the number of bad
 * detectors.
-* @param summaryInfo the results from running each the test
+* @return a pointer to the new dialog box
 */
-ExcitationsDiagResults* Diagnostics::raiseDialog()
+DiagResults* Diagnostics::raiseDialog()
 {
-  ExcitationsDiagResults *dialog = 0;
+  DiagResults *dialog = 0;
   try
   {
-    dialog = new ExcitationsDiagResults(this);
+    dialog = new DiagResults(this);
     connect(dialog, SIGNAL(pythonCodeConstructed(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
     m_uiForm.pbRun->setEnabled(false);
     connect(dialog, SIGNAL(releaseParentWindow()), this, SLOT(childFormDied()));
@@ -775,7 +768,6 @@ ExcitationsDiagResults* Diagnostics::raiseDialog()
   }
   return dialog;
 }
-
 /** Saves a values into a map for passing to the scripts. Usually these are values the
 *  user entered into the form. Some values used by algorithms are copied in to m_propertyValueMap
 *  @param variableName the internal name for the setting, not seen by users

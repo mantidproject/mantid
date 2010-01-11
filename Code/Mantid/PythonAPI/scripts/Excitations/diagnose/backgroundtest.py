@@ -1,5 +1,5 @@
 from mantidsimple import *
-import BadDetectorTestFunctions as functions
+import DetectorTestLib as functions
 
 #--these settings are read in from the MantidPlot GUI so probably don't change these first lines
 THISTEST = 'Background test'
@@ -10,15 +10,15 @@ NUMER = '_FindBadDetects Numerator'
 #-- a workspace that we'll reuse for different things, we're reusing to save memory
 TEMPBIG = '_FindBadDetects tempbig'
 #--These are the values passed over from the MantidPlot dialog via C++, probably don't change them
-DOWNSOFAR1 = '|MASK1|'
-DOWNSOFAR2 = '|MASK2|'
-DATAFILENAMES = '|EXPFILES|'
-ACCEPT = '|BACKGROUNDACCEPT|'
-NUMERRORBARS = '|ERRORBARS|'
-REMOVEZERO = '|REMOVEZEROS|'
-WBV1WS = '|WBV1|'
-WBV2WS = '|WBV2|'
-OMASKFILE = '|OUTPUTFILE|'
+DOWNSOFAR1 = |MASK1|
+DOWNSOFAR2 = |MASK2|
+DATAFILENAMES = |EXPFILES|
+ACCEPT = |BACKGROUNDACCEPT|
+NUMERRORBARS = |ERRORBARS|
+REMOVEZERO = |REMOVEZEROS|
+WBV1WS = |WBV1|
+WBV2WS = |WBV2|
+OMASKFILE = |OUTPUTFILE|
 
 if ( OMASKFILE != '' ) :
   outfile=open(OMASKFILE, 'a')
@@ -26,7 +26,9 @@ if ( OMASKFILE != '' ) :
   MDTFile = OMASKFILE+'_mdt'
 else : MDTFile = ''
 
-try:#--Calculations Start---
+
+
+try:#------------Calculations Start---
   #--load in the experimental run data  
   dataFiles = DATAFILENAMES.split(',')
   # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
@@ -76,15 +78,18 @@ try:#--Calculations Start---
   #--finally find the detectors! again reusing those workspaces
   MDT = MedianDetectorTest( InputWorkspace=SUM, OutputWorkspace=NORMA, SignificanceTest=NUMERRORBARS, LowThreshold=lowThres, HighThreshold=ACCEPT, OutputFile=MDTFile )#for usage see www.mantidproject.org/MedianDetectorTest
   
-  #--Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
+#----------------Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
+
+
+
   #--How many were found in just these tests
   numFound = functions.numberFromCommaSeparated(MDT.getPropertyValue('BadDetectorIDs')) \
   #  - functions.numberFromCommaSeparated(downArray)
   
   if OMASKFILE != "" :
     #--pick up the file output from one detector test that we did
-	functions.appendMaskFile(MDTFile, outfile)
-	outfile.close()
+    functions.appendMaskFile(MDTFile, outfile)
+    outfile.close()
 
   #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
   print 'success'

@@ -5,7 +5,7 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/ui_Diagnostics.h"
-#include "MantidQtCustomInterfaces/ExcitationsDiagResults.h"
+#include "MantidQtMantidWidgets/DiagResults.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -19,6 +19,8 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+  using namespace MantidQt::MantidWidgets;
+
 class Diagnostics : public MantidQt::API::UserSubWindow
 {
   Q_OBJECT
@@ -35,17 +37,8 @@ private:
   Ui::Diagnostics m_uiForm;
   // structures to hold the values entered by the use
 
-  // to store default values
-  static const char defHighAbsolute[];   ///< default value for reject above this number of counts
-  static const char defLowAbsolute[];    ///< default value for reject at or below this number of counts
-  static const char defSignificanceTest[];///< default value for the number of errorbars from the median number of counts needs to be before the detector can be rejectedn in a median test
-  static const char defHighMedian[];     ///< default value for the maximum number of times the median value the total number of counts can be without being rejected
-  static const char defLowMedian[];      ///< default value for the minimum number of times the median value the total number of counts can be without being rejected
-  static const char defVariation[];      ///< default value for the maximum allowed variation between white beam vanadium runs over the median
-  static const char defBackground[];     ///< default value for the maximum allowed variation between white beam vanadium runs over the median
-
   /// a pointer to the results dialog box
-  ExcitationsDiagResults *m_dispDialog;
+  DiagResults *m_dispDialog;
   /// we set this to true if python is running to say that we shouldn't start running more python
   bool m_busy;
   /// Pointers to instances of all the algorithms used. From these the properties are taken and used for validation
@@ -57,34 +50,43 @@ private:
   void loadAlgorDummies();
   void readTheDialog();
   void placeValidatorLabels();
-  ExcitationsDiagResults::TestSummary runWhite1();
-  ExcitationsDiagResults::TestSummary runWhite2(
-    const ExcitationsDiagResults::TestSummary &lastResults );
-  ExcitationsDiagResults::TestSummary runBack(
-    const ExcitationsDiagResults::TestSummary &test1,
-    const ExcitationsDiagResults::TestSummary &test2);
+  DiagResults::TestSummary runWhite1();
+  DiagResults::TestSummary runWhite2(
+    const DiagResults::TestSummary &lastResults );
+  DiagResults::TestSummary runBack(
+    const DiagResults::TestSummary &test1,
+    const DiagResults::TestSummary &test2);
   /// read in the parameters that users have entered on the form
   QString constructScript() const;
   QString constructScript(
-    const ExcitationsDiagResults::TestSummary &test1FoundBad) const;
+    const DiagResults::TestSummary &test1FoundBad) const;
   QString constructScript(
-    const ExcitationsDiagResults::TestSummary &test1,
-    const ExcitationsDiagResults::TestSummary &test2) const;
+    const DiagResults::TestSummary &test1,
+    const DiagResults::TestSummary &test2) const;
   void readFile(const QString &pythonFile, QString &scriptText) const;
-  ExcitationsDiagResults::TestSummary readRes(QString pyhtonOut);
-  ExcitationsDiagResults* raiseDialog();
+  DiagResults::TestSummary readRes(QString pyhtonOut);
+  DiagResults* raiseDialog();
   void getAlgProperties();
   void storeUserSetting(const std::string &varibleName, const QString &value);
   /// enable the run button if the results dialog has been closed and the python has stopped
   void pythonIsRunning(bool running);
-private slots:
-  ///run the algorithms that can be run with the data that users supplied
-  void run();
-  void browseClicked(const QString &buttonDis);
-  void addFile();
-  void removeName(QListWidgetItem *item = 0);
-  /// open the wiki page for this interface in their browser
-  void helpClicked();
+  // to store default values
+  static const char defHighAbsolute[];   ///< default value for reject above this number of counts
+  static const char defLowAbsolute[];    ///< default value for reject at or below this number of counts
+  static const char defSignificanceTest[];///< default value for the number of errorbars from the median number of counts needs to be before the detector can be rejectedn in a median test
+  static const char defHighMedian[];     ///< default value for the maximum number of times the median value the total number of counts can be without being rejected
+  static const char defLowMedian[];      ///< default value for the minimum number of times the median value the total number of counts can be without being rejected
+  static const char defVariation[];      ///< default value for the maximum allowed variation between white beam vanadium runs over the median
+  static const char defBackground[];     ///< default value for the maximum allowed variation between white beam vanadium runs over the median
+
+  private slots:
+    ///run the algorithms that can be run with the data that users supplied
+    void run();
+    void browseClicked(const QString &buttonDis);
+    void addFile();
+    void removeName(QListWidgetItem *item = 0);
+    /// open the wiki page for this interface in their browser
+    void helpClicked();
 
 protected:
   /// The properties associated with this algorithm
