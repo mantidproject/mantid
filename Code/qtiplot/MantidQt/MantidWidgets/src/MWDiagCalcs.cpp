@@ -15,8 +15,8 @@ const QString whiteBeam2::tempWS = "_Diag_tempory_workspace_";
 /** Read the data the user supplied to create Python code to do their calculation
 * @param userSettings the form that the user filled in
 */
-whiteBeam1::whiteBeam1(const Ui::MWDiag &userSettings) : m_settings(userSettings),
-  pythonCalc()
+whiteBeam1::whiteBeam1(const Ui::MWDiag &userSettings) :  
+  pythonCalc(), m_settings(userSettings) 
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   // load a template for the Python script that we will contain in a string
@@ -61,8 +61,7 @@ whiteBeam1::whiteBeam1(const Ui::MWDiag &userSettings) : m_settings(userSettings
 /** Read the data the user supplied to create Python code to do their calculation
 * @param userSettings the form that the user filled in
 */
-whiteBeam2::whiteBeam2(const Ui::MWDiag &userSettings) : m_settings(userSettings),
-  pythonCalc()
+whiteBeam2::whiteBeam2(const Ui::MWDiag &userSettings) :   pythonCalc(), m_settings(userSettings)
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   // load a template for the Python script that we will contain in a string

@@ -39,6 +39,8 @@ UI_DIR = $$HEADERDIR
 
 FORMS = \
   $$HEADERDIR/MWDiag.ui
+
+UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"
   
 #-----------------------------
 # Target and dependancies
