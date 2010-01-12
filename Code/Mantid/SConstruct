@@ -85,7 +85,7 @@ if os.name == 'nt':
 	else:
 		print "* Building for 64bit Windows *"
 		libDirList.append(third_party + '/lib/win64/')
-		libDirList.append('c:/Program Files/Microsoft SDKs/Windows/v6.0A/lib/')
+		libDirList.append('c:/Program Files/Microsoft SDKs/Windows/v6.0A/lib/x64/')
 		
 	
 	libList.append('python25')
