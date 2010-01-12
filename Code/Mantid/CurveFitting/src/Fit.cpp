@@ -159,7 +159,7 @@ namespace CurveFitting
   }
 
   /** Calculating least-squared cost function from fitting function
-  *.
+  *
   * @param x Input function arguments
   * @param params Input data
   * @return Value of least squared cost function
@@ -188,7 +188,7 @@ namespace CurveFitting
   }
 
   /** Calculating derivatives of least-squared cost function
-  *.
+  *
   * @param x Input function arguments
   * @param params Input data
   * @param df Derivatives cost function
@@ -217,7 +217,7 @@ namespace CurveFitting
 
   /** Return both derivatives and function value of least-squared cost function. This function is
   *   required by the GSL none least squares multidimensional fitting framework
-  *.
+  *
   * @param x Input function arguments
   * @param params Input data
   * @param f cost function value
