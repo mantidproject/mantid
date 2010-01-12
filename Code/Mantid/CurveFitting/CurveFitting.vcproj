@@ -215,6 +215,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FRConjugateGradientMinimizer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Gaussian.cpp"
 				>
 			</File>
@@ -318,6 +322,10 @@
 			</File>
 			<File
 				RelativePath=".\test\FitTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\FRConjugateGradientMinimizer.h"
 				>
 			</File>
 			<File

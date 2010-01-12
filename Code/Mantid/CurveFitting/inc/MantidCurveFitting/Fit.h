@@ -103,7 +103,6 @@ namespace Mantid
       API::IFunction* m_function;
 
       friend struct FitData1;
-
     };
 
     

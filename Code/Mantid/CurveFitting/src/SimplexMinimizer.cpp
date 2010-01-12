@@ -12,14 +12,14 @@ namespace CurveFitting
 SimplexMinimizer::SimplexMinimizer( gsl_multimin_function& gslContainer, 
   gsl_vector* startGuess, const double& size) : m_name("Simplex") 
 {
-  const gsl_multimin_fminimizer_type *simplexType = gsl_multimin_fminimizer_nmsimplex;
+  const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
 
   // step size for simplex
   m_simplexStepSize = gsl_vector_alloc(gslContainer.n);
   gsl_vector_set_all (m_simplexStepSize, size);  // is this always a sensible starting step size?
 
   // setup minimizer
-  m_gslSolver = gsl_multimin_fminimizer_alloc(simplexType, gslContainer.n);
+  m_gslSolver = gsl_multimin_fminimizer_alloc(T, gslContainer.n);
   gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, startGuess, m_simplexStepSize);
 }
 

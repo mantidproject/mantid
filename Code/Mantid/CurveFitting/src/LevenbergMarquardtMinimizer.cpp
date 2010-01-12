@@ -44,7 +44,8 @@ int LevenbergMarquardtMinimizer::hasConverged()
 
 double LevenbergMarquardtMinimizer::costFunctionVal()
 {
-  return gsl_blas_dnrm2(m_gslSolver->f);
+  double chi = gsl_blas_dnrm2(m_gslSolver->f);
+  return chi*chi;
 }
 
 } // namespace CurveFitting

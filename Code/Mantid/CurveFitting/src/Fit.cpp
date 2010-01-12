@@ -14,6 +14,7 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidCurveFitting/FRConjugateGradientMinimizer.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -90,11 +91,12 @@ namespace CurveFitting
     double * sqrtWeightData;
     /// pointer to instance of Fit
     Fit* fit;
-    /// Needed to use the simplex algorithm within the gsl least-squared framework.
-    /// Will store output function values from gsl_f
-    double * forSimplexLSwrap;
     /// Jacobi matrix interface
     JacobianImpl1 J;
+    /// To use the none least-squares gsl algorithms within the gsl least-squared framework
+    /// include here container for calculuated data and calculated jacobian. 
+    double * holdCalculatedData;
+    gsl_matrix * holdCalculatedJacobian;
   };
 
   /** Fit GSL function wrapper
@@ -156,9 +158,8 @@ namespace CurveFitting
       return GSL_SUCCESS;
   }
 
-  /** Calculating the cost function assuming it has the least-squared
-  format. Initially implemented to use the gsl simplex routine within
-  the least-squared scheme.
+  /** Calculating least-squared cost function from fitting function
+  *.
   * @param x Input function arguments
   * @param params Input data
   * @return Value of least squared cost function
@@ -167,26 +168,65 @@ namespace CurveFitting
   {
 
     struct FitData1 *p = (struct FitData1 *)params;
-    double * l_forSimplexLSwrap = p->forSimplexLSwrap;
+    double * l_holdCalculatedData = p->holdCalculatedData;
 
-    p->fit->function (x->data,
-      l_forSimplexLSwrap,
-      p->X,
-      p->n);
+    p->fit->function (x->data, l_holdCalculatedData, p->X, p->n);
 
     // function() return calculated data values. Need to convert this values into
     // calculated-observed devided by error values used by GSL
     for (size_t i = 0; i<p->n; i++)
-      l_forSimplexLSwrap[i] = 
-      (  l_forSimplexLSwrap[i] - p->Y[i] ) * p->sqrtWeightData[i];
+      l_holdCalculatedData[i] = 
+      (  l_holdCalculatedData[i] - p->Y[i] ) * p->sqrtWeightData[i];
 
     double retVal = 0.0;
 
     for (unsigned int i = 0; i < p->n; i++)
-      retVal += l_forSimplexLSwrap[i]*l_forSimplexLSwrap[i];
+      retVal += l_holdCalculatedData[i]*l_holdCalculatedData[i];
 
 
     return retVal;
+  }
+
+  /** Calculating derivatives of least-squared cost function
+  *.
+  * @param x Input function arguments
+  * @param params Input data
+  * @param df Derivatives cost function
+  */
+  static void gsl_costFunction_df(const gsl_vector * x, void *params, gsl_vector *df)
+  {
+
+    struct FitData1 *p = (struct FitData1 *)params;
+    double * l_holdCalculatedData = p->holdCalculatedData;
+
+    p->fit->function (x->data, l_holdCalculatedData, p->X, p->n);
+
+    p->J.setJ(p->holdCalculatedJacobian);
+    p->fit->functionDeriv (x->data, &p->J, p->X, p->n);
+
+    for (size_t iP = 0; iP < p->p; iP++) 
+    {
+      df->data[iP] = 0.0;
+      for (size_t iY = 0; iY < p->n; iY++) 
+      {
+        df->data[iP] += 2.0*(l_holdCalculatedData[iY]-p->Y[iY]) * p->holdCalculatedJacobian->data[iY*p->p + iP] 
+                        * p->sqrtWeightData[iY]*p->sqrtWeightData[iY];
+      }
+    }
+  }
+
+  /** Return both derivatives and function value of least-squared cost function. This function is
+  *   required by the GSL none least squares multidimensional fitting framework
+  *.
+  * @param x Input function arguments
+  * @param params Input data
+  * @param f cost function value
+  * @param df Derivatives of cost function
+  */
+  static void gsl_costFunction_fdf(const gsl_vector * x, void *params, double *f, gsl_vector *df)
+  {
+    *f = gsl_costFunction(x, params);
+    gsl_costFunction_df(x, params, df); 
   }
 
   ///Destructor
@@ -226,10 +266,11 @@ namespace CurveFitting
 
     declareProperty("Output","","If not empty OutputParameters TableWorksace and OutputWorkspace will be created.");
 
-    std::vector<std::string> propOptions;
-    propOptions.push_back("Levenberg-Marquardt");
-    propOptions.push_back("Simplex");
-    declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(propOptions),
+    std::vector<std::string> minimizerOptions;
+    minimizerOptions.push_back("Levenberg-Marquardt");
+    minimizerOptions.push_back("Simplex");
+    minimizerOptions.push_back("Conjugate gradient (Fletcher-Reeves imp.)");
+    declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::Input);
   }
 
@@ -331,19 +372,14 @@ namespace CurveFitting
       isDerivDefined = false;
     }
 
-    // For now only two minimizers allowed
+    // What minimizer to use
     std::string methodUsed = getProperty("Minimizer");
-    if ( methodUsed.compare("Levenberg-Marquardt") != 0 &&  
-      methodUsed.compare("Simplex") != 0 )
+    if ( !isDerivDefined && methodUsed.compare("Simplex") != 0 )
     {
-      methodUsed = "Levenberg-Marquardt";
-      g_log.warning() << "Minimizer not recognised. Default to Levenberg-Marquardt\n";
+      methodUsed = "Simplex";
+      g_log.information() << "No derivatives available for this fitting function"
+                          << " therefore Simplex method used for fitting\n";
     }
-    if ( methodUsed.compare("Simplex") == 0)
-    {
-      isDerivDefined = false;
-    }
-
 
     // create and populate GSL data container warn user if l_data.n < l_data.p 
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
@@ -365,7 +401,8 @@ namespace CurveFitting
     }
     l_data.X = new double[l_data.n];
     l_data.sqrtWeightData = new double[l_data.n];
-    l_data.forSimplexLSwrap = new double[l_data.n];
+    l_data.holdCalculatedData = new double[l_data.n];
+    l_data.holdCalculatedJacobian =  gsl_matrix_alloc (l_data.n, l_data.p);
 
     // check if histogram data in which case use mid points of histogram bins
 
@@ -421,6 +458,16 @@ namespace CurveFitting
     gslSimplexContainer.params = &l_data;
 
 
+    // set-up GSL container to be used with none-least squares GSL routines using derivatives
+
+    gsl_multimin_function_fdf gslMultiminContainer;
+    gslMultiminContainer.n = l_data.p;  // n here refers to number of parameters
+    gslMultiminContainer.f = &gsl_costFunction;
+    gslMultiminContainer.df = &gsl_costFunction_df;
+    gslMultiminContainer.fdf = &gsl_costFunction_fdf;
+    gslMultiminContainer.params = &l_data;
+
+
     // set-up GSL least squares container
 
     gsl_multifit_function_fdf f;
@@ -435,13 +482,22 @@ namespace CurveFitting
 
     IFuncMinimizer* minimizer = NULL;
 
-    if (isDerivDefined)
+    if ( methodUsed.compare("Simplex") == 0 )
     {
-      minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg);
+      minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
     }
     else
     {
-      minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
+      if ( methodUsed.compare("Levenberg-Marquardt") == 0 )
+        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg); 
+      else if ( methodUsed.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 )
+        minimizer = new FRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg);
+      else
+      {
+        g_log.error("Unrecognised minimizer in Fit. Default to Levenberg-Marquardt\n");
+        methodUsed = "Levenberg-Marquardt";
+        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg); 
+      }
     }
     
 
@@ -449,13 +505,13 @@ namespace CurveFitting
 
     int iter = 0;
     int status;
-    bool simplexFallBack = false; // set to true if levenberg-marquardt fails
+    //bool simplexFallBack = false; // set to true if levenberg-marquardt fails
     double finalCostFuncVal;
     double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
 
     // Standard least-squares used if derivative function defined otherwise simplex
     Progress prog(this,0.0,1.0,maxInterations);
-    if (isDerivDefined)
+    if ( methodUsed.compare("Simplex") != 0 )
     {
       status = GSL_CONTINUE;
       while (status == GSL_CONTINUE && iter < maxInterations)
@@ -472,7 +528,8 @@ namespace CurveFitting
           // gsl_multifit_fdfsolver_iterate has failed on the first or second hurdle
           if (iter < 3)
           {
-            simplexFallBack = true;
+            methodUsed = "Simplex";
+            //simplexFallBack = true;
             delete minimizer;
             minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
             iter = 0;
@@ -487,10 +544,10 @@ namespace CurveFitting
         prog.report();
       }
 
-      double chi = minimizer->costFunctionVal();
-      finalCostFuncVal = chi*chi / dof;
+      finalCostFuncVal = minimizer->costFunctionVal() / dof;
     }
-    if (!isDerivDefined || simplexFallBack == true)
+
+    if ( methodUsed.compare("Simplex") == 0 )
     {
       status = GSL_CONTINUE;
       while (status == GSL_CONTINUE && iter < maxInterations)
@@ -523,10 +580,6 @@ namespace CurveFitting
     // Output summary to log file
 
     std::string reportOfFit = gsl_strerror(status);
-
-    // if minimizer has been changed
-    if (isDerivDefined && simplexFallBack == false)
-      methodUsed = "Levenberg-Marquardt";
 
     g_log.information() << "Method used = " << methodUsed << "\n" <<
       "Iteration = " << iter << "\n" <<
@@ -618,7 +671,8 @@ namespace CurveFitting
 
     delete [] l_data.X;
     delete [] l_data.sqrtWeightData;
-    delete [] l_data.forSimplexLSwrap;
+    delete [] l_data.holdCalculatedData;
+    gsl_matrix_free (l_data.holdCalculatedJacobian);
 
     return;
   }
@@ -643,11 +697,8 @@ namespace CurveFitting
     m_function->functionWithConstraint(out,xValues,nData);
   }
 
-  /** Base class implementation of derivative function throws error. This is to check if such a function is provided
-  by derivative class. In the derived classes this method must return the derivatives of the resuduals function
-  (defined in void Fit::function(const double*, double*, const double*, const double*, const double*, const int&))
-  with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
-  algorithm is used.
+  /** Calculate derivates of fitting function
+  *
   * @param in Input fitting parameter values
   * @param out Derivatives
   * @param xValues X values for data points
