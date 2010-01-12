@@ -345,7 +345,7 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
 
 
-    TS_ASSERT_DELTA( gaus->height(), 97.8091 ,0.0001);
+    TS_ASSERT_DELTA( gaus->height(), 97.8091 ,0.01);
     TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.001);
 
@@ -355,7 +355,7 @@ public:
   void testAgainstMockDataSimplex2()
   {
     // create mock data to test against
-    std::string wsName = "GaussMockDataSimplex";
+    std::string wsName = "GaussMockDataSimplex2";
     int histogramNumber = 1;
     int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
@@ -400,7 +400,7 @@ public:
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
 
 
-    TS_ASSERT_DELTA( gaus->height(), 97.8091 ,0.0001);
+    TS_ASSERT_DELTA( gaus->height(), 97.8091 ,0.01);
     TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.001);
 
