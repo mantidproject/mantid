@@ -98,6 +98,7 @@ void NXObject::getAttributes()
     boost::shared_array<char> buff(new char[nbuff+1]);
     while(NXgetnextattr(m_fileID, pName, &iLength, &iType) != NX_EOD)
     {
+        //std::cerr<<"--------------------------\n";
         //std::cerr<<"name="<<path()<<'\n';
         //std::cerr<<pName<<' ' <<iLength<<' '<<iType<<'\n';
         switch(iType)
@@ -110,9 +111,9 @@ void NXObject::getAttributes()
                     buff.reset(new char[nbuff+1]);
                 }
                 int nz = iLength + 1;
-                NXgetattr(m_fileID,pName,buff.get(),&iLength,&iType);
-                buff[nz-1] = '\0';
+                NXgetattr(m_fileID,pName,buff.get(),&nz,&iType);
                 attributes.set(pName,buff.get());
+                //std::cerr<<"value="<<buff.get()<<'\n';
                 break;
             }
         case NX_INT16:
@@ -464,7 +465,7 @@ NXData::NXData(const NXClass& parent,const std::string& name):NXMainClass(parent
 //          NXLog methods
 //---------------------------------------------------------
 
-Kernel::Property* NXLog::createTimeSeries()
+Kernel::Property* NXLog::createTimeSeries(const std::string& start_time)
 {
   const std::string & logName = name();
   NXInfo vinfo = getDataSetInfo("time");
@@ -472,13 +473,13 @@ Kernel::Property* NXLog::createTimeSeries()
   {
     NXDouble times = openNXDouble("time");
     times.load();
-    return parseTimeSeries(logName, times);
+    return parseTimeSeries(logName, times, start_time);
   }
   else if( vinfo.type == NX_FLOAT32 )
   {
     NXFloat times = openNXFloat("time");
     times.load();
-    return parseTimeSeries(logName, times);
+    return parseTimeSeries(logName, times, start_time);
   }
 
   return NULL;

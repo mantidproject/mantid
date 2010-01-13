@@ -187,10 +187,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\PyAlgorithm.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\PythonWrapper.cpp"
 				>
 			</File>
@@ -207,7 +203,7 @@
 			<File
 				RelativePath=".\inc\MantidPythonAPI\api_exports.h"
 				>
-			</File>	
+			</File>
 			<File
 				RelativePath=".\inc\MantidPythonAPI\FrameworkManagerProxy.h"
 				>
