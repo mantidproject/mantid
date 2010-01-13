@@ -287,6 +287,9 @@ public:
     )
     TS_ASSERT( alg2.isExecuted() );
 
+    std::string minimizer = alg2.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("Levenberg-Marquardt") == 0 );
+
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
@@ -339,6 +342,8 @@ public:
     )
     TS_ASSERT( alg2.isExecuted() );
 
+    std::string minimizer = alg2.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("Simplex") == 0 );
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
@@ -394,6 +399,8 @@ public:
     )
     TS_ASSERT( alg2.isExecuted() );
 
+    std::string minimizer = alg2.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("Simplex") == 0 );
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
@@ -449,6 +456,8 @@ public:
     )
     TS_ASSERT( alg2.isExecuted() );
 
+    std::string minimizer = alg2.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 );
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
@@ -456,6 +465,120 @@ public:
 
 
     TS_ASSERT_DELTA( gaus->height(), 97.7995 ,0.0001);
+    TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.001);
+    TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.001);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void testAgainstMockDataPRConjugateGradient()
+  {
+    // create mock data to test against
+    std::string wsName = "GaussMockDataPRConjugateGradient";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // set up gaussian fitting function
+    Gaussian* gaus = new Gaussian();
+    gaus->initialize();
+    gaus->setCentre(11.2);
+    gaus->setHeight(100.7);
+    gaus->setWidth(2.2);
+
+    alg2.setFunction(gaus);
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex","0");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
+    alg2.setPropertyValue("Minimizer", "Conjugate gradient (Polak-Ribiere imp.)");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+    TS_ASSERT( alg2.isExecuted() );
+
+    std::string minimizer = alg2.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 );
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
+
+
+    TS_ASSERT_DELTA( gaus->height(), 97.7857 ,0.0001);
+    TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.001);
+    TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.001);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void testAgainstMockDataBFGS()
+  {
+    // create mock data to test against
+    std::string wsName = "GaussMockDataBFGS";
+    int histogramNumber = 1;
+    int timechannels = 20;
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    for (int i = 0; i < 20; i++) ws2D->dataX(0)[i] = i+1;
+    Mantid::MantidVec& y = ws2D->dataY(0); // y-values (counts)
+    Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
+    getMockData(y, e);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    Fit alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
+    TS_ASSERT( alg2.isInitialized() );
+
+    // set up gaussian fitting function
+    Gaussian* gaus = new Gaussian();
+    gaus->initialize();
+    gaus->setCentre(11.2);
+    gaus->setHeight(100.7);
+    gaus->setWidth(2.2);
+
+    alg2.setFunction(gaus);
+
+    // Set which spectrum to fit against and initial starting values
+    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setPropertyValue("WorkspaceIndex","0");
+    alg2.setPropertyValue("StartX","0");
+    alg2.setPropertyValue("EndX","20");
+    alg2.setPropertyValue("Minimizer", "BFGS");
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg2.execute() )
+    )
+    TS_ASSERT( alg2.isExecuted() );
+
+    std::string minimizer = alg2.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("BFGS") == 0 );
+
+    // test the output from fit is what you expect
+    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
+
+
+    TS_ASSERT_DELTA( gaus->height(), 97.8111 ,0.0001);
     TS_ASSERT_DELTA( gaus->centre(), 11.2356 ,0.001);
     TS_ASSERT_DELTA( gaus->width(), 2.6240 ,0.001);
 
@@ -531,6 +654,9 @@ public:
       TS_ASSERT( alg.execute() )
     )
     TS_ASSERT( alg.isExecuted() );
+
+    std::string minimizer = alg.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("Simplex") == 0 );
 
     // test the output from fit is what you expect
     double dummy = alg.getProperty("Output Chi^2/DoF");

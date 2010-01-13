@@ -15,6 +15,8 @@
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
 #include "MantidCurveFitting/FRConjugateGradientMinimizer.h"
+#include "MantidCurveFitting/PRConjugateGradientMinimizer.h"
+#include "MantidCurveFitting/BFGS_Minimizer.h"
 
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -270,8 +272,10 @@ namespace CurveFitting
     minimizerOptions.push_back("Levenberg-Marquardt");
     minimizerOptions.push_back("Simplex");
     minimizerOptions.push_back("Conjugate gradient (Fletcher-Reeves imp.)");
+    minimizerOptions.push_back("Conjugate gradient (Polak-Ribiere imp.)");
+    minimizerOptions.push_back("BFGS");
     declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
-      "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::Input);
+      "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
   }
 
 
@@ -492,6 +496,10 @@ namespace CurveFitting
         minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg); 
       else if ( methodUsed.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 )
         minimizer = new FRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg);
+      else if ( methodUsed.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 )
+        minimizer = new PRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg);
+      else if ( methodUsed.compare("BFGS") == 0 )
+        minimizer = new BFGS_Minimizer(gslMultiminContainer, initFuncArg);
       else
       {
         g_log.error("Unrecognised minimizer in Fit. Default to Levenberg-Marquardt\n");
@@ -593,6 +601,7 @@ namespace CurveFitting
 
     setProperty("Output Status", reportOfFit);
     setProperty("Output Chi^2/DoF", finalCostFuncVal);
+    setProperty("Minimizer", methodUsed);
     
 
     // if Output property is specified output additional workspaces

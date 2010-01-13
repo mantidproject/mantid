@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\BFGS_Minimizer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\BoundaryConstraint.cpp"
 				>
 			</File>
@@ -259,6 +263,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PRConjugateGradientMinimizer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Quadratic.cpp"
 				>
 			</File>
@@ -298,6 +306,10 @@
 			</File>
 			<File
 				RelativePath=".\test\BackToBackExponentialTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\BFGS_Minimizer.h"
 				>
 			</File>
 			<File
@@ -402,6 +414,10 @@
 			</File>
 			<File
 				RelativePath=".\test\LorentzianTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\PRConjugateGradientMinimizer.h"
 				>
 			</File>
 			<File
