@@ -46,7 +46,6 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    using API::Sample;
     class DLLExport BinaryOperation : public API::PairedGroupAlgorithm
     {
     public:
@@ -105,7 +104,7 @@ namespace Mantid
        *  @param rhs the other workspace
        *  @param ans the output workspace
        */
-      virtual void operateOnSample(const Sample& lhs, const Sample& rhs, Sample& ans) const {};
+      virtual void operateOnSample(const API::Sample& lhs, const API::Sample& rhs, API::Sample& ans) const {};
 
     private:
       void doSingleValue(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);

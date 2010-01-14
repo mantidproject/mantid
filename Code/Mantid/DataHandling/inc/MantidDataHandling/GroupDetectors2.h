@@ -18,8 +18,6 @@ namespace Mantid
 {
 namespace DataHandling
 {
-  using DataObjects::Workspace2D_const_sptr;
-  using DataObjects::Workspace2D_sptr;
 /** An algorithm for grouping detectors and their associated spectra into
   single spectra and DetectorGroups.
     This algorithm can only be used on a workspace that has common X bins.
@@ -147,9 +145,9 @@ private:
   void exec();
   
   /// read in the input parameters and see what findout what will be to grouped
-  void getGroups(Workspace2D_const_sptr workspace, std::vector<int> &unUsedSpec);
+  void getGroups(DataObjects::Workspace2D_const_sptr workspace, std::vector<int> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_ _numbers_ 
-  void processFile(std::string fname,  Workspace2D_const_sptr workspace,
+  void processFile(std::string fname,  DataObjects::Workspace2D_const_sptr workspace,
                                                 std::vector<int> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
@@ -163,11 +161,11 @@ private:
   double fileReadProg(int numGroupsRead, int numInHists);
 
   /// Copy the and combine the histograms that the user requested from the input into the output workspace
-  int formGroups(Workspace2D_const_sptr inputWS,
-                 Workspace2D_sptr outputWS, const double prog4Copy);
+  int formGroups(DataObjects::Workspace2D_const_sptr inputWS,
+                 DataObjects::Workspace2D_sptr outputWS, const double prog4Copy);
   /// Copy the data data in ungrouped histograms from the input workspace to the output
   void moveOthers(const std::set<int> &unGroupedSet,
-    Workspace2D_const_sptr inputWS,Workspace2D_sptr outputWS,int outIndex);
+    DataObjects::Workspace2D_const_sptr inputWS, DataObjects::Workspace2D_sptr outputWS,int outIndex);
 
   /// flag values
   enum {

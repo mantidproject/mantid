@@ -8,10 +8,7 @@ namespace Mantid
 {
 namespace Algorithms
 {
-  using DataObjects::Workspace2D_const_sptr;
-  using namespace API;
-  using namespace Geometry;
-/**????
+/** is being replaced
 
     @author Steve Williams based on code by T.G.Perring
     @date 6/10/2009

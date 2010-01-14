@@ -28,8 +28,7 @@ DECLARE_ALGORITHM(GroupDetectors2)
 
 using namespace Kernel;
 using namespace API;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_const_sptr;
+using namespace DataObjects;
 
 /// (Empty) Constructor
 GroupDetectors2::GroupDetectors2() : m_FracCompl(0.0) {}
@@ -98,7 +97,7 @@ void GroupDetectors2::exec()
   // ignore the one USED value in set or ignore all the ungrouped if the user doesn't want them
   const int numUnGrouped = keepAll ? unGroupedSet.size()-1 : 0;
 
-  Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<Workspace2D>(
+  DataObjects::Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
     WorkspaceFactory::Instance().create(inputWS,
     m_GroupSpecInds.size()+ numUnGrouped, inputWS->readX(0).size(),
     inputWS->blocksize())
@@ -431,12 +430,12 @@ double GroupDetectors2::fileReadProg(int numGroupsRead, int numInHists)
 *  @param outputWS user selected output workspace for the algorithm
 *  @param prog4Copy the amount of algorith progress to atribute to moving a single spectra
 */
-int GroupDetectors2::formGroups( Workspace2D_const_sptr inputWS, Workspace2D_sptr outputWS, const double prog4Copy)
+int GroupDetectors2::formGroups( DataObjects::Workspace2D_const_sptr inputWS, DataObjects::Workspace2D_sptr outputWS, const double prog4Copy)
 {
   // Get hold of the axis that holds the spectrum numbers
   Axis *inputSpecNums = inputWS->getAxis(1);
   // Get a reference to the spectra map on the output workspace
-  SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
+  API::SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
 
   g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups" << std::endl;
 

@@ -64,7 +64,7 @@ namespace Mantid
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
       bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
-      void operateOnSample(const Sample& lhs, const Sample& rhs, Sample & ans) const;
+      void operateOnSample(const API::Sample& lhs, const API::Sample& rhs, API::Sample & ans) const;
     };
 
   } // namespace Algorithm

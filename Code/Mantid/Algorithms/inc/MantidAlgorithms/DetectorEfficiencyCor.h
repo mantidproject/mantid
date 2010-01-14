@@ -15,9 +15,6 @@ namespace Mantid
 {
 namespace Algorithms
 {
-  using DataObjects::Workspace2D_const_sptr;
-  using namespace API;
-  using namespace Geometry;
 /** 
   Returns efficiency of cylindrical helium gas tube.
     wvec      Final neutron wavevector (Angsstrom^-1)
@@ -101,9 +98,9 @@ public:
 
 private:
   /// the user selected workspace
-  MatrixWorkspace_const_sptr m_inputWS;
+  API::MatrixWorkspace_const_sptr m_inputWS;
   /// output workspace, maybe the same as the input one
-  MatrixWorkspace_sptr m_outputWS;
+  API::MatrixWorkspace_sptr m_outputWS;
   /// points the map that stores additional properties for detectors in that map
   const Geometry::ParameterMap *m_paraMap;
   /// points to a detector masking helper object, or NULL if the mask map couldn't be opened
@@ -116,13 +113,13 @@ private:
 
   // lots of cached data
   /// a cached pointer to the shape used to save calculation time as most detectors have the same shape
-  const Object *m_shapeCache;
+  const Geometry::Object *m_shapeCache;
   /// the cached value for the radius in the cached shape used to save calculation time
   double m_radCache;
   /// sin of angle between its axis and a line to the sample.
   double m_sinThetaCache;
   /// cached value for the axis of cylinder that the detectors are based on, last time it was calculated
-  V3D m_baseAxisCache;
+  Geometry::V3D m_baseAxisCache;
   /// cached value a parameter used in the detector efficiency calculation, 1-wallthickness/radius
   double m_1_t2rad;
   /// caches the part of the calculation that is constant for a whole detector
@@ -140,9 +137,9 @@ private:
   void efficiencyCorrect(int spectraNumber);
   void set1_wvec(int spectraIn);
   double get1OverK(double DeltaE) const;
-  void getDetectorGeometry(boost::shared_ptr<IDetector> det);
+  void getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det);
   void getCylinderAxis();
-  double DistToSurface(const V3D start, const Object *shape) const;
+  double DistToSurface(const Geometry::V3D start, const Geometry::Object *shape) const;
   double EFF(const double oneOverwvec) const;//, double rad, double atms, double t2rad, double sintheta);
   double EFFCHB(double a, double b, const double exspansionCoefs[], double x) const;
   void logErrors(std::vector<int> &spuriousSpectra, std::vector<int> &unsetParams) const;

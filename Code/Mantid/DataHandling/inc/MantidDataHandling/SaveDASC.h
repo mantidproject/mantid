@@ -12,7 +12,6 @@ namespace Mantid
 {
 namespace DataHandling
 {
-  using API::MatrixWorkspace_const_sptr;
 /**
      Saves a workspace into an ASCII format that can be read by the
      DAVE analysis software.
@@ -64,7 +63,7 @@ private:
   ///Execution code
   void exec();
 
-  void writeHeader(MatrixWorkspace_const_sptr WS, std::ofstream &output);
+  void writeHeader(API::MatrixWorkspace_const_sptr WS, std::ofstream &output);
 };
 
 } // namespace DataHandling

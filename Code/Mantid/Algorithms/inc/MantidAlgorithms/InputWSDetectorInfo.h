@@ -8,7 +8,6 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    using namespace API;
     /** 
     Provides functions to get detector lists for a spectrum and check and
     change detector masking.  Pass a shared pointer to the constructor
@@ -48,18 +47,18 @@ namespace Mantid
     class InputWSDetectorInfo
     {
     public:
-      explicit InputWSDetectorInfo(MatrixWorkspace_const_sptr input);
+      explicit InputWSDetectorInfo(API::MatrixWorkspace_const_sptr input);
       bool aDetecIsMaskedinSpec(int SpecIndex) const;
       void maskAllDetectorsInSpec(int SpecIndex);
       int getSpecNum(int SpecIndex) const;
       std::vector<int> getDetectors(int SpecIndex) const;
     protected:
       /// a pointer the workspace with the detector information
-      const MatrixWorkspace_const_sptr m_Input;
+      const API::MatrixWorkspace_const_sptr m_Input;
       /// following the example MaskDetectors write to this version of the instrument
-      boost::shared_ptr<Instrument> m_WInstru;
+      boost::shared_ptr<API::Instrument> m_WInstru;
       /// when we read need to read from here
-      IInstrument_sptr m_RInstru;
+      API::IInstrument_sptr m_RInstru;
       /// pointer to the map that links detectors to their masking with the input workspace
       Geometry::ParameterMap* m_Pmap;
     };

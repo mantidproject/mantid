@@ -16,7 +16,6 @@ namespace Mantid
 {
 namespace DataHandling
 {
-  using namespace DataObjects;
 /** Adjusts TOF X-values for offset times and adds or modifies values for "3He(atm)" and
    "wallT(m)" in the workspace's parameter map using values read in from a DAT or RAW file.
    The RAW file or DAT file that is loaded should corrospond to the same run or series of
@@ -67,7 +66,7 @@ public:
 
 private:
   /// will store a pointer to the user selected workspace
-  Workspace2D_sptr m_workspace;
+  DataObjects::Workspace2D_sptr m_workspace;
   /// the instrument with in the user selected workspace
   API::IInstrument_sptr m_instrument;
   /// the map that stores additional properties for detectors
@@ -77,7 +76,7 @@ private:
   /// the detector IDs that are monitors, according to the raw file
   std::set<int> m_monitors;
   /// Xbin boundaries for the monitors, normally monitors have a different time delay and hence a different offset
-  Histogram1D::RCtype m_monitorXs;
+  DataObjects::Histogram1D::RCtype m_monitorXs;
   /// stores if the bin boundary values, X arrays, we initially common, because if that is we'll work to maximise sharing
   bool m_commonXs;
   /// the delay time for monitors, this algorithm requires all monitors have the same delay. Normally the delay is zero
@@ -102,7 +101,7 @@ private:
   void adjustXsCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
   void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
   void noteMonitorOffset(const float offSet, const int detID);
-  void setUpXArray(Histogram1D::RCtype &theXValuesArray, int specInd, double offset);
+  void setUpXArray(DataObjects::Histogram1D::RCtype &theXValuesArray, int specInd, double offset);
   void logErrorsFromRead(const std::vector<int> &missingDetectors);
 
   /// used to check that all the monitors have the same offset time

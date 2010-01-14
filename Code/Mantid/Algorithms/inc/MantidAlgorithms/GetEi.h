@@ -15,8 +15,6 @@ namespace Mantid
 {
 namespace Algorithms
 {
-  using namespace API;
-  using namespace DataObjects;
 /** Requires an estimate for the initial neutron energy which it uses to
   search for monitor peaks and from these calculate an accurate energy
 
@@ -66,7 +64,7 @@ public:
 
 private:
   /// name of the tempory workspace that we create and use
-  MatrixWorkspace_sptr m_tempWS;
+  API::MatrixWorkspace_sptr m_tempWS;
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_fracCompl;
   /// used by the function findHalfLoc to indicate whether to search left or right
@@ -79,10 +77,10 @@ private:
   void init();
   void exec();
   
-  void getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
-  std::vector<int> getMonitorSpecIndexs(Workspace2D_const_sptr WS, int specNum1, int specNum2) const;
+  void getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
+  std::vector<int> getMonitorSpecIndexs(DataObjects::Workspace2D_const_sptr WS, int specNum1, int specNum2) const;
   double timeToFly(double s, double E_KE) const;
-  double getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const double peakTime);
+  double getPeakCentre(DataObjects::Workspace2D_const_sptr WS, const int monitIn, const double peakTime);
   void extractSpec(int specInd, double start, double end);
   void getPeakEstimates(double &height, int &centreInd, double &background) const;
   double findHalfLoc(MantidVec::size_type startInd, const double height, const double noise, const direction go) const;

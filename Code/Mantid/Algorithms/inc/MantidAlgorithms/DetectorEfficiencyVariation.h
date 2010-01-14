@@ -15,7 +15,6 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    using namespace API;
     /**
     Required Properties:
     <UL>
@@ -58,11 +57,11 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport DetectorEfficiencyVariation : public Algorithm
+    class DLLExport DetectorEfficiencyVariation : public API::Algorithm
     {
     public:
       /// Default constructor initialises all data members and runs the base class constructor
-      DetectorEfficiencyVariation() : Algorithm(),                                   //call the base class constructor
+      DetectorEfficiencyVariation() : API::Algorithm(),                                   //call the base class constructor
           m_fracDone(0.0), m_TotalTime(RTTotal), m_usableMaskMap(true)
       {};
       /// Destructor
@@ -81,18 +80,18 @@ namespace Mantid
       
       // The different steps of the calculation, all called by exec()
       /// Loads and checks the values passed to the algorithm
-      void retrieveProperties( MatrixWorkspace_sptr &whiteBeam1,
-        MatrixWorkspace_sptr &whiteBeam2, double &vari,
+      void retrieveProperties( API::MatrixWorkspace_sptr &whiteBeam1,
+        API::MatrixWorkspace_sptr &whiteBeam2, double &vari,
         int &minSpec, int &maxSpec );
       /// Calculates the sum counts in each histogram
-      MatrixWorkspace_sptr getTotalCounts( MatrixWorkspace_sptr input,
+      API::MatrixWorkspace_sptr getTotalCounts(API::MatrixWorkspace_sptr input,
         int firstSpec, int lastSpec );
       /// Finds the median of values in single bin histograms
-      double getMedian(MatrixWorkspace_const_sptr input) const;
+      double getMedian(API::MatrixWorkspace_const_sptr input) const;
       /// Overwrites the first workspace with bad spectrum information, also outputs an array and a file
-      std::vector<int> findBad( MatrixWorkspace_sptr a, MatrixWorkspace_const_sptr b, const double average, double variation, const std::string &fileName);
-      void createOutputArray(const std::vector<int> &badList, const SpectraDetectorMap& detMap, std::vector<int> &total) const;
-      void writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const Axis * const SpecNums);
+      std::vector<int> findBad(API::MatrixWorkspace_sptr a, API::MatrixWorkspace_const_sptr b, const double average, double variation, const std::string &fileName);
+      void createOutputArray(const std::vector<int> &badList, const API::SpectraDetectorMap& detMap, std::vector<int> &total) const;
+      void writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const API::Axis * const SpecNums);
 
       /// the number of numbers on each line of the output file
       static const int LINESIZE = 10;
