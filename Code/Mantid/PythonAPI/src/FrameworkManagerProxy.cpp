@@ -99,7 +99,7 @@ std::string FrameworkManagerProxy::getConfigProperty(const std::string & key) co
  **/
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName)
 {
-	return API::FrameworkManager::Instance().createAlgorithm(algName);
+  return API::FrameworkManager::Instance().createAlgorithm(algName);
 }
 
 /**
@@ -110,7 +110,7 @@ API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algNa
  **/
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const int& version)
 {
-	return API::FrameworkManager::Instance().createAlgorithm(algName, version);
+  return API::FrameworkManager::Instance().createAlgorithm(algName, version);
 }
 
 /**
@@ -121,7 +121,7 @@ API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algNa
  **/
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const std::string& propertiesArray)
 {
-	return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray);
+  return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray);
 }
 
 /**
@@ -133,7 +133,7 @@ API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algNa
  **/
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version)
 {
-	return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray, version);
+  return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray, version);
 }
 
 /**
@@ -145,7 +145,7 @@ API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algNa
  **/
 API::IAlgorithm* FrameworkManagerProxy::execute(const std::string& algName, const std::string& propertiesArray,const int& version)
 {
-	return API::FrameworkManager::Instance().exec(algName, propertiesArray, version);
+  return API::FrameworkManager::Instance().exec(algName, propertiesArray, version);
 }
 
 /**
@@ -156,7 +156,7 @@ API::IAlgorithm* FrameworkManagerProxy::execute(const std::string& algName, cons
  **/
 API::IAlgorithm* FrameworkManagerProxy::execute(const std::string& algName, const std::string& propertiesArray)
 {
-	return API::FrameworkManager::Instance().exec(algName, propertiesArray);
+  return API::FrameworkManager::Instance().exec(algName, propertiesArray);
 }
 
 /**
@@ -174,7 +174,7 @@ boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWor
   else
   {
     throw std::runtime_error("\"" + wsName + "\" is not a matrix workspace. "
-			     "This may be a table workspace, try getTableWorkspace().");
+        "This may be a table workspace, try getTableWorkspace().");
   }
 }
 
@@ -193,7 +193,7 @@ boost::shared_ptr<API::ITableWorkspace> FrameworkManagerProxy::retrieveTableWork
   else
   {
     throw std::runtime_error("\"" + wsName + "\" is not a table workspace. "
-			     "This may be a matrix workspace, try getMatrixWorkspace().");
+        "This may be a matrix workspace, try getMatrixWorkspace().");
   }
 }
 
@@ -212,7 +212,7 @@ boost::shared_ptr<API::WorkspaceGroup> FrameworkManagerProxy::retrieveWorkspaceG
   else
   {
     throw std::runtime_error("\"" + group_name + "\" is not a group workspace. "
-			     "This may be a matrix workspace, try getMatrixWorkspace().");
+        "This may be a matrix workspace, try getMatrixWorkspace().");
   }
 }
 
@@ -313,7 +313,7 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
 // /**
 //  * Adds a algorithm created in Python to Mantid's algorithms.
 //  * Converts the Python object to a C++ object - not sure how, will find out.
-//  * \param pyAlg :: The Python based algorithm to add.
+//  * param pyAlg :: The Python based algorithm to add.
 //  * \returns The number of Python algorithms in Mantid
 //  **/
 // int FrameworkManagerProxy::addPythonAlgorithm(PyObject* pyAlg)
@@ -327,7 +327,7 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
 
 // /**
 //  * Execute one of the Python algorithms that has been added to Mantid.
-//  * \param algName :: The name of the algorithm to run.
+//  * param algName :: The name of the algorithm to run.
 //  **/
 // void FrameworkManagerProxy::executePythonAlgorithm(std::string algName)
 // {
