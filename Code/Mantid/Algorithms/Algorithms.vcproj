@@ -482,6 +482,10 @@
 				RelativePath=".\src\Unwrap.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WeightedMean.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -986,6 +990,10 @@
 			</File>
 			<File
 				RelativePath=".\test\UnwrapTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\WeightedMean.h"
 				>
 			</File>
 		</Filter>
