@@ -1,9 +1,6 @@
 #ifndef MUONREMOVEEXPDECAYTEST_H_
 #define MUONREMOVEEXPDECAYTEST_H_
 
-//This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
-
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadInstrument.h"
@@ -39,6 +36,9 @@ public:
 
   void testLoadNexusAndSetProperties()
   {
+  //This test does not run on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
+
     loader.initialize();
     loader.setPropertyValue("Filename", "../../../../Test/Nexus/emu00006473.nxs");
     loader.setPropertyValue("OutputWorkspace", "EMU6473");
@@ -48,15 +48,21 @@ public:
     alg.setPropertyValue("InputWorkspace", "EMU6473");
     alg.setPropertyValue("OutputWorkspace", "Result");
     alg.setPropertyValue("Spectra", "0");
+#endif /*_WIN64*/
   }
 
   void testProperties()
   {
+    //This test does not run on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     TS_ASSERT_EQUALS( alg.getPropertyValue("Spectra"), "0");
+#endif /*_WIN64*/
   }
 
   void testExecute()
   {
+      //This test does not run on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     try 
     {
       TS_ASSERT_EQUALS(alg.execute(),true);
@@ -67,6 +73,7 @@ public:
     }
 
     Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("Result");
+#endif /*_WIN64*/
   }
 
 private:
@@ -74,5 +81,5 @@ private:
   Mantid::NeXus::LoadMuonNexus loader;
 
 };
-#endif /*_WIN64*/
+
 #endif /*MUONREMOVEEXPDECAYTEST_H_*/
