@@ -327,7 +327,7 @@ public:
     TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
 	
 	}  
-  }
+   }
 
   void testarrayin()
   {

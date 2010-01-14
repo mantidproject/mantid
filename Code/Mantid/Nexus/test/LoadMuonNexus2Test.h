@@ -11,7 +11,7 @@
 //
 
 #include <fstream>
-//#include <cxxtest/TestSuite.h>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidNexus/LoadMuonNexus2.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -25,10 +25,10 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
-using namespace Mantid::DataHandling;
+//using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
-class LoadMuonNexus2Test// : public CxxTest::TestSuite
+class LoadMuonNexus2Test : public CxxTest::TestSuite
 {
 public:
   
@@ -38,7 +38,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    std::string inputFile = "../../../Test/Nexus/Muon-v2/argus0026287.nxs";
+    std::string inputFile = "../../../../Test/Nexus/Muon-v2/argus0026287.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);
 
     std::string outputSpace="outer";
@@ -78,12 +78,13 @@ public:
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output-> isDistribution() )
 
+    /*
     //----------------------------------------------------------------------
     // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     IInstrument_sptr i = output->getInstrument();
     Mantid::Geometry::IObjComponent_sptr source = i->getSource();
-    /*
+    
     Mantid::Geometry::IObjComponent_sptr samplepos = i->getSample();
     TS_ASSERT_EQUALS( samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA( samplepos->getPos().Y(), 10.0,0.01);
@@ -101,43 +102,32 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-    //boost::shared_ptr<Sample> sample = output->getSample();
-    //Property *l_property = output->sample().getLogData( std::string("beamlog_current") );
-    //TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
-    //std::string timeSeriesString = l_timeSeriesDouble->value();
-    //TS_ASSERT_EQUALS( timeSeriesString.substr(0,27), "2006-Nov-21 07:03:08  182.8" );
-    ////check that sample name has been set correctly
-    //TS_ASSERT_EQUALS(output->sample().getName(), "Cr2.7Co0.3Si")
+    Property *l_property = output->sample().getLogData( std::string("temperature_1_log") );
+    TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
+    std::map<dateAndTime, double> asMap = l_timeSeriesDouble ->valueAsMap();
+    TS_ASSERT_EQUALS(l_timeSeriesDouble->size(),37);
+    TS_ASSERT_EQUALS(l_timeSeriesDouble->nthValue(10),180.0);
+    std::string timeSeriesString = l_timeSeriesDouble->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,25), "2008-Sep-11 14:17:41  180" );
+    //check that sample name has been set correctly
+    TS_ASSERT_EQUALS(output->sample().getName(), "GaAs")
     
-	/*
+	
     //----------------------------------------------------------------------
     // Tests to check that Loading SpectraDetectorMap is done correctly
     //----------------------------------------------------------------------
-    map= output->getSpectraMap();
+    const SpectraDetectorMap& map = output->spectraMap();
     
     // Check the total number of elements in the map for HET
-    TS_ASSERT_EQUALS(map->nElements(),24964);
+    TS_ASSERT_EQUALS(map.nElements(),192);
     
-    // Test one to one mapping, for example spectra 6 has only 1 pixel
-    TS_ASSERT_EQUALS(map->ndet(6),1);
+   // Test one to one mapping, for example spectra 6 has only 1 pixel
+    TS_ASSERT_EQUALS(map.ndet(6),1);
     
-    // Test one to many mapping, for example 10 pixels contribute to spectra 2084
-    TS_ASSERT_EQUALS(map->ndet(2084),10);
-    // Check the id number of all pixels contributing
-    std::vector<Mantid::Geometry::IDetector*> detectorgroup;
-    detectorgroup=map->getDetectors(2084);
-    std::vector<Mantid::Geometry::IDetector*>::iterator it;
-    int pixnum=101191;
-    for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
-    TS_ASSERT_EQUALS((*it)->getID(),pixnum++);
-    
-    // Test with spectra that does not exist
-    // Test that number of pixel=0
-    TS_ASSERT_EQUALS(map->ndet(5),0);
-    // Test that trying to get the Detector throws.
-    boost::shared_ptr<Mantid::Geometry::IDetector> test;
-    TS_ASSERT_THROWS(test=map->getDetector(5),std::runtime_error);
-    */
+    std::vector<int> detectorgroup = map.getDetectors(100);
+    TS_ASSERT_EQUALS(detectorgroup.size(),1);
+    TS_ASSERT_EQUALS(detectorgroup.front(),100);
+
 
     AnalysisDataService::Instance().remove(outputSpace);
    
@@ -149,7 +139,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    nxLoad.setPropertyValue("FileName", "../../../Test/Nexus/Muon-v2/argus0026287.nxs");
+    nxLoad.setPropertyValue("FileName", "../../../../Test/Nexus/Muon-v2/argus0026287.nxs");
     std::string outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     nxLoad.setPropertyValue("SpectrumMin","10");
@@ -193,7 +183,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    nxLoad.setPropertyValue("FileName", "../../../Test/Nexus/Muon-v2/argus0026287.nxs");
+    nxLoad.setPropertyValue("FileName", "../../../../Test/Nexus/Muon-v2/argus0026287.nxs");
     std::string outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     nxLoad.setPropertyValue("SpectrumList","1,10,20");
@@ -235,7 +225,7 @@ public:
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
-    nxLoad.setPropertyValue("FileName", "../../../Test/Nexus/Muon-v2/argus0026287.nxs");
+    nxLoad.setPropertyValue("FileName", "../../../../Test/Nexus/Muon-v2/argus0026287.nxs");
     std::string outputSpace="outer";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace);
     nxLoad.setPropertyValue("SpectrumMin","10");

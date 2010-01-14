@@ -504,7 +504,9 @@ namespace Mantid
 
       std::string start_time = entry.getString("start_time");
 
+      std::string sampleName = entry.getString("sample/name");
       NXMainClass runlogs = entry.openNXClass<NXMainClass>("sample");
+      ws->mutableSample().setName(sampleName);
 
       for(std::vector<NXClassInfo>::const_iterator it=runlogs.groups().begin();it!=runlogs.groups().end();it++)
       {

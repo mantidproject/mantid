@@ -608,42 +608,40 @@ namespace Mantid
             }
             return logv;
           }
-          Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
           NXDouble value = openNXDouble("value");
-          value.load();
-          for(int i = 0; i < value.dim0(); i++)
-          {
-            time_t t = start_t + int(times[i]);
-            logv->addValue(t,value[i]);
-          }
-          return logv;
+          return loadValues<NXDouble,TYPE>(logName,value,start_t,times);
         }
         else if (vinfo.type == NX_FLOAT32 )
         {
-          Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
           NXFloat value = openNXFloat("value");
-          value.load();
-          for(int i = 0; i < value.dim0(); i++)
-          {
-            time_t t = start_t + int(times[i]);
-            logv->addValue(t,value[i]);
-          }
-          return logv;
+          return loadValues<NXFloat,TYPE>(logName,value,start_t,times);
         }
         else if (vinfo.type == NX_INT32)
         {
-          Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
           NXInt value = openNXInt("value");
-          value.load();
-          for(int i=0;i<value.dim0();i++)
-          {
-            time_t t = start_t + int(times[i]);
-            logv->addValue(t,value[i]);
-          }
-          return logv;
+          return loadValues<NXInt,TYPE>(logName,value,start_t,times);
         }
         return NULL;
       }
+
+      template<class NX_TYPE,class TIME_TYPE>
+      Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, time_t start_t,TIME_TYPE times)
+      {
+          Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
+          value.load();
+          int prev_index = 0;
+          for(int i=0;i<value.dim0();i++)
+          {
+            if (i == 0 || value[i] != value[i-1] || times[i] != times[i-1])
+            {
+              time_t t = start_t + int(times[i]);
+              logv->addValue(t,value[i]);
+              prev_index = i;
+            }
+          }
+          return logv;
+      }
+
     };
 
     /**  Implements NXnote Nexus class.

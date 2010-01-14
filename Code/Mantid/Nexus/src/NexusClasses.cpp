@@ -465,6 +465,12 @@ NXData::NXData(const NXClass& parent,const std::string& name):NXMainClass(parent
 //          NXLog methods
 //---------------------------------------------------------
 
+/** createTimeSeries
+ * Create a TimeSeries property form the records of the NXLog group. Times are in dataset "time"
+ * and the values are in dataset "value"
+ * @param start_time If the "time" dataset does not have the "start" attribute sets the
+ *   start time for the series.
+ */
 Kernel::Property* NXLog::createTimeSeries(const std::string& start_time)
 {
   const std::string & logName = name();
@@ -473,12 +479,30 @@ Kernel::Property* NXLog::createTimeSeries(const std::string& start_time)
   {
     NXDouble times = openNXDouble("time");
     times.load();
+    std::string units = times.attributes("units");
+    if (units == "minutes")
+    {
+      std::transform(times(),times()+times.dim0(),times(),std::bind2nd(std::multiplies<double>(),60));
+    }
+    else if (!units.empty() && units.substr(0,6) != "second")
+    {
+      return NULL;
+    }
     return parseTimeSeries(logName, times, start_time);
   }
   else if( vinfo.type == NX_FLOAT32 )
   {
     NXFloat times = openNXFloat("time");
     times.load();
+    std::string units = times.attributes("units");
+    if (units == "minutes")
+    {
+      std::transform(times(),times()+times.dim0(),times(),std::bind2nd(std::multiplies<float>(),60));
+    }
+    else if (!units.empty() && units.substr(0,6) != "second")
+    {
+      return NULL;
+    }
     return parseTimeSeries(logName, times, start_time);
   }
 

@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADMUONNEXUS_H_
-#define MANTID_DATAHANDLING_LOADMUONNEXUS_H_
+#ifndef MANTID_DATAHANDLING_LOADMUONNEXUS2_H_
+#define MANTID_DATAHANDLING_LOADMUONNEXUS2_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -125,4 +125,4 @@ namespace Mantid
   } // namespace NeXus
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_LOADMUONNEXUS_H_*/
+#endif /*MANTID_DATAHANDLING_LOADMUONNEXUS2_H_*/
