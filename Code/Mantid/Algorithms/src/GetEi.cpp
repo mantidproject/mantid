@@ -118,7 +118,7 @@ void GetEi::exec()
 *  @throw NotFoundError if no detector is found for the detector ID given
 *  @throw runtime_error if there is a problem with the SpectraDetectorMap
 */
-void GetEi::getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
+void GetEi::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
   const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
@@ -151,7 +151,7 @@ void GetEi::getGeometry(Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, d
 *  @return the indexes of the histograms created by the detector whose ID were passed
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 */
-std::vector<int> GetEi::getMonitorSpecIndexs(Workspace2D_const_sptr WS, int specNum1, int specNum2) const
+std::vector<int> GetEi::getMonitorSpecIndexs(DataObjects::Workspace2D_const_sptr WS, int specNum1, int specNum2) const
 {// getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
   std::vector<int> specInds;
   
@@ -205,7 +205,7 @@ double GetEi::timeToFly(double s, double E_KE) const
 *  @throw out_of_range if the peak runs off the edge of the histogram
 *  @throw runtime_error a sub-algorithm just falls over
 */
-double GetEi::getPeakCentre(Workspace2D_const_sptr WS, const int monitIn, const double peakTime)
+double GetEi::getPeakCentre(DataObjects::Workspace2D_const_sptr WS, const int monitIn, const double peakTime)
 {
   const MantidVec& timesArray = WS->readX(monitIn);
   // we search for the peak only inside some window because there are often more peaks in the monitor histogram

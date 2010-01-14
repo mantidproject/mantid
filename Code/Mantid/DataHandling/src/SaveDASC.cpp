@@ -98,7 +98,7 @@ void SaveDASC::exec()
 *  @param WS the input workspace
 *  @param output file stream to write to
 */
-void SaveDASC::writeHeader(MatrixWorkspace_const_sptr WS, std::ofstream &output)
+void SaveDASC::writeHeader(API::MatrixWorkspace_const_sptr WS, std::ofstream &output)
 {// Write to the header what the units of the X-values are
   // an axis doesn't have to have unit so we need to check
   Kernel::Unit_sptr& currentUnit = WS->getAxis(0)->unit();

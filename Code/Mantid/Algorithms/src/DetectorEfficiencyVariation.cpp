@@ -126,7 +126,7 @@ void DetectorEfficiencyVariation::exec()
 * @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
 */
 void DetectorEfficiencyVariation::retrieveProperties(
-  MatrixWorkspace_sptr &whiteBeam1, MatrixWorkspace_sptr &whiteBeam2,
+  API::MatrixWorkspace_sptr &whiteBeam1, API::MatrixWorkspace_sptr &whiteBeam2,
   double &vari, int &minSpec, int &maxSpec )
 {
   whiteBeam1 = getProperty("WhiteBeamBase");
@@ -188,7 +188,7 @@ void DetectorEfficiencyVariation::retrieveProperties(
 * @return Each histogram in the workspace has a single bin containing the sum of the bins in the input workspace
 */
 MatrixWorkspace_sptr DetectorEfficiencyVariation::getTotalCounts(
-                MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
+            API::MatrixWorkspace_sptr input, int firstSpec, int lastSpec )
 {
   g_log.information() << "Integrating input workspace" << std::endl;
   // get percentage completed estimates for now, t0 and when we've finished t1
@@ -226,7 +226,7 @@ MatrixWorkspace_sptr DetectorEfficiencyVariation::getTotalCounts(
 * @param input A histogram workspace with one entry in each bin
 * @return The median value of the histograms in the workspace that was passed to it
 */
-double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) const
+double DetectorEfficiencyVariation::getMedian(API::MatrixWorkspace_const_sptr input) const
 {
   g_log.information() << "Calculating the median count rate of the spectra" << std::endl;
 
@@ -298,9 +298,9 @@ double DetectorEfficiencyVariation::getMedian(MatrixWorkspace_const_sptr input) 
 * @param fileName name of a file to store the list of failed spectra in (pass "" to aviod writing to file)
 * @return An array that of the index numbers of the histograms that fail
 */
-std::vector<int> DetectorEfficiencyVariation::findBad( MatrixWorkspace_sptr a,
-  MatrixWorkspace_const_sptr b, const double average, double variation,
-  const std::string &fileName )
+std::vector<int> DetectorEfficiencyVariation::findBad(
+  API::MatrixWorkspace_sptr a, API::MatrixWorkspace_const_sptr b,
+  const double average, double variation, const std::string &fileName)
 {
   g_log.information("Apply the criteria to find failing detectors");
 

@@ -291,7 +291,7 @@ double DetectorEfficiencyCor::get1OverK(double DeltaE) const
 *  @param det a pointer to the detector to query
 *  @throw invalid_argument when the shape of the detector is inconsistent with a cylinder aligned along one axis
 */
-void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<IDetector> det)
+void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<Geometry::IDetector> det)
 {
   // get the shape information to find the radius and the base orientation of the cylinder
   const boost::shared_ptr< const Object > shape = det->Shape();

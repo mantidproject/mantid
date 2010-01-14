@@ -126,7 +126,7 @@ void GroupDetectors2::exec()
 *  @param workspace the user selected input workspace
 *  @param unUsedSpec spectra indexes that are members of any group
 */
-void GroupDetectors2::getGroups(Workspace2D_const_sptr workspace,
+void GroupDetectors2::getGroups(DataObjects::Workspace2D_const_sptr workspace,
                        std::vector<int> &unUsedSpec)
 {
   // this is the map that we are going to fill
@@ -196,8 +196,8 @@ void GroupDetectors2::getGroups(Workspace2D_const_sptr workspace,
 *  @param unUsedSpec the list of spectra indexes that have been included in a group (so far)
 *  @throws FileError if there's any problem with the file or its format
 */
-void GroupDetectors2::processFile( std::string fname,
-          Workspace2D_const_sptr workspace, std::vector<int> &unUsedSpec )
+void GroupDetectors2::processFile(std::string fname,
+  DataObjects::Workspace2D_const_sptr workspace, std::vector<int> &unUsedSpec)
 {
   // tring to open the file the user told us exists, skip down 20 lines to find out what happens if we can read from it
   g_log.debug() << "Opening input file ... " << fname;
@@ -496,7 +496,7 @@ int GroupDetectors2::formGroups( DataObjects::Workspace2D_const_sptr inputWS, Da
 *  @param outputWS user selected output workspace for the algorithm
 *  @param outIndex the next spectra index available after the grouped spectra
 */
-void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, Workspace2D_const_sptr inputWS, Workspace2D_sptr outputWS, int outIndex)
+void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, DataObjects::Workspace2D_const_sptr inputWS, DataObjects::Workspace2D_sptr outputWS, int outIndex)
 {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
   double prog4Copy = static_cast<float>(1.0-m_FracCompl)/unGroupedSet.size();
