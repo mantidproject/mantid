@@ -179,10 +179,12 @@ public:
     AnalysisDataService::Instance().remove("output4");
   }
 
-//This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
+
 	void testRealData()
 	{
+	
+	//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
 		Mantid::NeXus::LoadMuonNexus loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", "../../../../Test/Nexus/emu00006473.nxs");
@@ -210,8 +212,9 @@ public:
 		MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("result1"));
 		
 		TS_ASSERT_EQUALS(outputWS->dataX(0).size(), 1994);
-	}
 #endif /*_WIN64*/
+	}
+
 
 	void makeDummyWorkspace2D()
 	{
