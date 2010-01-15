@@ -101,12 +101,13 @@ private:
   double m_scattering;  ///< The scattering cross-section in barns
   std::vector<double> m_L1s,  ///< Cached L1 distances
                       m_elementVolumes;  ///< Cached element volumes
+  std::vector<Geometry::V3D> m_elementPositions; ///< Cached element positions
   int n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
   int x_step;           ///< The step in bin number between adjacent points
-	int m_numSlices;				///< The unmber of slices
+  int m_numSlices;      ///< The number of slices
   double m_sliceThickness;///<  The slice thickness
-  int m_numAnnuli;				///< The number of annuli
-  double m_deltaR;				///< radius of the cylindrical sample in cm / The number of annuli
+  int m_numAnnuli;        ///< The number of annuli
+  double m_deltaR;        ///< radius of the cylindrical sample in cm / The number of annuli
   int m_numVolumeElements;///< the number of volume elements
 
   std::vector<std::string> exp_options; ///< Options to compute exponential function

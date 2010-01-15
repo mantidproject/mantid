@@ -99,8 +99,8 @@ void CylinderAbsorption::exec()
 
   const bool isHist = inputWS->isHistogramData();
 
-	//calculate the cached values of L1 and element volumes
-	initialiseCachedDistances();
+  //calculate the cached values of L1 and element volumes
+  initialiseCachedDistances();
 
   int iprogress_step = numHists / 100;
   if (iprogress_step == 0)
@@ -108,10 +108,10 @@ void CylinderAbsorption::exec()
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
-	PARALLEL_FOR2(inputWS,correctionFactors)
+  PARALLEL_FOR2(inputWS,correctionFactors)
   for (int i = 0; i < numHists; ++i)
   {
-		PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
 
     // Copy over bin boundaries
     const MantidVec& X = inputWS->readX(i);
@@ -128,7 +128,7 @@ void CylinderAbsorption::exec()
       continue;
     }
 
-		std::vector<double> lTotal(m_numVolumeElements);
+    std::vector<double> lTotal(m_numVolumeElements);
     calculateDistances(det,lTotal);
 
     // Get a reference to the Y's in the output WS for storing the factors
@@ -150,12 +150,12 @@ void CylinderAbsorption::exec()
       interpolate(X, Y, isHist);
     }
 
-		prog.report();
+    prog.report();
 
-		PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-	PARALLEL_CHECK_INTERUPT_REGION
-	
+  PARALLEL_CHECK_INTERUPT_REGION
+
 
   g_log.information() << "Total number of elements in the integration was " << m_L1s.size() << std::endl;
   setProperty("OutputWorkspace", correctionFactors);
@@ -186,10 +186,10 @@ void CylinderAbsorption::retrieveProperties()
   else if (exp_string == "FastApprox") // Use the compact approximation
     EXPONENTIAL = fast_exp;
 
-	m_numSlices = getProperty("NumberOfSlices");
+  m_numSlices = getProperty("NumberOfSlices");
   m_sliceThickness = m_cylHeight / m_numSlices;
   m_numAnnuli = getProperty("NumberOfAnnuli");
-	m_deltaR = m_cylRadius / m_numAnnuli;
+  m_deltaR = m_cylRadius / m_numAnnuli;
 
   /* The number of volume elements is
    * numslices*(1+2+3+.....+numAnnuli)*6
@@ -243,11 +243,10 @@ void CylinderAbsorption::initialiseCachedDistances()
 {
   m_L1s.resize(m_numVolumeElements);
   m_elementVolumes.resize(m_numVolumeElements);
+  m_elementPositions.resize(m_numVolumeElements);
   
   int counter = 0;
   // loop over slices
-
-  V3D currentPosition;
 
   for (int i = 0; i < m_numSlices; ++i)
   {
@@ -266,11 +265,11 @@ void CylinderAbsorption::initialiseCachedDistances()
         const double phi = 2* M_PI * k / Ni;
         // Calculate the current position in the sample in Cartesian coordinates.
         // Remember that our cylinder has its axis along the y axis
-        currentPosition(R * sin(phi), z, R * cos(phi));
-        assert(m_cylinderSample.isValid(currentPosition));
+        m_elementPositions[counter](R * sin(phi), z, R * cos(phi));
+        assert(m_cylinderSample.isValid(m_elementPositions[counter]));
         // Create track for distance in cylinder before scattering point
         // Remember beam along Z direction
-        Track incoming(currentPosition, V3D(0.0, 0.0, -1.0));
+        Track incoming(m_elementPositions[counter], V3D(0.0, 0.0, -1.0));
         m_cylinderSample.interceptSurface(incoming);
         m_L1s[counter] = incoming.begin()->Dist;
 
@@ -291,54 +290,37 @@ void CylinderAbsorption::initialiseCachedDistances()
 /// @param lTotal a vestor of the total length (L1+ L2) for  each segment of the sample
 void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& lTotal) const
 {
-  int counter = 0;
-  // loop over slices
+  // We need to make sure this is right for grouped detectors - should use average theta & phi
+  V3D detectorPos;
+  // *** ASSUMES THAT SAMPLE AT ORIGIN AND BEAM ALONG Z ***
+  detectorPos.spherical(100.0*detector->getDistance(Component("dummy",V3D(0.0,0.0,0.0))),
+      detector->getTwoTheta(V3D(0.0,0.0,0.0),V3D(0.0,0.0,1.0))*180.0/M_PI,detector->getPhi()*180.0/M_PI);
 
-  V3D currentPosition;
-
-  for (int i = 0; i < m_numSlices; ++i)
+  for (int i = 0; i < m_numVolumeElements; ++i)
   {
-    // Number of elements in 1st annulus
-    int Ni = 0;
-    // loop over annuli
-    for (int j = 0; j < m_numAnnuli; ++j)
-    {
-      Ni += 6;
-      // loop over elements in current annulus
-      for (int k = 0; k < Ni; ++k)
-      {
-        // We need to make sure this is right for grouped detectors - should use average theta & phi
-        V3D detectorPos;
-        // *** ASSUMES THAT SAMPLE AT ORIGIN AND BEAM ALONG Z ***
-        detectorPos.spherical(100.0*detector->getDistance(Component("dummy",V3D(0.0,0.0,0.0))),
-            detector->getTwoTheta(V3D(0.0,0.0,0.0),V3D(0.0,0.0,1.0))*180.0/M_PI,detector->getPhi()*180.0/M_PI);
-        
-        // Create track for distance in cylinder between scattering point and detector
-        V3D direction = detectorPos - currentPosition;
-        direction.normalize();
-        Track outgoing(currentPosition, direction);
-        int temp = m_cylinderSample.interceptSurface(outgoing);
+    // Create track for distance in cylinder between scattering point and detector
+    V3D direction = detectorPos - m_elementPositions[i];
+    direction.normalize();
+    Track outgoing(m_elementPositions[i], direction);
+    int temp = m_cylinderSample.interceptSurface(outgoing);
 
-        /* Most of the time, the number of hits is 1. Sometime, we have more than one intersection due to
-         * arithmetic imprecision. If it is the case, then selecting the first intersection is valid.
-         * In principle, one could check the consistency of all distances if hits is larger than one by doing:
-         * Mantid::Geometry::Track::LType::const_iterator it=outgoing.begin();
-         * and looping until outgoing.end() checking the distances with it->Dist
-         */
-        // Not hitting the cylinder from inside, usually means detector is badly defined,
-        // i.e, position is (0,0,0).
-        if (temp < 1)
-        {
-          std::ostringstream message;
-          message << "Problem with detector at" << detectorPos << std::endl;
-          message << "This usually means that this detector is defined inside the sample cylinder";
-          g_log.error(message.str());
-          throw std::runtime_error("Problem in CylinderAbsorption::calculateDistances");
-        }
-        lTotal[counter] = outgoing.begin()->Dist + m_L1s[counter];
-        counter++;
-      }
+    /* Most of the time, the number of hits is 1. Sometime, we have more than one intersection due to
+     * arithmetic imprecision. If it is the case, then selecting the first intersection is valid.
+     * In principle, one could check the consistency of all distances if hits is larger than one by doing:
+     * Mantid::Geometry::Track::LType::const_iterator it=outgoing.begin();
+     * and looping until outgoing.end() checking the distances with it->Dist
+     */
+    // Not hitting the cylinder from inside, usually means detector is badly defined,
+    // i.e, position is (0,0,0).
+    if (temp < 1)
+    {
+      std::ostringstream message;
+      message << "Problem with detector at" << detectorPos << std::endl;
+      message << "This usually means that this detector is defined inside the sample cylinder";
+      g_log.error(message.str());
+      throw std::runtime_error("Problem in CylinderAbsorption::calculateDistances");
     }
+    lTotal[i] = outgoing.begin()->Dist + m_L1s[i];
   }
 }
 

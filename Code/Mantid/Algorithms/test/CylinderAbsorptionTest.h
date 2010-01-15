@@ -19,7 +19,7 @@ public:
     inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumMin","1000");
-    loader.setPropertyValue("SpectrumMax","1100");
+    loader.setPropertyValue("SpectrumMax","1010");
     loader.execute();
 
     Mantid::Algorithms::ConvertUnits convert;
@@ -58,8 +58,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("InputWorkspace",inputWS) )
     std::string outputWS("factors");
     TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("OutputWorkspace",outputWS) )
-//    TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("CylinderSampleHeight","0.04") )
-//    TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("CylinderSampleRadius","0.004") )
     TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("CylinderSampleHeight","4") )
     TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("CylinderSampleRadius","0.4") )
     TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("AttenuationXSection","5.08") )
@@ -70,6 +68,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( atten.setPropertyValue("ExpMethod","Normal") )
     TS_ASSERT_THROWS_NOTHING( atten.execute() )
     TS_ASSERT( atten.isExecuted() )
+    
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+    TS_ASSERT_DELTA( result->readY(0).front(), 0.7718, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(0).back(), 0.4282, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(0)[2000], 0.7348, 0.0001 )
   }
 
 private:
