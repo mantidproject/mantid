@@ -46,7 +46,7 @@ PolynomFitDialog::PolynomFitDialog( QWidget* parent, Qt::WFlags fl )
 : QDialog( parent, fl )
 {
     setName( "PolynomFitDialog" );
-	setWindowTitle(tr("QtiPlot - Polynomial Fit Options"));
+	setWindowTitle(tr("MantidPlot - Polynomial Fit Options"));
     setSizeGripEnabled( true );
 
     QGroupBox *gb1 = new QGroupBox();
@@ -112,7 +112,7 @@ void PolynomFitDialog::fit()
 	QStringList curvesList = graph->analysableCurvesList();
 	if (!curvesList.contains(curveName))
 	{
-		QMessageBox::critical(this, tr("QtiPlot - Warning"),
+		QMessageBox::critical(this, tr("MantidPlot - Warning"),
 				tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curveName));
 		boxName->clear();
 		boxName->insertStringList(curvesList);

@@ -47,7 +47,7 @@ SmoothCurveDialog::SmoothCurveDialog(int method, QWidget* parent, Qt::WFlags fl 
 	smooth_method = method;
 
     setName( "SmoothCurveDialog" );
-	setWindowTitle(tr("QtiPlot - Smoothing Options"));
+	setWindowTitle(tr("MantidPlot - Smoothing Options"));
 
     QGroupBox *gb1 = new QGroupBox();
     QGridLayout *gl1 = new QGridLayout(gb1);

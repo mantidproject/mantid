@@ -139,7 +139,6 @@ public:
 	void setIntensityChange(bool on);
 	/// returns boolan flag intensity change 
 	bool isIntensityChanged();
-	
 
 protected:
 	virtual void drawContourLines (QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QwtRasterData::ContourLines &lines) const;
@@ -181,13 +180,7 @@ protected:
 	//Graph *d_graph;
 	MantidColorMap mColorMap;
 	QString mCurrentColorMap;
-	// The user requested data and bin ranges
-  double mDataMinValue, mDataMaxValue;
-  double mBinMinValue, mBinMaxValue;
-
-  // The workspace data and bin range limits
-  double mWkspDataMin, mWkspDataMax;
-  double mWkspBinMin, mWkspBinMax;
+	
   int m_nRows;
   int m_nColumns;
   /// Store a value between 0->255 for each of the integrated spectra.

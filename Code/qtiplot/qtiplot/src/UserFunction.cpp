@@ -28,7 +28,7 @@ double UserFunction::operator()(double x, double y)
 	}
 	catch(mu::ParserError &e)
 	{
-		QMessageBox::critical(0,"QtiPlot - Input function error",QString::fromStdString(e.GetMsg()));
+		QMessageBox::critical(0,"MantidPlot - Input function error",QString::fromStdString(e.GetMsg()));
 	}
 	return result;
 }

@@ -39,15 +39,15 @@
 ExportDialog::ExportDialog(const QString& tableName, QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-	setWindowTitle( tr( "QtiPlot - Export ASCII" ) );
+	setWindowTitle( tr( "MantidPlot - Export ASCII" ) );
 	setSizeGripEnabled( true );
 
 	ApplicationWindow *app = (ApplicationWindow *)parent;
 
 	QGridLayout *gl1 = new QGridLayout();
-    gl1->addWidget(new QLabel(tr("Table")), 0, 0);
+    gl1->addWidget(new QLabel(tr("Export From")), 0, 0);
 	boxTable = new QComboBox();
-	QStringList tables = app->tableNames() + app->matrixNames();
+	QStringList tables = app->tableNames() + app->matrixNames() + app->mantidmatrixNames();
 	boxTable->addItems(tables);
 	boxTable->setCurrentIndex(0);
 
@@ -58,7 +58,7 @@ ExportDialog::ExportDialog(const QString& tableName, QWidget* parent, Qt::WFlags
     boxAllTables->setChecked(false);
 	gl1->addWidget(boxAllTables, 0, 2);
 
-    QLabel *sepText = new QLabel( tr( "Separator" ) );
+    sepText = new QLabel( tr( "Separator" ) );
 	gl1->addWidget(sepText, 1, 0);
 
     boxSeparator = new QComboBox();
@@ -130,7 +130,7 @@ void ExportDialog::help()
 {
 	QString s = tr("The column separator can be customized. The following special codes can be used:\n\\t for a TAB character \n\\s for a SPACE");
 	s += "\n"+tr("The separator must not contain the following characters: 0-9eE.+-");
-	QMessageBox::about(0, tr("QtiPlot - Help"),s);
+	QMessageBox::about(0, tr("MantidPlot - Help"),s);
 }
 
 void ExportDialog::enableTableName(bool ok)
@@ -151,7 +151,7 @@ void ExportDialog::accept()
 	sep.replace("\\t", "\t");
 
 	if (sep.contains(QRegExp("[0-9.eE+-]"))){
-		QMessageBox::warning(0, tr("QtiPlot - Import options error"),
+		QMessageBox::warning(0, tr("MantidPlot - Import options error"),
 				tr("The separator must not contain the following characters: 0-9eE.+-"));
 		return;
 	}
@@ -219,4 +219,9 @@ void ExportDialog::updateOptions(const QString & name)
 
     boxComments->setEnabled(w->inherits("Table"));
     boxNames->setEnabled(w->inherits("Table"));
+	boxSelection->setEnabled(!w->isA("MantidMatrix"));
+	boxSeparator->setEnabled(!w->isA("MantidMatrix"));
+	boxAllTables->setEnabled(!w->isA("MantidMatrix"));
+	sepText->setEnabled(!w->isA("MantidMatrix"));
+
 }

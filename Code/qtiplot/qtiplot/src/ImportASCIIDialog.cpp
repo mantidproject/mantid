@@ -46,11 +46,12 @@
 #include <QHeaderView>
 
 #include <gsl/gsl_math.h>
+#include<iostream>
 
 ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget * parent, bool extended, Qt::WFlags flags )
 : ExtensibleFileDialog(parent, extended, flags )
 {
-	setWindowTitle(tr("QtiPlot - Import ASCII File(s)"));
+	setWindowTitle(tr("MantidPlot - Import ASCII File(s)"));
 
 	QStringList filters;
 	filters << tr("All files") + " (*)";
@@ -116,7 +117,30 @@ ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget * parent, bo
     connect(d_comment_string, SIGNAL(textChanged(const QString&)), this, SLOT(preview()));
     connect(this, SIGNAL(currentChanged(const QString&)), this, SLOT(changePreviewFile(const QString&)));
 }
-
+void ImportASCIIDialog::addColumnSeparators()
+{
+	if(!d_column_separator) return;
+	d_column_separator->addItem(tr("TAB"));
+	d_column_separator->addItem(tr("SPACE"));
+	d_column_separator->addItem(";" + tr("TAB"));
+	d_column_separator->addItem("," + tr("TAB"));
+	d_column_separator->addItem(";" + tr("SPACE"));
+	d_column_separator->addItem("," + tr("SPACE"));
+	d_column_separator->addItem(";");
+	d_column_separator->addItem(",");
+}
+void ImportASCIIDialog::addColumnSeparatorsforLoadAscii()
+{
+	if(!d_column_separator) return;
+	d_column_separator->addItem(tr("CSV"));
+	d_column_separator->addItem(tr("Tab"));
+	d_column_separator->addItem(tr("Space"));
+	d_column_separator->addItem(tr("SemiColon"));
+	d_column_separator->addItem(tr("Colon"));
+}
+QString ImportASCIIDialog::getselectedColumnSeparator()
+{return d_column_separator->currentText();
+}
 void ImportASCIIDialog::initAdvancedOptions()
 {
 	d_advanced_options = new QGroupBox();
@@ -129,22 +153,17 @@ void ImportASCIIDialog::initAdvancedOptions()
 	// Important: Keep this in sync with the ImportMode enum.
 	d_import_mode->addItem(tr("New Table"));
 	d_import_mode->addItem(tr("New Matrice"));
+	d_import_mode->addItem(tr("New Workspace"));
 	d_import_mode->addItem(tr("New Columns"));
 	d_import_mode->addItem(tr("New Rows"));
 	d_import_mode->addItem(tr("Overwrite Current Window"));
+	
 	advanced_layout->addWidget(d_import_mode, 0, 1);
 
 	QLabel *label_column_separator = new QLabel(tr("Separator:"));
 	advanced_layout->addWidget(label_column_separator, 1, 0);
 	d_column_separator = new QComboBox();
-	d_column_separator->addItem(tr("TAB"));
-	d_column_separator->addItem(tr("SPACE"));
-	d_column_separator->addItem(";" + tr("TAB"));
-	d_column_separator->addItem("," + tr("TAB"));
-	d_column_separator->addItem(";" + tr("SPACE"));
-	d_column_separator->addItem("," + tr("SPACE"));
-	d_column_separator->addItem(";");
-	d_column_separator->addItem(",");
+	addColumnSeparators();
 	d_column_separator->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
 	d_column_separator->setEditable( true );
 	advanced_layout->addWidget(d_column_separator, 1, 1);
@@ -287,7 +306,7 @@ void ImportASCIIDialog::initPreview(int previewMode)
 				d_preview_stack->addWidget(d_preview_matrix);
 				enableTableOptions(false);
 			}
-		break;
+			break;
 	}
 	preview();
 }
@@ -358,7 +377,7 @@ void ImportASCIIDialog::displayHelp()
 	s +="\n\n"+tr("Warning: using these two last options leads to column overlaping if the columns in the ASCII file don't have the same number of rows.");
 	s +="\n"+tr("To avoid this problem you should precisely define the column separator using TAB and SPACE characters.");
 
-	QMessageBox::about(this, tr("QtiPlot - Help"), s);
+	QMessageBox::about(this, tr("MantidPlot - Help"), s);
 }
 
 void ImportASCIIDialog::updateImportMode(int mode)
@@ -367,6 +386,15 @@ void ImportASCIIDialog::updateImportMode(int mode)
 		setFileMode( QFileDialog::ExistingFile );
 	else
 		setFileMode( QFileDialog::ExistingFiles );
+	if(mode==NewWorkspace)
+	{
+		d_column_separator->clear();
+		addColumnSeparatorsforLoadAscii();
+	}
+	else
+	{	d_column_separator->clear();
+		addColumnSeparators();
+	}
 
 	initPreview(mode);
 }
@@ -488,7 +516,7 @@ void ImportASCIIDialog::changePreviewFile(const QString& path)
 		return;
 
 	if (!fi.isReadable()){
-		QMessageBox::critical(this, tr("QtiPlot - File openning error"),
+		QMessageBox::critical(this, tr("MantidPlot - File openning error"),
 		tr("You don't have the permission to open this file: <b>%1</b>").arg(path));
 		return;
 	}
@@ -503,6 +531,7 @@ void ImportASCIIDialog::setNewWindowsOnly(bool on)
         d_import_mode->clear();
         d_import_mode->addItem(tr("New Table"));
         d_import_mode->addItem(tr("New Matrice"));
+		d_import_mode->addItem(tr("New Workspace"));
     }
 
     d_preview_button->setChecked(false);

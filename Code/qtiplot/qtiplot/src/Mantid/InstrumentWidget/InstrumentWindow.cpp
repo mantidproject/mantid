@@ -183,7 +183,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	// Load settings
 	loadSettings();
     
-	askOnCloseEvent(false);
+	askOnCloseEvent(app->confirmCloseInstrWindow);
+	//askOnCloseEvent(false);
 	setAttribute(Qt::WA_DeleteOnClose);
 	
 	// Watch for the deletion of the associated workspace
@@ -684,7 +685,7 @@ void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_p
 {
   if (ws_name == mWorkspaceName)
   {
-    askOnCloseEvent(false);
+//    askOnCloseEvent(false);
     close();
   }
 }

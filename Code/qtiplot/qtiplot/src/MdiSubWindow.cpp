@@ -100,7 +100,7 @@ void MdiSubWindow::resizeEvent( QResizeEvent* e )
 void MdiSubWindow::closeEvent( QCloseEvent *e )
 {
 	if (d_confirm_close){
-    	switch( QMessageBox::information(this, tr("QtiPlot"),
+    	switch( QMessageBox::information(this, tr("MantidPlot"),
 				tr("Do you want to hide or delete") + "<p><b>'" + objectName() + "'</b> ?",
 				tr("Delete"), tr("Hide"), tr("Cancel"), 0, 2)){
 		case 0:

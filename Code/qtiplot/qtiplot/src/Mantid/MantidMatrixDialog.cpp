@@ -13,7 +13,7 @@ MantidMatrixDialog::MantidMatrixDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl ),
     d_matrix(0)
 {
-    setWindowTitle( tr( "QtiPlot - Matrix Properties" ) );
+    setWindowTitle( tr( "MantidPlot - Matrix Properties" ) );
 
 	QGridLayout * topLayout = new QGridLayout();
 	QHBoxLayout * bottomLayout = new QHBoxLayout();

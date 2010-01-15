@@ -78,7 +78,7 @@ QString FFT::fftCurve()
 	double *result = new double[2*d_n];
 
 	if(!amp || !result){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot") + " - " + tr("Error"),
+		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
         return "";
@@ -95,7 +95,7 @@ QString FFT::fftCurve()
 		gsl_fft_real_wavetable *real=gsl_fft_real_wavetable_alloc(d_n);
 
 		if(!work || !real){
-			QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot") + " - " + tr("Error"),
+			QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
 			return "";
@@ -115,7 +115,7 @@ QString FFT::fftCurve()
 		gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc (d_n);
 
 		if(!workspace || !wavetable){
-			QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot") + " - " + tr("Error"),
+			QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
 			return "";
@@ -179,7 +179,7 @@ QString FFT::fftTable()
 	gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc (d_n);
 
 	if(!amp || !wavetable || !workspace){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot") + " - " + tr("Error"),
+		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
         return "";
@@ -333,7 +333,7 @@ bool FFT::setDataFromTable(Table *t, const QString& realColName, const QString& 
 				d_y[i2+1] = d_table->cell(i, d_imag_col);
 		}
 	} else {
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot") + " - " + tr("Error"),
+		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
 		return false;

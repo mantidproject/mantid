@@ -8,7 +8,7 @@
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
-
+#include "Applicationwindow.h"
 //Qt
 #include <QTextEdit>
 #include <QMenuBar>
@@ -257,12 +257,12 @@ void ScriptOutputDock::resetFont()
  * @param parent The parent widget
  * @param flags Window flags passed to the base class
  */
-ScriptingWindow::ScriptingWindow(ScriptingEnv *env, QWidget *parent, Qt::WindowFlags flags) : 
+ScriptingWindow::ScriptingWindow(ScriptingEnv *env,ApplicationWindow *app,QWidget *parent, Qt::WindowFlags flags) : 
   QMainWindow(parent, flags)
 {
   setObjectName("MantidScriptWindow");
   // Sub-widgets
-  m_manager = new ScriptManagerWidget(env, this);
+  m_manager = new ScriptManagerWidget(env, this,app);
   setCentralWidget(m_manager);
   m_output_dock = new ScriptOutputDock(QString(), m_manager, this);
   m_output_dock->setScriptIsRunning(false);
@@ -409,10 +409,13 @@ void ScriptingWindow::fileAboutToShow()
   {
     m_file_menu->addAction(m_print_output);
   }
-
+  m_file_menu->insertSeparator();
+  m_file_menu->addAction(m_manager->m_actionScriptingLang);
   // Close current tab
   m_file_menu->insertSeparator();
   m_file_menu->addAction(m_manager->m_close_tab);
+
+ 
 
 }
 

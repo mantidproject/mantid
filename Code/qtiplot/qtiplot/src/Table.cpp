@@ -189,7 +189,7 @@ void Table::print(const QString& fileName)
 	printer.setColorMode (QPrinter::GrayScale);
 	if (!fileName.isEmpty())
 	{
-	    printer.setCreator("QtiPlot");
+	    printer.setCreator("MantidPlot");
 	    printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setOutputFileName(fileName);
 	}
@@ -585,7 +585,7 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
 		return false;
 
     if (d_table->isColumnReadOnly(col)){
-        QMessageBox::warning(this, tr("QtiPlot - Error"),
+        QMessageBox::warning(this, tr("MantidPlot - Error"),
         tr("Column '%1' is read only!").arg(col_label[col]));
         return false;
     }
@@ -859,7 +859,7 @@ void Table::setColName(int col, const QString& text, bool enumerateRight)
             newLabel += QString::number(n);
 
         if (col_label.contains(newLabel) > 0){
-            QMessageBox::critical(0,tr("QtiPlot - Error"),
+            QMessageBox::critical(0,tr("MantidPlot - Error"),
             tr("There is already a column called : <b>"+newLabel+"</b> in table <b>"+caption+"</b>!<p>Please choose another name!"));
             return;
         }
@@ -1136,7 +1136,7 @@ void Table::clearCell(int row, int col)
         return;
 
 	if (d_table->isColumnReadOnly(col)){
-		QMessageBox::warning(this, tr("QtiPlot - Error"), tr("Column '%1' is read only!").arg(colName(col)));
+		QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Column '%1' is read only!").arg(colName(col)));
         return;
 	}
 
@@ -1156,7 +1156,7 @@ void Table::deleteRows(int startRow, int endRow)
 {
 	for(int i=0; i<d_table->numCols(); i++){
         if (d_table->isColumnReadOnly(i)){
-			QMessageBox::warning(this, tr("QtiPlot - Error"),
+			QMessageBox::warning(this, tr("MantidPlot - Error"),
         	tr("The table '%1' contains read-only columns! Operation aborted!").arg(objectName()));
 			return;
 		}
@@ -1211,7 +1211,7 @@ void Table::clearSelection()
 				lstReadOnly << name;
 		}
 		if (lstReadOnly.count() > 0){
-			QMessageBox::warning(this, tr("QtiPlot - Error"),
+			QMessageBox::warning(this, tr("MantidPlot - Error"),
         	tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     	}
 
@@ -1231,7 +1231,7 @@ void Table::clearSelection()
 			int col = d_table->currentColumn();
 			QString name = colName(col);
 			if (d_table->isColumnReadOnly(col)){
-				QMessageBox::warning(this, tr("QtiPlot - Error"),
+				QMessageBox::warning(this, tr("MantidPlot - Error"),
        			tr("Column '%1' is read only!").arg(name));
 				return;
     		}
@@ -1245,7 +1245,7 @@ void Table::clearSelection()
 					lstReadOnly << name;
 			}
 			if (lstReadOnly.count() > 0){
-				QMessageBox::warning(this, tr("QtiPlot - Error"),
+				QMessageBox::warning(this, tr("MantidPlot - Error"),
         		tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     		}
 
@@ -1349,7 +1349,7 @@ void Table::pasteSelection()
 			lstReadOnly << name;
 	}
 	if (lstReadOnly.count() > 0){
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
         tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     }
 
@@ -1404,7 +1404,7 @@ void Table::removeCol(const QStringList& list)
 	}
 
 	if (lstReadOnly.count() > 0){
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
         tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     }
 
@@ -1453,7 +1453,7 @@ void Table::normalizeSelection()
 	}
 
 	if (lstReadOnly.count() > 0){
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
         tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     }
 
@@ -1472,7 +1472,7 @@ void Table::normalize()
 	}
 
 	if (lstReadOnly.count() > 0){
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
         tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     }
 
@@ -1551,12 +1551,12 @@ void Table::sortColumns(const QStringList&s, int type, int order, const QString&
 	}else{
 		int leadcol = colIndex(leadCol);
 		if (leadcol < 0){
-			QMessageBox::critical(this, tr("QtiPlot - Error"),
+			QMessageBox::critical(this, tr("MantidPlot - Error"),
 			tr("Please indicate the name of the leading column!"));
 			return;
 		}
 		if (columnType(leadcol) == Table::Text){
-			QMessageBox::critical(this, tr("QtiPlot - Error"),
+			QMessageBox::critical(this, tr("MantidPlot - Error"),
 			tr("The leading column has the type set to 'Text'! Operation aborted!"));
 			return;
 		}
@@ -1574,7 +1574,7 @@ void Table::sortColumns(const QStringList&s, int type, int order, const QString&
 		}
 
 		if (!non_empty_cells){
-			QMessageBox::critical(this, tr("QtiPlot - Error"),
+			QMessageBox::critical(this, tr("MantidPlot - Error"),
 			tr("The leading column is empty! Operation aborted!"));
 			return;
 		}
@@ -2098,7 +2098,7 @@ void Table::setRandomValues()
 	}
 
 	if (lstReadOnly.count() > 0){
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
         tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     }
 
@@ -2255,7 +2255,7 @@ void Table::setAscValues()
 	}
 
 	if (lstReadOnly.count() > 0){
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
         tr("The folowing columns")+":\n"+ lstReadOnly.join("\n") + "\n"+ tr("are read only!"));
     }
 
@@ -2421,7 +2421,7 @@ void Table::importASCII(const QString &fname, const QString &sep, int ignoredLin
 
         int steps = rows/100 + 1;
 		QProgressDialog progress((QWidget *)applicationWindow());
-		progress.setWindowTitle(tr("Qtiplot") + " - " + tr("Reading file..."));
+		progress.setWindowTitle(tr("MantidPlot") + " - " + tr("Reading file..."));
 		progress.setLabelText(fname);
 		progress.setActiveWindow();
 		progress.setAutoClose(true);
@@ -2485,7 +2485,7 @@ bool Table::exportASCII(const QString& fname, const QString& separator,
 	QFile f(fname);
 	if ( !f.open( QIODevice::WriteOnly ) ){
 		QApplication::restoreOverrideCursor();
-		QMessageBox::critical(0, tr("QtiPlot - ASCII Export Error"),
+		QMessageBox::critical(0, tr("MantidPlot - ASCII Export Error"),
 				tr("Could not write to file: <br><h4>"+fname+ "</h4><p>Please verify that you have the right to write to this location!").arg(fname));
 		return false;
 	}
@@ -2906,7 +2906,7 @@ void Table::resizeRows(int r)
 		QString text= tr("Rows will be deleted from the table!");
 		text+="<p>"+tr("Do you really want to continue?");
 		int i,cols = d_table->numCols();
-		switch( QMessageBox::information(this,tr("QtiPlot"), text, tr("Yes"), tr("Cancel"), 0, 1 ) )
+		switch( QMessageBox::information(this,tr("MantidPlot"), text, tr("Yes"), tr("Cancel"), 0, 1 ) )
 		{
 			case 0:
 				QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -2939,7 +2939,7 @@ void Table::resizeCols(int c)
 	if (cols > c){
 		QString text= tr("Columns will be deleted from the table!");
 		text+="<p>"+tr("Do you really want to continue?");
-		switch( QMessageBox::information(this,tr("QtiPlot"), text, tr("Yes"), tr("Cancel"), 0, 1 ) ){
+		switch( QMessageBox::information(this,tr("MantidPlot"), text, tr("Yes"), tr("Cancel"), 0, 1 ) ){
 			case 0: {
 				QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
                 Q3MemArray<int> columns(cols-c);

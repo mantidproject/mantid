@@ -25,7 +25,8 @@ SOURCES = \
   $$SRCDIR/AlgorithmDialog.cpp \
   $$SRCDIR/GenericDialog.cpp \
   $$SRCDIR/UserSubWindow.cpp \
-  $$SRCDIR/MantidQtDialog.cpp
+  $$SRCDIR/MantidQtDialog.cpp \
+  $$SRCDIR/MantidAbout.cpp
   
 HEADERS = \
   $$HEADERDIR/DllOption.h \
@@ -35,12 +36,19 @@ HEADERS = \
   $$HEADERDIR/AlgorithmDialog.h \
   $$HEADERDIR/GenericDialog.h \
   $$HEADERDIR/UserSubWindow.h \
-  $$HEADERDIR/MantidQtDialog.h
+  $$HEADERDIR/MantidQtDialog.h \
+  $$HEADERDIR/MantidAbout.h
+  
+FORMS = \
+  $$HEADERDIR/MantidAbout.ui
+  
+UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtAPI"
   
 #-----------------------------
 # Target and dependancies
 #-----------------------------
 TARGET = MantidQtAPI
+
 
 unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtAPI"'
 win32:headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtAPI"'

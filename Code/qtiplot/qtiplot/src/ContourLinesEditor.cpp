@@ -237,7 +237,7 @@ void ContourLinesEditor::showPenDialog(int row, int col)
 
 	if (!penDialog){
 		penDialog = new QDialog(this);
-		penDialog->setWindowTitle(tr("QtiPlot - Edit pen"));
+		penDialog->setWindowTitle(tr("MantidPlot - Edit pen"));
 
 		QGroupBox *gb1 = new QGroupBox();
 		QGridLayout *hl1 = new QGridLayout(gb1);

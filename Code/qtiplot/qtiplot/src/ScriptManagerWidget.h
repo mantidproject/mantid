@@ -23,6 +23,8 @@ class QComboBox;
 
 class FindReplaceDialog;
 
+
+
 /** 
     This class manages ScriptEdit objects and displays them in a series
     of tabs. It is also the single point of entry for executing scripts
@@ -58,7 +60,7 @@ class ScriptManagerWidget : public QTabWidget, scripted
 
 public:
   /// Constructor
-  ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode = false);
+  ScriptManagerWidget(ScriptingEnv *env, QWidget *parent,ApplicationWindow *app,bool interpreter_mode = false);
   ///Destructor
   ~ScriptManagerWidget();
   /// Ask if we should save
@@ -149,6 +151,9 @@ private slots:
   /// Toggle the progress reporting arrow
   void toggleProgressArrow(bool on);
 
+
+  void showScriptingLangDialog();
+
 private:
   /// Initialize the actions relevant to this object
   void initActions();
@@ -181,7 +186,7 @@ private:
   /// The index of the last active tab 
   int m_last_active_tab;
   /// File actions
-  QAction *m_new_tab, *m_open_curtab, *m_open_newtab, *m_save, *m_saveas, *m_close_tab;
+  QAction *m_new_tab, *m_open_curtab, *m_open_newtab, *m_save, *m_saveas, *m_close_tab,*m_actionScriptingLang;
   ///Edit actions that are necessary for the manager
   QAction *m_find;
   /// Script execute actions
@@ -194,6 +199,8 @@ private:
 
   ///Display mode boolean
   bool m_interpreter_mode;
+  ///
+  ApplicationWindow *m_app;
 };
 
 

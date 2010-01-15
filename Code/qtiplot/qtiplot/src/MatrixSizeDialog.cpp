@@ -41,7 +41,7 @@ MatrixSizeDialog::MatrixSizeDialog( Matrix *m, QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl ),
     d_matrix(m)
 {
-    setWindowTitle(tr("QtiPlot - Matrix Dimensions"));
+    setWindowTitle(tr("MantidPlot - Matrix Dimensions"));
 
 	groupBox1 = new QGroupBox(tr("Dimensions"));
 	QHBoxLayout *topLayout = new QHBoxLayout(groupBox1);

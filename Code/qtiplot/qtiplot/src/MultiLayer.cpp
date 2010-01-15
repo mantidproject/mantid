@@ -294,8 +294,8 @@ void MultiLayer::confirmRemoveLayer()
 {
 	if (graphsList.size() > 1){
 		switch(QMessageBox::information(this,
-					tr("QtiPlot - Guess best layout?"),
-					tr("Do you want QtiPlot to rearrange the remaining layers?"),
+					tr("MantidPlot - Guess best layout?"),
+					tr("Do you want MantidPlot to rearrange the remaining layers?"),
 					tr("&Yes"), tr("&No"), tr("&Cancel"),
 					0, 2) )
 		{
@@ -629,7 +629,7 @@ QPixmap MultiLayer::canvasPixmap()
 void MultiLayer::exportToFile(const QString& fileName)
 {
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(0, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
+		QMessageBox::critical(0, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
         return;
 	}
 
@@ -647,7 +647,7 @@ void MultiLayer::exportToFile(const QString& fileName)
 				return;
 			}
 		}
-    	QMessageBox::critical(this, tr("QtiPlot - Error"), tr("File format not handled, operation aborted!"));
+    	QMessageBox::critical(this, tr("MantidPlot - Error"), tr("File format not handled, operation aborted!"));
 	}
 }
 
@@ -689,14 +689,14 @@ void MultiLayer::exportPDF(const QString& fname)
 void MultiLayer::exportVector(const QString& fileName, int res, bool color, bool keepAspect, QPrinter::PageSize pageSize)
 {
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(this, tr("QtiPlot - Error"),
+		QMessageBox::critical(this, tr("MantidPlot - Error"),
 		tr("Please provide a valid file name!"));
         return;
 	}
 
 	QPrinter printer;
     printer.setDocName (objectName());
-    printer.setCreator("QtiPlot");
+    printer.setCreator("MantidPlot");
 	printer.setFullPage(true);
 	printer.setOutputFileName(fileName);
     if (fileName.contains(".eps"))

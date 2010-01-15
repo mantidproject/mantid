@@ -377,7 +377,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 		case Instrumental:
 			{
 				if (!d_graph && d_table){
-					QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Error"),
+					QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
   	    				tr("You cannot use the instrumental weighting method."));
   	    			return false;
 				}
@@ -396,7 +396,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 					}
                 }
 				if (error){
-					QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Error"),
+					QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
 					tr("The curve %1 has no associated Y error bars. You cannot use instrumental weighting method.").arg(d_curve->title().text()));
 					return false;
 				}
@@ -427,7 +427,7 @@ bool Fit::setWeightingData(WeightingMethod w, const QString& colName)
 					return false;
 
 				if (t->numRows() < d_n){
-  	            	QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Error"),
+  	            	QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
   	                tr("The column %1 has less points than the fitted data set. Please choose another column!.").arg(colName));
   	                return false;
   	            }
@@ -529,22 +529,22 @@ void Fit::fit()
 		return;
 
 	if (!d_n){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Fit Error"),
+		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
 				tr("You didn't specify a valid data set for this fit operation. Operation aborted!"));
 		return;
 	}
 	if (!d_p){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Fit Error"),
+		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
 				tr("There are no parameters specified for this fit operation. Operation aborted!"));
 		return;
 	}
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Fit Error"),
+  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   	    return;
   	}
 	if (d_formula.isEmpty()){
-		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Fit Error"),
+		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
 				tr("You must specify a valid fit function first. Operation aborted!"));
 		return;
 	}
@@ -653,7 +653,7 @@ bool Fit::save(const QString& fileName)
     QFile f(fileName);
 	if ( !f.open( QIODevice::WriteOnly ) ){
 		QApplication::restoreOverrideCursor();
-		QMessageBox::critical(0, tr("QtiPlot") + " - " + tr("File Save Error"),
+		QMessageBox::critical(0, tr("MantidPlot") + " - " + tr("File Save Error"),
 				tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that you have the right to write to this location!").arg(fileName));
 		return false;
 	}
@@ -692,7 +692,7 @@ bool Fit::load(const QString& fileName)
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(((ApplicationWindow *)parent()), tr("QtiPlot Fit Model"),
+        QMessageBox::warning(((ApplicationWindow *)parent()), tr("MantidPlot Fit Model"),
                               tr("Cannot read file %1:\n%2.")
                               .arg(fileName)
                               .arg(file.errorString()));

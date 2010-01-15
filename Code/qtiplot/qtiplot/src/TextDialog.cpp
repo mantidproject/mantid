@@ -51,7 +51,7 @@ TextDialog::TextDialog(TextType type, QWidget* parent, Qt::WFlags fl)
 	: QDialog( parent, fl)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowTitle( tr( "QtiPlot - Text options" ) );
+	setWindowTitle( tr( "MantidPlot - Text options" ) );
 	setSizeGripEnabled( true );
 
 	d_graph = NULL;
@@ -192,16 +192,16 @@ void TextDialog::setGraph(Graph *g)
 		l =	d_scale->title();
 		switch(d_scale->alignment()){
 			case QwtScaleDraw::BottomScale:
-				setWindowTitle(tr("QtiPlot") + " - " + tr("X Axis Title"));
+				setWindowTitle(tr("MantidPlot") + " - " + tr("X Axis Title"));
 			break;
 			case QwtScaleDraw::LeftScale:
-				setWindowTitle(tr("QtiPlot") + " - " + tr("Y Axis Title"));
+				setWindowTitle(tr("MantidPlot") + " - " + tr("Y Axis Title"));
 			break;
 			case QwtScaleDraw::TopScale:
-				setWindowTitle(tr("QtiPlot") + " - " + tr("Top Axis Title"));
+				setWindowTitle(tr("MantidPlot") + " - " + tr("Top Axis Title"));
 			break;
 			case QwtScaleDraw::RightScale:
-				setWindowTitle(tr("QtiPlot") + " - " + tr("Right Axis Title"));
+				setWindowTitle(tr("MantidPlot") + " - " + tr("Right Axis Title"));
 			break;
 		}
 	}

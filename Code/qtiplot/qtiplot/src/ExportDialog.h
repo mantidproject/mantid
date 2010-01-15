@@ -33,6 +33,7 @@
 class QPushButton;
 class QCheckBox;
 class QComboBox;
+class QLabel;
 
 //! Export ASCII dialog
 class ExportDialog : public QDialog
@@ -60,6 +61,7 @@ private:
 	QCheckBox* boxAllTables;
     QComboBox* boxSeparator;
 	QComboBox* boxTable;
+	QLabel *sepText;
 
 public slots:
 	//! Set the column delimiter

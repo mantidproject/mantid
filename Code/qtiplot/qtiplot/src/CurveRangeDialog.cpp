@@ -41,7 +41,7 @@
 CurveRangeDialog::CurveRangeDialog(QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-	setWindowTitle(tr("QtiPlot - Plot range"));
+	setWindowTitle(tr("MantidPlot - Plot range"));
     setName( "CurveRangeDialog" );
 
     QGroupBox *gb1 = new QGroupBox();

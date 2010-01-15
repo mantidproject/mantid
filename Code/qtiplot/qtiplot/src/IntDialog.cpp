@@ -47,7 +47,7 @@ IntDialog::IntDialog(QWidget* parent, Graph *g, Qt::WFlags fl )
 {
     setName( "IntegrationDialog" );
 	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowTitle(tr("QtiPlot - Integration Options"));
+	setWindowTitle(tr("MantidPlot - Integration Options"));
 	setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed));
 
     QGroupBox *gb1 = new QGroupBox();

@@ -44,7 +44,7 @@ LayerDialog::LayerDialog( QWidget* parent, Qt::WFlags fl )
 : QDialog( parent, fl )
 {
     setName("LayerDialog");
-	setWindowTitle(tr( "QtiPlot - Arrange Layers" ));
+	setWindowTitle(tr( "MantidPlot - Arrange Layers" ));
 
     QGroupBox *gb1 = new QGroupBox(tr("Layers"));
 	QGridLayout *gl1 = new QGridLayout(gb1);
@@ -226,7 +226,7 @@ void LayerDialog::update()
         int graphs = layersBox->value();
 		int old_graphs = multi_layer->layers();
 		int dn = multi_layer->layers() - graphs;
-		if (dn > 0 && QMessageBox::question(0, tr("QtiPlot - Delete Layers?"),
+		if (dn > 0 && QMessageBox::question(0, tr("MantidPlot - Delete Layers?"),
 					tr("You are about to delete %1 existing layers.").arg(dn)+"\n"+
 					tr("Are you sure you want to continue this operation?"),
 					tr("&Continue"), tr("&Cancel"), QString(), 0, 1 )) return;
@@ -248,7 +248,7 @@ void LayerDialog::update()
 
 		if (cols>graphs && !fitBox->isChecked())
 		{
-			QMessageBox::about(this, tr("QtiPlot - Columns input error"),
+			QMessageBox::about(this, tr("MantidPlot - Columns input error"),
 					tr("The number of columns you've entered is greater than the number of graphs (%1)!").arg(graphs));
 			boxX->setFocus();
 			return;
@@ -256,7 +256,7 @@ void LayerDialog::update()
 
 		if (rows>graphs && !fitBox->isChecked())
 		{
-			QMessageBox::about(this, tr("QtiPlot - Rows input error"),
+			QMessageBox::about(this, tr("MantidPlot - Rows input error"),
 					tr("The number of rows you've entered is greater than the number of graphs (%1)!").arg(graphs));
 			boxY->setFocus();
 			return;
@@ -301,7 +301,7 @@ void LayerDialog::accept()
 void LayerDialog::swapLayers()
 {
 	if(boxLayerSrc->value() == boxLayerDest->value()){
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
 		tr("Please enter different indexes for the source and destination layers!"));
 		return;
 	}

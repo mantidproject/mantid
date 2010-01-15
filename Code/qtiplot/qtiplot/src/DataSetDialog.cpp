@@ -42,7 +42,7 @@ DataSetDialog::DataSetDialog( const QString& text, QWidget* parent,  Qt::WFlags 
 : QDialog( parent, fl )
 {
 	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowTitle(tr("QtiPlot - Select data set"));
+	setWindowTitle(tr("MantidPlot - Select data set"));
 
 	d_operation = ApplicationWindow::NoAnalysis;
 	d_graph = 0;

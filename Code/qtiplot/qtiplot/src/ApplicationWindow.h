@@ -176,8 +176,7 @@ public:
 	bool autoUpdateTableValues(){return d_auto_update_table_values;};
 	void setAutoUpdateTableValues(bool on = true);
 	void enablesaveNexus(const QString& wsName);
-	
-	
+		
 public slots:
 	//! \name Projects and Project Files
 	//@{
@@ -407,7 +406,7 @@ public slots:
 	void importASCII();
 	void importASCII(const QStringList& files, int import_mode, const QString& local_column_separator, int local_ignored_lines, bool local_rename_columns,
         bool local_strip_spaces, bool local_simplify_spaces, bool local_import_comments, bool update_dec_separators,
-        QLocale local_separators, const QString& local_comment_string, bool import_read_only, int endLineChar);
+        QLocale local_separators, const QString& local_comment_string, bool import_read_only, int endLineChar,const QString& sepforloadAscii);
 	void exportAllTables(const QString& sep, bool colNames, bool colComments, bool expSelection);
 	void exportASCII(const QString& tableName, const QString& sep, bool colNames, bool colComments, bool expSelection);
 
@@ -761,7 +760,8 @@ public slots:
 	void moveColumnFirst();
 	void moveColumnLast();
 
-	void updateConfirmOptions(bool askTables, bool askMatrixes, bool askPlots2D, bool askPlots3D, bool askNotes);
+	void updateConfirmOptions(bool askTables, bool askMatrixes, bool askPlots2D, bool askPlots3D, bool askNotes,bool askInstrWindow);
+	
 
 	//! \name Plot3D Tools
 	//@{
@@ -838,6 +838,10 @@ public slots:
 
 	//! Returns a list with the names of all the matrices in the project
 	QStringList matrixNames();
+
+	/// returns a list of all the mantid matrix objects in the project
+	QStringList mantidmatrixNames();
+
 
 	//! \name Notes
 	//@{
@@ -982,9 +986,11 @@ public slots:
 	void showToolBarsMenu();
   void enableMantidPeakFit(bool yes);
   void savetoNexusFile();
+  
 
 signals:
 	void modified();
+	void resultsContextMenu();
 
 private:
 	virtual QMenu * createPopupMenu(){return NULL;};
@@ -1056,6 +1062,14 @@ private slots:
 
   //Mantid
   void showPeakFitDialog();
+
+  /// context menu for log window
+  void showresultsContextMenu(const QPoint &p);
+  ///
+  void showMantidConcepts();
+
+  ///
+  void showalgorithmDescriptions();
 	
 // TODO: a lot of this stuff should be private
 public:
@@ -1144,7 +1158,7 @@ public:
 	//! Path to the folder where the last template file was opened/saved
 	QString templatesDir;
 	bool smooth3DMesh, autoScaleFonts, autoResizeLayers, askForSupport, autoSearchUpdates;
-	bool confirmCloseTable, confirmCloseMatrix, confirmClosePlot2D, confirmClosePlot3D;
+	bool confirmCloseTable, confirmCloseMatrix, confirmClosePlot2D, confirmClosePlot3D,confirmCloseInstrWindow;
 	bool confirmCloseFolder, confirmCloseNotes;
 	bool titleOn, autoSave, drawBackbones, allAxesOn, autoscale2DPlots, antialiasing2DPlots;
 	int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, axesLineWidth, canvasFrameWidth;
@@ -1240,7 +1254,7 @@ private:
     QAction *actionLoad, *actionUndo, *actionRedo;
     QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
     QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
-    QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout;
+    QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
 #ifdef SCRIPTING_CONSOLE
     QAction *actionShowConsole;
 #endif
@@ -1261,7 +1275,7 @@ private:
     QAction *actionShowAxisDialog, *actionShowTitleDialog;
     QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
     QAction *actionTableRecalculate;
-    QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder;
+    QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms;
     QAction *actionRename, *actionCloseWindow, *actionConvertTable;
     QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
     QAction *actionResizeActiveWindow, *actionHideActiveWindow;

@@ -209,7 +209,7 @@ void ErrDialog::add()
 
 void ErrDialog::languageChange()
 {
-  setWindowTitle( tr( "QtiPlot - Error Bars" ) );
+  setWindowTitle( tr( "MantidPlot - Error Bars" ) );
   xErrBox->setText( tr( "&X Error Bars" ) );
   buttonAdd->setText( tr( "&Add" ) );
   textLabel1->setText( tr( "Add Error Bars to" ) );

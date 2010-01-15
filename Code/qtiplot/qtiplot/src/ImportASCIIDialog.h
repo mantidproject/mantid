@@ -95,9 +95,11 @@ public:
 	enum ImportMode {
 		NewTables, //!< create a new table for each file (default)
 		NewMatrices, //!< create a new matrix for each file
+		NewWorkspace, //!< create a new workspace  for each file 
 		NewColumns, //!< add each file as new columns to the current table
 		NewRows, //!< add each file as new rows to the current table
 		Overwrite //!< replace content of current table with the selected file (like importing a single file in previous versions of QtiPlot)
+		
 	};
 
 	//! Constructor
@@ -143,6 +145,8 @@ public:
 	
 	//! Returns the convention used for the end line character!
 	inline int endLineChar(){return boxEndLine->currentIndex();};
+	///
+	QString getselectedColumnSeparator();
 		
 private slots:
 	//! Display help for advanced options.
@@ -163,6 +167,9 @@ private:
 	//! Initialise #d_advanced_options and everything it contains.
 	void initAdvancedOptions();
 	void setNewWindowsOnly(bool on);
+	void addColumnSeparators();
+	void addColumnSeparatorsforLoadAscii();
+	
 
 	//! Container widget for all advanced options.
 	QGroupBox *d_advanced_options;

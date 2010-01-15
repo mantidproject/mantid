@@ -4,7 +4,7 @@
 #include "../pixmaps.h"
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
-
+#include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QTextEdit>
@@ -27,7 +27,7 @@ Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get(
 Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
-    QDockWidget(tr("Mantid Workspaces"),parent), m_mantidUI(mui)
+    QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui)
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -318,6 +318,17 @@ void MantidDockWidget::workspaceSelected()
 void MantidDockWidget::deleteWorkspaces()
 {
   QList<QTreeWidgetItem*> items = m_tree->selectedItems();
+  if(items.empty())
+  {
+	  MantidMatrix* m = (MantidMatrix*) m_mantidUI->appWindow()->activeWindow();
+	  if (!m || !m->isA("MantidMatrix")) return;
+	  if(m->workspaceName().isEmpty()) return;
+
+	  if(Mantid::API::AnalysisDataService::Instance().doesExist(m->workspaceName().toStdString()))
+	  {	  m_mantidUI->deleteWorkspace(m->workspaceName());
+	  }
+	  return;
+  }
   QList<QTreeWidgetItem*>::const_iterator itr=items.constBegin();
   for (itr = items.constBegin(); itr != items.constEnd(); ++itr)
   {
@@ -427,7 +438,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     {action->setEnabled(false);
     }
 
-    action = new QAction("Rename Workspace",this);
+    action = new QAction("Rename",this);
     connect(action,SIGNAL(activated()),m_mantidUI,SLOT(renameWorkspace()));
     menu->addAction(action);
     if(bDisable)
@@ -438,7 +449,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     //separate delete
     menu->addSeparator();
 
-    action = new QAction("Delete workspace",this);
+    action = new QAction("Delete",this);
     connect(action,SIGNAL(triggered()),this,SLOT(deleteWorkspaces()));
     menu->addAction(action);
     if(bDisable)
@@ -671,7 +682,7 @@ AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
     QDockWidget(w)
 {
   m_mantidUI = mui;
-  setWindowTitle(tr("Mantid Algorithms"));
+  setWindowTitle(tr("Algorithms"));
   setObjectName("exploreAlgorithms"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);

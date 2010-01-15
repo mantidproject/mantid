@@ -48,7 +48,7 @@
 
 	slopes = type;
 
-	setWindowTitle(tr("QtiPlot - Verify initial guesses"));
+	setWindowTitle(tr("MantidPlot - Verify initial guesses"));
 
 	QGroupBox *gb1 = new QGroupBox();
 	QGridLayout *gl1 = new QGridLayout();
@@ -194,7 +194,7 @@ void ExpDecayDialog::fit()
 	QStringList curvesList = graph->analysableCurvesList();
 	if (!c || !curvesList.contains(curve))
 	{
-		QMessageBox::critical(this,tr("QtiPlot - Warning"),
+		QMessageBox::critical(this,tr("MantidPlot - Warning"),
 				tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curve));
 		boxName->clear();
 		boxName->addItems(curvesList);

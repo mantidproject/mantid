@@ -49,7 +49,7 @@
 LineDialog::LineDialog( ArrowMarker *line, QWidget* parent,  Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-    setWindowTitle( tr( "QtiPlot - Line options" ) );
+    setWindowTitle( tr( "MantidPlot - Line options" ) );
 	setAttribute(Qt::WA_DeleteOnClose);
 	
 	lm = line;

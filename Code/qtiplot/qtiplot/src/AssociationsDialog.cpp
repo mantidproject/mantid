@@ -50,7 +50,7 @@ AssociationsDialog::AssociationsDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
     setName( "AssociationsDialog" );
-    setWindowTitle( tr( "QtiPlot - Plot Associations" ) );
+    setWindowTitle( tr( "MantidPlot - Plot Associations" ) );
 	setSizeGripEnabled(true);
 	setFocus();
 

@@ -104,7 +104,8 @@ d_labels_x_offset(0),
 d_labels_y_offset(0),
 d_selected_label(NULL),
 d_labels_align(Qt::AlignHCenter),
-mColorMap(),m_nRows(nrows),m_nColumns(ncols),mScaledValues(0),m_bIntensityChanged(false)
+mColorMap(),m_nRows(nrows),m_nColumns(ncols),
+mScaledValues(0),m_bIntensityChanged(false)
 {
 	
 	setTitle("UserHelperFunction");
@@ -243,14 +244,23 @@ colorAxis->setColorBarWidth(width);
 
 Spectrogram* Spectrogram::copy()
 {
-Spectrogram *new_s = new Spectrogram(matrix());
+	Spectrogram *new_s;
+	Matrix * m=matrix();
+	if(m)new_s= new Spectrogram(matrix());
+	else new_s=new Spectrogram(d_funct,m_nRows,m_nColumns,boundingRect(),data().range().minValue(),data().range().maxValue());
+	
 new_s->setDisplayMode(QwtPlotSpectrogram::ImageMode, testDisplayMode(QwtPlotSpectrogram::ImageMode));
 new_s->setDisplayMode(QwtPlotSpectrogram::ContourMode, testDisplayMode(QwtPlotSpectrogram::ContourMode));
-new_s->setColorMap (colorMap());
+new_s->color_map_policy = color_map_policy;
+if (new_s->color_map_policy == GrayScale)
+	new_s->setGrayScale();
+else new_s->setCustomColorMap(new_s->getColorMap());
+
 new_s->setAxis(xAxis(), yAxis());
 new_s->setDefaultContourPen(defaultContourPen());
 new_s->setLevelsNumber(levels());
-new_s->color_map_policy = color_map_policy;
+
+new_s->mutableColorMap().changeScaleType(getColorMap().getScaleType());
 return new_s;
 }
 
@@ -300,7 +310,7 @@ void Spectrogram::setCustomColorMap(const QwtColorMap &map)
 	QwtScaleWidget *colorAxis = plot->axisWidget(color_axis);
 	if (colorAxis)
 	{
-		colorAxis->setColorMap(this->data().range(), this->colorMap());
+		colorAxis->setColorMap(this->data().range(), this->getColorMap());
 	}
 }
 void Spectrogram::setCustomColorMap(const QwtLinearColorMap& map)

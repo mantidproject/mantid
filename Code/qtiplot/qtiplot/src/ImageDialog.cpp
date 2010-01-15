@@ -36,7 +36,7 @@ ImageDialog::ImageDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
 	setName( "ImageDialog" );
-	setWindowTitle( tr( "QtiPlot - Image Geometry" ) );
+	setWindowTitle( tr( "MantidPlot - Image Geometry" ) );
 
 	QGroupBox *gb1 = new QGroupBox(tr("Origin"));
 	boxX = new QSpinBox();

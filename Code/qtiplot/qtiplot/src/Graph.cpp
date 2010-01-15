@@ -766,13 +766,13 @@ void Graph::setLabelsDateTimeFormat(int axis, int type, const QString& formatInf
 	QStringList list = formatInfo.split(";", QString::KeepEmptyParts);
 	if ((int)list.count() < 2)
 	{
-        QMessageBox::critical(this, tr("QtiPlot - Error"),
+        QMessageBox::critical(this, tr("MantidPlot - Error"),
 		tr("Couldn't change the axis type to the requested format!"));
         return;
     }
     if (list[0].isEmpty() || list[1].isEmpty())
     {
-        QMessageBox::critical(this, tr("QtiPlot - Error"),
+        QMessageBox::critical(this, tr("MantidPlot - Error"),
 		tr("Couldn't change the axis type to the requested format!"));
         return;
     }
@@ -1304,9 +1304,9 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
 			  if(rightAxis)
 			  {
 			    sp->mutableColorMap().changeScaleType((GraphOptions::ScaleType)type);
-				  rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
+				 rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
 				  sp->setColorMap(sp->getColorMap());
-				  if(sp->isIntensityChanged())
+				 if(sp->isIntensityChanged())
 						sp->changeIntensity( start,end);
 	
 			  }
@@ -1384,7 +1384,7 @@ QPixmap Graph::graphPixmap()
 void Graph::exportToFile(const QString& fileName)
 {
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
+		QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
         return;
 	}
 
@@ -1402,7 +1402,7 @@ void Graph::exportToFile(const QString& fileName)
 				return;
 			}
 		}
-    	QMessageBox::critical(this, tr("QtiPlot - Error"), tr("File format not handled, operation aborted!"));
+    	QMessageBox::critical(this, tr("MantidPlot - Error"), tr("File format not handled, operation aborted!"));
 	}
 }
 
@@ -1438,12 +1438,12 @@ void Graph::exportImage(const QString& fileName, int quality, bool transparent)
 void Graph::exportVector(const QString& fileName, int, bool color, bool keepAspect, QPrinter::PageSize pageSize)
 {
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
+		QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
         return;
 	}
 
 	QPrinter printer;
-    printer.setCreator("QtiPlot");
+    printer.setCreator("MantidPlot");
 	printer.setFullPage(true);
 	//if (res) //only printing with screen resolution works correctly for the moment
 		//printer.setResolution(res);
@@ -3553,7 +3553,7 @@ ImageMarker* Graph::addImage(ImageMarker* mrk)
 ImageMarker* Graph::addImage(const QString& fileName)
 {
 	if (fileName.isEmpty() || !QFile::exists(fileName)){
-		QMessageBox::warning(0, tr("QtiPlot - File open error"),
+		QMessageBox::warning(0, tr("MantidPlot - File open error"),
 				tr("Image file: <p><b> %1 </b><p>does not exist anymore!").arg(fileName));
 		return 0;
 	}
@@ -3583,7 +3583,7 @@ void Graph::insertImageMarker(const QStringList& lst, int fileVersion)
 {
 	QString fn = lst[1];
 	if (!QFile::exists(fn)){
-		QMessageBox::warning(0, tr("QtiPlot - File open error"),
+		QMessageBox::warning(0, tr("MantidPlot - File open error"),
 				tr("Image file: <p><b> %1 </b><p>does not exist anymore!").arg(fn));
 	} else {
 		ImageMarker* mrk = new ImageMarker(fn);
@@ -4072,11 +4072,11 @@ void Graph::showPlotErrorMessage(QWidget *parent, const QStringList& emptyColumn
 		for (int i = 0; i < n; i++)
 			columns += "<p><b>" + emptyColumns[i] + "</b></p>";
 
-		QMessageBox::warning(parent, tr("QtiPlot - Warning"),
+		QMessageBox::warning(parent, tr("MantidPlot - Warning"),
 				tr("The columns") + ": " + columns + tr("are empty and will not be added to the plot!"));
 	}
 	else if (n == 1)
-		QMessageBox::warning(parent, tr("QtiPlot - Warning"),
+		QMessageBox::warning(parent, tr("MantidPlot - Warning"),
 				tr("The column") + " <b>" + emptyColumns[0] + "</b> " + tr("is empty and will not be added to the plot!"));
 }
 
@@ -4353,9 +4353,24 @@ void Graph::copy(Graph* g)
       c_keys.resize(++n_curves);
       c_keys[i] = d_plot->insertCurve(sp);
 
-      sp->showColorScale(((Spectrogram *)it)->colorScaleAxis(), ((Spectrogram *)it)->hasColorScale());
-      sp->setColorBarWidth(((Spectrogram *)it)->colorBarWidth());
-      sp->setVisible(it->isVisible());
+	 
+	  QwtScaleWidget *rightAxis = sp->plot()->axisWidget(QwtPlot::yRight);
+	  if (g->curveType(i) == ColorMap)
+		  rightAxis->setColorBarEnabled(true);
+	  else 
+		  rightAxis->setColorBarEnabled(false);
+	  sp->plot()->enableAxis(QwtPlot::yRight, true);
+	  sp->mutableColorMap().changeScaleType(sp->getColorMap().getScaleType());
+	   
+	  rightAxis->setColorMap(sp->data().range(),sp->mutableColorMap());
+	  sp->plot()->setAxisScale(QwtPlot::yRight,
+		  sp->data().range().minValue(),
+		  sp->data().range().maxValue());
+	  sp->plot()->setAxisScaleDiv(QwtPlot::yRight, *sp->plot()->axisScaleDiv(QwtPlot::yRight));
+   		
+     //sp->showColorScale(((Spectrogram *)it)->colorScaleAxis(), ((Spectrogram *)it)->hasColorScale());
+      /* sp->setColorBarWidth(((Spectrogram *)it)->colorBarWidth());
+      sp->setVisible(it->isVisible());*/
 
       c_type.resize(n_curves);
       c_type[i] = g->curveType(i);
@@ -4710,16 +4725,17 @@ Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,Q
 Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
 {
   	if (type == GrayScale)
-  		d_spectrogram->setGrayScale();
+		d_spectrogram->setGrayScale();
+
   	else if (type == Contour)
   		{
   	    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ImageMode, false);
   	    d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, true);
-  	    }
+		}
   	else if (type == ColorMap)
-  	    {
-	    // d_spectrogram->setDefaultColorMap();
-		 d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
+  	    {	d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
+			d_spectrogram->setDefaultColorMap();
+			d_spectrogram->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);
   	    }
 	c_keys.resize(++n_curves);
   	c_keys[n_curves-1] = d_plot->insertCurve(d_spectrogram);
@@ -4728,17 +4744,18 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   	c_type[n_curves-1] = type; 
 
 	QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
-	if(rightAxis==NULL) return 0;
+	if(!rightAxis) return 0;
 	rightAxis->setColorBarEnabled(type != Contour);
 	d_plot->enableAxis(QwtPlot::yRight, type != Contour);
-	d_spectrogram->mutableColorMap().changeScaleType(GraphOptions::Linear);
-	d_spectrogram->setDefaultColorMap();
-	rightAxis->setColorMap(d_spectrogram->data().range(),d_spectrogram->mutableColorMap());
+	
+	//d_spectrogram->setDefaultColorMap();
+	if(type == GrayScale) rightAxis->setColorBarEnabled(false); //rightAxis->setColorMap(d_spectrogram->data().range(),d_spectrogram->colorMap());
+	else rightAxis->setColorMap(d_spectrogram->data().range(),d_spectrogram->mutableColorMap());
 	d_plot->setAxisScale(QwtPlot::yRight,
 		d_spectrogram->data().range().minValue(),
 		d_spectrogram->data().range().maxValue());
    		
-	//setSpectrogram(d_spectrogram);
+	
 	d_plot->setAxisScaleDiv(QwtPlot::yRight, *d_plot->axisScaleDiv(QwtPlot::yRight));
 
 	for (int i=0; i < QwtPlot::axisCnt; i++)
@@ -4897,7 +4914,7 @@ void Graph::restoreCurveLabels(int curveID, const QStringList& lst)
 bool Graph::validCurvesDataSize()
 {
 	if (!n_curves){
-		QMessageBox::warning(this, tr("QtiPlot - Warning"), tr("There are no curves available on this plot!"));
+		QMessageBox::warning(this, tr("MantidPlot - Warning"), tr("There are no curves available on this plot!"));
 		return false;
 	} else {
 		for (int i=0; i < n_curves; i++){
@@ -4908,7 +4925,7 @@ bool Graph::validCurvesDataSize()
                     return true;
   	         }
   	    }
-		QMessageBox::warning(this, tr("QtiPlot - Error"),
+		QMessageBox::warning(this, tr("MantidPlot - Error"),
 		tr("There are no curves with more than two points on this plot. Operation aborted!"));
 		return false;
 	}

@@ -370,7 +370,7 @@ double Matrix::determinant()
 	int cols = numCols();
 
 	if (rows != cols){
-		QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("QtiPlot - Error"),
+		QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("MantidPlot - Error"),
 				tr("Calculation failed, the matrix is not square!"));
 		return GSL_POSINF;
 	}
@@ -382,7 +382,7 @@ double Matrix::determinant()
 	if (!A || !p){
 		QApplication::restoreOverrideCursor();
 		QMessageBox::critical((ApplicationWindow *)applicationWindow(),
-				tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+				tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
 				tr("Not enough memory, operation aborted!"));
 		return 0.0;
 	}
@@ -409,7 +409,7 @@ double Matrix::determinant()
 void Matrix::invert()
 {
 	if (numRows() != numCols()){
-		QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("QtiPlot - Error"),
+		QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("MantidPlot - Error"),
 		tr("Inversion failed, the matrix is not square!"));
 		return;
 	}
@@ -645,7 +645,7 @@ void Matrix::pasteSelection()
 
 	double *clipboardBuffer = (double *)malloc(rows*cols*sizeof(double));
 	if (!clipboardBuffer){
-		QMessageBox::critical(this, tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+		QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
 		tr("Not enough memory, operation aborted!"));
 		QApplication::restoreOverrideCursor();
 		return;
@@ -834,7 +834,7 @@ void Matrix::exportRasterImage(const QString& fileName, int quality)
 void Matrix::exportToFile(const QString& fileName)
 {
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
+		QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
         return;
 	}
 
@@ -852,7 +852,7 @@ void Matrix::exportToFile(const QString& fileName)
 				return;
 			}
 		}
-    	QMessageBox::critical(this, tr("QtiPlot - Error"), tr("File format not handled, operation aborted!"));
+    	QMessageBox::critical(this, tr("MantidPlot - Error"), tr("File format not handled, operation aborted!"));
 	}
 }
 
@@ -891,7 +891,7 @@ void Matrix::print(const QString& fileName)
 	printer.setColorMode (QPrinter::GrayScale);
 
 	if (!fileName.isEmpty()){
-	    printer.setCreator("QtiPlot");
+	    printer.setCreator("MantidPlot");
 	    printer.setOutputFormat(QPrinter::PdfFormat);
         printer.setOutputFileName(fileName);
 	} else {
@@ -989,12 +989,12 @@ void Matrix::exportVector(const QString& fileName, int res, bool color, bool kee
         return;
 
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
+		QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
         return;
 	}
 
 	QPrinter printer;
-    printer.setCreator("QtiPlot");
+    printer.setCreator("MantidPlot");
 	printer.setFullPage(true);
 	if (res)
 		printer.setResolution(res);
@@ -1076,7 +1076,7 @@ double** Matrix::allocateMatrixData(int rows, int columns)
 {
 	double** data = (double **)malloc(rows * sizeof (double*));
 	if(!data){
-		QMessageBox::critical(0, tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+		QMessageBox::critical(0, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
 		tr("Not enough memory, operation aborted!"));
 		return NULL;
 	}
@@ -1088,7 +1088,7 @@ double** Matrix::allocateMatrixData(int rows, int columns)
                 free(data[j]);
 		    free(data);
 
-			QMessageBox::critical(0, tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+			QMessageBox::critical(0, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
 			tr("Not enough memory, operation aborted!"));
 			return NULL;
 		}
@@ -1408,7 +1408,7 @@ bool Matrix::exportASCII(const QString& fname, const QString& separator, bool ex
 	QFile f(fname);
 	if ( !f.open( QIODevice::WriteOnly ) ){
 		QApplication::restoreOverrideCursor();
-		QMessageBox::critical(this, tr("QtiPlot - ASCII Export Error"),
+		QMessageBox::critical(this, tr("MantidPlot - ASCII Export Error"),
 				tr("Could not write to file: <br><h4>%1</h4><p>Please verify that you have the right to write to this location!").arg(fname));
 		return false;
 	}
@@ -1481,7 +1481,7 @@ bool Matrix::ignoreUndo()
 {
 	QString msg = tr("Due to memory limitations it will not be possible to undo this change. Do you want to continue anyways?");
 	return (QMessageBox::Yes == QMessageBox::warning((ApplicationWindow *)applicationWindow(),
-		tr("QtiPlot") + " - " + tr("Warning"), msg, QMessageBox::Yes, QMessageBox::Cancel));
+		tr("MantidPlot") + " - " + tr("Warning"), msg, QMessageBox::Yes, QMessageBox::Cancel));
 }
 
 double* Matrix::initWorkspace(int size)
@@ -1490,7 +1490,7 @@ double* Matrix::initWorkspace(int size)
 		d_workspace = (double *)malloc(size * sizeof (double));
 
 	if (!d_workspace)
-		QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+		QMessageBox::critical((ApplicationWindow *)applicationWindow(), tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
 		tr("Not enough memory, operation aborted!"));
 
 	return d_workspace;

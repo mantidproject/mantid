@@ -55,7 +55,7 @@ CurvesDialog::CurvesDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl )
 {
   setName( "CurvesDialog" );
-  setWindowTitle( tr( "QtiPlot - Add/Remove curves" ) );
+  setWindowTitle( tr( "MantidPlot - Add/Remove curves" ) );
   setSizeGripEnabled(true);
   setFocus();
 

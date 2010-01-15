@@ -59,7 +59,7 @@ Interpolation::Interpolation(ApplicationWindow *parent, Table *t, const QString&
 void Interpolation::init(int m)
 {
     if (m < 0 || m > 2){
-        QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot") + " - " + tr("Error"),
+        QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
         tr("Unknown interpolation method. Valid values are: 0 - Linear, 1 - Cubic, 2 - Akima."));
         d_init_err = true;
         return;
@@ -88,14 +88,14 @@ void Interpolation::init(int m)
 void Interpolation::setMethod(int m)
 {
 if (m < 0 || m > 2){
-    QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Error"),
+    QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
     tr("Unknown interpolation method, valid values are: 0 - Linear, 1 - Cubic, 2 - Akima."));
     d_init_err = true;
     return;
     }
 int min_points = m + 3;
 if (d_n < min_points){
-    QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot") + " - " + tr("Error"),
+    QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot") + " - " + tr("Error"),
     tr("You need at least %1 points in order to perform this operation!").arg(min_points));
     d_init_err = true;
     return;

@@ -1188,7 +1188,7 @@ AxesDialog::AxesDialog( QWidget* parent, Qt::WFlags fl )
     QPixmap image5( ( const char** ) image5_data );
     QPixmap image6( ( const char** ) image6_data );
     QPixmap image7( ( const char** ) image7_data );
-    setWindowTitle( tr( "QtiPlot - General Plot Options" ) );
+    setWindowTitle( tr( "MantidPlot - General Plot Options" ) );
 
     generalDialog = new QTabWidget();
 
@@ -2523,7 +2523,7 @@ bool AxesDialog::updatePlot()
 				}
 				catch(mu::ParserError &e)
 				{
-					QMessageBox::critical(this, tr("QtiPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+
+					QMessageBox::critical(this, tr("MantidPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+
 							tr("Valid variables are 'x' for Top/Bottom axes and 'y' for Left/Right axes!"));
 					boxFormula->setFocus();
 					m_updatePlot=false;

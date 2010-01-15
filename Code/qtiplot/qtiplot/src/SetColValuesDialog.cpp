@@ -52,7 +52,7 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
     : QDialog( parent, fl ), scripted(env)
 {
     setName( "SetColValuesDialog" );
-	setWindowTitle( tr( "QtiPlot - Set column values" ) );
+	setWindowTitle( tr( "MantidPlot - Set column values" ) );
 	setSizeGripEnabled(true);
 
 	QHBoxLayout *hbox1 = new QHBoxLayout();

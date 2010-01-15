@@ -49,7 +49,7 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 : QDialog( parent, fl ), scripted(env)
 {
     setName( "MatrixValuesDialog" );
-	setWindowTitle( tr( "QtiPlot - Set Matrix Values" ) );
+	setWindowTitle( tr( "MantidPlot - Set Matrix Values" ) );
 	setSizeGripEnabled(true);
 
 	QGridLayout *gl1 = new QGridLayout();

@@ -5,7 +5,8 @@
 #include "ScriptEditor.h"
 #include "ScriptingEnv.h"
 #include "Script.h"
-
+#include "ScriptingLangDialog.h"
+#include "Applicationwindow.h"
 // Qt
 #include <QPoint>
 #include <QAction>
@@ -41,11 +42,11 @@
 /**
  * Constructor
  */
-ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, 
-					 bool interpreter_mode)
-  : QTabWidget(parent), scripted(env), m_last_dir(""), m_script_runner(NULL), 
+ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent,
+										 ApplicationWindow *app,bool interpreter_mode)
+  : QTabWidget(parent), scripted(env), m_last_dir(""), m_script_runner(NULL),
     m_cursor_pos(), m_findrep_dlg(NULL), 
-    m_interpreter_mode(interpreter_mode)
+    m_interpreter_mode(interpreter_mode),m_app(app) 
 {
   //Create actions for this widget
   initActions();
@@ -659,6 +660,12 @@ void ScriptManagerWidget::initActions()
   m_toggle_progress->setCheckable(true);
   m_toggle_progress->setEnabled(scriptingEnv()->supportsProgressReporting());
   connect(m_toggle_progress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
+
+   //
+#ifdef SCRIPTING_DIALOG
+	m_actionScriptingLang = new QAction(tr("Scripting &language"), this);
+	connect(m_actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
+#endif
 }
 
 /**
@@ -719,6 +726,20 @@ void ScriptManagerWidget::customEvent(QEvent *event)
       delete old_lexer;
     }
   }
+}
+
+void ScriptManagerWidget::showScriptingLangDialog()
+{
+  // If a script is currently active, don't let a new one be selected
+  if(isScriptRunning() )
+  {
+    QMessageBox msg_box;
+    msg_box.setText("Cannot change scripting language, a script is still running.");
+    msg_box.exec();
+    return;
+  }
+  ScriptingLangDialog* d = new ScriptingLangDialog(scriptEnv, m_app);
+  d->exec();
 }
 
 /**

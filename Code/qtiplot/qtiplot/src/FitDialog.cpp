@@ -90,7 +90,7 @@ FitDialog::FitDialog(Graph *g, QWidget* parent, Qt::WFlags fl )
 : QDialog( parent, fl )
 {
     setObjectName("FitDialog");
-	setWindowTitle(tr("QtiPlot - Fit Wizard"));
+	setWindowTitle(tr("MantidPlot - Fit Wizard"));
 	setSizeGripEnabled(true);
 
 	d_param_table = 0;
@@ -517,13 +517,13 @@ void FitDialog::showParametersTable()
 {
 	QString tableName = paramTableName->text();
 	if (tableName.isEmpty()){
-		QMessageBox::critical(this, tr("QtiPlot - Error"),
+		QMessageBox::critical(this, tr("MantidPlot - Error"),
 				tr("Please enter a valid name for the parameters table."));
 		return;
 	}
 
 	if (!d_current_fit){
-		QMessageBox::critical(this, tr("QtiPlot - Error"),
+		QMessageBox::critical(this, tr("MantidPlot - Error"),
 				tr("Please perform a fit first and try again."));
 		return;
 	}
@@ -535,13 +535,13 @@ void FitDialog::showCovarianceMatrix()
 {
 	QString matrixName = covMatrixName->text();
 	if (matrixName.isEmpty()){
-		QMessageBox::critical(this, tr("QtiPlot - Error"),
+		QMessageBox::critical(this, tr("MantidPlot - Error"),
 				tr("Please enter a valid name for the covariance matrix."));
 		return;
 	}
 
 	if (!d_current_fit){
-		QMessageBox::critical(this, tr("QtiPlot - Error"),
+		QMessageBox::critical(this, tr("MantidPlot - Error"),
 				tr("Please perform a fit first and try again."));
 		return;
 	}
@@ -597,23 +597,23 @@ void FitDialog::activateCurve(const QString& curveName)
 void FitDialog::saveUserFunction()
 {
 	if (editBox->text().isEmpty()){
-		QMessageBox::critical(this, tr("QtiPlot - Input function error"), tr("Please enter a valid function!"));
+		QMessageBox::critical(this, tr("MantidPlot - Input function error"), tr("Please enter a valid function!"));
 		editBox->setFocus();
 		return;
 	} else if (boxName->text().isEmpty()) {
-		QMessageBox::critical(this, tr("QtiPlot - Input function error"),
+		QMessageBox::critical(this, tr("MantidPlot - Input function error"),
 				tr("Please enter a function name!"));
 		boxName->setFocus();
 		return;
 	} else if (boxParam->text().remove(QRegExp("[,;\\s]")).isEmpty()){
-		QMessageBox::critical(this, tr("QtiPlot - Input function error"),
+		QMessageBox::critical(this, tr("MantidPlot - Input function error"),
 				tr("Please enter at least one parameter name!"));
 		boxParam->setFocus();
 		return;
 	}
 
 	if (builtInFunctionNames().contains(boxName->text())){
-		QMessageBox::critical(this, tr("QtiPlot - Error: function name"),
+		QMessageBox::critical(this, tr("MantidPlot - Error: function name"),
 				"<p><b>" + boxName->text() + "</b>" + tr(" is a built-in function name"
 					"<p>You must choose another name for your function!"));
 		editBox->setFocus();
@@ -621,7 +621,7 @@ void FitDialog::saveUserFunction()
 	}
 
 	if (editBox->text().contains(boxName->text())){
-		QMessageBox::critical(this, tr("QtiPlot - Input function error"),
+		QMessageBox::critical(this, tr("MantidPlot - Input function error"),
 				tr("You can't define functions recursively!"));
 		editBox->setFocus();
 		return;
@@ -641,9 +641,9 @@ void FitDialog::saveUserFunction()
 			showExpression(index);
 	} else {
 	    ApplicationWindow *app = (ApplicationWindow *)this->parent();
-		QString filter = tr("QtiPlot fit model")+" (*.fit);;";
+		QString filter = tr("MantidPlot fit model")+" (*.fit);;";
 		filter += tr("All files")+" (*.*)";
-		QString fn = QFileDialog::getSaveFileName(app, tr("QtiPlot") + " - " + tr("Save Fit Model As"),
+		QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
                                 app->fitModelsPath + "/" + name, filter);
 		if (!fn.isEmpty()){
             QFileInfo fi(fn);
@@ -683,7 +683,7 @@ void FitDialog::removeUserFunction()
         return;
 
     QString s = tr("Are you sure you want to remove fit model file:\n %1 ?").arg(d_current_fit->fileName());
-    if (QMessageBox::Yes != QMessageBox::question (this, tr("QtiPlot") + " - " + tr("Remove Fit Model"), s, QMessageBox::Yes, QMessageBox::Cancel))
+    if (QMessageBox::Yes != QMessageBox::question (this, tr("MantidPlot") + " - " + tr("Remove Fit Model"), s, QMessageBox::Yes, QMessageBox::Cancel))
         return;
 
 	QString name = funcBox->currentItem()->text();
@@ -711,7 +711,7 @@ void FitDialog::showFitPage()
 {
 	QString formula = editBox->text().simplified();
 	if (formula.isEmpty()){
-		QMessageBox::critical(this, tr("QtiPlot - Input function error"), tr("Please enter a valid function!"));
+		QMessageBox::critical(this, tr("MantidPlot - Input function error"), tr("Please enter a valid function!"));
 		editBox->setFocus();
 		return;
 	}
@@ -1038,7 +1038,7 @@ void FitDialog::accept()
 	QString curve = boxCurve->currentText();
 	QStringList curvesList = d_graph->curvesList();
 	if (curvesList.contains(curve) <= 0){
-		QMessageBox::critical(app, tr("QtiPlot - Warning"),
+		QMessageBox::critical(app, tr("MantidPlot - Warning"),
 				tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curve));
 		boxCurve->clear();
 		boxCurve->addItems(curvesList);
@@ -1050,7 +1050,7 @@ void FitDialog::accept()
 	double eps = boxTolerance->value();
 
 	if (start >= end){
-		QMessageBox::critical(app, tr("QtiPlot - Input error"),
+		QMessageBox::critical(app, tr("MantidPlot - Input error"),
 				tr("Please enter x limits that satisfy: from < end!"));
 		boxTo->setFocus();
 		return;
@@ -1114,7 +1114,7 @@ void FitDialog::accept()
 		QString errorMsg = boxFunction->text() + " = " + formula + "\n" + QString::fromStdString(e.GetMsg()) + "\n" +
 			tr("Please verify that you have initialized all the parameters!");
 
-		QMessageBox::critical(app, tr("QtiPlot - Input function error"), errorMsg);
+		QMessageBox::critical(app, tr("MantidPlot - Input function error"), errorMsg);
 		boxFunction->setFocus();
 		error = true;
 	}
@@ -1379,9 +1379,9 @@ void FitDialog::saveInitialGuesses()
         d_current_fit->save(fileName);
     else {
 	    ApplicationWindow *app = (ApplicationWindow *)this->parent();
-		QString filter = tr("QtiPlot fit model") + " (*.fit);;";
+		QString filter = tr("MantidPlot fit model") + " (*.fit);;";
 		filter += tr("All files") + " (*.*)";
-		QString fn = QFileDialog::getSaveFileName(app, tr("QtiPlot") + " - " + tr("Save Fit Model As"),
+		QString fn = QFileDialog::getSaveFileName(app, tr("MantidPlot") + " - " + tr("Save Fit Model As"),
                                 app->fitModelsPath + "/" + d_current_fit->objectName(), filter);
 		if (!fn.isEmpty()){
             QFileInfo fi(fn);

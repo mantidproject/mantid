@@ -149,7 +149,7 @@ void PolynomialFit::fit()
         return;
 
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Fit Error"),
+  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   		return;
   	}
@@ -268,7 +268,7 @@ void LinearFit::fit()
         return;
 
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Fit Error"),
+  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   		return;
   	}
@@ -374,7 +374,7 @@ void LinearSlopeFit::fit()
         return;
 
 	if (d_p > d_n){
-  		QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Fit Error"),
+  		QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Fit Error"),
   	    tr("You need at least %1 data points for this fit operation. Operation aborted!").arg(d_p));
   		return;
   	}

@@ -50,7 +50,7 @@
 CustomActionDialog::CustomActionDialog(QWidget* parent, Qt::WFlags fl)
     : QDialog(parent, fl)
 {
-    setWindowTitle(tr("QtiPlot") + " - " + tr("Add Custom Action"));
+    setWindowTitle(tr("MantidPlot") + " - " + tr("Add Custom Action"));
 
     itemsList = new QListWidget();
     itemsList->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -267,12 +267,12 @@ bool CustomActionDialog::validUserInput()
 	QList<QAction *>actions = app->customActionsList();
 
 	if (textBox->text().isEmpty()){
-        QMessageBox::critical(app, tr("QtiPlot") + " - " + tr("Error"),
+        QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
         tr("Please provide a description for your custom action!"));
         textBox->setFocus();
         return false;
     } else if (textBox->text().contains(".")){
-        QMessageBox::critical(app, tr("QtiPlot") + " - " + tr("Error"),
+        QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
         tr("Dot characters are not allowed in the description text!"));
         textBox->setFocus();
         textBox->setText(textBox->text().remove(".").simplified());
@@ -282,7 +282,7 @@ bool CustomActionDialog::validUserInput()
     QString text = textBox->text().remove(".").simplified();
     foreach(QAction *action, actions){
         if(action->text() == text){
-            QMessageBox::critical(app, tr("QtiPlot") + " - " + tr("Error"),
+            QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
             tr("You have already defined an action having description: %1 <br>Please provide a different description text!").arg(textBox->text()));
             textBox->setFocus();
             return false;
@@ -292,7 +292,7 @@ bool CustomActionDialog::validUserInput()
     QString file = fileBox->text();
     QFileInfo fi(file);
     if (file.isEmpty() || !fi.exists()){
-        QMessageBox::critical(app, tr("QtiPlot") + " - " + tr("Error"),
+        QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
         tr("The file you have specified doesn't exist, please choose a valid script file!"));
         fileBox->setFocus();
         return false;
@@ -302,7 +302,7 @@ bool CustomActionDialog::validUserInput()
     QFileInfo iconInfo(iconPath);
     if (!iconPath.isEmpty() && (!iconInfo.exists() || !iconInfo.isFile() || !iconInfo.isReadable())){
         iconPath = QString();
-        QMessageBox::critical(app, tr("QtiPlot") + " - " + tr("Error"),
+        QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
         tr("The image file you have specified doesn't exist or can't be read, please choose another file!"));
         iconBox->setFocus();
         return false;
@@ -325,7 +325,7 @@ bool CustomActionDialog::validUserInput()
 	}
 
 	if (shortcuts.contains(shortcutBox->text().remove(QRegExp("\\s")))){
-		QMessageBox::critical(app, tr("QtiPlot") + " - " + tr("Error"),
+		QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
         tr("Please provide a different key sequence! The following shortcut key sequences are already assigned:") +
 		"\n\n" + s);
        	shortcutBox->setFocus();
@@ -362,7 +362,7 @@ void CustomActionDialog::customizeAction(QAction *action)
 void CustomActionDialog::removeAction()
 {
 	QString s = tr("Are you sure you want to remove this action?");
-    if (QMessageBox::Yes != QMessageBox::question(this, tr("QtiPlot") + " - " + tr("Remove Action"), s, QMessageBox::Yes, QMessageBox::Cancel))
+    if (QMessageBox::Yes != QMessageBox::question(this, tr("MantidPlot") + " - " + tr("Remove Action"), s, QMessageBox::Yes, QMessageBox::Cancel))
         return;
 
 	int row = itemsList->currentRow();
@@ -431,7 +431,7 @@ void CustomActionDialog::saveAction(QAction *action)
     QFile f(fileName);
 	if (!f.open( QIODevice::WriteOnly)){
 		QApplication::restoreOverrideCursor();
-		QMessageBox::critical(app, tr("QtiPlot") + " - " + tr("File Save Error"),
+		QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("File Save Error"),
 				tr("Could not write to file: <br><h4> %1 </h4><p>Please verify that you have the right to write to this location!").arg(fileName));
 		return;
 	}
@@ -465,7 +465,7 @@ void CustomActionDialog::chooseIcon()
 	}
 	filter+=");;" + aux2;
 
-	QString fn = QFileDialog::getOpenFileName(this, tr("QtiPlot - Load icon from file"), iconBox->text(), filter);
+	QString fn = QFileDialog::getOpenFileName(this, tr("MantidPlot - Load icon from file"), iconBox->text(), filter);
 	if (!fn.isEmpty())
 		iconBox->setText(fn);
 }
@@ -558,14 +558,14 @@ bool CustomActionHandler::startElement(const QString & /* namespaceURI */,
                                 const QXmlAttributes &attributes)
 {
      if (!metFitTag && qName != "action") {
-         errorStr = QObject::tr("The file is not a QtiPlot custom action file.");
+         errorStr = QObject::tr("The file is not a MantidPlot custom action file.");
          return false;
      }
 
      if (qName == "action") {
          QString version = attributes.value("version");
          if (!version.isEmpty() && version != "1.0") {
-             errorStr = QObject::tr("The file is not an QtiPlot custom action version 1.0 file.");
+             errorStr = QObject::tr("The file is not an MantidPlot custom action version 1.0 file.");
              return false;
          }
          metFitTag = true;

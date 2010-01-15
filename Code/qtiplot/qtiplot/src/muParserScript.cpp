@@ -76,7 +76,7 @@ muParserScript::muParserScript(ScriptingEnv *env, const QString &code, QObject *
 		if (d_warn_multiline_code){
         	QApplication::restoreOverrideCursor();
         	QString mess = tr("Multiline expressions take much more time to evaluate! Do you want to continue anyways?");
-        	if (QMessageBox::Yes == QMessageBox::warning((QWidget *)Context, tr("QtiPlot") + " - " + tr("Warning"), mess,
+        	if (QMessageBox::Yes == QMessageBox::warning((QWidget *)Context, tr("MantidPlot") + " - " + tr("Warning"), mess,
                            QMessageBox::Yes, QMessageBox::Cancel)){
            		parser.SetVarFactory(mu_addVariable);
             	rparser.SetVarFactory(mu_addVariableR);

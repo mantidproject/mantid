@@ -101,7 +101,7 @@ Triple UserParametricSurface::operator()(double u, double v)
 		z = parser.Eval();
 	}
 	catch(mu::ParserError &e){
-		QMessageBox::critical(0, "QtiPlot - Input function error", QString::fromStdString(e.GetMsg()));
+		QMessageBox::critical(0, "MantidPlot - Input function error", QString::fromStdString(e.GetMsg()));
 	}
 	return Triple(x, y, z);
 }
@@ -1937,7 +1937,7 @@ void Graph3D::exportPDF(const QString& fileName)
 void Graph3D::exportVector(const QString& fileName)
 {
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
+		QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
         return;
 	}
 
@@ -1959,7 +1959,7 @@ void Graph3D::exportVector(const QString& fileName)
 void Graph3D::exportToFile(const QString& fileName)
 {
 	if ( fileName.isEmpty() ){
-		QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please provide a valid file name!"));
+		QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please provide a valid file name!"));
         return;
 	}
 
@@ -1975,7 +1975,7 @@ void Graph3D::exportToFile(const QString& fileName)
 				return;
 			}
 		}
-    	QMessageBox::critical(this, tr("QtiPlot - Error"), tr("File format not handled, operation aborted!"));
+    	QMessageBox::critical(this, tr("MantidPlot - Error"), tr("File format not handled, operation aborted!"));
 	}
 }
 

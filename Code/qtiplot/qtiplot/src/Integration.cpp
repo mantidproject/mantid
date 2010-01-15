@@ -57,7 +57,7 @@ d_variable(var)
 	try {
 		parser.Eval();
 	} catch(mu::ParserError &e) {
-		QMessageBox::critical(parent, tr("QtiPlot - Input error"), QString::fromStdString(e.GetMsg()));
+		QMessageBox::critical(parent, tr("MantidPlot - Input error"), QString::fromStdString(e.GetMsg()));
 		d_init_err = true;
 	}
 
@@ -219,7 +219,7 @@ QString Integration::logInfo()
 void Integration::setMethodOrder(int n)
 {
     if (n < 1 || n > 5){
-        QMessageBox::critical((ApplicationWindow *)parent(), tr("QtiPlot - Error"),
+        QMessageBox::critical((ApplicationWindow *)parent(), tr("MantidPlot - Error"),
         tr("Unknown integration method. Valid values must be in the range: 1 (Trapezoidal Method) to 5."));
         return;
     }

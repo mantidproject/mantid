@@ -44,7 +44,7 @@
 FilterDialog::FilterDialog(int type, QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-	setWindowTitle(tr("QtiPlot - Filter options"));
+	setWindowTitle(tr("MantidPlot - Filter options"));
     filter_type = type;
 
     setName( "FilterDialog" );
@@ -122,14 +122,14 @@ try
 	}
 catch(mu::ParserError &e)
 	{
-	QMessageBox::critical(this, tr("QtiPlot - Frequency input error"), QString::fromStdString(e.GetMsg()));
+	QMessageBox::critical(this, tr("MantidPlot - Frequency input error"), QString::fromStdString(e.GetMsg()));
 	boxStart->setFocus();
 	return;
 	}
 
 if (from < 0)
 		{
-		QMessageBox::critical(this, tr("QtiPlot - Frequency input error"),
+		QMessageBox::critical(this, tr("MantidPlot - Frequency input error"),
 				tr("Please enter positive frequency values!"));
 		boxStart->setFocus();
 		return;
@@ -145,14 +145,14 @@ if (filter_type >= FFTFilter::BandPass)
 		}
 	catch(mu::ParserError &e)
 		{
-		QMessageBox::critical(this, tr("QtiPlot - High Frequency input error"), QString::fromStdString(e.GetMsg()));
+		QMessageBox::critical(this, tr("MantidPlot - High Frequency input error"), QString::fromStdString(e.GetMsg()));
 		boxEnd->setFocus();
 		return;
 		}
 
 	if (to < 0)
 		{
-		QMessageBox::critical(this, tr("QtiPlot - High Frequency input error"),
+		QMessageBox::critical(this, tr("MantidPlot - High Frequency input error"),
 				tr("Please enter positive frequency values!"));
 		boxEnd->setFocus();
 		return;
@@ -160,7 +160,7 @@ if (filter_type >= FFTFilter::BandPass)
 
 	if (from>=to)
 		{
-		QMessageBox::critical(this, tr("QtiPlot - Frequency input error"),
+		QMessageBox::critical(this, tr("MantidPlot - Frequency input error"),
 				tr("Please enter frequency limits that satisfy: Low < High !"));
 		boxEnd->setFocus();
 		return;

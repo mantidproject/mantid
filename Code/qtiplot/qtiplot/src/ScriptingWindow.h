@@ -17,6 +17,7 @@ class QPoint;
 class QMenu;
 class QAction;
 class QCloseEvent;
+class ApplicationWindow;
 
 /** @class ScriptOutputDock
     
@@ -105,7 +106,7 @@ class ScriptingWindow : public QMainWindow
 
 public:
   ///Constructor
-  ScriptingWindow(ScriptingEnv *env, QWidget *parent = 0, Qt::WindowFlags flags = 0);
+  ScriptingWindow(ScriptingEnv *env,ApplicationWindow *app,QWidget *parent = 0, Qt::WindowFlags flags = 0);
   ///Destructor
   ~ScriptingWindow();
   /// Is a script running?

@@ -171,7 +171,7 @@
 
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
-#include "Mantid/MantidAbout.h"
+//#include "Mantid/MantidAbout.h"
 #include "Mantid/MantidCustomActionDialog.h"
 #include "Mantid/PeakPickerTool1D.h"
 #include "Mantid/PeakPickerTool.h"
@@ -179,6 +179,7 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/MantidAbout.h"
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
@@ -275,7 +276,8 @@ void ApplicationWindow::init(bool factorySettings)
 
 	results=new QTextEdit(logWindow);
 	results->setReadOnly (true);
-
+	results->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(results, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(showresultsContextMenu(const QPoint &)));
 	logWindow->setWidget(results);
 	logWindow->hide();
 
@@ -365,6 +367,7 @@ void ApplicationWindow::init(bool factorySettings)
 	connect(lv, SIGNAL(deleteSelection()), this, SLOT(deleteSelectedItems()));
 	connect(lv, SIGNAL(itemRenamed(Q3ListViewItem *, int, const QString &)),
 			this, SLOT(renameWindow(Q3ListViewItem *, int, const QString &)));
+	//connect(this,SIGNAL(resultsContextMenu()),this,SLOT(showresultsContextMenu()));
 
 
 	connect(recent, SIGNAL(activated(int)), this, SLOT(openRecentProject(int)));
@@ -375,15 +378,33 @@ void ApplicationWindow::init(bool factorySettings)
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
     //Scripting
-    m_script_envs = QHash<QString, ScriptingEnv*>();
+   m_script_envs = QHash<QString, ScriptingEnv*>();
     setScriptingLanguage(defaultScriptingLang);
-    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,this,true);
     delete m_interpreterDock->widget();
     m_interpreterDock->setWidget(m_scriptInterpreter);
     loadCustomActions();
 
   //Mantid
-  mantidUI->init();
+  //mantidUI->init();
+
+}
+void ApplicationWindow::showresultsContextMenu(const QPoint & p)
+{
+	QMenu *menu = results->createStandardContextMenu();
+	if(!menu) return;
+	if(results->text().isEmpty())
+	{
+		actionClearLogInfo->setEnabled(false);
+	}
+	else 
+	{
+		actionClearLogInfo->setEnabled(true);
+	}
+
+	menu->addAction(actionClearLogInfo);
+	menu->popup(QCursor::pos());
+
 }
 
 void ApplicationWindow::initWindow()
@@ -530,13 +551,14 @@ void ApplicationWindow::initGlobalConstants()
 	d_add_curves_dialog_size = QSize(700, 400);
 	d_show_current_folder = false;
 
-	confirmCloseFolder = true;
-	confirmCloseTable = true;
-	confirmCloseMatrix = true;
-	confirmClosePlot2D = true;
-	confirmClosePlot3D = true;
-	confirmCloseNotes = true;
-	d_inform_rename_table = true;
+	confirmCloseFolder = false;
+	confirmCloseTable = false;
+	confirmCloseMatrix = false;
+	confirmClosePlot2D = false;
+	confirmClosePlot3D = false;
+	confirmCloseNotes = false;
+	d_inform_rename_table = false;
+	confirmCloseInstrWindow=false;
 
 	d_show_table_comments = false;
 
@@ -660,10 +682,10 @@ void ApplicationWindow::initToolBars()
 	fileTools->addAction(actionOpenRaw);
 	fileTools->addAction(actionOpenNexus);
 
-	fileTools->addAction(actionOpenTemplate);
+	//fileTools->addAction(actionOpenTemplate);
 	//fileTools->addAction(actionSaveProject);
 	fileTools->addAction(actionSaveProject);
-	fileTools->addAction(actionSaveTemplate);
+	//fileTools->addAction(actionSaveTemplate);
 	fileTools->addSeparator ();
 	fileTools->addAction(actionLoad);
 	fileTools->addSeparator ();
@@ -886,7 +908,7 @@ void ApplicationWindow::initToolBars()
 	actionContourMap->addTo(plotMatrixBar);
 	actionGrayMap->addTo(plotMatrixBar);
 	actionImagePlot->addTo(plotMatrixBar);
-	actionPlotHistogram->addTo(plotMatrixBar);
+	//actionPlotHistogram->addTo(plotMatrixBar);
 	plotMatrixBar->addSeparator();
 	actionSetMatrixValues->addTo(plotMatrixBar);
 	actionFlipMatrixHorizontally->addTo(plotMatrixBar);
@@ -1009,7 +1031,7 @@ void ApplicationWindow::initMainMenu()
 	edit->addAction(actionClearSelection);
 	edit->insertSeparator();
 	edit->addAction(actionDeleteFitTables);
-	edit->addAction(actionClearLogInfo);
+	//edit->addAction(actionClearLogInfo);
 
 	connect(edit, SIGNAL(aboutToShow()), this, SLOT(editMenuAboutToShow()));
 
@@ -1017,16 +1039,15 @@ void ApplicationWindow::initMainMenu()
 	view->setObjectName("viewMenu");
 
 	view->setCheckable(true);
-	view->addAction(actionToolBars);
-	view->addAction(actionShowPlotWizard);
+	
+	//view->addAction(actionShowPlotWizard);
 	view->addAction(actionShowExplorer);
 	view->addAction(actionShowLog);
-	view->addAction(actionShowUndoStack);
+	//view->addAction(actionShowUndoStack);
 #ifdef SCRIPTING_CONSOLE
 	view->addAction(actionShowConsole);
 #endif
-	view->addAction(actionShowConfigureDialog);
-
+	
 	graph = new QMenu(this);
 	graph->setObjectName("graphMenu");
 	graph->setCheckable(true);
@@ -1061,7 +1082,7 @@ void ApplicationWindow::initMainMenu()
 	plot3DMenu->addAction(actionContourMap);
 	plot3DMenu->addAction(actionGrayMap);
 	plot3DMenu->insertSeparator();
-	plot3DMenu->addAction(actionPlotHistogram);
+	//plot3DMenu->addAction(actionPlotHistogram);
 
 	matrixMenu = new QMenu(this);
 	matrixMenu->setObjectName("matrixMenu");
@@ -1105,9 +1126,6 @@ void ApplicationWindow::initMainMenu()
 	format = new QMenu(this);
 	format->setObjectName("formatMenu");
 
-	scriptingMenu = new QMenu(this);
-	scriptingMenu->setObjectName("scriptingMenu");
-
 	windowsMenu = new QMenu(this);
 	windowsMenu->setObjectName("windowsMenu");
 	windowsMenu->setCheckable(true);
@@ -1118,26 +1136,15 @@ void ApplicationWindow::initMainMenu()
 	
 	help = new QMenu(this);
 	help->setObjectName("helpMenu");
-	help->addAction(actionShowHelp);
-	help->addAction(actionChooseHelpFolder);
-	help->insertSeparator();
+
+		
 	help->addAction(actionHomePage);
-	//help->addAction(actionCheckUpdates); //Mantid change - commented out
-	//help->addAction(actionDownloadManual); //Mantid change - commented out
-	//help->addAction(actionTranslations); //Mantid change - commented out
-	//help->insertSeparator();//Mantid change - commented out
-	//help->addAction(actionTechnicalSupport);//Mantid change - commented out
-	//help->addAction(actionDonate);//Mantid change - commented out
-	//help->addAction(actionHelpForums);//Mantid change - commented out
+	help->addAction(actionMantidConcepts);
+	help->addAction(actionMantidAlgorithms);
+	help->insertSeparator();
 	help->addAction(actionHelpBugReports);
 	help->insertSeparator();
 	help->addAction(actionAbout);
-
-	//Mantid
-// 	QList<QMenu *> menus = customizableMenusList();
-// 	foreach (QMenu *m, menus)
-//     	connect(m, SIGNAL(triggered(QAction *)), this, SLOT(performCustomAction(QAction *)));
-
 	disableActions();
 }
 
@@ -1191,6 +1198,9 @@ void ApplicationWindow::tableMenuAboutToShow()
 	tableMenu->addAction(actionGoToColumn);
 	tableMenu->insertSeparator();
 	tableMenu->addAction(actionConvertTable);
+
+	tableMenu->insertSeparator();
+	tableMenu->addAction(actionShowPlotWizard);
 
     reloadCustomActions();
 }
@@ -1264,18 +1274,22 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	menuBar()->insertItem(tr("&Edit"), edit);
 	editMenuAboutToShow();
 	menuBar()->insertItem(tr("&View"), view);
-	menuBar()->insertItem(tr("&Scripting"), scriptingMenu);
 	
-	scriptingMenu->clear();
-	scriptingMenu->addAction(actionShowScriptWindow); //Mantid
-	scriptingMenu->addAction(actionShowScriptInterpreter); //Mantid
-#ifdef SCRIPTING_DIALOG
-	scriptingMenu->addAction(actionScriptingLang);
-#endif
-	scriptingMenu->addAction(actionCustomActionDialog);
-
-    mantidUI->insertMenu();//Mantid
-
+	view->insertSeparator();
+	view->addAction(actionShowScriptWindow);//Mantid
+	view->addAction(actionShowScriptInterpreter);
+	view->insertSeparator();
+	//Mantid
+	mantidUI->init();
+	view->insertSeparator();
+	view->addAction(actionToolBars);
+	view->addAction(actionShowConfigureDialog);
+	view->insertSeparator();
+	view->addAction(actionCustomActionDialog);
+	
+//#ifdef SCRIPTING_DIALOG
+//	scriptingMenu->addAction(actionScriptingLang);
+//#endif
 	// these use the same keyboard shortcut (Ctrl+Return) and should not be enabled at the same time
 	actionNoteEvaluate->setEnabled(false);
 	actionTableRecalculate->setEnabled(false);
@@ -1353,11 +1367,7 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 		} else if (w->isA("Note")) {
 			actionSaveTemplate->setEnabled(false);
 			actionNoteEvaluate->setEnabled(true);
-			scriptingMenu->insertSeparator();
-			scriptingMenu->addAction(actionNoteExecute);
-			scriptingMenu->addAction(actionNoteExecuteAll);
-			scriptingMenu->addAction(actionNoteEvaluate);
-
+			
 			actionNoteExecute->disconnect(SIGNAL(activated()));
 			actionNoteExecuteAll->disconnect(SIGNAL(activated()));
 			actionNoteEvaluate->disconnect(SIGNAL(activated()));
@@ -3433,7 +3443,7 @@ void ApplicationWindow::updateAppFonts()
 }
 
 void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, bool askPlots2D,
-		bool askPlots3D, bool askNotes)
+		bool askPlots3D, bool askNotes,bool askInstrWindow)
 {
 	QList<MdiSubWindow *> windows = windowsList();
 
@@ -3441,8 +3451,10 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
 	if (confirmCloseTable != askTables){
 		confirmCloseTable=askTables;
 		foreach(MdiSubWindow *w, windows){
+			
 			if (w->inherits("Table"))
-				w->askOnCloseEvent(confirmCloseTable);
+			{w->askOnCloseEvent(confirmCloseTable);
+			}
 		}
 	}
 
@@ -3450,7 +3462,8 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
 		confirmCloseMatrix = askMatrices;
 		foreach(MdiSubWindow *w, windows){
 			if (w->isA("Matrix"))
-				w->askOnCloseEvent(confirmCloseMatrix);
+			{w->askOnCloseEvent(confirmCloseMatrix);
+			}
 		}
 	}
 
@@ -3458,7 +3471,8 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
 		confirmClosePlot2D=askPlots2D;
 		foreach(MdiSubWindow *w, windows){
 			if (w->isA("MultiLayer"))
-				w->askOnCloseEvent(confirmClosePlot2D);
+			{w->askOnCloseEvent(confirmClosePlot2D);
+			}
 		}
 	}
 
@@ -3475,6 +3489,16 @@ void ApplicationWindow::updateConfirmOptions(bool askTables, bool askMatrices, b
 		foreach(MdiSubWindow *w, windows){
 			if (w->isA("Note"))
 				w->askOnCloseEvent(confirmCloseNotes);
+		}
+	}
+	
+	if (confirmCloseInstrWindow != askInstrWindow){
+		confirmCloseInstrWindow = askInstrWindow;
+		
+		foreach(MdiSubWindow *w, windows){
+			if (w->isA("InstrumentWindow"))
+			{w->askOnCloseEvent(confirmCloseInstrWindow);
+			}
 		}
 	}
 }
@@ -3570,8 +3594,7 @@ void ApplicationWindow::importASCII()
 	import_dialog->selectFilter(d_ASCII_file_filter);
 	if (import_dialog->exec() != QDialog::Accepted)
 		return;
-
-	asciiDirPath = import_dialog->directory().path();
+    asciiDirPath = import_dialog->directory().path();
     d_ASCII_import_mode = import_dialog->importMode();
     columnSeparator = import_dialog->columnSeparator();
     ignoredLines = import_dialog->ignoredLines();
@@ -3598,17 +3621,16 @@ void ApplicationWindow::importASCII()
 			import_dialog->decimalSeparators(),
 			import_dialog->commentString(),
 			import_dialog->readOnly(),
-			import_dialog->endLineChar());
+			import_dialog->endLineChar(),import_dialog->getselectedColumnSeparator());
 }
 
 void ApplicationWindow::importASCII(const QStringList& files, int import_mode, const QString& local_column_separator,
         int local_ignored_lines, bool local_rename_columns, bool local_strip_spaces, bool local_simplify_spaces,
         bool local_import_comments, bool update_dec_separators, QLocale local_separators, const QString& local_comment_string,
-		bool import_read_only, int endLineChar)
+		bool import_read_only, int endLineChar,const QString& sepforloadAscii)
 {
 	if (files.isEmpty())
 		return;
-
 	switch(import_mode) {
 		case ImportASCIIDialog::NewTables:
 			{
@@ -3723,6 +3745,33 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
                 modifiedProject();
 				break;
 			}
+		case ImportASCIIDialog::NewWorkspace:
+			{
+				try
+				{
+					Mantid::API::IAlgorithm_sptr alg =mantidUI->CreateAlgorithm("LoadAscii");
+					QStringList sorted_files = files;
+					sorted_files.sort();
+					for (int i=0; i<sorted_files.size(); i++){
+						QStringList ws=sorted_files[i].split(".",QString::SkipEmptyParts);
+						QString temp=ws[0];
+						int index=temp.lastIndexOf("\\");
+						if(index==-1) return;
+						QString wsName=temp.right(temp.size()-(index+1));
+						alg->setPropertyValue("Filename",sorted_files[i].toStdString());
+						alg->setPropertyValue("Workspace",wsName.toStdString());
+						std::string sep;
+						alg->setPropertyValue("Separator",sepforloadAscii.toStdString());
+						alg->execute();
+					}
+
+				}
+				catch(...)
+				{
+					throw std::runtime_error("LoadAscii failed when importing the file as workspace");
+				}
+				break;
+			}
 	}
 }
 
@@ -3775,7 +3824,7 @@ void ApplicationWindow::open()
 					}
 				} else {
 					QMessageBox::critical(this,tr("MantidPlot - File openning error"),//Mantid
-							tr("The file: <b>%1</b> is not a QtiPlot or Origin project file!").arg(fn));
+							tr("The file: <b>%1</b> is not a MantidPlot or Origin project file!").arg(fn));
 					return;
 				}
 				break;
@@ -3860,12 +3909,12 @@ void ApplicationWindow::openRecentProject(int index)
 	if (!fn.isEmpty()){
 		saveSettings();//the recent projects must be saved
 		bool isSaved = saved;
-		ApplicationWindow * a = open (fn);
+		ApplicationWindow * a = open (fn,false,false);
 		if (a && (fn.endsWith(".qti",Qt::CaseInsensitive) || fn.endsWith(".qti~",Qt::CaseInsensitive) ||
             fn.endsWith(".opj",Qt::CaseInsensitive) || fn.endsWith(".ogg", Qt::CaseInsensitive)))
 			if (isSaved)
 				savedProject();//force saved state
-			close();
+			//close();
 	}
 }
 
@@ -4219,13 +4268,13 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
   else
   {
     newEnv = ScriptingLangManager::newEnv(lang, this);
+	
     connect(newEnv, SIGNAL(error(const QString&,const QString&,int)),
 	    this, SLOT(scriptError(const QString&,const QString&,int)));
     connect(newEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
     if( newEnv->initialize() )
-    {
-      m_script_envs.insert(lang, newEnv);
+    {   m_script_envs.insert(lang, newEnv);
     }
     else
     {
@@ -4272,10 +4321,10 @@ void ApplicationWindow::showScriptingLangDialog()
 
 void ApplicationWindow::openTemplate()
 {
-	QString filter = "QtiPlot 2D Graph Template (*.qpt);;";
-	filter += "QtiPlot 3D Surface Template (*.qst);;";
-	filter += "QtiPlot Table Template (*.qtt);;";
-	filter += "QtiPlot Matrix Template (*.qmt);;";
+	QString filter = "MantidPlot 2D Graph Template (*.qpt);;";
+	filter += "MantidPlot 3D Surface Template (*.qst);;";
+	filter += "MantidPlot Table Template (*.qtt);;";
+	filter += "MantidPlot Matrix Template (*.qmt);;";
 
 	QString fn = QFileDialog::getOpenFileName(this, tr("MantidPlot - Open Template File"), templatesDir, filter);//Mantid
 	if (!fn.isEmpty()){
@@ -4285,7 +4334,7 @@ void ApplicationWindow::openTemplate()
 			openTemplate(fn);
 		else {
 			QMessageBox::critical(this,tr("MantidPlot - File opening error"),//Mantid
-					tr("The file: <b>%1</b> is not a QtiPlot template file!").arg(fn));
+					tr("The file: <b>%1</b> is not a MantidPlot template file!").arg(fn));
 			return;
 		}
 	}
@@ -4305,9 +4354,9 @@ MdiSubWindow* ApplicationWindow::openTemplate(const QString& fn)
 	f.open(QIODevice::ReadOnly);
 	QStringList l=t.readLine().split(QRegExp("\\s"), QString::SkipEmptyParts);
 	QString fileType=l[0];
-	if (fileType != "QtiPlot"){
+	if (fileType != "MantidPlot"){
 		QMessageBox::critical(this,tr("MantidPlot - File opening error"),//Mantid
-						tr("The file: <b> %1 </b> was not created using QtiPlot!").arg(fn));
+						tr("The file: <b> %1 </b> was not created using MantidPlot!").arg(fn));
 		return 0;
 	}
 
@@ -4479,7 +4528,7 @@ void ApplicationWindow::readSettings()
 	asciiDirPath = settings.value("/ASCII", appPath).toString();
 	imagesDirPath = settings.value("/Images", appPath).toString();
 #else
-	fitPluginsPath = settings.value("/FitPlugins", "/usr/lib/qtiplot/plugins").toString();
+	fitPluginsPath = settings.value("/FitPlugins", "/usr/lib/MantidPlot/plugins").toString();
 	templatesDir = settings.value("/TemplatesDir", QDir::homePath()).toString();
 	asciiDirPath = settings.value("/ASCII", QDir::homePath()).toString();
 	imagesDirPath = settings.value("/Images", QDir::homePath()).toString();
@@ -4517,6 +4566,7 @@ void ApplicationWindow::readSettings()
 	confirmClosePlot3D = settings.value("/Plot3D", true).toBool();
 	confirmCloseNotes = settings.value("/Note", true).toBool();
 	d_inform_rename_table = settings.value("/RenameTable", true).toBool();
+	confirmCloseInstrWindow=settings.value("/InstrumentWindow", true).toBool();
 	settings.endGroup(); // Confirmations
 
 
@@ -4720,7 +4770,7 @@ void ApplicationWindow::saveSettings()
 #ifdef Q_OS_MAC // Mac
 	QSettings settings(QSettings::IniFormat,QSettings::UserScope, QCoreApplication::organizationName(), QCoreApplication::applicationName());
 #else
-	QSettings settings;//(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "QtiPlot");
+	QSettings settings;//(QSettings::NativeFormat,QSettings::UserScope, "ProIndependent", "MantidPlot");
 #endif
 
 	/* ---------------- group General --------------- */
@@ -4814,6 +4864,7 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/Plot3D", confirmClosePlot3D);
 	settings.setValue("/Note", confirmCloseNotes);
 	settings.setValue("/RenameTable", d_inform_rename_table);
+	settings.value("/InstrumentWindow", confirmCloseInstrWindow).toBool();
 	settings.endGroup(); // Confirmations
 
 	/* ----------------- group Tables -------------- */
@@ -5341,7 +5392,7 @@ bool ApplicationWindow::saveProject(bool compress)
 		|| projectname.endsWith(".ogg", Qt::CaseInsensitive))
 	{
 		saveProjectAs();
-		return false;
+		return true;;
 	}
 
 #ifdef QTIPLOT_DEMO
@@ -5377,11 +5428,16 @@ void ApplicationWindow::savetoNexusFile()
 			std::string wsName;
 		MdiSubWindow *w = activeWindow();
 		if(w)
-		{ if(w->isA("MantidMatrix"))
+		{
+			if(w->isA("MantidMatrix"))
+			{
 				wsName=((MantidMatrix*)w)->getWorkspaceName();
+			}
 		}
 		else
+		{
 		  wsName=m_nexusInputWSName.toStdString();
+		}
 		if(!Mantid::API::AnalysisDataService::Instance().doesExist(wsName))
 		{
 			throw std::runtime_error("Invalid input workspace for SaveNexus");
@@ -5406,7 +5462,7 @@ void ApplicationWindow::loadNexus()
 	QString fileName= QFileDialog::getOpenFileName(this, tr("Open File"), fileDir, filter, &selectedFilter);
 	if(fileName.isEmpty()) return;
 	
-	//look for the last / in the file and . ,extract the string between these charcters to get the workspace name.
+	//look for the last "/ "in the file and . ,extract the string between these charcters to get the workspace name.
 	std::string name(fileName.toStdString());
 	std::basic_string<char>::size_type index1,index2;
 	index1=name.find_last_of("//");
@@ -5503,13 +5559,13 @@ void ApplicationWindow::saveAsTemplate(MdiSubWindow* w, const QString& fileName)
 	if (fn.isEmpty()){
 		QString filter;
 		if (w->isA("Matrix"))
-			filter = tr("QtiPlot Matrix Template")+" (*.qmt)";
+			filter = tr("MantidPlot Matrix Template")+" (*.qmt)";
 		else if (w->isA("MultiLayer"))
-			filter = tr("QtiPlot 2D Graph Template")+" (*.qpt)";
+			filter = tr("MantidPlot 2D Graph Template")+" (*.qpt)";
 		else if (w->inherits("Table"))
-			filter = tr("QtiPlot Table Template")+" (*.qtt)";
+			filter = tr("MantidPlot Table Template")+" (*.qtt)";
 		else if (w->isA("Graph3D"))
-			filter = tr("QtiPlot 3D Surface Template")+" (*.qst)";
+			filter = tr("MantidPlot 3D Surface Template")+" (*.qst)";
 
 		QString selectedFilter;
 		fn = QFileDialog::getSaveFileName(this, tr("Save Window As Template"), templatesDir + "/" + w->objectName(), filter, &selectedFilter);
@@ -5534,7 +5590,7 @@ void ApplicationWindow::saveAsTemplate(MdiSubWindow* w, const QString& fileName)
 	}
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-	QString text = "QtiPlot " + QString::number(maj_version)+"."+ QString::number(min_version)+"."+
+	QString text = "MantidPlot " + QString::number(maj_version)+"."+ QString::number(min_version)+"."+
 				QString::number(patch_version) + " template file\n";
 	text += w->saveAsTemplate(windowGeometryInfo(w));
 	QTextStream t( &f );
@@ -5772,12 +5828,14 @@ void ApplicationWindow::showExportASCIIDialog()
 {
     QString tableName = QString::null;
     MdiSubWindow* t = activeWindow();
-    if (t && (t->isA("Matrix") || t->inherits("Table")))
+    if (t && (t->isA("Matrix") || t->inherits("Table") || t->isA("MantidMatrix")))
+	{
         tableName = t->objectName();
 
     ExportDialog* ed = new ExportDialog(tableName, this, Qt::WindowContextHelpButtonHint);
     ed->setAttribute(Qt::WA_DeleteOnClose);
     ed->exec();
+	}
 }
 
 void ApplicationWindow::exportAllTables(const QString& sep, bool colNames, bool colComments, bool expSelection)
@@ -5836,7 +5894,7 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
                         bool colNames, bool colComments, bool expSelection)
 {
     MdiSubWindow* w = window(tableName);
-    if (!w || !(w->isA("Matrix") || w->inherits("Table")))
+    if (!w || !(w->isA("Matrix") || w->inherits("Table") || w->isA("MantidMatrix")))
 		return;
 
 	QString selectedFilter;
@@ -5855,6 +5913,21 @@ void ApplicationWindow::exportASCII(const QString& tableName, const QString& sep
             ((Table *)w)->exportASCII(fname, sep, colNames, colComments, expSelection);
         else if (w->isA("Matrix"))
             ((Matrix *)w)->exportASCII(fname, sep, expSelection);
+		else if (w->isA("MantidMatrix"))
+		{
+			//call save ascii
+			try
+			{
+			Mantid::API::IAlgorithm_sptr alg =mantidUI->CreateAlgorithm("SaveAscii");
+			alg->setPropertyValue("Filename",fname.toStdString());
+			alg->setPropertyValue("Workspace",tableName.toStdString());
+			alg->execute();
+			}
+			catch(...)
+			{
+			}
+		}
+
 		QApplication::restoreOverrideCursor();
 	}
 }
@@ -8161,7 +8234,7 @@ mb->setText(text);
 mb->exec();
     */
 //Mantid
-    MantidAbout *ma = new MantidAbout();
+	MantidQt::API::MantidAbout *ma = new MantidQt::API::MantidAbout();
     ma->exec();
 }
 
@@ -8323,7 +8396,6 @@ void ApplicationWindow::fileMenuAboutToShow()
 	newMenu->addAction(actionNewFunctionPlot);
 	newMenu->addAction(actionNewSurfacePlot);
 	
-	//fileMenu->addAction(actionOpen);
 	
 	openMenu=fileMenu->addMenu(tr("&Load"));
 	openMenu->addAction(actionOpenProj);
@@ -8334,36 +8406,38 @@ void ApplicationWindow::fileMenuAboutToShow()
 
 	fileMenu->insertSeparator();
 	fileMenu->addAction(actionLoadImage);
-	fileMenu->addAction(actionImportImage);
 
 	MdiSubWindow *w = activeWindow();
 	if (w && w->isA("Matrix"))
 		fileMenu->addAction(actionExportMatrix);
 
 	fileMenu->insertSeparator();
-	//fileMenu->addAction(actionSaveProject);
 	fileMenu->addAction(actionSaveProjectAs);
-	fileMenu->insertSeparator();
+	//fileMenu->insertSeparator();
 	saveMenu=fileMenu->addMenu(tr("&Save"));
-	//saveMenu->addAction(actionSaveProject);
 	saveMenu->addAction(actionSaveFile);
 	saveMenu->addAction(actionSaveProject);
-    fileMenu->insertSeparator();
-	fileMenu->addAction(actionOpenTemplate);
-	fileMenu->addAction(actionSaveTemplate);
+   
 	fileMenu->insertSeparator();
-
-	if (w && (w->isA("MultiLayer") || w->isA("Graph3D"))){
-		exportPlotMenu = fileMenu->addMenu (tr("&Export Graph"));
-		exportPlotMenu->addAction(actionExportGraph);
-		exportPlotMenu->addAction(actionExportAllGraphs);
-	}
 
 	fileMenu->addAction(actionPrint);
 	fileMenu->addAction(actionPrintAllPlots);
 	fileMenu->insertSeparator();
+	 MdiSubWindow* t = activeWindow();
+	 if (t && (t->isA("Matrix") || t->inherits("Table") || t->isA("MantidMatrix")))
+	 {
+		actionShowExportASCIIDialog->setEnabled(true);
+	 }
+	 else 
+	 {
+		 actionShowExportASCIIDialog->setEnabled(false);
+	 }
+
 	fileMenu->addAction(actionShowExportASCIIDialog);
 	fileMenu->addAction(actionLoad);
+    fileMenu->insertSeparator();
+	fileMenu->addAction(actionclearAllMemory);
+	
 	fileMenu->insertSeparator();
 	fileMenu->addAction(actionCloseAllWindows);
 
@@ -8422,9 +8496,9 @@ void ApplicationWindow::windowsMenuAboutToShow()
 	QList<MdiSubWindow *> windows = current_folder->windowsList();
 	int n = int(windows.count());
 	if (!n ){
-		#ifdef SCRIPTING_PYTHON
+		/*#ifdef SCRIPTING_PYTHON
 			windowsMenu->addAction(actionShowScriptWindow);
-		#endif
+		#endif*/
 		return;
 	}
 
@@ -8435,12 +8509,21 @@ void ApplicationWindow::windowsMenuAboutToShow()
 	windowsMenu->addAction(actionPrevWindow);
 	windowsMenu->insertSeparator();
 	windowsMenu->addAction(actionRename);
+	
 	windowsMenu->addAction(actionCopyWindow);
+	MdiSubWindow* activeWin=activeWindow();
+	if(!activeWin) return;
+	if(activeWin->isA("MantidMatrix") || activeWin->isA("InstrumentWindow") )
+	{
+		actionCopyWindow->setEnabled(false);
+	}
+	else
+	{
+		actionCopyWindow->setEnabled(true);
+	}
+
 	windowsMenu->insertSeparator();
-#ifdef SCRIPTING_PYTHON
-	windowsMenu->addAction(actionShowScriptWindow);
-	windowsMenu->insertSeparator();
-#endif
+
 
 	windowsMenu->addAction(actionResizeActiveWindow);
 	windowsMenu->insertItem(tr("&Hide Window"),
@@ -8540,13 +8623,9 @@ void ApplicationWindow::foldersMenuActivated( int id )
 void ApplicationWindow::newProject()
 {
 	saveSettings();//the recent projects must be saved
-
-	ApplicationWindow *ed = new ApplicationWindow();
-	ed->restoreApplicationGeometry();
-	ed->initWindow();
-	ed->savedProject();
-
-	close();
+	mantidUI->saveProject(saved);
+	clearLogInfo();
+	setWindowTitle(tr("MantidPlot - untitled"));//Mantid
 }
 
 void ApplicationWindow::savedProject()
@@ -8618,7 +8697,7 @@ void ApplicationWindow::dropEvent( QDropEvent* e )
 		importASCII(asciiFiles, ImportASCIIDialog::NewTables, columnSeparator, ignoredLines,
                     renameColumns, strip_spaces, simplify_spaces, d_ASCII_import_comments,
                     d_import_dec_separators, d_ASCII_import_locale, d_ASCII_comment_string,
-                    d_ASCII_import_read_only, d_ASCII_end_line);
+                    d_ASCII_import_read_only, d_ASCII_end_line,"");
 	}
 }
 
@@ -8668,7 +8747,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     int result = QMessageBox::information(this, tr("MantidPlot"), savemsg, tr("Yes"), tr("No"), tr("Cancel"), 0, 2);
     if( result == 2 || (result == 0 && !saveProject()) )
     {
-      ce->ignore();
+	  ce->ignore();
       return;
     }
   }
@@ -9161,7 +9240,7 @@ void ApplicationWindow::showTableContextMenu(bool selection)
 void ApplicationWindow::chooseHelpFolder()
 {
 	QFileInfo hfi(helpFilePath);
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the location of the QtiPlot help folder!"),
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the location of the MantidPlot help folder!"),
 			hfi.dir().absolutePath(), 0 /*!QFileDialog::ShowDirsOnly*/);
 
 	if (!dir.isEmpty()){
@@ -9204,7 +9283,7 @@ void ApplicationWindow::showStandAloneHelp()
 	{
 		QMessageBox::critical(0, tr("MantidPlot - Help Profile Not Found!"),//Mantid
 				tr("The assistant could not start because the file <b>%1</b> was not found in the help file directory!").arg("qtiplot.adp")+"<br>"+
-				tr("This file is provided with the QtiPlot manual which can be downloaded from the following internet address:")+
+				tr("This file is provided with the MantidPlot manual which can be downloaded from the following internet address:")+
 				"<p><a href = http://soft.proindependent.com/manuals.html>http://soft.proindependent.com/manuals.html</a></p>");
 		exit(0);
 	}
@@ -9240,7 +9319,7 @@ void ApplicationWindow::showHelp()
 	{
 		QMessageBox::critical(this,tr("MantidPlot - Help Profile Not Found!"),//Mantid
 				tr("The assistant could not start because the file <b>%1</b> was not found in the help file directory!").arg("qtiplot.adp")+"<br>"+
-				tr("This file is provided with the QtiPlot manual which can be downloaded from the following internet address:")+
+				tr("This file is provided with the MantidPlot manual which can be downloaded from the following internet address:")+
 				"<p><a href = http://soft.proindependent.com/manuals.html>http://soft.proindependent.com/manuals.html</a></p>");
 		return;
 	}
@@ -9411,11 +9490,11 @@ MultiLayer * ApplicationWindow::newFunctionPlot(QStringList &formulas, double st
 
 void ApplicationWindow::clearLogInfo()
 {
-	if (!current_folder->logInfo().isEmpty()){
+	//if (!current_folder->logInfo().isEmpty()){
 		current_folder->clearLogInfo();
 		results->setText("");
 		emit modified();
-	}
+	//}
 }
 
 void ApplicationWindow::clearParamFunctionsList()
@@ -11581,7 +11660,7 @@ void ApplicationWindow::setPlot3DOptions()
 
 void ApplicationWindow::createActions()
 {
-    actionCustomActionDialog = new QAction(tr("Manage Custom Mantid Menus..."), this);
+    actionCustomActionDialog = new QAction(tr("Manage Custom Menus..."), this);
 	connect(actionCustomActionDialog, SIGNAL(activated()), this, SLOT(showCustomActionDialog()));
 
 	actionNewProject = new QAction(QIcon(QPixmap(new_xpm)), tr("New &Project"), this);
@@ -11623,10 +11702,6 @@ void ApplicationWindow::createActions()
 	actionNewSurfacePlot->setShortcut( tr("Ctrl+ALT+Z") );
 	connect(actionNewSurfacePlot, SIGNAL(activated()), this, SLOT(newSurfacePlot()));
 
-	/*actionOpen = new QAction(QIcon(QPixmap(fileopen_xpm)), tr("&Open"), this);
-	actionOpen->setShortcut( tr("Ctrl+O") );
-	connect(actionOpen, SIGNAL(activated()), this, SLOT(open()));*/
-
 	actionOpenNexus=new QAction(QIcon(QPixmap(fileopen_xpm)), tr("&Nexus"), this);
 	actionOpenNexus->setShortcut( tr("Ctrl+Shift+N") );
 	connect(actionOpenNexus, SIGNAL(activated()), this, SLOT(loadNexus())); 
@@ -11645,10 +11720,6 @@ void ApplicationWindow::createActions()
 
 	actionImportImage = new QAction(tr("Import I&mage..."), this);
 	connect(actionImportImage, SIGNAL(activated()), this, SLOT(importImage()));
-
-	/*actionSaveProject = new QAction(QIcon(QPixmap(filesave_xpm)), tr("&Save Project"), this);
-	actionSaveProject->setShortcut( tr("Ctrl+S") );
-	connect(actionSaveProject, SIGNAL(activated()), this, SLOT(saveProject()));*/
 
 	actionSaveProjectAs = new QAction(tr("Save Project &As..."), this);
 	connect(actionSaveProjectAs, SIGNAL(activated()), this, SLOT(saveProjectAs()));
@@ -11675,7 +11746,7 @@ void ApplicationWindow::createActions()
 
 	actionCopyWindow = new QAction(QIcon(QPixmap(duplicate_xpm)), tr("&Duplicate"), this);
 	connect(actionCopyWindow, SIGNAL(activated()), this, SLOT(clone()));
-
+		
 	actionCutSelection = new QAction(QIcon(QPixmap(cut_xpm)), tr("Cu&t Selection"), this);
 	actionCutSelection->setShortcut( tr("Ctrl+X") );
 	connect(actionCutSelection, SIGNAL(activated()), this, SLOT(cutSelection()));
@@ -11990,6 +12061,13 @@ void ApplicationWindow::createActions()
 	actionShowHelp->setShortcut( tr("Ctrl+H") );
 	connect(actionShowHelp, SIGNAL(activated()), this, SLOT(showHelp()));
 
+	actionMantidConcepts=new QAction(tr("&Mantid Concepts"), this);
+	connect(actionMantidConcepts, SIGNAL(activated()), this, SLOT(showMantidConcepts()));
+
+	actionMantidAlgorithms=new QAction(tr("&Algorithm Descriptions"), this);
+	connect(actionMantidAlgorithms, SIGNAL(activated()), this, SLOT(showalgorithmDescriptions()));
+
+
 	actionChooseHelpFolder = new QAction(tr("&Choose Help Folder..."), this);
 	connect(actionChooseHelpFolder, SIGNAL(activated()), this, SLOT(chooseHelpFolder()));
 
@@ -12272,10 +12350,10 @@ void ApplicationWindow::createActions()
 // 	actionTechnicalSupport = new QAction(tr("Technical &Support"), this); // Mantid change
 // 	connect(actionTechnicalSupport, SIGNAL(activated()), this, SLOT(showSupportPage())); // Mantid change
 
-#ifdef SCRIPTING_DIALOG
-	actionScriptingLang = new QAction(tr("Scripting &language"), this);
-	connect(actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
-#endif
+//#ifdef SCRIPTING_DIALOG
+//	actionScriptingLang = new QAction(tr("Scripting &language"), this);
+//	connect(actionScriptingLang, SIGNAL(activated()), this, SLOT(showScriptingLangDialog()));
+//#endif
 
 	actionNoteExecute = new QAction(tr("E&xecute"), this);
 	actionNoteExecute->setShortcut(tr("Ctrl+J"));
@@ -12291,7 +12369,7 @@ void ApplicationWindow::createActions()
 	actionShowScriptWindow->setShortcut(tr("F3"));
 	actionShowScriptWindow->setToggleAction( true );
 	connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
-	actionShowScriptInterpreter = new QAction(QPixmap(python_xpm), tr("Command Line &Interpreter"), this);
+	actionShowScriptInterpreter = new QAction(QPixmap(python_xpm), tr("Script &Interpreter"), this);
 	actionShowScriptInterpreter->setShortcut(tr("F4"));
 	actionShowScriptInterpreter->setToggleAction(true);
 	connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
@@ -12372,6 +12450,10 @@ void ApplicationWindow::createActions()
 	actionMathSymbol = new QAction(QString(QChar(0x222B)), this);
 	actionMathSymbol->setToolTip(tr("Mathematical Symbols"));
 	connect(actionMathSymbol, SIGNAL(activated()), this, SLOT(insertMathSymbol()));
+
+	actionclearAllMemory = new QAction("&Clear All Memory",this);
+	actionclearAllMemory->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
+	connect(actionclearAllMemory,SIGNAL(triggered()), mantidUI, SLOT(clearAllMemory() ));
 }
 
 void ApplicationWindow::translateActionsStrings()
@@ -12426,10 +12508,6 @@ void ApplicationWindow::translateActionsStrings()
 	actionNewSurfacePlot->setToolTip(tr("Create a new 3D surface plot"));
 	actionNewSurfacePlot->setShortcut(tr("Ctrl+ALT+Z"));
 
-	/*actionOpen->setMenuText(tr("&Open"));
-	actionOpen->setShortcut(tr("Ctrl+O"));
-	actionOpen->setToolTip(tr("Open project"));*/
-
 	actionOpenProj->setMenuText(tr("&Project"));
 	actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
 	actionOpenProj->setToolTip(tr("Load Mantid project"));
@@ -12447,10 +12525,6 @@ void ApplicationWindow::translateActionsStrings()
 	actionLoadImage->setShortcut(tr("Ctrl+I"));
 
 	actionImportImage->setMenuText(tr("Import I&mage..."));
-
-	/*actionSaveProject->setMenuText(tr("&Save Project"));
-	actionSaveProject->setToolTip(tr("Project"));
-	actionSaveProject->setShortcut(tr("Ctrl+S"));*/
 
 	actionSaveFile->setMenuText(tr("&Nexus"));
 	actionSaveFile->setToolTip(tr("Save nexus file"));
@@ -12521,7 +12595,7 @@ void ApplicationWindow::translateActionsStrings()
 	actionShowScriptWindow->setShortcut(tr("F3"));
 #endif
 
-	actionCustomActionDialog->setMenuText(tr("Manage Custom Mantid Menus..."));
+	actionCustomActionDialog->setMenuText(tr("Manage Custom Menus..."));
 
 	actionAddLayer->setMenuText(tr("Add La&yer"));
 	actionAddLayer->setToolTip(tr("Add Layer"));
@@ -12721,11 +12795,15 @@ void ApplicationWindow::translateActionsStrings()
 	actionAbout->setMenuText(tr("&About MantidPlot"));//Mantid
 	actionAbout->setShortcut(tr("F1"));
 
-	actionShowHelp->setMenuText(tr("&Help"));
-	actionShowHelp->setShortcut(tr("Ctrl+H"));
+	//actionShowHelp->setMenuText(tr("&Help"));
+	//actionShowHelp->setShortcut(tr("Ctrl+H"));
 
-	actionChooseHelpFolder->setMenuText(tr("&Choose Help Folder..."));
-	actionRename->setMenuText(tr("&Rename Window"));
+	actionMantidConcepts->setMenuText(tr("&Mantid Concepts"));
+
+	actionMantidAlgorithms->setMenuText("&Algorithm Descriptions");
+
+	//actionChooseHelpFolder->setMenuText(tr("&Choose Help Folder..."));
+	//actionRename->setMenuText(tr("&Rename Window"));
 
 	actionCloseWindow->setMenuText(tr("Close &Window"));
 	actionCloseWindow->setShortcut(tr("Ctrl+W"));
@@ -12838,9 +12916,9 @@ void ApplicationWindow::translateActionsStrings()
 	//actionDonate->setMenuText(tr("Make a &Donation"));
 	//actionTechnicalSupport->setMenuText(tr("Technical &Support"));
 
-#ifdef SCRIPTING_DIALOG
-	actionScriptingLang->setMenuText(tr("Scripting &language"));
-#endif
+//#ifdef SCRIPTING_DIALOG
+//	actionScriptingLang->setMenuText(tr("Scripting &language"));
+//#endif
 
 	actionNoteExecute->setMenuText(tr("E&xecute"));
 	actionNoteExecute->setShortcut(tr("Ctrl+J"));
@@ -13519,6 +13597,15 @@ void ApplicationWindow::showHomePage()
 {
 	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org"));
 }
+void ApplicationWindow::showMantidConcepts()
+{
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Concepts"));
+}
+void ApplicationWindow::showalgorithmDescriptions()
+{
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Algorithms"));
+}
+
 //
 //void ApplicationWindow::showForums()
 //{
@@ -13576,8 +13663,8 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 			s += "-d " + tr("or") + " --default-settings: " + tr("start MantidPlot with the default settings") + "\n";//Mantid
 			s += "-h " + tr("or") + " --help: " + tr("show command line options") + "\n";
 			s += "-l=XX " + tr("or") + " --lang=XX: " + tr("start MantidPlot in language") + " XX ('en', 'fr', 'de', ...)\n";//Mantid
-			s += "-m " + tr("or") + " --manual: " + tr("show QtiPlot manual in a standalone window") + "\n";
-			s += "-v " + tr("or") + " --version: " + tr("print QtiPlot version and release date") + "\n";
+			s += "-m " + tr("or") + " --manual: " + tr("show MantidPlot manual in a standalone window") + "\n";
+			s += "-v " + tr("or") + " --version: " + tr("print MantidPlot version and release date") + "\n";
 			s += "-x " + tr("or") + " --execute: " + tr("execute the script file given as argument") + "\n\n";
 			s += "'" + tr("file") + "_" + tr("name") + "' " + tr("can be any .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py or ASCII file") + "\n";
 			#ifdef Q_OS_WIN
@@ -13726,6 +13813,20 @@ QStringList ApplicationWindow::matrixNames()
 	}
 	return names;
 }
+QStringList ApplicationWindow::mantidmatrixNames()
+{
+	QStringList names;
+	Folder *f = projectFolder();
+	while (f){
+		QList<MdiSubWindow *> folderWindows = f->windowsList();
+		foreach(MdiSubWindow *w, folderWindows){
+			if (w->isA("MantidMatrix"))
+				names << w->objectName();
+		}
+		f = f->folderBelow();
+	}
+	return names;
+}
 
 bool ApplicationWindow::alreadyUsedName(const QString& label)
 {
@@ -13785,7 +13886,7 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 		}
 	}else{
 		QMessageBox::critical(this,tr("MantidPlot - File opening error"),//Mantid
-				tr("The file: <b>%1</b> is not a QtiPlot or Origin project file!").arg(fn));
+				tr("The file: <b>%1</b> is not a MantidPlot or Origin project file!").arg(fn));
 		return 0;
 	}
 
@@ -14125,7 +14226,7 @@ void ApplicationWindow::saveFolderAsProject(Folder *f)
 	return;
 #endif
 	QString filter = tr("MantidPlot project")+" (*.qti);;";//Mantid
-	filter += tr("Compressed QtiPlot project")+" (*.qti.gz)";
+	filter += tr("Compressed MantidPlot project")+" (*.qti.gz)";
 
 	QString selectedFilter;
 	QString fn = QFileDialog::getSaveFileName(this, tr("Save project as"), workingDir, filter, &selectedFilter);
@@ -14733,6 +14834,14 @@ void ApplicationWindow::addListViewItem(MdiSubWindow *w)
 		it->setPixmap(0, QPixmap(trajectory_xpm));
 		it->setText(1, tr("3D Graph"));
 	}
+	else if (w->isA("MantidMatrix")){
+		it->setPixmap(0, QPixmap(mantid_matrix_xpm));
+		it->setText(1, tr("Workspace"));
+	}
+	else if (w->isA("InstrumentWindow")){
+		it->setText(1, tr("Instrument"));
+	}
+	
 
 	it->setText(0, w->objectName());
     it->setText(2, w->aspect());
@@ -15114,7 +15223,7 @@ void ApplicationWindow::goToColumn()
 void ApplicationWindow::showScriptWindow()
 {
   if (!scriptingWindow)
-  { scriptingWindow = new ScriptingWindow(scriptEnv);
+  { scriptingWindow = new ScriptingWindow(scriptEnv,this);
     scriptingWindow->resize(d_script_win_rect.size());
     scriptingWindow->move(d_script_win_rect.topLeft());
   }
@@ -15141,11 +15250,11 @@ void ApplicationWindow::showScriptInterpreter()
   if( !m_interpreterDock )
   {
     m_interpreterDock = new QDockWidget(this);
-    m_interpreterDock->setObjectName("m_interpreterDock");
+    m_interpreterDock->setObjectName("interpreterDock");
     m_interpreterDock->setWindowTitle("Script Interpreter");
     addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
     
-    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock, true);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,this,true);
     m_interpreterDock->setWidget(m_scriptInterpreter);
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
     m_interpreterDock->setFocusProxy(m_scriptInterpreter);
@@ -15153,11 +15262,11 @@ void ApplicationWindow::showScriptInterpreter()
 
   if( m_interpreterDock->isVisible() )
   {
-    m_interpreterDock->hide();
+	 m_interpreterDock->hide();
   }
   else
   {
-    m_interpreterDock->show();
+	m_interpreterDock->show();
     m_scriptInterpreter->setFocus();
   }
 
@@ -15224,7 +15333,7 @@ ApplicationWindow::~ApplicationWindow()
 
 QString ApplicationWindow::versionString()
 {
-	return "QtiPlot " + QString::number(maj_version) + "." +
+	return "MantidPlot " + QString::number(maj_version) + "." +
 		QString::number(min_version) + "." + QString::number(patch_version) + extra_version;
 }
 
@@ -15535,7 +15644,7 @@ void ApplicationWindow::saveFitFunctions(const QStringList& lst)
 	if (!lst.count())
 		return;
 
-    QString explain = tr("Starting with version 0.9.1 QtiPlot stores the user defined fit models to a different location.");
+    QString explain = tr("Starting with version 0.9.1 MantidPlot stores the user defined fit models to a different location.");
     explain += " " + tr("If you want to save your already defined models, please choose a destination folder.");
     if (QMessageBox::Ok != QMessageBox::information(this, tr("MantidPlot") + " - " + tr("Import fit models"), explain,//Mantid
                             QMessageBox::Ok, QMessageBox::Cancel)) return;
@@ -15925,7 +16034,7 @@ QList<QMenu *> ApplicationWindow::customizableMenusList()
 	QList<QMenu *> lst;
 	lst << 	windowsMenu << view << graph << fileMenu << format << edit;
 	lst << help << plot2DMenu << analysisMenu << multiPeakMenu;
-	lst << matrixMenu << plot3DMenu << plotDataMenu << scriptingMenu;
+	lst << matrixMenu << plot3DMenu << plotDataMenu ;// scriptingMenu;
 	lst << tableMenu << fillMenu << normMenu << newMenu << exportPlotMenu << smoothMenu;
 	lst << filterMenu << decayMenu;
 	return lst;
@@ -16180,7 +16289,13 @@ void ApplicationWindow::savedatainNexusFormat(const std::string& wsName,const st
 	//std::string s=workingDir.toStdString()+wsName+".nxs";
    // std::string fileName(s);
 	if(fileName.empty()) return ;
+	try
+	{
 	if(mantidUI)mantidUI->savedatainNexusFormat(fileName,wsName);
+	}
+	catch(...)
+	{
+	}
 }
 void ApplicationWindow::enablesaveNexus(const QString &wsName)
 {

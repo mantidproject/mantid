@@ -54,7 +54,7 @@ RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target,
 		d_selected_curve = NULL;
 	}
 	if (!d_selected_curve) {
-		QMessageBox::critical(d_graph, tr("QtiPlot - Warning"),
+		QMessageBox::critical(d_graph, tr("MantidPlot - Warning"),
 				tr("All the curves on this plot are empty!"));
 		return;
 	}
@@ -289,11 +289,11 @@ void RangeSelectorTool::clearSelection()
             return;
 
 		if (t->isReadOnlyColumn(t->colIndex(((DataCurve *)d_selected_curve)->xColumnName()))){
-    		QMessageBox::warning(d_graph, tr("QtiPlot - Warning"),
+    		QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
         	tr("The column '%1' is read-only! Operation aborted!").arg(((DataCurve *)d_selected_curve)->xColumnName()));
 		return;
 		} else if (t->isReadOnlyColumn(t->colIndex(d_selected_curve->title().text()))){
-    		QMessageBox::warning(d_graph, tr("QtiPlot - Warning"),
+    		QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
 			tr("The column '%1' is read-only! Operation aborted!").arg(d_selected_curve->title().text()));
 		return;
    		} 
@@ -335,11 +335,11 @@ void RangeSelectorTool::pasteSelection()
         return;
 	
 	if (t->isReadOnlyColumn(t->colIndex(((DataCurve *)d_selected_curve)->xColumnName()))){
-    	QMessageBox::warning(d_graph, tr("QtiPlot - Warning"),
+    	QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
         tr("The column '%1' is read-only! Operation aborted!").arg(((DataCurve *)d_selected_curve)->xColumnName()));
 	return;
 	} else if (t->isReadOnlyColumn(t->colIndex(d_selected_curve->title().text()))){
-    	QMessageBox::warning(d_graph, tr("QtiPlot - Warning"),
+    	QMessageBox::warning(d_graph, tr("MantidPlot - Warning"),
 		tr("The column '%1' is read-only! Operation aborted!").arg(d_selected_curve->title().text()));
 	return;
    	}

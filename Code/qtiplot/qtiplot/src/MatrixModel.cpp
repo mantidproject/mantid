@@ -355,7 +355,7 @@ bool MatrixModel::canResize(int rows, int cols)
 {
 	if (rows <= 0 || cols <= 0 || INT_MAX/rows < cols){ //avoid integer overflow
 		QApplication::restoreOverrideCursor();
-    	QMessageBox::critical(d_matrix, tr("QtiPlot") + " - " + tr("Input Size Error"),
+    	QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Input Size Error"),
     	tr("The dimensions you have specified are not acceptable!") + "\n" +
 		tr("Please enter positive values for which the product rows*columns does not exceed the maximum integer value available on your system!"));
 		return false;
@@ -372,7 +372,7 @@ bool MatrixModel::canResize(int rows, int cols)
     }
 
     QApplication::restoreOverrideCursor();
-    QMessageBox::critical(d_matrix, tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+    QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
     tr("Not enough memory, operation aborted!"));
     return false;
 }
@@ -727,7 +727,7 @@ bool MatrixModel::initWorkspace()
     	d_inv_perm = gsl_permutation_alloc(d_cols);
 	if (!d_direct_matrix || !d_inv_matrix || !d_inv_perm){
 		QApplication::restoreOverrideCursor();
-		QMessageBox::critical(d_matrix, tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+		QMessageBox::critical(d_matrix, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
 		tr("Not enough memory, operation aborted!"));
 		return false;
 	}

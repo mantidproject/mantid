@@ -349,7 +349,7 @@ void SymbolDialog::getChar(int btnIndex)
 
 void SymbolDialog::languageChange()
 {
-	setWindowTitle( tr( "QtiPlot - Choose Symbol" ) );
+	setWindowTitle( tr( "MantidPlot - Choose Symbol" ) );
 }
 
 

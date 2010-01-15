@@ -1,6 +1,6 @@
 /***************************************************************************
     File                 : FFTDialog.cpp
-    Project              : QtiPlot
+    Project              : MantidPlot
     --------------------------------------------------------------------
     Copyright            : (C) 2006 by Ion Vasilief, Tilman Hoener zu Siederdissen
     Email (use @ for *)  : ion_vasilief*yahoo.fr, thzs*gmx.net
@@ -51,7 +51,7 @@
 FFTDialog::FFTDialog(int type, QWidget* parent, Qt::WFlags fl )
 : QDialog( parent, fl )
 {
-	setWindowTitle(tr("QtiPlot - FFT Options"));
+	setWindowTitle(tr("MantidPlot - FFT Options"));
 
     d_matrix = 0;
 	d_table = 0;
@@ -155,7 +155,7 @@ void FFTDialog::accept()
 	}
 	catch(mu::ParserError &e)
 	{
-		QMessageBox::critical(this, tr("QtiPlot - Sampling value error"), QString::fromStdString(e.GetMsg()));
+		QMessageBox::critical(this, tr("MantidPlot - Sampling value error"), QString::fromStdString(e.GetMsg()));
 		boxSampling->setFocus();
 		return;
 	}
@@ -166,7 +166,7 @@ void FFTDialog::accept()
         fft = new FFT(app, graph, boxName->currentText());
 	else if (d_table){
 		if (boxReal->currentText().isEmpty()){
-			QMessageBox::critical(this, tr("QtiPlot - Error"), tr("Please choose a column for the real part of the data!"));
+			QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Please choose a column for the real part of the data!"));
 			boxReal->setFocus();
 			return;
 		}
@@ -265,7 +265,7 @@ void FFTDialog::fftMatrix()
         errors = true;
     else if (mIm && mIm->numCols() != width || mIm->numRows() != height){
         errors = true;
-        QMessageBox::warning(app, tr("QtiPlot"),
+        QMessageBox::warning(app, tr("MantidPlot"),
         tr("The two matrices have different dimensions, the imaginary part will be neglected!"));
     }
 

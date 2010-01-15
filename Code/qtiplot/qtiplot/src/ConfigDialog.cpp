@@ -824,10 +824,17 @@ void ConfigDialog::initConfirmationsPage()
 	boxNotes = new QCheckBox();
 	boxNotes->setChecked(app->confirmCloseNotes);
 	layout->addWidget( boxNotes );
+	
+	boxInstrWindow=new QCheckBox();
+	boxInstrWindow->setChecked(app->confirmCloseInstrWindow);
+	layout->addWidget( boxInstrWindow );
 	layout->addStretch();
 
 	boxPromptRenameTables = new QCheckBox();
 	boxPromptRenameTables->setChecked(app->d_inform_rename_table);
+
+	
+
 
 	QVBoxLayout * confirmPageLayout = new QVBoxLayout( confirm );
 	confirmPageLayout->addWidget(groupBoxConfirm);
@@ -971,6 +978,7 @@ void ConfigDialog::languageChange()
 	boxPlots2D->setText(tr("2D Plots"));
 	boxMatrices->setText(tr("Matrices"));
 	boxNotes->setText(tr("&Notes"));
+	boxInstrWindow->setText(tr("&Instrument Window"));
 
 	buttonOk->setText( tr( "&OK" ) );
 	buttonCancel->setText( tr( "&Cancel" ) );
@@ -1157,7 +1165,7 @@ void ConfigDialog::apply()
 	sep.replace("\\s", " ");
 
 	if (sep.contains(QRegExp("[0-9.eE+-]"))!=0){
-		QMessageBox::warning(0, tr("QtiPlot - Import options error"),
+		QMessageBox::warning(0, tr("MantidPlot - Import options error"),
 				tr("The separator must not contain the following characters: 0-9eE.+-"));
 		return;
 	}
@@ -1260,7 +1268,7 @@ void ConfigDialog::apply()
 	app->confirmCloseFolder = boxFolders->isChecked();
 	app->updateConfirmOptions(boxTables->isChecked(), boxMatrices->isChecked(),
 			boxPlots2D->isChecked(), boxPlots3D->isChecked(),
-			boxNotes->isChecked());
+			boxNotes->isChecked(),boxInstrWindow->isChecked());
 	// general page: colors tab
 	app->setAppColors(btnWorkspace->color(), btnPanels->color(), btnPanelsText->color());
 	// 3D plots page
@@ -1540,7 +1548,7 @@ void ConfigDialog::chooseTranslationsFolder()
 		return;
 
 	QFileInfo tfi(app->d_translations_folder);
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the location of the QtiPlot translations folder!"),
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Choose the location of the MantidPlot translations folder!"),
 			tfi.dir().absolutePath(), 0/*!QFileDialog::ShowDirsOnly*/);
 
 	if (!dir.isEmpty()){

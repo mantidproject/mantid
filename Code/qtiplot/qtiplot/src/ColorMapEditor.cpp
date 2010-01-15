@@ -227,7 +227,7 @@ if (col)
 
 if (row == 0 || row == table->rowCount() - 1)
 	{
-	QMessageBox::critical(this, tr("QtiPlot - Input Error"), tr("Sorry, you cannot edit this value!"));
+	QMessageBox::critical(this, tr("MantidPlot - Input Error"), tr("Sorry, you cannot edit this value!"));
 	table->blockSignals(true);
 	if (!row)
 		table->item(0, 0)->setText(QString::number(min_val));
@@ -241,7 +241,7 @@ bool user_input_error = false;
 QString s = table->item(row, 0)->text().remove("-").remove(".").remove(",").remove("+");
 if (s.isEmpty() || s.contains(QRegExp("\\D")))
 	{
-	QMessageBox::critical(this, tr("QtiPlot - Input Error"), tr("Please enter a valid color level value!"));
+	QMessageBox::critical(this, tr("MantidPlot - Input Error"), tr("Please enter a valid color level value!"));
 	user_input_error = true;
 	}
 

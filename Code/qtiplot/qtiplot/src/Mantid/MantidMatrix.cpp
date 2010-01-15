@@ -101,7 +101,7 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
 
   connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
-
+ 
   askOnCloseEvent(false);
 }
 
@@ -409,7 +409,7 @@ double** MantidMatrix::allocateMatrixData(int rows, int columns)
 {
   double** data = (double **)malloc(rows * sizeof (double*));
   if(!data){
-    QMessageBox::critical(0, tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+    QMessageBox::critical(0, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
                           tr("Not enough memory, operation aborted!"));
     return NULL;
   }
@@ -421,7 +421,7 @@ double** MantidMatrix::allocateMatrixData(int rows, int columns)
         free(data[j]);
       free(data);
 
-      QMessageBox::critical(0, tr("QtiPlot") + " - " + tr("Memory Allocation Error"),
+      QMessageBox::critical(0, tr("MantidPlot") + " - " + tr("Memory Allocation Error"),
                             tr("Not enough memory, operation aborted!"));
       return NULL;
     }
@@ -617,7 +617,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   plot->setZAxisLabel(tr(m_workspace->YUnit().c_str()));
 
   a->initPlot3D(plot);
-  plot->askOnCloseEvent(false);
+  //plot->askOnCloseEvent(false);
   QApplication::restoreOverrideCursor();
 
   return plot;
@@ -641,7 +641,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
   Graph* plot = g->activeGraph();
   ProjectData *prjData=0;
   plotSpectrogram(plot,a,type,false,prjData);
-  g->askOnCloseEvent(false);
+ // g->askOnCloseEvent(false);
   QApplication::restoreOverrideCursor();
   return g;
 }

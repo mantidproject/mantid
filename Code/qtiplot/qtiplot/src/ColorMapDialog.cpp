@@ -37,7 +37,7 @@ ColorMapDialog::ColorMapDialog(QWidget* parent, Qt::WFlags fl)
 	: QDialog(parent, fl)
 {
 setObjectName( "ColorMapDialog" );
-setWindowTitle(tr("QtiPlot") + " - " + tr("Custom Color Map"));
+setWindowTitle(tr("MantidPlot") + " - " + tr("Custom Color Map"));
 editor = new ColorMapEditor();
 	
 applyBtn = new QPushButton(tr("&Apply"));

@@ -38,7 +38,7 @@
 SortDialog::SortDialog( QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-	setWindowTitle(tr("QtiPlot - Sorting Options"));
+	setWindowTitle(tr("MantidPlot - Sorting Options"));
 	setSizeGripEnabled(true);
 
 	QGroupBox *groupBox1 = new QGroupBox();

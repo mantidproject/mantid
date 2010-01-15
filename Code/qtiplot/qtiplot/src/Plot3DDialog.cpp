@@ -58,7 +58,7 @@ Plot3DDialog::Plot3DDialog( QWidget* parent,  Qt::WFlags fl )
     : QDialog( parent, fl )
 {
     setName( "Plot3DDialog" );
-	setWindowTitle( tr( "QtiPlot - Surface Plot Options" ) );
+	setWindowTitle( tr( "MantidPlot - Surface Plot Options" ) );
 
 	bars=0; points=0;
 
@@ -776,7 +776,7 @@ bool Plot3DDialog::updatePlot()
 			parser.SetExpr(from.ascii());
 			start = parser.Eval();
 		} catch(mu::ParserError &e){
-			QMessageBox::critical(0,tr("QtiPlot - Start limit error"),  QString::fromStdString(e.GetMsg()));
+			QMessageBox::critical(0,tr("MantidPlot - Start limit error"),  QString::fromStdString(e.GetMsg()));
 			boxFrom->setFocus();
 			return false;
 		}
@@ -786,7 +786,7 @@ bool Plot3DDialog::updatePlot()
 			parser.SetExpr(to.ascii());
 			end = parser.Eval();
 		} catch(mu::ParserError &e){
-			QMessageBox::critical(0,tr("QtiPlot - End limit error"), QString::fromStdString(e.GetMsg()));
+			QMessageBox::critical(0,tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
 			boxTo->setFocus();
 			return false;
 		}

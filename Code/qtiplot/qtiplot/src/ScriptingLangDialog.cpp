@@ -38,7 +38,7 @@
 ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent, Qt::WFlags fl )
   : QDialog(parent, fl), scripted(env)
 {
-  setCaption(tr("QtiPlot - Select scripting language"));
+	setCaption(tr("MantidPlot - Select scripting language"));
 
   langList = new QListWidget(this);
 
@@ -74,6 +74,6 @@ void ScriptingLangDialog::accept()
 {
   ApplicationWindow *app = (ApplicationWindow*) parent();
   if (app->setScriptingLanguage(langList->currentItem()->text()))
-    close();
+	close();
 }
 
