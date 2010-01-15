@@ -49,6 +49,7 @@ public:
   int iterate();
   int hasConverged();
   double costFunctionVal();
+  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
 
 private:
   /// name of this minimizer

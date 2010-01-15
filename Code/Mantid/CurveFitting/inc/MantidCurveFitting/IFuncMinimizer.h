@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include <string>
+#include <gsl/gsl_multifit_nlin.h>
 
 namespace Mantid
 {
@@ -57,6 +58,13 @@ public:
 
   /// Get value of cost function 
   virtual double costFunctionVal() = 0;
+
+  /* Calculates covariance matrix
+   *
+   * @param epsrel Is used to remove linear-dependent columns
+   * @param covar Returned covariance matrix, here as 
+   */
+  virtual void calCovarianceMatrix(double epsrel, gsl_matrix * covar) = 0;
 };
 
 } // namespace CurveFitting

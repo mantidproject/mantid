@@ -44,5 +44,10 @@ double BFGS_Minimizer::costFunctionVal()
   return m_gslSolver->f;
 }
 
+void BFGS_Minimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
+{
+  Kernel::Exception::NotImplementedError("Covariance matrix calculation for Simplex not implemented.");
+}
+
 } // namespace CurveFitting
 } // namespace Mantid

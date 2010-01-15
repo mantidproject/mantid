@@ -49,6 +49,7 @@ public:
   int iterate();
   int hasConverged();
   double costFunctionVal();
+  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
 
 private:
   /// name of this minimizer
@@ -56,6 +57,9 @@ private:
 
   /// pointer to the GSL solver doing the work
   gsl_multifit_fdfsolver *m_gslSolver;
+
+  /// store pointer to GSL contained
+  gsl_multifit_function_fdf* m_gslContainer;
 };
 
 

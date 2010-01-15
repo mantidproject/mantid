@@ -50,5 +50,10 @@ double SimplexMinimizer::costFunctionVal()
   return m_gslSolver->fval;
 }
 
+void SimplexMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
+{
+  Kernel::Exception::NotImplementedError("Covariance matrix calculation for Simplex not implemented.");
+}
+
 } // namespace CurveFitting
 } // namespace Mantid

@@ -609,28 +609,102 @@ namespace CurveFitting
     std::string output = getProperty("Output");
     if (!output.empty())
     {
+      // calculate covariance matrix if derivatives available
+
+      gsl_matrix *covar;
+      std::vector<double> standardDeviations;
+
+      // only if derivative is defined for fitting function create covariance matrix output workspace
+      if ( methodUsed.compare("Levenberg-Marquardt") == 0 )    
+      {
+        // calculate covariance matrix
+        covar = gsl_matrix_alloc (l_data.p, l_data.p);
+        minimizer->calCovarianceMatrix( 0.0, covar);
+
+        // take standard deviations to be the square root of the diagonal elements of
+        // the covariance matrix
+        int iPNotFixed = 0;
+        for(size_t i=0; i < m_function->nParams(); i++)
+        {
+          standardDeviations.push_back(1.0);
+          if (m_function->isActive(i))
+          {
+            standardDeviations[i] = sqrt(gsl_matrix_get(covar,iPNotFixed,iPNotFixed));
+            iPNotFixed++;
+          }
+        }
+
+        // Create covariance matrix output workspace
+
+        declareProperty(
+          new WorkspaceProperty<API::ITableWorkspace>("OutputNormalisedCovarianceMatrix","",Direction::Output),
+          "The name of the TableWorkspace in which to store the final covariance matrix" );
+        setPropertyValue("OutputNormalisedCovarianceMatrix",output+"_NormalisedCovarianceMatrix");
+
+        Mantid::API::ITableWorkspace_sptr m_covariance = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+        m_covariance->addColumn("str","Name");
+        std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
+        for(size_t i=0; i < m_function->nParams(); i++) 
+        {
+          if (m_function->isActive(i)) 
+          {
+            m_covariance->addColumn("double",m_function->parameterName(i));
+            paramThatAreFitted.push_back(m_function->parameterName(i));
+          }
+        }
+
+        for(size_t i=0;i<l_data.p;i++) 
+        {
+          Mantid::API::TableRow row = m_covariance->appendRow();
+          row << paramThatAreFitted[i];
+          for(size_t j=0;j<l_data.p;j++)
+          {
+            if (j == i)
+              row << standardDeviations[i];
+            else
+            {
+              row << 100.0*gsl_matrix_get(covar,i,j)/sqrt(gsl_matrix_get(covar,i,i)*gsl_matrix_get(covar,j,j));
+            }
+          }
+        }
+
+        setProperty("OutputNormalisedCovarianceMatrix",m_covariance);
+      }
+
+      // create output parameter table workspace to store final fit parameters 
+      // including error estimates if derivative of fitting function defined
 
       declareProperty(
         new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
         "The name of the TableWorkspace in which to store the final fit parameters" );
-      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output), 
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), 
         "Name of the output Workspace holding resulting simlated spectrum");
 
       setPropertyValue("OutputParameters",output+"_Parameters");
       setPropertyValue("OutputWorkspace",output+"_Workspace");
 
-      // Save the final fit parameters in the output table workspace
       Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       m_result->addColumn("str","Name");
       m_result->addColumn("double","Value");
-      for(size_t i=0;i<m_function->nParams();i++)
+      if ( methodUsed.compare("Levenberg-Marquardt") == 0 ) 
+        m_result->addColumn("double","Error");
+      Mantid::API::TableRow row = m_result->appendRow();
+      row << "Chi^2/DoF" << finalCostFuncVal;
+
+      for(size_t i=0; i < m_function->nParams(); i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
         row << m_function->parameterName(i) << m_function->parameter(i);
+        if ( methodUsed.compare("Levenberg-Marquardt") == 0 && m_function->isActive(i)) 
+        {
+          row << standardDeviations[i];
+        }
       }
       setProperty("OutputParameters",m_result);
 
+
       // Save the fitted and simulated spectra in the output workspace
+
       Workspace2D_const_sptr inputWorkspace = getProperty("InputWorkspace");
       int iSpec = getProperty("WorkspaceIndex");
       const MantidVec& inputX = inputWorkspace->readX(iSpec);
@@ -670,7 +744,9 @@ namespace CurveFitting
 
       setProperty("OutputWorkspace",ws);
 
-    }
+      if ( methodUsed.compare("Levenberg-Marquardt") == 0 ) 
+        gsl_matrix_free(covar);
+    } 
 
     // minimizer may have dynamically allocated memory hence make sure this memory is freed up
 
