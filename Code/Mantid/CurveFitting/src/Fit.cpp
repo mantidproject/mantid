@@ -609,13 +609,11 @@ namespace CurveFitting
     std::string output = getProperty("Output");
     if (!output.empty())
     {
-      // calculate covariance matrix if derivatives available
-
       gsl_matrix *covar;
       std::vector<double> standardDeviations;
 
       // only if derivative is defined for fitting function create covariance matrix output workspace
-      if ( methodUsed.compare("Levenberg-Marquardt") == 0 )    
+      if ( methodUsed.compare("Levenberg-Marquardt") == 0)    
       {
         // calculate covariance matrix
         covar = gsl_matrix_alloc (l_data.p, l_data.p);
@@ -635,7 +633,6 @@ namespace CurveFitting
         }
 
         // Create covariance matrix output workspace
-
         declareProperty(
           new WorkspaceProperty<API::ITableWorkspace>("OutputNormalisedCovarianceMatrix","",Direction::Output),
           "The name of the TableWorkspace in which to store the final covariance matrix" );
@@ -677,7 +674,7 @@ namespace CurveFitting
       declareProperty(
         new WorkspaceProperty<API::ITableWorkspace>("OutputParameters","",Direction::Output),
         "The name of the TableWorkspace in which to store the final fit parameters" );
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), 
+      declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output), 
         "Name of the output Workspace holding resulting simlated spectrum");
 
       setPropertyValue("OutputParameters",output+"_Parameters");
@@ -688,10 +685,10 @@ namespace CurveFitting
       m_result->addColumn("double","Value");
       if ( methodUsed.compare("Levenberg-Marquardt") == 0 ) 
         m_result->addColumn("double","Error");
-      Mantid::API::TableRow row = m_result->appendRow();
-      row << "Chi^2/DoF" << finalCostFuncVal;
+      //Mantid::API::TableRow row = m_result->appendRow();
+      //row << "Chi^2/DoF" << finalCostFuncVal;
 
-      for(size_t i=0; i < m_function->nParams(); i++)
+      for(size_t i=0;i<m_function->nParams();i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
         row << m_function->parameterName(i) << m_function->parameter(i);
@@ -702,9 +699,7 @@ namespace CurveFitting
       }
       setProperty("OutputParameters",m_result);
 
-
       // Save the fitted and simulated spectra in the output workspace
-
       Workspace2D_const_sptr inputWorkspace = getProperty("InputWorkspace");
       int iSpec = getProperty("WorkspaceIndex");
       const MantidVec& inputX = inputWorkspace->readX(iSpec);
@@ -746,7 +741,9 @@ namespace CurveFitting
 
       if ( methodUsed.compare("Levenberg-Marquardt") == 0 ) 
         gsl_matrix_free(covar);
-    } 
+    }
+
+
 
     // minimizer may have dynamically allocated memory hence make sure this memory is freed up
 
