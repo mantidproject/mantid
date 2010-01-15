@@ -171,7 +171,7 @@
 
 #include "Mantid/MantidUI.h"
 #include "Mantid/MantidPlotReleaseDate.h"
-//#include "Mantid/MantidAbout.h"
+#include "Mantid/MantidAbout.h"
 #include "Mantid/MantidCustomActionDialog.h"
 #include "Mantid/PeakPickerTool1D.h"
 #include "Mantid/PeakPickerTool.h"
@@ -179,7 +179,6 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtAPI/MantidAbout.h"
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
@@ -8234,7 +8233,7 @@ mb->setText(text);
 mb->exec();
     */
 //Mantid
-	MantidQt::API::MantidAbout *ma = new MantidQt::API::MantidAbout();
+	MantidAbout *ma = new MantidAbout();
     ma->exec();
 }
 

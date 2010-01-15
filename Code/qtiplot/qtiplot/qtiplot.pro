@@ -422,6 +422,7 @@ HEADERS  += src/ApplicationWindow.h \
 #FORMS += src/Mantid/WorkspaceMgr.ui
 FORMS += src/Mantid/PeakFitDialog.ui
 FORMS += src/Mantid/UserFitFunctionDialog.ui
+FORMS += src/Mantid/MantidAbout.ui
 
 ###################### SOURCES ##############################################
 

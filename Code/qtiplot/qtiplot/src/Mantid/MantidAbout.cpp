@@ -2,12 +2,9 @@
 #include "MantidPlotReleaseDate.h"
 //#include "../globals.h"
 
-#include <QHBoxLayout>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QMessageBox>
-
+extern const int maj_version ;
+extern const int min_version ;
+extern const int patch_version ;
 const int maj_version = 0;
 const int min_version = 9;
 const int patch_version = 5;
@@ -15,59 +12,48 @@ extern const char * extra_version;
 extern const char * copyright_string;
 extern const char * release_date;
 
-MantidAbout::MantidAbout(QWidget *parent):QDialog(parent)
+/**
+ * Constructor
+ * @param parent The parent widget
+ */
+
+MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidQtDialog(parent)
 {
-    
-    setAttribute(Qt::WA_DeleteOnClose);
+	m_uiForm.setupUi(this);
 
-    QHBoxLayout *buttonLayout = new QHBoxLayout;
-    QPushButton *closeButton = new QPushButton("OK");
-    connect(closeButton,SIGNAL(clicked()),this,SLOT(close()));
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(closeButton);
-    buttonLayout->addStretch();
-
-    QLabel *mantidLogoLabel = new QLabel();
-    QPixmap *mantidLogoPixmap = new QPixmap(":/Mantid Logo.png");
-    mantidLogoLabel->setPixmap(*mantidLogoPixmap);
-    QHBoxLayout *mantidLayout = new QHBoxLayout;
-    mantidLayout->addStretch();
-    mantidLayout->addWidget(mantidLogoLabel);
-    mantidLayout->addStretch();
-
-    QString str = "<h2> MantidPlot</h2> <h3> release date: " + QString(MANTIDPLOT_RELEASE_DATE) + QString("</h3>");
-    str += "Built using";
-    str += "<h3>QtiPlot " + QString::number(maj_version) + "." +
+	QLabel* releasedate=m_uiForm.release_datevalue;
+	QString temp (MANTIDPLOT_RELEASE_DATE);
+	QStringList releaseDate=temp.split("(");
+	releasedate->setText(releaseDate[0]);
+	
+	QString version(MANTIDPLOT_RELEASE_VERSION);
+	QLabel* releaseversion=m_uiForm.release_versionvalue;
+	releaseversion->setText(version);
+	
+	QLabel* builtusing_labelvalue=m_uiForm.builtusing_labelvalue;
+	QString builtusing="QtiPlot "+QString::number(maj_version) + "." +
 		QString::number(min_version) + "." + QString::number(patch_version) + extra_version + "  ";
-    str += "Released: " + QString(release_date) + "<br>";
-    str += QString(copyright_string).replace("\n", "<br>") + "</h3>";
+    builtusing += "Released: " + QString(release_date) + "<br>";
+    builtusing += QString(copyright_string);
+	builtusing_labelvalue->setText(builtusing);
 
-    str += "<h3>Mantid</h3><p><a href = http://www.mantidproject.org/Main_Page>http://www.mantidproject.org</a></p>";
-    QLabel *mantidPlotLabel = new QLabel(str);
-    mantidPlotLabel->setOpenExternalLinks(true);
+	QString mantidurl="<p><a href = http://www.mantidproject.org/Main_Page>http://www.mantidproject.org</a></p>";
+	QLabel* url=m_uiForm.mantidurl;
+	url->setText(mantidurl);
+	url->setOpenExternalLinks(true);
 
-    QLabel *isisLogoLabel = new QLabel;
-    QLabel *tessellaLogoLabel = new QLabel;
-    QPixmap *isisLogoPixmap = new QPixmap(":/ISIS Logo.gif");
-    QPixmap *tessellaLogoPixmap = new QPixmap(":/Tessella_logo_intranet.gif");
-    isisLogoLabel->setPixmap(*isisLogoPixmap);
-    tessellaLogoLabel->setPixmap(*tessellaLogoPixmap);
-    QHBoxLayout *logosLayout = new QHBoxLayout;
-    logosLayout->addWidget(isisLogoLabel);
-    logosLayout->addWidget(tessellaLogoLabel);
 
-    QVBoxLayout *layout = new QVBoxLayout;
-    layout->addLayout(mantidLayout);
-    layout->addWidget(mantidPlotLabel);
-    layout->addLayout(logosLayout);
-    layout->addLayout(buttonLayout);
-	setLayout(layout);
-	setWindowTitle("Mantid - About");
-	setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+	QPixmap mantidLogoPixmap(":/Mantid Logo.png");
+	QLabel* mantidlogo=m_uiForm.mantidplotlogo;
+	mantidlogo->setPixmap(mantidLogoPixmap);
 
-}
+	QPixmap isisLogoPixmap(":/ISIS Logo.gif");
+	QLabel *isislogo=m_uiForm.isislogo;
+	isislogo->setPixmap(isisLogoPixmap);
 
-MantidAbout::~MantidAbout()
-{
+	QPixmap snsLogoPixmap(":/SNS Logo.gif");
+	QLabel *snslogo=m_uiForm.snslogo;
+	snslogo->setPixmap(snsLogoPixmap);
+		
 }
 
