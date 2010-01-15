@@ -31,11 +31,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( wm.initialize() )
     TS_ASSERT( wm.isInitialized() )
   }
-	
+
   void testExec()
   {
     if (!wm.isInitialized()) wm.initialize();
-	  
+
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/OFFSPEC00004622.raw");
@@ -55,7 +55,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( wm.setPropertyValue("InputWorkspace1","first") )
     TS_ASSERT_THROWS_NOTHING( wm.setPropertyValue("InputWorkspace2","second") )
     TS_ASSERT_THROWS_NOTHING( wm.setPropertyValue("OutputWorkspace","result") )
-	  
+
     TS_ASSERT_THROWS_NOTHING( wm.execute() )
     TS_ASSERT( wm.isExecuted() )
 
@@ -78,8 +78,12 @@ public:
     // Finally one where both are zero
     TS_ASSERT_EQUALS( result->readY(0)[4989], 0.0 )
     TS_ASSERT_EQUALS( result->readE(0)[4989], 0.0 )
+
+    AnalysisDataService::Instance().remove("first");
+    AnalysisDataService::Instance().remove("second");
+    AnalysisDataService::Instance().remove("result");
   }
-	
+
 private:
   Mantid::Algorithms::WeightedMean wm;
 };
