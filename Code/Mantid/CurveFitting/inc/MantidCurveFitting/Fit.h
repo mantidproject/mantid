@@ -96,6 +96,9 @@ namespace Mantid
       // Process input parameters and create the fitting function.
       void processParameters();
 
+      /// calculates the derivative of a declared parameter over active parameter i
+      double transformationDerivative(int i);
+
       /// Number of parameters.
       size_t nActive()const{return m_function->nActive();}
 

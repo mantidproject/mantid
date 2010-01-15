@@ -628,6 +628,10 @@ namespace CurveFitting
           if (m_function->isActive(i))
           {
             standardDeviations[i] = sqrt(gsl_matrix_get(covar,iPNotFixed,iPNotFixed));
+            if (m_function->activeParameter(iPNotFixed) != m_function->parameter(m_function->indexOfActive(iPNotFixed)))
+            {// it means the active param is not the same as declared but transformed
+              standardDeviations[i] *= fabs(transformationDerivative(iPNotFixed));
+            }
             iPNotFixed++;
           }
         }
@@ -965,6 +969,24 @@ namespace CurveFitting
       }
     }
 
+  }
+
+  /**
+   * If i-th parameter is transformed the derivative will be != 1.0.
+   * The derivative is calculated numerically.
+   * @param i The index of an active parameter
+   * @return The transformation derivative
+   */
+  double Fit::transformationDerivative(int i)
+  {
+    int j = m_function->indexOfActive(i);
+    double p0 = m_function->parameter(j);
+    double ap0 = m_function->activeParameter(i);
+    double dap = ap0 != 0.0? ap0 * 0.001 : 0.001;
+    m_function->setActiveParameter(i,ap0 + dap);
+    double deriv = ( m_function->parameter(j) - p0 ) / dap;
+    m_function->parameter(j) = p0;
+    return deriv;
   }
 
   /**
