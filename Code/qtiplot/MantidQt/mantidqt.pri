@@ -69,7 +69,15 @@ unix {
 
 win32 {
   INCLUDEPATH += "$$THIRDPARTY/include"
-  LIBPATH     += "$$THIRDPARTY/lib/win32"
+
+CONFIG(build64)  {
+    THIRDPARTYLIB = "$$THIRDPARTY/lib/win64"
+    message(SETTING FOR x64)
+  } else {
+    THIRDPARTYLIB = "$$THIRDPARTY/lib/win32"
+    message(SETTING FOR x86)
+  }
+  LIBPATH     += $$THIRDPARTYLIB 
   LIBS += "MantidKernel.lib"
   LIBS += "MantidGeometry.lib"
   LIBS += "MantidAPI.lib"
