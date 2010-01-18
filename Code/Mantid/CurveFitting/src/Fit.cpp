@@ -493,7 +493,7 @@ namespace CurveFitting
     else
     {
       if ( methodUsed.compare("Levenberg-Marquardt") == 0 )
-        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg); 
+        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg, m_function); 
       else if ( methodUsed.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 )
         minimizer = new FRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg);
       else if ( methodUsed.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 )
@@ -504,7 +504,7 @@ namespace CurveFitting
       {
         g_log.error("Unrecognised minimizer in Fit. Default to Levenberg-Marquardt\n");
         methodUsed = "Levenberg-Marquardt";
-        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg); 
+        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg, m_function); 
       }
     }
     

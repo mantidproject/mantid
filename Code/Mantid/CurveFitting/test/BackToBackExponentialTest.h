@@ -43,7 +43,7 @@ public:
   {
   }
 
-  void xtestAgainstHRPDdataPeak()
+  void testAgainstHRPDdataPeak()
   {
     // load dataset
     std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
@@ -93,6 +93,13 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // did you get what you expected
+
+    std::string minimizer = alg.getProperty("Minimizer");
+    TS_ASSERT( minimizer.compare("Levenberg-Marquardt") == 0 );
+
+    //std::string status = alg.getProperty("Output Status");
+    //std::cout << "status " << status << std::endl;
+
     double dummy = alg.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 9.15,0.1);
 

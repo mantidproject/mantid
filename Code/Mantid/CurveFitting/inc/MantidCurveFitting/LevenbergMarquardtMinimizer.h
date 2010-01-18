@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include <gsl/gsl_multifit_nlin.h>
+#include "MantidAPI/IFunction.h"
 
 namespace Mantid
 {
@@ -42,7 +43,8 @@ class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer(gsl_multifit_function_fdf& gslContainer, gsl_vector* startGuess);
+  LevenbergMarquardtMinimizer(gsl_multifit_function_fdf& gslContainer, 
+    gsl_vector* startGuess, API::IFunction* func);
 
   /// Overloading base class methods
   std::string name()const;
@@ -58,8 +60,8 @@ private:
   /// pointer to the GSL solver doing the work
   gsl_multifit_fdfsolver *m_gslSolver;
 
-  /// store pointer to GSL contained
-  gsl_multifit_function_fdf* m_gslContainer;
+  /// Stored to access IFunction interface in iterate()
+  API::IFunction* m_function;
 };
 
 

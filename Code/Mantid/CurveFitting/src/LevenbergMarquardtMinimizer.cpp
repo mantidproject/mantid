@@ -13,7 +13,7 @@ namespace CurveFitting
 
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer(
   gsl_multifit_function_fdf& gslContainer, 
-  gsl_vector* startGuess) : m_name("Levenberg Marquardt") 
+  gsl_vector* startGuess, API::IFunction* func) : m_name("Levenberg Marquardt") 
 {
   // specify the type of GSL solver to use
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
@@ -22,7 +22,7 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer(
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, gslContainer.n, gslContainer.p);
   gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, startGuess);
 
-  m_gslContainer = &gslContainer;
+  m_function = func;
 }
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer()
@@ -43,21 +43,11 @@ int LevenbergMarquardtMinimizer::iterate()
   // stock - even after having achieved a sensible fit. This seem in particular to be a
   // problem on Linux. However, to force GSL not to return ga ga have to do stuff in the
   // if statement below
-  /*if (retVal == GSL_CONTINUE)
+  if (retVal == GSL_CONTINUE)
   {
-    gsl_vector * dummy;
-    dummy = gsl_vector_alloc (m_gslContainer->n);
-    std::cout << "\nboevs " <<  m_gslContainer->n << std::endl;
-    try
-    {
-      double something = m_gslContainer->f(m_gslSolver->x, m_gslContainer, dummy);
-    }
-    catch(...)
-    {
-
-    }
-    gsl_vector_free (dummy);
-  }*/
+    for (int i = 0; i < m_function->nActive(); i++)
+      m_function->setActiveParameter(i,gsl_vector_get(m_gslSolver->x,i));
+  }
 
   return retVal;
 }
