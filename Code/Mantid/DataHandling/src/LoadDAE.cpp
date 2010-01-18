@@ -37,7 +37,7 @@ namespace Mantid
 
     /// load data from the DAE
     void LoadDAE::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
-    		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData)
+        int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData)
     {
       int ndims, dims_array[1];
       ndims = 1;
@@ -76,14 +76,8 @@ namespace Mantid
     {
       declareProperty("DAEname","", new MandatoryValidator<std::string>(),
         "The name of and path to the input DAE host.");
-      /*declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace",
-        "",Direction::Output),
-        "The name of the workspace that will be created, filled with the\n"
-        "read-in data and stored in the Analysis Data Service.  If the\n"
-        "input data contain multiple periods higher periods will be\n"
-        "stored in separate workspaces called OutputWorkspace_PeriodNo.");*/
 
-	  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
+      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace",
         "",Direction::Output),
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.  If the\n"
@@ -216,34 +210,34 @@ namespace Mantid
       int ndata = (m_numberOfSpectra+1)*(m_channelsPerSpectrum+1)*m_numberOfPeriods*4;
       if (ndata/1000000 < 10) // arbitrary number
       {
-          dims_array[0] = ndata;
-          allData.reset(new int[ ndata ]);
-          // and read them in
-          int ret = IDCgetpari(dae_handle, "CNT1", allData.get(), dims_array, &sv_ndims);
-          if (ret < 0)
-          {
-              allData.reset();
-              throw std::runtime_error("");
-          }
+        dims_array[0] = ndata;
+        allData.reset(new int[ ndata ]);
+        // and read them in
+        int ret = IDCgetpari(dae_handle, "CNT1", allData.get(), dims_array, &sv_ndims);
+        if (ret < 0)
+        {
+          allData.reset();
+          throw std::runtime_error("");
+        }
       }
 
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-               (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1)); 
+        (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1)); 
 
-	// workspace group added to handle  multi periods
-	  WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
-	  if(m_numberOfPeriods>1)
-	  {	
-		  if(wsGrpSptr)wsGrpSptr->add(localWSName);
-		  setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
-	  }
+      // workspace group added to handle  multi periods
+      WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+      if(m_numberOfPeriods>1)
+      {
+        if(wsGrpSptr)wsGrpSptr->add(localWSName);
+        setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+      }
 
       // Set the unit on the workspace to TOF
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
       loadSpectraMap(dae_handle, localWorkspace);
-	
+
       int histTotal = total_specs * m_numberOfPeriods;
       int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
@@ -253,17 +247,14 @@ namespace Mantid
         {
             localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                 (WorkspaceFactory::Instance().create(localWorkspace));
-            localWorkspace->newSample();
             //localWorkspace->newInstrumentParameters(); ????
         }
 
         int counter = 0;
-		//g_log.error()<<"max spec =" <<m_spec_max<<std::endl;
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
           int histToRead = i + period*total_specs;
-		 // g_log.error()<<"hist to read =  "<<histToRead<<" i" <<i<<std::endl;
           loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum.get(),localWorkspace,allData.get() );
           counter++;
           if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
@@ -272,9 +263,9 @@ namespace Mantid
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
         {
-		  for(unsigned int i=0; i < m_spec_list.size(); ++i)
+          for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
-			loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum.get(), localWorkspace,allData.get() );
+            loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum.get(), localWorkspace,allData.get() );
             counter++;
             if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
             interruption_point();
@@ -291,39 +282,23 @@ namespace Mantid
           runLoadInstrument(localWorkspace, iName);
           //runLoadLog(localWorkspace );
           // Set the total proton charge for this run
-          //localWorkspace->getSample()->setProtonCharge(m_proton_charge);
-		  localWorkspace->mutableSample().setProtonCharge(m_proton_charge);
+          localWorkspace->mutableSample().setProtonCharge(m_proton_charge);
         }
-        if (period != 0)
+        if(m_numberOfPeriods>1)
         {
-          // Create a WorkspaceProperty for the new workspace of a higher period
-          // The workspace name given in the OutputWorkspace property has _periodNumber appended to it
-          //                (for all but the first period, which has no suffix)
-          /*std::stringstream suffix;
+          std::stringstream suffix;
           suffix << (period+1);
-          outputWorkspace += suffix.str();
+          std::string outws("");
+          outws=outputWorkspace+"_"+suffix.str();
           std::string WSName = localWSName + "_" + suffix.str();
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outputWorkspace,WSName,Direction::Output));
-          g_log.information() << "Workspace " << WSName << " created. \n";*/
+          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
+          g_log.information() << "Workspace " << WSName << " created. \n";
+          if(wsGrpSptr)wsGrpSptr->add(WSName);
+          // Assign the result to the output workspace property
+          setProperty(outws,localWorkspace);
         }
-		if(m_numberOfPeriods>1)
-		{
-			std::stringstream suffix;
-			suffix << (period+1);
-			std::string outws("");
-			outws=outputWorkspace+"_"+suffix.str();
-			std::string WSName = localWSName + "_" + suffix.str();
-			declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
-			g_log.information() << "Workspace " << WSName << " created. \n";
-			 if(wsGrpSptr)wsGrpSptr->add(WSName);
-			// Assign the result to the output workspace property
-	        setProperty(outws,localWorkspace);
-		}
-		else 
-			setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-
-        // Assign the result to the output workspace property
-       // setProperty(outputWorkspace,localWorkspace);
+        else 
+          setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
 
       } // loop over periods
 
@@ -414,18 +389,18 @@ namespace Mantid
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
-	loadInst->setPropertyValue("Filename", fullPathIDF);
-	loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
-	loadInst->execute();
+        loadInst->setPropertyValue("Filename", fullPathIDF);
+        loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
+        loadInst->execute();
       }
       catch(std::invalid_argument &)
       {
-	successfulExecution = false;
+        successfulExecution = false;
         g_log.information("Invalid argument to LoadInstrument sub-algorithm");
       }
       catch (std::runtime_error&)
       {
-	successfulExecution = false;
+        successfulExecution = false;
         g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
       }
 
@@ -447,23 +422,22 @@ namespace Mantid
       };
 
       boost::shared_array<int> udet(new int[ndet]);
-      //int* udet= new int[ndet];
       dims_array[0] = ndet;
       sv_ndims = 1;
       int res = 0;
       if ((res = IDCgetpari(dae_handle, "UDET", udet.get(), dims_array, &sv_ndims)) != 0)
       {
-          g_log.error("Unable to read detector information (UDET) from DAE " + m_daename);
+        g_log.error("Unable to read detector information (UDET) from DAE " + m_daename);
       }
       else
       {
-          boost::shared_array<int> spec(new int[ndet]);
-          if (IDCgetpari(dae_handle, "SPEC", spec.get(), dims_array, &sv_ndims) != 0)
-          {
-              g_log.error("Unable to read detector information (SPEC) from DAE " + m_daename);
-              throw Exception::FileError("Unable to read detector information (SPEC) from DAE " , m_daename);
-          }
-          localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
+        boost::shared_array<int> spec(new int[ndet]);
+        if (IDCgetpari(dae_handle, "SPEC", spec.get(), dims_array, &sv_ndims) != 0)
+        {
+          g_log.error("Unable to read detector information (SPEC) from DAE " + m_daename);
+          throw Exception::FileError("Unable to read detector information (SPEC) from DAE " , m_daename);
+        }
+        localWorkspace->mutableSpectraMap().populate(spec.get(), udet.get(), ndet);
       }
 
     }

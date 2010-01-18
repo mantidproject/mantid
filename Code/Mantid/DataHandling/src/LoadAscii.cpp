@@ -19,8 +19,8 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-    // Initialise the logger
-    Logger& LoadAscii::g_log = Logger::get("LoadAscii");
+    /// Empty constructor
+    LoadAscii::LoadAscii() : Algorithm() {}
 
     /// Initialisation method.
     void LoadAscii::init()
@@ -42,7 +42,8 @@ namespace Mantid
       m_seperator_options.push_back("Colon");
       m_seperator_options.push_back("SemiColon");
 
-      declareProperty("Separator", "CSV", new ListValidator(m_seperator_options));
+      declareProperty("Separator", "CSV", new ListValidator(m_seperator_options),
+        "The column separator character (default: comma separated)");
 
       m_separatormap.insert(separator_pair("CSV",","));
       m_separatormap.insert(separator_pair("Tab","\t"));
@@ -50,6 +51,10 @@ namespace Mantid
       m_separatormap.insert(separator_pair("SemiColon",";"));
       m_separatormap.insert(separator_pair("Colon",":"));
 
+      std::vector<std::string> units = UnitFactory::Instance().getKeys();
+      units.insert(units.begin(),"Dimensionless");
+      declareProperty("Unit","Energy",new Kernel::ListValidator(units),
+        "The unit to assign to the X axis (default: Energy)");
     }
 
     /** 
@@ -133,14 +138,19 @@ namespace Mantid
 
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
-      //        localWorkspace->setTitle(title);
-      localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Energy");
+      try {
+        localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
+      } catch (Exception::NotFoundError) {
+        // Asked for dimensionless workspace (obviously not in unit factory)
+      }
 
       for(unsigned int i=0;i<nSpectra;i++)
       {
         localWorkspace->dataX(i) = spectra[i].dataX();
         localWorkspace->dataY(i) = spectra[i].dataY();
         localWorkspace->dataE(i) = spectra[i].dataE();
+        // Just have spectrum number start at 1 and count up
+        localWorkspace->getAxis(1)->spectraNo(i) = i+1;
       }
 
       setProperty("Workspace",localWorkspace);

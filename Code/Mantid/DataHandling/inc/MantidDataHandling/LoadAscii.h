@@ -5,29 +5,26 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 
 namespace Mantid
 {
   namespace DataHandling
   {
-    /** @class LoadAscii LoadAscii.h DataHandling/LoadAscii.h
+    /**
+    Loads a workspace from an ascii file. Spectra must be stored in columns.
 
-    Loads a workspace from a coma-separated ascii file. Spectra must be stored in columns.
     Properties:
     <ul>
-          <li>Filename - the name of the file to read from.  </li>
-          <li>Workspace - the workspace name that will be created and hold the loaded data.</li>
+    <li>Filename  - the name of the file to read from.</li>
+    <li>Workspace - the workspace name that will be created and hold the loaded data.</li>
+    <li>Separator - the column separation character: comma (default),tab,space,colon,semi-colon.</li>
+    <li>Unit      - the unit to assign to the X axis (default: Energy).</li>
     </ul>
 
     @author Roman Tolchenov, Tessella plc
     @date 3/07/09
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -50,27 +47,20 @@ namespace Mantid
     class DLLExport LoadAscii : public API::Algorithm
     {
     public:
-      /// Destructor
+      LoadAscii();
       ~LoadAscii() {}
-      /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadAscii"; }
-      /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1; }
-      /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
 
     private:
-      /// Overwrites Algorithm method.
       void init();
-      /// Overwrites Algorithm method
       void exec();
-      ///static reference to the logger class
-      static Kernel::Logger& g_log;
+
       /// Allowed values for the cache property
       std::vector<std::string> m_seperator_options;
-	  std::map<std::string,const char*> m_separatormap;
-	  typedef std::pair<std::string,const char*> separator_pair;
-
+      std::map<std::string,const char*> m_separatormap;
+      typedef std::pair<std::string,const char*> separator_pair;
     };
 
   } // namespace DataHandling

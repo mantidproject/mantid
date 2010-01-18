@@ -110,6 +110,8 @@ void SaveSPE::exec()
   // We write out values 8 at a time, so will need to do extra work if nBins isn't a factor of 8
   const int remainder = nBins % 8;
 
+  // Create a progress reporting object
+  Progress progress(this,0,1,nHist);
   // Loop over the spectra, writing out Y and then E values for each
   for (int i = 0; i < nHist; i++)
   {
@@ -145,6 +147,8 @@ void SaveSPE::exec()
       }
       fprintf(outSPE_File,"\n");
     }
+
+    progress.report();
   }
 
   // Close the file

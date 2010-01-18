@@ -45,7 +45,7 @@ void LoadLog::init()
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-    "The name of the workspace to which the log data will be added");
+                      "The name of the workspace to which the log data will be added");
 
   std::vector<std::string> exts(4, "");
   exts[0] = "txt";
@@ -53,12 +53,10 @@ void LoadLog::init()
   exts[2] = "s*";
   exts[3] = "add";
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-		  "The filename (including its full or relative path) of either an ISIS log file\n"
-		  "or an ISIS raw file. If a raw file is specified all log files associated with\n"
-		  "that raw file are loaded into the specified workspace. The file extension must\n"
-		  "either be .raw or .s when specifying a raw file");
-
-  //declareProperty("Period",1);
+    "The filename (including its full or relative path) of either an ISIS log file\n"
+    "or an ISIS raw file. If a raw file is specified all log files associated with\n"
+    "that raw file are loaded into the specified workspace. The file extension must\n"
+    "either be .raw or .s when specifying a raw file");
 }
 
   //@cond NODOC
@@ -70,8 +68,8 @@ void LoadLog::init()
 
       bool operator()(const std::string & test) const
       {
-	Poco::RegularExpression regex(m_expression, Poco::RegularExpression::RE_CASELESS);
-	return regex.match(test);
+        Poco::RegularExpression regex(m_expression, Poco::RegularExpression::RE_CASELESS);
+        return regex.match(test);
       }
       
     private:
@@ -89,7 +87,6 @@ void LoadLog::init()
 void LoadLog::exec()
 {
   // Retrieve the filename from the properties and perform some initial checks on the filename
-
   m_filename = getPropertyValue("Filename");
 
   // File property checks whether the given path exists, just check that is actually a file 
@@ -102,9 +99,7 @@ void LoadLog::exec()
 
   // Get the input workspace and retrieve sample from workspace.
   // the log file(s) will be loaded into the Sample container of the workspace 
-
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-  //boost::shared_ptr<API::Sample> sample = localWorkspace->getSample();
 
   // If m_filename is the filename of a raw datafile then search for potential log files
   // in the directory of this raw datafile. Otherwise check if m_filename is a potential
@@ -113,7 +108,7 @@ void LoadLog::exec()
   
   // start the process or populating potential log files into the container: potentialLogFiles
   std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
-   std::string threecolumnLogfile;
+  std::string threecolumnLogfile;
   bool rawFile = false;// Will be true if Filename property is a name of a RAW file
   if ( isAscii(m_filename) && l_filenamePart.find("_") != std::string::npos )
   {
@@ -136,56 +131,60 @@ void LoadLog::exec()
     {
       l_rawID = l_filenamePart;
     }
-	/// check for alternate data stream exists for raw file
-	/// if exists open the stream and read  log files name  from ADS
-	if(adsExists())potentialLogFiles=getLogfilenamesfromADS();
+    /// check for alternate data stream exists for raw file
+    /// if exists open the stream and read  log files name  from ADS
+    if(adsExists())
+    {
+      potentialLogFiles = getLogfilenamesfromADS();
+    }
+    else
+    {
+      // look for log files in the directory of the raw datafile
+      std::string pattern(l_rawID + "_*.txt");
+      Poco::Path dir(m_filename);
+      dir.makeParent();
+      try
+      {
+        Kernel::Glob::glob(Poco::Path(dir).resolve(pattern),potentialLogFiles);
+      }
+      catch(std::exception &)
+      {
+      }
 
-	else
-	{
-		// look for log files in the directory of the raw datafile
-		std::string pattern(l_rawID + "_*.txt");
-		Poco::Path dir(m_filename);
-		dir.makeParent();
-		try
-		{
-			Kernel::Glob::glob(Poco::Path(dir).resolve(pattern),potentialLogFiles);
-		}
-		catch(std::exception &)
-		{
-		}
+      if( potentialLogFiles.empty() )
+      {
+        Poco::RegularExpression regex(l_rawID + "_.*\\.txt", Poco::RegularExpression::RE_CASELESS );
+        Poco::DirectoryIterator end_iter;
+        for ( Poco::DirectoryIterator dir_itr(Poco::Path(m_filename).parent()); dir_itr != end_iter; ++dir_itr )
+        {
+          if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
 
-		if( potentialLogFiles.empty() )
-		{
-			Poco::RegularExpression regex(l_rawID + "_.*\\.txt", Poco::RegularExpression::RE_CASELESS );
-			Poco::DirectoryIterator end_iter;
-			for ( Poco::DirectoryIterator dir_itr(Poco::Path(m_filename).parent()); dir_itr != end_iter; ++dir_itr )
-			{
-				if ( !Poco::File(dir_itr->path() ).isFile() ) continue;
+          l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
 
-				l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
+          if ( regex.match(l_filenamePart) )
+          {
+            potentialLogFiles.insert( dir_itr->path() );
+          }
+        }
 
-				if ( regex.match(l_filenamePart) )
-				{
-					potentialLogFiles.insert( dir_itr->path() );
-				}
-			}
-
-		}
-	}
-	//.if a .log file exists in the raw file directory
-	if (threeColumnFormatLogFileExists())
-	{	
-		threecolumnLogfile=getThreecolumnFormatLogFile();
-		std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableSample());
-		//remove the file name from potential logfiles list if it's there in the .log file.
-		std::set<std::string>::const_iterator itr;
-		for(itr=blockFileNameList.begin();itr!=blockFileNameList.end();++itr)
-		{	
-			std::set<std::string>::iterator litr= find(potentialLogFiles.begin(),potentialLogFiles.end(),*itr);
-			if(litr!=potentialLogFiles.end())
-			{ potentialLogFiles.erase(litr);}
-		}
-	}
+      }
+    }
+    //.if a .log file exists in the raw file directory
+    if (threeColumnFormatLogFileExists())
+    {
+      threecolumnLogfile=getThreecolumnFormatLogFile();
+      std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableSample());
+      //remove the file name from potential logfiles list if it's there in the .log file.
+      std::set<std::string>::const_iterator itr;
+      for(itr=blockFileNameList.begin();itr!=blockFileNameList.end();++itr)
+      {
+        std::set<std::string>::iterator litr= find(potentialLogFiles.begin(),potentialLogFiles.end(),*itr);
+        if(litr!=potentialLogFiles.end())
+        {
+          potentialLogFiles.erase(litr);
+        }
+      }
+    }
   }
  
   //If there are no log files by now, we have nothing else to do
@@ -201,12 +200,6 @@ void LoadLog::exec()
 
   API::LogParser parser(icpevent_file_name);
   // Add mantid-created logs
-  /*int period = getproperty("period");
-  property* log = parser.createperiodlog(period);
-  if (log)
-  {
-    sample->addlogdata(log);
-  }*/
   
   m_periods=parser.getPeriodsProperty();
   localWorkspace->mutableSample().addLogData(parser.createAllPeriodsLog());
@@ -260,26 +253,25 @@ void LoadLog::exec()
       
       try
       {
-	// Make the property name by removing the workspce name and file extension from the log filename
-	std::string log_name = Poco::Path(Poco::Path(filename).getFileName()).getBaseName();
-	
-	if (rawFile)
-	{
-	  log_name.erase(0, n_common_chars);
-	}
-	
-	Property* log = parser.createLogProperty(*logs_itr,stringToLower(log_name));
-	if (log)
-	{
-	  //sample->addLogData(log);
-		localWorkspace->mutableSample().addLogData(log);
-	}
+        // Make the property name by removing the workspce name and file extension from the log filename
+        std::string log_name = Poco::Path(Poco::Path(filename).getFileName()).getBaseName();
+
+        if (rawFile)
+        {
+          log_name.erase(0, n_common_chars);
+        }
+
+        Property* log = parser.createLogProperty(*logs_itr,stringToLower(log_name));
+        if (log)
+        {
+          localWorkspace->mutableSample().addLogData(log);
+        }
       }
       catch(std::exception&)
       {
-	continue;
+        continue;
       }
-      
+
     } 
     inLogFile.close();
   } // end for
@@ -288,267 +280,266 @@ void LoadLog::exec()
   // operation was a success and ended normally
   return;
 }
+
 /** this method looks in the rawfile directory for  rawfilename.log (three column format )file 
-    @returns true if the file exists
+@returns true if the file exists
 */
 bool LoadLog::threeColumnFormatLogFileExists()
 {  
-	std::string rawID;
-	size_t pos = m_filename.find(".");
-   	if(pos!=std::string::npos)
-		rawID=m_filename.substr(0,pos);
-	// append .log to get the .log file name
-	 std::string logfileName=rawID+".log";	
-	 int count=0;
-	 if (Poco::File(logfileName).exists())
-	 {
-		 //validate the file
-		 std::ifstream inLogFile(logfileName.c_str());
-		 if (!inLogFile)
-		 { throw Exception::FileError("Unable to open file:" ,logfileName );}
+  std::string rawID;
+  size_t pos = m_filename.find(".");
+  if(pos!=std::string::npos)
+    rawID=m_filename.substr(0,pos);
+  // append .log to get the .log file name
+  std::string logfileName=rawID+".log";	
+  int count=0;
+  if (Poco::File(logfileName).exists())
+  {
+    //validate the file
+    std::ifstream inLogFile(logfileName.c_str());
+    if (!inLogFile)
+    { throw Exception::FileError("Unable to open file:" ,logfileName );}
 
-//check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
-		 std::string aLine;
-		 kind l_kind(LoadLog::empty);
-		 //if( std::getline(inLogFile, aLine, '\n') )
-		 while(Mantid::API::extractToEOL(inLogFile,aLine))
-		 {			 
-			 if ( !isDateTimeString(aLine) )
-			 { g_log.warning("File" + logfileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
-				 inLogFile.close();
-				 return false;
-			 }
+    //check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
+    std::string aLine;
+    kind l_kind(LoadLog::empty);
+    while(Mantid::API::extractToEOL(inLogFile,aLine))
+    {			 
+      if ( !isDateTimeString(aLine) )
+      { g_log.warning("File" + logfileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
+      inLogFile.close();
+      return false;
+      }
 
-			 std::stringstream ins(aLine);
-			 std::string firstcolumn;
-			 ins >> firstcolumn;
-			 // read in what follows the date-time string in the log file and figure out
-			 // what type it is
-			 std::string secondcolumn;
-			 ins >> secondcolumn;
-			 l_kind = classify(secondcolumn);
-			 if ( LoadLog::string != l_kind )
-			 {
-				 g_log.warning("ISIS log file contains unrecognised second column entries: " + logfileName);
-				 inLogFile.close();
-				 return false;
-			 }
+      std::stringstream ins(aLine);
+      std::string firstcolumn;
+      ins >> firstcolumn;
+      // read in what follows the date-time string in the log file and figure out
+      // what type it is
+      std::string secondcolumn;
+      ins >> secondcolumn;
+      l_kind = classify(secondcolumn);
+      if ( LoadLog::string != l_kind )
+      {
+        g_log.warning("ISIS log file contains unrecognised second column entries: " + logfileName);
+        inLogFile.close();
+        return false;
+      }
 
-			 std::string thirdcolumn;
-			 ins>>thirdcolumn;
-			 l_kind = classify(thirdcolumn);
-			 if ( LoadLog::string != l_kind && LoadLog::number!=l_kind)
-			 {
-				 g_log.warning("ISIS log file contains unrecognised third column entries: " + logfileName);
-				 inLogFile.close();
-				 return false;
-			 }
-			 ++count;
-			 if(count==2) ///reading first two lines from file for validation purpose.
-				 break;
-		 }
-		return true;
-	 }
-	else return false;
+      std::string thirdcolumn;
+      ins>>thirdcolumn;
+      l_kind = classify(thirdcolumn);
+      if ( LoadLog::string != l_kind && LoadLog::number!=l_kind)
+      {
+        g_log.warning("ISIS log file contains unrecognised third column entries: " + logfileName);
+        inLogFile.close();
+        return false;
+      }
+      ++count;
+      if(count==2) ///reading first two lines from file for validation purpose.
+        break;
+    }
+    return true;
+  }
+  else return false;
 }
+
 /* this method looks for ADS with name checksum exists
-*@return if ADS stream checkum  exists
-*/
+ * @return True if ADS stream checksum exists
+ */
 bool LoadLog::adsExists()
 {
-	std::string adsname(m_filename+":checksum");
-	std::ifstream adstream(adsname.c_str());
-	if(!adstream)
-	{return false;
-	}
-	return true;
+  std::string adsname(m_filename+":checksum");
+  std::ifstream adstream(adsname.c_str());
+  if(!adstream)
+  {return false;
+  }
+  return true;
 }
+
 /* this method reads  the checksum ADS associated with the
-* raw file and returns the filensmes of the log files
-*@return list of logfile names.
-*/
+ * raw file and returns the filensmes of the log files
+ * @return list of logfile names.
+ */
 std::set<std::string> LoadLog::getLogfilenamesfromADS()
 {	
-	std::string adsname(m_filename+":checksum");
-	std::ifstream adstream(adsname.c_str());
-	if(!adstream)
-		return std::set<std::string>();
-	std::string str;
-	std::string path;
-	std::string logFile;
-	std::set<std::string>logfilesList;
-	Poco::Path logpath(m_filename);
-	std::string p=logpath.home();
-	size_t pos =m_filename.find_last_of("/");
-	if(pos==std::string::npos)
-	{
-		pos =m_filename.find_last_of("\\");
-	}
-	if(pos!=std::string::npos)
-		 path=m_filename.substr(0,pos);
-	while(Mantid::API::extractToEOL(adstream,str))
-	{
-		std::string fileName;
-		pos = str.find("*");
-		if(pos==std::string::npos)
-			continue;
- 	    fileName=str.substr(pos+1,str.length()-pos);
-		pos= fileName.find("txt");
-		if(pos==std::string::npos)
-			continue;
-        logFile=path+"\\"+fileName;
-		if(logFile.empty())
-			continue;
-		logfilesList.insert(logFile);
-	}
-	return logfilesList;
+  std::string adsname(m_filename+":checksum");
+  std::ifstream adstream(adsname.c_str());
+  if(!adstream)
+    return std::set<std::string>();
+  std::string str;
+  std::string path;
+  std::string logFile;
+  std::set<std::string>logfilesList;
+  Poco::Path logpath(m_filename);
+  std::string p=logpath.home();
+  size_t pos =m_filename.find_last_of("/");
+  if(pos==std::string::npos)
+  {
+    pos =m_filename.find_last_of("\\");
+  }
+  if(pos!=std::string::npos)
+    path=m_filename.substr(0,pos);
+  while(Mantid::API::extractToEOL(adstream,str))
+  {
+    std::string fileName;
+    pos = str.find("*");
+    if(pos==std::string::npos)
+      continue;
+    fileName=str.substr(pos+1,str.length()-pos);
+    pos= fileName.find("txt");
+    if(pos==std::string::npos)
+      continue;
+    logFile=path+"\\"+fileName;
+    if(logFile.empty())
+      continue;
+    logfilesList.insert(logFile);
+  }
+  return logfilesList;
 }
 
 /**  this method returns the name of three column log file 
-    @returns file name of the.log file
-*/
+ *  @returns file name of the.log file
+ */
 std::string LoadLog::getThreecolumnFormatLogFile()
 {
-	size_t pos = m_filename.find(".");
-    std::string rawID;
-	if(pos!=std::string::npos)
-		rawID=m_filename.substr(0,pos);
-	// append .log to get the .log file name
-	 std::string logfileName=rawID+".log";	
-	 if (Poco::File(logfileName).exists())
-		 return logfileName;
-	 else return "";
+  size_t pos = m_filename.find(".");
+  std::string rawID;
+  if(pos!=std::string::npos)
+    rawID=m_filename.substr(0,pos);
+  // append .log to get the .log file name
+  std::string logfileName=rawID+".log";	
+  if (Poco::File(logfileName).exists())
+    return logfileName;
+  else return "";
 }
-/**
-This method reads the.log file and creates timeseries property and sets that to the sample object
-*@param logfile three column log(.log) file name.
-*@param sample sample object
-@returns list of logfiles which exists as blockname in the .log file
-*/
-std::set<std::string>  LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,API::Sample& sample)
- {    
-	
-	std::set<std::string> blockFileNameList;
-     std::string sdata,str;
-	std::string propname;
-	Mantid::Kernel::TimeSeriesProperty<double>* logd=0;
-	Mantid::Kernel::TimeSeriesProperty<std::string>* logs=0;
-	std::map<std::string,Kernel::TimeSeriesProperty<double>*> dMap;
-	std::map<std::string,Kernel::TimeSeriesProperty<std::string>*> sMap;
-	typedef std::pair<std::string,Kernel::TimeSeriesProperty<double>* > dpair;
-	typedef std::pair<std::string,Kernel::TimeSeriesProperty<std::string>* > spair;
 
-	std::basic_string <char>::size_type pos=m_filename.find(".");
-	bool isNumeric(false);
-	std::string path =m_filename.substr(0,pos);
-	std::ifstream file(logfile.c_str());
-	if (!file)
-	{	g_log.warning()<<"Cannot open log file "<<logfile<<"\n";
-		return std::set<std::string>();
-	}
-	while(Mantid::API::extractToEOL(file,str))
-	{
-		if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str[0]=='#')) 
-		{    //if the line doesn't start with a time read the next line
-			continue;
-		}
-		std::stringstream line(str);
-		std::string timecolumn;
-		line>>timecolumn;
-		std::string blockcolumn;
-		line>>blockcolumn;
-		std::string valuecolumn;
-		line>>valuecolumn;
-		sdata=valuecolumn;
+/** This method reads the.log file and creates timeseries property and sets that to the sample object
+ * @param logfile three column log(.log) file name.
+ * @param sample sample object
+ * @returns list of logfiles which exists as blockname in the .log file
+ */
+std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::string& logfile,API::Sample& sample)
+{    
+  std::set<std::string> blockFileNameList;
+  std::string sdata,str;
+  std::string propname;
+  Mantid::Kernel::TimeSeriesProperty<double>* logd=0;
+  Mantid::Kernel::TimeSeriesProperty<std::string>* logs=0;
+  std::map<std::string,Kernel::TimeSeriesProperty<double>*> dMap;
+  std::map<std::string,Kernel::TimeSeriesProperty<std::string>*> sMap;
+  typedef std::pair<std::string,Kernel::TimeSeriesProperty<double>* > dpair;
+  typedef std::pair<std::string,Kernel::TimeSeriesProperty<std::string>* > spair;
 
-		/////column two in .log file is called block column
-		/////if any .txt file with rawfilename_blockcolumn.txt exists
-		///// donot load that txt  files
-		///// blockFileNameList conatins the file names to be removed from potentiallogfiles list.
-		//std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
-		//if(blockcolumnFileExists(blockcolumnFileName))
-		//{	  blockFileNameList.insert(blockcolumnFileName);
-		//}
-		propname=stringToLower(blockcolumn);
-		//check if the data is numeric
-		std::istringstream istr(valuecolumn);
-		double dvalue;
-		istr >> dvalue;
-		isNumeric = !istr.fail();
-
-		if (isNumeric)
-		{				
-			std::map<std::string,Kernel::TimeSeriesProperty<double>*>::iterator ditr=dMap.find(propname);
-			if(ditr!=dMap.end())
-			{	Kernel::TimeSeriesProperty<double>* p=ditr->second;
-				if(p)p->addValue(timecolumn,dvalue);
-					dMap.insert(dpair(propname,p));
-
-			}
-			else
-			{	logd = new Kernel::TimeSeriesProperty<double>(propname);
-				logd->addValue(timecolumn,dvalue);
-				dMap.insert(dpair(propname,logd));
-				std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
-				if(blockcolumnFileExists(blockcolumnFileName))
-				{
-          blockFileNameList.insert(blockcolumnFileName);
-				}
-			}
-			
-		}
-		else
-		{		
-			std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::iterator sitr=sMap.find(propname);
-			if(sitr!=sMap.end())
-			{	Kernel::TimeSeriesProperty<std::string>* prop=sitr->second;
-			if(prop) prop->addValue(timecolumn,valuecolumn);
-				sMap.insert(spair(propname,prop));
-			}
-			else
-			{	logs = new Kernel::TimeSeriesProperty<std::string>(propname);
-				logs->addValue(timecolumn,valuecolumn);
-				sMap.insert(spair(propname,logs)); //sMap[propname]=logs;
-			}
-				std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
-				if(blockcolumnFileExists(blockcolumnFileName))
-				{
-          blockFileNameList.insert(blockcolumnFileName);
-				}
+  std::basic_string <char>::size_type pos=m_filename.find(".");
+  bool isNumeric(false);
+  std::string path =m_filename.substr(0,pos);
+  std::ifstream file(logfile.c_str());
+  if (!file)
+  {	
+    g_log.warning()<<"Cannot open log file "<<logfile<<"\n";
+    return std::set<std::string>();
+  }
+  while(Mantid::API::extractToEOL(file,str))
+  {
+    if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str[0]=='#')) 
+    {    //if the line doesn't start with a time read the next line
+      continue;
     }
-	}
-	try
-	{
-		std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr=dMap.begin();
-		for(;itr!=dMap.end();++itr)
-		{sample.addLogData(itr->second);
-		}	
-		std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr=sMap.begin();
-		for(;sitr!=sMap.end();++sitr)
-		{
-			sample.addLogData(sitr->second);
-		}
-	}
-	catch(std::invalid_argument &e)
-	{
-		g_log.warning()<<e.what();
-	}
-	catch(Exception::ExistsError&e)
-	{
-		g_log.warning()<<e.what();
-	}
-	
-   return blockFileNameList;
-	
+    std::stringstream line(str);
+    std::string timecolumn;
+    line>>timecolumn;
+    std::string blockcolumn;
+    line>>blockcolumn;
+    std::string valuecolumn;
+    line>>valuecolumn;
+    sdata=valuecolumn;
+
+    /////column two in .log file is called block column
+    /////if any .txt file with rawfilename_blockcolumn.txt exists
+    ///// donot load that txt  files
+    ///// blockFileNameList conatins the file names to be removed from potentiallogfiles list.
+    propname=stringToLower(blockcolumn);
+    //check if the data is numeric
+    std::istringstream istr(valuecolumn);
+    double dvalue;
+    istr >> dvalue;
+    isNumeric = !istr.fail();
+
+    if (isNumeric)
+    {				
+      std::map<std::string,Kernel::TimeSeriesProperty<double>*>::iterator ditr=dMap.find(propname);
+      if(ditr!=dMap.end())
+      {	
+        Kernel::TimeSeriesProperty<double>* p=ditr->second;
+        if (p) p->addValue(timecolumn,dvalue);
+      }
+      else
+      {	
+        logd = new Kernel::TimeSeriesProperty<double>(propname);
+        logd->addValue(timecolumn,dvalue);
+        dMap.insert(dpair(propname,logd));
+        std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
+        if(blockcolumnFileExists(blockcolumnFileName))
+        {
+          blockFileNameList.insert(blockcolumnFileName);
+        }
+      }
+    }
+    else
+    {		
+      std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::iterator sitr=sMap.find(propname);
+      if(sitr!=sMap.end())
+      {	
+        Kernel::TimeSeriesProperty<std::string>* prop=sitr->second;
+        if (prop) prop->addValue(timecolumn,valuecolumn);
+      }
+      else
+      {	
+        logs = new Kernel::TimeSeriesProperty<std::string>(propname);
+        logs->addValue(timecolumn,valuecolumn);
+        sMap.insert(spair(propname,logs));
+      }
+      std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
+      if(blockcolumnFileExists(blockcolumnFileName))
+      {
+        blockFileNameList.insert(blockcolumnFileName);
+      }
+    }
+  }
+  try
+  {
+    std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr=dMap.begin();
+    for(;itr!=dMap.end();++itr)
+    {sample.addLogData(itr->second);
+    }	
+    std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr=sMap.begin();
+    for(;sitr!=sMap.end();++sitr)
+    {
+      sample.addLogData(sitr->second);
+    }
+  }
+  catch(std::invalid_argument &e)
+  {
+    g_log.warning()<<e.what();
+  }
+  catch(Exception::ExistsError&e)
+  {
+    g_log.warning()<<e.what();
+  }
+
+  return blockFileNameList;
+
 }
+
 /** this method looks for file with second column(block column) name exists in the raw file directory
-*@param fileName -name of the file
-*@returns true if the file exists
-*/
+ * @param fileName -name of the file
+ * @return True if the file exists
+ */
 bool LoadLog::blockcolumnFileExists(const std::string& fileName)
-{ if (Poco::File(fileName).exists())
-		return true;
-	 else return false;
+{
+  if (Poco::File(fileName).exists()) return true;
+  else return false;
 }
 
 /** Takes as input a string and try to determine what type it is.
@@ -579,9 +570,9 @@ LoadLog::kind LoadLog::classify(const std::string& s)
 }
 
 /** change each element of the string to lower case
-* @param strToConvert The input string
-* @returns The string but with all characters in lower case
-*/
+ * @param strToConvert The input string
+ * @returns The string but with all characters in lower case
+ */
 std::string LoadLog::stringToLower(std::string strToConvert)
 {
   std::transform(strToConvert.begin(), strToConvert.end(), strToConvert.begin(), tolower);
@@ -589,9 +580,9 @@ std::string LoadLog::stringToLower(std::string strToConvert)
 }
 
 /** Checks whether filename is a simple text file
-* @param filename The filename to inspect
-* @returns true if the filename has the .txt extension
-*/
+ * @param filename The filename to inspect
+ * @returns true if the filename has the .txt extension
+ */
 bool LoadLog::isAscii(const std::string& filename)
 {
   FILE* file = fopen(filename.c_str(), "rb");
@@ -615,9 +606,9 @@ bool LoadLog::isAscii(const std::string& filename)
 }
 
 /** check if first 19 characters of a string is date-time string according to yyyy-mm-ddThh:mm:ss
-* @param str The string to test
-* @returns true if the strings format matched the expected date format
-*/
+ * @param str The string to test
+ * @returns true if the strings format matched the expected date format
+ */
 bool LoadLog::isDateTimeString(const std::string& str)
 {
   Poco::DateTime dt;

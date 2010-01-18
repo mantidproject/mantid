@@ -1,9 +1,6 @@
-#include "MantidKernel/Exception.h"
-#include "LoadRaw/isisraw2.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataHandling/LoadMappingTable.h"
+#include "LoadRaw/isisraw2.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/FileProperty.h"
 
 namespace Mantid
@@ -16,19 +13,17 @@ using namespace API;
 
 DECLARE_ALGORITHM(LoadMappingTable)
 
-LoadMappingTable::LoadMappingTable()
+LoadMappingTable::LoadMappingTable() : Algorithm()
 {
 }
 
 void LoadMappingTable::init()
 {
   declareProperty(new FileProperty("Filename","", FileProperty::Load),
-		  "The name of the RAW file from which to obtain the mapping information,\n"
-		  "including its full or relative path" );
-  declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
-    "The name of the input and output workspace on which to perform the\n"
-    "algorithm" );
+    "The name of the file from which to obtain the mapping information,\n"
+    "including its full or relative path" );
+  declareProperty(new WorkspaceProperty<>("Workspace","Anonymous",Direction::InOut),
+    "The name of the workspace to which the mapping information will be added");
 }
 
 void LoadMappingTable::exec()
