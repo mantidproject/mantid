@@ -283,6 +283,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\UserFunction.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\UserFunction1D.cpp"
 				>
 			</File>
@@ -445,11 +449,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidCurveFitting\UserFunction.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\UserFunction1D.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\UserFunction1DTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\UserFunctionTest.h"
 				>
 			</File>
 		</Filter>

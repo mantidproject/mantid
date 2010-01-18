@@ -56,8 +56,9 @@ namespace Mantid
       // Loop over functions. 
       for (tokenizer::Iterator ifun = functions.begin(); ifun != functions.end(); ++ifun)
       {
+        std::string functionName;
         tokenizer params(*ifun, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-        std::map<std::string,std::string> param;
+        std::vector<std::pair<std::string,std::string> > param;
         // Loop over function parameters to fill in param map: param[<name>]=<init_value>
         for (tokenizer::Iterator par = params.begin(); par != params.end(); ++par)
         {
@@ -66,12 +67,17 @@ namespace Mantid
           {
             std::string name = name_value[0];
             //std::transform(name.begin(), name.end(), name.begin(), toupper);
-            param[name] = name_value[1];
+            if (name == "name")
+            {
+              functionName = name_value[1];
+            }
+            else
+            {
+              param.push_back(std::pair<std::string,std::string>(name,name_value[1]));
+            }
           }
         }
 
-        // param["name"] gives the name(type) of the function
-        std::string functionName = param["name"];
         if (functionName.empty())
           throw std::runtime_error("Function is not defined");
 
@@ -87,14 +93,18 @@ namespace Mantid
         }
 
         // Loop over param to set the initial values and constraints
-        std::map<std::string,std::string>::const_iterator par = param.begin();
+        std::vector<std::pair<std::string,std::string> >::const_iterator par = param.begin();
         for(;par!=param.end();++par)
         {
           const std::string& parName(par->first);
-          if (parName != "name")
+          std::string parValue = par->second;
+          if (fun->hasAttribute(parName))
+          {
+            fun->setAttribute(parName,parValue);
+          }
+          else
           {
             // The init value part may contain a constraint setting string in brackets 
-            std::string parValue = par->second;
             size_t i = parValue.find_first_of('(');
             if (i != std::string::npos)
             {

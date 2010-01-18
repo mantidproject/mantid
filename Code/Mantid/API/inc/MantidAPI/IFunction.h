@@ -180,6 +180,17 @@ public:
   /// than the upper boundary value.
   virtual void setParametersToSatisfyConstraints() {};
 
+  /// Returns the number of attributes associated with the function
+  virtual int nAttributes()const{return 0;}
+  /// Returns a list of attribute names
+  virtual std::vector<std::string> getAttributeNames()const{return std::vector<std::string>();}
+  /// Return a value of attribute attName
+  virtual std::string getAttribute(const std::string& attName)const{return "";}
+  /// Set a value to attribute attName
+  virtual void setAttribute(const std::string& attName,const std::string& value){}
+  /// Check if attribute attName exists
+  virtual bool hasAttribute(const std::string& attName)const{return false;}
+
 protected:
 
   /// Function initialization. Declare function parameters in this method.

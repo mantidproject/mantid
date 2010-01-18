@@ -133,8 +133,15 @@ std::string IFunction::asString()const
 {
   std::ostringstream ostr;
   ostr << "name="<<this->name();
+  std::vector<std::string> attr = this->getAttributeNames();
+  for(size_t i=0;i<attr.size();i++)
+  {
+    ostr<<','<<attr[i]<<'='<<this->getAttribute(attr[i]);
+  }
   for(int i=0;i<nParams();i++)
+  {
     ostr<<','<<parameterName(i)<<'='<<parameter(i);
+  }
   return ostr.str();
 }
 
