@@ -8,7 +8,7 @@
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
-#include "Applicationwindow.h"
+#include "ApplicationWindow.h"
 //Qt
 #include <QTextEdit>
 #include <QMenuBar>
@@ -34,8 +34,8 @@
  * @param parent The parent widget
  * @param flags Window flags
  */
-ScriptOutputDock::ScriptOutputDock(const QString & title, ScriptManagerWidget* manager, QWidget * parent, 
-				   Qt::WindowFlags flags ) : 
+ScriptOutputDock::ScriptOutputDock(const QString & title, ScriptManagerWidget* manager, 
+				   QWidget * parent, Qt::WindowFlags flags ) : 
   QDockWidget(title, parent, flags), m_manager(manager)
 {
   setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
@@ -257,12 +257,12 @@ void ScriptOutputDock::resetFont()
  * @param parent The parent widget
  * @param flags Window flags passed to the base class
  */
-ScriptingWindow::ScriptingWindow(ScriptingEnv *env,ApplicationWindow *app,QWidget *parent, Qt::WindowFlags flags) : 
+ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFlags flags) : 
   QMainWindow(parent, flags)
 {
   setObjectName("MantidScriptWindow");
   // Sub-widgets
-  m_manager = new ScriptManagerWidget(env, this,app);
+  m_manager = new ScriptManagerWidget(env, this);
   setCentralWidget(m_manager);
   m_output_dock = new ScriptOutputDock(QString(), m_manager, this);
   m_output_dock->setScriptIsRunning(false);
@@ -288,7 +288,8 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,ApplicationWindow *app,QWidge
   QString lastdir = settings.value("LastDirectoryVisited", "").toString();
   // If nothgin, set the last directory to the Mantid scripts directory (if present)
   if( lastdir.isEmpty() )
-  {  lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
+  {  
+    lastdir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory"));
   }
   m_manager->m_last_dir = lastdir;
   if( env->supportsProgressReporting() )
@@ -409,8 +410,12 @@ void ScriptingWindow::fileAboutToShow()
   {
     m_file_menu->addAction(m_print_output);
   }
+
+  // Scripting language
   m_file_menu->insertSeparator();
-  m_file_menu->addAction(m_manager->m_actionScriptingLang);
+  m_file_menu->addAction(m_scripting_lang);
+
+
   // Close current tab
   m_file_menu->insertSeparator();
   m_file_menu->addAction(m_manager->m_close_tab);
@@ -482,6 +487,12 @@ void ScriptingWindow::initMenus()
 {
   //************* File menu *************
   m_file_menu = menuBar()->addMenu(tr("&File"));
+
+#ifdef SCRIPTING_DIALOG
+  m_scripting_lang = new QAction(tr("Scripting &language"), this);
+  connect(m_scripting_lang, SIGNAL(activated()), this, SIGNAL(chooseScriptingLanguage()));
+#endif
+
   connect(m_file_menu, SIGNAL(aboutToShow()), this, SLOT(fileAboutToShow()));
 
   m_print_output = new QAction(tr("Print &Output"), this);

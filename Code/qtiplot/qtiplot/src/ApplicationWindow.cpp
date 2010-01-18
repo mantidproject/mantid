@@ -377,15 +377,12 @@ void ApplicationWindow::init(bool factorySettings)
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
     //Scripting
-   m_script_envs = QHash<QString, ScriptingEnv*>();
+    m_script_envs = QHash<QString, ScriptingEnv*>();
     setScriptingLanguage(defaultScriptingLang);
-    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,this,true);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,true);
     delete m_interpreterDock->widget();
     m_interpreterDock->setWidget(m_scriptInterpreter);
     loadCustomActions();
-
-  //Mantid
-  //mantidUI->init();
 
 }
 void ApplicationWindow::showresultsContextMenu(const QPoint & p)
@@ -4273,7 +4270,8 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
     connect(newEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
     if( newEnv->initialize() )
-    {   m_script_envs.insert(lang, newEnv);
+    {   
+      m_script_envs.insert(lang, newEnv);
     }
     else
     {
@@ -15222,7 +15220,9 @@ void ApplicationWindow::goToColumn()
 void ApplicationWindow::showScriptWindow()
 {
   if (!scriptingWindow)
-  { scriptingWindow = new ScriptingWindow(scriptEnv,this);
+  { 
+    scriptingWindow = new ScriptingWindow(scriptEnv,this);
+    connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
     scriptingWindow->resize(d_script_win_rect.size());
     scriptingWindow->move(d_script_win_rect.topLeft());
   }
@@ -15253,7 +15253,7 @@ void ApplicationWindow::showScriptInterpreter()
     m_interpreterDock->setWindowTitle("Script Interpreter");
     addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
     
-    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,this,true);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,true);
     m_interpreterDock->setWidget(m_scriptInterpreter);
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
     m_interpreterDock->setFocusProxy(m_scriptInterpreter);

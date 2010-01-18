@@ -106,7 +106,7 @@ class ScriptingWindow : public QMainWindow
 
 public:
   ///Constructor
-  ScriptingWindow(ScriptingEnv *env,ApplicationWindow *app,QWidget *parent = 0, Qt::WindowFlags flags = 0);
+  ScriptingWindow(ScriptingEnv *env,QWidget *parent = 0, Qt::WindowFlags flags = 0);
   ///Destructor
   ~ScriptingWindow();
   /// Is a script running?
@@ -122,6 +122,10 @@ public:
   ///saves scripts file names to a string 
   QString saveToString();
 
+signals:
+  /// Show the scripting language dialog
+  void chooseScriptingLanguage();
+  
 private:
   /// Create menu bar and menu actions
   void initMenus();
@@ -156,6 +160,8 @@ private:
   QMenu *m_window_menu;
   /// Window actions
   QAction *m_always_on_top, *m_hide, *m_toggle_output, *m_print_output;
+  /// Change scripting language
+  QAction *m_scripting_lang;
 };
 
 #endif //SCRIPTINGWINDOW_H_
