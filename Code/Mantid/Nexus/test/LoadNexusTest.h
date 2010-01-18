@@ -1,9 +1,6 @@
 #ifndef LOADNEXUSTEST_H_
 #define LOADNEXUSTEST_H_
 
-//This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
-
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
@@ -41,7 +38,8 @@ public:
 
   void testExec()
   {
-    
+    //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
     outputSpace="LoadNexusTest";
@@ -80,10 +78,13 @@ public:
     // Check one particular value
     TS_ASSERT_EQUALS( output2D->dataY(11)[686], 81);
 
+#endif /*_WIN64*/
   }
 
   void testExec2()
   {
+  //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
 	  //multi period test
     // same tests but with 2nd Muon Nexus file that contains 4 periods
     if ( !alg2.isInitialized() ) alg2.initialize();
@@ -133,6 +134,8 @@ public:
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output2->getAxis(0)->unit()->unitID(), "TOF" )
+    
+#endif /*_WIN64*/
   }
  
 private:
@@ -142,5 +145,4 @@ private:
 
 };
 
-#endif /*_WIN64*/
 #endif /*LOADNEXUSTEST_H_*/

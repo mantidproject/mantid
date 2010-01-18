@@ -1,9 +1,6 @@
 #ifndef SAVENEXUSTEST_H_
 #define SAVENEXUSTEST_H_
 
-//This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
-
 #include <fstream>
 #include <cxxtest/TestSuite.h>
 
@@ -42,6 +39,8 @@ public:
   
 void testExecOnMuon()
   {
+  //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
@@ -91,6 +90,7 @@ void testExecOnMuon()
     TS_ASSERT( algToBeTested.isExecuted() );
     remove(outputFile.c_str());
    
+#endif /*_WIN64*/  
   }
 
   
@@ -101,5 +101,4 @@ private:
   int entryNumber;
   
 };
-#endif /*_WIN64*/  
 #endif /*SAVENEXUSTEST_H_*/

@@ -1,8 +1,6 @@
 #ifndef SAVENEXUSPROCESSEDTEST_H_
 #define SAVENEXUSPROCESSEDTEST_H_
 
-//This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
 
 #include <fstream>
 #include <cxxtest/TestSuite.h>
@@ -105,6 +103,8 @@ public:
 void testExecOnMuon()
   {
 
+//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     LoadNexus nxLoad;
     std::string outputSpace,inputFile;
     nxLoad.initialize();
@@ -157,6 +157,7 @@ void testExecOnMuon()
     if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
+#endif /*_WIN64*/
   }
 
 void testExecOnLoadraw()
@@ -209,6 +210,9 @@ void testExecOnLoadraw()
 
 void testExecOnMuonXml()
   {
+  
+//This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
 	//  std::string s;
    //std::getline(std::cin,s);
 
@@ -259,6 +263,7 @@ void testExecOnMuonXml()
     if(clearfiles) Poco::File(outputFile).remove();
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove(outputSpace));
 
+#endif /*_WIN64*/
   }
 
 private:
@@ -275,5 +280,4 @@ private:
   bool clearfiles;
 
 };
-#endif /*_WIN64*/
 #endif /*SAVENEXUSPROCESSEDTEST_H_*/

@@ -1,8 +1,7 @@
 #ifndef LOADMUONNEXUSTEST_H_
 #define LOADMUONNEXUSTEST_H_
 
-//This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
+
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
@@ -43,7 +42,8 @@ public:
 
   void testExec()
   {
-    
+    //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     if ( !nxLoad.isInitialized() ) nxLoad.initialize();
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(nxLoad.execute(),std::runtime_error);
@@ -147,6 +147,7 @@ public:
     TS_ASSERT_THROWS(test=map->getDetector(5),std::runtime_error);
     */
    
+#endif /*_WIN64*/  
   }
 //  void testWithManagedWorkspace()
 //  {
@@ -166,6 +167,8 @@ public:
 
   void testExec2()
   {
+  //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
     inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006475.nxs").toString();
@@ -261,9 +264,12 @@ public:
     TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
 	
 	}  
+#endif /*_WIN64*/  
   }
    void testExec2withZeroEntryNumber()
   {
+  //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     //test for multi period
     // Now set required filename and output workspace name
     inputFile2 = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Nexus/emu00006475.nxs").toString();
@@ -327,10 +333,13 @@ public:
     TS_ASSERT_EQUALS(output->sample().getName(), "ptfe test")
 	
 	}  
-   }
+#endif /*_WIN64*/  
+  }
 
   void testarrayin()
   {
+  //This test does not compile on Windows64 as is does not support HDF4 files
+#ifndef _WIN64
     if ( !nxload3.isInitialized() ) nxload3.initialize();
     
     nxload3.setPropertyValue("Filename", inputFile);    
@@ -363,6 +372,7 @@ public:
     // Check that the error on that value is correct
     TS_ASSERT_DELTA( output2D->dataX(8)[479], 7.410, 0.0001);
     
+#endif /*_WIN64*/  
   }
   
 private:
@@ -373,5 +383,4 @@ private:
   std::string inputFile2;
   boost::shared_ptr<SpectraDetectorMap> map;
 };
-#endif /*_WIN64*/  
 #endif /*LOADMUONNEXUSTEST_H_*/

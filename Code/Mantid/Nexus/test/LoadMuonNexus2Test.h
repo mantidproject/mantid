@@ -1,8 +1,6 @@
 #ifndef LOADMUONNEXUS2TEST_H_
 #define LOADMUONNEXUS2TEST_H_
 
-//This test does not compile on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this test case.
@@ -264,5 +262,4 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
   }
 };
-#endif /*_WIN64*/  
 #endif /*LOADMUONNEXUS2TEST_H_*/
