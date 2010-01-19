@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -53,7 +54,7 @@ void Q1D::exec()
   const int sizeOut = VectorHelper::createAxisFromRebinParams(binParams,XOut.access());
 
   // Now create the output workspace
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D",1,sizeOut,sizeOut-1);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnit("I(q)");
   // The final output is a distribution, but that messes up the label on the vertical axis
@@ -72,6 +73,12 @@ void Q1D::exec()
   MantidVec anglesSum(sizeOut-1);
 
   const int numSpec = inputWS->getNumberHistograms();
+
+  // Get a reference to the spectra-detector map
+  SpectraDetectorMap& specMap = outputWS->mutableSpectraMap();
+  const Axis* const spectraAxis = inputWS->getAxis(1);
+  int newSpectrumNo = -1;
+
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);
 
@@ -97,6 +104,13 @@ void Q1D::exec()
     // If this detector is masked, skip onto the next one
     if ( det->isMasked() ) continue;
 
+    // Map all the detectors onto the spectrum of the output
+    if (spectraAxis->isSpectra()) 
+    {
+      if (newSpectrumNo == -1) newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(i);
+      specMap.remap(spectraAxis->spectraNo(i),newSpectrumNo);
+    }
+
     // Get the current spectrum for both input workspaces - not references, have to reverse below
     const MantidVec& XIn = inputWS->readX(i);
     MantidVec YIn = inputWS->readY(i);
@@ -117,7 +131,7 @@ void Q1D::exec()
         // Calculate the drop (I'm fairly confident that Y is up!)
         // Using approx. constant prefix - will fix next week
         const double drop = 3.1336e-7 * XIn[j] * XIn[j] * L2;
-	
+
         // Calculate new 2theta in light of this
         V3D sampleDetVec = detPos - samplePos;
         sampleDetVec[1] += drop;
