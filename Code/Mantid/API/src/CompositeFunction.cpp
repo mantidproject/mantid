@@ -361,6 +361,27 @@ int CompositeFunction::activeIndex(int i)const
   return m_activeOffsets[iFun] + j;
 }
 
+/** Makes sure that the function is consistent. 
+ */
+void CompositeFunction::checkFunction()
+{
+  m_nParams = 0;
+  m_nActive = 0;
+  m_paramOffsets.clear();
+  m_activeOffsets.clear();
+  m_iFunction.clear();
+  m_iFunctionActive.clear();
+
+  std::vector<IFunction*> functions(m_functions.begin(),m_functions.end());
+  m_functions.clear();
+
+  for(int i=0;i<functions.size();i++)
+  {
+    IFunction* f = functions[i];
+    addFunction(f);
+  }
+}
+
 /** Add a function
  * @param f A pointer to the added function
  * @return The function index

@@ -715,7 +715,8 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
   {// Check if it is a function attribute
     for(int fi=0;fi<m_functionItems.size();fi++)
     {
-      QList<QtProperty*> funProps = m_functionItems[fi]->property()->subProperties();
+      QtProperty* fnProp = m_functionItems[fi]->property();
+      QList<QtProperty*> funProps = fnProp->subProperties();
       // If a string is found in funProps - it is an attribute
       int ia = funProps.indexOf(prop);
       if (ia >= 0)
@@ -730,8 +731,9 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
         {
           break;
         }
-        Mantid::API::IFunction* f_new = Mantid::API::FunctionFactory::Instance().createInitialized(*function(fi));
-        replaceFunction(fi,f_new);
+        m_compositeFunction->checkFunction();
+        removeFunProperties(fnProp);
+        addFunProperties(function(fi),fnProp);
         break;
       }
     }

@@ -137,6 +137,8 @@ public:
   int functionIndexActive(int i)const;
   /// Returns the name of parameter i as it declared in its function
   std::string parameterLocalName(int i)const;
+  /// Check the function.
+  void checkFunction();
 
 protected:
   /// Function initialization. Declare function parameters in this method.
