@@ -9,14 +9,19 @@ namespace Mantid
 namespace CurveFitting
 {
 
-BFGS_Minimizer::BFGS_Minimizer( gsl_multimin_function_fdf& gslContainer, 
-  gsl_vector* startGuess) : m_name("BFGS") 
+BFGS_Minimizer::BFGS_Minimizer( 
+  gsl_multimin_function_fdf& gslContainer, 
+  gsl_vector* startGuess,
+  gsl_multifit_function_fdf& gslLeastSquaresContainer) 
+  : m_name("BFGS") 
 {
   const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
 
   // setup minimizer
   m_gslSolver = gsl_multimin_fdfminimizer_alloc(T, gslContainer.n);
   gsl_multimin_fdfminimizer_set(m_gslSolver, &gslContainer, startGuess, 0.01, 0.01);
+
+  m_gslLeastSquaresContainer = &gslLeastSquaresContainer;
 }
 
 BFGS_Minimizer::~BFGS_Minimizer()
@@ -46,7 +51,13 @@ double BFGS_Minimizer::costFunctionVal()
 
 void BFGS_Minimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
 {
-  Kernel::Exception::NotImplementedError("Covariance matrix calculation for Simplex not implemented.");
+  gsl_matrix * holdCalculatedJacobian;
+  holdCalculatedJacobian =  gsl_matrix_alloc (m_gslLeastSquaresContainer->n, m_gslLeastSquaresContainer->p);
+
+  int dummy = m_gslLeastSquaresContainer->df(m_gslSolver->x, m_gslLeastSquaresContainer->params, holdCalculatedJacobian);
+  gsl_multifit_covar (holdCalculatedJacobian, epsrel, covar);
+
+  gsl_matrix_free (holdCalculatedJacobian);
 }
 
 } // namespace CurveFitting

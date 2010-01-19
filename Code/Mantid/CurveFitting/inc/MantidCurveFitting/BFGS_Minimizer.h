@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include <gsl/gsl_multimin.h>
+#include <gsl/gsl_multifit_nlin.h>
 
 namespace Mantid
 {
@@ -42,7 +43,8 @@ class DLLExport BFGS_Minimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~BFGS_Minimizer();
-  BFGS_Minimizer(gsl_multimin_function_fdf& gslContainer, gsl_vector* startGuess);
+  BFGS_Minimizer(gsl_multimin_function_fdf& gslContainer, gsl_vector* startGuess,
+    gsl_multifit_function_fdf& gslLeastSquaresContainer);
 
   /// Overloading base class methods
   std::string name()const;
@@ -57,6 +59,11 @@ private:
 
   /// pointer to the GSL solver doing the work
   gsl_multimin_fdfminimizer *m_gslSolver;
+
+  /// passed information about the derivative etc of fitting function
+  /// rather than the derivative etc of cost function
+  /// used for calculating covariance matrix
+  gsl_multifit_function_fdf* m_gslLeastSquaresContainer;
 };
 
 
