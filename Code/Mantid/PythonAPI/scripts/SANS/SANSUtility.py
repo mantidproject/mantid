@@ -58,7 +58,7 @@ def InfinitePlaneXML(id, plane_pt, normal_pt):
 	return '<infinite-plane id="' + str(id) + '">' + \
 	    '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
 	    '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-	    '</infinite-plane>\n'			
+	    '</infinite-plane>\n'
 
 def InfiniteCylinderXML(id, centre, radius, axis):
 	return  '<infinite-cylinder id="' + str(id) + '">' + \
@@ -87,30 +87,52 @@ def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
 
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax):
-	#Convert to radians
-	phimin = math.pi*phimin/180.0
-	phimax = math.pi*phimax/180.0
-	xmldef =  InfinitePlaneXML('pla',centre, [math.cos(phimin + math.pi/2.0),math.sin(phimin + math.pi/2.0),0]) + \
-	InfinitePlaneXML('pla2',centre, [-math.cos(phimax + math.pi/2.0),-math.sin(phimax + math.pi/2.0),0]) + \
-	InfinitePlaneXML('pla3',centre, [math.cos(phimax + math.pi/2.0),math.sin(phimax + math.pi/2.0),0]) + \
-	InfinitePlaneXML('pla4',centre, [-math.cos(phimin + math.pi/2.0),-math.sin(phimin + math.pi/2.0),0]) + \
-	'<algebra val="#((pla pla2):(pla3 pla4))" />'
-	
-	MaskDetectorsInShape(workspace, xmldef)	
+    #Convert to radians
+    phimin = math.pi*phimin/180.0
+    phimax = math.pi*phimax/180.0
+    xmldef =  InfinitePlaneXML('pla',centre, [math.cos(phimin + math.pi/2.0),math.sin(phimin + math.pi/2.0),0]) + \
+    InfinitePlaneXML('pla2',centre, [-math.cos(phimax + math.pi/2.0),-math.sin(phimax + math.pi/2.0),0]) + \
+    InfinitePlaneXML('pla3',centre, [math.cos(phimax + math.pi/2.0),math.sin(phimax + math.pi/2.0),0]) + \
+    InfinitePlaneXML('pla4',centre, [-math.cos(phimin + math.pi/2.0),-math.sin(phimin + math.pi/2.0),0]) + \
+    '<algebra val="#((pla pla2):(pla3 pla4))" />'
+    
+    MaskDetectorsInShape(workspace, xmldef)	
+
+# Essentially an enumeration
+class Orientation(object):
+
+    Horizontal = 1
+    Vertical = 2
+    Rotated = 3
 
 # Work out the spectra IDs for block of detectors
-def spectrumBlock(start_spec, ydim, xdim, strip_dim):
+def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
     '''Compile a list of spectrum IDs for rectangular block of size xdim by ydim'''
     output = ''
-    for y in range(0, ydim):
+    if orientation == Orientation.Horizontal:
+        start_spec = base + ylow*det_dimension + xlow
+        for y in range(0, ydim):
+            for x in range(0, xdim):
+                output += str(start_spec + x + (y*det_dimension)) + ','
+    elif orientation == Orientation.Vertical:
+        start_spec = base + ylow*det_dimension + xlow
         for x in range(0, xdim):
-            output += str(start_spec + x + (y*strip_dim)) + ','
-    output = output.rstrip(",")
-    return output
+            for y in range(0, ydim):
+                output += str(start_spec + y + x*det_dimension) + ','
+    else:
+        # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
+        start_spec = base + ylow*det_dimension + xlow
+        max_spec = det_dimension*det_dimension + base - 1
+        for y in range(0, ydim):
+            for x in range(0, xdim):
+                std_i = start_spec + x + (y*det_dimension)
+                output += str(max_spec - (std_i - base)) + ','
 
+    return output.rstrip(",")
+    
 # Convert a mask string to a spectra list
 # 6/8/9 RKH attempt to add a box mask e.g.  h12+v34 (= one pixel at intersection), h10>h12+v101>v123 (=block 3 wide, 23 tall)
-def ConvertToSpecList(maskstring, firstspec, dimension):
+def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
     '''Compile spectra ID list'''
     if maskstring == '':
         return ''
@@ -118,7 +140,6 @@ def ConvertToSpecList(maskstring, firstspec, dimension):
     speclist = ''
     for x in masklist:
         x = x.lower()
-#   new stuff -----------------------------------------------------------
         if '+' in x:
             bigPieces = x.split('+')
             if '>' in bigPieces[0]:
@@ -138,33 +159,30 @@ def ConvertToSpecList(maskstring, firstspec, dimension):
             if 'h' in bigPieces[0] and 'v' in bigPieces[1]:
                 ydim=abs(upp-low)+1
                 xdim=abs(upp2-low2)+1
-                speclist += spectrumBlock(firstspec + low*dimension + low2, ydim, xdim, dimension) + ','
+                speclist += spectrumBlock(firstspec,low, low2,ydim, xdim, dimension,orientation) + ','
             elif 'v' in bigPieces[0] and 'h' in bigPieces[1]:
                 xdim=abs(upp-low)+1
                 ydim=abs(upp2-low2)+1
-                speclist += spectrumBlock(firstspec + low2*dimension + low, ydim, xdim, dimension) + ','
+                speclist += spectrumBlock(firstspec,low2, low,nstrips, dimension, dimension,orientation)+ ','
             else:
                 print "error in mask, ignored:  " + x
-# end of new stuff --------------------------------------------
-# CHECK taking abs(upp-low) may avoid array index issues, but to get h9>h8 to work need to use low = min(low,upp) ???
         elif '>' in x:
             pieces = x.split('>')
             low = int(pieces[0].lstrip('hvs'))
             upp = int(pieces[1].lstrip('hvs'))
             if 'h' in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                speclist += spectrumBlock(firstspec + low*dimension, nstrips, dimension, dimension) + ','
+                speclist += spectrumBlock(firstspec,low, 0,nstrips, dimension, dimension,orientation)  + ','
             elif 'v' in pieces[0]:
                 nstrips = abs(upp - low) + 1
-                speclist += spectrumBlock(firstspec + low, dimension, nstrips, dimension) + ','
+                speclist += spectrumBlock(firstspec,0,low, dimension, nstrips, dimension,orientation)  + ','
             else:
                 for i in range(low, upp + 1):
                     speclist += str(i) + ','
         elif 'h' in x:
-            low = int(x.lstrip('h'))
-            speclist += spectrumBlock(firstspec + low*dimension, 1, dimension, dimension) + ','
+            speclist += spectrumBlock(firstspec,int(x.lstrip('h')), 0,1, dimension, dimension,orientation) + ','
         elif 'v' in x:
-            speclist += spectrumBlock(firstspec + int(x.lstrip('v')), dimension, 1, dimension) + ','
+            speclist += spectrumBlock(firstspec,0,int(x.lstrip('v')), dimension, 1, dimension,orientation) + ','
         else:
             speclist += x.lstrip('s') + ','
     

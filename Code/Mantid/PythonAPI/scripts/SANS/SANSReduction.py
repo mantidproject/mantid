@@ -1136,28 +1136,30 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
 ##
 # Apply the spectrum and time masks to a given workspace
 ##
-def applyMasking(workspace, firstspec, dimension, limitphi = True):
+def applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orientation.Horizontal,limitphi = True):
     # Spectra masks
-    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, dimension)
-    # Spectrum mask
+    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, dimension,orientation)
     SANSUtility.MaskBySpecNumber(workspace, speclist)
-    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec + dimension*dimension, dimension)
-    #This applies to both detectors
-    SANSUtility.MaskBySpecNumber(workspace, speclist)
-    
-    # Separate mask parameters for each detector
-    #Front
-    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING_F, firstspec + dimension*dimension, dimension) 
-    SANSUtility.MaskBySpecNumber(workspace, speclist)
-    #Rear
-    speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING_R, firstspec, dimension) 
-    SANSUtility.MaskBySpecNumber(workspace, speclist)
+    #Time mask
+    SANSUtility.MaskByBinRange(workspace,TIMEMASKSTRING)
+    # Front detector
+    if DETBANK == 'front-detector' or DETBANK == 'HAB':
+        specstring = SPECMASKSTRING_F
+        timestring = TIMEMASKSTRING_F
+    else:
+        specstring = SPECMASKSTRING_R
+        timestring = TIMEMASKSTRING_R
 
+    speclist = SANSUtility.ConvertToSpecList(specstring, firstspec, dimension,orientation) 
+    SANSUtility.MaskBySpecNumber(workspace, speclist)
+    SANSUtility.MaskByBinRange(workspace, timestring)
+    
     # Finally apply masking to get the correct phi range
     if (limitphi == True and PHIMAX - PHIMIN < 180):
         centre = mtd[workspace].getInstrument().getComponentByName(DETBANK).getPos()
         centre_pt = [centre.getX(), centre.getY(), centre.getZ()]
         SANSUtility.LimitPhi(workspace, centre_pt, PHIMIN,PHIMAX)
+        
 #----------------------------------------------------------------------------------------------------------------------------
 ##
 # Main correction routine
@@ -1166,18 +1168,23 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     '''Performs the data reduction steps'''
     global MONITORSPECTRUM, SPECMIN, SPECMAX
     sample_raw = run_setup.getRawWorkspace()
+    orientation = orientation=SANSUtility.Orientation.Horizontal
     if INSTR_NAME == "SANS2D":
-        sample_run = sample_raw.split('_')[0]
-        if int(sample_run) < 568:
+        sample_run = int(sample_raw.split('_')[0])
+        if sample_run < 568:
+            orientation=SANSUtility.Orientation.Vertical
             MONITORSPECTRUM = 73730
-            monstart = 0
             if DETBANK == 'rear-detector':
-                SPECMIN = DIMENSION*DIMENSION + 1 + monstart
-                SPECMAX = DIMENSION*DIMENSION*2 + monstart
+                SPECMIN = DIMENSION*DIMENSION + 1 
+                SPECMAX = DIMENSION*DIMENSION*2
             else:
-                SPECMIN = 1 + monstart
-                SPECMAX = DIMENSION*DIMENSION + monstart                        
-                                
+                SPECMIN = 1
+                SPECMAX = DIMENSION*DIMENSION
+        elif (sample_run >= 568 and sample_run < 684):
+            orientation = SANSUtility.Orientation.Rotated
+        else:
+            pass
+
     ############################# Setup workspaces ######################################
     monitorWS = "Monitor"
     # Get the monitor ( StartWorkspaceIndex is off by one with cropworkspace)
@@ -1208,7 +1215,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         if RMAX > 0.0:
             SANSUtility.MaskOutsideCylinder(final_result, RMAX, maskpt_rmax[0], maskpt_rmax[1])
 
-    applyMasking(final_result, SPECMIN, DIMENSION, True)
+    applyMasking(final_result, SPECMIN, DIMENSION, orientation,True)
     ####################################################################################
         
     ######################## Unit change and rebin #####################################

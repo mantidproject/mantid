@@ -146,7 +146,7 @@ private:
         QString mCurrentColorMap;
         QString m_savedialog_dir; /// The last used dialog directory
 
-  virtual void deleteHandle(const std::string & ws_name, boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
+  virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void clearADSHandle();
 };
 

@@ -4563,7 +4563,7 @@ void ApplicationWindow::readSettings()
 	confirmClosePlot3D = settings.value("/Plot3D", true).toBool();
 	confirmCloseNotes = settings.value("/Note", true).toBool();
 	d_inform_rename_table = settings.value("/RenameTable", true).toBool();
-	confirmCloseInstrWindow=settings.value("/InstrumentWindow", true).toBool();
+	confirmCloseInstrWindow=settings.value("/InstrumentWindow", false).toBool();
 	settings.endGroup(); // Confirmations
 
 
