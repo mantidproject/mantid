@@ -499,14 +499,16 @@ void CompositeFunction::replaceFunction(int i,IFunction* f)
   // Modify function indeces: The new function may have different number of parameters
   {
     std::vector<int>::iterator itFun = std::find(m_iFunction.begin(),m_iFunction.end(),i);
-    assert(itFun != m_iFunction.end()); // functions must have at least 1 parameter
-    if (np_old > np_new)
+    if(itFun != m_iFunction.end()) // functions must have at least 1 parameter
     {
-      m_iFunction.erase(itFun,itFun + np_old - np_new);
-    }
-    else if (np_old < np_new) 
-    {
-      m_iFunction.insert(itFun,np_new - np_old,i);
+      if (np_old > np_new)
+      {
+        m_iFunction.erase(itFun,itFun + np_old - np_new);
+      }
+      else if (np_old < np_new) 
+      {
+        m_iFunction.insert(itFun,np_new - np_old,i);
+      }
     }
   }
 

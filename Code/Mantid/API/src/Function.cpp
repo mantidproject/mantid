@@ -423,5 +423,24 @@ void Function::clearTies()
   m_ties.clear();
 }
 
+/// Nonvirtual member which removes all declared parameters
+void Function::clearAllParameters()
+{
+  for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
+  {
+    delete *it;
+  }
+  m_ties.clear();
+  for(std::vector<IConstraint*>::iterator it = m_constraints.begin();it!= m_constraints.end();it++)
+  {
+    delete *it;
+  }
+  m_constraints.clear();
+
+  m_parameters.clear();
+  m_parameterNames.clear();
+  m_indexMap.clear();
+}
+
 } // namespace API
 } // namespace Mantid

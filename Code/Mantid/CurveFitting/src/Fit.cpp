@@ -393,6 +393,11 @@ namespace CurveFitting
 
     l_data.p = m_function->nActive();
     l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
+    if (l_data.p == 0)
+    {
+      g_log.error("There are no active parameters.");
+      throw std::runtime_error("There are no active parameters.");
+    }
     if (l_data.n == 0)
     {
       g_log.error("The data set is empty.");
@@ -857,11 +862,6 @@ namespace CurveFitting
 
       API::IFunction* fun = API::FunctionFactory::Instance().createFunction(functionName);
 
-      if (isComposite)
-        static_cast<API::CompositeFunction*>(function)->addFunction(fun);
-      else
-        setFunction(fun);
-
       // Loop over param to set the initial values and constraints
       std::vector<std::pair<std::string,std::string> >::const_iterator par = param.begin();
       for(;par!=param.end();++par)
@@ -901,7 +901,16 @@ namespace CurveFitting
           fun->getParameter(parName) = atof(parValue.c_str());
         }
       }
-    }
+      // Attach the new function
+      if (isComposite)
+      {
+        static_cast<API::CompositeFunction*>(function)->addFunction(fun);
+      }
+      else
+      {
+        setFunction(fun);
+      }
+    }// for(ifun)
 
     // Ties property is a comma separated list of formulas of the form:
     // tiedParamName = MathExpression, parameter names defined in the fitted function can be used

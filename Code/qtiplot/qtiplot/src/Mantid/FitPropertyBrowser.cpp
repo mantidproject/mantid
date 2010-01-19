@@ -67,12 +67,21 @@ m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWind
   m_startX = m_doubleManager->addProperty("StartX");
   m_endX = m_doubleManager->addProperty("EndX");
   m_output = m_stringManager->addProperty("Output");
+  m_minimizer = m_enumManager->addProperty("Minimizer");
+
+  m_minimizers << "Levenberg-Marquardt"
+               << "Simplex"
+               << "Conjugate gradient (Fletcher-Reeves imp.)"
+               << "Conjugate gradient (Polak-Ribiere imp.)"
+               << "BFGS";
+  m_enumManager->setEnumNames(m_minimizer, m_minimizers);
 
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_output);
+  settingsGroup->addSubProperty(m_minimizer);
 
      /* Create editors and assign them to the managers */
 
@@ -366,26 +375,12 @@ void FitPropertyBrowser::addFunction(const std::string& fnName)
   QtProperty* fnProp = m_groupManager->addProperty(functionName(index()));
   m_functionsGroup->property()->addSubProperty(fnProp);
 
-  QtProperty* typeProp = m_enumManager->addProperty("Type");
-  fnProp->addSubProperty(typeProp);
-  int itype = m_registeredFunctions.indexOf(QString::fromStdString(functionType()));
-  m_enumManager->setEnumNames(typeProp, m_registeredFunctions);
-  m_enumManager->setValue(typeProp,itype);
-
-  // Add properties for the function's parameters
-  for(int i=0;i<f->nParams();i++)
-  {
-    QtProperty* parProp = m_doubleManager->addProperty(QString::fromStdString(f->parameterName(i)));
-    fnProp->addSubProperty(parProp);
-    m_doubleManager->setValue(parProp,f->parameter(i));
-  }
-
   QtBrowserItem* fnItem = findItem(m_functionsGroup,fnProp);
   m_browser->setExpanded(fnItem,false);
   m_functionItems.append(fnItem);
   selectFunction(index());
 
-  updateParameters();
+  addFunProperties(f,fnProp);
 
   m_changeSlotsEnabled = true;
 
@@ -398,10 +393,19 @@ void FitPropertyBrowser::addFunction(const std::string& fnName)
  */
 void FitPropertyBrowser::replaceFunction(int i,const std::string& fnName)
 {
-  if (i < 0 || i >= count()) return;
   disableUndo();
   Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
   f->initialize();
+  replaceFunction(i,f);
+}
+
+/** Replace the current function with a new one
+ * @param i The function index
+ * @param f A pointer to a new function
+ */
+void FitPropertyBrowser::replaceFunction(int i,Mantid::API::IFunction* f)
+{
+  if (i < 0 || i >= count()) return;
   Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
   if (pf && peakFunction(i))
   {
@@ -413,32 +417,9 @@ void FitPropertyBrowser::replaceFunction(int i,const std::string& fnName)
   m_compositeFunction->replaceFunction(i,f);
   QtBrowserItem* fnItem = m_functionItems[i];
   fnItem->property()->setPropertyName(functionName(i));
-  QList<QtProperty*> subs = fnItem->property()->subProperties();
-  
-  if (subs.size()-1 > f->nParams())
-  {
-    for(int j=f->nParams()+1;j<subs.size();j++)
-    {
-      fnItem->property()->removeSubProperty(subs[j]);
-      delete subs[j]; // ?
-    }
-  }
-  else if (subs.size()-1 < f->nParams())
-  {
-    for(int j=subs.size()-1;j<f->nParams();j++)
-    {
-      QtProperty* parProp = m_doubleManager->addProperty(QString::fromStdString(f->parameterName(j)));
-      fnItem->property()->addSubProperty(parProp);
-    }
-  }
-  subs = fnItem->property()->subProperties();
-  for(int j=0;j<f->nParams();j++)
-  {
-    subs[j+1]->setPropertyName(QString::fromStdString(f->parameterName(j)));
-    m_doubleManager->setValue(subs[j+1],f->parameter(j));
-  }
 
-  updateParameters();
+  removeFunProperties(fnItem->property());
+  addFunProperties(f,fnItem->property());
 }
 
 /** Remove a function
@@ -553,6 +534,13 @@ void FitPropertyBrowser::setOutputName(const std::string& name)
   m_stringManager->setValue(m_output,QString::fromStdString(name));
 }
 
+/// Get the minimizer
+std::string FitPropertyBrowser::minimizer()const
+{
+  int i = m_enumManager->value(m_minimizer);
+  return m_minimizers[i].toStdString();
+}
+
 /** Called when the function name property changed
  * @param prop A pointer to the function name property m_functionName
  */
@@ -648,11 +636,12 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
       QList<QtProperty*> subs = fnItem->property()->subProperties();
       Mantid::API::IFunction* f = m_compositeFunction->getFunction(i);
       bool done = false;
-      for(int j=1;j<subs.size();j++)
+      int j0 = 1 + f->nAttributes();
+      for(int j=j0;j<subs.size();j++)
       {
         if (subs[j] == prop)
         {
-          f->parameter(j-1) = value;
+          f->parameter(j-j0) = value;
           done = true;
           break;
         }
@@ -719,6 +708,31 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
           //QString msg = "Error in tie \""+estr+"\":\n\n"+QString::fromAscii(e.what());
           //m_stringManager->setValue(prop,"");
         }
+      }
+    }
+  }
+  else
+  {// Check if it is a function attribute
+    for(int fi=0;fi<m_functionItems.size();fi++)
+    {
+      QList<QtProperty*> funProps = m_functionItems[fi]->property()->subProperties();
+      // If a string is found in funProps - it is an attribute
+      int ia = funProps.indexOf(prop);
+      if (ia >= 0)
+      {
+        std::string attrName = prop->propertyName();
+        std::string attrValue = m_stringManager->value(prop).toStdString();
+        try
+        {
+          function(fi)->setAttribute(attrName,attrValue);
+        }
+        catch(...)
+        {
+          break;
+        }
+        Mantid::API::IFunction* f_new = Mantid::API::FunctionFactory::Instance().createInitialized(*function(fi));
+        replaceFunction(fi,f_new);
+        break;
       }
     }
   }
@@ -792,6 +806,8 @@ void FitPropertyBrowser::populateFunctionNames()
 {
   const std::vector<std::string> names = Mantid::API::FunctionFactory::Instance().getKeys();
   m_registeredFunctions.clear();
+  m_registeredPeaks.clear();
+  m_registeredBackgrounds.clear();
   for(size_t i=0;i<names.size();i++)
   {
     std::string fnName = names[i];
@@ -888,6 +904,7 @@ void FitPropertyBrowser::fit()
     alg->setProperty("EndX",endX());
     alg->setPropertyValue("Output",outputName());
     alg->setPropertyValue("Function",*m_compositeFunction);
+    alg->setPropertyValue("Minimizer",minimizer());
     QString tiesStr;
     for(int i=0;i<m_ties.size();i++)
     {
@@ -1158,7 +1175,8 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
   }
 }
 
-/// Update the function parameter properties
+/** Update the function parameter properties. 
+ */
 void FitPropertyBrowser::updateParameters()
 {
   for(int i=0;i<m_functionItems.size();i++)
@@ -1166,24 +1184,78 @@ void FitPropertyBrowser::updateParameters()
     QtBrowserItem* fnItem = m_functionItems[i];
     QList<QtProperty*> paramProps = fnItem->property()->subProperties();
     Mantid::API::IFunction* f = m_compositeFunction->getFunction(i);
-    for(int j=1;j<paramProps.size();j++)
+    // Parameter properties start after the "Type" field and all attributes
+    int j0 = 1 + f->nAttributes();
+    int nParamProps = paramProps.size()-j0;
+    // If new parameters appeared (e.g. in a UserFunction)
+    if (nParamProps != f->nParams())
     {
-      double v = f->parameter(j-1);
-      m_doubleManager->setValue(paramProps[j],v);
-      QList<QtProperty*> tieProps = paramProps[j]->subProperties();
-      for(int k=0;k<tieProps.size();k++)
+      for(int ip=0;ip< f->nParams();ip++)
       {
-        if (tieProps[k]->propertyName() == "Tie")
+        QString parName = QString::fromStdString(f->parameterName(ip));
+        QtProperty* parProp;
+        if (ip >= nParamProps)
         {
-          int it = indexOfTie(tieProps[k]);
-          if (it >= 0)
-          {
-            m_stringManager->setValue(tieProps[k],m_ties[it].exprRHS());
-          }
+          parProp = m_doubleManager->addProperty(parName);
         }
+        else
+        {
+          parProp = paramProps[j0 + ip];
+          parProp->setPropertyName(parName);
+        }
+        fnItem->property()->addSubProperty(parProp);
+        double v = f->parameter(ip);
+        m_doubleManager->setValue(parProp,v);
       }
+      if (nParamProps > f->nParams())
+      {// Remove the extra properties along with its ties and constraints
+        for(int ip = f->nParams(); ip < nParamProps; ip++)
+        {
+          QtProperty* parProp = paramProps[ip+j0];
+          for(int t=0;t<m_ties.size();)
+          {
+            if (m_ties[t].getProperty() == parProp)
+            {
+              m_ties.removeAt(t);
+            }
+            else
+            {
+              ++t;
+            }
+          }
+          QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator cit = m_constraints.find(parProp);
+          if (cit != m_constraints.end())
+          {
+            m_constraints.remove(parProp);
+          }
+          fnItem->property()->removeSubProperty(parProp);
+        }// for(ip)
+      }// if (nParamProps > f->nParams())
     }
-  }
+    else
+    {
+      for(int j=j0;j<paramProps.size();j++)
+      {
+        int ip = j - j0;
+        QString parName = QString::fromStdString(f->parameterName(ip));
+        paramProps[j]->setPropertyName(parName);
+        double v = f->parameter(ip);
+        m_doubleManager->setValue(paramProps[j],v);
+        QList<QtProperty*> tieProps = paramProps[j]->subProperties();
+        for(int k=0;k<tieProps.size();k++)
+        {
+          if (tieProps[k]->propertyName() == "Tie")
+          {
+            int it = indexOfTie(tieProps[k]);
+            if (it >= 0)
+            {
+              m_stringManager->setValue(tieProps[k],m_ties[it].exprRHS());
+            }
+          }
+        }// for(k)
+      }// for(j)
+    }
+  }// for(i)
 }
 
 /**
@@ -1729,4 +1801,64 @@ void FitPropertyBrowser::removeBounds()
 void FitPropertyBrowser::plotGuessCurrent()
 {
   emit plotGuess(index());
+}
+
+/// Remove all properties associated with a function
+void FitPropertyBrowser::removeFunProperties(QtProperty* fnProp)
+{
+  QList<QtProperty*> subs = fnProp->subProperties();
+  for(int i = 0; i < subs.size(); i++)
+  {
+    QtProperty* parProp = subs[i];
+    for(int t=0;t<m_ties.size();)
+    {
+      if (m_ties[t].getProperty() == parProp)
+      {
+        m_ties.removeAt(t);
+      }
+      else
+      {
+        ++t;
+      }
+    }
+    QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator cit = m_constraints.find(parProp);
+    if (cit != m_constraints.end())
+    {
+      m_constraints.remove(parProp);
+    }
+    fnProp->removeSubProperty(parProp);
+  }
+}
+/** Add properties associated with a function: type, attributes, parameters
+ * @param f A pointer to the function
+ * @param fnProp The group property for the function f
+ */
+void FitPropertyBrowser::addFunProperties(Mantid::API::IFunction* f,QtProperty* fnProp)
+{
+  m_changeSlotsEnabled = false;
+
+  QtProperty* typeProp = m_enumManager->addProperty("Type");
+  fnProp->addSubProperty(typeProp);
+  int itype = m_registeredFunctions.indexOf(QString::fromStdString(f->name()));
+  m_enumManager->setEnumNames(typeProp, m_registeredFunctions);
+  m_enumManager->setValue(typeProp,itype);
+
+  // Add attributes for the function's parameters
+  std::vector<std::string> attr = f->getAttributeNames();
+  for(size_t i=0;i<attr.size();i++)
+  {
+    QtProperty* parProp = m_stringManager->addProperty(QString::fromStdString(attr[i]));
+    fnProp->addSubProperty(parProp);
+    m_stringManager->setValue(parProp,QString::fromStdString(f->getAttribute(attr[i])));
+  }
+
+  // Add properties for the function's parameters
+  for(int i=0;i<f->nParams();i++)
+  {
+    QtProperty* parProp = m_doubleManager->addProperty(QString::fromStdString(f->parameterName(i)));
+    fnProp->addSubProperty(parProp);
+    m_doubleManager->setValue(parProp,f->parameter(i));
+  }
+
+  m_changeSlotsEnabled = true;
 }

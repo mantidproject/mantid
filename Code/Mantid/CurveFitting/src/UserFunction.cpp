@@ -35,7 +35,12 @@ namespace Mantid
 
       if (std::string(varName) != "x")
       {
-        fun.declareParameter(varName,0.0);
+        try
+        {
+          fun.declareParameter(varName,0.0);
+        }
+        catch(...)
+        {}
       }
       else
       {
@@ -58,6 +63,7 @@ namespace Mantid
       }
 
       m_x_set = false;
+      clearAllParameters();
 
       try
       {

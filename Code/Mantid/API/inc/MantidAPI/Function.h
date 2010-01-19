@@ -128,6 +128,9 @@ protected:
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(int i)const;
 
+  /// Nonvirtual member which removes all declared parameters
+  void clearAllParameters();
+
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i
   std::vector<int> m_indexMap;

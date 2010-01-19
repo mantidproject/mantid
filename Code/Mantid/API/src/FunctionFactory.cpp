@@ -83,15 +83,6 @@ namespace Mantid
 
         API::IFunction* fun = API::FunctionFactory::Instance().createFunction(functionName);
 
-        if (isComposite)
-        {
-          static_cast<API::CompositeFunction*>(function)->addFunction(fun);
-        }
-        else
-        {
-          function = fun;
-        }
-
         // Loop over param to set the initial values and constraints
         std::vector<std::pair<std::string,std::string> >::const_iterator par = param.begin();
         for(;par!=param.end();++par)
@@ -132,7 +123,15 @@ namespace Mantid
             fun->getParameter(parName) = atof(parValue.c_str());
           }
         }
-      }
+        if (isComposite)
+        {
+          static_cast<API::CompositeFunction*>(function)->addFunction(fun);
+        }
+        else
+        {
+          function = fun;
+        }
+      }// for(ifun)
       return function;
     }
 

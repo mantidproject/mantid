@@ -117,6 +117,8 @@ public:
   std::string outputName()const;
   /// Set the output name
   void setOutputName(const std::string&);
+  /// Get the minimizer
+  std::string minimizer()const;
 
   /// Get the start X
   double startX()const;
@@ -213,6 +215,8 @@ private:
 
   /// Create CompositeFunction
   void createCompositeFunction();
+  /// Replace function
+  void replaceFunction(int i,Mantid::API::IFunction* f);
   /// Get and store available workspace names
   void populateWorkspaceNames();
   /// Get the registered function names
@@ -237,6 +241,10 @@ private:
   bool hasTie(QtProperty* parProp)const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty* getTieProperty(QtProperty* parProp)const;
+  /// Remove all properties associated with a function
+  void removeFunProperties(QtProperty* fnProp);
+  /// Add properties associated with a function: type, attributes, parameters
+  void addFunProperties(Mantid::API::IFunction* f,QtProperty* fnProp);
 
   /// Button for doing fit
   QPushButton* m_btnFit;
@@ -271,6 +279,7 @@ private:
   QtProperty *m_startX;
   QtProperty *m_endX;
   QtProperty *m_output;
+  QtProperty *m_minimizer;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
@@ -280,6 +289,8 @@ private:
   mutable QStringList m_registeredBackgrounds;
   /// A list of available workspaces
   mutable QStringList m_workspaceNames;
+  /// A list of available minimizers
+  mutable QStringList m_minimizers;
 
   /// A copy of the edited function
   boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
