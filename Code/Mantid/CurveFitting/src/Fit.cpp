@@ -474,13 +474,13 @@ namespace CurveFitting
 
     // set-up GSL least squares container
 
-    gsl_multifit_function_fdf f;
-    f.f = &gsl_f;
-    f.df = &gsl_df;
-    f.fdf = &gsl_fdf;
-    f.n = l_data.n;
-    f.p = l_data.p;
-    f.params = &l_data;
+    gsl_multifit_function_fdf gslLeastSquaresContainer;
+    gslLeastSquaresContainer.f = &gsl_f;
+    gslLeastSquaresContainer.df = &gsl_df;
+    gslLeastSquaresContainer.fdf = &gsl_fdf;
+    gslLeastSquaresContainer.n = l_data.n;
+    gslLeastSquaresContainer.p = l_data.p;
+    gslLeastSquaresContainer.params = &l_data;
 
     // set-up minimizer
 
@@ -493,18 +493,18 @@ namespace CurveFitting
     else
     {
       if ( methodUsed.compare("Levenberg-Marquardt") == 0 )
-        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg, m_function); 
+        minimizer = new LevenbergMarquardtMinimizer(gslLeastSquaresContainer, initFuncArg, m_function); 
       else if ( methodUsed.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 )
-        minimizer = new FRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg);
+        minimizer = new FRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg, gslLeastSquaresContainer);
       else if ( methodUsed.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 )
-        minimizer = new PRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg);
+        minimizer = new PRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg, gslLeastSquaresContainer);
       else if ( methodUsed.compare("BFGS") == 0 )
         minimizer = new BFGS_Minimizer(gslMultiminContainer, initFuncArg);
       else
       {
         g_log.error("Unrecognised minimizer in Fit. Default to Levenberg-Marquardt\n");
         methodUsed = "Levenberg-Marquardt";
-        minimizer = new LevenbergMarquardtMinimizer(f, initFuncArg, m_function); 
+        minimizer = new LevenbergMarquardtMinimizer(gslLeastSquaresContainer, initFuncArg, m_function); 
       }
     }
     
@@ -613,7 +613,7 @@ namespace CurveFitting
       std::vector<double> standardDeviations;
 
       // only if derivative is defined for fitting function create covariance matrix output workspace
-      if ( methodUsed.compare("Levenberg-Marquardt") == 0)    
+      if ( methodUsed.compare("Simplex") != 0 )    
       {
         // calculate covariance matrix
         covar = gsl_matrix_alloc (l_data.p, l_data.p);
@@ -687,7 +687,7 @@ namespace CurveFitting
       Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       m_result->addColumn("str","Name");
       m_result->addColumn("double","Value");
-      if ( methodUsed.compare("Levenberg-Marquardt") == 0 ) 
+      if ( methodUsed.compare("Simplex") != 0 ) 
         m_result->addColumn("double","Error");
       //Mantid::API::TableRow row = m_result->appendRow();
       //row << "Chi^2/DoF" << finalCostFuncVal;
@@ -696,7 +696,7 @@ namespace CurveFitting
       {
         Mantid::API::TableRow row = m_result->appendRow();
         row << m_function->parameterName(i) << m_function->parameter(i);
-        if ( methodUsed.compare("Levenberg-Marquardt") == 0 && m_function->isActive(i)) 
+        if ( methodUsed.compare("Simplex") != 0 && m_function->isActive(i)) 
         {
           row << standardDeviations[i];
         }
@@ -743,7 +743,7 @@ namespace CurveFitting
 
       setProperty("OutputWorkspace",ws);
 
-      if ( methodUsed.compare("Levenberg-Marquardt") == 0 ) 
+      if ( methodUsed.compare("Simplex") != 0 ) 
         gsl_matrix_free(covar);
     }
 
