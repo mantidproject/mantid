@@ -499,7 +499,7 @@ namespace CurveFitting
       else if ( methodUsed.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 )
         minimizer = new PRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg, gslLeastSquaresContainer);
       else if ( methodUsed.compare("BFGS") == 0 )
-        minimizer = new BFGS_Minimizer(gslMultiminContainer, initFuncArg);
+        minimizer = new BFGS_Minimizer(gslMultiminContainer, initFuncArg, gslLeastSquaresContainer);
       else
       {
         g_log.error("Unrecognised minimizer in Fit. Default to Levenberg-Marquardt\n");
