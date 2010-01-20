@@ -721,7 +721,7 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
       int ia = funProps.indexOf(prop);
       if (ia >= 0)
       {
-        std::string attrName = prop->propertyName();
+        std::string attrName = prop->propertyName().toStdString();
         std::string attrValue = m_stringManager->value(prop).toStdString();
         try
         {
