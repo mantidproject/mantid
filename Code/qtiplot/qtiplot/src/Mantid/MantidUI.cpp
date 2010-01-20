@@ -133,8 +133,8 @@ m_progressDialog(0)
 // Should it be moved to the constructor?
 void MantidUI::init()
 {
-    FrameworkManager::Instance();
     MantidLog::connect(this);
+    FrameworkManager::Instance();
 
     actionToggleMantid = m_exploreMantid->toggleViewAction();
     actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));

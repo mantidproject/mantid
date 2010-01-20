@@ -24,10 +24,11 @@ struct Algorithm_descriptor
 };
 
 //----------------------------------------------------------------------
-// Forward declaration
+// Forward declarations
 //----------------------------------------------------------------------
 class IAlgorithm;
 class Algorithm;
+
 /** The AlgorithmFactory class is in charge of the creation of concrete
     instances of Algorithms. It inherits most of its implementation from
     the Dynamic Factory base class.
@@ -36,7 +37,7 @@ class Algorithm;
     @author Russell Taylor, Tessella Support Services plc
     @date 21/09/2007
     
-    Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -56,86 +57,84 @@ class Algorithm;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
+{
+public:
+  ///Creates an instance of an algorithm
+  boost::shared_ptr<IAlgorithm> create(const std::string& ,const int& ) const;
+
+  /// algorithm factory specific function to subscribe algorithms, calls the dynamic factory subscribe function internally
+  template <class C>
+  void subscribe()
   {
-  public:
-	  ///Creates an instance of an algorithm
-    boost::shared_ptr<IAlgorithm> create(const std::string& ,const int& ) const;
+    Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
+    boost::shared_ptr<IAlgorithm> tempAlg = newI-> createInstance();
 
-	  /// algorithm factory specific function to subscribe algorithms, calls the dynamic factory subscribe function internally
-	  template <class C>
-    void subscribe()
-	  {
-		  Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
-		  boost::shared_ptr<IAlgorithm> tempAlg = newI-> createInstance();
-      
-		  const int version = extractAlgVersion(tempAlg);
-          const std::string className = extractAlgName(tempAlg);
-		  delete newI;
-		  typename versionMap::iterator it = _vmap.find(className);
-		  if (!className.empty())
-		  {
-			  if( it == _vmap.end())
-				  _vmap[className] = version;	
-			  else
-			  {
-				  if(version == it->second )
-          {
-					  g_log.fatal() << "Cannot register algorithm " << className << " twice with the same version\n";
-					  throw std::runtime_error("Cannot register algorithm "+ className + " twice with the same version\n");
-          }
-				  if(version > it->second)
-					  _vmap[className]=version;
-			  }  
-			  Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
-		  }
-	  }
+    const int version = extractAlgVersion(tempAlg);
+    const std::string className = extractAlgName(tempAlg);
+    delete newI;
+    typename versionMap::iterator it = _vmap.find(className);
+    if (!className.empty())
+    {
+      if( it == _vmap.end())
+        _vmap[className] = version;	
+      else
+      {
+        if(version == it->second )
+        {
+          g_log.fatal() << "Cannot register algorithm " << className << " twice with the same version\n";
+          return;
+        }
+        if(version > it->second)
+          _vmap[className]=version;
+      }  
+      Kernel::DynamicFactory<Algorithm>::subscribe<C>(createName(className,version));	
+    }
+  }
 
-    /// Returns algorithm descriptors.
-    const std::vector<Algorithm_descriptor> getDescriptors() const;
-	  
-    void addPyAlgorithm(Algorithm* pyAlg);
-    void executePythonAlg(std::string algName);
-    /// Gives the number of registered Python algorithms
-    int numPythonAlgs() const { return pythonAlgs.size();}
+  std::vector<Algorithm_descriptor> getDescriptors() const;
 
-  private:
-	friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
+  void addPyAlgorithm(Algorithm* pyAlg);
+  void executePythonAlg(std::string algName);
+  /// Gives the number of registered Python algorithms
+  int numPythonAlgs() const { return pythonAlgs.size();}
+
+private:
+  friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;
 
   /// Extract the name of an algorithm
   const std::string extractAlgName(const boost::shared_ptr<IAlgorithm> alg) const;
   // Extract the version of an algorithm
   const int extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const;
-	
-	/// Private Constructor for singleton class
-	AlgorithmFactoryImpl();	
-	/// Private copy constructor - NO COPY ALLOWED
-	AlgorithmFactoryImpl(const AlgorithmFactoryImpl&);
-	/// Private assignment operator - NO ASSIGNMENT ALLOWED
-	AlgorithmFactoryImpl& operator = (const AlgorithmFactoryImpl&);
-	///Private Destructor
-	virtual ~AlgorithmFactoryImpl();
-	/// creates an algorithm name convolved from an name and version
-	std::string createName(const std::string&, const int&)const;
-	///static reference to the logger class
-	Kernel::Logger& g_log;
-  
-	/// A typedef for the map of algorithm versions
-	 typedef std::map<std::string, int> versionMap;
-	 /// The map holding the registered class names and their highest versions
-	 versionMap _vmap;
-	 
-	 ///Pointers to Python algorithms - the algorithms are owned by Python so must not be deleted in Mantid code. 
-	 std::vector<Algorithm*> pythonAlgs;     
 
-  };
+  /// Private Constructor for singleton class
+  AlgorithmFactoryImpl();	
+  /// Private copy constructor - NO COPY ALLOWED
+  AlgorithmFactoryImpl(const AlgorithmFactoryImpl&);
+  /// Private assignment operator - NO ASSIGNMENT ALLOWED
+  AlgorithmFactoryImpl& operator = (const AlgorithmFactoryImpl&);
+  ///Private Destructor
+  virtual ~AlgorithmFactoryImpl();
+  /// creates an algorithm name convolved from an name and version
+  std::string createName(const std::string&, const int&)const;
+  ///static reference to the logger class
+  Kernel::Logger& g_log;
+
+  /// A typedef for the map of algorithm versions
+  typedef std::map<std::string, int> versionMap;
+  /// The map holding the registered class names and their highest versions
+  versionMap _vmap;
+
+  /// Pointers to Python algorithms - the algorithms are owned by Python so must not be deleted in Mantid code. 
+  std::vector<Algorithm*> pythonAlgs;
+};
   
-	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
+template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
 #endif /* _WIN32 */
-	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
-	
+typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl> AlgorithmFactory;
+
 } // namespace API
 } // namespace Mantid
 

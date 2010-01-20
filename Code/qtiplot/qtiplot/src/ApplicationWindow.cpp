@@ -13709,16 +13709,16 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 	if (!file_name.isEmpty()){
 		QFileInfo fi(file_name);
 		if (fi.isDir()){
-			QMessageBox::critical(this, tr("MantidPlot - File openning error"),//Mantid
+      QMessageBox::critical(this, tr("MantidPlot - Error opening file"),//Mantid
 					tr("<b>%1</b> is a directory, please specify a file name!").arg(file_name));
 			return;
-		} else if (!fi.isReadable()) {
-			QMessageBox::critical(this, tr("MantidPlot - File openning error"),//Mantid
+    } else if (!fi.exists()) {
+      QMessageBox::critical(this, tr("MantidPlot - Error opening file"),//Mantid
+          tr("The file: <b>%1</b> doesn't exist!").arg(file_name));
+      return;
+    } else if (!fi.isReadable()) {
+      QMessageBox::critical(this, tr("MantidPlot - Error opening file"),//Mantid
 					tr("You don't have the permission to open this file: <b>%1</b>").arg(file_name));
-			return;
-		} else if (!fi.exists()) {
-			QMessageBox::critical(this, tr("MantidPlot - File openning error"),//Mantid
-					tr("The file: <b>%1</b> doesn't exist!").arg(file_name));
 			return;
 		}
 
