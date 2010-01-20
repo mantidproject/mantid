@@ -155,7 +155,8 @@ public:
   void clearADSHandle();
 
 signals:
-
+  void needWorkspaceChange(Mantid::API::MatrixWorkspace_sptr ws);
+  void needToClose();
   void needsUpdating();
   void showContextMenu();
 

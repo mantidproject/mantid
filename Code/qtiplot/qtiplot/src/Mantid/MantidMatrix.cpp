@@ -99,6 +99,9 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
   observeDelete();
   observeADSClear();
 
+  connect(this,SIGNAL(needWorkspaceChange(Mantid::API::MatrixWorkspace_sptr)),this,SLOT(changeWorkspace(Mantid::API::MatrixWorkspace_sptr))); 
+  connect(this,SIGNAL(needToClose()),this,SLOT(closeMatrix()));
+
   connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
  
@@ -911,7 +914,8 @@ void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::sha
   if( wsName != m_strName || !ws.get() ) return;
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
-  changeWorkspace(new_workspace);
+  emit needWorkspaceChange( new_workspace ); 
+
 
 }
 
@@ -1042,13 +1046,13 @@ void MantidMatrix::deleteHandle(const std::string& wsName,const boost::shared_pt
 {
   if (m_workspace.get() == ws.get())
   {
-    closeMatrix();
+    emit needToClose();
   }
 }
 
 void MantidMatrix::clearADSHandle()
 {
-  closeMatrix();
+  emit needToClose();
 }
 
 
