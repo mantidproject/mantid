@@ -662,12 +662,13 @@ def clearCurrentMaskDefaults():
 # Add a mask to the correct string
 ###################################
 def Mask(details):
-    if not details.startswith('MASK'):
-        _issueWarning('Ignoring malformed mask line ' + details)
-        return
     _printMessage('Mask("' + details + '")')
     details = details.lstrip()
     details_compare = details.upper()
+    if not details_compare.startswith('MASK'):
+        _issueWarning('Ignoring malformed mask line ' + details)
+        return
+
     global TIMEMASKSTRING, TIMEMASKSTRING_R, TIMEMASKSTRING_F,SPECMASKSTRING, SPECMASKSTRING_R, SPECMASKSTRING_F
     parts = details_compare.split('/')
     # A spectrum mask or mask range applied to both detectors
@@ -1139,7 +1140,9 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
 def applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orientation.Horizontal,limitphi = True):
     # Spectra masks
     speclist = SANSUtility.ConvertToSpecList(SPECMASKSTRING, firstspec, dimension,orientation)
+    _printMessage(str(speclist))
     SANSUtility.MaskBySpecNumber(workspace, speclist)
+
     #Time mask
     SANSUtility.MaskByBinRange(workspace,TIMEMASKSTRING)
     # Front detector
@@ -1174,7 +1177,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         if sample_run < 568:
             orientation=SANSUtility.Orientation.Vertical
             MONITORSPECTRUM = 73730
-            if DETBANK == 'rear-detector':
+            if DETBANK == 'front-detector':
                 SPECMIN = DIMENSION*DIMENSION + 1 
                 SPECMAX = DIMENSION*DIMENSION*2
             else:
@@ -1479,7 +1482,7 @@ def ViewCurrentMask():
         firstspec = 3
 
     dimension = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)[0]
-    applyMasking(top_layer, firstspec, dimension, False)
+    applyMasking(top_layer, firstspec, dimension, SANSUtility.Orientation.HorizontalFlipped, False)
     
     # Mark up "dead" detectors with error value 
     FindDeadDetectors(top_layer, top_layer, DeadValue=500)

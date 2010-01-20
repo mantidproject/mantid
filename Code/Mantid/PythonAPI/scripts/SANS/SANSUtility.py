@@ -104,6 +104,8 @@ class Orientation(object):
     Horizontal = 1
     Vertical = 2
     Rotated = 3
+    # This is for the empty instrument
+    HorizontalFlipped = 4
 
 # Work out the spectra IDs for block of detectors
 def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
@@ -115,11 +117,12 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
             for x in range(0, xdim):
                 output += str(start_spec + x + (y*det_dimension)) + ','
     elif orientation == Orientation.Vertical:
-        start_spec = base + ylow*det_dimension + xlow
-        for x in range(0, xdim):
+        start_spec = base + xlow*det_dimension + ylow
+        for x in range(det_dimension - 1, det_dimension - xdim-1,-1):
             for y in range(0, ydim):
-                output += str(start_spec + y + x*det_dimension) + ','
-    else:
+    	        std_i = start_spec + y + ((det_dimension-x-1)*det_dimension)
+		output += str(std_i ) + ','
+    elif orientation == Orientation.Rotated:
         # This is the horizontal one rotated so need to map the xlow and vlow to their rotated versions
         start_spec = base + ylow*det_dimension + xlow
         max_spec = det_dimension*det_dimension + base - 1
@@ -127,6 +130,15 @@ def spectrumBlock(base, ylow, xlow, ydim, xdim, det_dimension, orientation):
             for x in range(0, xdim):
                 std_i = start_spec + x + (y*det_dimension)
                 output += str(max_spec - (std_i - base)) + ','
+    elif orientation == Orientation.HorizontalFlipped:
+         start_spec = base + ylow*det_dimension + xlow
+	 for y in range(0,ydim):
+             max_row = base + (y+1)*det_dimension - 1
+	     min_row = base + (y)*det_dimension
+	     for x in range(0,xdim):
+                 std_i = start_spec + x + (y*det_dimension)
+		 diff_s = std_i - min_row
+		 output += str(max_row - diff_s) + ','
 
     return output.rstrip(",")
     
