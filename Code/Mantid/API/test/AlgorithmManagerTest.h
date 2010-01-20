@@ -80,8 +80,11 @@ public:
 
   void testVersionFail()
   {
-//    AlgorithmFactory::Instance().subscribe<AlgTest>("AlgTest");
-	TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(),std::runtime_error);
+    const int nalgs = AlgorithmFactory::Instance().getKeys().size();
+    TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestFail>());
+    // Size should be the same
+    TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs)
+    
   }
 
  void testVersionPass()
