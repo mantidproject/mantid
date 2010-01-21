@@ -25,7 +25,7 @@ namespace Mantid
     @author Nick Draper
     @date 14/12/2007
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratories
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -62,7 +62,7 @@ namespace Mantid
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
-      
+      void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
     };
 
   } // namespace Algorithm

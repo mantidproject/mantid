@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHM_BINARYOPERATION_H_
-#define MANTID_ALGORITHM_BINARYOPERATION_H_
+#ifndef MANTID_ALGORITHMS_BINARYOPERATION_H_
+#define MANTID_ALGORITHMS_BINARYOPERATION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -27,7 +27,7 @@ namespace Mantid
     @author Nick Draper
     @date 14/12/2007
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -97,9 +97,17 @@ namespace Mantid
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
-      
+
+      /** Should be overridden by operations that need to manipulate the units of the output workspace.
+       *  Does nothing by default.
+       *  @param lhs The first input workspace
+       *  @param rhs The second input workspace
+       *  @param out The output workspace
+       */
+      virtual void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out) {}
+
       /** Only overridden by operations that affect the properties of the sample (e.g. Plus
-       *  where the proton currents (charges) are added). Otherwise it does nothing
+       *  where the proton currents (charges) are added). Otherwise it does nothing.
        *  @param lhs one of the workspaces to operate on
        *  @param rhs the other workspace
        *  @param ans the output workspace

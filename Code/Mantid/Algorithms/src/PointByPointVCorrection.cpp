@@ -123,7 +123,7 @@ void PointByPointVCorrection::exec()
   }
 	PARALLEL_CHECK_INTERUPT_REGION
 
-  outputWS->setYUnit("Counts normalised to a vanadium");
+  outputWS->setYUnitLabel("Counts normalised to a vanadium");
   outputWS->isDistribution(false);
 }
 

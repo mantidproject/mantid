@@ -105,7 +105,7 @@ void CalculateTransmission::exec()
   // The main calculation
   MatrixWorkspace_sptr transmission = (M3_sample/M3_direct)*(M2_direct/M2_sample);
   // This workspace is now a distribution
-  transmission->isDistribution(true);
+  //transmission->isDistribution(true);
 
   // Output this data if requested
   const bool outputRaw = getProperty("OutputUnfittedData");

@@ -5,14 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
   namespace Algorithms
   {
     /** 
-    UnaryOperation supports the implmentation of a Unary operation an input workspace.
+    UnaryOperation supports the implementation of a Unary operation on an input workspace.
     It inherits from the Algorithm class, and overrides the init() & exec() methods.
 
     Required Properties:
@@ -24,7 +23,7 @@ namespace Mantid
     @author Russell Taylor, Tessella plc
     @date 24/03/2009
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -60,15 +59,15 @@ namespace Mantid
       virtual void exec();
 
       /// The name of the input workspace property
-			virtual const std::string inputPropName() const { return "InputWorkspace";}
+      virtual const std::string inputPropName() const { return "InputWorkspace";}
       /// The name of the output workspace property
-			virtual const std::string outputPropName() const { return "OutputWorkspace";}
+      virtual const std::string outputPropName() const { return "OutputWorkspace";}
 
-			/// A virtual function in which additional properties of an algorithm should be declared. Called by init().
-			virtual void defineProperties() { /*Empty in base class*/ }
-			/// A virtual function in which additional properties should be retrieved into member variables. Called by exec().
-			virtual void retrieveProperties() { /*Empty in base class*/ }
-			
+      /// A virtual function in which additional properties of an algorithm should be declared. Called by init().
+      virtual void defineProperties() { /*Empty in base class*/ }
+      /// A virtual function in which additional properties should be retrieved into member variables. Called by exec().
+      virtual void retrieveProperties() { /*Empty in base class*/ }
+
       /** Carries out the Unary operation on the current 'cell'
        *  @param XIn The X value. This will be the bin centre for histogram workspaces.
        *  @param YIn The input data value

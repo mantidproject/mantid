@@ -8,6 +8,22 @@ namespace Algorithms
 // Algorithm must be declared
 DECLARE_ALGORITHM(WeightedMean)
 
+bool WeightedMean::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+{
+  if ( lhs->YUnit() != rhs->YUnit() )
+  {
+    g_log.error("The two workspaces are not compatible because they have different units for the data (Y).");
+    return false;
+  }
+  if ( lhs->isDistribution() != rhs->isDistribution() )
+  {
+    g_log.error("The two workspaces are not compatible because one is flagged as a distribution.");
+    return false;
+  }
+
+  return BinaryOperation::checkCompatibility(lhs,rhs);
+}
+
 /** Performs a simple check to see if the sizes of two workspaces are identically sized
  * @param lhs the first workspace to compare
  * @param rhs the second workspace to compare

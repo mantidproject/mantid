@@ -73,7 +73,8 @@ public:
       TS_ASSERT_EQUALS( it->E(), 1.5 )
     }
 
-    TS_ASSERT_EQUALS( output->YUnit(), "Counts per microAmp.hour" )
+    TS_ASSERT_EQUALS( output->YUnitLabel(), "Counts" )
+    TS_ASSERT_EQUALS( output->YUnitLabel(), "Counts per microAmp.hour" )
   }
 
 private:

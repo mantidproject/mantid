@@ -94,6 +94,9 @@ namespace Mantid
         do2D(lhs,rhs,out_work);
       }
       
+      // Call the virtual unit manipulation method
+      setOutputUnits(lhs,rhs,out_work);
+
       // Assign the result to the output workspace property
       setProperty(outputPropName(),out_work);
 

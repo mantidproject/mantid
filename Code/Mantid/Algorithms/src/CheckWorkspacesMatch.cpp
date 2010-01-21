@@ -89,13 +89,6 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
     return false;
   }
   
-  // Check both have the same distribution flag
-  if ( ws1->isDistribution() != ws2->isDistribution() )
-  {
-    result = "Distribution flag mismatch";
-    return false;
-  }
-  
   const double tolerance = getProperty("Tolerance");
   
   // Now check the data itself
@@ -178,7 +171,18 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1, API::M
   
   if ( ws1->YUnit() != ws2->YUnit() )
   {
+    g_log.debug() << "YUnit strings : WS1 = " << ws1->YUnit() <<
+                                    " WS2 = " << ws2->YUnit() << "\n";
     result = "YUnit mismatch";
+    return false;
+  }
+  
+  // Check both have the same distribution flag
+  if ( ws1->isDistribution() != ws2->isDistribution() )
+  {
+    g_log.debug() << "Distribution flags: WS1 = " << ws1->isDistribution() <<
+                                        " WS2 = " << ws2->isDistribution() << "\n";
+    result = "Distribution flag mismatch";
     return false;
   }
   

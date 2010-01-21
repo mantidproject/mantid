@@ -80,7 +80,8 @@ void CylinderAbsorption::exec()
 
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
-  correctionFactors->setYUnit("Attenuation factor");
+  correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
+  correctionFactors->setYUnitLabel("Attenuation factor");
 
   const int numHists = inputWS->getNumberHistograms();
   const int specSize = inputWS->blocksize();

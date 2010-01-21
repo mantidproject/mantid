@@ -307,7 +307,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
   }
   // Get back the result
   outputWorkspace = divide->getProperty("OutputWorkspace");
-  outputWorkspace->setYUnit(""); // It's now dimensionless
+  // Output set to be dimensionless distribution within divide algorithm
 }
 
 /** Carries out the bin-by-bin normalisation

@@ -2140,7 +2140,7 @@ void MantidUI::setUpSpectrumGraph(MultiLayer* ml, const QString& wsName)
         s = "X axis";
     }
     g->setXAxisTitle(tr(s.c_str()));
-    g->setYAxisTitle(tr(workspace->YUnit().c_str()));
+    g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
     g->setAntialiasing(false);
     g->setAutoScale();
 }
@@ -2162,7 +2162,7 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
       else if ( axis->unit() ) xtitle = axis->unit()->caption() + " / " + axis->unit()->label();
     }
     g->setXAxisTitle(tr(xtitle.c_str()));
-    g->setYAxisTitle(tr(workspace->YUnit().c_str()));
+    g->setYAxisTitle(tr(workspace->YUnitLabel().c_str()));
     g->setAntialiasing(false);
 }
 

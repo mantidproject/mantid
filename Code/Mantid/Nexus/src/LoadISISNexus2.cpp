@@ -151,14 +151,14 @@ namespace Mantid
         if( (!m_spec_list.empty() && std::find(m_spec_list.begin(), m_spec_list.end(), index) == m_spec_list.end()) ||
           (m_range_supplied && (index < m_spec_min || index > m_spec_max)) )
         {
-			std::map<int, std::string>::iterator itr1 = itr;
-			itr++;
-            m_monitors.erase(itr1);
+          std::map<int, std::string>::iterator itr1 = itr;
+          itr++;
+          m_monitors.erase(itr1);
         }
-		else
-		{
-			++itr ;
-		}
+        else
+        {
+          ++itr ;
+        }
       }
 
 
@@ -178,8 +178,9 @@ namespace Mantid
 
       DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D", total_specs, x_length, m_numberOfChannels));
-      // Set the unit on the workspace to TOF
+      // Set the units on the workspace to TOF & Counts
       local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      local_workspace->setYUnit("Counts");
 
       //Load instrument and other data once then copy it later
       m_progress->report("Loading instrument");
@@ -215,7 +216,6 @@ namespace Mantid
         {
           local_workspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create(local_workspace));
-          local_workspace->newSample();
           loadLogs(local_workspace, entry ,p);	
           std::ostringstream os;
           os << p;
@@ -533,7 +533,7 @@ namespace Mantid
     void LoadISISNexus2::loadSampleData(DataObjects::Workspace2D_sptr local_workspace, NXEntry & entry)
     {
       /// The proton charge
-     // boost::shared_ptr<API::Sample> sample_details = local_workspace->getSample();
+      // boost::shared_ptr<API::Sample> sample_details = local_workspace->getSample();
       local_workspace->mutableSample().setProtonCharge(entry.getFloat("proton_charge"));
 
       /// Sample geometry

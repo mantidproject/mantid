@@ -220,7 +220,7 @@ namespace Mantid
       }
 
       outWS->getAxis(0)->title() = logName;
-      outWS->setYUnit("Asymmetry");
+      outWS->setYUnitLabel("Asymmetry");
       
       // Assign the result to the output workspace property
       setProperty("OutputWorkspace", boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outWS));

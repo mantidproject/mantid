@@ -163,6 +163,7 @@ namespace Mantid
         (WorkspaceFactory::Instance().create("Workspace2D",total_specs,nBins+1,nBins));
       // Set the unit on the workspace to TOF
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      localWorkspace->setYUnit("Counts");
 
       //g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
@@ -192,8 +193,6 @@ namespace Mantid
         {
           localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create(localWorkspace));
-          localWorkspace->newSample();
-          //localWorkspace->newInstrumentParameters(); ???
         }
 
         std::string outws("");

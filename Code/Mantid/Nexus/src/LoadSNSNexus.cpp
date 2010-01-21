@@ -136,6 +136,7 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
         (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins+1,nBins));
     ws->setTitle(entry.name());
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    ws->setYUnit("Counts");
 
     // Init loaded spectra counter
     int spec = 0;

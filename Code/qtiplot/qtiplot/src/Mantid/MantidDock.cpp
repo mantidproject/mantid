@@ -235,7 +235,7 @@ void MantidDockWidget::populateWorkspaceData(Mantid::API::Workspace_sptr workspa
     QTreeWidgetItem* xUnit = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
     xUnit->setFlags(Qt::NoItemFlags);
     ws_item->addChild(xUnit);
-    s = "Y axis: " + ws_ptr->YUnit();
+    s = "Y axis: " + ws_ptr->YUnitLabel();
     QTreeWidgetItem* yUnit = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
     yUnit->setFlags(Qt::NoItemFlags);
     ws_item->addChild(yUnit);

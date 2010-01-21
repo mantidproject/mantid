@@ -35,7 +35,7 @@ class SpectraDetectorMap;
     @author Laurent C Chapon, ISIS, RAL
     @date 26/09/2007
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -73,7 +73,6 @@ public:
   void setSample(const Sample& sample);
   IInstrument_sptr getInstrument() const;
   boost::shared_ptr<Instrument> getBaseInstrument()const;
-  void newSample();
 
   // SpectraDetectorMap accessors
   const SpectraDetectorMap& spectraMap() const;
@@ -148,10 +147,12 @@ public:
 
   std::string YUnit() const;
   void setYUnit(const std::string& newUnit);
+  std::string YUnitLabel() const;
+  void setYUnitLabel(const std::string& newLabel);
 
   /// Are the Y-values dimensioned?
   const bool& isDistribution() const;
-  bool& isDistribution(bool newValue)const;
+  bool& isDistribution(bool newValue);
 
   // Methods to set and access masked bins
   void maskBin(const int& spectrumIndex, const int& binIndex, const double& weight = 1.0);
@@ -187,8 +188,10 @@ private:
 
   /// The unit for the data values (e.g. Counts)
   std::string m_YUnit;
+  /// A text label for use when plotting spectra
+  std::string m_YUnitLabel;
   /// Flag indicating whether the Y-values are dimensioned. False by default
-  mutable bool m_isDistribution;
+  bool m_isDistribution;
 
   /// Parameters modifying the base instrument
  mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
@@ -196,8 +199,8 @@ private:
   /// The set of masked bins in a map keyed on spectrum index
   std::map< int, MaskList > m_masks;
   
-	/// Static reference to the logger class
-	static Kernel::Logger& g_log;
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
 };
 
 ///shared pointer to the matrix workspace base class

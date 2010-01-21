@@ -118,7 +118,7 @@ void SimpleIntegration::exec()
     else // Sum Y*binwidth and Sum the (E*binwidth)^2.
     {
       std::vector<double> widths(X.size());
-      std::adjacent_difference(lowit,highit+1,widths.begin());
+      std::adjacent_difference(lowit,highit+1,widths.begin()); // highit+1 is safe while input workspace guaranteed to be histogram
       sumY=std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
       sumE=std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),VectorHelper::TimesSquares<double>());
     }

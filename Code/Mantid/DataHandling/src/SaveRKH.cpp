@@ -108,7 +108,7 @@ void SaveRKH::writeHeader()
     const int unitCode2 = unit2->caption() == "q" ? 6 : 0;
     m_outRKH << "  " << unitCode1 << " " << unit1->caption() << " (" << unit1->label() << ")\n"
              << "  " << unitCode2 << " " << unit2->caption() << " (" << unit2->label() << ")\n"
-             << "  0 " << m_workspace->YUnit() << "\n"
+             << "  0 " << m_workspace->YUnitLabel() << "\n"
              << "  1\n";
   }
   // The workspace title

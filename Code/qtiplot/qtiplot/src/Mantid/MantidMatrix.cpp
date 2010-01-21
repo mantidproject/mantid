@@ -617,7 +617,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
       plot->setYAxisLabel(tr("Spectrum"));
   }
 
-  plot->setZAxisLabel(tr(m_workspace->YUnit().c_str()));
+  plot->setZAxisLabel(tr(m_workspace->YUnitLabel().c_str()));
 
   a->initPlot3D(plot);
   //plot->askOnCloseEvent(false);

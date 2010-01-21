@@ -20,7 +20,7 @@ Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
 MatrixWorkspace::MatrixWorkspace() : 
   Workspace(), m_axes(), m_isInitialized(false),
   sptr_instrument(new Instrument), m_spectramap(), m_sample(),
-  m_YUnit("Counts"), m_isDistribution(false), m_parmap(), m_masks()
+  m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(), m_masks()
 {}
 
 /// Destructor
@@ -205,25 +205,6 @@ boost::shared_ptr<Instrument> MatrixWorkspace::getBaseInstrument()const
     return sptr_instrument;
 }
 
-/** Replace the sample with a new one. 
- *  The new sample copies the name and proton charge from the old one.
- *  Used when creating workspaces for multiple period data: each period must have
- *  a sample of its own.
- */
-void MatrixWorkspace::newSample() 
-{
- 	Kernel::cow_ptr<Sample> old_sample=m_sample;
-	Kernel::cow_ptr<Sample> newsample;
-	m_sample=newsample;
-	m_sample.access().setProtonCharge(old_sample->getProtonCharge());
-	m_sample.access().setName(old_sample->getName());
-	m_sample.access().setShapeObject(old_sample->getShapeObject());
-	m_sample.access().setGeometryFlag(old_sample->getGeometryFlag());
-	m_sample.access().setThickness(old_sample->getThickness());
-	m_sample.access().setHeight(old_sample->getHeight());
-	m_sample.access().setWidth(old_sample->getWidth());
-	
-}
 /**  Returns a new copy of the instrument parameters
  */
 Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const
@@ -290,23 +271,41 @@ const bool MatrixWorkspace::isHistogramData() const
   return ( readX(0).size()==readY(0).size() ? false : true );
 }
 
-/// Returns the units of the data in the workspace (default 'Counts')
+/// Returns the units of the data in the workspace
 std::string MatrixWorkspace::YUnit() const
 {
-  std::string retVal = m_YUnit;
-  // If this workspace a distribution & has at least one axis & this axis has its unit set
-  // then append that unit to the string to be returned
-  if ( this->isDistribution() && this->axes() && this->getAxis(0)->unit() )
-  {
-    retVal = retVal + " per " + this->getAxis(0)->unit()->label();
-  }
-  return retVal;
+  return m_YUnit;
 }
 
 /// Sets a new unit for the data (Y axis) in the workspace
 void MatrixWorkspace::setYUnit(const std::string& newUnit)
 {
   m_YUnit = newUnit;
+}
+
+/// Returns a caption for the units of the data in the workspace
+std::string MatrixWorkspace::YUnitLabel() const
+{
+  std::string retVal;
+  if ( !m_YUnitLabel.empty() ) retVal = m_YUnitLabel;
+  else
+  {
+    retVal = m_YUnit;
+    // If this workspace a distribution & has at least one axis & this axis has its unit set
+    // then append that unit to the string to be returned
+    if ( !retVal.empty() && this->isDistribution() && this->axes() && this->getAxis(0)->unit() )
+    {
+      retVal = retVal + " per " + this->getAxis(0)->unit()->label();
+    }
+  }
+
+  return retVal;
+}
+
+/// Sets a new caption for the data (Y axis) in the workspace
+void MatrixWorkspace::setYUnitLabel(const std::string& newLabel)
+{
+  m_YUnitLabel = newLabel;
 }
 
 /// Are the Y-values in this workspace dimensioned?
@@ -316,7 +315,7 @@ const bool& MatrixWorkspace::isDistribution() const
 }
 
 /// Set the flag for whether the Y-values are dimensioned
-bool& MatrixWorkspace::isDistribution(bool newValue)const
+bool& MatrixWorkspace::isDistribution(bool newValue)
 {
   m_isDistribution = newValue;
   return m_isDistribution;

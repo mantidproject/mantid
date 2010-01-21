@@ -137,7 +137,8 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon3")) )
-    TS_ASSERT( !output->isDistribution() )
+    TS_ASSERT( output->isDistribution() )
+    TS_ASSERT( output->YUnit().empty() )
 
     // Check the non-monitor spectra
     for (int i = 1; i < output->getNumberHistograms(); ++i)

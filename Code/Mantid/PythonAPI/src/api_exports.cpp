@@ -126,9 +126,9 @@ namespace PythonAPI
     
     class_<Mantid::API::Workspace, boost::noncopyable>("Workspace", no_init)
       .def("getTitle", &Mantid::API::Workspace::getTitle, 
-	   return_value_policy< copy_const_reference >())
+         return_value_policy< copy_const_reference >())
       .def("getComment", &Mantid::API::MatrixWorkspace::getComment, 
-	   return_value_policy< copy_const_reference >() )
+         return_value_policy< copy_const_reference >() )
       .def("getMemorySize", &Mantid::API::Workspace::getMemorySize)
       .def("getName", &Mantid::API::Workspace::getName, return_value_policy< copy_const_reference >())
       .def("__str__", &Mantid::API::Workspace::getName, return_value_policy< copy_const_reference >())
@@ -155,9 +155,9 @@ namespace PythonAPI
       .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy< return_by_value >()) 
       .def("blocksize", &Mantid::API::MatrixWorkspace::blocksize)
       .def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, 
-	   return_value_policy< copy_const_reference >(), MatrixWorkspace_isDistribution_overloads_1())
-      .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool)const)&Mantid::API::MatrixWorkspace::isDistribution, 
-	   return_value_policy< copy_non_const_reference >(), MatrixWorkspace_isDistribution_overloads_2())
+         return_value_policy< copy_const_reference >(), MatrixWorkspace_isDistribution_overloads_1())
+      .def("isDistribution", (bool& (Mantid::API::MatrixWorkspace::*)(bool))&Mantid::API::MatrixWorkspace::isDistribution, 
+         return_value_policy< copy_non_const_reference >(), MatrixWorkspace_isDistribution_overloads_2())
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
       .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
       .def("getSampleDetails", &Mantid::API::MatrixWorkspace::sample, return_value_policy< copy_const_reference >() )
@@ -234,7 +234,7 @@ namespace PythonAPI
     //Sample class
     class_< Mantid::API::Sample >("Sample", no_init)
       .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)0, 
-	   return_value_policy< reference_existing_object>(), Sample_getLogData_overloads())
+         return_value_policy< reference_existing_object>(), Sample_getLogData_overloads())
       .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
       .def("getProtonCharge", &Mantid::API::Sample::getProtonCharge, return_value_policy< copy_const_reference>())
       .def("getGeometryFlag", &Mantid::API::Sample::getGeometryFlag)

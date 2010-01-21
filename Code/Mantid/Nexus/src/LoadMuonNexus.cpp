@@ -44,10 +44,7 @@ namespace Mantid
       exts.push_back("nxs");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the Nexus file to load" );      
-      /* declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
-      "The name of the workspace to be created as the output of the\n"
-      "algorithm. For multiperiod files, one workspace will be\n"
-      "generated for each period");*/
+
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace to be created as the output of the\n"
         "algorithm. For multiperiod files, one workspace will be\n"
@@ -118,7 +115,6 @@ namespace Mantid
       std::string localWSName = ws->value();
       // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
       boost::shared_ptr<IInstrument> instrument;
-      //-      boost::shared_ptr<SpectraDetectorMap> specMap;
       boost::shared_ptr<Sample> sample;
 
       // Call private method to validate the optional parameters, if set
@@ -156,13 +152,13 @@ namespace Mantid
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (WorkspaceFactory::Instance().create("Workspace2D",total_specs,lengthIn,lengthIn-1));
-      // Set the unit on the workspace to TOF
+      // Set the units on the workspace to TOF & Counts
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+      localWorkspace->setYUnit("Counts");
 
-      //g_log.error()<<" number of perioids= "<<m_numberOfPeriods<<std::endl;
       WorkspaceGroup_sptr wsGrpSptr=WorkspaceGroup_sptr(new WorkspaceGroup);
       if(m_numberOfPeriods>1)
-      {	
+      {
         if(wsGrpSptr)wsGrpSptr->add(localWSName);
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
@@ -190,7 +186,6 @@ namespace Mantid
         {
           localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create(localWorkspace));
-          localWorkspace->newSample();
           //localWorkspace->newInstrumentParameters(); ???
 
         }
@@ -472,7 +467,6 @@ namespace Mantid
         // directory of the executable, not the current working directory.
         directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
       }
-      //const int stripPath = m_filename.find_last_of("\\/");
       // For Nexus, Instrument name given by MuonNexusReader from Nexus file
       std::string instrumentID = m_instrument_name; //m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
       // force ID to upper case

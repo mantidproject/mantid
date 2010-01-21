@@ -56,9 +56,7 @@ void Q1D::exec()
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  outputWS->setYUnit("I(q)");
-  // The final output is a distribution, but that messes up the label on the vertical axis
-  //outputWS->isDistribution(true); 
+  outputWS->setYUnitLabel("I(q)");
   setProperty("OutputWorkspace",outputWS);
   // Set the X vector for the output workspace
   boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWS)->setX(0,XOut);

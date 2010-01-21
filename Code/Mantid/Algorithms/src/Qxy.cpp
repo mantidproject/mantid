@@ -169,7 +169,7 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace()
   // Set the axis units
   outputWorkspace->getAxis(1)->unit() = outputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
   // Set the 'Y' unit (gets confusing here...this is probably a Z axis in this case)
-  outputWorkspace->setYUnit("Cross Section (1/cm)");
+  outputWorkspace->setYUnitLabel("Cross Section (1/cm)");
 
   setProperty("OutputWorkspace",ws2D);
   return outputWorkspace;

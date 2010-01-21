@@ -34,17 +34,20 @@ namespace Mantid
     
     bool Plus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
-      if ( lhs->size() > 1 && rhs->size() > 1 && lhs->YUnit() != rhs->YUnit() )
+      if ( lhs->size() > 1 && rhs->size() > 1 )
       {
-        g_log.error("The two workspace are not compatible because they have different units for the data (Y).");
-        return false;
+        if ( lhs->YUnit() != rhs->YUnit() )
+        {
+          g_log.error("The two workspaces are not compatible because they have different units for the data (Y).");
+          return false;
+        }
+        if ( lhs->isDistribution() != rhs->isDistribution() )
+        {
+          g_log.error("The two workspaces are not compatible because one is flagged as a distribution.");
+          return false;
+        }
       }
-      if ( lhs->isDistribution() != rhs->isDistribution() )
-      {
-        g_log.error("The two workspace are not compatible because one is flagged as a distribution.");
-        return false;
-      }
-      
+
       return BinaryOperation::checkCompatibility(lhs,rhs);
     }
 

@@ -93,21 +93,24 @@ void ConvertUnits::exec()
   // Set the final unit that our output workspace will have
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(targetUnit);
 
-  // Check whether the Y data of the input WS is dimensioned and set output WS flag to be same
-  const bool distribution = outputWS->isDistribution(inputWS->isDistribution());
   const unsigned int size = inputWS->blocksize();
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / size;
 
   int iprogress_step = numberOfSpectra / 100;
   if (iprogress_step == 0) iprogress_step = 1;
-   //input and output workspaces are checked to ensure they suitable for multithreaded access.
-  
+  //input and output workspaces are checked to ensure they suitable for multithreaded access.
+
+  // Check whether the Y data of the input WS is dimensioned and set output WS flag to be same
+  bool distribution = outputWS->isDistribution(inputWS->isDistribution());
+  // In the context of this algorithm, we treat things as a distribution if the flag is set
+  // AND the data are not dimensionless
+  distribution = distribution && !inputWS->YUnit().empty();
+
   // Loop over the histograms (detector spectra)
-  Progress prog(this,0.0,0.5,numberOfSpectra);  
-  
+  Progress prog(this,0.0,0.5,numberOfSpectra);
   for (int i = 0; i < numberOfSpectra; ++i) 
-	{
+  {
     // Take the bin width dependency out of the Y & E data
     if (distribution)
     {
@@ -131,7 +134,7 @@ void ConvertUnits::exec()
         progress( double(i)/numberOfSpectra/2 );
         interruption_point();
     }
-		prog.report();
+    prog.report();
   }
 
   // Check whether there is a quick conversion available
@@ -209,35 +212,35 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
       {
         Histogram1D::RCtype xVals;
         xVals.access() = outputWS->dataX(0);
-				Progress prog(this,0.5,1.0,numberOfSpectra);
+        Progress prog(this,0.5,1.0,numberOfSpectra);
 
-				PARALLEL_FOR1(outputWS)
+        PARALLEL_FOR1(outputWS)
         for (int j = 1; j < numberOfSpectra; ++j)
         {
-					PARALLEL_START_INTERUPT_REGION
+          PARALLEL_START_INTERUPT_REGION
           WS2D->setX(j,xVals);
 
-					prog.report();
-					PARALLEL_END_INTERUPT_REGION
+          prog.report();
+          PARALLEL_END_INTERUPT_REGION
         }
-				PARALLEL_CHECK_INTERUPT_REGION
+        PARALLEL_CHECK_INTERUPT_REGION
       }
       return;
     }
   }
   // If we get to here then the bins weren't aligned and each spectrum is unique
   // Loop over the histograms (detector spectra)
-	PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR1(outputWS)
   for (int k = 0; k < numberOfSpectra; ++k) {
-		PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
     MantidVec::iterator it;
     for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
     {
       *it = factor * std::pow(*it,power);
     }
-		PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   }
-	PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
   return;
 }
 
@@ -286,10 +289,10 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
   std::vector<double> emptyVec;
   Progress prog(this,0.5,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
-	PARALLEL_FOR1(outputWS)
+  PARALLEL_FOR1(outputWS)
   for (int i = 0; i < numberOfSpectra; ++i) 
-	{
-		PARALLEL_START_INTERUPT_REGION
+  {
+    PARALLEL_START_INTERUPT_REGION
     double efixed = getProperty("Efixed");
     /// @todo Don't yet consider hold-off (delta)
     const double delta = 0.0;
@@ -343,10 +346,10 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
       outputWS->dataE(i).assign(outputWS->dataE(i).size(),0.0);
     }
 
-		prog.report();
-		PARALLEL_END_INTERUPT_REGION
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
   } // loop over spectra
-	PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 
   if (failedDetectorCount != 0)
   {
