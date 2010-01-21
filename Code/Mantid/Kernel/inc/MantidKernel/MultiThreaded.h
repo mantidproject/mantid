@@ -95,7 +95,7 @@
 #define PARALLEL_FOR1(workspace1)
 #define PARALLEL_FOR2(workspace1, workspace2)
 #define PARALLEL_FOR3(workspace1, workspace2, workspace3)
-#define IF_PARALLEL
+#define IF_PARALLEL if (false)
 #define IF_NOT_PARALLEL
 #define PARALLEL_START_INTERUPT_REGION
 #define PARALLEL_END_INTERUPT_REGION

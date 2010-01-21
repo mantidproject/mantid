@@ -60,10 +60,10 @@ namespace Mantid
       int progress_step = histnumber / 100;
       if (progress_step == 0) progress_step = 1;
       Progress prog(this,0.0,1.0,histnumber);
-      //PARALLEL_FOR2(inputW,outputW)
+      PARALLEL_FOR2(inputW,outputW)
       for (int hist=0; hist <  histnumber;++hist)
       {
-        //PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
         // get const references to input Workspace arrays (no copying)
         const MantidVec& XValues = inputW->readX(hist);
         const MantidVec& YValues = inputW->readY(hist);
@@ -98,17 +98,22 @@ namespace Mantid
           // OK, so this isn't a Workspace2D
         }
         
-        // Now propagate any masking correctly to the output workspace
-        if ( inputW->hasMaskedBins(hist) )  // Does the current spectrum have any masked bins?
-        {
-          this->propagateMasks(inputW,outputW,hist);
-        }
-        
         prog.report();
-        //PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
-      //PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
       outputW->isDistribution(dist);
+
+      // Now propagate any masking correctly to the output workspace
+      // More efficient to have this in a separate loop because 
+      // MatrixWorkspace::maskBins blocks multi-threading
+      for (int i=0; i <  histnumber; ++i)
+      {
+        if ( inputW->hasMaskedBins(i) )  // Does the current spectrum have any masked bins?
+        {
+          this->propagateMasks(inputW,outputW,i);
+        }
+      }
 
       for (int i=0; i < outputW->axes(); ++i)
       {
