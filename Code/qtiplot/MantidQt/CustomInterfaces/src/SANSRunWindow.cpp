@@ -761,8 +761,12 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
 
   //Pull in the table details first, skipping the first two rows
   int nrows = m_uiForm.mask_table->rowCount();
-  for(int row = 2; row <  nrows; ++row)
+  for(int row = 0; row <  nrows; ++row)
   {
+    if( m_uiForm.mask_table->item(row, 2)->text().startsWith("inf") )
+    {
+      continue;
+    }
     //Details are in the third column
     exec_script += "Mask('MASK";
     if( m_uiForm.mask_table->item(row, 0)->text() == "time")
