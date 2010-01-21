@@ -59,11 +59,11 @@ namespace Mantid
 
       int progress_step = histnumber / 100;
       if (progress_step == 0) progress_step = 1;
-	    Progress prog(this,0.0,1.0,histnumber);
-	    PARALLEL_FOR2(inputW,outputW)
+      Progress prog(this,0.0,1.0,histnumber);
+      //PARALLEL_FOR2(inputW,outputW)
       for (int hist=0; hist <  histnumber;++hist)
       {
-				PARALLEL_START_INTERUPT_REGION
+        //PARALLEL_START_INTERUPT_REGION
         // get const references to input Workspace arrays (no copying)
         const MantidVec& XValues = inputW->readX(hist);
         const MantidVec& YValues = inputW->readY(hist);
@@ -105,9 +105,9 @@ namespace Mantid
         }
         
         prog.report();
-				PARALLEL_END_INTERUPT_REGION
+        //PARALLEL_END_INTERUPT_REGION
       }
-			PARALLEL_CHECK_INTERUPT_REGION
+      //PARALLEL_CHECK_INTERUPT_REGION
       outputW->isDistribution(dist);
 
       for (int i=0; i < outputW->axes(); ++i)
