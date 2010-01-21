@@ -51,7 +51,7 @@ void ConvertUnits::init()
   propOptions.push_back("Direct");
   propOptions.push_back("Indirect");
   declareProperty("EMode","Elastic",new ListValidator(propOptions),
-    "The energy mode, default is elastic)");
+    "The energy mode (default: elastic)");
   BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed",0.0,mustBePositive,

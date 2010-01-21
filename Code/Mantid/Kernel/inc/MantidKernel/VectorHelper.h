@@ -62,6 +62,17 @@ namespace VectorHelper
   	}
   };
 
+  /// Functor to deal with the increase in the error when adding (or substracting) a number of counts. More generally add errors in quadrature using the square of one of the errors (variance = error^2)
+  template <class T> struct AddVariance: public std::binary_function<T,T,T>
+  {
+	  AddVariance(){}
+	  /// adds the square of the left-hand argument to the right hand argument and takes the square root
+	  T operator()(const T& r, const T& x) const
+	  {
+		  return sqrt(r*r+x);
+	  }
+  };
+
   /// Functor to accumulate a sum of squares
   template <class T> struct SumSquares: public std::binary_function<T,T,T>
   {

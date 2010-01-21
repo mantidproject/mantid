@@ -374,7 +374,7 @@ std::vector<int> DetectorEfficiencyVariation::findBad(
 
   // the output array doesn't list missingDataIndices because the array is used for masking detectors and informing users of the numbers of faulty instruments. A log is produced below at warning
   createOutputArray(badSpecs, a->spectraMap(), badDets);
-  // arecord is kept in the output file, however
+  // a record is kept in the output file, however
   writeFile(fileName, badSpecs, missingDataIndices, a->getAxis(1));
 
   g_log.information() << "Found a total of " << badSpecs.size() <<
@@ -428,20 +428,20 @@ void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std:
 
   // for the progress bar
   const double numLines = static_cast<double>(badList.size())/LINESIZE;
-  const int progStep = static_cast<int>(ceil(numLines/30));
+  const int progStep = LINESIZE*static_cast<int>(ceil(numLines/30));
 
 
   file << "---"<<name()<<"---" << std::endl;
   for ( std::vector<int>::size_type i = 0 ; i < badList.size(); ++i )
   {// output the spectra numbers of the failed spectra as the spectra number does change when a workspace is cropped
     file << badList[i];
-    if ( (i + 1) % 10 == 0 || i == badList.size()-1 )
-    {// write an end of line after every 10 entries or when we have run out of entries
+    if ( (i + 1) % LINESIZE == 0 )
+    {// write an end of line after every 10 entries
       file << std::endl;
-      if ( i % progStep == 0 )
+      if ( (i + 1) % progStep == 0 )
       {
-        progress(advanceProgress( progStep*RTWriteFile/numLines) );
-        progress( m_fracDone );
+        progress(advanceProgress( progStep*RTWriteFile/numLines ));
+        progress(m_fracDone);
         interruption_point();
       }
     }
@@ -450,24 +450,25 @@ void DetectorEfficiencyVariation::writeFile(const std::string &fname, const std:
       file << " ";
     }
   }
+  file << std::endl;
   file << "----" << "Spectra not linked to a valid detector in the instrument definition : " << problemIndices.size() << "----" << std::endl;
-  for ( std::vector<int>::size_type i = 0 ; i < problemIndices.size(); ++i )
+  for ( std::vector<int>::size_type j = 0 ; j < problemIndices.size(); ++j )
   {
     try
     {
-      file << SpecNums->spectraNo(problemIndices[i]);
+//      file << SpecNums->spectraNo(problemIndices[j]);
     }
     catch (Exception::IndexError)
     {
-      file << std::endl << "-Spectrum with index " << i << " does have a spectrum number";
+      file << std::endl << "-Spectrum with index " << j << " doesn't have a spectrum number";
     }
-    if ( (i + 1) % 10 == 0 || i == problemIndices.size()-1 )
-    {// write an end of line after every 10 entries and when we have run out of entries
+    if ( (j + 1) % LINESIZE == 0 )
+    {// write an end of line after every 10 entries
       file << std::endl;
-      if ( i % progStep == 1 )
+      if ( (j + 1) % progStep == 0 )
       {
         progress(advanceProgress( progStep*RTWriteFile/numLines) );
-        progress( m_fracDone );
+        progress(m_fracDone);
         interruption_point();
       }
     }

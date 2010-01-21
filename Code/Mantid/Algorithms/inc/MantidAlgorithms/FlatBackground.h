@@ -66,7 +66,10 @@ private:
   void exec();
 
   void checkRange(double& startX, double& endX);
-  double doFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
+  const bool isModeMean(const std::string &mode);
+  void getSpecInds(std::vector<int> &output, const int workspaceTotal);
+  double Mean(const MantidVec &XS, const MantidVec &YS, const double startX, const double endX, double &variance);
+  double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
 
   /// Progress reporting
   API::Progress* m_progress;

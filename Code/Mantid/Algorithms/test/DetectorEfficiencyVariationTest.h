@@ -134,7 +134,7 @@ public:
     for (int iHist = lastGoodSpec+1, i = 0 ; iHist < Nhist; iHist++, i++ )
     {
       correctLine += boost::lexical_cast<std::string>(iHist+1);
-      if ( (i + 1) % 10 == 0 || iHist == Nhist-1 ) 
+      if ( (i + 1) % 10 == 0 ) 
       {
         std::getline( testFile, fileLine );
         TS_ASSERT_EQUALS ( fileLine, correctLine )
@@ -145,6 +145,8 @@ public:
         correctLine += " ";
       }
     }
+    std::getline( testFile, fileLine );
+    TS_ASSERT_EQUALS( fileLine, correctLine )
     std::getline( testFile, fileLine );
     correctLine = "----Spectra not linked to a valid detector in the instrument definition : 0----";
     TS_ASSERT_EQUALS ( fileLine, correctLine )

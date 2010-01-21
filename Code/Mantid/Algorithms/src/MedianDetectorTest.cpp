@@ -100,7 +100,7 @@ void MedianDetectorTest::exec()
   //this calculation is optional, it depends on angle information existing
   if ( angles.use_count() == 1 )
   {
-    //if some numbers in angles are zero we will get the infinty flag value in the output work space which needs to be dealt with later
+    //if some numbers in angles are zero we will get the infinity flag value in the output work space which needs to be dealt with later
     counts = counts/angles;     
   }
   // An average of the data, the medain is less influenced by a small number of huge values than the mean
@@ -281,7 +281,7 @@ MatrixWorkspace_sptr MedianDetectorTest::getRate(MatrixWorkspace_sptr counts)
 *  average that is less affected by small numbers of very large values.
 * @param input A histogram workspace with one entry in each bin
 * @return The median value of the histograms in the workspace that was passed to it
-* @throw out_of_range if an input value is infinity or negative
+* @throw out_of_range if a value is incountered that is unbelievibly high or negative
 */
 double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
 {
@@ -363,7 +363,12 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
   gsl_sort( &nums[0], 1, nums.size() );//The address of foo[0] will return a pointer to a contiguous memory block that contains the values of foo. Vectors are guaranteed to store there memory elements in sequential order, so this operation is legal, and commonly used (http://bytes.com/groups/cpp/453169-dynamic-arrays-convert-vector-array)
   double median = gsl_stats_median_from_sorted_data( &nums[0], 1, nums.size() );
   g_log.information() << name() <<
-    ": The median integrated counts or soild angle normalised counts " << median << std::endl;
+    ": The median integrated counts or soild angle normalised counts is " << median << std::endl;
+  
+  if ( median < 0 || median > DBL_MAX/10 )
+  {// something has gone wrong
+    throw std::out_of_range("The calculated value for the median was either negative or unreliably large");
+  }
   return median;
 }
 /// Produces a workspace of single value histograms that indicate if the spectrum is within limits

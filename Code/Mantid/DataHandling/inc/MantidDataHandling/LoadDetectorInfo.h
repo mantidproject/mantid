@@ -65,6 +65,13 @@ public:
   virtual const std::string category() const{return "DataHandling\\Detectors";}
 
 private:
+  // stores the information that is to be saved in the parameter map for a detector
+  struct detectorInfo
+  {
+    int detID;                                      ///< ID number of the detector
+    double pressure;                                ///< detectors 3He partial pressure
+    double wallThick;                               ///< detector wall thickness
+  };
   /// will store a pointer to the user selected workspace
   DataObjects::Workspace2D_sptr m_workspace;
   /// the instrument with in the user selected workspace
@@ -93,7 +100,7 @@ private:
   void readDAT(const std::string& fName);
   void readRAW(const std::string& fName);
 
-  void setDetectorParams(int detID, double pressure, double wallThick);
+  void setDetectorParams(const detectorInfo &params, detectorInfo &changed);
   void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int> &detectIDs=std::vector<int>(), const std::vector<float> &delays=std::vector<float>());
   void adjDelayTOFs(double lastOffset, bool &differentDelays, const int * const detectIDs, const float * const delays, int numDetectors);
   void adjustXs(const std::vector<int> &detIDs, const std::vector<float> &offsets);
@@ -103,6 +110,7 @@ private:
   void noteMonitorOffset(const float offSet, const int detID);
   void setUpXArray(DataObjects::Histogram1D::RCtype &theXValuesArray, int specInd, double offset);
   void logErrorsFromRead(const std::vector<int> &missingDetectors);
+  void sometimesLogSuccess(const detectorInfo &params, bool &setToFalse);
 
   /// used to check that all the monitors have the same offset time
   static const float UNSETOFFSET;

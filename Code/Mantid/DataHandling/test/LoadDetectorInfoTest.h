@@ -108,6 +108,7 @@ public:
     info.isInitialized();
     // Set up a small workspace for testing
     makeSmallWS();
+
     info.setPropertyValue("Workspace", m_InoutWS);
     info.setPropertyValue("DataFilename", m_DatFile);
 
