@@ -58,7 +58,7 @@ void FlatBackground::exec()
   // check if the user passed an empty list, if so all of spec will be processed
   this->getSpecInds(specInds, numHists);
 
-  const bool useMean = isModeMean(getProperty("mode"));
+  bool useMean = isModeMean(getProperty("mode"));
  
   // Initialise the progress reporting object
   m_progress = new Progress(this,0.0,0.3,numHists); 
@@ -67,7 +67,7 @@ void FlatBackground::exec()
   // If input and output workspaces are not the same, create a new workspace for the output
   if (outputWS != inputWS )
   {
-    MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
+    outputWS = WorkspaceFactory::Instance().create(inputWS);
     PARALLEL_FOR2(inputWS,outputWS)
     for (int i=0; i < numHists; ++i)
     {
@@ -196,7 +196,7 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
 *  @return true if the user slected Mean background analysis and false if Linear Fit was selected
 *  @throw invalid_argument if the mode is not recognised
 */
-const bool FlatBackground::isModeMean(const std::string &mode)
+bool FlatBackground::isModeMean(const std::string &mode)
 {
   if ( mode == "Mean" )
   {

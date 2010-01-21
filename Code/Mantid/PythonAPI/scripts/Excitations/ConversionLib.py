@@ -2,29 +2,19 @@ from mantidsimple import *
 import CommonFunctions as common
 
 def NormaliseTo(reference, WS):
-  if reference == 'monitor' :
+  if reference == 'monitor-monitor peak1' :
     NormaliseToMonitor( WS, WS, MonitorSpectrum=1, IntegrationRangeMin=1000, IntegrationRangeMax=2000)
 
-  elif reference == 'current' :
-    NormaliseToCurrent( InputWorkspace=WS, OutputWorkspace=WS )
+  elif reference == 'protons (uAh)' :
+    NormaliseByCurrent( InputWorkspace=WS, OutputWorkspace=WS )
 
-  elif reference == 'peak' : raise Exception('Normalization by peak area not implemented yet')
+  elif reference == 'monitor-peak2 area' : raise Exception('Normalization by peak area not implemented yet')
 
-  elif reference != 'none' :
+  elif reference != 'no normalization' :
     raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')
-	
-def getRunName( path):
-  # get the string after the last /
-  filename = path.split('/')
-  filename = filename[len(filename)-1]
-  # and the last \
-  filename = filename.split('\\')
-  filename = filename[len(filename)-1]
-  # remove the last '.' and everything after it i.e. the extension. If there is not extension this just returns the whole thing
-  return filename.rpartition('.')[0]
 
 def NormaliseToWhiteBeam(WBRun, toNorm, mapFile, start, end) :
-  theNorm = "Temp workspace to be deleted soon"
+  theNorm = "_ETrans_norm_tempory_WS"
   common.LoadNexRaw(WBRun, theNorm)
  #comment the next line out?
   LoadDetectorInfo(theNorm, WBRun)
@@ -43,4 +33,4 @@ def NormaliseToWhiteBeam(WBRun, toNorm, mapFile, start, end) :
   mantid.deleteWorkspace(theNorm)
 
 # a workspace name that is very long and unlikely to have been created by the user before this script is run, it would be replaced  
-tempWS = "_ConvertToETrans_loading_tempory_workspace"
+tempWS = "_ETrans_loading_tempory_WS"

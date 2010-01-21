@@ -34,12 +34,12 @@ try:#------------Calculations Start---
   # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
   LoadRaw(dataFiles[0], TEMPBIG)											#for usage see www.mantidproject.org/LoadRaw
   # integrate the counts as soon as possible to reduce the size of the workspace
-  Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM |TOFWINDOWBLOCK|)                       #a Mantid algorithm
+  Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM, RangeLower=|TOF_WIN_LOW|, RangeUpper=|TOF_WIN_HIGH|)		#a Mantid algorithm
   if len(dataFiles) > 1 :
     for toAdd in dataFiles[ 1 : ] :
       # save the memory by overwriting the old workspaces
       LoadRaw(toAdd, "_FindBadDetects loading")
-      Integration(InputWorkspace="_FindBadDetects loading", OutputWorkspace="_FindBadDetects loading" |TOFWINDOWBLOCK|)# |TOFWINDOWBLOCK|)#a Mantid algorithm
+      Integration("_FindBadDetects loading", "_FindBadDetects loading", |TOF_WIN_LOW|, |TOF_WIN_HIGH|)	#a Mantid algorithm
       Plus(SUM, "_FindBadDetects loading", SUM)
     mantid.deleteWorkspace(TEMPBIG)
 	  
@@ -62,7 +62,7 @@ try:#------------Calculations Start---
     Multiply(WBV2WS, NORMA, NUMER)											#a Mantid algorithm
     Plus(NORMA, WBV2WS, NORMA)												#for usage see www.mantidproject.org/Plus
     Divide(NUMER, NORMA, NORMA)												#for usage see www.mantidproject.org/Divide
-    #--don't spend time on the factor of two as it will affect all histograms equally and so not affect the results
+    #--don't spend time on the factor of two in the harmonic as it will affect all histograms equally and so not affect the results
     mantid.deleteWorkspace(WBV2WS)
     mantid.deleteWorkspace(NUMER)
     
@@ -79,17 +79,13 @@ try:#------------Calculations Start---
   MDT = MedianDetectorTest( InputWorkspace=SUM, OutputWorkspace=NORMA, SignificanceTest=NUMERRORBARS, LowThreshold=lowThres, HighThreshold=ACCEPT, OutputFile=MDTFile )#for usage see www.mantidproject.org/MedianDetectorTest
   
 #----------------Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
-
-
-
-  #--How many were found in just these tests
-  numFound = functions.numberFromCommaSeparated(MDT.getPropertyValue('BadDetectorIDs')) \
-  #  - functions.numberFromCommaSeparated(downArray)
-  
   if OMASKFILE != "" :
     #--pick up the file output from one detector test that we did
-    functions.appendMaskFile(MDTFile, outfile)
+    functions.appendMaskFile(MDT.getPropertyValue("OutputFile"), outfile)
     outfile.close()
+
+  #--How many were found in just this set of tests
+  numFound = functions.numberFromCommaSeparated(MDT.getPropertyValue('BadDetectorIDs')) \
 
   #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
   print 'success'

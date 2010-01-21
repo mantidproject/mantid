@@ -4,6 +4,7 @@
 # Failures from the first test are writen to the second white beams
 # detector list and histograms are zero but not failure from the comparison
 ########################################################
+from os import remove
 from mantidsimple import *
 import DetectorTestLib as detLib
 
@@ -27,10 +28,10 @@ if OMASKFILE != '':
   outfile=open(OMASKFILE, 'a')
   outfile.write('--'+THISTEST+'--\n')
   DEVFile = OMASKFILE+'_dev'
-  OUTPUTWS = detLib.OUT_WS_PREFIX+'2WBV_'+OMASKFILE
+  OUTPUTWS = detLib.OUT_WS_PREFIX+'2WBV_'+common.getRunName(OMASKFILE)
 else :
   DEVFile = ''
-  OUTPUTWS = detLib.OUT_WS_PREFIX+'2WBV_'+WBV2FILE
+  OUTPUTWS = detLib.OUT_WS_PREFIX+'2WBV_'+common.getRunName(WBV2FILE)
 
 try:
   common.LoadNexRaw(WBV2FILE, WBV2WS)
@@ -46,29 +47,24 @@ try:
   #--write to the workspace
   MaskDetectors(Workspace=WBV2WS, DetectorList=downArray)
   
-  detLib.SingleWBV( WBV2WS, OUTPUTWS, HIGHABSOLUTE, LOWABSOLUTE, \
+  (sWBVResults, iiUNUSEDii) = detLib.SingleWBV( WBV2WS, OUTPUTWS, HIGHABSOLUTE, LOWABSOLUTE, \
     HIGHMEDIAN, LOWMEDIAN, NUMBERRORBARS, OMASKFILE )
   #--this will overwrite the OUTPUTWS with the cumulative list of the bad
   DEV = DetectorEfficiencyVariation( WhiteBeamBase=WBV1WS, WhiteBeamCompare=WBV2WS, \
     OutputWorkspace=OUTPUTWS, Variation=VARIATION, OutputFile=DEVFile )							#for usage see www.mantidproject.org/DetectorEfficiencyVariation
 
 #------------------------Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
-  DeadList = DEV.getPropertyValue('BadDetectorIDs')
-  #--How many were found in just these tests
-  numFound = detLib.numberFromCommaSeparated(DeadList)
-  
-  #--make a list of only the spectra that were marked bad this time
-  # Minus(OUTPUTWS, DOWNSOFAR, OUTPUTWS)																#for usage see www.mantidproject.org/Minus
-  
   if OMASKFILE != "" :
-    #--SingleWBV writes one file for each of its two tests, merge these in too
-    detLib.appendMaskFile(OMASKFILE+'_swbv_fdol', outfile)
-    detLib.appendMaskFile(OMASKFILE+'_swbv_mdt', outfile)
-    #--pick up the file output from the Mantid algorithm that we ran
-    detLib.appendMaskFile(DEVFile, outfile)
+    outfile.write(sWBVResults)
+	#--add the file output from the Mantid algorithm that we ran to the output file
+    detLib.appendMaskFile(DEV.getPropertyValue("OutputFile"), outfile)
     outfile.close()
-	
-  #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
+
+  DeadList = DEV.getPropertyValue('BadDetectorIDs')
+  #--How many were found in just this set of tests
+  numFound = detLib.numberFromCommaSeparated(DeadList)
+  	
+  #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. Changing any of these values is likely to make it incompatible with the Mantid GUI that ruins this script
   print 'success'
   print THISTEST
   print 'White beam vanadium comparison complete'
@@ -83,11 +79,10 @@ except Exception, reason:
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == '_FindBadDetects WBV2') : mantid.deleteWorkspace('_FindBadDetects WBV2')
   # the C++ that called this needs to look at the output from the print statements and deal with the fact that there was a problem
+  
+  #  if OMASKFILE != "" :
+    # check if it exists and os.remove(DEVFile)
 finally:
-#  if OMASKFILE != "" :
-  # check if it exists and os.remove(DEVFile)	
-  # check if it exists and os.remove(OMASKFILE+'.swbv_mdt')	
-  # check if it exists and os.remove(OMASKFILE+'.swbv_fdol')
 	
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == '_FindBadDetects ListofBad') : mantid.deleteWorkspace('_FindBadDetects ListofBad')

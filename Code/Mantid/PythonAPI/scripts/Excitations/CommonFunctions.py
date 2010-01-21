@@ -22,4 +22,15 @@ def loadMask(MaskFilename):
         for specNumber in numbers :
           spectraList = spectraList + ", " + specNumber
   #return everything after the first coma and space we added in the line above
-  return spectraList[2:]
+  return spectraList[2:]  
+	
+def getRunName(path):
+  # get the string after the last /
+  filename = path.split('/')
+  filename = filename[len(filename)-1]
+  # and the last \
+  filename = filename.split('\\')
+  filename = filename[len(filename)-1]
+  # remove the last '.' and everything after it i.e. the extension. If there is not extension this just returns the whole thing
+  return filename.rpartition('.')[0]
+

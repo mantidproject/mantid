@@ -3,7 +3,6 @@
 # Failing spectra are marked bad by writing to the detector list
 # and writing zeros to the histograms associated with those detectors
 ########################################################
-from os import remove
 from mantidsimple import *
 import CommonFunctions as common
 import DetectorTestLib as detLib
@@ -30,15 +29,16 @@ try:
   if WBV1FILE != '':
     #--Import the file and give it an obsure workspace name because we require that a workspace with that name doesn't exist and we'll remove it at the end
     common.LoadNexRaw(WBV1FILE, '_FindBadDetects WBV1')
-    OUTPUTWS = detLib.OUT_WS_PREFIX+'1WBV_'+WBV1FILE
+    OUTPUTWS = detLib.OUT_WS_PREFIX+'1WBV_'+common.getRunName(WBV1FILE)
   #--the outfile name has the highest precendence
   if OMASKFILE != '':
-    OUTPUTWS = detLib.OUT_WS_PREFIX+'1WBV_'+OMASKFILE
+    OUTPUTWS = detLib.OUT_WS_PREFIX+'1WBV_'+common.getRunName(OMASKFILE)
     outfile=open(OMASKFILE, 'w')
     if len(hardMask) > 0:
       outfile.write('--Hard Mask File List--\n')
       outfile.write(hardMask)
-      outfile.write('--'+THISTEST+'--\n')
+      outfile.write('\n')
+    outfile.write('--'+THISTEST+'--\n')
 
  #----------------Calculations Start------------
   if len(hardMask) > 0:
@@ -47,19 +47,18 @@ try:
   #--the integrated workspace will be much smaller so do this as soon as possible
   Integration('_FindBadDetects WBV1', '_FindBadDetects WBV1')
     
-  DeadList = detLib.SingleWBV( '_FindBadDetects WBV1', OUTPUTWS, \
+  (fileOut, numFound) = detLib.SingleWBV( '_FindBadDetects WBV1', OUTPUTWS, \
     HIGHABSOLUTE, LOWABSOLUTE, HIGHMEDIAN, LOWMEDIAN, NUMBERRORBARS, OMASKFILE )
 
 #--Calculations End---the rest of this script is about outputing the data and dealing with errors and clearing up
  
 
   #--DeadList is a string of comma separated integers, this gets the number of integers
-  numFound = detLib.numberFromCommaSeparated(DeadList)
+#  numFound = detLib.numberFromCommaSeparated(DeadList)
   
-  #--SingleWBV writes one file for each of its two tests, merge these into our main output file
+  #--if we were writing to asn output file, close it
   if OMASKFILE != '':
-    detLib.appendMaskFile(OMASKFILE+'_swbv_fdol', outfile)
-    detLib.appendMaskFile(OMASKFILE+'_swbv_mdt', outfile)
+    outfile.write(fileOut)
     outfile.close()
 
   #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time

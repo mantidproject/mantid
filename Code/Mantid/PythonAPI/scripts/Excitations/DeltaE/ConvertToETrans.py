@@ -10,6 +10,8 @@ from mantidsimple import *
 import CommonFunctions as common
 import ConversionLib as conv
 
+THISSCRIPT = 'Convert to Energy transfer'
+
 # all |GUI_SET_*| are quantities set by the QT interface that runs this script, changing this symbols here will stop the setting being read in from the script
 inOutWS = |GUI_SET_OUTWS|     # inOutWS is first used as an intermediate workspace and contains the output data at the end, it's renamed at the end
 
@@ -28,8 +30,9 @@ try:
 
   LoadDetectorInfo(inOutWS, input[0])
 
-  #--mask detectors that have failed tests run previously, does nothing unless the string ''#+|MASK_WORKSPACE| below is replaced with a valid workspace name
+  #--mask detectors that have failed tests run previously
   badDets = []
+  #-unless the string ''#+|MASK_WORKSPACE| below is replaced with a valid workspace name these lines do nothing
   DetectorMask = ''#+|MASK_WORKSPACE|
   if DetectorMask != '' :
     FDOL = FindDetectorsOutsideLimits(InputWorkspace=DetectorMask, OutputWorkspace=DetectorMask, HighThreshold=10, LowThreshold=-1, OutputFile='')
@@ -39,33 +42,42 @@ try:
   #--sum all the workspaces, when the workspaces are not summed single input files are specified in this file and the final Python script is made of many copies of this file
   if len(input) > 1:
     for toAdd in input[ 1 : ] :
-      # save the memory by overwriting old workspaces
-      common.LoadNexRaw(toAdd, conv.tempWS)
+      common.LoadNexRaw(toAdd, conv.tempWS)             #save the memory by overwriting old workspaces
       LoadDetectorInfo(conv.tempWS, toAdd)
-      Plus(inOutWS, conv.tempWS, inOutWS)
+      Plus(inOutWS, conv.tempWS, inOutWS)               #the detector masking in inOutWS will be preserved
     mantid.deleteWorkspace(conv.tempWS)
+  
+  if |RM_BG| == 'yes':
+    FlatBackground(InputWorkspace=inOutWS, OutputWorkspace=inOutWS, WorkspaceIndexList='', StartX=|TOF_LOW|, EndX=|TOF_HIGH|, mode='Mean')
+  
+  conv.NormaliseTo(|GUI_SET_NORM|, inOutWS)
+  
+  w = mantid[inOutWS]                                   #mantid here returns a pointer to a named workspace, it works like a dictionary object
+  w *= |GUI_SET_SCALING|								#warning writing w = w * ...  isn't be the same! That command would produce a new workspace because there is no way for the * operator to know that its output is also an input. The *= operator is much nicer
   
   ConvertUnits(inOutWS, inOutWS, 'DeltaE', 'Direct', IncidentE, 0)
 
   if |GUI_SET_BIN_BOUNDS| != '':
     Rebin(inOutWS, inOutWS, |GUI_SET_BIN_BOUNDS|)
   
-  DetectorEfficiencyCor(inOutWS, inOutWS, IncidentE)  
+  DetectorEfficiencyCor(inOutWS, inOutWS, IncidentE)
     
   mapFile = |GUI_SET_MAP_FILE|
   if mapFile != '':
     GroupDetectors( inOutWS, inOutWS, mapFile, KeepUngroupedSpectra=0)
   
   if |GUI_SET_WBV| != '':
-    conv.NormaliseToWhiteBeam(|GUI_SET_WBV|, inOutWS, mapFile, |GUI_SET_WBVLow|, |GUI_SET_WBVHigh|)
+    conv.NormaliseToWhiteBeam(|GUI_SET_WBV|, inOutWS, mapFile, |GUI_SET_WBVLOW|, |GUI_SET_WBVHIGH|)
 
-  #####remove this line###
+  #####remove this line?###
   ReplaceSpecialValues(inOutWS, inOutWS, 0, 0, 0)
-  
   # output to a file in ASCII
   SaveSPE(inOutWS, |GUI_SET_OUTPUT|)
 
 except Exception, reason:
+  print 'Error ',
+  print reason,
+  print ' encountered while running the ' + THISSCRIPT + " Python script"
   # delete the possibly part finished workspaces
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == inOutWS) : mantid.deleteWorkspace(inOutWS)
