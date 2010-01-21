@@ -242,15 +242,15 @@ void LoadISISNexus::checkOptionalProperties()
     m_list = !m_spec_list.empty();
 
     // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
-    if ( m_numberOfPeriods > 1)
-    {
-        if ( m_list || m_interval )
-        {
-            m_list = false;
-            m_interval = false;
-            g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
-        }
-    }
+    //if ( m_numberOfPeriods > 1)
+    //{
+    //    if ( m_list || m_interval )
+    //    {
+    //        m_list = false;
+    //        m_interval = false;
+    //        g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
+    //    }
+    //}
 
     // Check validity of spectra list property, if set
     if ( m_list )

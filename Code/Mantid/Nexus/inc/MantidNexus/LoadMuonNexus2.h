@@ -86,7 +86,7 @@ namespace Mantid
       void exec();
 
       void checkOptionalProperties();
-      void loadData(const NXInt& counts,const float* timeBins,int wsIndex,
+      void loadData(const NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
         int period,int spec,API::MatrixWorkspace_sptr localWorkspace);
       void runLoadInstrument(API::MatrixWorkspace_sptr localWorkspace);
       void loadLogs(API::MatrixWorkspace_sptr ws, NXEntry & entry,int period);

@@ -7,16 +7,17 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include "Poco/Path.h"
+#include <boost/shared_ptr.hpp>
 
 #include <cmath>
-#include <boost/shared_ptr.hpp>
-#include "MantidNexus/NexusClasses.h"
+#include <numeric>
 
 
 namespace Mantid
@@ -86,8 +87,15 @@ namespace Mantid
       // Create the root Nexus class
       NXRoot root(getPropertyValue("Filename"));
 
-      // Open the raw data group 'raw_data_1'
-      NXEntry entry = root.openEntry("run");
+      int iEntry = getProperty("EntryNumber");
+      if (iEntry >= root.groups().size())
+      {
+        throw std::invalid_argument("EntryNumber is out of range");
+      }
+
+      // Open the data entry
+      std::string entryName = root.groups()[iEntry].nxname;
+      NXEntry entry = root.openEntry(entryName);
 
       // Read in the instrument name from the Nexus file
       m_instrument_name = entry.getString("instrument/name");
@@ -103,18 +111,33 @@ namespace Mantid
       //-      boost::shared_ptr<SpectraDetectorMap> specMap;
       boost::shared_ptr<Sample> sample;
 
-      NXClass detectorGroup = entry.openNXGroup("instrument/detector_fb");
+      std::string detectorName;
+      // Only the first NXdata found
+      for(int i=0;i<entry.groups().size();i++)
+      {
+        std::string className = entry.groups()[i].nxclass;
+        if (className == "NXdata")
+        {
+          detectorName = entry.groups()[i].nxname;
+          break;
+        }
+      }
+      //NXClass detectorGroup = entry.openNXGroup(detectorName);
+      NXData dataGroup = entry.openNXData(detectorName);
 
-      NXInt spectrum_index = detectorGroup.openNXInt("spectrum_index");
+      NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
       spectrum_index.load();
       m_numberOfSpectra = spectrum_index.dim0();
 
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
 
-      NXFloat timeBins = detectorGroup.openNXFloat("raw_time");
-      timeBins.load();
-      int nBins = timeBins.dim0();
+      NXFloat raw_time = dataGroup.openNXFloat("raw_time");
+      raw_time.load();
+      int nBins = raw_time.dim0();
+      std::vector<double> timeBins;
+      timeBins.assign(raw_time(),raw_time()+nBins);
+      timeBins.push_back(raw_time[nBins-1]+raw_time[1]-raw_time[0]);
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       int total_specs;
@@ -137,7 +160,7 @@ namespace Mantid
 
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D",total_specs,nBins,nBins-1));
+        (WorkspaceFactory::Instance().create("Workspace2D",total_specs,nBins+1,nBins));
       // Set the unit on the workspace to TOF
       localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
@@ -149,25 +172,15 @@ namespace Mantid
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
-      NXInt period_index = detectorGroup.openNXInt("period_index");
+      NXInt period_index = dataGroup.openNXInt("period_index");
       period_index.load();
 
-      NXData dataGroup = entry.openNXData("detector_fb");
       NXInt counts = dataGroup.openIntData();
       counts.load();
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {
-        //if(m_entrynumber!=0)
-        //{
-        //  period=m_entrynumber-1;
-        //  if(period!=0)
-        //  {
-        //    runLoadInstrument(localWorkspace );
-        //    runLoadMappingTable(localWorkspace );
-        //  }
-        //}
 
         if (period == 0)
         {
@@ -200,7 +213,7 @@ namespace Mantid
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
-          loadData(counts,timeBins(),counter,period,i,localWorkspace);
+          loadData(counts,timeBins,counter,period,i,localWorkspace);
           localWorkspace->getAxis(1)->spectraNo(counter) = spectrum_index[i];
           counter++;
           progress.report();
@@ -211,7 +224,7 @@ namespace Mantid
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
             int k = m_spec_list[i];
-            loadData(counts,timeBins(),counter,period,k,localWorkspace);
+            loadData(counts,timeBins,counter,period,k,localWorkspace);
             localWorkspace->getAxis(1)->spectraNo(counter) = spectrum_index[k];
             counter++;
             progress.report();
@@ -427,20 +440,17 @@ namespace Mantid
     /** loadData
      *  Load the counts data from an NXInt into a workspace
      */
-    void LoadMuonNexus2::loadData(const NXInt& counts,const float* timeBins,int wsIndex,
+    void LoadMuonNexus2::loadData(const NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
       int period,int spec,API::MatrixWorkspace_sptr localWorkspace)
     {
       MantidVec& X = localWorkspace->dataX(wsIndex);
       MantidVec& Y = localWorkspace->dataY(wsIndex);
       MantidVec& E = localWorkspace->dataE(wsIndex);
-      int nBins = counts.dim2()-1; // It shouldn't be -1 here but timeBins has dim == counts.dim2() which is also wrong
-      X.assign(timeBins,timeBins+nBins+1);
+      int nBins = counts.dim2();
+      assert(nBins+1 == timeBins.size());
+      X.assign(timeBins.begin(),timeBins.end());
       int *data = &counts(period,spec,0);
       Y.assign(data,data+nBins);
-      //for(int i=0;i<nBins;++i)
-      //{
-      //  Y[i] = counts(period,spec,i);
-      //}
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
     }
 

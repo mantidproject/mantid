@@ -55,7 +55,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 192 for file inputFile = "argus0026287.nxs";
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 192);
-    TS_ASSERT_EQUALS( output2D->blocksize(), 2000-1);
+    TS_ASSERT_EQUALS( output2D->blocksize(), 2000);
     // Check two X vectors are the same
     TS_ASSERT( (output2D->dataX(3)) == (output2D->dataX(31)) );
     // Check two Y arrays have the same number of elements
@@ -156,7 +156,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 11);
-    TS_ASSERT_EQUALS( output2D->blocksize(), 2000-1);
+    TS_ASSERT_EQUALS( output2D->blocksize(), 2000);
     // Check two X vectors are the same
     TS_ASSERT( (output2D->dataX(3)) == (output2D->dataX(7)) );
     // Check two Y arrays have the same number of elements
@@ -199,7 +199,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 3);
-    TS_ASSERT_EQUALS( output2D->blocksize(), 2000-1);
+    TS_ASSERT_EQUALS( output2D->blocksize(), 2000);
     // Check two X vectors are the same
     TS_ASSERT( (output2D->dataX(0)) == (output2D->dataX(2)) );
     // Check two Y arrays have the same number of elements
@@ -243,7 +243,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 14);
-    TS_ASSERT_EQUALS( output2D->blocksize(), 2000-1);
+    TS_ASSERT_EQUALS( output2D->blocksize(), 2000);
     // Check two X vectors are the same
     TS_ASSERT( (output2D->dataX(3)) == (output2D->dataX(7)) );
     // Check two Y arrays have the same number of elements
