@@ -427,7 +427,15 @@ def _assignHelper(run_string, is_trans, reload = True):
 
     if is_trans:
         try:
-            _loadRawData(filename, wkspname, ext, spec_max = 8)
+            if INSTR_NAME == 'SANS2D' and int(run_no) < 568:
+                dimension = SANSUtility.GetInstrumentDetails(INSTR_NAME,DETBANK)[0]
+                specmin = dimension*dimension*2
+                specmax = specmin + 4
+            else:
+                specmin = None
+                specmax = 8
+                
+            _loadRawData(filename, wkspname, ext, specmin,specmax)
         except RuntimeError:
             return '',True,''
     else:
@@ -456,17 +464,11 @@ def padRunNumber(run_no, field_width):
 ##########################
 # Loader function
 ##########################
-def _loadRawData(filename, workspace, ext, spec_max = None):
+def _loadRawData(filename, workspace, ext, spec_min = None, spec_max = None):
     if ext.lower().startswith('n'):
-        if spec_max == None:
-            LoadNexus(filename + '.' + ext, workspace)
-        else:
-            LoadNexus(filename + '.' + ext, workspace, SpectrumMax=spec_max)
+        LoadNexus(filename + '.' + ext, workspace,SpectrumMin=spec_min,SpectrumMax=spec_max)
     else:
-        if spec_max == None:
-            LoadRaw(filename + '.' + ext, workspace)
-        else:
-            LoadRaw(filename + '.' + ext, workspace, SpectrumMax=spec_max)
+        LoadRaw(filename + '.' + ext, workspace, SpectrumMin = spec_min,SpectrumMax = spec_max)
         LoadSampleDetailsFromRaw(workspace, filename + '.' + ext)
 
     sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
