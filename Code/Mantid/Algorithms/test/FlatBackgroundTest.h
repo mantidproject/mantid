@@ -49,9 +49,6 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING( flatBG.initialize() )
     TS_ASSERT( flatBG.isInitialized() )
-
-    const std::vector<Property*> props = flatBG.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 5 )
   }
   
   void testExec()
