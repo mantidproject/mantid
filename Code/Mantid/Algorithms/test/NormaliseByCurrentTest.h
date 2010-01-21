@@ -58,6 +58,7 @@ public:
     MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normIn"));
     input->mutableSample().setProtonCharge(2.0);
     input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    input->setYUnit("Counts");
 
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )
@@ -73,7 +74,7 @@ public:
       TS_ASSERT_EQUALS( it->E(), 1.5 )
     }
 
-    TS_ASSERT_EQUALS( output->YUnitLabel(), "Counts" )
+    TS_ASSERT_EQUALS( output->YUnit(), "Counts" )
     TS_ASSERT_EQUALS( output->YUnitLabel(), "Counts per microAmp.hour" )
   }
 
