@@ -34,12 +34,13 @@ matlab = ARGUMENTS.get('matlab', 0)
 # on RHEL5 gcc 4.1 is the default
 # gcc 4.3 installed under a different name
 gcc44 = ARGUMENTS.get('gcc44', 0)
+
 if int(gcc44) :
     env["CC"] = "gcc44"
     env["CXX"] = "g++44"
     env["SHCC"] = "gcc44"
     env["SHCXX"] = "g++44"
-    
+
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
@@ -109,7 +110,6 @@ else:
 			boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
 			python_path=MantidBuild.procHeaderPath(ln,'PYTHON_LIB',python_path)
-			#third_party=os.path.abspath(MantidBuild.procHeader(ln,'THIRD',third_party))
 		f.close()
 	else:
 		boost_path=''
@@ -165,8 +165,7 @@ if os.name == 'nt':
 		env.Append(LINKFLAGS=['/OPT:REF','/OPT:ICF','/OPT:NOWIN98','/ltcg'])
 elif platform.system() == 'Linux':
 	if not rpmBuild:
-		cppPaths.append(poco_path + 'include')
-		cppPaths.append(poco_path +'Util')
+		cppPaths.append(poco_path)
 		libDirList.append(USRLOCALLIB)
 		if os.path.isdir('/usr/local/poco-1.3.1/'+ '/lib/Linux/i686') :
 			libDirList.append('/usr/local/poco-1.3.1/' +'/lib/Linux/i686')
@@ -338,16 +337,9 @@ ret = SConscript(['Main/SConscript'])
 env.Install('Bin/Shared', ret['shared'])
 
 skiptest=ARGUMENTS.get('skiptest',0)
-if not int(skiptest):
+if not int(skiptest) and not env.GetOption('clean'):
 	print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
-		# tests
-	if platform.system() != 'Linux':
-		ret = SConscript(['Build/Tests/SConscript'])
-	else:
-		cxxtestgen = env.WhereIs('cxxtestgen.py')
-		if cxxtestgen != None :
-			ret = SConscript(['Build/Tests/SConscript'])
-		else :
-			print 'CXXTESTGEN is not installed - tests will not be built'
+	# tests
+	ret = SConscript(['Build/Tests/SConscript'])
 else:
 	print "Not Building Tests."

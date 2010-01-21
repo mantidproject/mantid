@@ -21,8 +21,10 @@ doxylog.close()
 sconslog = open("../../../../logs/Mantid/scons.log","w")
 sconserr = open("../../../../logs/Mantid/sconsErr.log","w")
 buildargs = ["-j2","skiptest=1"]
-if platform.system() != 'Darwin':
+if os.name == 'nt':
     buildargs.append("matlab=1")
+elif platform.system() == 'Linux':
+    buildargs.append("gcc44=1")
 sp.call("python build.py "+' '.join(buildargs),stdout=sconslog,stderr=sconserr,shell=True)
 sconslog.close()
 sconserr.close()

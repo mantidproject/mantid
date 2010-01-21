@@ -1,12 +1,21 @@
 import os
 import subprocess as sp
 import sys
+import platform
 
 # Set the make command for this system
+buildargs = []
 if os.name == 'posix':
     make = "make"
 else:
     make = "nmake"
+
+
+if platform.system() == 'Linux':
+    qmake = "qmake-qt4"
+    buildargs.append("-j3")
+else:
+    qmake = 'qmake'
 
 # Update the local copy
 sp.call("svn up", shell=True)
@@ -40,8 +49,8 @@ if ret != 0:
     sys.exit(0)
 
 # Now build MantidPlot
-sp.call("qmake",stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
-ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
+sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
+ret = sp.call(make + ' ' + ''.join(buildargs),stdout=buildlog,stderr=errorlog,shell=True,cwd="qtiplot")
 if ret != 0:
     outcome = "MantidPlot build failed"
     buildlog.write(outcome)

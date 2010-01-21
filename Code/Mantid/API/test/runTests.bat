@@ -23,7 +23,7 @@ GOTO COMPILE
 
 :COMPILE
 echo "Compiling the test executable..."
-cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\inc" /I "..\..\kernel\inc" /I "..\..\Geometry\inc" /I "..\.." /D"_USE_MATH_DEFINES" /EHsc /MDd /W3 -wd4275 -wd4996 /nologo /c /ZI /TP
+cl runner.cpp /I "..\inc" /I "..\..\..\Third_Party\include" /I "..\..\..\Third_Party\src\cxxtest" /I "..\inc" /I "..\..\kernel\inc" /I "..\..\Geometry\inc" /I "..\.." /D"_USE_MATH_DEFINES" /EHsc /MDd /W3 -wd4275 -wd4996 /nologo /c /ZI /TP
 
 link /OUT:"runner.exe" /NOLOGO /LIBPATH:"../../Debug" /LIBPATH:"../../../Third_Party/lib/win32" /DEBUG /PDB:".\runner.pdb" Mantidkernel.lib runner.obj Mantidapi.lib Mantidgeometry.lib
   

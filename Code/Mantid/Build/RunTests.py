@@ -8,7 +8,10 @@ buildNotification.sendTestBuildStarted("Mantid")
 
 buildlog = open("../../../../logs/Mantid/testsBuild.log","w")
 builderr = open("../../../../logs/Mantid/testsBuildErr.log","w")
-sp.call("python build.py",stdout=buildlog,stderr=builderr,shell=True)
+buildargs=[]
+if platform.system() == 'Linux':
+    buildargs.append('gcc44=1')
+sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
 buildlog.close()
 builderr.close()
 
@@ -21,6 +24,10 @@ buildNotification.sendTestStarted("Mantid")
 # Hopefully can remove this when paths are correctly embedded by build
 if platform.system() == 'Darwin':
     os.putenv('DYLD_LIBRARY_PATH',os.getcwd()+'/Bin/Shared:'+os.getcwd()+'/../Third_Party/lib/mac')
+elif platform.system() == 'Linux':
+    os.putenv('LD_LIBRARY_PATH',os.getcwd()+'/Bin/Shared:')
+else:
+    pass
 
 runlog = ''
 runerr = open("../../../../logs/Mantid/testsRunErr.log","w")
@@ -42,3 +49,7 @@ runerr.close()
 
 if platform.system() == 'Darwin':
     os.unsetenv('DYLD_LIBRARY_PATH')
+elif  platform.system() == 'Linux':
+    os.unsetenv('LD_LIBRARY_PATH')
+else:
+    pass

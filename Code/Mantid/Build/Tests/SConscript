@@ -12,10 +12,12 @@ Import('env')
 
 libList = env['MYLIBLIST']
 libDirList = env['MYLIBDIRLIST']
+cppPath = env['CPPPATH']
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_TESTS',1)])
 myenv.Append(LIBS=libList)
 myenv.Append(LIBPATH=libDirList+['../../Bin/Shared'])
+myenv.Append(CPPPATH=cppPath + ['../../../Third_Party/src/cxxtest'])
 
 #GET LIST OF TESTS
 path = '../../'
@@ -27,15 +29,14 @@ testsToRun = []
 dirList = os.listdir(path)
 
 #Find Cxxtestgen
-cxxtestgen = env.WhereIs('cxxtestgen.py')
-if cxxtestgen == None :
-    cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
+cxxtestgen = 'python ../../../Third_Party/src/cxxtest/cxxtestgen.py'
 
 for fname in dirList:
   if os.path.isdir(path + fname):
     if fname != '.svn' and fname != 'LinuxBuildScripts' and fname != 'Build':
       #does folder contain /test?
-      if os.path.exists(path + fname + testfolder):
+      fullpath=path + fname + testfolder
+      if os.path.exists(fullpath) and len(os.listdir(fullpath)) > 0:
         #generate the test cpp file
         os.popen(cxxtestgen + ' --runner=MantidPrinter -o ' + fname + '.cpp '+ path + fname + testfolder +'/*.h')
         #If there are not tests then there will be no cpp file created
@@ -50,11 +51,4 @@ for test in testsToRun:
   if os.name == 'nt':
 	myenv.Program([dotcpp],LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB=dotpdb)
   else:
-	myenv.Program([dotcpp])
-	
-#write out the testsToRun file.  This is currently used by the linux build only and should be removed
-seperator="\n"
-f=open('../TestsToRun', 'w')
-f.write(seperator.join(testsToRun))
-f.close()
-
+	myenv.Program([dotcpp],CXX=env['CXX'])

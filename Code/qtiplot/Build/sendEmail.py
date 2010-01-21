@@ -1,12 +1,14 @@
 import re
 import smtplib
 import os
+import sys
 import platform
 from shutil import move
 from time import strftime
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
+#RECIPIENTS = ['martyn.gigg@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system() + 'BuildServer1@mantidproject.org'
 localServerName = 'http://' + platform.node()
@@ -45,7 +47,10 @@ if buildSuccess:
      f.write('launch')
 
 last = logDir + 'lastBuild.txt'
-lastBuild = open(last,'r').read()     
+try:
+     lastBuild = open(last,'r').read()
+except IOError:
+     lastBuild = 'False'
 open(last,'w').write(str(buildSuccess))
 
 # We want to skip sending email if this AND previous build succeeded
@@ -86,6 +91,6 @@ Server said: %s
     raise smtplib.SMTPException, errstr
 
 if buildSuccess:
-     exit(0)
+     sys.exit(0)
 else:
-     exit(1)
+     sys.exit(1)

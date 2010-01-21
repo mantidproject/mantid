@@ -3,6 +3,7 @@ import smtplib
 import os
 import platform
 import socket
+import sys
 from shutil import move
 from time import strftime
 import buildNotification
@@ -11,6 +12,7 @@ import buildNotification
 smtpserver = 'outbox.rl.ac.uk'
 
 #RECIPIENTS = ['russell.taylor@stfc.ac.uk']
+#RECIPIENTS=['martyn.gigg@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system()+'BuildServer1@mantidproject.org'
 
@@ -148,7 +150,10 @@ if platform.system() != 'Darwin':
                doxyWarnings = False
      move(filedoxy,archiveDir)
 
-     lastDoxy = int(open('prevDoxy','r').read())
+     try:
+          lastDoxy = int(open('prevDoxy','r').read())
+     except IOError:
+          lastDoxy = 0
      currentDoxy = open('prevDoxy','w')
      currentDoxy.write(str(warnCount))
 
@@ -254,7 +259,8 @@ except:
   print "Failed to send the build results email"
 
 if not buildSuccess:
-     exit(1)
+     # On Redhat we have python 2.4 and that doesn't seem to have the global exit command
+     sys.exit(1)
 else:
      fileLaunchQTIPlot = logDir+'LaunchQTIPlot.txt'
      f = open(fileLaunchQTIPlot,'w')
