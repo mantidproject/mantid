@@ -112,7 +112,7 @@ namespace Mantid
 
       // Define a value to use as an unset parameter
       module << "# Define a value to use as an unset parameter\n"
-	     << "UNSET_PARAM_VALUE = -9999\n\n";
+	     << "UNSET_PARAM_VALUE = None\n\n";
 
       //Make the FrameworkManager object available with case variations
       module << "# The main API object\n"

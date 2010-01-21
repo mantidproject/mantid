@@ -67,7 +67,7 @@ public:
     getline( is, line );
 
     getline( is, line );
-    TS_ASSERT_EQUALS(line, std::string("UNSET_PARAM_VALUE = -9999"));
+    TS_ASSERT_EQUALS(line, std::string("UNSET_PARAM_VALUE = None"));
     //next non-blank line should be API objects
     //eat blank lines
     while( getline(is, line) && ( line.empty() || line[0] == '#' ) )
