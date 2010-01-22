@@ -48,7 +48,7 @@ try:
     mantid.deleteWorkspace(conv.tempWS)
   
   if |RM_BG| == 'yes':
-    FlatBackground(InputWorkspace=inOutWS, OutputWorkspace=inOutWS, WorkspaceIndexList='', StartX=|TOF_LOW|, EndX=|TOF_HIGH|, mode='Mean')
+    FlatBackground(InputWorkspace=inOutWS, OutputWorkspace=inOutWS, WorkspaceIndexList='', StartX=|TOF_LOW|, EndX=|TOF_HIGH|, Mode='Mean')
   
   conv.NormaliseTo(|GUI_SET_NORM|, inOutWS)
   

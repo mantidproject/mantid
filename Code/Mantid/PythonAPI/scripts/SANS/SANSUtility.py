@@ -221,9 +221,9 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
 	tmpWS = inputWS + '_tmp'
 	if loqremovebins == True:
 		RemoveBins(inputWS,tmpWS, 19900, 20500, Interpolation='Linear')
-		FlatBackground(tmpWS, tmpWS, spec_list, backmon_start, backmon_end)
+		FlatBackground(tmpWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
 	else:
-		FlatBackground(inputWS, tmpWS, spec_list, backmon_start, backmon_end)
+		FlatBackground(inputWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
 	# Convert and rebin
 	ConvertUnits(tmpWS,tmpWS,"Wavelength")
 	Rebin(tmpWS, tmpWS, wavbining)

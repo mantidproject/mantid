@@ -36,7 +36,7 @@ void FlatBackground::init()
   std::vector<std::string> modeOptions;
   modeOptions.push_back("Linear Fit");
   modeOptions.push_back("Mean");
-  declareProperty("mode","Linear Fit",new ListValidator(modeOptions),
+  declareProperty("Mode","Linear Fit",new ListValidator(modeOptions),
     "Both method used to estimate the background assume that the bin widths are\n"
     "the same throughout the region of interest and background region (default:\n"
     "Linear Fit)");
