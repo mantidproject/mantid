@@ -9,6 +9,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include <Poco/NObserver.h>
 #include <climits>
+#include <cfloat>
 #include <string>
 #include <vector>
 
