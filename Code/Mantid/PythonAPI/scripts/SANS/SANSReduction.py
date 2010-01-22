@@ -283,7 +283,7 @@ def AssignSample(sample_run, reload = True):
         return '', '()'
     
     _SAMPLE_RUN = sample_run
-    SCATTER_SAMPLE,reset,logname = _assignHelper(sample_run, False, reload)
+    SCATTER_SAMPLE,reset,logname,filepath = _assignHelper(sample_run, False, reload)
     if SCATTER_SAMPLE == '':
         _issueWarning('Unable to load sans sample run, cannot continue.')
         return '','()'
@@ -292,7 +292,7 @@ def AssignSample(sample_run, reload = True):
     if (INSTR_NAME == 'SANS2D'):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
-        logvalues = _loadDetectorLogs(logname)
+        logvalues = _loadDetectorLogs(logname,filepath)
         if logvalues == None:
             mtd.deleteWorkspace(SCATTER_SAMPLE)
             _issueWarning("Sample logs cannot be loaded, cannot continue")
@@ -324,7 +324,7 @@ def AssignCan(can_run, reload = True):
         return '', '()'
 
     _CAN_RUN = can_run
-    SCATTER_CAN ,reset, logname = _assignHelper(can_run, False, reload)
+    SCATTER_CAN ,reset, logname,filepath = _assignHelper(can_run, False, reload)
     if SCATTER_CAN == '':
         _issueWarning('Unable to load sans can run, cannot continue.')
         return '','()'
@@ -333,7 +333,7 @@ def AssignCan(can_run, reload = True):
     if (INSTR_NAME == 'SANS2D'):
         global _MARKED_DETS_
         _MARKED_DETS_ = []
-        logvalues = _loadDetectorLogs(logname)
+        logvalues = _loadDetectorLogs(logname,filepath)
         if logvalues == None:
             _issueWarning("Can logs could not be loaded, using sample values.")
             return SCATTER_CAN, "()"
@@ -424,7 +424,7 @@ def _assignHelper(run_string, is_trans, reload = True):
     # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
     if not os.path.exists(filename + '.' + ext):
         filename = basename
-
+    
     if is_trans:
         try:
             if INSTR_NAME == 'SANS2D' and int(run_no) < 568:
@@ -435,15 +435,15 @@ def _assignHelper(run_string, is_trans, reload = True):
                 specmin = None
                 specmax = 8
                 
-            _loadRawData(filename, wkspname, ext, specmin,specmax)
+            filepath = _loadRawData(filename, wkspname, ext, specmin,specmax)
         except RuntimeError:
             return '',True,''
     else:
         try:
-            _loadRawData(filename, wkspname, ext)
+            filepath = _loadRawData(filename, wkspname, ext)
         except RuntimeError:
             return '',True,''
-    return wkspname,True, INSTR_NAME + logname
+    return wkspname,True, INSTR_NAME + logname, filepath
 
 def padRunNumber(run_no, field_width):
     nchars = len(run_no)
@@ -466,9 +466,9 @@ def padRunNumber(run_no, field_width):
 ##########################
 def _loadRawData(filename, workspace, ext, spec_min = None, spec_max = None):
     if ext.lower().startswith('n'):
-        LoadNexus(filename + '.' + ext, workspace,SpectrumMin=spec_min,SpectrumMax=spec_max)
+        alg = LoadNexus(filename + '.' + ext, workspace,SpectrumMin=spec_min,SpectrumMax=spec_max)
     else:
-        LoadRaw(filename + '.' + ext, workspace, SpectrumMin = spec_min,SpectrumMax = spec_max)
+        alg = LoadRaw(filename + '.' + ext, workspace, SpectrumMin = spec_min,SpectrumMax = spec_max)
         LoadSampleDetailsFromRaw(workspace, filename + '.' + ext)
 
     sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
@@ -477,12 +477,16 @@ def _loadRawData(filename, workspace, ext, spec_min = None, spec_max = None):
     SampleHeight(sample_details.getHeight())
     SampleWidth(sample_details.getWidth())
 
+    # Return the filepath actually used to load the data
+    fullpath = alg.getPropertyValue("Filename")
+    return os.path.dirname(fullpath)
+
 
 # Load the detector logs
-def _loadDetectorLogs(logname):
+def _loadDetectorLogs(logname,filepath):
     # Adding runs produces a 1000nnnn or 2000nnnn. For less copying, of log files doctor the filename
     logname = logname[0:6] + '0' + logname[7:]
-    filename = os.path.join(DATA_PATH, logname + '.log')
+    filename = os.path.join(filepath, logname + '.log')
 
     # Build a dictionary of log data 
     logvalues = {}
