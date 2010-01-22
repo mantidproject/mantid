@@ -394,7 +394,7 @@ def TransmissionCan(can, direct, reload = True):
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True):
     if run_string == '' or run_string.startswith('.'):
-        return '',True,''
+        return '',True,'',''
     pieces = run_string.split('.')
     if len(pieces) != 2 :
          _fatalError("Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format")
@@ -402,7 +402,7 @@ def _assignHelper(run_string, is_trans, reload = True):
         run_no = pieces[0]
         ext = pieces[1]
     if run_no == '':
-        return '',True,''
+        return '',True,'',''
         
     if INSTR_NAME == 'LOQ':
         field_width = 5
@@ -417,7 +417,7 @@ def _assignHelper(run_string, is_trans, reload = True):
         wkspname =  shortrun_no + '_sans_' + ext.lower()
 
     if reload == False and mtd.workspaceExists(wkspname):
-        return wkspname,False,''
+        return wkspname,False,'',''
 
     basename = INSTR_NAME + fullrun_no
     filename = os.path.join(DATA_PATH,basename)
@@ -437,12 +437,12 @@ def _assignHelper(run_string, is_trans, reload = True):
                 
             filepath = _loadRawData(filename, wkspname, ext, specmin,specmax)
         except RuntimeError:
-            return '',True,''
+            return '',True,'',''
     else:
         try:
             filepath = _loadRawData(filename, wkspname, ext)
         except RuntimeError:
-            return '',True,''
+            return '',True,'',''
     return wkspname,True, INSTR_NAME + logname, filepath
 
 def padRunNumber(run_no, field_width):
@@ -1175,21 +1175,26 @@ def applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orient
 ##
 def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False):
     '''Performs the data reduction steps'''
-    global MONITORSPECTRUM, SPECMIN, SPECMAX
+    global SPECMIN, SPECMAX, MONITORSPECTRUM
     sample_raw = run_setup.getRawWorkspace()
     orientation = orientation=SANSUtility.Orientation.Horizontal
     if INSTR_NAME == "SANS2D":
-        sample_run = int(sample_raw.split('_')[0])
-        if sample_run < 568:
-            orientation=SANSUtility.Orientation.Vertical
+        sample_run = sample_raw.split('_')[0]
+        ndigits = len(sample_run)
+        if ndigits > 3:
+            base_runno = int(sample_run[ndigits-3:])
+        else:
+            base_runno = int(sample_run)
+        if base_runno < 568:
             MONITORSPECTRUM = 73730
+            orientation=SANSUtility.Orientation.Vertical
             if DETBANK == 'front-detector':
                 SPECMIN = DIMENSION*DIMENSION + 1 
                 SPECMAX = DIMENSION*DIMENSION*2
             else:
                 SPECMIN = 1
                 SPECMAX = DIMENSION*DIMENSION
-        elif (sample_run >= 568 and sample_run < 684):
+        elif (base_runno >= 568 and base_runno < 684):
             orientation = SANSUtility.Orientation.Rotated
         else:
             pass

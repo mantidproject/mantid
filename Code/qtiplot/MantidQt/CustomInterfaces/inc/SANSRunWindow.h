@@ -169,6 +169,8 @@ private slots:
   void pasteToBatchTable();
   ///Clear the batch table
   void clearBatchTable();
+  ///Clear logger
+  void clearLogger();
   ///Verbose mode checked/unchecked
   void verboseMode(int state);
 

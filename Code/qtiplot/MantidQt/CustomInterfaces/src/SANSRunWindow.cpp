@@ -145,7 +145,7 @@ void SANSRunWindow::initLayout()
 
     //Logging
     connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
-    connect(m_uiForm.logger_clear, SIGNAL(clicked()), m_uiForm.logging_field, SLOT(clear()));
+    connect(m_uiForm.logger_clear, SIGNAL(clicked()), this, SLOT(clearLogger()));
     m_uiForm.logging_field->ensureCursorVisible();
 
     connect(m_uiForm.verbose_check, SIGNAL(stateChanged(int)), this, SLOT(verboseMode(int)));
@@ -1795,6 +1795,15 @@ void SANSRunWindow::clearBatchTable()
 }
 
 /**
+ * Clear the logger field
+ */
+void SANSRunWindow::clearLogger()
+{
+  m_uiForm.logging_field->clear();
+  m_uiForm.tabWidget->setTabText(4, "Logging");
+}
+
+/**
  * Handle a verbose mode check box state change
  * state The new state
  */
@@ -2171,7 +2180,8 @@ void SANSRunWindow::checkLogFlags()
 {
   if( m_log_warnings )
   {
-    showInformationBox("Warning messages occurred during previous operation, see log for details.");
+    m_uiForm.tabWidget->setTabText(4, "Logging - WARNINGS");
+    //    m_uiForm.tabWidget->tabBar()->setTabTextColor(4, QColor("red"));
   }
   m_log_warnings = false;
 }
