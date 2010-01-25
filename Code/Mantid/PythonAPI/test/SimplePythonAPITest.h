@@ -61,43 +61,12 @@ public:
     //next line should be string import
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("import string"));
+    getline(is, line);
+    getline(is, line);
 
-    // Empty line and comment line
-    getline( is, line );
-    getline( is, line );
-
-    getline( is, line );
-    TS_ASSERT_EQUALS(line, std::string("UNSET_PARAM_VALUE = None"));
-    //next non-blank line should be API objects
-    //eat blank lines
-    while( getline(is, line) && ( line.empty() || line[0] == '#' ) )
-    {
-    }
-    
-    TS_ASSERT_EQUALS(line, "mantid = MantidPyFramework()");
-    getline(is, line);
-    getline(is, line);
-    TS_ASSERT_EQUALS(line, "Mantid = mantid");
-    getline(is, line);
-    TS_ASSERT_EQUALS(line, "mtd = mantid");
-    getline(is, line);
-    TS_ASSERT_EQUALS(line, "Mtd = mantid");
-
-    //next non-blank line should be setWorkingDirectory()
-    //eat blank lines
-    while( getline(is, line) && line.empty() ) 
-    {
-    }
-
-    getline(is, line);
-    TS_ASSERT_EQUALS(line, "def makeString(value):");
-    while( getline(is, line) && !line.empty() ) 
-    {
-    }
-    
     // Comment line first
     getline(is, line);
-    getline(is, line);
+
     TS_ASSERT_EQUALS(line, "def setWorkingDirectory(path):");
     getline(is, line);
     TS_ASSERT_EQUALS(line, "\tos.chdir(path)");
