@@ -49,7 +49,10 @@ public:
   void testValue()
   {
     TS_ASSERT( ! iProp->value().compare("1") )
-    TS_ASSERT( ! dProp->value().compare("9.99") )
+    // Note that some versions of boost::lexical_cast > 1.34 give a string such as
+    // 9.9900000000000002 rather than 9.99. Converting back to a double however does
+    // still give the correct 9.99.
+    TS_ASSERT( ! dProp->value().substr(0,4).compare("9.99") )
     TS_ASSERT( ! sProp->value().compare("theValue") )
   }
 
@@ -95,13 +98,16 @@ public:
       "Could not set property defau1. Can not convert \"garbage\" to " + i.type() )
     TS_ASSERT_EQUALS( i.getDefault(), "3" )
 
+    // Note that some versions of boost::lexical_cast > 1.34 give a string such as
+    // 9.9900000000000002 rather than 9.99. Converting back to a double however does
+    // still give the correct 9.99.
     PropertyWithValue<double> d("defau3.33", 3.33);
-    TS_ASSERT_EQUALS( d.getDefault(), "3.33" )
+    TS_ASSERT_EQUALS( d.getDefault().substr(0,4), "3.33" )
     TS_ASSERT_EQUALS( d.setValue("1.6"), "" )
-    TS_ASSERT_EQUALS( d.getDefault(), "3.33" )
+    TS_ASSERT_EQUALS( d.getDefault().substr(0,4), "3.33" )
     TS_ASSERT_EQUALS( d.setValue("garbage"),
       "Could not set property defau3.33. Can not convert \"garbage\" to " + d.type() )
-    TS_ASSERT_EQUALS( d.getDefault(), "3.33" )
+    TS_ASSERT_EQUALS( d.getDefault().substr(0,4), "3.33" )
   }
 
   void testCopyConstructor()
@@ -231,7 +237,11 @@ public:
     TS_ASSERT( ! pp->name().compare("Prop2") )
     TS_ASSERT( ! pp->value().compare("5.5") )
     TS_ASSERT_EQUALS( pp->setValue("7.777"), "" )
-    TS_ASSERT( ! pp->value().compare("7.777") )
+    
+    // Note that some versions of boost::lexical_cast > 1.34 give a string such as
+    // 9.9900000000000002 rather than 9.99. Converting back to a double however does
+    // still give the correct 9.99.
+      TS_ASSERT( ! pp->value().substr(0,5).compare("7.777") )
     TS_ASSERT_EQUALS( d, 7.777 )
 
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(sProp), static_cast<Property*>(0) )

@@ -12,6 +12,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAlgorithms/PolynomialCorrection.h"
 #include <fstream>
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -258,7 +259,7 @@ public:
     std::fstream outFile(filename.c_str());
     TS_ASSERT( outFile )
     outFile.close();
-    remove(filename.c_str());
+    Poco::File(filename).remove();
 
     work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(
             "testdead_out"));

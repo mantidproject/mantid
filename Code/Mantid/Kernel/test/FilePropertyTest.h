@@ -55,7 +55,7 @@ public:
     delete fp;
   }
 
-  void testNoExistLoadProperty()
+  void testOptionalLoadProperty()
   {
     std::vector<std::string> exts(1, "raw");
     Mantid::Kernel::FileProperty *fp = 
@@ -64,7 +64,7 @@ public:
     TS_ASSERT_EQUALS(fp->isLoadProperty(), true)
     std::string msg = fp->setValue("GEM38370.raw");
     TS_ASSERT_EQUALS(msg, "")    
-    // I'm using part of the file's path to check that the property really has found the file, with NoExistLoad the property returns valid whether it finds the file or not
+    // I'm using part of the file's path to check that the property really has found the file, with OptionalLoad the property returns valid whether it finds the file or not
     TS_ASSERT(fp->value().find("Data") != std::string::npos)
     // do this in parts making no assumptions about the identity of the slash that separates directories
     TS_ASSERT(fp->value().find("Test") != std::string::npos)

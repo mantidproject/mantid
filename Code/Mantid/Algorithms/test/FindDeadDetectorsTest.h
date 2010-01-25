@@ -10,6 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "WorkspaceCreationHelper.hh"
 #include <fstream>
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -115,7 +116,7 @@ public:
     std::fstream outFile(filename.c_str());
     TS_ASSERT( outFile )
     outFile.close();
-    remove(filename.c_str());
+    Poco::File(filename).remove();
 
     // Set Range_lower to later in the histogram when the yTooDead detectors stop working
     alg.setPropertyValue("RangeLower", "11.0");
@@ -160,7 +161,6 @@ public:
     AnalysisDataService::Instance().remove("testdead_in");
     AnalysisDataService::Instance().remove("testdead_out");
   }
-
 };
 
 #endif /*FINDDEADDETECTORSTEST_H_*/
