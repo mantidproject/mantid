@@ -11,11 +11,11 @@ namespace Mantid
   {
 
     /// Private Constructor for singleton class
-    AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")),regAlg()
+    AlgorithmManagerImpl::AlgorithmManagerImpl(): g_log(Kernel::Logger::get("AlgorithmManager")),m_managed_algs()
     {
-      if ( ! Kernel::ConfigService::Instance().getValue("algorithms.retained",max_no_algs) || max_no_algs < 1 )
+      if ( ! Kernel::ConfigService::Instance().getValue("algorithms.retained",m_max_no_algs) || m_max_no_algs < 1 )
       {
-        max_no_algs = 100; //Default to keeping 100 algorithms if not specified
+        m_max_no_algs = 100; //Default to keeping 100 algorithms if not specified
       }
       
       g_log.debug() << "Algorithm Manager created." << std::endl;
@@ -51,9 +51,9 @@ namespace Mantid
     {
       std::vector<std::pair<std::string,std::string> > retVector;
 
-      for (unsigned int i=0; i < regAlg.size(); ++i)
+      for (unsigned int i=0; i < m_managed_algs.size(); ++i)
       {
-        std::pair<std::string,std::string> alg(regAlg[i]->name(),regAlg[i]->category());
+        std::pair<std::string,std::string> alg(m_managed_algs[i]->name(),m_managed_algs[i]->category());
         retVector.push_back(alg);
       }
 
@@ -73,31 +73,31 @@ namespace Mantid
       try
       {
         IAlgorithm_sptr alg = AlgorithmFactory::Instance().create(algName,version);// Throws on fail:
-        regAlg.push_back(IAlgorithm_sptr(new AlgorithmProxy(alg)));      
-        regAlg.back()->initialize();
+        m_managed_algs.push_back(IAlgorithm_sptr(new AlgorithmProxy(alg)));      
+        m_managed_algs.back()->initialize();
         
         // If this takes us beyond the maximum size, then remove the oldest one
-        if (regAlg.size() > static_cast<std::deque<IAlgorithm_sptr>::size_type>(max_no_algs) ) regAlg.pop_front();
+        if (m_managed_algs.size() > static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs) ) m_managed_algs.pop_front();
       }
       catch(std::runtime_error& ex)
       {
         g_log.error()<<"AlgorithmManager:: Unable to create algorithm "<< algName <<ex.what() << std::endl;  
         throw std::runtime_error("AlgorithmManager:: Unable to create algorithm " + algName); 
       }
-      return regAlg.back();
+      return m_managed_algs.back();
     }
 
     /// deletes all registered algorithms
     void AlgorithmManagerImpl::clear()
     {
-      regAlg.clear();
+      m_managed_algs.clear();
       return;
     }
 
     /// Returns a shared pointer by algorithm id
     IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const
     {
-      for( std::deque<IAlgorithm_sptr>::const_iterator a = regAlg.begin();a!=regAlg.end();a++)
+      for( std::deque<IAlgorithm_sptr>::const_iterator a = m_managed_algs.begin();a!=m_managed_algs.end();a++)
         if ((**a).getAlgorithmID() == id) return *a;
       return IAlgorithm_sptr();
     }

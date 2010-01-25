@@ -35,7 +35,7 @@ namespace PythonAPI
      * This is the main class through which Python interacts with Mantid and with the exception of PyAlgorithm and V3D, 
      * is the only one directly instantiable in Python
      */
-    class_<FrameworkManagerWrapper, boost::noncopyable>("FrameworkManager")
+    class_<FrameworkManagerProxy, FrameworkProxyCallback, boost::noncopyable>("FrameworkManager")
       .def("clear", &FrameworkManagerProxy::clear)
       .def("clearAlgorithms", &FrameworkManagerProxy::clearAlgorithms)
       .def("clearData", &FrameworkManagerProxy::clearData)
@@ -48,8 +48,8 @@ namespace PythonAPI
 	   return_value_policy< reference_existing_object >())
       .def("createAlgorithm", (createAlg_overload4)&FrameworkManagerProxy::createAlgorithm, 
 	   return_value_policy< reference_existing_object >())
-      .def("execute", (exec_ptr)&FrameworkManagerProxy::execute, 
-	   return_value_policy< reference_existing_object >(), FrameworkManager_execute_overloads())
+      .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)
+      .def("_observeAlgFactoryUpdates", &FrameworkManagerProxy::observeAlgFactoryUpdates)
       .def("deleteWorkspace", &FrameworkManagerProxy::deleteWorkspace)
       .def("getWorkspaceNames", &FrameworkManagerProxy::getWorkspaceNames)
       .def("getWorkspaceGroupNames", &FrameworkManagerProxy::getWorkspaceGroupNames)
@@ -61,54 +61,59 @@ namespace PythonAPI
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
       .def("_getRawTableWorkspacePointer", &FrameworkManagerProxy::retrieveTableWorkspace)
       .def("_getRawWorkspaceGroupPointer", &FrameworkManagerProxy::retrieveWorkspaceGroup)
-      .def("_workspaceRemoved", &FrameworkManagerProxy::workspaceRemoved, 
-	   &FrameworkManagerWrapper::default_workspaceRemoved)
-      .def("_workspaceReplaced", &FrameworkManagerProxy::workspaceReplaced, 
-	   &FrameworkManagerWrapper::default_workspaceReplaced)
-      .def("_workspaceAdded", &FrameworkManagerProxy::workspaceAdded, 
-	   &FrameworkManagerWrapper::default_workspaceAdded)
-      .def("_workspaceStoreCleared", &FrameworkManagerProxy::workspaceStoreCleared, 
-	   &FrameworkManagerWrapper::default_workspaceStoreCleared)
+      .def("_workspaceRemoved", &FrameworkProxyCallback::default_workspaceRemoved)
+      .def("_workspaceReplaced", &FrameworkProxyCallback::default_workspaceReplaced)
+      .def("_workspaceAdded", &FrameworkProxyCallback::default_workspaceAdded)
+      .def("_workspaceStoreCleared", &FrameworkProxyCallback::default_workspaceStoreCleared)
+      .def("_algorithmFactoryUpdated", &FrameworkProxyCallback::default_algorithmFactoryUpdated) 
       .def("_setGILRequired", &FrameworkManagerProxy::setGILRequired)
+      .staticmethod("_setGILRequired")
     ;
   }
 
   void export_ialgorithm()
   {
+    
     register_ptr_to_python<Mantid::API::IAlgorithm*>();
 
     class_< Mantid::API::IAlgorithm, boost::noncopyable>("IAlgorithm", no_init)
       .def("initialize", &Mantid::API::IAlgorithm::initialize)
       .def("execute", &Mantid::API::IAlgorithm::execute)
+      .def("executeAsync", &Mantid::API::IAlgorithm::executeAsync)
+      .def("isRunningAsync", &Mantid::API::IAlgorithm::isRunningAsync)
       .def("isInitialized", &Mantid::API::IAlgorithm::isInitialized)
       .def("isExecuted", &Mantid::API::IAlgorithm::isExecuted)
       .def("setPropertyValue", &Mantid::API::IAlgorithm::setPropertyValue)
       .def("getPropertyValue", &Mantid::API::IAlgorithm::getPropertyValue)
       .def("getProperties", &Mantid::API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
       ;
+
+    class_< Mantid::API::Algorithm, bases<Mantid::API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
+      ;
+
+    class_< Mantid::API::CloneableAlgorithm, bases<Mantid::API::Algorithm>, boost::noncopyable>("CloneableAlgorithm", no_init)
+      ;
     
-    //PyAlgorithm
+    //PyAlgorithmBase
     //Save some typing for all of the templated declareProperty and getProperty methods
-#define EXPORT_DECLAREPROPERTY(type, pyname)\
-    .def(pyname,(void(PyAlgorithmWrapper::*)(const std::string &, type, const std::string &,const unsigned int))&Mantid::PythonAPI::PyAlgorithmWrapper::_declareProperty<type>)
+#define EXPORT_DECLAREPROPERTY(type, suffix)\
+    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>)\
+    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)
     
 #define EXPORT_GETPROPERTY(type, pyname)\
-    .def(pyname,(type(PyAlgorithmWrapper::*)(const std::string &))&Mantid::PythonAPI::PyAlgorithmWrapper::_getProperty<type>)
+    .def(pyname,(type(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getProperty<type>)
     
-    class_< Mantid::PythonAPI::PyAlgorithmWrapper, boost::noncopyable >("PyAlgorithm")
-      .def("initialize", &Mantid::PythonAPI::PyAlgorithmWrapper::initialize)
-      .def("execute", &Mantid::PythonAPI::PyAlgorithmWrapper::execute)
-      .def("setPropertyValue", &Mantid::PythonAPI::PyAlgorithmWrapper::setPropertyValue)
-      .def("getPropertyValue", &Mantid::PythonAPI::PyAlgorithmWrapper::getPropertyValue)
-      .def("getProperties", &Mantid::PythonAPI::PyAlgorithmWrapper::getProperties, return_value_policy< copy_const_reference >())
-      .def("_setMatrixWorkspaceProperty", &Mantid::PythonAPI::PyAlgorithmWrapper::_setMatrixWorkspaceProperty)
-      .def("_setTableWorkspaceProperty", &Mantid::PythonAPI::PyAlgorithmWrapper::_setTableWorkspaceProperty)
-      .def("_declareFileProperty", &Mantid::PythonAPI::PyAlgorithmWrapper::_declareFileProperty)
-      .def("_declareMatrixWorkspace", &Mantid::PythonAPI::PyAlgorithmWrapper::_declareMatrixWorkspace)
-      .def("_declareTableWorkspace", &Mantid::PythonAPI::PyAlgorithmWrapper::_declareTableWorkspace)
-      EXPORT_DECLAREPROPERTY(int, "declareProperty_int")
-      EXPORT_DECLAREPROPERTY(double, "declareProperty_dbl")
-      EXPORT_DECLAREPROPERTY(std::string, "declareProperty_str")
+    class_< PyAlgorithmBase, boost::shared_ptr<PyAlgorithmCallback>, bases<Mantid::API::CloneableAlgorithm>, 
+      boost::noncopyable >("PyAlgorithmBase")
+      .enable_pickling()
+      .def("_setMatrixWorkspaceProperty", &PyAlgorithmBase::_setMatrixWorkspaceProperty)
+      .def("_setTableWorkspaceProperty", &PyAlgorithmBase::_setTableWorkspaceProperty)
+      .def("_declareFileProperty", &PyAlgorithmBase::_declareFileProperty)
+      .def("_declareMatrixWorkspace", &PyAlgorithmBase::_declareMatrixWorkspace)
+      .def("_declareTableWorkspace", &PyAlgorithmBase::_declareTableWorkspace)
+      EXPORT_DECLAREPROPERTY(int, int)
+      EXPORT_DECLAREPROPERTY(double, dbl)
+      EXPORT_DECLAREPROPERTY(std::string, str)
       EXPORT_GETPROPERTY(int, "getProperty_int")
       EXPORT_GETPROPERTY(double, "getProperty_dbl")
       ;

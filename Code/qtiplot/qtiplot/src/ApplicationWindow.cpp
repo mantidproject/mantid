@@ -384,6 +384,8 @@ void ApplicationWindow::init(bool factorySettings)
     m_interpreterDock->setWidget(m_scriptInterpreter);
     loadCustomActions();
 
+    //Mantid
+    mantidUI->init();
 }
 void ApplicationWindow::showresultsContextMenu(const QPoint & p)
 {
@@ -1275,8 +1277,9 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	view->addAction(actionShowScriptWindow);//Mantid
 	view->addAction(actionShowScriptInterpreter);
 	view->insertSeparator();
-	//Mantid
-	mantidUI->init();
+
+	mantidUI->addMenuItems(view);
+
 	view->insertSeparator();
 	view->addAction(actionToolBars);
 	view->addAction(actionShowConfigureDialog);

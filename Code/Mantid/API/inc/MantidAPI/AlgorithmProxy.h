@@ -21,6 +21,7 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
 #include <Poco/NObserver.h>
+#include <Poco/Void.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -97,7 +98,7 @@ public:
   void setChild(const bool isChild){} ///< Do nothing
 
   /// Asynchronous execution.
-  Poco::ActiveResult<bool> executeAsync(){return _executeAsync(0);}
+  Poco::ActiveResult<bool> executeAsync(){ return _executeAsync(Poco::Void()); }
 
   /// Raises the cancel flag. interuption_point() method if called inside exec() checks this flag
   /// and if true terminates the algorithm.
@@ -144,12 +145,9 @@ private:
     void addObservers();
 
   /// Poco::ActiveMethod used to implement asynchronous execution.
-  Poco::ActiveMethod<bool, int, AlgorithmProxy> _executeAsync;
-    /** executeAsync() implementation. Calls Algorithm::executeAsync() and when it has finished
-      deletes the real algorithm.
-      @param i Unused argument
-    */
-    bool executeAsyncImpl(const int& i);
+  Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy> _executeAsync;
+    /// Execute asynchronous implementation
+    bool executeAsyncImpl(const Poco::Void & dummy);
 
     std::string m_name;     ///< name of the real algorithm
     std::string m_category; ///< category of the real algorithm

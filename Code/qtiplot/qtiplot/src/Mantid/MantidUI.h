@@ -12,6 +12,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -88,6 +89,9 @@ public:
 
     // Initialization
     void init();
+
+    // Insert relevant items into a menu
+    void addMenuItems(QMenu *menu);
 
     // Pointer to QtiPLot main window
     ApplicationWindow *appWindow(){return m_appWindow;}
@@ -194,7 +198,7 @@ public:
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
   MultiLayer* plotBin(const QString& wsName, int bin, bool errors = false);
-  bool runAlgorithmAsynchronously(const QString & algName);
+  QString runAlgorithmAsync_PyCallback(const QString & algName);
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QString & enabled_names);
 /// Group selected workspaces
@@ -240,6 +244,7 @@ signals:
     void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
     void workspace_removed(const QString &);
     void workspaces_cleared();
+    void algorithms_updated();
 
     void needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
 
@@ -372,6 +377,9 @@ private:
 
   void handleClearADS(Mantid::API::ClearADSNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::ClearADSNotification> m_clearADSObserver;
+
+  void handleAlgorithmFactoryUpdates(Mantid::API::AlgorithmFactoryUpdateNotification_ptr pNf);
+  Poco::NObserver<MantidUI, Mantid::API::AlgorithmFactoryUpdateNotification> m_algUpdatesObserver;
 
 
 	//#678

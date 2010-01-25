@@ -44,6 +44,7 @@ namespace API
  */
 class EXPORT_OPT_MANTID_API AlgorithmManagerImpl
 {
+
 public:
   // Methods to create algorithm instances
   IAlgorithm_sptr create(const std::string& algName, const int& version = -1);
@@ -57,7 +58,7 @@ public:
    */
   int size() const
   {
-    return regAlg.size();
+    return m_managed_algs.size();
   }
 
   const std::vector<std::pair<std::string, std::string> > getNamesAndCategories() const;
@@ -65,7 +66,7 @@ public:
   /// Returns a reference to the container of managed algorithms
   const std::deque<IAlgorithm_sptr>& algorithms() const
   {
-    return regAlg;
+    return m_managed_algs;
   }
   
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
@@ -85,9 +86,10 @@ private:
 
   /// Reference to the logger class
   Kernel::Logger& g_log;
-
-  int max_no_algs; ///< The maximum size of the algorithm store
-  std::deque<IAlgorithm_sptr> regAlg; ///<  pointers to registered algorithms [policy???]
+  /// The maximum size of the algorithm store
+  int m_max_no_algs; 
+  /// The list of managed algorithms
+  std::deque<IAlgorithm_sptr> m_managed_algs; ///<  pointers to managed algorithms [policy???]
 };
 
 ///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.

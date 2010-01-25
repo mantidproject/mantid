@@ -7,7 +7,16 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Instantiator.h"
 #include "MantidKernel/Exception.h"
+
+// Boost
 #include "boost/shared_ptr.hpp"
+
+// Poco
+#include <Poco/Notification.h>
+#include <Poco/NotificationCenter.h>
+#include <Poco/AutoPtr.h>
+
+// std
 #include <map>
 #include <iostream>
 #include <vector>
@@ -48,6 +57,21 @@ class Logger;
 template <class Base>
 class DynamicFactory
 {
+public:
+  /**
+   * Base class for dynamic factory notifications
+   */
+  class DynamicFactoryNotification : public Poco::Notification
+  {
+  };
+
+  /**
+   * A notification that the factory has been updated
+   */
+  class UpdateNotification : public DynamicFactoryNotification
+  {
+  };
+
 public:
   /// A typedef for the instantiator
   typedef AbstractInstantiator<Base> AbstractFactory;
@@ -152,7 +176,7 @@ public:
   
   ///Returns the keys in the map
   /// \returns A string vector of keys 
-  const std::vector<std::string> getKeys() const
+  virtual const std::vector<std::string> getKeys() const
   {
     std::vector<std::string> names;
     names.reserve(_map.size());
@@ -165,13 +189,17 @@ public:
 
     return names;
   }
-  
+
+  /// Sends notifications to observers. Observers can subscribe to notificationCenter
+  /// using Poco::NotificationCenter::addObserver(...)
+  Poco::NotificationCenter notificationCenter;
+    
 protected:
   /// Protected constructor for base class
-  DynamicFactory()
+  DynamicFactory() : notificationCenter()
   {
   }  
-  
+
 private:
   /// Private copy constructor - NO COPY ALLOWED
   DynamicFactory(const DynamicFactory&);

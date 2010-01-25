@@ -57,6 +57,7 @@ m_addObserver(*this,&MantidUI::handleAddWorkspace),
 m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
 m_clearADSObserver(*this,&MantidUI::handleClearADS),
+m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
 m_appWindow(aw),
 m_progressDialog(0)
 {
@@ -136,23 +137,30 @@ void MantidUI::init()
     MantidLog::connect(this);
     FrameworkManager::Instance();
 
-    actionToggleMantid = m_exploreMantid->toggleViewAction();
-    actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
-    actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
-    appWindow()->view->addAction(actionToggleMantid);
-
-    actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
-    actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
-    appWindow()->view->addAction(actionToggleAlgorithms);
-
-    actionToggleFitFunction = m_fitFunction->toggleViewAction();
-    appWindow()->view->addAction(actionToggleFitFunction);
-    
-
     // Now that the framework is initialized we need to populate the algorithm tree
     m_exploreAlgorithms->update();
     m_fitFunction->init();
     m_fitFunction->hide();
+
+    //connect the signal from the algorithm factory to monitor updates
+    connect(this, SIGNAL(algorithms_updated()), m_exploreAlgorithms, SLOT(update()));
+    Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(m_algUpdatesObserver);
+
+}
+
+void MantidUI::addMenuItems(QMenu *menu)
+{
+  actionToggleMantid = m_exploreMantid->toggleViewAction();
+  actionToggleMantid->setIcon(QPixmap(mantid_matrix_xpm));
+  actionToggleMantid->setShortcut( tr("Ctrl+Shift+M") );
+  menu->addAction(actionToggleMantid);
+  
+  actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
+  actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
+  menu->addAction(actionToggleAlgorithms);
+  
+  actionToggleFitFunction = m_fitFunction->toggleViewAction();
+  menu->addAction(actionToggleFitFunction);
 
 }
 
@@ -185,6 +193,7 @@ MantidUI::~MantidUI()
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_algUpdatesObserver);
 
 }
 
@@ -1238,15 +1247,14 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
     }
 
     m_algMonitor->add(alg);
+
     try
     {
-	  Poco::ActiveResult<bool> res = alg->executeAsync();
+      Poco::ActiveResult<bool> res = alg->executeAsync();
       if ( !res.tryWait(100) && showDialog)
       {
-          //Use show rather than exec so that control is returned to the caller immediately
-		   m_progressDialog->exec();
+	m_progressDialog->exec();
       }
-
     }
     catch(...)
     {
@@ -1316,6 +1324,11 @@ void MantidUI::handleClearADS(ClearADSNotification_ptr)
   emit workspaces_cleared();
 }
 
+void MantidUI::handleAlgorithmFactoryUpdates(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
+{
+  emit algorithms_updated();
+}
+
 void MantidUI::logMessage(const Poco::Message& msg)
 {
     if (!appWindow()->results) return;
@@ -1355,17 +1368,6 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
 {
 
   if( !Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()) ) return NULL;
-
-  //See if a window for this instrument already exists
-  //QMdiSubWindow *subWin(NULL);
-  //foreach( subWin, appWindow()->d_workspace->subWindowList(QMdiArea::StackingOrder) )
-  //{
-  //  if( subWin->name() == QString("InstrumentWindow:") + wsName ) break;
-  //}
-  //if( subWin )
-  //{
-  //  return static_cast<InstrumentWindow*>(subWin);
-  //}
 
   //Need a new window
   InstrumentWindow *insWin = new InstrumentWindow(QString("Instrument"),appWindow());
@@ -1660,17 +1662,22 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
 /**
  * Run the named algorithm asynchronously
  */
-bool MantidUI::runAlgorithmAsynchronously(const QString & algName)
+QString MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name)
 {
-  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(algName);
-  if( !alg ) return false;
-  if( m_algMonitor ) m_algMonitor->add(alg);
-  Poco::ActiveResult<bool> result = alg->executeAsync();
+  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
+  if( !alg )
+  {
+    return false;
+  }
+   
+  Poco::ActiveResult<bool> result(alg->executeAsync());
   while( !result.available() )
   {
-    QCoreApplication::processEvents();
+    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
   }
-  return result.data();
+  result.wait();
+
+  return QString::fromStdString(result.error());
 }
 
 void MantidUI::cancelAllRunningAlgorithms()

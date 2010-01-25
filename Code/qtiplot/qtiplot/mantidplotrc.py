@@ -1,3 +1,5 @@
+
+
 #------------------------------------------------
 # mantidplotrc.py
 #
@@ -8,7 +10,7 @@
 #
 #----------------------------------------------
 import os
-from MantidFramework import MantidPyFramework, WorkspaceProxy
+from MantidFramework import *
 
 #-----------------------------------------------------------------
 
@@ -117,7 +119,7 @@ MantidUIImports = [
 for name in MantidUIImports:
     setattr(__main__,name,getattr(qti.app.mantidUI,name))
 
-# Create simple API (makes mantidsimple.py file in cwd)
-MantidPyFramework().createPythonSimpleAPI(True)
-# Import definitions to global symbol table
-from mantidsimple import *
+# Initialize the algorithm framework
+mtd._initPythonAlgorithms()
+mtd.createPythonSimpleAPI(True)
+mtd._importSimpleAPItoGlobal()

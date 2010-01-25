@@ -32,6 +32,7 @@ Algorithm::~Algorithm()
 	g_log.release();
 }
 
+
 /** Initialization method invoked by the framework. This method is responsible
  *  for any bookkeeping of initialization required by the framework itself.
  *  It will in turn invoke the init() method of the derived algorithm,
@@ -243,7 +244,7 @@ bool Algorithm::execute()
     setExecuted(false);
     m_runningAsync = false;
     m_running = false;
-
+    
     m_notificationCenter.postNotification(new ErrorNotification(this,"UNKNOWN Exception is caught "));
     g_log.error() << this->name() << ": UNKNOWN Exception is caught\n";
     throw;
@@ -506,6 +507,15 @@ void Algorithm::setChild(const bool isChild)
   m_isChildAlgorithm = isChild;
 }
 
+/**
+ * Asynchronous execution
+ */
+Poco::ActiveResult<bool> Algorithm::executeAsync()
+{ 
+  return m_executeAsync(Poco::Void());
+}
+
+
 /** To Process workspace groups.
  *  @param inputwsPtr input workspacegroup pointer to iterate through all members
  *  @param  prop a vector holding the input properties
@@ -738,18 +748,43 @@ bool Algorithm::isOutputWorkspaceProperty(const Kernel::Property* const prop) co
 	}
 	else return false;
 }
-bool Algorithm::executeAsyncImpl(const int&)
-{	try
-	{
-		m_runningAsync = true;
-		bool res = execute();
-		m_runningAsync = false;
 
-		return res;
-	}
-    catch(...)
-    { }
-    return false;
+
+namespace
+{
+  /**
+   * A object to set the flag marking asynchronous running correctly 
+   */
+  struct AsyncFlagHolder
+  {
+    /** Constructor
+     * @param A reference to the running flag
+     */
+    AsyncFlagHolder(bool & running_flag) : m_running_flag(running_flag)
+    {
+      m_running_flag = true;
+    }
+    ///Destructor
+    ~AsyncFlagHolder()
+    {
+      m_running_flag = false;
+    }
+    private:
+    ///Default constructor
+    AsyncFlagHolder();
+    ///Running flag
+    bool & m_running_flag;
+  };
+
+}
+
+/**
+ * Callback when an algorithm is executed asynchronously
+ */
+bool Algorithm::executeAsyncImpl(const Poco::Void&)
+{
+  AsyncFlagHolder running(m_runningAsync);
+  return this->execute();
 }
 
 /** Handles and rescales child algorithm progress notifications.

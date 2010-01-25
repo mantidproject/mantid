@@ -64,23 +64,7 @@ class PythonScripting: public ScriptingEnv
    * Steals a reference to object if decref is true; borrows otherwise.
    */
   QString toString(PyObject *object, bool decref=false);
-  //! evaluate a Python expression
-  /**
-   * Evaluates code, using argDict (borrowed reference) as local dictionary
-   * or an empty one if argDict==NULL. name is the filename Python uses when
-   * reporting errors. Returns a new reference; NULL means caller has to do
-   * exception handling.
-   */
-  PyObject* eval(const QString &code, PyObject *argDict=NULL, const char *name="<qtiplot>");
-  //! execute a sequence of Python statements
-  /**
-   * Executes code, using argDict (borrowed reference) as local dictionary
-   * or an empty one if argDict==NULL. name is the filename Python uses when
-   * reporting errors. A false return value means caller has to do exception
-   * handling.
-   */
-  bool exec(const QString &code, PyObject *argDict=NULL, const char *name="<qtiplot>");
-
+  // Create a new script object that can execute code within this enviroment
   Script *newScript(const QString &code, QObject *context, const QString &name="<input>")
   {
     return new PythonScript(this, code, context, name);
@@ -103,6 +87,7 @@ private:
   bool start();
   //Shutdown the environment
   void shutdown();
+  //Load a file
   bool loadInitFile(const QString &path);
 
   PyObject *m_globals;		// PyDict of global environment

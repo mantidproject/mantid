@@ -110,32 +110,6 @@ namespace Mantid
       module << "import os\n";
       module << "import string\n\n";
 
-      // Define a value to use as an unset parameter
-      module << "# Define a value to use as an unset parameter\n"
-	     << "UNSET_PARAM_VALUE = None\n\n";
-
-      //Make the FrameworkManager object available with case variations
-      module << "# The main API object\n"
-	     << "mantid = MantidPyFramework()\n"
-	     << "# Aliases\n"
-	     << "Mantid = mantid\n"
-	     << "mtd = mantid\n"
-	     << "Mtd = mantid\n\n";
-
-      // A function to convert things to a string. Basically does something
-      // different if the value is a list
-      module << "# Convert a value to a string with special handing for boolean or lists\n"
-	     << "def makeString(value):\n"
-	     << "\tif isinstance(value, list):\n"
-	     <<	"\t\treturn str(value).lstrip('[').rstrip(']')\n"
-	     <<	"\telif isinstance(value, bool):\n"
-	     << "\t\tif value:\n"
-	     << "\t\t\treturn '1'\n"
-	     << "\t\telse:\n"
-	     << "\t\t\treturn '0'\n"
-	     << "\telse:\n"
-	     <<	"\t\treturn str(value)\n\n";
-
       // A simple function to change the working directory
       module << "# A wrapper for changing the directory\n"
 	     << "def setWorkingDirectory(path):\n"
@@ -147,7 +121,7 @@ namespace Mantid
 	module << "# A utility function for the dialog routines that decides if the parameter\n"
 	       << "# should be added to the final list of parameters that have their widgets enabled\n"
 	       << "def convertToPair(param_name, param_value, enabled_list, disabled_list):\n"
-	       << "\tif param_value == UNSET_PARAM_VALUE:\n"
+	       << "\tif param_value == None:\n"
 	       << "\t\tif not param_name in disabled_list:\n"
 	       << "\t\t\treturn ('', param_name)\n"
 	       << "\t\telse:\n"
@@ -349,7 +323,7 @@ namespace Mantid
 
 	//properties are optional unless their current value results in an error (isValid != "")
 	if( (*pIter)->isValid() != "" ) ++iMand;
-	else os  << " = UNSET_PARAM_VALUE";
+	else os  << " = None";
 	if( ++pIter != pEnd ) os << ", ";
       }
 
@@ -370,7 +344,7 @@ namespace Mantid
 	}
 	else
 	{
-	  os << "\tif " << pvalue << " != UNSET_PARAM_VALUE:\n"
+	  os << "\tif " << pvalue << " != None:\n"
 	     << "\t\talgm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" 
 	     << pvalue << ").lstrip('? '))\n";
 	}
@@ -379,7 +353,7 @@ namespace Mantid
       if( async )
       {
 	writeAsyncFunctionCall(os, algm, "\t");
-	os << "\tif result == False:\n"
+	os << "\tif result != '':\n"
 	   << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
       }
       else
@@ -412,7 +386,7 @@ namespace Mantid
 	sanitizedNames[iarg] = removeCharacters((*pIter)->name(), "");
 	os << sanitizedNames[iarg];
 	
-	os << " = UNSET_PARAM_VALUE,";
+	os << " = None,";
       }
       //end of algorithm function parameters but add other arguments
       os << "Message = \"\", Enable=\"\", Disable=\"\"):\n"
@@ -439,7 +413,7 @@ namespace Mantid
       
       os << "\telse:\n"
 	 << "\t\tsys.exit('Information: Script execution cancelled')\n"
-	 << "\tif result == False:\n"
+	 << "\tif result != '':\n"
 	 << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n"
  	 << "\treturn mtd._createAlgProxy(algm)\n\n";
     }
@@ -563,9 +537,9 @@ namespace Mantid
     {
       if ( helpStrings.empty() ) return;
 
-      os << "def mtdHelp(cmd = UNSET_PARAM_VALUE):\n";
+      os << "def mtdHelp(cmd = None):\n";
       
-      os << "\tif cmd == UNSET_PARAM_VALUE or cmd == '':\n"
+      os << "\tif cmd == None or cmd == '':\n"
 	 << "\t\tmtdGlobalHelp()\n"
 	 << "\t\treturn\n";
       os << "\n\tcmd = string.lower(cmd)\n";
@@ -623,7 +597,7 @@ namespace Mantid
 						 const std::string & prefix)
     {
       output << prefix << "mtd._setGILRequired(True)\n" 
-	     << prefix << "result = qti.app.mantidUI.runAlgorithmAsynchronously(\"" << alg_name << "\")\n"
+	     << prefix << "result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(\"" << alg_name << "\")\n"
 	     << prefix << "mtd._setGILRequired(False)\n";
     }
 

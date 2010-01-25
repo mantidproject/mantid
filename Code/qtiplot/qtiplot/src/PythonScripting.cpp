@@ -186,54 +186,6 @@ QString PythonScripting::toString(PyObject *object, bool decref)
   return ret;
 }
 
-PyObject *PythonScripting::eval(const QString &code, PyObject *argDict, const char *name)
-{
-  PyObject *args;
-  if (argDict)
-  {
-    Py_INCREF(argDict);
-    args = argDict;
-  } 
-  else
-  {
-    args = PyDict_New();
-  }
-  PyObject *ret=NULL;
-  PyObject *co = Py_CompileString(code.ascii(), name, Py_eval_input);
-  if (co)
-  {
-    ret = PyEval_EvalCode((PyCodeObject*)co, m_globals, args);
-    Py_DECREF(co);
-  }
-  Py_DECREF(args);
-  return ret;
-}
-
-bool PythonScripting::exec (const QString &code, PyObject *argDict, const char *name)
-{
-  PyObject *args;
-  if (argDict)
-  {
-    Py_INCREF(argDict);
-    args = argDict;
-  } 
-  else
-  {
-    args = PyDict_New();
-  }
-  PyObject *tmp = NULL;
-  PyObject *co = Py_CompileString(code.ascii(), name, Py_file_input);
-  if (co)
-  {
-    tmp = PyEval_EvalCode((PyCodeObject*)co, m_globals, args);
-    Py_DECREF(co);
-  }
-  Py_DECREF(args);
-  if (!tmp) return false;
-  Py_DECREF(tmp);
-  return true;
-}
-
 bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 {
   if(!val) return false;

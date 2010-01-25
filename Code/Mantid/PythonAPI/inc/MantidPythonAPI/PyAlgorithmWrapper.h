@@ -1,14 +1,15 @@
 #ifndef MANTIDAPI_PYTHONAPI_PYALGORITHMWRAPPER_H_
 #define MANTIDAPI_PYTHONAPI_PYALGORITHMWRAPPER_H_
 
-#include <MantidAPI/Algorithm.h>
+#include <MantidAPI/CloneableAlgorithm.h>
 #include <MantidAPI/WorkspaceProperty.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/ITableWorkspace.h>
 
 #include <MantidKernel/FileProperty.h>
+#include <MantidPythonAPI/PythonInterfaceFunctions.h>
 
-#include <boost/python.hpp>
+#include <Poco/Void.h>
 
 namespace Mantid  
 {
@@ -20,7 +21,7 @@ namespace Mantid
 namespace PythonAPI
 {
 /** 
-    A wrapper around API::Algorithm that allows inheritance from Python
+    A wrapper around API::CloneableAlgorithm that allows inheritance from Python
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 20/12/2009
@@ -45,136 +46,153 @@ namespace PythonAPI
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-struct PyAlgorithmWrapper : Mantid::API::Algorithm, boost::python::wrapper<API::Algorithm>
+class PyAlgorithmBase : public Mantid::API::CloneableAlgorithm
 {
+
 public:
-  /// Declare a property
+  //Constructor
+  PyAlgorithmBase();
+ 
+  /**
+   * Declare a property, templated on the value
+   * @param prop_name The name of the property
+   * @param default_value The default value
+   * @param description A string describing the property
+   * @param direction The direction
+   */
   template<typename TYPE>
-  void _declareProperty(const std::string & prop_name, TYPE default_value, const std::string & description, 
-			const unsigned int direction)
+  void _declareProperty(const std::string & prop_name, TYPE default_value, 
+			const std::string & description, const unsigned int direction)
   {
-    Algorithm::declareProperty(prop_name, default_value, description, direction);
+    CloneableAlgorithm::declareProperty(prop_name, default_value, description, direction);
   }
 
-  ///Declare a matrix workspace
-  void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname, const std::string & description,
-			       const unsigned int direction)
-  {
-    Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction), description);
-  }
-
-  ///Declare a table workspace
-  void _declareTableWorkspace(const std::string & prop_name, const std::string & default_wsname, const std::string & description,
-			      const unsigned int direction)
-  {
-    Algorithm::declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(prop_name, default_wsname, direction), description);
-  }
-
-  /// File property
-  void _declareFileProperty(const std::string & prop_name, const std::string & default_value, const unsigned int type, 
-			    boost::python::list exts, const std::string & description, 
+  /**
+   * Declare a list property, templated on the list type
+   * @param prop_name The name of the property
+   * @param values A python list of values
+   * @param doc A string describing the property
+   * @param direction The direction
+   */
+  template<typename TYPE>
+  void _declareListProperty(const std::string &name, boost::python::list values, const std::string &doc,
 			    const unsigned int direction)
   {
-    Algorithm::declareProperty(new Kernel::FileProperty(prop_name, default_value, type, convertToStdVector<std::string>(exts), direction), description);
+    //Extract the values from the python list into a std vector
+    CloneableAlgorithm::declareProperty(name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+  }
+
+  /**
+   * Declare a MatrixWorkspace property
+   * @param prop_name The name of the property
+   * @param default_wsname A default name to use for the workspace name
+   * @param description A string describing the property
+   * @param direction The direction
+   */
+  void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname, 
+			       const std::string & description, const unsigned int direction)
+  {
+    CloneableAlgorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction), description);
+  }
+
+  /**
+   * Declare a TableWorkspace property
+   * @param prop_name The name of the property
+   * @param default_wsname A default name to use for the workspace name
+   * @param description A string describing the property
+   * @param direction The direction
+   */
+  void _declareTableWorkspace(const std::string & prop_name, const std::string & default_wsname, 
+			      const std::string & description, const unsigned int direction)
+  {
+    CloneableAlgorithm::declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(prop_name, default_wsname, direction), description);
+  }
+
+  /**
+   * Declare a FileProperty
+   * @param prop_name The name of the property
+   * @param default_value A default value for the filename
+   * @param type The load/save type for the property, FileAction.{Save,OptionalSave,Load,OptionalLoad}
+   * @param exts A Python list giving the extensions
+   * @param description A string describing the property
+   * @param direction The direction
+   */
+  void _declareFileProperty(const std::string & prop_name, const std::string & default_value, const unsigned int type, 
+			    boost::python::list exts, const std::string & description, const unsigned int direction)
+  {
+    CloneableAlgorithm::declareProperty(new Kernel::FileProperty(prop_name, default_value, type, Conversions::convertToStdVector<std::string>(exts), direction), description);
   }
   
-  ///getProperty function that gives back the correct type
+  /**
+   * Retrieve a property
+   * @param prop_name The name of the property
+   * @returns The value of the property
+   */
   template<typename TYPE>
   TYPE _getProperty(const std::string & prop_name)
   {
-    TYPE retval = Algorithm::getProperty(prop_name);
+    TYPE retval = CloneableAlgorithm::getProperty(prop_name);
     return retval;
   }
   
-  /// Set a matrix workspace property
-  void _setMatrixWorkspaceProperty(const std::string & prop_name, boost::python::object pyobject)
+  /**
+   * Special function to set MatrixWorkspace
+   * @param prop_name The name of the property
+   * @param workspace A pointer to the workspace
+   */
+  void _setMatrixWorkspaceProperty(const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
   {
-    API::MatrixWorkspace_sptr workspace = boost::python::extract<API::MatrixWorkspace_sptr>(pyobject);
-    Algorithm::setProperty(prop_name,workspace);
+    CloneableAlgorithm::setProperty(prop_name,workspace);
   }
 
-  /// Set a table workspace property
-  void _setTableWorkspaceProperty(const std::string & prop_name, boost::python::object pyobject)
+  /**
+   * Special function to set TableWorkspace
+   * @param prop_name The name of the property
+   * @param workspace A pointer to the workspace
+   */
+  void _setTableWorkspaceProperty(const std::string & prop_name, API::ITableWorkspace_sptr workspace)
   {
-    API::ITableWorkspace_sptr workspace = boost::python::extract<API::ITableWorkspace_sptr>(pyobject);
-    Algorithm::setProperty(prop_name,workspace);
+    CloneableAlgorithm::setProperty(prop_name,workspace);
   }
+
+  PyThreadState *m_saved_tstate;
+};
+
+/**
+ * A callback structure that can route calls into Python
+ */
+class PyAlgorithmCallback : public PyAlgorithmBase
+{
+
+public:
+  ///Constructor
+  PyAlgorithmCallback(PyObject *self);
+  ///Copy constructor
+  PyAlgorithmCallback(PyObject *self, const PyAlgorithmBase & other);
+
+  ///Destructor
+  ~PyAlgorithmCallback();
+
+  ///Overridden clone method
+  virtual CloneableAlgorithm * clone();
+  ///Overridden name method
+  const std::string name() const; 
+  ///Overridden version method
+  const int version() const;
+  /// Overridden category method
+  const std::string category() const;
 
 private:
   /// Overridden algorithm init method
-  virtual void init()
-  {
-    dispatch_python_call_noarg("PyInit");
-  }
+  virtual void init();
   /// Overridden algorithm exec method
-  virtual void exec()
-  {
-    dispatch_python_call_noarg("PyExec");
-  }
+  virtual void exec();
 
-  ///Overridden name method
-  virtual const std::string name() const 
-  {
-    return dispatch_python_call_noarg<std::string>("name");
-  }
-  ///Overridden version method
-  virtual const int version() const 
-  {
-    return dispatch_python_call_noarg<int>("version");
-  }
-  /// Overridden category method
-  virtual const std::string category() const 
-  {
-    return dispatch_python_call_noarg<std::string>("category");
-  }
-
-  /// Templated function call up to python for a no argument function
-  template<typename TYPE>
-  TYPE dispatch_python_call_noarg(const std::string & pyfunction_name) const
-  {
-    if( boost::python::override dispatcher = this->get_override(pyfunction_name.c_str()) )
-    {
-      PyGILState_STATE gstate = PyGILState_Ensure();
-      TYPE retval = dispatcher();
-      PyGILState_Release(gstate);
-      return retval;
-    }
-    return TYPE();
-  }
-  ///Specialized dispatcher for void
-  void dispatch_python_call_noarg(const std::string & pyfunction_name)
-  {
-    if( boost::python::override dispatcher = this->get_override(pyfunction_name.c_str()) )
-    {
-      PyGILState_STATE gstate = PyGILState_Ensure();
-      dispatcher();
-      PyGILState_Release(gstate);
-    }
-  }
-  
-  /// Convert a Boost Python list to a std::vector of the requested type
-  template<typename TYPE>
-  std::vector<TYPE> convertToStdVector(const boost::python::list & pylist)
-  {
-    int length = boost::python::extract<int>(pylist.attr("__len__")());
-    std::vector<TYPE> seq_std(length, TYPE());
-    if( length == 0 )
-    {
-      return seq_std;
-    }
-
-    for( int i = 0; i < length; ++i )
-    {
-      boost::python::extract<TYPE> cppobj(pylist[i]);
-      if( cppobj.check() )
-      {
-	seq_std[i] = cppobj();
-      }
-    }
-    return seq_std;
-  }
+  /// A pointer referring to the Python object 
+  PyObject *m_self;
 
 };
+
 
 }
 }

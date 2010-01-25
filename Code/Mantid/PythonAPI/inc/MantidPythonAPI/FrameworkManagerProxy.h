@@ -6,12 +6,13 @@
 //----------------------------------
 #include <string>
 #include <vector>
-#include <Python.h>
+#include <boost/python/object.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include <MantidAPI/AnalysisDataService.h>
+#include <MantidAPI/AlgorithmFactory.h>
 
 #include <Poco/NObserver.h>
 
@@ -69,6 +70,9 @@ public:
   /// Destructor
   virtual ~FrameworkManagerProxy();
 
+  /// Activate/deactivatye algorithm update listening
+  void observeAlgFactoryUpdates(bool listen);
+
   /** @name Memory functions */
   //@{
   /// Clears all memory associated with the FrameworkManager 
@@ -97,10 +101,6 @@ public:
   API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray);
   // Creates an instance of an algorithm of a specific version and sets the properties provided
   API::IAlgorithm* createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version);
-  /// Creates an instance of an algorithm, sets the properties provided & then executes it.
-  API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray);
-  /// Creates an algorithm of a given version, sets the properties provided & then executes it.
-  API::IAlgorithm* execute(const std::string& algName, const std::string& propertiesArray,const int& version);
   //@}
   
   /** @name Workspace related functions */ 
@@ -142,30 +142,30 @@ public:
   virtual void workspaceStoreCleared() {}
   //@}
 
-  /// Set GIL state
-  void setGILRequired(bool state) { m_gil_required = state; }
+  /** Set GIL state
+   * @param lock If true, the next call to Python will acquire the GIL before the call. Note that it is unlocked automatically
+   */
+  static void setGILRequired(bool lock) { g_gil_required = lock; }
+  /** Return if we need to aquire the GIL
+   * @returns A flag indicating if the thread lock is necessary
+   */
+  static bool requireGIL() { return g_gil_required; }
 
-  /// Return the list of currently registered algorithm names
-  std::vector<std::string> getAlgorithmNames() const;
-  //Send a log message to the Mantid Framework with a specified priority
+  ///Send a log message to the Mantid Framework with a specified priority
   void sendLogMessage(const std::string & msg);
   /// Create the simple Python API for Mantid
   void createPythonSimpleAPI(bool);
-
-//   /** Python algorithms */
-//   //@{
-//   /// Add a Python alogirthm
-//   int addPythonAlgorithm(PyObject* pyAlg);
-//   /// Execute a Python algorithm
-//   void executePythonAlgorithm(std::string algName);
-//   //@}
+  /// Register a Python algorithm object with the algorithm factory
+  void registerPyAlgorithm(PyObject *pyobj);
+  /// A function that can be overridden in Python to handle updates of the AlgorithmFactory
+  virtual void algorithmFactoryUpdated() {};
 
  protected:
   /** A flag indicating whether code has been executed from within Python. This is a bit of a hack
    * so that the notification signals don't cause deadlocks if they happen to get called from
    * a thread that did not originate from within Python
    */
-  static bool m_gil_required;
+  static bool g_gil_required;
 
  private:
   /// Copy constructor
@@ -192,9 +192,15 @@ public:
   /// Poco clear notification observer object
   Poco::NObserver<FrameworkManagerProxy, Mantid::API::ClearADSNotification> m_clear_observer;
 
+  /// Function called when observer objects recieve an update notification from the algorithm factory
+  void handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr notice);
+  /// Poco clear notification observer object
+  Poco::NObserver<FrameworkManagerProxy, Mantid::API::AlgorithmFactoryUpdateNotification> m_algupdate_observer;
+
+  /// Store the flag used to create the last version of simple API
+  static bool g_last_api_flag;
   /// A Python logger
   static Mantid::Kernel::Logger& g_log;
- 
 };
 
 }

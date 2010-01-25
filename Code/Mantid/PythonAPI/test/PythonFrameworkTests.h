@@ -17,7 +17,7 @@
 
 using namespace Mantid::PythonAPI;
 
-bool FrameworkManagerProxy::m_gil_required = false;
+bool FrameworkManagerProxy::g_gil_required = false;
 
 class FrameworkManagerProxyTest : public CxxTest::TestSuite
 {
@@ -55,22 +55,14 @@ public:
 	
   void testCreateAlgorithmMethod2()
   {
-    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("PropertyAlgorithm", "10;9.99");
+    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("PropertyAlgorithm", "10;1.23");
 	  
     TS_ASSERT( alg->isInitialized() );
     TS_ASSERT( !alg->isExecuted() );
     TS_ASSERT_EQUALS( alg->getPropertyValue("IntValue"), "10" );
-    TS_ASSERT_EQUALS( alg->getPropertyValue("DoubleValue"), "9.99" );
+    TS_ASSERT_EQUALS( alg->getPropertyValue("DoubleValue"), "1.23" );
   }
 	
-  void testExecuteAlgorithmMethod()
-  {
-    Mantid::API::IAlgorithm* alg = mgr->execute("PropertyAlgorithm", "8;8.88");
-    TS_ASSERT_EQUALS( alg->getPropertyValue("IntValue"), "8" );
-    TS_ASSERT( alg->isExecuted() );
-  }
-
-
   void testgetWorkspaceNames()
   {
     std::set<std::string> temp = mgr->getWorkspaceNames();
@@ -86,13 +78,6 @@ public:
     TS_ASSERT(temp.empty());
   }
 	
-  void testGetAlgorithmNames()
-  {
-    std::vector<std::string> temp = mgr->getAlgorithmNames();
-
-    TS_ASSERT(!temp.empty());
-  }
-
   void testCreatePythonSimpleAPI()
   {
     mgr->createPythonSimpleAPI(false);

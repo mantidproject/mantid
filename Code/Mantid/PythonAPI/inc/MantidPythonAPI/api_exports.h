@@ -6,6 +6,7 @@
  * so that we can override their behaviour in Python
  */
 #include <MantidPythonAPI/FrameworkManagerProxy.h>
+#include <MantidPythonAPI/PythonInterfaceFunctions.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/WorkspaceFactory.h>
 #include <MantidAPI/WorkspaceOpOverloads.h>
@@ -21,126 +22,77 @@ namespace PythonAPI
 {
   //@cond
   /**
-   * A wrapper for the PythonAPI::FrameworkManagerProxy
+   * A wrapper for the PythonAPI::FrameworkProxy
    */
-  struct FrameworkManagerWrapper : FrameworkManagerProxy, boost::python::wrapper<FrameworkManagerProxy>
+  class FrameworkProxyCallback : public FrameworkManagerProxy
   {
-    // Yet again we have some magic to perform due to threading issues.  There are 2 scenarios:
-    // 1) If an algorithm is running asynchronously and the algoirthm is being requested to execute from Python then 
-    //    the notifications will come in on a separate thread and we must acquire the global interpreter lock so that
-    //    the callback to Python from here doesn't crash the interpreter;
-    // 2) An algorithm is running but it was not requested to execute from Python. In that case when the Poco signals trigger
-    //    observers below we don't have an interpeter running trying to acquire the GIL will cause a deadlock so we don't it
+  public:
+    /// Constructor
+    FrameworkProxyCallback(PyObject* self) : FrameworkManagerProxy(), m_self(self) 
+    {
+      Py_INCREF(m_self);
+    }
 
-    // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock for more information 
-    // on the GIL
+    /// Destructor
+    ~FrameworkProxyCallback()
+    {
+      Py_DECREF(m_self);
+    }
+
     
     void workspaceRemoved(const std::string & name)
     {
-      dispatch_python_call("_workspaceRemoved", name, 
-			   &FrameworkManagerWrapper::default_workspaceRemoved);
+      PyCall_OneArg<void, std::string>::dispatch(m_self,"_workspaceRemoved" ,name);
     }
 
-    void default_workspaceRemoved(const std::string & name)
+    static void default_workspaceRemoved(FrameworkManagerProxy& self, const std::string & name)
     {
-      this->FrameworkManagerProxy::workspaceRemoved(name);
+      self.FrameworkManagerProxy::workspaceRemoved(name);
     }
 
     void workspaceReplaced(const std::string & name)
     {
-      dispatch_python_call("_workspaceReplaced", name, 
-			   &FrameworkManagerWrapper::default_workspaceReplaced);
+      PyCall_OneArg<void,std::string>::dispatch(m_self,"_workspaceReplaced",name);
     }
 
-    void default_workspaceReplaced(const std::string & name)
+    static void default_workspaceReplaced(FrameworkManagerProxy& self, const std::string & name)
     {
-      this->FrameworkManagerProxy::workspaceReplaced(name);
+      self.FrameworkManagerProxy::workspaceReplaced(name);
     }
 
     void workspaceAdded(const std::string & name)
     {
-      dispatch_python_call("_workspaceAdded", name, 
-			   &FrameworkManagerWrapper::default_workspaceAdded);
+      PyCall_OneArg<void, std::string>::dispatch(m_self,"_workspaceAdded",name);
     }
 
-    void default_workspaceAdded(const std::string & name)
+    static void default_workspaceAdded(FrameworkManagerProxy& self, const std::string & name)
     {
-      this->FrameworkManagerProxy::workspaceAdded(name);
+      self.FrameworkManagerProxy::workspaceAdded(name);
     }
 
     void workspaceStoreCleared()
     {
-      dispatch_python_call_noarg("_workspaceStoreCleared", 
-				 &FrameworkManagerWrapper::default_workspaceStoreCleared);
+      PyCall_NoArg<void>::dispatch(m_self,"_workspaceStoreCleared");
     }
 
-    void default_workspaceStoreCleared()
+    static void default_workspaceStoreCleared(FrameworkManagerProxy& self)
     {
-      this->FrameworkManagerProxy::workspaceStoreCleared();
+      self.FrameworkManagerProxy::workspaceStoreCleared();
+    }
+
+    void algorithmFactoryUpdated()
+    {
+      PyCall_NoArg<void>::dispatch(m_self,"_algorithmFactoryUpdated");
+    }
+
+    static void default_algorithmFactoryUpdated(FrameworkManagerProxy& self)
+    {
+      self.FrameworkManagerProxy::algorithmFactoryUpdated();
     }
 
   private:
-    /// Function pointer typedef for default function implementations with no arguments
-    typedef void(FrameworkManagerWrapper::*default_function_noarg)();
-    
-    /** Dispatch a single string argument python function call
-     * @param name pyfunction_name The name of the (possibly) overloaded python function
-     * @param arg The string argument
-     * @returns True if an overloaded function was found
-     */
-    void dispatch_python_call_noarg(const std::string & pyfunction_name, default_function_noarg def_fn)
-    {
-      if( boost::python::override dispatcher = this->get_override(pyfunction_name.c_str()) )
-      {
-        if( m_gil_required )
-        {
-          PyGILState_STATE gstate = PyGILState_Ensure();
-          dispatcher();
-          PyGILState_Release(gstate);
-        }
-        else 
-        {
-          dispatcher();
-        }
-      }
-      else 
-      {
-        // If no override is present then call our default implementation
-        (this->*def_fn)();
-      }
-    }
-
-    /// Function pointer typedef for default function implementations
-    typedef void(FrameworkManagerWrapper::*default_function)(const std::string &);
-    
-    /** Dispatch a single string argument python function call
-     * @param name pyfunction_name The name of the (possibly) overloaded python function
-     * @param arg The string argument
-     * @returns True if an overloaded function was found
-     */
-    void dispatch_python_call(const std::string & pyfunction_name, const std::string & arg,
-			      default_function def_fn)
-    {
-      if( boost::python::override dispatcher = this->get_override(pyfunction_name.c_str()) )
-      {
-        if( m_gil_required )
-        {
-          PyGILState_STATE gstate = PyGILState_Ensure();
-          dispatcher(arg);
-          PyGILState_Release(gstate);
-        }
-        else 
-        {
-          dispatcher(arg);
-        }
-      }
-      else 
-      {
-        // If no override is present then call our default implementation
-        (this->*def_fn)(arg);
-      }
-    }
-
+    /// Store the PyObject that the callbacks refer to
+    PyObject* m_self;
   };
 
 
@@ -151,10 +103,6 @@ namespace PythonAPI
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload2)(const std::string&, const int&);
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload3)(const std::string&, const std::string&);
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload4)(const std::string&, const std::string&, const int&);
-
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FrameworkManager_execute_overloads, execute, 2, 3)
-  typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*exec_ptr)(const std::string&, const std::string&, const int&);
-
 
   /**
    *  A proxy struct for implementing workspace algebra operator overloads

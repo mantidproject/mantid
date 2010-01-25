@@ -6,16 +6,16 @@
 #include <boost/python/handle.hpp>
 #include <boost/python/extract.hpp>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Algorithm.h"
+
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
+
+#include "MantidPythonAPI/PyAlgorithmWrapper.h"
 #include "MantidPythonAPI/SimplePythonAPI.h"
-#include "MantidAPI/FrameworkManager.h"
+
 #include "MantidKernel/ConfigService.h"
 
 namespace Mantid
@@ -27,21 +27,24 @@ namespace PythonAPI
 Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
 
 // Initialize GIL flag
-bool FrameworkManagerProxy::m_gil_required = false;
+bool FrameworkManagerProxy::g_gil_required = false;
+
+// Save the flag used on the last creation of the simple API
+bool FrameworkManagerProxy::g_last_api_flag = false;
 
 /// Default constructor
 FrameworkManagerProxy::FrameworkManagerProxy() 
   : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived),
     m_add_observer(*this, &FrameworkManagerProxy::addNotificationReceived),
     m_replace_observer(*this, &FrameworkManagerProxy::replaceNotificationReceived),
-    m_clear_observer(*this, &FrameworkManagerProxy::clearNotificationReceived)
+    m_clear_observer(*this, &FrameworkManagerProxy::clearNotificationReceived),
+    m_algupdate_observer(*this, &FrameworkManagerProxy::handleAlgorithmFactoryUpdate)
 {
   API::FrameworkManager::Instance();
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replace_observer);
   API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clear_observer);
-
 }
 
 ///Destructor
@@ -51,7 +54,19 @@ FrameworkManagerProxy::~FrameworkManagerProxy()
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replace_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_add_observer);
   API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+  API::AlgorithmFactory::Instance().notificationCenter.removeObserver(m_algupdate_observer);
+}
 
+void FrameworkManagerProxy::observeAlgFactoryUpdates(bool listen)
+{
+  if( listen )
+  {
+    API::AlgorithmFactory::Instance().notificationCenter.addObserver(m_algupdate_observer);
+  }
+  else
+  {
+    API::AlgorithmFactory::Instance().notificationCenter.removeObserver(m_algupdate_observer);
+  }
 }
 
 /// Clear the FrameworkManager	
@@ -134,29 +149,6 @@ API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algNa
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const std::string& propertiesArray,const int& version)
 {
   return API::FrameworkManager::Instance().createAlgorithm(algName, propertiesArray, version);
-}
-
-/**
- * Creates and executes a specified algorithm.
- * \param algName :: The name of the algorithm to execute.
- * \param propertiesArray :: A separated string containing the properties and their values.
- * \param version :: The version of the algorithm to use.
- * \return Pointer to algorithm.
- **/
-API::IAlgorithm* FrameworkManagerProxy::execute(const std::string& algName, const std::string& propertiesArray,const int& version)
-{
-  return API::FrameworkManager::Instance().exec(algName, propertiesArray, version);
-}
-
-/**
- * Creates and executes a specified algorithm.
- * \param algName :: The name of the algorithm to execute.
- * \param propertiesArray :: A separated string containing the properties and their values.
- * \return Pointer to algorithm.
- **/
-API::IAlgorithm* FrameworkManagerProxy::execute(const std::string& algName, const std::string& propertiesArray)
-{
-  return API::FrameworkManager::Instance().exec(algName, propertiesArray);
 }
 
 /**
@@ -274,15 +266,6 @@ std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const s
 }
 
 /**
- * Returns the name of all the algorithms.
- * \return Vector of strings.
- **/
-std::vector<std::string> FrameworkManagerProxy::getAlgorithmNames() const
-{
-  return API::AlgorithmFactory::Instance().getKeys();
-}
-
-/**
   * Create the simple Python API module
   * @param gui Whether the module is being made for use with qtiplot or not
   **/
@@ -290,6 +273,8 @@ void FrameworkManagerProxy::createPythonSimpleAPI(bool gui)
 {
   //Redirect to static helper class
   SimplePythonAPI::createModule(gui);
+  //Save the flag so that the module can be recreated
+  g_last_api_flag = gui;
 }
 
 /**
@@ -310,31 +295,31 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
   return API::AnalysisDataService::Instance().doesExist(name);
 }
 
-// /**
-//  * Adds a algorithm created in Python to Mantid's algorithms.
-//  * Converts the Python object to a C++ object - not sure how, will find out.
-//  * param pyAlg :: The Python based algorithm to add.
-//  * \returns The number of Python algorithms in Mantid
-//  **/
-// int FrameworkManagerProxy::addPythonAlgorithm(PyObject* pyAlg)
-// {
-//   boost::python::handle<> ph(boost::python::borrowed(pyAlg));
-//   PyAlgorithm* alg = boost::python::extract<PyAlgorithm*>(boost::python::object(ph));
-//   API::AlgorithmFactory::Instance().addPyAlgorithm(alg);
-//   return API::AlgorithmFactory::Instance().numPythonAlgs();
-// }
+/**
+ * Add a python algorithm to the algorithm factory
+ * @param py_algorithm The python algorithm object wrapped in a boost object
+ */
+void FrameworkManagerProxy::registerPyAlgorithm(PyObject *pyobj)
+{
+  //Increment the reference count by one to keep it alive in the factory 
+  Py_INCREF(pyobj);
 
+  boost::python::handle<> pyhandle(pyobj);
+  Mantid::API::CloneableAlgorithm *pyalg = 
+    boost::python::extract<Mantid::API::CloneableAlgorithm*>(boost::python::object(pyhandle));
 
-// /**
-//  * Execute one of the Python algorithms that has been added to Mantid.
-//  * param algName :: The name of the algorithm to run.
-//  **/
-// void FrameworkManagerProxy::executePythonAlgorithm(std::string algName)
-// {
-//   API::AlgorithmFactory::Instance().executePythonAlg(algName);
-// }
-
-
+  if( pyalg )
+  {
+    setGILRequired(true);
+    Mantid::API::AlgorithmFactory::Instance().storeCloneableAlgorithm(pyalg);
+    setGILRequired(false);
+  }
+  else
+  {
+    throw std::runtime_error("Unrecognized object type in Python algorithm registration.");
+  }
+}
+  
 //--------------------------------------------------------------------------
 //
 // Private member functions
@@ -361,7 +346,8 @@ boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspa
  * Utility function called when a workspace is deleted within the service
  * @param notice A pointer to a WorkspaceDeleteNotification object
  */
-void FrameworkManagerProxy::deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
+void FrameworkManagerProxy::
+deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
 {
   /// This function may be overridden in Python
   workspaceRemoved(notice->object_name());  
@@ -371,7 +357,8 @@ void FrameworkManagerProxy::deleteNotificationReceived(Mantid::API::WorkspaceDel
  * Utility function called when a workspace is added within the service
  * @param notice A pointer to a WorkspaceDeleteNotification object
  */
-void FrameworkManagerProxy::addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
+void FrameworkManagerProxy::
+addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
 {
   
 }
@@ -380,7 +367,8 @@ void FrameworkManagerProxy::addNotificationReceived(Mantid::API::WorkspaceAddNot
  * Utility function called when a workspace is replaced within the service
  * @param notice A pointer to a WorkspaceAfterReplaceNotification object
  */
-void FrameworkManagerProxy::replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
+void FrameworkManagerProxy::
+replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
 {  
   /// This function may be overridden in Python
   workspaceReplaced(notice->object_name());
@@ -390,10 +378,23 @@ void FrameworkManagerProxy::replaceNotificationReceived(Mantid::API::WorkspaceAf
  * Utility function called when a workspace is replaced within the service
  * @param notice A pointer to a ClearADSNotification object
  */
-void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotification_ptr notice)
+void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotification_ptr)
 {
   /// This function may be overridden in Python
   workspaceStoreCleared();
+}
+
+/**
+ * Called by AlgorithmFactory updates
+ * @param notice The nofification object
+ */
+void FrameworkManagerProxy::
+handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
+{
+  // First rewrite the simple API
+  createPythonSimpleAPI(g_last_api_flag);
+  //Call up to python via a virtual function
+  algorithmFactoryUpdated();
 }
 
 }

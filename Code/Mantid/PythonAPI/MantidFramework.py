@@ -1,16 +1,26 @@
-import os
-import types
+import os, sys, types, copy, __builtin__,__main__
 if os.name == 'nt':
-    import MantidPythonAPI as Mantid
+    from MantidPythonAPI import *
 else:
-    import libMantidPythonAPI as Mantid
+    from libMantidPythonAPI import *
 
 """
 Top-level interface classes for Mantid.
 """
 
 #-------------------------------------------------------------------------------
+def makeString(value):
+    if isinstance(value, list):
+        return str(value).lstrip('[').rstrip(']')
+    elif isinstance(value, bool):
+        if value:
+            return '1'
+        else:
+            return '0'
+    else:
+        return str(value)
 
+#-------------------------------------------------------------------------------
 class WorkspaceProxy(object):
     '''
     A proxy object that stores a workspace instance. When the workspace is deleted
@@ -28,7 +38,7 @@ class WorkspaceProxy(object):
         '''
         Is the data object a WorkspaceGroup or not
         '''
-        if isinstance(self.__obj, Mantid.WorkspaceGroup):
+        if isinstance(self.__obj, WorkspaceGroup):
             return True
         else:
             return False
@@ -267,34 +277,25 @@ class IAlgorithmProxy(object):
         for p in props:
             if p.direction() != 1:
                 continue
-            if isinstance(p, Mantid.MatrixWorkspaceProperty) or \
-                    isinstance(p, Mantid.TableWorkspaceProperty) or \
-                    isinstance(p, Mantid.WorkspaceProperty):
+            if isinstance(p, MatrixWorkspaceProperty) or \
+                    isinstance(p, TableWorkspaceProperty) or \
+                    isinstance(p, WorkspaceProperty):
                 self.__wkspnames.append(p.value())
         self.__havelist = True
 
 #---------------------------------------------------------------------------------------
 
-class MantidPyFramework(Mantid.FrameworkManager):
+class MantidPyFramework(FrameworkManager):
     '''
     The main Mantid Framework object. It mostly forwards its calls to the 
     C++ manager but some workspace related things are captured here first
     '''
-    
-    def __init__(self):
+    def __init__(self, gui_exts = False):
         # Call base class constructor
         super(MantidPyFramework, self).__init__()
         self._garbage_collector = WorkspaceGarbageCollector()
         self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector, self)
-
-    # Enables mtd['name'] syntax
-    def __getitem__(self, key):
-        '''
-        Enables the framework to be used in a dictionary like manner.
-        It returns the MatrixWorkspace proxy for the given name
-        '''
-        return self._proxyfactory.create(self._retrieveWorkspace(key))
-
+ 
     def list(self):
         '''
         Print a list of the workspaces stored in Mantid along with their type
@@ -307,9 +308,9 @@ class MantidPyFramework(Mantid.FrameworkManager):
             wksp = self._retrieveWorkspace(names[i])
             output.append([names[i],''])
             max_width = max(max_width, len(names[i]))
-            if( isinstance(wksp, Mantid.MatrixWorkspace) ):
+            if( isinstance(wksp, MatrixWorkspace) ):
                 output[i][1] = 'MatrixWorkspace'
-            elif( isinstance(wksp, Mantid.ITableWorkspace) ):
+            elif( isinstance(wksp, ITableWorkspace) ):
                 output[i][1] = 'TableWorkspace'
             else:
                 output[i][1] = 'WorkspaceGroup'
@@ -320,8 +321,70 @@ class MantidPyFramework(Mantid.FrameworkManager):
             output_table += '\t' + row[0].ljust(max_width, ' ') + '-   ' + row[1]
 
         print output_table
+
+    def __getitem__(self, key):
+        '''
+        Enables the framework to be used in a dictionary like manner.
+        It returns the MatrixWorkspace proxy for the given name
+        '''
+        return self._proxyfactory.create(self._retrieveWorkspace(key))
+
+##                     ##
+## "Private functions" ##
+##                     ##
+    def _initPythonAlgorithms(self, reload = False):
+        # Install the rollback importer that will allow us to "reload" modules cleanly
+        if reload == False:
+            self._reloader = RollbackImporter()
+            # Keep a list of modules that have been imported at start up
+            self._startupAlgs = []
+
+        # Check defined Python algorithm directories and load any modules
+        dir_list = self.getConfigProperty('pythonalgorithms.directories').split(';')
+        if len(dir_list) > 0:
+            for d in dir_list:
+                if d != '':
+                    self._importPyAlgorithms(d, reload)
+
+        # Now connect the relevant signals to monitor for algorithm factory updates
+        self._observeAlgFactoryUpdates(True)
+
+    def _importPyAlgorithms(self, dir, reload):
+        try:
+            files = os.listdir(dir)
+        except(OSError):
+            return
+        # Temporarily insert into path
+        sys.path.insert(0, dir)
         
-# *** "Private" functions
+        for modname in files:
+            if not modname.endswith('.py'):
+                continue
+            modname = modname.rstrip('.py')
+            __import__(modname)
+            if reload == False:
+                self._startupAlgs.append(modname)
+
+        # Cleanup system path
+        del sys.path[0]
+
+    def _importSimpleAPItoGlobal(self):
+        simpleapi = 'mantidsimple'
+        if simpleapi in sys.modules.keys():
+            del(sys.modules[simpleapi])
+
+        mod = __import__(simpleapi)
+	for name in dir(mod):
+            if name == '__name__':
+                continue
+            setattr(__main__, name, getattr(mod, name))
+            
+    def _refreshPyAlgorithms(self):
+        # Pass to the loader proxy
+        self._reloader.uninstall()        
+        # Now reload the modules that were loaded at startup
+        self._initPythonAlgorithms(reload = True)
+        
     def _retrieveWorkspace(self, name):
         '''
         Use the appropriate function to return the workspace that has that name
@@ -358,10 +421,17 @@ class MantidPyFramework(Mantid.FrameworkManager):
         '''
         self._garbage_collector.kill_all()
 
+    def _algorithmFactoryUpdated(self):
+        '''
+        Called in reponse to an algorithm factory update
+        '''
+        # Reload the simple api
+        self._importSimpleAPItoGlobal()
 
     def _createAlgProxy(self, ialg):
         return IAlgorithmProxy(ialg, self)
 
+      
 # *** Legacy functions ***
 
     def getMatrixWorkspace(self, name):
@@ -385,27 +455,64 @@ class MantidPyFramework(Mantid.FrameworkManager):
         names = wksp_grp.getNames()
         return [ self.getMatrixWorkspace(w) for w in names[1:] ]
 
+#------------------------------------------------------------------------------------------
 
-#-------------------------------------------------------------------------------------------
+##
+# Inspired by PyUnit, a class that handles reloading modules cleanly 
+# See http://pyunit.sourceforge.net/notes/reloading.html
+##
+class RollbackImporter:
+  
+    def __init__(self):
+        "Creates an instance and installs as the global importer"
+        self.previousModules = sys.modules.copy()
+        self.realImport = __builtin__.__import__
+        __builtin__.__import__ = self._import
+        self.pyalg_modules = {}
+        
+    def _import(self, name, globals=None, locals=None, fromlist=[]):
+        result = apply(self.realImport, (name, globals, locals, fromlist))
+        if self._containsPyAlgorithm(result):
+            self.pyalg_modules[name] = 1
+        return result
+
+    def _containsPyAlgorithm(self, module):
+        # Check attributes and check if there are any Python algorithms
+        attrs = dir(module)
+        for attname in attrs:
+            att = getattr(module, attname)
+            if type(att) == type(PythonAlgorithm) and issubclass(att, PythonAlgorithm) and att.__name__ != 'PythonAlgorithm':
+                return True
+        return False
+        
+    def uninstall(self):
+        for modname in self.pyalg_modules.keys():
+            if modname in sys.modules:
+                # Force reload when modname next imported
+                del(sys.modules[modname])
+
 #-------------------------------------------------------------------------------------------
 ##
 # PyAlgorithm class
 ##
-class PythonAlgorithm(Mantid.PyAlgorithm):
+class PythonAlgorithm(PyAlgorithmBase):
     '''
     Base class for all Mantid Python algorithms
     '''
     # Dictionary of property names/types
     _proptypes = {}
+
+    def clone(self):
+        return copy.deepcopy(self)
         
     def name(self):
-        raise NotImplementedError('name() method must be defined for a Python algorithm')
+        return self.__class__.__name__
 
     def version(self):
         return 1
         
     def category(self):
-        return 'PythonAlgorithm'
+        return 'PythonAlgorithms'
 
     def PyInit(self):
         raise NotImplementedError('PyInit() method must be defined for a Python algorithm')
@@ -414,7 +521,7 @@ class PythonAlgorithm(Mantid.PyAlgorithm):
         raise NotImplementedError('PyExec() method must be defined for a Python algorithm')
 
     # declareProperty "wrapper" function so that we don't need separate named functions for each type
-    def declareProperty(self, Name, DefaultValue, Direction = Mantid.Direction.Input, Description = '', ):
+    def declareProperty(self, Name, DefaultValue, Direction = Direction.Input, Description = '', ):
         '''
         Declare a property for this algorithm
         '''
@@ -441,18 +548,18 @@ class PythonAlgorithm(Mantid.PyAlgorithm):
 
     # Specialized version for workspaces
     def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Description = '', \
-                                     Type = Mantid.MatrixWorkspace):
-        if Type == Mantid.MatrixWorkspace:
+                                     Type = MatrixWorkspace):
+        if Type == MatrixWorkspace:
             self._declareMatrixWorkspace(PropertyName, WorkspaceName, Description, Direction)
-        elif Type == Mantid.Tableworkspace:
+        elif Type == Tableworkspace:
             self._declareTableWorkspace(PropertyName, WorkspaceName, Description, Direction)
         else:
             raise TypeError('Unrecognized type of workspace specified for property "' + PropertyName + '"')
         
-        self._mapPropertyToType(PropertyName, Mantid.WorkspaceProperty)
+        self._mapPropertyToType(PropertyName, WorkspaceProperty)
 
     # Specialized version for FileProperty
-    def declareFileProperty(self, Name, DefaultValue, Type, Exts = [], Direction = Mantid.Direction.Input,\
+    def declareFileProperty(self, Name, DefaultValue, Type, Exts = [], Direction = Direction.Input,\
                                 Description = ''):
         if not isinstance(DefaultValue, str):
             raise TypeError('Incorrect default value type for file property "' + Name + '"')
@@ -480,7 +587,7 @@ class PythonAlgorithm(Mantid.PyAlgorithm):
             return bool(self.getPropertyValue(Name))
         elif prop_type == type(''):
             return self.getPropertyValue(Name)
-        elif issubclass(prop_type, Mantid.WorkspaceProperty):
+        elif issubclass(prop_type, WorkspaceProperty):
             return self.getPropertyValue(Name)
         else:
             raise TypeError('Unrecognized type for property "' + Name + '"')
@@ -496,10 +603,10 @@ class PythonAlgorithm(Mantid.PyAlgorithm):
             self.setPropertyValue(Name, Value)
         elif isinstance(Value, bool):
             self.setPropertyValue(Name, str(int(Value)))
-        elif issubclass(prop_type, Mantid.WorkspaceProperty):
-            if isinstance(Value, Mantid.MatrixWorkspace):
+        elif issubclass(prop_type, WorkspaceProperty):
+            if isinstance(Value, MatrixWorkspace):
                 self._setMatrixWorkspaceProperty(Name, Value)
-            elif isinstance(Value, Mantid.TableWorkspace):
+            elif isinstance(Value, TableWorkspace):
                 self._setTableWorkspaceProperty(Name, Value)
             else:
                 raise TypeError('Attempting to set workspace property with value that is not a workspace.')
@@ -553,3 +660,14 @@ def BoundedValidator(lower = None, upper = None):
         else:
             raise TypeError("Invalid type for lower value of BoundedValidator")
         
+
+########################################################################################
+
+# Provide a named mantid object
+mtd = MantidPyFramework()
+mantid = mtd
+Mantid = mtd
+Mtd = mtd
+
+if os.name == 'posix':
+    sys.path.append(os.path.expanduser('~/.mantid'))

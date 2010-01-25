@@ -40,6 +40,7 @@
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
 #include <Poco/NObserver.h>
+#include <Poco/Void.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -201,7 +202,7 @@ namespace Mantid
 			void setChild(const bool isChild);
 
 			/// Asynchronous execution.
-			Poco::ActiveResult<bool> executeAsync(){return m_executeAsync(0);}
+			Poco::ActiveResult<bool> executeAsync();
 
 			/// Add an observer for a notification
 			void addObserver(const Poco::AbstractObserver& observer)const;
@@ -300,11 +301,11 @@ namespace Mantid
 			void setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*prop,const int nperiod,WorkspaceGroup_sptr sptrWSGrp,std::string &outParentname);
 
 			/// Poco::ActiveMethod used to implement asynchronous execution.
-			Poco::ActiveMethod<bool, int, Algorithm> m_executeAsync;
+			  Poco::ActiveMethod<bool, Poco::Void, Algorithm> m_executeAsync;
 			/** executeAsync() implementation.
 			@param i Unused argument
 			*/
-			bool executeAsyncImpl(const int& i);
+			bool executeAsyncImpl(const Poco::Void & i);
 
 			
 			bool m_isInitialized; ///< Algorithm has been initialized flag

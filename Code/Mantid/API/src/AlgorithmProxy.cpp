@@ -142,12 +142,17 @@ void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
 //----------------------------------------------------------------------
 // Private methods
 //----------------------------------------------------------------------
-
+/**
+ * Clean up when the real algorithm stops
+ */
 void AlgorithmProxy::stopped()
 {
     m_isExecuted = m_alg->isExecuted();
 }
 
+/**
+ * Add observers stored previously in m_externalObservers
+ */
 void AlgorithmProxy::addObservers()
 {
     if (!m_alg) return;
@@ -157,16 +162,27 @@ void AlgorithmProxy::addObservers()
     m_externalObservers.clear();
 }
 
-bool AlgorithmProxy::executeAsyncImpl(const int&)
+/** 
+ * executeAsync() implementation. Calls execute and when it has finished  deletes the real algorithm.
+*/
+bool AlgorithmProxy::executeAsyncImpl(const Poco::Void &)
 {
-    m_alg = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().createUnmanaged(name(),version()));
-    m_alg->initializeFromProxy(*this);
-    addObservers();
-    Poco::ActiveResult<bool> res = m_alg->executeAsync();
-    res.wait();
-    m_isExecuted = m_alg->isExecuted();
-    m_alg.reset();
+  m_alg = boost::dynamic_pointer_cast<Algorithm>(AlgorithmManager::Instance().createUnmanaged(name(),version()));
+  m_alg->initializeFromProxy(*this);
+  addObservers();
+  Poco::ActiveResult<bool> res = m_alg->executeAsync();
+  res.wait();
+  m_isExecuted = m_alg->isExecuted();
+  m_alg.reset();
+
+  try
+  {
     return res.data();
+  }
+  catch(Poco::NullPointerException&)
+  {
+    return false;
+  }
 }
 
 } // namespace API
