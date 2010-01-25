@@ -91,7 +91,6 @@ public:
     using namespace Mantid::DataObjects;
     Workspace2D_sptr workspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     workspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-	int sizex = 10,sizey=20;
 	
 	Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     work_in1->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
@@ -181,7 +180,6 @@ public:
     using namespace Mantid::DataObjects;
     Workspace2D_sptr workspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     workspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
-	int sizex = 10,sizey=20;
 	
 	Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 3, 1.0, 1.0);
     work_in1->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");

@@ -57,7 +57,7 @@ public:
     {
       std::getline( testFile, fileLine );
       std::string correct = boost::lexical_cast<std::string>((j+0.5)/1000.0);
-      TS_ASSERT_EQUALS ( fileLine, correct )
+      TS_ASSERT_EQUALS ( fileLine, correct.substr(0, fileLine.length()) )
     }
 
     std::getline( testFile, fileLine );

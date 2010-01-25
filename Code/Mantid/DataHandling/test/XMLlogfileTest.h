@@ -49,17 +49,17 @@ public:
 
     // check that parameter have been read into the instrument parameter map
     std::vector<V3D> ret1 = paramMap.getV3D("point-detector", "pos");
-    TS_ASSERT_EQUALS( ret1.size(), 1 );
+    TS_ASSERT_EQUALS( static_cast<int>(ret1.size()), 1 );
     TS_ASSERT_DELTA( ret1[0].X(), 12.113, 0.0001);
     TS_ASSERT_DELTA( ret1[0].Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA( ret1[0].Z(), 0.0081, 0.0001);
     std::vector<V3D> ret2 = paramMap.getV3D("linear-detector", "pos");
-    TS_ASSERT_EQUALS( ret2.size(), 1 );
+    TS_ASSERT_EQUALS( static_cast<int>(ret2.size()), 1 );
     TS_ASSERT_DELTA( ret2[0].X(), 12.403, 0.0001);
     TS_ASSERT_DELTA( ret2[0].Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA( ret2[0].Z(), 0.1499, 0.0001);
     std::vector<double> ret3 = paramMap.getDouble("slit1", "opening height");
-    TS_ASSERT_EQUALS( ret3.size(), 1 );
+    TS_ASSERT_EQUALS( static_cast<int>(ret3.size()), 1 );
     TS_ASSERT_DELTA( ret3[0], 0.5005, 0.0001);
 
   }

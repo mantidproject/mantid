@@ -108,7 +108,6 @@ void LoadLog::exec()
   
   // start the process or populating potential log files into the container: potentialLogFiles
   std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
-  std::string threecolumnLogfile;
   bool rawFile = false;// Will be true if Filename property is a name of a RAW file
   if ( isAscii(m_filename) && l_filenamePart.find("_") != std::string::npos )
   {
@@ -169,10 +168,11 @@ void LoadLog::exec()
 
       }
     }
+
     //.if a .log file exists in the raw file directory
-    if (threeColumnFormatLogFileExists())
+    std::string threecolumnLogfile = getThreeColumnName();
+    if( !threecolumnLogfile.empty() )
     {
-      threecolumnLogfile=getThreecolumnFormatLogFile();
       std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableSample());
       //remove the file name from potential logfiles list if it's there in the .log file.
       std::set<std::string>::const_iterator itr;
@@ -227,7 +227,7 @@ void LoadLog::exec()
     }
     // figure out if second column is a number or a string
     std::string aLine;
-    if( std::getline(inLogFile, aLine, '\n') )
+    if( Mantid::API::extractToEOL(inLogFile,aLine) )
     {
       if ( !isDateTimeString(aLine) )
       {
@@ -281,15 +281,17 @@ void LoadLog::exec()
   return;
 }
 
-/** this method looks in the rawfile directory for  rawfilename.log (three column format )file 
-@returns true if the file exists
+/** Return the name of the three column log file if we have one.
+ * @returns A string containing the full log file path to a three column log file if one exists. An empty string otherwise.
 */
-bool LoadLog::threeColumnFormatLogFileExists()
+std::string LoadLog::getThreeColumnName() const
 {  
   std::string rawID;
-  size_t pos = m_filename.find(".");
-  if(pos!=std::string::npos)
-    rawID=m_filename.substr(0,pos);
+  std::string::size_type dot = m_filename.rfind(".");
+  if( dot != std::string::npos)
+  {
+    rawID = m_filename.substr(0, dot);
+  }
   // append .log to get the .log file name
   std::string logfileName=rawID+".log";	
   int count=0;
@@ -298,7 +300,9 @@ bool LoadLog::threeColumnFormatLogFileExists()
     //validate the file
     std::ifstream inLogFile(logfileName.c_str());
     if (!inLogFile)
-    { throw Exception::FileError("Unable to open file:" ,logfileName );}
+    { 
+      throw Exception::FileError("Unable to open file:" ,logfileName );
+    }
 
     //check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
     std::string aLine;
@@ -308,7 +312,7 @@ bool LoadLog::threeColumnFormatLogFileExists()
       if ( !isDateTimeString(aLine) )
       { g_log.warning("File" + logfileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
       inLogFile.close();
-      return false;
+      return "";
       }
 
       std::stringstream ins(aLine);
@@ -323,7 +327,7 @@ bool LoadLog::threeColumnFormatLogFileExists()
       {
         g_log.warning("ISIS log file contains unrecognised second column entries: " + logfileName);
         inLogFile.close();
-        return false;
+        return "";
       }
 
       std::string thirdcolumn;
@@ -333,15 +337,15 @@ bool LoadLog::threeColumnFormatLogFileExists()
       {
         g_log.warning("ISIS log file contains unrecognised third column entries: " + logfileName);
         inLogFile.close();
-        return false;
+        return "";
       }
       ++count;
       if(count==2) ///reading first two lines from file for validation purpose.
         break;
     }
-    return true;
+    return logfileName;
   }
-  else return false;
+  else return "";
 }
 
 /* this method looks for ADS with name checksum exists
@@ -398,22 +402,6 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
   return logfilesList;
 }
 
-/**  this method returns the name of three column log file 
- *  @returns file name of the.log file
- */
-std::string LoadLog::getThreecolumnFormatLogFile()
-{
-  size_t pos = m_filename.find(".");
-  std::string rawID;
-  if(pos!=std::string::npos)
-    rawID=m_filename.substr(0,pos);
-  // append .log to get the .log file name
-  std::string logfileName=rawID+".log";	
-  if (Poco::File(logfileName).exists())
-    return logfileName;
-  else return "";
-}
-
 /** This method reads the.log file and creates timeseries property and sets that to the sample object
  * @param logfile three column log(.log) file name.
  * @param sample sample object
@@ -431,9 +419,14 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
   typedef std::pair<std::string,Kernel::TimeSeriesProperty<double>* > dpair;
   typedef std::pair<std::string,Kernel::TimeSeriesProperty<std::string>* > spair;
 
-  std::basic_string <char>::size_type pos=m_filename.find(".");
+  std::string path = m_filename;
+  std::string::size_type pos=m_filename.rfind(".");
+  if( pos != std::string::npos )
+  {
+    path = path.substr(0, pos);
+  }
   bool isNumeric(false);
-  std::string path =m_filename.substr(0,pos);
+
   std::ifstream file(logfile.c_str());
   if (!file)
   {	
@@ -465,7 +458,6 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
     double dvalue;
     istr >> dvalue;
     isNumeric = !istr.fail();
-
     if (isNumeric)
     {				
       std::map<std::string,Kernel::TimeSeriesProperty<double>*>::iterator ditr=dMap.find(propname);
@@ -476,6 +468,7 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
       }
       else
       {	
+
         logd = new Kernel::TimeSeriesProperty<double>(propname);
         logd->addValue(timecolumn,dvalue);
         dMap.insert(dpair(propname,logd));
@@ -547,7 +540,7 @@ bool LoadLog::blockcolumnFileExists(const std::string& fileName)
  *  @param s  string to be classified
  *  @return A enum kind which tells what type the string is
  */
-LoadLog::kind LoadLog::classify(const std::string& s)
+LoadLog::kind LoadLog::classify(const std::string& s) const
 {
   if( s.empty() )
   {
@@ -609,7 +602,7 @@ bool LoadLog::isAscii(const std::string& filename)
  * @param str The string to test
  * @returns true if the strings format matched the expected date format
  */
-bool LoadLog::isDateTimeString(const std::string& str)
+bool LoadLog::isDateTimeString(const std::string& str) const
 {
   Poco::DateTime dt;
   int tz_diff;

@@ -40,7 +40,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( saver->initialize() )
     TS_ASSERT( saver->isInitialized() )
     
-    TS_ASSERT_EQUALS( saver->getProperties().size(), 2 )
+    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 2 )
   }
 
   void testExec()

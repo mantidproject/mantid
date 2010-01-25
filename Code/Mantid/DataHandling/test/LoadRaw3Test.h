@@ -104,7 +104,6 @@ public:
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
    // boost::shared_ptr<Sample> sample = output2D->getSample();
-    const std::vector< Property* >& pro = output2D->sample().getLogData();
     Property *l_property = output2D->sample().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
@@ -408,7 +407,7 @@ public:
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
     Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
-    TS_ASSERT_EQUALS( pmap.size(), 140);
+    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 140);
   }
 
   void testTwoTimeRegimes()
@@ -505,8 +504,6 @@ public:
       ////----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-   // boost::shared_ptr<Sample> sample = output2D->getSample();
-    const std::vector< Property* >& pro = output2D->sample().getLogData();
     Property *l_property = output2D->sample().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();

@@ -97,7 +97,7 @@ namespace Mantid
       enum kind { empty, string, number };
 
       /// Takes as input a string and try to determine what type it is
-      kind classify(const std::string& s);
+      kind classify(const std::string& s) const;
 
       /// convert string to lower case
       std::string stringToLower(std::string strToConvert);
@@ -106,13 +106,9 @@ namespace Mantid
       bool isAscii(const std::string& filenamePart);
 
       /// check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
-      bool isDateTimeString(const std::string& str);
-
-	  /// if three column format(.log )file exists
-	  bool threeColumnFormatLogFileExists();
-
-	  /// returns the file name of the .log file
-	  std::string getThreecolumnFormatLogFile();
+      bool isDateTimeString(const std::string& str) const;
+      /// Return the name of the three column log file for associated with the specified file. Empty string if one doesn't exist
+      std::string getThreeColumnName() const;
 
 	 /// create timeseries property from .log file and adds taht to sample object
 	  std::set<std::string> createthreecolumnFileLogProperty(const std::string& logfile,

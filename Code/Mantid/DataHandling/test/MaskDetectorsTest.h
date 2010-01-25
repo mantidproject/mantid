@@ -80,7 +80,7 @@ public:
     TS_ASSERT( mdd.isInitialized() );
 
     std::vector<Property*> props = mdd.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 4 )
+    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 )
 
     TS_ASSERT_EQUALS( props[0]->name(), "Workspace" )
     TS_ASSERT( props[0]->isDefault() )
