@@ -218,15 +218,16 @@ def MaskByBinRange(workspace, timemask):
 
 # Setup the transmission workspace
 def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, loqremovebins):
-	tmpWS = inputWS + '_tmp'
-	if loqremovebins == True:
-		RemoveBins(inputWS,tmpWS, 19900, 20500, Interpolation='Linear')
-	if backmon_start != None and backmon_end != None:
-		FlatBackground(tmpWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
-	# Convert and rebin
-	ConvertUnits(tmpWS,tmpWS,"Wavelength")
-	Rebin(tmpWS, tmpWS, wavbining)
-	return tmpWS
+    tmpWS = inputWS + '_tmp'
+    if loqremovebins == True:
+        RemoveBins(inputWS,tmpWS, 19900, 20500, Interpolation='Linear')
+        inputWS = tmpWS
+    if backmon_start != None and backmon_end != None:
+        FlatBackground(inputWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
+    # Convert and rebin
+    ConvertUnits(tmpWS,tmpWS,"Wavelength")
+    Rebin(tmpWS, tmpWS, wavbining)
+    return tmpWS
 
 # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
 def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):

@@ -1188,8 +1188,8 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     if INSTR_NAME == "SANS2D":
         sample_run = sample_raw.split('_')[0]
         ndigits = len(sample_run)
-        if ndigits > 3:
-            base_runno = int(sample_run[ndigits-3:])
+        if ndigits > 4:
+            base_runno = int(sample_run[ndigits-4:])
         else:
             base_runno = int(sample_run)
         if base_runno < 568:
@@ -1208,6 +1208,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
 
     ############################# Setup workspaces ######################################
     monitorWS = "Monitor"
+    _printMessage('monitor ' + str(MONITORSPECTRUM), True)
     # Get the monitor ( StartWorkspaceIndex is off by one with cropworkspace)
     CropWorkspace(sample_raw, monitorWS, StartWorkspaceIndex = str(MONITORSPECTRUM - 1), EndWorkspaceIndex = str(MONITORSPECTRUM - 1))
     if INSTR_NAME == 'LOQ':
@@ -1216,7 +1217,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     # Remove flat background
     if BACKMON_START != None and BACKMON_END != None:
         FlatBackground(monitorWS, monitorWS, StartX = BACKMON_START, EndX = BACKMON_END, WorkspaceIndexList = '0')
-
+    
     # Get the bank we are looking at
     final_result = run_setup.getReducedWorkspace()
     CropWorkspace(sample_raw, final_result, StartWorkspaceIndex = (SPECMIN - 1), EndWorkspaceIndex = str(SPECMAX - 1))
