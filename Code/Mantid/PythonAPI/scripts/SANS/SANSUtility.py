@@ -11,9 +11,9 @@ import math
 def GetInstrumentDetails(instr_name, detbank):
 	if instr_name == 'LOQ':
 		if detbank == 'main-detector-bank':
-			return 128, 3, 16386, 31000, 39000
+			return 128, 3, 16386
 		elif detbank == 'HAB':
-			return 128, 16387, 17792, 31000, 39000
+			return 128, 16387, 17792
 		else:
 			return -1, -1, -1, -1, -1
 	else:
@@ -23,11 +23,11 @@ def GetInstrumentDetails(instr_name, detbank):
 		if detbank == 'front-detector':
 			smin = dim*dim + 1 + monstart
 			smax = dim*dim*2 + monstart
-			return dim, smin, smax, 85000, 100000
+			return dim, smin, smax
 		elif detbank == 'rear-detector':
 			smin = 1 + monstart
 			smax = dim*dim + monstart
-			return 192, smin, smax, 85000, 100000
+			return 192, smin, smax
 		else:
 			return -1, -1, -1, -1, -1
 			
@@ -221,9 +221,8 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
 	tmpWS = inputWS + '_tmp'
 	if loqremovebins == True:
 		RemoveBins(inputWS,tmpWS, 19900, 20500, Interpolation='Linear')
+	if backmon_start != None and backmon_end != None:
 		FlatBackground(tmpWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
-	else:
-		FlatBackground(inputWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
 	# Convert and rebin
 	ConvertUnits(tmpWS,tmpWS,"Wavelength")
 	Rebin(tmpWS, tmpWS, wavbining)

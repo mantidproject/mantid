@@ -212,20 +212,16 @@ def printParameter(var):
 ########################### 
 def SANS2D():
     _printMessage('SANS2D()')
-    global INSTR_NAME, BACKMON_START, BACKMON_END, MONITORSPECTRUM
+    global INSTR_NAME, MONITORSPECTRUM
     INSTR_NAME = 'SANS2D'
-    BACKMON_START = 85000
-    BACKMON_END = 100000
     MONITORSPECTRUM = 2
     if DETBANK != 'rear-detector':
         Detector('rear-detector')
 
 def LOQ():
     _printMessage('LOQ()')
-    global INSTR_NAME, BACKMON_START, BACKMON_END, MONITORSPECTRUM
+    global INSTR_NAME, MONITORSPECTRUM
     INSTR_NAME = 'LOQ'
-    BACKMON_START = 31000
-    BACKMON_END = 39000
     MONITORSPECTRUM = 2
     if DETBANK != 'main-detector-bank':
         Detector('main-detector-bank')
@@ -816,6 +812,17 @@ def MaskFile(filename):
             else:
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                 Gravity(False)
+        elif upper_line.startswith('BACK/MON/TIMES'):
+            tokens = upper_line.split()
+            global BACKMON_START, BACKMON_END
+            if len(tokens) == 3:
+                BACKMON_START = int(tokens[1])
+                BACKMON_END = int(tokens[2])
+            else:
+                _issueWarning('Incorrectly formatted BACK/MON/TIMES line, not running FlatBackground.')
+                BACKMON_START = None
+                BACKMON_END = None
+
         else:
             continue
 
@@ -957,8 +964,8 @@ def _initReduction(xcentre = None, ycentre = None):
         _CAN_SETUP = _init_run(SCATTER_CAN, [xcentre, ycentre], True)
 
     # Instrument specific information using function in utility file
-    global DIMENSION, SPECMIN, SPECMAX, BACKMON_START, BACKMON_END
-    DIMENSION, SPECMIN, SPECMAX, BACKMON_START, BACKMON_END = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)
+    global DIMENSION, SPECMIN, SPECMAX
+    DIMENSION, SPECMIN, SPECMAX  = SANSUtility.GetInstrumentDetails(INSTR_NAME, DETBANK)
 
     return _SAMPLE_SETUP, _CAN_SETUP
 
@@ -1207,7 +1214,8 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
         RemoveBins(monitorWS, monitorWS, '19900', '20500', Interpolation="Linear")
     
     # Remove flat background
-    FlatBackground(monitorWS, monitorWS, '0', BACKMON_START, BACKMON_END)
+    if BACKMON_START != None and BACKMON_END != None:
+        FlatBackground(monitorWS, monitorWS, StartX = BACKMON_START, EndX = BACKMON_END, WorkspaceIndexList = '0')
 
     # Get the bank we are looking at
     final_result = run_setup.getReducedWorkspace()
