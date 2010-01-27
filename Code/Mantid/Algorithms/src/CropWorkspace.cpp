@@ -162,7 +162,7 @@ void CropWorkspace::checkProperties()
   }
   if ( m_maxSpec > numberOfSpectra-1 )
   {
-    g_log.error("EndSpectrum out of range!");
+    g_log.error("EndWorkspaceIndex out of range!");
     throw std::out_of_range("EndWorkspaceIndex out of range!");
   }
   if ( m_maxSpec < m_minSpec )

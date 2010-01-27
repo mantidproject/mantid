@@ -53,7 +53,7 @@ public:
   virtual ~MultiplyRange() {}
 
   virtual const std::string name() const { return "MultiplyRange";}
-  virtual const int version()const { return (1);}
+  virtual const int version() const { return (1);}
   virtual const std::string category() const { return "CorrectionFunctions";}
 
 private:
@@ -62,9 +62,9 @@ private:
   ///Execution code
   void exec();
 
-  int StartBin;
-  int EndBin;
-  double Factor;
+  int m_startBin;
+  int m_endBin;
+  double m_factor;
 };
 
 } // namespace Algorithms
