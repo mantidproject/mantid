@@ -44,11 +44,14 @@ for fname in dirList:
           testsToRun.append(fname)
 
 #BUILD the tests
+libList = env['MYLIBLIST']
+if platform.system() == 'Darwin':
+	libList.append('python' + sys.version[0:3])
 for test in testsToRun:
   temp= test.split('/')
   dotcpp = test + '.cpp'
   dotpdb = test + '.pdb'
   if os.name == 'nt':
-	myenv.Program([dotcpp],LIBS=env['MYLIBLIST'], LIBPATH=env['MYLIBDIRLIST'], PDB=dotpdb)
+	myenv.Program([dotcpp],LIBS=libList, LIBPATH=env['MYLIBDIRLIST'], PDB=dotpdb)
   else:
-	myenv.Program([dotcpp],CXX=env['CXX'])
+	myenv.Program([dotcpp],CXX=env['CXX'],LIBS=libList,LIBPATH=env['MYLIBDIRLIST'])
