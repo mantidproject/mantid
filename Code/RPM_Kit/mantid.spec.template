@@ -96,6 +96,7 @@ mkdir -p $RPM_BUILD_ROOT/%{mantidinstrumentdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidincludesdir}
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
+install -m755 Code/qtiplot/MantidQt/lib/libMantidWidgets.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/qtiplot/MantidQt/lib/libMantidQtAPI.so $RPM_BUILD_ROOT/%{mantidlibdir}
 install -m755 Code/qtiplot/MantidQt/lib/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
 install -m755 Code/qtiplot/MantidQt/lib/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
