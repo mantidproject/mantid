@@ -659,6 +659,9 @@ def clearCurrentMaskDefaults():
     FRONT_DET_Z_CORR = FRONT_DET_Y_CORR = FRONT_DET_X_CORR = FRONT_DET_ROT_CORR = 0.0
     global REAR_DET_Z_CORR, REAR_DET_X_CORR
     REAR_DET_Z_CORR = REAR_DET_X_CORR = 0.0
+    
+    global BACKMON_START, BACKMON_END
+    BACKMON_START = BACKMON_END = None
 
 ####################################
 # Add a mask to the correct string
@@ -744,7 +747,7 @@ def MaskFile(filename):
         if line.startswith('!'):
             continue
         # This is so that I can be sure all EOL characters have been removed
-        line = line.rstrip()
+        line = line.lstrip().rstrip()
         upper_line = line.upper()
         if upper_line.startswith('L/'):
             _readLimitValues(line)

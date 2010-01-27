@@ -224,8 +224,9 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
         inputWS = tmpWS
     if backmon_start != None and backmon_end != None:
         FlatBackground(inputWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
+        inputWS = tmpWS
     # Convert and rebin
-    ConvertUnits(tmpWS,tmpWS,"Wavelength")
+    ConvertUnits(inputWS,tmpWS,"Wavelength")
     Rebin(tmpWS, tmpWS, wavbining)
     return tmpWS
 

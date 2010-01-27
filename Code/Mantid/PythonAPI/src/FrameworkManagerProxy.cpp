@@ -297,7 +297,7 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
 
 /**
  * Add a python algorithm to the algorithm factory
- * @param py_algorithm The python algorithm object wrapped in a boost object
+ * @param pyobj The python algorithm object wrapped in a boost object
  */
 void FrameworkManagerProxy::registerPyAlgorithm(PyObject *pyobj)
 {

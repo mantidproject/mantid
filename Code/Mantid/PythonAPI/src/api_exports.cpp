@@ -292,7 +292,7 @@ namespace PythonAPI
   {
     class_< PythonAPI::WorkspaceFactoryProxy, boost::noncopyable>("WorkspaceFactory", no_init)
       .def("createMatrixWorkspace", &PythonAPI::WorkspaceFactoryProxy::createMatrixWorkspace)
-      .staticmethod("createMatrixWorkspace")
+      //.staticmethod("createMatrixWorkspace")
       ;
   }
 

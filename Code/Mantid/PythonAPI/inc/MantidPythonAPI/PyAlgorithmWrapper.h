@@ -75,11 +75,11 @@ public:
    * @param direction The direction
    */
   template<typename TYPE>
-  void _declareListProperty(const std::string &name, boost::python::list values, const std::string &doc,
+  void _declareListProperty(const std::string & prop_name, boost::python::list values, const std::string &doc,
 			    const unsigned int direction)
   {
     //Extract the values from the python list into a std vector
-    CloneableAlgorithm::declareProperty(name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+    CloneableAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
   }
 
   /**

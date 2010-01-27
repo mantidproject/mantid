@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PyAlgorithmWrapper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PythonWrapper.cpp"
 				>
 			</File>
@@ -209,7 +213,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidPythonAPI\PyAlgorithm.h"
+				RelativePath=".\inc\MantidPythonAPI\PyAlgorithmWrapper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\PythonInterfaceFunctions.h"
 				>
 			</File>
 			<File

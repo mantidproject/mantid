@@ -206,6 +206,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CloneableAlgorithm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Column.cpp"
 				>
 			</File>
@@ -411,6 +415,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CheckWorkspacesMatch.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\CloneableAlgorithm.h"
 				>
 			</File>
 			<File
