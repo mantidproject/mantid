@@ -12,7 +12,7 @@ namespace MantidQt
     class whiteBeam1 : public pythonCalc
     {
     public:
-      explicit whiteBeam1(const Ui::MWDiag &userSettings);
+      whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings);
 
     private:
 
@@ -25,9 +25,25 @@ namespace MantidQt
     class whiteBeam2 : public pythonCalc
     {
     public:
-      explicit whiteBeam2(const Ui::MWDiag &userSettings);
-	  void incPrevious(DiagResults::TestSummary &firstTest);
+      whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings);
+	  void incPrevious(const DiagResults::TestSummary &firstTest);
   
+    private:
+
+      /// the form that ws filled in by the user
+      const Ui::MWDiag &m_settings;
+  
+      // holds the prefix that we give to output workspaces that will be deleted in the Python
+      static const QString tempWS;
+    };
+	
+    class backTest : public pythonCalc
+    {
+    public:
+      backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &runs);
+	  void incFirstTest(const DiagResults::TestSummary &results1);
+      void incSecondTest(const DiagResults::TestSummary &results2);
+	  void noSecondTest();
     private:
 
       /// the form that ws filled in by the user

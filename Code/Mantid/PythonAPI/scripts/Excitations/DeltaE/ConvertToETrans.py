@@ -48,7 +48,7 @@ try:
     mantid.deleteWorkspace(conv.tempWS)
   
   if |RM_BG| == 'yes':
-    FlatBackground(InputWorkspace=inOutWS, OutputWorkspace=inOutWS, WorkspaceIndexList='', StartX=|TOF_LOW|, EndX=|TOF_HIGH|, Mode='Mean')
+    FlatBackground(inOutWS, inOutWS, |TOF_LOW|, |TOF_HIGH|, '', Mode='Mean')
   
   conv.NormaliseTo(|GUI_SET_NORM|, inOutWS)
   
@@ -74,10 +74,7 @@ try:
   # output to a file in ASCII
   SaveSPE(inOutWS, |GUI_SET_OUTPUT|)
 
-except Exception, reason:
-  print 'Error ',
-  print reason,
-  print ' encountered while running the ' + THISSCRIPT + " Python script"
+except Exception:
   # delete the possibly part finished workspaces
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == inOutWS) : mantid.deleteWorkspace(inOutWS)

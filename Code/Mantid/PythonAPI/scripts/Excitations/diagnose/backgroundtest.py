@@ -12,7 +12,6 @@ TEMPBIG = '_FindBadDetects tempbig'
 #--These are the values passed over from the MantidPlot dialog via C++, probably don't change them
 DOWNSOFAR1 = |MASK1|
 DOWNSOFAR2 = |MASK2|
-DATAFILENAMES = |EXPFILES|
 ACCEPT = |BACKGROUNDACCEPT|
 NUMERRORBARS = |ERRORBARS|
 REMOVEZERO = |REMOVEZEROS|
@@ -26,11 +25,9 @@ if ( OMASKFILE != '' ) :
   MDTFile = OMASKFILE+'_mdt'
 else : MDTFile = ''
 
-
-
 try:#------------Calculations Start---
   #--load in the experimental run data  
-  dataFiles = DATAFILENAMES.split(',')
+  dataFiles = (|EXPFILES|)
   # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
   LoadRaw(dataFiles[0], TEMPBIG)											#for usage see www.mantidproject.org/LoadRaw
   # integrate the counts as soon as possible to reduce the size of the workspace

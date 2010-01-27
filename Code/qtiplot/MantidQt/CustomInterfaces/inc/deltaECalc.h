@@ -1,16 +1,12 @@
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtCustomInterfaces/ui_Excitations.h"
 #include <vector>
-#include <QString>
-#include <string>
 
 namespace MantidQt
 {
   namespace CustomInterfaces
-  {
-    using namespace MantidWidgets;
-	
-    class deltaECalc : public pythonCalc
+  {	
+    class deltaECalc : public MantidWidgets::pythonCalc
     {
     public:
       //??STEVES? move this into the file widget
@@ -23,10 +19,12 @@ namespace MantidQt
       public:
         FileInput(QLineEdit &num, QComboBox &instr);
         const std::vector<std::string>& getRunFiles();
+		std::string getFile1();
+		QString getRunString();
         void readComasAndHyphens(const std::string &in, std::vector<std::string> &out);
       };
   
-      deltaECalc(const Ui::Excitations &userSettings, FileInput &runFiles);
+      deltaECalc(QWidget * const interface, const Ui::Excitations &userSettings, deltaECalc::FileInput &runFiles, const bool removalBg, const double TOFWinSt, const double TOFWinEnd);
       void maskDetects(const QString &maskWS);
 	  /** removes the path from the filename passed and replaces extensions with .spe
       * @param inputFilename name of the file that the .SPE file is based on
@@ -40,15 +38,23 @@ namespace MantidQt
     private:
       /// the form that ws filled in by the user
       const Ui::Excitations &m_sets;
+	  /// whether to the remove background count rate from the data
+	  const bool m_bgRemove;
+	  /// used in remove background, the start of the background region
+	  const double m_TOFWinSt;
+	  /// used in remove background, the end of the background region
+	  const double m_TOFWinEnd;
 
 	  QString createProcessingScript(const std::string &inFiles, const std::string &oName);
 	  void createGetEIStatmens(QString &newScr);
 	  void createNormalizationStatmens(QString &newScr);
+	  void createRemoveBgStatmens(QString &newScr);
+	  void createRebinStatmens(QString &newScr);
       void createOutputStatmens(QString &WSName, QString &newScr);
       QString getScaling() const;
       QString getNormalization() const;
-      void LEChkCpIn(QString &text, QString pythonMark, QLineEdit * userVal, Property * const check);
-	  std::string replaceInErrsFind(QString &text, QString pythonMark, const QString &setting, Property * const check) const;
+      void LEChkCpIn(QString &text, QString pythonMark, QLineEdit * userVal, Mantid::Kernel::Property * const check);
+	  std::string replaceInErrsFind(QString &text, QString pythonMark, const QString &setting, Mantid::Kernel::Property * const check) const;
       void renameWorkspace(const QString &name);
   
       // holds the prefix that we give to output workspaces that will be deleted in the Python

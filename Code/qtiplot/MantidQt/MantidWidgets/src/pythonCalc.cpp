@@ -5,9 +5,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include <QTextStream>
 #include <QDir>
-#include <cmath>
+#include <QHash>
 #include <QMessageBox>
 #include <QTemporaryFile>
+#include <stdexcept>
+#include <cmath>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,6 +21,47 @@ using namespace MantidQt::MantidWidgets;
 const QString& pythonCalc::python() const
 {
   return m_pyScript;
+}
+/** Protected constructor must be overridden, this base class constructor connects the
+*  runAsPythonScript() signal to the QWidget passed to it
+*  @param interface this widget needs to have runAsPythonScript() connected to MantidPlot, for example be an interface
+*/
+pythonCalc::pythonCalc(QWidget * const interface) :
+  MantidWidget(), m_pyScript(), m_templateH(), m_templateB(), m_fails()
+{
+  // Only an interface widgets have there runAsPythonScript signal connected to QTiplot, need to connect to that
+  connect(this, SIGNAL(runAsPythonScript(const QString&)),
+          interface, SIGNAL(runAsPythonScript(const QString&)));
+}
+/** Looks for error reports from the object passed to it.  If the map returned by the
+*  the objects invalid() method isn't empty it places displays red stars and throws
+*  @param pythonGenerat the object with an invalid() map that contains a list of bad controls and error messages
+*  @return a description of any error
+*/
+QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &validLbls) const
+{
+  // any errors in reading user values and constructing the script were inserted into a map, go through it
+  std::map<const QWidget * const, std::string>::const_iterator errs =
+    m_fails.begin();
+  for ( ; errs != m_fails.end(); ++errs)
+  {// there are two maps, one links errors to the invalid control and one links controls to validators, put them together to load the errors into the validators
+	if ( validLbls.find(errs->first) == validLbls.end() )
+	{// can't find a validator label for this control, throw here, it'll get caught below and a dialog box will be raised
+	  return QString::fromStdString(errs->second);
+	}
+	validLbls[errs->first]->setToolTip(QString::fromStdString(errs->second));
+	validLbls[errs->first]->show();
+  }
+  if ( m_fails.size() > 0 )
+  {// some errors were displayed in the loop above
+	return "One or more settings are invalid. The invalid settings are\nmarked with a *, hold your mouse over the * for more information";
+  }
+  // catches other errors that didn't show up when checking individual controls, shouldn't happen really
+  if ( m_pyScript.count('\n') == 0 )
+  {// this means that a script wasn't produced, only a one line error message
+    return "Problem reading user settings: \""+m_pyScript+"\"";
+  }
+  return "";
 }
 /** Sets m_pyScript to the contents of the named file
 * @param pythonFile the name of the file to read
@@ -103,7 +146,7 @@ QString pythonCalc::runPythonCode(const QString & code, bool no_output)
   QTemporaryFile tmp_file;
   if( !tmp_file.open() )
   {
-    QMessageBox::information(this, "", "An error occurred opening a temporary file in " + QDir::tempPath());
+//??STEVES uncomment??//      QMessageBox::information(this, "", "An error occurred opening a temporary file in " + QDir::tempPath());
     return QString();
   }
   //The file name is only valid when the file is open

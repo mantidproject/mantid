@@ -73,7 +73,7 @@ try:
 except Exception, reason:
   print 'Error'
   print 'Exception ', reason, ' caught'
-  print THISTEST	
+  print THISTEST
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == "_FindBadDetects WBV1") : mantid.deleteWorkspace("_FindBadDetects WBV1")
   # the C++ that called this needs to look at the output from the print statements and deal with the fact that there was a problem

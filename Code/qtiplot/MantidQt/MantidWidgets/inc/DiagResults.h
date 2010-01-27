@@ -23,7 +23,7 @@ namespace MantidQt
       // stores the informtion returned by the python scripts that look for bad detectors
       struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS TestSummary
       {
-		TestSummary(QString name);
+		explicit TestSummary(QString name);
 	    QString pythonResults(const QString &pyhtonOut);
 		void setStatus(QString &info) {status = info;}
 		const QString& getStatus() const {return status;}
@@ -38,16 +38,15 @@ namespace MantidQt
   
       static const QString tests[];
       static const int numTests;
-
-      /// Default Constructor
-      DiagResults(QWidget *parent);
+	  
+      DiagResults(QWidget *parent = 0);
       void notifyDialog(const TestSummary &display);
 
     signals:
       ///Emits this signal to run some python code
       void runAsPythonScript(const QString&);
-      /// Is emitted just before the window dies to enable the parents Run button again
-      void releaseParentWindow();
+      /// is emitted just before the window dies to let the window that created know the pointer it has is invalid
+      void died();
 
     private:
       /// the layout that widgets are added to

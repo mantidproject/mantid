@@ -13,10 +13,11 @@
 
 using namespace MantidQt::MantidWidgets;
 DiagResults::TestSummary::TestSummary(QString name) :
-  test(name), numBad(NORESULTS) {}
+  test(name), status("Error"), numBad(NORESULTS) {}
 /** Reads the multi-line string created by the print statments in python scripts
 *  @param pythonOut string as returned by runPythonCode()
 *  @return either data (or if numBad is set to NORESULTS then diagnositic output, or possibly nothing at all)
+*  @throw invalid_argument if output from the wrong test is passed to this function
 */
 QString DiagResults::TestSummary::pythonResults(const QString &pyhtonOut)
 {// set the number found bad to the not ready state incase there is an error below
@@ -26,17 +27,17 @@ QString DiagResults::TestSummary::pythonResults(const QString &pyhtonOut)
 
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
-    status = "", outputWS = "", inputWS = "";
+    status = "Error", outputWS = "", inputWS = "";
     return "Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
   }
   // each script should return 7 strings
   if ( results.count() != 7 || results[0] != "success" )
   {// there was an error in the python, disregard these results
-    status = "", outputWS = "", inputWS = "";
+    status = "Error", outputWS = "", inputWS = "";
     return "Error \"" + results[1] + "\" during " + results[2] + ", more details may be found in the Mantid and python logs.";
   }
   if ( test != results[1] )
-  {//??STEVES, does this make sense, add to DeOxyGen?
+  {
     throw std::invalid_argument("Logic error:"+test.toStdString()+" is not "+results[1].toStdString());
   }
   
@@ -60,11 +61,14 @@ const QString DiagResults::tests[DiagResults::numTests] =
 // Public member functions
 //----------------------
 ///Constructor
-DiagResults::DiagResults(QWidget *parent): m_Grid(new QGridLayout),
-  m_ListMapper(new QSignalMapper(this)), m_ViewMapper(new QSignalMapper(this))
+DiagResults::DiagResults(QWidget *parent): QWidget(),
+  m_Grid(new QGridLayout), m_ListMapper(new QSignalMapper(this)),
+  m_ViewMapper(new QSignalMapper(this))
 {
   setWindowTitle("Failed detectors list");
 
+  connect(this, SIGNAL(runAsPythonScript(const QString&)),
+                  parent, SIGNAL(runAsPythonScript(const QString&)));
   connect(m_ListMapper, SIGNAL(mapped(const QString &)), this, SLOT(tableList(const QString &)));
   connect(m_ViewMapper, SIGNAL(mapped(const QString &)), this, SLOT(instruView(const QString &)));
   
@@ -120,8 +124,7 @@ int DiagResults::addRow(QString firstColumn, QString secondColumn)
 }
 
 /// insert a row at the bottom of the grid
-void DiagResults::updateRow(int row, QString firstColumn,
-                                      int secondColumn)
+void DiagResults::updateRow(int row, QString firstColumn, int secondColumn)
 {
   QWidget *oldLabel = m_Grid->itemAtPosition(row, 0)->widget();
   if ( !oldLabel ) return;
@@ -143,7 +146,6 @@ void DiagResults::updateRow(int row, QString firstColumn,
   else secondLabel = "";
   m_Grid->addWidget(new QLabel(secondLabel), row, 1);
 }
-
 /// insert a row at the bottom of the grid
 void DiagResults::addButtonsDisab(int row)
 {
@@ -167,19 +169,24 @@ void DiagResults::showButtons(int row, QString test)
   {// this shouldn't happen but it appears we can't find the button so don't show it
     return;
   }
-  bpList->setEnabled(true);
-  connect(bpList, SIGNAL(clicked()), m_ListMapper, SLOT(map()));
-  m_ListMapper->setMapping(bpList, test );
-  
+  if ( ! bpList->isEnabled() )
+  {
+    bpList->setEnabled(true);
+    connect(bpList, SIGNAL(clicked()), m_ListMapper, SLOT(map()));
+    m_ListMapper->setMapping(bpList, test );
+  }
   QPushButton *bpView =
     dynamic_cast<QPushButton*>(m_Grid->itemAtPosition(row, 3)->widget());
   if ( ! bpView )
   {// no button lets leave
     return;
   }
-  bpView->setEnabled(true);
-  connect(bpView, SIGNAL(clicked()), m_ViewMapper, SLOT(map()));
-  m_ViewMapper->setMapping(bpView, test);
+  if ( ! bpView->isEnabled() )
+  {
+    bpView->setEnabled(true);
+    connect(bpView, SIGNAL(clicked()), m_ViewMapper, SLOT(map()));
+    m_ViewMapper->setMapping(bpView, test);
+  }
 }
 
 /// enables the run button on the parent window so the user can do more analysis
@@ -194,7 +201,7 @@ void DiagResults::closeEvent(QCloseEvent *event)
     std::string toDel = it->second.toStdString();
     Mantid::API::FrameworkManager::Instance().deleteWorkspace(toDel);
   }
-  emit releaseParentWindow();
+  emit died();
   event->accept();
 }
 
@@ -203,7 +210,7 @@ void DiagResults::tableList(const QString &name)
   QString workspace = outputWorkS[name];
   QString tempOutp = QString("_FindBadDe") + workspace + QString("_temp");
 
-  QString viewTablePy = "import BadDetectorTestFunctions as functions\n";
+  QString viewTablePy = "import DetectorTestLib as functions\n";
   viewTablePy.append("if functions.workspaceExists :\n");
   viewTablePy.append(
     "  bad = FindDetectorsOutsideLimits(InputWorkspace='"+workspace+"', OutputWorkspace='"+tempOutp+"', HighThreshold=10, LowThreshold=-1 )\n");

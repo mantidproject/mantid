@@ -25,14 +25,14 @@ void FlatBackground::init()
     new HistogramValidator<> ), "Name of the input workspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output ),
     "Name to use for the output workspace.");
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-    "Indices of the spectra that will have their background removed\n"
-    "default: modify all spectra");
   MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
   declareProperty("StartX", Mantid::EMPTY_DBL(), mustHaveValue,
     "The X value at which to start the background fit");
   declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(),
     "The X value at which to end the background fit");
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+    "Indices of the spectra that will have their background removed\n"
+    "default: modify all spectra");
   std::vector<std::string> modeOptions;
   modeOptions.push_back("Linear Fit");
   modeOptions.push_back("Mean");

@@ -8,8 +8,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
-    <height>476</height>
+    <width>389</width>
+    <height>483</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -95,43 +95,7 @@
       <attribute name="title" >
        <string>Energy Transfer</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_5" >
-       <item row="0" column="3" colspan="2" >
-        <spacer name="horizontalSpacer_22" >
-         <property name="orientation" >
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0" >
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="3" column="0" >
-        <widget class="QLabel" name="lbSPE" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text" >
-          <string>SPE filename</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1" colspan="3" >
-        <widget class="QLineEdit" name="leNameSPE" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
+      <layout class="QGridLayout" name="gridLayout_3" >
        <item row="0" column="0" colspan="2" >
         <widget class="QLabel" name="lbPrefix" >
          <property name="enabled" >
@@ -164,7 +128,20 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="5" >
+       <item row="0" column="3" colspan="3" >
+        <spacer name="horizontalSpacer_22" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0" colspan="6" >
         <widget class="QGroupBox" name="gbExperiment" >
          <property name="title" >
           <string>Input Files</string>
@@ -175,7 +152,7 @@
          <property name="checkable" >
           <bool>false</bool>
          </property>
-         <layout class="QGridLayout" name="gridLayout_7" >
+         <layout class="QGridLayout" name="gridLayout_2" >
           <item rowspan="2" row="0" column="0" colspan="3" >
            <widget class="QLabel" name="loadRun_lbDiscrip" >
             <property name="text" >
@@ -183,10 +160,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="5" >
+          <item row="1" column="1" colspan="4" >
            <widget class="QLineEdit" name="loadRun_lenumber" />
           </item>
-          <item rowspan="2" row="0" column="6" >
+          <item rowspan="2" row="0" column="5" >
            <spacer name="horizontalSpacer_9" >
             <property name="orientation" >
              <enum>Qt::Horizontal</enum>
@@ -202,7 +179,7 @@
             </property>
            </spacer>
           </item>
-          <item rowspan="2" row="0" column="7" colspan="2" >
+          <item rowspan="2" row="0" column="6" colspan="2" >
            <widget class="QPushButton" name="loadRun_pbBrowse" >
             <property name="text" >
              <string>Browse</string>
@@ -229,7 +206,7 @@
             </property>
             <property name="minimumSize" >
              <size>
-              <width>150</width>
+              <width>80</width>
               <height>0</height>
              </size>
             </property>
@@ -238,10 +215,13 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="5" colspan="4" >
+          <item row="2" column="5" colspan="3" >
            <widget class="QComboBox" name="cbMonitors" >
             <property name="toolTip" >
              <string comment="Select the type of normalization for the runs" >Select the type of normalization for the runs</string>
+            </property>
+            <property name="sizeAdjustPolicy" >
+             <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
             </property>
            </widget>
           </item>
@@ -268,27 +248,46 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="4" >
-           <widget class="QCheckBox" name="cbNoBack" >
+          <item row="4" column="0" colspan="3" >
+           <widget class="QPushButton" name="pbBack" >
+            <property name="text" >
+             <string>bg removal:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="3" >
+           <widget class="QLabel" name="valBg" >
             <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+             <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximumSize" >
+            <property name="minimumSize" >
              <size>
-              <width>178</width>
-              <height>16777215</height>
+              <width>20</width>
+              <height>20</height>
              </size>
             </property>
             <property name="text" >
-             <string>Do not remove background</string>
+             <string>*</string>
             </property>
            </widget>
           </item>
           <item row="4" column="4" >
            <widget class="QCheckBox" name="ckSumSpecs" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+              <horstretch>64</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize" >
+             <size>
+              <width>64</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text" >
              <string>Sum Files</string>
             </property>
@@ -297,7 +296,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="5" colspan="2" >
+          <item row="4" column="5" colspan="3" >
            <widget class="QCheckBox" name="ckFixEi" >
             <property name="text" >
              <string>Fix Ei</string>
@@ -317,10 +316,17 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="2" colspan="5" >
+          <item row="5" column="2" colspan="3" >
            <widget class="QLineEdit" name="leWBV0" />
           </item>
-          <item row="5" column="7" colspan="2" >
+          <item row="5" column="5" >
+           <widget class="QLabel" name="valWBV" >
+            <property name="text" >
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="6" colspan="2" >
            <widget class="QPushButton" name="pbWBV0" >
             <property name="text" >
              <string>Browse</string>
@@ -369,14 +375,30 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="6" >
+          <item row="6" column="4" >
+           <spacer name="horizontalSpacer_3" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType" >
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="6" column="5" >
            <widget class="QLabel" name="lbWBV0High1" >
             <property name="text" >
              <string>High</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="7" >
+          <item row="6" column="6" >
            <widget class="QLineEdit" name="leWBV0High" >
             <property name="sizePolicy" >
              <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
@@ -392,7 +414,7 @@
             </property>
            </widget>
           </item>
-          <item row="6" column="8" >
+          <item row="6" column="7" >
            <widget class="QLabel" name="lbWBV0High2" >
             <property name="text" >
              <string>meV</string>
@@ -400,7 +422,7 @@
            </widget>
           </item>
           <item row="7" column="0" colspan="2" >
-           <widget class="QLabel" name="label_6" >
+           <widget class="QLabel" name="map_fileInput_lbName" >
             <property name="sizePolicy" >
              <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
               <horstretch>0</horstretch>
@@ -412,10 +434,29 @@
             </property>
            </widget>
           </item>
-          <item row="7" column="2" colspan="5" >
+          <item row="7" column="2" colspan="3" >
            <widget class="QLineEdit" name="map_fileInput_leName" />
           </item>
-          <item row="7" column="7" colspan="2" >
+          <item row="7" column="5" >
+           <widget class="QLabel" name="valMap" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize" >
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text" >
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="6" colspan="2" >
            <widget class="QPushButton" name="map_fileInput_pbBrowse" >
             <property name="text" >
              <string>Browse</string>
@@ -425,7 +466,7 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0" colspan="5" >
+       <item row="2" column="0" colspan="6" >
         <widget class="QGroupBox" name="gbConvUnits" >
          <property name="title" >
           <string>Conversion to Energy Transfer</string>
@@ -434,7 +475,7 @@
           <item row="0" column="2" colspan="2" >
            <widget class="QLabel" name="lbEGuess1" >
             <property name="text" >
-             <string>Inital Energy</string>
+             <string>Incident Energy</string>
             </property>
            </widget>
           </item>
@@ -614,10 +655,77 @@
             </property>
            </widget>
           </item>
+          <item row="0" column="7" >
+           <widget class="QLabel" name="valGuess" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize" >
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize" >
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text" >
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
+       <item row="3" column="0" >
+        <widget class="QLabel" name="lbSPE" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text" >
+          <string>SPE filename</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" colspan="3" >
+        <widget class="QLineEdit" name="leNameSPE" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
        <item row="3" column="4" >
+        <widget class="QLabel" name="valSPE" >
+         <property name="sizePolicy" >
+          <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize" >
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="text" >
+          <string>*</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5" >
         <widget class="QPushButton" name="pbBrowseSPE" >
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
@@ -1213,6 +1321,48 @@
   <zorder>horizontalSpacer_11</zorder>
   <zorder>tabWidget</zorder>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>loadRun_cbInst</tabstop>
+  <tabstop>loadRun_lenumber</tabstop>
+  <tabstop>loadRun_pbBrowse</tabstop>
+  <tabstop>cbNormal</tabstop>
+  <tabstop>cbMonitors</tabstop>
+  <tabstop>leScale</tabstop>
+  <tabstop>pbBack</tabstop>
+  <tabstop>ckSumSpecs</tabstop>
+  <tabstop>ckFixEi</tabstop>
+  <tabstop>leWBV0</tabstop>
+  <tabstop>pbWBV0</tabstop>
+  <tabstop>leWBV0Low</tabstop>
+  <tabstop>leWBV0High</tabstop>
+  <tabstop>map_fileInput_leName</tabstop>
+  <tabstop>map_fileInput_pbBrowse</tabstop>
+  <tabstop>leEGuess</tabstop>
+  <tabstop>leELow</tabstop>
+  <tabstop>leEWidth</tabstop>
+  <tabstop>leEHigh</tabstop>
+  <tabstop>leNameSPE</tabstop>
+  <tabstop>pbBrowseSPE</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>ckRunDiag</tabstop>
+  <tabstop>ckRunAbsol</tabstop>
+  <tabstop>leVanMass</tabstop>
+  <tabstop>leSamMass</tabstop>
+  <tabstop>leRMMMass</tabstop>
+  <tabstop>leVanEi</tabstop>
+  <tabstop>leVanELow</tabstop>
+  <tabstop>leVanEHigh</tabstop>
+  <tabstop>leMonoVan</tabstop>
+  <tabstop>pbAddMono</tabstop>
+  <tabstop>leVanMap</tabstop>
+  <tabstop>leVanMap_2</tabstop>
+  <tabstop>leWhiteVan</tabstop>
+  <tabstop>pbAddWhite</tabstop>
+  <tabstop>pbAddMap</tabstop>
+  <tabstop>pbAddMap_2</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

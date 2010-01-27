@@ -26,8 +26,9 @@ using namespace API;
 
 void MedianDetectorTest::init()
 {
-  HistogramValidator<MatrixWorkspace> *val =
-    new HistogramValidator<MatrixWorkspace>;
+  CompositeValidator<> *val = new CompositeValidator<>;
+    val->add(new CommonBinsValidator<>);
+    val->add(new HistogramValidator<>);
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input,val),
     "Name of the input workspace" );
@@ -95,7 +96,7 @@ void MedianDetectorTest::exec()
   //Adds the counts from all the bins and puts them in one total bin, calls subalgorithm Integration
   MatrixWorkspace_sptr counts = getTotalCounts(m_MinSpec, m_MaxSpec/*InputWorkspace and range properties are also read by this function*/);
   //Divides the total number of counts by the number of seconds, calls the ConvertToDistribution algorithm
-  counts = getRate(counts);
+  // this isn't needed if all spectra have commonbins counts = getRate(counts);
   //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
   //this calculation is optional, it depends on angle information existing
   if ( angles.use_count() == 1 )
@@ -365,7 +366,7 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
   g_log.information() << name() <<
     ": The median integrated counts or soild angle normalised counts is " << median << std::endl;
   
-  if ( median < 0 || median > DBL_MAX/10 )
+  if ( median < 0 || median > DBL_MAX/10.0 )
   {// something has gone wrong
     throw std::out_of_range("The calculated value for the median was either negative or unreliably large");
   }
