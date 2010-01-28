@@ -5,8 +5,9 @@ import platform
 import socket
 import sys
 from shutil import move
+sys.path.append('Build')
+import buildNotification as notifier
 from time import strftime
-import buildNotification
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
@@ -15,11 +16,6 @@ smtpserver = 'outbox.rl.ac.uk'
 #RECIPIENTS=['martyn.gigg@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system()+'BuildServer1@mantidproject.org'
-
-localServerName = 'http://' + platform.node()
-if platform.system() == 'Darwin':
-     localServerName += ':8080'
-localServerName += '/'
 
 tracLink = 'http://trac.mantidproject.org/mantid/'
 #Set up email content 
@@ -38,19 +34,17 @@ mssgSvn  = ''
 mssgDoxy = ''
 ticketList = []
 svnRevision = ''
-logDir = '../../../../logs/Mantid/'
 
 testCount = 0
 failCount = 0
 warnCount = 0
 
-#create archive directory
-archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
-os.mkdir(archiveDir)
-
+project = 'Mantid'
+remoteArchivePath, relativeLogDir = notifier.getArchiveDir(project)
+localLogDir = '../../../../logs/' + project + '/'
 
 #Get scons result and errors
-fileScons = logDir+'scons.log'
+fileScons = localLogDir + 'scons.log'
 f = open(fileScons,'r')
 
 for line in f.readlines():
@@ -59,17 +53,17 @@ for line in f.readlines():
           mssgSconsWarn = mssgSconsWarn + line
      
 f.close()
-move(fileScons,archiveDir)
+notifier.moveToArchive(fileScons,remoteArchivePath)
 
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
 
 # On Linux/Mac, compilation warning are in stderr file.
 # On Windows they're in stdout (read above)
-fileSconsErr = logDir+'sconsErr.log'
+fileSconsErr =  localLogDir + 'sconsErr.log'
 if os.name == 'posix':
      mssgSconsWarn = open(fileSconsErr,'r').read()
-move(fileSconsErr,archiveDir)
+notifier.moveToArchive(fileSconsErr,remoteArchivePath)
 
 # Count compilation warnings
 reWarnCount = re.compile(": warning")
@@ -77,7 +71,7 @@ wc = reWarnCount.findall(mssgSconsWarn)
 compilerWarnCount = len(wc)
 
 #Get tests scons result and errors
-filetestsBuild = logDir+'testsBuild.log'
+filetestsBuild =  localLogDir + 'testsBuild.log'
 f = open(filetestsBuild,'r')
 
 for line in f.readlines():
@@ -85,20 +79,20 @@ for line in f.readlines():
      mssgTestsBuild = mssgTestsBuild + line
      
 f.close()
-move(filetestsBuild,archiveDir)
+notifier.moveToArchive(filetestsBuild,remoteArchivePath)
 
 if testsResult.startswith('scons: done building targets.'):
 	testsBuildSuccess = True	
 	
-filetestsBuildErr = logDir+'testsBuildErr.log'
+filetestsBuildErr =  localLogDir + "testsBuildErr.log"
 mssgTestsErr = open(filetestsBuildErr,'r').read()
-move(filetestsBuildErr,archiveDir)
+notifier.moveToArchive(filetestsBuildErr,remoteArchivePath)
 
-filetestsRunErr = logDir+'testsRunErr.log'
-move(filetestsRunErr,archiveDir)
+filetestsRunErr =  localLogDir + 'testsRunErr.log'
+notifier.moveToArchive(filetestsRunErr,remoteArchivePath)
 
 #Get tests result
-filetestsRun = logDir+'testResults.log'
+filetestsRun = localLogDir + 'testResults.log'
 f = open(filetestsRun,'r')
 
 reTestCount = re.compile("Running\\s*(\\d+)\\s*test", re.IGNORECASE)
@@ -121,12 +115,12 @@ for line in f.readlines():
         mssgTestsResults = mssgTestsResults + line
      
 f.close()
-move(filetestsRun,archiveDir)
+notifier.moveToArchive(filetestsRun,remoteArchivePath)
 
 #Read svn log
-filesvn = logDir+'svn.log'
+filesvn = localLogDir + 'svn.log'
 mssgSvn = open(filesvn,'r').read()
-move(filesvn,archiveDir)
+notifier.moveToArchive(filesvn,remoteArchivePath)
 #attempt to parse out the svn revision and ticket number
 reSvnRevision = re.compile("r(\\d+)\\s\\|", re.IGNORECASE)
 m=reSvnRevision.search(mssgSvn)
@@ -139,8 +133,8 @@ for m in mList:
   ticketList.append(m)
   
 #Read doxygen log - skip on Mac
-if platform.system() != 'Darwin':
-     filedoxy = logDir+'doxy.log'
+if os.name != 'posix':
+     filedoxy = localLogDir + 'doxy.log'
      mssgDoxy = open(filedoxy,'r').read()
      reWarnCount = re.compile("Warning:")
      m=reWarnCount.findall(mssgDoxy)
@@ -148,7 +142,7 @@ if platform.system() != 'Darwin':
           warnCount = len(m)
           if warnCount >0:
                doxyWarnings = False
-     move(filedoxy,archiveDir)
+     notifier.moveToArchive(filedoxy,remoteArchivePath)
 
      try:
           lastDoxy = int(open('prevDoxy','r').read())
@@ -158,19 +152,18 @@ if platform.system() != 'Darwin':
      currentDoxy.write(str(warnCount))
 
 #Notify build completion
-buildErrors =1
+buildErrors=1
 testBuildErrors=1
 if buildSuccess:
-  buildErrors=0
+     buildErrors=0
 if testsBuildSuccess:
-  testBuildErrors=0
-buildNotification.sendTestCompleted(project="Mantid", \
-                    testCount=testCount,testFail=failCount, \
-                    compWarn=compilerWarnCount,docuWarn=warnCount, \
-                    buildErrors=buildErrors,testBuildErrors=testBuildErrors)
+     testBuildErrors=0
+notifier.sendTestCompleted(project,testCount=testCount,testFail=failCount, \
+                           compWarn=compilerWarnCount,docuWarn=warnCount, \
+                           buildErrors=buildErrors,testBuildErrors=testBuildErrors)
 
 #Construct Message
-httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
+httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess)
 if compilerWarnCount>0:
@@ -183,7 +176,7 @@ if failCount>0:
     message += str(failCount) + " failed out of "
 message += str(testCount) + " tests)\n"
 # Not doing doxygen on the Mac
-if platform.system() != 'Darwin':
+if os.name != 'posix':
      message += "Code Documentation Passed: " + str(doxyWarnings)
      if warnCount>0:
           message += " ("+str(warnCount) +" doxygen warnings"
@@ -215,7 +208,7 @@ message += 'Test Run stdout <' + httpLinkToArchive + 'testResults.log>\n'
 message += 'Test Run stderr <' + httpLinkToArchive + 'testsRunErr.log>\n'
 message += '------------------------------------------------------------------------\n'
 # Not doing doxygen on the Mac
-if platform.system() != 'Darwin':
+if os.name != 'posix':
      message += 'DOXYGEN LOG\n\n'
      message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
 
@@ -239,30 +232,30 @@ else:
 	subject += 'Tests Failed]\n'	
 
 #timeout in seconds
-socket.setdefaulttimeout(180)
+socket.setdefaulttimeout(120)
+emailErr = open(localLogDir + 'email.log','w')
 try:
-#Send Email
-  session = smtplib.SMTP(smtpserver)
-  smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
-
-  if smtpresult:
-      errstr = ""
-      for recip in smtpresult.keys():
-          errstr = """Could not deliver mail to: %s
-
-Server said: %s
-%s
-
-%s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
-      print errstr
-except:
-  print "Failed to send the build results email"
+     #Send Email
+     session = smtplib.SMTP(smtpserver)
+     smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
+     
+     if smtpresult:
+          errstr = ""
+          for recip in smtpresult.keys():
+               errstr = """Could not deliver mail to: %s
+               Server said: %s
+               %s
+               %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
+               emailErr.write(errstr)
+except smtplib.SMTPException, details:
+     emailErr.write(details)
+emailErr.close()
 
 if not buildSuccess:
      # On Redhat we have python 2.4 and that doesn't seem to have the global exit command
      sys.exit(1)
 else:
-     fileLaunchQTIPlot = logDir+'LaunchQTIPlot.txt'
+     fileLaunchQTIPlot = localLogDir+'LaunchQTIPlot.txt'
      f = open(fileLaunchQTIPlot,'w')
      f.write('launch')
 

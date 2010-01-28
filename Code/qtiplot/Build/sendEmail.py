@@ -1,9 +1,13 @@
 import re
 import smtplib
+import socket
 import os
 import sys
 import platform
+import subprocess as sp
 from shutil import move
+sys.path.insert(0,'../Mantid/Build')
+import buildNotification as notifier
 from time import strftime
 
 #Email settings
@@ -11,42 +15,36 @@ smtpserver = 'outbox.rl.ac.uk'
 #RECIPIENTS = ['martyn.gigg@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system() + 'BuildServer1@mantidproject.org'
-localServerName = 'http://' + platform.node()
-if platform.system() == 'Darwin':
-     localServerName += ':8080'
-localServerName += '/'
 
 #Set up email content 
 buildSuccess = True
 
-logDir = '../../../../logs/qtiplot/'
-
-#create archive directory
-archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
-os.mkdir(archiveDir)
+project = 'qtiplot'
+remoteArchiveDir, relativeLogDir = notifier.getArchiveDir(project)
+localLogDir = '../../../../logs/' + project + '/'
 
 #Get build result and errors
-fileBuild = logDir+'build.log'
+fileBuild = localLogDir+'build.log'
 f = open(fileBuild,'r')
 
 for line in f:
      buildResult = line
      
 f.close()
-move(fileBuild,archiveDir)
+notifier.moveToArchive(fileBuild,remoteArchiveDir)
 
 if 'failed' in buildResult:
      buildSuccess = False	
 	
-fileBuildErr = logDir+'error.log'
-move(fileBuildErr,archiveDir)
+fileBuildErr = localLogDir+'error.log'
+notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
 if buildSuccess:
-     fileLaunchInstaller = logDir+'LaunchInstaller.txt'
+     fileLaunchInstaller = localLogDir + 'LaunchInstaller.txt'
      f = open(fileLaunchInstaller,'w')
      f.write('launch')
 
-last = logDir + 'lastBuild.txt'
+last = localLogDir + 'lastBuild.txt'
 try:
      lastBuild = open(last,'r').read()
 except IOError:
@@ -58,11 +56,11 @@ if buildSuccess and lastBuild=='True':
      exit(0)
 
 #Construct Message
-httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
+httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'MantidPlot Build Passed: ' + str(buildSuccess) + "\n\n"
 message += '-----------------------------------------------------------------------\n'
-message += 'QTIPLOT BUILD LOG\n\n'
+message += 'MANTIDPLOT BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
@@ -73,22 +71,26 @@ if buildSuccess:
 	subject += '[MantidPlot Build Successful]\n\n\n'
 else:
 	subject += '[MantidPlot Build Failed]\n\n\n'
-	
-#Send Email
-session = smtplib.SMTP(smtpserver)
 
-smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
 
-if smtpresult:
-    errstr = ""
-    for recip in smtpresult.keys():
-        errstr = """Could not deliver mail to: %s
-
-Server said: %s
-%s
-
-%s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
-    raise smtplib.SMTPException, errstr
+socket.setdefaulttimeout(120)
+emailErr = open(localLogDir + 'email.log','w')
+try:
+     #Send Email
+     session = smtplib.SMTP(smtpserver)
+     smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
+     
+     if smtpresult:
+          errstr = ""
+          for recip in smtpresult.keys():
+               errstr = """Could not deliver mail to: %s
+               Server said: %s
+               %s
+               %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
+               emailErr.write(errstr)
+except smtplib.SMTPException, details:
+     emailErr.write(details)
+emailErr.close()
 
 if buildSuccess:
      sys.exit(0)

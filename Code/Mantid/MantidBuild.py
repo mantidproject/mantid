@@ -106,3 +106,4 @@ def getConfigFlags(command) :
 	else :
 		res = flags
 	return res
+

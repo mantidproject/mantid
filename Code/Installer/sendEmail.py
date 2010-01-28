@@ -3,11 +3,12 @@ import smtplib
 import os
 from shutil import move
 from time import strftime
+import sys
+sys.append('../Mantid/Build')
+import buildNotification as notifier
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-localServerName = 'http://NDW714/'
-#localServerName = 'file://c|/Program Files/CruiseControl/'
 
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = 'Installer@mantidproject.org'
@@ -22,15 +23,13 @@ buildSuccess = True
 mssgBuild = ''
 mssgBuildErr = ''
 
-logDir = '../../../../logs/Installer/'
+localLogDir = '../../../../logs/Installer/'
 
 #create archive directory
-archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
-os.mkdir(archiveDir)
-
+remoteArchiveDir,relativeLogDir = notifier.getArchiveDir('Installer')
 
 #Get build result and errors
-fileBuild = logDir+'build.log'
+fileBuild = localLogDir+'build.log'
 f = open(fileBuild,'r')
 
 for line in f.readlines():
@@ -38,20 +37,20 @@ for line in f.readlines():
      mssgBuild = mssgBuild + line
      
 f.close()
-move(fileBuild,archiveDir)
+notifier.moveToArchive(fileBuild,remoteArchiveDir)
 
 if buildResult.startswith('failed'):
 	buildSuccess = False	
 	
-fileBuildErr = logDir+'error.log'
+fileBuildErr = localLogDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
-move(fileBuildErr,archiveDir)
+notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
 if buildSuccess:
-     exit(0)
+     sys.exit(0)
 
 #Construct Message
-httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
+httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Build Passed: ' + str(buildSuccess) + "\n"
 message += 'BUILD LOG\n\n'
@@ -88,5 +87,5 @@ Server said: %s
 %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
     raise smtplib.SMTPException, errstr
 
-exit(1)
+sys.exit(1)
      

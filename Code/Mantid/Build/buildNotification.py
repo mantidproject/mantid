@@ -1,7 +1,10 @@
 import urllib2
 import socket
 import os
+import sys
 import platform
+from time import strftime
+import subprocess as sp
 
 def buildURL(messageDictionary):
   url= "http://ndlt343/build.psp?"
@@ -119,3 +122,47 @@ def sendTestCompleted(project,testCount=0,testFail=0, \
   messageDictionary['tbe']=str(testBuildErrors)
   return sendNotification(messageDictionary)
 #end def
+
+# Return the relative path the logs
+def getLogDir(project):
+  archiveDir = strftime("%Y-%m-%d_%H-%M-%S")
+  if os.name == 'nt':
+    logDir = "logs\\" + platform.system() + "\\" + project + "\\" + archiveDir + "\\"
+  else:
+    logDir = 'logs/' + platform.system() + '/' + project + '/' + archiveDir + '/'
+  return logDir
+    
+# Create a path that points to the archive directory
+def getArchiveDir(project):
+  machine = 'Shadow.nd.rl.ac.uk'
+  logDir = getLogDir(project)
+  if os.name == 'nt':
+    baseDir = "\\\\" + machine + "\\mantidkits$\\"
+    try:
+      os.mkdir(baseDir + logDir)
+    except WindowsError:
+      pass
+  else:
+    baseDir = '/isis/www/mantidproject_download/'
+    sp.call("ssh mantidlog@" + machine + " \"mkdir -p " + baseDir + logDir + "\"",shell=True)
+    
+  #create archive directory
+  archivePath = baseDir + logDir
+  if os.name == 'posix':
+    archivePath = "mantidlog@" + machine + ':' + archivePath
+  return archivePath, logDir
+
+# Move a file to a directory
+def moveToArchive(logfile, archiveDir):
+  if os.name == 'nt':
+    # Standard move works for network drives as well
+    move(logfile,archiveDir)
+  else:
+    # Need to scp logs to destination
+    if not archiveDir.endswith('/'):
+      archiveDir += '/'
+    locallogs = os.path.dirname(logfile)
+    filename = os.path.basename(logfile)
+    scplog = open(locallogs + '/scp.log','w')
+    sp.call("scp " + logfile + " " + archiveDir + filename,stdout=scplog,shell=True)
+    scplog.close()

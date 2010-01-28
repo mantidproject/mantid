@@ -12,8 +12,8 @@ else:
 
 
 if platform.system() == 'Linux':
-    qmake = "qmake-qt4"
-    buildargs.append("-j3")
+    qmake = "qmake-qt4 QMAKE_CXX=g++44 QMAKE_CC=gcc44"
+    buildargs.append("-j2")
 else:
     qmake = 'qmake'
 
