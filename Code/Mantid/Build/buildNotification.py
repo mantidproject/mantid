@@ -129,6 +129,7 @@ def getLogDir(project):
   archiveDir = strftime("%Y-%m-%d_%H-%M-%S")
   if os.name == 'nt':
     logDir = "logs\\" + platform.system() + "\\" + project + "\\" + archiveDir + "\\"
+    logDir = "logs/" + project + '/' + archiveDir
   else:
     logDir = 'logs/' + platform.system() + '/' + project + '/' + archiveDir + '/'
   return logDir
@@ -138,11 +139,12 @@ def getArchiveDir(project):
   machine = 'Shadow.nd.rl.ac.uk'
   logDir = getLogDir(project)
   if os.name == 'nt':
-    baseDir = "\\\\" + machine + "\\mantidkits$\\"
-    try:
-      os.mkdir(baseDir + logDir)
-    except WindowsError:
-      pass
+#    baseDir = "\\\\" + machine + "\\mantidkits$\\"
+#    try:
+#      os.mkdir(baseDir + logDir)
+#    except WindowsError:
+#      pass
+    baseDir = '../../../'
   else:
     baseDir = '/isis/www/mantidproject_download/'
     sp.call("ssh mantidlog@" + machine + " \"mkdir -p " + baseDir + logDir + "\"",shell=True)
