@@ -1,0 +1,37 @@
+#!/bin/sh
+# @file check_build check for rpm build
+#
+# run this from cron at regular intervals
+#
+# @author Freddie Akeroyd, STFC ISIS Facility
+# @date 30/03/2009
+#
+LOCK_FILE=/tmp/`basename $0`.lock
+if test -e $LOCK_FILE; then
+    echo "$LOCK_FILE exists"
+    exit
+else
+    touch $LOCK_FILE
+fi
+trap "rm -f $LOCK_FILE" 0
+
+echo "Running $0"
+
+[ -d /tmp/mantid_build ] || mkdir /tmp/mantid_build
+cd /tmp/mantid_build
+n=`ls | wc -l`
+if [ $n -gt 0 ]; then
+    rev=`ls | head`
+    rm -f $rev
+    echo "Building $rev"
+    log_file=/var/www/html/buildlog/build_$rev.log
+    /home/faa59/Mantid/Code/RPM_Kit/nightly_build $rev $log_file > $log_file 2>&1
+fi
+if test "$1" = "HEAD" -o "`date +%H%M`" = "2227"; then
+    echo "Building HEAD"
+    log_file=/var/www/html/buildlog/build.log
+    /home/faa59/Mantid/Code/RPM_Kit/nightly_build "" $log_file > $log_file 2>&1
+fi
+if test -r "$log_file"; then
+    scp $log_file mantidlog@shadow.nd.rl.ac.uk:/isis/www/mantidproject_download/logs/Linux/rpmbuild
+fi
