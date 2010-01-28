@@ -1,7 +1,6 @@
 #include "MantidGeometry/Instrument/ParCompAssembly.h" 
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidKernel/MultiThreaded.h"
 #include <algorithm>
 #include <stdexcept> 
 #include <ostream>
@@ -139,17 +138,11 @@ void ParCompAssembly::printTree(std::ostream& os) const
 V3D ParCompAssembly::getPos() const
 {
   V3D pos;
-
-  // Call to setCachedLocation is a write so not thread-safe
-  PARALLEL_CRITICAL(positionCache)
+  if (!m_map.getCachedLocation(m_base,pos))
   {
-    if (!m_map.getCachedLocation(m_base,pos))
-    {
-      pos = ParametrizedComponent::getPos();
-      m_map.setCachedLocation(m_base,pos);
-    }
+    pos = ParametrizedComponent::getPos();
+    m_map.setCachedLocation(m_base,pos);
   }
-
   return pos;
 }
 
@@ -160,17 +153,11 @@ V3D ParCompAssembly::getPos() const
 const Quat ParCompAssembly::getRotation() const
 {
   Quat rot;
-
-  // Call to setCachedRotation is a write so not thread-safe
-  PARALLEL_CRITICAL(rotationCache)
+  if (!m_map.getCachedRotation(m_base,rot))
   {
-    if (!m_map.getCachedRotation(m_base,rot))
-    {
-      rot = ParametrizedComponent::getRotation();
-      m_map.setCachedRotation(m_base,rot);
-    }
+    rot = ParametrizedComponent::getRotation();
+    m_map.setCachedRotation(m_base,rot);
   }
-
   return rot;
 }
 

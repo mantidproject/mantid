@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
 {
@@ -200,7 +201,11 @@ void ParameterMap::reportError(const std::string& str)
 /// @param location The location 
 void ParameterMap::setCachedLocation(const IComponent* comp, V3D& location) const
 {
-  m_cacheLocMap.setCache(comp->getComponentID(),location);
+  // Call to setCachedLocation is a write so not thread-safe
+  PARALLEL_CRITICAL(positionCache)
+  {
+    m_cacheLocMap.setCache(comp->getComponentID(),location);
+  }
 }
 
 ///Attempts to retreive a location from the location cache
@@ -209,7 +214,14 @@ void ParameterMap::setCachedLocation(const IComponent* comp, V3D& location) cons
 /// @returns true if the location is in the map, otherwise false
 bool ParameterMap::getCachedLocation(const IComponent* comp, V3D& location) const
 {
-  return m_cacheLocMap.getCache(comp->getComponentID(),location);
+  bool result;
+  // Call to getCachedLocation is a needs to be marked as the same critical region as a 
+  // write to the cache
+  PARALLEL_CRITICAL(positionCache)
+  {
+    result = m_cacheLocMap.getCache(comp->getComponentID(),location);
+  }
+  return result;
 }
 
 ///Sets a cached rotation on the rotation cache
@@ -217,7 +229,11 @@ bool ParameterMap::getCachedLocation(const IComponent* comp, V3D& location) cons
 /// @param rotation The rotation as a quaternion 
 void ParameterMap::setCachedRotation(const IComponent* comp, Quat& rotation) const
 {
-  m_cacheRotMap.setCache(comp->getComponentID(),rotation);
+  // Call to setCachedRotation is a write so not thread-safe
+  PARALLEL_CRITICAL(rotationCache)
+  {
+    m_cacheRotMap.setCache(comp->getComponentID(),rotation);
+  }
 }
 
 ///Attempts to retreive a rotation from the rotation cache
@@ -226,7 +242,14 @@ void ParameterMap::setCachedRotation(const IComponent* comp, Quat& rotation) con
 /// @returns true if the rotation is in the map, otherwise false
 bool ParameterMap::getCachedRotation(const IComponent* comp, Quat& rotation) const
 {
-  return m_cacheRotMap.getCache(comp->getComponentID(),rotation);
+  bool result;
+  // Call to getCachedRotation is a needs to be marked as the same critical region as a 
+  // write to the cache
+  PARALLEL_CRITICAL(rotationCache)
+  {
+    result = m_cacheRotMap.getCache(comp->getComponentID(),rotation);
+  }
+  return result;
 }
 
 
