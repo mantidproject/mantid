@@ -144,7 +144,7 @@ def getArchiveDir(project):
 #      os.mkdir(baseDir + logDir)
 #    except WindowsError:
 #      pass
-    baseDir = '../../../'
+    baseDir = '../../../../'
   else:
     baseDir = '/isis/www/mantidproject_download/'
     sp.call("ssh mantidlog@" + machine + " \"mkdir -p " + baseDir + logDir + "\"",shell=True)
