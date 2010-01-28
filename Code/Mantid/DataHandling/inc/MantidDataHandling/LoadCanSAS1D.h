@@ -7,12 +7,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 //----------------------------------------------------------------------
-namespace Poco{
-	namespace XML{
-			class Element;
-		
-	}
+
+namespace Poco {
+  namespace XML {
+    class Element;
+  }
 }
+
 namespace Mantid
 {
   namespace DataHandling
@@ -21,7 +22,7 @@ namespace Mantid
 
     This algorithm loads 1 CanSAS1d xml file into a workspace.
 
-	Required properties:
+    Required properties:
     <UL>
     <LI> OutputWorkspace - The name of workspace to be created.</LI>
     <LI> Filename - Name of the file to load</LI>
@@ -50,14 +51,14 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-	  class DLLExport LoadCanSAS1D : public API::Algorithm
-	  {
-	  public:
-		  ///default constructor
-		  LoadCanSAS1D();
-		  /// destructor
-		  ~LoadCanSAS1D();
-		  	   /// Algorithm's name for identification overriding a virtual method
+    class DLLExport LoadCanSAS1D : public API::Algorithm
+    {
+    public:
+      ///default constructor
+      LoadCanSAS1D();
+      /// destructor
+      ~LoadCanSAS1D();
+      /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadCanSAS1D"; }
       /// Algorithm's version for identification overriding a virtual method
       virtual const int version() const { return 1; }
@@ -70,14 +71,15 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-	  /// This method throws not found error if a element is not found in the xml file
-	  void throwException(Poco::XML::Element* elem,const std::string & name,const std::string& fileName);
-	  /// Run LoadInstrument sub algorithm
-	  void runLoadInstrument(const std::string & inst_name,DataObjects::Workspace2D_sptr localWorkspace);
+      /// This method throws not found error if a element is not found in the xml file
+      void throwException(Poco::XML::Element* elem,const std::string & name,const std::string& fileName);
+      /// Run LoadInstrument sub algorithm
+      void runLoadInstrument(const std::string & inst_name,DataObjects::Workspace2D_sptr localWorkspace);
 
 
-	  };
+    };
+    
   }
-
 }
+
 #endif

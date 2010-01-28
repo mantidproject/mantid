@@ -19,7 +19,7 @@ public:
 		LoadRaw3 loader;
 		if ( !loader.isInitialized() ) loader.initialize();
 		std::string inputFile; // Path to test input file assumes Test directory checked out from SVN
-		inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/LOQ48127.RAW").toString();
+		inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/LOQ48127.raw").toString();
 
 		std::string rawoutws="outWS";
 		loader.setPropertyValue("Filename", inputFile);
