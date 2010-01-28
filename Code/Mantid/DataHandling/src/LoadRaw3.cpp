@@ -350,9 +350,13 @@ void LoadRaw3::exec()
       }
     }
 
-    // check if values stored in logfiles should be used to define parameters of the instrument
-    populateInstrumentParameters(localWorkspace);
-    if (monitorWorkspace)populateInstrumentParameters(monitorWorkspace);
+    // populate instrument parameters
+
+    g_log.debug("Populating the instrument parameters...");
+    progress(m_prog, "Populating the instrument parameters...");
+    localWorkspace->populateInstrumentParameters();
+    if (monitorWorkspace)
+      monitorWorkspace->populateInstrumentParameters();
 
     // Assign the result to the output workspace property
 
@@ -827,7 +831,7 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
     localWorkspace->getAxis(1)->spectraNo(i) = i + 1;
   }
   m_prog = 0.9;
-  populateInstrumentParameters(localWorkspace);
+  localWorkspace->populateInstrumentParameters();
   separateOrexcludeMonitors(localWorkspace, bincludeMonitors, bexcludeMonitors, bseparateMonitors);
   m_prog = 1.0;
   progress(m_prog);
@@ -916,7 +920,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
         runLoadInstrument(monitorWorkspace);
         runLoadMappingTable(monitorWorkspace);
         localWorkspace->setSample(localWorkspace->sample());
-        populateInstrumentParameters(monitorWorkspace);
+        monitorWorkspace->populateInstrumentParameters();
       }
     }
   }
@@ -1108,87 +1112,6 @@ void LoadRaw3::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int peri
   if(plog) m_perioids=plog->getPeriodsProperty();
 }
 
-/** Add parameters to the instrument parameter map that are defined in instrument
- *  definition file and for which logfile data are available
- *
- *  @param localWorkspace A pointer to a workspace
- */
-void LoadRaw3::populateInstrumentParameters(DataObjects::Workspace2D_sptr localWorkspace)
-{
-  g_log.debug("Populating the instrument parameters...");
-  progress(m_prog, "Populating the instrument parameters...");
-  // Get instrument and sample
-  boost::shared_ptr<Instrument> instrument;
-  boost::shared_ptr<Sample> sample;
-  instrument = localWorkspace->getBaseInstrument();
-
-  // Get the data in the logfiles associated with the raw data
-  const std::vector<Kernel::Property*>& logfileProp =localWorkspace->sample().getLogData(); //sample->getLogData();
-
-  // Get pointer to parameter map that we may add parameters to and information about
-  // the parameters that my be specified in the instrument definition file (IDF)
-  Geometry::ParameterMap& paramMap = localWorkspace->instrumentParameters();
-  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >& paramInfoFromIDF =
-      instrument->getLogfileCache();
-
-  // iterator to browse throw the multimap: paramInfoFromIDF
-  std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::const_iterator it;
-  std::pair<std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator,
-      std::multimap<std::string, boost::shared_ptr<DataHandling::XMLlogfile> >::iterator> ret;
-
-  // loop over all logfiles and see if any of these are associated with parameters in the
-  // IDF
-  unsigned int N = logfileProp.size();
-  for (unsigned int i = 0; i < N; i++)
-  {
-    // Remove the path, the run number and extension from logfile filename
-
-    std::string logFilename = logfileProp[i]->name();
-    std::string filenamePart = Poco::Path(logFilename).getFileName(); // get filename part only
-    if (filenamePart.size() > 4 && filenamePart.rfind('.') == filenamePart.size() - 4)
-    {
-      filenamePart = filenamePart.erase(filenamePart.size() - 4, filenamePart.size()); // remove extension
-      filenamePart = filenamePart.substr(9); // remove front run number part
-    }
-
-    // See if filenamePart matches any logfile-IDs in IDF. If this add parameter to parameter map
-    ret = paramInfoFromIDF.equal_range(filenamePart);
-    for (it = ret.first; it != ret.second; ++it)
-    {
-      double value = ((*it).second)->createParamValue(
-          static_cast<Kernel::TimeSeriesProperty<double>*> (logfileProp[i]));
-
-      // special case if parameter name is "x", "y" or "z" and "rot"
-
-      std::string paramN = ((*it).second)->m_paramName;
-      if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-        paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-      else if (paramN.compare("rot") == 0)
-        paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-      else
-        paramMap.addDouble(((*it).second)->m_component, paramN, value);
-    }
-  } // finished looping over logfiles
-
-
-  // Check if parameters have been specified using the 'value' attribute rather than the 'logfile-id' attribute
-  // All such parameters have been stored using the key = "".
-  ret = paramInfoFromIDF.equal_range("");
-  TimeSeriesProperty<double>* dummy = NULL;
-  for (it = ret.first; it != ret.second; ++it)
-  {
-    double value = ((*it).second)->createParamValue(dummy);
-
-    // special case if parameter name is "x", "y" or "z" and "rot"
-    std::string paramN = ((*it).second)->m_paramName;
-    if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
-      paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
-    else if (paramN.compare("rot") == 0)
-      paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
-    else
-      paramMap.addDouble(((*it).second)->m_component, paramN, value);
-  }
-}
 
 } // namespace DataHandling
 } // namespace Mantid

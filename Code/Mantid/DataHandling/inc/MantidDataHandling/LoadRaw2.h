@@ -89,7 +89,6 @@ namespace Mantid
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr,int period=1);
-      void populateInstrumentParameters(DataObjects::Workspace2D_sptr);
 	   /// creates time series property showing times when when a particular period was active.
 	  Kernel::Property* createPeriodLog(int period)const;
 

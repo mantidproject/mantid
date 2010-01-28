@@ -431,7 +431,7 @@ void MatrixWorkspace::populateInstrumentParameters()
         {
             double value = ((*it).second)->createParamValue(static_cast<Kernel::TimeSeriesProperty<double>*>(logfileProp[i]));
 
-            // special case if parameter name is "x", "y" or "z" and "rot"
+            // special cases of parameter names
 
             std::string paramN = ((*it).second)->m_paramName;
             if ( paramN.compare("x")==0 || paramN.compare("y")==0 || paramN.compare("z")==0 )
@@ -443,6 +443,25 @@ void MatrixWorkspace::populateInstrumentParameters()
             else
                 paramMap.addDouble(((*it).second)->m_component, paramN, value);
         }
+    }
+
+    // Check if parameters have been specified using the 'value' attribute rather than the 'logfile-id' attribute
+    // All such parameters have been stored using the key = "".
+    ret = paramInfoFromIDF.equal_range("");
+    Kernel::TimeSeriesProperty<double>* dummy = NULL;
+    for (it = ret.first; it != ret.second; ++it)
+    {
+      double value = ((*it).second)->createParamValue(dummy);
+
+      // special cases of parameter names
+
+      std::string paramN = ((*it).second)->m_paramName;
+      if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)
+        paramMap.addPositionCoordinate(((*it).second)->m_component, paramN, value);
+      else if ( paramN.compare("rot")==0 || paramN.compare("rotx")==0 || paramN.compare("roty")==0 || paramN.compare("rotz")==0 )        
+        paramMap.addRotationParam(((*it).second)->m_component, paramN, value);
+      else
+        paramMap.addDouble(((*it).second)->m_component, paramN, value);
     }
 }
 

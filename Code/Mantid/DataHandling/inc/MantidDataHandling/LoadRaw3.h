@@ -91,7 +91,6 @@ namespace Mantid
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr,int period=1);
-      void populateInstrumentParameters(DataObjects::Workspace2D_sptr);
 
       void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<int>& monitorSpecList);
 
