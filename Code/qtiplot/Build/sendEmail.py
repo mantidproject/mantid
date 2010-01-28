@@ -53,7 +53,7 @@ open(last,'w').write(str(buildSuccess))
 
 # We want to skip sending email if this AND previous build succeeded
 if buildSuccess and lastBuild=='True':
-     exit(0)
+     sys.exit(0)
 
 #Construct Message
 httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
