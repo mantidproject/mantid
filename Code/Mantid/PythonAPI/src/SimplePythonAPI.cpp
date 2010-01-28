@@ -353,7 +353,7 @@ namespace Mantid
       if( async )
       {
 	writeAsyncFunctionCall(os, algm, "\t");
-	os << "\tif result != '':\n"
+	os << "\tif result == False:\n"
 	   << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
       }
       else
@@ -413,7 +413,7 @@ namespace Mantid
       
       os << "\telse:\n"
 	 << "\t\tsys.exit('Information: Script execution cancelled')\n"
-	 << "\tif result != '':\n"
+	 << "\tif result == False:\n"
 	 << "\t\tsys.exit('An error occurred while running " << algm << ". See results log for details.')\n"
  	 << "\treturn mtd._createAlgProxy(algm)\n\n";
     }
