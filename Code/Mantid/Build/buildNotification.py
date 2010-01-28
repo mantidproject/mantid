@@ -5,6 +5,7 @@ import sys
 import platform
 from time import strftime
 import subprocess as sp
+import shutil
 
 def buildURL(messageDictionary):
   url= "http://ndlt343/build.psp?"
@@ -156,7 +157,7 @@ def getArchiveDir(project):
 def moveToArchive(logfile, archiveDir):
   if os.name == 'nt':
     # Standard move works for network drives as well
-    move(logfile,archiveDir)
+    shutil.move(logfile,archiveDir)
   else:
     # Need to scp logs to destination
     if not archiveDir.endswith('/'):
