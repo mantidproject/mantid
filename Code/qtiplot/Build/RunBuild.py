@@ -14,7 +14,7 @@ else:
 if platform.system() == 'Linux':
     qmake = "qmake-qt4 QMAKE_CXX=g++44 QMAKE_CC=gcc44"
     buildargs.append("-j2")
-elif platform.system() = 'Darwin':
+elif platform.system() == 'Darwin':
     # Have to set QMAKESPEC for mac to avoid xcode build
     os.putenv('QMAKESPEC','/usr/local/Qt4.5/mkspecs/macx-g++')
     qmake = "qmake"
