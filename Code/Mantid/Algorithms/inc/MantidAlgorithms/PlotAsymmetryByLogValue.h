@@ -11,6 +11,10 @@ namespace Mantid
 //----------------------------------------------------------------------
 // Forward declarations
 //----------------------------------------------------------------------
+  namespace API
+  {
+    class MatrixWorkspace;
+  }
   namespace DataObjects
   {
       class Workspace2D;

@@ -216,7 +216,6 @@ namespace Mantid
         {
           local_workspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (WorkspaceFactory::Instance().create(local_workspace));
-          loadLogs(local_workspace, entry ,p);	
           std::ostringstream os;
           os << p;
           m_progress->report("Loading period " + os.str());

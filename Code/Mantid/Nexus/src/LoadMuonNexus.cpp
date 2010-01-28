@@ -181,6 +181,8 @@ namespace Mantid
           // Only run the sub-algorithms once
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
+          runLoadLog(localWorkspace );
+          localWorkspace->populateInstrumentParameters();
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -200,9 +202,6 @@ namespace Mantid
           declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(outws,WSName,Direction::Output));
           if(wsGrpSptr)wsGrpSptr->add(WSName);
         }
-
-        runLoadLog(localWorkspace );
-        localWorkspace->populateInstrumentParameters();
 
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)

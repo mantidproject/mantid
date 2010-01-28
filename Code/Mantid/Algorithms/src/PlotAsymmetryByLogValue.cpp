@@ -139,7 +139,7 @@ namespace Mantid
           ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
           TimeSeriesProperty<double>* logp = 
             //dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
-			dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+			      dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
           double Y,E; 
           calcIntAsymmetry(ws_red,Y,E);
           outWS->dataY(0)[i-is] = Y;
@@ -162,7 +162,7 @@ namespace Mantid
               //AnalysisDataService::Instance().add(wsName,ws);
               TimeSeriesProperty<double>* logp = 
                 //dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
-				dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
               outWS->dataY(0)[i-is] = Y;
@@ -189,7 +189,7 @@ namespace Mantid
               throw std::invalid_argument("Red or green period is out of range");
             TimeSeriesProperty<double>* logp = 
               //dynamic_cast<TimeSeriesProperty<double>*>(ws_red->getSample()->getLogData(logName));
-			  dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
+			        dynamic_cast<TimeSeriesProperty<double>*>(ws_red->sample().getLogData(logName));
             double Y,E; 
             calcIntAsymmetry(ws_red,ws_green,Y,E);
             outWS->dataY(0)[i-is] = Y;
@@ -259,7 +259,7 @@ namespace Mantid
         DataObjects::Workspace2D_sptr asymWS = asym->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr integr = createSubAlgorithm("Integration");
-        integr->setProperty("InputWorkspace",asymWS);
+        integr->setProperty("InputWorkspace",boost::dynamic_pointer_cast<API::MatrixWorkspace>(asymWS));
         integr->setPropertyValue("OutputWorkspace","tmp");
         if (setX)
         {
@@ -267,7 +267,7 @@ namespace Mantid
           integr->setProperty("RangeUpper",endX);
         }
         integr->execute();
-        DataObjects::Workspace2D_sptr out = integr->getProperty("OutputWorkspace");
+        API::MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
 
         Y = out->readY(0)[0];
         E = out->readE(0)[0];
@@ -336,7 +336,7 @@ namespace Mantid
       if (!m_int)
       {   //  "Differential asymmetry"
 
-        DataObjects::Workspace2D_sptr tmpWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::MatrixWorkspace_sptr tmpWS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
           API::WorkspaceFactory::Instance().create(ws_red,1,ws_red->readX(0).size(),ws_red->readY(0).size())
           );
 
