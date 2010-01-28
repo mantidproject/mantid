@@ -24,7 +24,7 @@ namespace Mantid
 
     This algorithm saves  workspace into CanSAS1d format.
 	The structure of CanSAS1d xml is
-	
+	@verbatim
 <SASroot version="1.0" xmlns="" xmlns:xsi="" xsi:schemaLocation="">
 	<SASentry>
 		<Title></Title>
@@ -54,7 +54,7 @@ namespace Mantid
 		<SASnote></SASnote>
 	</SASentry>
 </SASroot>
-
+  @endverbatim
  Required properties:
     <UL>
     <LI> InputWorkspace - The name workspace to save.</LI>
@@ -129,7 +129,7 @@ namespace Mantid
 	   ///Overloaded method. This method throws NullPointerException when Text node creation fails
 	  void throwException(Poco::XML::Text* text,const std::string & place,const std::string & objectName);
 	 
-	  API::MatrixWorkspace_const_sptr m_workspace;
+	  API::MatrixWorkspace_const_sptr m_workspace;///<workspace
 	  Poco::XML::Document* mDoc;         ///< The XML document    
 	  Poco::XML::Element*  mRoot;	     ///< The root XML element
 

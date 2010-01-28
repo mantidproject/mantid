@@ -88,7 +88,6 @@ namespace Mantid
 		}
 		
 		/** This method creates an XML element named "SASroot"
-		*  @param parent  parentelement 
 		*  @return  Poco::XML::Element*  returns the element created
 		*/
 		Poco::XML::Element* SaveCanSAS1D::createSASRootElement()
@@ -346,7 +345,7 @@ namespace Mantid
 		  * @param place  string which tells where the exception thrown
 		  * @param objectName  element name
 		 */
-		void SaveCanSAS1D::throwException(Text* text,const std::string & place,const std::string & objectName)
+		void SaveCanSAS1D::throwException(Poco::XML::Text* text,const std::string & place,const std::string & objectName)
 		{
 			if(!text)
 			{

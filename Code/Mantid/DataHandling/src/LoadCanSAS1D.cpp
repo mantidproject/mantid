@@ -6,7 +6,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
-
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "Poco/Path.h"
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"
@@ -44,7 +46,7 @@ namespace Mantid
 			exts.push_back("xml");
 			declareProperty(new Kernel::FileProperty("Filename","", Kernel::FileProperty::Load,exts),
 				"The name of the input  xml file to load");
-			declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Kernel::Direction::Output),
+			declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace","",Kernel::Direction::Output),
 				"The name of the Output workspace");
 
 		}
@@ -78,18 +80,20 @@ namespace Mantid
 			Element* sasDataElem = sasEntryElem->getChildElement("SASdata");
 			throwException(sasDataElem,"SASdata",fileName);
 			// getting number of Idata elements in the xml file
-			NodeList* idataElemList= sasDataElem->childNodes();
+			NodeList* idataElemList=sasDataElem->getElementsByTagName("Idata");
 			unsigned long idataCount=idataElemList->length();
 			//no.of bins
-			int nBins=idataCount/2;
+			int nBins=idataCount;
 			const int numSpectra=1;
 			// Create the output workspace
-			API::MatrixWorkspace_sptr ws =
-				(API::WorkspaceFactory::Instance().create("Workspace2D",numSpectra,nBins,nBins));
+			DataObjects::Workspace2D_sptr ws =
+				boost::dynamic_pointer_cast<DataObjects::Workspace2D>(API::WorkspaceFactory::Instance().create(
+				"Workspace2D", numSpectra, nBins, nBins));
 			ws->setTitle(wsTitle);
-			ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-			ws->setYUnit("Counts");
-			setProperty("OutputWorkspace",ws);
+			ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+			ws->setYUnit("");
+			API::Workspace_sptr workspace = boost::static_pointer_cast<API::Workspace>(ws);
+			setProperty("OutputWorkspace",workspace);
 
 			//load workspace data
 			MantidVec& X = ws->dataX(0);
@@ -135,19 +139,72 @@ namespace Mantid
 			}
 			idataElemList->release();
 
+			Element * instrElem=sasEntryElem->getChildElement("SASinstrument");
+			throwException(instrElem,"SASinstrument",fileName);
+			std::string instname;
+			Element*nameElem=instrElem->getChildElement("name");
+			throwException(nameElem,"name",fileName);
+			instname=nameElem->innerText();
+			// run load instrument
+			runLoadInstrument(instname, ws);
+
 		}
 
-		 /* This method throws not found error if a element is not found in the xml file
-		  * @param elem pointer to  element
-		  * @param name  element name
-		  * @param fileName xml file name
-		 */
-		void LoadCanSAS1D::throwException(Element* elem,const std::string & name,const std::string& fileName)
+		/** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+		* @param inst_name The name written in the Nexus file
+		* @param localWorkspace The workspace to insert the instrument into
+		*/
+		void LoadCanSAS1D::runLoadInstrument(const std::string & inst_name, 
+			DataObjects::Workspace2D_sptr localWorkspace)
+		{
+			// Determine the search directory for XML instrument definition files (IDFs)
+			std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+			if (directoryName.empty())
+			{
+				// This is the assumed deployment directory for IDFs, where we need to be relative to the
+				// directory of the executable, not the current working directory.
+				directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve(
+					"../Instrument").toString();
+			}
+
+			// For Nexus Mantid processed, Instrument XML file name is read from nexus 
+			std::string instrumentID = inst_name;
+			// force ID to upper case
+			std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
+			std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
+
+			API::IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+
+			// Now execute the sub-algorithm. Catch and log any error, but don't stop.
+			try
+			{
+				loadInst->setPropertyValue("Filename", fullPathIDF);
+				loadInst->setProperty<API::MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+				loadInst->execute();
+			}
+			catch( std::invalid_argument&)
+			{
+				g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+			}
+			catch (std::runtime_error&)
+			{
+				g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+			}
+
+		}
+
+		/* This method throws not found error if a element is not found in the xml file
+		* @param elem pointer to  element
+		* @param name  element name
+		* @param fileName xml file name
+		*/
+		void LoadCanSAS1D::throwException(Poco::XML::Element* elem,const std::string & name,const std::string& fileName)
 		{
 			if(!elem)
 			{
 				throw Kernel::Exception::NotFoundError(name+" element not found in CanSAS1D XML file", fileName);
 			}
 		}
+
 	}
 }
