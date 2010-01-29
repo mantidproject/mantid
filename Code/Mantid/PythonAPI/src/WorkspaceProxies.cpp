@@ -11,13 +11,7 @@ using namespace Mantid::PythonAPI;
 // WorkspaceAlgebraProxy
 //
 //****************************************
-/** @fn wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op, bool inplace)
- * Perform the given binary operation on two workspaces
- * @param lhs The left-hand side of the operation
- * @param rhs The right-hand side of the operation
- * @param op One of 'p', 'm', 't', 'd' to denote the required operation
- * @param inplace If true, then the lhs argument is replaced by the result of the operation.
- */
+// Binary operation for two workspaces
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op, bool inplace)
 {
   wraptype_ptr result;
@@ -63,13 +57,7 @@ WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const
 }
 
 
-/** @fn wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace)
- * Perform the given binary operation on a workspace and a double
- * @param lhs The left-hand side of the operation
- * @param rhs The right-hand side of the operation
- * @param op One of 'p', 'm', 't', 'd' to denote the required operation
- * @param inplace If true, then the lhs argument is replaced by the result of the operation.
- */
+// Binary operation for workspace and double
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace)
 {
   wraptype_ptr result;
@@ -117,13 +105,7 @@ WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(const
   return result;
 }
 
-/** @fn wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(double lhs, const wraptype_ptr rhs, char op)
- * Perform the given binary operation on a double and a workspace
- * @param lhs The left-hand side of the operation
- * @param rhs The right-hand side of the operation
- * @param op One of 'p', 'm', 't', 'd' to denote the required operation
- * @param inplace If true, then the lhs argument is replaced by the result of the operation.
- */
+/// Binary operation on double and workspace
 WorkspaceAlgebraProxy::wraptype_ptr WorkspaceAlgebraProxy::performBinaryOp(double lhs, const wraptype_ptr rhs, char op)
 {
   wraptype_ptr result;

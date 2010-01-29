@@ -102,7 +102,7 @@ namespace PythonAPI
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload3)(const std::string&, const std::string&);
   typedef Mantid::API::IAlgorithm*(FrameworkManagerProxy::*createAlg_overload4)(const std::string&, const std::string&, const int&);
 
-
+  //@endcond
 }
 }
 

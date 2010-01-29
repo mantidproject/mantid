@@ -72,7 +72,13 @@ namespace PythonAPI
     typedef API::MatrixWorkspace wraptype;
     typedef boost::shared_ptr<wraptype> wraptype_ptr;
     
-    //Binary operation for 2 workspaces
+    /** 
+     * Perform the given binary operation on two workspaces
+     * @param lhs The left-hand side of the operation
+     * @param rhs The right-hand side of the operation
+     * @param op One of 'p', 'm', 't', 'd' to denote the required operation
+     * @param inplace If true, then the lhs argument is replaced by the result of the operation.
+     */
     static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, const wraptype_ptr rhs, char op, bool inplace);
 
     //Plus workspace
@@ -116,9 +122,22 @@ namespace PythonAPI
       return performBinaryOp(lhs, rhs, 'd', true);
     }
 
-    /// Binary operation for a workspace and a double
+    /** 
+    * Perform the given binary operation on a workspace and a double
+    * @param lhs The left-hand side of the operation
+    * @param rhs The right-hand side of the operation
+    * @param op One of 'p', 'm', 't', 'd' to denote the required operation
+    * @param inplace If true, then the lhs argument is replaced by the result of the operation.
+    */
     static wraptype_ptr performBinaryOp(const wraptype_ptr lhs, double rhs, char op, bool inplace);
-    /// Binary operation for a double and a workspace
+
+    /** 
+    * Perform the given binary operation on a double and a workspace
+    * @param lhs The left-hand side of the operation
+    * @param rhs The right-hand side of the operation
+    * @param op One of 'p', 'm', 't', 'd' to denote the required operation
+    * @param inplace If true, then the lhs argument is replaced by the result of the operation.
+    */ 
     static wraptype_ptr performBinaryOp(double lhs, const wraptype_ptr rhs, char op);
     /// Plus
     static wraptype_ptr plus(const wraptype_ptr lhs, double rhs)

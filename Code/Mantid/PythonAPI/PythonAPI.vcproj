@@ -198,6 +198,10 @@
 				RelativePath=".\src\SimplePythonAPI.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\src\WorkspaceProxies.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -226,6 +230,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidPythonAPI\stl_proxies.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidPythonAPI\WorkspaceProxies.h"
 				>
 			</File>
 		</Filter>
