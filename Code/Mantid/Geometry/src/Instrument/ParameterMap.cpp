@@ -35,8 +35,7 @@ Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name)
     pmap_it it_found = m_map.find(id);
     if (it_found == m_map.end()) 
     {
-        //g_log.error("Component "+comp+" does not have any parameters.");
-        return Parameter_sptr();// ?
+        return Parameter_sptr();
     }
 
     pmap_it it_begin = m_map.lower_bound(id);
@@ -46,11 +45,29 @@ Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name)
 
     if ( param == it_end )
     {
-        //g_log.error("Component "+comp+" does not have parameter "+name+".");
-        return Parameter_sptr();// ?
+        return Parameter_sptr();
     }
         
     return param->second;
+}
+
+Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, const std::string& type)const
+{
+  Parameter_sptr retVal;
+
+  boost::shared_ptr<const IComponent> compInFocus(comp, NoDeleting());
+
+  while ( compInFocus != NULL )
+  {
+    retVal = get(&(*compInFocus), name);
+
+    if (retVal != Parameter_sptr())
+      return retVal;
+
+    compInFocus = compInFocus->getParent();
+  }
+
+  return Parameter_sptr();
 }
 
 std::string ParameterMap::getString(const IComponent* comp,const std::string& name)

@@ -26,11 +26,6 @@ class LoadEmptyInstrumentTest : public CxxTest::TestSuite
 {
 public:
 
-  LoadEmptyInstrumentTest()
-  {
-  }
-
-
   void testExecSLS()
   {
     LoadEmptyInstrument loaderSLS;
@@ -60,6 +55,52 @@ public:
     // Check the total number of elements in the map for SLS
     TS_ASSERT_EQUALS(output->spectraMap().nElements(),683);
   }
+
+
+  void testParameterTags()
+  {
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDF_for_unit_testing2.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws->populateInstrumentParameters();
+
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+
+    // check that parameter have been read into the instrument parameter map
+    std::vector<V3D> ret1 = paramMap.getV3D("monitors", "pos");
+    TS_ASSERT_DELTA( ret1[0].X(), 5.0, 0.0001);
+    TS_ASSERT_DELTA( ret1[0].Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ret1[0].Z(), 0.0, 0.0001);
+
+    // get detector corresponding to workspace index 0
+    IDetector_sptr det = ws->getDetector(0);  
+
+    TS_ASSERT_EQUALS( det->getID(), 1001);
+    TS_ASSERT_EQUALS( det->getName(), "upstream_monitor_det");
+
+    Parameter_sptr param = paramMap.get(&(*det), "boevs2");
+    TS_ASSERT_DELTA( param->value<double>(), 16.0, 0.0001);
+
+    param = paramMap.get(&(*det), "boevs");
+    TS_ASSERT( param == NULL );
+
+    param = paramMap.getRecursive(&(*det), "boevs", "spade");
+    TS_ASSERT_DELTA( param->value<double>(), 8.0, 0.0001);
+  }
+
 
 
 private:
