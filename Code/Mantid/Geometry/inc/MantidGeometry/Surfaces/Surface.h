@@ -81,7 +81,7 @@ class DLLExport Surface
   virtual int side(const V3D&) const;
 
   /// is point valid on surface 
-  virtual int onSurface(const V3D&) const =0;
+  virtual int onSurface(const V3D& R) const =0;
 
   /// returns the minimum distance to the surface
   virtual double distance(const V3D&) const =0; 

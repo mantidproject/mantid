@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Object.h"
 #include <vector>
 
 #include "Poco/DOM/DOMParser.h"

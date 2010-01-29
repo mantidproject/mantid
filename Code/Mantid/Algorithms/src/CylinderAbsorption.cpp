@@ -7,6 +7,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Fast_Exponential.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
+
 
 namespace Mantid
 {
@@ -22,9 +24,9 @@ using namespace API;
 
 CylinderAbsorption::CylinderAbsorption() :
   API::Algorithm(),                                      //the base class constructor
-  m_cylinderSample(), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),
-  m_L1s(), m_elementVolumes(), n_lambda(unSetInt), x_step(0),      //n_lambda i slinked to the NumberOfWavelengthPoints, unSetInt is a flag to say that values weren't passed for NumberOfWavelengthPoints/n_lambda
-	m_numSlices(0),m_sliceThickness(0),m_numAnnuli(0),m_deltaR(0),m_numVolumeElements(0),exp_options()
+  m_sampleObject(NULL), m_cylHeight(0.0), m_cylRadius(0.0), m_refAtten(0.0), m_scattering(0),
+  m_L1s(), m_elementVolumes(), n_lambda(unSetInt), x_step(0),      //n_lambda is linked to the NumberOfWavelengthPoints, unSetInt is a flag to say that values weren't passed for NumberOfWavelengthPoints/n_lambda
+  m_numSlices(0),m_sliceThickness(0),m_numAnnuli(0),m_deltaR(0),m_numVolumeElements(0),exp_options()
 {
 }
 
@@ -76,12 +78,14 @@ void CylinderAbsorption::exec()
   // Get the input parameters
   retrieveProperties();
   const double cylinder_volume = m_cylHeight * M_PI * m_cylRadius * m_cylRadius;
-  constructCylinderSample();
 
   // Create the output workspace
   MatrixWorkspace_sptr correctionFactors = WorkspaceFactory::Instance().create(inputWS);
+  correctionFactors->isDistribution(true); // The output of this is a distribution
   correctionFactors->setYUnit(""); // Need to explicitly set YUnit to nothing
   correctionFactors->setYUnitLabel("Attenuation factor");
+
+  constructCylinderSample(correctionFactors->mutableSample());
 
   const int numHists = inputWS->getNumberHistograms();
   const int specSize = inputWS->blocksize();
@@ -102,10 +106,6 @@ void CylinderAbsorption::exec()
 
   //calculate the cached values of L1 and element volumes
   initialiseCachedDistances();
-
-  int iprogress_step = numHists / 100;
-  if (iprogress_step == 0)
-    iprogress_step = 1;
 
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
@@ -161,9 +161,10 @@ void CylinderAbsorption::exec()
   g_log.information() << "Total number of elements in the integration was " << m_L1s.size() << std::endl;
   setProperty("OutputWorkspace", correctionFactors);
 
-  // Now do some cleaning-up since destructor is not called
+  // Now do some cleaning-up since destructor may not be called immediately
   m_L1s.clear();
   m_elementVolumes.clear();
+  m_elementPositions.clear();
   exp_options.clear();
 }
 
@@ -172,9 +173,12 @@ void CylinderAbsorption::retrieveProperties()
 {
   m_cylHeight = getProperty("CylinderSampleHeight"); // in cm
   m_cylRadius = getProperty("CylinderSampleRadius"); // in cm
+  m_cylHeight *= 0.01;  // now in m 
+  m_cylRadius *= 0.01;  // now in m
   const double sigma_atten = getProperty("AttenuationXSection"); // in barns
   const double sigma_s = getProperty("ScatteringXSection"); // in barns
-  const double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+  rho *= 100;  // Needed to get the units right
   m_refAtten = -sigma_atten * rho / 1.798;
   m_scattering = -sigma_s * rho;
   
@@ -200,41 +204,29 @@ void CylinderAbsorption::retrieveProperties()
 }
 
 /// Create the cylinder object using the Geometry classes
-void CylinderAbsorption::constructCylinderSample()
+void CylinderAbsorption::constructCylinderSample(API::Sample& sample)
 {
-  std::map<int, Surface*> surfaces;
-
-  const V3D normVec(0.0, 1.0, 0.0);
-
-  Cylinder* cyl = new Cylinder();
-  // For now, assume beam comes in along z axis, that y is up and that sample is at origin
-  cyl->setCentre(V3D(0.0, 0.0, 0.0));
-  cyl->setNorm(normVec);
-  cyl->setRadius(m_cylRadius);
-  surfaces[1] = cyl;
-
-  Plane* top = new Plane();
-  V3D pointInPlane = normVec * (m_cylHeight / 2.0);
-  top->setPlane(pointInPlane, normVec);
-  surfaces[2] = top;
-  Plane* bottom = new Plane();
-  pointInPlane[1] *= -1.0;
-  bottom->setPlane(pointInPlane, normVec);
-  surfaces[3] = bottom;
-
-  int success = m_cylinderSample.setObject(21, "-1 -2 3");
-  assert(success);
-  success = m_cylinderSample.populate(surfaces);
-  assert(!success);
-
-  assert(m_cylinderSample.isValid(V3D(0.0, 0.0, 0.0)));
-  assert(!m_cylinderSample.isValid(V3D(m_cylRadius + 0.001, 0.0, 0.0)));
-  assert(m_cylinderSample.isValid(V3D(m_cylRadius - 0.001, 0.0, 0.0)));
-  assert(!m_cylinderSample.isValid(V3D(0.0, m_cylHeight, 0.0)));
-  assert(!m_cylinderSample.isValid(V3D(0.0, -1.0 * m_cylHeight, 0.0)));
-  assert(m_cylinderSample.isOnSide(V3D(m_cylRadius, 0.0, 0.0)));
-  assert(m_cylinderSample.isOnSide(V3D(0.0, m_cylHeight / 2.0, 0.0)));
-  assert(m_cylinderSample.isOnSide(V3D(m_cylRadius, m_cylHeight / 2.0, 0.0)));
+  std::ostringstream xmlShapeStream;
+  xmlShapeStream 
+    << "<cylinder id=\"detector-shape\"> " 
+    << "<centre-of-bottom-base x=\"0.0\" y=\"" << -0.5*m_cylHeight << "\" z=\"0.0\" /> "
+    << "<axis x=\"0\" y=\"1\" z=\"0\" /> " 
+    << "<radius val=\"" << m_cylRadius << "\" /> "
+    << "<height val=\"" << m_cylHeight << "\" /> "
+    << "</cylinder>";
+  
+  boost::shared_ptr<Object> shape = ShapeFactory().createShape(xmlShapeStream.str());
+  sample.setShapeObject( shape );
+  m_sampleObject = shape.get();
+  
+  assert(m_sampleObject->isValid(V3D(0.0, 0.0, 0.0)));
+  assert(!m_sampleObject->isValid(V3D(m_cylRadius + 0.001, 0.0, 0.0)));
+  assert(m_sampleObject->isValid(V3D(m_cylRadius - 0.001, 0.0, 0.0)));
+  assert(!m_sampleObject->isValid(V3D(0.0, m_cylHeight, 0.0)));
+  assert(!m_sampleObject->isValid(V3D(0.0, -1.0 * m_cylHeight, 0.0)));
+  assert(m_sampleObject->isOnSide(V3D(m_cylRadius, 0.0, 0.0)));
+  assert(m_sampleObject->isOnSide(V3D(0.0, m_cylHeight / 2.0, 0.0)));
+  assert(m_sampleObject->isOnSide(V3D(m_cylRadius, m_cylHeight / 2.0, 0.0)));
 
   g_log.information("Successfully constructed the sample object");
 }
@@ -267,11 +259,11 @@ void CylinderAbsorption::initialiseCachedDistances()
         // Calculate the current position in the sample in Cartesian coordinates.
         // Remember that our cylinder has its axis along the y axis
         m_elementPositions[counter](R * sin(phi), z, R * cos(phi));
-        assert(m_cylinderSample.isValid(m_elementPositions[counter]));
+        assert(m_sampleObject->isValid(m_elementPositions[counter]));
         // Create track for distance in cylinder before scattering point
         // Remember beam along Z direction
         Track incoming(m_elementPositions[counter], V3D(0.0, 0.0, -1.0));
-        m_cylinderSample.interceptSurface(incoming);
+        m_sampleObject->interceptSurface(incoming);
         m_L1s[counter] = incoming.begin()->Dist;
 
         // Also calculate element volumes here
@@ -293,17 +285,19 @@ void CylinderAbsorption::calculateDistances(const Geometry::IDetector_const_sptr
 {
   // We need to make sure this is right for grouped detectors - should use average theta & phi
   V3D detectorPos;
-  // *** ASSUMES THAT SAMPLE AT ORIGIN AND BEAM ALONG Z ***
-  detectorPos.spherical(100.0*detector->getDistance(Component("dummy",V3D(0.0,0.0,0.0))),
-      detector->getTwoTheta(V3D(0.0,0.0,0.0),V3D(0.0,0.0,1.0))*180.0/M_PI,detector->getPhi()*180.0/M_PI);
-
+  
   for (int i = 0; i < m_numVolumeElements; ++i)
   {
+    // We need to make sure this is right for grouped detectors - should use average theta & phi
+    // *** ASSUMES THAT SAMPLE AT ORIGIN AND BEAM ALONG Z ***
+    V3D tester = m_elementPositions[i];
+    detectorPos.spherical(detector->getDistance(Component("dummy",m_elementPositions[i])),
+      detector->getTwoTheta(m_elementPositions[i],V3D(0.0,0.0,1.0))*180.0/M_PI,detector->getPhi()*180.0/M_PI);
     // Create track for distance in cylinder between scattering point and detector
     V3D direction = detectorPos - m_elementPositions[i];
     direction.normalize();
     Track outgoing(m_elementPositions[i], direction);
-    int temp = m_cylinderSample.interceptSurface(outgoing);
+    int temp = m_sampleObject->interceptSurface(outgoing);
 
     /* Most of the time, the number of hits is 1. Sometime, we have more than one intersection due to
      * arithmetic imprecision. If it is the case, then selecting the first intersection is valid.
@@ -341,7 +335,7 @@ double CylinderAbsorption::doIntegration(const double& lambda, const std::vector
     exponent = ((m_refAtten * lambda) + m_scattering) * (lTotal[i]);
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
   }
-
+  
   return integral;
 }
 

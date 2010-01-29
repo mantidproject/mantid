@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Objects/Object.h"
 #include <climits>
 
 namespace Mantid
@@ -46,7 +45,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 02/12/2008
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -87,14 +86,14 @@ private:
   void exec();
 
   void retrieveProperties();
-  void constructCylinderSample();
+  void constructCylinderSample(API::Sample& sample);
   void initialiseCachedDistances();
   void calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& lTotal) const;
   inline double doIntegration(const double& lambda,const std::vector<double>& lTotal) const;
   void interpolate(const MantidVec& x, MantidVec& y, bool is_histogram);
   
-  /// Sample object. Keeping separate from the full instrument geometry for now.
-  Geometry::Object m_cylinderSample;
+  /// Sample object.
+  const Geometry::Object* m_sampleObject;
   double m_cylHeight;   ///< The height of the cylindrical sample in cm
   double m_cylRadius;   ///< The radius of the cylindrical sample in cm
   double m_refAtten;    ///< The attenuation cross-section in barns at 1.8A

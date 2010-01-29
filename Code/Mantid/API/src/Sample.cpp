@@ -14,29 +14,32 @@ Sample::Sample() :
   m_height(0.0), m_width(0.0)
 {
 }
+
 /**  copy constructor 
   *  @param copy const reference to the sample object
 */
-  Sample::Sample(const Sample& copy):m_name(copy.m_name),m_protonCharge(copy.m_protonCharge),
-	  m_geom_id(copy.m_geom_id),m_thick(copy.m_thick),m_height(copy.m_height),m_width(copy.m_width),m_manager(copy.m_manager)
-  {  
-
-  }
+Sample::Sample(const Sample& copy) :
+  m_name(copy.m_name), m_manager(copy.m_manager), m_protonCharge(copy.m_protonCharge), 
+  m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height), m_width(copy.m_width)
+{
+}
+  
 /**  assignment operator 
   * @param rhs const reference to the sample object
 */
   const Sample& Sample::operator=(const Sample&rhs)
-  {
-	  if(this==&rhs)return *this;
-	  m_name=rhs.m_name;
-	  m_protonCharge=rhs.m_protonCharge;
-	  m_geom_id=rhs.m_geom_id;
-	  m_thick=rhs.m_thick;
-	  m_height=rhs.m_height;
-	  m_width=rhs.m_width;
-	 m_manager=rhs.m_manager;
-	  return *this;
-  }
+{
+  if (this == &rhs) return *this;
+  m_name = rhs.m_name;
+  m_protonCharge = rhs.m_protonCharge;
+  m_geom_id = rhs.m_geom_id;
+  m_thick = rhs.m_thick;
+  m_height = rhs.m_height;
+  m_width = rhs.m_width;
+  m_manager = rhs.m_manager;
+  return *this;
+}
+  
 /// Destructor
 Sample::~Sample()
 {
@@ -191,10 +194,14 @@ double Sample::getWidth() const
 {
   return m_width;
 }
+
+/**Deletes a log data item
+ * @param name The name of the item to delete
+ */
 void Sample::removeLogData(const std::string &name)
- {
-	 m_manager.removeProperty(name);
- }
+{
+  m_manager.removeProperty(name);
+}
 
 } // namespace API
 } // namespace Mantid

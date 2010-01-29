@@ -1,16 +1,16 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Objects/Object.h"
+#include "MantidGeometry/Surfaces/Quadratic.h"
+#include "MantidGeometry/Surfaces/Surface.h"
+#include "MantidGeometry/Surfaces/Sphere.h"
+#include "MantidGeometry/Surfaces/Plane.h"
+#include "MantidGeometry/Surfaces/Cylinder.h"
+#include "MantidGeometry/Surfaces/Cone.h"
+#include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
-#include "MantidKernel/PhysicalConstants.h"
-
-#include <fstream>
 
 #include "Poco/AutoPtr.h"
 #include "Poco/DOM/DOMParser.h"
@@ -29,14 +29,12 @@ using Poco::XML::NodeList;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeFilter;
 
-
 namespace Mantid
 {
 namespace Geometry
 {
 
 using namespace Kernel;
-using namespace Geometry;
 
 Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
 
@@ -44,13 +42,12 @@ Logger& ShapeFactory::g_log = Logger::get("ShapeFactory");
 ShapeFactory::ShapeFactory()
 {}
 
-
 /** Creates a geometric object directly from a XML shape string
  *
  *  @param shapeXML XML shape string
  *  @return A shared pointer to a geometric shape (defaults to an 'empty' shape if XML tags contain no geo. info.) 
  */
-boost::shared_ptr<Object> ShapeFactory::createShape(std::string &shapeXML)
+boost::shared_ptr<Object> ShapeFactory::createShape(std::string shapeXML)
 {
 	//wrap in a type tag
 	shapeXML = "<type name=\"userShape\"> " + shapeXML + " </type>";
@@ -924,6 +921,7 @@ V3D ShapeFactory::parsePosition(Poco::XML::Element* pElem)
   return retVal;
 }
 
+/// create a special geometry handler for the known finite primitives
 void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared_ptr<Object> Obj)
 {
 	if(pElem->tagName()=="cuboid"){
@@ -973,7 +971,5 @@ void ShapeFactory::createGeometryHandler(Poco::XML::Element* pElem,boost::shared
 
 }
 
-
-
-} // namespace DataHandling
+} // namespace Geometry
 } // namespace Mantid
