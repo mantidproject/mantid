@@ -59,11 +59,6 @@ namespace PythonAPI
       Py_DECREF(m_self);
     }
 
-//     /// Set an array in a workspace
-//     void setY(int index, boost::python::list data);
-//     void setE(int index, boost::python::list data);
-//     void setX(int index, boost::python::list data);
-
   private:
     /// Stored Python object
     PyObject *m_self;

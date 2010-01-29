@@ -57,7 +57,7 @@ public:
   }
 
 
-  void testParameterTags()
+  void xtestParameterTags()
   {
     LoadEmptyInstrument loader;
 
