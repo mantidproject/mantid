@@ -7,6 +7,7 @@
 #include "MantidQtCustomDialogs/MantidGLWidget.h"
 
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidGeometry/Objects/Object.h"
 
 #include <QMenu>
 #include <QLabel>
