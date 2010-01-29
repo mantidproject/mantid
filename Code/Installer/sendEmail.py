@@ -4,7 +4,7 @@ import os
 from shutil import move
 from time import strftime
 import sys
-sys.append('../Mantid/Build')
+sys.path.append('../Mantid/Build')
 import buildNotification as notifier
 
 #Email settings
@@ -51,6 +51,9 @@ if buildSuccess:
 
 #Construct Message
 httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
+if os.name == 'nt':
+    httpLinkToArchive = 'http://ndw714.isis.cclrc.ac.uk/' + relativeLogDir
+
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Build Passed: ' + str(buildSuccess) + "\n"
 message += 'BUILD LOG\n\n'
