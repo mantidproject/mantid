@@ -377,7 +377,7 @@ void ApplicationWindow::init(bool factorySettings)
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
     //Scripting
-    m_script_envs = QHash<QString, ScriptingEnv*>();
+   m_script_envs = QHash<QString, ScriptingEnv*>();
     setScriptingLanguage(defaultScriptingLang);
     m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,true);
     delete m_interpreterDock->widget();
@@ -11671,7 +11671,7 @@ void ApplicationWindow::createActions()
 	actionSaveProject->setShortcut( tr("Ctrl+Shift+S") );
 	connect(actionSaveProject, SIGNAL(activated()), this, SLOT(saveProject()));
 
-	actionSaveFile=new QAction(QIcon(QPixmap(filesave_xpm)), tr("Save Nexus &File"), this);
+	actionSaveFile=new QAction(QIcon(QPixmap(filesave_nexus_xpm)), tr("Save Nexus &File"), this);
 	actionSaveFile->setShortcut( tr("Ctrl+S") );
 	connect(actionSaveFile, SIGNAL(activated()), this, SLOT(savetoNexusFile()));
 
@@ -11702,7 +11702,7 @@ void ApplicationWindow::createActions()
 	actionNewSurfacePlot->setShortcut( tr("Ctrl+ALT+Z") );
 	connect(actionNewSurfacePlot, SIGNAL(activated()), this, SLOT(newSurfacePlot()));
 
-	actionOpenNexus=new QAction(QIcon(QPixmap(fileopen_xpm)), tr("&Nexus"), this);
+	actionOpenNexus=new QAction(QIcon(QPixmap(fileopen_nexus_xpm)), tr("&Nexus"), this);
 	actionOpenNexus->setShortcut( tr("Ctrl+Shift+N") );
 	connect(actionOpenNexus, SIGNAL(activated()), this, SLOT(loadNexus())); 
 
@@ -11710,7 +11710,7 @@ void ApplicationWindow::createActions()
 	actionOpenProj->setShortcut( tr("Ctrl+Shift+O") );
 	connect(actionOpenProj, SIGNAL(activated()), this, SLOT(open()));
 
-	actionOpenRaw=new QAction(QIcon(QPixmap(fileopen_xpm)), tr("&Raw"), this);
+	actionOpenRaw=new QAction(QIcon(QPixmap(fileopen_raw_xpm)), tr("&Raw"), this);
 	actionOpenRaw->setShortcut( tr("Ctrl+Shift+R") );
 	connect(actionOpenRaw, SIGNAL(activated()), this, SLOT(loadRaw())); 
 
