@@ -71,7 +71,7 @@ public:
   virtual ~FrameworkManagerProxy();
 
   /// Activate/deactivatye algorithm update listening
-  void observeAlgFactoryUpdates(bool listen);
+  void observeAlgFactoryUpdates(bool listen, bool force_update = false);
 
   /** @name Memory functions */
   //@{

@@ -3,6 +3,7 @@
 //
 #include <MantidPythonAPI/api_exports.h>
 #include <MantidPythonAPI/stl_proxies.h>
+#include <MantidPythonAPI/WorkspaceProxies.h>
 #include <string>
 #include <ostream>
 
@@ -97,7 +98,8 @@ namespace PythonAPI
     //PyAlgorithmBase
     //Save some typing for all of the templated declareProperty and getProperty methods
 #define EXPORT_DECLAREPROPERTY(type, suffix)\
-    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>)\
+    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
+    .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, Kernel::IValidator<type> &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
     .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)
     
 #define EXPORT_GETPROPERTY(type, pyname)\
@@ -149,15 +151,22 @@ namespace PythonAPI
     vector_proxy<MatrixWorkspace*>::wrap("stl_vector_matrixworkspace");
  
     //Operator overloads dispatch through the above structure. The typedefs save some typing
-    typedef MatrixWorkspaceProxy::wraptype_ptr(*binary_fn1)(const MatrixWorkspaceProxy::wraptype_ptr, const MatrixWorkspaceProxy::wraptype_ptr);
-    typedef MatrixWorkspaceProxy::wraptype_ptr(*binary_fn2)(const MatrixWorkspaceProxy::wraptype_ptr, double);
+    typedef WorkspaceAlgebraProxy::wraptype_ptr(*binary_fn1)(const WorkspaceAlgebraProxy::wraptype_ptr, const WorkspaceAlgebraProxy::wraptype_ptr);
+    typedef WorkspaceAlgebraProxy::wraptype_ptr(*binary_fn2)(const WorkspaceAlgebraProxy::wraptype_ptr, double);
+
+    /// Typedef for data access
+    typedef Mantid::MantidVec&(Mantid::API::MatrixWorkspace::*data_access)(int const);
 
     //MatrixWorkspace class
-    class_< Mantid::API::MatrixWorkspace, bases<Mantid::API::Workspace>, boost::noncopyable >("MatrixWorkspace", no_init)
+    class_< Mantid::API::MatrixWorkspace, bases<Mantid::API::Workspace>, MatrixWorkspaceCallback, 
+      boost::noncopyable >("MatrixWorkspace", no_init)
       .def("getNumberHistograms", &Mantid::API::MatrixWorkspace::getNumberHistograms)
-      .def("readX", &Mantid::API::MatrixWorkspace::readX, return_value_policy< return_by_value >()) 
-      .def("readY", &Mantid::API::MatrixWorkspace::readY, return_value_policy< return_by_value >()) 
-      .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy< return_by_value >()) 
+      .def("readX", &Mantid::API::MatrixWorkspace::readX, return_value_policy<return_by_value>() )
+      .def("readY", &Mantid::API::MatrixWorkspace::readY, return_value_policy<return_by_value>() )
+      .def("readE", &Mantid::API::MatrixWorkspace::readE, return_value_policy<return_by_value>() )
+      .def("dataX", (data_access)&Mantid::API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
+      .def("dataY", (data_access)&Mantid::API::MatrixWorkspace::dataY, return_internal_reference<>() )
+      .def("dataE", (data_access)&Mantid::API::MatrixWorkspace::dataE, return_internal_reference<>() )
       .def("blocksize", &Mantid::API::MatrixWorkspace::blocksize)
       .def("isDistribution", (const bool& (Mantid::API::MatrixWorkspace::*)() const)&Mantid::API::MatrixWorkspace::isDistribution, 
          return_value_policy< copy_const_reference >(), MatrixWorkspace_isDistribution_overloads_1())
@@ -166,26 +175,26 @@ namespace PythonAPI
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
       .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
       .def("getSampleDetails", &Mantid::API::MatrixWorkspace::sample, return_value_policy< copy_const_reference >() )
-      .def("__add__", (binary_fn1)&MatrixWorkspaceProxy::plus)
-      .def("__add__", (binary_fn2)&MatrixWorkspaceProxy::plus)
-      .def("__radd__",(binary_fn2)&MatrixWorkspaceProxy::rplus)
-      .def("__iadd__",(binary_fn1)&MatrixWorkspaceProxy::inplace_plus)
-      .def("__iadd__",(binary_fn2)&MatrixWorkspaceProxy::inplace_plus)
-      .def("__sub__", (binary_fn1)&MatrixWorkspaceProxy::minus)
-      .def("__sub__", (binary_fn2)&MatrixWorkspaceProxy::minus)
-      .def("__rsub__",(binary_fn2)&MatrixWorkspaceProxy::rminus)
-      .def("__isub__",(binary_fn1)&MatrixWorkspaceProxy::inplace_minus)
-      .def("__isub__",(binary_fn2)&MatrixWorkspaceProxy::inplace_minus)
-      .def("__mul__", (binary_fn1)&MatrixWorkspaceProxy::times)
-      .def("__mul__", (binary_fn2)&MatrixWorkspaceProxy::times)
-      .def("__rmul__",(binary_fn2)&MatrixWorkspaceProxy::rtimes)
-      .def("__imul__",(binary_fn1)&MatrixWorkspaceProxy::inplace_times)
-      .def("__imul__",(binary_fn2)&MatrixWorkspaceProxy::inplace_times)
-      .def("__div__", (binary_fn1)&MatrixWorkspaceProxy::divide)
-      .def("__div__", (binary_fn2)&MatrixWorkspaceProxy::divide)
-      .def("__rdiv__", (binary_fn2)&MatrixWorkspaceProxy::rdivide)
-      .def("__idiv__",(binary_fn1)&MatrixWorkspaceProxy::inplace_divide)
-      .def("__idiv__",(binary_fn2)&MatrixWorkspaceProxy::inplace_divide)
+      .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
+      .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
+      .def("__radd__",(binary_fn2)&WorkspaceAlgebraProxy::rplus)
+      .def("__iadd__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_plus)
+      .def("__iadd__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_plus)
+      .def("__sub__", (binary_fn1)&WorkspaceAlgebraProxy::minus)
+      .def("__sub__", (binary_fn2)&WorkspaceAlgebraProxy::minus)
+      .def("__rsub__",(binary_fn2)&WorkspaceAlgebraProxy::rminus)
+      .def("__isub__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_minus)
+      .def("__isub__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_minus)
+      .def("__mul__", (binary_fn1)&WorkspaceAlgebraProxy::times)
+      .def("__mul__", (binary_fn2)&WorkspaceAlgebraProxy::times)
+      .def("__rmul__",(binary_fn2)&WorkspaceAlgebraProxy::rtimes)
+      .def("__imul__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_times)
+      .def("__imul__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_times)
+      .def("__div__", (binary_fn1)&WorkspaceAlgebraProxy::divide)
+      .def("__div__", (binary_fn2)&WorkspaceAlgebraProxy::divide)
+      .def("__rdiv__", (binary_fn2)&WorkspaceAlgebraProxy::rdivide)
+      .def("__idiv__",(binary_fn1)&WorkspaceAlgebraProxy::inplace_divide)
+      .def("__idiv__",(binary_fn2)&WorkspaceAlgebraProxy::inplace_divide)
       ;
   }
 
@@ -292,7 +301,7 @@ namespace PythonAPI
   {
     class_< PythonAPI::WorkspaceFactoryProxy, boost::noncopyable>("WorkspaceFactory", no_init)
       .def("createMatrixWorkspace", &PythonAPI::WorkspaceFactoryProxy::createMatrixWorkspace)
-      //.staticmethod("createMatrixWorkspace")
+      .staticmethod("createMatrixWorkspace")
       ;
   }
 

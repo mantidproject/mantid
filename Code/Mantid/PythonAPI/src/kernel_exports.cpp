@@ -6,6 +6,8 @@
 //Kernel
 #include<MantidKernel/Property.h>
 #include<MantidKernel/FileProperty.h>
+#include<MantidKernel/BoundedValidator.h>
+#include<MantidKernel/MandatoryValidator.h>
 
 #include <MantidPythonAPI/stl_proxies.h>
 
@@ -48,10 +50,45 @@ namespace PythonAPI
       .value("OptionalLoad", FileProperty::OptionalLoad)
       ;
   }
+  
+  void export_validators()
+  {
+#define EXPORT_IVALIDATOR(type,suffix)				\
+    class_<Kernel::IValidator<type>, boost::noncopyable >("IValidator_"#suffix, no_init);
+    
+    EXPORT_IVALIDATOR(int,int);
+    EXPORT_IVALIDATOR(double,dbl);
+    EXPORT_IVALIDATOR(std::string,int);
+#undef EXPORT_IVALIDATOR
+
+    // Bounded validators
+#define EXPORT_BOUNDEDVALIDATOR(type,suffix)\
+    class_<Kernel::BoundedValidator<type>, bases<Kernel::IValidator<type> > >("BoundedValidator_"#suffix) \
+      .def(init<type,type>())\
+      .def("setLower", (void (Kernel::BoundedValidator<type>::*)(const type& value))&Kernel::BoundedValidator<type>::setLower )\
+      .def("setUpper", (void (Kernel::BoundedValidator<type>::*)(const type& value))&Kernel::BoundedValidator<type>::setUpper )\
+      ;\
+
+    EXPORT_BOUNDEDVALIDATOR(double,dbl);
+    EXPORT_BOUNDEDVALIDATOR(int,int);
+#undef EXPORT_BOUNDEDVALIDATOR      
+    
+    // Mandatory validators
+#define EXPORT_MANDATORYVALIDATOR(type,suffix)\
+    class_<Kernel::MandatoryValidator<type>, bases<Kernel::IValidator<type> > >("MandatoryValidator_"#suffix); \
+      
+    EXPORT_MANDATORYVALIDATOR(int,int);
+    EXPORT_MANDATORYVALIDATOR(double,dbl);
+    EXPORT_MANDATORYVALIDATOR(std::string,str);
+#undef EXPORT_MANDATORYVALIDATOR
+
+
+  }
 
   void export_kernel_namespace()
   {
     export_property();
+    export_validators();
   }
   
   //@endcond

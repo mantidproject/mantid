@@ -35,7 +35,6 @@ namespace Mantid
 	File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 	Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
-
     class DLLExport CloneableAlgorithm : public Algorithm
     {
     public:
@@ -46,6 +45,11 @@ namespace Mantid
 
       /// Create a clone of this algorithm
       virtual CloneableAlgorithm* clone() = 0;
+
+      /// Manage a call to delete for these types of object
+      virtual void kill()
+      {
+      }
 
     private:
       /// Assignment operator

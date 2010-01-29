@@ -193,6 +193,8 @@ class WorkspaceProxyFactory(object):
         wksp = obj
         if isinstance(obj, str):
             wksp = self.__framework._retrieveWorkspace(obj)
+        if wksp == None:
+            return None
         proxy = WorkspaceProxy(wksp, self)
         self.__gc.register(wksp.getName(), proxy)
         return proxy
@@ -295,6 +297,8 @@ class MantidPyFramework(FrameworkManager):
         super(MantidPyFramework, self).__init__()
         self._garbage_collector = WorkspaceGarbageCollector()
         self._proxyfactory = WorkspaceProxyFactory(self._garbage_collector, self)
+        self._algs = {}
+        self._reloader = None
  
     def list(self):
         '''
@@ -329,15 +333,23 @@ class MantidPyFramework(FrameworkManager):
         '''
         return self._proxyfactory.create(self._retrieveWorkspace(key))
 
+    def registerPyAlgorithm(self, algorithm):
+        '''
+        Register an algorithm into the framework
+        '''
+        # This keeps the original object alive
+        self._algs[algorithm.name()] = algorithm
+        super(MantidPyFramework, self).registerPyAlgorithm(algorithm)
+
 ##                     ##
 ## "Private functions" ##
 ##                     ##
     def _initPythonAlgorithms(self, reload = False):
-        # Install the rollback importer that will allow us to "reload" modules cleanly
-        if reload == False:
+        # Disable factory updates while everything is reimported
+        self._observeAlgFactoryUpdates(False,False)
+        
+        if self._reloader == None:
             self._reloader = RollbackImporter()
-            # Keep a list of modules that have been imported at start up
-            self._startupAlgs = []
 
         # Check defined Python algorithm directories and load any modules
         dir_list = self.getConfigProperty('pythonalgorithms.directories').split(';')
@@ -347,7 +359,7 @@ class MantidPyFramework(FrameworkManager):
                     self._importPyAlgorithms(d, reload)
 
         # Now connect the relevant signals to monitor for algorithm factory updates
-        self._observeAlgFactoryUpdates(True)
+        self._observeAlgFactoryUpdates(True, True)
 
     def _importPyAlgorithms(self, dir, reload):
         try:
@@ -362,8 +374,6 @@ class MantidPyFramework(FrameworkManager):
                 continue
             modname = modname.rstrip('.py')
             __import__(modname)
-            if reload == False:
-                self._startupAlgs.append(modname)
 
         # Cleanup system path
         del sys.path[0]
@@ -381,9 +391,10 @@ class MantidPyFramework(FrameworkManager):
             
     def _refreshPyAlgorithms(self):
         # Pass to the loader proxy
-        self._reloader.uninstall()        
-        # Now reload the modules that were loaded at startup
-        self._initPythonAlgorithms(reload = True)
+        if self._reloader != None:
+            self._reloader.uninstall()        
+            # Now reload the modules that were loaded at startup
+            self._initPythonAlgorithms(reload = True)
         
     def _retrieveWorkspace(self, name):
         '''
@@ -504,7 +515,7 @@ class PythonAlgorithm(PyAlgorithmBase):
 
     def clone(self):
         return copy.deepcopy(self)
-        
+    
     def name(self):
         return self.__class__.__name__
 
@@ -521,7 +532,7 @@ class PythonAlgorithm(PyAlgorithmBase):
         raise NotImplementedError('PyExec() method must be defined for a Python algorithm')
 
     # declareProperty "wrapper" function so that we don't need separate named functions for each type
-    def declareProperty(self, Name, DefaultValue, Direction = Direction.Input, Description = '', ):
+    def declareProperty(self, Name, DefaultValue, Validator = None, Description = '', Direction = Direction.Input):
         '''
         Declare a property for this algorithm
         '''
@@ -542,13 +553,16 @@ class PythonAlgorithm(PyAlgorithmBase):
                 pass
         else:
             raise TypeError('Unrecognized type for property "' + Name + '"')
-        
-        decl_func(Name, DefaultValue, Description, Direction)
+
+        if Validator == None:
+            decl_func(Name, DefaultValue, Description, Direction)
+        else:
+            decl_func(Name, DefaultValue, _createCPPValidator(type, Validator), Description, Direction)
         self._mapPropertyToType(Name, type)
 
     # Specialized version for workspaces
-    def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Description = '', \
-                                     Type = MatrixWorkspace):
+    def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Type = MatrixWorkspace, \
+                                     Description = ''):
         if Type == MatrixWorkspace:
             self._declareMatrixWorkspace(PropertyName, WorkspaceName, Description, Direction)
         elif Type == Tableworkspace:
@@ -559,8 +573,7 @@ class PythonAlgorithm(PyAlgorithmBase):
         self._mapPropertyToType(PropertyName, WorkspaceProperty)
 
     # Specialized version for FileProperty
-    def declareFileProperty(self, Name, DefaultValue, Type, Exts = [], Direction = Direction.Input,\
-                                Description = ''):
+    def declareFileProperty(self, Name, DefaultValue, Type, Exts = [], Description = '',  Direction = Direction.Input):
         if not isinstance(DefaultValue, str):
             raise TypeError('Incorrect default value type for file property "' + Name + '"')
         try:
@@ -619,47 +632,61 @@ class PythonAlgorithm(PyAlgorithmBase):
 
 #------------------------------------------------------------------------------------------------
 
-###
- # Factory Function
-###
-def BoundedValidator(lower = None, upper = None):
-    if isinstance(lower, None) and isinstance(upper,None):
-        raise TypeError("Cannot create BoundedValidator with both lower and upper limit unset.")
+######################################################################
+# Validators:
+#     In C++ validators are templated meaing the correct type
+#     must be called from Python. A Python class of the
+#     same name as the C++ type is used so that the user can indicate
+#     which validator the require and then its type is deduced from
+#     the type of the parameter that has been declared
+#
+######################################################################
+def _createCPPValidator(prop_type, py_valid):
+    if isinstance(py_valid, BoundedValidator):
+        return _cppBoundedValidator(prop_type, py_valid.lower, py_valid.upper)
+    elif isinstance(py_valid, MandatoryValidator):
+        return _cppMandatoryValidator(prop_type)
+
+#------------------- Validator types ---------------------------
+
+# Bounded
+class BoundedValidator(object):
     
-    if isinstance(lower, None):
-        if isinstance(upper, int):
-            b = IntBoundedValidator()
-        elif isinstance(upper, float):
-            b = DblBoundedValidator()
-        else:
-            raise TypeError("Invalid type for upper bound BoundedValidator")
-        b.setUpper(upper)
-    elif isinstance(upper, None):
-        if isinstance(lower, int):
-            b = IntBoundedValidator()
-        elif isinstance(lower, float):
-            b = DblBoundedValidator()
-        else:
-            raise TypeError("Invalid type for lower bound of BoundedValidator")
-        b.setLower(lower)
+    def __init__(self, Lower = None, Upper = None):
+        if Lower == None and Upper == None:
+            raise TypeError("Cannot create BoundedValidator with both Lower and Upper limit unset.")
+        self.lower = Lower
+        self.upper = Upper
+
+def _cppBoundedValidator(prop_type, low, up):
+    if prop_type == int:
+        validator = BoundedValidator_int()
+    elif prop_type == float:
+        validator = BoundedValidator_dbl()
     else:
-        if isinstance(lower, int):
-            if isinstance(upper, int):
-                return BoundedValidator_int(lower,upper)
-            elif isinstance(upper, float):
-                return BoundedValidator_dbl(float(lower),upper)
-            else:
-                raise TypeError("Invalid type for upper value of BoundedValidator")
-        elif isinstance(lower, float):
-            if isinstance(upper, float):
-                return BoundedValidator_dbl(lower,upper)
-            elif isinstance(upper, int):
-                return BoundedValidator_dbl(lower,float(upper))
-            else:
-                raise TypeError("Invalid type for upper value of BoundedValidator")
-        else:
-            raise TypeError("Invalid type for lower value of BoundedValidator")
-        
+        raise TypeError("Cannot create BoundedValidator for given property type.")
+    
+    if low != None:
+        validator.setLower(low)
+    if up != None:
+        validator.setUpper(up)
+
+    return validator
+      
+# Mandatory
+class MandatoryValidator(object):
+    pass
+
+def _cppMandatoryValidator(prop_type):
+    if prop_type == str:
+        return MandatoryValidator_str()
+    elif prop_type == int:
+        return MandatoryValidator_int()
+    elif prop_type == float:
+        return MandatoryValidator_dbl()
+    else:
+        raise TypeError("Cannot create MandatoryValidator for given property type.")
+    
 
 ########################################################################################
 

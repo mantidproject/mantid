@@ -57,11 +57,15 @@ FrameworkManagerProxy::~FrameworkManagerProxy()
   API::AlgorithmFactory::Instance().notificationCenter.removeObserver(m_algupdate_observer);
 }
 
-void FrameworkManagerProxy::observeAlgFactoryUpdates(bool listen)
+void FrameworkManagerProxy::observeAlgFactoryUpdates(bool listen, bool force_update)
 {
   if( listen )
   {
     API::AlgorithmFactory::Instance().notificationCenter.addObserver(m_algupdate_observer);
+    if( force_update )
+    {
+      API::AlgorithmFactory::Instance().notificationCenter.postNotification(new API::AlgorithmFactoryUpdateNotification);
+    }
   }
   else
   {
@@ -302,7 +306,7 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
 void FrameworkManagerProxy::registerPyAlgorithm(PyObject *pyobj)
 {
   //Increment the reference count by one to keep it alive in the factory 
-  Py_INCREF(pyobj);
+  //  Py_INCREF(pyobj);
 
   boost::python::handle<> pyhandle(pyobj);
   Mantid::API::CloneableAlgorithm *pyalg = 

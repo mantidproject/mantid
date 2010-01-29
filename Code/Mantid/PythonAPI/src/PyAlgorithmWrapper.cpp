@@ -32,9 +32,8 @@ PyAlgorithmCallback::PyAlgorithmCallback(PyObject *self) : PyAlgorithmBase(), m_
  */
 PyAlgorithmCallback::~PyAlgorithmCallback()
 {
+  Py_DECREF(m_self);
 }
-
-
 
 /**
  * Return a clone of this object
@@ -43,7 +42,7 @@ Mantid::API::CloneableAlgorithm * PyAlgorithmCallback::clone()
 {
   // Call the python clone method to get back a full copy of the whole object and
   // then return the C++ object extracted from this
-  PyAlgorithmBase*cloned = PyCall_NoArg<PyAlgorithmBase*>::dispatch(m_self, "clone");
+  PyAlgorithmBase *cloned = PyCall_NoArg<PyAlgorithmBase*>::dispatch(m_self, "clone");
   return cloned;
 }
 

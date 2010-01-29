@@ -7,6 +7,8 @@
 #include <MantidAPI/ITableWorkspace.h>
 
 #include <MantidKernel/FileProperty.h>
+#include <MantidKernel/NullValidator.h>
+
 #include <MantidPythonAPI/PythonInterfaceFunctions.h>
 
 #include <Poco/Void.h>
@@ -14,13 +16,14 @@
 namespace Mantid  
 {
 
-//---------------------------------------
-//Forward declarations
-//---------------------------------------
 
 namespace PythonAPI
 {
-/** 
+  //---------------------------------------
+  //Forward declarations
+  //---------------------------------------
+
+  /** 
     A wrapper around API::CloneableAlgorithm that allows inheritance from Python
 
     @author Martyn Gigg, Tessella Support Services plc
@@ -50,8 +53,24 @@ class PyAlgorithmBase : public Mantid::API::CloneableAlgorithm
 {
 
 public:
-  //Constructor
+  ///Constructor
   PyAlgorithmBase();
+
+  /**
+   * Declare a property, templated on the value along with a validator
+   * @param prop_name The name of the property
+   * @param default_value The default value
+   * @param validator A validator for this property
+   * @param description A string describing the property
+   * @param direction The direction
+   */
+  template<typename TYPE>
+  void _declareProperty(const std::string & prop_name, TYPE default_value, 
+			Kernel::IValidator<TYPE> & validator, 
+			const std::string & description, const unsigned int direction)
+  {
+    CloneableAlgorithm::declareProperty(prop_name, default_value, validator.clone(), description, direction);
+  }
  
   /**
    * Declare a property, templated on the value
@@ -66,6 +85,8 @@ public:
   {
     CloneableAlgorithm::declareProperty(prop_name, default_value, description, direction);
   }
+
+
 
   /**
    * Declare a list property, templated on the list type
@@ -155,7 +176,6 @@ public:
     CloneableAlgorithm::setProperty(prop_name,workspace);
   }
 
-  PyThreadState *m_saved_tstate;
 };
 
 /**
@@ -167,11 +187,15 @@ class PyAlgorithmCallback : public PyAlgorithmBase
 public:
   ///Constructor
   PyAlgorithmCallback(PyObject *self);
-  ///Copy constructor
-  PyAlgorithmCallback(PyObject *self, const PyAlgorithmBase & other);
 
   ///Destructor
   ~PyAlgorithmCallback();
+
+  /// Called when a delete is performed inside a shared pointer
+  virtual void kill()
+  {
+    Py_DECREF(m_self);
+  }
 
   ///Overridden clone method
   virtual CloneableAlgorithm * clone();
@@ -188,6 +212,7 @@ private:
   /// Overridden algorithm exec method
   virtual void exec();
 
+public:
   /// A pointer referring to the Python object 
   PyObject *m_self;
 
