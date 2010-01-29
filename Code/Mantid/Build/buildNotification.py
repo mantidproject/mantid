@@ -129,7 +129,7 @@ def getLogDir(project):
   archiveDir = strftime("%Y-%m-%d_%H-%M-%S")
   if os.name == 'nt':
     logDir = "logs\\" + platform.system() + "\\" + project + "\\" + archiveDir + "\\"
-    logDir = "logs/" + project + '/' + archiveDir
+    logDir = "logs/" + project + '/' + archiveDir + '/'
   else:
     logDir = 'logs/' + platform.system() + '/' + project + '/' + archiveDir + '/'
   return logDir
