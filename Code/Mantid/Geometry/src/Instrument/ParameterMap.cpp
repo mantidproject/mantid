@@ -160,7 +160,12 @@ void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::strin
     addV3D(comp, "pos", position);
 }
 
-/// Create or adjust "rot" parameter for a component
+/** Create or adjust "rot" parameter for a component
+  * Assumed that name either equals "rotx", "roty" or "rotz" otherwise this method will not add/modify "rot" parameter
+    @param comp Component
+    @param name Parameter name
+    @param value Parameter value in degrees
+  */
 void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
 {
   Parameter_sptr param = get(comp,"rot");

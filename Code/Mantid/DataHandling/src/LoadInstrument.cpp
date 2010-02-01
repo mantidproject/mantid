@@ -976,12 +976,16 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
       throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
         " contain <parameter> element with no name attribute in XML instrument file", m_filename);
 
-    if ( !pParamElem->hasAttribute("logfile-id") && !pParamElem->hasAttribute("value") )
-      throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
-        " contain <parameter> element with no logfile-id or value attribute in XML instrument file", m_filename);
+    //if ( !pParamElem->hasAttribute("logfile-id") && !pParamElem->hasAttribute("value") )
+    //  throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
+    //    " contain <parameter> element with no logfile-id or value attribute in XML instrument file", m_filename);
 
-    std::string logfileID;
-    std::string value;
+    std::string logfileID = "";
+    std::string value = "";
+    std::string paramName = pParamElem->getAttribute("name");
+    std::string type = "double"; // default
+    std::string extractSingleValueAs = "mean"; // default
+    std::string eq = "";
 
     if ( pParamElem->hasAttribute("logfile-id") )
     {
@@ -989,16 +993,63 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
       // hence if "logfile-id" specified value is read from logfile
       logfileID = pParamElem->getAttribute("logfile-id");
     }
-    else
+    else if ( pParamElem->hasAttribute("value") )
     {
       // rather then extracting value from logfile, specify a value directly
       value = pParamElem->getAttribute("value");
     }
+    else
+    {
+      NodeList* pNLvalue = pParamElem->getElementsByTagName("value");
+      unsigned int numberValueEle = pNLvalue->length();
+      Element* pValueElem;
 
-    std::string paramName = pParamElem->getAttribute("name");
-    std::string type = "double"; // default
-    std::string extractSingleValueAs = "mean"; // default
-    std::string eq = "";
+      // if more than one <value> specified for a parameter use only the first <value> element
+      if ( numberValueEle >= 1 )
+      {
+        pValueElem = static_cast<Element*>(pNLvalue->item(0));
+        if ( !pValueElem->hasAttribute("val") )
+          throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
+            " contains <parameter> element with invalid syntax for its subelement <value>." +
+            " Correct syntax is <value val=\"\"/>", m_filename);
+        value = pValueElem->getAttribute("val");
+      }
+      if ( numberValueEle > 1 )
+      {
+        g_log.warning() << "XML element with name or type = " << comp->getName() <<
+            " contains <parameter> element with more than one <value> subelement." <<
+            " Only the first <value> element will be used.";
+      }
+      pNLvalue->release();
+
+
+      NodeList* pNLlogfile = pParamElem->getElementsByTagName("logfile");
+      unsigned int numberLogfileEle = pNLlogfile->length();
+      Element* pLogfileElem;
+
+      // if more than one <logfile> specified for a parameter use only the first <logfile> element
+      if ( numberLogfileEle >= 1 )
+      {
+        pLogfileElem = static_cast<Element*>(pNLlogfile->item(0));
+        if ( !pLogfileElem->hasAttribute("id") )
+          throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
+            " contains <parameter> element with invalid syntax for its subelement logfile>." +
+            " Correct syntax is <logfile id=\"\"/>", m_filename);
+        logfileID = pLogfileElem->getAttribute("id");
+
+        if ( pLogfileElem->hasAttribute("eq") )
+          eq = pLogfileElem->getAttribute("eq");
+        if ( pLogfileElem->hasAttribute("extract-single-value-as") )
+          extractSingleValueAs = pLogfileElem->getAttribute("extract-single-value-as");
+      }
+      if ( numberLogfileEle > 1 )
+      {
+        g_log.warning() << "XML element with name or type = " << comp->getName() <<
+            " contains <parameter> element with more than one <logfile> subelement." <<
+            " Only the first <logfile> element will be used.";
+      }
+      pNLlogfile->release();      
+    }
 
     if ( pParamElem->hasAttribute("eq") )
       eq = pParamElem->getAttribute("eq");

@@ -94,13 +94,51 @@ public:
     Parameter_sptr param = paramMap.get(&(*det), "boevs2");
     TS_ASSERT_DELTA( param->value<double>(), 16.0, 0.0001);
 
+    param = paramMap.get(&(*det), "boevs3");
+    TS_ASSERT_DELTA( param->value<double>(), 32.0, 0.0001);
+
     param = paramMap.get(&(*det), "boevs");
     TS_ASSERT( param == NULL );
 
     param = paramMap.getRecursive(&(*det), "boevs", "spade");
     TS_ASSERT_DELTA( param->value<double>(), 8.0, 0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
+  void testToscaParameterTags()
+  {
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/TOSCA_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamToscaTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws->populateInstrumentParameters();
+
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+
+    // get detector corresponding to workspace index 0
+    IDetector_sptr det = ws->getDetector(69);  
+
+    TS_ASSERT_EQUALS( det->getID(), 78);
+    TS_ASSERT_EQUALS( det->getName(), "Detector #70");
+
+    Parameter_sptr param = paramMap.get(&(*det), "Efixed");
+    TS_ASSERT_DELTA( param->value<double>(), 4.000, 0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
 
 
 private:
