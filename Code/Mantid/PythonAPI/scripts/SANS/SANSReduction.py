@@ -1136,7 +1136,7 @@ def SetupComponentPositions(detector, dataws, xbeam, ybeam):
             RotateInstrumentComponent(dataws, detector,X="0.",Y="1.0",Z="0.",Angle=rotateDet)
             RotRadians = math.pi*(FRONT_DET_ROT + FRONT_DET_ROT_CORR)/180.
             xshift = (REAR_DET_X + REAR_DET_X_CORR - FRONT_DET_X - FRONT_DET_X_CORR + FRONT_DET_RADIUS*math.sin(RotRadians ) )/1000. - FRONT_DET_DEFAULT_X_M - xbeam
-            yshift = (FRONT_DET_X_CORR /1000.  - ybeam)
+            yshift = (FRONT_DET_Y_CORR /1000.  - ybeam)
             # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
             # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
             zshift = (FRONT_DET_Z + FRONT_DET_Z_CORR + FRONT_DET_RADIUS*(1 - math.cos(RotRadians)) )/1000. - FRONT_DET_DEFAULT_SD_M
