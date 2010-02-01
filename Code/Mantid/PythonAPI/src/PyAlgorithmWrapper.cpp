@@ -2,6 +2,7 @@
 // Includes
 //--------------------------------------------
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
+#include <boost/python.hpp>
 
 using namespace Mantid::PythonAPI;
 

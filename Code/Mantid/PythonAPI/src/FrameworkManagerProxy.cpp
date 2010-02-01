@@ -305,9 +305,6 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
  */
 void FrameworkManagerProxy::registerPyAlgorithm(PyObject *pyobj)
 {
-  //Increment the reference count by one to keep it alive in the factory 
-  //  Py_INCREF(pyobj);
-
   boost::python::handle<> pyhandle(pyobj);
   Mantid::API::CloneableAlgorithm *pyalg = 
     boost::python::extract<Mantid::API::CloneableAlgorithm*>(boost::python::object(pyhandle));
@@ -315,7 +312,10 @@ void FrameworkManagerProxy::registerPyAlgorithm(PyObject *pyobj)
   if( pyalg )
   {
     setGILRequired(true);
-    Mantid::API::AlgorithmFactory::Instance().storeCloneableAlgorithm(pyalg);
+    if( ! Mantid::API::AlgorithmFactory::Instance().storeCloneableAlgorithm(pyalg) )
+    {
+      g_log.error("Unable to register Python algorithm \"" + pyalg->name() + "\"");
+    }
     setGILRequired(false);
   }
   else

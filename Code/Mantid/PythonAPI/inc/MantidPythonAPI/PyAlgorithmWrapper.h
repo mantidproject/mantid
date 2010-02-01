@@ -117,6 +117,21 @@ public:
   }
 
   /**
+   * Declare a MatrixWorkspace property with a validator
+   * @param prop_name The name of the property
+   * @param default_wsname A default name to use for the workspace name
+   * @param validator A pointer to a validator object
+   * @param description A string describing the property
+   * @param direction The direction
+   */
+  void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname,
+			       Kernel::IValidator<API::MatrixWorkspace_sptr> & validator,
+			       const std::string & description, const unsigned int direction)
+  {
+    CloneableAlgorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, validator.clone()), description);
+  }
+
+  /**
    * Declare a TableWorkspace property
    * @param prop_name The name of the property
    * @param default_wsname A default name to use for the workspace name
@@ -177,6 +192,9 @@ public:
   }
 
 };
+
+// Declare the return handler for the callback functions
+DECLARE_DEFAULTRETURN(PyAlgorithmBase*, NULL)
 
 /**
  * A callback structure that can route calls into Python

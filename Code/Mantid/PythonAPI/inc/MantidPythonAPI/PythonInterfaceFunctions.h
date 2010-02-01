@@ -53,21 +53,60 @@ namespace Mantid
     {
     public:
       ///Constructor
-      PythonLocker()
+      PythonLocker() : m_tstate(PyGILState_UNLOCKED), m_locked(false)
+      {
+      }
+
+      void lock()
       {
 	m_tstate = PyGILState_Ensure();
+	m_locked = true;
       }
       ///Destructor
       ~PythonLocker()
       {
-	PyGILState_Release(m_tstate);
+	if( m_locked )
+	{
+	  PyGILState_Release(m_tstate);
+	}
       }
     private:
       /// Store the thread state
       PyGILState_STATE m_tstate;
+      /// If we've locked the state
+      bool m_locked;
     };
 
+    /// Handle a Python error state
+    void handle_python_error();
+    /// A structure t handle default returns for template functions
+    template<typename ResultType>
+    struct DefaultReturn
+    {
+    };
 
+#define DECLARE_DEFAULTRETURN(type, value)\
+    template<>\
+    struct DefaultReturn<type>\
+    {\
+      type operator()()\
+      {\
+	return value;\
+      }\
+    };\
+    template<>\
+    struct DefaultReturn<const type>\
+    {\
+      const type operator()()\
+      {\
+	return value;\
+      }\
+    };
+
+    DECLARE_DEFAULTRETURN(int, 0)
+    DECLARE_DEFAULTRETURN(bool, false)
+    DECLARE_DEFAULTRETURN(std::string, std::string())
+    
     /**
      * MG 14/01/2010
      * 
@@ -89,16 +128,21 @@ namespace Mantid
 
       static ResultType dispatch(PyObject *object, const std::string & func_name)
       {
+	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
-	  PythonLocker gil_lock;
-	  ResultType retval = boost::python::call_method<ResultType>(object, func_name.c_str());
-	  return retval;
+	  gil.lock();
 	}
-	else
+	try 
 	{
 	  return boost::python::call_method<ResultType>(object, func_name.c_str());
 	}
+	catch(boost::python::error_already_set&)
+	{
+	  handle_python_error();
+	}
+	DefaultReturn<ResultType> r;
+	return r();
       }
     };
     ///Specialization for void return type
@@ -108,14 +152,20 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name)
       {
+	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
-	  PythonLocker gil_lock;
-	  boost::python::call_method<void>(object, func_name.c_str());
+	  gil.lock();
 	}
-	else
+	PyThreadState *tstate = PyThreadState_GET();
+	try
 	{
 	  boost::python::call_method<void>(object, func_name.c_str());
+	}
+	catch(boost::python::error_already_set&)
+	{
+	  PyThreadState_Swap(tstate);
+	  handle_python_error();
 	}
       }
     };
@@ -132,16 +182,21 @@ namespace Mantid
 
       static ResultType dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
+	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
-	 PythonLocker gil_lock;
-	 ResultType retval = boost::python::call_method<ResultType>(object, func_name.c_str(),arg);
-	 return retval;
+	  gil.lock();
 	}
-	else
+	try 
 	{
 	  return boost::python::call_method<ResultType>(object, func_name.c_str(), arg);
 	}
+	catch(boost::python::error_already_set&)
+	{
+	  handle_python_error();
+	}
+	DefaultReturn<ResultType> r;
+	return r();
       }
     };
     ///Specialization for void return type
@@ -151,18 +206,22 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
+	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
-	  PythonLocker gil_lock;
-	  boost::python::call_method<void>(object, func_name.c_str(), arg);
+	  gil.lock();
 	}
-	else
+	try 
 	{
 	  boost::python::call_method<void>(object, func_name.c_str(), arg);
+	}
+	catch(boost::python::error_already_set&)
+	{
+	  handle_python_error();
 	}
       }
 
-    };
+     };
     //@}
 
     namespace Conversions
@@ -191,7 +250,7 @@ namespace Mantid
 	return seq_std;
       }
     }
-      //@}
+    //@}
     //@endcond
     
   }

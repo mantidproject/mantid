@@ -98,7 +98,7 @@ public:
   std::vector<Algorithm_descriptor> getDescriptors() const;
 	  
   /// Store a pointer to an algorithm that has alread been constructed; for instance an algorithm created in Python
-  void storeCloneableAlgorithm(CloneableAlgorithm* algorithm);
+  bool storeCloneableAlgorithm(CloneableAlgorithm* algorithm);
 
  private:
   friend struct Mantid::Kernel::CreateUsingNew<AlgorithmFactoryImpl>;

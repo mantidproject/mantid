@@ -14,6 +14,7 @@
 #include <MantidAPI/ParInstrument.h>
 #include <MantidAPI/Sample.h>
 #include <MantidAPI/WorkspaceProperty.h>
+#include <MantidAPI/WorkspaceValidators.h>
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
 
 namespace Mantid
@@ -111,7 +112,8 @@ namespace PythonAPI
       .def("_setMatrixWorkspaceProperty", &PyAlgorithmBase::_setMatrixWorkspaceProperty)
       .def("_setTableWorkspaceProperty", &PyAlgorithmBase::_setTableWorkspaceProperty)
       .def("_declareFileProperty", &PyAlgorithmBase::_declareFileProperty)
-      .def("_declareMatrixWorkspace", &PyAlgorithmBase::_declareMatrixWorkspace)
+      .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
+      .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator<boost::shared_ptr<API::MatrixWorkspace> >&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
       .def("_declareTableWorkspace", &PyAlgorithmBase::_declareTableWorkspace)
       EXPORT_DECLAREPROPERTY(int, int)
       EXPORT_DECLAREPROPERTY(double, dbl)
@@ -305,6 +307,26 @@ namespace PythonAPI
       ;
   }
 
+  void export_apivalidators()
+  {
+    class_<Kernel::IValidator<API::MatrixWorkspace_sptr>, boost::noncopyable>("IValidator_matrix", no_init)
+      ;
+
+    // Unit checking
+    class_<API::WorkspaceUnitValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("WorkspaceUnitValidator", init<std::string>())
+      ;
+    // Histogram checking
+    class_<API::HistogramValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("HistogramValidator", init<bool>())
+      ;
+    // Raw count checker
+    class_<API::RawCountValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("RawCountValidator", init<bool>())
+      ;
+    // Check for common bins
+    class_<API::CommonBinsValidator<API::MatrixWorkspace>, bases<Kernel::IValidator<API::MatrixWorkspace_sptr> > >("CommonBinsValidator")
+      ;
+	
+  }
+
   void export_api_namespace()
   {
     export_frameworkmanager();
@@ -317,6 +339,7 @@ namespace PythonAPI
     export_instrument();
     export_workspace_property();
     export_workspacefactory();
+    export_apivalidators();
   }
   //@endcond
 }

@@ -141,7 +141,7 @@ namespace Mantid
      * Store a pointer to an Algorithm object that is cloneable, e.g. a Python algorithm
      * @param algorithm A pointer to a clonable algorithm object
      */
-    void AlgorithmFactoryImpl::storeCloneableAlgorithm(CloneableAlgorithm* algorithm)
+    bool AlgorithmFactoryImpl::storeCloneableAlgorithm(CloneableAlgorithm* algorithm)
     {
       const std::string alg_name = algorithm->name();
       if( alg_name.empty() )
@@ -163,12 +163,29 @@ namespace Mantid
       {
 	m_vmap[alg_name] = alg_version;
       }
+
+      // Finally check that the algorithm can be initialized without throwing
+      try
+      {
+	algorithm->clone()->initialize();
+      }
+      catch( std::runtime_error & e )
+      {
+	g_log.error(e.what());
+	return false;
+      }
+      catch( ... )
+      {
+	return false;
+      }
+      
       //Insert into map, overwriting if necessary
       m_cloneable_algs[createName(alg_name, alg_version)] = algorithm;
       
       //Notify whomever is interested that the factory has been updated
       notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
-
+      
+      return true;
     }
 
     /** Extract the name of an algorithm

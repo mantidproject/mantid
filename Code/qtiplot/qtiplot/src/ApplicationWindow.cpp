@@ -376,16 +376,18 @@ void ApplicationWindow::init(bool factorySettings)
     updateAppFonts();
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
 
+    //Initialize Mantid
+    // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
+    // we register Python algorithms
+    mantidUI->init();
+    
     //Scripting
-   m_script_envs = QHash<QString, ScriptingEnv*>();
+    m_script_envs = QHash<QString, ScriptingEnv*>();
     setScriptingLanguage(defaultScriptingLang);
     m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,true);
     delete m_interpreterDock->widget();
     m_interpreterDock->setWidget(m_scriptInterpreter);
     loadCustomActions();
-
-    //Mantid
-    mantidUI->init();
 }
 void ApplicationWindow::showresultsContextMenu(const QPoint & p)
 {

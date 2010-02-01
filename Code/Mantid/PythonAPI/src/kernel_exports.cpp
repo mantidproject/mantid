@@ -82,7 +82,6 @@ namespace PythonAPI
     EXPORT_MANDATORYVALIDATOR(std::string,str);
 #undef EXPORT_MANDATORYVALIDATOR
 
-
   }
 
   void export_kernel_namespace()

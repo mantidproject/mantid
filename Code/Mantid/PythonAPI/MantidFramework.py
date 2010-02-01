@@ -373,7 +373,10 @@ class MantidPyFramework(FrameworkManager):
             if not modname.endswith('.py'):
                 continue
             modname = modname.rstrip('.py')
-            __import__(modname)
+            try:
+                __import__(modname)
+            except:
+                pass
 
         # Cleanup system path
         del sys.path[0]
@@ -561,15 +564,20 @@ class PythonAlgorithm(PyAlgorithmBase):
         self._mapPropertyToType(Name, type)
 
     # Specialized version for workspaces
-    def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Type = MatrixWorkspace, \
-                                     Description = ''):
+    def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Validator = None, \
+                                     Description = '', Type = MatrixWorkspace):
         if Type == MatrixWorkspace:
-            self._declareMatrixWorkspace(PropertyName, WorkspaceName, Description, Direction)
-        elif Type == Tableworkspace:
-            self._declareTableWorkspace(PropertyName, WorkspaceName, Description, Direction)
+            decl_fn = self._declareMatrixWorkspace
+        elif Type == TableWorkspace:
+            decl_fn = self._declareTableWorkspace
         else:
             raise TypeError('Unrecognized type of workspace specified for property "' + PropertyName + '"')
-        
+
+        if Validator == None:
+            decl_fn(PropertyName, WorkspaceName, Description, Direction)
+        else:
+            decl_fn(PropertyName, WorkspaceName, Validator, Description, Direction)
+            
         self._mapPropertyToType(PropertyName, WorkspaceProperty)
 
     # Specialized version for FileProperty
@@ -612,11 +620,15 @@ class PythonAlgorithm(PyAlgorithmBase):
         except KeyError:
             raise KeyError('Attempting to set unknown property "' + Name + '"')
         
-        if isinstance(Value, str):
+        value_type = self._typeof(Value)
+        if prop_type != value_type:
+            raise TypeError("Property '" + Name + "' declared as '" + str(prop_type) + "' but set as '" + str(value_type) + "'")
+
+        if value_type == str:
             self.setPropertyValue(Name, Value)
-        elif isinstance(Value, bool):
+        elif value_type == bool:
             self.setPropertyValue(Name, str(int(Value)))
-        elif issubclass(prop_type, WorkspaceProperty):
+        elif value_type == WorkspaceProperty:
             if isinstance(Value, MatrixWorkspace):
                 self._setMatrixWorkspaceProperty(Name, Value)
             elif isinstance(Value, TableWorkspace):
@@ -626,6 +638,22 @@ class PythonAlgorithm(PyAlgorithmBase):
         else:
             self.setPropertyValue(Name, str(Value))
             
+    # Return a type based on the value. This avoids the use of Python built-in type function since it
+    # returns something that is too generic for user-define class types
+    def _typeof(self, value):
+        if isinstance(value, int) or isinstance(value, long):
+            return int
+        elif isinstance(value, float):
+            return float
+        elif isinstance(value, str):
+            return str
+        elif isinstance(value, bool):
+            return bool
+        elif isinstance(value, MatrixWorkspace) or isinstance(value, TableWorkspace):
+            return WorkspaceProperty
+        else:
+            raise TypeError("Unknown property type for value '" + str(value) + "'")
+                    
     # Execute a string that declares a property and keep track of the registered type
     def _mapPropertyToType(self, name, prop_type):
         self._proptypes[name] = prop_type
