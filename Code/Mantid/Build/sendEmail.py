@@ -251,7 +251,7 @@ try:
                %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
                emailErr.write(errstr)
 except smtplib.SMTPException, details:
-     emailErr.write(details)
+     emailErr.write(str(details) + '\n')
 emailErr.close()
 
 if not buildSuccess:
