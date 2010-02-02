@@ -211,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Convolution.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Fit.cpp"
 				>
 			</File>
@@ -326,6 +330,14 @@
 			</File>
 			<File
 				RelativePath=".\test\CompositeFunctionTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\Convolution.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ConvolutionTest.h"
 				>
 			</File>
 			<File

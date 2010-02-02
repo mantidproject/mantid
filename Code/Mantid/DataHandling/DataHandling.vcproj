@@ -225,6 +225,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadCanSAS1D.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadDAE.cpp"
 				>
 			</File>
@@ -302,6 +306,10 @@
 			</File>
 			<File
 				RelativePath=".\src\SaveAscii.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\SaveCanSAS1D.cpp"
 				>
 			</File>
 			<File
@@ -416,6 +424,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\LoadAscii.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadCanSAS1D.h"
 				>
 			</File>
 			<File
@@ -560,6 +572,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\SaveAscii.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\SaveCanSAS1D.h"
 				>
 			</File>
 			<File

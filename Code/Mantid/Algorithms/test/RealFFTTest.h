@@ -15,7 +15,7 @@ using namespace Mantid::API;
 class RealFFTTest : public CxxTest::TestSuite
 {
 public:
-  RealFFTTest():N(100),dX(0.2),XX(N*dX)
+  RealFFTTest():N(116),dX(0.3),XX(N*dX)
     {
 
         FrameworkManager::Instance();

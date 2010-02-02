@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PythonInterfaceFunctions.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PythonWrapper.cpp"
 				>
 			</File>
