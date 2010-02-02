@@ -140,6 +140,35 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+void testCheckIfVariousInstrumentsLoad()
+  {
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/SANS2D_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParaSans2dTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+
+    LoadEmptyInstrument loaderPolRef;
+    loaderPolRef.initialize();
+    loaderPolRef.setPropertyValue("Filename", "../../../../Test/Instrument/POLREF_Definition.xml");
+    inputFile = loaderPolRef.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamPOLREFTest";
+    loaderPolRef.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderPolRef.execute());
+    TS_ASSERT( loaderPolRef.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 
 private:
   std::string inputFile;
