@@ -78,7 +78,10 @@ namespace Mantid
     };
 
     /// Handle a Python error state
-    void handle_python_error();
+    void handlePythonError();
+    /// Check on the current python state
+    bool pythonIsReady();
+
     /// A structure t handle default returns for template functions
     template<typename ResultType>
     struct DefaultReturn
@@ -128,6 +131,9 @@ namespace Mantid
 
       static ResultType dispatch(PyObject *object, const std::string & func_name)
       {
+	DefaultReturn<ResultType> default_value;
+	if( !pythonIsReady() ) return default_value();
+
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
@@ -139,10 +145,9 @@ namespace Mantid
 	}
 	catch(boost::python::error_already_set&)
 	{
-	  handle_python_error();
+	  handlePythonError();
 	}
-	DefaultReturn<ResultType> r;
-	return r();
+	return default_value();
       }
     };
     ///Specialization for void return type
@@ -152,6 +157,8 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name)
       {
+	if( !pythonIsReady() ) return;
+
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
@@ -165,7 +172,7 @@ namespace Mantid
 	catch(boost::python::error_already_set&)
 	{
 	  PyThreadState_Swap(tstate);
-	  handle_python_error();
+	  handlePythonError();
 	}
       }
     };
@@ -179,9 +186,12 @@ namespace Mantid
     template<typename ResultType, typename ArgType>
     struct PyCall_OneArg
     {
-
+      
       static ResultType dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
+	DefaultReturn<ResultType> default_value;
+	if( !pythonIsReady() ) return;
+
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
@@ -193,10 +203,10 @@ namespace Mantid
 	}
 	catch(boost::python::error_already_set&)
 	{
-	  handle_python_error();
+	  handlePythonError();
 	}
-	DefaultReturn<ResultType> r;
-	return r();
+
+	return default_value();
       }
     };
     ///Specialization for void return type
@@ -206,6 +216,8 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
+	if( !pythonIsReady() ) return;
+
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
@@ -217,7 +229,7 @@ namespace Mantid
 	}
 	catch(boost::python::error_already_set&)
 	{
-	  handle_python_error();
+	  handlePythonError();
 	}
       }
 

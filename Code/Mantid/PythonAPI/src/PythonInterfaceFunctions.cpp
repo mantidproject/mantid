@@ -4,7 +4,7 @@
 #include <MantidPythonAPI/PythonInterfaceFunctions.h>
 
 /// Convert a python error state to a C++ exception so that Mantid can catch it
-void Mantid::PythonAPI::handle_python_error()
+void Mantid::PythonAPI::handlePythonError()
 {
   if( !PyErr_Occurred() ) return;
   PyObject *exception(NULL), *value(NULL), *traceback(NULL);
@@ -23,3 +23,11 @@ void Mantid::PythonAPI::handle_python_error()
   throw std::runtime_error(msg);
 }
 
+/**
+ * Check if the current Python state will allow execution of Python code
+ */
+bool Mantid::PythonAPI::pythonIsReady()
+{
+  if( PyThreadState_GET() ) return true;
+  else return false;
+}

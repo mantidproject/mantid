@@ -354,12 +354,14 @@ class MantidPyFramework(FrameworkManager):
         # Check defined Python algorithm directories and load any modules
         dir_list = self.getConfigProperty('pythonalgorithms.directories').split(';')
         if len(dir_list) > 0:
+            changes = False
             for d in dir_list:
                 if d != '':
-                    self._importPyAlgorithms(d, reload)
+                    if self._importPyAlgorithms(d, reload) == True:
+                        changes = True
 
         # Now connect the relevant signals to monitor for algorithm factory updates
-        self._observeAlgFactoryUpdates(True, True)
+        self._observeAlgFactoryUpdates(True, reload and changes)
 
     def _importPyAlgorithms(self, dir, reload):
         try:
@@ -368,25 +370,33 @@ class MantidPyFramework(FrameworkManager):
             return
         # Temporarily insert into path
         sys.path.insert(0, dir)
-        
+        changes = False
         for modname in files:
             if not modname.endswith('.py'):
                 continue
+            original = os.path.join(dir, modname)
             modname = modname.rstrip('.py')
+            compiled = os.path.join(dir, modname + '.pyc')
+            if modname in sys.modules and \
+               os.path.exists(compiled) and \
+               os.path.getmtime(compiled) >= os.path.getmtime(original):
+                continue
             try:
                 __import__(modname)
-            except:
-                pass
+            except ImportError, details:
+                print details
+            changes = True
 
         # Cleanup system path
         del sys.path[0]
+        return changes
 
-    def _importSimpleAPItoGlobal(self):
+    def _importSimpleAPIToGlobal(self):
         simpleapi = 'mantidsimple'
-        if simpleapi in sys.modules.keys():
-            del(sys.modules[simpleapi])
-
-        mod = __import__(simpleapi)
+        if simpleapi in sys.modules:
+            mod = reload(sys.modules[simpleapi])
+        else:
+            mod = __import__(simpleapi)
 	for name in dir(mod):
             if name == '__name__':
                 continue
@@ -440,7 +450,7 @@ class MantidPyFramework(FrameworkManager):
         Called in reponse to an algorithm factory update
         '''
         # Reload the simple api
-        self._importSimpleAPItoGlobal()
+        self._importSimpleAPIToGlobal()
 
     def _createAlgProxy(self, ialg):
         return IAlgorithmProxy(ialg, self)
@@ -479,7 +489,6 @@ class RollbackImporter:
   
     def __init__(self):
         "Creates an instance and installs as the global importer"
-        self.previousModules = sys.modules.copy()
         self.realImport = __builtin__.__import__
         __builtin__.__import__ = self._import
         self.pyalg_modules = {}
@@ -487,8 +496,16 @@ class RollbackImporter:
     def _import(self, name, globals=None, locals=None, fromlist=[]):
         result = apply(self.realImport, (name, globals, locals, fromlist))
         if self._containsPyAlgorithm(result):
-            self.pyalg_modules[name] = 1
+            self.pyalg_modules[name] = self._findPathToModule(name)
         return result
+
+    def _findPathToModule(self, name):
+        for p in sys.path:
+            filename = os.path.join(p,name + '.py')
+            if os.path.exists(filename):
+                return p
+            
+        return ''
 
     def _containsPyAlgorithm(self, module):
         # Check attributes and check if there are any Python algorithms
@@ -502,8 +519,11 @@ class RollbackImporter:
     def uninstall(self):
         for modname in self.pyalg_modules.keys():
             if modname in sys.modules:
-                # Force reload when modname next imported
-                del(sys.modules[modname])
+                mpath = self.pyalg_modules[modname]
+                compiled = os.path.join(mpath, modname + '.pyc')
+                original = os.path.join(mpath, modname + '.py')
+                if os.path.getmtime(original) > os.path.getmtime(compiled):
+                    del( sys.modules[modname] )
 
 #-------------------------------------------------------------------------------------------
 ##
@@ -718,11 +738,17 @@ def _cppMandatoryValidator(prop_type):
 
 ########################################################################################
 
-# Provide a named mantid object
-mtd = MantidPyFramework()
-mantid = mtd
-Mantid = mtd
-Mtd = mtd
+def FrameworkSingleton():
+    try:
+        getattr(__main__, '__mantid__')
+    except AttributeError:
+        setattr(__main__, '__mantid__', MantidPyFramework())
+    return getattr(__main__, '__mantid__')
 
 if os.name == 'posix':
     sys.path.append(os.path.expanduser('~/.mantid'))
+
+mtd = FrameworkSingleton()
+mantid = mtd
+Mantid = mtd
+Mtd = mtd

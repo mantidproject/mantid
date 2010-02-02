@@ -1,5 +1,3 @@
-
-
 #------------------------------------------------
 # mantidplotrc.py
 #
@@ -120,6 +118,5 @@ for name in MantidUIImports:
     setattr(__main__,name,getattr(qti.app.mantidUI,name))
 
 # Initialize the algorithm framework
-mtd._initPythonAlgorithms()
-mtd.createPythonSimpleAPI(True)
-mtd._importSimpleAPItoGlobal()
+FrameworkSingleton()._initPythonAlgorithms()
+FrameworkSingleton()._importSimpleAPIToGlobal()
