@@ -32,7 +32,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( qxy.initialize() )
     TS_ASSERT( qxy.isInitialized() )
   }
-	
+
   void testExec()
   {
     Mantid::DataHandling::LoadRaw2 loader;
@@ -52,13 +52,13 @@ public:
     convert.execute();
     
     if (!qxy.isInitialized()) qxy.initialize();
-	  
+
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("InputWorkspace",inputWS) )
     const std::string outputWS("result");
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("MaxQxy","0.1") )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("DeltaQ","0.002") )
-	  
+
     TS_ASSERT_THROWS_NOTHING( qxy.execute() )
     TS_ASSERT( qxy.isExecuted() )
     
@@ -87,7 +87,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
-	
+
 private:
   Mantid::Algorithms::Qxy qxy;
 };

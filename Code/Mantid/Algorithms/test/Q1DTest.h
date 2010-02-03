@@ -32,14 +32,14 @@ public:
     TS_ASSERT_THROWS_NOTHING( Q1D.initialize() )
     TS_ASSERT( Q1D.isInitialized() )
   }
-	
+
   void testExec()
   {
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48127.raw");
     const std::string inputWS("wav");
-   loader.setPropertyValue("OutputWorkspace",inputWS);
+    loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumList","3");
     loader.execute();
 
@@ -51,14 +51,14 @@ public:
     convert.execute();
 
     if (!Q1D.isInitialized()) Q1D.initialize();
-	  
+
     TS_ASSERT_THROWS_NOTHING( Q1D.setPropertyValue("InputWorkspace",inputWS) )
     TS_ASSERT_THROWS_NOTHING( Q1D.setPropertyValue("InputForErrors",inputWS) )
     const std::string outputWS("result");
     TS_ASSERT_THROWS_NOTHING( Q1D.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( Q1D.setPropertyValue("OutputBinning","0.1,0.02,0.5") )
     TS_ASSERT_THROWS_NOTHING( Q1D.setPropertyValue("AccountForGravity","1") )
-	  
+
     TS_ASSERT_THROWS_NOTHING( Q1D.execute() )
     TS_ASSERT( Q1D.isExecuted() )
     
@@ -74,17 +74,17 @@ public:
     TS_ASSERT_EQUALS( result->readX(0).front(), 0.1 )
     TS_ASSERT_DELTA( result->readX(0)[6], 0.22, 0.01 )
     TS_ASSERT_EQUALS( result->readX(0).back(), 0.5 )
-    TS_ASSERT_DELTA( result->readY(0).front(), 3196551441, 1 )
-    TS_ASSERT_DELTA( result->readY(0)[13], 9272523451, 1 )
-    TS_ASSERT_DELTA( result->readY(0).back(), 454931528, 1 )
-    TS_ASSERT_DELTA( result->readE(0).front(), 17547891, 1 )
-    TS_ASSERT_DELTA( result->readE(0)[10], 55285188, 1 )
-    TS_ASSERT_DELTA( result->readE(0).back(), 13831579, 1 )
+    TS_ASSERT_DELTA( result->readY(0).front(), 3196551441.0, 1 )
+    TS_ASSERT_DELTA( result->readY(0)[13], 9272523451.0, 1 )
+    TS_ASSERT_DELTA( result->readY(0).back(), 454931528.0, 1 )
+    TS_ASSERT_DELTA( result->readE(0).front(), 17547891.0, 1 )
+    TS_ASSERT_DELTA( result->readE(0)[10], 55285188.0, 1 )
+    TS_ASSERT_DELTA( result->readE(0).back(), 13831579.0, 1 )
     
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
-	
+
 private:
   Mantid::Algorithms::Q1D Q1D;
   std::string inputWS;
