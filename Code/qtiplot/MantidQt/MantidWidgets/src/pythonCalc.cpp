@@ -26,7 +26,7 @@ const QString& pythonCalc::python() const
 *  runAsPythonScript() signal to the QWidget passed to it
 *  @param interface this widget needs to have runAsPythonScript() connected to MantidPlot, for example be an interface
 */
-pythonCalc::pythonCalc(QWidget * const interface) :
+pythonCalc::pythonCalc(const QWidget * const interface) :
   MantidWidget(), m_pyScript(), m_templateH(), m_templateB(), m_fails()
 {
   // Only an interface widgets have there runAsPythonScript signal connected to QTiplot, need to connect to that
@@ -165,4 +165,18 @@ QString pythonCalc::runPythonCode(const QString & code, bool no_output)
      tmpstring.append(stream.readLine().trimmed() + "\n");
    }
    return tmpstring;
+}
+/** Creates a string that codes a tupple in Python script
+*  @param vec the array of strings
+*  @return the members of the array inserted into a Python tupple
+*/
+std::string pythonCalc::vectorToTupple(const std::vector<std::string> &vec) const
+{
+  std::string fileList;
+  std::vector<std::string>::const_iterator inFile = vec.begin();
+  for( ; inFile != vec.end(); ++inFile)
+  {// there will be a spare ',' at the end of the list but Python accepts this without error and requires it if there is only one member in the list
+	fileList += "'"+(*inFile)+"',";
+  }
+  return fileList;
 }

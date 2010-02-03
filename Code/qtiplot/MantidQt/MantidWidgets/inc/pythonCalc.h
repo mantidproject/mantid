@@ -33,7 +33,7 @@ namespace MantidQt
         void runAsPythonScript(const QString& code);
     
 	protected:
-      pythonCalc(QWidget * const interface);
+      pythonCalc(const QWidget * const interface);
       /// this will store the executable python code when it is generated
 	  QString m_pyScript;
       /// a copy of the section of the template that contains the Python import statements
@@ -48,6 +48,7 @@ namespace MantidQt
 	  std::string replaceErrsFind(QString pythonMark, const QString &setting, Mantid::Kernel::Property * const check);
       /// Run a piece of python code and return any output that was written to stdout
       QString runPythonCode(const QString & code, bool no_output = false);
+	  std::string vectorToTupple(const std::vector<std::string> &vec) const;
 	private:
       /// Copy construction is not allowed because the runAsPythonScript() signal wouldn't be connected
       pythonCalc( const pythonCalc& right );

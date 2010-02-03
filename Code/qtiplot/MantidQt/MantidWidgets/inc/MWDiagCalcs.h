@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_MWDIAGCALCS_H_
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtMantidWidgets/MWDiag.h"
+#include "MantidQtMantidWidgets/ui_MWDiag.h"
 #include "MantidQtMantidWidgets/DiagResults.h"
 
 namespace MantidQt
@@ -25,7 +25,7 @@ namespace MantidQt
     class whiteBeam2 : public pythonCalc
     {
     public:
-      whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings);
+      whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &inFile);
 	  void incPrevious(const DiagResults::TestSummary &firstTest);
   
     private:
@@ -40,7 +40,7 @@ namespace MantidQt
     class backTest : public pythonCalc
     {
     public:
-      backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &runs);
+      backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const std::vector<std::string> &runs);
 	  void incFirstTest(const DiagResults::TestSummary &results1);
       void incSecondTest(const DiagResults::TestSummary &results2);
 	  void noSecondTest();

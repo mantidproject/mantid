@@ -44,8 +44,8 @@ try:#------------Calculations Start---
   downSoFar = "_FindBadDetects loading"
   if ( DOWNSOFAR2 != "" ) : Plus(DOWNSOFAR1, DOWNSOFAR2, downSoFar)
   else : downSoFar = DOWNSOFAR1
-  # good detectors were set to have a value of 0 and bad 100 so 10 works as a cut off
-  prevTest = FindDetectorsOutsideLimits(InputWorkspace=downSoFar, OutputWorkspace=downSoFar, HighThreshold=10, LowThreshold=-1, OutputFile='STEVESCHANGETHIS' )
+  # good detectors were set to have a value of 0 and bad 100 so 10 works as discriminator
+  prevTest = FindDetectorsOutsideLimits(InputWorkspace=downSoFar, OutputWorkspace=downSoFar, HighThreshold=10, LowThreshold=-1)
   downArray = prevTest.getPropertyValue('BadDetectorIDs')
   MaskDetectors(Workspace=SUM, DetectorList=downArray)
   

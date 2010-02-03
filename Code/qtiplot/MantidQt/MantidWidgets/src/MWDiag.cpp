@@ -30,18 +30,34 @@ static const double G_START_WINDOW_TOF = 18000;
 static const double G_END_WINDOW_TOF = 19500;
 static const bool G_NO_ZERO_BG = true;
 
-MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr) : m_dispDialog(NULL),
-  m_pastSettings(prevSettingsGr), m_WBVChanged(false), m_TOFChanged(false),
-  m_sTOFAutoVal(-1), m_eTOFAutoVal(-1)
+MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru):
+  m_dispDialog(NULL), m_instru(instru), m_WBVChanged(false),
+  m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1)
 {
   // allows saving and loading the values the user entered on to the form
-  m_prevSets.beginGroup(m_pastSettings);
+  m_prevSets.beginGroup(prevSettingsGr);
   
   m_designWidg.setupUi(this);
+  insertFileWidgs();
   loadDefaults();
   setupToolTips();
   connectSignals(parent);
   setUpValidators();
+}
+void MWDiag::insertFileWidgs()
+{
+  // we create and place some new widgets on the form using it's grid layout
+  QLayout *mapLayout = m_designWidg.gbVariation->layout();
+  QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout); 
+  // this requires that the form was setup with a grid layout
+  if ( ! mapLay )
+  { // if you see the following exception check that the group box gbExperiment has a grid layout
+    throw Exception::NullPointerException("Problem with the layout in MWDiag", "mapLay");
+  }
+  
+  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", m_instru, "WhiteBeamVan 2",
+    "The name of a white beam vanadium run from the same instrument as the first");
+  mapLay->addWidget(m_WBV2, 0, 0, 1, 4);
 }
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control
 void MWDiag::loadDefaults()
@@ -150,12 +166,6 @@ void MWDiag::setupToolTips()
   m_designWidg.leLowMed->setToolTip(lowMedToolTip);
   m_designWidg.lbLowMed->setToolTip(lowMedToolTip);
 
-  QString WBV2ToolTip =
-    "The name of a white beam vanadium run from the same instrument as the first";
-  m_designWidg.lbWBV2->setToolTip(WBV2ToolTip);
-  m_designWidg.leWBV2->setToolTip(WBV2ToolTip);
-  m_designWidg.pbWBV2->setToolTip(WBV2ToolTip);
-
   QString variationToolTip = 
     "When comparing equilivient spectra in the two white beam vanadiums reject any\n"
     "whose the total number of counts varies by more than this multiple of the\n"
@@ -191,11 +201,9 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
   signalMapper->setMapping(m_designWidg.pbIFile, QString("InputFile"));
   signalMapper->setMapping(m_designWidg.pbOFile, QString("OutputFile"));
   signalMapper->setMapping(m_designWidg.pbWBV1, QString("WBVanadium1"));
-  signalMapper->setMapping(m_designWidg.pbWBV2, QString("WBVanadium2"));
   connect(m_designWidg.pbIFile, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(m_designWidg.pbOFile, SIGNAL(clicked()), signalMapper, SLOT(map()));
   connect(m_designWidg.pbWBV1, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_designWidg.pbWBV2, SIGNAL(clicked()), signalMapper, SLOT(map()));
   
   connect(signalMapper, SIGNAL(mapped(const QString &)),
          this, SLOT(browseClicked(const QString &)));
@@ -214,8 +222,8 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
     connect(m_designWidg.leEndTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
 
-    connect(parentInterface, SIGNAL(MWDiag_sendRuns(const QString &)),
-	  this, SLOT(specifyRuns(const QString &)));
+    connect(parentInterface, SIGNAL(MWDiag_sendRuns(const std::vector<std::string> &)),
+	  this, SLOT(specifyRuns(const std::vector<std::string> &)));
   }
 }
 void MWDiag::setUpValidators()
@@ -262,12 +270,7 @@ void MWDiag::browseClicked(const QString &buttonDis)
     editBox = m_designWidg.leWBV1;
 	extensions << "raw" << "RAW" << "NXS" << "nxs";
   }
-  if ( buttonDis == "WBVanadium2")
-  {
-    editBox = m_designWidg.leWBV2;
-	extensions << "raw" << "RAW" << "NXS" << "nxs";
-  }
-  
+
   QString filepath = openFileDialog(toSave, extensions);
   if( filepath.isEmpty() ) return;
   editBox->setText(filepath);
@@ -451,9 +454,10 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
 */
 QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp)
 {  
-  if ( ! m_designWidg.leWBV2->text().isEmpty() )
+  if ( ! m_WBV2->getFileName().isEmpty() )
   {// the user has supplied an input file for the second test so fill the shared_ptr with the script
-    whiteBeamComp.reset(new whiteBeam2(this, m_designWidg));
+    whiteBeamComp.reset(
+	  new whiteBeam2(this, m_designWidg, m_WBV2->getFileName()));
 	//report any problems trying to construct it, likely to be problems with the values suggested by the user
     return whiteBeamComp->checkNoErrors(m_validators);
   }
@@ -486,7 +490,8 @@ DiagResults::TestSummary MWDiag::singleWhiteBeamTest(whiteBeam1 &python)
   results.status = "Analysing white beam vanadium 1";
   notifyDialog(results);
   
-  QString error = results.pythonResults(python.run());// use this code to see the script   QMessageBox::critical(this, this->windowTitle(), firstTest.python());
+  // use this code to see the script   QMessageBox::critical(this, this->windowTitle(), firstTest.python());
+  QString error = results.pythonResults(python.run());
   notifyDialog(results);
   
   if ( ! error.isEmpty() )
@@ -510,7 +515,7 @@ DiagResults::TestSummary MWDiag::whiteBeamCompTest(const DiagResults::TestSummar
 
   // adds the output workspace from the first test to the current script
   python->incPrevious(firstTest);
-
+  //uncomment out to check the script QMessageBox::critical(this, this->windowTitle(), python->python());
   QString error = results.pythonResults(python->run());
   notifyDialog(results);
 
@@ -579,9 +584,13 @@ void MWDiag::updateTOFs(const double &start, const double &end)
 	m_designWidg.leEndTime->setText(QString::number(end));
   }
 }
-void MWDiag::specifyRuns(const QString &fileList)
+/** This slot sets m_monoFiles based on the array that is
+*  passed to it
+*  @param runFileNames names of the files that will be used in the background test
+*/
+void MWDiag::specifyRuns(const std::vector<std::string> &runFileNames)
 {
-  m_monoFiles = fileList;
+  m_monoFiles = runFileNames;
 }
 /// note if the user has changed the white beam vanadium file away from its default, this will stop the setting from being replaced by the default
 void MWDiag::WBVUpd()

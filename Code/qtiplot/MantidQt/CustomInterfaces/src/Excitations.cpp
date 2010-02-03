@@ -25,6 +25,8 @@ namespace MantidQt
     DECLARE_SUBWINDOW(Excitations);
   }
 }
+using namespace Mantid::Kernel;
+using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 
 //these two defaults will be removed when other instruments are supported
@@ -53,7 +55,7 @@ static const std::string G_INPUT_EXTS[G_NUM_INPUT_EXTS] =
 //----------------------
 ///Constructor
 Excitations::Excitations(QWidget *parent) : UserSubWindow(parent),
-  m_diagPage(NULL), m_saveChanged(false), m_inFiles(NULL), m_busy(NULL)
+  m_runFilesWid(NULL), m_diagPage(NULL), m_saveChanged(false), m_busy(NULL)
 {}
 /// Set up the dialog layout
 void Excitations::initLayout()
@@ -75,21 +77,13 @@ void Excitations::initLayout()
 //  QLayout *diagTest2Layout = m_uiForm.gbVariation->layout();
 //  QGridLayout *diagTest2 = qobject_cast<QGridLayout*>(diagTest2Layout);
 //  diagTest2->addWidget(WBV2Widget, 0, 0, 1, -1);
-  QSignalMapper *signalMapper = new QSignalMapper(this);
-  signalMapper->setMapping(m_uiForm.pbWBV0, "pbWBV0");
-  signalMapper->setMapping(m_uiForm.map_fileInput_pbBrowse, QString("map_fileInput_pbBrowse"));
-  signalMapper->setMapping(m_uiForm.pbAddMono, QString("pbAddMono"));
-  signalMapper->setMapping(m_uiForm.pbAddWhite, QString("pbAddWhite"));
-  signalMapper->setMapping(m_uiForm.pbAddMap, QString("pbAddMap"));
-  signalMapper->setMapping(m_uiForm.pbBrowseSPE, QString("pbBrowseSPE"));
-  connect(m_uiForm.pbWBV0, SIGNAL(clicked()), signalMapper, SLOT(map()));
 
+  // the signal mapper is used to link both browse buttons on the form on to a load file dialog
+  QSignalMapper *signalMapper = new QSignalMapper(this);
+  signalMapper->setMapping(m_uiForm.map_fileInput_pbBrowse, QString("map_fileInput_pbBrowse"));
+  signalMapper->setMapping(m_uiForm.pbBrowseSPE, QString("pbBrowseSPE"));
   connect(m_uiForm.map_fileInput_pbBrowse, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbAddMono, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbAddWhite, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbAddMap, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  
+  connect(m_uiForm.pbBrowseSPE, SIGNAL(clicked()), signalMapper, SLOT(map()));  
   connect(signalMapper, SIGNAL(mapped(const QString)),
          this, SLOT(browseClicked(const QString)));
 
@@ -113,6 +107,7 @@ void Excitations::pythonIsRunning(bool running)
 *
 */
 QString Excitations::setUpInstru()
+//??STEVES?? move this function to a File widget
 { // if there were no previously used instruments the "" below adds a blank entry. The empty string entry will always be there, even as more instruments are added
   QStringList prevInstrus =
     m_prev.value("CustomInterfaces/Excitations/instrusList","").toStringList();
@@ -128,20 +123,12 @@ QString Excitations::setUpInstru()
     = m_prev.value("CustomInterfaces/Excitations/instrument", G_INSTRUMENT).toString();
   m_uiForm.loadRun_cbInst->setEditText(curInstru);
   
- // insert the file loader helper widget
-  //??STEVES?? implement the file widget
-  m_inFiles = new deltaECalc::FileInput(*m_uiForm.loadRun_lenumber, *m_uiForm.loadRun_cbInst);
-/*  FileInput *m_inFiles = new FileInput;
-  QLayout *mapLayout = m_uiForm.gbrunMap->layout();
-  QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout);
-  mapLay->addWidget(m_inFiles, 0, 0, 1, -1);*/
-  connect(m_uiForm.loadRun_pbBrowse, SIGNAL(clicked()), this, SLOT(addRunFile()));
-
   return curInstru;
 }
 /// For each widgets in the first tab this adds custom widgets, fills in combination boxes and runs setToolTip()
 void Excitations::setUpPage1()
 {
+  page1FileWidgs();
   page1setUpNormCom();
   page1Defaults();
   page1Validators();
@@ -150,14 +137,39 @@ void Excitations::setUpPage1()
   connect(m_uiForm.pbBack, SIGNAL(clicked()), this, SLOT(bgRemoveClick()));
 
   // SIGNALS and SLOTS that deal with coping the text from one edit box to another 
-  connect(m_uiForm.loadRun_lenumber, SIGNAL(editingFinished()), this, SLOT(runFilesChanged()));
   connect(m_uiForm.ckSumSpecs, SIGNAL(stateChanged(int)), this, SLOT(updateSaveName()));
   connect(m_uiForm.leNameSPE, SIGNAL(editingFinished()), this, SLOT(saveNameUpd()));
-  connect(m_uiForm.leWBV0, SIGNAL(editingFinished()), this, SLOT(updateWBV()));
-      
-  m_uiForm.lbPrefix->setToolTip("For example MAR, MAP, ...");
-  m_uiForm.loadRun_cbInst->setToolTip("For example MAR, MAP, ...");
 }
+/// put default values into the controls in the first tab
+void Excitations::page1FileWidgs()
+{
+  // we create and place some new widgets on the form using it's grid layout
+  QLayout *mapLayout = m_uiForm.gbExperiment->layout();
+  QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout); 
+  // this requires that the form was setup with a grid layout
+  if ( ! mapLay )
+  { // if you see the following exception check that the group box gbExperiment has a grid layout
+    throw Exception::NullPointerException("Problem with the layout in the first tab", "mapLay");
+  }
+
+  m_runFilesWid = new MWRunFiles(this, m_prev.group()+"/runs",
+	m_uiForm.loadRun_cbInst, "Run Files", "List of runs to load");
+  //??STEVES?? code for if the runs will be listed in a table
+//  m_uiForm.loadRun_tvRuns->setColumnCount(3);
+//  m_uiForm.loadRun_tvRuns->setRowCount(1);
+//  m_uiForm.loadRun_tvRuns->horizontalHeader()->hide();
+//  m_uiForm.loadRun_tvRuns->verticalHeader()->hide();
+  mapLay->addWidget(m_runFilesWid, 0, 0, 1, 8);
+  connect(m_runFilesWid, SIGNAL(fileChanged()), this, SLOT(runFilesChanged()));
+
+  m_WBVWid = new MWRunFile(this, m_prev.group()+"/WBV",
+	m_uiForm.loadRun_cbInst, "White Beam Van",
+	"This white beam vanadium run also sets the defaults\n"
+	"in Diagnose Detectors and Absolute Units");
+  mapLay->addWidget(m_WBVWid, 4, 0, 1, 8);
+  connect(m_WBVWid, SIGNAL(fileChanged()), this, SLOT(updateWBV()));
+}
+
 /// put default values into the controls in the first tab
 void Excitations::page1setUpNormCom()
 {
@@ -191,7 +203,6 @@ QString Excitations::removeStrMonitor(const QString &check)
   }
   return check;
 }
-
 /// put default values into the controls in the first tab
 void Excitations::page1Defaults()
 {
@@ -238,14 +249,11 @@ void Excitations::page1Defaults()
 void Excitations::page1Validators()
 {
   m_validators.clear();
-  m_validators[m_uiForm.loadRun_lenumber] = newStar(m_uiForm.gbExperiment, 1, 5);
 
   setupValidator(m_uiForm.valBg);
   m_validators[m_uiForm.pbBack] = m_uiForm.valBg;
 
-  setupValidator(m_uiForm.valWBV);
   setupValidator(m_uiForm.valMap);
-  m_validators[m_uiForm.leWBV0] = m_uiForm.valWBV;
   m_validators[m_uiForm.map_fileInput_leName] = m_uiForm.valMap;
   
   m_validators[m_uiForm.leWBV0Low] = newStar(m_uiForm.gbExperiment, 6, 4);
@@ -286,24 +294,22 @@ void Excitations::hideValidators()
 /// set all the tooltips for the first tab
 void Excitations::page1Tooltips()
 {  
+  m_uiForm.lbPrefix->setToolTip("For example MAR, MAP, ...");
+  m_uiForm.loadRun_cbInst->setToolTip("For example MAR, MAP, ...");
+
   m_uiForm.gbExperiment->setToolTip("Files to process");
-  m_uiForm.loadRun_lbDiscrip->setToolTip("List of runs to load"), m_uiForm.loadRun_lenumber->setToolTip("List of runs to load"), m_uiForm.loadRun_pbBrowse->setToolTip("List of runs to load");
   m_uiForm.ckSumSpecs->setToolTip("If this box is not ticked there will be one output file for each input, otherwise the output will be summed into one file");
   m_uiForm.ckSumSpecs->setToolTip("If this box is not ticked there will be one output file for each input, otherwise the output will be summed into one file");
   m_uiForm.ckFixEi->setToolTip("Leave unticked for the algorithm GetEi to calculate a the incident neutron energy based on the monitor signals and the guess below");
-//??STEVES?? this code will go to the run number to file name widget
-//  m_uiForm.loadRun_tvRuns->setToolTip("List of runs to load");
-//  m_uiForm.loadRun_tvRuns->setColumnCount(3);
-//  m_uiForm.loadRun_tvRuns->setRowCount(1);
-//  m_uiForm.loadRun_tvRuns->horizontalHeader()->hide();
-//  m_uiForm.loadRun_tvRuns->verticalHeader()->hide();
+
   m_uiForm.lbNorm->setToolTip("Select the type of normalization for the runs"), m_uiForm.cbNormal->setToolTip("Select the type of normalization for the runs");
   m_uiForm.cbMonitors->setToolTip("If normalization to monitor was selected");
   m_uiForm.lbScale->setToolTip("Multiply numbers of counts by this power of 10");
   m_uiForm.leScale->setToolTip("Multipling numbers by a large constant can make plotting easier");
-  m_uiForm.lbWBV0->setToolTip("The white beam vanadium run selected here will set the default for finding bad detectors and absolute units conversion"), m_uiForm.leWBV0->setToolTip("The white beam vanadium run picked here will set the default for finding bad detectors and absolute units conversion"), m_uiForm.pbWBV0->setToolTip("The white beam vanadium run picked here will set the default for finding bad detectors and absolute units conversion");
+
   m_uiForm.lbWBV0Low1->setToolTip("Energy range for the white beam normalisation"); m_uiForm.lbWBV0Low2->setToolTip("Energy range for the white beam normalisation");
   m_uiForm.lbWBV0High1->setToolTip("Energy range for the white beam normalisation"); m_uiForm.lbWBV0High2->setToolTip("Energy range for the white beam normalisation");
+
   m_uiForm.map_fileInput_lbName->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)"), m_uiForm.map_fileInput_leName->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)"), m_uiForm.map_fileInput_pbBrowse->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)");
 
   m_uiForm.gbConvUnits->setToolTip("Settings for units conversion to energy transfer");
@@ -326,11 +332,11 @@ void Excitations::setUpPage2()
   emit MWDiag_updateTOFs(m_prev.value("TOFstart", G_START_WINDOW_TOF).toDouble(),
     m_prev.value("TOFend", G_END_WINDOW_TOF).toDouble());
 	
-  // insert the widgets on to the second page (index = 1)
+  // insert the widget on to the second tab page (index = 1) of the form
   QLayout *mapLayout = m_uiForm.tabWidget->widget(1)->layout();
   QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout); 
   if ( mapLay )
-  { // this should always be true because we setup a grid layout in the designer
+  { // this should always happen because we layout to grid in the designer
     mapLay->addWidget(m_diagPage, 1, 0, 6, 5);
   }
 
@@ -404,7 +410,7 @@ void Excitations::saveSettings()
 	
   m_prev.setValue("map", m_uiForm.map_fileInput_leName->text());
 }
-// ??STEVES?? move this function to the file widget?
+// ??STEVES?? remove this function?
 QString Excitations::openFileDia(const bool save, const QStringList &exts)
 {
   QString filter;
@@ -464,17 +470,17 @@ void Excitations::runClicked()
   }
   catch (std::invalid_argument &e)
   {// can be caused by an invalid user entry that was detected
-    QMessageBox::critical(this, "", QString(e.what()));
+    QMessageBox::critical(this, "", QString::fromStdString(e.what()));
   }
   catch (std::runtime_error &e)
   {// possibly a Python run time error
     QMessageBox::critical(this, "", 
-      QString("Exception \"") + QString(e.what()) + QString("\" encountered during execution"));
+      QString("Exception \"") + QString::fromStdString(e.what()) + QString("\" encountered during execution"));
   }
   catch (std::exception &e)
   {// any exception that works its way passed here would cause QTiplot to suggest that it's shutdown, which I think would be uneccessary
     QMessageBox::critical(this, "", 
-      QString("Exception \"") + QString(e.what()) + QString("\" encountered"));
+      QString("Exception \"") + QString::fromStdString(e.what()) + QString("\" encountered"));
   }
   
   pythonIsRunning(false);
@@ -487,10 +493,10 @@ void Excitations::runClicked()
 bool Excitations::runScripts()
 {
   // constructing this builds the Python script, it is executed below
-  deltaECalc unitsConv( this, m_uiForm, *m_inFiles,
-    m_prev.value("bgremove", G_BACK_REMOVE).toString() == "bg removal: on",
-	m_prev.value("TOFstart", G_START_WINDOW_TOF).toDouble(),
-	m_prev.value("TOFend", G_END_WINDOW_TOF).toDouble());
+  deltaECalc unitsConv( this, m_uiForm, m_runFilesWid->getFileNames(),
+    m_prev.value("bgremove").toString() == "bg removal: on",
+	m_prev.value("TOFstart").toDouble(), m_prev.value("TOFend").toDouble(),
+	m_WBVWid->getFileName());
     
   QString errors("");
   
@@ -514,7 +520,7 @@ bool Excitations::runScripts()
     if (m_uiForm.ckRunDiag->isChecked())
     {
       QString maskOutWS =
-	    "mask_"+MantidWidgets::MantidWidget::removePath(m_inFiles->getFile1());
+	    "mask_"+MantidWidgets::MantidWidget::removePath(m_runFilesWid->getFile1().toStdString());
 	  // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
       pythonIsRunning(true);
 	  errors = m_diagPage->run(maskOutWS, true);
@@ -535,7 +541,8 @@ bool Excitations::runScripts()
   try
   {
     pythonIsRunning(true);
-    //unitsConv is always executed, the user can't switch this off, unless there's an error on the form. To examine the script that is executed uncomment QMessageBox::critical(this, "", unitsConv.python());
+    //unitsConv is always executed, the user can't switch this off, unless there's an error on the form. To examine the script that is executed uncomment 
+	QMessageBox::critical(this, "", unitsConv.python());
     errors = unitsConv.run();
 	
 	if ( ! errors.isEmpty() )
@@ -560,14 +567,6 @@ void Excitations::browseClicked(const QString buttonDis)
   QStringList extensions;
   bool toSave = false;
 
-  if (buttonDis == "pbWBV0")
-  {
-    editBox = m_uiForm.leWBV0;
-	for ( int i = 0; i < G_NUM_INPUT_EXTS; i++)
-	{
-	  extensions << QString::fromStdString(G_INPUT_EXTS[i]);
-	}
-  }
   if ( buttonDis == "map_fileInput_pbBrowse" )
   {
     editBox = m_uiForm.map_fileInput_leName;
@@ -606,40 +605,6 @@ void Excitations::browseClicked(const QString buttonDis)
   QString filepath = this->openFileDia(toSave, extensions);
   if( filepath.isEmpty() ) return;
   editBox->setText(filepath);
-  
-  // the diag widget wants to know if a white beam vanadium file was loaded as its algorithm needs one too
-  if ( buttonDis == "pbWBV0" )
-  {
-    emit MWDiag_updateWBV(m_uiForm.leWBV0->text());
-  }
-}
-//function will be replaced a function in a widget
-void Excitations::addRunFile()
-{
-  QStringList extensions;
-  for ( int i = 0; i < G_NUM_INPUT_EXTS; i++)
-  {
-	extensions << QString::fromStdString(G_INPUT_EXTS[i]);
-  }
-
-  if( ! m_uiForm.loadRun_lenumber->text().isEmpty() )
-  {
-    QString dir =
-	  QFileInfo(m_uiForm.loadRun_lenumber->text()).absoluteDir().path();
-	m_prev.setValue("directories/runfile", dir);
-  }
-
-  QString uFile = this->openFileDia(false, extensions);
-  if( uFile.isEmpty() ) return;
-
-  if ( ! m_uiForm.loadRun_lenumber->text().isEmpty() )
-  {
-    m_uiForm.loadRun_lenumber->setText(
-	  m_uiForm.loadRun_lenumber->text()+", " + uFile);
-  }
-  else m_uiForm.loadRun_lenumber->setText(uFile);
-  
-  runFilesChanged();
 }
 /**
  * A slot to handle the help button click
@@ -659,7 +624,6 @@ void Excitations::disenableAbsolute()
   m_uiForm.gbMasses->setEnabled(enabled);
   m_uiForm.gbInteg->setEnabled(enabled);
  }
-
 /** Enables or disables the find bad detectors controls based
 *  on whether or not the check box has been checked
 */
@@ -667,9 +631,12 @@ void Excitations::disenableDiag()
 {
   m_diagPage->setEnabled(m_uiForm.ckRunDiag->isChecked());
 }
+/** This slot updates the MWDiag and SPE filename suggestor with the
+* names of the files the user has just chosen
+*/
 void Excitations::runFilesChanged()
 {// this signal to the diag GUI allows the run files we choose here to be the default for its background correction
-  emit MWDiag_sendRuns(m_inFiles->getRunString());
+  emit MWDiag_sendRuns(m_runFilesWid->getFileNames());
   // the output file's default name is based on the input file names
   updateSaveName();
 }
@@ -691,14 +658,16 @@ void Excitations::saveNameUpd()
   if (m_saveChanged) return;
   m_saveChanged = m_uiForm.leNameSPE->text() != defaultName();
 }
+/** This slot passes the name of the white beam vanadium file to the MWDiag
+*/
 void Excitations::updateWBV()
 {
-  emit MWDiag_updateWBV(m_uiForm.leWBV0->text());
+  emit MWDiag_updateWBV(m_WBVWid->getFileName());
 }
 /** enables or disables the list of monitors depending on the whether
 * the monitor was set in the normalisation combobox
 *  @param the text in the normalisastion combobox
-*  throw invalid_argument if neither the chosen normalisation scheme or the default can be found
+*  @throw invalid_argument if neither the chosen normalisation scheme or the default can be found
 */
 void Excitations::setupNormBoxes(const QString &newText)
 {
@@ -732,7 +701,7 @@ void Excitations::enableSecondBox(bool toEnable)
 */
 QString Excitations::defaultName()
 {
-  const std::vector<std::string> &fileList = m_inFiles->getRunFiles();
+  const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
   if ( fileList.size() == 0 )
   {// no input files we can't say anything about the output files
     return "";

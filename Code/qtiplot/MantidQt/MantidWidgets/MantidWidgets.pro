@@ -24,6 +24,7 @@ SRCDIR = src
 
 SOURCES = \
   $$SRCDIR/MantidWidget.cpp \
+  $$SRCDIR/MWRunFiles.cpp \
   $$SRCDIR/pythonCalc.cpp \
   $$SRCDIR/DiagResults.cpp \
   $$SRCDIR/MWDiag.cpp \
@@ -31,6 +32,7 @@ SOURCES = \
 
 HEADERS = \
   $$HEADERDIR/MantidWidget.h \
+  $$HEADERDIR/MWRunFiles.h \
   $$HEADERDIR/pythonCalc.h \
   $$HEADERDIR/WidgetsDllOption.h \
   $$HEADERDIR/DiagResults.h \
@@ -40,6 +42,7 @@ HEADERS = \
 UI_DIR = $$HEADERDIR
 
 FORMS = \
+  $$HEADERDIR/MWRunFiles.ui \
   $$HEADERDIR/MWDiag.ui
 
 UI_HEADERS_DIR = "$$MANTIDQTINCLUDES/MantidQtMantidWidgets"

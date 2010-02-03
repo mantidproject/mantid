@@ -86,7 +86,7 @@ std::string FileValidator::checkValidity(const std::string &value) const
   //If the file is required to exist check it is there
   if ( m_fullTest && ( value.empty() || !Poco::File(value).exists() ) )
   {
-    return "File \"" + value + "\" not found";
+    return "File \"" + Poco::Path(value).getFileName() + "\" not found";
   }
 
   //Otherwise we are okay, file extensions are just a suggestion so no validation on them is necessary

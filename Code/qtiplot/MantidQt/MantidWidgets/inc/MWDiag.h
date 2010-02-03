@@ -2,29 +2,27 @@
 #define MANTIDQTCUSTOMINTERFACES_MWDIAG_H_
 
 #include "MantidQtMantidWidgets/ui_MWDiag.h"
+#include "MantidQtMantidWidgets/MWDiagCalcs.h"
 #include "MantidQtMantidWidgets/DiagResults.h"
+#include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidQtMantidWidgets/MantidWidget.h"
 #include "WidgetDllOption.h"
 #include <QSettings>
 #include <QStringList>
+#include <QComboBox>
 #include "boost/shared_ptr.hpp"
 
 namespace MantidQt
 {
   namespace MantidWidgets
   {
-    // forward declaration //??STEVES?? remove the need for these?
-	class whiteBeam1;
-	class whiteBeam2;
-	class backTest;
-    
 	class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWDiag : public MantidWidget
     {
       Q_OBJECT
 
     public:
       /// there has to be a default constructor but you can call it with a pointer to the thing that will take ownership of it
-      MWDiag(QWidget *parent = NULL, QString prevSettingsGr = "CustomWidgets/Diag");
+      MWDiag(QWidget *parent = NULL, QString prevSettingsGr = "CustomWidgets/Diag", const QComboBox * const instru = NULL);
 	  QString run(const QString &outWS = "", const bool saveSettings = true);
 	  signals:
 	    void runAsPythonScript(const QString&);
@@ -33,8 +31,10 @@ namespace MantidQt
       Ui::MWDiag m_designWidg;
 	  /// check if ==NULL before use, set to point to the results dialog box is deleted when it's closed!
       DiagResults *m_dispDialog;
-	  /// the name group of the group where the settings that we want to use are stored
-	  QString m_pastSettings;
+	  /// points to the control with the user selected instrument
+	  const QComboBox * const m_instru;
+	  /// points to the RunFile object used to specify the white beam vanadium file
+	  MWRunFile *m_WBV2;
 	  /// stores if the contents of the first white beam vanadium box have been filled in by the user or not, if not the contents are open to auto-fillin
 	  bool m_WBVChanged;
 	  /// true if either of the TOF windows have been changed by the user, otherwise false
@@ -47,8 +47,8 @@ namespace MantidQt
 	  double m_eTOFAutoVal;
       /// the name of the output workspace that contains many of the results from these tests
 	  QString m_outputWS;
-	  /// a coma separated list of run files that will be loaded to do the background test
-	  QString m_monoFiles;
+	  /// the run files that will be loaded to do the background test
+	  std::vector<std::string> m_monoFiles;
       /// the values on the form the last time it was SUCCESSFULLY run accessed through this object
 	  QSettings m_prevSets;
 
@@ -60,6 +60,7 @@ namespace MantidQt
 	  QString openFileDialog(const bool save, const QStringList &exts);
 
 	  void loadDefaults();
+	  void insertFileWidgs();
 	  void saveDefaults();
 	  void setupToolTips();
       void connectSignals(const QWidget * const parentInterface);
@@ -73,7 +74,7 @@ namespace MantidQt
 	  void browseClicked(const QString &buttonDis);
 	  void updateWBV(const QString &WBVSuggestion);
 	  void updateTOFs(const double &start, const double &end);
-	  void specifyRuns(const QString &);
+	  void specifyRuns(const std::vector<std::string> &);
 	  void WBVUpd();
 	  void TOFUpd();
 	  void noDispDialog() {m_dispDialog = NULL;}

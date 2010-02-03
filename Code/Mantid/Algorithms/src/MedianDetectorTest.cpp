@@ -319,13 +319,13 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
         if ( std::abs(toCopy) == std::numeric_limits<double>::infinity() )
         {
           g_log.debug() <<
-            "numeric_limits<double>::infinity() found" << std::endl;
+            "numeric_limits<double>::infinity() found\n";
           g_log.warning() <<
-            "Divide by zero error found in the spectrum with index " << i <<  ", the spectrum has a non-zero number of counts but its detectors have zero solid angle. Check your instrument definition file." << std::endl;
+            "Divide by zero error found in the spectrum with index " << i <<  ", the spectrum has a non-zero number of counts but its detectors have zero solid angle. Check your instrument definition file.\n";
           try
           {
             DetectorInfoHelper.maskAllDetectorsInSpec(i);
-            g_log.error() << "Its detectors have been masked" << std::endl;
+            g_log.error() << "Its detectors have been masked\n";
           }
           catch (std::exception)
           {
@@ -348,11 +348,9 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
   if (numUnusedDects > 0)
   {
     g_log.debug() <<
-      "Found \"Not a Number\" in the numbers of counts, assuming detectors with zero solid angle and zero counts were found"
-       << std::endl;
+      "Found \"Not a Number\" in the numbers of counts, assuming detectors with zero solid angle and zero counts were found\n";
     g_log.information() << numUnusedDects <<
-      " spectra found with non-contributing detectors that have zero solid angle and no counts, they have not been used and the detectors have been masked in the input workspace"
-      << std::endl;
+      " spectra found with non-contributing detectors that have zero solid angle and no counts, they have not been used and the detectors have been masked in the input workspace\n";
     void maskAllDetectorsInSpec(int SpecIndex);
   }
   if (numUnfoundDects > 0)
@@ -363,8 +361,8 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
   //we need a sorted array to calculate the median
   gsl_sort( &nums[0], 1, nums.size() );//The address of foo[0] will return a pointer to a contiguous memory block that contains the values of foo. Vectors are guaranteed to store there memory elements in sequential order, so this operation is legal, and commonly used (http://bytes.com/groups/cpp/453169-dynamic-arrays-convert-vector-array)
   double median = gsl_stats_median_from_sorted_data( &nums[0], 1, nums.size() );
-  g_log.information() << name() <<
-    ": The median integrated counts or soild angle normalised counts is " << median << std::endl;
+  g_log.notice() << name() <<
+    ": The median integrated counts or soild angle normalised counts are " << median << std::endl;
   
   if ( median < 0 || median > DBL_MAX/10.0 )
   {// something has gone wrong
@@ -469,21 +467,22 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
 *  @param detMap the map that contains the list of detectors associated with each spectrum
 *  @param total output property, the array of detector IDs
 */
-void MedianDetectorTest::createOutputArray(const std::vector<int> &lowList, const std::vector<int> &highList, const SpectraDetectorMap& detMap, std::vector<int> &total) const
+void MedianDetectorTest::createOutputArray(const std::vector<int> &lows, const std::vector<int> &highs, const SpectraDetectorMap& detMap, std::vector<int> &total) const
 {
-  // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
-  total.reserve(lowList.size()+highList.size());
+  // works best when each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors maybe we should improve this
+  total.reserve(lows.size()+highs.size());
 
-  for ( std::vector<int>::size_type i = 0; i < lowList.size(); ++i )
+  std::vector<int>::const_iterator lowIt = lows.begin(), highIt=highs.begin();
+  for(std::vector<int>::const_iterator endl = lows.end();lowIt != endl;++lowIt)
   {
-    std::vector<int> tStore = detMap.getDetectors(lowList[i]);
+    std::vector<int> tStore = detMap.getDetectors(*lowIt);
     total.resize(total.size()+tStore.size());
     copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
   }
 
-  for ( std::vector<int>::size_type i = 0; i < highList.size(); ++i )
+  for(std::vector<int>::const_iterator end = highs.end();highIt !=end;++highIt)
   {
-    std::vector<int> tStore = detMap.getDetectors(highList[i]);
+    std::vector<int> tStore = detMap.getDetectors(*highIt);
     total.resize(total.size()+tStore.size());
     copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
   }

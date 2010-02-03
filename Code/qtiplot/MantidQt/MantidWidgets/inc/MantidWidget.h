@@ -37,7 +37,7 @@ namespace MantidQt
 	  /// A list of labels to use as validation markers
       QHash<const QWidget * const, QLabel *> m_validators;
 	  
-      MantidWidget(){}
+      MantidWidget(QWidget *parent=NULL) : QWidget(parent) {}
 	  void renameWorkspace(const QString &oldName, const QString &newName);
       void setupValidator(QLabel *star);
 	  QLabel* newStar(const QGroupBox * const UI, int valRow, int valCol);

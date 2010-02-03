@@ -1,3 +1,6 @@
+#ifndef MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_
+#define MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_
+
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtCustomInterfaces/ui_Excitations.h"
 #include <vector>
@@ -9,22 +12,7 @@ namespace MantidQt
     class deltaECalc : public MantidWidgets::pythonCalc
     {
     public:
-      //??STEVES? move this into the file widget
-      class FileInput
-      {
-      private:
-        QLineEdit &m_lineEdit;
-	    QComboBox &m_box;
-        std::vector<std::string> m_files;
-      public:
-        FileInput(QLineEdit &num, QComboBox &instr);
-        const std::vector<std::string>& getRunFiles();
-		std::string getFile1();
-		QString getRunString();
-        void readComasAndHyphens(const std::string &in, std::vector<std::string> &out);
-      };
-  
-      deltaECalc(QWidget * const interface, const Ui::Excitations &userSettings, deltaECalc::FileInput &runFiles, const bool removalBg, const double TOFWinSt, const double TOFWinEnd);
+      deltaECalc(QWidget * const interface, const Ui::Excitations &userSettings, const std::vector<std::string> &inFiles, const bool removalBg, const double TOFWinSt, const double TOFWinEnd, QString WBV);
       void maskDetects(const QString &maskWS);
 	  /** removes the path from the filename passed and replaces extensions with .spe
       * @param inputFilename name of the file that the .SPE file is based on
@@ -45,9 +33,9 @@ namespace MantidQt
 	  /// used in remove background, the end of the background region
 	  const double m_TOFWinEnd;
 
-	  QString createProcessingScript(const std::string &inFiles, const std::string &oName);
+	  QString createProcessingScript(const std::string &inFiles, const std::string &oName, const QString &whiteB);
 	  void createGetEIStatmens(QString &newScr);
-	  void createNormalizationStatmens(QString &newScr);
+	  void createNormalizationStatmens(QString &newScr, const QString &norm);
 	  void createRemoveBgStatmens(QString &newScr);
 	  void createRebinStatmens(QString &newScr);
       void createOutputStatmens(QString &WSName, QString &newScr);
@@ -62,3 +50,5 @@ namespace MantidQt
     };
   }
 }
+
+#endif	//MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_

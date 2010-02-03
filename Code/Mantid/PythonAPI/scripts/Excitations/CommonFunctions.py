@@ -5,10 +5,13 @@ def LoadNexRaw(filename, workspace):
   # this removes everything after the last . It returns '' if there is no dot or the filename is an empty string (partition always returns three strings)
   extension = filename.rpartition('.')[2]
   if (extension == 'nxs') | (extension == 'NXS') :
-    LoadNexus(filename, workspace)
-  elif (extension == 'raw') | (extension == 'RAW') :
-    LoadRaw(filename, workspace)
-  else : raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")
+    LN = LoadNexus(filename, workspace)
+    return LN.getPropertyValue('OutputWorkspace')
+  if (extension == 'raw') | (extension == 'RAW') :
+    LR = LoadRaw(filename, workspace)
+    return LR.getPropertyValue('OutputWorkspace')
+  #we shouldn't get to here, the function should have returned by now
+  raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")
   
 def loadMask(MaskFilename):
   inFile = open(MaskFilename)

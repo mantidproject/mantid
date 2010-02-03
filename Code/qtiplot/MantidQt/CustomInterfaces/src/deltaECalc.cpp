@@ -2,10 +2,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/FileProperty.h"
 #include <QDir>
 #include "boost/lexical_cast.hpp"
-#include "Poco/StringTokenizer.h"
 #include <cmath>
 
 using namespace MantidQt::CustomInterfaces;
@@ -18,7 +16,7 @@ const QString deltaECalc::tempWS = "_Conv_ETrans_tempory_WS_";
 * @param userSettings the form that the user filled in
 * @throw invalid_argument where problems with user data prevent the calculation from proceeding
 */
-deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSettings, deltaECalc::FileInput &runFiles, const bool removalBg, const double TOFWinSt, const double TOFWinEnd) :
+deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSettings, const std::vector<std::string>  &input, const bool removalBg, const double TOFWinSt, const double TOFWinEnd, const QString WBV) :
   pythonCalc(interface), m_sets(userSettings), m_bgRemove(removalBg), m_TOFWinSt(TOFWinSt), m_TOFWinEnd(TOFWinEnd)
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
@@ -28,25 +26,19 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSet
   readFile(pythonFileName);
   
   // the run file selection has a profound effect on the script, we might once on a single file, ilterate the process over many files or sum the list of files and run just once
-  const std::vector<std::string> &inputFiles = runFiles.getRunFiles();
-  std::vector<std::string>::const_iterator inFile = inputFiles.begin();
-  if ( inputFiles.size() < 1 )
-  {
-    m_fails[m_sets.loadRun_lenumber] = "There must be at least one input file";
-  }
-
+  std::vector<std::string>::const_iterator inFile = input.begin();
   // ckSumSpec->isChecked() == true means sum all the files
-  if (m_sets.ckSumSpecs->isChecked() || inputFiles.size() < 2)
+  if (m_sets.ckSumSpecs->isChecked() || input.size() < 2)
   {// this is the easy case; the analysis is done just once on the sum of all the input spaces
-	QString WS = createProcessingScript(runFiles.getRunString().toStdString(),
-	                              m_sets.leNameSPE->text().toStdString());
+	QString WS = createProcessingScript(vectorToTupple(input),
+	                              m_sets.leNameSPE->text().toStdString(), WBV);
 	renameWorkspace(WS);
   }
   //no summing, the analysis is done once for _each_ input file, createProcessingScript() is run many times to make one long (possibly very long) script
   else if( m_sets.leNameSPE->text().isEmpty())
   {// here the names of the output files are based on the names of the input files, these names are likely to be unique but two files can have the same name if there are in different directories. Create a map to check on duplication
 	std::map<std::string, int> oldNames;
-	for(std::vector<std::string>::const_iterator end = inputFiles.end(); ; )
+	for(std::vector<std::string>::const_iterator end = input.end(); ; )
 	{
 	  std::string saveName = SPEFileName(*inFile).toStdString();
 	  if ( oldNames.find(saveName) == oldNames.end() )
@@ -57,7 +49,7 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSet
 	  {// duplicate names!
 	    saveName = insertNumber(saveName, oldNames[saveName]++);
 	  }
-      QString WS = createProcessingScript("'"+(*inFile)+"',", saveName);
+      QString WS = createProcessingScript("'"+(*inFile)+"',", saveName, WBV);
 	  // the last workspace will retained for the user to examine
 	  if (end == ++inFile)
 	  {// rename it to something they'll recognise
@@ -71,11 +63,11 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSet
   }
   else
   {// we have a base name to use, distingish the multiple output files using numbers
-	for( int i = 0, end = inputFiles.size(); ; )
+	for( int i = 0, end = input.size(); ; )
 	{
 	  // the coma at the end is required that so the Python interpretor will see the string as a list of strings, a list with one member
-	  QString WS = createProcessingScript("'"+inputFiles[i]+"',", 
-	    insertNumber(m_sets.leNameSPE->text().toStdString(), i));
+	  QString WS = createProcessingScript("'"+input[i]+"',", 
+	    insertNumber(m_sets.leNameSPE->text().toStdString(), i), WBV);
 
 	  // the last workspace will retained for the user to examine
 	  if (end == ++i)
@@ -93,7 +85,7 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSet
 *  @param oName the name of the output workspace
 *  @return the name that will be given to the output workspace
 */
-QString deltaECalc::createProcessingScript(const std::string &inFiles, const std::string &oName)
+QString deltaECalc::createProcessingScript(const std::string &inFiles, const std::string &oName, const QString &whiteB)
 {	
   // we make a copy of code we read from the file because we might replace some terms and we might need to repeat this operation
   QString newScr = m_templateB;
@@ -111,7 +103,7 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 
   createRebinStatmens(newScr);
 
-  createNormalizationStatmens(newScr);
+  createNormalizationStatmens(newScr, whiteB);
 
   LEChkCpIn(newScr, "|GUI_SET_MAP_FILE|", m_sets.map_fileInput_leName,
     group->getProperty("MapFile"));
@@ -155,27 +147,16 @@ void deltaECalc::createGetEIStatmens(QString &newScr)
 /** Completes the Python statements that implement normalisation
 *  @param newScr the Python script being developed from the template
 */
-void deltaECalc::createNormalizationStatmens(QString &newScr)
+void deltaECalc::createNormalizationStatmens(QString &newScr, const QString &norm)
 {  
   newScr.replace("|GUI_SET_NORM|", "'"+getNormalization()+"'");
 
-  if ( m_sets.leWBV0->text().isEmpty() )
-  {// the whitebeam normalisation isn't going to happen so these values aren't going to be used insert dummy values that Python will accept
-    newScr.replace("|GUI_SET_WBV|", "''");
-    newScr.replace("|GUI_SET_WBVLOW|", "''");
-    newScr.replace("|GUI_SET_WBVHIGH|", "''");
-	return;
-  }
+  newScr.replace("|GUI_SET_WBV|", "'"+norm+"'");
   
-  // we are going to do a normalisation, check the values
-  newScr.replace("|GUI_SET_WBVLOW|", m_sets.leWBV0Low->text());
-  newScr.replace("|GUI_SET_WBVHIGH|", m_sets.leWBV0High->text());
-
-  std::vector<std::string> exts;
-  exts.push_back("raw"); exts.push_back("RAW");
-  exts.push_back("NXS"); exts.push_back("nxs");
-  FileProperty loadData("Filename", "", FileProperty::Load, exts);
-  LEChkCpIn(newScr, "|GUI_SET_WBV|", m_sets.leWBV0, &loadData);
+  QString rebinStr = m_sets.leWBV0Low->text()+","+QString::number(
+    m_sets.leWBV0High->text().toDouble()-m_sets.leWBV0Low->text().toDouble())
+	+","+m_sets.leWBV0High->text();
+  newScr.replace("|GUI_SET_WBV_REBIN|", "'"+rebinStr+"'");
   
   bool isNumber;
   // check that we've got a usable value, an empty box is OK it means that the default will be used
@@ -187,26 +168,16 @@ void deltaECalc::createNormalizationStatmens(QString &newScr)
 	  m_fails[m_sets.leWBV0Low] = "Must be a number";
 	}
   }
-  if ( ! m_sets.leWBV0High->text().isEmpty() )
-  {
-	m_sets.leWBV0High->text().toDouble(&isNumber);
-	if ( ! isNumber )
-	{
-	  m_fails[m_sets.leWBV0High] = "Must be a number";
-	}
-  }
+  
   // using the algorithm's validator is a more stringent but less specific test, we don't get which number is out
   IAlgorithm_sptr rebin = AlgorithmManager::Instance().createUnmanaged("Rebin");
   rebin->initialize();
   Property * const params = rebin->getProperty("Params");
   // this is the rebin string that is created python
-  QString rebinStr = m_sets.leWBV0Low->text()+","+
-    QString::number(m_sets.leWBV0High->text().toDouble()-m_sets.leWBV0Low->text().toDouble())
-	+","+m_sets.leWBV0High->text();
-	
+
   std::string error = params->setValue(rebinStr.toStdString());
   if ( ! error.empty() )
-  {// the combination of the two number is wrong but which needs changing? Place the star at the end and allow the user to work it out
+  {// the combination of the two numbers is wrong but which needs changing? Place the star at the end and allow the user to work it out
     m_fails[m_sets.leWBV0High] = error;
   }
 }
@@ -368,114 +339,4 @@ void deltaECalc::renameWorkspace(const QString &name)
 {
   m_pyScript.append("RenameWorkspace(");
   m_pyScript.append("'"+tempWS+name+"', '"+name+"')\n");
-}
-
-deltaECalc::FileInput::FileInput(QLineEdit &num, QComboBox &instr)
-  : m_lineEdit(num), m_box(instr), m_files()
-{}
-/** Convert integers into filenames, leaves all non-integers values untouched
-*/
-const std::vector<std::string>& deltaECalc::FileInput::getRunFiles()
-{
-  readComasAndHyphens(m_lineEdit.text().toStdString(), m_files);
-  std::vector<std::string>::iterator i = m_files.begin(), end = m_files.end();
-  for ( ; i != end; ++i )
-  {
-    try
-	{
-	  const unsigned int runNumber = boost::lexical_cast<unsigned int>(*i);
-	  *i = m_box.currentText().toStdString() + //instrument code
-	    boost::lexical_cast<std::string>(runNumber) +
-		".raw";                                      //only raw files are supported at the moment
-	}
-	catch ( boost::bad_lexical_cast )
-	{// the entry doesn't read as a run number
-	}// the alternative is that they entered a filename and we leave that as it is
-  }
-  return m_files;
-}
-/** Safer than using getRunFiles() in the situation were there are no files
-*  @return the name of the first input file, or an empty string if no input files have been defined yet
-*/
-std::string deltaECalc::FileInput::getFile1()
-{
-  return m_files.begin() != m_files.end() ? *m_files.begin() : "";
-}
-
-//??STEVES? move this function into the file widget
-void deltaECalc::FileInput::readComasAndHyphens(const std::string &in, std::vector<std::string> &out)
-{
-  if ( in.empty() )
-  {// it is not an error to have an empty line but it would cause problems with an error check a the end of this function
-    return;
-  }
-  
-  Poco::StringTokenizer ranges(in, "-");
-  Poco::StringTokenizer::Iterator aList = ranges.begin();
-
-  out.clear();
-  do
-  {
-    Poco::StringTokenizer preHyp(*aList, ",", Poco::StringTokenizer::TOK_TRIM);
-    Poco::StringTokenizer::Iterator readPos = preHyp.begin();
-    if ( readPos == preHyp.end() )
-    {// can only mean that there was only an empty string or white space the '-'
-      throw std::invalid_argument("'-' found at the start of a list, can't interpret range specification");
-    }
-	out.reserve(out.size()+preHyp.count());
-    for ( ; readPos != preHyp.end(); ++readPos )
-    {
-      out.push_back(*readPos);
-    }
-    if (aList == ranges.end()-1)
-    {// there is no more input
-      break;
-    }
-
-    Poco::StringTokenizer postHy(*(aList+1),",",Poco::StringTokenizer::TOK_TRIM);
-    readPos = postHy.begin();
-    if ( readPos == postHy.end() )
-    {
-      throw std::invalid_argument("A '-' follows straight after another '-', can't interpret range specification");
-    }
-	
-    try
-    {//we've got the point in the string where there was a hyphen, first get the stuff that is after it
-      // the tokenizer will always return at least on string
-      const int rangeEnd = boost::lexical_cast<int>(*readPos);
-      // the last string before the hyphen should be an int, here we get the it
-      const int rangeStart = boost::lexical_cast<int>(out.back()); 
-      // counting down isn't supported
-      if ( rangeStart > rangeEnd )
-      {
-        throw std::invalid_argument("A range where the first integer is larger than the second is not allowed");
-      }
-      // expand the range
-      for ( int j = rangeStart+1; j < rangeEnd; j++ )
-      {
-        out.push_back(boost::lexical_cast<std::string>(j));
-      }
-	}
-	catch (boost::bad_lexical_cast)
-	{// the hyphen wasn't between two numbers, don't intepret it as a range instaed reconstruct the hyphenated string and add it to the list
-	  out.back() += "-" + *readPos;
-	}
-  }
-  while( ++aList != ranges.end() );
-
-  if ( *(in.end()-1) == '-' )
-  {
-    throw std::invalid_argument("'-' found at the end of a list, can't interpret range specification");
-  }
-}
-QString deltaECalc::FileInput::getRunString()
-{
-  const std::vector<std::string> &inputFiles = getRunFiles();
-  std::vector<std::string>::const_iterator inFile = inputFiles.begin();
-  std::string fileList;
-  for( ; inFile != inputFiles.end(); ++inFile)
-  {// there will be a spare ',' at the end of the list but Python accepts this without error and requires it if there is only one member in the list
-	fileList += "'"+(*inFile)+"',";
-  }
-  return QString::fromStdString(fileList);
 }

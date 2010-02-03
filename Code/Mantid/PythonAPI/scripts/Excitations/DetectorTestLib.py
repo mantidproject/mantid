@@ -34,9 +34,11 @@ def SingleWBV( inputWS, outputWS, HighAbsolute, LowAbsolute, HighMedian, LowMedi
   
   FDOL = FindDetectorsOutsideLimits( inputWS, outputWS, HighAbsolute, LowAbsolute, OutputFile=limitsTempFile )	#for usage see www.mantidproject.org/FindDetectorsOutsideLimits
   MaskDetectors(Workspace=inputWS, DetectorList=FDOL.getPropertyValue("BadDetectorIDs") )			#for usage see www.mantidproject.org/MaskDetectors
+  numBad = numberFromCommaSeparated(FDOL.getPropertyValue("BadDetectorIDs"))
   
   MDT = MedianDetectorTest( InputWorkspace=inputWS, OutputWorkspace=outputWS, SignificanceTest=NumErrorBars, LowThreshold=LowMedian, HighThreshold=HighMedian, OutputFile=MedianTempFile )#for usage see www.mantidproject.org/
   MaskDetectors(Workspace=inputWS, DetectorList=MDT.getPropertyValue("BadDetectorIDs"))						#for usage see www.mantidproject.org/MaskDetectors
+  numBad += numberFromCommaSeparated(MDT.getPropertyValue("BadDetectorIDs"))
   
   fileOutputs = ''
   #--get any file output to add to the main output file
@@ -48,7 +50,6 @@ def SingleWBV( inputWS, outputWS, HighAbsolute, LowAbsolute, HighMedian, LowMedi
         file.close()
         os.remove(algor.getPropertyValue("OutputFile"))	
 
-  numBad = numberFromCommaSeparated(MDT.getPropertyValue("BadDetectorIDs"))
   return (fileOutputs, numBad)
   
 def workspaceExists(workS) :

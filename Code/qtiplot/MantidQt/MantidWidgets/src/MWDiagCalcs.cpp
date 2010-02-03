@@ -66,7 +66,7 @@ const QString whiteBeam2::tempWS = "_Diag_temporyWS_WBV2_";
 /** Read the data the user supplied to create Python code to do their calculation
 * @param userSettings the form that the user filled in
 */
-whiteBeam2::whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings) :
+whiteBeam2::whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &inFile) :
   pythonCalc(interface), m_settings(userSettings)
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
@@ -77,13 +77,9 @@ whiteBeam2::whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings
   // we make a copy of code we read from the file because we might replace some terms but later need to repeat this operation
   m_pyScript = m_templateH;
   m_pyScript.append(m_templateB);
-   
-  std::vector<std::string> exts;
-  exts.push_back("raw"); exts.push_back("RAW");
-  exts.push_back("NXS"); exts.push_back("nxs");
-  FileProperty loadData("Filename", "", FileProperty::OptionalLoad, exts);
-  LEChkCp("|WBVANADIUM2|", m_settings.leWBV2, &loadData);
 
+  m_pyScript.replace("|WBVANADIUM2|", "'"+inFile+"'");
+  
   IAlgorithm_sptr var =
     AlgorithmManager::Instance().createUnmanaged("DetectorEfficiencyVariation");
   var->initialize();
@@ -116,7 +112,7 @@ const QString backTest::tempWS = "_Diag_temporyWS_back_";
 /** Read the data the user supplied to create Python code to do their calculation
 * @param userSettings the form that the user filled in
 */
-backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &runs) :
+backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const std::vector<std::string> &runs) :
   pythonCalc(interface), m_settings(userSettings)
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
@@ -136,11 +132,12 @@ backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, co
     med->getProperty("SignificanceTest") );
   }
   
-  if (runs.isEmpty())
+  if (runs.size() == 0)
   {
     throw std::invalid_argument("No input files have been specified, uncheck \"Check run backgrounds\" to continue");
   }
-  m_pyScript.replace("|EXPFILES|", runs);
+  m_pyScript.replace("|EXPFILES|",
+    QString::fromStdString(vectorToTupple(runs)));
   
   {// I'm limitting the scope of these algroithms pointers so that I don't mix them up while coding
   IAlgorithm_sptr inte =

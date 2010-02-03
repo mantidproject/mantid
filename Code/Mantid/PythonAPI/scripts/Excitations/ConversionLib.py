@@ -13,19 +13,19 @@ def NormaliseTo(reference, WS):
   elif reference != 'no normalization' :
     raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')
 
-def NormaliseToWhiteBeam(WBRun, toNorm, mapFile, start, end) :
+def NormaliseToWhiteBeam(WBRun, toNorm, mapFile, rebinString) :
   theNorm = "_ETrans_norm_tempory_WS"
   common.LoadNexRaw(WBRun, theNorm)
  #comment the next line out?
   LoadDetectorInfo(theNorm, WBRun)
-  
+
   ConvertUnits(theNorm, theNorm, "Energy", AlignBins = 0)
 
   #this both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-  Rebin(theNorm, theNorm, str(start)+', ' + str(end-start)+', ' + str(end))
+  Rebin(theNorm, theNorm, rebinString)
  # shouldn't we do the correction? It affects things when the angles are different
 #  DetectorEfficiencyCor(theNorm, theNorm, IncidentE)  
-    
+
   if mapFile!= "" :
     GroupDetectors( theNorm, theNorm, mapFile, KeepUngroupedSpectra=0)
 

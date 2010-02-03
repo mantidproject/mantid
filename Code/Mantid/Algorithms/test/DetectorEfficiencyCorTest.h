@@ -66,7 +66,6 @@ public:
     loadDetInfo(inName, m_rawFile);
 //    loadDetInfo(inName, "C:/mantid/Test/Data/merlin_detector.sca");
     ConvertToDeltaE(inName);
-
     DetectorEfficiencyCor grouper;
     TS_ASSERT_THROWS_NOTHING( grouper.initialize() )
     TS_ASSERT( grouper.isInitialized() )
@@ -80,14 +79,16 @@ public:
     MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outName));
 
     int firstNonMonitor = 5;
+    // save time by doing a sample of the spectra rather than all of them
     for ( int i = firstNonMonitor; i < input->getNumberHistograms(); i+=10 )
     {
-      for ( Mantid::MantidVec::size_type j = 0 ; j < input->readY(i).size(); j+=10 )
+      for ( Mantid::MantidVec::size_type j = 0 ; j < input->readY(i).size(); j++ )
       {
-        // the detector efficiency is always > 0
-        TS_ASSERT( output->readY(i)[j] > -1e-8 )
-        // the efficiency is always < 1 and the k_i/k_f factor greater than one when k_i > k_f (deltaE > 0) as correction=(k_i/k_f)/detector_efficiency
-        if (output->readX(i)[j] > 0 ) TS_ASSERT( output->readY(i)[j] >= input->readY(i)[j]*(1-1e-8) )
+        // the efficiency is always > 0 and < 1 and the k_i/k_f factor greater than one when k_i > k_f (deltaE > 0) as correction=(k_i/k_f)/detector_efficiency
+        if (input->readX(i)[j] > 0 && input->readY(i)[j] > 0)
+        {
+          TS_ASSERT( output->readY(i)[j] > input->readY(i)[j] )
+        }
      //This test needs to be more ... Steve Williams is waiting for data from the Excitations Group
       }
     }
