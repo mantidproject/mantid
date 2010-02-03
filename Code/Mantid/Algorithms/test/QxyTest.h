@@ -12,25 +12,6 @@ using namespace Mantid::Kernel;
 class QxyTest : public CxxTest::TestSuite
 {
 public:
-  QxyTest() : qxy(), inputWS("wav")
-  {
-    Mantid::DataHandling::LoadRaw2 loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48098.raw");
-    loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.setPropertyValue("SpectrumMin","30");
-    loader.setPropertyValue("SpectrumMax","130");
-    loader.execute();
-
-    Mantid::Algorithms::ConvertUnits convert;
-    convert.initialize();
-    convert.setPropertyValue("InputWorkspace",inputWS);
-    convert.setPropertyValue("OutputWorkspace",inputWS);
-    convert.setPropertyValue("Target","Wavelength");
-    //convert.setPropertyValue("AlignBins","1");
-    convert.execute();
-  }
-  
   void testName()
   {
     TS_ASSERT_EQUALS( qxy.name(), "Qxy" )
@@ -54,20 +35,61 @@ public:
 	
   void testExec()
   {
+    Mantid::DataHandling::LoadRaw2 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename","../../../../Test/Data/LOQ48098.raw");
+    const std::string inputWS("wav");
+    loader.setPropertyValue("OutputWorkspace",inputWS);
+    loader.setPropertyValue("SpectrumMin","30");
+    loader.setPropertyValue("SpectrumMax","130");
+    loader.execute();
+
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setPropertyValue("InputWorkspace",inputWS);
+    convert.setPropertyValue("OutputWorkspace",inputWS);
+    convert.setPropertyValue("Target","Wavelength");
+    convert.execute();
+    
     if (!qxy.isInitialized()) qxy.initialize();
 	  
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("InputWorkspace",inputWS) )
-    TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("OutputWorkspace","result") )
+    const std::string outputWS("result");
+    TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("MaxQxy","0.1") )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("DeltaQ","0.002") )
 	  
     TS_ASSERT_THROWS_NOTHING( qxy.execute() )
     TS_ASSERT( qxy.isExecuted() )
+    
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+    TS_ASSERT_EQUALS( result->getNumberHistograms(), 100 )
+    TS_ASSERT_EQUALS( result->blocksize(), 100 )
+    TS_ASSERT_EQUALS( result->getAxis(0)->unit()->unitID(), "MomentumTransfer" )
+    TS_ASSERT_EQUALS( result->getAxis(1)->unit()->unitID(), "MomentumTransfer" )
+    TS_ASSERT_EQUALS( (*(result->getAxis(1)))(0), -0.1 )
+    TS_ASSERT_DELTA( (*(result->getAxis(1)))(31), -0.038, 0.001 )
+    TS_ASSERT_EQUALS( (*(result->getAxis(1)))(100), 0.1 )
+    
+    TS_ASSERT_EQUALS( result->readX(0).size(), 101 )
+    TS_ASSERT_EQUALS( result->readX(0).front(), -0.1 )
+    TS_ASSERT_DELTA( result->readX(0)[64], 0.028, 0.01 )
+    TS_ASSERT_EQUALS( result->readX(0).back(), 0.1 )
+    TS_ASSERT_DIFFERS( result->readY(0).front(), result->readY(0).front() )  // NaN
+    TS_ASSERT_DELTA( result->readY(26)[73], 4438798, 1 )
+    TS_ASSERT_DELTA( result->readY(18)[36], 174005, 1 )
+    TS_ASSERT_EQUALS( result->readE(0).front(), 0 )
+    TS_ASSERT_EQUALS( result->readE(55)[50], 0 )
+    TS_ASSERT_EQUALS( result->readE(97).back(), 0 )
+    
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 	
 private:
   Mantid::Algorithms::Qxy qxy;
-  std::string inputWS;
 };
 
 #endif /*QXYTEST_H_*/

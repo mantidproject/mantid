@@ -2,13 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/Q1D.h"
-#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/Histogram1D.h"
 
 namespace Mantid
 {
@@ -59,7 +60,7 @@ void Q1D::exec()
   outputWS->setYUnitLabel("I(q)");
   setProperty("OutputWorkspace",outputWS);
   // Set the X vector for the output workspace
-  boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outputWS)->setX(0,XOut);
+  outputWS->setX(0,XOut);
   MantidVec& YOut = outputWS->dataY(0);
   // Don't care about errors here - create locals
   MantidVec EIn(inputWS->readE(0).size());
@@ -80,10 +81,21 @@ void Q1D::exec()
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);
 
+  const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
+  const V3D beamline = samplePos-sourcePos;
 
   const bool doGravity = getProperty("AccountForGravity");
-  if (doGravity) g_log.debug("Correcting for gravity");
+  double gm2over2h2 = 0.0;
+  if (doGravity) 
+  {
+    g_log.debug("Correcting for gravity");
+    // Calculate pre-factor in gravity calculation: gm^2/2h^2
+    gm2over2h2 = ( PhysicalConstants::g * PhysicalConstants::NeutronMass * PhysicalConstants::NeutronMass )
+                / ( 2.0 * PhysicalConstants::h * PhysicalConstants::h );
+    // Adjust for fact that wavelength is in angstroms
+    gm2over2h2 *= 1.0e-20;
+  }
 
   // A temporary vector to store intermediate Q values
   const int xLength = inputWS->readX(0).size();
@@ -128,13 +140,12 @@ void Q1D::exec()
 
         // Calculate the drop (I'm fairly confident that Y is up!)
         // Using approx. constant prefix - will fix next week
-        const double drop = 3.1336e-7 * XIn[j] * XIn[j] * L2;
+        const double drop = gm2over2h2 * XIn[j] * XIn[j] * L2;
 
         // Calculate new 2theta in light of this
-        V3D sampleDetVec = detPos - samplePos;
+        V3D sampleDetVec = detPos - samplePos; // must be in loop because of next line
         sampleDetVec[1] += drop;
-        // Do beamline vector more rigorously later
-        const double twoTheta = sampleDetVec.angle(V3D(0,0,1));
+        const double twoTheta = sampleDetVec.angle(beamline);
         const double sinTheta = sin( 0.5 * twoTheta );
 
         // Now we're ready to go to Q
