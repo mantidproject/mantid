@@ -281,6 +281,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadSPE.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ManagedRawFileWorkspace2D.cpp"
 				>
 			</File>
@@ -524,6 +528,10 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadSaveAsciiTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadSPE.h"
 				>
 			</File>
 			<File

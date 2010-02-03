@@ -59,10 +59,6 @@ private:
   void init();
   ///Execution code
   void exec();
-  /// Number format string for a single number to be printed by fprintf
-  static const char NUM_FORM[7];
-  /// Number format string for a line of numbers printed by fprintf
-  static const char NUMS_FORM[50];
 };
 
 } // namespace DataHandling

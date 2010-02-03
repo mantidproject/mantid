@@ -15,8 +15,12 @@ namespace DataHandling
 DECLARE_ALGORITHM(SaveSPE)
 
 using namespace Kernel;
-const char SaveSPE::NUM_FORM[] = "%10.3E";
-const char SaveSPE::NUMS_FORM[] = "%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E\n";
+
+///@cond
+const char NUM_FORM[] = "%10.3E";
+const char NUMS_FORM[] = "%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E%10.3E\n";
+///@endcond
+
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -31,7 +35,7 @@ void SaveSPE::init()
   wsValidator->add(new API::CommonBinsValidator<>);
   wsValidator->add(new API::HistogramValidator<>);
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsValidator),
-      "The input workspace, which must be in Energy Transfer");
+    "The input workspace, which must be in Energy Transfer");
   declareProperty(new FileProperty("Filename","", FileProperty::Save),
     "The filename to use for the saved data");
 }
