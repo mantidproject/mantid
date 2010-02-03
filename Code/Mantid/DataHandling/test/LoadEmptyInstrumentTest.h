@@ -103,6 +103,20 @@ public:
     param = paramMap.getRecursive(&(*det), "boevs", "spade");
     TS_ASSERT_DELTA( param->value<double>(), 8.0, 0.0001);
 
+
+    // check reserved keywords
+    std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
+    TS_ASSERT_DELTA( dummy[0], 2.0, 0.0001);
+    dummy = paramMap.getDouble("nickel-holder", "pos");
+    TS_ASSERT_EQUALS (dummy.size(), 0);
+    dummy = paramMap.getDouble("nickel-holder", "rot");
+    TS_ASSERT_EQUALS (dummy.size(), 0);
+    dummy = paramMap.getDouble("nickel-holder", "taabe");
+    TS_ASSERT_DELTA (dummy[0], 200.0, 0.0001);
+    dummy = paramMap.getDouble("nickel-holder", "mistake");
+    TS_ASSERT_EQUALS (dummy.size(), 0);
+
+
     AnalysisDataService::Instance().remove(wsName);
   }
 
