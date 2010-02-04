@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_CYLINDERABSORPTION_H_
-#define MANTID_ALGORITHMS_CYLINDERABSORPTION_H_
+#ifndef MANTID_ALGORITHMS_FLATPLATEABSORPTION_H_
+#define MANTID_ALGORITHMS_FLATPLATEABSORPTION_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,21 +10,21 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** Calculates attenuation due to absorption and scattering in a cylindrical sample.
+/** Calculates attenuation due to absorption and scattering in a flat plate/slab sample.
 
     Properties:
     <UL>
     <LI> InputWorkspace  - The name of the input workspace. </LI>
     <LI> OutputWorkspace - The name of the output workspace. Can be the same as the input one. </LI>
-    <LI> CylinderSampleHeight - The height of the cylindrical sample in centimetres. </LI>
-    <LI> CylinderSampleRadius - The radius of the cylindrical sample in centimetres. </LI>
     <LI> AttenuationXSection - The attenuation cross-section for the sample material in barns. </LI>
     <LI> ScatteringXSection - The scattering cross-section for the sample material in barns. </LI>
     <LI> SampleNumberDensity - The number density of the sample in Angstrom^-3.</LI>
-    <LI> NumberOfSlices - The number of slices into which the cylinder is divided for the calculation. </LI>
-    <LI> NumberOfAnnuli - The number of annuli into which each slice is divided for the calculation. </LI>
     <LI> NumberOfWavelengthPoints - The number of wavelength points for which numerical integral is calculated (default: all points). </LI>
-    <LI> ExpMethod - The method to calculate exponential function (Normal of Fast approximation). </LI>
+    <LI> ExpMethod - The method to calculate exponential function (Normal or Fast approximation). </LI>
+    <LI> SampleHeight - The height of the sample in centimetres. </LI>
+    <LI> SampleWidth - The width of the sample in centimetres. </LI>
+    <LI> SampleThickness - The thickness of the sample in centimetres. </LI>
+    <LI> ElementSize - The side dimension of an integration element cube in mm (default: 1). </LI>
     </UL>
 
     This algorithm uses numerical integration method to calculate attenuation factors
@@ -41,10 +41,10 @@ namespace Algorithms
     This algorithm assumes that the beam comes along the Z axis, that Y (the sample cylinder axis) is up
     and that the sample is at the origin.
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 02/12/2008
+    @author Russell Taylor, Tessella plc
+    @date 15/01/2010
 
-    Copyright &copy; 2008-2010 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -64,15 +64,15 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CylinderAbsorption : public AbsorptionCorrection
+class DLLExport FlatPlateAbsorption : public AbsorptionCorrection
 {
 public:
   /// (Empty) Constructor
-  CylinderAbsorption();
+  FlatPlateAbsorption();
   /// Virtual destructor
-  virtual ~CylinderAbsorption() {}
+  virtual ~FlatPlateAbsorption() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "CylinderAbsorption"; }
+  virtual const std::string name() const { return "FlatPlateAbsorption"; }
   /// Algorithm's version
   virtual const int version() const { return (1); }
   /// Algorithm's category for identification
@@ -83,16 +83,19 @@ private:
   void retrieveProperties();
   std::string sampleXML();
   void initialiseCachedDistances();
-  
-  double m_cylHeight;   ///< The height of the cylindrical sample in m
-  double m_cylRadius;   ///< The radius of the cylindrical sample in m
-  int m_numSlices;      ///< The number of slices
-  double m_sliceThickness;///<  The slice thickness
-  int m_numAnnuli;        ///< The number of annuli
-  double m_deltaR;        ///< radius of the cylindrical sample in m / The number of annuli
+
+  double m_slabHeight;      ///< The height of the sample in m
+  double m_slabWidth;       ///< The width of the sample in m
+  double m_slabThickness;   ///< The thickness of the sample in m
+  int m_numXSlices;         ///< The number of slices in X
+  int m_numYSlices;         ///< The number of slices in Y
+  int m_numZSlices;         ///< The number of slices in Z
+  double m_XSliceThickness; ///< The thickness of an X slice in m
+  double m_YSliceThickness; ///< The thickness of a Y slice in m
+  double m_ZSliceThickness; ///< The thickness of a Z slice in m
 };
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_CYLINDERABSORPTION_H_*/
+#endif /* MANTID_ALGORITHMS_FLATPLATEABSORPTION_H_*/
