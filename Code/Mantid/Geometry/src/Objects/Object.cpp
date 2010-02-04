@@ -865,8 +865,9 @@ namespace Mantid
       \retval -1 :: Exit Point
       */
     {
-      const Geometry::V3D testA(Pt-uVec*Surface::getSurfaceTolerance()*10.0);
-      const Geometry::V3D testB(Pt+uVec*Surface::getSurfaceTolerance()*10.0);
+      const Geometry::V3D shift(uVec*Surface::getSurfaceTolerance()*25.0);
+      const Geometry::V3D testA(Pt-shift);
+      const Geometry::V3D testB(Pt+shift);
       const int flagA=isValid(testA);
       const int flagB=isValid(testB);
       if (!(flagA ^ flagB)) return 0;
