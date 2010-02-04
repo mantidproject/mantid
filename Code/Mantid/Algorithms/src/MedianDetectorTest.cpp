@@ -462,8 +462,8 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
   logFinds(missingDataIndices.size(), lows.size(), highs.size(), cAlreadyMasked);
 }
 /** Create an array of detector IDs from the two arrays of spectra numbers that were passed to it
-*  @param lowList a list of spectra numbers
-*  @param highList another list of spectra numbers
+*  @param lows a list of spectra numbers
+*  @param highs another list of spectra numbers
 *  @param detMap the map that contains the list of detectors associated with each spectrum
 *  @param total output property, the array of detector IDs
 */

@@ -65,7 +65,7 @@ public:
   virtual const std::string category() const{return "DataHandling\\Detectors";}
 
 private:
-  // stores the information that is to be saved in the parameter map for a detector
+  /// stores the information that is to be saved in the parameter map for a detector
   struct detectorInfo
   {
     int detID;                                      ///< ID number of the detector
