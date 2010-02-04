@@ -81,8 +81,11 @@ void DiffractionFocussing2::exec()
   const API::SpectraDetectorMap& inSpecMap = inputW->spectraMap();
   const API::Axis* const inSpecAxis = inputW->getAxis(1);
   
+  API::Progress progress(this,0.0,1.0,nHist+nGroups);
   for (int i=0;i<nHist;i++)
   {
+    progress.report();
+
     //Check whether this spectra is in a valid group
     const int group=spectra_group[i];
     if (group==-1) // Not in a group
@@ -170,8 +173,6 @@ void DiffractionFocussing2::exec()
       // Rebin the weights - note that this is a distribution
       VectorHelper::rebin(limits,weights_default,emptyVec,Xout,groupWgt,EOutDummy,true,true);
     }
-        
-    progress(static_cast<double>(i)/101.0);
   }
   
   // Now propagate the errors.
@@ -180,7 +181,7 @@ void DiffractionFocussing2::exec()
   uf rs=std::sqrt;
   
   group2vectormap::const_iterator wit = group2wgtvector.begin();
-  
+
   for (int i=0; i < nGroups; ++i,++wit)
   {
     const MantidVec& Xout = out->readX(i);
@@ -206,9 +207,10 @@ void DiffractionFocussing2::exec()
     const int groupSize = std::count(spectra_group.begin(),spectra_group.end(),(*wit).first);
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
+
+    progress.report();
   }
   
-  progress(1.0);
   //Do some cleanup
   spectra_group.clear();
   group2xvector.clear();
