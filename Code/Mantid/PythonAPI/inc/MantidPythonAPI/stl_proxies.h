@@ -7,6 +7,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <vector>
 #include <set>
+#include <sstream>
 
 namespace Mantid
 {
@@ -20,13 +21,33 @@ namespace PythonAPI
     ///A typedef of a vector of tempolate ElementTypes
     typedef std::vector<ElementType> w_t;
 
+    static std::string to_string(const w_t & values)
+    {
+      if( values.empty() ) return "";
+      std::string retval;
+      w_t::const_iterator iend = values.end();
+      std::ostringstream os;
+      for( w_t::const_iterator itr = values.begin(); itr != iend; )
+      {
+        os << *itr;
+        retval += os.str();
+        os.str("");
+        if( ++itr != iend )
+        {
+          retval += ",";
+        }
+      }
+      return retval;
+    }
+
     ///a python wrapper
     static void
     wrap(std::string const& python_name)
     {
       boost::python::class_<w_t, std::auto_ptr<w_t> >(python_name.c_str())
         .def(boost::python::init<w_t const&>())
-	.def(boost::python::vector_indexing_suite<w_t>())
+	      .def(boost::python::vector_indexing_suite<w_t>())
+        .def("__str__", &vector_proxy::to_string)
       ;
    }
 

@@ -99,6 +99,22 @@ public:
    * Declare a list property, templated on the list type
    * @param prop_name The name of the property
    * @param values A python list of values
+   * @param validator A validator for the parameter
+   * @param doc A string describing the property
+   * @param direction The direction
+   */
+  template<typename TYPE>
+  void _declareListProperty(const std::string & prop_name, boost::python::list values, 
+    Kernel::IValidator<TYPE> & validator,const std::string &doc, const unsigned int direction)
+  {
+    //Extract the values from the python list into a std vector
+    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+  }
+
+  /**
+   * Declare a list property, templated on the list type
+   * @param prop_name The name of the property
+   * @param values A python list of values
    * @param doc A string describing the property
    * @param direction The direction
    */
@@ -174,7 +190,19 @@ public:
   template<typename TYPE>
   TYPE _getProperty(const std::string & prop_name)
   {
-    TYPE retval = this->Algorithm::getProperty(prop_name);
+    TYPE retval = getProperty(prop_name);
+    return retval;
+  }
+
+  /**
+   * Retrieve a list property
+   * @param prop_name The name of the property
+   * @returns The values of the property as a python list
+   */
+  template<typename TYPE>
+  std::vector<TYPE> _getListProperty(const std::string & prop_name)
+  {
+    std::vector<TYPE> retval = getProperty(prop_name);
     return retval;
   }
   

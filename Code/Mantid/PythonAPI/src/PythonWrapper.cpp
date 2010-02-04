@@ -33,13 +33,15 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 
   // Standard containers first
   // A vector of ints
-  vector_proxy<int>::wrap("stl_vector_integer");
+  vector_proxy<int>::wrap("cpp_list_int");
   // A vector of doubles
-  vector_proxy<double>::wrap("stl_vector_double");
+  vector_proxy<double>::wrap("cpp_list_dbl");
+  // A vector of bool
+  vector_proxy<bool>::wrap("cpp_list_bool");
   // A vector of strings
-  vector_proxy<std::string>::wrap("stl_vector_string");
+  vector_proxy<std::string>::wrap("cpp_list_str");
   // A set of strings
-  set_proxy<std::string>::wrap("stl_set_string");
+  set_proxy<std::string>::wrap("cpp_set_string");
 
   // Export functions
   export_kernel_namespace();

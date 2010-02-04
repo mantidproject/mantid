@@ -56,6 +56,11 @@ class WorkspaceProxy(object):
         """
         return getattr(self.__obj, attr)
 
+    def _getHeldObject(self):
+        """
+        Return the underlying object
+        """
+        return self.__obj
 
     def _kill_object(self):
         '''
@@ -529,6 +534,7 @@ class RollbackImporter:
 ##
 # PyAlgorithm class
 ##
+
 class PythonAlgorithm(PyAlgorithmBase):
     '''
     Base class for all Mantid Python algorithms
@@ -563,29 +569,59 @@ class PythonAlgorithm(PyAlgorithmBase):
         Declare a property for this algorithm
         '''
         # Test default value type and call the relevant function
-        if isinstance(DefaultValue, int) or isinstance(DefaultValue, long):
-            decl_func = self.declareProperty_int
-            type = int
-        elif isinstance(DefaultValue, float):
+        if isinstance(DefaultValue, float):
             decl_func = self.declareProperty_dbl
-            type = float
-        elif isinstance(DefaultValue, bool) or isinstance(DefaultValue, str):
+            ptype = float
+        elif isinstance(DefaultValue, str):
             decl_func = self.declareProperty_str
-            type = str
-            if isinstance(DefaultValue, bool):
-                DefaultValue = str(int(DefaultValue))
-                type = bool
-            else:
-                pass
+            ptype = str
+        elif isinstance(DefaultValue,bool):
+            decl_func = self.declareProperty_bool
+            ptype = bool
+        elif isinstance(DefaultValue, int) or isinstance(DefaultValue, long):
+            decl_func = self.declareProperty_int
+            ptype = int
         else:
             raise TypeError('Unrecognized type for property "' + Name + '"')
 
         if Validator == None:
             decl_func(Name, DefaultValue, Description, Direction)
         else:
-            decl_func(Name, DefaultValue, _createCPPValidator(type, Validator), Description, Direction)
-        self._mapPropertyToType(Name, type)
+            decl_func(Name, DefaultValue, _createCPPValidator(ptype, Validator), Description, Direction)
 
+        self._mapPropertyToType(Name, ptype)
+
+    def declareListProperty(self, Name, DefaultValue, Validator = None, Description = '', Direction = Direction.Input):
+        # If the value pass here is a type then given back an empty list and the correct C++ declareListProperty function
+        # If the value is a list check that all of the elements have the same type and give back the C++ declareListProperty function
+        if isinstance(DefaultValue,type):
+            if DefaultValue == int:
+                decl_func = self.declareListProperty_int
+                ltype = int
+            elif DefaultValue == float:
+                decl_func = self.declareListProperty_dbl
+                ltype = float
+            elif DefaultValue == str:
+                decl_func = self.declareListProperty_str
+                ltype = str
+            else:
+                raise TypeError('Unrecognized list type requested for property "' + Name + '"')
+            DefaultValue = []
+        elif isinstance(DefaultValue, list):
+            try:
+                decl_func,ltype = __getListType(DefaultValue)
+            except TypeError, err:
+                raise TypeError(str(err) + ' for property "' + Name + '"')
+        else:
+            raise TypeError('Unrecognized default value for list property ' + Name + "'")
+            
+        if Validator == None:
+            decl_func(Name, DefaultValue, Description, Direction)
+        else:
+            decl_func(Name, DefaultValue, _createCPPValidator(ltype, Validator), Description, Direction)
+            
+        self._mapPropertyToType(Name, [list, ltype])
+        
     # Specialized version for workspaces
     def declareWorkspaceProperty(self, PropertyName, WorkspaceName, Direction, Validator = None, \
                                      Description = '', Type = MatrixWorkspace):
@@ -623,18 +659,29 @@ class PythonAlgorithm(PyAlgorithmBase):
         except KeyError:
             raise KeyError('Unknown property name "' + Name + '"')
 
-        if prop_type == type(1):
+        if prop_type == int:
             return self.getProperty_int(Name)
-        elif prop_type == type(1.0):
+        elif prop_type == float:
             return self.getProperty_dbl(Name)
-        elif prop_type == type(bool):
-            return bool(self.getPropertyValue(Name))
-        elif prop_type == type(''):
+        elif prop_type == bool:
+            return self.getProperty_bool(Name)
+        elif prop_type == str:
             return self.getPropertyValue(Name)
+        elif len(prop_type) == 2:
+            if prop_type[0] == list:
+                ltype = prop_type[1]
+                if ltype == int:
+                    return self.getListProperty_int(Name)
+                elif ltype == float:
+                    return self.getListProperty_dbl(Name)
+                elif ltype == str:
+                    return self.getListProperty_str(Name)
+                else:
+                    raise TypeError('Cannot retrieve unrecognized list property "' + Name + '"')
         elif issubclass(prop_type, WorkspaceProperty):
             return self.getPropertyValue(Name)
         else:
-            raise TypeError('Unrecognized type for property "' + Name + '"')
+            raise TypeError('Cannot retrieve unrecognized type for property "' + Name + '"')
 
     # Wrapper around setPropertyValue
     def setProperty(self, Name, Value):
@@ -660,7 +707,7 @@ class PythonAlgorithm(PyAlgorithmBase):
                 raise TypeError('Attempting to set workspace property with value that is not a workspace.')
         else:
             self.setPropertyValue(Name, str(Value))
-            
+        
     # Return a type based on the value. This avoids the use of Python built-in type function since it
     # returns something that is too generic for user-define class types
     def _typeof(self, value):
@@ -672,6 +719,8 @@ class PythonAlgorithm(PyAlgorithmBase):
             return str
         elif isinstance(value, bool):
             return bool
+        elif isinstance(value,list):
+            return list
         elif isinstance(value, MatrixWorkspace) or isinstance(value, TableWorkspace):
             return WorkspaceProperty
         else:
@@ -680,6 +729,42 @@ class PythonAlgorithm(PyAlgorithmBase):
     # Execute a string that declares a property and keep track of the registered type
     def _mapPropertyToType(self, name, prop_type):
         self._proptypes[name] = prop_type
+
+    def _getListType(values):
+        """
+        Return the declareList function relevant to the given list
+        """
+        ptype = type(values[0])
+        for v in values:
+            if type(v) != ptype:
+                raise TypeError('List property contains mixed types')
+    
+        if isinstance(ptype, int):
+            return self.declareListProperty_int, int
+        elif isinstance(ptype, float):
+            return self.declareListProperty_dbl, float
+        elif isinstance(ptype, str):
+            return self.declareListProperty_str, str
+        else:
+            raise TypeError('Unrecognized list type')
+
+#------------------------------------------------------------------------------------------------
+# WorkspaceFactory
+class WorkspaceFactory(WorkspaceFactoryProxy):
+    
+    @staticmethod
+    def createMatrixWorkspace(NVectors, XLength, YLength):
+        return WorkspaceFactoryProxy.createMatrixWorkspace(NVectors, XLength, YLength)
+
+    @staticmethod
+    def createMatrixWorkspaceFromCopy(Copy, NVectors = -1, XLength = -1, YLength = -1):
+        if isinstance(Copy, WorkspaceProxy):
+            Copy = Copy._getHeldObject()
+        if Copy == None:
+            raise RuntimeError("Cannot create MatrixWorkspace from copy, original is None")
+        if not isinstance(Copy,MatrixWorkspace):
+            raise RuntimeError('Cannot create copy of MatrixWorkspace from template type given.')
+        return WorkspaceFactoryProxy.createMatrixWorkspaceFromTemplate(Copy, NVectors, XLength, YLength)
 
 #------------------------------------------------------------------------------------------------
 
@@ -697,6 +782,10 @@ def _createCPPValidator(prop_type, py_valid):
         return _cppBoundedValidator(prop_type, py_valid.lower, py_valid.upper)
     elif isinstance(py_valid, MandatoryValidator):
         return _cppMandatoryValidator(prop_type)
+    elif isinstance(py_valid, ListValidator):
+        return _cppListValidator(prop_type, py_valid.options)
+    else:
+        return None
 
 #------------------- Validator types ---------------------------
 
@@ -737,7 +826,20 @@ def _cppMandatoryValidator(prop_type):
         return MandatoryValidator_dbl()
     else:
         raise TypeError("Cannot create MandatoryValidator for given property type.")
+
+# ListValidator
+class ListValidator(object):
     
+    def __init__(self, options):
+        self.options = cpp_list_str()
+        for i in options:
+            self.options.append(i)
+    
+def _cppListValidator(prop_type, options):
+    if prop_type == str:
+        return ListValidator_str(options)
+    else:
+        raise TypeError("Cannot create ListValidator for the given property type")
 
 ########################################################################################
 

@@ -101,10 +101,14 @@ namespace PythonAPI
 #define EXPORT_DECLAREPROPERTY(type, suffix)\
     .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
     .def("declareProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, type, Kernel::IValidator<type> &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareProperty<type>) \
-    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)
+    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)\
+    .def("declareListProperty_"#suffix,(void(PyAlgorithmBase::*)(const std::string &, boost::python::list, Kernel::IValidator<type> &,const std::string &,const unsigned int))&PyAlgorithmBase::_declareListProperty<type>)
     
-#define EXPORT_GETPROPERTY(type, pyname)\
-    .def(pyname,(type(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getProperty<type>)
+#define EXPORT_GETPROPERTY(type, suffix)\
+    .def("getProperty_"#suffix,(type(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getProperty<type>)
+
+#define EXPORT_GETLISTPROPERTY(type, suffix)\
+    .def("getListProperty_"#suffix,(std::vector<type>(PyAlgorithmBase::*)(const std::string &))&PyAlgorithmBase::_getListProperty<type>)
     
     class_< PyAlgorithmBase, boost::shared_ptr<PyAlgorithmCallback>, bases<Mantid::API::CloneableAlgorithm>, 
       boost::noncopyable >("PyAlgorithmBase")
@@ -119,14 +123,18 @@ namespace PythonAPI
       EXPORT_DECLAREPROPERTY(int, int)
       EXPORT_DECLAREPROPERTY(double, dbl)
       EXPORT_DECLAREPROPERTY(std::string, str)
-      EXPORT_GETPROPERTY(int, "getProperty_int")
-      EXPORT_GETPROPERTY(double, "getProperty_dbl")
+      EXPORT_DECLAREPROPERTY(bool, bool)
+      EXPORT_GETPROPERTY(int, int)
+      EXPORT_GETLISTPROPERTY(int, int)
+      EXPORT_GETPROPERTY(double, dbl)
+      EXPORT_GETLISTPROPERTY(double, dbl)
+      EXPORT_GETPROPERTY(bool, bool)
       ;
 
     //Leave the place tidy 
 #undef EXPORT_DECLAREPROPERTY
 #undef EXPORT_GETPROPERTY
-
+#undef EXPORT_GETLISTPROPERTY
   }
 
   void export_workspace()
@@ -300,9 +308,11 @@ namespace PythonAPI
 
  void export_workspacefactory()
   {
-    class_< PythonAPI::WorkspaceFactoryProxy, boost::noncopyable>("WorkspaceFactory", no_init)
+    class_< PythonAPI::WorkspaceFactoryProxy, boost::noncopyable>("WorkspaceFactoryProxy", no_init)
       .def("createMatrixWorkspace", &PythonAPI::WorkspaceFactoryProxy::createMatrixWorkspace)
       .staticmethod("createMatrixWorkspace")
+      .def("createMatrixWorkspaceFromTemplate",&PythonAPI::WorkspaceFactoryProxy::createMatrixWorkspaceFromTemplate)
+      .staticmethod("createMatrixWorkspaceFromTemplate")
       ;
   }
 

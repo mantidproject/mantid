@@ -8,6 +8,7 @@
 #include<MantidKernel/FileProperty.h>
 #include<MantidKernel/BoundedValidator.h>
 #include<MantidKernel/MandatoryValidator.h>
+#include<MantidKernel/ListValidator.h>
 #include<MantidKernel/Logger.h>
 
 #include <MantidPythonAPI/stl_proxies.h>
@@ -82,6 +83,11 @@ namespace PythonAPI
     EXPORT_MANDATORYVALIDATOR(std::string,str);
 #undef EXPORT_MANDATORYVALIDATOR
 
+    //List validator
+    class_<Kernel::ListValidator, bases<Kernel::IValidator<std::string> > >("ListValidator_str", init<std::vector<std::string> >())
+//      .def(init<std::vector<std::string> >())
+      .def("addAllowedValue", &Kernel::ListValidator::addAllowedValue)
+      ;
   }
 
   void export_logger()

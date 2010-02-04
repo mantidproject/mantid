@@ -216,6 +216,14 @@ namespace PythonAPI
     }
 
     /**
+     * Create a matrix workspace that has the same attributes as the workspace given
+     */
+    static API::MatrixWorkspace_sptr createMatrixWorkspaceFromTemplate(const API::MatrixWorkspace_sptr & original, int nvectors = -1, int xlength = -1, int ylength = -1)
+    {
+      return API::WorkspaceFactory::Instance().create(original, nvectors, xlength, ylength);
+    }
+
+    /**
      * Create a table workspace object
      */
     static API::ITableWorkspace_sptr createTableWorkspace()
