@@ -535,6 +535,9 @@ class PythonAlgorithm(PyAlgorithmBase):
     '''
     # Dictionary of property names/types
     _proptypes = {}
+    
+    def __init__(self):
+        super(PythonAlgorithm,self).__init__()
 
     def clone(self):
         return copy.deepcopy(self)

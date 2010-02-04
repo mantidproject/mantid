@@ -57,6 +57,15 @@ public:
   PyAlgorithmBase();
 
   /**
+   * Return a reference to the logger object
+   * @returns A reference to this algorithms logger object
+   */
+  Kernel::Logger & getLogger()
+  {
+    return g_log;
+  }
+
+  /**
    * Declare a property, templated on the value along with a validator
    * @param prop_name The name of the property
    * @param default_value The default value
@@ -69,7 +78,7 @@ public:
 			Kernel::IValidator<TYPE> & validator, 
 			const std::string & description, const unsigned int direction)
   {
-    CloneableAlgorithm::declareProperty(prop_name, default_value, validator.clone(), description, direction);
+    this->IAlgorithm::declareProperty(prop_name, default_value, validator.clone(), description, direction);
   }
  
   /**
@@ -83,10 +92,8 @@ public:
   void _declareProperty(const std::string & prop_name, TYPE default_value, 
 			const std::string & description, const unsigned int direction)
   {
-    CloneableAlgorithm::declareProperty(prop_name, default_value, description, direction);
+    this->IAlgorithm::declareProperty(prop_name, default_value, description, direction);
   }
-
-
 
   /**
    * Declare a list property, templated on the list type
@@ -100,7 +107,7 @@ public:
 			    const unsigned int direction)
   {
     //Extract the values from the python list into a std vector
-    CloneableAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
   }
 
   /**
@@ -113,7 +120,7 @@ public:
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname, 
 			       const std::string & description, const unsigned int direction)
   {
-    CloneableAlgorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction), description);
+    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction), description);
   }
 
   /**
@@ -128,7 +135,7 @@ public:
 			       Kernel::IValidator<API::MatrixWorkspace_sptr> & validator,
 			       const std::string & description, const unsigned int direction)
   {
-    CloneableAlgorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, validator.clone()), description);
+    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, validator.clone()), description);
   }
 
   /**
@@ -141,7 +148,7 @@ public:
   void _declareTableWorkspace(const std::string & prop_name, const std::string & default_wsname, 
 			      const std::string & description, const unsigned int direction)
   {
-    CloneableAlgorithm::declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(prop_name, default_wsname, direction), description);
+    this->Algorithm::declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(prop_name, default_wsname, direction), description);
   }
 
   /**
@@ -156,7 +163,7 @@ public:
   void _declareFileProperty(const std::string & prop_name, const std::string & default_value, const unsigned int type, 
 			    boost::python::list exts, const std::string & description, const unsigned int direction)
   {
-    CloneableAlgorithm::declareProperty(new Kernel::FileProperty(prop_name, default_value, type, Conversions::convertToStdVector<std::string>(exts), direction), description);
+    this->Algorithm::declareProperty(new Kernel::FileProperty(prop_name, default_value, type, Conversions::convertToStdVector<std::string>(exts), direction), description);
   }
   
   /**
@@ -167,7 +174,7 @@ public:
   template<typename TYPE>
   TYPE _getProperty(const std::string & prop_name)
   {
-    TYPE retval = CloneableAlgorithm::getProperty(prop_name);
+    TYPE retval = this->Algorithm::getProperty(prop_name);
     return retval;
   }
   
@@ -178,7 +185,7 @@ public:
    */
   void _setMatrixWorkspaceProperty(const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
   {
-    CloneableAlgorithm::setProperty(prop_name,workspace);
+    this->IAlgorithm::setProperty(prop_name,workspace);
   }
 
   /**
@@ -188,7 +195,7 @@ public:
    */
   void _setTableWorkspaceProperty(const std::string & prop_name, API::ITableWorkspace_sptr workspace)
   {
-    CloneableAlgorithm::setProperty(prop_name,workspace);
+    this->IAlgorithm::setProperty(prop_name,workspace);
   }
 
 };

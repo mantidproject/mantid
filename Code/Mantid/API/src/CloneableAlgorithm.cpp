@@ -5,7 +5,7 @@ using namespace Mantid::API;
 /**
  * Default constructor
  */
-CloneableAlgorithm::CloneableAlgorithm()
+CloneableAlgorithm::CloneableAlgorithm() : Algorithm()
 {
 }
 

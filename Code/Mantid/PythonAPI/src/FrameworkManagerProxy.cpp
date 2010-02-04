@@ -303,18 +303,15 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
  * Add a python algorithm to the algorithm factory
  * @param pyobj The python algorithm object wrapped in a boost object
  */
-void FrameworkManagerProxy::registerPyAlgorithm(PyObject *pyobj)
+void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
 {
-  boost::python::handle<> pyhandle(pyobj);
-  Mantid::API::CloneableAlgorithm *pyalg = 
-    boost::python::extract<Mantid::API::CloneableAlgorithm*>(boost::python::object(pyhandle));
-
-  if( pyalg )
+  Mantid::API::CloneableAlgorithm* cppobj = boost::python::extract<Mantid::API::CloneableAlgorithm*>(pyobj);
+  if( cppobj )
   {
     setGILRequired(true);
-    if( ! Mantid::API::AlgorithmFactory::Instance().storeCloneableAlgorithm(pyalg) )
+    if( ! Mantid::API::AlgorithmFactory::Instance().storeCloneableAlgorithm(cppobj) )
     {
-      g_log.error("Unable to register Python algorithm \"" + pyalg->name() + "\"");
+      g_log.error("Unable to register Python algorithm \"" + cppobj->name() + "\"");
     }
     setGILRequired(false);
   }

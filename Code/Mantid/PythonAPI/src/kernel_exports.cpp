@@ -8,6 +8,7 @@
 #include<MantidKernel/FileProperty.h>
 #include<MantidKernel/BoundedValidator.h>
 #include<MantidKernel/MandatoryValidator.h>
+#include<MantidKernel/Logger.h>
 
 #include <MantidPythonAPI/stl_proxies.h>
 
@@ -21,7 +22,6 @@ namespace PythonAPI
 
   void export_property()
   {
-    
     //Pointer 
     register_ptr_to_python<Mantid::Kernel::Property*>();
     //Vector
@@ -84,10 +84,20 @@ namespace PythonAPI
 
   }
 
+  void export_logger()
+  {
+    class_<Kernel::Logger, boost::noncopyable>("MantidLogger", no_init)
+      .def("notice", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::notice)
+      .def("information", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::information)
+      .def("error", (void(Kernel::Logger::*)(const std::string&))&Kernel::Logger::error)
+      ;
+  }
+
   void export_kernel_namespace()
   {
     export_property();
     export_validators();
+    export_logger();
   }
   
   //@endcond

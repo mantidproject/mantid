@@ -156,7 +156,7 @@ public:
   /// Create the simple Python API for Mantid
   void createPythonSimpleAPI(bool);
   /// Register a Python algorithm object with the algorithm factory
-  void registerPyAlgorithm(PyObject *pyobj);
+  void registerPyAlgorithm(boost::python::object pyobj);
   /// A function that can be overridden in Python to handle updates of the AlgorithmFactory
   virtual void algorithmFactoryUpdated() {};
 
