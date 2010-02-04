@@ -73,16 +73,36 @@ void SaveSPE::exec()
   // Number of Workspaces and Number of Energy Bins
   fprintf(outSPE_File,"%8u%8u\n",nHist,nBins);
 
-  // Write the dummy angle grid
-  fprintf(outSPE_File,"### Phi Grid\n");
-  const int phiPoints = nHist + 1; // Pretend this is binned
-  for (int i = 0; i < phiPoints; i++)
+  // Write the angle grid (dummy if no 'vertical' axis)
+  if ( inputWS->axes() > 1 && inputWS->getAxis(1)->unit() )
   {
-    const double value = i + 0.5;
-    fprintf(outSPE_File,NUM_FORM,value);
-    if ( (i > 0) && ((i + 1) % 8 == 0) )
+    const Axis& axis = *(inputWS->getAxis(1));
+    const std::string commentLine = "### " + axis.unit()->caption() + " Grid\n";
+    fprintf(outSPE_File,commentLine.c_str());
+    const int axisLength = axis.length();
+    const int phiPoints = (axisLength==nHist) ? axisLength+1 : axisLength;
+    for (int i = 0; i < phiPoints; i++)
     {
-      fprintf(outSPE_File,"\n");
+      const double value = (i < axisLength) ? axis(i) : axis(axisLength-1)+1;
+      fprintf(outSPE_File,NUM_FORM,value);
+      if ( (i > 0) && ((i + 1) % 8 == 0) )
+      {
+        fprintf(outSPE_File,"\n");
+      }
+    }
+  }
+  else
+  {
+    fprintf(outSPE_File,"### Phi Grid\n");
+    const int phiPoints = nHist + 1; // Pretend this is binned
+    for (int i = 0; i < phiPoints; i++)
+    {
+      const double value = i + 0.5;
+      fprintf(outSPE_File,NUM_FORM,value);
+      if ( (i > 0) && ((i + 1) % 8 == 0) )
+      {
+        fprintf(outSPE_File,"\n");
+      }
     }
   }
 

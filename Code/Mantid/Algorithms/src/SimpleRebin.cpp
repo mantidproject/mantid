@@ -54,11 +54,9 @@ namespace Mantid
 
       // make output Workspace the same type is the input, but with new length of signal array
       API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
-      // Try to cast it to a Workspace2D for use later
-      Workspace2D_sptr outputW_2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
+      // Copy over the 'vertical' axis
+      if (inputW->axes() > 1) outputW->replaceAxis( 1, inputW->getAxis(1)->clone(outputW.get()) );
 
-      int progress_step = histnumber / 100;
-      if (progress_step == 0) progress_step = 1;
       Progress prog(this,0.0,1.0,histnumber);
       PARALLEL_FOR2(inputW,outputW)
       for (int hist=0; hist <  histnumber;++hist)
@@ -83,20 +81,14 @@ namespace Mantid
         }
         
         // Populate the output workspace X values
-        if (outputW_2D)
-        {
-          outputW_2D->setX(hist,XValues_new);
-        }
-        else
-        {
-          outputW->dataX(hist)=XValues_new.access();
-        }
-        //copy oer the spectrum No and ErrorHelper
-        try {
-          outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
-        } catch (Exception::IndexError) {
-          // OK, so this isn't a Workspace2D
-        }
+        outputW->setX(hist,XValues_new);
+        ////copy oer the spectrum No and ErrorHelper
+        //try {
+        //  outputW->getAxis(1)->setValue(hist,(*(inputW->getAxis(1)))(hist));
+        //  //outputW->getAxis(1)->spectraNo(hist)=inputW->getAxis(1)->spectraNo(hist);
+        //} catch (Exception::IndexError) {
+        //  // OK, so this isn't a Workspace2D
+        //}
         
         prog.report();
         PARALLEL_END_INTERUPT_REGION

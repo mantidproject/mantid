@@ -9,20 +9,20 @@ using namespace Mantid::API;
 class LoadSPETest : public CxxTest::TestSuite
 {
 public:
-	void testName()
-	{
+  void testName()
+  {
     TS_ASSERT_EQUALS( loader.name(), "LoadSPE" )
-	}
+  }
 
-	void testVersion()
-	{
+  void testVersion()
+  {
     TS_ASSERT_EQUALS( loader.version(), 1 )
-	}
+  }
 
-	void testCategory()
-	{
+  void testCategory()
+  {
     TS_ASSERT_EQUALS( loader.category(), "DataHandling" )
-	}
+  }
 
   void testInit()
   {
@@ -48,6 +48,7 @@ public:
 
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 32 )
     TS_ASSERT_EQUALS( ws->blocksize(), 195 )
+    TS_ASSERT( ws->isDistribution() )
     TS_ASSERT_EQUALS( ws->YUnit(), "" )
     TS_ASSERT_EQUALS( ws->YUnitLabel(), "S(Phi,Energy)" )
     TS_ASSERT_EQUALS( ws->getAxis(0)->unit()->unitID(), "DeltaE" )

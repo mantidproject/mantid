@@ -89,7 +89,7 @@ void LoadSPE::exec()
   }
 
   // Read in phi grid
-  for (int i = 0; i <= nhist; ++i)
+  for (unsigned int i = 0; i <= nhist; ++i)
   {
     double phi;
     retval = fscanf(speFile,"%10le",&phi);
@@ -113,7 +113,7 @@ void LoadSPE::exec()
   MantidVec& X = XValues.access();
   X.resize(nbins+1);
 
-  for (int i = 0; i <= nbins; ++i)
+  for (unsigned int i = 0; i <= nbins; ++i)
   {
     retval = fscanf(speFile,"%10le",&X[i]);
     if ( retval != 1 ) 
@@ -129,13 +129,14 @@ void LoadSPE::exec()
   // Now create the output workspace
   MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create("Workspace2D",nhist,nbins+1,nbins);
   workspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+  workspace->isDistribution(true); // It should be a distribution
   workspace->setYUnitLabel("S(Phi,Energy)");
   // Replace the default spectrum axis with the phi values one
   workspace->replaceAxis(1,phiAxis);
 
   // Now read in the data spectrum-by-spectrum
   Progress progress(this,0,1,nhist);
-  for (int j = 0; j < nhist; ++j) 
+  for (unsigned int j = 0; j < nhist; ++j) 
   {
     // Set the common X vector
     workspace->setX(j,XValues);
