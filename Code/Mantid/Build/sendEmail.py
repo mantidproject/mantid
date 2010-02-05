@@ -164,8 +164,6 @@ notifier.sendTestCompleted(project,testCount=testCount,testFail=failCount, \
 
 #Construct Message
 httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
-if os.name == 'nt':
-    httpLinkToArchive = 'http://ndw714.isis.cclrc.ac.uk/' + relativeLogDir
 
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess)

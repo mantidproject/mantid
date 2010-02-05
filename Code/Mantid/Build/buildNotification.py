@@ -129,8 +129,7 @@ def getLogDir(project):
   archiveDir = strftime("%Y-%m-%d_%H-%M-%S")
   if os.name == 'nt':
     # MG 29/01/10: Temporarily moved back to local machine until permissions sorted
-    #logDir = "logs\\" + platform.system() + "\\" + project + "\\" + archiveDir + "\\"
-    logDir = "logs/" + project + '/' + archiveDir + '/'
+    logDir = "logs\\" + platform.system() + "\\" + archiveDir + "\\"
   else:
     logDir = 'logs/' + platform.system() + '/' + project + '/' + archiveDir + '/'
   return logDir
@@ -140,11 +139,9 @@ def getArchiveDir(project):
   machine = 'Shadow.nd.rl.ac.uk'
   logDir = getLogDir(project)
   if os.name == 'nt':
-    # MG 29/01/10: Temporarily moved back to local machine until permissions sorted
-    #    baseDir = "\\\\" + machine + "\\mantidkits$\\"
-    baseDir = '../../../../'
+    baseDir = "\\\\" + machine + "\\mantidkits$\\"
     try:
-      os.mkdir(baseDir + logDir)
+      os.makedirs(baseDir + logDir)
     except WindowsError:
       pass
   else:
