@@ -89,7 +89,7 @@
    <item row="0" column="0" colspan="4" >
     <widget class="QTabWidget" name="tabWidget" >
      <property name="currentIndex" >
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="conv" >
       <attribute name="title" >
@@ -1265,16 +1265,6 @@
         </spacer>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="tab_2" >
-      <attribute name="title" >
-       <string>Empty</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tab_3" >
-      <attribute name="title" >
-       <string>Absorption</string>
-      </attribute>
      </widget>
     </widget>
    </item>

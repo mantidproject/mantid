@@ -2,6 +2,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/FileProperty.h"
 #include <QDir>
 #include "boost/lexical_cast.hpp"
 #include <cmath>
@@ -89,9 +90,6 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 {	
   // we make a copy of code we read from the file because we might replace some terms and we might need to repeat this operation
   QString newScr = m_templateB;
-  // validate the user's values using the validator from the algorithm that will be run
-  IAlgorithm_sptr group = AlgorithmManager::Instance().createUnmanaged("GroupDetectors");
-  group->initialize();
   QString err;
 
   // here we are placing code directly into specified parts of the Python that will get run
@@ -105,8 +103,11 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 
   createNormalizationStatmens(newScr, whiteB);
 
-  LEChkCpIn(newScr, "|GUI_SET_MAP_FILE|", m_sets.map_fileInput_leName,
-    group->getProperty("MapFile"));
+  // use a FileProperty to check that the file exists
+  std::vector<std::string> exts;
+  exts.push_back("map"); exts.push_back("MAP");
+  FileProperty loadData("Filename", "", FileProperty::Load, exts);
+  LEChkCpIn(newScr,"|GUI_SET_MAP_FILE|",m_sets.map_fileInput_leName,&loadData);
   
   QString WSName = QString::fromStdString(oName);
   createOutputStatmens(WSName, newScr);

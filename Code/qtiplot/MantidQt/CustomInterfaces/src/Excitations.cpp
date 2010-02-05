@@ -37,8 +37,8 @@ static const QString G_DEFAULT_MAP_FILE("mari_res.map");
 //default values
 static const int G_NUM_NORM_SCHEMES = 4;
 static const QString G_NORM_SCHEMES[G_NUM_NORM_SCHEMES] = 
-  {"protons (uAh)", "no normalization", "monitor-monitor peak1",
-  "monitor-peak2 area"};
+  {"protons (uAh)", "no normalization", "monitor-monitor peak1"};
+//  , "monitor-peak2 area"};
 static const QString G_DEFAULT_NORM = "monitor-monitor peak1";
 static const QString G_BACK_REMOVE("bg removal: none");
 static const double G_START_WINDOW_TOF(18000);
@@ -308,8 +308,9 @@ void Excitations::page1Tooltips()
   m_uiForm.lbScale->setToolTip("Multiply numbers of counts by this power of 10");
   m_uiForm.leScale->setToolTip("Multipling numbers by a large constant can make plotting easier");
 
-  m_uiForm.lbWBV0Low1->setToolTip("Energy range for the white beam normalisation"); m_uiForm.lbWBV0Low2->setToolTip("Energy range for the white beam normalisation");
-  m_uiForm.lbWBV0High1->setToolTip("Energy range for the white beam normalisation"); m_uiForm.lbWBV0High2->setToolTip("Energy range for the white beam normalisation");
+  static const QString WBV0_TIP = "Energy range for the white beam normalisation (passed\nto Integration)";
+  m_uiForm.lbWBV0Low1->setToolTip(WBV0_TIP); m_uiForm.leWBV0Low->setToolTip(WBV0_TIP); m_uiForm.lbWBV0Low2->setToolTip(WBV0_TIP);
+  m_uiForm.lbWBV0High1->setToolTip(WBV0_TIP); m_uiForm.leWBV0High->setToolTip(WBV0_TIP); m_uiForm.lbWBV0High2->setToolTip(WBV0_TIP);
 
   m_uiForm.map_fileInput_lbName->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)"), m_uiForm.map_fileInput_leName->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)"), m_uiForm.map_fileInput_pbBrowse->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)");
 
