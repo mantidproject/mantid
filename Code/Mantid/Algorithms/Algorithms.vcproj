@@ -331,6 +331,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\HRPDSlabCanAbsorption.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\InputWSDetectorInfo.cpp"
 				>
 			</File>

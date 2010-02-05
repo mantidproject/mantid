@@ -28,17 +28,14 @@ namespace Algorithms
     </UL>
 
     This algorithm uses numerical integration method to calculate attenuation factors
-    resulting from absorption and single scattering in a cylindrical sample with the dimensions and material
-    properties given. Factors are calculated for each spectrum (i.e. detector position) and wavelength point,
-    as defined by the input workspace. The sample is divided up into a stack of slices, which are then divided
-    into annuli (rings). These annuli are further divided to give the full set of elements for which a calculation
-    will be carried out. Thus the calculation speed depends linearly on the total number of bins in the workspace
-    and on the number of slices. The dependence on the number of annuli is stronger, going as 3n(n + 1).
-
-    Path lengths through the sample are then calculated for the centre-point of each element and a numerical
+    resulting from absorption and single scattering in a flat plate sample with the dimensions 
+    and material properties given. Factors are calculated for each spectrum (i.e. detector position)
+    and wavelength point, as defined by the input workspace. 
+    The sample is divided up into a small cubes and thenpath lengths through the sample are
+    calculated for the centre-point of each element and a numerical
     integration is carried out using these path lengths over the volume elements.
 
-    This algorithm assumes that the beam comes along the Z axis, that Y (the sample cylinder axis) is up
+    This algorithm assumes that the beam comes along the Z axis
     and that the sample is at the origin.
 
     @author Russell Taylor, Tessella plc
