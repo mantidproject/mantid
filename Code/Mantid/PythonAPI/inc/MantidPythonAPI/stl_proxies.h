@@ -23,11 +23,11 @@ namespace PythonAPI
 
     static std::string to_string(const w_t & values)
     {
-      if( values.empty() ) return "";
-      std::string retval;
-      w_t::const_iterator iend = values.end();
+      if( values.empty() ) return "[]";
+      std::string retval("[");
+      typename w_t::const_iterator iend = values.end();
       std::ostringstream os;
-      for( w_t::const_iterator itr = values.begin(); itr != iend; )
+      for( typename w_t::const_iterator itr = values.begin(); itr != iend; )
       {
         os << *itr;
         retval += os.str();
@@ -37,6 +37,7 @@ namespace PythonAPI
           retval += ",";
         }
       }
+      retval += "]";
       return retval;
     }
 
