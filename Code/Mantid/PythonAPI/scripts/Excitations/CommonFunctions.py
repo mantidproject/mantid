@@ -8,7 +8,7 @@ def LoadNexRaw(filename, workspace):
     LN = LoadNexus(filename, workspace)
     return LN.getPropertyValue('OutputWorkspace')
   if (extension == 'raw') | (extension == 'RAW') :
-    LR = LoadRaw(filename, workspace)
+    LR = LoadRaw(filename, workspace, LoadLogFiles=0)
     return LR.getPropertyValue('OutputWorkspace')
   #we shouldn't get to here, the function should have returned by now
   raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")

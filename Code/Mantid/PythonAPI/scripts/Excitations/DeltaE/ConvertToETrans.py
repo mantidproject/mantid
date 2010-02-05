@@ -37,8 +37,8 @@ try:
     for toAdd in input[ 1 : ] :
       toSum = common.LoadNexRaw(toAdd, conv.tempWS)          #save the memory by overwriting old workspaces
       LoadDetectorInfo(toSum, toAdd)
-	  #the detector masking in pInOut will be preserved
-      Plus(pInOut, toSum, pInOut)               #warning writing pInOut = pInOut + toSum  isn't be the same! That command would produce a new workspace because there is no way for the * operator to know that its output is also an input. The *= operator is much nicer
+      #throughout this script wark spaces are overwritten to save memory
+      Plus(pInOut, toSum, pInOut)
     mantid.deleteWorkspace(conv.tempWS)
   
   if |RM_BG| == 'yes':
@@ -66,12 +66,14 @@ try:
   if mapFile != '':
     GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
   
-  pInOut *= |GUI_SET_SCALING|	   #warning writing pInOut = pInOut * ...  isn't be the same! That command would produce a new workspace because there is no way for the * operator to know that its output is also an input. The *= operator is much nicer
-
- # if |GUI_SET_WBV| != '':
+  if |GUI_SET_SCALING| != 1:
+    CreateSingleValuedWorkspace(conv.tempWS, |GUI_SET_SCALING|)
+    Multiply(pInOut, conv.tempWS, pInOut)
+    mantid.deleteWorkspace(conv.tempWS)
+ 
   conv.NormaliseToWhiteBeam(|GUI_SET_WBV|, pInOut, mapFile, |GUI_SET_WBV_REBIN|)
 
-#  #####remove this line?###
+#INCLUDE THE FOLLOWING LINE TO ZERO INFINITIES AND "Not a Number" VALUES
 #  ReplaceSpecialValues(nameInOut, nameInOut, 0, 0, 0)
   # output to a file in ASCII
   SaveSPE(pInOut, |GUI_SET_OUTPUT|)
@@ -80,5 +82,7 @@ except Exception:
   # delete the possibly part finished workspaces
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == nameInOut) : mantid.deleteWorkspace(nameInOut)
+    if (workspace == conv.tempWS) : mantid.deleteWorkspace(conv.tempWS)
+
   raise
 

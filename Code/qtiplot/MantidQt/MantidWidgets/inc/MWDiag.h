@@ -33,14 +33,12 @@ namespace MantidQt
       DiagResults *m_dispDialog;
 	  /// points to the control with the user selected instrument
 	  const QComboBox * const m_instru;
-	  /// points to the RunFile object used to specify the white beam vanadium file
+	  /// points to the RunFile object used to specify the first white beam vanadium file
+	  MWRunFile *m_WBV1;
+	  /// points to the RunFile object used to specify a possible second white beam vanadium file
 	  MWRunFile *m_WBV2;
-	  /// stores if the contents of the first white beam vanadium box have been filled in by the user or not, if not the contents are open to auto-fillin
-	  bool m_WBVChanged;
 	  /// true if either of the TOF windows have been changed by the user, otherwise false
 	  bool m_TOFChanged;
-	  /// name of the white beam vanadium file that was last passed through the updateWBV() signal or empty if no value was passed
-	  QString m_WBVAutoVal;
 	  /// time of flight value for the start of the background window that was set through the update??? or -1 if no value was sent through
 	  double m_sTOFAutoVal;
 	  /// time of flight value for the end of the background window that was set through the update??? or -1 if no value was sent through
@@ -72,10 +70,8 @@ namespace MantidQt
 	  DiagResults::TestSummary backGroundTest(const DiagResults::TestSummary &firstTest, const DiagResults::TestSummary &secondTest, boost::shared_ptr<backTest>& thisTest);
 	private slots:
 	  void browseClicked(const QString &buttonDis);
-	  void updateWBV(const QString &WBVSuggestion);
 	  void updateTOFs(const double &start, const double &end);
-	  void specifyRuns(const std::vector<std::string> &);
-	  void WBVUpd();
+	  void specifyRuns(const std::vector<std::string> &runFileNames);
 	  void TOFUpd();
 	  void noDispDialog() {m_dispDialog = NULL;}
 	};

@@ -17,7 +17,7 @@ const QString whiteBeam1::tempWS = "_Diag_temporyWS_WBV1_";
 /** Read the data the user supplied to create Python code to do their calculation
 * @param userSettings the form that the user filled in
 */
-whiteBeam1::whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings) :
+whiteBeam1::whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &WBVFile) :
   pythonCalc(interface), m_settings(userSettings)
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
@@ -29,11 +29,7 @@ whiteBeam1::whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings
   m_pyScript = m_templateH;
   m_pyScript.append(m_templateB);
    
-  std::vector<std::string> exts;
-  exts.push_back("raw"); exts.push_back("RAW");
-  exts.push_back("NXS"); exts.push_back("nxs");
-  FileProperty loadData("Filename", "", FileProperty::Load, exts);
-  LEChkCp("|WBVANADIUM1|", m_settings.leWBV1, &loadData);
+  m_pyScript.replace("|WBVANADIUM1|", "'"+WBVFile+"'");
 
   IAlgorithm_sptr out =
     AlgorithmManager::Instance().createUnmanaged("FindDetectorsOutsideLimits");

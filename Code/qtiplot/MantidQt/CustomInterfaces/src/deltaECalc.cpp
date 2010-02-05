@@ -24,7 +24,7 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSet
   QString pythonFileName =
     scriptsdir.absoluteFilePath("Excitations/DeltaE/ConvertToETrans.py");
   readFile(pythonFileName);
-  
+    
   // the run file selection has a profound effect on the script, we might once on a single file, ilterate the process over many files or sum the list of files and run just once
   std::vector<std::string>::const_iterator inFile = input.begin();
   // ckSumSpec->isChecked() == true means sum all the files

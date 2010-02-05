@@ -12,7 +12,7 @@ namespace MantidQt
     class whiteBeam1 : public pythonCalc
     {
     public:
-      whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings);
+      whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &WBVFile);
 
     private:
 

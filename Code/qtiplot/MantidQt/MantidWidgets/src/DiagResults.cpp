@@ -61,9 +61,8 @@ const QString DiagResults::tests[DiagResults::numTests] =
 // Public member functions
 //----------------------
 ///Constructor
-DiagResults::DiagResults(QWidget *parent): QWidget(),
-  m_Grid(new QGridLayout), m_ListMapper(new QSignalMapper(this)),
-  m_ViewMapper(new QSignalMapper(this))
+DiagResults::DiagResults(QWidget *parent): m_Grid(new QGridLayout),
+  m_ListMapper(new QSignalMapper(this)), m_ViewMapper(new QSignalMapper(this))
 {
   setWindowTitle("Failed detectors list");
 

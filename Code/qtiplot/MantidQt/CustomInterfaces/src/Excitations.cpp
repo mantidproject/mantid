@@ -5,6 +5,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "Poco/Path.h"
 #include <QFile>
 #include <QDir>
 #include <QMessageBox>
@@ -60,6 +61,7 @@ Excitations::Excitations(QWidget *parent) : UserSubWindow(parent),
 /// Set up the dialog layout
 void Excitations::initLayout()
 {
+
   // standard setting up of all widgets
   m_uiForm.setupUi(this);
    
@@ -154,7 +156,7 @@ void Excitations::page1FileWidgs()
 
   m_runFilesWid = new MWRunFiles(this, m_prev.group()+"/runs",
 	m_uiForm.loadRun_cbInst, "Run Files", "List of runs to load");
-  //??STEVES?? code for if the runs will be listed in a table
+  //??STEVES?? code for if the selected files will be listed in a table
 //  m_uiForm.loadRun_tvRuns->setColumnCount(3);
 //  m_uiForm.loadRun_tvRuns->setRowCount(1);
 //  m_uiForm.loadRun_tvRuns->horizontalHeader()->hide();
@@ -256,7 +258,7 @@ void Excitations::page1Validators()
   setupValidator(m_uiForm.valMap);
   m_validators[m_uiForm.map_fileInput_leName] = m_uiForm.valMap;
   
-  m_validators[m_uiForm.leWBV0Low] = newStar(m_uiForm.gbExperiment, 6, 4);
+  m_validators[m_uiForm.leWBV0Low] = newStar(m_uiForm.gbExperiment, 5, 4);
   m_validators[m_uiForm.leWBV0High] = m_validators[m_uiForm.leWBV0Low];
   
   setupValidator(m_uiForm.valGuess);
@@ -298,9 +300,8 @@ void Excitations::page1Tooltips()
   m_uiForm.loadRun_cbInst->setToolTip("For example MAR, MAP, ...");
 
   m_uiForm.gbExperiment->setToolTip("Files to process");
-  m_uiForm.ckSumSpecs->setToolTip("If this box is not ticked there will be one output file for each input, otherwise the output will be summed into one file");
-  m_uiForm.ckSumSpecs->setToolTip("If this box is not ticked there will be one output file for each input, otherwise the output will be summed into one file");
-  m_uiForm.ckFixEi->setToolTip("Leave unticked for the algorithm GetEi to calculate a the incident neutron energy based on the monitor signals and the guess below");
+  m_uiForm.ckSumSpecs->setToolTip("If this box is not ticked there will be one output file for each input, otherwise\nthe output will be summed into one file");
+  m_uiForm.ckFixEi->setToolTip("Leave unticked for the algorithm GetEi to calculate a the incident neutron\nenergy based on the monitor signals and the guess below");
 
   m_uiForm.lbNorm->setToolTip("Select the type of normalization for the runs"), m_uiForm.cbNormal->setToolTip("Select the type of normalization for the runs");
   m_uiForm.cbMonitors->setToolTip("If normalization to monitor was selected");
@@ -324,9 +325,8 @@ void Excitations::page1Tooltips()
 /// Adds the diag custom widgets and a check box to allow users to enable or disable the widget
 void Excitations::setUpPage2()
 {/* The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
- this second page is largely filled with the diag widget*/
-  // previous settings, second argument, depends on the instrument and the detector diagnostic settings are kept separate in "diag/"
-  m_diagPage = new MantidWidgets::MWDiag(this, m_prev.group()+"/diag");
+ this second page is largely filled with the diag widget, previous settings, second argument, depends on the instrument and the detector diagnostic settings are kept separate in "diag/"*/
+  m_diagPage = new MWDiag(this, m_prev.group()+"/diag", m_uiForm.loadRun_cbInst);
 
   // set the default background region to the same as the default on this form
   emit MWDiag_updateTOFs(m_prev.value("TOFstart", G_START_WINDOW_TOF).toDouble(),
@@ -492,72 +492,52 @@ void Excitations::runClicked()
 */
 bool Excitations::runScripts()
 {
+  // display the first page because it's likely any problems occur now relate to problems with settings here
+  m_uiForm.tabWidget->setCurrentIndex(0);
   // constructing this builds the Python script, it is executed below
   deltaECalc unitsConv( this, m_uiForm, m_runFilesWid->getFileNames(),
     m_prev.value("bgremove").toString() == "bg removal: on",
 	m_prev.value("TOFstart").toDouble(), m_prev.value("TOFend").toDouble(),
 	m_WBVWid->getFileName());
     
-  QString errors("");
+  // if this function finds a control with an invalid entry the control is marked with a star and some information is returned here
+  QString errors = unitsConv.checkNoErrors(m_validators);
+  if ( ! errors.isEmpty() )
+  {
+    throw std::invalid_argument(errors.toStdString());
+  }
   
-  try
-  {// if this function finds a control with an invalid entry the control is marked with a star and some information is returned here
-    errors = unitsConv.checkNoErrors(m_validators);
+  // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
+  pythonIsRunning(true);
+
+  // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
+  if (m_uiForm.ckRunDiag->isChecked())
+  {
+    // display the second page in case errors occur in processing the user settings here
+    m_uiForm.tabWidget->setCurrentIndex(1);
+    QString maskOutWS = "mask_"+QString::fromStdString(
+	  Poco::Path(m_runFilesWid->getFile1().toStdString()).getBaseName());
+	errors = m_diagPage->run(maskOutWS, true);
 	if ( ! errors.isEmpty() )
 	{
+      pythonIsRunning(false); 
       throw std::invalid_argument(errors.toStdString());
     }
-  }
-  catch(std::exception)
-  {// it's likely the problem come from somewhere on this page
-    m_uiForm.tabWidget->setCurrentIndex(0);
-    throw;
+	// pass the bad detector list to the conversion script to enable masking
+	unitsConv.maskDetects(maskOutWS);
   }
 
-  try
-  {
-    // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
-    if (m_uiForm.ckRunDiag->isChecked())
-    {
-      QString maskOutWS =
-	    "mask_"+MantidWidgets::MantidWidget::removePath(m_runFilesWid->getFile1().toStdString());
-	  // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
-      pythonIsRunning(true);
-	  errors = m_diagPage->run(maskOutWS, true);
-	  if ( ! errors.isEmpty() )
-	  {
-        throw std::invalid_argument(errors.toStdString());
-      }
-	  // pass the bad detector list to the conversion script to enable masking
-	  unitsConv.maskDetects(maskOutWS);
-    }
-  }
-  catch(std::exception)
-  {// it's likely the problem come from somewhere on this page
-    m_uiForm.tabWidget->setCurrentIndex(1);
-    throw;
-  }
-  
-  try
-  {
-    pythonIsRunning(true);
-    //unitsConv is always executed, the user can't switch this off, unless there's an error on the form. To examine the script that is executed uncomment 
-	QMessageBox::critical(this, "", unitsConv.python());
-    errors = unitsConv.run();
-	
-	if ( ! errors.isEmpty() )
-	{
-      throw std::runtime_error(errors.toStdString());
-	}
-  }
-  catch (std::exception)
-  {// it's likely the problem come from somewhere on this page
-    m_uiForm.tabWidget->setCurrentIndex(0);
-    pythonIsRunning(false); 
-    throw;
-  }
-  
+  // we're back to processing the settings on the first page
+  m_uiForm.tabWidget->setCurrentIndex(0);
+  //unitsConv is always executed, the user can't switch this off, unless there's an error on the form. To examine the script that is executed uncomment QMessageBox::critical(this, "", unitsConv.python());
+  errors = unitsConv.run();
   pythonIsRunning(false); 
+
+  if ( ! errors.isEmpty() )
+  {
+    throw std::runtime_error(errors.toStdString());
+  }
+  
   return errors.isEmpty();
 }
 //this function will be replaced a function in a widget
@@ -636,9 +616,16 @@ void Excitations::disenableDiag()
 */
 void Excitations::runFilesChanged()
 {// this signal to the diag GUI allows the run files we choose here to be the default for its background correction
-  emit MWDiag_sendRuns(m_runFilesWid->getFileNames());
-  // the output file's default name is based on the input file names
-  updateSaveName();
+  try
+  {// there might be an invalid file name in the box
+    const std::vector<std::string> &names = m_runFilesWid->getFileNames();
+    emit MWDiag_sendRuns(names);
+    // the output file's default name is based on the input file names
+    updateSaveName();
+  }
+  catch (std::invalid_argument)
+  {// nothing is sent if there is an invalid filename
+  }//the problem is displayed by the file widget's validator
 }
 /** Check if the user has specified a name for the output SPE file,
 * if not insert a name based on the name of the input files
@@ -662,7 +649,13 @@ void Excitations::saveNameUpd()
 */
 void Excitations::updateWBV()
 {
-  emit MWDiag_updateWBV(m_WBVWid->getFileName());
+  try
+  {  
+    emit MWDiag_updateWBV(m_WBVWid->getFileName());
+  }
+  catch (std::invalid_argument)
+  {// nothing is sent if there is an invalid filename
+  }//the problem is displayed by the file widget's validator
 }
 /** enables or disables the list of monitors depending on the whether
 * the monitor was set in the normalisation combobox
@@ -701,17 +694,24 @@ void Excitations::enableSecondBox(bool toEnable)
 */
 QString Excitations::defaultName()
 {
-  const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
-  if ( fileList.size() == 0 )
-  {// no input files we can't say anything about the output files
-    return "";
+  try
+  {//this will trhow if there is an invalid filename
+    const std::vector<std::string> &fileList = m_runFilesWid->getFileNames();
+    if ( fileList.size() == 0 )
+    {// no input files we can't say anything about the output files
+      return "";
+    }
+    if ( fileList.size() > 1 && ! m_uiForm.ckSumSpecs->isChecked() )
+    {// multiple input files that are not summed give rise to multiple output files. Prepare to give the output files names that corrospond to the input filenames
+      return "";
+    }
+    // maybe normal operation: the output file name is based on the first input file
+    return deltaECalc::SPEFileName(fileList.front());
   }
-  if ( fileList.size() > 1 && ! m_uiForm.ckSumSpecs->isChecked() )
-  {// multiple input files that are not summed give rise to multiple output files. Prepare to give the output files names that corrospond to the input filenames
+  catch (std::invalid_argument)
+  {// if there is an invalid filename
     return "";
-  }
-  // maybe normal operation: the output file name is based on the first input file
-  return deltaECalc::SPEFileName(fileList.front());
+  }//the error is also displayed by the file widget's validator
 }
 /** creates and shows the background removal time of flight form
 */

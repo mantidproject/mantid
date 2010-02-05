@@ -29,7 +29,7 @@ namespace MantidQt
 	  
 	  QString run();
       signals:
-        /// Emitted to start a (generally small) script running
+        /// Emitted to start a script running
         void runAsPythonScript(const QString& code);
     
 	protected:

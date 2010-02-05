@@ -23,16 +23,6 @@ namespace MantidQt
     {
       Q_OBJECT
 	  
-    public:
-	  //??STEVES make this an ordinary member soon, move it to the file widget?
-	  /** removes the path and extension from the filename
-      * @param inputFilename name of the file that the .SPE file is based on
-      */
-      static QString removePath(const std::string &inputFilename)
-      {
-        std::string root = Poco::Path(inputFilename).getBaseName();
-        return root.empty() ? "" : QString::fromStdString(root);
-      }
 	protected:
 	  /// A list of labels to use as validation markers
       QHash<const QWidget * const, QLabel *> m_validators;

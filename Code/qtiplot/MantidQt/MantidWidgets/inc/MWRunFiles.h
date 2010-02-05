@@ -48,8 +48,8 @@ namespace MantidQt
 	  
 	  protected slots:
         virtual void browseClicked();
-	    void instrumentChange(const QString &newInstr);
-		void readEntries();
+		virtual void readEntries();
+	    virtual void instrumentChange(const QString &newInstr);
 	};
 
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFile : public MWRunFiles
@@ -57,20 +57,29 @@ namespace MantidQt
       Q_OBJECT
 
     public:
-      /// only calls the base class constructor
-	  MWRunFile(QWidget *parent=NULL, const QString prevSettingsGr="MWRunFiles/standardload", const QComboBox * const instrum=NULL, const QString label="", const QString toolTip="", const QString exts=DEFAULT_FILTER):
-        MWRunFiles(parent, prevSettingsGr, instrum, label, exts) {}
+	  MWRunFile(QWidget *parent=NULL, const QString prevSettingsGr="MWRunFiles/standardload", const QComboBox * const instrum=NULL, const QString label="", const QString toolTip="", const QString exts=DEFAULT_FILTER);
 
-	  QString getFileName() const {
-	    /* need to check validation status*/
-	    return getFile1();}	  
+	  /** Returns the user entered filename, throws if the file is not found or mulitiple
+      *  files were entered
+      *  @return a filename validated against a FileProperty
+      *  @throw invalid_argument if the file couldn't be found or multiple files were entered
+      */
+      QString getFileName() const {return getFile1();}
       signals:
 	    void fileChanged();
+	  public slots:
+	    void suggestFilename(const QString &newName);
 	protected:
+	  /// it is possible to set and change the default value for this widget, this stores the last default value given to it
+	  QString m_suggestedName;
+	  /// stores if the widget has been changed by the user away from its default value
+	  bool m_userChange;
 	  virtual QString openFileDia();
 	
 	private slots:
       void browseClicked();
+	  void instrumentChange(const QString &);
+	  void readEntries();
 	};
   }
 }

@@ -31,7 +31,7 @@ static const double G_END_WINDOW_TOF = 19500;
 static const bool G_NO_ZERO_BG = true;
 
 MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru):
-  m_dispDialog(NULL), m_instru(instru), m_WBVChanged(false),
+  m_dispDialog(NULL), m_instru(instru), m_WBV1(NULL), m_WBV2(NULL),
   m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1)
 {
   // allows saving and loading the values the user entered on to the form
@@ -39,6 +39,7 @@ MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const 
   
   m_designWidg.setupUi(this);
   insertFileWidgs();
+  
   loadDefaults();
   setupToolTips();
   connectSignals(parent);
@@ -48,16 +49,21 @@ void MWDiag::insertFileWidgs()
 {
   // we create and place some new widgets on the form using it's grid layout
   QLayout *mapLayout = m_designWidg.gbVariation->layout();
-  QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout); 
+  QGridLayout *varLay = qobject_cast<QGridLayout*>(mapLayout); 
+  mapLayout = m_designWidg.gbIndividual->layout();
+  QGridLayout *indLay = qobject_cast<QGridLayout*>(mapLayout); 
   // this requires that the form was setup with a grid layout
-  if ( ! mapLay )
+  if ( ! ( varLay && indLay ) )
   { // if you see the following exception check that the group box gbExperiment has a grid layout
-    throw Exception::NullPointerException("Problem with the layout in MWDiag", "mapLay");
+    throw Exception::NullPointerException("Problem with the layout in MWDiag", "m_designWidg");
   }
   
-  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", m_instru, "WhiteBeamVan 2",
-    "The name of a white beam vanadium run from the same instrument as the first");
-  mapLay->addWidget(m_WBV2, 0, 0, 1, 4);
+  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", m_instru, "White Beam Van 2",
+    "Another white beam vanadium run from the same instrument as the first");
+  varLay->addWidget(m_WBV2, 0, 0, 1, 4);
+  m_WBV1 = new MWRunFile(this, m_prevSets.group()+"/WBV1", m_instru, "White Beam Van 1",
+    "Name of a white beam vanadium run from the instrument of interest");
+  indLay->addWidget(m_WBV1, 0, 0, 1, 4);
 }
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control
 void MWDiag::loadDefaults()
@@ -134,12 +140,6 @@ void MWDiag::setupToolTips()
   m_designWidg.leSignificance->setToolTip(significanceToolTip);
   m_designWidg.lbSignificance->setToolTip(significanceToolTip);
 //-------------------------------------------------------------------------------------------------
-  QString WBV1ToolTip =
-    "The name of a white beam vanadium run from the instrument of interest";
-  m_designWidg.lbWBV1->setToolTip(WBV1ToolTip);
-  m_designWidg.leWBV1->setToolTip(WBV1ToolTip);
-  m_designWidg.pbWBV1->setToolTip(WBV1ToolTip);
-
   QString highAbsSetTool =
     "Reject any spectrum that contains more than this number of counts in total\n"
     "(sets property HighThreshold when FindDetectorsOutsideLimits is run)";
@@ -200,11 +200,8 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
   QSignalMapper *signalMapper = new QSignalMapper(this);
   signalMapper->setMapping(m_designWidg.pbIFile, QString("InputFile"));
   signalMapper->setMapping(m_designWidg.pbOFile, QString("OutputFile"));
-  signalMapper->setMapping(m_designWidg.pbWBV1, QString("WBVanadium1"));
   connect(m_designWidg.pbIFile, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_designWidg.pbOFile, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  connect(m_designWidg.pbWBV1, SIGNAL(clicked()), signalMapper, SLOT(map()));
-  
+  connect(m_designWidg.pbOFile, SIGNAL(clicked()), signalMapper, SLOT(map()));  
   connect(signalMapper, SIGNAL(mapped(const QString &)),
          this, SLOT(browseClicked(const QString &)));
 
@@ -215,8 +212,8 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
             parentInterface, SIGNAL(runAsPythonScript(const QString&)));
 
 	// controls that copy the text from other controls
-    connect(m_designWidg.leWBV1, SIGNAL(editingFinished()), this, SLOT(WBVUpd()));
-    connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)), this, SLOT(updateWBV(const QString&)));
+    connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
+	  m_WBV1, SLOT(suggestFilename(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
 	        this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
@@ -265,20 +262,10 @@ void MWDiag::browseClicked(const QString &buttonDis)
     extensions << "msk";
     toSave = true;
   }
-  if ( buttonDis == "WBVanadium1")
-  {
-    editBox = m_designWidg.leWBV1;
-	extensions << "raw" << "RAW" << "NXS" << "nxs";
-  }
-
+	
   QString filepath = openFileDialog(toSave, extensions);
   if( filepath.isEmpty() ) return;
   editBox->setText(filepath);
-  
-  if ( buttonDis == "WBVanadium1")
-  {
-    WBVUpd();
-  }
 }
 /** create, setup and show a dialog box that reports the number of bad
 * detectors.
@@ -348,10 +335,10 @@ QString MWDiag::openFileDialog(const bool save, const QStringList &exts)
   }
   return filename;
 } 
-/**raise the window containing the results summary, run the Python scripts that
+/**raises the window containing the results summary, run the Python scripts that
 *  have been created and, optionally on success, save the values on the form 
 *  @param saveSettings if the Python executes successfully and this parameter is true the settings are saved
-*  @return this method catches many exceptions and a description of the any problem found is returned here
+*  @return this method catches most exceptions and this return is main way that errors are reported
 */
 QString MWDiag::run(const QString &outWS, const bool saveSettings)
 {
@@ -360,76 +347,82 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
   hideValidators();
   // prepare to remove any intermediate workspaces used only during the calculations
   std::vector<std::string> tempOutputWS;
+  QString prob1;
 
-  // these objects read the user settings in the GUI on construction
-  whiteBeam1 firstTest(this, m_designWidg);
+  try
+  {
+    // these objects read the user settings in the GUI on construction
+    whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFileName());
   
-  QString prob1 = firstTest.checkNoErrors(m_validators);
+    prob1 = firstTest.checkNoErrors(m_validators);
   
-  // the two tests below are optional, dependent on the information supplied by the user
-  boost::shared_ptr<whiteBeam2> optional1;
-  QString prob2 = possibleSecondTest(optional1);
-  boost::shared_ptr<backTest> optional2;
-  QString prob3 = possibleThirdTest(optional2);
+    // the two tests below are optional, dependent on the information supplied by the user
+    boost::shared_ptr<whiteBeam2> optional1;
+    QString prob2 = possibleSecondTest(optional1);
+    boost::shared_ptr<backTest> optional2;
+    QString prob3 = possibleThirdTest(optional2);
   
-  // stars have already been placed next to any problem input, if were errors return a description of the first error
-  if ( ! prob1.isEmpty() )
-  {
-    return "In detector test:\n" + prob1;
-  }
-  if ( ! prob2.isEmpty() )
-  {
-    return "In detector test:\n" + prob2;
-  }
-  if ( ! prob3.isEmpty() )
-  {
-    return "In detector test:\n" + prob3;
-  }
-
-  // the input is good bring up the status window
-  raiseDialog();
-  // run things that are dependent on the dialog box being present, it is deleted whenever the user closes it!
-  try 
-  {
-    DiagResults::TestSummary sumFirst = singleWhiteBeamTest(firstTest);
-
-    // the final test contains the definitive data, we'll only know which test was the last at the end, we'll keep on updating this pointer
-    DiagResults::TestSummary *finalTest = &sumFirst;
-    // must have the same scope as finalTest above, these structures are used to report progress and pass results from one test to another
-    DiagResults::TestSummary sumOption1("");
-    DiagResults::TestSummary sumOption2("");
-	tempOutputWS.push_back(sumFirst.inputWS.toStdString());
-
-    if ( optional1.use_count() > 0 )
+    //if were errors return a description of the first error
+    //stars have already been placed next to any problem input
+    if ( ! prob1.isEmpty() )
     {
-      sumOption1 = whiteBeamCompTest(sumFirst, optional1);
-	  finalTest = &sumOption1;
-	  tempOutputWS.push_back(sumOption1.inputWS.toStdString());
+      throw std::invalid_argument(prob1.toStdString());
+    }
+    if ( ! prob2.isEmpty() )
+    {
+      throw std::invalid_argument(prob2.toStdString());
+    }
+    if ( ! prob3.isEmpty() )
+    {
+      throw std::invalid_argument(prob3.toStdString());
     }
 
-    if ( optional2.use_count() > 0 )
+    // the input is good bring up the status window
+    raiseDialog();
+    try // run things that are dependent on the dialog box being present, it is deleted whenever the user closes it!
     {
-      sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
-	  finalTest = &sumOption2;
-	}
+      DiagResults::TestSummary sumFirst = singleWhiteBeamTest(firstTest);
+
+      // the final test contains the definitive data, we'll only know which test was the last at the end, we'll keep on updating this pointer
+      DiagResults::TestSummary *finalTest = &sumFirst;
+      // must have the same scope as finalTest above, these structures are used to report progress and pass results from one test to another
+      DiagResults::TestSummary sumOption1("");
+      DiagResults::TestSummary sumOption2("");
+	  tempOutputWS.push_back(sumFirst.inputWS.toStdString());
+
+      if ( optional1.use_count() > 0 )
+      {
+        sumOption1 = whiteBeamCompTest(sumFirst, optional1);
+	    finalTest = &sumOption1;
+        tempOutputWS.push_back(sumOption1.inputWS.toStdString());
+      }
+
+      if ( optional2.use_count() > 0 )
+      {
+        sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
+	    finalTest = &sumOption2;
+	  }
 	
-  //  the test are complete display and save output
-	if ( ! outWS.isEmpty() )
-    {
-      renameWorkspace(finalTest->outputWS, outWS);
-	  finalTest->outputWS = outWS;
+      //  the test are complete display and save output
+	  if ( ! outWS.isEmpty() )
+      {
+        renameWorkspace(finalTest->outputWS, outWS);
+	    finalTest->outputWS = outWS;
+      }
+      notifyDialog(*finalTest);
     }
-    notifyDialog(*finalTest);
+    catch ( Exception::NullPointerException )
+    {// the diag has died, probably the user closed it
+      prob1 = "The results window was closed, calculation aborted";
+    }
+    catch (std::runtime_error &e)
+    {
+      return "Exception \""+QString(e.what())+"\" encountered running detector diagnostic tests";
+    }
   }
-  catch ( Exception::NullPointerException )
-  {// the diag has died, probably the user closed it
-    prob1 = "Dialog box died";
-  }
-  catch (std::runtime_error &e)
+  catch (std::invalid_argument &e)
   {
-    prob1 = QString("Exception \"") + QString(e.what()) + QString("\" encountered running detector diagnostic tests");
-	QMessageBox::critical(this, "", prob1);
-    return prob1;
+    return "In detector test:\n" + QString(e.what());
   }
 
   // clean up tempory workspaces that were used in the calculations
@@ -490,7 +483,7 @@ DiagResults::TestSummary MWDiag::singleWhiteBeamTest(whiteBeam1 &python)
   results.status = "Analysing white beam vanadium 1";
   notifyDialog(results);
   
-  // use this code to see the script   QMessageBox::critical(this, this->windowTitle(), firstTest.python());
+  // use this code to see the script    QMessageBox::critical(this, this->windowTitle(), python.python());
   QString error = results.pythonResults(python.run());
   notifyDialog(results);
   
@@ -558,18 +551,6 @@ DiagResults::TestSummary MWDiag::backGroundTest(const DiagResults::TestSummary &
   }
   return results;
 }
-/** Called when the user selects a white beam vanadium run on a different form, it copies
-*  the filename over
-*  @param WBVSuggestion the user selected white beam vanadium filename
-*/
-void MWDiag::updateWBV(const QString &WBVSuggestion)
-{// if the user added their own value don't change it
-  m_WBVAutoVal = WBVSuggestion;
-  if ( ! m_WBVChanged ) 
-  {
-    m_designWidg.leWBV1->setText(m_WBVAutoVal);
-  }
-}
 /** Called when the user identifies the background region in a different form, it copies the values over
 *  @param start the TOF value of the start of the background region
 *  @param end the TOF value of the end of the background region
@@ -592,13 +573,7 @@ void MWDiag::specifyRuns(const std::vector<std::string> &runFileNames)
 {
   m_monoFiles = runFileNames;
 }
-/// note if the user has changed the white beam vanadium file away from its default, this will stop the setting from being replaced by the default
-void MWDiag::WBVUpd()
-{// if the user had already altered the contents of the box it has been noted that the save name is under user control so do nothing
-  if (m_WBVChanged) return;
-  m_WBVChanged = m_designWidg.leWBV1->text() != m_WBVAutoVal;
-}
-/// note if the user has changed either of the time of flight values from their defaults, this will stop the setting from being replaced by the default
+/// if the user has changed either of the time of flight values running this method stops the setting from being replaced by the default
 void MWDiag::TOFUpd()
 {// if the user had already altered the contents of the box it has been noted that the save name is under user control so do nothing
   if (m_TOFChanged) return;

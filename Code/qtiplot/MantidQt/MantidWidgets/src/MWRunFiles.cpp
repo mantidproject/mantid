@@ -10,6 +10,7 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 
 static const int MAX_FILE_NOT_FOUND_DISP = 3;
+static const QString TIP_SEC_1 = "\n(selected intrument = ", TIP_SEC_2 = ")";
 
 const QString MWRunFiles::DEFAULT_FILTER = "Files (*.RAW *.raw *.NXS *.nxs);;All Files (*.*)";
 
@@ -19,6 +20,9 @@ MWRunFiles::MWRunFiles(QWidget *parent, const QString prevSettingsGr, const QCom
   // allows saving and loading the values the user entered on to the form
   m_prevSets.beginGroup(prevSettingsGr);
 
+  m_designedWidg.setupUi(this);
+	
+  setToolTip( m_toolTipOrig+TIP_SEC_1+instrum->currentText()+TIP_SEC_2 );
   if(instrum)
   {// this function also adds some information to the tooltip
     instrumentChange(instrum->currentText());
@@ -28,8 +32,6 @@ MWRunFiles::MWRunFiles(QWidget *parent, const QString prevSettingsGr, const QCom
     setToolTip(m_toolTipOrig + "\n(no intrument selected)");
   }
 
-  m_designedWidg.setupUi(this);
-  
   m_designedWidg.lbDiscrip->setText(label);
 
   // setup the label on the form that contains a star to look like a validator star
@@ -43,27 +45,37 @@ MWRunFiles::MWRunFiles(QWidget *parent, const QString prevSettingsGr, const QCom
 
   connect(instrum, SIGNAL(currentIndexChanged(const QString &)),
     this, SLOT(instrumentChange(const QString &)));
-
 }
 /** Returns the user entered filenames as a coma seperated list (integers are expanded to
-*  filenames). If one of the files couldn't be found it then no filenames are returned
+*  filenames)
+*  @return an array of filenames entered in the box
+*  @throw invalid_argument if one of the files couldn't be found it then no filenames are returned
 */
 const std::vector<std::string>& MWRunFiles::getFileNames() const
 {
+  if ( ! m_designedWidg.valid->isHidden() )
+  {// the validator is showing there was a problem with one of the input files
+	throw std::invalid_argument("Some input files could not be found in the edit box marked with a *");
+  }
   return m_files;
 }
 /** Safer than using getRunFiles()[0] in the situation were there are no files
 *  @return an empty string is returned if no input files have been defined or one of the files can't be found, otherwise it's the name of the first input file
+*  @throw invalid_argument if one of the files couldn't be found it then no filenames are returned
 */
 QString MWRunFiles::getFile1() const
 {
-  if ( m_files.begin() != m_files.end() )
+  const std::vector<std::string>& fileList = getFileNames();
+  if ( fileList.begin() != fileList.end() )
   {
-    return QString::fromStdString(*m_files.begin());
+    return QString::fromStdString(*(fileList.begin()));
   }
   return "";
 }
-
+/** Lauches a load file browser allowing a user to select multiple
+*  files
+*  @return the names of the selected files as a coma separated list
+*/
 QString MWRunFiles::openFileDia()
 {
   QStringList filenames;
@@ -116,7 +128,7 @@ void MWRunFiles::readRunNumAndRanges()
   }
   if ( errors.size() > 0 )
   {
-    m_designedWidg.valid->setToolTip(errors.join(", "));
+    m_designedWidg.valid->setToolTip(errors.join(",\n")+"\nHas the path been entered into your Mantid.user.properties file?");
 	m_designedWidg.valid->show();
 	m_files.clear();
   }
@@ -212,7 +224,6 @@ void MWRunFiles::instrumentChange(const QString &newInstr)
   }
   else
   {
-    static const QString TIP_SEC_1 = "\n(selected intrument = ", TIP_SEC_2 = ")";
     if ( toolTip() == m_toolTipOrig+TIP_SEC_1+m_instrument+TIP_SEC_2 )
     {// this checked if the tool tip was modified outside the widget, it wasn't and so we'll update it
       setToolTip(m_toolTipOrig+TIP_SEC_1+newInstr+TIP_SEC_2);
@@ -223,12 +234,22 @@ void MWRunFiles::instrumentChange(const QString &newInstr)
   
   readEntries();
 }
+/** Puts the coma separated string in the leFiles into the m_files array
+*/
 void MWRunFiles::readEntries()
 {
   readRunNumAndRanges();
-  //??STEVES?? do the validation, then conditionally do the next line
   emit fileChanged();
 }
+
+MWRunFile::MWRunFile(QWidget *parent, const QString prevSettingsGr, const QComboBox * const instrum, const QString label, const QString toolTip, const QString exts):
+  MWRunFiles(parent, prevSettingsGr, instrum, label, toolTip, exts), m_userChange(false)
+{
+}
+/** Lauches a load file browser where a user can select only
+*  a single file
+*  @return the name of the file that was selected
+*/
 QString MWRunFile::openFileDia()
 {
   QString filename;
@@ -241,6 +262,26 @@ QString MWRunFile::openFileDia()
   }
   return filename;
 }
+/** Slot changes the filename only if it has not already been changed by
+*  user
+*/
+void MWRunFile::suggestFilename(const QString &newName)
+{
+  try
+  {// check if the user has entered another value (other than the default) into the box
+    m_userChange = m_userChange || (m_suggestedName != getFileName());
+  }
+  catch (std::invalid_argument)
+  {// its possible that the old value was a bad value caused an exception, ignore that
+  }
+  //only set the filename to the default if the user hadn't changed it
+  if ( ! m_userChange )
+  {
+    m_suggestedName = newName;
+	m_designedWidg.leFiles->setText(newName);
+	readEntries();
+  }
+}
 /** Slot opens a file browser, writing the selected file to leFiles
 *  LineEdit and emits fileChanged()
 */
@@ -251,6 +292,23 @@ void MWRunFile::browseClicked()
 
   m_designedWidg.leFiles->setText(uFile);
   
-  readEntries();  
+  readEntries();
+}
+void MWRunFile::instrumentChange(const QString &inst)
+{
+  MWRunFile::instrumentChange(inst);
+  emit fileChanged();
+}
+void MWRunFile::readEntries()
+{
+  MWRunFiles::readEntries();
+
+  if ( m_files.size() > 1 )
+  {
+    m_designedWidg.valid->setToolTip("Only one file is allowed here (, and - are not\nallowed in filenames)");
+	m_designedWidg.valid->show();
+	m_files.clear();
+  }
+  
   emit fileChanged();
 }

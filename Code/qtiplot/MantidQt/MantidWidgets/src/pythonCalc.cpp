@@ -22,8 +22,8 @@ const QString& pythonCalc::python() const
 {
   return m_pyScript;
 }
-/** Protected constructor must be overridden, this base class constructor connects the
-*  runAsPythonScript() signal to the QWidget passed to it
+/** Protected constructor, connects the runAsPythonScript() signal to the QWidget
+*  passed to it
 *  @param interface this widget needs to have runAsPythonScript() connected to MantidPlot, for example be an interface
 */
 pythonCalc::pythonCalc(const QWidget * const interface) :
@@ -146,8 +146,7 @@ QString pythonCalc::runPythonCode(const QString & code, bool no_output)
   QTemporaryFile tmp_file;
   if( !tmp_file.open() )
   {
-//??STEVES uncomment??//      QMessageBox::information(this, "", "An error occurred opening a temporary file in " + QDir::tempPath());
-    return QString();
+    throw std::runtime_error("An error occurred opening a temporary file in " + QDir::tempPath().toStdString());
   }
   //The file name is only valid when the file is open
    QString tmpstring = tmp_file.fileName();
