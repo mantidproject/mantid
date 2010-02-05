@@ -969,14 +969,12 @@ public slots:
 
 	//! \name Scripting
 	//@{
-	//! notify the user that an error occured in the scripting system
-	void scriptError(const QString &message, const QString &scriptName, int lineNumber);
 	//! execute all notes marked auto-exec
 	void executeNotes();
 	//! show scripting language selection dialog
 	void showScriptingLangDialog();
 	//! print to scripting console (if available) or to stdout
-	void scriptPrint(const QString &text);
+        void scriptPrint(const QString &text,bool error = false, bool timestamp = false);
 	//! switches to the given scripting language; 
 	bool setScriptingLanguage(const QString &lang);
 

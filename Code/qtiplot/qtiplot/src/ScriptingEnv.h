@@ -91,6 +91,8 @@ class ScriptingEnv : public QObject
   //to return the appropriate code lexer if one is required
   virtual QsciLexer* scriptCodeLexer() const = 0;
 
+  void execute(const QString & code);						
+
   public slots:
     // global variables
     virtual bool setQObject(QObject*, const char*) { return false; }

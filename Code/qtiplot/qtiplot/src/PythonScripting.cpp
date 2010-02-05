@@ -264,8 +264,7 @@ const QStringList PythonScripting::fileExtensions() const
 
 void PythonScripting::refreshAlgorithms()
 {
-  m_current_script->setCode("mtd._refreshPyAlgorithms();");
-  m_current_script->exec();
+  this->execute("mtd._refreshPyAlgorithms()");
 }
 
 //------------------------------------------------------------

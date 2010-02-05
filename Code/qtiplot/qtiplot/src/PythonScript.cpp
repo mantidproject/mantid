@@ -95,42 +95,45 @@ bool PythonScript::compile(bool for_eval)
   // Support for the convenient col() and cell() functions.
   // This can't be done anywhere else, because we need access to the local
   // variables self, i and j.
-  if( Context->inherits("Table") ) 
+  if( Context )
   {
-    // A bit of a hack, but we need either IndexError or len() from __builtins__.
-    PyDict_SetItemString(localDict, "__builtins__",
-			 PyDict_GetItemString(env()->globalDict(), "__builtins__"));
-    PyObject *ret = PyRun_String(
-				 "def col(c,*arg):\n"
-				 "\ttry: return self.cell(c,arg[0])\n"
-				 "\texcept(IndexError): return self.cell(c,i)\n"
-				 "def cell(c,r):\n"
-				 "\treturn self.cell(c,r)\n"
-				 "def tablecol(t,c):\n"
-				 "\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
-				 "def _meth_table_col_(t,c):\n"
-				 "\treturn t.cell(c,i)\n"
-				 "self.__class__.col = _meth_table_col_",
-				 Py_file_input, localDict, localDict);
-    if (ret)
-      Py_DECREF(ret);
-    else
-      PyErr_Print();
-  } 
-  else if(Context->inherits("Matrix")) 
-  {
-    // A bit of a hack, but we need either IndexError or len() from __builtins__.
-    PyDict_SetItemString(localDict, "__builtins__",
-			 PyDict_GetItemString(env()->globalDict(), "__builtins__"));
-    PyObject *ret = PyRun_String(
-				 "def cell(*arg):\n"
-				 "\ttry: return self.cell(arg[0],arg[1])\n"
-				 "\texcept(IndexError): return self.cell(i,j)\n",
-				 Py_file_input, localDict, localDict);
-    if (ret)
-      Py_DECREF(ret);
-    else
-      PyErr_Print();
+    if( Context->inherits("Table") ) 
+    {
+      // A bit of a hack, but we need either IndexError or len() from __builtins__.
+      PyDict_SetItemString(localDict, "__builtins__",
+			   PyDict_GetItemString(env()->globalDict(), "__builtins__"));
+      PyObject *ret = PyRun_String(
+				   "def col(c,*arg):\n"
+				   "\ttry: return self.cell(c,arg[0])\n"
+				   "\texcept(IndexError): return self.cell(c,i)\n"
+				   "def cell(c,r):\n"
+				   "\treturn self.cell(c,r)\n"
+				   "def tablecol(t,c):\n"
+				   "\treturn self.folder().rootFolder().table(t,True).cell(c,i)\n"
+				   "def _meth_table_col_(t,c):\n"
+				   "\treturn t.cell(c,i)\n"
+				   "self.__class__.col = _meth_table_col_",
+				   Py_file_input, localDict, localDict);
+      if (ret)
+	Py_DECREF(ret);
+      else
+	PyErr_Print();
+    } 
+    else if(Context->inherits("Matrix")) 
+    {
+      // A bit of a hack, but we need either IndexError or len() from __builtins__.
+      PyDict_SetItemString(localDict, "__builtins__",
+			   PyDict_GetItemString(env()->globalDict(), "__builtins__"));
+      PyObject *ret = PyRun_String(
+				   "def cell(*arg):\n"
+				   "\ttry: return self.cell(arg[0],arg[1])\n"
+				   "\texcept(IndexError): return self.cell(i,j)\n",
+				   Py_file_input, localDict, localDict);
+      if (ret)
+	Py_DECREF(ret);
+      else
+	PyErr_Print();
+    }
   }
   bool success(false);
   Py_XDECREF(PyCode);

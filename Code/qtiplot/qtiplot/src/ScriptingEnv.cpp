@@ -86,3 +86,8 @@ void ScriptingEnv::decref()
 		delete this;
 }
 
+void ScriptingEnv::execute(const QString & code)
+{
+  m_current_script->setCode(code);
+  m_current_script->exec();
+}						

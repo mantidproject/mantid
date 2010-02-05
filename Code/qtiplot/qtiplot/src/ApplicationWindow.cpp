@@ -4236,18 +4236,37 @@ void ApplicationWindow::executeNotes()
 			((Note*)widget)->executeAll();
 }
 
-void ApplicationWindow::scriptError(const QString &message, const QString &, int)
+void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timestamp)
 {
-	QMessageBox::critical(this, tr("MantidPlot") + " - "+ tr("Script Error"), message);//Mantid
-}
+  if( error )
+  {
+    console->setTextColor(Qt::red);
+  }
+  else
+  {
+    console->setTextColor(Qt::black);
+  }
+  QString msg_to_print = msg;
 
-void ApplicationWindow::scriptPrint(const QString &text)
-{
-#ifdef SCRIPTING_CONSOLE
-	if(!text.stripWhiteSpace().isEmpty() ) console->append(text);
-#else
-	printf(text.ascii());
-#endif
+  if( error || timestamp )
+  {
+    if( timestamp )
+    {
+      QString separator(75, '-'); 
+      msg_to_print  = separator + "\n" + QDateTime::currentDateTime().toString() 
+	+ ": " + msg.trimmed() + "\n" + separator + '\n';
+    }
+
+    // Check for last character being a new line character unless we are at the start of the 
+    // scroll area
+    if( !console->text().endsWith('\n') && console->textCursor().position() != 0 )
+    {
+      console->textCursor().insertText("\n");    
+    }
+  }
+
+  console->textCursor().insertText(msg_to_print);    
+  console->moveCursor(QTextCursor::End);
 }
 
 bool ApplicationWindow::setScriptingLanguage(const QString &lang)
@@ -4269,12 +4288,9 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
   else
   {
     newEnv = ScriptingLangManager::newEnv(lang, this);
-	
-    connect(newEnv, SIGNAL(error(const QString&,const QString&,int)),
-	    this, SLOT(scriptError(const QString&,const QString&,int)));
     connect(newEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
-    connect(mantidUI, SIGNAL(algorithmAboutToBeCreated()), newEnv, SLOT(refreshAlgorithms()));
 
+    connect(mantidUI, SIGNAL(algorithmAboutToBeCreated()), newEnv, SLOT(refreshAlgorithms()));
 
     if( newEnv->initialize() )
     {   
@@ -16001,14 +16017,13 @@ void ApplicationWindow::runPythonScript(const QString & code)
 {
   if( code.isEmpty() ) return;
   setScriptingLanguage("Python");
-  ScriptEdit *script = new ScriptEdit(scriptEnv, 0);
-  connect(script, SIGNAL(outputMessage(const QString &)), this, SLOT(scriptPrint(const QString &)));
-  connect(script, SIGNAL(outputError(const QString &)), this, SLOT(scriptPrint(const QString &)));
-  script->importCodeBlock(code);
+  connect(m_scriptInterpreter, SIGNAL(MessageToPrint(const QString&,bool,bool)), this, 
+	  SLOT(scriptPrint(const QString&, bool,bool)));
   d_user_script_running = true;
-  script->executeAll();
+  m_scriptInterpreter->runScriptCode(code);
   d_user_script_running = false;
-  delete script;
+  disconnect(m_scriptInterpreter, SIGNAL(MessageToPrint(const QString&,bool,bool)), this, 
+	  SLOT(scriptPrint(const QString&, bool,bool)));
 }
 
 void ApplicationWindow::loadCustomActions()
