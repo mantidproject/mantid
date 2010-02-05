@@ -1318,8 +1318,8 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 			menuBar()->insertItem(tr("&Graph"), graph);
 			menuBar()->insertItem(tr("&Data"), plotDataMenu);
 			plotDataMenuAboutToShow();
-			menuBar()->insertItem(tr("&Analysis"), analysisMenu);
-			analysisMenuAboutToShow();
+			//menuBar()->insertItem(tr("&Analysis"), analysisMenu);
+			//analysisMenuAboutToShow();
 			menuBar()->insertItem(tr("For&mat"), format);
 
 			format->clear();
@@ -9036,7 +9036,7 @@ void ApplicationWindow::showGraphContextMenu()
 		}
 		cm.addAction(actionShowCurvesDialog);
 		cm.addAction(actionAddFunctionCurve);
-		cm.insertItem(tr("Anal&yze"), analysisMenu);
+		//cm.insertItem(tr("Anal&yze"), analysisMenu);
 	}
 
 	if (lastCopiedLayer){
