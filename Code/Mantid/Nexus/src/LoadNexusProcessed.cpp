@@ -105,7 +105,10 @@ namespace Mantid
       {
         API::WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
         //This forms the name of the group
-        const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
+        std::string base_name = getPropertyValue("OutputWorkspace");
+        // First member of group should be the group itself, for some reason!
+        wksp_group->add(base_name);
+        base_name += "_";
         const std::string prop_name = "OutputWorkspace_";
         for( int p = 1; p <= nperiods; ++p )
         {
