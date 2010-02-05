@@ -11,7 +11,7 @@
 #include <gsl/gsl_fft_real.h>
 #include <gsl/gsl_fft_halfcomplex.h>
 
-#include <fstream>
+#include <sstream>
 
 namespace Mantid
 {
@@ -21,7 +21,7 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
-DECLARE_FUNCTION(Convolution)
+//DECLARE_FUNCTION(Convolution)
 
 /// Constructor
 Convolution::Convolution()
@@ -213,6 +213,33 @@ void Convolution::refreshResolution()const
   m_resolution = NULL;
   m_resolutionSize = 0;
 }
+
+/// Writes itself into a string
+std::string Convolution::asString()const
+{
+  if (nFunctions() != 2)
+  {
+    throw std::runtime_error("Convolution function is incomplete");
+  }
+  std::ostringstream ostr;
+  ostr<<"composite=Convolution;";
+  IFunction* res = getFunction(0);
+  IFunction* fun = getFunction(1);
+  bool isCompRes = dynamic_cast<CompositeFunction*>(res) != 0;
+  bool isCompFun = dynamic_cast<CompositeFunction*>(fun) != 0;
+
+  if (isCompRes) ostr << '(';
+  ostr << *res ;
+  if (isCompRes) ostr << ')';
+  ostr << ';';
+
+  if (isCompFun) ostr << '(';
+  ostr << *fun ;
+  if (isCompFun) ostr << ')';
+
+  return ostr.str();
+}
+
 
 } // namespace CurveFitting
 } // namespace Mantid

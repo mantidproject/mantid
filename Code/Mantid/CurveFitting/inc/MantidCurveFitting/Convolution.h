@@ -130,6 +130,9 @@ namespace Mantid
     protected:
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
+      /// Writes itself into a string
+      std::string asString()const;
+
     private:
       /// To keep the Fourier transform of the resolution function (divided by the step in xValues)
       mutable double* m_resolution;
