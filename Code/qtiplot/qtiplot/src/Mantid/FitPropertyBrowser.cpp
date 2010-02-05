@@ -898,6 +898,7 @@ void FitPropertyBrowser::fit()
     }
     m_btnUnFit->setEnabled(true);
 
+    bool simpleFunction;
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace",wsName);
@@ -905,12 +906,25 @@ void FitPropertyBrowser::fit()
     alg->setProperty("StartX",startX());
     alg->setProperty("EndX",endX());
     alg->setPropertyValue("Output",outputName());
-    alg->setPropertyValue("Function",*m_compositeFunction);
+    if (m_compositeFunction->nFunctions() > 1)
+    {
+      alg->setPropertyValue("Function",*m_compositeFunction);
+      simpleFunction = false;
+    }
+    else
+    {
+      alg->setPropertyValue("Function",*(m_compositeFunction->getFunction(0)));
+      simpleFunction = true;
+    }
     alg->setPropertyValue("Minimizer",minimizer());
+
+    std::cerr<< *m_compositeFunction <<'\n';
+
     QString tiesStr;
+
     for(int i=0;i<m_ties.size();i++)
     {
-      tiesStr += m_ties[i].expr();
+      tiesStr += m_ties[i].expr(simpleFunction);
       if (i!=m_ties.size()-1)
       {
         tiesStr += ",";

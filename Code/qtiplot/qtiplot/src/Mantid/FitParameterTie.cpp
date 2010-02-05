@@ -73,13 +73,22 @@ void FitParameterTie::set(const QString& estr)
 }
 
 /// The tying expression
-QString FitParameterTie::expr()const
+QString FitParameterTie::expr(bool removePrefix)const
 {
   QString str = m_expr;
   for(int j=0;j<m_iFunctions.size();j++)
   {
     QString ph = "#"+QString::number(j);
-    QString fi = "f"+QString::number(m_iFunctions[j]);
+    QString fi;
+    if (removePrefix)
+    {
+      ph += ".";
+      fi = "";
+    }
+    else
+    {
+      fi = "f"+QString::number(m_iFunctions[j]);
+    }
     str.replace(ph,fi);
   }
   return str;

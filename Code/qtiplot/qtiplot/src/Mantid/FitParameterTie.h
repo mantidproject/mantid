@@ -28,7 +28,7 @@ public:
   /// Set the tying expression, e.g. "f1.Sigma = 2*f0.Sigma + 1"
   void set(const QString& estr);
   /// The tying expression
-  QString expr()const;
+  QString expr(bool removePrefix=false)const;
   /// The parameter name
   QString parName()const;
   /// Returns the right-hand side of the expression
