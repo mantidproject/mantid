@@ -58,11 +58,13 @@ void MWDiag::insertFileWidgs()
     throw Exception::NullPointerException("Problem with the layout in MWDiag", "m_designWidg");
   }
   
-  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", m_instru, "White Beam Van 2",
-    "Another white beam vanadium run from the same instrument as the first");
+  m_WBV2 = new MWRunFile(this, m_prevSets.group()+"/WBV2", true, m_instru,
+    "White Beam Van 2",
+	"Another white beam vanadium run from the same instrument as the first");
   varLay->addWidget(m_WBV2, 0, 0, 1, 4);
-  m_WBV1 = new MWRunFile(this, m_prevSets.group()+"/WBV1", m_instru, "White Beam Van 1",
-    "Name of a white beam vanadium run from the instrument of interest");
+  m_WBV1 = new MWRunFile(this, m_prevSets.group()+"/WBV1", false, m_instru,
+    "White Beam Van 1",
+	"Name of a white beam vanadium run from the instrument of interest");
   indLay->addWidget(m_WBV1, 0, 0, 1, 4);
 }
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control

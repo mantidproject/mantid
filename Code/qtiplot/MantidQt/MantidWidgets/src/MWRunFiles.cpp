@@ -14,8 +14,8 @@ static const QString TIP_SEC_1 = "\n(selected intrument = ", TIP_SEC_2 = ")";
 
 const QString MWRunFiles::DEFAULT_FILTER = "Files (*.RAW *.raw *.NXS *.nxs);;All Files (*.*)";
 
-MWRunFiles::MWRunFiles(QWidget *parent, const QString prevSettingsGr, const QComboBox * const instrum, const QString label, const QString toolTip, const QString exts) :
-  MantidWidget(parent), m_toolTipOrig(toolTip), m_filter(exts)
+MWRunFiles::MWRunFiles(QWidget *parent, const QString prevSettingsGr, bool allowEmpty, const QComboBox * const instrum, const QString label, const QString toolTip, const QString exts) :
+  MantidWidget(parent), m_allowEmpty(allowEmpty), m_toolTipOrig(toolTip), m_filter(exts)
 {
   // allows saving and loading the values the user entered on to the form
   m_prevSets.beginGroup(prevSettingsGr);
@@ -104,6 +104,11 @@ void MWRunFiles::readRunNumAndRanges()
   exts.push_back("NXS"); exts.push_back("nxs");
   FileProperty loadData("Filename", "", FileProperty::Load, exts);
 
+  if ( m_files.size() == 0 && ! m_allowEmpty )
+  {
+    errors << "A filename must be specified";
+  }
+
   std::vector<std::string>::iterator i = m_files.begin(), end = m_files.end();
   for ( ; i != end; ++i )
   {
@@ -128,7 +133,14 @@ void MWRunFiles::readRunNumAndRanges()
   }
   if ( errors.size() > 0 )
   {
-    m_designedWidg.valid->setToolTip(errors.join(",\n")+"\nHas the path been entered into your Mantid.user.properties file?");
+    if ( m_files.size() > 0 )
+	{
+      m_designedWidg.valid->setToolTip(errors.join(",\n")+"\nHas the path been entered into your Mantid.user.properties file?");
+	}
+	else
+	{
+      m_designedWidg.valid->setToolTip(errors.front());
+	}
 	m_designedWidg.valid->show();
 	m_files.clear();
   }
@@ -242,8 +254,8 @@ void MWRunFiles::readEntries()
   emit fileChanged();
 }
 
-MWRunFile::MWRunFile(QWidget *parent, const QString prevSettingsGr, const QComboBox * const instrum, const QString label, const QString toolTip, const QString exts):
-  MWRunFiles(parent, prevSettingsGr, instrum, label, toolTip, exts), m_userChange(false)
+MWRunFile::MWRunFile(QWidget *parent, QString prevSettingsGr, bool allowEmpty, const QComboBox * const instrum, QString label, QString toolTip, QString exts):
+  MWRunFiles(parent, prevSettingsGr, allowEmpty, instrum, label, toolTip, exts), m_userChange(false)
 {
 }
 /** Lauches a load file browser where a user can select only

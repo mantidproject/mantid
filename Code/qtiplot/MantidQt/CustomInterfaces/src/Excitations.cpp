@@ -154,7 +154,7 @@ void Excitations::page1FileWidgs()
     throw Exception::NullPointerException("Problem with the layout in the first tab", "mapLay");
   }
 
-  m_runFilesWid = new MWRunFiles(this, m_prev.group()+"/runs",
+  m_runFilesWid = new MWRunFiles(this, m_prev.group()+"/runs", false,
 	m_uiForm.loadRun_cbInst, "Run Files", "List of runs to load");
   //??STEVES?? code for if the selected files will be listed in a table
 //  m_uiForm.loadRun_tvRuns->setColumnCount(3);
@@ -164,7 +164,7 @@ void Excitations::page1FileWidgs()
   mapLay->addWidget(m_runFilesWid, 0, 0, 1, 8);
   connect(m_runFilesWid, SIGNAL(fileChanged()), this, SLOT(runFilesChanged()));
 
-  m_WBVWid = new MWRunFile(this, m_prev.group()+"/WBV",
+  m_WBVWid = new MWRunFile(this, m_prev.group()+"/WBV", false,
 	m_uiForm.loadRun_cbInst, "White Beam Van",
 	"This white beam vanadium run also sets the defaults\n"
 	"in Diagnose Detectors and Absolute Units");
@@ -300,7 +300,11 @@ void Excitations::page1Tooltips()
   m_uiForm.loadRun_cbInst->setToolTip("For example MAR, MAP, ...");
 
   m_uiForm.gbExperiment->setToolTip("Files to process");
-  m_uiForm.ckSumSpecs->setToolTip("If this box is not ticked there will be one output file for each input, otherwise\nthe output will be summed into one file");
+  m_uiForm.pbBack->setToolTip("Enabling this removes the mean number of counts per bin in the background region\n"
+                               "of spectra from the all bins. Negative values are replaced with zeros (uses\n"
+							   "FlatBackground)");
+  m_uiForm.ckSumSpecs->setToolTip("If this box is not ticked there will be one output file for each input, otherwise\n"
+                                   "the output will be summed into one file");
   m_uiForm.ckFixEi->setToolTip("Leave unticked for the algorithm GetEi to calculate a the incident neutron\nenergy based on the monitor signals and the guess below");
 
   m_uiForm.lbNorm->setToolTip("Select the type of normalization for the runs"), m_uiForm.cbNormal->setToolTip("Select the type of normalization for the runs");

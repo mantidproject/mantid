@@ -19,7 +19,7 @@ namespace MantidQt
       Q_OBJECT
 
     public:
-      MWRunFiles(QWidget *parent=NULL, const QString prevSettingsGr="MWRunFiles/standardload", const QComboBox * const instrum=NULL, const QString label="", const QString toolTip="", const QString exts=DEFAULT_FILTER);
+      MWRunFiles(QWidget *parent=NULL, QString prevSettingsGr="MWRunFiles/standardload", bool allowEmpty=false, const QComboBox * const instrum=NULL, QString label="", QString toolTip="", QString exts=DEFAULT_FILTER);
 	  const std::vector<std::string>& getFileNames() const;
 	  virtual QString getFile1() const;
 	  
@@ -39,6 +39,8 @@ namespace MantidQt
 	  const QString m_toolTipOrig;
 	  /// An array of valid file names derived from the entries in the leNumber LineEdit
 	  std::vector<std::string> m_files;
+	  /// stores whether or not a file must be specified
+	  const bool m_allowEmpty;
 
 	  virtual QString openFileDia();
 	  void readRunNumAndRanges();
@@ -57,7 +59,7 @@ namespace MantidQt
       Q_OBJECT
 
     public:
-	  MWRunFile(QWidget *parent=NULL, const QString prevSettingsGr="MWRunFiles/standardload", const QComboBox * const instrum=NULL, const QString label="", const QString toolTip="", const QString exts=DEFAULT_FILTER);
+	  MWRunFile(QWidget *parent=NULL, QString prevSettingsGr="MWRunFiles/standardload", bool allowEmpty=false, const QComboBox * const instrum=NULL, QString label="", QString toolTip="", QString exts=DEFAULT_FILTER);
 
 	  /** Returns the user entered filename, throws if the file is not found or mulitiple
       *  files were entered

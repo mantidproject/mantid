@@ -21,7 +21,7 @@ input = (|GUI_SET_RAWFILE_LIST|)
 try:
 #the new workspace will be able to be accessed via the pointer, pInOut, or its name, nameInout
   pInOut = common.LoadNexRaw(input[0], nameInOut)
-
+  if pInOut.isGroup() : raise Exception("Workspace groups are not supported here")
 #----Calculations start------------------
   # the string |GUI_SET_E| below is replaced by a value depending on what was entered on the user interface, either the value of the energy to use (in meV) or the string 'Run GEtEi'
   IncidentE = |GUI_SET_E|
