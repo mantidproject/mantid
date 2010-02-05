@@ -1212,7 +1212,8 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
 
   QString sample_logs, can_logs;
-  bool is_loaded(true);  
+  bool is_loaded(true); 
+  QString error();
   //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
   if( !m_run_no_boxes.value(4)->text().isEmpty() && m_run_no_boxes.value(7)->text().isEmpty() )
   {
