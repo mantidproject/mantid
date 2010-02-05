@@ -22,7 +22,7 @@ namespace MantidQt
 
     public:
       /// there has to be a default constructor but you can call it with a pointer to the thing that will take ownership of it
-      MWDiag(QWidget *parent = NULL, QString prevSettingsGr = "CustomWidgets/Diag", const QComboBox * const instru = NULL);
+      MWDiag(QWidget *parent=NULL, QString prevSettingsGr="CustomWidgets/Diag", const QComboBox * const instru=NULL);
 	  QString run(const QString &outWS = "", const bool saveSettings = true);
 	  signals:
 	    void runAsPythonScript(const QString&);
@@ -49,6 +49,8 @@ namespace MantidQt
 	  std::vector<std::string> m_monoFiles;
       /// the values on the form the last time it was SUCCESSFULLY run accessed through this object
 	  QSettings m_prevSets;
+	  //?? remove this
+	  int remove;
 
 	  void raiseDialog();
       void notifyDialog(const DiagResults::TestSummary &display);

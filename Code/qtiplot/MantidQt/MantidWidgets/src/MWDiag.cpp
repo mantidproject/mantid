@@ -66,6 +66,8 @@ void MWDiag::insertFileWidgs()
     "White Beam Van 1",
 	"Name of a white beam vanadium run from the instrument of interest");
   indLay->addWidget(m_WBV1, 0, 0, 1, 4);
+  
+  MWRunFile test;//??remove this line
 }
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control
 void MWDiag::loadDefaults()
