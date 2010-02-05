@@ -811,7 +811,7 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 }
 void MantidUI::executeAlgorithm(QString algName, int version)
 {
-
+  emit algorithmAboutToBeCreated(); 
   Mantid::API::IAlgorithm_sptr alg;
   try
   {

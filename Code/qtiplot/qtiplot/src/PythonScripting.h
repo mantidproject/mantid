@@ -67,7 +67,8 @@ class PythonScripting: public ScriptingEnv
   // Create a new script object that can execute code within this enviroment
   Script *newScript(const QString &code, QObject *context, const QString &name="<input>")
   {
-    return new PythonScript(this, code, context, name);
+    m_current_script = new PythonScript(this, code, context, name);
+    return m_current_script;
   }
 
   bool setQObject(QObject*, const char*, PyObject *dict);
@@ -81,6 +82,10 @@ class PythonScripting: public ScriptingEnv
 
   PyObject *globalDict() { return m_globals; }
   PyObject *sysDict() { return m_sys; }
+
+  public slots:
+    virtual void refreshAlgorithms();
+
 
 private:
   //Start the environment

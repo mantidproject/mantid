@@ -55,7 +55,8 @@ class muParserScripting: public ScriptingEnv
     bool isRunning() const { return true; }
     Script *newScript(const QString &code, QObject *context, const QString &name="<input>")
     {
-      return new muParserScript(this, code, context, name);
+      m_current_script = new muParserScript(this, code, context, name);
+      return m_current_script;
     }
     
     // Mantid - follows changes to ScriptingEnv for QScintilla

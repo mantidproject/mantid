@@ -4273,6 +4273,8 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
     connect(newEnv, SIGNAL(error(const QString&,const QString&,int)),
 	    this, SLOT(scriptError(const QString&,const QString&,int)));
     connect(newEnv, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
+    connect(mantidUI, SIGNAL(algorithmAboutToBeCreated()), newEnv, SLOT(refreshAlgorithms()));
+
 
     if( newEnv->initialize() )
     {   

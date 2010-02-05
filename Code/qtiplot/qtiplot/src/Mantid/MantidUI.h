@@ -227,6 +227,8 @@ public slots:
 signals:
   //A signal to indicate that we want a script to produce a dialog
   void showPropertyInputDialog(const QString & algName);
+  // Broadcast that an algorithm is about to be created
+  void algorithmAboutToBeCreated();
 private:
   Mantid::API::IAlgorithm_sptr findAlgorithmPointer(const QString & algName);
 

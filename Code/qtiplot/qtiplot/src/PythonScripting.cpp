@@ -262,6 +262,11 @@ const QStringList PythonScripting::fileExtensions() const
 	return extensions;
 }
 
+void PythonScripting::refreshAlgorithms()
+{
+  m_current_script->setCode("mtd._refreshPyAlgorithms();");
+  m_current_script->exec();
+}
 
 //------------------------------------------------------------
 // Private member functions

@@ -97,6 +97,8 @@ class ScriptingEnv : public QObject
     virtual bool setInt(int, const char*) { return false; }
     virtual bool setDouble(double, const char*) { return false; }
 
+    virtual void refreshAlgorithms() {};
+
     //! Clear the global environment. What exactly happens depends on the implementation.
     virtual void clear() {}
 
@@ -116,6 +118,8 @@ class ScriptingEnv : public QObject
     bool d_initialized;
     //! the context in which we are running
     ApplicationWindow *d_parent;
+    // The current script object
+    Script* m_current_script;
 
 private:
   /** Override to perform some initialisation code */
@@ -134,6 +138,7 @@ private:
   bool m_report_progress;
   // Whether a script is running
   bool m_is_running;
+
 };
 
 #endif
