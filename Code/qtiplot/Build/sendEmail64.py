@@ -36,14 +36,14 @@ for line in f.readlines():
      mssgBuild = mssgBuild + line
      
 f.close()
-notifier.moveToArchive(fileBuild,remoteArchivePath)
+notifier.moveToArchive(fileBuild,remoteArchiveDir)
 
 if buildResult.startswith('nmake failed'):
 	buildSuccess = False	
 	
 fileBuildErr = localLogDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
-notifier.moveToArchive(fileBuildErr,remoteArchivePath)
+notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
 if buildSuccess:
      fileLaunchInstaller = localLogDir+'LaunchInstaller.txt'
