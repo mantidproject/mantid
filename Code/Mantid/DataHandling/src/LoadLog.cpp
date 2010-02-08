@@ -222,7 +222,7 @@ void LoadLog::exec()
     if (!inLogFile)
     {
       // Unable to open file...
-      g_log.error("Unable to open file " + filename);
+      g_log.warning("Unable to open file " + filename);
       // ...go on to the next one
       continue;
     }
