@@ -265,7 +265,7 @@ except:
 if not buildSuccess:
      exit(1)
 else:
-     fileLaunchQTIPlot = logDir+'LaunchQTIPlot.txt'
+     fileLaunchQTIPlot = localLogDir+'LaunchQTIPlot.txt'
      f = open(fileLaunchQTIPlot,'w')
      f.write('launch')
 
