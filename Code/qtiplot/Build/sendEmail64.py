@@ -3,13 +3,13 @@ import smtplib
 import os
 from shutil import move
 from time import strftime
+import sys
+sys.path.insert(0,'../Mantid/Build')
+import buildNotification as notifier
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-localServerName = 'http://130.246.49.183/'
-#localServerName = 'file://c|/Program Files/CruiseControl/'
 
-#RECIPIENTS = ['r.tolchenov@rl.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = 'BuildServer64@mantidproject.org'
 if (os.name =='nt'):
@@ -23,12 +23,9 @@ buildSuccess = True
 mssgBuild = ''
 mssgBuildErr = ''
 
-logDir = '../../../../logs/qtiplot/'
-
-#create archive directory
-archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
-os.mkdir(archiveDir)
-
+project = 'qtiplot'
+remoteArchiveDir, relativeLogDir = notifier.getArchiveDir(project)
+localLogDir = '../../../../logs/' + project + '/'
 
 #Get build result and errors
 fileBuild = logDir+'build.log'
@@ -39,14 +36,14 @@ for line in f.readlines():
      mssgBuild = mssgBuild + line
      
 f.close()
-move(fileBuild,archiveDir)
+notifier.moveToArchive(fileBuild,remoteArchivePath)
 
 if buildResult.startswith('nmake failed'):
 	buildSuccess = False	
 	
 fileBuildErr = logDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
-move(fileBuildErr,archiveDir)
+notifier.moveToArchive(fileBuildErr,remoteArchivePath)
 
 if buildSuccess:
      fileLaunchInstaller = logDir+'LaunchInstaller.txt'
@@ -56,7 +53,8 @@ if buildSuccess:
 
 
 #Construct Message
-httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
+httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
+
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'QTIPlot Build Passed: ' + str(buildSuccess) + "\n"
 message += 'QTIPLOT BUILD LOG\n\n'

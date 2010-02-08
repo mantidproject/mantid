@@ -4,7 +4,9 @@ import os
 import socket
 from shutil import move
 from time import strftime
-import buildNotification
+import sys
+sys.insert(0,os.path.join(os.getcwd(),'Build'))
+import buildNotification as notifier
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
@@ -13,15 +15,6 @@ smtpserver = 'outbox.rl.ac.uk'
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 #,'mantid-developers@mantidproject.org'
 SENDER = 'BuildServer64@mantidproject.org'
-
-localServerName = 'http://' 
-if (os.name =='nt'):
-     SENDER = 'Win' + SENDER
-     localServerName = localServerName + os.getenv('COMPUTERNAME') + '/'
-
-else:
-     SENDER = 'Linux' + SENDER
-     localServerName = localServerName + os.getenv('HOSTNAME') + '/'
 
 tracLink = 'http://trac.mantidproject.org/mantid/'
 #Set up email content 
@@ -42,16 +35,14 @@ mssgSvn  = ''
 mssgDoxy = ''
 ticketList = []
 svnRevision = ''
-logDir = '../../../../logs/Mantid/'
 
 testCount = 0
 failCount = 0
 warnCount = 0
 
-#create archive directory
-archiveDir = logDir + strftime("%Y-%m-%d_%H-%M-%S")
-os.mkdir(archiveDir)
-
+project = 'Mantid'
+remoteArchivePath, relativeLogDir = notifier.getArchiveDir(project)
+localLogDir = '../../../../logs/' + project + '/'
 
 #Get scons result and errors
 fileScons = logDir+'scons.log'
@@ -62,7 +53,7 @@ for line in f.readlines():
      mssgScons = mssgScons + line
      
 f.close()
-move(fileScons,archiveDir)
+notifier.move(fileScons,remoteArchivePath)
 
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
@@ -74,7 +65,7 @@ compilerWarnCount = len(wc)
 
 fileSconsErr = logDir+'sconsErr.log'
 mssgSconsErr = open(fileSconsErr,'r').read()
-move(fileSconsErr,archiveDir)
+notifier.move(fileSconsErr,remoteArchivePath)
 
 #Get tests scons result and errors
 filetestsBuild = logDir+'testsBuild.log'
@@ -85,14 +76,14 @@ for line in f.readlines():
      mssgTestsBuild = mssgTestsBuild + line
      
 f.close()
-move(filetestsBuild,archiveDir)
+notifier.move(filetestsBuild,remoteArchivePath)
 
 if testsResult.startswith('scons: done building targets.'):
 	testsBuildSuccess = True	
 	
 filetestsBuildErr = logDir+'testsBuildErr.log'
 mssgTestsErr = open(filetestsBuildErr,'r').read()
-move(filetestsBuildErr,archiveDir)
+notifier.move(filetestsBuildErr,remoteArchivePath)
 
 filetestsRunErr = logDir+'testsRunErr.log'
 f = open(filetestsRunErr,'r')
@@ -104,7 +95,7 @@ for line in f.readlines():
 		mssgTestsRunErr  = mssgTestsRunErr + temp[0:temp.find('>>')] + '\n'
      
 f.close()
-move(filetestsRunErr,archiveDir)
+notifier.move(filetestsRunErr,remoteArchivePath)
 
 #Get tests result
 filetestsRun = logDir+'testResults.log'
@@ -130,12 +121,12 @@ for line in f.readlines():
         mssgTestsResults = mssgTestsResults + line
      
 f.close()
-move(filetestsRun,archiveDir)
+notifier.move(filetestsRun,remoteArchivePath)
 
 #Read svn log
 filesvn = logDir+'svn.log'
 mssgSvn = open(filesvn,'r').read()
-move(filesvn,archiveDir)
+notifier.move(filesvn,remoteArchivePath)
 #attempt to parse out the svn revision and ticket number
 reSvnRevision = re.compile("r(\\d+)\\s\\|", re.IGNORECASE)
 m=reSvnRevision.search(mssgSvn)
@@ -156,7 +147,7 @@ if m:
   warnCount = len(m)
   if warnCount >0:
     doxyWarnings = False
-move(filedoxy,archiveDir)
+notifier.move(filedoxy,remoteArchivePath)
 
 lastDoxy = int(open('prevDoxy','r').read())
 currentDoxy = open('prevDoxy','w')
@@ -169,13 +160,13 @@ if buildSuccess:
   buildErrors=0
 if testsBuildSuccess:
   testBuildErrors=0
-buildNotification.sendTestCompleted(project="Mantid", \
+buildNotification.sendTestCompleted(project, \
                     testCount=testCount,testFail=failCount, \
                     compWarn=compilerWarnCount,docuWarn=warnCount, \
                     buildErrors=buildErrors,testBuildErrors=testBuildErrors)
 
 #Construct Message
-httpLinkToArchive = localServerName + archiveDir.replace('../../../../','') + '/'
+httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
 message = 'Build Completed at: ' + strftime("%H:%M:%S %d-%m-%Y") + "\n"
 message += 'Framework Build Passed: ' + str(buildSuccess)
 if compilerWarnCount>0:
