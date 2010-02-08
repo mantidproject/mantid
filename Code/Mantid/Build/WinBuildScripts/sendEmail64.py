@@ -5,7 +5,7 @@ import socket
 from shutil import move
 from time import strftime
 import sys
-sys.insert(0,os.path.join(os.getcwd(),'Build'))
+sys.path.insert(0,os.path.join(os.getcwd(),'Build'))
 import buildNotification as notifier
 
 #Email settings
@@ -45,7 +45,7 @@ remoteArchivePath, relativeLogDir = notifier.getArchiveDir(project)
 localLogDir = '../../../../logs/' + project + '/'
 
 #Get scons result and errors
-fileScons = logDir+'scons.log'
+fileScons = localLogDir+'scons.log'
 f = open(fileScons,'r')
 
 for line in f.readlines():
@@ -63,12 +63,12 @@ reWarnCount = re.compile(": warning")
 wc = reWarnCount.findall(mssgScons)
 compilerWarnCount = len(wc)
 
-fileSconsErr = logDir+'sconsErr.log'
+fileSconsErr = localLogDir+'sconsErr.log'
 mssgSconsErr = open(fileSconsErr,'r').read()
 notifier.move(fileSconsErr,remoteArchivePath)
 
 #Get tests scons result and errors
-filetestsBuild = logDir+'testsBuild.log'
+filetestsBuild = localLogDir+'testsBuild.log'
 f = open(filetestsBuild,'r')
 
 for line in f.readlines():
@@ -81,11 +81,11 @@ notifier.move(filetestsBuild,remoteArchivePath)
 if testsResult.startswith('scons: done building targets.'):
 	testsBuildSuccess = True	
 	
-filetestsBuildErr = logDir+'testsBuildErr.log'
+filetestsBuildErr = localLogDir+'testsBuildErr.log'
 mssgTestsErr = open(filetestsBuildErr,'r').read()
 notifier.move(filetestsBuildErr,remoteArchivePath)
 
-filetestsRunErr = logDir+'testsRunErr.log'
+filetestsRunErr = localLogDir+'testsRunErr.log'
 f = open(filetestsRunErr,'r')
 
 for line in f.readlines():
@@ -98,7 +98,7 @@ f.close()
 notifier.move(filetestsRunErr,remoteArchivePath)
 
 #Get tests result
-filetestsRun = logDir+'testResults.log'
+filetestsRun = localLogDir+'testResults.log'
 f = open(filetestsRun,'r')
 
 reTestCount = re.compile("Running\\s*(\\d+)\\s*tests", re.IGNORECASE)
@@ -124,7 +124,7 @@ f.close()
 notifier.move(filetestsRun,remoteArchivePath)
 
 #Read svn log
-filesvn = logDir+'svn.log'
+filesvn = localLogDir+'svn.log'
 mssgSvn = open(filesvn,'r').read()
 notifier.move(filesvn,remoteArchivePath)
 #attempt to parse out the svn revision and ticket number
@@ -139,7 +139,7 @@ for m in mList:
   ticketList.append(m)
   
 #Read doxygen log
-filedoxy = logDir+'doxy.log'
+filedoxy =localLogDir+'doxy.log'
 mssgDoxy = open(filedoxy,'r').read()
 reWarnCount = re.compile("Warning:")
 m=reWarnCount.findall(mssgDoxy)

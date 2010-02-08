@@ -28,7 +28,7 @@ remoteArchiveDir, relativeLogDir = notifier.getArchiveDir(project)
 localLogDir = '../../../../logs/' + project + '/'
 
 #Get build result and errors
-fileBuild = logDir+'build.log'
+fileBuild = localLogDir+'build.log'
 f = open(fileBuild,'r')
 
 for line in f.readlines():
@@ -41,12 +41,12 @@ notifier.moveToArchive(fileBuild,remoteArchivePath)
 if buildResult.startswith('nmake failed'):
 	buildSuccess = False	
 	
-fileBuildErr = logDir+'error.log'
+fileBuildErr = localLogDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
 notifier.moveToArchive(fileBuildErr,remoteArchivePath)
 
 if buildSuccess:
-     fileLaunchInstaller = logDir+'LaunchInstaller.txt'
+     fileLaunchInstaller = localLogDir+'LaunchInstaller.txt'
      f = open(fileLaunchInstaller,'w')
      f.write('launch')
      exit(0)
