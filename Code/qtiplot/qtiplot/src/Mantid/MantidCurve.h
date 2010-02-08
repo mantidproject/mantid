@@ -129,7 +129,8 @@ private slots:
 private:
 
   /// Make the curve name
-  static QString createCurveName(const QString& wsName,const QString& type,int index);
+  static QString createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
+                                 const QString& wsName,const QString& type,int index);
   /// Make a name for a copied curve
   static QString createCopyName(const QString& curveName);
   bool m_drawErrorBars;///< True for drawing error bars

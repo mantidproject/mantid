@@ -551,11 +551,15 @@ void MantidMatrixFunction::init()
 
 double MantidMatrixFunction::operator()(double x, double y)
 {
-  x += 0.5*m_dx;
-  y -= 0.5*m_dy;
+  x += 0.001*m_dx;
+  y -= 0.001*m_dy;
 
-  int i = abs((y - m_matrix->yStart())/m_dy);
-  int j = abs((x - m_matrix->xStart())/m_dx);
+  double yi = (y - m_matrix->yStart())/m_dy;
+  int i = abs(yi);
+  if (yi - double(i) >= 0.5) i++;
+  double xj = (x - m_matrix->xStart())/m_dx;
+  int j = abs(xj);
+  if (xj - double(j) >= 0.5) j++;
 
   int jj = m_matrix->indexX(x);
   if (jj >= 0) j = jj;

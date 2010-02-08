@@ -68,7 +68,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,
   }
   // If there's only one spectrum in the workspace, title is simply workspace name
   if (ws->getNumberHistograms() == 1) this->setTitle(wsName);
-  else this->setTitle(createCurveName(wsName,type,index));
+  else this->setTitle(createCurveName(ws,wsName,type,index));
   init(ws,g,type,index);
   observeDelete();
   connect( this, SIGNAL(resetData(const QString&)), this, SLOT(dataReset(const QString&)) );
@@ -184,12 +184,22 @@ void MantidCurve::itemChanged()
  *  @param type   The data type ("spectra", "bin",...)
  *  @param index  The spectra (bin) index
  */
-QString MantidCurve::createCurveName(const QString& wsName,const QString& type,int index)
+QString MantidCurve::createCurveName(const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
+                                     const QString& wsName,const QString& type,int index)
 {
   QString name = wsName + "-";
   if (type == "spectra")
-    name += "sp-";
-  name += QString::number(index);
+  {
+    if (ws->getAxis(1)->isSpectra())
+    {
+      int spec = ws->getAxis(1)->spectraNo(index);
+      name += "sp-"+QString::number(spec);
+    }
+    else
+    {
+      name += "wi-"+QString::number(index);
+    }
+  }
   return name;
 }
 
