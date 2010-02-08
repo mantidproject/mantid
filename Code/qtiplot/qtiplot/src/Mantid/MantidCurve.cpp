@@ -157,7 +157,9 @@ void MantidCurve::draw(QPainter *p,
         const int ei1 = yMap.transform(Y - E);
         const int ei2 = yMap.transform(Y + E);
 
-        p->drawLine(xi,ei1,xi,ei2);
+        // This call can crash MantidPlot if the error is zero,
+        //   so protect against this (line of zero length anyway)
+        if (E) p->drawLine(xi,ei1,xi,ei2);
         p->drawLine(xi-dx,ei1,xi+dx,ei1);
         p->drawLine(xi-dx,ei2,xi+dx,ei2);
 
