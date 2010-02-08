@@ -221,9 +221,10 @@ void LoadLog::exec()
 
     if (!inLogFile)
     {
-      // Unable to open file
+      // Unable to open file...
       g_log.error("Unable to open file " + filename);
-      throw Exception::FileError("Unable to open file:" , filename);
+      // ...go on to the next one
+      continue;
     }
     // figure out if second column is a number or a string
     std::string aLine;
