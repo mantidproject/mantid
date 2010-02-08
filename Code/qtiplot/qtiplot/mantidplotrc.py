@@ -13,18 +13,12 @@ from MantidFramework import *
 #-----------------------------------------------------------------
 
 def plotSpectrum(source, indices, error_bars = False):
-    if isinstance(source, list):
-        workspace_names = __getWorkspaceNames(source)
-        if isinstance(indices, list):
-            return __tryPlot(workspace_names, indices, error_bars)
-        else:
-            return __tryPlot(workspace_names, [indices], error_bars)
+    workspace_names = __getWorkspaceNames(source)
+    index_list = __getWorkspaceIndices(indices)
+    if len(workspace_names) > 0 and len(index_list) > 0:
+        return __tryPlot(workspace_names, index_list, error_bars)
     else:
-        workspace_name  = __getWorkspaceNames([source])
-        if isinstance(indices, list):
-            return __tryPlot(workspace_name, indices, error_bars)
-        else:
-            return __tryPlot(workspace_name, [indices], error_bars)
+        return None
 
 def plotBin(source, indices, error_bars = False):
     return __doPlotting(source,indices,error_bars)
@@ -33,15 +27,55 @@ def plotBin(source, indices, error_bars = False):
 plotTimeBin = plotBin
 #-----------------------------------------------------------------
 # Returns a list of workspace names for the given list that could contain workspace proxies
-def __getWorkspaceNames(source_list):
+def __getWorkspaceNames(source):
     ws_names = []
-    for w in source_list:
-        if isinstance(w,WorkspaceProxy):
-            ws_names.append(w.getName())
+    if isinstance(source, list):
+        for w in source:
+            names = __getWorkspaceNames(w)
+            for n in names:
+                ws_names.append(n)
+    elif isinstance(source,WorkspaceProxy):
+        wspace = source._getHeldObject()
+        if wspace == None:
+            return []
+        if isinstance(wspace,WorkspaceGroup):
+            grp_names = source.getNames()
+            for n in grp_names:
+                if n != wspace.getName():
+                    ws_names.append(n)
+        elif isinstance(wspace,MatrixWorkspace):
+            ws_names.append(wspace.getName())
         else:
-            ws_names.append(w)
-    
+            pass
+    elif isinstance(source,str):
+        w = mtd[source]
+        if w != None:
+            names = __getWorkspaceNames(w)
+            for n in names:
+                ws_names.append(n)
+    else:
+        raise TypeError('Incorrect type passed as workspace argument "' + str(source) + '"')
     return ws_names
+    
+def __getWorkspaceIndices(source):
+    index_list = []
+    if isinstance(source,list):
+        for i in source:
+            nums = __getWorkspaceIndices(i)
+            for j in nums:
+                index_list.append(j)
+    elif isinstance(source, int):
+        index_list.append(source)
+    elif isinstance(source, str):
+        elems = source.split(',')
+        for i in elems:
+            try:
+                index_list.append(int(i))
+            except ValueError:
+                pass
+    else:
+        raise TypeError('Incorrect type passed as index argument "' + str(source) + '"')
+    return index_list
 
 # Try plotting, raising an error if no plot object is created
 def __tryPlot(workspace_names, indices, error_bars):

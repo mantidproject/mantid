@@ -1572,7 +1572,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
   QList<int> binAsList;
   binAsList.append(bin);
   Table *t = createTableFromBins(wsName, ws, binAsList, errors);
- // t->askOnCloseEvent(false);
+  t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_QuitOnClose);
   MultiLayer* ml(NULL);
   if( !t ) return ml;
@@ -1581,7 +1581,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors)
   Graph *g = ml->activeGraph();
   appWindow()->polishGraph(g,Graph::Line);
   setUpBinGraph(ml,wsName, ws);
-  //ml->askOnCloseEvent(false);
+  ml->askOnCloseEvent(false);
   return ml;
 }
 
