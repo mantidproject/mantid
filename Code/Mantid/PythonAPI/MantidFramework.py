@@ -241,8 +241,10 @@ class WorkspaceGarbageCollector(object):
         '''
         Kill all references to data objects
         '''
+        # Note here that a simple clear won't do as it won't set the object reference to None 
+        for w in self._refs:
+            self._refs[w]._kill_object()
         self._refs.clear()
-
 #---------------------------------------------------------------------------------------
 
 class IAlgorithmProxy(object):
