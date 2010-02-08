@@ -53,7 +53,7 @@ for line in f.readlines():
      mssgScons = mssgScons + line
      
 f.close()
-notifier.move(fileScons,remoteArchivePath)
+notifier.moveToArchive(fileScons,remoteArchivePath)
 
 if sconsResult.startswith('scons: done building targets.'):
 	buildSuccess = True	
@@ -65,7 +65,7 @@ compilerWarnCount = len(wc)
 
 fileSconsErr = localLogDir+'sconsErr.log'
 mssgSconsErr = open(fileSconsErr,'r').read()
-notifier.move(fileSconsErr,remoteArchivePath)
+notifier.moveToArchive(fileSconsErr,remoteArchivePath)
 
 #Get tests scons result and errors
 filetestsBuild = localLogDir+'testsBuild.log'
@@ -76,14 +76,14 @@ for line in f.readlines():
      mssgTestsBuild = mssgTestsBuild + line
      
 f.close()
-notifier.move(filetestsBuild,remoteArchivePath)
+notifier.moveToArchive(filetestsBuild,remoteArchivePath)
 
 if testsResult.startswith('scons: done building targets.'):
 	testsBuildSuccess = True	
 	
 filetestsBuildErr = localLogDir+'testsBuildErr.log'
 mssgTestsErr = open(filetestsBuildErr,'r').read()
-notifier.move(filetestsBuildErr,remoteArchivePath)
+notifier.moveToArchive(filetestsBuildErr,remoteArchivePath)
 
 filetestsRunErr = localLogDir+'testsRunErr.log'
 f = open(filetestsRunErr,'r')
@@ -95,7 +95,7 @@ for line in f.readlines():
 		mssgTestsRunErr  = mssgTestsRunErr + temp[0:temp.find('>>')] + '\n'
      
 f.close()
-notifier.move(filetestsRunErr,remoteArchivePath)
+notifier.moveToArchive(filetestsRunErr,remoteArchivePath)
 
 #Get tests result
 filetestsRun = localLogDir+'testResults.log'
@@ -121,12 +121,12 @@ for line in f.readlines():
         mssgTestsResults = mssgTestsResults + line
      
 f.close()
-notifier.move(filetestsRun,remoteArchivePath)
+notifier.moveToArchive(filetestsRun,remoteArchivePath)
 
 #Read svn log
 filesvn = localLogDir+'svn.log'
 mssgSvn = open(filesvn,'r').read()
-notifier.move(filesvn,remoteArchivePath)
+notifier.moveToArchive(filesvn,remoteArchivePath)
 #attempt to parse out the svn revision and ticket number
 reSvnRevision = re.compile("r(\\d+)\\s\\|", re.IGNORECASE)
 m=reSvnRevision.search(mssgSvn)
@@ -147,7 +147,7 @@ if m:
   warnCount = len(m)
   if warnCount >0:
     doxyWarnings = False
-notifier.move(filedoxy,remoteArchivePath)
+notifier.moveToArchive(filedoxy,remoteArchivePath)
 
 lastDoxy = int(open('prevDoxy','r').read())
 currentDoxy = open('prevDoxy','w')
