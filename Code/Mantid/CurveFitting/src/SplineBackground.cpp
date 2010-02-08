@@ -71,6 +71,12 @@ void SplineBackground::exec()
     n -= inWS->maskedBins(spec).size();
   }
 
+  if (n < ncoeffs)
+  {
+    g_log.error("Too many basis functions (NCoeff)");
+    throw std::out_of_range("Too many basis functions (NCoeff)");
+  }
+
   /* allocate a cubic bspline workspace (k = 4) */
   bw = gsl_bspline_alloc(k, nbreak);
   B = gsl_vector_alloc(ncoeffs);
