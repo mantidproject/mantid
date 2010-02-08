@@ -129,7 +129,10 @@ def getLogDir(project):
   archiveDir = strftime("%Y-%m-%d_%H-%M-%S")
   if os.name == 'nt':
     # MG 29/01/10: Temporarily moved back to local machine until permissions sorted
-    logDir = "logs\\" + platform.system() + "\\" + project + "\\" + archiveDir + "\\"
+    system = platform.system()
+    if platform.architecture()[0] == '64bit':
+        system += '64'
+    logDir = "logs\\" + system + "\\" + project + "\\" + archiveDir + "\\"
   else:
     logDir = 'logs/' + platform.system() + '/' + project + '/' + archiveDir + '/'
   return logDir
