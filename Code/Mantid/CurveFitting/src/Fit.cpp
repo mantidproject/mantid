@@ -439,11 +439,11 @@ namespace CurveFitting
 
     if (localworkspace->hasMaskedBins(histNumber))
     {
-      Mantid::API::MatrixWorkspace::MaskList mlist = localworkspace->maskedBins(histNumber);
-      Mantid::API::MatrixWorkspace::MaskList::iterator it = mlist.begin();
+      const MatrixWorkspace::MaskList& mlist = localworkspace->maskedBins(histNumber);
+      MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
       for(;it!=mlist.end();it++)
       {
-        l_data.sqrtWeightData[it->first] = 0.;
+        l_data.sqrtWeightData[it->first-m_minX] = 0.;
       }
     }
 
