@@ -50,39 +50,39 @@ try:
 
   if |GUI_SET_BIN_BOUNDS| != '':
     Rebin(pInOut, pInOut, |GUI_SET_BIN_BOUNDS|)
-  
-  #--mask detectors that have failed tests run previously
-  detIDs = []
-  #-unless the string ''#+|MASK_WORKSPACE| below is replaced with a valid workspace name these lines do nothing
-  DetectorMask = ''#+|MASK_WORKSPACE|
-  if DetectorMask != '' :
-    FDOL = FindDetectorsOutsideLimits(InputWorkspace=DetectorMask, OutputWorkspace=DetectorMask, HighThreshold=10, LowThreshold=-1, OutputFile='')
-    detIDs = FDOL.getPropertyValue('BadDetectorIDs')
-    MaskDetectors(Workspace=pInOut, DetectorList=detIDs)
-
+ 
   DetectorEfficiencyCor(pInOut, pInOut, IncidentE)
-    
-  mapFile = |GUI_SET_MAP_FILE|
-  if mapFile != '':
-    GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
   
   if |GUI_SET_SCALING| != 1:
     CreateSingleValuedWorkspace(conv.tempWS, |GUI_SET_SCALING|)
     Multiply(pInOut, conv.tempWS, pInOut)
     mantid.deleteWorkspace(conv.tempWS)
- 
-  conv.NormaliseToWhiteBeam(|GUI_SET_WBV|, pInOut, mapFile, |GUI_SET_WBV_REBIN|)
 
-#INCLUDE THE FOLLOWING LINE TO ZERO INFINITIES AND "Not a Number" VALUES
-#  ReplaceSpecialValues(nameInOut, nameInOut, 0, 0, 0)
+ 
+  DetectorMask = ''#+|MASK_WORKSPACE|
+  if DetectorMask != '' :
+    FDOL = FindDetectorsOutsideLimits(InputWorkspace=DetectorMask,OutputWorkspace='_ETrans_loading_bad_detector_WS',HighThreshold=10,LowThreshold=-1,OutputFile='')
+    detIDs = FDOL.getPropertyValue('BadDetectorIDs')
+    MaskDetectors(Workspace=pInOut, DetectorList=detIDs)
+
+  mapFile = |GUI_SET_MAP_FILE|
+  if mapFile != '':
+    GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
+
+#replaces inifinities and error values with large numbers. Infinity values can be normally be fixed passing good energy values to ConvertUnits
+  ReplaceSpecialValues(pInOut, pInOut, 1e20, 1e20, 1e20, 1e20)
+
+   #masking bad detectors is done here, at the end to save processing time. But if |MASK_WORKSPACE| is an empty string there is no masking
+  conv.NormaliseToWhiteBeamAndLoadMask(|GUI_SET_WBV|, pInOut, mapFile, |GUI_SET_WBV_REBIN|, DetectorMask)
+ 
   # output to a file in ASCII
   SaveSPE(pInOut, |GUI_SET_OUTPUT|)
 
-except Exception:
+except Exception, reason:
   # delete the possibly part finished workspaces
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == nameInOut) : mantid.deleteWorkspace(nameInOut)
     if (workspace == conv.tempWS) : mantid.deleteWorkspace(conv.tempWS)
-
-  raise
+  print reason
+  #raise
 

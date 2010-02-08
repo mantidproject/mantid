@@ -1,5 +1,5 @@
 #include "MantidDataHandling/SaveDASC.h"
-#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/FileProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <boost/shared_ptr.hpp>
@@ -13,6 +13,7 @@ namespace DataHandling
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveDASC)
+using namespace Kernel;
 using namespace API;
 //---------------------------------------------------
 // Private member functions
@@ -29,8 +30,8 @@ void SaveDASC::init()
   wsValidator->add(new API::HistogramValidator<>);
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,wsValidator),
       "The input workspace");
-  declareProperty("Filename", "", new Mantid::Kernel::FileValidator(std::vector<std::string>(), false),
-      "The filename to use for the saved data", Kernel::Direction::Input);
+  declareProperty(new FileProperty("Filename","",FileProperty::Save),
+    "The filename to use for the saved data");
 }
 
 /**

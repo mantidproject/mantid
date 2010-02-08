@@ -2,14 +2,13 @@ from mantidsimple import *
 
 # uses the extension to decide whether use LoadNexus or LoadRaw
 def LoadNexRaw(filename, workspace):
-  # this removes everything after the last . It returns '' if there is no dot or the filename is an empty string (partition always returns three strings)
+  # this removes everything after the last, partition always returns three strings
   extension = filename.rpartition('.')[2]
   if (extension == 'nxs') | (extension == 'NXS') :
-    LN = LoadNexus(filename, workspace)
-    return LN.getPropertyValue('OutputWorkspace')
+    #return the first property from the algorithm, which for LoadNexus is the output workspace
+    return LoadNexus(filename, workspace)[0]
   if (extension == 'raw') | (extension == 'RAW') :
-    LR = LoadRaw(filename, workspace, LoadLogFiles=0)
-    return LR.getPropertyValue('OutputWorkspace')
+    return LoadRaw(filename, workspace, LoadLogFiles=0)[0]
   #we shouldn't get to here, the function should have returned by now
   raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")
   

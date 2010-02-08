@@ -308,7 +308,7 @@ void MWRunFile::browseClicked()
 }
 void MWRunFile::instrumentChange(const QString &inst)
 {
-  MWRunFile::instrumentChange(inst);
+  MWRunFiles::instrumentChange(inst);
   emit fileChanged();
 }
 void MWRunFile::readEntries()

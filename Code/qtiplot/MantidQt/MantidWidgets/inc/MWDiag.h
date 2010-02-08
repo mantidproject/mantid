@@ -49,8 +49,6 @@ namespace MantidQt
 	  std::vector<std::string> m_monoFiles;
       /// the values on the form the last time it was SUCCESSFULLY run accessed through this object
 	  QSettings m_prevSets;
-	  //?? remove this
-	  int remove;
 
 	  void raiseDialog();
       void notifyDialog(const DiagResults::TestSummary &display);

@@ -34,11 +34,9 @@ void FindDetectorsOutsideLimits::init()
     "Spectra whose total number of counts are equal to or below this value\n"
     "will be marked bad (default 0)" );
 
-  BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
-  mustBePositive->setLower(0);
-  declareProperty("GoodValue",0.0, mustBePositive,
+  declareProperty("GoodValue",0.0,
     "The value to be assigned to spectra flagged as 'live' (default 0.0)" );
-  declareProperty("BadValue",100.0, mustBePositive->clone(),
+  declareProperty("BadValue",100.0,
     "The value to be assign to spectra flagged as 'bad' (default 100.0)" );
   declareProperty("RangeLower", EMPTY_DBL(),
     "No bin with a boundary at an x value less than this will be used\n"

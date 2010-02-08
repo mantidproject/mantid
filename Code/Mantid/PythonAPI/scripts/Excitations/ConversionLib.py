@@ -13,24 +13,33 @@ def NormaliseTo(reference, WS):
   elif reference != 'no normalization' :
     raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')
 
-def NormaliseToWhiteBeam(WBRun, toNorm, mapFile, rebinString) :
+def NormaliseToWhiteBeamAndLoadMask(WBRun, toNorm, mapFile, rebinString, DetectorMask) :
   theNorm = "_ETrans_norm_tempory_WS"
-  common.LoadNexRaw(WBRun, theNorm)
- #comment the next line out?
-  LoadDetectorInfo(theNorm, WBRun)
+  try:
+    common.LoadNexRaw(WBRun, theNorm)
+    LoadDetectorInfo(theNorm, WBRun)
 
-  ConvertUnits(theNorm, theNorm, "Energy", AlignBins = 0)
+    ConvertUnits(theNorm, theNorm, "Energy", AlignBins = 0)
 
-  #this both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-  Rebin(theNorm, theNorm, rebinString)
- # shouldn't we do the correction? It affects things when the angles are different
-#  DetectorEfficiencyCor(theNorm, theNorm, IncidentE)  
+    #this both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
+    Rebin(theNorm, theNorm, rebinString)
+   # shouldn't we do the correction? It affects things when the angles are different
+  #  DetectorEfficiencyCor(theNorm, theNorm, IncidentE)  
 
-  if mapFile!= "" :
-    GroupDetectors( theNorm, theNorm, mapFile, KeepUngroupedSpectra=0)
+    if DetectorMask != '' :
+      FDOL = FindDetectorsOutsideLimits(InputWorkspace=DetectorMask,OutputWorkspace='_ETrans_loading_bad_detector_WS',HighThreshold=10,LowThreshold=-1,OutputFile='')
+      detIDs = FDOL.getPropertyValue('BadDetectorIDs')
+      MaskDetectors(Workspace=theNorm, DetectorList=detIDs)
+      
+    if mapFile!= "" :
+      GroupDetectors( theNorm, theNorm, mapFile, KeepUngroupedSpectra=0)
 
-  Divide(toNorm, theNorm, toNorm)
-  mantid.deleteWorkspace(theNorm)
+    Divide(toNorm, theNorm, toNorm)
+    #bad detectors were identified by the last command as infinities or NaN (0/0 = Not a Number)
+    ReplaceSpecialValues(toNorm, toNorm, NaNValue=-1e30, InfinityValue=-1e30)
+  
+  finally:
+    mantid.deleteWorkspace(theNorm)
 
 # a workspace name that is very long and unlikely to have been created by the user before this script is run, it would be replaced  
 tempWS = "_ETrans_loading_tempory_WS"
