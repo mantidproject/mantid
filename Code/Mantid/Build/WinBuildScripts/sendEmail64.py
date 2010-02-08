@@ -160,7 +160,7 @@ if buildSuccess:
   buildErrors=0
 if testsBuildSuccess:
   testBuildErrors=0
-buildNotification.sendTestCompleted(project, \
+notifier.sendTestCompleted(project, \
                     testCount=testCount,testFail=failCount, \
                     compWarn=compilerWarnCount,docuWarn=warnCount, \
                     buildErrors=buildErrors,testBuildErrors=testBuildErrors)
