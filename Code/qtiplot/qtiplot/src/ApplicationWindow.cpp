@@ -949,16 +949,16 @@ void ApplicationWindow::initToolBars()
 	mantidPeakFitTools->setIconSize( QSize(18,20) );
 	addToolBar( Qt::TopToolBarArea, mantidPeakFitTools);
 
-	btnPeakPick = new QAction(tr("Select Peak..."), this);
-	//btnPeakPick->setShortcut( tr("Alt+B") );
-	btnPeakPick->setActionGroup(dataTools);
-	btnPeakPick->setCheckable( true );
-	btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
-	mantidPeakFitTools->addAction(btnPeakPick);
+	//btnPeakPick = new QAction(tr("Select Peak..."), this);
+	////btnPeakPick->setShortcut( tr("Alt+B") );
+	//btnPeakPick->setActionGroup(dataTools);
+	//btnPeakPick->setCheckable( true );
+	//btnPeakPick->setIcon(QIcon(QPixmap(Fit_xpm)));
+	//mantidPeakFitTools->addAction(btnPeakPick);
 
-  QAction* actionFitPeaks = new QAction(tr("Fit"), this);
-	connect(actionFitPeaks, SIGNAL(activated()), this, SLOT(showPeakFitDialog()));
-  mantidPeakFitTools->addAction(actionFitPeaks);
+ // QAction* actionFitPeaks = new QAction(tr("Fit"), this);
+	//connect(actionFitPeaks, SIGNAL(activated()), this, SLOT(showPeakFitDialog()));
+ // mantidPeakFitTools->addAction(actionFitPeaks);
 
 	btnMultiPeakPick = new QAction(tr("Select Multiple Peaks..."), this);
 	btnMultiPeakPick->setActionGroup(dataTools);
@@ -11567,8 +11567,8 @@ void ApplicationWindow::pickDataTool( QAction* action )
 		drawArrow();
 	else if (action == btnLine)
 		drawLine();
-	else if (action == btnPeakPick)
-		selectPeak();
+	//else if (action == btnPeakPick)
+	//	selectPeak();
 	else if (action == btnMultiPeakPick)
 		selectMultiPeak();
 }
@@ -16270,8 +16270,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
       btnZoomIn->setOn(true);
     else if (g->areRangeSelectorsOn())
       btnSelect->setOn(true);
-    else if (dynamic_cast<PeakPickerTool1D*>(tool))
-      btnPeakPick->setOn(true);
+    //else if (dynamic_cast<PeakPickerTool1D*>(tool))
+    //  btnPeakPick->setOn(true);
     else if (dynamic_cast<PeakPickerTool*>(tool))
       btnMultiPeakPick->setOn(true);
     else if (dynamic_cast<DataPickerTool*>(tool))
