@@ -19,7 +19,7 @@ vfile.close()
 MantidVersion = '1.0.' + vstr[12:vlen-2]
 print('Mantid version '+MantidVersion)
 
-product_uuid='{9ca6d0c1-c0e2-4eba-a31c-3db46c76e64c}'
+product_uuid='{a431e4e7-13fa-4bf9-a030-d7f65d54287d}'
 
 MantidInstallDir = 'MantidInstall'
 
@@ -295,6 +295,8 @@ for line in prop_file:
         prop_file_ins.write('pythonscripts.directory = ../scripts\n')
     elif line.find('instrumentDefinition.directory') >= 0:
         prop_file_ins.write('instrumentDefinition.directory = ../instrument\n')
+    elif line.find('pythonalgorithms.directories') >= 0:
+        prop_file_ins.write('pythonalgorithms.directories = ../plugins/PythonAlgs\n')
     else:
         prop_file_ins.write(line)
 prop_file_ins.close()
@@ -364,6 +366,13 @@ addFileV('hd421mdll','hd421m.dll','hd421m.dll','../Third_Party/lib/win32/hd421m.
 addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../Third_Party/lib/win32/hdf5dll.dll',Plugins)
 addFileV('hm421mdll','hm421m.dll','hm421m.dll','../Third_Party/lib/win32/hm421m.dll',Plugins)
 addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win32/libNeXus-0.dll',Plugins)
+
+# Python algorithms
+pyalgsDir = addDirectory('PyAlgsDir','PythonAlgs','PythonAlgs',pluginsDir)
+pyalgsExampleDir = addDirectory('PyAlgsExampleDir','Examples','Examples',pyalgsDir)
+pyalgsExamples = addComponent('PyAlgsEx','{4ac60beb-e2bc-4bbb-836b-347bb923ba43',pyalgsExampleDir)
+addAllFiles('../Mantid/PythonAPI/PythonAlgorithms','PyAlgsEx',pyalgsExamples)
+
 
 # Add qt custom dialogs library
 addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../qtiplot/MantidQt/lib/MantidQtCustomDialogs.dll',Plugins)
