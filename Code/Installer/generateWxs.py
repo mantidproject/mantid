@@ -535,6 +535,7 @@ addCRefs(instrument,MantidExec)
 addCRefs(sconsList,MantidExec)
 addCRef('PyQt',MantidExec)
 addCRef('Sip',MantidExec)
+addCRef('PyAlgsEx',MantidExec)
 
 Redist = addHiddenFeature('Redist',Complete)
 addModules('toget/VCRedist',Redist)
