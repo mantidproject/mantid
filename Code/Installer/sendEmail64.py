@@ -9,10 +9,7 @@ import buildNotification as notifier
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-localServerName = 'http://130.246.49.183/'
-#localServerName = 'file://c|/Program Files/CruiseControl/'
-
-RECIPIENTS = ['r.tolchenov@rl.ac.uk']
+RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = 'Installer64@mantidproject.org'
 if (os.name =='nt'):
      SENDER = 'Win' + SENDER
@@ -31,7 +28,7 @@ localLogDir = '../../../../logs/Installer/'
 remoteArchiveDir,relativeLogDir = notifier.getArchiveDir('Installer')
 
 #Get build result and errors
-fileBuild = logDir+'build.log'
+fileBuild = localLogDir+'build.log'
 f = open(fileBuild,'r')
 
 for line in f.readlines():
@@ -44,7 +41,7 @@ notifier.moveToArchive(fileBuild,remoteArchiveDir)
 if buildResult.startswith('failed'):
 	buildSuccess = False	
 	
-fileBuildErr = logDir+'error.log'
+fileBuildErr = localLogDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
 notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
