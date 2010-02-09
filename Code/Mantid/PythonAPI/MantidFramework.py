@@ -611,7 +611,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             DefaultValue = []
         elif isinstance(DefaultValue, list):
             try:
-                decl_func,ltype = __getListType(DefaultValue)
+                decl_func,ltype = self._getListType(DefaultValue)
             except TypeError, err:
                 raise TypeError(str(err) + ' for property "' + Name + '"')
         else:
@@ -732,7 +732,7 @@ class PythonAlgorithm(PyAlgorithmBase):
     def _mapPropertyToType(self, name, prop_type):
         self._proptypes[name] = prop_type
 
-    def _getListType(values):
+    def _getListType(self,values):
         """
         Return the declareList function relevant to the given list
         """
@@ -741,11 +741,11 @@ class PythonAlgorithm(PyAlgorithmBase):
             if type(v) != ptype:
                 raise TypeError('List property contains mixed types')
     
-        if isinstance(ptype, int):
+        if ptype == int:
             return self.declareListProperty_int, int
-        elif isinstance(ptype, float):
+        elif ptype == float:
             return self.declareListProperty_dbl, float
-        elif isinstance(ptype, str):
+        elif ptype == str:
             return self.declareListProperty_str, str
         else:
             raise TypeError('Unrecognized list type')
