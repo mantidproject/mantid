@@ -88,7 +88,7 @@ void PlotAsymmetryByLogValueDialog::parseInput()
   storePropertyValue("ForwardSpectra", m_uiForm.forwardBox->text());
   storePropertyValue("BackwardSpectra", m_uiForm.backwardBox->text());
   storePropertyValue("TimeMin", m_uiForm.timeMinBox->text());
-  storePropertyValue("TimeMax", m_uiForm.timeMaxBox->text());
+  storePropertyValue("TimeMax", m_uiForm.timeMaxBox->text()); 
 }
 
 /**
@@ -122,11 +122,11 @@ void PlotAsymmetryByLogValueDialog::browseLastClicked()
     MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(m_uiForm.firstRunBox->text()).absoluteDir().path());
   }
 
-  QString filepath = this->openFileDialog("FirstRun");
+  QString filepath = this->openFileDialog("LastRun");
   if( !filepath.isEmpty() )
   {
-    m_uiForm.firstRunBox->clear();
-    m_uiForm.firstRunBox->setText(filepath.trimmed());
+    m_uiForm.lastRunBox->clear();
+    m_uiForm.lastRunBox->setText(filepath.trimmed());
   }
 
 //  //Add a suggestion for workspace name
