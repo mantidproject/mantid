@@ -242,9 +242,9 @@ private:
   /// Returns the tie property for a parameter property, or NULL
   QtProperty* getTieProperty(QtProperty* parProp)const;
   /// Remove all properties associated with a function
-  void removeFunProperties(QtProperty* fnProp);
+  void removeFunProperties(QtProperty* fnProp,bool doubleOnly = false);
   /// Add properties associated with a function: type, attributes, parameters
-  void addFunProperties(Mantid::API::IFunction* f,QtProperty* fnProp);
+  void addFunProperties(Mantid::API::IFunction* f,QtProperty* fnProp,bool doubleOnly = false);
 
   /// Button for doing fit
   QPushButton* m_btnFit;

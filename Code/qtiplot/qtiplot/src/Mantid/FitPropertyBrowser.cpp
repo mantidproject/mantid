@@ -732,8 +732,8 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
           break;
         }
         m_compositeFunction->checkFunction();
-        removeFunProperties(fnProp);
-        addFunProperties(function(fi),fnProp);
+        removeFunProperties(fnProp,true);
+        addFunProperties(function(fi),fnProp,true);
         break;
       }
     }
@@ -1820,12 +1820,13 @@ void FitPropertyBrowser::plotGuessCurrent()
 }
 
 /// Remove all properties associated with a function
-void FitPropertyBrowser::removeFunProperties(QtProperty* fnProp)
+void FitPropertyBrowser::removeFunProperties(QtProperty* fnProp,bool doubleOnly)
 {
   QList<QtProperty*> subs = fnProp->subProperties();
   for(int i = 0; i < subs.size(); i++)
   {
     QtProperty* parProp = subs[i];
+    if (doubleOnly && parProp->propertyManager() != m_doubleManager) continue;
     for(int t=0;t<m_ties.size();)
     {
       if (m_ties[t].getProperty() == parProp)
@@ -1849,23 +1850,26 @@ void FitPropertyBrowser::removeFunProperties(QtProperty* fnProp)
  * @param f A pointer to the function
  * @param fnProp The group property for the function f
  */
-void FitPropertyBrowser::addFunProperties(Mantid::API::IFunction* f,QtProperty* fnProp)
+void FitPropertyBrowser::addFunProperties(Mantid::API::IFunction* f,QtProperty* fnProp,bool doubleOnly)
 {
   m_changeSlotsEnabled = false;
 
-  QtProperty* typeProp = m_enumManager->addProperty("Type");
-  fnProp->addSubProperty(typeProp);
-  int itype = m_registeredFunctions.indexOf(QString::fromStdString(f->name()));
-  m_enumManager->setEnumNames(typeProp, m_registeredFunctions);
-  m_enumManager->setValue(typeProp,itype);
-
-  // Add attributes for the function's parameters
-  std::vector<std::string> attr = f->getAttributeNames();
-  for(size_t i=0;i<attr.size();i++)
+  if (!doubleOnly)
   {
-    QtProperty* parProp = m_stringManager->addProperty(QString::fromStdString(attr[i]));
-    fnProp->addSubProperty(parProp);
-    m_stringManager->setValue(parProp,QString::fromStdString(f->getAttribute(attr[i])));
+    QtProperty* typeProp = m_enumManager->addProperty("Type");
+    fnProp->addSubProperty(typeProp);
+    int itype = m_registeredFunctions.indexOf(QString::fromStdString(f->name()));
+    m_enumManager->setEnumNames(typeProp, m_registeredFunctions);
+    m_enumManager->setValue(typeProp,itype);
+
+    // Add attributes for the function's parameters
+    std::vector<std::string> attr = f->getAttributeNames();
+    for(size_t i=0;i<attr.size();i++)
+    {
+      QtProperty* parProp = m_stringManager->addProperty(QString::fromStdString(attr[i]));
+      fnProp->addSubProperty(parProp);
+      m_stringManager->setValue(parProp,QString::fromStdString(f->getAttribute(attr[i])));
+    }
   }
 
   // Add properties for the function's parameters
