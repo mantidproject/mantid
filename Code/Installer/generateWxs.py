@@ -349,7 +349,6 @@ addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', '../qtiplot/qtiplot/qtiplotrc.
 addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', '../qtiplot/qtiplot/qtiUtil.py', MantidDlls)
 addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', '../qtiplot/qtiplot/mantidplotrc.py', MantidDlls)
 
-addAllFiles('toget/pyc','pyc',QTIPlot)
 if (QTDIR == 'C:/Qt/4_4_0/bin'): 	 
 	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/MantidPlot.exe.manifest',QTIPlot)
 
