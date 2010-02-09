@@ -70,7 +70,7 @@ try:
     GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
 
 #replaces inifinities and error values with large numbers. Infinity values can be normally be fixed passing good energy values to ConvertUnits
-  ReplaceSpecialValues(pInOut, pInOut, 1e20, 1e20, 1e20, 1e20)
+  ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
 
    #masking bad detectors is done here, at the end to save processing time. But if |MASK_WORKSPACE| is an empty string there is no masking
   conv.NormaliseToWhiteBeamAndLoadMask(|GUI_SET_WBV|, pInOut, mapFile, |GUI_SET_WBV_REBIN|, DetectorMask)

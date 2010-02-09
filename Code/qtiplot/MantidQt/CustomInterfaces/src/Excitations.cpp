@@ -597,7 +597,7 @@ void Excitations::browseClicked(const QString buttonDis)
 void Excitations::helpClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-    "Detector Efficiency Tests"));
+    "Excitations' Convert to Energy"));
 }
 /** Enables or disables the absoulte unit conversion cocntrols based
 *  on whether or not the check box has been checked
