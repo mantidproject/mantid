@@ -152,6 +152,6 @@ for name in MantidUIImports:
     setattr(__main__,name,getattr(qti.app.mantidUI,name))
 
 # Initialize the algorithm framework
-FrameworkSingleton().createPythonSimpleAPI(True)
 FrameworkSingleton()._initPythonAlgorithms()
+FrameworkSingleton().createPythonSimpleAPI(True)
 FrameworkSingleton()._importSimpleAPIToGlobal()

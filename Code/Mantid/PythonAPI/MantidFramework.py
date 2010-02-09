@@ -404,7 +404,7 @@ class MantidPyFramework(FrameworkManager):
             mod = reload(sys.modules[simpleapi])
         else:
             mod = __import__(simpleapi)
-	for name in dir(mod):
+        for name in dir(mod):
             if name == '__name__':
                 continue
             setattr(__main__, name, getattr(mod, name))
@@ -669,7 +669,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             return self.getProperty_bool(Name)
         elif prop_type == str:
             return self.getPropertyValue(Name)
-        elif len(prop_type) == 2:
+        elif isinstance(prop_type,list):
             if prop_type[0] == list:
                 ltype = prop_type[1]
                 if ltype == int:
@@ -681,7 +681,7 @@ class PythonAlgorithm(PyAlgorithmBase):
                 else:
                     raise TypeError('Cannot retrieve unrecognized list property "' + Name + '"')
         elif issubclass(prop_type, WorkspaceProperty):
-            return self.getPropertyValue(Name)
+            return mantid[self.getPropertyValue(Name)]
         else:
             raise TypeError('Cannot retrieve unrecognized type for property "' + Name + '"')
 
@@ -701,9 +701,11 @@ class PythonAlgorithm(PyAlgorithmBase):
         elif value_type == bool:
             self.setPropertyValue(Name, str(int(Value)))
         elif value_type == WorkspaceProperty:
+            if isinstance(Value, WorkspaceProxy):
+                Value = Value._getHeldObject()
             if isinstance(Value, MatrixWorkspace):
                 self._setMatrixWorkspaceProperty(Name, Value)
-            elif isinstance(Value, TableWorkspace):
+            elif isinstance(Value, ITableWorkspace):
                 self._setTableWorkspaceProperty(Name, Value)
             else:
                 raise TypeError('Attempting to set workspace property with value that is not a workspace.')
@@ -723,7 +725,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             return bool
         elif isinstance(value,list):
             return list
-        elif isinstance(value, MatrixWorkspace) or isinstance(value, TableWorkspace):
+        elif isinstance(value, WorkspaceProxy) or isinstance(value, MatrixWorkspace) or isinstance(value, ITableWorkspace):
             return WorkspaceProperty
         else:
             raise TypeError("Unknown property type for value '" + str(value) + "'")
