@@ -227,8 +227,12 @@ namespace Mantid
       std::map<std::string, CloneableAlgorithm*>::const_iterator itr = m_cloneable_algs.find(fqlname);
       if( itr != m_cloneable_algs.end() )
       {
-	//Need to clone the object stored here
-	return boost::shared_ptr<API::Algorithm>(itr->second->clone(), std::mem_fun(&CloneableAlgorithm::kill));
+	API::CloneableAlgorithm *cloned = itr->second->clone();
+	if( !cloned )
+	{
+	  throw std::runtime_error("Cloning algorithm failed, cannot create algorithm \"" + name + "\"");
+	}
+	return boost::shared_ptr<API::CloneableAlgorithm>(cloned, std::mem_fun(&CloneableAlgorithm::kill));
       }
       else
       {

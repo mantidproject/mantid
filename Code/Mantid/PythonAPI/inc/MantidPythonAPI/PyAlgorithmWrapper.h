@@ -247,6 +247,12 @@ public:
   /// Called when a delete is performed inside a shared pointer
   virtual void kill()
   {
+    PythonLocker gil;
+    if( FrameworkManagerProxy::requireGIL() )
+    {
+      gil.lock();
+    }
+    
     Py_DECREF(m_self);
   }
 

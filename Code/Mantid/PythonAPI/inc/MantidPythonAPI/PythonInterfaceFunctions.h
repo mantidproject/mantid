@@ -131,14 +131,15 @@ namespace Mantid
 
       static ResultType dispatch(PyObject *object, const std::string & func_name)
       {
-	DefaultReturn<ResultType> default_value;
-	if( !pythonIsReady() ) return default_value();
-
+	// The order of the GIL lock and ready query are important
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
 	  gil.lock();
 	}
+	DefaultReturn<ResultType> default_value;
+	if( !pythonIsReady() ) return default_value();
+
 	try 
 	{
 	  return boost::python::call_method<ResultType>(object, func_name.c_str());
@@ -157,13 +158,12 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name)
       {
-	if( !pythonIsReady() ) return;
-
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
 	  gil.lock();
 	}
+	if( !pythonIsReady() ) return;
 	PyThreadState *tstate = PyThreadState_GET();
 	try
 	{
@@ -189,14 +189,15 @@ namespace Mantid
       
       static ResultType dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
-	DefaultReturn<ResultType> default_value;
-	if( !pythonIsReady() ) return;
-
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
 	  gil.lock();
 	}
+
+	DefaultReturn<ResultType> default_value;
+	if( !pythonIsReady() ) return;
+
 	try 
 	{
 	  return boost::python::call_method<ResultType>(object, func_name.c_str(), arg);
@@ -216,13 +217,13 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
-	if( !pythonIsReady() ) return;
-
 	PythonLocker gil;
 	if( FrameworkManagerProxy::requireGIL() )
 	{
 	  gil.lock();
 	}
+	if( !pythonIsReady() ) return;
+
 	try 
 	{
 	  boost::python::call_method<void>(object, func_name.c_str(), arg);
