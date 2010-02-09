@@ -368,10 +368,10 @@ addFileV('hm421mdll','hm421m.dll','hm421m.dll','../Third_Party/lib/win32/hm421m.
 addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../Third_Party/lib/win32/libNeXus-0.dll',Plugins)
 
 # Python algorithms
-pyalgsDir = addDirectory('PyAlgsDir','PythonAlgs','PythonAlgs',pluginsDir)
+pyalgsDir = addDirectory('PyAlgsDir','Python.Alg','PythonAlgs',pluginsDir)
 pyalgsExampleDir = addDirectory('PyAlgsExampleDir','Examples','Examples',pyalgsDir)
-pyalgsExamples = addComponent('PyAlgsEx','{4ac60beb-e2bc-4bbb-836b-347bb923ba43',pyalgsExampleDir)
-addAllFiles('../Mantid/PythonAPI/PythonAlgorithms','PyAlgsEx',pyalgsExamples)
+pyalgsExamples = addComponent('PyAlgsEx','{4ac60beb-e2bc-4bbb-836b-347bb923ba43}',pyalgsExampleDir)
+addAllFiles('../Mantid/PythonAPI/PythonAlgorithms','PyAlEx',pyalgsExamples)
 
 
 # Add qt custom dialogs library
