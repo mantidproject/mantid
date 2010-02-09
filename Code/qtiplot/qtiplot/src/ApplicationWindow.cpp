@@ -15244,7 +15244,9 @@ void ApplicationWindow::showScriptWindow()
 {
   if (!scriptingWindow)
   { 
-    scriptingWindow = new ScriptingWindow(scriptEnv,this);
+    // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
+    // flag, it is treated as a sub window of its parent
+    scriptingWindow = new ScriptingWindow(scriptEnv,NULL);
     connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
     scriptingWindow->resize(d_script_win_rect.size());
     scriptingWindow->move(d_script_win_rect.topLeft());
