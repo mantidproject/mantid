@@ -371,6 +371,8 @@ class MantidPyFramework(FrameworkManager):
         self._observeAlgFactoryUpdates(True, reload and changes)
 
     def _importPyAlgorithms(self, dir, reload):
+        # Make sure the directory doesn't contain a trailing slash
+        dir = os.path.dirname(dir)
         try:
             files = os.listdir(dir)
         except(OSError):
