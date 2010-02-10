@@ -1,15 +1,13 @@
 # Automatic creation of installer source file (.wxs)
 import os
-import os.path
 import xml
 import xml.dom.minidom
 import msilib
 import md5
-
+import uuid
 import string
 
 QTDIR = 'toget/qt'
-#QTDIR = 'c:/qt/bin'
 
 vfile = open('build_number.txt','r')
 vstr = vfile.read()
@@ -19,7 +17,10 @@ vfile.close()
 MantidVersion = '1.0.' + vstr[12:vlen-2]
 print('Mantid version '+MantidVersion)
 
-product_uuid='{a431e4e7-13fa-4bf9-a030-d7f65d54287d}'
+# To perform a major upgrade, i.e. uninstall the old version if an old one exists, 
+# the product and package GUIDs need to change everytime
+product_uuid = '{' + str(uuid.uuid1()) + '}'
+package_uuid = '{' + str(uuid.uuid1()) + '}'
 
 MantidInstallDir = 'MantidInstall'
 
@@ -226,7 +227,6 @@ doc.appendChild(wix)
 
 Product = doc.createElement('Product')
 Product.setAttribute('Name','Mantid '+ MantidVersion)
-#Product.setAttribute('Id','{5EE8BEAB-286E-4968-9D80-6018DE38E9A4}')
 Product.setAttribute('Id',product_uuid)
 Product.setAttribute('Language','1033')
 Product.setAttribute('Codepage','1252')
@@ -236,7 +236,7 @@ Product.setAttribute('Manufacturer','STFC Rutherford Appleton Laboratories')
 wix.appendChild(Product)
 
 Package = doc.createElement('Package')
-Package.setAttribute('Id','????????-????-????-????-????????????')
+Package.setAttribute('Id',package_uuid)
 Package.setAttribute('Keywords','Installer')
 Package.setAttribute('Description','Mantid Installer')
 #Package.setAttribute('Comments','')
@@ -248,8 +248,15 @@ Package.setAttribute('SummaryCodepage','1252')
 Product.appendChild(Package)
 
 Upgrade = addTo(Product,'Upgrade',{'Id':'{E9B6F1A9-8CB7-4441-B783-4E7A921B37F0}'})
-addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'yes','Property':'PATCHFOUND','Minimum':MantidVersion,'IncludeMinimum':'yes','Maximum':MantidVersion,'IncludeMaximum':'yes'})
+addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'no','Property':'PREVIOUSFOUND','Minimum': '1.0.0','IncludeMinimum':'yes','Maximum':MantidVersion,'IncludeMaximum':'no'})
 addTo(Upgrade,'UpgradeVersion',{'OnlyDetect':'yes','Property':'NEWERFOUND','Minimum':MantidVersion,'IncludeMinimum':'no'})
+
+addTo(Product,'CustomAction',{'Id':'NoDowngrade','Error':'A later version of [ProductName] is already installed.'})
+
+exeSec = addTo(Product,'InstallExecuteSequence',{})
+NoDowngrade = addTo(exeSec,'Custom',{'Action':'NoDowngrade','After':'FindRelatedProducts'})
+addText('NEWERFOUND',NoDowngrade)
+addTo(exeSec,'RemoveExistingProducts',{'After':'InstallInitialize'})
 
 Media = doc.createElement('Media')
 Media.setAttribute('Id','1')
@@ -257,9 +264,6 @@ Media.setAttribute('Cabinet','Mantid.cab')
 Media.setAttribute('EmbedCab','yes')
 Media.setAttribute('DiskPrompt','CD-ROM #1')
 Product.appendChild(Media)
-
-addTo(Product,'CustomAction',{'Id':'AlreadyUpdated','Error':'[ProductName] is already installed.'})
-addTo(Product,'CustomAction',{'Id':'NoDowngrade','Error':'A later version of [ProductName] is already installed.'})
 
 Prop = doc.createElement('Property')
 Prop.setAttribute('Id','DiskPrompt')
@@ -540,7 +544,7 @@ addCRef('PyAlgsEx',MantidExec)
 Redist = addHiddenFeature('Redist',Complete)
 addModules('toget/VCRedist',Redist)
 
-Includes = addFeature('Includes','Includes','Mantid and third party header files.','1',Complete)
+Includes = addFeature('Includes','Includes','Mantid and third party header files.','2',Complete)
 addCRef('IncludeMantidAlgorithms',Includes)
 addCRef('IncludeMantidAPI',Includes)
 addCRef('IncludeMantidCurveFitting',Includes)
@@ -561,12 +565,6 @@ addCRef('QTIPlot',QTIPlotExec)
 addTo(Product,'UIRef',{'Id':'WixUI_FeatureTree'})
 addTo(Product,'UIRef',{'Id':'WixUI_ErrorProgressText'})
 
-exeSec = addTo(Product,'InstallExecuteSequence',{})
-AlreadyUpdated = addTo(exeSec,'Custom',{'Action':'AlreadyUpdated','After':'FindRelatedProducts'})
-addText('PATCHFOUND',AlreadyUpdated)
-NoDowngrade = addTo(exeSec,'Custom',{'Action':'NoDowngrade','After':'FindRelatedProducts'})
-addText('NEWERFOUND',NoDowngrade)
-addTo(exeSec,'RemoveExistingProducts',{'After':'InstallFinalize'})
 
 f = open('tmp.wxs','w')
 doc.writexml(f,newl="\r\n")
