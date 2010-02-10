@@ -30,6 +30,7 @@ def NormaliseToWhiteBeamAndLoadMask(WBRun, toNorm, mapFile, rebinString, Detecto
       FDOL = FindDetectorsOutsideLimits(InputWorkspace=DetectorMask,OutputWorkspace='_ETrans_loading_bad_detector_WS',HighThreshold=10,LowThreshold=-1,OutputFile='')
       detIDs = FDOL.getPropertyValue('BadDetectorIDs')
       MaskDetectors(Workspace=theNorm, DetectorList=detIDs)
+      mantid.deleteWorkspace('_ETrans_loading_bad_detector_WS')
       
     if mapFile!= "" :
       GroupDetectors( theNorm, theNorm, mapFile, KeepUngroupedSpectra=0)

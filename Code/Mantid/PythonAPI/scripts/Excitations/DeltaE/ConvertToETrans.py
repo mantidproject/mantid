@@ -64,7 +64,8 @@ try:
     FDOL = FindDetectorsOutsideLimits(InputWorkspace=DetectorMask,OutputWorkspace='_ETrans_loading_bad_detector_WS',HighThreshold=10,LowThreshold=-1,OutputFile='')
     detIDs = FDOL.getPropertyValue('BadDetectorIDs')
     MaskDetectors(Workspace=pInOut, DetectorList=detIDs)
-
+    mantid.deleteWorkspace('_ETrans_loading_bad_detector_WS')
+    
   mapFile = |GUI_SET_MAP_FILE|
   if mapFile != '':
     GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
