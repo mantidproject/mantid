@@ -63,9 +63,9 @@ void IkedaCarpenterPV::setHeight(const double h)
 
 void IkedaCarpenterPV::setWidth(const double w) 
 {
-  getParameter("SigmaSquared") = w*w/9.0;  
+  getParameter("SigmaSquared") = w*w/80.0;  
 
-  getParameter("Gamma") = w/16.0; 
+  getParameter("Gamma") = w/32.0; 
 
   m_width = w;
 

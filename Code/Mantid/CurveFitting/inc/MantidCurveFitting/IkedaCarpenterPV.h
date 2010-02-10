@@ -74,6 +74,7 @@ namespace Mantid
       /// method for updating m_waveLength
       void calWavelengthAtEachDataPoint(const double* xValues, const int& nData);
 
+      // used in setHeight and setWidth
       double m_width; 
       double m_height;
     };
