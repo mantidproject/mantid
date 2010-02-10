@@ -86,5 +86,8 @@ Server said: %s
 %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
     raise smtplib.SMTPException, errstr
 
-sys.exit(1)
+if buildSuccess:
+    sys.exit(0)
+else:
+    sys.exit(1)
      

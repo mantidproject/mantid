@@ -41,8 +41,16 @@ fileBuildErr = localLogDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
 notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
-if buildSuccess:
-     exit(0)
+last = localLogDir + 'lastBuild.txt'
+try:
+     lastBuild = open(last,'r').read()
+except IOError:
+     lastBuild = 'False'
+open(last,'w').write(str(buildSuccess))
+
+# We want to skip sending email if this AND previous build succeeded
+if buildSuccess and lastBuild =='True':
+     sys.exit(0)
 
 #Construct Message
 httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
@@ -75,5 +83,7 @@ Server said: %s
 %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
     raise smtplib.SMTPException, errstr
 
-exit(1)
-     
+if buildSuccess:
+    sys.exit(0)
+else:
+    sys.exit(1)
