@@ -11,11 +11,7 @@ import buildNotification as notifier
 smtpserver = 'outbox.rl.ac.uk'
 
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-SENDER = 'Installer@mantidproject.org'
-if (os.name =='nt'):
-     SENDER = 'Win' + SENDER
-else:
-     SENDER = 'Linux' + SENDER
+SENDER = 'WinInstaller@mantidproject.org'
 
 #Set up email content 
 buildSuccess = True
@@ -46,7 +42,15 @@ fileBuildErr = localLogDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
 notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
-if buildSuccess:
+last = localLogDir + 'lastBuild.txt'
+try:
+     lastBuild = open(last,'r').read()
+except IOError:
+     lastBuild = 'False'
+open(last,'w').write(str(buildSuccess))
+
+# We want to skip sending email if this AND previous build succeeded
+if buildSuccess and lastBuild =='True':
      sys.exit(0)
 
 #Construct Message
@@ -59,13 +63,7 @@ message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
 #Create Subject
-subject = 'Subject: '
-if (os.name=='nt'):
-     subject += "Windows"
-else:
-     subject += "Linux"
-          
-subject += ' Build Report: '
+subject = 'Subject: Windows Build Report: '
 
 if buildSuccess:
 	subject += '[Build Successful]\n\n\n'

@@ -10,11 +10,7 @@ import buildNotification as notifier
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-SENDER = 'Installer64@mantidproject.org'
-if (os.name =='nt'):
-     SENDER = 'Win' + SENDER
-else:
-     SENDER = 'Linux' + SENDER
+SENDER = 'WinInstaller64@mantidproject.org'
 
 #Set up email content 
 buildSuccess = True
@@ -57,14 +53,7 @@ message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
 #Create Subject
-subject = 'Subject: '
-if (os.name=='nt'):
-     subject += "Windows"
-else:
-     subject += "Linux"
-          
-subject += ' Build Report: '
-
+subject = 'Subject: Windows64 Installer Build Report: '
 if buildSuccess:
 	subject += '[Build Successful]\n\n\n'
 else:
