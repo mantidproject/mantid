@@ -757,6 +757,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\HRPDSlabCanAbsorption.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\InputWSDetectorInfo.h"
 				>
 			</File>
