@@ -35,7 +35,15 @@ double IkedaCarpenterPV::height()const
 double IkedaCarpenterPV::width()const 
 {
   // here estimated to sum of the HWHM of the gaussian and lorentzian part...
-  return getParameter("Gamma")+sqrt(getParameter("SigmaSquared")*2*log(2.0));
+  double eta = getParameter("Eta");
+
+  // eta should always be between zero and one but before putting in codes to
+  // constrain this do the following
+
+  if (eta >= 0 && eta <= 1.0)
+    return 0.5*(eta*getParameter("Gamma")+(1-eta)*sqrt(getParameter("SigmaSquared"))*2);
+  else
+    return 0.5*(getParameter("Gamma")+sqrt(getParameter("SigmaSquared"))*2);
 };
 
 void IkedaCarpenterPV::setCentre(const double c) 
@@ -45,13 +53,24 @@ void IkedaCarpenterPV::setCentre(const double c)
 
 void IkedaCarpenterPV::setHeight(const double h) 
 {
-  getParameter("I") = h;
+  m_height = h;
+
+  if (m_width != 0.0)
+    getParameter("I") = h;
+  else
+    getParameter("I") = 0.25*m_width*m_height;
 };
 
 void IkedaCarpenterPV::setWidth(const double w) 
 {
-  getParameter("Gamma") = w/4.0;  // gamma represent lorentzian HWHM. Here set to half the total HWHM=w/2
-  getParameter("SigmaSquared") = pow((w/2.0)/(8*log(2.0)),2);  // Set sigma according to formula FWHM=2*sqrt(2*ln2)*sigma.
+  getParameter("SigmaSquared") = w*w/9.0;  
+
+  getParameter("Gamma") = w/16.0; 
+
+  m_width = w;
+
+  if ( m_height != 0.0 )
+    getParameter("I") = 0.25*m_width*m_height;
 };
 
 
@@ -66,6 +85,8 @@ void IkedaCarpenterPV::init()
   declareParameter("Gamma",1.0);
   declareParameter("Eta",0.0);
   declareParameter("X0",0.0);
+
+  m_width = 0.0; m_height = 0.0; 
 }
 
 void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const int& nData)

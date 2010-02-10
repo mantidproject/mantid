@@ -73,6 +73,9 @@ namespace Mantid
 
       /// method for updating m_waveLength
       void calWavelengthAtEachDataPoint(const double* xValues, const int& nData);
+
+      double m_width; 
+      double m_height;
     };
 
   } // namespace CurveFitting
