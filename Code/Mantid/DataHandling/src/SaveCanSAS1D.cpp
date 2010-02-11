@@ -290,7 +290,7 @@ void SaveCanSAS1D::createSASInstrument(Poco::XML::Element* parent)
   sasDetectorElem->appendChild(detectorSDDElem);
   detectorSDDElem->setAttribute("unit", "m");
   std::stringstream sdd;
-  double distance = det->getDistance(*m_workspace->getInstrument()->getSample());
+  double distance = detgroup->getDistance(*m_workspace->getInstrument()->getSample());
   sdd << distance;
   Poco::XML::Text* detectorSDDText = mDoc->createTextNode(sdd.str());
   throwException(detectorSDDText, "SaveCanSAS1D::createSASInstrument", "SDD");
