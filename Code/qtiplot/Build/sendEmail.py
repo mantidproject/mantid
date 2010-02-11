@@ -21,7 +21,8 @@ buildSuccess = True
 
 project = 'qtiplot'
 remoteArchiveDir, relativeLogDir = notifier.getArchiveDir(project)
-localLogDir = '../../../../logs/' + project + '/'
+localBaseLog = '../../../../logs/' 
+localLogDir = localBaseLog + project + '/'
 
 #Get build result and errors
 fileBuild = localLogDir+'build.log'
@@ -39,7 +40,17 @@ if 'failed' in buildResult:
 fileBuildErr = localLogDir+'error.log'
 notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
-if buildSuccess:
+mtdtests = localBaseLog + 'Mantid' + '/MantidTests.txt'
+f = open(mtdtests, 'r')
+for line in f:
+     mtdTestsResult = line
+f.close()
+if 'False' in mtdTestsResult:
+     mtdTestsPassed = False
+else:
+     mtdTestsPassed = True
+
+if buildSuccess and mtdTestsPassed:
      fileLaunchInstaller = localLogDir + 'LaunchInstaller.txt'
      f = open(fileLaunchInstaller,'w')
      f.write('launch')

@@ -252,6 +252,12 @@ except smtplib.SMTPException, details:
      emailErr.write(str(details) + '\n')
 emailErr.close()
 
+# Write out what happened with the tests
+mantidtests = localLogDir + 'MantidTests.txt'
+f = open(mantidtests,'w')
+f.write('Tests ' + str(testsPass))
+f.close()
+
 if not buildSuccess:
      # On Redhat we have python 2.4 and that doesn't seem to have the global exit command
      sys.exit(1)
