@@ -75,29 +75,60 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4" >
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8" >
+        <layout class="QHBoxLayout" name="horizontalLayout_12" >
          <item>
-          <widget class="QRadioButton" name="single_mode_btn" >
-           <property name="text" >
-            <string>Single run mode</string>
+          <widget class="QLabel" name="label_7" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="checked" >
-            <bool>true</bool>
+           <property name="maximumSize" >
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text" >
+            <string>Data directory</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QRadioButton" name="batch_mode_btn" >
-           <property name="enabled" >
-            <bool>true</bool>
+          <widget class="QLineEdit" name="datadir_edit" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
            </property>
-           <property name="text" >
-            <string>Batch mode</string>
+           <property name="minimumSize" >
+            <size>
+             <width>200</width>
+             <height>0</height>
+            </size>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_16" >
+          <widget class="QPushButton" name="data_dirBtn" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text" >
+            <string>Browse</string>
+           </property>
+           <property name="autoDefault" >
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer" >
            <property name="orientation" >
             <enum>Qt::Horizontal</enum>
            </property>
@@ -160,6 +191,43 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8" >
+         <item>
+          <widget class="QRadioButton" name="single_mode_btn" >
+           <property name="text" >
+            <string>Single run mode</string>
+           </property>
+           <property name="checked" >
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="batch_mode_btn" >
+           <property name="enabled" >
+            <bool>true</bool>
+           </property>
+           <property name="text" >
+            <string>Batch mode</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_16" >
+           <property name="orientation" >
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0" >
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="Line" name="line_2" >
          <property name="orientation" >
           <enum>Qt::Horizontal</enum>
@@ -169,87 +237,10 @@
        <item>
         <widget class="QStackedWidget" name="mode_stack" >
          <property name="currentIndex" >
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page_5" >
           <layout class="QVBoxLayout" name="verticalLayout_9" >
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_11" >
-             <property name="spacing" >
-              <number>6</number>
-             </property>
-             <property name="sizeConstraint" >
-              <enum>QLayout::SetFixedSize</enum>
-             </property>
-             <item>
-              <widget class="QLabel" name="label_7" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize" >
-                <size>
-                 <width>16777215</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="text" >
-                <string>Data directory</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="datadir_edit" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize" >
-                <size>
-                 <width>200</width>
-                 <height>0</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="data_dirBtn" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Maximum" hsizetype="Minimum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text" >
-                <string>Browse</string>
-               </property>
-               <property name="autoDefault" >
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer" >
-               <property name="orientation" >
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeType" >
-                <enum>QSizePolicy::MinimumExpanding</enum>
-               </property>
-               <property name="sizeHint" stdset="0" >
-                <size>
-                 <width>40</width>
-                 <height>30</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-            </layout>
-           </item>
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_14" >
              <property name="sizeConstraint" >
@@ -1106,6 +1097,9 @@
         </layout>
        </item>
       </layout>
+      <zorder>line_2</zorder>
+      <zorder>mode_stack</zorder>
+      <zorder></zorder>
      </widget>
      <widget class="QWidget" name="tab_2" >
       <attribute name="title" >
@@ -3334,8 +3328,6 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <tabstops>
-  <tabstop>datadir_edit</tabstop>
-  <tabstop>data_dirBtn</tabstop>
   <tabstop>rad_min</tabstop>
   <tabstop>rad_max</tabstop>
   <tabstop>wav_min</tabstop>

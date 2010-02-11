@@ -1558,11 +1558,11 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
             script += '[COLETTE]  STEP/QXY/LINEAR ' + str(DQXY) + '\n'
     
     # Correct
-    script += '[COLETTE] CORRECT'
+    script += '[COLETTE] CORRECT\n'
     if plotresults:
-        script += '[COLETTE]  DISPLAY/HISTOGRAM ' + reduced
+        script += '[COLETTE]  DISPLAY/HISTOGRAM ' + reduced + '\n'
     if savepath != '':
-        script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath
+        script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath + '\n'
         
     return script
 
