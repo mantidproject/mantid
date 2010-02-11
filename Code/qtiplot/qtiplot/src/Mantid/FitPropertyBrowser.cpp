@@ -641,7 +641,7 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
       {
         if (subs[j] == prop)
         {
-          f->parameter(j-j0) = value;
+          f->setParameter(j-j0,value);
           done = true;
           break;
         }
@@ -894,7 +894,7 @@ void FitPropertyBrowser::fit()
     m_initialParameters.resize(compositeFunction()->nParams());
     for(int i=0;i<compositeFunction()->nParams();i++)
     {
-      m_initialParameters[i] = compositeFunction()->parameter(i);
+      m_initialParameters[i] = compositeFunction()->getParameter(i);
     }
     m_btnUnFit->setEnabled(true);
 
@@ -1220,7 +1220,7 @@ void FitPropertyBrowser::updateParameters()
           parProp->setPropertyName(parName);
         }
         fnItem->property()->addSubProperty(parProp);
-        double v = f->parameter(ip);
+        double v = f->getParameter(ip);
         m_doubleManager->setValue(parProp,v);
       }
       if (nParamProps > f->nParams())
@@ -1255,7 +1255,7 @@ void FitPropertyBrowser::updateParameters()
         int ip = j - j0;
         QString parName = QString::fromStdString(f->parameterName(ip));
         paramProps[j]->setPropertyName(parName);
-        double v = f->parameter(ip);
+        double v = f->getParameter(ip);
         m_doubleManager->setValue(paramProps[j],v);
         QList<QtProperty*> tieProps = paramProps[j]->subProperties();
         for(int k=0;k<tieProps.size();k++)
@@ -1321,7 +1321,7 @@ void FitPropertyBrowser::getFitResults()
         {
           name.insert(0,"f0.");
         }
-        compositeFunction()->getParameter(name) = value;
+        compositeFunction()->setParameter(name,value);
       }
       while(row.next());
       updateParameters();
@@ -1342,7 +1342,7 @@ void FitPropertyBrowser::undoFit()
   {
     for(int i=0;i<compositeFunction()->nParams();i++)
     {
-      compositeFunction()->parameter(i) = m_initialParameters[i];
+      compositeFunction()->setParameter(i,m_initialParameters[i]);
     }
     updateParameters();
   }
@@ -1877,7 +1877,7 @@ void FitPropertyBrowser::addFunProperties(Mantid::API::IFunction* f,QtProperty* 
   {
     QtProperty* parProp = m_doubleManager->addProperty(QString::fromStdString(f->parameterName(i)));
     fnProp->addSubProperty(parProp);
-    m_doubleManager->setValue(parProp,f->parameter(i));
+    m_doubleManager->setValue(parProp,f->getParameter(i));
   }
 
   m_changeSlotsEnabled = true;
