@@ -40,6 +40,8 @@ buildlog = open("../../../../logs/qtiplot/build.log","w")
 errorlog = open("../../../../logs/qtiplot/error.log","w")
 
 # Build MantidQt
+# Updates to UI files alone don't always seem to get picked up without a clean first, so do that until we can figure out why
+sp.call(make + ' clean',stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 if ret != 0:
     outcome = "MantidQt build failed"
