@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <ctime>
 
+#include <boost/shared_ptr.hpp>
+
 #include "MantidGeometry/V3D.h" 
 #include "MantidGeometry/Objects/Object.h" 
 #include "MantidGeometry/Surfaces/Cylinder.h" 
@@ -16,11 +18,12 @@
 #include "MantidGeometry/Math/Algebra.h" 
 #include "MantidGeometry/Surfaces/SurfaceFactory.h" 
 #include "MantidGeometry/Objects/Track.h" 
-
 #include "MantidGeometry/Rendering/GluGeometryHandler.h"
 
 using namespace Mantid;
 using namespace Geometry;
+
+typedef boost::shared_ptr<Object> Object_sptr;
 
 class testObject: public CxxTest::TestSuite
 {
@@ -32,163 +35,163 @@ public:
 
   void testCreateUnitCube()
   {
-    Object A = createUnitCube();
+    Object_sptr geom_obj = createUnitCube();
 
-    TS_ASSERT_EQUALS(A.str(),"68 -1 0 -6 5 -4 3 -2 1");
+    TS_ASSERT_EQUALS(geom_obj->str(),"68 -1 0 -6 5 -4 3 -2 1");
   }
 
   void testIsOnSideCappedCylinder()
   {
-    Object A = createCappedCylinder();
+	Object_sptr geom_obj = createCappedCylinder();
     //inside
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,0)),0); //origin
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,2.9,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,-2.9,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,-2.9)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,2.9)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,0)),0); //origin
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,2.9,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-2.9,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-2.9)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,2.9)),0);
     //on the side
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,3,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,-3,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,-3)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,3)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(1.2,0,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(-3.2,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,0)),1);
 
     //on the edges
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(1.2,3,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(1.2,-3,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(1.2,0,-3)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(1.2,0,3)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(-3.2,3,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(-3.2,-3,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(-3.2,0,-3)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(-3.2,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,-3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,-3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,-3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,-3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,3)),1);
     //out side
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,3.1,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,-3.1,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,-3.1)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,3.1)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(1.3,0,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(-3.3,0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,3.1,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-3.1,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-3.1)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,3.1)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.3,0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.3,0,0)),0);
   }
 
   void testIsValidCappedCylinder()
   {
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     //inside
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),1); //origin
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,2.9,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,-2.9,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,-2.9)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,2.9)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,0)),1); //origin
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,2.9,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-2.9,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-2.9)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,2.9)),1);
     //on the side
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,3,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,-3,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,-3)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,3)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(1.2,0,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(-3.2,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,0)),1);
 
     //on the edges
-    TS_ASSERT_EQUALS(A.isValid(V3D(1.2,3,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(1.2,-3,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(1.2,0,-3)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(1.2,0,3)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(-3.2,3,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(-3.2,-3,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(-3.2,0,-3)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(-3.2,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,-3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,-3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,-3,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,-3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,3)),1);
     //out side
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,3.1,0)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,-3.1,0)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,-3.1)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,3.1)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(1.3,0,0)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(-3.3,0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,3.1,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-3.1,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-3.1)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,3.1)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.3,0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.3,0,0)),0);
   }
 
   void testIsOnSideSphere()
   {
-    Object A = createSphere();
+    Object_sptr geom_obj = createSphere();
     //inside
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,0)),0); //origin
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,4.0,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,-4.0,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,-4.0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,4.0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,0)),0); //origin
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.0)),0);
     //on the side
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,4.1,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,-4.1,0)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,-4.1)),1);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,4.1)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.1)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.1)),1);
 
     //out side
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,4.2,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,-4.2,0)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,-4.2)),0);
-    TS_ASSERT_EQUALS(A.isOnSide(V3D(0,0,4.2)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.2,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.2,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.2)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.2)),0);
   }
 
   void testIsValidSphere()
   {
-    Object A = createSphere();
+    Object_sptr geom_obj = createSphere();
     //inside
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,0)),1); //origin
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,4.0,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,-4.0,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,-4.0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,4.0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,0)),1); //origin
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.0)),1);
     //on the side
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,4.1,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,-4.1,0)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,-4.1)),1);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,4.1)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.1)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.1)),1);
 
     //out side
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,4.2,0)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,-4.2,0)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,-4.2)),0);
-    TS_ASSERT_EQUALS(A.isValid(V3D(0,0,4.2)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.2,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.2,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.2)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.2)),0);
   }
 
   void testCalcValidTypeSphere()
   {
-    Object A = createSphere();
+    Object_sptr geom_obj = createSphere();
     //entry on the normal
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(1,0,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(-1,0,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(4.1,0,0),V3D(1,0,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(4.1,0,0),V3D(-1,0,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-4.1,0),V3D(0,1,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-4.1,0),V3D(0,-1,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,4.1,0),V3D(0,1,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,4.1,0),V3D(0,-1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1,0,0),V3D(1,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1,0,0),V3D(-1,0,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1,0,0),V3D(1,0,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1,0,0),V3D(-1,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,-4.1,0),V3D(0,1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,-4.1,0),V3D(0,-1,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,4.1,0),V3D(0,1,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,4.1,0),V3D(0,-1,0)),1);
 
     //a glancing blow
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(0,1,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1,0,0),V3D(0,1,0)),0);
     //not quite on the normal
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-4.1,0,0),V3D(0.5,0.5,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(4.1,0,0),V3D(0.5,0.5,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-4.1,0,0),V3D(0.5,0.5,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(4.1,0,0),V3D(0.5,0.5,0)),-1);
   }
 
   void testCalcValidTypeCappedCylinder()
   {
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     //entry on the normal
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(1,0,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(-1,0,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(1.2,0,0),V3D(1,0,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(1.2,0,0),V3D(-1,0,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-3,0),V3D(0,1,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,-3,0),V3D(0,-1,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,3,0),V3D(0,1,0)),-1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(0,3,0),V3D(0,-1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2,0,0),V3D(1,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2,0,0),V3D(-1,0,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2,0,0),V3D(1,0,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2,0,0),V3D(-1,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,-3,0),V3D(0,1,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,-3,0),V3D(0,-1,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,3,0),V3D(0,1,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(0,3,0),V3D(0,-1,0)),1);
 
     //a glancing blow
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(0,1,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2,0,0),V3D(0,1,0)),0);
     //not quite on the normal
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(-3.2,0,0),V3D(0.5,0.5,0)),1);
-    TS_ASSERT_EQUALS(A.calcValidType(V3D(1.2,0,0),V3D(0.5,0.5,0)),-1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(-3.2,0,0),V3D(0.5,0.5,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->calcValidType(V3D(1.2,0,0),V3D(0.5,0.5,0)),-1);
   }
 
   void testInterceptSurfaceSphereZ()
@@ -205,9 +208,9 @@ public:
     // A sphere 
     std::string ObjSphere="-41" ;
 
-    Object A; 
-    A.setObject(41,ObjSphere);
-    A.populate(SphSurMap);
+    Object_sptr geom_obj = Object_sptr(new Object); 
+    geom_obj->setObject(41,ObjSphere);
+    geom_obj->populate(SphSurMap);
 
 
     Track track(V3D(-1,1.5,1),V3D(1,0,0));
@@ -216,63 +219,63 @@ public:
     // forward only intercepts means that start point should be track origin
     //expectedResults.push_back(TUnit(V3D(-sqrt(16-0.25)+1,1.5,1),
     expectedResults.push_back(TUnit(V3D(-1,1.5,1),
-      V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,A.getName()));
+      V3D(sqrt(16-0.25)+1,1.5,1.0),sqrt(15.75)+2,geom_obj->getName()));
 
-    checkTrackIntercept(A,track,expectedResults);
+    checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceSphereY()
   {
     std::vector<TUnit> expectedResults;
-    Object A = createSphere();
+    Object_sptr geom_obj = createSphere();
     Track track(V3D(0,-10,0),V3D(0,1,0));
 
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(0,-4.1,0),V3D(0,4.1,0),14.1,A.getName()));
+    expectedResults.push_back(TUnit(V3D(0,-4.1,0),V3D(0,4.1,0),14.1,geom_obj->getName()));
 
-    checkTrackIntercept(A,track,expectedResults);
+    checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceSphereX()
   {
     std::vector<TUnit> expectedResults;
-    Object A = createSphere();
+    Object_sptr geom_obj = createSphere();
     Track track(V3D(-10,0,0),V3D(1,0,0));
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(-4.1,0,0),V3D(4.1,0,0),14.1,A.getName()));
-    checkTrackIntercept(A,track,expectedResults);
+    expectedResults.push_back(TUnit(V3D(-4.1,0,0),V3D(4.1,0,0),14.1,geom_obj->getName()));
+    checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceCappedCylinderY()
   {
     std::vector<TUnit> expectedResults;
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(0,-3,0),V3D(0,3,0),13,A.getName()));
+    expectedResults.push_back(TUnit(V3D(0,-3,0),V3D(0,3,0),13,geom_obj->getName()));
 
     Track track(V3D(0,-10,0),V3D(0,1,0));
-    checkTrackIntercept(A,track,expectedResults);
+    checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceCappedCylinderX()
   {
     std::vector<TUnit> expectedResults;
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     Track track(V3D(-10,0,0),V3D(1,0,0));
 
     //format = startPoint, endPoint, total distance so far, objectID
-    expectedResults.push_back(TUnit(V3D(-3.2,0,0),V3D(1.2,0,0),11.2,A.getName()));
+    expectedResults.push_back(TUnit(V3D(-3.2,0,0),V3D(1.2,0,0),11.2,geom_obj->getName()));
 
-    checkTrackIntercept(A,track,expectedResults);
+    checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void testInterceptSurfaceCappedCylinderMiss()
   {
     std::vector<TUnit> expectedResults; //left empty as there are no expected results
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     Track track(V3D(-10,0,0),V3D(1,1,0));
 
-    checkTrackIntercept(A,track,expectedResults);
+    checkTrackIntercept(geom_obj,track,expectedResults);
   }
 
   void checkTrackIntercept(Track& track, std::vector<TUnit>& expectedResults)
@@ -290,9 +293,9 @@ public:
     TS_ASSERT_EQUALS(index,static_cast<int>(expectedResults.size()));
   }
 
-  void checkTrackIntercept(Object& obj, Track& track, std::vector<TUnit>& expectedResults)
+  void checkTrackIntercept(Object_sptr obj, Track& track, std::vector<TUnit>& expectedResults)
   {
-    int unitCount = obj.interceptSurface(track);
+    int unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount,expectedResults.size())
       checkTrackIntercept(track,expectedResults);
   }
@@ -462,34 +465,34 @@ public:
     Test find point in cube
     */
   {
-    Object A = createUnitCube();
+    Object_sptr geom_obj = createUnitCube();
     // initial guess in object
     Geometry::V3D pt;
-    TS_ASSERT_EQUALS(A.getPointInObject(pt),1);
+    TS_ASSERT_EQUALS(geom_obj->getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0,0,0));
     // initial guess not in object, but on x-axis
     std::vector<std::string> planes;
     planes.push_back("px 10"); planes.push_back("px 11");
     planes.push_back("py -0.5"); planes.push_back("py 0.5");
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
-    Object B =createCuboid(planes);
-    TS_ASSERT_EQUALS(B.getPointInObject(pt),1);
+    Object_sptr B =createCuboid(planes);
+    TS_ASSERT_EQUALS(B->getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(10,0,0));
     // on y axis
     planes.clear();
     planes.push_back("px -0.5"); planes.push_back("px 0.5");
     planes.push_back("py -22"); planes.push_back("py -21");
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
-    Object C =createCuboid(planes);
-    TS_ASSERT_EQUALS(C.getPointInObject(pt),1);
+    Object_sptr C =createCuboid(planes);
+    TS_ASSERT_EQUALS(C->getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0,-21,0));
     // not on principle axis, now works using getBoundingBox
     planes.clear();
     planes.push_back("px 0.5"); planes.push_back("px 1.5");
     planes.push_back("py -22"); planes.push_back("py -21");
     planes.push_back("pz -0.5"); planes.push_back("pz 0.5");
-    Object D =createCuboid(planes);
-    TS_ASSERT_EQUALS(D.getPointInObject(pt),1);
+    Object_sptr D =createCuboid(planes);
+    TS_ASSERT_EQUALS(D->getPointInObject(pt),1);
     TS_ASSERT_DELTA(pt.X(),1.0,1e-6);
     TS_ASSERT_DELTA(pt.Y(),-21.5,1e-6);
     TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
@@ -502,8 +505,8 @@ public:
     planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
     planes.push_back("p 0 .70710678118 .70710678118 -1.1"); planes.push_back("p 0 .70710678118 .70710678118 -0.1");
     planes.push_back("p 0 -.70710678118 .70710678118 -0.5"); planes.push_back("p 0 -.70710678118 .70710678118 0.5");
-    Object E =createCuboid(planes);
-    TS_ASSERT_EQUALS(E.getPointInObject(pt),1);
+    Object_sptr E =createCuboid(planes);
+    TS_ASSERT_EQUALS(E->getPointInObject(pt),1);
     TS_ASSERT_DELTA(pt.X(),0.0,1e-6);
     TS_ASSERT_DELTA(pt.Y(),-0.1414213562373,1e-6);
     TS_ASSERT_DELTA(pt.Z(),0.0,1e-6);
@@ -515,14 +518,14 @@ public:
     planes.push_back("p 1 0 0 -0.5"); planes.push_back("p 1 0 0 0.5");
     planes.push_back("p 0  .70710678118 .70710678118 -2"); planes.push_back("p 0  .70710678118 .70710678118 -1");
     planes.push_back("p 0 -.70710678118 .70710678118 -0.5"); planes.push_back("p 0 -.70710678118 .70710678118 0.5");
-    Object F =createCuboid(planes);
-    TS_ASSERT_EQUALS(F.getPointInObject(pt),0);
+    Object_sptr F =createCuboid(planes);
+    TS_ASSERT_EQUALS(F->getPointInObject(pt),0);
     // Test use of defineBoundingBox to explictly set the bounding box, when the automatic method fails
-    F.defineBoundingBox(0.5,-1/(2.0*sqrt(2.0)),-1.0/(2.0*sqrt(2.0)),
+    F->defineBoundingBox(0.5,-1/(2.0*sqrt(2.0)),-1.0/(2.0*sqrt(2.0)),
       -0.5,-sqrt(2.0)-1.0/(2.0*sqrt(2.0)),-sqrt(2.0)-1.0/(2.0*sqrt(2.0)));
-    TS_ASSERT_EQUALS(F.getPointInObject(pt),1);
-    Object S = createSphere();
-    TS_ASSERT_EQUALS(S.getPointInObject(pt),1);
+    TS_ASSERT_EQUALS(F->getPointInObject(pt),1);
+    Object_sptr S = createSphere();
+    TS_ASSERT_EQUALS(S->getPointInObject(pt),1);
     TS_ASSERT_EQUALS(pt,V3D(0.0,0.0,0));
   }
 
@@ -532,32 +535,32 @@ public:
     Test solid angle calculation for a sphere
     */
   {
-    Object A = createSphere();
+    Object_sptr geom_obj = createSphere();
     double satol=2e-2; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(8.1,0,0)),0.864364,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,8.1,0)),0.864364,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,8.1)),0.864364,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(8.1,0,0)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,8.1,0)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,0,8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(0,0,0)),4*M_PI,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(0,0,0)),4*M_PI,satol);
     // surface point
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
     // distant points
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(20,0,0)),0.133442,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(200,0,0)),0.0013204,satol);
-    TS_ASSERT_DELTA(A.rayTraceSolidAngle(V3D(2000,0,0)),1.32025e-5,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(20,0,0)),0.133442,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(200,0,0)),0.0013204,satol);
+    TS_ASSERT_DELTA(geom_obj->rayTraceSolidAngle(V3D(2000,0,0)),1.32025e-5,satol);
     //
     // test solidAngle interface, which will be main method to solid angle
     //
-    TS_ASSERT_DELTA(A.solidAngle(V3D(8.1,0,0)),0.864364,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,8.1,0)),0.864364,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,8.1)),0.864364,satol);
-    TS_ASSERT_DELTA(A.solidAngle(V3D(0,0,-8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(8.1,0,0)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0,8.1,0)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0,0,8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->solidAngle(V3D(0,0,-8.1)),0.864364,satol);
     //
   }
 
@@ -566,11 +569,11 @@ public:
     Test solid angle calculation for a capped cylinder
     */
   {
-    Object A = createSmallCappedCylinder();
+    Object_sptr geom_obj = createSmallCappedCylinder();
     // Want to test triangulation so setup a geometry handler
-    boost::shared_ptr<GluGeometryHandler> h = boost::shared_ptr<GluGeometryHandler>(new GluGeometryHandler(&A));
+    boost::shared_ptr<GluGeometryHandler> h = boost::shared_ptr<GluGeometryHandler>(new GluGeometryHandler(geom_obj.get()));
     h->setCylinder(V3D(-1.0,0.0,0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
-    A.setGeometryHandler(h);
+    geom_obj->setGeometryHandler(h);
 
     double satol(1e-4); // tolerance for solid angle
 
@@ -578,20 +581,20 @@ public:
     //
     // soild angle of circle radius 3, distance 3 is 2pi(1-cos(t)) where
     // t is atan(3/3), should be 0.000317939
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.000317939, satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.000317939, satol);
     // Other end
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.000317939, satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.000317939, satol);
 
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0, 0, 0.1)), 8.03225e-05, satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0, 0.1, 0)), 8.03225e-05, satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0.1)), 8.03225e-05, satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0.1, 0)), 8.03225e-05, satol);
 
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-0.999, 0.0, 0.0)),4*M_PI,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.999, 0.0, 0.0)),4*M_PI,satol);
 
     // surface points
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-1.0, 0.0, 0.0)),2*M_PI,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-0.997, 0.0, 0.0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0, 0.0, 0.0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.997, 0.0, 0.0)),2*M_PI,satol);
 
   }
 
@@ -601,19 +604,19 @@ public:
     - test for using Open Cascade surface triangulation for all solid angles.
     */
   {
-    Object A = createUnitCube();
+    Object_sptr geom_obj = createUnitCube();
     double satol=1e-3; // tolerance for solid angle
 
     // solid angle at distance 0.5 should be 4pi/6 by symmetry
     //
     // tests for Triangulated cube
     //
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(1.0,0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(-1.0,0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,1.0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,-1.0,0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(1.0,0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.0,0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,1.0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,-1.0,0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
 
     if(timeTest)
     {
@@ -624,13 +627,13 @@ public:
       int iter=4000;
       int starttime=clock();
       for (int i=0;i<iter;i++)
-        saTri=A.triangleSolidAngle(observer);
+        saTri=geom_obj->triangleSolidAngle(observer);
       int endtime=clock();
       std::cout << std::endl << "Cube tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
       iter=50;
       starttime=clock();
       for (int i=0;i<iter;i++)
-        saRay=A.rayTraceSolidAngle(observer);
+        saRay=geom_obj->rayTraceSolidAngle(observer);
       endtime=clock();
       std::cout << "Cube ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
     }
@@ -642,11 +645,11 @@ public:
     Test bounding box for a object capped cylinder
     */
   {
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     double xmax,ymax,zmax,xmin,ymin,zmin;
     xmax=ymax=zmax=100;
     xmin=ymin=zmin=-100;
-    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    geom_obj->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
     TS_ASSERT_DELTA(xmax,1.2,0.0001);
     TS_ASSERT_DELTA(ymax,3.0,0.0001);
     TS_ASSERT_DELTA(zmax,3.0,0.0001);
@@ -660,12 +663,12 @@ public:
     Test use of defineBoundingBox
     */
   {
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     double xmax,ymax,zmax,xmin,ymin,zmin;
     xmax=1.2;ymax=3.0;zmax=3.0;
     xmin=-3.2;ymin=-3.0;zmin=-3.0;
-    A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    geom_obj->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
     TS_ASSERT_EQUALS(xmax,1.2);
     TS_ASSERT_EQUALS(ymax,3.0);
     TS_ASSERT_EQUALS(zmax,3.0);
@@ -673,7 +676,7 @@ public:
     TS_ASSERT_EQUALS(ymin,-3.0);
     TS_ASSERT_EQUALS(zmin,-3.0);
     xmax=1.2;xmin=3.0;
-    TS_ASSERT_THROWS(A.defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin),std::invalid_argument&);
+    TS_ASSERT_THROWS(geom_obj->defineBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin),std::invalid_argument&);
 
   }
   void testSurfaceTriangulation()
@@ -681,11 +684,11 @@ public:
     Test triangle solid angle calc
     */
   {
-    Object A = createCappedCylinder();
+    Object_sptr geom_obj = createCappedCylinder();
     double xmax,ymax,zmax,xmin,ymin,zmin;
     xmax=20;ymax=20.0;zmax=20.0;
     xmin=-20.0;ymin=-20.0;zmin=-20.0;
-    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+    geom_obj->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
     double saTri,saRay;
     V3D observer(4.2,0,0);
     
@@ -698,38 +701,38 @@ public:
       int iter=4000;
       int starttime=clock();
       for (int i=0;i<iter;i++)
-        saTri=A.triangleSolidAngle(observer);
+        saTri=geom_obj->triangleSolidAngle(observer);
       int endtime=clock();
       std::cout << std::endl << "Cyl tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
       iter=50;
       starttime=clock();
       for (int i=0;i<iter;i++)
-        saRay=A.rayTraceSolidAngle(observer);
+        saRay=geom_obj->rayTraceSolidAngle(observer);
       endtime=clock();
       std::cout << "Cyl ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
     }
 
-    saTri=A.triangleSolidAngle(observer);
-    saRay=A.rayTraceSolidAngle(observer);
+    saTri=geom_obj->triangleSolidAngle(observer);
+    saRay=geom_obj->rayTraceSolidAngle(observer);
     TS_ASSERT_DELTA(saTri,1.840302,0.001);
     TS_ASSERT_DELTA(saRay,1.840302,0.01);
     
     observer=V3D(-7.2,0,0);
-    saTri=A.triangleSolidAngle(observer);
-    saRay=A.rayTraceSolidAngle(observer);
+    saTri=geom_obj->triangleSolidAngle(observer);
+    saRay=geom_obj->rayTraceSolidAngle(observer);
     
     TS_ASSERT_DELTA(saTri,1.25663708,0.001);
     TS_ASSERT_DELTA(saRay,1.25663708,0.001);
 
     // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,7)),0.7531,0.753*satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,7,0)),0.7531,0.753*satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,7)),0.7531,0.753*satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,7,0)),0.7531,0.753*satol);
 
-    saTri=A.triangleSolidAngle(V3D(20,0,0));
+    saTri=geom_obj->triangleSolidAngle(V3D(20,0,0));
     TS_ASSERT_DELTA(saTri,0.07850147,satol*0.0785);
-    saTri=A.triangleSolidAngle(V3D(200,0,0));
+    saTri=geom_obj->triangleSolidAngle(V3D(200,0,0));
     TS_ASSERT_DELTA(saTri,0.000715295,satol*0.000715);
-    saTri=A.triangleSolidAngle(V3D(2000,0,0));
+    saTri=geom_obj->triangleSolidAngle(V3D(2000,0,0));
     TS_ASSERT_DELTA(saTri,7.08131e-6,satol*7.08e-6);
     
   }
@@ -738,25 +741,25 @@ public:
     Test solid angle calculation for a sphere from triangulation
     */
   {
-    Object A = createSphere();
+    Object_sptr geom_obj = createSphere();
     double satol=1e-3; // tolerance for solid angle
 
     // Solid angle at distance 8.1 from centre of sphere radius 4.1 x/y/z
     // Expected solid angle calculated values from sa=2pi(1-cos(arcsin(R/r))
     // where R is sphere radius and r is distance of observer from sphere centre
     // Intercept for track in reverse direction now worked round
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(8.1,0,0)),0.864364,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,8.1,0)),0.864364,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,8.1)),0.864364,satol);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(8.1,0,0)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,8.1,0)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,8.1)),0.864364,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,-8.1)),0.864364,satol);
     // internal point (should be 4pi)
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(0,0,0)),4*M_PI,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,0)),4*M_PI,satol);
     // surface point
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(4.1,0,0)),2*M_PI,satol);
     // distant points
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(20,0,0)),0.133442,satol*0.133);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(200,0,0)),0.0013204,satol*0.00132);
-    TS_ASSERT_DELTA(A.triangleSolidAngle(V3D(2000,0,0)),1.32025e-5,satol*1.32e-5);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(20,0,0)),0.133442,satol*0.133);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(200,0,0)),0.0013204,satol*0.00132);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(2000,0,0)),1.32025e-5,satol*1.32e-5);
 
     if(timeTest)
     {
@@ -767,13 +770,13 @@ public:
       V3D observer(8.1,0,0);
       int starttime=clock();
       for (int i=0;i<iter;i++)
-        saTri=A.triangleSolidAngle(observer);
+        saTri=geom_obj->triangleSolidAngle(observer);
       int endtime=clock();
       std::cout << std::endl << "Sphere tri time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
       iter=40;
       starttime=clock();
       for (int i=0;i<iter;i++)
-        saRay=A.rayTraceSolidAngle(observer);
+        saRay=geom_obj->rayTraceSolidAngle(observer);
       endtime=clock();
       std::cout << "Sphere ray time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
     }
@@ -790,7 +793,7 @@ private:
   
   STYPE SMap;   ///< Surface Map
 
-  Object createCappedCylinder()
+  Object_sptr createCappedCylinder()
   {
     std::string C31="cx 3.0";         // cylinder x-axis radius 3
     std::string C32="px 1.2";
@@ -813,16 +816,18 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder="-31 -32 33";
 
-    Object retVal; 
-    retVal.setObject(21,ObjCapCylinder);
-    retVal.populate(CylSurMap);
+	Object_sptr retVal = Object_sptr(new Object); 
+    retVal->setObject(21,ObjCapCylinder);
+    retVal->populate(CylSurMap);
+
+	TS_ASSERT(retVal.get())
 
     return retVal;
   }
   
   // This creates a cylinder to test the solid angle that is more realistic in size
   // for a detector cylinder
-  Object createSmallCappedCylinder()
+  Object_sptr createSmallCappedCylinder()
   {
     std::string C31="cx 0.005";         // cylinder x-axis radius 0.005 and height 0.003
     std::string C32="px -0.997";
@@ -845,14 +850,14 @@ private:
     // using surface ids: 31 (cylinder) 32 (plane (top) ) and 33 (plane (base))
     std::string ObjCapCylinder="-31 -32 33";
 
-    Object retVal; 
-    retVal.setObject(21,ObjCapCylinder);
-    retVal.populate(CylSurMap);
+    Object_sptr retVal = Object_sptr(new Object); 
+    retVal->setObject(21,ObjCapCylinder);
+    retVal->populate(CylSurMap);
 
     return retVal;
   }
 
-  Object createSphere()
+  Object_sptr createSphere()
   {
     std::string S41="so 4.1";         // Sphere at origin radius 4.1
 
@@ -865,9 +870,9 @@ private:
     // A sphere 
     std::string ObjSphere="-41" ;
 
-    Object retVal; 
-    retVal.setObject(41,ObjSphere);
-    retVal.populate(SphSurMap);
+    Object_sptr retVal = Object_sptr(new Object); 
+    retVal->setObject(41,ObjSphere);
+    retVal->populate(SphSurMap);
 
     return retVal;
   }
@@ -939,7 +944,7 @@ private:
   }
 
 
-  Object createUnitCube()
+  Object_sptr createUnitCube()
   {
     std::string C1="px -0.5";         // cube +/-0.5
     std::string C2="px 0.5";
@@ -974,15 +979,15 @@ private:
     // using surface ids:  1-6
     std::string ObjCube="1 -2 3 -4 5 -6";
 
-    Object retVal; 
-    retVal.setObject(68,ObjCube);
-    retVal.populate(CubeSurMap);
+    Object_sptr retVal = Object_sptr(new Object); 
+    retVal->setObject(68,ObjCube);
+    retVal->populate(CubeSurMap);
 
     return retVal;
   }
 
 
-  Object createCuboid(std::vector<std::string>& planes)
+  Object_sptr createCuboid(std::vector<std::string>& planes)
   {
     std::string C1=planes[0];
     std::string C2=planes[1];
@@ -1017,9 +1022,9 @@ private:
     // using surface ids:  1-6
     std::string ObjCube="1 -2 3 -4 5 -6";
 
-    Object retVal; 
-    retVal.setObject(68,ObjCube);
-    retVal.populate(CubeSurMap);
+    Object_sptr retVal = Object_sptr(new Object); 
+    retVal->setObject(68,ObjCube);
+    retVal->populate(CubeSurMap);
 
     return retVal;
   }
