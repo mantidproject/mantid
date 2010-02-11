@@ -42,9 +42,11 @@ try:
     mantid.deleteWorkspace(conv.tempWS)
   
   if |RM_BG| == 'yes':
+    ConvertToDistribution(pInOut)
     FlatBackground(pInOut, pInOut, |TOF_LOW|, |TOF_HIGH|, '', Mode='Mean')
+    ConvertFromDistribution(pInOut)
   
-  conv.NormaliseTo(|GUI_SET_NORM|, pInOut)
+  conv.NormaliseTo(|GUI_SET_NORM|, pInOut, float(IncidentE))
     
   ConvertUnits(pInOut, pInOut, 'DeltaE', 'Direct', IncidentE, 0)
 
@@ -70,10 +72,10 @@ try:
   if mapFile != '':
     GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
 
-#replaces inifinities and error values with large numbers. Infinity values can be normally be fixed passing good energy values to ConvertUnits
+  #replaces inifinities and error values with large numbers. Infinity values can be normally be fixed passing good energy values to ConvertUnits
   ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
 
-   #masking bad detectors is done here, at the end to save processing time. But if |MASK_WORKSPACE| is an empty string there is no masking
+  #masking bad detectors is done here, at the end to save processing time. But if |MASK_WORKSPACE| is an empty string there is no masking
   conv.NormaliseToWhiteBeamAndLoadMask(|GUI_SET_WBV|, pInOut, mapFile, |GUI_SET_WBV_REBIN|, DetectorMask)
  
   # output to a file in ASCII

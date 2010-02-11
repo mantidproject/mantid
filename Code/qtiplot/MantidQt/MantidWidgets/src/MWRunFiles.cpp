@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include <QStringList>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -40,6 +41,13 @@ MWRunFiles::MWRunFiles(QWidget *parent, QString prevSettingsGr, bool allowEmpty,
   m_designedWidg.valid->setPalette(pal);
   m_designedWidg.valid->hide();
   
+  const std::vector<std::string>& searchDirs =
+    ConfigService::Instance().getDataSearchDirs();
+  if ( searchDirs.size() > 0 )
+  {
+    m_defDir = QString::fromStdString(searchDirs.front());
+  }
+  
   connect(m_designedWidg.leFiles, SIGNAL(editingFinished()), this, SLOT(readEntries()));
   connect(m_designedWidg.pbBrowse, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
@@ -79,8 +87,9 @@ QString MWRunFiles::getFile1() const
 QString MWRunFiles::openFileDia()
 {
   QStringList filenames;
-  filenames = QFileDialog::getOpenFileNames(this, "Open file",
-    m_prevSets.value("load file dir", "").toString(), m_filter);
+  QString dir = m_prevSets.value("load file dir", m_defDir).toString();
+  
+  filenames = QFileDialog::getOpenFileNames(this, "Open file", dir, m_filter);
   if(filenames.isEmpty())
   {
 	return "";
@@ -265,8 +274,9 @@ MWRunFile::MWRunFile(QWidget *parent, QString prevSettingsGr, bool allowEmpty, c
 QString MWRunFile::openFileDia()
 {
   QString filename;
-  filename = QFileDialog::getOpenFileName(this, "Open file",
-    m_prevSets.value("load file dir", "").toString(), m_filter);
+  QString dir = m_prevSets.value("load file dir", m_defDir).toString();
+  
+  filename = QFileDialog::getOpenFileName(this, "Open file", dir, m_filter);
   if( ! filename.isEmpty() )
   {
 	m_prevSets.setValue("load file dir", 

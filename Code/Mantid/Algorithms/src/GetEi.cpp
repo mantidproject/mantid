@@ -189,7 +189,7 @@ double GetEi::timeToFly(double s, double E_KE) const
   // t = s/v, v = sqrt(2*E_KE/m)
   // t = s/sqrt(2*E_KE/m)
 
-  // convert E_KE to joules kg m^2 t^-2
+  // convert E_KE to joules kg m^2 s^-2
   E_KE *= PhysicalConstants::meV;
 
   return s/sqrt(2*E_KE/PhysicalConstants::NeutronMass);

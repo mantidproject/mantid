@@ -1,14 +1,59 @@
 from mantidsimple import *
 import CommonFunctions as common
+import math
 
-def NormaliseTo(reference, WS):
-  if reference == 'monitor-monitor peak1' :
-    NormaliseToMonitor( WS, WS, MonitorSpectrum=1, IntegrationRangeMin=1000, IntegrationRangeMax=2000)
+def getPeakTime(Ei, monSpec, WS):
+  source = WS.getInstrument().getSource();
 
-  elif reference == 'protons (uAh)' :
+
+#??STEVES?? replace MARI specific code below
+#  dets = WS.spectraMap().getDetectors(monSpec);
+#  if len(dets) != 1 : raise Exception('Found a grouped monitor, this is not supported')
+
+
+
+#!! MARI Specific code!
+  det = WS.getDetector(\
+  \
+  \
+    monSpec-1\
+  \
+  \
+  \
+  );
+  distance = det.getDistance(source)
+  
+  # convert distance to time, knowingthe kinetic energy:
+  # E_KE = mv^2/2, s = vt
+  # t = s/v, v = sqrt(2*E_KE/m)
+  # t = s/sqrt(2*E_KE/m)
+
+  # convert E_KE to joules kg m^2 s^-2
+  NeutronMass = 1.674927211e-27 #kg
+  meV = 1.602176487e-22             #joules
+  Ei *= meV;
+  # return the calculated time in micro-seconds
+  return (1e6*distance)/math.sqrt(2*Ei/NeutronMass)
+
+def NormaliseTo(reference, WS, energy=0):
+  if (reference == 'monitor-monitor 1') :
+    if (energy == 0) : raise Exception('A non-zero energy must be supplied for normalisation by monitor')
+    # set the region where the monitor is
+    min = getPeakTime(energy, 2, WS)*0.96
+    max = getPeakTime(energy, 2, WS)*1.04
+    NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=2, IntegrationRangeMin=min, IntegrationRangeMax=max)
+    return
+
+  if reference == 'protons (uAh)' :
     NormaliseByCurrent( InputWorkspace=WS, OutputWorkspace=WS )
 
-  elif reference == 'monitor-peak2 area' : raise Exception('Normalization by peak area not implemented yet')
+  elif reference == 'monitor-monitor 2' :
+    if (energy == 0) : raise Exception('A non-zero energy must be supplied for normalisation by monitor')
+    # set the region where the monitor is
+    min = getPeakTime(energy, 3, WS)*0.96
+    max = getPeakTime(energy, 3, WS)*1.04
+    NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=3, IntegrationRangeMin=min, IntegrationRangeMax=max)
+    return
 
   elif reference != 'no normalization' :
     raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')

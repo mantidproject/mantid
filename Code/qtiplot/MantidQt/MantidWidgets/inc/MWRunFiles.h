@@ -37,6 +37,8 @@ namespace MantidQt
       const QString m_filter;
 	  /// the tooltip passed to this function, information about which instrument's runs we load is added to the end of this string
 	  const QString m_toolTipOrig;
+	  /// the first directory listed in the users save path, or empty if none are defined in the Mantid*properties files
+	  QString m_defDir;
 	  /// An array of valid file names derived from the entries in the leNumber LineEdit
 	  std::vector<std::string> m_files;
 	  /// stores whether or not a file must be specified

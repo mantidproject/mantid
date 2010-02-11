@@ -37,9 +37,9 @@ static const QString G_DEFAULT_MAP_FILE("mari_res.map");
 //default values
 static const int G_NUM_NORM_SCHEMES = 4;
 static const QString G_NORM_SCHEMES[G_NUM_NORM_SCHEMES] = 
-  {"protons (uAh)", "no normalization", "monitor-monitor peak1"};
-//  , "monitor-peak2 area"};
-static const QString G_DEFAULT_NORM = "monitor-monitor peak1";
+  {"protons (uAh)", "no normalization", "monitor-monitor 1"
+  , "monitor-monitor 2"};
+static const QString G_DEFAULT_NORM = "monitor-monitor 1";
 static const QString G_BACK_REMOVE("bg removal: none");
 static const double G_START_WINDOW_TOF(18000);
 static const double G_END_WINDOW_TOF(19500);
