@@ -132,7 +132,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
         if file_1 != '.txt':
             SaveRKH(reduced,file_1,'0')
         if verbose:
-            mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, file_1))
+            mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
         # Rename the final workspace
         final_name = run['output_as']
         if final_name == '':
