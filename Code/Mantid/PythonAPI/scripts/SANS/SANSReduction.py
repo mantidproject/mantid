@@ -1526,12 +1526,15 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     script += '[COLETTE]  ASSIGN/SAMPLE ' + file_1 + '\n'
     file_1 = inputdata['sample_trans'] + format
     file_2 = inputdata['sample_direct_beam'] + format
-    script += '[COLETTE]  TRANSMISSION/SAMPLE/MEASURED ' + file_1 + ' ' + file_2 + '\n'
+    if file_1 != format and file_2 != format:
+        script += '[COLETTE]  TRANSMISSION/SAMPLE/MEASURED ' + file_1 + ' ' + file_2 + '\n'
     file_1 = inputdata['can_sans'] + format
-    script +='[COLETTE]  ASSIGN/CAN ' + file_1 + '\n'
+    if file_1 != format:
+        script +='[COLETTE]  ASSIGN/CAN ' + file_1 + '\n'
     file_1 = inputdata['can_trans'] + format
     file_2 = inputdata['can_direct_beam'] + format
-    script += '[COLETTE]  TRANSMISSION/CAN/MEASURED ' + file_1 + ' ' + file_2 + '\n'
+    if file_1 != format and file_2 != format:
+        script += '[COLETTE]  TRANSMISSION/CAN/MEASURED ' + file_1 + ' ' + file_2 + '\n'
     if centreit:
         script += '[COLETTE]  FIT/MIDDLE'
     # Parameters

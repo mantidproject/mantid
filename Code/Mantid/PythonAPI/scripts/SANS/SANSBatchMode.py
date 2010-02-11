@@ -102,12 +102,11 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
             continue
         
         # Sans Can 
-        run_file = run['can_sans'] + format
-        can_ws = AssignCan(run_file)[0]
-        if len(can_ws) == 0:
+        run_file = run['can_sans']
+        can_ws = AssignCan(run_file + format)[0]
+        if run_file != '' and len(can_ws) == 0:
             _issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
             continue
-
 
         #Can trans
         run_file = run['can_trans']
