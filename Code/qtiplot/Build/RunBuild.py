@@ -17,7 +17,7 @@ if platform.system() == 'Linux':
 elif platform.system() == 'Darwin':
     # Have to set QMAKESPEC for mac to avoid xcode build
     os.putenv('QMAKESPEC','/usr/local/Qt4.5/mkspecs/macx-g++')
-    qmake = "qmake"
+    qmake = "qmake CONFIG+=release"
     buildargs.append("-j2")
 else:
     qmake = 'qmake'
