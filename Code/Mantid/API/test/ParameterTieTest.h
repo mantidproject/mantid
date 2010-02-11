@@ -49,31 +49,31 @@ public:
 
   double centre()const
   {
-    return parameter(0);
+    return getParameter(0);
   }
 
   double height()const
   {
-    return parameter(1);
+    return getParameter(1);
   }
 
   double width()const
   {
-    return parameter(2);
+    return getParameter(2);
   }
 
   void setCentre(const double c)
   {
-    parameter(0) = c;
+    setParameter(0,c);
   }
   void setHeight(const double h)
   {
-    parameter(1) = h;
+    setParameter(1,h);
   }
 
   void setWidth(const double w)
   {
-    parameter(2) = w;
+    setParameter(2,w);
   }
 };
 
@@ -121,22 +121,22 @@ public:
     mfun.addFunction(g1);
     mfun.addFunction(g2);
 
-    g1->getParameter("c") = 3.1;
-    g1->getParameter("h") = 1.1;
-    g1->getParameter("s") = 1.;
+    g1->setParameter("c",3.1);
+    g1->setParameter("h",1.1);
+    g1->setParameter("s",1.);
 
-    g2->getParameter("c") = 7.1;
-    g2->getParameter("h") = 1.1;
-    g2->getParameter("s") = 2.;
+    g2->setParameter("c",7.1);
+    g2->setParameter("h",1.1);
+    g2->setParameter("s",2.);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
     ParameterTie tie(&mfun,"f1.s");
     tie.set("f2.s^2+f0.a+1");
 
     TS_ASSERT_DELTA(tie.eval(),5.8,0.00001);
-    TS_ASSERT_EQUALS(tie.parameter(),&mfun.parameter(4));
-    TS_ASSERT_EQUALS(tie.parameter(),&g1->parameter(2));
+    TS_ASSERT_EQUALS(*tie.parameter(),mfun.getParameter(4));
+    TS_ASSERT_EQUALS(*tie.parameter(),g1->getParameter(2));
 
     TS_ASSERT_THROWS(mustThrow1(&mfun),std::invalid_argument);
     TS_ASSERT_THROWS(mustThrow2(&mfun),std::invalid_argument);
@@ -150,13 +150,13 @@ public:
   {
     ParameterTieTest_Linear bk;
 
-    bk.getParameter("a") = 0.8;
-    bk.getParameter("b") = 0.;
+    bk.setParameter("a",0.8);
+    bk.setParameter("b",0.);
 
     ParameterTie tie(&bk,"b");
     tie.set("2*a-1");
 
-    TS_ASSERT_EQUALS(tie.parameter(),&bk.parameter(1));
+    TS_ASSERT_EQUALS(*tie.parameter(),bk.getParameter(1));
     TS_ASSERT_DELTA(tie.eval(),0.6,0.00001);
     TS_ASSERT_THROWS( mustThrow4(&bk),std::invalid_argument);
     TS_ASSERT_THROWS( mustThrow5(&bk),std::invalid_argument);

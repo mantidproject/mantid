@@ -67,12 +67,12 @@ public:
   /// Derivatives to be used in covariance matrix calculation. 
   void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
-  /// Address of i-th parameter
-  double& parameter(int);
-  /// Address of i-th parameter
-  double parameter(int i)const;
-  /// Get parameter by name.
-  double& getParameter(const std::string& name);
+  /// Set i-th parameter
+  void setParameter(int, const double& value, bool explicitlySet = true);
+  /// Get i-th parameter
+  double getParameter(int i)const;
+  /// Set parameter by name.
+  void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
   /// Get parameter by name.
   double getParameter(const std::string& name)const;
   /// Total number of parameters
@@ -83,6 +83,8 @@ public:
   int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
   std::string parameterName(int i)const;
+  /// Checks if a parameter has been set explicitly
+  bool isExplicitlySet(int i)const;
 
   /// Number of active (in terms of fitting) parameters
   int nActive()const;
@@ -147,6 +149,8 @@ protected:
   virtual void declareParameter(const std::string& name,double initValue = 0);
   /// Add a new tie
   virtual void addTie(ParameterTie* tie);
+  /// Get the address of the parameter
+  virtual double* getParameterAddress(int i);
 
 private:
 

@@ -55,18 +55,18 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     TS_ASSERT_EQUALS(f.nParams(),4);
     TS_ASSERT_EQUALS(f.nActive(),4);
 
-    TS_ASSERT_EQUALS(f.parameter(0),1.0);
-    TS_ASSERT_EQUALS(f.parameter(1),1.1);
-    TS_ASSERT_EQUALS(f.parameter(2),1.2);
-    TS_ASSERT_EQUALS(f.parameter(3),1.3);
+    TS_ASSERT_EQUALS(f.getParameter(0),1.0);
+    TS_ASSERT_EQUALS(f.getParameter(1),1.1);
+    TS_ASSERT_EQUALS(f.getParameter(2),1.2);
+    TS_ASSERT_EQUALS(f.getParameter(3),1.3);
 
     TS_ASSERT_EQUALS(f.parameterName(0),"c0");
     TS_ASSERT_EQUALS(f.parameterName(1),"c1");
@@ -118,10 +118,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.removeActive(1);
     f.removeActive(3);
@@ -154,10 +154,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.removeActive(1);
     f.removeActive(3);
@@ -195,10 +195,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.removeActive(1);
     f.removeActive(3);
@@ -212,10 +212,10 @@ public:
     TS_ASSERT_EQUALS(f.activeParameter(0),2.0);
     TS_ASSERT_EQUALS(f.activeParameter(1),2.1);
 
-    TS_ASSERT_EQUALS(f.parameter(0),2.0);
-    TS_ASSERT_EQUALS(f.parameter(1),1.1);
-    TS_ASSERT_EQUALS(f.parameter(2),2.1);
-    TS_ASSERT_EQUALS(f.parameter(3),1.3);
+    TS_ASSERT_EQUALS(f.getParameter(0),2.0);
+    TS_ASSERT_EQUALS(f.getParameter(1),1.1);
+    TS_ASSERT_EQUALS(f.getParameter(2),2.1);
+    TS_ASSERT_EQUALS(f.getParameter(3),1.3);
 
     TS_ASSERT_EQUALS(f.getParameter("c0"),2.0);
     TS_ASSERT_EQUALS(f.getParameter("c1"),1.1);
@@ -228,10 +228,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.tie("c1","0");
     f.tie("c3","0");
@@ -266,10 +266,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.tie("c1","c0+4");
     f.tie("c3","c2/2");
@@ -290,10 +290,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.tie("c1","c0+4");
     f.tie("c3","c2/2");
@@ -309,7 +309,7 @@ public:
     TS_ASSERT_EQUALS(f.getParameter("c3"),0.6);
 
     f.removeTie("c3");
-    f.getParameter("c3") = 3.3;
+    f.setParameter("c3",3.3);
 
     f.applyTies();
 
@@ -336,10 +336,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.tie("c1","c0+4");
     f.tie("c3","c2/2");
@@ -355,8 +355,8 @@ public:
     TS_ASSERT_EQUALS(f.getParameter("c3"),0.6);
 
     f.clearTies();
-    f.getParameter("c1") = 3.1;
-    f.getParameter("c3") = 3.3;
+    f.setParameter("c1",3.1);
+    f.setParameter("c3",3.3);
 
     f.applyTies();
 
@@ -383,10 +383,10 @@ public:
   {
     IFT_Funct f;
 
-    f.getParameter("c0") = 1.0;
-    f.getParameter("c1") = 1.1;
-    f.getParameter("c2") = 1.2;
-    f.getParameter("c3") = 1.3;
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    f.setParameter("c2",1.2);
+    f.setParameter("c3",1.3);
 
     f.tie("c1","c0+4");
     f.tie("c3","c2/2");
@@ -403,6 +403,18 @@ public:
     TS_ASSERT_EQUALS(f.getParameter("c2"),22.2);
     TS_ASSERT_EQUALS(f.getParameter("c3"),11.1);
 
+  }
+
+  void testExplicitlySet()
+  {
+    IFT_Funct f;
+
+    f.setParameter("c0",1.0);
+    f.setParameter("c1",1.1);
+    TS_ASSERT(f.isExplicitlySet(0));
+    TS_ASSERT(f.isExplicitlySet(1));
+    TS_ASSERT(!f.isExplicitlySet(2));
+    TS_ASSERT(!f.isExplicitlySet(3));
   }
 
   private:

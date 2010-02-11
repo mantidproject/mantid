@@ -34,7 +34,7 @@ public:
     gaus->initialize();
     gaus->setCentre(11.2);
     gaus->setHeight(100.7);
-    gaus->getParameter("Sigma") = 1.1;
+    gaus->setParameter("Sigma",1.1);
 
     BoundaryConstraint* bc = new BoundaryConstraint("Sigma");
 

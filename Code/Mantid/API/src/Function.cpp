@@ -62,31 +62,43 @@ void Function::setParametersToSatisfyConstraints()
   }
 }
 
-/** Reference to the i-th parameter.
+/** Sets a new value to the i-th parameter.
  *  @param i The parameter index
+ *  @param value The new value
+ *  @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
  */
-double& Function::parameter(int i)
+void Function::setParameter(int i, const double& value, bool explicitlySet)
 {
   if (i >= nParams())
+  {
     throw std::out_of_range("Function parameter index out of range.");
-  return m_parameters[i];
+  }
+  m_parameters[i] = value;
+  if (explicitlySet)
+  {
+    m_explicitlySet[i] = true;
+  }
 }
 
-/** Reference to the i-th parameter.
+/** Get the i-th parameter.
  *  @param i The parameter index
  */
-double Function::parameter(int i)const
+double Function::getParameter(int i)const
 {
   if (i >= nParams())
+  {
     throw std::out_of_range("Function parameter index out of range.");
+  }
   return m_parameters[i];
 }
 
 /**
- * Parameters by name.
+ * Sets a new value to a parameter by name.
  * @param name The name of the parameter.
+ * @param value The new value
+ * @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
  */
-double& Function::getParameter(const std::string& name)
+void Function::setParameter(const std::string& name, const double& value, bool explicitlySet)
 {
   std::string ucName(name);
   //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
@@ -98,7 +110,7 @@ double& Function::getParameter(const std::string& name)
     msg << "Function parameter ("<<ucName<<") does not exist.";
     throw std::invalid_argument(msg.str());
   }
-  return m_parameters[it - m_parameterNames.begin()];
+  return setParameter(it - m_parameterNames.begin(),value,explicitlySet);
 }
 
 /**
@@ -185,6 +197,7 @@ void Function::declareParameter(const std::string& name,double initValue )
   m_indexMap.push_back(nParams());
   m_parameterNames.push_back(ucName);
   m_parameters.push_back(initValue);
+  m_explicitlySet.push_back(false);
 }
 
 /** This method calls function() and add any penalty to its output if constraints are violated.
@@ -379,7 +392,7 @@ bool Function::removeTie(int i)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  double* par = &parameter(i);
+  double* par = &m_parameters[i];
   std::vector<ParameterTie*>::iterator it = std::find_if(m_ties.begin(),m_ties.end(),TieEqual(par));
   if (it != m_ties.end())
   {
@@ -440,6 +453,26 @@ void Function::clearAllParameters()
   m_parameters.clear();
   m_parameterNames.clear();
   m_indexMap.clear();
+}
+
+/// Get the address of the parameter
+double* Function::getParameterAddress(int i)
+{
+  if (i >= nParams())
+  {
+    throw std::out_of_range("Function parameter index out of range.");
+  }
+  return &m_parameters[i];
+}
+
+/// Checks if a parameter has been set explicitly
+bool Function::isExplicitlySet(int i)const
+{
+  if (i >= nParams())
+  {
+    throw std::out_of_range("Function parameter index out of range.");
+  }
+  return m_explicitlySet[i];
 }
 
 } // namespace API

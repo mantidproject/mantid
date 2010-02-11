@@ -56,12 +56,12 @@ namespace Mantid
 
 
       /// overwrite IPeakFunction base class methods
-      virtual double centre()const {return getParameter("PeakCentre");};
-      virtual double height()const {return getParameter("Height");};
-      virtual double width()const {return 2.0*sqrt(2.0*std::log(2.0))*getParameter("Sigma");};
-      virtual void setCentre(const double c) {getParameter("PeakCentre") = c;};
-      virtual void setHeight(const double h) {getParameter("Height") = h;};
-      virtual void setWidth(const double w) {getParameter("Sigma") = w/(2.0*sqrt(2.0*std::log(2.0)));};
+      virtual double centre()const {return getParameter("PeakCentre");}
+      virtual double height()const {return getParameter("Height");}
+      virtual double width()const {return 2.0*sqrt(2.0*std::log(2.0))*getParameter("Sigma");}
+      virtual void setCentre(const double c) {setParameter("PeakCentre",c);}
+      virtual void setHeight(const double h) {setParameter("Height",h);}
+      virtual void setWidth(const double w) {setParameter("Sigma",w/(2.0*sqrt(2.0*std::log(2.0))));}
 
 
       /// overwrite IFunction base class methods

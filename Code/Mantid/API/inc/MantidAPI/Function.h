@@ -69,12 +69,12 @@ public:
   ///  This method returns same as functionDeriv() plus any penalty if constraints are violated
   void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData);
 
-  /// Address of i-th parameter
-  virtual double& parameter(int);
-  /// Address of i-th parameter
-  virtual double parameter(int i)const;
-  /// Get parameter by name.
-  virtual double& getParameter(const std::string& name);
+  /// Set i-th parameter
+  virtual void setParameter(int, const double& value, bool explicitlySet = true);
+  /// Get i-th parameter
+  virtual double getParameter(int i)const;
+  /// Set parameter by name.
+  virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const;
   /// Total number of parameters
@@ -85,6 +85,8 @@ public:
   virtual int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const;
+  /// Checks if a parameter has been set explicitly
+  virtual bool isExplicitlySet(int i)const;
 
   /// Number of active (in terms of fitting) parameters
   virtual int nActive()const{return m_indexMap.size();}
@@ -127,6 +129,8 @@ protected:
   virtual bool removeTie(int i);
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(int i)const;
+  /// Get the address of the parameter
+  virtual double* getParameterAddress(int i);
 
   /// Nonvirtual member which removes all declared parameters
   void clearAllParameters();
@@ -142,6 +146,8 @@ private:
   std::vector<ParameterTie*> m_ties;
   /// Holds the constraints added to function
   std::vector<IConstraint*> m_constraints;
+  /// Flags of explicitly set parameters
+  std::vector<bool> m_explicitlySet;
 };
 
 } // namespace API

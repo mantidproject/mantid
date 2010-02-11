@@ -48,7 +48,7 @@ public:
     Quadratic* quad = new Quadratic();
     quad->initialize();
 
-    quad->getParameter("A0") = 3.0;
+    quad->setParameter("A0",3.0);
 
     alg2.setFunction(quad);
 

@@ -120,7 +120,7 @@ namespace Mantid
               }
               parValue.erase(i);
             }
-            fun->getParameter(parName) = atof(parValue.c_str());
+            fun->setParameter(parName,atof(parValue.c_str()));
           }
         }
         if (isComposite)

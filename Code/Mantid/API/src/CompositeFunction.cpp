@@ -163,22 +163,33 @@ void CompositeFunction::calJacobianForCovariance(Jacobian* out, const double* xV
 }
 
 
-/// Address of i-th parameter
-double& CompositeFunction::parameter(int i)
+/** Sets a new value to the i-th parameter.
+ *  @param i The parameter index
+ *  @param value The new value
+ *  @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
+ */
+void CompositeFunction::setParameter(int i, const double& value, bool explicitlySet)
 {
   int iFun = functionIndex(i);
-  return m_functions[ iFun ]->parameter(i - m_paramOffsets[iFun]);
+  m_functions[ iFun ]->setParameter(i - m_paramOffsets[iFun],value,explicitlySet);
 }
 
-/// Address of i-th parameter
-double CompositeFunction::parameter(int i)const
+/** Get the i-th parameter.
+ *  @param i The parameter index
+ */
+double CompositeFunction::getParameter(int i)const
 {
   int iFun = functionIndex(i);
-  return m_functions[ iFun ]->parameter(i - m_paramOffsets[iFun]);
+  return m_functions[ iFun ]->getParameter(i - m_paramOffsets[iFun]);
 }
 
-/// Get parameter by name.
-double& CompositeFunction::getParameter(const std::string& name)
+/**
+ * Sets a new value to a parameter by name.
+ * @param name The name of the parameter.
+ * @param value The new value
+ * @param explicitlySet A boolean falgging the parameter as explicitly set (by user)
+ */
+void CompositeFunction::setParameter(const std::string& name, const double& value, bool explicitlySet)
 {
   std::string pname;
   int index;
@@ -187,11 +198,14 @@ double& CompositeFunction::getParameter(const std::string& name)
     throw std::invalid_argument("CompositeFunction::getParameter: parameter name must contain function index");
   else
   {   
-    return getFunction(index)->getParameter(pname);
+    getFunction(index)->setParameter(pname,value,explicitlySet);
   }
 }
 
-/// Get parameter by name.
+/**
+ * Parameters by name.
+ * @param name The name of the parameter.
+ */
 double CompositeFunction::getParameter(const std::string& name)const
 {
   std::string pname;
@@ -427,7 +441,7 @@ void CompositeFunction::removeFunction(int i, bool del)
   std::vector<const double*> pars;
   for(int j=0;j<fun->nParams();j++)
   {
-    pars.push_back(&fun->parameter(j));
+    pars.push_back(fun->getParameterAddress(j));
   }
 
   for(int j=0;j<nParams();)
@@ -745,6 +759,22 @@ void CompositeFunction::setParametersToSatisfyConstraints()
   {
     getFunction(i)->setParametersToSatisfyConstraints();
   }
+}
+
+/// Get the address of the parameter
+double* CompositeFunction::getParameterAddress(int i)
+{
+  int iFun = functionIndex(i);
+  return m_functions[ iFun ]->getParameterAddress(i - m_paramOffsets[iFun]);
+}
+
+/** 
+ *  @param i The parameter index
+ */
+bool CompositeFunction::isExplicitlySet(int i)const
+{
+  int iFun = functionIndex(i);
+  return m_functions[ iFun ]->isExplicitlySet(i - m_paramOffsets[iFun]);
 }
 
 

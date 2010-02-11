@@ -72,31 +72,31 @@ public:
 
   double centre()const
   {
-    return parameter(0);
+    return getParameter(0);
   }
 
   double height()const
   {
-    return parameter(1);
+    return getParameter(1);
   }
 
   double width()const
   {
-    return parameter(2);
+    return getParameter(2);
   }
 
   void setCentre(const double c)
   {
-    parameter(0) = c;
+    setParameter(0,c);
   }
   void setHeight(const double h)
   {
-    parameter(1) = h;
+    setParameter(1,h);
   }
 
   void setWidth(const double w)
   {
-    parameter(2) = w;
+    setParameter(2,w);
   }
 
 };

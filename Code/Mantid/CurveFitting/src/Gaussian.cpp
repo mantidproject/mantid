@@ -71,9 +71,9 @@ void Gaussian::setActiveParameter(int i,double value)
   int j = indexOfActive(i);
 
   if (parameterName(j) == "Sigma") 
-    parameter(j) = sqrt(1./value);
+    setParameter(j,sqrt(1./value),false);
   else
-    parameter(j) = value;
+    setParameter(j,value,false);
 }
 
 double Gaussian::activeParameter(int i)const
@@ -81,9 +81,9 @@ double Gaussian::activeParameter(int i)const
   int j = indexOfActive(i);
 
   if (parameterName(j) == "Sigma") 
-    return 1./pow(parameter(j),2);
+    return 1./pow(getParameter(j),2);
   else
-    return parameter(j);
+    return getParameter(j);
 }
 
 

@@ -64,31 +64,31 @@ public:
 
   double centre()const
   {
-    return parameter(0);
+    return getParameter(0);
   }
 
   double height()const
   {
-    return parameter(1);
+    return getParameter(1);
   }
 
   double width()const
   {
-    return parameter(2);
+    return getParameter(2);
   }
 
   void setCentre(const double c)
   {
-    parameter(0) = c;
+    setParameter(0,c);
   }
   void setHeight(const double h)
   {
-    parameter(1) = h;
+    setParameter(1,h);
   }
 
   void setWidth(const double w)
   {
-    parameter(2) = w;
+    setParameter(2,w);
   }
 
 };
@@ -180,36 +180,36 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     TS_ASSERT_EQUALS(mfun->nParams(),12);
     TS_ASSERT_EQUALS(mfun->nActive(),12);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),0.8);
-    TS_ASSERT_EQUALS(mfun->parameter(1),0.0);
-    TS_ASSERT_EQUALS(mfun->parameter(2),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(3),1.2);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.3);
-    TS_ASSERT_EQUALS(mfun->parameter(5),2.1);
-    TS_ASSERT_EQUALS(mfun->parameter(6),2.2);
-    TS_ASSERT_EQUALS(mfun->parameter(7),2.3);
-    TS_ASSERT_EQUALS(mfun->parameter(8),2.4);
-    TS_ASSERT_EQUALS(mfun->parameter(9),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(10),3.2);
-    TS_ASSERT_EQUALS(mfun->parameter(11),3.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),2.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),2.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(8),2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(10),3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(11),3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterName(0),"f0.a");
     TS_ASSERT_EQUALS(mfun->parameterName(1),"f0.b");
@@ -277,20 +277,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->tie("f0.a","0");
     mfun->tie("f0.b","0");
@@ -349,18 +349,18 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),12);
     TS_ASSERT_EQUALS(mfun->nActive(),6);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),0.8);
-    TS_ASSERT_EQUALS(mfun->parameter(1),0.0);
-    TS_ASSERT_EQUALS(mfun->parameter(2),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(3),1.2);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.3);
-    TS_ASSERT_EQUALS(mfun->parameter(5),2.1);
-    TS_ASSERT_EQUALS(mfun->parameter(6),2.2);
-    TS_ASSERT_EQUALS(mfun->parameter(7),2.3);
-    TS_ASSERT_EQUALS(mfun->parameter(8),2.4);
-    TS_ASSERT_EQUALS(mfun->parameter(9),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(10),3.2);
-    TS_ASSERT_EQUALS(mfun->parameter(11),3.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),2.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),2.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(8),2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(10),3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(11),3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterName(0),"f0.a");
     TS_ASSERT_EQUALS(mfun->parameterName(1),"f0.b");
@@ -416,20 +416,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->tie("f0.a","-1");
     mfun->tie("f0.b","-2");
@@ -455,18 +455,18 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),12);
     TS_ASSERT_EQUALS(mfun->nActive(),6);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),0.8);
-    TS_ASSERT_EQUALS(mfun->parameter(1),0.0);
-    TS_ASSERT_EQUALS(mfun->parameter(2),100);
-    TS_ASSERT_EQUALS(mfun->parameter(3),101);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.3);
-    TS_ASSERT_EQUALS(mfun->parameter(5),102);
-    TS_ASSERT_EQUALS(mfun->parameter(6),2.2);
-    TS_ASSERT_EQUALS(mfun->parameter(7),2.3);
-    TS_ASSERT_EQUALS(mfun->parameter(8),103);
-    TS_ASSERT_EQUALS(mfun->parameter(9),104);
-    TS_ASSERT_EQUALS(mfun->parameter(10),3.2);
-    TS_ASSERT_EQUALS(mfun->parameter(11),105);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),100);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),101);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),102);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),2.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(8),103);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),104);
+    TS_ASSERT_EQUALS(mfun->getParameter(10),3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(11),105);
   }
 
   void testRemoveActive()
@@ -481,20 +481,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->removeActive(0);
     mfun->removeActive(1);
@@ -522,18 +522,18 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),12);
     TS_ASSERT_EQUALS(mfun->nActive(),6);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),0.8);
-    TS_ASSERT_EQUALS(mfun->parameter(1),0.0);
-    TS_ASSERT_EQUALS(mfun->parameter(2),100);
-    TS_ASSERT_EQUALS(mfun->parameter(3),101);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.3);
-    TS_ASSERT_EQUALS(mfun->parameter(5),102);
-    TS_ASSERT_EQUALS(mfun->parameter(6),2.2);
-    TS_ASSERT_EQUALS(mfun->parameter(7),2.3);
-    TS_ASSERT_EQUALS(mfun->parameter(8),103);
-    TS_ASSERT_EQUALS(mfun->parameter(9),104);
-    TS_ASSERT_EQUALS(mfun->parameter(10),3.2);
-    TS_ASSERT_EQUALS(mfun->parameter(11),105);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),100);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),101);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),102);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),2.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),2.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(8),103);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),104);
+    TS_ASSERT_EQUALS(mfun->getParameter(10),3.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(11),105);
 
   }
 
@@ -549,20 +549,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->tie("f0.b","77");
     mfun->tie("f0.a","2*f0.b");
@@ -583,18 +583,18 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),12);
     TS_ASSERT_EQUALS(mfun->nActive(),6);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),154);
-    TS_ASSERT_EQUALS(mfun->parameter(1),77);
-    TS_ASSERT_EQUALS(mfun->parameter(2),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(3),1.2);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.65);
-    TS_ASSERT_EQUALS(mfun->parameter(5),2.1);
-    TS_ASSERT_EQUALS(mfun->parameter(6),2.4*2.4);
-    TS_ASSERT_EQUALS(mfun->parameter(7),sqrt(2.4));
-    TS_ASSERT_EQUALS(mfun->parameter(8),2.4);
-    TS_ASSERT_EQUALS(mfun->parameter(9),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(10),79.1);
-    TS_ASSERT_EQUALS(mfun->parameter(11),3.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),154);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),77);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.65);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),2.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),2.4*2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),sqrt(2.4));
+    TS_ASSERT_EQUALS(mfun->getParameter(8),2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(10),79.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(11),3.3);
 
   }
 
@@ -610,20 +610,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->tie("f0.a","2*f0.b");
     mfun->tie("f0.b","77");
@@ -644,18 +644,18 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),12);
     TS_ASSERT_EQUALS(mfun->nActive(),6);
 
-    TS_ASSERT_DIFFERS(mfun->parameter(0),154);
-    TS_ASSERT_EQUALS(mfun->parameter(1),77);
-    TS_ASSERT_EQUALS(mfun->parameter(2),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(3),1.2);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.65);
-    TS_ASSERT_EQUALS(mfun->parameter(5),2.1);
-    TS_ASSERT_EQUALS(mfun->parameter(6),2.4*2.4);
-    TS_ASSERT_EQUALS(mfun->parameter(7),sqrt(2.4));
-    TS_ASSERT_EQUALS(mfun->parameter(8),2.4);
-    TS_ASSERT_EQUALS(mfun->parameter(9),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(10),79.1);
-    TS_ASSERT_EQUALS(mfun->parameter(11),3.3);
+    TS_ASSERT_DIFFERS(mfun->getParameter(0),154);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),77);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.65);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),2.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),2.4*2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),sqrt(2.4));
+    TS_ASSERT_EQUALS(mfun->getParameter(8),2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(10),79.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(11),3.3);
 
   }
 
@@ -672,20 +672,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->tie("f0.a","101");
     mfun->tie("f0.b","102");
@@ -705,14 +705,14 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),8);
     TS_ASSERT_EQUALS(mfun->nActive(),4);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),101);
-    TS_ASSERT_EQUALS(mfun->parameter(1),102);
-    TS_ASSERT_EQUALS(mfun->parameter(2),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(3),1.2);
-    TS_ASSERT_EQUALS(mfun->parameter(4),103);
-    TS_ASSERT_EQUALS(mfun->parameter(5),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(6),106);
-    TS_ASSERT_EQUALS(mfun->parameter(7),3.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),101);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),102);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),103);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),106);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterName(0),"f0.a");
     TS_ASSERT_EQUALS(mfun->parameterName(1),"f0.b");
@@ -789,20 +789,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->tie("f0.a","101");
     mfun->tie("f0.b","102");
@@ -812,8 +812,8 @@ public:
     mfun->tie("f3.h","106");
 
     Linear* bk1 = new Linear();
-    bk1->getParameter("a") = 4.1;
-    bk1->getParameter("b") = 4.2;
+    bk1->setParameter("a",4.1);
+    bk1->setParameter("b",4.2);
 
     clearDeleted();
     mfun->replaceFunction(2,bk1);
@@ -826,16 +826,16 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),10);
     TS_ASSERT_EQUALS(mfun->nActive(),6);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),101);
-    TS_ASSERT_EQUALS(mfun->parameter(1),102);
-    TS_ASSERT_EQUALS(mfun->parameter(2),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(3),1.2);
-    TS_ASSERT_EQUALS(mfun->parameter(4),103);
-    TS_ASSERT_EQUALS(mfun->parameter(5),4.1);
-    TS_ASSERT_EQUALS(mfun->parameter(6),4.2);
-    TS_ASSERT_EQUALS(mfun->parameter(7),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(8),106);
-    TS_ASSERT_EQUALS(mfun->parameter(9),3.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),101);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),102);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),103);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),4.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),4.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(8),106);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterName(0),"f0.a");
     TS_ASSERT_EQUALS(mfun->parameterName(1),"f0.b");
@@ -934,20 +934,20 @@ public:
     mfun->addFunction(cub);
     mfun->addFunction(g2);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
-    g1->getParameter("c") = 1.1;
-    g1->getParameter("h") = 1.2;
-    g1->getParameter("s") = 1.3;
+    g1->setParameter("c",1.1);
+    g1->setParameter("h",1.2);
+    g1->setParameter("s",1.3);
 
-    cub->getParameter("c0") = 2.1;
-    cub->getParameter("c1") = 2.2;
-    cub->getParameter("c2") = 2.3;
-    cub->getParameter("c3") = 2.4;
+    cub->setParameter("c0",2.1);
+    cub->setParameter("c1",2.2);
+    cub->setParameter("c2",2.3);
+    cub->setParameter("c3",2.4);
 
-    g2->getParameter("c") = 3.1;
-    g2->getParameter("h") = 3.2;
-    g2->getParameter("s") = 3.3;
+    g2->setParameter("c",3.1);
+    g2->setParameter("h",3.2);
+    g2->setParameter("s",3.3);
 
     mfun->tie("f0.a","101");
     mfun->tie("f0.b","102");
@@ -957,10 +957,10 @@ public:
     mfun->tie("f3.h","106");
 
     Cubic* cub1 = new Cubic();
-    cub1->getParameter("c0") = 4.1;
-    cub1->getParameter("c1") = 4.2;
-    cub1->getParameter("c2") = 4.3;
-    cub1->getParameter("c3") = 4.4;
+    cub1->setParameter("c0",4.1);
+    cub1->setParameter("c1",4.2);
+    cub1->setParameter("c2",4.3);
+    cub1->setParameter("c3",4.4);
 
     clearDeleted();
     mfun->replaceFunction(0,cub1);
@@ -973,20 +973,20 @@ public:
     TS_ASSERT_EQUALS(mfun->nParams(),14);
     TS_ASSERT_EQUALS(mfun->nActive(),10);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),4.1);
-    TS_ASSERT_EQUALS(mfun->parameter(1),4.2);
-    TS_ASSERT_EQUALS(mfun->parameter(2),4.3);
-    TS_ASSERT_EQUALS(mfun->parameter(3),4.4);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(5),1.2);
-    TS_ASSERT_EQUALS(mfun->parameter(6),103);
-    TS_ASSERT_EQUALS(mfun->parameter(7),2.1);
-    TS_ASSERT_EQUALS(mfun->parameter(8),104);
-    TS_ASSERT_EQUALS(mfun->parameter(9),105);
-    TS_ASSERT_EQUALS(mfun->parameter(10),2.4);
-    TS_ASSERT_EQUALS(mfun->parameter(11),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(12),106);
-    TS_ASSERT_EQUALS(mfun->parameter(13),3.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),4.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),4.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),4.3);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),4.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),1.2);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),103);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),2.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(8),104);
+    TS_ASSERT_EQUALS(mfun->getParameter(9),105);
+    TS_ASSERT_EQUALS(mfun->getParameter(10),2.4);
+    TS_ASSERT_EQUALS(mfun->getParameter(11),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(12),106);
+    TS_ASSERT_EQUALS(mfun->getParameter(13),3.3);
 
     TS_ASSERT_EQUALS(mfun->parameterName(0),"f0.c0");
     TS_ASSERT_EQUALS(mfun->parameterName(1),"f0.c1");
@@ -1110,14 +1110,14 @@ public:
     Gauss *g = new Gauss();
     Linear *bk = new Linear();
 
-    bk->getParameter("a") = 0.1;
-    bk->getParameter("b") = 0.2;
+    bk->setParameter("a",0.1);
+    bk->setParameter("b",0.2);
 
     bk->tie("b","a/2");
 
-    g->getParameter("c") = 1.1;
-    g->getParameter("h") = 1.2;
-    g->getParameter("s") = 1.3;
+    g->setParameter("c",1.1);
+    g->setParameter("h",1.2);
+    g->setParameter("s",1.3);
     g->tie("s","1.33");
 
     mfun->addFunction(bk);
@@ -1150,12 +1150,12 @@ public:
     Gauss *g = new Gauss();
     Linear *bk = new Linear();
 
-    bk->getParameter("a") = 0.1;
-    bk->getParameter("b") = 0.2;
+    bk->setParameter("a",0.1);
+    bk->setParameter("b",0.2);
 
-    g->getParameter("c") = 1.1;
-    g->getParameter("h") = 1.2;
-    g->getParameter("s") = 1.3;
+    g->setParameter("c",1.1);
+    g->setParameter("h",1.2);
+    g->setParameter("s",1.3);
 
     mfun->addFunction(bk);
     mfun->addFunction(g);

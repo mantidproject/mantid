@@ -122,12 +122,12 @@ public:
   /// are different form the declared ones.
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
-  /// Address of i-th parameter
-  virtual double& parameter(int) = 0;
-  /// Address of i-th parameter
-  virtual double parameter(int i)const = 0;
-  /// Get parameter by name.
-  virtual double& getParameter(const std::string& name) = 0;
+  /// Set i-th parameter
+  virtual void setParameter(int, const double& value, bool explicitlySet = true) = 0;
+  /// Get i-th parameter
+  virtual double getParameter(int i)const = 0;
+  /// Set parameter by name.
+  virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true) = 0;
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const = 0;
   /// Total number of parameters
@@ -138,6 +138,8 @@ public:
   virtual int parameterIndex(const double* p)const = 0;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const = 0;
+  /// Checks if a parameter has been set explicitly
+  virtual bool isExplicitlySet(int i)const = 0;
 
   /// Number of active (in terms of fitting) parameters
   virtual int nActive()const = 0;
@@ -206,7 +208,10 @@ protected:
   virtual bool removeTie(int i) = 0;
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(int i)const = 0;
+  /// Get the address of the parameter
+  virtual double* getParameterAddress(int i) = 0;
 
+  friend class ParameterTie;
   friend class CompositeFunction;
 
   /// Shared pointer to the workspace

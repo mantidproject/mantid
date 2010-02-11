@@ -63,13 +63,13 @@ void IFunction::updateActive(const double* in)
 void IFunction::setActiveParameter(int i,double value)
 {
   int j = indexOfActive(i);
-  parameter(j) = value;
+  setParameter(j,value,false);
 }
 
 double IFunction::activeParameter(int i)const
 {
   int j = indexOfActive(i);
-  return parameter(j);
+  return getParameter(j);
 }
 
 /** Create a new tie. IFunctions can have their own types of ties.
@@ -140,7 +140,7 @@ std::string IFunction::asString()const
   }
   for(int i=0;i<nParams();i++)
   {
-    ostr<<','<<parameterName(i)<<'='<<parameter(i);
+    ostr<<','<<parameterName(i)<<'='<<getParameter(i);
   }
   return ostr.str();
 }

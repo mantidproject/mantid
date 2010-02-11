@@ -74,14 +74,14 @@ void BoundaryConstraint::setParamToSatisfyConstraint(API::IFunction* fn)
     return;
   }
 
-  double paramValue = fn->parameter(fn->indexOfActive(m_activeParameterIndex));
+  double paramValue = fn->getParameter(fn->indexOfActive(m_activeParameterIndex));
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      fn->getParameter(fn->nameOfActive(m_activeParameterIndex)) = m_lowerBound;
+      fn->setParameter(fn->nameOfActive(m_activeParameterIndex),m_lowerBound,false);
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      fn->getParameter(fn->nameOfActive(m_activeParameterIndex)) = m_upperBound;
+      fn->setParameter(fn->nameOfActive(m_activeParameterIndex),m_upperBound,false);
 }
 
 
@@ -105,7 +105,7 @@ double BoundaryConstraint::check(IFunction* fn)
   }
 
 
-  double paramValue = fn->parameter(fn->indexOfActive(m_activeParameterIndex));
+  double paramValue = fn->getParameter(fn->indexOfActive(m_activeParameterIndex));
 
   double penalty = 0.0;
 
@@ -130,7 +130,7 @@ boost::shared_ptr<std::vector<double> > BoundaryConstraint::checkDeriv(IFunction
     return penalty;
   } 
 
-  double paramValue = fn->parameter(fn->indexOfActive(m_activeParameterIndex));
+  double paramValue = fn->getParameter(fn->indexOfActive(m_activeParameterIndex));
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )

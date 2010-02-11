@@ -121,8 +121,8 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 0.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
     bk->removeActive(1);  
     //bk->removeActive(1);
 
@@ -133,9 +133,9 @@ public:
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
-    fn->getParameter("Height") = 200.0;
-    fn->getParameter("PeakCentre") = 79450.0;
-    fn->getParameter("Sigma") = 300.0;
+    fn->setParameter("Height",200.0);
+    fn->setParameter("PeakCentre",79450.0);
+    fn->setParameter("Sigma",300.0);
 
     // add constraint to function
     BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
@@ -197,8 +197,8 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 0.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
     bk->removeActive(1);  
     //bk->removeActive(1);
 
@@ -209,9 +209,9 @@ public:
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
-    fn->getParameter("Height") = 200.0;
-    fn->getParameter("PeakCentre") = 79450.0;
-    fn->getParameter("Sigma") = 300.0;
+    fn->setParameter("Height",200.0);
+    fn->setParameter("PeakCentre",79450.0);
+    fn->setParameter("Sigma",300.0);
 
     // add constraint to function
     BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
@@ -620,8 +620,8 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 0.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
     bk->removeActive(1);  
     //bk->removeActive(1);
 
@@ -632,9 +632,9 @@ public:
     SimplexGaussian* fn = new SimplexGaussian();
     fn->initialize();
 
-    fn->getParameter("Height") = 200.0;
-    fn->getParameter("PeakCentre") = 79450.0;
-    fn->getParameter("Sigma") = 300.0;
+    fn->setParameter("Height",200.0);
+    fn->setParameter("PeakCentre",79450.0);
+    fn->setParameter("Sigma",300.0);
 
     // add constraint to function
     BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);

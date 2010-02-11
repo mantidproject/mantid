@@ -65,31 +65,31 @@ public:
 
   double centre()const
   {
-    return parameter(0);
+    return getParameter(0);
   }
 
   double height()const
   {
-    return parameter(1);
+    return getParameter(1);
   }
 
   double width()const
   {
-    return parameter(2);
+    return getParameter(2);
   }
 
   void setCentre(const double c)
   {
-    parameter(0) = c;
+    setParameter(0,c);
   }
   void setHeight(const double h)
   {
-    parameter(1) = h;
+    setParameter(1,h);
   }
 
   void setWidth(const double w)
   {
-    parameter(2) = w;
+    setParameter(2,w);
   }
 
   void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax)
@@ -179,27 +179,27 @@ public:
     mfun->addFunction(g1);
     mfun->addFunction(g2);
 
-    g1->getParameter("c") = 3.1;
-    g1->getParameter("h") = 1.1;
-    g1->getParameter("s") = 1.;
+    g1->setParameter("c",3.1);
+    g1->setParameter("h",1.1);
+    g1->setParameter("s",1.);
 
-    g2->getParameter("c") = 7.1;
-    g2->getParameter("h") = 1.1;
-    g2->getParameter("s") = 1.;
+    g2->setParameter("c",7.1);
+    g2->setParameter("h",1.1);
+    g2->setParameter("s",1.);
 
-    bk->getParameter("a") = 0.8;
+    bk->setParameter("a",0.8);
 
     TS_ASSERT_EQUALS(mfun->nParams(),8);
     TS_ASSERT_EQUALS(mfun->nActive(),8);
 
-    TS_ASSERT_EQUALS(mfun->parameter(0),0.8);
-    TS_ASSERT_EQUALS(mfun->parameter(1),0.0);
-    TS_ASSERT_EQUALS(mfun->parameter(2),3.1);
-    TS_ASSERT_EQUALS(mfun->parameter(3),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(4),1.0);
-    TS_ASSERT_EQUALS(mfun->parameter(5),7.1);
-    TS_ASSERT_EQUALS(mfun->parameter(6),1.1);
-    TS_ASSERT_EQUALS(mfun->parameter(7),1.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(0),0.8);
+    TS_ASSERT_EQUALS(mfun->getParameter(1),0.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(2),3.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(3),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(4),1.0);
+    TS_ASSERT_EQUALS(mfun->getParameter(5),7.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(6),1.1);
+    TS_ASSERT_EQUALS(mfun->getParameter(7),1.0);
 
     WS_type ws = mkWS(1,0,10,0.1);
     addNoise(ws,0.1);
@@ -231,28 +231,28 @@ public:
     }
 
     TS_ASSERT_EQUALS(mfun->parameterName(0),"f0.a");
-    TS_ASSERT_DELTA(mfun->parameter(0),1,0.1);
+    TS_ASSERT_DELTA(mfun->getParameter(0),1,0.1);
 
     TS_ASSERT_EQUALS(mfun->parameterName(1),"f0.b");
-    TS_ASSERT_DELTA(mfun->parameter(1),0.1,0.1);
+    TS_ASSERT_DELTA(mfun->getParameter(1),0.1,0.1);
 
     TS_ASSERT_EQUALS(mfun->parameterName(2),"f1.c");
-    TS_ASSERT_DELTA(mfun->parameter(2),4,0.2);
+    TS_ASSERT_DELTA(mfun->getParameter(2),4,0.2);
 
     TS_ASSERT_EQUALS(mfun->parameterName(3),"f1.h");
-    TS_ASSERT_DELTA(mfun->parameter(3),1,0.2);
+    TS_ASSERT_DELTA(mfun->getParameter(3),1,0.2);
 
     TS_ASSERT_EQUALS(mfun->parameterName(4),"f1.s");
-    TS_ASSERT_DELTA(mfun->parameter(4),2.13,0.2);
+    TS_ASSERT_DELTA(mfun->getParameter(4),2.13,0.2);
 
     TS_ASSERT_EQUALS(mfun->parameterName(5),"f2.c");
-    TS_ASSERT_DELTA(mfun->parameter(5),6,0.2);
+    TS_ASSERT_DELTA(mfun->getParameter(5),6,0.2);
 
     TS_ASSERT_EQUALS(mfun->parameterName(6),"f2.h");
-    TS_ASSERT_DELTA(mfun->parameter(6),2,0.2);
+    TS_ASSERT_DELTA(mfun->getParameter(6),2,0.2);
 
     TS_ASSERT_EQUALS(mfun->parameterName(7),"f2.s");
-    TS_ASSERT_DELTA(mfun->parameter(7),3.0,0.2);
+    TS_ASSERT_DELTA(mfun->getParameter(7),3.0,0.2);
 
 
     TWS_type outParams = getTWS("out_Parameters");

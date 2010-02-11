@@ -48,7 +48,7 @@ double IkedaCarpenterPV::width()const
 
 void IkedaCarpenterPV::setCentre(const double c) 
 {
-  getParameter("X0") = c;
+  setParameter("X0",c);
 };
 
 void IkedaCarpenterPV::setHeight(const double h) 
@@ -56,21 +56,21 @@ void IkedaCarpenterPV::setHeight(const double h)
   m_height = h;
 
   if (m_width != 0.0)
-    getParameter("I") = h;
+    setParameter("I",h);
   else
-    getParameter("I") = 0.25*m_width*m_height;
+    setParameter("I",0.25*m_width*m_height);
 };
 
 void IkedaCarpenterPV::setWidth(const double w) 
 {
-  getParameter("SigmaSquared") = w*w/80.0;  
+  setParameter("SigmaSquared",w*w/80.0);
 
-  getParameter("Gamma") = w/32.0; 
+  setParameter("Gamma",w/32.0);
 
   m_width = w;
 
   if ( m_height != 0.0 )
-    getParameter("I") = 0.25*m_width*m_height;
+    setParameter("I",0.25*m_width*m_height);
 };
 
 

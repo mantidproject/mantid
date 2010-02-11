@@ -101,8 +101,8 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 0.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
     bk->removeActive(1);  
 
     // set up Lorentzian fitting function
@@ -232,8 +232,8 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 0.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
     //bk->removeActive(0);  
     bk->removeActive(1);
 

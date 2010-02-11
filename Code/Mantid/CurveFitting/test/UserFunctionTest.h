@@ -36,9 +36,9 @@ public:
   {
     UserFunction fun;
     fun.setAttribute("Formula","h*sin(a*x-c)");
-    fun.getParameter("h") = 2.2;
-    fun.getParameter("a") = 2.0;
-    fun.getParameter("c") = 1.2;
+    fun.setParameter("h",2.2);
+    fun.setParameter("a",2.0);
+    fun.setParameter("c",1.2);
 
     TS_ASSERT_EQUALS(fun.getParameter("h") , 2.2);
     TS_ASSERT_EQUALS(fun.getParameter("a") , 2.0);

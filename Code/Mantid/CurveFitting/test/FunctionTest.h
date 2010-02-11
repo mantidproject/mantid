@@ -56,31 +56,31 @@ public:
 
   double centre()const
   {
-    return parameter(0);
+    return getParameter(0);
   }
 
   double height()const
   {
-    return parameter(1);
+    return getParameter(1);
   }
 
   double width()const
   {
-    return parameter(2);
+    return getParameter(2);
   }
 
   void setCentre(const double c)
   {
-    parameter(0) = c;
+    setParameter(0,c);
   }
   void setHeight(const double h)
   {
-    parameter(1) = h;
+    setParameter(1,h);
   }
 
   void setWidth(const double w)
   {
-    parameter(2) = w;
+    setParameter(2,w);
   }
 
   void testInit(Mantid::DataObjects::Workspace2D_const_sptr ws,int spec,int xMin,int xMax)
@@ -112,16 +112,16 @@ public:
   {
     FunctionTestGauss *g = new FunctionTestGauss();
 
-    g->getParameter("c") = 5.5;
-    g->getParameter("h") = 1.2;
-    g->getParameter("s") = 1.;
+    g->setParameter("c",5.5);
+    g->setParameter("h",1.2);
+    g->setParameter("s",1.);
 
     TS_ASSERT_EQUALS(g->nParams(),3);
     TS_ASSERT_EQUALS(g->nActive(),3);
 
-    TS_ASSERT_EQUALS(g->parameter(0),5.5);
-    TS_ASSERT_EQUALS(g->parameter(1),1.2);
-    TS_ASSERT_EQUALS(g->parameter(2),1.);
+    TS_ASSERT_EQUALS(g->getParameter(0),5.5);
+    TS_ASSERT_EQUALS(g->getParameter(1),1.2);
+    TS_ASSERT_EQUALS(g->getParameter(2),1.);
 
     WS_type ws = mkWS(Exp(),1,0,10,0.1);
     storeWS("Exp",ws);
@@ -152,13 +152,13 @@ public:
     }
 
     TS_ASSERT_EQUALS(g->parameterName(0),"c");
-    TS_ASSERT_DELTA(g->parameter(0),5,0.00001);
+    TS_ASSERT_DELTA(g->getParameter(0),5,0.00001);
 
     TS_ASSERT_EQUALS(g->parameterName(1),"h");
-    TS_ASSERT_DELTA(g->parameter(1),1,0.00001);
+    TS_ASSERT_DELTA(g->getParameter(1),1,0.00001);
 
     TS_ASSERT_EQUALS(g->parameterName(2),"s");
-    TS_ASSERT_DELTA(g->parameter(2),3,0.00001);
+    TS_ASSERT_DELTA(g->getParameter(2),3,0.00001);
 
 
     TWS_type outParams = getTWS("out_Parameters");
@@ -189,9 +189,9 @@ public:
   {
     FunctionTestGauss* g = new FunctionTestGauss();
 
-    g->getParameter("c") = 5.5;
-    g->getParameter("h") = 1.2;
-    g->getParameter("s") = 2.;
+    g->setParameter("c",5.5);
+    g->setParameter("h",1.2);
+    g->setParameter("s",2.);
 
     g->removeActive(2);
 
@@ -214,9 +214,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TS_ASSERT_DELTA(g->parameter(0),5,0.0001);
-    TS_ASSERT_DELTA(g->parameter(1),0.8944,0.0001);
-    TS_ASSERT_DELTA(g->parameter(2),2,0.00001);
+    TS_ASSERT_DELTA(g->getParameter(0),5,0.0001);
+    TS_ASSERT_DELTA(g->getParameter(1),0.8944,0.0001);
+    TS_ASSERT_DELTA(g->getParameter(2),2,0.00001);
 
     removeWS("Exp");
   }
@@ -225,16 +225,16 @@ public:
   {
     FunctionTestGauss g;
 
-    g.getParameter("c") = 5.5;
-    g.getParameter("h") = 1.2;
-    g.getParameter("s") = 1.;
+    g.setParameter("c",5.5);
+    g.setParameter("h",1.2);
+    g.setParameter("s",1.);
 
     TS_ASSERT_EQUALS(g.nParams(),3);
     TS_ASSERT_EQUALS(g.nActive(),3);
 
-    TS_ASSERT_EQUALS(g.parameter(0),5.5);
-    TS_ASSERT_EQUALS(g.parameter(1),1.2);
-    TS_ASSERT_EQUALS(g.parameter(2),1.);
+    TS_ASSERT_EQUALS(g.getParameter(0),5.5);
+    TS_ASSERT_EQUALS(g.getParameter(1),1.2);
+    TS_ASSERT_EQUALS(g.getParameter(2),1.);
 
     WS_type ws = mkWS(Exp(),1,0,10,0.1);
     storeWS("Exp",ws);
@@ -262,13 +262,13 @@ public:
     }
 
     TS_ASSERT_EQUALS(g.parameterName(0),"c");
-    TS_ASSERT_DELTA(g.parameter(0),5.5,0.00001);
+    TS_ASSERT_DELTA(g.getParameter(0),5.5,0.00001);
 
     TS_ASSERT_EQUALS(g.parameterName(1),"h");
-    TS_ASSERT_DELTA(g.parameter(1),1.2,0.00001);
+    TS_ASSERT_DELTA(g.getParameter(1),1.2,0.00001);
 
     TS_ASSERT_EQUALS(g.parameterName(2),"s");
-    TS_ASSERT_DELTA(g.parameter(2),1.,0.00001);
+    TS_ASSERT_DELTA(g.getParameter(2),1.,0.00001);
 
 
     TWS_type outParams = getTWS("out_Parameters");

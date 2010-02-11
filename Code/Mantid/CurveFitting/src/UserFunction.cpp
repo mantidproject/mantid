@@ -92,7 +92,7 @@ namespace Mantid
       m_parser->DefineVar("x",&m_x);
       for(int i=0;i<nParams();i++)
       {
-        m_parser->DefineVar(parameterName(i),&parameter(i));
+        m_parser->DefineVar(parameterName(i),getParameterAddress(i));
       }
 
       m_parser->SetExpr(m_formula);
@@ -126,7 +126,7 @@ namespace Mantid
       std::vector<double> param(nParams());
       for(int i=0;i<nParams();i++)
       {
-        double param = parameter(i);
+        double param = getParameter(i);
         if (param != 0.0)
         {
           dp[i] = param*0.01;
@@ -147,13 +147,14 @@ namespace Mantid
 
       for (int j = 0; j < nParams(); j++) 
       {
-        parameter(j) += dp[j];
+        double p0 = getParameter(j);
+        setParameter(j,p0 + dp[j],false);
         function(m_tmp1.get(),xValues, nData);
         for (int i = 0; i < nData; i++) 
         {
           out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
         }
-        parameter(j) -= dp[j];
+        setParameter(j,p0,false);
       }
     }
 

@@ -70,18 +70,18 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 8.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",8.0);
+    bk->setParameter("A1",0.0);
     bk->removeActive(1);    
 
     BackToBackExponential* fn = new BackToBackExponential();
     fn->initialize();
 
-    fn->getParameter("I") = 297.0;
-    fn->getParameter("A") = 2.0;
-    fn->getParameter("B") = 0.03;
-    fn->getParameter("X0") = 79400.0;
-    fn->getParameter("S") = 8.0;
+    fn->setParameter("I",297.0);
+    fn->setParameter("A",2.0);
+    fn->setParameter("B",0.03);
+    fn->setParameter("X0",79400.0);
+    fn->setParameter("S",8.0);
 
     fnWithBk->addFunction(fn);
     fnWithBk->addFunction(bk);
@@ -140,18 +140,18 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 8.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",8.0);
+    bk->setParameter("A1",0.0);
     bk->removeActive(1);    
 
     SimplexBackToBackExponential* fn = new SimplexBackToBackExponential();
     fn->initialize();
 
-    fn->getParameter("I") = 297.0;
-    fn->getParameter("A") = 2.0;
-    fn->getParameter("B") = 0.03;
-    fn->getParameter("X0") = 79400.0;
-    fn->getParameter("S") = 8.0;
+    fn->setParameter("I",297.0);
+    fn->setParameter("A",2.0);
+    fn->setParameter("B",0.03);
+    fn->setParameter("X0",79400.0);
+    fn->setParameter("S",8.0);
 
     fnWithBk->addFunction(fn);
     fnWithBk->addFunction(bk);
@@ -204,18 +204,18 @@ public:
     LinearBackground *bk = new LinearBackground();
     bk->initialize();
 
-    bk->getParameter("A0") = 8.0;
-    bk->getParameter("A1") = 0.0;
+    bk->setParameter("A0",8.0);
+    bk->setParameter("A1",0.0);
     bk->removeActive(1);    
 
     BackToBackExponential* fn = new BackToBackExponential();
     fn->initialize();
 
-    fn->getParameter("I") = 297.0;
-    fn->getParameter("A") = 2.0;
-    fn->getParameter("B") = 0.03;
-    fn->getParameter("X0") = 79400.0;
-    fn->getParameter("S") = 8.0;
+    fn->setParameter("I",297.0);
+    fn->setParameter("A",2.0);
+    fn->setParameter("B",0.03);
+    fn->setParameter("X0",79400.0);
+    fn->setParameter("S",8.0);
 
     fnWithBk->addFunction(fn);
     fnWithBk->addFunction(bk);

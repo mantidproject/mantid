@@ -19,7 +19,7 @@ namespace API
                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     m_parser->SetVarFactory(AddVariable, this);
 
-    m_par = &funct->getParameter(parName);
+    m_par = funct->getParameterAddress(funct->parameterIndex(parName));
   }
 
   /// Destructor
@@ -35,7 +35,7 @@ namespace API
   double* ParameterTie::AddVariable(const char *varName, void *palg)
   {
     ParameterTie& tie = *(ParameterTie*)palg;
-    return &(tie.m_function->getParameter(std::string(varName)));
+    return tie.m_function->getParameterAddress(tie.m_function->parameterIndex(std::string(varName)));
   }
 
   /**

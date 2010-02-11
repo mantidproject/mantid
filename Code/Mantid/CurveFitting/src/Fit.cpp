@@ -599,7 +599,9 @@ namespace CurveFitting
       "Status = " << reportOfFit << "\n" <<
       "Chi^2/DoF = " << finalCostFuncVal << "\n";
     for (int i = 0; i < m_function->nParams(); i++)
-      g_log.information() << m_function->parameterName(i) << " = " << m_function->parameter(i) << "  \n";
+    {
+      g_log.information() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
+    }
 
 
     // also output summary to properties
@@ -633,7 +635,7 @@ namespace CurveFitting
           if (m_function->isActive(i))
           {
             standardDeviations[i] = sqrt(gsl_matrix_get(covar,iPNotFixed,iPNotFixed));
-            if (m_function->activeParameter(iPNotFixed) != m_function->parameter(m_function->indexOfActive(iPNotFixed)))
+            if (m_function->activeParameter(iPNotFixed) != m_function->getParameter(m_function->indexOfActive(iPNotFixed)))
             {// it means the active param is not the same as declared but transformed
               standardDeviations[i] *= fabs(transformationDerivative(iPNotFixed));
             }
@@ -700,7 +702,7 @@ namespace CurveFitting
       for(size_t i=0;i<m_function->nParams();i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
-        row << m_function->parameterName(i) << m_function->parameter(i);
+        row << m_function->parameterName(i) << m_function->getParameter(i);
         if ( methodUsed.compare("Simplex") != 0 && m_function->isActive(i)) 
         {
           row << standardDeviations[i];
@@ -898,7 +900,7 @@ namespace CurveFitting
             }
             parValue.erase(i);
           }
-          fun->getParameter(parName) = atof(parValue.c_str());
+          fun->setParameter(parName,atof(parValue.c_str()));
         }
       }
       // Attach the new function
@@ -1001,12 +1003,12 @@ namespace CurveFitting
   double Fit::transformationDerivative(int i)
   {
     int j = m_function->indexOfActive(i);
-    double p0 = m_function->parameter(j);
+    double p0 = m_function->getParameter(j);
     double ap0 = m_function->activeParameter(i);
     double dap = ap0 != 0.0? ap0 * 0.001 : 0.001;
     m_function->setActiveParameter(i,ap0 + dap);
-    double deriv = ( m_function->parameter(j) - p0 ) / dap;
-    m_function->parameter(j) = p0;
+    double deriv = ( m_function->getParameter(j) - p0 ) / dap;
+    m_function->setParameter(j,p0,false);
     return deriv;
   }
 

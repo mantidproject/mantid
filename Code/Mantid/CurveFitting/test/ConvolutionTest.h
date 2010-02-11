@@ -1,13 +1,15 @@
 #ifndef CONVOLUTIONTEST_H_
 #define CONVOLUTIONTEST_H_
 
-//#include <cxxtest/TestSuite.h>
+#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -72,31 +74,31 @@ public:
 
   double centre()const
   {
-    return parameter(0);
+    return getParameter(0);
   }
 
   double height()const
   {
-    return parameter(1);
+    return getParameter(1);
   }
 
   double width()const
   {
-    return parameter(2);
+    return getParameter(2);
   }
 
   void setCentre(const double c)
   {
-    parameter(0) = c;
+    setParameter(0,c);
   }
   void setHeight(const double h)
   {
-    parameter(1) = h;
+    setParameter(1,h);
   }
 
   void setWidth(const double w)
   {
-    parameter(2) = w;
+    setParameter(2,w);
   }
 
 };
@@ -137,7 +139,7 @@ public:
 DECLARE_FUNCTION(ConvolutionTest_Gauss);
 DECLARE_FUNCTION(ConvolutionTest_Linear);
 
-class ConvolutionTest //: public CxxTest::TestSuite
+class ConvolutionTest : public CxxTest::TestSuite
 {
 public:
   ConvolutionTest()
@@ -150,20 +152,20 @@ public:
     Convolution conv;
 
     ConvolutionTest_Gauss* gauss1 = new ConvolutionTest_Gauss();
-    gauss1->parameter(0) = 1.1;
-    gauss1->parameter(1) = 1.2;
-    gauss1->parameter(2) = 1.3;
+    gauss1->setParameter(0,1.1);
+    gauss1->setParameter(1,1.2);
+    gauss1->setParameter(2,1.3);
     ConvolutionTest_Gauss* gauss2 = new ConvolutionTest_Gauss();
-    gauss2->parameter(0) = 2.1;
-    gauss2->parameter(1) = 2.2;
-    gauss2->parameter(2) = 2.3;
+    gauss2->setParameter(0,2.1);
+    gauss2->setParameter(1,2.2);
+    gauss2->setParameter(2,2.3);
     ConvolutionTest_Gauss* gauss3 = new ConvolutionTest_Gauss();
-    gauss3->parameter(0) = 3.1;
-    gauss3->parameter(1) = 3.2;
-    gauss3->parameter(2) = 3.3;
+    gauss3->setParameter(0,3.1);
+    gauss3->setParameter(1,3.2);
+    gauss3->setParameter(2,3.3);
     ConvolutionTest_Linear* linear = new ConvolutionTest_Linear();
-    linear->parameter(0) = 0.1;
-    linear->parameter(1) = 0.2;
+    linear->setParameter(0,0.1);
+    linear->setParameter(1,0.2);
 
     int iFun = -1;
     iFun = conv.addFunction(linear);
@@ -182,13 +184,13 @@ public:
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(conv.nParams(),11);
     TS_ASSERT_EQUALS(conv.parameterName(0),"f0.a");
-    TS_ASSERT_EQUALS(conv.parameter(0),0.1);
+    TS_ASSERT_EQUALS(conv.getParameter(0),0.1);
     TS_ASSERT_EQUALS(conv.parameterName(2),"f1.f0.c");
-    TS_ASSERT_EQUALS(conv.parameter(2),1.1);
+    TS_ASSERT_EQUALS(conv.getParameter(2),1.1);
     TS_ASSERT_EQUALS(conv.parameterName(6),"f1.f1.h");
-    TS_ASSERT_EQUALS(conv.parameter(6),2.2);
+    TS_ASSERT_EQUALS(conv.getParameter(6),2.2);
     TS_ASSERT_EQUALS(conv.parameterName(10),"f1.f2.s");
-    TS_ASSERT_EQUALS(conv.parameter(10),3.3);
+    TS_ASSERT_EQUALS(conv.getParameter(10),3.3);
 
     TS_ASSERT_EQUALS(conv.nActive(),9);
     TS_ASSERT_EQUALS(conv.nameOfActive(0),"f1.f0.c");
@@ -212,9 +214,9 @@ public:
     double a = 1.3;
     double h = 3.;
     ConvolutionTest_Gauss* res = new ConvolutionTest_Gauss();
-    res->getParameter("c") = 0;
-    res->getParameter("h") = h;
-    res->getParameter("s") = a;
+    res->setParameter("c",0);
+    res->setParameter("h",h);
+    res->setParameter("s",a);
 
     conv.addFunction(res);
 
@@ -261,9 +263,9 @@ public:
     double h1 = 3;
     double s1 = pi/2;
     ConvolutionTest_Gauss* res = new ConvolutionTest_Gauss();
-    res->getParameter("c") = c1;
-    res->getParameter("h") = h1;
-    res->getParameter("s") = s1;
+    res->setParameter("c",c1);
+    res->setParameter("h",h1);
+    res->setParameter("s",s1);
 
     conv.addFunction(res);
 
@@ -280,9 +282,9 @@ public:
     double h2 = 10.;
     double s2 = pi/3;
     ConvolutionTest_Gauss* fun = new ConvolutionTest_Gauss();
-    fun->getParameter("c") = c2;
-    fun->getParameter("h") = h2;
-    fun->getParameter("s") = s2;
+    fun->setParameter("c",c2);
+    fun->setParameter("h",h2);
+    fun->setParameter("s",s2);
 
     conv.addFunction(fun);
 
