@@ -4,6 +4,7 @@
 #include "MantidDataHandling/SaveCanSAS1D.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/DOMWriter.h"
 #include "Poco/DOM/Element.h"
@@ -34,10 +35,11 @@ SaveCanSAS1D::~SaveCanSAS1D()
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init()
 {
+  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
+      new API::WorkspaceUnitValidator<>("MomentumTransfer")),
+      "The input workspace, which must be in units of Q");
   std::vector<std::string> exts;
   exts.push_back("xml");
-  declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
-      "Input workspace Name");
   declareProperty(new Kernel::FileProperty("Filename", "", Kernel::FileProperty::Save, exts),
       "The name of the xml file to save");
 
@@ -71,6 +73,11 @@ void SaveCanSAS1D::exec()
   {
     throw Kernel::Exception::FileError("Unable to open file:", fileName);
   }
+
+  // Just write out header manually, because I can't see a way to do stylesheet part in Poco
+  outFile << "<?xml version=\"1.0\"?>\n"
+          << "<?xml-stylesheet type=\"text/xsl\" href=\"cansasxml-html.xsl\" ?>\n";
+
   DOMWriter writer;
   writer.setNewLine("\n");
   writer.setOptions(XMLWriter::PRETTY_PRINT);
@@ -153,6 +160,8 @@ void SaveCanSAS1D::createSASDataElement(Poco::XML::Element* parent)
   throwException(sasDataElem, "SaveCanSAS1D::createSASDataElement", "SASdata");
   parent->appendChild(sasDataElem);
 
+  const std::string dataUnit = m_workspace->YUnitLabel();
+
   for (int i = 0; i < m_workspace->getNumberHistograms(); ++i)
   {
     const MantidVec& xdata = m_workspace->readX(i);
@@ -185,7 +194,7 @@ void SaveCanSAS1D::createSASDataElement(Poco::XML::Element* parent)
       throwException(iText, "SaveCanSAS1D::createSASDataElement", "I");
       Poco::XML::Element*iElem = mDoc->createElement("I");
       throwException(iElem, "SaveCanSAS1D::createSASDataElement", "I");
-      iElem->setAttribute("unit", "a.u");
+      iElem->setAttribute("unit", dataUnit);
       iElem->appendChild(iText);
       iDataElem->appendChild(iElem);
 
@@ -194,7 +203,7 @@ void SaveCanSAS1D::createSASDataElement(Poco::XML::Element* parent)
       e << edata[j];
       Poco::XML::Element* idevElem = mDoc->createElement("Idev");
       throwException(idevElem, "SaveCanSAS1D::createSASDataElement", "Idev");
-      idevElem->setAttribute("unit", "a.u");
+      idevElem->setAttribute("unit", dataUnit);
       iDataElem->appendChild(idevElem);
       Poco::XML::Text*eText = mDoc->createTextNode(e.str());
       throwException(eText, "SaveCanSAS1D::createSASDataElement", "Idev");
@@ -221,6 +230,7 @@ void SaveCanSAS1D::createSASsample(Poco::XML::Element* parent)
   throwException(idText, "SaveCanSAS1D::createSASsample", "ID");
   idElem->appendChild(idText);
 }
+
 /** This method creates an XML element named "SASinstrument"
  and its conatined elements
  *  @param parent   is the parent element 
@@ -285,8 +295,8 @@ void SaveCanSAS1D::createSASInstrument(Poco::XML::Element* parent)
   Poco::XML::Text* detectorSDDText = mDoc->createTextNode(sdd.str());
   throwException(detectorSDDText, "SaveCanSAS1D::createSASInstrument", "SDD");
   detectorSDDElem->appendChild(detectorSDDText);
-
 }
+
 /** This method creates an XML element named "SASnote"
  *  @param parent   is the parent element 
  */
