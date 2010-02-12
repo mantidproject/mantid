@@ -429,7 +429,7 @@ void Expression::setFunct(const std::string& name)
   }
 
   // Check if the function has arguments
-  unsigned int i = std::string::npos;
+  std::string::size_type i = std::string::npos;
 
   bool inQuotes = false;
   for(std::string::const_iterator c = name.begin(); c != name.end(); c++)
@@ -451,7 +451,7 @@ void Expression::setFunct(const std::string& name)
 
   if (i != std::string::npos)
   {
-    unsigned int j = name.find_last_of(')');
+    std::string::size_type j = name.find_last_of(')');
     if (j == std::string::npos || j < i)
     {
       throw std::runtime_error("Unmatched brackets");
