@@ -165,7 +165,9 @@ private:
   ///Close a tab with a given index
   void closeTabAtIndex(int index);
   ///Close a tab at a given position
-  void closeTabAtPosition(const QPoint & pos);  
+  void closeTabAtPosition(const QPoint & pos);
+  ///Does the actual saving of a file
+  void doSave(ScriptEditor * editor);
 
  private:
   /// So that the window can access the actions that are relevant

@@ -315,9 +315,11 @@ QString ScriptManagerWidget::saveAs(int index)
 
   // Set last directory
   m_last_dir = QFileInfo(file_to_save).absolutePath();
-  ScriptEditor *editor = qobject_cast<ScriptEditor*>(currentWidget());
+  if( index == -1 ) index = currentIndex();
+  ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
   editor->setFileName(file_to_save);
-  save(index);
+  doSave(editor);
+  //save(index);
   return file_to_save;
 }
 
@@ -335,14 +337,11 @@ void ScriptManagerWidget::save(int index)
     //Open dialog if necessary
     if( filename.isEmpty() )
     {
-      if( saveAs().isEmpty() ) return;
+      saveAs(index);
     }
     else
     {
-      editor->saveScript(filename);
-      setTabText(currentIndex(), QFileInfo(filename).fileName());
-      editor->setModified(false);
-      connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
+      doSave(editor);
     }
   }
 }
@@ -822,6 +821,18 @@ void ScriptManagerWidget::closeTabAtPosition(const QPoint & pos)
   int index = tabBar()->tabAt(pos);
   //Index is checked in closeTab
   closeTabAtIndex(index);
+}
+
+/** Writes the file to disk
+ *  @param The editor tab to be saved
+ */
+void ScriptManagerWidget::doSave(ScriptEditor * editor)
+{
+  QString filename = editor->fileName();
+  editor->saveScript(filename);
+  setTabText(currentIndex(), QFileInfo(filename).fileName());
+  editor->setModified(false);
+  connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
 }
 
 //***************************************************************************
