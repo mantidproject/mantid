@@ -3,8 +3,11 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/FlatBackground.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidCurveFitting/Linear.h"
+#include <boost/lexical_cast.hpp>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -15,51 +18,58 @@ public:
   FlatBackgroundTest()
   {
     bg = 100.0;
-    const int numBins = 30;
     Mantid::DataObjects::Workspace1D_sptr WS(new Mantid::DataObjects::Workspace1D);
-    WS->initialize(1,numBins+1,numBins);
+    WS->initialize(1,m_numBins+1,m_numBins);
     
-    for (int i = 0; i < numBins; ++i)
+    for (int i = 0; i < m_numBins; ++i)
     {
       WS->dataX(0)[i] = i;
       WS->dataY(0)[i] = bg+(static_cast<double>(std::rand()-RAND_MAX/2)/static_cast<double>(RAND_MAX/2));
       WS->dataE(0)[i] = 0.05*WS->dataY(0)[i];   
     }
-    WS->dataX(0)[numBins] = numBins;
+    WS->dataX(0)[m_numBins] = m_numBins;
     
     AnalysisDataService::Instance().add("flatBG",WS);
+
+    //create another test wrokspace
+    Mantid::DataObjects::Workspace2D_sptr WS2D(new Mantid::DataObjects::Workspace2D);
+    WS2D->initialize(m_numSpecs,m_numBins+1,m_numBins);
+    
+    for (int j = 0; j < m_numSpecs; ++j)
+    {
+      for (int i = 0; i < m_numBins; ++i)
+      {
+        WS2D->dataX(j)[i] = i;
+        // any function that means the calculation is non-trival
+        WS2D->dataY(j)[i] = j+4*(i+1)-(i*i)/10;
+        WS2D->dataE(j)[i] = 2*i;
+      }
+      WS2D->dataX(j)[m_numBins] = m_numBins;
+    }
+    
+    AnalysisDataService::Instance().add("flatbackgroundtest_ramp",WS2D);
   }
   
-	void testName()
+	void testStatics()
 	{
+    Mantid::Algorithms::FlatBackground flatBG;
     TS_ASSERT_EQUALS( flatBG.name(), "FlatBackground" )
-	}
-
-	void testVersion()
-	{
     TS_ASSERT_EQUALS( flatBG.version(), 1 )
-	}
-
-	void testCategory()
-	{
     TS_ASSERT_EQUALS( flatBG.category(), "SANS" )
-	}
-
-  void testInit()
-  {
-    TS_ASSERT_THROWS_NOTHING( flatBG.initialize() )
-    TS_ASSERT( flatBG.isInitialized() )
   }
-  
+
   void testExec()
   {
-    if ( !flatBG.isInitialized() ) flatBG.initialize();
+    Mantid::Algorithms::FlatBackground flatBG;
+    TS_ASSERT_THROWS_NOTHING( flatBG.initialize() )
+    TS_ASSERT( flatBG.isInitialized() )
     
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("InputWorkspace","flatBG") )
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("OutputWorkspace","Removed") )
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("WorkspaceIndexList","0") )
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("StartX","9.5") )
     TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("EndX","20.5") )
+    TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("Mode","Linear Fit") )
 
     TS_ASSERT_THROWS_NOTHING( flatBG.execute() )
     TS_ASSERT( flatBG.isExecuted() )
@@ -76,9 +86,121 @@ public:
     }
   }
 
+  void testMeanFirst()
+  {
+    Mantid::Algorithms::FlatBackground back;
+    TS_ASSERT_THROWS_NOTHING( back.initialize() )
+    TS_ASSERT( back.isInitialized() )
+    
+    back.setPropertyValue("InputWorkspace","flatbackgroundtest_ramp");
+    back.setPropertyValue("OutputWorkspace","flatbackgroundtest_first");
+    back.setPropertyValue("WorkspaceIndexList","");
+    back.setPropertyValue("Mode","Mean");
+    // remove the first half of the spectrum
+    back.setPropertyValue("StartX","0");
+    back.setPropertyValue("EndX","15");
+
+    TS_ASSERT_THROWS_NOTHING( back.execute() )
+    TS_ASSERT( back.isExecuted() )
+    
+    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_ramp"));
+    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_first"));
+    // The X vectors should be the same
+    TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
+
+    for (int j = 0; j < m_numSpecs; ++j)
+    {
+      const Mantid::MantidVec &YIn = inputWS->readY(j);
+      const Mantid::MantidVec &EIn = inputWS->readE(j);
+      const Mantid::MantidVec &YOut = outputWS->readY(j);
+      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      // do our own calculation of the background and its error to check with later
+      double background = 0, backError = 0;
+      for( int k = 0; k < 15; ++k)
+      {
+        background += YIn[k];
+        backError += EIn[k]*EIn[k];
+      }
+      background /= 15.0;
+      backError = std::sqrt(backError)/15.0;
+      for (int i = 0; i < m_numBins; ++i)
+      {
+        double correct = ( YIn[i] - background ) > 0 ? YIn[i]-background : 0;
+        TS_ASSERT_EQUALS( YOut[i], correct )
+
+        if ( YIn[i] - background < 0 )
+        {
+          TS_ASSERT_EQUALS(EOut[i], background)
+        }
+        else
+        {
+          TS_ASSERT_EQUALS(EOut[i], std::sqrt((EIn[i]*EIn[i])+(backError*backError)) )
+        }
+      }
+    }
+  }
+
+  void testMeanSecond()
+  {
+    Mantid::Algorithms::FlatBackground back;
+    TS_ASSERT_THROWS_NOTHING( back.initialize() )
+    TS_ASSERT( back.isInitialized() )
+    
+    back.setPropertyValue("InputWorkspace","flatbackgroundtest_ramp");
+    back.setPropertyValue("OutputWorkspace","flatbackgroundtest_second");
+    back.setPropertyValue("WorkspaceIndexList","");
+    back.setPropertyValue("Mode","Mean");
+    // remove the last half of the spectrum
+    back.setProperty("StartX", 2*double(m_numBins)/3);
+    back.setProperty("EndX", double(m_numBins));
+
+    TS_ASSERT_THROWS_NOTHING( back.execute() )
+    TS_ASSERT( back.isExecuted() )
+    
+    MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_ramp"));
+    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_second"));
+    // The X vectors should be the same
+    TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
+
+    for (int j = 0; j < m_numSpecs; ++j)
+    {
+      const Mantid::MantidVec &YIn = inputWS->readY(j);
+      const Mantid::MantidVec &EIn = inputWS->readE(j);
+      const Mantid::MantidVec &YOut = outputWS->readY(j);
+      const Mantid::MantidVec &EOut = outputWS->readE(j);
+      // do our own calculation of the background and its error to check with later
+      double background = 0, backError = 0, numSummed = 0;
+      // 2*m_numBins/3 makes use of the truncation of integer division
+      for( int k = 2*m_numBins/3; k < m_numBins; ++k)
+      {
+        background += YIn[k];
+        backError += EIn[k]*EIn[k];
+        numSummed++;
+      }
+      background /= numSummed ;
+      backError = std::sqrt(backError)/numSummed ;
+      for (int i = 0; i < m_numBins; ++i)
+      {
+        double correct = ( YIn[i] - background ) > 0 ? YIn[i]-background : 0;
+        TS_ASSERT_EQUALS( YOut[i], correct )
+
+        if ( YIn[i] - background < 0 )
+        {
+          TS_ASSERT_EQUALS(EOut[i], background)
+        }
+        else
+        {
+          TS_ASSERT_EQUALS(EOut[i], std::sqrt((EIn[i]*EIn[i])+(backError*backError)) )
+        }
+      }
+    }
+  }
+
 private:
-  Mantid::Algorithms::FlatBackground flatBG;
   double bg;
+  static const int m_numBins = 31;
+  static const int m_numSpecs = 4;
+
 };
 
 #endif /*FlatBackgroundTest_H_*/

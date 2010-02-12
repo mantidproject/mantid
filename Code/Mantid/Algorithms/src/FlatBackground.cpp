@@ -22,7 +22,9 @@ using namespace API;
 void FlatBackground::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
-    new HistogramValidator<> ), "Name of the input workspace.");
+    new HistogramValidator<> ),
+    "The input workspace must either have constant width bins or is a distribution\n"
+    "workspace. It is also assumed that all spectra have the same X bin boundaries");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output ),
     "Name to use for the output workspace.");
   MandatoryValidator<double> *mustHaveValue = new MandatoryValidator<double>;
@@ -30,16 +32,15 @@ void FlatBackground::init()
     "The X value at which to start the background fit");
   declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(),
     "The X value at which to end the background fit");
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-    "Indices of the spectra that will have their background removed\n"
-    "default: modify all spectra");
   std::vector<std::string> modeOptions;
   modeOptions.push_back("Linear Fit");
   modeOptions.push_back("Mean");
   declareProperty("Mode","Linear Fit",new ListValidator(modeOptions),
-    "Both method used to estimate the background assume that the bin widths are\n"
-    "the same throughout the region of interest and background region (default:\n"
-    "Linear Fit)");
+    "The background count rate is estimated either by taking a mean or doing a\n"
+    "linear fit (default: Linear Fit)");
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+    "Indices of the spectra that will have their background removed\n"
+    "default: modify all spectra");
 }
 
 void FlatBackground::exec()
@@ -58,7 +59,7 @@ void FlatBackground::exec()
   // check if the user passed an empty list, if so all of spec will be processed
   this->getSpecInds(specInds, numHists);
 
-  bool useMean = isModeMean(getProperty("mode"));
+  const bool useMean = isModeMean(getProperty("mode"));
  
   // Initialise the progress reporting object
   m_progress = new Progress(this,0.0,0.3,numHists); 
@@ -93,14 +94,12 @@ void FlatBackground::exec()
     const int currentSpec = *specIt;
     try
     {
-      // Get references to the current spectrum
-      MantidVec &Y = outputWS->dataY(currentSpec);
       // Only if Mean() is called will variance be changed
       double variance = -1;
 
       // Now call the function the user selected to calculate the background
       const double background = useMean ?
-        this->Mean(outputWS->readX(currentSpec),Y , startX, endX, variance) :
+        this->Mean(outputWS, currentSpec, startX, endX, variance) :
         this->LinearFit(outputWS, currentSpec, startX, endX);
       
       if (background < 0)
@@ -112,29 +111,34 @@ void FlatBackground::exec()
         continue;
       }
       else
-      {
+      {// only used for the logging that gets done at the end
         backgroundTotal += background;
       }
 
+      MantidVec &E = outputWS->dataE(currentSpec);
+      // only the Mean() function calculates the variance
+      if ( variance > 0 )
+      {
+        // adjust the errors using the variance (variance = error^2)
+        std::transform(E.begin(), E.end(), E.begin(),
+          std::bind2nd(VectorHelper::AddVariance<double>(), variance ));
+      }
+      // Get references to the current spectrum
+      MantidVec &Y = outputWS->dataY(currentSpec);
       // Now subtract the background from the data. Make sure it doesn't lead to negative values.
       for (int j=0; j < blocksize; ++j)
       {
         Y[j] -= background;
-        if (Y[j] < 0.0) Y[j]=0;
+        if (Y[j] < 0.0)
+        {
+          Y[j]=0;
+          E[j]=background;
+        }
       }
-      // only the Mean() function calculates the variance
-      if ( variance > 0 )
-      {
-        // adjust the errors using the variance (vasriance = error^2)
-        MantidVec &ES = outputWS->dataE(currentSpec);
-        std::transform(ES.begin(), ES.end(), ES.begin(),
-          std::bind2nd(VectorHelper::AddVariance<double>(), variance ));
-      }
-
     }
     catch (std::exception)
     {
-      g_log.error() << "Error processing the spectrum with index " << currentSpec;
+      g_log.error() << "Error processing the spectrum with index " << currentSpec << std::endl;
       throw;
     }
 
@@ -191,7 +195,7 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
     output[i] = i;
   }
 }
-/** Calculate the background using the function selected by the user
+/** Checks the user selected mode value
 *  @param mode must be one of LinearFit or Mean
 *  @return true if the user slected Mean background analysis and false if Linear Fit was selected
 *  @throw invalid_argument if the mode is not recognised
@@ -210,8 +214,8 @@ bool FlatBackground::isModeMean(const std::string &mode)
 }
 /** Gets the mean number of counts in each bin the background region and the variance (error^2) of that
 *  number
-*  @param XS the array of X-values for the spectrum
-*  @param YS the array of Y-values (numbers of counts)
+*  @param WS points to the input workspace
+*  @param specInd index of the spectrum to process
 *  @param startX a X-value in the first bin that will be considered, must not be greater endX
 *  @param endX a X-value in the last bin that will be considered, must not less than startX
 *  @param variance will be set to the number of counts divided by the number of bins squared (= error^2)
@@ -219,8 +223,10 @@ bool FlatBackground::isModeMean(const std::string &mode)
 *  @throw out_of_range if either startX or endX are out of the range of X-values in the specified spectrum
 *  @throw invalid_argument if endX has the value of first X-value one of the spectra
 */
-double FlatBackground::Mean(const MantidVec &XS, const MantidVec &YS, const double startX, const double endX, double &variance)
+double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const
 {
+  const MantidVec &XS = WS->readX(specInd), &YS = WS->readY(specInd);
+  const MantidVec &ES = WS->readE(specInd);
   // the function checkRange should already have checked that startX <= endX, but we still need to check values weren't out side the ranges
   if ( endX > XS.back() || startX < XS.front() )
   {
@@ -232,8 +238,9 @@ double FlatBackground::Mean(const MantidVec &XS, const MantidVec &YS, const doub
   {// happens if startX is the first X-value, e.g. the first X-value is zero and the user selects zero
     startInd = 0;
   }
+
   // the -1 matches definition of startIn, see the comment above that statement
-  int endInd = std::lower_bound(XS.begin(),XS.end(),endX) - XS.begin() - 1;
+  int endInd=std::lower_bound(XS.begin()+startInd,XS.end(),endX)-XS.begin()-1;
   if ( endInd == -1 )
   {// 
     throw std::invalid_argument("EndX was set to the start of one of the spectra, it must greater than the first X-value in any of the specified spectra");
@@ -245,7 +252,8 @@ double FlatBackground::Mean(const MantidVec &XS, const MantidVec &YS, const doub
   double background =
     std::accumulate( YS.begin()+startInd, YS.begin()+endInd+1, 0.0 )/numBins;
   // The error on the total number of background counts in the background region is taken as the sqrt the total number counts. To get the the error on the counts in each bin just divide this by the number of bins. The variance = error^2 that is the total variance divide by the number of bins _squared_.
-  variance = background/numBins;
+  variance = 
+    std::accumulate( ES.begin()+startInd, ES.begin()+endInd+1, 0.0, VectorHelper::SumSquares<double>())/(numBins*numBins);
   // return mean number of counts in each bin, the sum of the number of counts in all the bins divided by the number of bins used in that sum
   return background;
 }

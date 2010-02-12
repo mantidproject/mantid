@@ -20,6 +20,7 @@ namespace Algorithms
     <LI> SpectrumIndexList  - The workspace indices of the spectra to fit background to. </LI>
     <LI> StartX             - The start of the flat region to fit to. </LI>
     <LI> EndX               - The end of the flat region to fit to. </LI>
+    <LI> Mode               - How to estimate the background number of counts: a linear fit or the mean. </LI>
     </UL>
 
     @author Russell Taylor, Tessella plc
@@ -49,7 +50,7 @@ class DLLExport FlatBackground : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  FlatBackground() : API::Algorithm(),m_progress(NULL) {}
+  FlatBackground() : API::Algorithm(), m_progress(NULL) {}
   /// Virtual destructor
   virtual ~FlatBackground() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
@@ -68,7 +69,7 @@ private:
   void checkRange(double& startX, double& endX);
   bool isModeMean(const std::string &mode);
   void getSpecInds(std::vector<int> &output, const int workspaceTotal);
-  double Mean(const MantidVec &XS, const MantidVec &YS, const double startX, const double endX, double &variance);
+  double Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
 
   /// Progress reporting
