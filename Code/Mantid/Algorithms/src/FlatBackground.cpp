@@ -32,15 +32,15 @@ void FlatBackground::init()
     "The X value at which to start the background fit");
   declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(),
     "The X value at which to end the background fit");
+  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+    "Indices of the spectra that will have their background removed\n"
+    "default: modify all spectra");
   std::vector<std::string> modeOptions;
   modeOptions.push_back("Linear Fit");
   modeOptions.push_back("Mean");
   declareProperty("Mode","Linear Fit",new ListValidator(modeOptions),
     "The background count rate is estimated either by taking a mean or doing a\n"
     "linear fit (default: Linear Fit)");
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
-    "Indices of the spectra that will have their background removed\n"
-    "default: modify all spectra");
 }
 
 void FlatBackground::exec()
