@@ -79,6 +79,8 @@ public:
   void setParent(IComponent*);
   //! Return a pointer to the current parent.
   boost::shared_ptr<const IComponent> getParent() const;
+  //! Return an array of all ancestors
+  std::vector<boost::shared_ptr<const IComponent> > getAncestors() const;
   //! Set the component name
   void setName(const std::string&);
   //! Get the component name

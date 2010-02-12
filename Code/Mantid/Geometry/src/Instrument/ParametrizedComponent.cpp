@@ -55,6 +55,22 @@ namespace Mantid
       return ParComponentFactory::create(parent,m_map);
     }
 
+    /*! Returns an array of all ancestors of this component,
+     *  starting with the direct parent and moving up
+     *  @return An array of pointers to ancestor components
+     */
+    std::vector<boost::shared_ptr<const IComponent> > ParametrizedComponent::getAncestors() const
+    {
+      std::vector<boost::shared_ptr<const IComponent> > ancs;
+      boost::shared_ptr<const IComponent> current = m_base->getParent();
+      while (current)
+      {
+        ancs.push_back( ParComponentFactory::create(current,m_map) );
+        current = current->getParent();
+      }
+      return ancs;
+    }
+
     /*! Set the name of the ParametrizedComponent (currently does nothing)
     *  @param s :: name string
     */

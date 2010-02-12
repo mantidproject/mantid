@@ -97,6 +97,10 @@ private:
   {
     return boost::shared_ptr<const IComponent>();
   }
+  std::vector<boost::shared_ptr<const IComponent> > getAncestors() const
+  {
+    return std::vector<boost::shared_ptr<const IComponent> >();
+  }
   std::string getName() const{return "";}
   void setParent(IComponent*){}
   void setName(const std::string&){}

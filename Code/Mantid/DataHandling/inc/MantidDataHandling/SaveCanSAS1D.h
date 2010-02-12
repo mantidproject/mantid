@@ -125,14 +125,14 @@ namespace Mantid
       void createRunElement(Poco::XML::Element* parent);
 
       /// This method throws NullPointerException when element creation fails
-      void throwException(Poco::XML::Element* elem,const std::string & place,const std::string & objectName);
+      void throwException(const Poco::XML::Element* elem,const std::string & place,const std::string & objectName);
 
       ///Overloaded method. This method throws NullPointerException when Text node creation fails
-      void throwException(Poco::XML::Text* text,const std::string & place,const std::string & objectName);
+      void throwException(const Poco::XML::Text* text,const std::string & place,const std::string & objectName);
       
-      API::MatrixWorkspace_const_sptr m_workspace;///<workspace
-      Poco::XML::Document* mDoc;         ///< The XML document    
-      Poco::XML::Element*  mRoot;	     ///< The root XML element
+      API::MatrixWorkspace_const_sptr m_workspace; ///<workspace
+      Poco::XML::Document* mDoc;                   ///< The XML document    
+      Poco::XML::Element*  mRoot;                  ///< The root XML element
     };
     
   }

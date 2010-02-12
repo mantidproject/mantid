@@ -18,17 +18,18 @@ namespace Algorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The (partly) corrected data in units of wavelength. </LI>
-    <LI> InputForErrors  - The workspace containing the counts to use for the error calculation
-                           Must also be in units of wavelength and have matching bins to the InputWorkspace. </LI>
-    <LI> OutputWorkspace - The workspace in which to store the result histogram. </LI>
-    <LI> OutputBinning   - The bin parameters to use for the final result. </LI>
+    <LI> InputWorkspace    - The (partly) corrected data in units of wavelength. </LI>
+    <LI> InputForErrors    - The workspace containing the counts to use for the error calculation
+                             Must also be in units of wavelength and have matching bins to the InputWorkspace. </LI>
+    <LI> OutputWorkspace   - The workspace in which to store the result histogram. </LI>
+    <LI> OutputBinning     - The bin parameters to use for the final result. </LI>
+    <LI> AccountForGravity - Whether to correct for the effects of gravity (default: false). </LI>
     </UL>
  
     @author Russell Taylor, Tessella plc
     @date 16/10/2009
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 

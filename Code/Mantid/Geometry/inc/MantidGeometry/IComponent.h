@@ -69,6 +69,8 @@ public:
   virtual void setParent(IComponent*)= 0;
   //! Return a pointer to the current parent.
   virtual boost::shared_ptr<const IComponent> getParent() const = 0;
+  //! Return an array of all ancestors, the nearest first
+  virtual std::vector<boost::shared_ptr<const IComponent> > getAncestors() const = 0;
   //! Set the IComponent name
   virtual void setName(const std::string&) = 0;
   //! Get the IComponent name

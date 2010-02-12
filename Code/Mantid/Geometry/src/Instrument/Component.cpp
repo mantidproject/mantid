@@ -92,6 +92,22 @@ boost::shared_ptr<const IComponent> Component::getParent() const
     return boost::shared_ptr<const IComponent>(parent,NoDeleting());
 }
 
+/*! Returns an array of all ancestors of this component,
+ *  starting with the direct parent and moving up
+ *  @return An array of pointers to ancestor components
+ */
+std::vector<boost::shared_ptr<const IComponent> > Component::getAncestors() const
+{
+  std::vector<boost::shared_ptr<const IComponent> > ancs;
+  boost::shared_ptr<const IComponent> current = this->getParent();
+  while (current)
+  {
+    ancs.push_back(current);
+    current = current->getParent();
+  }
+  return ancs;
+}
+
 /*! Set the name of the component
  *  @param s :: name string
  */

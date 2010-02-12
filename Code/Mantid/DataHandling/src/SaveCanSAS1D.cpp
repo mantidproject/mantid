@@ -162,6 +162,7 @@ void SaveCanSAS1D::createSASDataElement(Poco::XML::Element* parent)
 
   const std::string dataUnit = m_workspace->YUnitLabel();
 
+  API::Progress progress(this,0.0,0.9,m_workspace->size());
   for (int i = 0; i < m_workspace->getNumberHistograms(); ++i)
   {
     const MantidVec& xdata = m_workspace->readX(i);
@@ -209,6 +210,7 @@ void SaveCanSAS1D::createSASDataElement(Poco::XML::Element* parent)
       throwException(eText, "SaveCanSAS1D::createSASDataElement", "Idev");
       idevElem->appendChild(eText);
 
+      progress.report();
     }
   }
 
@@ -272,18 +274,21 @@ void SaveCanSAS1D::createSASInstrument(Poco::XML::Element* parent)
   throwException(detectornameElem, "SaveCanSAS1D::createSASInstrument", "name");
   sasDetectorElem->appendChild(detectornameElem);
 
-  std::string detectorName;
-  boost::shared_ptr<const IComponent> currentdet;
-  boost::shared_ptr<const IComponent> parentdet;
+  // Get the detector object (probably a group) that goes with the result spectrum
+  Geometry::IDetector_const_sptr detgroup = m_workspace->getDetector(0);
+  const int id = detgroup->getID(); //id of the first detector in the group
+  // Now make sure we've got an individual detector object
+  Geometry::IDetector_const_sptr det = m_workspace->getInstrument()->getDetector(id);
+  // Get all its ancestors
+  const std::vector<boost::shared_ptr<const IComponent> > ancs = det->getAncestors();
+  // The one we want is the penultimate one
+  // Shouldn't ever happen, but protect against detector having no ancestors
+  const int size = ancs.size();
+  const std::string detectorName = (size > 1) ? ancs[size-2]->getName() : det->getName();
 
-  Geometry::IDetector_sptr detgroup = m_workspace->getDetector(0);
-  int id = detgroup->getID();//id of the first detector in the group
-  Geometry::IDetector_sptr det = m_workspace->getInstrument()->getDetector(id);
-
-  detectorName = det->getName();
-  Poco::XML::Text* dectornameText = mDoc->createTextNode(detectorName);
-  throwException(dectornameText, "SaveCanSAS1D::createSASInstrument", "name");
-  detectornameElem->appendChild(dectornameText);
+  Poco::XML::Text* detectornameText = mDoc->createTextNode(detectorName);
+  throwException(detectornameText, "SaveCanSAS1D::createSASInstrument", "name");
+  detectornameElem->appendChild(detectornameText);
 
   Poco::XML::Element* detectorSDDElem = mDoc->createElement("SDD");
   throwException(detectorSDDElem, "SaveCanSAS1D::createSASInstrument", "SDD");
@@ -315,8 +320,8 @@ void SaveCanSAS1D::createSASnote(Poco::XML::Element* parent)
  * @param place  string which tells where the exception thrown
  * @param objectName  element name
  */
-void SaveCanSAS1D::throwException(Poco::XML::Element* elem, const std::string & place,
-    const std::string & objectName)
+void SaveCanSAS1D::throwException(const Poco::XML::Element* elem, 
+                                  const std::string & place,const std::string & objectName)
 {
   if (!elem)
   {
@@ -329,8 +334,8 @@ void SaveCanSAS1D::throwException(Poco::XML::Element* elem, const std::string & 
  * @param place  string which tells where the exception thrown
  * @param objectName  element name
  */
-void SaveCanSAS1D::throwException(Poco::XML::Text* text, const std::string & place,
-    const std::string & objectName)
+void SaveCanSAS1D::throwException(const Poco::XML::Text* text, 
+                                  const std::string & place, const std::string & objectName)
 {
   if (!text)
   {
