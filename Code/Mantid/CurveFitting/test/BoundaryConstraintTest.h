@@ -11,6 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Expression.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
@@ -60,6 +61,69 @@ public:
 
   }
 
+  void testInitialize1()
+  {
+    BoundaryConstraint bc;
+    Expression expr;
+    expr.parse("BoundaryConstraint(10<Theta<20)");
+    bc.initialize(expr);
+
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
+    TS_ASSERT_DELTA( bc.upper(), 20 ,0.0001);
+  }
+
+  void testInitialize2()
+  {
+    BoundaryConstraint bc;
+    Expression expr;
+    expr.parse("BoundaryConstraint(20>Theta>10)");
+    bc.initialize(expr);
+
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
+    TS_ASSERT_DELTA( bc.upper(), 20 ,0.0001);
+  }
+
+  void testInitialize3()
+  {
+    BoundaryConstraint bc;
+    Expression expr;
+    expr.parse("BoundaryConstraint(10<Theta)");
+    bc.initialize(expr);
+
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
+    TS_ASSERT( !bc.hasUpper() );
+  }
+
+  void testInitialize4()
+  {
+    BoundaryConstraint bc;
+    Expression expr;
+    expr.parse("BoundaryConstraint(Theta<20)");
+    bc.initialize(expr);
+
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_DELTA( bc.upper(), 20 ,0.0001);
+    TS_ASSERT( !bc.hasLower() );
+  }
+
+  void testInitialize5()
+  {
+    BoundaryConstraint bc;
+    Expression expr;
+    expr.parse("BoundaryConstraint(Theta==20)");
+    TS_ASSERT_THROWS(bc.initialize(expr),std::invalid_argument);
+  }
+
+  void testInitialize6()
+  {
+    BoundaryConstraint bc;
+    Expression expr;
+    expr.parse("BoundaryConstraint(a<Theta<b)");
+    TS_ASSERT_THROWS(bc.initialize(expr),std::invalid_argument);
+  }
 };
 
 #endif /*BOUNDARYCONSTRAINTTEST_H_*/

@@ -44,6 +44,16 @@ namespace Mantid
     class DLLExport BoundaryConstraint : public API::IConstraint
     {
     public:
+      /// Default constructor 
+      BoundaryConstraint() : 
+        m_activeParameterIndex(-1),
+        m_penaltyFactor(1000.0),
+        m_parameterName(""),
+        m_hasLowerBound( false), 
+        m_hasUpperBound( false)
+      {
+      }
+
       /// Constructor with no boundary arguments
       BoundaryConstraint(const std::string& paramName) : 
         m_activeParameterIndex(-1),
@@ -68,6 +78,9 @@ namespace Mantid
 
       /// Destructor
       virtual ~BoundaryConstraint() {}
+
+      /// Initialize the constraint from an expression
+      void initialize(const API::Expression& expr);
 
       /// Set panelty factor. The larger the number to thigter the constraint. This number
       /// must be set to a number larger than zero
@@ -109,6 +122,9 @@ namespace Mantid
         clearLower(); 
         clearUpper(); 
       }
+
+      /// Get parameter name
+      std::string getParameterName()const{return m_parameterName;}
 
       /// overwrite IConstraint base class methods
       virtual double check(API::IFunction* fn);

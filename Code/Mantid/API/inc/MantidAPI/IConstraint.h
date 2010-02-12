@@ -10,6 +10,10 @@ namespace Mantid
 {
 namespace API
 {
+//----------------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------------
+  class Expression;
 /** An interface to a constraint.
 
     @author Anders Markvardsen, ISIS, RAL
@@ -42,6 +46,9 @@ public:
   IConstraint() {}
   /// Virtual destructor
   virtual ~IConstraint() {}
+
+  /// Initialize the constraint from an expression
+  virtual void initialize(const Expression& expr) = 0;
 
   /// Returns a penalty number which is bigger than or equal to zero
   /// If zero it means that the constraint is not penalized. If larger

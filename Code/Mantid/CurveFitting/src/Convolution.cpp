@@ -21,7 +21,7 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
-//DECLARE_FUNCTION(Convolution)
+DECLARE_FUNCTION(Convolution)
 
 /// Constructor
 Convolution::Convolution()

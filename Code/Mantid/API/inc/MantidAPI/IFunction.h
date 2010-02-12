@@ -65,7 +65,7 @@ class IConstraint;
     Method addConstraint adds constraints on possible values of a declared parameter. Constraints
     and ties are used only in fitting.
 
-    The main methof of IFunction is called function(out,xValues,nData). It calculates nData output values
+    The main method of IFunction is called function(out,xValues,nData). It calculates nData output values
     out[i] at arguments xValues[i]. Implement functionDeriv method for the function to be used with
     fitting algorithms using derivatives. functionDeriv calculates patrial derivatives of the
     function 
@@ -263,7 +263,7 @@ DLLExport std::ostream& operator<<(std::ostream& ostr,const IFunction& f);
  */
 #define DECLARE_FUNCTION(classname) \
         namespace { \
-	Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+	Mantid::Kernel::RegistrationHelper register_function_##classname( \
   ((Mantid::API::FunctionFactory::Instance().subscribe<classname>(#classname)) \
 	, 0)); \
 	}

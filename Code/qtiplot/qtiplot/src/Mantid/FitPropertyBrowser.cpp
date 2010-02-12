@@ -813,7 +813,7 @@ void FitPropertyBrowser::populateFunctionNames()
   for(size_t i=0;i<names.size();i++)
   {
     std::string fnName = names[i];
-    if (fnName != "CompositeFunction")
+    if (fnName != "CompositeFunction" && fnName != "Convolution")
     {
       QString qfnName = QString::fromStdString(fnName);
       m_registeredFunctions << qfnName;

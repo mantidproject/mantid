@@ -56,7 +56,11 @@ std::string CompositeFunction::asString()const
   std::ostringstream ostr;
   for(int i=0;i<nFunctions();i++)
   {
-    ostr << getFunction(i)->asString() << ';';
+    IFunction* fun = getFunction(i);
+    bool isComp = dynamic_cast<CompositeFunction*>(fun) != 0;
+    if (isComp) ostr << '(';
+    ostr << fun->asString() << ';';
+    if (isComp) ostr << ')';
   }
   return ostr.str();
 }

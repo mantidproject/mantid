@@ -2,19 +2,107 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BoundaryConstraint.h"
-
+#include "MantidAPI/Expression.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/Logger.h"
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
 namespace CurveFitting
 {
 
+DECLARE_CONSTRAINT(BoundaryConstraint)
+
 //using namespace Kernel;
 using namespace API;
 
 // Get a reference to the logger
 Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstraint");
+
+/** Initialize the constraint from an expression.
+ * @param expr The initializing expression which must look like this:
+ * "BoundaryConstraint( 10 < Sigma < 20 )" or
+ * "BoundaryConstraint( Sigma > 20 )"
+ */
+void BoundaryConstraint::initialize(const API::Expression& expr)
+{
+  if (expr.size() != 1 || expr.begin()->size() < 2 || expr.begin()->name() != "==")
+  {
+    g_log.error("Wrong initialization expression");
+    throw std::invalid_argument("Wrong initialization expression");
+  }
+  clearBounds();
+  const Expression& terms(*expr.begin());
+
+  std::vector<double> values(3);
+  int ilow = -1;
+  int ihi = -1;
+  std::string parName;
+  for(int i=0;i<terms.size();i++)
+  {
+    std::string name = terms[i].name();
+    try
+    {
+      double d = boost::lexical_cast<double>(name);
+      values[i] = d;
+      std::string op = terms[i].operator_name();
+      if (op.empty())
+      {
+        op = terms[i+1].operator_name();
+        if (op[0] == '<')
+        {
+          ilow = i;
+        }
+        else if (op[0] == '>')
+        {
+          ihi = i;
+        }
+        else
+        {
+          g_log.error("Unknown operator in initialization expression");
+          throw std::invalid_argument("Unknown operator in initialization expression");
+        }
+      }// if empty
+      else
+      {
+        if (op[0] == '<')
+        {
+          ihi = i;
+        }
+        else if (op[0] == '>')
+        {
+          ilow = i;
+        }
+        else
+        {
+          g_log.error("Unknown operator in initialization expression");
+          throw std::invalid_argument("Unknown operator in initialization expression");
+        }
+      }// if not empty
+    }
+    catch(boost::bad_lexical_cast)
+    {
+      if ( !parName.empty() )
+      {
+        g_log.error("Non-numeric value for a bound");
+        throw std::invalid_argument("Non-numeric value for a bound");
+      }
+      parName = name;
+    }
+  }// for i 
+
+  m_parameterName = parName;
+  if (ilow >= 0)
+  {
+    setLower(values[ilow]);
+  }
+  if (ihi >= 0)
+  {
+    setUpper(values[ihi]);
+  }
+
+}
 
 /** Set penalty factor
  *

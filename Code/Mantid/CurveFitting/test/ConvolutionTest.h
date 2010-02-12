@@ -3,13 +3,17 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/Fit.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -30,7 +34,7 @@ class ConvolutionExp
 {
 public:
   double operator()(double x)
-  {return exp(-0.5*(x-5)*(x-5)*2);}
+  {return exp(-0.5*(x-7)*(x-7)*2);}
 };
 
 class ConvolutionTest_Gauss: public IPeakFunction
@@ -43,7 +47,7 @@ public:
     declareParameter("s",1.);
   }
 
-  std::string name()const{return "Gauss";}
+  std::string name()const{return "ConvolutionTest_Gauss";}
 
   void function(double* out, const double* xValues, const int& nData)
   {
@@ -113,7 +117,7 @@ public:
     declareParameter("b");
   }
 
-  std::string name()const{return "Linear";}
+  std::string name()const{return "ConvolutionTest_Linear";}
 
   void function(double* out, const double* xValues, const int& nData)
   {
@@ -144,7 +148,7 @@ class ConvolutionTest : public CxxTest::TestSuite
 public:
   ConvolutionTest()
   {
-    FrameworkManager::Instance();
+    //FrameworkManager::Instance();
   }
 
   void testFunction()
@@ -205,6 +209,41 @@ public:
     TS_ASSERT_EQUALS(conv.parameterLocalName(6),"f1.h");
     TS_ASSERT_EQUALS(conv.parameterLocalName(10),"f2.s");
 
+    IFunction* fun = FunctionFactory::Instance().createInitialized(conv);
+    TS_ASSERT(fun);
+
+    Convolution* conv1 = dynamic_cast<Convolution*>(fun);
+    TS_ASSERT(conv1);
+
+    TS_ASSERT_EQUALS(conv1->nFunctions(),2);
+    TS_ASSERT_EQUALS(conv1->name(),"Convolution");
+
+    CompositeFunction* cf1 = dynamic_cast<CompositeFunction*>(conv1->getFunction(1));
+    TS_ASSERT(cf1);
+    TS_ASSERT_EQUALS(conv1->nParams(),11);
+    TS_ASSERT_EQUALS(conv1->parameterName(0),"f0.a");
+    TS_ASSERT_EQUALS(conv1->getParameter(0),0.1);
+    TS_ASSERT_EQUALS(conv1->parameterName(2),"f1.f0.c");
+    TS_ASSERT_EQUALS(conv1->getParameter(2),1.1);
+    TS_ASSERT_EQUALS(conv1->parameterName(6),"f1.f1.h");
+    TS_ASSERT_EQUALS(conv1->getParameter(6),2.2);
+    TS_ASSERT_EQUALS(conv1->parameterName(10),"f1.f2.s");
+    TS_ASSERT_EQUALS(conv1->getParameter(10),3.3);
+
+    TS_ASSERT_EQUALS(conv1->nActive(),9);
+    TS_ASSERT_EQUALS(conv1->nameOfActive(0),"f1.f0.c");
+    TS_ASSERT_EQUALS(conv1->activeParameter(0),1.1);
+    TS_ASSERT_EQUALS(conv1->nameOfActive(4),"f1.f1.h");
+    TS_ASSERT_EQUALS(conv1->activeParameter(4),2.2);
+    TS_ASSERT_EQUALS(conv1->nameOfActive(8),"f1.f2.s");
+    TS_ASSERT_EQUALS(conv1->activeParameter(8),3.3);
+
+    TS_ASSERT_EQUALS(conv1->parameterLocalName(0),"a");
+    TS_ASSERT_EQUALS(conv1->parameterLocalName(2),"f0.c");
+    TS_ASSERT_EQUALS(conv1->parameterLocalName(6),"f1.h");
+    TS_ASSERT_EQUALS(conv1->parameterLocalName(10),"f2.s");
+
+    delete fun;
   }
 
   void testResolution()
@@ -308,6 +347,12 @@ public:
       //fconv<<f<<' '<<h1*h2*pi/sqrt(s1*s2)*exp(-pi*pi*f*f*(1./s1+1./s2))<<" 0"<<'\n';
     }
 
+  }
+
+  void testFit()
+  {
+    Fit fit;
+    WS_type ws = mkWS(ConvolutionExp(),1,10,24,0.13);
   }
 
 private:

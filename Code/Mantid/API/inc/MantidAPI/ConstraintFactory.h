@@ -1,5 +1,5 @@
-#ifndef MANTID_API_FUNCTIONFACTORY_H_
-#define MANTID_API_FUNCTIONFACTORY_H_
+#ifndef MANTID_API_CONSTRAINTFACTORY_H_
+#define MANTID_API_CONSTRAINTFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -26,19 +26,17 @@ namespace API
 //----------------------------------------------------------------------
 // More forward declarations
 //----------------------------------------------------------------------
-  class IFunction;
-  class CompositeFunction;
-  class Expression;
+  class IConstraint;
 
 /** @class FunctionFactoryImpl
 
-    The FunctionFactory class is in charge of the creation of concrete
-    instances of fitting functions. It inherits most of its implementation from
+    The ConstraintFactory class is in charge of the creation of concrete
+    instances of Constraints. It inherits most of its implementation from
     the Dynamic Factory base class.
     It is implemented as a singleton class.
     
     @author Roman Tolchenov, Tessella Support Services plc
-    @date 27/10/2009
+    @date 4/02/2010
     
     Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
 
@@ -60,36 +58,26 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-  class EXPORT_OPT_MANTID_API FunctionFactoryImpl : public Kernel::DynamicFactory<IFunction>
+  class EXPORT_OPT_MANTID_API ConstraintFactoryImpl : public Kernel::DynamicFactory<IConstraint>
   {
   public:
-    /**Creates an instance of a function
-     * @param type The function's type
-     * @return A pointer to the created function
+    /**Creates an instance of a Constraint
+     * @param input The creation expression
+     * @return A pointer to the created Constraint
      */
-    IFunction* createFunction(const std::string& type) const;
-
-    ///Creates an instance of a function
-    IFunction* createInitialized(const std::string& input) const;
+    IConstraint* createInitialized(const std::string& input) const;
 
   private:
-    friend struct Mantid::Kernel::CreateUsingNew<FunctionFactoryImpl>;
+    friend struct Mantid::Kernel::CreateUsingNew<ConstraintFactoryImpl>;
 
     /// Private Constructor for singleton class
-    FunctionFactoryImpl();
+    ConstraintFactoryImpl();
     /// Private copy constructor - NO COPY ALLOWED
-    FunctionFactoryImpl(const FunctionFactoryImpl&);
+    ConstraintFactoryImpl(const ConstraintFactoryImpl&);
     /// Private assignment operator - NO ASSIGNMENT ALLOWED
-    FunctionFactoryImpl& operator = (const FunctionFactoryImpl&);
+    ConstraintFactoryImpl& operator = (const ConstraintFactoryImpl&);
     ///Private Destructor
-    virtual ~FunctionFactoryImpl();
-
-    /// Create a simple function
-    IFunction* createSimple(const Expression& expr)const;
-    /// Create a composite function
-    CompositeFunction* createComposite(const Expression& expr)const;
-    /// Throw an exception
-    void inputError(const std::string& str="")const;
+    virtual ~ConstraintFactoryImpl();
 
     ///static reference to the logger class
     Kernel::Logger& g_log;
@@ -99,11 +87,21 @@ namespace API
 	///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
+	template class EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl>;
 #endif /* _WIN32 */
-	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<FunctionFactoryImpl> FunctionFactory;
+	typedef EXPORT_OPT_MANTID_API Mantid::Kernel::SingletonHolder<ConstraintFactoryImpl> ConstraintFactory;
 	
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_FUNCTIONFACTORY_H_*/
+/**
+ * Macro for declaring a new type of function to be used with the FunctionFactory
+ */
+#define DECLARE_CONSTRAINT(classname) \
+        namespace { \
+	Mantid::Kernel::RegistrationHelper register_constraint_##classname( \
+  ((Mantid::API::ConstraintFactory::Instance().subscribe<classname>(#classname)) \
+	, 0)); \
+	}
+
+#endif /*MANTID_API_CONSTRAINTFACTORY_H_*/

@@ -223,6 +223,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ConstraintFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Expression.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\FrameworkManager.cpp"
 				>
 			</File>
@@ -447,6 +455,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\ConstraintFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ConvertFromDistribution.h"
 				>
 			</File>
@@ -523,6 +535,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAPI\Expression.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ExpressionTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ExtractSingleSpectrum.h"
 				>
 			</File>
@@ -568,6 +588,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\FunctionFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FunctionFactoryTest.h"
 				>
 			</File>
 			<File
