@@ -12,6 +12,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+static const int NUMBINS = 31;
+static const int NUMSPECS = 4;
+
 class FlatBackgroundTest : public CxxTest::TestSuite
 {
 public:
@@ -19,32 +22,32 @@ public:
   {
     bg = 100.0;
     Mantid::DataObjects::Workspace1D_sptr WS(new Mantid::DataObjects::Workspace1D);
-    WS->initialize(1,m_numBins+1,m_numBins);
+    WS->initialize(1,NUMBINS+1,NUMBINS);
     
-    for (int i = 0; i < m_numBins; ++i)
+    for (int i = 0; i < NUMBINS; ++i)
     {
       WS->dataX(0)[i] = i;
       WS->dataY(0)[i] = bg+(static_cast<double>(std::rand()-RAND_MAX/2)/static_cast<double>(RAND_MAX/2));
       WS->dataE(0)[i] = 0.05*WS->dataY(0)[i];   
     }
-    WS->dataX(0)[m_numBins] = m_numBins;
+    WS->dataX(0)[NUMBINS] = NUMBINS;
     
     AnalysisDataService::Instance().add("flatBG",WS);
 
     //create another test wrokspace
     Mantid::DataObjects::Workspace2D_sptr WS2D(new Mantid::DataObjects::Workspace2D);
-    WS2D->initialize(m_numSpecs,m_numBins+1,m_numBins);
+    WS2D->initialize(NUMSPECS,NUMBINS+1,NUMBINS);
     
-    for (int j = 0; j < m_numSpecs; ++j)
+    for (int j = 0; j < NUMSPECS; ++j)
     {
-      for (int i = 0; i < m_numBins; ++i)
+      for (int i = 0; i < NUMBINS; ++i)
       {
         WS2D->dataX(j)[i] = i;
         // any function that means the calculation is non-trival
         WS2D->dataY(j)[i] = j+4*(i+1)-(i*i)/10;
         WS2D->dataE(j)[i] = 2*i;
       }
-      WS2D->dataX(j)[m_numBins] = m_numBins;
+      WS2D->dataX(j)[NUMBINS] = NUMBINS;
     }
     
     AnalysisDataService::Instance().add("flatbackgroundtest_ramp",WS2D);
@@ -108,7 +111,7 @@ public:
     // The X vectors should be the same
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
 
-    for (int j = 0; j < m_numSpecs; ++j)
+    for (int j = 0; j < NUMSPECS; ++j)
     {
       const Mantid::MantidVec &YIn = inputWS->readY(j);
       const Mantid::MantidVec &EIn = inputWS->readE(j);
@@ -123,7 +126,7 @@ public:
       }
       background /= 15.0;
       backError = std::sqrt(backError)/15.0;
-      for (int i = 0; i < m_numBins; ++i)
+      for (int i = 0; i < NUMBINS; ++i)
       {
         double correct = ( YIn[i] - background ) > 0 ? YIn[i]-background : 0;
         TS_ASSERT_EQUALS( YOut[i], correct )
@@ -151,8 +154,8 @@ public:
     back.setPropertyValue("WorkspaceIndexList","");
     back.setPropertyValue("Mode","Mean");
     // remove the last half of the spectrum
-    back.setProperty("StartX", 2*double(m_numBins)/3);
-    back.setProperty("EndX", double(m_numBins));
+    back.setProperty("StartX", 2*double(NUMBINS)/3);
+    back.setProperty("EndX", double(NUMBINS));
 
     TS_ASSERT_THROWS_NOTHING( back.execute() )
     TS_ASSERT( back.isExecuted() )
@@ -162,7 +165,7 @@ public:
     // The X vectors should be the same
     TS_ASSERT_EQUALS( inputWS->readX(0), outputWS->readX(0) )
 
-    for (int j = 0; j < m_numSpecs; ++j)
+    for (int j = 0; j < NUMSPECS; ++j)
     {
       const Mantid::MantidVec &YIn = inputWS->readY(j);
       const Mantid::MantidVec &EIn = inputWS->readE(j);
@@ -170,8 +173,8 @@ public:
       const Mantid::MantidVec &EOut = outputWS->readE(j);
       // do our own calculation of the background and its error to check with later
       double background = 0, backError = 0, numSummed = 0;
-      // 2*m_numBins/3 makes use of the truncation of integer division
-      for( int k = 2*m_numBins/3; k < m_numBins; ++k)
+      // 2*NUMBINS/3 makes use of the truncation of integer division
+      for( int k = 2*NUMBINS/3; k < NUMBINS; ++k)
       {
         background += YIn[k];
         backError += EIn[k]*EIn[k];
@@ -179,7 +182,7 @@ public:
       }
       background /= numSummed ;
       backError = std::sqrt(backError)/numSummed ;
-      for (int i = 0; i < m_numBins; ++i)
+      for (int i = 0; i < NUMBINS; ++i)
       {
         double correct = ( YIn[i] - background ) > 0 ? YIn[i]-background : 0;
         TS_ASSERT_EQUALS( YOut[i], correct )
@@ -198,9 +201,6 @@ public:
 
 private:
   double bg;
-  static const int m_numBins = 31;
-  static const int m_numSpecs = 4;
-
 };
 
 #endif /*FlatBackgroundTest_H_*/
