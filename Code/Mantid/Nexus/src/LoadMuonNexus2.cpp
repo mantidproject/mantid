@@ -188,6 +188,7 @@ namespace Mantid
           // Only run the sub-algorithms once
           runLoadInstrument(localWorkspace );
           localWorkspace->mutableSpectraMap().populate(spectrum_index(),spectrum_index(),m_numberOfSpectra);
+          loadLogs(localWorkspace, entry, period);
         }
         else   // We are working on a higher period of a multiperiod raw file
         {
@@ -207,7 +208,6 @@ namespace Mantid
           if(wsGrpSptr)wsGrpSptr->add(WSName);
         }
 
-        loadLogs(localWorkspace, entry, period);
 
         int counter = 0;
         for (int i = m_spec_min; i < m_spec_max; ++i)
