@@ -54,12 +54,6 @@ try:
     Rebin(pInOut, pInOut, |GUI_SET_BIN_BOUNDS|)
  
   DetectorEfficiencyCor(pInOut, pInOut, IncidentE)
-  
-  if |GUI_SET_SCALING| != 1:
-    CreateSingleValuedWorkspace(conv.tempWS, |GUI_SET_SCALING|)
-    Multiply(pInOut, conv.tempWS, pInOut)
-    mantid.deleteWorkspace(conv.tempWS)
-
  
   DetectorMask = ''#+|MASK_WORKSPACE|
   if DetectorMask != '' :
@@ -71,13 +65,21 @@ try:
   mapFile = |GUI_SET_MAP_FILE|
   if mapFile != '':
     GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
+  
+  # miltiple by the user defined arbitary scaling factor, used because some plotting applications prefer numbers close to 1
+  if |GUI_SET_SCALING| != 1:
+    CreateSingleValuedWorkspace(conv.tempWS, |GUI_SET_SCALING|)
+    Multiply(pInOut, conv.tempWS, pInOut)
+    mantid.deleteWorkspace(conv.tempWS)
+
+  ConvertToDistribution(pInOut)
 
   #replaces inifinities and error values with large numbers. Infinity values can be normally be fixed passing good energy values to ConvertUnits
   ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
 
   #masking bad detectors is done here, at the end to save processing time. But if |MASK_WORKSPACE| is an empty string there is no masking
   conv.NormaliseToWhiteBeamAndLoadMask(|GUI_SET_WBV|, pInOut, mapFile, |GUI_SET_WBV_REBIN|, DetectorMask)
- 
+   
   # output to a file in ASCII
   SaveSPE(pInOut, |GUI_SET_OUTPUT|)
 
@@ -88,4 +90,3 @@ except Exception, reason:
     if (workspace == conv.tempWS) : mantid.deleteWorkspace(conv.tempWS)
   print reason
   #raise
-

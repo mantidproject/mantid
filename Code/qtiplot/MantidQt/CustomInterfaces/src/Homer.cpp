@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Excitations.h"
+#include "MantidQtCustomInterfaces/Homer.h"
 #include "MantidQtCustomInterfaces/Background.h"
 #include "MantidQtMantidWidgets/MantidWidget.h"
 #include "MantidKernel/Exception.h"
@@ -23,7 +23,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(Excitations);
+    DECLARE_SUBWINDOW(Homer);
   }
 }
 using namespace Mantid::Kernel;
@@ -55,11 +55,11 @@ static const std::string G_INPUT_EXTS[G_NUM_INPUT_EXTS] =
 // Public member functions
 //----------------------
 ///Constructor
-Excitations::Excitations(QWidget *parent) : UserSubWindow(parent),
+Homer::Homer(QWidget *parent) : UserSubWindow(parent),
   m_runFilesWid(NULL), m_diagPage(NULL), m_saveChanged(false), m_busy(NULL)
 {}
 /// Set up the dialog layout
-void Excitations::initLayout()
+void Homer::initLayout()
 {
 
   // standard setting up of all widgets
@@ -98,7 +98,7 @@ void Excitations::initLayout()
 *  and enables it when instructed that Pythons scripts have stopped
 *  @param running if set to false only controls disabled by a previous call to this function will be re-enabled
 */
-void Excitations::pythonIsRunning(bool running)
+void Homer::pythonIsRunning(bool running)
 {// the run button was disabled when the results form was shown, as we can only do one analysis at a time, we can enable it now
   m_busy = running;
   m_uiForm.tabWidget->setEnabled( ! running );
@@ -108,11 +108,11 @@ void Excitations::pythonIsRunning(bool running)
 *  and set the current text to the one that was passed
 *
 */
-QString Excitations::setUpInstru()
+QString Homer::setUpInstru()
 //??STEVES?? move this function to a File widget
 { // if there were no previously used instruments the "" below adds a blank entry. The empty string entry will always be there, even as more instruments are added
   QStringList prevInstrus =
-    m_prev.value("CustomInterfaces/Excitations/instrusList","").toStringList();
+    m_prev.value("CustomInterfaces/Homer/instrusList","").toStringList();
 
 	/*??STEVES ?? get rid of this when more instruments are supported*/if ( ! prevInstrus.contains(G_INSTRUMENT) ) prevInstrus.prepend(G_INSTRUMENT);
   QStringList::const_iterator instru = prevInstrus.begin();
@@ -122,13 +122,13 @@ QString Excitations::setUpInstru()
   }
   
   QString curInstru
-    = m_prev.value("CustomInterfaces/Excitations/instrument", G_INSTRUMENT).toString();
+    = m_prev.value("CustomInterfaces/Homer/instrument", G_INSTRUMENT).toString();
   m_uiForm.loadRun_cbInst->setEditText(curInstru);
   
   return curInstru;
 }
 /// For each widgets in the first tab this adds custom widgets, fills in combination boxes and runs setToolTip()
-void Excitations::setUpPage1()
+void Homer::setUpPage1()
 {
   page1FileWidgs();
   page1setUpNormCom();
@@ -143,7 +143,7 @@ void Excitations::setUpPage1()
   connect(m_uiForm.leNameSPE, SIGNAL(editingFinished()), this, SLOT(saveNameUpd()));
 }
 /// put default values into the controls in the first tab
-void Excitations::page1FileWidgs()
+void Homer::page1FileWidgs()
 {
   // we create and place some new widgets on the form using it's grid layout
   QLayout *mapLayout = m_uiForm.gbExperiment->layout();
@@ -173,7 +173,7 @@ void Excitations::page1FileWidgs()
 }
 
 /// put default values into the controls in the first tab
-void Excitations::page1setUpNormCom()
+void Homer::page1setUpNormCom()
 {
   m_uiForm.cbNormal->addItem("monitor");
   for ( int i = 0; i < G_NUM_NORM_SCHEMES; ++i )
@@ -196,7 +196,7 @@ void Excitations::page1setUpNormCom()
 *  @param the string in which to test the presence of the string monitor
 *  @return the string that was passed with any initial string equal to "monitor-" removed
 */
-QString Excitations::removeStrMonitor(const QString &check)
+QString Homer::removeStrMonitor(const QString &check)
 {
   if (check.startsWith("monitor-"))
   {
@@ -206,7 +206,7 @@ QString Excitations::removeStrMonitor(const QString &check)
   return check;
 }
 /// put default values into the controls in the first tab
-void Excitations::page1Defaults()
+void Homer::page1Defaults()
 {
   // unchanging defaults
   m_uiForm.leScale->setText("0");
@@ -248,7 +248,7 @@ void Excitations::page1Defaults()
     m_prev.value("map", G_DEFAULT_MAP_FILE).toString());
 }
 /// make validator labels and associate them with the controls that need them in the first tab
-void Excitations::page1Validators()
+void Homer::page1Validators()
 {
   m_validators.clear();
 
@@ -270,13 +270,13 @@ void Excitations::page1Validators()
   
   hideValidators();
 }
-void Excitations::setupValidator(QLabel *star)
+void Homer::setupValidator(QLabel *star)
 {
   QPalette pal = star->palette();
   pal.setColor(QPalette::WindowText, Qt::darkRed);
   star->setPalette(pal);
 }
-QLabel* Excitations::newStar(const QGroupBox * const UI, int valRow, int valCol)
+QLabel* Homer::newStar(const QGroupBox * const UI, int valRow, int valCol)
 {// use new to create the QLabel the layout will take ownership and delete it later
   QLabel *validLbl = new QLabel("*");
   setupValidator(validLbl);
@@ -285,7 +285,7 @@ QLabel* Excitations::newStar(const QGroupBox * const UI, int valRow, int valCol)
   grid->addWidget(validLbl, valRow, valCol);
   return validLbl;
 }
-void Excitations::hideValidators()
+void Homer::hideValidators()
 {// loop through all the validators in the map
   QHash<const QWidget * const, QLabel *>::iterator vali = m_validators.begin();
   for ( ; vali != m_validators.end(); ++vali)
@@ -294,7 +294,7 @@ void Excitations::hideValidators()
   }
 }
 /// set all the tooltips for the first tab
-void Excitations::page1Tooltips()
+void Homer::page1Tooltips()
 {  
   m_uiForm.lbPrefix->setToolTip("For example MAR, MAP, ...");
   m_uiForm.loadRun_cbInst->setToolTip("For example MAR, MAP, ...");
@@ -328,7 +328,7 @@ void Excitations::page1Tooltips()
   m_uiForm.lbSPE->setToolTip("File name for the converted data"), m_uiForm.leNameSPE->setToolTip("File name for the converted data"), m_uiForm.pbBrowseSPE->setToolTip("File name for the converted data");
 }
 /// Adds the diag custom widgets and a check box to allow users to enable or disable the widget
-void Excitations::setUpPage2()
+void Homer::setUpPage2()
 {/* The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
  this second page is largely filled with the diag widget, previous settings, second argument, depends on the instrument and the detector diagnostic settings are kept separate in "diag/"*/
   m_diagPage = new MWDiag(this, m_prev.group()+"/diag", m_uiForm.loadRun_cbInst);
@@ -351,7 +351,7 @@ void Excitations::setUpPage2()
   connect(m_uiForm.ckRunDiag, SIGNAL(clicked()), this, SLOT(disenableDiag()));
 }
 
-void Excitations::setUpPage3()
+void Homer::setUpPage3()
 {
   m_uiForm.leVanMap->setText("mari_res.map");
   m_uiForm.leVanMass->setText("32.58");
@@ -381,22 +381,22 @@ void Excitations::setUpPage3()
 /** is run if the Python scripts complete successfully, enters a slection of the values
 *  entered on the form into the QSettings database (Window's registry, Linux .file, etc.)
 */
-void Excitations::saveSettings()
+void Homer::saveSettings()
 {  
   m_prev.endGroup();
 
   QString instrument = m_uiForm.loadRun_cbInst->currentText();
-  m_prev.setValue("CustomInterfaces/Excitations/instrument", instrument); 
+  m_prev.setValue("CustomInterfaces/Homer/instrument", instrument); 
   
   QStringList prevInstrus =
-    m_prev.value("CustomInterfaces/Excitations/instrusList","").toStringList();
+    m_prev.value("CustomInterfaces/Homer/instrusList","").toStringList();
   if ( ! prevInstrus.contains(instrument) )
   {
     prevInstrus.append(instrument);
     // put the instrument list alphabetic order to make it easier to use
     prevInstrus.sort();
   }
-  m_prev.setValue("CustomInterfaces/Excitations/instrumsList", prevInstrus);
+  m_prev.setValue("CustomInterfaces/Homer/instrumsList", prevInstrus);
   
   // where settings are stored (except the list of previously used instruments) is dependent on the instrument selected
   setSettingsGroup(instrument);
@@ -416,7 +416,7 @@ void Excitations::saveSettings()
   m_prev.setValue("map", m_uiForm.map_fileInput_leName->text());
 }
 // ??STEVES?? remove this function?
-QString Excitations::openFileDia(const bool save, const QStringList &exts)
+QString Homer::openFileDia(const bool save, const QStringList &exts)
 {
   QString filter;
   if ( !exts.empty() )
@@ -455,14 +455,14 @@ QString Excitations::openFileDia(const bool save, const QStringList &exts)
 /** the form entries that are saved are stored under a directory like string
 *  in QSettings tht is dependent on the instrument, this is set up here
 */
-void Excitations::setSettingsGroup(const QString &instrument)
+void Homer::setSettingsGroup(const QString &instrument)
 {
-  m_prev.beginGroup("CustomInterfaces/Excitations/in instrument "+instrument);
+  m_prev.beginGroup("CustomInterfaces/Homer/in instrument "+instrument);
 }
 /** this runs after the run button was clicked. It runs runScripts()
 *  ans saves the settings on the form
 */
-void Excitations::runClicked()
+void Homer::runClicked()
 {
   hideValidators();
   try
@@ -495,7 +495,7 @@ void Excitations::runClicked()
 *  @throw invalid_argument if some of the user entries are invalid
 *  @throws runtime_error if there was a problem during execution of a Python script
 */
-bool Excitations::runScripts()
+bool Homer::runScripts()
 {
   // display the first page because it's likely any problems occur now relate to problems with settings here
   m_uiForm.tabWidget->setCurrentIndex(0);
@@ -546,7 +546,7 @@ bool Excitations::runScripts()
   return errors.isEmpty();
 }
 //this function will be replaced a function in a widget
-void Excitations::browseClicked(const QString buttonDis)
+void Homer::browseClicked(const QString buttonDis)
 {
   QLineEdit *editBox = NULL;
   QStringList extensions;
@@ -594,15 +594,15 @@ void Excitations::browseClicked(const QString buttonDis)
 /**
  * A slot to handle the help button click
  */
-void Excitations::helpClicked()
+void Homer::helpClicked()
 {
   QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-    "Excitations' Convert to Energy"));
+    "Homer"));
 }
 /** Enables or disables the absoulte unit conversion cocntrols based
 *  on whether or not the check box has been checked
 */
-void Excitations::disenableAbsolute()
+void Homer::disenableAbsolute()
 {
   const bool enabled = m_uiForm.ckRunAbsol->isChecked();
   m_uiForm.gbCalRuns->setEnabled(enabled);
@@ -612,14 +612,14 @@ void Excitations::disenableAbsolute()
 /** Enables or disables the find bad detectors controls based
 *  on whether or not the check box has been checked
 */
-void Excitations::disenableDiag()
+void Homer::disenableDiag()
 {
   m_diagPage->setEnabled(m_uiForm.ckRunDiag->isChecked());
 }
 /** This slot updates the MWDiag and SPE filename suggestor with the
 * names of the files the user has just chosen
 */
-void Excitations::runFilesChanged()
+void Homer::runFilesChanged()
 {// this signal to the diag GUI allows the run files we choose here to be the default for its background correction
   try
   {// there might be an invalid file name in the box
@@ -635,7 +635,7 @@ void Excitations::runFilesChanged()
 /** Check if the user has specified a name for the output SPE file,
 * if not insert a name based on the name of the input files
 */
-void Excitations::updateSaveName()
+void Homer::updateSaveName()
 {// if the user added their own value prevent it from being changed
   if ( ! m_saveChanged ) 
   {
@@ -645,14 +645,14 @@ void Excitations::updateSaveName()
 /** update m_saveChanged with whether the user has changed the name away from the
 *  default in this instance of the dialog box
 */
-void Excitations::saveNameUpd()
+void Homer::saveNameUpd()
 {// if the user had already altered the contents of the box it has been noted that the save name is under user control so do nothing
   if (m_saveChanged) return;
   m_saveChanged = m_uiForm.leNameSPE->text() != defaultName();
 }
 /** This slot passes the name of the white beam vanadium file to the MWDiag
 */
-void Excitations::updateWBV()
+void Homer::updateWBV()
 {
   try
   {  
@@ -667,7 +667,7 @@ void Excitations::updateWBV()
 *  @param the text in the normalisastion combobox
 *  @throw invalid_argument if neither the chosen normalisation scheme or the default can be found
 */
-void Excitations::setupNormBoxes(const QString &newText)
+void Homer::setupNormBoxes(const QString &newText)
 {
   enableSecondBox( newText == "monitor" );
 }
@@ -675,7 +675,7 @@ void Excitations::setupNormBoxes(const QString &newText)
 *  _without_ a blank entry or other it is disabled and left blank
 *  @param toEnable true if the second box will be used
 */
-void Excitations::enableSecondBox(bool toEnable)
+void Homer::enableSecondBox(bool toEnable)
 {
   int blankInd = m_uiForm.cbMonitors->findText("");
   if (toEnable && blankInd > -1)
@@ -697,7 +697,7 @@ void Excitations::enableSecondBox(bool toEnable)
 /** Create a suggested output filename based on the supplied input
 *  file names
 */
-QString Excitations::defaultName()
+QString Homer::defaultName()
 {
   try
   {//this will trhow if there is an invalid filename
@@ -720,7 +720,7 @@ QString Excitations::defaultName()
 }
 /** creates and shows the background removal time of flight form
 */
-void Excitations::bgRemoveClick()
+void Homer::bgRemoveClick()
 {
   Background *bgRemovDialog = new Background(this, m_prev.group());
   connect(bgRemovDialog, SIGNAL(formClosed()),
@@ -731,7 +731,7 @@ void Excitations::bgRemoveClick()
 }
 /** runs when the background removal time of flight form is run
 */
-void Excitations::bgRemoveReadSets()
+void Homer::bgRemoveReadSets()
 { // the user can press these buttons again, they were disabled before while the dialog box was up
   m_uiForm.pbBack->setEnabled(true);
   m_uiForm.pbRun->setEnabled(true);

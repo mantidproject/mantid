@@ -26,11 +26,9 @@ using namespace API;
 
 void MedianDetectorTest::init()
 {
-  CompositeValidator<> *val = new CompositeValidator<>;
-    val->add(new CommonBinsValidator<>);
-    val->add(new HistogramValidator<>);
   declareProperty(
-    new WorkspaceProperty<>("InputWorkspace","",Direction::Input,val),
+    new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
+    new HistogramValidator<>),
     "Name of the input workspace" );
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
@@ -90,13 +88,13 @@ void MedianDetectorTest::exec()
 {
   //gets and checks the values passed to the algorithm that need checking, throws an invalid_argument if we can't find a good value for a property
   retrieveProperties();
-  //now do the calculations ...  
+  //now do the calculations ...
+  //Adds the counts from all the bins and puts them in one total bin, calls subalgorithm Integration
+  MatrixWorkspace_sptr counts = getTotalCounts(m_MinSpec, m_MaxSpec);//InputWorkspace and range properties are also read by this function
+  //Divides the total number of counts by the number of seconds, calls the ConvertToDistribution algorithm, this isn't needed if all spectra have commonbins
+  counts = getRate(counts); 
   //calls subalgorithm SolidAngle to get the total solid angle of the detectors that acquired each spectrum or nul on failure
   MatrixWorkspace_sptr angles = getSolidAngles(m_MinSpec, m_MaxSpec);// function uses the InputWorkspace property
-  //Adds the counts from all the bins and puts them in one total bin, calls subalgorithm Integration
-  MatrixWorkspace_sptr counts = getTotalCounts(m_MinSpec, m_MaxSpec/*InputWorkspace and range properties are also read by this function*/);
-  //Divides the total number of counts by the number of seconds, calls the ConvertToDistribution algorithm
-  // this isn't needed if all spectra have commonbins counts = getRate(counts);
   //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
   //this calculation is optional, it depends on angle information existing
   if ( angles.use_count() == 1 )
@@ -250,6 +248,8 @@ MatrixWorkspace_sptr MedianDetectorTest::getTotalCounts(int firstSpec, int lastS
 *
 * @param counts A histogram workspace with counts in time bins 
 * @return A workspace of the counts per unit time in each bin
+* @throw invalid_argument if the ConvertToDistribution validation on the input workspace fails (a workspace that is already a distribution is acceptable)
+* @throw runtime_error if there is an during the execution of ConvertToDistribution
 */
 MatrixWorkspace_sptr MedianDetectorTest::getRate(MatrixWorkspace_sptr counts)
 {
@@ -259,8 +259,21 @@ MatrixWorkspace_sptr MedianDetectorTest::getRate(MatrixWorkspace_sptr counts)
   IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertToDistribution", t0, t1);
   try
   {
-    //pass inputed values straight to this sub-algorithm, checking must be done there
-    childAlg->setProperty<MatrixWorkspace_sptr>( "Workspace", counts );    
+    childAlg->setProperty<MatrixWorkspace_sptr>( "Workspace", counts ); 
+  }
+  catch (std::invalid_argument &e)
+  {
+    std::string prob = e.what();
+    if ( prob.find("A workspace containing numbers of counts is required here")
+      != std::string::npos)
+    {// this error means that the input workspace was already a distribution and so we don't need to convert it but just continue
+      g_log.debug("Could not convert Workspace to a distribution as the workspace seems to be a distribution already, continuing");
+      return counts;
+    }
+    throw;
+  }   
+  try
+  {
     // Now execute the sub-algorithm. Catch and log any error
     childAlg->execute();
   }
@@ -276,7 +289,6 @@ MatrixWorkspace_sptr MedianDetectorTest::getRate(MatrixWorkspace_sptr counts)
   }
   return childAlg->getProperty("Workspace");
 }
-/// Finds the median of numbers of counts in single bin histograms
 /** Finds the median of values in single bin histograms rejecting spectra from masked
 *  detectors and the results of divide by zero (infinite and NaN).  The median is an
 *  average that is less affected by small numbers of very large values.
@@ -370,7 +382,6 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
   }
   return median;
 }
-/// Produces a workspace of single value histograms that indicate if the spectrum is within limits
 /** Takes a single valued histogram workspace and assesses which histograms are within the limits
 *
 * @param responses a workspace of histograms with one bin

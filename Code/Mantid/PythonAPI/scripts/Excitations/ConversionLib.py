@@ -42,10 +42,6 @@ def NormaliseTo(reference, WS, energy=0):
     min = getPeakTime(energy, 2, WS)*0.96
     max = getPeakTime(energy, 2, WS)*1.04
     NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=2, IntegrationRangeMin=min, IntegrationRangeMax=max)
-    return
-
-  if reference == 'protons (uAh)' :
-    NormaliseByCurrent( InputWorkspace=WS, OutputWorkspace=WS )
 
   elif reference == 'monitor-monitor 2' :
     if (energy == 0) : raise Exception('A non-zero energy must be supplied for normalisation by monitor')
@@ -53,7 +49,9 @@ def NormaliseTo(reference, WS, energy=0):
     min = getPeakTime(energy, 3, WS)*0.96
     max = getPeakTime(energy, 3, WS)*1.04
     NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=3, IntegrationRangeMin=min, IntegrationRangeMax=max)
-    return
+
+  elif reference == 'protons (uAh)' :
+    NormaliseByCurrent( InputWorkspace=WS, OutputWorkspace=WS )
 
   elif reference != 'no normalization' :
     raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')

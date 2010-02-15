@@ -17,7 +17,7 @@ const QString deltaECalc::tempWS = "_Conv_ETrans_tempory_WS_";
 * @param userSettings the form that the user filled in
 * @throw invalid_argument where problems with user data prevent the calculation from proceeding
 */
-deltaECalc::deltaECalc(QWidget * const interface, const Ui::Excitations &userSettings, const std::vector<std::string>  &input, const bool removalBg, const double TOFWinSt, const double TOFWinEnd, const QString WBV) :
+deltaECalc::deltaECalc(QWidget * const interface, const Ui::Homer &userSettings, const std::vector<std::string>  &input, const bool removalBg, const double TOFWinSt, const double TOFWinEnd, const QString WBV) :
   pythonCalc(interface), m_sets(userSettings), m_bgRemove(removalBg), m_TOFWinSt(TOFWinSt), m_TOFWinEnd(TOFWinEnd)
 {
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));

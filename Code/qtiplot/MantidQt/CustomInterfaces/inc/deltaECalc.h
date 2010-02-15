@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_DELTAECALC_H_
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
-#include "MantidQtCustomInterfaces/ui_Excitations.h"
+#include "MantidQtCustomInterfaces/ui_Homer.h"
 #include <vector>
 
 namespace MantidQt
@@ -12,7 +12,7 @@ namespace MantidQt
     class deltaECalc : public MantidWidgets::pythonCalc
     {
     public:
-      deltaECalc(QWidget * const interface, const Ui::Excitations &userSettings, const std::vector<std::string> &inFiles, const bool removalBg, const double TOFWinSt, const double TOFWinEnd, QString WBV);
+      deltaECalc(QWidget * const interface, const Ui::Homer &userSettings, const std::vector<std::string> &inFiles, const bool removalBg, const double TOFWinSt, const double TOFWinEnd, QString WBV);
       void maskDetects(const QString &maskWS);
 	  /** removes the path from the filename passed and replaces extensions with .spe
       * @param inputFilename name of the file that the .SPE file is based on
@@ -25,7 +25,7 @@ namespace MantidQt
       std::string insertNumber(const std::string &filename, const int number) const;
     private:
       /// the form that ws filled in by the user
-      const Ui::Excitations &m_sets;
+      const Ui::Homer &m_sets;
 	  /// whether to the remove background count rate from the data
 	  const bool m_bgRemove;
 	  /// used in remove background, the start of the background region
