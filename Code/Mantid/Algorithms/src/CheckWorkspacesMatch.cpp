@@ -106,6 +106,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
     {
       if ( std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance ) 
       {
+        g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
         result = "Data mismatch";
         return false;
       }

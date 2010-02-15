@@ -57,7 +57,7 @@ void Q1D::exec()
   // Now create the output workspace
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
-  outputWS->setYUnitLabel("I(q)");
+  outputWS->setYUnitLabel("1/cm");
   setProperty("OutputWorkspace",outputWS);
   // Set the X vector for the output workspace
   outputWS->setX(0,XOut);

@@ -166,12 +166,13 @@ void ConvertUnits::exec()
   if (alignBins && !WorkspaceHelpers::commonBoundaries(outputWS)) 
     outputWS = this->alignBins(outputWS);
 
+  const unsigned int outSize = outputWS->blocksize();
   // If appropriate, put back the bin width division into Y/E.
   if (distribution)
   {
     for (int i = 0; i < numberOfSpectra; ++i) {
       // There must be good case for having a 'divideByBinWidth'/'normalise' algorithm...
-      for (unsigned int j = 0; j < size; ++j)
+      for (unsigned int j = 0; j < outSize; ++j)
       {
         const double width = std::abs( outputWS->dataX(i)[j+1] - outputWS->dataX(i)[j] );
         outputWS->dataY(i)[j] = outputWS->dataY(i)[j]/width;
