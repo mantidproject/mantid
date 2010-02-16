@@ -668,7 +668,7 @@ namespace CurveFitting
           for(size_t j=0;j<l_data.p;j++)
           {
             if (j == i)
-              row << standardDeviations[i];
+              row << 1.0;
             else
             {
               row << 100.0*gsl_matrix_get(covar,i,j)/sqrt(gsl_matrix_get(covar,i,i)*gsl_matrix_get(covar,j,j));
