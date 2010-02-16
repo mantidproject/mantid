@@ -319,7 +319,6 @@ QString ScriptManagerWidget::saveAs(int index)
   ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
   editor->setFileName(file_to_save);
   doSave(editor);
-  //save(index);
   return file_to_save;
 }
 
