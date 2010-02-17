@@ -23,9 +23,21 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+  
+// choose an instrument to test, we could test all instruments very time but I think a detailed test on the smallest workspace is enough as the other workspaces take a long time to process (Steve Williams)
+                                    //MARI                               MAPS                         MERLIN
+static const std::string RAWFILE =  /**/"../../../../Test/Data/MAR11015.RAW" /*"../../../../Test/Data/MAP10241.RAW" "../../../../Test/Data/MER02257.RAW"/**/;
+static const double TIMEOFF  =      /**/3.9                                 /*9.5                         5.3/**/   ;
+static const int MONITOR =          /**/2                                   /*41473                         69634/**/  ;
+static const int NUMRANDOM =        7;
+static const int DETECTS[NUMRANDOM]=/**/{4101,4804,1323,1101,3805,1323,3832} /*{22301173,12607241,11305101,52102085,41501009,43306001,32404209}/*
+                                                                                                       {6470765, 6470769, 6470773, 6470777, 6470781, 6470785, 6470789}/**/;
 
 class LoadDetectorInfoTest : public CxxTest::TestSuite
 {
+
+
+
 public:
   void testLoadDat()
   {// also tests changing X-values with   -same bins, different offsets
@@ -42,7 +54,7 @@ public:
     makeSmallWS();
     grouper.setPropertyValue("Workspace", m_InoutWS);
     grouper.setPropertyValue("DataFilename", m_DatFile);
-
+    
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
 
@@ -73,8 +85,10 @@ public:
       else TS_ASSERT ( ! par )
     }
 
-    // test sharing X-value arrays
+    // ensure that the loops below are entered into
     TS_ASSERT( WS->getNumberHistograms() > 0 )
+    TS_ASSERT( WS->readX(0).size() > 0)
+    // test sharing X-value arrays
     const double *previous = (&(WS->dataX(0)[0]));
     for (int k = 1; k < WS->getNumberHistograms(); ++k)
     {
@@ -114,11 +128,12 @@ public:
 
     MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(m_InoutWS));
-    //change a bin boundary, so their not common anymore, only difference from the last test
-    const int alteredHist = 4, alteredIndex = 1;
+    //change a bin boundary, so they're not common anymore, only difference from the last test
+    const int alteredHist = 4, alteredBin = 1;
     const double alteredAmount = 1e-4;
-    WS->dataX(alteredHist)[alteredIndex] =
-      WS->dataX(alteredHist)[alteredIndex] + alteredAmount;
+
+    WS->dataX(alteredHist)[alteredBin] =
+      WS->dataX(alteredHist)[alteredBin] + alteredAmount;
 
     TS_ASSERT_THROWS_NOTHING(info.execute());
     TS_ASSERT( info.isExecuted() );
@@ -129,7 +144,7 @@ public:
     {
       for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
       {
-        if ( x == alteredHist && j == alteredIndex)
+        if ( x == alteredHist && j == alteredBin)
         {
           TS_ASSERT_DELTA( WS->readX(x)[j], -boost::lexical_cast<double>(delta[x])+alteredAmount, 1e-6 )
           continue;
@@ -157,31 +172,29 @@ public:
     MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(m_MariWS));
 
-// to test Different Bins Same Offsets uncomment out the next lines change the tests below appropriately
-/*    // the next two are numbers picked at random for testing
-    const int alteredHist = 317, alteredIndex = 133;
+    // check the X-values for a sample of spectra avoiding the monitors
+    const int firstIndex = 5, lastIndex = 690;
+    // you must uncomment this code and choose the appropiate test below to test Different Bins Same Offsets
+    // the next two are numbers picked at random for testing
+    const int alteredHist = 317, alteredBin = 133;
     const double alteredAmount = 1e-4;
-    WS->dataX(alteredHist)[alteredIndex] =
-      WS->dataX(alteredHist)[alteredIndex] + alteredAmount;*/
+/*    WS->dataX(alteredHist)[alteredBin] =
+    WS->dataX(alteredHist)[alteredBin] + alteredAmount;/**/
 
     grouper.setPropertyValue("Workspace", m_MariWS);
 
-    grouper.setPropertyValue("DataFilename", m_RawFile); 
+    grouper.setPropertyValue("DataFilename", m_rawFile); 
 //    grouper.setPropertyValue("DataFilename", "C:/mantid/Test/Data/merlin_detector.sca");
+
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
 
     ParameterMap& pmap = WS->instrumentParameters();
           
     // read the parameters from some random detectors, they're parameters are all set to the same thing
-    const int numRandom = 7;
-    // this arbitary list contains the first listed dectetor, last lowerest detID, largest, and a repeated value
-    const int randDetects[] = { 4101, 4804, 1323, 1101, 3805, 1323, 3832 };
-//      /*random detectors in MAP*/       {22608069, 22608073, 22608077, 22608081, 22608085, 22608089, 22608093};
-//      /*random detectors in MERLIN*/    {6470765, 6470769, 6470773, 6470777, 6470781, 6470785, 6470789};
-    for ( int i = 0; i < numRandom; ++i)
+    for ( int i = 0; i < NUMRANDOM; ++i)
     {
-      int detID = randDetects[i];
+      int detID = DETECTS[i];
       boost::shared_ptr<IDetector> detector =WS->getInstrument()->getDetector(detID);
 
     const IComponent* baseComp = detector->getComponent();
@@ -195,31 +208,31 @@ public:
       TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0,6))
     }
 
-    // compare the arrays that store the X-values for detectors but not the monitors
-    int firstNonMontor = 5;
-    // all non-monitors should shared the same array
-    const double *first = &WS->readX(firstNonMontor)[0];
-    for (int i = firstNonMontor; i < WS->getNumberHistograms(); ++i)
+    // all non-monitors should share the same array
+/**/    const double *first = &WS->readX(firstIndex)[0];
+    for (int i = firstIndex+1; i < lastIndex+1; ++i)
     {
       TS_ASSERT_EQUALS( first, &(WS->readX(i)[0]) )
-    }/**//*
+    }/*
 // to test Different Bins Same Offsets comment out the code above and uncomment the code below
-    for (int j = 0; j < WS->readX(1).size(); j++ )
-    {// we're assuming here that the second spectrum (index 1) is a monitor
-      if (j == alteredIndex)
-        TS_ASSERT_DELTA( WS->readX(1)[j] - WS->readX(alteredHist)[j], 3.9-alteredAmount, 1e-6 )
-      else
-        TS_ASSERT_DELTA( WS->readX(1)[j] - WS->readX(alteredHist)[j] , 3.9, 1e-6 )
-    }*/
+    for (int i = firstIndex; i < lastIndex+1; i++ )
+    {
+      for (int j = 0; j < WS->readX(i).size(); j++ )
+      {
+        if (i == alteredHist && j == alteredBin)
+          TS_ASSERT_DELTA( WS->readX(i)[j] - WS->readX(MONITOR)[j], -(TIMEOFF-alteredAmount), 1e-6 )
+        else
+          TS_ASSERT_DELTA( WS->readX(i)[j] - WS->readX(MONITOR)[j] , -TIMEOFF, 1e-6 )
+      }
+    }/**/
     
     // the code above proves that the X-values for each histogram are the same so just check one histogram
     TS_ASSERT( WS->readX(1).size() > 0 )
-    double timeOff = 3.9; //MARI
-//    double timeOff = 5.3; //MERLIN
+
     // the time of flight values that matter are the differences between the detector values and the monitors
-    for (int j = 0; j < static_cast<int>(WS->readX(1).size()); j++ )
+    for (int j = 0; j < static_cast<int>(WS->readX(firstIndex).size()); j++ )
     {// we're assuming here that the second spectrum (index 1) is a monitor
-      TS_ASSERT_DELTA( WS->readX(1)[j] - WS->readX(firstNonMontor)[j], timeOff, 1e-6 )
+      TS_ASSERT_DELTA( WS->readX(firstIndex)[j] - WS->readX(MONITOR)[j], -TIMEOFF, 1e-6 )
     }
 
     AnalysisDataService::Instance().remove(m_MariWS);
@@ -230,7 +243,7 @@ public:
     LoadRaw3 loader;
     loader.initialize();
 
-    loader.setPropertyValue("Filename", m_RawFile);
+    loader.setPropertyValue("Filename", m_rawFile);
     loader.setPropertyValue("OutputWorkspace", m_MariWS);
 
     TS_ASSERT_THROWS_NOTHING(loader.execute());
@@ -241,12 +254,9 @@ public:
       m_DatFile("loaddetectorinfotest_filename.dat"),
       m_MariWS("MARfromRaw")
   {
-    // a smallish raw file that contains the detailed detector information stored by the excitations group 
-  m_RawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11015.RAW").toString();
-//    m_RawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10241.RAW").toString();
-//    m_RawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.RAW").toString();
     // create a .dat file in the current directory that we'll load later
     writeDatFile();
+    m_rawFile = Poco::Path(Poco::Path::current()).resolve(RAWFILE).toString();
   }
   
   ~LoadDetectorInfoTest()
@@ -303,7 +313,7 @@ public:
 
   private:
     const std::string m_InoutWS, m_DatFile, m_MariWS;
-    std::string m_RawFile;
+    std::string m_rawFile;
     enum constants { NDETECTS = 6, NBINS = 4, NOTUSED = -123456, DAT_MONTOR_IND = 1};
     static const std::string delta[NDETECTS], pressure[NDETECTS], wallThick[NDETECTS], code[NDETECTS];
 
@@ -311,7 +321,7 @@ public:
     {
       std::ofstream file(m_DatFile.c_str());
       file << "DETECTOR.DAT writen by LoadDetecs" << std::endl;
-      file << 165888  <<    14 << std::endl;
+      file << 165888  <<  " " << 14 << std::endl;
       file << "det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4" << std::endl;
       for( int i = 0; i < NDETECTS; ++i )
       {

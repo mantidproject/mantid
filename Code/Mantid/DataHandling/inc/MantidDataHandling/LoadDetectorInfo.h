@@ -125,20 +125,28 @@ private:
   /// special numbers in DAT files from "DETECTOR.DAT format" referenced above
   enum {
     PSD_GAS_TUBE = 3,
+    NON_PSD_GAS_TUBE = 2,
     MONITOR_DEVICE = 1,
     DUMMY_DECT = 0
   };
 
-  /// Apparently undocumented constants for excitations RAW files (assumed by Steve Williams)
-  enum {
-    OUR_TOTAL_NUM_TAB = 10,
-    OUR_USER_TABLE_FORM = 2,
-    USER_TABLE_MONITOR = 1,
-    PRESSURE_TAB_NUM = 7,
-    WALL_THICK_TAB_NUM = 8,
+  /// Holds data about the where detector information is stored in the user tables of raw files
+  struct detectDatForm {
+    /** default constructor
+    *  @param total value for totalNumTabs
+    *  @param pressure value pressureTabNum will be set to
+    *  @param wall value to set wallThickTabNum to
+    */    
+    detectDatForm(unsigned int total=-1, unsigned int pressure=-1, unsigned int wall=-1) :
+      totalNumTabs(total), pressureTabNum(pressure), wallThickTabNum(wall) {}
+    unsigned int totalNumTabs;                      ///< total number of tables in the user area of the raw file
+    unsigned int pressureTabNum;                    ///< user table that contains detector pressures (set this > totalNumTabs to crash the app!)
+    unsigned int wallThickTabNum;                   ///< user table that contains detector pressures (set this > totalNumTabs to crash the app!)
   };
+  static const detectDatForm MARI_TYPE;             ///< the data format that I've seen in MARI raw files (Steve Williams)
+  static const detectDatForm MAPS_MER_TYPE;         ///< the data format that I've seen in MAPS and MERLIN files (Steve Williams)
 
-  static const int INTERVAL = 512;                       ///< update this many detectors before checking for user cancel messages and updating the progress bar
+  static const int INTERVAL = 512;                  ///< update this many spectra before checking for user cancel messages and updating the progress bar
 
 };
 

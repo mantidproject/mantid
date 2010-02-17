@@ -22,6 +22,9 @@ using namespace Geometry;
 using namespace DataObjects;
 
 const float LoadDetectorInfo::UNSETOFFSET = float(-1e12);
+const LoadDetectorInfo::detectDatForm LoadDetectorInfo::MARI_TYPE(10, 7, 8);
+const LoadDetectorInfo::detectDatForm
+  LoadDetectorInfo::MAPS_MER_TYPE(14, 11, 12);
 /// Empty default constructor
 LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
   m_workspace(), m_instrument(), m_paraMap(NULL), m_numHists(-1), m_monitors(),
@@ -125,15 +128,16 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
   g_log.debug() << "Reading " << fName << std::endl;
   g_log.information() << "Writing to the detector parameter map, only the first and last entries will be logged here\n";
 
-  int detectorCount;
+  int detectorCount, numColumns;
   getline(sFile,str);
   std::istringstream header2(str);
-  // there are two numbers on this detector count line, we want the first
-  header2 >> detectorCount;
-  if(detectorCount<1)
+  // header information is two numbers, the number of detectors, which we use but don't rely on, and the number of columns which we trust
+  header2 >> detectorCount >> numColumns;
+  if( detectorCount < 1 || numColumns != 14)
   {
-    g_log.error("Bad detector count in data file");
-    throw Exception::FileError("Problem reading the detector count on the second line of the data file", fName);
+    g_log.debug() << "Problem with the header information on the second line of the file, found: " << str << std::endl; 
+    g_log.error() << name() << " requires that the input file has 14 columns and the number of detectors is positve\n";
+    throw Exception::FileError("Incompatible file format found when reading line 2 in the input file", fName);
   }
  
   // skip title line
@@ -172,23 +176,31 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
     detectorList.push_back(readin.detID);
     offsets.push_back(delta);
 
-    if ( code != PSD_GAS_TUBE && code != MONITOR_DEVICE )
-    {// the type of detector is wrong, we can't use the information
-      if (code != DUMMY_DECT)
-      {//we can't use data for detectors with other codes because it could be in the wrong format, ignore the data and write to g_log.warning() once at the end
+    // check we have a supported code
+    switch (code)
+    {
+      // these first two codes are detectors that we'll process, the code for this is below
+      case PSD_GAS_TUBE : break;
+      case NON_PSD_GAS_TUBE : break;
+
+      // the following detectors codes specify little or no analysis
+      case MONITOR_DEVICE :
+        // throws invalid_argument if the detection delay time is different for different monitors
+        noteMonitorOffset( delta, readin.detID);
+        // skip the rest of this loop and move on to the next detector
+        continue;
+
+      // the detector is set to dummy, we won't report any error for this we'll just do nothing
+      case DUMMY_DECT : continue;
+      
+      //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
+      default :
         detectorProblemCount ++;
         g_log.debug() << "Ignoring data for a detector with code " << code << std::endl;
-      }
-      // dummy or not skip the code below and move on to the next detector
-      continue;
+        continue;
     }
-    if ( code == MONITOR_DEVICE )
-    {// throws invalid_argument if the detection delay time is different for different monitors
-      noteMonitorOffset( delta, readin.detID);
-      // skip the rest of this loop and move on to the next detector
-      continue;
-    }
-    // PSD gas tube specific code now until the end of the for block
+
+    // gas filled detector specific code now until the end of this method
     
     // normally all the offsets are the same and things work faster, check for this
     if ( delta != detectorOffset )
@@ -263,10 +275,20 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 
   // the number of detectors according to the raw file header
   const int numDets = iraw.i_det;
-  // check the number of user tables in the raw file where we will read pressures and wall thinknesses for each detector
-  if ( iraw.i_use != OUR_TOTAL_NUM_TAB )
+  
+  // there are different formats for where pressures and wall thinknesses are stored check the number of user tables
+  detectDatForm tableForm;
+  if ( iraw.i_use == MARI_TYPE.totalNumTabs )
   {
-    g_log.warning() << "The user table has " << iraw.i_use << " entries expecting " << OUR_TOTAL_NUM_TAB << ". The workspace has not been altered" << std::endl;
+    tableForm = MARI_TYPE;
+  }
+  else if ( iraw.i_use == MAPS_MER_TYPE.totalNumTabs )
+  {
+    tableForm = MAPS_MER_TYPE;
+  }
+  else
+  {
+    g_log.warning() << "The user table has " << iraw.i_use << " entries expecting, " << name() << " expects " << MARI_TYPE.totalNumTabs << " or "  << MAPS_MER_TYPE.totalNumTabs << ". The workspace has not been altered\n";
     g_log.debug() << "This algorithm reads some data in from the user table. The data in the user table can vary between RAW files and we use the total number of user table entries and the code field as checks that we have the correct format\n";
     throw Exception::FileError("Detector gas pressure or wall thickness information is missing in the RAW file header or is in the wrong format", fName);
   }
@@ -282,21 +304,30 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
   for (int i = 0; i < numDets; ++i)
   {
     // this code tells us what the numbers in the user table (iraw.ut), which we are about to use, mean
-    const int format = iraw.code[i];
-    if ( format != OUR_USER_TABLE_FORM )
-    {// the data is not in the format that we expect for a PSD detector
-      if ( format == USER_TABLE_MONITOR )
-      {// throws invalid_argument if the detection delay time is different for different monitors
+    switch (iraw.code[i])
+    {
+      // these first two codes are detectors that we'll process, the code for this is below
+      case PSD_GAS_TUBE : break;
+      case NON_PSD_GAS_TUBE : break;
+
+      // the following detectors codes specify little or no analysis
+      case MONITOR_DEVICE :
+        // throws invalid_argument if the detection delay time is different for different monitors
         noteMonitorOffset(iraw.delt[i], iraw.udet[i]);
-      }
-      else
-      {// the format of the data for this detector may be wrong, ignore the data and write to g_log.warning() once at the end
+        // skip the rest of this loop and move on to the next detector
+        continue;
+
+      // the detector is set to dummy, we won't report any error for this we'll just do nothing
+      case DUMMY_DECT : continue;
+      
+      //we can't use data for detectors with other codes because we don't know the format, ignore the data and write to g_log.warning() once at the end
+      default :
         detectorProblemCount ++;
-        g_log.debug() << "Ignoring RAW file header user table information that has code " << format << std::endl;
-      }
-      continue;
+        g_log.debug() << "Ignoring detector with code " << iraw.code[i] << std::endl;
+        continue;
     }
-    // PSD gas tube specific code now until the end of the for block
+
+    // gas tube specific code now until the end of the for block
 
     // iraw.delt contains the all the detector offset times in the same order as the detector IDs in iraw.udet
     if ( iraw.delt[i] != detectorOffset )
@@ -310,8 +341,9 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 
     detectorInfo readin;
     readin.detID = iraw.udet[i];
-    readin.pressure = iraw.ut[i+PRESSURE_TAB_NUM*numDets];
-    readin.wallThick = iraw.ut[i+WALL_THICK_TAB_NUM*numDets];
+    readin.pressure = iraw.ut[i+tableForm.pressureTabNum*numDets];
+    readin.wallThick = iraw.ut[i+tableForm.wallThickTabNum*numDets];
+
     try
     {// iraw.udet contains the detector IDs and the other parameters are stored in order in the user table array (ut)
       setDetectorParams(readin, log);
@@ -716,7 +748,7 @@ void LoadDetectorInfo::sometimesLogSuccess(const detectorInfo &params, bool &nee
 {
   if (needToLog)
   {
-    g_log.information() << "Algorithm has set pressure=" << params.pressure << " and wall thickness=" << params.wallThick << " for the detector with ID " << params.detID << std::endl;
+    g_log.information() << name() << " has set pressure=" << params.pressure << " and wall thickness=" << params.wallThick << " for the detector with ID " << params.detID << std::endl;
   }
   needToLog = false;
 }
