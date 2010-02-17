@@ -5,6 +5,10 @@
 #ifdef __linux__
 #include <unistd.h>
 #include <malloc.h>
+#elif __APPLE__
+#include <malloc/malloc.h>
+#include <sys/sysctl.h>
+#include <mach/mach_host.h>
 #endif
 
 #include "MantidAPI/MemoryManager.h"
@@ -107,9 +111,34 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
   const int unusedReserved = mallinfo().fordblks/1024;
   g_log.debug() << "Linux - Adding reserved but unused memory of " << unusedReserved << " KB\n";
   mi.availMemory += unusedReserved;
-#else // Currently get to here if building on a mac. For now just use big numbers.
-  mi.availMemory = 9000000;
-  mi.totalMemory = 10000000;
+
+#elif defined __APPLE__
+
+    // Get the total RAM of the system
+    uint64_t totalmem;
+    size_t len = sizeof(totalmem);
+    // Gives system memory in bytes
+    int err = sysctlbyname("hw.memsize",&totalmem,&len,NULL,0);
+    if (err) g_log.warning("Unable to obtain memory of system");
+    mi.totalMemory = totalmem / 1024;
+
+    // Now get the amount of free memory (=free+inactive memory)
+    mach_port_t port = mach_host_self();
+    // Need to find out the system page size for next part
+    vm_size_t pageSize;
+    host_page_size(port, &pageSize);
+    vm_statistics vmStats;
+    mach_msg_type_number_t count;
+    count = sizeof(vm_statistics) / sizeof(natural_t);
+    err = host_statistics(port, HOST_VM_INFO, (host_info_t)&vmStats, &count);
+    if (err) g_log.warning("Unable to obtain memory statistics");
+    mi.availMemory = pageSize * ( vmStats.free_count + vmStats.inactive_count ) / 1024;
+
+    // Now add in reserved but unused memory as reported by malloc
+    const size_t unusedReserved = mstats().bytes_free / 1024;
+    g_log.debug() << "Mac - Adding reserved but unused memory of " << unusedReserved << " KB\n";
+    mi.availMemory += unusedReserved;
+
 #endif
     
   mi.freeRatio = static_cast<int>(100.0*mi.availMemory/mi.totalMemory);
