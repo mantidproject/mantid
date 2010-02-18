@@ -89,7 +89,7 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
   // because the function called is, in principle, potentially quite expensive.
   if (goManaged)
   {
-    const unsigned int reserved = ReservedMem();
+    const size_t reserved = ReservedMem();
     g_log.debug() << "Windows - Adding reserved but unused memory of " << reserved << " KB\n";
     triggerSize += reserved / 100 * availPercent / sizeof(double);
     goManaged = (wsSize > triggerSize);

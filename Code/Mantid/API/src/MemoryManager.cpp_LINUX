@@ -86,6 +86,8 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
    *
    * The only way I can see as to get acces to the Cached value is from the /proc/meminfo file
    * so if this is not successful I'll fall back to using the sysconf method and forget the cache
+   *
+   * RJT (18/2/10): Should we be using sysinfo() here?
    */
   if (!ReadMemInfo(mi))
   {

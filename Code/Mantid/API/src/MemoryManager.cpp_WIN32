@@ -7,7 +7,7 @@ namespace {  // Anonymous namespace
 
   MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
 
-  unsigned int ReservedMem()
+  size_t ReservedMem()
   {
     MEMORY_BASIC_INFORMATION info; // Windows structure
 
