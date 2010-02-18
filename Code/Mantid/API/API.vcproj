@@ -967,6 +967,11 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\src\MemoryManager.cpp_WIN32"
+			FileType="0"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
