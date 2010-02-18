@@ -154,6 +154,42 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void testGEMParameterTags()
+  {
+    LoadEmptyInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/GEM_Definition.xml");
+    inputFile = loader.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentParamGemTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT( loader.isExecuted() );
+
+    MatrixWorkspace_sptr ws;
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    ws->populateInstrumentParameters();
+
+    // get parameter map
+    ParameterMap& paramMap = ws->instrumentParameters();
+
+    // get detector corresponding to workspace index 0
+    IDetector_sptr det = ws->getDetector(101);  
+
+    TS_ASSERT_EQUALS( det->getID(), 102046);
+    TS_ASSERT_EQUALS( det->getName(), "Det45");
+
+    Parameter_sptr param = paramMap.getRecursive(&(*det), "Alpha0", "fitting");
+    TS_ASSERT_DELTA( param->value<double>(), 0.734079, 0.0001);
+
+    //param = paramMap.getRecursive(&(*det), "Alpha0", "fittting");
+    //TS_ASSERT( param == NULL );
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
 void testCheckIfVariousInstrumentsLoad()
   {
     LoadEmptyInstrument loader;
