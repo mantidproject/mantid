@@ -37,6 +37,11 @@ namespace {  // Anonymous namespace
   
 }
 
+namespace Mantid
+{
+namespace API
+{
+
 void MemoryManagerImpl::init()
 {
   memStatus.dwLength = sizeof(MEMORYSTATUSEX);
@@ -79,3 +84,6 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
       << mi.freeRatio << "%.\n";
   return mi;
 }
+
+} // namespace API
+} // namespace Mantid

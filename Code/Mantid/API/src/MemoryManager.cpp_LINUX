@@ -1,13 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <iomanip>
-#include <iostream>
-#include <limits>
-
-#include <unistd.h>
 #include <malloc.h>
-
 #include <fstream>
 #include <sstream>
 
@@ -17,7 +11,7 @@ namespace {  // Anonymous namespace
  * A unix specific function to read values from /proc/meminfo
  * @param mi A struct to fill with the appropriate values
  */
-bool MemoryManagerImpl::ReadMemInfo(MemoryInfo & mi)
+bool ReadMemInfo(Mantid::API::MemoryInfo & mi)
 {
   std::ifstream file("/proc/meminfo");
   std::string line;
@@ -36,27 +30,21 @@ bool MemoryManagerImpl::ReadMemInfo(MemoryInfo & mi)
     {
       ++values_found;
       mi.totalMemory = value;
-      g_log.debug() << "Linux - Total memory available: " << value << " KB.\n";
     }
     else if (tag == "MemFree:")
     {
       ++values_found;
       mi.availMemory += value;
-      g_log.debug() << "Linux - Free memory reported: " << value << " KB.\n";
     }
     else if (tag == "Cached:")
     {
       ++values_found;
       mi.availMemory += (8*value/10);
-      g_log.debug() << "Linux - Cached memory reported: " << value
-          << " KB. Note: Using 80% of this value as additional free memory.\n";
     }
     else
       continue;
     if (values_found == 3)
     {
-      g_log.debug() << "Linux - Memory taken to be available for use (incl. cache): " << mi.availMemory
-          << " KB.\n";
       file.close();
       return true;
     }
@@ -65,7 +53,12 @@ bool MemoryManagerImpl::ReadMemInfo(MemoryInfo & mi)
   return false;
 }
 
-}
+} // End anonymous namespace
+
+namespace Mantid
+{
+namespace API
+{
 
 void MemoryManagerImpl::init()
 {
@@ -112,3 +105,6 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
       << mi.freeRatio << "%.\n";
   return mi;
 }
+
+} // namespace API
+} // namespace Mantid

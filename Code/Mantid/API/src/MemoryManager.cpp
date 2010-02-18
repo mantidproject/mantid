@@ -4,19 +4,19 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 
+// Get the 'meat' of this class from the appropriate file for the platform
+#ifdef __linux__
+#include "MemoryManager.cpp_LINUX"
+#elif __APPLE__
+#include "MemoryManager.cpp_MAC"
+#elif _WIN32
+#include "MemoryManager.cpp_WIN32"
+#endif
+
 namespace Mantid
 {
 namespace API
 {
-
-// Get the 'meat' of this class from the appropriate file for the platform
-#ifdef __linux__
-#include "MemoryManager.cpp_LINUX
-#elif __APPLE__
-#include "MemoryManager.cpp_MAC
-#elif _WIN32
-#include "MemoryManager.cpp_WIN32"
-#endif
 
 /// Private Constructor for singleton class
 MemoryManagerImpl::MemoryManagerImpl() :

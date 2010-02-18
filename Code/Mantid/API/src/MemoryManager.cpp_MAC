@@ -5,6 +5,11 @@
 #include <sys/sysctl.h>
 #include <mach/mach_host.h>
 
+namespace Mantid
+{
+namespace API
+{
+
 void MemoryManagerImpl::init()
 {
   // Nothing to do here at present
@@ -45,3 +50,6 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
       << mi.freeRatio << "%.\n";
   return mi;
 }
+
+} // namespace API
+} // namespace Mantid
