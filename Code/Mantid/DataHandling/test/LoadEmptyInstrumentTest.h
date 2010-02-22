@@ -184,8 +184,15 @@ public:
     Parameter_sptr param = paramMap.getRecursive(&(*det), "Alpha0", "fitting");
     TS_ASSERT_DELTA( param->value<double>(), 0.734079, 0.0001);
 
-    //param = paramMap.getRecursive(&(*det), "Alpha0", "fittting");
-    //TS_ASSERT( param == NULL );
+    IDetector_sptr det1 = ws->getDetector(501);
+    TS_ASSERT_EQUALS( det1->getID(), 211001 );
+    Parameter_sptr param1 = paramMap.getRecursive(&(*det1), "Alpha0", "fitting");
+    TS_ASSERT_DELTA( param1->value<double>(), 0.734079, 0.0001);
+
+    IDetector_sptr det2 = ws->getDetector(341);
+    TS_ASSERT_EQUALS( det2->getID(), 201001 );
+    Parameter_sptr param2 = paramMap.getRecursive(&(*det2), "Alpha0", "fitting");
+    TS_ASSERT_DELTA( param2->value<double>(), 0.734079, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }

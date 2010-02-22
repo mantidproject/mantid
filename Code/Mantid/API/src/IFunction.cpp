@@ -5,6 +5,12 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 
 #include <sstream>
 #include <iostream>
@@ -40,6 +46,37 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
+
+  // check if parameter are specified in instrument definition file
+
+  Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
+
+  // in some tests where workspace a created on the fly a spectra to detector map
+  // is for convenience not created. 
+  if ( !(m_workspace->spectraMap().nElements()) )  
+    return;
+
+  Geometry::IDetector_sptr det = m_workspace->getDetector(wi);
+
+  // if det is a detector groupworkspace then take as the detector
+  // the detector returned by det->getID()
+  if ( boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det) )
+  {
+    API::IInstrument_sptr inst = m_workspace->getInstrument();
+    det = inst->getDetector(det->getID());
+  }
+
+  for (int i = 0; i < nParams(); i++)
+  {
+    if ( !isExplicitlySet(i) )
+    {
+      Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), parameterName(i), "fitting");
+      if (param != Geometry::Parameter_sptr())
+      {
+        setParameter(i, param->value<double>());
+      }
+    }
+  }
 }
 
 /** Update active parameters. Ties are applied.
