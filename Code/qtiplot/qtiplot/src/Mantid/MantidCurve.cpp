@@ -250,6 +250,16 @@ void MantidCurve::dataReset(const QString& wsName)
     deleteHandle(wsNameStd,mws);
   }
   delete new_mantidData;
+  if (mws->isHistogramData())
+  {
+    setStyle(QwtPlotCurve::Steps);
+    setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
+  }
+  else
+  {
+    setStyle(QwtPlotCurve::Lines);
+  }
+  plot()->replot();
 }
 
 void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
