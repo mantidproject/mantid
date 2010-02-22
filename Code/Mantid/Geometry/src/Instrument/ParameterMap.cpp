@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
@@ -107,12 +108,21 @@ std::string ParameterMap::asString()const
         boost::shared_ptr<Parameter> p = it->second;
         if (p && it->first)
         {
-            out << ((const IComponent*)(it->first))->getName() << ';' << p->type()<< ';' << p->name() << ';' << p->asString() << '|';
+          const IComponent* comp = (const IComponent*)(it->first);
+          const IDetector* det = dynamic_cast<const IDetector*>(comp);
+          if (det)
+          {
+            out << "detID:"<<det->getID();
+          }
+          else
+          {
+            out << comp->getName();
+          }
+          out << ';' << p->type()<< ';' << p->name() << ';' << p->asString() << '|';
         }
     }
     return out.str();
 }
-
 
 /** Create or adjust "pos" parameter for a component
   * Assumed that name either equals "x", "y" or "z" otherwise this method will not add/modify "pos" parameter

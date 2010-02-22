@@ -1566,14 +1566,32 @@ namespace Mantid
       {
         if ( ! it->empty() )
         {
+          Geometry::IComponent* comp = 0;
           tokenizer itemTok(*it,boost::char_separator<char>(";"));
           tokenizer::iterator i = itemTok.begin();
           std::string compName = *i++;
+          if (compName.find("detID:") != std::string::npos)
+          {
+            int detID = atoi(compName.substr(6).c_str());
+            comp = instr->getDetector(detID).get();
+            if (!comp)
+            {
+              g_log.warning()<<"Cannot find detector "<<detID<<'\n';
+              continue;
+            }
+          }
+          else
+          {
+            comp = instr->getComponentByName(compName).get();
+            if (!comp)
+            {
+              g_log.warning()<<"Cannot find component "<<compName<<'\n';
+              continue;
+            }
+          }
           std::string type = *i++;
           std::string name = *i++;
           std::string val = *i;
-          Geometry::IComponent* comp = instr->getComponentByName(compName).get();
-          if (!comp) continue;
           params.add(type,comp,name,val);
         }
       }

@@ -509,15 +509,34 @@ namespace Mantid
       Poco::StringTokenizer splitter(details, "|", options);
 
       Poco::StringTokenizer::Iterator iend = splitter.end();
-      std::string prev_name;
+      //std::string prev_name;
       for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
       {
         Poco::StringTokenizer tokens(*itr, ";");
         if( tokens.count() != 4 ) continue;
         std::string comp_name = tokens[0];
-        if( comp_name == prev_name ) continue;
-        prev_name = comp_name;
-        Geometry::IComponent* comp = instr->getComponentByName(comp_name).get();
+        //if( comp_name == prev_name ) continue; this blocks reading in different parameters of the same component. RNT
+        //prev_name = comp_name;
+        Geometry::IComponent* comp = 0;
+        if (comp_name.find("detID:") != std::string::npos)
+        {
+          int detID = atoi(comp_name.substr(6).c_str());
+          comp = instr->getDetector(detID).get();
+          if (!comp)
+          {
+            g_log.warning()<<"Cannot find detector "<<detID<<'\n';
+            continue;
+          }
+        }
+        else
+        {
+          comp = instr->getComponentByName(comp_name).get();
+          if (!comp)
+          {
+            g_log.warning()<<"Cannot find component "<<comp_name<<'\n';
+            continue;
+          }
+        }
         if( !comp ) continue;
         pmap.add(tokens[1], comp, tokens[2], tokens[3]);
       }
