@@ -232,22 +232,19 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
 
 # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
 def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
-	# Data reduced with Mantid is a factor of ~pi higher than colette. Divide by this until we understand why.
-	rescaleToColette = math.pi
-	correction = scalefactor/rescaleToColette
 	# Divide by the area
 	if geomid == 1:
 		# Volume = circle area * height
 		# Factor of four comes from radius = width/2
-		correction /= (height*math.pi*math.pow(width,2)/4.0)
+		scalefactor /= (height*math.pi*math.pow(width,2)/4.0)
 	elif geomid == 2:
-		correction /= (width*height*thickness)
+		scalefactor /= (width*height*thickness)
 	else:
 		# Factor of four comes from radius = width/2
-		correction /= (thickness*math.pi*math.pow(width, 2)/4.0)
+		scalefactor /= (thickness*math.pi*math.pow(width, 2)/4.0)
 	# Multiply by the calculated correction factor
 	ws = mtd[inputWS]
-	ws *= correction
+	ws *= scalefactor
 
 def InfinitePlaneXML(id, planept, normalpt):
 	return  '<infinite-plane id="' + str(id) + '">' + \

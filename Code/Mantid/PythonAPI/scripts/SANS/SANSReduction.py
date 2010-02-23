@@ -1275,7 +1275,14 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     ###################################################################################
         
     ############################# Scale by volume #####################################
-    SANSUtility.ScaleByVolume(tmpWS, RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS)
+    scalefactor = RESCALE
+    # Data reduced with Mantid is a factor of ~pi higher than colette.
+    # For LOQ only, divide by this until we understand why.
+    if INSTR_NAME == 'LOQ':
+        rescaleToColette = math.pi
+        scalefactor /= rescaleToColette
+    
+    SANSUtility.ScaleByVolume(tmpWS, scalefactor, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS)
     ################################################## ################################
         
     ################################ Correction in Q space ############################
