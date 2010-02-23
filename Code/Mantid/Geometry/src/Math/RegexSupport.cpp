@@ -134,7 +134,8 @@ StrFullCut(std::string& Text,const boost::regex& Re,T& Aout,
   if (!StrFunc::convert((*m1)[compNum+1].str(),Aout))
     return 0;
   // Found object 
-  Text.erase(m1->position(0),(*m1)[0].str().length());
+  unsigned int zero = 0; // Needed for boost 1.40 (can't just put 0 in next line)
+  Text.erase(m1->position(zero),(*m1)[0].str().length());
   return 1;
 }
 
@@ -160,7 +161,8 @@ StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
 
   std::cerr<<"SFC :: "<<std::endl;
   Aout.clear();
-  const int M0=m1->position(0);
+  unsigned int zero = 0; // Needed for boost 1.40
+  const int M0=m1->position(zero);
   int ML=M0;
   for(;m1!=empty;m1++)
     {
@@ -171,7 +173,7 @@ StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
 	    return 0;
 	  Aout.push_back(tmp);
 	}
-      ML=m1->position(0)+(*m1)[0].str().length();
+      ML=m1->position(zero)+(*m1)[0].str().length();
     }
   std::cerr<<"SFC :: "<<M0<<" "<<ML<<std::endl;
   // Found object 
@@ -202,11 +204,12 @@ StrFullCut(std::string& Text,const boost::regex& Re,
   if (m1==empty)
     return 0;
 
-  const int M0=m1->position(0);
+  unsigned int zero = 0; // Needed for boost 1.40
+  const int M0=m1->position(zero);
   int ML=M0;
   for(;m1!=empty;m1++)
     {
-      ML=m1->position(0)+(*m1)[0].str().length();
+      ML=m1->position(zero)+(*m1)[0].str().length();
       for(unsigned int index=1;index<m1->size();index++)
 	Aout.push_back((*m1)[index].str());
     }

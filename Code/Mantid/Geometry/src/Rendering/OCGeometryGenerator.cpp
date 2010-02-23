@@ -1,6 +1,7 @@
 #include "MantidKernel/Logger.h"
 #include <vector>
 #include <math.h>
+#include <limits.h> // Needed for g++4.4 on Mac with OpenCASCADE 6.3.0
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Objects/Object.h"
