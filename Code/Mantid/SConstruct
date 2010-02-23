@@ -36,10 +36,15 @@ matlab = ARGUMENTS.get('matlab', 0)
 gcc44 = ARGUMENTS.get('gcc44', 0)
 
 if int(gcc44) :
-    env["CC"] = "gcc44"
-    env["CXX"] = "g++44"
-    env["SHCC"] = "gcc44"
-    env["SHCXX"] = "g++44"
+    if sys.platform == 'darwin':
+        env.Replace(
+        CC = '/opt/local/bin/gcc-mp-4.4',
+        CXX = '/opt/local/bin/g++-mp-4.4')
+    else:
+        env["CC"] = "gcc44"
+        env["CXX"] = "g++44"
+        env["SHCC"] = "gcc44"
+        env["SHCXX"] = "g++44"
 
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
@@ -197,6 +202,8 @@ if os.name == 'posix':
 	libList.append('NeXus')
 	libList.append('muparser')
 	libList.append('gsl')
+	if sys.platform == 'darwin':
+            libList.append('z')
 
 	# OpenMP support library which doesn't get linked by default for some reason
 	# Add the library if it is available on the system
@@ -248,7 +255,7 @@ MantidBuild.collectIncludes('.', 'includes')
 
 libDirList.append(os.path.abspath('./Bin/Shared'))
 
-if os.name != 'nt':	
+if platform.system() == 'Linux':	
   if rpmBuild :
     lpts.append('-Wl,-rpath,'+MANTIDLIB)
     lpts.append('-Wl,-rpath,'+MANTIDPLUGINS)
@@ -260,7 +267,7 @@ if os.name != 'nt':
   print 'LINKFLAGS: ',lpts
   env.Append(LINKFLAGS=lpts)
 
-else: 
+elif os.name == 'nt': 
   if int(win64):
     lpts.append('/MACHINE:X64')
     env.Append(LINKFLAGS=lpts)
