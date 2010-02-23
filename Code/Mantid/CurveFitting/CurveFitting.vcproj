@@ -275,6 +275,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Resolution.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SimplexMinimizer.cpp"
 				>
 			</File>
@@ -442,6 +446,14 @@
 			</File>
 			<File
 				RelativePath=".\test\QuadraticTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\Resolution.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ResolutionTest.h"
 				>
 			</File>
 			<File

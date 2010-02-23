@@ -1,0 +1,148 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidCurveFitting/Resolution.h"
+#include "MantidKernel/FileValidator.h"
+#include <cmath>
+#include <fstream>
+#include <sstream>
+
+namespace Mantid
+{
+namespace CurveFitting
+{
+
+using namespace Kernel;
+using namespace API;
+
+DECLARE_FUNCTION(Resolution)
+
+void Resolution::function(double* out, const double* xValues, const int& nData)
+{
+  if (nData <= 0) return;
+
+  if (m_xStart >= xValues[nData-1] || m_xEnd <= xValues[0]) return;
+
+  int i = 0;
+  while(i < nData - 1 && xValues[i] < m_xStart)
+  {
+    out[i] = 0;
+    i++;
+  }
+  int j = 0;
+  for(;i<nData;i++)
+  {
+    if (j >= size()-1)
+    {
+      out[i] = 0;
+    }
+    else
+    {
+      double xi = xValues[i];
+      while(j < size()-1 && xi > m_xData[j]) j++;
+      if (xi == m_xData[j])
+      {
+        out[i] = m_yData[j];
+      }
+      else if (j == size()-1)
+      {
+        out[i] = 0;
+      }
+      else if (j > 0)
+      {
+        double x0 = m_xData[j-1];
+        double x1 = m_xData[j];
+        double y0 = m_yData[j-1];
+        double y1 = m_yData[j];
+        out[i] = y0 + (y1 - y0)*(xi - x0)/(x1 - x0);
+      }
+      else
+      {
+        out[i] = 0;
+      }
+    }
+  }
+}
+
+/// Returns a list of attribute names
+std::vector<std::string> Resolution::getAttributeNames()const
+{
+  std::vector<std::string> res(1,"FileName");
+  return res;
+}
+
+/** Set a value to attribute attName
+ * @param attName The attribute name
+ * @param value The new value
+ */
+void Resolution::setAttribute(const std::string& attName,const std::string& value)
+{
+  if (attName == "FileName")
+  {
+    FileValidator fval;
+    std::string error = fval.isValid(value);
+    if (error == "")
+    {
+      m_fileName = value;
+    }
+    else
+    {
+      throw std::runtime_error(error);
+    }
+    load(m_fileName);
+  }
+}
+
+/**
+ * Load the resolution data from an ascii file. The file has three columns with
+ * x,y and ignored data.
+ * @param fname The file name
+ */
+void Resolution::load(const std::string& fname)
+{
+  std::ifstream fil(fname.c_str());
+  std::string str;
+  m_xData.clear();
+  m_yData.clear();
+  while(getline(fil,str))
+  {
+    str += ' ';
+    std::istringstream istr(str);
+    double x,y,e;
+    istr >> x >> y >> e;
+    if (!istr.good())
+    {
+      break;
+    }
+    m_xData.push_back(x);
+    m_yData.push_back(y);
+  }
+
+  if (m_xData.size() < 2)
+  {
+    throw std::runtime_error("Resolution: too few data points");
+  }
+
+  m_xStart = m_xData.front();
+  m_xEnd   = m_xData.back();
+
+  //m_dx = (m_xEnd - m_xStart) / (size() - 1);
+
+  //if (m_dx <= 0)
+  //{
+  //  throw std::runtime_error("Resolution: decreasing x values");
+  //}
+
+  //m_isXRegular = true;
+  //for (int i=1;i<size();i++)
+  //{
+  //  if ( fabs((m_xData[i]-m_xData[i-1])/m_dx - 1.) > 1e-7)
+  //  {
+  //    m_isXRegular = false;
+  //    break;
+  //  }
+  //}
+}
+
+} // namespace CurveFitting
+} // namespace Mantid
