@@ -104,6 +104,9 @@ public:
   /// Restores a declared parameter i to the active status
   virtual void restoreActive(int i);
 
+  /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
+  virtual int getParameterIndex(const ParameterReference& ref)const;
+
   /// Apply the ties
   virtual void applyTies();
   /// Remove all ties

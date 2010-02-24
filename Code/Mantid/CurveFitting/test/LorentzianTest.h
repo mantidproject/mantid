@@ -174,7 +174,7 @@ public:
     fn->setWidth(2.2);
 
     // add constraint to function
-    BoundaryConstraint* bc = new BoundaryConstraint("PeakCentre",11.3, 12.0);
+    BoundaryConstraint* bc = new BoundaryConstraint(fn,"PeakCentre",11.3, 12.0);
     fn->addConstraint(bc);
 
     //void setFunction(API::IFunction* fun);
@@ -245,7 +245,7 @@ public:
     fn->setWidth(2.2);
 
     // add constraint to function
-    BoundaryConstraint* bc = new BoundaryConstraint("PeakCentre",11.3, 12.0);
+    BoundaryConstraint* bc = new BoundaryConstraint(fn,"PeakCentre",11.3, 12.0);
     fn->addConstraint(bc);
 
     fnWithBk->addFunction(fn);

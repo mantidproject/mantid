@@ -27,6 +27,7 @@ namespace API
 // More forward declarations
 //----------------------------------------------------------------------
   class IConstraint;
+  class IFunction;
 
 /** @class FunctionFactoryImpl
 
@@ -62,10 +63,11 @@ namespace API
   {
   public:
     /**Creates an instance of a Constraint
+     * @param fun The function
      * @param input The creation expression
      * @return A pointer to the created Constraint
      */
-    IConstraint* createInitialized(const std::string& input) const;
+    IConstraint* createInitialized(IFunction* fun, const std::string& input) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<ConstraintFactoryImpl>;

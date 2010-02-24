@@ -37,7 +37,8 @@ public:
     gaus->setHeight(100.7);
     gaus->setParameter("Sigma",1.1);
 
-    BoundaryConstraint* bc = new BoundaryConstraint("Sigma");
+    BoundaryConstraint* bc = new BoundaryConstraint();
+    bc->set(gaus);
 
     TS_ASSERT(!bc->hasLower());
     TS_ASSERT(!bc->hasUpper());
@@ -48,81 +49,96 @@ public:
     TS_ASSERT(bc->hasLower());
     TS_ASSERT(bc->hasUpper());
 
-    BoundaryConstraint* bc2 = new BoundaryConstraint("Sigma",10,20);
+    BoundaryConstraint* bc2 = new BoundaryConstraint();
+    bc2->set(gaus,2);
+    bc2->setBounds(10,20);
 
     TS_ASSERT_DELTA( bc2->lower(), 10 ,0.0001);
     TS_ASSERT_DELTA( bc2->upper(), 20 ,0.0001);
 
     TS_ASSERT_DELTA( gaus->getParameter("Sigma"), 1.1 ,0.0001);
-    bc2->setParamToSatisfyConstraint(gaus);
+    
+    bc2->setParamToSatisfyConstraint();
     TS_ASSERT_DELTA( gaus->getParameter("Sigma"), 10.0 ,0.0001);
 
-
+    delete gaus;
 
   }
 
   void testInitialize1()
   {
+    Gaussian gaus;
+    gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(10<Theta<20)");
-    bc.initialize(expr);
+    expr.parse("BoundaryConstraint(10<Sigma<20)");
+    bc.initialize(&gaus,expr);
 
-    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
     TS_ASSERT_DELTA( bc.upper(), 20 ,0.0001);
   }
 
   void testInitialize2()
   {
+    Gaussian gaus;
+    gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(20>Theta>10)");
-    bc.initialize(expr);
+    expr.parse("BoundaryConstraint(20>Sigma>10)");
+    bc.initialize(&gaus,expr);
 
-    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
     TS_ASSERT_DELTA( bc.upper(), 20 ,0.0001);
   }
 
   void testInitialize3()
   {
+    Gaussian gaus;
+    gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(10<Theta)");
-    bc.initialize(expr);
+    expr.parse("BoundaryConstraint(10<Sigma)");
+    bc.initialize(&gaus,expr);
 
-    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
     TS_ASSERT( !bc.hasUpper() );
   }
 
   void testInitialize4()
   {
+    Gaussian gaus;
+    gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(Theta<20)");
-    bc.initialize(expr);
+    expr.parse("BoundaryConstraint(Sigma<20)");
+    bc.initialize(&gaus,expr);
 
-    TS_ASSERT_EQUALS( bc.getParameterName(), "Theta" );
+    TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.upper(), 20 ,0.0001);
     TS_ASSERT( !bc.hasLower() );
   }
 
   void testInitialize5()
   {
+    Gaussian gaus;
+    gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(Theta==20)");
-    TS_ASSERT_THROWS(bc.initialize(expr),std::invalid_argument);
+    expr.parse("BoundaryConstraint(Sigma==20)");
+    TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
   }
 
   void testInitialize6()
   {
+    Gaussian gaus;
+    gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(a<Theta<b)");
-    TS_ASSERT_THROWS(bc.initialize(expr),std::invalid_argument);
+    expr.parse("BoundaryConstraint(a<Sigma<b)");
+    TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
   }
 };
 

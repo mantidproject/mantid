@@ -366,7 +366,7 @@ namespace CurveFitting
       std::vector<double> outTest(nActive());
       const double xValuesTest = 0;
       JacobianImpl1 J;
-      boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(nActive(),1) );
+      boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(1,nActive()) );
       J.setJ(M.get());
       // note nData set to zero (last argument) hence this should avoid further memory problems
       functionDeriv(NULL, &J, &xValuesTest, 0);  
@@ -880,12 +880,14 @@ namespace CurveFitting
               int iPar = cf->parameterIndex(parName);
               int iFun = cf->functionIndex(iPar);
               parName = cf->parameterLocalName(iPar);
-              con = new BoundaryConstraint(parName);
+              con = new BoundaryConstraint();
+              con->set(cf->getFunction(iFun),cf->getFunction(iFun)->parameterIndex(parName));
               cf->getFunction(iFun)->addConstraint(con);
             }
             else
             {
-              con = new BoundaryConstraint(parName);
+              con = new BoundaryConstraint();
+              con->set(m_function,m_function->parameterIndex(parName));
               m_function->addConstraint(con);
             }
 

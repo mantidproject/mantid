@@ -39,7 +39,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IConstraint
+class DLLExport IConstraint: public ParameterReference
 {
 public:
   /// Default constructor
@@ -48,22 +48,22 @@ public:
   virtual ~IConstraint() {}
 
   /// Initialize the constraint from an expression
-  virtual void initialize(const Expression& expr) = 0;
+  virtual void initialize(IFunction* fun, const Expression& expr) = 0;
 
   /// Returns a penalty number which is bigger than or equal to zero
   /// If zero it means that the constraint is not penalized. If larger
   /// than zero the constraint is penalized where the larger this number
   /// is the larger the penalty
-  virtual double check(IFunction* fn) = 0;
+  virtual double check() = 0;
 
   /// Returns the derivative of the penalty for each active parameter
-  virtual boost::shared_ptr<std::vector<double> > checkDeriv(IFunction* fn) = 0;
+  virtual double checkDeriv() = 0;
 
   /// Set the parameters of IFunction to satisfy constraint. For example
   /// for a BoundaryConstraint this if param value less than lower boundary
   /// it is set to that value and vice versa for if the param value is larger
   /// than the upper boundary value. 
-  virtual void setParamToSatisfyConstraint(IFunction* fn) = 0;
+  virtual void setParamToSatisfyConstraint() = 0;
 };
 
 

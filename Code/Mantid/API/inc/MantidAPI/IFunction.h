@@ -22,6 +22,7 @@ class MatrixWorkspace;
 class Jacobian;
 class ParameterTie;
 class IConstraint;
+class ParameterReference;
 /** This is an interface to a fitting function - a semi-abstarct class.
     Functions derived from IFunction can be used with the Fit algorithm.
     IFunction defines the structure of a fitting funtion.
@@ -163,6 +164,9 @@ public:
   /// Restores a declared parameter i to the active status
   virtual void restoreActive(int i) = 0;
 
+  /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
+  virtual int getParameterIndex(const ParameterReference& ref)const = 0;
+
   /// Tie a parameter to other parameters (or a constant)
   virtual void tie(const std::string& parName,const std::string& expr);
   /// Apply the ties
@@ -223,6 +227,37 @@ protected:
   /// Upper bin index
   int m_xMaxIndex;
 
+};
+
+/**
+ * A reference to a parameter. To uniquely identify a parameter
+ * in a composite function
+ */
+class ParameterReference
+{
+public:
+  /// Default constructor
+  ParameterReference():m_function(0),m_index(-1){}
+  /// Constructor
+  ParameterReference(IFunction* fun,int index=-1):m_function(fun),m_index(index){}
+  /// Return pointer to the function
+  IFunction* getFunction()const{return m_function;}
+  /// Return parameter index in that function
+  int getIndex()const{return m_index;}
+  /// Set the reference
+  void set(IFunction* fun,int index)
+  {
+    m_function = fun;
+    m_index = index;
+  }
+  /// Set the reference
+  void set(IFunction* fun)
+  {
+    m_function = fun;
+  }
+private:
+  IFunction* m_function; ///< pointer to the function
+  int m_index; ///< parameter index
 };
 
 /** Represents the Jacobian in functionDeriv. 

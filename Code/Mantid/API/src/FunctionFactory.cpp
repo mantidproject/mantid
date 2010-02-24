@@ -120,13 +120,13 @@ namespace Mantid
             if ((*term)[1][0].name() == "==")
             {
               IConstraint* c = ConstraintFactory::Instance().createUnwrapped("BoundaryConstraint");
-              c->initialize((*term)[1]);
+              c->initialize(fun,(*term)[1]);
               fun->addConstraint(c);
             }
             else
             {
               IConstraint* c = ConstraintFactory::Instance().createUnwrapped((*term)[1][0].name());
-              c->initialize((*term)[1][0]);
+              c->initialize(fun,(*term)[1][0]);
               fun->addConstraint(c);
             }
           }

@@ -126,7 +126,7 @@ public:
     bk->removeActive(1);  
     //bk->removeActive(1);
 
-    BoundaryConstraint* bc_b = new BoundaryConstraint("A0",0, 20.0);
+    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     //bk->addConstraint(bc_b);
 
     // set up Lorentzian fitting function
@@ -138,9 +138,9 @@ public:
     fn->setParameter("Sigma",300.0);
 
     // add constraint to function
-    BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
-    BoundaryConstraint* bc2 = new BoundaryConstraint("PeakCentre",79200, 79700.0);
-    BoundaryConstraint* bc3 = new BoundaryConstraint("Sigma",20, 100.0);
+    BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
+    BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
+    BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
     //fn->addConstraint(bc1);
     //fn->addConstraint(bc2);
     fn->addConstraint(bc3);
@@ -202,7 +202,7 @@ public:
     bk->removeActive(1);  
     //bk->removeActive(1);
 
-    BoundaryConstraint* bc_b = new BoundaryConstraint("A0",0, 20.0);
+    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     bk->addConstraint(bc_b);
 
     // set up Lorentzian fitting function
@@ -214,9 +214,9 @@ public:
     fn->setParameter("Sigma",300.0);
 
     // add constraint to function
-    BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
-    BoundaryConstraint* bc2 = new BoundaryConstraint("PeakCentre",79200, 79700.0);
-    BoundaryConstraint* bc3 = new BoundaryConstraint("Sigma",20, 100.0);
+    BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
+    BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
+    BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
     fn->addConstraint(bc1);
     //fn->addConstraint(bc2);
     //fn->addConstraint(bc3);
@@ -625,7 +625,7 @@ public:
     bk->removeActive(1);  
     //bk->removeActive(1);
 
-    BoundaryConstraint* bc_b = new BoundaryConstraint("A0",0, 20.0);
+    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     //bk->addConstraint(bc_b);
 
     // set up Lorentzian fitting function
@@ -637,9 +637,9 @@ public:
     fn->setParameter("Sigma",300.0);
 
     // add constraint to function
-    BoundaryConstraint* bc1 = new BoundaryConstraint("Height",100, 300.0);
-    BoundaryConstraint* bc2 = new BoundaryConstraint("PeakCentre",79200, 79700.0);
-    BoundaryConstraint* bc3 = new BoundaryConstraint("Sigma",20, 100.0);
+    BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
+    BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
+    BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
     //fn->addConstraint(bc1);
     //fn->addConstraint(bc2);
     fn->addConstraint(bc3);

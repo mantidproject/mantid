@@ -6,6 +6,7 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/Logger.h"
 #include <boost/lexical_cast.hpp>
+#include <sstream>
 
 namespace Mantid
 {
@@ -20,12 +21,32 @@ using namespace API;
 // Get a reference to the logger
 Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstraint");
 
+/** Constructor with boundary arguments
+ * @param The function
+ * @param paramName The parameter name
+ * @param lowerBound The lower bound
+ * @param upperBound The upper bound
+ */
+BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
+m_activeParameterIndex(-1),
+m_penaltyFactor(1000.0),
+m_parameterName(paramName),
+m_hasLowerBound( true), 
+m_hasUpperBound( true),    
+m_lowerBound(lowerBound), 
+m_upperBound(upperBound)
+{
+  set(fun,fun->parameterIndex(paramName));
+  m_activeParameterIndex = fun->activeIndex(getIndex());
+}
+
 /** Initialize the constraint from an expression.
+ * @param fun The function
  * @param expr The initializing expression which must look like this:
  * "BoundaryConstraint( 10 < Sigma < 20 )" or
  * "BoundaryConstraint( Sigma > 20 )"
  */
-void BoundaryConstraint::initialize(const API::Expression& expr)
+void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr)
 {
   if (expr.size() != 1 || expr.begin()->size() < 2 || expr.begin()->name() != "==")
   {
@@ -92,7 +113,30 @@ void BoundaryConstraint::initialize(const API::Expression& expr)
     }
   }// for i 
 
-  m_parameterName = parName;
+  try
+  {
+    int i = fun->parameterIndex(parName);
+    set(fun,i);
+    m_parameterName = parName;
+  }
+  catch(...)
+  {
+    g_log.error()<<"Parameter "<<parName<<" not found in function "<<fun->name()<<'\n';
+    throw;
+  }
+
+  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
+
+  if (m_activeParameterIndex < 0)
+  {
+    std::ostringstream msg;
+     msg << "Constaint name " << m_parameterName << " is not one of the active parameter"
+      << " names of function " << fun->name() << ". Therefore"
+      << " this constraint applied to this funtion serves no purpose";
+    g_log.error(msg.str());
+    throw std::runtime_error(msg.str());
+  }
+
   if (ilow >= 0)
   {
     setLower(values[ilow]);
@@ -127,30 +171,30 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
  *  @param fn fitting function
  *  @return active parameter index or -1 if no active parameter index found
  */
-int BoundaryConstraint::determineParameterIndex(IFunction* fn)
-{
-  //if (m_activeParameterIndex < 0)
-  //{
-  int retVal = -1;
-  for (int i = 0; i < fn->nActive(); i++)
-  {
-    if ( m_parameterName.compare(fn->nameOfActive(i)) == 0 )
-    {
-      retVal = i;
-    }
-  }
-  return retVal;
-  //}
-}
+//int BoundaryConstraint::determineParameterIndex(IFunction* fn)
+//{
+//  //if (m_activeParameterIndex < 0)
+//  //{
+//  int retVal = -1;
+//  for (int i = 0; i < fn->nActive(); i++)
+//  {
+//    if ( m_parameterName.compare(fn->nameOfActive(i)) == 0 )
+//    {
+//      retVal = i;
+//    }
+//  }
+//  return retVal;
+//  //}
+//}
 
-void BoundaryConstraint::setParamToSatisfyConstraint(API::IFunction* fn)
+void BoundaryConstraint::setParamToSatisfyConstraint()
 {
-  m_activeParameterIndex = determineParameterIndex(fn);
+  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
 
   if (m_activeParameterIndex < 0)
   {
     g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
-      << " names of function " << fn->name() << ". Therefore"
+      << " names of function " << getFunction()->name() << ". Therefore"
       << " this constraint applied to this funtion serves no purpose";
     return;
   }
@@ -162,25 +206,25 @@ void BoundaryConstraint::setParamToSatisfyConstraint(API::IFunction* fn)
     return;
   }
 
-  double paramValue = fn->getParameter(fn->indexOfActive(m_activeParameterIndex));
+  double paramValue = getFunction()->getParameter(getIndex());
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      fn->setParameter(fn->nameOfActive(m_activeParameterIndex),m_lowerBound,false);
+      getFunction()->setParameter(getIndex(),m_lowerBound,false);
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      fn->setParameter(fn->nameOfActive(m_activeParameterIndex),m_upperBound,false);
+      getFunction()->setParameter(getIndex(),m_upperBound,false);
 }
 
 
-double BoundaryConstraint::check(IFunction* fn)
+double BoundaryConstraint::check()
 {
-  m_activeParameterIndex = determineParameterIndex(fn);
+  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
 
   if (m_activeParameterIndex < 0)
   {
     g_log.warning() << "Constaint name " << m_parameterName << " is not one of the active parameter"
-      << " names of function " << fn->name() << ". Therefore"
+      << " names of function " << getFunction()->name() << ". Therefore"
       << " this constraint applied to this funtion serves no purpose";
     return 0.0;
   }
@@ -193,7 +237,7 @@ double BoundaryConstraint::check(IFunction* fn)
   }
 
 
-  double paramValue = fn->getParameter(fn->indexOfActive(m_activeParameterIndex));
+  double paramValue = getFunction()->getParameter(getIndex());
 
   double penalty = 0.0;
 
@@ -207,9 +251,9 @@ double BoundaryConstraint::check(IFunction* fn)
   return penalty;
 }
 
-boost::shared_ptr<std::vector<double> > BoundaryConstraint::checkDeriv(IFunction* fn)
+double BoundaryConstraint::checkDeriv()
 {
-  boost::shared_ptr<std::vector<double> > penalty(new std::vector<double>(fn->nActive(),0.0)); 
+  double penalty = 0.0;
 
   if (m_activeParameterIndex < 0 || !(m_hasLowerBound || m_hasUpperBound))
   {
@@ -218,14 +262,14 @@ boost::shared_ptr<std::vector<double> > BoundaryConstraint::checkDeriv(IFunction
     return penalty;
   } 
 
-  double paramValue = fn->getParameter(fn->indexOfActive(m_activeParameterIndex));
+  double paramValue = getFunction()->getParameter(getIndex());
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      (*penalty)[m_activeParameterIndex] = -m_penaltyFactor;
+      penalty = -m_penaltyFactor;
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      (*penalty)[m_activeParameterIndex] = m_penaltyFactor;
+      penalty = m_penaltyFactor;
 
   return penalty;
 }

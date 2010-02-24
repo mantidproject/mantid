@@ -781,6 +781,22 @@ bool CompositeFunction::isExplicitlySet(int i)const
   return m_functions[ iFun ]->isExplicitlySet(i - m_paramOffsets[iFun]);
 }
 
+/**
+ * Returns the index of parameter if the ref points to one of the member function or -1
+ * @param ref A reference to a parameter
+ * @return Parameter index or -1
+ */
+int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
+{
+  std::vector<IFunction*>::const_iterator it = std::find(m_functions.begin(),m_functions.end(),ref.getFunction());
+  if (it != m_functions.end() && ref.getIndex() < (*it)->nParams())
+  {
+    return ref.getIndex();
+  }
+  return -1;
+}
+
+
 
 } // namespace API
 } // namespace Mantid

@@ -108,6 +108,9 @@ public:
   /// Restores a declared parameter i to the active status
   void restoreActive(int i);
 
+  /// Return parameter index from a parameter reference.
+  int getParameterIndex(const ParameterReference& ref)const;
+
   /// Apply the ties
   void applyTies();
   /// Remove all ties

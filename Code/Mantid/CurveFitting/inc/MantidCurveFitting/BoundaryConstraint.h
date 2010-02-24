@@ -54,9 +54,9 @@ namespace Mantid
       {
       }
 
-      /// Constructor with no boundary arguments
-      BoundaryConstraint(const std::string& paramName) : 
-        m_activeParameterIndex(-1),
+        /// Constructor with no boundary arguments
+        BoundaryConstraint(const std::string& paramName) : 
+      m_activeParameterIndex(-1),
         m_penaltyFactor(1000.0),
         m_parameterName(paramName),
         m_hasLowerBound( false), 
@@ -65,22 +65,13 @@ namespace Mantid
       }
 
       /// Constructor with boundary arguments
-      BoundaryConstraint(const std::string paramName, const double lowerBound, const double upperBound) : 
-        m_activeParameterIndex(-1),
-        m_penaltyFactor(1000.0),
-        m_parameterName(paramName),
-        m_hasLowerBound( true), 
-        m_hasUpperBound( true),    
-        m_lowerBound(lowerBound), 
-        m_upperBound(upperBound)
-      {
-      }
+      BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound);
 
       /// Destructor
       virtual ~BoundaryConstraint() {}
 
       /// Initialize the constraint from an expression
-      void initialize(const API::Expression& expr);
+      void initialize(API::IFunction* fun, const API::Expression& expr);
 
       /// Set panelty factor. The larger the number to thigter the constraint. This number
       /// must be set to a number larger than zero
@@ -127,9 +118,9 @@ namespace Mantid
       std::string getParameterName()const{return m_parameterName;}
 
       /// overwrite IConstraint base class methods
-      virtual double check(API::IFunction* fn);
-      virtual boost::shared_ptr<std::vector<double> > checkDeriv(API::IFunction* fn);
-      virtual void setParamToSatisfyConstraint(API::IFunction* fn);
+      virtual double check();
+      virtual double checkDeriv();
+      virtual void setParamToSatisfyConstraint();
 
     private:
 
@@ -140,7 +131,7 @@ namespace Mantid
       /// instantiate m_activeParameterIndex if not already instantiated
       //void instantiateParameterIndex(API::IFunction* fn);
 
-      int determineParameterIndex(API::IFunction* fn);
+      //int determineParameterIndex(API::IFunction* fn);
 
 
       double m_penaltyFactor;

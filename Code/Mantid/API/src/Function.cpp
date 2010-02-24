@@ -58,7 +58,7 @@ void Function::setParametersToSatisfyConstraints()
 {
   for (unsigned int i = 0; i < m_constraints.size(); i++)
   {
-    m_constraints[i]->setParamToSatisfyConstraint(this);
+    m_constraints[i]->setParamToSatisfyConstraint();
   }
 }
 
@@ -145,7 +145,7 @@ int Function::parameterIndex(const std::string& name)const
   if (it == m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "Function parameter ("<<ucName<<") does not exist.";
+    msg << "Function "<<this->name()<<" does not have parameter ("<<ucName<<").";
     throw std::invalid_argument(msg.str());
   }
   return int(it - m_parameterNames.begin());
@@ -216,7 +216,7 @@ void Function::functionWithConstraint(double* out, const double* xValues, const 
   double penalty = 0.0;
   for (unsigned int i = 0; i < m_constraints.size(); i++)
   {
-    penalty += m_constraints[i]->check(this);
+    penalty += m_constraints[i]->check();
   }
 
   // add penalty to first and last point and every 10th point in between
@@ -245,12 +245,9 @@ void Function::functionDerivWithConstraint(Jacobian* out, const double* xValues,
 
   for (unsigned i = 0; i < m_constraints.size(); i++)
   {  
-    boost::shared_ptr<std::vector<double> > penalty = m_constraints[i]->checkDeriv(this);
+    double penalty = m_constraints[i]->checkDeriv();
 
-    // for each active paramter check if there is a penalty and if yes add to derivatives
-    for (unsigned int ii = 0; ii<(*penalty).size(); ii++)
-      if ((*penalty)[ii] != 0.0)
-        out->addNumberToColumn((*penalty)[ii], ii);
+    out->addNumberToColumn(penalty, getParameterIndex(*m_constraints[i]));
   }
 }
 
@@ -473,6 +470,20 @@ bool Function::isExplicitlySet(int i)const
     throw std::out_of_range("Function parameter index out of range.");
   }
   return m_explicitlySet[i];
+}
+
+/**
+ * Returns the index of parameter if the ref points to this function or -1
+ * @param ref A reference to a parameter
+ * @return Parameter index or -1
+ */
+int Function::getParameterIndex(const ParameterReference& ref)const
+{
+  if (ref.getFunction() == this && ref.getIndex() < nParams())
+  {
+    return ref.getIndex();
+  }
+  return -1;
 }
 
 } // namespace API
