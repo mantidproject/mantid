@@ -79,31 +79,35 @@ protected:
   virtual void initialiseCachedDistances() = 0;
 
   const Geometry::Object* m_sampleObject;  ///< Local cache of sample object.
-  std::vector<double> m_L1s,  ///< Cached L1 distances
-                      m_elementVolumes;  ///< Cached element volumes
+  std::vector<double> m_L1s,               ///< Cached L1 distances
+                      m_elementVolumes;    ///< Cached element volumes
   std::vector<Geometry::V3D> m_elementPositions; ///< Cached element positions
-  int m_numVolumeElements;///< The number of volume elements
-  double m_sampleVolume; ///< The total volume of the sample
+  int m_numVolumeElements;                 ///< The number of volume elements
+  double m_sampleVolume;                   ///< The total volume of the sample
 
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
 
   void retrieveBaseProperties();
   void constructSample(API::Sample& sample);
-  void calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& lTotal) const;
-  inline double doIntegration(const double& lambda,const std::vector<double>& lTotal) const;
+  void calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& L2s) const;
+  inline double doIntegration(const double& lambda,const std::vector<double>& L2s) const;
+  inline double doIntegration(const double& lambda_i,const double& lambda_f,const std::vector<double>& L2s) const;
   void interpolate(const MantidVec& x, MantidVec& y, bool is_histogram);
   
   double m_refAtten;    ///< The attenuation cross-section in barns at 1.8A
   double m_scattering;  ///< The scattering cross-section in barns
   int n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
   int x_step;           ///< The step in bin number between adjacent points
+  int m_emode;          ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
+  double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy, if provided
 
   typedef double (*expfunction)(double); ///< Typedef pointer to exponential function
   expfunction EXPONENTIAL; ///< Pointer to exponential function
+
 };
 
 } // namespace Algorithms

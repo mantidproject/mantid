@@ -80,6 +80,56 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 
+  void testInelastic()
+  {
+    Mantid::Algorithms::CylinderAbsorption atten2;
+    atten2.initialize();
+
+    Mantid::DataHandling::LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename","../../../../Test/Data/IRS38633.raw");
+    const std::string inputWS = "rawWS";
+    loader.setPropertyValue("OutputWorkspace",inputWS);
+    loader.setPropertyValue("SpectrumList","10,100");
+    loader.execute();
+
+    Mantid::Algorithms::ConvertUnits convert;
+    convert.initialize();
+    convert.setPropertyValue("InputWorkspace",inputWS);
+    convert.setPropertyValue("OutputWorkspace",inputWS);
+    convert.setPropertyValue("Target","Wavelength");
+    convert.execute();
+
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("InputWorkspace",inputWS) )
+    const std::string outputWS("factors");
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("OutputWorkspace",outputWS) )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("CylinderSampleHeight","4") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("CylinderSampleRadius","0.4") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("AttenuationXSection","5.08") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("ScatteringXSection","5.1") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("SampleNumberDensity","0.07192") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("NumberOfSlices","2") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("NumberOfAnnuli","2") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("NumberOfWavelengthPoints","101") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("EMode","Indirect") )
+    TS_ASSERT_THROWS_NOTHING( atten2.setPropertyValue("EFixed","10.0") )
+    TS_ASSERT_THROWS_NOTHING( atten2.execute() )
+    TS_ASSERT( atten2.isExecuted() )
+    
+    Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+    TS_ASSERT_DELTA( result->readY(0).front(), 0.3438, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(0).back(), 0.2991, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(0)[1111], 0.3180, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(1).front(), 0.4763, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(1).back(), 0.4250, 0.0001 )
+    TS_ASSERT_DELTA( result->readY(1)[555], 0.4612, 0.0001 )
+    
+    Mantid::API::AnalysisDataService::Instance().remove(inputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+  }
+
 private:
   Mantid::Algorithms::CylinderAbsorption atten;
   std::string inputWS;

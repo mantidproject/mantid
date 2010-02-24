@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 
 namespace Mantid
@@ -52,6 +53,16 @@ void AbsorptionCorrection::init()
     "Select the method to use to calculate exponentials, normal or a\n"
     "fast approximation (default: Normal)" );
 
+  std::vector<std::string> propOptions;
+  propOptions.push_back("Elastic");
+  propOptions.push_back("Direct");
+  propOptions.push_back("Indirect");
+  declareProperty("EMode","Elastic",new ListValidator(propOptions),
+    "The energy mode (default: elastic)");
+  declareProperty("EFixed",0.0,mustBePositive->clone(),
+    "The value of the initial or final energy, as appropriate, in meV.\n"
+    "Will be taken from the instrument definition file, if available.");
+
   // Call the virtual method for concrete algorithm to define any other properties
   defineProperties();
 }
@@ -60,6 +71,8 @@ void AbsorptionCorrection::exec()
 {
   // Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  // Get a reference to the parameter map (used for indirect instruments)
+  const ParameterMap& pmap = inputWS->constInstrumentParameters();
 
   // Get the input parameters
   retrieveBaseProperties();
@@ -104,7 +117,7 @@ void AbsorptionCorrection::exec()
     correctionFactors->dataX(i) = X;
 
     // Get detector position
-    IDetector_const_sptr det;
+    IDetector_sptr det;
     try
     {
       det = inputWS->getDetector(i);
@@ -114,8 +127,25 @@ void AbsorptionCorrection::exec()
       continue;
     }
 
-    std::vector<double> lTotal(m_numVolumeElements);
-    calculateDistances(det,lTotal);
+    std::vector<double> L2s(m_numVolumeElements);
+    calculateDistances(det,L2s);
+
+    // If an indirect instrument, see if there's an efixed in the paramter map
+    double lambda_f = m_lambdaFixed;
+    if (m_emode==2)
+    {
+      try {
+        Parameter_sptr par = pmap.get(det->getComponent(),"Efixed");
+        if (par)
+        {
+          Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
+          double factor, power;
+          energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),factor,power);
+          lambda_f = factor * std::pow(par->value<double>(),power);
+        }
+      } catch (std::runtime_error) { /* Throws if a DetectorGroup, use single provided value */ }
+    }
+
 
     // Get a reference to the Y's in the output WS for storing the factors
     MantidVec& Y = correctionFactors->dataY(i);
@@ -124,15 +154,29 @@ void AbsorptionCorrection::exec()
     for (int j = 0; j < specSize; j = j + x_step)
     {
       const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
-      Y[j] = this->doIntegration(lambda, lTotal);
+      if ( m_emode == 0 ) // Elastic
+      {
+        Y[j] = this->doIntegration(lambda, L2s);
+      }
+      else if ( m_emode == 1 ) // Direct
+      {
+        Y[j] = this->doIntegration(m_lambdaFixed, lambda, L2s);
+      }
+      else if ( m_emode == 2 ) // Indirect
+      {
+        Y[j] = this->doIntegration(lambda, lambda_f, L2s);
+      }
       Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
+
+      // Make certain that last point is calculates
+      if ( x_step > 1 && j+x_step >= specSize && j+1 != specSize)
+      {
+        j = specSize - x_step - 1;
+      }
     }
 
     if (x_step > 1) // Interpolate linearly between points separated by x_step, last point required
     {
-      const double lambda = (isHist ? (0.5 * (X[specSize - 1] + X[specSize])) : X[specSize - 1]);
-      Y[specSize - 1] = this->doIntegration(lambda, lTotal);
-      Y[specSize - 1] /= m_sampleVolume;
       interpolate(X, Y, isHist);
     }
 
@@ -169,6 +213,22 @@ void AbsorptionCorrection::retrieveBaseProperties()
   else if (exp_string == "FastApprox") // Use the compact approximation
     EXPONENTIAL = fast_exp;
 
+  // Get the energy mode
+  const std::string emodeStr = getProperty("EMode");
+  // Convert back to an integer representation
+  m_emode = 0;
+  if (emodeStr == "Direct") m_emode=1;
+  else if (emodeStr == "Indirect") m_emode=2;
+  // If inelastic, get the fixed energy and convert it to a wavelength
+  if (m_emode)
+  {
+    const double efixed = getProperty("Efixed");
+    Unit_const_sptr energy = UnitFactory::Instance().create("Energy");
+    double factor, power;
+    energy->quickConversion(*UnitFactory::Instance().create("Wavelength"),factor,power);
+    m_lambdaFixed = factor * std::pow(efixed,power);
+  }
+
   // Call the virtual function for any further properties
   retrieveProperties();
 }
@@ -186,7 +246,7 @@ void AbsorptionCorrection::constructSample(API::Sample& sample)
 /// Calculate the distances traversed by the neutrons within the sample
 /// @param detector the detector we are working on
 /// @param lTotal a vestor of the total length (L1+ L2) for  each segment of the sample
-void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& lTotal) const
+void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sptr& detector, std::vector<double>& L2s) const
 {
   // We need to make sure this is right for grouped detectors - should use average theta & phi
   V3D detectorPos;
@@ -219,24 +279,41 @@ void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sp
       g_log.error(message.str());
       throw std::runtime_error("Problem in AbsorptionCorrection::calculateDistances");
     }
-    lTotal[i] = outgoing.begin()->Dist + m_L1s[i];
+    L2s[i] = outgoing.begin()->Dist;
   }
 }
 
-/// Carries out the numerical integration over the cylinder
-double AbsorptionCorrection::doIntegration(const double& lambda, const std::vector<double>& lTotal) const
+/// Carries out the numerical integration over the sample for elastic instruments
+double AbsorptionCorrection::doIntegration(const double& lambda, const std::vector<double>& L2s) const
 {
   double integral = 0.0;
-  double exponent;
 
-  int el = lTotal.size();
-
+  int el = L2s.size();
   // Iterate over all the elements, summing up the integral
   for (int i = 0; i < el; ++i)
   {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
-    exponent = ((m_refAtten * lambda) + m_scattering) * (lTotal[i]);
+    const double exponent = ((m_refAtten * lambda) + m_scattering) * (m_L1s[i]+L2s[i]);
+    integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
+  }
+  
+  return integral;
+}
+
+/// Carries out the numerical integration over the sample for inelastic instruments
+double AbsorptionCorrection::doIntegration(const double& lambda_i,const double& lambda_f, const std::vector<double>& L2s) const
+{
+  double integral = 0.0;
+
+  int el = L2s.size();
+  // Iterate over all the elements, summing up the integral
+  for (int i = 0; i < el; ++i)
+  {
+    // Equation is exponent * element volume
+    // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )  (N.B. distances are in cm)
+    double exponent = ((m_refAtten * lambda_i) + m_scattering) * m_L1s[i];
+    exponent += ((m_refAtten * lambda_f) + m_scattering) * L2s[i];
     integral += (EXPONENTIAL(exponent) * (m_elementVolumes[i]));
   }
   
