@@ -11,6 +11,12 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 
+#if (IN_MANTID_GEOMETRY)
+#define GEOMETRY_DLL_EXPORT __declspec( dllexport )
+#else
+#define GEOMETRY_DLL_EXPORT __declspec( dllimport )
+#endif
+
 namespace Mantid
 {
 	
@@ -51,7 +57,7 @@ class Parameter;
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
-class DLLExport ParameterFactory
+class GEOMETRY_DLL_EXPORT ParameterFactory
 {
 public:
   template<class C>
