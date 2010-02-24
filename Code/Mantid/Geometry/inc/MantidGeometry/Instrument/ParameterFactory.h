@@ -11,10 +11,14 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 
+#ifdef _WIN32
 #if (IN_MANTID_GEOMETRY)
 #define GEOMETRY_DLL_EXPORT __declspec( dllexport )
 #else
 #define GEOMETRY_DLL_EXPORT __declspec( dllimport )
+#endif
+#else
+#define GEOMETRY_DLL_EXPORT
 #endif
 
 namespace Mantid
