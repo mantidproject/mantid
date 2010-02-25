@@ -6,11 +6,10 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidAPI/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <sstream>
 #include <iostream>
@@ -25,9 +24,9 @@ namespace API
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
     algorithm is used.
-* @param out Derivatives
-* @param xValues X values for data points
-* @param nData Number of data points
+ * @param out Derivatives
+ * @param xValues X values for data points
+ * @param nData Number of data points
  */
 void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
