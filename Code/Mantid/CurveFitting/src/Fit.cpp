@@ -738,7 +738,7 @@ namespace CurveFitting
 
 
       double* lOut = new double[l_data.n];  // to capture output from call to function()
-      function(NULL, lOut, l_data.X, l_data.n);
+      m_function->function( lOut, l_data.X, l_data.n);
 
       for(unsigned int i=0; i<l_data.n; i++) 
       {
@@ -787,7 +787,30 @@ namespace CurveFitting
   {
 
     if (in) m_function->updateActive(in);
-    m_function->functionWithConstraint(out,xValues,nData);
+    m_function->function(out,xValues,nData);
+  
+    // Add penalty factor to function if any constraint is violated
+
+    API::IConstraint* c = m_function->firstConstraint();
+    if (!c) return;
+
+    double penalty = c->check();
+    while(c = m_function->nextConstraint())
+    {
+      penalty += c->check();
+    }
+
+    // add penalty to first and last point and every 10th point in between
+    if ( penalty != 0.0 )
+    {
+      out[0] += penalty;
+      out[nData-1] += penalty;
+
+      for (int i = 9; i < nData-1; i+=10)
+      {
+        out[i] += penalty;
+      }
+    }
   }
 
   /** Calculate derivates of fitting function
@@ -800,7 +823,18 @@ namespace CurveFitting
   void Fit::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
   {
     if (in) m_function->updateActive(in);
-    m_function->functionDerivWithConstraint(out,xValues,nData);
+    m_function->functionDeriv(out,xValues,nData);
+
+    API::IConstraint* c = m_function->firstConstraint();
+    if (!c) return;
+
+    do
+    {  
+      double penalty = c->checkDeriv();
+      out->addNumberToColumn(penalty, m_function->getParameterIndex(*c));
+    }
+    while(c = m_function->nextConstraint());
+
     //std::cerr<<"-------------- Jacobian ---------------\n";
     //for(int i=0;i<nActive();i++)
     //  for(int j=0;j<nData;j++)

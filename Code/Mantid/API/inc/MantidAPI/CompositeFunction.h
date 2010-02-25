@@ -60,10 +60,6 @@ public:
   void function(double* out, const double* xValues, const int& nData);
   /// Derivatives of function with respect to active parameters
   void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
-  /// This method returns same as function() plus any penalty if constraints are violated
-  void functionWithConstraint(double* out, const double* xValues, const int& nData);
-  ///  This method returns same as functionDeriv() plus any penalty if constraints are violated
-  void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData);
   /// Derivatives to be used in covariance matrix calculation. 
   void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 
@@ -123,6 +119,10 @@ public:
   /// Overwrite IFunction methods
   void addConstraint(IConstraint* ic);
   void setParametersToSatisfyConstraints();
+  /// Get first constraint
+  IConstraint* firstConstraint();
+  /// Get next constraint
+  IConstraint* nextConstraint();
 
              /* CompositeFunction own methods */
 
@@ -176,6 +176,8 @@ private:
   int m_nActive;
   /// Total number of parameters
   int m_nParams;
+  /// Function counter to be used in nextConstraint
+  int m_iConstraintFunction;
 
   //friend class ParameterTie;
 };

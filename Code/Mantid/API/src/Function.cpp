@@ -16,6 +16,7 @@ namespace API
 
 /// Copy contructor
 Function::Function(const Function& f)
+:m_iConstraint(0)
 {
   m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
@@ -28,6 +29,7 @@ Function& Function::operator=(const Function& f)
   m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
   m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
+  m_iConstraint = f.m_iConstraint;
   return *this;
 }
 
@@ -52,6 +54,28 @@ Function::~Function()
 void Function::addConstraint(IConstraint* ic)
 {
   m_constraints.push_back(ic);
+}
+
+/// Get first constraint
+IConstraint* Function::firstConstraint()
+{
+  m_iConstraint = 0;
+  if (m_constraints.size())
+  {
+    return m_constraints[0];
+  }
+  return 0;
+}
+
+/// Get next constraint
+IConstraint* Function::nextConstraint()
+{
+  if (m_constraints.size() < 2 || m_iConstraint >= m_constraints.size() - 2)
+  {
+    return 0;
+  }
+  ++m_iConstraint;
+  return m_constraints[m_iConstraint];
 }
 
 void Function::setParametersToSatisfyConstraints()
@@ -199,58 +223,6 @@ void Function::declareParameter(const std::string& name,double initValue )
   m_parameters.push_back(initValue);
   m_explicitlySet.push_back(false);
 }
-
-/** This method calls function() and add any penalty to its output if constraints are violated.
-*
-* @param out function values of for the data points
-* @param xValues X values for data points
-* @param nData Number of data points
- */
-void Function::functionWithConstraint(double* out, const double* xValues, const int& nData)
-{
-  function(out, xValues, nData);
-
-
-  // Add penalty factor to function if any constraint is violated
-
-  double penalty = 0.0;
-  for (unsigned int i = 0; i < m_constraints.size(); i++)
-  {
-    penalty += m_constraints[i]->check();
-  }
-
-  // add penalty to first and last point and every 10th point in between
-  if ( penalty != 0.0 )
-  {
-    out[0] += penalty;
-    out[nData-1] += penalty;
-
-    for (int i = 9; i < nData-1; i+=10)
-    {
-      out[i] += penalty;
-    }
-  }
-}
-
-
-/** This method calls functionDeriv() and add any penalty to its output if constraints are violated.
-*
-* @param out Derivatives
-* @param xValues X values for data points
-* @param nData Number of data points
- */
-void Function::functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData)
-{
-  functionDeriv(out, xValues, nData);
-
-  for (unsigned i = 0; i < m_constraints.size(); i++)
-  {  
-    double penalty = m_constraints[i]->checkDeriv();
-
-    out->addNumberToColumn(penalty, getParameterIndex(*m_constraints[i]));
-  }
-}
-
 
 /**
  * Returns the "global" index of an active parameter.

@@ -64,11 +64,6 @@ public:
   /// Virtual destructor
   virtual ~Function();
 
-  /// This method returns same as function() plus any penalty if constraints are violated
-  void functionWithConstraint(double* out, const double* xValues, const int& nData);
-  ///  This method returns same as functionDeriv() plus any penalty if constraints are violated
-  void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData);
-
   /// Set i-th parameter
   virtual void setParameter(int, const double& value, bool explicitlySet = true);
   /// Get i-th parameter
@@ -114,6 +109,10 @@ public:
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic);
+  /// Get first constraint
+  virtual IConstraint* firstConstraint();
+  /// Get next constraint
+  virtual IConstraint* nextConstraint();
  
   void setParametersToSatisfyConstraints();
 
@@ -151,6 +150,8 @@ private:
   std::vector<IConstraint*> m_constraints;
   /// Flags of explicitly set parameters
   std::vector<bool> m_explicitlySet;
+  /// Constraint counter for use in nextConstraint()
+  int m_iConstraint;
 };
 
 } // namespace API
