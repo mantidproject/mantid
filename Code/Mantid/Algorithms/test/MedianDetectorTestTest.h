@@ -13,7 +13,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
-#include <math.h>
+#include <cmath>
 #include <iostream>
 #include <sstream>
 #include <fstream>

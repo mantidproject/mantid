@@ -1,6 +1,8 @@
-#ifndef LineIntersectVisit_h
-#define LineIntersectVisit_h
+#ifndef MANTID_GEOMETRY_LINEINTERSECTVISIT_H
+#define MANTID_GEOMETRY_LINEINTERSECTVISIT_H
 
+#include <MantidGeometry/Surfaces/BaseVisit.h>
+#include <MantidGeometry/Surfaces/Line.h>
 
 namespace Mantid
 {

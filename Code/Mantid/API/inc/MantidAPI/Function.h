@@ -73,7 +73,7 @@ public:
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const;
   /// Total number of parameters
-  virtual int nParams()const{return m_parameters.size();}
+  virtual int nParams()const{return static_cast<int>(m_parameters.size());}
   /// Returns the index of parameter name
   virtual int parameterIndex(const std::string& name)const;
   /// Returns the index of a parameter
@@ -84,7 +84,7 @@ public:
   virtual bool isExplicitlySet(int i)const;
 
   /// Number of active (in terms of fitting) parameters
-  virtual int nActive()const{return m_indexMap.size();}
+  virtual int nActive()const{return static_cast<int>(m_indexMap.size());}
   /// Returns "global" index of active parameter i
   virtual int indexOfActive(int i)const;
   /// Returns the name of active parameter i

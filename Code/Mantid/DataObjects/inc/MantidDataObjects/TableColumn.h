@@ -84,7 +84,7 @@ public:
     /// Type check
     bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
     /// Memory used by the column
-    long int sizeOfData()const{return m_data.size()*sizeof(Type);}
+    long int sizeOfData()const{return static_cast<long int>(m_data.size()*sizeof(Type));}
 
     /// Reference to the data.
     std::vector<Type>& data(){return m_data;}

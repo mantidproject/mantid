@@ -9,7 +9,10 @@ buildNotification.sendTestBuildStarted("Mantid")
 buildlog = open("../../../../logs/Mantid/testsBuild.log","w")
 builderr = open("../../../../logs/Mantid/testsBuildErr.log","w")
 buildargs=[]
-if platform.system() == 'Linux':
+if platform.system() == 'Windows':
+	if platform.architecture()[0] == '64bit':
+		buildargs.append("win64=1")
+elif platform.system() == 'Linux':
     buildargs.append('gcc44=1')
 sp.call("python build.py "+' '.join(buildargs),stdout=buildlog,stderr=builderr,shell=True)
 buildlog.close()

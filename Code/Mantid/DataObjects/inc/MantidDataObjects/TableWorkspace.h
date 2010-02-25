@@ -102,7 +102,7 @@ public:
     /// Removes a column.
     void removeColumn( const std::string& name);
     /// Number of columns in the workspace.
-    int columnCount() const {return m_columns.size();}
+    int columnCount() const {return static_cast<int>(m_columns.size());}
     /// Gets the shared pointer to a column.
     API::Column_sptr getColumn(const std::string& name);
     /// Gets the shared pointer to a column.

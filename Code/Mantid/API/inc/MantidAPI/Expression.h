@@ -79,7 +79,7 @@ namespace Mantid
       /// it empty.
       const std::vector<Expression>& terms()const{return m_terms;}
       /// Returns the number of argumens
-      int size()const{return m_terms.size();}
+      int size()const{return static_cast<int>(m_terms.size());}
       typedef std::vector<Expression>::const_iterator iterator;
       iterator begin()const{return m_terms.begin();}
       iterator end()const{return m_terms.end();}

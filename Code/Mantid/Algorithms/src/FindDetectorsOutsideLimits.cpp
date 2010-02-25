@@ -4,7 +4,7 @@
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <fstream>
-#include <math.h>
+#include <cmath>
 
 namespace Mantid
 {

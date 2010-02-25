@@ -4,7 +4,7 @@
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
 #include "MantidKernel/Exception.h"
 #include <limits>
-#include <math.h>
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

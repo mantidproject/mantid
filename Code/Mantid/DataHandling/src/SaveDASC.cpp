@@ -3,7 +3,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <boost/shared_ptr.hpp>
-#include <math.h>
+#include <cmath>
 #include <fstream>
 
 namespace Mantid

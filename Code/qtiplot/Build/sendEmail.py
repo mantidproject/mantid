@@ -14,7 +14,14 @@ from time import strftime
 smtpserver = 'outbox.rl.ac.uk'
 #RECIPIENTS = ['martyn.gigg@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-SENDER = platform.system() + 'BuildServer1@mantidproject.org'
+SENDER = platform.system() 
+#Create Subject
+subject = 'Subject: ' + platform.system()
+if platform.architecture()[0] == '64bit':
+    SENDER += '64'
+    subject += '64'
+SENDER += 'BuildServer1@mantidproject.org'
+subject += ' Build Report: '
 
 #Set up email content 
 buildSuccess = True
@@ -76,8 +83,6 @@ message += 'MANTIDPLOT BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
-#Create Subject
-subject = 'Subject: ' + platform.system() + ' Build Report: '
 
 if buildSuccess:
 	subject += '[MantidPlot Build Successful]\n\n\n'

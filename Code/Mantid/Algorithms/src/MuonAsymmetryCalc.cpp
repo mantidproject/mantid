@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 #include "MantidDataObjects/Workspace2D.h"

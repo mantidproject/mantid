@@ -1,5 +1,4 @@
 #include <iostream>
-//#include <stdexcept>
 #include <cmath>
 #include <vector>
 #include <cstdlib>
@@ -53,15 +52,11 @@ void V3D::spherical(const double& R, const double& theta, const double& phi)
     \param A :: V3D to copy
     \return *this
   */
-V3D&
-V3D::operator=(const V3D& A)
+V3D& V3D::operator=(const V3D& rhs)
 {
-  if (this!=&A)
-    {
-      x=A.x;
-      y=A.y;
-      z=A.z;
-    }
+  x = rhs.x;
+  y = rhs.y;
+  z = rhs.z;
   return *this;
 }
 
@@ -258,9 +253,9 @@ V3D::operator/=(const double D)
 bool
 V3D::operator==(const V3D& v) const
 {
-  return (fabs(x-v.x)>Tolerance ||
-	  fabs(y-v.y)>Tolerance ||
-	  fabs(z-v.z)>Tolerance)  ?
+  return (std::fabs(x-v.x)>Tolerance ||
+    std::fabs(y-v.y)>Tolerance ||
+    std::fabs(z-v.z)>Tolerance)  ?
     false : true;
 }
 
@@ -422,11 +417,7 @@ V3D::scalar_prod(const V3D& V) const
 V3D
 V3D::cross_prod(const V3D& v) const
 {
-  V3D out;
-  out.x=y*v.z-z*v.y;
-  out.y=z*v.x-x*v.z;
-  out.z=x*v.y-y*v.x;
-  return out;
+  return V3D(y*v.z-z*v.y, z*v.x-x*v.z,x*v.y-y*v.x);
 }
 
   /**

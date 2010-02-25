@@ -46,19 +46,19 @@ namespace Mantid
     /// @endcond
 
     Object::Object() :
-      ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
-		  AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false),bGeometryCaching(false),
-		  vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
-		  vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>())
+    ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
+      AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false),bGeometryCaching(false),
+      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
+      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>())
       /*!
       Defaut constuctor, set temperature to 300K and material to vacuum
       */
     {
-		handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
-	}
+      handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+    }
 
     Object::Object(const Object& A) :
-      ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
+    ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
       TopRule((A.TopRule) ? A.TopRule->clone() : 0),
       AABBxMax(A.AABBxMax),
       AABByMax(A.AABByMax),
@@ -66,16 +66,16 @@ namespace Mantid
       AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin),
       AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),bGeometryCaching(A.bGeometryCaching),
-	  vtkCacheReader(A.vtkCacheReader),
-	  vtkCacheWriter(A.vtkCacheWriter),
+      vtkCacheReader(A.vtkCacheReader),
+      vtkCacheWriter(A.vtkCacheWriter),
       SurList(A.SurList)
       /*!
       Copy constructor
       \param A :: Object to copy
       */
     {
-		handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
-	}
+      handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+    }
 
     Object&
       Object::operator=(const Object& A)
@@ -112,8 +112,8 @@ namespace Mantid
       */
     {
       delete TopRule;
-	  //for(int i=0;i<SurList.size();i++)
-		 // delete SurList[i];
+      //for(int i=0;i<SurList.size();i++)
+      // delete SurList[i];
     }
 
     int
@@ -311,7 +311,7 @@ namespace Mantid
           }
         }
       }
-      
+
       //PLog.debug() <<"Populated surfaces =="<<Rcount<<" in "<<ObjName<<std::endl;
 
       createSurfaceList();
@@ -415,10 +415,10 @@ namespace Mantid
       - (d) Return 1 / 0 depending on test (c)
 
       \todo This needs to be completed to deal with apex points
-            In the case of a apex (e.g. top of a pyramid) you need
-            to interate over all clusters of points on the Snorm
-            ie. sum of 2, sum of 3 sum of 4. etc. to be certain
-            to get a correct normal test.
+      In the case of a apex (e.g. top of a pyramid) you need
+      to interate over all clusters of points on the Snorm
+      ie. sum of 2, sum of 3 sum of 4. etc. to be certain
+      to get a correct normal test.
 
       \param Pt :: Point to check
       \returns 1 if the point is on the surface
@@ -430,14 +430,14 @@ namespace Mantid
       for(vc=SurList.begin();vc!=SurList.end();vc++)
       {
         if ((*vc)->onSurface(Pt))
-          {
-            Snorms.push_back((*vc)->surfaceNormal(Pt));
-            // can check direct normal here since one success
-            // means that we can return 1 and finish
-            if (!checkSurfaceValid(Pt,Snorms.back()))
-              return 1;
-          }
-       }
+        {
+          Snorms.push_back((*vc)->surfaceNormal(Pt));
+          // can check direct normal here since one success
+          // means that we can return 1 and finish
+          if (!checkSurfaceValid(Pt,Snorms.back()))
+            return 1;
+        }
+      }
       std::list<Geometry::V3D>::const_iterator xs,ys;
       Geometry::V3D NormPair;
       for(xs=Snorms.begin();xs!=Snorms.end();xs++)
@@ -466,7 +466,7 @@ namespace Mantid
       */
     {
       int status(0);
-	  Geometry::V3D tmp=C+Nm*(Surface::getSurfaceTolerance()*5.0);
+      Geometry::V3D tmp=C+Nm*(Surface::getSurfaceTolerance()*5.0);
       status= (!isValid(tmp)) ? 1 : -1;
       tmp-= Nm*(Surface::getSurfaceTolerance()*10.0);
       status+= (!isValid(tmp)) ? 1 : -1;
@@ -819,7 +819,7 @@ namespace Mantid
     }
 
     int
-    Object::interceptSurface(Geometry::Track& UT) const
+      Object::interceptSurface(Geometry::Track& UT) const
       /*!
       Given a track, fill the track with valid section
       \param UT :: Initial track
@@ -828,7 +828,6 @@ namespace Mantid
     {
       int cnt = UT.count();    // Number of intersections original track
       // Loop over all the surfaces.
-
       LineIntersectVisit LI(UT.getInit(),UT.getUVec());
       std::vector<const Surface*>::const_iterator vc;
       for(vc=SurList.begin();vc!=SurList.end();vc++)
@@ -875,30 +874,30 @@ namespace Mantid
     }
 
     double
-        Object::solidAngle(const Geometry::V3D& observer) const
-        /*!
-        Find soild angle of object wrt the observer. This interface routine calls either
-        getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of triangles
-        in the discete surface representation.
-        @param observer :: point to measure solid angle from
-        @return :: estimate of solid angle of object. Accuracy depends on object shape.
-        */
+      Object::solidAngle(const Geometry::V3D& observer) const
+      /*!
+      Find soild angle of object wrt the observer. This interface routine calls either
+      getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of triangles
+      in the discete surface representation.
+      @param observer :: point to measure solid angle from
+      @return :: estimate of solid angle of object. Accuracy depends on object shape.
+      */
     {
-        if( this->NumberOfTriangles()>30000 )
-            return rayTraceSolidAngle(observer);
-        return triangleSolidAngle(observer);
+      if( this->NumberOfTriangles()>30000 )
+        return rayTraceSolidAngle(observer);
+      return triangleSolidAngle(observer);
     }
 
     double
-        Object::solidAngle(const Geometry::V3D& observer, const Geometry::V3D& scaleFactor) const
-        /*!
-        Find soild angle of object wrt the observer with a scaleFactor for the object.
-        @param observer :: point to measure solid angle from
-        @param scaleFactor :: V3D giving scaling of the object
-        @return :: estimate of solid angle of object. Accuracy depends on triangulation quality.
-        */
+      Object::solidAngle(const Geometry::V3D& observer, const Geometry::V3D& scaleFactor) const
+      /*!
+      Find soild angle of object wrt the observer with a scaleFactor for the object.
+      @param observer :: point to measure solid angle from
+      @param scaleFactor :: V3D giving scaling of the object
+      @return :: estimate of solid angle of object. Accuracy depends on triangulation quality.
+      */
     {
-        return triangleSolidAngle(observer,scaleFactor);
+      return triangleSolidAngle(observer,scaleFactor);
     }
 
     double
@@ -916,328 +915,332 @@ namespace Mantid
       // Accuracy is of the order of 1% for objects with an accurate boundng box, though
       // less in the case of high aspect ratios.
       //
-	  // resBB controls accuracy and cost - linear accuracy improvement with increasing res,
-	  // but quadratic increase in run time. If no bounding box found, resNoBB used instead.
-	  const int resNoBB=200,resBB=100,resPhiMin=10;
+      // resBB controls accuracy and cost - linear accuracy improvement with increasing res,
+      // but quadratic increase in run time. If no bounding box found, resNoBB used instead.
+      const int resNoBB=200,resBB=100,resPhiMin=10;
       int res=resNoBB,itheta,jphi,resPhi;
       double theta,phi,sum,dphi,dtheta;
       if( this->isValid(observer) && ! this->isOnSide(observer) )
-         return 4*M_PI;  // internal point
+        return 4*M_PI;  // internal point
       if( this->isOnSide(observer) )
-         return 2*M_PI;  // this is wrong if on an edge
-	  // Use BB if available, and if observer not within it
-	  const double big(1e10);
-	  double xmin,ymin,zmin,xmax,ymax,zmax,thetaMax=M_PI;
-	  bool useBB=false,usePt=false;
-	  Geometry::V3D ptInObject,axis;
-	  Quat zToPt;
+        return 2*M_PI;  // this is wrong if on an edge
+      // Use BB if available, and if observer not within it
+      const double big(1e10);
+      double xmin,ymin,zmin,xmax,ymax,zmax,thetaMax=M_PI;
+      bool useBB=false,usePt=false;
+      Geometry::V3D ptInObject,axis;
+      Quat zToPt;
 
-	  xmin=ymin=zmin=-big;
-	  xmax=ymax=zmax=big;
-	  getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	  // Is the bounding box a reasonable one?
-	  if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
+      xmin=ymin=zmin=-big;
+      xmax=ymax=zmax=big;
+      getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+      // Is the bounding box a reasonable one?
+      if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
       {
-            // If observer not inside bounding box, then can make use of it
-			if( !inBoundingBox(observer,xmax,ymax,zmax,xmin,ymin,zmin) )
-			{
-				useBB=usePt=true;
-				thetaMax=bbAngularWidth(observer,xmax,ymax,zmax,xmin,ymin,zmin);
-				ptInObject=Geometry::V3D(0.5*(xmin+xmax),0.5*(ymin+ymax),0.5*(zmin+zmax));
-				res=resBB;
-			}
+        // If observer not inside bounding box, then can make use of it
+        if( !inBoundingBox(observer,xmax,ymax,zmax,xmin,ymin,zmin) )
+        {
+          useBB=usePt=true;
+          thetaMax=bbAngularWidth(observer,xmax,ymax,zmax,xmin,ymin,zmin);
+          ptInObject=Geometry::V3D(0.5*(xmin+xmax),0.5*(ymin+ymax),0.5*(zmin+zmax));
+          res=resBB;
+        }
       }
-	  // Try and find a point in the object if useful bounding box not found
+      // Try and find a point in the object if useful bounding box not found
       if( !useBB )
-		  usePt=getPointInObject(ptInObject)==1;
-	  if( usePt )
-	  {
-		  // found point in object, now get rotation that maps z axis to this direction from observer
-		  ptInObject-=observer;
-		  double theta0=-180.0/M_PI*acos(ptInObject.Z()/ptInObject.norm());
-		  axis=ptInObject.cross_prod(Geometry::V3D (0.0,0.0,1.0));
-		  if(axis.nullVector()) axis=Geometry::V3D (1.0,0.0,0.0);
-		  zToPt(theta0,axis);
-	  }
+      {
+        usePt=getPointInObject(ptInObject)==1;
+      }
+      if( usePt )
+      {
+        // found point in object, now get rotation that maps z axis to this direction from observer
+        ptInObject-=observer;
+        double theta0=-180.0/M_PI*acos(ptInObject.Z()/ptInObject.norm());
+        Geometry::V3D zDir(0.0,0.0,1.0);
+        axis=ptInObject.cross_prod(zDir);
+        if(axis.nullVector()) axis=Geometry::V3D (1.0,0.0,0.0);
+        zToPt(theta0,axis);
+      }
       dtheta=thetaMax/res;
-	  int count=0,countPhi;
-	  sum=0.;
+      int count=0,countPhi;
+      sum=0.;
       for(itheta=1;itheta<=res;itheta++)
       {
-         // itegrate theta from 0 to maximum from bounding box, or PI otherwise
-         theta=thetaMax*(itheta-0.5)/res;
-         resPhi=static_cast<int> (res*sin(theta));
-         if(resPhi<resPhiMin) resPhi=resPhiMin;
-         dphi=2*M_PI/resPhi;
-		 countPhi=0;
-         for(jphi=1;jphi<=resPhi;jphi++)
-         {
-		    // integrate phi from 0 to 2*PI
-            phi=2.0*M_PI*(jphi-0.5)/resPhi;
-			Geometry::V3D dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-			if( usePt ) zToPt.rotate(dir);
-			if( !useBB || lineHitsBoundingBox(observer,dir,xmax,ymax,zmax,xmin,ymin,zmin) )
-			{
-               Track tr(observer, dir);
-               if(this->interceptSurface(tr)>0)
-               {
-                  sum+=dtheta*dphi*sin(theta);
-				  countPhi++;
-		       }
-			}
-		 }
-		 // this break (only used in no BB defined) may be wrong if object has hole in middle
-		 if(!useBB && countPhi==0) break;
-		 count+=countPhi;
-	  }
-	  if(!useBB && count<resPhiMin+1)
-	  {
-		  // case of no bound box defined and object has few if any points in sum
-		  // redo integration on finer scale
-	     thetaMax=thetaMax*(itheta-0.5)/res;
-         dtheta=thetaMax/res;
-	     sum=0;
-         for(itheta=1;itheta<=res;itheta++)
-         {
-            theta=thetaMax*(itheta-0.5)/res;
-            resPhi=static_cast<int> (res*sin(theta));
-            if(resPhi<resPhiMin) resPhi=resPhiMin;
-            dphi=2*M_PI/resPhi;
-			countPhi=0;
-            for(jphi=1;jphi<=resPhi;jphi++)
+        // itegrate theta from 0 to maximum from bounding box, or PI otherwise
+        theta=thetaMax*(itheta-0.5)/res;
+        resPhi=static_cast<int> (res*sin(theta));
+        if(resPhi<resPhiMin) resPhi=resPhiMin;
+        dphi=2*M_PI/resPhi;
+        countPhi=0;
+        for(jphi=1;jphi<=resPhi;jphi++)
+        {
+          // integrate phi from 0 to 2*PI
+          phi=2.0*M_PI*(jphi-0.5)/resPhi;
+          Geometry::V3D dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+          if( usePt ) zToPt.rotate(dir);
+          if( !useBB || lineHitsBoundingBox(observer,dir,xmax,ymax,zmax,xmin,ymin,zmin) )
+          {
+            Track tr(observer, dir);
+            if(this->interceptSurface(tr)>0)
             {
-               phi=2.0*M_PI*(jphi-0.5)/resPhi;
-	    	   Geometry::V3D dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
-			   if( usePt ) zToPt.rotate(dir);
-               Track tr(observer, dir);
-               if(this->interceptSurface(tr)>0)
-               {
-                  sum+=dtheta*dphi*sin(theta);
-			      countPhi++;
-		       }
-		    }
-		    if(countPhi==0) break;
-	     }
-	  }
+              sum+=dtheta*dphi*sin(theta);
+              countPhi++;
+            }
+          }
+        }
+        // this break (only used in no BB defined) may be wrong if object has hole in middle
+        if(!useBB && countPhi==0) break;
+        count+=countPhi;
+      }
+      if(!useBB && count<resPhiMin+1)
+      {
+        // case of no bound box defined and object has few if any points in sum
+        // redo integration on finer scale
+        thetaMax=thetaMax*(itheta-0.5)/res;
+        dtheta=thetaMax/res;
+        sum=0;
+        for(itheta=1;itheta<=res;itheta++)
+        {
+          theta=thetaMax*(itheta-0.5)/res;
+          resPhi=static_cast<int> (res*sin(theta));
+          if(resPhi<resPhiMin) resPhi=resPhiMin;
+          dphi=2*M_PI/resPhi;
+          countPhi=0;
+          for(jphi=1;jphi<=resPhi;jphi++)
+          {
+            phi=2.0*M_PI*(jphi-0.5)/resPhi;
+            Geometry::V3D dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+            if( usePt ) zToPt.rotate(dir);
+            Track tr(observer, dir);
+            if(this->interceptSurface(tr)>0)
+            {
+              sum+=dtheta*dphi*sin(theta);
+              countPhi++;
+            }
+          }
+          if(countPhi==0) break;
+        }
+      }
 
       return sum;
     }
 
     /**
-     * Find the solid angle of a triangle defined by vectors a,b,c from point "observer"
-     *
-     * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
-     *
-     * @param a :: first point of triangle
-     * @param b :: second point of triangle
-     * @param c :: third point of triangle
-     * @param observer :: point from which solid angle is required
-     * @return :: solid angle of triangle in Steradians.
-     */
+    * Find the solid angle of a triangle defined by vectors a,b,c from point "observer"
+    *
+    * formula (Oosterom) O=2atan([a,b,c]/(abc+(a.b)c+(a.c)b+(b.c)a))
+    *
+    * @param a :: first point of triangle
+    * @param b :: second point of triangle
+    * @param c :: third point of triangle
+    * @param observer :: point from which solid angle is required
+    * @return :: solid angle of triangle in Steradians.
+    */
     double Object::getTriangleSolidAngle(const V3D& a, const V3D& b, const V3D& c, const V3D& observer) const
     {
-        const V3D ao=a-observer;
-        const V3D bo=b-observer;
-        const V3D co=c-observer;
-        const double modao=ao.norm();
-        const double modbo=bo.norm();
-        const double modco=co.norm();
-        const double aobo=ao.scalar_prod(bo);
-        const double aoco=ao.scalar_prod(co);
-        const double boco=bo.scalar_prod(co);
-        const double scalTripProd=ao.scalar_prod(bo.cross_prod(co));
-        const double denom=modao*modbo*modco+modco*aobo+modbo*aoco+modao*boco;
-        if(denom!=0.0)
-            return 2.0*atan(scalTripProd/denom);
-        else
-            return 0.0; // not certain this is correct
+      const V3D ao=a-observer;
+      const V3D bo=b-observer;
+      const V3D co=c-observer;
+      const double modao=ao.norm();
+      const double modbo=bo.norm();
+      const double modco=co.norm();
+      const double aobo=ao.scalar_prod(bo);
+      const double aoco=ao.scalar_prod(co);
+      const double boco=bo.scalar_prod(co);
+      const double scalTripProd=ao.scalar_prod(bo.cross_prod(co));
+      const double denom=modao*modbo*modco+modco*aobo+modbo*aoco+modao*boco;
+      if(denom!=0.0)
+        return 2.0*atan(scalTripProd/denom);
+      else
+        return 0.0; // not certain this is correct
     }
 
 
-	/**
-	 * Find solid angle of object from point "observer" using the
-	 * OC triangluation of the object, if it exists
-	 *
-	 * @param observer :: Point from which solid angle is required
-	 */
-	double Object::triangleSolidAngle(const V3D& observer) const
-    {
-       //
-       // Because the triangles from OC are not consistently ordered wrt their outward normal
-       // internal points give incorrect solid angle. Surface points are difficult to get right
-       // with the triangle based method. Hence catch these two (unlikely) cases.
-       if(!boolBounded)
-       {
-           const double big(1e8);
-           AABBxMax=AABByMax=AABBzMax=big; AABBxMin=AABByMin=AABBzMin=-big;
-           getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
-       }
-       if(inBoundingBox(observer,AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin))
-       {
-           if(isValid(observer))
-           {
-               if(isOnSide(observer))
-                   return(2.0*M_PI);
-               else
-                   return(4.0*M_PI);
-           }
-       }
-
-       int nTri = this->NumberOfTriangles();
-       //
-       // If triangulation is not available fall back to ray tracing method, unless
-       // object is a standard shape, currently: sphere, cuboid or cylinder.
-       //
-       if(nTri==0)
-       {
-	 double height(0.0),radius(0.0);
-	 int type(0);
-	 std::vector<Mantid::Geometry::V3D> geometry_vectors(0);
-	 this->GetObjectGeom( type, geometry_vectors, radius, height);
-	 if(type==1)
-	   return CuboidSolidAngle(observer, geometry_vectors);
-	 else if(type==2)
-	   return SphereSolidAngle(observer, geometry_vectors, radius);
-	 else if(type==3)
-	   return CylinderSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
-	 else if(type==4)
-	   return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
-	 return rayTraceSolidAngle(observer);
-       }
-       
-       double* vertices = this->getTriangleVertices();
-       int *faces = this->getTriangleFaces();
-       double sangle(0.0), sneg(0.0);
-       for(int i=0; i < nTri; i++)
-       {
-           int p1 = faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
-           V3D vp1 = V3D(vertices[3*p1],vertices[3*p1+1],vertices[3*p1+2]);
-           V3D vp2 = V3D(vertices[3*p2],vertices[3*p2+1],vertices[3*p2+2]);
-           V3D vp3 = V3D(vertices[3*p3],vertices[3*p3+1],vertices[3*p3+2]);
-	   double sa = getTriangleSolidAngle(vp1,vp2,vp3,observer);
-           if(sa > 0.0)
-	   {
-	     sangle += sa;
-	   }
-           else
-	   {
-	     sneg += sa;
-	   }
-       }
-       return 0.5*(sangle-sneg);
-    }
     /**
-     * Find solid angle of object from point "observer" using the
-     * OC triangluation of the object, if it exists. This method expects a
-     * scaling vector scaleFactor that scales the three axes.
-     *
-     * @param observer :: Point from which solid angle is required - THIS MUST NOT BE SCALED
-     * @param scaleFactor :: V3D each component giving the scaling of the object only (not observer)
+    * Find solid angle of object from point "observer" using the
+    * OC triangluation of the object, if it exists
+    *
+    * @param observer :: Point from which solid angle is required
     */
-	double Object::triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) const
+    double Object::triangleSolidAngle(const V3D& observer) const
     {
-       //
-       // Because the triangles from OC are not consistently ordered wrt their outward normal
-       // internal points give incorrect solid angle. Surface points are difficult to get right
-       // with the triangle based method. Hence catch these two (unlikely) cases.
-       if(!boolBounded)
-       {
-           const double big(1e8);
-           AABBxMax=AABByMax=AABBzMax=big; AABBxMin=AABByMin=AABBzMin=-big;
-           getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
-       }
-       double sx=scaleFactor[0],sy=scaleFactor[1],sz=scaleFactor[2];
-       V3D sObserver=observer/scaleFactor;
-       if(inBoundingBox(sObserver,AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin))
-       {
-           if(isValid(sObserver))
-           {
-               if(isOnSide(sObserver))
-                   return(2.0*M_PI);
-               else
-                   return(4.0*M_PI);
-           }
-       }
-	   int nTri=this->NumberOfTriangles();
-       //
-       // If triangulation is not available fall back to ray tracing method, unless
-       // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
-       // and Cone cases as well.
-       //
-       if(nTri==0)
-       {
-	 double height=0.0,radius(0.0);
-           int type;
-           std::vector<Geometry::V3D> vectors;
-           this->GetObjectGeom( type, vectors, radius, height);
-           if(type==1)
-           {
-               for(size_t i=0;i<vectors.size();i++)
-                   vectors[i] *= scaleFactor;
-               return CuboidSolidAngle(observer,vectors);
-           }
-           else if(type==2) // this is wrong for scaled objects
-               return SphereSolidAngle(observer,vectors,radius);
-           //
-           // No special case, do the ray trace.
-           //
-           return rayTraceSolidAngle(observer); // so is this
-       }
-	   double* vertices=this->getTriangleVertices();
-	   int *faces=this->getTriangleFaces();
-	   double sangle(0.0), sneg(0.0);
-       for(int i=0;i<nTri;i++)
-       {
-           int p1=faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
-           // would be more efficient to pre-multiply the vertices (copy of) by these factors beforehand
-           V3D vp1=V3D(sx*vertices[3*p1],sy*vertices[3*p1+1],sz*vertices[3*p1+2]);
-           V3D vp2=V3D(sx*vertices[3*p2],sy*vertices[3*p2+1],sz*vertices[3*p2+2]);
-           V3D vp3=V3D(sx*vertices[3*p3],sy*vertices[3*p3+1],sz*vertices[3*p3+2]);
-           double sa=getTriangleSolidAngle(vp1,vp2,vp3,observer);
-           if(sa > 0.0)
-              sangle+=sa;
-           else
-              sneg+=sa;
-     //    std::cout << vp1 << vp2 << vp2;
-       }
-       return(0.5*(sangle-sneg));
-    }
-    /**
-     * Get the solid angle of a sphere defined by centre and radius using an analytic formula
-     * @param observer :: point from which solid angle required
-     * @param vectors :: vector of V3D - the only value is the sphere centre
-     * @param radius :: sphere radius
-     * @return :: solid angle of sphere
-     */
-	double Object::SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const
-	{
-        const double distance=(observer-vectors[0]).norm();
-		const double tol=Surface::getSurfaceTolerance();
-        if(distance>radius+tol)
+      //
+      // Because the triangles from OC are not consistently ordered wrt their outward normal
+      // internal points give incorrect solid angle. Surface points are difficult to get right
+      // with the triangle based method. Hence catch these two (unlikely) cases.
+      if(!boolBounded)
+      {
+        const double big(1e8);
+        AABBxMax=AABByMax=AABBzMax=big; AABBxMin=AABByMin=AABBzMin=-big;
+        getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
+      }
+      if(inBoundingBox(observer,AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin))
+      {
+        if(isValid(observer))
         {
-           const double sa=2.0*M_PI*(1.0-cos(asin(radius/distance)));
-           return sa;
+          if(isOnSide(observer))
+            return(2.0*M_PI);
+          else
+            return(4.0*M_PI);
         }
-        else if(distance<radius-tol)
-           return 4.0*M_PI; // internal point
+      }
+
+      int nTri = this->NumberOfTriangles();
+      //
+      // If triangulation is not available fall back to ray tracing method, unless
+      // object is a standard shape, currently: sphere, cuboid or cylinder.
+      //
+      if(nTri==0)
+      {
+        double height(0.0),radius(0.0);
+        int type(0);
+        std::vector<Mantid::Geometry::V3D> geometry_vectors(0);
+        this->GetObjectGeom( type, geometry_vectors, radius, height);
+        if(type==1)
+          return CuboidSolidAngle(observer, geometry_vectors);
+        else if(type==2)
+          return SphereSolidAngle(observer, geometry_vectors, radius);
+        else if(type==3)
+          return CylinderSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
+        else if(type==4)
+          return ConeSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
+        return rayTraceSolidAngle(observer);
+      }
+
+      double* vertices = this->getTriangleVertices();
+      int *faces = this->getTriangleFaces();
+      double sangle(0.0), sneg(0.0);
+      for(int i=0; i < nTri; i++)
+      {
+        int p1 = faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
+        V3D vp1 = V3D(vertices[3*p1],vertices[3*p1+1],vertices[3*p1+2]);
+        V3D vp2 = V3D(vertices[3*p2],vertices[3*p2+1],vertices[3*p2+2]);
+        V3D vp3 = V3D(vertices[3*p3],vertices[3*p3+1],vertices[3*p3+2]);
+        double sa = getTriangleSolidAngle(vp1,vp2,vp3,observer);
+        if(sa > 0.0)
+        {
+          sangle += sa;
+        }
         else
-           return 2.0*M_PI; // surface point
+        {
+          sneg += sa;
+        }
+      }
+      return 0.5*(sangle-sneg);
     }
- 
     /**
-     * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle based soild angle
-     * calculation. Should work for parallel-piped as well.
-     * @param observer :: point from which solid angle required
-     * @param vectors :: vector of V3D - the values are the 4 points used to defined the cuboid
-     * @return :: solid angle of cuboid - good accuracy
-     */
-	double Object::CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const
-	{
+    * Find solid angle of object from point "observer" using the
+    * OC triangluation of the object, if it exists. This method expects a
+    * scaling vector scaleFactor that scales the three axes.
+    *
+    * @param observer :: Point from which solid angle is required - THIS MUST NOT BE SCALED
+    * @param scaleFactor :: V3D each component giving the scaling of the object only (not observer)
+    */
+    double Object::triangleSolidAngle(const V3D& observer, const V3D& scaleFactor) const
+    {
+      //
+      // Because the triangles from OC are not consistently ordered wrt their outward normal
+      // internal points give incorrect solid angle. Surface points are difficult to get right
+      // with the triangle based method. Hence catch these two (unlikely) cases.
+      if(!boolBounded)
+      {
+        const double big(1e8);
+        AABBxMax=AABByMax=AABBzMax=big; AABBxMin=AABByMin=AABBzMin=-big;
+        getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
+      }
+      double sx=scaleFactor[0],sy=scaleFactor[1],sz=scaleFactor[2];
+      V3D sObserver=observer/scaleFactor;
+      if(inBoundingBox(sObserver,AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin))
+      {
+        if(isValid(sObserver))
+        {
+          if(isOnSide(sObserver))
+            return(2.0*M_PI);
+          else
+            return(4.0*M_PI);
+        }
+      }
+      int nTri=this->NumberOfTriangles();
+      //
+      // If triangulation is not available fall back to ray tracing method, unless
+      // object is a standard shape, currently Cuboid or Sphere. Should add Cylinder
+      // and Cone cases as well.
+      //
+      if(nTri==0)
+      {
+        double height=0.0,radius(0.0);
+        int type;
+        std::vector<Geometry::V3D> vectors;
+        this->GetObjectGeom( type, vectors, radius, height);
+        if(type==1)
+        {
+          for(size_t i=0;i<vectors.size();i++)
+            vectors[i] *= scaleFactor;
+          return CuboidSolidAngle(observer,vectors);
+        }
+        else if(type==2) // this is wrong for scaled objects
+          return SphereSolidAngle(observer,vectors,radius);
+        //
+        // No special case, do the ray trace.
+        //
+        return rayTraceSolidAngle(observer); // so is this
+      }
+      double* vertices=this->getTriangleVertices();
+      int *faces=this->getTriangleFaces();
+      double sangle(0.0), sneg(0.0);
+      for(int i=0;i<nTri;i++)
+      {
+        int p1=faces[i*3],p2=faces[i*3+1],p3=faces[i*3+2];
+        // would be more efficient to pre-multiply the vertices (copy of) by these factors beforehand
+        V3D vp1=V3D(sx*vertices[3*p1],sy*vertices[3*p1+1],sz*vertices[3*p1+2]);
+        V3D vp2=V3D(sx*vertices[3*p2],sy*vertices[3*p2+1],sz*vertices[3*p2+2]);
+        V3D vp3=V3D(sx*vertices[3*p3],sy*vertices[3*p3+1],sz*vertices[3*p3+2]);
+        double sa=getTriangleSolidAngle(vp1,vp2,vp3,observer);
+        if(sa > 0.0)
+          sangle+=sa;
+        else
+          sneg+=sa;
+        //    std::cout << vp1 << vp2 << vp2;
+      }
+      return(0.5*(sangle-sneg));
+    }
+    /**
+    * Get the solid angle of a sphere defined by centre and radius using an analytic formula
+    * @param observer :: point from which solid angle required
+    * @param vectors :: vector of V3D - the only value is the sphere centre
+    * @param radius :: sphere radius
+    * @return :: solid angle of sphere
+    */
+    double Object::SphereSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors, const double radius) const
+    {
+      const double distance=(observer-vectors[0]).norm();
+      const double tol=Surface::getSurfaceTolerance();
+      if(distance>radius+tol)
+      {
+        const double sa=2.0*M_PI*(1.0-cos(asin(radius/distance)));
+        return sa;
+      }
+      else if(distance<radius-tol)
+        return 4.0*M_PI; // internal point
+      else
+        return 2.0*M_PI; // surface point
+    }
+
+    /**
+    * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle based soild angle
+    * calculation. Should work for parallel-piped as well.
+    * @param observer :: point from which solid angle required
+    * @param vectors :: vector of V3D - the values are the 4 points used to defined the cuboid
+    * @return :: solid angle of cuboid - good accuracy
+    */
+    double Object::CuboidSolidAngle(const V3D observer, const std::vector<Geometry::V3D> vectors) const
+    {
       // Build bounding points, then set up map of 12 bounding
       // triangles defining the 6 surfaces of the bounding box. Using a consistent
       // ordering of points the "away facing" triangles give -ve contributions to the
       // solid angle and hence are ignored.
       std::vector<V3D> pts;
+      pts.reserve(8);
       Geometry::V3D dx=vectors[1]-vectors[0];
       Geometry::V3D dz=vectors[3]-vectors[0];
       pts.push_back(vectors[2]); pts.push_back(vectors[2]+dx);
@@ -1245,13 +1248,8 @@ namespace Mantid
       pts.push_back(vectors[2]+dz); pts.push_back(vectors[2]+dz+dx);
       pts.push_back(vectors[1]+dz); pts.push_back(vectors[0]+dz);
 
-      std::vector<std::vector<int> > triMap;
-      for(int i=0;i<12;i++)
-      {
-          triMap.push_back(std::vector<int>());
-          for(int j=0;j<3;j++)
-              triMap[i].push_back(0);
-      }
+      const int ntriangles(12);
+      std::vector<std::vector<int> > triMap(ntriangles, std::vector<int>(3, 0));
       triMap[0][0]=1; triMap[0][1]=4; triMap[0][2]=3;triMap[1][0]=3;triMap[1][1]=2;triMap[1][2]=1;
       triMap[2][0]=5; triMap[2][1]=6; triMap[2][2]=7;triMap[3][0]=7;triMap[3][1]=8;triMap[3][2]=5;
       triMap[4][0]=1; triMap[4][1]=2; triMap[4][2]=6;triMap[5][0]=6;triMap[5][1]=5;triMap[5][2]=1;
@@ -1259,16 +1257,16 @@ namespace Mantid
       triMap[8][0]=3; triMap[8][1]=4; triMap[8][2]=8;triMap[9][0]=8;triMap[9][1]=7;triMap[9][2]=3;
       triMap[10][0]=1; triMap[10][1]=5; triMap[10][2]=8;triMap[11][0]=8;triMap[11][1]=4;triMap[11][2]=1;
       double sangle=0.0;
-      for(unsigned int i=0;i<triMap.size();i++)
+      for(unsigned int i=0; i < ntriangles;i++)
       {
-          double sa=getTriangleSolidAngle(pts[triMap[i][0]-1],pts[triMap[i][1]-1],pts[triMap[i][2]-1],observer);
-          if(sa>0)
-              sangle+=sa;
+        double sa=getTriangleSolidAngle(pts[triMap[i][0]-1],pts[triMap[i][1]-1],pts[triMap[i][2]-1],observer);
+        if(sa>0)
+          sangle+=sa;
       }
       return(sangle);
-   }
+    }
 
-   /**
+    /**
     * Calculate the solid angle for a cylinder using triangulation.
     * @param observer The observer's point
     * @param centre The centre vector
@@ -1278,137 +1276,137 @@ namespace Mantid
     * @returns The solid angle value
     */
     double Object::CylinderSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
-				      const Mantid::Geometry::V3D & axis, 
-				      const double radius, const double height) const
-   {
-     // The cylinder is broken down into three pieces and then in turn broken down into triangles. Any triangle
-     // that has a normal facing away from the observer gives a negative solid angle and is excluded
-     // For simplicity the triangulation points are constructed such that the cone axis points up the +Z axis
-     // and then rotated into their final position
-     Geometry::V3D  axis_direction = axis;
-     axis_direction.normalize();
-     // Required rotation
-     Geometry::V3D initial_axis = Geometry::V3D(0., 0., 1.0);
-     Geometry::V3D final_axis = axis_direction;
-     Geometry::Quat transform(initial_axis, final_axis);
+      const Mantid::Geometry::V3D & axis, 
+      const double radius, const double height) const
+    {
+      // The cylinder is broken down into three pieces and then in turn broken down into triangles. Any triangle
+      // that has a normal facing away from the observer gives a negative solid angle and is excluded
+      // For simplicity the triangulation points are constructed such that the cone axis points up the +Z axis
+      // and then rotated into their final position
+      Geometry::V3D  axis_direction = axis;
+      axis_direction.normalize();
+      // Required rotation
+      Geometry::V3D initial_axis = Geometry::V3D(0., 0., 1.0);
+      Geometry::V3D final_axis = axis_direction;
+      Geometry::Quat transform(initial_axis, final_axis);
 
-     // Do the base cap which is a point at the centre and nslices points around it
-     const int nslices(Mantid::Geometry::Cylinder::g_nslices);
-     const double angle_step = 2*M_PI/(double)nslices;
-     // Store the (x,y) points as they are used quite frequently
-     double *cos_table = new double[nslices];
-     double *sin_table = new double[nslices];
+      // Do the base cap which is a point at the centre and nslices points around it
+      const int nslices(Mantid::Geometry::Cylinder::g_nslices);
+      const double angle_step = 2*M_PI/(double)nslices;
+      // Store the (x,y) points as they are used quite frequently
+      double *cos_table = new double[nslices];
+      double *sin_table = new double[nslices];
 
-     double solid_angle(0.0);
-     for( int sl = 0; sl < nslices; ++sl )
-     {
-       int vertex = sl;
-       cos_table[vertex] = radius*std::cos(angle_step*vertex);
-       sin_table[vertex] = radius*std::sin(angle_step*vertex);
-       Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], 0.0);
+      double solid_angle(0.0);
+      for( int sl = 0; sl < nslices; ++sl )
+      {
+        int vertex = sl;
+        cos_table[vertex] = radius*std::cos(angle_step*vertex);
+        sin_table[vertex] = radius*std::sin(angle_step*vertex);
+        Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], 0.0);
 
-       if( sl < nslices - 1 )
-       { 
-	 vertex = sl + 1;
-	 cos_table[vertex] = radius*std::cos(angle_step*vertex);
-	 sin_table[vertex] = radius*std::sin(angle_step*vertex);
-       }
-       else vertex = 0;
+        if( sl < nslices - 1 )
+        { 
+          vertex = sl + 1;
+          cos_table[vertex] = radius*std::cos(angle_step*vertex);
+          sin_table[vertex] = radius*std::sin(angle_step*vertex);
+        }
+        else vertex = 0;
 
-       Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], 0.0);
-       transform.rotate(pt2);
-       transform.rotate(pt3);       
-       pt2 += centre;
-       pt3 += centre;
+        Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], 0.0);
+        transform.rotate(pt2);
+        transform.rotate(pt3);       
+        pt2 += centre;
+        pt3 += centre;
 
-       double sa = getTriangleSolidAngle(centre, pt2, pt3, observer);
-       if( sa > 0.0 )
-       {
-	 solid_angle += sa;
-       }
-     }
+        double sa = getTriangleSolidAngle(centre, pt2, pt3, observer);
+        if( sa > 0.0 )
+        {
+          solid_angle += sa;
+        }
+      }
 
-     // Second the top cap
-     Geometry::V3D top_centre = Geometry::V3D(0.0, 0.0, height);
-     transform.rotate(top_centre);
-     top_centre += centre;
+      // Second the top cap
+      Geometry::V3D top_centre = Geometry::V3D(0.0, 0.0, height);
+      transform.rotate(top_centre);
+      top_centre += centre;
 
-     for( int sl = 0; sl < nslices; ++sl )
-     {
-       int vertex = sl;
-       Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], height);
+      for( int sl = 0; sl < nslices; ++sl )
+      {
+        int vertex = sl;
+        Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], height);
 
-       if( sl < nslices - 1 ) vertex = sl + 1;
-       else vertex = 0;
-       Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], height);
+        if( sl < nslices - 1 ) vertex = sl + 1;
+        else vertex = 0;
+        Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], height);
 
-       // Rotate them to the correct axis orientation
-       transform.rotate(pt2);
-       transform.rotate(pt3); 
-       pt2 += centre;
-       pt3 += centre;      
-       double sa = getTriangleSolidAngle(top_centre, pt3, pt2, observer);
-       if( sa > 0.0 )
-       {
-	 solid_angle += sa;
-       }
-     }
+        // Rotate them to the correct axis orientation
+        transform.rotate(pt2);
+        transform.rotate(pt3); 
+        pt2 += centre;
+        pt3 += centre;      
+        double sa = getTriangleSolidAngle(top_centre, pt3, pt2, observer);
+        if( sa > 0.0 )
+        {
+          solid_angle += sa;
+        }
+      }
 
-     // Now the main section
-     const int nstacks(Mantid::Geometry::Cylinder::g_nstacks);
-     const double z_step = height / nstacks;
-     double z0(0.0), z1(z_step);
+      // Now the main section
+      const int nstacks(Mantid::Geometry::Cylinder::g_nstacks);
+      const double z_step = height / nstacks;
+      double z0(0.0), z1(z_step);
 
-     for( int st = 1; st <= nstacks; ++st )
-     {
-       if( st == nstacks ) z1 = height;
-       
-       for( int sl = 0; sl < nslices; ++sl )
-       {
-	 int vertex = sl;
-	 Geometry::V3D pt1 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z0);
-	 if( sl < nslices - 1 ) vertex = sl + 1;
-	 else vertex = 0;
-	 Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z0);
+      for( int st = 1; st <= nstacks; ++st )
+      {
+        if( st == nstacks ) z1 = height;
 
-	 vertex = sl;
-	 Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z1);
-	 if( sl < nslices - 1 ) vertex = sl + 1;
-	 else vertex = 0;
-	 Geometry::V3D pt4 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z1);
-	 // Rotations
-	 transform.rotate(pt1);
-	 transform.rotate(pt3);
-	 transform.rotate(pt2);
-	 transform.rotate(pt4);
+        for( int sl = 0; sl < nslices; ++sl )
+        {
+          int vertex = sl;
+          Geometry::V3D pt1 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z0);
+          if( sl < nslices - 1 ) vertex = sl + 1;
+          else vertex = 0;
+          Geometry::V3D pt3 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z0);
 
-	 pt1 += centre;
-	 pt2 += centre;
-	 pt3 += centre;
-	 pt4 += centre;
+          vertex = sl;
+          Geometry::V3D pt2 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z1);
+          if( sl < nslices - 1 ) vertex = sl + 1;
+          else vertex = 0;
+          Geometry::V3D pt4 = Geometry::V3D(cos_table[vertex], sin_table[vertex], z1);
+          // Rotations
+          transform.rotate(pt1);
+          transform.rotate(pt3);
+          transform.rotate(pt2);
+          transform.rotate(pt4);
 
-	 double sa = getTriangleSolidAngle(pt1, pt4, pt3, observer);
-	 if( sa > 0.0 ) 
-	 {
-	   solid_angle += sa;
-	 }
-	 sa = getTriangleSolidAngle(pt1, pt2, pt4, observer);
-	 if( sa > 0.0 )
-	 { 
-	   solid_angle += sa;
-	 }
-       }
+          pt1 += centre;
+          pt2 += centre;
+          pt3 += centre;
+          pt4 += centre;
 
-       z0 = z1;
-       z1 += z_step;
-     }
+          double sa = getTriangleSolidAngle(pt1, pt4, pt3, observer);
+          if( sa > 0.0 ) 
+          {
+            solid_angle += sa;
+          }
+          sa = getTriangleSolidAngle(pt1, pt2, pt4, observer);
+          if( sa > 0.0 )
+          { 
+            solid_angle += sa;
+          }
+        }
+
+        z0 = z1;
+        z1 += z_step;
+      }
 
       delete [] cos_table;
       delete [] sin_table;
-     return solid_angle;
-   }
+      return solid_angle;
+    }
 
-   /**
+    /**
     * Calculate the solid angle for a cone using triangulation.
     * @param observer The observer's point
     * @param centre The centre vector
@@ -1418,199 +1416,199 @@ namespace Mantid
     * @returns The solid angle value
     */
     double Object::ConeSolidAngle(const V3D & observer, const Mantid::Geometry::V3D & centre, 
-				      const Mantid::Geometry::V3D & axis, 
-				      const double radius, const double height) const
-   {
-     // The cone is broken down into three pieces and then in turn broken down into triangles. Any triangle
-     // that has a normal facing away from the observer gives a negative solid angle and is excluded
-     // For simplicity the triangulation points are constructed such that the cone axis points up the +Z axis
-     // and then rotated into their final position
+      const Mantid::Geometry::V3D & axis, 
+      const double radius, const double height) const
+    {
+      // The cone is broken down into three pieces and then in turn broken down into triangles. Any triangle
+      // that has a normal facing away from the observer gives a negative solid angle and is excluded
+      // For simplicity the triangulation points are constructed such that the cone axis points up the +Z axis
+      // and then rotated into their final position
 
-     Geometry::V3D  axis_direction = axis;
-     axis_direction.normalize();
-     // Required rotation
-     Geometry::V3D initial_axis = Geometry::V3D(0., 0., 1.0);
-     Geometry::V3D final_axis = axis_direction;
-     Geometry::Quat transform(initial_axis, final_axis);
+      Geometry::V3D  axis_direction = axis;
+      axis_direction.normalize();
+      // Required rotation
+      Geometry::V3D initial_axis = Geometry::V3D(0., 0., 1.0);
+      Geometry::V3D final_axis = axis_direction;
+      Geometry::Quat transform(initial_axis, final_axis);
 
-     // Do the base cap which is a point at the centre and nslices points around it
-     const int nslices(Mantid::Geometry::Cone::g_nslices);
-     const double angle_step = 2*M_PI/(double)nslices;
-     // Store the (x,y) points as they are used quite frequently
-     double *cos_table = new double[nslices];
-     double *sin_table = new double[nslices];
+      // Do the base cap which is a point at the centre and nslices points around it
+      const int nslices(Mantid::Geometry::Cone::g_nslices);
+      const double angle_step = 2*M_PI/(double)nslices;
+      // Store the (x,y) points as they are used quite frequently
+      double *cos_table = new double[nslices];
+      double *sin_table = new double[nslices];
 
-     double solid_angle(0.0);
-     for( int sl = 0; sl < nslices; ++sl )
-     {
-       int vertex = sl;
-       cos_table[vertex] = std::cos(angle_step*vertex);
-       sin_table[vertex] = std::sin(angle_step*vertex);
-       Geometry::V3D pt2 = Geometry::V3D(radius*cos_table[vertex], radius*sin_table[vertex], 0.0);
+      double solid_angle(0.0);
+      for( int sl = 0; sl < nslices; ++sl )
+      {
+        int vertex = sl;
+        cos_table[vertex] = std::cos(angle_step*vertex);
+        sin_table[vertex] = std::sin(angle_step*vertex);
+        Geometry::V3D pt2 = Geometry::V3D(radius*cos_table[vertex], radius*sin_table[vertex], 0.0);
 
-       if( sl < nslices - 1 )
-       { 
-	 vertex = sl + 1;
-	 cos_table[vertex] = std::cos(angle_step*vertex);
-	 sin_table[vertex] = std::sin(angle_step*vertex);
-       }
-       else vertex = 0;
+        if( sl < nslices - 1 )
+        { 
+          vertex = sl + 1;
+          cos_table[vertex] = std::cos(angle_step*vertex);
+          sin_table[vertex] = std::sin(angle_step*vertex);
+        }
+        else vertex = 0;
 
-       Geometry::V3D pt3 = Geometry::V3D(radius*cos_table[vertex], radius*sin_table[vertex], 0.0);
-       
-       transform.rotate(pt2);
-       transform.rotate(pt3);       
-       pt2 += centre;
-       pt3 += centre;
+        Geometry::V3D pt3 = Geometry::V3D(radius*cos_table[vertex], radius*sin_table[vertex], 0.0);
 
-       double sa = getTriangleSolidAngle(centre, pt2, pt3, observer);
-       if( sa > 0.0 )
-       {
-	 solid_angle += sa;
-       }
-     }
+        transform.rotate(pt2);
+        transform.rotate(pt3);       
+        pt2 += centre;
+        pt3 += centre;
 
-     // Now the main section
-     const int nstacks(Mantid::Geometry::Cone::g_nstacks);
-     const double z_step = height / nstacks;
-     const double r_step = height / nstacks;
-     double z0(0.0), z1(z_step);
-     double r0(radius), r1(r0 - r_step);
+        double sa = getTriangleSolidAngle(centre, pt2, pt3, observer);
+        if( sa > 0.0 )
+        {
+          solid_angle += sa;
+        }
+      }
 
-     for( int st = 1; st < nstacks; ++st )
-     {
-       if( st == nstacks ) z1 = height;
-       
-       for( int sl = 0; sl < nslices; ++sl )
-       {
-	 int vertex = sl;
-	 Geometry::V3D pt1 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], z0);
-	 if( sl < nslices - 1 ) vertex = sl + 1;
-	 else vertex = 0;
-	 Geometry::V3D pt3 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], z0);
+      // Now the main section
+      const int nstacks(Mantid::Geometry::Cone::g_nstacks);
+      const double z_step = height / nstacks;
+      const double r_step = height / nstacks;
+      double z0(0.0), z1(z_step);
+      double r0(radius), r1(r0 - r_step);
 
-	 vertex = sl;
-	 Geometry::V3D pt2 = Geometry::V3D(r1*cos_table[vertex], r1*sin_table[vertex], z1);
-	 if( sl < nslices - 1 ) vertex = sl + 1;
-	 else vertex = 0;
-	 Geometry::V3D pt4 = Geometry::V3D(r1*cos_table[vertex], r1*sin_table[vertex], z1);
-	 // Rotations
-	 transform.rotate(pt1);
-	 transform.rotate(pt3);
-	 transform.rotate(pt2);
-	 transform.rotate(pt4);
+      for( int st = 1; st < nstacks; ++st )
+      {
+        if( st == nstacks ) z1 = height;
 
-	 pt1 += centre;
-	 pt2 += centre;
-	 pt3 += centre;
-	 pt4 += centre;
-	 double sa = getTriangleSolidAngle(pt1, pt4, pt3, observer);
-	 if( sa > 0.0 ) 
-	 {
-	   solid_angle += sa;
-	 }
-	 sa = getTriangleSolidAngle(pt1, pt2, pt4, observer);
-	 if( sa > 0.0 )
-	 { 
-	   solid_angle += sa;
-	 }
-       }
+        for( int sl = 0; sl < nslices; ++sl )
+        {
+          int vertex = sl;
+          Geometry::V3D pt1 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], z0);
+          if( sl < nslices - 1 ) vertex = sl + 1;
+          else vertex = 0;
+          Geometry::V3D pt3 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], z0);
 
-       z0 = z1;
-       r0 = r1;
-       z1 += z_step;
-       r1 -= r_step;
-     }
+          vertex = sl;
+          Geometry::V3D pt2 = Geometry::V3D(r1*cos_table[vertex], r1*sin_table[vertex], z1);
+          if( sl < nslices - 1 ) vertex = sl + 1;
+          else vertex = 0;
+          Geometry::V3D pt4 = Geometry::V3D(r1*cos_table[vertex], r1*sin_table[vertex], z1);
+          // Rotations
+          transform.rotate(pt1);
+          transform.rotate(pt3);
+          transform.rotate(pt2);
+          transform.rotate(pt4);
 
-     // Top section
-     Geometry::V3D top_centre = Geometry::V3D(0.0, 0.0, height) + centre;
-     transform.rotate(top_centre);
-     top_centre += centre;
+          pt1 += centre;
+          pt2 += centre;
+          pt3 += centre;
+          pt4 += centre;
+          double sa = getTriangleSolidAngle(pt1, pt4, pt3, observer);
+          if( sa > 0.0 ) 
+          {
+            solid_angle += sa;
+          }
+          sa = getTriangleSolidAngle(pt1, pt2, pt4, observer);
+          if( sa > 0.0 )
+          { 
+            solid_angle += sa;
+          }
+        }
 
-     for( int sl = 0; sl < nslices; ++sl )
-     {
-       int vertex = sl;
-       Geometry::V3D pt2 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], height);
+        z0 = z1;
+        r0 = r1;
+        z1 += z_step;
+        r1 -= r_step;
+      }
 
-       if( sl < nslices - 1 ) vertex = sl + 1;
-       else vertex = 0;
-       Geometry::V3D pt3 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], height);
+      // Top section
+      Geometry::V3D top_centre = Geometry::V3D(0.0, 0.0, height) + centre;
+      transform.rotate(top_centre);
+      top_centre += centre;
 
-       // Rotate them to the correct axis orientation
-       transform.rotate(pt2);
-       transform.rotate(pt3);
+      for( int sl = 0; sl < nslices; ++sl )
+      {
+        int vertex = sl;
+        Geometry::V3D pt2 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], height);
 
-       pt2 += centre;
-       pt3 += centre;
+        if( sl < nslices - 1 ) vertex = sl + 1;
+        else vertex = 0;
+        Geometry::V3D pt3 = Geometry::V3D(r0*cos_table[vertex], r0*sin_table[vertex], height);
 
-       double sa = getTriangleSolidAngle(top_centre, pt3, pt2, observer);
-       if( sa > 0.0 )
-       {
-	 solid_angle += sa;
-       }
-     }
+        // Rotate them to the correct axis orientation
+        transform.rotate(pt2);
+        transform.rotate(pt3);
 
+        pt2 += centre;
+        pt3 += centre;
 
-     delete [] cos_table;
-     delete [] sin_table;
-
-     return solid_angle;
-   }
-
-	/**
-	 * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
-	 * object and returns them back in max and min points.
-	 *
-	 * @param xmax :: Maximum value for the bounding box in x direction
-	 * @param ymax :: Maximum value for the bounding box in y direction
-	 * @param zmax :: Maximum value for the bounding box in z direction
-	 * @param xmin :: Minimum value for the bounding box in x direction
-	 * @param ymin :: Minimum value for the bounding box in y direction
-	 * @param zmin :: Minimum value for the bounding box in z direction
-	 */
-	void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
-	{
-		if (!TopRule)
-		{ //If no rule defined then return zero boundbing box
-			xmax=ymax=zmax=xmin=ymin=zmin=0.0;
-			return;
-		}
-		if(!boolBounded){
-			AABBxMax=xmax;AABByMax=ymax;AABBzMax=zmax;
-			AABBxMin=xmin;AABByMin=ymin;AABBzMin=zmin;
-			TopRule->getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
-			if(AABBxMax>=xmax||AABBxMin<=xmin||AABByMax>=ymax||AABByMin<=ymin||AABBzMax>=zmax||AABBzMin<=zmin)
-				boolBounded=false;
-			else
-				boolBounded=true;
-		}
-		xmax=AABBxMax;	ymax=AABByMax;	zmax=AABBzMax;
-		xmin=AABBxMin;	ymin=AABByMin;	zmin=AABBzMin;
-	}
-
-	/*!
-	 * Takes input axis aligned bounding box max and min points and stores these as the
-	 * bounding box for the object. Can be used when getBoundingBox fails and bounds are
-	 * known.
-	 *
-	 * @param xMax :: Maximum value for the bounding box in x direction
-	 * @param yMax :: Maximum value for the bounding box in y direction
-	 * @param zMax :: Maximum value for the bounding box in z direction
-	 * @param xMin :: Minimum value for the bounding box in x direction
-	 * @param yMin :: Minimum value for the bounding box in y direction
-	 * @param zMin :: Minimum value for the bounding box in z direction
-	 */
-	void Object::defineBoundingBox(const double &xMax, const double &yMax, const double &zMax, const double &xMin, const double &yMin, const double &zMin)
-	{
-		if(xMax<xMin || yMax<yMin || zMax<zMin)
-            throw std::invalid_argument("Invalid range in Object::defineBoundingBox");
-		AABBxMax=xMax;	AABByMax=yMax;	AABBzMax=zMax;
-		AABBxMin=xMin;	AABByMin=yMin;	AABBzMin=zMin;
-		boolBounded=true;
-	}
+        double sa = getTriangleSolidAngle(top_centre, pt3, pt2, observer);
+        if( sa > 0.0 )
+        {
+          solid_angle += sa;
+        }
+      }
 
 
-	int
+      delete [] cos_table;
+      delete [] sin_table;
+
+      return solid_angle;
+    }
+
+    /**
+    * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
+    * object and returns them back in max and min points.
+    *
+    * @param xmax :: Maximum value for the bounding box in x direction
+    * @param ymax :: Maximum value for the bounding box in y direction
+    * @param zmax :: Maximum value for the bounding box in z direction
+    * @param xmin :: Minimum value for the bounding box in x direction
+    * @param ymin :: Minimum value for the bounding box in y direction
+    * @param zmin :: Minimum value for the bounding box in z direction
+    */
+    void Object::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
+    {
+      if (!TopRule)
+      { //If no rule defined then return zero boundbing box
+        xmax=ymax=zmax=xmin=ymin=zmin=0.0;
+        return;
+      }
+      if(!boolBounded){
+        AABBxMax=xmax;AABByMax=ymax;AABBzMax=zmax;
+        AABBxMin=xmin;AABByMin=ymin;AABBzMin=zmin;
+        TopRule->getBoundingBox(AABBxMax,AABByMax,AABBzMax,AABBxMin,AABByMin,AABBzMin);
+        if(AABBxMax>=xmax||AABBxMin<=xmin||AABByMax>=ymax||AABByMin<=ymin||AABBzMax>=zmax||AABBzMin<=zmin)
+          boolBounded=false;
+        else
+          boolBounded=true;
+      }
+      xmax=AABBxMax;	ymax=AABByMax;	zmax=AABBzMax;
+      xmin=AABBxMin;	ymin=AABByMin;	zmin=AABBzMin;
+    }
+
+    /*!
+    * Takes input axis aligned bounding box max and min points and stores these as the
+    * bounding box for the object. Can be used when getBoundingBox fails and bounds are
+    * known.
+    *
+    * @param xMax :: Maximum value for the bounding box in x direction
+    * @param yMax :: Maximum value for the bounding box in y direction
+    * @param zMax :: Maximum value for the bounding box in z direction
+    * @param xMin :: Minimum value for the bounding box in x direction
+    * @param yMin :: Minimum value for the bounding box in y direction
+    * @param zMin :: Minimum value for the bounding box in z direction
+    */
+    void Object::defineBoundingBox(const double &xMax, const double &yMax, const double &zMax, const double &xMin, const double &yMin, const double &zMin)
+    {
+      if(xMax<xMin || yMax<yMin || zMax<zMin)
+        throw std::invalid_argument("Invalid range in Object::defineBoundingBox");
+      AABBxMax=xMax;	AABByMax=yMax;	AABBzMax=zMax;
+      AABBxMin=xMin;	AABByMin=yMin;	AABBzMin=zMin;
+      boolBounded=true;
+    }
+
+
+    int
       Object::getPointInObject(Geometry::V3D& point) const
       /*!
       Try to find a point that lies within (or on) the object
@@ -1620,37 +1618,37 @@ namespace Mantid
     {
       //
       // Simple method - check if origin in object, if not search directions along
-	  // axes. If that fails, try centre of boundingBox, and paths about there
-	  //
-		Geometry::V3D testPt(0,0,0);
-		if(searchForObject(testPt))
-		{
-			point=testPt;
-			return 1;
-		}
-		//
-		// Try centre of bounding box as initial guess, if one can be found
-		// Note that if initial bounding box estimate greater than ~O(1e16) times
-		// actual size, boundingBox may be wrong.
-		//
-		const double big(1e10);
-		double xmin,ymin,zmin,xmax,ymax,zmax;
-		xmin=ymin=zmin=-big;
-		xmax=ymax=zmax=big;
-		this->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-		if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
-		{
-		   testPt=Geometry::V3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
-		   if(searchForObject(testPt)>0)
-		   {
-			   point=testPt;
-			   return 1;
-		   }
-		}
-		return 0;
-	}
+      // axes. If that fails, try centre of boundingBox, and paths about there
+      //
+      Geometry::V3D testPt(0,0,0);
+      if(searchForObject(testPt))
+      {
+        point=testPt;
+        return 1;
+      }
+      //
+      // Try centre of bounding box as initial guess, if one can be found
+      // Note that if initial bounding box estimate greater than ~O(1e16) times
+      // actual size, boundingBox may be wrong.
+      //
+      const double big(1e10);
+      double xmin,ymin,zmin,xmax,ymax,zmax;
+      xmin=ymin=zmin=-big;
+      xmax=ymax=zmax=big;
+      this->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
+      if( xmax<big && ymax<big && zmax<big && xmin>-big && ymin>-big && zmin>-big )
+      {
+        testPt=Geometry::V3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
+        if(searchForObject(testPt)>0)
+        {
+          point=testPt;
+          return 1;
+        }
+      }
+      return 0;
+    }
 
-	int
+    int
       Object::searchForObject(Geometry::V3D& point) const
       /*!
       Try to find a point that lies within (or on) the object, given a seed point
@@ -1660,297 +1658,299 @@ namespace Mantid
     {
       //
       // Method - check if point in object, if not search directions along
-	  // principle axes using interceptSurface
-	  //
-		Geometry::V3D testPt;
-		if(isValid(point))
-			return 1;
-		std::vector<Geometry::V3D> axes;
-		axes.push_back(Geometry::V3D(1,0,0)); axes.push_back(Geometry::V3D(-1,0,0));
-		axes.push_back(Geometry::V3D(0,1,0)); axes.push_back(Geometry::V3D(0,-1,0));
-		axes.push_back(Geometry::V3D(0,0,1)); axes.push_back(Geometry::V3D(0,0,-1));
-		std::vector<Geometry::V3D>::const_iterator  dir;
-		for(dir=axes.begin();dir!=axes.end();dir++)
-		{
-			Geometry::Track tr(point,(*dir));
-			if(this->interceptSurface(tr)>0)
-			{
-				point=tr.begin()->PtA;
-				return 1;
-			}
-		}
-		return 0;
-	}
+      // principle axes using interceptSurface
+      //
+      Geometry::V3D testPt;
+      if(isValid(point))
+        return 1;
+      std::vector<Geometry::V3D> axes;
+      axes.reserve(6);
+      axes.push_back(Geometry::V3D(1,0,0)); axes.push_back(Geometry::V3D(-1,0,0));
+      axes.push_back(Geometry::V3D(0,1,0)); axes.push_back(Geometry::V3D(0,-1,0));
+      axes.push_back(Geometry::V3D(0,0,1)); axes.push_back(Geometry::V3D(0,0,-1));
+      std::vector<Geometry::V3D>::const_iterator  dir;
+      for(dir=axes.begin();dir!=axes.end();dir++)
+      {
+        Geometry::Track tr(point,(*dir));
+        if(this->interceptSurface(tr)>0)
+        {
+          point=tr.begin()->PtA;
+          return 1;
+        }
+      }
+      return 0;
+    }
 
     int
       Object::lineHitsBoundingBox(const Geometry::V3D& orig, const Geometry::V3D& dir,
-	                              const double& xmax, const double& ymax, const double& zmax,
-	                              const double& xmin, const double& ymin, const double& zmin ) const
+      const double& xmax, const double& ymax, const double& zmax,
+      const double& xmin, const double& ymin, const double& zmin ) const
       /*!
       Fast test to determine if Line hits BoundingBox.
       \param orig :: Origin of line to test
-	  \param dir  :: direction of line
-	  \param xmax :: Maximum value for the bounding box in x direction
-	  \param ymax :: Maximum value for the bounding box in y direction
-	  \param zmax :: Maximum value for the bounding box in z direction
-	  \param xmin :: Minimum value for the bounding box in x direction
-	  \param ymin :: Minimum value for the bounding box in y direction
-	  \param zmin :: Minimum value for the bounding box in z direction
+      \param dir  :: direction of line
+      \param xmax :: Maximum value for the bounding box in x direction
+      \param ymax :: Maximum value for the bounding box in y direction
+      \param zmax :: Maximum value for the bounding box in z direction
+      \param xmin :: Minimum value for the bounding box in x direction
+      \param ymin :: Minimum value for the bounding box in y direction
+      \param zmin :: Minimum value for the bounding box in z direction
       \return 1 if line hits, 0 otherwise
       */
     {
       //
       // Method - Loop through planes looking for ones that are visible and check intercept
-	  // Assume that orig is outside of BoundingBox.
-	  //
-		double lambda;
-		const double tol=Surface::getSurfaceTolerance();
-		if(orig.X()>xmax)
-		{
-			if(dir.X()<-tol)
-			{
-	           lambda=(xmax-orig.X())/dir.X();
-			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
-                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
-					  return 1;
-			}
-		}
-		if(orig.X()<xmin)
-		{
-			if(dir.X()>tol)
-			{
-	           lambda=(xmin-orig.X())/dir.X();
-			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
-                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
-					  return 1;
-			}
-		}
-		if(orig.Y()>ymax)
-		{
-			if(dir.Y()<-tol)
-			{
-	           lambda=(ymax-orig.Y())/dir.Y();
-			   if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
-                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
-					  return 1;
-			}
-		}
-		if(orig.Y()<ymin)
-		{
-			if(dir.Y()>tol)
-			{
-	           lambda=(ymin-orig.Y())/dir.Y();
-			   if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
-                  if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
-					  return 1;
-			}
-		}
-		if(orig.Z()>zmax)
-		{
-			if(dir.Z()<-tol)
-			{
-	           lambda=(zmax-orig.Z())/dir.Z();
-			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
-                  if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
-					  return 1;
-			}
-		}
-		if(orig.Z()<zmin)
-		{
-			if(dir.Z()>tol)
-			{
-	           lambda=(zmin-orig.Z())/dir.Z();
-			   if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
-                  if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
-					  return 1;
-			}
-		}
-		return 0;
+      // Assume that orig is outside of BoundingBox.
+      //
+      double lambda;
+      const double tol=Surface::getSurfaceTolerance();
+      if(orig.X()>xmax)
+      {
+        if(dir.X()<-tol)
+        {
+          lambda=(xmax-orig.X())/dir.X();
+          if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+            if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+              return 1;
+        }
+      }
+      if(orig.X()<xmin)
+      {
+        if(dir.X()>tol)
+        {
+          lambda=(xmin-orig.X())/dir.X();
+          if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+            if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+              return 1;
+        }
+      }
+      if(orig.Y()>ymax)
+      {
+        if(dir.Y()<-tol)
+        {
+          lambda=(ymax-orig.Y())/dir.Y();
+          if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+            if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+              return 1;
+        }
+      }
+      if(orig.Y()<ymin)
+      {
+        if(dir.Y()>tol)
+        {
+          lambda=(ymin-orig.Y())/dir.Y();
+          if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+            if( zmin < orig.Z()+lambda*dir.Z() && zmax > orig.Z()+lambda*dir.Z() )
+              return 1;
+        }
+      }
+      if(orig.Z()>zmax)
+      {
+        if(dir.Z()<-tol)
+        {
+          lambda=(zmax-orig.Z())/dir.Z();
+          if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+            if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+              return 1;
+        }
+      }
+      if(orig.Z()<zmin)
+      {
+        if(dir.Z()>tol)
+        {
+          lambda=(zmin-orig.Z())/dir.Z();
+          if( ymin < orig.Y()+lambda*dir.Y() && ymax > orig.Y()+lambda*dir.Y() )
+            if( xmin < orig.X()+lambda*dir.X() && xmax > orig.X()+lambda*dir.X() )
+              return 1;
+        }
+      }
+      return 0;
 
     }
 
     int
       Object::inBoundingBox(const Geometry::V3D& point,
-	                        const double& xmax, const double& ymax, const double& zmax,
-	                        const double& xmin, const double& ymin, const double& zmin ) const
+      const double& xmax, const double& ymax, const double& zmax,
+      const double& xmin, const double& ymin, const double& zmin ) const
       /*!
       Test point in BoundingBox
       \param point :: Point to test
-	  \param xmax :: Maximum value for the bounding box in x direction
-	  \param ymax :: Maximum value for the bounding box in y direction
-	  \param zmax :: Maximum value for the bounding box in z direction
-	  \param xmin :: Minimum value for the bounding box in x direction
-	  \param ymin :: Minimum value for the bounding box in y direction
-	  \param zmin :: Minimum value for the bounding box in z direction
+      \param xmax :: Maximum value for the bounding box in x direction
+      \param ymax :: Maximum value for the bounding box in y direction
+      \param zmax :: Maximum value for the bounding box in z direction
+      \param xmin :: Minimum value for the bounding box in x direction
+      \param ymin :: Minimum value for the bounding box in y direction
+      \param zmin :: Minimum value for the bounding box in z direction
       \return 1 if in, 0 otherwise
       */
     {
       //
       const double tol=Surface::getSurfaceTolerance();
       if(point.X()<=xmax+tol && point.X()>=xmin-tol && point.Y()<=ymax+tol && point.Y()>=ymin-tol
-         && point.Z()<=zmax+tol && point.Z()>=zmin-tol )
-		   return 1;
-	   return 0;
-	}
+        && point.Z()<=zmax+tol && point.Z()>=zmin-tol )
+        return 1;
+      return 0;
+    }
 
     double
-		Object::bbAngularWidth(const Geometry::V3D& observer,
-	                         const double& xmax, const double& ymax, const double& zmax,
-	                         const double& xmin, const double& ymin, const double& zmin ) const
+      Object::bbAngularWidth(const Geometry::V3D& observer,
+      const double& xmax, const double& ymax, const double& zmax,
+      const double& xmin, const double& ymin, const double& zmin ) const
       /*!
       Find maximum angular half width of the bounding box from the observer, that is
-	  the greatest angle between the centre point and any corner point
+      the greatest angle between the centre point and any corner point
       \param observer :: Viewing point
-	  \param xmax :: Maximum value for the bounding box in x direction
-	  \param ymax :: Maximum value for the bounding box in y direction
-	  \param zmax :: Maximum value for the bounding box in z direction
-	  \param xmin :: Minimum value for the bounding box in x direction
-	  \param ymin :: Minimum value for the bounding box in y direction
-	  \param zmin :: Minimum value for the bounding box in z direction
+      \param xmax :: Maximum value for the bounding box in x direction
+      \param ymax :: Maximum value for the bounding box in y direction
+      \param zmax :: Maximum value for the bounding box in z direction
+      \param xmin :: Minimum value for the bounding box in x direction
+      \param ymin :: Minimum value for the bounding box in y direction
+      \param zmin :: Minimum value for the bounding box in z direction
       \return 1 if in, 0 otherwise
       */
     {
-		double theta,thetaMax=-1;
-		Geometry::V3D centre(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin));
-		centre-=observer;
-		std::vector<Geometry::V3D> pts;
-		pts.push_back(Geometry::V3D(xmin,ymin,zmin)-observer);
-		pts.push_back(Geometry::V3D(xmin,ymin,zmax)-observer);
-		pts.push_back(Geometry::V3D(xmin,ymax,zmin)-observer);
-		pts.push_back(Geometry::V3D(xmin,ymax,zmax)-observer);
-		pts.push_back(Geometry::V3D(xmax,ymin,zmin)-observer);
-		pts.push_back(Geometry::V3D(xmax,ymin,zmax)-observer);
-		pts.push_back(Geometry::V3D(xmin,ymax,zmin)-observer);
-		pts.push_back(Geometry::V3D(xmin,ymax,zmax)-observer);
-		std::vector<Geometry::V3D>::const_iterator ip;
-		for(ip=pts.begin();ip!=pts.end();ip++)
-		{
-			theta=acos((ip)->scalar_prod(centre)/((ip)->norm()*centre.norm()));
-			if(theta>thetaMax) thetaMax=theta;
-		}
-		return thetaMax;
-	}
+      double theta,thetaMax=-1;
+      Geometry::V3D centre = Geometry::V3D(0.5*(xmax+xmin),0.5*(ymax+ymin),0.5*(zmax+zmin)) - observer;
+      std::vector<Geometry::V3D> pts;
+      pts.reserve(8);
+      pts.push_back(Geometry::V3D(xmin,ymin,zmin)-observer);
+      pts.push_back(Geometry::V3D(xmin,ymin,zmax)-observer);
+      pts.push_back(Geometry::V3D(xmin,ymax,zmin)-observer);
+      pts.push_back(Geometry::V3D(xmin,ymax,zmax)-observer);
+      pts.push_back(Geometry::V3D(xmax,ymin,zmin)-observer);
+      pts.push_back(Geometry::V3D(xmax,ymin,zmax)-observer);
+      pts.push_back(Geometry::V3D(xmin,ymax,zmin)-observer);
+      pts.push_back(Geometry::V3D(xmin,ymax,zmax)-observer);
+      std::vector<Geometry::V3D>::const_iterator ip;
+      double centre_norm = centre.norm();
+      for(ip=pts.begin();ip!=pts.end();ip++)
+      {
+        theta=acos((ip)->scalar_prod(centre)/((ip)->norm()*centre_norm));
+        if(theta>thetaMax) thetaMax=theta;
+      }
+      return thetaMax;
+    }
 
 
-	/**
-	* Set the geometry handler for Object
-	* @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
-	*/
-	void Object::setGeometryHandler(boost::shared_ptr<GeometryHandler> h)
-	{
-		if(h==NULL)return;
-		handle=h;
-	}
+    /**
+    * Set the geometry handler for Object
+    * @param[in] h is pointer to the geometry handler. don't delete this pointer in the calling function.
+    */
+    void Object::setGeometryHandler(boost::shared_ptr<GeometryHandler> h)
+    {
+      if(h==NULL)return;
+      handle=h;
+    }
 
-	/**
-	* Draws the Object using geometry handler, If the handler is not set then this function does nothing.
-	*/
-	void Object::draw() const
-	{
-		if(handle==NULL)return;
-		//Render the Object
-		handle->Render();
-	}
+    /**
+    * Draws the Object using geometry handler, If the handler is not set then this function does nothing.
+    */
+    void Object::draw() const
+    {
+      if(handle==NULL)return;
+      //Render the Object
+      handle->Render();
+    }
 
-	/**
-	* Initializes/prepares the object to be rendered, this will generate geometry for object,
-	* If the handler is not set then this function does nothing.
-	*/
-	void Object::initDraw() const
-	{
-		if(handle==NULL)return;
-		//Render the Object
-		handle->Initialize();
-	}
-	/**
-	 * set vtkGeometryCache writer 
-	 */
-	void Object::setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter> writer)
-	{
-		vtkCacheWriter=writer;
-		updateGeometryHandler();
-	}
+    /**
+    * Initializes/prepares the object to be rendered, this will generate geometry for object,
+    * If the handler is not set then this function does nothing.
+    */
+    void Object::initDraw() const
+    {
+      if(handle==NULL)return;
+      //Render the Object
+      handle->Initialize();
+    }
+    /**
+    * set vtkGeometryCache writer 
+    */
+    void Object::setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter> writer)
+    {
+      vtkCacheWriter=writer;
+      updateGeometryHandler();
+    }
 
-	/**
-	 * set vtkGeometryCache reader
-	 */
-	void Object::setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader> reader)
-	{
-		vtkCacheReader=reader;
-	}
+    /**
+    * set vtkGeometryCache reader
+    */
+    void Object::setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader> reader)
+    {
+      vtkCacheReader=reader;
+    }
 
-	/**
-	 * Returns the geometry handler
-	 */
-	boost::shared_ptr<GeometryHandler> Object::getGeometryHandler()
-	{
-		//Check if the geometry handler is upto dated with the cache, if not then
-		//cache it now.
-		return handle;
-	}
-	/**
-	 * Updates the geometry handler if needed
-	 */
-	void Object::updateGeometryHandler()
-	{
-		if(bGeometryCaching) return;
-		bGeometryCaching=true;
-		//Check if the Geometry handler can be handled for cache
-		if(handle==NULL)return;
-		if(!handle->canTriangulate()) return;
-		//Check if the reader exist then read the cache
-		if(vtkCacheReader.get()!=NULL)
-		{
-			vtkCacheReader->readCacheForObject(this);
-		}
-		//Check if the writer exist then write the cache
-		if(vtkCacheWriter.get()!=NULL)
-		{
-			vtkCacheWriter->addObject(this);
-		}
-	}
-	//Initialize Draw Object
+    /**
+    * Returns the geometry handler
+    */
+    boost::shared_ptr<GeometryHandler> Object::getGeometryHandler()
+    {
+      //Check if the geometry handler is upto dated with the cache, if not then
+      //cache it now.
+      return handle;
+    }
+    /**
+    * Updates the geometry handler if needed
+    */
+    void Object::updateGeometryHandler()
+    {
+      if(bGeometryCaching) return;
+      bGeometryCaching=true;
+      //Check if the Geometry handler can be handled for cache
+      if(handle==NULL)return;
+      if(!handle->canTriangulate()) return;
+      //Check if the reader exist then read the cache
+      if(vtkCacheReader.get()!=NULL)
+      {
+        vtkCacheReader->readCacheForObject(this);
+      }
+      //Check if the writer exist then write the cache
+      if(vtkCacheWriter.get()!=NULL)
+      {
+        vtkCacheWriter->addObject(this);
+      }
+    }
+    //Initialize Draw Object
 
-	/**
-	* get number of triangles
-	*/
-	int Object::NumberOfTriangles() const
-	{
-		if(handle==NULL)return 0;
-		return handle->NumberOfTriangles();
-	}
-	/**
-	* get number of points
-	*/
-	int Object::NumberOfPoints() const
-	{
-		if(handle==NULL)return 0;
-		return handle->NumberOfPoints();
-	}
-	/**
-	* get vertices
-	*/
-	double* Object::getTriangleVertices() const
-	{
-		if(handle==NULL)return NULL;
-		return handle->getTriangleVertices();
-	}
-	/**
-	* get faces
-	*/
-	int* Object::getTriangleFaces() const
-	{
-		if(handle==NULL)return NULL;
-		return handle->getTriangleFaces();
-	}
+    /**
+    * get number of triangles
+    */
+    int Object::NumberOfTriangles() const
+    {
+      if(handle==NULL)return 0;
+      return handle->NumberOfTriangles();
+    }
+    /**
+    * get number of points
+    */
+    int Object::NumberOfPoints() const
+    {
+      if(handle==NULL)return 0;
+      return handle->NumberOfPoints();
+    }
+    /**
+    * get vertices
+    */
+    double* Object::getTriangleVertices() const
+    {
+      if(handle==NULL)return NULL;
+      return handle->getTriangleVertices();
+    }
+    /**
+    * get faces
+    */
+    int* Object::getTriangleFaces() const
+    {
+      if(handle==NULL)return NULL;
+      return handle->getTriangleFaces();
+    }
     /**
     * get info on standard shapes
     */
     void Object::GetObjectGeom(int& type, std::vector<Geometry::V3D>& vectors, double& myradius, double & myheight) const
     {
-       type=0;
-       if(handle==NULL)return;
-       handle->GetObjectGeom( type, vectors, myradius, myheight);
+      type=0;
+      if(handle==NULL)return;
+      handle->GetObjectGeom( type, vectors, myradius, myheight);
     }
 
   }  // NAMESPACE Geometry

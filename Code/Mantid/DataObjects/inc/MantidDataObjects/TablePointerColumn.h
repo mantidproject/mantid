@@ -62,7 +62,7 @@ public:
     /// Virtual destructor.
     virtual ~TablePointerColumn(){}
     /// Number of individual elements in the column.
-    int size()const{return int(m_data.size());}
+    int size()const{return static_cast<int>(m_data.size());}
     /// Reference to the data.
     Type& data(int i){return *m_data[i];}
     /// Returns typeid for the data in the column
@@ -74,7 +74,7 @@ public:
     /// Type check
     bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
     /// Memory used by the column
-    long int sizeOfData()const{return m_data.size()*sizeof(Type);}
+    long int sizeOfData()const{return static_cast<long int>(m_data.size()*sizeof(Type));}
 protected:
     /// Resize.
     void resize(int count)

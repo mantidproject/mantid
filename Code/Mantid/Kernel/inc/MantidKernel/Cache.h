@@ -56,7 +56,7 @@ namespace Mantid
       }
 
       ///The number of cache entries
-      int size() {return m_cacheMap.size(); }
+      int size() {return static_cast<int>(m_cacheMap.size()); }
 
       ///total number of times the cache has contained the requested information
       int hitCount() { return m_cacheHit; }

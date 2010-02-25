@@ -304,9 +304,9 @@ public:
     /** Get the element
         @param i Element's position
      */
-    T& operator[](size_t i){return m_column->cell<T>(i);}
+    T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}
     /// Size of the vector
-    int size(){return int(m_column->size());}
+    int size(){return static_cast<int>(m_column->size());}
 private:
     Column_sptr m_column;///< Pointer to the underlying column
 };

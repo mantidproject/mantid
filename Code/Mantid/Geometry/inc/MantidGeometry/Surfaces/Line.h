@@ -1,5 +1,5 @@
-#ifndef Line_h
-#define Line_h
+#ifndef MANTID_GEOMETRY_LINE_H
+#define MANTID_GEOMETRY_LINE_H
 
 namespace Mantid
 {

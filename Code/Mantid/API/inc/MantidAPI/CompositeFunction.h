@@ -131,7 +131,7 @@ public:
   /// Returns the pointer to i-th function
   IFunction* getFunction(int i)const;
   /// Number of functions
-  int nFunctions()const{return m_functions.size();}
+  int nFunctions()const{return static_cast<int>(m_functions.size());}
   /// Remove a function
   void removeFunction(int i, bool del=true);
   /// Replace a function

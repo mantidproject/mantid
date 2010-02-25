@@ -1,6 +1,6 @@
 #include "MantidKernel/Logger.h"
 #include <vector>
-#include <math.h>
+#include <cmath>
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Objects/Object.h"

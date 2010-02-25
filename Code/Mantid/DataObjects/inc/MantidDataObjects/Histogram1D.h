@@ -103,15 +103,15 @@ public:
   ///Clear the error data
   StorageType& emptyE() { refE.access().clear(); return refE.access(); }
 
-  int nxbin() const { return refX->size(); }         ///< Return the number of X bins
-  int nybin() const { return refY->size(); }         ///< Return the number of data bin (Y or YE)
-  virtual int size() const { return refY->size(); }          ///< get pseudo size
+  int nxbin() const { return static_cast<int>(refX->size()); }         ///< Return the number of X bins
+  int nybin() const { return static_cast<int>(refY->size()); }         ///< Return the number of data bin (Y or YE)
+  virtual int size() const { return static_cast<int>(refY->size()); }          ///< get pseudo size
 
   /// Checks for errors
   bool isError() const { return refE->empty(); }
   /// Gets the memory size of the histogram
   long int getMemorySize() const 
-    { return (refX->size()+refY->size()+refE->size())*sizeof(double); }
+    { return static_cast<long int>((refX->size()+refY->size()+refE->size())*sizeof(double)); }
 };
 
 } // namespace DataObjects

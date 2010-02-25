@@ -110,6 +110,8 @@ public:
     TS_ASSERT_DELTA( fn->getParameter("S"), 8.15 ,0.1);
 
     TS_ASSERT_DELTA( bk->getParameter("A0"), 7.88 ,0.1);
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputSpace);
   }
 
 
@@ -173,6 +175,8 @@ public:
     TS_ASSERT_DELTA( fn->getParameter("S"), 17.4257 ,0.1);
 
     TS_ASSERT_DELTA( bk->getParameter("A0"), 6.08 ,0.1);
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputSpace);
   }
 
   // here set Minimizer = Simplex

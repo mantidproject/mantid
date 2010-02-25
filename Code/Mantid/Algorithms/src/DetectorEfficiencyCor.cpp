@@ -6,7 +6,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <algorithm>
 #include <functional>
-#include <math.h>
+#include <cmath>
 
 namespace Mantid
 {

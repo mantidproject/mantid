@@ -4,7 +4,7 @@
 #include "MantidCurveFitting/Fit.h"
 #include <sstream>
 #include <numeric>
-#include <math.h>
+#include <cmath>
 #include <iomanip>
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/TableRow.h"

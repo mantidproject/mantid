@@ -25,6 +25,7 @@ public:
 
     void testExec()
     {
+#ifndef _WIN64
         PlotAsymmetryByLogValue alg;
         alg.initialize();
         alg.setPropertyValue("FirstRun",firstRin);
@@ -56,10 +57,12 @@ public:
         TS_ASSERT_DELTA(Y[8],0.0278501,0.00001);
         TS_ASSERT_DELTA(Y[9],0.0191948,0.00001);
         TS_ASSERT_DELTA(Y[10],0.0142141,0.00001);
+#endif
     }
   
     void testDifferential()
     {
+#ifndef _WIN64
         PlotAsymmetryByLogValue alg;
         alg.initialize();
         alg.setPropertyValue("FirstRun",firstRin);
@@ -92,6 +95,7 @@ public:
         TS_ASSERT_DELTA(Y[8],0.029188,0.00001);
         TS_ASSERT_DELTA(Y[9],0.009614,0.00001);
         TS_ASSERT_DELTA(Y[10],0.007757,0.00001);
+#endif
     }
 private:
   std::string firstRin,lastRun;

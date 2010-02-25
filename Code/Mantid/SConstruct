@@ -72,6 +72,8 @@ opencascade_path = ''
 python_path = ''
 win64 = ''
 
+dest_dir = './Bin/Shared'
+
 #Get paths
 if os.name == 'nt': 
 	print "* COMMENCING WINDOWS BUILD *"
@@ -79,9 +81,15 @@ if os.name == 'nt':
 	
 	python_path = 'C:/Python25/'
 	opencascade_path=third_party + '/include/OpenCascade'
-	libList.append('PocoUtil')
-	libList.append('PocoFoundation')
-	libList.append('PocoXML')
+	if int(debug) == 0:
+		libList.append('PocoUtil')
+		libList.append('PocoFoundation')
+		libList.append('PocoXML')
+	else:
+		libList.append('PocoUtild')
+		libList.append('PocoFoundationd')
+		libList.append('PocoXMLd')
+	
 	libDirList.append(python_path + '/libs/')
 	
 	win64=ARGUMENTS.get('win64',0)
@@ -163,7 +171,7 @@ if os.name == 'nt':
 		cflags.extend(['/DNOMINMAX','/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
 		cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
 	else :
-		cflags = ['/Ox', '/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL']
+		cflags = ['/Ox','/Oi', '/Ot', '/Oy', '/Ob2', '/GL', '/openmp', '/W3','/EHsc', '/MD', '/TP', '/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DGSL_DLL']
 		cflags.extend(['/DMS_VISUAL_STUDIO=1', '/DWIN32', '/D_WINDOWS', '/DPOCO_DLL', '/DWINVER=0x0500'])
 		cflags.extend(['/DNOMINMAX','/D_USE_MATH_DEFINES', '/DWNT', '/wd4275', '/wd4996'])
 		cflags.extend(['/D_SCL_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_WARNINGS', '/D_CRT_SECURE_NO_DEPRECATE', '/D_CRT_NONSTDC_NO_DEPRECATE', '/D_SCL_SECURE_NO_DEPRECATE'])
@@ -253,7 +261,7 @@ while(len(dirpath)):
 #Collect the includes into a single directory
 MantidBuild.collectIncludes('.', 'includes')
 
-libDirList.append(os.path.abspath('./Bin/Shared'))
+libDirList.append(os.path.abspath(dest_dir))
 
 if platform.system() == 'Linux':	
   if rpmBuild :
@@ -263,7 +271,7 @@ if platform.system() == 'Linux':
     ##
     ## BIT FOR -Wl,-rpath : This avoids the STUPID STUPID export LD_PATH in run_test 
     ## 
-    lpts.append('-Wl,-rpath,./Bin/Shared')
+    lpts.append('-Wl,-rpath,' + dest_dir)
   print 'LINKFLAGS: ',lpts
   env.Append(LINKFLAGS=lpts)
 
@@ -313,7 +321,7 @@ for subproj in subProjs:
 	ret = SConscript([subproj+'/SConscript'])
 	if len(ret) == 0:
 	   continue
-	env.Install('Bin/Shared', ret['shared'])
+	env.Install(dest_dir, ret['shared'])
 	f.write(str( ret['shared'][0]) + '\n')
 	shared_libraries.insert(0,ret['shared'])
 	shared_objects = shared_objects + ret['sharedobjs']
@@ -337,11 +345,11 @@ env.Install('Bin/Plugins', ret['shared'])
 # matlab interface
 if int(matlab) :
        ret = SConscript(['MatlabAPI/SConscript'])
-       env.Install('Bin/Shared', ret['shared'])
+       env.Install(dest_dir, ret['shared'])
 
 # main program
 ret = SConscript(['Main/SConscript'])
-env.Install('Bin/Shared', ret['shared'])
+env.Install(dest_dir, ret['shared'])
 
 skiptest=ARGUMENTS.get('skiptest',0)
 if not int(skiptest) and not env.GetOption('clean'):

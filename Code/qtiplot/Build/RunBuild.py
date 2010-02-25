@@ -9,7 +9,7 @@ buildargs = []
 if os.name == 'posix':
     make = "make"
 else:
-    make = "nmake"
+	make = "nmake"
 
 if platform.system() == 'Linux':
     qmake = "qmake-qt4 QMAKE_CXX=g++44 QMAKE_CC=gcc44"
@@ -19,8 +19,17 @@ elif platform.system() == 'Darwin':
     os.putenv('QMAKESPEC','/usr/local/Qt4.5/mkspecs/macx-g++')
     qmake = "qmake CONFIG+=release"
     buildargs.append("-j2")
+elif platform.system() == 'Windows':
+    setenv = 'CALL "%VCINSTALLDIR%\\vcvarsall.bat"'
+    qmake_conf = ''
+    if platform.architecture()[0] == '64bit':
+        setenv += ' amd64'
+        qmake_conf = 'CONFIG+=build64'
+    setenv += ' && '
+    make = setenv + make
+    qmake = setenv + 'qmake' + ' ' + qmake_conf
 else:
-    qmake = 'qmake'
+    pass
 
 # Update the local copy
 sp.call("svn up", shell=True)
@@ -41,6 +50,7 @@ errorlog = open("../../../../logs/qtiplot/error.log","w")
 
 # Build MantidQt
 # Updates to UI files alone don't always seem to get picked up without a clean first, so do that until we can figure out why
+sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 sp.call(make + ' clean',stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="MantidQt")
 if ret != 0:
@@ -49,6 +59,7 @@ if ret != 0:
     sys.exit(0)
 
 # Build QtPropertyBrowser
+sp.call(qmake,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
 ret = sp.call(make,stdout=buildlog,stderr=errorlog,shell=True,cwd="QtPropertyBrowser")
 if ret != 0:
     outcome = "QtPropertyBrowser build failed"

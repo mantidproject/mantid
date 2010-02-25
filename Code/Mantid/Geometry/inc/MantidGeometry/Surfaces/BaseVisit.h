@@ -1,5 +1,5 @@
-#ifndef Geometry_BaseVisit_h
-#define Geometry_BaseVisit_h
+#ifndef GEOMETRY_BASEVISIT_H
+#define GEOMETRY_BASEVISIT_H
 
 namespace Mantid
 {

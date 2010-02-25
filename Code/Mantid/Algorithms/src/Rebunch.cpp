@@ -6,7 +6,7 @@
 
 #include <sstream>
 #include <numeric>
-#include <math.h>
+#include <cmath>
 
 namespace Mantid
 {

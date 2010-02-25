@@ -8,7 +8,7 @@
 #include <boost/shared_ptr.hpp>
 #include <gsl/gsl_statistics.h>
 #include <gsl/gsl_sort.h>
-#include <math.h>
+#include <cmath>
 #include <string>
 #include <vector>
 #include <iomanip>

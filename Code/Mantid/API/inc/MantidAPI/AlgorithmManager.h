@@ -58,7 +58,7 @@ public:
    */
   int size() const
   {
-    return m_managed_algs.size();
+    return static_cast<int>(m_managed_algs.size());
   }
 
   const std::vector<std::pair<std::string, std::string> > getNamesAndCategories() const;

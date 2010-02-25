@@ -73,7 +73,7 @@ public:
     ///virtual destructor
     virtual ~ParameterMap(){}
     /// Return the size of the map
-    int size() const {return m_map.size();}
+    int size() const {return static_cast<int>(m_map.size());}
     ///Copy Contructor
     ParameterMap(const ParameterMap& copy);
     /// Clears the map

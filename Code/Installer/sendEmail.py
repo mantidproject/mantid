@@ -1,6 +1,7 @@
 import re
 import smtplib
 import os
+import platform
 from shutil import move
 from time import strftime
 import sys
@@ -9,9 +10,10 @@ import buildNotification as notifier
 
 #Email settings
 smtpserver = 'outbox.rl.ac.uk'
-
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-SENDER = 'WinInstaller@mantidproject.org'
+SENDER = 'Win' + platform.architecture()[0][:2]  + 'Installer@mantidproject.org'
+#Create Subject
+subject = 'Subject: Windows' + platform.architecture()[0][:2]  + ' Build Report: '
 
 #Set up email content 
 buildSuccess = True
@@ -62,8 +64,6 @@ message += 'BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
-#Create Subject
-subject = 'Subject: Windows Build Report: '
 
 if buildSuccess:
 	subject += '[Build Successful]\n\n\n'

@@ -33,6 +33,9 @@
  */
 #ifdef _WIN32
   #pragma warning( disable: 4251 )
+  // MG: Given that we are compiling everything with msvc under Windows and linking all with the same runtime we can disable the warning about
+  // inheriting from a non-exported interface, e.g. std::runtime_error
+  #pragma warning( disable : 4275 )
   #define DLLExport __declspec( dllexport )
   #define DLLImport __declspec( dllimport )
 #else

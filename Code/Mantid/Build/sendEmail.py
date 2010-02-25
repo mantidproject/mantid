@@ -15,7 +15,14 @@ smtpserver = 'outbox.rl.ac.uk'
 #RECIPIENTS = ['russell.taylor@stfc.ac.uk']
 #RECIPIENTS=['martyn.gigg@stfc.ac.uk']
 RECIPIENTS = ['mantid-buildserver@mantidproject.org']
-SENDER = platform.system()+'BuildServer1@mantidproject.org'
+SENDER = platform.system() 
+#Create Subject
+subject = 'Subject: ' + platform.system() 
+if platform.architecture()[0] == '64bit':
+    SENDER += '64'
+    subject += '64'
+SENDER += 'BuildServer1@mantidproject.org'
+subject += ' Build Report: '
 
 tracLink = 'http://trac.mantidproject.org/mantid/'
 #Set up email content 
@@ -212,10 +219,6 @@ message += '--------------------------------------------------------------------
 if os.name != 'posix':
      message += 'DOXYGEN LOG\n\n'
      message += 'Doxygen Log <' + httpLinkToArchive + 'doxy.log>\n'
-
-
-#Create Subject
-subject = 'Subject: ' + platform.system() + ' Build Report: '
 
 if buildSuccess:
 	subject += '[Framework Build Successful, '

@@ -81,7 +81,7 @@ public:
   /// Gets a list of spectra corresponding to a list of detector numbers
   std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
   /// Return the size of the map
-  int nElements() const {return m_s2dmap.size();}
+  int nElements() const {return static_cast<int>(m_s2dmap.size());}
   /// Tests two maps for equality
   bool operator==(const SpectraDetectorMap& other) const;
   /// Tests two maps for inequality
