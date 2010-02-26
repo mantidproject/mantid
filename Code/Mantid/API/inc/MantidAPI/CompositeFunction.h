@@ -76,7 +76,7 @@ public:
   /// Returns the index of parameter name
   int parameterIndex(const std::string& name)const;
   /// Returns the index of a parameter
-  int parameterIndex(const double* p)const;
+  //int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
   std::string parameterName(int i)const;
   /// Checks if a parameter has been set explicitly
@@ -152,8 +152,6 @@ protected:
   virtual void declareParameter(const std::string& name,double initValue = 0);
   /// Add a new tie
   virtual void addTie(ParameterTie* tie);
-  /// Get the address of the parameter
-  virtual double* getParameterAddress(int i);
 
 private:
 

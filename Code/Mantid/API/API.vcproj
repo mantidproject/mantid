@@ -287,6 +287,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ParameterReference.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ParameterTie.cpp"
 				>
 			</File>
@@ -760,6 +764,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\PairedGroupAlgorithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAPI\ParameterReference.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ParameterReferenceTest.h"
 				>
 			</File>
 			<File

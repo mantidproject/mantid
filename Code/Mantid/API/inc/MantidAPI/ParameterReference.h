@@ -1,12 +1,11 @@
-#ifndef MANTID_API_PARAMETERTIE_H_
-#define MANTID_API_PARAMETERTIE_H_
+#ifndef MANTID_API_PARAMETERREFERENCE_H_
+#define MANTID_API_PARAMETERREFERENCE_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllExport.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/ParameterReference.h"
 
 namespace mu
 {
@@ -17,13 +16,12 @@ namespace Mantid
 {
 namespace API
 {
-/** Ties fitting parameters. A tie is a formula that is used to 
-    calculate the value of a function parameter based on the values of other parameters.
-    A tied parameter is not considered independent and doesn't take part in fitting.
-    Its value is always calculated with its tie's formula.
+/** 
+    A reference to a parameter in a function. To uniquely identify a parameter
+    in a composite function
 
     @author Roman Tolchenov, Tessella Support Services plc
-    @date 28/10/2009
+    @date 26/02/2010
 
     Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
 
@@ -45,34 +43,29 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ParameterTie: public ParameterReference
+class DLLExport ParameterReference
 {
 public:
+  /// Default constructor
+  ParameterReference():m_function(0),m_index(-1){}
   /// Constructor
-  ParameterTie(IFunction* funct,const std::string& parName);
-  /// Destructor
-  virtual ~ParameterTie();
-  /// Set the tie expression
-  virtual void set(const std::string& expr);
-  /// Evaluate the expression
-  virtual double eval();
-
-  /// Check if the tie has any references to certain parameters
-  bool findParametersOf(const IFunction* fun)const;
-
-protected:
-  mu::Parser* m_parser;         ///< math parser
-  /// Store for parameters used in the tie. The map's key is address used bu the mu::Parser
-  std::map<double*,ParameterReference> m_varMap;
-  /// Keep the function that was passed to the constructor
-  IFunction* m_function1;
-
+  ParameterReference(IFunction* fun,int index){reset(fun,index);}
+  /// Return pointer to the function
+  IFunction* getFunction()const{return m_function;}
+  /// Return parameter index in that function
+  int getIndex()const{return m_index;}
+  /// Reset the reference
+  void reset(IFunction* fun,int index);
+  /// Set the parameter
+  void setParameter(const double& value) {m_function->setParameter(m_index,value);}
+  /// Get the value of the parameter
+  double getParameter()const{return m_function->getParameter(m_index);}
 private:
-  /// MuParser callback function
-  static double* AddVariable(const char *varName, void *palg);
+  IFunction* m_function; ///< pointer to the function
+  int m_index; ///< parameter index
 };
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_PARAMETERTIE_H_*/
+#endif /*MANTID_API_PARAMETERREFERENCE_H_*/

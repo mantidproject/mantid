@@ -77,7 +77,7 @@ public:
   /// Returns the index of parameter name
   virtual int parameterIndex(const std::string& name)const;
   /// Returns the index of a parameter
-  virtual int parameterIndex(const double* p)const;
+  //virtual int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const;
   /// Checks if a parameter has been set explicitly
@@ -131,7 +131,7 @@ protected:
   virtual bool removeTie(int i);
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(int i)const;
-  /// Get the address of the parameter
+  /// Get the address of the parameter. For use in UserFunction with mu::Parser
   virtual double* getParameterAddress(int i);
 
   /// Nonvirtual member which removes all declared parameters

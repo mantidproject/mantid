@@ -180,16 +180,16 @@ int Function::parameterIndex(const std::string& name)const
  * @param p A pointer to a double variable.
  * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
  */
-int Function::parameterIndex(const double* p)const
-{
-  const double* p0 = &m_parameters.front();
-  const double* p1 = &m_parameters.back();
-  if (p >= p0 && p <= p1)
-  {
-    return p - p0;
-  }
-  return -1;
-}
+//int Function::parameterIndex(const double* p)const
+//{
+//  const double* p0 = &m_parameters.front();
+//  const double* p1 = &m_parameters.back();
+//  if (p >= p0 && p <= p1)
+//  {
+//    return p - p0;
+//  }
+//  return -1;
+//}
 
 /** Returns the name of parameter i
  * @param i The index of a parameter
@@ -336,18 +336,18 @@ void Function::applyTies()
  */
 class TieEqual
 {
-  const double* m_par;///< pointer
+  const int m_i;///< index to find
 public:
   /** Constructor
    * @param par A pointer to the parameter you want to search for
    */
-  TieEqual(const double* par):m_par(par){}
+  TieEqual(int i):m_i(i){}
   /**
    * @return True if found
    */
   bool operator()(ParameterTie* p)
   {
-    return p->parameter() == m_par;
+    return p->getIndex() == m_i;
   }
 };
 
@@ -361,8 +361,7 @@ bool Function::removeTie(int i)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  double* par = &m_parameters[i];
-  std::vector<ParameterTie*>::iterator it = std::find_if(m_ties.begin(),m_ties.end(),TieEqual(par));
+  std::vector<ParameterTie*>::iterator it = std::find_if(m_ties.begin(),m_ties.end(),TieEqual(i));
   if (it != m_ties.end())
   {
     delete *it;
@@ -383,8 +382,7 @@ ParameterTie* Function::getTie(int i)const
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  const double* par = &m_parameters[i];
-  std::vector<ParameterTie*>::const_iterator it = std::find_if(m_ties.begin(),m_ties.end(),TieEqual(par));
+  std::vector<ParameterTie*>::const_iterator it = std::find_if(m_ties.begin(),m_ties.end(),TieEqual(i));
   if (it != m_ties.end())
   {
     return *it;
@@ -398,7 +396,7 @@ void Function::clearTies()
 {
   for(std::vector<ParameterTie*>::iterator it = m_ties.begin();it != m_ties.end(); it++)
   {
-    int i = parameterIndex((**it).parameter());
+    int i = getParameterIndex(**it);
     restoreActive(i);
     delete *it;
   }

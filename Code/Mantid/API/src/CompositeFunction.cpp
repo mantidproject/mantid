@@ -222,18 +222,18 @@ int CompositeFunction::parameterIndex(const std::string& name)const
  * @param p A pointer to a double variable.
  * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
  */
-int CompositeFunction::parameterIndex(const double* p)const
-{
-  for(int iFun=0;iFun<nFunctions();iFun++)
-  {
-    int i = m_functions[iFun]->parameterIndex(p);
-    if (i >= 0)
-    {
-      return m_paramOffsets[iFun] + i;
-    }
-  }
-  return -1;
-}
+//int CompositeFunction::parameterIndex(const double* p)const
+//{
+//  for(int iFun=0;iFun<nFunctions();iFun++)
+//  {
+//    int i = m_functions[iFun]->parameterIndex(p);
+//    if (i >= 0)
+//    {
+//      return m_paramOffsets[iFun] + i;
+//    }
+//  }
+//  return -1;
+//}
 
 /// Returns the name of parameter i
 std::string CompositeFunction::parameterName(int i)const
@@ -414,17 +414,10 @@ void CompositeFunction::removeFunction(int i, bool del)
   int dna = fun->nActive();
   int dnp = fun->nParams();
 
-  // Delete the ties that point to the function being removed
-  std::vector<const double*> pars;
-  for(int j=0;j<fun->nParams();j++)
-  {
-    pars.push_back(fun->getParameterAddress(j));
-  }
-
   for(int j=0;j<nParams();)
   {
     ParameterTie* tie = getTie(j);
-    if (tie && tie->findParameters(pars))
+    if (tie && tie->findParametersOf(fun))
     {
       removeTie(j);
     }
@@ -703,7 +696,7 @@ ParameterTie* CompositeFunction::getTie(int i)const
  */
 void CompositeFunction::addTie(ParameterTie* tie)
 {
-  int i = parameterIndex(tie->parameter());
+  int i = getParameterIndex(*tie);
   if (i < 0)
   {
     throw std::logic_error("Trying to use a tie on a parameter not belonging to this function");
@@ -775,13 +768,6 @@ IConstraint* CompositeFunction::nextConstraint()
   return getFunction(m_iConstraintFunction)->firstConstraint();
 }
 
-/// Get the address of the parameter
-double* CompositeFunction::getParameterAddress(int i)
-{
-  int iFun = functionIndex(i);
-  return m_functions[ iFun ]->getParameterAddress(i - m_paramOffsets[iFun]);
-}
-
 /** 
  *  @param i The parameter index
  */
@@ -798,10 +784,17 @@ bool CompositeFunction::isExplicitlySet(int i)const
  */
 int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
 {
-  std::vector<IFunction*>::const_iterator it = std::find(m_functions.begin(),m_functions.end(),ref.getFunction());
-  if (it != m_functions.end() && ref.getIndex() < (*it)->nParams())
+  if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
     return ref.getIndex();
+  }
+  for(int iFun=0;iFun<nFunctions();iFun++)
+  {
+    int iLocalIndex = getFunction(iFun)->getParameterIndex(ref);
+    if (iLocalIndex >= 0)
+    {
+      return m_paramOffsets[iFun] + iLocalIndex;
+    }
   }
   return -1;
 }

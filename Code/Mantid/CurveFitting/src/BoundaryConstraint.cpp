@@ -36,7 +36,7 @@ m_hasUpperBound( true),
 m_lowerBound(lowerBound), 
 m_upperBound(upperBound)
 {
-  set(fun,fun->parameterIndex(paramName));
+  reset(fun,fun->parameterIndex(paramName)),
   m_activeParameterIndex = fun->activeIndex(getIndex());
 }
 
@@ -116,7 +116,7 @@ void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& 
   try
   {
     int i = fun->parameterIndex(parName);
-    set(fun,i);
+    reset(fun,i);
     m_parameterName = parName;
   }
   catch(...)

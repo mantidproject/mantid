@@ -12,14 +12,13 @@ namespace API
    * @param parName The name of the parameter to be tied
    */
   ParameterTie::ParameterTie(IFunction* funct,const std::string& parName)
-    :m_parser(new mu::Parser()),m_function(funct)
+    :ParameterReference(funct,funct->parameterIndex(parName)),m_parser(new mu::Parser())
   {
     m_parser->DefineNameChars("0123456789_."
                        "abcdefghijklmnopqrstuvwxyz"
                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     m_parser->SetVarFactory(AddVariable, this);
-
-    m_par = funct->getParameterAddress(funct->parameterIndex(parName));
+    m_function1 = funct;
   }
 
   /// Destructor
@@ -35,7 +34,11 @@ namespace API
   double* ParameterTie::AddVariable(const char *varName, void *palg)
   {
     ParameterTie& tie = *(ParameterTie*)palg;
-    return tie.m_function->getParameterAddress(tie.m_function->parameterIndex(std::string(varName)));
+    double* var = new double;
+    *var = 0;
+    ParameterReference ref(tie.m_function1,tie.m_function1->parameterIndex(std::string(varName)));
+    tie.m_varMap[var] = ref;
+    return var;
   }
 
   /**
@@ -68,6 +71,10 @@ namespace API
     double res = 0;
     try
     {
+      for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+      {
+        *(it->first) = it->second.getParameter();
+      }
       res = m_parser->Eval();
     }
     catch(...)
@@ -75,22 +82,22 @@ namespace API
       throw std::runtime_error("Error in expresseion");
     }
 
-    *m_par = res;
+//    *m_par = res;
+    setParameter(res);
 
     return res;
   }
 
   /** This method takes a list of double pointers and checks if any of them match
    * to the variables defined in the internal mu::Parser
-   * @param pars A list of pointers to check.
-   * @return True if any of the pars is used as a variable in the mu::Parser
+   * @param fun A function
+   * @return True if any of the parameters is used as a variable in the mu::Parser
    */
-  bool ParameterTie::findParameters(const std::vector<const double*>& pars)const
+  bool ParameterTie::findParametersOf(const IFunction* fun)const
   {
-    mu::varmap_type vars = m_parser->GetVar();
-    for(mu::varmap_type::const_iterator it=vars.begin();it!=vars.end();it++)
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
     {
-      if (std::find(pars.begin(),pars.end(),it->second) != pars.end())
+      if (it->second.getFunction() == fun)
       {
         return true;
       }

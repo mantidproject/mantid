@@ -115,10 +115,6 @@ public:
   virtual void function(double* out, const double* xValues, const int& nData) = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
-  /// This method returns same as function() plus any penalty if constraints are violated
-  //virtual void functionWithConstraint(double* out, const double* xValues, const int& nData) = 0;
-  ///  This method returns same as functionDeriv() plus any penalty if constraints are violated
-  //virtual void functionDerivWithConstraint(Jacobian* out, const double* xValues, const int& nData) = 0;
   /// Derivatives to be used in covariance matrix calculation. Override this method some of the fitted parameters
   /// are different form the declared ones.
   virtual void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
@@ -136,7 +132,7 @@ public:
   /// Returns the index of parameter name
   virtual int parameterIndex(const std::string& name)const = 0;
   /// Returns the index of a parameter
-  virtual int parameterIndex(const double* p)const = 0;
+  //virtual int parameterIndex(const double* p)const = 0;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const = 0;
   /// Checks if a parameter has been set explicitly
@@ -217,7 +213,7 @@ protected:
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(int i)const = 0;
   /// Get the address of the parameter
-  virtual double* getParameterAddress(int i) = 0;
+  //virtual double* getParameterAddress(int i) = 0;
 
   friend class ParameterTie;
   friend class CompositeFunction;
@@ -233,36 +229,6 @@ protected:
 
 };
 
-/**
- * A reference to a parameter. To uniquely identify a parameter
- * in a composite function
- */
-class ParameterReference
-{
-public:
-  /// Default constructor
-  ParameterReference():m_function(0),m_index(-1){}
-  /// Constructor
-  ParameterReference(IFunction* fun,int index=-1):m_function(fun),m_index(index){}
-  /// Return pointer to the function
-  IFunction* getFunction()const{return m_function;}
-  /// Return parameter index in that function
-  int getIndex()const{return m_index;}
-  /// Set the reference
-  void set(IFunction* fun,int index)
-  {
-    m_function = fun;
-    m_index = index;
-  }
-  /// Set the reference
-  void set(IFunction* fun)
-  {
-    m_function = fun;
-  }
-private:
-  IFunction* m_function; ///< pointer to the function
-  int m_index; ///< parameter index
-};
 
 /** Represents the Jacobian in functionDeriv. 
 *  It is abstract to abstract from any GSL

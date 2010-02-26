@@ -11,6 +11,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/CompositeFunction.h"
 
 #include <sstream>
 #include <iostream>
@@ -126,7 +127,7 @@ ParameterTie* IFunction::createTie(const std::string& parName)
 void IFunction::tie(const std::string& parName,const std::string& expr)
 {
   ParameterTie* tie = this->createTie(parName);
-  int i = parameterIndex(tie->parameter());
+  int i = getParameterIndex(*tie);
   if (i < 0)
   {
     delete tie;

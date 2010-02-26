@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ParameterReference.h"
 
 namespace Mantid
 {

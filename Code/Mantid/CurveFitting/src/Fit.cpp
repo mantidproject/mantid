@@ -825,13 +825,16 @@ namespace CurveFitting
     if (in) m_function->updateActive(in);
     m_function->functionDeriv(out,xValues,nData);
 
+    if (nData <= 0) return;
+
     API::IConstraint* c = m_function->firstConstraint();
     if (!c) return;
 
     do
     {  
       double penalty = c->checkDeriv();
-      out->addNumberToColumn(penalty, m_function->getParameterIndex(*c));
+      int i = m_function->getParameterIndex(*c);
+      out->addNumberToColumn(penalty, m_function->activeIndex(i));
     }
     while(c = m_function->nextConstraint());
 
@@ -915,13 +918,13 @@ namespace CurveFitting
               int iFun = cf->functionIndex(iPar);
               parName = cf->parameterLocalName(iPar);
               con = new BoundaryConstraint();
-              con->set(cf->getFunction(iFun),cf->getFunction(iFun)->parameterIndex(parName));
+              con->reset(cf->getFunction(iFun),cf->getFunction(iFun)->parameterIndex(parName));
               cf->getFunction(iFun)->addConstraint(con);
             }
             else
             {
               con = new BoundaryConstraint();
-              con->set(m_function,m_function->parameterIndex(parName));
+              con->reset(m_function,m_function->parameterIndex(parName));
               m_function->addConstraint(con);
             }
 

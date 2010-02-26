@@ -135,8 +135,8 @@ public:
     tie.set("f2.s^2+f0.a+1");
 
     TS_ASSERT_DELTA(tie.eval(),5.8,0.00001);
-    TS_ASSERT_EQUALS(*tie.parameter(),mfun.getParameter(4));
-    TS_ASSERT_EQUALS(*tie.parameter(),g1->getParameter(2));
+    TS_ASSERT_EQUALS(tie.getFunction(),g1);
+    TS_ASSERT_EQUALS(tie.getIndex(),2);
 
     TS_ASSERT_THROWS(mustThrow1(&mfun),std::invalid_argument);
     TS_ASSERT_THROWS(mustThrow2(&mfun),std::invalid_argument);
@@ -156,7 +156,7 @@ public:
     ParameterTie tie(&bk,"b");
     tie.set("2*a-1");
 
-    TS_ASSERT_EQUALS(*tie.parameter(),bk.getParameter(1));
+    TS_ASSERT_EQUALS(tie.getIndex(),1);
     TS_ASSERT_DELTA(tie.eval(),0.6,0.00001);
     TS_ASSERT_THROWS( mustThrow4(&bk),std::invalid_argument);
     TS_ASSERT_THROWS( mustThrow5(&bk),std::invalid_argument);
