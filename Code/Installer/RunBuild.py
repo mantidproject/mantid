@@ -11,4 +11,10 @@ else:
     pass
 
 build_cmd += ' 1> ../../../../logs/Installer/build.log 2> ../../../../logs/Installer/error.log'
-os.system(build_cmd)
+retcode = os.system(build_cmd)
+if retcode == 0:
+    exit(0)
+else:
+    print "Error building MSI"
+    exit(1)
+

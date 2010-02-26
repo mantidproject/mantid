@@ -42,7 +42,7 @@ if ARCH == '32':
     comp_guid['Plugins'] = '{EEF0B4C9-DE52-4f99-A8D0-9D3C3941FA73}'
     comp_guid['PyAlgsEx'] = '{4ac60beb-e2bc-4bbb-836b-347bb923ba43}'
     comp_guid['Documents'] = '{C16B2B59-17C8-4cc9-8A7F-16254EB8B2F4}'
-    comp_guid['Logs'] = '{0918C9A4-3481-4f21-B  941-983BE21F9674}'
+    comp_guid['Logs'] = '{0918C9A4-3481-4f21-B941-983BE21F9674}'
     comp_guid['IncludeMantidAlgorithms'] = '{EDB85D81-1CED-459a-BF87-E148CEE6F9F6}'
     comp_guid['IncludeMantidAPI'] = '{4761DDF6-813C-4470-8852-98CB9A69EBC9}'    
     comp_guid['IncludeMantidCurveFitting'] = '{44d0bdf5-e13a-4a27-8609-e273965ee860}'
@@ -244,7 +244,6 @@ def addCompList(Id,location,name,parent):
         m = md5.new(location + ARCH)
     u = m.hexdigest()
     uuid = '{'+u[0:8]+'-'+u[8:12]+'-'+u[12:16]+'-'+u[16:20]+'-'+u[20:]+'}'
-    print Id,uuid
     comp = addComponent(Id,uuid,directory)
     lst.append(Id)
     files = os.listdir(location)

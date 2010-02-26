@@ -11,6 +11,8 @@ if /i not %1 == x86 (
     )
 )
 
+REM Delete Old MSI
+del %MSI_NAME%
 svn update > build_number.txt
 python generateWxs.py
 if errorlevel 1 goto wxs_error
@@ -35,11 +37,11 @@ goto failed
 echo "Usage: build.bat x86|amd64"
 goto failed
 
-:failed
-ENDLOCAL
-exit(1)
-
 :end
 ENDLOCAL
 echo "MSI build succeeded"
-exit(0)
+EXIT 0
+
+:failed
+ENDLOCAL
+EXIT 1
