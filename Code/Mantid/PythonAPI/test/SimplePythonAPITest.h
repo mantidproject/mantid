@@ -25,7 +25,7 @@ public:
     using namespace Mantid::PythonAPI;
     //first call the function to create the module file
     SimplePythonAPI::createModule(false);
-    Poco::File apimodule(SimplePythonAPI::getModuleName());
+    Poco::File apimodule(SimplePythonAPI::getModuleFilename());
     //has it been written ?
     TS_ASSERT(apimodule.exists());
 
@@ -121,6 +121,12 @@ public:
     // remove
     TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
     TS_ASSERT( !apimodule.exists() );
+    
+    //Check keyword file
+    Poco::File apikeywords(SimplePythonAPI::getKeywordsFilename());
+    //has it been written ?
+    TS_ASSERT(apikeywords.exists());
+    apikeywords.remove();
 
   }
 
