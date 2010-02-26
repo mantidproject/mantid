@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -212,19 +213,6 @@ public:
     // test of some detector...
     boost::shared_ptr<Detector> ptrDetShape = boost::dynamic_pointer_cast<Detector>(i->getDetector(101001));
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
-
-    // test of parameter map
-    ParameterMap& paramMap = ws2D->instrumentParameters();
-
-    // get detector corresponding to workspace index 0
-    IDetector_sptr det = ws2D->getDetector(101);  
-
-    TS_ASSERT_EQUALS( det->getID(), 102046);
-    TS_ASSERT_EQUALS( det->getName(), "Det45");
-
-    Parameter_sptr param = paramMap.getRecursive(&(*det), "Alpha0", "fitting");
-    TS_ASSERT_DELTA( param->value<double>(), 0.734079, 0.0001);
-
   }
 
   void testExecSLS()

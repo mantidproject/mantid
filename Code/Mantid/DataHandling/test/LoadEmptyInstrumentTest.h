@@ -14,6 +14,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include <vector>
 
 using namespace Mantid::API;
@@ -182,17 +183,20 @@ public:
     TS_ASSERT_EQUALS( det->getName(), "Det45");
 
     Parameter_sptr param = paramMap.getRecursive(&(*det), "Alpha0", "fitting");
-    TS_ASSERT_DELTA( param->value<double>(), 0.734079, 0.0001);
+    const FitParameter& fitParam = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam.getValue(), 0.734079, 0.0001);
 
     IDetector_sptr det1 = ws->getDetector(501);
     TS_ASSERT_EQUALS( det1->getID(), 211001 );
     Parameter_sptr param1 = paramMap.getRecursive(&(*det1), "Alpha0", "fitting");
-    TS_ASSERT_DELTA( param1->value<double>(), 0.734079, 0.0001);
+    const FitParameter& fitParam1 = param1->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam1.getValue(), 0.734079, 0.0001);
 
     IDetector_sptr det2 = ws->getDetector(341);
     TS_ASSERT_EQUALS( det2->getID(), 201001 );
     Parameter_sptr param2 = paramMap.getRecursive(&(*det2), "Alpha0", "fitting");
-    TS_ASSERT_DELTA( param2->value<double>(), 0.734079, 0.0001);
+    const FitParameter& fitParam2 = param2->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam2.getValue(), 0.734079, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }
