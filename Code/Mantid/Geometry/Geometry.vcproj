@@ -229,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Instrument\FitParameter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Surfaces\General.cpp"
 				>
 			</File>
@@ -547,6 +551,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidGeometry\Instrument\FitParameter.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidGeometry\Surfaces\General.h"
 				>
 			</File>
@@ -627,11 +635,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
 				>
 			</File>
 			<File

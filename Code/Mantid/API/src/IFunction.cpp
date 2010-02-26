@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IConstraint.h"
@@ -72,7 +73,8 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
       Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), parameterName(i), "fitting");
       if (param != Geometry::Parameter_sptr())
       {
-        setParameter(i, param->value<double>());
+        const Geometry::FitParameter& fitParam = param->value<Geometry::FitParameter>();
+        setParameter(i, fitParam.getValue());
       }
     }
   }
