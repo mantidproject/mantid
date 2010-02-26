@@ -75,9 +75,17 @@ std::string FlatPlateAbsorption::sampleXML()
 /// Calculate the distances for L1 and element size for each element in the sample
 void FlatPlateAbsorption::initialiseCachedDistances()
 {
-  m_L1s.resize(m_numVolumeElements);
-  m_elementVolumes.resize(m_numVolumeElements);
-  m_elementPositions.resize(m_numVolumeElements);
+  try
+  {
+    m_L1s.resize(m_numVolumeElements);
+    m_elementVolumes.resize(m_numVolumeElements);
+    m_elementPositions.resize(m_numVolumeElements);
+  } catch (...) {
+    // Typically get here if the number of volume elements is too large
+    // Provide a bit more information
+    g_log.error("Too many volume elements requested - try increasing the value of the ElementSize property.");
+    throw;
+  }
   
   int counter = 0;
   
