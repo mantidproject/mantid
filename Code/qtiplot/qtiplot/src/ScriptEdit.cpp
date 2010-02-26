@@ -60,7 +60,7 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
 	connect(this, SIGNAL(textChanged()), this, SLOT(updateEditor()));
 
 	//QScintilla specific stuff
-	codeLexer = env->scriptCodeLexer();
+	codeLexer = env->getCodeLexer();
 	setLexer(codeLexer);
 	setAutoIndent(true);
 	setMarginLineNumbers(1,true);
@@ -111,7 +111,7 @@ void ScriptEdit::customEvent(QEvent *e)
 
       //Get new code lexer
       if( codeLexer ) delete codeLexer;
-      codeLexer = scriptEnv->scriptCodeLexer();
+      codeLexer = scriptEnv->getCodeLexer();
       setLexer(codeLexer);
       setAutoIndent(true);
     }

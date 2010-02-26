@@ -270,7 +270,7 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
   QString tab_title = "New script";
   setCurrentIndex(insertTab(index, editor, tab_title));
   //Set the current code lexer, the editor takes ownership
-  editor->setLexer(scriptingEnv()->scriptCodeLexer());
+  editor->setLexer(scriptingEnv()->getCodeLexer());
   // Set the current editor to focus
   setFocusProxy(editor);
   editor->setFocus();
@@ -601,6 +601,93 @@ void ScriptManagerWidget::toggleProgressArrow(bool state)
   }
 }
 
+/**
+ * Toggle code folding on/off
+ * @param state The state of the option
+ */
+void ScriptManagerWidget::toggleCodeFolding(bool state)
+{
+  QsciScintilla::FoldStyle fold_option;
+  if( state && !m_interpreter_mode )
+  {
+    fold_option = QsciScintilla::BoxedTreeFoldStyle;
+  }
+  else
+  {
+    fold_option = QsciScintilla::NoFoldStyle;
+  }
+
+  int index_end = count() - 1;
+  for( int index = index_end; index >= 0; --index )
+  {
+    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
+    if( editor ) editor->setFolding(fold_option);
+  }
+}
+/**
+ * Toggle code completion. Note that turning off code completion automatically turns off call tips
+ * @param state The state of the option
+ */
+void ScriptManagerWidget::toggleCodeCompletion(bool state)
+{
+  QsciScintilla::AutoCompletionSource api_source;
+  int threshold(-1);
+  if( state )
+  {
+    api_source = QsciScintilla::AcsAPIs;
+    threshold = 2;
+  }
+  else
+  {
+    api_source = QsciScintilla::AcsNone;
+    threshold = -1;
+  }
+
+  int index_end = count() - 1;
+  for( int index = index_end; index >= 0; --index )
+  {
+    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
+    if( editor ) 
+    {
+      //Code completion
+      editor->setAutoCompletionThreshold(threshold);  // threshold characters before autocomplete kicks in
+      editor->setAutoCompletionSource(api_source);
+    }
+  }
+}
+
+/**
+ * Toggle call tips.
+ * @param state The state of the option
+ */
+void ScriptManagerWidget::toggleCallTips(bool state)
+{
+  QsciScintilla::CallTipsStyle tip_style;
+  int nvisible(-1);
+  if( state )
+  {
+    tip_style = QsciScintilla::CallTipsNoAutoCompletionContext;
+    nvisible = 0; // This actually makes all of them visible at the same time
+  }
+  else
+  {
+    tip_style = QsciScintilla::CallTipsNone;
+    nvisible = -1;
+  }
+
+  int index_end = count() - 1;
+  for( int index = index_end; index >= 0; --index )
+  {
+    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
+    if( editor ) 
+    {
+      //Code completion
+      editor->setCallTipsVisible(nvisible);
+      editor->setCallTipsStyle(tip_style);
+    }
+  }
+}
+
 //--------------------------------------------
 // Private member functions (non-slot)
 //--------------------------------------------
@@ -658,6 +745,20 @@ void ScriptManagerWidget::initActions()
   m_toggle_progress->setEnabled(scriptingEnv()->supportsProgressReporting());
   connect(m_toggle_progress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
 
+  // Toggle code folding
+  m_toggle_folding = new QAction(tr("Code &Folding"), this);
+  m_toggle_folding->setCheckable(true);
+  connect(m_toggle_folding, SIGNAL(toggled(bool)), this, SLOT(toggleCodeFolding(bool)));
+
+  // Toggle code completion
+  m_toggle_completion = new QAction(tr("Code &Completion"), this);
+  m_toggle_completion->setCheckable(true);
+  connect(m_toggle_completion, SIGNAL(toggled(bool)), this, SLOT(toggleCodeCompletion(bool)));
+
+  // Toggle call tips
+  m_toggle_calltips = new QAction(tr("Call &Tips"), this);
+  m_toggle_calltips->setCheckable(true);
+  connect(m_toggle_calltips, SIGNAL(toggled(bool)), this, SLOT(toggleCallTips(bool)));
 }
 
 /**
@@ -713,9 +814,7 @@ void ScriptManagerWidget::customEvent(QEvent *event)
     for( int index = 0; index < ntabs; ++index )
     {
       ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-      QsciLexer *old_lexer = editor->lexer();
-      editor->setLexer(scriptingEnv()->scriptCodeLexer());
-      delete old_lexer;
+      editor->setLexer(scriptingEnv()->getCodeLexer());
     }
   }
 }

@@ -250,7 +250,7 @@ void ScriptEditor::setText(int lineno, const QString& txt)
  */
 void ScriptEditor::keyPressEvent(QKeyEvent* event)
 {
-  if( !m_interpreter_mode )
+  if( !m_interpreter_mode || isListActive() )
   {
     return QsciScintilla::keyPressEvent(event);
   }
@@ -348,8 +348,13 @@ void ScriptEditor::update()
 {
   emit undoAvailable(isUndoAvailable());
   emit redoAvailable(isRedoAvailable());
-
-  setMarginWidth( 1, 38 + 5*std::log10(static_cast<double>(lines())) );
+  int width = 38;
+  int ntens = static_cast<int>(std::log10(static_cast<double>(lines())));
+  if( ntens > 1 )
+  {
+    width += 5*ntens;
+  }
+  setMarginWidth( 1, width );
 }
 
 /**

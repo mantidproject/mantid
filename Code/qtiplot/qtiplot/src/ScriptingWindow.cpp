@@ -301,6 +301,10 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFl
     m_manager->m_toggle_progress->setChecked(false);
   }
 
+  m_manager->m_toggle_folding->setChecked(settings.value("CodeFolding", true).toBool());
+  m_manager->m_toggle_completion->setChecked(settings.value("CodeCompletion", true).toBool());
+  m_manager->m_toggle_calltips->setChecked(settings.value("CallTips", true).toBool());
+
   settings.endGroup();
 
 
@@ -343,6 +347,9 @@ void ScriptingWindow::saveSettings()
   settings.setValue("/width", window_size.width());
   settings.setValue("/height", window_size.height());
   settings.setValue("/ProgressArrow", m_manager->m_toggle_progress->isChecked());
+  settings.setValue("/CodeFolding", m_manager->m_toggle_folding->isChecked());
+  settings.setValue("/CodeCompletion", m_manager->m_toggle_completion->isChecked());
+  settings.setValue("/CallTips", m_manager->m_toggle_calltips->isChecked());
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.endGroup();
 
@@ -525,6 +532,8 @@ void ScriptingWindow::initMenus()
   m_hide = new QAction(tr("&Hide"), this);
   connect(m_hide, SIGNAL(activated()), this, SLOT(hide()));
   m_window_menu->addAction(m_hide);
+
+  m_window_menu->insertSeparator();
   //Toggle output dock
   m_toggle_output = m_output_dock->toggleViewAction();
   m_toggle_output->setText("&Show Output");
@@ -532,6 +541,14 @@ void ScriptingWindow::initMenus()
   m_window_menu->addAction(m_toggle_output);
   //Toggle progress
   m_window_menu->addAction(m_manager->m_toggle_progress);
+
+  m_window_menu->insertSeparator();
+  //Toggle folding
+  m_window_menu->addAction(m_manager->m_toggle_folding);
+  //Toggle code completion
+  m_window_menu->addAction(m_manager->m_toggle_completion);
+  //Toggle call tips
+  m_window_menu->addAction(m_manager->m_toggle_calltips);
 }
 /**
  * calls ScriptManagerWidget saveToString and  

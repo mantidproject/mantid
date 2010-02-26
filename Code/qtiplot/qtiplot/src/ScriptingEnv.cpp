@@ -31,6 +31,12 @@
 
 #include <string.h>
 
+#include <QDir>
+#include <QDateTime>
+#include <Qsci/qscilexer.h> //Mantid
+#include <Qsci/qsciapis.h> //Mantid
+#include "MantidKernel/ConfigService.h" //Mantid
+
 #ifdef SCRIPTING_MUPARSER
 #include "muParserScript.h"
 #include "muParserScripting.h"
@@ -42,10 +48,22 @@
 
 ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
   : QObject(0, langName), d_parent(parent), languageName(langName), m_report_progress(false), 
-  m_is_running(false), m_current_script(NULL)
+  m_is_running(false), m_current_script(NULL), m_lexer(NULL), m_completer(NULL), m_api_preparing(false)
 {
   d_initialized=false;
   d_refcount=0;
+}
+
+ScriptingEnv::~ScriptingEnv()
+{
+  if( m_completer )
+  {
+    delete m_completer;
+  }
+  if( m_lexer )
+  { 
+    delete m_lexer;
+  }
 }
 
 bool ScriptingEnv::initialize()
@@ -84,6 +102,62 @@ void ScriptingEnv::decref()
 	d_refcount--;
 	if (d_refcount==0)
 		delete this;
+}
+/**
+ * Set the code lexer for this environment
+ */
+void ScriptingEnv::setCodeLexer(QsciLexer* lexer)
+{ 
+  if( m_lexer )
+  {
+    delete m_lexer;
+    m_lexer = NULL;
+  }
+
+  m_lexer = lexer;
+  // Get the API for this environment
+  if( m_completer == NULL )
+  {
+    m_completer = new QsciAPIs(m_lexer);
+    connect(m_completer,SIGNAL(apiPreparationStarted()), this, SLOT(apiPrepStarted()));
+    connect(m_completer,SIGNAL(apiPreparationCancelled()), this, SLOT(apiPrepCancelled()));
+    connect(m_completer,SIGNAL(apiPreparationFinished()), this, SLOT(apiPrepDone()));
+  }
+}
+
+void ScriptingEnv::updateCodeCompletion(const QString & fname, bool prepare)
+{
+  if( m_completer->load(fname) && prepare) 
+  {
+    // This is performed in a separate thread as it can take a while
+    if( m_api_preparing )
+    {
+      m_completer->cancelPreparation();
+    }
+    else
+    {
+      m_completer->prepare();
+    }
+  }
+}
+
+// Slot to handle the started signal from the api auto complete preparation
+void ScriptingEnv::apiPrepStarted()
+{
+  m_api_preparing = true;
+}
+
+// Slot to handle a cancelled signal from the api auto-complete preparation
+void ScriptingEnv::apiPrepCancelled()
+{
+  m_api_preparing = false;
+  m_completer->prepare();
+}
+
+// Slot to handle the completed signal from the api auto complete preparation
+void ScriptingEnv::apiPrepDone()
+{
+  m_api_preparing = false;
 }
 
 void ScriptingEnv::execute(const QString & code)

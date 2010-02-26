@@ -336,7 +336,7 @@ PyObject* PythonScript::callExec(PyObject* return_tuple)
 {
   // Before requested code is executed we want to "uninstall" the modules containing Python algorithms so that a 
   // fresh import reloads them
-  PyRun_SimpleString("mtd._refreshPyAlgorithms()");
+  env()->refreshAlgorithms();
 
   PyObject* pyret(NULL);
   //If an exception is thrown the thread state needs resetting so we need to save it
@@ -389,6 +389,10 @@ PyObject* PythonScript::callExec(PyObject* return_tuple)
   if( return_tuple )
   {
     Py_DECREF(return_tuple);
+  }
+  if( pyret )
+  {
+    env()->refreshCompletion();
   }
   return pyret;
 }

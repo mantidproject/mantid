@@ -150,6 +150,12 @@ private slots:
   void setScriptIsRunning(bool running);
   /// Toggle the progress reporting arrow
   void toggleProgressArrow(bool on);
+  /// Toggle code folding
+  void toggleCodeFolding(bool on);
+  /// Toggle code folding
+  void toggleCodeCompletion(bool on);
+  /// Toggle call tips
+  void toggleCallTips(bool on);
 
 private:
   /// Initialize the actions relevant to this object
@@ -192,6 +198,12 @@ private:
   QAction *m_exec, *m_exec_all, *m_eval;
   ///Toggle progress
   QAction *m_toggle_progress;
+  /// Toggle code folding
+  QAction *m_toggle_folding;
+  /// Toggle code folding
+  QAction *m_toggle_completion;
+  /// Toggle code folding
+  QAction *m_toggle_calltips;
 
   /// The find replace dialog
   FindReplaceDialog *m_findrep_dlg;

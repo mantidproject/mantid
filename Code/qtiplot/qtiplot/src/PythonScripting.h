@@ -31,7 +31,6 @@
 
 #include "ScriptingEnv.h"
 #include "PythonScript.h"
-#include <Qsci/qscilexerpython.h> //Mantid
 
 class QObject;
 class QString;
@@ -45,6 +44,8 @@ class PythonScripting: public ScriptingEnv
   static const char *langName;
   //Factory function
   static ScriptingEnv *constructor(ApplicationWindow *parent);
+  /// Name of completion file
+  static QString completionSourceName() { return "mtdpy_keywords.txt"; }
   /// Default constructor
   PythonScripting(ApplicationWindow *parent);
   ///Destructor
@@ -52,9 +53,6 @@ class PythonScripting: public ScriptingEnv
 
   void write(const QString &text) { emit print(text); }
   
-  //Mantid. To ensure the correct code lexer for Python 
-  virtual QsciLexer* scriptCodeLexer() const { return new QsciLexerPython; }
-
   // Python supports progress monitoring
   virtual bool supportsProgressReporting() const { return true; }
   
@@ -85,6 +83,7 @@ class PythonScripting: public ScriptingEnv
 
   public slots:
     virtual void refreshAlgorithms();
+    virtual void refreshCompletion();
 
 
 private:

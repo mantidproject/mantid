@@ -39,6 +39,7 @@
 #include <QDir>
 #include <QCoreApplication>
 
+#include <Qsci/qscilexerpython.h> //Mantid
 #include "MantidKernel/ConfigService.h" //Mantid
 
 // includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
@@ -139,12 +140,25 @@ bool PythonScripting::start()
       loadInitFile(mantidbin.absoluteFilePath("mantidplotrc")) )
   {
     d_initialized = true;
-    return true;
   }
   else
   {
-    return false;
+    d_initialized = false;
   }
+
+  // If all previous initialization has been successful load the auto complete information
+  if( !d_initialized ) return false;
+  
+  QsciLexer *lexer = new QsciLexerPython;
+  setCodeLexer(lexer);
+  //Fixed API
+  QDir bindir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
+  // Load the fixed API for Mantid Python
+  this->updateCodeCompletion(bindir.absoluteFilePath(completionSourceName()), false);
+  // Generated simple API 
+  QDir outputdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
+  this->updateCodeCompletion(outputdir.absoluteFilePath("mtdpyalgorithm_keywords.txt"), true);
+  return true;
 }
 
 /**
@@ -264,7 +278,13 @@ const QStringList PythonScripting::fileExtensions() const
 
 void PythonScripting::refreshAlgorithms()
 {
-  this->execute("mtd._refreshPyAlgorithms()");
+  PyRun_SimpleString("mtd._refreshPyAlgorithms()");
+}
+
+void PythonScripting::refreshCompletion()
+{
+  QDir outputdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
+  this->updateCodeCompletion(outputdir.absoluteFilePath("mtdpyalgorithm_keywords.txt"), true);
 }
 
 //------------------------------------------------------------

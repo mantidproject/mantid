@@ -44,6 +44,7 @@ class ApplicationWindow;
 class Script;
 
 class QsciLexer; //Mantid - For QScintilla
+class QsciAPIs;
 
 //! An interpreter for evaluating scripting code. Abstract.
 /**
@@ -57,6 +58,7 @@ class ScriptingEnv : public QObject
 
   public:
   ScriptingEnv(ApplicationWindow *parent, const char *langName);
+  ~ScriptingEnv();
   //! Initialize the environment
   bool initialize();
   bool isRunning() const { return m_is_running; }
@@ -87,10 +89,11 @@ class ScriptingEnv : public QObject
   //!Set whether we should be reporting progress
   void reportProgress(bool on) { m_report_progress = on; }
 
-  // Mantid - For QScintilla. This is overridden in the concrete implementation 
-  //to return the appropriate code lexer if one is required
-  virtual QsciLexer* scriptCodeLexer() const = 0;
-
+  /// Return the code lexer, can be NULL
+  QsciLexer* getCodeLexer() const { return m_lexer; };
+  /// Set the code lexer for this environment
+  void setCodeLexer(QsciLexer* lexer);
+  /// Execute a code string in the current environment
   void execute(const QString & code);						
 
   public slots:
@@ -100,9 +103,17 @@ class ScriptingEnv : public QObject
     virtual bool setDouble(double, const char*) { return false; }
 
     virtual void refreshAlgorithms() {};
+    virtual void refreshCompletion() {};
 
     //! Clear the global environment. What exactly happens depends on the implementation.
     virtual void clear() {}
+
+    /// Slot to handle the started signal from the api auto complete preparation
+    void apiPrepStarted();
+    /// Slot to handle a cancelled signal from the api auto-complete preparation
+    void apiPrepCancelled();
+    /// Slot to handle the completed signal from the api auto complete preparation
+    void apiPrepDone();
 
     //! Increase the reference count. This should only be called by scripted and Script to avoid memory leaks.
     void incref();
@@ -115,6 +126,10 @@ class ScriptingEnv : public QObject
     //! output that is not handled by a Script
     void print(const QString & output);
     
+protected:
+    // Load code completion source file
+    void updateCodeCompletion(const QString & fname, bool prepare);
+
   protected:
     //! whether the interpreter has been successfully initialized
     bool d_initialized;
@@ -140,7 +155,12 @@ private:
   bool m_report_progress;
   // Whether a script is running
   bool m_is_running;
-
+  /// An optional code lexer for this environment
+  QsciLexer *m_lexer;
+  /// An installed API for code completion
+  QsciAPIs *m_completer;
+  /// Flag indicating if the API is currently preparing code completion information
+  bool m_api_preparing;
 };
 
 #endif
