@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../../Third_Party/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				WarningLevel="3"
@@ -123,7 +123,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../../Third_Party/include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_KERNEL=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				WarningLevel="3"

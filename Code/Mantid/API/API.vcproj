@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;../../Third_Party/include/muParser"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include;../../Third_Party/include/muParser"
 				PreprocessorDefinitions="IN_MANTID_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				OpenMP="true"
@@ -118,7 +118,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="inc;../Kernel/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include;../../Third_Party/include/muParser"
+				AdditionalIncludeDirectories="inc;../Kernel/inc;../Geometry/inc;../../Third_Party/include;../../Third_Party/include/muParser"
 				PreprocessorDefinitions="_WIN32;IN_MANTID_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				OpenMP="true"

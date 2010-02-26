@@ -471,6 +471,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\SofQW.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SolidAngle.cpp"
 				>
 			</File>
@@ -978,6 +982,10 @@
 			</File>
 			<File
 				RelativePath=".\test\SmoothDataTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\SofQW.h"
 				>
 			</File>
 			<File
