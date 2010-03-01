@@ -5066,6 +5066,12 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/KeepAspect", d_keep_plot_aspect);
 	settings.endGroup(); // ExportImage
 
+	if(m_scriptInterpreter)
+	{
+	  m_scriptInterpreter->saveSettings();
+	  m_interpreterDock->hide();
+	}
+
 	if( scriptingWindow )
  	{
 	  scriptingWindow->raise();//Mantid
@@ -5073,6 +5079,7 @@ void ApplicationWindow::saveSettings()
 	  scriptingWindow->saveSettings(); //Mantid
     scriptingWindow->hide();
 	}
+
 
     settings.beginGroup("/ToolBars");
     settings.setValue("/FileToolBar", d_file_tool_bar);

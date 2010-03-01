@@ -301,10 +301,6 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFl
     m_manager->m_toggle_progress->setChecked(false);
   }
 
-  m_manager->m_toggle_folding->setChecked(settings.value("CodeFolding", true).toBool());
-  m_manager->m_toggle_completion->setChecked(settings.value("CodeCompletion", true).toBool());
-  m_manager->m_toggle_calltips->setChecked(settings.value("CallTips", true).toBool());
-
   settings.endGroup();
 
 
@@ -347,9 +343,6 @@ void ScriptingWindow::saveSettings()
   settings.setValue("/width", window_size.width());
   settings.setValue("/height", window_size.height());
   settings.setValue("/ProgressArrow", m_manager->m_toggle_progress->isChecked());
-  settings.setValue("/CodeFolding", m_manager->m_toggle_folding->isChecked());
-  settings.setValue("/CodeCompletion", m_manager->m_toggle_completion->isChecked());
-  settings.setValue("/CallTips", m_manager->m_toggle_calltips->isChecked());
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.endGroup();
 

@@ -59,6 +59,7 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, boo
   // Start with a blank tab
   newTab();
 
+  QString group;
   if( interpreter_mode )
   {
     tabBar()->hide();
@@ -67,8 +68,21 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, boo
     connect(editor, SIGNAL(executeLine(const QString&)), this, SLOT(executeInterpreter(const QString &)));
     connect(this, SIGNAL(MessageToPrint(const QString&, bool,bool)), editor, 
 	    SLOT(displayOutput(const QString&,bool)));
+    group = "ScriptInterpreter";
 
   }
+  else
+  {
+    group = "ScriptWindow";
+  }
+  
+  // Settings
+  QSettings settings;
+  settings.beginGroup(group);
+  m_toggle_folding->setChecked(settings.value("CodeFolding", true).toBool());
+  m_toggle_completion->setChecked(settings.value("CodeCompletion", true).toBool());
+  m_toggle_calltips->setChecked(settings.value("CallTips", true).toBool());
+  settings.endGroup();
 
   setFocusPolicy(Qt::StrongFocus);
   setFocus();
@@ -91,17 +105,26 @@ ScriptManagerWidget::~ScriptManagerWidget()
 }
 
 /**
- * Close all tabs
+ * Save the settings applicable here
  */
-void ScriptManagerWidget::closeAllTabs()
+void ScriptManagerWidget::saveSettings()
 {
-  int index_end = count() - 1;
-  setCurrentIndex(index_end);
-  for( int index = index_end; index >= 0; --index )
+  QString group;
+  if( m_interpreter_mode )
   {
-    //This closes the tab at the end.
-    closeTabAtIndex(index);
+    group = "ScriptInterpreter";
   }
+  else
+  {
+    group = "ScriptWindow";
+  }
+    
+  QSettings settings;
+  settings.beginGroup(group);
+  settings.setValue("/CodeFolding", m_toggle_folding->isChecked());
+  settings.setValue("/CodeCompletion", m_toggle_completion->isChecked());
+  settings.setValue("/CallTips", m_toggle_calltips->isChecked());
+  settings.endGroup();
 }
 
 /**
@@ -256,17 +279,13 @@ QAction* ScriptManagerWidget::printAction() const
 ScriptEditor* ScriptManagerWidget::newTab(int index)
 {
   ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode);
-  if( m_interpreter_mode )
+  if( !m_interpreter_mode )
   {
-    editor->setContextMenuPolicy(Qt::NoContextMenu);
-  }
-  else
-  {
-    editor->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
-	    this, SLOT(editorContextMenu(const QPoint&)));
     connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
   }
+  editor->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
+	  this, SLOT(editorContextMenu(const QPoint&)));
   QString tab_title = "New script";
   setCurrentIndex(insertTab(index, editor, tab_title));
   //Set the current code lexer, the editor takes ownership
@@ -346,7 +365,21 @@ void ScriptManagerWidget::save(int index)
 }
 
 /**
-    This method is useful for saving the currently opened script files to project file 
+ * Close all tabs
+ */
+void ScriptManagerWidget::closeAllTabs()
+{
+  int index_end = count() - 1;
+  setCurrentIndex(index_end);
+  for( int index = index_end; index >= 0; --index )
+  {
+    //This closes the tab at the end.
+    closeTabAtIndex(index);
+  }
+}
+
+/**
+ *  This method is useful for saving the currently opened script files to project file 
 */
 QString ScriptManagerWidget::saveToString()
 {
@@ -512,31 +545,37 @@ void ScriptManagerWidget::showFindDialog(bool replace)
  */
 void ScriptManagerWidget::editorContextMenu(const QPoint &)
 {
-  if( m_interpreter_mode ) return;
-
   QMenu context(this);
 
-  //File actions
-  context.addAction(m_open_curtab);
-  context.addAction(m_save);
-  context.addAction(printAction());
-  
-  // Edit actions
-  context.insertSeparator();
-  context.addAction(copyAction());
-  context.addAction(cutAction());
-  context.addAction(pasteAction());
+  if( !m_interpreter_mode ) 
+  {
+    //File actions
+    context.addAction(m_open_curtab);
+    context.addAction(m_save);
+    context.addAction(printAction());
+    
+    // Edit actions
+    context.insertSeparator();
+    context.addAction(copyAction());
+    context.addAction(cutAction());
+    context.addAction(pasteAction());
+    
+    context.insertSeparator();
+    
+    //Evaluate and execute
+    context.addAction(m_exec);
+    context.addAction(m_exec_all);
+    if( scriptingEnv()->supportsEvaluation() )
+    {
+      context.addAction(m_eval);
+    }
+  }
 
   context.insertSeparator();
-  
-  //Evaluate and execute
-  context.addAction(m_exec);
-  context.addAction(m_exec_all);
-  if( scriptingEnv()->supportsEvaluation() )
-  {
-    context.addAction(m_eval);
-  }
-  
+
+  context.addAction(m_toggle_completion);
+  context.addAction(m_toggle_calltips);
+
   context.exec(QCursor::pos());
 }
 

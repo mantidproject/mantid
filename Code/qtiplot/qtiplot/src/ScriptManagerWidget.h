@@ -63,6 +63,8 @@ public:
   ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode = false);
   ///Destructor
   ~ScriptManagerWidget();
+  ///Save settings applicable to the manager
+  void saveSettings();  
   /// Ask if we should save
   void askSave(int index);
   /// Open a script from a file and read the file into a QString. 
