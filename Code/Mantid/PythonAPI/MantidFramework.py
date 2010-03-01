@@ -372,7 +372,7 @@ class MantidPyFramework(FrameworkManager):
 
     def _importPyAlgorithms(self, dir, reload):
         # Make sure the directory doesn't contain a trailing slash
-        dir = os.path.dirname(dir)
+        dir = dir.rstrip("/").rstrip("\\")
         try:
             files = os.listdir(dir)
         except(OSError):
