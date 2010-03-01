@@ -81,7 +81,7 @@ public:
   void testCreatePythonSimpleAPI()
   {
     mgr->createPythonSimpleAPI(false);
-    Poco::File apimodule(SimplePythonAPI::getModuleName());
+    Poco::File apimodule(SimplePythonAPI::getModuleFilename());
     TS_ASSERT( apimodule.exists() );
     TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
     TS_ASSERT( !apimodule.exists() );
