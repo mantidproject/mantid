@@ -1051,7 +1051,20 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
     if ( pParamElem->hasAttribute("type") )
       type = pParamElem->getAttribute("type");
 
-    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, paramName, type, extractSingleValueAs, eq, comp));
+    // check if <fixed /> element present
+
+    bool fixed = false;
+    NodeList* pNLFixed = pParamElem->getElementsByTagName("fixed");
+    unsigned int numberFixed = pNLFixed->length();
+ 
+    if ( numberFixed >= 1 )
+    {
+      Element* pFixed = static_cast<Element*>(pNLFixed->item(0));
+      fixed = true;
+    }
+
+
+    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, paramName, type, fixed, extractSingleValueAs, eq, comp));
     logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
   }
   pNL->release();

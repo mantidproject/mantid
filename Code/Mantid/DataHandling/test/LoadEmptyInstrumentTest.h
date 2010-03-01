@@ -197,6 +197,7 @@ public:
     Parameter_sptr param2 = paramMap.getRecursive(&(*det2), "Alpha0", "fitting");
     const FitParameter& fitParam2 = param2->value<FitParameter>();
     TS_ASSERT_DELTA( fitParam2.getValue(), 0.734079, 0.0001);
+    TS_ASSERT( fitParam2.getTie().compare("Alpha0=0.734079") == 0 );
 
     AnalysisDataService::Instance().remove(wsName);
   }

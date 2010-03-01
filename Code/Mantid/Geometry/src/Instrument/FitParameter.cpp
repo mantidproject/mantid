@@ -30,8 +30,6 @@ namespace Geometry
     */
   std::ostream& operator<<(std::ostream& os, const FitParameter& f)
   {
-    //os << f.getValue();
-
     f.printSelf(os);
     return os;
   }
@@ -45,6 +43,21 @@ namespace Geometry
   std::istream& operator>>(std::istream& in, FitParameter& f)
   {
     in >> f.setValue();
+
+    if ( in.fail() == true )
+    {
+      f.setValue() = 0.0;
+      f.setTie() = "";
+      return in;
+    }
+
+    in >> f.setTie();
+
+    if ( in.fail() == true )
+    {
+      f.setTie() = "";
+    }
+
     return in;
   }
 

@@ -6,6 +6,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <muParser.h>
 #include <ctime>
+#include <fstream>
 #include "MantidAPI/LogParser.h"
 
 namespace Mantid
@@ -23,15 +24,26 @@ Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
  *  @param value Rather then extracting value from logfile, specify a value directly
  *  @param paramName The name of the parameter which will be created based on the log values
  *  @param type The type
+ *  @param fixed - specific to fitting parameter is it by default fixed or not?
  *  @param extractSingleValueAs Describes the way to extract a single value from the log file( average, first number, etc)
  *  @param eq muParser equation to calculate the parameter value from the log value
  *  @param comp The pointer to the instrument component
  */
 XMLlogfile::XMLlogfile(std::string& logfileID, std::string& value, std::string& paramName, std::string& type,
+                       bool fixed,
                        std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp)
                        : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type),
                        m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
-{}
+{
+  if ( fixed )
+  {
+    std::ostringstream str;
+    str << paramName << "=" << value;
+    m_tie = str.str();
+  }
+  else
+    m_tie = "";
+}
 
 
 /** Returns parameter value as generated using possibly equation expression etc

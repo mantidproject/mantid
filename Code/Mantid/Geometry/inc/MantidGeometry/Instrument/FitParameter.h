@@ -51,7 +51,7 @@ namespace Mantid
       /// set parameter value
       double& setValue() {return m_value;}
       /// get tie
-      std::string getTie() { return m_tie; }
+      std::string getTie() const { return m_tie; }
       /// set tie
       std::string& setTie() { return m_tie; }
 
@@ -65,7 +65,7 @@ namespace Mantid
       std::string m_tie;
     };
 
-    // Overload operator <<
+    // defining operator << and >>
     DLLExport std::ostream& operator<<(std::ostream&, const FitParameter& );
     DLLExport std::istream& operator>>(std::istream&,FitParameter&);
 

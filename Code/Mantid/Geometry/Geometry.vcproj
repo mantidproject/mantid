@@ -555,6 +555,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\FitParameterTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidGeometry\Surfaces\General.h"
 				>
 			</File>
@@ -635,11 +639,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\Matrix.h"
+				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Math\Matrix.h"
+				RelativePath=".\auxinc\Matrix.h"
 				>
 			</File>
 			<File
@@ -771,11 +775,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\auxinc\RotCounter.h"
+				RelativePath=".\inc\MantidGeometry\Math\RotCounter.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidGeometry\Math\RotCounter.h"
+				RelativePath=".\auxinc\RotCounter.h"
 				>
 			</File>
 			<File

@@ -76,6 +76,12 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
       {
         const Geometry::FitParameter& fitParam = param->value<Geometry::FitParameter>();
         setParameter(i, fitParam.getValue());
+        if ( fitParam.getTie().compare("") )
+        { 
+          std::ostringstream str;
+          str << fitParam.getValue();
+          tie(parameterName(i), str.str());
+        }
       }
     }
   }

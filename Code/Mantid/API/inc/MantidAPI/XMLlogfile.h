@@ -54,7 +54,7 @@ namespace Mantid
     public:
       /// Default constructor
       XMLlogfile(std::string& logfileID, std::string& value, std::string& paramName, std::string& type, 
-                 std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp);
+                 bool fixed, std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp);
 
       /// Destructor
       ~XMLlogfile() {}
@@ -65,6 +65,7 @@ namespace Mantid
       const std::string m_value;  ///< rather then extracting value from logfile, specify a value directly
       const std::string m_paramName;  ///< parameter name
       const std::string m_type;       ///< type of the data
+      std::string m_tie;                /// specific to fitting parameter specify any tie
       const std::string m_extractSingleValueAs;  ///< describes the way to extract a single value from the log file( average, first number, etc)
       const std::string m_eq;         ///< muParser equation to calculate the parameter value from the log value
       const Geometry::Component* m_component;  ///< the component address
