@@ -141,6 +141,9 @@ void SofQW::exec()
        continue;
     }
   }
+
+  // If the input workspace was a distribution, need to divide by q bin width
+  if (inputWorkspace->isDistribution()) this->makeDistribution(outputWorkspace,verticalAxis);
 }
 
 /** Creates the output workspace, setting the axes according to the input binning parameters
@@ -177,6 +180,25 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   
   setProperty("OutputWorkspace",outputWorkspace);
   return outputWorkspace;
+}
+
+/** Divide each bin by the width of its q bin.
+ *  @param outputWS The output workspace
+ *  @param qAxis    A vector of the q bin boundaries
+ */
+void SofQW::makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis)
+{
+  std::vector<double> widths(qAxis.size());
+  std::adjacent_difference(qAxis.begin(),qAxis.end(),widths.begin());
+
+  const int numQBins = outputWS->getNumberHistograms();
+  for (int i=0; i < numQBins; ++i)
+  {
+    MantidVec& Y = outputWS->dataY(i);
+    MantidVec& E = outputWS->dataE(i);
+    std::transform(Y.begin(),Y.end(),Y.begin(),std::bind2nd(std::divides<double>(),widths[i+1]));
+    std::transform(E.begin(),E.end(),E.begin(),std::bind2nd(std::divides<double>(),widths[i+1]));
+  }
 }
 
 } // namespace Algorithms

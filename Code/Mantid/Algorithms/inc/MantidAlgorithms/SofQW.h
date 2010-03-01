@@ -10,19 +10,22 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** 
+/** Converts a 2D workspace that has axes of energy transfer against spectrum number to 
+    one that gives intensity as a function of momentum transfer against energy.
+
     Required Properties:
     <UL>
-    <LI> InputWorkspace  - The corrected data in units of wavelength. </LI>
-    <LI> OutputWorkspace - The workspace in which to store data as x & y components of Q. </LI>
-    <LI> MaxQxy          - The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy). </LI>
-    <LI> DeltaQ          - The dimension of a Qx-Qy cell. </LI>
+    <LI> InputWorkspace  - Reduced data in units of energy transfer. Must have common bins. </LI>
+    <LI> OutputWorkspace - The name to use for the q-w workspace. </LI>
+    <LI> QAxisBinning    - The bin parameters to use for the q axis. </LI>
+    <LI> Emode           - The energy mode (direct or indirect geometry). </LI>
+    <LI> Efixed          - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV). </LI>
     </UL>
     
     @author Russell Taylor, Tessella plc
-    @date 01/10/2009
+    @date 24/02/2010
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -63,6 +66,7 @@ private:
   void exec();
 
   API::MatrixWorkspace_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace, std::vector<double>& newAxis);
+  void makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vector<double> qAxis);
 };
 
 } // namespace Algorithms
