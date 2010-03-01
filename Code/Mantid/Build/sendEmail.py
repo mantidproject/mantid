@@ -255,9 +255,11 @@ except smtplib.SMTPException, details:
      emailErr.write(str(details) + '\n')
 emailErr.close()
 
-# Write out what happened with the tests
+# Write out what happened with the tests. 
+# This is for deciding whether to build installer - only do so if tests both built and passed
 mantidtests = localLogDir + 'MantidTests.txt'
 f = open(mantidtests,'w')
+testsPass = testsBuildSuccess and testsPass
 f.write('Tests ' + str(testsPass))
 f.close()
 
