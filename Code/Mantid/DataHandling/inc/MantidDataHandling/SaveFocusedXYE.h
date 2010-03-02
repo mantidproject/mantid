@@ -8,12 +8,11 @@
 
 namespace Mantid
 {
-
 namespace DataHandling
 {
 /**
      Saves a focused data set (usually output of a diffraction focusing routine but not exclusively)
-     into a three column format containing X_i, Y_i, and E_I.
+     into a three column format containing X_i, Y_i, and E_i.
      For data where the focusing routine has generated several spectra (for example, multi-bank instruments),
      the option is provided for saving all spectra into a single file, separated by headers, or into
      several files that will be named "workspaceName_"+spectra_number.
@@ -21,13 +20,20 @@ namespace DataHandling
      Required properties:
      <UL>
      <LI> InputWorkspace - The workspace name to save. </LI>
-     <LI> Filename - The filename for output </LI>
-     <LI> SplitFiles- Option for splitting into N files for workspace with N-spectra</UL>
+     <LI> Filename - The filename for output. </LI>
+     </UL>
+
+     Optional properties:
+     <UL>
+     <LI> SplitFiles    - Split into N files for workspace with N-spectra (default: true).</LI>
+     <LI> Append        - Append to Filename, if it already exists (default: false).</LI>
+     <LI> IncludeHeader - Include header (comment) lines in output (default: true).</LI>
+     </UL>
 
      @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
      @date 04/03/2009
 
-     Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+     Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
      This file is part of Mantid.
 
@@ -47,11 +53,11 @@ namespace DataHandling
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport SaveFocusedXYE : public Mantid::API::Algorithm
+class DLLExport SaveFocusedXYE : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  SaveFocusedXYE() : Mantid::API::Algorithm(){}
+  SaveFocusedXYE() : API::Algorithm(){}
   /// Virtual destructor
   virtual ~SaveFocusedXYE() {}
   /// Algorithm's name
@@ -60,20 +66,18 @@ public:
   virtual const int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction"; }
-  ///
+
 private:
   /// Initialisation code
   void init();
-  ///Execution code
+  /// Execution code
   void exec();
-  ///Write the header information
+  /// Write the header information
   void writeHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
-/// sets non workspace properties for the algorithm
-	void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
+  /// sets non workspace properties for the algorithm
+  void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 };
 
 }
-
 }
-
 #endif //DATAHANDING_SAVEFOCUSEDXYE_H_
