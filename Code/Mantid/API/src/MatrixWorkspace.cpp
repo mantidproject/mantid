@@ -459,7 +459,7 @@ void MatrixWorkspace::populateInstrumentParameters()
       if ( category.compare("fitting") == 0 )
       {
         std::ostringstream str;
-        str << value << " " << ((*it).second)->m_tie;
+        str << value << " , " << ((*it).second)->m_fittingFunction << " , " << ((*it).second)->m_tie;
         paramMap.add("FitParameter",((*it).second)->m_component, paramN, str.str());
       }
       else

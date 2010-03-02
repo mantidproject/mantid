@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
+#include <Poco/StringTokenizer.h>
 
 
 namespace Mantid
@@ -42,21 +43,25 @@ namespace Geometry
   */
   std::istream& operator>>(std::istream& in, FitParameter& f)
   {
-    in >> f.setValue();
 
-    if ( in.fail() == true )
+    typedef Poco::StringTokenizer tokenizer;
+    std::string str;
+    getline(in, str);
+    tokenizer values(str, ",", tokenizer::TOK_TRIM);
+
+    try
+    {
+      f.setValue() = atof(values[0].c_str());
+    }
+    catch (...)
     {
       f.setValue() = 0.0;
-      f.setTie() = "";
-      return in;
     }
 
-    in >> f.setTie();
+    f.setFunction() = values[1];
 
-    if ( in.fail() == true )
-    {
-      f.setTie() = "";
-    }
+    if ( values.count() > 2 )
+      f.setTie() = values[2];
 
     return in;
   }

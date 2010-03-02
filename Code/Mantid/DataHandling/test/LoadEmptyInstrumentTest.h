@@ -104,6 +104,12 @@ public:
     param = paramMap.getRecursive(&(*det), "boevs", "spade");
     TS_ASSERT_DELTA( param->value<double>(), 8.0, 0.0001);
 
+    param = paramMap.getRecursive(&(*det), "fiddo", "fitting");
+    const FitParameter& fitParam = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam.getValue(), 84.0, 0.0001);
+    TS_ASSERT( fitParam.getTie().compare("") == 0 );
+    TS_ASSERT( fitParam.getFunction().compare("somefunction") == 0 );
+
 
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
@@ -198,6 +204,7 @@ public:
     const FitParameter& fitParam2 = param2->value<FitParameter>();
     TS_ASSERT_DELTA( fitParam2.getValue(), 0.734079, 0.0001);
     TS_ASSERT( fitParam2.getTie().compare("Alpha0=0.734079") == 0 );
+    TS_ASSERT( fitParam2.getFunction().compare("IkedaCarpenterPV") == 0 );
 
     AnalysisDataService::Instance().remove(wsName);
   }

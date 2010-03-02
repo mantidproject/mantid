@@ -35,10 +35,34 @@ XMLlogfile::XMLlogfile(std::string& logfileID, std::string& value, std::string& 
                        : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type),
                        m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
 {
+
+  if ( type.compare("fitting") == 0 )
+  {
+    size_t found = m_paramName.find(":");
+    if (found!=std::string::npos)
+    {
+      // check that only one : in name
+      size_t index = m_paramName.find(":", found+1); 
+      if (index!=std::string::npos)
+      {
+        g_log.error() << "Fitting <parameter> in instrument definition file defined with" 
+          << " more than one column character :. One must used.\n";
+        m_fittingFunction = "";
+      }
+      else
+      {
+        m_fittingFunction = m_paramName.substr(0,found);
+        m_paramName = m_paramName.substr(found+1, m_paramName.size());
+      }
+    }
+  }
+  else
+    m_fittingFunction = "";
+
   if ( fixed )
   {
     std::ostringstream str;
-    str << paramName << "=" << value;
+    str << m_paramName << "=" << value;
     m_tie = str.str();
   }
   else

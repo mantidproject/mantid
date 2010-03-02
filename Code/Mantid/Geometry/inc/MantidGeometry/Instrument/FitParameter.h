@@ -44,7 +44,7 @@ namespace Mantid
     {
     public:
       /// Constructor
-      FitParameter() {};
+      FitParameter() : m_value(0.0), m_tie(""), m_function("") {};
 
       /// get paramter value
       double getValue() const {return m_value;}
@@ -54,6 +54,10 @@ namespace Mantid
       std::string getTie() const { return m_tie; }
       /// set tie
       std::string& setTie() { return m_tie; }
+      /// get function
+      std::string getFunction() const { return m_function; }
+      /// set function
+      std::string& setFunction() { return m_function; }
 
       /// Prints object to stream
       void printSelf(std::ostream& os) const;
@@ -63,6 +67,8 @@ namespace Mantid
       double m_value;
       /// tie of parameter
       std::string m_tie;
+      /// name of fitting function
+      std::string m_function;
     };
 
     // defining operator << and >>

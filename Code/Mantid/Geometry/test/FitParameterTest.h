@@ -31,12 +31,12 @@ public:
 	{
     FitParameter fitP;
 
-    //operator>>(std::istream&,FitParameter&);
-    std::istringstream input("9.1 bob");
+    std::istringstream input("9.1 , fido , bob");
 
     input >> fitP;
 
     TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
+    TS_ASSERT( fitP.getFunction().compare("fido")==0 );
     TS_ASSERT( fitP.getTie().compare("bob")==0 );
 	}
 
@@ -44,8 +44,7 @@ public:
 	{
     FitParameter fitP;
 
-    //operator>>(std::istream&,FitParameter&);
-    std::istringstream input("9.1");
+    std::istringstream input("9.1 , , ");
 
     input >> fitP;
 
@@ -57,8 +56,7 @@ public:
 	{
     FitParameter fitP;
 
-    //operator>>(std::istream&,FitParameter&);
-    std::istringstream input("bob");
+    std::istringstream input("bob , ,      ");
 
     input >> fitP;
 
@@ -70,8 +68,7 @@ public:
 	{
     FitParameter fitP;
 
-    //operator>>(std::istream&,FitParameter&);
-    std::istringstream input("9.1 ");
+    std::istringstream input("9.1 , , ");
 
     input >> fitP;
 
@@ -83,8 +80,7 @@ public:
 	{
     FitParameter fitP;
 
-    //operator>>(std::istream&,FitParameter&);
-    std::istringstream input("9.1         ");
+    std::istringstream input("9.1 , ,         ");
 
     input >> fitP;
 
