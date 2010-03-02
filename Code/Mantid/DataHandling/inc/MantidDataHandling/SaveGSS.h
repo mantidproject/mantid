@@ -5,14 +5,14 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+
 namespace Mantid
 {
-
 namespace DataHandling
 {
 /**
      Saves a focused data set
-     into a three column GSAS format containing X_i, Y_i*step, and E_I*step. Exclusively for
+     into a three column GSAS format containing X_i, Y_i*step, and E_i*step. Exclusively for
      the crystallography package GSAS and data needs to be in time-of-flight
      For data where the focusing routine has generated several spectra (for example, multi-bank instruments),
      the option is provided for saving all spectra into a single file, separated by headers, or into
@@ -21,13 +21,20 @@ namespace DataHandling
      Required properties:
      <UL>
      <LI> InputWorkspace - The workspace name to save. </LI>
-     <LI> Filename - The filename for output </LI>
-     <LI> SplitFiles- Option for splitting into N files for workspace with N-spectra</UL>
+     <LI> Filename       - The filename for output </LI>
+     </UL>
+
+     Optional properties:
+     <UL>
+     <LI> SplitFiles - Option for splitting into N files for workspace with N-spectra</LI>
+     <LI> Append     - Append to Filename, if it already exists (default: true).</LI>
+     <LI> Bank       - The bank number of the first spectrum (default: 1)</LI>
+     </UL>
 
      @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
      @date 04/03/2009
 
-     Copyright &copy; 2009 STFC Rutherford Appleton Laboratories
+     Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
      This file is part of Mantid.
 
@@ -60,7 +67,7 @@ public:
   virtual const int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Diffraction"; }
-  ///
+
 private:
   /// Initialisation code
   void init();
@@ -69,11 +76,9 @@ private:
   ///Write the header information
   void writeHeaders(std::ostream& os,API::MatrixWorkspace_const_sptr& workspace) const;
   /// sets non workspace properties for the algorithm
-  void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
+  void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int periodNum);
 };
 
 }
-
 }
-
 #endif //DATAHANDING_SAVEGSS_H_

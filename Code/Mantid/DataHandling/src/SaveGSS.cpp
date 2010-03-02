@@ -140,23 +140,31 @@ void SaveGSS::exec()
   return;
 }
 
-/** virtual method to set the non workspace properties for this algorithm
- *  @param alg pointer to the algorithm
- *  @param propertyName name of the property
- *  @param propertyValue value  of the property
- *  @param perioidNum period number
+/** Ensures that when a workspace group is passed as output to this workspace
+ *  everything is saved to one file and the bank number increments for each
+ *  group member.
+ *  @param alg           Pointer to the algorithm
+ *  @param propertyName  Name of the property
+ *  @param propertyValue Value  of the property
+ *  @param periodNum     Effectively a counter through the group members
  */
-void SaveGSS::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int perioidNum)
+void SaveGSS::setOtherProperties(IAlgorithm* alg,const std::string& propertyName,const std::string& propertyValue,int periodNum)
 {
-  if(!propertyName.compare("Append"))
+  // We want to append subsequent group members to the first one
+  if( propertyName == "Append")
   {
-    if(perioidNum!=1)
+    if(periodNum!=1)
     {
       alg->setPropertyValue(propertyName,"1");
     }
     else alg->setPropertyValue(propertyName,propertyValue);
   }
-  else Algorithm::setOtherProperties(alg,propertyName,propertyValue,perioidNum);
+  // We want the bank number to increment for each member of the group
+  else if ( propertyName == "Bank" )
+  {
+    alg->setProperty("Bank",atoi(propertyValue.c_str())+periodNum-1);
+  }
+  else Algorithm::setOtherProperties(alg,propertyName,propertyValue,periodNum);
 }
 
 /**
