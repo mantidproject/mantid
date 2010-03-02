@@ -70,7 +70,7 @@ IConstraint* Function::firstConstraint()
 /// Get next constraint
 IConstraint* Function::nextConstraint()
 {
-  if (m_constraints.size() < 2 || m_iConstraint >= m_constraints.size() - 2)
+  if (m_constraints.size() < 2 || m_iConstraint >= m_constraints.size() - 1)
   {
     return 0;
   }

@@ -857,6 +857,32 @@ namespace CurveFitting
     std::string input = getProperty("Function");
     if (input.empty()) return;
 
+    std::string::size_type i = input.find_last_not_of(" \t\n\r");
+    if (i == std::string::npos) return;
+    if (i >= 0 && input[i] == ';')
+    {
+      input.erase(i);
+    }
+
+    std::string inputConstraints = getProperty("Constraints");
+    if (!inputConstraints.empty())
+    {
+      if (input.find(';') != std::string::npos)
+      {
+        input += ";";
+      }
+      else
+      {
+        input += ",";
+      }
+      std::string::size_type i = inputConstraints.find_last_not_of(" \t\n\r");
+      if (i >= 0 && inputConstraints[i] == ',')
+      {
+        inputConstraints.erase(i);
+      }
+      input += "constraints=("+inputConstraints+")";
+    }
+
     setFunction(API::FunctionFactory::Instance().createInitialized(input));
 
     typedef Poco::StringTokenizer tokenizer;
@@ -880,67 +906,6 @@ namespace CurveFitting
         }
       }
     }
-
-    std::string inputConstraints = getProperty("Constraints");
-    if (!inputConstraints.empty())
-    {
-      tokenizer cons(inputConstraints, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-      for (tokenizer::Iterator con = cons.begin(); con != cons.end(); ++con)
-      {
-        tokenizer name_value(*con, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-        if (name_value.count() > 1)
-        {
-          std::string conValue = name_value[1];
-          // constraint value may be wrapped in brackets
-          size_t i = conValue.find_first_of('(');
-          if (i != std::string::npos)
-          {
-            size_t j = conValue.find_last_of(')');
-            if (j != std::string::npos)
-            {
-              conValue = conValue.substr(i+1,j-i-1);
-            }
-            else
-            {
-              conValue.erase(i,1);
-            }
-          }
-          
-          tokenizer constraint(conValue, ":", tokenizer::TOK_TRIM);
-          if (constraint.count()>0)
-          {
-            std::string parName = name_value[0];
-            BoundaryConstraint* con = 0;
-            API::CompositeFunction* cf = dynamic_cast<API::CompositeFunction*>(m_function);
-            if (cf)
-            {
-              int iPar = cf->parameterIndex(parName);
-              int iFun = cf->functionIndex(iPar);
-              parName = cf->parameterLocalName(iPar);
-              con = new BoundaryConstraint();
-              con->reset(cf->getFunction(iFun),cf->getFunction(iFun)->parameterIndex(parName));
-              cf->getFunction(iFun)->addConstraint(con);
-            }
-            else
-            {
-              con = new BoundaryConstraint();
-              con->reset(m_function,m_function->parameterIndex(parName));
-              m_function->addConstraint(con);
-            }
-
-            if (constraint.count() >= 1 && !constraint[0].empty())
-            {
-              con->setLower(atof(constraint[0].c_str()));
-            }
-            if (constraint.count() > 1 && !constraint[1].empty())
-            {
-              con->setUpper(atof(constraint[1].c_str()));
-            }
-          }
-        }
-      }
-    }
-
   }
 
   /**

@@ -90,6 +90,12 @@ namespace API
     CompositeFunction* createComposite(const Expression& expr)const;
     /// Throw an exception
     void inputError(const std::string& str="")const;
+    /// Add constraints to the created function
+    void addConstraints(IFunction* fun,const Expression& expr)const;
+    /// Add a single constraint to the created function
+    void addConstraint(IFunction* fun,const Expression& expr)const;
+    /// Add a constraint to the created function if str has a form of (min:max), or return false
+    bool tryAddConstraint(IFunction* fun,const std::string& parName,const std::string& str)const;
 
     ///static reference to the logger class
     Kernel::Logger& g_log;

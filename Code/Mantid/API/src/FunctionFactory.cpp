@@ -7,6 +7,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
 #include <Poco/StringTokenizer.h>
+#include <sstream>
 
 namespace Mantid
 {
@@ -63,7 +64,9 @@ namespace Mantid
 
       if (expr.name() == ";")
       {
-        return createComposite(expr);
+        IFunction* fun = createComposite(expr);
+        if (!fun) inputError();
+        return fun;
       }
 
       return createSimple(expr);
@@ -112,24 +115,21 @@ namespace Mantid
           }
           fun->setAttribute(parName,parValue);
         }
+        else if (parName.size() >= 10 && parName.substr(0,10) == "constraint")
+        {
+          addConstraints(fun,(*term)[1]);
+        }
         else
         {// set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
           if ((*term)[1].isFunct())
           {// than its argument is a constraint
-            if ((*term)[1][0].name() == "==")
+            // check if the constraint has a form of (min:max)
+            if (!tryAddConstraint(fun, parName,(*term)[1][0].name()))
             {
-              IConstraint* c = ConstraintFactory::Instance().createUnwrapped("BoundaryConstraint");
-              c->initialize(fun,(*term)[1]);
-              fun->addConstraint(c);
+              addConstraint(fun,(*term)[1][0]);
             }
-            else
-            {
-              IConstraint* c = ConstraintFactory::Instance().createUnwrapped((*term)[1][0].name());
-              c->initialize(fun,(*term)[1][0]);
-              fun->addConstraint(c);
-            }
-          }
+          }// if there is a constraint
         }
       }// for term
 
@@ -144,6 +144,11 @@ namespace Mantid
     CompositeFunction* FunctionFactoryImpl::createComposite(const Expression& expr)const
     {
       if (expr.name() != ";") inputError(expr.str());
+
+      if (expr.size() == 0)
+      {
+        return 0;
+      }
 
       const std::vector<Expression>& terms = expr.terms();
       std::vector<Expression>::const_iterator term = terms.begin();
@@ -206,10 +211,19 @@ namespace Mantid
         if (term->name() == ";")
         {
           fun = createComposite(*term);
+          if (!fun) continue;
         }
         else
         {
-          fun = createSimple(*term);
+          if ((*term)[0].name().size() >= 10 && (*term)[0].name().substr(0,10) == "constraint")
+          {
+            addConstraints(cfun,(*term)[1]);
+            continue;
+          }
+          else
+          {
+            fun = createSimple(*term);
+          }
         }
         cfun->addFunction(fun);
       }
@@ -226,6 +240,83 @@ namespace Mantid
         msg += "\n" + str;
       }
       throw std::invalid_argument(msg);
+    }
+
+    /** 
+     * Add constraints to the created function
+     * @param fun The function
+     * @param expr The constraint expression. The expression name must be either a single constraint
+     *    expression such as "0 < Sigma < 1" or a list of constraint expressions separated by commas ','
+     *    and enclosed in brackets "(...)" .
+     */
+    void FunctionFactoryImpl::addConstraints(IFunction* fun,const Expression& expr)const
+    {
+      if (expr.name() == ",")
+      {
+        for(int i=0;i<expr.size();i++)
+        {
+          addConstraint(fun,expr[i]);
+        }
+      }
+      else
+      {
+        addConstraint(fun,expr);
+      }
+    }
+
+    /** 
+     * Add a constraints to the function
+     * @param fun The function
+     * @param expr The constraint expression.
+     */
+    void FunctionFactoryImpl::addConstraint(IFunction* fun,const Expression& expr)const
+    {
+      IConstraint* c = ConstraintFactory::Instance().createInitialized(fun,expr);
+      fun->addConstraint(c);
+    }
+
+    /** 
+     * Add a constraints to the function
+     * @param fun The function
+     * @param parName The parameter name
+     * @param str The constraint expression of the form (min:max). min or max can be empty
+     * @return True if OK or false if failed
+     */
+    bool FunctionFactoryImpl::tryAddConstraint(IFunction* fun,const std::string& parName,const std::string& str)const
+    {
+      if (str.find(':') == std::string::npos) 
+      {
+        return false;
+      }
+
+      Poco::StringTokenizer constraint(str, ":", Poco::StringTokenizer::TOK_TRIM);
+      if (constraint.count() == 2)
+      {// constraint is either (min:max) or (:max)
+        std::ostringstream ostr;
+        if ( ! constraint[0].empty() )
+        {
+          ostr << constraint[0] << '<';
+        }
+        ostr << parName;
+        if ( ! constraint[1].empty() )
+        {
+          ostr << '<' << constraint[1];
+        }
+        Expression expr;
+        expr.parse(ostr.str());
+        addConstraint(fun,expr);
+        return true;
+      }
+      else if (constraint.count() == 1)
+      {// only min is set (min:)
+        std::ostringstream ostr;
+        ostr << constraint[0] << '<' << parName;
+        Expression expr;
+        expr.parse(ostr.str());
+        addConstraint(fun,expr);
+        return true;
+      }
+      return false;
     }
 
   } // namespace API

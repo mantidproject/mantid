@@ -27,7 +27,20 @@ namespace Mantid
     {
       Expression expr;
       expr.parse(input);
-      IConstraint* c = createUnwrapped(expr.name());
+      return createInitialized(fun,expr);
+    }
+
+    IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const Expression& expr) const
+    {
+      IConstraint* c = 0;
+      if (expr.name() == "==")
+      {
+        c = createUnwrapped("BoundaryConstraint");
+      }
+      else
+      {
+        c = createUnwrapped(expr.name());
+      }
       c->initialize(fun,expr);
       return c;
     }

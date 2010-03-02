@@ -956,20 +956,28 @@ void FitPropertyBrowser::fit()
               upperStr = QString::number(m_doubleManager->value(sub));
             }
           }
-          if (!lowerStr.isEmpty() || !upperStr.isEmpty())
+          if (!lowerStr.isEmpty())
           {
-            if (m_functionItems.size() > 1)
-            {
-              constraintsStr += "f" + QString::number(i) + ".";
-            }
-            constraintsStr += parProps[j]->propertyName() + "=" + lowerStr + ":" + upperStr + ",";
+            constraintsStr += lowerStr + "<";
           }
+          if (m_functionItems.size() > 1)
+          {
+            constraintsStr += "f" + QString::number(i) + ".";
+          }
+          constraintsStr += parProps[j]->propertyName();
+          if (!upperStr.isEmpty())
+          {
+            constraintsStr += "<" + upperStr;
+          }
+          constraintsStr += ",";
         }
       }
 
-      alg->setPropertyValue("Constraints",constraintsStr.toStdString());
-
     }
+
+    std::cerr<< constraintsStr.toStdString() << '\n';
+
+    alg->setPropertyValue("Constraints",constraintsStr.toStdString());
 
     observeFinish(alg);
     alg->executeAsync();

@@ -71,7 +71,7 @@ public:
     gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(10<Sigma<20)");
+    expr.parse("10<Sigma<20");
     bc.initialize(&gaus,expr);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
@@ -85,7 +85,7 @@ public:
     gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(20>Sigma>10)");
+    expr.parse("20>Sigma>10");
     bc.initialize(&gaus,expr);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
@@ -99,7 +99,7 @@ public:
     gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(10<Sigma)");
+    expr.parse("10<Sigma");
     bc.initialize(&gaus,expr);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
@@ -113,7 +113,7 @@ public:
     gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(Sigma<20)");
+    expr.parse("Sigma<20");
     bc.initialize(&gaus,expr);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
@@ -127,7 +127,7 @@ public:
     gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(Sigma==20)");
+    expr.parse("Sigma==20");
     TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
   }
 
@@ -137,7 +137,7 @@ public:
     gaus.initialize();
     BoundaryConstraint bc;
     Expression expr;
-    expr.parse("BoundaryConstraint(a<Sigma<b)");
+    expr.parse("a<Sigma<b");
     TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
   }
 };

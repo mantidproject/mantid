@@ -28,6 +28,7 @@ namespace API
 //----------------------------------------------------------------------
   class IConstraint;
   class IFunction;
+  class Expression;
 
 /** @class FunctionFactoryImpl
 
@@ -68,6 +69,12 @@ namespace API
      * @return A pointer to the created Constraint
      */
     IConstraint* createInitialized(IFunction* fun, const std::string& input) const;
+    /**Creates an instance of a Constraint
+     * @param fun The function
+     * @param expr The creation expression
+     * @return A pointer to the created Constraint
+     */
+    IConstraint* createInitialized(IFunction* fun, const Expression& expr) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<ConstraintFactoryImpl>;

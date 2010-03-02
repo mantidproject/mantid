@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/IConstraint.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
@@ -720,7 +721,9 @@ void CompositeFunction::declareParameter(const std::string& name,double initValu
  */
 void CompositeFunction::addConstraint(IConstraint* ic)
 {
-  throw Kernel::Exception::NotImplementedError("addConstraint is not implemented for CompositeFunction yet.");
+  int i = getParameterIndex(*ic);
+  int iFun = functionIndex(i);
+  getFunction(iFun)->addConstraint(ic);
 }
 
 void CompositeFunction::setParametersToSatisfyConstraints()

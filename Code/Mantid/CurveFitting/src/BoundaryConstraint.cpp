@@ -43,18 +43,18 @@ m_upperBound(upperBound)
 /** Initialize the constraint from an expression.
  * @param fun The function
  * @param expr The initializing expression which must look like this:
- * "BoundaryConstraint( 10 < Sigma < 20 )" or
- * "BoundaryConstraint( Sigma > 20 )"
+ * " 10 < Sigma < 20 " or
+ * " Sigma > 20 "
  */
 void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr)
 {
-  if (expr.size() != 1 || expr.begin()->size() < 2 || expr.begin()->name() != "==")
+  if ( expr.size() < 2 || expr.name() != "==")
   {
     g_log.error("Wrong initialization expression");
     throw std::invalid_argument("Wrong initialization expression");
   }
   clearBounds();
-  const Expression& terms(*expr.begin());
+  const Expression& terms(expr);
 
   std::vector<double> values(3);
   int ilow = -1;
