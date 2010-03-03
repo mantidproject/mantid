@@ -44,6 +44,7 @@ class GL3DWidget : public QGLWidget
 {
 	Q_OBJECT
 public:
+        enum InteractionMode {MoveMode = 0, PickMode = 1};
 	enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
 	GL3DWidget(QWidget* parent=0); ///< Constructor
 	virtual ~GL3DWidget();         ///< Destructor
@@ -66,6 +67,7 @@ protected:
 	void paintEvent(QPaintEvent *event);
 	void resizeGL(int,int);
 	void mousePressEvent(QMouseEvent*);
+  void contextMenuEvent(QContextMenuEvent*);
 	void mouseMoveEvent(QMouseEvent*);
     void mouseReleaseEvent(QMouseEvent*);
 	void wheelEvent(QWheelEvent *);
@@ -92,7 +94,7 @@ private:
 	void drawPickingScene();
 	void switchToPickingMode();
 	QColor bgColor; ///< Background color
-	int iInteractionMode;
+	InteractionMode iInteractionMode;
 	bool mPickingDraw;
 	GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
 	GLActor* mPickedActor;

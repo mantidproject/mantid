@@ -59,11 +59,11 @@ void GLGroupPickBox::setPickImage(QImage pickerImage)
  */ 
 void GLGroupPickBox::mouseMoveEvent ( QMouseEvent * event )
 {
-	if(mPickingActive)
-	{
-		mBoxEndPtX=event->x();
-		mBoxEndPtY=event->y();		
-	}
+  if(mPickingActive)
+  {
+    mBoxEndPtX=event->x();
+    mBoxEndPtY=event->y();		
+  }
 }
 
 /**
@@ -71,20 +71,20 @@ void GLGroupPickBox::mouseMoveEvent ( QMouseEvent * event )
  * when mouse button is pressed that point will be the start point of the pick box
  * @param event: input with mouse event information such as button state
  */
-void GLGroupPickBox::mousePressEvent ( QMouseEvent * event )
+void GLGroupPickBox::mousePressed(Qt::MouseButtons buttons, const QPoint & pos)
 {
-	if(event->buttons() & Qt::LeftButton)
-	{
-		mPickingActive=true;
-		mBoxStartPtX=event->x();
-		mBoxStartPtY=event->y();
-		mBoxEndPtX=event->x();
-		mBoxEndPtY=event->y();
-	}
-	else
-	{
-		mPickingActive=false;
-	}
+  if( (buttons & Qt::LeftButton) || (buttons & Qt::RightButton) )
+  {
+    mPickingActive = true;
+    mBoxStartPtX=pos.x();
+    mBoxStartPtY=pos.y();
+    mBoxEndPtX=pos.x();
+    mBoxEndPtY=pos.y();
+  }
+  else
+  {
+    mPickingActive = false;
+  }
 }
 
 /**
@@ -92,51 +92,51 @@ void GLGroupPickBox::mousePressEvent ( QMouseEvent * event )
  * when the mouse button is released then that point will be the end point of the pick box
  * @param event: input with mouse event information such as button state
  */
-void GLGroupPickBox::mouseReleaseEvent ( QMouseEvent * event )
+void GLGroupPickBox::mouseReleased (Qt::MouseButtons buttons, const QPoint & pos )
 {
-	if(mPickingActive)
-	{
-		mPickingActive=false;
-		mBoxEndPtX=event->x();
-		mBoxEndPtY=event->y();	
-		//Lookup in the actors collection which have same pixel color value as the
-		//pixels in the box, collect unique colors
-		std::set<QRgb> colorSet;
-		//Check for the box limits
-		int x,y,width,height;
-		x=mBoxStartPtX;
-		y=mBoxStartPtY;
-		width=mBoxEndPtX-mBoxStartPtX;
-		height=mBoxEndPtY-mBoxStartPtY;
-		if(width<0)
-		{
-			x=mBoxEndPtX;
-			width*=-1;
-		}
-		else if(width==0)
-		{
-			width=1;
-		}
-		if(height<0)
-		{
-			y=mBoxEndPtY;
-			height*=-1;
-		}
-		else if(height==0)
-		{
-			height=1;
-		}
-		QImage selectedImage=mPickImage.copy(x,y,width,height);
-		for(int iPix=0;iPix<selectedImage.width();iPix++)
-		{
-			for(int jPix=0;jPix<selectedImage.height();jPix++)
-			{
-				QRgb colorVal=selectedImage.pixel(iPix,jPix);
-				colorSet.insert(colorVal);
-			}
-		}
-		mColorSet=colorSet;
-	}
+  if(mPickingActive)
+  {
+    mPickingActive=false;
+    mBoxEndPtX=pos.x();
+    mBoxEndPtY=pos.y();	
+    //Lookup in the actors collection which have same pixel color value as the
+    //pixels in the box, collect unique colors
+    std::set<QRgb> colorSet;
+    //Check for the box limits
+    int x,y,width,height;
+    x=mBoxStartPtX;
+    y=mBoxStartPtY;
+    width=mBoxEndPtX-mBoxStartPtX;
+    height=mBoxEndPtY-mBoxStartPtY;
+    if(width<0)
+    {
+      x=mBoxEndPtX;
+      width*=-1;
+    }
+    else if(width==0)
+    {
+      width=1;
+    }
+    if(height<0)
+    {
+      y=mBoxEndPtY;
+      height*=-1;
+    }
+    else if(height==0)
+    {
+      height=1;
+    }
+    QImage selectedImage=mPickImage.copy(x,y,width,height);
+    for(int iPix=0;iPix<selectedImage.width();iPix++)
+    {
+      for(int jPix=0;jPix<selectedImage.height();jPix++)
+      {
+	QRgb colorVal=selectedImage.pixel(iPix,jPix);
+	colorSet.insert(colorVal);
+      }
+    }
+    mColorSet=colorSet;
+  }
 }
 
 /**
@@ -176,5 +176,5 @@ void GLGroupPickBox::draw(QPainter* painter)
 void GLGroupPickBox::drawPickBox(QPainter* painter)
 {
     painter->setPen(Qt::blue);
-	painter->drawRect(mBoxStartPtX,mBoxStartPtY,mBoxEndPtX-mBoxStartPtX,mBoxEndPtY-mBoxStartPtY);
+    painter->drawRect(mBoxStartPtX,mBoxStartPtY,mBoxEndPtX-mBoxStartPtX,mBoxEndPtY-mBoxStartPtY);
 }

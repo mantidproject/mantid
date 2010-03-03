@@ -153,33 +153,32 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	connect(mSaveImage, SIGNAL(clicked()), this, SLOT(saveImage()));
 	connect(mMinValueBox,SIGNAL(editingFinished()),this, SLOT(minValueChanged()));
 	connect(mMaxValueBox,SIGNAL(editingFinished()),this, SLOT(maxValueChanged()));
-	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelected(int)), this, SLOT(spectraInformation(int)));
-	connect(mInstrumentDisplay, SIGNAL(actionDetectorSelected(int)), this, SLOT(detectorInformation(int)));
+
 	connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(int,int,int)),this,SLOT(detectorHighlighted(int,int,int)));
-	connect(mInstrumentDisplay, SIGNAL(actionSpectraSelectedList(std::set<int>)), this, SLOT(spectraListInformation(std::set<int>)));
-	connect(mInstrumentDisplay, SIGNAL(actionDetectorSelectedList(std::vector<int>)), this, SLOT(detectorListInformation(std::vector<int>)));
+	connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
+
+
 	connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(double,double)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double)));
 	connect(axisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
 	connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
 
-	mPopupContext = new QMenu(mInstrumentDisplay);
-	QAction* infoAction = new QAction(tr("&Info"), this);
-	connect(infoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
-	mPopupContext->addAction(infoAction);
+	// Init actions
+	mInfoAction = new QAction(tr("&Details"), this);
+	connect(mInfoAction,SIGNAL(triggered()),this,SLOT(spectraInfoDialog()));
 	
-	QAction* plotAction = new QAction(tr("&Plot spectra"), this);
-	connect(plotAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraSignal()));
-	mPopupContext->addAction(plotAction);
-	
-	mDetectorGroupPopupContext = new QMenu(mInstrumentDisplay);
-	QAction* infoGroupAction = new QAction(tr("&Info"), this);
-	connect(infoGroupAction,SIGNAL(triggered()),this,SLOT(spectraGroupInfoDialog()));
-	mDetectorGroupPopupContext->addAction(infoGroupAction);
-	QAction* plotGroupAction = new QAction(tr("&Plot spectra"), this);
-	connect(plotGroupAction,SIGNAL(triggered()),this,SLOT(sendPlotSpectraGroupSignal()));
-	mDetectorGroupPopupContext->addAction(plotGroupAction);
-    
+	mPlotAction = new QAction(tr("&Plot Spectra"), this);
+	connect(mPlotAction,SIGNAL(triggered()),this,SLOT(plotSelectedSpectra()));
+
+	mDetTableAction = new QAction(tr("&Detector Table"), this);
+	connect(mDetTableAction, SIGNAL(triggered()), this, SLOT(showDetectorTable()));
+
+	mGroupDetsAction = new QAction(tr("&Group"), this);
+	connect(mGroupDetsAction, SIGNAL(triggered()), this, SLOT(groupDetectors()));
+
+	mMaskDetsAction = new QAction(tr("&Mask"), this);
+	connect(mMaskDetsAction, SIGNAL(triggered()), this, SLOT(maskDetectors()));
+ 
 	// Load settings
 	loadSettings();
     
@@ -189,6 +188,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	
 	// Watch for the deletion of the associated workspace
 	observeDelete();
+	observeAfterReplace();
 	observeADSClear();
 }
 
@@ -250,37 +250,22 @@ void InstrumentWindow::changeColormap(const QString &filename)
   }
 }
 
-/**
- * This is the spectra information slot executed when a detector is picked/selected.
- */
-void InstrumentWindow::spectraInformation(int value)
+void InstrumentWindow::showPickOptions()
 {
-	mPopupContext->popup(QCursor::pos());
-	mSpectraIDSelected=value;
-}
+  QMenu context(mInstrumentDisplay);
+  
+  context.addAction(mInfoAction);
+  context.addAction(mPlotAction);
+  context.addAction(mDetTableAction);
 
-/**
- * This is the detector information slot executed when a detector is picked in graphics widget.
- */
-void InstrumentWindow::detectorInformation(int value)
-{
-	mDetectorIDSelected=value;
-}
-/**
- * This method is a slot for the collection of the spectra index list that was selected
- */
-void InstrumentWindow::spectraListInformation(const std::set<int>& result)
-{
-	mDetectorGroupPopupContext->popup(QCursor::pos());
-	mSpectraIDSelectedList=result;
-}
-/**
- * This method is a slot for the collection of the detector list that was selected
- */
-void InstrumentWindow::detectorListInformation(const std::vector<int>& result)
-{
-	mDetectorGroupPopupContext->popup(QCursor::pos());
-	mDetectorIDSelectedList=result;
+  if( mInstrumentDisplay->getSelectedWorkspaceIndices().size() > 1 )
+  {
+    context.insertSeparator();
+    context.addAction(mGroupDetsAction);
+    context.addAction(mMaskDetsAction);
+  }
+
+  context.exec(QCursor::pos());
 }
 
 /**
@@ -288,54 +273,122 @@ void InstrumentWindow::detectorListInformation(const std::vector<int>& result)
  */
 void InstrumentWindow::detectorHighlighted(int detectorId,int spectraId,int count)
 {
-  QString txt("Detector ID: ");
-  if(detectorId != -1) txt += QString::number(detectorId);
-  txt+="\nSpectra ID: ";
-  if(spectraId != -1) txt += QString::number(spectraId);
-  txt += "  Count: ";
-  if(detectorId != -1) txt += QString::number(count);
-  mInteractionInfo->setText(txt);
+  QString txt("Detector ID: %1\nSpectraID: %2  Count: %3");
+  mInteractionInfo->setText(txt.arg(QString::number(detectorId), QString::number(spectraId), QString::number(count)));
 }
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
  */
 void InstrumentWindow::spectraInfoDialog()
 {
-  QString info("Workspace Index: ");
-  info += QString::number(mSpectraIDSelected);
-  info +="\nDetector ID: ";
-  info += QString::number(mDetectorIDSelected);
-  QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
-}
-
-/**
- * Shows dialog with group of detectors information
- */
-void InstrumentWindow::spectraGroupInfoDialog()
-{
-  QString info("Index list size: ");
-  info += QString::number(mSpectraIDSelectedList.size());
-  info +="\nDetector list size: ";
-  info += QString::number(mDetectorIDSelectedList.size());
-  QMessageBox::information(this,tr("Detector/Spectrum Information"), info, QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
-
+  QString info;
+  const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
+  const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
+  const int ndets = det_ids.size();
+  if( ndets == 1 )
+  {
+    info = QString("Workspace index: %1\nDetector ID: %2").arg(QString::number(wksp_indices.front()),QString::number(det_ids.front()));
+  }
+  else
+  {
+    info = QString("Index list size: %1\nDetector list size: %2").arg(QString::number(wksp_indices.size()), QString::number(ndets));
+  }
+  QMessageBox::information(this,tr("Detector/Spectrum Information"), info, 
+			   QMessageBox::Ok|QMessageBox::Default, QMessageBox::NoButton, QMessageBox::NoButton);
 }
 
 /**
  *   Sends a signal to plot the selected spectrum.
  */
-void InstrumentWindow::sendPlotSpectraSignal()
+void InstrumentWindow::plotSelectedSpectra()
 {
-    emit plotSpectra( QString::fromStdString(mInstrumentDisplay->getWorkspaceName()), mSpectraIDSelected );
+  std::set<int> indices(mInstrumentDisplay->getSelectedWorkspaceIndices().begin(), mInstrumentDisplay->getSelectedWorkspaceIndices().end());
+  emit plotSpectra( mInstrumentDisplay->getWorkspaceName(), indices);
 }
 
 /**
- *   Sends a signal to plot the selected spectrum.
+ * Show detector table
  */
-void InstrumentWindow::sendPlotSpectraGroupSignal()
+void InstrumentWindow::showDetectorTable()
 {
-    emit plotSpectraList( QString::fromStdString(mInstrumentDisplay->getWorkspaceName()), mSpectraIDSelectedList );
+  emit createDetectorTable(mInstrumentDisplay->getWorkspaceName(), mInstrumentDisplay->getSelectedWorkspaceIndices());
 }
+
+QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets)
+{
+  QString message("This operation will affect %1 detectors.\nSelect output workspace option:");
+  QMessageBox prompt(this);
+  prompt.setWindowTitle("MantidPlot");
+  prompt.setText(message.arg(QString::number(ndets)));
+  QPushButton *replace = prompt.addButton("Replace", QMessageBox::ActionRole);
+  QPushButton *create = prompt.addButton("New", QMessageBox::ActionRole);
+  prompt.addButton("Cancel", QMessageBox::ActionRole);
+  prompt.exec();
+  QString outputWS;
+  if( prompt.clickedButton() == replace )
+  {
+    outputWS = inputWS;
+  }
+  else if( prompt.clickedButton() == create )
+  {
+    outputWS = inputWS + "_" + opName;
+  }
+  else
+  {
+    outputWS = "";
+  }
+  return outputWS;
+}
+
+/**
+ * Group selected detectors
+ */
+void InstrumentWindow::groupDetectors()
+{
+  const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
+  const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
+  QString inputWS = mInstrumentDisplay->getWorkspaceName();
+  QString outputWS = confirmDetectorOperation("grouped", inputWS, static_cast<int>(det_ids.size()));
+  if( outputWS.isEmpty() ) return;
+  QString param_list = "InputWorkspace=%1;OutputWorkspace=%2;WorkspaceIndexList=%3;KeepUngroupedSpectra=1";
+  emit execMantidAlgorithm("GroupDetectors",
+			   param_list.arg(inputWS, outputWS, asString(wksp_indices))
+			   );
+}
+
+/**
+ * Mask selected detectors
+ */
+void InstrumentWindow::maskDetectors()
+{
+  const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
+  const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
+  QString inputWS = mInstrumentDisplay->getWorkspaceName();
+  QString outputWS = confirmDetectorOperation("masked", inputWS, static_cast<int>(det_ids.size()));
+  if( outputWS.isEmpty() ) return;
+
+  QString param_list = "InputWorkspace=%1;OutputWorkspace=%2;WorkspaceIndexList=%3";
+  QString indices = asString(mInstrumentDisplay->getSelectedWorkspaceIndices());
+  emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, outputWS, asString(wksp_indices)));
+}
+
+/**
+ * Convert a list of integers to a comma separated string of numbers 
+ */
+QString InstrumentWindow::asString(const std::vector<int>& numbers) const
+{
+  QString num_str;
+  std::vector<int>::const_iterator iend = numbers.end();
+  for( std::vector<int>::const_iterator itr = numbers.begin(); itr < iend; ++itr )
+  {
+    num_str += QString::number(*itr) + ",";
+  }
+  //Remove trailing comma
+  num_str.chop(1);
+  return num_str;
+}
+
+
 /**
  * Destructor
  */
@@ -406,13 +459,13 @@ void InstrumentWindow::updateWindow()
 
 void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
 {
-  mInstrumentDisplay->setWorkspace(mWorkspaceName);
+  mInstrumentDisplay->setWorkspace(QString::fromStdString(mWorkspaceName));
   // Need to check if the values have already been set for the range
-  if( mMinValueBox->text().isEmpty() )
+  if( !mInstrumentDisplay->dataMinValueEdited() )
   {
     mMinValueBox->setText(QString::number(mInstrumentDisplay->getDataMinValue()));
   }
-  if( mMaxValueBox->text().isEmpty() )
+  if( !mInstrumentDisplay->dataMaxValueEdited() )
   {
     mMaxValueBox->setText(QString::number(mInstrumentDisplay->getDataMaxValue()));
   }
@@ -488,11 +541,17 @@ void InstrumentWindow::setDataMappingIntegral(double minValue,double maxValue)
  */
 void InstrumentWindow::minValueChanged()
 {
-  double value = mMinValueBox->displayText().toDouble();
+  double updated_value = mMinValueBox->displayText().toDouble();
+  double old_value = mInstrumentDisplay->getDataMinValue();
+  // If the new value is the same
+  if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
+
+  mInstrumentDisplay->setMinData(updated_value);
+
   if( this->isVisible() )
   { 
     setupColorBarScaling();
-    mInstrumentDisplay->updateForNewMinData(value);
+    mInstrumentDisplay->recount();
   }
 }
 
@@ -501,11 +560,16 @@ void InstrumentWindow::minValueChanged()
  */
 void InstrumentWindow::maxValueChanged()
 {
-  double value = mMaxValueBox->displayText().toDouble();
+  double updated_value = mMaxValueBox->displayText().toDouble();
+  double old_value = mInstrumentDisplay->getDataMaxValue();
+  // If the new value is the same
+  if( std::abs( (updated_value - old_value) / old_value) < 1e-08 ) return;
+  mInstrumentDisplay->setMaxData(updated_value);
+
   if( this->isVisible() )
   { 
     setupColorBarScaling();
-    mInstrumentDisplay->updateForNewMaxData(value);
+    mInstrumentDisplay->recount();
   }
 }
 
@@ -688,6 +752,13 @@ void InstrumentWindow::deleteHandle(const std::string & ws_name, boost::shared_p
     askOnCloseEvent(false);
     close();
   }
+}
+
+void InstrumentWindow::afterReplaceHandle(const std::string&,
+					  const boost::shared_ptr<Mantid::API::Workspace>)
+{
+  //Replace current workspace
+  updateWindow();
 }
 
 void InstrumentWindow::clearADSHandle()

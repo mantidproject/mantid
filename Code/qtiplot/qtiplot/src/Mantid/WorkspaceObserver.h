@@ -3,6 +3,53 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include <Poco/NObserver.h>
+#include <QObject>
+
+//------------------------------------------------
+// Forward declaration
+//------------------------------------------------
+class WorkspaceObserver;
+
+/**
+ * A simple callback class so that we avoid multiple inheritance issues with QObject.
+ * 
+ * This adds an extra level of indirection to the call between a Poco notification handler and the call to the correct WorkspaceObserver handler.
+ * It is necessary to do this rather than just call the function directly so that the function call gets executed in the object's thread rather than
+ * in the thread that the notificiation was recieved in.
+ *
+ * Multiple inheritance is not used in WorkspaceObserver as their seems to be some problem using it and QObject
+ * 
+ */
+class ObserverCallback : public QObject
+{
+  Q_OBJECT
+  
+public:
+  ObserverCallback(WorkspaceObserver *observer) : QObject(NULL), m_observer(observer)
+  {
+  }
+
+signals:
+  /// Delete signal handler
+  void deleteRequested(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void afterReplaced(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void adsCleared();
+  
+private slots:
+  /// Delete slot
+  void handleDelete(const std::string &name,  Mantid::API::Workspace_sptr workspace);
+  /// Replace slot
+  void handleAfterReplace(const std::string &name,  Mantid::API::Workspace_sptr workspace);
+  ///Clear slot
+  void handleClearADS();
+
+private:
+  friend class WorkspaceObserver;
+  /// Default constructor
+  ObserverCallback();
+  /// Object to call back to
+  WorkspaceObserver *m_observer;
+};
 
 /** @class WorkspaceObserver 
 
@@ -32,18 +79,23 @@
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-
 class WorkspaceObserver
 {
 public:
+  /// Default constructor
   WorkspaceObserver() :
     m_deleteObserver(*this,&WorkspaceObserver::_deleteHandle),
     m_afterReplaceObserver(*this,&WorkspaceObserver::_afterReplaceHandle),
     m_clearADSObserver(*this,&WorkspaceObserver::_clearADSHandle)
-  {}
-
-  virtual ~WorkspaceObserver()
   {
+    m_proxy = new ObserverCallback(this);
+  }
+
+  /// Destructor
+  ~WorkspaceObserver()
+  {
+    delete m_proxy;
+
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_afterReplaceObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
@@ -52,16 +104,28 @@ public:
   void observeDelete()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+    m_proxy->connect(m_proxy, 
+		     SIGNAL(deleteRequested(const std::string &,Mantid::API::Workspace_sptr)),
+		     SLOT(handleDelete(const std::string &, Mantid::API::Workspace_sptr))
+		     );
   }
 
   void observeAfterReplace()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_afterReplaceObserver);
+    m_proxy->connect(m_proxy, 
+		     SIGNAL(afterReplaced(const std::string &,Mantid::API::Workspace_sptr)),
+		     SLOT(handleAfterReplace(const std::string &, Mantid::API::Workspace_sptr))
+		     );
   }
 
   void observeADSClear()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
+    m_proxy->connect(m_proxy, 
+		     SIGNAL(adsCleared()),
+		     SLOT(handleClearADS())
+		     );
   }
 
 protected:
@@ -81,21 +145,21 @@ protected:
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
   {
   }
+
   /** Handle an ADS clear notification
    * 
    */
   virtual void clearADSHandle()
   {
   }
-  
-private:
 
+protected:
   /** Poco notification handler for DataService::DeleteNotification.
   @param pNf The pointer to the notification.
   */
   void _deleteHandle(Mantid::API::WorkspaceDeleteNotification_ptr pNf)
   {
-    this->deleteHandle(pNf->object_name(),pNf->object());
+    m_proxy->deleteRequested(pNf->object_name(), pNf->object());
   }
   /// Poco::NObserver for DataServise::DeleteNotification.
   Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceDeleteNotification> m_deleteObserver;
@@ -105,7 +169,7 @@ private:
   */
   void _afterReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
   {
-    this->afterReplaceHandle(pNf->object_name(),pNf->object());
+    m_proxy->afterReplaced(pNf->object_name(), pNf->object());
   }
   /// Poco::NObserver for DataServise::DeleteNotification.
   Poco::NObserver<WorkspaceObserver, Mantid::API::WorkspaceAfterReplaceNotification> m_afterReplaceObserver;
@@ -115,11 +179,13 @@ private:
   /// ADS clear notification
   void _clearADSHandle(Mantid::API::ClearADSNotification_ptr)
   {
-    this->clearADSHandle();
+    m_proxy->adsCleared();
   }
 
-  
-
+private:
+  friend class ObserverCallback;
+  ObserverCallback *m_proxy;
 };
+
 
 #endif

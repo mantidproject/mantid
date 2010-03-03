@@ -120,13 +120,15 @@ m_progressDialog(0)
     menuMantidMatrix = new QMenu(m_appWindow);
 	connect(menuMantidMatrix, SIGNAL(aboutToShow()), this, SLOT(menuMantidMatrixAboutToShow()));
 
-    // To be able to use them in signals they need to be registered
-    static bool Workspace_sptr_qRegistered = false;
-    if (!Workspace_sptr_qRegistered)
+    // To be able to use them in queued signals they need to be registered
+    static bool registered_addtional_types = false;
+    if( !registered_addtional_types )
     {
-        Workspace_sptr_qRegistered = true;
+        registered_addtional_types = true;
         qRegisterMetaType<Mantid::API::Workspace_sptr>();
         qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
+	//Register std::string as well as we use it alot
+	qRegisterMetaType<std::string>();
     }
 
 }
@@ -642,58 +644,72 @@ void MantidUI::copyValues()
 
 Table* MantidUI::createTableDetectors(MantidMatrix *m)
 {
-	 Table* t = new Table(appWindow()->scriptEnv, m->numRows(), 6, "", appWindow(), 0);
-	 appWindow()->initTable(t, appWindow()->generateUniqueName(m->name()+"-Detectors-"));
-   t->showNormal();
-   //t->askOnCloseEvent(false);
+  std::vector<int> indices(m->numRows(), 0);
+  for(int i = 0; i < m->numRows();i++)
+  {
+    indices[i] = m->workspaceIndex(i);
+  }
+  return createDetectorTable(m->workspaceName(), indices);
+}
 
-   Mantid::API::MatrixWorkspace_sptr ws = m->workspace();
-   Mantid::API::Axis *spectraAxis = ws->getAxis(1);
-   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
-   for(int i=0;i<m->numRows();i++)
-   {
+Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices)
+{
+  const int nrows = indices.size();
+  Table* t = new Table(appWindow()->scriptEnv, nrows, 6, "", appWindow(), 0);
+  appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
+  t->showNormal();
 
-         int ws_index = m->workspaceIndex(i);
-         int currentSpec = spectraAxis->spectraNo(ws_index);
-         int detID = 0;
-         double R = 0.;
-         double Theta = 0.;
-         double Phi = 0.;
-         try
-         {
-             boost::shared_ptr<Mantid::Geometry::IDetector> det = ws->getDetector(ws_index);
-             detID = det->getID();
-             // We want the position of the detector relative to the sample
-             Mantid::Geometry::V3D pos = det->getPos() - sample->getPos();
-             pos.getSpherical(R,Theta,Phi);
-             // Need to get R & Theta through these methods to be correct for grouped detectors
-             R = det->getDistance(*sample);
-             Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
-         }
-         catch(...)
-         {
-             detID = 0;
-         }
-         t->setCell(i,0,ws_index);
-         if (i == 0) t->setColName(0,"Index");
+  MatrixWorkspace_sptr ws;
+  if( AnalysisDataService::Instance().doesExist(wsName.toStdString()) )
+  {
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  }
+  
+  if( !ws ) return NULL;
 
-         t->setCell(i,1,currentSpec);
-         if (i == 0) t->setColName(1,"Spectra");
+  Mantid::API::Axis *spectraAxis = ws->getAxis(1);
+  Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+  for( int i = 0; i < nrows; ++i )
+  {
+    int ws_index = indices[i];
+    int currentSpec = spectraAxis->spectraNo(ws_index);
+    int detID = 0;
+    double R(0.0), Theta(0.0), Phi(0.0);
+    try
+    {
+      boost::shared_ptr<Mantid::Geometry::IDetector> det = ws->getDetector(ws_index);
+      detID = det->getID();
+      // We want the position of the detector relative to the sample
+      Mantid::Geometry::V3D pos = det->getPos() - sample->getPos();
+      pos.getSpherical(R,Theta,Phi);
+      // Need to get R & Theta through these methods to be correct for grouped detectors
+      R = det->getDistance(*sample);
+      Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
+    }
+    catch(...)
+    {
+      detID = 0;
+    }
+    t->setCell(i,0,ws_index);
+    if (i == 0) t->setColName(0,"Index");
 
-         t->setCell(i,2,detID);
-         if (i == 0) t->setColName(2,"Detectors");
+    t->setCell(i,1,currentSpec);
+    if (i == 0) t->setColName(1,"Spectra");
 
-         t->setCell(i,3,R);
-         if (i == 0) t->setColName(3,"R");
+    t->setCell(i,2,detID);
+    if (i == 0) t->setColName(2,"Detectors");
 
-         t->setCell(i,4,Theta);
-         if (i == 0) t->setColName(4,"Theta");
+    t->setCell(i,3,R);
+    if (i == 0) t->setColName(3,"R");
 
-         t->setCell(i,5,Phi);
-         if (i == 0) t->setColName(5,"Phi");
-   }
-   return t;
- }
+    t->setCell(i,4,Theta);
+    if (i == 0) t->setColName(4,"Theta");
+
+    t->setCell(i,5,Phi);
+    if (i == 0) t->setColName(5,"Phi");
+  }
+  return t;
+}	
 
 bool MantidUI::drop(QDropEvent* e)
 {
@@ -811,43 +827,41 @@ void MantidUI::executeSaveNexus(QString algName,int version)
 }
 void MantidUI::executeAlgorithm(QString algName, int version)
 {
-  emit algorithmAboutToBeCreated(); 
-  Mantid::API::IAlgorithm_sptr alg;
-  try
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
+  if( !alg ) return;
+  QString presets(""), enabled("");
+  //If a workspace is selected in the dock then set this as a preset for the dialog
+  QString selected = getSelectedWorkspaceName();
+  if( !selected.isEmpty() )
   {
-    alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+    QString property_name = findInputWorkspaceProperty(alg);
+    presets = "|" + property_name + "=" + selected + "|";
+    enabled = property_name + ",";
+  }
+  //Check if a workspace is selected in the dock and set this as a preference for the input workspace
+  MantidQt::API::AlgorithmDialog *dlg = 
+    MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
 
-  }
-  catch(...)
+  if( !dlg ) return;
+  if ( dlg->exec() == QDialog::Accepted)
   {
-    QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+algName+" version "+QString::number(version));
-    return;
+    delete dlg;
+    executeAlgorithmAsync(alg);
   }
-  if (alg)
+  else
   {
-    QString presets(""), enabled("");
-    //If a workspace is selected in the dock then set this as a preset for the dialog
-    QString selected = getSelectedWorkspaceName();
-    if( !selected.isEmpty() )
-    {
-      QString property_name = findInputWorkspaceProperty(alg);
-      presets = "|" + property_name + "=" + selected + "|";
-      enabled = property_name + ",";
-    }
-    //Check if a workspace is selected in the dock and set this as a preference for the input workspace
-    MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow, false, presets, "", enabled);
+    delete dlg;
+  }
+}
 
-    if( !dlg ) return;
-    if ( dlg->exec() == QDialog::Accepted)
-    {
-      delete dlg;
-      executeAlgorithmAsync(alg);
-    }
-    else
-    {
-      delete dlg;
-    }
-  }
+void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList)
+{
+  //Get latest version of the algorithm
+  Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
+  if( !alg ) return;
+
+  alg->setProperties(paramList.toStdString());
+  executeAlgorithmAsync(alg);
 }
 
 /**
@@ -1239,6 +1253,24 @@ void MantidUI::ungroupWorkspaces()
 	}
 
 }
+
+Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, int version)
+{
+  emit algorithmAboutToBeCreated(); 
+  Mantid::API::IAlgorithm_sptr alg;
+  try
+  {
+    alg = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString(),version);
+  }
+  catch(...)
+  {
+    QMessageBox::critical(appWindow(),"MantidPlot",
+			  "Cannot create algorithm \""+ algName + "\" version "+QString::number(version));
+    alg = Mantid::API::IAlgorithm_sptr();
+  }
+  return alg;
+}
+
 void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog)
 {
     if (showDialog)
@@ -1380,11 +1412,12 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
   connect(insWin, SIGNAL(closedWindow(MdiSubWindow*)), appWindow(), SLOT(closeWindow(MdiSubWindow*)));
   connect(insWin,SIGNAL(hiddenWindow(MdiSubWindow*)), appWindow(), SLOT(hideWindow(MdiSubWindow*)));
   connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
-  connect(insWin,SIGNAL(plotSpectra(const QString&,int)),this,SLOT(plotInstrumentSpectrum(const QString&,int)));
-  connect(insWin,SIGNAL(plotSpectraList(const QString&,std::set<int>)),this,SLOT(plotInstrumentSpectrumList(const QString&,std::set<int>)));
-
-  //  insWin->resize(400,400);
-
+  connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
+	  SLOT(plotSpectraList(const QString&,const std::set<int>&)));
+  connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&)),this,
+	  SLOT(createDetectorTable(const QString&,const std::vector<int>&)));
+  connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&)), this,
+	  SLOT(executeAlgorithm(const QString&, const QString&)));
   return insWin;
 }
 

@@ -106,7 +106,7 @@ void Table::init(int rows, int cols)
 	setHeaderColType();
 
 	int w = 4*(d_table->horizontalHeader())->sectionSize(0);
-	int h = (rows+1)*(d_table->verticalHeader())->sectionSize(0);
+	int h = (rows+5)*(d_table->verticalHeader()->sectionSize(0));
 	if (rows>11)
 		h=11*(d_table->verticalHeader())->sectionSize(0);
 	setGeometry(50, 50, w + 45, h);

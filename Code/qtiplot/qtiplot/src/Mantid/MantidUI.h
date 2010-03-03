@@ -67,7 +67,7 @@ class FitPropertyBrowser;
 /// Required by Qt to use Mantid::API::Workspace_sptr as a parameter type in signals
 Q_DECLARE_METATYPE(Mantid::API::Workspace_sptr)
 Q_DECLARE_METATYPE(Mantid::API::MatrixWorkspace_sptr)
-
+Q_DECLARE_METATYPE(std::string)
 
 class MantidUI:public QObject
 {
@@ -155,9 +155,12 @@ public:
     // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
     MultiLayer* plotSelectedRows(MantidMatrix *m, bool errs = true);
 
+public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
-    MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=true);
-    MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=true);
+    MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false);
+
+public:
+    MultiLayer* plotSpectraList(const QMultiMap<QString,int>& toPlot, bool errs=false);
 
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraRange(const QString& wsName, int i0, int i1, bool errs=true);
@@ -182,8 +185,10 @@ public:
 
     // Creates and shows a Table with detector ids for the workspace in the MantidMatrix
     Table* createTableDetectors(MantidMatrix *m);
-
-    //  *****                            *****  //
+public slots:
+  Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices);
+  //  *****                            *****  //
+public:
 
     // Return pointer to the fit function property browser
     FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
@@ -299,6 +304,9 @@ public slots:
     // Execute algorithm given name and version
     void executeAlgorithm(QString algName, int version);
 
+    //Execute an algorithm with the given parameter list
+    void executeAlgorithm(const QString & algName, const QString & paramList);
+
     // Find the name of the first input workspace for an algorithm
     QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
 
@@ -361,6 +369,8 @@ public:
 
 private:
 
+// Create a pointer to the named algorithm and version
+    Mantid::API::IAlgorithm_sptr createAlgorithm(const QString& algName, int version);
     // Execute algorithm asinchronously
     void executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog = true);
 

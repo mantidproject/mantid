@@ -39,8 +39,9 @@ Instrument3DWidget::Instrument3DWidget(QWidget* parent):
   GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
   mColorMap(), mInstrumentActor(NULL), mAxisDirection(Mantid::Geometry::V3D(0.0,0.0,1.0)),
   mAxisUpVector(Mantid::Geometry::V3D(0.0,1.0,0.0)), mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX),
-  mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX),
-  mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), strWorkspaceName(""), mScaledValues(0)
+  mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX), mDataMinEdited(false), mDataMaxEdited(false),
+  mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), 
+  mWorkspaceName(""), mWorkspace(), mScaledValues(0)
 {
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
   connect(this, SIGNAL(actorHighlighted(QRgb)),this,SLOT(fireDetectorHighligted(QRgb)));
@@ -68,6 +69,7 @@ void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction,const Ma
 void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
 {
   std::vector<int> detectorIds;
+  detectorIds.reserve(pickedColors.size());
   for(std::set<QRgb>::const_iterator it = pickedColors.begin(); it!= pickedColors.end(); it++)
   {
     int iDecId = mInstrumentActor->getDetectorIDFromColor(qRed((*it))*65536+qGreen((*it))*256+qBlue((*it)));
@@ -75,30 +77,27 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
     {
       detectorIds.push_back(iDecId);
     }
-
   }
-  //convert detector ids to spectra index ids
-  std::vector<int> spectraIndices;
-  getSpectraIndexList(detectorIds, spectraIndices);
-  if( !detectorIds.empty() )
-  {
-    if( detectorIds.size() == 1)
-    {
-      //emit the detector id
-      emit actionDetectorSelected(detectorIds.front());
-      //emit the spectra id
-      emit actionSpectraSelected(spectraIndices.front());
-    }
-    else // If more than one detector selected
-    {
-      std::set<int> spectralist(spectraIndices.begin(), spectraIndices.end());
-      //emit the detector ids
-      emit actionDetectorSelectedList(detectorIds);
-      //emit the spectra ids
-      emit actionSpectraSelectedList(spectralist);
-    }
+  if( detectorIds.empty() ) return;
+  createWorkspaceIndexList(detectorIds);
+  emit detectorsSelected();
 
-  }
+//   if( detectorIds.size() == 1)
+//   {
+//     //emit the detector id
+//     emit actionDetectorSelected(detectorIds.front());
+//     //emit the spectra id
+//     emit actionSpectraSelected(spectraIndices.front());
+//   }
+//   else // If more than one detector selected
+//   {
+//     std::set<int> spectralist(spectraIndices.begin(), spectraIndices.end());
+//     //emit the detector ids
+//     emit actionDetectorSelectedList(detectorIds);
+//     //emit the spectra ids
+//     emit actionSpectraSelectedList(spectralist);
+//   }
+
 }
 
 /**
@@ -118,20 +117,19 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
   {
     //convert detector id to spectra index id
     std::vector<int> idDecVec(1, iDecId);
-    std::vector<int> indexList;
-    getSpectraIndexList(idDecVec, indexList);
-    MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
+    createWorkspaceIndexList(idDecVec);
     int spectrumNumber(1);
+    int index = m_workspace_indices.front();
     try
     {
-      spectrumNumber = workspace->getAxis(1)->spectraNo(indexList.front());
+      spectrumNumber = mWorkspace->getAxis(1)->spectraNo(index);
     }
     catch(Mantid::Kernel::Exception::IndexError&)
     {
       //Not a Workspace2D
     }
 
-    double sum = integrateSingleSpectra(workspace, indexList.front());
+    double sum = integrateSingleSpectra(mWorkspace, index);
     //emit the detector id, spectrum number and count to display in the window
     emit actionDetectorHighlighted(iDecId, spectrumNumber, std::floor(sum));
   }
@@ -142,13 +140,19 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
  * This method sets the workspace name input to the widget.
  * @param wsName input workspace name
  */
-void Instrument3DWidget::setWorkspace(const std::string& wsName)
+void Instrument3DWidget::setWorkspace(const QString& wsName)
 {
-  if( strWorkspaceName == wsName ) return;
-
+  MatrixWorkspace_sptr output = 
+    boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  if( !output )
+  {
+    QMessageBox::warning(this, "MantidPlot", QString("Error retrieving workspace \"") + 
+			 wsName + QString("\". Cannot render instrument"));
+    return;
+  }
   // Save the workspace name
-  strWorkspaceName = wsName;
-  MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
+  mWorkspaceName = wsName;
+  mWorkspace = output;
   // Read the instrument geometry
   boost::shared_ptr<Mantid::API::IInstrument> ins = output->getInstrument();
   this->ParseInstrumentGeometry(ins);
@@ -175,11 +179,11 @@ void Instrument3DWidget::setWorkspace(const std::string& wsName)
  */
 void Instrument3DWidget::ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument> ins)
 {
-	makeCurrent();
-	boost::shared_ptr<GLActorCollection> scene = boost::shared_ptr<GLActorCollection>(new GLActorCollection);
-	mInstrumentActor = new InstrumentActor(ins, mFastRendering);
-	scene->addActor(mInstrumentActor);
-	this->setActorCollection(scene);
+  makeCurrent();
+  boost::shared_ptr<GLActorCollection> scene = boost::shared_ptr<GLActorCollection>(new GLActorCollection);
+  mInstrumentActor = new InstrumentActor(ins, mFastRendering);
+  scene->addActor(mInstrumentActor);
+  this->setActorCollection(scene);
 }
 
 /**
@@ -247,21 +251,21 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
  */
 void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace)
 {
+  if( !workspace ) return;
   // This looks like a strange way of doing this but the CompAssemblyActor needs the colours in the same
   // order as it fills its detector lists!
   std::vector<int> detector_list(0);
   mInstrumentActor->getDetectorIDList(detector_list);
   if( detector_list.empty() ) return;
-  std::vector<int> index_list;
-  getSpectraIndexList(detector_list, index_list);
+  createWorkspaceIndexList(detector_list);
 
-  const int n_spec = index_list.size();
+  const int n_spec = m_workspace_indices.size();
   std::vector<double> integrated_values(n_spec, 0.0);
   mWkspDataMin = DBL_MAX;
   mWkspDataMax = -DBL_MAX;
   for( int i = 0; i < n_spec; ++i )
   {
-    int widx = index_list[i];
+    int widx = m_workspace_indices[i];
     if( widx != -1 )
     {
       double sum = integrateSingleSpectra(workspace, widx);
@@ -282,14 +286,17 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
       integrated_values[i] = -1.0;
     }
   }
+  //No need to store these now
+  m_workspace_indices.clear();
+  m_detector_ids.clear();
 
   // No preset value
-  if( std::abs(mDataMinValue - DBL_MAX)/DBL_MAX < 1e-08 )
+  if( mDataMinEdited == false )
   {
     mDataMinValue = mWkspDataMin;
   }
 
-  if( (mDataMaxValue + DBL_MAX)/DBL_MAX < 1e-08 )
+  if( mDataMaxEdited == false )
   {
     mDataMaxValue = mWkspDataMax;
   }
@@ -365,13 +372,9 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
  */
 void Instrument3DWidget::recount()
 {
-  MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
-  if( output.get() )
-  {
-    calculateColorCounts(output);
-    mInstrumentActor->refresh();
-    update();
-  }
+  calculateColorCounts(mWorkspace);
+  mInstrumentActor->refresh();
+  update();
 }
 
 /**
@@ -419,44 +422,56 @@ void Instrument3DWidget::updateColorsForNewMap()
 /**
  * Update the colors based on a change in the maximum data value
  */
-void Instrument3DWidget::updateForNewMaxData(const double new_max)
+void Instrument3DWidget::setMaxData(const double new_max)
 {
-  // If the new value is the same
-  if( std::abs(new_max - mDataMaxValue) / mDataMaxValue < 1e-08 ) return;
-
   mDataMaxValue = new_max;
-  recount();
+  setDataMaxEdited(true);
 }
 
 /**
- * Update the colors based on a change in the maximum data value
+ * Update the colors based on a change in the minimum data value
  */
-void Instrument3DWidget::updateForNewMinData(const double new_min)
+void Instrument3DWidget::setMinData(const double new_min)
 {
-  // If the new value is the same
-  if( std::abs(new_min - mDataMinValue) / mDataMinValue < 1e-08 ) return;
-
   mDataMinValue = new_min;
-  recount();
+  setDataMinEdited(true);
 }
 
+/**
+ * Mark the min data as bein user edited
+ * @param If true the data min value has been set by the user
+ */
+void Instrument3DWidget::setDataMinEdited(bool state)
+{
+  mDataMinEdited = state;
+}
+
+/**
+ * Mark the min data as bein user edited
+ * @param If true the data min value has been set by the user
+ */
+void Instrument3DWidget::setDataMaxEdited(bool state)
+{
+  mDataMaxEdited = state;
+}
 
 /**
  * This method returns the Spectra Index list for the input dectector id list.
  * @param idDecVec is list of detector id's
  */
-void Instrument3DWidget::getSpectraIndexList(const std::vector<int>& detIDs, std::vector<int> & wkspIndices) const
+void Instrument3DWidget::createWorkspaceIndexList(const std::vector<int> & det_ids)
 {
-  wkspIndices.clear();
-  if( strWorkspaceName.empty() ) return;
-  MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
+  if( det_ids.empty() ) return;
+  m_workspace_indices.clear();
+  m_detector_ids = det_ids;
+
   // There is no direct way of getting histogram index from the spectra id,
-  // get the spectra axis and convert form index to spectra number and create
+  // get the spectra axis and convert from index to spectra number and create
   // a map.
-  const std::vector<int> spectraList = workspace->spectraMap().getSpectra(detIDs);
-  Axis* spectraAxis = workspace->getAxis(1);
+  const std::vector<int> spectraList = mWorkspace->spectraMap().getSpectra(m_detector_ids);
+  Axis* spectraAxis = mWorkspace->getAxis(1);
   std::map<int,int> index_map;
-  int n_hist = workspace->getNumberHistograms();
+  int n_hist = mWorkspace->getNumberHistograms();
   for (int i = 0; i < n_hist; ++i)
   {
     int current_spectrum = spectraAxis->spectraNo(i);
@@ -464,19 +479,20 @@ void Instrument3DWidget::getSpectraIndexList(const std::vector<int>& detIDs, std
   }
 
   std::vector<int>::const_iterator spec_end = spectraList.end();
-  std::vector<int>::const_iterator d_itr = detIDs.begin();
+  std::vector<int>::const_iterator d_itr = m_detector_ids.begin();
   for( std::vector<int>::const_iterator spec_itr = spectraList.begin(); spec_itr != spec_end;
        ++spec_itr, ++d_itr )
   {
     if( (*d_itr) != -1 )
     {
-      wkspIndices.push_back(index_map[*spec_itr]);
+      m_workspace_indices.push_back(index_map[*spec_itr]);
     }
     else
     {
-      wkspIndices.push_back(-1);
+      m_workspace_indices.push_back(-1);
     }
   }
+
 }
 
 /**
@@ -485,19 +501,18 @@ void Instrument3DWidget::getSpectraIndexList(const std::vector<int>& detIDs, std
  */
 void Instrument3DWidget::setTimeBin(int value)
 {
-	if(value>0)
-	{
-		this->iTimeBin=value;
-	}
+  if(value>0)
+  {
+    this->iTimeBin=value;
+  }
 }
-
 
 /**
  * Returns workspace name
  */
-std::string Instrument3DWidget::getWorkspaceName() const
+QString Instrument3DWidget::getWorkspaceName() const
 {
-	return strWorkspaceName;
+  return mWorkspaceName;
 }
 
 /**
@@ -572,23 +587,21 @@ void Instrument3DWidget::setDataMappingType(DataMappingType dmType)
 
 void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue)
 {
-	this->mBinMinValue = minValue;
-	this->mBinMaxValue = maxValue;
-	setDataMappingType(INTEGRAL);
-	if( this->isVisible() )
-	{
-	  MatrixWorkspace_sptr workspace =
-	    boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(strWorkspaceName));
-	  calculateColorCounts(workspace);
-	  mInstrumentActor->refresh();
-	  update();
-	}
+  this->mBinMinValue = minValue;
+  this->mBinMaxValue = maxValue;
+  setDataMappingType(INTEGRAL);
+  if( this->isVisible() )
+  {
+    calculateColorCounts(mWorkspace);
+    mInstrumentActor->refresh();
+    update();
+  }
 }
 
 void Instrument3DWidget::setDataMappingSingleBin(int binNumber)
 {
-	this->iTimeBin=binNumber;
-	setDataMappingType(SINGLE_BIN);
+  this->iTimeBin=binNumber;
+  setDataMappingType(SINGLE_BIN);
 }
 
 /**
@@ -664,11 +677,13 @@ void Instrument3DWidget::setFastRendering()
 void Instrument3DWidget::resetWidget()
 {
 	iTimeBin = 0;
-	strWorkspaceName = "";
+	mWorkspaceName = QString();
 	mBinMinValue = DBL_MAX;
 	mBinMaxValue = -DBL_MAX;
 	mDataMinValue = DBL_MAX;
 	mDataMaxValue = -DBL_MAX;
+	mDataMinEdited = false;
+	mDataMaxEdited = false;
 	mDataMapping = INTEGRAL;
 	mAxisDirection = Mantid::Geometry::V3D(0.0,0.0,1.0);
 	mAxisUpVector = Mantid::Geometry::V3D(0.0,1.0,0.0);

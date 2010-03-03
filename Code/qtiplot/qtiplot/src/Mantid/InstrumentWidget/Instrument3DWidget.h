@@ -55,8 +55,8 @@ class Instrument3DWidget : public GL3DWidget
 public:
   Instrument3DWidget(QWidget* parent=0); ///< Constructor
   virtual ~Instrument3DWidget();         ///< Destructor
-  void setWorkspace(const std::string& name);
-  std::string getWorkspaceName() const;
+  void setWorkspace(const QString& name);
+  QString getWorkspaceName() const;
   const MantidColorMap & getColorMap() const;
   MantidColorMap & mutableColorMap();
   double getDataMinValue() const;
@@ -70,9 +70,18 @@ public:
   void setFastRendering();
   void setSlowRendering();
   void updateColorsForNewMap();
-  void updateForNewMaxData(const double);
-  void updateForNewMinData(const double);
-  void recount();				
+  void setMinData(const double);
+  void setMaxData(const double);
+  void setDataMinEdited(bool state);
+  void setDataMaxEdited(bool state);
+  bool dataMinValueEdited() const { return mDataMinEdited; }
+  bool dataMaxValueEdited() const { return mDataMaxEdited; }
+  
+  void recount();
+
+  const std::vector<int> & getSelectedDetectorIDs() const { return m_detector_ids; }
+  const std::vector<int> & getSelectedWorkspaceIndices() const { return m_workspace_indices; }
+			
 public slots:
   void fireDetectorsPicked(const std::set<QRgb>& );
   void fireDetectorHighligted(QRgb);
@@ -89,11 +98,8 @@ public slots:
   void setViewDirectionZNegative();
 
 signals:
-  void actionDetectorSelected(int);
-  void actionSpectraSelected(int);
+  void detectorsSelected();
   void actionDetectorHighlighted(int,int,int);
-  void actionDetectorSelectedList(std::vector<int>);
-  void actionSpectraSelectedList(std::set<int>);
 
 private:
   void ParseInstrumentGeometry(boost::shared_ptr<Mantid::API::IInstrument>);
@@ -108,6 +114,10 @@ private:
   void getBoundingBox(Mantid::Geometry::V3D& minBound, Mantid::Geometry::V3D& maxBound);
 
 private:
+  /// Convert the list of detector ids to a list of workspace indices and store them
+  void createWorkspaceIndexList(const std::vector<int> & idlist);
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> getMatrixWorkspace(QString ) const;
+
   bool mFastRendering;
   int iTimeBin;
   DataMappingType mDataMapping;
@@ -117,20 +127,24 @@ private:
   Mantid::Geometry::V3D mAxisDirection;
   Mantid::Geometry::V3D mAxisUpVector;
 
-
   // The user requested data and bin ranges
   double mDataMinValue, mDataMaxValue;
   double mBinMinValue, mBinMaxValue;
+
+  bool mDataMinEdited, mDataMaxEdited;
 
   // The workspace data and bin range limits
   double mWkspDataMin, mWkspDataMax;
   double mWkspBinMin, mWkspBinMax;
 
-  std::string strWorkspaceName;
+  QString mWorkspaceName;
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> mWorkspace;
+
   /// Store a value between 0->255 for each of the integrated spectra.
   std::vector<unsigned char> mScaledValues;
 
-  void getSpectraIndexList(const std::vector<int>& idDecVec, std::vector<int>& wkspIndices ) const;
+  std::vector<int> m_detector_ids;
+  std::vector<int> m_workspace_indices;
 
 };
 

@@ -47,9 +47,9 @@ public:
 	void setPickImage(QImage);
 	void draw(QPainter*);
 	void drawPickBox(QPainter* painter);
+	void mousePressed (Qt::MouseButtons buttons, const QPoint & pos );
 	void mouseMoveEvent ( QMouseEvent * event );
-    void mousePressEvent ( QMouseEvent * event );
-	void mouseReleaseEvent ( QMouseEvent * event ); 
+	void mouseReleased(Qt::MouseButtons buttons, const QPoint & pos); 
 	QRgb pickPoint(int x, int y);
 	std::set<QRgb> getListOfColorsPicked();
 private:

@@ -66,7 +66,7 @@ class QComboBox;
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
-class InstrumentWindow : public MdiSubWindow, WorkspaceObserver
+class InstrumentWindow : public MdiSubWindow, public WorkspaceObserver
 {
 	Q_OBJECT
 
@@ -90,16 +90,14 @@ public:
 public slots:
 	void modeSelectButtonClicked();
 	void selectBinButtonClicked();
-	void spectraInformation(int);
-	void detectorInformation(int value);
 	void detectorHighlighted(int detectorId,int spectraid,int count);
-	void spectraListInformation(const std::set<int>&);
-	void detectorListInformation(const std::vector<int>&);
-	void spectraInfoDialog();
-	void spectraGroupInfoDialog();
+        void showPickOptions();
+        void spectraInfoDialog();
+        void plotSelectedSpectra();
+        void showDetectorTable();
+        void groupDetectors();
+        void maskDetectors();
 	void changeColormap(const QString & filename = "");
-    void sendPlotSpectraSignal();
-	void sendPlotSpectraGroupSignal();
 	void minValueChanged();
 	void maxValueChanged();
 	void setViewDirection(const QString&);
@@ -108,23 +106,25 @@ public slots:
   void saveImage();
 
 signals:
-  void plotSpectra(const QString&,int);
-  void plotSpectraList(const QString&,const std::set<int>&);
+  void plotSpectra(const QString&,const std::set<int>&);
+  void createDetectorTable(const QString&,const std::vector<int>&);
+  void execMantidAlgorithm(const QString&,const QString&);								  
 
 private slots:
         void scaleTypeChanged(int);
-
 private:
 
 	void loadSettings();
 	void saveSettings();
 	void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
         void setupColorBarScaling();
-
+        QString asString(const std::vector<int>& numbers) const;
+  QString confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets);
 	QLabel*      mInteractionInfo;
 	QTabWidget*  mControlsTab;
-    QMenu*       mPopupContext; ///< Popup menu for detector picking
-	QMenu*       mDetectorGroupPopupContext; ///< Popup menu for detector picking
+  // Actions for the pick menu
+  QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
+
 	QPushButton* mSelectButton; ///< Select the mode Pick/Normal
 	QPushButton* mSelectColormap; ///< Select colormap button
         QPushButton* mSaveImage; ///< Save the currently displayed image
@@ -147,6 +147,7 @@ private:
         QString m_savedialog_dir; /// The last used dialog directory
 
   virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
+  virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void clearADSHandle();
 };
 

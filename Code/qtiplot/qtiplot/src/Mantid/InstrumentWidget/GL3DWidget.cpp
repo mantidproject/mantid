@@ -22,50 +22,54 @@
 
 
 GL3DWidget::GL3DWidget(QWidget* parent):
-				QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent)
+  QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent)
 {
-	_viewport=new GLViewport;
-	_trackball=new GLTrackball(_viewport);
-	isKeyPressed=false;
-	scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection());
-	mPickedActor=NULL;
-	mPickingDraw=false;
-	iInteractionMode=0;
-	mPickBox=new GLGroupPickBox();
-	setFocusPolicy(Qt::StrongFocus);
-    setAutoFillBackground(false);
-	bgColor=QColor(0,0,0,1);
-	mLightingState = 0;
+  _viewport=new GLViewport;
+  _trackball=new GLTrackball(_viewport);
+  isKeyPressed=false;
+  scene=boost::shared_ptr<GLActorCollection>(new GLActorCollection());
+  mPickedActor=NULL;
+  mPickingDraw=false;
+  iInteractionMode=GL3DWidget::MoveMode;
+  mPickBox=new GLGroupPickBox();
+  setFocusPolicy(Qt::StrongFocus);
+  setAutoFillBackground(false);
+  bgColor=QColor(0,0,0,1);
+  mLightingState = 0;
+  
+  //Enable right-click in pick mode
+  setContextMenuPolicy(Qt::DefaultContextMenu);
 }
+
 GL3DWidget::~GL3DWidget()
 {
-	delete _viewport;
-	delete _trackball;
+  delete _viewport;
+  delete _trackball;
 }
 
 void GL3DWidget::setInteractionModePick()
 {
-	iInteractionMode=1;// Pick mode
-	setMouseTracking(true);
-	//Set basic lighting model
-	setLightingModel(0);
-	switchToPickingMode();
+  iInteractionMode = GL3DWidget::PickMode;// Pick mode
+  setMouseTracking(true);
+  //Set basic lighting model
+  setLightingModel(0);
+  switchToPickingMode();
 }
 
 void GL3DWidget::setInteractionModeNormal()
 {
-	iInteractionMode=0;//Normal mode
-	setMouseTracking(false);
-	setCursor(Qt::PointingHandCursor);
-	//Revert the lighting model if necessary
-	setLightingModel(mLightingState); 
-	glEnable(GL_NORMALIZE);
-	update();
+  iInteractionMode = GL3DWidget::MoveMode;//Normal mode
+  setMouseTracking(false);
+  setCursor(Qt::PointingHandCursor);
+  //Revert the lighting model if necessary
+  setLightingModel(mLightingState); 
+  glEnable(GL_NORMALIZE);
+  update();
 }
 
 GLActor* GL3DWidget::getPickedActor()
 {
-	return mPickedActor;
+  return mPickedActor;
 }
 
 /**
@@ -74,17 +78,17 @@ GLActor* GL3DWidget::getPickedActor()
  */
 void GL3DWidget::initializeGL()
 {
-	setCursor(Qt::PointingHandCursor); // This is to set the initial window mouse cursor to Hand icon
-
-	// Set the relevant OpenGL rendering options (not lighting)
-	setRenderingOptions();
-
-	// Set lighting mode
-	setLightingModel(mLightingState);
-
-	// Clear the memory buffers
-	glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  setCursor(Qt::PointingHandCursor); // This is to set the initial window mouse cursor to Hand icon
+  
+  // Set the relevant OpenGL rendering options (not lighting)
+  setRenderingOptions();
+  
+  // Set lighting mode
+  setLightingModel(mLightingState);
+  
+  // Clear the memory buffers
+  glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void GL3DWidget::setRenderingOptions()
@@ -145,30 +149,31 @@ void GL3DWidget::setLightingModel(int state)
  */
 void GL3DWidget::drawDisplayScene()
 {
-  	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Issue the rotation, translation and zooming of the trackball to the object
-	_trackball->IssueRotation();
-
-	glPushMatrix();
-	if(isKeyPressed){
-		glDisable(GL_LIGHTING);
-		scene->draw();
-		//scene->drawBoundingBox();
-	}
-	else
-	{
-		QApplication::setOverrideCursor(Qt::WaitCursor);
-		scene->draw();
-		glPointSize(3.0);
-		glBegin(GL_POINTS);
-		glVertex3d(0.0,0.0,0.0);
-		glEnd();
-		QApplication::restoreOverrideCursor();
-	}
-	glPopMatrix();
+  // Issue the rotation, translation and zooming of the trackball to the object
+  _trackball->IssueRotation();
+  
+  glPushMatrix();
+  if(isKeyPressed)
+  {
+    glDisable(GL_LIGHTING);
+    scene->draw();
+    //scene->drawBoundingBox();
+  }
+  else
+  {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    scene->draw();
+    glPointSize(3.0);
+    glBegin(GL_POINTS);
+    glVertex3d(0.0,0.0,0.0);
+    glEnd();
+      QApplication::restoreOverrideCursor();
+  }
+  glPopMatrix();
 }
 
 /**
@@ -176,16 +181,15 @@ void GL3DWidget::drawDisplayScene()
  */
 void GL3DWidget::drawPickingScene()
 {
-
-	glClearColor(0.0,0.0,0.0,1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// Issue the rotation, translation and zooming of the trackball to the object
-	_trackball->IssueRotation();
-	glPushMatrix();
-	drawSceneUsingColorID();
-	glPopMatrix();
+  glClearColor(0.0,0.0,0.0,1.0);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // Issue the rotation, translation and zooming of the trackball to the object
+  _trackball->IssueRotation();
+  glPushMatrix();
+  drawSceneUsingColorID();
+  glPopMatrix();
 }
 
 /**
@@ -193,15 +197,15 @@ void GL3DWidget::drawPickingScene()
  */
 void GL3DWidget::switchToPickingMode()
 {
-	drawDisplayScene();
-	glReadBuffer(GL_BACK);
-	mPickBox->setDisplayImage(grabFrameBuffer(false));
-    glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
-    glDisable(GL_NORMALIZE);
-    drawPickingScene();
-	mPickBox->setPickImage(grabFrameBuffer(false));
-    glEnable(GL_MULTISAMPLE);   //enable antialiasing
-	mPickingDraw=false;
+  drawDisplayScene();
+  glReadBuffer(GL_BACK);
+  mPickBox->setDisplayImage(grabFrameBuffer(false));
+  glDisable(GL_MULTISAMPLE);  //This will disable antialiasing which is build in by default for samplebuffers
+  glDisable(GL_NORMALIZE);
+  drawPickingScene();
+  mPickBox->setPickImage(grabFrameBuffer(false));
+  glEnable(GL_MULTISAMPLE);   //enable antialiasing
+  mPickingDraw=false;
 }
 
 /**
@@ -209,33 +213,36 @@ void GL3DWidget::switchToPickingMode()
  */
 void GL3DWidget::paintEvent(QPaintEvent *event)
 {
-	makeCurrent();
-	if(iInteractionMode == 1){
-		if(mPickingDraw==true)
-			switchToPickingMode();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		if(format().sampleBuffers())
-		{
-			QPainter painter(this);
-			painter.setRenderHint(QPainter::Antialiasing);
-			mPickBox->draw(&painter);
-			painter.end();
-		}
-		else
-		{
-			drawDisplayScene();
-			QPainter painter(this);
-			painter.setRenderHint(QPainter::Antialiasing);
-			mPickBox->drawPickBox(&painter);
-			painter.end();
-		}
-	}
-	else
-	{
-		drawDisplayScene();
-		QPainter painter(this);
-		painter.end();
-	}
+  makeCurrent();
+  if(iInteractionMode == GL3DWidget::PickMode)
+  {
+    if(mPickingDraw==true)
+    {
+      switchToPickingMode();
+    }
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(format().sampleBuffers())
+    {
+      QPainter painter(this);
+      painter.setRenderHint(QPainter::Antialiasing);
+      mPickBox->draw(&painter);
+      painter.end();
+    }
+    else
+    {
+      drawDisplayScene();
+      QPainter painter(this);
+      painter.setRenderHint(QPainter::Antialiasing);
+      mPickBox->drawPickBox(&painter);
+      painter.end();
+    }
+  }
+  else
+  {
+    drawDisplayScene();
+    QPainter painter(this);
+    painter.end();
+  }
 }
 
 /**
@@ -245,13 +252,13 @@ void GL3DWidget::paintEvent(QPaintEvent *event)
 void GL3DWidget::resizeGL(int width, int height)
 {
 
-	_viewport->resize(width,height);
-	_viewport->issueGL();
-
-	if(iInteractionMode==1) //This is when in picking mode and the window is resized so update the image
-	{
-		mPickingDraw=true;
-	}
+  _viewport->resize(width,height);
+  _viewport->issueGL();
+  
+  if( iInteractionMode == GL3DWidget::PickMode) //This is when in picking mode and the window is resized so update the image
+  {
+    mPickingDraw=true;
+  }
 }
 
 /**
@@ -264,33 +271,53 @@ void GL3DWidget::resizeGL(int width, int height)
  */
 void GL3DWidget::mousePressEvent(QMouseEvent* event)
 {
-	if(iInteractionMode==1 && (event->buttons() & Qt::LeftButton)) // Pick Mode
-	{
-		setCursor(Qt::CrossCursor);
-		mPickBox->mousePressEvent(event);
-		return;
-	} //end of pick mode and start of normal mode
-	if (event->buttons() & Qt::MidButton)
-	{
-		setCursor(Qt::SizeVerCursor);
-		_trackball->initZoomFrom(event->x(),event->y());
-		isKeyPressed=true;
-		setSceneLowResolution();
-	}
-	else if (event->buttons() & Qt::LeftButton)
-	{
-		setCursor(Qt::OpenHandCursor);
-		_trackball->initRotationFrom(event->x(),event->y());
-		isKeyPressed=true;
-		setSceneLowResolution();
-	}
-	else if(event->buttons() & Qt::RightButton)
-	{
-		setCursor(Qt::CrossCursor);
-		_trackball->initTranslateFrom(event->x(),event->y());
-		isKeyPressed=true;
-		setSceneLowResolution();
-	}
+  // Pick Mode
+  if( iInteractionMode == GL3DWidget::PickMode && (event->buttons() & Qt::LeftButton) )
+  { 
+    setCursor(Qt::CrossCursor);
+    mPickBox->mousePressed(event->buttons(), event->pos());
+    return;
+  } //end of pick mode and start of normal mode
+  
+  if (event->buttons() & Qt::MidButton)
+  {
+    setCursor(Qt::SizeVerCursor);
+    _trackball->initZoomFrom(event->x(),event->y());
+    isKeyPressed=true;
+    setSceneLowResolution();
+  }
+  else if (event->buttons() & Qt::LeftButton)
+  {
+    setCursor(Qt::OpenHandCursor);
+    _trackball->initRotationFrom(event->x(),event->y());
+    isKeyPressed=true;
+    setSceneLowResolution();
+  }
+  else if(event->buttons() & Qt::RightButton)
+  {
+    setCursor(Qt::CrossCursor);
+    _trackball->initTranslateFrom(event->x(),event->y());
+    isKeyPressed=true;
+    setSceneLowResolution();
+  }
+}
+
+/**
+ * Called when a custom context menu event is recieved
+ */
+void GL3DWidget::contextMenuEvent(QContextMenuEvent * event)
+{
+  if( iInteractionMode == GL3DWidget::PickMode )
+  {
+    mPickBox->mousePressed(Qt::RightButton, QCursor::pos());
+    mPickBox->mouseReleased(Qt::RightButton, QCursor::pos());
+    std::set<QRgb> result=mPickBox->getListOfColorsPicked();
+    if(!result.empty())
+    {
+      emit actorsPicked(result);
+    }
+
+  }
 }
 
 /**
@@ -304,31 +331,38 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
  */
 void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
-	if(iInteractionMode==1){
-		setCursor(Qt::CrossCursor);
-		QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
-		emit actorHighlighted(tmpColor);
-		mPickBox->mouseMoveEvent(event);
-		update();
-	}else{
-		if (event->buttons() & Qt::LeftButton)
-		{
-			setCursor(Qt::ClosedHandCursor);
-			_trackball->generateRotationTo(event->x(),event->y());
-			update();
-			_trackball->initRotationFrom(event->x(),event->y());
-		}else if(event->buttons() & Qt::RightButton){ //Translate
-			setCursor(Qt::CrossCursor);
-			_trackball->generateTranslationTo(event->x(),event->y());
-			update();
-			_trackball->initTranslateFrom(event->x(),event->y());
-		}else if(event->buttons() & Qt::MidButton){ //Zoom
-			setCursor(Qt::SizeVerCursor);
-			_trackball->generateZoomTo(event->x(),event->y());
-			update();
-			_trackball->initZoomFrom(event->x(),event->y());
-		}
-	}
+  if(iInteractionMode == GL3DWidget::PickMode)
+  {
+    setCursor(Qt::CrossCursor);
+    QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
+    emit actorHighlighted(tmpColor);
+    mPickBox->mouseMoveEvent(event);
+    update();
+  }
+  else
+  {
+    if (event->buttons() & Qt::LeftButton)
+    {
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->generateRotationTo(event->x(),event->y());
+      update();
+      _trackball->initRotationFrom(event->x(),event->y());
+    }
+    else if(event->buttons() & Qt::RightButton)
+    { //Translate
+      setCursor(Qt::CrossCursor);
+      _trackball->generateTranslationTo(event->x(),event->y());
+      update();
+      _trackball->initTranslateFrom(event->x(),event->y());
+    }
+    else if(event->buttons() & Qt::MidButton)
+    { //Zoom
+      setCursor(Qt::SizeVerCursor);
+      _trackball->generateZoomTo(event->x(),event->y());
+      update();
+      _trackball->initZoomFrom(event->x(),event->y());
+    }
+  }
 }
 
 /**
@@ -337,19 +371,19 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
  */
 void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 {
-	setCursor(Qt::PointingHandCursor);
-	isKeyPressed=false;
-	setSceneHighResolution();
-	if(iInteractionMode==1)
-	{
-		mPickBox->mouseReleaseEvent(event);
-		std::set<QRgb> result=mPickBox->getListOfColorsPicked();
-		if(!result.empty())
-		{
-		  emit actorsPicked(result);
-		}
-	}
-	update();
+  setCursor(Qt::PointingHandCursor);
+  isKeyPressed=false;
+  setSceneHighResolution();
+  if(iInteractionMode == GL3DWidget::PickMode)
+  {
+    mPickBox->mouseReleased(event->buttons(), event->pos());
+    std::set<QRgb> result=mPickBox->getListOfColorsPicked();
+    if(!result.empty())
+    {
+      emit actorsPicked(result);
+    }
+  }
+  update();
 }
 
 /**
@@ -358,11 +392,11 @@ void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
  */
 void GL3DWidget::wheelEvent(QWheelEvent* event)
 {
-	setCursor(Qt::SizeVerCursor);
-	_trackball->initZoomFrom(event->x(),event->y());
-	_trackball->generateZoomTo(event->x(),event->y()+event->delta());
-	update();
-	setCursor(Qt::PointingHandCursor);
+  setCursor(Qt::SizeVerCursor);
+  _trackball->initZoomFrom(event->x(),event->y());
+  _trackball->generateZoomTo(event->x(),event->y()+event->delta());
+  update();
+  setCursor(Qt::PointingHandCursor);
 }
 
 /**
@@ -371,118 +405,119 @@ void GL3DWidget::wheelEvent(QWheelEvent* event)
  */
 void GL3DWidget::keyPressEvent(QKeyEvent *event)
 {
-	grabKeyboard();
-	if(iInteractionMode==1) return; ///Ignore keyboard event when in pick mode
-	int width,height;
-	_viewport->getViewport(&width,&height);
-	int halfwidth=width/2;
-	int halfheight=height/2;
-	switch(event->key())
-	{
-		//-----------------------Translation-----------------
-	case Qt::Key_Left:
-		isKeyPressed=true;
-		setCursor(Qt::CrossCursor);
-		_trackball->initTranslateFrom(1,0);
-		_trackball->generateTranslationTo(0,0);
-		update();
-		break;
-	case Qt::Key_Right:
-		isKeyPressed=true;
-		setCursor(Qt::CrossCursor);
-		_trackball->initTranslateFrom(0,0);
-		_trackball->generateTranslationTo(1,0);
-		update();
-		break;
-	case Qt::Key_Up:
-		isKeyPressed=true;
-		setCursor(Qt::CrossCursor);
-		_trackball->initTranslateFrom(0,1);
-		_trackball->generateTranslationTo(0,0);
-		update();
-		break;
-	case Qt::Key_Down:
-		isKeyPressed=true;
-		setCursor(Qt::CrossCursor);
-		_trackball->initTranslateFrom(0,0);
-		_trackball->generateTranslationTo(0,1);
-		update();
-		break;
-		//--------------------End of Translation---------------
-		//--------------------Rotation-------------------------
-	case Qt::Key_1:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth-1,halfheight+1);
-		update();
-		break;
-	case Qt::Key_2:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth,halfheight+1);
-		update();
-		break;
-	case Qt::Key_3:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth+1,halfheight+1);
-		update();
-		break;
-	case Qt::Key_4:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth-1,halfheight);
-		update();
-		break;
-	case Qt::Key_6:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth+1,halfheight);
-		update();
-		break;
-	case Qt::Key_7:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth-1,halfheight-1);
-		update();
-		break;
-	case Qt::Key_8:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth,halfheight-1);
-		update();
-		break;
-	case Qt::Key_9:
-		isKeyPressed=true;
-		setCursor(Qt::ClosedHandCursor);
-		_trackball->initRotationFrom(halfwidth,halfheight);
-		_trackball->generateRotationTo(halfwidth+1,halfheight-1);
-		update();
-		break;
-		//---------------------------------End of Rotation--------------
-		//---------------------------------Zoom-------------------------
-	case Qt::Key_PageUp:
-		isKeyPressed=true;
-		setCursor(Qt::SizeVerCursor);
-		_trackball->initZoomFrom(halfwidth,halfheight);
-		_trackball->generateZoomTo(halfwidth,halfheight-1);
-		update();
-		break;
-	case Qt::Key_PageDown:
-		isKeyPressed=true;
-		setCursor(Qt::SizeVerCursor);
-		_trackball->initZoomFrom(halfwidth,halfheight);
-		_trackball->generateZoomTo(halfwidth,halfheight+1);
-		update();
-		break;
-	}
+  grabKeyboard();
+  // Ignore keyboard event when in pick mode
+  if( iInteractionMode== GL3DWidget::PickMode) return; 
+  int width,height;
+  _viewport->getViewport(&width,&height);
+  int halfwidth=width/2;
+  int halfheight=height/2;
+  switch(event->key())
+    {
+      //-----------------------Translation-----------------
+    case Qt::Key_Left:
+      isKeyPressed=true;
+      setCursor(Qt::CrossCursor);
+      _trackball->initTranslateFrom(1,0);
+      _trackball->generateTranslationTo(0,0);
+      update();
+      break;
+    case Qt::Key_Right:
+      isKeyPressed=true;
+      setCursor(Qt::CrossCursor);
+      _trackball->initTranslateFrom(0,0);
+      _trackball->generateTranslationTo(1,0);
+      update();
+      break;
+    case Qt::Key_Up:
+      isKeyPressed=true;
+      setCursor(Qt::CrossCursor);
+      _trackball->initTranslateFrom(0,1);
+      _trackball->generateTranslationTo(0,0);
+      update();
+      break;
+    case Qt::Key_Down:
+      isKeyPressed=true;
+      setCursor(Qt::CrossCursor);
+      _trackball->initTranslateFrom(0,0);
+      _trackball->generateTranslationTo(0,1);
+      update();
+      break;
+      //--------------------End of Translation---------------
+      //--------------------Rotation-------------------------
+    case Qt::Key_1:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth-1,halfheight+1);
+      update();
+      break;
+    case Qt::Key_2:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth,halfheight+1);
+      update();
+      break;
+    case Qt::Key_3:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth+1,halfheight+1);
+      update();
+      break;
+    case Qt::Key_4:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth-1,halfheight);
+      update();
+      break;
+    case Qt::Key_6:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth+1,halfheight);
+      update();
+      break;
+    case Qt::Key_7:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth-1,halfheight-1);
+      update();
+      break;
+    case Qt::Key_8:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth,halfheight-1);
+      update();
+      break;
+    case Qt::Key_9:
+      isKeyPressed=true;
+      setCursor(Qt::ClosedHandCursor);
+      _trackball->initRotationFrom(halfwidth,halfheight);
+      _trackball->generateRotationTo(halfwidth+1,halfheight-1);
+      update();
+      break;
+      //---------------------------------End of Rotation--------------
+      //---------------------------------Zoom-------------------------
+    case Qt::Key_PageUp:
+      isKeyPressed=true;
+      setCursor(Qt::SizeVerCursor);
+      _trackball->initZoomFrom(halfwidth,halfheight);
+      _trackball->generateZoomTo(halfwidth,halfheight-1);
+      update();
+      break;
+    case Qt::Key_PageDown:
+      isKeyPressed=true;
+      setCursor(Qt::SizeVerCursor);
+      _trackball->initZoomFrom(halfwidth,halfheight);
+      _trackball->generateZoomTo(halfwidth,halfheight+1);
+      update();
+      break;
+    }
 }
 
 /**
@@ -491,11 +526,11 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
  */
 void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
 {
-	releaseKeyboard();
-	setCursor(Qt::PointingHandCursor);
-	isKeyPressed=false;
-	if(!event->isAutoRepeat())
-		update();
+  releaseKeyboard();
+  setCursor(Qt::PointingHandCursor);
+  isKeyPressed=false;
+  if(!event->isAutoRepeat())
+    update();
 }
 /**
  * This method sets the collection of actors that widget needs to display
@@ -503,11 +538,11 @@ void GL3DWidget::keyReleaseEvent(QKeyEvent *event)
  */
 void GL3DWidget::setActorCollection(boost::shared_ptr<GLActorCollection> col)
 {
-	scene=col;
-	int width,height;
-	_viewport->getViewport(&width,&height);
-	resizeGL(width,height);
-	update();
+  scene=col;
+  int width,height;
+  _viewport->getViewport(&width,&height);
+  resizeGL(width,height);
+  update();
 }
 
 /**
@@ -523,47 +558,47 @@ void GL3DWidget::MakeObject()
  */
 void GL3DWidget::setViewDirection(AxisDirection dir)
 {
-	Mantid::Geometry::V3D minPoint,maxPoint;
-	//	double minValue,maxValue,_bbmin[3],_bbmax[3];
-	double _bbmin[3],_bbmax[3];
-	getBoundingBox(minPoint,maxPoint);
-	Mantid::Geometry::V3D centre=(maxPoint+minPoint)/2.0;
-	defaultProjection();
-	_viewport->getProjection(_bbmin[0],_bbmax[0],_bbmin[1],_bbmax[1],_bbmin[2],_bbmax[2]);
-	switch(dir)
-	{
-	case XPOSITIVE:
-		_trackball->setViewToXPositive();
-		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
-		break;
-	case YPOSITIVE:
-		_trackball->setViewToYPositive();
-		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
-		break;
-	case ZPOSITIVE:
-		_trackball->setViewToZPositive();
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
-		break;
-	case XNEGATIVE:
-		_trackball->setViewToXNegative();
-		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
-		break;
-	case YNEGATIVE:
-		_trackball->setViewToYNegative();
-		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
-		break;
-	case ZNEGATIVE:
-		_trackball->setViewToZNegative();
-		_trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
-		_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
-		break;
-	}
-	_viewport->issueGL();
-	update();
+  Mantid::Geometry::V3D minPoint,maxPoint;
+  double _bbmin[3],_bbmax[3];
+  getBoundingBox(minPoint,maxPoint);
+  Mantid::Geometry::V3D centre=(maxPoint+minPoint)/2.0;
+  defaultProjection();
+  _viewport->getProjection(_bbmin[0],_bbmax[0],_bbmin[1],_bbmax[1],_bbmin[2],_bbmax[2]);
+  switch(dir)
+  {
+  case XPOSITIVE:
+    _trackball->setViewToXPositive();
+    _trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+    _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+    break;
+  case YPOSITIVE:
+    _trackball->setViewToYPositive();
+    _trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+    _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+    break;
+  case ZPOSITIVE:
+    _trackball->setViewToZPositive();
+    _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+    break;
+  case XNEGATIVE:
+    _trackball->setViewToXNegative();
+    _trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+    _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+    break;
+  case YNEGATIVE:
+    _trackball->setViewToYNegative();
+    _trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+    _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+    break;
+  case ZNEGATIVE:
+    _trackball->setViewToZNegative();
+    _trackball->rotateBoundingBox(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minPoint[2],maxPoint[2]);
+    _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],_bbmin[2],_bbmax[2]);
+    break;
+  }
+  
+  _viewport->issueGL();
+  update();
 }
 
 /**
@@ -571,39 +606,39 @@ void GL3DWidget::setViewDirection(AxisDirection dir)
  */
 void GL3DWidget::defaultProjection()
 {
-	// Getting the bounding box of the scene and setting the orthagonal projection
-	// such that the orthogonal projection places the object completly in the screen
-	// Its a simplified version of placing the object completly in screen with same
-	// min and max values in all directions.
-	Mantid::Geometry::V3D minPoint,maxPoint;
-	getBoundingBox(minPoint,maxPoint);
-	if(minPoint[0]==DBL_MAX||minPoint[1]==DBL_MAX||minPoint[2]==DBL_MAX||maxPoint[0]==-DBL_MAX||maxPoint[1]==-DBL_MAX||maxPoint[2]==-DBL_MAX)
-	{
-		minPoint=Mantid::Geometry::V3D(-1.0,-1.0,-1.0);
-		maxPoint=Mantid::Geometry::V3D( 1.0, 1.0, 1.0);
-	}
-	double minValue,maxValue;
-	minValue=minPoint[0];
-	if(minValue>minPoint[1])minValue=minPoint[1];
-	if(minValue>minPoint[2])minValue=minPoint[2];
-	maxValue=maxPoint[0];
-	if(maxValue<maxPoint[1])maxValue=maxPoint[1];
-	if(maxValue<maxPoint[2])maxValue=maxPoint[2];
-	if(minValue>maxValue)
-	{
-		double tmp;
-		tmp=maxValue;
-		maxValue=minValue;
-		minValue=maxValue;
-	}
-	double temp=minValue-fabs(maxValue-minValue);
-	maxValue=maxValue+fabs(maxValue-minValue);
-	minValue=temp;
-
-	_viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*-1,maxValue*-1);
-	Mantid::Geometry::V3D center;
-	center=(minPoint+maxPoint)/2.0;
-	_viewport->issueGL();
+  // Getting the bounding box of the scene and setting the orthagonal projection
+  // such that the orthogonal projection places the object completly in the screen
+  // Its a simplified version of placing the object completly in screen with same
+  // min and max values in all directions.
+  Mantid::Geometry::V3D minPoint,maxPoint;
+  getBoundingBox(minPoint,maxPoint);
+  if(minPoint[0]==DBL_MAX||minPoint[1]==DBL_MAX||minPoint[2]==DBL_MAX||maxPoint[0]==-DBL_MAX||maxPoint[1]==-DBL_MAX||maxPoint[2]==-DBL_MAX)
+  {
+    minPoint=Mantid::Geometry::V3D(-1.0,-1.0,-1.0);
+    maxPoint=Mantid::Geometry::V3D( 1.0, 1.0, 1.0);
+  }
+  double minValue,maxValue;
+  minValue=minPoint[0];
+  if(minValue>minPoint[1])minValue=minPoint[1];
+  if(minValue>minPoint[2])minValue=minPoint[2];
+  maxValue=maxPoint[0];
+  if(maxValue<maxPoint[1])maxValue=maxPoint[1];
+  if(maxValue<maxPoint[2])maxValue=maxPoint[2];
+  if(minValue>maxValue)
+  {
+    double tmp;
+    tmp=maxValue;
+    maxValue=minValue;
+    minValue=maxValue;
+  }
+  double temp=minValue-fabs(maxValue-minValue);
+  maxValue=maxValue+fabs(maxValue-minValue);
+  minValue=temp;
+  
+  _viewport->setOrtho(minPoint[0],maxPoint[0],minPoint[1],maxPoint[1],minValue*-1,maxValue*-1);
+  Mantid::Geometry::V3D center;
+  center=(minPoint+maxPoint)/2.0;
+  _viewport->issueGL();
 }
 
 /**

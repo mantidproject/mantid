@@ -570,6 +570,7 @@ SOURCES  += src/ApplicationWindow.cpp \
 	    src/Mantid/PeakPickerTool.cpp \
 	    src/Mantid/PeakFitDialog.cpp \
 	    src/Mantid/MantidCurve.cpp \
+            src/Mantid/WorkspaceObserver.cpp \
 	    src/Mantid/UserFitFunctionDialog.cpp \
 	    src/Mantid/FitPropertyBrowser.cpp \
 	    src/Mantid/IFunctionWrapper.cpp \
