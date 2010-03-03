@@ -35,10 +35,9 @@ try:
   #--sum all the workspaces, when the workspaces are not summed single input files are specified in this file and the final Python script is made of many copies of this file
   if len(input) > 1:
     for toAdd in input[ 1 : ] :
-      toSum = common.LoadNexRaw(toAdd, conv.tempWS)          #save the memory by overwriting old workspaces
-      LoadDetectorInfo(toSum, toAdd)
       #throughout this script wark spaces are overwritten to save memory
-      Plus(pInOut, toSum, pInOut)
+      common.LoadNexRaw(toAdd, conv.tempWS)
+      Plus(pInOut, conv.tempWS, pInOut)
     mantid.deleteWorkspace(conv.tempWS)
   
   if |RM_BG| == 'yes':
@@ -66,7 +65,7 @@ try:
   if mapFile != '':
     GroupDetectors( pInOut, pInOut, mapFile, KeepUngroupedSpectra=0)
   
-  # miltiple by the user defined arbitary scaling factor, used because some plotting applications prefer numbers close to 1
+  # multiply by the user defined arbitary scaling factor, used because some plotting applications prefer numbers close to 1
   if |GUI_SET_SCALING| != 1:
     CreateSingleValuedWorkspace(conv.tempWS, |GUI_SET_SCALING|)
     Multiply(pInOut, conv.tempWS, pInOut)
@@ -74,10 +73,9 @@ try:
 
   ConvertToDistribution(pInOut)
 
-  #replaces inifinities and error values with large numbers. Infinity values can be normally be fixed passing good energy values to ConvertUnits
+  #replaces inifinities and error values with large numbers. Infinity values can be normally be avoided passing good energy values to ConvertUnits
   ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
 
-  #masking bad detectors is done here, at the end to save processing time. But if |MASK_WORKSPACE| is an empty string there is no masking
   conv.NormaliseToWhiteBeamAndLoadMask(|GUI_SET_WBV|, pInOut, mapFile, |GUI_SET_WBV_REBIN|, DetectorMask)
    
   # output to a file in ASCII
