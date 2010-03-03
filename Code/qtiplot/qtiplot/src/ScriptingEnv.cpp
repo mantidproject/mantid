@@ -120,7 +120,6 @@ void ScriptingEnv::setCodeLexer(QsciLexer* lexer)
   {
     m_completer = new QsciAPIs(m_lexer);
     connect(m_completer,SIGNAL(apiPreparationStarted()), this, SLOT(apiPrepStarted()));
-    connect(m_completer,SIGNAL(apiPreparationCancelled()), this, SLOT(apiPrepCancelled()));
     connect(m_completer,SIGNAL(apiPreparationFinished()), this, SLOT(apiPrepDone()));
   }
 }
@@ -130,11 +129,7 @@ void ScriptingEnv::updateCodeCompletion(const QString & fname, bool prepare)
   if( m_completer->load(fname) && prepare) 
   {
     // This is performed in a separate thread as it can take a while
-    if( m_api_preparing )
-    {
-      m_completer->cancelPreparation();
-    }
-    else
+    if( !m_api_preparing )
     {
       m_completer->prepare();
     }
@@ -145,13 +140,6 @@ void ScriptingEnv::updateCodeCompletion(const QString & fname, bool prepare)
 void ScriptingEnv::apiPrepStarted()
 {
   m_api_preparing = true;
-}
-
-// Slot to handle a cancelled signal from the api auto-complete preparation
-void ScriptingEnv::apiPrepCancelled()
-{
-  m_api_preparing = false;
-  m_completer->prepare();
 }
 
 // Slot to handle the completed signal from the api auto complete preparation
