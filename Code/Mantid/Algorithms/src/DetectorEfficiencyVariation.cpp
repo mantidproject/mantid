@@ -47,7 +47,7 @@ void DetectorEfficiencyVariation::init()
   BoundedValidator<double> *moreThanZero = new BoundedValidator<double>();
   // Variation can't be zero as we take its reciprocal, so I've set the minimum to something below which double precession arithmetic might start to fail
   moreThanZero->setLower(1e-280);
-  declareProperty("Variation", -1.0, moreThanZero,
+  declareProperty("Variation", 1.1, moreThanZero,
     "Identify spectra whose total number of counts has changed by more\n"
     "than this factor of the median change between the two input workspaces" );
   BoundedValidator<int> *mustBePosInt = new BoundedValidator<int>();
@@ -77,7 +77,7 @@ void DetectorEfficiencyVariation::init()
   declareProperty("BadValue", 100.0,
     "For each input workspace spectrum that fails write this flag value\n"
     "to the equivalent spectrum in the output workspace (default 100.0)" );
-  declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
+  declareProperty("BadSpectraNums",std::vector<int>(),Direction::Output);
 }
 
 /** Executes the algorithm that includes calls to SolidAngle and Integration
@@ -109,13 +109,11 @@ void DetectorEfficiencyVariation::exec()
   double av = getMedian(frac);
   
   // information on bad spectra will be writen to counts1 by this function, it looks for spectra whose number of counts differ in the two workspaces by more than frac
-  std::vector<int> outArray =
-    findBad( counts1, counts2, av, vari, getProperty("OutputFile") );
+  setProperty("BadSpectraNums",
+    findBad( counts1, counts2, av, vari, getProperty("OutputFile") ) );
 
   // counts1 was overwriten by the last function, now register it with the Analysis Data Service so that users can see it
   setProperty("OutputWorkspace", counts1);
-  // make the output array visible to the user too
-  setProperty("BadDetectorIDs", outArray);
 }
 /** Loads, checks and passes back the values passed to the algorithm
 * @param whiteBeam1 A white beam vanadium spectrum that will be used to check detector efficiency variations
@@ -372,8 +370,6 @@ std::vector<int> DetectorEfficiencyVariation::findBad(
     }
   }
 
-  // the output array doesn't list missingDataIndices because the array is used for masking detectors and informing users of the numbers of faulty instruments. A log is produced below at warning
-  createOutputArray(badSpecs, a->spectraMap(), badDets);
   // a record is kept in the output file, however
   writeFile(fileName, badSpecs, missingDataIndices, a->getAxis(1));
 
@@ -384,24 +380,7 @@ std::vector<int> DetectorEfficiencyVariation::findBad(
   //finish off setting up the output workspace, it should have no units
   a->isDistribution(false);
   a->setYUnit("");
-  return badDets;
-}
-/** Create an array of detector IDs from the two arrays of spectra numbers that were passed to it
-*  @param badList a list of spectra numbers that will be writen to file
-*  @param detMap the map that contains the list of detectors associated with each spectrum
-*  @param total output property, the array of detector IDs
-*/
-void DetectorEfficiencyVariation::createOutputArray(const std::vector<int> &badList, const SpectraDetectorMap& detMap, std::vector<int> &total) const
-{
-  // this assumes that each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors may be we should increse this
-  total.reserve(badList.size());
-
-  for ( std::vector<int>::size_type i = 0; i < badList.size(); ++i )
-  {
-    std::vector<int> tStore = detMap.getDetectors(badList[i]);
-    total.resize(total.size()+tStore.size());
-    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
-  }
+  return badSpecs;
 }
 /** Write a mask file which lists bad spectra in groups saying what the problem is. The file
 * is human readable

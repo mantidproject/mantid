@@ -187,7 +187,7 @@ public:
         double correct = ( YIn[i] - background ) > 0 ? YIn[i]-background : 0;
         TS_ASSERT_EQUALS( YOut[i], correct )
 
-        if ( YIn[i] - background < 0 )
+        if ( YIn[i] - background < 0 && EIn[i] < background )
         {
           TS_ASSERT_EQUALS(EOut[i], background)
         }

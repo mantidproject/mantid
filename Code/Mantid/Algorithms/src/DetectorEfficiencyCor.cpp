@@ -112,7 +112,7 @@ void DetectorEfficiencyCor::exec()
   std::vector<int> unsetParams;
 
   int numHists = m_inputWS->getNumberHistograms();
-  const int progStep = static_cast<int>(ceil(numHists/30.0));
+  const int progStep = static_cast<int>(ceil(numHists/100.0));
   for (int i = 0; i < numHists; ++i )
   {
     try

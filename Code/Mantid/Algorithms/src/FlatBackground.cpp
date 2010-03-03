@@ -125,14 +125,16 @@ void FlatBackground::exec()
       }
       // Get references to the current spectrum
       MantidVec &Y = outputWS->dataY(currentSpec);
-      // Now subtract the background from the data. Make sure it doesn't lead to negative values.
+      // Now subtract the background from the data
       for (int j=0; j < blocksize; ++j)
       {
         Y[j] -= background;
+        //remove negative values
         if (Y[j] < 0.0)
         {
           Y[j]=0;
-          E[j]=background;
+          // The error estimate must go up in this nonideal situation and the value of background is a good estimate for it. However, don't reduce the error if it was already more than that
+          E[j] = E[j]>background ? E[j] : background;
         }
       }
     }

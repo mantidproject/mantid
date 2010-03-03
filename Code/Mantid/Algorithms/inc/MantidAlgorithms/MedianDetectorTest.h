@@ -120,7 +120,6 @@ namespace Mantid
       double getMedian(MatrixWorkspace_const_sptr input) const;
       /// Produces a workspace of single value histograms that indicate if the spectrum is within limits
       void FindDetects(MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename);
-      void createOutputArray(const std::vector<int> &lows, const std::vector<int> &highs, const SpectraDetectorMap &detMap, std::vector<int> &total) const;
       void writeFile(const std::string &fname, const std::vector<int> &lowList, const std::vector<int> &highList, const std::vector<int> &notFound);
       void logFinds(std::vector<int>::size_type missing, std::vector<int>::size_type low, std::vector<int>::size_type high, int alreadyMasked);
 

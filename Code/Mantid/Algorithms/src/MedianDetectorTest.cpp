@@ -77,7 +77,7 @@ void MedianDetectorTest::init()
     "For each input workspace spectrum that fails write this flag value\n"
     "to the equivalent spectrum in the output workspace (default 100.0)" );
       // This output property will contain the list of UDETs for the dead detectors
-  declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
+  declareProperty("BadSpectraNums",std::vector<int>(),Direction::Output);
 }
 /** Executes the algorithm that includes calls to SolidAngle and Integration
 *
@@ -109,12 +109,12 @@ void MedianDetectorTest::exec()
   const std::string outFile = getPropertyValue("outputfile");
   std::vector<int> deadList;
   // Find report and mask any detectors whoses signals are outside the threshold range
-  FindDetects(counts,av,deadList, outFile);// function reads the properties ErrorThreshold, lower and upper thresholds
+  FindDetects(counts, av, deadList, outFile);// function reads the properties ErrorThreshold, lower and upper thresholds
 
   // Now the calculation is complete, setting the output property to the workspace will register it in the Analysis Data Service and allow the user to see it
   setProperty("OutputWorkspace", counts);
 
-  setProperty("BadDetectorIDs", deadList);
+  setProperty("BadSpectraNums", deadList);
 }
 /** Loads and checks the values passed to the algorithm
 *
@@ -386,11 +386,11 @@ double MedianDetectorTest::getMedian(MatrixWorkspace_const_sptr input) const
 *
 * @param responses a workspace of histograms with one bin
 * @param baseNum The number expected number of counts, spectra near to this number of counts won't fail
-* @param badDets the ID numbers of all the detectors that were found bad will be added to the end of this array
+* @param specNums must be empty(), the ID numbers of all the detectors that were found bad are inserted into this array
 * @param filename write the list of spectra numbers for failed detectors to a file with this name
 * @return An array that of the index numbers of the histograms that fail
 */
-void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &badDets, const std::string &filename)
+void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const double baseNum, std::vector<int> &specNums, const std::string &filename)
 {
   g_log.information("Applying the criteria to find failing detectors");
   
@@ -402,7 +402,9 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
   double minNumStandDevs = getProperty("SignificanceTest");
 
   //an array that will store the spectra indexes related to bad detectors
-  std::vector<int> lows, highs, missingDataIndices;
+  std::vector<int> highs, missingDataIndices;
+  // reuse an vector, just to save memory and CPU time
+  std::vector<int> &lows = specNums;
   // get ready to write to the log the number of bad detectors found
   int cAlreadyMasked = 0;
 
@@ -466,37 +468,12 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
     }
   }
 
-  // the output array doesn't list missingDataIndices because the array is used for masking detectors and informing users of the numbers of faulty instruments. A log is produced below at warning
-  createOutputArray(lows, highs, responses->spectraMap(), badDets);
-  // arecord is kept in the output file, however
+  // a record is kept in the output file, however.
   writeFile(filename, lows, highs, missingDataIndices);
   logFinds(missingDataIndices.size(), lows.size(), highs.size(), cAlreadyMasked);
-}
-/** Create an array of detector IDs from the two arrays of spectra numbers that were passed to it
-*  @param lows a list of spectra numbers
-*  @param highs another list of spectra numbers
-*  @param detMap the map that contains the list of detectors associated with each spectrum
-*  @param total output property, the array of detector IDs
-*/
-void MedianDetectorTest::createOutputArray(const std::vector<int> &lows, const std::vector<int> &highs, const SpectraDetectorMap& detMap, std::vector<int> &total) const
-{
-  // works best when each spectrum has only one detector, MERLIN has 4 if there are lots of dead detectors maybe we should improve this
-  total.reserve(lows.size()+highs.size());
-
-  std::vector<int>::const_iterator lowIt = lows.begin(), highIt=highs.begin();
-  for(std::vector<int>::const_iterator endl = lows.end();lowIt != endl;++lowIt)
-  {
-    std::vector<int> tStore = detMap.getDetectors(*lowIt);
-    total.resize(total.size()+tStore.size());
-    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
-  }
-
-  for(std::vector<int>::const_iterator end = highs.end();highIt !=end;++highIt)
-  {
-    std::vector<int> tStore = detMap.getDetectors(*highIt);
-    total.resize(total.size()+tStore.size());
-    copy( tStore.begin(), tStore.end(), total.end()-tStore.size() );
-  }
+  // the output array doesn't list missingDataIndices because the array is used for masking detectors and informing users of the numbers of faulty instruments. A log wanring was produced above
+  //lows = specNums
+  specNums.insert(lows.end(), highs.begin(), highs.end());
 }
 /** Write a mask file which lists bad spectra in groups saying what the problem is. The file
 * is human readable

@@ -50,7 +50,7 @@ void FindDetectorsOutsideLimits::init()
     "The name of a file to write the list spectra that have a bad detector\n"
     "(default no file output)");
     // This output property will contain the list of UDETs for the dead detectors
-  declareProperty("BadDetectorIDs",std::vector<int>(),Direction::Output);
+  declareProperty("BadSpectraNums",std::vector<int>(),Direction::Output);
 }
 
 /** Executes the algorithm
@@ -80,7 +80,7 @@ void FindDetectorsOutsideLimits::exec()
 
   g_log.debug() << "Finding dead detectors" << std::endl;
   // store the IDs of the spectra and detectors that fail
-  std::vector<int> lows, highs, deadDets;
+  std::vector<int> lows, highs;
 
   // iterate over the data values setting the live and dead values
   const int numSpec = integratedWorkspace->getNumberHistograms();
@@ -110,7 +110,6 @@ void FindDetectorsOutsideLimits::exec()
     yInputOutput = liveValue;
   }
 
-  createOutputArray(lows, highs, integratedWorkspace->spectraMap(), deadDets);
   writeFile(getPropertyValue("OutputFile"), lows, highs);
 
   g_log.information() << "Found a total of " << lows.size()+highs.size() << " failing "
@@ -119,7 +118,10 @@ void FindDetectorsOutsideLimits::exec()
   
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", integratedWorkspace);
-  setProperty("BadDetectorIDs", deadDets);
+  
+  //sum the highs and the lows
+  lows.insert(lows.end(), highs.begin(), highs.end());
+  setProperty("BadSpectraNums", lows);
 }
 
 /** Run Integration as a sub-algorithm

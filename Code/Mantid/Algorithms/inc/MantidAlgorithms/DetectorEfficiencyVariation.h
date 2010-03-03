@@ -90,7 +90,6 @@ namespace Mantid
       double getMedian(API::MatrixWorkspace_const_sptr input) const;
       /// Overwrites the first workspace with bad spectrum information, also outputs an array and a file
       std::vector<int> findBad(API::MatrixWorkspace_sptr a, API::MatrixWorkspace_const_sptr b, const double average, double variation, const std::string &fileName);
-      void createOutputArray(const std::vector<int> &badList, const API::SpectraDetectorMap& detMap, std::vector<int> &total) const;
       void writeFile(const std::string &fname, const std::vector<int> &badList, const std::vector<int> &problemIndices, const API::Axis * const SpecNums);
 
       /// the number of numbers on each line of the output file

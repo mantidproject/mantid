@@ -51,7 +51,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     std::vector<int> OArray;
-    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty( "BadDetectorIDs" ) )
+    TS_ASSERT_THROWS_NOTHING( OArray = alg.getProperty("BadSpectraNums") )
     // Get back the saved workspace
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("MedianDetectorTestOutput"));
@@ -286,7 +286,7 @@ private:
   Workspace2D_sptr m_2DWS;
   double m_YSum;
   enum spectraIndexConsts{ THEMASKED = 40, SAVEDBYERRORBAR = 143, Nhist = 144 };
-  //these values must match the values in DetectorEfficiencyVariation.h
+  //these values must match the values in MedianDetectorTest.h
   const double BadVal;
   const double GoodVal;
 
