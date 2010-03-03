@@ -184,17 +184,24 @@ void LoadInstrument::exec()
   {
     Element* pParameterElem = static_cast<Element*>(pNL_parameter->item(i));
     hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
+    Element* crap = static_cast<Element*>(pParameterElem->parentNode());
+    //std::cout << "Name " << crap->getAttribute("name") << std::endl;
   }
   pNL_parameter->release();
 
 
   // Get reference to Instrument and set its name
   m_instrument = localWorkspace->getBaseInstrument();
-  // We don't want the name taken out of the file itself, it should be the stem of the filename
-  //if ( pRootElem->hasAttribute("name") ) m_instrument->setName( pRootElem->getAttribute("name") );
+  // We don't want the name taken out of the XML file itself, it should come from the filename
   // Strip off "_Definition.xml"
   const size_t underScore = instrumentFile.find_first_of("_");
   m_instrument->setName( instrumentFile.substr(0,underScore) );
+
+
+  // See if any parameters set at instrument level
+
+  setLogfile(m_instrument.get(), pRootElem);
+
 
   // do analysis for each top level compoment element
   NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes

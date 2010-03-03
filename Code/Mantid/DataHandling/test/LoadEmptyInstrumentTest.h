@@ -110,6 +110,11 @@ public:
     TS_ASSERT( fitParam.getTie().compare("") == 0 );
     TS_ASSERT( fitParam.getFunction().compare("somefunction") == 0 );
 
+    param = paramMap.getRecursive(&(*det), "toplevel", "fitting");
+    const FitParameter& fitParam1 = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam1.getValue(), 100.0, 0.0001);
+    TS_ASSERT( fitParam1.getTie().compare("") == 0 );
+    TS_ASSERT( fitParam1.getFunction().compare("somefunction") == 0 );
 
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
