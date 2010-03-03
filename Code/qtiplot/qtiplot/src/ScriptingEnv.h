@@ -110,8 +110,6 @@ class ScriptingEnv : public QObject
 
     /// Slot to handle the started signal from the api auto complete preparation
     void apiPrepStarted();
-    /// Slot to handle a cancelled signal from the api auto-complete preparation
-    void apiPrepCancelled();
     /// Slot to handle the completed signal from the api auto complete preparation
     void apiPrepDone();
 
