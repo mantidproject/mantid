@@ -176,6 +176,12 @@ private:
   void closeTabAtPosition(const QPoint & pos);
   ///Does the actual saving of a file
   void doSave(ScriptEditor * editor);
+  ///Set auto complete behaviour for the given editor
+  void setCodeCompletionBehaviour(ScriptEditor *editor, bool state);
+  ///Set auto complete behaviour for the given editor
+  void setCallTipsBehaviour(ScriptEditor *editor, bool state);
+  ///Set auto complete behaviour for the given editor
+  void setCodeFoldingBehaviour(ScriptEditor *editor, bool state);
 
  private:
   /// So that the window can access the actions that are relevant

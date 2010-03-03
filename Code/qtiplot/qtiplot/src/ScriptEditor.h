@@ -164,10 +164,13 @@ signals:
   void executeLine(const QString&);
 
 private:
-  /// Disable window editing keys when we are in interpreter mode
-  void remapWindowEditingKeys();
   ///Execute the code at a given line
   void executeCodeAtLine(int line);
+  /// Disable window editing keys when we are in interpreter mode
+  void remapWindowEditingKeys();
+  /// Forward a KeyPress event to QsciScintilla base class. Necessary due to bug in QsciScintilla
+  void forwardKeyPressToBase(QKeyEvent *event);
+  
   /// The file name associated with this editor
   QString m_filename;
 

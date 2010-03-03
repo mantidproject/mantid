@@ -250,9 +250,12 @@ void ScriptEditor::setText(int lineno, const QString& txt)
  */
 void ScriptEditor::keyPressEvent(QKeyEvent* event)
 {
+  bool handled(false);
+
   if( !m_interpreter_mode || isListActive() )
   {
-    return QsciScintilla::keyPressEvent(event);
+    forwardKeyPressToBase(event);
+    return;
   }
    // Check if we have flagged to mark the line as read only
   if( m_read_only ) return;
@@ -262,7 +265,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
   if( key == Qt::Key_Return || key == Qt::Key_Enter )
   {
     executeCodeAtLine(last_line);
-    return;
+    handled = true;
   }
   else if( key == Qt::Key_Up )
   {
@@ -271,7 +274,7 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
       QString cmd = m_history.getPrevious();
       setText(last_line, cmd);
     }
-    return;
+    handled = true;
   }
   else if( key == Qt::Key_Down )
   {
@@ -280,20 +283,23 @@ void ScriptEditor::keyPressEvent(QKeyEvent* event)
       QString cmd = m_history.getNext();
       setText(last_line, cmd);
     }
-    return;
+    handled = true;
   }
   //At the start of a line we don't want to go back to the previous
   else if( key == Qt::Key_Left || key == Qt::Key_Backspace )
   {
     int index(-1), dummy(-1);
     getCursorPosition(&dummy, &index);
-    if( index == 0 ) return;
+    if( index == 0 ) handled = true;
   }
   else
   {
-    return QsciScintilla::keyPressEvent(event);
   }
-  return QsciScintilla::keyPressEvent(event);
+  
+  if( handled ) return;
+  
+  forwardKeyPressToBase(event);
+  return;
 }
 
 /**
@@ -513,4 +519,42 @@ void ScriptEditor::remapWindowEditingKeys()
   keyDef = 'V' + (SCMOD_CTRL << 16);
   SendScintilla(SCI_CLEARCMDKEY, keyDef);
   
+}
+
+/**
+ * Forward the QKeyEvent to the QsciScintilla base class. 
+ * Under Gnome on Linux with Qscintilla versions < 2.4.2 there is a bug with the autocomplete
+ * box that means the editor loses focus as soon as it the box appears. This functions
+ * forwards the call and sets the correct flags on the resulting window so that this does not occur
+ */
+void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
+{
+  // Handle event
+  QsciScintilla::keyPressEvent(event);
+  
+  // Only need to do this for Unix and for QScintilla version < 2.4.2. Moreover, only Gnome but I don't think we can detect that
+#ifdef Q_OS_LINUX
+#if QSCINTILLA_VERSION < 0x020402
+  // If an autocomplete box has surfaced, correct the window flags. Unfortunately the only way to 
+  // do this is to search through the child objects.
+  if( isListActive() )
+  {
+    QObjectList children = this->children();
+    QListIterator<QObject*> itr(children);
+    // Search is performed in reverse order as we want the last one created
+    itr.toBack();
+    while( itr.hasPrevious() )
+    {
+      QObject *child = itr.previous();
+      if( child->inherits("QListWidget") )
+      {
+	QWidget *w = qobject_cast<QWidget*>(child);
+	w->setWindowFlags(Qt::ToolTip|Qt::WindowStaysOnTopHint);
+	w->show();
+	break;
+      }
+    }
+  }  
+  #endif
+#endif
 }

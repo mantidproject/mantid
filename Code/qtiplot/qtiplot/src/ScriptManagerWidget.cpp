@@ -29,7 +29,6 @@
 #include <QButtonGroup>
 #include <QTextCursor>
 
-#include <iostream>
 
 //***************************************************************************
 //
@@ -288,8 +287,11 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
 	  this, SLOT(editorContextMenu(const QPoint&)));
   QString tab_title = "New script";
   setCurrentIndex(insertTab(index, editor, tab_title));
-  //Set the current code lexer, the editor takes ownership
   editor->setLexer(scriptingEnv()->getCodeLexer());
+  // Completion etc
+  setCodeCompletionBehaviour(editor, m_toggle_completion->isChecked());
+  setCallTipsBehaviour(editor, m_toggle_calltips->isChecked());
+  setCodeFoldingBehaviour(editor, m_toggle_folding->isChecked());
   // Set the current editor to focus
   setFocusProxy(editor);
   editor->setFocus();
@@ -646,21 +648,13 @@ void ScriptManagerWidget::toggleProgressArrow(bool state)
  */
 void ScriptManagerWidget::toggleCodeFolding(bool state)
 {
-  QsciScintilla::FoldStyle fold_option;
-  if( state && !m_interpreter_mode )
-  {
-    fold_option = QsciScintilla::BoxedTreeFoldStyle;
-  }
-  else
-  {
-    fold_option = QsciScintilla::NoFoldStyle;
-  }
-
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-    if( editor ) editor->setFolding(fold_option);
+    if( ScriptEditor *editor = qobject_cast<ScriptEditor*>(this->widget(index)) )
+    { 
+      setCodeFoldingBehaviour(editor, state);
+    }
   }
 }
 /**
@@ -669,28 +663,12 @@ void ScriptManagerWidget::toggleCodeFolding(bool state)
  */
 void ScriptManagerWidget::toggleCodeCompletion(bool state)
 {
-  QsciScintilla::AutoCompletionSource api_source;
-  int threshold(-1);
-  if( state )
-  {
-    api_source = QsciScintilla::AcsAPIs;
-    threshold = 2;
-  }
-  else
-  {
-    api_source = QsciScintilla::AcsNone;
-    threshold = -1;
-  }
-
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-    if( editor ) 
+    if( ScriptEditor *editor = qobject_cast<ScriptEditor*>(this->widget(index)) )
     {
-      //Code completion
-      editor->setAutoCompletionThreshold(threshold);  // threshold characters before autocomplete kicks in
-      editor->setAutoCompletionSource(api_source);
+      setCodeCompletionBehaviour(editor, state);
     }
   }
 }
@@ -701,28 +679,12 @@ void ScriptManagerWidget::toggleCodeCompletion(bool state)
  */
 void ScriptManagerWidget::toggleCallTips(bool state)
 {
-  QsciScintilla::CallTipsStyle tip_style;
-  int nvisible(-1);
-  if( state )
-  {
-    tip_style = QsciScintilla::CallTipsNoAutoCompletionContext;
-    nvisible = 0; // This actually makes all of them visible at the same time
-  }
-  else
-  {
-    tip_style = QsciScintilla::CallTipsNone;
-    nvisible = -1;
-  }
-
   int index_end = count() - 1;
   for( int index = index_end; index >= 0; --index )
   {
-    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-    if( editor ) 
+    if( ScriptEditor *editor = qobject_cast<ScriptEditor*>(this->widget(index)) )
     {
-      //Code completion
-      editor->setCallTipsVisible(nvisible);
-      editor->setCallTipsStyle(tip_style);
+      setCallTipsBehaviour(editor, state);
     }
   }
 }
@@ -971,6 +933,75 @@ void ScriptManagerWidget::doSave(ScriptEditor * editor)
   editor->setModified(false);
   connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
 }
+
+/** 
+ * Set auto complete behaviour for the given editor
+ * @param editor The editor widget to set the behaviour on
+ * @param state The state required
+ */
+void ScriptManagerWidget::setCodeCompletionBehaviour(ScriptEditor *editor, bool state)
+{
+  QsciScintilla::AutoCompletionSource api_source;
+  int threshold(-1);
+  if( state )
+  {
+    api_source = QsciScintilla::AcsAll;
+    threshold = 2;
+  }
+  else
+  {
+    api_source = QsciScintilla::AcsNone;
+    threshold = -1;
+  }
+  
+  editor->setAutoCompletionThreshold(threshold);  // threshold characters before autocomplete kicks in
+  editor->setAutoCompletionSource(api_source);
+}
+
+/** 
+ * Set call tips behaviour for the given editor
+ * @param editor The editor widget to set the behaviour on
+ * @param state The state required
+ */
+void ScriptManagerWidget::setCallTipsBehaviour(ScriptEditor *editor, bool state)
+{
+  QsciScintilla::CallTipsStyle tip_style;
+  int nvisible(-1);
+  if( state )
+  {
+    tip_style = QsciScintilla::CallTipsNoAutoCompletionContext;
+    nvisible = 0; // This actually makes all of them visible at the same time
+  }
+  else
+  {
+    tip_style = QsciScintilla::CallTipsNone;
+    nvisible = -1;
+  }
+
+  editor->setCallTipsVisible(nvisible);
+  editor->setCallTipsStyle(tip_style);
+}
+
+/** 
+ * Set code folding behaviour for the given editor
+ * @param editor The editor widget to set the behaviour on
+ * @param state The state required
+ */
+void ScriptManagerWidget::setCodeFoldingBehaviour(ScriptEditor *editor, bool state)
+{
+  QsciScintilla::FoldStyle fold_option;
+  if( state && !m_interpreter_mode )
+  {
+    fold_option = QsciScintilla::BoxedTreeFoldStyle;
+  }
+  else
+  {
+    fold_option = QsciScintilla::NoFoldStyle;
+  }
+  
+  editor->setFolding(fold_option);
+}
+
 
 //***************************************************************************
 //
