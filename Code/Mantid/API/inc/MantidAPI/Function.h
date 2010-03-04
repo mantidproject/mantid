@@ -106,13 +106,17 @@ public:
   virtual void applyTies();
   /// Remove all ties
   virtual void clearTies();
+  /// Removes i-th parameter's tie
+  virtual bool removeTie(int i);
+  /// Get the tie of i-th parameter
+  virtual ParameterTie* getTie(int i)const;
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic);
   /// Get first constraint
-  virtual IConstraint* firstConstraint();
+  virtual IConstraint* firstConstraint()const;
   /// Get next constraint
-  virtual IConstraint* nextConstraint();
+  virtual IConstraint* nextConstraint()const;
  
   void setParametersToSatisfyConstraints();
 
@@ -127,10 +131,6 @@ protected:
 
   /// Add a new tie
   virtual void addTie(ParameterTie* tie);
-  /// Removes i-th parameter's tie
-  virtual bool removeTie(int i);
-  /// Get the tie of i-th parameter
-  virtual ParameterTie* getTie(int i)const;
   /// Get the address of the parameter. For use in UserFunction with mu::Parser
   virtual double* getParameterAddress(int i);
 
@@ -151,7 +151,7 @@ private:
   /// Flags of explicitly set parameters
   std::vector<bool> m_explicitlySet;
   /// Constraint counter for use in nextConstraint()
-  int m_iConstraint;
+  mutable int m_iConstraint;
 };
 
 } // namespace API

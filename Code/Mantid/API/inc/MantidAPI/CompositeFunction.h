@@ -120,9 +120,9 @@ public:
   void addConstraint(IConstraint* ic);
   void setParametersToSatisfyConstraints();
   /// Get first constraint
-  IConstraint* firstConstraint();
+  IConstraint* firstConstraint()const;
   /// Get next constraint
-  IConstraint* nextConstraint();
+  IConstraint* nextConstraint()const;
 
              /* CompositeFunction own methods */
 
@@ -140,6 +140,8 @@ public:
   int functionIndex(int i)const;
   /// Get the function index
   int functionIndexActive(int i)const;
+  /// Returns the index of parameter i as it declared in its function
+  int parameterLocalIndex(int i)const;
   /// Returns the name of parameter i as it declared in its function
   std::string parameterLocalName(int i)const;
   /// Check the function.
@@ -175,7 +177,7 @@ private:
   /// Total number of parameters
   int m_nParams;
   /// Function counter to be used in nextConstraint
-  int m_iConstraintFunction;
+  mutable int m_iConstraintFunction;
 
   //friend class ParameterTie;
 };

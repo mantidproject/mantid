@@ -515,6 +515,99 @@ public:
     delete fun;
   }
 
+  void testCreateWithTies()
+  {
+    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1^2)";
+    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
+
+    funa->applyTies();
+
+    TS_ASSERT_DELTA(funa->getParameter("a0"),1.21,0.0001);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
+
+    delete funa;
+
+  }
+
+  void testCreateWithTies1()
+  {
+    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1=4)";
+    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
+
+    funa->applyTies();
+
+    TS_ASSERT_EQUALS(funa->getParameter("a0"),4);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
+
+    delete funa;
+
+  }
+
+  void testCreateWithTies2()
+  {
+    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=2,a1=4)";
+    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(funa);
+    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
+
+    funa->applyTies();
+
+    TS_ASSERT_EQUALS(funa->getParameter("a0"),2);
+    TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
+
+    delete funa;
+
+  }
+
+  void testCreateCompositeWithTies()
+  {
+    std::string fnString = 
+      "name=FunctionFactoryTest_FunctA,ties=(a0=a1=14);"
+      "name=FunctionFactoryTest_FunctB,b0=0.2,b1=1.2;ties=(f1.b0=f0.a0+f0.a1)";
+
+    IFunction* fun = FunctionFactory::Instance().createInitialized(fnString);
+    TS_ASSERT(fun);
+    TS_ASSERT_EQUALS(fun->getParameter(0),0.);
+    TS_ASSERT_EQUALS(fun->getParameter(1),0.);
+    TS_ASSERT_EQUALS(fun->getParameter(2),0.2);
+    TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
+
+    fun->applyTies();
+
+    TS_ASSERT_EQUALS(fun->getParameter(0),14.);
+    TS_ASSERT_EQUALS(fun->getParameter(1),14.);
+    TS_ASSERT_EQUALS(fun->getParameter(2),28.);
+    TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
+
+    IFunction* fun1 = FunctionFactory::Instance().createInitialized(*fun);
+
+    fun1->setParameter(0,0.);
+    fun1->setParameter(1,0.);
+    fun1->setParameter(2,0.);
+    fun1->setParameter(3,789);
+
+    TS_ASSERT_EQUALS(fun1->getParameter(0),0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1),0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(2),0.);
+    TS_ASSERT_EQUALS(fun1->getParameter(3),789);
+
+    fun1->applyTies();
+
+    TS_ASSERT_EQUALS(fun1->getParameter(0),14.);
+    TS_ASSERT_EQUALS(fun1->getParameter(1),14.);
+    TS_ASSERT_EQUALS(fun1->getParameter(2),28.);
+    TS_ASSERT_EQUALS(fun1->getParameter(3),789);
+
+    delete fun;
+  }
+
 };
 
 #endif /*FUNCTIONFACTORYTEST_H_*/

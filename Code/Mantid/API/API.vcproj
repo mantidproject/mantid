@@ -415,22 +415,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\BinaryOperation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CalculateTransmission.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ChangeBinOffset.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CheckWorkspacesMatch.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\CloneableAlgorithm.h"
 				>
 			</File>
@@ -443,10 +427,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CommutativeBinaryOperation.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\CompositeFunction.h"
 				>
 			</File>
@@ -455,51 +435,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ConjoinWorkspaces.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\ConstraintFactory.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ConvertFromDistribution.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ConvertSpectrumAxis.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ConvertToDistribution.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ConvertUnits.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CorrectToFile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CreateCalFileByNames.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CreateSingleValuedWorkspace.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CropWorkspace.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CrossCorrelate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\CylinderAbsorption.h"
 				>
 			</File>
 			<File
@@ -507,35 +443,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\DetectorEfficiencyCor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\DetectorEfficiencyVariation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\DiffractionFocussing.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\DiffractionFocussing2.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Divide.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\DllExport.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\EfficiencyScriptInput.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ExponentialCorrection.h"
 				>
 			</File>
 			<File
@@ -544,38 +452,6 @@
 			</File>
 			<File
 				RelativePath=".\test\ExpressionTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ExtractSingleSpectrum.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\FFT.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\FFTSmooth.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\FindDeadDetectors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\FindDetectorsOutsideLimits.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\FindPeaks.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\FindPeaks1D.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\FlatBackground.h"
 				>
 			</File>
 			<File
@@ -600,26 +476,6 @@
 			</File>
 			<File
 				RelativePath=".\test\FunctionTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\GEMScriptInput.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\GeneralisedSecondDifference.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\GetDetectorOffsets.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\GetEi.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\GroupWorkspaces.h"
 				>
 			</File>
 			<File
@@ -652,10 +508,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAPI\ILocatedData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\InputWSDetectorInfo.h"
 				>
 			</File>
 			<File
@@ -699,18 +551,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\LOQScriptInput.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\MaskBins.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\MaskDetectorsIf.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\MatrixWorkspace.h"
 				>
 			</File>
@@ -719,47 +559,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Max.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\MedianDetectorTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\MemoryManager.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\MergeRuns.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Minus.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Multiply.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\MuonAsymmetryCalc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\MuonRemoveExpDecay.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\NormaliseByCurrent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\NormaliseToMonitor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\OneMinusExponentialCor.h"
 				>
 			</File>
 			<File
@@ -791,79 +591,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\PlotAsymmetryByLogValue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Plus.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\PointByPointVCorrection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\PoissonErrors.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\PolynomialCorrection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\PowerLawCorrection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\Progress.h"
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Q1D.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Qxy.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ReadGroupsFromFile.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\RealFFT.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\RebinPreserveValue.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\RebinToWorkspace.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Rebunch.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\RefAxis.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Regroup.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\RemoveBins.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\RenameWorkspace.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\ReplaceSpecialValues.h"
 				>
 			</File>
 			<File
@@ -875,22 +607,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\SimpleIntegration.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\SimpleRebin.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\SmoothData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\SolidAngle.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\SpectraDetectorMap.h"
 				>
 			</File>
@@ -899,31 +615,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\StripPeaks.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\SumRowColumn.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\SumSpectra.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAPI\TableRow.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\UnaryOperation.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\UnGroupWorkspaces.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAPI\inc\MantidAlgorithms\Unwrap.h"
 				>
 			</File>
 			<File

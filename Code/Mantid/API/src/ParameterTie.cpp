@@ -2,6 +2,9 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
 
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
+
 namespace Mantid
 {
 namespace API
@@ -12,18 +15,21 @@ namespace API
    * @param parName The name of the parameter to be tied
    */
   ParameterTie::ParameterTie(IFunction* funct,const std::string& parName)
-    :ParameterReference(funct,funct->parameterIndex(parName)),m_parser(new mu::Parser())
+    :ParameterReference(funct,funct->parameterIndex(parName)),m_parser(new mu::Parser()),m_function1(funct)
   {
     m_parser->DefineNameChars("0123456789_."
                        "abcdefghijklmnopqrstuvwxyz"
                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     m_parser->SetVarFactory(AddVariable, this);
-    m_function1 = funct;
   }
 
   /// Destructor
   ParameterTie::~ParameterTie()
   {
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+    {
+      delete it->first;
+    }
     delete m_parser;
   }
 
@@ -64,6 +70,39 @@ namespace API
     {
       throw std::runtime_error("Error in expresseion "+expr);
     }
+
+    std::string parName = m_function1->parameterName(m_function1->getParameterIndex(*this));
+    // Create the template m_expression
+    boost::regex rx;//("((f\\d+\\.)+\\w)");
+    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(m_function1);
+    if (cf)
+    {
+      rx = "((f\\d+\\.)+\\w)";
+    }
+    else
+    {
+      rx = "\\b(([[:alpha:]]|_)([[:alnum:]]|_)*)\\b(?!(\\s*\\())";
+    }
+    std::string input = expr;
+    boost::smatch res;
+    std::string::const_iterator start = input.begin();
+    std::string::const_iterator end = input.end();
+
+    std::map<std::string,int> varNames;
+    int i = 0;
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+    {
+      varNames[m_function1->parameterName(m_function1->getParameterIndex(it->second))] = i;
+      i++;
+    }
+
+    while(boost::regex_search(start,end,res,rx))
+    {
+      m_expression.append(start,res[0].first);
+      m_expression += "#" + boost::lexical_cast<std::string>(varNames[res[1]]);
+      start = res[0].second;
+    }
+    m_expression.append(start,end);
   }
 
   double ParameterTie::eval()
@@ -82,10 +121,58 @@ namespace API
       throw std::runtime_error("Error in expresseion");
     }
 
-//    *m_par = res;
     setParameter(res);
 
     return res;
+  }
+
+  /**
+   * 
+   */
+  std::string ParameterTie::asString(const IFunction* fun)const
+  {
+    const CompositeFunction* cf  = dynamic_cast<const CompositeFunction*>(fun);
+    CompositeFunction* cf1 = dynamic_cast<CompositeFunction*>(m_function1);
+    std::string res_expression;
+    try
+    {
+      res_expression = fun->parameterName(fun->getParameterIndex(*this)) + "=";
+
+      if (m_varMap.size() == 0)
+      {// constants
+        return res_expression + m_expression;;
+      }
+
+      boost::regex rx(std::string("#(\\d+)"));
+      boost::smatch res;
+      std::string::const_iterator start = m_expression.begin();
+      std::string::const_iterator end = m_expression.end();
+
+      while(boost::regex_search(start,end,res,rx))
+      {
+        res_expression.append(start,res[0].first);
+
+        int iTemp = boost::lexical_cast<int>(res[1]);
+        int i = 0;
+        for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+        {
+          if (i == iTemp)
+          {
+            res_expression += fun->parameterName(fun->getParameterIndex(it->second));
+            break;
+          }
+          i++;
+        }
+
+        start = res[0].second;
+      }
+      res_expression.append(start,end);
+    }
+    catch(...)
+    {// parameters are not from function fun
+      res_expression = "";
+    }
+    return res_expression;
   }
 
   /** This method takes a list of double pointers and checks if any of them match

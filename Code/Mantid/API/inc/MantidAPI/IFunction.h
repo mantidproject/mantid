@@ -171,13 +171,18 @@ public:
   virtual void removeTie(const std::string& parName);
   /// Remove all ties
   virtual void clearTies() = 0;
+  /// Removes i-th parameter's tie
+  virtual bool removeTie(int i) = 0;
+  /// Get the tie of i-th parameter
+  virtual ParameterTie* getTie(int i)const = 0;
+  /// Get 
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
   /// Get first constraint
-  virtual IConstraint* firstConstraint() = 0;
+  virtual IConstraint* firstConstraint()const = 0;
   /// Get next constraint
-  virtual IConstraint* nextConstraint() = 0;
+  virtual IConstraint* nextConstraint()const = 0;
 
   /// Set the parameters of the function to satisfy the constraints of
   /// of the function. For example
@@ -208,12 +213,6 @@ protected:
   virtual ParameterTie* createTie(const std::string& parName);
   /// Add a new tie
   virtual void addTie(ParameterTie* tie) = 0;
-  /// Removes i-th parameter's tie
-  virtual bool removeTie(int i) = 0;
-  /// Get the tie of i-th parameter
-  virtual ParameterTie* getTie(int i)const = 0;
-  /// Get the address of the parameter
-  //virtual double* getParameterAddress(int i) = 0;
 
   friend class ParameterTie;
   friend class CompositeFunction;

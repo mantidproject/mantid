@@ -121,6 +121,7 @@ namespace Mantid
       virtual double check();
       virtual double checkDeriv();
       virtual void setParamToSatisfyConstraint();
+      virtual std::string asString()const;
 
     private:
 

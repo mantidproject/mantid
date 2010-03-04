@@ -758,10 +758,6 @@ public:
     TS_ASSERT_EQUALS(outParams->rowCount(),8);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
-    std::cerr<<outParams->getColumnNames()[0]<<'\n';
-    std::cerr<<outParams->getColumnNames()[1]<<'\n';
-    std::cerr<<outParams->getColumnNames()[2]<<'\n';
-
     TableRow row = outParams->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"f0.a");
     TS_ASSERT_DELTA(row.Double(1),1.0016,0.0001);

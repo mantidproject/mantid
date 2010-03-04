@@ -65,6 +65,9 @@ public:
   /// it is set to that value and vice versa for if the param value is larger
   /// than the upper boundary value. 
   virtual void setParamToSatisfyConstraint() = 0;
+
+  /// Return the string that can be used in this->initialize() to recreate this constraint
+  virtual std::string asString()const = 0;
 };
 
 

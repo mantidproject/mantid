@@ -253,7 +253,7 @@ public:
     std::string str = "name=Linear,a=0.8,b=0;";
     str += "name=Gauss,c=1.1,h=1.2,s=1.3;";
     str += "name=Cubic,c0=2.1,c1=2.2,c2=2.3,c3=2.4;";
-    str += "name=Gauss,c=3.1,h=3.2,s=3.3;";
+    str += "name=Gauss,c=3.1,h=3.2,s=3.3";
 
     TS_ASSERT_EQUALS(mfun->asString(),str);
 

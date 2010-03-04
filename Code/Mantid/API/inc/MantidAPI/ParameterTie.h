@@ -56,6 +56,8 @@ public:
   virtual void set(const std::string& expr);
   /// Evaluate the expression
   virtual double eval();
+  /// Return the string that can be used to recreate this tie
+  virtual std::string asString(const IFunction* fun = 0)const;
 
   /// Check if the tie has any references to certain parameters
   bool findParametersOf(const IFunction* fun)const;
@@ -66,6 +68,9 @@ protected:
   std::map<double*,ParameterReference> m_varMap;
   /// Keep the function that was passed to the constructor
   IFunction* m_function1;
+  /// Keep the template for the input string passed to this->set(...)
+  /// In the template CompositeFunction prefixes are replaced with placeholders
+  std::string m_expression;
 
 private:
   /// MuParser callback function

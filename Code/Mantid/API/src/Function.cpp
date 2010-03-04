@@ -57,7 +57,7 @@ void Function::addConstraint(IConstraint* ic)
 }
 
 /// Get first constraint
-IConstraint* Function::firstConstraint()
+IConstraint* Function::firstConstraint()const
 {
   m_iConstraint = 0;
   if (m_constraints.size())
@@ -68,7 +68,7 @@ IConstraint* Function::firstConstraint()
 }
 
 /// Get next constraint
-IConstraint* Function::nextConstraint()
+IConstraint* Function::nextConstraint()const
 {
   if (m_constraints.size() < 2 || m_iConstraint >= m_constraints.size() - 1)
   {
@@ -93,7 +93,7 @@ void Function::setParametersToSatisfyConstraints()
  */
 void Function::setParameter(int i, const double& value, bool explicitlySet)
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
@@ -109,7 +109,7 @@ void Function::setParameter(int i, const double& value, bool explicitlySet)
  */
 double Function::getParameter(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
@@ -175,29 +175,15 @@ int Function::parameterIndex(const std::string& name)const
   return int(it - m_parameterNames.begin());
 }
 
-/**
- * Checks that a pointer points to a parameter of this function and returns its index.
- * @param p A pointer to a double variable.
- * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
- */
-//int Function::parameterIndex(const double* p)const
-//{
-//  const double* p0 = &m_parameters.front();
-//  const double* p1 = &m_parameters.back();
-//  if (p >= p0 && p <= p1)
-//  {
-//    return p - p0;
-//  }
-//  return -1;
-//}
-
 /** Returns the name of parameter i
  * @param i The index of a parameter
  */
 std::string Function::parameterName(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
+  {
     throw std::out_of_range("Function parameter index out of range.");
+  }
   return m_parameterNames[i];
 }
 /**
@@ -259,7 +245,7 @@ bool Function::isActive(int i)const
  */
 void Function::removeActive(int i)
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
     throw std::out_of_range("Function parameter index out of range.");
 
   if (m_indexMap.size() == 0)// This should never happen
@@ -283,7 +269,7 @@ void Function::removeActive(int i)
  */
 void Function::restoreActive(int i)
 {
-  if (i >= nParams())
+  if (i >= nParams()  || i < 0)
     throw std::out_of_range("Function parameter index out of range.");
 
   if (nParams() == nActive()) return;
@@ -357,7 +343,7 @@ public:
  */
 bool Function::removeTie(int i)
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
@@ -378,7 +364,7 @@ bool Function::removeTie(int i)
  */
 ParameterTie* Function::getTie(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
@@ -425,7 +411,7 @@ void Function::clearAllParameters()
 /// Get the address of the parameter
 double* Function::getParameterAddress(int i)
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
@@ -435,7 +421,7 @@ double* Function::getParameterAddress(int i)
 /// Checks if a parameter has been set explicitly
 bool Function::isExplicitlySet(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }

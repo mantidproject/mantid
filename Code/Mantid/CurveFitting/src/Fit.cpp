@@ -883,10 +883,6 @@ namespace CurveFitting
       input += "constraints=("+inputConstraints+")";
     }
 
-    setFunction(API::FunctionFactory::Instance().createInitialized(input));
-
-    typedef Poco::StringTokenizer tokenizer;
-
     // Ties property is a comma separated list of formulas of the form:
     // tiedParamName = MathExpression, parameter names defined in the fitted function can be used
     // as variables in MathExpression. If the fitted function is a CompositeFunction parameter names
@@ -896,16 +892,24 @@ namespace CurveFitting
     std::string inputTies = getProperty("Ties");
     if (!inputTies.empty())
     {
-      tokenizer ties(inputTies, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-      for (tokenizer::Iterator tie = ties.begin(); tie != ties.end(); ++tie)
+      if (input.find(';') != std::string::npos)
       {
-        tokenizer name_value(*tie, "=", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-        if (name_value.count() > 1)
-        {
-          m_function->tie(name_value[0],name_value[1]);
-        }
+        input += ";";
       }
+      else
+      {
+        input += ",";
+      }
+      std::string::size_type i = inputTies.find_last_not_of(" \t\n\r");
+      if (i >= 0 && inputTies[i] == ',')
+      {
+        inputTies.erase(i);
+      }
+      input += "ties=("+inputTies+")";
     }
+
+    setFunction(API::FunctionFactory::Instance().createInitialized(input));
+
   }
 
   /**

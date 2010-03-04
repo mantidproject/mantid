@@ -483,7 +483,6 @@ void Expression::setFunct(const std::string& name)
 std::string Expression::str()const
 {
   std::ostringstream res;
-  res << m_op;
   size_t prec = op_prec(m_funct);
   if (!prec || size() == 1)
   {
@@ -497,7 +496,7 @@ std::string Expression::str()const
     if (bk) res << '(' ;
     for(size_t i=0;i<m_terms.size();i++)
     {
-      res << m_terms[i].str();
+      res << m_terms[i].operator_name() << m_terms[i].str();
     }
     if (bk) res <<')';
   }

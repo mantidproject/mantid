@@ -52,7 +52,18 @@ void CompositeFunction::init()
 {
 }
 
-/// Writes itself into a string
+/** 
+ * Writes itself into a string. Functions derived from CompositeFunction must
+ * override this method with something like this:
+ *   std::string NewFunction::asString()const
+ *   {
+ *      ostr << "composite=" << this->name() << ';';
+ *      // write NewFunction's own attributes and parameters
+ *      ostr << CompositeFunction::asString();
+ *      // write NewFunction's own ties and constraints
+ *      // ostr << ";constraints=(" << ... <<")";
+ *   }
+ */
 std::string CompositeFunction::asString()const
 {
   std::ostringstream ostr;
@@ -61,8 +72,38 @@ std::string CompositeFunction::asString()const
     IFunction* fun = getFunction(i);
     bool isComp = dynamic_cast<CompositeFunction*>(fun) != 0;
     if (isComp) ostr << '(';
-    ostr << fun->asString() << ';';
+    ostr << fun->asString();
     if (isComp) ostr << ')';
+    if (i < nFunctions() - 1)
+    {
+      ostr << ';';
+    }
+  }
+  std::string ties;
+  for(int i=0;i<nParams();i++)
+  {
+    const ParameterTie* tie = getTie(i);
+    if (tie)
+    {
+      IFunction* fun = getFunction(functionIndex(i));
+      std::string tmp = tie->asString(fun);
+      if (tmp.empty())
+      {
+        tmp = tie->asString(this);
+        if (!tmp.empty())
+        {
+          if (!ties.empty())
+          {
+            ties += ",";
+          }
+          ties += tmp;
+        }
+      }
+    }
+  }
+  if (!ties.empty())
+  {
+    ostr << ";ties=(" << ties << ")";
   }
   return ostr.str();
 }
@@ -564,9 +605,10 @@ void CompositeFunction::replaceFunction(int i,IFunction* f)
  */
 IFunction* CompositeFunction::getFunction(int i)const
 {
-  if ( i >= nFunctions() )
+  if ( i >= nFunctions()  || i < 0)
+  {
     throw std::out_of_range("Function index out of range.");
-
+  }
   return m_functions[i];
 }
 
@@ -576,8 +618,10 @@ IFunction* CompositeFunction::getFunction(int i)const
  */
 int CompositeFunction::functionIndex(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
+  {
     throw std::out_of_range("Function parameter index out of range.");
+  }
   return m_iFunction[i];
 }
 
@@ -587,7 +631,7 @@ int CompositeFunction::functionIndex(int i)const
  */
 int CompositeFunction::functionIndexActive(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
     throw std::out_of_range("Function parameter index out of range.");
   return m_iFunctionActive[i];
 }
@@ -621,6 +665,16 @@ void CompositeFunction::parseName(const std::string& varName,int& index, std::st
   }
 }
 
+/** Returns the index of parameter i as it declared in its function
+ * @param i The parameter index
+ * @return The local index of the parameter
+ */
+int CompositeFunction::parameterLocalIndex(int i)const
+{
+  int iFun = functionIndex(i);
+  return i - m_paramOffsets[iFun];
+}
+
 /** Returns the name of parameter i as it declared in its function
  * @param i The parameter index
  * @return The pure parameter name (without the function identifier f#.)
@@ -645,7 +699,7 @@ void CompositeFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 }
 
 /**
- * Apply the ties. First the ties of the individual functions are applied, then the common ties (inter-function)
+ * Apply the ties.
  */
 void CompositeFunction::applyTies()
 {
@@ -735,7 +789,7 @@ void CompositeFunction::setParametersToSatisfyConstraints()
 }
 
 /// Get first constraint
-IConstraint* CompositeFunction::firstConstraint()
+IConstraint* CompositeFunction::firstConstraint()const
 {
   m_iConstraintFunction = 0;
   if (nFunctions() == 0) 
@@ -752,7 +806,7 @@ IConstraint* CompositeFunction::firstConstraint()
 }
 
 /// Get next constraint
-IConstraint* CompositeFunction::nextConstraint()
+IConstraint* CompositeFunction::nextConstraint()const
 {
   if (nFunctions() == 0) 
   {

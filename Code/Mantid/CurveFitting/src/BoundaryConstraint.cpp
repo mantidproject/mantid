@@ -274,6 +274,20 @@ double BoundaryConstraint::checkDeriv()
   return penalty;
 }
 
+std::string BoundaryConstraint::asString()const
+{
+  std::ostringstream ostr;
+  if (m_hasLowerBound)
+  {
+    ostr << m_lowerBound << '<';
+  }
+  ostr << getFunction()->parameterName(getIndex());
+  if (m_hasUpperBound)
+  {
+    ostr<< '<' << m_upperBound;
+  }
+  return ostr.str();
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

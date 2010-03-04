@@ -107,6 +107,19 @@ public:
   }
 };
 
+class ParameterTieTest_Nothing: public Function
+{
+public:
+  ParameterTieTest_Nothing()
+  {
+    declareParameter("a");
+    declareParameter("alpha12");
+    declareParameter("B1e2Ta_");
+  }
+  std::string name()const{return "ParameterTieTest_Nothing";}
+  void function(double* out, const double* xValues, const int& nData){}
+};
+
 class ParameterTieTest : public CxxTest::TestSuite
 {
 public:
@@ -133,6 +146,7 @@ public:
 
     ParameterTie tie(&mfun,"f1.s");
     tie.set("f2.s^2+f0.a+1");
+    TS_ASSERT_EQUALS(tie.asString(&mfun),"f1.s=f2.s^2+f0.a+1");
 
     TS_ASSERT_DELTA(tie.eval(),5.8,0.00001);
     TS_ASSERT_EQUALS(tie.getFunction(),g1);
@@ -143,6 +157,87 @@ public:
     TS_ASSERT_THROWS(mustThrow3(&mfun),std::out_of_range);
 
     TS_ASSERT_THROWS(tie.set("a+b"),std::invalid_argument);
+
+  }
+
+  void testComposite1()
+  {
+    CompositeFunction mfun;
+    ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
+    ParameterTieTest_Linear *bk1 = new ParameterTieTest_Linear(),*bk2 = new ParameterTieTest_Linear();
+
+    mfun.addFunction(bk1);
+    mfun.addFunction(bk2);
+    mfun.addFunction(g1);
+    mfun.addFunction(g2);
+
+    ParameterTie tie(&mfun,"f0.b");
+    tie.set("f3.s^2+f1.a+1");
+    TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.b=f3.s^2+f1.a+1");
+
+    TS_ASSERT_DELTA(tie.eval(),2,0.00001);
+    TS_ASSERT_EQUALS(tie.getFunction(),bk1);
+    TS_ASSERT_EQUALS(tie.getIndex(),1);
+
+    mfun.removeFunction(2);
+    TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.b=f2.s^2+f1.a+1");
+
+  }
+
+  void testComposite2()
+  {
+    CompositeFunction mfun;
+    CompositeFunction* mf1 = new CompositeFunction;
+    CompositeFunction* mf2 = new CompositeFunction;
+    ParameterTieTest_Gauss *g1 = new ParameterTieTest_Gauss(),*g2 = new ParameterTieTest_Gauss();
+    ParameterTieTest_Linear *bk1 = new ParameterTieTest_Linear(),*bk2 = new ParameterTieTest_Linear();
+    ParameterTieTest_Nothing* nth = new ParameterTieTest_Nothing;
+
+    mf1->addFunction(bk1);
+    mf1->addFunction(bk2);
+    mf2->addFunction(g1);
+    mf2->addFunction(g2);
+    mf2->addFunction(nth);
+    mfun.addFunction(mf1);
+    mfun.addFunction(mf2);
+
+    ParameterTie tie(mf1,"f0.b");
+    tie.set("f1.a^2+f1.b+1");
+    TS_ASSERT_EQUALS(tie.asString(mf1),"f0.b=f1.a^2+f1.b+1");
+    TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.f0.b=f0.f1.a^2+f0.f1.b+1");
+
+    ParameterTie tie1(&mfun,"f1.f0.s");
+    tie1.set("sin(f1.f0.s)+f1.f1.c/2");
+    TS_ASSERT_EQUALS(tie1.asString(&mfun),"f1.f0.s=sin(f1.f0.s)+f1.f1.c/2");
+    TS_ASSERT_EQUALS(tie1.asString(mf2),"f0.s=sin(f0.s)+f1.c/2");
+
+    ParameterTie tie2(&mfun,"f1.f0.s");
+    tie2.set("123.4");
+    TS_ASSERT_EQUALS(tie2.asString(mf1),"");
+    TS_ASSERT_EQUALS(tie2.asString(&mfun),"f1.f0.s=123.4");
+    TS_ASSERT_EQUALS(tie2.asString(mf2),"f0.s=123.4");
+    TS_ASSERT_EQUALS(tie2.asString(g1),"s=123.4");
+
+    ParameterTie tie3(g1,"s");
+    tie3.set("123.4");
+    TS_ASSERT_EQUALS(tie3.asString(mf1),"");
+    TS_ASSERT_EQUALS(tie3.asString(&mfun),"f1.f0.s=123.4");
+    TS_ASSERT_EQUALS(tie3.asString(mf2),"f0.s=123.4");
+    TS_ASSERT_EQUALS(tie3.asString(g1),"s=123.4");
+
+    ParameterTie tie4(mf2,"f0.s");
+    tie4.set("123.4");
+    TS_ASSERT_EQUALS(tie4.asString(mf1),"");
+    TS_ASSERT_EQUALS(tie4.asString(&mfun),"f1.f0.s=123.4");
+    TS_ASSERT_EQUALS(tie4.asString(mf2),"f0.s=123.4");
+    TS_ASSERT_EQUALS(tie4.asString(g1),"s=123.4");
+
+    ParameterTie tie5(nth,"a");
+    tie5.set("cos(B1e2Ta_)-sin (alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(mf1),"");
+    TS_ASSERT_EQUALS(tie5.asString(&mfun),"f1.f2.a=cos(f1.f2.B1e2Ta_)-sin (f1.f2.alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(mf2),"f2.a=cos(f2.B1e2Ta_)-sin (f2.alpha12)");
+    TS_ASSERT_EQUALS(tie5.asString(nth),"a=cos(B1e2Ta_)-sin (alpha12)");
 
   }
 

@@ -10,6 +10,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Expression.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -140,6 +141,75 @@ public:
     expr.parse("a<Sigma<b");
     TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
   }
+
+  void testAsString()
+  {
+    Gaussian gaus;
+    gaus.initialize();
+    BoundaryConstraint* bc = new BoundaryConstraint;
+    Expression expr;
+    expr.parse("Sigma<20");
+    bc->initialize(&gaus,expr);
+
+    TS_ASSERT_EQUALS( bc->getParameterName(), "Sigma" );
+    TS_ASSERT_DELTA( bc->upper(), 20 ,0.0001);
+    TS_ASSERT( !bc->hasLower() );
+
+    gaus.addConstraint(bc);
+    IFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
+    TS_ASSERT(fun);
+
+    IConstraint* c = fun->firstConstraint();
+    TS_ASSERT(c);
+    bc = dynamic_cast<BoundaryConstraint*>(c);
+    TS_ASSERT(bc);
+
+    TS_ASSERT_EQUALS( bc->getParameterName(), "Sigma" );
+    TS_ASSERT_DELTA( bc->upper(), 20 ,0.0001);
+    TS_ASSERT( !bc->hasLower() );
+
+  }
+
+  void testAsString1()
+  {
+    Gaussian gaus;
+    gaus.initialize();
+
+    BoundaryConstraint* bcSigma = new BoundaryConstraint;
+    Expression exprSigma;
+    exprSigma.parse("Sigma<20");
+    bcSigma->initialize(&gaus,exprSigma);
+    gaus.addConstraint(bcSigma);
+
+    BoundaryConstraint* bcHeight = new BoundaryConstraint;
+    Expression exprHeight;
+    exprHeight.parse("1.3<Height<3.4");
+    bcHeight->initialize(&gaus,exprHeight);
+    gaus.addConstraint(bcHeight);
+
+    IFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
+    TS_ASSERT(fun);
+
+    IConstraint* c = fun->firstConstraint();
+    TS_ASSERT(c);
+    BoundaryConstraint* bc = dynamic_cast<BoundaryConstraint*>(c);
+    TS_ASSERT(bc);
+
+    TS_ASSERT_EQUALS( bc->getParameterName(), "Sigma" );
+    TS_ASSERT_DELTA( bc->upper(), 20 ,0.0001);
+    TS_ASSERT( !bc->hasLower() );
+
+    c = fun->nextConstraint();
+    TS_ASSERT(c);
+    bc = dynamic_cast<BoundaryConstraint*>(c);
+    TS_ASSERT(bc);
+
+    TS_ASSERT_EQUALS( bc->getParameterName(), "Height" );
+    TS_ASSERT_DELTA( bc->lower(), 1.3 ,0.0001);
+    TS_ASSERT_DELTA( bc->upper(), 3.4 ,0.0001);
+
+  }
+
 };
 
 #endif /*BOUNDARYCONSTRAINTTEST_H_*/

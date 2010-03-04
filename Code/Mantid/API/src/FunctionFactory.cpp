@@ -116,8 +116,12 @@ namespace Mantid
           fun->setAttribute(parName,parValue);
         }
         else if (parName.size() >= 10 && parName.substr(0,10) == "constraint")
-        {
+        {// or it can be a list of constraints
           addConstraints(fun,(*term)[1]);
+        }
+        else if (parName == "ties")
+        {
+          addTies(fun,(*term)[1]);
         }
         else
         {// set initial parameter value
@@ -220,6 +224,11 @@ namespace Mantid
             addConstraints(cfun,(*term)[1]);
             continue;
           }
+          else if ((*term)[0].name() == "ties")
+          {
+            addTies(cfun,(*term)[1]);
+            continue;
+          }
           else
           {
             fun = createSimple(*term);
@@ -317,6 +326,43 @@ namespace Mantid
         return true;
       }
       return false;
+    }
+
+    /**
+     * @param fun The function
+     * @param expr The tie expression: either parName = TieString or a list
+     *   of name = string pairs
+     */
+    void FunctionFactoryImpl::addTies(IFunction* fun,const Expression& expr)const
+    {
+      if (expr.name() == "=")
+      {
+        addTie(fun,expr);
+      }
+      else if (expr.name() == ",")
+      {
+        for(int i=0;i<expr.size();i++)
+        {
+          addTie(fun,expr[i]);
+        }
+      }
+    }
+
+    /**
+     * @param fun The function
+     * @param expr The tie expression: parName = TieString
+     */
+    void FunctionFactoryImpl::addTie(IFunction* fun,const Expression& expr)const
+    {
+      if (expr.size() > 1)
+      {// if size > 2 it is interpreted as setting a tie (last expr.term) to multiple parameters, e.g 
+        // f1.alpha = f2.alpha = f3.alpha = f0.beta^2/2
+        const std::string value = expr[expr.size()-1].str();
+        for (int i=expr.size()-2;i>=0;i--)
+        {
+          fun->tie(expr[i].name(),value);
+        }
+      }
     }
 
   } // namespace API
