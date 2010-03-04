@@ -351,6 +351,15 @@ class MantidPyFramework(FrameworkManager):
 ##                     ##
 ## "Private functions" ##
 ##                     ##
+    def initialise(self, GUI = False):
+        """
+        Initialise the framework
+        """
+        self._initPythonAlgorithms()
+        self.createPythonSimpleAPI(GUI)
+        self._importSimpleAPIToGlobal()
+
+
     def _initPythonAlgorithms(self, reload = False):
         # Disable factory updates while everything is reimported
         self._observeAlgFactoryUpdates(False,False)
