@@ -1070,8 +1070,72 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
       fixed = true;
     }
 
+    // some processing
 
-    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, paramName, type, fixed, extractSingleValueAs, eq, comp));
+    std::string fittingFunction = "";
+    std::string tie = "";
+
+    if ( type.compare("fitting") == 0 )
+    {
+      size_t found = paramName.find(":");
+      if (found!=std::string::npos)
+      {
+        // check that only one : in name
+        size_t index = paramName.find(":", found+1); 
+        if (index!=std::string::npos)
+        {
+          g_log.error() << "Fitting <parameter> in instrument definition file defined with" 
+            << " more than one column character :. One must used.\n";
+        }
+        else
+        {
+          fittingFunction = paramName.substr(0,found);
+          paramName = paramName.substr(found+1, paramName.size());
+        }
+      }
+    }
+
+    if ( fixed )
+    {
+      std::ostringstream str;
+      str << paramName << "=" << value;
+      tie = str.str();
+    }
+
+    // check if <min> or <max> elements present
+
+    std::stringstream constraint;
+    
+    NodeList* pNLMin = pParamElem->getElementsByTagName("min");
+    unsigned int numberMin = pNLMin->length();
+    NodeList* pNLMax = pParamElem->getElementsByTagName("max");
+    unsigned int numberMax = pNLMax->length();
+ 
+    if ( numberMin+numberMax >= 1 )
+    {
+      if ( numberMin >= 1  && numberMax >= 1 )
+      {
+        Element* pMin = static_cast<Element*>(pNLMin->item(0));
+        Element* pMax = static_cast<Element*>(pNLMax->item(0));
+
+        constraint << atof( pMin->getAttribute("val").c_str() ) 
+          << " < " << paramName << " < " << atof( pMax->getAttribute("val").c_str() );
+      }
+      else if ( numberMin >= 1 )
+      {
+        Element* pMin = static_cast<Element*>(pNLMin->item(0));
+        constraint << atof( pMin->getAttribute("val").c_str() ) 
+          << " < " << paramName;
+      }
+      else
+      {
+        Element* pMax = static_cast<Element*>(pNLMax->item(0));
+        constraint << paramName << " < " << atof( pMax->getAttribute("val").c_str() );
+      }
+    }
+
+    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, paramName, type, tie, constraint.str(), 
+      fittingFunction, extractSingleValueAs, eq, comp));
     logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
   }
   pNL->release();

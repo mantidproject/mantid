@@ -115,6 +115,7 @@ public:
     TS_ASSERT_DELTA( fitParam1.getValue(), 100.0, 0.0001);
     TS_ASSERT( fitParam1.getTie().compare("") == 0 );
     TS_ASSERT( fitParam1.getFunction().compare("somefunction") == 0 );
+    TS_ASSERT( fitParam1.getConstraint().compare("80 < toplevel < 120") == 0 );
 
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");

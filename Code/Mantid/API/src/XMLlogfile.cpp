@@ -30,43 +30,12 @@ Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
  *  @param comp The pointer to the instrument component
  */
 XMLlogfile::XMLlogfile(std::string& logfileID, std::string& value, std::string& paramName, std::string& type,
-                       bool fixed,
+                       std::string& tie, std::string& constraint, std::string& fitFunc,
                        std::string& extractSingleValueAs, std::string& eq, Geometry::Component* comp)
                        : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type),
+                       m_tie(tie), m_constraint(constraint), m_fittingFunction(fitFunc),
                        m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
 {
-
-  if ( type.compare("fitting") == 0 )
-  {
-    size_t found = m_paramName.find(":");
-    if (found!=std::string::npos)
-    {
-      // check that only one : in name
-      size_t index = m_paramName.find(":", found+1); 
-      if (index!=std::string::npos)
-      {
-        g_log.error() << "Fitting <parameter> in instrument definition file defined with" 
-          << " more than one column character :. One must used.\n";
-        m_fittingFunction = "";
-      }
-      else
-      {
-        m_fittingFunction = m_paramName.substr(0,found);
-        m_paramName = m_paramName.substr(found+1, m_paramName.size());
-      }
-    }
-  }
-  else
-    m_fittingFunction = "";
-
-  if ( fixed )
-  {
-    std::ostringstream str;
-    str << m_paramName << "=" << value;
-    m_tie = str.str();
-  }
-  else
-    m_tie = "";
 }
 
 

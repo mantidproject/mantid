@@ -452,14 +452,14 @@ void MatrixWorkspace::populateInstrumentParameters()
     {
       double value = ((*it).second)->createParamValue(dummy);
 
-      // special cases of parameter names
+      // special case of parameter names
 
       std::string paramN = ((*it).second)->m_paramName;
       std::string category = ((*it).second)->m_type;
       if ( category.compare("fitting") == 0 )
       {
         std::ostringstream str;
-        str << value << " , " << ((*it).second)->m_fittingFunction << " , " << ((*it).second)->m_tie;
+        str << value << " , " << ((*it).second)->m_fittingFunction << " , " << ((*it).second)->m_constraint << " , " << ((*it).second)->m_tie;
         paramMap.add("FitParameter",((*it).second)->m_component, paramN, str.str());
       }
       else

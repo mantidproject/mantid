@@ -31,7 +31,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , fido , bob");
+    std::istringstream input("9.1 , fido , , bob ");
 
     input >> fitP;
 
@@ -44,7 +44,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , , ");
+    std::istringstream input("9.1 , , , ");
 
     input >> fitP;
 
@@ -56,7 +56,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("bob , ,      ");
+    std::istringstream input("bob , , ,     ");
 
     input >> fitP;
 
@@ -68,7 +68,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , , ");
+    std::istringstream input("9.1 , , , ");
 
     input >> fitP;
 
@@ -80,12 +80,25 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , ,         ");
+    std::istringstream input("9.1 , , ,        ");
 
     input >> fitP;
 
     TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
     TS_ASSERT( fitP.getTie().compare("")==0 );
+	}
+
+	void test7()
+	{
+    FitParameter fitP;
+
+    std::istringstream input("9.1 , , 0 < 3 < 8 ,        ");
+
+    input >> fitP;
+
+    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
+    TS_ASSERT( fitP.getTie().compare("")==0 );
+    TS_ASSERT( fitP.getConstraint().compare("0 < 3 < 8")==0 );
 	}
 
 };

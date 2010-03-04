@@ -60,8 +60,10 @@ namespace Geometry
 
     f.setFunction() = values[1];
 
-    if ( values.count() > 2 )
-      f.setTie() = values[2];
+    f.setConstraint() = values[2];
+
+    if ( values.count() > 3 )
+      f.setTie() = values[3];
 
     return in;
   }

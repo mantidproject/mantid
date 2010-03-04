@@ -54,6 +54,10 @@ namespace Mantid
       std::string getTie() const { return m_tie; }
       /// set tie
       std::string& setTie() { return m_tie; }
+      /// get constraint
+      std::string getConstraint() const { return m_constraint; }
+      /// set constraint
+      std::string& setConstraint() { return m_constraint; }
       /// get function
       std::string getFunction() const { return m_function; }
       /// set function
@@ -67,6 +71,8 @@ namespace Mantid
       double m_value;
       /// tie of parameter
       std::string m_tie;
+      /// constraint of parameter
+      std::string m_constraint;
       /// name of fitting function
       std::string m_function;
     };
