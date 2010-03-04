@@ -437,6 +437,7 @@ addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', '../qtiplot/qtiplot/qtiplotrc.
 addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', '../qtiplot/qtiplot/qtiUtil.py', MantidDlls)
 addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', '../qtiplot/qtiplot/mantidplotrc.py', MantidDlls)
 addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', '../qtiplot/qtiplot/mantidplot.py', MantidDlls)
+addFileV('mtdkeywords', 'mtdwds.txt', 'mtdpy_keywords.txt', '../qtiplot/qtiplot/mtdpy_keywords.txt', MantidDlls)
 
 if (QTDIR == 'C:/Qt/4_4_0/bin'): 	 
 	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/MantidPlot.exe.manifest',QTIPlot)
