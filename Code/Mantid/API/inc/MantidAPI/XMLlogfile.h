@@ -53,9 +53,10 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      XMLlogfile(std::string& logfileID, std::string& value, std::string& paramName, std::string& type, 
-        std::string& tie, std::string& constraint, std::string& fitFunc, std::string& extractSingleValueAs, 
-        std::string& eq, Geometry::Component* comp);
+      XMLlogfile(const std::string& logfileID, const std::string& value, const std::string& paramName, 
+		 const std::string& type, const std::string& tie, const std::string& constraint, 
+		 const std::string& fitFunc, const std::string& extractSingleValueAs,
+		 const std::string& eq, Geometry::Component* comp);
 
       /// Destructor
       ~XMLlogfile() {}

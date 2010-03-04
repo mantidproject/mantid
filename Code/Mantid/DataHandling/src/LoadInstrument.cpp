@@ -184,8 +184,6 @@ void LoadInstrument::exec()
   {
     Element* pParameterElem = static_cast<Element*>(pNL_parameter->item(i));
     hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
-    Element* crap = static_cast<Element*>(pParameterElem->parentNode());
-    //std::cout << "Name " << crap->getAttribute("name") << std::endl;
   }
   pNL_parameter->release();
 
@@ -1066,7 +1064,6 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
  
     if ( numberFixed >= 1 )
     {
-      Element* pFixed = static_cast<Element*>(pNLFixed->item(0));
       fixed = true;
     }
 
