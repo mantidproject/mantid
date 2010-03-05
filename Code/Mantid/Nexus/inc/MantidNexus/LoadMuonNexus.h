@@ -78,12 +78,12 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
       
-    private:
+    protected:
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
       void exec();
-
+    private:
       void checkOptionalProperties();
       void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int&, DataObjects::Workspace2D_sptr );
       void runLoadInstrument(DataObjects::Workspace2D_sptr);

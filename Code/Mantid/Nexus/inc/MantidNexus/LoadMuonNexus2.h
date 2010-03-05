@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidNexus/LoadMuonNexus.h"
 
 #include <climits>
 
@@ -65,7 +66,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadMuonNexus2 : public API::Algorithm
+    class DLLExport LoadMuonNexus2 : public LoadMuonNexus
     {
     public:
       /// Default constructor
@@ -73,18 +74,18 @@ namespace Mantid
       /// Destructor
       ~LoadMuonNexus2() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadMuonNexus2"; }
+      virtual const std::string name() const { return "LoadMuonNexus"; }
       /// Algorithm's version for identification overriding a virtual method
-      virtual const int version() const { return 1; }
+      virtual const int version() const { return 2; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
 
-    private:
-      /// Overwrites Algorithm method.
-      void init();
+    protected:
+
       /// Overwrites Algorithm method
       void exec();
 
+    private:
       void checkOptionalProperties();
       void loadData(const NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
         int period,int spec,API::MatrixWorkspace_sptr localWorkspace);

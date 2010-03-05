@@ -34,7 +34,7 @@ namespace Mantid
     LoadMuonNexus::LoadMuonNexus() : 
     Algorithm(),
       m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
-      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
+      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT())
     {}
 
     /// Initialisation method.
@@ -57,7 +57,7 @@ namespace Mantid
         "Index number of the first spectrum to read, only used if\n"
         "spectrum_max is set and only for single period data\n"
         "(default 0)" );
-      declareProperty( "SpectrumMax", unSetInt, mustBePositive->clone(),
+      declareProperty( "SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
         "Index of last spectrum to read, only for single period data\n"
         "(default the last spectrum)");
 
@@ -390,19 +390,8 @@ namespace Mantid
       m_spec_max = getProperty("SpectrumMax");
       //Are we using a list of spectra or all the spectra in a range?
       m_list = !m_spec_list.empty();
-      m_interval = (m_spec_max != unSetInt);
-      if ( m_spec_max == unSetInt ) m_spec_max = 0;
-
-      // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
-      //if ( m_numberOfPeriods > 1)
-      //{
-      //  if ( m_list || m_interval )
-      //  {
-      //    m_list = false;
-      //    m_interval = false;
-      //    g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
-      //  }
-      //}
+      m_interval = (m_spec_max != EMPTY_INT());
+      if ( m_spec_max == EMPTY_INT() ) m_spec_max = 0;
 
       // Check validity of spectra list property, if set
       if ( m_list )

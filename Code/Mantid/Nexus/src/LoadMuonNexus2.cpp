@@ -31,50 +31,10 @@ namespace Mantid
     using namespace API;
 
     /// Empty default constructor
-    LoadMuonNexus2::LoadMuonNexus2() : 
-    Algorithm(),
-      m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
-      m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT())
+    LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus()
+      //m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
+      //m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT())
     {}
-
-    /// Initialisation method.
-    void LoadMuonNexus2::init()
-    {
-      std::vector<std::string> exts;
-      exts.push_back("nxs");
-      declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The name of the Nexus file to load" );      
-      /* declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
-      "The name of the workspace to be created as the output of the\n"
-      "algorithm. For multiperiod files, one workspace will be\n"
-      "generated for each period");*/
-      declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output),
-        "The name of the workspace to be created as the output of the\n"
-        "algorithm. For multiperiod files, one workspace will be\n"
-        "generated for each period");
-
-
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-      mustBePositive->setLower(0);
-      declareProperty( "SpectrumMin",0, mustBePositive,
-        "Index number of the first spectrum to read, only used if\n"
-        "spectrum_max is set and only for single period data\n"
-        "(default 0)" );
-      declareProperty( "SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
-        "Index of last spectrum to read, only for single period data\n"
-        "(default the last spectrum)");
-
-      declareProperty(new ArrayProperty<int>("SpectrumList"), 
-        "Array, or comma separated list, of indexes of spectra to\n"
-        "load");
-      declareProperty("AutoGroup",false,
-        "Determines whether the spectra are automatically grouped\n"
-        "together based on the groupings in the NeXus file, only\n"
-        "for single period data (default no)");
-
-      declareProperty("EntryNumber", 0, mustBePositive->clone(),
-        "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
-    }
 
     /** Executes the algorithm. Reading in the file and creating and populating
     *  the output workspace
@@ -96,6 +56,29 @@ namespace Mantid
       // Open the data entry
       std::string entryName = root.groups()[iEntry].nxname;
       NXEntry entry = root.openEntry(entryName);
+
+      NXInfo info = entry.getDataSetInfo("definition");
+      if (info.stat == NX_ERROR)
+      {
+        info = entry.getDataSetInfo("analysis");
+        if (info.stat == NX_OK && entry.getString("analysis") == "muonTD")
+        {
+          LoadMuonNexus::exec();
+          return;
+        }
+        else
+        {
+          throw std::runtime_error("Unknown Muon Nexus file format");
+        }
+      }
+      else
+      {
+        std::string definition = entry.getString("definition");
+        if (info.stat == NX_ERROR || entry.getString("definition") != "pulsedTD")
+        {
+          throw std::runtime_error("Unknown Muon Nexus file format");
+        }
+      }
 
       // Read in the instrument name from the Nexus file
       m_instrument_name = entry.getString("instrument/name");
@@ -232,156 +215,22 @@ namespace Mantid
         // Just a sanity check
         assert(counter == total_specs);
 
-    //    bool autogroup = getProperty("AutoGroup");
+        bool autogroup = getProperty("AutoGroup");
 
-    //    if (autogroup)
-    //    {
-
-    //      //Get the groupings
-    //      int max_group = 0;
-    //      // use a map for mapping group number and output workspace index in case 
-    //      // there are group numbers > number of groups
-    //      std::map<int,int> groups;
-    //      m_groupings.resize(nxload.numDetectors);
-    //      bool thereAreZeroes = false;
-    //      for (int i =0; i < nxload.numDetectors; ++i)
-    //      {
-    //        int ig = nxload.detectorGroupings[i];
-    //        if (ig == 0)
-    //        {
-    //          thereAreZeroes = true;
-    //          continue;
-    //        }
-    //        m_groupings[i] = ig;
-    //        if (groups.find(ig) == groups.end())
-    //          groups[ig] = groups.size();
-    //        if (ig > max_group) max_group = ig;
-    //      }
-
-    //      if (thereAreZeroes)
-    //        for (int i =0; i < nxload.numDetectors; ++i)
-    //        {
-    //          int ig = nxload.detectorGroupings[i];
-    //          if (ig == 0)
-    //          {
-    //            ig = ++max_group;
-    //            m_groupings[i] = ig;
-    //            groups[ig] = groups.size();
-    //          }
-    //        }
-
-    //        int numHists = localWorkspace->getNumberHistograms();
-    //        int ngroups = int(groups.size()); // number of groups
-
-    //        // to output groups in ascending order
-    //        {
-    //          int i=0;
-    //          for(std::map<int,int>::iterator it=groups.begin();it!=groups.end();it++,i++)
-    //          {
-    //            it->second = i;
-    //            g_log.information()<<"group "<<it->first<<": ";
-    //            bool first = true;
-    //            int first_i,last_i;
-    //            for(int i=0;i<numHists;i++)
-    //              if (m_groupings[i] == it->first)
-    //              {
-    //                if (first) 
-    //                {
-    //                  first = false;
-    //                  g_log.information()<<i;
-    //                  first_i = i;
-    //                }
-    //                else
-    //                {
-    //                  if (first_i >= 0)
-    //                  {
-    //                    if (i > last_i + 1)
-    //                    {
-    //                      g_log.information()<<'-'<<i;
-    //                      first_i = -1;
-    //                    }
-    //                  }
-    //                  else
-    //                  {
-    //                    g_log.information()<<','<<i;
-    //                    first_i = i;
-    //                  }
-    //                }
-    //                last_i = i;
-    //              }
-    //              else
-    //              {
-    //                if (!first && first_i >= 0)
-    //                {
-    //                  if (last_i > first_i)
-    //                    g_log.information()<<'-'<<last_i;
-    //                  first_i = -1;
-    //                }
-    //              }
-    //              if (first_i >= 0 && last_i > first_i)
-    //                g_log.information()<<'-'<<last_i;
-    //              g_log.information()<<'\n';
-    //          }
-    //        }
-
-    //        //Create a workspace with only two spectra for forward and back
-    //        DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-    //          (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
-
-    //        boost::shared_array<int> spec(new int[numHists]);
-    //        boost::shared_array<int> dets(new int[numHists]);
-
-    //        //Compile the groups
-    //        for (int i = 0; i < numHists; ++i)
-    //        {    
-    //          int k = groups[ m_groupings[numHists*period + i] ];
-
-    //          for (int j = 0; j < localWorkspace->blocksize(); ++j)
-    //          {
-    //            groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
-
-    //            //Add the errors in quadrature
-    //            groupedWS->dataE(k)[j] 
-    //            = sqrt(pow(groupedWS->dataE(k)[j], 2) + pow(localWorkspace->dataE(i)[j], 2));
-    //          }
-
-    //          //Copy all the X data
-    //          groupedWS->dataX(k) = localWorkspace->dataX(i);
-    //          spec[i] = k + 1;
-    //          dets[i] = i + 1;
-    //        }
-
-    //        m_groupings.clear();
-
-    //        // All two spectra
-    //        for(int k=0;k<ngroups;k++)
-    //        {
-    //          groupedWS->getAxis(1)->spectraNo(k)= k + 1;
-    //        }
-
-    //        groupedWS->mutableSpectraMap().populate(spec.get(),dets.get(),numHists);
-
-    //        // Assign the result to the output workspace property
-    //        if(m_numberOfPeriods>1)
-    //          setProperty(outws,groupedWS);
-    //        else
-    //        {
-    //          setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(groupedWS));
-
-    //        }
-
-    //    }
-    //    else
-    //    {
-    //      // Assign the result to the output workspace property
+        if (autogroup)
+        {
+          g_log.warning("Autogrouping is not implemented for muon NeXus version 2 files");
+        }
+        //else
+        //{
+          // Assign the result to the output workspace property
           if(m_numberOfPeriods>1)
             setProperty(outws,localWorkspace);
           else
           {
             setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
           }
-
-    //    }
+        //}
 
       } // loop over periods
 
@@ -399,17 +248,6 @@ namespace Mantid
       m_list = !m_spec_list.empty();
       m_interval = (m_spec_max != EMPTY_INT());
       if ( m_spec_max == EMPTY_INT() ) m_spec_max = 0;
-
-      //// If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
-      //if ( m_numberOfPeriods > 1)
-      //{
-      //  if ( m_list || m_interval )
-      //  {
-      //    m_list = false;
-      //    m_interval = false;
-      //    g_log.warning("Ignoring spectrum properties in this multiperiod dataset");
-      //  }
-      //}
 
       // Check validity of spectra range, if set
       if ( m_interval )

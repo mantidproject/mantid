@@ -94,13 +94,9 @@ namespace Mantid
         g_log.error("Error no entries found in " + m_filename);
         throw Exception::FileError("Error no entries found in " , m_filename);
       }
-      if( definition[0]==muonTD )
+      if( definition[0]==muonTD || definition[0]==pulsedTD)
       {
         runLoadMuonNexus();
-      }
-      else if( definition[0]==pulsedTD )
-      {
-        runLoadMuonNexus2();
       }
       else if( entryName[0]=="mantid_workspace_1" )
       {
@@ -159,72 +155,6 @@ namespace Mantid
       //   g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
       //  }
       if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus2 sub-algorithm");
-      // Get pointer to the workspace created
-      //  m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
-      //  setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));
-      Workspace_sptr localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
-      setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-      //
-      // copy pointers to any new output workspaces created by alg LoadMuonNexus to alg LoadNexus
-      // Loop through names of form "OutputWorkspace<n>" where <n> is integer from 2 upwards
-      // until name not found
-      //
-
-      int period=0;
-      bool noError=true;
-      while(noError)
-      {
-        std::stringstream suffix;
-        //period++;
-        suffix << (period+1);
-        std::string opWS = outputWorkspace + "_"+suffix.str();
-        std::string WSName = m_workspace + "_" + suffix.str();
-        try
-        {
-          m_localWorkspace=loadMuonNexus->getProperty(opWS); 
-          declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(opWS,WSName,Direction::Output));
-          setProperty<Workspace2D_sptr>(opWS,m_localWorkspace);
-          period++;
-        }
-        catch (Exception::NotFoundError)
-        {
-          noError=false;
-        }
-      }
-
-    }
-
-    void LoadNexus::runLoadMuonNexus2()
-    {
-      IAlgorithm_sptr loadMuonNexus = createSubAlgorithm("LoadMuonNexus2",0.,1.);
-      // Pass through the same input filename
-      loadMuonNexus->setPropertyValue("Filename",m_filename);
-      // Set the workspace property
-      std::string outputWorkspace="OutputWorkspace";
-      loadMuonNexus->setPropertyValue(outputWorkspace,m_workspace);
-      //Get the array passed in the spectrum_list, if an empty array was passed use the default 
-      std::vector<int> specList = getProperty("SpectrumList");
-      if ( !specList.empty() )
-        loadMuonNexus->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
-      //
-      int specMax = getProperty("SpectrumMax");
-      if( specMax != unSetInt )
-      {
-        loadMuonNexus->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
-        loadMuonNexus->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
-      }
-      loadMuonNexus->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
-
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      // try
-      // {
-      loadMuonNexus->execute();
-      // }
-      // catch (std::runtime_error&)
-      // {
-      //   g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
-      //  }
-      if ( ! loadMuonNexus->isExecuted() ) g_log.error("Unable to successfully run LoadMuonNexus sub-algorithm");
       // Get pointer to the workspace created
       //  m_localWorkspace=loadMuonNexus->getProperty(outputWorkspace); 
       //  setProperty(outputWorkspace,boost::dynamic_pointer_cast<Workspace>(m_localWorkspace));

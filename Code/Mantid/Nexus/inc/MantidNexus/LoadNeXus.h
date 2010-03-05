@@ -91,9 +91,6 @@ namespace Mantid
 	  /// run LoadMuonNexus
 	  void runLoadMuonNexus();
 
-	  /// run LoadMuonNexus2
-	  void runLoadMuonNexus2();
-
 	  /// run LoadIsisNexus
 	  void runLoadIsisNexus();
 
