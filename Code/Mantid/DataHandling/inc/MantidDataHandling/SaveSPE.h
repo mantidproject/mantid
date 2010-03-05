@@ -44,7 +44,7 @@ class DLLExport SaveSPE : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  SaveSPE() : API::Algorithm(){}
+  SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(-1) {}
   /// Virtual destructor
   virtual ~SaveSPE() {}
   /// Algorithm's name
@@ -55,10 +55,27 @@ public:
   virtual const std::string category() const { return "DataHandling"; }
   ///
 private:
+  ///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
+  int m_nBins;
+  ///the SPE files have a constant number of numbers writen on each line, but depending on the number of bins there will be some "spare" numbers at the end of the block, this holds that number of spares
+  int m_remainder;
+
+  void writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile);
+  void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const;
+  void writeMaskFlags(FILE * const outFile) const;
+  void writeBins(const MantidVec &Vs, FILE * const outFile) const;
+  void writeValue(const double value, FILE * const outFile) const;
+  void logAnyMissing(std::vector<int> &spuriousSpectra) const;
   /// Initialisation code
   void init();
   ///Execution code
   void exec();
+
+protected:
+  /// the mask flag (=-1e30) from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
+  static const double MASK_FLAG;
+  /// the error value (=0.0) for spectra whose detectors are all masked, from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
+  static const double MASK_ERROR;
 };
 
 } // namespace DataHandling
