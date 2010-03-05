@@ -152,7 +152,7 @@ void SaveSPE::exec()
 *  @param WS the workspace to be saved
 *  @param outFile the file object to write to
 */
-void SaveSPE::writeHists(const MatrixWorkspace_const_sptr WS, FILE * const outFile)
+void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile)
 {
   // We write out values NUM_PER_LINE at a time, so will need to do extra work if nBins isn't a factor of NUM_PER_LINE
   m_remainder = m_nBins % NUM_PER_LINE;
@@ -196,7 +196,7 @@ void SaveSPE::writeHists(const MatrixWorkspace_const_sptr WS, FILE * const outFi
 *  @param outFile the file object to write to
 *  @param specIn the index number of the histgram to write
 */
-void SaveSPE::writeHist(const MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const
+void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const
 {
   fprintf(outFile, Y_HEADER);
   writeBins(WS->readY(specIn), outFile);
