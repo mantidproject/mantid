@@ -75,7 +75,6 @@ public:
 
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-    ws->populateInstrumentParameters();
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
@@ -150,7 +149,6 @@ public:
 
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-    ws->populateInstrumentParameters();
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
@@ -183,17 +181,13 @@ public:
 
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
-    ws->populateInstrumentParameters();
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
 
-    // get detector corresponding to workspace index 0
     IDetector_sptr det = ws->getDetector(101);  
-
     TS_ASSERT_EQUALS( det->getID(), 102046);
     TS_ASSERT_EQUALS( det->getName(), "Det45");
-
     Parameter_sptr param = paramMap.getRecursive(&(*det), "Alpha0", "fitting");
     const FitParameter& fitParam = param->value<FitParameter>();
     TS_ASSERT_DELTA( fitParam.getValue(), 0.734079, 0.0001);

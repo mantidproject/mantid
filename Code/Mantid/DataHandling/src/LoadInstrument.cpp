@@ -320,9 +320,12 @@ void LoadInstrument::exec()
     }
     writer->write();
   }
+
+  // populate parameter map of workspace 
+  localWorkspace->populateInstrumentParameters();
+
   // Add the instrument to the InstrumentDataService
   InstrumentDataService::Instance().add(instrumentFile,m_instrument);
-  return;
 }
 
 /** Assumes second argument is a XML location element and its parent is a component element
