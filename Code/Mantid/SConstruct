@@ -29,10 +29,9 @@ opts.Add('gcc44','Set to 1 to build with gcc44 on RHEL5', 0)
 env = Environment(ENV=os.environ, options = opts)
 Help(opts.GenerateHelpText(env))
 debug = ARGUMENTS.get('debug', 0)
-matlab = ARGUMENTS.get('matlab', 0)
 
 # on RHEL5 gcc 4.1 is the default
-# gcc 4.3 installed under a different name
+# gcc 4.4 installed under a different name
 gcc44 = ARGUMENTS.get('gcc44', 0)
 
 if int(gcc44) :
@@ -49,7 +48,6 @@ if int(gcc44) :
 #get libraries and the library directories
 print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
-uppath=os.path.abspath('../')
 
 libList = []
 boost_append=''
@@ -59,7 +57,7 @@ if not env.GetOption('clean'): # do not re-rerun checking on a "scons -c"
 		boost_append = '-gcc41'
 	env = conf.Finish()
 
-libDirList = [uppath,cwdpath ]
+libDirList = []
 cflags = []
 dirList = []
 cppPaths = []
@@ -101,7 +99,6 @@ if os.name == 'nt':
 		libDirList.append(third_party + '/lib/win64/')
 	
 	libList.append('python25')
-	libList.append('libNeXus-0')
 
 	libList.append('gsl')
 	libList.append('ws2_32')   # winsock library
@@ -197,6 +194,7 @@ elif platform.system() == 'Darwin':
 	cppPaths.append(third_party+'/include')
 	cppPaths.append(third_party+'/include/muParser')
 	libDirList.append(third_party+'/lib/mac')
+	env.Append(SHLINKFLAGS='-install_name @executable_path/./${TARGET.file}')
 	
 if os.name == 'posix':
 	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
@@ -207,7 +205,6 @@ if os.name == 'posix':
 	libList.append('boost_regex'+boost_append)
 	libList.append('boost_signals'+boost_append)
 	libList.append('boost_date_time'+boost_append)
-	libList.append('NeXus')
 	libList.append('muparser')
 	libList.append('gsl')
 	if sys.platform == 'darwin':
@@ -241,23 +238,6 @@ if conf.CheckCXXHeader('unordered_map.h'):
 	conf.env.Append('-DHAS_UNORDERED_MAP_H')
 env = conf.Finish()
 
-#GET INCLUDE PATHS FOR OTHER PARTS OF MANTID
-dirpath=os.listdir(uppath)
-while(len(dirpath)):
-	try:
-		item=dirpath.pop(0)
-		if not item.startswith("RPM_Kit"):
-			for file in os.listdir("../"+item):
-				fullPath="../"+item+"/"+file
-				if (file=="inc"):
-					cppPaths.insert(0,os.path.abspath(fullPath))
-				elif (os.path.isdir(fullPath) and (not file.endswith('svn') )
-				and (not file.endswith('test'))):
-					dirpath.append(fullPath[3:])
-	except:
-		pass
-
-
 #Collect the includes into a single directory
 MantidBuild.collectIncludes('.', 'includes')
 
@@ -287,73 +267,71 @@ if int(debug) == 0:
 
 #Export for SConscripts
 env.Append(CCFLAGS=cflags)
+cppPaths.append('inc')
 env.Append(CPPPATH=cppPaths)
 env.Replace(MYLIBLIST=libList)
 env.Replace(MYLIBDIRLIST=libDirList)
 
 Export('env')
 
-#Real work begins here
-subProjs = []
+# Real work begins here
 
-#This order matters slightly! Kernel-geometry-api in that order
-subProjs.append('Kernel')
-subProjs.append('Geometry')
-subProjs.append('API')
-subProjs.append('DataObjects')
+# This order matters slightly! Kernel-geometry-api in that order
+coreSubProjs = []
+coreSubProjs.append('Kernel')
+coreSubProjs.append('Geometry')
+coreSubProjs.append('API')
+
+for subproj in coreSubProjs:
+	ret = SConscript([subproj+'/SConscript'])
+	env.Install(dest_dir, ret['shared'])
+	env.Append(MYLIBLIST=ret['libs'])
+	env.Append(CPPPATH='#/'+subproj+'/inc')
+
+# Now build DataObjects, PythonAPI & MatlabAPI, 
+# which depend on Kernel, Geometry & API.
+# Python interface
+ret = SConscript('PythonAPI/SConscript')
+env.Install(dest_dir, ret['shared'])
+# MATLAB interface
+matlab = ARGUMENTS.get('matlab', 0)
+if int(matlab) :
+       ret = SConscript(['MatlabAPI/SConscript'])
+       env.Install(dest_dir, ret['shared'])
+# Now DataObjects, and insert into list of dependencies
+ret = SConscript('DataObjects/SConscript')
+env.Install(dest_dir, ret['shared'])
+env.Append(MYLIBLIST=ret['libs'])
+env.Append(CPPPATH=['#/DataObjects/inc'])
+
+# Now build the libraries which depend on Kernel, Geomerty, API & DataObjects
+subProjs = []
 subProjs.append('CurveFitting')
 subProjs.append('Algorithms')
 subProjs.append('DataHandling')
 subProjs.append('Nexus')
-subProjs.append('PythonAPI')
 subProjs.append('Crystal')
 
-# we want to link libraries in the reverse order we build them
-shared_libraries = []
-static_libraries = []
-shared_objects = []
-lib_list = []
-orig_libs = env['MYLIBLIST']
-
-f=open('libs.txt', 'w')
-
 for subproj in subProjs:
-	ret = SConscript([subproj+'/SConscript'])
-	if len(ret) == 0:
-	   continue
-	env.Install(dest_dir, ret['shared'])
-	f.write(str( ret['shared'][0]) + '\n')
-	shared_libraries.insert(0,ret['shared'])
-	shared_objects = shared_objects + ret['sharedobjs']
-	lib_list.insert(0,ret['libs'])
-	env.Replace(MYLIBLIST=orig_libs + lib_list)
-
-f.close()
-
-env.Replace(SHARED_LIST=shared_libraries)
-
-#
-# Correct bug in windows scons - OBJSUFFIX is not substituted for some reason
-#
-for i in range(len(shared_objects)) :
-    shared_objects[i] = string.replace(shared_objects[i], '$OBJSUFFIX', env['OBJSUFFIX'])
-
-# User Algs
-ret = SConscript(['UserAlgorithms/SConscript'])
-env.Install('Bin/Plugins', ret['shared'])
-    
-# matlab interface
-if int(matlab) :
-       ret = SConscript(['MatlabAPI/SConscript'])
-       env.Install(dest_dir, ret['shared'])
+    ret = SConscript(subproj+'/SConscript')
+    if ( len(ret) > 0 ):
+       env.Install(dest_dir, ret['shared'])    
 
 # main program
 ret = SConscript(['Main/SConscript'])
 env.Install(dest_dir, ret['shared'])
 
+# User Algs
+# Currently has a dependency on CurveFitting (which ought to be removed)
+env.Append(MYLIBLIST='MantidCurveFitting')
+env.Append(CPPPATH='#/CurveFitting/inc')
+ret = SConscript(['UserAlgorithms/SConscript'])
+env.Install('Bin/Plugins', ret['shared'])
+
+# The unit tests
 skiptest=ARGUMENTS.get('skiptest',0)
 if not int(skiptest) and not env.GetOption('clean'):
-	print 'Building Code and Tests.  Specify "skiptest=1" to skip the tests'
+	print 'Building Tests.  Specify "skiptest=1" to skip the tests'
 	# tests
 	ret = SConscript(['Build/Tests/SConscript'])
 else:

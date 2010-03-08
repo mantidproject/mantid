@@ -13,7 +13,7 @@ import MantidBuild
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_MAIN',1)])
-shared_list = env['SHARED_LIST']
+#shared_list = env['SHARED_LIST']
 #static_list = env['STATIC_LIST']
 libList = env['MYLIBLIST']
 libDirList = env['MYLIBDIRLIST']

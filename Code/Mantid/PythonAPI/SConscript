@@ -12,11 +12,17 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_PYTHON_API',1)])
+# linux/mac
 if os.name == 'posix':
-   #env.Append(CPPPATH='/usr/include/python' + sys.version[0:3])
+   #myenv.Append(CPPPATH='/usr/include/python' + sys.version[0:3])
    myenv.Append(MYLIBLIST='python' + sys.version[0:3])
    myenv.Replace(SHLIBSUFFIX='.so')
+# windows
 else:
+   #python_path = 'C:/Python25/'
+   #myenv.Append(CPPPATH=python_path+'include/')
+   #myenv.Append(MYLIBDIRLIST=python_path+'libs/')
+   #myenv.Append(MYLIBLIST=python25)
    myenv.Replace(SHLIBSUFFIX='.pyd')
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 
