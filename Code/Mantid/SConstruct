@@ -177,8 +177,7 @@ if os.name == 'posix':
 	libList.append('boost_date_time'+boost_append)
 	libList.append('muparser')
 	libList.append('gsl')
-	if sys.platform == 'darwin':
-            libList.append('z')
+        libList.append('z')
 
 	# OpenMP support library which doesn't get linked by default for some reason
 	# Add the library if it is available on the system

@@ -17,20 +17,20 @@ echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
 #  - it's always a good idea to run your new/changed test on its own
 if [ $# -eq 0 ]; then
-	cxxtestgen.pl --error-printer -o runner.cpp *.h
+	python ../../../Third_Party/src/cxxtest/cxxtestgen.py --error-printer -o runner.cpp *.h
 else
-	cxxtestgen.pl --error-printer -o runner.cpp $*
+	python ../../../Third_Party/src/cxxtest/cxxtestgen.py --error-printer -o runner.cpp $*
 fi
 echo
 
 echo "Compiling the test executable..."
 g++ -w -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc \
-	                         -I ../../../Third_Party/include -I /usr/include/python2.3 \
-	                         -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 -L $OPENCASCADELIBS \
+	                         -I ../../../Third_Party/src/cxxtest -I /usr/include/python2.4 \
+	                         -L ../../Bin/Shared -L /opt/OpenCASCADE/lib64 \
 	                         -lMantidPythonAPI -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
 	                         -lPocoFoundation -lPocoUtil -lboost_python -lboost_regex \
-	                         -lboost_date_time -lboost_signals -lpython2.3 \
-	                         -lmuparserd -lgsl -lgslcblas -lGL -lGLU -lgts \
+	                         -lboost_date_time -lboost_signals -lpython2.4 \
+	                         -lmuparser -lgsl -lgslcblas -lGL -lGLU -lgts \
 				             -lTKernel -lTKBO -lTKPrim -lTKMesh
 echo
 
