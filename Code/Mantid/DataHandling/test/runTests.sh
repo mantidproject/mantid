@@ -21,22 +21,22 @@ echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
 #  - it's always a good idea to run your new/changed test on its own
 if [ $# -eq 0 ]; then
-	python ../../../Third_Party/src/cxxtest/cxxtestgen.py
+	cxxtestgen.pl --error-printer -o runner.cpp *.h
 else
-	python ../../../Third_Party/src/cxxtest/cxxtestgen.py --error-printer -o runner.cpp $*
+	cxxtestgen.pl --error-printer -o runner.cpp $*
 fi
 echo
 
 echo "Compiling the test executable..."
 # -lboost_filesystem added for the SaveCSVTest test
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc \
-            -I ../../Geometry/inc  -I ../../../Third_Party/src \
-            -L../../Bin/Shared -L/opt/OpenCASCADE/lib64\
+            -I ../../Geometry/inc  -I ../../../Third_Party/include \
+            -L../../debug -L../../Build -L../../../Third_Party/lib/linux64 -L $OPENCASCADELIBS \
             -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
             -lPocoFoundation -lPocoUtil \
             -lboost_regex -lboost_signals -lboost_date_time \
-            -lmuparser -lgsl -lgslcblas -lNeXus -lGL -lGLU \
-            -lTKernel -lTKBO -lTKPrim -lTKMesh -lpython2.4
+            -lmuparserd -lgsl -lgslcblas -lNeXus -lGL -lGLU -lgts \
+            -lTKernel -lTKBO -lTKPrim -lTKMesh
 echo
 
 
