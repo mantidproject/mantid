@@ -439,6 +439,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\LoadDAETest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidDataHandling\LoadDetectorInfo.h"
 				>
 			</File>
