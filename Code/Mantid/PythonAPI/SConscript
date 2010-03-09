@@ -17,6 +17,7 @@ if os.name == 'posix':
    #myenv.Append(CPPPATH='/usr/include/python' + sys.version[0:3])
    myenv.Append(MYLIBLIST='python' + sys.version[0:3])
    myenv.Replace(SHLIBSUFFIX='.so')
+   myenv.Append(MYLIBLIST='boost_python'+MantidBuild.findBoost('','')['append'])
 # windows
 else:
    #python_path = 'C:/Python25/'

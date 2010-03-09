@@ -50,13 +50,6 @@ print 'Current path == ',os.getcwd()
 cwdpath=os.getcwd()
 
 libList = []
-boost_append=''
-if not env.GetOption('clean'): # do not re-rerun checking on a "scons -c"
-	conf = Configure(env)
-	if conf.CheckLib('boost_date_time-gcc41','_ZNK5boost9gregorian10greg_month14as_long_stringEv'):
-		boost_append = '-gcc41'
-	env = conf.Finish()
-
 libDirList = []
 cflags = []
 dirList = []
@@ -64,6 +57,7 @@ cppPaths = []
 lpts = []
 
 boost_path = ''
+boost_append=''
 poco_path = ''
 third_party = os.path.abspath('../Third_Party/')
 opencascade_path = ''
@@ -129,31 +123,7 @@ else:
 		boost_append = ''
 		
 	opencascade_path= '/opt/OpenCASCADE'
-	#Find the boost_path and the boost append
-	startPath = '/usr/local/include/'
-	dirpath=os.listdir(startPath)
-	while(len(dirpath)):
-		try:
-			item=dirpath.pop(0)
-			if item.startswith('boost'):
-				for file in os.listdir(startPath+item):
-					print file
-					if file == 'weak_ptr.hpp':
-						boost_path = startPath
-					elif file.startswith('boost'):
-						boost_path =startPath+item				
-		except:
-			pass
-
-	dirpath=os.listdir('/usr/local/lib/')
-	while(len(dirpath)):
-		try:
-			item=dirpath.pop(0)
-			m=re.search("libboost_python(.*).so", item)
-			if m != None:
-				boost_append=m.group(1)
-		except:
-			pass	
+	MantidBuild.findBoost(boost_path,boost_append)
 	
 print "POCO_ROOT: ",poco_path
 print "BOOST_ROOT: ",boost_path
@@ -201,7 +171,7 @@ if os.name == 'posix':
 	libList.append('PocoUtil')
 	libList.append('PocoFoundation')
 	libList.append('PocoXML')
-	libList.append('boost_python'+boost_append)
+	#libList.append('boost_python'+boost_append)
 	libList.append('boost_regex'+boost_append)
 	libList.append('boost_signals'+boost_append)
 	libList.append('boost_date_time'+boost_append)
@@ -318,8 +288,8 @@ for subproj in subProjs:
        env.Install(dest_dir, ret['shared'])    
 
 # main program
-#ret = SConscript(['Main/SConscript'])
-#env.Install(dest_dir, ret['shared'])
+ret = SConscript(['Main/SConscript'])
+env.Install(dest_dir, ret['shared'])
 
 # User Algs
 # Currently has a dependency on CurveFitting (which ought to be removed)
