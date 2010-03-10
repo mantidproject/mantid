@@ -4,7 +4,7 @@ import os
 from shutil import move
 from time import strftime
 import sys
-sys.append('../Mantid/Build')
+sys.path.append('../Mantid/Build')
 import buildNotification as notifier
 
 #Email settings
@@ -42,8 +42,8 @@ fileBuildErr = localLogDir+'error.log'
 mssgBuildErr = open(fileBuildErr,'r').read()
 notifier.moveToArchive(fileBuildErr,remoteArchiveDir)
 
-#if buildSuccess:
-#     sys.exit(0)
+if buildSuccess:
+     sys.exit(0)
 
 #Construct Message
 httpLinkToArchive = 'http://download.mantidproject.org/' + relativeLogDir.replace("\\","/")
