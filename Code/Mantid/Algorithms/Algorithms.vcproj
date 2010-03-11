@@ -271,10 +271,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\EfficiencyScriptInput.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\ExponentialCorrection.cpp"
 				>
 			</File>
@@ -303,19 +299,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\FindPeaks1D.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\FlatBackground.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\src\FlatPlateAbsorption.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\GEMScriptInput.cpp"
 				>
 			</File>
 			<File
@@ -336,10 +324,6 @@
 			</File>
 			<File
 				RelativePath=".\src\InputWSDetectorInfo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\LOQScriptInput.cpp"
 				>
 			</File>
 			<File
@@ -673,10 +657,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\EfficiencyScriptInput.h"
-				>
-			</File>
-			<File
 				RelativePath=".\inc\MantidAlgorithms\ExponentialCorrection.h"
 				>
 			</File>
@@ -713,10 +693,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\FindPeaks1D.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\FindPeaksTest.h"
 				>
 			</File>
@@ -730,10 +706,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\FlatPlateAbsorption.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\GEMScriptInput.h"
 				>
 			</File>
 			<File
@@ -766,10 +738,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\InputWSDetectorInfo.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\LOQScriptInput.h"
 				>
 			</File>
 			<File
