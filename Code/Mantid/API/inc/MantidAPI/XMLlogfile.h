@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Interpolation.h"
 
 
 namespace Mantid
@@ -53,10 +54,9 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      XMLlogfile(const std::string& logfileID, const std::string& value, const std::string& paramName, 
-		 const std::string& type, const std::string& tie, const std::string& constraint, 
-		 const std::string& fitFunc, const std::string& extractSingleValueAs,
-		 const std::string& eq, Geometry::Component* comp);
+      XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation,
+        const std::string& paramName, const std::string& type, const std::string& tie, const std::string& constraint, 
+		    const std::string& fitFunc, const std::string& extractSingleValueAs, const std::string& eq, Geometry::Component* comp);
 
       /// Destructor
       ~XMLlogfile() {}
@@ -70,6 +70,7 @@ namespace Mantid
       const std::string m_tie;                /// specific to fitting parameter specify any tie
       const std::string m_constraint;                /// specific to fitting parameter specify any boundary constraint
       const std::string m_fittingFunction;    /// specific to fitting parameter specify fitting function
+      boost::shared_ptr<Kernel::Interpolation> m_interpolation; // specific to fitting parameter 
       const std::string m_extractSingleValueAs;  ///< describes the way to extract a single value from the log file( average, first number, etc)
       const std::string m_eq;         ///< muParser equation to calculate the parameter value from the log value
       const Geometry::Component* m_component;  ///< the component address

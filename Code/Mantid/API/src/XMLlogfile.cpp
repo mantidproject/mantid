@@ -29,14 +29,15 @@ Logger& XMLlogfile::g_log = Logger::get("XMLlogfile");
  *  @param eq muParser equation to calculate the parameter value from the log value
  *  @param comp The pointer to the instrument component
  */
-XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, const std::string& paramName, 
-		       const std::string& type, const std::string& tie, const std::string& constraint, 
-		       const std::string& fitFunc, const std::string& extractSingleValueAs, const std::string& eq, 
-		       Geometry::Component* comp)
+XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation, 
+                       const std::string& paramName, const std::string& type, const std::string& tie, const std::string& constraint, 
+		                   const std::string& fitFunc, const std::string& extractSingleValueAs, const std::string& eq, 
+		                   Geometry::Component* comp)
   : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type),
     m_tie(tie), m_constraint(constraint), m_fittingFunction(fitFunc),
     m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
 {
+  m_interpolation = interpolation;
 }
 
 

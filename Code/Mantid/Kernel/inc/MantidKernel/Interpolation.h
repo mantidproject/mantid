@@ -55,21 +55,45 @@ private:
   /// method used for doing the interpolation
   std::string m_name; 
 
+  /// unit of x
+  std::string m_xUnit;
+
 public:
 
-  /// Constructor
-  Interpolation(const std::string &name);
+  /// Constructor default to linear interpolation and x-unit set to TOF
+  Interpolation();
 
   /// add data point
   void addPoint(const double& xx, const double& yy);
 
   /// get interpolated value at location at
-  double value (const double& at);
+  double value(const double& at) const;
 
+  /// set interpolation method
+  void setMethod(const std::string& method) { m_name=method; }
+
+  /// get interpolation method
+  std::string getMethod() const { return m_name; };
+
+  /// set interpolation method
+  void setXUnit(const std::string& unit) { m_xUnit=unit; }
+
+  /// get interpolation method
+  std::string getXUnit() const { return m_xUnit; };
+
+  /// return false if no data has been added
+  bool containData() const { return m_x.size() ? true : false;}
+
+  /// Prints object to stream
+  void printSelf(std::ostream& os) const;
 
   /// static reference to the logger class
   static Logger& g_log;
 };
+
+// defining operator << and >>
+DLLExport std::ostream& operator<<(std::ostream&, const Interpolation& );
+DLLExport std::istream& operator>>(std::istream&, Interpolation&);
 
 } // namespace Kernel
 } // namespace Mantid

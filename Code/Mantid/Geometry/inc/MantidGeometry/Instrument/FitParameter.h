@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 //#include <fstream>
 #include "MantidKernel/System.h"
+#include "MantidKernel/Interpolation.h"
 
 namespace Mantid
 {
@@ -62,6 +63,10 @@ namespace Mantid
       std::string getFunction() const { return m_function; }
       /// set function
       std::string& setFunction() { return m_function; }
+      /// get look up table
+      Kernel::Interpolation getLookUpTable() const { return m_lookUpTable; }
+      /// set look up table
+      Kernel::Interpolation& setLookUpTable() { return m_lookUpTable; }
 
       /// Prints object to stream
       void printSelf(std::ostream& os) const;
@@ -75,6 +80,8 @@ namespace Mantid
       std::string m_constraint;
       /// name of fitting function
       std::string m_function;
+      /// look up table
+      Kernel::Interpolation m_lookUpTable;
     };
 
     // defining operator << and >>

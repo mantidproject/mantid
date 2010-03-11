@@ -62,8 +62,13 @@ namespace Geometry
 
     f.setConstraint() = values[2];
 
-    if ( values.count() > 3 )
-      f.setTie() = values[3];
+    f.setTie() = values[3];
+
+    if ( values.count() > 4 )
+    {
+      std::stringstream str(values[4]);
+      str >> f.setLookUpTable();
+    }
 
     return in;
   }

@@ -61,7 +61,6 @@ public:
   void testParameterTags()
   {
     LoadEmptyInstrument loader;
-
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDF_for_unit_testing2.xml");
@@ -115,6 +114,17 @@ public:
     TS_ASSERT( fitParam1.getTie().compare("") == 0 );
     TS_ASSERT( fitParam1.getFunction().compare("somefunction") == 0 );
     TS_ASSERT( fitParam1.getConstraint().compare("80 < toplevel < 120") == 0 );
+    TS_ASSERT( !fitParam1.getLookUpTable().containData() );
+
+    param = paramMap.getRecursive(&(*det), "toplevel2", "fitting");
+    const FitParameter& fitParam2 = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam2.getValue(), 0.0, 0.0001);
+    TS_ASSERT( fitParam2.getTie().compare("") == 0 );
+    TS_ASSERT( fitParam2.getFunction().compare("somefunction") == 0 );
+    TS_ASSERT( fitParam2.getConstraint().compare("") == 0 );
+    TS_ASSERT( fitParam2.getLookUpTable().containData() );
+    TS_ASSERT( fitParam2.getLookUpTable().getMethod().compare("linear") == 0 );
+    TS_ASSERT( fitParam2.getLookUpTable().getXUnit().compare("TOF") == 0 );
 
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");

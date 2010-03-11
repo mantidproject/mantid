@@ -12,6 +12,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/Interpolation.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
@@ -1011,6 +1012,26 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
     unsigned int numberLogfileEle = pNLlogfile->length();
     Element* pLogfileElem;
 
+    NodeList* pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
+    unsigned int numberLookUp = pNLLookUp->length();
+
+    if ( numberValueEle+numberLogfileEle+numberLookUp > 1 )
+    {
+      g_log.warning() << "XML element with name or type = " << comp->getName() <<
+        " contains <parameter> element where the value of the parameter has been specified" <<
+        " more than once. See www.mantidproject.org/InstrumentDefinitionFile for how the value" <<
+        " of the parameter is set in this case.";
+    }
+
+    if ( numberValueEle+numberLogfileEle+numberLookUp == 0 )
+    {
+      g_log.error() << "XML element with name or type = " << comp->getName() <<
+        " contains <parameter> for which no value is specified." <<
+        " See www.mantidproject.org/InstrumentDefinitionFile for how to set the value" <<
+        " of a parameter. This parameter is ignored.";
+      continue;
+    }
+
     // if more than one <value> specified for a parameter use only the first <value> element
     if ( numberValueEle >= 1 )
     {
@@ -1035,40 +1056,24 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
       if ( pLogfileElem->hasAttribute("extract-single-value-as") )
         extractSingleValueAs = pLogfileElem->getAttribute("extract-single-value-as");      
     }
-
     pNLlogfile->release();
     pNLvalue->release();
 
-    if ( numberValueEle+numberLogfileEle > 1 )
-    {
-      g_log.warning() << "XML element with name or type = " << comp->getName() <<
-        " contains <parameter> element where the value of the parameter has been specified" <<
-        " more than once. See www.mantidproject.org/InstrumentDefinitionFile for how the value" <<
-        " of the parameter is set in this case.";
-    }
-
-    if ( numberValueEle+numberLogfileEle == 0 )
-    {
-      g_log.error() << "XML element with name or type = " << comp->getName() <<
-        " contains <parameter> for which no value is specified." <<
-        " See www.mantidproject.org/InstrumentDefinitionFile for how to set the value" <<
-        " of a parameter. This parameter is ignored.";
-      continue;
-    }
 
     if ( pParamElem->hasAttribute("type") )
       type = pParamElem->getAttribute("type");
+
 
     // check if <fixed /> element present
 
     bool fixed = false;
     NodeList* pNLFixed = pParamElem->getElementsByTagName("fixed");
     unsigned int numberFixed = pNLFixed->length();
- 
     if ( numberFixed >= 1 )
     {
       fixed = true;
     }
+    pNLFixed->release();
 
     // some processing
 
@@ -1133,8 +1138,38 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
         constraint << paramName << " < " << atof( pMax->getAttribute("val").c_str() );
       }
     }
+    pNLMin->release();
+    pNLMax->release();
 
-    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, paramName, type, tie, constraint.str(), 
+
+    // Check if look up table is specified
+
+    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+
+    if ( numberLookUp >= 1 )
+    {
+      Element* pLookUp = static_cast<Element*>(pNLLookUp->item(0));
+
+      interpolation->setMethod(pLookUp->getAttribute("interpolation"));
+      interpolation->setXUnit(pLookUp->getAttribute("x-unit"));    
+
+      NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
+      unsigned int numberPoint = pNLpoint->length();
+
+      for ( int i = 0; i < numberPoint; i++)
+      {
+        Element* pPoint = static_cast<Element*>(pNLpoint->item(i));
+        double x = atof( pPoint->getAttribute("x").c_str() );
+        double y = atof( pPoint->getAttribute("y").c_str() );
+        interpolation->addPoint(x,y); 
+      }
+      pNLpoint->release();
+    }
+    pNLLookUp->release();
+
+
+
+    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, paramName, type, tie, constraint.str(), 
       fittingFunction, extractSingleValueAs, eq, comp));
     logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
   }
