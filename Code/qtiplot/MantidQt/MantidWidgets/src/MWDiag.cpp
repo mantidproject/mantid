@@ -17,21 +17,22 @@ using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 
 // default parameters writen to in the GUI
-static const bool G_NO_SOLIDS = false;
-static const char G_HIGH_ABSOLUTE[5] = "1e10";
-static const char G_LOW_ABSOLUTE[2] = "0";
-static const char G_SIGNIFIC_TEST[4] = "3.3";
-static const char G_HIGH_MEDIAN[4] = "3.0";
-static const char G_LOW_MEDIAN[4] = "0.1";
-static const char G_VARIATION[4] = "1.1";
-static const bool G_CHECK_BACK = true;
-static const char G_BACK_CRITERIA[4] = "5.0";
-static const double G_START_WINDOW_TOF = 18000;
-static const double G_END_WINDOW_TOF = 19500;
-static const bool G_NO_ZERO_BG = true;
+static const bool NO_SOLIDS = false;
+static const char HIGH_ABSOLUTE[5] = "1e10";
+static const char LOW_ABSOLUTE[2] = "0";
+static const char SIGNIFIC_TEST[4] = "3.3";
+static const char HIGH_MEDIAN[4] = "3.0";
+static const char LOW_MEDIAN[4] = "0.1";
+static const char VARIATION[4] = "1.1";
+static const bool CHECK_BACK = true;
+static const char BACK_CRITERIA[4] = "5.0";
+static const double START_WINDOW_TOF = 18000;
+static const double END_WINDOW_TOF = 19500;
+static const bool NO_ZERO_BG = true;
 
-MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru):
-  m_dispDialog(NULL), m_instru(instru), m_WBV1(NULL), m_WBV2(NULL),
+MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru, QWidget *childHook):
+  MantidWidget(parent),
+  m_dispDialog(NULL), m_mainApp(childHook), m_instru(instru), m_WBV1(NULL), m_WBV2(NULL),
   m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1)
 {
   // allows saving and loading the values the user entered on to the form
@@ -73,32 +74,32 @@ void MWDiag::loadDefaults()
   m_designWidg.leIFile->setText(
     m_prevSets.value("input mask", "").toString());
   m_designWidg.leSignificance->setText(
-    m_prevSets.value("significance", G_SIGNIFIC_TEST).toString());
+    m_prevSets.value("significance", SIGNIFIC_TEST).toString());
   m_designWidg.ckAngles->setChecked(
-    m_prevSets.value("no solid", G_NO_SOLIDS).toBool());
+    m_prevSets.value("no solid", NO_SOLIDS).toBool());
 
   m_designWidg.leHighAbs->setText(
-    m_prevSets.value("high abs", G_HIGH_ABSOLUTE).toString());
+    m_prevSets.value("high abs", HIGH_ABSOLUTE).toString());
   m_designWidg.leLowAbs->setText(
-    m_prevSets.value("low abs", G_LOW_ABSOLUTE).toString());
+    m_prevSets.value("low abs", LOW_ABSOLUTE).toString());
   m_designWidg.leHighMed->setText(
-    m_prevSets.value("high median", G_HIGH_MEDIAN).toString());
+    m_prevSets.value("high median", HIGH_MEDIAN).toString());
   m_designWidg.leLowMed->setText(
-    m_prevSets.value("low median", G_LOW_MEDIAN).toString());
+    m_prevSets.value("low median", LOW_MEDIAN).toString());
 
   m_designWidg.leVariation->setText(
-    m_prevSets.value("variation", G_VARIATION).toString());
+    m_prevSets.value("variation", VARIATION).toString());
 
   m_designWidg.ckDoBack->setChecked(
-    m_prevSets.value("test background", G_CHECK_BACK).toBool());
+    m_prevSets.value("test background", CHECK_BACK).toBool());
   m_designWidg.leAcceptance->setText(
-    m_prevSets.value("back criteria", G_BACK_CRITERIA).toString());
+    m_prevSets.value("back criteria", BACK_CRITERIA).toString());
   m_designWidg.ckZeroCounts->setChecked(
-    m_prevSets.value("no zero background", G_NO_ZERO_BG).toBool());
+    m_prevSets.value("no zero background", NO_ZERO_BG).toBool());
   m_designWidg.leStartTime->setText(
-    m_prevSets.value("TOF start", G_START_WINDOW_TOF).toString());
+    m_prevSets.value("TOF start", START_WINDOW_TOF).toString());
   m_designWidg.leEndTime->setText(
-    m_prevSets.value("TOF end", G_END_WINDOW_TOF).toString());
+    m_prevSets.value("TOF end", END_WINDOW_TOF).toString());
 }
 /// loads default values into each control using either the previous value used when the form was run or the default value for that control
 void MWDiag::saveDefaults()
@@ -141,6 +142,7 @@ void MWDiag::setupToolTips()
     "MedianDetectorTest is run)";
   m_designWidg.leSignificance->setToolTip(significanceToolTip);
   m_designWidg.lbSignificance->setToolTip(significanceToolTip);
+  m_designWidg.ckAngles->setToolTip("Not yet implemented");
 //-------------------------------------------------------------------------------------------------
   QString highAbsSetTool =
     "Reject any spectrum that contains more than this number of counts in total\n"
@@ -273,10 +275,12 @@ void MWDiag::browseClicked(const QString &buttonDis)
 * detectors.
 */
 void MWDiag::raiseDialog()
-{// uses new to create the form but the form should have setAttribute(Qt::WA_DeleteOnClose) and so the memory will be freed
-  m_dispDialog = new DiagResults(this);
+{// uses new to create the form and the form needs to execute setAttribute(Qt::WA_DeleteOnClose) so that its memory will be freed
+  m_dispDialog = new DiagResults(NULL);//QApplication::activeWindow());
   m_dispDialog->show();
   connect(m_dispDialog, SIGNAL(died()), this, SLOT(noDispDialog()));
+  connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&)),
+            this, SIGNAL(runAsPythonScript(const QString&)));
 }
 /** checks that the results dialog box hasn't been closed before asking it to display
 *  data
@@ -390,26 +394,26 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
       // must have the same scope as finalTest above, these structures are used to report progress and pass results from one test to another
       DiagResults::TestSummary sumOption1("");
       DiagResults::TestSummary sumOption2("");
-	  tempOutputWS.push_back(sumFirst.inputWS.toStdString());
+      tempOutputWS.push_back(sumFirst.inputWS.toStdString());
 
       if ( optional1.use_count() > 0 )
       {
         sumOption1 = whiteBeamCompTest(sumFirst, optional1);
-	    finalTest = &sumOption1;
+        finalTest = &sumOption1;
         tempOutputWS.push_back(sumOption1.inputWS.toStdString());
       }
 
       if ( optional2.use_count() > 0 )
       {
         sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
-	    finalTest = &sumOption2;
-	  }
+	      finalTest = &sumOption2;
+      }
 	
       //  the test are complete display and save output
-	  if ( ! outWS.isEmpty() )
+  	  if ( ! outWS.isEmpty() )
       {
         renameWorkspace(finalTest->outputWS, outWS);
-	    finalTest->outputWS = outWS;
+        finalTest->outputWS = outWS;
       }
       notifyDialog(*finalTest);
     }
@@ -417,7 +421,7 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
     {// the diag has died, probably the user closed it
       prob1 = "The results window was closed, calculation aborted";
     }
-    catch (std::runtime_error &e)
+    catch (std::exception &e)
     {
       return "Exception \""+QString(e.what())+"\" encountered running detector diagnostic tests";
     }
@@ -435,12 +439,20 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
   }
  
   if (prob1.isEmpty() && saveSettings)
-  {// avoids saving user settings that caused errors
+  {//avoid saving user settings that caused errors
     saveDefaults();
   }
-  
-  // if this method has continued running to this point it's likely taht problem=""
+  //tell the results window it may re-enable its buttons
+  blockPython(false);
+  // at this point it's likely that problem=="" but any problem would be returned
   return prob1;
+}
+void MWDiag::blockPython(const bool block)
+{//don't need to do anything if the dialog box was closed
+  if(m_dispDialog)
+  {
+    m_dispDialog->showButtons( ! block );
+  }
 }
 /** Pointers the passed pointer to an object will contain all the Python script for
 *  the two white beam vanadium detector test
@@ -452,7 +464,7 @@ QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp)
   if ( ! m_WBV2->getFileName().isEmpty() )
   {// the user has supplied an input file for the second test so fill the shared_ptr with the script
     whiteBeamComp.reset(
-	  new whiteBeam2(this, m_designWidg, m_WBV2->getFileName()));
+	    new whiteBeam2(this, m_designWidg, m_WBV2->getFileName()));
 	//report any problems trying to construct it, likely to be problems with the values suggested by the user
     return whiteBeamComp->checkNoErrors(m_validators);
   }
@@ -510,7 +522,7 @@ DiagResults::TestSummary MWDiag::whiteBeamCompTest(const DiagResults::TestSummar
 
   // adds the output workspace from the first test to the current script
   python->incPrevious(firstTest);
-  //uncomment out to check the script QMessageBox::critical(this, this->windowTitle(), python->python());
+  //uncomment out to check the script  QMessageBox::critical(this, this->windowTitle(), python->python());
   QString error = results.pythonResults(python->run());
   notifyDialog(results);
 
@@ -543,8 +555,8 @@ DiagResults::TestSummary MWDiag::backGroundTest(const DiagResults::TestSummary &
   {
     python->noSecondTest();
   }
-
-  QString error = results.pythonResults(python->run());// uncomment out this to see the script    QMessageBox::critical(this, this->windowTitle(), python->python());
+// uncomment out this to see the script QMessageBox::critical(this, this->windowTitle(), python->python());
+  QString error = results.pythonResults(python->run());
   notifyDialog(results);
 
   if ( ! error.isEmpty() )

@@ -2,13 +2,11 @@ from mantidsimple import *
 
 # returns a string with is comma separated list of the elements in the tuple, array or comma separated string!
 def listToString(list):
-  stringIt = str(list)
+  stringIt = str(list).strip()                                                   #remove any white space from the front and end
   if stringIt[0] == '[' or stringIt[0] == '(' :
-    # we get here if we were passed an array or tuple
-    lastInd = len(stringIt)-1
+    lastInd = len(stringIt)-1                                                    # we get here if we were passed an array or tuple
     if stringIt[lastInd] == ']' or stringIt[lastInd] == ')':
-      # only need to knock the brackets off
-      stringIt = stringIt[1:(lastInd-1)]
+      stringIt = stringIt[1:(lastInd)]                                           # only need to knock the brackets off
   return stringIt
 
 def stringToList(commaSeparated):
@@ -20,24 +18,25 @@ def stringToList(commaSeparated):
   return theList
     
 #sum all the workspaces, when the workspaces are not summed single input files are specified in this file and the final Python script is made of many copies of this file
-def sumWorkspaces(total, runNumbers):
-    if len(runNumbers) > 1:
-      for toAdd in runNumbers[ 1 : ] :
-        #workspaces are overwritten to save memory
-        instru.loadRunNumber(toAdd, conv.tempWS)
-        Plus(total, conv.tempWS, total)
-      mantid.deleteWorkspace(conv.tempWS)
+def sumWorkspaces(total, instrument, runNumbers):
+  if len(runNumbers) > 1:
+    tempWS = 'CommonFuncs_sumWorkspaces_tempory'
+    for toAdd in runNumbers[ 1 : ] :
+      instrument.loadRun(toAdd, tempWS)                               #workspaces are overwriten to save memory
+      Plus(total, tempWS, total)
+    mantid.deleteWorkspace(tempWS)                                    #from www.mantidproject.org/MantidPyFramework
   
 #-- Functions to do with input files
 # uses the extension to decide whether use LoadNexus or LoadRaw
 def LoadNexRaw(filename, workspace):
-  # this removes everything after the last, partition always returns three strings
+  filename = filename.strip()                                                   #remove any white space from the front or end of the name
+  # this removes everything after the last '.'  (rpartition always returns three strings)
   extension = filename.rpartition('.')[2]
-  if (extension == 'nxs') | (extension == 'NXS') :
+  if (extension.lower() == 'nxs') :
     #return the first property from the algorithm, which for LoadNexus is the output workspace
     return LoadNexus(filename, workspace)[0]
-  if (extension == 'raw') | (extension == 'RAW') :
-    return LoadRaw(filename, workspace, LoadLogFiles=0)[0]
+  if (extension.lower() == 'raw') :
+    return LoadRaw(filename, workspace)[0]
   #we shouldn't get to here, the function should have returned by now
   raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")
 
@@ -52,7 +51,7 @@ def getFileName(instrumentPref, runNumber):
   #only raw files are supported at the moment
   return instrumentPref + runNumber + '.raw'
 
-def loadRunNumber(instru, runNum, workspace):
+def loadRun(instru, runNum, workspace):
   return LoadNexRaw(getFileName(instru, runNum), workspace)
   
 def loadMask(MaskFilename):
@@ -91,10 +90,10 @@ class defaults:
   def getFileName(self, runNumber):
     try :
       number = int(str(runNumber), 10)
-    except TypeError :
-	# means we weren't passed a number assume it is a valid file name and return it unprocessed
-	    return runNumber
+    except Exception :
+      # means we weren't passed a number assume it is a valid file name and return it unprocessed
+      return runNumber
     return getFileName(self.instrument_pref, number)
     
-  def loadRunNumber(self, runNum, workspace):
+  def loadRun(self, runNum, workspace):
     return LoadNexRaw(self.getFileName(runNum), workspace)

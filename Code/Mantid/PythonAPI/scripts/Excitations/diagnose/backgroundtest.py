@@ -1,7 +1,6 @@
 from mantidsimple import *
 import DetectorTestLib as functions
 
-#--these settings are read in from the MantidPlot GUI so probably don't change these first lines
 THISTEST = 'Background test'
 #setup some workspace names (we need that they don't already exist because they will be overwriten) to make things easier to read later on
 SUM = "_FindBadDetects Sum"
@@ -27,7 +26,7 @@ else : MDTFile = ''
 
 try:#------------Calculations Start---
   #--load in the experimental run data  
-  dataFiles = (|EXPFILES|)
+  dataFiles = common.listToString('|EXPFILES|').split(',')
   # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
   LoadRaw(dataFiles[0], TEMPBIG)											#for usage see www.mantidproject.org/LoadRaw
   # integrate the counts as soon as possible to reduce the size of the workspace
@@ -46,11 +45,11 @@ try:#------------Calculations Start---
   else : downSoFar = DOWNSOFAR1
   # good detectors were set to have a value of 0 and bad 100 so 10 works as discriminator
   prevTest = FindDetectorsOutsideLimits(InputWorkspace=downSoFar, OutputWorkspace=downSoFar, HighThreshold=10, LowThreshold=-1)
-  downArray = prevTest.getPropertyValue('BadDetectorIDs')
-  MaskDetectors(Workspace=SUM, DetectorList=downArray)
+  downArray = prevTest.getPropertyValue('BadSpectraNums')
+  MaskDetectors(Workspace=SUM, SpectraList=downArray)
   
   #--prepare to normalise the spectra against the WBV runs
-  Integration(InputWorkspace=WBV1WS, OutputWorkspace=NORMA)					#a Mantid algorithm
+  Integration(InputWorkspace=WBV1WS, OutputWorkspace=NORMA)					        #a Mantid algorithm
   if ( WBV2WS != '' ) :
     #--we have another white beam vanadium we'll combine it with the first white beam
     Integration(InputWorkspace=WBV2WS, OutputWorkspace=WBV2WS)                #a Mantid algorithm
@@ -82,7 +81,7 @@ try:#------------Calculations Start---
     outfile.close()
 
   #--How many were found in just this set of tests
-  numFound = functions.numberFromCommaSeparated(MDT.getPropertyValue('BadDetectorIDs')) \
+  numFound = functions.numberFromCommaSeparated(MDT.getPropertyValue('BadSpectraNums')) \
 
   #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
   print 'success'
@@ -98,6 +97,10 @@ except Exception, reason:
   print THISTEST	
   for workspace in mantid.getWorkspaceNames() :
     if (workspace == NORMA) : mantid.deleteWorkspace(NORMA)
+  if OMASKFILE != "" :
+    if not outfile.closed :
+      outfile.write('1 exception was rasied during execution')
+ 
   # the C++ that called this needs to look at the output from the print statements and deal with the fact that there was a problem
 finally:
   for workspace in mantid.getWorkspaceNames() :
@@ -107,6 +110,3 @@ finally:
     if (workspace == WBV1WS) : mantid.deleteWorkspace(WBV1WS)
     if (workspace == WBV2WS) : mantid.deleteWorkspace(WBV2WS)
     if (workspace == "_FindBadDetects loading") : mantid.deleteWorkspace("_FindBadDetects loading")
-
-#  if OMASKFILE != "" :
-# check if it exists and os.remove(MDTFile)	

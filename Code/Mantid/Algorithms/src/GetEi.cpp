@@ -62,6 +62,7 @@ void GetEi::init()
     "An approximate value for the typical incident energy, energy of\n"
     "neutrons leaving the source (meV)");
   declareProperty("IncidentEnergy", -1.0, Direction::Output);
+  declareProperty("FirstMonitorPeak", -1.0, Direction::Output);
 
   m_fracCompl = 0.0;
 }
@@ -86,26 +87,28 @@ void GetEi::exec()
   // we're assuming that the time units for the X-values in the workspace are micro-seconds
   const double peakLoc0 = 1e6*timeToFly(dist2moni0, E_est);
   // write a lot of stuff to the log at user level as it is very possible for fit routines not to the expected thing
-  g_log.information() << "Based on the user selected energy the first peak will be searched for at TOF " << peakLoc0 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*HALF_WINDOW) << "%" << std::endl;
+  g_log.information() << "Based on the user selected energy the first peak will be searched for at TOF " << peakLoc0 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*HALF_WINDOW) << "%\n";
   const double peakLoc1 = 1e6*timeToFly(dist2moni1, E_est);
-  g_log.information() << "Based on the user selected energy the second peak will be searched for at TOF " << peakLoc1 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*HALF_WINDOW) << "%" << std::endl;
+  g_log.information() << "Based on the user selected energy the second peak will be searched for at TOF " << peakLoc1 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*HALF_WINDOW) << "%\n";
 
     // get the histograms created by the monitors
   std::vector<int> indexes = getMonitorSpecIndexs(inWS, mon1Spec, mon2Spec);
 
   g_log.information() << "Looking for a peak in the first monitor spectrum, spectra index " << indexes[0] << std::endl;
   double t_monitor0 = getPeakCentre(inWS, indexes[0], peakLoc0);
-  g_log.information() << "The first peak has been found at TOF = " << t_monitor0 << std::endl;
+  g_log.notice() << "The first peak has been found at TOF = " << t_monitor0 << " microseconds\n";
+  setProperty("FirstMonitorPeak", t_monitor0);
+
   g_log.information() << "Looking for a peak in the second monitor spectrum, spectra index " << indexes[1] << std::endl;
   double t_monitor1 = getPeakCentre(inWS, indexes[1], peakLoc1);
-  g_log.information() << "The second peak has been found at TOF = " << t_monitor1 << std::endl;
+  g_log.information() << "The second peak has been found at TOF = " << t_monitor1 << " microseconds\n";
 
   // assumes that the source and the both mintors lie on one straight line, the 1e-6 converts microseconds to seconds as the mean speed needs to be in m/s
   double meanSpeed = (dist2moni1 - dist2moni0)/(1e-6*(t_monitor1 - t_monitor0));
 
   // uses 0.5mv^2 to get the kinetic energy in joules which we then convert to meV
   double E_i = neutron_E_At(meanSpeed)/PhysicalConstants::meV;
-  g_log.notice() << "The incident energy has been calculated to be " << E_i << " meV" << " (your estimate was " << E_est << " meV)" << std::endl;
+  g_log.notice() << "The incident energy has been calculated to be " << E_i << " meV" << " (your estimate was " << E_est << " meV)\n";
 
   setProperty("IncidentEnergy", E_i);
 }
@@ -126,7 +129,7 @@ void GetEi::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, in
   std::vector<int> dets = WS->spectraMap().getDetectors(mon0Spec);
   if ( dets.size() != 1 )
   {
-    g_log.error() << "The detector for spectrum number " << mon0Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm" << std::endl;
+    g_log.error() << "The detector for spectrum number " << mon0Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm\n";
     g_log.error() << "Error retrieving data for the first monitor" << std::endl;
     throw std::bad_cast();
   }
@@ -137,8 +140,8 @@ void GetEi::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, in
   dets = WS->spectraMap().getDetectors(mon1Spec);
   if ( dets.size() != 1 )
   {
-    g_log.error() << "The detector for spectrum number " << mon1Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm" << std::endl;
-    g_log.error() << "Error retrieving data for the second monitor" << std::endl;
+    g_log.error() << "The detector for spectrum number " << mon1Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm\n";
+    g_log.error() << "Error retrieving data for the second monitor\n";
     throw std::bad_cast();
   }
   det = WS->getInstrument()->getDetector(dets[0]);
@@ -307,7 +310,7 @@ void GetEi::getPeakEstimates(double &height, int &centreInd, double &background)
     throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background, was the energy estimate (" + getPropertyValue("EnergyEstimate") + " meV) close enough?");
   }
 
-  g_log.debug() << "Peak position is the bin that has the maximum Y value in the monitor spectrum, which is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)" << std::endl;
+  g_log.debug() << "Peak position is the bin that has the maximum Y value in the monitor spectrum, which is at TOF " << (m_tempWS->readX(0)[centreInd]+m_tempWS->readX(0)[centreInd+1])/2 << " (peak height " << height << " counts/microsecond)\n";
 
 }
 /** Estimates the closest time, looking either or back, when the number of counts is
@@ -339,7 +342,7 @@ double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height, co
 
   if ( std::abs(static_cast<int>(endInd - startInd)) < PEAK_THRESH_W )
   {// we didn't find a significant peak
-    g_log.error() << "Likely precision problem or error, one half height distance is less than the threshold number of bins from the central peak: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << ". Check the monitor peak" << std::endl;
+    g_log.error() << "Likely precision problem or error, one half height distance is less than the threshold number of bins from the central peak: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << ". Check the monitor peak\n";
   }
   // we have a peak in range, do an area check to see if the peak has any significance
   double hOverN = (height-noise)/noise;
@@ -360,7 +363,7 @@ double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height, co
     halfTime -= deltaY/gradient;
   }
 
-  g_log.debug() << "One half height point found at TOF = " << halfTime << " microseconds" << std::endl;
+  g_log.debug() << "One half height point found at TOF = " << halfTime << " microseconds\n";
   return halfTime;
 }
 /** Get the kinetic energy of a neuton in joules given it speed using E=mv^2/2

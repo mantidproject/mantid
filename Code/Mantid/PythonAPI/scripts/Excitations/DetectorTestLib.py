@@ -7,7 +7,7 @@ from os import remove
 from mantidsimple import *
 import CommonFunctions as common
 # these are the defaults for different instruments
-import defaults
+import ExcitDefaults
 
 OUT_WS_PREFIX = 'mask_'
 
@@ -109,7 +109,7 @@ def single_white_van(wbrf, tiny, huge, median_hi, median_lo, error_bars, hardMas
       if (workspace == OUTPUTWS) : mantid.deleteWorkspace(OUTPUTWS)
     raise
  
-def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,oFile='',previous_wb_results=[],previous_wb_ws=SINGLE_WHITE_WS, r=defaults.DetectorEfficiencyVariation_Variation) :
+def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,oFile='',previous_wb_results=[],previous_wb_ws=SINGLE_WHITE_WS, r=ExcitDefaults.DetectorEfficiencyVariation_Variation) :
 
    #--Start with settings
   THISTEST = 'Second white beam test'
@@ -135,7 +135,7 @@ def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,oFile='',prev
     (sWBVResults, iiUNUSEDii) = SingleWBV(COMP_WHITE_WS, OUTPUTWS, huge, tiny, \
       median_hi, median_lo, error_bars, oFile)
     #--this will overwrite the OUTPUTWS with the cumulative list of the bad
-    DEV = DetectorEfficiencyVariation(previous_wb_ws, COMP_WHITE_WS, OUTPUTWS, Variation=r, OutputFile=DEVFile)				#for usage see www.mantidproject.org/DetectorEfficiencyVariation
+    DEV = DetectorEfficiencyVariation(previous_wb_ws, COMP_WHITE_WS, OUTPUTWS, Variation=r, OutputFile=DEVFile)				#for details see www.mantidproject.org/DetectorEfficiencyVariation
 
 #------------------------Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
     if oFile != '' :
@@ -186,15 +186,15 @@ def bgTest(instru, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, error_b
 
   try:#------------Calculations Start---
     # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
-    instru.loadRunNumber(run_nums[0], TEMPBIG)											#for usage see www.mantidproject.org/LoadRaw
+    instru.loadRun(run_nums[0], TEMPBIG)
     # integrate the counts as soon as possible to reduce the size of the workspace
     Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM, RangeLower=TOFLow, RangeUpper=TOFHigh)		#a Mantid algorithm
     if len(run_nums) > 1 :
       for toAdd in run_nums[ 1 : ] :
         # save the memory by overwriting the old workspaces
-        instru.loadRunNumber(toAdd, '_FindBadDetects loading')
-        Integration('_FindBadDetects loading', '_FindBadDetects loading', TOFLow, TOFHigh)	#a Mantid algorithm
-        Plus(SUM, '_FindBadDetects loading', SUM)
+        instru.loadRun(toAdd, '_FindBadDetects loading')
+        Integration('_FindBadDetects loading', '_FindBadDetects loading', TOFLow, TOFHigh)				#a Mantid algorithm
+        Plus(SUM, '_FindBadDetects loading', SUM)                                                                                        #for details see www.mantidproject.org/LoadDetectorInfo
       mantid.deleteWorkspace(TEMPBIG)
 
       #--mask the detectors that were found bad in the previous test
@@ -261,7 +261,7 @@ def bgTest(instru, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, error_b
 def diagnose(instrum='',maskFile='',wbrf='',wbrf2='',runs='',tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,bmin=-1e8,bmax=-1e8,zero='False',out_asc='') :
   
   #convert the run numbers, if one was passed into a run name
-  instru = defaults.loadDefaults(instrum)
+  instru = ExcitDefaults.loadDefaults(instrum)
 
   try :
     #--load input workspace and files and get the names of the output workspace and files
@@ -292,7 +292,7 @@ def diagnose(instrum='',maskFile='',wbrf='',wbrf2='',runs='',tiny=1e-10,huge=1e1
       if wbrf2 != '':
 	wbrf2 = instru.getFileName(wbrf2)
 	found += second_white_van(wbrf2, tiny=tiny, huge=huge, median_lo=median_lo, median_hi=median_hi, error_bars=sv_sig, oFile=out_asc,\
-	  previous_wb_results=common.listToString(found), previous_wb_ws=SINGLE_WHITE_WS, r=defaults.DetectorEfficiencyVariation_Variation)
+	  previous_wb_results=common.listToString(found), previous_wb_ws=SINGLE_WHITE_WS, r=ExcitDefaults.DetectorEfficiencyVariation_Variation)
 	comp_white_beam = COMP_WHITE_WS
       if runs != '':
         if bmin < -9.9e7:
@@ -313,4 +313,6 @@ def diagnose(instrum='',maskFile='',wbrf='',wbrf2='',runs='',tiny=1e-10,huge=1e1
     print 'Exception ', reason, ' caught'
     raise
  
-#diagnose(instrum='MAR',wbrf='11060',wbrf2='11060',runs='11001, 11015',tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,zero='False', out_asc='C:/mantid/Code/Mantid/release/11060-11001.msk',maskFile='C:/mantid/Code/Mantid/release/11060-11001.new.msk') 
+#below is a quick test/example command to run this library, it must be commented or the library won't work!
+#badSpectra = diagnose(instrum='MAR',wbrf='11060',wbrf2='11060',runs='15537',tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,zero='False', out_asc='C:/Users/wht13119/Desktop/docs/Excitations/test/11060.msk',maskFile='')
+#print badSpectra

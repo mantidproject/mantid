@@ -194,6 +194,9 @@
           </item>
           <item row="2" column="0" colspan="2" >
            <widget class="QLabel" name="lbScale" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
             <property name="text" >
              <string>X10 to the</string>
             </property>
@@ -201,6 +204,9 @@
           </item>
           <item row="2" column="2" >
            <widget class="QLineEdit" name="leScale" >
+            <property name="enabled" >
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy" >
              <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
               <horstretch>0</horstretch>

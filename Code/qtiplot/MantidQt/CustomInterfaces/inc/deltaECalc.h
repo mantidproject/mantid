@@ -26,24 +26,23 @@ namespace MantidQt
     private:
       /// the form that ws filled in by the user
       const Ui::Homer &m_sets;
-	  /// whether to the remove background count rate from the data
-	  const bool m_bgRemove;
-	  /// used in remove background, the start of the background region
-	  const double m_TOFWinSt;
-	  /// used in remove background, the end of the background region
-	  const double m_TOFWinEnd;
+  	  /// whether to the remove background count rate from the data
+	    const bool m_bgRemove;
+	    /// used in remove background, the start of the background region
+  	  const double m_TOFWinSt;
+	    /// used in remove background, the end of the background region
+	    const double m_TOFWinEnd;
 
-	  QString createProcessingScript(const std::string &inFiles, const std::string &oName, const QString &whiteB);
-	  void createGetEIStatmens(QString &newScr);
-	  void createNormalizationStatmens(QString &newScr, const QString &norm);
-	  void createRemoveBgStatmens(QString &newScr);
-	  void createRebinStatmens(QString &newScr);
+	    QString createProcessingScript(const std::string &inFiles, const std::string &oName, const QString &whiteB);
+  	  void createGetEIStatmens(QString &newScr);
+	    void createNormalizationStatmens(QString &newScr, const QString &norm);
+	    void createRemoveBgStatmens(QString &newScr);
+  	  void createRebinStatmens(QString &newScr);
       void createOutputStatmens(QString &WSName, QString &newScr);
-      QString getScaling() const;
       QString getNormalization() const;
       void LEChkCpIn(QString &text, QString pythonMark, QLineEdit * userVal, Mantid::Kernel::Property * const check);
-	  std::string replaceInErrsFind(QString &text, QString pythonMark, const QString &setting, Mantid::Kernel::Property * const check) const;
-      void renameWorkspace(const QString &name);
+	    std::string replaceInErrsFind(QString &text, QString pythonMark, const QString &setting, Mantid::Kernel::Property * const check) const;
+      void saveWorkspace(const QString &name);
   
       // holds the prefix that we give to output workspaces that will be deleted in the Python
       static const QString tempWS;

@@ -19,20 +19,27 @@ namespace MantidQt
 {
   namespace MantidWidgets
   {    
-	class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWidget : public QWidget
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MantidWidget : public QWidget
     {
       Q_OBJECT
-	  
-	protected:
-	  /// A list of labels to use as validation markers
+	  public:
+      signals:
+        /// this signal should be connected to Qtiplot to run python scripts 
+        void runAsPythonScript(const QString& code);
+    protected:
+	    /// A list of labels to use as validation markers
       QHash<const QWidget * const, QLabel *> m_validators;
+      ///to stop MantidPlot from being terminated need to check that this is false before a script is run, then set it to true and return it to false once the script has terminated
+      static bool g_pythonRunning;
 	  
-      MantidWidget(QWidget *parent=NULL) : QWidget(parent) {}
-	  void renameWorkspace(const QString &oldName, const QString &newName);
+      MantidWidget(QWidget *interface);
+  	  void renameWorkspace(const QString &oldName, const QString &newName);
       void setupValidator(QLabel *star);
-	  QLabel* newStar(const QGroupBox * const UI, int valRow, int valCol);
+	    QLabel* newStar(const QGroupBox * const UI, int valRow, int valCol);
       QLabel* newStar(QGridLayout * const lay, int valRow, int valCol);
-	  void hideValidators();
+	    void hideValidators();
+      QString runPythonCode(const QString & code, bool no_output = false);
+      void runPython(const QString &code);
     };
   }
 }

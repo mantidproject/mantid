@@ -43,9 +43,9 @@ try:
 
   #--pickup bad detectors from earlier tests, good detectors were set to have a value of 0 and bad 100 so 10 works as a cut off
   prevTest = FindDetectorsOutsideLimits(InputWorkspace=DOWNSOFAR, OutputWorkspace=DOWNSOFAR, HighThreshold=10, LowThreshold=-1, OutputFile='' )
-  downArray = prevTest.getPropertyValue('BadDetectorIDs')
+  downArray = prevTest.getPropertyValue('BadSpectraNums')
   #--write to the workspace
-  MaskDetectors(Workspace=WBV2WS, DetectorList=downArray)
+  MaskDetectors(Workspace=WBV2WS, SpectraList=downArray)
   
   (sWBVResults, iiUNUSEDii) = detLib.SingleWBV( WBV2WS, OUTPUTWS, HIGHABSOLUTE, LOWABSOLUTE, \
     HIGHMEDIAN, LOWMEDIAN, NUMBERRORBARS, OMASKFILE )
@@ -55,12 +55,11 @@ try:
 
 #------------------------Calculations End---the rest of this script is out outputing the data and dealing with errors and clearing up
   if OMASKFILE != "" :
-    outfile.write(sWBVResults)
 	#--add the file output from the Mantid algorithm that we ran to the output file
     detLib.appendMaskFile(DEV.getPropertyValue("OutputFile"), outfile)
     outfile.close()
 
-  DeadList = DEV.getPropertyValue('BadDetectorIDs')
+  DeadList = DEV.getPropertyValue('BadSpectraNums')
   #--How many were found in just this set of tests
   numFound = detLib.numberFromCommaSeparated(DeadList)
   	

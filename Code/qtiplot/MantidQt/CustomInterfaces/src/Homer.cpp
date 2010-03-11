@@ -35,10 +35,10 @@ static const QString G_INSTRUMENT("MAR");
 static const QString G_DEFAULT_MAP_FILE("mari_res.map");
 
 //default values
-static const int G_NUM_NORM_SCHEMES = 4;
+static const int G_NUM_NORM_SCHEMES = 3;
 static const QString G_NORM_SCHEMES[G_NUM_NORM_SCHEMES] = 
-  {"protons (uAh)", "no normalization", "monitor-monitor 1"
-  , "monitor-monitor 2"};
+{"protons (uAh)", "no normalization", "monitor-monitor 1"};
+//  , "monitor-monitor 2"};
 static const QString G_DEFAULT_NORM = "monitor-monitor 1";
 static const QString G_BACK_REMOVE("bg removal: none");
 static const double G_START_WINDOW_TOF(18000);
@@ -55,13 +55,12 @@ static const std::string G_INPUT_EXTS[G_NUM_INPUT_EXTS] =
 // Public member functions
 //----------------------
 ///Constructor
-Homer::Homer(QWidget *parent) : UserSubWindow(parent),
-  m_runFilesWid(NULL), m_diagPage(NULL), m_saveChanged(false), m_busy(NULL)
+Homer::Homer(QWidget *pare) : UserSubWindow(pare),
+  m_mantidplot(pare), m_runFilesWid(NULL),m_diagPage(NULL),m_saveChanged(false)
 {}
 /// Set up the dialog layout
 void Homer::initLayout()
 {
-
   // standard setting up of all widgets
   m_uiForm.setupUi(this);
    
@@ -74,12 +73,6 @@ void Homer::initLayout()
   // but the initial values on each page can depend on the values in previous pages
   setUpPage3();
   
-    // a helper widget for loading the second white beam vanadium run used to find bad detectors
-//  RunNumbers *WBV2Widget = new RunNumbers;
-//  QLayout *diagTest2Layout = m_uiForm.gbVariation->layout();
-//  QGridLayout *diagTest2 = qobject_cast<QGridLayout*>(diagTest2Layout);
-//  diagTest2->addWidget(WBV2Widget, 0, 0, 1, -1);
-
   // the signal mapper is used to link both browse buttons on the form on to a load file dialog
   QSignalMapper *signalMapper = new QSignalMapper(this);
   signalMapper->setMapping(m_uiForm.map_fileInput_pbBrowse, QString("map_fileInput_pbBrowse"));
@@ -100,13 +93,12 @@ void Homer::initLayout()
 */
 void Homer::pythonIsRunning(bool running)
 {// the run button was disabled when the results form was shown, as we can only do one analysis at a time, we can enable it now
-  m_busy = running;
   m_uiForm.tabWidget->setEnabled( ! running );
   m_uiForm.pbRun->setEnabled( ! running );
+  m_diagPage->blockPython(running);
 }
 /** Fill the instrument selection dialog box with the list of instruments
 *  and set the current text to the one that was passed
-*
 */
 QString Homer::setUpInstru()
 //??STEVES?? move this function to a File widget
@@ -179,17 +171,18 @@ void Homer::page1setUpNormCom()
   for ( int i = 0; i < G_NUM_NORM_SCHEMES; ++i )
   {
     QString displayName = removeStrMonitor(G_NORM_SCHEMES[i]);
-	if (displayName == G_NORM_SCHEMES[i])
-	{// these means that the normalisation scheme doesn't include the word monitor and so we don't need the second combobox
-	  m_uiForm.cbNormal->addItem(G_NORM_SCHEMES[i]);
-	}
-	else // this is a monitor based normalisation scheme add the name to the second combobox
-	{
-	  m_uiForm.cbMonitors->addItem(displayName);
-	}
+	  if (displayName == G_NORM_SCHEMES[i])
+	  {// these means that the normalisation scheme doesn't include the word monitor and so we don't need the second combobox
+	    m_uiForm.cbNormal->addItem(G_NORM_SCHEMES[i]);
+	  }
+	  else // this is a monitor based normalisation scheme add the name to the second combobox
+	  {
+	    m_uiForm.cbMonitors->addItem(displayName);
+	  }
   }
   
-  connect(m_uiForm.cbNormal, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(setupNormBoxes(const QString &)));
+  connect(m_uiForm.cbNormal, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(setupNormBoxes(const QString &)));
 }
 /** Removes the string "monitor-" from the startt of the string that is passed. If the string
 *  doesn't start with "monitor-" a copy of the string that was originally passed is returned
@@ -331,7 +324,7 @@ void Homer::page1Tooltips()
 void Homer::setUpPage2()
 {/* The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
  this second page is largely filled with the diag widget, previous settings, second argument, depends on the instrument and the detector diagnostic settings are kept separate in "diag/"*/
-  m_diagPage = new MWDiag(this, m_prev.group()+"/diag", m_uiForm.loadRun_cbInst);
+  m_diagPage = new MWDiag(this, m_prev.group()+"/diag", m_uiForm.loadRun_cbInst, QApplication::activeWindow());
 
   // set the default background region to the same as the default on this form
   emit MWDiag_updateTOFs(m_prev.value("TOFstart", G_START_WINDOW_TOF).toDouble(),
@@ -340,14 +333,13 @@ void Homer::setUpPage2()
   // insert the widget on to the second tab page (index = 1) of the form
   QLayout *mapLayout = m_uiForm.tabWidget->widget(1)->layout();
   QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout); 
-  if ( mapLay )
+  if (mapLay)
   { // this should always happen because we layout to grid in the designer
     mapLay->addWidget(m_diagPage, 1, 0, 6, 5);
   }
 
   m_uiForm.ckRunDiag->setToolTip("Enable or disable all the controls on this page");
-  // either enables or disables the detector diagnostics page depending on if the check box is clicked or not
-  disenableDiag();
+  // disenableDiag() enables or disables the detector diagnostics page depending on if the check box is clicked or not
   connect(m_uiForm.ckRunDiag, SIGNAL(clicked()), this, SLOT(disenableDiag()));
 }
 
@@ -512,19 +504,18 @@ bool Homer::runScripts()
     throw std::invalid_argument(errors.toStdString());
   }
   
-  // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
-  pythonIsRunning(true);
-
   // The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
   if (m_uiForm.ckRunDiag->isChecked())
   {
+    // mostly important to stop the run button being clicked twice, prevents any change to the form until the run has completed
+    pythonIsRunning(true);
     // display the second page in case errors occur in processing the user settings here
     m_uiForm.tabWidget->setCurrentIndex(1);
     QString maskOutWS = "mask_"+QString::fromStdString(
-	  Poco::Path(m_runFilesWid->getFile1().toStdString()).getBaseName());
-	errors = m_diagPage->run(maskOutWS, true);
-	if ( ! errors.isEmpty() )
-	{
+	    Poco::Path(m_runFilesWid->getFile1().toStdString()).getBaseName());
+    errors = m_diagPage->run(maskOutWS, true);
+    if ( ! errors.isEmpty() )
+    {
       pythonIsRunning(false); 
       throw std::invalid_argument(errors.toStdString());
     }
@@ -532,9 +523,11 @@ bool Homer::runScripts()
 	unitsConv.maskDetects(maskOutWS);
   }
 
+  pythonIsRunning(true);
   // we're back to processing the settings on the first page
   m_uiForm.tabWidget->setCurrentIndex(0);
-  //unitsConv is always executed, the user can't switch this off, unless there's an error on the form. To examine the script that is executed uncomment QMessageBox::critical(this, "", unitsConv.python());
+  //unitsConv is always executed, the user can't switch this off, unless there's an error on the form. To examine the script that is executed uncomment 
+  // QStringList list1 = unitsConv.python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-6)+'\n'+*(list1.end()-5)+'\n'+*(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2));
   errors = unitsConv.run();
   pythonIsRunning(false); 
 

@@ -11,7 +11,7 @@ using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-const QString deltaECalc::tempWS = "_Conv_ETrans_tempory_WS_";
+const QString deltaECalc::tempWS = "mono_sample_temporyWS";
 
 /** Read the data the user supplied to create Python code to do their calculation
 * @param userSettings the form that the user filled in
@@ -23,8 +23,11 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Homer &userSettings,
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   // load a template for the Python script that we will contain in a string
   QString pythonFileName =
-    scriptsdir.absoluteFilePath("Excitations/DeltaE/ConvertToETrans.py");
-  readFile(pythonFileName);
+    scriptsdir.absoluteFilePath("Excitations/DetectorTestLib.py");
+  appendFile(pythonFileName);
+  pythonFileName =
+    scriptsdir.absoluteFilePath("Excitations/ConversionLib.py");
+  appendFile(pythonFileName);
   
   if (WBV.isEmpty())
   {
@@ -35,54 +38,54 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Homer &userSettings,
   // ckSumSpec->isChecked() == true means sum all the files
   if (m_sets.ckSumSpecs->isChecked() || input.size() < 2)
   {// this is the easy case; the analysis is done just once on the sum of all the input spaces
-	QString WS = createProcessingScript(vectorToTupple(input),
+	  QString WS = createProcessingScript(vectorToCommaSep(input),
 	                              m_sets.leNameSPE->text().toStdString(), WBV);
-	renameWorkspace(WS);
+    saveWorkspace(WS);
   }
   //no summing, the analysis is done once for _each_ input file, createProcessingScript() is run many times to make one long (possibly very long) script
   else if( m_sets.leNameSPE->text().isEmpty())
   {// here the names of the output files are based on the names of the input files, these names are likely to be unique but two files can have the same name if there are in different directories. Create a map to check on duplication
-	std::map<std::string, int> oldNames;
-	for(std::vector<std::string>::const_iterator end = input.end(); ; )
-	{
-	  std::string saveName = SPEFileName(*inFile).toStdString();
-	  if ( oldNames.find(saveName) == oldNames.end() )
-	  {// this is the first time this name has been used, record the name and say that it hasn't been used before
-	    oldNames[saveName] = 1;
+    std::map<std::string, int> oldNames;
+    for(std::vector<std::string>::const_iterator end = input.end(); ; )
+    {
+      std::string saveName = SPEFileName(*inFile).toStdString();
+      if ( oldNames.find(saveName) == oldNames.end() )
+      {// this is the first time this name has been used, record the name and say that it hasn't been used before
+	      oldNames[saveName] = 1;
+      }
+      else
+      {// duplicate names!
+        saveName = insertNumber(saveName, oldNames[saveName]++);
+      }
+      QString WS = createProcessingScript(*inFile, saveName, WBV);
+	    // the last workspace will retained for the user to examine
+	    if (end == ++inFile)
+      {// rename it to something they'll recognise
+        saveWorkspace(WS);
+	      break;
+      }
+      // all the other workspaces will be deleted
+      m_pyScript.append("mantid.deleteWorkspace(");
+      m_pyScript.append("'"+tempWS+WS+"')\n");
 	  }
-	  else
-	  {// duplicate names!
-	    saveName = insertNumber(saveName, oldNames[saveName]++);
-	  }
-      QString WS = createProcessingScript("'"+(*inFile)+"',", saveName, WBV);
-	  // the last workspace will retained for the user to examine
-	  if (end == ++inFile)
-	  {// rename it to something they'll recognise
-	    renameWorkspace(WS);
-	    break;
-	  }
-	  // all the other workspaces will be deleted
-	  m_pyScript.append("mantid.deleteWorkspace(");
-	  m_pyScript.append("'"+tempWS+WS+"')\n");
-	}
   }
   else
   {// we have a base name to use, distingish the multiple output files using numbers
-	for( int i = 0, end = input.size(); ; )
-	{
-	  // the coma at the end is required that so the Python interpretor will see the string as a list of strings, a list with one member
-	  QString WS = createProcessingScript("'"+input[i]+"',", 
-	    insertNumber(m_sets.leNameSPE->text().toStdString(), i), WBV);
+    for( int i = 0, end = input.size(); ; )
+	  {
+	    // the coma at the end is required that so the Python interpretor will see the string as a list of strings, a list with one member
+	    QString WS = createProcessingScript(input[i], 
+	      insertNumber(m_sets.leNameSPE->text().toStdString(), i), WBV);
 
-	  // the last workspace will retained for the user to examine
-	  if (end == ++i)
-	  {// rename it to something they'll recognise
-	    renameWorkspace(WS);
-	    break;
+	    // the last workspace will retained for the user to examine
+	    if (end == ++i)
+	    {// rename it to something they'll recognise
+	      saveWorkspace(WS);
+	      break;
+	    }
+	    m_pyScript.append("mantid.deleteWorkspace(");
+	    m_pyScript.append("'"+tempWS+WS+"')\n");
 	  }
-	  m_pyScript.append("mantid.deleteWorkspace(");
-	  m_pyScript.append("'"+tempWS+WS+"')\n");
-	}
   }
 }
 /** Adds user values from the GUI into the Python script
@@ -92,37 +95,34 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Homer &userSettings,
 */
 QString deltaECalc::createProcessingScript(const std::string &inFiles, const std::string &oName, const QString &whiteB)
 {	
-  // we make a copy of code we read from the file because we might replace some terms and we might need to repeat this operation
-  QString newScr = m_templateB;
+  QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
+  QString pythonFileName =
+    scriptsdir.absoluteFilePath("Excitations/GUI Interface code.py");
+  appendFile(pythonFileName);  // we make a copy of code we read from the file because we might replace some terms and we might need to repeat this operation
+
   QString err;
 
   // here we are placing code directly into specified parts of the Python that will get run
-  newScr.replace("|GUI_SET_RAWFILE_LIST|", QString::fromStdString(inFiles));
+  m_pyScript.replace("|GUI_SET_RAWFILE_LIST|", QString::fromStdString(inFiles));
   // these functions replace whole blocks of code
-  createGetEIStatmens(newScr);
+  createGetEIStatmens(m_pyScript);
 
-  createRemoveBgStatmens(newScr);
+  createRemoveBgStatmens(m_pyScript);
 
-  createRebinStatmens(newScr);
+  createRebinStatmens(m_pyScript);
 
-  createNormalizationStatmens(newScr, whiteB);
+  createNormalizationStatmens(m_pyScript, whiteB);
 
   // use a FileProperty to check that the file exists
   std::vector<std::string> exts;
   exts.push_back("map"); exts.push_back("MAP");
-  FileProperty loadData("Filename", "", FileProperty::Load, exts);
-  LEChkCpIn(newScr,"|GUI_SET_MAP_FILE|",m_sets.map_fileInput_leName,&loadData);
+  FileProperty loadData("Filename", "", FileProperty::OptionalLoad, exts);
+  LEChkCpIn(m_pyScript,"|GUI_SET_MAP_FILE|",m_sets.map_fileInput_leName,&loadData);
   
   QString WSName = QString::fromStdString(oName);
-  createOutputStatmens(WSName, newScr);
+  createOutputStatmens(WSName, m_pyScript);
   
-  newScr.replace("|GUI_SET_SCALING|", getScaling());
-
-  if (m_pyScript.isEmpty())
-  {// put the import statement at the top of the script, only do this once
-    m_pyScript.append(m_templateH);
-  }
-  m_pyScript.append(newScr);
+  m_pyScript.replace("|TEMPWS|", tempWS);
 
   return WSName;
 }
@@ -137,13 +137,12 @@ void deltaECalc::createGetEIStatmens(QString &newScr)
   gEi->initialize();
   // run getEi, unless the user checked the box 
   if (m_sets.ckFixEi->isChecked())
-  {// the function returns a string that is placed in the python source code where the python intepretor reads it as a number
-    LEChkCpIn(newScr, "|GUI_SET_E|", m_sets.leEGuess,
-	  gEi->getProperty("EnergyEstimate"));
+  {
+    newScr.replace("|GUI_SET_E|", "'fixei'");
   }
   else
   {
-    newScr.replace("|GUI_SET_E|", "'Run GetEi'");
+    newScr.replace("|GUI_SET_E|", "'true'");
   }
   //this e guess (approximate Ei value) doesn't always get used, it depends on the tests above. However, Pyhton requires that the '|' in the code is replaced by something
   LEChkCpIn(newScr, "|GUI_SET_E_GUESS|", m_sets.leEGuess,
@@ -158,10 +157,12 @@ void deltaECalc::createNormalizationStatmens(QString &newScr, const QString &nor
 
   newScr.replace("|GUI_SET_WBV|", "'"+norm+"'");
   
+  newScr.replace("|GUI_WB_LOW_E|", "'"+m_sets.leWBV0Low->text()+"'");
+  newScr.replace("|GUI_WB_HIGH_E|", "'"+m_sets.leWBV0High->text()+"'");
+
   QString rebinStr = m_sets.leWBV0Low->text()+","+QString::number(
-    m_sets.leWBV0High->text().toDouble()-m_sets.leWBV0Low->text().toDouble())
+    2*(m_sets.leWBV0High->text().toDouble()-m_sets.leWBV0Low->text().toDouble()))
 	+","+m_sets.leWBV0High->text();
-  newScr.replace("|GUI_SET_WBV_REBIN|", "'"+rebinStr+"'");
   
   bool isNumber;
   // check that we've got a usable value, an empty box is OK it means that the default will be used
@@ -254,19 +255,7 @@ void deltaECalc::createOutputStatmens(QString &WSName, QString &newScr)
   }
 
   // the name of the workspace which may remain in Mantid after this interface has finished will be the same as the saved file
-  newScr.replace("|GUI_SET_OUTWS|", "'"+tempWS+WSName+"'");
-}
-/** reads leScale from the form to calculate the scaling factor
-* @throw NotFoundError if the leScale text can't be converted to an integer
-*/
-QString deltaECalc::getScaling() const
-{
-  bool status = false;
-  QString exponetial;
-  int power = m_sets.leScale->text().toInt(&status);
-  if ( ! status ) throw Exception::NotFoundError("Can't scale by a none integer power of ten", "integer");
-  exponetial.setNum(std::pow(10.0, power));
-  return exponetial;
+  newScr.replace("|GUI_SET_OUTWS|", tempWS+WSName);
 }
 /** reads cbNormal and returns the user setting, unless it is set to monitor
 * in which case it returns the text in cbMonitors
@@ -337,11 +326,11 @@ std::string deltaECalc::replaceInErrsFind(QString &text, QString pythonMark, con
   return check->setValue(setting.toStdString());
 }
 /** appends Python commands that will remove the tempWS string from the
-* workspace name that will create a workspace with the name that was passed
-* @param name the name that the workspace will be renamed to (orginal name was tempWS+name)
+* workspace name and save the file
+* @param name the finbal name of the workspace (orginal name was tempWS+name)
 */
-void deltaECalc::renameWorkspace(const QString &name)
+void deltaECalc::saveWorkspace(const QString &name)
 {
-  m_pyScript.append("RenameWorkspace(");
-  m_pyScript.append("'"+tempWS+name+"', '"+name+"')\n");
+  m_pyScript.append("RenameWorkspace('"+tempWS+name+"', '"+name+"')\n");
+  m_pyScript.append("SaveSPE('"+name+"', '"+name+"')\n");
 }

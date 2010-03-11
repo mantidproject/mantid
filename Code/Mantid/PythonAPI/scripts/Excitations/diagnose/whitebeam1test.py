@@ -56,11 +56,6 @@ try:
   #--DeadList is a string of comma separated integers, this gets the number of integers
 #  numFound = detLib.numberFromCommaSeparated(DeadList)
   
-  #--if we were writing to asn output file, close it
-  if OMASKFILE != '':
-    outfile.write(fileOut)
-    outfile.close()
-
   #-- this output is passed back to the calling MantidPlot application and must be executed last so not to interfer with any error reporting. It must start with success (for no error), the next lines are the workspace name and number of detectors found bad this time
   print 'success'
   print THISTEST

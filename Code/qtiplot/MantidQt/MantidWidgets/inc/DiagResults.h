@@ -24,12 +24,12 @@ namespace MantidQt
       // stores the informtion returned by the python scripts that look for bad detectors
       struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS TestSummary
       {
-		explicit TestSummary(QString name);
-	    QString pythonResults(const QString &pyhtonOut);
-		void setStatus(QString &info) {status = info;}
-		const QString& getStatus() const {return status;}
+        explicit TestSummary(QString name);
+        QString pythonResults(const QString &pyhtonOut);
+        void setStatus(QString &info) {status = info;}
+        const QString& getStatus() const {return status;}
 		
-		QString test;                       //< Name of the test is displayed to users
+        QString test;                       //< Name of the test is displayed to users
         QString status;                     //< status is displayed to users
         QString outputWS;                   //< Name of the workspace that contains the bad detectors
         int numBad;                         //< The total number of bad detectors
@@ -37,16 +37,15 @@ namespace MantidQt
         enum resultsStatus {NORESULTS = 15-INT_MAX};  //< a flag value to indicate that there are no results to show, could be that the test has not completed or there was an error
       };
   
-      static const QString tests[];
-      static const int numTests;
+      static const QString TESTS[];
+      static const int NUMTESTS;
 	  
-      DiagResults(QWidget *parent = 0);
+      DiagResults(QWidget *parent);
       void notifyDialog(const TestSummary &display);
+      void showButtons(bool show=true);
 
     signals:
-      ///Emits this signal to run some python code
-      void runAsPythonScript(const QString&);
-      /// is emitted just before the window dies to let the window that created know the pointer it has is invalid
+      /// is emitted just before the window dies to let the window that created this know the pointer it has is invalid
       void died();
 
     private:
@@ -57,11 +56,11 @@ namespace MantidQt
       /// points to the slot that deals with view buttons being pressed
       QSignalMapper *m_ViewMapper;
       /// stores the name of the workspaces that contains the results of each test
-      std::map<QString, QString> outputWorkS;
+      std::map<QString, QString> m_outputWorkS;
 
       int addRow(QString firstColumn, QString secondColumn);
       void addButtonsDisab(int row);
-      void showButtons(int row, QString test);
+      void setupButtons(int row, QString test);
       void updateRow(int row, QString firstColumn, int secondColumn);
       void closeEvent(QCloseEvent *event);
 

@@ -3,11 +3,9 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include <QTextStream>
-#include <QDir>
 #include <QHash>
-#include <QMessageBox>
-#include <QTemporaryFile>
+#include <QTextStream>
+#include <QFile>
 #include <stdexcept>
 #include <cmath>
 
@@ -22,16 +20,12 @@ const QString& pythonCalc::python() const
 {
   return m_pyScript;
 }
-/** Protected constructor, connects the runAsPythonScript() signal to the QWidget
-*  passed to it
-*  @param interface this widget needs to have runAsPythonScript() connected to MantidPlot, for example be an interface
+/** Protected constructor only desendents of this class can be construected
+*  @param interface this parent widget needs to have its runAsPythonScript signal connected to MantidPlot
 */
-pythonCalc::pythonCalc(const QWidget * const interface) :
-  MantidWidget(), m_pyScript(), m_templateH(), m_templateB(), m_fails()
+pythonCalc::pythonCalc(QWidget *interface) : MantidWidget(interface),
+  m_pyScript(""), m_fails()
 {
-  // Only an interface widgets have there runAsPythonScript signal connected to QTiplot, need to connect to that
-  connect(this, SIGNAL(runAsPythonScript(const QString&)),
-          interface, SIGNAL(runAsPythonScript(const QString&)));
 }
 /** Looks for error reports from the object passed to it.  If the map returned by the
 *  the objects invalid() method isn't empty it places displays red stars and throws
@@ -66,7 +60,7 @@ QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &
 /** Sets m_pyScript to the contents of the named file
 * @param pythonFile the name of the file to read
 */
-void pythonCalc::readFile(const QString &pythonFile)
+void pythonCalc::appendFile(const QString &pythonFile)
 {
   QFile py_script(pythonFile);
   try
@@ -77,17 +71,10 @@ void pythonCalc::readFile(const QString &pythonFile)
     }
     QTextStream stream(&py_script);
     QString line;
-	while( !stream.atEnd() )
+    while( !stream.atEnd() )
     {
-	  line = stream.readLine();
-	  // strip some Python comments, might speed things up when there are multiple input files and these lines are repeated many times
-	  if ( line.indexOf("#") == 0 ) continue;
-	  // separate out the header because we might want to create a file where the body is repeated many times but there is one header
-	  if ( line.indexOf("import ") == 0 || line.indexOf(" import ") != -1 )
-	  {
-		m_templateH.append(line + "\n");
-	  }
-	  else m_templateB.append(line + "\n");
+	    line = stream.readLine();
+  	  m_pyScript.append(line + "\n");
     }
     py_script.close();
   }
@@ -125,57 +112,28 @@ std::string pythonCalc::replaceErrsFind(QString pythonMark, const QString &setti
 }
 /** Sends interpretes the Python code through runPythonCode() and returns
 *  a results summary
-*  @return some information about the results of the Python execution
+*  @return any print statements executed in the Python script
 */
 QString pythonCalc::run()
 {
   return runPythonCode(m_pyScript, false);
 }
-//??STEVES?? this is a copy of what is in the interfaces class
-QString pythonCalc::runPythonCode(const QString & code, bool no_output)
-{
-  if( no_output )
-  {
-    emit runAsPythonScript(code);
-    return QString();
-  }
-  
-  // Otherwise we need to gather the information from stdout. This is achieved by redirecting the stdout stream
-  // to a temproary file and then reading its contents
-  // A QTemporaryFile object is used since the file is automatically deleted when the object goes out of scope
-  QTemporaryFile tmp_file;
-  if( !tmp_file.open() )
-  {
-    throw std::runtime_error("An error occurred opening a temporary file in " + QDir::tempPath().toStdString());
-  }
-  //The file name is only valid when the file is open
-   QString tmpstring = tmp_file.fileName();
-   tmp_file.close();
-   QString code_to_run = "import sys; sys.stdout = open('" + tmpstring + "', 'w')\n" + code;
-
-   emit runAsPythonScript(code_to_run);
-
-   //Now get the output
-   tmp_file.open();
-   QTextStream stream(&tmp_file);
-   tmpstring.clear();
-   while( !stream.atEnd() )
-   {
-     tmpstring.append(stream.readLine().trimmed() + "\n");
-   }
-   return tmpstring;
-}
-/** Creates a string that codes a tupple in Python script
+/** Creates a string with entries separated by commas
 *  @param vec the array of strings
 *  @return the members of the array inserted into a Python tupple
 */
-std::string pythonCalc::vectorToTupple(const std::vector<std::string> &vec) const
+std::string pythonCalc::vectorToCommaSep(const std::vector<std::string> &vec) const
 {
   std::string fileList;
-  std::vector<std::string>::const_iterator inFile = vec.begin();
-  for( ; inFile != vec.end(); ++inFile)
-  {// there will be a spare ',' at the end of the list but Python accepts this without error and requires it if there is only one member in the list
-	fileList += "'"+(*inFile)+"',";
+  std::vector<std::string>::const_iterator inFile = vec.begin(), end=vec.end();
+  for( ; inFile != end; ++inFile)
+  {//create a list with a comma after each entry except the last entry
+	  fileList += *inFile;
+    if (inFile == end-1)
+    {
+      break;
+    }
+    fileList += ",";
   }
   return fileList;
 }

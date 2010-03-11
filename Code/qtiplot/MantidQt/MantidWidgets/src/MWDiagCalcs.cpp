@@ -24,10 +24,7 @@ whiteBeam1::whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings
   // load a template for the Python script that we will contain in a string
   QString pythonFileName =
     scriptsdir.absoluteFilePath("Excitations/diagnose/whitebeam1test.py");
-  readFile(pythonFileName);
-  // we make a copy of code we read from the file because we might replace some terms but later need to repeat this operation
-  m_pyScript = m_templateH;
-  m_pyScript.append(m_templateB);
+  appendFile(pythonFileName);
    
   m_pyScript.replace("|WBVANADIUM1|", "'"+WBVFile+"'");
 
@@ -69,10 +66,7 @@ whiteBeam2::whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings
   // load a template for the Python script that we will contain in a string
   QString pythonFileName =
     scriptsdir.absoluteFilePath("Excitations/diagnose/whitebeam2test.py");
-  readFile(pythonFileName);
-  // we make a copy of code we read from the file because we might replace some terms but later need to repeat this operation
-  m_pyScript = m_templateH;
-  m_pyScript.append(m_templateB);
+  appendFile(pythonFileName);
 
   m_pyScript.replace("|WBVANADIUM2|", "'"+inFile+"'");
   
@@ -115,10 +109,8 @@ backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, co
   // load a template for the Python script that we will contain in a string
   QString pythonFileName =
     scriptsdir.absoluteFilePath("Excitations/diagnose/backgroundtest.py");
-  readFile(pythonFileName);
-  // we make a copy of code we read from the file because we might replace some terms but later need to repeat this operation
-  m_pyScript = m_templateH;
-  m_pyScript.append(m_templateB);
+  appendFile(pythonFileName);
+  
   {// I'm limitting the scope of these algroithms pointers so that I don't mix them up while coding
   IAlgorithm_sptr med =
     AlgorithmManager::Instance().createUnmanaged("MedianDetectorTest");
@@ -133,7 +125,7 @@ backTest::backTest(QWidget * const interface, const Ui::MWDiag &userSettings, co
     throw std::invalid_argument("No input files have been specified, uncheck \"Check run backgrounds\" to continue");
   }
   m_pyScript.replace("|EXPFILES|",
-    QString::fromStdString(vectorToTupple(runs)));
+    QString::fromStdString(vectorToCommaSep(runs)));
   
   {// I'm limitting the scope of these algroithms pointers so that I don't mix them up while coding
   IAlgorithm_sptr inte =

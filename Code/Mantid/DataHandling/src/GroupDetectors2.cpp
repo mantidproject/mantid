@@ -72,7 +72,7 @@ void GroupDetectors2::exec()
   // Bin boundaries need to be the same, so do the full check on whether they actually are
   if (!API::WorkspaceHelpers::commonBoundaries(inputWS))
   {
-    g_log.error() << "Can only group if the histograms have common bin boundaries" << std::endl;
+    g_log.error() << "Can only group if the histograms have common bin boundaries\n";
     throw std::invalid_argument("Can only group if the histograms have common bin boundaries");
   }
   progress( m_FracCompl = CHECKBINS );
@@ -100,8 +100,7 @@ void GroupDetectors2::exec()
   DataObjects::Workspace2D_sptr outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
     WorkspaceFactory::Instance().create(inputWS,
     m_GroupSpecInds.size()+ numUnGrouped, inputWS->readX(0).size(),
-    inputWS->blocksize())
-    );
+    inputWS->blocksize())   );
 
   // prepare to move the requested histograms into groups, first estimate how long for progress reporting. +1 in the demonator gets rid of any divide by zero risk
   double prog4Copy=( (1.0 - m_FracCompl)/(numInHists-unGroupedSet.size()+1) )*
@@ -116,7 +115,7 @@ void GroupDetectors2::exec()
     moveOthers(unGroupedSet, inputWS, outputWS, outIndex);
   }
 
-  g_log.information() << name() << " algorithm has finished" << std::endl;
+  g_log.information() << name() << " algorithm has finished\n";
 
   setProperty("OutputWorkspace",outputWS);
 }
@@ -157,7 +156,7 @@ void GroupDetectors2::getGroups(DataObjects::Workspace2D_const_sptr workspace,
   {
     WorkspaceHelpers::getIndicesFromSpectra(workspace,
                                             spectraList, m_GroupSpecInds[0]);
-     g_log.debug() << "Converted " << spectraList.size() << " spectra numbers into spectra indexes to be combined" << std::endl;
+    g_log.debug() << "Converted " << spectraList.size() << " spectra numbers into spectra indices to be combined\n";
   }
   else if ( ! detectorList.empty() )
   {// we are going to group on the basis of detector IDs, convert from detectors to spectra numbers
@@ -165,17 +164,17 @@ void GroupDetectors2::getGroups(DataObjects::Workspace2D_const_sptr workspace,
     //then from spectra numbers to indices
     WorkspaceHelpers::getIndicesFromSpectra(
                                   workspace, mySpectraList, m_GroupSpecInds[0]);
-    g_log.debug() << "Found " << m_GroupSpecInds[0].size() << " spectra indexes from the list of " << detectorList.size() << " detectors" << std::endl;
+    g_log.debug() << "Found " << m_GroupSpecInds[0].size() << " spectra indices from the list of " << detectorList.size() << " detectors\n";
   }
   else if ( ! indexList.empty() )
   {
     m_GroupSpecInds[0] = indexList;
-    g_log.debug() << "Read in " << m_GroupSpecInds[0].size() << " spectra indexs to be combined" << std::endl;
+    g_log.debug() << "Read in " << m_GroupSpecInds[0].size() << " spectra indices to be combined\n";
   }
 
   if ( m_GroupSpecInds[0].empty() )
   {
-    g_log.information() << name() << ": File, WorkspaceIndexList, SpectraList, and DetectorList properties are all empty" << std::endl;
+    g_log.information() << name() << ": File, WorkspaceIndexList, SpectraList, and DetectorList properties are all empty\n";
     throw std::invalid_argument("All list properties are empty, nothing to group");
   }
 
@@ -186,7 +185,7 @@ void GroupDetectors2::getGroups(DataObjects::Workspace2D_const_sptr workspace,
     {
       unUsedSpec[m_GroupSpecInds[0][i]] = USED;
     }
-    else g_log.warning() << "Duplicate index found" << std::endl;
+    else g_log.warning() << "Duplicate index found\n";
   }
 }
 /** Read the spectra numbers in from the input file (the file format is in the
@@ -208,9 +207,9 @@ void GroupDetectors2::processFile(std::string fname,
   // for error reporting keep a count of where we are reading in the file
   int lineNum = 1;
   
-  if ( File.rdstate() & std::ios::failbit ) 
+  if (File.fail()) 
   {
-    g_log.debug() << " file state failbit set after reading attempt" << std::endl;
+    g_log.debug() << " file state failbit set after read attempt\n";
     throw Exception::FileError("Couldn't read file", fname);
   }
   g_log.debug() << " success opening input file " << fname << std::endl;
@@ -239,7 +238,7 @@ void GroupDetectors2::processFile(std::string fname,
 
     if ( m_GroupSpecInds.size() != static_cast<size_t>(totalNumberOfGroups) )
     {
-      g_log.warning() << "The input file header states there are " << totalNumberOfGroups << " but the file contains " << m_GroupSpecInds.size() << " groups" << std::endl;
+      g_log.warning() << "The input file header states there are " << totalNumberOfGroups << " but the file contains " << m_GroupSpecInds.size() << " groups\n";
     }
   }
   // add some more info to the error messages, including the line number, to help users correct their files. These problems should cause the algorithm to stop
@@ -248,8 +247,10 @@ void GroupDetectors2::processFile(std::string fname,
     g_log.debug() << "Exception thrown: " << e.what() << std::endl;
     File.close();
     std::string error(e.what() + std::string(" near line number ") + boost::lexical_cast<std::string>(lineNum));
-    if ( File.rdstate() & std::ios::failbit )
+    if (File.fail())
+    {
       error = "Input output error while reading file ";
+    }
     throw Exception::FileError(error, fname);
   }
   catch (boost::bad_lexical_cast &e)
@@ -257,12 +258,14 @@ void GroupDetectors2::processFile(std::string fname,
     g_log.debug() << "Exception thrown: " << e.what() << std::endl;
     File.close();
     std::string error(std::string("Problem reading integer value \"") + e.what() + std::string("\" near line number ") + boost::lexical_cast<std::string>(lineNum));
-    if ( File.rdstate() & std::ios::failbit )
+    if (File.fail())
+    {
       error = "Input output error while reading file ";
+    }
     throw Exception::FileError(error, fname);
   }
   File.close();
-  g_log.debug() << "Closed file " << fname << " after reading in " << m_GroupSpecInds.size() << " groups" << std::endl;
+  g_log.debug() << "Closed file " << fname << " after reading in " << m_GroupSpecInds.size() << " groups\n";
   m_FracCompl += fileReadProg( m_GroupSpecInds.size(), specs2index.size() );
   return;
 }
@@ -402,7 +405,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
       }
       else
       {// the spectra was already included in a group
-        g_log.warning() << "Duplicate spectra number " << specNumbers[i] << " ignored in input file" << std::endl;
+        g_log.warning() << "Duplicate spectra number " << specNumbers[i] << " ignored in input file\n";
       }
     }
   }
@@ -437,7 +440,7 @@ int GroupDetectors2::formGroups( DataObjects::Workspace2D_const_sptr inputWS, Da
   // Get a reference to the spectra map on the output workspace
   API::SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
 
-  g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups" << std::endl;
+  g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups\n";
 
   // where we are copying spectra to, we start copying to the start of the output workspace
   int outIndex = 0;
@@ -486,7 +489,7 @@ int GroupDetectors2::formGroups( DataObjects::Workspace2D_const_sptr inputWS, Da
     }
     outIndex ++;
   }
-  g_log.debug() << name() << " created " << outIndex << " new grouped spectra" << std::endl;
+  g_log.debug() << name() << " created " << outIndex << " new grouped spectra\n";
   return outIndex;
 }
 /** Only to be used if the KeepUnGrouped property is true, moves the spectra that were not selected
@@ -526,7 +529,7 @@ void GroupDetectors2::moveOthers(const std::set<int> &unGroupedSet, DataObjects:
       interruption_point();
     }
   }
-  g_log.debug() << name() << " copied " << unGroupedSet.size()-1 << " ungrouped spectra" << std::endl;
+  g_log.debug() << name() << " copied " << unGroupedSet.size()-1 << " ungrouped spectra\n";
 }
 //RangeHelper
 /** Expands any ranges in the input string, eg. "1 3-5 4" -> "1 3 4 5 4"
