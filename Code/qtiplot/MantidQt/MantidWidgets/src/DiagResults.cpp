@@ -235,7 +235,7 @@ void DiagResults::tableList(const QString &name)
   viewTablePy.append(
     "  bad = FindDetectorsOutsideLimits(InputWorkspace='"+workspace+"', OutputWorkspace='"+tempOutp+"', HighThreshold=10, LowThreshold=-1 )\n");
   viewTablePy.append("  mantid.deleteWorkspace('"+tempOutp+"')\n");
-  viewTablePy.append("  stBad = bad.getPropertyValue('BadDetectorIDs')\n");
+  viewTablePy.append("  stBad = bad.getPropertyValue('BadSpectraNums')\n");
   viewTablePy.append("  liBad = stBad.split(',')\n");
   viewTablePy.append("else : liBad = ['The analysis data has been removed, run the detector efficiency tests again']\n");
   viewTablePy.append("tbBad = newTable('Failed Detector IDs -" + name + "', len(liBad), 1)\n");

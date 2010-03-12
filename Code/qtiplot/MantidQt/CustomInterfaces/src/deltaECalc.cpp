@@ -97,7 +97,7 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 {	
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   QString pythonFileName =
-    scriptsdir.absoluteFilePath("Excitations/GUI Interface code.py");
+    scriptsdir.absoluteFilePath("Excitations/GUI_Interface.py");
   appendFile(pythonFileName);  // we make a copy of code we read from the file because we might replace some terms and we might need to repeat this operation
 
   QString err;
