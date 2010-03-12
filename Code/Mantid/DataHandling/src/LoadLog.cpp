@@ -395,7 +395,7 @@ std::set<std::string> LoadLog::getLogfilenamesfromADS()
     pos= fileName.find("txt");
     if(pos==std::string::npos)
       continue;
-    logFile=path+"\\"+fileName;
+    logFile=path+"/"+fileName;
     if(logFile.empty())
       continue;
     logfilesList.insert(logFile);
