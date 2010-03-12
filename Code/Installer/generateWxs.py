@@ -248,18 +248,20 @@ def addCompList(Id,location,name,parent):
     lst.append(Id)
     files = os.listdir(location)
     for fil in files:
-        if ( fil.find('.svn') < 0 and os.path.isdir(location+'/'+fil) ):
-            idir += 1
-            lst = lst + addCompList(Id+'_'+str(idir), location+'/'+fil, fil, directory)
-        elif fil.find('.svn') < 0:
-            globalFileCount += 1
-            ifil = globalFileCount
-            fn = fil.replace('-','_')
-            fn = fn.replace('+','_')
-            fileId = 'd'+fn+'_file'+str(ifil)
-            fileName = 'file'+str(ifil)
-            fileLongName = fil
-            addFileV(fileId,fileName,fileLongName,location+'/'+fil,comp)
+        if (fil.find('.svn') < 0 and fil.find('UNIT_TESTING') < 0):
+            if ( os.path.isdir(location+'/'+fil) ):
+                idir += 1
+                lst = lst + addCompList(Id+'_'+str(idir), location+'/'+fil, fil, directory)
+            else:
+                globalFileCount += 1
+                ifil = globalFileCount
+                fn = fil.replace(' ','_')
+                fn = fil.replace('-','_')
+                fn = fn.replace('+','_')
+                fileId = 'd'+fn+'_file'+str(ifil)
+                fileName = 'file'+str(ifil)
+                fileLongName = fil
+                addFileV(fileId,fileName,fileLongName,location+'/'+fil,comp)
     return lst
 		
 def addCRefs(lstId,parent):
