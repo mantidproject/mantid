@@ -34,7 +34,7 @@ namespace PythonAPI
       .def("angle", &Mantid::Geometry::V3D::angle)
       .def("zenith", &Mantid::Geometry::V3D::zenith)
       .def("scalar_prod", &Mantid::Geometry::V3D::scalar_prod)
-      .def("cross_prod", &Mantid::Geometry::V3D::scalar_prod)
+      .def("cross_prod", &Mantid::Geometry::V3D::cross_prod)
       .def("norm", &Mantid::Geometry::V3D::norm)
       .def("norm2", &Mantid::Geometry::V3D::norm2)
       .def(self + self)
