@@ -37,6 +37,12 @@ cp ../Third_Party/lib/mac/lib*.*.dylib MantidPlot.app/Contents/MacOS/
 cp ../Third_Party/lib/mac/libboost* MantidPlot.app/Contents/MacOS/
 # The NeXus library
 cp /usr/local/lib/libNeXus.0.dylib MantidPlot.app/Contents/Frameworks/
+# GL libraries for MantidGeometry
+cp /usr/X11/lib/libGL.1.dylib MantidPlot.app/Contents/Frameworks/
+cp /usr/X11/lib/libGLU.1.dylib MantidPlot.app/Contents/Frameworks/
+install_name_tool -change /usr/X11/lib/libGL.1.dylib @loader_path/../Frameworks/libGL.1.dylib MantidPlot.app/Contents/MacOS/libMantidGeometry.dylib
+install_name_tool -change /usr/X11/lib/libGLU.1.dylib @loader_path/../Frameworks/libGLU.1.dylib MantidPlot.app/Contents/MacOS/libMantidGeometry.dylib
+install_name_tool -change /usr/X11/lib/libGL.1.dylib @loader_path/./libGL.1.dylib MantidPlot.app/Contents/Frameworks/libGLU.1.dylib
 # ...other stuff needed for qtiplot
 cp ../qtiplot/3rdparty/qwt/lib/libqwt.5.dylib MantidPlot.app/Contents/Frameworks/
 cp /Library/Frameworks/libqscintilla2.5.dylib MantidPlot.app/Contents/Frameworks/
