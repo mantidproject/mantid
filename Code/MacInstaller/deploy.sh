@@ -18,7 +18,7 @@ rsync -aC ../Mantid/PythonAPI/scripts MantidPlot.app/
 
 # Now run the Qt macdeployqt tool to copy the Qt libraries and set the 
 # executable to point to them
-macdeployqt MantidPlot.app -no-plugins
+macdeployqt MantidPlot.app 
 
 # Now the Mantid shared libraries
 # First the core Mantid libraries
@@ -78,6 +78,18 @@ cp /Library/Python/2.5/site-packages/sip.so MantidPlot.app/Contents/MacOS/
 mkdir MantidPlot.app/Contents/MacOS/PyQt4
 cp /Library/Python/2.5/site-packages/PyQt4/Qt*.so MantidPlot.app/Contents/MacOS/PyQt4/
 cp /Library/Python/2.5/site-packages/PyQt4/__init__.py MantidPlot.app/Contents/MacOS/PyQt4/
+
+# Need to point PyQt libraries to local ones
+cd MantidPlot.app/Contents/MacOS/PyQt4
+PYQTLIBS=$(ls Qt*.so)
+for so in $PYQTLIBS
+do
+  for qt in $QTLIBS
+  do
+    install_name_tool -change $qt @loader_path/../../Frameworks/$qt $so
+  done
+done
+cd ../../../..
 
 # Populate the plugins directory
 cp ../Mantid/Bin/Shared/libMantidAlgorithms.dylib MantidPlot.app/plugins/

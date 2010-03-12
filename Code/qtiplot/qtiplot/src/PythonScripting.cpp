@@ -62,6 +62,10 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
   : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
     m_sys(NULL)
 {
+#ifdef __APPLE__
+  const std::string sipLocation = "/Applications/MantidPlot.app/Contents/MacOS";
+  setenv("PYTHONPATH",sipLocation.c_str(),1);
+#endif
 }
 
 PythonScripting::~PythonScripting()
