@@ -26,11 +26,11 @@ def NormaliseTo(reference, WS, fromTOF):
   elif reference != 'no normalization' :
     raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')
 
-def NormaliseToWhiteBeam(WBRun, toNorm,mapFile, detMask, rebinString, prevNorm, fromTOF) :
+def NormaliseToWhiteBeam(WBRun, toNorm,mapFile, detMask, rebinString, prevNorm) :
   theNorm = "_ETrans_norm_tempory_WS"
   try:
     common.LoadNexRaw(WBRun, theNorm)
-    NormaliseTo(prevNorm, mtd[theNorm], fromTOF)
+    NormaliseTo(prevNorm, mtd[theNorm], 0)
 
     ConvertUnits(theNorm, theNorm, "Energy", AlignBins=0)
 
@@ -153,7 +153,7 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, wb_low_e=0, wb_high_e=1e8, get
     ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
 
     wb_rebin = str(wb_low_e) + ', ' + str(2*float(wb_high_e)) + ', ' + str(wb_high_e)
-    NormaliseToWhiteBeam(instru.getFileName(wbrf), pInOut, det_map, det_mask, wb_rebin, norma, offSet)
+    NormaliseToWhiteBeam(instru.getFileName(wbrf), pInOut, det_map, det_mask, wb_rebin, norma)
    
     return pInOut
 
