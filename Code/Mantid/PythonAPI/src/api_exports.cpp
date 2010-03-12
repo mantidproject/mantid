@@ -183,7 +183,7 @@ namespace PythonAPI
          return_value_policy< copy_const_reference >() )
       .def("getInstrument", &Mantid::API::MatrixWorkspace::getInstrument)
       .def("getDetector", &Mantid::API::MatrixWorkspace::getDetector)
-      .def("getSampleDetails", &Mantid::API::MatrixWorkspace::sample, return_value_policy< copy_const_reference >() )
+      .def("getSampleDetails", &Mantid::API::MatrixWorkspace::sample, return_internal_reference<>() )
       .def("__add__", (binary_fn1)&WorkspaceAlgebraProxy::plus)
       .def("__add__", (binary_fn2)&WorkspaceAlgebraProxy::plus)
       .def("__radd__",(binary_fn2)&WorkspaceAlgebraProxy::rplus)
@@ -252,12 +252,14 @@ namespace PythonAPI
   void export_sample()
   {
     //Pointer
-    register_ptr_to_python<boost::shared_ptr<Mantid::API::Sample> >();
+    register_ptr_to_python<Mantid::API::Sample*>();
 
     //Sample class
-    class_< Mantid::API::Sample >("Sample", no_init)
-      .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)0, 
-         return_value_policy< reference_existing_object>(), Sample_getLogData_overloads())
+    class_< Mantid::API::Sample, boost::noncopyable >("Sample", no_init)
+      .def("getLogData", (Mantid::Kernel::Property* (Mantid::API::Sample::*)(const std::string&) const)&Sample::getLogData, 
+        return_internal_reference<>())//return_value_policy<return_by_value>())
+      .def("getLogData", (const std::vector<Mantid::Kernel::Property*> & (Mantid::API::Sample::*)() const)&Sample::getLogData, 
+        return_internal_reference<>())//return_value_policy<return_by_value>())
       .def("getName", &Mantid::API::Sample::getName, return_value_policy<copy_const_reference>())
       .def("getProtonCharge", &Mantid::API::Sample::getProtonCharge, return_value_policy< copy_const_reference>())
       .def("getGeometryFlag", &Mantid::API::Sample::getGeometryFlag)

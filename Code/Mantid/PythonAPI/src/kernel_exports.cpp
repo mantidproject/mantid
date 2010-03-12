@@ -37,6 +37,7 @@ namespace PythonAPI
       ;
     
     class_< Mantid::Kernel::Property, boost::noncopyable>("Property", no_init)
+      .def("name", &Mantid::Kernel::Property::name, return_value_policy<copy_const_reference>())
       .def("isValid", &Mantid::Kernel::Property::isValid)
       .def("value", &Mantid::Kernel::Property::value)
       .def("allowedValues", &Mantid::Kernel::Property::allowedValues)
