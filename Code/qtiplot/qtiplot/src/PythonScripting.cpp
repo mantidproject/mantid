@@ -278,7 +278,10 @@ const QStringList PythonScripting::fileExtensions() const
 
 void PythonScripting::refreshAlgorithms()
 {
-  PyRun_SimpleString("mtd._refreshPyAlgorithms()");
+  if( !m_current_script->scriptIsRunning() )
+  {
+    PyRun_SimpleString("mtd._refreshPyAlgorithms()");
+  }
 }
 
 void PythonScripting::refreshCompletion()
