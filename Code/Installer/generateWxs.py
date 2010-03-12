@@ -441,6 +441,11 @@ addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', '../qtiplot/qtiplot/mant
 addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', '../qtiplot/qtiplot/mantidplot.py', MantidDlls)
 addFileV('mtdkeywords', 'mtdwds.txt', 'mtdpy_keywords.txt', '../qtiplot/qtiplot/mtdpy_keywords.txt', MantidDlls)
 
+# Remove *.pyc files that have been created
+files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.pyc','MantidFramework.pyc','MantidHeader.pyc']
+for index, name in enumerate(files_to_remove):
+    addTo(MantidDlls,'RemoveFile',{'Id':'Pyc_' + str(index),'On':'uninstall','LongName': name, 'Name':name[:8]})
+
 if (QTDIR == 'C:/Qt/4_4_0/bin'): 	 
 	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/MantidPlot.exe.manifest',QTIPlot)
 

@@ -136,8 +136,8 @@ bool PythonScripting::start()
 
   // Changed initialization to include a script which also loads the 
   // MantidPythonAPI - M. Gigg
-  if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc")) && 
-      loadInitFile(mantidbin.absoluteFilePath("mantidplotrc")) )
+  if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc.py")) && 
+      loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
   {
     d_initialized = true;
   }
@@ -294,74 +294,39 @@ void PythonScripting::refreshCompletion()
 // Private member functions
 //------------------------------------------------------------
 
-bool PythonScripting::loadInitFile(const QString &path)
+bool PythonScripting::loadInitFile(const QString & filename)
 {
-  QFileInfo pyFile(path+".py"), pycFile(path+".pyc");
-  bool success = false;
-  if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) 
+  if( !filename.endsWith(".py") || !QFileInfo(filename).isReadable() )
   {
-    // if we have a recent pycFile, use it
-    FILE *f = fopen(pycFile.filePath(), "rb");
-    success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
-  } 
-  else if (pyFile.isReadable() && pyFile.exists())
-  {
-    // try to compile pyFile to pycFile if the current location is writable
-    QString testfile(QFileInfo(path).absoluteDir().absoluteFilePath("UNLIKELYFILENAME"));
-    QFile tester(testfile);
-    if( tester.open(QIODevice::WriteOnly) )
-    {
-      PyObject *compileModule = PyImport_ImportModule("py_compile");
-      if (compileModule)
-      {
-	PyObject *compile = PyDict_GetItemString(PyModule_GetDict(compileModule), "compile");
-	if (compile) 
-	{
-	  PyObject *tmp = PyObject_CallFunctionObjArgs(compile,
-						       PyString_FromString(pyFile.filePath()),
-						       PyString_FromString(pycFile.filePath()),
-						       NULL);
-	  if (tmp)
-	    Py_DECREF(tmp);
-	  else
-	    PyErr_Print();
-	} 
-	else
-	{
-	  PyErr_Print();
-	}
-	Py_DECREF(compileModule);
-      } 
-      else
-      {
-	PyErr_Print();
-      }
-      pycFile.refresh();
-    }
-    //Remove the testing file   
-    tester.remove();
-    if (pycFile.isReadable() && (pycFile.lastModified() >= pyFile.lastModified())) 
-    {
-      // run the newly compiled pycFile
-      FILE *f = fopen(pycFile.filePath(), "rb");
-      success = (PyRun_SimpleFileEx(f, pycFile.filePath(), false) == 0);
-      fclose(f);
-    } 
-    else 
-    {
-      // fallback: just run pyFile
-	/*FILE *f = fopen(pyFile.filePath(), "r");
-	  success = PyRun_SimpleFileEx(f, pyFile.filePath(), false) == 0;
-	  fclose(f);*/
-	//TODO: code above crashes on Windows - bug in Python?
-      QFile f(pyFile.filePath());
-      if (f.open(QIODevice::ReadOnly | QIODevice::Text))
-      {
-	QByteArray data = f.readAll();
-	success = (PyRun_SimpleString(data.data()) == 0);
-	f.close();
-      }
-    }
+    return false;
   }
+  this->write(QString("Loading init file: ") + filename + "\n");
+  // MG: The Python/C PyRun_SimpleFile function crashes on Windows when trying to run
+  // a simple text file which is why it is not used here
+  QFile file(filename);
+  bool success(false);
+  if(file.open(QIODevice::ReadOnly | QIODevice::Text) )
+  {
+	  QByteArray data = file.readAll();
+    if( PyRun_SimpleString(data.data() ) == 0 )
+    {
+      success = true;
+    }
+    else
+    {
+      success = false;
+    }
+	  file.close();
+  }
+  else
+  {
+    this->write(QString("Error: Cannot open file \"") + filename + "\"\n");
+    success = false;
+  }
+  if( !success )
+  {
+    this->write("Error running init file \"" + filename + "\"\n");
+  }
+
   return success;
 }
