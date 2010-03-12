@@ -7,11 +7,13 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ConstraintFactory.h"
 
 #include <sstream>
 #include <iostream>
@@ -80,14 +82,29 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
         // check first if this parameter is actually specified for this function
         if ( name().compare(fitParam.getFunction()) == 0 )
         {
-          // update value
-          setParameter(i, fitParam.getValue());
-          // set any tie which may be specified
+          // update value          
+          IFunctionWithLocation* testWithLocation = dynamic_cast<IFunctionWithLocation*>(this);
+          if ( testWithLocation == NULL )
+          {
+            setParameter(i, fitParam.getValue());
+          }
+          else
+          {
+            setParameter(i, fitParam.getValue(testWithLocation->centre()));
+          }
+
+          // add tie if specified for this parameter in instrument definition file
           if ( fitParam.getTie().compare("") )
           {  
             std::ostringstream str;
             str << fitParam.getValue();
             tie(parameterName(i), str.str());
+          }
+
+          // add constraint if specified for this parameter in instrument definition file
+          if ( fitParam.getConstraint().compare("") )
+          {  
+            ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint());
           }
         }
       }

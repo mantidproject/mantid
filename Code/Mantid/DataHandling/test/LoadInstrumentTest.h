@@ -347,7 +347,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
-    loaderIDF.setPropertyValue("Filename", "../../../../Test/Instrument/IDF_for_unit_testing.xml");
+    loaderIDF.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml");
     inputFile = loaderIDF.getPropertyValue("Filename");
 
     loaderIDF.setPropertyValue("Workspace", wsName);
@@ -566,7 +566,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from SVN
-    loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDF_for_unit_testing2.xml");
+    loaderIDF2.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     inputFile = loaderIDF2.getPropertyValue("Filename");
 
     loaderIDF2.setPropertyValue("Workspace", wsName);

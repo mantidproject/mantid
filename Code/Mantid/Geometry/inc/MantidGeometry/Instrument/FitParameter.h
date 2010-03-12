@@ -48,7 +48,9 @@ namespace Mantid
       FitParameter() : m_value(0.0), m_tie(""), m_function("") {};
 
       /// get paramter value
-      double getValue() const {return m_value;}
+      double getValue(const double& at) const;
+      /// get paramter value
+      double getValue() const;
       /// set parameter value
       double& setValue() {return m_value;}
       /// get tie

@@ -63,7 +63,7 @@ public:
     LoadEmptyInstrument loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
-    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDF_for_unit_testing2.xml");
+    loader.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -118,7 +118,8 @@ public:
 
     param = paramMap.getRecursive(&(*det), "toplevel2", "fitting");
     const FitParameter& fitParam2 = param->value<FitParameter>();
-    TS_ASSERT_DELTA( fitParam2.getValue(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( fitParam2.getValue(0), 1.0, 0.0001);
+    TS_ASSERT_DELTA( fitParam2.getValue(5), 1120.0, 0.0001);
     TS_ASSERT( fitParam2.getTie().compare("") == 0 );
     TS_ASSERT( fitParam2.getFunction().compare("somefunction") == 0 );
     TS_ASSERT( fitParam2.getConstraint().compare("") == 0 );

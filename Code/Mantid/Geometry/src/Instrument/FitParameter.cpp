@@ -12,6 +12,28 @@ namespace Mantid
 namespace Geometry
 {
 
+  /**
+    Get parameter value. The default parameter 'at' is ignored expect if
+    the value of the parameter is determined from a look up table etc.
+    @param at number to return the value at
+  */
+  double FitParameter::getValue(const double& at) const 
+  { 
+    if ( m_lookUpTable.containData() )
+    {
+      return  m_lookUpTable.value(at);
+    }
+
+    return m_value;
+  }
+
+  /**
+    Get parameter value.
+  */
+  double FitParameter::getValue() const 
+  { 
+    return m_value;
+  }
 
   /**
     Prints object to stream
