@@ -104,7 +104,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
           // add constraint if specified for this parameter in instrument definition file
           if ( fitParam.getConstraint().compare("") )
           {  
-            ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint());
+            addConstraint(ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint()));
           }
         }
       }

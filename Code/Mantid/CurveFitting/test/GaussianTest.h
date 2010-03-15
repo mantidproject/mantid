@@ -10,11 +10,13 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
+#include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -100,10 +102,18 @@ public:
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "MAR_Dataset";
+    std::string outputSpace = "HRP38692_Dataset";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
     loader.execute();
 
+    // reload instrument to test constraint defined in IDF is working
+    LoadInstrument reLoadInstrument;
+    reLoadInstrument.initialize();
+    std::string instrumentName = "HRPD_for_UNIT_TESTING.xml";
+    reLoadInstrument.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/" + instrumentName);
+    reLoadInstrument.setPropertyValue("Workspace", outputSpace);
+    TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
+    TS_ASSERT( reLoadInstrument.isExecuted() );
 
     Fit alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -133,17 +143,13 @@ public:
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
-    fn->setParameter("Height",200.0);
-    fn->setParameter("PeakCentre",79450.0);
-    fn->setParameter("Sigma",300.0);
+    //fn->setParameter("Height",200.0);    // these are set in HRPD_for_UNIT_TESTING.xml
+    //fn->setParameter("PeakCentre",79450.0);
+    //fn->setParameter("Sigma",300.0);
 
     // add constraint to function
-    BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
-    BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
-    BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
-    //fn->addConstraint(bc1);
-    //fn->addConstraint(bc2);
-    fn->addConstraint(bc3);
+    // BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);  
+    // fn->addConstraint(bc3);   // this is set in HRPD_for_UNIT_TESTING.xml
 
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
@@ -167,6 +173,7 @@ public:
     TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
 
     AnalysisDataService::Instance().remove(outputSpace);
+    InstrumentDataService::Instance().remove(instrumentName);
   }
 
   void testAgainstHRPD_FallbackToSimplex()
@@ -176,7 +183,7 @@ public:
     LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", inputFile);
-    std::string outputSpace = "MAR_Dataset";
+    std::string outputSpace = "HRPD_Dataset";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
     loader.execute();
 
@@ -209,7 +216,7 @@ public:
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
-    fn->setParameter("Height",200.0);
+    fn->setParameter("Height",200.0);   
     fn->setParameter("PeakCentre",79450.0);
     fn->setParameter("Sigma",300.0);
 
@@ -217,7 +224,7 @@ public:
     BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
     BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
     BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
-    fn->addConstraint(bc1);
+    //fn->addConstraint(bc1);
     //fn->addConstraint(bc2);
     //fn->addConstraint(bc3);
 
@@ -225,6 +232,9 @@ public:
     fnWithBk->addFunction(fn);
 
     alg.setFunction(fnWithBk);
+
+    //int iii;
+    //std::cin >> iii;
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
