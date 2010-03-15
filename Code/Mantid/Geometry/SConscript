@@ -18,8 +18,6 @@ myenv.Append(CPPDEFINES=[('IN_MANTID_GEOMETRY',1)])
 if platform.system() == 'Darwin':
    myenv.Append(CPPDEFINES=['HAVE_IOSTREAM','HAVE_LIMITS','HAVE_IOMANIP'])
    myenv.Append(CPPPATH=['../../Third_Party/include/OpenCascade'])
-   #,'/usr/X11/include/GL'])
-   #myenv.Append(MYLIBDIRLIST='/usr/X11/lib')
 
    # In Mac-land we should link to the OpenGL framework rather than
    # specific libraries
@@ -38,9 +36,10 @@ elif platform.system() == 'Linux':
    # so the library path doesn't need to be touched
    myenv.Append(CPPPATH='/usr/include/opencascade')
 
-#if os.name == 'posix':
    myenv.Append(MYLIBLIST=['GL','GLU'])
+
 else:
+   # Windows
    myenv.Append(MYLIBLIST=['opengl32','glu32'])
    
 myenv.Append(MYLIBLIST=['TKBO','TKPrim','TKBRep','TKernel','TKTopAlgo','TKMath','TKMesh','TKG2d'])
