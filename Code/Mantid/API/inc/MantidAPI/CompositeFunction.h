@@ -106,6 +106,8 @@ public:
 
   /// Return parameter index from a parameter reference.
   int getParameterIndex(const ParameterReference& ref)const;
+  /// Get the containing function
+  IFunction* getContainingFunction(const ParameterReference& ref)const;
 
   /// Apply the ties
   void applyTies();
@@ -123,6 +125,8 @@ public:
   IConstraint* firstConstraint()const;
   /// Get next constraint
   IConstraint* nextConstraint()const;
+  /// Remove a constraint
+  void removeConstraint(const std::string& parName);
 
              /* CompositeFunction own methods */
 

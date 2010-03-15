@@ -73,16 +73,7 @@ namespace API
 
     std::string parName = m_function1->parameterName(m_function1->getParameterIndex(*this));
     // Create the template m_expression
-    boost::regex rx;//("((f\\d+\\.)+\\w)");
-    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(m_function1);
-    if (cf)
-    {
-      rx = "((f\\d+\\.)+\\w)";
-    }
-    else
-    {
-      rx = "\\b(([[:alpha:]]|_)([[:alnum:]]|_)*)\\b(?!(\\s*\\())";
-    }
+    boost::regex rx("\\b(([[:alpha:]]|_)([[:alnum:]]|_|\\.)*)\\b(?!(\\s*\\())");
     std::string input = expr;
     boost::smatch res;
     std::string::const_iterator start = input.begin();
@@ -131,6 +122,10 @@ namespace API
    */
   std::string ParameterTie::asString(const IFunction* fun)const
   {
+    if (!fun)
+    {
+      fun = getFunction();
+    }
     const CompositeFunction* cf  = dynamic_cast<const CompositeFunction*>(fun);
     CompositeFunction* cf1 = dynamic_cast<CompositeFunction*>(m_function1);
     std::string res_expression;

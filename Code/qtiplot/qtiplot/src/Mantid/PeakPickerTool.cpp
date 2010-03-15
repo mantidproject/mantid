@@ -21,7 +21,7 @@
 PeakPickerTool::PeakPickerTool(Graph *graph, MantidUI *mantidUI) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
-m_mantidUI(mantidUI),m_wsName(),m_spec(),m_init(false),m_current(-1),
+m_mantidUI(mantidUI),m_wsName(),m_spec(),m_init(false),m_current(0),
 m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false),
 m_defaultPeakName("Gaussian")
 {
@@ -50,16 +50,16 @@ m_defaultPeakName("Gaussian")
   }
   fitBrowser()->setWorkspaceName(m_wsName);
   fitBrowser()->setWorkspaceIndex(m_spec);
-  connect(fitBrowser(),SIGNAL(indexChanged(int)),this,SLOT(indexChanged(int)));
+  connect(fitBrowser(),SIGNAL(currentChanged()),this,SLOT(currentChanged()));
   connect(fitBrowser(),SIGNAL(workspaceIndexChanged(int)),this,SLOT(workspaceIndexChanged(int)));
   connect(fitBrowser(),SIGNAL(workspaceNameChanged(const QString&)),this,SLOT(workspaceNameChanged(const QString&)));
-  connect(fitBrowser(),SIGNAL(functionRemoved(int)),this,SLOT(functionRemoved(int)));
+  connect(fitBrowser(),SIGNAL(functionRemoved(Mantid::API::IFunction*)),this,SLOT(functionRemoved(Mantid::API::IFunction*)));
   connect(fitBrowser(),SIGNAL(functionCleared()),this,SLOT(functionCleared()));
   connect(fitBrowser(),SIGNAL(algorithmFinished(const QString&)),this,SLOT(algorithmFinished(const QString&)));
   connect(fitBrowser(),SIGNAL(startXChanged(double)),this,SLOT(startXChanged(double)));
   connect(fitBrowser(),SIGNAL(endXChanged(double)),this,SLOT(endXChanged(double)));
-  connect(fitBrowser(),SIGNAL(parameterChanged(int)),this,SLOT(parameterChanged(int)));
-  connect(fitBrowser(),SIGNAL(plotGuess(int)),this,SLOT(plotGuess(int)));
+  connect(fitBrowser(),SIGNAL(parameterChanged(Mantid::API::IFunction*)),this,SLOT(parameterChanged(Mantid::API::IFunction*)));
+  connect(fitBrowser(),SIGNAL(plotGuess(Mantid::API::IFunction*)),this,SLOT(plotGuess(Mantid::API::IFunction*)));
 
   m_mantidUI->showFitPropertyBrowser();
   connect(this,SIGNAL(isOn(bool)),fitBrowser(),SLOT(setPeakToolOn(bool)));
@@ -78,7 +78,7 @@ m_defaultPeakName("Gaussian")
     xMax(fitBrowser()->endX());
     m_changingXMin = false;
     m_changingXMax = false;
-    setCurrent(fitBrowser()->index());
+//    setCurrent(fitBrowser()->index());
     attach(d_graph->plotWidget());
     d_graph->plotWidget()->replot();
   }
@@ -86,7 +86,7 @@ m_defaultPeakName("Gaussian")
 
 PeakPickerTool::~PeakPickerTool()
 {
-  QMap<int,FunctionCurve*>::iterator it = m_guessCurves.begin();
+  QMap<Mantid::API::IFunction*,FunctionCurve*>::iterator it = m_guessCurves.begin();
   for(;it!=m_guessCurves.end();it++)
   {
     d_graph->removeCurve(it.value());
@@ -216,7 +216,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
             widthIsSet();
             double x = d_graph->plotWidget()->invTransform(2,p.x());
             double x1 = d_graph->plotWidget()->invTransform(2,p.x()+3);
-            int ic = clickedOnCentreMarker(x,fabs(x1-x));
+            Mantid::API::IFunction* fun = clickedOnCentreMarker(x,fabs(x1-x));
             if (clickedOnXMax(x,fabs(x1-x)))
             {// begin changing xMax
               changingXMax(true);
@@ -238,11 +238,11 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
               d_graph->plotWidget()->replot();
               emit peakChanged();
             }
-            else if (ic >= 0)
+            else if (fun)
             {// select current, begin changing centre and height
-              //setCurrent(ic);
-              fitBrowser()->selectFunction(ic);
-              //d_graph->plotWidget()->replot();
+              setCurrent(fun);
+              fitBrowser()->setCurrentFunction(fun);
+              d_graph->plotWidget()->replot();
               resetting(true);
               emit peakChanged();
             }
@@ -277,7 +277,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
   return QwtPlotPicker::eventFilter(obj, event);
 }
 
-void PeakPickerTool::windowStateChanged( Qt::WindowStates oldState, Qt::WindowStates newState )
+void PeakPickerTool::windowStateChanged( Qt::WindowStates, Qt::WindowStates newState )
 {
   if (newState.testFlag(Qt::WindowActive))
     m_mantidUI->appWindow()->enableMantidPeakFit(true);
@@ -303,14 +303,15 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
     {
       for(int iFun=0;iFun < fitBrowser()->compositeFunction()->nFunctions();iFun++)
       {
-        Mantid::API::IPeakFunction* pf = 
-          dynamic_cast<Mantid::API::IPeakFunction*>(fitBrowser()->compositeFunction()->getFunction(iFun));
+        Mantid::API::IFunction* f = 
+          dynamic_cast<Mantid::API::IFunction*>(fitBrowser()->compositeFunction()->getFunction(iFun));
+        Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
         if (!pf) continue;
         double c = pf->centre();
         if (c >= xMap.s1() && c <= xMap.s2())
         {
           int ic = xMap.transform(c);
-          if (iFun == fitBrowser()->index())
+          if (f == fitBrowser()->function())
           {
             double width = pf->width();
             QPen pen;
@@ -369,7 +370,7 @@ void PeakPickerTool::addPeak(double c,double h)
   fitBrowser()->setCentre(c);
   fitBrowser()->setHeight(h);
   fitBrowser()->setWidth(m_width);
-  setCurrent(fitBrowser()->index());
+  //setCurrent(fitBrowser()->index());
 }
 
 // Give new centre and height to the current peak
@@ -382,7 +383,7 @@ void PeakPickerTool::setPeak(double c,double h)
   }
   fitBrowser()->setCentre(c);
   fitBrowser()->setHeight(h);
-  setCurrent( fitBrowser()->index() );
+  //setCurrent( fitBrowser()->index() );
 }
 
 // Return the centre of the currently selected peak
@@ -435,24 +436,25 @@ bool PeakPickerTool::clickedOnWidthMarker(double x,double dx)
   return (fabs(x - c - w) <= dx) || (fabs(x - c + w) <= dx);
 }
 
-// Check if x is near a peak centre marker (+-dx). If true returns the peak's index or -1 otherwise.
-int PeakPickerTool::clickedOnCentreMarker(double x,double dx)
+// Check if x is near a peak centre marker (+-dx). If true returns the peak's address or 0 otherwise.
+Mantid::API::IFunction* PeakPickerTool::clickedOnCentreMarker(double x,double dx)
 {
-  for(int i=0;i<fitBrowser()->count();i++)
+  Mantid::API::CompositeFunction* cf = fitBrowser()->compositeFunction();
+  for(int i=0;i<cf->nFunctions();i++)
   {
-    Mantid::API::IPeakFunction* pf = fitBrowser()->peakFunction(i);
+    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(cf->getFunction(i));
     if (pf && fabs(x - pf->centre()) <= dx)
     {
-      return i;
+      return dynamic_cast<Mantid::API::IFunction*>(cf->getFunction(i));
     }
   }
-  return -1;
+  return 0;
 }
 
 // Change current peak
-void PeakPickerTool::setCurrent(int i)
+void PeakPickerTool::setCurrent(Mantid::API::IFunction* f)
 {
-  m_current = i;
+  m_current = f;
 }
 
 // Lower fit boundary
@@ -493,27 +495,27 @@ void PeakPickerTool::setDefaultPeakName(const std::string& fnName)
  * Slot. Reacts on the index change in the Fit Browser.
  * @param i The new function index.
  */
-void PeakPickerTool::indexChanged(int i)
+void PeakPickerTool::currentChanged()
 {
-  int j = fitBrowser()->isPeak() ? i : -1;
-  setCurrent(j);
+  Mantid::API::IFunction* pf = fitBrowser()->isPeak() ? fitBrowser()->function() : 0;
+  setCurrent(pf);
   d_graph->plotWidget()->replot();
 }
 
 /**
  * Slot. Reacts on the function deletion in the Fit Browser.
- * @param i The index of the deleted function.
+ * @param f The address of the deleted function.
  */
-void PeakPickerTool::functionRemoved(int i)
+void PeakPickerTool::functionRemoved(Mantid::API::IFunction* f)
 {
-  QMap<int,FunctionCurve*>::iterator it = m_guessCurves.find(i);
+  QMap<Mantid::API::IFunction*,FunctionCurve*>::iterator it = m_guessCurves.find(f);
   if (it != m_guessCurves.end())
   {
     d_graph->removeCurve(it.value());
     m_guessCurves.erase(it);
   }
-  int j = fitBrowser()->isPeak() ? fitBrowser()->index() : -1;
-  setCurrent(j);
+  Mantid::API::IFunction* pf = fitBrowser()->isPeak() ? fitBrowser()->function() : 0;
+  setCurrent(pf);
   d_graph->plotWidget()->replot();
 }
 
@@ -529,8 +531,8 @@ void PeakPickerTool::algorithmFinished(const QString& out)
   graph()->removeCurve(curveFitName);
   graph()->removeCurve(curveResName);
 
-  MantidCurve* c1 = new MantidCurve(curveFitName,out,graph(),"spectra",1,false);
-  MantidCurve* c2 = new MantidCurve(curveResName,out,graph(),"spectra",2,false);
+  new MantidCurve(curveFitName,out,graph(),"spectra",1,false);
+  new MantidCurve(curveResName,out,graph(),"spectra",2,false);
 
   graph()->replot();
 }
@@ -581,24 +583,22 @@ void PeakPickerTool::endXChanged(double eX)
 
 /**
  * Slot. Called in response to parameterChanged signal from FitBrowser
- * @param i The index of the function with the changed parameter
+ * @param f The pointer to the function with the changed parameter
  */
-void PeakPickerTool::parameterChanged(int i)
+void PeakPickerTool::parameterChanged(Mantid::API::IFunction* f)
 {
-  QMap<int,FunctionCurve*>::iterator it = m_guessCurves.find(i);
+  QMap<Mantid::API::IFunction*,FunctionCurve*>::iterator it = m_guessCurves.find(f);
   if (it != m_guessCurves.end())
   {
-    if (it.value()->title().text() != fitBrowser()->functionName(i))
-    {
-      removeGuess(i);
-    }
-    else
-    {
-      QStringList formulas = it.value()->formulas();
-      formulas[1] = QString::fromStdString(*fitBrowser()->function(i));
-      it.value()->setFormulas(formulas);
-      it.value()->loadData();
-    }
+    QStringList formulas = it.value()->formulas();
+    formulas[1] = QString::fromStdString(*f);
+    it.value()->setFormulas(formulas);
+    it.value()->loadData();
+  }
+  if (f != fitBrowser()->theFunction() && m_guessCurves.find(fitBrowser()->theFunction()) != m_guessCurves.end())
+  {
+    parameterChanged(fitBrowser()->theFunction());
+    return;
   }
   graph()->replot();
 }
@@ -620,17 +620,30 @@ void PeakPickerTool::prepareContextMenu(QMenu& menu)
 
   if (fitBrowser()->count()>0)
   {
+    if (hasGuessPlotted(fitBrowser()->theFunction()))
+    {
+      action = new QAction("Remove guess",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(removeAllGuess()));
+      menu.addAction(action);
+    }
+    else
+    {
+      action = new QAction("Plot guess",this);
+      connect(action,SIGNAL(triggered()),this,SLOT(plotAllGuess()));
+      menu.addAction(action);
+    }
+
     if (current()>=0)
     {
       if (hasGuessPlotted(current()))
       {
-        action = new QAction("Remove guess",this);
+        action = new QAction("Remove guess for this peak",this);
         connect(action,SIGNAL(triggered()),this,SLOT(removeCurrentGuess()));
         menu.addAction(action);
       }
       else
       {
-        action = new QAction("Plot guess",this);
+        action = new QAction("Plot guess for this peak",this);
         connect(action,SIGNAL(triggered()),this,SLOT(plotCurrentGuess()));
         menu.addAction(action);
       }
@@ -707,7 +720,7 @@ void PeakPickerTool::addPeakAt(int x,int y)
  */
 void PeakPickerTool::deletePeak()
 {
-  if (current() < 0) return;
+  if (!current()) return;
   fitBrowser()->removeFunction(current());
 }
 
@@ -739,10 +752,11 @@ void PeakPickerTool::addBackground()
  */
 void PeakPickerTool::deleteFunction()
 {
+  Mantid::API::CompositeFunction* cf = fitBrowser()->compositeFunction();
   QStringList names;
-  for(int i=0;i<fitBrowser()->count();i++)
+  for(int i=0;i<cf->nFunctions();i++)
   {
-    names << fitBrowser()->functionName(i);
+    names << fitBrowser()->functionName(cf->getFunction(i));
   }
   bool ok;
   QString fnName = 
@@ -751,9 +765,9 @@ void PeakPickerTool::deleteFunction()
   if (ok)
   {
     QRegExp rx("^f(\\d+)-");
-    int i = rx.indexIn(fnName);
+    rx.indexIn(fnName);
     int j = rx.cap(1).toInt();
-    fitBrowser()->removeFunction(j);
+    fitBrowser()->removeFunction(cf->getFunction(j));
   }
 }
 
@@ -784,33 +798,31 @@ void PeakPickerTool::setToolTip(const QString& txt)
 
 /**
  * Slot. Plot the initial guess for the i-th function
+ * @param i The function index. -1 means plot the whole composite function
  */
-void PeakPickerTool::plotGuess(int i)
+void PeakPickerTool::plotGuess(Mantid::API::IFunction* f)
 {
-  if (i >= 0)
-  {
-    removeGuess(i);
+  if (!f) return;
+  removeGuess(f);
+  FunctionCurve* curve = new FunctionCurve(f,
+    QString::fromStdString(fitBrowser()->workspaceName()),
+    fitBrowser()->workspaceIndex(),fitBrowser()->functionName(f));
 
-    FunctionCurve* curve = new FunctionCurve(fitBrowser()->compositeFunction()->getFunction(i),
-      QString::fromStdString(fitBrowser()->workspaceName()),
-      fitBrowser()->workspaceIndex(),fitBrowser()->functionName());
+  curve->setRange(fitBrowser()->startX(), fitBrowser()->endX());
+  curve->loadData();
 
-    curve->setRange(fitBrowser()->startX(), fitBrowser()->endX());
-    curve->loadData();
+  d_graph->insertCurve(curve);
+  d_graph->replot();
 
-    d_graph->insertCurve(curve);
-    d_graph->replot();
-
-    m_guessCurves[i] = curve;
-  }
+  m_guessCurves[f] = curve;
 }
 
 /**
  * Slot. Remove the plot of the i-th function
  */
-void PeakPickerTool::removeGuess(int i)
+void PeakPickerTool::removeGuess(Mantid::API::IFunction* f)
 {
-  QMap<int,FunctionCurve*>::iterator oldCurve = m_guessCurves.find(i);
+  QMap<Mantid::API::IFunction*,FunctionCurve*>::iterator oldCurve = m_guessCurves.find(f);
   if (oldCurve != m_guessCurves.end())
   {
     d_graph->removeCurve(oldCurve.value());
@@ -834,7 +846,23 @@ void PeakPickerTool::removeCurrentGuess()
   removeGuess(current());
 }
 
-bool PeakPickerTool::hasGuessPlotted(int i)
+/**
+ * Slot. Plot the initial guess for the whole function
+ */
+void PeakPickerTool::plotAllGuess()
 {
-  return m_guessCurves.find(i) != m_guessCurves.end();
+  plotGuess(fitBrowser()->theFunction());
+}
+
+/**
+ * Slot. Remove the plot of the whole function
+ */
+void PeakPickerTool::removeAllGuess()
+{
+  removeGuess(fitBrowser()->theFunction());
+}
+
+bool PeakPickerTool::hasGuessPlotted(Mantid::API::IFunction* f)
+{
+  return m_guessCurves.find(f) != m_guessCurves.end();
 }

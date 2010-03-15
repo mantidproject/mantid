@@ -15,6 +15,9 @@ namespace Mantid
 {
 namespace API
 {
+#ifndef IGNORE_IFUNCTION_ARGUMENT
+#define IGNORE_IFUNCTION_ARGUMENT(x)
+#endif
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -162,9 +165,13 @@ public:
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual int getParameterIndex(const ParameterReference& ref)const = 0;
+  /// Get a function containing the parameter refered to by the reference. In case of a simple function
+  /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
+  /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
+  virtual IFunction* getContainingFunction(const ParameterReference& ref)const = 0;
 
   /// Tie a parameter to other parameters (or a constant)
-  virtual void tie(const std::string& parName,const std::string& expr);
+  virtual ParameterTie* tie(const std::string& parName,const std::string& expr);
   /// Apply the ties
   virtual void applyTies() = 0;
   /// Removes the tie off a parameter
@@ -183,6 +190,8 @@ public:
   virtual IConstraint* firstConstraint()const = 0;
   /// Get next constraint
   virtual IConstraint* nextConstraint()const = 0;
+  /// Remove a constraint
+  virtual void removeConstraint(const std::string& parName) = 0;
 
   /// Set the parameters of the function to satisfy the constraints of
   /// of the function. For example
@@ -196,11 +205,12 @@ public:
   /// Returns a list of attribute names
   virtual std::vector<std::string> getAttributeNames()const{return std::vector<std::string>();}
   /// Return a value of attribute attName
-  virtual std::string getAttribute(const std::string& attName)const{return "";}
+  virtual std::string getAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName))const{return "";}
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string& attName,const std::string& value){}
+  virtual void setAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName),
+                            const std::string& IGNORE_IFUNCTION_ARGUMENT(value)){}
   /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string& attName)const{return false;}
+  virtual bool hasAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName))const{return false;}
 
 protected:
 
@@ -228,7 +238,6 @@ protected:
 
 };
 
-
 /** Represents the Jacobian in functionDeriv. 
 *  It is abstract to abstract from any GSL
 */
@@ -246,7 +255,7 @@ public:
   *   @param value Value to add
   *   @param iActiveP The index of an active parameter.
   */
-  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
+  virtual void addNumberToColumn(const double& IGNORE_IFUNCTION_ARGUMENT(value), const int& IGNORE_IFUNCTION_ARGUMENT(iActiveP)) 
   {
     throw Kernel::Exception::NotImplementedError("No addNumberToColumn() method of Jacobian provided");
   }

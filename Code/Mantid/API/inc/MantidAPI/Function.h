@@ -101,6 +101,8 @@ public:
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
   virtual int getParameterIndex(const ParameterReference& ref)const;
+  /// Get the containing function
+  IFunction* getContainingFunction(const ParameterReference& ref)const;
 
   /// Apply the ties
   virtual void applyTies();
@@ -117,6 +119,8 @@ public:
   virtual IConstraint* firstConstraint()const;
   /// Get next constraint
   virtual IConstraint* nextConstraint()const;
+  /// Remove a constraint
+  virtual void removeConstraint(const std::string& parName);
  
   void setParametersToSatisfyConstraints();
 

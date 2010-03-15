@@ -15,16 +15,16 @@ class ParameterTieTest_Gauss: public IPeakFunction
 public:
   ParameterTieTest_Gauss()
   {
-    declareParameter("c");
-    declareParameter("h",1.);
-    declareParameter("s",1.);
+    declareParameter("cen");
+    declareParameter("hi",1.);
+    declareParameter("sig",1.);
   }
   std::string name()const{return "ParameterTieTest_Gauss";}
   void function(double* out, const double* xValues, const int& nData)
   {
-    double c = getParameter("c");
-    double h = getParameter("h");
-    double w = getParameter("s");
+    double c = getParameter("cen");
+    double h = getParameter("hi");
+    double w = getParameter("sig");
     for(int i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
@@ -34,9 +34,9 @@ public:
   void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
-    double c = getParameter("c");
-    double h = getParameter("h");
-    double w = getParameter("s");
+    double c = getParameter("cen");
+    double h = getParameter("hi");
+    double w = getParameter("sig");
     for(int i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
@@ -134,19 +134,19 @@ public:
     mfun.addFunction(g1);
     mfun.addFunction(g2);
 
-    g1->setParameter("c",3.1);
-    g1->setParameter("h",1.1);
-    g1->setParameter("s",1.);
+    g1->setParameter("cen",3.1);
+    g1->setParameter("hi",1.1);
+    g1->setParameter("sig",1.);
 
-    g2->setParameter("c",7.1);
-    g2->setParameter("h",1.1);
-    g2->setParameter("s",2.);
+    g2->setParameter("cen",7.1);
+    g2->setParameter("hi",1.1);
+    g2->setParameter("sig",2.);
 
     bk->setParameter("a",0.8);
 
-    ParameterTie tie(&mfun,"f1.s");
-    tie.set("f2.s^2+f0.a+1");
-    TS_ASSERT_EQUALS(tie.asString(&mfun),"f1.s=f2.s^2+f0.a+1");
+    ParameterTie tie(&mfun,"f1.sig");
+    tie.set("f2.sig^2+f0.a+1");
+    TS_ASSERT_EQUALS(tie.asString(&mfun),"f1.sig=f2.sig^2+f0.a+1");
 
     TS_ASSERT_DELTA(tie.eval(),5.8,0.00001);
     TS_ASSERT_EQUALS(tie.getFunction(),g1);
@@ -172,15 +172,15 @@ public:
     mfun.addFunction(g2);
 
     ParameterTie tie(&mfun,"f0.b");
-    tie.set("f3.s^2+f1.a+1");
-    TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.b=f3.s^2+f1.a+1");
+    tie.set("f3.sig^2+f1.a+1");
+    TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.b=f3.sig^2+f1.a+1");
 
     TS_ASSERT_DELTA(tie.eval(),2,0.00001);
     TS_ASSERT_EQUALS(tie.getFunction(),bk1);
     TS_ASSERT_EQUALS(tie.getIndex(),1);
 
     mfun.removeFunction(2);
-    TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.b=f2.s^2+f1.a+1");
+    TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.b=f2.sig^2+f1.a+1");
 
   }
 
@@ -206,31 +206,31 @@ public:
     TS_ASSERT_EQUALS(tie.asString(mf1),"f0.b=f1.a^2+f1.b+1");
     TS_ASSERT_EQUALS(tie.asString(&mfun),"f0.f0.b=f0.f1.a^2+f0.f1.b+1");
 
-    ParameterTie tie1(&mfun,"f1.f0.s");
-    tie1.set("sin(f1.f0.s)+f1.f1.c/2");
-    TS_ASSERT_EQUALS(tie1.asString(&mfun),"f1.f0.s=sin(f1.f0.s)+f1.f1.c/2");
-    TS_ASSERT_EQUALS(tie1.asString(mf2),"f0.s=sin(f0.s)+f1.c/2");
+    ParameterTie tie1(&mfun,"f1.f0.sig");
+    tie1.set("sin(f1.f0.sig)+f1.f1.cen/2");
+    TS_ASSERT_EQUALS(tie1.asString(&mfun),"f1.f0.sig=sin(f1.f0.sig)+f1.f1.cen/2");
+    TS_ASSERT_EQUALS(tie1.asString(mf2),"f0.sig=sin(f0.sig)+f1.cen/2");
 
-    ParameterTie tie2(&mfun,"f1.f0.s");
+    ParameterTie tie2(&mfun,"f1.f0.sig");
     tie2.set("123.4");
     TS_ASSERT_EQUALS(tie2.asString(mf1),"");
-    TS_ASSERT_EQUALS(tie2.asString(&mfun),"f1.f0.s=123.4");
-    TS_ASSERT_EQUALS(tie2.asString(mf2),"f0.s=123.4");
-    TS_ASSERT_EQUALS(tie2.asString(g1),"s=123.4");
+    TS_ASSERT_EQUALS(tie2.asString(&mfun),"f1.f0.sig=123.4");
+    TS_ASSERT_EQUALS(tie2.asString(mf2),"f0.sig=123.4");
+    TS_ASSERT_EQUALS(tie2.asString(g1),"sig=123.4");
 
-    ParameterTie tie3(g1,"s");
+    ParameterTie tie3(g1,"sig");
     tie3.set("123.4");
     TS_ASSERT_EQUALS(tie3.asString(mf1),"");
-    TS_ASSERT_EQUALS(tie3.asString(&mfun),"f1.f0.s=123.4");
-    TS_ASSERT_EQUALS(tie3.asString(mf2),"f0.s=123.4");
-    TS_ASSERT_EQUALS(tie3.asString(g1),"s=123.4");
+    TS_ASSERT_EQUALS(tie3.asString(&mfun),"f1.f0.sig=123.4");
+    TS_ASSERT_EQUALS(tie3.asString(mf2),"f0.sig=123.4");
+    TS_ASSERT_EQUALS(tie3.asString(g1),"sig=123.4");
 
-    ParameterTie tie4(mf2,"f0.s");
+    ParameterTie tie4(mf2,"f0.sig");
     tie4.set("123.4");
     TS_ASSERT_EQUALS(tie4.asString(mf1),"");
-    TS_ASSERT_EQUALS(tie4.asString(&mfun),"f1.f0.s=123.4");
-    TS_ASSERT_EQUALS(tie4.asString(mf2),"f0.s=123.4");
-    TS_ASSERT_EQUALS(tie4.asString(g1),"s=123.4");
+    TS_ASSERT_EQUALS(tie4.asString(&mfun),"f1.f0.sig=123.4");
+    TS_ASSERT_EQUALS(tie4.asString(mf2),"f0.sig=123.4");
+    TS_ASSERT_EQUALS(tie4.asString(g1),"sig=123.4");
 
     ParameterTie tie5(nth,"a");
     tie5.set("cos(B1e2Ta_)-sin (alpha12)");
@@ -263,15 +263,15 @@ public:
 private:
   void mustThrow1(CompositeFunction* fun)
   {
-    ParameterTie tie(fun,"s");
+    ParameterTie tie(fun,"sig");
   }
   void mustThrow2(CompositeFunction* fun)
   {
-    ParameterTie tie(fun,"g1.s");
+    ParameterTie tie(fun,"g1.sig");
   }
   void mustThrow3(CompositeFunction* fun)
   {
-    ParameterTie tie(fun,"f10.s");
+    ParameterTie tie(fun,"f10.sig");
   }
   void mustThrow4(IFunction* fun)
   {
@@ -279,7 +279,7 @@ private:
   }
   void mustThrow5(IFunction* fun)
   {
-    ParameterTie tie(fun,"c");
+    ParameterTie tie(fun,"cen");
   }
 };
 

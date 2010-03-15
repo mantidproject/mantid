@@ -411,6 +411,8 @@ void CompositeFunction::checkFunction()
   for(int i=0;i<functions.size();i++)
   {
     IFunction* f = functions[i];
+    CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f);
+    if (cf) cf->checkFunction();
     addFunction(f);
   }
 }
@@ -825,6 +827,16 @@ IConstraint* CompositeFunction::nextConstraint()const
   return getFunction(m_iConstraintFunction)->firstConstraint();
 }
 
+/** Remove a constraint
+ * @param parName The name of a parameter which constarint to remove.
+ */
+void CompositeFunction::removeConstraint(const std::string& parName)
+{
+  int iPar = parameterIndex(parName);
+  int iFun = functionIndex(iPar);
+  getFunction(iFun)->removeConstraint(parameterLocalName(iPar));
+}
+
 /** 
  *  @param i The parameter index
  */
@@ -856,7 +868,26 @@ int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
   return -1;
 }
 
-
+/**
+ * @param ref The reference
+ * @return A function containing parameter pointed to by ref
+ */
+IFunction* CompositeFunction::getContainingFunction(const ParameterReference& ref)const
+{
+  if (ref.getFunction() == this && ref.getIndex() < nParams())
+  {
+    return ref.getFunction();
+  }
+  for(int iFun=0;iFun<nFunctions();iFun++)
+  {
+    IFunction* fun = getFunction(iFun)->getContainingFunction(ref);
+    if (fun)
+    {
+      return getFunction(iFun);
+    }
+  }
+  return NULL;
+}
 
 } // namespace API
 } // namespace Mantid

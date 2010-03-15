@@ -258,8 +258,6 @@ public:
     TS_ASSERT_EQUALS(f.activeIndex(2),1);
     TS_ASSERT_EQUALS(f.activeIndex(3),-1);
 
-    TS_ASSERT_THROWS(f.tie("c1","c0+4"),std::logic_error);
-
   }
 
   void testApplyTies()

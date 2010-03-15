@@ -61,12 +61,16 @@ public:
   /// Parameter map typedef
   typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
   /// Parameter map iterator typedef
-  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_it;
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
+  /// Parameter map iterator typedef
+  typedef std::multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
 #else
   /// Parameter map typedef
   typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> > pmap;
   /// Parameter map iterator typedef
-  typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_it;
+  typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::iterator pmap_it;
+  /// Parameter map iterator typedef
+  typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
 #endif
     ///Constructor
     ParameterMap(){}
@@ -88,6 +92,15 @@ public:
     {
       boost::shared_ptr<Parameter> param = ParameterFactory::create(type,name);
       param->fromString(value);
+      std::pair<pmap_it,pmap_it> range = m_map.equal_range(comp->getComponentID());
+      for(pmap_it it=range.first;it!=range.second;++it)
+      {
+        if (it->second->name() == name)
+        {
+          it->second = param;
+          return;
+        }
+      }
       m_map.insert(std::make_pair(comp->getComponentID(),param));
     }
 
@@ -103,18 +116,22 @@ public:
         throw std::runtime_error("Error in adding parameter: incompatible types");
       }
       paramT->setValue(value);
+      std::pair<pmap_it,pmap_it> range = m_map.equal_range(comp->getComponentID());
+      for(pmap_it it=range.first;it!=range.second;++it)
+      {
+        if (it->second->name() == name)
+        {
+          it->second = param;
+          return;
+        }
+      }
       m_map.insert(std::make_pair(comp->getComponentID(),param));
     }
 
-    /// Method is provided to add a parameter of any custom type which must be created with 'new' operator.
-    /// ParameterMap takes the owneship of the parameter. e.g. AMap.add(new CustomParameter,"comp","name","value");
-    //void add(Parameter* param,const IComponent* comp,const std::string& name, const std::string& value)
-    //{
-    //    param->fromString(value);
-    //    m_map.insert(std::make_pair(comp,boost::shared_ptr<Parameter>(param)));
-    //}
-
-    /** The same as above except that the caller is resposible for setting the parameter's value.
+    /** 
+     *  Method is provided to add a parameter of any custom type which must be created with 'new' operator.
+     *  ParameterMap takes the owneship of the parameter. e.g. AMap.add(new CustomParameter,"comp","name","value");
+     *  The caller is resposible for setting the parameter's value.
      *      e.g. CustomParameter* param = new CustomParameter;
      *      param->setItsValue(value);
      *      AMap.add(param,"comp","name");
@@ -122,10 +139,19 @@ public:
      *  @param comp A pointer to the component
      *  @param name The paramenter name
      */
-    void add(Parameter* param,const IComponent* comp,const std::string& name)
-    {
-        m_map.insert(std::make_pair(comp->getComponentID(),boost::shared_ptr<Parameter>(param)));
-    }
+    //void add(Parameter* param,const IComponent* comp,const std::string& name)
+    //{
+    //  std::pair<pmap_it,pmap_it> range = m_map.equal_range(comp->getComponentID());
+    //  for(pmap_it it=m_map.begin();it!=m_map.end();++it)
+    //  {
+    //    if (it->second->name() == name)
+    //    {
+    //      it->second.reset(param);
+    //      return;
+    //    }
+    //  }
+    //  m_map.insert(std::make_pair(comp->getComponentID(),boost::shared_ptr<Parameter>(param)));
+    //}
 
     /// Create or adjust "pos" parameter for a component
     void addPositionCoordinate(const IComponent* comp,const std::string& name, const double value);
@@ -238,7 +264,7 @@ public:
     {
       std::vector<T> retval;
 
-      pmap_it it;
+      pmap_cit it;
       for (it = m_map.begin(); it != m_map.end(); ++it)
       {
         if ( compName.compare(((const IComponent*)(*it).first)->getName()) == 0 )  

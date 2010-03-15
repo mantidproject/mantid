@@ -16,7 +16,7 @@
 #include "MantidAPI/ConstraintFactory.h"
 
 #include <sstream>
-#include <iostream>
+#include <iostream> 
 
 namespace Mantid
 {
@@ -155,7 +155,7 @@ ParameterTie* IFunction::createTie(const std::string& parName)
  * @param parName The name of the parameter to tie.
  * @param expr    A math expression 
  */
-void IFunction::tie(const std::string& parName,const std::string& expr)
+ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr)
 {
   ParameterTie* tie = this->createTie(parName);
   int i = getParameterIndex(*tie);
@@ -165,14 +165,15 @@ void IFunction::tie(const std::string& parName,const std::string& expr)
     throw std::logic_error("Parameter "+parName+" was not found.");
   }
 
-  if (!this->isActive(i))
-  {
-    delete tie;
-    throw std::logic_error("Parameter "+parName+" is already tied.");
-  }
+  //if (!this->isActive(i))
+  //{
+  //  delete tie;
+  //  throw std::logic_error("Parameter "+parName+" is already tied.");
+  //}
   tie->set(expr);
   addTie(tie);
   this->removeActive(i);
+  return tie;
 }
 
 /** Removes the tie off a parameter. The parameter becomes active

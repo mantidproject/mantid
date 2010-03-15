@@ -33,16 +33,16 @@ ParameterMap::ParameterMap(const ParameterMap& copy)
 Parameter_sptr ParameterMap::get(const IComponent* comp,const std::string& name)const
 {
     const ComponentID id = comp->getComponentID();
-    pmap_it it_found = m_map.find(id);
+    pmap_cit it_found = m_map.find(id);
     if (it_found == m_map.end()) 
     {
         return Parameter_sptr();
     }
 
-    pmap_it it_begin = m_map.lower_bound(id);
-    pmap_it it_end = m_map.upper_bound(id);
+    pmap_cit it_begin = m_map.lower_bound(id);
+    pmap_cit it_end = m_map.upper_bound(id);
 
-    pmap_it param = std::find_if(it_begin,it_end,equalParameterName(name));
+    pmap_cit param = std::find_if(it_begin,it_end,equalParameterName(name));
 
     if ( param == it_end )
     {
@@ -84,16 +84,16 @@ std::vector<std::string> ParameterMap::nameList(const IComponent* comp)const
 
     const ComponentID id = comp->getComponentID();
 
-    pmap_it it_found = m_map.find(id);
+    pmap_cit it_found = m_map.find(id);
     if (it_found == m_map.end()) 
     {
         return lst;
     }
 
-    pmap_it it_begin = m_map.lower_bound(id);
-    pmap_it it_end = m_map.upper_bound(id);
+    pmap_cit it_begin = m_map.lower_bound(id);
+    pmap_cit it_end = m_map.upper_bound(id);
 
-    for(pmap_it it = it_begin;it!=it_end;it++)
+    for(pmap_cit it = it_begin;it!=it_end;it++)
         lst.push_back(it->second->name());
 
     return lst;
@@ -103,7 +103,7 @@ std::vector<std::string> ParameterMap::nameList(const IComponent* comp)const
 std::string ParameterMap::asString()const
 {
     std::stringstream out;
-    for(pmap_it it=m_map.begin();it!=m_map.end();it++)
+    for(pmap_cit it=m_map.begin();it!=m_map.end();it++)
     {
         boost::shared_ptr<Parameter> p = it->second;
         if (p && it->first)

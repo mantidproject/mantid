@@ -17,7 +17,9 @@ namespace Mantid
 {
 namespace API
 {
-
+#ifndef IGNORE_ALGORITHM_OBSERVER_ARGUMENT
+#define IGNORE_ALGORITHM_OBSERVER_ARGUMENT(x)
+#endif
 /** @class AlgorithmObserver AlgorithmObserver.h API/AlgorithmObserver.h
 
  Observes Algorithm notifications: start,progress,finish,error.
@@ -125,7 +127,8 @@ public:
         @param p Progress reported by the algorithm, 0 <= p <= 1
         @param msg Optional message string sent by the algorithm
     */
-    virtual void progressHandle(const IAlgorithm* alg,double p,const std::string& msg)
+    virtual void progressHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg),
+                                double p,const std::string& IGNORE_ALGORITHM_OBSERVER_ARGUMENT(msg))
     {
         std::cerr<<"Progress "<<p<<'\n';
     }
@@ -137,7 +140,7 @@ public:
         an observer can be connected to an AlgorithmProxy instance and receive notifications from
         the corresponding Algorithm type object.
     */
-    virtual void startHandle(const IAlgorithm* alg)
+    virtual void startHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg))
     {
         std::cerr<<"Started "<<'\n';
     }
@@ -148,7 +151,7 @@ public:
         an observer can be connected to an AlgorithmProxy instance and receive notifications from
         the corresponding Algorithm type object.
     */
-    virtual void finishHandle(const IAlgorithm* alg)
+    virtual void finishHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg))
     {
         std::cerr<<"Finished "<<'\n';
     }
@@ -160,7 +163,7 @@ public:
         the corresponding Algorithm type object.
         @param what The error message
     */
-    virtual void errorHandle(const IAlgorithm* alg,const std::string& what)
+    virtual void errorHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg),const std::string& what)
     {
         std::cerr<<"Error "<<what<<'\n';
     }

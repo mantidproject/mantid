@@ -54,8 +54,10 @@ public:
     ParameterReferenceTest_Fun* f1_1 = new ParameterReferenceTest_Fun;
     CompositeFunction* f1_2 = new CompositeFunction;
     ParameterReferenceTest_Fun* f1_2_0 = new ParameterReferenceTest_Fun;
+    ParameterReferenceTest_Fun* f1_2_1 = new ParameterReferenceTest_Fun;
 
     f1_2->addFunction(f1_2_0);
+    f1_2->addFunction(f1_2_1);
 
     f1->addFunction(f1_0);
     f1->addFunction(f1_1);
@@ -64,7 +66,7 @@ public:
     cf->addFunction(f0);
     cf->addFunction(f1);
 
-    TS_ASSERT_EQUALS(cf->nParams(),12);
+    TS_ASSERT_EQUALS(cf->nParams(),15);
     TS_ASSERT_EQUALS(cf->parameterName(10),"f1.f2.f0.b");
 
     ParameterReference r0(cf,0);
@@ -79,6 +81,18 @@ public:
     ParameterReference r9(cf,9);
     ParameterReference r10(cf,10);
     ParameterReference r11(cf,11);
+
+    ParameterReference r12(f1_2_1,1);
+
+    TS_ASSERT_EQUALS(cf->getParameterIndex(r12),13);
+    TS_ASSERT_EQUALS(f1->getParameterIndex(r12),10);
+    TS_ASSERT_EQUALS(f1_2->getParameterIndex(r12),4);
+    TS_ASSERT_EQUALS(f1_2_1->getParameterIndex(r12),1);
+
+    TS_ASSERT_EQUALS(cf->getContainingFunction(r12),f1);
+    TS_ASSERT_EQUALS(f1->getContainingFunction(r12),f1_2);
+    TS_ASSERT_EQUALS(f1_2->getContainingFunction(r12),f1_2_1);
+    TS_ASSERT_EQUALS(f1_2_1->getContainingFunction(r12),f1_2_1);
 
     TS_ASSERT_EQUALS(r0.getFunction(),f0);
     TS_ASSERT_EQUALS(r1.getFunction(),f0);

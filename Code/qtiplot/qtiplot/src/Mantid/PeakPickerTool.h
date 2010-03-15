@@ -30,6 +30,7 @@ namespace Mantid
 {
   namespace API
   {
+    class IFunction;
     class CompositeFunction;
   }
 }
@@ -94,12 +95,12 @@ signals:
 
 private slots:
   void functionCleared();
-  void indexChanged(int);
-  void functionRemoved(int);
+  void currentChanged();
+  void functionRemoved(Mantid::API::IFunction*);
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
-  void parameterChanged(int);
+  void parameterChanged(Mantid::API::IFunction*);
   void startXChanged(double);
   void endXChanged(double);
 
@@ -111,11 +112,14 @@ private slots:
   void undoFit();
   void clear();
 
-  void plotGuess(int i);
-  void removeGuess(int i);
+  void plotGuess(Mantid::API::IFunction*);
+  void removeGuess(Mantid::API::IFunction*);
 
   void plotCurrentGuess();
   void removeCurrentGuess();
+
+  void plotAllGuess();
+  void removeAllGuess();
 
 private:
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
@@ -142,11 +146,11 @@ private:
   // Check if x is near a width marker (+-dx)
   bool clickedOnWidthMarker(double x,double dx);
   // Check if x is near a peak centre marker (+-dx). If true returns the peak's index or -1 otherwise.
-  int clickedOnCentreMarker(double x,double dx);
+  Mantid::API::IFunction* clickedOnCentreMarker(double x,double dx);
   // Get the current peak index
-  int current()const{return m_current;}
+  Mantid::API::IFunction* current()const{return m_current;}
   // Change current peak
-  void setCurrent(int i);
+  void setCurrent(Mantid::API::IFunction*);
   // Give new centre and height to the current peak
   void setPeak(double c,double h);
   // Indicates that the marker (and peak tool) is in a process of resetting a peak (changing centre and height)
@@ -168,7 +172,7 @@ private:
   void setToolTip(const QString& txt);
 
   // Shows if a function i is plotted
-  bool hasGuessPlotted(int i);
+  bool hasGuessPlotted(Mantid::API::IFunction*);
 
   FitPropertyBrowser* fitBrowser()const;
   /// The parent application window
@@ -179,7 +183,7 @@ private:
   int m_spec;
 
   bool m_init;      // Is the tool initialized?
-  int m_current;    // Index of the current peak
+  Mantid::API::IFunction* m_current;    // Index of the current peak
   bool m_width_set; // The width set flag
   double m_width;   // The default width
   bool m_addingPeak;// The adding peak state flag
@@ -189,7 +193,7 @@ private:
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
   std::string m_defaultPeakName; // The default peak function name
-  QMap<int,FunctionCurve*> m_guessCurves; // Pointers to the guess curves
+  QMap<Mantid::API::IFunction*,FunctionCurve*> m_guessCurves; // Pointers to the guess curves
 };
 
 

@@ -6,7 +6,7 @@
 
 #include "FitParameterTie.h"
 
-#include <boost/shared_ptr.hpp>
+//#include <boost/shared_ptr.hpp>
 #include <QDockWidget>
 #include <QMap>
 
@@ -35,6 +35,7 @@ namespace Mantid
     class IPeakFunction;
     class CompositeFunction;
     class Workspace;
+    class ParameterTie;
   }
 }
 /**
@@ -67,39 +68,32 @@ public:
   void setWidth(double value);
   /// Get count
   int count()const;
-  /// Get index
-  int index()const;
-  /// Set index
-  void setIndex(int i)const;
   /// Is the current function a peak?
   bool isPeak()const;
-  /// Get the i-th function
-  Mantid::API::IFunction* function(int i)const;
   /// Get the current function
-  Mantid::API::IFunction* function()const{return function(index());}
-  /// Get the i-th function if it is a peak
-  Mantid::API::IPeakFunction* peakFunction(int i)const;
+  Mantid::API::IFunction* function()const{return m_currentFunction;}
+  /// Set new current function
+  void setCurrentFunction(Mantid::API::IFunction* f)const;
+  /// Get the current function
+  Mantid::API::IFunction* theFunction()const;
   /// Get the current function if it is a peak
-  Mantid::API::IPeakFunction* peakFunction()const{return peakFunction(index());}
-  /// Select a function
-  void selectFunction(int i)const;
+  Mantid::API::IPeakFunction* peakFunction()const;
   /// Update the function parameters
   void updateParameters();
+  /// Remove items from m_functionItems
+  void removeFunctionItems(QtBrowserItem* fnItem);
 
   /// Create a new function
-  void addFunction(const std::string& fnName);
+  void addFunction(const std::string& fnName, Mantid::API::CompositeFunction* cfun = NULL);
   /// Replace function
-  void replaceFunction(int i,const std::string& fnName);
+  void replaceFunction(Mantid::API::IFunction* f_old,const std::string& fnName);
   /// Remove function
-  void removeFunction(int i);
+  void removeFunction(Mantid::API::IFunction* f);
   /// Get Composite Function
-  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction()const{return m_compositeFunction;}
-  /// Get the current function type
-  std::string functionType(int i)const;
-  std::string functionType()const{return functionType(index());}
+  Mantid::API::CompositeFunction* compositeFunction()const{return m_compositeFunction;}
   /// Get the current function name
-  QString functionName(int i)const;
-  QString functionName()const{return functionName(index());}
+  QString functionName(Mantid::API::IFunction* f,Mantid::API::CompositeFunction* cf = NULL)const;
+  QString functionName()const{return functionName(m_currentFunction);}
   /// Get the default function name
   std::string defaultFunctionType()const;
   /// Set the default function name
@@ -142,9 +136,9 @@ public:
   bool isFitEnabled()const;
 
   /// Adds a tie
-  void addTie(const QString& tstr);
+  //void addTie(const QString& tstr);
   /// Check ties' validity. Removes invalid ties.
-  void removeTiesWithFunction(int);
+  //void removeTiesWithFunction(int);
 
   /// Display a tip
   void setTip(const QString& txt);
@@ -165,18 +159,17 @@ public slots:
   void setPeakToolOn(bool on){m_peakToolOn = on;}
 
 signals:
-  void indexChanged(int i)const;
-  void functionRemoved(int i);
+  void currentChanged()const;
+  void functionRemoved(Mantid::API::IFunction*);
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
   void functionChanged(int);
   void startXChanged(double);
   void endXChanged(double);
-  void parameterChanged(int);
+  void parameterChanged(Mantid::API::IFunction*);
   void functionCleared();
-  void plotGuess(int i);
-  //void removeGuesses();
+  void plotGuess(Mantid::API::IFunction*);
 
 private slots:
   void enumChanged(QtProperty* prop);
@@ -194,18 +187,16 @@ private slots:
   void addLowerBound10();
   void addLowerBound50();
   void addLowerBound();
-  void addLowerBound(int f);
+  void addConstraint(int f,bool lo,bool up);
   void addUpperBound10();
   void addUpperBound50();
   void addUpperBound();
-  void addUpperBound(int f);
   void addBothBounds10();
   void addBothBounds50();
   void addBothBounds();
-  void removeLowerBound();
-  void removeUpperBound();
   void removeBounds();
   void plotGuessCurrent();
+  void plotGuessAll();
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -216,7 +207,7 @@ private:
   /// Create CompositeFunction
   void createCompositeFunction();
   /// Replace function
-  void replaceFunction(int i,Mantid::API::IFunction* f);
+  void replaceFunction(Mantid::API::IFunction* f_old,Mantid::API::IFunction* f_new);
   /// Get and store available workspace names
   void populateWorkspaceNames();
   /// Get the registered function names
@@ -233,18 +224,31 @@ private:
   void disableUndo();
   /// Enable/disable the Fit button;
   void setFitEnabled(bool yes);
-  /// Adds a tie
-  void addTie(int i,QtProperty* parProp,const QString& tieExpr);
+  /// Remove all properties associated with a function
+  void removeFunProperties(QtProperty* fnProp,bool doubleOnly = false);
+  /// Add properties associated with a function: type, attributes, parameters
+  void addFunProperties(Mantid::API::IFunction* f,bool doubleOnly = false);
+  /// Create a double property and set some settings
+  QtProperty* addDoubleProperty(const QString& name)const;
+  /// Updates function names after removing/replacing functions
+  void updateNames();
+  /// Get the property for a parameter
+  QtProperty* getParameterProperty(Mantid::API::IFunction* f,int i)const;
+  /// Check that the properties match the function
+  void checkFunction();
+
+   /// Adds a tie
+  bool addTie(const QString& tieExpr,Mantid::API::IFunction* f);
+   /// Adds a tie
+  //void addTie(int i,QtProperty* parProp,const QString& tieExpr);
   /// Find the tie index for a property. 
-  int indexOfTie(QtProperty* tieProp);
+  //int indexOfTie(QtProperty* tieProp);
   /// Does a parameter have a tie
   bool hasTie(QtProperty* parProp)const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty* getTieProperty(QtProperty* parProp)const;
-  /// Remove all properties associated with a function
-  void removeFunProperties(QtProperty* fnProp,bool doubleOnly = false);
-  /// Add properties associated with a function: type, attributes, parameters
-  void addFunProperties(Mantid::API::IFunction* f,QtProperty* fnProp,bool doubleOnly = false);
+  /// Extracts lower and upper bounds form a string of the form 1<Sigma<3, or 1<Sigma or Sigma < 3
+  void extractLowerAndUpper(const std::string& str,double& lo,double& up,bool& hasLo, bool& hasUp)const;
 
   /// Button for doing fit
   QPushButton* m_btnFit;
@@ -263,7 +267,7 @@ private:
   QtBoolPropertyManager *m_boolManager;
   /// Properties:
 
-  mutable int m_index;
+  mutable Mantid::API::IFunction* m_currentFunction;
 
   /// The top level group
   //QtBrowserItem* m_fitGroup;
@@ -272,7 +276,9 @@ private:
   /// Group for input/output settings
   QtBrowserItem* m_settingsGroup;
   /// Browser items for functions
-  QList<QtBrowserItem*> m_functionItems;
+  QMap<QtBrowserItem*,Mantid::API::IFunction*> m_functionItems;
+  /// Map from properties to their browser items
+  QMap<QtProperty*,QtBrowserItem*> m_paramItems;
 
   QtProperty *m_workspace;
   QtProperty *m_workspaceIndex;
@@ -293,7 +299,7 @@ private:
   mutable QStringList m_minimizers;
 
   /// A copy of the edited function
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  Mantid::API::CompositeFunction* m_compositeFunction;
   /// To keep a copy of the initial parameters in case for undo fit
   std::vector<double> m_initialParameters;
 
@@ -313,7 +319,7 @@ private:
   bool m_changeSlotsEnabled;
 
   /// Ties
-  QList<FitParameterTie> m_ties;
+  QMap<QtProperty*,Mantid::API::ParameterTie*> m_ties;
 
   /// Constraints <parameter property, <lower bound property, upper bound property> >
   QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> > m_constraints;

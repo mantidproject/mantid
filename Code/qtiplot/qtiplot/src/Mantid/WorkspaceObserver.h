@@ -10,6 +10,9 @@
 //------------------------------------------------
 class WorkspaceObserver;
 
+#ifndef IGNORE_WORKSPACE_OBSERVER_ARGUMENT
+#define IGNORE_WORKSPACE_OBSERVER_ARGUMENT(x)
+#endif
 /**
  * A simple callback class so that we avoid multiple inheritance issues with QObject.
  * 
@@ -134,7 +137,8 @@ protected:
         @param wsName The name of the deleted workspace.
         @param ws The shared pointer to the workspace to be deleted.
     */
-  virtual void deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+  virtual void deleteHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
+                            const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
   {
   }
     /** Handler of the AfterReplace notifications. Could be overriden in inherited classes.
@@ -142,7 +146,8 @@ protected:
         @param wsName The name of the deleted workspace.
         @param ws The shared pointer to the workspace to be deleted.
     */
-  virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
+  virtual void afterReplaceHandle(const std::string& IGNORE_WORKSPACE_OBSERVER_ARGUMENT(wsName),
+                                  const boost::shared_ptr<Mantid::API::Workspace> IGNORE_WORKSPACE_OBSERVER_ARGUMENT(ws))
   {
   }
 

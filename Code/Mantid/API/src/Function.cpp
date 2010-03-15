@@ -53,7 +53,22 @@ Function::~Function()
  */
 void Function::addConstraint(IConstraint* ic)
 {
-  m_constraints.push_back(ic);
+  int iPar = ic->getIndex();
+  bool found = false;
+  for(int i=0;i<m_constraints.size();i++)
+  {
+    if (m_constraints[i]->getIndex() == iPar) 
+    {
+      found = true;
+      delete m_constraints[i];
+      m_constraints[i] = ic;
+      break;
+    }
+  }
+  if (!found)
+  {
+    m_constraints.push_back(ic);
+  }
 }
 
 /// Get first constraint
@@ -76,6 +91,23 @@ IConstraint* Function::nextConstraint()const
   }
   ++m_iConstraint;
   return m_constraints[m_iConstraint];
+}
+
+/** Remove a constraint
+ * @param parName The name of a parameter which constarint to remove.
+ */
+void Function::removeConstraint(const std::string& parName)
+{
+  int iPar = parameterIndex(parName);
+  for(std::vector<IConstraint*>::iterator it=m_constraints.begin();it!=m_constraints.end();it++)
+  {
+    if (iPar == (**it).getIndex())
+    {
+      delete *it;
+      m_constraints.erase(it);
+      break;
+    }
+  }
 }
 
 void Function::setParametersToSatisfyConstraints()
@@ -303,7 +335,22 @@ int Function::activeIndex(int i)const
  */
 void Function::addTie(ParameterTie* tie)
 {
-  m_ties.push_back(tie);
+  int iPar = tie->getIndex();
+  bool found = false;
+  for(int i=0;i<m_ties.size();i++)
+  {
+    if (m_ties[i]->getIndex() == iPar) 
+    {
+      found = true;
+      delete m_ties[i];
+      m_ties[i] = tie;
+      break;
+    }
+  }
+  if (!found)
+  {
+    m_ties.push_back(tie);
+  }
 }
 
 /**
@@ -440,6 +487,19 @@ int Function::getParameterIndex(const ParameterReference& ref)const
     return ref.getIndex();
   }
   return -1;
+}
+
+/**
+ * @param ref The reference
+ * @return A function containing parameter pointed to by ref
+ */
+IFunction* Function::getContainingFunction(const ParameterReference& ref)const
+{
+  if (ref.getFunction() == this && ref.getIndex() < nParams())
+  {
+    return ref.getFunction();
+  }
+  return NULL;
 }
 
 } // namespace API
