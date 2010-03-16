@@ -29,15 +29,15 @@ public:
     TS_ASSERT_DELTA( interpolation.value(203.5), 350.0 ,0.000000001); 
 
 
-    interpolation.setXUnit("bob");
+    interpolation.setXUnit("Wavelength");
     std::stringstream str;
     str << interpolation;
-    TS_ASSERT( str.str().compare("linear ; bob ; 200 50 ; 201 60 ; 202 100 ; 203 300 ; 204 400") == 0 );
+    TS_ASSERT( str.str().compare("linear ; Wavelength ; 200 50 ; 201 60 ; 202 100 ; 203 300 ; 204 400") == 0 );
 
     Interpolation readIn;
-    TS_ASSERT( readIn.getXUnit().compare("TOF") == 0 );
+    TS_ASSERT( readIn.getXUnit()->unitID() == "TOF" );
     str >> readIn;
-    TS_ASSERT( readIn.getXUnit().compare("bob") == 0 );
+    TS_ASSERT( readIn.getXUnit()->unitID() == "Wavelength" );
 
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT_DELTA( readIn.value(100), 50.0 ,0.000000001); 
