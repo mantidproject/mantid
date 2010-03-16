@@ -294,9 +294,42 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 {
   //This will only ever be of size zero or one
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
-  if( name_matches.isEmpty() )return;
+  if( name_matches.isEmpty() )
+  {
+	  // for deleting member workspaces from mantid tree
+	  static const basic_string <char>::size_type npos = -1;
+	  std::string groupwsName;
+	  basic_string <char>::size_type index=ws_name.lastIndexOf("_");
+	  if(index!=npos)
+	  {
+		  groupwsName=ws_name.left(index);
+	  }
+	  name_matches = m_tree->findItems(QString::fromStdString(groupwsName),Qt::MatchFixedString);
+	  if(! name_matches.isEmpty() )
+	  {	  
+		  if(!name_matches[0])
+		  {
+			  return;
+		  }
+		  int count=name_matches[0]->childCount();
+		  for(int i=0;i<count;++i)
+		  {
+			  QTreeWidgetItem* item=name_matches[0]->child(i);
+			  if(!item)
+			  {
+				  return;
+			  }
+			  if(!ws_name.compare(item->text(0)))
+			  {
+				  name_matches[0]->takeChild(i);
+				  break;
+			  }
+		  }
+	  }
+	  return;
+  }
   m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
-
+ 
 }
 
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
@@ -329,28 +362,13 @@ void MantidDockWidget::deleteWorkspaces()
 	  }
 	  return;
   }
-  QList<QTreeWidgetItem*>::const_iterator itr=items.constBegin();
-  for (itr = items.constBegin(); itr != items.constEnd(); ++itr)
-  {
-    int count=(*itr)->childCount();
-    //for loop for removing the children
-    for (int i=0;i<count;i++)
-    {
-      QTreeWidgetItem *pchild=(*itr)->child(0);
-      if(Mantid::API::AnalysisDataService::Instance().doesExist(pchild->text(0).toStdString()))
-      {
-        m_mantidUI->deleteWorkspace(pchild->text(0));
-      }
-
-      (*itr)->takeChild(0);
-    }
-    //now remove the parent
-    if(Mantid::API::AnalysisDataService::Instance().doesExist((*itr)->text(0).toStdString()))
-      m_mantidUI->deleteWorkspace((*itr)->text(0));
-    QTreeWidgetItem* topItem=m_tree->topLevelItem(0);
-    if(topItem)topItem->removeChild((*itr));
-
-  }//end of for loop for selected items
+  //loop through multiple items selected from the mantid tree
+  QList<QTreeWidgetItem*>::iterator itr=items.begin();
+  for (itr = items.begin(); itr != items.end(); ++itr)
+  {	
+	  std::cout<<"selected workspace name is "<<(*itr)->text(0).toStdString()<<std::endl;
+	  m_mantidUI->deleteWorkspace((*itr)->text(0));
+   }//end of for loop for selected items
 }
 
 void MantidDockWidget::popupMenu(const QPoint & pos)
