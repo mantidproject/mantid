@@ -419,8 +419,10 @@ class MantidPyFramework(FrameworkManager):
                 continue
             try:
                 __import__(modname)
-            except ImportError, details:
-                print details
+            except (ImportError,SyntaxError,RuntimeError), details:
+                print "\tWarning: Cannot import",modname,'module - ',details
+            except:
+                continue
             changes = True
 
         # Cleanup system path
