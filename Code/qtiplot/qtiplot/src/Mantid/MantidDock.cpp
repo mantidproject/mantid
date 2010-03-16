@@ -297,14 +297,13 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
   if( name_matches.isEmpty() )
   {
 	  // for deleting member workspaces from mantid tree
-	  static const basic_string <char>::size_type npos = -1;
-	  std::string groupwsName;
-	  basic_string <char>::size_type index=ws_name.lastIndexOf("_");
-	  if(index!=npos)
+	  QString  groupwsName;
+	  int index=ws_name.lastIndexOf("_");
+	  if(index!=-1)
 	  {
 		  groupwsName=ws_name.left(index);
 	  }
-	  name_matches = m_tree->findItems(QString::fromStdString(groupwsName),Qt::MatchFixedString);
+	  name_matches = m_tree->findItems(groupwsName,Qt::MatchFixedString);
 	  if(! name_matches.isEmpty() )
 	  {	  
 		  if(!name_matches[0])
@@ -366,7 +365,6 @@ void MantidDockWidget::deleteWorkspaces()
   QList<QTreeWidgetItem*>::iterator itr=items.begin();
   for (itr = items.begin(); itr != items.end(); ++itr)
   {	
-	  std::cout<<"selected workspace name is "<<(*itr)->text(0).toStdString()<<std::endl;
 	  m_mantidUI->deleteWorkspace((*itr)->text(0));
    }//end of for loop for selected items
 }
