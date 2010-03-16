@@ -40,7 +40,7 @@ using namespace Mantid::API;
 //Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(label, parent, name, 0), WorkspaceObserver(), m_funct(this),m_histogram(false),
-  y_start(0.0),y_end(0.0),m_min(0),m_max(0),m_are_min_max_set(false),
+  y_start(0.0),y_end(0.0),m_min(0),m_max(0),m_are_min_max_set(false),m_boundingRect(),
   m_selectedRows(),m_selectedCols()
 {
   m_appWindow = parent;
@@ -104,7 +104,8 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
 
   connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
- 
+  m_funct.init();
+
   askOnCloseEvent(false);
 }
 
@@ -174,24 +175,74 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
   if ( ws->isHistogramData() ) m_histogram = true;
   connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
-  x_start = ws->readX(0)[0];
-  if (ws->readX(0).size() != ws->readY(0).size()) x_end = ws->readX(0)[ws->blocksize()];
-  else
-    x_end = ws->readX(0)[ws->blocksize()-1];
-
-  // This is only meaningful if a 2D (or greater) workspace
-  if (ws->axes() > 1)
+  // Define the spectrogram bounding box
   {
-    const Mantid::API::Axis* const ax = ws->getAxis(1);
-    y_start =(*ax)(m_startRow);
-    y_end   =(*ax)(m_endRow);
-  }
+    x_start = ws->readX(m_startRow)[0];
+    if (ws->readX(m_startRow).size() != ws->readY(m_startRow).size()) x_end = ws->readX(m_startRow)[ws->blocksize()];
+    else
+      x_end = ws->readX(m_startRow)[ws->blocksize()-1];
+
+    // check if all X vectors are the same
+    bool theSame = true;
+    for(int i=m_startRow+1;i<=m_endRow;++i)
+    {
+      if (ws->readX(i).front() != x_start || ws->readX(i).back() != x_end)
+      {
+        theSame = false;
+        break;
+      }
+    }
+
+    double dx = fabs(x_end - x_start)/(double)(numCols() - 1);
+    if ( !theSame )
+    {
+      double ddx = dx;
+      for(int i=m_startRow+1;i<=m_endRow;++i)
+      {
+        const Mantid::MantidVec& X = ws->readX(i);
+        if (X.front() < x_start)
+        {
+          x_start = X.front();
+        }
+        if (X.back() > x_end)
+        {
+          x_end = X.back();
+        }
+        for(int j=1;j<X.size();++j)
+        {
+          double d = X[j] - X[j-1];
+          if (d < ddx)
+          {
+            ddx = d;
+          }
+        }
+      }
+      m_spectrogramCols = int((x_end - x_start)/ddx);
+      if (m_spectrogramCols < 100) m_spectrogramCols = 100;
+    }
+    else
+    {
+      m_spectrogramCols = numCols() > 100 ? numCols() : 100;
+    }
+    m_spectrogramRows = numRows() > 100 ? numRows() : 100;
+
+    // This is only meaningful if a 2D (or greater) workspace
+    if (ws->axes() > 1)
+    {
+      const Mantid::API::Axis* const ax = ws->getAxis(1);
+      y_start =(*ax)(m_startRow);
+      y_end   =(*ax)(m_endRow);
+    }
+
+    double dy = fabs(y_end - y_start)/(double)(numRows() - 1);
+    m_boundingRect = QwtDoubleRect(QMIN(x_start, x_end) - 0.5*dx, QMIN(y_start, y_end) - 0.5*dy,
+      fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy).normalized();
+
+  }// Define the spectrogram bounding box
 
   m_bk_color = QColor(128, 255, 255);
   m_matrix_icon = mantid_matrix_xpm;
   m_column_width = 100;
-
-  m_funct.init();
 
 }
 
@@ -498,18 +549,19 @@ double MantidMatrix::dataE(int row, int col) const
 
 }
 
-int MantidMatrix::indexX(double s)const
+int MantidMatrix::indexX(int row,double s)const
 {
   int n = m_workspace->blocksize();
 
-  if (n == 0 || s < m_workspace->readX(0)[0] || s > m_workspace->readX(0)[n-1]) return -1;
+  const Mantid::MantidVec& X = m_workspace->readX(row + m_startRow);
+  if (n == 0 || s < X[0] || s > X[n-1]) return -1;
 
   int i = 0, j = n-1, k = n/2;
   double ss;
   int it;
   for(it=0;it<n;it++)
   {
-    ss = m_workspace->readX(0)[k];
+    ss = X[k];
     if (ss == s || abs(i - j) <2) break;
     if (s > ss) i = k;
     else
@@ -527,13 +579,17 @@ QString MantidMatrix::workspaceName() const
 
 QwtDoubleRect MantidMatrix::boundingRect()
 {
-  int rows = numRows();
-  int cols = numCols();
-  double dx = fabs(x_end - x_start)/(double)(cols - 1);
-  double dy = fabs(y_end - y_start)/(double)(rows - 1);
+  //if (m_boundingRect.isNull())
+  //{
+  //  int rows = numRows();
+  //  int cols = numCols();
+  //  double dx = fabs(x_end - x_start)/(double)(cols - 1);
+  //  double dy = fabs(y_end - y_start)/(double)(rows - 1);
+  //  m_boundingRect = QwtDoubleRect(QMIN(x_start, x_end) - 0.5*dx, QMIN(y_start, y_end) - 0.5*dy,
+  //                     fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy).normalized();
+  //}
 
-  return QwtDoubleRect(QMIN(x_start, x_end) - 0.5*dx, QMIN(y_start, y_end) - 0.5*dy,
-                       fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy).normalized();
+  return m_boundingRect;
 }
 
 //----------------------------------------------------------------------------
@@ -547,6 +603,10 @@ void MantidMatrixFunction::init()
 
   if (m_dx == 0.) m_dx = 1.;//?
   if (m_dy == 0.) m_dy = 1.;//?
+
+  double tmp;
+  m_matrix->range(&tmp,&m_outside);
+  m_outside *= 1.1;
 }
 
 double MantidMatrixFunction::operator()(double x, double y)
@@ -557,17 +617,14 @@ double MantidMatrixFunction::operator()(double x, double y)
   double yi = (y - m_matrix->yStart())/m_dy;
   int i = abs(yi);
   if (yi - double(i) >= 0.5) i++;
-  double xj = (x - m_matrix->xStart())/m_dx;
-  int j = abs(xj);
-  if (xj - double(j) >= 0.5) j++;
 
-  int jj = m_matrix->indexX(x);
-  if (jj >= 0) j = jj;
+  int j = m_matrix->indexX(i,x);
 
   if (i >= 0 && i < m_matrix->numRows() && j >=0 && j < m_matrix->numCols())
     return m_matrix->dataY(i,j);
   else
-    return 0.0;
+    //throw std::runtime_error("");
+    return m_outside;
 }
 //----------------------------------------------------------------------------
 
@@ -681,7 +738,7 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Gr
   // Set the range on the thirs, colour axis
   double minz, maxz;
   range(&minz,&maxz);
-  Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, numRows(), numCols(), boundingRect(), minz, maxz, type);
+  Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
   if( spgrm )
   {  spgrm->setDisplayMode(QwtPlotSpectrogram::ImageMode, true);
     spgrm->setDisplayMode(QwtPlotSpectrogram::ContourMode, false);

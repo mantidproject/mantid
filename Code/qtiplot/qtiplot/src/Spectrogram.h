@@ -70,6 +70,11 @@ public:
 
 	enum ColorMapPolicy{GrayScale, Default, Custom};
 
+  virtual QImage renderImage(
+        const QwtScaleMap &xMap, const QwtScaleMap &yMap, 
+        const QwtDoubleRect &rect) const;
+
+
 	Spectrogram* copy();
 	Matrix * matrix(){return d_matrix;};
     UserHelperFunction *funct(){return d_funct;}

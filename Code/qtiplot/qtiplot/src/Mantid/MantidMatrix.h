@@ -51,6 +51,7 @@ public:
 private:
   MantidMatrix* m_matrix;
   double m_dx,m_dy;
+  double m_outside;
 };
 
 /** MantidMatrix is the class that represents a Qtiplot window for displaying workspaces.
@@ -103,7 +104,7 @@ public:
   double dataX(int row, int col) const;
   double dataY(int row, int col) const;
   double dataE(int row, int col) const;
-  int indexX(double s)const;
+  int indexX(int row,double s)const;
 
   Mantid::API::MatrixWorkspace_sptr workspace(){return m_workspace;}
   QString workspaceName() const;
@@ -257,6 +258,9 @@ protected:
   double m_min;           // Saved minimum Y-value
   double m_max;           // Saved maximum Y-value
   bool m_are_min_max_set; // If true ::range does not iterate over WS to find min and max but uses m_min and m_max instead
+  QwtDoubleRect m_boundingRect; // The bounding box in x and y coordinates used in spectrogram drawing
+  int m_spectrogramRows; // Number of rows in the spectrogram created from this matris
+  int m_spectrogramCols; // Number of columns in the spectrogram created from this matris
 
   // MDI windows created by this MantidMatrix
   QVector<MultiLayer*> m_plots2D;

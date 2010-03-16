@@ -764,5 +764,139 @@ bool Spectrogram::isIntensityChanged()
 { return m_bIntensityChanged;
 }
 
+/**
+ * Override QwtPlotSpectrogram::renderImage to draw ragged spectrograms. It is almost
+ * a copy of QwtPlotSpectrogram::renderImage except that pixels of the image that are 
+ * outside the boundaries of the histograms are set to a special colour (white).
+ */
+QImage Spectrogram::renderImage(
+    const QwtScaleMap &xMap, const QwtScaleMap &yMap, 
+    const QwtDoubleRect &area) const
+{
+  
+    if ( area.isEmpty() )
+        return QImage();
 
+    QRect rect = transform(xMap, yMap, area);
+
+    QwtScaleMap xxMap = xMap;
+    QwtScaleMap yyMap = yMap;
+
+    const QSize res = data().rasterHint(area);
+    if ( res.isValid() )
+    {
+        /*
+          It is useless to render an image with a higher resolution
+          than the data offers. Of course someone will have to
+          scale this image later into the size of the given rect, but f.e.
+          in case of postscript this will done on the printer.
+         */
+        rect.setSize(rect.size().boundedTo(res));
+
+        int px1 = rect.x();
+        int px2 = rect.x() + rect.width();
+        if ( xMap.p1() > xMap.p2() )
+            qSwap(px1, px2);
+
+        double sx1 = area.x();
+        double sx2 = area.x() + area.width();
+        if ( xMap.s1() > xMap.s2() )
+            qSwap(sx1, sx2);
+
+        int py1 = rect.y();
+        int py2 = rect.y() + rect.height();
+        if ( yMap.p1() > yMap.p2() )
+            qSwap(py1, py2);
+
+        double sy1 = area.y();
+        double sy2 = area.y() + area.height();
+        if ( yMap.s1() > yMap.s2() )
+            qSwap(sy1, sy2);
+
+        xxMap.setPaintInterval(px1, px2);
+        xxMap.setScaleInterval(sx1, sx2);
+        yyMap.setPaintInterval(py1, py2);
+        yyMap.setScaleInterval(sy1, sy2); 
+    }
+
+    QImage image(rect.size(), this->colorMap().format() == QwtColorMap::RGB
+            ? QImage::Format_ARGB32 : QImage::Format_Indexed8 );
+
+    const QwtDoubleInterval intensityRange = data().range();
+    if ( !intensityRange.isValid() )
+        return image;
+
+    //data().initRaster(area, rect.size());
+
+    if ( this->colorMap().format() == QwtColorMap::RGB )
+    {
+        for ( int y = rect.top(); y <= rect.bottom(); y++ )
+        {
+            const double ty = yyMap.invTransform(y);
+
+            QRgb *line = (QRgb *)image.scanLine(y - rect.top());
+            for ( int x = rect.left(); x <= rect.right(); x++ )
+            {
+                const double tx = xxMap.invTransform(x);
+
+                *line++ = this->colorMap().rgb(intensityRange,
+                    data().value(tx, ty));
+            }
+        }
+    }
+    else if ( this->colorMap().format() == QwtColorMap::Indexed )
+    {
+        // Modify the colour table so that the last colour is white and transparent
+        // which will indicate no value
+        QVector<QRgb> ctable = this->colorMap().colorTable(intensityRange);
+        ctable[255] = qRgba(255,255,255,0);
+        image.setColorTable(ctable);
+
+        for ( int y = rect.top(); y <= rect.bottom(); y++ )
+        {
+            const double ty = yyMap.invTransform(y);
+
+            unsigned char *line = image.scanLine(y - rect.top());
+            for ( int x = rect.left(); x <= rect.right(); x++ )
+            {
+                const double tx = xxMap.invTransform(x);
+
+                unsigned char idx;
+                double val = data().value(tx, ty);
+                // if the value is outside the range show no-value. If data().value(...)
+                // wants to indicate this it returns a value outside intensityRange.
+                if (intensityRange.contains(val))
+                {
+                  idx = this->colorMap().colorIndex(intensityRange,val);
+                  if (idx == 255) idx = 254;
+                }
+                else
+                {
+                  idx = 255;
+                }
+                *line++ = idx;
+            }
+        }
+    }
+
+    //data().discardRaster();
+
+    // Mirror the image in case of inverted maps
+
+    const bool hInvert = xxMap.p1() > xxMap.p2();
+    const bool vInvert = yyMap.p1() < yyMap.p2();
+    if ( hInvert || vInvert )
+    {
+#ifdef __GNUC__
+#warning Better invert the for loops above
+#endif
+#if QT_VERSION < 0x040000
+        image = image.mirror(hInvert, vInvert);
+#else
+        image = image.mirrored(hInvert, vInvert);
+#endif
+    }
+
+    return image;
+}
 
