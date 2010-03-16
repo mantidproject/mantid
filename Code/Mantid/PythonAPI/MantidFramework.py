@@ -1,12 +1,16 @@
-import os, sys, types, copy, __builtin__,__main__
+"""Access the Mantid Framework.
+"""
+import os
+import sys
+import types
+import copy
+import __builtin__
+import __main__
+# Finally the Mantid API
 if os.name == 'nt':
     from MantidPythonAPI import *
 else:
     from libMantidPythonAPI import *
-
-"""
-Top-level interface classes for Mantid.
-"""
 
 #-------------------------------------------------------------------------------
 def makeString(value):
@@ -355,6 +359,20 @@ class MantidPyFramework(FrameworkManager):
         """
         Initialise the framework
         """
+        # Update paths so that Mantid can find everything we need
+        # Add current directory
+        if not '.' is sys.path:
+            sys.path.insert(0, '.')
+        # Required directories (config service has changed them to
+        # absolute paths)
+        self._addToPySearchPath(self.getConfigProperty('requiredpythonscript.directories'))
+        
+        # Now additional user specified directories
+        self._addToPySearchPath(self.getConfigProperty('pythonscripts.directories'))
+        
+        # Finally old scripts key
+        self._addToPySearchPath(self.getConfigProperty('pythonscripts.directory'))
+        
         self._initPythonAlgorithms()
         self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToGlobal()
@@ -420,6 +438,16 @@ class MantidPyFramework(FrameworkManager):
                 continue
             setattr(__main__, name, getattr(mod, name))
             
+    def _addToPySearchPath(self, dirs):
+        if type(dirs) == str:
+            dirs = dirs.split(';')
+        if type(dirs) != list:
+            return
+        for path in dirs:
+            if path.endswith('/') or path.endswith("\\"):
+                path = os.path.dirname(path)
+            sys.path.append(path)
+
     def _refreshPyAlgorithms(self):
         # Pass to the loader proxy
         if self._reloader != None:

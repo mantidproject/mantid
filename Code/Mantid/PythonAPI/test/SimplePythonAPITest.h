@@ -34,23 +34,11 @@ public:
 
     std::string line;
     getline(is, line);
-    TS_ASSERT_EQUALS(line, "import sys");
-
-    //skip lines containing append commands ( I don't know how
-    //This will leave line containing the next either non-blank or sys cmd line
-    while( getline(is, line) && (line.empty() || line.find("sys") != std::string::npos) )
-    {
-    }
-
-    //Next should import main Python API
-    std::string modline("");
 #ifdef _WIN32
-    modline = "from MantidPythonAPI import *";
+    TS_ASSERT_EQUALS(line, "from MantidPythonAPI import *");
 #else
-    modline = "from libMantidPythonAPI import *";
+    TS_ASSERT_EQUALS(line, "from libMantidPythonAPI import *");
 #endif
-        
-    TS_ASSERT_EQUALS(line, modline);
     //next line should be MantidFramework import
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("from MantidFramework import *"));
@@ -88,10 +76,9 @@ public:
     {
     }
 
-    modline = "def mtdGlobalHelp():";
     getline(is, line);
     getline(is, line);
-    TS_ASSERT_EQUALS(line, modline);
+    TS_ASSERT_EQUALS(line, "def mtdGlobalHelp():");
 
     //skip over help
     while( getline(is, line) && !line.empty() ) 

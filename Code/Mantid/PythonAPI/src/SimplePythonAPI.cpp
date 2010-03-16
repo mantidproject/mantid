@@ -58,48 +58,6 @@ namespace Mantid
     void SimplePythonAPI::createModule(bool gui)
     {
       std::ofstream module(getModuleFilename().c_str());
-      // Append the current directory and the scripts directory to the path to make importing
-      // other Mantid things easier
-      module << 
-        "import sys\n"
-        "if '.' in sys.path == False:\n"
-        "\tsys.path.append('.')\n";
-      // Add the directory for MantidFramework.py which is the location of the executable
-      module << "sys.path.append('" << convertPathToUnix(Mantid::Kernel::getDirectoryOfExecutable()) << "')\n";
-
-      std::string scripts_dir = Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directory");
-      //If there isn't one assume one relative to the executable directory
-      if( scripts_dir.empty() ) 
-      {
-        scripts_dir = Mantid::Kernel::ConfigService::Instance().getBaseDir() + "../scripts";
-      }
-      Poco::File attr_test(scripts_dir);
-      if( attr_test.exists() && attr_test.isDirectory() )
-      {
-        //Also append scripts directory and all sub directories
-        module << "sys.path.append('" << convertPathToUnix(scripts_dir) << "')\n";
-        Poco::DirectoryIterator iend;
-        for( Poco::DirectoryIterator itr(scripts_dir); itr != iend; ++itr )
-        {
-          Poco::File entry(itr->path());
-          bool is_dir(false);
-          // This avoids an error where the directory iterator gives a path to a file that Poco::File can't actually access.
-          // This happened when I had emacs open with an unsaved file which creates a hidden symbolic link to a strange location!
-          // that Poco can't seem to handle. - M. Gigg
-          try
-          {
-            is_dir = entry.isDirectory();
-          }
-          catch( Poco::FileNotFoundException )
-          {
-            continue;
-          }
-          if( is_dir )
-          {
-            module << "sys.path.append('" << convertPathToUnix(itr->path()) << "')\n";
-          }
-        }
-      }
 
       // Need to import definitions from main Python API
 #ifdef _WIN32
@@ -686,30 +644,6 @@ namespace Mantid
         }
       }
       return retstring;
-    }
-
-    /**
-    * Windows style backslash paths seems to cause problems sometimes. This function
-    * converts all '\' characters for '/' ones
-    * @param path The path string to check
-    */
-    std::string SimplePythonAPI::convertPathToUnix(const std::string & path)
-    {
-      size_t nchars = path.size();
-      std::string retvalue;
-      for( size_t i = 0; i < nchars; ++i )
-      {
-        char symbol = path.at(i);
-        if( symbol == '\\' )
-        {
-          retvalue += '/';
-        }
-        else
-        {
-          retvalue += symbol;
-        }
-      }
-      return retvalue;
     }
 
     /**

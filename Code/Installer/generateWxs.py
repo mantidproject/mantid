@@ -283,6 +283,46 @@ def addModules(location,parent):
             addTo(Redist,'MergeRef',{'Id':Id})
             globalFileCount = globalFileCount + 1
             
+def createPropertiesFile(filename):
+    # Field replacements
+    replacements = {
+    "plugins.directory":"plugins.directory = ../plugins",
+    "instrumentDefinition.directory":"instrumentDefinition.directory = ../instrument",
+    "requiredpythonscript.directories":"""requiredpythonscript.directories = ../scripts/Crystallography;../scripts/Disordered Materials;../scripts/Engineering;\\
+../scripts/Excitations;../scripts/Large Scale Structures;../scripts/Molecular Spectroscopy;\\
+../scripts/Muons;../scripts/Neutrinos;../scripts/SANS""",
+    "pythonscripts.directory":"pythonscripts.directory = ../scripts",
+    "pythonscripts.directories":"pythonscripts.directories = ../scripts",
+    "pythonalgorithms.directories":"../plugins/PythonAlgs"
+    }
+
+    template = open(filename,'r')
+    original = template.readlines()
+    prop_file = open('Mantid.properties','w')
+    continuation = False
+    nlines = len(original)
+    index = 0
+    while( index < nlines ):
+        line = original[index]
+        key = ""
+        for rep in replacements.iterkeys():
+            if line.startswith(rep):
+                key = rep
+                break
+        if key != "":
+            prop_file.write(replacements[key] + "\n")
+            # Skip any backslashed lines
+            while line.rstrip().endswith("\\") and index < nlines:
+                index += 1
+                line = original[index]
+        else:
+            prop_file.write(line)
+        index += 1
+    
+    template.close()
+    prop_file.close()
+
+    
 doc = xml.dom.minidom.Document()
 #doc.encoding('Windows-1252')
 wix = doc.createElement('Wix')
@@ -367,23 +407,11 @@ MantidDlls = addComponent('MantidDLLs',comp_guid['MantidDLLs'],binDir)
 addTo(MantidDlls,'Registry',{'Id':'RegInstallDir','Root':'HKLM','Key':'Software\Mantid','Name':'InstallDir','Action':'write','Type':'string','Value':'[INSTALLDIR]'})
 addTo(MantidDlls,'Registry',{'Id':'RegMantidVersion','Root':'HKLM','Key':'Software\Mantid','Name':'Version','Action':'write','Type':'string','Value':MantidVersion})
 addTo(MantidDlls,'Registry',{'Id':'RegMantidGUID','Root':'HKLM','Key':'Software\Mantid','Name':'GUID','Action':'write','Type':'string','Value':product_uuid})
-# Modify Mantid.properties to set directories right
-prop_file = open('../Mantid/Properties/Mantid.properties','r')
-prop_file_ins = open('Mantid.properties','w')
-for line in prop_file:
-    if line.find('plugins.directory') >= 0:
-        prop_file_ins.write('plugins.directory = ../plugins\n')
-    elif line.find('pythonscripts.directory') >= 0:
-        prop_file_ins.write('pythonscripts.directory = ../scripts\n')
-    elif line.find('instrumentDefinition.directory') >= 0:
-        prop_file_ins.write('instrumentDefinition.directory = ../instrument\n')
-    elif line.find('pythonalgorithms.directories') >= 0:
-        prop_file_ins.write('pythonalgorithms.directories = ../plugins/PythonAlgs\n')
-    else:
-        prop_file_ins.write(line)
-prop_file_ins.close()
-prop_file.close()
+
+# Need to create Mantid.properties file. A template exists but some entries point to the incorrect locations so those need modifying
+createPropertiesFile('../Mantid/Properties/Mantid.properties')
 addFileV('MantidProperties','Mantid.pro','Mantid.properties','Mantid.properties',MantidDlls)
+
 MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat','../Mantid/PythonAPI/MantidScript.bat',MantidDlls)
 addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
 addFileV('MantidStartup','MStart.py','MantidStartup.py','../Mantid/PythonAPI/MantidStartup.py',MantidDlls)

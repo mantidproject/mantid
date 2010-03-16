@@ -59,7 +59,8 @@ private:
   enum RunMode { SingleMode = 0, BatchMode };
   /// Initialize the layout
   virtual void initLayout();
-
+  /// Init Python environment
+  virtual void initLocalPython();
   /**@name Utility functions */
   //@{
   /// Create the necessary widget maps

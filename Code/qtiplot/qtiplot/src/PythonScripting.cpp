@@ -130,11 +130,11 @@ bool PythonScripting::start()
 
   QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
   QString pycode = 
-    QString("import sys; sys.path.append('") + mantidbin.absolutePath() + QString("');");
+    QString("import sys; sys.path.insert(0,'") + mantidbin.absolutePath() + QString("');");
   QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
   if( mantidoutput != mantidbin )
   {
-      pycode += QString("sys.path.append('") + mantidoutput.absolutePath() + QString("');");
+      pycode += QString("sys.path.insert(1,'") + mantidoutput.absolutePath() + QString("');");
   }
   PyRun_SimpleString(pycode.toStdString().c_str());
 

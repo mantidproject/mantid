@@ -31,13 +31,13 @@ namespace Mantid
 
     /// Private constructor for singleton class
     ConfigServiceImpl::ConfigServiceImpl() : 
-  m_pConf(NULL), m_pSysConfig(NULL),
+    m_pConf(NULL), m_pSysConfig(NULL),
     g_log(Logger::get("ConfigService")), 
-    m_vConfigPaths(), m_mAbsolutePaths(),
+    m_ConfigPaths(), m_AbsolutePaths(),
     m_strBaseDir(""), m_PropertyString(""),
     m_properties_file_name("Mantid.properties"),
     m_user_properties_file_name("Mantid.user.properties"),
-    m_vDataSearchDirs()
+    m_DataSearchDirs()
   {
     //getting at system details
     m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
@@ -74,12 +74,15 @@ namespace Mantid
     }
 
     //Fill the list of possible relative path keys that may require conversion to absolute paths
-    m_vConfigPaths.resize(5, "");
-    m_vConfigPaths[0] = "plugins.directory";
-    m_vConfigPaths[1] = "instrumentDefinition.directory";
-    m_vConfigPaths[2] = "pythonscripts.directory";
-    m_vConfigPaths[3] = "ManagedWorkspace.FilePath";
-    m_vConfigPaths[3] = "defaultsave.directory";
+    m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
+    m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
+    m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
+    m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", false));
+    m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", false));
+    m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", false));
+    m_ConfigPaths.insert(std::make_pair("defaultsave.directory", false));
+    m_ConfigPaths.insert(std::make_pair("datasearch.directories",false));
+    m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories",false));
 
     //attempt to load the default properties file that resides in the directory of the executable
     loadConfig( getBaseDir() + m_properties_file_name);
@@ -112,31 +115,97 @@ namespace Mantid
   */
   void ConfigServiceImpl::convertRelativeToAbsolute()
   {
-    if( m_vConfigPaths.empty() ) return;
+    if( m_ConfigPaths.empty() ) return;
 
     std::string execdir(getBaseDir());
-    m_mAbsolutePaths.clear();
+    m_AbsolutePaths.clear();
 
-    std::vector<std::string>::const_iterator send = m_vConfigPaths.end();
-    for( std::vector<std::string>::const_iterator sitr = m_vConfigPaths.begin(); sitr != send; ++sitr )
+    std::map<std::string, bool>::const_iterator send = m_ConfigPaths.end();
+    for( std::map<std::string, bool>::const_iterator sitr = m_ConfigPaths.begin(); sitr != send; ++sitr )
     {
-      if( !m_pConf->hasProperty(*sitr) ) continue;
+      std::string key = sitr->first;
+      if( !m_pConf->hasProperty(key) ) continue;
 
-      std::string value(m_pConf->getString(*sitr));
-      try 
+      std::string value(m_pConf->getString(key));
+      value = makeAbsolute(value, key);
+      if( !value.empty() )
       {
-        if( Poco::Path(value).isRelative() )
-        {
-          m_mAbsolutePaths.insert(std::make_pair(*sitr, Poco::Path(execdir).resolve(value).toString()));
-        }
-      }
-      catch (Poco::PathSyntaxException)
-      {
-        g_log.error() << "Incorrect path syntax detected in properties file for variable \"" << *sitr << "\"" << std::endl;  
-        m_mAbsolutePaths.insert(std::make_pair(*sitr, execdir));
+        m_AbsolutePaths.insert(std::make_pair(key, value));
       }
     }
   }
+
+  /**
+  * Make a relative path or a list of relative paths into an absolute one.
+  * @param dir The directory to convert
+  * @param key The key variable this relates to
+  * @returns A string containing an aboluste path by resolving the relative directory with the executable directory
+  */
+  std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::string & key) const
+  {
+    std::string converted;
+    const std::string execdir(getBaseDir());
+    // If we have a list, chop it up and convert each one
+    if( dir.find_first_of(";,") != std::string::npos )
+    {
+      int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+      Poco::StringTokenizer tokenizer(dir, ";,", options);
+      Poco::StringTokenizer::Iterator iend = tokenizer.end();
+      for( Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; )
+      {
+        std::string absolute = makeAbsolute(*itr, key);
+        if( !absolute.empty() )
+        {
+          converted += absolute;
+        }
+        if( ++itr != iend )
+        {
+          converted += ";";
+        }
+      }
+      return converted;
+    }
+
+    // MG 05/10/09: When the Poco::FilePropertyConfiguration object reads its key/value pairs it 
+    // treats a backslash as the start of an escape sequence. If the next character does not
+    // form a valid sequence then the backslash is removed from the stream. This has the effect
+    // of giving malformed paths when using Windows-style directories. E.g C:\Mantid ->C:Mantid
+    // and Poco::Path::isRelative throws an exception on this
+    bool is_relative(false);
+    try
+    {
+      is_relative = Poco::Path(dir).isRelative();
+    }
+    catch(Poco::PathSyntaxException &)
+    {
+      g_log.error() << "Malformed path detected in the \"" << key << "\" variable, skipping \"" << dir << "\"\n";
+      return "";
+    }
+    if( is_relative )
+    {
+      converted = Poco::Path(execdir).resolve(dir).toString();
+    }
+    else
+    {
+      converted = dir;
+    }
+    converted = Poco::Path(converted).makeDirectory().toString();
+    
+    // C++ doesn't have a const version of operator[] for maps so I can't call that here
+    std::map<std::string,bool>::const_iterator it = m_ConfigPaths.find(key);
+    bool required = false;
+    if( it != m_ConfigPaths.end() )
+    {
+      required = it->second;
+    }
+    if( required && !Poco::File(converted).exists() )
+    {
+     g_log.error() << "Required properties path \"" << converted << "\" in the \"" << key << "\" variable does not exist.\n";
+     converted = "";
+    }
+    return converted;
+ }
+
 
   /**
   * Create the store of data search paths from the 'datasearch.directories' key within the Mantid.properties file.
@@ -144,48 +213,17 @@ namespace Mantid
   */
   void ConfigServiceImpl::defineDataSearchPaths()
   {
-    m_vDataSearchDirs.clear();
+    m_DataSearchDirs.clear();
     std::string paths = getString("datasearch.directories");
     //Nothing to do
     if( paths.empty() ) return;
     int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
     Poco::StringTokenizer tokenizer(paths, ";,", options);
     Poco::StringTokenizer::Iterator iend = tokenizer.end();
-    m_vDataSearchDirs.reserve(tokenizer.count());
-    const std::string execdir = getBaseDir();
+    m_DataSearchDirs.reserve(tokenizer.count());
     for( Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; ++itr )
     {
-      std::string entry = *itr;
-      // MG 05/10/09: When the Poco::FilePropertyConfiguration object reads its key/value pairs it 
-      // treats a backslash as the start of an escape sequence. If the next character does not
-      // form a valid sequence then the backslash is removed from the stream. This has the effect
-      // of giving malformed paths when using Windows-style directories. E.g C:\Mantid ->C:Mantid
-      // and Poco::Path::isRelative throws an exception on this
-      bool is_relative(false);
-      try
-      {
-        is_relative = Poco::Path(entry).isRelative();
-      }
-      catch(Poco::PathSyntaxException &)
-      {
-        g_log.error() << "Malformed path detected in datasearch.directories variable, skipping \"" << entry << "\"\n";
-        continue;
-      }
-
-      if( is_relative )
-      {
-        entry = Poco::Path().resolve(entry).toString();
-      }
-
-      Poco::Path token = Poco::Path(entry).makeDirectory();
-      if( Poco::File(token).exists() )
-      {
-        m_vDataSearchDirs.push_back(token.toString());
-      }
-      else
-      {
-        g_log.information() << "Ignoring search path \"" << token.toString() << "\", path does not exist.\n";
-      }
+      m_DataSearchDirs.push_back(*itr);
     }
   }
 
@@ -352,7 +390,7 @@ namespace Mantid
 
     //Ensure that any relative paths given in the configuration file are relative to the current directory
     convertRelativeToAbsolute();
-    //Configure search paths that have been loaded from the properties file
+    //Configure search paths into a specially saved store as they will be used frequently
     defineDataSearchPaths();
   }
 
@@ -366,8 +404,8 @@ namespace Mantid
   */
   std::string ConfigServiceImpl::getString(const std::string& keyName)
   {
-    std::map<std::string, std::string>::const_iterator mitr = m_mAbsolutePaths.find(keyName);
-    if( mitr != m_mAbsolutePaths.end() ) 
+    std::map<std::string, std::string>::const_iterator mitr = m_AbsolutePaths.find(keyName);
+    if( mitr != m_AbsolutePaths.end() ) 
     {
       return (*mitr).second;
     }
@@ -494,7 +532,7 @@ namespace Mantid
 
   const std::vector<std::string>& ConfigServiceImpl::getDataSearchDirs() const
   {
-    return m_vDataSearchDirs;
+    return m_DataSearchDirs;
   }
 
   /// \cond TEMPLATE 

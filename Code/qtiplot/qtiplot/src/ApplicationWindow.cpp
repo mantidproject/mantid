@@ -16016,6 +16016,7 @@ void ApplicationWindow::performCustomAction(QAction *action)
       connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, SLOT(runPythonScript(const QString&)));
       d_workspace->addSubWindow(usr_win);
       usr_win->show();
+      user_interface->initializeLocalPython();
     }
     else
     { 

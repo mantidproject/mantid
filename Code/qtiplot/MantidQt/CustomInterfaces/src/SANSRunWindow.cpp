@@ -9,6 +9,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -184,7 +185,26 @@ void SANSRunWindow::initLayout()
     m_uiForm.qy_dqy_opt->setItemData(0, "LIN");
 
     readSettings();
-}    
+}
+
+/**
+ * Run local Python initialization code
+ */
+void SANSRunWindow::initLocalPython()
+{
+  // Imoprt the SANS module and set the correct instrument
+  QString result = runPythonCode("try:\n\tfrom SANSReduction import *\nexcept ImportError:\tprint 'Error: Cannot find SANSReduction module.\\nUnable to continue.'");
+  if( result.trimmed().isEmpty() )
+  {
+    m_have_reducemodule = true;
+  }
+  else
+  {
+    showInformationBox(result);
+    m_have_reducemodule = false;
+    setProcessingState(true, -1);    
+  }
+}
 
 /**
  * Initialize the widget maps
@@ -342,9 +362,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 {
   if( !m_have_reducemodule )
   {
-    // Imoprt the SANS module and set the correct instrument
-    runPythonCode("from SANSReduction import *\n" , false);
-    m_have_reducemodule = true;
+    return QString();
   }
   //Ensure the correct instrument is set
   QString code_torun =  "SetNoPrintMode(True)\n" + pycode + "\nSetNoPrintMode(False)";
@@ -688,6 +706,8 @@ void SANSRunWindow::setProcessingState(bool running, int type)
   //m_uiForm.plotBtn->setEnabled(!running);
   m_uiForm.saveBtn->setEnabled(!running);
   m_uiForm.runcentreBtn->setEnabled(!running);
+  m_uiForm.userfileBtn->setEnabled(!running);
+  m_uiForm.data_dirBtn->setEnabled(!running);
 
   if( running )
   {
@@ -1213,7 +1233,7 @@ bool SANSRunWindow::handleLoadButtonClick()
 
   QString sample_logs, can_logs;
   bool is_loaded(true); 
-  QString error();
+  QString error;
   //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
   if( !m_run_no_boxes.value(4)->text().isEmpty() && m_run_no_boxes.value(7)->text().isEmpty() )
   {
@@ -1238,9 +1258,13 @@ bool SANSRunWindow::handleLoadButtonClick()
       continue;
     }
     is_loaded &= runAssign(key, logs);
-    if( !is_loaded )
+    // Check if the last LoadRaw algorithm was run successfully. If so then any problem with
+    // loading is with the log files for the first 2 keys
+    Mantid::API::IAlgorithm_sptr last_run = Mantid::API::AlgorithmManager::Instance().algorithms().back();
+    bool raw_data_ok = last_run->isExecuted();
+    if( !raw_data_ok )
     {
-      showInformationBox("Error: Problem loading run \"" + run_no + "\", please check log window for details.");
+      showInformationBox("Error: Cannot load run \"" + run_no + "\", see results log for details.");
       break;
     }
     if( key == 0 ) 
@@ -1253,7 +1277,7 @@ bool SANSRunWindow::handleLoadButtonClick()
         break;
       }
     }
-    if( key == 1 ) 
+    else if( key == 1 ) 
     { 
       can_logs = logs;
       if( m_uiForm.inst_opt->currentIndex() == 1 && can_logs.isEmpty() )
@@ -1262,6 +1286,7 @@ bool SANSRunWindow::handleLoadButtonClick()
         showInformationBox("Warning: Cannot find log file for can run, using sample values.");
       }
     }
+    else{}
   }
   if (!is_loaded) 
   {

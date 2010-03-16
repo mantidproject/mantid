@@ -91,8 +91,6 @@ class DLLExport SimplePythonAPI
   static std::string convertEOLToString(const std::string & value);
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
   static std::string removeCharacters(const std::string & value, const std::string & cs = "", bool eol_to_space = false);
-  /// Converts windows style paths to forward-slash paths
-  static std::string convertPathToUnix(const std::string & path);
   /// A split function that mimics Python's split function
   static std::vector<std::string> split(const std::string & str, const std::string & delim = " ");
 

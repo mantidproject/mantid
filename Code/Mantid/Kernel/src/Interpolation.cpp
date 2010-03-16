@@ -45,6 +45,7 @@ namespace Kernel
         return m_y[i-1] + (at-m_x[i-1])*(m_y[i]-m_y[i-1])/(m_x[i]-m_x[i-1]);
       }
     }
+    return 0.0;
   }
 
   /** Add point

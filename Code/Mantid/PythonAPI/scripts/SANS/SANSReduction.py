@@ -433,11 +433,13 @@ def _assignHelper(run_string, is_trans, reload = True):
                 
             filepath = _loadRawData(filename, wkspname, ext, specmin,specmax)
         except RuntimeError:
+            _issueWarning(str(details))
             return '',True,'',''
     else:
         try:
             filepath = _loadRawData(filename, wkspname, ext)
-        except RuntimeError:
+        except RuntimeError, details:
+            _issueWarning(str(details))
             return '',True,'',''
     return wkspname,True, INSTR_NAME + logname, filepath
 

@@ -257,9 +257,6 @@ Layer.Right = GraphOptions.Right
 Layer.Bottom = GraphOptions.Bottom
 Layer.Top = GraphOptions.Top
 
-# import utility module
-import sys
-sys.path.append(".")
 try:
 	import_to_global("qtiUtil")
 	print "qtiUtil file successfully imported!"

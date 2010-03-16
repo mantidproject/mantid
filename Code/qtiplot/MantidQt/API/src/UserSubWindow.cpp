@@ -84,6 +84,16 @@ void UserSubWindow::mantidLogReceiver(const Poco::Message & msg)
   emit logMessageReceived(QString::fromStdString(msg.getText()));
 }
 
+/**
+ * Initialize local Python environment. This is called once when the interface is created and
+ * is meant to be used to run one off code, i.e. importing modules.
+ */
+void UserSubWindow::initializeLocalPython()
+{
+  //Call overridable function
+  this->initLocalPython();
+}
+
 //--------------------------------------
 // Protected member functions
 //-------------------------------------

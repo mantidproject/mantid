@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <set>
 #include <vector>
 #include <map>
 
@@ -122,7 +123,7 @@ namespace Mantid
 
       // Searches for a configuration property and returns its value
       template<typename T>
-	int getValue(const std::string& keyName, T& out);
+	    int getValue(const std::string& keyName, T& out);
 
       // Searches for the given environment variable and returns it as a string
       std::string getEnvironment(const std::string& keyName);
@@ -160,6 +161,9 @@ namespace Mantid
       /// if the working directory is altered the paths will not be affected
       void convertRelativeToAbsolute();
 
+      ///Make a relative path or a list of relative paths into an absolute one.
+      std::string makeAbsolute(const std::string & dir, const std::string & key) const;
+
       /// Create the storage of the data search directories
       void defineDataSearchPaths();
 
@@ -172,11 +176,12 @@ namespace Mantid
       /// static reference to the logger class
       Logger& g_log;
 
-      /// A list of keys that may contain relative paths and need to be altered
-      std::vector<std::string> m_vConfigPaths;
+      /// A map storing string/key pairs where the string denotes a path that could be relative in the user properties file
+      /// The boolean indicates whether the path needs to exist or not
+      std::map<std::string, bool> m_ConfigPaths;
 	  
       /// Local storage for the relative path key/values that have been changed 
-      std::map<std::string, std::string> m_mAbsolutePaths;
+      std::map<std::string, std::string> m_AbsolutePaths;
 
       /// The directory that is considered to be the base directory
       std::string m_strBaseDir;
@@ -190,7 +195,7 @@ namespace Mantid
       const std::string m_user_properties_file_name;
 
       /// Store a list of data search paths
-      std::vector<std::string> m_vDataSearchDirs;
+      std::vector<std::string> m_DataSearchDirs;
     };
 	
     ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

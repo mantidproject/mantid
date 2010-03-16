@@ -88,6 +88,8 @@ public:
 public:
   /// Create the layout of the widget. Can only be called once.
   void initializeLayout();
+  /// Run local Python init code. Calls overridable function in specialized interface
+  void initializeLocalPython();
 
   /// Is this dialog initialized
   bool isInitialized() const;
@@ -106,6 +108,8 @@ protected:
   //@{
   /// To be overridden to set the appropriate layout
   virtual void initLayout() = 0;
+  /// Run local Python setup code
+  virtual void initLocalPython() {}
   //@}
   
   /// Raise a dialog box giving some information
