@@ -39,6 +39,15 @@ MantidUIImports = [
 # Update globals
 for name in MantidUIImports:
     globals()[name] = getattr(qti.app.mantidUI,name)
+    
+# Set some aliases for Layer enumerations so that old code will still work
+Layer = qti.Layer
+Layer.Log10 = qti.GraphOptions.Log10
+Layer.Linear = qti.GraphOptions.Linear
+Layer.Left = qti.GraphOptions.Left
+Layer.Right = qti.GraphOptions.Right
+Layer.Bottom = qti.GraphOptions.Bottom
+Layer.Top = qti.GraphOptions.Top
 
 #--------------------------- "Private" functions -----------------------
 

@@ -63,9 +63,7 @@ DEF_RMAX = None
 WAV1 = None
 WAV2 = None
 DWAV = None
-Q1 = None
-Q2 = None
-DQ = None
+Q_REBIN = None
 QXY2 = None
 DQXY = None
 DIRECT_BEAM_FILE_R = None
@@ -524,16 +522,28 @@ def LimitsWav(lmin, lmax, step, type):
     _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + type + ')')
     _readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + type)
 
-def LimitsQ(qmin, qmax, step, type):
-    _printMessage('LimitsQ(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type))
-    _readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
+def LimitsQ(*args):
+    # If given one argument it must be a rebin string
+    if len(args) == 1:
+        val = args[0]
+        if type(val) == str:
+            _printMessage("LimitsQ(" + val + ")")
+            _readLimitValues("L/Q " + val)
+        else:
+            _issueWarning("LimitsQ can only be called with a single string or 4 values")
+    elif len(args) == 4:
+        qmin,qmax,step,step_type = args
+        _printMessage('LimitsQ(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(step_type) + ')')
+        _readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type)
+    else:
+        pass
 
 def LimitsQXY(qmin, qmax, step, type):
-    _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type))
+    _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
     
 def LimitsPhi(phimin, phimax):
-    _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax))
+    _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + ')')
     _readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax))
 	
 def Gravity(flag):
@@ -648,8 +658,8 @@ def clearCurrentMaskDefaults():
     SetFrontEfficiencyFile(None)
     global RMIN,RMAX, DEF_RMIN, DEF_RMAX
     RMIN = RMAX = DEF_RMIN = DEF_RMAX = None
-    global WAV1, WAV2, DWAV, Q1, Q2, DQ, QXY2, DQY
-    WAV1 = WAV2 = DWAV = Q1 = Q2 = DQ = QXY = DQY = None
+    global WAV1, WAV2, DWAV, Q_REBIN, QXY2, DQY
+    WAV1 = WAV2 = DWAV = Q_REBIN = QXY = DQY = None
     global SAMPLE_Z_CORR
     SAMPLE_Z_CORR = 0.0
     global RESCALE, SAMPLE_GEOM, SAMPLE_WIDTH, SAMPLE_HEIGHT, SAMPLE_THICKNESS
@@ -841,46 +851,65 @@ def MaskFile(filename):
 
 # Read a limit line of a mask file
 def _readLimitValues(limit_line):
-    limits = limit_line.partition('L/')[2]
-    # Split with no arguments defaults to any whitespace character and in particular
-    # multiple spaces are include
-    elements = limits.split()
-    type, minval, maxval = elements[0], elements[1], elements[2]
-    if len(elements) == 4:
-        step = elements[3]
-        step_details = step.split('/')
-        if len(step_details) == 2:
-            step_size = step_details[0]
-            step_type = step_details[1]
-            if step_type.upper() == 'LIN':
-                step_type = ''
+    limits = limit_line.partition('L/')
+    if len(limits) != 3:
+        _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
+        return
+    limits = limits[2]
+    limit_type = ''
+    if not ',' in limit_line:
+        # Split with no arguments defaults to any whitespace character and in particular
+        # multiple spaces are include
+        elements = limits.split()
+        if len(elements) == 4:
+            limit_type, minval, maxval, step = elements[0], elements[1], elements[2], elements[3]
+            rebin_str = None
+            step_details = step.split('/')
+            if len(step_details) == 2:
+                step_size = step_details[0]
+                step_type = step_details[1]
+                if step_type.upper() == 'LIN':
+                    step_type = ''
+                else:
+                    step_type = '-'
             else:
-                step_type = '-'
+                step_size = step_details[0]
+                step_type = ''
+        elif len(elements) == 3:
+            limit_type, minval, maxval = elements[0], elements[1], elements[2]
         else:
-            step_size = step_details[0]
+            # We don't use the L/SP line
+            if not 'L/SP' in limit_line:
+                _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
+                return
+    else:
+        limit_type = limits[0].lstrip().rstrip()
+        rebin_str = limits[1:].lstrip().rstrip()
+        minval = maxval = step_type = step_size = None
 
-    if type.upper() == 'WAV':
+    if limit_type.upper() == 'WAV':
         global WAV1, WAV2, DWAV
         WAV1 = float(minval)
         WAV2 = float(maxval)
         DWAV = float(step_type + step_size)
-    elif type.upper() == 'Q':
-        global Q1, Q2, DQ
-        Q1 = float(minval)
-        Q2 = float(maxval)
-        DQ = float(step_type + step_size)
-    elif type.upper() == 'QXY':
+    elif limit_type.upper() == 'Q':
+        global Q_REBIN
+        if not rebin_str is None:
+            Q_REBIN = rebin_str
+        else:
+            Q_REBIN = minval + "," + step_type + step_size + "," + maxval
+    elif limit_type.upper() == 'QXY':
         global QXY2, DQXY
         QXY2 = float(maxval)
         DQXY = float(step_type + step_size)
-    elif type.upper() == 'R':
+    elif limit_type.upper() == 'R':
         global RMIN, RMAX, DEF_RMIN, DEF_RMAX
         RMIN = float(minval)/1000.
         RMAX = float(maxval)/1000.
         DEF_RMIN = RMIN
         DEF_RMAX = RMAX
-    elif type.upper() == 'PHI':
-    	SetPhiLimit(float(minval), float(maxval))
+    elif limit_type.upper() == 'PHI':
+        SetPhiLimit(float(minval), float(maxval))
     else:
         pass
 
@@ -934,7 +963,7 @@ def SetFrontEfficiencyFile(filename):
 def displayMaskFile():
     print '-- Mask file defaults --'
     print '    Wavelength range: ',WAV1, WAV2, DWAV
-    print '    Q range: ',Q1, Q2, DQ
+    print '    Q range: ', Q_REBIN
     print '    QXY range: ', QXY2, DQXY
     print '    radius', RMIN, RMAX
     print '    direct beam file rear:', DIRECT_BEAM_FILE_R
@@ -1290,12 +1319,11 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     ################################ Correction in Q space ############################
     # 1D
     if CORRECTION_TYPE == '1D':
-        q_bins = str(Q1) + "," + str(DQ) + "," + str(Q2)
         if finding_centre == True:
-            GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], q_bins)
+            GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
             return
         else:
-            Q1D(tmpWS,final_result,final_result,q_bins, AccountForGravity=GRAVITY)
+            Q1D(tmpWS,final_result,final_result,Q_REBIN, AccountForGravity=GRAVITY)
     # 2D    
     else:
         # Run 2D algorithm
@@ -1553,12 +1581,16 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         script += '[COLETTE]  STEP/WAVELENGTH/LOGARITHMIC ' + str(DWAV)[1:] + '\n'
     else:
         script += '[COLETTE]  STEP/WAVELENGTH/LINEAR ' + str(DWAV) + '\n'
+    # For the moment treat the rebin string as min/max/step
+    qbins = q_REBEIN.split(",")
+    nbins = len(qbins)
     if CORRECTION_TYPE == '1D':
-        script += '[COLETTE]  LIMIT/Q ' + str(Q1) + ' ' + str(Q2) + '\n'
-        if DQ <  0:
-            script += '[COLETTE]  STEP/Q/LOGARITHMIC ' + str(DQ)[1:] + '\n'
+        script += '[COLETTE]  LIMIT/Q ' + str(qbins[0]) + ' ' + str(qbins[nbins-1]) + '\n'
+        dq = float(qbins[1])
+        if dq <  0:
+            script += '[COLETTE]  STEP/Q/LOGARITHMIC ' + str(dq)[1:] + '\n'
         else:
-            script += '[COLETTE]  STEP/Q/LINEAR ' + str(DQ) + '\n'
+            script += '[COLETTE]  STEP/Q/LINEAR ' + str(dq) + '\n'
     else:
         script += '[COLETTE]  LIMIT/QXY ' + str(0.0) + ' ' + str(QXY2) + '\n'
         if DQXY <  0:

@@ -97,6 +97,11 @@ void SANSRunWindow::initLayout()
     //Set column stretch on the mask table
     m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
 
+    // Set stacked widget margin
+ /*   int left(0),right(0), top(0), bottom(0);
+    m_uiForm.q_stack->layout()->getContentsMargins(&left, &top, &right, &bottom);*/
+    m_uiForm.q_stack->layout()->setContentsMargins(0, 0, 0, 0);
+
     //Button connections
     connect(m_uiForm.data_dirBtn, SIGNAL(clicked()), this, SLOT(selectDataDir()));
     connect(m_uiForm.userfileBtn, SIGNAL(clicked()), this, SLOT(selectUserFile()));
@@ -420,9 +425,19 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.wav_max->setText(runReduceScriptFunction("printParameter('WAV2'),"));
   setLimitStepParameter("wavelength", runReduceScriptFunction("printParameter('DWAV'),"), m_uiForm.wav_dw, m_uiForm.wav_dw_opt);
   //Q
-  m_uiForm.q_min->setText(runReduceScriptFunction("printParameter('Q1'),"));
-  m_uiForm.q_max->setText(runReduceScriptFunction("printParameter('Q2'),"));
-  setLimitStepParameter("Q", runReduceScriptFunction("printParameter('DQ'),"), m_uiForm.q_dq, m_uiForm.q_dq_opt);
+  QString text = runReduceScriptFunction("printParameter('Q_REBIN'),");
+  QStringList values = text.split(",");
+  if( values.count() == 3 )
+  {
+    m_uiForm.q_min->setText(values[0].trimmed());
+    m_uiForm.q_max->setText(values[2].trimmed());
+    setLimitStepParameter("Q", values[1].trimmed(), m_uiForm.q_dq, m_uiForm.q_dq_opt);
+  }
+  else
+  {
+    m_uiForm.q_rebin->setText(text.trimmed());
+    m_uiForm.q_dq_opt->setCurrentIndex(2);
+  }
   //Qxy
   m_uiForm.qy_max->setText(runReduceScriptFunction("printParameter('QXY2'),"));
   setLimitStepParameter("Qxy", runReduceScriptFunction("printParameter('DQXY'),"), m_uiForm.qy_dqy, m_uiForm.qy_dqy_opt);
@@ -519,7 +534,7 @@ bool SANSRunWindow::loadCSVFile()
  * @param step_value The field to store the actual value
  * @param step_type The combo box with the type options
  */
-void SANSRunWindow::setLimitStepParameter(const QString& pname, QString param, QLineEdit* step_value,  QComboBox* step_type)
+void SANSRunWindow::setLimitStepParameter(const QString& pname, QString param, QLineEdit* step_value, QComboBox* step_type)
 {
   if( param.startsWith("-") )
   {
@@ -1379,10 +1394,17 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   exec_reduce += 
     "LimitsR(" + m_uiForm.rad_min->text() + "," + m_uiForm.rad_max->text() + ")\n" +
     "LimitsWav(" + m_uiForm.wav_min->text() + "," + m_uiForm.wav_max->text() + "," + 
-        m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() + "')\n" +
-    "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
-        m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n" +
-    "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
+        m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() + "')\n";
+    if( m_uiForm.q_dq_opt->currentIndex() == 2 )
+    {
+      "LimitsQ(" + m_uiForm.q_rebin->text() + ")\n";
+    }
+    else
+    {
+      "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
+          m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n";
+    }
+    exec_reduce += "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
         m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n" +
     "LimitsPhi(" + m_uiForm.phi_min->text() + "," + m_uiForm.phi_max->text() + ")\n";  
 
@@ -1640,8 +1662,20 @@ void SANSRunWindow::handleStepComboChange(int new_index)
   }
   else if( origin.startsWith("q_dq") )
   {
-    if( new_index == 0 ) m_uiForm.q_step_lbl->setText("stepping");
-    else m_uiForm.q_step_lbl->setText("dQ / Q");
+    if( new_index == 0 ) 
+    {
+      m_uiForm.q_stack->setCurrentIndex(0);
+      m_uiForm.q_step_lbl->setText("stepping");
+    }
+    else if( new_index == 1 ) 
+    {
+      m_uiForm.q_stack->setCurrentIndex(0);
+      m_uiForm.q_step_lbl->setText("dQ / Q");
+    }
+    else 
+    {
+      m_uiForm.q_stack->setCurrentIndex(1);
+    }
   } 
   else
   {

@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>771</width>
+    <width>796</width>
     <height>428</height>
    </rect>
   </property>
@@ -1116,6 +1116,9 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="layoutDirection" >
+            <enum>Qt::LeftToRight</enum>
+           </property>
            <property name="title" >
             <string>Limits</string>
            </property>
@@ -1153,14 +1156,7 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0" >
-             <widget class="QLabel" name="label_19" >
-              <property name="text" >
-               <string>Qx (Angstroms^-1)</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0" >
+            <item row="5" column="0" >
              <widget class="QLabel" name="label_21" >
               <property name="text" >
                <string>Qxy (Angstroms^-1)</string>
@@ -1185,22 +1181,6 @@
             </item>
             <item row="2" column="1" >
              <widget class="QLineEdit" name="wav_min" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1" >
-             <widget class="QLineEdit" name="q_min" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
@@ -1267,23 +1247,7 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="3" column="2" >
-             <widget class="QLineEdit" name="q_max" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="2" >
+            <item row="5" column="2" >
              <widget class="QLineEdit" name="qy_max" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
@@ -1306,14 +1270,7 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="3" column="3" >
-             <widget class="QLabel" name="q_step_lbl" >
-              <property name="text" >
-               <string>stepping</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="3" >
+            <item row="5" column="3" >
              <widget class="QLabel" name="qy_step_lbl" >
               <property name="text" >
                <string>stepping</string>
@@ -1336,23 +1293,7 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="3" column="4" >
-             <widget class="QLineEdit" name="q_dq" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>70</width>
-                <height>16777215</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="4" >
+            <item row="5" column="4" >
              <widget class="QLineEdit" name="qy_dqy" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Maximum" hsizetype="Expanding" >
@@ -1394,42 +1335,7 @@ p, li { white-space: pre-wrap; }
               </item>
              </widget>
             </item>
-            <item row="3" column="5" >
-             <widget class="QComboBox" name="q_dq_opt" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize" >
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize" >
-               <size>
-                <width>95</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="currentIndex" >
-               <number>0</number>
-              </property>
-              <item>
-               <property name="text" >
-                <string>Linear</string>
-               </property>
-              </item>
-              <item>
-               <property name="text" >
-                <string>Logarithmic</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item row="4" column="5" >
+            <item row="5" column="5" >
              <widget class="QComboBox" name="qy_dqy_opt" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
@@ -1464,21 +1370,21 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="5" column="1" >
+            <item row="6" column="1" >
              <widget class="QCheckBox" name="def_trans" >
               <property name="text" >
                <string/>
               </property>
              </widget>
             </item>
-            <item row="5" column="0" >
+            <item row="6" column="0" >
              <widget class="QLabel" name="label_36" >
               <property name="text" >
                <string>Use default transmission</string>
               </property>
              </widget>
             </item>
-            <item row="5" column="2" colspan="2" >
+            <item row="6" column="2" colspan="2" >
              <widget class="QLabel" name="label_23" >
               <property name="text" >
                <string>Account for gravity</string>
@@ -1488,14 +1394,204 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="5" column="4" >
+            <item row="6" column="4" >
              <widget class="QCheckBox" name="gravity_check" >
               <property name="text" >
                <string/>
               </property>
              </widget>
             </item>
+            <item row="3" column="0" colspan="5" >
+             <widget class="QStackedWidget" name="q_stack" >
+              <property name="autoFillBackground" >
+               <bool>false</bool>
+              </property>
+              <property name="lineWidth" >
+               <number>1</number>
+              </property>
+              <property name="currentIndex" >
+               <number>1</number>
+              </property>
+              <widget class="QWidget" name="page_2" >
+               <layout class="QGridLayout" name="gridLayout_16" >
+                <property name="margin" >
+                 <number>0</number>
+                </property>
+                <item row="0" column="5" >
+                 <widget class="QLineEdit" name="q_dq" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize" >
+                   <size>
+                    <width>70</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="4" >
+                 <widget class="QLabel" name="q_step_lbl" >
+                  <property name="text" >
+                   <string>stepping</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="3" >
+                 <widget class="QLineEdit" name="q_max" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize" >
+                   <size>
+                    <width>70</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="2" >
+                 <widget class="QLineEdit" name="q_min" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize" >
+                   <size>
+                    <width>70</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="1" >
+                 <widget class="QLabel" name="label_19" >
+                  <property name="sizePolicy" >
+                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize" >
+                   <size>
+                    <width>120</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text" >
+                   <string>Qx (Angstroms^-1)</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+               <zorder>q_dq_opt</zorder>
+               <zorder>q_min</zorder>
+               <zorder>q_max</zorder>
+               <zorder>q_step_lbl</zorder>
+               <zorder>q_dq</zorder>
+               <zorder>label_19</zorder>
+              </widget>
+              <widget class="QWidget" name="page_4" >
+               <layout class="QHBoxLayout" name="horizontalLayout_17" >
+                <property name="margin" >
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_37" >
+                  <property name="minimumSize" >
+                   <size>
+                    <width>120</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text" >
+                   <string>Qx (Angstroms^-1)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="q_rebin" />
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+            <item row="3" column="5" >
+             <widget class="QComboBox" name="q_dq_opt" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize" >
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>95</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="currentIndex" >
+               <number>0</number>
+              </property>
+              <item>
+               <property name="text" >
+                <string>Linear</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Logarithmic</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Variable</string>
+               </property>
+              </item>
+             </widget>
+            </item>
            </layout>
+           <zorder>label_3</zorder>
+           <zorder>label_16</zorder>
+           <zorder>label_21</zorder>
+           <zorder>rad_min</zorder>
+           <zorder>wav_min</zorder>
+           <zorder>rad_max</zorder>
+           <zorder>limits_max_lbl</zorder>
+           <zorder>wav_max</zorder>
+           <zorder>qy_max</zorder>
+           <zorder>wav_step_lbl</zorder>
+           <zorder>qy_step_lbl</zorder>
+           <zorder>wav_dw</zorder>
+           <zorder>qy_dqy</zorder>
+           <zorder>wav_dw_opt</zorder>
+           <zorder>qy_dqy_opt</zorder>
+           <zorder>limits_min_lbl</zorder>
+           <zorder>def_trans</zorder>
+           <zorder>label_36</zorder>
+           <zorder>label_23</zorder>
+           <zorder>gravity_check</zorder>
+           <zorder>q_stack</zorder>
+           <zorder>label_19</zorder>
+           <zorder>q_min</zorder>
+           <zorder>q_max</zorder>
+           <zorder>q_step_lbl</zorder>
+           <zorder>q_dq</zorder>
+           <zorder>q_dq_opt</zorder>
           </widget>
          </item>
         </layout>
@@ -3334,10 +3430,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>wav_max</tabstop>
   <tabstop>wav_dw</tabstop>
   <tabstop>wav_dw_opt</tabstop>
-  <tabstop>q_min</tabstop>
-  <tabstop>q_max</tabstop>
-  <tabstop>q_dq</tabstop>
-  <tabstop>q_dq_opt</tabstop>
   <tabstop>qy_max</tabstop>
   <tabstop>qy_dqy</tabstop>
   <tabstop>qy_dqy_opt</tabstop>

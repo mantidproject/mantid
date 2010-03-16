@@ -303,7 +303,7 @@ class MantidPyFramework(FrameworkManager):
     The main Mantid Framework object. It mostly forwards its calls to the 
     C++ manager but some workspace related things are captured here first
     '''
-    def __init__(self, gui_exts = False):
+    def __init__(self):
         # Call base class constructor
         super(MantidPyFramework, self).__init__()
         self._garbage_collector = WorkspaceGarbageCollector()
@@ -359,20 +359,6 @@ class MantidPyFramework(FrameworkManager):
         """
         Initialise the framework
         """
-        # Update paths so that Mantid can find everything we need
-        # Add current directory
-        if not '.' is sys.path:
-            sys.path.insert(0, '.')
-        # Required directories (config service has changed them to
-        # absolute paths)
-        self._addToPySearchPath(self.getConfigProperty('requiredpythonscript.directories'))
-        
-        # Now additional user specified directories
-        self._addToPySearchPath(self.getConfigProperty('pythonscripts.directories'))
-        
-        # Finally old scripts key
-        self._addToPySearchPath(self.getConfigProperty('pythonscripts.directory'))
-        
         self._initPythonAlgorithms()
         self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToGlobal()
@@ -440,16 +426,6 @@ class MantidPyFramework(FrameworkManager):
                 continue
             setattr(__main__, name, getattr(mod, name))
             
-    def _addToPySearchPath(self, dirs):
-        if type(dirs) == str:
-            dirs = dirs.split(';')
-        if type(dirs) != list:
-            return
-        for path in dirs:
-            if path.endswith('/') or path.endswith("\\"):
-                path = os.path.dirname(path)
-            sys.path.append(path)
-
     def _refreshPyAlgorithms(self):
         # Pass to the loader proxy
         if self._reloader != None:
@@ -902,3 +878,29 @@ mtd = FrameworkSingleton()
 mantid = mtd
 Mantid = mtd
 Mtd = mtd
+
+# Update paths so that Mantid can find everything we need
+# Add current directory
+if not '.' in sys.path:
+    sys.path.insert(0, '.')
+
+def __addToPySearchPath(dirs):
+    if type(dirs) == str:
+        dirs = dirs.split(';')
+    if type(dirs) != list:
+        return
+    for path in dirs:
+        if path.endswith('/') or path.endswith("\\"):
+            path = os.path.dirname(path)
+        if not path in sys.path:
+            sys.path.append(path)
+
+# Required directories (config service has changed them to
+# absolute paths)
+__addToPySearchPath(mtd.getConfigProperty('requiredpythonscript.directories'))
+
+# Now additional user specified directories
+__addToPySearchPath(mtd.getConfigProperty('pythonscripts.directories'))
+
+# Finally old scripts key
+__addToPySearchPath(mtd.getConfigProperty('pythonscripts.directory'))
