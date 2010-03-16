@@ -125,7 +125,7 @@ public:
     TS_ASSERT( fitParam2.getConstraint().compare("") == 0 );
     TS_ASSERT( fitParam2.getLookUpTable().containData() );
     TS_ASSERT( fitParam2.getLookUpTable().getMethod().compare("linear") == 0 );
-    TS_ASSERT( fitParam2.getLookUpTable().getXUnit().compare("TOF") == 0 );
+    TS_ASSERT( fitParam2.getLookUpTable().getXUnit()->unitID().compare("TOF") == 0 );
 
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
