@@ -68,7 +68,6 @@ public:
     TS_ASSERT(fp->value().find("Data") != std::string::npos)
     // do this in parts making no assumptions about the identity of the slash that separates directories
     TS_ASSERT(fp->value().find("Test") != std::string::npos)
-    TS_ASSERT(fp->value().find("..") != std::string::npos)
 
     msg = fp->setValue("GEM38371.raw");
     TS_ASSERT_EQUALS(msg, "")    
