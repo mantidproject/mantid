@@ -9,6 +9,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Unit.h"
 #include <iostream>
 #include <map>
 #include <vector>
@@ -58,6 +59,9 @@ private:
   /// unit of x
   std::string m_xUnit;
 
+  // unit of x-axis
+  Unit_sptr m_unit;
+
 public:
 
   /// Constructor default to linear interpolation and x-unit set to TOF
@@ -75,11 +79,11 @@ public:
   /// get interpolation method
   std::string getMethod() const { return m_name; };
 
-  /// set interpolation method
-  void setXUnit(const std::string& unit) { m_xUnit=unit; }
+  /// set x-axis unit
+  void setXUnit(const std::string& unit);
 
-  /// get interpolation method
-  std::string getXUnit() const { return m_xUnit; };
+  /// get x-axis unit
+  Unit_sptr getXUnit() const { return m_unit; };
 
   /// return false if no data has been added
   bool containData() const { return m_x.size() ? true : false;}

@@ -1,5 +1,6 @@
 #include "MantidKernel/Interpolation.h"
 #include <Poco/StringTokenizer.h>
+#include "MantidKernel/UnitFactory.h"
 
 namespace Mantid
 {
@@ -12,7 +13,14 @@ namespace Kernel
    */
   Interpolation::Interpolation() : m_name("linear"), m_xUnit("TOF")
   {
+    m_unit = UnitFactory::Instance().create("TOF");
   }
+
+  void Interpolation::setXUnit(const std::string& unit) 
+  { 
+    m_unit = UnitFactory::Instance().create(unit);
+  }
+
 
   /** Get interpolated value at location at
   * @param at Location where to get interpolated value
@@ -104,7 +112,7 @@ namespace Kernel
   */
   void Interpolation::printSelf(std::ostream& os) const
   {
-    os << m_name << " ; " << m_xUnit;
+    os << m_name << " ; " << m_unit->unitID();
 
     for ( int i = 0; i < m_x.size(); i++)
     {

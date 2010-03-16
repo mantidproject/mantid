@@ -90,8 +90,49 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
           }
           else
           {
-            setParameter(i, fitParam.getValue(testWithLocation->centre()));
-          }
+            double centreValue = testWithLocation->centre();
+            Kernel::Unit_sptr lookUpUnit = fitParam.getLookUpTable().getXUnit();
+            Kernel::Unit_sptr wsUnit = m_workspace->getAxis(0)->unit();
+
+            if ( lookUpUnit->unitID().compare(wsUnit->unitID()) != 0 )
+            {
+
+              double factor,power;
+              if (wsUnit->quickConversion(*lookUpUnit,factor,power) )
+              {
+                centreValue = factor * std::pow(centreValue,power);
+              }
+              else
+              {
+                double l1,l2,twoTheta;
+
+                // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
+                IInstrument_const_sptr instrument = m_workspace->getInstrument();
+                Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+                l1 = instrument->getSource()->getDistance(*sample);
+                Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
+                if ( ! det->isMonitor() )
+                {
+                  l2 = det->getDistance(*sample);
+                  twoTheta = m_workspace->detectorTwoTheta(det);
+                }
+                else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+                {
+                  l2 = det->getDistance(*(instrument->getSource()));
+                  l2 = l2 - l1;
+                  twoTheta = 0.0;
+                }
+
+                std::vector<double> endPoint;
+                endPoint.push_back(centreValue);
+                std::vector<double> emptyVec;
+                wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+                lookUpUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+                centreValue = endPoint[0];
+              }
+            }
+            setParameter(i, fitParam.getValue(centreValue));
+          }  // end of update parameter value
 
           // add tie if specified for this parameter in instrument definition file
           if ( fitParam.getTie().compare("") )
