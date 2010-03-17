@@ -17,12 +17,14 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAlgorithms/ConvertUnits.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+using namespace Mantid::Algorithms;
 
 // Algorithm to force Gaussian1D to be run by simplex algorithm
 class SimplexGaussian : public Gaussian
@@ -138,7 +140,7 @@ public:
 
     fn->setParameter("Height",300.0);    
     fn->setParameter("PeakCentre",60990.0);
-    //fn->setParameter("Sigma",100.0);     // set using lookuptable
+    //fn->setParameter("Sigma", 0.1);     // set using lookuptable
 
     // set the workspace explicitely just to make sure that Sigma has been
     // set as expected from the look up table
@@ -170,6 +172,97 @@ public:
     AnalysisDataService::Instance().remove(outputSpace);
     InstrumentDataService::Instance().remove(instrumentName);
   }
+
+
+  // test look up table 
+  void testAgainstHRPD_DatasetLookUpTableDifferentUnit()
+  {
+    // load dataset to test against
+    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", inputFile);
+    std::string outputSpace = "HRP38692_Dataset";
+    loader.setPropertyValue("OutputWorkspace", outputSpace);
+    loader.execute();
+
+    ConvertUnits units;
+    units.initialize();
+    units.setPropertyValue("InputWorkspace", outputSpace);
+    units.setPropertyValue("OutputWorkspace", outputSpace);
+    units.setPropertyValue("Target", "Wavelength");
+    units.setPropertyValue("EMode", "Direct");
+    TS_ASSERT_THROWS_NOTHING(units.execute());
+    TS_ASSERT( units.isExecuted() );
+
+    // reload instrument to test constraint defined in IDF is working
+    LoadInstrument reLoadInstrument;
+    reLoadInstrument.initialize();
+    std::string instrumentName = "HRPD_for_UNIT_TESTING2.xml";
+    reLoadInstrument.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/" + instrumentName);
+    reLoadInstrument.setPropertyValue("Workspace", outputSpace);
+    TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
+    TS_ASSERT( reLoadInstrument.isExecuted() );
+
+    Fit alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace",outputSpace);
+    alg.setPropertyValue("WorkspaceIndex","68");
+    alg.setPropertyValue("StartX","2.46");
+    alg.setPropertyValue("EndX","2.52");
+
+    // create function you want to fit against
+    CompositeFunction *fnWithBk = new CompositeFunction();
+
+    LinearBackground *bk = new LinearBackground();
+    bk->initialize();
+
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
+    bk->removeActive(1);  
+
+    // set up Lorentzian fitting function
+    Gaussian* fn = new Gaussian();
+    fn->initialize();
+
+    //fn->setParameter("Height",300.0);    // set using lookuptable
+    fn->setParameter("PeakCentre",2.5);
+    fn->setParameter("Sigma",0.01);     
+
+    // set the workspace explicitely just to make sure that Sigma has been
+    // set as expected from the look up table
+    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
+    fn->setWorkspace(wsToPass,68,0,0);
+    TS_ASSERT_DELTA( fn->getParameter("Height"), 317.23 ,0.1);
+
+    fnWithBk->addFunction(bk);
+    fnWithBk->addFunction(fn);
+
+    alg.setFunction(fnWithBk);
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg.execute() )
+    )
+    TS_ASSERT( alg.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 1.43,0.1);
+
+    TS_ASSERT_DELTA( fn->height(), 315.4 ,1);
+    TS_ASSERT_DELTA( fn->centre(), 2.5 ,0.01);
+    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 0.0046 ,0.001);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 7.2654 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
+
+    AnalysisDataService::Instance().remove(outputSpace);
+    InstrumentDataService::Instance().remove(instrumentName);
+  }
+
 
 
   // here we have an example where an upper constraint on Sigma <= 100 makes

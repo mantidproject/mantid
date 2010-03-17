@@ -61,12 +61,16 @@ namespace Mantid
       std::string getConstraint() const { return m_constraint; }
       /// set constraint
       std::string& setConstraint() { return m_constraint; }
+      /// get formula
+      std::string getFormula() const { return m_formula; }
+      /// set formula
+      std::string& setFormula() { return m_formula; }
       /// get function
       std::string getFunction() const { return m_function; }
       /// set function
       std::string& setFunction() { return m_function; }
       /// get look up table
-      Kernel::Interpolation getLookUpTable() const { return m_lookUpTable; }
+      const Kernel::Interpolation& getLookUpTable() const { return m_lookUpTable; }
       /// set look up table
       Kernel::Interpolation& setLookUpTable() { return m_lookUpTable; }
 
@@ -84,6 +88,11 @@ namespace Mantid
       std::string m_function;
       /// look up table
       Kernel::Interpolation m_lookUpTable;
+      /// formula
+      std::string m_formula;
+
+	    /// Static reference to the logger class
+	    static Kernel::Logger& g_log;
     };
 
     // defining operator << and >>

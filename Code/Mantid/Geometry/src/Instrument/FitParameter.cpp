@@ -5,12 +5,16 @@
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <Poco/StringTokenizer.h>
+#include <muParser.h>
 
 
 namespace Mantid
 {
 namespace Geometry
 {
+
+  // Get a reference to the logger
+  Kernel::Logger& FitParameter::g_log = Kernel::Logger::get("FitParameter");
 
   /**
     Get parameter value. The default parameter 'at' is ignored expect if
@@ -22,6 +26,38 @@ namespace Geometry
     if ( m_lookUpTable.containData() )
     {
       return  m_lookUpTable.value(at);
+    }
+
+    if ( m_formula.compare("") != 0 )
+    {
+ /*     size_t found;
+      std::string equationStr = m_formula;
+      found = equationStr.find("value");
+      std::stringstream readDouble;
+      readDouble << at;
+      std::string extractedValueStr = readDouble.str();
+      equationStr.replace(found, 5, extractedValueStr);
+
+      // check if more than one 'value' in m_eq
+
+      while ( equationStr.find("value") != std::string::npos )
+      {
+        found = equationStr.find("value");
+        equationStr.replace(found, 5, extractedValueStr);
+      }
+
+      try
+      {
+        mu::Parser p;
+        p.SetExpr(equationStr);
+        return p.Eval();
+      }
+      catch (mu::Parser::exception_type &e)
+      {
+        g_log.error() << "Cannot evaluate fitting parameter formula."
+          << " Formula which cannot be passed is " << m_formula 
+          << ". Muparser error message is: " << e.GetMsg();
+      }*/
     }
 
     return m_value;
@@ -86,9 +122,11 @@ namespace Geometry
 
     f.setTie() = values[3];
 
-    if ( values.count() > 4 )
+    f.setFormula() = values[4];
+
+    if ( values.count() > 5 )
     {
-      std::stringstream str(values[4]);
+      std::stringstream str(values[5]);
       str >> f.setLookUpTable();
     }
 

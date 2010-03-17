@@ -84,7 +84,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
         {
           // update value          
           IFunctionWithLocation* testWithLocation = dynamic_cast<IFunctionWithLocation*>(this);
-          if ( testWithLocation == NULL )
+          if ( testWithLocation == NULL || fitParam.getLookUpTable().containData() == false )
           {
             setParameter(i, fitParam.getValue());
           }
@@ -94,9 +94,9 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
             Kernel::Unit_sptr lookUpUnit = fitParam.getLookUpTable().getXUnit();
             Kernel::Unit_sptr wsUnit = m_workspace->getAxis(0)->unit();
 
+            // if units are different first convert centre value into unit of look up table
             if ( lookUpUnit->unitID().compare(wsUnit->unitID()) != 0 )
             {
-
               double factor,power;
               if (wsUnit->quickConversion(*lookUpUnit,factor,power) )
               {
@@ -130,7 +130,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
                 lookUpUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
                 centreValue = endPoint[0];
               }
-            }
+            }  // end of: lookUpUnit->unitID().compare(wsUnit->unitID()) != 0
             setParameter(i, fitParam.getValue(centreValue));
           }  // end of update parameter value
 
