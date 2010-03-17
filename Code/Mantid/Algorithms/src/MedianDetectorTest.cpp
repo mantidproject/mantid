@@ -431,6 +431,7 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
 
     // get the address of the value of the first bin the spectra, we'll check it's value and then write a pass or fail to that location
     double &yInputOutput = responses->dataY(i)[0];
+    double sig = minNumStandDevs*responses->readE(i)[0];
     try
     {
       if ( m_usableMaskMap && DetectorInfoHelper.aDetecIsMaskedinSpec(i) )
@@ -441,7 +442,10 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
       }
       if ( yInputOutput <= lowLim )
       {// compare the difference against the size of the errorbar -statistical significance check
-        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+        //don't allow spectra to pass if their error is invalid
+        if ( abs(sig)==std::numeric_limits<double>::infinity() || sig!=sig ||
+          //now the significience test itself
+          baseNum - yInputOutput > sig)
         {
           lows.push_back(responses->getAxis(1)->spectraNo(i));
           yInputOutput = BadVal;
@@ -449,8 +453,11 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
         }
       }
       if ( yInputOutput >= highLim )
-      {// check that the deviation is not within stastical error
-        if ( std::abs(yInputOutput-baseNum) > minNumStandDevs*responses->readE(i)[0] )
+      {// compare the difference against the size of the errorbar -statistical significance check
+        //don't allow spectra to pass if their error is invalid
+        if ( abs(sig)==std::numeric_limits<double>::infinity() || sig!=sig ||
+          //now the significience test itself
+          yInputOutput - baseNum > sig )
         {
           highs.push_back(responses->getAxis(1)->spectraNo(i));
           yInputOutput = BadVal;

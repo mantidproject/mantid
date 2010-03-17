@@ -78,7 +78,7 @@ void GroupDetectors2::exec()
   progress( m_FracCompl = CHECKBINS );
   interruption_point();
   
-  // There may be alot of spectra so listing the the ones that aren't grouped could be big deal
+  // There may be alot of spectra so listing the the ones that aren't grouped could be a big deal
   std::vector<int> unGroupedInds;
   unGroupedInds.reserve(numInHists);
   for( int i = 0; i < numInHists ; i++ )
@@ -158,18 +158,32 @@ void GroupDetectors2::getGroups(DataObjects::Workspace2D_const_sptr workspace,
                                             spectraList, m_GroupSpecInds[0]);
     g_log.debug() << "Converted " << spectraList.size() << " spectra numbers into spectra indices to be combined\n";
   }
-  else if ( ! detectorList.empty() )
-  {// we are going to group on the basis of detector IDs, convert from detectors to spectra numbers
-    std::vector<int> mySpectraList = workspace->spectraMap().getSpectra(detectorList);
-    //then from spectra numbers to indices
-    WorkspaceHelpers::getIndicesFromSpectra(
+  else
+  {// go thorugh the rest of the properties in order of decreasing presidence, abort when we get the data we need ignore the rest
+    if ( ! detectorList.empty() )
+    {// we are going to group on the basis of detector IDs, convert from detectors to spectra numbers
+      std::vector<int> mySpectraList = workspace->spectraMap().getSpectra(detectorList);
+      //then from spectra numbers to indices
+      WorkspaceHelpers::getIndicesFromSpectra(
                                   workspace, mySpectraList, m_GroupSpecInds[0]);
-    g_log.debug() << "Found " << m_GroupSpecInds[0].size() << " spectra indices from the list of " << detectorList.size() << " detectors\n";
-  }
-  else if ( ! indexList.empty() )
-  {
-    m_GroupSpecInds[0] = indexList;
-    g_log.debug() << "Read in " << m_GroupSpecInds[0].size() << " spectra indices to be combined\n";
+      g_log.debug() << "Found " << m_GroupSpecInds[0].size() << " spectra indices from the list of " << detectorList.size() << " detectors\n";
+    }
+    else if ( ! indexList.empty() )
+    {
+      m_GroupSpecInds[0] = indexList;
+      g_log.debug() << "Read in " << m_GroupSpecInds[0].size() << " spectra indices to be combined\n";
+    }
+    //check we don't have an index that is too high for the workspace
+    int maxIn = workspace->getNumberHistograms() - 1;
+    std::vector<int>::const_iterator it = m_GroupSpecInds[0].begin();
+    for( ; it != m_GroupSpecInds[0].end() ; ++it )
+    {
+      if ( *it > maxIn )
+      {
+        g_log.error() << "Spectra index " << *it << " doesn't exist in the input workspace, the highest possible index is " << maxIn << std::endl;
+        throw std::out_of_range("One of the spectra requested to group does not exist in the input workspace");
+      }
+    }
   }
 
   if ( m_GroupSpecInds[0].empty() )
@@ -179,13 +193,14 @@ void GroupDetectors2::getGroups(DataObjects::Workspace2D_const_sptr workspace,
   }
 
   // up date unUsedSpec, this is used to find duplicates and when the user has set KeepUngroupedSpectra
-  for ( storage_map::size_type i = 0 ; i < m_GroupSpecInds[0].size(); i++ )
-  {
-    if ( unUsedSpec[m_GroupSpecInds[0][i]] != USED )
+  std::vector<int>::const_iterator index = m_GroupSpecInds[0].begin(); 
+  for (  ; index != m_GroupSpecInds[0].end(); ++index )
+  {// the vector<int> m_GroupSpecInds[0] must not index contain numbers that don't exist in the workspaace
+    if ( unUsedSpec[*index] != USED )
     {
-      unUsedSpec[m_GroupSpecInds[0][i]] = USED;
+      unUsedSpec[*index] = USED;
     }
-    else g_log.warning() << "Duplicate index found\n";
+    else g_log.warning() << "Duplicate index, " << *index << ", found\n";
   }
 }
 /** Read the spectra numbers in from the input file (the file format is in the
@@ -385,18 +400,19 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
   Poco::StringTokenizer dataComment(line, "#", IGNORE_SPACES);
   if ( dataComment.begin() != dataComment.end() )
   {
-    std::vector<int> specNumbers;
-    specNumbers.reserve(output.capacity());
+    std::vector<int> specNums;
+    specNums.reserve(output.capacity());
 
-    RangeHelper::getList(*dataComment.begin(), specNumbers);
-
-    for ( std::vector<int>::size_type i = 0; i < specNumbers.size(); ++i )
+    RangeHelper::getList(*dataComment.begin(), specNums);
+    
+    std::vector<int>::const_iterator specN = specNums.begin();
+    for( ;specN!=specNums.end(); ++specN)
     {
-      std::map<int, int>::const_iterator ind = specs2index.find(specNumbers[i]);
+      std::map<int, int>::const_iterator ind = specs2index.find(*specN);
       if ( ind == specs2index.end() )
       {
-        g_log.debug() << name() << ": spectrum number " << specNumbers[i] << " refered to in the input file was not found in the input workspace" << std::endl;
-        throw std::invalid_argument("Spectrum number " + boost::lexical_cast<std::string>(specNumbers[i]) + " not found");
+        g_log.debug() << name() << ": spectrum number " << *specN << " refered to in the input file was not found in the input workspace\n";
+        throw std::invalid_argument("Spectrum number " + boost::lexical_cast<std::string>(*specN) + " not found");
       } 
       if ( unUsedSpec[ind->second] != USED )
       {// this array is used when the user sets KeepUngroupedSpectra, as well as to find duplicates
@@ -405,7 +421,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
       }
       else
       {// the spectra was already included in a group
-        g_log.warning() << "Duplicate spectra number " << specNumbers[i] << " ignored in input file\n";
+        g_log.warning() << "Duplicate spectra number " << *specN << " ignored in input file\n";
       }
     }
   }

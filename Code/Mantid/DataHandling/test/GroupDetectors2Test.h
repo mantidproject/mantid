@@ -116,7 +116,7 @@ public:
     std::vector<double> tens(NBINS+1, 10.0);
     std::vector<double> ones(NBINS, 1.0);
     TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
-    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, (0+1)+(1+3)) )
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, 1+4) )
     for (int i = 0; i < NBINS; ++i)
     {
       TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(double(2)), 0.0001 )
@@ -129,7 +129,42 @@ public:
     
     AnalysisDataService::Instance().remove(output);
   }
+  void testIndexList()
+  {
+    GroupDetectors2 grouper3;
+    grouper3.initialize();
+    grouper3.setPropertyValue("InputWorkspace", inputWS);
+    std::string output(outputBase + "Indices");
+    grouper3.setPropertyValue("OutputWorkspace", output);
 
+    // test the algorithm behaves if you give it a non-existent index
+    grouper3.setPropertyValue("WorkspaceIndexList","4-6");
+    grouper3.execute();
+    TS_ASSERT( ! grouper3.isExecuted() )
+
+    grouper3.setPropertyValue("WorkspaceIndexList","2-5");
+    TS_ASSERT_THROWS_NOTHING( grouper3.execute());
+    TS_ASSERT( grouper3.isExecuted() );
+
+    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(output));
+    TS_ASSERT_EQUALS( outputWS->getNumberHistograms(), 1 )
+    std::vector<double> tens(NBINS+1, 10.0);
+    std::vector<double> ones(NBINS, 1.0);
+    TS_ASSERT_EQUALS( outputWS->dataX(0), tens )
+    TS_ASSERT_EQUALS( outputWS->dataY(0), std::vector<double>(NBINS, (3+4+5+6)) )
+    for (int i = 0; i < NBINS; ++i)
+    {
+      TS_ASSERT_DELTA( outputWS->dataE(0)[i], std::sqrt(4.0), 0.0001 )
+    }
+
+    boost::shared_ptr<IDetector> det;
+    TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
+    TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
+    TS_ASSERT_THROWS_ANYTHING(det = outputWS->getDetector(1))
+    
+    AnalysisDataService::Instance().remove(output);
+  }
 
   void testDetectorList()
   {
@@ -161,7 +196,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(0) )
     TS_ASSERT( boost::dynamic_pointer_cast<DetectorGroup>(det) )
     TS_ASSERT_THROWS_ANYTHING( det = outputWS->getDetector(1) )
-    
+
     AnalysisDataService::Instance().remove(output);
   }
 

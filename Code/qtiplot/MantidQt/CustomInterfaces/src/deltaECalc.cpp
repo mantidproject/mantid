@@ -193,7 +193,10 @@ void deltaECalc::createNormalizationStatmens(QString &newScr, const QString &nor
 */
 void deltaECalc::createRemoveBgStatmens(QString &newScr)
 {
-  newScr.replace("|RM_BG|", m_bgRemove ? "'yes'" : "'no'");
+  if ( ! m_bgRemove )
+  {
+    newScr.replace("('+|TOF_LOW|+','+|TOF_HIGH|+')", "noback");
+  }
   
   IAlgorithm_sptr flatB
     = AlgorithmManager::Instance().createUnmanaged("FlatBackground");

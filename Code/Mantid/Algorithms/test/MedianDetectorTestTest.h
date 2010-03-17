@@ -43,8 +43,6 @@ public:
     //these are realistic values that I just made up
     alg.setProperty( "LowThreshold", 0.5 );
     alg.setProperty( "HighThreshold", 1.3333 );
-    // we check file output in the next test, this file is not used, can we remove it?
-    alg.setPropertyValue( "OutputFile", m_OFileName );
     //we are using the defaults on StartSpectrum, EndSpectrum, RangeLower and RangeUpper which is to use the whole spectrum
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
@@ -77,29 +75,29 @@ public:
     for (int lHist = 1; lHist < firstGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), BadVal )
+        outputMat->readY(lHist).front(), BAD_VAL )
     }
     for (int lHist=firstGoodSpec; lHist < THEMASKED-1; lHist++)
     {
       TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), GoodVal )
+        outputMat->readY(lHist).front(), GOOD_VAL )
     }
     TS_ASSERT_EQUALS(
-        outputMat->readY(THEMASKED-1).front(), BadVal )
+        outputMat->readY(THEMASKED-1).front(), BAD_VAL )
     for (int lHist=THEMASKED; lHist <= lastGoodSpec; lHist++)
     {
       TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), GoodVal )
+        outputMat->readY(lHist).front(), GOOD_VAL )
     }
     for (int lHist = lastGoodSpec+1; lHist < SAVEDBYERRORBAR; lHist++)
     {
       TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), BadVal )
+        outputMat->readY(lHist).front(), BAD_VAL )
     }
     for (int lHist = SAVEDBYERRORBAR; lHist < Nhist; lHist++)
     {
       TS_ASSERT_EQUALS(
-        outputMat->readY(lHist).front(), GoodVal )
+        outputMat->readY(lHist).front(), GOOD_VAL )
     }
     //now check the array
     std::vector<int>::const_iterator it = OArray.begin();
@@ -199,7 +197,7 @@ public:
   }
     
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput"),
-    m_OFileName("MedianDetectorTestTestFile.txt"), BadVal(100.0), GoodVal(0.0)
+    m_OFileName("MedianDetectorTestTestFile.txt")
   {
     using namespace Mantid;
     // Set up a small workspace for testing
@@ -287,8 +285,7 @@ private:
   double m_YSum;
   enum spectraIndexConsts{ THEMASKED = 40, SAVEDBYERRORBAR = 143, Nhist = 144 };
   //these values must match the values in MedianDetectorTest.h
-  const double BadVal;
-  const double GoodVal;
+  enum FLAGS{ BAD_VAL = 100, GOOD_VAL = 0 };
 
 };
 
