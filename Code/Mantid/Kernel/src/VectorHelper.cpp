@@ -19,13 +19,13 @@ namespace VectorHelper
  **/
 int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::vector<double>& xnew)
 {
-  double xcurr, xs;
+  double xs;
   int ibound(2), istep(1), inew(1);
   int ibounds = params.size(); //highest index in params array containing a bin boundary
   int isteps = ibounds - 1; // highest index in params array containing a step
   xnew.clear();
 
-  xcurr = params[0];
+  double xcurr = params[0];
   xnew.push_back(xcurr);
 
   while ((ibound <= ibounds) && (istep <= isteps))
@@ -36,7 +36,8 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
     else
       xs = xcurr * fabs(params[istep]);
     /* continue stepping unless we get to almost where we want to */
-    if ((xcurr + xs) < (params[ibound] - (xs * 1.E-6)))
+    // Ensure that last bin in a range is not smaller than 25% of previous bin
+    if ( (xcurr + xs*1.25) <= params[ibound] )
     {
       xcurr += xs;
     }
@@ -50,28 +51,21 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
     inew++;
   }
 
-  // If the last bin is smaller than 25% of the penultimate one, then combine the last two
-  if (inew > 2 && (xnew[inew - 1] - xnew[inew - 2]) < 0.25 * (xnew[inew - 2] - xnew[inew - 3]))
-  {
-    xnew.erase(xnew.end() - 2);
-    --inew;
-  }
-
   return inew;
 }
 
 /** Rebins data according to a new output X array
  *
- *  @param xold Old X array of data. 
- *  @param yold Old Y array of data. Must be 1 element shorter than xold.
- *  @param eold Old error array of data. Must be same length as yold.
- *  @param xnew X array of data to rebin to.
- *  @param ynew Rebinned data. Must be 1 element shorter than xnew.
- *  @param enew Rebinned errors. Must be same length as ynew.
- *  @param distribution Flag defining if distribution data (true) or not (false).
- *  @param addition If true, rebinned values are added to the existing ynew/enew vectors.
- *                  NOTE THAT, IN THIS CASE THE RESULTING enew WILL BE THE SQUARED ERRORS
- *                  AND THE ynew WILL NOT HAVE THE BIN WIDTH DIVISION PUT IN!
+ *  @param[in] xold Old X array of data. 
+ *  @param[in] yold Old Y array of data. Must be 1 element shorter than xold.
+ *  @param[in] eold Old error array of data. Must be same length as yold.
+ *  @param[in] xnew X array of data to rebin to.
+ *  @param[out] ynew Rebinned data. Must be 1 element shorter than xnew.
+ *  @param[out] enew Rebinned errors. Must be same length as ynew.
+ *  @param[in] distribution Flag defining if distribution data (true) or not (false).
+ *  @param[in] addition If true, rebinned values are added to the existing ynew/enew vectors.
+ *                      NOTE THAT, IN THIS CASE THE RESULTING enew WILL BE THE SQUARED ERRORS
+ *                      AND THE ynew WILL NOT HAVE THE BIN WIDTH DIVISION PUT IN!
  *  @throw runtime_error Thrown if algorithm cannot execute.
  *  @throw invalid_argument Thrown if input to function is incorrect.
  **/
@@ -193,14 +187,14 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
 /** Rebins histogram data according to a new output X array. Should be faster than previous one.
  *  @author Laurent Chapon 10/03/2009
  *
- *  @param xold Old X array of data. 
- *  @param yold Old Y array of data. Must be 1 element shorter than xold.
- *  @param eold Old error array of data. Must be same length as yold.
- *  @param xnew X array of data to rebin to.
- *  @param ynew Rebinned data. Must be 1 element shorter than xnew.
- *  @param enew Rebinned errors. Must be same length as ynew.
- *  @param addition If true, rebinned values are added to the existing ynew/enew vectors.
- *                  NOTE THAT, IN THIS CASE THE RESULTING enew WILL BE THE SQUARED ERRORS!
+ *  @param xold[in] Old X array of data. 
+ *  @param yold[in] Old Y array of data. Must be 1 element shorter than xold.
+ *  @param eold[in] Old error array of data. Must be same length as yold.
+ *  @param xnew[in] X array of data to rebin to.
+ *  @param ynew[out] Rebinned data. Must be 1 element shorter than xnew.
+ *  @param enew[out] Rebinned errors. Must be same length as ynew.
+ *  @param addition[in] If true, rebinned values are added to the existing ynew/enew vectors.
+ *                      NOTE THAT, IN THIS CASE THE RESULTING enew WILL BE THE SQUARED ERRORS!
  *  @throw runtime_error Thrown if vector sizes are inconsistent
  **/
 void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
