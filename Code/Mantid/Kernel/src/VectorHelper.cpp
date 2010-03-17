@@ -187,13 +187,13 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
 /** Rebins histogram data according to a new output X array. Should be faster than previous one.
  *  @author Laurent Chapon 10/03/2009
  *
- *  @param xold[in] Old X array of data. 
- *  @param yold[in] Old Y array of data. Must be 1 element shorter than xold.
- *  @param eold[in] Old error array of data. Must be same length as yold.
- *  @param xnew[in] X array of data to rebin to.
- *  @param ynew[out] Rebinned data. Must be 1 element shorter than xnew.
- *  @param enew[out] Rebinned errors. Must be same length as ynew.
- *  @param addition[in] If true, rebinned values are added to the existing ynew/enew vectors.
+ *  @param[in] xold Old X array of data. 
+ *  @param[in] yold Old Y array of data. Must be 1 element shorter than xold.
+ *  @param[in] eold Old error array of data. Must be same length as yold.
+ *  @param[in] xnew X array of data to rebin to.
+ *  @param[out] ynew Rebinned data. Must be 1 element shorter than xnew.
+ *  @param[out] enew Rebinned errors. Must be same length as ynew.
+ *  @param[in] addition If true, rebinned values are added to the existing ynew/enew vectors.
  *                      NOTE THAT, IN THIS CASE THE RESULTING enew WILL BE THE SQUARED ERRORS!
  *  @throw runtime_error Thrown if vector sizes are inconsistent
  **/
