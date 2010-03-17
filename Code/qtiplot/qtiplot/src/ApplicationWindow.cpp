@@ -123,6 +123,7 @@
 #include "Mantid/MantidCurve.h"
 #include "ContourLinesEditor.h"
 #include "Mantid/InstrumentWidget/InstrumentWindow.h"
+#include "Mantid/RemoveErrorsDialog.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -721,6 +722,7 @@ void ApplicationWindow::initToolBars()
 	plotTools->addAction(actionAutomaticLayout);
 	plotTools->addSeparator();
 	plotTools->addAction(actionAddErrorBars);
+	plotTools->addAction(actionRemoveErrorBars);
 	plotTools->addAction(actionShowCurvesDialog);
 	plotTools->addAction(actionAddFunctionCurve);
 	plotTools->addAction(actionNewLegend);
@@ -1052,6 +1054,7 @@ void ApplicationWindow::initMainMenu()
 	graph->setObjectName("graphMenu");
 	graph->setCheckable(true);
 	graph->addAction(actionAddErrorBars);
+	graph->addAction(actionRemoveErrorBars);
 	graph->addAction(actionShowCurvesDialog);
 	graph->addAction(actionAddFunctionCurve);
 	graph->addAction(actionNewLegend);
@@ -3244,6 +3247,55 @@ void ApplicationWindow::addErrorBars()
     ed->setCurveNames(g->analysableCurvesList());
     ed->setSrcTables(tableList());
     ed->exec();
+}
+
+void ApplicationWindow::removeErrorBars()
+{
+	MdiSubWindow *w = activeWindow(MultiLayerWindow);
+    if (!w)
+		return;
+
+	MultiLayer* plot = (MultiLayer*)w;
+	if (plot->isEmpty()){
+		QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
+				tr("<h4>There are no plot layers available in this window.</h4>"
+					"<p><h4>Please add a layer and try again!</h4>"));
+		return;
+	}
+
+	Graph* g = (Graph*)plot->activeGraph();
+	if (!g)
+        return;
+
+    if (!g->curves()){
+		QMessageBox::warning(this, tr("MantidPlot - Warning"), tr("There are no curves available on this plot!"));//Mantid
+		return;
+	}
+
+	if (g->isPiePlot()){
+        QMessageBox::warning(this, tr("MantidPlot - Warning"), tr("This functionality is not available for pie plots!"));//Mantid
+        return;
+	}
+
+    RemoveErrorsDialog* ed = new RemoveErrorsDialog(this);
+    connect (ed,SIGNAL(curveName(const QString&)),this,SLOT(removeErrorBars(const QString&)));
+
+    ed->setCurveNames(g->analysableCurvesList());
+    ed->exec();
+}
+
+void ApplicationWindow::removeErrorBars(const QString& name)
+{
+  MdiSubWindow *w = activeWindow(MultiLayerWindow);
+  if (!w)
+    return;
+
+  Graph* g = ((MultiLayer*)w)->activeGraph();
+  if (!g)
+    return;
+
+  g->removeMantidErrorBars(name);
+
 }
 
 void ApplicationWindow::defineErrorBars(const QString& name, int type, const QString& percent, int direction)
@@ -11862,6 +11914,10 @@ void ApplicationWindow::createActions()
 	actionAddErrorBars->setShortcut( tr("Ctrl+B") );
 	connect(actionAddErrorBars, SIGNAL(activated()), this, SLOT(addErrorBars()));
 
+	actionRemoveErrorBars = new QAction(QIcon(QPixmap(errors_xpm)), tr("Remove Error Bars..."), this);
+	//actionRemoveErrorBars->setShortcut( tr("Ctrl+B") );
+	connect(actionRemoveErrorBars, SIGNAL(activated()), this, SLOT(removeErrorBars()));
+
 	actionAddFunctionCurve = new QAction(QIcon(QPixmap(fx_xpm)), tr("Add &Function..."), this);
 	actionAddFunctionCurve->setShortcut( tr("Ctrl+Alt+F") );
 	connect(actionAddFunctionCurve, SIGNAL(activated()), this, SLOT(addFunctionCurve()));
@@ -12677,7 +12733,7 @@ void ApplicationWindow::translateActionsStrings()
 	actionAddErrorBars->setToolTip(tr("Add Error Bars..."));
 	actionAddErrorBars->setShortcut(tr("Ctrl+B"));
 
-	actionAddFunctionCurve->setMenuText(tr("Add &Function..."));
+  actionAddFunctionCurve->setMenuText(tr("Add &Function..."));
 	actionAddFunctionCurve->setToolTip(tr("Add Function..."));
 	actionAddFunctionCurve->setShortcut(tr("Ctrl+Alt+F"));
 

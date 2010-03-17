@@ -296,6 +296,8 @@ public slots:
 
   /// Adds the errors to an existing MantidCurve
   void addMantidErrorBars(const QString& curveName);
+  /// Removes the errors off an existing MantidCurve
+  void removeMantidErrorBars(const QString& curveName);
 
   void updateErrorBars(QwtErrorPlotCurve *er, bool xErr, double width, int cap, const QColor& c, bool plus, bool minus, bool through);
 

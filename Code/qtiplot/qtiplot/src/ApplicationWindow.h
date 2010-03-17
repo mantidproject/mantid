@@ -634,6 +634,8 @@ public slots:
 	void addErrorBars();
 	void defineErrorBars(const QString& name,int type,const QString& percent,int direction);
 	void defineErrorBars(const QString& curveName,const QString& errColumnName, int direction);
+	void removeErrorBars();
+	void removeErrorBars(const QString& name);
 	void movePoints();
 	void removePoints();
 
@@ -1260,7 +1262,7 @@ private:
     QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
     QAction *actionExportPDF, *actionReadOnlyCol;
     QAction *actionCloseAllWindows, *actionClearLogInfo, *actionShowPlotWizard, *actionShowConfigureDialog;
-    QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage, *actionAddText;
+    QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage, *actionAddText;
     QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
     QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;
 	QAction *actionPlotHorizontalBars, *actionPlotArea, *actionPlotPie, *actionPlotVectXYAM, *actionPlotVectXYXY;

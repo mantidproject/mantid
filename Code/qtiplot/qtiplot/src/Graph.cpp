@@ -2803,6 +2803,24 @@ void Graph::addMantidErrorBars(const QString& curveName)
   return;
 }
 
+/** Removes the error bars form a MantidCurve
+ *  @param curveName The name of the curve
+ */
+void Graph::removeMantidErrorBars(const QString& curveName)
+{
+  MantidCurve * c = dynamic_cast<MantidCurve*>(curve(curveName));
+  // Give a message if this isn't a MantidCurve
+  if (!c)
+  {
+    QMessageBox::critical(0,"MantidPlot","The selected curve is not Mantid workspace data");
+    return;
+  }
+
+  c->setErrorBars(false);
+  updatePlot();
+  return;
+}
+
 QwtPieCurve* Graph::plotPie(Table* w, const QString& name, const QPen& pen, int brush,
 					int size, int firstColor, int startRow, int endRow, bool visible,
 					double d_start_azimuth, double d_view_angle, double d_thickness,
