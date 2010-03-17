@@ -34,6 +34,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <algorithm>
+#include <limits>
 
 using namespace Mantid::API;
 
@@ -436,6 +437,10 @@ void MantidMatrix::range(double *min, double *max)
     for(int i=0; i<rows; i++){
       for(int j=0; j<cols; j++){
         double aux = cell(i, j);
+        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+        {
+          continue;
+        }
         if (aux <= m_min)
           m_min = aux;
 

@@ -6,6 +6,7 @@
 
 #include <qpainter.h>
 #include <stdexcept>
+#include <limits>
 
 using namespace Mantid::API;
 
@@ -128,6 +129,28 @@ void MantidCurve::setData(const QwtData &data)
   if (!dynamic_cast<const MantidQwtData*>(&data)) 
     throw std::runtime_error("Only MantidQwtData can be set to a MantidCurve");
   PlotCurve::setData(data);
+}
+
+QwtDoubleRect MantidCurve::boundingRect() const
+{
+  if (m_boundingRect.isNull())
+  {
+    const MantidQwtData* data = mantidData();
+    if (data->size() == 0) return QwtDoubleRect(0,0,1,1);
+    double y_min = std::numeric_limits<double>::infinity();
+    double y_max = -y_min;
+    for(size_t i=0;i<data->size();++i)
+    {
+      double y = data->y(i);
+      if (y == std::numeric_limits<double>::infinity() || y != y) continue;
+      if (y < y_min) y_min = y;
+      if (y > y_max) y_max = y;
+    }
+    double x_min = data->x(0);
+    double x_max = data->x(data->size()-1);
+    m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
+  }
+  return m_boundingRect;
 }
 
 void MantidCurve::draw(QPainter *p, 

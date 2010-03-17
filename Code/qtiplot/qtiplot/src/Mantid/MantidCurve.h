@@ -76,6 +76,9 @@ public:
   /// Overrides qwt_plot_curve::setData to make sure only data of MantidQwtData type can  be set
   void setData(const QwtData &data);
 
+  /// Overrides qwt_plot_curve::boundingRect
+  QwtDoubleRect boundingRect() const;
+
   /// Return pointer to the data if it of the right type or 0 otherwise
   MantidQwtData* mantidData();
   /// Return pointer to the data if it of the right type or 0 otherwise, const version
@@ -139,6 +142,8 @@ private:
   QString m_type;
   /// workspace index
   int  m_index;
+  /// The bounding rect used by qwt to set the axes
+  mutable QwtDoubleRect m_boundingRect;
 };
 
 /**  This class implements QwtData with direct access to a MatrixWorkspace.
