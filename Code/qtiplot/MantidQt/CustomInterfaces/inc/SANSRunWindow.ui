@@ -1149,13 +1149,6 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0" >
-             <widget class="QLabel" name="label_16" >
-              <property name="text" >
-               <string>Wavelength (Angstroms)</string>
-              </property>
-             </widget>
-            </item>
             <item row="5" column="0" >
              <widget class="QLabel" name="label_21" >
               <property name="text" >
@@ -1338,7 +1331,7 @@ p, li { white-space: pre-wrap; }
             <item row="5" column="5" >
              <widget class="QComboBox" name="qy_dqy_opt" >
               <property name="sizePolicy" >
-               <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+               <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -1370,21 +1363,21 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="6" column="1" >
+            <item row="7" column="1" >
              <widget class="QCheckBox" name="def_trans" >
               <property name="text" >
                <string/>
               </property>
              </widget>
             </item>
-            <item row="6" column="0" >
+            <item row="7" column="0" >
              <widget class="QLabel" name="label_36" >
               <property name="text" >
                <string>Use default transmission</string>
               </property>
              </widget>
             </item>
-            <item row="6" column="2" colspan="2" >
+            <item row="7" column="2" colspan="2" >
              <widget class="QLabel" name="label_23" >
               <property name="text" >
                <string>Account for gravity</string>
@@ -1394,7 +1387,7 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="6" column="4" >
+            <item row="7" column="4" >
              <widget class="QCheckBox" name="gravity_check" >
               <property name="text" >
                <string/>
@@ -1417,10 +1410,10 @@ p, li { white-space: pre-wrap; }
                 <property name="margin" >
                  <number>0</number>
                 </property>
-                <item row="0" column="5" >
-                 <widget class="QLineEdit" name="q_dq" >
+                <item row="0" column="2" >
+                 <widget class="QLineEdit" name="q_min" >
                   <property name="sizePolicy" >
-                   <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
+                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -1430,13 +1423,6 @@ p, li { white-space: pre-wrap; }
                     <width>70</width>
                     <height>16777215</height>
                    </size>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="4" >
-                 <widget class="QLabel" name="q_step_lbl" >
-                  <property name="text" >
-                   <string>stepping</string>
                   </property>
                  </widget>
                 </item>
@@ -1456,10 +1442,17 @@ p, li { white-space: pre-wrap; }
                   </property>
                  </widget>
                 </item>
-                <item row="0" column="2" >
-                 <widget class="QLineEdit" name="q_min" >
+                <item row="0" column="4" >
+                 <widget class="QLabel" name="q_step_lbl" >
+                  <property name="text" >
+                   <string>stepping</string>
+                  </property>
+                 </widget>
+                </item>
+                <item row="0" column="5" >
+                 <widget class="QLineEdit" name="q_dq" >
                   <property name="sizePolicy" >
-                   <sizepolicy vsizetype="Preferred" hsizetype="Preferred" >
+                   <sizepolicy vsizetype="Maximum" hsizetype="Maximum" >
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
@@ -1492,7 +1485,6 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                </layout>
-               <zorder>q_dq_opt</zorder>
                <zorder>q_min</zorder>
                <zorder>q_max</zorder>
                <zorder>q_step_lbl</zorder>
@@ -1564,34 +1556,46 @@ p, li { white-space: pre-wrap; }
               </item>
              </widget>
             </item>
+            <item row="6" column="0" >
+             <widget class="QLabel" name="label_38" >
+              <property name="text" >
+               <string>Trans Fit (Angstroms)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" >
+             <widget class="QLabel" name="label_16" >
+              <property name="text" >
+               <string>Wavelength (Angstroms)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="6" column="1" >
+             <widget class="QLineEdit" name="trans_min" />
+            </item>
+            <item row="6" column="2" >
+             <widget class="QLineEdit" name="trans_max" />
+            </item>
+            <item row="6" column="5" >
+             <widget class="QComboBox" name="trans_opt" >
+              <item>
+               <property name="text" >
+                <string>Logarithmic</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Linear</string>
+               </property>
+              </item>
+              <item>
+               <property name="text" >
+                <string>Off</string>
+               </property>
+              </item>
+             </widget>
+            </item>
            </layout>
-           <zorder>label_3</zorder>
-           <zorder>label_16</zorder>
-           <zorder>label_21</zorder>
-           <zorder>rad_min</zorder>
-           <zorder>wav_min</zorder>
-           <zorder>rad_max</zorder>
-           <zorder>limits_max_lbl</zorder>
-           <zorder>wav_max</zorder>
-           <zorder>qy_max</zorder>
-           <zorder>wav_step_lbl</zorder>
-           <zorder>qy_step_lbl</zorder>
-           <zorder>wav_dw</zorder>
-           <zorder>qy_dqy</zorder>
-           <zorder>wav_dw_opt</zorder>
-           <zorder>qy_dqy_opt</zorder>
-           <zorder>limits_min_lbl</zorder>
-           <zorder>def_trans</zorder>
-           <zorder>label_36</zorder>
-           <zorder>label_23</zorder>
-           <zorder>gravity_check</zorder>
-           <zorder>q_stack</zorder>
-           <zorder>label_19</zorder>
-           <zorder>q_min</zorder>
-           <zorder>q_max</zorder>
-           <zorder>q_step_lbl</zorder>
-           <zorder>q_dq</zorder>
-           <zorder>q_dq_opt</zorder>
           </widget>
          </item>
         </layout>

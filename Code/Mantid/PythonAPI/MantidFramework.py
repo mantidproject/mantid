@@ -886,6 +886,7 @@ if not '.' in sys.path:
 
 def __addToPySearchPath(dirs):
     if type(dirs) == str:
+        if dirs.rstrip() == "": return
         dirs = dirs.split(';')
     if type(dirs) != list:
         return
@@ -902,5 +903,18 @@ __addToPySearchPath(mtd.getConfigProperty('requiredpythonscript.directories'))
 # Now additional user specified directories
 __addToPySearchPath(mtd.getConfigProperty('pythonscripts.directories'))
 
-# Finally old scripts key
-__addToPySearchPath(mtd.getConfigProperty('pythonscripts.directory'))
+# Finally old scripts key; For backwards compatability add all directories that are one-level below this
+direcs = mtd.getConfigProperty('pythonscripts.directory')
+__addToPySearchPath(direcs)
+if direcs == '':
+    files = []
+else:
+    try:
+        files = os.listdir(direcs)
+    except:
+        files = []
+
+for file in files:
+    fullpath = os.path.join(direcs,file)
+    if not 'svn' in file and os.path.isdir(fullpath):
+        __addToPySearchPath(fullpath)

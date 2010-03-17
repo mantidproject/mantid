@@ -77,12 +77,12 @@ namespace Mantid
     m_ConfigPaths.insert(std::make_pair("plugins.directory", true));
     m_ConfigPaths.insert(std::make_pair("instrumentDefinition.directory", true));
     m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
-    m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", false));
-    m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", false));
-    m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", false));
+    m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
+    m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
+    m_ConfigPaths.insert(std::make_pair("ManagedWorkspace.FilePath", true));
     m_ConfigPaths.insert(std::make_pair("defaultsave.directory", false));
-    m_ConfigPaths.insert(std::make_pair("datasearch.directories",false));
-    m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories",false));
+    m_ConfigPaths.insert(std::make_pair("datasearch.directories",true));
+    m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories",true));
 
     //attempt to load the default properties file that resides in the directory of the executable
     loadConfig( getBaseDir() + m_properties_file_name);
@@ -128,10 +128,7 @@ namespace Mantid
 
       std::string value(m_pConf->getString(key));
       value = makeAbsolute(value, key);
-      if( !value.empty() )
-      {
-        m_AbsolutePaths.insert(std::make_pair(key, value));
-      }
+      m_AbsolutePaths.insert(std::make_pair(key, value));
     }
   }
 
@@ -154,13 +151,17 @@ namespace Mantid
       for( Poco::StringTokenizer::Iterator itr = tokenizer.begin(); itr != iend; )
       {
         std::string absolute = makeAbsolute(*itr, key);
-        if( !absolute.empty() )
+        if( absolute.empty() )
+        {
+          ++itr;
+        }
+        else
         {
           converted += absolute;
-        }
-        if( ++itr != iend )
-        {
-          converted += ";";
+          if( ++itr != iend )
+          {
+            converted += ";";
+          }
         }
       }
       return converted;

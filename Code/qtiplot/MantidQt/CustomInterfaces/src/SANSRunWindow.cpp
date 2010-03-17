@@ -97,11 +97,6 @@ void SANSRunWindow::initLayout()
     //Set column stretch on the mask table
     m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
 
-    // Set stacked widget margin
- /*   int left(0),right(0), top(0), bottom(0);
-    m_uiForm.q_stack->layout()->getContentsMargins(&left, &top, &right, &bottom);*/
-    m_uiForm.q_stack->layout()->setContentsMargins(0, 0, 0, 0);
-
     //Button connections
     connect(m_uiForm.data_dirBtn, SIGNAL(clicked()), this, SLOT(selectDataDir()));
     connect(m_uiForm.userfileBtn, SIGNAL(clicked()), this, SLOT(selectUserFile()));
@@ -178,6 +173,9 @@ void SANSRunWindow::initLayout()
     connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
 	    SLOT(handleInstrumentChange(int)));
 
+    // Default transmission switch
+    connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+
     // Add Python set functions as underlying data 
     m_uiForm.inst_opt->setItemData(0, "LOQ()");
     m_uiForm.inst_opt->setItemData(1, "SANS2D()");
@@ -188,6 +186,9 @@ void SANSRunWindow::initLayout()
     m_uiForm.q_dq_opt->setItemData(0, "LIN");
     m_uiForm.q_dq_opt->setItemData(1, "LOG");
     m_uiForm.qy_dqy_opt->setItemData(0, "LIN");
+    m_uiForm.trans_opt->setItemData(0,"Log");
+    m_uiForm.trans_opt->setItemData(1,"Linear");
+    m_uiForm.trans_opt->setItemData(2,"Off");
 
     readSettings();
 }
@@ -198,7 +199,7 @@ void SANSRunWindow::initLayout()
 void SANSRunWindow::initLocalPython()
 {
   // Imoprt the SANS module and set the correct instrument
-  QString result = runPythonCode("try:\n\tfrom SANSReduction import *\nexcept ImportError:\tprint 'Error: Cannot find SANSReduction module.\\nUnable to continue.'");
+  QString result = runPythonCode("try:\n\tfrom SANSReduction import *\nexcept (ImportError,SyntaxError), details:\tprint 'Error importing SANSReduction: ' + str(details)");
   if( result.trimmed().isEmpty() )
   {
     m_have_reducemodule = true;
@@ -442,6 +443,16 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.qy_max->setText(runReduceScriptFunction("printParameter('QXY2'),"));
   setLimitStepParameter("Qxy", runReduceScriptFunction("printParameter('DQXY'),"), m_uiForm.qy_dqy, m_uiForm.qy_dqy_opt);
 
+  // Tranmission options
+  m_uiForm.trans_min->setText(runReduceScriptFunction("printParameter('TRANS_WAV1'),"));
+  m_uiForm.trans_max->setText(runReduceScriptFunction("printParameter('TRANS_WAV2'),"));
+  text = runReduceScriptFunction("printParameter('TRANS_FIT')");
+  int index = m_uiForm.trans_opt->findData(text, Qt::UserRole, Qt::MatchFixedString);
+  if( index >= 0 )
+  {
+    m_uiForm.trans_opt->setCurrentIndex(index);
+  }
+
   //Monitor spectrum
   m_uiForm.monitor_spec->setText(runReduceScriptFunction("printParameter('MONITORSPECTRUM'),"));
 
@@ -476,7 +487,7 @@ bool SANSRunWindow::loadUserFile()
   
   ////Detector bank
   param = runReduceScriptFunction("printParameter('DETBANK')");
-  int index = m_uiForm.detbank_sel->findText(param);  
+  index = m_uiForm.detbank_sel->findText(param);  
   if( index >= 0 && index < 2 )
   {
     m_uiForm.detbank_sel->setCurrentIndex(index);
@@ -1394,19 +1405,23 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   exec_reduce += 
     "LimitsR(" + m_uiForm.rad_min->text() + "," + m_uiForm.rad_max->text() + ")\n" +
     "LimitsWav(" + m_uiForm.wav_min->text() + "," + m_uiForm.wav_max->text() + "," + 
-        m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() + "')\n";
-    if( m_uiForm.q_dq_opt->currentIndex() == 2 )
-    {
-      "LimitsQ(" + m_uiForm.q_rebin->text() + ")\n";
-    }
-    else
-    {
-      "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
-          m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n";
-    }
-    exec_reduce += "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
-        m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n" +
-    "LimitsPhi(" + m_uiForm.phi_min->text() + "," + m_uiForm.phi_max->text() + ")\n";  
+    m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() + "')\n";
+  if( m_uiForm.q_dq_opt->currentIndex() == 2 )
+  {
+    "LimitsQ(" + m_uiForm.q_rebin->text() + ")\n";
+  }
+  else
+  {
+    "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
+      m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n";
+  }
+  exec_reduce += "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
+    m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n" +
+    "LimitsPhi(" + m_uiForm.phi_min->text() + "," + m_uiForm.phi_max->text() + ")\n";
+
+  //Transmission behaviour
+  exec_reduce += "TransFit('" + m_uiForm.trans_opt->itemData(m_uiForm.trans_opt->currentIndex()).toString() + "'," +
+    m_uiForm.trans_min->text() + "," + m_uiForm.trans_max->text() + ")\n";
 
   //Centre values
   exec_reduce += "SetCentre(" + m_uiForm.beam_x->text() + "," + m_uiForm.beam_y->text() + ")\n";
@@ -1878,6 +1893,18 @@ void SANSRunWindow::verboseMode(int state)
     runReduceScriptFunction("SetVerboseMode(False)");
   }
   else {}
+}
+
+/**
+ * Update the transmission range boxes if the "Use Transmission defaults is checked"
+ */
+void SANSRunWindow::updateTransInfo(int state)
+{
+  if( state == Qt::Checked )
+  {
+    m_uiForm.trans_min->setText(runReduceScriptFunction("printParameter('TRANS_WAV1_FULL'),"));
+    m_uiForm.trans_max->setText(runReduceScriptFunction("printParameter('TRANS_WAV2_FULL'),"));
+  }
 }
 
 /** 

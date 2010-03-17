@@ -130,10 +130,24 @@ REAR_DET_X_CORR = 0.0
 
 #------------------------------- End of input section -----------------------------------------
 
-# Transmission variables for SANS2D. The CalculateTransmission algorithm contains the defaults
-# for LOQ so these are not used for LOQ
-TRANS_WAV1 = 2.0
-TRANS_WAV2 = 14.0
+# Transmission variables
+TRANS_FIT_DEF = 'Log'
+TRANS_FIT = TRANS_FIT_DEF
+# Map input values to Mantid options
+TRANS_FIT_OPTIONS = {
+'YLOG' : 'Log',
+'STRAIGHT' : 'Linear',
+'CLEAR' : 'Off',
+# Add Mantid ones as well
+'LOG' : 'Log',
+'LINEAR' : 'Linear',
+'OFF' : 'Off'
+}
+TRANS_WAV1 = None
+TRANS_WAV2 = None
+TRANS_WAV1_FULL = None
+TRANS_WAV2_FULL = None
+# Mon/Det for SANS2D
 TRANS_UDET_MON = 2
 TRANS_UDET_DET = 3
 
@@ -210,9 +224,11 @@ def printParameter(var):
 ########################### 
 def SANS2D():
     _printMessage('SANS2D()')
-    global INSTR_NAME, MONITORSPECTRUM
+    global INSTR_NAME, MONITORSPECTRUM, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
     INSTR_NAME = 'SANS2D'
     MONITORSPECTRUM = 2
+    TRANS_WAV1_FULL = TRANS_WAV1 = 2.0
+    TRANS_WAV2_FULL = TRANS_WAV2 = 14.0
     if DETBANK != 'rear-detector':
         Detector('rear-detector')
 
@@ -221,6 +237,8 @@ def LOQ():
     global INSTR_NAME, MONITORSPECTRUM
     INSTR_NAME = 'LOQ'
     MONITORSPECTRUM = 2
+    TRANS_WAV1_FULL = TRANS_WAV1 = 2.2
+    TRANS_WAV2_FULL = TRANS_WAV2 = 10.0
     if DETBANK != 'main-detector-bank':
         Detector('main-detector-bank')
 
@@ -355,7 +373,7 @@ def AssignCan(can_run, reload = True):
 
     det_names = ['Front_Det_Z', 'Front_Det_X','Front_Det_Rot', 'Rear_Det_Z', 'Rear_Det_X']
     for i in range(0, 5):
-        if math.fabs(smp_values[i] - can_values[i]) > 5e-03:
+        if math.fabs(smp_values[i] - can_values[i]) > 5e-04:
             _issueWarning(det_names[i] + " values differ between sample and can runs. Sample = " + str(smp_values[i]) + \
                               ' , Can = ' + str(can_values[i]))
             _MARKED_DETS_.append(det_names[i])
@@ -545,15 +563,33 @@ def LimitsQXY(qmin, qmax, step, type):
 def LimitsPhi(phimin, phimax):
     _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + ')')
     _readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax))
-	
+
 def Gravity(flag):
     _printMessage('Gravity(' + str(flag) + ')')
     if isinstance(flag, bool) or isinstance(flag, int):
         global GRAVITY
         GRAVITY = flag
     else:
-        _warnUser("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(GRAVITY))
-        
+        _issueWarning("Invalid GRAVITY flag passed, try True/False. Setting kept as " + str(GRAVITY))
+
+def TransFit(mode,lambdamin=None,lambdamax=None):
+    global TRANS_WAV1, TRANS_WAV2, TRANS_FIT
+    if lambdamin is None or lambdamax is None:
+        _printMessage("TransFit(\"" + str(mode) + "\")")
+        TRANS_WAV1 = TRANS_WAV1_FULL
+        TRANS_WAV2 = TRANS_WAV2_FULL
+    else:
+        _printMessage("TransFit(\"" + str(mode) + "\"," + str(lambdamin) + "," + str(lambdamax) + ")")
+        TRANS_WAV1 = lambdamin
+        TRANS_WAV2 = lambdamax
+
+    mode = mode.upper()
+    if mode in TRANS_FIT_OPTIONS.keys():
+        TRANS_FIT = TRANS_FIT_OPTIONS[mode]
+    else:
+        _issueWarning("Invalid fit mode passed to TransFit, using default LOG method")
+        TRANS_FIT = 'Log'
+
 ###################################
 # Scaling value
 ###################################
@@ -837,7 +873,14 @@ def MaskFile(filename):
                 _issueWarning('Incorrectly formatted BACK/MON/TIMES line, not running FlatBackground.')
                 BACKMON_START = None
                 BACKMON_END = None
-
+        elif upper_line.startswith("FIT/TRANS/"):
+            params = upper_line[10:].split()
+            if len(params) == 3:
+                fit_type, lambdamin, lambdamax = params
+                TransFit(fit_type, lambdamin, lambdamax)
+            else:
+                _issueWarning('Incorrectly formatted FIT/TRANS line, setting defaults to LOG and full range')
+                TransFit(TRANS_FIT_DEF)
         else:
             continue
 
@@ -1113,38 +1156,52 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         return None
 
     if use_def_trans == DefaultTrans:
-        if INSTR_NAME == 'SANS2D':
-            fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(TRANS_WAV1) + '_' + str(TRANS_WAV2)
-            wavbin = str(TRANS_WAV1) + ',' + str(DWAV) + ',' + str(TRANS_WAV2)
-        else:
-            fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_2.2_10'
-            wavbin = str(2.2) + ',' + str(DWAV) + ',' + str(10.0)
+        wavbin = str(TRANS_WAV1_FULL) + ',' + str(DWAV) + ',' + str(TRANS_WAV2_FULL)
+        translambda_min = TRANS_WAV1_FULL
+        translambda_max = TRANS_WAV2_FULL
     else:
-        fulltransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(lambdamin) + '_' + str(lambdamax)
+        translambda_min = TRANS_WAV1
+        translambda_max = TRANS_WAV2
         wavbin = str(lambdamin) + ',' + str(DWAV) + ',' + str(lambdamax)
 
-    if mtd.workspaceExists(fulltransws) == False or use_def_trans == False:
+    fittedtransws = trans_raw.split('_')[0] + '_trans_' + run_setup.getSuffix() + '_' + str(translambda_min) + '_' + str(translambda_max)
+    unfittedtransws = fittedtransws + "_unfitted"
+    if use_def_trans == False or \
+    (TRANS_FIT != 'Off' and mtd.workspaceExists(fittedtransws) == False) or \
+    (TRANS_FIT == 'Off' and mtd.workspaceExists(unfittedtransws) == False):
+        # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
+        if TRANS_FIT == 'Off':
+            fit_type = 'Linear'
+        else:
+            fit_type = TRANS_FIT
         if INSTR_NAME == 'LOQ':
             # Change the instrument definition to the correct one in the LOQ case
             LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
             LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
             trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, True)
             direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, True)
-            CalculateTransmission(trans_tmp_out,direct_tmp_out, fulltransws, OutputUnfittedData=True)
+            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength = translambda_min, MaxWavelength =  translambda_max, \
+                                  FitMethod = fit_type, OutputUnfittedData=True)
         else:
-            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, False) 
+            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, False)
             direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, False)
-            CalculateTransmission(trans_tmp_out,direct_tmp_out, fulltransws, TRANS_UDET_MON, TRANS_UDET_DET, TRANS_WAV1, TRANS_WAV2, OutputUnfittedData=True)
-        # Remove temopraries
+            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, TRANS_UDET_MON, TRANS_UDET_DET, MinWavelength = translambda_min, \
+                                  MaxWavelength = translambda_max, FitMethod = fit_type, OutputUnfittedData=True)
+        # Remove temporaries
         mantid.deleteWorkspace(trans_tmp_out)
         mantid.deleteWorkspace(direct_tmp_out)
+        
+    if TRANS_FIT == 'Off':
+        result = unfittedtransws
+    else:
+        result = fittedtransws
 
     if use_def_trans == DefaultTrans:
         tmp_ws = 'trans_' + run_setup.getSuffix() + '_' + str(lambdamin) + '_' + str(lambdamax)
-        CropWorkspace(fulltransws, tmp_ws, XMin = str(lambdamin), XMax = str(lambdamax))
+        CropWorkspace(result, tmp_ws, XMin = str(lambdamin), XMax = str(lambdamax))
         return tmp_ws
     else: 
-        return fulltransws
+        return result
 
 ##
 # Setup component positions, xbeam and ybeam in metres
