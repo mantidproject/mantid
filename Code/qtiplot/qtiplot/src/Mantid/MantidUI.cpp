@@ -1282,11 +1282,14 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
 
     try
     {
-      Poco::ActiveResult<bool> res = alg->executeAsync();
-      if ( !res.tryWait(100) && showDialog)
+      // Raise the dialog first so that it is properly constructed before the algorithm
+      // begins. No need for it to be modal as the user can background it and regain
+      // application control anyway.
+      if(showDialog)
       {
-	m_progressDialog->exec();
+	m_progressDialog->show();
       }
+      Poco::ActiveResult<bool> res = alg->executeAsync();
     }
     catch(...)
     {
