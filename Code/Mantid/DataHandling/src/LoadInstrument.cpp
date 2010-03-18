@@ -1015,7 +1015,10 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
     NodeList* pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
     unsigned int numberLookUp = pNLLookUp->length();
 
-    if ( numberValueEle+numberLogfileEle+numberLookUp > 1 )
+    NodeList* pNLFormula = pParamElem->getElementsByTagName("formula");
+    unsigned int numberFormula = pNLFormula->length();
+
+    if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula > 1 )
     {
       g_log.warning() << "XML element with name or type = " << comp->getName() <<
         " contains <parameter> element where the value of the parameter has been specified" <<
@@ -1023,7 +1026,7 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
         " of the parameter is set in this case.";
     }
 
-    if ( numberValueEle+numberLogfileEle+numberLookUp == 0 )
+    if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula == 0 )
     {
       g_log.error() << "XML element with name or type = " << comp->getName() <<
         " contains <parameter> for which no value is specified." <<
@@ -1171,8 +1174,6 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
     // Check if formula is specified
 
     std::string formula = "";
-    NodeList* pNLFormula = pParamElem->getElementsByTagName("formula");
-    unsigned int numberFormula = pNLFormula->length();
 
     if ( numberFormula >= 1 )
     {

@@ -30,13 +30,14 @@ namespace Geometry
 
     if ( m_formula.compare("") != 0 )
     {
- /*     size_t found;
+      size_t found;
       std::string equationStr = m_formula;
       found = equationStr.find("value");
       std::stringstream readDouble;
       readDouble << at;
       std::string extractedValueStr = readDouble.str();
-      equationStr.replace(found, 5, extractedValueStr);
+      if ( found != std::string::npos )
+        equationStr.replace(found, 5, extractedValueStr);
 
       // check if more than one 'value' in m_eq
 
@@ -57,7 +58,7 @@ namespace Geometry
         g_log.error() << "Cannot evaluate fitting parameter formula."
           << " Formula which cannot be passed is " << m_formula 
           << ". Muparser error message is: " << e.GetMsg();
-      }*/
+      }
     }
 
     return m_value;

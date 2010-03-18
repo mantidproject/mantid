@@ -264,7 +264,7 @@ public:
   }
 
 
-
+  // Also pick values from HRPD_for_UNIT_TESTING.xml
   // here we have an example where an upper constraint on Sigma <= 100 makes
   // the Gaussian fit below success. The starting value of Sigma is here 300. 
   // Note that the fit is equally successful if we had no constraint on Sigma
@@ -350,6 +350,95 @@ public:
     InstrumentDataService::Instance().remove(instrumentName);
   }
 
+
+  // Same as testAgainstHRPD_DatasetWithConstraints but
+  // also test <formula> from HRPD_for_UNIT_TESTING2.xml
+  void testAgainstHRPD_DatasetWithConstraintsTestAlsoFormula()
+  {
+    // load dataset to test against
+    std::string inputFile = "../../../../Test/Data/HRP38692.RAW";
+    LoadRaw loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", inputFile);
+    std::string outputSpace = "HRP38692_Dataset";
+    loader.setPropertyValue("OutputWorkspace", outputSpace);
+    loader.execute();
+
+    // reload instrument to test constraint defined in IDF is working
+    LoadInstrument reLoadInstrument;
+    reLoadInstrument.initialize();
+    std::string instrumentName = "HRPD_for_UNIT_TESTING2.xml";
+    reLoadInstrument.setPropertyValue("Filename", "../../../../Test/Instrument/IDFs_for_UNIT_TESTING/" + instrumentName);
+    reLoadInstrument.setPropertyValue("Workspace", outputSpace);
+    TS_ASSERT_THROWS_NOTHING(reLoadInstrument.execute());
+    TS_ASSERT( reLoadInstrument.isExecuted() );
+
+    Fit alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT( alg.isInitialized() );
+
+    // Set which spectrum to fit against and initial starting values
+    alg.setPropertyValue("InputWorkspace",outputSpace);
+    alg.setPropertyValue("WorkspaceIndex","2");
+    alg.setPropertyValue("StartX","79300");
+    alg.setPropertyValue("EndX","79600");
+
+    // create function you want to fit against
+    CompositeFunction *fnWithBk = new CompositeFunction();
+
+    LinearBackground *bk = new LinearBackground();
+    bk->initialize();
+
+    bk->setParameter("A0",0.0);
+    bk->setParameter("A1",0.0);
+    bk->removeActive(1);  
+    //bk->removeActive(1);
+
+    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
+    //bk->addConstraint(bc_b);
+
+    // set up Lorentzian fitting function
+    Gaussian* fn = new Gaussian();
+    fn->initialize();
+
+
+    // set the workspace explicitely just to make sure that Sigma has been
+    // set as expected from the look up table
+    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
+    fn->setParameter("PeakCentre",80000.0, false);  // set here for the purpose of the test below only.
+    fn->setWorkspace(wsToPass,2,0,0);
+    TS_ASSERT_DELTA( fn->getParameter("Height"), 200 ,0.1);
+
+    // add constraint to function
+    // BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);  
+    // fn->addConstraint(bc3);   // this is set in HRPD_for_UNIT_TESTING.xml
+
+    fnWithBk->addFunction(bk);
+    fnWithBk->addFunction(fn);
+
+    alg.setFunction(fnWithBk);
+
+    // execute fit
+    TS_ASSERT_THROWS_NOTHING(
+      TS_ASSERT( alg.execute() )
+    )
+    TS_ASSERT( alg.isExecuted() );
+
+    // test the output from fit is what you expect
+    double dummy = alg.getProperty("Output Chi^2/DoF");
+    TS_ASSERT_DELTA( dummy, 5.1604,1);
+
+    TS_ASSERT_DELTA( fn->height(), 232.1146 ,1);
+    TS_ASSERT_DELTA( fn->centre(), 79430.1 ,1);
+    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 26.14 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A0"), 8.0575 ,0.1);
+    TS_ASSERT_DELTA( bk->getParameter("A1"), 0.0 ,0.01); 
+
+    AnalysisDataService::Instance().remove(outputSpace);
+    InstrumentDataService::Instance().remove(instrumentName);
+  }
+
+
   void testAgainstHRPD_FallbackToSimplex()
   {
     // load dataset to test against
@@ -406,9 +495,6 @@ public:
     fnWithBk->addFunction(fn);
 
     alg.setFunction(fnWithBk);
-
-    //int iii;
-    //std::cin >> iii;
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

@@ -84,9 +84,14 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
         {
           // update value          
           IFunctionWithLocation* testWithLocation = dynamic_cast<IFunctionWithLocation*>(this);
-          if ( testWithLocation == NULL || fitParam.getLookUpTable().containData() == false )
+          if ( testWithLocation == NULL || 
+            (fitParam.getLookUpTable().containData() == false && fitParam.getFormula().compare("") == 0) )
           {
             setParameter(i, fitParam.getValue());
+          }
+          else if ( testWithLocation != NULL && fitParam.getFormula().compare("") != 0 )
+          {
+            setParameter(i, fitParam.getValue(testWithLocation->centre()));
           }
           else
           {

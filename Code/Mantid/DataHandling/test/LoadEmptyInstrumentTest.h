@@ -127,6 +127,16 @@ public:
     TS_ASSERT( fitParam2.getLookUpTable().getMethod().compare("linear") == 0 );
     TS_ASSERT( fitParam2.getLookUpTable().getXUnit()->unitID().compare("TOF") == 0 );
 
+    param = paramMap.getRecursive(&(*det), "formula", "fitting");
+    const FitParameter& fitParam3 = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam3.getValue(0), 100.0, 0.0001);
+    TS_ASSERT_DELTA( fitParam3.getValue(5), 175.0, 0.0001);
+    TS_ASSERT( fitParam3.getTie().compare("") == 0 );
+    TS_ASSERT( fitParam3.getFunction().compare("somefunction") == 0 );
+    TS_ASSERT( fitParam3.getConstraint().compare("") == 0 );
+    TS_ASSERT( !fitParam3.getLookUpTable().containData() );
+    TS_ASSERT( fitParam3.getFormula().compare("100.0+10*value+value^2") == 0 );
+
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA( dummy[0], 2.0, 0.0001);
