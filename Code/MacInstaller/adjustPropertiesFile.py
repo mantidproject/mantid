@@ -3,18 +3,41 @@
 # Copies the default Mantid.properties file, adjusting directories where
 # necessary.
 #
-prop_file = open('../Mantid/Properties/Mantid.properties','r')
-prop_file_ins = open('MantidPlot.app/Contents/MacOS/Mantid.properties','w')
-for line in prop_file:
-    if line.find('plugins.directory') >= 0:
-        prop_file_ins.write('plugins.directory = ../../plugins\n')
-    elif line.find('pythonscripts.directory') >= 0:
-        prop_file_ins.write('pythonscripts.directory = ../../scripts\n')
-    elif line.find('instrumentDefinition.directory') >= 0:
-        prop_file_ins.write('instrumentDefinition.directory = ../../instrument\n')
-    elif line.find('pythonalgorithms.directories') >= 0:
-        prop_file_ins.write('pythonalgorithms.directories = ../../plugins/PythonAlgs\n')
+
+# Field replacements
+replacements = {
+    "plugins.directory":"plugins.directory = ../../plugins",
+    "instrumentDefinition.directory":"instrumentDefinition.directory = ../../instrument",
+    "requiredpythonscript.directories":"""requiredpythonscript.directories = ../../scripts/Crystallography;../../scripts/Disordered Materials;../../scripts/Engineering;\\
+../../scripts/Excitations;../../scripts/Large Scale Structures;../../scripts/Molecular Spectroscopy;\\
+../../scripts/Muons;../../scripts/Neutrinos;../../scripts/SANS""",
+    "pythonscripts.directory":"pythonscripts.directory = ../../scripts",
+    "pythonscripts.directories":"pythonscripts.directories = ../../scripts",
+    "pythonalgorithms.directories":"../../plugins/PythonAlgs"
+}
+
+template = open('../Mantid/Properties/Mantid.properties','r')
+original = template.readlines()
+prop_file = open('MantidPlot.app/Contents/MacOS/Mantid.properties','w')
+continuation = False
+nlines = len(original)
+index = 0
+while( index < nlines ):
+    line = original[index]
+    key = ""
+    for rep in replacements.iterkeys():
+        if line.startswith(rep):
+            key = rep
+            break
+    if key != "":
+        prop_file.write(replacements[key] + "\n")
+        # Skip any backslashed lines
+        while line.rstrip().endswith("\\") and index < nlines:
+            index += 1
+            line = original[index]
     else:
-        prop_file_ins.write(line)
-prop_file_ins.close()
+        prop_file.write(line)
+    index += 1
+    
+template.close()
 prop_file.close()
