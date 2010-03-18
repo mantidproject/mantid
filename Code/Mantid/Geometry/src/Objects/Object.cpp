@@ -35,46 +35,49 @@
 
 namespace Mantid
 {
-
   namespace Geometry
   {
 
     Kernel::Logger& Object::PLog(Kernel::Logger::get("Object"));
 
-    /// @cond
-    //const double OTolerance(1e-6);
-    /// @endcond
-
     Object::Object() :
-    ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
+      ObjName(0),MatN(-1),Tmp(300),density(0.0),TopRule(0),
       AABBxMax(0),AABByMax(0),AABBzMax(0),AABBxMin(0),AABByMin(0),AABBzMin(0),boolBounded(false),bGeometryCaching(false),
       vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
       vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>())
       /*!
-      Defaut constuctor, set temperature to 300K and material to vacuum
+      Default constuctor, set temperature to 300K and material to vacuum
       */
     {
       handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
     }
 
     Object::Object(const Object& A) :
-    ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
+      ObjName(A.ObjName),MatN(A.MatN),Tmp(A.Tmp),density(A.density),
       TopRule((A.TopRule) ? A.TopRule->clone() : 0),
       AABBxMax(A.AABBxMax),
       AABByMax(A.AABByMax),
       AABBzMax(A.AABBzMax),
       AABBxMin(A.AABBxMin),
       AABByMin(A.AABByMin),
-      AABBzMin(A.AABBzMin),boolBounded(A.boolBounded),bGeometryCaching(A.bGeometryCaching),
+      AABBzMin(A.AABBzMin),
+      boolBounded(A.boolBounded),
+      bGeometryCaching(A.bGeometryCaching),
       vtkCacheReader(A.vtkCacheReader),
-      vtkCacheWriter(A.vtkCacheWriter),
-      SurList(A.SurList)
+      vtkCacheWriter(A.vtkCacheWriter)
       /*!
       Copy constructor
       \param A :: Object to copy
       */
     {
       handle=boost::shared_ptr<GeometryHandler>(new CacheGeometryHandler(this));
+
+      // Need to deep-copy the vector of pointers to surfaces
+      std::vector<const Surface*>::const_iterator vc;
+      for(vc=A.SurList.begin();vc!=A.SurList.end();vc++)
+      {
+        SurList.push_back((*vc)->clone());
+      }
     }
 
     Object&
@@ -93,7 +96,6 @@ namespace Mantid
         density=A.density;
         delete TopRule;
         TopRule=(A.TopRule) ? A.TopRule->clone() : 0;
-        SurList=A.SurList;
         AABBxMax=A.AABBxMax;
         AABByMax=A.AABByMax;
         AABBzMax=A.AABBzMax;
@@ -102,6 +104,17 @@ namespace Mantid
         AABBzMin=A.AABBzMin;
         boolBounded=A.boolBounded;
         handle=A.handle;
+        bGeometryCaching = A.bGeometryCaching;
+        vtkCacheReader = A.vtkCacheReader;
+        vtkCacheWriter = A.vtkCacheWriter;
+
+        // Need to deep-copy the vector of pointers to surfaces
+        SurList.clear();
+        std::vector<const Surface*>::const_iterator vc;
+        for(vc=A.SurList.begin();vc!=A.SurList.end();vc++)
+        {
+          SurList.push_back((*vc)->clone());
+        }
       }
       return *this;
     }
@@ -1954,5 +1967,4 @@ namespace Mantid
     }
 
   }  // NAMESPACE Geometry
-
 }  // NAMESPACE Mantid

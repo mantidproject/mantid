@@ -39,7 +39,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../CurveFitting/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include"
 				PreprocessorDefinitions="_USE_MATH_DEFINES;WIN32;_DEBUG;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;NOMINMAX"
 				RuntimeLibrary="3"
 				OpenMP="true"
@@ -118,7 +118,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../CurveFitting/inc;../../Third_Party/include"
+				AdditionalIncludeDirectories="inc;../API/inc;../Geometry/inc;../Kernel/inc;../DataObjects/inc;../../Third_Party/include"
 				PreprocessorDefinitions="_USE_MATH_DEFINES;WIN32;_WINDOWS;POCO_DLL;WINVER=0x0500;IN_MANTID_ALGORITHMS=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;GSL_DLL;NOMINMAX"
 				RuntimeLibrary="2"
 				OpenMP="true"
@@ -180,6 +180,10 @@
 			>
 			<File
 				RelativePath=".\src\AbsorptionCorrection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\AnyShapeAbsorption.cpp"
 				>
 			</File>
 			<File
@@ -498,6 +502,10 @@
 			>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\AbsorptionCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\AnyShapeAbsorption.h"
 				>
 			</File>
 			<File

@@ -236,11 +236,27 @@ void AbsorptionCorrection::retrieveBaseProperties()
 /// Create the cylinder object using the Geometry classes
 void AbsorptionCorrection::constructSample(API::Sample& sample)
 {
-  boost::shared_ptr<Object> shape = ShapeFactory().createShape(sampleXML());
-  sample.setShapeObject( shape );
-  m_sampleObject = shape.get();
+  const std::string xmlstring = sampleXML();
+  if (xmlstring.empty())
+  {
+    // This means that we should use the shape already defined on the sample.
+    m_sampleObject = &sample.getShapeObject();
+    // Check there is one, and fail if not
+    if ( ! m_sampleObject )
+    {
+      const std::string mess("No shape has been defined for the sample in the input workspace");
+      g_log.error(mess);
+      throw std::invalid_argument(mess);
+    }
+  }
+  else
+  {
+    boost::shared_ptr<Object> shape = ShapeFactory().createShape(xmlstring);
+    sample.setShapeObject( *shape );
+    m_sampleObject = &sample.getShapeObject();
 
-  g_log.information("Successfully constructed the sample object");
+    g_log.information("Successfully constructed the sample object");
+  }
 }
 
 /// Calculate the distances traversed by the neutrons within the sample

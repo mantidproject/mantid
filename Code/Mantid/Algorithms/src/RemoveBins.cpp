@@ -62,7 +62,7 @@ void RemoveBins::init()
  */
 void RemoveBins::exec()
 {
-	this->checkProperties();
+  this->checkProperties();
 
   // If the X range has been given in a different unit, or if the workspace isn't square, then we will need
   // to calculate the bin indices to cut out each time.
@@ -102,9 +102,9 @@ void RemoveBins::exec()
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   if (m_inputWorkspace!=outputWS) // Create the output workspace only if not the same as input
-	{
-	  outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
-	}
+  {
+    outputWS = WorkspaceFactory::Instance().create(m_inputWorkspace);
+  }
 
   // Loop over the spectra
   int start=0,end=0;
@@ -153,7 +153,7 @@ void RemoveBins::exec()
       const double endFrac = (endX-X[end-1])/(X[end]-X[end-1]);
       this->RemoveFromMiddle(start-1,end,startFrac,endFrac,myY,myE);
     }
-     prog.report();
+    prog.report();
   } // Loop over spectra
 
   // Assign to the output workspace property
@@ -240,7 +240,7 @@ void RemoveBins::transformRangeUnit(const int& index, double& startX, double& en
   const Kernel::Unit_sptr inputUnit = m_inputWorkspace->getAxis(0)->unit();
   // First check for a 'quick' conversion
   double factor,power;
-  if ( inputUnit->quickConversion(*m_rangeUnit,factor,power) )
+  if ( m_rangeUnit->quickConversion(*inputUnit,factor,power) )
   {
     startX = factor * std::pow(m_startX,power);
     endX = factor * std::pow(m_endX,power);

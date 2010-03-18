@@ -20,10 +20,11 @@ Sample::Sample() :
 */
 Sample::Sample(const Sample& copy) :
   m_name(copy.m_name), m_manager(copy.m_manager), m_protonCharge(copy.m_protonCharge), 
-  m_geom_id(copy.m_geom_id), m_thick(copy.m_thick), m_height(copy.m_height), m_width(copy.m_width)
+  m_sample_shape(copy.m_sample_shape), m_geom_id(copy.m_geom_id), 
+  m_thick(copy.m_thick), m_height(copy.m_height), m_width(copy.m_width)
 {
 }
-  
+
 /**  assignment operator 
   * @param rhs const reference to the sample object
 */
@@ -31,12 +32,13 @@ Sample::Sample(const Sample& copy) :
 {
   if (this == &rhs) return *this;
   m_name = rhs.m_name;
+  m_manager = rhs.m_manager;
   m_protonCharge = rhs.m_protonCharge;
+  m_sample_shape = rhs.m_sample_shape;
   m_geom_id = rhs.m_geom_id;
   m_thick = rhs.m_thick;
   m_height = rhs.m_height;
   m_width = rhs.m_width;
-  m_manager = rhs.m_manager;
   return *this;
 }
   
@@ -107,7 +109,7 @@ const double& Sample::getProtonCharge() const
  * Set the object that describes the sample shape
  * @param sample_shape The shape object
  */
-void Sample::setShapeObject(boost::shared_ptr<Geometry::Object> sample_shape)
+void Sample::setShapeObject(const Geometry::Object & sample_shape)
 {
   m_sample_shape = sample_shape;
 }
@@ -116,7 +118,7 @@ void Sample::setShapeObject(boost::shared_ptr<Geometry::Object> sample_shape)
  * Get a pointer to the sample shape object
  * @returns A shared pointer to the sample object
  */
-boost::shared_ptr<Geometry::Object> Sample::getShapeObject() const
+const Geometry::Object& Sample::getShapeObject() const
 {
   return m_sample_shape;
 }

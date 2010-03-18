@@ -24,6 +24,8 @@ namespace Algorithms
     <LI> SampleHeight - The height of the sample in centimetres. </LI>
     <LI> SampleWidth - The width of the sample in centimetres. </LI>
     <LI> SampleThickness - The thickness of the sample in centimetres. </LI>
+    <LI> Emode  - The energy mode (0=elastic, 1=direct geometry, 2=indirect geometry) </LI>
+    <LI> Efixed - Value of fixed energy: EI (emode=1) or EF (emode=2) (meV) </LI>
     <LI> ElementSize - The side dimension of an integration element cube in mm (default: 1). </LI>
     </UL>
 

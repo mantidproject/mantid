@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Objects/Object.h"
-#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid
 {
@@ -19,7 +18,7 @@ namespace API
     @author Russell Taylor, Tessella Support Services plc
     @date 26/11/2007
 
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -41,7 +40,6 @@ namespace API
 */
 class DLLExport Sample
 {
-	
 public:
   Sample();
   virtual ~Sample();
@@ -57,8 +55,8 @@ public:
   void setProtonCharge( const double &charge);
   const double& getProtonCharge() const;
 
-  void setShapeObject(boost::shared_ptr<Geometry::Object> sample_shape);
-  boost::shared_ptr<Geometry::Object> getShapeObject() const;
+  void setShapeObject(const Geometry::Object & sample_shape);
+  const Geometry::Object& getShapeObject() const;
 
   void setGeometryFlag(int geom_id);
   int getGeometryFlag() const;
@@ -72,14 +70,12 @@ public:
   void setWidth(double width);
   double getWidth() const;
   
-///// copy constructor. 
+  ///// copy constructor. 
   Sample(const Sample& copy);
-	///// copy assignment operator. 
+  ///// copy assignment operator. 
   const Sample& operator=(const Sample& rhs);
 
 private: 
-	
-
   /// The name for the sample
   std::string m_name;
   /// Stores the information read in from the logfiles.
@@ -87,7 +83,7 @@ private:
   /// The good proton charge for this run in uA.hour
   double m_protonCharge;
   /// The sample shape object
-  boost::shared_ptr<Geometry::Object> m_sample_shape;
+  Geometry::Object m_sample_shape;
   /// The sample geometry flag
   int m_geom_id;
   /// The sample thickness from the SPB_STRUCT in the raw file
