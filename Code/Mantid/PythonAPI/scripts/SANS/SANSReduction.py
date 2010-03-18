@@ -554,7 +554,7 @@ def LimitsQ(*args):
         _printMessage('LimitsQ(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(step_type) + ')')
         _readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type)
     else:
-        pass
+        _issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
 
 def LimitsQXY(qmin, qmax, step, type):
     _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
@@ -1193,6 +1193,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
         
     if TRANS_FIT == 'Off':
         result = unfittedtransws
+        mantid.deleteWorkspace(fittedtransws)
     else:
         result = fittedtransws
 

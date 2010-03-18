@@ -1408,11 +1408,11 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() + "')\n";
   if( m_uiForm.q_dq_opt->currentIndex() == 2 )
   {
-    "LimitsQ(" + m_uiForm.q_rebin->text() + ")\n";
+    exec_reduce += "LimitsQ('" + m_uiForm.q_rebin->text() + "')\n";
   }
   else
   {
-    "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
+    exec_reduce += "LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," + 
       m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n";
   }
   exec_reduce += "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
