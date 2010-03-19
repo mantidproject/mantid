@@ -39,6 +39,7 @@
 
 #include <iostream>
 #include <numeric>
+
 #include "MantidAPI/MatrixWorkspace.h"
 using namespace Mantid::API;
 
@@ -811,8 +812,6 @@ QImage Spectrogram::renderImage(
         // image2matrix_yMap[image_row] ->  matrix_row or -1
         std::vector<int> image2matrix_yMap(rect.height(),-1);
 
-        std::vector<int> image2matrix_xMap(rect.height(),-1);
-
         for(int row = 0;row<mantidFun->numRows();++row)
         {
           double ymin,ymax;
@@ -839,13 +838,6 @@ QImage Spectrogram::renderImage(
             }
           }
           std::fill(image2matrix_yMap.begin()+imin,image2matrix_yMap.begin()+imax+1,row);
-          double xmin,xmax;
-          mantidFun->getRowXRange(row,xmin,xmax);
-          int jmin = xMap.transform(xmin)-rect.left();
-          int jmax = xMap.transform(xmax)-rect.left();
-          if (jmin < 0) jmin = 0;
-          if (jmax < 0) jmin = -1;
-          std::fill(image2matrix_xMap.begin()+imin,image2matrix_xMap.begin()+imax+1,jmin);
 
         }
 
@@ -854,6 +846,10 @@ QImage Spectrogram::renderImage(
         for(int i=0;i<image2matrix_yMap.size();++i)
         {
           int row = image2matrix_yMap[i];
+          if (row < 0)
+          {
+            continue;
+          }
           if (row == row0)
           {
             unsigned char *line = image.scanLine(i);
@@ -862,8 +858,13 @@ QImage Spectrogram::renderImage(
             continue; 
           }
           row0 = row;
-          int jmin = image2matrix_xMap[i];
-          if (row < 0 || jmin < 0)
+
+          double xmin,xmax;
+          mantidFun->getRowXRange(row,xmin,xmax);
+          int jmin = xMap.transform(xmin)-rect.left();
+          if (jmin < 0) jmin = 0;
+
+          if (jmin < 0)
           {
             continue;
           }
@@ -887,7 +888,6 @@ QImage Spectrogram::renderImage(
           }
 
         }
-
     } // QwtColorMap::Indexed 
 
     // Mirror the image in case of inverted maps
