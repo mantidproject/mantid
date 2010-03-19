@@ -14,9 +14,13 @@ class AnyShapeAbsorptionTest : public CxxTest::TestSuite
 public:
   AnyShapeAbsorptionTest()
   {
+  }
+
+  void setUp()
+  {
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
-    loader.setPropertyValue("Filename","../../../../Test/Data/HRP39191.raw");
+    loader.setPropertyValue("Filename","../../../../Test/Data/HRP39191.RAW");
     inputWS = "rawWS";
     loader.setPropertyValue("OutputWorkspace",inputWS);
     loader.setPropertyValue("SpectrumList","100");

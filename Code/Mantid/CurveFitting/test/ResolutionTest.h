@@ -7,6 +7,8 @@
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/Convolution.h"
 #include "MantidAPI/IPeakFunction.h"
+#include <Poco/File.h>
+
 
 #include <fstream>
 
@@ -92,6 +94,10 @@ public:
     :resH(3),resS(acos(0.)),
     N(117),DX(10),X0(-DX/2),dX(DX/(N-1)),yErr(0),resFileName("ResolutionTestResolution.res")
   {
+  }
+
+  void setUp()
+  {
     std::ofstream fil(resFileName.c_str());
 
     double y0 = 0;
@@ -105,6 +111,15 @@ public:
       y0 = y;
     }
 
+  }
+
+void tearDown()
+  {
+    Poco::File phandle(resFileName);
+    if( phandle.exists() ) 
+      {
+	phandle.remove();
+      }
   }
 
   void testIt()

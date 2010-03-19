@@ -13,8 +13,8 @@ from time import strftime
 smtpserver = 'outbox.rl.ac.uk'
 
 #RECIPIENTS = ['russell.taylor@stfc.ac.uk']
-#RECIPIENTS=['martyn.gigg@stfc.ac.uk']
-RECIPIENTS = ['mantid-buildserver@mantidproject.org']
+RECIPIENTS=['martyn.gigg@stfc.ac.uk']
+#RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system() 
 #Create Subject
 subject = 'Subject: ' + platform.system() 
@@ -105,6 +105,7 @@ f = open(filetestsRun,'r')
 reTestCount = re.compile("Running\\s*(\\d+)\\s*test", re.IGNORECASE)
 reCrashCount = re.compile("OK!")
 reFailCount = re.compile("Failed\\s*(\\d+)\\s*of\\s*(\\d+)\\s*tests", re.IGNORECASE)
+reFailSuite = re.compile("Failed all tests", re.IGNORECASE)
 for line in f.readlines():
         m=reTestCount.search(line)
         if m:
@@ -119,6 +120,10 @@ for line in f.readlines():
             failCount -= 1
             failCount += int(m.group(1))
             testsPass = False
+        m=reFailSuite.match(line)
+        if m:
+            testsPass = False
+            failCount += 1
         mssgTestsResults = mssgTestsResults + line
      
 f.close()

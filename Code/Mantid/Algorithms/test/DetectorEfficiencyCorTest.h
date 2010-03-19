@@ -40,7 +40,10 @@ public:
 //    m_Ei = 15.0796918; m_rawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MER02257.RAW").toString();
 //    m_Ei = 398.739; m_rawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAP10266.RAW").toString();
     m_Ei = 12.9462875; m_rawFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/MAR11001.RAW").toString();
-    
+  }
+
+  void setUp()
+  {
     // create a .dat file in the current directory that we'll load later
     writeDatFile();
   }
@@ -140,7 +143,7 @@ public:
     TS_ASSERT( loader.isExecuted() );
   }
 
-  ~DetectorEfficiencyCorTest()
+  void tearDown()
   {
     Poco::File(m_DatFile).remove();    
   }
