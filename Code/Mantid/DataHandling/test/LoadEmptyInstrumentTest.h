@@ -136,6 +136,7 @@ public:
     TS_ASSERT( fitParam3.getConstraint().compare("") == 0 );
     TS_ASSERT( !fitParam3.getLookUpTable().containData() );
     TS_ASSERT( fitParam3.getFormula().compare("100.0+10*value+value^2") == 0 );
+    TS_ASSERT( fitParam3.getFormulaUnit().compare("TOF") == 0 );
 
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");

@@ -460,7 +460,8 @@ void MatrixWorkspace::populateInstrumentParameters()
       {
         std::ostringstream str;
         str << value << " , " << ((*it).second)->m_fittingFunction << " , " << ((*it).second)->m_constraint << " , " 
-          << ((*it).second)->m_tie << " , " << ((*it).second)->m_formula << " , " << (*(((*it).second)->m_interpolation));
+          << ((*it).second)->m_tie << " , " << ((*it).second)->m_formula << " , " << ((*it).second)->m_formulaUnit << " , " 
+          << (*(((*it).second)->m_interpolation));
         paramMap.add("FitParameter",((*it).second)->m_component, paramN, str.str());
       }
       else

@@ -1174,16 +1174,19 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
     // Check if formula is specified
 
     std::string formula = "";
+    std::string formulaUnit = "TOF";
 
     if ( numberFormula >= 1 )
     {
       Element* pFormula = static_cast<Element*>(pNLFormula->item(0));
       formula = pFormula->getAttribute("eq");   
+      if ( pFormula->hasAttribute("unit") )
+        formulaUnit = pFormula->getAttribute("unit");
     }
     pNLFormula->release();
 
 
-    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, paramName, type, tie, constraint.str(), 
+    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, paramName, type, tie, constraint.str(), 
       fittingFunction, extractSingleValueAs, eq, comp));
     logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
   }

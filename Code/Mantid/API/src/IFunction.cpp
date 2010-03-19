@@ -14,6 +14,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <sstream>
 #include <iostream> 
@@ -89,21 +90,22 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
           {
             setParameter(i, fitParam.getValue());
           }
-          else if ( testWithLocation != NULL && fitParam.getFormula().compare("") != 0 )
-          {
-            setParameter(i, fitParam.getValue(testWithLocation->centre()));
-          }
           else
           {
             double centreValue = testWithLocation->centre();
-            Kernel::Unit_sptr lookUpUnit = fitParam.getLookUpTable().getXUnit();
+            Kernel::Unit_sptr targetUnit;
+            if ( fitParam.getFormula().compare("") == 0 )
+              targetUnit = fitParam.getLookUpTable().getXUnit();  // from table
+            else
+              targetUnit =  Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit());  // from formula
+
             Kernel::Unit_sptr wsUnit = m_workspace->getAxis(0)->unit();
 
             // if units are different first convert centre value into unit of look up table
-            if ( lookUpUnit->unitID().compare(wsUnit->unitID()) != 0 )
+            if ( targetUnit->unitID().compare(wsUnit->unitID()) != 0 )
             {
               double factor,power;
-              if (wsUnit->quickConversion(*lookUpUnit,factor,power) )
+              if (wsUnit->quickConversion(*targetUnit,factor,power) )
               {
                 centreValue = factor * std::pow(centreValue,power);
               }
@@ -132,7 +134,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
                 endPoint.push_back(centreValue);
                 std::vector<double> emptyVec;
                 wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-                lookUpUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+                targetUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
                 centreValue = endPoint[0];
               }
             }  // end of: lookUpUnit->unitID().compare(wsUnit->unitID()) != 0

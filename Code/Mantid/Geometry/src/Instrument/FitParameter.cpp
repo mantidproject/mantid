@@ -125,9 +125,11 @@ namespace Geometry
 
     f.setFormula() = values[4];
 
-    if ( values.count() > 5 )
+    f.setFormulaUnit() = values[5];
+
+    if ( values.count() > 6 )
     {
-      std::stringstream str(values[5]);
+      std::stringstream str(values[6]);
       str >> f.setLookUpTable();
     }
 

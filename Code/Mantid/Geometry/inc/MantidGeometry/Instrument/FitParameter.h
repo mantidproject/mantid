@@ -65,6 +65,10 @@ namespace Mantid
       std::string getFormula() const { return m_formula; }
       /// set formula
       std::string& setFormula() { return m_formula; }
+      /// get formula unit
+      std::string getFormulaUnit() const { return m_formula_unit; }
+      /// set formula unit
+      std::string& setFormulaUnit() { return m_formula_unit; }
       /// get function
       std::string getFunction() const { return m_function; }
       /// set function
@@ -90,6 +94,7 @@ namespace Mantid
       Kernel::Interpolation m_lookUpTable;
       /// formula
       std::string m_formula;
+      std::string m_formula_unit;
 
 	    /// Static reference to the logger class
 	    static Kernel::Logger& g_log;

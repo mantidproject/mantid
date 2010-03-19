@@ -407,7 +407,7 @@ public:
     Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
     fn->setParameter("PeakCentre",80000.0, false);  // set here for the purpose of the test below only.
     fn->setWorkspace(wsToPass,2,0,0);
-    TS_ASSERT_DELTA( fn->getParameter("Height"), 200 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("Height"), 201.44 ,0.1);
 
     // add constraint to function
     // BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);  
