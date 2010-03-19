@@ -37,6 +37,10 @@ namespace Mantid
       // We need to do a deep copy here
       if ( this != &other )
       {
+        for ( PropertyMap::iterator it = m_properties.begin(); it != m_properties.end(); ++it )
+        {
+          delete it->second;
+        }
         this->m_properties.clear();
         this->m_orderedProperties.resize(other.m_orderedProperties.size());
         for (unsigned int i = 0; i < m_orderedProperties.size(); ++i)

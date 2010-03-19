@@ -36,6 +36,33 @@ public:
     std::vector<Property*> props = mgr.getProperties();
     TS_ASSERT( props.empty() );
   }
+  
+  void testCopyConstructor()
+  {
+    PropertyManagerHelper mgr1;
+    mgr1.declareProperty("aProp",10);
+    PropertyManagerHelper mgr2 = mgr1;
+    const std::vector<Property*>& props1 = mgr1.getProperties();
+    const std::vector<Property*>& props2 = mgr2.getProperties();
+    TS_ASSERT_EQUALS( props1.size(), props2.size() )
+    TS_ASSERT_DIFFERS( &props1[0], &props2[0] )
+    TS_ASSERT_EQUALS( props1[0]->name(), props2[0]->name() )
+    TS_ASSERT_EQUALS( props1[0]->value(), props2[0]->value() )
+  }
+  
+  void testCopyAssignment()
+  {
+    PropertyManagerHelper mgr1;
+    mgr1.declareProperty("aProp",10);
+    PropertyManagerHelper mgr2;
+    mgr2 = mgr1;
+    const std::vector<Property*>& props1 = mgr1.getProperties();
+    const std::vector<Property*>& props2 = mgr2.getProperties();
+    TS_ASSERT_EQUALS( props1.size(), props2.size() )
+    TS_ASSERT_DIFFERS( &props1[0], &props2[0] )
+    TS_ASSERT_EQUALS( props1[0]->name(), props2[0]->name() )
+    TS_ASSERT_EQUALS( props1[0]->value(), props2[0]->value() )
+  }
 
   void testdeclareProperty_pointer()
   {
