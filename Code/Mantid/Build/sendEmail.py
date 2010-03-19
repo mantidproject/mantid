@@ -13,8 +13,8 @@ from time import strftime
 smtpserver = 'outbox.rl.ac.uk'
 
 #RECIPIENTS = ['russell.taylor@stfc.ac.uk']
-RECIPIENTS=['martyn.gigg@stfc.ac.uk']
-#RECIPIENTS = ['mantid-buildserver@mantidproject.org']
+#RECIPIENTS=['martyn.gigg@stfc.ac.uk']
+RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system() 
 #Create Subject
 subject = 'Subject: ' + platform.system() 
