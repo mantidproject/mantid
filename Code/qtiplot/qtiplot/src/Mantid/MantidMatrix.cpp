@@ -554,20 +554,50 @@ double MantidMatrix::dataE(int row, int col) const
 
 }
 
-int MantidMatrix::indexX(int row,double s)const
+/////////////////////////////////////////
+
+int MantidMatrix::indexY(double s)const
 {
-  int n = m_workspace->blocksize();
+  int n = m_rows;
 
-  const Mantid::MantidVec& X = m_workspace->readX(row + m_startRow);
-  if (n == 0 || s < X[0] || s > X[n-1]) return -1;
+  const Mantid::API::Axis& yAxis = *m_workspace->getAxis(1);
 
-  int i = 0, j = n-1, k = n/2;
+  bool isNumeric = yAxis.isNumeric();
+  
+  if (n == 0) return -1;
+
+  int i0 = m_startRow;
+
+  if (s < yAxis(i0))
+  {
+    if (isNumeric || yAxis(i0) - s > 0.5) return -1;
+    return 0;
+  }
+  else if (s > yAxis(n-1))
+  {
+    if (isNumeric || s - yAxis(n-1) > 0.5) return -1;
+    return n-1;
+  }
+
+  int i = i0, j = n-1, k = n/2;
   double ss;
   int it;
   for(it=0;it<n;it++)
   {
-    ss = X[k];
-    if (ss == s || abs(i - j) <2) break;
+    ss = yAxis(k);
+    if (ss == s ) return k;
+    if (abs(i - j) <2)
+    {
+      double ds = fabs(ss-s);
+      double ds1 = fabs(yAxis(j)-s);
+      if (ds1 < ds)
+      {
+        if (isNumeric || ds1 < 0.5) return j;
+        return -1;
+      }
+      if (isNumeric || ds < 0.5) return i;
+      return -1;
+    }
     if (s > ss) i = k;
     else
       j = k;
@@ -584,30 +614,25 @@ QString MantidMatrix::workspaceName() const
 
 QwtDoubleRect MantidMatrix::boundingRect()
 {
-  //if (m_boundingRect.isNull())
-  //{
-  //  int rows = numRows();
-  //  int cols = numCols();
-  //  double dx = fabs(x_end - x_start)/(double)(cols - 1);
-  //  double dy = fabs(y_end - y_start)/(double)(rows - 1);
-  //  m_boundingRect = QwtDoubleRect(QMIN(x_start, x_end) - 0.5*dx, QMIN(y_start, y_end) - 0.5*dy,
-  //                     fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy).normalized();
-  //}
-
   return m_boundingRect;
 }
 
 //----------------------------------------------------------------------------
 void MantidMatrixFunction::init()
 {
-  int nx = m_matrix->numCols();
-  int ny = m_matrix->numRows();
+  //int nx = m_matrix->numCols();
+  //int ny = m_matrix->numRows();
 
-  m_dx = (m_matrix->xEnd() - m_matrix->xStart()) / (nx > 1? nx - 1 : 1);
-  m_dy = (m_matrix->yEnd() - m_matrix->yStart()) / (ny > 1? ny - 1 : 1);
+  //m_dx = (m_matrix->xEnd() - m_matrix->xStart()) / (nx > 1? nx - 1 : 1);
+  //m_dy = (m_matrix->yEnd() - m_matrix->yStart()) / (ny > 1? ny - 1 : 1);
 
-  if (m_dx == 0.) m_dx = 1.;//?
-  if (m_dy == 0.) m_dy = 1.;//?
+  //if (m_dx == 0.) m_dx = 1.;//?
+  //if (m_dy == 0.) m_dy = 1.;//?
+
+ if (!m_matrix->workspace()->getAxis(1))
+ {
+   throw std::runtime_error("The y-axis is not set");
+ }
 
   double tmp;
   m_matrix->range(&tmp,&m_outside);
@@ -616,21 +641,114 @@ void MantidMatrixFunction::init()
 
 double MantidMatrixFunction::operator()(double x, double y)
 {
-  x += 0.001*m_dx;
-  y -= 0.001*m_dy;
-
-  double yi = (y - m_matrix->yStart())/m_dy;
-  int i = abs(yi);
-  if (yi - double(i) >= 0.5) i++;
+  int i = m_matrix->indexY(y);
+  if (i < 0 || i >= m_matrix->numRows())
+  {
+    return m_outside;
+  }
 
   int j = m_matrix->indexX(i,x);
 
-  if (i >= 0 && i < m_matrix->numRows() && j >=0 && j < m_matrix->numCols())
+  if (j >=0 && j < m_matrix->numCols())
     return m_matrix->dataY(i,j);
   else
-    //throw std::runtime_error("");
     return m_outside;
 }
+int MantidMatrixFunction::numRows()const
+{
+  return m_matrix->m_rows;
+}
+
+int MantidMatrixFunction::numCols()const
+{
+  return m_matrix->m_cols;
+}
+
+double MantidMatrixFunction::value(int row,int col)const
+{
+  return m_matrix->m_workspace->readY(row + m_matrix->m_startRow)[col];
+}
+
+void MantidMatrixFunction::getRowYRange(int row,double& ymin, double& ymax)const
+{
+  const Mantid::API::Axis& yAxis = *(m_matrix->m_workspace->getAxis(1));
+
+
+  int i = row + m_matrix->m_startRow;
+  double y = yAxis(i);
+
+  int imax = m_matrix->m_workspace->getNumberHistograms()-1;
+  if (yAxis.isNumeric())
+  {
+    if (i < imax)
+    {
+      ymax = (yAxis(i+1) + y)/2;
+      if (i > 0)
+      {
+        ymin = (yAxis(i-1) + y)/2;
+      }
+      else
+      {
+        ymin = 2*y - ymax;
+      }
+    }
+    else
+    {
+      ymin = (yAxis(i-1) + y)/2;
+      ymax = 2*y - ymin;
+    }
+  }
+  else // if spectra
+  {
+    ymin = y - 0.5;
+    ymax = y + 0.5;
+  }
+  
+}
+
+void MantidMatrixFunction::getRowXRange(int row,double& xmin, double& xmax)const
+{
+  const Mantid::MantidVec& X = m_matrix->m_workspace->readX(row + m_matrix->m_startRow);
+  xmin = X[0];
+  xmax = X[X.size()-1];
+}
+
+const Mantid::MantidVec& MantidMatrixFunction::getMantidVec(int row)const
+{
+  return m_matrix->m_workspace->readX(row + m_matrix->m_startRow);
+}
+
+int MantidMatrix::indexX(int row,double s)const
+{
+  int n = m_workspace->blocksize();
+
+  bool isHistogram = m_workspace->isHistogramData();
+
+  const Mantid::MantidVec& X = m_workspace->readX(row + m_startRow);
+  if (n == 0 || s < X[0] || s > X[n-1]) return -1;
+
+  int i = 0, j = n-1, k = n/2;
+  double ss;
+  int it;
+  for(it=0;it<n;it++)
+  {
+    ss = X[k];
+    if (ss == s ) return k;
+    if (abs(i - j) <2)
+    {
+      double ds = fabs(ss-s);
+      if (fabs(X[j]-s) < ds) return j;
+      return i;
+    }
+    if (s > ss) i = k;
+    else
+      j = k;
+    k = i + (j - i)/2;
+  }
+
+  return i;
+}
+
 //----------------------------------------------------------------------------
 
 Graph3D * MantidMatrix::plotGraph3D(int style)

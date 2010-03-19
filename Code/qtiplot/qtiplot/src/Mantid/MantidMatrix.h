@@ -42,12 +42,23 @@ class QTabWidget;
 class UpdateDAEThread;
 class ProjectData;
 
+/**
+ * This class helps displaying a MantidMatrix in a 2D graph
+ */
 class MantidMatrixFunction: public UserHelperFunction
 {
 public:
   MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm){}
   double operator()(double x, double y);
   void init();
+  int numRows()const;
+  int numCols()const;
+  double value(int row,int col)const;
+  /// Return in ymin and ymax the inetrval the row takes on the y axis
+  void getRowYRange(int row,double& ymin, double& ymax)const;
+  /// Return in xmin and xmax the inetrval the cell takes on the x axis
+  void getRowXRange(int row,double& xmin, double& xmax)const;
+  const Mantid::MantidVec& getMantidVec(int row)const;
 private:
   MantidMatrix* m_matrix;
   double m_dx,m_dy;
@@ -105,6 +116,7 @@ public:
   double dataY(int row, int col) const;
   double dataE(int row, int col) const;
   int indexX(int row,double s)const;
+  int indexY(double s)const;
 
   Mantid::API::MatrixWorkspace_sptr workspace(){return m_workspace;}
   QString workspaceName() const;
@@ -285,6 +297,7 @@ private:
 
   QString m_colormapName;
 
+  friend MantidMatrixFunction;
 };
 
 class ProjectData

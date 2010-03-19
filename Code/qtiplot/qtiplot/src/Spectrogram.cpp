@@ -764,6 +764,8 @@ bool Spectrogram::isIntensityChanged()
 { return m_bIntensityChanged;
 }
 
+#include "Mantid/MantidMatrix.h"
+
 /**
  * Override QwtPlotSpectrogram::renderImage to draw ragged spectrograms. It is almost
  * a copy of QwtPlotSpectrogram::renderImage except that pixels of the image that are 
@@ -773,51 +775,17 @@ QImage Spectrogram::renderImage(
     const QwtScaleMap &xMap, const QwtScaleMap &yMap, 
     const QwtDoubleRect &area) const
 {
+
+  MantidMatrixFunction* mantidFun = dynamic_cast<MantidMatrixFunction*>(d_funct);
+  if (!mantidFun)
+  {
+    return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
+  }
   
     if ( area.isEmpty() )
         return QImage();
 
     QRect rect = transform(xMap, yMap, area);
-
-    QwtScaleMap xxMap = xMap;
-    QwtScaleMap yyMap = yMap;
-
-    const QSize res = data().rasterHint(area);
-    if ( res.isValid() )
-    {
-        /*
-          It is useless to render an image with a higher resolution
-          than the data offers. Of course someone will have to
-          scale this image later into the size of the given rect, but f.e.
-          in case of postscript this will done on the printer.
-         */
-        rect.setSize(rect.size().boundedTo(res));
-
-        int px1 = rect.x();
-        int px2 = rect.x() + rect.width();
-        if ( xMap.p1() > xMap.p2() )
-            qSwap(px1, px2);
-
-        double sx1 = area.x();
-        double sx2 = area.x() + area.width();
-        if ( xMap.s1() > xMap.s2() )
-            qSwap(sx1, sx2);
-
-        int py1 = rect.y();
-        int py2 = rect.y() + rect.height();
-        if ( yMap.p1() > yMap.p2() )
-            qSwap(py1, py2);
-
-        double sy1 = area.y();
-        double sy2 = area.y() + area.height();
-        if ( yMap.s1() > yMap.s2() )
-            qSwap(sy1, sy2);
-
-        xxMap.setPaintInterval(px1, px2);
-        xxMap.setScaleInterval(sx1, sx2);
-        yyMap.setPaintInterval(py1, py2);
-        yyMap.setScaleInterval(sy1, sy2); 
-    }
 
     QImage image(rect.size(), this->colorMap().format() == QwtColorMap::RGB
             ? QImage::Format_ARGB32 : QImage::Format_Indexed8 );
@@ -826,23 +794,9 @@ QImage Spectrogram::renderImage(
     if ( !intensityRange.isValid() )
         return image;
 
-    //data().initRaster(area, rect.size());
-
     if ( this->colorMap().format() == QwtColorMap::RGB )
     {
-        for ( int y = rect.top(); y <= rect.bottom(); y++ )
-        {
-            const double ty = yyMap.invTransform(y);
-
-            QRgb *line = (QRgb *)image.scanLine(y - rect.top());
-            for ( int x = rect.left(); x <= rect.right(); x++ )
-            {
-                const double tx = xxMap.invTransform(x);
-
-                *line++ = this->colorMap().rgb(intensityRange,
-                    data().value(tx, ty));
-            }
-        }
+      return QwtPlotSpectrogram::renderImage(xMap,yMap,area);
     }
     else if ( this->colorMap().format() == QwtColorMap::Indexed )
     {
@@ -852,39 +806,94 @@ QImage Spectrogram::renderImage(
         ctable[255] = qRgba(255,255,255,0);
         image.setColorTable(ctable);
 
-        for ( int y = rect.top(); y <= rect.bottom(); y++ )
+        image.fill(255);
+
+        // image2matrix_yMap[image_row] ->  matrix_row or -1
+        std::vector<int> image2matrix_yMap(rect.height(),-1);
+
+        std::vector<int> image2matrix_xMap(rect.height(),-1);
+
+        for(int row = 0;row<mantidFun->numRows();++row)
         {
-            const double ty = yyMap.invTransform(y);
-
-            unsigned char *line = image.scanLine(y - rect.top());
-            for ( int x = rect.left(); x <= rect.right(); x++ )
+          double ymin,ymax;
+          mantidFun->getRowYRange(row,ymin,ymax);
+          int imax = yMap.transform(ymin)-rect.top(); // image row corresponding to ymin
+          int imin = yMap.transform(ymax)-rect.top(); // image row corresponding to ymax
+          if (imin < 0)
+          {
+            if (imax < 0) break;
+            else
             {
-                const double tx = xxMap.invTransform(x);
-
-                unsigned char idx;
-                double val = data().value(tx, ty);
-                // if the value is outside the range show no-value. If data().value(...)
-                // wants to indicate this it returns a value outside intensityRange.
-                if (intensityRange.contains(val))
-                {
-                  idx = this->colorMap().colorIndex(intensityRange,val);
-                  if (idx == 255) idx = 254;
-                }
-                else
-                {
-                  idx = 255;
-                }
-                *line++ = idx;
+              imin = 0;
             }
-        }
-    }
+          }
+          if (imax > rect.height()-1)
+          {
+            if (imin > rect.height()-1)
+            {
+              continue;
+            }
+            else
+            {
+              imax = rect.height()-1;
+            }
+          }
+          std::fill(image2matrix_yMap.begin()+imin,image2matrix_yMap.begin()+imax+1,row);
+          double xmin,xmax;
+          mantidFun->getRowXRange(row,xmin,xmax);
+          int jmin = xMap.transform(xmin)-rect.left();
+          int jmax = xMap.transform(xmax)-rect.left();
+          if (jmin < 0) jmin = 0;
+          if (jmax < 0) jmin = -1;
+          std::fill(image2matrix_xMap.begin()+imin,image2matrix_xMap.begin()+imax+1,jmin);
 
-    //data().discardRaster();
+        }
+
+        int imageWidth = rect.width();
+        int row0 = -2;
+        for(int i=0;i<image2matrix_yMap.size();++i)
+        {
+          int row = image2matrix_yMap[i];
+          if (row == row0)
+          {
+            unsigned char *line = image.scanLine(i);
+            unsigned char *line0 = image.scanLine(i-1);
+            std::copy(line0,line0+imageWidth,line);
+            continue; 
+          }
+          row0 = row;
+          int jmin = image2matrix_xMap[i];
+          if (row < 0 || jmin < 0)
+          {
+            continue;
+          }
+          unsigned char *line = image.scanLine(i)+jmin;
+          const Mantid::MantidVec& X = mantidFun->getMantidVec(row);
+          int col = 0;
+          int nX = X.size()-1;
+          for(int j=jmin;j<imageWidth;++j)
+          {
+            double x = xMap.invTransform(j+rect.left());
+            double x1 = X[col+1];
+            while(x1 < x)
+            {
+              ++col;
+              if (col >= nX) break;
+              x1 = X[col+1];
+            }
+            if (col >= nX) break;
+            double val = mantidFun->value(row,col);
+            *line++ = this->colorMap().colorIndex(intensityRange,val);
+          }
+
+        }
+
+    } // QwtColorMap::Indexed 
 
     // Mirror the image in case of inverted maps
 
-    const bool hInvert = xxMap.p1() > xxMap.p2();
-    const bool vInvert = yyMap.p1() < yyMap.p2();
+    const bool hInvert = xMap.p1() > xMap.p2();
+    const bool vInvert = yMap.p1() < yMap.p2();
     if ( hInvert || vInvert )
     {
 #ifdef __GNUC__
