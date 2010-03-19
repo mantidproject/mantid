@@ -23,24 +23,15 @@ namespace Mantid
         const double& leftY = lhsY[j];
         const double& rightY = rhsY[j];
 
-        // Calculate result and store in local variable to avoid overwriting original data if
-        // output workspace is same as one of the input ones
-        const double Y = leftY/rightY;
+        //  error dividing two uncorrelated numbers, re-arrange so that you don't get infinity if leftY==0 (when rightY=0 the Y value and the result will both be infinity)
+        // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
+        // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
+        // = (Sa 1/b)2 + (Sb (a/b2))2
+        // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY*rhsE[j]/rightY, 2) )/rightY;
 
-        if (fabs(rightY)>1.0e-12 && fabs(Y)>1.0e-12)
-        {
-          //  gaussian errors
-          // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
-          //  So after taking proportions, squaring, summing,
-          //  and taking the square root, you get a proportional error to the product c.
-          //  Multiply that proportional error by c to get the actual standard deviation Sc.
-          const double lhsFactor = (lhsE[j]<1.0e-12|| fabs(leftY)<1.0e-12) ? 0.0 : pow((lhsE[j]/leftY),2);
-          const double rhsFactor = rhsE[j]<1.0e-12 ? 0.0 : pow((rhsE[j]/rightY),2);
-          EOut[j] = std::abs(Y) * sqrt(lhsFactor+rhsFactor);
-        }
-
-        // Now store the result
-        YOut[j] = Y;
+        // Copy the result last in case one of the input workspaces is also any output
+        YOut[j] = leftY/rightY;;
       }
     }
 
@@ -48,23 +39,17 @@ namespace Mantid
                                        const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       // Do the right-hand part of the error calculation just once
-      const double rhsFactor = (rhsE<1.0e-12) ? 0.0 : pow((rhsE/rhsY),2);
+      const double rhsFactor = pow(rhsE/rhsY,2);
       const int bins = lhsE.size();
       for (int j=0; j<bins; ++j)
       {
         // Get reference to input Y
         const double& leftY = lhsY[j];
-        // Calculate result into local variable
-        const double Y = leftY/rhsY;
 
-        if (fabs(Y)>1.0e-12)
-        {
-          const double lhsFactor = (lhsE[j]<1.0e-12 || fabs(leftY)<1.0e-12) ? 0.0 : pow((lhsE[j]/leftY),2);
-          EOut[j] = std::abs(Y) * sqrt(lhsFactor+rhsFactor);
-        }
-
-        // Copy result in
-        YOut[j] = Y;
+        // see comment in the function above for the error formula
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/rhsY;
+        // Copy the result last in case one of the input workspaces is also any output
+        YOut[j] = leftY/rhsY;
       }
     }
 

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/PolynomialCorrection.h"
 #include "MantidKernel/ArrayProperty.h"
+#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -41,7 +42,7 @@ namespace Algorithms
     
     // Multiply the data and error by the correction factor
     YOut = YIn*factor;
-    EOut = EIn*factor;
+    EOut = EIn*std::abs(factor);
   }
 
 } // namespace Algorithms

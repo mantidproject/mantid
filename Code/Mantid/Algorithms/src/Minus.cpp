@@ -26,7 +26,7 @@ namespace Mantid
     {
       std::transform(lhsY.begin(),lhsY.end(),YOut.begin(),std::bind2nd(std::minus<double>(),rhsY));
       // Only do E if non-zero, otherwise just copy
-      if (rhsE > 1.0e-12)
+      if (rhsE != 0)
         std::transform(lhsE.begin(),lhsE.end(),EOut.begin(),std::bind2nd(VectorHelper::SumGaussError<double>(),rhsE));
       else
         EOut = lhsE;
