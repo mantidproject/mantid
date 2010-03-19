@@ -289,13 +289,20 @@ void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sp
     // i.e, position is (0,0,0).
     if (temp < 1)
     {
-      std::ostringstream message;
-      message << "Problem with detector at" << detectorPos << std::endl;
-      message << "This usually means that this detector is defined inside the sample cylinder";
-      g_log.error(message.str());
-      throw std::runtime_error("Problem in AbsorptionCorrection::calculateDistances");
+      // FOR NOW AT LEAST, JUST IGNORE THIS ERROR AND USE A ZERO PATH LENGTH, WHICH I RECKON WILL MAKE A
+      // NEGLIGIBLE DIFFERENCE ANYWAY (ALWAYS SEEMS TO HAPPEN WITH ELEMENT RIGHT AT EDGE OF SAMPLE)
+      L2s[i] = 0.0;
+
+      //std::ostringstream message;
+      //message << "Problem with detector at " << detectorPos << " ID:" << detector->getID() << std::endl;
+      //message << "This usually means that this detector is defined inside the sample cylinder";
+      //g_log.error(message.str());
+      //throw std::runtime_error("Problem in AbsorptionCorrection::calculateDistances");
     }
-    L2s[i] = outgoing.begin()->Dist;
+    else // The normal situation
+    {
+      L2s[i] = outgoing.begin()->Dist;
+    }
   }
 }
 
