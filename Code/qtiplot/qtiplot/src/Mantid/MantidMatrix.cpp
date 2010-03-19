@@ -620,15 +620,6 @@ QwtDoubleRect MantidMatrix::boundingRect()
 //----------------------------------------------------------------------------
 void MantidMatrixFunction::init()
 {
-  //int nx = m_matrix->numCols();
-  //int ny = m_matrix->numRows();
-
-  //m_dx = (m_matrix->xEnd() - m_matrix->xStart()) / (nx > 1? nx - 1 : 1);
-  //m_dy = (m_matrix->yEnd() - m_matrix->yStart()) / (ny > 1? ny - 1 : 1);
-
-  //if (m_dx == 0.) m_dx = 1.;//?
-  //if (m_dy == 0.) m_dy = 1.;//?
-
  if (!m_matrix->workspace()->getAxis(1))
  {
    throw std::runtime_error("The y-axis is not set");

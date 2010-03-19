@@ -297,7 +297,7 @@ private:
 
   QString m_colormapName;
 
-  friend MantidMatrixFunction;
+  friend class MantidMatrixFunction;
 };
 
 class ProjectData
