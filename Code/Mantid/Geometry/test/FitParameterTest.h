@@ -26,6 +26,26 @@ public:
     TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
     TS_ASSERT( fitP.getTie().compare("bob")==0 );
 	}
+
+	void testReadInOut()
+	{
+    FitParameter fitP1;
+
+    std::istringstream input("9.1 , fido , , bob , boevs, TOF");
+    input >> fitP1;
+    std::stringstream inout;
+    inout << fitP1;
+
+    FitParameter fitP;
+    inout >> fitP;
+
+
+    TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
+    TS_ASSERT( fitP.getFunction().compare("fido")==0 );
+    TS_ASSERT( fitP.getTie().compare("bob")==0 );
+    TS_ASSERT( fitP.getFormula().compare("boevs")==0 );
+    TS_ASSERT( fitP.getFormulaUnit().compare("TOF")==0 );
+	}
 	
 	void test2()
 	{

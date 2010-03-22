@@ -78,7 +78,9 @@ namespace Geometry
   */
   void FitParameter::printSelf(std::ostream& os) const
   {
-    os << m_value;
+    os << m_value  << " , " << m_function << " , " << m_constraint << " , " 
+          << m_tie << " , " << m_formula << " , " << m_formulaUnit << " , " 
+          << m_lookUpTable;
     return;
   }
 
