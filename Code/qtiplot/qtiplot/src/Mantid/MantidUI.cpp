@@ -518,7 +518,7 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
     }
 
     // Create new Table
-    Table* t = new Table(appWindow()->scriptEnv, ws->rowCount(), ws->columnCount(), "", appWindow(), 0);
+    Table* t = new Table(appWindow()->scriptingEnv(), ws->rowCount(), ws->columnCount(), "", appWindow(), 0);
     appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
   //  t->askOnCloseEvent(false);
     if (makeVisible) t->showNormal();
@@ -655,7 +655,7 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
 Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices)
 {
   const int nrows = indices.size();
-  Table* t = new Table(appWindow()->scriptEnv, nrows, 6, "", appWindow(), 0);
+  Table* t = new Table(appWindow()->scriptingEnv(), nrows, 6, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
   t->showNormal();
 
@@ -1769,7 +1769,7 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
 
   int rowcount(loglines.count());
-  Table* t = new Table(appWindow()->scriptEnv, rowcount, 2, "", appWindow(), 0);
+  Table* t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
   if( !t ) return;
   //t->askOnCloseEvent(false);
   //Have to replace "_" since the legend widget uses them to separate things
@@ -1841,7 +1841,7 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
     Mantid::Kernel::LogFilter flt(logData);
 
     int rowcount = flt.data()->size();
-    Table* t = new Table(appWindow()->scriptEnv, rowcount, 2, "", appWindow(), 0);
+    Table* t = new Table(appWindow()->scriptingEnv(), rowcount, 2, "", appWindow(), 0);
     if( !t ) return;
    // t->askOnCloseEvent(false);
     //Have to replace "_" since the legend widget uses them to separate things
@@ -2049,7 +2049,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
      int numRows = workspace->blocksize();
      bool isHistogram = workspace->isHistogramData();
      int no_cols = static_cast<int>(indexList.size());
-     Table* t = new Table(appWindow()->scriptEnv, numRows, (1+c)*no_cols, "", appWindow(), 0);
+     Table* t = new Table(appWindow()->scriptingEnv(), numRows, (1+c)*no_cols, "", appWindow(), 0);
      appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
     // t->askOnCloseEvent(false);
 
@@ -2334,7 +2334,7 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
 
   if (j0 >= numRows || j1 >= numRows) return NULL;
 
-  Table* t = new Table(appWindow()->scriptEnv, numRows, c*bins.size() + 1, "", appWindow(), 0);
+  Table* t = new Table(appWindow()->scriptingEnv(), numRows, c*bins.size() + 1, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
  // t->askOnCloseEvent(false);
   int kY,kErr;

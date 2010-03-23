@@ -33,9 +33,7 @@
 
 #include <QDir>
 #include <QDateTime>
-#include <Qsci/qscilexer.h> //Mantid
-#include <Qsci/qsciapis.h> //Mantid
-#include "MantidKernel/ConfigService.h" //Mantid
+#include "MantidKernel/ConfigService.h"
 
 #ifdef SCRIPTING_MUPARSER
 #include "muParserScript.h"
@@ -47,37 +45,26 @@
 #endif
 
 ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
-  : QObject(0, langName), d_parent(parent), languageName(langName), m_report_progress(false), 
-  m_is_running(false), m_current_script(NULL), m_lexer(NULL), m_completer(NULL), m_api_preparing(false)
+  : QObject(0, langName), d_initialized(false), d_parent(parent), d_refcount(0),
+    languageName(langName), m_report_progress(false), m_is_running(false)
 {
-  d_initialized=false;
-  d_refcount=0;
 }
 
 ScriptingEnv::~ScriptingEnv()
 {
-  if( m_completer )
-  {
-    delete m_completer;
-  }
-  if( m_lexer )
-  { 
-    delete m_lexer;
-  }
 }
 
 bool ScriptingEnv::initialize()
 {
-  static bool is_initialized(false);
-  if( !is_initialized )
+  static bool init_called(false);
+  if( !init_called )
   {
-    is_initialized = true;
+    init_called = true;
     return start();
   }
-  return true;
+  return isInitialized();
 }
 
-//Mantid
 const QString ScriptingEnv::scriptingLanguage() const
 {
   return QString(languageName);
@@ -94,62 +81,64 @@ const QString ScriptingEnv::fileFilter() const
 
 void ScriptingEnv::incref()
 {
-	d_refcount++;
+  d_refcount++;
 }
 
 void ScriptingEnv::decref()
 {
-	d_refcount--;
-	if (d_refcount==0)
-		delete this;
+  d_refcount--;
+  if (d_refcount==0)
+    delete this;
 }
+
+//---------------------------------------------------------
+// ScriptingLangManager
+//---------------------------------------------------------
 /**
- * Set the code lexer for this environment
+ * A list of available languages
  */
-void ScriptingEnv::setCodeLexer(QsciLexer* lexer)
-{ 
-  if( m_lexer )
+ScriptingLangManager::ScriptingLang ScriptingLangManager::g_langs[] = 
   {
-    delete m_lexer;
-    m_lexer = NULL;
-  }
+#ifdef SCRIPTING_MUPARSER
+    { muParserScripting::langName, muParserScripting::constructor },
+#endif
+#ifdef SCRIPTING_PYTHON
+    { PythonScripting::langName, PythonScripting::constructor },
+#endif
+    // Sentinel defining the end of the list
+    { NULL, NULL }
+};
 
-  m_lexer = lexer;
-  // Get the API for this environment
-  if( m_completer == NULL )
+ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent)
+{
+  if (!g_langs[0].constructor)
   {
-    m_completer = new QsciAPIs(m_lexer);
-    connect(m_completer,SIGNAL(apiPreparationStarted()), this, SLOT(apiPrepStarted()));
-    connect(m_completer,SIGNAL(apiPreparationFinished()), this, SLOT(apiPrepDone()));
+    return NULL;
+  }
+  else 
+  {
+    return g_langs[0].constructor(parent);
   }
 }
 
-void ScriptingEnv::updateCodeCompletion(const QString & fname, bool prepare)
+ScriptingEnv *ScriptingLangManager::newEnv(const char *name, ApplicationWindow *parent)
 {
-  if( m_completer->load(fname) && prepare) 
-  {
-    // This is performed in a separate thread as it can take a while
-    if( !m_api_preparing )
+  for(ScriptingLang *l = g_langs; l->constructor; l++)
+  {	
+    if( QString(name) == QString(l->name) )
     {
-      m_completer->prepare();
+      return l->constructor(parent);
     }
   }
+  return NULL;
 }
 
-// Slot to handle the started signal from the api auto complete preparation
-void ScriptingEnv::apiPrepStarted()
+QStringList ScriptingLangManager::languages()
 {
-  m_api_preparing = true;
+  QStringList lang_list;
+  for (ScriptingLang *l = g_langs; l->constructor; l++)
+  {
+    lang_list << l->name;
+  }
+  return lang_list;
 }
-
-// Slot to handle the completed signal from the api auto complete preparation
-void ScriptingEnv::apiPrepDone()
-{
-  m_api_preparing = false;
-}
-
-void ScriptingEnv::execute(const QString & code)
-{
-  m_current_script->setCode(code);
-  m_current_script->exec();
-}						

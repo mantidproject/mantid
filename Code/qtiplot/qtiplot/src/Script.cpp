@@ -29,27 +29,22 @@
 #include "ScriptingEnv.h"
 #include "Script.h"
 
-#include <string.h>
 #include <QMessageBox>
 
-#ifdef SCRIPTING_MUPARSER
-#include "muParserScript.h"
-#include "muParserScripting.h"
-#endif
-#ifdef SCRIPTING_PYTHON
-#include "PythonScript.h"
-#include "PythonScripting.h"
-#endif
+Script::Script(ScriptingEnv *env, const QString &code, bool interactive, QObject *context, 
+	       const QString &name)
+  : Env(env), Code(code), Name(name), isInteractive(interactive), compiled(notCompiled), 
+    m_line_offset(-1)
+{ 
+  Env->incref(); 
+  Context = context; 
+  EmitErrors=true; 
+}
 
-ScriptingLangManager::ScriptingLang ScriptingLangManager::langs[] = {
-#ifdef SCRIPTING_MUPARSER
-	{ muParserScripting::langName, muParserScripting::constructor },
-#endif
-#ifdef SCRIPTING_PYTHON
-	{ PythonScripting::langName, PythonScripting::constructor },
-#endif
-	{ NULL, NULL }
-};
+Script::~Script()
+{
+  Env->decref();
+}
 
 void Script::addCode(const QString &code) 
 { 
@@ -67,39 +62,6 @@ void Script::setCode(const QString &code)
   emit codeChanged();
 }
 
-ScriptingEnv *ScriptingLangManager::newEnv(ApplicationWindow *parent)
-{
-  if (!langs[0].constructor)
-  {
-    return NULL;
-  }
-  else 
-  {
-    return langs[0].constructor(parent);
-  }
-}
-
-ScriptingEnv *ScriptingLangManager::newEnv(const char *name, ApplicationWindow *parent)
-{
-  for(ScriptingLang *i = langs; i->constructor; i++)
-  {	
-    if (!strcmp(name, i->name))
-    {
-      return i->constructor(parent);
-    }
-  }
-  return NULL;
-}
-
-QStringList ScriptingLangManager::languages()
-{
-  QStringList l;
-  for (ScriptingLang *i = langs; i->constructor; i++)
-  {
-    l << i->name;
-  }
-  return l;
-}
 
 bool Script::compile(bool)
 {
@@ -119,20 +81,3 @@ bool Script::exec()
   return false;
 }
 
-scripted::scripted(ScriptingEnv *env)
-{
-  env->incref();
-  scriptEnv = env;
-}
-
-scripted::~scripted()
-{
-  scriptEnv->decref();
-}
-
-void scripted::scriptingChangeEvent(ScriptingChangeEvent *sce)
-{
-  scriptEnv->decref();
-  sce->scriptingEnv()->incref();
-  scriptEnv = sce->scriptingEnv();
-}

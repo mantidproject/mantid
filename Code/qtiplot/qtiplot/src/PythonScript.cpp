@@ -67,14 +67,17 @@ namespace
 /**
  * Constructor
  */
-PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
+PythonScript::PythonScript(PythonScripting *env, const QString &code, bool interactive, QObject *context, 
 			   const QString &name)
-  : Script(env, code, context, name), PyCode(NULL), localDict(NULL), 
+  : Script(env, code, interactive, context, name), PyCode(NULL), localDict(NULL), 
     stdoutSave(NULL), stderrSave(NULL), isFunction(false)
 {
   ROOT_CODE_OBJECT = NULL;
   CURRENT_SCRIPT_OBJECT = this;
-  localDict = PyDict_New();
+
+  PyObject *pymodule = PyImport_AddModule("__main__");
+  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+  Py_INCREF(localDict);
   setQObject(Context, "self");
 }
 
@@ -154,11 +157,7 @@ bool PythonScript::compile(bool for_eval)
     // for why there isn't an easier way to do this in Python.
     PyErr_Clear(); // silently ignore errors
     PyObject *key(NULL), *value(NULL);
-#if PY_VERSION_HEX >= 0x02050000
     Py_ssize_t i(0);
-#else
-    int i(0);
-#endif
     QString signature = "";
     while(PyDict_Next(localDict, &i, &key, &value))
     {
@@ -203,86 +202,89 @@ bool PythonScript::compile(bool for_eval)
 
 QVariant PythonScript::eval()
 {	
-	if (!isFunction) compiled = notCompiled;
-	if (compiled != isCompiled && !compile(true))
-		return QVariant();
-	
-	PyObject *pyret;
-	beginStdoutRedirect();
-	if (PyCallable_Check(PyCode)){
-		PyObject *empty_tuple = PyTuple_New(0);
-		pyret = PyObject_Call(PyCode, empty_tuple, localDict);
-		Py_DECREF(empty_tuple);
-	} else
-		pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), localDict);
-	endStdoutRedirect();
-	if (!pyret){
-		if (PyErr_ExceptionMatches(PyExc_ValueError) ||
-			PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){				
-            PyErr_Clear(); // silently ignore errors
-			return  QVariant("");
-		} else {
-			emit_error(constructErrorMsg(), 0);
-			return QVariant();
-		}
-	}
+  if (!isFunction) compiled = notCompiled;
+  if (compiled != isCompiled && !compile(true))
+    return QVariant();
+  
+  PyObject *pyret;
+  beginStdoutRedirect();
+  if (PyCallable_Check(PyCode)){
+    PyObject *empty_tuple = PyTuple_New(0);
+    pyret = PyObject_Call(PyCode, empty_tuple, localDict);
+    Py_DECREF(empty_tuple);
+  } else
+    pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), localDict);
+  endStdoutRedirect();
+  if (!pyret){
+    if (PyErr_ExceptionMatches(PyExc_ValueError) ||
+	PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){				
+      PyErr_Clear(); // silently ignore errors
+      return  QVariant("");
+    } else {
+      emit_error(constructErrorMsg(), 0);
+      return QVariant();
+    }
+  }
 
-	QVariant qret = QVariant();
-	/* None */
-	if (pyret == Py_None)
-		qret = QVariant("");
-	/* numeric types */
-	else if (PyFloat_Check(pyret))
-		qret = QVariant(PyFloat_AS_DOUBLE(pyret));
-	else if (PyInt_Check(pyret))
-		qret = QVariant((qlonglong)PyInt_AS_LONG(pyret));
-	else if (PyLong_Check(pyret))
-		qret = QVariant((qlonglong)PyLong_AsLongLong(pyret));
-	else if (PyNumber_Check(pyret)){
-		PyObject *number = PyNumber_Float(pyret);
-		if (number){
-			qret = QVariant(PyFloat_AS_DOUBLE(number));
-			Py_DECREF(number);
-		}
-		/* bool */
-	} else if (PyBool_Check(pyret))
-		qret = QVariant(pyret==Py_True, 0);
-	// could handle advanced types (such as PyList->QValueList) here if needed
-	/* fallback: try to convert to (unicode) string */
-	if(!qret.isValid()) {
-		PyObject *pystring = PyObject_Unicode(pyret);
-		if (pystring) {
-			PyObject *asUTF8 = PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring), PyUnicode_GET_DATA_SIZE(pystring), 0);
-			Py_DECREF(pystring);
-			if (asUTF8) {
-				qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
-				Py_DECREF(asUTF8);
-			} else if ((pystring = PyObject_Str(pyret))) {
-				qret = QVariant(QString(PyString_AS_STRING(pystring)));
-				Py_DECREF(pystring);
-			}
-		}
-	}
-
-	Py_DECREF(pyret);
-	if (PyErr_Occurred()){
-		if (PyErr_ExceptionMatches(PyExc_ValueError) ||
-			PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){
-            PyErr_Clear(); // silently ignore errors
-			return  QVariant("");
-		} else {
-			emit_error(constructErrorMsg(), 0);
-			return QVariant();
-		}
-	} else
-		return qret;
+  QVariant qret = QVariant();
+  /* None */
+  if (pyret == Py_None)
+    qret = QVariant("");
+  /* numeric types */
+  else if (PyFloat_Check(pyret))
+    qret = QVariant(PyFloat_AS_DOUBLE(pyret));
+  else if (PyInt_Check(pyret))
+    qret = QVariant((qlonglong)PyInt_AS_LONG(pyret));
+  else if (PyLong_Check(pyret))
+    qret = QVariant((qlonglong)PyLong_AsLongLong(pyret));
+  else if (PyNumber_Check(pyret)){
+    PyObject *number = PyNumber_Float(pyret);
+    if (number){
+      qret = QVariant(PyFloat_AS_DOUBLE(number));
+      Py_DECREF(number);
+    }
+    /* bool */
+  } else if (PyBool_Check(pyret))
+    qret = QVariant(pyret==Py_True, 0);
+  // could handle advanced types (such as PyList->QValueList) here if needed
+  /* fallback: try to convert to (unicode) string */
+  if(!qret.isValid()) {
+    PyObject *pystring = PyObject_Unicode(pyret);
+    if (pystring) {
+      PyObject *asUTF8 = PyUnicode_EncodeUTF8(PyUnicode_AS_UNICODE(pystring), PyUnicode_GET_DATA_SIZE(pystring), 0);
+      Py_DECREF(pystring);
+      if (asUTF8) {
+	qret = QVariant(QString::fromUtf8(PyString_AS_STRING(asUTF8)));
+	Py_DECREF(asUTF8);
+      } else if ((pystring = PyObject_Str(pyret))) {
+	qret = QVariant(QString(PyString_AS_STRING(pystring)));
+	Py_DECREF(pystring);
+      }
+    }
+  }
+  
+  Py_DECREF(pyret);
+  if (PyErr_Occurred()){
+    if (PyErr_ExceptionMatches(PyExc_ValueError) ||
+	PyErr_ExceptionMatches(PyExc_ZeroDivisionError)){
+      PyErr_Clear(); // silently ignore errors
+      return  QVariant("");
+	} else {
+      emit_error(constructErrorMsg(), 0);
+	return QVariant();
+	  }
+  } else
+    return qret;
 }
 
 bool PythonScript::exec()
 {
+  env()->setIsRunning(true);
+  
   if (isFunction) compiled = notCompiled;
   if (compiled != Script::isCompiled && !compile(false))
   {
+    env()->setIsRunning(false);
     return false;
   }
 
@@ -291,39 +293,39 @@ bool PythonScript::exec()
   // This stores the address of the main file that is being executed so that
   // we can track line numbers from the main code only
   ROOT_CODE_OBJECT = ((PyCodeObject*)PyCode)->co_filename;
-  if( env()->reportProgress() )
+  if( isInteractive && env()->reportProgress() )
   {
     PyEval_SetTrace((Py_tracefunc)&_trace_callback, PyCode);
   }
 
-  PyObject *pyret(NULL);
-  if (PyCallable_Check(PyCode))
+  PyObject *pyret(NULL), *empty_tuple(NULL);
+  if( PyCallable_Check(PyCode) )
   {
-    PyObject *empty_tuple = PyTuple_New(0);
+    empty_tuple = PyTuple_New(0);
     if (!empty_tuple) 
     {
       emit_error(constructErrorMsg(), 0);
+      env()->setIsRunning(false);
       return false;
     }
-    pyret = callExec(empty_tuple);
   }
-  else
-  {
-    pyret = callExec(NULL);
-  }
+  /// Return value is NULL if everything succeeded
+  pyret = executeScript(empty_tuple);
 
   // Restore output
   endStdoutRedirect();
 	
-  //Disable trace
+  /// Disable trace
   PyEval_SetTrace(NULL, NULL);
 
-  if(pyret) 
+  if( pyret ) 
   {
     Py_DECREF(pyret);
+    env()->setIsRunning(false);
     return true;
   }
   emit_error(constructErrorMsg(), 0);
+  env()->setIsRunning(false);
   return false;
 }
 
@@ -332,10 +334,10 @@ bool PythonScript::exec()
  * @param return_tuple If this is a valid pointer then the code object is called rather than executed and the return values are placed into this tuple
  * @returns A pointer to an object indicating the success/failure of the code execution
  */
-PyObject* PythonScript::callExec(PyObject* return_tuple)
+PyObject* PythonScript::executeScript(PyObject* return_tuple)
 {
-  // Before requested code is executed we want to "uninstall" the modules containing Python algorithms so that a 
-  // fresh import reloads them
+  // Before requested code is executed we want to "uninstall" the modules 
+  // containing Python algorithms so that a fresh import reloads them
   env()->refreshAlgorithms();
 
   PyObject* pyret(NULL);
@@ -349,7 +351,34 @@ PyObject* PythonScript::callExec(PyObject* return_tuple)
     }
     else
     {
-      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, env()->globalDict(), env()->globalDict());
+      // MG: In order to keep track of the variables local to the current script, for the code completion, 
+      // we take a copy of the global dictionary before and after and then remove all of the entries that 
+      // did not exist before the execute call. While there is a "locals" argument to PyEval, it has
+      // the side effect that locally defined functions aren't accessible to each other i.e.
+      /**
+	 def foo():
+	     print 'foo'
+
+         def bar():
+	     foo():
+	     print 'bar'
+      */
+      // produces a name error in "bar" as it cannot see foo.
+
+      //      PyObject *globals_before = PyDict_Copy(env()->globalDict());
+      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);//env()->globalDict(), env()->globalDict());
+//       PyObject *globals_after = PyDict_Copy(env()->globalDict());
+
+//       PyObject *key, *value;
+//       Py_ssize_t i = 0;
+//       while(PyDict_Next(globals_after, &i, &key, &value))
+//       {
+// 	if( !PyDict_Contains(globals_before, key) )
+// 	{
+// 	  PyDict_SetItem(localDict, key, value);
+// 	  PyDict_DelItem(env()->globalDict(), key);
+// 	}
+//       }
     }
   }
   // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to
@@ -390,9 +419,9 @@ PyObject* PythonScript::callExec(PyObject* return_tuple)
   {
     Py_DECREF(return_tuple);
   }
-  if( pyret )
+  if( isInteractive && pyret )
   {
-    env()->refreshCompletion();
+    emit keywordsChanged(createAutoCompleteList());
   }
   return pyret;
 }
@@ -532,10 +561,34 @@ void PythonScript::setContext(QObject *context)
   setQObject(Context, "self");
 }
 
+/**
+ * Create a list autocomplete keywords
+ */
+QStringList PythonScript::createAutoCompleteList() const
+{
+  PyObject *main_module = PyImport_AddModule("__main__");
+  PyObject *method = PyString_FromString("_ScopeInspector_GetFunctionAttributes");
+  Py_INCREF(method);
+  PyObject *keywords = PyObject_CallMethodObjArgs(main_module, method, localDict, NULL);
+  
+  QStringList keyword_list;
+  if( PyErr_Occurred() || !keywords )
+  {
+    PyErr_Print();
+    return keyword_list;
+  }
+
+  Py_INCREF(keywords);
+  keyword_list = env()->toStringList(keywords);
+  Py_DECREF(keywords);
+  Py_DECREF(method);
+  return keyword_list;
+}
+
 //-------------------------------------------------------
 // Private
 //-------------------------------------------------------
-PythonScripting * PythonScript::env()
+PythonScripting * PythonScript::env() const
 { 
   //Env is protected in the base class
   return static_cast<PythonScripting*>(Env); 

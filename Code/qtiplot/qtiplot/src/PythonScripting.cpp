@@ -38,12 +38,14 @@
 #include <QStringList>
 #include <QDir>
 #include <QCoreApplication>
+#include <QTemporaryFile>
+#include <QTextStream>
 
-#include <Qsci/qscilexerpython.h> //Mantid
-#include "MantidKernel/ConfigService.h" //Mantid
+#include <Qsci/qscilexerpython.h> 
+#include "MantidKernel/ConfigService.h"
 
-// includes sip.h, which undefines Qt's "slots" macro since SIP 4.6
 #include "../sipAPIqti.h"
+
 // Function is defined in a sip object file that is linked in later. There is no header file
 // so this is necessary
 extern "C" void initqti();
@@ -51,13 +53,13 @@ extern "C" void initqti();
 // Language name
 const char* PythonScripting::langName = "Python";
 
-//Factory function
+// Factory function
 ScriptingEnv *PythonScripting::constructor(ApplicationWindow *parent) 
 { 
   return new PythonScripting(parent); 
 }
 
-//Constructor
+/** Constructor */
 PythonScripting::PythonScripting(ApplicationWindow *parent)
   : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
     m_sys(NULL)
@@ -71,6 +73,14 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 PythonScripting::~PythonScripting()
 {
   shutdown();
+}
+
+/**
+ * Create a code lexer for Python. Ownership of the created object is transferred to the caller.
+ */
+QsciLexer * PythonScripting::createCodeLexer() const
+{
+  return new QsciLexerPython;
 }
 
 /**
@@ -150,18 +160,9 @@ bool PythonScripting::start()
     d_initialized = false;
   }
 
-  // If all previous initialization has been successful load the auto complete information
+  // If all previous initialization has been successful confuigure auto complete functionality
   if( !d_initialized ) return false;
-  
-  QsciLexer *lexer = new QsciLexerPython;
-  setCodeLexer(lexer);
-  //Fixed API
-  QDir bindir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
-  // Load the fixed API for Mantid Python
-  this->updateCodeCompletion(bindir.absoluteFilePath(completionSourceName()), false);
-  // Generated simple API 
-  QDir outputdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
-  this->updateCodeCompletion(outputdir.absoluteFilePath("mtdpyalgorithm_keywords.txt"), true);
+
   return true;
 }
 
@@ -204,6 +205,24 @@ QString PythonScripting::toString(PyObject *object, bool decref)
   return ret;
 }
 
+QStringList PythonScripting::toStringList(PyObject *py_seq)
+{
+  QStringList elements;
+  if( PyList_Check(py_seq) )
+  {
+    Py_ssize_t nitems = PyList_Size(py_seq);
+    for( Py_ssize_t i = 0; i < nitems; ++i )
+    {
+      PyObject *item = PyList_GetItem(py_seq, i);
+      if( PyString_Check(item) )
+      {
+	elements << PyString_AsString(item);
+      }
+    }
+  }
+  return elements;
+}
+
 bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 {
   if(!val) return false;
@@ -225,73 +244,63 @@ bool PythonScripting::setQObject(QObject *val, const char *name, PyObject *dict)
 
 bool PythonScripting::setInt(int val, const char *name, PyObject *dict)
 {
-	PyObject *pyobj = Py_BuildValue("i",val);
-	if (!pyobj) return false;
-	if (dict)
-		PyDict_SetItemString(dict,name,pyobj);
-	else
-		PyDict_SetItemString(m_globals,name,pyobj);
-	Py_DECREF(pyobj);
-	return true;
+  PyObject *pyobj = Py_BuildValue("i",val);
+  if (!pyobj) return false;
+  if (dict)
+    PyDict_SetItemString(dict,name,pyobj);
+  else
+    PyDict_SetItemString(m_globals,name,pyobj);
+  Py_DECREF(pyobj);
+  return true;
 }
 
 bool PythonScripting::setDouble(double val, const char *name, PyObject *dict)
 {
-	PyObject *pyobj = Py_BuildValue("d",val);
-	if (!pyobj) return false;
-	if (dict)
-		PyDict_SetItemString(dict,name,pyobj);
-	else
-		PyDict_SetItemString(m_globals,name,pyobj);
-	Py_DECREF(pyobj);
-	return true;
+  PyObject *pyobj = Py_BuildValue("d",val);
+  if (!pyobj) return false;
+  if (dict)
+    PyDict_SetItemString(dict,name,pyobj);
+  else
+    PyDict_SetItemString(m_globals,name,pyobj);
+  Py_DECREF(pyobj);
+  return true;
 }
 
 const QStringList PythonScripting::mathFunctions() const
 {
-	QStringList flist;
-	PyObject *key, *value;
-#if PY_VERSION_HEX >= 0x02050000
-	Py_ssize_t i=0;
-#else
-	int i=0;
-#endif
-	while(PyDict_Next(m_math, &i, &key, &value))
-		if (PyCallable_Check(value))
-			flist << PyString_AsString(key);
-	flist.sort();
-	return flist;
+  QStringList flist;
+  PyObject *key, *value;
+  Py_ssize_t i=0;
+  while(PyDict_Next(m_math, &i, &key, &value))
+    if (PyCallable_Check(value))
+      flist << PyString_AsString(key);
+  flist.sort();
+  return flist;
 }
 
 const QString PythonScripting::mathFunctionDoc(const QString &name) const
 {
-	PyObject *mathf = PyDict_GetItemString(m_math,name); // borrowed
-	if (!mathf) return "";
-	PyObject *pydocstr = PyObject_GetAttrString(mathf, "__doc__"); // new
-	QString qdocstr = PyString_AsString(pydocstr);
-	Py_XDECREF(pydocstr);
-	return qdocstr;
+  PyObject *mathf = PyDict_GetItemString(m_math,name); // borrowed
+  if (!mathf) return "";
+  PyObject *pydocstr = PyObject_GetAttrString(mathf, "__doc__"); // new
+  QString qdocstr = PyString_AsString(pydocstr);
+  Py_XDECREF(pydocstr);
+  return qdocstr;
 }
 
 const QStringList PythonScripting::fileExtensions() const
 {
-	QStringList extensions;
-	extensions << "py" << "PY";
-	return extensions;
+  QStringList extensions;
+  extensions << "py" << "PY";
+  return extensions;
 }
 
 void PythonScripting::refreshAlgorithms()
 {
-  if( !m_current_script->scriptIsRunning() )
+  if( !isRunning() )
   {
     PyRun_SimpleString("mtd._refreshPyAlgorithms()");
   }
-}
-
-void PythonScripting::refreshCompletion()
-{
-  QDir outputdir(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
-  this->updateCodeCompletion(outputdir.absoluteFilePath("mtdpyalgorithm_keywords.txt"), true);
 }
 
 //------------------------------------------------------------
@@ -311,7 +320,7 @@ bool PythonScripting::loadInitFile(const QString & filename)
   bool success(false);
   if(file.open(QIODevice::ReadOnly | QIODevice::Text) )
   {
-	  QByteArray data = file.readAll();
+    QByteArray data = file.readAll();
     if( PyRun_SimpleString(data.data() ) == 0 )
     {
       success = true;
@@ -334,3 +343,4 @@ bool PythonScripting::loadInitFile(const QString & filename)
 
   return success;
 }
+

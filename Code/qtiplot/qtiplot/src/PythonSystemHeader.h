@@ -10,6 +10,7 @@
  #include <Python.h>
  #define slots
 
+ typedef int Py_ssize_t;
  #if PY_VERSION_HEX < 0x020400A1 
   // Also need to typedef this for early 2.4 relases
   typedef struct _traceback 

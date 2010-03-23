@@ -1,3 +1,4 @@
+
 /***************************************************************************
     File                 : Table.h
     Project              : QtiPlot
@@ -39,7 +40,7 @@
 #include "Graph.h"
 #include "MdiSubWindow.h"
 #include "ScriptingEnv.h"
-#include "Script.h"
+#include "Scripted.h"
 
 class MyTable : public Q3Table
 {
@@ -57,7 +58,7 @@ private:
  * Port to the Model/View approach used in Qt4 and get rid of the Qt3Support dependancy.
  * [ assigned to thzs ]
  */
-class Table: public MdiSubWindow, public scripted
+class Table: public MdiSubWindow, public Scripted
 {
     Q_OBJECT
 

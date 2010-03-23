@@ -65,14 +65,14 @@
 #include <gsl/gsl_linalg.h>
 
 Matrix::Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f), scripted(env)
+: MdiSubWindow(label, parent, name, f), Scripted(env)
 {
     m_bk_color = QColor(255, 255, 128);
     m_matrix_icon = matrix_xpm;
 }
 
 Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f), scripted(env)
+: MdiSubWindow(label, parent, name, f), Scripted(env)
 {
     m_bk_color = QColor(255, 255, 128);
     m_matrix_icon = matrix_xpm;
@@ -80,7 +80,7 @@ Matrix::Matrix(ScriptingEnv *env, int r, int c, const QString& label, Applicatio
 }
 
 Matrix::Matrix(ScriptingEnv *env, const QImage& image, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label, parent, name, f), scripted(env)
+: MdiSubWindow(label, parent, name, f), Scripted(env)
 {
     m_bk_color = QColor(255, 255, 128);
     m_matrix_icon = matrix_xpm;
@@ -462,8 +462,8 @@ bool Matrix::canCalculate(bool useMuParser)
 		return false;
 
 	if (useMuParser){
-    	muParserScript *mup = new muParserScript(scriptEnv, formula_str, this, QString("<%1>").arg(objectName()), false);
-		connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&, const QString&,int)));
+    	muParserScript *mup = new muParserScript(scriptingEnv(), formula_str, this, QString("<%1>").arg(objectName()), false);
+		connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&, const QString&,int)));
 
     	double *ri = mup->defineVariable("i");
     	double *rr = mup->defineVariable("row");
@@ -487,9 +487,9 @@ bool Matrix::canCalculate(bool useMuParser)
 				return false;
 		}
 	} else {
-		Script *script = scriptEnv->newScript(formula_str, this, QString("<%1>").arg(objectName()));
-		connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
-		connect(script, SIGNAL(print(const QString&)), scriptEnv, SIGNAL(print(const QString&)));
+	  Script *script = scriptingEnv()->newScript(formula_str, this, false, QString("<%1>").arg(objectName()));
+		connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
+		connect(script, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
 		if (!script->compile())
 			return false;
 
@@ -529,7 +529,7 @@ bool Matrix::muParserCalculate(int startRow, int endRow, int startCol, int endCo
 
 bool Matrix::calculate(int startRow, int endRow, int startCol, int endCol, bool forceMuParser)
 {
-	if (QString(scriptEnv->name()) == "muParser" || forceMuParser)
+	if (QString(scriptingEnv()->name()) == "muParser" || forceMuParser)
 		return muParserCalculate(startRow, endRow, startCol, endCol);
 
 	double *buffer = d_matrix_model->dataCopy(startRow, endRow, startCol, endCol);

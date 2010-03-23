@@ -6,7 +6,8 @@
 //---------------------------------------------------------
 #include <QTabWidget>
 #include <QDialog>
-#include "Script.h"
+#include <QHash>
+#include "Scripted.h"
 
 //---------------------------------------------------------
 // Forward declarations
@@ -16,6 +17,7 @@ class QPoint;
 class ScriptingWindow;
 class ScriptOutputDock;
 class ScriptEditor;
+class Script;
 class QAction;
 class QPushButton;
 class QCheckBox;
@@ -53,7 +55,7 @@ class FindReplaceDialog;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class ScriptManagerWidget : public QTabWidget, scripted
+class ScriptManagerWidget : public QTabWidget, Scripted
 {
   /// Qt macro so that we can use the signal/slot 
   Q_OBJECT
@@ -70,15 +72,8 @@ public:
   /// Open a script from a file and read the file into a QString. 
   /// QStrings are implicity shared so the return, seemingly by value, is not expensive
   QString readScript(const QString& filename, bool *ok);
-  /// Is a script running?
-  inline bool isScriptRunning() const
-  {
-    if( m_script_runner )
-    {
-      return m_script_runner->scriptIsRunning();
-    }
-    else return false;
-  }
+  /// Is a script running in the environment
+  bool isScriptRunning();
   /// Return the current editor
   ScriptEditor *currentEditor() const;
   /// Undo action for the current editor
@@ -132,7 +127,7 @@ public slots:
   void executeInterpreter(const QString & code);
   //@}
   ///Run script code
-  bool runScriptCode(const QString & code);
+  bool runScriptCode(const QString & code, const int line_offset = 0);
 
   ///Format an output message with an optional timestamp
   void displayOutput(const QString & msg, bool timestamp = false);
@@ -169,7 +164,7 @@ private:
   ///Open a script
   void open(bool newtab, const QString & filename = QString());
   /// Create a new Script object and connect up the relevant signals.
-  void setNewScriptRunner();
+  Script * createScriptRunner(ScriptEditor *editor);
   ///Close a tab with a given index
   void closeTabAtIndex(int index);
   ///Close a tab at a given position
@@ -190,8 +185,8 @@ private:
 
   /// The last directory visted with a file dialog
   QString m_last_dir;
-  /// The script object that will execute the code
-  Script *m_script_runner;
+  /// The script objects for each tab that will execute the code
+  QHash<int, Script *> m_script_runners;
   // The cursor position within the tab bar when the right-mouse button was last clicked
   // I need this to ensure that the position of a call to tabBar()->tabAt() is accurate
   // as Qt doesn't provide an action signal parameterized on a position

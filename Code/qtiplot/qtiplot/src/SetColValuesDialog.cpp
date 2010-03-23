@@ -49,7 +49,7 @@
 #endif
 
 SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl ), scripted(env)
+    : QDialog( parent, fl ), Scripted(env)
 {
     setName( "SetColValuesDialog" );
 	setWindowTitle( tr( "MantidPlot - Set column values" ) );
@@ -116,7 +116,7 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 	hbox2->addWidget(explain);
 	hbox2->addWidget(gb);
 
-	commands = new ScriptEdit( scriptEnv);
+	commands = new ScriptEdit( scriptingEnv());
 
 	QVBoxLayout *vbox2 = new QVBoxLayout();
 	btnApply = new QPushButton(tr( "&Apply" ));
@@ -148,7 +148,7 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 	setFocusProxy (commands);
 	commands->setFocus();
 
-	functions->insertStringList(scriptEnv->mathFunctions(), -1);
+	functions->insertStringList(scriptingEnv()->mathFunctions(), -1);
 	if (functions->count() > 0)
 		insertExplain(0);
 
@@ -236,7 +236,7 @@ bool SetColValuesDialog::apply()
 
 void SetColValuesDialog::insertExplain(int index)
 {
-	explain->setText(scriptEnv->mathFunctionDoc(functions->text(index)));
+	explain->setText(scriptingEnv()->mathFunctionDoc(functions->text(index)));
 }
 
 void SetColValuesDialog::insertFunction()

@@ -45,7 +45,7 @@ class PythonScript : public Script
   Q_OBJECT
   public:
   /// Constructor
-  PythonScript(PythonScripting *env, const QString &code, QObject *context = 0, 
+  PythonScript(PythonScripting *env, const QString &code, bool interactive, QObject *context = 0, 
 	       const QString &name="<input>");
   ///Destructor
   ~PythonScript();
@@ -55,7 +55,7 @@ class PythonScript : public Script
     emit print(text); 
   }
   
-  // Emit a new line signal
+  /// Emit a new line signal
   inline void broadcastNewLineNumber(int lineno)
   {
     emit currentLineChanged(getLineOffset() + lineno, true);
@@ -68,8 +68,6 @@ public slots:
   QVariant eval();
   /// Excute the current code
   bool exec();
-  /// Perform a call to the Python eval function with the necessary wrapping
-  PyObject* callExec(PyObject* return_tuple);  
   /// Construct the error message from the stack trace (if one exists)
   QString constructErrorMsg();
   /// Set the name of the passed object so that Python can refer to it
@@ -82,7 +80,13 @@ public slots:
   void setContext(QObject *context);
 
 private:
-  PythonScripting* env(); 
+  /// Perform a call to the Python eval function with the necessary wrapping
+  PyObject* executeScript(PyObject* return_tuple);  
+  /// Create a list of keywords for the code completion API
+  QStringList createAutoCompleteList() const;
+
+private:
+  PythonScripting* env() const; 
   void beginStdoutRedirect();
   void endStdoutRedirect();
 

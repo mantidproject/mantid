@@ -17,6 +17,11 @@
 #include <QClipboard>
 #include <QShortcut>
 
+// Qscintilla
+#include <Qsci/qscilexer.h> 
+#include <Qsci/qsciapis.h>
+#include <Qsci/qscilexerpython.h> 
+
 // std
 #include <cmath>
 #include <iostream>
@@ -110,9 +115,9 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * Constructor
  * @param parent The parent widget (can be NULL)
  */
-ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode) : 
+ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *codelexer) : 
   QsciScintilla(parent), m_filename(""), m_marker_handle(-1), m_interpreter_mode(interpreter_mode),
-  m_history(), m_read_only(false), m_need_newline(false)
+  m_history(), m_read_only(false), m_need_newline(false),  m_completer(NULL)
 {
   // Undo action
   m_undo = new QAction(tr("&Undo"), this);
@@ -146,6 +151,9 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode) :
   m_print = new QAction(tr("&Print script"), this);
   m_print->setShortcut(tr("Ctrl+P"));
   connect(m_print, SIGNAL(activated()), this, SLOT(print()));
+
+  //Syntax highlighting and code completion
+  setLexer(codelexer);
 
   if( interpreter_mode )
   {
@@ -181,6 +189,45 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode) :
  */
 ScriptEditor::~ScriptEditor()
 {
+  if( m_completer )
+  {
+    delete m_completer;
+  }
+  if( QsciLexer * current = lexer() )
+  {
+    delete current;
+  }
+}
+
+/**
+ * Set a new code lexer for this object. Note that this clears all auto complete information
+ */
+void ScriptEditor::setLexer(QsciLexer *codelexer)
+{
+  if( !codelexer )
+  {
+    if( m_completer )
+    {
+      delete m_completer;
+      m_completer = NULL;
+    }
+    return;
+  }
+
+  //Delete the current lexer if one is installed
+  if( QsciLexer * current = lexer() )
+  {
+    delete current;
+  }
+  this->QsciScintilla::setLexer(codelexer);
+
+  if( m_completer )
+  {
+    delete m_completer;
+    m_completer = NULL;
+  }
+  
+  m_completer = new QsciAPIs(codelexer);
 }
 
 /**
@@ -401,6 +448,21 @@ void ScriptEditor::updateMarker(int lineno, bool success)
 
   ensureLineVisible(lineno);
   markerAdd(lineno - 1, m_marker_handle);
+}
+
+/**
+ * Update the completion API with a new list of keywords. Note that the old is cleared
+ */
+void ScriptEditor::updateCompletionAPI(const QStringList & keywords)
+{
+  if( !m_completer ) return;
+  QStringListIterator iter(keywords);
+  m_completer->clear();
+  while( iter.hasNext() )
+  {
+    m_completer->add(iter.next());
+  }
+  m_completer->prepare();
 }
 
 /**

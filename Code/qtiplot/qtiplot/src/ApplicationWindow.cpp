@@ -192,15 +192,13 @@ void file_uncompress(char  *file);
 
 
 ApplicationWindow::ApplicationWindow(bool factorySettings)
-  : QMainWindow(), scripted(ScriptingLangManager::newEnv(this))
+  : QMainWindow(), Scripted(ScriptingLangManager::newEnv(this))
 {
     QCoreApplication::setOrganizationName("ISIS");
     QCoreApplication::setApplicationName("MantidPlot");
     mantidUI = new MantidUI(this);
     setAttribute(Qt::WA_DeleteOnClose);
     init(factorySettings);
-    //Mantid 
-    d_user_script_running = false;
 }
 
 void ApplicationWindow::init(bool factorySettings)
@@ -385,9 +383,10 @@ void ApplicationWindow::init(bool factorySettings)
     //Scripting
     m_script_envs = QHash<QString, ScriptingEnv*>();
     setScriptingLanguage(defaultScriptingLang);
-    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,true);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptingEnv(), m_interpreterDock,true);
     delete m_interpreterDock->widget();
     m_interpreterDock->setWidget(m_scriptInterpreter);
+    m_iface_script = NULL;
     loadCustomActions();
 }
 void ApplicationWindow::showresultsContextMenu(const QPoint & p)
@@ -2322,7 +2321,7 @@ Matrix* ApplicationWindow::importImage(const QString& fileName)
         m = (Matrix *)w;
         m->importImage(fn);
     } else {
-        m = new Matrix(scriptEnv, image, "", this);
+        m = new Matrix(scriptingEnv(), image, "", this);
         initMatrix(m, generateUniqueName(tr("Matrix")));
         m->show();
         m->setWindowLabel(fn);
@@ -2621,7 +2620,7 @@ void ApplicationWindow::setPreferences(Graph* g)
  */
 Table* ApplicationWindow::newTable()
 {
-	Table* w = new Table(scriptEnv, 30, 2, "", this, 0);
+	Table* w = new Table(scriptingEnv(), 30, 2, "", this, 0);
 	initTable(w, generateUniqueName(tr("Table")));
 	w->showNormal();
 	return w;
@@ -2632,7 +2631,7 @@ Table* ApplicationWindow::newTable()
  */
 Table* ApplicationWindow::newTable(const QString& caption, int r, int c)
 {
-	Table* w = new Table(scriptEnv, r, c, "", this, 0);
+	Table* w = new Table(scriptingEnv(), r, c, "", this, 0);
 	initTable(w, caption);
 	if (w->objectName() != caption){//the table was renamed
 		renamedTables << caption << w->objectName();
@@ -2647,7 +2646,7 @@ Table* ApplicationWindow::newTable(const QString& caption, int r, int c)
 
 Table* ApplicationWindow::newTable(int r, int c, const QString& name, const QString& legend)
 {
-	Table* w = new Table(scriptEnv, r, c, legend, this, 0);
+	Table* w = new Table(scriptingEnv(), r, c, legend, this, 0);
 	initTable(w, name);
 	return w;
 }
@@ -2659,7 +2658,7 @@ Table* ApplicationWindow::newTable(const QString& caption, int r, int c, const Q
     if (lst.count() == 2)
         legend = lst[1];
 
-	Table* w = new Table(scriptEnv, r, c, legend, this, 0);
+	Table* w = new Table(scriptingEnv(), r, c, legend, this, 0);
 
 	QStringList rows = text.split("\n", QString::SkipEmptyParts);
 	QString rlist = rows[0];
@@ -2681,7 +2680,7 @@ Table* ApplicationWindow::newTable(const QString& caption, int r, int c, const Q
 
 Table* ApplicationWindow::newHiddenTable(const QString& name, const QString& label, int r, int c, const QString& text)
 {
-	Table* w = new Table(scriptEnv, r, c, label, this, 0);
+	Table* w = new Table(scriptingEnv(), r, c, label, this, 0);
 
 	if (!text.isEmpty()) {
 		QStringList rows = text.split("\n", QString::SkipEmptyParts);
@@ -2727,7 +2726,7 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
  */
 TableStatistics *ApplicationWindow::newTableStatistics(Table *base, int type, QList<int> target, const QString &caption)
 {
-	TableStatistics* s = new TableStatistics(scriptEnv, this, base, (TableStatistics::Type) type, target);
+	TableStatistics* s = new TableStatistics(scriptingEnv(), this, base, (TableStatistics::Type) type, target);
 	if (caption.isEmpty())
 		initTable(s, s->objectName());
 	else
@@ -2741,7 +2740,7 @@ TableStatistics *ApplicationWindow::newTableStatistics(Table *base, int type, QL
  */
 Note* ApplicationWindow::newNote(const QString& caption)
 {
-	Note* m = new Note(scriptEnv, "", this);
+	Note* m = new Note(scriptingEnv(), "", this);
 
 	QString name = caption;
 	while(name.isEmpty() || alreadyUsedName(name))
@@ -2768,7 +2767,7 @@ Note* ApplicationWindow::newNote(const QString& caption)
 
 Matrix* ApplicationWindow::newMatrix(int rows, int columns)
 {
-	Matrix* m = new Matrix(scriptEnv, rows, columns, "", this, 0);
+	Matrix* m = new Matrix(scriptingEnv(), rows, columns, "", this, 0);
 	initMatrix(m, generateUniqueName(tr("Matrix")));
 	m->showNormal();
 	return m;
@@ -2776,7 +2775,7 @@ Matrix* ApplicationWindow::newMatrix(int rows, int columns)
 
 Matrix* ApplicationWindow::newMatrix(const QString& caption, int r, int c)
 {
-	Matrix* w = new Matrix(scriptEnv, r, c, "", this, 0);
+	Matrix* w = new Matrix(scriptingEnv(), r, c, "", this, 0);
 	initMatrix(w, caption);
 	if (w->objectName() != caption)//the matrix was renamed
 		renamedTables << caption << w->objectName();
@@ -2982,14 +2981,14 @@ Table* ApplicationWindow::matrixToTable(Matrix* m, MatrixToTableConversion conve
 
 	Table* w = NULL;
 	if (conversionType == Direct){
-		w = new Table(scriptEnv, rows, cols, "", this, 0);
+		w = new Table(scriptingEnv(), rows, cols, "", this, 0);
 		for (int i = 0; i<rows; i++){
 			for (int j = 0; j<cols; j++)
 				w->setCell(i, j, m->cell(i,j));
 		}
 	} else if (conversionType == XYZ){
 		int tableRows = rows*cols;
-		w = new Table(scriptEnv, tableRows, 3, "", this, 0);
+		w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
 		for (int i = 0; i<rows; i++){
 			for (int j = 0; j<cols; j++){
 				int cell = i*cols + j;
@@ -3000,7 +2999,7 @@ Table* ApplicationWindow::matrixToTable(Matrix* m, MatrixToTableConversion conve
 		}
 	} else if (conversionType == YXZ){
 		int tableRows = rows*cols;
-		w = new Table(scriptEnv, tableRows, 3, "", this, 0);
+		w = new Table(scriptingEnv(), tableRows, 3, "", this, 0);
 		for (int i = 0; i<cols; i++){
 			for (int j = 0; j<rows; j++){
 				int cell = i*rows + j;
@@ -3071,7 +3070,7 @@ Matrix* ApplicationWindow::tableToMatrix(Table* t)
 	int cols = t->numCols();
 
 	QString caption = generateUniqueName(tr("Matrix"));
-	Matrix* m = new Matrix(scriptEnv, rows, cols, "", this, 0);
+	Matrix* m = new Matrix(scriptingEnv(), rows, cols, "", this, 0);
 	initMatrix(m, caption);
 
 	for (int i = 0; i<rows; i++){
@@ -4007,7 +4006,7 @@ ApplicationWindow* ApplicationWindow::openProject(const QString& fn, bool factor
 					tr("The file \"%1\" was created using \"%2\" as scripting language.\n\n"\
 						"Initializing support for this language FAILED; I'm using \"%3\" instead.\n"\
 						"Various parts of this file may not be displayed as expected.")\
-					.arg(fn).arg(list[1]).arg(scriptEnv->name()));
+					.arg(fn).arg(list[1]).arg(scriptingEnv()->name()));
 		
      	s = t.readLine();
 		list=s.split("\t", QString::SkipEmptyParts);
@@ -4324,7 +4323,7 @@ void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timesta
 bool ApplicationWindow::setScriptingLanguage(const QString &lang)
 {
   if ( lang.isEmpty() ) return false;
-  if( scriptEnv && lang == scriptEnv->name() ) return true;
+  if( scriptingEnv() && lang == scriptingEnv()->name() ) return true;
 
   if( m_bad_script_envs.contains(lang) ) 
   {
@@ -4380,14 +4379,14 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
 void ApplicationWindow::showScriptingLangDialog()
 {
   // If a script is currently active, don't let a new one be selected
-  if( d_user_script_running || (scriptingWindow && scriptingWindow->isScriptRunning()) )
+  if( scriptingEnv()->isRunning() )
   {
     QMessageBox msg_box;
     msg_box.setText("Cannot change scripting language, a script is still running.");
     msg_box.exec();
     return;
   }
-  ScriptingLangDialog* d = new ScriptingLangDialog(scriptEnv, this);
+  ScriptingLangDialog* d = new ScriptingLangDialog(scriptingEnv(), this);
   d->exec();
 }
 
@@ -6061,7 +6060,7 @@ void ApplicationWindow::showColumnValuesDialog()
 		return;
 
     if (w->selectedColumns().count()>0 || w->table()->currentSelection() >= 0){
-        SetColValuesDialog* vd = new SetColValuesDialog(scriptEnv, this);
+        SetColValuesDialog* vd = new SetColValuesDialog(scriptingEnv(), this);
         vd->setAttribute(Qt::WA_DeleteOnClose);
         vd->setTable(w);
         vd->exec();
@@ -6522,7 +6521,7 @@ void ApplicationWindow::showMatrixValuesDialog()
 	if (!m)
 		return;
 
-	MatrixValuesDialog* md = new MatrixValuesDialog(scriptEnv, this);
+	MatrixValuesDialog* md = new MatrixValuesDialog(scriptingEnv(), this);
 	md->setAttribute(Qt::WA_DeleteOnClose);
 	md->setMatrix(m);
 	md->exec();
@@ -8808,7 +8807,7 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   // Mantid changes here
 
-  if( d_user_script_running || ( scriptingWindow && scriptingWindow->isScriptRunning() ) )
+  if( scriptingEnv()->isRunning() )
   {
     if( QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
     {
@@ -10398,7 +10397,7 @@ void ApplicationWindow::openInstrumentWindow(const QStringList &list)
 void ApplicationWindow::openScriptWindow(const QStringList &list)
 {	showScriptWindow();
    	if(!scriptingWindow) return;
-	scriptingWindow->setWindowTitle("MantidPlot: " + scriptEnv->scriptingLanguage() + " Window");
+	scriptingWindow->setWindowTitle("MantidPlot: " + scriptingEnv()->scriptingLanguage() + " Window");
 	QString s=list[0];
 	QStringList scriptnames=s.split("\t");
 	int count=scriptnames.size();
@@ -14288,7 +14287,7 @@ void ApplicationWindow::saveFolder(Folder *folder, const QString& fn, bool compr
 		text += "<log>\n" + folder->logInfo() + "</log>" ;
 
 	text.prepend("<windows>\t"+QString::number(windows)+"\n");
-	text.prepend("<scripting-lang>\t"+QString(scriptEnv->name())+"\n");
+	text.prepend("<scripting-lang>\t"+QString(scriptingEnv()->name())+"\n");
 	text.prepend("MantidPlot " + QString::number(maj_version)+"."+ QString::number(min_version)+"."+
 			QString::number(patch_version)+" project file\n");
 
@@ -15315,7 +15314,7 @@ void ApplicationWindow::showScriptWindow()
   { 
     // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
     // flag, it is treated as a sub window of its parent
-    scriptingWindow = new ScriptingWindow(scriptEnv,NULL);
+    scriptingWindow = new ScriptingWindow(scriptingEnv(),NULL);
     connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
     scriptingWindow->resize(d_script_win_rect.size());
     scriptingWindow->move(d_script_win_rect.topLeft());
@@ -15347,7 +15346,7 @@ void ApplicationWindow::showScriptInterpreter()
     m_interpreterDock->setWindowTitle("Script Interpreter");
     addDockWidget( Qt::BottomDockWidgetArea, m_interpreterDock );
     
-    m_scriptInterpreter = new ScriptManagerWidget(scriptEnv, m_interpreterDock,true);
+    m_scriptInterpreter = new ScriptManagerWidget(scriptingEnv(), m_interpreterDock,true);
     m_interpreterDock->setWidget(m_scriptInterpreter);
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
     m_interpreterDock->setFocusProxy(m_scriptInterpreter);
@@ -15355,11 +15354,11 @@ void ApplicationWindow::showScriptInterpreter()
 
   if( m_interpreterDock->isVisible() )
   {
-	 m_interpreterDock->hide();
+    m_interpreterDock->hide();
   }
   else
   {
-	m_interpreterDock->show();
+    m_interpreterDock->show();
     m_scriptInterpreter->setFocus();
   }
 
@@ -15403,21 +15402,21 @@ void ApplicationWindow::fitFrameToLayer()
 
 ApplicationWindow::~ApplicationWindow()
 {
-	if (lastCopiedLayer)
-		delete lastCopiedLayer;
+  if (lastCopiedLayer)
+    delete lastCopiedLayer;
 
-	delete hiddenWindows;
-
-	if (scriptingWindow){
-	  scriptingWindow->setAttribute(Qt::WA_DeleteOnClose);
-	  scriptingWindow->close();
-	}
-
-    if (d_text_editor)
-		delete d_text_editor;
-
-	QApplication::clipboard()->clear(QClipboard::Clipboard);
-
+  delete hiddenWindows;
+  
+  if (scriptingWindow)
+    {
+      delete scriptingWindow;
+    }
+  
+  if (d_text_editor)
+    delete d_text_editor;
+  
+  QApplication::clipboard()->clear(QClipboard::Clipboard);
+  
   btnPointer->setChecked(true);
 
   //Mantid
@@ -16065,11 +16064,14 @@ void ApplicationWindow::performCustomAction(QAction *action)
     MantidQt::API::UserSubWindow *user_interface = MantidQt::API::InterfaceManager::Instance().createSubWindow(action_data, usr_win);
     if( user_interface )
     { 
-      QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(), usr_win->frameGeometry().bottomRight() - usr_win->geometry().bottomRight());
+      QRect frame = QRect(usr_win->frameGeometry().topLeft() - usr_win->geometry().topLeft(), 
+			  usr_win->frameGeometry().bottomRight() - usr_win->geometry().bottomRight());
       usr_win->setWidget(user_interface);
-      QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(), frame.bottomRight() + user_interface->geometry().bottomRight());
+      QRect iface_geom = QRect(frame.topLeft() + user_interface->geometry().topLeft(), 
+			       frame.bottomRight() + user_interface->geometry().bottomRight());
       usr_win->setGeometry(iface_geom);
-      connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, SLOT(runPythonScript(const QString&)));
+      connect(user_interface, SIGNAL(runAsPythonScript(const QString&)), this, 
+	      SLOT(runPythonScript(const QString&)));
       d_workspace->addSubWindow(usr_win);
       usr_win->show();
       user_interface->initializeLocalPython();
@@ -16087,15 +16089,21 @@ void ApplicationWindow::performCustomAction(QAction *action)
 
 void ApplicationWindow::runPythonScript(const QString & code)
 {
-  if( code.isEmpty() ) return;
-  setScriptingLanguage("Python");
-  connect(m_scriptInterpreter, SIGNAL(MessageToPrint(const QString&,bool,bool)), this, 
-	  SLOT(scriptPrint(const QString&, bool,bool)));
-  d_user_script_running = true;
-  m_scriptInterpreter->runScriptCode(code);
-  d_user_script_running = false;
-  disconnect(m_scriptInterpreter, SIGNAL(MessageToPrint(const QString&,bool,bool)), this, 
-	  SLOT(scriptPrint(const QString&, bool,bool)));
+  if( code.isEmpty() || scriptingEnv()->isRunning() ) return;
+  
+  if( m_iface_script == NULL )
+  {
+    setScriptingLanguage("Python");
+    m_iface_script = scriptingEnv()->newScript("",this,false, "");
+    connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
+    connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this, 
+	    SLOT(scriptPrint(const QString &)));
+
+  }
+  
+  m_iface_script->setCode(code);
+  m_iface_script->exec();
+
 }
 
 void ApplicationWindow::loadCustomActions()

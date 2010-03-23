@@ -61,7 +61,7 @@
 #include <ctime>
 
 Table::Table(ScriptingEnv *env, int r, int c, const QString& label, ApplicationWindow* parent, const QString& name, Qt::WFlags f)
-: MdiSubWindow(label,parent,name,f), scripted(env)
+: MdiSubWindow(label,parent,name,f), Scripted(env)
 {
 	init(r,c);
 }
@@ -301,8 +301,8 @@ void Table::cellEdited(int row, int col)
   		d_table->setText(row, col, locale().toString(res, f, precision));
   	else
   	{
-  	Script *script = scriptEnv->newScript(d_table->text(row,col),this,QString("<%1_%2_%3>").arg(objectName()).arg(row+1).arg(col+1));
-  	connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
+	  Script *script = scriptingEnv()->newScript(d_table->text(row,col),this,false, QString("<%1_%2_%3>").arg(objectName()).arg(row+1).arg(col+1));
+  	connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
 
   	script->setInt(row+1, "i");
   	script->setInt(col+1, "j");
@@ -533,9 +533,9 @@ bool Table::muParserCalculate(int col, int startRow, int endRow, bool notifyChan
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    muParserScript *mup = new muParserScript(scriptEnv, cmd, this,  QString("<%1>").arg(colName(col)));
-	connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
-	connect(mup, SIGNAL(print(const QString&)), scriptEnv, SIGNAL(print(const QString&)));
+    muParserScript *mup = new muParserScript(scriptingEnv(), cmd, this,  QString("<%1>").arg(colName(col)));
+	connect(mup, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
+	connect(mup, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
 
     double *r = mup->defineVariable("i");
     mup->defineVariable("j", (double)col);
@@ -590,7 +590,7 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
         return false;
     }
 
-	if (QString(scriptEnv->name()) == "muParser" || forceMuParser)
+	if (QString(scriptingEnv()->name()) == "muParser" || forceMuParser)
 		return muParserCalculate(col, startRow, endRow, notifyChanges);
 
 	if (startRow < 0)
@@ -610,9 +610,9 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
 
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
-	Script *colscript = scriptEnv->newScript(cmd, this,  QString("<%1>").arg(colName(col)));
-	connect(colscript, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
-	connect(colscript, SIGNAL(print(const QString&)), scriptEnv, SIGNAL(print(const QString&)));
+	Script *colscript = scriptingEnv()->newScript(cmd, this,  false, QString("<%1>").arg(colName(col)));
+	connect(colscript, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
+	connect(colscript, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
 
 	if (!colscript->compile()){
 		QApplication::restoreOverrideCursor();

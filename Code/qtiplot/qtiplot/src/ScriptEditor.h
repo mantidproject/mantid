@@ -1,3 +1,4 @@
+
 #ifndef SCRIPTEDITOR_H_
 #define SCRIPTEDITOR_H_
 
@@ -14,6 +15,7 @@
 class QAction;
 class QKeyEvent;
 class QMouseEvent;
+class QsciAPIs;
 
 /**
  * A small wrapper around a QStringList to manage a command history
@@ -76,9 +78,11 @@ class ScriptEditor : public QsciScintilla
 
 public:
   /// Constructor
-  ScriptEditor(QWidget* parent = 0, bool interpreter_mode = false);
+  ScriptEditor(QWidget* parent = 0, bool interpreter_mode = false, QsciLexer* lexer = NULL);
   ///Destructor
   ~ScriptEditor();
+  // Set a new code lexer for this object
+  void setLexer(QsciLexer *);
   // Size hint
   QSize sizeHint() const;
   /// Set the text on a given line number
@@ -98,7 +102,6 @@ public:
   {
     return m_filename;
   }
-
   /**
    * Set a new file name
    * @param filename The new filename
@@ -107,7 +110,7 @@ public:
   {
     m_filename = filename;
   }
-
+  
   /// Undo action for this editor
   inline QAction* undoAction() const
   {
@@ -139,7 +142,12 @@ public:
   inline QAction* printAction() const
   {
     return m_print;
-  }  
+  } 
+  /// Return a pointer to the object responsible for code completion
+  inline QsciAPIs * scintillaAPI() const
+  {
+    return m_completer;
+  }
 
 public slots:
   /// Update the editor
@@ -148,6 +156,8 @@ public slots:
   void setMarkerState(bool enabled);
   /// Update the marker on this widget
   void updateMarker(int lineno, bool success);
+  /// Refresh the autocomplete information base on a new set of keywords
+  void updateCompletionAPI(const QStringList & keywords);
   /// Print the text within the widget
   void print();
   ///Display the output from a script that has been run in interpeter mode
@@ -186,6 +196,8 @@ private:
   bool m_read_only;
   /// Flag to indicate we need a new line in the output((only used in interpreter mode)
   bool m_need_newline;
+  /// A pointer to a QsciAPI object that handles the code completion
+  QsciAPIs *m_completer;
   /// The colour of the marker for a success state
   static QColor g_success_colour;
   /// The colour of the marker for an error state

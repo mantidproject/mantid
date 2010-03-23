@@ -25,45 +25,13 @@ def makeString(value):
         return str(value)
 
 #-------------------------------------------------------------------------------
-class WorkspaceProxy(object):
-    '''
-    A proxy object that stores a workspace instance. When the workspace is deleted
-    from the ADS in Mantid, the object reference held here is set to "None"
-    '''
-
-    def __init__(self, obj, factory):
-        """
-        Create a proxy for the given object
-        """
-        self.__obj = obj
-        self.__factory = factory
-
-    def isGroup(self):
-        '''
-        Is the data object a WorkspaceGroup or not
-        '''
-        if isinstance(self.__obj, WorkspaceGroup):
-            return True
-        else:
-            return False
-
-    def __getitem__(self, index):
-        if self.isGroup():
-            return self.__factory.create(self.__obj.getNames()[index])
-        else:
-            return self
-        
-
-    def __getattr__(self, attr):
-        """
-        Reroute a method call to the the stored object
-        """
-        return getattr(self.__obj, attr)
+class ProxyObject(object):
+    """Base class for all objects acting as proxys
+    """
+    def __init__(self, toproxy):
+        self.__obj = toproxy
 
     def _getHeldObject(self):
-        """
-        Return the underlying object
-        """
         return self.__obj
 
     def _kill_object(self):
@@ -78,41 +46,77 @@ class WorkspaceProxy(object):
         '''
         self.__obj = obj
 
+
+class WorkspaceProxy(ProxyObject):
+    '''
+    A proxy object that stores a workspace instance. When the workspace is deleted
+    from the ADS in Mantid, the object reference held here is set to "None"
+    '''
+
+    def __init__(self, obj, factory):
+        """
+        Create a proxy for the given object
+        """
+        super(WorkspaceProxy, self).__init__(obj)
+        self.__factory = factory
+
+    def isGroup(self):
+        '''
+        Is the data object a WorkspaceGroup or not
+        '''
+        if isinstance(self._getHeldObject(), WorkspaceGroup):
+            return True
+        else:
+            return False
+
+    def __getitem__(self, index):
+        if self.isGroup():
+            return self.__factory.create(self._getHeldObject().getNames()[index])
+        else:
+            return self
+
+    def __getattr__(self, attr):
+        """
+        Reroute a method call to the the stored object
+        """
+        return getattr(self._getHeldObject(), attr)
+
+
     def __str__(self):
         '''
         Return a string representation of the proxied object
         '''
-        return str(self.__obj)
+        return str(self._getHeldObject())
 
     def __repr__(self):
         '''
         Return a string representation of the proxied object
         '''
-        return `self.__obj`
+        return `self._getHeldObject()`
 
     def __add__(self, rhs):
         '''
         Sum the proxied objects and return a new proxy managing that object
         '''
         if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self.__obj + rhs.__obj)
+            return self.__factory.create(self._getHeldObject() + rhs._getHeldObject())
         else:
-            return self.__factory.create(self.__obj + rhs)
+            return self.__factory.create(self._getHeldObject() + rhs)
 
     def __radd__(self, rhs):
         '''
         Sum the proxied objects and return a new proxy managing that object
         '''
-        return self.__factory.create(rhs + self.__obj)
+        return self.__factory.create(rhs + self._getHeldObject())
 
     def __iadd__(self, rhs):
         '''
         In-place ssum the proxied objects and return a new proxy managing that object
         '''
-        if isinstance(rhs, WorkspaceProxy) :
-            self.__obj += rhs.__obj
-        else:
-            self.__obj += rhs
+        result = self._getHeldObject()
+        if isinstance(rhs, WorkspaceProxy):
+            rhs = rhs._getHeldObject()
+        result += rhs
         return self
 
     def __sub__(self, rhs):
@@ -120,24 +124,24 @@ class WorkspaceProxy(object):
         Subtract the proxied objects and return a new proxy managing that object
         '''
         if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self.__obj - rhs.__obj)
+            return self.__factory.create(self._getHeldObject() - rhs._getHeldObject())
         else:
-            return self.__factory.create(self.__obj - rhs)
+            return self.__factory.create(self._getHeldObject() - rhs)
 
     def __rsub__(self, rhs):
         '''
         Subtract the proxied objects and return a new proxy managing that object
         '''
-        return self.__factory.create(rhs - self.__obj)
+        return self.__factory.create(rhs - self._getHeldObject())
 
     def __isub__(self, rhs):
         '''
         In-place subtract the proxied objects and return a new proxy managing that object
         '''
-        if isinstance(rhs, WorkspaceProxy) :
-            self.__obj -= rhs.__obj
-        else:
-            self.__obj -= rhs
+        result = self._getHeldObject()
+        if isinstance(rhs, WorkspaceProxy):
+            rhs = rhs._getHeldObject()
+        result -= rhs
         return self
 
     def __mul__(self, rhs):
@@ -145,24 +149,24 @@ class WorkspaceProxy(object):
         Multiply the proxied objects and return a new proxy managing that object
         '''
         if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self.__obj * rhs.__obj)
+            return self.__factory.create(self._getHeldObject() * rhs._getHeldObject())
         else:
-            return self.__factory.create(self.__obj * rhs)
+            return self.__factory.create(self._getHeldObject() * rhs)
 
     def __rmul__(self, rhs):
         '''
         Multiply the proxied objects and return a new proxy managing that object
         '''
-        return self.__factory.create(rhs * self.__obj)
+        return self.__factory.create(rhs * self._getHeldObject())
 
     def __imul__(self, rhs):
         '''
         In-place multiply the proxied objects and return a new proxy managing that object
         '''
-        if isinstance(rhs, WorkspaceProxy) :
-            self.__obj *= rhs.__obj
-        else:
-            self.__obj *= rhs
+        result = self._getHeldObject()
+        if isinstance(rhs, WorkspaceProxy):
+            rhs = rhs._getHeldObject()
+        result *= rhs
         return self
 
     def __div__(self, rhs):
@@ -170,24 +174,24 @@ class WorkspaceProxy(object):
         Divide the proxied objects and return a new proxy managing that object
         '''
         if isinstance(rhs, WorkspaceProxy) :
-            return self.__factory.create(self.__obj / rhs.__obj)
+            return self.__factory.create(self._getHeldObject() / rhs._getHeldObject())
         else:
-            return self.__factory.create(self.__obj / rhs)
+            return self.__factory.create(self._getHeldObject() / rhs)
 
     def __rdiv__(self, rhs):
         '''
         Divide the proxied objects and return a new proxy managing that object
         '''
-        return self.__factory.create(rhs / self.__obj)
+        return self.__factory.create(rhs / self._getHeldObject())
 
     def __idiv__(self, rhs):
         '''
         In-place divide the proxied objects and return a new proxy managing that object
         '''
-        if isinstance(rhs, WorkspaceProxy) :
-            self.__obj /= rhs.__obj
-        else:
-            self.__obj /= rhs
+        result = self._getHeldObject()
+        if isinstance(rhs, WorkspaceProxy):
+            rhs = rhs._getHeldObject()
+        result /= rhs
         return self
 
 #-------------------------------------------------------------------------------
@@ -251,13 +255,13 @@ class WorkspaceGarbageCollector(object):
         self._refs.clear()
 #---------------------------------------------------------------------------------------
 
-class IAlgorithmProxy(object):
+class IAlgorithmProxy(ProxyObject):
     '''
     A proxy object for IAlgorithm returns
     '''
     
     def __init__(self, ialg, framework):
-        self.__alg = ialg
+        super(IAlgorithmProxy, self).__init__(ialg)
         self.__framework = framework
         self.__havelist = False
         self.__wkspnames = []
@@ -269,7 +273,7 @@ class IAlgorithmProxy(object):
         """
         Reroute a method call to the the stored object
         """
-        return getattr(self.__alg, attr)
+        return getattr(self._getHeldObject(), attr)
 
     def __getitem__(self, index):
         return self._retrieveWorkspaceByIndex(index)
@@ -285,7 +289,7 @@ class IAlgorithmProxy(object):
 
     def _createWorkspaceList(self):
         # Create a list for the output workspaces
-        props = self.__alg.getProperties()
+        props = self._getHeldObject().getProperties()
   
         for p in props:
             if p.direction() != 1:

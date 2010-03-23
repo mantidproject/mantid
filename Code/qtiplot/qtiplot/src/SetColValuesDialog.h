@@ -33,7 +33,7 @@
 #define VALUESDIALOG_H
 
 #include "ScriptingEnv.h"
-#include "Script.h"
+#include "Scripted.h"
 #include <QDialog>
 
 class QComboBox;
@@ -50,7 +50,7 @@ class ScriptEdit;
 
 
 //! Set column values dialog
-class SetColValuesDialog : public QDialog, public scripted
+class SetColValuesDialog : public QDialog, public Scripted
 {
     Q_OBJECT
 

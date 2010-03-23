@@ -42,15 +42,12 @@
  * Constructor
  */
 ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, bool interpreter_mode)
-  : QTabWidget(parent), scripted(env), m_last_dir(""), m_script_runner(NULL),
+  : QTabWidget(parent), Scripted(env), m_last_dir(""), m_script_runners(),
     m_cursor_pos(), m_findrep_dlg(NULL), 
     m_interpreter_mode(interpreter_mode)
 {
   //Create actions for this widget
   initActions();
-
-  // Create and store the script object that will execute the code
-  setNewScriptRunner();
 
   // Execution state change
   connect(this, SIGNAL(ScriptIsActive(bool)), this, SLOT(setScriptIsRunning(bool)));
@@ -92,15 +89,19 @@ ScriptManagerWidget::ScriptManagerWidget(ScriptingEnv *env, QWidget *parent, boo
  */
 ScriptManagerWidget::~ScriptManagerWidget()
 {
-  if( m_script_runner )
-  {
-    delete m_script_runner;
-  }
-
   if( m_findrep_dlg )
   {
     delete m_findrep_dlg;
   }
+  
+  QList<int> script_keys = m_script_runners.uniqueKeys();
+  QListIterator<int> iter(script_keys);
+  while( iter.hasNext() )
+  {
+    Script *code = m_script_runners.take(iter.next());
+    delete code;
+  }
+
 }
 
 /**
@@ -189,6 +190,14 @@ QString ScriptManagerWidget::readScript(const QString& filename, bool *ok)
 }
 
 /**
+ * Is a script running in the environment
+ */
+bool ScriptManagerWidget::isScriptRunning()
+{
+  return scriptingEnv()->isRunning();
+}
+
+/**
  * Return the current editor
  */
 ScriptEditor* ScriptManagerWidget::currentEditor() const
@@ -273,11 +282,11 @@ QAction* ScriptManagerWidget::printAction() const
 //-------------------------------------------
 /**
  * Create a new tab such that it is the specified index within the tab range.
- * @param index The index to give the new tab
+ * @param index The index to give the new tab. If this is invalid the tab is simply appended
  */
 ScriptEditor* ScriptManagerWidget::newTab(int index)
 {
-  ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode);
+  ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode, scriptingEnv()->createCodeLexer());
   if( !m_interpreter_mode )
   {
     connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
@@ -286,8 +295,11 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
   connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
 	  this, SLOT(editorContextMenu(const QPoint&)));
   QString tab_title = "New script";
-  setCurrentIndex(insertTab(index, editor, tab_title));
-  editor->setLexer(scriptingEnv()->getCodeLexer());
+  index = insertTab(index, editor, tab_title);
+  setCurrentIndex(index);
+  // Store a script runner
+  m_script_runners.insert(index, createScriptRunner(editor));
+
   // Completion etc
   setCodeCompletionBehaviour(editor, m_toggle_completion->isChecked());
   setCallTipsBehaviour(editor, m_toggle_calltips->isChecked());
@@ -408,7 +420,7 @@ QString ScriptManagerWidget::saveToString()
  */
 void ScriptManagerWidget::execute()
 {
-  if( m_script_runner->scriptIsRunning() ) return;
+  if( isScriptRunning() ) return;
   //Current editor
   ScriptEditor *editor = currentEditor();
   if( !editor ) return;
@@ -422,14 +434,7 @@ void ScriptManagerWidget::execute()
   int lineFrom(0), indexFrom(0), lineTo(0), indexTo(0);
   //Qscintilla function
   editor->getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
-
-  //Execute the selection
-  m_script_runner->setLineOffset(lineFrom);
-  connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	  SLOT(updateMarker(int, bool)));
-  runScriptCode(code);
-  disconnect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	  SLOT(updateMarker(int, bool)));
+  runScriptCode(code, lineFrom);
 }
 
 /**
@@ -437,7 +442,7 @@ void ScriptManagerWidget::execute()
  */
 void ScriptManagerWidget::executeAll()
 {
-  if( m_script_runner->scriptIsRunning() ) return;
+  if( isScriptRunning() ) return;
   //Current editor
   ScriptEditor *editor = currentEditor();
   if( !editor ) return;
@@ -446,12 +451,7 @@ void ScriptManagerWidget::executeAll()
   if( script_txt.isEmpty() ) return;
   
   //Run the code
-  m_script_runner->setLineOffset(0);
-  connect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	  SLOT(updateMarker(int, bool)));
-  runScriptCode(script_txt);
-  disconnect(m_script_runner, SIGNAL(currentLineChanged(int, bool)), editor, 
-	  SLOT(updateMarker(int, bool)));
+  runScriptCode(script_txt, 0);
 }
 
 /**
@@ -468,7 +468,7 @@ void ScriptManagerWidget::evaluate()
  */
 void ScriptManagerWidget::executeInterpreter(const QString & code)
 {
-  if( m_script_runner->scriptIsRunning() ) return;
+  if( isScriptRunning() ) return;
   runScriptCode(code);
   ScriptEditor *editor = currentEditor();
   editor->newInputLine();
@@ -479,21 +479,37 @@ void ScriptManagerWidget::executeInterpreter(const QString & code)
 /**
  * Run a piece of code in the current environment
  * @param code The chunk of code to execute
+ * @param line_offset If this is a chunk of code from an editor, give offset from the start
  */
-bool ScriptManagerWidget::runScriptCode(const QString & code)
+bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_offset)
 {
-  m_script_runner->setCode(code);
+  // Get the correct script runner
+  Script * runner = m_script_runners.value(this->currentIndex());
+  runner->setLineOffset(line_offset);
+  ScriptEditor *editor = currentEditor();
+  if( editor ) 
+  {
+    connect(runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	    SLOT(updateMarker(int, bool)));
+  }
+  runner->setCode(code);
   emit ScriptIsActive(true);
+
   if( !m_interpreter_mode ) 
   {
     displayOutput("Script execution started.", true);
   }
 
-  bool success = m_script_runner->exec();
+  bool success = runner->exec();
   emit ScriptIsActive(false);
   if( !m_interpreter_mode && success )
   {
     displayOutput("Script execution completed successfully.", true);
+  }
+  if( editor )
+  {
+    disconnect(runner, SIGNAL(currentLineChanged(int, bool)), editor, 
+	       SLOT(updateMarker(int, bool)));
   }
   return success;
 }
@@ -617,7 +633,6 @@ void ScriptManagerWidget::markCurrentAsChanged()
  */
 void ScriptManagerWidget::setScriptIsRunning(bool running)
 {
-  scriptingEnv()->setIsRunning(running);
   // Enable/disable execute actions
   m_exec->setEnabled(!running);
   m_exec_all->setEnabled(!running);
@@ -806,16 +821,15 @@ void ScriptManagerWidget::customEvent(QEvent *event)
   {    
     ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent*>(event);
     // This handles reference counting of the scripting environment
-    scripted::scriptingChangeEvent(sce);
-
-    setNewScriptRunner();
+    Scripted::scriptingChangeEvent(sce);
 
     // Update the code lexers for each tab
     int ntabs = count();
     for( int index = 0; index < ntabs; ++index )
     {
       ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-      editor->setLexer(scriptingEnv()->getCodeLexer());
+      editor->setLexer(scriptingEnv()->createCodeLexer());
+      m_script_runners[index] = createScriptRunner(editor);
     }
   }
 }
@@ -874,19 +888,25 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
 }
 
 /**
- * Create a new Script object, connect up the relevant signals and store the pointer. Note
- * that this will always delete the current scripting running object
+ * Create and return a new Script object, connecting up the relevant signals.
+ * @param An optional ScriptEditor object
  */
-void ScriptManagerWidget::setNewScriptRunner()
+Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
 {
-  if( m_script_runner ) delete m_script_runner;
-  
-  m_script_runner = scriptingEnv()->newScript("", this, "");
+  Script *script = scriptingEnv()->newScript("", this, "");
   // Connect the signals that print output and error messages to the formatting functions
-  connect(m_script_runner, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
-  connect(m_script_runner, SIGNAL(error(const QString &, const QString&, int)), this, 
+  connect(script, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
+  connect(script, SIGNAL(error(const QString &, const QString&, int)), this, 
 	  SLOT(displayError(const QString &)));
-  
+  if( editor )
+  {
+    connect(script, SIGNAL(keywordsChanged(const QStringList&)), editor, 
+	    SLOT(updateCompletionAPI(const QStringList &)));
+    /// Initialize the auto complete by evaluating some completely trivial code
+    script->setCode("1");
+    script->exec();
+  }
+  return script;
 }
 
 /**
@@ -945,7 +965,7 @@ void ScriptManagerWidget::setCodeCompletionBehaviour(ScriptEditor *editor, bool 
   int threshold(-1);
   if( state )
   {
-    api_source = QsciScintilla::AcsAll;
+    api_source = QsciScintilla::AcsAPIs;
     threshold = 2;
   }
   else

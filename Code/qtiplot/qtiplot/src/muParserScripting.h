@@ -52,15 +52,13 @@ class muParserScripting: public ScriptingEnv
     muParserScripting(ApplicationWindow *parent) : ScriptingEnv(parent, langName) { d_initialized=true; }
     static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
-    bool isRunning() const { return true; }
-    Script *newScript(const QString &code, QObject *context, const QString &name="<input>")
+  bool isRunning() const { return true; }
+  Script *newScript(const QString &code, QObject *context, bool interactive = true,   
+		    const QString &name="<input>")
     {
-      m_current_script = new muParserScript(this, code, context, name);
-      return m_current_script;
+      return new muParserScript(this, code, context, name);
     }
     
-    // Mantid - follows changes to ScriptingEnv for QScintilla
-    virtual QsciLexer* scriptCodeLexer() const { return NULL; }
     virtual bool supportsEvaluation() { return true; }
 
     // we do not support global variables

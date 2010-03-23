@@ -50,17 +50,17 @@
 #include <QDateTime>
 
 ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
-  : QsciScintilla(parent), scripted(env), d_error(false), m_iFirstLineNumber(0), 
+  : QsciScintilla(parent), Scripted(env), d_error(false), m_iFirstLineNumber(0), 
     m_bIsRunning(false), m_bErrorRaised(false) //Mantid
 {
-	myScript = scriptEnv->newScript("", this, name);
+  myScript = scriptingEnv()->newScript("", this, true, name);
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
 	connect(myScript, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
 	connect(this, SIGNAL(textChanged()), this, SLOT(updateEditor()));
 
 	//QScintilla specific stuff
-	codeLexer = env->getCodeLexer();
+	codeLexer = env->createCodeLexer();
 	setLexer(codeLexer);
 	setAutoIndent(true);
 	setMarginLineNumbers(1,true);
@@ -101,17 +101,17 @@ void ScriptEdit::customEvent(QEvent *e)
     {
       ScriptingChangeEvent* sce = (ScriptingChangeEvent*)e;
       //Forward the call to the script base class to deal with the environment change
-      scripted::scriptingChangeEvent(sce);
+      Scripted::scriptingChangeEvent(sce);
 
       // Create a new script class from the new environment
       delete myScript;
-      myScript = scriptEnv->newScript("", this, name());
+      myScript = scriptingEnv()->newScript("", this, true, name());
       connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
       connect(myScript, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
       //Get new code lexer
       if( codeLexer ) delete codeLexer;
-      codeLexer = scriptEnv->getCodeLexer();
+      codeLexer = scriptingEnv()->createCodeLexer();
       setLexer(codeLexer);
       setAutoIndent(true);
     }
@@ -141,7 +141,7 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
   menu.insertSeparator();
   //Now the running actions (the shortcuts are assigned to the ScriptWindow actions)
   bool inMuParser(false);
-  if( scriptEnv->scriptingLanguage().startsWith("P") )
+  if( scriptingEnv()->scriptingLanguage().startsWith("P") )
   {
     menu.addAction(actionExecute);
     menu.addAction(actionExecuteAll);  
@@ -168,7 +168,7 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
   {
     functionsMenu->clear();
     functionsMenu->setTearOffEnabled(true);
-    QStringList flist = scriptEnv->mathFunctions();
+    QStringList flist = scriptingEnv()->mathFunctions();
     QMenu *submenu=NULL;
     for (int i=0; i<flist.size(); i++)
       {
@@ -191,7 +191,7 @@ void ScriptEdit::contextMenuEvent(QContextMenuEvent *e)
 	} else
 	  newAction = functionsMenu->addAction(flist[i]);
 	newAction->setData(i);
-	newAction->setWhatsThis(scriptEnv->mathFunctionDoc(flist[i]));
+	newAction->setWhatsThis(scriptingEnv()->mathFunctionDoc(flist[i]));
       }
     functionsMenu->setTitle(tr("&Functions"));
     menu.addMenu(functionsMenu);
@@ -227,7 +227,7 @@ void ScriptEdit::insertFunction(const QString &fname)
 
 void ScriptEdit::insertFunction(QAction *action)
 {
-  insertFunction(scriptEnv->mathFunctions()[action->data().toInt()]);
+  insertFunction(scriptingEnv()->mathFunctions()[action->data().toInt()]);
 }
 
 int ScriptEdit::lineNumber() const
@@ -386,7 +386,7 @@ void ScriptEdit::importCodeBlock(const QString & code)
 QString ScriptEdit::importASCII(const QString &filename)
 {
 
-	QString filter = scriptEnv->fileFilter();
+	QString filter = scriptingEnv()->fileFilter();
 	filter += tr("Text") + " (*.txt *.TXT);;";
 	filter += tr("All Files")+" (*)";
 
@@ -425,7 +425,7 @@ QString ScriptEdit::importASCII(const QString &filename)
 
 QString ScriptEdit::exportASCII(const QString &filename)
 {
-	QString filter = scriptEnv->fileFilter();
+	QString filter = scriptingEnv()->fileFilter();
 	filter += tr("Text") + " (*.txt *.TXT);;";
 	filter += tr("All Files")+" (*)";
 

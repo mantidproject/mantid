@@ -61,8 +61,6 @@ class DLLExport SimplePythonAPI
   static void createModule(bool gui);
   /// Create and return the full-qualified path name for the module
   static std::string getModuleFilename(); 
-  /// Create and return the full-qualified path name for the keywords file
-  static std::string getKeywordsFilename();
   
   private:
   ///private constructor
@@ -81,7 +79,7 @@ class DLLExport SimplePythonAPI
   /// Writes the global help command
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap, bool gui);
   /// Creates a help string for the given algorithm
-  static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog, std::ostream & keywords);
+  static std::string createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog);
   /// Writes the given help strings to the Python module
   static void writeFunctionHelp(std::ostream & output, const IndexVector & helpStrings, 
 				const std::map<std::string, std::set<std::string> >& categories);
@@ -109,8 +107,6 @@ class DLLExport SimplePythonAPI
   
   /// The full name of the module file
   static std::string g_module_name;
-  ///
-  static std::string g_keywords_name;
 };
 
 }

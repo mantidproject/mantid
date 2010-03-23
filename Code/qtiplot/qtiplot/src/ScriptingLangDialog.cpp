@@ -36,7 +36,7 @@
 #include <QMessageBox>
 
 ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent, Qt::WFlags fl )
-  : QDialog(parent, fl), scripted(env)
+  : QDialog(parent, fl), Scripted(env)
 {
 	setCaption(tr("MantidPlot - Select scripting language"));
 
@@ -65,7 +65,7 @@ void ScriptingLangDialog::updateLangList()
 {
   langList->clear();
   langList->insertItems(0, ScriptingLangManager::languages());
-  QListWidgetItem *current = langList->findItems(scriptEnv->name(), Qt::MatchExactly).first();
+  QListWidgetItem *current = langList->findItems(scriptingEnv()->name(), Qt::MatchExactly).first();
   if (current)
     langList->setCurrentItem(current);
 }

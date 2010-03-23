@@ -467,9 +467,8 @@ addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', '../qtiplot/qtiplot/qtiplotrc.
 addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', '../qtiplot/qtiplot/qtiUtil.py', MantidDlls)
 addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', '../qtiplot/qtiplot/mantidplotrc.py', MantidDlls)
 addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', '../qtiplot/qtiplot/mantidplot.py', MantidDlls)
-addFileV('mtdkeywords', 'mtdwds.txt', 'mtdpy_keywords.txt', '../qtiplot/qtiplot/mtdpy_keywords.txt', MantidDlls)
 
-# Remove *.pyc files that have been created
+# Remove files that may have been created
 files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.pyc','MantidFramework.pyc','MantidHeader.pyc',\
                    'mantidsimple.py', 'mantidsimple.pyc','mtdpyalgorithm_keywords.txt']
 for index, name in enumerate(files_to_remove):

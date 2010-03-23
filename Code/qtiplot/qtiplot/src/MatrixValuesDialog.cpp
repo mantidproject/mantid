@@ -46,7 +46,7 @@
 #endif
 
 MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl ), scripted(env)
+: QDialog( parent, fl ), Scripted(env)
 {
     setName( "MatrixValuesDialog" );
 	setWindowTitle( tr( "MantidPlot - Set Matrix Values" ) );
@@ -99,7 +99,7 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 
 	QHBoxLayout *hbox3 = new QHBoxLayout();
 
-	commands = new ScriptEdit( scriptEnv);
+	commands = new ScriptEdit( scriptingEnv());
 	commands->setFocus();
 	hbox3->addWidget(commands);
 
@@ -116,7 +116,7 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 	vbox3->addLayout(hbox2);
 #ifdef SCRIPTING_PYTHON	
 	boxMuParser = NULL;
-	if (scriptEnv->name() != QString("muParser")){
+	if (scriptingEnv()->name() != QString("muParser")){
 		boxMuParser = new QCheckBox(tr("Use built-in muParser (much faster)"));
 		boxMuParser->setChecked(true);
 		vbox3->addWidget(boxMuParser);
@@ -125,7 +125,7 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 	vbox3->addWidget(new QLabel(tr( "Cell(i,j)=" )));
 	vbox3->addLayout(hbox3);
 
-	functions->insertStringList(scriptEnv->mathFunctions(), -1);
+	functions->insertStringList(scriptingEnv()->mathFunctions(), -1);
 	insertExplain(0);
 
 	connect(btnAddCell, SIGNAL(clicked()), this, SLOT(addCell()));
@@ -199,7 +199,7 @@ void MatrixValuesDialog::setMatrix(Matrix* m)
 
 void MatrixValuesDialog::insertExplain(int index)
 {
-	explain->setText(scriptEnv->mathFunctionDoc(functions->text(index)));
+	explain->setText(scriptingEnv()->mathFunctionDoc(functions->text(index)));
 }
 
 void MatrixValuesDialog::insertFunction()

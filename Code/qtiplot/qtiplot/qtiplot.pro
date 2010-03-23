@@ -317,6 +317,7 @@ HEADERS  += src/ApplicationWindow.h \
             src/Folder.h\
             src/FindDialog.h\
             src/ScriptingEnv.h\
+            src/Scripted.h\
             src/Script.h\
             src/ScriptEdit.h\
             src/ScriptEditor.h\
@@ -511,6 +512,7 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/SigmoidalFit.cpp\
 			src/LogisticFit.cpp\
             src/ScriptingEnv.cpp\
+            src/Scripted.cpp\
             src/Script.cpp\
             src/ScriptingLangDialog.cpp\
             src/TableStatistics.cpp\

@@ -31,7 +31,7 @@
 #define SCRIPTING_LANG_DIALOG_H
 
 #include "ScriptingEnv.h"
-#include "Script.h"
+#include "Scripted.h"
 
 #include <QDialog>
 
@@ -39,20 +39,20 @@ class ApplicationWindow;
 class QListWidget;
 class QPushButton;
 
-class ScriptingLangDialog: public QDialog, public scripted
+class ScriptingLangDialog: public QDialog, public Scripted
 {
-	Q_OBJECT
-
-	public:
-		ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent, Qt::WFlags fl = 0);
-
-	public slots:
-		void updateLangList();
-		void accept();
-
-	private:
-		QListWidget *langList;
-		QPushButton *btnOK, *btnCancel;
+  Q_OBJECT
+  
+  public:
+  ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent, Qt::WFlags fl = 0);
+										      
+public slots:
+  void updateLangList();
+  void accept();
+  
+private:
+  QListWidget *langList;
+  QPushButton *btnOK, *btnCancel;
 };
 
 #endif

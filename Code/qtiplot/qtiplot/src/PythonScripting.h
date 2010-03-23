@@ -35,68 +35,79 @@
 class QObject;
 class QString;
 
+/**
+ * A scripting environment for executing Python code.
+ */
 class PythonScripting: public ScriptingEnv
 {
+
   Q_OBJECT
   
-  public:
-  /// The langauge name
-  static const char *langName;
-  //Factory function
+public:
+  /// Factory function
   static ScriptingEnv *constructor(ApplicationWindow *parent);
-  /// Name of completion file
-  static QString completionSourceName() { return "mtdpy_keywords.txt"; }
-  /// Default constructor
-  PythonScripting(ApplicationWindow *parent);
-  ///Destructor
+  /// Destructor
   ~PythonScripting();
-
+  /// Write text to std out
   void write(const QString &text) { emit print(text); }
-  
+  /// Create a new code lexer for Python
+  QsciLexer * createCodeLexer() const;
   // Python supports progress monitoring
   virtual bool supportsProgressReporting() const { return true; }
-  
-  //! like str(object) in Python
-  /**
-   * Convert object to a string.
-   * Steals a reference to object if decref is true; borrows otherwise.
-   */
-  QString toString(PyObject *object, bool decref=false);
-  // Create a new script object that can execute code within this enviroment
-  Script *newScript(const QString &code, QObject *context, const QString &name="<input>")
+  /// Return a string represenation of the given object
+  QString toString(PyObject *object, bool decref = false);
+  //Convert a Python list object to a Qt QStringList
+  QStringList toStringList(PyObject *py_seq);
+  /// Create a new script object that can execute code within this enviroment
+  Script *newScript(const QString &code, QObject *context, bool interactive = true, const QString &name="<input>")
   {
-    m_current_script = new PythonScript(this, code, context, name);
-    return m_current_script;
+    return new PythonScript(this, code, interactive, context, name);
   }
-
-  bool setQObject(QObject*, const char*, PyObject *dict);
-  bool setQObject(QObject *val, const char *name) { return setQObject(val,name,NULL); }
-  bool setInt(int, const char*, PyObject *dict=NULL);
-  bool setDouble(double, const char*, PyObject *dict=NULL);
-
-  const QStringList mathFunctions() const;
-  const QString mathFunctionDoc (const QString &name) const;
+  ///Return a list of file extensions for Python
   const QStringList fileExtensions() const;
-
+  /// Set a reference to a QObject in the given dictionary
+  bool setQObject(QObject*, const char*, PyObject *dict);
+  /// Set a reference to a QObject in the global dictionary
+  bool setQObject(QObject *val, const char *name) { return setQObject(val,name,NULL); }
+  /// Set a reference to an int in the global dictionary
+  bool setInt(int, const char*, PyObject *dict=NULL);
+  /// Set a reference to a double in the global dictionary
+  bool setDouble(double, const char*, PyObject *dict=NULL);
+  /// Return a list of mathematical functions define by qtiplot
+  const QStringList mathFunctions() const;
+  /// Return a doc string for the given function
+  const QString mathFunctionDoc (const QString &name) const;
+  /// Return the global dictionary for this environment
   PyObject *globalDict() { return m_globals; }
+  /// Return the sys dictionary for this environment
   PyObject *sysDict() { return m_sys; }
-
-  public slots:
-    virtual void refreshAlgorithms();
-    virtual void refreshCompletion();
-
+  /// The language name
+  static const char * langName;
+				     
+public slots:
+  /// Refresh Python algorithms state
+  virtual void refreshAlgorithms();
 
 private:
-  //Start the environment
+  /// Constructor
+  PythonScripting(ApplicationWindow *parent);
+  /// Default constructor
+  PythonScripting();
+  /// Start the environment
   bool start();
-  //Shutdown the environment
+  /// Shutdown the environment
   void shutdown();
-  //Load a file
+  /// Run execfile on a given file
   bool loadInitFile(const QString &path);
 
-  PyObject *m_globals;		// PyDict of global environment
-  PyObject *m_math;		// PyDict of math functions
-  PyObject *m_sys;		// PyDict of sys module
+private:
+  /// The global dictionary
+  PyObject *m_globals;
+  /// A dictionary of math functions
+  PyObject *m_math;
+  /// The dictionary of the sys module
+  PyObject *m_sys;
+  
 };
 
 #endif

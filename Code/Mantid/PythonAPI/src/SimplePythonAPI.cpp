@@ -25,8 +25,6 @@ namespace Mantid
 
     /// The module filename
     std::string SimplePythonAPI::g_module_name = "mantidsimple.py";
-    /// The keywords filename
-    std::string SimplePythonAPI::g_keywords_name = "mtdpyalgorithm_keywords.txt";
 
     //------------------------------
     //Public methods
@@ -38,15 +36,6 @@ namespace Mantid
     std::string SimplePythonAPI::getModuleFilename()
     {
       return Poco::Path(Mantid::Kernel::ConfigService::Instance().getOutputDir()).append(Poco::Path(g_module_name)).toString(); 
-    }
-
-    /**
-    * Return the name of the file containing the auto-completion source
-    * @returns A string containing the name of the module file
-    */
-    std::string SimplePythonAPI::getKeywordsFilename()
-    {
-      return Poco::Path(Mantid::Kernel::ConfigService::Instance().getOutputDir()).append(Poco::Path(g_keywords_name)).toString(); 
     }
 
     /**
@@ -182,7 +171,6 @@ namespace Mantid
       writeGlobalHelp(module, vMap, gui);
       //Function definitions for each algorithm
       IndexVector helpStrings;
-      std::ofstream keywords(getKeywordsFilename().c_str());
       std::map<std::string, std::set<std::string> > categories;
       for( VersionMap::const_iterator vIter = vMap.begin(); vIter != vMap.end();
         ++vIter)
@@ -200,11 +188,11 @@ namespace Mantid
 
         // Help strings
         std::transform(name.begin(), name.end(), name.begin(), tolower);
-        helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties, false, keywords)));
+        helpStrings.push_back(make_pair(name, createHelpString(vIter->first, orderedProperties, false)));
         //The help for the dialog functions if necessary
         if( gui )
         {
-          helpStrings.push_back(make_pair(name + "dialog", createHelpString(vIter->first, orderedProperties, true, keywords)));
+          helpStrings.push_back(make_pair(name + "dialog", createHelpString(vIter->first, orderedProperties, true)));
         }
 
         // Get the category and save it to our map
@@ -427,10 +415,9 @@ namespace Mantid
     * @param algm The name of the algorithm
     * @param properties The list of properties
     * @param dialog A boolean indicating whether this is a dialog function or not
-    * @param keywords The stream to use to write the autocompletion source
     * @return A help string for users
     */
-    std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog, std::ostream & keywords)
+    std::string SimplePythonAPI::createHelpString(const std::string & algm, const PropertyVector & properties, bool dialog)
     {
       std::ostringstream os;
       os << "\t\tparams_list = [";
@@ -477,8 +464,6 @@ namespace Mantid
         argument_list += ",Message,Enable,Disable";
       }
       argument_list += ")";
-      // Update autocompletion source
-      keywords << argument_list << "\n";
 
       os << "]\n"
         << "\t\thelpstring = '\\nUsage: ' + '" << argument_list << "\\n\\n'\n"

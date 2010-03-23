@@ -47,7 +47,7 @@ class ScriptEdit;
 class Matrix;
 
 //! Set matrix values dialog
-class MatrixValuesDialog : public QDialog, public scripted
+class MatrixValuesDialog : public QDialog, public Scripted
 {
     Q_OBJECT
 

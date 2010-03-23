@@ -1,3 +1,4 @@
+
 /***************************************************************************
     File                 : Matrix.h
     Project              : QtiPlot
@@ -40,7 +41,7 @@
 #include "MatrixModel.h"
 #include "MdiSubWindow.h"
 #include "ScriptingEnv.h"
-#include "Script.h"
+#include "Scripted.h"
 
 #include <qwt_double_rect.h>
 #include <qwt_color_map.h>
@@ -57,12 +58,12 @@ class QShortcut;
 class QUndoStack;
 
 //! Matrix worksheet class
-class Matrix: public MdiSubWindow, public scripted
+class Matrix: public MdiSubWindow, public Scripted
 {
-    Q_OBJECT
-
-protected:
-	Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
+  Q_OBJECT
+  
+  protected:
+  Matrix(ScriptingEnv *env, const QString& label, ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
 
 public:
 

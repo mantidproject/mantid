@@ -43,8 +43,8 @@
 #include <QSet>
 #include "Table.h"
 #include "ScriptingEnv.h"
+#include "Scripted.h"
 #include "Script.h"
-
 
 class QPixmap;
 class QCloseEvent;
@@ -120,7 +120,7 @@ class ScriptManagerWidget;
  * in ApplicationWindow after the above reorganizations. Think about whether a Model/View approach can be
  * used for Project/ProjectExplorer.
  */
-class ApplicationWindow: public QMainWindow, public scripted
+class ApplicationWindow: public QMainWindow, public Scripted
 {
     Q_OBJECT
 public:
@@ -1223,6 +1223,7 @@ private:
 
 	QAssistantClient *assistant;
 	ScriptingWindow *scriptingWindow; //Mantid
+        Script *m_iface_script;
 	QTranslator *appTranslator, *qtTranslator;
 	QDockWidget *explorerWindow, *undoStackWindow;
 	QTextEdit *results;
@@ -1322,7 +1323,6 @@ private:
 
     QList<QAction *> d_user_actions;
     QList<QMenu* > d_user_menus; //Mantid
-  bool d_user_script_running;
 
     QUndoView *d_undo_view;
     /// list of mantidmatrix windows opened from project file.

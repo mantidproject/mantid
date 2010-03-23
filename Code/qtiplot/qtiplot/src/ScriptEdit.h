@@ -34,6 +34,7 @@
 // not be merged here - M. Gigg
 
 #include "ScriptingEnv.h"
+#include "Scripted.h"
 #include "Script.h"
 
 // Qt includes
@@ -51,16 +52,16 @@ class QsciLexer;
  *
  * Inherits from QsciScintilla, which supports syntax highlighting and line numbering
  */
-class ScriptEdit: public QsciScintilla, public scripted
+class ScriptEdit: public QsciScintilla, public Scripted
 {
   Q_OBJECT
 
   public:
-    ScriptEdit(ScriptingEnv *env, QWidget *parent=0, const char *name=0);
-    ~ScriptEdit();
-	//! Handle changing of scripting environment.
-    void customEvent(QEvent*);
-  	//! Map cursor positions to line numbers.
+  ScriptEdit(ScriptingEnv *env, QWidget *parent=0, const char *name=0);
+  ~ScriptEdit();
+  //! Handle changing of scripting environment.
+  void customEvent(QEvent*);
+  //! Map cursor positions to line numbers.
   int lineNumber() const;
 			
   bool isRunning() const { return m_bIsRunning; }
@@ -69,17 +70,17 @@ public slots:
   void execute();
   void executeAll();
   void evaluate();
-
-    void print();
-    void exportPDF(const QString& fileName);
+  
+  void print();
+  void exportPDF(const QString& fileName);
   void importCodeBlock(const QString & code);
-    QString exportASCII(const QString &file=QString::null);
-    QString importASCII(const QString &file=QString::null);
-    void insertFunction(const QString &);
-    void insertFunction(QAction * action);
-    void setContext(QObject *context) { myScript->setContext(context); }
-    void scriptPrint(const QString&);
-	void setDirPath(const QString& path);
+  QString exportASCII(const QString &file=QString::null);
+  QString importASCII(const QString &file=QString::null);
+  void insertFunction(const QString &);
+  void insertFunction(QAction * action);
+  void setContext(QObject *context) { myScript->setContext(context); }
+  void scriptPrint(const QString&);
+  void setDirPath(const QString& path);
 
   void updateEditor();
 
@@ -104,15 +105,13 @@ public slots:
   virtual void contextMenuEvent(QContextMenuEvent *e);
 
   private:
-    Script *myScript;
+  Script *myScript;
   QAction *actionExecute, *actionExecuteAll, *actionEval, *actionAbort;
-    //! Submenu of context menu with mathematical functions.
-  	QMenu *functionsMenu;
-  	//! Cursor used for output of evaluation results and error messages.  
-  	QString scriptsDirPath;
-  
+  //! Submenu of context menu with mathematical functions.
+  QMenu *functionsMenu;
+  //! Cursor used for output of evaluation results and error messages.  
+  QString scriptsDirPath;
   QsciLexer* codeLexer;
-
   //! True if we are inside evaluate(), execute() or executeAll() there were errors.
   bool d_error;
 
