@@ -108,13 +108,6 @@ public:
     // remove
     TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
     TS_ASSERT( !apimodule.exists() );
-    
-    //Check keyword file
-    Poco::File apikeywords(SimplePythonAPI::getKeywordsFilename());
-    //has it been written ?
-    TS_ASSERT(apikeywords.exists());
-    apikeywords.remove();
-
   }
 
 };
