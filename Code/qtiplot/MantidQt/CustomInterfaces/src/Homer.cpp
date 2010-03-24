@@ -153,14 +153,14 @@ void Homer::page1FileWidgs()
 //  m_uiForm.loadRun_tvRuns->setRowCount(1);
 //  m_uiForm.loadRun_tvRuns->horizontalHeader()->hide();
 //  m_uiForm.loadRun_tvRuns->verticalHeader()->hide();
-  mapLay->addWidget(m_runFilesWid, 0, 0, 1, 8);
+  mapLay->addWidget(m_runFilesWid, 0, 0, 1, 7);
   connect(m_runFilesWid, SIGNAL(fileChanged()), this, SLOT(runFilesChanged()));
 
   m_WBVWid = new MWRunFile(this, m_prev.group()+"/WBV", false,
 	m_uiForm.loadRun_cbInst, "White Beam Van",
 	"This white beam vanadium run also sets the defaults\n"
 	"in Diagnose Detectors and Absolute Units");
-  mapLay->addWidget(m_WBVWid, 4, 0, 1, 8);
+  mapLay->addWidget(m_WBVWid, 4, 0, 1, 7);
   connect(m_WBVWid, SIGNAL(fileChanged()), this, SLOT(updateWBV()));
 }
 
@@ -201,9 +201,6 @@ QString Homer::removeStrMonitor(const QString &check)
 /// put default values into the controls in the first tab
 void Homer::page1Defaults()
 {
-  // unchanging defaults
-  m_uiForm.leScale->setText("0");
-
   QString normalise = m_prev.value("normalise", G_DEFAULT_NORM).toString();
   // if the normalisation scheme is monitor based then it will contain the name monitor
   QString displayName = removeStrMonitor(normalise);  
@@ -250,9 +247,6 @@ void Homer::page1Validators()
 
   setupValidator(m_uiForm.valMap);
   m_validators[m_uiForm.map_fileInput_leName] = m_uiForm.valMap;
-  
-  m_validators[m_uiForm.leWBV0Low] = newStar(m_uiForm.gbExperiment, 5, 4);
-  m_validators[m_uiForm.leWBV0High] = m_validators[m_uiForm.leWBV0Low];
   
   setupValidator(m_uiForm.valGuess);
   m_validators[m_uiForm.leEGuess] = m_uiForm.valGuess;
@@ -302,12 +296,6 @@ void Homer::page1Tooltips()
 
   m_uiForm.lbNorm->setToolTip("Select the type of normalization for the runs"), m_uiForm.cbNormal->setToolTip("Select the type of normalization for the runs");
   m_uiForm.cbMonitors->setToolTip("If normalization to monitor was selected");
-  m_uiForm.lbScale->setToolTip("Multiply numbers of counts by this power of 10");
-  m_uiForm.leScale->setToolTip("Multipling numbers by a large constant can make plotting easier");
-
-  static const QString WBV0_TIP = "Energy range for the white beam normalisation (passed\nto Integration)";
-  m_uiForm.lbWBV0Low1->setToolTip(WBV0_TIP); m_uiForm.leWBV0Low->setToolTip(WBV0_TIP); m_uiForm.lbWBV0Low2->setToolTip(WBV0_TIP);
-  m_uiForm.lbWBV0High1->setToolTip(WBV0_TIP); m_uiForm.leWBV0High->setToolTip(WBV0_TIP); m_uiForm.lbWBV0High2->setToolTip(WBV0_TIP);
 
   m_uiForm.map_fileInput_lbName->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)"), m_uiForm.map_fileInput_leName->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)"), m_uiForm.map_fileInput_pbBrowse->setToolTip("Sum spectra into groups defined by this file (passed to GroupDetectors)");
 
@@ -472,12 +460,12 @@ void Homer::runClicked()
   catch (std::runtime_error &e)
   {// possibly a Python run time error
     QMessageBox::critical(this, "", 
-      QString("Exception \"") + QString::fromStdString(e.what()) + QString("\" encountered during execution"));
+      QString::fromStdString(e.what()) + QString("  Exception encountered during execution"));
   }
   catch (std::exception &e)
   {// any exception that works its way passed here would cause QTiplot to suggest that it's shutdown, which I think would be uneccessary
-    QMessageBox::critical(this, "", 
-      QString("Exception \"") + QString::fromStdString(e.what()) + QString("\" encountered"));
+    QMessageBox::critical(this, "", QString::fromStdString(e.what()) +
+      QString("  Exception encountered"));
   }
   
   pythonIsRunning(false);
@@ -527,7 +515,8 @@ bool Homer::runScripts()
   // we're back to processing the settings on the first page
   m_uiForm.tabWidget->setCurrentIndex(0);
   //unitsConv is always executed, the user can't switch this off, unless there's an error on the form. To examine the script that is executed uncomment 
-  // QStringList list1 = unitsConv.python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-6)+'\n'+*(list1.end()-5)+'\n'+*(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2));
+  // use the following code to see the script
+  //QStringList list1 = unitsConv.python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-6)+'\n'+*(list1.end()-5)+'\n'+*(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2));
   errors = unitsConv.run();
   pythonIsRunning(false); 
 

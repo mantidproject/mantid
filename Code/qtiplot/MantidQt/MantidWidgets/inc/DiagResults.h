@@ -29,19 +29,20 @@ namespace MantidQt
         void setStatus(QString &info) {status = info;}
         const QString& getStatus() const {return status;}
 		
-        QString test;                       //< Name of the test is displayed to users
-        QString status;                     //< status is displayed to users
-        QString outputWS;                   //< Name of the workspace that contains the bad detectors
-        int numBad;                         //< The total number of bad detectors
-        QString inputWS;                    //< If these results came from loading another workspace this contains the name of that workspace
-        enum resultsStatus {NORESULTS = 15-INT_MAX};  //< a flag value to indicate that there are no results to show, could be that the test has not completed or there was an error
+        QString test;                                 ///< Name of the test is displayed to users
+        QString status;                               ///< status is displayed to users
+        QString outputWS;                             ///< Name of the workspace that contains the bad detectors
+        int numBad;                                   ///< The total number of bad detectors
+        QString inputWS;                              ///< If these results came from loading another workspace this contains the name of that workspace
+        QString listBad;                              ///< the spectra numbers of all the spectrums that were found bad
+        enum resultsStatus {NORESULTS = 15-INT_MAX};  ///< a flag value to indicate that there are no results to show, could be that the test has not completed or there was an error
       };
   
       static const QString TESTS[];
       static const int NUMTESTS;
 	  
       DiagResults(QWidget *parent);
-      void notifyDialog(const TestSummary &display);
+      void addResults(const TestSummary &display);
       void showButtons(bool show=true);
 
     signals:

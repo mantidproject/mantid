@@ -24,7 +24,7 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::Homer &userSettings,
   // load a template for the Python script that we will contain in a string
   QString pythonFileName =
     scriptsdir.absoluteFilePath("Excitations/DetectorTestLib.py");
-  appendFile(pythonFileName);
+  loadFile(pythonFileName);
   pythonFileName =
     scriptsdir.absoluteFilePath("Excitations/ConversionLib.py");
   appendFile(pythonFileName);
@@ -98,7 +98,7 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
   QDir scriptsdir(QString::fromStdString(ConfigService::Instance().getString("pythonscripts.directory")));
   QString pythonFileName =
     scriptsdir.absoluteFilePath("Excitations/GUI_Interface.py");
-  appendFile(pythonFileName);  // we make a copy of code we read from the file because we might replace some terms and we might need to repeat this operation
+  appendFile(pythonFileName);
 
   QString err;
 
@@ -111,7 +111,9 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 
   createRebinStatmens(m_pyScript);
 
-  createNormalizationStatmens(m_pyScript, whiteB);
+  m_pyScript.replace("|GUI_SET_NORM|", "'"+getNormalization()+"'");
+
+  m_pyScript.replace("|GUI_SET_WBV|", "'"+whiteB+"'");
 
   // use a FileProperty to check that the file exists
   std::vector<std::string> exts;
@@ -147,45 +149,6 @@ void deltaECalc::createGetEIStatmens(QString &newScr)
   //this e guess (approximate Ei value) doesn't always get used, it depends on the tests above. However, Pyhton requires that the '|' in the code is replaced by something
   LEChkCpIn(newScr, "|GUI_SET_E_GUESS|", m_sets.leEGuess,
     gEi->getProperty("EnergyEstimate"));
-}
-/** Completes the Python statements that implement normalisation
-*  @param newScr the Python script being developed from the template
-*/
-void deltaECalc::createNormalizationStatmens(QString &newScr, const QString &norm)
-{  
-  newScr.replace("|GUI_SET_NORM|", "'"+getNormalization()+"'");
-
-  newScr.replace("|GUI_SET_WBV|", "'"+norm+"'");
-  
-  newScr.replace("|GUI_WB_LOW_E|", "'"+m_sets.leWBV0Low->text()+"'");
-  newScr.replace("|GUI_WB_HIGH_E|", "'"+m_sets.leWBV0High->text()+"'");
-
-  QString rebinStr = m_sets.leWBV0Low->text()+","+QString::number(
-    2*(m_sets.leWBV0High->text().toDouble()-m_sets.leWBV0Low->text().toDouble()))
-	+","+m_sets.leWBV0High->text();
-  
-  bool isNumber;
-  // check that we've got a usable value, an empty box is OK it means that the default will be used
-  if ( ! m_sets.leWBV0Low->text().isEmpty() )
-  {
-    m_sets.leWBV0Low->text().toDouble(&isNumber);
-	if ( ! isNumber )
-	{
-	  m_fails[m_sets.leWBV0Low] = "Must be a number";
-	}
-  }
-  
-  // using the algorithm's validator is a more stringent but less specific test, we don't get which number is out
-  IAlgorithm_sptr rebin = AlgorithmManager::Instance().createUnmanaged("Rebin");
-  rebin->initialize();
-  Property * const params = rebin->getProperty("Params");
-  // this is the rebin string that is created python
-
-  std::string error = params->setValue(rebinStr.toStdString());
-  if ( ! error.empty() )
-  {// the combination of the two numbers is wrong but which needs changing? Place the star at the end and allow the user to work it out
-    m_fails[m_sets.leWBV0High] = error;
-  }
 }
 /** Tests the user definitions for the TOF start and ends of the background regions
 *  against their FlatBackground validator and adds the user values to the Python script
@@ -270,7 +233,7 @@ QString deltaECalc::getNormalization() const
   {
     return m_sets.cbNormal->currentText();
   }// if we get passed this point it must be one of the monitor normalisations
-  if (m_sets.cbMonitors->currentText().isEmpty()) Exception::NotFoundError("Normalise to monitor has been selected but which monitor to use hasn't been specified", "monitors");
+  if (m_sets.cbMonitors->currentText().isEmpty()) Exception::NotFoundError("Normalize to monitor has been selected but which monitor to use hasn't been specified", "monitors");
   return "monitor-"+m_sets.cbMonitors->currentText();
 }
 /** Use the detector masking present in the workspace whose name was passed in

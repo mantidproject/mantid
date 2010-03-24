@@ -73,6 +73,8 @@ void MWDiag::loadDefaults()
 {  
   m_designWidg.leIFile->setText(
     m_prevSets.value("input mask", "").toString());
+  m_designWidg.leOFile->setText(
+    m_prevSets.value("output file", "").toString());
   m_designWidg.leSignificance->setText(
     m_prevSets.value("significance", SIGNIFIC_TEST).toString());
   m_designWidg.ckAngles->setChecked(
@@ -105,6 +107,8 @@ void MWDiag::loadDefaults()
 void MWDiag::saveDefaults()
 {
   m_prevSets.setValue("input mask", m_designWidg.leIFile->text());
+  m_prevSets.setValue("output file", m_designWidg.leOFile->text());
+
   m_prevSets.setValue("significance", m_designWidg.leSignificance->text());
   m_prevSets.setValue("no solid", m_designWidg.ckAngles->isChecked());
   
@@ -217,7 +221,7 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
 
 	// controls that copy the text from other controls
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
-	  m_WBV1, SLOT(suggestFilename(const QString&)));
+      m_WBV1, SLOT(suggestFilename(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
 	        this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
@@ -244,7 +248,7 @@ void MWDiag::setUpValidators()
 
   m_validators[m_designWidg.leVariation] = newStar(m_designWidg.gbVariation,2,1);
 
-  m_validators[m_designWidg.leAcceptance] = newStar(m_designWidg.gbBackTest,0,3);
+  m_validators[m_designWidg.leAcceptance] = newStar(m_designWidg.gbBackTest,0,6);
   m_validators[m_designWidg.leStartTime] = newStar(m_designWidg.gbBackTest, 1,1);
   m_validators[m_designWidg.leEndTime] = newStar(m_designWidg.gbBackTest, 1, 5);
 
@@ -293,7 +297,7 @@ void MWDiag::notifyDialog(const DiagResults::TestSummary &display)
   {
     throw Exception::NullPointerException("MWDiag::notifyDialog", "m_dispDialog");
   }
-  m_dispDialog->notifyDialog(display);
+  m_dispDialog->addResults(display);
 }
 /** close the results window, if there is one open
 */
@@ -358,15 +362,15 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
   try
   {
     // these objects read the user settings in the GUI on construction
-    whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFileName());
+    whiteBeam1 firstTest(this, m_designWidg, m_WBV1->getFileName(), m_instru->currentText(), outWS);
   
     prob1 = firstTest.checkNoErrors(m_validators);
   
     // the two tests below are optional, dependent on the information supplied by the user
     boost::shared_ptr<whiteBeam2> optional1;
-    QString prob2 = possibleSecondTest(optional1);
+    QString prob2 = possibleSecondTest(optional1, outWS);
     boost::shared_ptr<backTest> optional2;
-    QString prob3 = possibleThirdTest(optional2);
+    QString prob3 = possibleThirdTest(optional2, outWS);
   
     //if were errors return a description of the first error
     //stars have already been placed next to any problem input
@@ -389,8 +393,6 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
     {
       DiagResults::TestSummary sumFirst = singleWhiteBeamTest(firstTest);
 
-      // the final test contains the definitive data, we'll only know which test was the last at the end, we'll keep on updating this pointer
-      DiagResults::TestSummary *finalTest = &sumFirst;
       // must have the same scope as finalTest above, these structures are used to report progress and pass results from one test to another
       DiagResults::TestSummary sumOption1("");
       DiagResults::TestSummary sumOption2("");
@@ -399,23 +401,13 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
       if ( optional1.use_count() > 0 )
       {
         sumOption1 = whiteBeamCompTest(sumFirst, optional1);
-        finalTest = &sumOption1;
         tempOutputWS.push_back(sumOption1.inputWS.toStdString());
       }
 
       if ( optional2.use_count() > 0 )
       {
         sumOption2 = backGroundTest(sumFirst, sumOption1, optional2);
-	      finalTest = &sumOption2;
-      }
-	
-      //  the test are complete display and save output
-  	  if ( ! outWS.isEmpty() )
-      {
-        renameWorkspace(finalTest->outputWS, outWS);
-        finalTest->outputWS = outWS;
-      }
-      notifyDialog(*finalTest);
+      }	
     }
     catch ( Exception::NullPointerException )
     {// the diag has died, probably the user closed it
@@ -423,28 +415,27 @@ QString MWDiag::run(const QString &outWS, const bool saveSettings)
     }
     catch (std::exception &e)
     {
-      return "Exception \""+QString(e.what())+"\" encountered running detector diagnostic tests";
+      return QString(e.what())+"  Exception encountered running detector diagnostic tests";
     }
   }
   catch (std::invalid_argument &e)
   {
     return "In detector test:\n" + QString(e.what());
   }
-
   // clean up tempory workspaces that were used in the calculations
   std::vector<std::string>::const_iterator it = tempOutputWS.begin();
   for ( ; it !=  tempOutputWS.end(); ++it )
   {
     Mantid::API::FrameworkManager::Instance().deleteWorkspace(*it);
   }
- 
-  if (prob1.isEmpty() && saveSettings)
-  {//avoid saving user settings that caused errors
-    saveDefaults();
-  }
   //tell the results window it may re-enable its buttons
   blockPython(false);
-  // at this point it's likely that problem=="" but any problem would be returned
+
+  if (prob1.isEmpty() && saveSettings)
+  {//avoid saving user settings that caused errors but assume there are no errors by this point
+    saveDefaults();
+  }
+  // prob1 should be empty so the next line is equivalent to return ""
   return prob1;
 }
 void MWDiag::blockPython(const bool block)
@@ -456,15 +447,16 @@ void MWDiag::blockPython(const bool block)
 }
 /** Pointers the passed pointer to an object will contain all the Python script for
 *  the two white beam vanadium detector test
-*  @param whiteBeamComp will be pointered to a valid whiteBeam2 object
+*  @param whiteBeamComp will be pointed at a valid whiteBeam2 object
+*  @param outWS the name of the workspace that will remain after execution
 *  @return any errors or an empty string for no error
 */
-QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp)
+QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp, const QString &WSName)
 {  
   if ( ! m_WBV2->getFileName().isEmpty() )
   {// the user has supplied an input file for the second test so fill the shared_ptr with the script
     whiteBeamComp.reset(
-	    new whiteBeam2(this, m_designWidg, m_WBV2->getFileName()));
+	    new whiteBeam2(this, m_designWidg, m_WBV2->getFileName(), m_instru->currentText(), WSName));
 	//report any problems trying to construct it, likely to be problems with the values suggested by the user
     return whiteBeamComp->checkNoErrors(m_validators);
   }
@@ -475,11 +467,11 @@ QString MWDiag::possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp)
 *  @param backCheck will be pointered to a valid backTest object
 *  @return any errors or an empty string for no error
 */
-QString MWDiag::possibleThirdTest(boost::shared_ptr<backTest> &backCheck)
+QString MWDiag::possibleThirdTest(boost::shared_ptr<backTest> &backCheck, const QString &WSName)
 {
   if (m_designWidg.ckDoBack->isChecked())
   { //generate a Python script
-    backCheck.reset(new backTest(this, m_designWidg, m_monoFiles));
+    backCheck.reset(new backTest(this, m_designWidg, m_monoFiles, m_instru->currentText(), WSName));
 	//report any problems trying to construct it, likely to be problems with the values suggested by the user
 	return backCheck->checkNoErrors(m_validators);
   }
@@ -497,8 +489,13 @@ DiagResults::TestSummary MWDiag::singleWhiteBeamTest(whiteBeam1 &python)
   results.status = "Analysing white beam vanadium 1";
   notifyDialog(results);
   
-  // use this code to see the script    QMessageBox::critical(this, this->windowTitle(), python.python());
+  // use the following code to see the script QStringList list1 = python.python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
   QString error = results.pythonResults(python.run());
+  
+  if ( results.status == "success" )
+  {
+    results.status = "White beam vanadium 1 complete";
+  }
   notifyDialog(results);
   
   if ( ! error.isEmpty() )
@@ -522,8 +519,13 @@ DiagResults::TestSummary MWDiag::whiteBeamCompTest(const DiagResults::TestSummar
 
   // adds the output workspace from the first test to the current script
   python->incPrevious(firstTest);
-  //uncomment out to check the script  QMessageBox::critical(this, this->windowTitle(), python->python());
+  // use the following code to see the script QStringList list1 = python->python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
   QString error = results.pythonResults(python->run());
+  
+  if ( results.status == "success" )
+  {
+    results.status = "White beam vanadium comparison complete";
+  }
   notifyDialog(results);
 
   if ( ! error.isEmpty() )
@@ -546,17 +548,21 @@ DiagResults::TestSummary MWDiag::backGroundTest(const DiagResults::TestSummary &
   results.status = "Analysing the background regions of experimental runs";
   notifyDialog(results);
   
-  python->incFirstTest(firstTest); 
   if ( secondTest.status != "Error" )
   {
-    python->incSecondTest(secondTest);
+    python->incSecondTest(secondTest, secondTest.inputWS);
   }
   else
   {
-    python->noSecondTest();
+    python->incFirstTest(firstTest);
   }
-// uncomment out this to see the script QMessageBox::critical(this, this->windowTitle(), python->python());
+  // use the following code to see the script  QStringList list1 = python->python().split("\n"); QMessageBox::critical(this, "", *(list1.end()-4)+'\n'+*(list1.end()-3)+'\n'+*(list1.end()-2)+'\n'+*(list1.end()-1));
   QString error = results.pythonResults(python->run());
+  
+  if ( results.status == "success" )
+  {
+    results.status = "Tests on low flux background complete";
+  }
   notifyDialog(results);
 
   if ( ! error.isEmpty() )

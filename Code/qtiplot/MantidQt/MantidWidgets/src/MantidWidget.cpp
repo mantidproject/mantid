@@ -12,11 +12,14 @@ using namespace MantidQt::MantidWidgets;
 
 bool MantidWidget::g_pythonRunning = false;
 
+/**Creates a widget whose runAsPythonScript() singal is connects MantidPlot via a GUI
+*  @param interface a GUI object whose runAsPythonScript() is connected to MantidPlot
+*/
 MantidWidget::MantidWidget(QWidget *interface) : QWidget(interface)
 {
   if (interface)
   {
-    // interface widgets have their runAsPythonScript signal connected to Qtiplot, this widget will only run Python if this signal is connected to that
+    // interface widgets have their runAsPythonScript signal connected to Qtiplot, this widget will only run Python if this signal is connected to an interface
     connect(this, SIGNAL(runAsPythonScript(const QString&)),
             interface, SIGNAL(runAsPythonScript(const QString&)));
   }

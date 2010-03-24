@@ -27,27 +27,27 @@ QString DiagResults::TestSummary::pythonResults(const QString &pyhtonOut)
 
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
-    status = "Error", outputWS = "", inputWS = "";
+    status = "Error", outputWS = "", inputWS = "", listBad = "";
     return "Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
   }
-  // each script should return 7 strings
-  if ( results.count() != 7 || results[0] != "success" )
+  if ( results[0] != "Created the workspaces:" )
   {// there was an error in the python, disregard these results
-    status = "Error", outputWS = "", inputWS = "";
-    return results[1] + "\" found during " + results[2] + ". Diagnostic information may be found in the Mantid and python logs.";
+    status = "Error", outputWS = "", inputWS = "", listBad = "";
+    return results[0] + " '"+results[1]+"' " + results[2] + ". Diagnostic information may be found in the Mantid and python logs.";
   }
-  if ( test != results[1] )
+  if ( ! results[3].contains(test) )
   {
-    throw std::invalid_argument("Logic error:"+test.toStdString()+" is not "+results[1].toStdString());
+    throw std::invalid_argument("Logic error: test '"+test.toStdString()+"' was excuted out of order");
   }
   
   //no errors, return the results
   std::string theBad = results[4].toStdString();
   
-  status = results[2];
-  outputWS = results[3];
+  status = "success";
+  outputWS = results[1];
   numBad = boost::lexical_cast<int>(theBad);
-  inputWS = results[5];
+  inputWS = results[2];
+  listBad = results[5];
   return "";
 }
 
@@ -90,7 +90,7 @@ DiagResults::DiagResults(QWidget *parent): MantidWidget(parent),
   setAttribute(Qt::WA_DeleteOnClose);
 }
 
-void DiagResults::notifyDialog(const TestSummary &display)
+void DiagResults::addResults(const TestSummary &display)
 {
   // store with the test the location of the data, outputWS could be an empty string
   m_outputWorkS[display.test] = display.outputWS;

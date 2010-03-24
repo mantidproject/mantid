@@ -163,6 +163,8 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const 
 
   // there are very often spectra that are missing detectors, as this can be a lot of detectors log it once at the end
   std::vector<int> spuriousSpectra;
+  // used only for debugging
+  int nMasked = 0;
   // Loop over the spectra, writing out Y and then E values for each
   for (int i = 0; i < nHist; i++)
   {
@@ -176,6 +178,7 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const 
       else
       {//all the detectors are masked, write the masking value from the SPE spec http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
         writeMaskFlags(outFile);
+        nMasked ++;
       }
     }
     catch (Exception::NotFoundError &)
@@ -189,7 +192,7 @@ void SaveSPE::writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const 
       progress.report();
     }
   }
-  logAnyMissing(spuriousSpectra);
+  logMissingMasked(spuriousSpectra, nHist-nMasked, nMasked);
 }
 /** Write the bin values and errors in a single histogram spectra to the file
 *  @param WS the workspace to being saved
@@ -255,13 +258,18 @@ void SaveSPE::writeValue(const double value, FILE * const outFile) const
     fprintf(outFile,"\n");
   }
 }
-
-void SaveSPE::logAnyMissing(std::vector<int> &inds) const
+/**Write a summary information about what the algorithm had managed to save to the
+*  file
+*  @param inds the indices of histograms whose detectors couldn't be found
+*  @param nonMasked the number of histograms saved successfully
+*  @param masked the number of histograms for which mask values were writen
+*/
+void SaveSPE::logMissingMasked(const std::vector<int> &inds, const int nonMasked, const int masked) const
 {
   std::vector<int>::const_iterator index = inds.begin(), end = inds.end();
   if (index != end)
   {
-    g_log.information() << "Found " << inds.size() << " spectra without associated detectors, probably the detectors are not present in the instrument definition, this is not unusual. The Y values for those spectra have been set to zero" << std::endl;
+    g_log.information() << "Found " << inds.size() << " spectra without associated detectors, probably the detectors are not present in the instrument definition, this is not unusual. The Y values for those spectra have been set to zero\n";
     g_log.information() << "The spectrum indices that were set to zero are: " << *index;
     for ( ; index != end; ++index )
     {
@@ -269,6 +277,7 @@ void SaveSPE::logAnyMissing(std::vector<int> &inds) const
     }
     g_log.information() << std::endl;
   }
+  g_log.debug() << "Wrote " << nonMasked << " histograms and " << masked << " masked histograms to the output SPE file\n";
 }
 
 }

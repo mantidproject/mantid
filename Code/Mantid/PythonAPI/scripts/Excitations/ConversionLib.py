@@ -4,11 +4,12 @@ import CommonFunctions as common
 import ExcitDefaults
 import math
 
-def NormaliseTo(reference, WS, fromTOF):
+def NormaliseTo(reference, WS, fromTOF, instrument=common.defaults()):
   if (reference == 'monitor-monitor 1') :
-    # ??STEVES read this in from defaults
-    min = 1000-fromTOF
-    max = 2000-fromTOF
+    if instrument.monitor1_integr[0] <= -1e5 or instrument.monitor1_integr[1] <= -1e5 :
+      raise Exception('Can\'t normalize to monitor1 without instrument defaults information')
+    min = instrument.monitor1_integr[0]-fromTOF
+    max = instrument.monitor1_integr[1]-fromTOF
     NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=1, IntegrationRangeMin=min, IntegrationRangeMax=max)
 
   elif reference == 'monitor-monitor 2' :
@@ -26,36 +27,38 @@ def NormaliseTo(reference, WS, fromTOF):
   elif reference != 'no normalization' :
     raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')
 
-def NormaliseToWhiteBeam(WBRun, toNorm,mapFile, detMask, rebinString, prevNorm) :
+def NormaliseToWhiteBeam(instr, WBRun, toNorm, mapFile, detMask, prevNorm) :
   theNorm = "_ETrans_norm_tempory_WS"
   try:
-    common.LoadNexRaw(WBRun, theNorm)
-    NormaliseTo(prevNorm, mtd[theNorm], 0)
+    pNorm = common.LoadNexRaw(instr.getFileName(WBRun), theNorm)
+    NormaliseTo(prevNorm, pNorm, 0, instr)
 
-    ConvertUnits(theNorm, theNorm, "Energy", AlignBins=0)
+    ConvertUnits(pNorm, pNorm, "Energy", AlignBins=0)
 
     #this both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-    Rebin(theNorm, theNorm, rebinString)
-   # shouldn't we do the correction? It affects things when the angles are different
-  #  DetectorEfficiencyCor(theNorm, theNorm, IncidentE)  
+    #    wb_rebin = str(wb_low_e) + ', ' + str(2.0*float(wb_high_e)) + ', ' + str(wb_high_e)
+    Rebin(pNorm, pNorm,
+      str(instr.white_beam_integr[0])+','+str(2.0*instr.white_beam_integr[1])+','+str(instr.white_beam_integr[1])  )
+   # shouldn't we do the correction? It affects things when the angles are different, would need a LoadDetectorInfo too
+  #  DetectorEfficiencyCor(pNorm, pNorm, IncidentE)  
     if detMask != '' :
-      MaskDetectors(Workspace=theNorm, SpectraList=detMask)
+      MaskDetectors(pNorm, SpectraList=detMask)
     
     if mapFile!= "" :
-      GroupDetectors( theNorm, theNorm, mapFile, KeepUngroupedSpectra=0)
+      GroupDetectors(pNorm, pNorm, mapFile, KeepUngroupedSpectra=0)
 
-    Divide(toNorm, theNorm, toNorm)
+    toNorm /= pNorm                               # we need '/=' here '/' by itself would do something different (create a new workspace)
   
   finally:
     mantid.deleteWorkspace(theNorm)
 
-# returns the background range from the string range, which could be two numbers separated by a coma or could be empty and then the default values in instrument are used. Another possiblity is that background correction isn't going to be done, then we don't have to do anything
+# returns the background range from the string range, which could be two numbers separated by a comma or could be empty and then the default values in instrument are used. Another possiblity is that background correction isn't going to be done, then we don't have to do anything
 # throws if the string range is in the wrong format
 def getBackRange(range, instrument) :
   if range == 'noback' :  return ['noback', 'noback']
   # load the default time of flight values that delimit the background region
-  TOFLow = instrument.backgroundRange[0]
-  TOFHigh = instrument.backgroundRange[1]
+  TOFLow = instrument.background_range[0]
+  TOFHigh = instrument.background_range[1]
   if range != '' :
     range = common.listToString(range)
     strings = range.split(',')
@@ -76,7 +79,7 @@ def retrieveSettings(instrum, back, runs):
   try:
     [TOFLow, TOFHigh] = getBackRange(back, instru)
   except:
-    raise Exception('The background range must be specified as a string\n  Two numbers separated by a coma to specify the range\n  noback to disable background correction\n  an empty string or absent for no background correction')
+    raise Exception('The background range must be specified as a string\n of two numbers separated by a comma specifing the range\nor noback to disable background correction')
   
   return (instru, TOFLow, TOFHigh, run_nums)
 
@@ -99,7 +102,7 @@ def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile=''):
 
   #??STEVES?? MARI specfic code GetEiData.FirstMonitor ?
   p0=workS.getDetector(1).getPos()                                              # set the source to be where the neutrons were at the origin of time (that first GetEi monitor)
-  mtd.sendLogMessage('Adjusting the TOF values to start when the peak was registered by the monitor (2) at the new origin')
+  mtd.sendLogMessage('Adjusting the X-values so that the zero of time is when the peak was registered at the new origin , which monitor 2')
   src = workS.getInstrument().getSource().getName()                             #this name could be 'Moderator',  'undulator', etc.
   MoveInstrumentComponent(workS, src, X=p0.getX() , Y=p0.getY() ,Z=p0.getZ(), RelativePosition=False)
   return [Ei, offSetTime]
@@ -111,7 +114,7 @@ tempWS = '_ETrans_loading_tempory_WS'
 # Applies unit conversion, detector convcy and grouping correction to a
 # raw file
 ###########################################
-def mono_sample(instrum, runs, Ei, d_rebin, wbrf, wb_low_e=0, wb_high_e=1e8, getEi=True, back='', norma='', det_map='', det_mask='', nameInOut = 'mono_sample_temporyWS') :
+def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', nameInOut = 'mono_sample_temporyWS') :
   (instru, TOFLow, TOFHigh, run_nums) = retrieveSettings(instrum, back, runs)
 
   #----Calculations start------------------
@@ -128,7 +131,7 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, wb_low_e=0, wb_high_e=1e8, get
       ConvertFromDistribution(pInOut)                                           #some algorithms later can't deal with distributions
   
     # deals with normalize to monitor (e.g.  norm = 'monitor-monitor 1'), current (if norm = 'protons (uAh)'), etc.
-    NormaliseTo(getNorm(instru, norma), pInOut, offSet)
+    NormaliseTo(getNorm(instru, norma), pInOut, offSet, instru)
   
     ConvertUnits(pInOut, pInOut, 'DeltaE', 'Direct', Ei, AlignBins=0)
 
@@ -141,19 +144,19 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, wb_low_e=0, wb_high_e=1e8, get
       MaskDetectors(Workspace=pInOut, SpectraList=common.listToString(det_mask))
     
     if det_map != '':
-      GroupDetectors( pInOut, pInOut, det_map, KeepUngroupedSpectra=0)
+      GroupDetectors(pInOut, pInOut, det_map, KeepUngroupedSpectra=0)
 
     ConvertToDistribution(pInOut)
   
-    CreateSingleValuedWorkspace(tempWS, 1.8182e8)
-    Multiply(pInOut, tempWS, pInOut)
-    mantid.deleteWorkspace(tempWS)
+#    CreateSingleValuedWorkspace(tempWS, instru.scale_factor)
+#    Multiply(pInOut, tempWS, pInOut)
+#    mantid.deleteWorkspace(tempWS)
+    pInOut *= instru.scale_factor                               #we need '*=' here '*' would do something very different
     
     #replaces inifinities and error values with large numbers. Infinity values can be normally be avoided passing good energy values to ConvertUnits
     ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
 
-    wb_rebin = str(wb_low_e) + ', ' + str(2*float(wb_high_e)) + ', ' + str(wb_high_e)
-    NormaliseToWhiteBeam(instru.getFileName(wbrf), pInOut, det_map, det_mask, wb_rebin, norma)
+    NormaliseToWhiteBeam(instru, wbrf, pInOut, det_map, det_mask, norma)
    
     return pInOut
 
@@ -168,4 +171,6 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, wb_low_e=0, wb_high_e=1e8, get
 
 #below is a quick test/example command to run this library, it must be commented or the library won't work!
 #badSpectra = diagnose(instrum='MAR',wbrf='11060',wbrf2='11060',runs='15537',tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,zero='False', out_asc='',maskFile='')
-#pRes = mono_sample('MAR', '15537', 82.541, '-10,0.1, 70', 11060, wb_low_e=20, wb_high_e=40, getEi='false', back='', norma='monitor-monitor 1', det_map='mari_res.map', det_mask=[])
+#getBackRange('('+'18000'+','+'19000'+')', ExcitDefaults.loadDefaults('MAR'))
+#(instru, TOFLow, TOFHigh, run_nums) = retrieveSettings('MAR', 'noback', '11001')
+#pRes = mono_sample('MAR', '15537', 82.541, '-10,0.1, 70', 11060, getEi='false', back='('+'18000'+','+'19000'+')', norma='monitor-monitor 1', det_map='mari_res.map', det_mask=[])

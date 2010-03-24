@@ -66,8 +66,8 @@ namespace MantidQt
 	    void setupToolTips();
       void connectSignals(const QWidget * const parentInterface);
   	  void setUpValidators();
-	    QString possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp);
-	    QString possibleThirdTest(boost::shared_ptr<backTest> &backCheck);
+	    QString possibleSecondTest(boost::shared_ptr<whiteBeam2> &whiteBeamComp, const QString &WSName);
+	    QString possibleThirdTest(boost::shared_ptr<backTest> &backCheck, const QString &WSName);
       DiagResults::TestSummary singleWhiteBeamTest(whiteBeam1 &python);
 	    DiagResults::TestSummary whiteBeamCompTest(const DiagResults::TestSummary firstTest, boost::shared_ptr<whiteBeam2> &python);
 	    DiagResults::TestSummary backGroundTest(const DiagResults::TestSummary &firstTest, const DiagResults::TestSummary &secondTest, boost::shared_ptr<backTest>& thisTest);

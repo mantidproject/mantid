@@ -63,7 +63,7 @@ const std::vector<std::string>& MWRunFiles::getFileNames() const
 {
   if ( ! m_designedWidg.valid->isHidden() )
   {// the validator is showing there was a problem with one of the input files
-	throw std::invalid_argument("Some input files could not be found in the edit box marked with a *");
+	  throw std::invalid_argument("Some input files could not be found in the edit box marked with a *");
   }
   return m_files;
 }
@@ -156,6 +156,7 @@ void MWRunFiles::readRunNumAndRanges()
 }
 void MWRunFiles::readComasAndHyphens(const std::string &in, std::vector<std::string> &out)
 {
+  out.clear();
   if ( in.empty() )
   {// it is not an error to have an empty line but it would cause problems with an error check a the end of this function
     return;
@@ -164,7 +165,6 @@ void MWRunFiles::readComasAndHyphens(const std::string &in, std::vector<std::str
   Poco::StringTokenizer ranges(in, "-");
   Poco::StringTokenizer::Iterator aList = ranges.begin();
 
-  out.clear();
   do
   {
     Poco::StringTokenizer preHyp(*aList, ",", Poco::StringTokenizer::TOK_TRIM);
@@ -173,7 +173,7 @@ void MWRunFiles::readComasAndHyphens(const std::string &in, std::vector<std::str
     {// can only mean that there was only an empty string or white space the '-'
       throw std::invalid_argument("'-' found at the start of a list, can't interpret range specification");
     }
-	out.reserve(out.size()+preHyp.count());
+	  out.reserve(out.size()+preHyp.count());
     for ( ; readPos != preHyp.end(); ++readPos )
     {
       out.push_back(*readPos);
@@ -206,11 +206,11 @@ void MWRunFiles::readComasAndHyphens(const std::string &in, std::vector<std::str
       {
         out.push_back(boost::lexical_cast<std::string>(j));
       }
-	}
-	catch (boost::bad_lexical_cast)
-	{// the hyphen wasn't between two numbers, don't intepret it as a range instaed reconstruct the hyphenated string and add it to the list
-	  out.back() += "-" + *readPos;
-	}
+	  }
+	  catch (boost::bad_lexical_cast)
+	  {// the hyphen wasn't between two numbers, don't intepret it as a range instaed reconstruct the hyphenated string and add it to the list
+	    out.back() += "-" + *readPos;
+	  }
   }
   while( ++aList != ranges.end() );
 
@@ -291,17 +291,18 @@ void MWRunFile::suggestFilename(const QString &newName)
 {
   try
   {// check if the user has entered another value (other than the default) into the box
-    m_userChange = m_userChange || (m_suggestedName != getFileName());
+    m_userChange =
+      m_userChange || (m_suggestedName != m_designedWidg.leFiles->text());
   }
   catch (std::invalid_argument)
-  {// its possible that the old value was a bad value caused an exception, ignore that
+  {// its possible that the old value was a bad value and caused an exception, ignore that
   }
   //only set the filename to the default if the user hadn't changed it
   if ( ! m_userChange )
   {
     m_suggestedName = newName;
-	m_designedWidg.leFiles->setText(newName);
-	readEntries();
+    m_designedWidg.leFiles->setText(newName);
+    readEntries();
   }
 }
 /** Slot opens a file browser, writing the selected file to leFiles

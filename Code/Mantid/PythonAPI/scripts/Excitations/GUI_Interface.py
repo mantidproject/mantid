@@ -18,4 +18,5 @@ if DetectorMask != '' :
   badSpectra = FDOL.getPropertyValue('BadSpectraNums')
   mantid.deleteWorkspace('_ETrans_loading_bad_detector_WS')
 
-mono_sample('MAR', '|GUI_SET_RAWFILE_LIST|', |GUI_SET_E_GUESS|, |GUI_SET_BIN_BOUNDS|, |GUI_SET_WBV|, wb_low_e=|GUI_WB_LOW_E|, wb_high_e=|GUI_WB_HIGH_E|, getEi=|GUI_SET_E|, back='('+|TOF_LOW|+','+|TOF_HIGH|+')', norma=|GUI_SET_NORM|, det_map=|GUI_SET_MAP_FILE|, det_mask=badSpectra, nameInOut='|GUI_SET_OUTWS|')
+mtd.sendLogMessage("--Executing Python function: mono_sample('MAR', '|GUI_SET_RAWFILE_LIST|', |GUI_SET_E_GUESS|, |GUI_SET_BIN_BOUNDS|, |GUI_SET_WBV|, getEi=|GUI_SET_E|, back='('+|TOF_LOW|+','+|TOF_HIGH|+')', norma=|GUI_SET_NORM|, det_map=|GUI_SET_MAP_FILE|, det_mask=badSpectra, nameInOut='|GUI_SET_OUTWS|')--")
+mono_sample('MAR', '|GUI_SET_RAWFILE_LIST|', |GUI_SET_E_GUESS|, |GUI_SET_BIN_BOUNDS|, |GUI_SET_WBV|, getEi=|GUI_SET_E|, back='('+|TOF_LOW|+','+|TOF_HIGH|+')', norma=|GUI_SET_NORM|, det_map=|GUI_SET_MAP_FILE|, det_mask=badSpectra, nameInOut='|GUI_SET_OUTWS|')

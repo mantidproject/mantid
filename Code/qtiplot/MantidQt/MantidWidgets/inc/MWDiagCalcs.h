@@ -12,12 +12,10 @@ namespace MantidQt
     class whiteBeam1 : public pythonCalc
     {
     public:
-      whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &WBVFile);
+      whiteBeam1(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &WBVFile, const QString &instru, const QString &WSName);
+      void addDiagnoseFunc(const Ui::MWDiag &userSettings, const QString &WBVFile, const QString &instru, const QString &WSName);
 
     private:
-
-      /// the form that ws filled in by the user
-      const Ui::MWDiag &m_settings;
       // holds the prefix that we give to output workspaces that will be deleted in the Python
       static const QString tempWS;
     };
@@ -25,8 +23,9 @@ namespace MantidQt
     class whiteBeam2 : public pythonCalc
     {
     public:
-      whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &inFile);
-	  void incPrevious(const DiagResults::TestSummary &firstTest);
+      whiteBeam2(QWidget * const interface, const Ui::MWDiag &userSettings, const QString &inFile, const QString &instru, const QString &WSName);
+      void addDiagnoseFunc(const Ui::MWDiag &userSettings, const QString &inFile, const QString &instru, const QString &WSName);
+      void incPrevious(const DiagResults::TestSummary &firstTest);
   
     private:
 
@@ -40,10 +39,10 @@ namespace MantidQt
     class backTest : public pythonCalc
     {
     public:
-      backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const std::vector<std::string> &runs);
-	  void incFirstTest(const DiagResults::TestSummary &results1);
-      void incSecondTest(const DiagResults::TestSummary &results2);
-	  void noSecondTest();
+      backTest(QWidget * const interface, const Ui::MWDiag &userSettings, const std::vector<std::string> &runs, const QString &instru, const QString &WSName);
+      void addDiagnoseFunc(const Ui::MWDiag &userSettings, const std::vector<std::string> &runs, const QString &instru, const QString &WSName);
+      void incFirstTest(const DiagResults::TestSummary &results);
+      void incSecondTest(const DiagResults::TestSummary &results, const QString &WS);
     private:
 
       /// the form that ws filled in by the user

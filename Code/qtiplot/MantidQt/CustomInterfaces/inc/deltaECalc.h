@@ -35,7 +35,6 @@ namespace MantidQt
 
 	    QString createProcessingScript(const std::string &inFiles, const std::string &oName, const QString &whiteB);
   	  void createGetEIStatmens(QString &newScr);
-	    void createNormalizationStatmens(QString &newScr, const QString &norm);
 	    void createRemoveBgStatmens(QString &newScr);
   	  void createRebinStatmens(QString &newScr);
       void createOutputStatmens(QString &WSName, QString &newScr);

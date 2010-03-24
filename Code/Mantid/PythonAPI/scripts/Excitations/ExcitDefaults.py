@@ -1,8 +1,18 @@
 #! you need to restart the application you are using (e.g. MantidPlot) before changes to this file will take effect!
 import CommonFunctions as common
 
-MARI = common.defaults(backgroundRange=(12000, 18000), normalization='monitor-monitor 1', instrument_pref='MAR')
-MAPS = common.defaults(backgroundRange=(12000, 18000), normalization='monitor-monitor 1', instrument_pref='MAP')
+MARI = common.defaults(
+  background_range=(18000.0,19500.0),
+  normalization='monitor-monitor 1',
+  instrument_pref='MAR',
+  white_beam_integr=(20.0,40.0),
+  scale_factor=1.8182e8,
+  monitor1_integr=(1000,2000))
+
+MAPS = common.defaults(
+  background_range=(12000.0, 18000.0),
+  normalization='monitor-monitor 1',
+  instrument_pref='MAP')
 
 # we only have support for MARI at the moment, ??STEVES?? change this
 def loadDefaults(instPrefix):

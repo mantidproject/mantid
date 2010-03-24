@@ -39,16 +39,16 @@ QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &
     m_fails.begin();
   for ( ; errs != m_fails.end(); ++errs)
   {// there are two maps, one links errors to the invalid control and one links controls to validators, put them together to load the errors into the validators
-	if ( validLbls.find(errs->first) == validLbls.end() )
-	{// can't find a validator label for this control, throw here, it'll get caught below and a dialog box will be raised
-	  return QString::fromStdString(errs->second);
-	}
-	validLbls[errs->first]->setToolTip(QString::fromStdString(errs->second));
-	validLbls[errs->first]->show();
+    if ( validLbls.find(errs->first) == validLbls.end() )
+	  {// can't find a validator label for this control, throw here, it'll get caught below and a dialog box will be raised
+	    return QString::fromStdString(errs->second);
+	  }
+	  validLbls[errs->first]->setToolTip(QString::fromStdString(errs->second));
+	  validLbls[errs->first]->show();
   }
   if ( m_fails.size() > 0 )
   {// some errors were displayed in the loop above
-	return "One or more settings are invalid. The invalid settings are\nmarked with a *, hold your mouse over the * for more information";
+	  return "One or more settings are invalid. The invalid settings are\nmarked with a *, hold your mouse over the * for more information";
   }
   // catches other errors that didn't show up when checking individual controls, shouldn't happen really
   if ( m_pyScript.count('\n') == 0 )
@@ -62,6 +62,34 @@ QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &
 */
 void pythonCalc::appendFile(const QString &pythonFile)
 {
+  QFile py_script(pythonFile);
+  try
+  {
+    if ( !py_script.open(QIODevice::ReadOnly) )
+    {
+      throw Mantid::Kernel::Exception::FileError(std::string("Couldn't open python file "), pythonFile.toStdString());
+    }
+    QTextStream stream(&py_script);
+    QString line;
+    while( !stream.atEnd() )
+    {
+	    line = stream.readLine();
+  	  m_pyScript.append(line + "\n");
+    }
+    py_script.close();
+  }
+  catch( ... )
+  {
+    py_script.close();
+    throw;
+  }
+}
+/** Sets m_pyScript to the contents of the named file
+* @param pythonFile the name of the file to read
+*/
+void pythonCalc::loadFile(const QString &pythonFile)
+{
+  m_pyScript.clear();
   QFile py_script(pythonFile);
   try
   {
@@ -109,6 +137,20 @@ std::string pythonCalc::replaceErrsFind(QString pythonMark, const QString &setti
 {
   m_pyScript.replace(pythonMark, "'"+setting+"'");
   return check->setValue(setting.toStdString());
+}
+/** Appends the text in the QLineEdit to m_pyScript and stores any error
+*   in m_fails
+* @param userVal points to the QLineEdit containing the user value
+* @param check the property that will be used to for validity checking
+*/
+void pythonCalc::appendChk(const QLineEdit * const userVal, Property * const check)
+{
+  m_pyScript.append("'"+userVal->text()+"'");
+  std::string error = check->setValue(userVal->text().toStdString());
+  if ( ! error.empty() )
+  {
+    m_fails[userVal] = error;
+  }
 }
 /** Sends interpretes the Python code through runPythonCode() and returns
 *  a results summary

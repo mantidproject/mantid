@@ -31,14 +31,18 @@ namespace MantidQt
     
 	protected:
       pythonCalc(QWidget *interface);
-      /// this will store the executable python code when it is generated
+      ///this will store the executable python code when it is generated
       QString m_pyScript;
-      /// stores the namees of controls with invalid entries as the keys and a discription of the error as the associated value
+      ///stores the namees of controls with invalid entries as the keys and a discription of the error as the associated value
       std::map<const QWidget * const , std::string> m_fails;
   
       virtual void appendFile(const QString &pythonFile);
+      virtual void loadFile(const QString &pythonFile);
+
       void LEChkCp(QString pythonMark, const QLineEdit * const userVal, Mantid::Kernel::Property * const check);
       std::string replaceErrsFind(QString pythonMark, const QString &setting, Mantid::Kernel::Property * const check);
+
+      void appendChk(const QLineEdit * const userVal, Mantid::Kernel::Property * const check);
       std::string vectorToCommaSep(const std::vector<std::string> &vec) const;
     };
   }

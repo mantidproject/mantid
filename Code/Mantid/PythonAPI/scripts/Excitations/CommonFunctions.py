@@ -3,18 +3,31 @@ from mantidsimple import *
 # returns a string with is comma separated list of the elements in the tuple, array or comma separated string!
 def listToString(list):
   stringIt = str(list).strip()                                                   #remove any white space from the front and end
+  
+  if stringIt == '' : return ''
   if stringIt[0] == '[' or stringIt[0] == '(' :
-    lastInd = len(stringIt)-1                                                    # we get here if we were passed an array or tuple
+    stringIt = stringIt[1:]
+    lastInd = len(stringIt)-1
     if stringIt[lastInd] == ']' or stringIt[lastInd] == ')':
-      stringIt = stringIt[1:(lastInd)]                                           # only need to knock the brackets off
+      stringIt = stringIt[0:lastInd]
   return stringIt
 
 def stringToList(commaSeparated):
   if commaSeparated == '' : return []
+  #remove any leading or trailing ','
+  if commaSeparated[0] == ',':
+    commaSeparated = commaSeparated[1:]
+  if commaSeparated[len(commaSeparated)-1] == ',':
+    commaSeparated = commaSeparated[0:len(commaSeparated)-1]
+
   theList = []
   numbers = commaSeparated.split(',')
   for quoted in numbers :
-    theList.append(int(quoted))
+    try :
+      num = int(quoted)
+      theList.append(num)
+    except : #we're not demanding that the entries are all integers
+      theList.append(quoted)                       
   return theList
     
 #sum all the workspaces, when the workspaces are not summed single input files are specified in this file and the final Python script is made of many copies of this file
@@ -57,16 +70,20 @@ def loadRun(instru, runNum, workspace):
 def loadMask(MaskFilename):
   inFile = open(MaskFilename)
   spectraList = ""
-  for line in inFile:
-    # for each line separate all the numbers (or words) into array
+  for line in inFile:                                             # for each line separate all the numbers (or words) into array
     numbers = line.split()
-    # if the line didn't start with a number reject that whole line
-    if len(numbers) > 0 :
-      if numbers[0].isdigit() :
+    if len(numbers) > 0 :                                         # ignore empty lines
+      if numbers[0][0].isdigit() :                                # any non-numeric character at the start of the line marks a comment, check the first character of the first word
         for specNumber in numbers :
-          spectraList = spectraList + ", " + specNumber
-  #return everything after the first comma and space we added in the line above
-  return spectraList[2:]
+        
+          if specNumber == '-' :
+            spectraList[len(spectraList)-1] = spectraList + '-'   #if there is a hyphen we don't need commas 
+          else : spectraList = spectraList + "," + specNumber
+
+  if len(spectraList) < 1 :
+    mantid.sendLogMessage('Only comment lines found in mask file '+MaskFilename)
+    return ''
+  return spectraList[1:]                                          #return everything after the very first comma we added in the line above
 	
 def getRunName(path):
   # get the string after the last /
@@ -80,11 +97,14 @@ def getRunName(path):
   
 #-- Holds data about the defaults used for diferent instruments (MARI, MAPS ...)
 class defaults:
-  # set the defaults for a default machine. They won't work and so they must be overriden by the correct machine
-  def __init__(self, backgroundRange=(-1, -1), normalization='not set', instrument_pref=''):
-    self.backgroundRange = backgroundRange
-    self.normalization = normalization
-    self.instrument_pref = instrument_pref
+  # set the defaults for a default machine. These default values for defaults won't work and so they must be overriden by the correct values for the machine when this is run
+  def __init__(self, background_range=(-1.0,-1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0,-1.0), scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5)):
+    self.background_range=background_range
+    self.normalization=normalization
+    self.instrument_pref=instrument_pref
+    self.white_beam_integr=white_beam_integr
+    self.scale_factor=scale_factor
+    self.monitor1_integr=monitor1_integr
       
   # guess the filename from run number assuming global_getFileName_instrument_pref is setup
   def getFileName(self, runNumber):

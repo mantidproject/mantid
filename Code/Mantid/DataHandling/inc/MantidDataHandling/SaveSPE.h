@@ -65,7 +65,7 @@ private:
   void writeMaskFlags(FILE * const outFile) const;
   void writeBins(const MantidVec &Vs, FILE * const outFile) const;
   void writeValue(const double value, FILE * const outFile) const;
-  void logAnyMissing(std::vector<int> &spuriousSpectra) const;
+  void logMissingMasked(const std::vector<int> &inds, const int nonMasked, const int masked) const;
   /// Initialisation code
   void init();
   ///Execution code
