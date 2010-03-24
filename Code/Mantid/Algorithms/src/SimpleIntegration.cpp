@@ -30,10 +30,10 @@ void SimpleIntegration::init()
   declareProperty("RangeUpper",EMPTY_DBL());
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex",0, mustBePositive);
+  declareProperty("StartWorkspaceIndex", 0, mustBePositive);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex",0, mustBePositive->clone());
+  declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive->clone());
 }
 
 /** Executes the algorithm
@@ -59,7 +59,7 @@ void SimpleIntegration::exec()
     g_log.warning("StartSpectrum out of range! Set to 0.");
     m_MinSpec = 0;
   }
-  if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
+  if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
   if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
   {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
