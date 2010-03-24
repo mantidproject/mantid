@@ -941,6 +941,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\Scale.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\SimpleIntegration.h"
 				>
 			</File>

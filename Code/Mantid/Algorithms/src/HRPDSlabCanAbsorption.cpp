@@ -42,7 +42,12 @@ void HRPDSlabCanAbsorption::init()
     "Select the method to use to calculate exponentials, normal or a\n"
     "fast approximation (default: Normal)" );
 
-  declareProperty("Thickness", -1.0, mustBePositive->clone());
+  std::vector<std::string> thicknesses(4);
+  thicknesses[0] = "0.2";
+  thicknesses[1] = "0.5";
+  thicknesses[2] = "1.0";
+  thicknesses[3] = "1.5";
+  declareProperty("Thickness", "", new ListValidator(thicknesses));
   
   BoundedValidator<double> *moreThanZero = new BoundedValidator<double> ();
   moreThanZero->setLower(0.001);
@@ -83,6 +88,7 @@ void HRPDSlabCanAbsorption::exec()
   const int specSize = workspace->blocksize();
   const bool isHist = workspace->isHistogramData();
   //
+  Progress progress(this,0.91,1.0,numHists);
   for (int i = 0; i < numHists; ++i)
   {
     const MantidVec& X = workspace->readX(i);
@@ -138,6 +144,7 @@ void HRPDSlabCanAbsorption::exec()
       }
     }
 
+    progress.report();
   }
   
   setProperty("OutputWorkspace", workspace);
@@ -146,7 +153,7 @@ void HRPDSlabCanAbsorption::exec()
 API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
 {
   // Call FlatPlateAbsorption as a sub-algorithm
-  IAlgorithm_sptr childAlg = createSubAlgorithm("FlatPlateAbsorption");
+  IAlgorithm_sptr childAlg = createSubAlgorithm("FlatPlateAbsorption",0.0,0.9);
   // Pass through all the properties
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", getProperty("InputWorkspace"));
   childAlg->setProperty<double>("AttenuationXSection", getProperty("SampleAttenuationXSection"));
@@ -160,7 +167,8 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
   childAlg->setProperty("SampleHeight", HRPDCanHeight);
   childAlg->setProperty("SampleWidth", HRPDCanWidth);
   // Valid values are 0.2,0.5,1.0 & 1.5 - would be nice to have a numeric list validator
-  childAlg->setProperty<double>("SampleThickness", getProperty("Thickness"));
+  const std::string thickness = getPropertyValue("Thickness");
+  childAlg->setPropertyValue("SampleThickness", thickness);
 
   // Now execute the sub-algorithm. Catch and log any error
   try

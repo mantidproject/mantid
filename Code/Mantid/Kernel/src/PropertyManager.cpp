@@ -28,7 +28,9 @@ namespace Mantid
       {
         Property * p = other.m_orderedProperties[i]->clone();
         this->m_orderedProperties[i] = p;
-        this->m_properties[p->name()] = p;
+        std::string key = p->name();
+        std::transform(key.begin(), key.end(), key.begin(), toupper);
+        this->m_properties[key] = p;
       }
     }
 

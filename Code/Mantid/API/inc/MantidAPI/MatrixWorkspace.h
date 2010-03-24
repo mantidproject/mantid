@@ -69,8 +69,6 @@ public:
   virtual ~MatrixWorkspace();
 
   void setInstrument(const IInstrument_sptr&);
-  /// setting the sample object
-  void setSample(const Sample& sample);
   IInstrument_sptr getInstrument() const;
   boost::shared_ptr<Instrument> getBaseInstrument()const;
 
@@ -78,12 +76,10 @@ public:
   const SpectraDetectorMap& spectraMap() const;
   SpectraDetectorMap& mutableSpectraMap();
 
-  /// Sample accessors  
+  /// Sample accessors
   const  Sample& sample() const;
-  ///  mutable accessor
   Sample& mutableSample();
- 
-  
+
   /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
   Geometry::IDetector_sptr getDetector(const int index) const;
   double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
@@ -95,7 +91,6 @@ public:
   Geometry::ParameterMap& instrumentParameters()const;
   /// Const version
   const Geometry::ParameterMap& constInstrumentParameters() const;
-  //void newInstrumentParameters();
   // Add parameters to the instrument parameter map
   void populateInstrumentParameters();
 
@@ -194,7 +189,7 @@ private:
   bool m_isDistribution;
 
   /// Parameters modifying the base instrument
- mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
+  mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
 
   /// The set of masked bins in a map keyed on spectrum index
   std::map< int, MaskList > m_masks;

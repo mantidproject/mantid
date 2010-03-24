@@ -166,8 +166,7 @@ void LoadRaw3::exec()
       getTimeChannels(noTimeRegimes, m_lengthIn);
 
   // Need to extract the user-defined output workspace name
-  Property *ws = getProperty("OutputWorkspace");
-  std::string localWSName = ws->value();
+  const std::string localWSName = getPropertyValue("OutputWorkspace");
 
   int histTotal = total_specs * m_numberOfPeriods;
   int histCurrent = -1;
@@ -176,8 +175,23 @@ void LoadRaw3::exec()
   DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(total_specs, m_lengthIn);
   localWorkspace->setTitle(title);
 
+  // Only run the sub-algorithms once
   runLoadInstrument(localWorkspace);
   runLoadMappingTable(localWorkspace);
+  Sample& sample = localWorkspace->mutableSample();
+  if (bLoadlogFiles)
+  {
+    runLoadLog(localWorkspace);
+    Property* log = createPeriodLog(1);
+    if (log) sample.addLogData(log);
+  }
+  // Set the total proton charge for this run
+  sample.setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
+
+  // populate instrument parameters
+  g_log.debug("Populating the instrument parameters...");
+  progress(m_prog, "Populating the instrument parameters...");
+  localWorkspace->populateInstrumentParameters();
 
   WorkspaceGroup_sptr sptrWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup);
   WorkspaceGroup_sptr monitorWSGrp;
@@ -197,7 +211,8 @@ void LoadRaw3::exec()
     // now create a workspace of size normalwsSpecs and set it as outputworkspace
     if (normalwsSpecs > 0)
     {
-      localWorkspace = createWorkspace(normalwsSpecs, m_lengthIn);
+      localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (WorkspaceFactory::Instance().create(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1));
       setWorkspaceProperty("OutputWorkspace", title, sptrWSGrp, localWorkspace, false);
     }
     if (normalwsSpecs <= 0 && bexcludeMonitors)
@@ -210,7 +225,8 @@ void LoadRaw3::exec()
     {
       if (monitorwsSpecs > 0)
       { //create monitor workspace
-        monitorWorkspace = createWorkspace(monitorwsSpecs, m_lengthIn);
+        monitorWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+          (WorkspaceFactory::Instance().create(localWorkspace,monitorwsSpecs,m_lengthIn,m_lengthIn-1));
         //create monitor workspace group
         monitorWSGrp = createGroupWorkspace();
         if (normalwsSpecs > 0)
@@ -238,15 +254,25 @@ void LoadRaw3::exec()
     {
       localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
-      //localWorkspace->newSample();
+
+      if (bLoadlogFiles)
+      {
+        //remove previous period data
+        std::stringstream prevPeriod;
+        prevPeriod << "PERIOD " << (period);
+        //std::string prevPeriod="PERIOD "+suffix.str();
+        Sample& sampleObj = localWorkspace->mutableSample();
+        sampleObj.removeLogData(prevPeriod.str());
+        //add current period data
+        Property* log = createPeriodLog(period+1);
+        if (log) sampleObj.addLogData(log);
+      }
 
       if (bseparateMonitors && monitorwsSpecs > 0)
       {
         monitorWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-            WorkspaceFactory::Instance().create(monitorWorkspace));
-        //monitorWorkspace->newSample();
+            WorkspaceFactory::Instance().create(localWorkspace,monitorwsSpecs,m_lengthIn,m_lengthIn-1));
       }
-      //localWorkspace->newInstrumentParameters(); ????
     }
     isisRaw->skipData(file, period * (m_numberOfSpectra + 1));
     int counter = 0;
@@ -308,58 +334,7 @@ void LoadRaw3::exec()
         isisRaw->skipData(file, histToRead);
       }
     }
-    if (period == 0)
-    {
-      // Only run the sub-algorithms once
-      if (bLoadlogFiles)
-      {
-        runLoadLog(localWorkspace);
-        Property* log=createPeriodLog(period+1);
-        if(log)localWorkspace->mutableSample().addLogData(log);
-      }
-
-      if (bseparateMonitors || bexcludeMonitors)
-      {
-        runLoadInstrument(localWorkspace);
-        runLoadMappingTable(localWorkspace);
-        if (monitorWorkspace)
-        { 
-          runLoadInstrument(monitorWorkspace);
-          runLoadMappingTable(monitorWorkspace);
-          if (bLoadlogFiles)monitorWorkspace->setSample(localWorkspace->sample());
-          monitorWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
-        }
-      }
-      // Set the total proton charge for this run
-      // (not sure how this works for multi_period files)
-      localWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
-    }
-    else // We are working on a higher period of a multiperiod raw file
-    {
-      if (bLoadlogFiles)
-      {
-        //remove previous period data
-        std::stringstream suffix;
-        suffix << (period);
-        std::string prevPeriod="PERIOD "+suffix.str();
-        localWorkspace->mutableSample().removeLogData(prevPeriod);
-        //add current period data
-        Property* log=createPeriodLog(period+1);
-        if(log)localWorkspace->mutableSample().addLogData(log);
-        if(monitorWorkspace)monitorWorkspace->setSample(localWorkspace->sample());
-      }
-    }
-
-    // populate instrument parameters
-
-    g_log.debug("Populating the instrument parameters...");
-    progress(m_prog, "Populating the instrument parameters...");
-    localWorkspace->populateInstrumentParameters();
-    if (monitorWorkspace)
-      monitorWorkspace->populateInstrumentParameters();
-
     // Assign the result to the output workspace property
-
     if (m_numberOfPeriods > 1)
     {
       if (bseparateMonitors)
@@ -392,19 +367,19 @@ void LoadRaw3::exec()
  */
 Kernel::Property*  LoadRaw3::createPeriodLog(int period)const
 {
-    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
-    if(!periods) return 0;
-    std::ostringstream ostr;
-    ostr<<period;
-    Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
-    std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
-    std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
-    if (it->second != period)
-        p->addValue(it->first,false);
-    for(;it!=pMap.end();it++)
-        p->addValue(it->first, (it->second == period) );
+  Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
+  if(!periods) return 0;
+  std::ostringstream ostr;
+  ostr<<period;
+  Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
+  std::map<Kernel::dateAndTime, int> pMap = periods->valueAsMap();
+  std::map<Kernel::dateAndTime, int>::const_iterator it = pMap.begin();
+  if (it->second != period)
+    p->addValue(it->first,false);
+  for(;it!=pMap.end();it++)
+    p->addValue(it->first, (it->second == period) );
 
-    return p;
+  return p;
 }
 
 /** sets the workspace properties
@@ -839,6 +814,7 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
 }
 
 /** This method separates/excludes monitors from output workspace and creates a separate workspace for monitors
+ *  THIS METHOD IS ONLY CALLED BY THE goManagedRaw METHOD ABOVE AND NOT IN THE GENERAL CASE
  *  @param localWorkspace shared pointer to workspace
  *  @param bincludeMonitors boolean  variable for including monitors
  *  @param bexcludeMonitors  boolean variable for excluding monitors
@@ -862,8 +838,8 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorWSName,
         Direction::Output));
     //create monitor workspace
-    monitorWorkspace = createWorkspace(monitorSpecList.size(), m_lengthIn);
-    monitorWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    monitorWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      WorkspaceFactory::Instance().create(localWorkspace,monitorSpecList.size(),m_lengthIn,m_lengthIn-1));
     setProperty("MonitorWorkspace", boost::dynamic_pointer_cast<Workspace>(monitorWorkspace));
     file = fopen(m_filename.c_str(), "rb");
     if (file == NULL)
@@ -914,14 +890,6 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     if (bseparateMonitors)
     {
       fclose(file);
-      monitorWorkspace->mutableSample().setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);
-      if (monitorWorkspace)
-      {
-        runLoadInstrument(monitorWorkspace);
-        runLoadMappingTable(monitorWorkspace);
-        localWorkspace->setSample(localWorkspace->sample());
-        monitorWorkspace->populateInstrumentParameters();
-      }
     }
   }
 }
@@ -1111,7 +1079,6 @@ void LoadRaw3::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace, int peri
   LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
   if(plog) m_perioids=plog->getPeriodsProperty();
 }
-
 
 } // namespace DataHandling
 } // namespace Mantid

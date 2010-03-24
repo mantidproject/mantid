@@ -68,7 +68,7 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sp
   ws->setComment(parent->getComment());
   ws->setInstrument(parent->getInstrument());  // This call also copies the parameter map
   ws->m_spectramap = parent->m_spectramap;
-  ws->setSample(parent->sample());
+  ws->m_sample = parent->m_sample;
   ws->setYUnit(parent->m_YUnit);
   ws->setYUnitLabel(parent->m_YUnitLabel);
   ws->isDistribution(parent->isDistribution());

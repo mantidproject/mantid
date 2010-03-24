@@ -87,12 +87,8 @@ public:
 
   void testGetSetSample()
   {
-	TS_ASSERT( &ws->sample() )
-    //boost::shared_ptr<Sample> s(new Sample);
-	Sample s;
-	TS_ASSERT_THROWS_NOTHING( ws->setSample(s) )
-	//TS_ASSERT_EQUALS( &ws->sample(), &s )
- 
+    TS_ASSERT( &ws->sample() )
+
     ws->mutableSample().setName("test");
     TS_ASSERT_EQUALS( ws->sample().getName(), "test" )
   }

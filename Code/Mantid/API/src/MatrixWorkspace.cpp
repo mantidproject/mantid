@@ -87,13 +87,6 @@ void MatrixWorkspace::setInstrument(const IInstrument_sptr& instr)
     }
   }
 }
-/** Set the sample
- *  @param sample constant reference to the sample object
- */
-void MatrixWorkspace::setSample(const Sample& sample)
-{ 
-  m_sample.access()=sample;
-}
 
 /** Get a const reference to the SpectraDetectorMap associated with this workspace.
  *  Can ONLY be taken as a const reference!
@@ -118,19 +111,22 @@ SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
 }
 
 /** Get a constant reference to the Sample associated with this workspace.
-
-*/
+ */
 const  Sample& MatrixWorkspace::sample() const
 {
-	return *m_sample;
+  return *m_sample;
 }
-/** Get a reference to the Sample associated with this workspace.
 
-*/
+/** Get a reference to the Sample associated with this workspace.
+ *  This non-const method will copy the sample if it is shared between 
+ *  more than one workspace, and the reference returned will be to the copy.
+ *  Can ONLY be taken by reference!
+ */
 Sample& MatrixWorkspace::mutableSample()
 {
-	return m_sample.access();
+  return m_sample.access();
 }
+
 /** Get the effective detector for the given spectrum
  *  @param  index The workspace index for which the detector is required
  *  @return A single detector object representing the detector(s) contributing
