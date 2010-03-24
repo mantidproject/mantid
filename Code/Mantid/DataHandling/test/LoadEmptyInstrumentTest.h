@@ -138,6 +138,15 @@ public:
     TS_ASSERT( fitParam3.getFormula().compare("100.0+10*value+value^2") == 0 );
     TS_ASSERT( fitParam3.getFormulaUnit().compare("TOF") == 0 );
 
+    param = paramMap.getRecursive(&(*det), "percentage", "fitting");
+    const FitParameter& fitParam4 = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam4.getValue(), 250.0, 0.0001);
+    TS_ASSERT( fitParam4.getTie().compare("") == 0 );
+    TS_ASSERT( fitParam4.getFunction().compare("somefunction") == 0 );
+    TS_ASSERT( fitParam4.getConstraint().compare("200 < percentage < 300") == 0 );
+    TS_ASSERT( !fitParam4.getLookUpTable().containData() );
+    TS_ASSERT( fitParam4.getFormula().compare("") == 0 );
+
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA( dummy[0], 2.0, 0.0001);

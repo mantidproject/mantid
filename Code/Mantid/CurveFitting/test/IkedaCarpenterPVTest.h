@@ -271,8 +271,6 @@ public:
     // set up fitting function and pass to Fit
     IkedaCarpenterPV* icpv = new IkedaCarpenterPV();
     icpv->initialize();
-    //int iii;
-    //std::cin >> iii;
 
     icpv->setParameter("I",106860.45);
     icpv->setParameter("X0",7326.34);

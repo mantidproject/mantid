@@ -28,19 +28,37 @@ namespace Geometry
       return std::string("");
 
     std::stringstream constraint;
+    size_t foundMinPercentage, foundMaxPercentage;
+    foundMinPercentage = m_constraintMin.find('%');
+    foundMaxPercentage = m_constraintMax.find('%');
+    double min;
+    double max;
+    if ( m_constraintMin.compare("") )
+    {
+      if ( foundMinPercentage != std::string::npos )
+        min = atof( m_constraintMin.substr(0,m_constraintMin.size()-1).c_str() )*m_value*0.01;
+      else
+        min = atof( m_constraintMin.c_str() );
+    }
+    if ( m_constraintMax.compare("") )
+    {
+      if ( foundMaxPercentage != std::string::npos )
+        max = atof( m_constraintMax.substr(0,m_constraintMax.size()-1).c_str() )*m_value*0.01;
+      else
+        max = atof( m_constraintMax.c_str() );
+    }
 
     if ( m_constraintMin.compare("") && m_constraintMax.compare("") )
     {
-      constraint << atof( m_constraintMin.c_str() ) 
-        << " < " << m_name << " < " << atof( m_constraintMax.c_str() );
+      constraint << min << " < " << m_name << " < " << max;
     }
     else if ( m_constraintMin.compare("") )
     {
-      constraint << atof( m_constraintMin.c_str() ) << " < " << m_name;
+      constraint << min << " < " << m_name;
     }
     else
     {
-      constraint << m_name << " < " << atof( m_constraintMax.c_str() );
+      constraint << m_name << " < " << max;
     }
     
     return constraint.str();
