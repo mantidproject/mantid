@@ -28,7 +28,6 @@ BuildRequires:	qwt-devel
 BuildRequires:	qwtplot3d-qt4-devel
 BuildRequires:	muParser-devel
 BuildRequires:	PyQt4-devel
-BuildRequires: 	gts-devel
 BuildRequires: 	nexus
 BuildRequires: 	sip-devel
 BuildRequires: 	qscintilla-devel
@@ -36,16 +35,13 @@ BuildRequires: 	OpenCASCADE-devel
 
 Requires: 	boost >= 1.34.1
 Requires: 	qt4 >= 4.2
-Requires: 	gts
 Requires: 	nexus
 Requires: 	qscintilla
-Requires:	sip
 Requires:	qwt
 Requires:	poco
 Requires:	gsl
 Requires:	glibc
 Requires:	qwtplot3d-qt4
-Requires:	PyQt4
 Requires:	OpenCASCADE
 Requires:	muParser
 
@@ -57,6 +53,7 @@ Requires:	muParser
 %define mantidincludesdir	%{mantiddir}/include
 %define mantidimagesdir		%{mantiddir}/images
 %define mantidinstrumentdir	%{mantiddir}/instrument
+%define pythonsitepackages	PYTHON_SITEPACKAGES
 
 %description
 Mantid
@@ -76,19 +73,20 @@ sh build.sh rpmbuild=1 skiptest=1 debug=0
 cd ../qtiplot
 python release_date.py %{version} SVN_VERSION
 cd MantidQt
-qmake-qt4
+qmake-qt4 QMAKE_CC="gcc44" QMAKE_CXX="g++44"
 make
 cd ../QtPropertyBrowser
-qmake-qt4
+qmake-qt4 QMAKE_CC="gcc44" QMAKE_CXX="g++44"
 make
 cd ../qtiplot
-qmake-qt4
+qmake-qt4 QMAKE_CC="gcc44" QMAKE_CXX="g++44"
 make
 
 %install
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
 mkdir -p $RPM_BUILD_ROOT/%{mantidlibdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidbindir}
+mkdir -p $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4
 mkdir -p $RPM_BUILD_ROOT/%{mantidpluginsdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidscriptsdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidimagesdir}
@@ -117,6 +115,13 @@ for i in qtiplotrc.py qtiUtil.py mantidplotrc.py mantidplot.py; do
     install -m755 Code/qtiplot/qtiplot/$i $RPM_BUILD_ROOT/%{mantidbindir}/$i
 done
 install -m755 Code/Mantid/PythonAPI/MantidFramework.py $RPM_BUILD_ROOT/%{mantidbindir}
+
+install -m755 %{pythonsitepackages}/sip.so $RPM_BUILD_ROOT/%{mantidbindir}
+for i in %{pythonsitepackages}/PyQt4/*.so; do
+    install -m755 $i $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4/`basename $i`
+done
+install -m755 %{pythonsitepackages}/PyQt4/__init__.py $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4/__init__.py
+
 cp -r instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
 cp -r Code/Mantid/PythonAPI/scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
 cp -r Images/* $RPM_BUILD_ROOT/%{mantidimagesdir}
@@ -131,6 +136,7 @@ sed -i -e "s!pythonscripts\.directory.*!pythonscripts.directory = %{mantidscript
 sed -i -e "s!instrumentDefinition\.directory.*!instrumentDefinition.directory = %{mantidinstrumentdir}!" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!ManagedWorkspace\.FilePath.*!ManagedWorkspace.FilePath = !" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s!logging\.channels\.fileChannel\.path.*!logging.channels.fileChannel.path = !" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s!\.\./\.\./PythonAPI!%{mantiddir}!g" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 
 %clean
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi

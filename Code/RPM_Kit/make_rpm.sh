@@ -1,3 +1,4 @@
+
 #!/bin/sh
 # 
 # @file make_rpm.sh RPM build script for Mantid
@@ -57,7 +58,7 @@ if $do_local; then
     cd ../..
 else
     svn_version="$svn_rev"
-    echo "Exporing mantid source revision $svn_rev from subversion ..."
+    echo "Exporting mantid source revision $svn_rev from subversion ..."
     echo "Directory structure ..."
     while ! svn -q --non-interactive export -r "$svn_rev" $mantid_svn/Code/RPM_Kit/Mantid Mantid-$mantid_version; do echo "Retrying svn"; rm -fr Mantid-$mantid_version; sleep 30; done
 #
@@ -76,8 +77,10 @@ fi
 mantid_release="0.svnR${svn_version}.`date +%Y%m%d`"
 echo "Exporting complete - making spec file for version $mantid_version release $mantid_release"
 #
-sed -e "s/MANTID_VERSION/$mantid_version/" -e "s/MANTID_RELEASE/$mantid_release/" -e "s/SVN_VERSION/$svn_version/" < mantid.spec.template > Mantid.spec
-echo "Buliding tar file Mantid-$mantid_version.tar.gz"
+# Set correct path to python
+py_sitepackages=`python python_sitepackages.py`
+sed -e "s/MANTID_VERSION/$mantid_version/" -e "s/MANTID_RELEASE/$mantid_release/" -e "s/SVN_VERSION/$svn_version/" -e "s@PYTHON_SITEPACKAGES@$py_sitepackages@" < mantid.spec.template > Mantid.spec
+echo "Building tar file Mantid-$mantid_version.tar.gz"
 tar -cpzf Mantid-$mantid_version.tar.gz Mantid-$mantid_version
 topdir=`rpm --showrc|grep topdir| awk '{print $3}' | tail -1`
 if test ! -e "$topdir"; then
