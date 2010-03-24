@@ -1112,34 +1112,23 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
 
     // check if <min> or <max> elements present
 
-    std::stringstream constraint;
+    std::string constraintMin;
+    std::string constraintMax;
     
     NodeList* pNLMin = pParamElem->getElementsByTagName("min");
     unsigned int numberMin = pNLMin->length();
     NodeList* pNLMax = pParamElem->getElementsByTagName("max");
     unsigned int numberMax = pNLMax->length();
- 
-    if ( numberMin+numberMax >= 1 )
-    {
-      if ( numberMin >= 1  && numberMax >= 1 )
-      {
-        Element* pMin = static_cast<Element*>(pNLMin->item(0));
-        Element* pMax = static_cast<Element*>(pNLMax->item(0));
 
-        constraint << atof( pMin->getAttribute("val").c_str() ) 
-          << " < " << paramName << " < " << atof( pMax->getAttribute("val").c_str() );
-      }
-      else if ( numberMin >= 1 )
-      {
-        Element* pMin = static_cast<Element*>(pNLMin->item(0));
-        constraint << atof( pMin->getAttribute("val").c_str() ) 
-          << " < " << paramName;
-      }
-      else
-      {
-        Element* pMax = static_cast<Element*>(pNLMax->item(0));
-        constraint << paramName << " < " << atof( pMax->getAttribute("val").c_str() );
-      }
+    if ( numberMin >= 1)
+    {
+      Element* pMin = static_cast<Element*>(pNLMin->item(0));
+      constraintMin = pMin->getAttribute("val"); 
+    }
+    if ( numberMax >= 1)
+    {
+      Element* pMax = static_cast<Element*>(pNLMax->item(0));
+      constraintMax = pMax->getAttribute("val");
     }
     pNLMin->release();
     pNLMax->release();
@@ -1186,8 +1175,8 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
     pNLFormula->release();
 
 
-    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, paramName, type, tie, constraint.str(), 
-      fittingFunction, extractSingleValueAs, eq, comp));
+    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, paramName, type, tie, 
+      constraintMin, constraintMax, fittingFunction, extractSingleValueAs, eq, comp));
     logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
   }
   pNL->release();

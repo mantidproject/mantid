@@ -271,19 +271,21 @@ public:
     // set up fitting function and pass to Fit
     IkedaCarpenterPV* icpv = new IkedaCarpenterPV();
     icpv->initialize();
-    icpv->setWorkspace(wsToPass, 1,0,1);
-
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.001);
+    //int iii;
+    //std::cin >> iii;
 
     icpv->setParameter("I",106860.45);
-
-    icpv->setParameter("SigmaSquared",10075.96);
     icpv->setParameter("X0",7326.34);
     icpv->setParameter("Eta",0);
     icpv->tie("Eta", "0");
     icpv->setParameter("Gamma",1);
     icpv->tie("Gamma", "1");
+
+    icpv->setWorkspace(wsToPass, 1,0,1);  // for unit testing purpose set workspace here
+
+    TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.001);
+    TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.001);
+    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 6422 ,1);
 
     fnWithBk->addFunction(icpv);
     fnWithBk->addFunction(bk);

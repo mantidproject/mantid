@@ -31,7 +31,7 @@ public:
 	{
     FitParameter fitP1;
 
-    std::istringstream input("9.1 , fido , , bob , boevs, TOF");
+    std::istringstream input("9.1 , fido , , , , tie , formula, TOF ,");
     input >> fitP1;
     std::stringstream inout;
     inout << fitP1;
@@ -42,8 +42,9 @@ public:
 
     TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
     TS_ASSERT( fitP.getFunction().compare("fido")==0 );
-    TS_ASSERT( fitP.getTie().compare("bob")==0 );
-    TS_ASSERT( fitP.getFormula().compare("boevs")==0 );
+    TS_ASSERT( fitP.getName().compare("")==0 );
+    TS_ASSERT( fitP.getTie().compare("tie")==0 );
+    TS_ASSERT( fitP.getFormula().compare("formula")==0 );
     TS_ASSERT( fitP.getFormulaUnit().compare("TOF")==0 );
 	}
 	
@@ -51,14 +52,14 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , fido , , bob , boevs, TOF");
+    std::istringstream input("9.1 , fido , , , , tie , formula, TOF ,");
 
     input >> fitP;
 
     TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
     TS_ASSERT( fitP.getFunction().compare("fido")==0 );
-    TS_ASSERT( fitP.getTie().compare("bob")==0 );
-    TS_ASSERT( fitP.getFormula().compare("boevs")==0 );
+    TS_ASSERT( fitP.getTie().compare("tie")==0 );
+    TS_ASSERT( fitP.getFormula().compare("formula")==0 );
     TS_ASSERT( fitP.getFormulaUnit().compare("TOF")==0 );
 	}
 
@@ -66,7 +67,7 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , , , , , ");
+    std::istringstream input("9.1 , , , , , , ");
 
     input >> fitP;
 
@@ -114,13 +115,14 @@ public:
 	{
     FitParameter fitP;
 
-    std::istringstream input("9.1 , , 0 < 3 < 8 , , ,      ");
+    std::istringstream input("9.1 , function , name , 3, 8 , , ,      ");
 
     input >> fitP;
 
     TS_ASSERT_DELTA( fitP.getValue(), 9.1 ,0.0001);
+    TS_ASSERT( fitP.getName().compare("name")==0 );
     TS_ASSERT( fitP.getTie().compare("")==0 );
-    TS_ASSERT( fitP.getConstraint().compare("0 < 3 < 8")==0 );
+    TS_ASSERT( fitP.getConstraint().compare("3 < name < 8")==0 );
 	}
 
 };

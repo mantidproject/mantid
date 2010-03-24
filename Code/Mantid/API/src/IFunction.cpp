@@ -88,6 +88,7 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
           if ( testWithLocation == NULL || 
             (fitParam.getLookUpTable().containData() == false && fitParam.getFormula().compare("") == 0) )
           {
+            double bob = fitParam.getValue();
             setParameter(i, fitParam.getValue());
           }
           else

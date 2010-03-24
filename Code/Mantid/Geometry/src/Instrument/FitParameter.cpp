@@ -16,16 +16,48 @@ namespace Geometry
   // Get a reference to the logger
   Kernel::Logger& FitParameter::g_log = Kernel::Logger::get("FitParameter");
 
+
+  /**
+    Get constraint string. 
+    @return Constraint string
+  */
+  std::string FitParameter::getConstraint() const
+  {
+
+    if ( m_constraintMin.compare("")==0 && m_constraintMax.compare("")==0 )
+      return std::string("");
+
+    std::stringstream constraint;
+
+    if ( m_constraintMin.compare("") && m_constraintMax.compare("") )
+    {
+      constraint << atof( m_constraintMin.c_str() ) 
+        << " < " << m_name << " < " << atof( m_constraintMax.c_str() );
+    }
+    else if ( m_constraintMin.compare("") )
+    {
+      constraint << atof( m_constraintMin.c_str() ) << " < " << m_name;
+    }
+    else
+    {
+      constraint << m_name << " < " << atof( m_constraintMax.c_str() );
+    }
+    
+    return constraint.str();
+  }
+
+
   /**
     Get parameter value. The default parameter 'at' is ignored expect if
-    the value of the parameter is determined from a look up table etc.
+    the value of the parameter is determined from a look up table or a formula.
     @param at number to return the value at
   */
-  double FitParameter::getValue(const double& at) const 
+  double FitParameter::getValue(const double& at) const
   { 
     if ( m_lookUpTable.containData() )
     {
-      return  m_lookUpTable.value(at);
+      m_value = m_lookUpTable.value(at);
+      return m_value;
     }
 
     if ( m_formula.compare("") != 0 )
@@ -51,7 +83,8 @@ namespace Geometry
       {
         mu::Parser p;
         p.SetExpr(equationStr);
-        return p.Eval();
+        m_value = p.Eval();
+        return m_value;
       }
       catch (mu::Parser::exception_type &e)
       {
@@ -67,7 +100,7 @@ namespace Geometry
   /**
     Get parameter value.
   */
-  double FitParameter::getValue() const 
+  double FitParameter::getValue() const
   { 
     return m_value;
   }
@@ -78,9 +111,9 @@ namespace Geometry
   */
   void FitParameter::printSelf(std::ostream& os) const
   {
-    os << m_value  << " , " << m_function << " , " << m_constraint << " , " 
-          << m_tie << " , " << m_formula << " , " << m_formulaUnit << " , " 
-          << m_lookUpTable;
+    os << m_value  << " , " << m_function << " , " << m_name << " , " << m_constraintMin << " , " 
+      << m_constraintMax << " , " << m_tie << " , " << m_formula << " , " << m_formulaUnit << " , " 
+      << m_lookUpTable;
     return;
   }
 
@@ -119,19 +152,72 @@ namespace Geometry
       f.setValue() = 0.0;
     }
 
-    f.setFunction() = values[1];
-
-    f.setConstraint() = values[2];
-
-    f.setTie() = values[3];
-
-    f.setFormula() = values[4];
-
-    f.setFormulaUnit() = values[5];
-
-    if ( values.count() > 6 )
+    try
     {
-      std::stringstream str(values[6]);
+      f.setFunction() = values[1];
+    }
+    catch (...)
+    {
+      f.setFunction() = "";
+    }
+
+    try
+    {
+      f.setName() = values[2];
+    }
+    catch (...)
+    {
+      f.setName() = "";
+    }
+
+    try
+    {
+      f.setConstraintMin() = values[3];
+    }
+    catch (...)
+    {
+      f.setConstraintMin() = ""; 
+    }
+
+    try
+    {
+      f.setConstraintMax() = values[4];
+    }
+    catch (...)
+    {
+      f.setConstraintMax() = ""; 
+    }
+
+    try
+    {
+      f.setTie() = values[5];
+    }
+    catch (...)
+    {
+      f.setTie() = "";
+    }
+
+    try
+    {
+      f.setFormula() = values[6];
+    }
+    catch (...)
+    {
+      f.setFormula() = "";
+    }
+
+    try
+    {
+      f.setFormulaUnit() = values[7];
+    }
+    catch (...)
+    {
+      f.setFormulaUnit() = "";
+    }
+
+    if ( values.count() > 8 )
+    {
+      std::stringstream str(values[8]);
       str >> f.setLookUpTable();
     }
 

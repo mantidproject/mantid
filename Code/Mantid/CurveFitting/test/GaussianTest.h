@@ -280,6 +280,8 @@ public:
     loader.setPropertyValue("OutputWorkspace", outputSpace);
     loader.execute();
 
+    //int iii;
+    //std::cin >> iii;
     // reload instrument to test constraint defined in IDF is working
     LoadInstrument reLoadInstrument;
     reLoadInstrument.initialize();
@@ -310,7 +312,7 @@ public:
     bk->removeActive(1);  
     //bk->removeActive(1);
 
-    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
+    //BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     //bk->addConstraint(bc_b);
 
     // set up Lorentzian fitting function

@@ -58,9 +58,10 @@ namespace Mantid
       /// set tie
       std::string& setTie() { return m_tie; }
       /// get constraint
-      std::string getConstraint() const { return m_constraint; }
+      std::string getConstraint() const;
       /// set constraint
-      std::string& setConstraint() { return m_constraint; }
+      std::string& setConstraintMin() { return m_constraintMin; }
+      std::string& setConstraintMax() { return m_constraintMax; }
       /// get formula
       std::string getFormula() const { return m_formula; }
       /// set formula
@@ -73,6 +74,10 @@ namespace Mantid
       std::string getFunction() const { return m_function; }
       /// set function
       std::string& setFunction() { return m_function; }
+      /// get name
+      std::string getName() const { return m_name; }
+      /// set name
+      std::string& setName() { return m_name; }
       /// get look up table
       const Kernel::Interpolation& getLookUpTable() const { return m_lookUpTable; }
       /// set look up table
@@ -83,13 +88,16 @@ namespace Mantid
 
     private:
       /// value of parameter
-      double m_value;
+      mutable double m_value;
       /// tie of parameter
       std::string m_tie;
       /// constraint of parameter
-      std::string m_constraint;
+      std::string m_constraintMin;
+      std::string m_constraintMax;
       /// name of fitting function
       std::string m_function;
+      /// name of parameter
+      std::string m_name;
       /// look up table
       Kernel::Interpolation m_lookUpTable;
       /// formula
