@@ -108,6 +108,8 @@ public:
   int getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
   IFunction* getContainingFunction(const ParameterReference& ref)const;
+  /// Get the containing function
+  IFunction* getContainingFunction(const IFunction* fun);
 
   /// Apply the ties
   void applyTies();

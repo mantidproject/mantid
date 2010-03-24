@@ -889,5 +889,26 @@ IFunction* CompositeFunction::getContainingFunction(const ParameterReference& re
   return NULL;
 }
 
+/**
+ * @param fun The searched function
+ * @return A function containing the argument function fun
+ */
+IFunction* CompositeFunction::getContainingFunction(const IFunction* fun)
+{
+  if (fun == this)
+  {
+    return this;
+  }
+  for(int iFun=0;iFun<nFunctions();iFun++)
+  {
+    IFunction* f = getFunction(iFun)->getContainingFunction(fun);
+    if (f)
+    {
+      return getFunction(iFun);
+    }
+  }
+  return NULL;
+}
+
 } // namespace API
 } // namespace Mantid

@@ -51,113 +51,120 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
 
-  // check if parameter are specified in instrument definition file
-
-  Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
-
-  // in some tests where workspace a created on the fly a spectra to detector map
-  // is for convenience not created. 
-  if ( !(m_workspace->spectraMap().nElements()) )  
-    return;
-
-  Geometry::IDetector_sptr det = m_workspace->getDetector(wi);
-
-  // if det is a detector groupworkspace then take as the detector
-  // the detector returned by det->getID()
-  if ( boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det) )
+  try
   {
-    API::IInstrument_sptr inst = m_workspace->getInstrument();
-    det = inst->getDetector(det->getID());
-  }
 
-  for (int i = 0; i < nParams(); i++)
-  {
-    if ( !isExplicitlySet(i) )
+    // check if parameter are specified in instrument definition file
+
+    Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
+
+    // in some tests where workspace a created on the fly a spectra to detector map
+    // is for convenience not created. 
+    if ( !(m_workspace->spectraMap().nElements()) )  
+      return;
+
+    Geometry::IDetector_sptr det = m_workspace->getDetector(wi);
+
+    // if det is a detector groupworkspace then take as the detector
+    // the detector returned by det->getID()
+    if ( boost::dynamic_pointer_cast<Geometry::DetectorGroup>(det) )
     {
-      Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), parameterName(i), "fitting");
-      if (param != Geometry::Parameter_sptr())
+      API::IInstrument_sptr inst = m_workspace->getInstrument();
+      det = inst->getDetector(det->getID());
+    }
+
+    for (int i = 0; i < nParams(); i++)
+    {
+      if ( !isExplicitlySet(i) )
       {
-        // get FitParameter
-        const Geometry::FitParameter& fitParam = param->value<Geometry::FitParameter>();
-
-        // check first if this parameter is actually specified for this function
-        if ( name().compare(fitParam.getFunction()) == 0 )
+        Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), parameterName(i), "fitting");
+        if (param != Geometry::Parameter_sptr())
         {
-          // update value          
-          IFunctionWithLocation* testWithLocation = dynamic_cast<IFunctionWithLocation*>(this);
-          if ( testWithLocation == NULL || 
-            (fitParam.getLookUpTable().containData() == false && fitParam.getFormula().compare("") == 0) )
-          {
-            double bob = fitParam.getValue();
-            setParameter(i, fitParam.getValue());
-          }
-          else
-          {
-            double centreValue = testWithLocation->centre();
-            Kernel::Unit_sptr targetUnit;
-            if ( fitParam.getFormula().compare("") == 0 )
-              targetUnit = fitParam.getLookUpTable().getXUnit();  // from table
-            else
-              targetUnit =  Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit());  // from formula
+          // get FitParameter
+          const Geometry::FitParameter& fitParam = param->value<Geometry::FitParameter>();
 
-            Kernel::Unit_sptr wsUnit = m_workspace->getAxis(0)->unit();
-
-            // if units are different first convert centre value into unit of look up table
-            if ( targetUnit->unitID().compare(wsUnit->unitID()) != 0 )
+          // check first if this parameter is actually specified for this function
+          if ( name().compare(fitParam.getFunction()) == 0 )
+          {
+            // update value          
+            IFunctionWithLocation* testWithLocation = dynamic_cast<IFunctionWithLocation*>(this);
+            if ( testWithLocation == NULL || 
+              (fitParam.getLookUpTable().containData() == false && fitParam.getFormula().compare("") == 0) )
             {
-              double factor,power;
-              if (wsUnit->quickConversion(*targetUnit,factor,power) )
-              {
-                centreValue = factor * std::pow(centreValue,power);
-              }
+              double bob = fitParam.getValue();
+              setParameter(i, fitParam.getValue());
+            }
+            else
+            {
+              double centreValue = testWithLocation->centre();
+              Kernel::Unit_sptr targetUnit;
+              if ( fitParam.getFormula().compare("") == 0 )
+                targetUnit = fitParam.getLookUpTable().getXUnit();  // from table
               else
+                targetUnit =  Kernel::UnitFactory::Instance().create(fitParam.getFormulaUnit());  // from formula
+
+              Kernel::Unit_sptr wsUnit = m_workspace->getAxis(0)->unit();
+
+              // if units are different first convert centre value into unit of look up table
+              if ( targetUnit->unitID().compare(wsUnit->unitID()) != 0 )
               {
-                double l1,l2,twoTheta;
-
-                // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
-                IInstrument_const_sptr instrument = m_workspace->getInstrument();
-                Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-                l1 = instrument->getSource()->getDistance(*sample);
-                Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
-                if ( ! det->isMonitor() )
+                double factor,power;
+                if (wsUnit->quickConversion(*targetUnit,factor,power) )
                 {
-                  l2 = det->getDistance(*sample);
-                  twoTheta = m_workspace->detectorTwoTheta(det);
+                  centreValue = factor * std::pow(centreValue,power);
                 }
-                else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+                else
                 {
-                  l2 = det->getDistance(*(instrument->getSource()));
-                  l2 = l2 - l1;
-                  twoTheta = 0.0;
+                  double l1,l2,twoTheta;
+
+                  // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
+                  IInstrument_const_sptr instrument = m_workspace->getInstrument();
+                  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+                  l1 = instrument->getSource()->getDistance(*sample);
+                  Geometry::IDetector_const_sptr det = m_workspace->getDetector(wi);
+                  if ( ! det->isMonitor() )
+                  {
+                    l2 = det->getDistance(*sample);
+                    twoTheta = m_workspace->detectorTwoTheta(det);
+                  }
+                  else  // If this is a monitor then make l1+l2 = source-detector distance and twoTheta=0
+                  {
+                    l2 = det->getDistance(*(instrument->getSource()));
+                    l2 = l2 - l1;
+                    twoTheta = 0.0;
+                  }
+
+                  std::vector<double> endPoint;
+                  endPoint.push_back(centreValue);
+                  std::vector<double> emptyVec;
+                  wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+                  targetUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
+                  centreValue = endPoint[0];
                 }
+              }  // end of: lookUpUnit->unitID().compare(wsUnit->unitID()) != 0
+              setParameter(i, fitParam.getValue(centreValue));
+            }  // end of update parameter value
 
-                std::vector<double> endPoint;
-                endPoint.push_back(centreValue);
-                std::vector<double> emptyVec;
-                wsUnit->toTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-                targetUnit->fromTOF(endPoint,emptyVec,l1,l2,twoTheta,0,0.0,0.0);
-                centreValue = endPoint[0];
-              }
-            }  // end of: lookUpUnit->unitID().compare(wsUnit->unitID()) != 0
-            setParameter(i, fitParam.getValue(centreValue));
-          }  // end of update parameter value
+            // add tie if specified for this parameter in instrument definition file
+            if ( fitParam.getTie().compare("") )
+            {  
+              std::ostringstream str;
+              str << fitParam.getValue();
+              tie(parameterName(i), str.str());
+            }
 
-          // add tie if specified for this parameter in instrument definition file
-          if ( fitParam.getTie().compare("") )
-          {  
-            std::ostringstream str;
-            str << fitParam.getValue();
-            tie(parameterName(i), str.str());
-          }
-
-          // add constraint if specified for this parameter in instrument definition file
-          if ( fitParam.getConstraint().compare("") )
-          {  
-            addConstraint(ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint()));
+            // add constraint if specified for this parameter in instrument definition file
+            if ( fitParam.getConstraint().compare("") )
+            {  
+              addConstraint(ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint()));
+            }
           }
         }
       }
     }
+  }
+  catch(...)
+  {
   }
 }
 

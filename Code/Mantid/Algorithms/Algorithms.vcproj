@@ -447,6 +447,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Scale.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\SimpleIntegration.cpp"
 				>
 			</File>

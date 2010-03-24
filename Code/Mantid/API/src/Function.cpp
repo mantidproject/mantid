@@ -502,5 +502,18 @@ IFunction* Function::getContainingFunction(const ParameterReference& ref)const
   return NULL;
 }
 
+/**
+ * @param fun The function
+ * @return A function containing fun
+ */
+IFunction* Function::getContainingFunction(const IFunction* fun)
+{
+  if (fun == this)
+  {
+    return this;
+  }
+  return NULL;
+}
+
 } // namespace API
 } // namespace Mantid

@@ -317,7 +317,7 @@ public:
       xr[i] = x[i] - x0 - Dx/2;
     }
 
-    double c2 = (Dx-x0)/2;
+    double c2 = x0 + Dx/2;
     double h2 = 10.;
     double s2 = pi/3;
     ConvolutionTest_Gauss* fun = new ConvolutionTest_Gauss();

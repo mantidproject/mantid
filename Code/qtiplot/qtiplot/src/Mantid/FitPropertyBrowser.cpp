@@ -10,6 +10,8 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
 
+#include "FilenameEditorFactory.h"
+
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
 #include "qteditorfactory.h"
@@ -22,6 +24,8 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QSettings>
+#include <QFileInfo>
 
 /**
  * Constructor
@@ -46,6 +50,7 @@ m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWind
   m_enumManager =   new QtEnumPropertyManager(w);
   m_intManager =    new QtIntPropertyManager(w);
   m_boolManager = new QtBoolPropertyManager(w);
+  m_filenameManager = new QtStringPropertyManager(w);
 
     /* Create the top level group */
 
@@ -56,6 +61,7 @@ m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWind
   connect(m_intManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(intChanged(QtProperty*)));
   connect(m_doubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(doubleChanged(QtProperty*)));
   connect(m_stringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(stringChanged(QtProperty*)));
+  connect(m_filenameManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(filenameChanged(QtProperty*)));
 
     /* Create function group */
 
@@ -93,6 +99,7 @@ m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWind
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(w);
   QtDoubleSpinBoxFactory *doubleSpinBoxFactory = new QtDoubleSpinBoxFactory(w);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(w);
+  FilenameEditorFactory* filenameEditFactory = new FilenameEditorFactory(w);
 
   m_browser = new QtTreePropertyBrowser();
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
@@ -100,6 +107,7 @@ m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWind
   m_browser->setFactoryForManager(m_intManager, spinBoxFactory);
   m_browser->setFactoryForManager(m_doubleManager, doubleSpinBoxFactory);
   m_browser->setFactoryForManager(m_stringManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_filenameManager, filenameEditFactory);
 
   m_functionsGroup = m_browser->addProperty(functionsGroup);
   m_settingsGroup = m_browser->addProperty(settingsGroup);
@@ -738,7 +746,7 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
     }
   }
   else if (prop->propertyName() == "Tie")
-  {
+  {//   -------  need to change this code for setting a tie from the property editor ---------
     //for(int i=0;i<m_ties.size();i++)
     //{
     //  if (prop == m_ties[i].getProperty())
@@ -781,10 +789,9 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
       if (fun)
       {
         std::string attrName = prop->propertyName().toStdString();
-        std::string attrValue = m_stringManager->value(prop).toStdString();
         try
         {
-          fun->setAttribute(attrName,attrValue);
+          fun->setAttribute(attrName,m_stringManager->value(prop).toStdString());
           m_compositeFunction->checkFunction();
           removeFunProperties(fnItem->property(),true);
           addFunProperties(fun,true);
@@ -797,6 +804,45 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
   }
 }
 
+/** Called when a filename property changed
+ * @param prop A pointer to the property 
+ */
+void FitPropertyBrowser::filenameChanged(QtProperty* prop)
+{
+  if ( ! m_changeSlotsEnabled ) return;
+
+  if (m_paramItems.contains(prop))
+  {// Check if it is a function attribute
+    QtBrowserItem* attrItem = m_paramItems[prop];
+    QtBrowserItem* fnItem = attrItem->parent();
+    if (fnItem && m_functionItems.contains(fnItem))
+    {
+      Mantid::API::IFunction* fun = m_functionItems[fnItem];
+      if (fun)
+      {
+        std::string attrName = prop->propertyName().toStdString();
+        std::string attrValue = m_filenameManager->value(prop).toStdString();
+        try
+        {
+          fun->setAttribute(attrName,attrValue);
+          m_compositeFunction->checkFunction();
+          removeFunProperties(fnItem->property(),true);
+          addFunProperties(fun,true);
+          QFileInfo finfo(QString::fromStdString(attrValue));
+          QSettings settings;
+          settings.setValue("Mantid/FitBrowser/ResolutionDir",finfo.absolutePath());
+        }
+        catch(std::exception& e)
+        {
+          std::cerr<<"Error "<<e.what()<<'\n';
+          QMessageBox::critical(this,"Mantid - Error","Error in loading a resolution file.\n"
+            "The file must have two or more columns of numbers.\n"
+            "The first two columns are x and y-values of the resolution.");
+        }
+      }
+    }
+  }
+}
 // Centre of the current peak
 double FitPropertyBrowser::centre()const
 {
@@ -870,8 +916,8 @@ void FitPropertyBrowser::populateFunctionNames()
   for(size_t i=0;i<names.size();i++)
   {
     std::string fnName = names[i];
-    if (fnName != "Convolution")
-    {
+    //if (fnName != "Convolution")
+    //{
       QString qfnName = QString::fromStdString(fnName);
       m_registeredFunctions << qfnName;
       boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().create(fnName);
@@ -886,7 +932,7 @@ void FitPropertyBrowser::populateFunctionNames()
       {
         m_registeredBackgrounds << qfnName;
       }
-    }
+    //}
   }
 }
 
@@ -1661,17 +1707,6 @@ void FitPropertyBrowser::removeFunProperties(QtProperty* fnProp,bool doubleOnly)
   {
     QtProperty* parProp = subs[i];
     if (doubleOnly && parProp->propertyManager() != m_doubleManager) continue;
-    //for(int t=0;t<m_ties.size();)
-    //{
-    //  if (m_ties[t].getProperty() == parProp)
-    //  {
-    //    m_ties.removeAt(t);
-    //  }
-    //  else
-    //  {
-    //    ++t;
-    //  }
-    //}
     QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator cit = m_constraints.find(parProp);
     if (cit != m_constraints.end())
     {
@@ -1715,9 +1750,22 @@ void FitPropertyBrowser::addFunProperties(Mantid::API::IFunction* f,bool doubleO
     std::vector<std::string> attr = f->getAttributeNames();
     for(size_t i=0;i<attr.size();i++)
     {
-      QtProperty* parProp = m_stringManager->addProperty(QString::fromStdString(attr[i]));
-      fnProp->addSubProperty(parProp);
-      m_stringManager->setValue(parProp,QString::fromStdString(f->getAttribute(attr[i])));
+      std::string attName = attr[i];
+      QtProperty* parProp = 0;
+
+      if (attName == "FileName")
+      {
+        parProp = m_filenameManager->addProperty(QString::fromStdString(attName));
+        fnProp->addSubProperty(parProp);
+        m_filenameManager->setValue(parProp,QString::fromStdString(f->getAttribute(attName)));
+      }
+      else
+      {
+        parProp = m_stringManager->addProperty(QString::fromStdString(attName));
+        fnProp->addSubProperty(parProp);
+        m_stringManager->setValue(parProp,QString::fromStdString(f->getAttribute(attName)));
+      }
+
       QtBrowserItem* attrItem = findItem(m_functionsGroup,parProp);
       if (attrItem)
       {

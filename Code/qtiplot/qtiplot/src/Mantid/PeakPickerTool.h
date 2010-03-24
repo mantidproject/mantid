@@ -121,6 +121,8 @@ private slots:
   void plotAllGuess();
   void removeAllGuess();
 
+  void curveRemoved();
+
 private:
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
@@ -173,6 +175,9 @@ private:
 
   // Shows if a function i is plotted
   bool hasGuessPlotted(Mantid::API::IFunction*);
+
+  // Checks that the plotted functions exist
+  void checkPlots();
 
   FitPropertyBrowser* fitBrowser()const;
   /// The parent application window

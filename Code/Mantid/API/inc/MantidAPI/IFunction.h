@@ -169,6 +169,8 @@ public:
   /// it will be the same as ParameterReference::getFunction(). In case of a CompositeFunction it returns
   /// a top-level function that contains the parameter. The return function itself can be a CompositeFunction
   virtual IFunction* getContainingFunction(const ParameterReference& ref)const = 0;
+  /// The same as the method above but the argument is a function
+  virtual IFunction* getContainingFunction(const IFunction* fun) = 0;
 
   /// Tie a parameter to other parameters (or a constant)
   virtual ParameterTie* tie(const std::string& parName,const std::string& expr);

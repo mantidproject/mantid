@@ -177,6 +177,7 @@ private slots:
   void intChanged(QtProperty* prop);
   void doubleChanged(QtProperty* prop);
   void stringChanged(QtProperty* prop);
+  void filenameChanged(QtProperty* prop);
   void workspace_added(const QString &, Mantid::API::Workspace_sptr);
   void workspace_removed(const QString &);
   void currentItemChanged(QtBrowserItem*);
@@ -265,6 +266,7 @@ private:
   QtEnumPropertyManager *m_enumManager;
   QtIntPropertyManager *m_intManager;
   QtBoolPropertyManager *m_boolManager;
+  QtStringPropertyManager *m_filenameManager;
   /// Properties:
 
   mutable Mantid::API::IFunction* m_currentFunction;

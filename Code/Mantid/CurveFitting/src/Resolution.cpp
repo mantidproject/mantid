@@ -108,8 +108,8 @@ void Resolution::load(const std::string& fname)
   {
     str += ' ';
     std::istringstream istr(str);
-    double x,y,e;
-    istr >> x >> y >> e;
+    double x,y;
+    istr >> x >> y;
     if (!istr.good())
     {
       break;
@@ -126,22 +126,6 @@ void Resolution::load(const std::string& fname)
   m_xStart = m_xData.front();
   m_xEnd   = m_xData.back();
 
-  //m_dx = (m_xEnd - m_xStart) / (size() - 1);
-
-  //if (m_dx <= 0)
-  //{
-  //  throw std::runtime_error("Resolution: decreasing x values");
-  //}
-
-  //m_isXRegular = true;
-  //for (int i=1;i<size();i++)
-  //{
-  //  if ( fabs((m_xData[i]-m_xData[i-1])/m_dx - 1.) > 1e-7)
-  //  {
-  //    m_isXRegular = false;
-  //    break;
-  //  }
-  //}
 }
 
 } // namespace CurveFitting

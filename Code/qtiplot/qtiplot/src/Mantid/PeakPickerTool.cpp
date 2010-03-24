@@ -82,10 +82,12 @@ m_defaultPeakName("Gaussian")
     attach(d_graph->plotWidget());
     d_graph->plotWidget()->replot();
   }
+  connect(d_graph,SIGNAL(curveRemoved()),this,SLOT(curveRemoved()));
 }
 
 PeakPickerTool::~PeakPickerTool()
 {
+  disconnect(d_graph,SIGNAL(curveRemoved()),this,SLOT(curveRemoved()));
   QMap<Mantid::API::IFunction*,FunctionCurve*>::iterator it = m_guessCurves.begin();
   for(;it!=m_guessCurves.end();it++)
   {
@@ -865,4 +867,27 @@ void PeakPickerTool::removeAllGuess()
 bool PeakPickerTool::hasGuessPlotted(Mantid::API::IFunction* f)
 {
   return m_guessCurves.find(f) != m_guessCurves.end();
+}
+
+void PeakPickerTool::curveRemoved()
+{
+  checkPlots();
+}
+
+void PeakPickerTool::checkPlots()
+{
+  QMap<Mantid::API::IFunction*,FunctionCurve*>::iterator it = m_guessCurves.begin();
+  for(;it!=m_guessCurves.end();)
+  {
+    int index = d_graph->curveIndex(dynamic_cast<QwtPlotCurve*>(it.value()));
+    if (!fitBrowser()->theFunction()->getContainingFunction(it.key()) || index < 0)
+    {
+      std::cerr<<"deleting plot for "<<it.key()->name()<<'\n';
+      it = m_guessCurves.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
 }
