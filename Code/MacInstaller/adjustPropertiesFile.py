@@ -13,7 +13,7 @@ replacements = {
 ../../scripts/Muons;../../scripts/Neutrinos;../../scripts/SANS""",
     "pythonscripts.directory":"pythonscripts.directory = ../../scripts",
     "pythonscripts.directories":"pythonscripts.directories = ../../scripts",
-    "pythonalgorithms.directories":"../../plugins/PythonAlgs"
+    "pythonalgorithms.directories":"pythonalgorithms.directories = ../../plugins/PythonAlgs"
 }
 
 template = open('../Mantid/Properties/Mantid.properties','r')

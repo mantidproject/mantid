@@ -97,6 +97,7 @@ cp ../Mantid/Bin/Shared/libMantidCurveFitting.dylib MantidPlot.app/plugins/
 cp ../Mantid/Bin/Shared/libMantidDataHandling.dylib MantidPlot.app/plugins/
 cp ../Mantid/Bin/Shared/libMantidDataObjects.dylib MantidPlot.app/plugins/
 cp ../Mantid/Bin/Shared/libMantidNexus.dylib MantidPlot.app/plugins/
+install_name_tool -change /usr/local/lib/libNeXus.0.dylib @loader_path/../Contents/Frameworks/libNeXus.0.dylib MantidPlot.app/plugins/libMantidNexus.dylib
 cp ../qtiplot/MantidQt/lib/libMantidQtCustomDialogs.dylib MantidPlot.app/plugins/
 cp ../qtiplot/MantidQt/lib/libMantidQtCustomInterfaces.dylib MantidPlot.app/plugins/
 cp ../Mantid/PythonAPI/PythonAlgorithms/Squares.py MantidPlot.app/plugins/PythonAlgs/Examples/
