@@ -179,7 +179,7 @@ namespace Mantid
     }
     catch(Poco::PathSyntaxException &)
     {
-      g_log.error() << "Malformed path detected in the \"" << key << "\" variable, skipping \"" << dir << "\"\n";
+      g_log.warning() << "Malformed path detected in the \"" << key << "\" variable, skipping \"" << dir << "\"\n";
       return "";
     }
     if( is_relative )
@@ -201,7 +201,7 @@ namespace Mantid
     }
     if( required && !Poco::File(converted).exists() )
     {
-     g_log.error() << "Required properties path \"" << converted << "\" in the \"" << key << "\" variable does not exist.\n";
+     g_log.warning() << "Required properties path \"" << converted << "\" in the \"" << key << "\" variable does not exist.\n";
      converted = "";
     }
     return converted;
@@ -252,7 +252,7 @@ namespace Mantid
     }
     catch (std::runtime_error ex)
     {
-      g_log.error()<<"Unable to write out user.properties file to " << getOutputDir() << m_user_properties_file_name
+      g_log.warning()<<"Unable to write out user.properties file to " << getOutputDir() << m_user_properties_file_name
         << " error: " << ex.what() << std::endl;
     }
 
