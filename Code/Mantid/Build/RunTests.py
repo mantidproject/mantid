@@ -43,15 +43,15 @@ for test in testsToRun:
         if os.name == 'posix':
             test = "./" + test
         proc = sp.Popen(test,stdout=sp.PIPE,stderr=runerr,shell=True,cwd=testDir)
-	stdout = proc.communicate()[0]
-	# The standard out seems to get lost if the process fails
-	if proc.returncode != 0:
-	    runlog += "Failed all tests.\n"
-	else:
-	    runlog += stdout
-	# Extra bit to help Internet Explorer render this readably
-	if os.name == 'posix':
-	    runlog += "\r\n"
+        stdout = proc.communicate()[0]
+        # The standard out seems to get lost if the process aborted unexpectedly so assume a fatal error occurred.
+        if stdout == '':
+            runlog += "A fatal error occurred.\n"
+        else:
+            runlog += stdout
+        # Extra bit to help Internet Explorer render this readably
+        if os.name == 'posix':
+            runlog += "\r\n"
 
 open("../../../../logs/Mantid/testResults.log","w").write(runlog)
 runerr.close()

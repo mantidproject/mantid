@@ -105,7 +105,7 @@ f = open(filetestsRun,'r')
 reTestCount = re.compile("Running\\s*(\\d+)\\s*test", re.IGNORECASE)
 reCrashCount = re.compile("OK!")
 reFailCount = re.compile("Failed\\s*(\\d+)\\s*of\\s*(\\d+)\\s*tests", re.IGNORECASE)
-reFailSuite = re.compile("Failed all tests", re.IGNORECASE)
+reFailSuite = re.compile("A fatal error occurred", re.IGNORECASE)
 for line in f.readlines():
         m=reTestCount.search(line)
         if m:
