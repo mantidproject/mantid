@@ -388,7 +388,17 @@ void ApplicationWindow::init(bool factorySettings)
     m_interpreterDock->setWidget(m_scriptInterpreter);
     m_iface_script = NULL;
     loadCustomActions();
+
+    // Print a warning message if the scripting language is set to muParser
+    if (defaultScriptingLang == "muParser")
+    {
+      logWindow->show();
+      results->setTextColor(Qt::blue);
+      results->insertPlainText("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
+      results->setTextColor(Qt::black);
+    }
 }
+
 void ApplicationWindow::showresultsContextMenu(const QPoint & p)
 {
 	QMenu *menu = results->createStandardContextMenu();
