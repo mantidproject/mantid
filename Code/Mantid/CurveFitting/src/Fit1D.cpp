@@ -558,7 +558,7 @@ void Fit1D::exec()
   {
     // calculate covariance matrix if derivatives available
 
-    gsl_matrix *covar;
+    gsl_matrix *covar(NULL);
     std::vector<double> standardDeviations;
     std::vector<double> sdExtended;
     if (isDerivDefined)    

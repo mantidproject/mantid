@@ -828,7 +828,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
   std::vector<int> monitorwsList;
   int noTimeRegimes = 0;
   DataObjects::Workspace2D_sptr monitorWorkspace;
-  FILE *file;
+  FILE *file(NULL);
   getmonitorSpectrumList(localWorkspace, monitorSpecList);
   if (bseparateMonitors && monitorSpecList.size() > 0)
   {

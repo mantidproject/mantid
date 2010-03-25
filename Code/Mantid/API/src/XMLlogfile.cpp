@@ -33,13 +33,12 @@ XMLlogfile::XMLlogfile(const std::string& logfileID, const std::string& value, c
                        const std::string& formula, const std::string& formulaUnit, const std::string& paramName, const std::string& type, const std::string& tie, 
                        const std::string& constraintMin, const std::string& constraintMax, const std::string& fitFunc, const std::string& extractSingleValueAs, 
                        const std::string& eq, Geometry::Component* comp)
-  : m_logfileID(logfileID), m_value(value), m_formula(formula), m_formulaUnit(formulaUnit), m_paramName(paramName), m_type(type),
-    m_tie(tie), m_constraintMin(constraintMin), m_constraintMax(constraintMax), m_fittingFunction(fitFunc),
+  : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type), m_tie(tie),
+    m_constraintMin(constraintMin), m_constraintMax(constraintMax), m_fittingFunction(fitFunc),
+    m_formula(formula), m_formulaUnit(formulaUnit), m_interpolation(interpolation),
     m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp)
 {
-  m_interpolation = interpolation;
 }
-
 
 /** Returns parameter value as generated using possibly equation expression etc
  *

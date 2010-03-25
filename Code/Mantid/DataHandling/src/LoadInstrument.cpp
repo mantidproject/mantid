@@ -1148,7 +1148,7 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
       NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
       unsigned int numberPoint = pNLpoint->length();
 
-      for ( int i = 0; i < numberPoint; i++)
+      for ( unsigned int i = 0; i < numberPoint; i++)
       {
         Element* pPoint = static_cast<Element*>(pNLpoint->item(i));
         double x = atof( pPoint->getAttribute("x").c_str() );

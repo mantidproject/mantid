@@ -56,7 +56,7 @@ namespace CurveFitting
     ///  @throw runtime_error Thrown if column of Jacobian to add number to does not exist
     void addNumberToColumn(const double& value, const int& iActiveP) 
     {
-      if (iActiveP < m_J->size2)
+      if (iActiveP < static_cast<int>(m_J->size2) )
       {
         // add penalty to first and last point and every 10th point in between
         m_J->data[iActiveP] += value;
@@ -518,9 +518,9 @@ namespace CurveFitting
     // finally do the fitting
 
     int iter = 0;
-    int status;
+    int status = 0;
     //bool simplexFallBack = false; // set to true if levenberg-marquardt fails
-    double finalCostFuncVal;
+    double finalCostFuncVal = 0.0;
     double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
 
     // Standard least-squares used if derivative function defined otherwise simplex
@@ -617,7 +617,7 @@ namespace CurveFitting
     std::string output = getProperty("Output");
     if (!output.empty())
     {
-      gsl_matrix *covar;
+      gsl_matrix *covar(NULL);
       std::vector<double> standardDeviations;
 
       // only if derivative is defined for fitting function create covariance matrix output workspace
@@ -797,7 +797,7 @@ namespace CurveFitting
     if (!c) return;
 
     double penalty = c->check();
-    while(c = m_function->nextConstraint())
+    while( (c = m_function->nextConstraint()) )
     {
       penalty += c->check();
     }
@@ -838,7 +838,7 @@ namespace CurveFitting
       int i = m_function->getParameterIndex(*c);
       out->addNumberToColumn(penalty, m_function->activeIndex(i));
     }
-    while(c = m_function->nextConstraint());
+    while( (c = m_function->nextConstraint()) );
 
     //std::cerr<<"-------------- Jacobian ---------------\n";
     //for(int i=0;i<nActive();i++)
