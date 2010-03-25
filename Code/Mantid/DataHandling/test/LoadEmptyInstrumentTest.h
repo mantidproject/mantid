@@ -118,7 +118,7 @@ public:
 
     param = paramMap.getRecursive(&(*det), "toplevel2", "fitting");
     const FitParameter& fitParam2 = param->value<FitParameter>();
-    TS_ASSERT_DELTA( fitParam2.getValue(0), 1.0, 0.0001);
+    TS_ASSERT_DELTA( fitParam2.getValue(0), -48.5, 0.0001);
     TS_ASSERT_DELTA( fitParam2.getValue(5), 1120.0, 0.0001);
     TS_ASSERT( fitParam2.getTie().compare("") == 0 );
     TS_ASSERT( fitParam2.getFunction().compare("somefunction") == 0 );
