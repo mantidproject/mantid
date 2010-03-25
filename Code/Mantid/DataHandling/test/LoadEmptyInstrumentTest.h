@@ -135,7 +135,7 @@ public:
     TS_ASSERT( fitParam3.getFunction().compare("somefunction") == 0 );
     TS_ASSERT( fitParam3.getConstraint().compare("") == 0 );
     TS_ASSERT( !fitParam3.getLookUpTable().containData() );
-    TS_ASSERT( fitParam3.getFormula().compare("100.0+10*value+value^2") == 0 );
+    TS_ASSERT( fitParam3.getFormula().compare("100.0+10*centre+centre^2") == 0 );
     TS_ASSERT( fitParam3.getFormulaUnit().compare("TOF") == 0 );
 
     param = paramMap.getRecursive(&(*det), "percentage", "fitting");

@@ -38,11 +38,14 @@ namespace Kernel
     // check first if at is within the limits of interpolation interval
 
     if ( at <= m_x[0] )
-      return m_y[0];
+    {
+      return m_y[0]-(m_x[0]-at)*(m_y[1]-m_y[0])/(m_x[1]-m_x[0]);
+    }
 
     if ( at >= m_x[N-1] )
-      return m_y[N-1];
-
+    {
+      return m_y[N-1]+(at-m_y[N-1])*(m_y[N-1]-m_y[N-2])/(m_x[N-1]-m_x[N-2]);
+    }
 
     // otherwise
 
@@ -63,8 +66,6 @@ namespace Kernel
   */
   void Interpolation::addPoint(const double& xx, const double& yy)
   { 
-//m_x.push_back(xx); m_y.push_back(yy);
-
     unsigned int N = m_x.size();
     std::vector<double>::iterator it;
 

@@ -82,19 +82,21 @@ namespace Geometry
     {
       size_t found;
       std::string equationStr = m_formula;
-      found = equationStr.find("value");
+      std::string toReplace = "centre"; // replace this string in formula
+      size_t len = toReplace.size();
+      found = equationStr.find(toReplace);
       std::stringstream readDouble;
       readDouble << at;
       std::string extractedValueStr = readDouble.str();
       if ( found != std::string::npos )
-        equationStr.replace(found, 5, extractedValueStr);
+        equationStr.replace(found, len, extractedValueStr);
 
-      // check if more than one 'value' in m_eq
+      // check if more than one string to replace in m_eq
 
-      while ( equationStr.find("value") != std::string::npos )
+      while ( equationStr.find(toReplace) != std::string::npos )
       {
-        found = equationStr.find("value");
-        equationStr.replace(found, 5, extractedValueStr);
+        found = equationStr.find(toReplace);
+        equationStr.replace(found, len, extractedValueStr);
       }
 
       try
