@@ -39,7 +39,7 @@ void SumSpectra::init()
     "The first Workspace index to be included in the summing (default 0)" );
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex",0, mustBePositive->clone(),
+  declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
     "The last Workspace index to be included in the summing (default\n"
     "highest index)" );
 }
@@ -64,7 +64,7 @@ void SumSpectra::exec()
     g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
     m_MinSpec = 0;
   }
-  if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
+  if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
   if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
   {
     g_log.warning("EndWorkspaceIndex out of range! Set to max Workspace Index");
@@ -73,13 +73,13 @@ void SumSpectra::exec()
 
   // Create the 1D workspace for the output
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,
-			1,localworkspace->readX(0).size(),YLength);
+                                                         1,localworkspace->readX(0).size(),YLength);
 
   Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
   
   // Copy over the bin boundaries
   outputWorkspace->dataX(0) = localworkspace->readX(0);
-	// Get references to the output workspaces's data vectors
+  // Get references to the output workspaces's data vectors
   MantidVec& YSum = outputWorkspace->dataY(0);
   MantidVec& YError = outputWorkspace->dataE(0);
   // Get a reference to the spectra-detector map
@@ -99,7 +99,7 @@ void SumSpectra::exec()
     const MantidVec& YValues = localworkspace->readY(i);
     const MantidVec& YErrors = localworkspace->readE(i);
 
-		for (int k = 0; k < YLength; ++k)
+    for (int k = 0; k < YLength; ++k)
     {
       YSum[k] += YValues[k];
       YError[k] += YErrors[k]*YErrors[k];
@@ -110,9 +110,9 @@ void SumSpectra::exec()
 
     progress.report();
   }
-	//take the square root of all the accumulated squared errors - Assumes Gaussian errors
+  //take the square root of all the accumulated squared errors - Assumes Gaussian errors
   std::transform(YError.begin(), YError.end(), YError.begin(), dblSqrt);
-	
+
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",outputWorkspace);
 

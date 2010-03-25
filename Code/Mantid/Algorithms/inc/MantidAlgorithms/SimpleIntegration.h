@@ -32,7 +32,7 @@ namespace Algorithms
     @date 05/10/2007
 	  @author L C Chapon, ISIS, Rutherford Appleton Laboratory
 	  @date 01/03/2009 Modified to account for distribution.
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 

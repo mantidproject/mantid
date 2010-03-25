@@ -33,7 +33,7 @@ void Max::init()
   declareProperty("StartWorkspaceIndex",0, mustBePositive);
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex",0, mustBePositive->clone());
+  declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone());
 }
 
 /** Executes the algorithm
@@ -45,8 +45,6 @@ void Max::exec()
   // Try and retrieve the optional properties
   m_MinRange = getProperty("RangeLower");
   m_MaxRange = getProperty("RangeUpper");
-  //m_MinSpec = getProperty("StartSpectrum");
-  //m_MaxSpec = getProperty("EndSpectrum");
   m_MinSpec = getProperty("StartWorkspaceIndex");
   m_MaxSpec = getProperty("EndWorkspaceIndex");
 
@@ -62,7 +60,7 @@ void Max::exec()
     g_log.warning("StartSpectrum out of range! Set to 0.");
     m_MinSpec = 0;
   }
-  if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
+  if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
   if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
   {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
@@ -83,8 +81,8 @@ void Max::exec()
   // Loop over spectra
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   {
-  	PARALLEL_START_INTERUPT_REGION
-  	int newindex=i-m_MinSpec;
+    PARALLEL_START_INTERUPT_REGION
+    int newindex=i-m_MinSpec;
     if (localworkspace->axes() > 1)
     {
       outputWorkspace->getAxis(1)->spectraNo(newindex) = localworkspace->getAxis(1)->spectraNo(i);

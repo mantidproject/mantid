@@ -50,7 +50,7 @@ namespace Mantid
         "The index number of the first Workspace to use (default 0)" );
       // As the property takes ownership of the validator pointer, have to take care to pass in a unique
       // pointer to each property.
-      declareProperty("EndWorkspaceIndex",0, mustBePositive->clone(),
+      declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
         "The index number of the last Workspace to use (default 0)");
     }
 
@@ -71,7 +71,7 @@ namespace Mantid
         g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
         m_MinSpec = 0;
       }
-      if ( !m_MaxSpec ) m_MaxSpec = numberOfSpectra-1;
+      if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
       if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
       {
         g_log.warning("EndWorkspaceIndex out of range! Set to max detector number");
@@ -106,44 +106,43 @@ namespace Mantid
 
       // Loop over the histograms (detector spectra)
       PARALLEL_FOR2(outputWS,inputWS)
-        for (int j = 0; j <= loopIterations; ++j) 
+      for (int j = 0; j <= loopIterations; ++j) 
+      {
+        PARALLEL_START_INTERUPT_REGION
+        int i = j + m_MinSpec;
+        try {
+          // Get the spectrum number for this histogram
+          outputWS->getAxis(1)->spectraNo(j) = inputWS->getAxis(1)->spectraNo(i);
+          // Now get the detector to which this relates
+          Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
+          // Solid angle should be zero if detector is masked ('dead')
+          double solidAngle = det->isMasked() ? 0.0 : det->solidAngle(samplePos);
+
+          outputWS->dataX(j)[0] = inputWS->readX(i).front();
+          outputWS->dataX(j)[1] = inputWS->readX(i).back();
+          outputWS->dataY(j)[0] = solidAngle;
+          outputWS->dataE(j)[0] = 0;
+        } 
+        catch (Exception::NotFoundError e)
         {
-          PARALLEL_START_INTERUPT_REGION
-            int i = j + m_MinSpec;
-          try {
-            // Get the spectrum number for this histogram
-            outputWS->getAxis(1)->spectraNo(j) = inputWS->getAxis(1)->spectraNo(i);
-            // Now get the detector to which this relates
-            Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
-            // Solid angle should be zero if detector is masked ('dead')
-            double solidAngle = det->isMasked() ? 0.0 : det->solidAngle(samplePos);
+          // Get to here if exception thrown when calculating distance to detector
+          failCount++;
+          outputWS->dataX(j).assign(outputWS->dataX(j).size(),0.0);
+          outputWS->dataY(j).assign(outputWS->dataY(j).size(),0.0);
+          outputWS->dataE(j).assign(outputWS->dataE(j).size(),0.0);
+        }
 
-            outputWS->dataX(j)[0] = inputWS->readX(i).front();
-            outputWS->dataX(j)[1] = inputWS->readX(i).back();
-            outputWS->dataY(j)[0] = solidAngle;
-            outputWS->dataE(j)[0] = 0;
-          } 
-          catch (Exception::NotFoundError e)
-          {
-            // Get to here if exception thrown when calculating distance to detector
-            failCount++;
-            outputWS->dataX(j).assign(outputWS->dataX(j).size(),0.0);
-            outputWS->dataY(j).assign(outputWS->dataY(j).size(),0.0);
-            outputWS->dataE(j).assign(outputWS->dataE(j).size(),0.0);
-          }
+        prog.report();
+        PARALLEL_END_INTERUPT_REGION
+      } // loop over spectra
+      PARALLEL_CHECK_INTERUPT_REGION
 
-          prog.report();
-          PARALLEL_END_INTERUPT_REGION
-        } // loop over spectra
-        PARALLEL_CHECK_INTERUPT_REGION
-
-          if (failCount != 0)
-          {
-            g_log.information() << "Unable to calculate solid angle for " << failCount << " spectra. Zeroing spectrum." << std::endl;
-          }
+      if (failCount != 0)
+      {
+        g_log.information() << "Unable to calculate solid angle for " << failCount << " spectra. Zeroing spectrum." << std::endl;
+      }
 
     }
-
 
   } // namespace Algorithm
 } // namespace Mantid

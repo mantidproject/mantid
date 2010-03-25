@@ -11,8 +11,8 @@ namespace Mantid
 namespace Algorithms
 {
 /** Takes a 2D workspace as input and find the maximum in each 1D spectrum.
- * The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries
- * and error. This is used in particular for single crystal as a quick way to find strong peaks.
+    The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries
+    and error. This is used in particular for single crystal as a quick way to find strong peaks.
 
     Required Properties:
     <UL>
@@ -28,9 +28,9 @@ namespace Algorithms
     <LI> EndSpectrum - End spectrum number  (default max)</LI>
     </UL>
 
-	@author L C Chapon, ISIS, Rutherford Appleton Laboratory
+    @author L C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 11/08/2009
-    Copyright &copy; 2007-8 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 

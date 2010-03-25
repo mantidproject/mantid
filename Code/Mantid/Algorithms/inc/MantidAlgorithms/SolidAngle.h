@@ -11,7 +11,7 @@ namespace Mantid
 namespace Algorithms
 {
 /** Calculates and outputs the solid angles for each detector in the instrument.  
-		The sample position is taken as a point source for the solid angle calculations.
+    The sample position is taken as a point source for the solid angle calculations.
 
     Required Properties:
     <UL>
@@ -22,7 +22,7 @@ namespace Algorithms
     @author Nick Draper, Tessella Support Services plc
     @date 26/01/2009
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 

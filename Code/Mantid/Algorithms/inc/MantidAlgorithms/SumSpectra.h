@@ -28,7 +28,7 @@ namespace Algorithms
     @author Nick Draper, Tessella Support Services plc
     @date 22/01/2009
 
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
