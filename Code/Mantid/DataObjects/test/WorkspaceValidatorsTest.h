@@ -169,6 +169,7 @@ public:
     IValidator<MatrixWorkspace_sptr> *v = compVal.clone();
     TS_ASSERT_DIFFERS( v, &compVal )
     TS_ASSERT( dynamic_cast<CompositeValidator<>*>(v) )
+    delete v;
   }
 
   void testCompositeValidator_isValidandAdd()

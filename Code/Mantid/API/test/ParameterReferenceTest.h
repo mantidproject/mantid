@@ -126,6 +126,7 @@ public:
     TS_ASSERT_EQUALS(r10.getIndex(),1);
     TS_ASSERT_EQUALS(r11.getIndex(),2);
 
+    delete cf;
   }
 
 };

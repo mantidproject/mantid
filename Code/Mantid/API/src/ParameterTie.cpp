@@ -126,8 +126,6 @@ namespace API
     {
       fun = getFunction();
     }
-    const CompositeFunction* cf  = dynamic_cast<const CompositeFunction*>(fun);
-    CompositeFunction* cf1 = dynamic_cast<CompositeFunction*>(m_function1);
     std::string res_expression;
     try
     {

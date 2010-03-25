@@ -74,6 +74,7 @@ public:
     ManagedWorkspace2D *ws = new ManagedWorkspace2D;
     TS_ASSERT( dynamic_cast<Workspace2D*>(ws) )
     TS_ASSERT( dynamic_cast<Mantid::API::Workspace*>(ws) )
+    delete ws;
   }
 
   void testId()

@@ -23,6 +23,11 @@ public:
         p->addValue("2007-11-30T16:17:40",5);
     }
 
+    ~LogFilterTest()
+    {
+      delete p;
+    }
+    
     void testnthValue()
     {
         TS_ASSERT_EQUALS( p->size(), 5 )

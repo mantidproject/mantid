@@ -26,12 +26,8 @@ echo
 echo "Compiling the test executable..."
 g++ -w -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc \
 	                         -I ../../../Third_Party/include -I /usr/include/python2.3 \
-	                         -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 -L $OPENCASCADELIBS \
-	                         -lMantidPythonAPI -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects \
-	                         -lPocoFoundation -lPocoUtil -lboost_python -lboost_regex \
-	                         -lboost_date_time -lboost_signals -lpython2.3 \
-	                         -lmuparserd -lgsl -lgslcblas -lGL -lGLU -lgts \
-				             -lTKernel -lTKBO -lTKPrim -lTKMesh
+	                         -L ../../debug -L ../../Build \
+	                         -lMantidPythonAPI
 echo
 
 echo "Running the tests..."

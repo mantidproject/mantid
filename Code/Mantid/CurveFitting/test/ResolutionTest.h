@@ -149,8 +149,7 @@ void tearDown()
     const int nX = 100;
     const int nY = nX - 1;
 
-    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-      (WorkspaceFactory::Instance().create("Workspace2D",1,nX,nY));
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D",1,nX,nY));
 
     double spec;
     double x;

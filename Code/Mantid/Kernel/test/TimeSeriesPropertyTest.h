@@ -17,6 +17,13 @@ public:
     sProp = new TimeSeriesProperty<std::string>("stringProp");
   }
   
+  ~TimeSeriesPropertyTest()
+  {
+    delete iProp;
+    delete dProp;
+    delete sProp;
+  }
+  
 	void testConstructor()
 	{
     // Test that all the base class member variables are correctly assigned to

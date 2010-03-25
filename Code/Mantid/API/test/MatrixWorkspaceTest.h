@@ -123,6 +123,7 @@ public:
   {
     Axis* axBad = new Axis(AxisType::Spectra,5);
     TS_ASSERT_THROWS( ws->replaceAxis(0,axBad), std::runtime_error )
+    delete axBad;
     Axis* ax = new Axis(AxisType::Spectra,1);
     TS_ASSERT_THROWS( ws->replaceAxis(1,ax), Exception::IndexError )
     TS_ASSERT_THROWS_NOTHING( ws->replaceAxis(0,ax) )
@@ -182,6 +183,8 @@ public:
     TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->first, 1 )
     TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->second, 0.5 )
     TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 )
+    
+    delete ws2;
   }
   
 private:

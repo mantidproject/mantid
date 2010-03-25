@@ -17,8 +17,10 @@ namespace Mantid
     Kernel::Logger& TableWorkspace::g_log = Kernel::Logger::get("TableWorkspace");
 
     /// Constructor
-    TableWorkspace::TableWorkspace(int nrows)
-    {setRowCount(nrows);}
+    TableWorkspace::TableWorkspace(int nrows) : ITableWorkspace(), m_rowCount(0)
+    {
+      setRowCount(nrows);
+    }
 
     ///Destructor
     TableWorkspace::~TableWorkspace()

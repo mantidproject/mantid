@@ -256,7 +256,7 @@ int CompositeFunction::parameterIndex(const std::string& name)const
   if (index < 0)
     throw std::invalid_argument("CompositeFunction::getParameter: parameter name must contain function index");
 
-  return m_paramOffsets[index] + getFunction(index)->parameterIndex(pname);
+  return getFunction(index)->parameterIndex(pname) + m_paramOffsets[index];
 }
 
 /**
@@ -408,7 +408,7 @@ void CompositeFunction::checkFunction()
   std::vector<IFunction*> functions(m_functions.begin(),m_functions.end());
   m_functions.clear();
 
-  for(int i=0;i<functions.size();i++)
+  for(std::vector<IFunction*>::size_type i=0;i<functions.size();i++)
   {
     IFunction* f = functions[i];
     CompositeFunction* cf = dynamic_cast<CompositeFunction*>(f);

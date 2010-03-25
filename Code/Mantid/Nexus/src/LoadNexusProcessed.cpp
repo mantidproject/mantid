@@ -354,6 +354,7 @@ namespace Mantid
       }
 
       local_workspace->mutableSpectraMap().populate(spectra_list, det_list.get(), ndets);
+      delete[] spectra_list;
     }
 
     /**

@@ -72,6 +72,7 @@ public:
     msg = fp->setValue("GEM38371.raw");
     TS_ASSERT_EQUALS(msg, "")    
 
+    delete fp;
   }
 
   void testSaveProperty()
@@ -84,6 +85,8 @@ public:
     //Test for some random file name as this doesn't need to exist here
     std::string msg = fp->setValue("filepropertytest.sav");
     TS_ASSERT_EQUALS(msg, "")
+    
+    delete fp;
   }
 
 };

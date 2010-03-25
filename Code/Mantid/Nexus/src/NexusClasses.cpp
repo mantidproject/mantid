@@ -310,7 +310,7 @@ std::vector< std::string >& NXNote::data()
       NXgetdata(m_fileID,buffer);
       NXclosedata(m_fileID);
       std::istringstream istr(std::string(buffer,n));
-      delete buffer;
+      delete[] buffer;
       /* end of new code */
 
       m_data.clear();

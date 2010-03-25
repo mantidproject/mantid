@@ -360,21 +360,22 @@ namespace CurveFitting
 
     // check if derivative defined in derived class
     bool isDerivDefined = true;
-    try
-    {
       const std::vector<double> inTest(nActive(),1.0);
       std::vector<double> outTest(nActive());
       const double xValuesTest = 0;
       JacobianImpl1 J;
-      boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(1,nActive()) );
-      J.setJ(M.get());
+      gsl_matrix* M( gsl_matrix_alloc(1,nActive()) );
+      J.setJ(M);
+      try
+      {
       // note nData set to zero (last argument) hence this should avoid further memory problems
-      functionDeriv(NULL, &J, &xValuesTest, 0);  
+      functionDeriv(NULL, &J, &xValuesTest, 0);
     }
     catch (Exception::NotImplementedError&)
     {
       isDerivDefined = false;
     }
+    gsl_matrix_free(M);
 
     // What minimizer to use
     std::string methodUsed = getProperty("Minimizer");
@@ -629,7 +630,7 @@ namespace CurveFitting
         // take standard deviations to be the square root of the diagonal elements of
         // the covariance matrix
         int iPNotFixed = 0;
-        for(size_t i=0; i < m_function->nParams(); i++)
+        for(int i=0; i < m_function->nParams(); i++)
         {
           standardDeviations.push_back(1.0);
           if (m_function->isActive(i))
@@ -652,7 +653,7 @@ namespace CurveFitting
         Mantid::API::ITableWorkspace_sptr m_covariance = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
         m_covariance->addColumn("str","Name");
         std::vector<std::string> paramThatAreFitted; // used for populating 1st "name" column
-        for(size_t i=0; i < m_function->nParams(); i++) 
+        for(int i=0; i < m_function->nParams(); i++) 
         {
           if (m_function->isActive(i)) 
           {
@@ -699,7 +700,7 @@ namespace CurveFitting
       //Mantid::API::TableRow row = m_result->appendRow();
       //row << "Chi^2/DoF" << finalCostFuncVal;
 
-      for(size_t i=0;i<m_function->nParams();i++)
+      for(int i=0;i<m_function->nParams();i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
         row << m_function->parameterName(i) << m_function->getParameter(i);
@@ -766,7 +767,8 @@ namespace CurveFitting
     delete [] l_data.sqrtWeightData;
     delete [] l_data.holdCalculatedData;
     gsl_matrix_free (l_data.holdCalculatedJacobian);
-
+    gsl_vector_free (initFuncArg);
+    
     return;
   }
 

@@ -75,6 +75,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(output << AH);
     TS_ASSERT_EQUALS(output.str(),correctOutput);
 
+    delete timeinfo;
+    delete alg;
   }
 
 

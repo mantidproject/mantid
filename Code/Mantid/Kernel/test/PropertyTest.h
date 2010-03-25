@@ -27,6 +27,11 @@ public:
     p = new PropertyHelper;
   }
 
+  ~PropertyTest()
+  {
+    delete p;
+  }
+  
   void testName()
   {
     TS_ASSERT( ! p->name().compare("Test") )

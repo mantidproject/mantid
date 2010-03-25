@@ -43,8 +43,8 @@ namespace DataHandling
 class DLLExport SaveSPE : public API::Algorithm
 {
 public:
-  /// (Empty) Constructor
-  SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(-1) {}
+  /// Constructor
+  SaveSPE();
   /// Virtual destructor
   virtual ~SaveSPE() {}
   /// Algorithm's name
@@ -53,12 +53,12 @@ public:
   virtual const int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
-  ///
+
 private:
-  ///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
-  int m_nBins;
-  ///the SPE files have a constant number of numbers writen on each line, but depending on the number of bins there will be some "spare" numbers at the end of the block, this holds that number of spares
-  int m_remainder;
+  /// Initialisation code
+  void init();
+  ///Execution code
+  void exec();
 
   void writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile);
   void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const;
@@ -66,12 +66,12 @@ private:
   void writeBins(const MantidVec &Vs, FILE * const outFile) const;
   void writeValue(const double value, FILE * const outFile) const;
   void logMissingMasked(const std::vector<int> &inds, const int nonMasked, const int masked) const;
-  /// Initialisation code
-  void init();
-  ///Execution code
-  void exec();
+  
+  ///the SPE files have a constant number of numbers writen on each line, but depending on the number of bins there will be some "spare" numbers at the end of the block, this holds that number of spares
+  int m_remainder;
+  ///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
+  int m_nBins;
 
-protected:
   /// the mask flag (=-1e30) from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
   static const double MASK_FLAG;
   /// the error value (=0.0) for spectra whose detectors are all masked, from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf

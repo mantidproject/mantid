@@ -26,8 +26,7 @@ echo
 
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../../Third_Party/include \
-            -L ../../debug -L ../../Build -L ../../../Third_Party/lib/linux64 \
-            -lMantidKernel -lPocoFoundationd -lPocoUtild -lboost_signals
+            -L ../../debug -L ../../Build -lMantidKernel
 echo
 
 echo "Running the tests..."

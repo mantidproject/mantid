@@ -203,6 +203,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(1),1.1);
     TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
+    delete fun;
   }
 
   void testCreateComposite1()
@@ -222,6 +223,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(1),0.);
     TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
+    delete fun;
   }
 
   void testCreateComposite2()
@@ -243,6 +245,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(2),0.2);
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
     TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctB");
+    delete fun;
   }
 
   void testCreateComposite3()
@@ -266,6 +269,7 @@ public:
     TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctA");
     TS_ASSERT(fun->hasAttribute("attr"));
     TS_ASSERT_EQUALS(fun->getAttribute("attr"),"hello");
+    delete fun;
   }
 
   void testCreateCompositeNested()
@@ -285,7 +289,9 @@ public:
     TS_ASSERT_EQUALS(cf->getFunction(1)->name(),"FunctionFactoryTest_CompFunctB");
     TS_ASSERT_EQUALS(dynamic_cast<CompositeFunction*>(cf->getFunction(0))->nFunctions(),2);
     TS_ASSERT_EQUALS(dynamic_cast<CompositeFunction*>(cf->getFunction(1))->nFunctions(),2);
+    delete fun;
   }
+  
   void testCreateWithConstraint()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1(0<a0<0.2),a1=1.1";
@@ -606,6 +612,7 @@ public:
     TS_ASSERT_EQUALS(fun1->getParameter(3),789);
 
     delete fun;
+    delete fun1;
   }
 
 };

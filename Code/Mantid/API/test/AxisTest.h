@@ -68,7 +68,8 @@ public:
     TS_ASSERT_DIFFERS( newSpecAxis, spectraAxis )
     Axis* newNumAxis = numericAxis->clone();
     TS_ASSERT_DIFFERS( newNumAxis, numericAxis )
-    delete newSpecAxis, newNumAxis;
+    delete newSpecAxis;
+    delete newNumAxis;
   }
   
   void testTitle()

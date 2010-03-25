@@ -66,6 +66,7 @@ public:
     CompressedWorkspace2D *ws = new CompressedWorkspace2D;
     TS_ASSERT( dynamic_cast<Workspace2D*>(ws) )
     TS_ASSERT( dynamic_cast<Mantid::API::Workspace*>(ws) )
+    delete ws;
   }
 
   void testId()

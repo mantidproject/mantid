@@ -281,10 +281,11 @@ void Fit1D::exec()
     std::vector<double> outTest(m_parameterNames.size());
     const double xValuesTest = 0;
     JacobianImpl J;
-    boost::shared_ptr<gsl_matrix> M( gsl_matrix_alloc(m_parameterNames.size(),1) );
-    J.setJ(M.get());
+    gsl_matrix* M( gsl_matrix_alloc(m_parameterNames.size(),1) );
+    J.setJ(M);
     // note nData set to zero (last argument) hence this should avoid further memory problems
-    functionDeriv(&(inTest.front()), &J, &xValuesTest, 0);  
+    functionDeriv(&(inTest.front()), &J, &xValuesTest, 0);
+    gsl_matrix_free(M);
   }
   catch (Exception::NotImplementedError&)
   {
@@ -708,6 +709,7 @@ void Fit1D::exec()
   delete [] l_data.sigmaData;
   delete [] l_data.forSimplexLSwrap;
   delete [] l_data.parameters;
+  gsl_vector_free (initFuncArg);
 
   return;
 }

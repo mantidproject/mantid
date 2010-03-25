@@ -33,9 +33,10 @@ public:
       a[i]=i+0.1;
     }
     for (int j = 0; j < 5; ++j) {
-      space->dataX(j) = *( new Mantid::MantidVec(a+(5*j), a+(5*j)+5) );
+      space->dataX(j) = Mantid::MantidVec(a+(5*j), a+(5*j)+5);
     }
-    delete a,b;
+    delete[] a;
+    delete[] b;
     
     // Create the axis that the tests will be performed on
     refAxis = new RefAxis(5, space);
@@ -46,7 +47,8 @@ public:
   ~RefAxisTest()
   {
     delete refAxis;
-    delete space, space2;
+    delete space;
+    delete space2;
   }
   
   void testConstructor()
@@ -68,6 +70,7 @@ public:
     TS_ASSERT( clonedAxis->isNumeric() )
     TS_ASSERT_EQUALS( (*clonedAxis)(0,0), 0.0 )
     TS_ASSERT_THROWS( (*clonedAxis)(0,1), std::range_error )
+    delete clonedAxis;
   }
 
   void testOperatorBrackets()

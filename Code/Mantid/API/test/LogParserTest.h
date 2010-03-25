@@ -80,7 +80,8 @@ public:
         TS_ASSERT_EQUALS(tp1->firstValue(),1);
         //TS_ASSERT_EQUALS(secondValue(p1),2);
         TS_ASSERT_EQUALS(tp1->lastValue(),9);
-
+        
+        delete p1;
     }
 
     void testLate()
@@ -113,7 +114,8 @@ public:
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         TS_ASSERT_DELTA(timeMean(p1),8.0818, 0.001);
-
+        
+        delete p1;
     }
 
     void testEarly()
@@ -147,6 +149,7 @@ public:
         TS_ASSERT_EQUALS(ti->tm_min, 23);
         TS_ASSERT_DELTA(timeMean(p1),4.7096, 0.001);
 
+        delete p1;
     }
 
     void testSingle()
@@ -168,6 +171,7 @@ public:
         TS_ASSERT_EQUALS(ti->tm_min, 22);
         TS_ASSERT_DELTA(timeMean(p1),4., 0.001);
 
+        delete p1;
     }
 
     void testStr()
@@ -199,7 +203,7 @@ public:
         TS_ASSERT_EQUALS(ti->tm_hour, 14);
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         // assert_throws(timeMean(p1));
-
+        delete p1;
     }
 
     void testNoICPevent()
@@ -230,6 +234,7 @@ public:
         TS_ASSERT_EQUALS(ti->tm_min, 3);
         TS_ASSERT_DELTA(timeMean(p1),8.0756, 0.001);
 
+        delete p1;
     }
 //*/
 private:

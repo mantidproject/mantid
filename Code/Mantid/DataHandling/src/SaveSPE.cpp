@@ -31,6 +31,8 @@ static const int NUM_PER_LINE = 8;
 const double SaveSPE::MASK_FLAG=-1e30;
 const double SaveSPE::MASK_ERROR=0.0;
 
+SaveSPE::SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(-1) {}
+
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------

@@ -401,7 +401,7 @@ public:
     TS_ASSERT_EQUALS(mfun->parameterIndex("f3.h"),10);
     TS_ASSERT_EQUALS(mfun->parameterIndex("f3.s"),11);
 
-
+    delete mfun;
   }
 
   void testSetActive()
@@ -467,6 +467,8 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter(9),104);
     TS_ASSERT_EQUALS(mfun->getParameter(10),3.2);
     TS_ASSERT_EQUALS(mfun->getParameter(11),105);
+    
+    delete mfun;
   }
 
   void testRemoveActive()
@@ -535,6 +537,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter(10),3.2);
     TS_ASSERT_EQUALS(mfun->getParameter(11),105);
 
+    delete mfun;
   }
 
   void testApplyTies()
@@ -596,6 +599,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter(10),79.1);
     TS_ASSERT_EQUALS(mfun->getParameter(11),3.3);
 
+    delete mfun;
   }
 
   void testApplyTiesInWrongOrder()
@@ -657,6 +661,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter(10),79.1);
     TS_ASSERT_EQUALS(mfun->getParameter(11),3.3);
 
+    delete mfun;
   }
 
   void testRemoveFunction()
@@ -774,6 +779,7 @@ public:
     TS_ASSERT( ! mfun->isActive(6));
     TS_ASSERT(   mfun->isActive(7));
 
+    delete mfun;
   }
 
   // replacing function has fewer parameters
@@ -1142,6 +1148,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter("f1.h"),0.2);
     TS_ASSERT_EQUALS(mfun->getParameter("f1.s"),1.33);
 
+    delete mfun;
   }
 
   void testRemoveFunctionWithTies()
@@ -1181,6 +1188,7 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter("f0.h"),1.2);
     TS_ASSERT_EQUALS(mfun->getParameter("f0.s"),0.3);
 
+    delete mfun;
   }
 
 private:
