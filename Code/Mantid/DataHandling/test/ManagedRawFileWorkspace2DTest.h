@@ -91,7 +91,7 @@ public:
   void testLoadRaw2()
   {
     
-    ConfigService::Instance().loadConfig("UseManagedWS.properties");
+    ConfigService::Instance().updateConfig("UseManagedWS.properties");
     LoadRaw2 loader;
     if ( !loader.isInitialized() ) loader.initialize();
 
@@ -195,7 +195,7 @@ public:
     TS_ASSERT(test.empty());
     
     AnalysisDataService::Instance().remove(outputSpace);
-    ConfigService::Instance().loadConfig("Mantid.properties");
+    ConfigService::Instance().updateConfig("Mantid.properties");
   }
 
 private:

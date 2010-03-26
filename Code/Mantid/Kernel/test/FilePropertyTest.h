@@ -14,7 +14,7 @@ public:
   {
     // It wasn't happy having this in the constructor as I think all of the objects in the test
     //get created first and then all of the tests run
-    Mantid::Kernel::ConfigService::Instance().loadConfig("Mantid.properties");
+    Mantid::Kernel::ConfigService::Instance().updateConfig("Mantid.properties");
     TS_ASSERT_DIFFERS(Mantid::Kernel::ConfigService::Instance().getDataSearchDirs().size(), 0);
   }
   

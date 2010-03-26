@@ -279,7 +279,7 @@ public:
 
   void testWithManagedWorkspace()
   {
-    ConfigService::Instance().loadConfig("UseManagedWS.properties");
+    ConfigService::Instance().updateConfig("UseManagedWS.properties");
     LoadRaw2 loader4;
     loader4.initialize();
     loader4.setPropertyValue("Filename", inputFile);
@@ -292,7 +292,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
     TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
     
-    ConfigService::Instance().loadConfig("Mantid.properties");
+    ConfigService::Instance().updateConfig("Mantid.properties");
     AnalysisDataService::Instance().remove("managedws2");
   }
 

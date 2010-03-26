@@ -4,18 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <set>
+#include "MantidKernel/DllExport.h"
+#include "MantidKernel/SingletonHolder.h"
 #include <vector>
 #include <map>
 
-#include "MantidKernel/DllExport.h"
-#include "MantidKernel/SingletonHolder.h"
-
 //----------------------------------------------------------------------
-// Forward declaration
+// Forward declarations
 //----------------------------------------------------------------------
 /// @cond Exclude from doxygen documentation
 namespace Poco
@@ -32,98 +27,50 @@ namespace Mantid
 {
   namespace Kernel
   {
-    class Logger;	
-	
+    //----------------------------------------------------------------------
+    // More forward declarations
+    //----------------------------------------------------------------------
+    class Logger;
+
     /** The ConfigService class provides a simple facade to access the Configuration functionality of the Mantid Framework.
-	The class gathers information from config files and the system variables.  
-	This information is available to all the objects within the framework as well as being used to configure the logging framework.
-	This class currently uses the Logging functionality provided through the POCO (portable components library).
-    
-	@author Nicholas Draper, Tessella Support Services plc
-	@date 15/10/2007
-    
-	Copyright &copy; 2007 STFC Rutherford Appleton Laboratories
+        The class gathers information from config files and the system variables.  
+        This information is available to all the objects within the framework as well as being used to configure the logging framework.
+        This class currently uses the Logging functionality provided through the POCO (portable components library).
 
-	This file is part of Mantid.
+        @author Nicholas Draper, Tessella Support Services plc
+        @date 15/10/2007
 
-	Mantid is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; either version 3 of the License, or
-	(at your option) any later version.
+        Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
-	Mantid is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+        This file is part of Mantid.
 
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+        Mantid is free software; you can redistribute it and/or modify
+        it under the terms of the GNU General Public License as published by
+        the Free Software Foundation; either version 3 of the License, or
+        (at your option) any later version.
 
-	File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
-	Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
+        Mantid is distributed in the hope that it will be useful,
+        but WITHOUT ANY WARRANTY; without even the implied warranty of
+        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        GNU General Public License for more details.
+
+        You should have received a copy of the GNU General Public License
+        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+        Code Documentation is available at: <http://doxygen.mantidproject.org>
+     */
     class EXPORT_OPT_MANTID_KERNEL ConfigServiceImpl
     {
-      /** Inner templated class to wrap the poco library objects that have protected 
-       *  desctructors and expose them as public.
-       */
-      template<typename T >
-	class WrappedObject : public T
-      {
-      public:
-	/// The template type of class that is being wrapped
-	typedef T element_type;
-	/// Simple constructor
-	WrappedObject() : T()
-	{
-	  m_pPtr = static_cast<T*>(this);
-	}
+    public:
+      void updateConfig(const std::string& filename, const bool append=false);
 
-	/** Constructor with a class to wrap
-	 *  @param F The object to wrap
-	 */
-	template<typename Field>
-	WrappedObject(Field& F) : T(F)
-	{
-	  m_pPtr = static_cast<T*>(this);
-	}
-
-	/// Copy constructor
-	WrappedObject(const WrappedObject<T>& A) : T(A)
-	{
-	  m_pPtr = static_cast<T*>(this);
-	}
-		       
-	/// Virtual destructor
-	virtual ~WrappedObject()
-	{}
-		       
-	/// Overloaded * operator returns the wrapped object pointer
-	const T& operator*() const { return *m_pPtr; }	    
-	/// Overloaded * operator returns the wrapped object pointer
-	T& operator*() { return m_pPtr; }
-	/// Overloaded -> operator returns the wrapped object pointer
-	const T* operator->() const{ return m_pPtr; }
-	/// Overloaded -> operator returns the wrapped object pointer
-	T* operator->() { return m_pPtr; }
-
-      private:
-	/// Private pointer to the wrapped class
-	T* m_pPtr;
-      };
-
-      // Back to the ConfigService class itself...
-	  
-    public:	
-      // Loads a config file
-      void loadConfig(const std::string& filename, const bool append=false);
-		
       // Searches for a configuration property
       std::string getString(const std::string& keyName);
 
       // Searches for a configuration property and returns its value
       template<typename T>
-	    int getValue(const std::string& keyName, T& out);
+      int getValue(const std::string& keyName, T& out);
 
       // Searches for the given environment variable and returns it as a string
       std::string getEnvironment(const std::string& keyName);
@@ -132,7 +79,7 @@ namespace Mantid
       std::string getOSName();
       std::string getComputerName();
       std::string getOSArchitecture();
-      std::string getOSVersion();	
+      std::string getOSVersion();
       std::string getCurrentDir();
       std::string getTempDir();
       std::string getBaseDir() const;
@@ -143,62 +90,59 @@ namespace Mantid
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
-	
+
       // Private constructors and destructor for singleton class
       ConfigServiceImpl();
       /// Private copy constructor. Prevents singleton being copied.
       ConfigServiceImpl(const ConfigServiceImpl&);
-	    
+
       virtual ~ConfigServiceImpl();
 
+      // Loads a config file
+      void loadConfig(const std::string& filename, const bool append=false);
+      // Starts up the logging
+      void configureLogging();
       /// Provies a string of a default configuration
       const std::string defaultConfig() const;
-
       /// Writes out a fresh user properties file
       void createUserPropertiesFile() const;
-
       /// Convert any relative paths to absolute ones and store them locally so that
       /// if the working directory is altered the paths will not be affected
       void convertRelativeToAbsolute();
-
       ///Make a relative path or a list of relative paths into an absolute one.
       std::string makeAbsolute(const std::string & dir, const std::string & key) const;
-
       /// Create the storage of the data search directories
       void defineDataSearchPaths();
 
-    private:
+      // Forward declaration of inner class
+      template <class T>
+      class WrappedObject;
       /// the POCO file config object
       WrappedObject<Poco::Util::PropertyFileConfiguration>* m_pConf;
       /// the POCO system Config Object
       WrappedObject<Poco::Util::SystemConfiguration>* m_pSysConfig;
 
-      /// static reference to the logger class
+      /// reference to the logger class
       Logger& g_log;
 
       /// A map storing string/key pairs where the string denotes a path that could be relative in the user properties file
       /// The boolean indicates whether the path needs to exist or not
       std::map<std::string, bool> m_ConfigPaths;
-	  
       /// Local storage for the relative path key/values that have been changed 
       std::map<std::string, std::string> m_AbsolutePaths;
-
       /// The directory that is considered to be the base directory
       std::string m_strBaseDir;
-
       ///The configuration properties in string format
       std::string m_PropertyString;
-		
       /// The filename of the Mantid properties file
       const std::string m_properties_file_name;
       /// The filename of the Mantid user properties file
       const std::string m_user_properties_file_name;
-
       /// Store a list of data search paths
       std::vector<std::string> m_DataSearchDirs;
     };
-	
-    ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
+
+    /// Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef __APPLE__
     inline
 #endif

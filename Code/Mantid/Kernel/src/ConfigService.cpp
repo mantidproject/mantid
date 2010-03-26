@@ -23,14 +23,65 @@
 
 namespace Mantid
 {
-  namespace Kernel
-  {
-    //-------------------------------
-    // Private member functions
-    //-------------------------------
+namespace Kernel
+{
 
-    /// Private constructor for singleton class
-    ConfigServiceImpl::ConfigServiceImpl() : 
+  /** Inner templated class to wrap the poco library objects that have protected 
+   *  destructors and expose them as public.
+   */
+  template<typename T >
+  class ConfigServiceImpl::WrappedObject : public T
+  {
+  public:
+    /// The template type of class that is being wrapped
+    typedef T element_type;
+    /// Simple constructor
+    WrappedObject() : T()
+    {
+      m_pPtr = static_cast<T*>(this);
+    }
+
+    /** Constructor with a class to wrap
+     *  @param F The object to wrap
+     */
+    template<typename Field>
+    WrappedObject(Field& F) : T(F)
+    {
+      m_pPtr = static_cast<T*>(this);
+    }
+
+    /// Copy constructor
+    WrappedObject(const WrappedObject<T>& A) : T(A)
+    {
+      m_pPtr = static_cast<T*>(this);
+    }
+
+    /// Virtual destructor
+    virtual ~WrappedObject()
+    {}
+
+    /// Overloaded * operator returns the wrapped object pointer
+    const T& operator*() const { return *m_pPtr; }	    
+    /// Overloaded * operator returns the wrapped object pointer
+    T& operator*() { return m_pPtr; }
+    /// Overloaded -> operator returns the wrapped object pointer
+    const T* operator->() const{ return m_pPtr; }
+    /// Overloaded -> operator returns the wrapped object pointer
+    T* operator->() { return m_pPtr; }
+
+  private:
+    /// Private pointer to the wrapped class
+    T* m_pPtr;
+  };
+
+  //Back to the ConfigService class itself...
+
+  //-------------------------------
+  // Private member functions
+  //-------------------------------
+
+  /// Private constructor for singleton class
+  ConfigServiceImpl::ConfigServiceImpl() : 
     m_pConf(NULL), m_pSysConfig(NULL),
     g_log(Logger::get("ConfigService")), 
     m_ConfigPaths(), m_AbsolutePaths(),
@@ -89,6 +140,9 @@ namespace Mantid
     //and then append the user properties
     loadConfig( getOutputDir() + m_user_properties_file_name, true);
 
+    // Now start up the logging
+    configureLogging();
+
     g_log.debug() << "ConfigService created." << std::endl;
     g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
     g_log.information() << "This is Mantid Version " << MANTID_VERSION << std::endl;
@@ -100,8 +154,8 @@ namespace Mantid
   }
 
   /** Private Destructor
-  *  Prevents client from calling 'delete' on the pointer handed out by Instance
-  */
+   *  Prevents client from calling 'delete' on the pointer handed out by Instance
+   */
   ConfigServiceImpl::~ConfigServiceImpl()
   {
     Kernel::Logger::shutdown();
@@ -109,10 +163,111 @@ namespace Mantid
     delete m_pConf;                // potential double delete???
   }
 
+  /** Loads the config file provided.
+   *  If the file contains logging setup instructions then these will be used to setup the logging framework.
+   *
+   *  @param filename The filename and optionally path of the file to load
+   *  @param append If false (default) then any previous configuration is discarded, otherwise the new keys are added, and repeated keys will override existing ones.
+   */
+  void ConfigServiceImpl::loadConfig(const std::string& filename, const bool append)
+  {
+    delete m_pConf;
+    if (!append)
+    {
+      //remove the previous property string
+      m_PropertyString = "";
+    }
+
+    try
+    {
+      std::ifstream propFile(filename.c_str(),std::ios::in);
+      bool good = propFile.good();
+
+      //slurp in entire file - extremely unlikely delimter used as an alternate to \n
+      std::string temp; 
+      getline(propFile,temp,'¬');
+      propFile.close();
+
+      // check if we have failed to open the file
+      if ((!good) || (temp==""))
+      {
+        if (filename == getOutputDir() + m_user_properties_file_name)
+        {
+          //write out a fresh file
+          createUserPropertiesFile();
+        }
+        else
+        {
+          throw Exception::FileError("Cannot open file",filename);
+        }
+      }
+
+      //store the property string
+      if((append) && (m_PropertyString!=""))
+      {
+        m_PropertyString = m_PropertyString + "\n" + temp;
+      }
+      else
+      {
+        m_PropertyString = temp;
+      }
+
+    }
+    catch (std::exception& e)
+    {
+      //there was a problem loading the file - it probably is not there
+      std::cerr << "Problem loading the configuration file " << filename << " " << e.what() << std::endl;
+
+      if(!append)
+      {
+        // if we have no property values then take the default
+        m_PropertyString = defaultConfig();
+      }
+    }
+
+    //use the cached property string to initialise the POCO property file
+    std::istringstream istr(m_PropertyString);
+    m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
+  }
+
+  /// Configures the Poco logging and starts it up
+  void ConfigServiceImpl::configureLogging()
+  {
+    try
+    {
+      //Ensure that the logging directory exists
+      Poco::Path logpath(getString("logging.channels.fileChannel.path"));
+      if( logpath.toString().empty() || getOutputDir() != getBaseDir() )
+      {
+        std::string logfile = getOutputDir() + "mantid.log";
+        logpath.assign(logfile);
+        m_pConf->setString("logging.channels.fileChannel.path", logfile);
+      }
+      //make this path point to the parent directory and create it if it does not exist
+      logpath.makeParent();
+      if( !logpath.toString().empty() )
+      {
+        Poco::File(logpath).createDirectory();
+      }
+      //configure the logging framework
+      Poco::Util::LoggingConfigurator configurator;
+      configurator.configure(m_pConf);
+    }
+    catch (std::exception& e)
+    {
+      std::cerr << "Trouble configuring the logging framework " << e.what()<<std::endl;
+    }
+
+    //Ensure that any relative paths given in the configuration file are relative to the current directory
+    convertRelativeToAbsolute();
+    //Configure search paths into a specially saved store as they will be used frequently
+    defineDataSearchPaths();
+  }
+
   /**
-  * Searches the stored list for keys that have been loaded from the config file and may contain
-  * relative paths. Any it find are converted to absolute paths and stored separately
-  */
+   * Searches the stored list for keys that have been loaded from the config file and may contain
+   * relative paths. Any it find are converted to absolute paths and stored separately
+   */
   void ConfigServiceImpl::convertRelativeToAbsolute()
   {
     if( m_ConfigPaths.empty() ) return;
@@ -133,11 +288,11 @@ namespace Mantid
   }
 
   /**
-  * Make a relative path or a list of relative paths into an absolute one.
-  * @param dir The directory to convert
-  * @param key The key variable this relates to
-  * @returns A string containing an aboluste path by resolving the relative directory with the executable directory
-  */
+   * Make a relative path or a list of relative paths into an absolute one.
+   * @param dir The directory to convert
+   * @param key The key variable this relates to
+   * @returns A string containing an aboluste path by resolving the relative directory with the executable directory
+   */
   std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::string & key) const
   {
     std::string converted;
@@ -207,11 +362,10 @@ namespace Mantid
     return converted;
  }
 
-
   /**
-  * Create the store of data search paths from the 'datasearch.directories' key within the Mantid.properties file.
-  * The value of the key should be a semi-colon separated list of directories
-  */
+   * Create the store of data search paths from the 'datasearch.directories' key within the Mantid.properties file.
+   * The value of the key should be a semi-colon separated list of directories
+   */
   void ConfigServiceImpl::defineDataSearchPaths()
   {
     m_DataSearchDirs.clear();
@@ -229,9 +383,9 @@ namespace Mantid
   }
 
   /**
-  * writes a basic placeholder user.properties file to disk
-  * any errors are caught and logged, but not propagated
-  */
+   * writes a basic placeholder user.properties file to disk
+   * any errors are caught and logged, but not propagated
+   */
   void ConfigServiceImpl::createUserPropertiesFile() const
   {
     try
@@ -259,9 +413,9 @@ namespace Mantid
   }
 
   /**
-  * Provides a default Configuration string to use if the config file cannot be loaded.
-  * @returns The string value of default properties
-  */
+   * Provides a default Configuration string to use if the config file cannot be loaded.
+   * @returns The string value of default properties
+   */
   const std::string ConfigServiceImpl::defaultConfig() const
   {
     std::string propFile = 
@@ -293,116 +447,28 @@ namespace Mantid
     return propFile;
   }
 
-
   //-------------------------------
   // Public member functions
   //-------------------------------
 
-  /** Loads the config file provided.
-  *  If the file contains logging setup instructions then these will be used to setup the logging framework.
-  *
-  *  @param filename The filename and optionally path of the file to load
-  *  @param append If false (default) then any previous configuration is discarded, otherwise the new keys are added, and repeated keys will override existing ones.
-  */
-  void ConfigServiceImpl::loadConfig(const std::string& filename, const bool append)
+  /** Updates and existing configuration and restarts the logging
+   *  @param filename The filename and optionally path of the file to load
+   *  @param append   If false (default) then any previous configuration is discarded, 
+   *                  otherwise the new keys are added, and repeated keys will override existing ones.
+   */
+  void ConfigServiceImpl::updateConfig(const std::string& filename, const bool append)
   {
-    delete m_pConf;
-    if (!append)
-    {
-      //remove the previous property string
-      m_PropertyString = "";
-    }
-
-    try
-    {
-      std::ifstream propFile(filename.c_str(),std::ios::in);
-      bool good = propFile.good();
-
-      //slurp in entire file - extremely unlikely delimter used as an alternate to \n
-      std::string temp; 
-      getline(propFile,temp,'¬');
-      propFile.close();
-
-      // check if we have failed to open the file
-      if ((!good) || (temp==""))
-      {
-        if (filename == getOutputDir() + m_user_properties_file_name)
-        {
-          //write out a fresh file
-          createUserPropertiesFile();
-        }
-        else
-        {
-          throw Exception::FileError("Cannot open file",filename);
-        }
-      }
-
-      //store the property string
-      if((append) && (m_PropertyString!=""))
-      {
-        m_PropertyString = m_PropertyString + "\n" + temp;
-      }
-      else
-      {
-        m_PropertyString = temp;
-      }
-
-    }
-    catch (std::exception& e)
-    {
-      //there was a problem loading the file - it probably is not there
-      std::cerr << "Problem loading the configuration file " << filename << " " << e.what() << std::endl;
-
-      if(!append)
-      {
-        // if we have no property values then take the default
-        m_PropertyString = defaultConfig();
-      }
-    }
-
-    //use the cached property string to initialise the POCO property file
-    std::istringstream istr(m_PropertyString);
-    m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
-
-    try
-    {
-      //Ensure that the logging directory exists
-      Poco::Path logpath(getString("logging.channels.fileChannel.path"));
-      if( logpath.toString().empty() || getOutputDir() != getBaseDir() )
-      {
-        std::string logfile = getOutputDir() + "mantid.log";
-        logpath.assign(logfile);
-        m_pConf->setString("logging.channels.fileChannel.path", logfile);
-      }
-      //make this path point to the parent directory and create it if it does not exist
-      logpath.makeParent();
-      if( !logpath.toString().empty() )
-      {
-        Poco::File(logpath).createDirectory();
-      }
-      //configure the logging framework
-      Poco::Util::LoggingConfigurator configurator;
-      configurator.configure(m_pConf);
-    }
-    catch (std::exception& e)
-    {
-      std::cerr << "Trouble configuring the logging framework " << e.what()<<std::endl;
-    }
-
-    //Ensure that any relative paths given in the configuration file are relative to the current directory
-    convertRelativeToAbsolute();
-    //Configure search paths into a specially saved store as they will be used frequently
-    defineDataSearchPaths();
+    loadConfig(filename, append);
+    configureLogging();
   }
 
-
   /** Searches for a string within the currently loaded configuaration values and 
-  *  returns the value as a string. If the key is one of those that was a possible relative path
-  *  then the local store is searched first.
-  *
-  *  @param keyName The case sensitive name of the property that you need the value of.
-  *  @returns The string value of the property, or an empty string if the key cannot be found
-  */
+   *  returns the value as a string. If the key is one of those that was a possible relative path
+   *  then the local store is searched first.
+   *
+   *  @param keyName The case sensitive name of the property that you need the value of.
+   *  @returns The string value of the property, or an empty string if the key cannot be found
+   */
   std::string ConfigServiceImpl::getString(const std::string& keyName)
   {
     std::map<std::string, std::string>::const_iterator mitr = m_AbsolutePaths.find(keyName);
@@ -424,12 +490,12 @@ namespace Mantid
   }
 
   /** Searches for a string within the currently loaded configuaration values and 
-  *  attempts to convert the values to the template type supplied.
-  *
-  *  @param keyName The case sensitive name of the property that you need the value of.
-  *  @param out     The value if found
-  *  @returns A success flag - 0 on failure, 1 on success
-  */
+   *  attempts to convert the values to the template type supplied.
+   *
+   *  @param keyName The case sensitive name of the property that you need the value of.
+   *  @param out     The value if found
+   *  @returns A success flag - 0 on failure, 1 on success
+   */
   template<typename T>
   int ConfigServiceImpl::getValue(const std::string& keyName, T& out)
   {
@@ -439,85 +505,85 @@ namespace Mantid
   }
 
   /** Searches for the string within the environment variables and returns the 
-  *  value as a string.
-  *
-  *  @param keyName The name of the environment variable that you need the value of.
-  *  @returns The string value of the property
-  */
+   *  value as a string.
+   *
+   *  @param keyName The name of the environment variable that you need the value of.
+   *  @returns The string value of the property
+   */
   std::string ConfigServiceImpl::getEnvironment(const std::string& keyName)	
   {
     return m_pSysConfig->getString("system.env." + keyName);
   }
 
   /** Gets the name of the host operating system
-  *
-  *  @returns The name pf the OS version
-  */
+   *
+   *  @returns The name pf the OS version
+   */
   std::string ConfigServiceImpl::getOSName()
   {
     return m_pSysConfig->getString("system.osName");
   }
 
   /** Gets the name of the computer running Mantid
-  *
-  *  @returns The  name of the computer
-  */
+   *
+   *  @returns The  name of the computer
+   */
   std::string ConfigServiceImpl::getOSArchitecture()
   {
     return m_pSysConfig->getString("system.osArchitecture");
   }
 
   /** Gets the name of the operating system Architecture
-  *
-  * @returns The operating system architecture
-  */
+   *
+   * @returns The operating system architecture
+   */
   std::string ConfigServiceImpl::getComputerName()
   {
     return m_pSysConfig->getString("system.nodeName");
   }
 
   /** Gets the name of the operating system version
-  *
-  * @returns The operating system version
-  */
+   *
+   * @returns The operating system version
+   */
   std::string ConfigServiceImpl::getOSVersion()
   {
     return m_pSysConfig->getString("system.osVersion");
   }
 
   /** Gets the absolute path of the current directory containing the dll
-  *
-  * @returns The absolute path of the current directory containing the dll
-  */
+   *
+   * @returns The absolute path of the current directory containing the dll
+   */
   std::string ConfigServiceImpl::getCurrentDir()
   {
     return m_pSysConfig->getString("system.currentDir");
   }
 
   /** Gets the absolute path of the temp directory 
-  *
-  * @returns The absolute path of the temp directory 
-  */
+   *
+   * @returns The absolute path of the temp directory 
+   */
   std::string ConfigServiceImpl::getTempDir()
   {
     return m_pSysConfig->getString("system.tempDir");
   }
 
   /**
-  * Gets the directory that we consider to be the bse directory. Basically, this is the 
-  * executable directory when running normally or the current directory on startup when
-  * running through Python on the command line
-  * @returns The directory to consider as the base directory, including a trailing slash
-  */
+   * Gets the directory that we consider to be the bse directory. Basically, this is the 
+   * executable directory when running normally or the current directory on startup when
+   * running through Python on the command line
+   * @returns The directory to consider as the base directory, including a trailing slash
+   */
   std::string ConfigServiceImpl::getBaseDir() const
   {
     return m_strBaseDir;
   }
 
   /**
-  * Return the directory that Mantid should use for writing files. A trailing slash is appended
-  * so that filenames can more easily be concatenated with this
-  */
+   * Return the directory that Mantid should use for writing files. A trailing slash is appended
+   * so that filenames can more easily be concatenated with this
+   */
   std::string ConfigServiceImpl::getOutputDir() const
   {
 #ifdef _WIN32 
@@ -537,12 +603,10 @@ namespace Mantid
   }
 
   /// \cond TEMPLATE 
-
   template DLLExport int ConfigServiceImpl::getValue(const std::string&,double&);
   template DLLExport int ConfigServiceImpl::getValue(const std::string&,std::string&);
   template DLLExport int ConfigServiceImpl::getValue(const std::string&,int&);
-
   /// \endcond TEMPLATE
 
-  } // namespace Kernel
+} // namespace Kernel
 } // namespace Mantid

@@ -151,7 +151,7 @@ public:
   }
 //  void testWithManagedWorkspace()
 //  {
-//    ConfigService::Instance().loadConfig("UseManagedWS.properties");
+//    ConfigService::Instance().updateConfig("UseManagedWS.properties");
 //    //LoadRaw loader4;
 //    //loader4.initialize();
 //    //loader4.setPropertyValue("Filename", inputFile);    

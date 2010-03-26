@@ -885,7 +885,7 @@ public:
   }
   void testWithManagedWorkspace()
   {
-    ConfigService::Instance().loadConfig("UseManagedWS.properties");
+    ConfigService::Instance().updateConfig("UseManagedWS.properties");
     LoadRaw3 loader4;
     loader4.initialize();
     loader4.setPropertyValue("Filename", inputFile);
@@ -901,7 +901,7 @@ public:
   }
  void testSeparateMonitorsWithManagedWorkspace()
   {
-	  ConfigService::Instance().loadConfig("UseManagedWS.properties");
+	  ConfigService::Instance().updateConfig("UseManagedWS.properties");
 	  LoadRaw3 loader8;
 	  loader8.initialize();
 	  loader8.setPropertyValue("Filename", inputFile);

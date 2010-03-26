@@ -18,7 +18,7 @@ public:
 
   ConfigServiceTest()
   {
-	  ConfigService::Instance().loadConfig("MantidTest.properties");
+	  ConfigService::Instance().updateConfig("MantidTest.properties");
   }
 
   void testLogging()
@@ -145,7 +145,7 @@ public:
 	{
 
 		//This should clear out all old properties
-		ConfigService::Instance().loadConfig("MantidTest.properties");
+		ConfigService::Instance().updateConfig("MantidTest.properties");
 		//this should return an empty string
 		TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "");
     //this should pass
@@ -153,7 +153,7 @@ public:
 	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
 
 		//This should append a new properties file properties
-		ConfigService::Instance().loadConfig("MantidTest.user.properties",true);
+		ConfigService::Instance().updateConfig("MantidTest.user.properties",true);
 		//this should now be valid
 		TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "5");
     //this should have been overridden
@@ -162,7 +162,7 @@ public:
 	  TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.thorax"), "1");
 
 		//This should clear out all old properties
-		ConfigService::Instance().loadConfig("MantidTest.properties");
+		ConfigService::Instance().updateConfig("MantidTest.properties");
 		//this should return an empty string
 		TS_ASSERT_EQUALS(ConfigService::Instance().getString("mantid.noses"), "");
     //this should pass

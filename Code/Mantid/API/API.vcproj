@@ -45,7 +45,7 @@
 				OpenMP="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
-				DisableSpecificWarnings="4275"
+				DisableSpecificWarnings="4251;4275"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -123,7 +123,7 @@
 				RuntimeLibrary="2"
 				OpenMP="true"
 				WarningLevel="3"
-				DisableSpecificWarnings="4275"
+				DisableSpecificWarnings="4251;4275"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"

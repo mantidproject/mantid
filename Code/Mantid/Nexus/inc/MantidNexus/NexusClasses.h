@@ -604,7 +604,7 @@ namespace Mantid
             for(int i = 0; i < value.dim0(); i++)
             {
               time_t t = start_t + int(times[i]);
-              logv->addValue(t,value[i]);
+              logv->addValue( t, (value[i] == 0 ? false : true) );
             }
             return logv;
           }
