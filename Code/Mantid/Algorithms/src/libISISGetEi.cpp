@@ -604,7 +604,7 @@ void libISISGetEi::getPeakMean(const MantidVec& Xs, const MantidVec& Ys, const M
     w = xp_hh - xm_hh;
 
 // ! area:
-    double area, dummy;
+    double dummy;
     integrate(area, dummy, xint, yint, eint, pk_min, pk_max);
 // ! first moment:
     std::transform(yint.begin(), yint.end(), xint.begin(), yint.begin(), std::multiplies<double>());
