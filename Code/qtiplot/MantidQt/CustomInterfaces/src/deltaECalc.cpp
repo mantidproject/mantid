@@ -115,6 +115,16 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 
   m_pyScript.replace("|GUI_SET_WBV|", "'"+whiteB+"'");
 
+  QString eitype;
+  if( m_sets.getei_type->currentIndex() == 0 )
+  {
+    eitype = "MantidGetEi";
+  }
+  else
+  {
+    eitype = "libISISGetEi";
+  }
+  m_pyScript.replace("|GUI_GETEI_TYPE|", eitype);
   // use a FileProperty to check that the file exists
   std::vector<std::string> exts;
   exts.push_back("map"); exts.push_back("MAP");
@@ -134,9 +144,21 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 */
 void deltaECalc::createGetEIStatmens(QString &newScr)
 {
-  // create this algorithm for doing the validation, actually, depending on the user settings, getEi might not get run but the validation is good anyway
-  IAlgorithm_sptr gEi = AlgorithmManager::Instance().createUnmanaged("GetEi");
-  gEi->initialize();
+  if (m_sets.getei_type->currentIndex() == 0 )
+  {//means we are going to run GetEi, this has a validator, check it
+   // create this algorithm for doing the validation, actually, depending on the user settings, getEi might not get run but the validation is good anyway
+     IAlgorithm_sptr gEi = AlgorithmManager::Instance().createUnmanaged("GetEi");
+     gEi->initialize();
+    //this e guess (approximate Ei value) doesn't always get used, it depends on the tests above. However, Pyhton requires that the '|' in the code is replaced by something
+    LEChkCpIn(newScr, "|GUI_SET_E_GUESS|", m_sets.leEGuess,
+      gEi->getProperty("EnergyEstimate"));
+  }
+  else
+  {
+    // going to run libISISGetEi"
+    m_pyScript.replace("|GUI_SET_E_GUESS|", "'"+m_sets.leEGuess->text()+"'");
+  }
+
   // run getEi, unless the user checked the box 
   if (m_sets.ckFixEi->isChecked())
   {
@@ -146,9 +168,6 @@ void deltaECalc::createGetEIStatmens(QString &newScr)
   {
     newScr.replace("|GUI_SET_E|", "'true'");
   }
-  //this e guess (approximate Ei value) doesn't always get used, it depends on the tests above. However, Pyhton requires that the '|' in the code is replaced by something
-  LEChkCpIn(newScr, "|GUI_SET_E_GUESS|", m_sets.leEGuess,
-    gEi->getProperty("EnergyEstimate"));
 }
 /** Tests the user definitions for the TOF start and ends of the background regions
 *  against their FlatBackground validator and adds the user values to the Python script

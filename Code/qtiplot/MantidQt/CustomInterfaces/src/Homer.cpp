@@ -251,7 +251,7 @@ void Homer::page1Validators()
   setupValidator(m_uiForm.valGuess);
   m_validators[m_uiForm.leEGuess] = m_uiForm.valGuess;
   
-  m_validators[m_uiForm.leEHigh] = newStar(m_uiForm.gbConvUnits, 2, 8);
+  m_validators[m_uiForm.leEHigh] = newStar(m_uiForm.gbConvUnits, 2, 9);
   setupValidator(m_uiForm.valSPE);
   m_validators[m_uiForm.leNameSPE] = m_uiForm.valSPE;
   

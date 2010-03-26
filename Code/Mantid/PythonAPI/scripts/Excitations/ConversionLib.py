@@ -83,7 +83,7 @@ def retrieveSettings(instrum, back, runs):
   
   return (instru, TOFLow, TOFHigh, run_nums)
 
-def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile=''):
+def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile='', GetEiType = 'MantidGetEi'):
   if detInfoFile != '' :
     LoadDetectorInfo(workS, detInfoFile)             				                  #for details see www.mantidproject.org/LoadDetectorInfo
 
@@ -91,8 +91,13 @@ def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile=''):
   if not runGetEi :
     mtd.sendLogMessage('Getting peak times (the GetEi() energy will be overriden by '+str(E_guess)+' meV)')
 
-  #??STEVES?? MARI specfic code GetEiData.FirstMonitor ?
-  GetEiData = GetEi(workS, 2, 3, E_guess)
+  #MARI specfic code GetEiData.FirstMonitor ?
+  if GetEiType.lower() == "mantidgetei":
+    GetEiData = GetEi(workS, 2, 3, E_guess)
+  else:
+    if E_guess == '':
+      E_guess = None
+    GetEiData = libISISGetEi(workS, 2, 3, E_guess)
 
   if runGetEi : Ei = GetEiData.getPropertyValue('IncidentEnergy')
   else : Ei = E_guess
@@ -114,7 +119,7 @@ tempWS = '_ETrans_loading_tempory_WS'
 # Applies unit conversion, detector convcy and grouping correction to a
 # raw file
 ###########################################
-def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', nameInOut = 'mono_sample_temporyWS') :
+def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', nameInOut = 'mono_sample_temporyWS', GetEiType = 'MantidGetEi') :
   (instru, TOFLow, TOFHigh, run_nums) = retrieveSettings(instrum, back, runs)
 
   #----Calculations start------------------
@@ -123,7 +128,7 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='',
     if pInOut.isGroup() : raise Exception("Workspace groups are not supported here")
 
     common.sumWorkspaces(pInOut, instru, run_nums)                              #the final workspace will take the X-values and instrument from the first workspace and so we don't need to rerun ChangeBinOffset(), MoveInstrumentComponent(), etc.
-    [Ei, offSet] = findPeaksOffSetTimeAndEi(pInOut, Ei, getEi, instru.getFileName(run_nums[0]))
+    [Ei, offSet] = findPeaksOffSetTimeAndEi(pInOut, Ei, getEi, instru.getFileName(run_nums[0]),GetEiType )
  
     if back != 'noback':                                                        #remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
       ConvertToDistribution(pInOut)                                             #deal correctly with changing bin widths
