@@ -110,7 +110,7 @@ namespace Geometry
       {
         g_log.error() << "Cannot evaluate fitting parameter formula."
           << " Formula which cannot be passed is " << m_formula 
-          << ". Muparser error message is: " << e.GetMsg();
+          << ". Muparser error message is: " << e.GetMsg() << std::endl;
       }
     }
 

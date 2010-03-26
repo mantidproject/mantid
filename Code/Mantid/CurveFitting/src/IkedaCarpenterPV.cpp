@@ -21,6 +21,8 @@ using namespace SpecialFunctionSupport;
 
 DECLARE_FUNCTION(IkedaCarpenterPV)
 
+// Get a reference to the logger
+Kernel::Logger& IkedaCarpenterPV::g_log = Kernel::Logger::get("IkedaCarpenterPV");
 
 double IkedaCarpenterPV::centre()const 
 {
@@ -89,34 +91,50 @@ void IkedaCarpenterPV::init()
   m_width = 0.0; m_height = 0.0; 
 }
 
+
+/** Method for updating m_waveLength, although don't do this if m_waveLengthFixed = true.
+ *  Also if size of m_waveLength is equal to number of data (for a new instance of this 
+ *  class this vector is empty initially) then don't recalculate it.
+ *
+ *  @param xValues x values
+ *  @param nData length of xValues
+ */
 void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const int& nData)
 {
   if (!m_waveLengthFixed)
   { 
     // if wavelength vector already have the right size no need for resizing it
+    // further we make the assumption that no need to recalculate this vector if
+    // it already has the right size
 
     if (m_waveLength.size() != nData)
     {
-      m_waveLength.resize(nData);
-    }
+      // This peak shape requires the fit to be done in TOF units
 
-    // Get the geometric information for this detector
-    
-    API::IInstrument_const_sptr instrument = m_workspace->getInstrument();
-    Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-    const double l1 = instrument->getSource()->getDistance(*sample);
-    Geometry::IDetector_sptr det = m_workspace->getDetector(m_workspaceIndex);  // i is the workspace index
-    const double l2 = det->getDistance(*sample);
-    const double twoTheta = m_workspace->detectorTwoTheta(det);
-   
-    Mantid::Kernel::Unit_const_sptr wavelength = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-    //mWaveLength = workspace->readX(m_workspaceIndex); // Copy the TOF values for the spectrum of interest
-    for (int i = 0; i < nData; i++)
-    {
-      m_waveLength[i] = xValues[i];
+      if ( m_workspace->getAxis(0)->unit()->unitID().compare("TOF") != 0 )
+      {
+        g_log.warning() << "IkedaCarpenterPV function should ONLY be used when working with x-axis unit = TOF\n";
+      }
+
+      m_waveLength.resize(nData);
+
+      // Get the geometric information for this detector
+      
+      API::IInstrument_const_sptr instrument = m_workspace->getInstrument();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      const double l1 = instrument->getSource()->getDistance(*sample);
+      Geometry::IDetector_sptr det = m_workspace->getDetector(m_workspaceIndex);  // i is the workspace index
+      const double l2 = det->getDistance(*sample);
+      const double twoTheta = m_workspace->detectorTwoTheta(det);
+     
+      Mantid::Kernel::Unit_const_sptr wavelength = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+      for (int i = 0; i < nData; i++)
+      {
+        m_waveLength[i] = xValues[i];
+      }
+      std::vector<double> y; // Create an empty vector, it's not used in fromTOF
+      wavelength->fromTOF(m_waveLength,y,l1,l2,twoTheta,0,0.0,0.0);
     }
-    std::vector<double> y; // Create an empty vector, it's not used in fromTOF
-    wavelength->fromTOF(m_waveLength,y,l1,l2,twoTheta,0,0.0,0.0);
   }
 }
 
@@ -156,9 +174,9 @@ void IkedaCarpenterPV::function(double* out, const double* xValues, const int& n
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-X0;
 
-
         if (m_waveLengthFixed)
         {
+          // this is to allow unit testing when a workspace is not available
           R = exp(-81.799/(m_waveLength[0]*m_waveLength[0]*kappa));
           alpha = 1.0 / (alpha0+m_waveLength[0]*alpha1);
         }
@@ -167,8 +185,6 @@ void IkedaCarpenterPV::function(double* out, const double* xValues, const int& n
           R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
           alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
         }
-
-
 
         a_minus = alpha*(1-k);
         a_plus = alpha*(1+k);

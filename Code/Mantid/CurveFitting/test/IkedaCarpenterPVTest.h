@@ -265,7 +265,6 @@ public:
 
     bk->setParameter("A0",0.0);
     bk->setParameter("A1",0.0);
-    //bk->removeActive(1);
     bk->tie("A1", "0.0");
 
     // set up fitting function and pass to Fit
@@ -289,7 +288,6 @@ public:
     fnWithBk->addFunction(bk);
 
     alg2.setFunction(fnWithBk);
-
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

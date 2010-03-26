@@ -43,9 +43,9 @@ namespace Mantid
       /// Destructor
       virtual ~IkedaCarpenterPV() {};
 
-      /// these contruction for unit testing
+      /// contruction used for standard fitting
       IkedaCarpenterPV() : m_waveLengthFixed(false) {};
-      /// Constructor for unit testing - fixing the wave length
+      /// Constructor used for unit testing where a workspace may not be available
       IkedaCarpenterPV(double wavelength) : m_waveLengthFixed(true) 
          {m_waveLength.push_back(wavelength);};
 
@@ -68,7 +68,9 @@ namespace Mantid
     private:
 
       /// container for storing wavelength values for each data point
-      std::vector<double> m_waveLength; 
+      std::vector<double> m_waveLength;
+
+      /// used for unit testing where a workspace may not be available
       bool m_waveLengthFixed;
 
       /// method for updating m_waveLength
@@ -77,6 +79,9 @@ namespace Mantid
       // used in setHeight and setWidth
       double m_width; 
       double m_height;
+
+	    /// Static reference to the logger class
+	    static Kernel::Logger& g_log;
     };
 
   } // namespace CurveFitting
