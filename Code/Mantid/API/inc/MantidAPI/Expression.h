@@ -84,6 +84,9 @@ namespace Mantid
       iterator begin()const{return m_terms.begin();}
       iterator end()const{return m_terms.end();}
       const Expression& operator[](int i)const{return m_terms.at(i);}
+      /// If the expression has 1 argument and empty function name it means it is wrapped in brackets
+      /// This method returns first sub-expression without brackets
+      const Expression& bracketsRemoved()const;
     private:
 
       /// copy contructor

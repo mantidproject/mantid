@@ -17,7 +17,7 @@ public:
   {
     Expression expr;
     TS_ASSERT_THROWS_NOTHING(expr.parse("a+b*c-1"));
-    TS_ASSERT_EQUALS(expr.str(),"(a+(b*c)-1)");
+    TS_ASSERT_EQUALS(expr.str(),"a+b*c-1");
     TS_ASSERT(expr.isFunct());
     TS_ASSERT_EQUALS(expr.name(),"+");
     TS_ASSERT_EQUALS(expr.operator_name(),"");
@@ -35,7 +35,7 @@ public:
   {
     Expression expr;
     TS_ASSERT_THROWS_NOTHING(expr.parse("(a+b)*c"));
-    TS_ASSERT_EQUALS(expr.str(),"((a+b)*c)");
+    TS_ASSERT_EQUALS(expr.str(),"(a+b)*c");
     TS_ASSERT(expr.isFunct());
     TS_ASSERT_EQUALS(expr.name(),"*");
     TS_ASSERT_EQUALS(expr.operator_name(),"");
@@ -58,7 +58,7 @@ public:
   {
     Expression expr;
     TS_ASSERT_THROWS_NOTHING(expr.parse("sin(x)+cos(x)"));
-    TS_ASSERT_EQUALS(expr.str(),"(sin(x)+cos(x))");
+    TS_ASSERT_EQUALS(expr.str(),"sin(x)+cos(x)");
     TS_ASSERT(expr.isFunct());
     TS_ASSERT_EQUALS(expr.name(),"+");
     TS_ASSERT_EQUALS(expr.operator_name(),"");
@@ -78,7 +78,7 @@ public:
   {
     Expression expr;
     TS_ASSERT_THROWS_NOTHING(expr.parse("sin(x,y) + cos(x,y)"));
-    TS_ASSERT_EQUALS(expr.str(),"(sin(x,y)+cos(x,y))");
+    TS_ASSERT_EQUALS(expr.str(),"sin(x,y)+cos(x,y)");
     TS_ASSERT(expr.isFunct());
     TS_ASSERT_EQUALS(expr.name(),"+");
     TS_ASSERT_EQUALS(expr.operator_name(),"");
@@ -114,7 +114,7 @@ public:
   {
     Expression expr;
     TS_ASSERT_THROWS_NOTHING(expr.parse("x = \" y + z\""));
-    TS_ASSERT_EQUALS(expr.str(),"(x=\" y + z\")");
+    TS_ASSERT_EQUALS(expr.str(),"x=\" y + z\"");
     TS_ASSERT(expr.isFunct());
     TS_ASSERT_EQUALS(expr.name(),"=");
     TS_ASSERT_EQUALS(expr.operator_name(),"");
@@ -156,7 +156,7 @@ public:
   {
     Expression e1;
     TS_ASSERT_THROWS_NOTHING(e1.parse("x =-1"));
-    TS_ASSERT_EQUALS(e1.str(),"(x=-(1))");
+    TS_ASSERT_EQUALS(e1.str(),"x= -1");
     TS_ASSERT_EQUALS(e1.size(),2);
     TS_ASSERT_EQUALS(e1.name(),"=");
     TS_ASSERT_EQUALS(e1[0].name(),"x");
@@ -164,7 +164,7 @@ public:
 
     Expression e2;
     TS_ASSERT_THROWS_NOTHING(e2.parse("x =-  (1-2)"));
-    TS_ASSERT_EQUALS(e2.str(),"(x=-((1-2)))");
+    TS_ASSERT_EQUALS(e2.str(),"x= -(1-2)");
     TS_ASSERT_EQUALS(e2.size(),2);
     TS_ASSERT_EQUALS(e2.name(),"=");
     TS_ASSERT_EQUALS(e2[0].name(),"x");
@@ -172,7 +172,7 @@ public:
 
     Expression e3;
     TS_ASSERT_THROWS_NOTHING(e3.parse("x =-1+2"));
-    TS_ASSERT_EQUALS(e3.str(),"(x=-(1)+2)");
+    TS_ASSERT_EQUALS(e3.str(),"x= -1+2");
     TS_ASSERT_EQUALS(e3.size(),2);
     TS_ASSERT_EQUALS(e3.name(),"=");
     TS_ASSERT_EQUALS(e3[0].name(),"x");
@@ -181,7 +181,7 @@ public:
 
     Expression e4;
     TS_ASSERT_THROWS_NOTHING(e4.parse("x ==+1"));
-    TS_ASSERT_EQUALS(e4.str(),"(x==+(1))");
+    TS_ASSERT_EQUALS(e4.str(),"x== +1");
     TS_ASSERT_EQUALS(e4.size(),2);
     TS_ASSERT_EQUALS(e4.name(),"==");
     TS_ASSERT_EQUALS(e4[0].name(),"x");
@@ -195,7 +195,7 @@ public:
 
     Expression e5(bin_ops,un_ops);
     TS_ASSERT_THROWS_NOTHING(e5.parse("x=!1"));
-    TS_ASSERT_EQUALS(e5.str(),"(x=!(1))");
+    TS_ASSERT_EQUALS(e5.str(),"x= !1");
     TS_ASSERT_EQUALS(e5.size(),2);
     TS_ASSERT_EQUALS(e5.name(),"=");
     TS_ASSERT_EQUALS(e5[0].name(),"x");
@@ -203,7 +203,7 @@ public:
 
     Expression e6(bin_ops,un_ops);
     TS_ASSERT_THROWS_NOTHING(e6.parse("x= ! 1"));
-    TS_ASSERT_EQUALS(e6.str(),"(x=!(1))");
+    TS_ASSERT_EQUALS(e6.str(),"x= !1");
     TS_ASSERT_EQUALS(e6.size(),2);
     TS_ASSERT_EQUALS(e6.name(),"=");
     TS_ASSERT_EQUALS(e6[0].name(),"x");
@@ -211,7 +211,7 @@ public:
 
     Expression e7(bin_ops,un_ops);
     TS_ASSERT_THROWS_NOTHING(e7.parse("x=%%1"));
-    TS_ASSERT_EQUALS(e7.str(),"(x=%%(1))");
+    TS_ASSERT_EQUALS(e7.str(),"x= %%1");
     TS_ASSERT_EQUALS(e7.size(),2);
     TS_ASSERT_EQUALS(e7.name(),"=");
     TS_ASSERT_EQUALS(e7[0].name(),"x");
@@ -219,7 +219,7 @@ public:
 
     Expression e8(bin_ops,un_ops);
     TS_ASSERT_THROWS_NOTHING(e8.parse("x= %%1"));
-    TS_ASSERT_EQUALS(e8.str(),"(x=%%(1))");
+    TS_ASSERT_EQUALS(e8.str(),"x= %%1");
     TS_ASSERT_EQUALS(e8.size(),2);
     TS_ASSERT_EQUALS(e8.name(),"=");
     TS_ASSERT_EQUALS(e8[0].name(),"x");
@@ -233,7 +233,7 @@ public:
 
     Expression e9(bin_ops1,un_ops1);
     TS_ASSERT_THROWS_NOTHING(e9.parse("x==!1"));
-    TS_ASSERT_EQUALS(e9.str(),"(x==!(1))");
+    TS_ASSERT_EQUALS(e9.str(),"x== !1");
     TS_ASSERT_EQUALS(e9.size(),2);
     TS_ASSERT_EQUALS(e9.name(),"==");
     TS_ASSERT_EQUALS(e9[0].name(),"x");
@@ -241,7 +241,7 @@ public:
 
     Expression e10(bin_ops1,un_ops1);
     TS_ASSERT_THROWS_NOTHING(e10.parse("x== !1"));
-    TS_ASSERT_EQUALS(e10.str(),"(x==!(1))");
+    TS_ASSERT_EQUALS(e10.str(),"x== !1");
     TS_ASSERT_EQUALS(e10.size(),2);
     TS_ASSERT_EQUALS(e10.name(),"==");
     TS_ASSERT_EQUALS(e10[0].name(),"x");
@@ -249,7 +249,7 @@ public:
 
     Expression e11(bin_ops1,un_ops1);
     TS_ASSERT_THROWS_NOTHING(e11.parse("x==%%1"));
-    TS_ASSERT_EQUALS(e11.str(),"(x==%%(1))");
+    TS_ASSERT_EQUALS(e11.str(),"x== %%1");
     TS_ASSERT_EQUALS(e11.size(),2);
     TS_ASSERT_EQUALS(e11.name(),"==");
     TS_ASSERT_EQUALS(e11[0].name(),"x");
@@ -257,7 +257,7 @@ public:
 
     Expression e12(bin_ops1,un_ops1);
     TS_ASSERT_THROWS_NOTHING(e12.parse("x== %%1"));
-    TS_ASSERT_EQUALS(e12.str(),"(x==%%(1))");
+    TS_ASSERT_EQUALS(e12.str(),"x== %%1");
     TS_ASSERT_EQUALS(e12.size(),2);
     TS_ASSERT_EQUALS(e12.name(),"==");
     TS_ASSERT_EQUALS(e12[0].name(),"x");
@@ -278,7 +278,7 @@ public:
 
     Expression e15(bin_ops2,un_ops2);
     TS_ASSERT_THROWS_NOTHING(e15.parse("x--1"));
-    TS_ASSERT_EQUALS(e15.str(),"(x--1)");
+    TS_ASSERT_EQUALS(e15.str(),"x--1");
     TS_ASSERT_EQUALS(e15.size(),2);
     TS_ASSERT_EQUALS(e15.name(),"--");
     TS_ASSERT_EQUALS(e15[0].name(),"x");
@@ -286,7 +286,7 @@ public:
 
     Expression e16(bin_ops2,un_ops2);
     TS_ASSERT_THROWS_NOTHING(e16.parse("x---1"));
-    TS_ASSERT_EQUALS(e16.str(),"(x---(1))");
+    TS_ASSERT_EQUALS(e16.str(),"x-- -1");
     TS_ASSERT_EQUALS(e16.size(),2);
     TS_ASSERT_EQUALS(e16.name(),"--");
     TS_ASSERT_EQUALS(e16[0].name(),"x");
@@ -294,7 +294,7 @@ public:
 
     Expression e17(bin_ops2,un_ops2);
     TS_ASSERT_THROWS_NOTHING(e17.parse("x-- -1"));
-    TS_ASSERT_EQUALS(e17.str(),"(x---(1))"); // this is not the same as input
+    TS_ASSERT_EQUALS(e17.str(),"x-- -1"); // this is not the same as input
     TS_ASSERT_EQUALS(e17.size(),2);
     TS_ASSERT_EQUALS(e17.name(),"--");
     TS_ASSERT_EQUALS(e17[0].name(),"x");
@@ -302,7 +302,7 @@ public:
 
     Expression e18(bin_ops2,un_ops2);
     TS_ASSERT_THROWS_NOTHING(e18.parse("x- --1"));
-    TS_ASSERT_EQUALS(e18.str(),"(x---(1))"); // this is not the same as input
+    TS_ASSERT_EQUALS(e18.str(),"x- --1"); // this is not the same as input
     TS_ASSERT_EQUALS(e18.size(),2);
     TS_ASSERT_EQUALS(e18.name(),"-");
     TS_ASSERT_EQUALS(e18[0].name(),"x");
@@ -310,7 +310,7 @@ public:
 
     Expression e19(bin_ops2,un_ops2);
     TS_ASSERT_THROWS_NOTHING(e19.parse("x-- --1"));
-    TS_ASSERT_EQUALS(e19.str(),"(x----(1))");
+    TS_ASSERT_EQUALS(e19.str(),"x-- --1");
     TS_ASSERT_EQUALS(e19.size(),2);
     TS_ASSERT_EQUALS(e19.name(),"--");
     TS_ASSERT_EQUALS(e19[0].name(),"x");
@@ -318,7 +318,7 @@ public:
 
     Expression e20(bin_ops2,un_ops2);
     TS_ASSERT_THROWS_NOTHING(e20.parse("x----1"));
-    TS_ASSERT_EQUALS(e20.str(),"(x----(1))");
+    TS_ASSERT_EQUALS(e20.str(),"x-- --1");
     TS_ASSERT_EQUALS(e20.size(),2);
     TS_ASSERT_EQUALS(e20.name(),"--");
     TS_ASSERT_EQUALS(e20[0].name(),"x");
@@ -326,7 +326,7 @@ public:
 
     Expression e21(bin_ops2,un_ops2);
     TS_ASSERT_THROWS_NOTHING(e21.parse("x- -1"));
-    TS_ASSERT_EQUALS(e21.str(),"(x--(1))"); // this is not the same as input
+    TS_ASSERT_EQUALS(e21.str(),"x- -1"); // this is not the same as input
     TS_ASSERT_EQUALS(e21.size(),2);
     TS_ASSERT_EQUALS(e21.name(),"-");
     TS_ASSERT_EQUALS(e21[0].name(),"x");
@@ -338,7 +338,7 @@ public:
   {
     Expression e;
     TS_ASSERT_THROWS_NOTHING(e.parse("- - -1"));
-    TS_ASSERT_EQUALS(e.str(),"-(-(-(1)))"); // this is not the same as input
+    TS_ASSERT_EQUALS(e.str(),"-( -( -1))"); // this is not the same as input
     TS_ASSERT_EQUALS(e.size(),1);
     TS_ASSERT_EQUALS(e.name(),"-");
     TS_ASSERT_EQUALS(e[0].name(),"-");
@@ -347,6 +347,24 @@ public:
 
     Expression e1;
     TS_ASSERT_THROWS(e1.parse("---1"),std::runtime_error);
+  }
+
+  void testRemoveBrackets()
+  {
+    Expression e;
+    e.parse("(((a+b+sin(x))))");
+    TS_ASSERT_EQUALS(e.str(),"(((a+b+sin(x))))");
+    TS_ASSERT_EQUALS(e.bracketsRemoved().str(),"a+b+sin(x)");
+    TS_ASSERT_EQUALS(e.bracketsRemoved().name(),"+");
+    TS_ASSERT_EQUALS(e.bracketsRemoved().bracketsRemoved().str(),"a+b+sin(x)");
+    TS_ASSERT_EQUALS(e.bracketsRemoved().bracketsRemoved().name(),"+");
+  }
+
+  void testBrackets1()
+  {
+    Expression e;
+    e.parse("2*(a+b)+(1-sin(x-y))");
+    TS_ASSERT_EQUALS(e.str(),"2*(a+b)+(1-sin(x-y))");
   }
 
 };

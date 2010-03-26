@@ -62,7 +62,7 @@ void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& 
   std::string parName;
   for(int i=0;i<terms.size();i++)
   {
-    std::string name = terms[i].name();
+    std::string name = terms[i].str();
     try
     {
       double d = boost::lexical_cast<double>(name);

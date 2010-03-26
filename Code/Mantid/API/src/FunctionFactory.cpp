@@ -62,14 +62,16 @@ namespace Mantid
         inputError(input);
       }
 
-      if (expr.name() == ";")
+      const Expression& e = expr.bracketsRemoved();
+
+      if (e.name() == ";")
       {
-        IFunction* fun = createComposite(expr);
+        IFunction* fun = createComposite(e);
         if (!fun) inputError();
         return fun;
       }
 
-      return createSimple(expr);
+      return createSimple(e);
 
     }
 

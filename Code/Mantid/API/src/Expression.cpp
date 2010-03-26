@@ -482,27 +482,56 @@ void Expression::setFunct(const std::string& name)
 
 std::string Expression::str()const
 {
+  bool brackets = false;
   std::ostringstream res;
   size_t prec = op_prec(m_funct);
-  if (!prec || size() == 1)
-  {
+  if (size() == 1 && is_unary(m_funct))
+  {// unary operator
     res << m_funct;
-    prec = 1000;
+    if (op_prec(m_terms[0].m_funct) > 0)
+    {
+      brackets = true;
+    }
+  }
+  else if (!prec)
+  {// function with a name
+    res << m_funct;
+    brackets = true;
   }
 
   if (m_terms.size())
   {
-    bool bk = prec > op_prec(m_terms[0].m_funct);
-    if (bk) res << '(' ;
+    if (brackets) res << '(' ;
     for(size_t i=0;i<m_terms.size();i++)
     {
-      res << m_terms[i].operator_name() << m_terms[i].str();
+      res << m_terms[i].operator_name();
+      int prec1 = op_prec(m_terms[i].m_funct);
+      bool isItUnary = false;
+      if (m_terms[i].size() == 1 && is_unary(m_terms[i].m_funct))
+      {
+        prec1 = 0; // unary operator
+        isItUnary = true;
+      }
+      bool bk = prec > 0 && prec1 > 0 && prec > prec1;
+      if (bk) res << '(' ;
+      if (isItUnary) res << ' ';
+      res << m_terms[i].str();
+      if (bk) res <<')';
     }
-    if (bk) res <<')';
+    if (brackets) res << ')' ;
   }
   return res.str();
 }
 
+const Expression& Expression::bracketsRemoved()const
+{
+  const Expression* e = this;
+  while(e->name().empty() && e->size() == 1)
+  {
+    e = &e->m_terms[0];
+  }
+  return *e;
+}
 
 }//API
 }//Mantid

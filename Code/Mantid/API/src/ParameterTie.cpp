@@ -53,6 +53,14 @@ namespace API
    */
   void ParameterTie::set(const std::string& expr)
   {
+    for(std::map<double*,ParameterReference>::const_iterator it=m_varMap.begin();it!=m_varMap.end();it++)
+    {
+      delete it->first;
+    }
+    if (m_varMap.size())
+    {
+      m_varMap.clear();
+    }
     try
     {// Set the expression and initialize the variables
       m_parser->SetExpr(expr);

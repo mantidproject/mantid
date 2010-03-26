@@ -277,6 +277,7 @@ bool Function::isActive(int i)const
  */
 void Function::removeActive(int i)
 {
+  if (!isActive(i)) return;
   if (i >= nParams() || i < 0)
     throw std::out_of_range("Function parameter index out of range.");
 

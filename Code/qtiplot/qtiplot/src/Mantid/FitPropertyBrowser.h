@@ -156,6 +156,7 @@ public slots:
   void fit();
   void undoFit();
   void clear();
+  void clearBrowser();
   void setPeakToolOn(bool on){m_peakToolOn = on;}
 
 signals:
@@ -172,6 +173,7 @@ signals:
   void plotGuess(Mantid::API::IFunction*);
 
 private slots:
+
   void enumChanged(QtProperty* prop);
   void boolChanged(QtProperty* prop);
   void intChanged(QtProperty* prop);
@@ -198,6 +200,9 @@ private slots:
   void removeBounds();
   void plotGuessCurrent();
   void plotGuessAll();
+  void saveFunction();
+  void loadFunction();
+  void copy();///< Copy the function string to the clipboard
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -206,7 +211,9 @@ private slots:
 private:
 
   /// Create CompositeFunction
-  void createCompositeFunction();
+  void createCompositeFunction(const QString& str = "");
+  /// Adds properties associated with the new fuction
+  void addFunctionToBrowser(Mantid::API::IFunction* f,Mantid::API::CompositeFunction* cfun);
   /// Replace function
   void replaceFunction(Mantid::API::IFunction* f_old,Mantid::API::IFunction* f_new);
   /// Get and store available workspace names

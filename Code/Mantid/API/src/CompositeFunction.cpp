@@ -347,6 +347,7 @@ bool CompositeFunction::isActive(int i)const
  */
 void CompositeFunction::removeActive(int i)
 {
+  if (!isActive(i)) return;
   int iFun = functionIndex(i);
   int ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
   m_iFunctionActive.erase(m_iFunctionActive.begin()+ia);
