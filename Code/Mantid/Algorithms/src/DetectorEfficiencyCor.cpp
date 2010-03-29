@@ -196,8 +196,6 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
     m_XsCache = &(m_inputWS->readX(spectraIn));
   }
 
-  // loop through all detectors to get the mean detector efficiency
-  double detEfficiency(0.0);
   // we have to leave monitorr spectra unchanged because we don't know how to change anything for them
   int moniFound(0);
   // get a pointer to the detectors that created the spectrum
@@ -272,9 +270,9 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
       }
     }
     else
-    {
+    {//add the results from other detectors to output spectrum
       for ( MantidVec::size_type i = 0; i < m_inputWS->readY(spectraIn).size(); ++i )
-      {//add more to the output spectra
+      {
         //          correction= (k_i/k_f)        / detector_efficiency
         const double correcti = m_ki*m_1_wvec[i] / EFF(m_1_wvec[i]);
         // an efficiency of zero shouldn't happen so, to save processor time, I don't check for divide by zero  if ( correction < 0 || correction == std::numeric_limits<double>::infinity() ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
@@ -284,9 +282,9 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
     }
   }
     
-  const int detGroupSize = dets.size();
+  const std::vector<int>::size_type detGroupSize = dets.size();
   if ( detGroupSize != 1 )
-  {// the detectors are grouped
+  {// there were grouped detectors
     for ( MantidVec::size_type j = 0; j < m_inputWS->readY(spectraIn).size(); ++j )
     {
       m_outputWS->dataY(spectraIn)[j] /= detGroupSize;
