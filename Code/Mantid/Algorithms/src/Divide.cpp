@@ -55,14 +55,18 @@ namespace Mantid
 
     void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out)
     {
+      if ( rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(lhs,rhs,true) )
+      {
+        // Do nothing
+      }
       // If the Y units match, then the output will be a distribution and will be dimensionless
-      if ( lhs->YUnit() == rhs->YUnit() )
+      else if ( lhs->YUnit() == rhs->YUnit() && rhs->blocksize() > 1 )
       {
         out->setYUnit("");
         out->isDistribution(true);
       }
       // Else we need to set the unit that results from the division
-      else if ( ! rhs->YUnit().empty() ) // Nothing to do if rhs was dimensionless
+      else
       {
         if ( ! lhs->YUnit().empty() ) out->setYUnit(lhs->YUnit() + "/" + rhs->YUnit());
         else out->setYUnit("1/" + rhs->YUnit());
