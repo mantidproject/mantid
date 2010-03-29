@@ -44,9 +44,9 @@ namespace Mantid
       virtual ~IkedaCarpenterPV() {};
 
       /// contruction used for standard fitting
-      IkedaCarpenterPV() : m_waveLengthFixed(false) {};
+      IkedaCarpenterPV() : m_waveLengthFixed(false), m_width(1.0), m_height(0.0) {};
       /// Constructor used for unit testing where a workspace may not be available
-      IkedaCarpenterPV(double wavelength) : m_waveLengthFixed(true) 
+      IkedaCarpenterPV(double wavelength) : m_waveLengthFixed(true), m_width(1.0), m_height(0.0)  
          {m_waveLength.push_back(wavelength);};
 
       /// overwrite IPeakFunction base class methods
@@ -61,6 +61,8 @@ namespace Mantid
       std::string name()const{return "IkedaCarpenterPV";}
       virtual void function(double* out, const double* xValues, const int& nData);
 
+      void constFunction(double* out, const double* xValues, const int& nData) const;
+
     protected:
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
@@ -68,16 +70,16 @@ namespace Mantid
     private:
 
       /// container for storing wavelength values for each data point
-      std::vector<double> m_waveLength;
+      mutable std::vector<double> m_waveLength;
 
       /// used for unit testing where a workspace may not be available
       bool m_waveLengthFixed;
 
       /// method for updating m_waveLength
-      void calWavelengthAtEachDataPoint(const double* xValues, const int& nData);
+      void calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const;
 
-      // used in setHeight and setWidth
-      double m_width; 
+      /// used in setHeight and setWidth. m_width defaults to 1.0 and m_height to 0.0
+      double m_width;  
       double m_height;
 
 	    /// Static reference to the logger class

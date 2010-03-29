@@ -403,6 +403,21 @@ void FitPropertyBrowser::addFunction(const std::string& fnName, Mantid::API::Com
     f = Mantid::API::FunctionFactory::Instance().createInitialized(fnName);
   }
 
+  std::string wsName = workspaceName();
+  if (!wsName.empty())
+  {
+    try
+    {
+      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+      if (ws)
+      {
+        f->setWorkspace(ws,workspaceIndex(),-1,-1);
+      }
+    }
+    catch(...){}
+  }
+
   Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
   if (pf)
   {
