@@ -21,7 +21,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 // E = KSquaredToE*K^2    KSquaredToE = (hbar^2)/(2*NeutronMass) 
-const double DetectorEfficiencyCor::KSquaredToE = 2.07212466;// units of meV Angsstrom^-2
+const double DetectorEfficiencyCor::KSquaredToE = 2.07212466;// units of meV Angstrom^-2
 
 const short  DetectorEfficiencyCor::NUMCOEFS = 25;
 // series expansion coefficients copied from a fortran source code file
@@ -132,7 +132,7 @@ void DetectorEfficiencyCor::exec()
       bool paramProb = error.find("3He(atm)") != std::string::npos;
       paramProb = paramProb || error.find("wallT(m)") != std::string::npos;
       if (paramProb)
-      {// Couldn't get one of the properties for a detector, I don't why that would be but zero the spectra and tell the user
+      {// Couldn't get one of the properties for a detector, I don't why that would be but zero the spectra and tell the user in a log message later
         unsetParams.push_back(i);
         // mark the detectors as masked
         m_detMasking->maskAllDetectorsInSpec(i);
@@ -189,76 +189,117 @@ Gets the detector information and uses this to calculate its efficiency
 */
 void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
 {
-  // get a pointer to one of the detector that created the spectrum
-  const int specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
-  const std::vector<int> dets = m_inputWS->spectraMap().getDetectors(specNum);
-  // now test if we have a good detector or not
-  // could get rid of this test as the function above should throw rather than return NULL
-  if ( dets.size() < 1 )
-  {
-    throw Exception::NullPointerException("DetectorEfficiencyCor::detectorEfficiency()", "dets");
-  }
-  //??STEVES?? look at this again
-  // for faster processing we are going to assume that all the detectors in a group are the same shape, so we can just examine the properties of the first
-  const IDetector_sptr detector = m_inputWS->getInstrument()->getDetector(dets[0]);
-  if ( ! detector )
-  {
-    throw Exception::NullPointerException("DetectorEfficiencyCor::detectorEfficiency()", "detector");
-  }
-  if (detector->isMonitor())
-  {// the monitor spectra will be untouched by this algorithm
-    return;
-  }
-
-  IComponent* detComp = NULL;
-  try
-  {// catch the common problem 0f the detector map and the detectors listed in the instrument file being slightly different
-    // updates sin of the angle between the detector axis and a line to the sample, m_sinThetaCache, and, only if the shape is different, the radius, m_radCache
-    getDetectorGeometry(detector);
-    
-    // the rest of the data we need is stored in a map of properties against the componants pointer
-    detComp = detector->getComponent();
-  }// deal with exceptions caused by detectors not being listed in the instrument file because this happens a lot
-  catch( std::runtime_error &e )
-  {// deal with exceptions thrown here separately from those thrown below
-    throw Exception::NotFoundError(e.what(), spectraIn);
-  }
-  
-  Parameter_sptr par = m_paraMap->get(detComp,"3He(atm)");
-  if ( ! par )
-  {
-    throw Exception::NotFoundError("3He(atm)", spectraIn);
-  }
-  const double atms = par->value<double>();
-    
-  par = m_paraMap->get(detComp,"wallT(m)");
-  if ( ! par )
-  {
-    throw Exception::NotFoundError("wallT(m)", spectraIn);
-  }
-  
-  // 1 - (wallThickness/radius)
-  m_1_t2rad = 1 - (par->value<double>()/m_radCache);
-  
-  // cache the values that we've calculated because the next part of the efficiency calculation will vary for each bin in the spectrum!
-  m_CONST_rad_sintheta_1_t2rad_atms =
-    CONSTA*(m_radCache/m_sinThetaCache)*(m_1_t2rad)*atms;
-
+  // get the wave vectors for each bin, usually this doesn't vary between spectra
   if ( m_XsCache != &(m_inputWS->readX(spectraIn)) )
   {// either the X-values have changed or this is the first time this function has been run, either way the calculate wave vectors
     set1_wvec(spectraIn);
     m_XsCache = &(m_inputWS->readX(spectraIn));
   }
 
-  // in this loop we go through all the bins in all the spectra and so it takes a lot of time
-  for ( MantidVec::size_type i = 0; i < m_inputWS->readY(spectraIn).size(); ++i )
+  // loop through all detectors to get the mean detector efficiency
+  double detEfficiency(0.0);
+  // we have to leave monitorr spectra unchanged because we don't know how to change anything for them
+  int moniFound(0);
+  // get a pointer to the detectors that created the spectrum
+  const int specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
+  const std::vector<int> dets = m_inputWS->spectraMap().getDetectors(specNum);
+  std::vector<int>::const_iterator it = dets.begin(), end = dets.end();
+  if ( it == end )
   {
-    //          correction= (k_i/k_f)        / detector_efficiency
-    const double correcti = m_ki*m_1_wvec[i] / EFF(m_1_wvec[i]);
-    // an efficiency of zero shouldn't happen so, to save processor time, I don't check for divide by zero  if ( correction < 0 || correction == std::numeric_limits<double>::infinity() ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
-    m_outputWS->dataY(spectraIn)[i] = m_inputWS->readY(spectraIn)[i]*correcti;
-    m_outputWS->dataE(spectraIn)[i] = m_inputWS->readE(spectraIn)[i]*correcti;
+    g_log.error() << "No detectors were found for spectrum number " << specNum << std::endl;
+    throw Exception::NullPointerException("DetectorEfficiencyCor::detectorEfficiency()", "dets");
   }
+
+  for ( ; it != end ; ++it )
+  {
+    const IDetector_sptr detector = m_inputWS->getInstrument()->getDetector(*it);
+    if ( ! detector )
+    {
+      g_log.error() << "Couldn't load data for detector ID " << *it << " from spectrum number " << specNum << std::endl;
+      throw Exception::NullPointerException("DetectorEfficiencyCor::detectorEfficiency()", "detector");
+    }
+    if (detector->isMonitor())
+    {
+      g_log.information() << "Spectrum number " << specNum << " is linked to a monitor no calculations will be done on this spectrum\n";
+      moniFound ++;
+      continue;
+    }
+    
+    IComponent* detComp = NULL;
+    try
+    {// catch the common problem of the detector map and the detectors listed in the instrument file being different
+      // updates sin of the angle between the detector axis and a line to the sample, m_sinThetaCache, and (only if the shape is different) the radius, m_radCache
+      getDetectorGeometry(detector);
+      
+      // the rest of the data we need is stored in a map of properties against the componants pointer
+      detComp = detector->getComponent();
+    }// deal with exceptions caused by detectors not being listed in the instrument file because this happens a lot
+    catch( std::runtime_error &e )
+    {// deal with detector definition problems found here separately from parameter value problems found below
+      throw Exception::NotFoundError(e.what(), spectraIn);
+    }
+    
+    Parameter_sptr par = m_paraMap->get(detComp,"3He(atm)");
+    if ( ! par )
+    {
+      throw Exception::NotFoundError("3He(atm)", spectraIn);
+    }
+    const double atms = par->value<double>();
+    
+    par = m_paraMap->get(detComp,"wallT(m)");
+    if ( ! par )
+    {
+      throw Exception::NotFoundError("wallT(m)", spectraIn);
+    }
+    
+    // 1 - (wallThickness/radius)
+    m_1_t2rad = 1 - (par->value<double>()/m_radCache);
+    
+    // cache the values that we've calculated because the efficiency calculation will vary for each bin in the spectrum
+    m_CONST_rad_sintheta_1_t2rad_atms =
+      CONSTA*(m_radCache/m_sinThetaCache)*(m_1_t2rad)*atms;
+
+    //multiply all the bins in the spectrum by the detector efficiency, time consuming
+    if ( it == dets.begin() )
+    {//write data to the output sepctra for the first time
+      for ( MantidVec::size_type i = 0; i < m_inputWS->readY(spectraIn).size(); ++i )
+      {
+        //          correction= (k_i/k_f)        / detector_efficiency
+        const double correcti = m_ki*m_1_wvec[i] / EFF(m_1_wvec[i]);
+        // an efficiency of zero shouldn't happen so, to save processor time, I don't check for divide by zero  if ( correction < 0 || correction == std::numeric_limits<double>::infinity() ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
+        m_outputWS->dataY(spectraIn)[i] = m_inputWS->readY(spectraIn)[i]*correcti;
+        m_outputWS->dataE(spectraIn)[i] = m_inputWS->readE(spectraIn)[i]*correcti;
+      }
+    }
+    else
+    {
+      for ( MantidVec::size_type i = 0; i < m_inputWS->readY(spectraIn).size(); ++i )
+      {//add more to the output spectra
+        //          correction= (k_i/k_f)        / detector_efficiency
+        const double correcti = m_ki*m_1_wvec[i] / EFF(m_1_wvec[i]);
+        // an efficiency of zero shouldn't happen so, to save processor time, I don't check for divide by zero  if ( correction < 0 || correction == std::numeric_limits<double>::infinity() ) g_log.fatal() << "Neg E spec " << spectraIn << " index " << i << std::endl;
+        m_outputWS->dataY(spectraIn)[i] += m_inputWS->readY(spectraIn)[i]*correcti;
+        m_outputWS->dataE(spectraIn)[i] += m_inputWS->readE(spectraIn)[i]*correcti;
+      }
+    }
+  }
+    
+  const int detGroupSize = dets.size();
+  if ( detGroupSize != 1 )
+  {// the detectors are grouped
+    for ( MantidVec::size_type j = 0; j < m_inputWS->readY(spectraIn).size(); ++j )
+    {
+      m_outputWS->dataY(spectraIn)[j] /= detGroupSize;
+      m_outputWS->dataE(spectraIn)[j] /= detGroupSize;
+    }
+  }
+
+  if ( moniFound > detGroupSize )
+  {
+    g_log.error() << "Spectra number " << specNum << " has a mixture of detectors and monitors, can't calculate the detector efficiency\n";
+    throw Exception::NotImplementedError("One spectrum is linked to a monitor as well as other detectors, this algorithm can't calculate the correction for that");
+  }
+
 }
 /** Calculates the wave vectors from the X-values in the specified histogram
 *  updating the value of m_1_wvec
@@ -266,7 +307,7 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
 */
 void DetectorEfficiencyCor::set1_wvec(int spectraIn)
 {
-  // there is one more X bin boundary varible than the bins contained by them
+  // there is one more X bin boundary variable than the bins contained by them
   MantidVec::size_type numBins = m_inputWS->readX(spectraIn).size() - 1;
   m_1_wvec.resize( numBins );
   for ( MantidVec::size_type j = 0; j < numBins; ++j)
@@ -278,7 +319,7 @@ void DetectorEfficiencyCor::set1_wvec(int spectraIn)
 }
 /** Calculates one over the wave number of a neutron based on deltaE
 *  @param DeltaE the engery the neutron lost in the sample (meV)
-*  @return one over the final neutron wavenumber in Angsstrom
+*  @return one over the final neutron wavenumber in Angstrom
 */
 double DetectorEfficiencyCor::get1OverK(double DeltaE) const
 {
@@ -354,7 +395,7 @@ void DetectorEfficiencyCor::getCylinderAxis()
     return;
   }
   
-  g_log.debug() << "Found a detector that doesn't appear to be a cylinder on either the x-axis, the y-axis or the z-axis" << std::endl;
+  g_log.error() << "Found a detector that doesn't appear to be a cylinder on either the x-axis, the y-axis or the z-axis\n";
   throw std::invalid_argument("Fatal error while calculating the radius and axis of a detector, the detector shape is not as expected" );
 }
 
@@ -384,13 +425,12 @@ double DetectorEfficiencyCor::DistToSurface(const V3D start, const Object *shape
 }
 
 /** Calculates detector efficiency, copied from the fortran code in effic_3he_cylinder.for
-*  @param oneOverwvec Final neutron wavevector (Angsstrom^-1)
+*  @param oneOverwvec Final neutron wavevector (Angstrom^-1)
 *  @return detector efficiency
 */
 double DetectorEfficiencyCor::EFF(const double oneOverwvec) const
-{
-  //T.G.Perring Aug 2009: replace the following with the one after:  alf = const*rad*(1.0d0-t2rad)*atms/wvec
-  // implements the equation with a large amount of caching of calculated values in member variables
+{//Implements the equation with a large amount of caching of calculated values in member variables
+  //from alf = const*rad*(1.0d0-t2rad)*atms/wvec in T.G.Perring's effic_3he_cylinder.for 
   double alf = m_CONST_rad_sintheta_1_t2rad_atms  *  oneOverwvec;
 
   if ( alf < 9.0 )
