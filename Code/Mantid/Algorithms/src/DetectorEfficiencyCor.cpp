@@ -197,7 +197,7 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
   }
 
   // we have to leave monitorr spectra unchanged because we don't know how to change anything for them
-  int moniFound(0);
+  std::vector<int>::size_type moniFound(0);
   // get a pointer to the detectors that created the spectrum
   const int specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
   const std::vector<int> dets = m_inputWS->spectraMap().getDetectors(specNum);
@@ -292,7 +292,7 @@ void DetectorEfficiencyCor::efficiencyCorrect(int spectraIn)
     }
   }
 
-  if ( moniFound > detGroupSize )
+  if ( ( moniFound > 0 ) && ( moniFound < detGroupSize ) )
   {
     g_log.error() << "Spectra number " << specNum << " has a mixture of detectors and monitors, can't calculate the detector efficiency\n";
     throw Exception::NotImplementedError("One spectrum is linked to a monitor as well as other detectors, this algorithm can't calculate the correction for that");
