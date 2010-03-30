@@ -56,7 +56,7 @@
 <listOptionValue builtIn="false" value="boost_python"/>
 </option>
 <option id="gnu.cpp.link.option.paths.2119564089" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/debug}&quot;"/>
+<listOptionValue builtIn="false" value="../../debug"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.766714949" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -538,7 +538,7 @@
 <tool command="g++" id="cdt.managedbuild.tool.gnu.cpp.linker.so.release.578669090" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.so.release">
 <option defaultValue="true" id="gnu.cpp.link.so.release.option.shared.2142746155" name="Shared (-shared)" superClass="gnu.cpp.link.so.release.option.shared" valueType="boolean"/>
 <option id="gnu.cpp.link.option.paths.108642178" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/release}&quot;"/>
+<listOptionValue builtIn="false" value="../../release"/>
 </option>
 <option id="gnu.cpp.link.option.libs.46898258" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="MantidKernel"/>

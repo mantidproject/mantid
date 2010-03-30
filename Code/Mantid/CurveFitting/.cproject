@@ -56,7 +56,7 @@
 <listOptionValue builtIn="false" value="MantidDataObjects"/>
 </option>
 <option id="gnu.cpp.link.option.paths.644500828" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/debug}&quot;"/>
+<listOptionValue builtIn="false" value="../../debug"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.2064212188" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -545,7 +545,7 @@
 <listOptionValue builtIn="false" value="MantidDataObjects"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1238131384" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/release}&quot;"/>
+<listOptionValue builtIn="false" value="../../release"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1837520450" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

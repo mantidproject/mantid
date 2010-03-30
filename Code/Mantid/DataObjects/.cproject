@@ -57,7 +57,7 @@
 <listOptionValue builtIn="false" value="z"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1451054355" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/debug}&quot;"/>
+<listOptionValue builtIn="false" value="../../debug"/>
 </option>
 <option id="gnu.cpp.link.option.debugging.gprof.1941921014" name="Generate gprof information (-pg)" superClass="gnu.cpp.link.option.debugging.gprof" value="false" valueType="boolean"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.813919791" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -546,7 +546,7 @@
 <listOptionValue builtIn="false" value="MantidAPI"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1558616052" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/debug}&quot;"/>
+<listOptionValue builtIn="false" value="../../release"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.635479194" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

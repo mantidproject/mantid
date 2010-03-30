@@ -66,7 +66,7 @@
 <listOptionValue builtIn="false" value="muparserd"/>
 </option>
 <option id="gnu.cpp.link.option.paths.777028932" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/debug}&quot;"/>
+<listOptionValue builtIn="false" value="../../debug"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1385031720" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -565,7 +565,7 @@
 <listOptionValue builtIn="false" value="muparser"/>
 </option>
 <option id="gnu.cpp.link.option.paths.2057753832" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/release}&quot;"/>
+<listOptionValue builtIn="false" value="../../release"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.643787513" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

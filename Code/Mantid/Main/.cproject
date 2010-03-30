@@ -41,7 +41,7 @@
 <tool command="g++" id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1306057294" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 <tool command="g++" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1295368970" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 <option id="gnu.cpp.link.option.paths.1337117463" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/release}&quot;"/>
+<listOptionValue builtIn="false" value="../../release"/>
 </option>
 <option id="gnu.cpp.link.option.libs.73769224" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="MantidAPI"/>
@@ -531,7 +531,7 @@
 <tool command="g++" id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1019072453" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 <tool command="g++" id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.490429010" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 <option id="gnu.cpp.link.option.paths.2131793319" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/debug}&quot;"/>
+<listOptionValue builtIn="false" value="../../debug"/>
 </option>
 <option id="gnu.cpp.link.option.libs.1581965565" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="MantidAPI"/>
