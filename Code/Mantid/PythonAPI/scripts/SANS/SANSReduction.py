@@ -104,6 +104,8 @@ DETBANK = None
 # The monitor spectrum taken from the GUI. Is this still necessary?? or can I just deduce
 # it from the instrument name 
 MONITORSPECTRUM = None
+# agruments after MON/LENGTH need to take precendence over those after MON/SPECTRUM and this variable ensures that
+MONITORSPECLOCKED = False
 
 # Detector position information for SANS2D
 FRONT_DET_RADIUS = 306.0
@@ -802,7 +804,9 @@ def MaskFile(filename):
         elif upper_line.startswith('MON/'):
             details = line[4:]
             if details.upper().startswith('LENGTH'):
-                SetMonitorSpectrum(int(details.split()[1]))
+                SuggestMonitorSpectrum(int(details.split()[1]))
+            elif details.upper().startswith('SPECTRUM'):
+                SetMonitorSpectrum(int(details.split('=')[1]))
             elif 'DIRECT' in details.upper():
                 parts = details.split("=")
                 if len(parts) == 2:
@@ -994,7 +998,15 @@ def SetSampleOffset(value):
 def SetMonitorSpectrum(spec):
     global MONITORSPECTRUM
     MONITORSPECTRUM = spec
-    
+    global MONITORSPECLOCKED
+    MONITORSPECLOCKED = True
+
+def SuggestMonitorSpectrum(spec):
+    global MONITORSPECLOCKED
+    if not MONITORSPECLOCKED :
+        global MONITORSPECTRUM
+        MONITORSPECTRUM = spec
+
 def SetRearEfficiencyFile(filename):
     global DIRECT_BEAM_FILE_R
     DIRECT_BEAM_FILE_R = filename
