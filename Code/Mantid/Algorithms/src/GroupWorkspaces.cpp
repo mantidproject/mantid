@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/GroupWorkspaces.h"
-
+#include "MantidDataObjects/Workspace2D.h"
 namespace Mantid
 {
 	namespace Algorithms
@@ -25,75 +25,148 @@ namespace Mantid
 		{
 			try
 			{
-				std::vector<std::string> inputWS=getProperty("InputWorkspaces");
-				std::string newGroup=getPropertyValue("OutputWorkspace");
-				if(inputWS.size()<2)
+				const std::vector<std::string> inputworkspaces=getProperty("InputWorkspaces");
+				if(inputworkspaces.size()<2)
 				{	throw std::runtime_error("Select atleast two workspaces to group ");
 				}
-				//creates workspace group
-				WorkspaceGroup_sptr outputGrpWS=WorkspaceGroup_sptr(new WorkspaceGroup);
-				if(outputGrpWS)
+				// output groupworkspace name
+				std::string newGroup=getPropertyValue("OutputWorkspace");
+				//creates workspace group pointer
+				WorkspaceGroup_sptr outgrp_sptr=WorkspaceGroup_sptr(new WorkspaceGroup);
+
+				//add "NewGroup" to  workspace group
+				outgrp_sptr->add(newGroup);
+				setProperty("OutputWorkspace",outgrp_sptr);
+
+				std::string outputWorkspace = "OutputWorkspace";
+				int count=0;
+				std::vector<std::string>::const_iterator citr;
+				// iterate through the input workspaces
+				for (citr=inputworkspaces.begin();citr!=inputworkspaces.end();++citr)
 				{
-					//add "NewGroup" to  workspace group
-					outputGrpWS->add(newGroup);
-					setProperty("OutputWorkspace",outputGrpWS);
-					// iterate through the selected input workspaces
-					std::vector<std::string>::const_iterator itr;
-					for (itr=inputWS.begin();itr!=inputWS.end();itr++)
+					//if the input workspace is a group disassemble the group and add to output group 
+					Workspace_sptr inws_sptr=AnalysisDataService::Instance().retrieve(*citr);
+					WorkspaceGroup_sptr ingrp_sptr=boost::dynamic_pointer_cast<WorkspaceGroup>(inws_sptr);
+					if(ingrp_sptr)
 					{
-						std::vector<std::string> groupVec=outputGrpWS->getNames();
-						if(groupVec.size()>1)
+						std::vector<std::string> names=ingrp_sptr->getNames();
+						std::vector<std::string>::const_iterator itr=names.begin();
+						for (++itr;itr!=names.end();++itr)
 						{
-							std::string firstWS=groupVec[1];
-							if(isCompatibleWorkspaces(firstWS,(*itr)))
-								outputGrpWS->add((*itr));
-							else
-							{  
-								throw std::runtime_error("Selected workspaces are not of same Types.\n"
-									"Check the selected workspaces and ensure that they are of same types to group");
-							}
+							std::stringstream suffix;
+							suffix<<++count;
+							std::string outws = outputWorkspace + "_" + suffix.str();
+							//retrieving the workspace pointer
+							Workspace_sptr ws_sptr=AnalysisDataService::Instance().retrieve((*itr));
+							//workspace name
+							std::string wsName=(*itr);
+							//declaring the member output workspaces property
+							declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> (outws, wsName, Direction::Output));
+							setProperty(outws, boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_sptr));
+
+							//add to output group
+							addworkspacetoGroup(outgrp_sptr,(*itr));
 						}
-						else
-							outputGrpWS->add((*itr));
-					}//end of for loop for selected workspace iteration
-				}
+					}
+					else
+					{	
+						std::stringstream suffix;
+						suffix<<++count;
+						std::string outws = outputWorkspace + "_" + suffix.str();
+						//retrieving the workspace pointer
+						Workspace_sptr ws_sptr=AnalysisDataService::Instance().retrieve((*citr));
+						//workspace name
+						std::string wsName=(*citr);
+						//declaring the member output workspaces property
+						declareProperty(new WorkspaceProperty<DataObjects::Workspace2D> (outws, wsName, Direction::Output));
+						setProperty(outws, boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws_sptr));
+						//add to output group
+						addworkspacetoGroup(outgrp_sptr,(*citr));
+					}
+
+					
+				}//end of for loop for input workspaces
+
+				// send this notification to mantidplot to remove the input workspace from mantid tree
+				Mantid::API::AnalysisDataService::Instance().notificationCenter.postNotification(
+					new Kernel::DataService<Workspace>::GroupWorkspacesNotification(inputworkspaces));	
+
 			}
+			 catch(Kernel::Exception::NotFoundError&)
+			 {
+				 throw ;
+			 }
 			catch(std::invalid_argument &)
 			{
-				//g_log.error()<<"Error:"<<ex.what()<<std::endl;
 				throw;
 			}
 			catch(std::runtime_error& )
 			{
-				//g_log.error()<<"Error:"<<ex.what()<<std::endl;
 				throw;
 			}
 			catch(std::exception& )
 			{
-				//g_log.error()<<"Error:"<<ex.what()<<std::endl;
 				throw;
 			}
 
 		}
 		/** checks the input workspaces are of same types
 		*  @param firstWS    first workspace added to group vector
-		*  @param newWStoAdd   new workspace to add to vector
+		*  @param newWStoAdd   new workspace to add to group
 		*  @retval boolean  true if two workspaces are of same types else false
 		*/
 		bool GroupWorkspaces::isCompatibleWorkspaces(const std::string & firstWS,const std::string& newWStoAdd )
 		{
-			std::string firstWSTypeId("");
 			bool bStatus=0;
-			Workspace_sptr wsSptr1=Mantid::API::AnalysisDataService::Instance().retrieve(firstWS);
-			firstWSTypeId=wsSptr1->id();
+			try
+			{
+				std::string firstWSTypeId;
+				
+				Workspace_sptr wsSptr1=Mantid::API::AnalysisDataService::Instance().retrieve(firstWS);
+				firstWSTypeId=wsSptr1->id();
 
-			//check the typeid  of the  next workspace
-			std::string wsTypeId("");
-			Workspace_sptr wsSptr=Mantid::API::AnalysisDataService::Instance().retrieve(newWStoAdd);
-			if(wsSptr) wsTypeId=wsSptr->id();
-			(firstWSTypeId==wsTypeId) ? (bStatus=true ) :( bStatus= false);
-			//}
+				//check the typeid  of the  next workspace
+				std::string wsTypeId("");
+				Workspace_sptr wsSptr=Mantid::API::AnalysisDataService::Instance().retrieve(newWStoAdd);
+				if(wsSptr)
+				{
+					wsTypeId=wsSptr->id();
+				}
+				(firstWSTypeId==wsTypeId) ? (bStatus=true ) :( bStatus= false);
+			}
+			catch(Kernel::Exception::NotFoundError& e)
+			{
+				g_log.error()<<e.what()<<std::endl;
+				bStatus=false;
+			}
+			
 			return bStatus;
+		}
+
+		/** add workspace to groupworkspace
+		*  @param outgrp_sptr    shared pointer to groupworkspace
+		*  @param wsName   name of the workspace to add to group
+		*/
+		void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr  outgrp_sptr,const std::string &wsName)
+		{
+			std::vector<std::string> groupVec=outgrp_sptr->getNames();
+			if(groupVec.size()>1)
+			{
+				std::string firstws=groupVec[1];
+				if(isCompatibleWorkspaces(firstws,wsName))
+				{
+					outgrp_sptr->add(wsName);
+				}
+				else
+				{  
+					throw std::runtime_error("Selected workspaces are not of same Types.\n"
+						"Check the selected workspaces and ensure that they are of same types to group");
+				}
+			}
+			else
+			{
+				outgrp_sptr->add(wsName);
+			}
 		}
 
 	}

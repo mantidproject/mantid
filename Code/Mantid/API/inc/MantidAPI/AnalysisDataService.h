@@ -101,6 +101,15 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>:
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification ClearADSNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::ClearNotification>& ClearADSNotification_ptr;
 
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification WorkspaceRenameNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification>& WorkspaceRenameNotification_ptr;
+
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification GroupWorkspacesNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification>& GroupWorkspacesNotification_ptr;
+
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification UnGroupWorkspaceNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification>& UnGroupWorkspaceNotification_ptr;
+
 
 } // Namespace API
 } // Namespace Mantid

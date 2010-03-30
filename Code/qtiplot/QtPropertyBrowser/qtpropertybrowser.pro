@@ -35,7 +35,7 @@ win32:build_pass:CONFIG(debug, debug|release) {
   TARGET = QtPropertyBrowserd
 } else {
   # Put in local output directory
-  DESTDIR = lib
+  DESTDIR =..\..\Mantid\release
   TARGET = QtPropertyBrowser
 }
 

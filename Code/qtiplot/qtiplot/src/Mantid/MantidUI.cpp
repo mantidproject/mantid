@@ -58,6 +58,9 @@ m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
 m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
 m_clearADSObserver(*this,&MantidUI::handleClearADS),
 m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
+m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
+m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
+m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
 m_appWindow(aw),
 m_progressDialog(0)
 {
@@ -108,6 +111,10 @@ m_progressDialog(0)
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
+	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
+	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
+	
 
 
     mantidMenu = new QMenu(m_appWindow);
@@ -129,6 +136,7 @@ m_progressDialog(0)
         qRegisterMetaType<Mantid::API::MatrixWorkspace_sptr>();
 	//Register std::string as well as we use it alot
 	qRegisterMetaType<std::string>();
+	
     }
 
 }
@@ -893,44 +901,20 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 {
 	//iterate through each of the selected workspaces
 	QList<QTreeWidgetItem*>::const_iterator itr;
-		for(itr=selectedItems.begin();itr!=selectedItems.end();itr++)
-		{
-			std::string inputWSName=(*itr)->text(0).toStdString();
-			Workspace_sptr wsSptr=Mantid::API::AnalysisDataService::Instance().retrieve(inputWSName);
-			WorkspaceGroup_sptr group=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-			if(group)
-			{
-				//it's a group worksopace
-				std::vector<std::string> inputGrpWS=group->getNames();
-				if(!inputGrpWS.empty())
-				{
-					std::vector<std::string>::const_iterator it=inputGrpWS.begin();
-					//copy  group workspace members to a vector except the 1st as it is of type workspacegroup
-					for (it++;it!=inputGrpWS.end();it++)
-					{	inputWSVec.push_back((*it));
-					}
-
-				}
-			}
-			else{
-
-				inputWSVec.push_back(inputWSName);
-			}
-
-
-		}//end of for loop for input workspaces
+	for(itr=selectedItems.begin();itr!=selectedItems.end();itr++)
+	{
+		std::string inputWSName=(*itr)->text(0).toStdString();
+		inputWSVec.push_back(inputWSName);
+	}//end of for loop for input workspaces
 }
 
-void MantidUI::renameWorkspace()
-{ //get selected workspace
-	QList<QTreeWidgetItem*>selectedItems=m_exploreMantid->m_tree->selectedItems();
-	QString selctedWsName ("");
-	if(!selectedItems.empty())
-	{
-		selctedWsName=selectedItems[0]->text(0);
-
-	}
-
+/**
+ * Renames selected workspace
+ * @param wsName selected workspace name
+ */
+void MantidUI::renameWorkspace(const QString & wsName)
+{ 
+	//execute the algorithm
 	std::string algName("RenameWorkspace");
 	int version=-1;
 	Mantid::API::IAlgorithm_sptr alg;
@@ -944,93 +928,39 @@ void MantidUI::renameWorkspace()
 		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+QString::fromStdString(algName)+" version "+QString::number(version));
         return;
     }
-    if (alg)
-    {
-      MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
-      if( !dlg ) return;
-	  //getting the combo box which has input workspaces and removing the workspaces except the selected one
-	  QComboBox *combo = dlg->findChild<QComboBox*>();
-	  if(combo)
-	  {
-		  int count=combo->count();
-		  int index=count-1;
-		  while(count>1)
-		  {
-			  int selectedIndex=combo->findText(selctedWsName,Qt::MatchExactly );
-			  if(selectedIndex!=index)
-			  {
-				  combo->removeItem(index);
-				  count=combo->count();
-			  }
-			  index=index-1;
-
-		  }
-
-	  }//end of if loop for combo
-	  if ( dlg->exec() == QDialog::Accepted)
-	  {
-		  delete dlg;
-		  alg->execute();
-	  }
-      else
-      {
-	delete dlg;
-      }
-	  //getting the renamed ws name
-	  std::string WSName=alg->getPropertyValue("OutputWorkspace");
-	  //at this point selected group workspace is getting deleted from ADS by the algorithm RenameWorkspace ,
-	  //so its children too getting deleted from tree
-	  //below code adds the children back to the tree
-	  moveSelctedWSChildrentoRenamedWS(WSName,selectedItems);
-
-    }
-}
-void MantidUI::moveSelctedWSChildrentoRenamedWS(const std::string & renamedWSName,QList<QTreeWidgetItem*>& selectedItems)
-{
-	if(Mantid::API::AnalysisDataService::Instance().doesExist(renamedWSName))
-	  {
-		  Workspace_sptr wsSptr=Mantid::API::AnalysisDataService::Instance().retrieve(renamedWSName);
-		  WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-		  if(wsGrpSptr)
-		  {
-			  QList<QTreeWidgetItem*>::const_iterator selectedItr;
-			  for (selectedItr=selectedItems.begin();selectedItr!=selectedItems.end();selectedItr++)
-			  {
-				  //child count
-				  int count=(*selectedItr)->childCount();
-				  //for loop for moving the selected ws's children to  newly created (renamed) ws's children
-				  for (int i=1;i<count;i++)
-				  {
-					  QTreeWidgetItem *pchild=NULL;
-					  pchild=(*selectedItr)->child(i);
-					  if(pchild)
-					  {
-						  //m_exploreMantid->m_tree->addTopLevelItem(pchild);
-						  QTreeWidgetItem* ws_item = new QTreeWidgetItem(QStringList(pchild->text(0)));
-						  if(ws_item)
-						  {
-							  std::string wsName=pchild->text(0).toStdString();
-							  //get the workspace pointer
-							  Workspace_sptr ws_ptr=Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-							  if(ws_ptr)
-							  {	//call function to add code for each workspace populating with histograms,bins etc
-                  m_exploreMantid->populateWorkspaceData(ws_ptr,ws_item);
-							  }
-							  ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-							  QList<QTreeWidgetItem *> name_matches = m_exploreMantid->m_tree->findItems(QString::fromStdString(renamedWSName),Qt::MatchExactly);
-							  QTreeWidgetItem*  renamedWS=NULL;
-							  if(!name_matches.isEmpty())
-								  renamedWS=name_matches[0];
-							  if(renamedWS)renamedWS->addChild(ws_item);
-						  }
-
-					  }
-				  }//end of for loop child count
-			  }//end of for loop of selected workspaces
-		  }
-
-	  }//end of liip for ADS exists check
-
+	if (!alg)
+	{
+		return;
+	}
+	MantidQt::API::AlgorithmDialog *dlg = MantidQt::API::InterfaceManager::Instance().createDialog(alg.get(), m_appWindow);
+	if( !dlg ) return;
+	//getting the combo box which has input workspaces and removing the workspaces except the selected one
+	QComboBox *combo = dlg->findChild<QComboBox*>();
+	if(combo)
+	{
+		int count=combo->count();
+		int index=count-1;
+		while(count>1)
+		{
+			int selectedIndex=combo->findText(wsName,Qt::MatchExactly );
+			if(selectedIndex!=index)
+			{
+				combo->removeItem(index);
+				count=combo->count();
+			}
+			index=index-1;
+		}
+	}//end of if loop for combo
+	if ( dlg->exec() == QDialog::Accepted)
+	{
+		delete dlg;
+		alg->execute();
+	}
+	else
+	{
+		delete dlg;
+	}
+		
 }
 void MantidUI::groupWorkspaces()
 {
@@ -1058,114 +988,27 @@ void MantidUI::groupWorkspaces()
 		alg->setPropertyValue("OutputWorkspace",sgrpName);
 		//execute the algorithm
 		bool bStatus =alg->execute();
-
-		// move the selcted workspaces to the new group created on mantid tree
-       if(bStatus)
-	   {
-		std::vector<std::string> grpVec;
-		Workspace_sptr ws;
-
-		if( !Mantid::API::AnalysisDataService::Instance().doesExist(sgrpName) ) return;
-
-		//remove the selected workspaces from tree
-		QList<QTreeWidgetItem*>::const_iterator selectedItr;
-		for(selectedItr=selectedItems.begin();selectedItr!=selectedItems.end();selectedItr++)
+		if(!bStatus)
 		{
-            //get the child count
-			int count=(*selectedItr)->childCount();
-			//for loop for removing the children
-			for (int i=0;i<count;i++)
-			{
-				//QTreeWidgetItem *pchild=(*selectedItr)->child(0);
-				(*selectedItr)->takeChild(0);
-			}
-			QTreeWidgetItem* parent=NULL;
-			parent=(*selectedItr)->parent();
-			if(parent==NULL)
-			{
-				int index=m_exploreMantid->m_tree->indexOfTopLevelItem((*selectedItr));
-				m_exploreMantid->m_tree->takeTopLevelItem(index);
-			}
-			else
-			{
-				parent->removeChild((*selectedItr));
-			}
-
-
-		}//end of for loop for removing the  selected workspaces from the tree
-
-		//add selected workspaces to the new group created
-
-		//search for newly created workspace ("NewGroup")on  mantid workspace tree
-		QList<QTreeWidgetItem *> name_matches = m_exploreMantid->m_tree->findItems(qwsGrpName,Qt::MatchExactly);
-		QTreeWidgetItem*  newGroup=NULL;
-		if(!name_matches.isEmpty())
-			newGroup=name_matches[0];
-		else
-		{
-			if(Mantid::API::AnalysisDataService::Instance().doesExist(sgrpName))
-			{
-				//if one of the selcted workspaces to group is "NewGroup" (i.e "NewGroup"  already exists in tree)
-				//as i'm deleting the selected workspaces above "NewGroup" also getting deleted
-				//so adding it to tree again
-				QTreeWidgetItem*  ws_item=new QTreeWidgetItem(QStringList(QString::fromStdString(sgrpName)));
-				ws_item->setIcon(0,QIcon(QPixmap(mantid_wsgroup_xpm)));
-				QTreeWidgetItem* wsid_item=new QTreeWidgetItem(QStringList("WorkspaceGroup"));
-				ws_item->addChild(wsid_item);
-				m_exploreMantid->m_tree->addTopLevelItem(ws_item);
-				newGroup=ws_item;
-			}
-
+			QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
 		}
-		if(newGroup)
-		{
-			//retrieve the output group workspace
-			ws=Mantid::API::AnalysisDataService::Instance().retrieve(sgrpName);
-			WorkspaceGroup_sptr grpWS=boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-			//get the workspace group members
-			if(grpWS)grpVec=grpWS->getNames();
-			std::vector<std::string>::iterator itr=grpVec.begin();
-			for(itr++;itr!=grpVec.end();itr++)
-			{
-				//add each output workspaces to the newly created group
-				QTreeWidgetItem*  wsid_item=new QTreeWidgetItem(QStringList(QString::fromStdString((*itr))));
-				if(wsid_item)
-				{
-					wsid_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-
-					//get the workspace pointer
-					Workspace_sptr ws_ptr=Mantid::API::AnalysisDataService::Instance().retrieve((*itr));
-					//Mantid::API::MatrixWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-					if(ws_ptr)
-					{
-						//call function to add code for each workspace populating with histograms,bins etc
-            m_exploreMantid->populateWorkspaceData(ws_ptr,wsid_item);
-					}
-
-					newGroup->addChild(wsid_item);
-				}
-			}//end of for loop for adding the members in group workspace vector to mantid tree
-
-		}//end of if loop for newGroup
-
-	   }//end of if loop for bStatus
 
 	}
 	catch(std::invalid_argument &)
 	{
-		//logObject.error()<<"Error:"<<ex.what()<<std::endl;
+		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
 	}
 	catch(Mantid::Kernel::Exception::NotFoundError&)//if not a valid object in analysis data service
 	{
-		//logObject.error()<<"Error: "<< e.what()<<std::endl;
+		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
 	}
 	catch(std::runtime_error& )
 	{
-		//logObject.error()<<"Error:"<<ex.what()<<std::endl;
+		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
 	}
 	catch(std::exception& )
 	{
-		//logObject.error()<<"Error:"<<ex.what()<<std::endl;
+	 QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in GroupWorkspaces algorithm");
 	}
 
 }
@@ -1175,81 +1018,37 @@ void MantidUI::ungroupWorkspaces()
 	{
 		QList<QTreeWidgetItem*>selectedItems=m_exploreMantid->m_tree->selectedItems();
 		if(selectedItems.isEmpty())
-			throw std::runtime_error("Select a group workspace to Ungroup. ");
-
-		std::vector<std::string > inputWSVec;
-		QList<QTreeWidgetItem*>::const_iterator itr;
-		for(itr=selectedItems.begin();itr!=selectedItems.end();itr++)
 		{
-			std::string name=(*itr)->text(0).toStdString();
-			inputWSVec.push_back(name);
-			Workspace_sptr wsSptr= Mantid::API::AnalysisDataService::Instance().retrieve(name);
-			if(wsSptr)
-			{
-			WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-			if(!wsGrpSptr)
-			throw std::invalid_argument("Selected Workspace is not a Group to Ungroup.\n"
-			"Check the selected workspace type and ensure that the workspace is a group workspace to Ungroup");
-			}
+			throw std::runtime_error("Select a group workspace to Ungroup.");
 		}
+
+		//workspace name
+		std::string wsname=selectedItems[0]->text(0).toStdString();
 
 		std::string algName("UnGroupWorkspace");
 		Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create(algName,1);
 		alg->initialize();
-		alg->setProperty("InputWorkspaces",inputWSVec);
+		alg->setProperty("InputWorkspace",wsname);
 
 		//execute the algorithm
 		bool bStatus=alg->execute();
-		if(bStatus)
+		if(!bStatus)
 		{
-			//at this point selected group workspace is getting deleted from ADS ,
-			//so its children too getting deleted from tree
-			//below code adds the children back to the tree as toplevel item
-			QList<QTreeWidgetItem*>::const_iterator selectedItr;
-			for (selectedItr=selectedItems.begin();selectedItr!=selectedItems.end();selectedItr++)
-			{
-				//child count
-				int count=(*selectedItr)->childCount();
-				//for loop for moving the children to tree as toplevel item
-				for (int i=1;i<count;i++)
-				{
-					QTreeWidgetItem *pchild=NULL;
-					pchild=(*selectedItr)->child(i);
-					if(pchild)
-					{
-						//m_exploreMantid->m_tree->addTopLevelItem(pchild);
-						QTreeWidgetItem* ws_item = new QTreeWidgetItem(QStringList(pchild->text(0)));
-						if(ws_item)
-						{
-							std::string wsName=pchild->text(0).toStdString();
-							//get the workspace pointer
-							Workspace_sptr ws_ptr=Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-							//Mantid::API::MatrixWorkspace_sptr ws_ptr = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
-							if(ws_ptr)
-							{	//call function to add code for each workspace populating with histograms,bins etc
-                m_exploreMantid->populateWorkspaceData(ws_ptr,ws_item);
-							}
-							ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-							m_exploreMantid->m_tree->addTopLevelItem(ws_item);
-						}
-
-					}//end of if loop for pchild
-				}//end of for loop for child count iteration
-			}//end of for loop selected items
+			QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
 		}
-
+	
 	}
 	catch(std::invalid_argument &)
 	{
-	//	logObject.error()<<"Error:"<<ex.what()<<std::endl;
+		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
 	}
 	catch(std::runtime_error & )
 	{
-	//	logObject.error()<<"Error:"<<e.what()<<std::endl;
+		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
 	}
 	catch(std::exception & )
 	{
-		//logObject.error()<<"Error:"<<e.what()<<std::endl;
+		QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error"," Error in UnGroupWorkspace algorithm");
 	}
 
 }
@@ -1341,12 +1140,12 @@ void MantidUI::showAlgMonitor()
 void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
 {
   // workspace_added ?
-  emit workspace_replaced(QString::fromStdString(pNf->object_name()), pNf->object());
+  emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
 void MantidUI::handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf)
 {
-  emit workspace_replaced(QString::fromStdString(pNf->object_name()), pNf->object());
+  emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
 void MantidUI::handleDeleteWorkspace(WorkspaceDeleteNotification_ptr pNf)
@@ -1362,6 +1161,25 @@ void MantidUI::handleClearADS(ClearADSNotification_ptr)
 void MantidUI::handleAlgorithmFactoryUpdates(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
 {
   emit algorithms_updated();
+}
+void MantidUI::handleRenameWorkspace(WorkspaceRenameNotification_ptr pNf)
+{
+  emit workspace_renamed(QString::fromStdString(pNf->object_name()), QString::fromStdString(pNf->new_objectname()));
+}
+void MantidUI::handleGroupWorkspaces(GroupWorkspacesNotification_ptr pNf)
+{
+	const std::vector<std::string> wsvec=pNf->inputworkspacenames();
+	QStringList wsList;
+	std::vector<std::string>::const_iterator citr;
+	for(citr=wsvec.begin();citr!=wsvec.end();++citr)
+	{
+		wsList.append(QString::fromStdString(*citr));
+	}
+	emit workspaces_grouped(wsList);
+}
+void MantidUI::handleUnGroupWorkspace(UnGroupWorkspaceNotification_ptr pNf)
+{
+	emit workspace_ungrouped(QString::fromStdString(pNf->object_name()));
 }
 
 void MantidUI::logMessage(const Poco::Message& msg)

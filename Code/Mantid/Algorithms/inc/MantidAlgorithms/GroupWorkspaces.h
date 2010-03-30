@@ -64,6 +64,8 @@ private:
   void exec();
   /// method to check the input workspaces are of same types
   bool isCompatibleWorkspaces(const std::string & firstWS,const std::string& newWStoAdd );
+  /// add member workspace to the groupworkspace
+  void addworkspacetoGroup(Mantid::API::WorkspaceGroup_sptr  outgrp_sptr,const std::string &wsName);
 
  
 };

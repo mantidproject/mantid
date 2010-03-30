@@ -226,6 +226,9 @@ public:
 	void saveProject(bool save);
 	void enableSaveNexus(const QString & wsName);
 
+	void renameWorkspace(const QString&);
+	
+
 public slots:
   void cancelAllRunningAlgorithms();
 
@@ -252,6 +255,9 @@ signals:
     void workspace_removed(const QString &);
     void workspaces_cleared();
     void algorithms_updated();
+	void workspace_renamed(const QString &, const QString);
+	void workspaces_grouped(const QStringList&);
+	void workspace_ungrouped(const QString&);
 
     void needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
 
@@ -357,7 +363,6 @@ public slots:
 	//for loading and saving nexus workspace
 	void loadNexusWorkspace();
 	void saveNexusWorkspace();
-	void renameWorkspace();
 	QString saveToString(const std::string &workingDir);
 
 #ifdef _WIN32
@@ -393,16 +398,26 @@ private:
   void handleAlgorithmFactoryUpdates(Mantid::API::AlgorithmFactoryUpdateNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::AlgorithmFactoryUpdateNotification> m_algUpdatesObserver;
 
+  //handles rename workspace notification
+   void handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf);
+    Poco::NObserver<MantidUI, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 
+	 //handles notification send by Groupworkspaces algorithm 
+	void handleGroupWorkspaces(Mantid::API::GroupWorkspacesNotification_ptr pNf);
+	Poco::NObserver<MantidUI, Mantid::API::GroupWorkspacesNotification> m_groupworkspacesObserver;
+
+	 //handles notification send by UnGroupworkspaces algorithm 
+	void handleUnGroupWorkspace(Mantid::API::UnGroupWorkspaceNotification_ptr pNf);
+	Poco::NObserver<MantidUI, Mantid::API::UnGroupWorkspaceNotification> m_ungroupworkspaceObserver;
+
+ 
 	//#678
     //for savenexus algorithm
 	void executeSaveNexus(QString algName,int version);
 
     void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
 	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
-	void moveSelctedWSChildrentoRenamedWS(const std::string & renamedWSName,QList<QTreeWidgetItem*>& selectedItems);
-
-
+	
 
     // Private variables
 

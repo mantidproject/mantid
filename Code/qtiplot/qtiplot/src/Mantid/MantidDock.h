@@ -27,20 +27,28 @@ private:
   bool isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString & ws_name); //std::vector<std::string> wsGroupNames,const QString & ws_name);
   bool isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace);
   void removeFromWSGroupNames(const QString& wsName);
+  Mantid::API::WorkspaceGroup_sptr getGroupWorkspace(QTreeWidgetItem *parentItem);
+  bool isTheWorkspaceToRenameIsaGroupMember(const QString & wsName,Mantid::API::WorkspaceGroup_sptr grpwsSptr );
+  QTreeWidgetItem* getparentWorkspaceItem(const QString & wsName);
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
   void deleteWorkspaces();
+  void renameWorkspace();
 protected slots:
   void popupMenu(const QPoint & pos);
   void workspaceSelected();
 private slots:
   void populateWorkspaceData(Mantid::API::Workspace_sptr workspace, QTreeWidgetItem* ws_item);
   void updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr);
+  void updateWorkspaceTreeafterRenaming(const QString &, const QString &);
+  void updateWorkspacesTreeafterGrouping(const QStringList&);
+  void updateWorkspacesTreeafterUnGrouping(const QString &);
   void removeWorkspaceEntry(const QString &);
   void populateWorkspaceTree(const QString & ws_name, Mantid::API::Workspace_sptr,bool isitParent);
   void treeSelectionChanged();
   void groupOrungroupWorkspaces();
   void plotSpectra();
+
 protected:
   MantidTreeWidget * m_tree;
   friend class MantidUI;
@@ -53,6 +61,7 @@ private:
   std::vector<std::string> m_wsGroupNames;
 
   static Mantid::Kernel::Logger& logObject;
+
 };
 
 

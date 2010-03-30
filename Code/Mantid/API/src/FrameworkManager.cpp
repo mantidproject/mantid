@@ -181,8 +181,9 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
 	{
 		ws_sptr=AnalysisDataService::Instance().retrieve(wsName);
 	}
-	catch(Kernel::Exception::NotFoundError&)
+	catch(Kernel::Exception::NotFoundError&ex)
 	{
+		g_log.error()<<ex.what()<<std::endl;
 	}
 	boost::shared_ptr<WorkspaceGroup> ws_grpsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
 	if(ws_grpsptr)
@@ -194,29 +195,6 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
 	}
 	else
 	{
-		//if the selected workspace is a member workspace then delete from workspacegroup vector 
-		
-		static const basic_string <char>::size_type npos = -1;
-		std::string groupwsName;
-		//index of _ to get the group(parent)workspace name
-		basic_string <char>::size_type index=wsName.find_last_of("_");
-		if(index!=npos)
-		{
-			groupwsName=wsName.substr(0,index);
-		}
-		try
-		{
-			ws_sptr=AnalysisDataService::Instance().retrieve(groupwsName);
-		}
-		catch(Kernel::Exception::NotFoundError&)
-		{
-		}
-		boost::shared_ptr<WorkspaceGroup> ws_grpsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
-		if(ws_grpsptr)
-		{			
-			 // delete from the workspacegroup vector
-			  ws_grpsptr->remove(wsName);
-		}
 		//delete from the ADS
 		try
 		{
