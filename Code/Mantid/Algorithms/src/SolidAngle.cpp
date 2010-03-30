@@ -47,11 +47,13 @@ namespace Mantid
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
       declareProperty("StartWorkspaceIndex",0, mustBePositive,
-        "The index number of the first Workspace to use (default 0)" );
+        "The index number of the first spectrum for which to find the solid angle\n"
+        "(default: 0)" );
       // As the property takes ownership of the validator pointer, have to take care to pass in a unique
       // pointer to each property.
       declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
-        "The index number of the last Workspace to use (default 0)");
+        "The index of the last spectrum whose solid angle is to be found (default: the\n"
+        "last spectrum in the workspace)");
     }
 
     /** Executes the algorithm
