@@ -31,65 +31,35 @@ double IkedaCarpenterPV::centre()const
 
 void IkedaCarpenterPV::setHeight(const double h) 
 {
-
-
-//  m_height = h;
-
+  // calculate height of peakshape function corresponding to intensity = 1
   setParameter("I",1);
   double h0 = height();
 
-  //double oldIntensity = getParameter("I");
-
+  // The intensity is then estimated to be h/h0
   setParameter("I", h/h0);
-
-  /*if (m_width != 1.0)
-    setParameter("I",h);
-  else
-    setParameter("I",0.5*m_width*m_height);*/
 };
 
 
 double IkedaCarpenterPV::height()const 
 {
+  // return the function value at centre()
   double h0;
- 
   double toCentre = centre();
-  
   constFunction(&h0, &toCentre, 1);
-
-  std::cerr<<"height = "<<h0<<"\n";
   return h0;
-
- /* if (m_width != 1.0)
-    return getParameter("I");
-  else
-    return getParameter("I")/(0.5*m_width);*/
-
 };
 
 double IkedaCarpenterPV::width()const 
 {
-  // here estimated to sum of the HWHM of the gaussian and lorentzian part...
-  //double eta = getParameter("Eta");
-
-  // eta should always be between zero and one but before putting in codes to
-  // constrain this do the following
-
-  //if (eta >= 0 && eta <= 1.0)
-  //  return 0.5*(eta*getParameter("Gamma")+(1-eta)*sqrt(getParameter("SigmaSquared"))*2);
-  //else
-  //  return 0.5*(getParameter("Gamma")+sqrt(getParameter("SigmaSquared"))*2);
-
+  // for now assume that with is totally determined by Gaussian part
   return sqrt(getParameter("SigmaSquared"))*2;
 };
 
 void IkedaCarpenterPV::setWidth(const double w) 
 {
+  // for now set the Lorentzian part to zero and adjust only gaussian part
+  setParameter("Eta", 0);
   setParameter("SigmaSquared", w*w/4);
-
-  //if ( m_height != 0.0 )
-    //setParameter("I",getParameter("I")*w/m_width);
-    //m_width = w;
 };
 
 void IkedaCarpenterPV::setCentre(const double c) 
