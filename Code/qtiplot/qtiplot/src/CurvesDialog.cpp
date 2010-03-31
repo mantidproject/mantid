@@ -183,7 +183,8 @@ void CurvesDialog::showCurveBtn(int)
   if (!it)
     return;
 
-  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
+  if ( it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram ||
+       it->rtti() == QwtPlotItem::Rtti_PlotUserItem )
   {
     btnEditFunction->setEnabled(false);
     btnAssociations->setEnabled(false);
