@@ -536,6 +536,26 @@ namespace Mantid
         }
       }
 
+      TimeSeriesProperty<int> geomId("geom_id");
+      geomId.addValue(0, sample.getGeometryFlag());
+      writeNexusNumericLog<int>(&geomId);
+      
+      TimeSeriesProperty<double> thick("geom_thickness");
+      thick.addValue(0, sample.getThickness());
+      writeNexusNumericLog<double>(&thick);
+
+      TimeSeriesProperty<double> width("geom_width");
+      width.addValue(0, sample.getWidth());
+      writeNexusNumericLog<double>(&width);
+
+      TimeSeriesProperty<double> height("geom_height");
+      height.addValue(0, sample.getHeight());
+      writeNexusNumericLog<double>(&height);
+      g_log.debug() << "Set geom_id to " << sample.getGeometryFlag();
+      g_log.debug() << ", geom_thickness to " << sample.getThickness();
+      g_log.debug() << ", geom_width to " << sample.getWidth();
+      g_log.debug() << "and geom_height to " << sample.getHeight() << std::endl;
+      
       status=NXclosegroup(fileID);
 
       return(0);

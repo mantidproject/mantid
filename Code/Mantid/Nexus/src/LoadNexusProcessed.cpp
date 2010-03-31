@@ -394,7 +394,48 @@ namespace Mantid
           Kernel::Property *p = log_entry.createTimeSeries();
           if( p ) 
           {
-            local_workspace->mutableSample().addLogData(p);
+            if(itr->nxname == "geom_id")
+            {
+              TimeSeriesProperty<double> *geomDouble
+                = dynamic_cast<TimeSeriesProperty<double>*>(p);
+              if (geomDouble)
+              {
+                const int geomId = static_cast<int>(geomDouble->getSingleValue(0));
+                local_workspace->mutableSample().setGeometryFlag(geomId);
+                g_log.debug() << "Set sample geometry ID=" << geomId << std::endl;
+              }
+            }
+            else if(itr->nxname == "geom_thickness")
+            {
+              TimeSeriesProperty<double> *thick
+                = dynamic_cast<TimeSeriesProperty<double>*>(p);
+              if (thick)
+              {
+                local_workspace->mutableSample().setThickness(thick->getSingleValue(0));
+                g_log.debug() << "set sample thickness=" << thick->getSingleValue(0) << std::endl;
+              }
+            }
+            else if(itr->nxname == "geom_width")
+            {
+              TimeSeriesProperty<double> *width
+                = dynamic_cast<TimeSeriesProperty<double>*>(p);
+              if (width)
+              {
+                local_workspace->mutableSample().setWidth(width->getSingleValue(0));
+                g_log.debug() << "set sample width=" << width->getSingleValue(0) << std::endl;
+              }
+            }
+            else if(itr->nxname == "geom_height")
+            {
+              TimeSeriesProperty<double> *height
+                = dynamic_cast<TimeSeriesProperty<double>*>(p);
+              if (height)
+              {
+                local_workspace->mutableSample().setHeight(height->getSingleValue(0));
+                g_log.debug() << "set sample height=" << height->getSingleValue(0) << std::endl;
+              }
+            }
+            else local_workspace->mutableSample().addLogData(p);
           }
         }
       }
