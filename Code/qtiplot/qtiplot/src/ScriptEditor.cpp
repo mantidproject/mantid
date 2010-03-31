@@ -297,17 +297,16 @@ void ScriptEditor::setText(int lineno, const QString& txt)
  */
 void ScriptEditor::keyPressEvent(QKeyEvent* event)
 {
-  bool handled(false);
-
-  if( !m_interpreter_mode || isListActive() )
+  if( isListActive() || !m_interpreter_mode )
   {
     forwardKeyPressToBase(event);
     return;
   }
    // Check if we have flagged to mark the line as read only
   if( m_read_only ) return;
-
   int key = event->key();
+
+  bool handled(false);
   int last_line = lines() - 1;
   if( key == Qt::Key_Return || key == Qt::Key_Enter )
   {
@@ -559,14 +558,8 @@ void ScriptEditor::executeCodeAtLine(int lineno)
  */
 void ScriptEditor::remapWindowEditingKeys()
 {
-  //Down
-  int keyDef = SCK_DOWN + (0 << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  //Up
-  keyDef = SCK_UP + (0 << 16);
-  SendScintilla(SCI_CLEARCMDKEY, keyDef);
   //Select all 
-  keyDef = 'A' + (SCMOD_CTRL << 16);
+  int keyDef = 'A' + (SCMOD_CTRL << 16);
   SendScintilla(SCI_CLEARCMDKEY, keyDef);
   //Undo
   keyDef = 'Z' + (SCMOD_CTRL << 16);
@@ -580,7 +573,6 @@ void ScriptEditor::remapWindowEditingKeys()
   //Paste
   keyDef = 'V' + (SCMOD_CTRL << 16);
   SendScintilla(SCI_CLEARCMDKEY, keyDef);
-  
 }
 
 /**
@@ -610,13 +602,13 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
       QObject *child = itr.previous();
       if( child->inherits("QListWidget") )
       {
-	QWidget *w = qobject_cast<QWidget*>(child);
-	w->setWindowFlags(Qt::ToolTip|Qt::WindowStaysOnTopHint);
-	w->show();
-	break;
+        QWidget *w = qobject_cast<QWidget*>(child);
+        w->setWindowFlags(Qt::ToolTip|Qt::WindowStaysOnTopHint);
+        w->show();
+        break;
       }
     }
   }  
-  #endif
+#endif
 #endif
 }
