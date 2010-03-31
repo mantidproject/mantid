@@ -50,7 +50,7 @@ public:
   virtual ~AlgorithmHistory();
   AlgorithmHistory& operator=(const AlgorithmHistory&);
   AlgorithmHistory(const AlgorithmHistory&);
-  AlgorithmHistory(const std::string& name, int vers, const dateAndTime& start = 0, const double& duration = -1);
+  AlgorithmHistory(const std::string& name, int vers, const dateAndTime& start = 0, const double& duration = -1,unsigned int uexeccount=0);
 
   void addExecutionInfo(const dateAndTime& start, const double& duration);
   void addProperty(const std::string& name,const std::string& value,bool isdefault, 

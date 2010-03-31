@@ -400,13 +400,29 @@ namespace NeXus
    time(&now);
    strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&now));
    writeNxNote("MantidEnvironment","mantid",buffer,"Mantid Environment data",output.str());
+//map used to order the history by execution order
+   typedef std::map <unsigned int,std::string> orderedHistMap;
+	orderedHistMap ordMap;
    int histsize = static_cast<int>(algHist.size());
    for(int i=0; i < histsize;i++)
    {
-       std::stringstream algNumber,algData;
-       algNumber << "MantidAlgorithm_" << i;
-       algHist[i].printSelf(algData);
-       writeNxNote(algNumber.str(),"mantid","","Mantid Algorithm data",algData.str());
+	   std::stringstream algNumber,algData;
+	  // algNumber << "MantidAlgorithm_" << i;
+	   algHist[i].printSelf(algData);
+	   //get execute count
+	   int nexecCount=algHist[i].execCount();
+	   //order by execute count
+	   ordMap.insert(orderedHistMap::value_type(nexecCount,algData.str()));
+	   //  writeNxNote(algNumber.str(),"mantid","","Mantid Algorithm data",algData.str());
+   }
+   int num=0;
+   std::map <unsigned int,std::string>::iterator m_Iter;
+   for (m_Iter=ordMap.begin( );m_Iter!=ordMap.end( );++m_Iter)
+   {
+	   ++num;
+	   std::stringstream algNumber;
+	   algNumber << "MantidAlgorithm_" << num;
+	   writeNxNote(algNumber.str(),"mantid","","Mantid Algorithm data",m_Iter->second);
    }
    status=NXclosegroup(fileID);
    return(0);

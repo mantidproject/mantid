@@ -97,6 +97,8 @@ namespace Mantid
       static const int unSetInt = INT_MAX - 15;
 
     };
+	/// to sort the algorithmhistory vector
+	bool UDlesserExecCount(NXClassInfo& elem1,NXClassInfo &elem2);
 
   } // namespace NeXus
 } // namespace Mantid
