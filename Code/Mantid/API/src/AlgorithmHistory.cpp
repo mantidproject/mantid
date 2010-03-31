@@ -39,6 +39,7 @@ AlgorithmHistory::~AlgorithmHistory()
     \param vers The algorithm version.
     \param start The start time of the algorithm execution (optional).
     \param duration The time (in seconds) that it took to run this algorithm (optional).
+	 \param uexeccount  an  unsigned int for algorithm execution order
  */
 AlgorithmHistory::AlgorithmHistory(const std::string& name, int vers, const dateAndTime& start, const double& duration,unsigned int uexeccount) :
   m_name(name),m_version(vers),m_executionDate(start),
