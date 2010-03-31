@@ -1,0 +1,1 @@
+A new Eclipse set-up expects this directory to be there on check-out. So don't remove it from the repository!
