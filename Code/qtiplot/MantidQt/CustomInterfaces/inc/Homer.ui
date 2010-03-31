@@ -8,7 +8,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>436</width>
+    <width>386</width>
     <height>465</height>
    </rect>
   </property>
@@ -153,6 +153,19 @@
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_3" >
+          <item row="0" column="1" >
+           <spacer name="verticalSpacer_4" >
+            <property name="orientation" >
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
           <item row="1" column="0" >
            <widget class="QLabel" name="lbNorm" >
             <property name="toolTip" >
@@ -289,52 +302,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1" >
-           <spacer name="verticalSpacer_4" >
-            <property name="orientation" >
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0" >
-             <size>
-              <width>20</width>
-              <height>10</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="5" >
-           <widget class="QComboBox" name="getei_type" >
-            <property name="minimumSize" >
-             <size>
-              <width>90</width>
-              <height>0</height>
-             </size>
-            </property>
-            <item>
-             <property name="text" >
-              <string>MantidGetEi</string>
-             </property>
-            </item>
-            <item>
-             <property name="text" >
-              <string>libISISGetEi</string>
-             </property>
-            </item>
-           </widget>
-          </item>
          </layout>
-         <zorder>lbNorm</zorder>
-         <zorder>cbNormal</zorder>
-         <zorder>cbMonitors</zorder>
-         <zorder>pbBack</zorder>
-         <zorder>valBg</zorder>
-         <zorder>ckSumSpecs</zorder>
-         <zorder>ckFixEi</zorder>
-         <zorder>map_fileInput_lbName</zorder>
-         <zorder>map_fileInput_leName</zorder>
-         <zorder>valMap</zorder>
-         <zorder>map_fileInput_pbBrowse</zorder>
-         <zorder>getei_type</zorder>
         </widget>
        </item>
        <item row="2" column="0" colspan="6" >

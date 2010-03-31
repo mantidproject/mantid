@@ -1,4 +1,4 @@
-#include "MantidAlgorithms/libISISGetEi.h"
+#include "MantidAlgorithms/GetEi2.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -18,7 +18,7 @@ namespace Algorithms
 {
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(libISISGetEi)
+DECLARE_ALGORITHM(GetEi2)
 
 using namespace Kernel;
 using namespace API;
@@ -32,12 +32,12 @@ static const double BKGD_FAC=0.5;
 static const double NO_ESTIMATE=-1e200;
 
 // progress estimates
-const double libISISGetEi::CROP = 0.15;
-const double libISISGetEi::GET_COUNT_RATE = 0.15;
-const double libISISGetEi::FIT_PEAK = 0.2;
+const double GetEi2::CROP = 0.15;
+const double GetEi2::GET_COUNT_RATE = 0.15;
+const double GetEi2::FIT_PEAK = 0.2;
 
 
-void libISISGetEi::init()
+void GetEi2::init()
 
 {// Declare required input parameters for algorithm and do some validation here
   CompositeValidator<Workspace2D> *val = new CompositeValidator<Workspace2D>;
@@ -73,7 +73,7 @@ void libISISGetEi::init()
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
 *  @throw runtime_error if there is a problem with the SpectraDetectorMap or a sub-algorithm falls over
 */
-void libISISGetEi::exec()
+void GetEi2::exec()
 {
   Workspace2D_const_sptr inWS = getProperty("InputWorkspace");
   const int mon1Spec = getProperty("Monitor1Spec");
@@ -129,7 +129,7 @@ void libISISGetEi::exec()
 *  @throw NotFoundError if no detector is found for the detector ID given
 *  @throw runtime_error if there is a problem with the SpectraDetectorMap
 */
-void libISISGetEi::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
+void GetEi2::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
   const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
@@ -163,7 +163,7 @@ void libISISGetEi::getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0S
 *  @return the indexes of the histograms created by the detector whose ID were passed
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 */
-std::vector<int> libISISGetEi::getMonitorSpecIndexs(DataObjects::Workspace2D_const_sptr WS, int specNum1, int specNum2) const
+std::vector<int> GetEi2::getMonitorSpecIndexs(DataObjects::Workspace2D_const_sptr WS, int specNum1, int specNum2) const
 {// getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
   std::vector<int> specInds;
   
@@ -196,7 +196,7 @@ std::vector<int> libISISGetEi::getMonitorSpecIndexs(DataObjects::Workspace2D_con
 * @param E_KE kinetic energy in meV
 * @return the time to taken to travel that uninterrupted distance in seconds
 */
-double libISISGetEi::timeToFly(double s, double E_KE) const
+double GetEi2::timeToFly(double s, double E_KE) const
 {
   // E_KE = mv^2/2, s = vt
   // t = s/v, v = sqrt(2*E_KE/m)
@@ -211,14 +211,14 @@ double libISISGetEi::timeToFly(double s, double E_KE) const
 /** Looks for and examines a peak close to that specified by the input parameters and
 *  examines it to find a representative time for when the neutrons hit the detector
 *  @param WS the workspace containing the monitor spectrum
-*  @param monitIn the index of the histogram that contains the monitor spectrum
+*  @param monitIn Monitor index in the workspace
 *  @param peakTime the estimated TOF of the monitor peak in the time units of the workspace
 *  @return a time of flight value in the peak in microseconds
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
 *  @throw out_of_range if the peak runs off the edge of the histogram
 *  @throw runtime_error a sub-algorithm just falls over
 */
-double libISISGetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime)
+double GetEi2::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime)
 {
   double tMin = 0;
   double tMax = 0;
@@ -226,19 +226,21 @@ double libISISGetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int
   if ( peakTime > 0.0 )
   {
     switch (monitIn)
-    {//MARI specific code
-      case 1 :
+    {
+      case 1:
         tMin = (1-MON1_TOF_WIN)*peakTime;
         tMax = (1+MON1_TOF_WIN)*peakTime;
         g_log.information() << "Based on the user selected energy the first peak will be searched for at TOF " << peakTime << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*MON1_TOF_WIN) << "%\n";
         break;
-      //MARI specific code
-      case 2 :
+      case 2:
         tMin = (1-MON2_TOF_WIN)*peakTime;
         tMax = (1+MON2_TOF_WIN)*peakTime;
         g_log.information() << "Based on the user selected energy the second peak will be searched for at TOF " << peakTime << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*MON2_TOF_WIN) << "%\n";
         break;
+      default:
+        throw std::runtime_error("Invalid monitor selected");
     }
+
   }
   else
   {
@@ -253,7 +255,7 @@ double libISISGetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int
   // look out for user cancel messgages as the above command can take a bit of time
 //  advanceProgress(GET_COUNT_RATE);
 
-  return getPeakFirstMoments(m_tempWS, tMin, tMax );
+  return getPeakFirstMoments(m_tempWS, tMin, tMax);
 }
 /** Calls CropWorkspace as a sub-algorithm and passes to it the InputWorkspace property
 *  @param specInd the index number of the histogram to extract
@@ -263,7 +265,7 @@ double libISISGetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int
 *  @throw runtime_error if the algorithm just falls over
 *  @throw invalid_argument if the input workspace does not have common binning
 */
-void libISISGetEi::extractSpec(int specInd, double start, double end)
+void GetEi2::extractSpec(int specInd, double start, double end)
 {
   IAlgorithm_sptr childAlg =
     createSubAlgorithm("CropWorkspace", 100*m_fracCompl, 100*(m_fracCompl+CROP) );
@@ -301,7 +303,7 @@ void libISISGetEi::extractSpec(int specInd, double start, double end)
 
 /** Implements the Fortran subroute IXFmoments_dataset_2d() from the libISIS
 */
-double libISISGetEi::getPeakFirstMoments(API::MatrixWorkspace_sptr WS, const double tMin, const double tMax)
+double GetEi2::getPeakFirstMoments(API::MatrixWorkspace_sptr WS, const double tMin, const double tMax)
 {
   // ! the original Fortran subroutine IXFunspike_1d() used by libISIS is more thorough it checks the errors too
   // calls SmoothData as a subalgorithm
@@ -360,7 +362,7 @@ double libISISGetEi::getPeakFirstMoments(API::MatrixWorkspace_sptr WS, const dou
   return T_Mean;
 }
 
-API::MatrixWorkspace_sptr libISISGetEi::smooth(API::MatrixWorkspace_sptr WS)
+API::MatrixWorkspace_sptr GetEi2::smooth(API::MatrixWorkspace_sptr WS)
 {
   IAlgorithm_sptr childAlg =
     createSubAlgorithm("SmoothData");
@@ -386,7 +388,7 @@ API::MatrixWorkspace_sptr libISISGetEi::smooth(API::MatrixWorkspace_sptr WS)
   return childAlg->getProperty("OutputWorkspace");
 }
 
-API::MatrixWorkspace_sptr libISISGetEi::reBin(API::MatrixWorkspace_sptr WS, const double first, const double width, const double end)
+API::MatrixWorkspace_sptr GetEi2::reBin(API::MatrixWorkspace_sptr WS, const double first, const double width, const double end)
 {
   IAlgorithm_sptr childAlg =
     createSubAlgorithm("Rebin");
@@ -414,7 +416,7 @@ API::MatrixWorkspace_sptr libISISGetEi::reBin(API::MatrixWorkspace_sptr WS, cons
   return childAlg->getProperty("OutputWorkspace");
 }
 
-void libISISGetEi::getPeakMean(const MantidVec& Xs, const MantidVec& Ys, const MantidVec& Es, const double prominence, double &area, double &c, double &c_fwhm, double &w, double &xbar)
+void GetEi2::getPeakMean(const MantidVec& Xs, const MantidVec& Ys, const MantidVec& Es, const double prominence, double &area, double &c, double &c_fwhm, double &w, double &xbar)
 {
   MantidVec::const_iterator peakIt = std::max_element(Ys.begin(), Ys.end());    //! position of peak
   unsigned int iPeak = peakIt - Ys.begin();
@@ -615,7 +617,7 @@ void libISISGetEi::getPeakMean(const MantidVec& Xs, const MantidVec& Ys, const M
   advanceProgress(FIT_PEAK);
 }
 
-void libISISGetEi::integrate(double &bkgd_m, double &bkgd_err_m, const MantidVec &x, const MantidVec &s, const MantidVec &e, const double xmin, const double xmax)
+void GetEi2::integrate(double &bkgd_m, double &bkgd_err_m, const MantidVec &x, const MantidVec &s, const MantidVec &e, const double xmin, const double xmax)
 {
   MantidVec::const_iterator lowit=std::lower_bound(x.begin(), x.end(), xmin);
   MantidVec::difference_type distmin=std::distance(x.begin(),lowit);
@@ -628,137 +630,20 @@ void libISISGetEi::integrate(double &bkgd_m, double &bkgd_err_m, const MantidVec
   bkgd_m=std::inner_product(s.begin()+distmin,s.begin()+distmax,widths.begin(),0.0);
   bkgd_err_m=std::inner_product(e.begin()+distmin,e.begin()+distmax,widths.begin(),0.0,std::plus<double>(),VectorHelper::TimesSquares<double>());
 
-//    unsigned int nx = s.size();
-//    unsigned int ml(0), mu(nx - 1);
-//    MantidVec::const_iterator lowit = std::lower_bound(x.begin(), x.end(), xmin);
-//    ml = lowit - x.begin();
-//    
-//    MantidVec::const_iterator highit = std::lower_bound(x.begin(), x.end(), xmax);
-//    mu = highit - x.begin();
-//   
-//
-//
-//    //! note: At this point, 0=<ml=<nx & xmin=<x(ml); 1=<mu=<nx & x(mu)=<xmax; BUT mu > ml-1
-//
-//    //! Perform integration:
-//    //! ----------------------
-//
-//    //! Calculate integral:
-//
-//    //!	if (mu<ml) then
-//    //!	special case of no data points in the integration range
-//    //!		ilo = max(ml-1,1)	! x(1) is end point if ml=1
-//    //!		ihi = min(mu+1,nx)	! x(mu) is end point if mu=nx
-//    //!		val = 0.5_dp * ((xmax-xmin)/(x(ihi)-x(ilo))) * &
-//    //!			&( s(ihi)*((xmax-x(ilo))+(xmin-x(ilo))) + s(ilo)*((x(ihi)-xmax)+(x(ihi)-xmin)) )
-//    //!	else
-//    //!	xmin and xmax are separated by at least one data point in x(:)
-//    //!	  sum over complete steps in the integration range:
-//    //!		if (mu > ml) then	! at least one complete step
-//    //!			val = sum((s(ml+1:mu)+s(ml:mu-1))*(x(ml+1:mu)-x(ml:mu-1)))
-//    //!		else
-//    //!			val = 0.0_dp
-//    //!		endif
-//    //!	  ends of the integration range:
-//    //!		if (ml>1) then	! x(1) is end point if ml=1
-//    //!			x1eff = (xmin*(xmin-x(ml-1)) + x(ml-1)*(x(ml)-xmin))/(x(ml)-x(ml-1))
-//    //!			s1eff = s(ml-1)*(x(ml)-xmin)/((x(ml)-x(ml-1)) + (xmin-x(ml-1)))
-//    //!			val = val + (x(ml)-x1eff)*(s(ml)+s1eff)
-//    //!		endif
-//    //!		if (mu<nx) then	! x(mu) is end point if mu=nx
-//    //!			xneff = (xmax*(x(mu+1)-xmax) + x(mu+1)*(xmax-x(mu)))/(x(mu+1)-x(mu))
-//    //!			sneff = s(mu+1)*(xmax-x(mu))/((x(mu+1)-x(mu)) + (x(mu+1)-xmax))
-//    //!			val = val + (xneff-x(mu))*(s(mu)+sneff)
-//    //!		endif
-//    //!		val = 0.5_dp*val
-//    //!	endif			
-//
-//    //! Calculate error on the integral:
-//
-//    if (mu<ml) 
-//    {
-//      throw std::out_of_range("Incorrect integration limits");
-//    }
-//
-//    //!	xmin and xmax are separated by at least one data point in x(:)
-//      // !	Set up effective end points:
-//    double x1eff(0.0), s1eff(0.0), e1eff(0.0);
-//    if (ml > 0) 
-//    {
-//      	// x(1) is end point if ml=1
-//          x1eff = (xmin*(xmin-x[ml-1]) + x[ml-1]*(x[ml]-xmin))/(x[ml]-x[ml-1]);
-//          s1eff = s[ml-1]*(x[ml]-xmin)/((x[ml]-x[ml-1]) + (xmin-x[ml-1]));
-//          e1eff = e[ml-1]*(x[ml]-xmin)/((x[ml]-x[ml-1]) + (xmin-x[ml-1]));
-//    }
-//    else 
-//    {
-//         x1eff = x[ml];
-//         s1eff = 0.0;
-//         e1eff = 0.0;
-//    }
-//    double xneff(0.0), sneff(0.0), eneff(0.0); 
-//    if ( mu < nx - 1 ) 
-//    {	
-//      // x(mu) is end point if mu=nx
-//          xneff = (xmax*(x[mu+1]-xmax) + x[mu+1]*(xmax-x[mu]))/(x[mu+1]-x[mu]);
-//          sneff = s[mu+1]*(xmax-x[mu])/((x[mu+1]-x[mu]) + (x[mu+1]-xmax));
-//          eneff = e[mu+1]*(xmax-x[mu])/((x[mu+1]-x[mu]) + (x[mu+1]-xmax));
-//    }
-//       else
-//       {
-//          xneff = x[nx -1];
-//          sneff = 0.0;
-//          eneff = 0.0;
-//      }
-//       //	xmin to x(ml):
-//       double val = (x[ml]-x1eff)*(s[ml]+s1eff);
-//         double err = std::pow(e1eff*(x[ml]-x1eff), 2);
-////       !	x(ml) to x(mu):
-//       if (mu==ml)
-//       {
-//         //! one data point, no complete intervals
-//         err = err + std::pow(e[ml]*(xneff-x1eff), 2);
-//       }
-//       else if (mu == ml+1)
-//       {
-//         //! one complete interval
-//          val = val + (s[mu]+s[ml])*(x[mu]-x[ml]);
-//          err = err + std::pow(e[ml]*(x[ml+1]-x1eff), 2) + std::pow(e[mu]*(xneff-x[mu-1]), 2);
-//       }
-//       else
-//       {
-//         // ! this is the whole trapezium summing
-////          val = val + sum( (s(ml+1:mu)+s(ml:mu-1))*(x(ml+1:mu)-x(ml:mu-1)) );
-//            std::vector<double> ssum(mu - ml, 0.0);
-//            std::transform(s.begin()+ml+1, s.begin()+mu, s.begin()+ml, ssum.begin(), std::plus<double>());
-//            std::vector<double> xdiff(mu - ml, 0.0);
-//            std::transform(x.begin()+ml+1, x.begin()+mu, x.begin()+ml, xdiff.begin(), std::minus<double>());
-//            val += std::inner_product(ssum.begin(), ssum.end(), xdiff.begin(), 0.0);
-//
-//          //err = err + (e(ml)*(x(ml+1)-x1eff))**2 + (e(mu)*(xneff-x(mu-1)))**2 
-//          //err = err+ sum((e(ml+1:mu-1)*(x(ml+2:mu)-x(ml:mu-2)))**2)
-//       }
-//
-//       //	x(mu) to xmax:
-//       val = val + (xneff-x[mu])*(s[mu]+sneff);
-//         err = err + std::pow(eneff*(xneff-x[mu]), 2);
-//
-//       bkgd_m = 0.5*val;
-//       bkgd_err_m = 0.0;//0.5*std::sqrt(err);
 }
 
 /** Get the kinetic energy of a neuton in joules given it speed using E=mv^2/2
 *  @param speed the instantanious speed of a neutron in metres per second
 *  @return the energy in joules
 */
-double libISISGetEi::neutron_E_At(double speed) const
+double GetEi2::neutron_E_At(double speed) const
 {
   // E_KE = mv^2/2
   return PhysicalConstants::NeutronMass*speed*speed/(2);
 }
 
 /// Update the percentage complete estimate assuming that the algorithm has completed a task with estimated RunTime toAdd
-void libISISGetEi::advanceProgress(double toAdd)
+void GetEi2::advanceProgress(double toAdd)
 {
   m_fracCompl += toAdd;
   progress(m_fracCompl);

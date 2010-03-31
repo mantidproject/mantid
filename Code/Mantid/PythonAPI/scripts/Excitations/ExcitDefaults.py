@@ -7,7 +7,9 @@ MARI = common.defaults(
   instrument_pref='MAR',
   white_beam_integr=(20.0,40.0),
   scale_factor=1.8182e8,
-  monitor1_integr=(1000,2000))
+  monitor1_integr=(1000,2000),
+  white_beam_scale=1000.
+  )
 
 MAPS = common.defaults(
   background_range=(12000.0, 18000.0),

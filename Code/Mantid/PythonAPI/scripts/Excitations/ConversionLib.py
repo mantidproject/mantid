@@ -34,13 +34,14 @@ def NormaliseToWhiteBeam(instr, WBRun, toNorm, mapFile, detMask, prevNorm) :
     NormaliseTo(prevNorm, pNorm, 0, instr)
 
     ConvertUnits(pNorm, pNorm, "Energy", AlignBins=0)
-
+    
     #this both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
     #    wb_rebin = str(wb_low_e) + ', ' + str(2.0*float(wb_high_e)) + ', ' + str(wb_high_e)
-    Rebin(pNorm, pNorm,
-      str(instr.white_beam_integr[0])+','+str(2.0*instr.white_beam_integr[1])+','+str(instr.white_beam_integr[1])  )
-   # shouldn't we do the correction? It affects things when the angles are different, would need a LoadDetectorInfo too
-  #  DetectorEfficiencyCor(pNorm, pNorm, IncidentE)  
+    low = instr.white_beam_integr[0]
+    hi = instr.white_beam_integr[1]
+    delta = 2.0*(hi - low)
+    Rebin(pNorm, pNorm, str(low)+','+str(delta)+','+str(hi)  )
+
     if detMask != '' :
       MaskDetectors(pNorm, SpectraList=detMask)
     
@@ -83,21 +84,16 @@ def retrieveSettings(instrum, back, runs):
   
   return (instru, TOFLow, TOFHigh, run_nums)
 
-def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile='', GetEiType = 'MantidGetEi'):
+def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile=''):
   if detInfoFile != '' :
     LoadDetectorInfo(workS, detInfoFile)             				                  #for details see www.mantidproject.org/LoadDetectorInfo
 
   runGetEi = str(getEi).lower() != 'fixei' and str(getEi).lower() != 'false'
   if not runGetEi :
     mtd.sendLogMessage('Getting peak times (the GetEi() energy will be overriden by '+str(E_guess)+' meV)')
-
-  #MARI specfic code GetEiData.FirstMonitor ?
-  if GetEiType.lower() == "mantidgetei":
-    GetEiData = GetEi(workS, 2, 3, E_guess)
-  else:
-    if E_guess == '':
-      E_guess = None
-    GetEiData = libISISGetEi(workS, 2, 3, E_guess)
+    
+  # Get incident energy
+  GetEiData = GetEi(workS, 2, 3, E_guess)
 
   if runGetEi : Ei = GetEiData.getPropertyValue('IncidentEnergy')
   else : Ei = E_guess
@@ -110,7 +106,7 @@ def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile='', GetEiTy
   mtd.sendLogMessage('Adjusting the X-values so that the zero of time is when the peak was registered at the new origin , which monitor 2')
   src = workS.getInstrument().getSource().getName()                             #this name could be 'Moderator',  'undulator', etc.
   MoveInstrumentComponent(workS, src, X=p0.getX() , Y=p0.getY() ,Z=p0.getZ(), RelativePosition=False)
-  return [Ei, offSetTime]
+  return Ei, offSetTime
   
 # a workspace name that is very long and unlikely to have been created by the user before this script is run, it would be replaced  
 tempWS = '_ETrans_loading_tempory_WS'
@@ -119,7 +115,7 @@ tempWS = '_ETrans_loading_tempory_WS'
 # Applies unit conversion, detector convcy and grouping correction to a
 # raw file
 ###########################################
-def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', nameInOut = 'mono_sample_temporyWS', GetEiType = 'MantidGetEi') :
+def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', nameInOut = 'mono_sample_temporyWS') :
   (instru, TOFLow, TOFHigh, run_nums) = retrieveSettings(instrum, back, runs)
 
   #----Calculations start------------------
@@ -128,7 +124,7 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='',
     if pInOut.isGroup() : raise Exception("Workspace groups are not supported here")
 
     common.sumWorkspaces(pInOut, instru, run_nums)                              #the final workspace will take the X-values and instrument from the first workspace and so we don't need to rerun ChangeBinOffset(), MoveInstrumentComponent(), etc.
-    [Ei, offSet] = findPeaksOffSetTimeAndEi(pInOut, Ei, getEi, instru.getFileName(run_nums[0]),GetEiType )
+    Ei, offSet = findPeaksOffSetTimeAndEi(pInOut, Ei, getEi, instru.getFileName(run_nums[0]))
  
     if back != 'noback':                                                        #remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
       ConvertToDistribution(pInOut)                                             #deal correctly with changing bin widths
@@ -152,17 +148,14 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='',
       GroupDetectors(pInOut, pInOut, det_map, KeepUngroupedSpectra=0)
 
     ConvertToDistribution(pInOut)
-  
-#    CreateSingleValuedWorkspace(tempWS, instru.scale_factor)
-#    Multiply(pInOut, tempWS, pInOut)
-#    mantid.deleteWorkspace(tempWS)
-    pInOut *= instru.scale_factor                               #we need '*=' here '*' would do something very different
+    pInOut *= instru.scale_factor 
     
     #replaces inifinities and error values with large numbers. Infinity values can be normally be avoided passing good energy values to ConvertUnits
     ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
 
     NormaliseToWhiteBeam(instru, wbrf, pInOut, det_map, det_mask, norma)
-   
+    pInOut /= instru.white_beam_scale
+    
     return pInOut
 
   except Exception, reason:

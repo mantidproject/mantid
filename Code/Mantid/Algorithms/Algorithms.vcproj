@@ -323,6 +323,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GetEi2.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\HRPDSlabCanAbsorption.cpp"
 				>
 			</File>
@@ -730,6 +734,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\GetEi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\GetEi2.h"
 				>
 			</File>
 			<File

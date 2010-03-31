@@ -98,13 +98,14 @@ def getRunName(path):
 #-- Holds data about the defaults used for diferent instruments (MARI, MAPS ...)
 class defaults:
   # set the defaults for a default machine. These default values for defaults won't work and so they must be overriden by the correct values for the machine when this is run
-  def __init__(self, background_range=(-1.0,-1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0,-1.0), scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5)):
+  def __init__(self, background_range=(-1.0,-1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0,-1.0), scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5), white_beam_scale = 1.0):
     self.background_range=background_range
     self.normalization=normalization
     self.instrument_pref=instrument_pref
     self.white_beam_integr=white_beam_integr
     self.scale_factor=scale_factor
     self.monitor1_integr=monitor1_integr
+    self.white_beam_scale = white_beam_scale
       
   # guess the filename from run number assuming global_getFileName_instrument_pref is setup
   def getFileName(self, runNumber):
