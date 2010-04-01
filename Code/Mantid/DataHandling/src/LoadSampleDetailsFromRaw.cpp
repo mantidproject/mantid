@@ -41,6 +41,13 @@ void LoadSampleDetailsFromRaw::init()
  */
 void LoadSampleDetailsFromRaw::exec()
 {
+  MatrixWorkspace_sptr data_ws = getProperty("InputWorkspace");
+  if( !data_ws.get() )
+  {
+    g_log.error() << "Cannot retrieve InputWorkspace " << getPropertyValue("InputWorkspace");
+    throw Exception::NotFoundError("Cannot retrieve InputWorkspace", getPropertyValue("InputWorkspace"));
+  }
+  
   std::string filename = getPropertyValue("Filename");
   FILE* file = fopen(filename.c_str(), "rb");
   if (file == NULL)
@@ -51,33 +58,18 @@ void LoadSampleDetailsFromRaw::exec()
 
   ISISRAW2 *isis_raw = new ISISRAW2;
   isis_raw->ioRAW(file, true);
+  fclose(file);
 
-  MatrixWorkspace_sptr data_ws = getProperty("InputWorkspace");
-  if( !data_ws.get() )
-  {
-    g_log.error() << "Cannot retrieve InputWorkspace " << getPropertyValue("InputWorkspace");
-    throw Exception::NotFoundError("Cannot retrieve InputWorkspace", getPropertyValue("InputWorkspace"));
-  }
-//  boost::shared_ptr<Sample> ws_sample = data_ws->getSample();
-  
-  //if( ws_sample.get() )
-  {  
-    // Pick out the geometry information
-    data_ws->mutableSample().setGeometryFlag(isis_raw->spb.e_geom);
-    data_ws->mutableSample().setThickness(static_cast<double>(isis_raw->spb.e_thick));
-    data_ws->mutableSample().setHeight(static_cast<double>(isis_raw->spb.e_height));
-    data_ws->mutableSample().setWidth(static_cast<double>(isis_raw->spb.e_width));
+  // Pick out the geometry information
+  data_ws->mutableSample().setGeometryFlag(isis_raw->spb.e_geom);
+  data_ws->mutableSample().setThickness(static_cast<double> (isis_raw->spb.e_thick));
+  data_ws->mutableSample().setHeight(static_cast<double> (isis_raw->spb.e_height));
+  data_ws->mutableSample().setWidth(static_cast<double> (isis_raw->spb.e_width));
 
-    g_log.debug() << "Raw file sample details:\n"
-		  << "\tsample geometry flag: " << isis_raw->spb.e_geom << "\n"
-		  << "\tsample thickness: " << data_ws->mutableSample().getThickness() << "\n"
-		  << "\tsample height: " << data_ws->mutableSample().getHeight() << "\n"
-		  << "\tsample width: " << data_ws->mutableSample().getWidth() << std::endl;
-  }
-  //else
-  //{
-  //  g_log.warning() << getPropertyValue("InputWorkspace") << " has no sample object, sample details not set.";
-  //}
+  g_log.debug() << "Raw file sample details:\n" << "\tsample geometry flag: " << isis_raw->spb.e_geom
+      << "\n" << "\tsample thickness: " << data_ws->mutableSample().getThickness() << "\n"
+      << "\tsample height: " << data_ws->mutableSample().getHeight() << "\n" << "\tsample width: "
+      << data_ws->mutableSample().getWidth() << std::endl;
 
   // Free the used memory
   delete isis_raw;
