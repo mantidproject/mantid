@@ -23,13 +23,14 @@ public:
     d2->setID(11);
     d2->setPos(3.0,4.0,5.0);
     d2->markAsMonitor();
-    group->addDetector(d2);
+    bool warn = true;
+    group->addDetector(d2,warn);
     std::vector<IDetector_sptr> vec(1,boost::shared_ptr<IDetector>(group));
     dg = new DetectorGroup( vec );
     d3 = boost::shared_ptr<Detector>(new Detector("d3",0));
     d3->setID(10);
     d3->setPos(5.0,5.0,5.0);
-    dg->addDetector(d3);
+    dg->addDetector(d3,warn);
   }
 
   ~DetectorGroupTest()
@@ -61,7 +62,8 @@ public:
     d->setPos(6.0, 3.0, 2.0);
     TS_ASSERT( ! detg.isMasked() )
 
-    detg.addDetector(d);
+    bool warn = true;
+    detg.addDetector(d,warn);
     TS_ASSERT_EQUALS( detg.getID(), 99 )
     TS_ASSERT_EQUALS( detg.getPos()[0], 4.0 )
     TS_ASSERT_EQUALS( detg.getPos()[1], 2.5 )
