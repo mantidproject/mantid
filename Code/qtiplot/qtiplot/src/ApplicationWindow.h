@@ -1068,6 +1068,10 @@ private slots:
   ///
   void showMantidConcepts();
 
+   /// show MantidPlot Help webpage
+  void showmantidplotHelp();
+
+
   ///
   void showalgorithmDescriptions();
 	
@@ -1276,7 +1280,7 @@ private:
     QAction *actionShowAxisDialog, *actionShowTitleDialog;
     QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
     QAction *actionTableRecalculate;
-    QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms;
+    QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms,*actionmantidplotHelp;
     QAction *actionRename, *actionCloseWindow, *actionConvertTable;
     QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
     QAction *actionResizeActiveWindow, *actionHideActiveWindow;

@@ -374,11 +374,11 @@ void ApplicationWindow::init(bool factorySettings)
     //apply user settings
     updateAppFonts();
     setAppColors(workspaceColor, panelsColor, panelsTextColor, true);
-
     //Initialize Mantid
     // MG: 01/02/2009 - Moved this to before scripting so that the logging is connected when
     // we register Python algorithms
     mantidUI->init();
+	
     
     //Scripting
     m_script_envs = QHash<QString, ScriptingEnv*>();
@@ -1153,6 +1153,7 @@ void ApplicationWindow::initMainMenu()
 	help->addAction(actionHomePage);
 	help->addAction(actionMantidConcepts);
 	help->addAction(actionMantidAlgorithms);
+	help->addAction(actionmantidplotHelp);
 	help->insertSeparator();
 	help->addAction(actionHelpBugReports);
 	help->insertSeparator();
@@ -12160,6 +12161,9 @@ void ApplicationWindow::createActions()
 	actionMantidAlgorithms=new QAction(tr("&Algorithm Descriptions"), this);
 	connect(actionMantidAlgorithms, SIGNAL(activated()), this, SLOT(showalgorithmDescriptions()));
 
+	actionmantidplotHelp=new QAction(tr("&MantidPlot Help"), this);
+	connect(actionmantidplotHelp, SIGNAL(activated()), this, SLOT(showmantidplotHelp()));
+
 
 	actionChooseHelpFolder = new QAction(tr("&Choose Help Folder..."), this);
 	connect(actionChooseHelpFolder, SIGNAL(activated()), this, SLOT(chooseHelpFolder()));
@@ -12894,6 +12898,8 @@ void ApplicationWindow::translateActionsStrings()
 	actionMantidConcepts->setMenuText(tr("&Mantid Concepts"));
 
 	actionMantidAlgorithms->setMenuText("&Algorithm Descriptions");
+	
+	actionmantidplotHelp->setMenuText("&MantidPlot Help");
 
 	//actionChooseHelpFolder->setMenuText(tr("&Choose Help Folder..."));
 	//actionRename->setMenuText(tr("&Rename Window"));
@@ -13697,6 +13703,13 @@ void ApplicationWindow::showMantidConcepts()
 void ApplicationWindow::showalgorithmDescriptions()
 {
 	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Algorithms"));
+}
+/*
+ Show mantidplot help page
+*/
+void ApplicationWindow::showmantidplotHelp()
+{
+	QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_Help"));
 }
 
 //
