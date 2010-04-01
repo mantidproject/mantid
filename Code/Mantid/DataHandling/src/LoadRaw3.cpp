@@ -667,6 +667,7 @@ bool LoadRaw3::isAscii(const std::string & filename) const
   FILE* file = fopen(filename.c_str(), "rb");
   char data[256];
   int n = fread(data, 1, sizeof(data), file);
+  fclose(file);
   char *pend = &data[n];
   /*
    * Call it a binary file if we find a non-ascii character in the 
