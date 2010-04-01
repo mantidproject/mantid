@@ -169,6 +169,19 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
     remapWindowEditingKeys();
     QShortcut *shortcut = new QShortcut(m_paste->shortcut(), this);
     connect(shortcut, SIGNAL(activated()), this, SLOT(paste()));
+
+    // Use a fixed width font
+    QFont f("Andale Mono");
+    f.setFixedPitch(true);
+    f.setPointSize(10);
+    if( codelexer )
+    {
+      codelexer->setFont(f);
+    }
+    else
+    {
+      setFont(f);
+    }      
   }
   else
   {
@@ -181,7 +194,6 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
     //Update the editor
     update();
   }
-  
 }
 
 /**
