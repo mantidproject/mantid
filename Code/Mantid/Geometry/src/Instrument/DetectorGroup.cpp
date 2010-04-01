@@ -24,10 +24,11 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets) :
     g_log.error("Illegal attempt to create an empty DetectorGroup");
     throw std::invalid_argument("Empty DetectorGroup objects are not allowed");
   }
+  bool warn = true;
   std::vector<IDetector_sptr>::const_iterator it;
   for (it = dets.begin(); it != dets.end(); ++it)
   {
-    addDetector(*it);
+    addDetector(*it,warn);
   }
 }
 
@@ -36,25 +37,26 @@ DetectorGroup::~DetectorGroup()
 {
 }
 
-/// Add a detector to the collection
-void DetectorGroup::addDetector(IDetector_sptr det)
+/** Add a detector to the collection
+ *  @param det  A pointer to the detector to add
+ *  @param warn Whether to issue warnings to the log
+ */
+void DetectorGroup::addDetector(IDetector_sptr det, bool& warn)
 {
   // Warn if adding a masked detector
-  if ( det->isMasked() )
+  if ( warn && det->isMasked() )
   {
     g_log.warning() << "Adding a detector (ID:" << det->getID() << ") that is flagged as masked." << std::endl;
+    warn = false;
   }
 
   // For now at least, the ID is the same as the first detector that is added
   if ( m_detectors.empty() ) m_id = det->getID();
 
-  if ( m_detectors.insert( DetCollection::value_type(det->getID(), det) ).second )
-  {
-    //g_log.debug() << "Detector with ID " << det->getID() << " added to group." << std::endl;
-  }
-  else
+  if ( (! m_detectors.insert( DetCollection::value_type(det->getID(), det) ).second ) && warn)
   {
     g_log.warning() << "Detector with ID " << det->getID() << " is already in group." << std::endl;
+    warn = false;
   }
 }
 

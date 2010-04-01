@@ -52,7 +52,7 @@ public:
   DetectorGroup(const std::vector<IDetector_sptr>& dets);
   virtual ~DetectorGroup();
 
-  void addDetector(IDetector_sptr det);
+  void addDetector(IDetector_sptr det, bool& warn);
 
   // IDetector methods
   int getID() const;
