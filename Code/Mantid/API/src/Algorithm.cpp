@@ -521,114 +521,124 @@ Poco::ActiveResult<bool> Algorithm::executeAsync()
  *  @param  prop a vector holding the input properties
  *  @returns true - if all the workspace members are executed.
  */
-
 bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<Mantid::Kernel::Property*>&prop)
-{	
-	int nPeriod=1;
-	int execPercentage=0;
-	bool bgroupPassed=true;
-	bool bgroupFailed=false;
-	std::string outWSParentName("");
-	WorkspaceGroup_sptr sptrWSGrp1; 
-	WorkspaceGroup_sptr sptrWSGrp2;
-	bool bnewGoup1=true;
-	bool bnewGoup2=true;
-	bool bStatus=false;
-	std::string prevPropName("");
-	
-	//getting the input workspace group names
-	const std::vector<std::string>& inputWSNames=inputwsPtr->getNames();
-	int nSize=inputWSNames.size();
-	//size is one if only group header.
-	//return if atleast one meber is not there in group to process
-	if(nSize<2)
-	{	g_log.error()<<"Input WorkspaceGroup has no members to process  "<<std::endl;
-		return false;
-	}
-	std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
-	int execTotal=0;
-	//removing the header count from the totalsize
-	execTotal=(nSize-1)*10;
-	m_notificationCenter.postNotification(new StartedNotification(this));
-	IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",this->version());
-	if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
-	//for each member in the input workspace group
-	//starts from the 2nd item in the group as 1st item is group header
-	for(++wsItr;wsItr!=inputWSNames.end();wsItr++)
-	{	//set  properties
-		std::vector<Mantid::Kernel::Property*>::const_iterator itr;
-		for (itr=prop.begin();itr!=prop.end();itr++)
-		{	
-			int outWSCount=0;		
-			if(isWorkspaceProperty(*itr) )
-			{
-				if(isInputWorkspaceProperty(*itr))
-				{
-					//setInputWSProperties(alg,*itr,*wsItr);
-					bool b=setInputWSProperties(alg,prevPropName,*itr,*wsItr);
-					if(!b)
-					{
-						g_log.error()<<"Giving two workspace groups as input is not permitted for the algorithm  "<<this->name()<<std::endl;
-						return false;
-						
-					}
-				}
-				if(isOutputWorkspaceProperty(*itr))
-				{
-					++outWSCount;
-					//create a group and pass that to setOutputWSProperties properties
-					if(outWSCount==1)
-					{ 	if( bnewGoup1)
-							{	sptrWSGrp1= WorkspaceGroup_sptr(new WorkspaceGroup);
-								bnewGoup1=false;
-							}
-						setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp1,outWSParentName);
-					}
-					if(outWSCount==2)
-					{	if( bnewGoup2){sptrWSGrp2= WorkspaceGroup_sptr(new WorkspaceGroup);
-						bnewGoup2=false;
-					}
-						setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp2,outWSParentName);
-					}
-																		
-				}
+{
+  int nPeriod=1;
+  int execPercentage=0;
+  bool bgroupPassed=true;
+  bool bgroupFailed=false;
+  std::string outWSParentName("");
+  WorkspaceGroup_sptr sptrWSGrp1; 
+  WorkspaceGroup_sptr sptrWSGrp2;
+  bool bnewGoup1=true;
+  bool bnewGoup2=true;
+  std::string prevPropName("");
 
-			}
-			else
-			{
-				//alg->setPropertyValue((*itr)->name(),(*itr)->value());
-				this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
-			}
-		}//end of for loop for setting properties
-		//resetting the previous properties at the end of each execution 
-		prevPropName="";
-		// execute the algorithm 
-		bStatus=alg->execute();
-		// status of each execution is checking 
-		bgroupPassed=bgroupPassed&&bStatus;
-		bgroupFailed=bgroupFailed||bStatus;
-		execPercentage+=10;
-		progress(double((execPercentage)/execTotal));
-		//if a workspace execution fails
-		if(!bStatus)
-		{  	g_log.error()<<" execution failed for the input workspace "<<(*wsItr)<<std::endl;
-		}
-		//increment count for outworkpsace name
-		nPeriod++;
+  //getting the input workspace group names
+  const std::vector<std::string>& inputWSNames=inputwsPtr->getNames();
+  int nSize=inputWSNames.size();
+  //size is one if only group header.
+  //return if atleast one meber is not there in group to process
+  if(nSize<2)
+  {	g_log.error()<<"Input WorkspaceGroup has no members to process  "<<std::endl;
+  return false;
+  }
+  std::vector<std::string>::const_iterator wsItr=inputWSNames.begin();
+  int execTotal=0;
+  //removing the header count from the totalsize
+  execTotal=(nSize-1)*10;
+  m_notificationCenter.postNotification(new StartedNotification(this));
+  IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",this->version());
+  if(!alg) {g_log.error()<<"createAlgorithm returned null pointer "<<std::endl;return false;}
+  //for each member in the input workspace group
+  //starts from the 2nd item in the group as 1st item is group header
+  for(++wsItr;wsItr!=inputWSNames.end();wsItr++)
+  {	//set  properties
+    std::vector<Mantid::Kernel::Property*>::const_iterator itr;
+    for (itr=prop.begin();itr!=prop.end();itr++)
+    {
+      int outWSCount=0;
+      if(isWorkspaceProperty(*itr) )
+      {
+        if(isInputWorkspaceProperty(*itr))
+        {
+          //setInputWSProperties(alg,*itr,*wsItr);
+          bool b = true;
+          try {
+            b = setInputWSProperties(alg,prevPropName,*itr,*wsItr);
+          } catch (std::invalid_argument& ex) {
+            g_log.warning(ex.what());
+          }
+          if(!b)
+          {
+            g_log.error()<<"Giving two workspace groups as input is not permitted for the algorithm  "<<this->name()<<std::endl;
+            return false;
 
-	}//end of for loop for input workspace group members processing
-	//if all passed 
-	if(bgroupPassed)
-	{setExecuted(true);
-	}
-	//if all failed
-	if(!bgroupFailed)
-	{	// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
-		AnalysisDataService::Instance().remove(outWSParentName);
-	}
-	m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
-	return bStatus;
+          }
+        }
+        if(isOutputWorkspaceProperty(*itr))
+        {
+          ++outWSCount;
+          //create a group and pass that to setOutputWSProperties properties
+          if(outWSCount==1)
+          { 
+            if( bnewGoup1)
+            {
+              sptrWSGrp1= WorkspaceGroup_sptr(new WorkspaceGroup);
+              bnewGoup1=false;
+            }
+            setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp1,outWSParentName);
+          }
+          if(outWSCount==2)
+          {
+            if( bnewGoup2)
+            {
+              sptrWSGrp2= WorkspaceGroup_sptr(new WorkspaceGroup);
+              bnewGoup2=false;
+            }
+            setOutputWSProperties(alg,*itr,nPeriod,sptrWSGrp2,outWSParentName);
+          }
+
+        }
+
+      }
+      else
+      {
+        //alg->setPropertyValue((*itr)->name(),(*itr)->value());
+        this->setOtherProperties(alg,(*itr)->name(),(*itr)->value(),nPeriod);
+      }
+    }//end of for loop for setting properties
+    //resetting the previous properties at the end of each execution 
+    prevPropName="";
+    // execute the algorithm 
+    bool bStatus = false;
+    if ( alg->validateProperties() ) bStatus = alg->execute();
+    // status of each execution is checking 
+    bgroupPassed=bgroupPassed&&bStatus;
+    bgroupFailed=bgroupFailed||bStatus;
+    execPercentage+=10;
+    progress(double((execPercentage)/execTotal));
+    //if a workspace execution fails
+    if(!bStatus)
+    {  	g_log.error()<<" execution failed for the input workspace "<<(*wsItr)<<std::endl;
+    }
+    //increment count for outworkpsace name
+    nPeriod++;
+
+  }//end of for loop for input workspace group members processing
+  //if all passed 
+  if(bgroupPassed)
+  {setExecuted(true);
+  }
+  //if all failed
+  //if(!bgroupFailed)
+  //{	// remove the group parent  from the ADS - bcoz only group parent will get displayed in the mantid workspace widget
+  //  AnalysisDataService::Instance().remove(outWSParentName);
+  //}
+  m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
+  return bgroupPassed;
 }
+
  /** virtual method to set the non workspace properties for this algorithm.
  *  @param alg pointer to the algorithm
  *  @param propertyName name of the property
@@ -637,8 +647,9 @@ bool Algorithm::processGroups(WorkspaceGroup_sptr inputwsPtr,const std::vector<M
  */ 
 void Algorithm::setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int nPeriod)
 {
-	if(alg) alg->setPropertyValue(propertyName,propertyValue);
+  if(alg) alg->setPropertyValue(propertyName,propertyValue);
 }
+
 /** Setting input workspace properties for an algorithm,for handling workspace groups.
  *  @param pAlg  pointer to algorithm
  *  @param prevPropName An in/out string argument denoting the previous property's name to keep track of this in a group
@@ -700,7 +711,7 @@ void Algorithm::setOutputWSProperties(IAlgorithm* pAlg,Mantid::Kernel::Property*
 	std::stringstream suffix;
 	suffix<<nPeriod;
 	outWSChildName=outWSParentName+"_"+suffix.str();
-	pAlg->setPropertyValue(prop->name(), outWSChildName);
+  if (prop->direction() == Kernel::Direction::Output) pAlg->setPropertyValue(prop->name(), outWSChildName);
 	if(nPeriod==1){
 		if(sptrWSGrp)sptrWSGrp->add(outWSParentName);
 		AnalysisDataService::Instance().addOrReplace(outWSParentName,sptrWSGrp );
