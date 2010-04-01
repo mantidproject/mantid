@@ -183,6 +183,7 @@ void FunctionCurve::loadData(int points)
       boost::shared_ptr<Mantid::API::IFunction> f(Mantid::API::FunctionFactory::Instance().createInitialized(fnInput.toStdString()));
       if (!f) return;
       f->setWorkspace(ws,wsIndex,d_from,d_to);
+      f->applyTies();
       f->function(Y.data(),X.constData(),nPoints);
 
       setData(X.data(), Y.data(), nPoints);
@@ -191,7 +192,7 @@ void FunctionCurve::loadData(int points)
     {
       return;
     }
-  }
+  }// Mantid
   else
   {// mu::Parser is used to calculate the data points
     if (!points)

@@ -190,6 +190,10 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
     connect(action,SIGNAL(triggered()),this,SLOT(copy()));
     menu->addAction(action);
 
+    action = new QAction("Paste",this);
+    connect(action,SIGNAL(triggered()),this,SLOT(paste()));
+    menu->addAction(action);
+
     menu->addSeparator();
   }
   else if (isFunctionsGroup || isSettingsGroup || isASetting)
@@ -403,20 +407,7 @@ void FitPropertyBrowser::addFunction(const std::string& fnName, Mantid::API::Com
     f = Mantid::API::FunctionFactory::Instance().createInitialized(fnName);
   }
 
-  std::string wsName = workspaceName();
-  if (!wsName.empty())
-  {
-    try
-    {
-      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
-      if (ws)
-      {
-        f->setWorkspace(ws,workspaceIndex(),-1,-1);
-      }
-    }
-    catch(...){}
-  }
+  m_changeSlotsEnabled = false;
 
   Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
   if (pf)
@@ -429,8 +420,48 @@ void FitPropertyBrowser::addFunction(const std::string& fnName, Mantid::API::Com
     {
       m_default_width = pf->width();
     }
+    if (!workspaceName().empty() && workspaceIndex() >= 0)
+    {
+      pf->setCentre( (startX() + endX())/2 );
+    }
   }
-  m_changeSlotsEnabled = false;
+
+  if (f->name() == "LinearBackground" && !workspaceName().empty())
+  {
+    int wi = workspaceIndex();
+    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()) );
+    if (ws && wi >= 0 && wi < ws->getNumberHistograms())
+    {
+      const Mantid::MantidVec& X = ws->readX(wi);
+      double istart = 0, iend = 0;
+      for(int i=0;i<X.size()-1;++i)
+      {
+        double x = X[i];
+        if (x < startX())
+        {
+          istart = i;
+        }
+        if (x > endX())
+        {
+          iend = i;
+          if (iend > 0) iend--;
+          break;
+        }
+      }
+      if (iend > istart)
+      {
+        const Mantid::MantidVec& Y = ws->readY(wi);
+        double p0 = Y[istart];
+        double p1 = Y[iend];
+        double A1 = (p1-p0)/(X[iend]-X[istart]);
+        double A0 = p0 - A1*X[istart];
+        f->setParameter("A0",A0);
+        f->setParameter("A1",A1);
+      }
+    }
+  }
+  setWorkspace(f);
 
   Mantid::API::CompositeFunction* cf = cfun ? cfun : m_compositeFunction;
 
@@ -495,6 +526,7 @@ void FitPropertyBrowser::replaceFunction(Mantid::API::IFunction* f_old,const std
   disableUndo();
   Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
   f->initialize();
+  setWorkspace(f);
   replaceFunction(f_old,f);
 }
 
@@ -1050,6 +1082,7 @@ void FitPropertyBrowser::createCompositeFunction(const QString& str)
       m_compositeFunction = cf;
     }
   }
+  setWorkspace(m_compositeFunction);
   m_functionItems[m_functionsGroup] = m_compositeFunction;
   for(int i=0;i<m_compositeFunction->nFunctions();++i)
   {
@@ -2139,4 +2172,29 @@ void FitPropertyBrowser::copy()
 {
   QClipboard *clipboard = QApplication::clipboard();
   clipboard->setText(QString::fromStdString(*theFunction()));
+}
+
+void FitPropertyBrowser::paste()
+{
+  QClipboard *clipboard = QApplication::clipboard();
+  QString str = clipboard->text();
+  createCompositeFunction(str);
+}
+
+void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction* f)const
+{
+  std::string wsName = workspaceName();
+  if (!wsName.empty())
+  {
+    try
+    {
+      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+      if (ws)
+      {
+        f->setWorkspace(ws,workspaceIndex(),-1,-1);
+      }
+    }
+    catch(...){}
+  }
 }

@@ -882,7 +882,6 @@ void PeakPickerTool::checkPlots()
     int index = d_graph->curveIndex(dynamic_cast<QwtPlotCurve*>(it.value()));
     if (!fitBrowser()->theFunction()->getContainingFunction(it.key()) || index < 0)
     {
-      std::cerr<<"deleting plot for "<<it.key()->name()<<'\n';
       it = m_guessCurves.erase(it);
     }
     else

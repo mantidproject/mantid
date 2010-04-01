@@ -203,6 +203,7 @@ private slots:
   void saveFunction();
   void loadFunction();
   void copy();///< Copy the function string to the clipboard
+  void paste();///< Paste a function string from the clipboard
 
   void popupMenu(const QPoint &);
   /* Context menu slots */
@@ -244,6 +245,8 @@ private:
   QtProperty* getParameterProperty(Mantid::API::IFunction* f,int i)const;
   /// Check that the properties match the function
   void checkFunction();
+  /// Sets the workspace to a function
+  void setWorkspace(Mantid::API::IFunction* f)const;
 
    /// Adds a tie
   bool addTie(const QString& tieExpr,Mantid::API::IFunction* f);
