@@ -20,7 +20,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactExtension="so" artifactName="MantidKernel" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.1388365806" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug" postbuildStep="cp libMantidKernel.so ../../debug" prebuildStep="">
+<configuration artifactExtension="so" artifactName="MantidKernel" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.debug.1388365806" name="Debug" parent="cdt.managedbuild.config.gnu.so.debug" postbuildStep="cp libMantidKernel.so ../../debug" preannouncebuildStep="Creates a required header containing the SVN revision number" prebuildStep="cd ../..; python release_version.py">
 <folderInfo id="cdt.managedbuild.config.gnu.so.debug.1388365806." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.so.debug.12654320" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.debug">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.so.debug.1838568657" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.debug"/>
@@ -505,7 +505,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactExtension="so" artifactName="MantidKernel" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.951264689" name="Release" parent="cdt.managedbuild.config.gnu.so.release" postbuildStep="cp libMantidKernel.so ../../release">
+<configuration artifactExtension="so" artifactName="MantidKernel" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.sharedLib" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.sharedLib" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.so.release.951264689" name="Release" parent="cdt.managedbuild.config.gnu.so.release" postbuildStep="cp libMantidKernel.so ../../release" preannouncebuildStep="Creates a required header containing the SVN revision number" prebuildStep="cd ../..; python release_version.py">
 <folderInfo id="cdt.managedbuild.config.gnu.so.release.951264689." name="/" resourcePath="">
 <toolChain id="cdt.managedbuild.toolchain.gnu.so.release.1811291492" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.so.release">
 <targetPlatform id="cdt.managedbuild.target.gnu.platform.so.release.1857381788" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.so.release"/>
