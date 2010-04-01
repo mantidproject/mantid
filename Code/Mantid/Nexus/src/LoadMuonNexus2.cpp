@@ -105,7 +105,6 @@ namespace Mantid
           break;
         }
       }
-      //NXClass detectorGroup = entry.openNXGroup(detectorName);
       NXData dataGroup = entry.openNXData(detectorName);
 
       NXInt spectrum_index = dataGroup.openNXInt("spectrum_index");
@@ -221,16 +220,15 @@ namespace Mantid
         {
           g_log.warning("Autogrouping is not implemented for muon NeXus version 2 files");
         }
-        //else
-        //{
-          // Assign the result to the output workspace property
-          if(m_numberOfPeriods>1)
-            setProperty(outws,localWorkspace);
-          else
-          {
-            setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-          }
-        //}
+
+        // Assign the result to the output workspace property
+        if(m_numberOfPeriods>1)
+          setProperty(outws,localWorkspace);
+        else
+        {
+          setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
+        }
+
 
       } // loop over periods
 
@@ -361,13 +359,6 @@ namespace Mantid
         Kernel::Property* logv = nxLog.createTimeSeries(start_time);
         if (!logv) continue;
         ws->mutableSample().addLogData(logv);
-        //if (it->nxname == "icp_event")
-        //{
-        //  LogParser parser(logv);
-        //  ws->mutableSample().addLogData(parser.createPeriodLog(period));
-        //  ws->mutableSample().addLogData(parser.createAllPeriodsLog());
-        //  ws->mutableSample().addLogData(parser.createRunningLog());
-        //}
       }
 
       ws->populateInstrumentParameters();
