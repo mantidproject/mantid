@@ -170,7 +170,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mPlotAction = new QAction(tr("&Plot Spectra"), this);
 	connect(mPlotAction,SIGNAL(triggered()),this,SLOT(plotSelectedSpectra()));
 
-	mDetTableAction = new QAction(tr("&Detector Table"), this);
+	mDetTableAction = new QAction(tr("&Extract Data"), this);
 	connect(mDetTableAction, SIGNAL(triggered()), this, SLOT(showDetectorTable()));
 
 	mGroupDetsAction = new QAction(tr("&Group"), this);
@@ -311,7 +311,7 @@ void InstrumentWindow::plotSelectedSpectra()
  */
 void InstrumentWindow::showDetectorTable()
 {
-  emit createDetectorTable(mInstrumentDisplay->getWorkspaceName(), mInstrumentDisplay->getSelectedWorkspaceIndices());
+  emit createDetectorTable(mInstrumentDisplay->getWorkspaceName(), mInstrumentDisplay->getSelectedWorkspaceIndices(), true);
 }
 
 QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets)
@@ -364,12 +364,10 @@ void InstrumentWindow::maskDetectors()
   const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
   const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
   QString inputWS = mInstrumentDisplay->getWorkspaceName();
-  QString outputWS = confirmDetectorOperation("masked", inputWS, static_cast<int>(det_ids.size()));
-  if( outputWS.isEmpty() ) return;
-
-  QString param_list = "InputWorkspace=%1;OutputWorkspace=%2;WorkspaceIndexList=%3";
+  // Masking can only replace the input workspace so no need to ask for confirmation
+  QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
   QString indices = asString(mInstrumentDisplay->getSelectedWorkspaceIndices());
-  emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, outputWS, asString(wksp_indices)));
+  emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, asString(wksp_indices)));
 }
 
 /**

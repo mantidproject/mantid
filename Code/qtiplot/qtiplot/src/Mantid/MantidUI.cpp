@@ -660,12 +660,26 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
   return createDetectorTable(m->workspaceName(), indices);
 }
 
-Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices)
+Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data)
 {
   const int nrows = indices.size();
-  Table* t = new Table(appWindow()->scriptingEnv(), nrows, 6, "", appWindow(), 0);
+  int ncols = 6;
+  QStringList col_names;
+  col_names << "Index" << "Spectra" << "Detector ID";
+  if( include_data )
+  {
+    ncols += 2;
+    col_names << "Data Value" << "Data Error";  
+  }
+  col_names << "R" << "Theta" << "Phi";
+
+  Table* t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
-  t->showNormal();
+  //Set the column names
+  for( int col = 0; col < ncols; ++col )
+  {
+    t->setColName(col, col_names[col]);
+  }
 
   MatrixWorkspace_sptr ws;
   if( AnalysisDataService::Instance().doesExist(wsName.toStdString()) )
@@ -673,13 +687,18 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
   }
   
-  if( !ws ) return NULL;
+  if( !ws ) 
+  {
+    delete t;
+    return NULL;
+  }
 
   Mantid::API::Axis *spectraAxis = ws->getAxis(1);
   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
-  for( int i = 0; i < nrows; ++i )
+  QList<double> col_values;
+  for( int row = 0; row < nrows; ++row )
   {
-    int ws_index = indices[i];
+    int ws_index = indices[row];
     int currentSpec = spectraAxis->spectraNo(ws_index);
     int detID = 0;
     double R(0.0), Theta(0.0), Phi(0.0);
@@ -698,24 +717,19 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     {
       detID = 0;
     }
-    t->setCell(i,0,ws_index);
-    if (i == 0) t->setColName(0,"Index");
+    col_values << static_cast<double>(ws_index) <<  static_cast<double>(currentSpec) << static_cast<double>(detID);
+    if( include_data )
+    {
+      col_values << ws->readY(ws_index)[0] << ws->readE(ws_index)[0];
+    }
+    col_values << R << Theta << Phi;
+    for(int col = 0; col < ncols; ++col)
+    {
+      t->setCell(row, col, col_values[col]);
+    }
 
-    t->setCell(i,1,currentSpec);
-    if (i == 0) t->setColName(1,"Spectra");
-
-    t->setCell(i,2,detID);
-    if (i == 0) t->setColName(2,"Detectors");
-
-    t->setCell(i,3,R);
-    if (i == 0) t->setColName(3,"R");
-
-    t->setCell(i,4,Theta);
-    if (i == 0) t->setColName(4,"Theta");
-
-    t->setCell(i,5,Phi);
-    if (i == 0) t->setColName(5,"Phi");
   }
+  t->showNormal();
   return t;
 }	
 
@@ -1235,8 +1249,8 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
   connect (insWin,SIGNAL(showContextMenu()), appWindow(),SLOT(showWindowContextMenu()));
   connect(insWin,SIGNAL(plotSpectra(const QString&,const std::set<int>&)),this,
 	  SLOT(plotSpectraList(const QString&,const std::set<int>&)));
-  connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&)),this,
-	  SLOT(createDetectorTable(const QString&,const std::vector<int>&)));
+  connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
+	  SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
   connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&)), this,
 	  SLOT(executeAlgorithm(const QString&, const QString&)));
   return insWin;

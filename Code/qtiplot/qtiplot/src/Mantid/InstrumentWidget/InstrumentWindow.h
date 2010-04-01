@@ -107,7 +107,7 @@ public slots:
 
 signals:
   void plotSpectra(const QString&,const std::set<int>&);
-  void createDetectorTable(const QString&,const std::vector<int>&);
+  void createDetectorTable(const QString&,const std::vector<int>&,bool);
   void execMantidAlgorithm(const QString&,const QString&);								  
 
 private slots:
