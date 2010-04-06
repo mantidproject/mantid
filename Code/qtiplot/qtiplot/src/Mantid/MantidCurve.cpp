@@ -287,6 +287,7 @@ void MantidCurve::dataReset(const QString& wsName)
 
 void MantidCurve::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
+  invalidateBoundingRect();
   emit resetData(QString::fromStdString(wsName));
 }
 /* This method saves the curve details to a string.

@@ -861,13 +861,18 @@ QImage Spectrogram::renderImage(
 
           double xmin,xmax;
           mantidFun->getRowXRange(row,xmin,xmax);
-          int jmin = xMap.transform(xmin)-rect.left();
-          if (jmin < 0) jmin = 0;
-
-          if (jmin < 0)
+          int jmin = -1;
+          if (xmin != std::numeric_limits<double>::infinity() && xmin == xmin &&
+            xmax != std::numeric_limits<double>::infinity() && xmax == xmax)
+          {
+            jmin = xMap.transform(xmin)-rect.left();
+          }
+          else
           {
             continue;
           }
+          if (jmin < 0) jmin = 0;
+
           unsigned char *line = image.scanLine(i)+jmin;
           const Mantid::MantidVec& X = mantidFun->getMantidVec(row);
           int col = 0;
