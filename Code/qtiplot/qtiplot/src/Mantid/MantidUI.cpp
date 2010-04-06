@@ -100,7 +100,7 @@ m_progressDialog(0)
 	actionCopyColumnToGraphErr->setIcon(QIcon(QPixmap(graph_xpm)));
 	connect(actionCopyColumnToGraphErr, SIGNAL(activated()), this, SLOT(copyColumnToGraphErr()));
 
-    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*)),this,SLOT(createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*)));
+    connect(this,SIGNAL(needToCreateLoadDAEMantidMatrix(const QString&)),this,SLOT(createLoadDAEMantidMatrix(const QString&)));
     connect(this,SIGNAL(needToShowCritical(const QString&)),this,SLOT(showCritical(const QString&)));
 
     m_algMonitor = new AlgorithmMonitor(this);
@@ -1112,12 +1112,13 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
 
 void MantidUI::handleLoadDAEFinishedNotification(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
 {
-    emit needToCreateLoadDAEMantidMatrix(pNf->algorithm());
+  std::string wsNAme = pNf->algorithm()->getProperty("OutputWorkspace");
+  emit needToCreateLoadDAEMantidMatrix(QString::fromStdString(wsNAme));
 }
 
-void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm* alg)
+void MantidUI::createLoadDAEMantidMatrix(const QString& wsQName)
 {
-    std::string wsName = alg->getProperty("OutputWorkspace");
+  std::string wsName = wsQName.toStdString();
     Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
 
     if (ws.use_count() == 0)
@@ -1135,10 +1136,9 @@ void MantidUI::createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm* alg)
     {
         IAlgorithm_sptr updater = CreateAlgorithm("UpdateDAE");
         updater->setPropertyValue("Workspace",wsName);
-        updater->setPropertyValue("update_rate",QString::number(updateInterval).toStdString());
+        updater->setPropertyValue("UpdateRate",QString::number(updateInterval).toStdString());
         executeAlgorithmAsync(updater,false);
     }
-
 }
 
 void MantidUI::showCritical(const QString& text)

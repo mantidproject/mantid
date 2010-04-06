@@ -260,7 +260,7 @@ signals:
 	void workspaces_grouped(const QStringList&);
 	void workspace_ungrouped(const QString&);
 
-    void needToCreateLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
+    void needToCreateLoadDAEMantidMatrix(const QString&);
 
     // Display a critical error dialog box
     void needToShowCritical(const QString&);
@@ -293,7 +293,7 @@ public slots:
     // Create a MantidMatrix from workspace wsName
     Table *importTableWorkspace(const QString& wsName, bool showDlg = true, bool makeVisible = true);
 
-    void createLoadDAEMantidMatrix(const Mantid::API::IAlgorithm*);
+    void createLoadDAEMantidMatrix(const QString&);
 
     // Slots responding to MantidMatrix context menu commands
     void copyRowToTable();
