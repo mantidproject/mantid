@@ -441,7 +441,7 @@ def _assignHelper(run_string, is_trans, reload = True):
     
     if is_trans:
         try:
-            if INSTR_NAME == 'SANS2D' and int(run_no) < 568:
+            if INSTR_NAME == 'SANS2D' and int(shortrun_no) < 568:
                 dimension = SANSUtility.GetInstrumentDetails(INSTR_NAME,DETBANK)[0]
                 specmin = dimension*dimension*2
                 specmax = specmin + 4
@@ -450,8 +450,8 @@ def _assignHelper(run_string, is_trans, reload = True):
                 specmax = 8
                 
             filepath = _loadRawData(filename, wkspname, ext, specmin,specmax)
-        except RuntimeError:
-            _issueWarning(str(details))
+        except RuntimeError, err:
+            _issueWarning(str(err))
             return '',True,'',''
     else:
         try:
