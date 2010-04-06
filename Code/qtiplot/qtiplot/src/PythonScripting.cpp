@@ -37,7 +37,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QDir>
-#include <QCoreApplication>
+#include <QApplication>
 #include <QTemporaryFile>
 #include <QTextStream>
 
@@ -117,6 +117,8 @@ bool PythonScripting::start()
     return false;
   }
   Py_INCREF(m_sys);
+
+
   //Embedded qti module needs sip definitions initializing before it can be used
   initqti();
 
@@ -159,11 +161,7 @@ bool PythonScripting::start()
   {
     d_initialized = false;
   }
-
-  // If all previous initialization has been successful confuigure auto complete functionality
-  if( !d_initialized ) return false;
-
-  return true;
+  return d_initialized;
 }
 
 /**

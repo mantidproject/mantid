@@ -11,7 +11,7 @@ def import_to_global(modname, attrs=None, math=False):
         mod = getattr(mod, submod)
     if attrs==None: attrs=dir(mod)
     for name in attrs:
-        if name == '__name__':
+        if name.startswith('__'):
             continue
         f = getattr(mod, name)
         setattr(__main__, name, f)

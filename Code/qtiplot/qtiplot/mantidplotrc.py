@@ -68,10 +68,10 @@ if __name__ == '__main__':
             diff = len(args) - len(defs)
             calltip = ''
             for index in range(len(args) - 1, -1,-1):
-		def_index = index - diff
-		if def_index >= 0:
+                def_index = index - diff
+                if def_index >= 0:
                     calltip = '[' + args[index] + '],' + calltip
-		else:
+                else:
                     calltip = args[index] + "," + calltip
             calltip = '(' + calltip.rstrip(',') + ')'
         return calltip

@@ -426,7 +426,7 @@ class MantidPyFramework(FrameworkManager):
         else:
             mod = __import__(simpleapi)
         for name in dir(mod):
-            if name == '__name__':
+            if name.startswith('__'):
                 continue
             setattr(__main__, name, getattr(mod, name))
             

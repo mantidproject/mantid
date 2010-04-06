@@ -493,6 +493,12 @@ bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_off
 	    SLOT(updateMarker(int, bool)));
   }
   runner->setCode(code);
+  QString filename = "<input>";
+  if( editor && !editor->fileName().isEmpty() )
+  {
+    filename = editor->fileName();
+  }
+  runner->setName(filename);
   emit ScriptIsActive(true);
 
   if( !m_interpreter_mode ) 

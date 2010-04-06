@@ -351,34 +351,8 @@ PyObject* PythonScript::executeScript(PyObject* return_tuple)
     }
     else
     {
-      // MG: In order to keep track of the variables local to the current script, for the code completion, 
-      // we take a copy of the global dictionary before and after and then remove all of the entries that 
-      // did not exist before the execute call. While there is a "locals" argument to PyEval, it has
-      // the side effect that locally defined functions aren't accessible to each other i.e.
-      /**
-	 def foo():
-	     print 'foo'
 
-         def bar():
-	     foo():
-	     print 'bar'
-      */
-      // produces a name error in "bar" as it cannot see foo.
-
-      //      PyObject *globals_before = PyDict_Copy(env()->globalDict());
-      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);//env()->globalDict(), env()->globalDict());
-//       PyObject *globals_after = PyDict_Copy(env()->globalDict());
-
-//       PyObject *key, *value;
-//       Py_ssize_t i = 0;
-//       while(PyDict_Next(globals_after, &i, &key, &value))
-//       {
-// 	if( !PyDict_Contains(globals_before, key) )
-// 	{
-// 	  PyDict_SetItem(localDict, key, value);
-// 	  PyDict_DelItem(env()->globalDict(), key);
-// 	}
-//       }
+      pyret = PyEval_EvalCode((PyCodeObject*)PyCode, localDict, localDict);
     }
   }
   // Given that C++ has no mechanism to move through a code block first if an exception is thrown, some code needs to
@@ -518,9 +492,8 @@ QString PythonScript::constructErrorMsg()
   if( marker_lineno >=0 
       && !PyErr_GivenExceptionMatches(exception, PyExc_SystemExit) 
       && !filename.isEmpty() 
-      && !filename.contains("mantidsimple") 
-      && !filename.contains("mantidplotrc") 
-      && !filename.contains("qtiplotrc") )
+      && filename != "<input>"
+    )
   {
     message += "in file '" + QFileInfo(filename).fileName() 
       + "' at line " + QString::number(msg_lineno);
