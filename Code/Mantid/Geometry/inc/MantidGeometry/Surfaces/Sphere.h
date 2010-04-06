@@ -51,6 +51,8 @@ namespace Mantid
 
       void rotate(const Geometry::Matrix<double>&);
       void displace(const Geometry::V3D&);
+      /// Compute the distance from the centre of the sphere to the given point
+      double centreToPoint(const V3D & pt) const;
 
     public:
 

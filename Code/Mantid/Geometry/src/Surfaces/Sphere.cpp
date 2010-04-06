@@ -151,11 +151,14 @@ Sphere::side(const Geometry::V3D& Pt) const
      \retval 1 :: Pt outside the sphere 
   */
 {
-  const Geometry::V3D Xv=Pt-Centre;
-  const double R2(Xv.scalar_prod(Xv));
-  if (fabs(R2-Radius*Radius)<getSurfaceTolerance())
+  const double displace = centreToPoint(Pt) - Radius;
+  //MG:  Surface test  - This does not use onSurface since it would double the amount of
+  // computation if the object is not on the surface which is most likely
+  if( std::abs(displace) < getSurfaceTolerance() )
+  {
     return 0;
-  return (R2>Radius*Radius) ? 1 : -1;
+  }
+  return (displace > 0.0) ? 1 : -1;
 }
 
 int
@@ -167,8 +170,11 @@ Sphere::onSurface(const Geometry::V3D& Pt) const
     \return 1 :: on the surfacae or 0 if not.
   */
 {
-  const Geometry::V3D Xv=Pt-Centre;
-  return (fabs(Xv.scalar_prod(Xv)-Radius*Radius)>getSurfaceTolerance()) ? 0 : 1;
+  if( distance(Pt) > getSurfaceTolerance() )
+  {
+    return 0;
+  }
+  return 1;
 }
 
 double
@@ -180,8 +186,8 @@ Sphere::distance(const Geometry::V3D& Pt) const
     \return distance (Positive only)
   */
 {
-  const Geometry::V3D Amov=Pt-Centre;
-  return fabs(Amov.norm()-Radius);
+  const Geometry::V3D disp_vec = Pt - Centre;
+  return std::abs(disp_vec.norm() - Radius);
 }
 
 
@@ -207,6 +213,16 @@ Sphere::rotate(const Geometry::Matrix<double>& MA)
   Centre.rotate(MA);
   Quadratic::rotate(MA);
   return;
+}
+
+double Sphere::centreToPoint(const V3D & pt) const
+{
+  /*!
+    Compute the distance between the given point and the centre of the sphere
+    \param pt :: The chosen point 
+  */
+  const Geometry::V3D displace_vec = pt - Centre;
+  return displace_vec.norm();
 }
 
 void 
