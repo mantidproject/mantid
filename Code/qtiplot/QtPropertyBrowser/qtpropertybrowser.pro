@@ -12,7 +12,8 @@ SOURCES += src/qtpropertybrowser.cpp \
         src/qttreepropertybrowser.cpp \
         src/qtbuttonpropertybrowser.cpp \
         src/qtgroupboxpropertybrowser.cpp \
-        src/qtpropertybrowserutils.cpp
+        src/qtpropertybrowserutils.cpp \
+        src/FilenameEditorFactory.cpp
 HEADERS += src/qtpropertybrowser.h \
         src/qtpropertymanager.h \
         src/qteditorfactory.h \
@@ -20,7 +21,8 @@ HEADERS += src/qtpropertybrowser.h \
         src/qttreepropertybrowser.h \
         src/qtbuttonpropertybrowser.h \
         src/qtgroupboxpropertybrowser.h \
-        src/qtpropertybrowserutils_p.h
+        src/qtpropertybrowserutils_p.h \
+        src/FilenameEditorFactory.h 
 RESOURCES += src/qtpropertybrowser.qrc
 
 win32 {
