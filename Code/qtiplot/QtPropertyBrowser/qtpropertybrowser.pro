@@ -12,8 +12,7 @@ SOURCES += src/qtpropertybrowser.cpp \
         src/qttreepropertybrowser.cpp \
         src/qtbuttonpropertybrowser.cpp \
         src/qtgroupboxpropertybrowser.cpp \
-        src/qtpropertybrowserutils.cpp \
-        src/FilenameEditorFactory.cpp
+        src/qtpropertybrowserutils.cpp
 HEADERS += src/qtpropertybrowser.h \
         src/qtpropertymanager.h \
         src/qteditorfactory.h \
@@ -21,8 +20,7 @@ HEADERS += src/qtpropertybrowser.h \
         src/qttreepropertybrowser.h \
         src/qtbuttonpropertybrowser.h \
         src/qtgroupboxpropertybrowser.h \
-        src/qtpropertybrowserutils_p.h \
-        src/FilenameEditorFactory.h
+        src/qtpropertybrowserutils_p.h
 RESOURCES += src/qtpropertybrowser.qrc
 
 win32 {
@@ -35,7 +33,7 @@ win32:build_pass:CONFIG(debug, debug|release) {
   TARGET = QtPropertyBrowserd
 } else {
   # Put in local output directory
-  DESTDIR =..\..\Mantid\release
+  DESTDIR = lib
   TARGET = QtPropertyBrowser
 }
 
