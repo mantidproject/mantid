@@ -171,7 +171,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
     connect(shortcut, SIGNAL(activated()), this, SLOT(paste()));
 
     // Use a fixed width font
-    QFont f("Andale Mono");
+    QFont f("Courier");
     f.setFixedPitch(true);
     f.setPointSize(10);
     if( codelexer )
