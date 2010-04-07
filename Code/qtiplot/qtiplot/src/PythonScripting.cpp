@@ -64,8 +64,14 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
   : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
     m_sys(NULL)
 {
-#ifdef __APPLE__
+  // MG (Russell actually found tbis for OS X): We ship SIP and PyQt4 with Mantid and we need to
+  // ensure that the internal import that sip does of PyQt picks up the correct version.
+#if defined(Q_OS_DARWIN) || defined(Q_OS_LINUX)
+ #if defined(Q_OS_DARWIN)
   const std::string sipLocation = "/Applications/MantidPlot.app/Contents/MacOS";
+ #else
+  const std::string sipLocation = Mantid::Kernel::ConfigService::Instance().getBaseDir();
+ #endif
   setenv("PYTHONPATH",sipLocation.c_str(),1);
 #endif
 }
