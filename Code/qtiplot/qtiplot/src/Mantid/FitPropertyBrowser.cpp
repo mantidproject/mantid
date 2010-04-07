@@ -190,9 +190,9 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
     connect(action,SIGNAL(triggered()),this,SLOT(copy()));
     menu->addAction(action);
 
-    action = new QAction("Paste",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(paste()));
-    menu->addAction(action);
+    //action = new QAction("Paste",this);
+    //connect(action,SIGNAL(triggered()),this,SLOT(paste()));
+    //menu->addAction(action);
 
     menu->addSeparator();
   }
