@@ -239,6 +239,13 @@ void LoadInstrument::exec()
       {
         std::string idlist = pElem->getAttribute("idlist");
         Element* pFound = pDoc->getElementById(idlist, "idname");
+
+        if ( pFound == NULL )
+        {
+          throw Kernel::Exception::InstrumentDefinitionError(
+            "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", m_filename);
+        }       
+
         populateIdList(pFound, idList);
       }
 
@@ -259,23 +266,22 @@ void LoadInstrument::exec()
           ss1 << idList.vec.size(); ss2 << idList.counted;
           g_log.error("The number of detector IDs listed in idlist named "
             + pElem->getAttribute("idlist") +
-            " is not equal to the number of detectors listed in type = "
+            " is larger than the number of detectors listed in type = "
             + pElem->getAttribute("type"));
           throw Kernel::Exception::InstrumentDefinitionError(
-            "Number of IDs listed in idlist (=" + ss1.str() + ") does not match number of detectors listed in type = "
-            + pElem->getAttribute("type") + " (=" + ss2.str() + ")", m_filename);
+            "Number of IDs listed in idlist (=" + ss1.str() + ") is larger than the number of detectors listed in type = "
+            + pElem->getAttribute("type") + " (=" + ss2.str() + ").", m_filename);
         }
       }
       else
       {	
-		for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
+		    for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
-		  appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
-		 }
-		
+		      appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
+		    }
       }
-	  std::vector<int>monitordetIdList=m_instrument->getMonitors();
-	  setProperty("MonitorList",monitordetIdList);
+	    std::vector<int>monitordetIdList=m_instrument->getMonitors();
+	    setProperty("MonitorList",monitordetIdList);
       pNL_location->release();
     }
   }
@@ -449,6 +455,18 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     }
 
     Geometry::Detector* detector = new Geometry::Detector(name, mapTypeNameToShape[typeName], parent);
+
+    // before setting detector ID check that the IDF satisfy the following 
+
+    if (idList.counted >=  static_cast<int>(idList.vec.size()) )
+    {
+       std::stringstream ss1, ss2;
+       ss1 << idList.vec.size(); ss2 << idList.counted;
+       g_log.error("The number of detector IDs listed in idlist named "
+          + idList.idname + " is less then the number of detectors");
+        throw Kernel::Exception::InstrumentDefinitionError(
+          "Number of IDs listed in idlist (=" + ss1.str() + ") is less than the number of detectors.", m_filename);
+    }
 
     // set detector ID and increment it. Finally add the detector to the parent
     detector->setID(idList.vec[idList.counted]);
@@ -700,7 +718,7 @@ Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocE
 
 /** Method for populating IdList.
  *
- *  @param pE  Poco::XML element that points a idlist element in the XML doc
+ *  @param pE  Poco::XML element that points to an <idlist>
  *  @param idList The structure to populate with detector ID numbers
  *
  *  @throw logic_error Thrown if argument is not a child of component element
@@ -713,6 +731,10 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
     g_log.error("Argument to function createIdList must be a pointer to an XML element with tag name idlist.");
     throw std::logic_error( "Argument to function createIdList must be a pointer to an XML element with tag name idlist." );
   }
+
+  // set name of idlist
+
+  idList.idname = pE->getAttribute("idname");
 
   // If idname element has start and end attributes then just use those to populate idlist.
   // Otherwise id sub-elements
@@ -735,7 +757,7 @@ void LoadInstrument::populateIdList(Poco::XML::Element* pE, IdList& idList)
   }
   else
   {
-    // test first if any id elements
+    // test first if any <id> elements
 
     NodeList* pNL = pE->getElementsByTagName("id");
 

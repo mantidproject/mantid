@@ -100,6 +100,8 @@ namespace API
         int counted;
         ///Vector of the values of the ID list
         std::vector<int> vec;
+        /// name of idlist
+        std::string idname;
 
         ///Constructor
         IdList() : counted(0) {};
