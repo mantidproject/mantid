@@ -717,6 +717,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     {
       detID = 0;
     }
+    if (!col_values.isEmpty()) col_values.clear();
     col_values << static_cast<double>(ws_index) <<  static_cast<double>(currentSpec) << static_cast<double>(detID);
     if( include_data )
     {
@@ -2406,6 +2407,7 @@ void MantidUI::memoryImage()
     m->setCoordinates(0,colNum,0,rowNum);
     int row = 0;
     int col = 0;
+    QImage image(colNum,rowNum,QImage::Format_Mono);
     for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
     {
         int n = b->size/1024;
@@ -2423,6 +2425,39 @@ void MantidUI::memoryImage()
         }
     }
     MultiLayer* g = appWindow()->plotSpectrogram(m, Graph::ColorMap);
+}
+
+void MantidUI::memoryImage2()
+{
+    //ofstream ofil("memory.txt");
+    vector<mem_block> mem;
+    int total;
+    countVirtual(mem,total);
+    int colNum = 1024;
+    int rowNum = total/1024/colNum;
+    int row = 0;
+    int col = 0;
+    QImage image(colNum,rowNum,QImage::Format_Mono);
+    for(vector<mem_block>::iterator b=mem.begin();b!=mem.end();b++)
+    {
+        int n = b->size/1024;
+        for(int i=0;i<n;i++)
+        {
+          if (row < rowNum && col < colNum)
+          {
+            image.setPixel(col,row,b->state > 600);
+          }
+          //ofil<<b->state<<'\t';
+          col++;
+          if (col >= colNum)
+          {
+            col = 0;
+            row++;
+            //ofil<<'\n';
+          }
+        }
+    }
+    image.save("memory_image.jpg");
 }
 
 #endif

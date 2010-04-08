@@ -370,6 +370,7 @@ public slots:
 public:
     // Shows 2D plot of current memory usage.
     void memoryImage();
+    void memoryImage2();
 #endif
 
 
