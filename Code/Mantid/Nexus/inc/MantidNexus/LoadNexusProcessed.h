@@ -82,9 +82,19 @@ namespace Mantid
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
       void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int blocksize, 
 		     int nchannels, int &hist, DataObjects::Workspace2D_sptr local_workspace);
+
+	  /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
+      void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int blocksize, 
+		     int nchannels, int &hist,int& wsIndex, DataObjects::Workspace2D_sptr local_workspace);
       /// Load a block of data into the workspace
       void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins, 
-		     int blocksize, int nchannels, int &hist, DataObjects::Workspace2D_sptr local_workspace);
+		     int blocksize, int nchannels, int &hist,int& wsIndex, DataObjects::Workspace2D_sptr local_workspace);
+
+	  /// Validates the optional 'spectra to read' properties, if they have been set
+	  void checkOptionalProperties(const int numberofspectra);
+
+	  /// calculates the workspace size
+	  int calculateWorkspacesize(const int numberofspectra);
      
       /// Does the current workspace have uniform binning
       bool m_shared_bins;
@@ -95,6 +105,17 @@ namespace Mantid
 
       ///a flag int value that indicates a value that wasn't set
       static const int unSetInt = INT_MAX - 15;
+
+	  /// Flag set if list of spectra to save is specifed
+	  bool m_list;
+      /// Flag set if interval of spectra to write is set
+      bool m_interval;
+      /// The value of the spectrum_list property
+      std::vector<int> m_spec_list;
+      /// The value of the spectrum_min property
+      int m_spec_min;
+      /// The value of the spectrum_max property
+      int m_spec_max;
 
     };
 	/// to sort the algorithmhistory vector

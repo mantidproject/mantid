@@ -10,7 +10,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
+#include "MantidKernel/ArrayProperty.h"
 #include "Poco/Path.h"
 #include "Poco/DateTimeParser.h"
 #include <cmath>
@@ -29,7 +29,8 @@ namespace Mantid
 
     /// Default constructor
     LoadNexusProcessed::LoadNexusProcessed() : Algorithm(), m_shared_bins(false), m_xbins(), 
-      m_axis1vals()
+      m_axis1vals(), m_list(false), m_interval(false),
+      m_spec_list(), m_spec_min(0), m_spec_max(unSetInt)
     {
       NXMDisableErrorReporting();
     }
@@ -63,7 +64,18 @@ namespace Mantid
       // optional
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
       mustBePositive->setLower(0);
-      declareProperty("EntryNumber", 0, mustBePositive,
+
+	  declareProperty("SpectrumMin", 1, mustBePositive,
+		  "Index number of the first spectrum to read, only used if\n"
+		  "spectrum_max is set and only for single period data, not\n"
+		  " yet implemented (default 0)");
+	  declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
+		  "Index of last spectrum to read, only for single period data,\n"
+		  " not yet implemented (default the last spectrum).");
+	  declareProperty(new ArrayProperty<int> ("SpectrumList"),
+		  "Array, or comma separated list, of indexes of spectra to\n"
+		  "load. Not yet implemented.");
+	  declareProperty("EntryNumber", 0, mustBePositive->clone(),
         "The particular entry number to read (default: read all entries)" );
     }
 
@@ -74,7 +86,7 @@ namespace Mantid
      */
     void LoadNexusProcessed::exec()
     {
-      progress(0,"Opening file...");
+	  progress(0,"Opening file...");
 
       //Throws an approriate exception if there is a problem with file access
       NXRoot root(getPropertyValue("Filename"));
@@ -176,8 +188,15 @@ namespace Mantid
       int nspectra = data.dim0();
       int nchannels = data.dim1();
 
-      DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create("Workspace2D", nspectra, xlength, nchannels));
+	  //// validate the optional spectrum parameters, if set
+	  checkOptionalProperties(nspectra);
+	  
+	  //size of the workspace
+	  int total_specs=calculateWorkspacesize(nspectra);
+
+	  //// Create the 2D workspace for the output
+	  DataObjects::Workspace2D_sptr local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (WorkspaceFactory::Instance().create("Workspace2D", total_specs, xlength, nchannels));
 
       //Units
       try 
@@ -227,40 +246,132 @@ namespace Mantid
       readParameterMap(mtd_entry, local_workspace);      
 
       NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
-      const int blocksize(8);
-      const int fullblocks = nspectra / blocksize;
+      
+	  int blocksize(8);
+      //const int fullblocks = nspectra / blocksize;
+	  int fullblocks = total_specs / blocksize;
       int read_stop = (fullblocks * blocksize);
-      const double progressBegin = progressStart+0.25*progressRange;
+	  const double progressBegin = progressStart+0.25*progressRange;
       const double progressScaler = 0.75*progressRange;
       int hist_index = 0;
-      if( m_shared_bins )
+	  int wsIndex=0;     
+	  if( m_shared_bins )
       {
-        for( ; hist_index < read_stop; )
-        {
-          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
-          loadBlock(data, errors, blocksize, nchannels, hist_index, local_workspace);
-        }
-        int finalblock = nspectra - read_stop;
-        if( finalblock > 0 )
-        {
-          loadBlock(data, errors, finalblock, nchannels, hist_index, local_workspace);
-        }
+		  //if spectrum min,max,list properties are set
+		   if(m_interval||m_list)
+		  {
+			  //if spectrum max,min properties are set read the data as a block(multiple of 8) and 
+			  //then read the remaining data as finalblock
+			  if(m_interval)
+			  {
+				  //specs at the min-max interval
+				  int interval_specs=m_spec_max-m_spec_min;
+				  fullblocks=(interval_specs)/blocksize;
+				  read_stop = (fullblocks * blocksize)+m_spec_min-1;
+
+				  if(interval_specs<blocksize)
+				  {
+					  blocksize=total_specs;
+					  read_stop=m_spec_max-1;
+				  }
+				  hist_index=m_spec_min-1;
+
+				  for( ; hist_index < read_stop; )
+				  {
+					  progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+					  loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
+				  }
+				  int finalblock = m_spec_max-1 - read_stop;
+				  if( finalblock > 0 )
+				  {
+					  loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
+				  }
+			  }
+			  // if spectrum list property is set read each spectrum separately by setting blocksize=1
+			  if(m_list)
+			  {
+				  std::vector<int>::iterator itr=m_spec_list.begin();
+				  for(;itr!=m_spec_list.end();++itr)
+				  { 
+					  int specIndex=(*itr)-1;
+					  progress(progressBegin+progressScaler*specIndex/m_spec_list.size(),"Reading workspace data...");
+					  loadBlock(data, errors, 1, nchannels, specIndex,wsIndex, local_workspace);
+				  }
+
+			  }
+		  }
+		  else
+		  {
+			  for( ; hist_index < read_stop; )
+			  {
+				  progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+				  loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
+			  }
+			  int finalblock = total_specs - read_stop;
+			  if( finalblock > 0 )
+			  {
+				    loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
+			  }
+		  }
+
       }
       else
       {
-        for( ; hist_index < read_stop; )
-        {
-          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
-          loadBlock(data, errors, xbins, blocksize, nchannels, hist_index, local_workspace);
-        }
-        int finalblock = nspectra - read_stop;
-        if( finalblock > 0 )
-        {
-          loadBlock(data, errors, xbins, finalblock, nchannels, hist_index, local_workspace);
-        }
+		if(m_interval||m_list)
+		{
+			if(m_interval)
+			{
+				int interval_specs=m_spec_max-m_spec_min;
+				fullblocks=(interval_specs)/blocksize;
+				read_stop = (fullblocks * blocksize)+m_spec_min-1;
+				
+				if(interval_specs<blocksize)
+				{
+					blocksize=interval_specs;
+					read_stop=m_spec_max-1;
+				}
+				hist_index=m_spec_min-1;
 
+				for( ; hist_index < read_stop; )
+				{
+					progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+					loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
+				}
+				int finalblock = m_spec_max-1 - read_stop;
+				if( finalblock > 0 )
+				{
+					loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
+				}
+			}
+			// 
+			if(m_list)
+			{
+				std::vector<int>::iterator itr=m_spec_list.begin();
+				for(;itr!=m_spec_list.end();++itr)
+				{
+					int specIndex=(*itr)-1;
+					progress(progressBegin+progressScaler*specIndex/read_stop,"Reading workspace data...");
+					loadBlock(data, errors, xbins, 1, nchannels, specIndex,wsIndex,local_workspace);
+				}
+
+			}
+		}
+		else
+		{
+			for( ; hist_index < read_stop; )
+			{
+				progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+				loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
+			}
+			int finalblock = total_specs - read_stop;
+			if( finalblock > 0 )
+			{
+				loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
+			}
+		}
       }
-      return local_workspace;
+     
+       return local_workspace;
     }	
 
     /**
@@ -327,32 +438,43 @@ namespace Mantid
         have_spectra = false;
       }
 
-      //Now build the spectra list 
-      int *spectra_list = new int[ndets];
-      API::Axis *axis1 = local_workspace->getAxis(1);
-      for(int i = 0; i < nspectra; ++i)
-      {
-        int spectrum(-1);
-        if( have_spectra ) spectrum = spectra[i];
-        else spectrum = i + 1;
+	  //Now build the spectra list 
+	  int *spectra_list = new int[ndets];
+	  API::Axis *axis1 = local_workspace->getAxis(1);
 
-        if( m_axis1vals.empty() )
-        {
-          axis1->spectraNo(i) = spectrum;
-        }
-        else
-        {
-          axis1->setValue(i, m_axis1vals[i]);
-        }
+	  int index=0;
 
-        int offset = det_index[i];
-        int detcount = det_count[i];
-        for(int j = 0; j < detcount; j++)
-        {
-          spectra_list[offset + j] = spectrum;
-        }
-      }
+	  for(int i = 1; i <= nspectra; ++i)
+	  {
+		  if ((i >= m_spec_min && i < m_spec_max )||(m_list && find(m_spec_list.begin(), m_spec_list.end(),
+			  i) != m_spec_list.end()))
+		  {
 
+			  int spectrum(-1);
+			  if( have_spectra ) spectrum = spectra[i-1];
+			  else spectrum = i+1 ;
+
+			  if( m_axis1vals.empty() )
+			  {
+				  axis1->spectraNo(index) = spectrum;
+			  }
+			  else
+			  {
+				  axis1->setValue(index, m_axis1vals[i-1]);
+			  }
+
+			  int offset = det_index[i-1];
+			  int detcount = det_count[i-1];
+			  for(int j = 0; j < detcount; j++)
+			  {
+				  spectra_list[offset + j] = spectrum;
+			  }
+			  ++index;
+		  }
+	  }
+
+	 
+	   
       local_workspace->mutableSpectraMap().populate(spectra_list, det_list.get(), ndets);
       delete[] spectra_list;
     }
@@ -703,6 +825,44 @@ namespace Mantid
       }
     }
 
+	 /**
+     * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. This assumes that the
+     * xbins have alread been cached
+     * @param data The NXDataSet object of y values
+     * @param errors The NXDataSet object of error values
+     * @param blocksize The blocksize to use
+     * @param nchannels The number of channels for the block
+     * @param hist The workspace index to start reading into
+	 * @param wsIndex The workspace index to save data into
+     * @param local_workspace A pointer to the workspace
+     */
+
+	void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, 
+      int blocksize, int nchannels, int &hist,int& wsIndex,
+      DataObjects::Workspace2D_sptr local_workspace)
+    {
+      data.load(blocksize,hist);
+      errors.load(blocksize,hist);
+      double *data_start = data();
+      double *data_end = data_start + nchannels;
+      double *err_start = errors();
+      double *err_end = err_start + nchannels;
+      int final(hist + blocksize);
+      while( hist < final )
+      {
+        MantidVec& Y = local_workspace->dataY(wsIndex);
+        Y.assign(data_start, data_end);
+        data_start += nchannels; data_end += nchannels;
+        MantidVec& E = local_workspace->dataE(wsIndex);
+        E.assign(err_start, err_end);
+        err_start += nchannels; err_end += nchannels;
+        local_workspace->setX(wsIndex, m_xbins);
+        ++hist;
+		++wsIndex;
+		
+      }
+    }
+
     /**
      * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given blocksize. The xbins are read along with
      * each call to the data/error loading
@@ -712,10 +872,11 @@ namespace Mantid
      * @param blocksize The blocksize to use
      * @param nchannels The number of channels for the block
      * @param hist The workspace index to start reading into
+	 * @param wsIndex The workspace index to save data into
      * @param local_workspace A pointer to the workspace
      */
     void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins,
-      int blocksize, int nchannels, int &hist, 
+      int blocksize, int nchannels, int &hist, int& wsIndex,
       DataObjects::Workspace2D_sptr local_workspace)
     {
       data.load(blocksize,hist);
@@ -731,18 +892,116 @@ namespace Mantid
       int final(hist + blocksize);
       while( hist < final )
       {
-        MantidVec& Y = local_workspace->dataY(hist);
+        MantidVec& Y = local_workspace->dataY(wsIndex);
         Y.assign(data_start, data_end);
         data_start += nchannels; data_end += nchannels;
-        MantidVec& E = local_workspace->dataE(hist);
+        MantidVec& E = local_workspace->dataE(wsIndex);
         E.assign(err_start, err_end);
         err_start += nchannels; err_end += nchannels;
-        MantidVec& X = local_workspace->dataX(hist);
+        MantidVec& X = local_workspace->dataX(wsIndex);
         X.assign(xbin_start, xbin_end);
         xbin_start += nxbins; xbin_end += nxbins;	
         ++hist;
+		++wsIndex;
       }
     }
+
+	
+	/**
+	*Validates the optional 'spectra to read' properties, if they have been set
+	* @param numberofspectra number of spectrum 
+	*/
+	void LoadNexusProcessed::checkOptionalProperties(const int numberofspectra )
+	{
+		//read in the settings passed to the algorithm
+		m_spec_list = getProperty("SpectrumList");
+		m_spec_max = getProperty("SpectrumMax");
+		m_spec_min = getProperty("SpectrumMin");
+		//Are we using a list of spectra or all the spectra in a range?
+		m_list = !m_spec_list.empty();
+		m_interval = (m_spec_max != unSetInt) || (m_spec_min != 1);
+		if ( m_spec_max == unSetInt ) m_spec_max = 1;
+		
+		// Check validity of spectra list property, if set
+		if (m_list)
+		{
+			m_list = true;
+			const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
+			const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
+			if (maxlist > numberofspectra || minlist == 0)
+			{
+				g_log.error("Invalid list of spectra");
+				throw std::invalid_argument("Inconsistent properties defined");
+			}
+		}
+
+		// Check validity of spectra range, if set
+		if (m_interval)
+		{
+			m_interval = true;
+			m_spec_min = getProperty("SpectrumMin");
+			if (m_spec_min != 1 && m_spec_max == 1)
+			{
+				m_spec_max = numberofspectra;
+			}
+			if (m_spec_max < m_spec_min || m_spec_max >numberofspectra)
+			{
+				g_log.error("Invalid Spectrum min/max properties");
+				throw std::invalid_argument("Inconsistent properties defined");
+			}
+		}
+	}
+
+	/**
+	* Calculate the size of a workspace
+	* @param numberofspectra number of spectrums 
+	*/
+
+	int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
+	{
+		// Calculate the size of a workspace, given its number of spectra to read
+		int total_specs;
+		if( m_interval || m_list)
+		{
+			if (m_interval)
+			{
+				if (m_spec_min != 1 && m_spec_max == 1)
+				{
+					m_spec_max = numberofspectra;
+				}
+				total_specs = (m_spec_max-m_spec_min+1);
+				m_spec_max += 1;
+			}
+			else
+				total_specs = 0;
+
+			if (m_list)
+			{
+				if (m_interval)
+				{
+					for(std::vector<int>::iterator it=m_spec_list.begin();it!=m_spec_list.end();)
+						if (*it >= m_spec_min && *it <m_spec_max)
+						{
+							it = m_spec_list.erase(it);
+						}
+						else
+							it++;
+
+				}
+				if (m_spec_list.size() == 0) m_list = false;
+				total_specs += m_spec_list.size();
+			}
+		}
+		else
+		{
+			total_specs = numberofspectra;
+			m_spec_min = 1;
+			m_spec_max = numberofspectra +1;
+		}
+		return total_specs;
+	}
+
+
 
   } // namespace NeXus
 } // namespace Mantid

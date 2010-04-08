@@ -53,7 +53,7 @@ namespace Mantid
       // Declare optional input parameters
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(0);
-      declareProperty("SpectrumMin",0, mustBePositive,
+      declareProperty("SpectrumMin",1, mustBePositive,
         "Index number of first spectrum to read, only for single period data");
       declareProperty("SpectrumMax", unSetInt, mustBePositive->clone(),
         "Index number of last spectrum to read, only for single period data");
@@ -199,24 +199,29 @@ namespace Mantid
       std::string outputWorkspace="OutputWorkspace";
       loadNexusPro->setPropertyValue(outputWorkspace,m_workspace);
 
+	  loadNexusPro->setPropertyValue("SpectrumMin",getPropertyValue("SpectrumMin"));
+	  loadNexusPro->setPropertyValue("SpectrumMax",getPropertyValue("SpectrumMax"));
+	  loadNexusPro->setPropertyValue("SpectrumList",getPropertyValue("SpectrumList"));
+
+	
       /* !!! The spectrum min/max/list properties are currently missing from LoadNexus
              so don't pass them through here, just print a warning !!! */
 
       //Get the array passed in the spectrum_list, if an empty array was passed use the default 
-      std::vector<int> specList = getProperty("SpectrumList");
-      if ( !specList.empty() )
-      {
-        g_log.warning("SpectrumList property ignored - it is not implemented in LoadNexusProcessed.");
-        //loadNexusPro->setProperty("SpectrumList",specList);
-      }
-      int specMin = getProperty("SpectrumMin");
-      int specMax = getProperty("SpectrumMax");
-      if ( specMax != unSetInt || specMin != 0 )
-      {
-        g_log.warning("SpectrumMin/Max properties ignored - they are not implemented in LoadNexusProcessed.");
-        //loadNexusPro->setProperty("SpectrumMax",specMin);
-        //loadNexusPro->setProperty("SpectrumMin",specMax);
-      }
+      //std::vector<int> specList = getProperty("SpectrumList");
+      //if ( !specList.empty() )
+      //{
+      //  g_log.warning("SpectrumList property ignored - it is not implemented in LoadNexusProcessed.");
+      //  //loadNexusPro->setProperty("SpectrumList",specList);
+      //}
+      //int specMin = getProperty("SpectrumMin");
+      //int specMax = getProperty("SpectrumMax");
+      //if ( specMax != unSetInt || specMin != 0 )
+      //{
+      //  g_log.warning("SpectrumMin/Max properties ignored - they are not implemented in LoadNexusProcessed.");
+      //  //loadNexusPro->setProperty("SpectrumMax",specMin);
+      //  //loadNexusPro->setProperty("SpectrumMin",specMax);
+      //}
 
       loadNexusPro->setPropertyValue("EntryNumber",getPropertyValue("EntryNumber"));
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
