@@ -66,6 +66,8 @@ win32 {
 
 unix {
   INCLUDEPATH       += /usr/include/
+  INCLUDEPATH       += /usr/include/qwt-qt4/
+  INCLUDEPATH       += /usr/include/qwtplot3d-qt4/
   INCLUDEPATH       += /usr/include/qwt/
   INCLUDEPATH       += /usr/include/qwtplot3d/
 }
