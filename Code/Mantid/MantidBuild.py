@@ -124,7 +124,10 @@ def findBoost(boost_path,boost_append,boost_lib):
 			pass
 
 	for startPath in [ '/usr/lib64/', '/usr/lib/', '/usr/local/lib/' ] :
-	  dirpath=os.listdir(startPath)
+	  try:
+	    dirpath=os.listdir(startPath)
+	  except:
+	    dirpath=''
 	  while(len(dirpath)):
 		try:
 			item=dirpath.pop(0)
