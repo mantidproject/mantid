@@ -809,12 +809,16 @@ void AlgorithmDialog::setValue(QWidget *widget, const QString & propName)
       //Need to check if this is the default value as we don't fill them in if they are
       if( m_python_arguments.contains(propName) || !property->isDefault() )
       {
-	      textfield->setText(value);
+	textfield->setText(value);
       }
     }
   }
   else if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
   {
+    if( value.isEmpty() && dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(property) )
+    {
+      value = QString::fromStdString(property->value());
+    }
     if( value == "0" )
     {
       checker->setCheckState(Qt::Unchecked);
