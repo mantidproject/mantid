@@ -114,6 +114,7 @@ else:
 			boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
 			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
 			python_path=MantidBuild.procHeaderPath(ln,'PYTHON_LIB',python_path)
+			boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
 		f.close()
 	else:
 		boost_path=''
@@ -123,7 +124,9 @@ else:
 		boost_append = ''
 		
 	opencascade_path= '/opt/OpenCASCADE'
-	MantidBuild.findBoost(boost_path,boost_append)
+	boost_res = MantidBuild.findBoost(boost_path,boost_append,'libboost_regex')
+	boost_append = boost_res['append']
+	boost_path = boost_res['path']
 	
 print "POCO_ROOT: ",poco_path
 print "BOOST_ROOT: ",boost_path
@@ -158,6 +161,7 @@ elif platform.system() == 'Linux':
 	cppPaths.append(boost_path)
 	cppPaths.append(USRINCLUDE)
 	cppPaths.append(USRLOCALINCLUDE)
+	cppPaths.append(USRINCLUDE+'/muParser')
 	
 	libDirList.append(USRLIB)
 elif platform.system() == 'Darwin':

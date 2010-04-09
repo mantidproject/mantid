@@ -107,16 +107,15 @@ def getConfigFlags(command) :
 		res = flags
 	return res
 
-def findBoost(boost_path,boost_append):
+def findBoost(boost_path,boost_append,boost_lib):
 	#Find the boost_path and the boost append
-	startPath = '/usr/local/include/'
-	dirpath=os.listdir(startPath)
-	while(len(dirpath)):
+	for startPath in [ '/usr/include/', '/usr/local/include/' ] :
+	  dirpath=os.listdir(startPath)
+	  while(len(dirpath)):
 		try:
 			item=dirpath.pop(0)
 			if item.startswith('boost'):
 				for file in os.listdir(startPath+item):
-					print file
 					if file == 'weak_ptr.hpp':
 						boost_path = startPath
 					elif file.startswith('boost'):
@@ -124,11 +123,12 @@ def findBoost(boost_path,boost_append):
 		except:
 			pass
 
-	dirpath=os.listdir('/usr/local/lib/')
-	while(len(dirpath)):
+	for startPath in [ '/usr/lib64/', '/usr/lib/', '/usr/local/lib/' ] :
+	  dirpath=os.listdir(startPath)
+	  while(len(dirpath)):
 		try:
 			item=dirpath.pop(0)
-			m=re.search("libboost_python(.*).so", item)
+			m=re.search(boost_lib+"(.*).so", item)
 			if m != None:
 				boost_append=m.group(1)
 		except:
