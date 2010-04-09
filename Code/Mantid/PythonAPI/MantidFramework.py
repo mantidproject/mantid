@@ -521,8 +521,13 @@ class RollbackImporter:
         __builtin__.__import__ = self._import
         self.pyalg_modules = {}
         
-    def _import(self, name, globals=None, locals=None, fromlist=[]):
-        result = apply(self.realImport, (name, globals, locals, fromlist))
+    def _import(self, name, globals=None, locals=None, fromlist=[], level=-1):
+        # __import__ takes a different number of arguments in different Python versions
+        if sys.version_info[1] == 4:
+            result = apply(self.realImport, (name, globals, locals, fromlist))
+        else:
+            result = apply(self.realImport, (name, globals, locals, fromlist, level))
+
         if self._containsPyAlgorithm(result):
             self.pyalg_modules[name] = self._findPathToModule(name)
         return result

@@ -898,11 +898,11 @@ def MaskFile(filename):
 
 # Read a limit line of a mask file
 def _readLimitValues(limit_line):
-    limits = limit_line.partition('L/')
-    if len(limits) != 3:
+    limits = limit_line.split('L/')
+    if len(limits) != 2:
         _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
         return
-    limits = limits[2]
+    limits = limits[1]
     limit_type = ''
     if not ',' in limit_line:
         # Split with no arguments defaults to any whitespace character and in particular
