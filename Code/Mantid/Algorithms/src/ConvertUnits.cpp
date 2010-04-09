@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include <cfloat>
 #include <iostream>
+#include <limits>
 
 namespace Mantid
 {
@@ -389,6 +390,12 @@ API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr work
   }
 }
 
+/// Checks if a double is not infinity or a NaN
+bool isANumber(const double& d)
+{
+  return d == d && fabs(d) != std::numeric_limits<double>::infinity();
+}
+
 /// The Rebin parameters should cover the full range of the converted unit, with the same number of bins
 const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWorkspace_const_sptr workspace) const
 {
@@ -402,8 +409,13 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
       if ( !det->isMasked() )
       {
         const MantidVec & XData = workspace->readX(i);
-        if ( XData.front() < XMin ) XMin = XData.front();
-        if ( XData.back() > XMax )  XMax = XData.back();
+        double xfront = XData.front();
+        double xback = XData.back();
+        if (isANumber(xfront) && isANumber(xback))
+        {
+          if ( xfront < XMin ) XMin = xfront;
+          if ( xback > XMax )  XMax = xback;
+        }
       }
     } catch (Exception::NotFoundError) {} //Do nothing
   }
