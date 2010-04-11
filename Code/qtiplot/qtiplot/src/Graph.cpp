@@ -27,6 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qwt_compat.h"
 #include <QVarLengthArray>
 
 static const char *cut_xpm[]={

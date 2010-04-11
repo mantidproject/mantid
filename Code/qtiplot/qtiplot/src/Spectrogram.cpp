@@ -26,6 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "qwt_compat.h"
 #include "Spectrogram.h"
 #include <math.h>
 #include <QPen>
