@@ -72,16 +72,7 @@ sed -i -e "s!MANTIDPLUGINS = .*'!MANTIDPLUGINS = '%{mantidpluginsdir}'!" SConstr
 cd Code/Mantid
 sh build.sh rpmbuild=1 skiptest=1 debug=0
 cd ../qtiplot
-python release_date.py %{version} SVN_VERSION
-cd MantidQt
-qmake-qt4 QMAKE_CC="gcc44" QMAKE_CXX="g++44"
-make
-cd ../QtPropertyBrowser
-qmake-qt4 QMAKE_CC="gcc44" QMAKE_CXX="g++44"
-make
-cd ../qtiplot
-qmake-qt4 QMAKE_CC="gcc44" QMAKE_CXX="g++44"
-make
+sh build.sh clean %{version} SVN_VERSION
 
 %install
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi

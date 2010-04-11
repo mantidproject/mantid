@@ -3,12 +3,18 @@
 # Build the Mantidplot user interface
 #
 #
-python release_date.py
-
 CLEAN="0"
-if [ $# -eq 1 ]; then 
-    if [ $1 = "clean" ]; then CLEAN="1";fi
+if [ $# -ge 1 ]; then 
+    if [ $1 = "clean" ]; then CLEAN="1"; fi
 fi
+if [ $# -ge 2 ]; then 
+    VERSION=$2
+fi
+if [ $# -ge 3 ]; then 
+    SVN_VERSION=$3
+fi
+
+python release_date.py $VERSION $SVN_VERSION
 
 # The top-level directory 
 ROOTDIR=`pwd`
@@ -17,7 +23,7 @@ ROOTDIR=`pwd`
 cd $ROOTDIR/MantidQt
 if [ $CLEAN = "1" ]; then 
     make clean 
-    qmake 
+    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}"
 fi
 make
 ERRORCODE=$?
@@ -30,7 +36,7 @@ fi
 cd $ROOTDIR/QtPropertyBrowser
 if [ $CLEAN = "1" ]; then 
     make clean
-    qmake
+    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}"
 fi
 make -j2
 ERRORCODE=$?
@@ -43,7 +49,7 @@ fi
 cd $ROOTDIR/qtiplot
 if [ $CLEAN = "1" ]; then 
     make clean
-    qmake
+    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}"
 fi
 make -j2
 ERRORCODE=$?
