@@ -65,7 +65,8 @@ INCLUDEPATH  += ../MantidQt/includes
 INCLUDEPATH  += ../3rdparty/liborigin
 INCLUDEPATH  += ../QtPropertyBrowser/src
 
-unix {
+unix:!macx {
+
   INCLUDEPATH       += /usr/include/
   INCLUDEPATH       += /usr/include/muParser/
   INCLUDEPATH       += /usr/include/qwt-qt4/
