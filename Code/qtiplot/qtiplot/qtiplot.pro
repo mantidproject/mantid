@@ -82,8 +82,21 @@ unix {
 unix {
   LIBS         += -lqscintilla2
   LIBS         += -lmuparser
-  LIBS         += -L/usr/lib -lqwtplot3d-qt4
-  LIBS         += -L/usr/lib/ -lqwt-qt4 -lqwt
+  # Some systems have qwt and qwtplot3d-qt4 and others have -qt4 suffixes on both
+
+  exists(/usr/lib/libqwt-qt4.so){
+    LIBS += -lqwt-qt4
+  }else{
+    message(Adding libqwt)
+    LIBS += -lqwt
+  }
+
+  exists(/usr/lib/libqwtplot3d-qt4.so){
+    LIBS += -lqwtplot3d-qt4
+  } else{
+    LIBS += -lqwtplot3d
+  }
+
   LIBS         += -lgsl -lgslcblas
 
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI

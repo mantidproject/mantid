@@ -64,7 +64,11 @@ unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
   LIBS += -L$$MANTIDLIBPATH -lMantidGeometry
   LIBS += -L/usr/lib/ -lPocoFoundation
-  LIBS += -lboost_signals-mt
+  macx{
+   LIBS += -lboost_signals
+ } else{
+   LIBS += -lboost_signals-mt
+ }
 }
 
 win32 {
