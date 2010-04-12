@@ -155,6 +155,7 @@ void LoadRaw3::exec()
   if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(total_specs, m_lengthIn,
       channelsPerSpectrum) && total_specs == m_numberOfSpectra)
   {
+    fclose(file);
     goManagedRaw(bincludeMonitors, bexcludeMonitors, bseparateMonitors);
     return;
   }
@@ -181,9 +182,15 @@ void LoadRaw3::exec()
   Sample& sample = localWorkspace->mutableSample();
   if (bLoadlogFiles)
   {
+    // temporarily close the file
+    isisRaw->clear();
+    fclose(file);
     runLoadLog(localWorkspace);
     Property* log = createPeriodLog(1);
     if (log) sample.addLogData(log);
+    // reopen the file
+    file = fopen(m_filename.c_str(), "rb");
+    isisRaw->ioRAW(file, true);
   }
   // Set the total proton charge for this run
   sample.setProtonCharge(isisRaw->rpb.r_gd_prtn_chrg);

@@ -16,6 +16,7 @@ public:
 
 	void skipData(FILE* file, int i);
 	void readData(FILE* file, int i);
+  void clear();
 
 	int ndes;
 private:

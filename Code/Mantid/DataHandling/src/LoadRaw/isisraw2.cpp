@@ -112,6 +112,10 @@ void ISISRAW2::readData(FILE* file, int i)
 ISISRAW2::~ISISRAW2()
 {
     //fclose(m_file);
-    delete[] outbuff;
+    if (outbuff) delete[] outbuff;
 }
 
+void ISISRAW2::clear()
+{
+  if (outbuff) delete[] outbuff;
+}
