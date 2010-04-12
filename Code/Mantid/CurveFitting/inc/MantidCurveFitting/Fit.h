@@ -73,6 +73,8 @@ namespace Mantid
 
       /// Set a function for fitting
       void setFunction(API::IFunction* fun);
+      /// Get the function for fitting
+      const API::IFunction* getFunction()const{return m_function;}
 
     protected:
       // Overridden Algorithm methods

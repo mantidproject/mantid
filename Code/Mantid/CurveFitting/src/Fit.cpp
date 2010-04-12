@@ -254,7 +254,8 @@ namespace CurveFitting
       "A value in, or on the high x boundary of, the last bin the fitting range\n"
       "(default the highest value of x)" );
 
-    declareProperty("Function","","Parameters defining the fitting function and its initial values" );
+    //declareProperty("Function","","Parameters defining the fitting function and its initial values",Direction::InOut );
+    declareProperty("Function","",Direction::InOut );
     declareProperty("Ties","","Math expressions that tie parameters to other parameters or to constants" );
     declareProperty("Constraints","","List of constraints" );
 
@@ -610,6 +611,7 @@ namespace CurveFitting
     setProperty("Output Status", reportOfFit);
     setProperty("Output Chi^2/DoF", finalCostFuncVal);
     setProperty("Minimizer", methodUsed);
+    setPropertyValue("Function",*m_function);
     
 
     // if Output property is specified output additional workspaces

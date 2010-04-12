@@ -413,7 +413,7 @@ public:
     alg.setPropertyValue("InputWorkspace","Exp");
     alg.setPropertyValue("WorkspaceIndex","0");
     alg.setPropertyValue("Output","out");
-    std::string params = "name=FitTest_Gauss, c=4.1(4.0:4.2),h=1.1,s=0.5;";
+    std::string params = "name=FitTest_Gauss, c=4.1,h=1.1,s=0.5,constraint=(4.0<c<4.2)";
 
     alg.setPropertyValue("Function",params);
 
