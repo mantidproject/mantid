@@ -1,8 +1,16 @@
 #############################################################################
 ###################### USER-SERVICEABLE PART ################################
 #############################################################################
-
-QMAKESPEC=macx-g++
+win32 {
+ QMAKESPEC=win32-msvc2005  
+}
+unix {
+ macx{
+ QMAKESPEC=macx-g++
+ } else {
+ QMAKESPE=linux-g++
+ }
+}
 
 # building without muParser doesn't work yet
 SCRIPTING_LANGS += muParser
@@ -34,9 +42,9 @@ win32:build_pass:CONFIG(debug, debug|release) {
 
 build_pass:CONFIG(debug, debug|release) {
   # Put the debug version alongside the Mantid debug dlls to make sure it picks them up
-  DESTDIR = ../../Mantid/debug
+  DESTDIR = ../../Mantid/Bin/Shared
 } else {
-  DESTDIR = ./
+  DESTDIR = ../../Mantid/Bin/Shared
 }
 
 mac:CXXFLAGS+=-headerpad_max_install_names
@@ -57,15 +65,6 @@ INCLUDEPATH  += ../MantidQt/includes
 INCLUDEPATH  += ../3rdparty/liborigin
 INCLUDEPATH  += ../QtPropertyBrowser/src
 
-# win32 {
-  INCLUDEPATH       += ../../Third_Party/include/
-  INCLUDEPATH       += ../../Third_Party/include/muparser
-  INCLUDEPATH       += ../../Third_Party/include
-  INCLUDEPATH       += ../../Third_Party/include/zlib123
-  INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
-  INCLUDEPATH       += ../3rdparty/qwt/src
-# }
-
 unix {
   INCLUDEPATH       += /usr/include/
   INCLUDEPATH       += /usr/include/muParser/
@@ -73,7 +72,15 @@ unix {
   INCLUDEPATH       += /usr/include/qwtplot3d-qt4/
   INCLUDEPATH       += /usr/include/qwt/
   INCLUDEPATH       += /usr/include/qwtplot3d/
+} else{
+  INCLUDEPATH       += ../../Third_Party/include/
+  INCLUDEPATH       += ../../Third_Party/include/muparser
+  INCLUDEPATH       += ../../Third_Party/include
+  INCLUDEPATH       += ../../Third_Party/include/zlib123
+  INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
+  INCLUDEPATH       += ../3rdparty/qwt/src
 }
+
 ##################### 3rd PARTY LIBRARIES SECTION ###########################
 #!!! Warning: You must modify these paths according to your computer settings
 #############################################################################
@@ -89,6 +96,7 @@ unix {
 macx {
   LIBS += -L../3rdparty/qwt/lib -lqwt
   LIBS += -lqwtplot3d
+  LIBS += -lboost_signals
 }else{
   # Some systems have qwt and qwtplot3d-qt4 and others have -qt4 suffixes on both
   exists(/usr/lib/libqwt-qt4.so){
@@ -102,6 +110,12 @@ macx {
   } else{
     LIBS += -lqwtplot3d
   }
+  LIBS += -lboost_signals-mt
+
+  LIBS 		+= -Wl,-rpath,/opt/Mantid/bin
+  LIBS 		+= -Wl,-rpath,/opt/Mantid/plugins
+  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib64
+  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib
 }
 
   LIBS         += -lgsl -lgslcblas
@@ -109,19 +123,15 @@ macx {
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
+
   LIBS          += -L../QtPropertyBrowser/lib -lQtPropertyBrowser
 
   LIBS   += -L../MantidQt/lib -lMantidQtAPI
 
   LIBS		+= -L/usr/lib/ -lPocoUtil
   LIBS		+= -L/usr/lib/ -lPocoFoundation
-  LIBS          += -lboost_signals
-
-  #LIBS 		+= -Wl,-rpath,/opt/Mantid/bin
-  #LIBS 		+= -Wl,-rpath,/opt/Mantid/plugins
-  #LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib64
-  #LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib
 }
+
 ##################### Windows ###############################################
 win32 {
   LIBPATH += C:/Python25/libs
