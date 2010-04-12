@@ -292,30 +292,6 @@ public:
     delete fun;
   }
   
-  void testCreateWithConstraint()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1(0<a0<0.2),a1=1.1";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
-    TS_ASSERT_EQUALS(funa->nParams(),2);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    IConstraint* c = funa->firstConstraint();
-    TS_ASSERT(c);
-    TS_ASSERT_EQUALS(c->check(),0);
-
-    funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c->check(),800);
-
-    funa->setParameter("a0",-1);
-    TS_ASSERT_EQUALS(c->check(),1000);
-    delete funa;
-
-  }
-
   void testCreateWithConstraint1()
   {
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,constraint=0<a0<0.2";
@@ -369,78 +345,6 @@ public:
     funa->setParameter("a1",11);
     TS_ASSERT_EQUALS(c1->check(),0);
 
-    delete funa;
-
-  }
-
-  void testCreateWithConstraint3()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1(0:0.2),a1=1.1";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
-    TS_ASSERT_EQUALS(funa->nParams(),2);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    IConstraint* c = funa->firstConstraint();
-    TS_ASSERT(c);
-    TS_ASSERT_EQUALS(c->check(),0);
-
-    funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c->check(),800);
-
-    funa->setParameter("a0",-1);
-    TS_ASSERT_EQUALS(c->check(),1000);
-    delete funa;
-
-  }
-
-  void testCreateWithConstraint4()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1(:0.2),a1=1.1";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
-    TS_ASSERT_EQUALS(funa->nParams(),2);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    IConstraint* c = funa->firstConstraint();
-    TS_ASSERT(c);
-    TS_ASSERT_EQUALS(c->check(),0);
-
-    funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c->check(),800);
-
-    funa->setParameter("a0",-1);
-    TS_ASSERT_EQUALS(c->check(),0);
-    delete funa;
-
-  }
-
-  void testCreateWithConstraint5()
-  {
-    std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1(0:),a1=1.1";
-    IFunction* funa = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->parameterName(0),"a0");
-    TS_ASSERT_EQUALS(funa->parameterName(1),"a1");
-    TS_ASSERT_EQUALS(funa->nParams(),2);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    IConstraint* c = funa->firstConstraint();
-    TS_ASSERT(c);
-    TS_ASSERT_EQUALS(c->check(),0);
-
-    funa->setParameter("a0",1);
-    TS_ASSERT_EQUALS(c->check(),0);
-
-    funa->setParameter("a0",-1);
-    TS_ASSERT_EQUALS(c->check(),1000);
     delete funa;
 
   }

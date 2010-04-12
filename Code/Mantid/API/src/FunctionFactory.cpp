@@ -46,13 +46,13 @@ namespace Mantid
      */
     IFunction* FunctionFactoryImpl::createInitialized(const std::string& input) const
     {
-      std::vector<std::string> ops;
-      ops.push_back(";");
-      ops.push_back(",");
-      ops.push_back("=");
-      ops.push_back("== < > <= >=");
+      //std::vector<std::string> ops;
+      //ops.push_back(";");
+      //ops.push_back(",");
+      //ops.push_back("=");
+      //ops.push_back("== < > <= >=");
 
-      Expression expr(ops);
+      Expression expr;
       try
       {
         expr.parse(input);
@@ -108,7 +108,7 @@ namespace Mantid
       {// loop over function's parameters/attributes
         if (term->name() != "=") inputError(expr.str());
         std::string parName = term->terms()[0].name();
-        std::string parValue = term->terms()[1].name();
+        std::string parValue = term->terms()[1].str();
         if (fun->hasAttribute(parName))
         {// set attribute
           if (parValue.size() > 1 && parValue[0] == '"')
@@ -128,14 +128,6 @@ namespace Mantid
         else
         {// set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
-          if ((*term)[1].isFunct())
-          {// than its argument is a constraint
-            // check if the constraint has a form of (min:max)
-            if (!tryAddConstraint(fun, parName,(*term)[1][0].name()))
-            {
-              addConstraint(fun,(*term)[1][0]);
-            }
-          }// if there is a constraint
         }
       }// for term
 
@@ -157,19 +149,20 @@ namespace Mantid
       }
 
       const std::vector<Expression>& terms = expr.terms();
-      std::vector<Expression>::const_iterator term = terms.begin();
+      std::vector<Expression>::const_iterator it = terms.begin();
+      const Expression& term = it->bracketsRemoved();
 
       CompositeFunction* cfun = 0;
 
-      if (term->name() == "=")
+      if (term.name() == "=")
       {
-        if (term->terms()[0].name() == "composite")
+        if (term.terms()[0].name() == "composite")
         {
-          cfun = dynamic_cast<CompositeFunction*>(createFunction(term->terms()[1].name()));
+          cfun = dynamic_cast<CompositeFunction*>(createFunction(term.terms()[1].name()));
           if (!cfun) inputError(expr.str());
-          term++;
+          it++;
         }
-        else if (term->terms()[0].name() == "name")
+        else if (term.terms()[0].name() == "name")
         {
           cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
           if (!cfun) inputError(expr.str());
@@ -179,16 +172,16 @@ namespace Mantid
           inputError(expr.str());
         }
       }
-      else if (term->name() == ",")
+      else if (term.name() == ",")
       {
-        std::vector<Expression>::const_iterator firstTerm = term->terms().begin();
+        std::vector<Expression>::const_iterator firstTerm = term.terms().begin();
         if (firstTerm->name() == "=")
         {
           if (firstTerm->terms()[0].name() == "composite")
           {
-            cfun = dynamic_cast<CompositeFunction*>(createSimple(*term));
+            cfun = dynamic_cast<CompositeFunction*>(createSimple(term));
             if (!cfun) inputError(expr.str());
-            term++;
+            it++;
           }
           else if (firstTerm->terms()[0].name() == "name")
           {
@@ -201,7 +194,7 @@ namespace Mantid
           }
         }
       }
-      else if (term->name() == ";")
+      else if (term.name() == ";")
       {
         cfun = dynamic_cast<CompositeFunction*>(createFunction("CompositeFunction"));
         if (!cfun) inputError(expr.str());
@@ -211,29 +204,30 @@ namespace Mantid
         inputError(expr.str());
       }
 
-      for(;term!=terms.end();term++)
+      for(;it!=terms.end();it++)
       {
+        const Expression& term = it->bracketsRemoved();
         IFunction* fun;
-        if (term->name() == ";")
+        if (term.name() == ";")
         {
-          fun = createComposite(*term);
+          fun = createComposite(term);
           if (!fun) continue;
         }
         else
         {
-          if ((*term)[0].name().size() >= 10 && (*term)[0].name().substr(0,10) == "constraint")
+          if (term[0].name().size() >= 10 && term[0].name().substr(0,10) == "constraint")
           {
-            addConstraints(cfun,(*term)[1]);
+            addConstraints(cfun,term[1]);
             continue;
           }
-          else if ((*term)[0].name() == "ties")
+          else if (term[0].name() == "ties")
           {
-            addTies(cfun,(*term)[1]);
+            addTies(cfun,term[1]);
             continue;
           }
           else
           {
-            fun = createSimple(*term);
+            fun = createSimple(term);
           }
         }
         cfun->addFunction(fun);
@@ -284,50 +278,6 @@ namespace Mantid
     {
       IConstraint* c = ConstraintFactory::Instance().createInitialized(fun,expr);
       fun->addConstraint(c);
-    }
-
-    /** 
-     * Add a constraints to the function
-     * @param fun The function
-     * @param parName The parameter name
-     * @param str The constraint expression of the form (min:max). min or max can be empty
-     * @return True if OK or false if failed
-     */
-    bool FunctionFactoryImpl::tryAddConstraint(IFunction* fun,const std::string& parName,const std::string& str)const
-    {
-      if (str.find(':') == std::string::npos) 
-      {
-        return false;
-      }
-
-      Poco::StringTokenizer constraint(str, ":", Poco::StringTokenizer::TOK_TRIM);
-      if (constraint.count() == 2)
-      {// constraint is either (min:max) or (:max)
-        std::ostringstream ostr;
-        if ( ! constraint[0].empty() )
-        {
-          ostr << constraint[0] << '<';
-        }
-        ostr << parName;
-        if ( ! constraint[1].empty() )
-        {
-          ostr << '<' << constraint[1];
-        }
-        Expression expr;
-        expr.parse(ostr.str());
-        addConstraint(fun,expr);
-        return true;
-      }
-      else if (constraint.count() == 1)
-      {// only min is set (min:)
-        std::ostringstream ostr;
-        ostr << constraint[0] << '<' << parName;
-        Expression expr;
-        expr.parse(ostr.str());
-        addConstraint(fun,expr);
-        return true;
-      }
-      return false;
     }
 
     /**

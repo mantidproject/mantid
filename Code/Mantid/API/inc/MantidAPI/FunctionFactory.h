@@ -94,8 +94,6 @@ namespace API
     void addConstraints(IFunction* fun,const Expression& expr)const;
     /// Add a single constraint to the created function
     void addConstraint(IFunction* fun,const Expression& expr)const;
-    /// Add a constraint to the created function if str has a form of (min:max), or return false
-    bool tryAddConstraint(IFunction* fun,const std::string& parName,const std::string& str)const;
     /// Add ties to the created function
     void addTies(IFunction* fun,const Expression& expr)const;
     /// Add a tie to the created function
