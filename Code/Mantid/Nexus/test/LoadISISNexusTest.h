@@ -44,7 +44,7 @@ public:
         TS_ASSERT_EQUALS(ws->spectraMap().nElements(),17792);
 
         const std::vector< Property* >& logs = ws->sample().getLogData();
-        TS_ASSERT_EQUALS(logs.size(),18);
+        TS_ASSERT_EQUALS(logs.size(),25);
 
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_event"));
         TS_ASSERT(slog);

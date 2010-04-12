@@ -558,7 +558,7 @@ namespace Mantid
       /// Nexus class id
       std::string NX_class()const{return "NXlog";}
       /// Creates a TimeSeriesProperty and returns a pointer to it
-      Kernel::Property* createTimeSeries(const std::string& start_time = "");
+      Kernel::Property* createTimeSeries(const std::string& start_time = "",const std::string& new_name = "");
     private:
       ///Parse a time series
       template<class TYPE>

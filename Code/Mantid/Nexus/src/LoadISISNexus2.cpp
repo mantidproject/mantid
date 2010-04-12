@@ -568,6 +568,7 @@ namespace Mantid
       NXMainClass runlogs = entry.openNXClass<NXMainClass>("runlog");
 
       for(std::vector<NXClassInfo>::const_iterator it=runlogs.groups().begin();it!=runlogs.groups().end();it++)
+      {
         if (it->nxclass == "NXlog")
         {
           NXLog nxLog = runlogs.openNXLog(it->nxname);
@@ -582,6 +583,23 @@ namespace Mantid
             ws->mutableSample().addLogData(parser.createRunningLog());
           }
         }
+      }
+
+      NXMainClass selogs = entry.openNXClass<NXMainClass>("selog");
+      for(std::vector<NXClassInfo>::const_iterator it=selogs.groups().begin();it!=selogs.groups().end();it++)
+      {
+        if (it->nxclass == "IXseblock")
+        {
+          NXMainClass selog = selogs.openNXClass<NXMainClass>(it->nxname);
+          if (selog.isValid("value_log"))
+          {
+            NXLog nxLog = selog.openNXLog("value_log");
+            Kernel::Property* logv = nxLog.createTimeSeries("","selog_"+it->nxname);
+            if (!logv) continue;
+            ws->mutableSample().addLogData(logv);
+          }
+        }
+      }
 
         ws->populateInstrumentParameters();
     }

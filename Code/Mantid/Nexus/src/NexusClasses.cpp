@@ -169,7 +169,7 @@ void NXClass::readAllInfo()
             data_info.nxname = info.nxname;
             m_datasets->push_back(data_info);
         }
-        else if(info.nxclass.substr(0,2) == "NX")
+        else if(info.nxclass.substr(0,2) == "NX" || info.nxclass.substr(0,2) == "IX")
         {
             m_groups->push_back(info);
         }
@@ -470,10 +470,11 @@ NXData::NXData(const NXClass& parent,const std::string& name):NXMainClass(parent
  * and the values are in dataset "value"
  * @param start_time If the "time" dataset does not have the "start" attribute sets the
  *   start time for the series.
+ * @param new_name If not empty it is used as the TimeSeries property name
  */
-Kernel::Property* NXLog::createTimeSeries(const std::string& start_time)
+Kernel::Property* NXLog::createTimeSeries(const std::string& start_time,const std::string& new_name)
 {
-  const std::string & logName = name();
+  const std::string & logName = new_name.empty()? name(): new_name;
   NXInfo vinfo = getDataSetInfo("time");
   if( vinfo.type == NX_FLOAT64)
   {
