@@ -182,99 +182,6 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
   if ( ws->isHistogramData() ) m_histogram = true;
   connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
-  // Define the spectrogram bounding box
-  {
-    m_spectrogramRows = numRows() > 100 ? numRows() : 100;
-
-    // This is only meaningful if a 2D (or greater) workspace
-    if (ws->axes() > 1)
-    {
-      const Mantid::API::Axis* const ax = ws->getAxis(1);
-      y_start =(*ax)(m_startRow);
-      y_end   =(*ax)(m_endRow);
-    }
-
-    double dy = fabs(y_end - y_start)/(double)(numRows() - 1);
-
-    int i0 = m_startRow+1;
-    x_start = x_end = 0;
-    while(x_start == x_end && i0 <= m_endRow)
-    {
-      const Mantid::MantidVec& X = ws->readX(i0);
-      x_start = X[0];
-      if (X.size() != ws->readY(i0).size()) x_end = X[ws->blocksize()];
-      else
-        x_end = X[ws->blocksize()-1];
-      if ( !isANumber(x_start) || !isANumber(x_end) )
-      {
-        x_start = x_end = 0;
-        i0++;
-      }
-    }
-
-    // if i0 > m_endRow there aren't any plottable rows
-    if (i0 <= m_endRow)
-    {
-      // check if all X vectors are the same
-      bool theSame = true;
-      double dx = 0.;
-      for(int i=i0;i<=m_endRow;++i)
-      {
-        if (ws->readX(i).front() != x_start || ws->readX(i).back() != x_end)
-        {
-          theSame = false;
-          break;
-        }
-      }
-      dx = fabs(x_end - x_start)/(double)(numCols() - 1);
-
-      if ( !theSame )
-      {
-        // Find the smallest bin width and thus the number of columns in a spectrogram
-        // that can be plotted from this matrix
-        double ddx = dx;
-        for(int i=m_startRow+1;i<=m_endRow;++i)
-        {
-          const Mantid::MantidVec& X = ws->readX(i);
-          if (X.front() < x_start)
-          {
-            double xs = X.front();
-            if (!isANumber(xs)) continue;
-            x_start = xs;
-          }
-          if (X.back() > x_end)
-          {
-            double xe = X.back();
-            if (!isANumber(xe)) continue;
-            x_end = xe;
-          }
-          for(int j=1;j<X.size();++j)
-          {
-            double d = X[j] - X[j-1];
-            if (ddx == 0 && d < ddx)
-            {
-              ddx = d;
-            }
-          }
-        }
-        m_spectrogramCols = int((x_end - x_start)/ddx);
-        if (m_spectrogramCols < 100) m_spectrogramCols = 100;
-      }
-      else
-      {
-        m_spectrogramCols = numCols() > 100 ? numCols() : 100;
-      }
-      m_boundingRect = QwtDoubleRect(QMIN(x_start, x_end) - 0.5*dx, QMIN(y_start, y_end) - 0.5*dy,
-        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy).normalized();
-
-    }
-    else
-    {
-      m_spectrogramCols = 0;
-      m_boundingRect = QwtDoubleRect(0, QMIN(y_start, y_end) - 0.5*dy,
-        1, fabs(y_end - y_start) + dy).normalized();
-    }
-  }// Define the spectrogram bounding box
 
   m_bk_color = QColor(128, 255, 255);
   m_matrix_icon = mantid_matrix_xpm;
@@ -649,6 +556,99 @@ QString MantidMatrix::workspaceName() const
 
 QwtDoubleRect MantidMatrix::boundingRect()
 {
+  if (m_boundingRect.isNull())
+  {
+    m_spectrogramRows = numRows() > 100 ? numRows() : 100;
+
+    // This is only meaningful if a 2D (or greater) workspace
+    if (m_workspace->axes() > 1)
+    {
+      const Mantid::API::Axis* const ax = m_workspace->getAxis(1);
+      y_start =(*ax)(m_startRow);
+      y_end   =(*ax)(m_endRow);
+    }
+
+    double dy = fabs(y_end - y_start)/(double)(numRows() - 1);
+
+    int i0 = m_startRow;
+    x_start = x_end = 0;
+    while(x_start == x_end && i0 <= m_endRow)
+    {
+      i0++;
+      const Mantid::MantidVec& X = m_workspace->readX(i0);
+      x_start = X[0];
+      if (X.size() != m_workspace->readY(i0).size()) x_end = X[m_workspace->blocksize()];
+      else
+        x_end = X[m_workspace->blocksize()-1];
+      if ( !isANumber(x_start) || !isANumber(x_end))
+      {
+        x_start = x_end = 0;
+      }
+    }
+
+    // if i0 > m_endRow there aren't any plottable rows
+    if (i0 <= m_endRow)
+    {
+      // check if all X vectors are the same
+      bool theSame = true;
+      double dx = 0.;
+      for(int i=i0;i<=m_endRow;++i)
+      {
+        if (m_workspace->readX(i).front() != x_start || m_workspace->readX(i).back() != x_end)
+        {
+          theSame = false;
+          break;
+        }
+      }
+      dx = fabs(x_end - x_start)/(double)(numCols() - 1);
+
+      if ( !theSame )
+      {
+        // Find the smallest bin width and thus the number of columns in a spectrogram
+        // that can be plotted from this matrix
+        double ddx = dx;
+        for(int i=m_startRow+1;i<=m_endRow;++i)
+        {
+          const Mantid::MantidVec& X = m_workspace->readX(i);
+          if (X.front() < x_start)
+          {
+            double xs = X.front();
+            if (!isANumber(xs)) continue;
+            x_start = xs;
+          }
+          if (X.back() > x_end)
+          {
+            double xe = X.back();
+            if (!isANumber(xe)) continue;
+            x_end = xe;
+          }
+          for(int j=1;j<X.size();++j)
+          {
+            double d = X[j] - X[j-1];
+            if (ddx == 0 && d < ddx)
+            {
+              ddx = d;
+            }
+          }
+        }
+        m_spectrogramCols = int((x_end - x_start)/ddx);
+        if (m_spectrogramCols < 100) m_spectrogramCols = 100;
+      }
+      else
+      {
+        m_spectrogramCols = numCols() > 100 ? numCols() : 100;
+      }
+      m_boundingRect = QwtDoubleRect(QMIN(x_start, x_end) - 0.5*dx, QMIN(y_start, y_end) - 0.5*dy,
+        fabs(x_end - x_start) + dx, fabs(y_end - y_start) + dy).normalized();
+
+    }
+    else
+    {
+      m_spectrogramCols = 0;
+      m_boundingRect = QwtDoubleRect(0, QMIN(y_start, y_end) - 0.5*dy,
+        1, fabs(y_end - y_start) + dy).normalized();
+    }
+  }// Define the spectrogram bounding box
   return m_boundingRect;
 }
 
