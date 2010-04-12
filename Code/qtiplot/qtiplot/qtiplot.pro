@@ -2,7 +2,7 @@
 ###################### USER-SERVICEABLE PART ################################
 #############################################################################
 
-QMAKESPEC=win32-msvc2005 
+QMAKESPEC=macx-g++
 
 # building without muParser doesn't work yet
 SCRIPTING_LANGS += muParser
@@ -39,6 +39,8 @@ build_pass:CONFIG(debug, debug|release) {
   DESTDIR = ./
 }
 
+mac:CXXFLAGS+=-headerpad_max_install_names
+
 ##################### 3rd PARTY HEADER FILES SECTION ########################
 #!!! Warning: You must modify these paths according to your computer settings
 #############################################################################
@@ -55,14 +57,14 @@ INCLUDEPATH  += ../MantidQt/includes
 INCLUDEPATH  += ../3rdparty/liborigin
 INCLUDEPATH  += ../QtPropertyBrowser/src
 
-win32 {
+# win32 {
   INCLUDEPATH       += ../../Third_Party/include/
   INCLUDEPATH       += ../../Third_Party/include/muparser
   INCLUDEPATH       += ../../Third_Party/include
   INCLUDEPATH       += ../../Third_Party/include/zlib123
   INCLUDEPATH       += ../../Third_Party/include/qwtplot3d
   INCLUDEPATH       += ../3rdparty/qwt/src
-}
+# }
 
 unix {
   INCLUDEPATH       += /usr/include/
@@ -80,22 +82,27 @@ unix {
 
 # dynamically link against dependencies if they are installed system-wide
 unix {
+  LIBS         += -L../../Third_Party/lib/mac
   LIBS         += -lqscintilla2
   LIBS         += -lmuparser
-  # Some systems have qwt and qwtplot3d-qt4 and others have -qt4 suffixes on both
 
+macx {
+  LIBS += -L../3rdparty/qwt/lib -lqwt
+  LIBS += -lqwtplot3d
+}else{
+  # Some systems have qwt and qwtplot3d-qt4 and others have -qt4 suffixes on both
   exists(/usr/lib/libqwt-qt4.so){
     LIBS += -lqwt-qt4
   }else{
     message(Adding libqwt)
     LIBS += -lqwt
   }
-
   exists(/usr/lib/libqwtplot3d-qt4.so){
     LIBS += -lqwtplot3d-qt4
   } else{
     LIBS += -lqwtplot3d
   }
+}
 
   LIBS         += -lgsl -lgslcblas
 
@@ -108,11 +115,12 @@ unix {
 
   LIBS		+= -L/usr/lib/ -lPocoUtil
   LIBS		+= -L/usr/lib/ -lPocoFoundation
+  LIBS          += -lboost_signals
 
-  LIBS 		+= -Wl,-rpath,/opt/Mantid/bin
-  LIBS 		+= -Wl,-rpath,/opt/Mantid/plugins
-  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib64
-  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib
+  #LIBS 		+= -Wl,-rpath,/opt/Mantid/bin
+  #LIBS 		+= -Wl,-rpath,/opt/Mantid/plugins
+  #LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib64
+  #LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib
 }
 ##################### Windows ###############################################
 win32 {
@@ -672,7 +680,7 @@ contains(SCRIPTING_LANGS, muParser) {
              src/muParserScripting.h \
 
   SOURCES += src/muParserScript.cpp \
-             src/muParserScripting.cpp \
+             src/muParserScripting.cpp
 }
 
 ##################### PYTHON + SIP + PyQT #####################
