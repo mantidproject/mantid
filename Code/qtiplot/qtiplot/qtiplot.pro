@@ -83,7 +83,7 @@ unix {
   LIBS         += -lqscintilla2
   LIBS         += -lmuparser
   LIBS         += -L/usr/lib -lqwtplot3d-qt4
-  LIBS         += -L/usr/lib/ -lqwt
+  LIBS         += -L/usr/lib/ -lqwt-qt4 -lqwt
   LIBS         += -lgsl -lgslcblas
 
   LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
@@ -759,7 +759,7 @@ contains(SCRIPTING_LANGS, Python) {
              $${SIP_DIR}/sipqtiPythonScript.cpp\
              $${SIP_DIR}/sipqtiPythonScripting.cpp\
              $${SIP_DIR}/sipqtiFolder.cpp\
-             $${SIP_DIR}/sipqtiQList.cpp\
+             $${SIP_DIR}/sipqtiQList*.cpp\
              $${SIP_DIR}/sipqtiFit.cpp \
              $${SIP_DIR}/sipqtiExponentialFit.cpp \
              $${SIP_DIR}/sipqtiTwoExpFit.cpp \
