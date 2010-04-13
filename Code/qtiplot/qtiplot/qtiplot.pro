@@ -100,13 +100,18 @@ macx {
   LIBS += -lboost_signals
 }else{
   # Some systems have qwt and qwtplot3d-qt4 and others have -qt4 suffixes on both
-  exists(/usr/lib/libqwt-qt4.so){
-    LIBS += -lqwt-qt4
-  }else{
-    message(Adding libqwt)
-    LIBS += -lqwt
+  # and some in /usr/lib64 others /usr/lib
+  exists(/usr/lib64/) {
+   PREFIX=/usr/lib64/
+  } else {
+   PREFIX=/usr/lib/
   }
-  exists(/usr/lib/libqwtplot3d-qt4.so){
+  exists($$join(PREFIX,"","",libqwt-qt4.so)){
+    LIBS += -L$$PREFIX -lqwt-qt4
+  }else{
+    LIBS +=  -L$$PREFIX -lqwt
+  }
+  exists($$join(PREFIX,"","",libqwtplot3d-qt4.so)){
     LIBS += -lqwtplot3d-qt4
   } else{
     LIBS += -lqwtplot3d
