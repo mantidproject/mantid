@@ -147,8 +147,13 @@ macx {
 
   LIBS   += -L../MantidQt/lib -lMantidQtAPI
 
-  LIBS		+= -L/usr/lib/ -lPocoUtil
-  LIBS		+= -L/usr/lib/ -lPocoFoundation
+CONFIG(debug, debug|release) {
+  LIBS	+= -lPocoUtild
+  LIBS	+= -lPocoFoundationd
+} else {
+  LIBS	+= -lPocoUtil
+  LIBS	+= -lPocoFoundation
+ }
 }
 
 ##################### Windows ###############################################

@@ -172,10 +172,16 @@ elif platform.system() == 'Darwin':
 	
 if os.name == 'posix':
 	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
-	libList.append('PocoUtil')
-	libList.append('PocoFoundation')
-	libList.append('PocoXML')
-	#libList.append('boost_python'+boost_append)
+	# I've seen nasty things mixing poco release and debug stuff
+	if int(debug) == 0:
+		libList.append('PocoUtil')
+		libList.append('PocoFoundation')
+		libList.append('PocoXML')
+	else:
+		libList.append('PocoUtild')
+		libList.append('PocoFoundationd')
+		libList.append('PocoXMLd')
+
 	libList.append('boost_regex'+boost_append)
 	libList.append('boost_signals'+boost_append)
 	libList.append('boost_date_time'+boost_append)
