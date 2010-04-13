@@ -103,7 +103,7 @@ for i in Code/Mantid/Bin/Shared/*.so; do
 	    ;;
     esac
 done
-install -m755 Code/qtiplot/qtiplot/MantidPlot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
+install -m755 Code/Mantid/Bin/Shared/MantidPlot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
 for i in qtiplotrc.py qtiUtil.py mantidplotrc.py mantidplot.py; do
     install -m755 Code/qtiplot/qtiplot/$i $RPM_BUILD_ROOT/%{mantidbindir}/$i
 done
