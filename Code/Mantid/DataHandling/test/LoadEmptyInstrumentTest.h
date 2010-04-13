@@ -80,7 +80,7 @@ public:
 
     // check that parameter have been read into the instrument parameter map
     std::vector<V3D> ret1 = paramMap.getV3D("monitors", "pos");
-    TS_ASSERT_DELTA( ret1[0].X(), 5.0, 0.0001);
+    TS_ASSERT_DELTA( ret1[0].X(), 10.0, 0.0001);
     TS_ASSERT_DELTA( ret1[0].Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA( ret1[0].Z(), 0.0, 0.0001);
 
@@ -89,6 +89,9 @@ public:
 
     TS_ASSERT_EQUALS( det->getID(), 1001);
     TS_ASSERT_EQUALS( det->getName(), "upstream_monitor_det");
+    TS_ASSERT_DELTA( det->getPos().X(), 10.0, 0.0001);
+    TS_ASSERT_DELTA( det->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( det->getPos().Z(), 0.0, 0.0001);
 
     Parameter_sptr param = paramMap.get(&(*det), "boevs2");
     TS_ASSERT_DELTA( param->value<double>(), 16.0, 0.0001);
@@ -159,6 +162,23 @@ public:
     dummy = paramMap.getDouble("nickel-holder", "mistake");
     TS_ASSERT_EQUALS (dummy.size(), 0);
 
+
+    // check if combined translation works
+
+    boost::shared_ptr<IInstrument> i = ws->getInstrument();
+    boost::shared_ptr<IDetector> ptrDet = i->getDetector(1003);
+    TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation");
+    TS_ASSERT_EQUALS( ptrDet->getID(), 1003);
+    TS_ASSERT_DELTA( ptrDet->getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet->getPos().Z(), 0.0, 0.0001);
+
+    boost::shared_ptr<IDetector> ptrDet1 = i->getDetector(1004);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation2");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1004);
+    TS_ASSERT_DELTA( ptrDet1->getRelativePos().X(), 2.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 3.0, 0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
   }

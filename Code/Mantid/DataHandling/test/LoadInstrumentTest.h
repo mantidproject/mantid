@@ -210,16 +210,6 @@ public:
     // test of some detector...
     boost::shared_ptr<IDetector> ptrDetShape = i->getDetector(101001);
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
-
-    // get parameter map
-   // ParameterMap& paramMap = output->instrumentParameters();
-
-   // std::cout << paramMap.asString();
-    //IDetector_sptr det101 = output->getDetector(101);  
-    //TS_ASSERT_EQUALS( ptrDet->getID(), 101001);
-    //Parameter_sptr param = paramMap.getRecursive(&(*ptrDet), "Alpha0", "fitting");
-    //const FitParameter& fitParam = param->value<FitParameter>();
-    //TS_ASSERT_DELTA( fitParam.getValue(), 0.734079, 0.0001);
   }
 
   void testExecSLS()
@@ -281,6 +271,51 @@ public:
     TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
     TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
   }
+
+  void testExecNIMROD()
+  {
+    LoadInstrument loaderNIMROD;
+
+    TS_ASSERT_THROWS_NOTHING(loaderNIMROD.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestNIMROD";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    loaderNIMROD.setPropertyValue("Filename", "../../../../Test/Instrument/NIM_Definition.xml");
+    inputFile = loaderNIMROD.getPropertyValue("Filename");
+
+    loaderNIMROD.setPropertyValue("Workspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderNIMROD.getPropertyValue("Filename") )
+    TS_ASSERT( ! result.compare(inputFile));
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderNIMROD.getPropertyValue("Workspace") )
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderNIMROD.execute());
+
+    TS_ASSERT( loaderNIMROD.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName)));
+
+    boost::shared_ptr<IInstrument> i = output->getInstrument();
+
+    boost::shared_ptr<IDetector> ptrDet = i->getDetector(20201001);
+    TS_ASSERT_EQUALS( ptrDet->getName(), "det 1");
+    TS_ASSERT_EQUALS( ptrDet->getID(), 20201001);
+    TS_ASSERT_DELTA( ptrDet->getPos().X(),  -0.0909, 0.0001);
+    TS_ASSERT_DELTA( ptrDet->getPos().Y(), 0.3983, 0.0001);
+    TS_ASSERT_DELTA( ptrDet->getPos().Z(),  4.8888, 0.0001);
+  }
+
 
   void testExecHRP()
   {

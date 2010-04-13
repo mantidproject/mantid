@@ -559,6 +559,8 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     throw std::logic_error( "Second argument to function setLocation must be a pointer to an XML element with tag name location." );
   }
 
+  Geometry::V3D pos;  // position may be defined from values in <location> combined with values from sub-elements <trans>
+
   // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
   if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") || pElem->hasAttribute("p") ||
        pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
@@ -610,7 +612,6 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     else
     {
       // In this case, the value given represents a vector from the parent to the child
-      Geometry::V3D pos;
       pos.spherical(R,theta,phi);
       comp->setPos(pos);
     }
@@ -624,7 +625,58 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
     if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
     if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
 
-    comp->setPos(Geometry::V3D(x,y,z));
+    pos(x,y,z);
+    comp->setPos(pos);
+  }
+
+  // Check if sub-elements <trans> present - for now ignore these if m_deltaOffset = true
+
+  Element* pRecursive = pElem;
+  if ( !m_deltaOffsets )
+  {
+    bool stillTransElement = true;
+    Geometry::V3D posTrans;
+    while ( stillTransElement )
+    {
+      Element* tElem = pRecursive->getChildElement("trans");
+      if (tElem)
+      {
+        // Polar coordinates can be labelled as (r,t,p) or (R,theta,phi)
+        if ( tElem->hasAttribute("r") || tElem->hasAttribute("t") || tElem->hasAttribute("p") ||
+             tElem->hasAttribute("R") || tElem->hasAttribute("theta") || tElem->hasAttribute("phi") )
+        {
+          double R=0.0, theta=0.0, phi=0.0;
+
+          if ( tElem->hasAttribute("r") ) R = atof((tElem->getAttribute("r")).c_str());
+          if ( tElem->hasAttribute("t") ) theta = atof((tElem->getAttribute("t")).c_str());
+          if ( tElem->hasAttribute("p") ) phi = atof((tElem->getAttribute("p")).c_str());
+
+          if ( tElem->hasAttribute("R") ) R = atof((tElem->getAttribute("R")).c_str());
+          if ( tElem->hasAttribute("theta") ) theta = atof((tElem->getAttribute("theta")).c_str());
+          if ( tElem->hasAttribute("phi") ) phi = atof((tElem->getAttribute("phi")).c_str());      
+
+          posTrans.spherical(R,theta,phi);
+        }
+        else
+        {
+          double x=0.0, y=0.0, z=0.0;
+
+          if ( tElem->hasAttribute("x") ) x = atof((tElem->getAttribute("x")).c_str());
+          if ( tElem->hasAttribute("y") ) y = atof((tElem->getAttribute("y")).c_str());
+          if ( tElem->hasAttribute("z") ) z = atof((tElem->getAttribute("z")).c_str());
+
+          posTrans(x,y,z);
+        }
+        pos += posTrans;     
+
+        pRecursive = tElem; // for recursive action
+      }
+      else
+        stillTransElement = false;
+    }
+
+    // Set potentially updated position
+    comp->setPos(pos);
   }
 
 
@@ -649,10 +701,11 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
   }
 
   // loop recursively to see if location element containes (further) rotation instructions
+  pRecursive = pElem;
   bool stillRotationElement = true;
   while ( stillRotationElement )
   {
-    Element* rotElement = pElem->getChildElement("rot");
+    Element* rotElement = pRecursive->getChildElement("rot");
     if (rotElement) 
     {
       double rotAngle = atof( (rotElement->getAttribute("val")).c_str() ); // assumed to be in degrees
@@ -670,7 +723,7 @@ void LoadInstrument::setLocation(Geometry::Component* comp, Poco::XML::Element* 
 
       comp->rotate(Geometry::Quat(rotAngle, Geometry::V3D(axis_x,axis_y,axis_z)));      
 
-      pElem = rotElement; // for recursive action
+      pRecursive = rotElement; // for recursive action
     }
     else
       stillRotationElement = false;
@@ -992,216 +1045,222 @@ void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* p
 
   if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
-
-  NodeList* pNL = pElem->getElementsByTagName("parameter");
-  unsigned int numberParam = pNL->length();
-
   // Get logfile-cache from instrument
   std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache = m_instrument->getLogfileCache();
 
-  for (unsigned int i = 0; i < numberParam; i++)
+
+  NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
+  unsigned int pNL_comp_length = pNL_comp->length();
+
+  for (unsigned int i = 0; i < pNL_comp_length; i++)
   {
-    Element* pParamElem = static_cast<Element*>(pNL->item(i));
-
-    if ( !pParamElem->hasAttribute("name") )
-      throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
-        " contain <parameter> element with no name attribute in XML instrument file", m_filename);
-
-    std::string paramName = pParamElem->getAttribute("name");
-
-    if ( paramName.compare("rot")==0 || paramName.compare("pos")==0  )
+    // we are only interest in the top level parameter elements hence
+    // the reason for the if statement below
+    if ( (pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
+        ((pNL_comp->item(i))->nodeName()).compare("parameter") == 0 )
     {
-      g_log.error() << "XML element with name or type = " << comp->getName() <<
-         " contains <parameter> element with name=\"" << paramName << "\"." <<
-            " This is a reserved Mantid keyword. Please use other name, " <<
-            "and see www.mantidproject.org/InstrumentDefinitionFile for list of reserved keywords." <<
-            " This parameter is ignored";
-      continue;
-    }
+      Element* pParamElem = static_cast<Element*>(pNL_comp->item(i));
 
-    std::string logfileID = "";
-    std::string value = "";
-
-    std::string type = "double"; // default
-    std::string extractSingleValueAs = "mean"; // default
-    std::string eq = "";
-
-    NodeList* pNLvalue = pParamElem->getElementsByTagName("value");
-    unsigned int numberValueEle = pNLvalue->length();
-    Element* pValueElem;
-
-    NodeList* pNLlogfile = pParamElem->getElementsByTagName("logfile");
-    unsigned int numberLogfileEle = pNLlogfile->length();
-    Element* pLogfileElem;
-
-    NodeList* pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
-    unsigned int numberLookUp = pNLLookUp->length();
-
-    NodeList* pNLFormula = pParamElem->getElementsByTagName("formula");
-    unsigned int numberFormula = pNLFormula->length();
-
-    if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula > 1 )
-    {
-      g_log.warning() << "XML element with name or type = " << comp->getName() <<
-        " contains <parameter> element where the value of the parameter has been specified" <<
-        " more than once. See www.mantidproject.org/InstrumentDefinitionFile for how the value" <<
-        " of the parameter is set in this case.";
-    }
-
-    if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula == 0 )
-    {
-      g_log.error() << "XML element with name or type = " << comp->getName() <<
-        " contains <parameter> for which no value is specified." <<
-        " See www.mantidproject.org/InstrumentDefinitionFile for how to set the value" <<
-        " of a parameter. This parameter is ignored.";
-      continue;
-    }
-
-    // if more than one <value> specified for a parameter use only the first <value> element
-    if ( numberValueEle >= 1 )
-    {
-      pValueElem = static_cast<Element*>(pNLvalue->item(0));
-      if ( !pValueElem->hasAttribute("val") )
+      if ( !pParamElem->hasAttribute("name") )
         throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
-          " contains <parameter> element with invalid syntax for its subelement <value>." +
-          " Correct syntax is <value val=\"\"/>", m_filename);
-      value = pValueElem->getAttribute("val");
-    }
-    else if ( numberLogfileEle >= 1 )
-    {
-      pLogfileElem = static_cast<Element*>(pNLlogfile->item(0));
-      if ( !pLogfileElem->hasAttribute("id") )
-        throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
-          " contains <parameter> element with invalid syntax for its subelement logfile>." +
-          " Correct syntax is <logfile id=\"\"/>", m_filename);
-      logfileID = pLogfileElem->getAttribute("id");
+          " contain <parameter> element with no name attribute in XML instrument file", m_filename);
 
-      if ( pLogfileElem->hasAttribute("eq") )
-        eq = pLogfileElem->getAttribute("eq");
-      if ( pLogfileElem->hasAttribute("extract-single-value-as") )
-        extractSingleValueAs = pLogfileElem->getAttribute("extract-single-value-as");      
-    }
-    pNLlogfile->release();
-    pNLvalue->release();
+      std::string paramName = pParamElem->getAttribute("name");
 
-
-    if ( pParamElem->hasAttribute("type") )
-      type = pParamElem->getAttribute("type");
-
-
-    // check if <fixed /> element present
-
-    bool fixed = false;
-    NodeList* pNLFixed = pParamElem->getElementsByTagName("fixed");
-    unsigned int numberFixed = pNLFixed->length();
-    if ( numberFixed >= 1 )
-    {
-      fixed = true;
-    }
-    pNLFixed->release();
-
-    // some processing
-
-    std::string fittingFunction = "";
-    std::string tie = "";
-
-    if ( type.compare("fitting") == 0 )
-    {
-      size_t found = paramName.find(":");
-      if (found!=std::string::npos)
+      if ( paramName.compare("rot")==0 || paramName.compare("pos")==0  )
       {
-        // check that only one : in name
-        size_t index = paramName.find(":", found+1); 
-        if (index!=std::string::npos)
+        g_log.error() << "XML element with name or type = " << comp->getName() <<
+           " contains <parameter> element with name=\"" << paramName << "\"." <<
+              " This is a reserved Mantid keyword. Please use other name, " <<
+              "and see www.mantidproject.org/InstrumentDefinitionFile for list of reserved keywords." <<
+              " This parameter is ignored";
+        continue;
+      }
+
+      std::string logfileID = "";
+      std::string value = "";
+
+      std::string type = "double"; // default
+      std::string extractSingleValueAs = "mean"; // default
+      std::string eq = "";
+
+      NodeList* pNLvalue = pParamElem->getElementsByTagName("value");
+      unsigned int numberValueEle = pNLvalue->length();
+      Element* pValueElem;
+
+      NodeList* pNLlogfile = pParamElem->getElementsByTagName("logfile");
+      unsigned int numberLogfileEle = pNLlogfile->length();
+      Element* pLogfileElem;
+
+      NodeList* pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
+      unsigned int numberLookUp = pNLLookUp->length();
+
+      NodeList* pNLFormula = pParamElem->getElementsByTagName("formula");
+      unsigned int numberFormula = pNLFormula->length();
+
+      if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula > 1 )
+      {
+        g_log.warning() << "XML element with name or type = " << comp->getName() <<
+          " contains <parameter> element where the value of the parameter has been specified" <<
+          " more than once. See www.mantidproject.org/InstrumentDefinitionFile for how the value" <<
+          " of the parameter is set in this case.";
+      }
+
+      if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula == 0 )
+      {
+        g_log.error() << "XML element with name or type = " << comp->getName() <<
+          " contains <parameter> for which no value is specified." <<
+          " See www.mantidproject.org/InstrumentDefinitionFile for how to set the value" <<
+          " of a parameter. This parameter is ignored.";
+        continue;
+      }
+
+      // if more than one <value> specified for a parameter use only the first <value> element
+      if ( numberValueEle >= 1 )
+      {
+        pValueElem = static_cast<Element*>(pNLvalue->item(0));
+        if ( !pValueElem->hasAttribute("val") )
+          throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
+            " contains <parameter> element with invalid syntax for its subelement <value>." +
+            " Correct syntax is <value val=\"\"/>", m_filename);
+        value = pValueElem->getAttribute("val");
+      }
+      else if ( numberLogfileEle >= 1 )
+      {
+        pLogfileElem = static_cast<Element*>(pNLlogfile->item(0));
+        if ( !pLogfileElem->hasAttribute("id") )
+          throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
+            " contains <parameter> element with invalid syntax for its subelement logfile>." +
+            " Correct syntax is <logfile id=\"\"/>", m_filename);
+        logfileID = pLogfileElem->getAttribute("id");
+
+        if ( pLogfileElem->hasAttribute("eq") )
+          eq = pLogfileElem->getAttribute("eq");
+        if ( pLogfileElem->hasAttribute("extract-single-value-as") )
+          extractSingleValueAs = pLogfileElem->getAttribute("extract-single-value-as");      
+      }
+      pNLlogfile->release();
+      pNLvalue->release();
+
+
+      if ( pParamElem->hasAttribute("type") )
+        type = pParamElem->getAttribute("type");
+
+
+      // check if <fixed /> element present
+
+      bool fixed = false;
+      NodeList* pNLFixed = pParamElem->getElementsByTagName("fixed");
+      unsigned int numberFixed = pNLFixed->length();
+      if ( numberFixed >= 1 )
+      {
+        fixed = true;
+      }
+      pNLFixed->release();
+
+      // some processing
+
+      std::string fittingFunction = "";
+      std::string tie = "";
+
+      if ( type.compare("fitting") == 0 )
+      {
+        size_t found = paramName.find(":");
+        if (found!=std::string::npos)
         {
-          g_log.error() << "Fitting <parameter> in instrument definition file defined with" 
-            << " more than one column character :. One must used.\n";
-        }
-        else
-        {
-          fittingFunction = paramName.substr(0,found);
-          paramName = paramName.substr(found+1, paramName.size());
+          // check that only one : in name
+          size_t index = paramName.find(":", found+1); 
+          if (index!=std::string::npos)
+          {
+            g_log.error() << "Fitting <parameter> in instrument definition file defined with" 
+              << " more than one column character :. One must used.\n";
+          }
+          else
+          {
+            fittingFunction = paramName.substr(0,found);
+            paramName = paramName.substr(found+1, paramName.size());
+          }
         }
       }
-    }
 
-    if ( fixed )
-    {
-      std::ostringstream str;
-      str << paramName << "=" << value;
-      tie = str.str();
-    }
-
-    // check if <min> or <max> elements present
-
-    std::string constraintMin;
-    std::string constraintMax;
-    
-    NodeList* pNLMin = pParamElem->getElementsByTagName("min");
-    unsigned int numberMin = pNLMin->length();
-    NodeList* pNLMax = pParamElem->getElementsByTagName("max");
-    unsigned int numberMax = pNLMax->length();
-
-    if ( numberMin >= 1)
-    {
-      Element* pMin = static_cast<Element*>(pNLMin->item(0));
-      constraintMin = pMin->getAttribute("val"); 
-    }
-    if ( numberMax >= 1)
-    {
-      Element* pMax = static_cast<Element*>(pNLMax->item(0));
-      constraintMax = pMax->getAttribute("val");
-    }
-    pNLMin->release();
-    pNLMax->release();
-
-
-    // Check if look up table is specified
-
-    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
-
-    if ( numberLookUp >= 1 )
-    {
-      Element* pLookUp = static_cast<Element*>(pNLLookUp->item(0));
-
-      interpolation->setMethod(pLookUp->getAttribute("interpolation"));
-      interpolation->setXUnit(pLookUp->getAttribute("x-unit"));    
-
-      NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
-      unsigned int numberPoint = pNLpoint->length();
-
-      for ( unsigned int i = 0; i < numberPoint; i++)
+      if ( fixed )
       {
-        Element* pPoint = static_cast<Element*>(pNLpoint->item(i));
-        double x = atof( pPoint->getAttribute("x").c_str() );
-        double y = atof( pPoint->getAttribute("y").c_str() );
-        interpolation->addPoint(x,y); 
+        std::ostringstream str;
+        str << paramName << "=" << value;
+        tie = str.str();
       }
-      pNLpoint->release();
-    }
-    pNLLookUp->release();
+
+      // check if <min> or <max> elements present
+
+      std::string constraintMin;
+      std::string constraintMax;
+      
+      NodeList* pNLMin = pParamElem->getElementsByTagName("min");
+      unsigned int numberMin = pNLMin->length();
+      NodeList* pNLMax = pParamElem->getElementsByTagName("max");
+      unsigned int numberMax = pNLMax->length();
+
+      if ( numberMin >= 1)
+      {
+        Element* pMin = static_cast<Element*>(pNLMin->item(0));
+        constraintMin = pMin->getAttribute("val"); 
+      }
+      if ( numberMax >= 1)
+      {
+        Element* pMax = static_cast<Element*>(pNLMax->item(0));
+        constraintMax = pMax->getAttribute("val");
+      }
+      pNLMin->release();
+      pNLMax->release();
 
 
-    // Check if formula is specified
+      // Check if look up table is specified
 
-    std::string formula = "";
-    std::string formulaUnit = "TOF";
+      boost::shared_ptr<Interpolation> interpolation(new Interpolation);
 
-    if ( numberFormula >= 1 )
-    {
-      Element* pFormula = static_cast<Element*>(pNLFormula->item(0));
-      formula = pFormula->getAttribute("eq");   
-      if ( pFormula->hasAttribute("unit") )
-        formulaUnit = pFormula->getAttribute("unit");
-    }
-    pNLFormula->release();
+      if ( numberLookUp >= 1 )
+      {
+        Element* pLookUp = static_cast<Element*>(pNLLookUp->item(0));
+
+        interpolation->setMethod(pLookUp->getAttribute("interpolation"));
+        interpolation->setXUnit(pLookUp->getAttribute("x-unit"));    
+
+        NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
+        unsigned int numberPoint = pNLpoint->length();
+
+        for ( unsigned int i = 0; i < numberPoint; i++)
+        {
+          Element* pPoint = static_cast<Element*>(pNLpoint->item(i));
+          double x = atof( pPoint->getAttribute("x").c_str() );
+          double y = atof( pPoint->getAttribute("y").c_str() );
+          interpolation->addPoint(x,y); 
+        }
+        pNLpoint->release();
+      }
+      pNLLookUp->release();
 
 
-    boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, paramName, type, tie, 
-      constraintMin, constraintMax, fittingFunction, extractSingleValueAs, eq, comp));
-    logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
+      // Check if formula is specified
+
+      std::string formula = "";
+      std::string formulaUnit = "TOF";
+
+      if ( numberFormula >= 1 )
+      {
+        Element* pFormula = static_cast<Element*>(pNLFormula->item(0));
+        formula = pFormula->getAttribute("eq");   
+        if ( pFormula->hasAttribute("unit") )
+          formulaUnit = pFormula->getAttribute("unit");
+      }
+      pNLFormula->release();
+
+
+      boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, paramName, type, tie, 
+        constraintMin, constraintMax, fittingFunction, extractSingleValueAs, eq, comp));
+      logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
+    } // end of if statement
   }
-  pNL->release();
+  pNL_comp->release();
 }
 
 
