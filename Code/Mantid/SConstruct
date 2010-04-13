@@ -199,6 +199,8 @@ if os.name == 'posix':
 	    lpts.append('-g')
 	else :
 	    cflags.append('-O3')
+	    cflags.append('-g')   # debug symbols useful in release mode too
+	    lpts.append('-g')
 
 	cflags.append(MantidBuild.getConfigFlags('gsl-config --cflags'))
 	lpts.append(MantidBuild.getConfigFlags('gsl-config --libs'))
