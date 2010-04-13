@@ -1,10 +1,13 @@
 #############################################################################
 ###################### USER-SERVICEABLE PART ################################
 #############################################################################
+
 win32 {
  QMAKESPEC=win32-msvc2005  
 }
 unix {
+ QMAKE_CXXFLAGS_RELEASE += -g
+ QMAKE_LFLAGS_RELEASE += -g
  macx{
  QMAKESPEC=macx-g++
  } else {
@@ -69,10 +72,16 @@ unix:!macx {
 
   INCLUDEPATH       += /usr/include/
   INCLUDEPATH       += /usr/include/muParser/
-  INCLUDEPATH       += /usr/include/qwt-qt4/
-  INCLUDEPATH       += /usr/include/qwtplot3d-qt4/
-  INCLUDEPATH       += /usr/include/qwt/
-  INCLUDEPATH       += /usr/include/qwtplot3d/
+  exists(/usr/include/qwt-qt4) {
+    INCLUDEPATH       += /usr/include/qwt-qt4/
+  } else {
+    INCLUDEPATH       += /usr/include/qwt/
+  }
+  exists(/usr/include/qwtplot3d-qt4) {
+    INCLUDEPATH       += /usr/include/qwtplot3d-qt4/
+  } else {
+    INCLUDEPATH       += /usr/include/qwtplot3d/
+  }
 } else{
   INCLUDEPATH       += ../../Third_Party/include/
   INCLUDEPATH       += ../../Third_Party/include/muparser
@@ -90,31 +99,35 @@ unix:!macx {
 
 # dynamically link against dependencies if they are installed system-wide
 unix {
-  LIBS         += -L../../Third_Party/lib/mac
   LIBS         += -lqscintilla2
   LIBS         += -lmuparser
 
 macx {
+  LIBS += -L../../Third_Party/lib/mac
   LIBS += -L../3rdparty/qwt/lib -lqwt
   LIBS += -lqwtplot3d
   LIBS += -lboost_signals
 }else{
   # Some systems have qwt and qwtplot3d-qt4 and others have -qt4 suffixes on both
   # and some in /usr/lib64 others /usr/lib
-  exists(/usr/lib64/) {
-   PREFIX=/usr/lib64/
-  } else {
-   PREFIX=/usr/lib/
-  }
-  exists($$join(PREFIX,"","",libqwt-qt4.so)){
-    LIBS += -L$$PREFIX -lqwt-qt4
+  # some systems also have a /usr/lib64 but are not 64 bit
+  exists(/usr/lib64/libqwt-qt4.so){
+    LIBS += -lqwt-qt4
   }else{
-    LIBS +=  -L$$PREFIX -lqwt
+    exists(/usr/lib/libqwt-qt4.so){
+     LIBS += -lqwt-qt4
+    }else{
+     LIBS += -lqwt
+    }
   }
-  exists($$join(PREFIX,"","",libqwtplot3d-qt4.so)){
+  exists(/usr/lib64/libqwtplot3d-qt4.so){
     LIBS += -lqwtplot3d-qt4
   } else{
-    LIBS += -lqwtplot3d
+    exists(/usr/lib/libqwtplot3d-qt4.so){
+     LIBS += -lqwtplot3d-qt4
+    }else{
+     LIBS += -lqwtplot3d
+    }
   }
   LIBS += -lboost_signals-mt
 
