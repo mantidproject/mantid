@@ -26,7 +26,7 @@ ThreadSafeLogStreamBuf::~ThreadSafeLogStreamBuf()
 }
 
 /**
- * If the character is a new line character, \r or \n, then write the buffered messsage to the chosen device(s). If
+ * If the character is an EOL character then write the buffered messsage to the chosen device(s). If
  * not, buffer the character
  * @param c The input character
  * @returns The ASCII code of the input character
@@ -35,15 +35,15 @@ int ThreadSafeLogStreamBuf::writeToDevice(char c)
 {
   if (c == '\n' || c == '\r')
   {
-    Poco::Message msg(logger().name(), m_messages[omp_get_thread_num()], getPriority());
-    m_messages[omp_get_thread_num()] = "";
+    Poco::Message msg(logger().name(), m_messages[PARALLEL_THREAD_NUMBER], getPriority());
+    m_messages[PARALLEL_THREAD_NUMBER] = "";
     logger().log(msg);
   }
   else 
   {
     PARALLEL_CRITICAL(logstream)
     {
-      m_messages[omp_get_thread_num()] += c;
+      m_messages[PARALLEL_THREAD_NUMBER] += c;
     }
   }
   return static_cast<int>(c);
@@ -95,9 +95,8 @@ ThreadSafeLogStream::ThreadSafeLogStream(Poco::Logger& logger, Poco::Message::Pr
 }
 
 /**
- * Constructor taking a name for the stream logger
+ * Constructor taking a name for a logger
  * @param loggerName A name for the logger stream
- * @param logger A reference to the logger associated with this stream
  * @param priority The stream priority
  */
 ThreadSafeLogStream::ThreadSafeLogStream(const std::string& loggerName, Poco::Message::Priority priority):

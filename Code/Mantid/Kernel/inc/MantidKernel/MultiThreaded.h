@@ -89,6 +89,8 @@
 #define PARALLEL_CRITICAL(name) \
                 PRAGMA(omp critical(name))
 
+#define PARALLEL_THREAD_NUMBER omp_get_thread_num()
+
 #else //_OPENMP
 ///Empty definitions - to enable set your complier to enable openMP
 #define PARALLEL_FOR_NO_WSP_CHECK()
@@ -101,6 +103,7 @@
 #define PARALLEL_END_INTERUPT_REGION
 #define PARALLEL_CHECK_INTERUPT_REGION
 #define PARALLEL_CRITICAL(name)
+#define PARALLEL_THREAD_NUMBER 0
 #endif //_OPENMP
 
 #endif //MANTID_KERNEL_MULTITHREADED_H_

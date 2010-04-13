@@ -8,10 +8,11 @@ from socket import gethostname
 def procHeaderPath(ln,keyname,out):
   ## Strips the header components if in existance and returns:
   ## Yes this is ugly repetition in a loop.
+  out = ""
   if ln.startswith(keyname):
     out=ln[len(keyname)+1:].strip('\n')
-    if out[-1]!='/':
-      out+='/'
+    if len(out) > 0 and out[-1]!='/':
+      out += '/'
   return out
 
 def procHeader(ln,keyname,out):
