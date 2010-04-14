@@ -804,6 +804,9 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
     if (cell(i,j) > zMax) zMax = cell(i,j);
   }
 
+  // Calculate xStart(), xEnd(), yStart(), yEnd()
+  boundingRect();
+  
   plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
 
   const Mantid::API::Axis* ax = m_workspace->getAxis(0);
