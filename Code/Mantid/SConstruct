@@ -205,8 +205,11 @@ if os.name == 'posix':
 	    lpts.append('-g')
 	else :
 	    cflags.append('-O3')
-	    cflags.append('-g')   # debug symbols useful in release mode too
-	    lpts.append('-g')
+#	    # it would be nice to have debug symbols here too
+#	    # but OpenMP seems to not like it
+#	    # need to investigate e.g. usining -g3 options
+#	    cflags.append('-g')
+#	    lpts.append('-g')
 
 	cflags.append(MantidBuild.getConfigFlags('gsl-config --cflags'))
 	lpts.append(MantidBuild.getConfigFlags('gsl-config --libs'))

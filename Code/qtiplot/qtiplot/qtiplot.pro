@@ -6,12 +6,14 @@ win32 {
  QMAKESPEC=win32-msvc2005  
 }
 unix {
- QMAKE_CXXFLAGS_RELEASE += -g
- QMAKE_LFLAGS_RELEASE += -g
+# openmp seems to be funny about debug symbols
+# QMAKE_CXXFLAGS_RELEASE += -g
+# QMAKE_LFLAGS_RELEASE += -g
  macx{
  QMAKESPEC=macx-g++
  } else {
- QMAKESPE=linux-g++
+# could also be linux-g++-64 so maybe best left to the system to determine
+# QMAKESPEC=linux-g++
  }
 }
 
