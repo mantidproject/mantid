@@ -299,6 +299,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\ThreadSafeLogStream.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TimeSeriesProperty.cpp"
 				>
 			</File>
@@ -566,6 +570,10 @@
 			</File>
 			<File
 				RelativePath=".\test\TestChannel.hh"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\ThreadSafeLogStream.h"
 				>
 			</File>
 			<File

@@ -180,6 +180,34 @@ public:
     TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 3.0, 0.0001);
 
+    ptrDet1 = i->getDetector(1005);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation3");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1005);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1006);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation4");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1006);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 20.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1007);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation5");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1007);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
+    ptrDet1 = i->getDetector(1008);
+    TS_ASSERT_EQUALS( ptrDet1->getName(), "combined translation6");
+    TS_ASSERT_EQUALS( ptrDet1->getID(), 1008);
+    TS_ASSERT_DELTA( ptrDet1->getPos().X(), 12.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Y(), 0.0, 0.0001);
+    TS_ASSERT_DELTA( ptrDet1->getPos().Z(), 0.0, 0.0001);
+
     AnalysisDataService::Instance().remove(wsName);
   }
 
