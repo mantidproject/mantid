@@ -707,7 +707,6 @@ namespace Mantid
 
       const std::string & details =  pmap_node.data().front();
       Geometry::ParameterMap& pmap = local_workspace->instrumentParameters();
-      pmap.clear();
       IInstrument_sptr instr = local_workspace->getBaseInstrument();
 
       int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
