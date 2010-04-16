@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/FitMultispectral.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/LoadNexus.h"
+#include "MantidNexus/LoadNeXus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid::API;
