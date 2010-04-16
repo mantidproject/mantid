@@ -16,7 +16,7 @@ namespace Mantid
   }
 
   namespace Geometry {
-    class Component;
+    class IComponent;
   }
 
   namespace API
@@ -56,7 +56,7 @@ namespace Mantid
       XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation,
         const std::string& formula, const std::string& formulaUnit, const std::string& paramName, const std::string& type, const std::string& tie, 
         const std::string& constraintMin, const std::string& constraintMax, const std::string& fitFunc, const std::string& extractSingleValueAs, 
-        const std::string& eq, Geometry::Component* comp);
+        const std::string& eq, const Geometry::IComponent* comp);
 
       /// Destructor
       ~XMLlogfile() {}
@@ -76,7 +76,7 @@ namespace Mantid
       boost::shared_ptr<Kernel::Interpolation> m_interpolation; // specific to fitting parameter 
       const std::string m_extractSingleValueAs;  ///< describes the way to extract a single value from the log file( average, first number, etc)
       const std::string m_eq;         ///< muParser equation to calculate the parameter value from the log value
-      const Geometry::Component* m_component;  ///< the component address
+      const Geometry::IComponent* m_component;  ///< the component address
 
       ///Returns parameter value as generated using possibly equation expression etc
       double createParamValue(Mantid::Kernel::TimeSeriesProperty<double>* logData);

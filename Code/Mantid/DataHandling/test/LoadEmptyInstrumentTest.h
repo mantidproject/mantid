@@ -68,6 +68,9 @@ public:
     wsName = "LoadEmptyInstrumentParamTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
 
+    //int iii;
+    //std::cin >> iii;
+
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT( loader.isExecuted() );
 
@@ -152,7 +155,7 @@ public:
 
     // check reserved keywords
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
-    TS_ASSERT_DELTA( dummy[0], 2.0, 0.0001);
+    TS_ASSERT_DELTA( dummy[0], 1.0, 0.0001);
     dummy = paramMap.getDouble("nickel-holder", "pos");
     TS_ASSERT_EQUALS (dummy.size(), 0);
     dummy = paramMap.getDouble("nickel-holder", "rot");
@@ -162,9 +165,19 @@ public:
     dummy = paramMap.getDouble("nickel-holder", "mistake");
     TS_ASSERT_EQUALS (dummy.size(), 0);
 
+    // check if <component-link> works
+    dummy = paramMap.getDouble("nickel-holder", "fjols");
+    //TS_ASSERT_EQUALS (dummy.size(), 0);
+    TS_ASSERT_DELTA( dummy[0], 200.0, 0.0001);
+
+  //  TS_ASSERT_EQUALS( det->getID(), 1008);
+  //  TS_ASSERT_EQUALS( det->getName(), "combined translation6");
+  //  param = paramMap.get(&(*det), "fjols");
+  //  TS_ASSERT_DELTA( param->value<double>(), 20.0, 0.0001);
+
+  //  std::cout << paramMap.asString() << std::endl;
 
     // check if combined translation works
-
     boost::shared_ptr<IInstrument> i = ws->getInstrument();
     boost::shared_ptr<IDetector> ptrDet = i->getDetector(1003);
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation");

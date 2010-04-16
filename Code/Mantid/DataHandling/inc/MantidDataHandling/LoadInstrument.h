@@ -124,7 +124,8 @@ namespace API
       void setLocation(Geometry::Component* comp, Poco::XML::Element* pElem);
 
       /// Set parameter/logfile info (if any) associated with component
-      void setLogfile(Geometry::Component* comp, Poco::XML::Element* pElem);
+      void setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
+                                std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache);
 
       /// Holds all the xml elements that have a \<parameter\> child element.
       /// Added purely for the purpose of computing speed and is used in setLogFile()

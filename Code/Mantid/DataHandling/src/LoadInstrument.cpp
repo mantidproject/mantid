@@ -8,6 +8,8 @@
 #include "MantidAPI/XMLlogfile.h"
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/ParametrizedComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -199,7 +201,7 @@ void LoadInstrument::exec()
 
   // See if any parameters set at instrument level
 
-  setLogfile(m_instrument.get(), pRootElem);
+  setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
 
 
   // do analysis for each top level compoment element
@@ -290,8 +292,6 @@ void LoadInstrument::exec()
   // Don't need this anymore (if it was even used) so empty it out to save memory
   m_tempPosHolder.clear();
 
-  pDoc->release();
-
   // Get cached file name
   std::string cacheFilename(m_filename.begin(),m_filename.end()-3);
   cacheFilename += "vtp";
@@ -327,6 +327,34 @@ void LoadInstrument::exec()
     }
     writer->write();
   }
+
+
+  // See if any <component-link> defined in IDF
+
+  NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
+  unsigned int numberLinks = pNL_link->length();
+  for (unsigned int iLink = 0; iLink < numberLinks; iLink++)
+  {
+    Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
+    std::string name = pLinkElem->getAttribute("name");
+    boost::shared_ptr<Geometry::IComponent> sharedIComp = m_instrument->getComponentByName(name);
+
+    if ( sharedIComp != boost::shared_ptr<Geometry::IComponent>() )
+    {
+      if ( boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp) )
+      {
+        boost::shared_ptr<Geometry::ParametrizedComponent> sharedParamComp = boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp);
+        setLogfile(sharedParamComp->base(), pLinkElem, m_instrument->getLogfileCache());
+      }
+      else
+      {
+        //boost::shared_ptr<Geometry::Component> sharedComp = boost::dynamic_pointer_cast<Geometry::Component>(sharedIComp);
+        setLogfile(sharedIComp.get(), pLinkElem, m_instrument->getLogfileCache());
+      }
+    }
+  }
+  pNL_link->release();
+  pDoc->release();
 
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
@@ -374,7 +402,7 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
 
   setLocation(ass, pLocElem);
   setFacing(ass, pLocElem);
-  setLogfile(ass, pCompElem);
+  setLogfile(ass, pCompElem, m_instrument->getLogfileCache());
 
 
   // The newly added component is required to have a type. Find out what this
@@ -477,7 +505,7 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     // check if any logfiles are referred to through the <parameter> element.
     setLocation(detector, pLocElem);
     setFacing(detector, pLocElem);
-    setLogfile(detector, pCompElem);
+    setLogfile(detector, pCompElem, m_instrument->getLogfileCache());
 
     try
     {
@@ -532,7 +560,7 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
     setLocation(comp, pLocElem);
     setFacing(comp, pLocElem);
-    setLogfile(comp, pCompElem);
+    setLogfile(comp, pCompElem, m_instrument->getLogfileCache());
   }
 }
 
@@ -1036,17 +1064,19 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
  *
  *  @param comp Some component
  *  @param pElem  Associated Poco::XML element to component that may hold a \<parameter\> element
+ *  @param logfileCache Cache to add information about parameter to
  *
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-void LoadInstrument::setLogfile(Geometry::Component* comp, Poco::XML::Element* pElem)
+void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
+                                std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache)
 {
   // check first if pElem contains any <parameter> child elements
 
   if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
   // Get logfile-cache from instrument
-  std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache = m_instrument->getLogfileCache();
+  //std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache = instrument->getLogfileCache();
 
 
   NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
