@@ -78,7 +78,7 @@ public:
 
   /// Overrides qwt_plot_curve::boundingRect
   QwtDoubleRect boundingRect() const;
-  /// Invalidates the bounding rect fourcing it to be recalculated
+  /// Invalidates the bounding rect forcing it to be recalculated
   void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
   /// Return pointer to the data if it of the right type or 0 otherwise

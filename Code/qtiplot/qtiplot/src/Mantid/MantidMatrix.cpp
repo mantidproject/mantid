@@ -1140,7 +1140,6 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
     closeDependants();
   }
 
-
   // Save selection
   QItemSelectionModel *oldSelModel = activeView()->selectionModel();
   QModelIndexList indexList = oldSelModel->selectedIndexes();
@@ -1165,6 +1164,8 @@ void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
     QItemSelectionModel *selModel = activeView()->selectionModel();
     selModel->select(sel,QItemSelectionModel::Select);
   }
+
+  invalidateBoundingRect();
 
   repaintAll();
 

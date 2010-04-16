@@ -206,7 +206,8 @@ public slots:
 
   //! Returns the bounding rect of the matrix coordinates
   QwtDoubleRect boundingRect();
-  //! Set the X and Y coordinate intervals
+  /// Invalidates the bounding rect forcing it to be recalculated
+  void invalidateBoundingRect(){m_boundingRect = QwtDoubleRect();}
 
   //! Min and max values in the matrix.
   void range(double *min, double *max);
