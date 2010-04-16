@@ -201,17 +201,30 @@ void NXClass::open()
   readAllInfo();
 }
 
-void NXClass::openLocal()
+/** It is fast, but the parent of this class must be open at
+ * the time of calling. openNXClass uses open() (the slow one). To open calss using openLocal() do:
+ *    NXTheClass class(parent,name);
+ *    class.openLocal();
+ *    // work with class
+ *    class.close();
+ * @param nxclass The NX class name. If empty NX_class() will be used
+ * @return true if OK
+ */
+bool NXClass::openLocal(const std::string& nxclass)
 {
-  if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),NX_class().c_str())) 
+  std::string className = nxclass.empty()? NX_class() : nxclass;
+  if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),className.c_str())) 
   {
-    if (NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str())) 
-    {
-      throw std::runtime_error("Cannot open group "+m_path+" of class "+NX_class());
-    }
+    // It would be nice if this worked
+    //if (NX_ERROR == NXopengrouppath(m_fileID,m_path.c_str())) 
+    //{
+    //  throw std::runtime_error("Cannot open group "+m_path+" of class "+NX_class());
+    //}
+    return false;
   }
   m_open = true;
   readAllInfo();
+  return true;
 }
 
 void NXClass::close()
@@ -424,6 +437,20 @@ void NXDataSet::open()
   NXclosedata(m_fileID);
 }
 
+void NXDataSet::openLocal()
+{
+  if( NXopendata(m_fileID,name().c_str()) != NX_OK )
+  {
+    throw std::runtime_error("Error opening data in group \"" + name() + "\"");
+  }
+  if( NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NX_OK )
+  {
+    throw std::runtime_error("Error retrieving information for " + name() + " group");
+  }
+  getAttributes();
+  NXclosedata(m_fileID);
+}
+
 /**  Wrapper to the NXgetdata.
  *   @param data The pointer to the buffer accepting the data from the file.
  *   @throw runtime_error if the operation fails.
@@ -478,7 +505,8 @@ Kernel::Property* NXLog::createTimeSeries(const std::string& start_time,const st
   NXInfo vinfo = getDataSetInfo("time");
   if( vinfo.type == NX_FLOAT64)
   {
-    NXDouble times = openNXDouble("time");
+    NXDouble times(*this,"time");
+    times.openLocal();
     times.load();
     std::string units = times.attributes("units");
     if (units == "minutes")
@@ -493,7 +521,8 @@ Kernel::Property* NXLog::createTimeSeries(const std::string& start_time,const st
   }
   else if( vinfo.type == NX_FLOAT32 )
   {
-    NXFloat times = openNXFloat("time");
+    NXFloat times(*this,"time");
+    times.openLocal();
     times.load();
     std::string units = times.attributes("units");
     if (units == "minutes")

@@ -149,6 +149,8 @@ namespace Mantid
       std::string NX_class()const{return "SDS";}
       /// Opens the data set. Does not read in any data. Call load(...) to load the data
       void open(); 
+      /// Opens datasets faster but the parent group must be already open
+      void openLocal(); 
       /// Returns the rank (number of dimensions) of the data. The maximum is 4
       int rank()const{return m_info.rank;}
       /// Returns the number of elements along i-th dimension
@@ -530,8 +532,15 @@ namespace Mantid
       */
       NXInfo getDataSetInfo(const std::string& name)const;
       void close();///< Close this class 
-      void open();         ///< Opens this NXClass
-      void openLocal();         ///< Opens this NXClass
+      /// Opens this NXClass using NXopengrouppath. Can be slow (or is slow)
+      void open();
+      /// Opens this NXClass using NXopengroup. It is fast, but the parent of this class must be open at
+      /// the time of calling. openNXClass uses open() (the slow one). To open calss using openLocal() do:
+      ///     NXTheClass class(parent,name);
+      ///     class.openLocal();
+      ///     // work with class
+      ///     class.close();
+      bool openLocal(const std::string& nxclass = "");
 
     protected:
       boost::shared_ptr<std::vector<NXClassInfo> > m_groups; ///< Holds info about the child NXClasses
@@ -579,7 +588,8 @@ namespace Mantid
         if (vinfo.type == NX_CHAR)
         {
           Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(logName);
-          NXChar value = openNXChar("value");
+          NXChar value(*this,"value");
+          value.openLocal();
           value.load();
           for(int i=0;i<value.dim0();i++)
           {
@@ -598,8 +608,8 @@ namespace Mantid
           if(logName.find("running")!=std::string::npos || logName.find("period ")!=std::string::npos )
           {
             Kernel::TimeSeriesProperty<bool>* logv = new Kernel::TimeSeriesProperty<bool>(logName);
-            // NXBool value = openNXBool("value");
-            NXDouble value = openNXDouble("value");
+            NXDouble value(*this,"value");
+            value.openLocal();
             value.load();
             for(int i = 0; i < value.dim0(); i++)
             {
@@ -608,17 +618,17 @@ namespace Mantid
             }
             return logv;
           }
-          NXDouble value = openNXDouble("value");
+          NXDouble value(*this,"value");
           return loadValues<NXDouble,TYPE>(logName,value,start_t,times);
         }
         else if (vinfo.type == NX_FLOAT32 )
         {
-          NXFloat value = openNXFloat("value");
+          NXFloat value(*this,"value");
           return loadValues<NXFloat,TYPE>(logName,value,start_t,times);
         }
         else if (vinfo.type == NX_INT32)
         {
-          NXInt value = openNXInt("value");
+          NXInt value(*this,"value");
           return loadValues<NXInt,TYPE>(logName,value,start_t,times);
         }
         return NULL;
@@ -627,6 +637,7 @@ namespace Mantid
       template<class NX_TYPE,class TIME_TYPE>
       Kernel::Property* loadValues(const std::string& logName, NX_TYPE value, time_t start_t,TIME_TYPE times)
       {
+          value.openLocal();
           Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(logName);
           value.load();
           int prev_index = 0;

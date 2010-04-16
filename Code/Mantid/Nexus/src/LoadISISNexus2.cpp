@@ -188,6 +188,7 @@ namespace Mantid
 
       local_workspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
       loadSampleData(local_workspace, entry);
+      m_progress->report("Loading logs");
       loadLogs(local_workspace, entry);
 
       // Load first period outside loop
@@ -563,17 +564,22 @@ namespace Mantid
     void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, NXEntry & entry,int period)
     {
 
-      std::string stime = entry.getString("start_time");
-
       NXMainClass runlogs = entry.openNXClass<NXMainClass>("runlog");
 
       for(std::vector<NXClassInfo>::const_iterator it=runlogs.groups().begin();it!=runlogs.groups().end();it++)
       {
         if (it->nxclass == "NXlog")
         {
-          NXLog nxLog = runlogs.openNXLog(it->nxname);
+          
+          NXLog nxLog(runlogs,it->nxname);
+          nxLog.openLocal();
+
           Kernel::Property* logv = nxLog.createTimeSeries();
-          if (!logv) continue;
+          if (!logv)
+          {
+            nxLog.close();
+            continue;
+          }
           ws->mutableSample().addLogData(logv);
           if (it->nxname == "icp_event")
           {
@@ -582,6 +588,7 @@ namespace Mantid
             ws->mutableSample().addLogData(parser.createAllPeriodsLog());
             ws->mutableSample().addLogData(parser.createRunningLog());
           }
+          nxLog.close();
         }
       }
 
@@ -590,18 +597,28 @@ namespace Mantid
       {
         if (it->nxclass == "IXseblock")
         {
-          NXMainClass selog = selogs.openNXClass<NXMainClass>(it->nxname);
-          if (selog.isValid("value_log"))
+          NXMainClass selog(selogs,it->nxname);
+          selog.openLocal("IXseblock");
+          NXLog nxLog(selog,"value_log");
+          bool ok = nxLog.openLocal();
+
+          if (ok)
           {
-            NXLog nxLog = selog.openNXLog("value_log");
             Kernel::Property* logv = nxLog.createTimeSeries("","selog_"+it->nxname);
-            if (!logv) continue;
+            if (!logv)
+            {
+              nxLog.close();
+              selog.close();
+              continue;
+            }
             ws->mutableSample().addLogData(logv);
+            nxLog.close();
           }
+          selog.close();
         }
       }
 
-        ws->populateInstrumentParameters();
+      ws->populateInstrumentParameters();
     }
 
     double LoadISISNexus2::dblSqrt(double in)
