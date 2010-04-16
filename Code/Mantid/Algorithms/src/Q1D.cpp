@@ -75,6 +75,11 @@ void Q1D::exec()
 
   // Get a reference to the spectra-detector map
   SpectraDetectorMap& specMap = outputWS->mutableSpectraMap();
+  // Clear the map, this will be faster than remap
+  specMap.clear();
+  //
+  const SpectraDetectorMap& inSpecMap = inputWS->spectraMap();
+
   const Axis* const spectraAxis = inputWS->getAxis(1);
   int newSpectrumNo = -1;
 
@@ -118,7 +123,7 @@ void Q1D::exec()
     if (spectraAxis->isSpectra()) 
     {
       if (newSpectrumNo == -1) newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(i);
-      specMap.remap(spectraAxis->spectraNo(i),newSpectrumNo);
+      specMap.addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(i)));
     }
 
     // Get the current spectrum for both input workspaces - not references, have to reverse below
@@ -235,7 +240,6 @@ void Q1D::exec()
     const double fractional = errY[k] ? std::sqrt(errE[k])/errY[k] : 0.0;
     EOut[k] = fractional*YOut[k];
   }
-
 }
 
 } // namespace Algorithms
