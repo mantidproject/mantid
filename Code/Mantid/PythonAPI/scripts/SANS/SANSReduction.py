@@ -290,6 +290,9 @@ _SAMPLE_RUN = ''
 def AssignSample(sample_run, reload = True):
     _printMessage('AssignSample("' + sample_run + '")')
     global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN
+    
+    __clearPrevious(SCATTER_SAMPLE,others=[SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
+    
     if( sample_run.startswith('.') or sample_run == '' or sample_run == None):
         _SAMPLE_SETUP = None
         _SAMPLE_RUN = ''
@@ -331,6 +334,9 @@ _CAN_RUN = ''
 def AssignCan(can_run, reload = True):
     _printMessage('AssignCan("' + can_run + '")')
     global SCATTER_CAN, _CAN_SETUP, _CAN_RUN
+    
+    __clearPrevious(SCATTER_CAN,others=[SCATTER_SAMPLE,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
+    
     if( can_run.startswith('.') or can_run == '' or can_run == None):
         SCATTER_CAN = ''
         _CAN_RUN = ''
@@ -388,6 +394,10 @@ def AssignCan(can_run, reload = True):
 def TransmissionSample(sample, direct, reload = True):
     _printMessage('TransmissionSample("' + sample + '","' + direct + '")')
     global TRANS_SAMPLE, DIRECT_SAMPLE
+    
+    __clearPrevious(TRANS_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
+    __clearPrevious(DIRECT_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_CAN])
+    
     TRANS_SAMPLE = _assignHelper(sample, True, reload)[0]
     DIRECT_SAMPLE = _assignHelper(direct, True, reload)[0]
     return TRANS_SAMPLE, DIRECT_SAMPLE
@@ -398,6 +408,10 @@ def TransmissionSample(sample, direct, reload = True):
 def TransmissionCan(can, direct, reload = True):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
     global TRANS_CAN, DIRECT_CAN
+    
+    __clearPrevious(TRANS_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,DIRECT_SAMPLE,DIRECT_CAN])
+    __clearPrevious(DIRECT_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE])
+
     TRANS_CAN = _assignHelper(can, True, reload)[0]
     if direct == '' or direct == None:
         DIRECT_CAN = DIRECT_SAMPLE 
@@ -476,6 +490,10 @@ def padRunNumber(run_no, field_width):
     else:
         filebase = run_no[:digit_end].rjust(field_width, '0')
         return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
+
+def __clearPrevious(ws1, others = []):
+    if type(ws1) == str and mtd.workspaceExists(ws1) and (not ws1 in others):
+        mtd.deleteWorkspace(ws1)
 
 ##########################
 # Loader function
