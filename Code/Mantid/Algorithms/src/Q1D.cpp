@@ -89,6 +89,8 @@ void Q1D::exec()
   const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
   const V3D beamline = samplePos-sourcePos;
+  // 2 * norm of beamline.
+  const double beamline_norm=2.0*beamline.norm();
 
   const bool doGravity = getProperty("AccountForGravity");
   double gm2over2h2 = 0.0;
@@ -105,6 +107,8 @@ void Q1D::exec()
   // A temporary vector to store intermediate Q values
   const int xLength = inputWS->readX(0).size();
   MantidVec Qx(xLength);
+  //
+  const double fmp=4.0*M_PI;
 
   for (int i = 0; i < numSpec; ++i)
   {
@@ -136,8 +140,12 @@ void Q1D::exec()
     {
       // Get the vector to get at the 3 components of the pixel position
       V3D detPos = det->getPos();
-      // Want L2 (sample-pixel distance) squared
-      const double L2 = std::pow(detPos.distance(samplePos),2);
+      // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
+      const double L2 = gm2over2h2*std::pow(detPos.distance(samplePos),2);
+      // Now detPos will be set with respect to samplePos
+      detPos-=samplePos;
+      // Keep a track of the drop for the previous bin, so we avoid create new V3D all the time
+      double previous_drop=0;
       for ( int j = 0; j < xLength; ++j)
       {
         // Lots more to do in this loop than for the non-gravity case
@@ -145,23 +153,22 @@ void Q1D::exec()
 
         // Calculate the drop (I'm fairly confident that Y is up!)
         // Using approx. constant prefix - will fix next week
-        const double drop = gm2over2h2 * XIn[j] * XIn[j] * L2;
-
-        // Calculate new 2theta in light of this
-        V3D sampleDetVec = detPos - samplePos; // must be in loop because of next line
-        sampleDetVec[1] += drop;
-        const double twoTheta = sampleDetVec.angle(beamline);
-        const double sinTheta = sin( 0.5 * twoTheta );
-
+        const double drop =  XIn[j] * XIn[j] * L2;
+        detPos[1] += (drop-previous_drop);
+        previous_drop=drop;
+        // This is 0.5*cos(2theta)
+        double halfcosTheta=detPos.scalar_prod(beamline)/detPos.norm()/beamline_norm;
+        // This is sin(theta)
+        double sinTheta=sqrt(0.5-halfcosTheta);
         // Now we're ready to go to Q
-        Qx[xLength-j-1] = 4.0*M_PI*sinTheta/XIn[j];
+        Qx[xLength-j-1] = fmp*sinTheta/XIn[j];
       }
     }
     else
     {
       // Calculate the Q values for the current spectrum
       const double sinTheta = sin( inputWS->detectorTwoTheta(det)/2.0 );
-      const double factor = 4.0*M_PI*sinTheta;
+      const double factor = fmp*sinTheta;
       for ( int j = 0; j < xLength; ++j)
       {
         Qx[xLength-j-1] = factor/XIn[j];
