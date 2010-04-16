@@ -6,6 +6,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cfloat>
+#include <iomanip>
 
 namespace Mantid
 {
@@ -64,6 +65,9 @@ void NormaliseToMonitor::init()
     "Entering a value here will cause normalisation by integrated count\n"
     "mode to be used and crop the spectrum removing any of the spectrum at\n"
     "higher X values");
+  declareProperty("IncludePartialBins", false, 
+    "If true and an integration range is set then partial bins at either \n"
+    "end of the integration range are also included");
 }
 
 void NormaliseToMonitor::exec()
@@ -285,6 +289,8 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
   integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
   integrate->setProperty("RangeLower",m_integrationMin);
   integrate->setProperty("RangeUpper",m_integrationMax);
+  const bool incPartBins = getProperty("IncludePartialBins");
+  integrate->setProperty("IncludePartialBins",incPartBins);
   try {
     integrate->execute();
   } catch (std::runtime_error) {

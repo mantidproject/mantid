@@ -5,6 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/Progress.h"
+#include <cmath>
 
 namespace Mantid
 {
@@ -34,6 +35,7 @@ void SimpleIntegration::init()
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
   declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePositive->clone());
+  declareProperty("IncludePartialBins", false, "If true then partial bins from the beginning and end of the input range are also included in the integration.");
 }
 
 /** Executes the algorithm
@@ -47,6 +49,7 @@ void SimpleIntegration::exec()
   m_MaxRange = getProperty("RangeUpper");
   m_MinSpec = getProperty("StartWorkspaceIndex");
   m_MaxSpec = getProperty("EndWorkspaceIndex");
+  const bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
@@ -75,7 +78,6 @@ void SimpleIntegration::exec()
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
   bool is_distrib=outputWorkspace->isDistribution();
-
   Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
   // Loop over spectra
   PARALLEL_FOR2(localworkspace,outputWorkspace)
@@ -106,26 +108,62 @@ void SimpleIntegration::exec()
     
     highit--; // Upper limit is the bin before, i.e. the last value smaller than MaxRange
   
-    MantidVec::difference_type distmin=std::distance(X.begin(),lowit);
-    MantidVec::difference_type distmax=std::distance(X.begin(),highit);
+    MantidVec::difference_type distmin = std::distance(X.begin(),lowit);
+    MantidVec::difference_type distmax = std::distance(X.begin(),highit);
 
     double sumY, sumE;
     if (!is_distrib) //Sum the Y, and sum the E in quadrature
     {
-      sumY=std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
-      sumE=std::accumulate(E.begin()+distmin,E.begin()+distmax,0.0,VectorHelper::SumSquares<double>());
+      sumY = std::accumulate(Y.begin()+distmin,Y.begin()+distmax,0.0);
+      sumE = std::accumulate(E.begin()+distmin,E.begin()+distmax,0.0,VectorHelper::SumSquares<double>());
     }
     else // Sum Y*binwidth and Sum the (E*binwidth)^2.
     {
       std::vector<double> widths(X.size());
       std::adjacent_difference(lowit,highit+1,widths.begin()); // highit+1 is safe while input workspace guaranteed to be histogram
-      sumY=std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
-      sumE=std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),VectorHelper::TimesSquares<double>());
+      sumY = std::inner_product(Y.begin()+distmin,Y.begin()+distmax,widths.begin()+1,0.0);
+      sumE = std::inner_product(E.begin()+distmin,E.begin()+distmax,widths.begin()+1,0.0,std::plus<double>(),VectorHelper::TimesSquares<double>());
+    }
+    // If partial bins are included, set integration range to exact range given and add on contributions from partial bins either side of range.
+    if( incPartBins )
+    {
+      if( distmin > 0 )
+      {
+        const double lower_bin = *lowit;
+        const double prev_bin = *(lowit - 1);
+        double fraction = (lower_bin - m_MinRange);
+        if( !is_distrib )
+        {
+          fraction /= (lower_bin - prev_bin);
+        }
+        const MantidVec::size_type val_index = distmin - 1;
+        sumY += Y[val_index] * fraction;
+        const double eval = E[val_index];
+        sumE += eval * eval * fraction * fraction;
+      }
+      if( highit < X.end() - 1)
+      {
+        const double upper_bin = *highit;
+        const double next_bin = *(highit + 1);
+        double fraction = (m_MaxRange - upper_bin);
+        if( !is_distrib )
+        {
+          fraction /= (next_bin - upper_bin);
+        }
+        sumY += Y[distmax] * fraction;
+        const double eval = E[distmax];
+        sumE += eval * eval * fraction * fraction;
+      }
+      
+      outputWorkspace->dataX(j)[0] = m_MinRange;
+      outputWorkspace->dataX(j)[1] = m_MaxRange;
+    }
+    else
+    {
+      outputWorkspace->dataX(j)[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
+      outputWorkspace->dataX(j)[1] = *highit;
     }
 
-    //Set X-boundaries
-    outputWorkspace->dataX(j)[0] = lowit==X.end() ? *(lowit-1) : *(lowit);
-    outputWorkspace->dataX(j)[1] = *highit;
     outputWorkspace->dataY(j)[0] = sumY;
     outputWorkspace->dataE(j)[0] = sqrt(sumE); // Propagate Gaussian error
 

@@ -29,7 +29,8 @@ public:
       input->dataX(1)[i] = i;
       input->dataX(2)[i] = i;
     }
-    input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
+
+     input->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     // Now need to set up a minimal instrument and spectra-detector map
     int forSpecDetMap[3] = {0,1,2};
     input->getAxis(1)->spectraNo(0) = 0;
@@ -158,6 +159,45 @@ public:
       TS_ASSERT_EQUALS( output->readY(0)[k], 0.2 )
       TS_ASSERT_DELTA( output->readE(0)[k], 0.0657, 0.0001 )
     }
+  }
+
+  void testNormaliseByIntegratedCountIncPartBins()
+  {
+    NormaliseToMonitor norm3;
+    norm3.initialize();
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("InputWorkspace","normMon") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("OutputWorkspace","normMon4") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("MonitorSpectrum","0") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("IntegrationRangeMin","3.5") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("IntegrationRangeMax","9.7") )
+    TS_ASSERT_THROWS_NOTHING( norm3.setPropertyValue("IncludePartialBins","1") )
+    TS_ASSERT_THROWS_NOTHING( norm3.execute() )
+    TS_ASSERT( norm3.isExecuted() )
+
+    MatrixWorkspace_const_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon4")) )
+    TS_ASSERT( ! output->isDistribution() )
+    TS_ASSERT( output->YUnit().empty() )
+
+    // Check the non-monitor spectra
+    for (int i = 1; i < output->getNumberHistograms(); ++i)
+    {
+      for (int j = 0; j < output->blocksize(); ++j)
+      {
+        TS_ASSERT_EQUALS( output->readX(i)[j], j )
+        TS_ASSERT_DELTA( output->readY(i)[j], 0.0323, 0.0001 )
+        TS_ASSERT_DELTA( output->readE(i)[j], 0.0485, 0.0001 )
+      }
+    }
+
+    // Now check the monitor one
+    for (int k = 0; k < output->blocksize(); ++k)
+    {
+      TS_ASSERT_EQUALS( output->readX(0)[k], k )
+      TS_ASSERT_DELTA( output->readY(0)[k], 0.1613, 0.0001 )
+      TS_ASSERT_DELTA( output->readE(0)[k], 0.0518, 0.0001 )
+    }
+    AnalysisDataService::Instance().remove("normMon4");
   }
 
   void testFailsOnSettingBothMethods()
