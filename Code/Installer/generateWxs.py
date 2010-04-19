@@ -251,7 +251,7 @@ def addCompList(Id,location,name,parent):
         if (fil.find('.svn') < 0 and fil.find('UNIT_TESTING') < 0):
             if ( os.path.isdir(location+'/'+fil) ):
                 idir += 1
-                lst = lst + addCompList(Id+'_'+str(idir), location+'/'+fil, fil, directory)
+                lst = lst + addCompList(Id+'_'+str(idir), location+'/'+fil, fil, directory)[0]
             else:
                 globalFileCount += 1
                 ifil = globalFileCount
