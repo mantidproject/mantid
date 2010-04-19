@@ -564,7 +564,7 @@ instrument_ids, instr_comp = addCompList('instrument',ins_def_dir,'instrument',I
 # At r4214 instrument cache files were moved to be written to managed workspace temp directory
 # so here we'll check if old files exist next to the instrument definitions and remove them
 idf_files = os.listdir(ins_def_dir)
-for file in idf_files:
+for index, file in enumerate(idf_files):
     if not file.endswith(".xml"): 
         continue
     file = file.rstrip('.xml')
