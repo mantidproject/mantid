@@ -14,6 +14,7 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Interpolation.h"
 
 #include "Poco/DOM/DOMParser.h"
@@ -23,6 +24,7 @@
 #include "Poco/DOM/NodeIterator.h"
 #include "Poco/DOM/NodeFilter.h"
 #include "Poco/File.h"
+#include "Poco/Path.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <sstream>
 
@@ -293,12 +295,21 @@ void LoadInstrument::exec()
   m_tempPosHolder.clear();
 
   // Get cached file name
+  // File should be written to a temp directory so we'll use the same one as the managed 
+  // workspaces
   std::string cacheFilename(m_filename.begin(),m_filename.end()-3);
   cacheFilename += "vtp";
+  cacheFilename =  Poco::Path(cacheFilename).getFileName();
+  
+  std::string tempDir = Kernel::ConfigService::Instance().getString("ManagedWorkspace.FilePath");
+  if( tempDir.empty() )
+  {
+    // Use system temporary directory
+    tempDir = Kernel::ConfigService::Instance().getTempDir();
+  }
   // check for the geometry cache
   Poco::File defFile(m_filename);
-  Poco::File vtkFile(cacheFilename);
-  
+  Poco::File vtkFile(Poco::Path(tempDir).resolve(cacheFilename));
   bool cacheAvailable = true;
   if ((!vtkFile.exists()) || defFile.getLastModified() > vtkFile.getLastModified())
     cacheAvailable = false;
@@ -307,8 +318,8 @@ void LoadInstrument::exec()
     g_log.information("Loading geometry cache from " + cacheFilename);
     // create a vtk reader
     std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
-    boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> reader(
-        new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
+    boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader> 
+      reader(new Mantid::Geometry::vtkGeometryCacheReader(vtkFile.path()));
     for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
     {
       ((*objItr).second)->setVtkGeometryCacheReader(reader);
@@ -319,8 +330,8 @@ void LoadInstrument::exec()
     g_log.information("Geometry cache is not available");
     // create a vtk writer
     std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
-    boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> writer(
-        new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
+    boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter> 
+      writer(new Mantid::Geometry::vtkGeometryCacheWriter(vtkFile.path()));
     for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); objItr++)
     {
       ((*objItr).second)->setVtkGeometryCacheWriter(writer);

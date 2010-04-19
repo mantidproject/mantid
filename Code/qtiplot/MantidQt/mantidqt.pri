@@ -63,7 +63,13 @@ unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidKernel
   LIBS += -L$$MANTIDLIBPATH -lMantidAPI
   LIBS += -L$$MANTIDLIBPATH -lMantidGeometry
-  LIBS += -L/usr/lib/ -lPocoFoundation
+
+  CONFIG(debug, debug|release) {
+  LIBS	+= -lPocoFoundationd
+  } else {
+  LIBS	+= -lPocoFoundation
+ }
+
   macx{
    LIBS += -lboost_signals
  } else{

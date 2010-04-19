@@ -262,7 +262,7 @@ def addCompList(Id,location,name,parent):
                 fileName = 'file'+str(ifil)
                 fileLongName = fil
                 addFileV(fileId,fileName,fileLongName,location+'/'+fil,comp)
-    return lst
+    return lst,comp
 		
 def addCRefs(lstId,parent):
     for Id in lstId:
@@ -559,7 +559,17 @@ pocoList = addCompList('poco','../Third_Party/include/Poco','Poco',includeDir)
 
 sconsList = addCompList('scons','../Third_Party/src/scons-local','scons-local',InstallDir)
 
-instrument = addCompList('instrument','../../Test/Instrument','instrument',InstallDir)
+ins_def_dir = '../../Test/Instrument'
+instrument_comps, dir_comp = addCompList('instrument',ins_def_dir,'instrument',InstallDir)
+# At r4214 instrument cache files were moved to be written to managed workspace temp directory
+# so here we'll check if old files exist next to the instrument definitions and remove them
+idf_files = os.listdir(ins_def_dir)
+for file in idf_files:
+    if not file.endswith(".xml"): 
+        continue
+    file = file.rstrip('.xml')
+    file += ".vtp"
+    addTo(dir_comp,'RemoveFile',{'Id':'RmVTP_' + str(index),'On':'uninstall','LongName': file, 'Name':file[:8]})
 
 tempDir = addDirectory('TempDir','temp','temp',InstallDir)
 Temp = addComponent('Temp',comp_guid['Temp'],tempDir)
@@ -656,7 +666,7 @@ addCRef('Colormaps',MantidExec)
 addCRef('Temp',MantidExec)
 addCRef('Data',MantidExec)
 addCRefs(Matlab,MantidExec)
-addCRefs(instrument,MantidExec)
+addCRefs(instrument_comps,MantidExec)
 addCRefs(sconsList,MantidExec)
 addCRef('PyQt',MantidExec)
 addCRef('Sip',MantidExec)
