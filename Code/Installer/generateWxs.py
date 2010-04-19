@@ -569,7 +569,7 @@ for index, file in enumerate(idf_files):
         continue
     file = file.rstrip('.xml')
     file += ".vtp"
-    addTo(instr_comp,'RemoveFile',{'Id':'RmVTP_' + str(index),'On':'uninstall','LongName': file, 'Name':file[:8]})
+    addTo(instr_comp,'RemoveFile',{'Id':'RmVTP_' + str(index),'On':'both','LongName': file, 'Name':file[:8]})
 
 tempDir = addDirectory('TempDir','temp','temp',InstallDir)
 Temp = addComponent('Temp',comp_guid['Temp'],tempDir)
