@@ -392,7 +392,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
  * Creates a new function. 
  * @param fnName A registered function name
  */
-void FitPropertyBrowser::addFunction(const std::string& fnName, Mantid::API::CompositeFunction* cfun)
+Mantid::API::IFunction* FitPropertyBrowser::addFunction(const std::string& fnName, Mantid::API::CompositeFunction* cfun)
 {
 
   disableUndo();
@@ -488,6 +488,7 @@ void FitPropertyBrowser::addFunction(const std::string& fnName, Mantid::API::Com
   setFitEnabled(true);
   m_defaultFunction = fnName;
   setFocus();
+  return f;
 }
 
 /**

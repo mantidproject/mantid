@@ -368,11 +368,15 @@ void PeakPickerTool::addPeak(double c,double h)
 {
   std::string fnName = fitBrowser()->isPeak()? 
     fitBrowser()->defaultFunctionType() : m_defaultPeakName;
-  fitBrowser()->addFunction(fnName);
+  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(fitBrowser()->addFunction(fnName));
+  if (!pf) return;
   fitBrowser()->setCentre(c);
   fitBrowser()->setHeight(h);
-  fitBrowser()->setWidth(m_width);
-  //setCurrent(fitBrowser()->index());
+  double width = pf->width();
+  if (width == 0)
+  {
+    fitBrowser()->setWidth(m_width);
+  }
 }
 
 // Give new centre and height to the current peak

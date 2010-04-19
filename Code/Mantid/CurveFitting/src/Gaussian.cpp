@@ -18,7 +18,7 @@ void Gaussian::init()
 {
   declareParameter("Height", 0.0);
   declareParameter("PeakCentre", 0.0);
-  declareParameter("Sigma", 1.0);
+  declareParameter("Sigma", 0.0);
 }
 
 

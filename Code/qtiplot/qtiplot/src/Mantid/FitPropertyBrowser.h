@@ -84,7 +84,7 @@ public:
   void removeFunctionItems(QtBrowserItem* fnItem);
 
   /// Create a new function
-  void addFunction(const std::string& fnName, Mantid::API::CompositeFunction* cfun = NULL);
+  Mantid::API::IFunction* addFunction(const std::string& fnName, Mantid::API::CompositeFunction* cfun = NULL);
   /// Replace function
   void replaceFunction(Mantid::API::IFunction* f_old,const std::string& fnName);
   /// Remove function
