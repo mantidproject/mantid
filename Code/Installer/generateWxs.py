@@ -437,7 +437,7 @@ addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','
 # Only on 32bit windows for the moment
 if ARCH == '32':
     addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll','../Mantid/Bin/Shared/MantidMatlabAPI.dll',MantidDlls)
-    Matlab=addCompList('MatlabMFiles','../Mantid/MatlabAPI/mfiles','Matlab',binDir)
+    Matlab=addCompList('MatlabMFiles','../Mantid/MatlabAPI/mfiles','Matlab',binDir)[0]
 
     #Add mantid_setup file
     setupfile = open('mantid_setup.m','w')
@@ -539,7 +539,7 @@ includeMantidDataObjectsDir = addDirectory('IncludeMantidDataObjectsDir','MDO','
 IncludeMantidDataObjects = addComponent('IncludeMantidDataObjects',comp_guid['IncludeMantidDataObjects'],includeMantidDataObjectsDir)
 addAllFiles('../Mantid/includes/MantidDataObjects','do',IncludeMantidDataObjects)
 
-includeMantidGeometryDirList = addCompList('IncludeMantidGeometryDirList','../Mantid/includes/MantidGeometry','MantidGeometry',includeDir)
+includeMantidGeometryDirList = addCompList('IncludeMantidGeometryDirList','../Mantid/includes/MantidGeometry','MantidGeometry',includeDir)[0]
 
 includeMantidKernelDir = addDirectory('IncludeMantidKernelDir','KER','MantidKernel',includeDir)
 IncludeMantidKernel = addComponent('IncludeMantidKernel',comp_guid['IncludeMantidKernel'],includeMantidKernelDir)
@@ -553,14 +553,14 @@ includeMantidPythonAPIDir = addDirectory('IncludeMantidPythonAPIDir','PAPI','Man
 IncludeMantidPythonAPI = addComponent('IncludeMantidPythonAPI',comp_guid['IncludeMantidPythonAPI'],includeMantidPythonAPIDir)
 addAllFiles('../Mantid/includes/MantidPythonAPI','papi',IncludeMantidPythonAPI)
 
-boostList = addCompList('boost','../Third_Party/include/boost','boost',includeDir)
-pocoList = addCompList('poco','../Third_Party/include/Poco','Poco',includeDir)
+boostList = addCompList('boost','../Third_Party/include/boost','boost',includeDir)[0]
+pocoList = addCompList('poco','../Third_Party/include/Poco','Poco',includeDir)[0]
 #-------------------  end of Includes ---------------------------------------
 
-sconsList = addCompList('scons','../Third_Party/src/scons-local','scons-local',InstallDir)
+sconsList = addCompList('scons','../Third_Party/src/scons-local','scons-local',InstallDir)[0]
 
 ins_def_dir = '../../Test/Instrument'
-instrument_comps, dir_comp = addCompList('instrument',ins_def_dir,'instrument',InstallDir)
+instrument_ids, instr_comp = addCompList('instrument',ins_def_dir,'instrument',InstallDir)
 # At r4214 instrument cache files were moved to be written to managed workspace temp directory
 # so here we'll check if old files exist next to the instrument definitions and remove them
 idf_files = os.listdir(ins_def_dir)
@@ -569,7 +569,7 @@ for file in idf_files:
         continue
     file = file.rstrip('.xml')
     file += ".vtp"
-    addTo(dir_comp,'RemoveFile',{'Id':'RmVTP_' + str(index),'On':'uninstall','LongName': file, 'Name':file[:8]})
+    addTo(instr_comp,'RemoveFile',{'Id':'RmVTP_' + str(index),'On':'uninstall','LongName': file, 'Name':file[:8]})
 
 tempDir = addDirectory('TempDir','temp','temp',InstallDir)
 Temp = addComponent('Temp',comp_guid['Temp'],tempDir)
@@ -638,7 +638,7 @@ addAllFiles(toget + '/PyQt4','PyQt',PyQt)
 addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', '../Mantid/PythonAPI/MantidFramework.py', MantidDlls)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
-scriptsList = addCompList("ScriptsDir","../Mantid/PythonAPI/scripts","scripts",InstallDir)
+scriptsList = addCompList("ScriptsDir","../Mantid/PythonAPI/scripts","scripts",InstallDir)[0]
 #-----------------------------------------------------------------------
 
 #-------------------------- Colormaps ------------------------------------
@@ -666,7 +666,7 @@ addCRef('Colormaps',MantidExec)
 addCRef('Temp',MantidExec)
 addCRef('Data',MantidExec)
 addCRefs(Matlab,MantidExec)
-addCRefs(instrument_comps,MantidExec)
+addCRefs(instrument_ids,MantidExec)
 addCRefs(sconsList,MantidExec)
 addCRef('PyQt',MantidExec)
 addCRef('Sip',MantidExec)
