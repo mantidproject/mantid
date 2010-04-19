@@ -249,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadInstrumentParamFile.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadLog.cpp"
 				>
 			</File>
@@ -468,6 +472,10 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadInstrumentFromRawTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadInstrumentParamFile.h"
 				>
 			</File>
 			<File

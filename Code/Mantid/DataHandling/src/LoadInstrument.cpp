@@ -339,39 +339,17 @@ void LoadInstrument::exec()
     writer->write();
   }
 
-
-  // See if any <component-link> defined in IDF
-
-  NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
-  unsigned int numberLinks = pNL_link->length();
-  for (unsigned int iLink = 0; iLink < numberLinks; iLink++)
-  {
-    Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
-    std::string name = pLinkElem->getAttribute("name");
-    boost::shared_ptr<Geometry::IComponent> sharedIComp = m_instrument->getComponentByName(name);
-
-    if ( sharedIComp != boost::shared_ptr<Geometry::IComponent>() )
-    {
-      if ( boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp) )
-      {
-        boost::shared_ptr<Geometry::ParametrizedComponent> sharedParamComp = boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp);
-        setLogfile(sharedParamComp->base(), pLinkElem, m_instrument->getLogfileCache());
-      }
-      else
-      {
-        //boost::shared_ptr<Geometry::Component> sharedComp = boost::dynamic_pointer_cast<Geometry::Component>(sharedIComp);
-        setLogfile(sharedIComp.get(), pLinkElem, m_instrument->getLogfileCache());
-      }
-    }
-  }
-  pNL_link->release();
-  pDoc->release();
+  // Add/overwrite any instrument params with values specified in <component-link> XML elements
+  setComponentLinks(m_instrument, pRootElem);
 
   // populate parameter map of workspace 
   localWorkspace->populateInstrumentParameters();
 
   // Add the instrument to the InstrumentDataService
   InstrumentDataService::Instance().add(instrumentFile,m_instrument);
+
+  // release XML document
+  pDoc->release();
 }
 
 /** Assumes second argument is a XML location element and its parent is a component element
@@ -413,7 +391,8 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
 
   setLocation(ass, pLocElem);
   setFacing(ass, pLocElem);
-  setLogfile(ass, pCompElem, m_instrument->getLogfileCache());
+  setLogfile(ass, pCompElem, m_instrument->getLogfileCache());  // params specified within <component> 
+  setLogfile(ass, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
 
   // The newly added component is required to have a type. Find out what this
@@ -516,7 +495,8 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
     // check if any logfiles are referred to through the <parameter> element.
     setLocation(detector, pLocElem);
     setFacing(detector, pLocElem);
-    setLogfile(detector, pCompElem, m_instrument->getLogfileCache());
+    setLogfile(detector, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
+    setLogfile(detector, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
 
     try
     {
@@ -571,7 +551,8 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
     setLocation(comp, pLocElem);
     setFacing(comp, pLocElem);
-    setLogfile(comp, pCompElem, m_instrument->getLogfileCache());
+    setLogfile(comp, pCompElem, m_instrument->getLogfileCache()); // params specified within <component>
+    setLogfile(comp, pLocElem, m_instrument->getLogfileCache());  // params specified within specific <location>
   }
 }
 
@@ -1086,10 +1067,6 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
 
   if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
-  // Get logfile-cache from instrument
-  //std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache = instrument->getLogfileCache();
-
-
   NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
   unsigned int pNL_comp_length = pNL_comp->length();
 
@@ -1302,6 +1279,38 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
     } // end of if statement
   }
   pNL_comp->release();
+}
+
+
+/** Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
+ *
+ *  @param instrument Instrument
+ *  @param pElem  Associated Poco::XML element to component that may hold a \<parameter\> element
+ */
+void LoadInstrument::setComponentLinks(boost::shared_ptr<API::Instrument>& instrument, Poco::XML::Element* pRootElem)
+{
+  NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
+  unsigned int numberLinks = pNL_link->length();
+  for (unsigned int iLink = 0; iLink < numberLinks; iLink++)
+  {
+    Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
+    std::string name = pLinkElem->getAttribute("name");
+    boost::shared_ptr<Geometry::IComponent> sharedIComp = instrument->getComponentByName(name);
+
+    if ( sharedIComp != boost::shared_ptr<Geometry::IComponent>() )
+    {
+      if ( boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp) )
+      {
+        boost::shared_ptr<Geometry::ParametrizedComponent> sharedParamComp = boost::dynamic_pointer_cast<Geometry::ParametrizedComponent>(sharedIComp);
+        setLogfile(sharedParamComp->base(), pLinkElem, instrument->getLogfileCache());
+      }
+      else
+      {
+        setLogfile(sharedIComp.get(), pLinkElem, instrument->getLogfileCache());
+      }
+    }
+  }
+  pNL_link->release();
 }
 
 

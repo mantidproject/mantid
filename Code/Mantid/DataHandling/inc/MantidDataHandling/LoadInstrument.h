@@ -39,15 +39,13 @@ namespace API
     Loads instrument data from a XML instrument description file and adds it
     to a workspace.
 
-    LoadInstrument is intended to be used as a child algorithm of
-    other Loadxxx algorithms, rather than being used directly.
     LoadInstrument is an algorithm and as such inherits
     from the Algorithm class and overrides the init() & exec()  methods.
 
     Required Properties:
     <UL>
-    <LI> Workspace - The name of the workspace in which to use as a basis for any data to be added.</LI>
-    <LI> Filename - The name of and path to the input RAW file </LI>
+    <LI> Workspace - The name of the workspace </LI>
+    <LI> Filename - The name of the IDF file </LI>
     </UL>
 
     @author Nick Draper, Tessella Support Services plc
@@ -88,6 +86,9 @@ namespace API
       virtual const int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Instrument";}
+
+      /// Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
+      void setComponentLinks(boost::shared_ptr<API::Instrument>& instrument, Poco::XML::Element* pElem);
 
     private:
       void init();
