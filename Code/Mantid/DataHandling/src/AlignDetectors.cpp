@@ -7,6 +7,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidGeometry/V3D.h"
+
 #include <fstream>
 
 namespace Mantid
@@ -55,6 +57,9 @@ void AlignDetectors::exec()
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");
   std::map<int,double> offsets;
+
+  progress(0.0,"Reading calibration file");
+
   if ( ! this->readCalFile(calFileName, offsets) )
   {
     throw Exception::FileError("Problem reading file", calFileName);
@@ -93,9 +98,16 @@ void AlignDetectors::exec()
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / inputWS->blocksize();
 
+
+  // Get some positions
+  const Geometry::V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
+  const Geometry::V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
+  const Geometry::V3D beamline = samplePos-sourcePos;
+  const double beamline_norm=2.0*beamline.norm();
+
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
-  
+
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i)
   {
@@ -108,19 +120,25 @@ void AlignDetectors::exec()
       double factor = 0.0;
       for (int j = 0; j < ndets; ++j)
       {
-        Geometry::IDetector_const_sptr det = instrument->getDetector(dets[j]);
+    	double detsj=dets[j];
+        Geometry::IDetector_const_sptr det = instrument->getDetector(detsj);
         // Get the sample-detector distance for this detector (in metres)
-        const double l2 = det->getDistance(*sample);
+
         // The scattering angle for this detector (in radians).
-        const double twoTheta = inputWS->detectorTwoTheta(det);
-        // Get the correction for this detector
-        const double offset = offsets[dets[j]];
-        const double numerator = constant * (1.0+offset);
-        const double denom = ((l1+l2)*sin(twoTheta/2.0));
-        factor += numerator / denom;
+        Geometry::V3D detPos = det->getPos();
+        // Now detPos will be set with respect to samplePos
+        detPos-=samplePos;
+        // 0.5*cos(2theta)
+        double halfcosTheta=detPos.scalar_prod(beamline)/(detPos.norm()*beamline_norm);
+        // This is sin(theta)
+        double sinTheta=sqrt(0.5-halfcosTheta);
+        const double numerator = (1.0+offsets[detsj]);
+        //
+        sinTheta*= (l1+detPos.norm());
+        factor += numerator / sinTheta;
       }
-      // Now average the factor
-      factor = factor / ndets;
+      // Now average the factor and multiplies by the prefactor.
+      factor*= constant/ndets;
       // Get a reference to the x data
       const MantidVec& xIn = inputWS->dataX(i);
       MantidVec& xOut = outputWS->dataX(i);
