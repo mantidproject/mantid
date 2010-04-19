@@ -14,10 +14,14 @@ myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_PYTHON_API',1)])
 # linux/mac
 if os.name == 'posix':
-   #myenv.Append(CPPPATH='/usr/include/python' + sys.version[0:3])
+   libraries = myenv['MYLIBLIST']
+   # This avoids segfaulting on some systems when using Mantid in a standalone interpreter
+   # It must be linked before lGL
+   mylibraries = ['stdc++'] + libraries
+   myenv['MYLIBLIST'] = mylibraries
    myenv.Append(MYLIBLIST='python' + sys.version[0:3])
    myenv.Replace(SHLIBSUFFIX='.so')
-   myenv.Append(MYLIBLIST='boost_python'+MantidBuild.findBoost('','','libboost_python')['append'])
+   myenv.Append(MYLIBLIST='boost_python' + myenv['BOOST_APPEND'])
 # windows
 else:
    #python_path = 'C:/Python25/'

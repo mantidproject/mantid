@@ -57,8 +57,9 @@ cppPaths = []
 lpts = []
 
 boost_path = ''
-boost_append=''
+boost_append = ''
 poco_path = ''
+nexus_path = ''
 third_party = os.path.abspath('../Third_Party/')
 opencascade_path = ''
 python_path = ''
@@ -115,6 +116,7 @@ else:
 			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
 			python_path=MantidBuild.procHeaderPath(ln,'PYTHON_LIB',python_path)
 			boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
+			nexus_path=MantidBuild.procHeader(ln,'NEXUS_ROOT',nexus_path)
 		f.close()
 	else:
 		boost_path=''
@@ -122,17 +124,20 @@ else:
 		third_party=''
 		python_path = ''
 		boost_append = ''
+		nexus_path= ''
 		
+	# Store boost append and nexus path to pass to dependent SConscripts
+	env['BOOST_APPEND'] = boost_append
+	env['NEXUS_ROOT'] = nexus_path
 	opencascade_path= '/opt/OpenCASCADE'
-	boost_res = MantidBuild.findBoost(boost_path,boost_append,'libboost_regex')
-	boost_append = boost_res['append']
-	boost_path = boost_res['path']
+	
 	
 print "POCO_ROOT: ",poco_path
 print "BOOST_ROOT: ",boost_path
 print "BOOST_APPEND: ",boost_append
 print "THIRD_PARTY: ",third_party
 print "PYTHON_ROOT: ",python_path
+print "NEXUS ROOT:", nexus_path
 
 if os.name == 'nt':
 	if int(debug) :
@@ -221,9 +226,6 @@ conf = Configure(env)
 if conf.CheckCXXHeader('unordered_map.h'):
 	conf.env.Append('-DHAS_UNORDERED_MAP_H')
 env = conf.Finish()
-
-#Collect the includes into a single directory
-MantidBuild.collectIncludes('.', 'includes')
 
 libDirList.append(os.path.abspath(dest_dir))
 

@@ -1,6 +1,7 @@
 #For MantidNexus
 
 import os
+import platform
 import MantidBuild
 
 #GET LIST OF CPPS files
@@ -11,6 +12,14 @@ listCpps = MantidBuild.getCPPFiles(codeFolder)
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_NEXUS',1),'NOMINMAX'])
+
+
+if platform.system() == 'Linux':
+   # Add path to nexus if necessary
+   nexus_path = myenv['NEXUS_ROOT']
+   if nexus_path != '':
+      myenv.Append(CPPPATH=[nexus_path + 'include'])
+      myenv.Append(MYLIBDIRLIST=[nexus_path + 'lib'])
 
 # Add dependency on nexus libraries
 if os.name == 'posix':
