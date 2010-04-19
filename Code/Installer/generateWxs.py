@@ -232,7 +232,7 @@ def addText(text,parent):
 
 # Copies files in nested folders from location to parent directory
 # Returns a list of component names to be used in addCRefs
-def addCompList(Id,location,name,parent):
+def addCompList(Id,location,name,parent, suffix=None):
     global globalFileCount
     directory = addDirectory(Id+'_dir','dir',name,parent)
     lst = []
@@ -253,6 +253,8 @@ def addCompList(Id,location,name,parent):
                 idir += 1
                 lst = lst + addCompList(Id+'_'+str(idir), location+'/'+fil, fil, directory)[0]
             else:
+                if (not suffix is None) and (not fil.endswith(suffix) ): 
+                    continue
                 globalFileCount += 1
                 ifil = globalFileCount
                 fn = fil.replace(' ','_')
@@ -560,14 +562,15 @@ pocoList = addCompList('poco','../Third_Party/include/Poco','Poco',includeDir)[0
 sconsList = addCompList('scons','../Third_Party/src/scons-local','scons-local',InstallDir)[0]
 
 ins_def_dir = '../../Test/Instrument'
-instrument_ids, instr_comp = addCompList('instrument',ins_def_dir,'instrument',InstallDir)
+ins_suffix = '.xml'
+instrument_ids, instr_comp = addCompList('instrument',ins_def_dir,'instrument',InstallDir, ins_suffix)
 # At r4214 instrument cache files were moved to be written to managed workspace temp directory
 # so here we'll check if old files exist next to the instrument definitions and remove them
 idf_files = os.listdir(ins_def_dir)
 for index, file in enumerate(idf_files):
-    if not file.endswith(".xml"): 
+    if not file.endswith(ins_suffix): 
         continue
-    file = file.rstrip('.xml')
+    file = file.rstrip(ins_suffix)
     file += ".vtp"
     addTo(instr_comp,'RemoveFile',{'Id':'RmVTP_' + str(index),'On':'both','LongName': file, 'Name':file[:8]})
 
