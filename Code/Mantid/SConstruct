@@ -227,6 +227,9 @@ if conf.CheckCXXHeader('unordered_map.h'):
 	conf.env.Append('-DHAS_UNORDERED_MAP_H')
 env = conf.Finish()
 
+#Collect the includes into a single directory 
+MantidBuild.collectIncludes('.', 'includes') 
+
 libDirList.append(os.path.abspath(dest_dir))
 
 if platform.system() == 'Linux':	
