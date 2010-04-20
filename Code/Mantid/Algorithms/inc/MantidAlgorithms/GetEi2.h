@@ -54,7 +54,7 @@ namespace Algorithms
     {
     public:
       /// empty contructor calls the base class constructor
-      GetEi2() : Algorithm() {}
+      GetEi2() : Algorithm(), m_mon_indices() {}
 
       /// Initialize the algorithm
       void init();
@@ -70,21 +70,23 @@ namespace Algorithms
 
     private:
       void advanceProgress(double toAdd);
-      void getGeometry(DataObjects::Workspace2D_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
-      std::vector<int> getMonitorSpecIndexs(DataObjects::Workspace2D_const_sptr WS, int specNum1, int specNum2) const;
+      void getGeometry(DataObjects::Workspace2D_const_sptr WS, double &monitor0Dist, double &monitor1Dist) const;
       double timeToFly(double s, double E_KE) const;
       double getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime);
-      void extractSpec(int specInd, double start, double end);
+      void extractSpec(int specInd, double start = -1.0, double end = -1.0);
       double getPeakFirstMoments(API::MatrixWorkspace_sptr WS, const double tMin, const double tMax);
+      void regroup(double xmin, double delta, double xmax, const MantidVec &x, const MantidVec &y, const MantidVec &e, MantidVec& xnew, MantidVec& ynew, MantidVec& enew);
       void getPeakMean(const MantidVec& Xs, const MantidVec& Ys, const MantidVec& Es, const double prominence, double &area, double &c, double &c_fwhm, double &w, double &xbar);
       void integrate(double &bkgd_m, double &bkgd_err_m, const MantidVec &x, const MantidVec &y, const MantidVec &e, const double start, const double end);
       API::MatrixWorkspace_sptr smooth(API::MatrixWorkspace_sptr WS);
-      API::MatrixWorkspace_sptr reBin(API::MatrixWorkspace_sptr WS, const double first, const double width, const double end);
+      API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr WS, const double first, const double width, const double end);
       double neutron_E_At(double speed) const;
       /// An estimate of the percentage of the algorithm runtimes that has been completed 
       double m_fracCompl;
       /// name of the tempory workspace that we create and will contain the monitor histogram that we're examining
       API::MatrixWorkspace_sptr m_tempWS;
+      /// Workspace indices for the monitors
+      std::vector<int> m_mon_indices;
 
       // for estimating algorithm progress
       static const double CROP;                                ///< fraction of algorithm time taken up with running CropWorkspace

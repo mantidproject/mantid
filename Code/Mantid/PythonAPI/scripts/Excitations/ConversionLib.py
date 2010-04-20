@@ -8,9 +8,9 @@ def NormaliseTo(reference, WS, fromTOF, instrument=common.defaults()):
   if (reference == 'monitor-monitor 1') :
     if instrument.monitor1_integr[0] <= -1e5 or instrument.monitor1_integr[1] <= -1e5 :
       raise Exception('Can\'t normalize to monitor1 without instrument defaults information')
-    min = instrument.monitor1_integr[0]-fromTOF
-    max = instrument.monitor1_integr[1]-fromTOF
-    NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=1, IntegrationRangeMin=min, IntegrationRangeMax=max)
+    min = instrument.monitor1_integr[0] - fromTOF
+    max = instrument.monitor1_integr[1] - fromTOF
+    NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=1, IntegrationRangeMin=min, IntegrationRangeMax=max,IncludePartialBins=True)
 
   elif reference == 'monitor-monitor 2' :
 
@@ -36,7 +36,6 @@ def NormaliseToWhiteBeam(instr, WBRun, toNorm, mapFile, detMask, prevNorm) :
     ConvertUnits(pNorm, pNorm, "Energy", AlignBins=0)
     
     #this both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-    #    wb_rebin = str(wb_low_e) + ', ' + str(2.0*float(wb_high_e)) + ', ' + str(wb_high_e)
     low = instr.white_beam_integr[0]
     hi = instr.white_beam_integr[1]
     delta = 2.0*(hi - low)
@@ -48,7 +47,7 @@ def NormaliseToWhiteBeam(instr, WBRun, toNorm, mapFile, detMask, prevNorm) :
     if mapFile!= "" :
       GroupDetectors(pNorm, pNorm, mapFile, KeepUngroupedSpectra=0)
 
-    toNorm /= pNorm                               # we need '/=' here '/' by itself would do something different (create a new workspace)
+    toNorm /= pNorm
   
   finally:
     mantid.deleteWorkspace(theNorm)
@@ -133,9 +132,9 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='',
   
     # deals with normalize to monitor (e.g.  norm = 'monitor-monitor 1'), current (if norm = 'protons (uAh)'), etc.
     NormaliseTo(getNorm(instru, norma), pInOut, offSet, instru)
-  
-    ConvertUnits(pInOut, pInOut, 'DeltaE', 'Direct', Ei, AlignBins=0)
 
+    ConvertUnits(pInOut, pInOut, 'DeltaE', 'Direct', Ei, AlignBins=0)
+    
     if d_rebin != '':
       Rebin(pInOut, pInOut, common.listToString(d_rebin))
  
@@ -164,11 +163,3 @@ def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='',
       if (workspace == nameInOut) : mantid.deleteWorkspace(nameInOut)
       if (workspace == tempWS) : mantid.deleteWorkspace(tempWS)
     print reason
-    #best to raise the exception if you know that all your Python environments can take that
-    #raise
-
-#below is a quick test/example command to run this library, it must be commented or the library won't work!
-#badSpectra = diagnose(instrum='MAR',wbrf='11060',wbrf2='11060',runs='15537',tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,zero='False', out_asc='',maskFile='')
-#getBackRange('('+'18000'+','+'19000'+')', ExcitDefaults.loadDefaults('MAR'))
-#(instru, TOFLow, TOFHigh, run_nums) = retrieveSettings('MAR', 'noback', '11001')
-#pRes = mono_sample('MAR', '15537', 82.541, '-10,0.1, 70', 11060, getEi='false', back='('+'18000'+','+'19000'+')', norma='monitor-monitor 1', det_map='mari_res.map', det_mask=[])
