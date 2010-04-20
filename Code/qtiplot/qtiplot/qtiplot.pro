@@ -47,9 +47,9 @@ win32:build_pass:CONFIG(debug, debug|release) {
 
 build_pass:CONFIG(debug, debug|release) {
   # Put the debug version alongside the Mantid debug dlls to make sure it picks them up
-  DESTDIR = ../../Mantid/Bin/Shared
+  DESTDIR = ../../Mantid/debug
 } else {
-  DESTDIR = ../../Mantid/Bin/Shared
+  DESTDIR = ./
 }
 
 mac:CXXFLAGS+=-headerpad_max_install_names
