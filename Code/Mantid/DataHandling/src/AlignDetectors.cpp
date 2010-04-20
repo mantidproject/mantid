@@ -129,12 +129,13 @@ void AlignDetectors::exec()
         // Now detPos will be set with respect to samplePos
         detPos-=samplePos;
         // 0.5*cos(2theta)
-        double halfcosTheta=detPos.scalar_prod(beamline)/(detPos.norm()*beamline_norm);
+        double l2=detPos.norm();
+        double halfcosTheta=detPos.scalar_prod(beamline)/(l2*beamline_norm);
         // This is sin(theta)
         double sinTheta=sqrt(0.5-halfcosTheta);
         const double numerator = (1.0+offsets[detsj]);
         //
-        sinTheta*= (l1+detPos.norm());
+        sinTheta*= (l1+l2);
         factor += numerator / sinTheta;
       }
       // Now average the factor and multiplies by the prefactor.
