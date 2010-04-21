@@ -48,7 +48,8 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty default constructor
-LoadInstrument::LoadInstrument() : Algorithm(), m_haveDefaultFacing(false), m_deltaOffsets(false)
+LoadInstrument::LoadInstrument() : Algorithm(), m_haveDefaultFacing(false), m_deltaOffsets(false),
+  hasParameterElement_beenSet(false)
 {}
 
 /// Initialisation method.
@@ -191,6 +192,7 @@ void LoadInstrument::exec()
     hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
   }
   pNL_parameter->release();
+  hasParameterElement_beenSet = true;
 
 
   // Get reference to Instrument and set its name
@@ -1063,9 +1065,11 @@ void LoadInstrument::setFacing(Geometry::Component* comp, Poco::XML::Element* pE
 void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem, 
                                 std::multimap<std::string, boost::shared_ptr<API::XMLlogfile> >& logfileCache)
 {
-  // check first if pElem contains any <parameter> child elements
+  // check first if pElem contains any <parameter> child elements, however not if this method is called through
+  // setComponentLinks() for example by the LoadParameter algorithm
 
-  if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
+  if ( hasParameterElement_beenSet )
+    if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
   NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
   unsigned int pNL_comp_length = pNL_comp->length();

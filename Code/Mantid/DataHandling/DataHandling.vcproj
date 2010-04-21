@@ -249,10 +249,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\LoadInstrumentParamFile.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\LoadLog.cpp"
 				>
 			</File>
@@ -262,6 +258,10 @@
 			</File>
 			<File
 				RelativePath=".\src\LoadMappingTable.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadParameterFile.cpp"
 				>
 			</File>
 			<File
@@ -475,10 +475,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidDataHandling\LoadInstrumentParamFile.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\LoadInstrumentTest.h"
 				>
 			</File>
@@ -500,6 +496,14 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadMappingTableTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadParameterFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadParameterFileTest.h"
 				>
 			</File>
 			<File

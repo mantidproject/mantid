@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadInstrumentParamFile.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -36,17 +36,17 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_ALGORITHM(LoadInstrumentParamFile)
+DECLARE_ALGORITHM(LoadParameterFile)
 
 using namespace Kernel;
 using namespace API;
 
 /// Empty default constructor
-LoadInstrumentParamFile::LoadInstrumentParamFile() : Algorithm()
+LoadParameterFile::LoadParameterFile() : Algorithm()
 {}
 
 /// Initialisation method.
-void LoadInstrumentParamFile::init()
+void LoadParameterFile::init()
 {
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
@@ -66,7 +66,7 @@ void LoadInstrumentParamFile::init()
  *  @throw FileError Thrown if unable to parse XML file
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
  */
-void LoadInstrumentParamFile::exec()
+void LoadParameterFile::exec()
 {
   // Retrieve the filename from the properties
   std::string filename = getPropertyValue("Filename");

@@ -134,6 +134,9 @@ namespace API
       /// associated with it or not - instead of using the comparatively slow poco
       /// call getElementsByTagName() (or getChildElement)
       std::vector<Poco::XML::Element*> hasParameterElement;
+      /// has hasParameterElement been set - used when public method setComponentLinks is used
+      bool hasParameterElement_beenSet;
+
 
       /// Get parent component element of location element
       Poco::XML::Element* getParentComponent(Poco::XML::Element* pLocElem);
