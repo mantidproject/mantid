@@ -499,6 +499,15 @@ bool SANSRunWindow::loadUserFile()
   // Phi values 
   m_uiForm.phi_min->setText(runReduceScriptFunction("printParameter('PHIMIN')"));
   m_uiForm.phi_max->setText(runReduceScriptFunction("printParameter('PHIMAX')"));
+
+  if ( runReduceScriptFunction("printParameter('PHIMIRROR')") == "True" )
+  {
+    m_uiForm.mirror_phi->setChecked(true);
+  }
+  else
+  {
+    m_uiForm.mirror_phi->setChecked(false);
+  }
   
   m_cfg_loaded = true;
   m_uiForm.userfileBtn->setText("Reload");
@@ -1417,7 +1426,15 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   }
   exec_reduce += "LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," + 
     m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n" +
-    "LimitsPhi(" + m_uiForm.phi_min->text() + "," + m_uiForm.phi_max->text() + ")\n";
+    "LimitsPhi(" + m_uiForm.phi_min->text() + "," + m_uiForm.phi_max->text();
+  if ( m_uiForm.mirror_phi->isChecked() )
+  {
+    exec_reduce += ", True)\n";
+  }
+  else
+  {
+    exec_reduce += ", False)\n";
+  }
 
   //Transmission behaviour
   exec_reduce += "TransFit('" + m_uiForm.trans_opt->itemData(m_uiForm.trans_opt->currentIndex()).toString() + "'," +

@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>796</width>
-    <height>428</height>
+    <width>728</width>
+    <height>415</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -1485,11 +1485,6 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                </layout>
-               <zorder>q_min</zorder>
-               <zorder>q_max</zorder>
-               <zorder>q_step_lbl</zorder>
-               <zorder>q_dq</zorder>
-               <zorder>label_19</zorder>
               </widget>
               <widget class="QWidget" name="page_4" >
                <layout class="QHBoxLayout" name="horizontalLayout_17" >
@@ -1740,15 +1735,8 @@ p, li { white-space: pre-wrap; }
            <property name="title" >
             <string>Phi range</string>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout" >
-            <item>
-             <widget class="QLabel" name="label_45" >
-              <property name="text" >
-               <string>Limit Phi (degrees)</string>
-              </property>
-             </widget>
-            </item>
-            <item>
+           <layout class="QGridLayout" name="gridLayout_17" >
+            <item row="0" column="2" >
              <widget class="QLineEdit" name="phi_min" >
               <property name="enabled" >
                <bool>true</bool>
@@ -1767,14 +1755,14 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item>
+            <item row="0" column="3" >
              <widget class="QLabel" name="label_33" >
               <property name="text" >
                <string>to</string>
               </property>
              </widget>
             </item>
-            <item>
+            <item row="0" column="4" >
              <widget class="QLineEdit" name="phi_max" >
               <property name="enabled" >
                <bool>true</bool>
@@ -1790,6 +1778,23 @@ p, li { white-space: pre-wrap; }
                 <width>50</width>
                 <height>16777215</height>
                </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" colspan="3" >
+             <widget class="QCheckBox" name="mirror_phi" >
+              <property name="text" >
+               <string>Use mirror sector</string>
+              </property>
+              <property name="checked" >
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1" >
+             <widget class="QLabel" name="label_45" >
+              <property name="text" >
+               <string>Limit Phi (degrees)</string>
               </property>
              </widget>
             </item>

@@ -75,6 +75,7 @@ CORRECTION_TYPE = '1D'
 SAMPLE_Z_CORR = 0.0
 PHIMIN=-90.0
 PHIMAX=90.0
+PHIMIRROR=True
 
 # Scaling values
 RESCALE = 100.  # percent
@@ -580,9 +581,13 @@ def LimitsQXY(qmin, qmax, step, type):
     _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
     _readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type)
     
-def LimitsPhi(phimin, phimax):
-    _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + ')')
-    _readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax))
+def LimitsPhi(phimin, phimax, use_mirror=True):
+    if use_mirror :
+        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
+        _readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax))
+    else :
+        _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
+        _readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax))
 
 def Gravity(flag):
     _printMessage('Gravity(' + str(flag) + ')')
@@ -684,24 +689,28 @@ def SetCentre(XVAL, YVAL):
 #####################################
 # Set the phi limit
 #####################################
-def SetPhiLimit(phimin,phimax):
-    if phimin > phimax:
-        phimin, phimax = phimax, phimin
-    if abs(phimin) > 180.0:
-        phimin = -90.0
-    if abs(phimax) > 180.0:
-        phimax = 90.0
+def SetPhiLimit(phimin,phimax, phimirror=True):
+    if phimirror :
+        if phimin > phimax:
+            phimin, phimax = phimax, phimin
+        if abs(phimin) > 180.0 :
+            phimin = -90.0
+        if abs(phimax) > 180.0 :
+            phimax = 90.0
 	
-    if phimax - phimin == 180.0:
-        phimin = -90.0
-        phimax = 90.0
-    else:
-        phimin = SANSUtility.normalizePhi(phimin)
-        phimax = SANSUtility.normalizePhi(phimax)
+        if phimax - phimin == 180.0 :
+            phimin = -90.0
+            phimax = 90.0
+        else:
+            phimin = SANSUtility.normalizePhi(phimin)
+            phimax = SANSUtility.normalizePhi(phimax)
+          
   	
-    global PHIMIN, PHIMAX
+    global PHIMIN, PHIMAX, PHIMIRROR
     PHIMIN = phimin
     PHIMAX = phimax
+    PHIMIRROR = phimirror
+    
 
 #####################################
 # Clear current mask defaults
@@ -974,7 +983,9 @@ def _readLimitValues(limit_line):
         DEF_RMIN = RMIN
         DEF_RMAX = RMAX
     elif limit_type.upper() == 'PHI':
-        SetPhiLimit(float(minval), float(maxval))
+        SetPhiLimit(float(minval), float(maxval), True)
+    elif limit_type.upper() == 'PHI/NOMIRROR':
+        SetPhiLimit(float(minval), float(maxval), False)
     else:
         pass
 
@@ -1296,7 +1307,7 @@ def applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orient
     if (limitphi == True and PHIMAX - PHIMIN < 180):
         centre = mtd[workspace].getInstrument().getComponentByName(DETBANK).getPos()
         centre_pt = [centre.getX(), centre.getY(), centre.getZ()]
-        SANSUtility.LimitPhi(workspace, centre_pt, PHIMIN,PHIMAX)
+        SANSUtility.LimitPhi(workspace, centre_pt, PHIMIN,PHIMAX,PHIMIRROR)
         
 #----------------------------------------------------------------------------------------------------------------------------
 ##

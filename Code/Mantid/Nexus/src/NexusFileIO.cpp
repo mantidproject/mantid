@@ -554,7 +554,7 @@ namespace Mantid
       g_log.debug() << "Set geom_id to " << sample.getGeometryFlag();
       g_log.debug() << ", geom_thickness to " << sample.getThickness();
       g_log.debug() << ", geom_width to " << sample.getWidth();
-      g_log.debug() << "and geom_height to " << sample.getHeight() << std::endl;
+      g_log.debug() << " and geom_height to " << sample.getHeight() << std::endl;
       
       status=NXclosegroup(fileID);
 
