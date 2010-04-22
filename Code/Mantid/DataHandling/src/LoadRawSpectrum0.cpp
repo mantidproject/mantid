@@ -16,6 +16,11 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "Poco/Path.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/shared_ptr.hpp>
+#include "Poco/Path.h"
+#include <cmath>
+#include <cstdio> //Required for gcc 4.4
+
 namespace Mantid
 {
 	namespace DataHandling

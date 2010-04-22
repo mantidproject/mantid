@@ -124,7 +124,7 @@ void LoadRawHelper::reset()
 
 /**reads the histogram from raw file
   *@param file - pointer to the raw file
-  *@param pos - postion in the file to read
+  *@param hist - postion in the file to read
 */
 void LoadRawHelper::readData(FILE* file,int hist)
 {
@@ -181,6 +181,7 @@ DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(DataObjects::Worksp
  *  @param nVectors The number of vectors/histograms in the workspace
  *  @param xlengthIn The number of X data points/bin boundaries in each vector 
  *  @param ylengthIn The number of Y data points/bin boundaries in each vector 
+ *  @param title title of the workspace
  *  @return Workspace2D_sptr shared pointer to the workspace
  */
 DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(int nVectors, int xlengthIn,int ylengthIn,const std::string& title)
@@ -427,7 +428,7 @@ WorkspaceGroup_sptr LoadRawHelper::createGroupWorkspace()
 
 /**
  * Check if a file is a text file
- * @param filename The file path to check
+ * @param file The file pointer
  * @returns true if the file an ascii text file, false otherwise
  */
 bool LoadRawHelper::isAscii(FILE* file) const
