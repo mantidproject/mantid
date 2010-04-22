@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidAPI/Instrument.h"
 #include "MantidAPI/InstrumentDataService.h"
@@ -352,6 +353,9 @@ void LoadInstrument::exec()
 
   // release XML document
   pDoc->release();
+
+  // check if default parameter file is also present
+  runLoadParameterFile();
 }
 
 /** Assumes second argument is a XML location element and its parent is a component element
@@ -1315,6 +1319,51 @@ void LoadInstrument::setComponentLinks(boost::shared_ptr<API::Instrument>& instr
     }
   }
   pNL_link->release();
+}
+
+
+/// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+void LoadInstrument::runLoadParameterFile()
+{
+  g_log.debug("Loading the parameter definition...");
+  // Determine the search directory for XML parameter definition files
+  std::string directoryName = Kernel::ConfigService::Instance().getString(
+      "parameterDefinition.directory");
+  if (directoryName.empty())
+  {
+    // This is the assumed deployment directory for parameter files, where we need to be 
+    // relative to the directory of the executable, not the current working directory.
+    directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve(
+        "../Instrument").toString();
+  }
+
+  // Remove the path from the filename
+  const int stripPath = m_filename.find_last_of("\\/");
+  std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
+  // the ID is the bit in front of _Definition
+  const int getID = instrumentFile.find("_Definition");
+  std::string instrumentID = instrumentFile.substr(0,getID);
+
+  // force ID to upper case
+  std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
+  std::string fullPathIDF = directoryName + "/" + instrumentID + "_Parameters.xml";
+
+  IAlgorithm_sptr loadInstParam = createSubAlgorithm("LoadParameterFile");
+
+  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    loadInstParam->setPropertyValue("Filename", fullPathIDF);
+    const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+    loadInstParam->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadInstParam->execute();
+  } catch (std::invalid_argument&)
+  {
+    g_log.information("Invalid argument to LoadParameter sub-algorithm");
+  } catch (std::runtime_error&)
+  {
+    g_log.information("Unable to successfully run LoadParameter sub-algorithm");
+  }
 }
 
 

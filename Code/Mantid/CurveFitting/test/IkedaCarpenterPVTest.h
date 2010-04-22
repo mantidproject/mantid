@@ -237,14 +237,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(load.execute());
     TS_ASSERT( load.isExecuted() );
 
-    LoadInstrument loaderGEM;
-    loaderGEM.initialize();
-    loaderGEM.setPropertyValue("Filename", "../../../../Test/Instrument/GEM_Definition.xml");;
-    loaderGEM.setPropertyValue("Workspace", wsname);
-    TS_ASSERT_THROWS_NOTHING(loaderGEM.execute());
-    TS_ASSERT( loaderGEM.isExecuted() );
-
-
     Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(wsname));
 
     Fit alg2;

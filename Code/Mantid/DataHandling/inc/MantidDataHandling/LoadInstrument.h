@@ -200,6 +200,9 @@ namespace API
 
       /// Map to store positions of parent components in spherical coordinates
       std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
+
+      /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+      void runLoadParameterFile();
     };
 
   } // namespace DataHandling

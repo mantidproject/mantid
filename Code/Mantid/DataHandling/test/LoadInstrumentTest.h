@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidAPI/InstrumentDataService.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Instrument.h"
@@ -27,11 +28,6 @@ class LoadInstrumentTest : public CxxTest::TestSuite
 {
 public:
 
-  LoadInstrumentTest()
-  {
-	//initialise framework manager to allow logging
-	//Mantid::API::FrameworkManager::Instance().initialize();
-  }
   void testInit()
   {
     TS_ASSERT( !loader.isInitialized() );
@@ -137,6 +133,8 @@ public:
     loadAgain.setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING( loadAgain.execute() )
     TS_ASSERT_EQUALS( output->getInstrument(), i )
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testExecGEM()
@@ -210,6 +208,8 @@ public:
     // test of some detector...
     boost::shared_ptr<IDetector> ptrDetShape = i->getDetector(101001);
     TS_ASSERT( ptrDetShape->isValid(V3D(0.0,0.0,0.0)+ptrDetShape->getPos()) );
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testExecSLS()
@@ -270,6 +270,8 @@ public:
     // test of sample shape
     TS_ASSERT( samplepos->isValid(V3D(0.0,0.0,0.005)+samplepos->getPos()) );
     TS_ASSERT( !samplepos->isValid(V3D(0.0,0.0,0.05)+samplepos->getPos()) );
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testExecNIMROD()
@@ -314,17 +316,21 @@ public:
     TS_ASSERT_DELTA( ptrDet->getPos().X(),  -0.0909, 0.0001);
     TS_ASSERT_DELTA( ptrDet->getPos().Y(), 0.3983, 0.0001);
     TS_ASSERT_DELTA( ptrDet->getPos().Z(),  4.8888, 0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 
   void testExecHRP()
   {
+    InstrumentDataService::Instance().remove("HRPD_Definition.xml");
+
     LoadInstrument loaderHRP;
 
     TS_ASSERT_THROWS_NOTHING(loaderHRP.initialize());
 
     //create a workspace with some sample data
-    wsName = "LoadInstrumentTestHRP";
+    wsName = "LoadInstrumentTestHRPD";
     Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
     Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
 
@@ -365,6 +371,16 @@ public:
     TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0071,0.0227,0.0)+ptrDetShape->getPos()) );
     TS_ASSERT( ptrDetShape->isValid(V3D(-0.0069,0.0227,0.000009)+ptrDetShape->getPos()) );
     TS_ASSERT( !ptrDetShape->isValid(V3D(-0.0069,0.0227,0.011)+ptrDetShape->getPos()) );
+
+    // test if a dummy parameter has been read in
+    boost::shared_ptr<IComponent> comp = i->getComponentByName("bank_90degnew");
+    TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
+
+    ParameterMap& paramMap = output->instrumentParameters();
+    Parameter_sptr param = paramMap.get(&(*comp), "test");
+    TS_ASSERT_DELTA( param->value<double>(), 50.0, 0.0001);
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testExecIDF_for_unit_testing() // IDF stands for Instrument Definition File
@@ -583,6 +599,8 @@ public:
     TS_ASSERT( source->isValid(V3D(0.0,0.0,0.005)+source->getPos()) );
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,-0.005)+source->getPos()) );
     TS_ASSERT( !source->isValid(V3D(0.0,0.0,0.02)+source->getPos()) );
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 
@@ -645,6 +663,8 @@ public:
     TS_ASSERT( ptrMonShape->isValid(V3D(-0.0621,0.0641,0.01)+ptrMonShape->getPos()) );
     TS_ASSERT( !ptrMonShape->isValid(V3D(-0.0621,0.0641,0.011)+ptrMonShape->getPos()) );
     TS_ASSERT( !ptrMonShape->isValid(V3D(-0.0621,0.0651,0.01)+ptrMonShape->getPos()) );
+
+    AnalysisDataService::Instance().remove(wsName);
   }
 
 
