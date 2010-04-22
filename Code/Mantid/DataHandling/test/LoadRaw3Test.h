@@ -38,7 +38,8 @@ public:
 
   void testExec()
   {
-	  if ( !loader.isInitialized() ) loader.initialize();
+	 	 
+	if ( !loader.isInitialized() ) loader.initialize();
 
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(loader.execute(),std::runtime_error);
@@ -141,6 +142,8 @@ public:
 
  void testMixedLimits()
   {
+	   /*std::string s;
+	  std::getline(std::cin,s);*/
     if ( !loader2.isInitialized() ) loader2.initialize();
 
     loader2.setPropertyValue("Filename", inputFile);
@@ -243,6 +246,8 @@ public:
 
   void testListlimit()
   {
+	 /*  std::string s;
+	  std::getline(std::cin,s);*/
     LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
     if ( !alg.isInitialized() ) alg.initialize();
@@ -310,7 +315,8 @@ public:
 
   void testMultiPeriod()
   {
-	LoadRaw3 loader5;
+
+    LoadRaw3 loader5;
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
@@ -383,13 +389,10 @@ public:
 	
   }
 
-  
-
-
   // test if parameters set in instrument definition file are loaded properly
   void testIfParameterFromIDFLoaded()
   {
-    LoadRaw3 loader4;
+	 LoadRaw3 loader4;
     loader4.initialize();
     loader4.setPropertyValue("Filename", "../../../../Test/Data/TSC10076.raw");
     loader4.setPropertyValue("OutputWorkspace", "parameterIDF");
@@ -432,7 +435,10 @@ public:
   }
   void testSeparateMonitors()
   {
-	   LoadRaw3 loader6;
+   /*  std::string s;
+	 std::getline(std::cin,s);*/
+
+	 LoadRaw3 loader6;
 	 if ( !loader6.isInitialized() ) loader6.initialize();
 
     // Should fail because mandatory parameter has not been set
@@ -539,7 +545,7 @@ public:
   }
   void testSeparateMonitorsMultiPeriod()
   {
-	 LoadRaw3 loader7;
+	LoadRaw3 loader7;
     loader7.initialize();
     loader7.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
     loader7.setPropertyValue("OutputWorkspace", "multiperiod");
@@ -634,7 +640,6 @@ public:
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
       TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 196 )
-
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
     itr++;
@@ -755,9 +760,7 @@ public:
 
   //select start and end spectra a mix of monitors and normal workspace
   void testSeparateMonitorswithMaxMinimits2()
-  {	//  std::string s;
-	//  std::getline(std::cin,s);
-
+  {	
 	 LoadRaw3 loader10;
     if ( !loader10.isInitialized() ) loader10.initialize();
 
@@ -910,8 +913,8 @@ public:
 	  TS_ASSERT_THROWS_NOTHING( loader8.execute() )
 	  TS_ASSERT( loader8.isExecuted() )
 
-		  // Get back workspace and check it really is a ManagedWorkspace2D
-		  Workspace_sptr output;
+	  // Get back workspace and check it really is a ManagedWorkspace2D
+	  Workspace_sptr output;
 	  TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
 	  TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
 		  Workspace_sptr output1;
