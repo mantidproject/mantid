@@ -42,7 +42,7 @@ namespace Mantid
       exts.push_back("nxs");
       exts.push_back("nx5");
       exts.push_back("xml");
-      exts.push_back("s*");
+      exts.push_back("n*");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the Nexus file to load" );      
 
