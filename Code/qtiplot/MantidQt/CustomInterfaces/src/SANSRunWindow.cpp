@@ -1353,7 +1353,6 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
 
   // Set the geometry
-  //boost::shared_ptr<Mantid::API::Sample> sample_details = sample_workspace->getSample();
   int geomid  = sample_workspace->sample().getGeometryFlag();
   if( geomid > 0 && geomid < 4 )
   {
@@ -1373,7 +1372,6 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
 
   forceDataReload(false);
-
 
   for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
   {
@@ -1476,6 +1474,15 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
+    //Need to check which mode we're in
+  if( m_uiForm.single_mode_btn->isChecked() )
+  {
+    // Currently the components are moved with each reduce click. Check if a load is necessary
+    // This must be done before the script is written as we need to get correct values from the
+    // loaded raw data
+    handleLoadButtonClick();
+  }
+
   QString py_code = createAnalysisDetailsScript(type);
   if( py_code.isEmpty() )
   {
@@ -1495,8 +1502,6 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   //Need to check which mode we're in
   if( m_uiForm.single_mode_btn->isChecked() )
   {
-    //Currently the components are moved with each reduce click. Check if a load is necessary
-    handleLoadButtonClick();
     py_code += "\nreduced = WavRangeReduction(use_def_trans=" + trans_behav + ")\n";
     if( m_uiForm.plot_check->isChecked() )
     {
