@@ -189,10 +189,11 @@ public slots:
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
   //  *****                            *****  //
+  void renameWorkspace(QString = "");
 public:
 
-    // Return pointer to the fit function property browser
-    FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
+  // Return pointer to the fit function property browser
+  FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
 
   /** ---------------------------------
    * Commands purely for python interaction
@@ -208,28 +209,26 @@ public:
   bool createPropertyInputDialog(const QString & alg_name, const QString & preset_values,
 				 const QString & optional_msg,  const QString & enabled_names);
 /// Group selected workspaces
-	void groupWorkspaces();
-	/// UnGroup selected groupworkspace
-	void ungroupWorkspaces();
-   /** save the workspace data to nexus file
-	    This method is useful when a project is saved from mantidplot
-	*/
-	void savedatainNexusFormat(const std::string& fileName,const std::string & wsName);
+  void groupWorkspaces();
+  /// UnGroup selected groupworkspace
+  void ungroupWorkspaces();
+  /** save the workspace data to nexus file
+      This method is useful when a project is saved from mantidplot
+  */
+  void savedatainNexusFormat(const std::string& fileName,const std::string & wsName);
+  
+  /** load data from nexus file.This method is useful 
+      when a project is opened  from mantidplot
+  */
+  void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
+  void loadadataFromRawFile(const std::string& wsname,const std::string& fileName,bool project=false);
+  
+  MantidMatrix* openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper);
+  
+  void saveProject(bool save);
+  void enableSaveNexus(const QString & wsName);
 
-	/** load data from nexus file.This method is useful 
-	when a project is opened  from mantidplot
-	*/
-	void loaddataFromNexusFile(const std::string& wsname,const std::string& fileName,bool project=false);
-	void loadadataFromRawFile(const std::string& wsname,const std::string& fileName,bool project=false);
-
-	MantidMatrix* openMatrixWorkspace(ApplicationWindow* parent,const QString& wsName,int lower,int upper);
-
-	void saveProject(bool save);
-	void enableSaveNexus(const QString & wsName);
-
-	void renameWorkspace(const QString&);
-	
-
+					      
 public slots:
   void cancelAllRunningAlgorithms();
 

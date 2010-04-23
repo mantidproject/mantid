@@ -198,26 +198,33 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
   {
     const Mantid::MantidVec & values = workspace->readX(i);
     double xtest = values.front();
-    if( xtest < mWkspBinMin )
+    if( !std::isinf(xtest) )
     {
-      mWkspBinMin = xtest;
+    
+      if( xtest < mWkspBinMin )
+      {
+	mWkspBinMin = xtest;
+      }
+      else if( xtest > mWkspBinMax )
+      {
+	mWkspBinMax = xtest;
+      }
+      else {}
     }
-    else if( xtest > mWkspBinMax )
-    {
-      mWkspBinMax = xtest;
-    }
-    else {}
 
     xtest = values.back();
-    if( xtest < mWkspBinMin )
+    if( !std::isinf(xtest) )
     {
-      mWkspBinMin = xtest;
+      if( xtest < mWkspBinMin )
+      {
+	mWkspBinMin = xtest;
+      }
+      else if( xtest > mWkspBinMax )
+      {
+	mWkspBinMax = xtest;
+      }
+      else {}
     }
-    else if( xtest > mWkspBinMax )
-    {
-      mWkspBinMax = xtest;
-    }
-    else {}
   }
 
   // Value has not been preset
@@ -342,7 +349,7 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_sptr workspace, const int wksp_index)
 {
 	// If the index is not valid for this workspace
-	if (wksp_index<0 || wksp_index>workspace->getNumberHistograms())
+	if (wksp_index < 0 || wksp_index > workspace->getNumberHistograms())
 		return 0.0;
 
 	// Get Handle to data
@@ -354,16 +361,20 @@ double Instrument3DWidget::integrateSingleSpectra(Mantid::API::MatrixWorkspace_s
 	// Iterators for limits
 	Mantid::MantidVec::const_iterator lowit=x.begin(),highit=x.end()-1;
 	// If the first element is lower that the xmin then search for new lowit
-	if ((*lowit)<mBinMinValue)
-		lowit=std::lower_bound(x.begin(),x.end(),mBinMinValue);
+	if ((*lowit) < mBinMinValue)
+		lowit = std::lower_bound(x.begin(),x.end(),mBinMinValue);
 	// If the last element is higher that the xmax then search for new lowit
-	if ((*highit)>mBinMaxValue)
-		highit=std::upper_bound(lowit,x.end(),mBinMaxValue);
+	if ((*highit) > mBinMaxValue)
+		highit = std::upper_bound(lowit,x.end(),mBinMaxValue);
 	// Get the range for the y vector
-	Mantid::MantidVec::difference_type distmin=std::distance(x.begin(),lowit);
-	Mantid::MantidVec::difference_type distmax=std::distance(x.begin(),highit);
-	// Integrate
-	double sum=std::accumulate(y.begin()+distmin,y.begin()+distmax,0.0);
+	Mantid::MantidVec::difference_type distmin = std::distance(x.begin(), lowit);
+	Mantid::MantidVec::difference_type distmax = std::distance(x.begin(), highit);
+	double sum(0.0);
+	if( distmin <= distmax )
+	{
+	  // Integrate
+	  sum = std::accumulate(y.begin() + distmin,y.begin() + distmax,0.0);
+	}
 	return sum;
 }
 

@@ -927,12 +927,24 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
  * Renames selected workspace
  * @param wsName selected workspace name
  */
-void MantidUI::renameWorkspace(const QString & wsName)
+void MantidUI::renameWorkspace(QString wsName)
 { 
-	//execute the algorithm
-	std::string algName("RenameWorkspace");
-	int version=-1;
-	Mantid::API::IAlgorithm_sptr alg;
+  // If the wsname is blank look for an active window and assume this workspace is
+  // the one to rename
+  MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
+  if( matrix )
+  {
+    wsName = matrix->workspaceName();
+  }  
+  else
+  {
+    return;
+  }
+
+  //execute the algorithm
+  std::string algName("RenameWorkspace");
+  int version=-1;
+  Mantid::API::IAlgorithm_sptr alg;
     try
     {
         alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
