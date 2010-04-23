@@ -931,14 +931,17 @@ void MantidUI::renameWorkspace(QString wsName)
 { 
   // If the wsname is blank look for an active window and assume this workspace is
   // the one to rename
-  MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
-  if( matrix )
+  if( wsName.isEmpty() )
   {
-    wsName = matrix->workspaceName();
-  }  
-  else
-  {
-    return;
+    MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
+    if( matrix )
+    {
+      wsName = matrix->workspaceName();
+    }
+    else
+    {
+      return;
+    }
   }
 
   //execute the algorithm
