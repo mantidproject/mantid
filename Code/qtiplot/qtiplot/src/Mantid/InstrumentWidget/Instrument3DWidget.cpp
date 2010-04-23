@@ -198,7 +198,7 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
   {
     const Mantid::MantidVec & values = workspace->readX(i);
     double xtest = values.front();
-    if( !std::isinf(xtest) )
+    if( xtest != std::numeric_limits<double>::infinity() )
     {
     
       if( xtest < mWkspBinMin )
@@ -213,7 +213,7 @@ void Instrument3DWidget::calculateBinRange(Mantid::API::MatrixWorkspace_sptr wor
     }
 
     xtest = values.back();
-    if( !std::isinf(xtest) )
+    if( xtest != std::numeric_limits<double>::infinity() )
     {
       if( xtest < mWkspBinMin )
       {
