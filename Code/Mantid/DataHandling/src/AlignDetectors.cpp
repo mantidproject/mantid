@@ -41,8 +41,8 @@ void AlignDetectors::init()
     new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, 
-				   std::vector<std::string>(1,"cal")),
-		  "The CalFile containing the position correction factors");
+     std::vector<std::string>(1,"cal")),
+     "The CalFile containing the position correction factors");
 }
 
 /** Executes the algorithm
@@ -98,7 +98,6 @@ void AlignDetectors::exec()
   // Calculate the number of spectra in this workspace
   const int numberOfSpectra = inputWS->size() / inputWS->blocksize();
 
-
   // Get some positions
   const Geometry::V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const Geometry::V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
@@ -109,8 +108,10 @@ void AlignDetectors::exec()
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
   // Loop over the histograms (detector spectra)
+  PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numberOfSpectra; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
     try {
       // Get the spectrum number for this histogram
       const int spec = inputWS->getAxis(1)->spectraNo(i);
@@ -120,7 +121,7 @@ void AlignDetectors::exec()
       double factor = 0.0;
       for (int j = 0; j < ndets; ++j)
       {
-    	double detsj=dets[j];
+        const int detsj=dets[j];
         Geometry::IDetector_const_sptr det = instrument->getDetector(detsj);
         // Get the sample-detector distance for this detector (in metres)
 
@@ -156,7 +157,9 @@ void AlignDetectors::exec()
     }
     
     progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /// Reads the calibration file. Returns true for success, false otherwise.
