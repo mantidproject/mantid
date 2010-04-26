@@ -430,7 +430,7 @@ void MantidDockWidget::populateWorkspaceData(Mantid::API::Workspace_sptr workspa
   }
 }
 
-bool MantidDockWidget::isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString& ws_name) //std::vector<std::string>wsGroupNames,const QString& ws_name)
+bool MantidDockWidget::isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString& ws_name)
 {
   if(!grpSPtr)
   {	return false;
@@ -477,9 +477,9 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
   if( name_matches.isEmpty() )
   {	 
-	//   if there are  no toplevel items in three matching the workspace name ,loop through
+  //   if there are  no toplevel items in three matching the workspace name ,loop through
 	 //  all child elements 
-      int topitemCounts=m_tree->topLevelItemCount();
+    int topitemCounts=m_tree->topLevelItemCount();
 	  for (int index=0;index<topitemCounts;++index)
 	  {
 		  QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
@@ -498,33 +498,15 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 			  //if the workspace  exists as child workspace
 			  if(!ws_name.compare(childItem->text(0)))
 			  {
-				  //get the parent workspace name
-				  QString parentwsName=topItem->text(0);
-				  Workspace_sptr ws_sptr;
-				  try
-				  {
-					  ws_sptr=Mantid::API::AnalysisDataService::Instance().retrieve(parentwsName.toStdString());
-				  }
-				  catch(Mantid::Kernel::Exception::NotFoundError&)
-				  {
-					  return;
-				  }
-				  WorkspaceGroup_sptr ws_grpsptr=boost::dynamic_pointer_cast<WorkspaceGroup>(ws_sptr);
-				  if(ws_grpsptr)
-				  {	
-					  // delete the workspace from group vector
-					  ws_grpsptr->remove(ws_name.toStdString());
-				  }
 				  topItem->takeChild(chIndex);
 				  return;
 			  }
-
 		  }
 	  }
 	  //if no matching workspaces underneath the group workspace return 
-	  return;
-	
+	  return;	
   }
+
   m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
  
 }
@@ -535,18 +517,16 @@ This slot handles the notification send by the GroupWorkspaces algorithm.
 */
 void MantidDockWidget::updateWorkspacesTreeafterGrouping(const QStringList& workspaces)
 {
-	if(workspaces.empty())
+  if(workspaces.empty())
 	{
 		return;
 	}
-	//remove the selected workspaces from tree
-	QStringList::const_iterator wsitr;
-	for(int  i=0;i<workspaces.size();++i)
-	{
-	  removeWorkspaceEntry(workspaces[i]);
-	}//end of for loop for removing the  selected workspaces from the tree
-
-
+  //remove the selected workspaces from tree
+  QStringListIterator itr(workspaces);
+  while( itr.hasNext() )
+  {
+    removeWorkspaceEntry(itr.next());
+  }
 }
 /*
 This slot handles the notification send by the UnGroupWorkspace algorithm.
