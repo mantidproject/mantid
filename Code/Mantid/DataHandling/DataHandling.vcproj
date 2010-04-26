@@ -277,6 +277,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadRawBin0.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\LoadRawHelper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRKH.cpp"
 				>
 			</File>
@@ -524,6 +532,18 @@
 			</File>
 			<File
 				RelativePath=".\test\LoadRaw3Test.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadRawBin0.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\LoadRawBin0Test.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\LoadRawHelper.h"
 				>
 			</File>
 			<File

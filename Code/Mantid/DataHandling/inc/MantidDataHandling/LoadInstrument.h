@@ -112,9 +112,11 @@ namespace API
       void populateIdList(Poco::XML::Element* pElem, IdList& idList);
 
       /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
+      void appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList,
+                          const std::vector<std::string> excludeList);
       /// Add XML element to parent assuming the element contains other component elements
-      void appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList);
+      void appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pElem, IdList& idList,
+                          const std::vector<std::string> excludeList);
 
       /// Add XML element to parent assuming the element contains no other component elements
       void appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Element* pElem, IdList& idList);
@@ -203,6 +205,9 @@ namespace API
 
       /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
       void runLoadParameterFile();
+
+      /// get name of location element
+      std::string getNameOfLocationElement(Poco::XML::Element* pElem);
     };
 
   } // namespace DataHandling

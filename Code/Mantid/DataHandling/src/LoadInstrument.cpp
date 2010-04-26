@@ -226,17 +226,17 @@ void LoadInstrument::exec()
 
       IdList idList; // structure to possibly be populated with detector IDs
 
-      // get all location element contained in component element
+      // get all location elements contained in component element
 
       NodeList* pNL_location = pElem->getElementsByTagName("location");
       unsigned int pNL_location_length = pNL_location->length();
       if (pNL_location_length == 0)
       {
-        g_log.error(std::string("All component elements must contain at least one location element") +
-          " even it is just an empty location element of the form <location />");
+        g_log.error(std::string("A component element must contain at least one location element") +
+          " even if it is just an empty location element of the form <location />");
         throw Kernel::Exception::InstrumentDefinitionError(
-          std::string("All component elements must contain at least one location element") +
-          " even it is just an empty location element of the form <location />", m_filename);
+          std::string("A component element must contain at least one location element") +
+          " even if it is just an empty location element of the form <location />", m_filename);
       }
 
 
@@ -261,7 +261,21 @@ void LoadInstrument::exec()
       {		
         for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
         {
-          appendAssembly(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
+          Element* pLocElem = static_cast<Element*>(pNL_location->item(i_loc));
+
+          // check if <exclude> sub-elements for this location and create new exclude list to pass on 
+          NodeList* pNLexclude = pLocElem->getElementsByTagName("exclude");
+          unsigned int numberExcludeEle = pNLexclude->length();
+          std::vector<std::string> newExcludeList;
+          for (int i = 0; i < numberExcludeEle; i++)
+          {
+            Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
+            if ( pExElem->hasAttribute("sub-part") )
+              newExcludeList.push_back(pExElem->getAttribute("sub-part"));
+          }
+          pNLexclude->release();
+
+          appendAssembly(m_instrument, pLocElem, idList, newExcludeList);
         }
 
 
@@ -367,7 +381,8 @@ void LoadInstrument::exec()
  *  @param pLocElem  Poco::XML element that points to a location element in an instrument description XML file
  *  @param idList The current IDList
  */
-void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
+void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList, 
+                                    const std::vector<std::string> excludeList)
 {
   // The location element is required to be a child of a component element. Get this component element
 
@@ -378,19 +393,8 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
   ass->setParent(parent);
   parent->add(ass);
 
+  ass->setName( getNameOfLocationElement(pLocElem) );
 
-  // set name of newly added component assembly.
-
-  if ( pLocElem->hasAttribute("name") )
-    ass->setName(pLocElem->getAttribute("name"));
-  else if ( pCompElem->hasAttribute("name") )
-  {
-    ass->setName(pCompElem->getAttribute("name"));
-  }
-  else
-  {
-    ass->setName(pCompElem->getAttribute("type"));
-  }
 
   // set location for this newly added comp and set facing if specified in instrument def. file. Also
   // check if any logfiles are referred to through the <parameter> element.
@@ -415,21 +419,41 @@ void LoadInstrument::appendAssembly(Geometry::CompAssembly* parent, Poco::XML::E
     {
       Element* pElem = static_cast<Element*>(pNode);
 
-      std::string typeName = (getParentComponent(pElem))->getAttribute("type");
+      // check if this location is in the exclude list
+      std::vector<std::string>::const_iterator it = find(excludeList.begin(), excludeList.end(), getNameOfLocationElement(pElem));
+      if ( it == excludeList.end() )
+      {
 
-      if ( isAssembly(typeName) )
-        appendAssembly(ass, pElem, idList);
-      else
-        appendLeaf(ass, pElem, idList);
+        std::string typeName = (getParentComponent(pElem))->getAttribute("type");
+
+        if ( isAssembly(typeName) )
+        {
+          // check if <exclude> sub-elements for this location and create new exclude list to pass on 
+          NodeList* pNLexclude = pElem->getElementsByTagName("exclude");
+          unsigned int numberExcludeEle = pNLexclude->length();
+          std::vector<std::string> newExcludeList;
+          for (int i = 0; i < numberExcludeEle; i++)
+          {
+            Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
+            if ( pExElem->hasAttribute("sub-part") )
+              newExcludeList.push_back(pExElem->getAttribute("sub-part"));
+          }
+          pNLexclude->release();
+
+          appendAssembly(ass, pElem, idList, newExcludeList);
+        }
+        else
+          appendLeaf(ass, pElem, idList);
+      }
     }
-
     pNode = it.nextNode();
   }
 }
 
-void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList)
+void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> parent, Poco::XML::Element* pLocElem, IdList& idList,
+                                    const std::vector<std::string> excludeList)
 {
-  appendAssembly(parent.get(), pLocElem, idList);
+  appendAssembly(parent.get(), pLocElem, idList, excludeList);
 }
 
 
@@ -464,19 +488,7 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
 
   if ( category.compare("detector") == 0 )
   {
-    std::string name;
-    if ( pLocElem->hasAttribute("name") )
-    {
-      name = pLocElem->getAttribute("name");
-    }
-    else if ( pCompElem->hasAttribute("name") )
-    {
-      name = pCompElem->getAttribute("name");
-    }
-    else
-    {
-      name = typeName;
-    }
+    std::string name = getNameOfLocationElement(pLocElem);
 
     Geometry::Detector* detector = new Geometry::Detector(name, mapTypeNameToShape[typeName], parent);
 
@@ -527,17 +539,7 @@ void LoadInstrument::appendLeaf(Geometry::CompAssembly* parent, Poco::XML::Eleme
   }
   else
   {
-    std::string name;
-    if ( pLocElem->hasAttribute("name") )
-      name = pLocElem->getAttribute("name");
-    else if ( pCompElem->hasAttribute("name") )
-    {
-      name = pCompElem->getAttribute("name");
-    }
-    else
-    {
-      name = typeName;
-    }
+    std::string name = getNameOfLocationElement(pLocElem);
 
     Geometry::ObjComponent *comp = new Geometry::ObjComponent(name, mapTypeNameToShape[typeName], parent);
     parent->add(comp);
@@ -1364,6 +1366,32 @@ void LoadInstrument::runLoadParameterFile()
   {
     g_log.information("Unable to successfully run LoadParameter sub-algorithm");
   }
+}
+
+
+/** get name of location element
+ *
+ *  @param pLocElem  Poco::XML element that points to a location element
+ *  @return name of location element
+ */
+std::string LoadInstrument::getNameOfLocationElement(Poco::XML::Element* pElem)
+{
+  Element* pCompElem = getParentComponent(pElem);
+
+  std::string retVal;
+
+  if ( pElem->hasAttribute("name") )
+    retVal = pElem->getAttribute("name");
+  else if ( pCompElem->hasAttribute("name") )
+  {
+    retVal = pCompElem->getAttribute("name");
+  }
+  else
+  {
+    retVal = pCompElem->getAttribute("type");
+  }
+
+  return retVal;
 }
 
 
