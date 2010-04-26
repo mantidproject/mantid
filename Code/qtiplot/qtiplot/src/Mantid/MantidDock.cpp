@@ -536,8 +536,6 @@ This slot handles the notification send by the UnGroupWorkspace algorithm.
 
 void MantidDockWidget::updateWorkspacesTreeafterUnGrouping(const QString& wsGroupName)
 {
-	try
-	{
 		QList<QTreeWidgetItem*> match_items=m_tree->findItems(wsGroupName,Qt::MatchFixedString);
 		if(match_items.isEmpty())
 		{
@@ -555,7 +553,15 @@ void MantidDockWidget::updateWorkspacesTreeafterUnGrouping(const QString& wsGrou
 				std::string wsName=pchild->text(0).toStdString();
 
 				//get the workspace pointer
-				Workspace_sptr ws_ptr=Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+				Workspace_sptr ws_ptr;
+        try
+        {
+          ws_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+        }
+        catch(Mantid::Kernel::Exception::NotFoundError&)
+        {
+          return;
+        }
 
 				QTreeWidgetItem* ws_item = new QTreeWidgetItem(QStringList(pchild->text(0)));
 				if(!ws_item)
@@ -575,11 +581,7 @@ void MantidDockWidget::updateWorkspacesTreeafterUnGrouping(const QString& wsGrou
 
 			}//end of if loop for pchild
 		}//end of for loop for child count iteration
-	}
-	catch(Mantid::Kernel::Exception::NotFoundError& e)
-	{
-		throw std::runtime_error(e.what());
-	}
+
 }
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
