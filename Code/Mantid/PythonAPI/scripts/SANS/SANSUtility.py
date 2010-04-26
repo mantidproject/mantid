@@ -87,27 +87,31 @@ def MaskOutsideCylinder(workspace, radius, xcentre = '0.0', ycentre = '0.0'):
 
 # Mask such that the remainder is that specified by the phi range
 def LimitPhi(workspace, centre, phimin, phimax, use_mirror=True):
-    # get rid of any multiple rotations
+    # convert all angles to be between 0 and 360
     while phimax > 360 : phimax -= 360
-    while phimax < -360 : phimax += 360
+    while phimax < 0 : phimax += 360
     while phimin > 360 : phimin -= 360
-    while phimin < -360 : phimin += 360
+    while phimin < 0 : phimin += 360
+    while phimax<phimin : phimax += 360
 
     #Convert to radians
     phimin = math.pi*phimin/180.0
     phimax = math.pi*phimax/180.0
-    xmldef =  InfinitePlaneXML('pla',centre, [math.cos(phimin + math.pi/2.0),math.sin(phimin + math.pi/2.0),0]) + \
-    InfinitePlaneXML('pla2',centre, [-math.cos(phimax + math.pi/2.0),-math.sin(phimax + math.pi/2.0),0]) + \
-    InfinitePlaneXML('pla3',centre, [math.cos(phimax + math.pi/2.0),math.sin(phimax + math.pi/2.0),0]) + \
-    InfinitePlaneXML('pla4',centre, [-math.cos(phimin + math.pi/2.0),-math.sin(phimin + math.pi/2.0),0])
+    xmldef =  InfinitePlaneXML('pla',centre, [math.cos(-phimin + math.pi/2.0),math.sin(-phimin + math.pi/2.0),0]) + \
+    InfinitePlaneXML('pla2',centre, [-math.cos(-phimax + math.pi/2.0),-math.sin(-phimax + math.pi/2.0),0]) + \
+    InfinitePlaneXML('pla3',centre, [math.cos(-phimax + math.pi/2.0),math.sin(-phimax + math.pi/2.0),0]) + \
+    InfinitePlaneXML('pla4',centre, [-math.cos(-phimin + math.pi/2.0),-math.sin(-phimin + math.pi/2.0),0])
     
     if use_mirror : 
         xmldef += '<algebra val="#((pla pla2):(pla3 pla4))" />'
     else:
-        if ( abs(phimax-phimin) > math.pi ) :# to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
-	    xmldef += '<algebra val="#(pla:pla2)" />'
-        else :# an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
-	    xmldef += '<algebra val="#(pla pla2)" />'
+        #the formula is different for acute verses obstruse angles
+	if phimax-phimin > math.pi :
+	      # to get an obtruse angle, a wedge that's more than half the area, we need to add the semi-inifinite volumes
+            xmldef += '<algebra val="#(pla:pla2)" />'
+        else :
+	      # an acute angle, wedge is more less half the area, we need to use the intesection of those semi-inifinite volumes
+            xmldef += '<algebra val="#(pla pla2)" />'
     
     MaskDetectorsInShape(workspace, xmldef)	
 

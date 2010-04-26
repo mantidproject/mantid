@@ -1142,11 +1142,11 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
         if CORRECTION_TYPE == '1D':
             SANSUtility.StripEndZeroes(final_workspace)
     else:
+        UnGroupWorkspace(final_workspace)
         RenameWorkspace(final_workspace + '_1', 'Left')
         RenameWorkspace(final_workspace + '_2', 'Right')
         RenameWorkspace(final_workspace + '_3', 'Up')
         RenameWorkspace(final_workspace + '_4', 'Down')
-        UnGroupWorkspace(final_workspace)
 
     # Revert the name change so that future calls with different wavelengths get the correct name
     sample_setup.setReducedWorkspace(wsname_cache)                                
@@ -1176,7 +1176,7 @@ def _init_run(raw_ws, beamcoords, emptycell):
             final_ws += 'main'
         else:
             final_ws += 'HAB'
-            final_ws += '_' + CORRECTION_TYPE
+        final_ws += '_' + CORRECTION_TYPE
 
     # Put the components in the correct positions
     maskpt_rmin, maskpt_rmax = SetupComponentPositions(DETBANK, raw_ws, beamcoords[0], beamcoords[1])
@@ -1304,10 +1304,9 @@ def applyMasking(workspace, firstspec, dimension, orientation=SANSUtility.Orient
     SANSUtility.MaskByBinRange(workspace, timestring)
     
     # Finally apply masking to get the correct phi range
-    if (limitphi == True and PHIMAX - PHIMIN < 180):
-        centre = mtd[workspace].getInstrument().getComponentByName(DETBANK).getPos()
-        centre_pt = [centre.getX(), centre.getY(), centre.getZ()]
-        SANSUtility.LimitPhi(workspace, centre_pt, PHIMIN,PHIMAX,PHIMIRROR)
+    if limitphi == True:
+        # Detector has been moved such that beam centre is at [0,0,0]
+        SANSUtility.LimitPhi(workspace, [0,0,0], PHIMIN,PHIMAX,PHIMIRROR)
         
 #----------------------------------------------------------------------------------------------------------------------------
 ##
@@ -1373,7 +1372,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
 
     applyMasking(final_result, SPECMIN, DIMENSION, orientation,True)
     ####################################################################################
-        
+
     ######################## Unit change and rebin #####################################
     # Convert all of the files to wavelength and rebin
     # ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
@@ -1467,7 +1466,7 @@ def GroupIntoQuadrants(reduced_ws, final_result, xcentre, ycentre, q_bins):
         to_group += final_result + '_' + str(counter) + ','
         CreateQuadrant(reduced_ws, final_result, q, xcentre, ycentre, q_bins, final_result + '_' + str(counter))
 
-    # We don't need these now 
+    # We don't need these now
     mantid.deleteWorkspace(final_result)                    
     mantid.deleteWorkspace(reduced_ws)
     GroupWorkspaces(final_result, to_group.strip(','))
