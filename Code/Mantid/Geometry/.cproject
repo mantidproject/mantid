@@ -33,7 +33,7 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/Geometry/inc}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/Kernel/inc}&quot;"/>
 </option>
-<option id="gnu.cpp.compiler.option.other.other.400463227" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC" valueType="string"/>
+<option id="gnu.cpp.compiler.option.other.other.400463227" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC -fopenmp" valueType="string"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1938010390" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 <listOptionValue builtIn="false" value="HAVE_CONFIG_H"/>
 </option>
@@ -533,7 +533,7 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/Geometry/inc}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/Kernel/inc}&quot;"/>
 </option>
-<option id="gnu.cpp.compiler.option.other.other.1606236694" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC" valueType="string"/>
+<option id="gnu.cpp.compiler.option.other.other.1606236694" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC -fopenmp" valueType="string"/>
 <option id="gnu.cpp.compiler.option.warnings.pedantic.947790869" name="Pedantic (-pedantic)" superClass="gnu.cpp.compiler.option.warnings.pedantic" value="true" valueType="boolean"/>
 <option id="gnu.cpp.compiler.option.warnings.allwarn.1575021818" name="All warnings (-Wall)" superClass="gnu.cpp.compiler.option.warnings.allwarn" value="true" valueType="boolean"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.577000153" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
