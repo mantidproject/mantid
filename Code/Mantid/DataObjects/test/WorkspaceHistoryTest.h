@@ -112,7 +112,7 @@ for a Workspace1D or Workspace2D, at the moment...
 */
 
 
-class AlgorithmTest : public CxxTest::TestSuite
+class WorkspaceHistoryTest : public CxxTest::TestSuite
 {
 public:
 

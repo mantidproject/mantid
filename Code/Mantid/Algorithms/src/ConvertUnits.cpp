@@ -110,8 +110,10 @@ void ConvertUnits::exec()
 
   // Loop over the histograms (detector spectra)
   Progress prog(this,0.0,0.5,numberOfSpectra);
+  PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numberOfSpectra; ++i) 
   {
+    PARALLEL_START_INTERUPT_REGION
     // Take the bin width dependency out of the Y & E data
     if (distribution)
     {
@@ -129,14 +131,12 @@ void ConvertUnits::exec()
       outputWS->dataE(i) = inputWS->dataE(i);
     }
     // Copy over the X data (no copying will happen if the two workspaces are the same)
-    outputWS->dataX(i) = inputWS->readX(i);
-    if ( i % iprogress_step == 0)
-    {
-        progress( double(i)/numberOfSpectra/2 );
-        interruption_point();
-    }
+    outputWS->setX( i, inputWS->refX(i) );
+    
     prog.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Check whether there is a quick conversion available
   double factor, power;
