@@ -4,8 +4,10 @@
 #
 #
 CLEAN="0"
+QMAKE_CONFIG=""
 if [ $# -ge 1 ]; then 
     if [ $1 = "clean" ]; then CLEAN="1"; fi
+    if [ $2 = "--debug" ]; then QMAKE_CONFIG="CONFIG+=debug"; fi
 fi
 if [ $# -ge 2 ]; then 
     VERSION=$2
@@ -23,8 +25,9 @@ ROOTDIR=`pwd`
 cd $ROOTDIR/MantidQt
 if [ $CLEAN = "1" ]; then 
     make clean 
-    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}"
+    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}" QMAKE_LINK="${CXX:-g++}" ${QMAKE_CONFIG}
 fi
+
 make
 ERRORCODE=$?
 if [ $ERRORCODE != 0 ]; then
@@ -36,7 +39,7 @@ fi
 cd $ROOTDIR/QtPropertyBrowser
 if [ $CLEAN = "1" ]; then 
     make clean
-    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}"
+    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}" QMAKE_LINK="${CXX:-g++}" ${QMAKE_CONFIG}
 fi
 make -j2
 ERRORCODE=$?
@@ -49,7 +52,7 @@ fi
 cd $ROOTDIR/qtiplot
 if [ $CLEAN = "1" ]; then 
     make clean
-    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}"
+    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}" QMAKE_LINK="${CXX:-g++}" ${QMAKE_CONFIG}
 fi
 make -j2
 ERRORCODE=$?
