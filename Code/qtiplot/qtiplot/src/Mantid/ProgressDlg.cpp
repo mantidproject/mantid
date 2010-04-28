@@ -26,13 +26,20 @@ ProgressDlg::ProgressDlg(Mantid::API::IAlgorithm_sptr alg,QWidget *parent):QDial
     layout->addLayout(topLayout);
     layout->addLayout(buttonLayout);
 
-	setLayout(layout);
-	setWindowTitle("Mantid - Algorithm progress");
-	setFixedHeight(sizeHint().height());
+    setLayout(layout);
+    setWindowTitle("Mantid - Algorithm progress");
+    setFixedHeight(sizeHint().height());
+    
+    setAttribute(Qt::WA_DeleteOnClose);
 
-    observeProgress(m_alg);
-    observeFinish(m_alg);
-    observeError(m_alg);
+}
+
+
+void ProgressDlg::beginMonitoring()
+{
+  observeProgress(m_alg);
+  observeFinish(m_alg);
+  observeError(m_alg);
 }
 
 void ProgressDlg::cancelClicked()

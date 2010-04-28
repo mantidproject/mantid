@@ -6,11 +6,10 @@
 //----------------------------------
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
-#include "ProgressDlg.h"
 #include "MantidLog.h"
 
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -442,8 +441,6 @@ private:
 	  QMenu *mantidMenu;
     QMenu *menuMantidMatrix;             //  MantidMatrix specific menu
     AlgorithmMonitor *m_algMonitor;      //  Class for monitoring running algorithms
-
-    ProgressDlg *m_progressDialog;       //< Progress of algorithm running asynchronously
 
     // Map of <workspace_name,update_interval> pairs. Positive update_intervals mean
     // UpdateDAE must be launched after LoadDAE for this workspace

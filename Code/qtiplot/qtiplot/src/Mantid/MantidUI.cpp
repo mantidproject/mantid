@@ -10,6 +10,7 @@
 //#include "MemoryImage.h"
 #include "MantidCurve.h"
 #include "FitPropertyBrowser.h"
+#include "ProgressDlg.h"
 
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -61,8 +62,7 @@ m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
 m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
 m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
 m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
-m_appWindow(aw),
-m_progressDialog(0)
+m_appWindow(aw)
 {
     m_exploreMantid = new MantidDockWidget(this,aw);
     m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
@@ -1102,9 +1102,10 @@ Mantid::API::IAlgorithm_sptr MantidUI::createAlgorithm(const QString& algName, i
 
 void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool showDialog)
 {
+  ProgressDlg *progress_box = NULL;
     if (showDialog)
     {
-        m_progressDialog = new ProgressDlg(alg,appWindow());
+        progress_box = new ProgressDlg(alg,appWindow());
     }
 
     m_algMonitor->add(alg);
@@ -1114,11 +1115,15 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
       // Raise the dialog first so that it is properly constructed before the algorithm
       // begins. No need for it to be modal as the user can background it and regain
       // application control anyway.
-      if(showDialog)
+      if(progress_box)
       {
-	m_progressDialog->show();
+	progress_box->show();
       }
       Poco::ActiveResult<bool> res = alg->executeAsync();
+      if( progress_box && !res.available() )
+      {
+	progress_box->beginMonitoring();
+      } 
     }
     catch(...)
     {
