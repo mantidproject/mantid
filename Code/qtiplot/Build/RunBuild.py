@@ -12,7 +12,7 @@ else:
 	make = "nmake"
 
 if platform.system() == 'Linux':
-    qmake = "qmake-qt4 QMAKE_CXX=g++44 QMAKE_CC=gcc44"
+    qmake = "qmake-qt4 QMAKE_CXX=g++44 QMAKE_CC=gcc44 QMAKE_LINK=g++44"
     buildargs.append("-j2")
 elif platform.system() == 'Darwin':
     # Have to set QMAKESPEC for mac to avoid xcode build
