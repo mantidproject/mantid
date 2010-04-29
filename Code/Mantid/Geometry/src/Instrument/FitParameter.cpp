@@ -132,8 +132,8 @@ namespace Geometry
   void FitParameter::printSelf(std::ostream& os) const
   {
     os << m_value  << " , " << m_function << " , " << m_name << " , " << m_constraintMin << " , " 
-      << m_constraintMax << " , " << m_tie << " , " << m_formula << " , " << m_formulaUnit << " , " 
-      << m_lookUpTable;
+      << m_constraintMax << " , " << m_constraintPenaltyFactor << " , " << m_tie << " , " 
+      << m_formula << " , " << m_formulaUnit << " , " << m_lookUpTable;
     return;
   }
 
@@ -210,7 +210,16 @@ namespace Geometry
 
     try
     {
-      f.setTie() = values[5];
+      f.setConstraintPenaltyFactor() = values[5];
+    }
+    catch (...)
+    {
+      f.setConstraintPenaltyFactor() = "";  
+    }
+
+    try
+    {
+      f.setTie() = values[6];
     }
     catch (...)
     {
@@ -219,7 +228,7 @@ namespace Geometry
 
     try
     {
-      f.setFormula() = values[6];
+      f.setFormula() = values[7];
     }
     catch (...)
     {
@@ -228,16 +237,16 @@ namespace Geometry
 
     try
     {
-      f.setFormulaUnit() = values[7];
+      f.setFormulaUnit() = values[8];
     }
     catch (...)
     {
       f.setFormulaUnit() = "";
     }
 
-    if ( values.count() > 8 )
+    if ( values.count() > 9 )
     {
-      std::stringstream str(values[8]);
+      std::stringstream str(values[9]);
       str >> f.setLookUpTable();
     }
 

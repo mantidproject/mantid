@@ -23,6 +23,7 @@ namespace Mantid
 {
 namespace API
 {
+Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
 
 /** Base class implementation of derivative IFunction throws error. This is to check if such a function is provided
     by derivative class. In the derived classes this method must return the derivatives of the resuduals function
@@ -155,7 +156,21 @@ void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> works
             // add constraint if specified for this parameter in instrument definition file
             if ( fitParam.getConstraint().compare("") )
             {  
-              addConstraint(ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint()));
+              IConstraint* constraint = ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint());
+              if ( fitParam.getConstraintPenaltyFactor().compare("") )
+              {
+                double penalty;
+                try
+                {
+                  penalty = atof(fitParam.getConstraintPenaltyFactor().c_str());
+                  constraint->setPenaltyFactor(penalty);
+                }
+                catch (...)
+                {
+                  g_log.warning() << "Can't set penalty factor for constraint\n";
+                }
+              }
+              addConstraint(constraint);
             }
           }
         }

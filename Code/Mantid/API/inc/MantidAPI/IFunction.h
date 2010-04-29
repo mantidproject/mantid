@@ -238,6 +238,8 @@ protected:
   /// Upper bin index
   int m_xMaxIndex;
 
+  /// Static reference to the logger class
+  static Kernel::Logger& g_log;
 };
 
 /** Represents the Jacobian in functionDeriv. 

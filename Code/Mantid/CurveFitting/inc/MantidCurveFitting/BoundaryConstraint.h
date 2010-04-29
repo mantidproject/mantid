@@ -73,14 +73,9 @@ namespace Mantid
       /// Initialize the constraint from an expression
       void initialize(API::IFunction* fun, const API::Expression& expr);
 
-      /// Set panelty factor. The larger the number to thigter the constraint. This number
-      /// must be set to a number larger than zero
+      /// implement IConstraint virtual functions
       void setPenaltyFactor(const double& c); 
-
-      /// Check to see if constraint is valid with respect to a given fitting function, this
-      /// means for now that the parameter name which have been specified for the constraint
-      /// is also one of the active parameters of the fitting function
-      //bool isValid(API::IFunction* fn);
+      double getPenaltyFactor()const { return m_penaltyFactor;}
 
       /// Return if it has a lower bound
       bool        hasLower() const { return m_hasLowerBound; }

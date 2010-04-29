@@ -55,7 +55,8 @@ namespace Mantid
       /// Default constructor
       XMLlogfile(const std::string& logfileID, const std::string& value, const boost::shared_ptr<Kernel::Interpolation>& interpolation,
         const std::string& formula, const std::string& formulaUnit, const std::string& paramName, const std::string& type, const std::string& tie, 
-        const std::string& constraintMin, const std::string& constraintMax, const std::string& fitFunc, const std::string& extractSingleValueAs, 
+        const std::vector<std::string>& constraint, std::string& penaltyFactor, 
+        const std::string& fitFunc, const std::string& extractSingleValueAs, 
         const std::string& eq, const Geometry::IComponent* comp);
 
       /// Destructor
@@ -68,8 +69,10 @@ namespace Mantid
       const std::string m_paramName;  ///< parameter name
       const std::string m_type;       ///< type of the data
       const std::string m_tie;                /// specific to fitting parameter specify any tie
-      const std::string m_constraintMin;             /// specific to fitting parameter specify lower boundary constraint
-      const std::string m_constraintMax;             /// specific to fitting parameter specify upper boundary constraint
+      //const std::string m_constraintMin;             /// specific to fitting parameter specify lower boundary constraint
+      //const std::string m_constraintMax;             /// specific to fitting parameter specify upper boundary constraint
+      const std::vector<std::string> m_constraint;  /// specific to fitting parameter specify lower and upper bound in that order
+      std::string m_penaltyFactor;                  /// specific to fitting parameter specify penalty factor
       const std::string m_fittingFunction;    /// specific to fitting parameter specify fitting function
       const std::string m_formula;            /// specific to fitting parameter. Specify formula to use for setting this parameter
       const std::string m_formulaUnit;       /// unit for formula

@@ -134,7 +134,7 @@ public:
     bk->setParameter("A1",0.0);
     bk->removeActive(1);  
 
-    // set up Lorentzian fitting function
+    // set up Gaussian fitting function
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
@@ -224,7 +224,7 @@ public:
     bk->setParameter("A1",0.0);
     bk->removeActive(1);  
 
-    // set up Lorentzian fitting function
+    // set up Gaussian fitting function
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
@@ -310,22 +310,19 @@ public:
     bk->setParameter("A0",0.0);
     bk->setParameter("A1",0.0);
     bk->removeActive(1);  
-    //bk->removeActive(1);
 
-    //BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
-    //bk->addConstraint(bc_b);
-
-    // set up Lorentzian fitting function
+    // set up Gaussian fitting function
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
-    //fn->setParameter("Height",200.0);    // these are set in HRPD_for_UNIT_TESTING.xml
-    //fn->setParameter("PeakCentre",79450.0);
-    //fn->setParameter("Sigma",300.0);
-
-    // add constraint to function
-    // BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);  
-    // fn->addConstraint(bc3);   // this is set in HRPD_for_UNIT_TESTING.xml
+    // set the workspace explicitely for unit testing purpose only
+    Mantid::DataObjects::Workspace2D_sptr wsToPass = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve(outputSpace));
+    fn->setWorkspace(wsToPass,2,0,0);
+    TS_ASSERT_DELTA( fn->getParameter("Height"), 200 ,0.1);
+    TS_ASSERT_DELTA( fn->getParameter("Sigma"), 300 ,0.1);
+    IConstraint* testConstraint = fn->firstConstraint();
+    TS_ASSERT( testConstraint->asString().compare("20<Sigma<100") == 0);
+    TS_ASSERT_DELTA( testConstraint->getPenaltyFactor(), 1000.001 ,0.00001);
 
     fnWithBk->addFunction(bk);
     fnWithBk->addFunction(fn);
@@ -399,7 +396,7 @@ public:
     BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     //bk->addConstraint(bc_b);
 
-    // set up Lorentzian fitting function
+    // set up Gaussian fitting function
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
@@ -477,7 +474,7 @@ public:
     BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     bk->addConstraint(bc_b);
 
-    // set up Lorentzian fitting function
+    // set up Gaussian fitting function
     Gaussian* fn = new Gaussian();
     fn->initialize();
 
@@ -900,7 +897,7 @@ public:
     BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     //bk->addConstraint(bc_b);
 
-    // set up Lorentzian fitting function
+    // set up Gaussian fitting function
     SimplexGaussian* fn = new SimplexGaussian();
     fn->initialize();
 

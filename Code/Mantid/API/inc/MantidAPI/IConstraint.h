@@ -66,6 +66,14 @@ public:
   /// than the upper boundary value. 
   virtual void setParamToSatisfyConstraint() = 0;
 
+  /// set the penalty factor for the constraint
+  /// Set panelty factor. The larger the number to thigter the constraint. This number
+  /// must be set to a number larger than zero
+  virtual void setPenaltyFactor(const double& c) = 0;   
+
+  /// get the penalty factor for the constraint
+  virtual double getPenaltyFactor()const = 0;   
+
   /// Return the string that can be used in this->initialize() to recreate this constraint
   virtual std::string asString()const = 0;
 };

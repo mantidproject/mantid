@@ -77,7 +77,7 @@ void IkedaCarpenterPV::init()
   declareParameter("Kappa",46.0);
   declareParameter("SigmaSquared",1.0);
   declareParameter("Gamma",1.0);
-  declareParameter("Eta",0.0);
+  declareParameter("Eta",0.5);   // which means initially half gauss half lorentzian
   declareParameter("X0",0.0);
 
   m_width = 0.0; m_height = 0.0; 

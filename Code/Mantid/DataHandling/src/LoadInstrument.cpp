@@ -1220,8 +1220,7 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
 
       // check if <min> or <max> elements present
 
-      std::string constraintMin;
-      std::string constraintMax;
+      std::vector<std::string> constraint(2); 
       
       NodeList* pNLMin = pParamElem->getElementsByTagName("min");
       unsigned int numberMin = pNLMin->length();
@@ -1231,15 +1230,30 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
       if ( numberMin >= 1)
       {
         Element* pMin = static_cast<Element*>(pNLMin->item(0));
-        constraintMin = pMin->getAttribute("val"); 
+        constraint[0] = pMin->getAttribute("val"); 
       }
       if ( numberMax >= 1)
       {
         Element* pMax = static_cast<Element*>(pNLMax->item(0));
-        constraintMax = pMax->getAttribute("val");
+        constraint[1] = pMax->getAttribute("val");
       }
       pNLMin->release();
       pNLMax->release();
+
+
+      // check if penalty-factor> elements present
+
+      std::string penaltyFactor; 
+      
+      NodeList* pNL_penaltyFactor = pParamElem->getElementsByTagName("penalty-factor");
+      unsigned int numberPenaltyFactor =  pNL_penaltyFactor->length();
+
+      if ( numberPenaltyFactor>= 1)
+      {
+        Element* pPenaltyFactor = static_cast<Element*>(pNL_penaltyFactor->item(0));
+        penaltyFactor = pPenaltyFactor->getAttribute("val"); 
+      }
+      pNL_penaltyFactor->release();
 
 
       // Check if look up table is specified
@@ -1284,7 +1298,7 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
 
 
       boost::shared_ptr<XMLlogfile> temp(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, paramName, type, tie, 
-        constraintMin, constraintMax, fittingFunction, extractSingleValueAs, eq, comp));
+        constraint, penaltyFactor, fittingFunction, extractSingleValueAs, eq, comp));
       logfileCache.insert( std::pair<std::string,boost::shared_ptr<XMLlogfile> >(logfileID,temp));
     } // end of if statement
   }

@@ -147,6 +147,7 @@ public:
     TS_ASSERT( fitParam4.getTie().compare("") == 0 );
     TS_ASSERT( fitParam4.getFunction().compare("somefunction") == 0 );
     TS_ASSERT( fitParam4.getConstraint().compare("200 < percentage < 300") == 0 );
+    TS_ASSERT( fitParam4.getConstraintPenaltyFactor().compare("9.1") == 0 );
     TS_ASSERT( !fitParam4.getLookUpTable().containData() );
     TS_ASSERT( fitParam4.getFormula().compare("") == 0 );
 

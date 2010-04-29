@@ -57,11 +57,13 @@ namespace Mantid
       std::string getTie() const { return m_tie; }
       /// set tie
       std::string& setTie() { return m_tie; }
-      /// get constraint
+      /// get constraint and penalty factor
       std::string getConstraint() const;
-      /// set constraint
+      std::string getConstraintPenaltyFactor() const { return m_constraintPenaltyFactor; }
+      /// set constraint and penalty factors
       std::string& setConstraintMin() { return m_constraintMin; }
       std::string& setConstraintMax() { return m_constraintMax; }
+      std::string& setConstraintPenaltyFactor() { return m_constraintPenaltyFactor; }
       /// get formula
       std::string getFormula() const { return m_formula; }
       /// set formula
@@ -94,6 +96,7 @@ namespace Mantid
       /// constraint of parameter
       std::string m_constraintMin;
       std::string m_constraintMax;
+      std::string m_constraintPenaltyFactor;
       /// name of fitting function
       std::string m_function;
       /// name of parameter
