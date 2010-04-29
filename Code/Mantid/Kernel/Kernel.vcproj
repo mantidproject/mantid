@@ -303,6 +303,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Timer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\TimeSeriesProperty.cpp"
 				>
 			</File>
@@ -574,6 +578,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidKernel\ThreadSafeLogStream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidKernel\Timer.h"
 				>
 			</File>
 			<File

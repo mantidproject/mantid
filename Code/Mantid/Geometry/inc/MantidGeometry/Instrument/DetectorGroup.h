@@ -26,7 +26,7 @@ namespace Geometry
     @author Russell Taylor, Tessella Support Services plc
     @date 08/04/2008
 
-    Copyright &copy; 2008-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2008-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -57,12 +57,12 @@ public:
   // IDetector methods
   int getID() const;
   V3D getPos() const;
-	double getDistance(const IComponent& comp) const;
+  double getDistance(const IComponent& comp) const;
   double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double getPhi() const;
   double solidAngle(const V3D& observer) const; 
-	bool isMasked() const;
-	bool isMonitor() const;
+  bool isMasked() const;
+  bool isMonitor() const;
   bool isValid(const V3D& point) const;
   virtual bool isOnSide(const V3D& point) const;
   ///Try to find a point that lies within (or on) the object

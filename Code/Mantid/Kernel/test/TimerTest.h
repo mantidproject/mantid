@@ -3,6 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 
 class TimerTest : public CxxTest::TestSuite
 {
@@ -11,9 +14,17 @@ public:
   {
     // Instantiating the object starts the timer
     Mantid::Kernel::Timer timer;
-    sleep(2);
+    #ifdef _WIN32
+      Sleep(2000);
+    #else
+      sleep(2);
+    #endif
     TS_ASSERT_DELTA( timer.elapsed(), 2.00, 0.01 );
-    sleep(1);
+    #ifdef _WIN32
+      Sleep(1000);
+    #else
+      sleep(1);
+    #endif
     // Calling elapsed above should reset the timer
     TS_ASSERT_DELTA( timer.elapsed(), 1.00, 0.01 );
   }

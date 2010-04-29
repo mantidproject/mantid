@@ -4,7 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#ifndef _WIN32
+#include "MantidKernel/System.h"
+#ifdef _WIN32
+#include <time.h>
+#else
 #include <sys/time.h>
 #endif
 
@@ -37,7 +40,7 @@ namespace Kernel
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class Timer
+class DLLExport Timer
 {
 public:
   Timer();

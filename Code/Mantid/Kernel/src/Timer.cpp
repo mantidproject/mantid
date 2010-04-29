@@ -29,7 +29,7 @@ float Timer::elapsed()
 {
 #ifdef _WIN32
   clock_t now = clock();
-  const float retval = float((now - m_start)/CLOCKS_PER_SEC);
+  const float retval = float(now - m_start)/CLOCKS_PER_SEC;
   m_start = now;
 #else /* linux & mac */
   timeval now;
