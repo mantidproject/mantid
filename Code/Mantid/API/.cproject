@@ -52,7 +52,6 @@
 <option id="gnu.cpp.link.option.libs.1959069848" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="MantidKernel"/>
 <listOptionValue builtIn="false" value="MantidGeometry"/>
-<listOptionValue builtIn="false" value="gomp"/>
 </option>
 <option id="gnu.cpp.link.option.paths.562638393" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="../../debug"/>
@@ -540,7 +539,6 @@
 <option id="gnu.cpp.link.option.libs.1888055487" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="MantidKernel"/>
 <listOptionValue builtIn="false" value="MantidGeometry"/>
-<listOptionValue builtIn="false" value="gomp"/>
 </option>
 <option id="gnu.cpp.link.option.paths.1799304643" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 <listOptionValue builtIn="false" value="../../release"/>

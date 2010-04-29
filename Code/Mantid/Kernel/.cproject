@@ -52,6 +52,7 @@
 <listOptionValue builtIn="false" value="PocoFoundationd"/>
 <listOptionValue builtIn="false" value="PocoUtild"/>
 <listOptionValue builtIn="false" value="boost_signals"/>
+<listOptionValue builtIn="false" value="gomp"/>
 </option>
 <option id="gnu.cpp.link.option.paths.351751122" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1013490100" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -535,6 +536,7 @@
 <listOptionValue builtIn="false" value="PocoFoundation"/>
 <listOptionValue builtIn="false" value="PocoUtil"/>
 <listOptionValue builtIn="false" value="boost_signals"/>
+<listOptionValue builtIn="false" value="gomp"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1351394856" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

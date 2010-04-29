@@ -5,6 +5,8 @@
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/Timer.h"
+#include <iomanip>
 
 using namespace Mantid::Kernel;
 
@@ -87,7 +89,6 @@ void Algorithm::initialize()
 bool Algorithm::execute()
 {
   m_notificationCenter.postNotification(new StartedNotification(this));
-  clock_t start,end;
   time_t start_time;
   // Return a failure if the algorithm hasn't been initialized
   if ( !isInitialized() )
@@ -172,24 +173,29 @@ bool Algorithm::execute()
     {
       if (!m_isChildAlgorithm) m_running = true;
       time(&start_time);
-      start = clock();
       //count used for defining the algorithm execution order
-      ++Algorithm::g_execCount; 
+      ++Algorithm::g_execCount;
+      // Start a timer
+      Timer timer;
       // Call the concrete algorithm's exec method
       this->exec();
-      end = clock();
+      // Get how long this algorithm took to run
+      const float duration = timer.elapsed();
       // need it to throw before trying to run fillhistory() on an algorithm which has failed
       // Put any output workspaces into the AnalysisDataService - if this is not a child algorithm
       if (!isChild())
       {
-        fillHistory(start_time,double(end - start)/CLOCKS_PER_SEC,Algorithm::g_execCount);
+        fillHistory(start_time,duration,Algorithm::g_execCount);
         this->store();
       }
 
       // RJT, 19/3/08: Moved this up from below the catch blocks
       setExecuted(true);
-      if (!m_isChildAlgorithm) g_log.notice() << name() << " successful, Duration "
-                                     << double(end - start)/CLOCKS_PER_SEC << " seconds" << std::endl;
+      if (!m_isChildAlgorithm) 
+      {
+        g_log.notice() << name() << " successful, Duration "
+                       << std::fixed << std::setprecision(2) << duration << " seconds" << std::endl;
+      }
       m_running = false;
     }
     catch(std::runtime_error& ex)
