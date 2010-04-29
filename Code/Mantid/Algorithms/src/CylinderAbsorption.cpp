@@ -58,7 +58,20 @@ void CylinderAbsorption::retrieveProperties()
    * Since the first annulus is separated in 6 segments, the next one in 12 and so on.....
    */
   m_numVolumeElements = m_numSlices * m_numAnnuli * (m_numAnnuli + 1) * 3;
+
+  if( m_numVolumeElements == 0 )
+  {
+    g_log.error() << "Input properties lead to no defined volume elements.\n";
+    throw std::runtime_error("No volume elements defined.");
+  }
+
   m_sampleVolume = m_cylHeight * M_PI * m_cylRadius * m_cylRadius;
+
+  if( m_sampleVolume == 0.0 )
+  {
+    g_log.error() << "Defined sample has zero volume.\n";
+    throw std::runtime_error("Sample with zero volume defined.");
+  }
 }
 
 std::string CylinderAbsorption::sampleXML()
@@ -84,7 +97,6 @@ void CylinderAbsorption::initialiseCachedDistances()
   
   int counter = 0;
   // loop over slices
-
   for (int i = 0; i < m_numSlices; ++i)
   {
     const double z = (i + 0.5) * m_sliceThickness - 0.5 * m_cylHeight;
@@ -107,6 +119,7 @@ void CylinderAbsorption::initialiseCachedDistances()
         // Create track for distance in cylinder before scattering point
         // Remember beam along Z direction
         Track incoming(m_elementPositions[counter], V3D(0.0, 0.0, -1.0));
+	
         m_sampleObject->interceptSurface(incoming);
         m_L1s[counter] = incoming.begin()->Dist;
 

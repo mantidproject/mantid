@@ -95,7 +95,7 @@ public:
   }
 
   /// Destructor
-  ~WorkspaceObserver()
+  virtual ~WorkspaceObserver()
   {
     delete m_proxy;
 

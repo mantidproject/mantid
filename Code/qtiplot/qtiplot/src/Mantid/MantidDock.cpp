@@ -90,13 +90,6 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   connect(m_mantidUI, SIGNAL(workspace_renamed(const QString &,const QString&)),
           this, SLOT(updateWorkspaceTreeafterRenaming(const QString &, const QString&)));
 
-   connect(m_mantidUI, SIGNAL(workspaces_grouped(const QStringList&)),
-	 this, SLOT(updateWorkspacesTreeafterGrouping(const QStringList&)));
-
- connect(m_mantidUI, SIGNAL(workspace_ungrouped(const QString&)),
-	 this, SLOT(updateWorkspacesTreeafterUnGrouping(const QString&)));
-
-  
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
 }
 
@@ -256,10 +249,10 @@ void MantidDockWidget::populateWorkspaceTree(const QString & ws_name, Mantid::AP
 {
   // This check is here because the signals don't get delivered immediately when the add/replace notification in MantidUI
   // is recieved. The signal cannot be removed in favour of a direct call because the call is from a separate thread.
-if( !Mantid::API::AnalysisDataService::Instance().doesExist(ws_name.toStdString()) ) return;
+  if( !Mantid::API::AnalysisDataService::Instance().doesExist(ws_name.toStdString()) ) return;
+  
+  QTreeWidgetItem *ws_item = NULL;
 
-QTreeWidgetItem *ws_item = NULL;
- // Sleep(100);
   
   bool bExists=false;
   bool bGroupMember=false;
@@ -267,50 +260,51 @@ QTreeWidgetItem *ws_item = NULL;
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name, Qt::MatchFixedString);
   if( name_matches.isEmpty() )
   {
-	  //if there are no top level items in the tree with the given workspace name
-      // loop through member workspaces  of each group workspace
-	  int topitemCounts=m_tree->topLevelItemCount();
-	  for (int index=0;index<topitemCounts;++index)
-	  {
-		  QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
-		  if(!topItem)
-		  {
-			  return;
-		  }
-		  int childCounts=topItem->childCount();
-		  for(int chIndex=0;chIndex<childCounts;++chIndex)
-		  {
-			  QTreeWidgetItem* childItem= topItem->child(chIndex);
-			  if(childItem)
-			  {
-				  if(!ws_name.compare(childItem->text(0)))
-				  {	
-					  //this a goup member workspace
-					  bExists=true;
-					  ws_item = childItem;
-					  ws_item->takeChildren();
-					  break;
-				  }
-			  }
-
-		  }
-		  //if the search item is found stop the search.
-		  if(bExists)
-		  {
-			  break;
-		  }
+    //if there are no top level items in the tree with the given workspace name
+    // loop through member workspaces  of each group workspace
+    int topitemCounts=m_tree->topLevelItemCount();
+    for (int index=0; index < topitemCounts; ++index)
+    {
+      QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
+      if(!topItem)
+      {
+	continue;
+      }
+      int childCounts=topItem->childCount();
+      for(int chIndex=0;chIndex<childCounts;++chIndex)
+      {
+	QTreeWidgetItem* childItem= topItem->child(chIndex);
+	if(childItem)
+	{
+	  if(!ws_name.compare(childItem->text(0)))
+	  {	
+	    //this a goup member workspace
+	    bExists=true;
+	    ws_item = childItem;
+	    ws_item->takeChildren();
+	    break;
 	  }
-	 
+	}
+	
+      }
+      //if the search item is found stop the search.
+      if(bExists)
+      {
+	break;
+      }
+    }
+    
   }
   else
-  {	ws_item = name_matches[0];
+  {	
+    ws_item = m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
     ws_item->takeChildren();
-	bExists=true;
+    bExists=true;
   }
   //if this a new workspace create treewidgetitem pointer 
   if(!bExists)
   {
-	  ws_item = new QTreeWidgetItem(QStringList(ws_name));
+    ws_item = new QTreeWidgetItem(QStringList(ws_name));
   }
   QTreeWidgetItem*  wsid_item=new QTreeWidgetItem(QStringList(QString::fromStdString(workspace->id())));
   wsid_item->setFlags(Qt::NoItemFlags);
@@ -318,67 +312,77 @@ QTreeWidgetItem *ws_item = NULL;
 
   if(bGroup)
   {	
-	  ws_item->setIcon(0,QIcon(QPixmap(mantid_wsgroup_xpm)));
-	  //add the gurop workspace
-	  m_tree->addTopLevelItem(ws_item);
-	  populateWorkspaceData(workspace,ws_item);
+    ws_item->setIcon(0,QIcon(QPixmap(mantid_wsgroup_xpm)));
+    //add the gurop workspace
+    m_tree->addTopLevelItem(ws_item);
+    populateWorkspaceData(workspace,ws_item);
+
+    // Populate workspace group
+    Mantid::API::WorkspaceGroup_sptr wsgroup = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace);
+    std::vector<std::string>::const_iterator itr = wsgroup->getNames().begin();
+    std::vector<std::string>::const_iterator iend = wsgroup->getNames().end();
+    for( ++itr ; itr != iend ;++itr )
+    {
+      Mantid::API::Workspace_sptr member = Mantid::API::AnalysisDataService::Instance().retrieve(*itr);
+      populateWorkspaceTree(QString::fromStdString(*itr), member, false);
+    }
+    return;
   }
   else 
   {
-	  //this could be member workspace or normal workspace
-
-	 //loop thorugh each member in the tree 
-	  QTreeWidgetItem* groupws=NULL;
-	  //number of toplevel workspaces in mantid tree
-	  int topitemCounts=m_tree->topLevelItemCount();
-	  for (int index=0;index<topitemCounts;++index)
+    //this could be member workspace or normal workspace
+    //loop thorugh each member in the tree 
+    QTreeWidgetItem* groupws=NULL;
+    //number of toplevel workspaces in mantid tree
+    int topitemCounts=m_tree->topLevelItemCount();
+    for (int index=0;index<topitemCounts;++index)
+      {
+	//get the tree item pointer for each workspace
+	QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
+	if(!topItem)
+	{
+	  continue;
+	}
+	//get the workspace name from pointer
+	QString ws=topItem->text(0);
+	try
+	{
+	  //retrieve the workspace pointer froom ADS and check it's agroup workspace
+	  Mantid::API::Workspace_sptr wssptr=AnalysisDataService::Instance().retrieve(ws.toStdString());
+	  Mantid::API::WorkspaceGroup_sptr grpsptr=boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wssptr);
+	  if(grpsptr)
 	  {
-		  //get the tree item pointer for each workspace
-		  QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
-		  if(!topItem)
-		  {
-			  return;
-		  }
-		  //get the workspace name from pointer
-		  QString ws=topItem->text(0);
-		  
-		  try{
-			  //retrieve the workspace pointer froom ADS and check it's agroup workspace
-			  Mantid::API::Workspace_sptr wssptr=AnalysisDataService::Instance().retrieve(ws.toStdString());
-			  Mantid::API::WorkspaceGroup_sptr grpsptr=boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wssptr);
-			  if(grpsptr)
-			  {
-				  //if this is a group
-				  std::vector<std::string> wsNames=grpsptr->getNames();
-				  std::vector<std::string>::iterator itr;
-				  //check the workspace is in the group
-				  itr=std::find(wsNames.begin(),wsNames.end(),ws_name.toStdString());
-				  if(itr!=wsNames.end())
-				  {
-					  bGroupMember=true;
-					  groupws=topItem;
-					//stop the search 
-					  break;
-
-				  }
-			  }
-		  }
-		  catch(Mantid::Kernel::Exception::NotFoundError&)
-		  {
-
-		  }
-
+	    //if this is a group
+	    const std::vector<std::string> & wsNames=grpsptr->getNames();
+	    std::vector<std::string>::const_iterator itr;
+	    //check the workspace is in the group
+	    itr = std::find(wsNames.begin()+1,wsNames.end(),ws_name.toStdString());
+	    if(itr!=wsNames.end())
+	    {
+	      bGroupMember=true;
+	      groupws=topItem;
+	      //stop the search 
+	      break;
+	      
+	    }
 	  }
-	  if(bGroupMember)
-	  {
-		  //add the member workspace underneath the group workspace 
-		   groupws->addChild(ws_item);
-	  }
-	  else //normal workspace
-	  {
-		  m_tree->addTopLevelItem(ws_item);
-	  }
-	  populateWorkspaceData(workspace,ws_item);
+	}
+	catch(Mantid::Kernel::Exception::NotFoundError&)
+	{
+	  
+	}
+	
+      }
+    if(bGroupMember)
+    {
+      //add the member workspace underneath the group workspace 
+      groupws->addChild(ws_item);
+    }
+    else //normal workspace
+    {
+      m_tree->addTopLevelItem(ws_item);
+    }
+    populateWorkspaceData(workspace,ws_item);
   }
 
 }
@@ -473,6 +477,9 @@ bool MantidDockWidget::isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr 
 
 void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 {
+  // Check if we need to unroll a workspace group before removing it
+  workspaceGroupRemoved(ws_name);
+
   //This will only ever be of size zero or one
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
   if( name_matches.isEmpty() )
@@ -480,107 +487,95 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
   //   if there are  no toplevel items in three matching the workspace name ,loop through
 	 //  all child elements 
     int topitemCounts=m_tree->topLevelItemCount();
-	  for (int index=0;index<topitemCounts;++index)
-	  {
-		  QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
-		  if(!topItem)
-		  {
-			  return;
-		  }
-		  int childCounts=topItem->childCount();
-		  for(int chIndex=0;chIndex<childCounts;++chIndex)
-		  {
-			  QTreeWidgetItem* childItem= topItem->child(chIndex);
-			  if(!childItem)
-			  {
-				  return;
-			  }
-			  //if the workspace  exists as child workspace
-			  if(!ws_name.compare(childItem->text(0)))
-			  {
-				  topItem->takeChild(chIndex);
-				  return;
-			  }
-		  }
-	  }
-	  //if no matching workspaces underneath the group workspace return 
-	  return;	
+    for (int index=0;index<topitemCounts;++index)
+    {
+      QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
+      if(!topItem)
+      {
+	return;
+      }
+      int childCounts=topItem->childCount();
+      for(int chIndex=0;chIndex<childCounts;++chIndex)
+      {
+	QTreeWidgetItem* childItem= topItem->child(chIndex);
+	if(!childItem)
+	{
+	  return;
+	}
+	//if the workspace  exists as child workspace
+	if(!ws_name.compare(childItem->text(0)))
+	{
+	  topItem->takeChild(chIndex);
+	  return;
+	}
+      }
+    }
+    //if no matching workspaces underneath the group workspace return 
+    return;	
   }
 
   m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
  
 }
+
 /*
-This slot handles the notification send by the GroupWorkspaces algorithm.
-//This method removes the workspaces selected from grouping from mantid tree
-@param workspaces list of the workspaces  to remove
-*/
-void MantidDockWidget::updateWorkspacesTreeafterGrouping(const QStringList& workspaces)
+ * This slot handles the notification send by the UnGroupWorkspace algorithm.
+ * @param wsGroupName name of the groupworkspace to disassemble
+ *
+ */
+void MantidDockWidget::workspaceGroupRemoved(const QString& wsGroupName)
 {
-  if(workspaces.empty())
-	{
-		return;
-	}
-  //remove the selected workspaces from tree
-  QStringListIterator itr(workspaces);
-  while( itr.hasNext() )
+  Workspace_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieve(wsGroupName.toStdString());
+  if( !boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup_sptr>(workspace) ) 
   {
-    removeWorkspaceEntry(itr.next());
+    return;
   }
-}
-/*
-This slot handles the notification send by the UnGroupWorkspace algorithm.
-//This method loops through members of the group workspace and adds members to workspace tree 
-@param wsGroupName name of the groupworkspace to disassemble
-*/
 
-void MantidDockWidget::updateWorkspacesTreeafterUnGrouping(const QString& wsGroupName)
-{
-		QList<QTreeWidgetItem*> match_items=m_tree->findItems(wsGroupName,Qt::MatchFixedString);
-		if(match_items.isEmpty())
-		{
-			return;
-		}
-		//child count of the group workspace
-		int count=match_items[0]->childCount();
-		//loop through member workspaces
-		for (int i=1;i<count;i++)
-		{
-			QTreeWidgetItem *pchild=NULL;
-			pchild=match_items[0]->child(i);
-			if(pchild)
-			{
-				std::string wsName=pchild->text(0).toStdString();
+  QList<QTreeWidgetItem*> match_items=m_tree->findItems(wsGroupName,Qt::MatchFixedString);
+  if(match_items.isEmpty())
+  {
+    return;
+  }
+  //child count of the group workspace
+  int count=match_items[0]->childCount();
+  //loop through member workspaces
+  for (int i=1;i<count;i++)
+    {
+      QTreeWidgetItem *pchild=NULL;
+      pchild=match_items[0]->child(i);
+      if(pchild)
+	{
+	  std::string wsName=pchild->text(0).toStdString();
 
-				//get the workspace pointer
-				Workspace_sptr ws_ptr;
-        try
-        {
-          ws_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
-        }
-        catch(Mantid::Kernel::Exception::NotFoundError&)
-        {
-          return;
-        }
+	  //get the workspace pointer
+	  Workspace_sptr ws_ptr;
+	  try
+	    {
+	      ws_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
+	    }
+	  catch(Mantid::Kernel::Exception::NotFoundError&)
+	    {
+	      return;
+	    }
 
-				QTreeWidgetItem* ws_item = new QTreeWidgetItem(QStringList(pchild->text(0)));
-				if(!ws_item)
-				{
-					return;
-				}
-				ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
-				//create the workspace id
-				QTreeWidgetItem*  wsid_item=new QTreeWidgetItem(QStringList(QString::fromStdString(ws_ptr->id())));
-				wsid_item->setFlags(Qt::NoItemFlags);
-				ws_item->addChild(wsid_item);
+	  QTreeWidgetItem* ws_item = new QTreeWidgetItem(QStringList(pchild->text(0)));
+	  if(!ws_item)
+	    {
+	      return;
+	    }
+	  ws_item->setIcon(0,QIcon(QPixmap(mantid_matrix_xpm)));
+	  //create the workspace id
+	  QTreeWidgetItem*  wsid_item=new QTreeWidgetItem(QStringList(QString::fromStdString(ws_ptr->id())));
+	  wsid_item->setFlags(Qt::NoItemFlags);
+	  ws_item->addChild(wsid_item);
 
-				//populating workspace with histograms,bins etc
-				populateWorkspaceData(ws_ptr,ws_item);
-				//add the workspace to tree
-				m_tree->addTopLevelItem(ws_item);
+	  //populating workspace with histograms,bins etc
+	  populateWorkspaceData(ws_ptr,ws_item);
+	  //add the workspace to tree
+	  m_tree->addTopLevelItem(ws_item);
 
-			}//end of if loop for pchild
-		}//end of for loop for child count iteration
+	}//end of if loop for pchild
+    }//end of for loop for child count iteration
 
 }
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
