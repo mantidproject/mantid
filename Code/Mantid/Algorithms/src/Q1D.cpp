@@ -104,14 +104,13 @@ void Q1D::exec()
     gm2over2h2 *= 1.0e-20;
   }
 
-  // A temporary vector to store intermediate Q values
   const int xLength = inputWS->readX(0).size();
-  MantidVec Qx(xLength);
-  //
   const double fmp=4.0*M_PI;
 
+  PARALLEL_FOR3(inputWS,outputWS,errorsWS)
   for (int i = 0; i < numSpec; ++i)
   {
+    PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
     IDetector_const_sptr det;
     try {
@@ -127,6 +126,7 @@ void Q1D::exec()
     if (spectraAxis->isSpectra()) 
     {
       if (newSpectrumNo == -1) newSpectrumNo = outputWS->getAxis(1)->spectraNo(0) = spectraAxis->spectraNo(i);
+      PARALLEL_CRITICAL(q1d_a)    /* Write to shared memory - must protect */
       specMap.addSpectrumEntries(newSpectrumNo,inSpecMap.getDetectors(spectraAxis->spectraNo(i)));
     }
 
@@ -135,6 +135,8 @@ void Q1D::exec()
     MantidVec YIn = inputWS->readY(i);
     MantidVec errYIn = errorsWS->readY(i);
     MantidVec errEIn = errorsWS->readE(i);
+    // A temporary vector to store intermediate Q values
+    MantidVec Qx(xLength);
 
     if ( doGravity )
     {
@@ -179,9 +181,12 @@ void Q1D::exec()
     std::reverse(YIn.begin(),YIn.end());
     std::reverse(errYIn.begin(),errYIn.end());
     std::reverse(errEIn.begin(),errEIn.end());
-    // Pass to rebin, flagging as a distribution
-    VectorHelper::rebin(Qx,YIn,EIn,*XOut,YOut,EOutDummy,true,true);
-    VectorHelper::rebin(Qx,errYIn,errEIn,*XOut,errY,errE,true,true);
+    // Pass to rebin, flagging as a distribution. Need to protect from writing by more that one thread at once.
+    PARALLEL_CRITICAL(q1d_b)
+    {
+      VectorHelper::rebin(Qx,YIn,EIn,*XOut,YOut,EOutDummy,true,true);
+      VectorHelper::rebin(Qx,errYIn,errEIn,*XOut,errY,errE,true,true);
+    }
 
     // Now summing the solid angle across the appropriate range
     const double solidAngle = det->solidAngle(samplePos);
@@ -236,7 +241,9 @@ void Q1D::exec()
     }
 
     progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Now need to loop over resulting vectors dividing by solid angle
   // and setting fractional error to match that in the 'errors' workspace

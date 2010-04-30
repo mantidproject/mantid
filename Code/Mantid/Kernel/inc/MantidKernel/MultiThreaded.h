@@ -89,6 +89,11 @@
 #define PARALLEL_CRITICAL(name) \
                 PRAGMA(omp critical(name))
 
+/** Allows only one thread at a time to write to a specific memory location
+ */
+#define PARALLEL_ATOMIC \
+                PRAGMA(omp atomic)
+
 #define PARALLEL_THREAD_NUMBER omp_get_thread_num()
 
 #else //_OPENMP
@@ -103,6 +108,7 @@
 #define PARALLEL_END_INTERUPT_REGION
 #define PARALLEL_CHECK_INTERUPT_REGION
 #define PARALLEL_CRITICAL(name)
+#define PARALLEL_ATOMIC
 #define PARALLEL_THREAD_NUMBER 0
 #endif //_OPENMP
 
