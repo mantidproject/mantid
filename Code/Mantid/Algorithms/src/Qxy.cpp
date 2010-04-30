@@ -57,9 +57,10 @@ void Qxy::exec()
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);
   
-  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
+  //PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int i = 0; i < numSpec; ++i)
   {
+    //PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
     IDetector_sptr det;
     try {
@@ -102,15 +103,17 @@ void Qxy::exec()
       const MantidVec::difference_type xIndex = std::upper_bound(axis.begin(),axis.end(),Qx) - axis.begin() - 1;
       const MantidVec::difference_type yIndex = std::upper_bound(axis.begin(),axis.end(),Qy) - axis.begin() - 1;
       // Add the contents of the current bin to the 2D array. Protect against simultaneous write.
-      PARALLEL_ATOMIC
+      //PARALLEL_ATOMIC
       outputWorkspace->dataY(yIndex)[xIndex] += Y[j];
       // And the current solid angle number to same location. Protect against simultaneous write.
-      PARALLEL_ATOMIC
+      //PARALLEL_ATOMIC
       solidAngles->dataY(yIndex)[xIndex] += solidAngle;
     } // loop over single spectrum
     
     progress.report();
+    //PARALLEL_END_INTERUPT_REGION
   } // loop over all spectra
+  //PARALLEL_CHECK_INTERUPT_REGION
 
   // Divide the output data by the solid angles
   outputWorkspace /= solidAngles;
