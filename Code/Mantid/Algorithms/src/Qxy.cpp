@@ -57,6 +57,7 @@ void Qxy::exec()
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);
   
+  PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   for (int i = 0; i < numSpec; ++i)
   {
     // Get the pixel relating to this spectrum
@@ -87,7 +88,6 @@ void Qxy::exec()
     
     for (int j = numBins-1; j >= 0; --j)
     {
-      //if (Y[j]==0) continue;
       // Calculate the wavelength at the mid-point of this bin (note this is 1/lambda)
       const double oneOverLambda = 2.0/(X[j]+X[j+1]);
       // Calculate |Q| for this bin
@@ -101,9 +101,11 @@ void Qxy::exec()
       // Find the indices pointing to the place in the 2D array where this bin's contents should go
       const MantidVec::difference_type xIndex = std::upper_bound(axis.begin(),axis.end(),Qx) - axis.begin() - 1;
       const MantidVec::difference_type yIndex = std::upper_bound(axis.begin(),axis.end(),Qy) - axis.begin() - 1;
-      // Add the contents of the current bin to the 2D array
+      // Add the contents of the current bin to the 2D array. Protect against simultaneous write.
+      PARALLEL_ATOMIC
       outputWorkspace->dataY(yIndex)[xIndex] += Y[j];
-      // And the current solid angle number to same location
+      // And the current solid angle number to same location. Protect against simultaneous write.
+      PARALLEL_ATOMIC
       solidAngles->dataY(yIndex)[xIndex] += solidAngle;
     } // loop over single spectrum
     
