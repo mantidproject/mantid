@@ -101,12 +101,14 @@ void ISISRAW2::skipData(FILE* file, int i)
         fseek(file,4*ddes[i].nwords,SEEK_CUR);
 }
 
-void ISISRAW2::readData(FILE* file, int i)
+bool ISISRAW2::readData(FILE* file, int i)
 {
-    if (i >= ndes) return;
+    if (i >= ndes) return false;
     int nwords = 4*ddes[i].nwords;
-    ISISRAW::ioRAW(file, outbuff, nwords, true);
+    int res = ISISRAW::ioRAW(file, outbuff, nwords, true);
+    if (res != 0) return false;
     byte_rel_expn(outbuff, nwords, 0, (int*)dat1, t_ntc1+1);
+    return true;
 }
 
 ISISRAW2::~ISISRAW2()

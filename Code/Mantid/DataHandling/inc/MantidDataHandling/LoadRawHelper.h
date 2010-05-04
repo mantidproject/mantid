@@ -72,7 +72,7 @@ namespace Mantid
 	  void ioRaw(FILE* file,bool from_file );
 
 	  /// reads data
-	  void readData(FILE* file,int histToRead);
+	  bool readData(FILE* file,int histToRead);
 	 	  
 	  ///creates shared pointer to workspace from parent workspace
 	  DataObjects::Workspace2D_sptr createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,

@@ -326,7 +326,10 @@ void LoadRaw3::excludeMonitors(FILE* file,const int& period,const std::vector<in
 			}
 
 			//read spectrum 
-			readData(file, histToRead);
+			if (!readData(file, histToRead))
+      {
+        throw std::runtime_error("Error reading raw file");
+      }
 			//set the workspace data
 			setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,m_lengthIn,1);
 			//increment workspace index
@@ -369,7 +372,10 @@ void LoadRaw3::includeMonitors(FILE* file,const int& period,DataObjects::Workspa
 		  progress(m_prog, "Reading raw file data...");
 
 		  //read spectrum from raw file
-		  readData(file, histToRead);
+		  if (!readData(file, histToRead))
+      {
+        throw std::runtime_error("Error reading raw file");
+      }
           //set worksapce data
 		  setWorkspaceData(ws_sptr, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,m_lengthIn,1);
 		  ++wsIndex;
@@ -416,7 +422,10 @@ void LoadRaw3::separateMonitors(FILE* file,const int& period,const std::vector<i
         progress(m_prog, "Reading raw file data...");
         
 		//read spectrum from raw file
-		readData(file, histToRead);
+		if (!readData(file, histToRead))
+    {
+        throw std::runtime_error("Error reading raw file");
+    }
 		//if this a moniotor  store that spectrum to monitor workspace
 		if (isMonitor(monitorList, i))
 		{ 
@@ -617,7 +626,10 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     int histToRead = i + 1;
     if (bseparate && monitorSpecList.size() > 0)
     {
-      readData(file, histToRead);
+      if (!readData(file, histToRead))
+      {
+        throw std::runtime_error("Error reading raw file");
+      }
     }
     if ((bseparate && monitorSpecList.size() > 0) || bexclude)
     {

@@ -15,7 +15,7 @@ public:
 	virtual int ioRAW(FILE* file, bool from_file, bool do_data = true);
 
 	void skipData(FILE* file, int i);
-	void readData(FILE* file, int i);
+	bool readData(FILE* file, int i);
   void clear();
 
 	int ndes;

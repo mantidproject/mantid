@@ -126,9 +126,9 @@ void LoadRawHelper::reset()
   *@param file - pointer to the raw file
   *@param hist - postion in the file to read
 */
-void LoadRawHelper::readData(FILE* file,int hist)
+bool LoadRawHelper::readData(FILE* file,int hist)
 {
-	isisRaw->readData(file, hist);
+	return isisRaw->readData(file, hist);
 }
 
 float LoadRawHelper::getProtonCharge()const

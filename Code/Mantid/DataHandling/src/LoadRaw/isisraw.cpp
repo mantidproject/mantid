@@ -728,6 +728,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 			if (from_file)
 			{
 				n = fread(s, sizeof(char), len, file);
+        return n - len;
 			}
 			else
 			{
