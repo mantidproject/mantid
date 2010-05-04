@@ -8,6 +8,7 @@
 replacements = {
     "plugins.directory":"plugins.directory = ../../plugins",
     "instrumentDefinition.directory":"instrumentDefinition.directory = ../../instrument",
+    "parameterDefinition.directory":"parameterDefinition.directory = ../../instrument",    
     "requiredpythonscript.directories":"""requiredpythonscript.directories = ../../scripts/Crystallography;../../scripts/Disordered Materials;../../scripts/Engineering;\\
 ../../scripts/Excitations;../../scripts/Large Scale Structures;../../scripts/Molecular Spectroscopy;\\
 ../../scripts/Muons;../../scripts/Neutrinos;../../scripts/SANS""",
