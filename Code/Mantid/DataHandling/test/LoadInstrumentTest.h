@@ -15,6 +15,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include <vector>
 #include <iostream>
 
@@ -379,6 +380,13 @@ public:
     ParameterMap& paramMap = output->instrumentParameters();
     Parameter_sptr param = paramMap.get(&(*comp), "test");
     TS_ASSERT_DELTA( param->value<double>(), 50.0, 0.0001);
+
+    param = paramMap.getRecursive(&(*comp), "S", "fitting");
+    const FitParameter& fitParam4 = param->value<FitParameter>();
+    TS_ASSERT_DELTA( fitParam4.getValue(1.0), 65.7593, 0.01);
+    TS_ASSERT( fitParam4.getTie().compare("") == 0 );
+    TS_ASSERT( fitParam4.getFunction().compare("BackToBackExponential") == 0 );
+    TS_ASSERT( fitParam4.getFormula().compare("sqrt(158.011*centre^4+4166.279*centre^2)") == 0 );
 
     AnalysisDataService::Instance().remove(wsName);
   }
