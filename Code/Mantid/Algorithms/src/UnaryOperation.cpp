@@ -55,7 +55,7 @@ namespace Mantid
       for (int i = 0; i < numSpec; ++i)
       {
         // Copy the X values over
-        out_work->dataX(i) = in_work->readX(i);
+        out_work->setX(i,in_work->refX(i));
         // Get references to the data
         const MantidVec& X = in_work->readX(i);
         const MantidVec& Y = in_work->readY(i);
