@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IkedaCarpenterPV.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
@@ -80,7 +81,10 @@ void IkedaCarpenterPV::init()
   declareParameter("Eta",0.5);   // which means initially half gauss half lorentzian
   declareParameter("X0",0.0);
 
-  m_width = 0.0; m_height = 0.0; 
+  //IConstraint* constraint = ConstraintFactory::Instance().createInitialized(this, fitParam.getConstraint());
+//API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound
+  //BoundaryConstraint bc(this, "Eta", 0.0, 1.0);
+  addConstraint(new BoundaryConstraint(this, "Eta", 0.0, 1.0));
 }
 
 

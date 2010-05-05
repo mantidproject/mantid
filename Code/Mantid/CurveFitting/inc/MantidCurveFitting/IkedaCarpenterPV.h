@@ -44,9 +44,9 @@ namespace Mantid
       virtual ~IkedaCarpenterPV() {};
 
       /// contruction used for standard fitting
-      IkedaCarpenterPV() : m_waveLengthFixed(false), m_width(1.0), m_height(0.0) {};
+      IkedaCarpenterPV() : m_waveLengthFixed(false) {};
       /// Constructor used for unit testing where a workspace may not be available
-      IkedaCarpenterPV(double wavelength) : m_waveLengthFixed(true), m_width(1.0), m_height(0.0)  
+      IkedaCarpenterPV(double wavelength) : m_waveLengthFixed(true)  
          {m_waveLength.push_back(wavelength);};
 
       /// overwrite IPeakFunction base class methods
@@ -77,10 +77,6 @@ namespace Mantid
 
       /// method for updating m_waveLength
       void calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const;
-
-      /// used in setHeight and setWidth. m_width defaults to 1.0 and m_height to 0.0
-      double m_width;  
-      double m_height;
 
 	    /// Static reference to the logger class
 	    static Kernel::Logger& g_log;
