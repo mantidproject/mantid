@@ -323,8 +323,14 @@ void MantidDockWidget::populateWorkspaceTree(const QString & ws_name, Mantid::AP
     std::vector<std::string>::const_iterator iend = wsgroup->getNames().end();
     for( ++itr ; itr != iend ;++itr )
     {
-      Mantid::API::Workspace_sptr member = Mantid::API::AnalysisDataService::Instance().retrieve(*itr);
-      populateWorkspaceTree(QString::fromStdString(*itr), member, false);
+      try
+      {
+        Mantid::API::Workspace_sptr member = Mantid::API::AnalysisDataService::Instance().retrieve(*itr);
+        populateWorkspaceTree(QString::fromStdString(*itr), member, false);
+      }
+      catch(Mantid::Kernel::Exception::NotFoundError&)
+      {
+      }
     }
     return;
   }
@@ -484,30 +490,30 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
   if( name_matches.isEmpty() )
   {	 
-  //   if there are  no toplevel items in three matching the workspace name ,loop through
-	 //  all child elements 
+    //   if there are  no toplevel items in three matching the workspace name ,loop through
+    //  all child elements 
     int topitemCounts=m_tree->topLevelItemCount();
     for (int index=0;index<topitemCounts;++index)
     {
       QTreeWidgetItem* topItem=m_tree->topLevelItem(index);
       if(!topItem)
       {
-	return;
+        return;
       }
       int childCounts=topItem->childCount();
       for(int chIndex=0;chIndex<childCounts;++chIndex)
       {
-	QTreeWidgetItem* childItem= topItem->child(chIndex);
-	if(!childItem)
-	{
-	  return;
-	}
-	//if the workspace  exists as child workspace
-	if(!ws_name.compare(childItem->text(0)))
-	{
-	  topItem->takeChild(chIndex);
-	  return;
-	}
+        QTreeWidgetItem* childItem= topItem->child(chIndex);
+        if(!childItem)
+        {
+          return;
+        }
+        //if the workspace  exists as child workspace
+        if(!ws_name.compare(childItem->text(0)))
+        {
+          topItem->takeChild(chIndex);
+          return;
+        }
       }
     }
     //if no matching workspaces underneath the group workspace return 
@@ -525,7 +531,16 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
  */
 void MantidDockWidget::workspaceGroupRemoved(const QString& wsGroupName)
 {
-  Workspace_sptr workspace = Mantid::API::AnalysisDataService::Instance().retrieve(wsGroupName.toStdString());
+  Workspace_sptr workspace;
+  try
+  {
+    workspace = Mantid::API::AnalysisDataService::Instance().retrieve(wsGroupName.toStdString());
+  }
+  catch(Mantid::Kernel::Exception::NotFoundError&)
+  {
+    return;
+  }
+  
   if( !boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup_sptr>(workspace) ) 
   {
     return;
@@ -664,7 +679,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
       // Check for single-valued workspaces because they don't like to be plotted!
       if ( ws->id() == "WorkspaceSingleValue" ) singleValueWS = true;
     }
-    catch(Mantid::Kernel::Exception::NotFoundError &e)//if not a valid object in analysis data service
+    catch(Mantid::Kernel::Exception::NotFoundError &)//if not a valid object in analysis data service
     {
       bDisable=true;
 
@@ -848,7 +863,6 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
               (Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     if(!grpWSPstr)
     {
-      //logObject.debug()<<"Name=  "<<wsName.toStdString()<<"normal workspace"<<"  " << std::endl;
       if ( ! wsName.isEmpty() )
       {
         m_mantidUI->importWorkspace(wsName,false);
@@ -856,7 +870,7 @@ void MantidTreeWidget::mouseDoubleClickEvent(QMouseEvent *e)
       }
     }
   }
-  catch(Mantid::Kernel::Exception::NotFoundError &e)
+  catch(Mantid::Kernel::Exception::NotFoundError &)
   {
     return;
   }
