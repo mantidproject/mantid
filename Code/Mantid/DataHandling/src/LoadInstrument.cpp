@@ -358,11 +358,11 @@ void LoadInstrument::exec()
   // check if default parameter file is also present
   runLoadParameterFile();
 }
-/** Reads the contents of the <defaults> element to set member variables,
+/** Reads the contents of the \<defaults\> element to set member variables,
 *  requires m_instrument to be already set
-*  @param defaults points to the data read from the <defaults> element
+*  @param defaults points to the data read from the \<defaults\> element
 */
-void LoadInstrument::readDefaults(Element* defaults)
+void LoadInstrument::readDefaults(Poco::XML::Element* defaults)
 {
   // Check whether spherical coordinates should be treated as offsets to parents position
   std::string offsets;
@@ -811,7 +811,7 @@ Poco::XML::Element* LoadInstrument::getParentComponent(Poco::XML::Element* pLocE
 
 /** Method for populating IdList.
  *
- *  @param pE  Poco::XML element that points to an <idlist>
+ *  @param pE  Poco::XML element that points to an \<idlist\>
  *  @param idList The structure to populate with detector ID numbers
  *
  *  @throw logic_error Thrown if argument is not a child of component element
@@ -1318,10 +1318,10 @@ void LoadInstrument::setLogfile(const Geometry::IComponent* comp, Poco::XML::Ele
 }
 
 
-/** Add/overwrite any parameters specified in instrument with param values specified in <component-link> XML elements
+/** Add/overwrite any parameters specified in instrument with param values specified in \<component-link\> XML elements
  *
  *  @param instrument Instrument
- *  @param pElem  Associated Poco::XML element to component that may hold a \<parameter\> element
+ *  @param pRootElem  Associated Poco::XML element to component that may hold a \<parameter\> element
  */
 void LoadInstrument::setComponentLinks(boost::shared_ptr<API::Instrument>& instrument, Poco::XML::Element* pRootElem)
 {
@@ -1397,7 +1397,7 @@ void LoadInstrument::runLoadParameterFile()
 
 /** get name of location element
  *
- *  @param pLocElem  Poco::XML element that points to a location element
+ *  @param pElem  Poco::XML element that points to a location element
  *  @return name of location element
  */
 std::string LoadInstrument::getNameOfLocationElement(Poco::XML::Element* pElem)
