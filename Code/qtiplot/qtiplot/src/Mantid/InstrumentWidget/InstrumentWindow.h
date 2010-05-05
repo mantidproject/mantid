@@ -114,7 +114,9 @@ private slots:
         void scaleTypeChanged(int);
 private:
 
-	void loadSettings();
+	QFrame * const setupAxisFrame();
+
+  void loadSettings();
 	void saveSettings();
 	void renderInstrument(Mantid::API::MatrixWorkspace* workspace);
         void setupColorBarScaling();
@@ -136,7 +138,8 @@ private:
 	QwtScaleWidget* mColorMapWidget; ///< colormap display widget
 	QLineEdit*   mMinValueBox;       ///< Minvalue for the colormap
 	QLineEdit*   mMaxValueBox;       ///< Max value for the colormap
-        QComboBox *mScaleOptions;
+  QComboBox *mScaleOptions;
+  QComboBox *mAxisCombo;           ///< the user can select an axis to view the instrument from, this combo box stores the list of axis names and (behind the scenes) the coordinates of the different axises
 	BinDialog*   mBinMapDialog;
 	InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
         QCheckBox *mLightingToggle; ///< A tick box to toggle the lighting
@@ -145,6 +148,8 @@ private:
         QString mDefaultColorMap; ///< The full path of the default color map
         QString mCurrentColorMap;
         QString m_savedialog_dir; /// The last used dialog directory
+
+  bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)
 
   virtual void deleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);

@@ -84,6 +84,8 @@ public:
   /// Returns a shared pointer to a component
   boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id);
 
+  /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
+  std::string getDefaultAxis() const {return m_instr->getDefaultAxis();}
 private:
   /// Private copy assignment operator
   ParInstrument& operator=(const ParInstrument&);

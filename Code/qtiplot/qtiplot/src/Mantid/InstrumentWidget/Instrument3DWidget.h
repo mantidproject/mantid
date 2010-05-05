@@ -65,7 +65,7 @@ public:
   double getBinMaxValue() const;
   void setDataMappingType(DataMappingType);
   void setView(const Mantid::Geometry::V3D&,double,double,double,double,double,double);
-  void setAxis(const Mantid::Geometry::V3D&,const Mantid::Geometry::V3D&);
+  void setAxis(const Mantid::Geometry::V3D &direction);
   void resetWidget();
   void setFastRendering();
   void setSlowRendering();

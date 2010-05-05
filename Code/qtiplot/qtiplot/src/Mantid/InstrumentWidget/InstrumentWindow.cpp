@@ -28,12 +28,13 @@
 #include "qwt_scale_engine.h"
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 /**
  * Constructor.
  */
 InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
-  MdiSubWindow(label, app, name, f), WorkspaceObserver()
+  MdiSubWindow(label, app, name, f), WorkspaceObserver(), mViewChanged(false)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	setFocus();
@@ -79,19 +80,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 	mMinValueBox->setText("");
 	mMaxValueBox->setText("");
 
-	//Axis view buttons
-	QFrame* axisViewFrame = new QFrame();
-	QHBoxLayout* axisViewLayout = new QHBoxLayout();
-	axisViewLayout->addWidget(new QLabel("Axis View:"));
-	QComboBox* axisCombo=new QComboBox();
-	axisCombo->addItem("Z+");
-	axisCombo->addItem("Z-");
-	axisCombo->addItem("X+");
-	axisCombo->addItem("X-");
-	axisCombo->addItem("Y+");
-	axisCombo->addItem("Y-");
-	axisViewLayout->addWidget(axisCombo);
-	axisViewFrame->setLayout(axisViewLayout);
+	QFrame * const axisViewFrame = setupAxisFrame();
 
 	//Colormap Frame widget
 	QFrame* lColormapFrame = new QFrame();
@@ -160,7 +149,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
 
 	connect(mSelectBin, SIGNAL(clicked()), this, SLOT(selectBinButtonClicked()));
 	connect(mBinMapDialog,SIGNAL(IntegralMinMax(double,double)), mInstrumentDisplay, SLOT(setDataMappingIntegral(double,double)));
-	connect(axisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
+	connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setViewDirection(const QString&)));
 	connect(btnBackgroundColor,SIGNAL(clicked()),this,SLOT(pickBackgroundColor()));
 
 	// Init actions
@@ -339,7 +328,6 @@ QString InstrumentWindow::confirmDetectorOperation(const QString & opName, const
   }
   return outputWS;
 }
-
 /**
  * Group selected detectors
  */
@@ -444,7 +432,7 @@ void InstrumentWindow::updateWindow()
     {
       renderInstrument(workspace.get());
     }
-    catch(std::bad_alloc &e)
+    catch(std::bad_alloc &)
     {
       QMessageBox::critical(this,"Mantid -- Error","not enough memory to display this instrument");
       mInstrumentDisplay->resetWidget();
@@ -468,7 +456,6 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
     mMaxValueBox->setText(QString::number(mInstrumentDisplay->getDataMaxValue()));
   }
   
-
   // Setup the colour map details
   GraphOptions::ScaleType type = (GraphOptions::ScaleType)mScaleOptions->itemData(mScaleOptions->currentIndex()).toUInt();
   mInstrumentDisplay->mutableColorMap().changeScaleType(type);
@@ -478,6 +465,18 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
   mInstrumentDisplay->update();
   // Populate the instrument tree
   mInstrumentTree->setInstrument(workspace->getInstrument());
+
+  if ( ! mViewChanged )
+  {
+    // set the default view, the axis that the instrument is be viewed from initially can be set in the instrument definition and there is always a value in the Instrument
+    QString axisName = QString::fromStdString(
+    workspace->getInstrument()->getDefaultAxis());
+    axisName = axisName.toUpper();
+    int axisInd = mAxisCombo->findText(axisName.toUpper());
+    mAxisCombo->setCurrentIndex(axisInd);
+    // this was an automatic view change, only flag that the view changed if the user initiated the change
+    mViewChanged = false;
+  }
 }
 
 /// Set a maximum and minimum for the colour map range
@@ -602,6 +601,8 @@ void InstrumentWindow::setViewDirection(const QString& input)
 	{
 		mInstrumentDisplay->setViewDirectionZNegative();
 	}
+
+  mViewChanged = true;
 }
 
 /**
@@ -633,7 +634,7 @@ void InstrumentWindow::componentSelected(const QItemSelection & selected, const 
 
   double xmax(0.), xmin(0.), ymax(0.), ymin(0.), zmax(0.), zmin(0.);
   mInstrumentTree->getSelectedBoundingBox(items.first(), xmax, ymax, zmax, xmin, ymin, zmin);
-  Mantid::Geometry::V3D pos = mInstrumentTree->getSamplePos();
+  V3D pos = mInstrumentTree->getSamplePos();
   mInstrumentDisplay->setView(pos, xmax, ymax, zmax, xmin, ymin, zmin);
 }
 
@@ -701,7 +702,29 @@ void InstrumentWindow::scaleTypeChanged(int index)
     mInstrumentDisplay->recount();
   }
 }
+/** Sets up the controls and surrounding layout that allows uses to view the instrument
+*  from an axis that they select
+*  @return the QFrame that will be inserted on the main instrument view form
+*/
+QFrame * const InstrumentWindow::setupAxisFrame()
+{
+  QFrame* axisViewFrame = new QFrame();
+  QHBoxLayout* axisViewLayout = new QHBoxLayout();
+  axisViewLayout->addWidget(new QLabel("Axis View:"));
 
+  mAxisCombo = new QComboBox();
+  mAxisCombo->addItem("Z+");
+  mAxisCombo->addItem("Z-");
+  mAxisCombo->addItem("X+");
+  mAxisCombo->addItem("X-");
+  mAxisCombo->addItem("Y+");
+  mAxisCombo->addItem("Y-");
+
+  axisViewLayout->addWidget(mAxisCombo);
+  axisViewFrame->setLayout(axisViewLayout);
+
+  return axisViewFrame;
+}
 /**
  * This method loads the setting from QSettings
  */

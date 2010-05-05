@@ -14,12 +14,14 @@ Kernel::Logger& Instrument::g_log = Kernel::Logger::get("Instrument");
 
 /// Default constructor
 Instrument::Instrument() : Geometry::CompAssembly(),
-                           _detectorCache(),_sourceCache(0),_sampleCache(0)
+                           _detectorCache(),_sourceCache(0),_sampleCache(0),
+                           m_defaultViewAxis("Z+")
 {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string& name) : Geometry::CompAssembly(name),
-                           _detectorCache(),_sourceCache(0),_sampleCache(0)
+                           _detectorCache(),_sourceCache(0),_sampleCache(0),
+                           m_defaultViewAxis("Z+")
 {}
 
   

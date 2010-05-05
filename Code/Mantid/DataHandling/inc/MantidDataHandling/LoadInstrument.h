@@ -108,6 +108,9 @@ namespace API
         IdList() : counted(0) {};
       };
 
+      /// Reads the contents of the <defaults> element to set member variables,
+      void readDefaults(Poco::XML::Element* defaults);
+
       /// Method for populating IdList
       void populateIdList(Poco::XML::Element* pElem, IdList& idList);
 

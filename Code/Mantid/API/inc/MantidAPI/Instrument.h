@@ -103,6 +103,10 @@ public:
   /// Get information about the parameters described in the instrument definition file
   std::multimap<std::string, boost::shared_ptr<XMLlogfile> >& getLogfileCache() {return _logfileCache;}
 
+  /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
+  std::string getDefaultAxis() const {return m_defaultViewAxis;}
+  /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
+  void setDefaultViewAxis(const std::string &axis) {m_defaultViewAxis = axis;}
 private:
   friend class ParInstrument;
 
@@ -136,6 +140,9 @@ private:
 
   /// a vector holding detector ids of monitor s
   std::vector<int> m_monitorCache;
+
+  /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possiblities are "Z+, Z-, X+, ..."
+  std::string m_defaultViewAxis;
 };
 
 } // namespace API

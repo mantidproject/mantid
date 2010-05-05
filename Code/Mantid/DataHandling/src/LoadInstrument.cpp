@@ -103,6 +103,8 @@ void LoadInstrument::exec()
 	setProperty("MonitorList",monitordetIdList);
     return;
   }
+  // Get reference to Instrument and set its name
+  m_instrument = localWorkspace->getBaseInstrument();
 
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
@@ -124,19 +126,7 @@ void LoadInstrument::exec()
     throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
   }
 
-  // Check whether spherical coordinates should be treated as offsets to parents position
-  std::string offsets;
-  Element* offsetElement = pRootElem->getChildElement("defaults")->getChildElement("offsets");
-  if (offsetElement) offsets = offsetElement->getAttribute("spherical");
-  if ( offsets == "delta" ) m_deltaOffsets = true;
-
-  // Check whether default facing is set
-  Element* defaultFacingElement = pRootElem->getChildElement("defaults")->getChildElement("components-are-facing");
-  if (defaultFacingElement)
-  {
-    m_haveDefaultFacing = true;
-    m_defaultFacing = parseFacingElementToV3D(defaultFacingElement);
-  }
+  readDefaults(pRootElem->getChildElement("defaults"));
 
   // create maps: isTypeAssembly and mapTypeNameToShape
   Geometry::ShapeFactory shapeCreator;
@@ -195,9 +185,6 @@ void LoadInstrument::exec()
   pNL_parameter->release();
   hasParameterElement_beenSet = true;
 
-
-  // Get reference to Instrument and set its name
-  m_instrument = localWorkspace->getBaseInstrument();
   // We don't want the name taken out of the XML file itself, it should come from the filename
   // Strip off "_Definition.xml"
   const size_t underScore = instrumentFile.find_first_of("_");
@@ -371,7 +358,33 @@ void LoadInstrument::exec()
   // check if default parameter file is also present
   runLoadParameterFile();
 }
+/** Reads the contents of the <defaults> element to set member variables,
+*  requires m_instrument to be already set
+*  @param defaults points to the data read from the <defaults> element
+*/
+void LoadInstrument::readDefaults(Element* defaults)
+{
+  // Check whether spherical coordinates should be treated as offsets to parents position
+  std::string offsets;
+  Element* offsetElement = defaults->getChildElement("offsets");
+  if (offsetElement) offsets = offsetElement->getAttribute("spherical");
+  if ( offsets == "delta" ) m_deltaOffsets = true;
 
+  // Check whether default facing is set
+  Element* defaultFacingElement = defaults->getChildElement("components-are-facing");
+  if (defaultFacingElement)
+  {
+    m_haveDefaultFacing = true;
+    m_defaultFacing = parseFacingElementToV3D(defaultFacingElement);
+  }
+
+  // the default view is used by the instrument viewer to decide the angle to display the instrument from on start up
+  Element* defaultView = defaults->getChildElement("default-view");
+  if (defaultView)
+  {
+    m_instrument->setDefaultViewAxis(defaultView->getAttribute("axis-view"));
+  }
+}
 /** Assumes second argument is a XML location element and its parent is a component element
  *  which is assigned to be an assemble. This method appends the parent component element of
  %  the location element to the CompAssembly passed as the 1st arg. Note this method may call
@@ -455,7 +468,6 @@ void LoadInstrument::appendAssembly(boost::shared_ptr<Geometry::CompAssembly> pa
 {
   appendAssembly(parent.get(), pLocElem, idList, excludeList);
 }
-
 
 /** Assumes second argument is pointing to a leaf, which here means the location element (indirectly
  *  representing a component element) that contains no sub-components. This component is appended

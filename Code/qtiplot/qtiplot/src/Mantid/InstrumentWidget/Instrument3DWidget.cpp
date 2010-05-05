@@ -55,10 +55,9 @@ Instrument3DWidget::~Instrument3DWidget()
 /**
  * Set the default Axis direction of the model
  */
-void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction,const Mantid::Geometry::V3D& up)
+void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction)
 {
 	mAxisDirection = direction;
-	mAxisUpVector = up;
 }
 
 /**

@@ -81,7 +81,9 @@ public:
   virtual plottables_const_sptr getPlottable() const = 0;
 
   /// returns a list containing  detector ids of monitors
-  virtual  const std::vector<int> getMonitors()const=0; ;
+  virtual  const std::vector<int> getMonitors()const=0;
+  /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
+  virtual std::string getDefaultAxis() const=0;
 };
 
 /// Shared pointer to IInstrument
