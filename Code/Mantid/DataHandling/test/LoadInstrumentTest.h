@@ -378,10 +378,8 @@ public:
     TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
 
     ParameterMap& paramMap = output->instrumentParameters();
-    Parameter_sptr param = paramMap.get(&(*comp), "test");
-    TS_ASSERT_DELTA( param->value<double>(), 50.0, 0.0001);
 
-    param = paramMap.getRecursive(&(*comp), "S", "fitting");
+    Parameter_sptr param = paramMap.getRecursive(&(*comp), "S", "fitting");
     const FitParameter& fitParam4 = param->value<FitParameter>();
     TS_ASSERT_DELTA( fitParam4.getValue(1.0), 65.7593, 0.01);
     TS_ASSERT( fitParam4.getTie().compare("") == 0 );
