@@ -78,11 +78,13 @@ namespace Mantid
       int ndets(0);
       try
       {
-
         NXClass det_class = entry.openNXGroup("detector_1");
         NXInt spectrum_index = det_class.openNXInt("spectrum_index");
         spectrum_index.load();
         ndets = spectrum_index.dim0();
+        // We assume that this spectrum list increases monotonically
+        m_spec = spectrum_index.sharedBuffer();
+        m_spec_end = m_spec.get() + ndets;
         m_have_detector = true;
       }
       catch(std::runtime_error &)
@@ -145,19 +147,27 @@ namespace Mantid
       checkOptionalProperties();
 
       // Check which monitors need loading
+      const bool empty_spec_list = m_spec_list.empty(); 
       for( std::map<int, std::string>::iterator itr = m_monitors.begin(); itr != m_monitors.end(); )
       {
         int index = itr->first;
-        if( (!m_spec_list.empty() && std::find(m_spec_list.begin(), m_spec_list.end(), index) == m_spec_list.end()) ||
+        std::vector<int>::iterator spec_it = std::find(m_spec_list.begin(), m_spec_list.end(), index);
+        if( (!empty_spec_list && spec_it == m_spec_list.end()) ||
           (m_range_supplied && (index < m_spec_min || index > m_spec_max)) )
         {
           std::map<int, std::string>::iterator itr1 = itr;
-          itr++;
+          ++itr;
           m_monitors.erase(itr1);
+        }
+        // In the case that a monitor is in the spectrum list, we need to erase it from there
+        else if ( !empty_spec_list && spec_it != m_spec_list.end() )
+        {
+          m_spec_list.erase(spec_it);
+          ++itr;
         }
         else
         {
-          ++itr ;
+          ++itr;
         }
       }
 
@@ -171,7 +181,7 @@ namespace Mantid
       }
       else
       {
-        total_specs = m_spec_list.size();
+        total_specs = m_spec_list.size() + m_monitors.size();
       }
 
       m_progress = boost::shared_ptr<API::Progress>(new Progress(this, 0.0, 1.0, total_specs * m_numberOfPeriods));
@@ -234,6 +244,11 @@ namespace Mantid
         setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(local_workspace));
       }
 
+      // Clear off the member variable containers
+      m_spec_list.clear();
+      m_tof_data.reset();
+      m_spec.reset();
+      m_monitors.clear();
     }
 
     // Function object for remove_if STL algorithm
@@ -359,6 +374,7 @@ namespace Mantid
         NXDataSetTyped<int> data = nxdata.openIntData();
         data.open();
         //Start with thelist members that are lower than the required spectrum
+        const int * const spec_begin = m_spec.get();
         std::vector<int>::iterator min_end = m_spec_list.end();
         if( !m_spec_list.empty() )
         {
@@ -373,7 +389,8 @@ namespace Mantid
           {
             // Load each
             int spectra_no = (*itr);
-            int filestart = spectra_no - 1;
+            // For this to work correctly, we assume that the spectrum list increases monotonically
+            int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
             m_progress->report("Loading data");
             loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
           }
@@ -388,7 +405,8 @@ namespace Mantid
           const int fullblocks = rangesize / blocksize;
           int read_stop = 0;
           int spectra_no = m_spec_min + m_monitors.size();
-          int filestart = (m_spec_min - 1);
+          // For this to work correctly, we assume that the spectrum list increases monotonically
+          int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           if( fullblocks > 0 )
           {
             read_stop = (fullblocks * blocksize) + m_monitors.size();
@@ -410,7 +428,8 @@ namespace Mantid
         {
           // Load each
           int spectra_no = (*itr);
-          int filestart = spectra_no - 1;
+          // For this to work correctly, we assume that the spectrum list increases monotonically
+          int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
         }
       }

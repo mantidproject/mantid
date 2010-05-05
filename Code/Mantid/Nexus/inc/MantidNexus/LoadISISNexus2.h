@@ -127,6 +127,8 @@ namespace Mantid
       double m_proton_charge;
       /// Spectra numbers
       boost::shared_array<int> m_spec;
+      /// Pointer to one-past-the-end of spectrum number array (m_spec)
+      const int * m_spec_end;
       /// Monitors
       std::map<int,std::string> m_monitors;
 
