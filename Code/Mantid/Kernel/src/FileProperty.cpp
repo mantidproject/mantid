@@ -46,11 +46,18 @@ std::string FileProperty::setValue(const std::string & filename)
   // If the path is absolute then don't do any searching but make sure the directory exists for a Save property
   if( Poco::Path(filename).isAbsolute() )
   {
+    std::string error("");
     if( !isLoadProperty() )
     {
-      checkDirectory(filename);
+       error = checkDirectory(filename);
+       if( !error.empty() ) return error;
     }
-    return PropertyWithValue<std::string>::setValue(filename);
+
+    error = PropertyWithValue<std::string>::setValue(filename);
+    if( error.empty() ) return error;
+    // Change the file extension to a lower/upper cased version of the extension to check if this can be found instead
+    std::string diffcase_ext = convertExtension(filename);
+    return PropertyWithValue<std::string>::setValue(diffcase_ext);
   }
 
   std::string valid_string("");
@@ -64,6 +71,12 @@ std::string FileProperty::setValue(const std::string & filename)
     valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
     if( !valid_string.empty() || !check_file.exists() )
     {
+      std::string diffcase_ext = convertExtension(filename);
+      valid_string = PropertyWithValue<std::string>::setValue(diffcase_ext);
+      check_file = Poco::Path(Poco::Path::current()).resolve(diffcase_ext);
+      if( valid_string.empty() && check_file.exists() ) return "";
+
+      Poco::File relative_diffext(diffcase_ext);
       const std::vector<std::string>& search_dirs = ConfigService::Instance().getDataSearchDirs();
       std::vector<std::string>::const_iterator iend = search_dirs.end();
       for( std::vector<std::string>::const_iterator it = search_dirs.begin(); it != iend; ++it )
@@ -74,6 +87,13 @@ std::string FileProperty::setValue(const std::string & filename)
           valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
           break;
         }
+        check_file = Poco::File(Poco::Path(*it).resolve(relative_diffext.path()));
+        if( check_file.exists() )
+        {
+          valid_string = PropertyWithValue<std::string>::setValue(check_file.path());
+          break;
+        }
+
       }
     }
   }
@@ -105,16 +125,13 @@ std::string FileProperty::setValue(const std::string & filename)
     {
       save_dir = Poco::Path(save_path).makeDirectory();
     }
-    if( Poco::File(save_dir).canWrite() )
+    valid_string = checkDirectory(save_dir.toString());
+    if( valid_string.empty() )
     {
       std::string fullpath = save_dir.resolve(filename).toString();
-      checkDirectory(fullpath);
       valid_string = PropertyWithValue<std::string>::setValue(fullpath);
     }
-    else
-    {
-      valid_string = "Cannot write file to path \"" + save_dir.toString() + "\". Location is not writable.";
-    }
+
   }
   return valid_string;
 }
@@ -122,20 +139,64 @@ std::string FileProperty::setValue(const std::string & filename)
 /**
  * Check whether a given directory exists and create it if it does not.
  * @param fullpath The path to the directory, which can include file stem
+ * @returns A string indicating a problem if one occurred
  */
-void FileProperty::checkDirectory(const std::string & fullpath) const
+std::string FileProperty::checkDirectory(const std::string & fullpath) const
 {
   Poco::Path stempath(fullpath);
   if( stempath.isFile() )
   {
     stempath.makeParent();
   }
+  std::string error("");
   if( !stempath.toString().empty() )
   {
     Poco::File stem(stempath);
     if( !stem.exists() )
     {
-      stem.createDirectories();
+      try
+      {
+	stem.createDirectories();
+      }
+      catch(Poco::Exception &e)
+      {
+	error = e.what();
+      }
     }
   }
+  else
+  {
+    error = "Invalid directory.";
+  }
+  return error;
+}
+
+/**
+ * Check file extension to see if a lower- or upper-cased version will also match if the given one does not exist
+ * @param filepath A filename whose extension is checked and converted to lower/upper case if necessary.
+ * @returns The new filename
+ */
+std::string FileProperty::convertExtension(const std::string & filepath) const
+{
+  Poco::Path fullpath(filepath);
+  std::string ext = fullpath.getExtension();
+  if( ext.empty() ) return "";
+  int nchars = ext.size();
+  for( int i = 0; i < nchars; ++i )
+  {
+    int c = static_cast<int>(ext[i]);
+    if( c >= 65 && c <= 90 )
+    {
+      ext[i] = static_cast<char>(c + 32);
+    }
+    else if( c >= 97 && c <= 122 )
+    {
+      ext[i] = static_cast<char>(c - 32);
+    }
+    else
+    {
+    }
+  }
+  fullpath.setExtension(ext);
+  return fullpath.toString();  
 }

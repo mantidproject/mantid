@@ -48,8 +48,9 @@ public:
 
 private:
   /// Check that a given directory exists
-  void checkDirectory(const std::string & filepath) const;
-
+  std::string checkDirectory(const std::string & filepath) const;
+  /// Check file extension to see if a lower- or upper-cased version will also match if the first does not exist
+  std::string convertExtension(const std::string & filepath) const;
   /// The action type of this property, i.e. load/save
   unsigned int m_action;
 };
