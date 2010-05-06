@@ -32,14 +32,18 @@ ProgressDlg::ProgressDlg(Mantid::API::IAlgorithm_sptr alg,QWidget *parent):QDial
     
     setAttribute(Qt::WA_DeleteOnClose);
 
+    observeProgress(m_alg);
+    observeFinish(m_alg);
+    observeError(m_alg);
 }
 
 
-void ProgressDlg::beginMonitoring()
+void ProgressDlg::startAlgorithm()
 {
-  observeProgress(m_alg);
-  observeFinish(m_alg);
-  observeError(m_alg);
+  m_alg->executeAsync();
+//   observeProgress(m_alg);
+//   observeFinish(m_alg);
+//   observeError(m_alg);
 }
 
 void ProgressDlg::cancelClicked()

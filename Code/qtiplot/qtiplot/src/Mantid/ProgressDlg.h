@@ -15,7 +15,7 @@ class ProgressDlg : public QDialog, public Mantid::API::AlgorithmObserver
 	
 public:
   ProgressDlg(Mantid::API::IAlgorithm_sptr alg,QWidget *parent = 0);
-  void beginMonitoring();
+  void startAlgorithm();
 
 private slots:
 	void cancelClicked();

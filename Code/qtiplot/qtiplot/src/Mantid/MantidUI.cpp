@@ -1118,12 +1118,12 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg, bool show
       if(progress_box)
       {
 	progress_box->show();
+	progress_box->startAlgorithm();
       }
-      Poco::ActiveResult<bool> res = alg->executeAsync();
-      if( progress_box && !res.available() )
+      else
       {
-	progress_box->beginMonitoring();
-      } 
+	alg->executeAsync();
+      }
     }
     catch(...)
     {
