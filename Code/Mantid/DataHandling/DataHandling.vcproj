@@ -369,6 +369,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\UpdateInstrumentFromRaw.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\vms_convert.cpp"
 				>
 			</File>
@@ -680,6 +684,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataHandling\UpdateDAE.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataHandling\UpdateInstrumentFromRaw.h"
 				>
 			</File>
 			<File
