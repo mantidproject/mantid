@@ -246,14 +246,7 @@ void ParameterMap::setCachedLocation(const IComponent* comp, V3D& location) cons
 /// @returns true if the location is in the map, otherwise false
 bool ParameterMap::getCachedLocation(const IComponent* comp, V3D& location) const
 {
-  bool result;
-  // Call to getCachedLocation is a needs to be marked as the same critical region as a 
-  // write to the cache
-  PARALLEL_CRITICAL(positionCache)
-  {
-    result = m_cacheLocMap.getCache(comp->getComponentID(),location);
-  }
-  return result;
+  return m_cacheLocMap.getCache(comp->getComponentID(),location);
 }
 
 ///Sets a cached rotation on the rotation cache
@@ -274,14 +267,7 @@ void ParameterMap::setCachedRotation(const IComponent* comp, Quat& rotation) con
 /// @returns true if the rotation is in the map, otherwise false
 bool ParameterMap::getCachedRotation(const IComponent* comp, Quat& rotation) const
 {
-  bool result;
-  // Call to getCachedRotation is a needs to be marked as the same critical region as a 
-  // write to the cache
-  PARALLEL_CRITICAL(rotationCache)
-  {
-    result = m_cacheRotMap.getCache(comp->getComponentID(),rotation);
-  }
-  return result;
+  return m_cacheRotMap.getCache(comp->getComponentID(),rotation);
 }
 
 

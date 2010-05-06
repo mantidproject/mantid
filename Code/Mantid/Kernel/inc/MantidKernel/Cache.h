@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include <map>
 #include "MantidKernel/System.h"
+#include "MantidKernel/MultiThreaded.h"
+
 namespace Mantid
 {
   namespace Kernel
@@ -74,46 +76,39 @@ namespace Mantid
       }
 
       ///Sets a cached value on the rotation cache
-      void setCache(const KEYTYPE key, VALUETYPE value)
+      void setCache(const KEYTYPE& key, const VALUETYPE& value)
       {
-        if (getCacheNoStats(key,value))
-        {
-          //remove key
-          removeCache(key);
-        }
-        m_cacheMap.insert(std::make_pair(key,value));
+        m_cacheMap[key] = value;
       }
 
       ///Attempts to retreive a value from the cache
-      bool getCache(const KEYTYPE key, VALUETYPE& value) const
+      bool getCache(const KEYTYPE& key, VALUETYPE& value) const
       {
         bool found = getCacheNoStats(key,value);
         if (found) 
         {
+          PARALLEL_ATOMIC
           m_cacheHit++;
         }
         else
         {
+          PARALLEL_ATOMIC
           m_cacheMiss++;
         }
         return found;
       }
 
       ///removes the value associated with a key
-      void removeCache(const KEYTYPE key)
+      void removeCache(const KEYTYPE& key)
       {
-        CacheMapIterator it_found = m_cacheMap.find(key);
-        if (it_found != m_cacheMap.end()) 
-        {
-          m_cacheMap.erase(it_found);
-        }
+        m_cacheMap.erase(key);
       }
 
     private:
       ///Attempts to retreive a value from the cache
       bool getCacheNoStats(const KEYTYPE key, VALUETYPE& value) const
       {
-	CacheMapConstIterator it_found = m_cacheMap.find(key);
+        CacheMapConstIterator it_found = m_cacheMap.find(key);
         if (it_found == m_cacheMap.end()) 
         {
           return false; // did not find the component

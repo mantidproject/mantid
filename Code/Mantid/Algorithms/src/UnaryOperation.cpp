@@ -52,8 +52,10 @@ namespace Mantid
       Progress progress(this,0.0,1.0,numSpec);
       
       // Loop over every cell in the workspace, calling the abstract correction function
+      PARALLEL_FOR2(in_work,out_work)
       for (int i = 0; i < numSpec; ++i)
       {
+        PARALLEL_START_INTERUPT_REGION
         // Copy the X values over
         out_work->setX(i,in_work->refX(i));
         // Get references to the data
@@ -72,8 +74,9 @@ namespace Mantid
         }
         
         progress.report();
+        PARALLEL_END_INTERUPT_REGION
       }
-      
+      PARALLEL_CHECK_INTERUPT_REGION
       return;
     }
        
