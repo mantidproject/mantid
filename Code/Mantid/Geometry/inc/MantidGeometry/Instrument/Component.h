@@ -110,6 +110,40 @@ public:
   const Quat getRotation() const;
   //! Get the distance to another component
   double getDistance(const IComponent&) const;
+  /** @name ParamaterMap access */
+  //@{
+  // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
+  // one for each type, luckily there won't be too many
+  
+  /**
+   * Get a parameter defined as a double
+   * @param pname The name of the parameter
+   * @returns A list of size 0 as this is not a parameterized component
+   */
+  std::vector<double> getNumberParameter(const std::string& pname) const
+  {
+    return std::vector<double>(0);
+  }
+  /**
+   * Get a parameter defined as a V3D
+   * @param pname The name of the parameter
+   * @returns A list of size 0 as this is not a parameterized component
+   */
+  std::vector<V3D> getPositionParameter(const std::string& pname) const
+  {
+    return std::vector<V3D>(0);
+  }
+  /**
+   * Get a parameter defined as a Quaternion
+   * @param pname The name of the parameter
+   * @returns A list of size 0 as this is not a parameterized component
+   */
+  std::vector<Quat> getRotationParameter(const std::string& pname) const
+  {
+    return std::vector<Quat>(0);
+  }
+  //@}
+  
   void printSelf(std::ostream&) const;
 private:
   /// Private, unimplemented copy assignment operator

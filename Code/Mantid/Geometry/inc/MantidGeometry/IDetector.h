@@ -78,28 +78,7 @@ public:
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();
 
-  /** Get a double value from the parameter map. This default version returns an empty vector to indicate that
-   * we are not in a parameterized component.
-   * @param param_name The name of the parameter to retrieve
-   * @return The parameter as the first component of the vector
-   */
-  virtual std::vector<double> getNumberParameter(const std::string & param_name) const;
-
-  /** Get a position value from the parameter map. This default version returns an empty vector to indicate that
-   * we are not in a parameterized component.
-   * @param param_name The name of the parameter to retrieve
-   * @return The parameter as the first component of the vector
-   */
-  virtual std::vector<V3D> getPositionParameter(const std::string & param_name) const;
-
-  /** Get a rotation value from the parameter map as a quaternion. This default version returns an empty vector to indicate that
-   * we are not in a parameterized component.
-   * @param param_name The name of the parameter to retrieve
-   * @return The parameter as the first component of the vector
-   */
-  virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const;
-  
-   /// (Empty) Constructor
+  /// (Empty) Constructor
   IDetector() {}
   /// Virtual destructor
   virtual ~IDetector() {}

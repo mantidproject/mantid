@@ -16,6 +16,12 @@ namespace Mantid
 namespace Geometry
 {
 
+//----------------------------------------------------------------------
+// Forward declarations
+//----------------------------------------------------------------------
+class V3D;
+class Quat;
+
 /** @class ParametrizedComponent ParametrizedComponent.h Geometry/ParametrizedComponent.h
 
     ParametrizedComponent is a wrapper for a Component which can modify some of its
@@ -109,6 +115,44 @@ public:
 
     //! Get the distance to another IComponent
      double getDistance(const IComponent&) const;
+
+     /** @name ParamaterMap access */
+     //@{
+     // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
+     // one for each type, luckily there won't be too many
+
+     /**
+      * Get a parameter defined as a double
+      * @param pname The name of the parameter
+      * @return A list of size 0 or 1 containing the parameter value or 
+      * nothing if it does not exist
+      */
+     std::vector<double> getNumberParameter(const std::string& pname) const
+     {
+       return getParameter<double>(pname);
+     }
+     /**
+      * Get a parameter defined as a V3D
+      * @param pname The name of the parameter
+      * @return A list of size 0 or 1 containing the parameter value or 
+      * nothing if it does not exist
+      */
+     std::vector<V3D> getPositionParameter(const std::string& pname) const
+     {
+       return getParameter<V3D>(pname);
+     }
+     /**
+      * Get a parameter defined as a Quaternion
+      * @param pname The name of the parameter
+      * @return A list of size 0 or 1 containing the parameter value or 
+      * nothing if it does not exist
+      */
+     std::vector<Quat> getRotationParameter(const std::string& pname) const
+     {
+       return getParameter<Quat>(pname);
+     }
+     //@}
+
      void printSelf(std::ostream&) const;
 
      /// Returns the address of the base component
@@ -125,8 +169,27 @@ protected:
     /// Reference to the map
     const ParameterMap& m_map;
 
-    /// Parent ParametrizedComponent
-    //mutable ParametrizedComponent *m_parent;
+private:
+
+     /**
+      *  Get a parameter from the parameter map
+      * @param p_name The name of the parameter
+      * @return A list of size 0 or 1 containing the parameter value or 
+      * nothing if it does not exist
+      */
+     template <class TYPE>
+     std::vector<TYPE> getParameter(const std::string & p_name) const
+     {
+       Parameter_sptr param = m_map.get(this, p_name);
+       if( param != Parameter_sptr() )
+       {
+	 return std::vector<TYPE>(1, param->value<TYPE>());
+       }
+       else
+       {
+	 return std::vector<TYPE>(0);
+       }
+     }
 };
 
 } // namespace Geometry

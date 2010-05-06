@@ -103,6 +103,17 @@ public:
   virtual const Quat getRotation() const = 0;
   //! Get the distance to another IComponent
   virtual double getDistance(const IComponent&) const = 0;
+  /** @name ParameterMap access */
+  //@{
+  // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
+  // one for each type, luckily there won't be too many
+  /// Get a parameter defined as a double
+  virtual std::vector<double> getNumberParameter(const std::string& pname) const = 0;
+  /// Get a parameter defined as a V3D
+  virtual std::vector<V3D> getPositionParameter(const std::string& pname) const = 0;
+  /// Get a parameter defined as a Quaternion
+  virtual std::vector<Quat> getRotationParameter(const std::string& pname) const = 0;
+  //@}
   /** Prints a text representation of itself
    */
   virtual void printSelf(std::ostream&) const = 0;

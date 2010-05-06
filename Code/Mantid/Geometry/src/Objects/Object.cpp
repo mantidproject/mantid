@@ -1261,7 +1261,7 @@ namespace Mantid
       pts.push_back(vectors[2]+dz); pts.push_back(vectors[2]+dz+dx);
       pts.push_back(vectors[1]+dz); pts.push_back(vectors[0]+dz);
 
-      const int ntriangles(12);
+      const unsigned int ntriangles(12);
       std::vector<std::vector<int> > triMap(ntriangles, std::vector<int>(3, 0));
       triMap[0][0]=1; triMap[0][1]=4; triMap[0][2]=3;triMap[1][0]=3;triMap[1][1]=2;triMap[1][2]=1;
       triMap[2][0]=5; triMap[2][1]=6; triMap[2][2]=7;triMap[3][0]=7;triMap[3][1]=8;triMap[3][2]=5;

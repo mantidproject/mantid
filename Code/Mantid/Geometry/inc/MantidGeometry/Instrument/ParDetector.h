@@ -66,45 +66,6 @@ public:
   // end IDetector methods
   void markAsMonitor(const bool flag = true);
 
-  /**
-  * Return the value, as a double, of the named parameter for this detector. If no value is found then an empty
-  * vector is returned
-  * @param param_name The name of the parameter value
-  */
-  virtual std::vector<double> getNumberParameter(const std::string & param_name) const;
-
-  /**
-  * Return the value, as a postion vector, of the named parameter for this detector. If no value is found then an empty
-  * vector is returned
-  * @param param_name The name of the parameter value
-  */
-  virtual std::vector<V3D> getPositionParameter(const std::string & param_name) const;
-
-  /**
-  * Return the value, as a postion vector, of the named parameter for this detector. If no value is found then an empty
-  * vector is returned
-  * @param param_name The name of the parameter value
-  */
-  virtual std::vector<Quat> getRotationParameter(const std::string & param_name) const;
-
-private:
-  /**
-  * A templated utility function for getting various parameter types and checking if they exist
-  */
-  template <class TYPE>
-  std::vector<TYPE> getParameter(const std::string & p_name) const
-  {
-    Parameter_sptr param = m_map.get(this, p_name);
-    if( param != Parameter_sptr() )
-    {
-      return std::vector<TYPE>(1, param->value<TYPE>());
-    }
-    else
-    {
-      return std::vector<TYPE>(0);
-    }
-  }
-
 protected:
   ParDetector(const ParDetector&);
 

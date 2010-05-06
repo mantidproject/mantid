@@ -88,6 +88,9 @@ namespace PythonAPI
       .def("getPos", &Mantid::Geometry::IComponent::getPos)
       .def("getName", &Mantid::Geometry::IComponent::getName)
       .def("type", &Mantid::Geometry::IComponent::type)
+      .def("getNumberParameter", &Mantid::Geometry::IComponent::getNumberParameter)
+      .def("getPositionParameter", &Mantid::Geometry::IComponent::getPositionParameter)
+      .def("getRotationParameter", &Mantid::Geometry::IComponent::getRotationParameter)
       ;
    
     //ICompAssembly class
@@ -109,18 +112,14 @@ namespace PythonAPI
     //IDetector Class
     register_ptr_to_python<boost::shared_ptr<Mantid::Geometry::IDetector> >();
   
-    class_< Mantid::Geometry::IDetector, boost::noncopyable>("IDetector", no_init)
+    class_< Mantid::Geometry::IDetector, bases<Mantid::Geometry::IObjComponent>,
+      boost::noncopyable>("IDetector", no_init)
       .def("getID", &Mantid::Geometry::IDetector::getID)
       .def("isMasked", &Mantid::Geometry::IDetector::isMasked)
       .def("isMonitor", &Mantid::Geometry::IDetector::isMonitor)
       .def("solidAngle", &Mantid::Geometry::IDetector::solidAngle)
-      .def("getPos", &Mantid::Geometry::IDetector::getPos)
-      .def("getDistance", &Mantid::Geometry::IDetector::getDistance)
       .def("getTwoTheta", &Mantid::Geometry::IDetector::getTwoTheta)
       .def("getPhi", &Mantid::Geometry::IDetector::getPhi)
-      .def("getNumberParameter", &Mantid::Geometry::IDetector::getNumberParameter)
-      .def("getPositionParameter", &Mantid::Geometry::IDetector::getPositionParameter)
-      .def("getRotationParameter", &Mantid::Geometry::IDetector::getRotationParameter)
       ;
 
     /**
