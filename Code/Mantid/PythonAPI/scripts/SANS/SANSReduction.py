@@ -38,6 +38,8 @@ DIRECT_SAMPLE = ''
 DIRECT_CAN = ''
 DIRECT_CAN = ''
 
+#This is stored as UserFile in the output workspace
+MASKFILE = '_ no file'
 # Now the mask string (can be empty)
 # These apply to both detectors
 SPECMASKSTRING = ''
@@ -922,6 +924,11 @@ def MaskFile(filename):
         SetRearEfficiencyFile(DIRECT_BEAM_FILE_F)
     if DIRECT_BEAM_FILE_F == None and DIRECT_BEAM_FILE_R != None:
         SetFrontEfficiencyFile(DIRECT_BEAM_FILE_R)
+        
+    # just print thhe name, remove the path
+    filename = os.path.basename(filename)
+    global MASKFILE
+    MASKFILE = filename
 
 # Read a limit line of a mask file
 def _readLimitValues(limit_line):
@@ -1149,7 +1156,9 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
         RenameWorkspace(final_workspace + '_4', 'Down')
 
     # Revert the name change so that future calls with different wavelengths get the correct name
-    sample_setup.setReducedWorkspace(wsname_cache)                                
+    sample_setup.setReducedWorkspace(wsname_cache)
+    AddSampleLog(final_workspace, "UserFile", MASKFILE)
+
     return final_workspace
 
 ##

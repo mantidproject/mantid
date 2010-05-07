@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\AddSampleLog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\AnyShapeAbsorption.cpp"
 				>
 			</File>
@@ -510,6 +514,10 @@
 			>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\AbsorptionCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\AddSampleLog.h"
 				>
 			</File>
 			<File
