@@ -49,8 +49,8 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty default constructor
-LoadInstrument::LoadInstrument() : Algorithm(), m_haveDefaultFacing(false), m_deltaOffsets(false),
-  hasParameterElement_beenSet(false)
+LoadInstrument::LoadInstrument() : Algorithm(), hasParameterElement_beenSet(false),
+    m_haveDefaultFacing(false), m_deltaOffsets(false)
 {}
 
 /// Initialisation method.

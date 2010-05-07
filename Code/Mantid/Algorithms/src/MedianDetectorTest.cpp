@@ -443,7 +443,7 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
       if ( yInputOutput <= lowLim )
       {// compare the difference against the size of the errorbar -statistical significance check
         //don't allow spectra to pass if their error is invalid
-        if ( abs(sig)==std::numeric_limits<double>::infinity() || sig!=sig ||
+        if ( std::abs(sig)==std::numeric_limits<double>::infinity() || sig!=sig ||
           //now the significience test itself
           baseNum - yInputOutput > sig)
         {
@@ -455,7 +455,7 @@ void MedianDetectorTest::FindDetects(MatrixWorkspace_sptr responses, const doubl
       if ( yInputOutput >= highLim )
       {// compare the difference against the size of the errorbar -statistical significance check
         //don't allow spectra to pass if their error is invalid
-        if ( abs(sig)==std::numeric_limits<double>::infinity() || sig!=sig ||
+        if ( std::abs(sig)==std::numeric_limits<double>::infinity() || sig!=sig ||
           //now the significience test itself
           yInputOutput - baseNum > sig )
         {

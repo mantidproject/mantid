@@ -32,8 +32,8 @@ using namespace API;
 /// Constructor
 LoadRawHelper::LoadRawHelper() :
   Algorithm(),isisRaw(new ISISRAW2),
-  m_specTimeRegimes(),m_spec_list(), m_spec_min(0),
-  m_spec_max(unSetInt),m_bmspeclist(false),m_list(false)
+  m_list(false),m_spec_list(),m_spec_min(0),
+  m_spec_max(unSetInt),m_specTimeRegimes(),m_bmspeclist(false)
 {
 }
 

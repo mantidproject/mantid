@@ -17,7 +17,7 @@ namespace Mantid
     using namespace API;
 
     /// Constructor
-    UserFunction::UserFunction():m_x_set(false),m_parser(new mu::Parser()) {}
+    UserFunction::UserFunction() : m_parser(new mu::Parser()), m_x_set(false) {}
 
     /// Destructor
     UserFunction::~UserFunction()

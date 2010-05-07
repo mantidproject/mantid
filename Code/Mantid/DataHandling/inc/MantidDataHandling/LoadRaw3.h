@@ -92,33 +92,33 @@ namespace Mantid
       ///  returns true if the Include Monitor Option  selected
       bool isIncludeMonitors();
 
-	  /// validate workspace sizes
-	  void validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
-								   const int normalwsSpecs,const int  monitorwsSpecs);
-	  
+      /// validate workspace sizes
+      void validateWorkspaceSizes( bool bexcludeMonitors ,bool bseparateMonitors,
+                                   const int normalwsSpecs,const int  monitorwsSpecs);
+
       /// this method will be executed if not enough memory.
-	  void goManagedRaw(bool bincludeMonitors,bool bexcludeMonitors,
-		  bool bseparateMonitors,const std::string& fileName);
+      void goManagedRaw(bool bincludeMonitors,bool bexcludeMonitors,
+                        bool bseparateMonitors,const std::string& fileName);
       
 
-	  /// This method is useful for separating  or excluding   monitors from the output workspace
+      /// This method is useful for separating  or excluding   monitors from the output workspace
       void  separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWorkspace,
-									  bool binclude,bool bexclude,bool bseparate,
-									  int numberOfSpectra,const std::string &fileName);
+                                      bool binclude,bool bexclude,bool bseparate,
+                                      int numberOfSpectra,const std::string &fileName);
 
-	  /// creates output workspace, monitors excluded from this workspace
-	  void excludeMonitors(FILE* file,const int& period,const std::vector<int>& monitorList,
-		  DataObjects::Workspace2D_sptr ws_sptr);
-	  
-	  /// creates output workspace whcih includes monitors
-	  void includeMonitors(FILE* file,const int& period,DataObjects::Workspace2D_sptr ws_sptr);
-	  
-	  /// creates two output workspaces none normal workspace and separate one for monitors
-	  void separateMonitors(FILE* file,const int& period,const std::vector<int>& monitorList,
-		  DataObjects::Workspace2D_sptr ws_sptr,DataObjects::Workspace2D_sptr mws_sptr);
+      /// creates output workspace, monitors excluded from this workspace
+      void excludeMonitors(FILE* file,const int& period,const std::vector<int>& monitorList,
+                           DataObjects::Workspace2D_sptr ws_sptr);
 
-	  ///sets optional properties
-	  void setOptionalProperties();
+      /// creates output workspace whcih includes monitors
+      void includeMonitors(FILE* file,const int& period,DataObjects::Workspace2D_sptr ws_sptr);
+
+      /// creates two output workspaces none normal workspace and separate one for monitors
+      void separateMonitors(FILE* file,const int& period,const std::vector<int>& monitorList,
+                            DataObjects::Workspace2D_sptr ws_sptr,DataObjects::Workspace2D_sptr mws_sptr);
+
+      ///sets optional properties
+      void setOptionalProperties();
       
       /// The name and path of the input file
       std::string m_filename;
@@ -131,8 +131,8 @@ namespace Mantid
       std::vector<std::string> m_cache_options;
       /// A map for storing the time regime for each spectrum
       std::map<int,int> m_specTimeRegimes;
-	  /// number of time regime
-	  int m_noTimeRegimes;
+      /// number of time regime
+      int m_noTimeRegimes;
       /// The current value of the progress counter
       double m_prog;
 

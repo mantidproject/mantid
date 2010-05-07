@@ -33,10 +33,9 @@ using namespace API;
 
 /// Constructor
 LoadRaw3::LoadRaw3() :
-   m_filename(),
-  //m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),m_bmspeclist(false),
-  m_specTimeRegimes(), m_prog(0.0),m_lengthIn(0),m_numberOfPeriods(0),
-  m_timeChannelsVec(),m_noTimeRegimes(0),m_total_specs(0)
+  m_filename(), m_numberOfPeriods(0),
+  m_specTimeRegimes(), m_noTimeRegimes(0),m_prog(0.0),m_lengthIn(0),
+  m_timeChannelsVec(),m_total_specs(0)
 {
 }
 
@@ -131,9 +130,6 @@ void LoadRaw3::exec()
   // Get the time channel array(s) and store in a vector inside a shared pointer
   m_timeChannelsVec =getTimeChannels(m_noTimeRegimes,m_lengthIn);
 
-  int histTotal = m_total_specs * m_numberOfPeriods;
-  int histCurrent = -1;
- 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, m_lengthIn,m_lengthIn-1,title);
   //localWorkspace->setTitle(title);
