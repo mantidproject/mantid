@@ -59,6 +59,9 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "IkedaCarpenterPV";}
+      //virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const int& nData);
+      virtual void setActiveParameter(int i,double value);
+      virtual double activeParameter(int i)const;
       virtual void function(double* out, const double* xValues, const int& nData);
 
       void constFunction(double* out, const double* xValues, const int& nData) const;

@@ -412,14 +412,6 @@ Mantid::API::IFunction* FitPropertyBrowser::addFunction(const std::string& fnNam
   Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
   if (pf)
   {
-    if (m_default_width != 0.0)
-    {
-      pf->setWidth(m_default_width);
-    }
-    else
-    {
-      m_default_width = pf->width();
-    }
     if (!workspaceName().empty() && workspaceIndex() >= 0)
     {
       pf->setCentre( (startX() + endX())/2 );
