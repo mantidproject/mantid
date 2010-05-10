@@ -1148,17 +1148,18 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
         ReplaceSpecialValues(InputWorkspace = final_workspace, OutputWorkspace = final_workspace, NaNValue="0", InfinityValue="0")
         if CORRECTION_TYPE == '1D':
             SANSUtility.StripEndZeroes(final_workspace)
+        # Store the mask file within the final workspace so that it is saved to the CanSAS file
+        AddSampleLog(final_workspace, "UserFile", MASKFILE)
     else:
         UnGroupWorkspace(final_workspace)
-        RenameWorkspace(final_workspace + '_1', 'Left')
-        RenameWorkspace(final_workspace + '_2', 'Right')
-        RenameWorkspace(final_workspace + '_3', 'Up')
-        RenameWorkspace(final_workspace + '_4', 'Down')
+        quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
+        for key, value in quadrants.iteritems():
+            old_name = final_workspace + '_' + str(key)
+            RenameWorkspace(old_name, value)
+            AddSampleLog(value, "UserFile", MASKFILE)
 
     # Revert the name change so that future calls with different wavelengths get the correct name
     sample_setup.setReducedWorkspace(wsname_cache)
-    AddSampleLog(final_workspace, "UserFile", MASKFILE)
-
     return final_workspace
 
 ##
