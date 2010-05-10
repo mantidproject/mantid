@@ -402,13 +402,13 @@ private:
    void handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf);
     Poco::NObserver<MantidUI, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
 
-	 //handles notification send by Groupworkspaces algorithm 
-	void handleGroupWorkspaces(Mantid::API::GroupWorkspacesNotification_ptr pNf);
-	Poco::NObserver<MantidUI, Mantid::API::GroupWorkspacesNotification> m_groupworkspacesObserver;
+  //handles notification send by Groupworkspaces algorithm 
+  void handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf);
+  Poco::NObserver<MantidUI, Mantid::API::WorkspacesGroupedNotification> m_groupworkspacesObserver;
 
-	 //handles notification send by UnGroupworkspaces algorithm 
-	void handleUnGroupWorkspace(Mantid::API::UnGroupWorkspaceNotification_ptr pNf);
-	Poco::NObserver<MantidUI, Mantid::API::UnGroupWorkspaceNotification> m_ungroupworkspaceObserver;
+  //handles notification send by UnGroupworkspaces algorithm 
+  void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupedNotification_ptr pNf);
+  Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupedNotification> m_ungroupworkspaceObserver;
 
  
 	//#678

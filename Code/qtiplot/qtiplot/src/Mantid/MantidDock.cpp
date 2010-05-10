@@ -83,6 +83,8 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
           this, SLOT(updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr)));
   connect(m_mantidUI, SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr)),
           this, SLOT(updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr)));
+  connect(m_mantidUI, SIGNAL(workspace_ungrouped(const QString &)),
+          this, SLOT(workspaceGroupRemoved(const QString &)));
   connect(m_mantidUI, SIGNAL(workspace_removed(const QString &)),
           this, SLOT(removeWorkspaceEntry(const QString &)));
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()));
@@ -483,8 +485,6 @@ bool MantidDockWidget::isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr 
 
 void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 {
-  // Check if we need to unroll a workspace group before removing it
-  workspaceGroupRemoved(ws_name);
 
   //This will only ever be of size zero or one
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
@@ -531,21 +531,6 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
  */
 void MantidDockWidget::workspaceGroupRemoved(const QString& wsGroupName)
 {
-  Workspace_sptr workspace;
-  try
-  {
-    workspace = Mantid::API::AnalysisDataService::Instance().retrieve(wsGroupName.toStdString());
-  }
-  catch(Mantid::Kernel::Exception::NotFoundError&)
-  {
-    return;
-  }
-  
-  if( !boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup_sptr>(workspace) ) 
-  {
-    return;
-  }
-
   QList<QTreeWidgetItem*> match_items=m_tree->findItems(wsGroupName,Qt::MatchFixedString);
   if(match_items.isEmpty())
   {

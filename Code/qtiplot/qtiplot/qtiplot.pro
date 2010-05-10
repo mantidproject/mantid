@@ -100,6 +100,11 @@ unix:!macx {
 
 # dynamically link against dependencies if they are installed system-wide
 unix {
+  # MG: By default, ld populates the symbol table with only those referenced within the linked libraries.
+  # Given that Mantid uses dlopen it may not necessarily reference all symbols at link time. We therefore need to 
+  # ensure that the symbol table is populated with all symbols defined within the linked libraries.
+  QMAKE_LFLAGS += -Wl,--export-dynamic
+
   LIBS         += -lqscintilla2
   LIBS         += -lmuparser
 

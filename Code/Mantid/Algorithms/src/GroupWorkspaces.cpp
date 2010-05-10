@@ -88,7 +88,7 @@ namespace Mantid
 
       // Notify listeners that a new grop has been created
       Mantid::API::AnalysisDataService::Instance().notificationCenter.postNotification(
-        new Kernel::DataService<Workspace>::GroupWorkspacesNotification(inputworkspaces));	
+        new WorkspacesGroupedNotification(inputworkspaces));	
 
     }
 

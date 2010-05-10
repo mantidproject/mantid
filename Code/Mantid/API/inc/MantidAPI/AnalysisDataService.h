@@ -104,11 +104,11 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>:
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification WorkspaceRenameNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification>& WorkspaceRenameNotification_ptr;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification GroupWorkspacesNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification>& GroupWorkspacesNotification_ptr;
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification WorkspacesGroupedNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification>& WorkspacesGroupedNotification_ptr;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification UnGroupWorkspaceNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification>& UnGroupWorkspaceNotification_ptr;
+typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification WorkspaceUnGroupedNotification;
+typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification>& WorkspaceUnGroupedNotification_ptr;
 
 
 } // Namespace API

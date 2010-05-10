@@ -111,10 +111,9 @@ m_appWindow(aw)
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_clearADSObserver);
-	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
-	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
-	Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
-	
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
 
 
     mantidMenu = new QMenu(m_appWindow);
@@ -199,12 +198,13 @@ void MantidUI::shutdown()
 MantidUI::~MantidUI()
 {
   if( m_algMonitor ) delete m_algMonitor;
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_groupworkspacesObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_ungroupworkspaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_algUpdatesObserver);
-
 }
 
 void MantidUI::saveSettings() const
@@ -1201,20 +1201,20 @@ void MantidUI::handleRenameWorkspace(WorkspaceRenameNotification_ptr pNf)
 {
   emit workspace_renamed(QString::fromStdString(pNf->object_name()), QString::fromStdString(pNf->new_objectname()));
 }
-void MantidUI::handleGroupWorkspaces(GroupWorkspacesNotification_ptr pNf)
+void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf)
 {
-	const std::vector<std::string> wsvec=pNf->inputworkspacenames();
-	QStringList wsList;
-	std::vector<std::string>::const_iterator citr;
-	for(citr=wsvec.begin();citr!=wsvec.end();++citr)
-	{
-		wsList.append(QString::fromStdString(*citr));
-	}
-	emit workspaces_grouped(wsList);
+  const std::vector<std::string> wsvec=pNf->inputworkspacenames();
+  QStringList wsList;
+  std::vector<std::string>::const_iterator citr;
+  for(citr=wsvec.begin();citr!=wsvec.end();++citr)
+    {
+      wsList.append(QString::fromStdString(*citr));
+    }
+  emit workspaces_grouped(wsList);
 }
-void MantidUI::handleUnGroupWorkspace(UnGroupWorkspaceNotification_ptr pNf)
+void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupedNotification_ptr pNf)
 {
-	emit workspace_ungrouped(QString::fromStdString(pNf->object_name()));
+  emit workspace_ungrouped(QString::fromStdString(pNf->object_name()));
 }
 
 void MantidUI::logMessage(const Poco::Message& msg)
