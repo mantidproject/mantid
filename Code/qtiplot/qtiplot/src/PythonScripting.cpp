@@ -72,7 +72,19 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
  #else
   const std::string sipLocation = Mantid::Kernel::ConfigService::Instance().getBaseDir();
  #endif
-  setenv("PYTHONPATH",sipLocation.c_str(),1);
+  // MG: The documentation claims that if the third argument to setenv is non zero then it will update the
+  // environment variable. What this seems to mean is that it actually overwrites it. So here we'll have 
+  // to save it and update it ourself.
+  const char * envname = "PYTHONPATH";
+  char * pythonpath = getenv(envname);
+  std::string value("");
+  if( pythonpath )
+  {
+    // Only doing this for Darwin and Linux so separator is always ":"
+    value = std::string(pythonpath);
+  }
+  value = sipLocation + ":" + value;
+  setenv(envname, value.c_str(), 1);
 #endif
 }
 
@@ -97,6 +109,22 @@ bool PythonScripting::start()
   if( Py_IsInitialized() ) return true;
   // Initialize interpreter, disabling signal registration as we don't need it
   Py_InitializeEx(0);
+
+  // Add in Mantid paths.
+  QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
+  QString pycode = 
+    "import sys\n"
+    "mantidbin = '" +  mantidbin.absolutePath() + "'\n" + 
+    "if not mantidbin in sys.path:\n"
+    "\tsys.path.insert(0,mantidbin)\n";
+
+  QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
+  if( mantidoutput != mantidbin )
+  {
+      pycode += QString("sys.path.insert(1,'") + mantidoutput.absolutePath() + QString("')\n");
+  }
+  PyRun_SimpleString(pycode.toStdString().c_str());
+
   //Keep a hold of the globals, math and sys dictionary objects
   PyObject *pymodule = PyImport_AddModule("__main__");
   if( !pymodule )
@@ -146,18 +174,6 @@ bool PythonScripting::start()
   setQObject(this, "stdout", m_sys);
   setQObject(this, "stderr", m_sys);
 
-  QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getBaseDir()));
-  QString pycode = 
-    QString("import sys; sys.path.insert(0,'") + mantidbin.absolutePath() + QString("');");
-  QDir mantidoutput(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getOutputDir()));
-  if( mantidoutput != mantidbin )
-  {
-      pycode += QString("sys.path.insert(1,'") + mantidoutput.absolutePath() + QString("');");
-  }
-  PyRun_SimpleString(pycode.toStdString().c_str());
-
-  // Changed initialization to include a script which also loads the 
-  // MantidPythonAPI - M. Gigg
   if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc.py")) && 
       loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
   {

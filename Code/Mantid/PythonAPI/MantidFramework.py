@@ -881,17 +881,14 @@ def FrameworkSingleton():
     return getattr(__main__, '__mantid__')
 
 if os.name == 'posix':
-    sys.path.append(os.path.expanduser('~/.mantid'))
+    outputdir = os.path.expanduser('~/.mantid')
+    if not outputdir in sys.path:
+        sys.path.append(outputdir)
 
 mtd = FrameworkSingleton()
 mantid = mtd
 Mantid = mtd
 Mtd = mtd
-
-# Update paths so that Mantid can find everything we need
-# Add current directory
-if not '.' in sys.path:
-    sys.path.insert(0, '.')
 
 def __addToPySearchPath(dirs):
     if type(dirs) == str:
