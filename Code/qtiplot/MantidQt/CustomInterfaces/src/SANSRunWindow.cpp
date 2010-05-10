@@ -52,11 +52,12 @@ Mantid::Kernel::Logger& SANSRunWindow::g_log = Mantid::Kernel::Logger::get("SANS
 //----------------------------------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true), m_run_no_boxes(), 
-  m_period_lbls(), m_warnings_issued(false), m_force_reload(false), m_log_warnings(false),
-  m_delete_observer(*this,&SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(), 
-  m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1), m_have_reducemodule(false), 
-  m_dirty_batch_grid(false), m_tmp_batchfile("")
+  UserSubWindow(parent), m_data_dir(""), m_ins_defdir(""), m_last_dir(""), m_cfg_loaded(true),
+  m_sample_no(), m_run_no_boxes(),  m_period_lbls(), m_warnings_issued(false),
+  m_force_reload(false), m_log_warnings(false), m_delete_observer(*this,
+  &SANSRunWindow::handleMantidDeleteWorkspace), m_s2d_detlabels(),
+  m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
 {
   m_reducemapper = new QSignalMapper(this);
   m_mode_mapper = new QSignalMapper(this);
@@ -1352,23 +1353,26 @@ bool SANSRunWindow::handleLoadButtonClick()
     m_uiForm.tof_max->setText(QString::number(sample_workspace->readX(0).back()));
   }
 
-  // Set the geometry
-  int geomid  = sample_workspace->sample().getGeometryFlag();
-  if( geomid > 0 && geomid < 4 )
+  // Set the geometry if the sample has been changed
+  if ( m_sample_no != run_number )
   {
-    m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
-    m_uiForm.sample_thick->setText(QString::number(sample_workspace->sample().getThickness()));
-    m_uiForm.sample_width->setText(QString::number(sample_workspace->sample().getWidth()));
-    m_uiForm.sample_height->setText(QString::number(sample_workspace->sample().getHeight()));
-  }
-  else
-  {
-    m_uiForm.sample_geomid->setCurrentIndex(2);
-    m_uiForm.sample_thick->setText("1");
-    m_uiForm.sample_width->setText("8");
-    m_uiForm.sample_height->setText("8");
-    //Warn user
-    raiseOneTimeMessage("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.", 2);
+    int geomid  = sample_workspace->sample().getGeometryFlag();
+    if( geomid > 0 && geomid < 4 )
+    {
+      m_uiForm.sample_geomid->setCurrentIndex(geomid - 1);
+      m_uiForm.sample_thick->setText(QString::number(sample_workspace->sample().getThickness()));
+      m_uiForm.sample_width->setText(QString::number(sample_workspace->sample().getWidth()));
+      m_uiForm.sample_height->setText(QString::number(sample_workspace->sample().getHeight()));
+    }
+    else
+    {
+      m_uiForm.sample_geomid->setCurrentIndex(2);
+      m_uiForm.sample_thick->setText("1");
+      m_uiForm.sample_width->setText("8");
+      m_uiForm.sample_height->setText("8");
+      //Warn user
+      raiseOneTimeMessage("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.", 2);
+    }
   }
 
   forceDataReload(false);
@@ -1378,6 +1382,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     m_uiForm.tabWidget->setTabEnabled(index, true);
   }
  
+  m_sample_no = run_number;
   setProcessingState(false, -1);
   return true;
 }

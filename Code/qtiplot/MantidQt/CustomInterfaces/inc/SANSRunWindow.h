@@ -188,6 +188,8 @@ private:
   QString m_last_dir;
   /// Is the user file loaded
   bool m_cfg_loaded;
+  /// The sample that was loaded
+  QString m_sample_no;
   /// A map for quickly retrieving the different line edits
   QHash<int, QLineEdit*> m_run_no_boxes;
   /// A hash for quickly retrieving the different label fields
