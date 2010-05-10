@@ -64,11 +64,7 @@ namespace Mantid
       // Create and fill another vector for the errors, containing sqrt(count)
       MantidVec& E = localWorkspace->dataE(hist);
       std::transform(Y.begin(), Y.end(), E.begin(), LoadDAE::dblSqrt);
-      // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->spectraNo(hist)= ispec;
-      // NOTE: Raw numbers go straight into the workspace
-      //     - no account taken of bin widths/units etc.
     }
 
     /// Initialisation method.
@@ -254,8 +250,9 @@ namespace Mantid
         for (int i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
-          int histToRead = i + period*total_specs;
+          int histToRead = i + period*(total_specs+1);
           loadData(timeChannelsVec,counter,histToRead,dae_handle,lengthIn,spectrum.get(),localWorkspace,allData.get() );
+          localWorkspace->getAxis(1)->spectraNo(counter)= i;
           counter++;
           if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
           interruption_point();
@@ -266,6 +263,7 @@ namespace Mantid
           for(unsigned int i=0; i < m_spec_list.size(); ++i)
           {
             loadData(timeChannelsVec,counter,m_spec_list[i],dae_handle,lengthIn,spectrum.get(), localWorkspace,allData.get() );
+            localWorkspace->getAxis(1)->spectraNo(counter)= i;
             counter++;
             if (++histCurrent % 10 == 0) progress(double(histCurrent)/histTotal);
             interruption_point();
