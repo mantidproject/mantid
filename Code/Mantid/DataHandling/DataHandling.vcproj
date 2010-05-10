@@ -691,6 +691,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\UpdateInstrumentFromRawTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadRaw\vms_convert.h"
 				>
 			</File>
