@@ -75,5 +75,8 @@ if __name__ == '__main__':
                     calltip = args[index] + "," + calltip
             calltip = '(' + calltip.rstrip(',') + ')'
         return calltip
+    
+    import sys
+    sys.path.insert(0,'')
 else:
     raise ImportError("mantidplotrc.py is an initialization file for MantidPlot not an importable module")

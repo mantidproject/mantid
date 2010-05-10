@@ -161,25 +161,12 @@ int main( int argc, char ** argv )
       app.processEvents();
       splash.showMessage("Release: " + QString(MANTIDPLOT_RELEASE_DATE),Qt::AlignLeft | Qt::AlignBottom);
 
-      QString path = argv[0];
-      int i = path.lastIndexOf('/');
-      if (i < 0) i = path.lastIndexOf('\\'); 
-      if (i>=0) 
-      {
-        path.remove(i,1000);
-        QDir::setCurrent(path);
-      }
-
       bool factorySettings = false;
       if (args.contains("-d") || args.contains("--default-settings"))
         factorySettings = true;
 
       ApplicationWindow *mw = new ApplicationWindow(factorySettings);
       mw->restoreApplicationGeometry();
-      /*if (mw->autoSearchUpdates){
-      mw->autoSearchUpdatesRequest = true;
-      mw->searchForUpdates();
-      }*/
       mw->parseCommandLineArguments(args);
       t.wait();
       splash.finish(mw);
