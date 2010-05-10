@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/Workspace2D.h"
 //----------------------------------------------------------------------
 
 namespace Poco{
@@ -49,9 +50,17 @@ namespace Mantid
         <SAScollimation/>
         <SASdetector>
           <name></name>
+		  <SDD></SDD>
         </SASdetector>
       </SASinstrument>
-      <SASnote></SASnote>
+	  <SASprocess>
+		<name></name>
+		<date></date>
+		<term name="svn"></term>
+		<term name="user_file"></term>
+	  </SASprocess>
+      <SASnote>
+	  </SASnote>
     </SASentry>
   </SASroot>
   @endverbatim
@@ -105,34 +114,37 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-      /// creates SASRoot element
-      Poco::XML::Element* createSASRootElement();
-      
-      /// creates SASEntry Element 
-      Poco::XML::Element* createSASEntryElement(Poco::XML::Element* parent);
-      /// creates SASDataElement and the elements it contains
-      void  createSASDataElement(Poco::XML::Element* parent);
-      ///creates SASsample element and  the elements it contains
-      void  createSASsample(Poco::XML::Element* parent);
-      /// creates SASNInstrument element and the elements it contains
-      void createSASInstrument(Poco::XML::Element* parent);
-      /// createSASNote element
-      void createSASnote(Poco::XML::Element* parent);
-      /// creates Title element
-      void createTitleElement(Poco::XML::Element* parent);
+     /// this method searches for xml special characters and replace with entity references
+	  void searchandreplaceSpecialChars(std::string &input);
 
-      /// creates Run element
-      void createRunElement(Poco::XML::Element* parent);
+	  /// replaces the charcter at index in the input string with xml entity reference(eg.replace '&' with "&amp;")
+	  void replacewithEntityReference(std::string& input,int index);
 
-      /// This method throws NullPointerException when element creation fails
-      void throwException(const Poco::XML::Element* elem,const std::string & place,const std::string & objectName);
+	  /// sasroot element
+	  void createSASRootElement(std::string& rootElem);
 
-      ///Overloaded method. This method throws NullPointerException when Text node creation fails
-      void throwException(const Poco::XML::Text* text,const std::string & place,const std::string & objectName);
-      
-      API::MatrixWorkspace_const_sptr m_workspace; ///<workspace
-      Poco::XML::Document* mDoc;                   ///< The XML document    
-      Poco::XML::Element*  mRoot;                  ///< The root XML element
+	  /// this method creates sastitle element
+	  void createSASTitleElement(std::string& sasTitle);
+
+	  /// this method creates sassample element
+	  void createSASSampleElement(std::string &sasSample);
+
+	  /// this method creates sasRun Element
+	  void createSASRunElement(std::string& sasRun);
+
+	  /// this method creates SASData element
+	  void createSASDataElement(std::string& sasData);
+
+	  /// this method creates SASSourcelement
+	  void createSASSourceElement(std::string& sasSource );
+
+	  ///this method creates sasDetector element
+	  void createSASDetectorElement(std::string& sasDet);
+	  
+	  ///this method creates sasProcess element
+	  void createSASProcessElement(std::string& sasProcess);
+	      
+      API::MatrixWorkspace_sptr m_workspace; ///<workspace
     };
     
   }

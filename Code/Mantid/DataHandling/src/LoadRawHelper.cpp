@@ -148,7 +148,7 @@ void  LoadRawHelper::setProtonCharge(API::Sample& sample)
   *@param noTimeRegimes number of time regime.
 
 */
-void LoadRawHelper::readworkspaceParameters(int& numberOfSpectra,int& numberOfPeriods,int& lengthIn,int & noTimeRegimes )
+void LoadRawHelper::readworkspaceParameters(int& numberOfSpectra,int& numberOfPeriods,int& lengthIn,int& noTimeRegimes )
 {
 	// Read in the number of spectra in the RAW file
   m_numberOfSpectra=numberOfSpectra = isisRaw->t_nsp1;
@@ -832,6 +832,49 @@ void LoadRawHelper::calculateWorkspacesizes(const std::vector<int>& monitorSpecL
   }
 
 }
+void LoadRawHelper::loadSpectra(FILE* file,const int& period,const int& total_specs,
+								 DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec)
+{
+	int histCurrent = -1;
+	int wsIndex=0;
+	int numberOfPeriods=isisRaw->t_nper;
+	int histTotal = total_specs * numberOfPeriods;
+	int noTimeRegimes=getNumberofTimeRegimes();
+	int lengthIn = isisRaw->t_ntc1+1;
+	
+	//loop through spectra
+	for (int i = 1; i <= m_numberOfSpectra; ++i)
+	{
+		int histToRead = i + period * (m_numberOfSpectra + 1);
+		if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
+			i) != m_spec_list.end()))
+		{
+			progress(m_prog, "Reading raw file data...");
+
+			//read spectrum from raw file
+			readData(file, histToRead);
+			//set worksapce data
+			setWorkspaceData(ws_sptr, timeChannelsVec, wsIndex, i,noTimeRegimes,lengthIn,1);
+			++wsIndex;
+
+			if (numberOfPeriods == 1)
+			{
+				if (++histCurrent % 100 == 0)
+				{
+					m_prog = double(histCurrent) / histTotal;
+				}
+				interruption_point();
+			}
+
+		}
+		else
+		{
+			skipData(file, histToRead);
+		}
+	}
+
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid

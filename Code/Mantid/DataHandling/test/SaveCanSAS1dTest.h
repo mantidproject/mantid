@@ -17,12 +17,15 @@ public:
   {
     using namespace Mantid::DataHandling;
     using namespace Mantid::API;
+	
+	/*std::string s;
+	std::getline(std::cin,s);*/
 
     SaveCanSAS1D savealg;
     LoadRaw3 loader;
     if ( !loader.isInitialized() ) loader.initialize();
     std::string inputFile; // Path to test input file assumes Test directory checked out from SVN
-    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/LOQ48127.raw").toString();
+    inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
 
     std::string rawoutws="outWS";
     loader.setPropertyValue("Filename", inputFile);
@@ -51,17 +54,31 @@ public:
     //testing the first few lines of the xml file
     std::string fileLine;
     std::getline( testFile, fileLine );
-    std::getline( testFile, fileLine );
-    std::getline( testFile, fileLine );
-    std::string sasroot;
-    sasroot="<SASroot version=\"1.0\" xmlns=\"cansas1d/1.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd\">";
-    
-    TS_ASSERT_EQUALS (fileLine,sasroot);
-    std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine,"\t<SASentry>");
+	std::getline( testFile, fileLine );
+
+	std::getline( testFile, fileLine );
+	std::string sasRootexpected=fileLine;
 
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine,"\t\t<Title>48127 LOQ team &amp; SANS Xpre direct beam              18-DEC-2008 17:58:38</Title>");
+	sasRootexpected+=fileLine;
+    std::getline( testFile, fileLine );
+	sasRootexpected+=fileLine;
+
+	std::getline( testFile, fileLine );
+	sasRootexpected+=fileLine;
+
+    std::string sasroot;
+    sasroot="<SASroot version=\"1.0\"";
+	sasroot +="\t\t xmlns=\"cansas1d/1.0\"";
+	sasroot+="\t\t xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"";
+	sasroot+="\t\t xsi:schemaLocation=\"cansas1d/1.0 http://svn.smallangles.net/svn/canSAS/1dwg/trunk/cansas1d.xsd\">";
+    TS_ASSERT_EQUALS (sasroot,sasRootexpected);
+
+    std::getline( testFile, fileLine );
+    TS_ASSERT_EQUALS ( fileLine,"\t<SASentry name=\"workspace\">");
+
+    std::getline( testFile, fileLine );
+    TS_ASSERT_EQUALS ( fileLine,"\t\t<Title>15869 DTA RIB              White Van                13-APR-2005 14:10:46</Title>");
 
     std::getline( testFile, fileLine );
     TS_ASSERT_EQUALS ( fileLine,"\t\t<Run>outWS</Run>");
@@ -70,19 +87,11 @@ public:
     TS_ASSERT_EQUALS ( fileLine,"\t\t<SASdata>");
 
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine,"\t\t\t<Idata>");
-    std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine,"\t\t\t\t<Q unit=\"1/A\">3543.75</Q>");
+	std::string idataline="\t\t\t<Idata><Q unit=\"1/A\">5.125</Q><I unit=\"Counts\">0</I><Idev unit=\"Counts\">0</Idev></Idata>";
+	TS_ASSERT_EQUALS ( fileLine,idataline);
 
-    std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine,"\t\t\t\t<I unit=\"Counts\">111430</I>");
-
-    std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine,"\t\t\t\t<Idev unit=\"Counts\">333.811</Idev>");
-
-}
-
-
+  }
+  
 };
 
 
