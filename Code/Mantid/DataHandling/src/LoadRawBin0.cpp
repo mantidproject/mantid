@@ -34,8 +34,7 @@ using namespace API;
 /// Constructor
 LoadRawBin0::LoadRawBin0() :
    m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
-  //m_list(false), m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(unSetInt),
-  m_specTimeRegimes(), m_prog(0.0), m_bmspeclist(false)
+   m_specTimeRegimes(), m_prog(0.0), m_bmspeclist(false)
 {
 }
 
@@ -107,8 +106,9 @@ void LoadRawBin0::exec()
     return;
   }
 
-  // Get the time channel array(s) and store in a vector inside a shared pointer
-  m_timeChannelsVec =getTimeChannels(m_noTimeRegimes,m_lengthIn);
+//no real X values for bin 0,so initialize this to zero
+  boost::shared_ptr<MantidVec> channelsVec(new MantidVec(1,0));
+  m_timeChannelsVec.push_back(channelsVec);
  
   // Need to extract the user-defined output workspace name
   const std::string wsName = getPropertyValue("OutputWorkspace");
@@ -143,7 +143,6 @@ void LoadRawBin0::exec()
         //remove previous period data
         std::stringstream prevPeriod;
         prevPeriod << "PERIOD " << (period);
-        //std::string prevPeriod="PERIOD "+suffix.str();
         Sample& sampleObj = localWorkspace->mutableSample();
         sampleObj.removeLogData(prevPeriod.str());
         //add current period data
@@ -175,8 +174,13 @@ void LoadRawBin0::exec()
         }
 
       }
+	  else
+	  {
+		  skipData(file, histToRead);
+	  }
     
     }
+	
 	if(m_numberOfPeriods>1)
 	{
 		setWorkspaceProperty(localWorkspace, ws_grp, period, false);

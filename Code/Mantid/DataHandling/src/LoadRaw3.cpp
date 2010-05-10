@@ -172,10 +172,10 @@ void LoadRaw3::exec()
 	  {
 		  validateWorkspaceSizes(bexcludeMonitors,bseparateMonitors,normalwsSpecs, monitorwsSpecs);
 	  }
-	  catch(std::out_of_range& ex)
+	  catch(std::out_of_range&)
 	  {
 		  fclose(file);
-		  throw ex;
+		  throw ;
 	  }
 
 	  //now create a workspace of size normalwsSpecs and set it as outputworkspace
@@ -236,7 +236,7 @@ void LoadRaw3::exec()
 			Property* log = createPeriodLog(period+1);
 			if (log) sampleObj.addLogData(log);
 		}
-      }
+      }//end of if loop for loadlogfiles
       if (bseparateMonitors)
       {
        	  try
@@ -252,7 +252,7 @@ void LoadRaw3::exec()
 		  {
 			  g_log.information()<<"Separate Monitors option is selected,Error in creating one of the output workspaces"<<std::endl;
 		  }
-      }
+      }//end of separate Monitors
     }
 	//skipping the first spectra in each period
 	skipData(file, period * (m_numberOfSpectra + 1));
@@ -355,6 +355,7 @@ void LoadRaw3::excludeMonitors(FILE* file,const int& period,const std::vector<in
 */
 void LoadRaw3::includeMonitors(FILE* file,const int& period,DataObjects::Workspace2D_sptr ws_sptr)
 {
+	
 	int histCurrent = -1;
 	int wsIndex=0;
 	int histTotal = m_total_specs * m_numberOfPeriods;
@@ -391,6 +392,7 @@ void LoadRaw3::includeMonitors(FILE* file,const int& period,DataObjects::Workspa
          skipData(file, histToRead);
       }
     }
+	//loadSpectra(file,period,m_total_specs,ws_sptr,m_timeChannelsVec);
 }
 
 /** This method separates monitors and creates two outputworkspaces 
@@ -585,7 +587,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
 											  bool binclude,bool bexclude,bool bseparate,
 											  int m_numberOfSpectra,const std::string &fileName)
 {
-  //std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec;
+
   std::vector<int> monitorSpecList;
   std::vector<int> monitorwsList;
   DataObjects::Workspace2D_sptr monitorWorkspace;

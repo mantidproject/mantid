@@ -142,6 +142,9 @@ namespace Mantid
 	   /// calculate workspace sizes if separate or exclude monitors are selected
 	   void calculateWorkspacesizes(const std::vector<int>& monitorSpecList, 
                                     int& normalwsSpecs, int& monitorwsSpecs);
+	   /// load the specra
+	   void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
+								   DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
 	    /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?

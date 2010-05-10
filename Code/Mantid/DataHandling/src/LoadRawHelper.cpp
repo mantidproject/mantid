@@ -148,7 +148,7 @@ void  LoadRawHelper::setProtonCharge(API::Sample& sample)
   *@param noTimeRegimes number of time regime.
 
 */
-void LoadRawHelper::readworkspaceParameters(int& numberOfSpectra,int& numberOfPeriods,int& lengthIn,int& noTimeRegimes )
+void LoadRawHelper::readworkspaceParameters(int& numberOfSpectra,int& numberOfPeriods,int& lengthIn,int & noTimeRegimes )
 {
 	// Read in the number of spectra in the RAW file
   m_numberOfSpectra=numberOfSpectra = isisRaw->t_nsp1;
@@ -832,6 +832,7 @@ void LoadRawHelper::calculateWorkspacesizes(const std::vector<int>& monitorSpecL
   }
 
 }
+
 void LoadRawHelper::loadSpectra(FILE* file,const int& period,const int& total_specs,
 								 DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec)
 {
@@ -874,7 +875,6 @@ void LoadRawHelper::loadSpectra(FILE* file,const int& period,const int& total_sp
 	}
 
 }
-
 
 } // namespace DataHandling
 } // namespace Mantid

@@ -69,12 +69,10 @@ public:
     TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->dataY(2111).size() );
 
     // Check one particular value
-    //TS_ASSERT_EQUALS( output2D->dataY(999)[0], 0);
+    //TS_ASSERT_EQUALS( output2D->dataY(3)[0], 24);
     // Check that the error on that value is correct
-    //TS_ASSERT_EQUALS( output2D->dataE(999)[0], 3);
-    // Check that the error on that value is correct
-    //TS_ASSERT_EQUALS( output2D->dataX(999)[0], 554.1875);
-
+	TS_ASSERT_EQUALS( output2D->dataE(2)[0], std::sqrt(output2D->dataY(2)[0]));
+    
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF" )
     TS_ASSERT( ! output2D-> isDistribution() )
@@ -143,13 +141,7 @@ public:
     TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr5->dataX(1) )
     TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr6->dataX(1) )
 
-    // But the data should be different
-    /* TS_ASSERT_DIFFERS( outsptr1->dataY(1)[0], outsptr2->dataY(1)[0] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[0], outsptr3->dataY(1)[0] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[0], outsptr4->dataY(1)[0] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[0], outsptr5->dataY(1)[0] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[0], outsptr6->dataY(1)[0] )*/
-
+   
    TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
     TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr2->sample()))
