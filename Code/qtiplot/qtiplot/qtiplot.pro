@@ -100,11 +100,6 @@ unix:!macx {
 
 # dynamically link against dependencies if they are installed system-wide
 unix {
-  # MG: By default, ld populates the symbol table with only those referenced within the linked libraries.
-  # Given that Mantid uses dlopen it may not necessarily reference all symbols at link time. We therefore need to 
-  # ensure that the symbol table is populated with all symbols defined within the linked libraries.
-  QMAKE_LFLAGS += -Wl,--export-dynamic
-
   LIBS         += -lqscintilla2
   LIBS         += -lmuparser
 
@@ -114,6 +109,11 @@ macx {
   LIBS += -lqwtplot3d
   LIBS += -lboost_signals
 }else{
+  # MG: By default, ld populates the symbol table with only those referenced within the linked libraries.
+  # Given that Mantid uses dlopen it may not necessarily reference all symbols at link time. We therefore need to 
+  # ensure that the symbol table is populated with all symbols defined within the linked libraries.
+  QMAKE_LFLAGS += -Wl,--export-dynamic
+
   # Some systems have qwt and qwtplot3d-qt4 and others have -qt4 suffixes on both
   # and some in /usr/lib64 others /usr/lib
   # some systems also have a /usr/lib64 but are not 64 bit
