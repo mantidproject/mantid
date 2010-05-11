@@ -99,7 +99,7 @@
        <item row="0" column="0" colspan="2" >
         <widget class="QLabel" name="lbPrefix" >
          <property name="enabled" >
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="text" >
           <string>Instrument File Prefix</string>
@@ -109,7 +109,7 @@
        <item row="0" column="2" >
         <widget class="QComboBox" name="loadRun_cbInst" >
          <property name="enabled" >
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="sizePolicy" >
           <sizepolicy vsizetype="Fixed" hsizetype="Fixed" >
@@ -126,6 +126,21 @@
          <property name="editable" >
           <bool>true</bool>
          </property>
+         <item>
+          <property name="text" >
+           <string>MAR</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>MAP</string>
+          </property>
+         </item>
+         <item>
+          <property name="text" >
+           <string>MER</string>
+          </property>
+         </item>
         </widget>
        </item>
        <item row="0" column="3" colspan="3" >

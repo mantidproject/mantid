@@ -102,6 +102,7 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
 
   QString err;
 
+  m_pyScript.replace("|PREFIX|", m_sets.loadRun_cbInst->currentText());
   // here we are placing code directly into specified parts of the Python that will get run
   m_pyScript.replace("|GUI_SET_RAWFILE_LIST|", QString::fromStdString(inFiles));
   // these functions replace whole blocks of code
@@ -125,6 +126,8 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
   createOutputStatmens(WSName, m_pyScript);
   
   m_pyScript.replace("|TEMPWS|", tempWS);
+
+  std::cerr << m_pyScript.toStdString() << "\n";
 
   return WSName;
 }

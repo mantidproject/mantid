@@ -31,41 +31,45 @@ def stringToList(commaSeparated):
   return theList
     
 #sum all the workspaces, when the workspaces are not summed single input files are specified in this file and the final Python script is made of many copies of this file
-def sumWorkspaces(total, instrument, runNumbers):
+def sumWorkspaces(total, prefix, runNumbers):
   if len(runNumbers) > 1:
     tempWS = 'CommonFuncs_sumWorkspaces_tempory'
-    for toAdd in runNumbers[ 1 : ] :
-      instrument.loadRun(toAdd, tempWS)                               #workspaces are overwriten to save memory
+    for toAdd in runNumbers[1:]:
+      loadRun(prefix, toAdd, tempWS)
       Plus(total, tempWS, total)
-    mantid.deleteWorkspace(tempWS)                                    #from www.mantidproject.org/MantidPyFramework
+    mantid.deleteWorkspace(tempWS)
   
 #-- Functions to do with input files
 # uses the extension to decide whether use LoadNexus or LoadRaw
 def LoadNexRaw(filename, workspace):
   filename = filename.strip()                                                   #remove any white space from the front or end of the name
   # this removes everything after the last '.'  (rpartition always returns three strings)
-  extension = filename.rpartition('.')[2]
-  if (extension.lower() == 'nxs') :
+  partitions = filename.split('.')
+  if len(partitions) != 2:
+    raise RuntimeError('Incorrect filename format encountered "' + filename + '"')
+  extension = filename.split('.')[1]
+  if (extension.lower() == 'raw'):
+    loader = LoadRaw(filename, workspace)
+  elif (extension.lower() == 'nxs'):
     #return the first property from the algorithm, which for LoadNexus is the output workspace
-    return LoadNexus(filename, workspace)[0]
-  if (extension.lower() == 'raw') :
-    return LoadRaw(filename, workspace)[0]
-  #we shouldn't get to here, the function should have returned by now
-  raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")
+    loader = LoadNexus(filename, workspace)
+  else:
+    raise Exception("Could not find a load function for file "+filename+", *.raw and *.nxs accepted")
+  return loader.workspace(),loader.getPropertyValue("Filename")
 
 # guess the filename from run number using the instrument code
 def getFileName(instrumentPref, runNumber):
   runNumber = str(runNumber)
-  try :
-    number = int(runNumber, 10)
-  except TypeError :
+  try:
+    number = int(runNumber)
+  except ValueError:
     # means we weren't passed a number assume it is a valid file name and return it unprocessed
     return runNumber
   #only raw files are supported at the moment
   return instrumentPref + runNumber + '.raw'
 
-def loadRun(instru, runNum, workspace):
-  return LoadNexRaw(getFileName(instru, runNum), workspace)
+def loadRun(prefix, runNum, workspace):
+  return LoadNexRaw(getFileName(prefix, runNum), workspace)
   
 def loadMask(MaskFilename):
   inFile = open(MaskFilename)
@@ -75,7 +79,6 @@ def loadMask(MaskFilename):
     if len(numbers) > 0 :                                         # ignore empty lines
       if numbers[0][0].isdigit() :                                # any non-numeric character at the start of the line marks a comment, check the first character of the first word
         for specNumber in numbers :
-        
           if specNumber == '-' :
             spectraList[len(spectraList)-1] = spectraList + '-'   #if there is a hyphen we don't need commas 
           else : spectraList = spectraList + "," + specNumber
@@ -84,7 +87,7 @@ def loadMask(MaskFilename):
     mantid.sendLogMessage('Only comment lines found in mask file '+MaskFilename)
     return ''
   return spectraList[1:]                                          #return everything after the very first comma we added in the line above
-	
+
 def getRunName(path):
   # get the string after the last /
   filename = path.split('/')
@@ -95,10 +98,14 @@ def getRunName(path):
   # remove the last '.' and everything after it i.e. the extension. If there is not extension this just returns the whole thing
   return filename.rpartition('.')[0]
   
+def loadRun(prefix, runNum, workspace):
+    return LoadNexRaw(getFileName(prefix,runNum), workspace)
+
 #-- Holds data about the defaults used for diferent instruments (MARI, MAPS ...)
 class defaults:
   # set the defaults for a default machine. These default values for defaults won't work and so they must be overriden by the correct values for the machine when this is run
-  def __init__(self, background_range=(-1.0,-1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0,-1.0), scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5), white_beam_scale = 1.0):
+  def __init__(self, background_range=(-1.0,-1.0), normalization='not set', instrument_pref='', white_beam_integr=(-1.0,-1.0), \
+                scale_factor=1, monitor1_integr=(-1.0e5, -1.0e5), white_beam_scale = 1.0, getei_monitors = (-1,-1)):
     self.background_range=background_range
     self.normalization=normalization
     self.instrument_pref=instrument_pref
@@ -106,6 +113,7 @@ class defaults:
     self.scale_factor=scale_factor
     self.monitor1_integr=monitor1_integr
     self.white_beam_scale = white_beam_scale
+    self.getei_monitors = getei_monitors
       
   # guess the filename from run number assuming global_getFileName_instrument_pref is setup
   def getFileName(self, runNumber):
@@ -116,5 +124,3 @@ class defaults:
       return runNumber
     return getFileName(self.instrument_pref, number)
     
-  def loadRun(self, runNum, workspace):
-    return LoadNexRaw(self.getFileName(runNum), workspace)

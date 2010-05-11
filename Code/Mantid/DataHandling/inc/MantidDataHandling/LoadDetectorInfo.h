@@ -74,10 +74,6 @@ private:
   };
   /// will store a pointer to the user selected workspace
   DataObjects::Workspace2D_sptr m_workspace;
-  /// the instrument with in the user selected workspace
-  API::IInstrument_sptr m_instrument;
-  /// the map that stores additional properties for detectors
-  Geometry::ParameterMap *m_paraMap;
   /// number of histograms in the workspace
   int m_numHists;
   /// the detector IDs that are monitors, according to the raw file

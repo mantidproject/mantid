@@ -1,165 +1,134 @@
+"""Excitations analysis module
+"""
 from mantidsimple import *
 import CommonFunctions as common
-# these are the defaults for different instruments
-import ExcitDefaults
 import math
 
-def NormaliseTo(reference, WS, fromTOF, instrument=common.defaults()):
-  if (reference == 'monitor-monitor 1') :
-    if instrument.monitor1_integr[0] <= -1e5 or instrument.monitor1_integr[1] <= -1e5 :
-      raise Exception('Can\'t normalize to monitor1 without instrument defaults information')
-    min = instrument.monitor1_integr[0] - fromTOF
-    max = instrument.monitor1_integr[1] - fromTOF
-    NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=1, IntegrationRangeMin=min, IntegrationRangeMax=max,IncludePartialBins=True)
+# these are the defaults for different instruments. Need to be moved to parameter file
+import ExcitDefaults
 
-  elif reference == 'monitor-monitor 2' :
+def mono_sample(inst_prefix, run_nums, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', output_name = 'mono_sample_temporyWS') :
+  """
+  Calculate Ei and detector offsets for a mono-chromatic run.
+  """
+  run_nums = common.listToString(run_nums).split(',')
+  result_ws, det_eff_file = common.loadRun(inst_prefix,run_nums[0], output_name)
+  if result_ws.isGroup():
+    raise RunTimeError("Workspace groups are not supported here")
 
+  instrument = result_ws.getInstrument()
+  # The final workspace will take the X-values and instrument from the first workspace and so we don't need to rerun ChangeBinOffset(), MoveInstrumentComponent(), etc.
+  common.sumWorkspaces(result_ws, inst_prefix, run_nums)
+  if det_eff_file != '':
+    LoadDetectorInfo(result_ws, det_eff_file)
+
+  Ei, mon1_peak = calculateEi(result_ws, Ei, getEi,instrument)
+  bin_offset = -mon1_peak
+  
+  if back != 'noback':
+    TOFLow = instrument.getNumberParameter("bkgd-range-min")[0]
+    TOFHigh = instrument.getNumberParameter("bkgd-range-max")[0]
+    # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
+    ConvertToDistribution(result_ws)                                             
+    FlatBackground(result_ws, result_ws, TOFLow + bin_offset, TOFHigh + bin_offset, '', 'Mean')
+    ConvertFromDistribution(result_ws)
+
+  # deals with normalize to monitor (e.g.  norm = 'monitor-monitor 1'), current (if norm = 'protons (uAh)'), etc.
+  NormaliseTo(norma, result_ws, bin_offset, instrument)
+
+  ConvertUnits(result_ws, result_ws, 'DeltaE', 'Direct', Ei, AlignBins=0)
+
+  if d_rebin != '':
+    Rebin(result_ws, result_ws, common.listToString(d_rebin))
+ 
+  if det_eff_file != '':
+    DetectorEfficiencyCor(result_ws, result_ws, Ei)
+ 
+  if det_mask != '' :
+    MaskDetectors(Workspace=result_ws, SpectraList=common.listToString(det_mask))
+  
+  if det_map != '':
+    GroupDetectors(result_ws, result_ws, det_map, KeepUngroupedSpectra=0)
+  ConvertToDistribution(result_ws)
+  
+  NormaliseToWhiteBeam(wbrf, result_ws, det_map, det_mask, norma, inst_prefix, instrument)
+
+  # Overall scale factor
+  scale_factor = instrument.getNumberParameter("scale-factor")[0]
+  result_ws *= scale_factor
+  
+  return result_ws
+
+def calculateEi(input_ws, E_guess, getEi, instrument):
+  """
+  Calculate incident energy of neutrons
+  """
+  getEi = str(getEi).lower()
+  if getEi == 'fixei' or getEi == 'false':
+    fixei = True
+  else:
+    fixei = False
+  
+  monitor1_spec = int(instrument.getNumberParameter("ei-mon1-spec")[0])
+  monitor2_spec = int(instrument.getNumberParameter("ei-mon2-spec")[0])
+  
+  # Get incident energy
+  alg = GetEi(input_ws, monitor1_spec, monitor2_spec, E_guess,FixEi=fixei,AdjustBins=True)
+  mon1_peak = float(alg.getPropertyValue("FirstMonitorPeak"))
+  ei = float(input_ws.getSampleDetails().getLogData("Ei").value())
+
+  return ei, mon1_peak
+
+
+def NormaliseTo(scheme, data_ws, offset, instrument):
+
+  if scheme == 'monitor-monitor 1':
+    min = instrument.getNumberParameter("norm-mon1-min")[0]
+    max = instrument.getNumberParameter("norm-mon1-max")[0]
+    min += offset
+    max += offset
+    
+    mon_spec = int(instrument.getNumberParameter("norm-mon1-spec")[0])
+    NormaliseToMonitor( InputWorkspace=data_ws, OutputWorkspace=data_ws, MonitorSpectrum=mon_spec, IntegrationRangeMin=min, IntegrationRangeMax=max,IncludePartialBins=True)
+  elif scheme == 'monitor-monitor 2':
     PEAKWIDTH = 4.0/100
     # the origin of time was set to the location of the peak so to get it's area integrate around the origin, PEAKWIDTH fraction of total time of flight
     min = (-PEAKWIDTH/2)*20000
     max = (PEAKWIDTH/2)*20000
+    mon_spec = int(instrument.getNumberParameter("norm-mon2-spec")[0])
+    NormaliseToMonitor( InputWorkspace=data_ws, OutputWorkspace=data_ws, MonitorSpectrum=mon_spec, IntegrationRangeMin=min, IntegrationRangeMax=max,IncludePartialBins=True)
+  elif scheme == 'protons (uAh)':
+    NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=data_ws)
+  elif scheme == 'no normalization':
+    return
+  else:
+    raise RunTimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')
 
-    NormaliseToMonitor( InputWorkspace=WS, OutputWorkspace=WS, MonitorSpectrum=2, IntegrationRangeMin=min, IntegrationRangeMax=max)
-
-  elif reference == 'protons (uAh)' :
-    NormaliseByCurrent( InputWorkspace=WS, OutputWorkspace=WS )
-
-  elif reference != 'no normalization' :
-    raise Exception('Normalisation scheme ' + reference + ' not found. It must be one of monitor, current, peak or none')
-
-def NormaliseToWhiteBeam(instr, WBRun, toNorm, mapFile, detMask, prevNorm) :
-  theNorm = "_ETrans_norm_tempory_WS"
-  try:
-    pNorm = common.LoadNexRaw(instr.getFileName(WBRun), theNorm)
-    NormaliseTo(prevNorm, pNorm, 0, instr)
-
-    ConvertUnits(pNorm, pNorm, "Energy", AlignBins=0)
-    
-    #this both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
-    low = instr.white_beam_integr[0]
-    hi = instr.white_beam_integr[1]
-    delta = 2.0*(hi - low)
-    Rebin(pNorm, pNorm, str(low)+','+str(delta)+','+str(hi)  )
-
-    if detMask != '' :
-      MaskDetectors(pNorm, SpectraList=detMask)
-    
-    if mapFile!= "" :
-      GroupDetectors(pNorm, pNorm, mapFile, KeepUngroupedSpectra=0)
-
-    toNorm /= pNorm
+def NormaliseToWhiteBeam(WBRun, mono_ws, mapFile, detMask, scheme, prefix, instrument):
+  wbnorm_name = "_ETrans_norm_tempory_WS"
+  wbnorm_ws = common.LoadNexRaw(common.getFileName(prefix, WBRun), wbnorm_name)[0]
   
-  finally:
-    mantid.deleteWorkspace(theNorm)
+  NormaliseTo(scheme, wbnorm_ws, 0., instrument)
+  ConvertUnits(wbnorm_ws, wbnorm_ws, "Energy", AlignBins=0)
+  # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
+  low = instrument.getNumberParameter("wb-integr-min")[0]
+  hi = instrument.getNumberParameter("wb-integr-max")[0]
+  delta = 2.0*(hi - low)
+  Rebin(wbnorm_ws, wbnorm_ws, [low, delta, hi])
 
-# returns the background range from the string range, which could be two numbers separated by a comma or could be empty and then the default values in instrument are used. Another possiblity is that background correction isn't going to be done, then we don't have to do anything
-# throws if the string range is in the wrong format
-def getBackRange(range, instrument) :
-  if range == 'noback' :  return ['noback', 'noback']
-  # load the default time of flight values that delimit the background region
-  TOFLow = instrument.background_range[0]
-  TOFHigh = instrument.background_range[1]
-  if range != '' :
-    range = common.listToString(range)
-    strings = range.split(',')
-    TOFLow = float(strings[0])
-    TOFHigh = float(strings[1])
-  return [TOFLow, TOFHigh]
+  if detMask != '' :
+    MaskDetectors(wbnorm_ws, SpectraList=detMask)
   
-## return specified normalisation method or the default for the instrument if '' was passed
-def getNorm(instrument, normMethod):
-  if normMethod == '' : return instrument.normalization
-  return normMethod
+  if mapFile!= "" :
+    GroupDetectors(wbnorm_ws, wbnorm_ws, mapFile, KeepUngroupedSpectra=0)
 
-###--Read in user set parameters or defaults values---------------
-def retrieveSettings(instrum, back, runs):
-  instru = ExcitDefaults.loadDefaults(instrum)
+  # White beam scale factor
+  wb_scale_factor = instrument.getNumberParameter("wb-scale-factor")[0]
+  wbnorm_ws *= wb_scale_factor
+  mono_ws /= wbnorm_ws
   
-  run_nums = common.listToString(runs).split(',')
-  try:
-    [TOFLow, TOFHigh] = getBackRange(back, instru)
-  except:
-    raise Exception('The background range must be specified as a string\n of two numbers separated by a comma specifing the range\nor noback to disable background correction')
-  
-  return (instru, TOFLow, TOFHigh, run_nums)
+  mtd.deleteWorkspace(wbnorm_name)
+  return
 
-def findPeaksOffSetTimeAndEi(workS, E_guess, getEi=True, detInfoFile=''):
-  if detInfoFile != '' :
-    LoadDetectorInfo(workS, detInfoFile)             				                  #for details see www.mantidproject.org/LoadDetectorInfo
-
-  runGetEi = str(getEi).lower() != 'fixei' and str(getEi).lower() != 'false'
-  if not runGetEi :
-    mtd.sendLogMessage('Getting peak times (the GetEi() energy will be overriden by '+str(E_guess)+' meV)')
-    
-  # Get incident energy
-  GetEiData = GetEi(workS, 2, 3, E_guess)
-
-  if runGetEi : Ei = GetEiData.getPropertyValue('IncidentEnergy')
-  else : Ei = E_guess
-  
-  offSetTime=float(GetEiData.getPropertyValue('FirstMonitorPeak'))             # set the origin of time to be when the neutrons arrive at the first GetEi monitor (often called monitor 2)
-  ChangeBinOffset(workS, workS, -offSetTime)
-
-  #??STEVES?? MARI specfic code GetEiData.FirstMonitor ?
-  p0=workS.getDetector(1).getPos()                                              # set the source to be where the neutrons were at the origin of time (that first GetEi monitor)
-  mtd.sendLogMessage('Adjusting the X-values so that the zero of time is when the peak was registered at the new origin , which monitor 2')
-  src = workS.getInstrument().getSource().getName()                             #this name could be 'Moderator',  'undulator', etc.
-  MoveInstrumentComponent(workS, src, X=p0.getX() , Y=p0.getY() ,Z=p0.getZ(), RelativePosition=False)
-  return Ei, offSetTime
-  
 # a workspace name that is very long and unlikely to have been created by the user before this script is run, it would be replaced  
 tempWS = '_ETrans_loading_tempory_WS'
-
-###########################################
-# Applies unit conversion, detector convcy and grouping correction to a
-# raw file
-###########################################
-def mono_sample(instrum, runs, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', nameInOut = 'mono_sample_temporyWS') :
-  (instru, TOFLow, TOFHigh, run_nums) = retrieveSettings(instrum, back, runs)
-
-  #----Calculations start------------------
-  try:
-    pInOut = instru.loadRun(run_nums[0], nameInOut)                             #this new workspace is accessed by its name nameInOut = 'mono_sample_temporyWS' or pInOut (a pointer)
-    if pInOut.isGroup() : raise Exception("Workspace groups are not supported here")
-
-    common.sumWorkspaces(pInOut, instru, run_nums)                              #the final workspace will take the X-values and instrument from the first workspace and so we don't need to rerun ChangeBinOffset(), MoveInstrumentComponent(), etc.
-    Ei, offSet = findPeaksOffSetTimeAndEi(pInOut, Ei, getEi, instru.getFileName(run_nums[0]))
- 
-    if back != 'noback':                                                        #remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
-      ConvertToDistribution(pInOut)                                             #deal correctly with changing bin widths
-      FlatBackground(pInOut, pInOut, TOFLow-offSet, TOFHigh-offSet, '', 'Mean') #the TOFs in the workspace were offset in a command above so we must take care referring to times now 
-      ConvertFromDistribution(pInOut)                                           #some algorithms later can't deal with distributions
-  
-    # deals with normalize to monitor (e.g.  norm = 'monitor-monitor 1'), current (if norm = 'protons (uAh)'), etc.
-    NormaliseTo(getNorm(instru, norma), pInOut, offSet, instru)
-
-    ConvertUnits(pInOut, pInOut, 'DeltaE', 'Direct', Ei, AlignBins=0)
-    
-    if d_rebin != '':
-      Rebin(pInOut, pInOut, common.listToString(d_rebin))
- 
-    DetectorEfficiencyCor(pInOut, pInOut, Ei)
- 
-    if det_mask != '' :
-      MaskDetectors(Workspace=pInOut, SpectraList=common.listToString(det_mask))
-    
-    if det_map != '':
-      GroupDetectors(pInOut, pInOut, det_map, KeepUngroupedSpectra=0)
-
-    ConvertToDistribution(pInOut)
-    pInOut *= instru.scale_factor 
-    
-    #replaces inifinities and error values with large numbers. Infinity values can be normally be avoided passing good energy values to ConvertUnits
-    ReplaceSpecialValues(pInOut, pInOut, 1e40, 1e40, 1e40, 1e40)
-
-    NormaliseToWhiteBeam(instru, wbrf, pInOut, det_map, det_mask, norma)
-    pInOut /= instru.white_beam_scale
-    
-    return pInOut
-
-  except Exception, reason:
-    # delete the possibly part finished workspaces
-    for workspace in mantid.getWorkspaceNames() :
-      if (workspace == nameInOut) : mantid.deleteWorkspace(nameInOut)
-      if (workspace == tempWS) : mantid.deleteWorkspace(tempWS)
-    print reason

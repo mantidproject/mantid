@@ -3,6 +3,7 @@
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
+#include <numeric>
 #include <iostream>
 
 namespace Mantid
@@ -281,6 +282,27 @@ void rebinHistogram(const std::vector<double>& xold, const std::vector<double>& 
   }
 
   return;
+}
+
+/**
+ * Convert the given set of bin boundaries into bin centre values
+ * @param bin_edges A vector of values specifying bin boundaries
+ * @param bin_centres An output vector of bin centre values.
+*/
+void convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres)
+{
+  const std::vector<double>::size_type npoints = bin_edges.size();
+  if( bin_centres.size() != npoints )
+  {
+    bin_centres.resize(npoints);
+  }
+
+  // The custom binary function modifies the behaviour of the algorithm to compute the average of
+  // two adjacent bin boundaries
+  std::adjacent_difference(bin_edges.begin(), bin_edges.end(), bin_centres.begin(), SimpleAverage<double>());
+  // The algorithm copies the first element of the input to the first element of the output so we need to 
+  // remove the first element of the output
+  bin_centres.erase(bin_centres.begin());
 }
 
 } // End namespace VectorHelper

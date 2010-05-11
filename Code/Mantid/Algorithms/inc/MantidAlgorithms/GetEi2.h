@@ -5,11 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument/ParametrizedComponent.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include <vector>
-#include <string>
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -53,9 +49,8 @@ namespace Algorithms
     class DLLExport GetEi2 : public API::Algorithm
     {
     public:
-      /// empty contructor calls the base class constructor
-      GetEi2() : Algorithm(), m_mon_indices() {}
-
+      /// Default constructor
+      GetEi2();
       /// Initialize the algorithm
       void init();
       /// Execute the algorithm
@@ -69,30 +64,48 @@ namespace Algorithms
       virtual const std::string category() const{return "CorrectionFunctions";}
 
     private:
-      void advanceProgress(double toAdd);
-      void getGeometry(DataObjects::Workspace2D_const_sptr WS, double &monitor0Dist, double &monitor1Dist) const;
-      double timeToFly(double s, double E_KE) const;
-      double getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime);
-      void extractSpec(int specInd, double start = -1.0, double end = -1.0);
-      double getPeakFirstMoments(API::MatrixWorkspace_sptr WS, const double tMin, const double tMax);
-      void regroup(double xmin, double delta, double xmax, const MantidVec &x, const MantidVec &y, const MantidVec &e, MantidVec& xnew, MantidVec& ynew, MantidVec& enew);
-      void getPeakMean(const MantidVec& Xs, const MantidVec& Ys, const MantidVec& Es, const double prominence, double &area, double &c, double &c_fwhm, double &w, double &xbar);
-      void integrate(double &bkgd_m, double &bkgd_err_m, const MantidVec &x, const MantidVec &y, const MantidVec &e, const double start, const double end);
-      API::MatrixWorkspace_sptr smooth(API::MatrixWorkspace_sptr WS);
-      API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr WS, const double first, const double width, const double end);
-      double neutron_E_At(double speed) const;
-      /// An estimate of the percentage of the algorithm runtimes that has been completed 
-      double m_fracCompl;
-      /// name of the tempory workspace that we create and will contain the monitor histogram that we're examining
-      API::MatrixWorkspace_sptr m_tempWS;
-      /// Workspace indices for the monitors
-      std::vector<int> m_mon_indices;
+      /// Calculate Ei from the initial guess given
+      double calculateEi(const double initial_guess);
+      /// Get the distance from the source of the detector at the workspace index given
+      double getDistanceFromSource(const int ws_index) const;
+      /// Calculate the peak position within the given window
+      double calculatePeakPosition(const int ws_index, const double t_min, const double t_max);
+      /// Extract the required spectrum from the input workspace
+      API::MatrixWorkspace_sptr extractSpectrum(const int ws_index, const double start, const double end);
+      /// Calculate peak width
+      double calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws, const double prominence,
+                                            std::vector<double> & peak_x, std::vector<double> & peak_y, std::vector<double> & peak_e) const;
+      /// Calculate the value of the first moment of the given spectrum
+      double calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws, const double prominence);
+      /// Rebin the given workspace using the given parameters
+      API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr input_ws, const double first, const double width, const double end);
+      /// Integrate the point data
+      void integrate(double &integral_value, double &integral_err, const MantidVec &x, const MantidVec &y, const MantidVec &e, const double xmin, const double xmax) const;
+      /// Offset the bins on the input workspace by the calculated time of the first monitor peak
+      void applyBinOffset();
+      /// Move the source of neutrons to the position defined by the first input monitor
+      void moveNeutronSource();
+      /// Store the incident energy within the sample object
+      void storeEi(const double ei) const;
 
-      // for estimating algorithm progress
-      static const double CROP;                                ///< fraction of algorithm time taken up with running CropWorkspace
-      static const double GET_COUNT_RATE;                      ///< fraction of algorithm taken by a single call to ConvertToDistribution
-      static const double FIT_PEAK;                            ///< fraction required to find a peak
-
+      /// The input workspace
+      API::MatrixWorkspace_sptr m_input_ws;
+      /// The calculated position of the first peak
+      std::pair<int, double> m_peak1_pos;
+      /// True if the Ei should be fixed at the guess energy
+      bool m_fixedei;
+      /// Conversion factor between time and energy
+      double m_t_to_mev; 
+      /// The percentage deviation from the estimated peak time that defines the peak region 
+      const double m_tof_window;
+      /// Number of std deviations to consider a peak
+      const double m_peak_signif;
+      /// Number of std deviations to consider a peak for the derivative
+      const double m_peak_deriv;
+      /// The fraction of the peak width for the new bins
+      const double m_binwidth_frac;
+      /// The fraction of the peakwidth to use in calculating background points
+      const double m_bkgd_frac;
     };
 
 } // namespace Algorithms

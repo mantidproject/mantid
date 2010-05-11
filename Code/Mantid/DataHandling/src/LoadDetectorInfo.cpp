@@ -27,7 +27,7 @@ const LoadDetectorInfo::detectDatForm
   LoadDetectorInfo::MAPS_MER_TYPE(14, 11, 12);
 /// Empty default constructor
 LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
-  m_workspace(), m_instrument(), m_paraMap(NULL), m_numHists(-1), m_monitors(),
+  m_workspace(), m_numHists(-1), m_monitors(),
   m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_error(false),
   m_FracCompl(0.0)
 {
@@ -64,8 +64,6 @@ void LoadDetectorInfo::exec()
 {
   // get the infomation that will be need from the user selected workspace, assume it exsists because of the validator in init()
   m_workspace = getProperty("Workspace");
-  m_instrument = m_workspace->getInstrument();
-  m_paraMap = &(m_workspace->instrumentParameters());
   m_numHists = m_workspace->getNumberHistograms();
   // when we change the X-values will care take to maintain sharing. I have only implemented maintaining sharing where _all_ the arrays are initiall common
   m_commonXs = WorkspaceHelpers::sharedXData(m_workspace);
@@ -382,31 +380,43 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 */
 void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInfo &change)
 {
-  IComponent* baseComp = NULL;
+  Geometry::IDetector_sptr det;
   try
-  {// there are often exceptions caused by detectors not being listed in the instrument file
-    Geometry::IDetector_sptr det = m_instrument->getDetector(params.detID);
-    baseComp = det->getComponent();
+  {
+    det = m_workspace->getInstrument()->getDetector(params.detID);
   }
   catch( std::runtime_error &e)
-  {// when detector information is incomplete there are a range of exceptions you can get, I think none of which should kill the algorithm
+  {
     throw Exception::NotFoundError(e.what(), params.detID);
   }
 
+  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
+  IComponent* comp = det->getComponent();
   // set the detectors pressure, first check if it already has a setting, if not add it
-  Parameter_sptr setting = m_paraMap->get(baseComp, "3He(atm)");
-  if (setting) setting->set(params.pressure);
+  Parameter_sptr setting = pmap.get(comp, "3He(atm)");
+  if (setting)
+  {
+    setting->set(params.pressure);
+  }
   else
-    m_paraMap->add("double", baseComp, "3He(atm)", params.pressure);
+  {
+    pmap.add("double", comp, "3He(atm)", params.pressure);
+  }
 
-  setting = m_paraMap->get(baseComp, "wallT(m)");
-  if (setting) setting->set(params.wallThick);
+  setting = pmap.get(comp, "wallT(m)");
+  if (setting)
+  {
+    setting->set(params.wallThick);
+  }
   else
-    m_paraMap->add("double", baseComp, "wallT(m)", params.wallThick);
+  {
+    pmap.add("double", comp, "wallT(m)", params.wallThick);
+  }
 
   // this operation has been successful if we are here, the following infomation is usefull for logging
   change = params;
 }
+
 /** Decides if the bin boundaries for all non-monitor spectra will be the same and runs the appropiate
 *  function. It is possible for this function to set all detectors spectra X-values when they shouldn't
 *  @param lastOffset the delay time of the last detector is only used if differentDelays is false or if detectID and delays are leave empty e.g. when we use common bins

@@ -30,10 +30,6 @@ using namespace Mantid::Kernel;
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::CustomInterfaces;
 
-//these two defaults will be removed when other instruments are supported
-static const QString G_INSTRUMENT("MAR");
-static const QString G_DEFAULT_MAP_FILE("mari_res.map");
-
 //default values
 static const int G_NUM_NORM_SCHEMES = 3;
 static const QString G_NORM_SCHEMES[G_NUM_NORM_SCHEMES] = 
@@ -101,22 +97,14 @@ void Homer::pythonIsRunning(bool running)
 *  and set the current text to the one that was passed
 */
 QString Homer::setUpInstru()
-//??STEVES?? move this function to a File widget
-{ // if there were no previously used instruments the "" below adds a blank entry. The empty string entry will always be there, even as more instruments are added
-  QStringList prevInstrus =
-    m_prev.value("CustomInterfaces/Homer/instrusList","").toStringList();
-
-	/*??STEVES ?? get rid of this when more instruments are supported*/if ( ! prevInstrus.contains(G_INSTRUMENT) ) prevInstrus.prepend(G_INSTRUMENT);
-  QStringList::const_iterator instru = prevInstrus.begin();
-  for ( ; instru != prevInstrus.end(); ++instru )
+{ 
+  QString curInstru = m_prev.value("CustomInterfaces/Homer/instrument", "").toString();
+  int index = m_uiForm.loadRun_cbInst->findText(curInstru);
+  if( index < 0 )
   {
-    m_uiForm.loadRun_cbInst->addItem(*instru);
+    index = 0;
   }
-  
-  QString curInstru
-    = m_prev.value("CustomInterfaces/Homer/instrument", G_INSTRUMENT).toString();
-  m_uiForm.loadRun_cbInst->setEditText(curInstru);
-  
+  m_uiForm.loadRun_cbInst->setCurrentIndex(index);
   return curInstru;
 }
 /// For each widgets in the first tab this adds custom widgets, fills in combination boxes and runs setToolTip()
@@ -234,8 +222,7 @@ void Homer::page1Defaults()
   m_prev.setValue("TOFend",
     m_prev.value("TOFend", G_END_WINDOW_TOF).toDouble());
 
-  m_uiForm.map_fileInput_leName->setText(
-    m_prev.value("map", G_DEFAULT_MAP_FILE).toString());
+  //m_uiForm.map_fileInput_leName->setText(m_prev.value("map", G_DEFAULT_MAP_FILE).toString());
 }
 /// make validator labels and associate them with the controls that need them in the first tab
 void Homer::page1Validators()

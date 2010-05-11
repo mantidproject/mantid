@@ -51,6 +51,9 @@ namespace VectorHelper
   void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
           const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
 
+  /// Convert an array of bin boundaries to bin centre values.
+  void DLLExport convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
+
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
   {
@@ -117,6 +120,17 @@ namespace VectorHelper
 			return l/r;
 		}
 	};
+
+  /// A binary functor to compute the simple average of 2 numbers
+  template <class T> struct SimpleAverage: public std::binary_function<T,T,T>
+  {
+    SimpleAverage() {}
+    /// Return the average of the two arguments
+    T operator()(const T & x, const T & y) const
+    {
+      return 0.5 * (x + y);
+    }
+  };
 
 } // namespace VectorHelper
 } // namespace Kernel
