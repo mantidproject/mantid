@@ -58,10 +58,20 @@ public:
 	QString saveCurveLayout();
 	void restoreCurveLayout(const QStringList& lst);
 
+  // remove this curve form the graph (and delete from memory)
+  void removeMe(){emit removeMe(this);}
+
+  // to be called only by Plot before deleting the curve
+  void aboutToBeDeleted();
+
 signals:
 
+  // fired to tell the owing plot to remove it
   void removeMe(PlotCurve*);
   void dataUpdated();
+  // fired to indicate that this curve is about to be deleted from memory
+  // and any reference to it must be invalidated
+  void forgetMe(PlotCurve*);
 
 protected:
 	int d_type;

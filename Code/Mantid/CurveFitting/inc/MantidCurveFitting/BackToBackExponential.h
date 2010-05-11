@@ -66,7 +66,7 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "BackToBackExponential";}
-      virtual void function(double* out, const double* xValues, const int& nData);
+      virtual void function(double* out, const double* xValues, const int& nData)const;
       virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
     protected:

@@ -35,7 +35,7 @@ public:
 
   std::string name()const{return "Gauss";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double c = getParameter("c");
     double h = getParameter("h");
@@ -105,7 +105,7 @@ public:
 
   std::string name()const{return "Linear";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -139,7 +139,7 @@ public:
 
   std::string name()const{return "Cubic";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");

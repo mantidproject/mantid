@@ -213,7 +213,7 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
 
 }
 
-void IkedaCarpenterPV::function(double* out, const double* xValues, const int& nData)
+void IkedaCarpenterPV::function(double* out, const double* xValues, const int& nData)const
 {
     const double& I = getParameter("I");
     const double& alpha0 =getParameter("Alpha0");

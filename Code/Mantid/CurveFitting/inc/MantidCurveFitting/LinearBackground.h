@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Function.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
 
 namespace Mantid
 {
@@ -43,7 +43,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LinearBackground : public API::Function
+    class DLLExport LinearBackground : public BackgroundFunction
     {
     public:
       /// Destructor
@@ -51,8 +51,10 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "LinearBackground";}
-      virtual void function(double* out, const double* xValues, const int& nData);
+      virtual void function(double* out, const double* xValues, const int& nData)const;
       virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
+
+      void fit(const std::vector<double>& X,const std::vector<double>& Y);
 
     protected:
       /// overwrite IFunction base class method, which declare function parameters

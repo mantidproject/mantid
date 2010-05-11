@@ -10,6 +10,7 @@
 #include <boost/shared_array.hpp>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 namespace Mantid
 {
@@ -109,7 +110,7 @@ std::string CompositeFunction::asString()const
 }
 
 /// Function you want to fit to.
-void CompositeFunction::function(double* out, const double* xValues, const int& nData)
+void CompositeFunction::function(double* out, const double* xValues, const int& nData)const
 {
   if (nData <= 0) return;
   boost::shared_array<double> tmpOut(new double[nData]);
@@ -528,6 +529,20 @@ void CompositeFunction::removeFunction(int i, bool del)
   {
     delete fun;
   }
+}
+
+/** Replace a function with a new one. The old function is deleted.
+ * @param f_old The pointer to the function to replace. If it's not
+ *  a member of this composite function nothing happens
+ * @param f_new A pointer to the new function
+ */
+void CompositeFunction::replaceFunction(const IFunction* f_old,IFunction* f_new)
+{
+  std::vector<IFunction*>::const_iterator it = 
+    std::find(m_functions.begin(),m_functions.end(),f_old);
+  if (it == m_functions.end()) return;
+  int iFun = it - m_functions.begin();
+  replaceFunction(iFun,f_new);
 }
 
 /** Replace a function with a new one. The old function is deleted.

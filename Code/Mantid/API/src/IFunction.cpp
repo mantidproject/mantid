@@ -25,6 +25,17 @@ namespace API
 {
 Kernel::Logger& IFunction::g_log = Kernel::Logger::get("IFunction");
 
+/**
+ * Destructor
+ */
+  IFunction::~IFunction()
+  {
+    if (m_handler)
+    {
+      delete m_handler;
+    }
+  }
+
 /** Base class implementation of derivative IFunction throws error. This is to check if such a function is provided
     by derivative class. In the derived classes this method must return the derivatives of the resuduals function
     (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
@@ -325,6 +336,19 @@ std::string IFunction::asString()const
   return ostr.str();
 }
 
+/** Set a function handler
+ * @param handler A new handler
+ */
+void IFunction::setHandler(FunctionHandler* handler)
+{
+  m_handler = handler;
+  if (handler && handler->function() != this)
+  {
+    throw std::runtime_error("Function handler points to a different function");
+  }
+  m_handler->init();
+}
+
 /**
  * Operator <<
  * @param ostr The output stream
@@ -335,6 +359,7 @@ std::ostream& operator<<(std::ostream& ostr,const IFunction& f)
   ostr << f.asString();
   return ostr;
 }
+
 
 } // namespace API
 } // namespace Mantid

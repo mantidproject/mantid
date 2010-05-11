@@ -27,7 +27,7 @@ public:
 
   std::string name()const{return "ResolutionTest_Gauss";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double c = getParameter("c");
     double h = getParameter("h");

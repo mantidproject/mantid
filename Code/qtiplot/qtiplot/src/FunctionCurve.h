@@ -50,6 +50,7 @@ public:
   FunctionCurve(const Mantid::API::IFunction* fun, 
     const QString& wsName, int wsIndex = 0, const QString& name = QString());
 	FunctionCurve(const FunctionCurve& c);
+  ~FunctionCurve();
 
   PlotCurve* clone()const{return new FunctionCurve(*this);}
 

@@ -1,4 +1,5 @@
 #include "FitPropertyBrowser.h"
+#include "PropertyHandler.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -9,6 +10,8 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/LibraryManager.h"
 
 #include "FilenameEditorFactory.h"
 
@@ -34,9 +37,33 @@
  * @param parent The parent widget - must be an ApplicationWindow
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget* parent)
-:QDockWidget("Fit Function",parent),m_currentFunction(0),m_compositeFunction(0),m_defaultFunction("Gaussian"),m_default_width(0),
-m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWindow((ApplicationWindow*)parent)
+:QDockWidget("Fit Function",parent),
+m_appWindow((ApplicationWindow*)parent),
+m_currentHandler(0),
+m_compositeFunction(0),
+m_defaultFunction("Gaussian"),
+m_guessOutputName(true),
+m_changeSlotsEnabled(false),
+m_peakToolOn(false),
+m_auto_back(false),
+m_autoBgName(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground")),
+m_autoBackground(NULL)
 {
+  if (QString::fromStdString(m_autoBgName).toLower() == "none")
+  {
+    m_autoBgName = "";
+  }
+  else
+  {
+    // Make sure plugins are loaded
+    std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
+    if( !libpath.empty() )
+    {
+      int loaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
+    }
+    setAutoBackgroundName(m_autoBgName);
+  }
+
   setObjectName("FitFunction"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
   setMinimumWidth(200);
@@ -145,12 +172,90 @@ m_guessOutputName(true),m_changeSlotsEnabled(true),m_peakToolOn(false),m_appWind
 
   createCompositeFunction();
 
+  m_changeSlotsEnabled = true;
+
 }
 
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser()
 {
   if (m_compositeFunction) delete m_compositeFunction;
+}
+
+/// Get handler to the root composite function
+PropertyHandler* FitPropertyBrowser::getHandler()const
+{
+  return static_cast<PropertyHandler*>(m_compositeFunction->getHandler());
+}
+
+PropertyHandler* FitPropertyBrowser::addFunction(const std::string& fnName)
+{
+  return getHandler()->addFunction(fnName);
+}
+
+/** Slot. Called to add a new function
+ */
+void FitPropertyBrowser::addFunction()
+{
+  QtBrowserItem * ci = m_browser->currentItem();
+  // Find the function which has ci as its top browser item 
+  const Mantid::API::CompositeFunction* cf = getHandler()->findCompositeFunction(ci);
+  if ( !cf ) return;
+  int i = m_registeredFunctions.indexOf(QString::fromStdString(m_defaultFunction));
+  bool ok = false;
+  QString fnName = 
+    QInputDialog::getItem(this, "MantidPlot - Fit", "Select function type", m_registeredFunctions,i,false,&ok);
+  if (ok)
+  {
+    PropertyHandler* h = getHandler()->findHandler(cf);
+    h->addFunction(fnName.toStdString());
+  }
+}
+
+/// Create CompositeFunction
+void FitPropertyBrowser::createCompositeFunction(const QString& str)
+{
+ if (m_compositeFunction)
+  {
+    emit functionRemoved();
+    delete m_compositeFunction;
+    m_autoBackground = NULL;
+  }
+  if (str.isEmpty())
+  {
+    m_compositeFunction = new Mantid::API::CompositeFunction();
+  }
+  else
+  {
+    Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(str.toStdString());
+    if (!f)
+    {
+      createCompositeFunction();
+      return;
+    }
+    Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f);
+    if (!cf)
+    {
+      m_compositeFunction = new Mantid::API::CompositeFunction();
+      m_compositeFunction->addFunction(f);
+    }
+    else
+    {
+      m_compositeFunction = cf;
+    }
+  }
+  setWorkspace(m_compositeFunction);
+
+  PropertyHandler* h = new PropertyHandler(m_compositeFunction,NULL,this);
+  m_compositeFunction->setHandler(h);
+
+  if (m_auto_back)
+  {
+    addAutoBackground();
+  }
+
+  disableUndo();
+  setFitEnabled(false);
 }
 
 void FitPropertyBrowser::popupMenu(const QPoint &)
@@ -163,8 +268,15 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
   bool isFunctionsGroup = ci == m_functionsGroup;
   bool isSettingsGroup = ci == m_settingsGroup;
   bool isASetting = ci->parent() == m_settingsGroup;
-  bool isFunction = m_functionItems.contains(ci);
-  bool isCompositeFunction = isFunction && dynamic_cast<Mantid::API::CompositeFunction*>(m_functionItems[ci]);
+  bool isFunction = getHandler()->findFunction(ci) != NULL;
+  bool isCompositeFunction = isFunction && getHandler()->findCompositeFunction(ci);
+
+  if (!isFunction)
+  {
+    const Mantid::API::IFunction* h = getHandler()->findFunction(ci);
+  }
+
+  PropertyHandler* h = getHandler()->findHandler(ci->property());
 
   if (isFunctionsGroup)
   {
@@ -172,9 +284,21 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
     connect(action,SIGNAL(triggered()),this,SLOT(addFunction()));
     menu->addAction(action);
 
-    action = new QAction("Plot",this);
-    connect(action,SIGNAL(triggered()),this,SLOT(plotGuessAll()));
-    menu->addAction(action);
+    if (m_peakToolOn)
+    {
+      if (h && h->hasPlot())
+      {
+        action = new QAction("Remove plot",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(removeGuessAll()));
+        menu->addAction(action);
+      }
+      else
+      {
+        action = new QAction("Plot",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(plotGuessAll()));
+        menu->addAction(action);
+      }
+    }
 
     menu->addSeparator();
 
@@ -232,17 +356,25 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
 
     if (m_peakToolOn)
     {
-      action = new QAction("Plot",this);
-      connect(action,SIGNAL(triggered()),this,SLOT(plotGuessCurrent()));
-      menu->addAction(action);
+      if (h && h->hasPlot())
+      {
+        action = new QAction("Remove plot",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(removeGuessCurrent()));
+        menu->addAction(action);
+      }
+      else
+      {
+        action = new QAction("Plot",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(plotGuessCurrent()));
+        menu->addAction(action);
+      }
     }
 
     menu->addSeparator();
   }
-  else
+  else if (h)
   {
-
-    bool isParameter = m_functionItems.contains(ci->parent());
+    bool isParameter = h->isParameter(ci->property());
     bool isTie = !isParameter && ci->property()->propertyName() == "Tie";
     bool isLowerBound = !isParameter && ci->property()->propertyName() == "Lower Bound";
     bool isUpperBound = !isParameter && ci->property()->propertyName() == "Upper Bound";
@@ -265,87 +397,62 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
       connect(action,SIGNAL(triggered()),this,SLOT(removeBounds()));
       menu->addAction(action);
     }
-    //else if (isUpperBound)
-    //{
-    //  action = new QAction("Remove",this);
-    //  connect(action,SIGNAL(triggered()),this,SLOT(removeUpperBound()));
-    //  menu->addAction(action);
-    //}
     else if (count() > 0 && isParameter)
     {
-      bool noTies =  !hasTie(ci->property());
-      bool hasLower = false;
-      bool hasUpper = false;
+      bool hasTies;
+      bool hasBounds;
+      hasConstraints(ci->property(),hasTies,hasBounds);
 
-      QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator c = m_constraints.find(ci->property());
-      if (c != m_constraints.end())
-      {
-        hasLower = c.value().first != 0;
-        hasUpper = c.value().second != 0;
-      }
-      bool hasBounds = hasLower || hasUpper;
-
-      if (noTies && !hasBounds)
+      if (!hasTies && !hasBounds)
       {
         action = new QAction("Fix",this);
         connect(action,SIGNAL(triggered()),this,SLOT(addFixTie()));
         menu->addAction(action);
       }
 
-      if (noTies && (!hasLower || !hasUpper))
+      if (!hasTies)
       {
         QMenu *constraintMenu = menu->addMenu("Constraint");
 
-        if (!hasLower)
-        {
-          QMenu* detailMenu = constraintMenu->addMenu("Lower Bound");
+        QMenu* detailMenu = constraintMenu->addMenu("Lower Bound");
 
-          action = new QAction("10%",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound10()));
-          detailMenu->addAction(action);
+        action = new QAction("10%",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound10()));
+        detailMenu->addAction(action);
 
-          action = new QAction("50%",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound50()));
-          detailMenu->addAction(action);
+        action = new QAction("50%",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound50()));
+        detailMenu->addAction(action);
 
-          action = new QAction("Custom",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound()));
-          detailMenu->addAction(action);
-        }
+        action = new QAction("Custom",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addLowerBound()));
+        detailMenu->addAction(action);
+        detailMenu = constraintMenu->addMenu("Upper Bound");
 
-        if (!hasUpper)
-        {
-          QMenu* detailMenu = constraintMenu->addMenu("Upper Bound");
+        action = new QAction("10%",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound10()));
+        detailMenu->addAction(action);
 
-          action = new QAction("10%",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound10()));
-          detailMenu->addAction(action);
+        action = new QAction("50%",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound50()));
+        detailMenu->addAction(action);
 
-          action = new QAction("50%",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound50()));
-          detailMenu->addAction(action);
+        action = new QAction("Custom",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound()));
+        detailMenu->addAction(action);
+        detailMenu = constraintMenu->addMenu("Both Bounds");
 
-          action = new QAction("Custom",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addUpperBound()));
-          detailMenu->addAction(action);
-        }
+        action = new QAction("10%",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds10()));
+        detailMenu->addAction(action);
 
-        if (!hasLower && !hasUpper)
-        {
-          QMenu* detailMenu = constraintMenu->addMenu("Both Bounds");
+        action = new QAction("50%",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds50()));
+        detailMenu->addAction(action);
 
-          action = new QAction("10%",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds10()));
-          detailMenu->addAction(action);
-
-          action = new QAction("50%",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds50()));
-          detailMenu->addAction(action);
-
-          action = new QAction("Custom",this);
-          connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds()));
-          detailMenu->addAction(action);
-        }
+        action = new QAction("Custom",this);
+        connect(action,SIGNAL(triggered()),this,SLOT(addBothBounds()));
+        detailMenu->addAction(action);
       }
 
       if (hasBounds)
@@ -355,7 +462,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
         menu->addAction(action);
       }
 
-      if (noTies && !hasBounds)
+      if (!hasTies && !hasBounds)
       {
         if (count() == 1)
         {
@@ -376,7 +483,7 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
           detail->addAction(action);
         }
       }
-      else if (!noTies)
+      else if (hasTies)
       {
         action = new QAction("Remove tie",this);
         connect(action,SIGNAL(triggered()),this,SLOT(deleteTie()));
@@ -388,258 +495,22 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
   menu->popup(QCursor::pos());
 }
 
-/**
- * Creates a new function. 
- * @param fnName A registered function name
+/** Slot. Called to remove a function
  */
-Mantid::API::IFunction* FitPropertyBrowser::addFunction(const std::string& fnName, Mantid::API::CompositeFunction* cfun)
+void FitPropertyBrowser::deleteFunction()
 {
-
-  disableUndo();
-  Mantid::API::IFunction* f = 0;
-  if (fnName.find("=") == std::string::npos)
+  QtBrowserItem* ci = m_browser->currentItem();
+  PropertyHandler* h = getHandler()->findHandler(ci->property());
+  if (h)
   {
-    f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
-    f->initialize();
-  }
-  else
-  {
-    f = Mantid::API::FunctionFactory::Instance().createInitialized(fnName);
-  }
-
-  m_changeSlotsEnabled = false;
-
-  Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f);
-  if (pf)
-  {
-    if (!workspaceName().empty() && workspaceIndex() >= 0)
-    {
-      pf->setCentre( (startX() + endX())/2 );
-    }
-  }
-
-  if (f->name() == "LinearBackground" && !workspaceName().empty())
-  {
-    int wi = workspaceIndex();
-    Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()) );
-    if (ws && wi >= 0 && wi < ws->getNumberHistograms())
-    {
-      const Mantid::MantidVec& X = ws->readX(wi);
-      double istart = 0, iend = 0;
-      for(int i=0;i<X.size()-1;++i)
-      {
-        double x = X[i];
-        if (x < startX())
-        {
-          istart = i;
-        }
-        if (x > endX())
-        {
-          iend = i;
-          if (iend > 0) iend--;
-          break;
-        }
-      }
-      if (iend > istart)
-      {
-        const Mantid::MantidVec& Y = ws->readY(wi);
-        double p0 = Y[istart];
-        double p1 = Y[iend];
-        double A1 = (p1-p0)/(X[iend]-X[istart]);
-        double A0 = p0 - A1*X[istart];
-        f->setParameter("A0",A0);
-        f->setParameter("A1",A1);
-      }
-    }
-  }
-  setWorkspace(f);
-
-  Mantid::API::CompositeFunction* cf = cfun ? cfun : m_compositeFunction;
-
-  int nFunctions = cf->nFunctions()+1;
-  cf->addFunction(f);
-
-  if (cf->nFunctions() != nFunctions)
-  {// this may happen
-    clearBrowser();
-    for(int i=0;i<m_compositeFunction->nFunctions();++i)
-    {
-      addFunctionToBrowser(m_compositeFunction->getFunction(i),m_compositeFunction);
-    }
-  }
-  else
-  {
-    addFunctionToBrowser(f,cf);
-  }
-
-  checkFunction();
-
-  m_changeSlotsEnabled = true;
-
-  setFitEnabled(true);
-  m_defaultFunction = fnName;
-  setFocus();
-  return f;
-}
-
-/**
- * Does what needed to add a function to the browser
- * @param f The new function
- */
-void FitPropertyBrowser::addFunctionToBrowser(Mantid::API::IFunction* f,Mantid::API::CompositeFunction* cf)
-{
-  // Add a group property named after the function: f<index>-<type>, where <type> is the function's class name
-  QtProperty* fnProp = m_groupManager->addProperty(functionName(f));
-  QtBrowserItem* cfunItem = m_functionItems.key(cf,m_functionsGroup);
-  cfunItem->property()->addSubProperty(fnProp);
-
-  QtBrowserItem* fnItem = findItem(m_functionsGroup,fnProp);
-  m_browser->setExpanded(fnItem,false);
-  m_functionItems[fnItem] = f;
-  setCurrentFunction(f);
-  addFunProperties(f);
-
-  Mantid::API::CompositeFunction* cff = dynamic_cast<Mantid::API::CompositeFunction*>(f);
-  if (cff)
-  {
-    for(int i=0;i<cff->nFunctions();++i)
-    {
-      addFunctionToBrowser(cff->getFunction(i),cff);
-    }
+    getHandler()->removePlot();
+    h->removeFunction();
+    emit functionRemoved();
   }
 }
 
-/** Replace the current function with a new one
- * @param i The function index
- * @param fnName A registered function name
- */
-void FitPropertyBrowser::replaceFunction(Mantid::API::IFunction* f_old,const std::string& fnName)
-{
-  disableUndo();
-  Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createUnwrapped(fnName);
-  f->initialize();
-  setWorkspace(f);
-  replaceFunction(f_old,f);
-}
+//***********************************************************************************//
 
-/** Replace the current function with a new one
- * @param i The function index
- * @param f A pointer to a new function
- */
-void FitPropertyBrowser::replaceFunction(Mantid::API::IFunction* f_old,Mantid::API::IFunction* f_new)
-{
-  QtBrowserItem* fItem = m_functionItems.key(f_old,NULL);
-  if (fItem == NULL) return;
-  
-  QtBrowserItem* fParent = fItem->parent();
-  if (fParent == NULL) return;
-  Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(m_functionItems[fParent]);
-  if (!cf) return;
-  int iFun = -1;
-  for (int i=0;i<cf->nFunctions();i++)
-  {
-    if (f_old == cf->getFunction(i))
-    {
-      iFun = i;
-      break;
-    }
-  }
-  if (iFun < 0) return;
-  removeFunctionItems(fItem);
-
-  Mantid::API::IPeakFunction* pf_new = dynamic_cast<Mantid::API::IPeakFunction*>(f_new);
-  Mantid::API::IPeakFunction* pf_old = dynamic_cast<Mantid::API::IPeakFunction*>(f_old);
-  if (pf_new && pf_old)
-  {
-    pf_new->setCentre(pf_old->centre());
-    pf_new->setHeight(pf_old->height());
-    pf_new->setWidth(pf_old->width());
-  }
-  //removeTiesWithFunction(i);// do it before replaceFunction
-  cf->replaceFunction(iFun,f_new);
-  fItem->property()->setPropertyName(functionName(f_new));
-
-  m_functionItems[fItem] = f_new;
-  removeFunProperties(fItem->property());
-  addFunProperties(f_new);
-  checkFunction();
-}
-
-/** Remove a function
- * @param i The function index
- */
-void FitPropertyBrowser::removeFunction(Mantid::API::IFunction* f)
-{
-  QtBrowserItem* fnItem = m_functionItems.key(f,NULL);
-  if (fnItem == NULL) return;
-  
-  QtBrowserItem* fnParent = fnItem->parent();
-  if (fnParent == NULL) return;
-  Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(m_functionItems[fnParent]);
-  if (!cf) return;
-  int iFun = -1;
-  for (int i=0;i<cf->nFunctions();i++)
-  {
-    if (f == cf->getFunction(i))
-    {
-      iFun = i;
-      break;
-    }
-  }
-  if (iFun < 0) return;
-
-  removeFunctionItems(fnItem);
-  //removeTiesWithFunction(i);// do it before removeFunction
-  QList<QtProperty*> subs = fnItem->property()->subProperties();
-  for(int j=0;j<subs.size();j++)
-  {
-    fnItem->property()->removeSubProperty(subs[j]);
-    delete subs[j]; // ?
-  }
-  QtProperty* fnGroup = fnItem->parent()->property();
-  fnGroup->removeSubProperty(fnItem->property());
-  cf->removeFunction(iFun);
-  checkFunction();
-  if (count() == 0)
-  {
-    setFitEnabled(false);
-  }
-  updateParameters();
-  updateNames();
-  disableUndo();
-  setFocus();
-  emit functionRemoved(f);
-}
-
-
-/** Get function name
- * @param f The function's address
- */
-QString FitPropertyBrowser::functionName(Mantid::API::IFunction* f,Mantid::API::CompositeFunction* cf)const
-{
-  if (f == m_compositeFunction) return "Functions";
-  if (!cf) cf = m_compositeFunction;
-  QString outName = "f";
-  for(int iFun = 0;iFun < cf->nFunctions(); iFun++)
-  {
-    Mantid::API::IFunction* fun = cf->getFunction(iFun);
-    if (fun == f)
-    {
-      return "f" + QString::number(iFun) + "-" + QString::fromStdString(fun->name());
-    }
-    Mantid::API::CompositeFunction* cf1 = dynamic_cast<Mantid::API::CompositeFunction*>(fun);
-    if (cf1)
-    {
-      QString fn = functionName(f,cf1);
-      if (!fn.isEmpty())
-      {
-        return "f" + QString::number(iFun) + "." + fn;
-      }
-    }
-  }
-  return "";
-}
 
 // Get the default function name
 std::string FitPropertyBrowser::defaultFunctionType()const
@@ -723,22 +594,12 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
   }
   else if (prop->propertyName() == "Type")
   {
-    QtBrowserItem* typeItem = m_paramItems[prop];
-    if (typeItem)
-    {
-      Mantid::API::IFunction* fun = 0;
-      int j = m_enumManager->value(prop);
-      QString fnName = m_registeredFunctions[j];
-      QtBrowserItem* fnItem = typeItem->parent();
-      if (m_functionItems.contains(fnItem))
-      {
-        fun = m_functionItems[fnItem];
-      }
-      if (fun)
-      {
-        replaceFunction(fun,fnName.toStdString());
-      }
-    }
+      disableUndo();
+      PropertyHandler* h = getHandler()->findHandler(prop);
+      if (!h) return;
+      if (!h->parentHandler()) return;
+      Mantid::API::IFunction* f = h->changeType(prop);
+      if (f) setCurrentFunction(f);
   }
 }
 
@@ -794,59 +655,34 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   if (prop == m_startX )
   {
     emit startXChanged(startX());
+    return;
   }
   else if (prop == m_endX )
   {
     emit endXChanged(endX());
+    return;
   }
-  else if(m_paramItems.contains(prop))
+  else if(getHandler()->setParameter(prop))
   {
-    QtBrowserItem* parItem = m_paramItems[prop];
-    QtBrowserItem* fnItem = parItem->parent();
-    Mantid::API::IFunction* f = m_functionItems[fnItem];
-    if (!f) return;
-    QList<QtProperty*> subs = fnItem->property()->subProperties();
-    int j0 = 1 + f->nAttributes();
-    for(int j=j0;j<subs.size();j++)
-    {
-      if (subs[j] == prop)
-      {
-        f->setParameter(j-j0,value);
-        emit parameterChanged(f);
-        break;
-      }
-    }
+    return;
   }
   else
   {// check if it is a constraint
-    QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator it = m_constraints.begin();
-    for(;it!= m_constraints.end();++it)
+    PropertyHandler* h = getHandler()->findHandler(prop);
+    if (!h) return;
+
+    QtProperty* parProp = h->getParameterProperty(prop);
+    if (!parProp) return;
+
+    if (prop->propertyName() == "LowerBound")
     {
-      QtProperty* lo = it.value().first;
-      QtProperty* up = it.value().second;
-      if (prop == lo || prop == up)
-      {
-        QtBrowserItem* parItem = m_paramItems[it.key()];
-        QtBrowserItem* fnItem = parItem->parent();
-        Mantid::API::IFunction* f = m_functionItems[fnItem];
-        if (!f) return;
-        std::ostringstream ostr;
-        if (lo) 
-        {
-          ostr << m_doubleManager->value(lo) << "<";
-        }
-        ostr << it.key()->propertyName().toStdString();
-        if (up)
-        {
-          ostr << "<" << m_doubleManager->value(up);
-        }
-        try
-        {
-          Mantid::API::IConstraint* c = Mantid::API::ConstraintFactory::Instance().createInitialized(f,ostr.str());
-          f->addConstraint(c);
-        }
-        catch(...){}
-      }
+      double loBound = m_doubleManager->value(prop);
+      h->addConstraint(parProp,true,false,loBound,0);
+    }
+    else if (prop->propertyName() == "UpperBound")
+    {
+      double upBound = m_doubleManager->value(prop);
+      h->addConstraint(parProp,false,true,0,upBound);
     }
   }
 }
@@ -875,40 +711,28 @@ void FitPropertyBrowser::stringChanged(QtProperty* prop)
   }
   else if (prop->propertyName() == "Tie")
   {
+    PropertyHandler* h = getHandler()->findHandler(prop);
+    if (!h) return;
+
+    QtProperty* parProp = h->getParameterProperty(prop);
+    if (!parProp) return;
+
+    QString parName = h->functionPrefix()+"."+parProp->propertyName();
+
     QString str = m_stringManager->value(prop);
+    Mantid::API::ParameterTie* tie = 
+      new Mantid::API::ParameterTie(compositeFunction(),parName.toStdString());
     try
     {
-      Mantid::API::ParameterTie* tie = m_ties[prop];
-      if (!tie) return;
-      int index = theFunction()->getParameterIndex(*tie);
-      std::string parName = theFunction()->parameterName(index);
-      tie = theFunction()->tie(parName,m_stringManager->value(prop).toStdString());
-      m_ties[prop] = tie;
+      tie->set(str.toStdString());
+      h->addTie(parName+"="+str);
     }
-    catch(...){}
+    catch(...){std::cerr<<"Failed\n";}
+    delete tie;
   }
-  else if (m_paramItems.contains(prop))
-  {// Check if it is a function attribute
-    QtBrowserItem* attrItem = m_paramItems[prop];
-    QtBrowserItem* fnItem = attrItem->parent();
-    if (fnItem && m_functionItems.contains(fnItem))
-    {
-      Mantid::API::IFunction* fun = m_functionItems[fnItem];
-      if (fun)
-      {
-        std::string attrName = prop->propertyName().toStdString();
-        try
-        {
-          fun->setAttribute(attrName,m_stringManager->value(prop).toStdString());
-          m_compositeFunction->checkFunction();
-          removeFunProperties(fnItem->property(),true);
-          addFunProperties(fun,true);
-        }
-        catch(...)
-        {
-        }
-      }
-    }
+  else if (getHandler()->setAttribute(prop))
+  {
+    return;
   }
 }
 
@@ -919,44 +743,17 @@ void FitPropertyBrowser::filenameChanged(QtProperty* prop)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
-  if (m_paramItems.contains(prop))
-  {// Check if it is a function attribute
-    QtBrowserItem* attrItem = m_paramItems[prop];
-    QtBrowserItem* fnItem = attrItem->parent();
-    if (fnItem && m_functionItems.contains(fnItem))
-    {
-      Mantid::API::IFunction* fun = m_functionItems[fnItem];
-      if (fun)
-      {
-        std::string attrName = prop->propertyName().toStdString();
-        std::string attrValue = m_filenameManager->value(prop).toStdString();
-        try
-        {
-          fun->setAttribute(attrName,attrValue);
-          m_compositeFunction->checkFunction();
-          removeFunProperties(fnItem->property(),true);
-          addFunProperties(fun,true);
-          QFileInfo finfo(QString::fromStdString(attrValue));
-          QSettings settings;
-          settings.setValue("Mantid/FitBrowser/ResolutionDir",finfo.absolutePath());
-        }
-        catch(std::exception& e)
-        {
-          std::cerr<<"Error "<<e.what()<<'\n';
-          QMessageBox::critical(this,"Mantid - Error","Error in loading a resolution file.\n"
-            "The file must have two or more columns of numbers.\n"
-            "The first two columns are x and y-values of the resolution.");
-        }
-      }
-    }
+  if (getHandler()->setAttribute(prop))
+  {
+    return;
   }
 }
 // Centre of the current peak
 double FitPropertyBrowser::centre()const
 {
-  if (isPeak())
+  if (m_currentHandler && m_currentHandler->pfun())
   {
-    return peakFunction()->centre();
+    return m_currentHandler->pfun()->centre();
   }
   return 0;
 }
@@ -966,18 +763,18 @@ double FitPropertyBrowser::centre()const
  */
 void FitPropertyBrowser::setCentre(double value)
 {
-  if (isPeak())
+  if (m_currentHandler)
   {
-    peakFunction()->setCentre(value);
+    m_currentHandler->setCentre(value);
   }
 }
 
 // Height of the current peak
 double FitPropertyBrowser::height()const
 {
-  if (isPeak())
+  if (m_currentHandler && m_currentHandler->pfun())
   {
-    return peakFunction()->height();
+    return m_currentHandler->pfun()->height();
   }
   return 0.;
 }
@@ -987,18 +784,18 @@ double FitPropertyBrowser::height()const
  */
 void FitPropertyBrowser::setHeight(double value)
 {
-  if (isPeak())
+  if (m_currentHandler)
   {
-    peakFunction()->setHeight(value);
+    m_currentHandler->setHeight(value);
   }
 }
 
 // Width of the current peak
 double FitPropertyBrowser::width()const
 {
-  if (isPeak())
+  if (m_currentHandler && m_currentHandler->pfun())
   {
-    return peakFunction()->width();
+    return m_currentHandler->pfun()->width();
   }
   return 0;
 }
@@ -1008,9 +805,9 @@ double FitPropertyBrowser::width()const
  */
 void FitPropertyBrowser::setWidth(double value)
 {
-  if (isPeak())
+  if (m_currentHandler)
   {
-    peakFunction()->setWidth(value);
+    m_currentHandler->setWidth(value);
   }
 }
 
@@ -1024,67 +821,23 @@ void FitPropertyBrowser::populateFunctionNames()
   for(size_t i=0;i<names.size();i++)
   {
     std::string fnName = names[i];
-    //if (fnName != "Convolution")
-    //{
-      QString qfnName = QString::fromStdString(fnName);
-      m_registeredFunctions << qfnName;
-      boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().create(fnName);
-      f->initialize();
-      Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
-      Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
-      if (pf)
-      {
-        m_registeredPeaks << qfnName;
-      }
-      else if (!cf)
-      {
-        m_registeredBackgrounds << qfnName;
-      }
-    //}
+    QString qfnName = QString::fromStdString(fnName);
+    m_registeredFunctions << qfnName;
+    boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().create(fnName);
+    f->initialize();
+    Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
+    Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
+    if (pf)
+    {
+      m_registeredPeaks << qfnName;
+    }
+    else if (!cf)
+    {
+      m_registeredBackgrounds << qfnName;
+    }
   }
 }
 
-/// Create CompositeFunction
-void FitPropertyBrowser::createCompositeFunction(const QString& str)
-{
- if (m_compositeFunction)
-  {
-    emit functionRemoved(m_compositeFunction);
-    delete m_compositeFunction;
-  }
-  if (str.isEmpty())
-  {
-    m_compositeFunction = new Mantid::API::CompositeFunction();
-  }
-  else
-  {
-    Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(str.toStdString());
-    if (!f)
-    {
-      createCompositeFunction();
-      return;
-    }
-    Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f);
-    if (!cf)
-    {
-      m_compositeFunction = new Mantid::API::CompositeFunction();
-      m_compositeFunction->addFunction(f);
-    }
-    else
-    {
-      m_compositeFunction = cf;
-    }
-  }
-  setWorkspace(m_compositeFunction);
-  m_functionItems[m_functionsGroup] = m_compositeFunction;
-  for(int i=0;i<m_compositeFunction->nFunctions();++i)
-  {
-    addFunctionToBrowser(m_compositeFunction->getFunction(i),m_compositeFunction);
-  }
-  checkFunction();
-  disableUndo();
-  setFitEnabled(false);
-}
 
 /// Get number of functions in CompositeFunction
 int FitPropertyBrowser::count()const
@@ -1092,18 +845,31 @@ int FitPropertyBrowser::count()const
   return m_compositeFunction->nFunctions();
 }
 
+/// Get the current function
+PropertyHandler* FitPropertyBrowser::currentHandler()const
+{
+  return m_currentHandler;
+}
+
+/** Set new current function
+ * @param h New current function
+ */
+void FitPropertyBrowser::setCurrentFunction(PropertyHandler* h)const
+{
+  m_currentHandler = h;
+  if (m_currentHandler)
+  {
+    m_browser->setCurrentItem(m_currentHandler->item());
+    emit currentChanged();
+  }
+}
+
 /** Set new current function
  * @param f New current function
  */
-void FitPropertyBrowser::setCurrentFunction(Mantid::API::IFunction* f)const
+void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFunction* f)const
 {
-  m_currentFunction = f;
-  QtBrowserItem* fnItem = m_functionItems.key(f,0);
-  if (fnItem)
-  {
-    m_browser->setCurrentItem(fnItem);
-    emit currentChanged();
-  }
+  setCurrentFunction(getHandler()->findHandler(f));
 }
 
 /**
@@ -1111,8 +877,6 @@ void FitPropertyBrowser::setCurrentFunction(Mantid::API::IFunction* f)const
  */
 void FitPropertyBrowser::fit()
 {
-  std::cerr << '\n' << *m_compositeFunction <<'\n';
-
   std::string wsName = workspaceName();
   if (wsName.empty())
   {
@@ -1156,7 +920,6 @@ void FitPropertyBrowser::fit()
     QString msg = "Fit algorithm failed.\n\n"+QString(e.what())+"\n";
     m_appWindow->mantidUI->showCritical(msg);
   }
-
 }
 
 void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
@@ -1245,7 +1008,7 @@ bool FitPropertyBrowser::isPeak()const
   {
     return false;
   }
-  return peakFunction() != 0;
+  return m_currentHandler && m_currentHandler->pfun();
 }
 
 /// Get the start X
@@ -1272,42 +1035,6 @@ void FitPropertyBrowser::setEndX(double value)
   m_doubleManager->setValue(m_endX,value);
 }
 
-/** 
- * Get the current function if it's a peak
- */
-Mantid::API::IPeakFunction* FitPropertyBrowser::peakFunction()const
-{
-  return dynamic_cast<Mantid::API::IPeakFunction*>(m_currentFunction);
-}
-
-/** Slot. Called to add a new function
- */
-void FitPropertyBrowser::addFunction()
-{
-  QtBrowserItem * ci = m_browser->currentItem();
-  if ( !m_functionItems.contains(ci) ) return;
-  Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(m_functionItems[ci]);
-  if ( !cf ) return;
-  int i = m_registeredFunctions.indexOf(QString::fromStdString(m_defaultFunction));
-  bool ok = false;
-  QString fnName = 
-    QInputDialog::getItem(this, "MantidPlot - Fit", "Select function type", m_registeredFunctions,i,false,&ok);
-  if (ok)
-  {
-    addFunction(fnName.toStdString(),cf);
-  }
-}
-
-/** Slot. Called to remove a function
- */
-void FitPropertyBrowser::deleteFunction()
-{
-  if (m_currentFunction != NULL && m_currentFunction != m_compositeFunction)
-  {
-    removeFunction(m_currentFunction);
-  }
-}
-
 QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* prop)const
 {
   QList<QtBrowserItem*> children = parent->children();
@@ -1330,22 +1057,14 @@ QtBrowserItem* FitPropertyBrowser::findItem(QtBrowserItem* parent,QtProperty* pr
  */
 void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
 {
-  Mantid::API::IFunction* f = 0;
-  QtBrowserItem* fnItem = current;
-  for(int i=0;i<100;i++)
+  if (current)
   {
-    if (f || !fnItem) break;
-    if (m_functionItems.contains(fnItem))
-    {
-      f = m_functionItems[fnItem];
-    }
-    else
-    {
-      fnItem = fnItem->parent();
-    }
+    m_currentHandler = getHandler()->findHandler(current->property());
   }
-
-  m_currentFunction = f;
+  else
+  {
+    m_currentHandler = NULL;
+  }
   emit currentChanged();
 }
 
@@ -1353,22 +1072,7 @@ void FitPropertyBrowser::currentItemChanged(QtBrowserItem * current )
  */
 void FitPropertyBrowser::updateParameters()
 {
-  QMap<QtProperty*,QtBrowserItem*>::iterator it = m_paramItems.begin();
-  for(;it!=m_paramItems.end();it++)
-  {
-    if (it.key()->propertyManager() == m_doubleManager)
-    {
-      QtBrowserItem* fnItem = it.value()->parent();
-      if (m_functionItems.contains(fnItem))
-      {
-        Mantid::API::IFunction* fun = m_functionItems[fnItem];
-        if (fun)
-        {
-          m_doubleManager->setValue(it.key(),fun->getParameter(it.key()->propertyName().toStdString()));
-        }
-      }
-    }
-  }
+  getHandler()->updateParameters();
 }
 
 /**
@@ -1376,6 +1080,7 @@ void FitPropertyBrowser::updateParameters()
  */
 void FitPropertyBrowser::clear()
 {
+  getHandler()->removeAllPlots();
   clearBrowser();
   createCompositeFunction();
   emit functionCleared();
@@ -1389,9 +1094,6 @@ void FitPropertyBrowser::clearBrowser()
   {
     m_functionsGroup->property()->removeSubProperty(prop);
   }
-  m_functionItems.clear();
-  m_paramItems.clear();
-  m_ties.clear();
 }
 
 /// Set the parameters to the fit outcome
@@ -1469,61 +1171,18 @@ bool FitPropertyBrowser::isFitEnabled()const
   return m_btnFit->isEnabled();
 }
 
-/** Get the property for a function's parameter.
- * @param f A pointer to a simple function
- * 
- */
-QtProperty* FitPropertyBrowser::getParameterProperty(Mantid::API::IFunction* f,int i)const
-{
-  QtBrowserItem* fnItem = m_functionItems.key(f,0);
-  if (!fnItem) return 0;
-  QList<QtProperty*> props = fnItem->property()->subProperties();
-  int j = 1 + f->nAttributes() + i;
-  if (j > props.size()) return 0;
-  return props[j];
-}
-
-/**
- * Adds a tie to a function
- * @param tieExpr The expression, e.g. "f1.Sigma= f0.Height/2"
- */
-bool FitPropertyBrowser::addTie(const QString& tieExpr,Mantid::API::IFunction* f)
-{
-  QStringList parts = tieExpr.split("=");
-  if (parts.size() != 2) return false;
-  std::string name = parts[0].trimmed().toStdString();
-  std::string expr = parts[1].trimmed().toStdString();
-  try
-  {
-    Mantid::API::ParameterTie* tie = f->tie(name,expr);
-    if (tie == NULL) return false;
-    QtProperty* parProp = getParameterProperty(tie->getFunction(),tie->getIndex());
-    if (!parProp) return false;
-    m_changeSlotsEnabled = false;
-    QtProperty* tieProp = m_stringManager->addProperty( "Tie" );
-    m_stringManager->setValue(tieProp,QString::fromStdString(expr));
-    m_changeSlotsEnabled = true;
-    parProp->addSubProperty(tieProp);
-    m_ties[tieProp] = tie;
-    return true;
-  }
-  catch(...)
-  {
-    return false;
-  }
-  return false;
-}
-
 /** 
  * Slot. Adds a tie. Full expression to be entered <name>=<formula>
  */
 void FitPropertyBrowser::addTie()
 {
   QtBrowserItem * ci = m_browser->currentItem();
-  QtProperty* paramProp = m_paramItems.key(ci,0);
-  if (!paramProp) return;
-  QtBrowserItem* fnItem = ci->parent();
-  Mantid::API::IFunction* f = m_functionItems.contains(fnItem) ? m_functionItems[fnItem] : 0;
+  QtProperty* paramProp = ci->property();
+  PropertyHandler* h = getHandler()->findHandler(paramProp);
+  if (!h->isParameter(paramProp)) return;
+  if (!h) return;
+
+  const Mantid::API::IFunction* f = h->function();
   if (!f) return;
 
   bool ok = false;
@@ -1534,12 +1193,9 @@ void FitPropertyBrowser::addTie()
     tieStr = tieStr.trimmed();
     if (!tieStr.contains('='))
     {
-      int iPar = f->parameterIndex(paramProp->propertyName().toStdString());
-      Mantid::API::ParameterReference ref(f,iPar);
-      iPar = m_compositeFunction->getParameterIndex(ref);
-      tieStr = QString::fromStdString(m_compositeFunction->parameterName(iPar)) + "=" + tieStr;
+      tieStr = h->functionPrefix()+"."+paramProp->propertyName() + "=" + tieStr;
     }
-    ok = addTie(tieStr,m_compositeFunction);
+    h->addTie(tieStr);
   } // if (ok)
 }
 
@@ -1549,7 +1205,11 @@ void FitPropertyBrowser::addTie()
 void FitPropertyBrowser::addTieToFunction()
 {
   QtBrowserItem * ci = m_browser->currentItem();
-  std::string parName = ci->property()->propertyName().toStdString();
+  QtProperty* paramProp = ci->property();
+  PropertyHandler* h = getHandler()->findHandler(paramProp);
+  if (!h) return;
+  if (!h->isParameter(paramProp)) return;
+  std::string parName = paramProp->propertyName().toStdString();
   bool ok;
   QStringList fnNames;
 
@@ -1558,8 +1218,7 @@ void FitPropertyBrowser::addTieToFunction()
   {
     Mantid::API::ParameterReference ref(m_compositeFunction,i);
     Mantid::API::IFunction* fun = ref.getFunction();
-    QtProperty* prop = getParameterProperty(fun,ref.getIndex());
-    if (prop == ci->property())
+    if (fun == h->function())
     {
       iPar = i;
       continue;
@@ -1582,7 +1241,7 @@ void FitPropertyBrowser::addTieToFunction()
 
   QString tieExpr = QString::fromStdString(m_compositeFunction->parameterName(iPar)) + "=" + tieName;
 
-  addTie(tieExpr,m_compositeFunction);
+  h->addTie(tieExpr);
 
 }
 
@@ -1592,15 +1251,11 @@ void FitPropertyBrowser::addTieToFunction()
 void FitPropertyBrowser::addFixTie()
 {
   QtBrowserItem * ci = m_browser->currentItem();
-  QtProperty* paramProp = m_paramItems.key(ci,0);
-  if (!paramProp) return;
-  QtBrowserItem* fnItem = ci->parent();
-  Mantid::API::IFunction* f = m_functionItems.contains(fnItem) ? m_functionItems[fnItem] : 0;
-  if (!f) return;
-  double value = m_doubleManager->value(paramProp);
-  addTie(paramProp->propertyName() + "=" + QString::number(value),f);
-  paramProp->setEnabled(false);
-  m_browser->setExpanded(ci,false);
+  QtProperty* paramProp = ci->property();
+  PropertyHandler* h = getHandler()->findHandler(paramProp);
+  if (!h) return;
+  if (!h->isParameter(paramProp)) return;
+  h->fix(paramProp->propertyName());
 }
 
 /** 
@@ -1609,48 +1264,44 @@ void FitPropertyBrowser::addFixTie()
 void FitPropertyBrowser::deleteTie()
 {
   QtBrowserItem * ci = m_browser->currentItem();
-  QtProperty* parProp;
-  QtProperty* tieProp;
+  QtProperty* paramProp = ci->property();
+  PropertyHandler* h = getHandler()->findHandler(paramProp);
+
   if (ci->property()->propertyName() != "Tie") 
   {
-    parProp = ci->property();
-    tieProp = getTieProperty(parProp);
-    if (!tieProp) return;
+    h->removeTie(ci->property()->propertyName());
   }
   else
   {
-    tieProp = ci->property();
-    parProp = ci->parent()->property();
+    h->removeTie(ci->property());
   }
-
-  //for(QMap<QtProperty*,Mantid::API::ParameterTie*>::iterator it = m_ties.begin();it!=m_ties.end();it++)
-  //{
-  //  std::cerr<<it.key()->propertyName().toStdString()<<' '<<it.value()<<'\n';
-  //}
-
-  QString parName = parProp->propertyName();
-  Mantid::API::ParameterTie* tie = m_ties[tieProp];
-  if (!tie) return;
-  tie->getFunction()->removeTie(tie->getIndex());
-  m_ties.remove(tieProp);
-  parProp->removeSubProperty(tieProp);
-  parProp->setEnabled(true);
 }
 
 /** Does a parameter have a tie
  * @param parProp The property for a function parameter
  */
-bool FitPropertyBrowser::hasTie(QtProperty* parProp)const
+void FitPropertyBrowser::hasConstraints(QtProperty* parProp,
+                                        bool& hasTie,
+                                        bool& hasBounds)const
 {
+  hasTie = false;
+  hasBounds = false;
   QList<QtProperty*> subs = parProp->subProperties();
   for(int i=0;i<subs.size();i++)
   {
     if (subs[i]->propertyName() == "Tie")
     {
-      return true;
+      hasTie = true;
+    }
+    if (subs[i]->propertyName() == "LowerBound")
+    {
+      hasBounds = true;
+    }
+    if (subs[i]->propertyName() == "UpperBound")
+    {
+      hasBounds = true;
     }
   }
-  return false;
 }
 
 /** Returns the tie property for a parameter property, or NULL
@@ -1685,52 +1336,14 @@ void FitPropertyBrowser::addConstraint(int f,bool lo,bool up)
 {
   QtBrowserItem * ci = m_browser->currentItem();
   QtProperty* parProp = ci->property();
-  if (!m_paramItems.contains(parProp) || m_paramItems[parProp] != ci) return;
-  QtBrowserItem* fnItem = ci->parent();
-  if (!m_functionItems.contains(fnItem)) return;
-  Mantid::API::IFunction* fun = m_functionItems[fnItem];
-  int iPar = fun->parameterIndex(parProp->propertyName().toStdString());
+  PropertyHandler* h = getHandler()->findHandler(parProp);
+  if (!h) return;
 
   double x = m_doubleManager->value(parProp);
   double loBound = x*(1-0.01*f);
   double upBound = x*(1+0.01*f);
-  Mantid::API::IConstraint* c_old = fun->firstConstraint();
-  while(c_old)
-  {
-    if (c_old->getIndex() == iPar)
-    {
-      double lowerBound = 1;
-      bool hasLo = false;
-      double upperBound = 0;
-      bool hasUp = false;
-      extractLowerAndUpper(c_old->asString(),lowerBound,upperBound,hasLo,hasUp);
-      if (hasLo && !lo)
-      {
-        lo = true;
-        loBound = lowerBound;
-      }
-      if (hasUp && !up)
-      {
-        up = true;
-        upBound = upperBound;
-      }
-    }
-    c_old = fun->nextConstraint();
-  }
 
-  std::ostringstream ostr;
-  if (lo) 
-  {
-    ostr << loBound << "<";
-  }
-  ostr << parProp->propertyName().toStdString();
-  if (up)
-  {
-    ostr << "<" << upBound;
-  }
-  Mantid::API::IConstraint* c = Mantid::API::ConstraintFactory::Instance().createInitialized(fun,ostr.str());
-  fun->addConstraint(c);
-  checkFunction();
+  h->addConstraint(ci->property(),lo,up,loBound,upBound);
 }
 
 /**
@@ -1813,20 +1426,10 @@ void FitPropertyBrowser::removeBounds()
 {
   QtBrowserItem * ci = m_browser->currentItem();
   QtProperty* parProp = ci->property();
-  QString parName = parProp->propertyName();
-  if (parName == "Upper Bound" || parName == "Lower Bound" )
-  {
-    ci = ci->parent();
-    parProp = ci->property();
-  }
-  QtBrowserItem* fnItem = ci->parent();
-  if (!fnItem) return;
-  if (!m_functionItems.contains(fnItem)) return;
-  Mantid::API::IFunction* fun = m_functionItems[fnItem];
-  if (!fun) return;
-  fun->removeConstraint(parProp->propertyName().toStdString());
-  checkFunction();
-  return;
+  PropertyHandler* h = getHandler()->findHandler(parProp);
+  if (!h) return;
+
+  h->removeConstraint(parProp);
 }
 
 /**
@@ -1834,7 +1437,7 @@ void FitPropertyBrowser::removeBounds()
  */
 void FitPropertyBrowser::plotGuessCurrent()
 {
-  emit plotGuess(function());
+  emit plotCurrentGuess();
 }
 
 /**
@@ -1842,105 +1445,23 @@ void FitPropertyBrowser::plotGuessCurrent()
  */
 void FitPropertyBrowser::plotGuessAll()
 {
-  emit plotGuess(theFunction());
+  emit plotGuess();
 }
 
-/// Remove all properties associated with a function
-void FitPropertyBrowser::removeFunProperties(QtProperty* fnProp,bool doubleOnly)
-{
-  QList<QtProperty*> subs = fnProp->subProperties();
-  for(int i = 0; i < subs.size(); i++)
-  {
-    QtProperty* parProp = subs[i];
-    if (doubleOnly && parProp->propertyManager() != m_doubleManager) continue;
-    QMap<QtProperty*,std::pair<QtProperty*,QtProperty*> >::iterator cit = m_constraints.find(parProp);
-    if (cit != m_constraints.end())
-    {
-      m_constraints.remove(parProp);
-    }
-    fnProp->removeSubProperty(parProp);
-    if (m_paramItems.contains(parProp))
-    {
-      m_paramItems.remove(parProp);
-    }
-  }
-}
-/** Add properties associated with a function: type, attributes, parameters
- * @param f A pointer to the function
- * @param doubleOnly If true only the fitting parameters will be added to the browser but not 
- *   attributes and Type. It is useful for UserFunction when its parameters have changed 
+/**
+ * Slot. Sends a signal to remove the guess for the current (selected) function
  */
-void FitPropertyBrowser::addFunProperties(Mantid::API::IFunction* f,bool doubleOnly)
+void FitPropertyBrowser::removeGuessCurrent()
 {
-  m_changeSlotsEnabled = false;
+  emit removeCurrentGuess();
+}
 
-  QtBrowserItem* fnItem = m_functionItems.key(f,NULL);
-  if (fnItem == NULL) return;
-  QtProperty* fnProp = fnItem->property();
-
-  if (!doubleOnly)
-  {
-    QtProperty* typeProp = m_enumManager->addProperty("Type");
-    fnProp->addSubProperty(typeProp);
-    QtBrowserItem* typeItem = findItem(m_functionsGroup,typeProp);
-    if (typeItem)
-    {
-      m_paramItems[typeProp] = typeItem;
-    }
-
-    int itype = m_registeredFunctions.indexOf(QString::fromStdString(f->name()));
-    m_enumManager->setEnumNames(typeProp, m_registeredFunctions);
-    m_enumManager->setValue(typeProp,itype);
-
-    // Add attributes for the function's parameters
-    std::vector<std::string> attr = f->getAttributeNames();
-    for(size_t i=0;i<attr.size();i++)
-    {
-      std::string attName = attr[i];
-      QtProperty* parProp = 0;
-
-      if (attName == "FileName")
-      {
-        parProp = m_filenameManager->addProperty(QString::fromStdString(attName));
-        fnProp->addSubProperty(parProp);
-        m_filenameManager->setValue(parProp,QString::fromStdString(f->getAttribute(attName)));
-      }
-      else
-      {
-        parProp = m_stringManager->addProperty(QString::fromStdString(attName));
-        fnProp->addSubProperty(parProp);
-        m_stringManager->setValue(parProp,QString::fromStdString(f->getAttribute(attName)));
-      }
-
-      QtBrowserItem* attrItem = findItem(m_functionsGroup,parProp);
-      if (attrItem)
-      {
-        m_paramItems[parProp] = attrItem;
-      }
-    }
-  }
-
-  // Add properties for the function's parameters
-  for(int i=0;i<f->nParams();i++)
-  {
-    Mantid::API::ParameterReference pref(f,i);
-    // add only local parameters
-    if (f->getContainingFunction(pref) != f) continue;
-    QtProperty* parProp = addDoubleProperty(QString::fromStdString(f->parameterName(i)));
-    fnProp->addSubProperty(parProp);
-    m_doubleManager->setValue(parProp,f->getParameter(i));
-    QList<QtBrowserItem*> items = fnItem->children();
-    foreach(QtBrowserItem* item,items)
-    {
-      if (item->property() == parProp)
-      {
-        m_paramItems[parProp] = item;
-        break;
-      }
-    }
-  }
-
-  m_changeSlotsEnabled = true;
+/**
+ * Slot. Sends a signal to remove the guess for the whole function
+ */
+void FitPropertyBrowser::removeGuessAll()
+{
+  emit removeGuess();
 }
 
 /** Create a double property and set some settings
@@ -1954,176 +1475,13 @@ QtProperty* FitPropertyBrowser::addDoubleProperty(const QString& name)const
   return prop;
 }
 
-void FitPropertyBrowser::updateNames()
-{
-  QMap<QtBrowserItem*,Mantid::API::IFunction*>::iterator it = m_functionItems.begin();
-  for(;it!=m_functionItems.end();it++)
-  {
-    it.key()->property()->setPropertyName(functionName(it.value()));
-  }
-}
-
-/** Remove items from m_functionItems
- * @param fnItem The function item to remove. If it is connected to a CompositeFunction
- *   remove all its members
- */
-void FitPropertyBrowser::removeFunctionItems(QtBrowserItem* fnItem)
-{
-  if ( !m_functionItems.contains(fnItem) ) return;
-  Mantid::API::IFunction* fun = m_functionItems[fnItem];
-  Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(fun);
-  if (cf)
-  {
-    for(int i=0;i<cf->nFunctions();i++)
-    {
-      QtBrowserItem* fItem = m_functionItems.key(cf->getFunction(i));
-      if (fItem) removeFunctionItems(fItem);
-    }
-  }
-  QMap<QtProperty*,QtBrowserItem*>::iterator it = m_paramItems.begin();
-  for(;it!=m_paramItems.end();)
-  {
-    if (it.value()->parent() == fnItem)
-    {
-      it = m_paramItems.erase(it);
-      //it++;
-    }
-    else
-    {
-      it++;
-    }
-  }
-  m_functionItems.remove(fnItem);
-}
-
-Mantid::API::IFunction* FitPropertyBrowser::theFunction()const
+const Mantid::API::IFunction* FitPropertyBrowser::theFunction()const
 {
   return dynamic_cast<Mantid::API::CompositeFunction*>(m_compositeFunction);
 }
 
 void FitPropertyBrowser::checkFunction()
 {
-  m_compositeFunction->checkFunction();
-  for(int i=0;i<m_compositeFunction->nParams();i++)
-  {
-    Mantid::API::ParameterReference ref(m_compositeFunction,i);
-    Mantid::API::IFunction* fun = ref.getFunction();
-    int iPar = ref.getIndex();
-    QtProperty* parProp = getParameterProperty(fun,iPar);
-    QList<QtProperty*> subs = parProp->subProperties();
-
-    QtProperty* lowerProp = 0;
-    QtProperty* upperProp = 0;
-    QtProperty* tieProp = 0;
-    Mantid::API::ParameterTie* tie = fun->getTie(iPar);
-    Mantid::API::IConstraint* c = fun->firstConstraint();
-    while(c)
-    {
-      if (c->getIndex() == iPar)
-      {
-        break;
-      }
-      c = fun->nextConstraint();
-    }
-
-    for(int j=0;j<subs.size();j++)
-    {
-      if (subs[j]->propertyName() == "Tie")
-      {
-        tieProp = subs[j];
-      }
-      if (subs[j]->propertyName() == "Lower Bound")
-      {
-        lowerProp = subs[j];
-      }
-      if (subs[j]->propertyName() == "Upper Bound")
-      {
-        upperProp = subs[j];
-      }
-    }
-
-    if (tie)
-    {
-      m_changeSlotsEnabled = false;
-      if (!tieProp)
-      {
-        tieProp = m_stringManager->addProperty( "Tie" );
-        parProp->addSubProperty(tieProp);
-        m_ties[tieProp] = tie;
-      }
-      QString str = QString::fromStdString(tie->asString(m_compositeFunction));
-      m_stringManager->setValue(tieProp,str.split("=")[1]);
-      m_changeSlotsEnabled = true;
-    }
-    else
-    {
-      if (tieProp)
-      {
-        parProp->removeSubProperty(tieProp);
-        m_ties.remove(tieProp);
-      }
-    }
-
-    if (c)
-    {
-      bool hasLower = false;
-      bool hasUpper = false;
-      double lower,upper;
-      extractLowerAndUpper(c->asString(),lower,upper,hasLower,hasUpper);
-      if (hasUpper && !upperProp)
-      {
-        upperProp = addDoubleProperty("Upper Bound");
-        parProp->addSubProperty(upperProp);
-        std::pair<QtProperty*,QtProperty*>& cpair = m_constraints[parProp];
-        cpair.second = upperProp;
-        m_doubleManager->setValue(upperProp,upper);
-      }
-      if (hasLower && !lowerProp)
-      {
-        lowerProp = addDoubleProperty("Lower Bound");
-        parProp->addSubProperty(lowerProp);
-        std::pair<QtProperty*,QtProperty*>& cpair = m_constraints[parProp];
-        cpair.first = lowerProp;
-        m_doubleManager->setValue(lowerProp,lower);
-      }
-    }
-    else // if !c
-    {
-      if (upperProp)
-      {
-        parProp->removeSubProperty(upperProp);
-        m_constraints.remove(parProp);
-      }
-      if (lowerProp)
-      {
-        parProp->removeSubProperty(lowerProp);
-        if (m_constraints.contains(parProp))
-        {
-          m_constraints.remove(parProp);
-        }
-      }
-    }
-  } // for i
-}
-
-/// Extracts lower and upper bounds form a string of the form 1<Sigma<3, or 1<Sigma or Sigma < 3
-void FitPropertyBrowser::extractLowerAndUpper(const std::string& str,double& lo,double& up,bool& hasLo, bool& hasUp)const
-{
-  hasLo = false;
-  hasUp = false;
-  QStringList lst = QString::fromStdString(str).split("<");
-  if (lst.size() == 3)
-  {
-    hasLo = true;
-    hasUp = true;
-    lo = lst[0].toDouble();
-    up = lst[2].toDouble();
-  }
-  else if (lst.size() == 2)
-  {
-    lo = lst[0].toDouble(&hasLo);
-    up = lst[1].toDouble(&hasUp);
-  }
 
 }
 
@@ -2189,5 +1547,50 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction* f)const
       }
     }
     catch(...){}
+  }
+}
+
+void FitPropertyBrowser::addAutoBackground()
+{
+  if (m_autoBgName.empty()) return;
+  bool hasPlot = false;
+  PropertyHandler* ch = currentHandler();
+  if (m_autoBackground)
+  {
+    if (ch == m_autoBackground)
+    {
+      ch = NULL;
+    }
+    hasPlot = m_autoBackground->hasPlot();
+    m_autoBackground->removeFunction();
+    m_autoBackground = NULL;
+  }
+  PropertyHandler* h = getHandler()->addFunction(m_autoBgName);
+  if (!h) return;
+  m_autoBackground = h;
+  getHandler()->calcBaseAll();
+  if (hasPlot)
+  {
+    setCurrentFunction(h);
+    emit plotCurrentGuess();
+    if (ch)
+    {
+      setCurrentFunction(ch);
+    }
+  }
+}
+
+void FitPropertyBrowser::setAutoBackgroundName(const std::string& aName)
+{
+  try
+  {
+    boost::shared_ptr<Mantid::API::IFunction> f = 
+      Mantid::API::FunctionFactory::Instance().create(aName);
+    m_auto_back = true;
+    m_autoBgName = aName;
+  }
+  catch(...)
+  {
+    m_auto_back = false;
   }
 }

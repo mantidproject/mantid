@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/IFunctionWithLocation.h"
 
 namespace Mantid
 {
@@ -39,7 +39,7 @@ namespace API
 class DLLExport IBackgroundFunction : public IFunctionWithLocation
 {
 public:
-
+  virtual void fit(const std::vector<double>& X,const std::vector<double>& Y) = 0;
 };
 
 } // namespace API

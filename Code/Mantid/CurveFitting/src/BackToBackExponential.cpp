@@ -25,7 +25,7 @@ void BackToBackExponential::init()
 }
 
 
-void BackToBackExponential::function(double* out, const double* xValues, const int& nData)
+void BackToBackExponential::function(double* out, const double* xValues, const int& nData)const
 {
     const double& I = getParameter("I");
     const double& a = getParameter("A");

@@ -1052,10 +1052,20 @@ void Graph::updateSecondaryAxis(int axis)
 void Graph::setAutoScale()
 {	
 	for (int i = 0; i < QwtPlot::axisCnt; i++)
-		d_plot->setAxisAutoScale(i);
+  {
+    if ( !m_fixed_axes.contains(i) )
+    {
+      d_plot->setAxisAutoScale(i);
+    }
+  }
 	d_plot->replot();
 	updateScale();
 	emit modifiedGraph();
+}
+
+void Graph::setFixedScale(int axis)
+{
+  m_fixed_axes.insert(axis);
 }
 
 void Graph::initScaleLimits()
@@ -3417,6 +3427,7 @@ void Graph::removeCurve(int index)
             disableTools();
     }
 
+  c->aboutToBeDeleted();
 	d_plot->removeCurve(c_keys[index]);
 	n_curves--;
 

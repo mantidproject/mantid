@@ -22,7 +22,7 @@ void Lorentzian::init()
 }
 
 
-void Lorentzian::function(double* out, const double* xValues, const int& nData)
+void Lorentzian::function(double* out, const double* xValues, const int& nData)const
 {
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");

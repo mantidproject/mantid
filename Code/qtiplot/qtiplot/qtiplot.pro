@@ -461,6 +461,7 @@ HEADERS  += src/ApplicationWindow.h \
 	    src/Mantid/WorkspaceObserver.h \
 	    src/Mantid/UserFitFunctionDialog.h \
 	    src/Mantid/FitPropertyBrowser.h \
+	    src/Mantid/PropertyHandler.h \
 	    src/Mantid/IFunctionWrapper.h \
 	    src/Mantid/FitParameterTie.h \
 	    src/Mantid/RemoveErrorsDialog.h \
@@ -641,6 +642,7 @@ SOURCES  += src/ApplicationWindow.cpp \
             src/Mantid/WorkspaceObserver.cpp \
 	    src/Mantid/UserFitFunctionDialog.cpp \
 	    src/Mantid/FitPropertyBrowser.cpp \
+	    src/Mantid/PropertyHandler.cpp \
 	    src/Mantid/IFunctionWrapper.cpp \
 	    src/Mantid/FitParameterTie.cpp \
 	    src/Mantid/RemoveErrorsDialog.cpp \

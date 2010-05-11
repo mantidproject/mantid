@@ -20,7 +20,7 @@ public:
     declareParameter("sig",1.);
   }
   std::string name()const{return "ParameterTieTest_Gauss";}
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double c = getParameter("cen");
     double h = getParameter("hi");
@@ -87,7 +87,7 @@ public:
     declareParameter("b");
   }
   std::string name()const{return "ParameterTieTest_Linear";}
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -117,7 +117,7 @@ public:
     declareParameter("B1e2Ta_");
   }
   std::string name()const{return "ParameterTieTest_Nothing";}
-  void function(double* out, const double* xValues, const int& nData){}
+  void function(double* out, const double* xValues, const int& nData)const{}
 };
 
 class ParameterTieTest : public CxxTest::TestSuite

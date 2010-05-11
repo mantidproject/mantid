@@ -54,7 +54,7 @@ namespace Mantid
       std::string name()const{return "UserFunction";}
 
       /// Function you want to fit to.
-      void function(double* out, const double* xValues, const int& nData);
+      void function(double* out, const double* xValues, const int& nData)const;
       /// Derivatives of function with respect to active parameters
       void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
@@ -79,13 +79,13 @@ namespace Mantid
       /// muParser instance
       mu::Parser* m_parser;
       /// Used as 'x' variable in m_parser.
-      double m_x;
+      mutable double m_x;
       /// True indicates that input formula contains 'x' variable
       bool m_x_set;
       /// Temporary data storage used in functionDeriv
-      boost::shared_array<double> m_tmp;
+      mutable boost::shared_array<double> m_tmp;
       /// Temporary data storage used in functionDeriv
-      boost::shared_array<double> m_tmp1;
+      mutable boost::shared_array<double> m_tmp1;
 
       /// mu::Parser callback function for setting variables.
       static double* AddVariable(const char *varName, void *pufun);

@@ -49,7 +49,7 @@ public:
 
   std::string name()const{return "ConvolutionTest_Gauss";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double c = getParameter("c");
     double h = getParameter("h");
@@ -119,7 +119,7 @@ public:
 
   std::string name()const{return "ConvolutionTest_Linear";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");

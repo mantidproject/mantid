@@ -25,6 +25,7 @@ class QToolBar;
 class PeakRangeMarker;
 class FitPropertyBrowser;
 class FunctionCurve;
+class PropertyHandler;
 
 namespace Mantid
 {
@@ -32,6 +33,7 @@ namespace Mantid
   {
     class IFunction;
     class CompositeFunction;
+    class MatrixWorkspace;
   }
 }
 
@@ -84,7 +86,7 @@ public:
   /// Set the default peak function
   void setDefaultPeakName(const std::string& fnName);
   /// Prepare a context menu
-  void prepareContextMenu(QMenu& menu);
+  void prepareContextMenu(QMenu& menu); 
 
 public slots:
   void windowStateChanged( Qt::WindowStates oldState, Qt::WindowStates newState );
@@ -96,38 +98,37 @@ signals:
 private slots:
   void functionCleared();
   void currentChanged();
-  void functionRemoved(Mantid::API::IFunction*);
+  void functionRemoved();
   void algorithmFinished(const QString&);
   void workspaceIndexChanged(int i);
   void workspaceNameChanged(const QString&);
-  void parameterChanged(Mantid::API::IFunction*);
+  void parameterChanged(const Mantid::API::IFunction*);
   void startXChanged(double);
   void endXChanged(double);
 
   void addPeak();
   void addBackground();
   void deletePeak();
-  void deleteFunction();
   void fit();
   void undoFit();
   void clear();
 
-  void plotGuess(Mantid::API::IFunction*);
-  void removeGuess(Mantid::API::IFunction*);
-
+  void plotGuess();
+  void removeGuess();
   void plotCurrentGuess();
   void removeCurrentGuess();
 
-  void plotAllGuess();
-  void removeAllGuess();
-
   void curveRemoved();
+  void modifiedGraph();
+
+  void resetRange();
 
 private:
   virtual void draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRect &) const;
   // Add a new peak with centre c and height h. 
   void addPeak(double c,double h);
   void addPeakAt(int x,int y);
+
   // Return the centre of the currently selected peak
   double centre()const;
   // Return the width of the currently selected peak
@@ -147,12 +148,9 @@ private:
   bool clickedOnXMax(double x,double dx);
   // Check if x is near a width marker (+-dx)
   bool clickedOnWidthMarker(double x,double dx);
-  // Check if x is near a peak centre marker (+-dx). If true returns the peak's index or -1 otherwise.
-  Mantid::API::IFunction* clickedOnCentreMarker(double x,double dx);
-  // Get the current peak index
-  Mantid::API::IFunction* current()const{return m_current;}
-  // Change current peak
-  void setCurrent(Mantid::API::IFunction*);
+  // Return valid handler if x is within +- dx around peak's centre
+  PropertyHandler* clickedOnCentreMarker(double x,double dx)const;
+
   // Give new centre and height to the current peak
   void setPeak(double c,double h);
   // Indicates that the marker (and peak tool) is in a process of resetting a peak (changing centre and height)
@@ -173,12 +171,6 @@ private:
   // Set the tool tip text
   void setToolTip(const QString& txt);
 
-  // Shows if a function i is plotted
-  bool hasGuessPlotted(Mantid::API::IFunction*);
-
-  // Checks that the plotted functions exist
-  void checkPlots();
-
   FitPropertyBrowser* fitBrowser()const;
   /// The parent application window
   MantidUI* m_mantidUI;
@@ -186,9 +178,10 @@ private:
   QString m_wsName;
   /// Spectrum index
   int m_spec;
+  /// Pointer to the workspace
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;
 
   bool m_init;      // Is the tool initialized?
-  Mantid::API::IFunction* m_current;    // Index of the current peak
   bool m_width_set; // The width set flag
   double m_width;   // The default width
   bool m_addingPeak;// The adding peak state flag
@@ -198,7 +191,6 @@ private:
   bool m_changingXMin; // Flag indicating that changing of xMin is in progress
   bool m_changingXMax; // Flag indicating that changing of xMax is in progress
   std::string m_defaultPeakName; // The default peak function name
-  QMap<Mantid::API::IFunction*,FunctionCurve*> m_guessCurves; // Pointers to the guess curves
 };
 
 

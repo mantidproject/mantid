@@ -26,6 +26,7 @@ class Jacobian;
 class ParameterTie;
 class IConstraint;
 class ParameterReference;
+class FunctionHandler;
 /** This is an interface to a fitting function - a semi-abstarct class.
     Functions derived from IFunction can be used with the Fit algorithm.
     IFunction defines the structure of a fitting funtion.
@@ -100,8 +101,10 @@ class ParameterReference;
 class DLLExport IFunction
 {
 public:
+  /// Constructor
+  IFunction():m_handler(NULL){}
   /// Virtual destructor
-  virtual ~IFunction(){}
+  virtual ~IFunction();
 
   /// Returns the function's name
   virtual std::string name()const = 0;
@@ -111,11 +114,15 @@ public:
   virtual operator std::string()const{return asString();}
   /// Set the workspace
   virtual void setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax);
+  /// Get the workspace
+  virtual boost::shared_ptr<const API::MatrixWorkspace> getWorkspace()const{return m_workspace;}
+  /// Get workspace index
+  virtual int getWorkspaceIndex()const{return m_workspaceIndex;}
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
   /// Function you want to fit to.
-  virtual void function(double* out, const double* xValues, const int& nData) = 0;
+  virtual void function(double* out, const double* xValues, const int& nData)const = 0;
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
   /// Derivatives to be used in covariance matrix calculation. Override this method some of the fitted parameters
@@ -134,8 +141,6 @@ public:
   virtual int nParams()const = 0;
   /// Returns the index of parameter name
   virtual int parameterIndex(const std::string& name)const = 0;
-  /// Returns the index of a parameter
-  //virtual int parameterIndex(const double* p)const = 0;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const = 0;
   /// Checks if a parameter has been set explicitly
@@ -184,7 +189,6 @@ public:
   virtual bool removeTie(int i) = 0;
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(int i)const = 0;
-  /// Get 
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
@@ -214,6 +218,11 @@ public:
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName))const{return false;}
 
+  /// Set a function handler
+  void setHandler(FunctionHandler* handler);
+  /// Return the handler
+  FunctionHandler* getHandler()const{return m_handler;}
+
 protected:
 
   /// Function initialization. Declare function parameters in this method.
@@ -237,6 +246,9 @@ protected:
   int m_xMinIndex;
   /// Upper bin index
   int m_xMaxIndex;
+
+  /// Pointer to a function handler
+  FunctionHandler* m_handler;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
@@ -271,6 +283,28 @@ protected:
 
 /// Overload operator <<
 DLLExport std::ostream& operator<<(std::ostream& ostr,const IFunction& f);
+
+/**
+ * Classes inherited from FunctionHandler will handle the function.
+ * The intended purpose is to help with displaying nested composite
+ * functions in a tree view. This way a display handler shows only
+ * single function and there is no need to duplicate the function tree
+ * structure.
+ */
+class FunctionHandler
+{
+public:
+  /// Constructor
+  FunctionHandler(IFunction* fun):m_fun(fun){}
+  /// Virtual destructor
+  virtual ~FunctionHandler(){}
+  /// abstract init method. It is called after setting handler to the function
+  virtual void init() = 0;
+  /// Return the handled function
+  const IFunction* function()const{return m_fun;}
+protected:
+  IFunction* m_fun;///< pointer to the handled function
+};
 
 } // namespace API
 } // namespace Mantid

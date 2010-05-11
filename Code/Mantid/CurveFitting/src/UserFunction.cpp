@@ -104,7 +104,7 @@ namespace Mantid
     *  @param xValues The array of nData x-values.
     *  @param nData The size of the fitted data.
     */
-    void UserFunction::function(double* out, const double* xValues, const int& nData)
+    void UserFunction::function(double* out, const double* xValues, const int& nData)const
     {
       for (int i = 0; i < nData; i++) 
       {
@@ -120,7 +120,6 @@ namespace Mantid
     */
     void UserFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
     {
-      //throw Exception::NotImplementedError("No derivative function provided");
       if (nData == 0) return;
       std::vector<double> dp(nParams());
       std::vector<double> param(nParams());

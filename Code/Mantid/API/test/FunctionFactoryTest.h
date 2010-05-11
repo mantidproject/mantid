@@ -25,7 +25,7 @@ public:
     declareParameter("a1");
   }
   std::string name()const{return "FunctionFactoryTest_FunctA";}
-  void function(double* out, const double* xValues, const int& nData){}
+  void function(double* out, const double* xValues, const int& nData)const{}
   void functionDeriv(Jacobian* out, const double* xValues, const int& nData){}
   bool hasAttribute(const std::string& attName)const
   {
@@ -68,7 +68,7 @@ public:
 
   std::string name()const{return "FunctionFactoryTest_FunctB";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
   }
   void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
@@ -84,7 +84,7 @@ public:
 
   std::string name()const{return "FunctionFactoryTest_CompFunctA";}
 
-  void function(double* out, const double* xValues, const int& nData){}
+  void function(double* out, const double* xValues, const int& nData)const{}
   void functionDeriv(Jacobian* out, const double* xValues, const int& nData){}
   bool hasAttribute(const std::string& attName)const
   {
@@ -109,7 +109,7 @@ public:
 
   std::string name()const{return "FunctionFactoryTest_CompFunctB";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
   }
   void functionDeriv(Jacobian* out, const double* xValues, const int& nData)

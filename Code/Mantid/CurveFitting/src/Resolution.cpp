@@ -17,7 +17,7 @@ using namespace API;
 
 DECLARE_FUNCTION(Resolution)
 
-void Resolution::function(double* out, const double* xValues, const int& nData)
+void Resolution::function(double* out, const double* xValues, const int& nData)const
 {
   if (nData <= 0) return;
 

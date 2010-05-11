@@ -164,6 +164,11 @@ void PlotCurve::restoreCurveLayout(const QStringList& lst)
 	}
 }
 
+void PlotCurve::aboutToBeDeleted()
+{
+  emit forgetMe(this);
+}
+
 DataCurve::DataCurve(Table *t, const QString& xColName, const QString& name, int startRow, int endRow):
     PlotCurve(name),
 	d_table(t),

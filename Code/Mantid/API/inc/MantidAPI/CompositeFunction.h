@@ -57,7 +57,7 @@ public:
   std::string asString()const;
 
   /// Function you want to fit to.
-  void function(double* out, const double* xValues, const int& nData);
+  void function(double* out, const double* xValues, const int& nData)const;
   /// Derivatives of function with respect to active parameters
   void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
   /// Derivatives to be used in covariance matrix calculation. 
@@ -142,6 +142,8 @@ public:
   void removeFunction(int i, bool del=true);
   /// Replace a function
   void replaceFunction(int i,IFunction* f);
+  /// Replace a function
+  void replaceFunction(const IFunction* f_old,IFunction* f_new);
   /// Get the function index
   int functionIndex(int i)const;
   /// Get the function index

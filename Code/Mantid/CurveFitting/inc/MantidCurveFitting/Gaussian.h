@@ -69,7 +69,7 @@ namespace Mantid
       virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const int& nData);
       virtual void setActiveParameter(int i,double value);
       virtual double activeParameter(int i)const;
-      virtual void function(double* out, const double* xValues, const int& nData);
+      virtual void function(double* out, const double* xValues, const int& nData)const;
       virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
     protected:

@@ -21,7 +21,7 @@ public:
 
   std::string name()const{return "IFT_Funct";}
 
-  void function(double* out, const double* xValues, const int& nData)
+  void function(double* out, const double* xValues, const int& nData)const
   {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");

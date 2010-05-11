@@ -61,7 +61,9 @@ FunctionCurve::FunctionCurve(const Mantid::API::IFunction* fun,
     const QString& wsName, int wsIndex, const QString& name):
 	PlotCurve(name),
 	d_function_type(FunctionCurve::Normal),
-  d_variable("") // This indicates that mu::Parser is not used
+  d_variable(""), // This indicates that mu::Parser is not used
+  d_from(0),
+  d_to(0)
 {
 	setType(Graph::Function);
 
@@ -75,6 +77,10 @@ d_variable(c.d_variable),
 d_formulas(c.d_formulas),
 d_from(c.d_from),
 d_to(c.d_to)
+{
+}
+
+FunctionCurve::~FunctionCurve()
 {
 }
 

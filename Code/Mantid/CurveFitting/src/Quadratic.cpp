@@ -26,7 +26,7 @@ void Quadratic::init()
 /*! \relates Quadratic 
  * Implements the quadratic function
  */
-void Quadratic::function(double* out, const double* xValues, const int& nData)
+void Quadratic::function(double* out, const double* xValues, const int& nData)const
 {
     const double& a0 = getParameter("A0");
     const double& a1 = getParameter("A1");

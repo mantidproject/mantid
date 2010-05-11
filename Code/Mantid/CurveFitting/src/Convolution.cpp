@@ -42,7 +42,7 @@ void Convolution::init()
 /**
  * Calculates convolution of the two member functions. 
  */
-void Convolution::function(double* out, const double* xValues, const int& nData)
+void Convolution::function(double* out, const double* xValues, const int& nData)const
 {
   if (nFunctions() == 0)
   {
