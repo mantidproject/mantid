@@ -12,12 +12,10 @@ import MantidBuild
 Import('env')
 myenv = env.Clone()
 myenv.Append(CPPDEFINES=[('IN_MANTID_MAIN',1)])
-#shared_list = env['SHARED_LIST']
-#static_list = env['STATIC_LIST']
 libList = myenv['MYLIBLIST']
 libDirList = myenv['MYLIBDIRLIST']
 
-if os.name == 'posix':
+if platform.system() == 'Linux':
     # MG: By default, ld populates the symbol table with only those referenced within the linked libraries.
     # Given that we use dlopen we may not necessarily reference all symbols at link time so we need to 
     # ensure that the symbol table is populated with all symbols defined within the linked libraries.
