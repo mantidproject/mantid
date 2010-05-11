@@ -23,14 +23,23 @@ n=`ls | wc -l`
 if [ $n -gt 0 ]; then
     rev=`ls | head`
     rm -f $rev
-    echo "Building $rev"
     log_file=/var/www/html/buildlog/build_$rev.log
-    /home/faa59/Mantid/Code/RPM_Kit/nightly_build $rev $log_file > $log_file 2>&1
+    echo "Building $rev"
+    echo "Building $rev" > $log_file
+    sh nightly_build "$rev" $log_file >> $log_file 2>&1
 fi
 if test "$1" = "HEAD" -o "`date +%H%M`" = "2227"; then
-    echo "Building HEAD"
     log_file=/var/www/html/buildlog/build.log
-    /home/faa59/Mantid/Code/RPM_Kit/nightly_build "" $log_file > $log_file 2>&1
+    if test "$1" = "HEAD"; then
+	rev=""
+        echo "Building HEAD"
+        echo "Building HEAD" > $log_file
+    else
+	rev=`svn info http://svn.mantidproject.org/mantid/tags/systemtested  |  grep "Last Changed Rev:"  |  awk '{print $4}'`
+        echo "Building system tested version ($rev)"
+        echo "Building system tested version ($rev)" > $log_file
+    fi
+    sh nightly_build "$rev" $log_file >> $log_file 2>&1
 fi
 if test -r "$log_file"; then
     scp $log_file mantidlog@shadow.nd.rl.ac.uk:/isis/www/mantidproject_download/logs/Linux/rpmbuild

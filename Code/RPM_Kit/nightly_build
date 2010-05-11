@@ -24,9 +24,9 @@ function error_found() {
     exit $exit_status
 }
 
-build_base=/home/faa59/mybuilds
+build_base=$HOME/mybuilds
 find $build_base -type f -name 'Mantid-*' -exec rm -f {} \;
-cd ~faa59/Mantid
+cd ../..
 svn update
 svn update # do twice in case of network issue
 log_file="$2"
