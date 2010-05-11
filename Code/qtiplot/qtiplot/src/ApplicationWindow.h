@@ -1165,6 +1165,7 @@ public:
 	bool confirmCloseTable, confirmCloseMatrix, confirmClosePlot2D, confirmClosePlot3D,confirmCloseInstrWindow;
 	bool confirmCloseFolder, confirmCloseNotes;
 	bool titleOn, autoSave, drawBackbones, allAxesOn, autoscale2DPlots, antialiasing2DPlots;
+  bool xLogNotLin, yLogNotLin, zLogNotLin;
 	int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, axesLineWidth, canvasFrameWidth;
 	QColor legendBackground, legendTextColor, defaultArrowColor;
 	int defaultArrowHeadLength, defaultArrowHeadAngle;

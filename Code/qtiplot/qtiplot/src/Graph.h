@@ -336,7 +336,10 @@ public slots:
   void logYlinX();
   /// set both the x and y axes to linear
   void linearAxes();
-
+  /// set a log scale for the color bar
+  void logColor();
+  /// change the color bar to use a linear scale
+  void linColor();
   //! \name Curves Layout
   //@{
   CurveLayout initCurveLayout(int style, int curves = 0);

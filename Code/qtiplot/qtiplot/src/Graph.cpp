@@ -1312,6 +1312,18 @@ void Graph::linearAxes()
   notifyChanges();
 }
 
+void Graph::logColor()
+{
+	setScale(QwtPlot::yRight, QwtScaleTransformation::Log10);
+  notifyChanges();
+}
+
+void Graph::linColor()
+{
+	setScale(QwtPlot::yRight, QwtScaleTransformation::Linear);
+  notifyChanges();
+}
+
 void Graph::setAxisScale(int axis, double start, double end, int type, double step,
 				  int majorTicks, int minorTicks)
 {

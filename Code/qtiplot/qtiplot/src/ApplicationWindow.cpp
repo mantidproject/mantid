@@ -577,6 +577,9 @@ void ApplicationWindow::initGlobalConstants()
 	canvasFrameWidth = 0;
 	defaultPlotMargin = 0;
 	drawBackbones = true;
+  xLogNotLin = true;
+  yLogNotLin = true;
+  zLogNotLin = true;
 	axesLineWidth = 1;
 	autoscale2DPlots = true;
 	autoScaleFonts = true;
@@ -2614,6 +2617,7 @@ void ApplicationWindow::setPreferences(Graph* g)
 		g->setTicksLength (minTicksLength, majTicksLength);
 		g->setAxesLinewidth(axesLineWidth);
 		g->drawAxesBackbones(drawBackbones);
+//    need to call the plot functions for log/linear, errorbars and distribution stuff
 	}
 
 	g->initFonts(plotAxesFont, plotNumbersFont);
@@ -4680,6 +4684,9 @@ void ApplicationWindow::readSettings()
 	canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
 	defaultPlotMargin = settings.value("/Margin", 0).toInt();
 	drawBackbones = settings.value("/AxesBackbones", true).toBool();
+  xLogNotLin = settings.value("/AxisXLog", false).toBool();
+  yLogNotLin = settings.value("/AxisYLog", false).toBool();
+  zLogNotLin = settings.value("/AxisZLog", false).toBool();
 	axesLineWidth = settings.value("/AxesLineWidth", 1).toInt();
 	autoscale2DPlots = settings.value("/Autoscale", true).toBool();
 	autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
@@ -4980,6 +4987,9 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
 	settings.setValue("/Margin", defaultPlotMargin);
 	settings.setValue("/AxesBackbones", drawBackbones);
+  settings.setValue("/AxisXLog", xLogNotLin);
+  settings.setValue("/AxisYLog", yLogNotLin);
+  settings.setValue("/AxisZLog", zLogNotLin);
 	settings.setValue("/AxesLineWidth", axesLineWidth);
 	settings.setValue("/Autoscale", autoscale2DPlots);
 	settings.setValue("/AutoScaleFonts", autoScaleFonts);
@@ -9109,6 +9119,8 @@ void ApplicationWindow::showGraphContextMenu()
     return;
   }
 
+	QMenu axes(this);
+	QMenu colour(this);
 	QMenu exports(this);
 	QMenu copy(this);
 	QMenu prints(this);
@@ -9139,6 +9151,17 @@ void ApplicationWindow::showGraphContextMenu()
 		cm.insertItem(QPixmap(paste_xpm), tr("&Paste Image"), plot, SIGNAL(pasteMarker()));
 	}
 	cm.insertSeparator();
+	axes.insertItem(tr("Lo&g(x),Log(y)"), ag, SLOT(logLogAxes()));
+	axes.insertItem(tr("Log(&x),Linear(y)"), ag, SLOT(logXLinY()));
+	axes.insertItem(tr("Linear(x),Log(&y)"), ag, SLOT(logYlinX()));
+	axes.insertItem(tr("&Linear(x),Linear(y)"), ag, SLOT(linearAxes()));
+	cm.insertItem(tr("&Axes"), &axes);
+
+	colour.insertItem(tr("Lo&g Scale"), ag, SLOT(logColor()));
+	colour.insertItem(tr("&Linear"), ag, SLOT(linColor()));
+	cm.insertItem(tr("&Color Bar"), &colour);
+
+  cm.insertSeparator();
 	copy.insertItem(tr("&Layer"), this, SLOT(copyActiveLayer()));
 	copy.insertItem(tr("&Window"), plot, SLOT(copyAllLayers()));
 	cm.insertItem(QPixmap(copy_xpm), tr("&Copy"), &copy);
