@@ -105,8 +105,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_sptr ws, ApplicationWind
 
   connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
-  m_funct.init();
-
   askOnCloseEvent(false);
 }
 
@@ -807,6 +805,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   // Calculate xStart(), xEnd(), yStart(), yEnd()
   boundingRect();
   
+  m_funct.init();
   plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
 
   const Mantid::API::Axis* ax = m_workspace->getAxis(0);
@@ -889,6 +888,7 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Gr
 
   // Set the range on the thirs, colour axis
   double minz, maxz;
+  m_funct.init();
   range(&minz,&maxz);
   Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
   if( spgrm )
