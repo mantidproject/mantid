@@ -1247,6 +1247,60 @@ void Graph::setScale(int axis, double start, double end, double step,
 // 	d_plot->replot();
 // 	d_plot->axisWidget(axis)->repaint();
 }
+/** Overloads function setScale() with one with a much easier
+*  argument list
+*  @param axis the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
+*  @param scaleType either QwtScaleTransformation::Log10 or ::Linear
+*/
+void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
+{
+  const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(axis);
+  double start = QMIN(scDiv->lBound(), scDiv->hBound());
+  double end = QMAX(scDiv->lBound(), scDiv->hBound());
+
+  ScaleEngine *scaleEng = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+
+  // call the QTiPlot function set scale which takes many arguments, fill the arguments with the same settings the plot already has
+  setScale(axis, start, end, axisStep(axis),
+    scDiv->ticks(QwtScaleDiv::MajorTick).count(),
+    d_plot->axisMaxMinor(axis), scaleType,
+    scaleEng->testAttribute(QwtScaleEngine::Inverted),
+    scaleEng->axisBreakLeft(),
+    scaleEng->axisBreakRight(),
+    scaleEng->minTicksBeforeBreak(),
+    scaleEng->minTicksAfterBreak(),
+    scaleEng->log10ScaleAfterBreak(),
+    scaleEng->breakWidth(),
+    scaleEng->hasBreakDecoration());
+}
+
+void Graph::logLogAxes()
+{
+	setScale(QwtPlot::xBottom, QwtScaleTransformation::Log10);
+	setScale(QwtPlot::yLeft, QwtScaleTransformation::Log10);
+  notifyChanges();
+}
+
+void Graph::logXLinY()
+{
+	setScale(QwtPlot::xBottom, QwtScaleTransformation::Log10);
+  setScale(QwtPlot::yLeft, QwtScaleTransformation::Linear);
+  notifyChanges();
+}
+
+void Graph::logYlinX()
+{
+	setScale(QwtPlot::xBottom, QwtScaleTransformation::Linear);
+	setScale(QwtPlot::yLeft, QwtScaleTransformation::Log10);
+  notifyChanges();
+}
+
+void Graph::linearAxes()
+{
+	setScale(QwtPlot::xBottom, QwtScaleTransformation::Linear);
+	setScale(QwtPlot::yLeft, QwtScaleTransformation::Linear);
+  notifyChanges();
+}
 
 void Graph::setAxisScale(int axis, double start, double end, int type, double step,
 				  int majorTicks, int minorTicks)

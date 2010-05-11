@@ -321,11 +321,20 @@ public slots:
                 double left_break = -DBL_MAX, double right_break = DBL_MAX, int pos = 50,
                 double stepBeforeBreak = 0.0, double stepAfterBreak = 0.0, int minTicksBeforeBreak = 4,
                 int minTicksAfterBreak = 4, bool log10AfterBreak = false, int breakWidth = 4, bool breakDecoration = true);
+  void setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType);
   double axisStep(int axis){return d_user_step[axis];};
   //! Set the axis scale
   void setAxisScale(int axis, double start, double end, int type = -1, double step = 0.0,
                     int majorTicks = 5, int minorTicks = 5);
-
+  
+	/// in plot windows change both axis to log-log
+  void logLogAxes();
+  /// the plot's x-axis will be log and y-axis linear
+  void logXLinY();
+  /// the plot's y-axis will be log and x-axis linear
+  void logYlinX();
+  /// set both the x and y axes to linear
+  void linearAxes();
 
   //! \name Curves Layout
   //@{
