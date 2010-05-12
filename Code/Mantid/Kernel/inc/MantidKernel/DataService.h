@@ -122,8 +122,8 @@ public:
     class DeleteNotification: public DataServiceNotification
     {
     public:
-        /// Constructor
-		DeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
+      /// Constructor
+      DeleteNotification(const std::string& name,const boost::shared_ptr<T> obj):DataServiceNotification(name,obj){}
     };
 
     /// Clear notification is sent when the service is cleared
@@ -134,42 +134,17 @@ public:
       ClearNotification() :  DataServiceNotification("", boost::shared_ptr<T>()) {}
     };
     /// Rename notification is sent from Renameworkspaces algorithm after a workspace is renamed
-	/// when we rename a workspace the RenameWorkspace algorithm places the member workspace outside the groupworkspace in Mnatidplot treewidget
-	/// This is bocz the ADS add/addorreplace methods adds the member workspace as a normal workspace to mantidplot.
-	/// This notification is send to mantidplot to place the member workspces underneath the groupworkspace
-	class RenameNotification: public DataServiceNotification
+    class RenameNotification: public DataServiceNotification
     {
     public:
         /// Constructor
-		RenameNotification(const std::string& name,const std::string& newwsname):DataServiceNotification(name,boost::shared_ptr<T>()),m_outwsname(newwsname){}
+      RenameNotification(const std::string& name,const std::string& newwsname):DataServiceNotification(name,boost::shared_ptr<T>()),m_outwsname(newwsname){}
 
-		///name of the new workspace
-		const std::string& new_objectname()const{return m_outwsname;}
-	private:
-		std::string m_outwsname;
+      ///name of the new workspace
+      const std::string& new_objectname()const{return m_outwsname;}
+    private:
+      std::string m_outwsname;
     };
-	/// GroupWorkspaces notification is send from GroupWorkspaces algorithm
-	/// this notification removes the workspaces selected for grouping from mantid tree
-	class GroupWorkspacesNotification: public DataServiceNotification
-    {
-    public:
-        /// Constructor
-		GroupWorkspacesNotification(const std::vector<std::string>& wsnames):DataServiceNotification("",boost::shared_ptr<T>()),m_wsnames(wsnames){}
-		/// returns the workspace names
-		const std::vector<std::string>& inputworkspacenames()const{return m_wsnames;}
-	private:
-		std::vector<std::string> m_wsnames;
-    };
-	/// UnGroupWorkspace notification is send from UnGroupWorkspace algorithm
-	/// this notification adds disassembled workspaces to mantid tree
-	class UnGroupWorkspaceNotification: public DataServiceNotification
-    {
-    public:
-        /// Constructor
-		UnGroupWorkspaceNotification(const std::string& name):DataServiceNotification(name,boost::shared_ptr<T>()){}
-	private:
-    };
-	
 
   /// Add an object to the service
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)

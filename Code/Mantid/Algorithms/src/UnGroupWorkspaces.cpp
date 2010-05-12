@@ -25,24 +25,28 @@ namespace Mantid
      */
     void UnGroupWorkspace::exec()
     {
-      std::string inputws=getProperty("InputWorkspace");
-      // send this notification to mantidplot to add the group member workspaces to mantid tree
-      // this is bcoz the ADS remove will delete the group workspace and its member workspaces from mantid tree
-      //send this before ADS remove to mantidplot
-      Mantid::API::AnalysisDataService::Instance().notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupedNotification(inputws));
-      
-      Workspace_sptr wsSptr=API::AnalysisDataService::Instance().retrieve(inputws);
+      std::string inputws = getProperty("InputWorkspace");
+      Mantid::API::AnalysisDataServiceImpl & data_store = Mantid::API::AnalysisDataService::Instance();
+      Workspace_sptr wsSptr = data_store.retrieve(inputws);
+      WorkspaceGroup_sptr wsGrpSptr = boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+      if( !wsGrpSptr )
+      {
+	throw std::runtime_error("Selected Workspace is not a WorkspaceGroup");
+      }
+
+      // Notify observers that a WorkspaceGroup is about to be unrolled
+      data_store.notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
       if(wsSptr)
       {
 	//if this is group workspace
-	WorkspaceGroup_sptr wsGrpSptr=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+
 	if(wsGrpSptr)
 	{
 	  API::AnalysisDataService::Instance().remove(inputws);
 	}
 	else
 	{
-	  throw std::runtime_error("Selected Workspace is not a Groupworkspace to Ungroup ");
+	
 	}
       }
     }

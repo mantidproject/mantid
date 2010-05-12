@@ -5,8 +5,9 @@
 #include <QTreeWidget>
 #include <QComboBox>
 #include <QPoint>
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 class MantidUI;
 class ApplicationWindow;
@@ -14,6 +15,7 @@ class MantidTreeWidget;
 class QLabel;
 class QMenu;
 class QPushButton;
+class QTreeWidget;
 
 
 class MantidDockWidget: public QDockWidget
@@ -23,13 +25,7 @@ public:
   MantidDockWidget(MantidUI *mui, ApplicationWindow *parent);
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
-private:
-  bool isItWorkspaceGroupItem(Mantid::API::WorkspaceGroup_sptr grpSPtr,const QString & ws_name);
-  bool isItWorkspaceGroupParentItem(Mantid::API::Workspace_sptr workspace);
-  void removeFromWSGroupNames(const QString& wsName);
-  Mantid::API::WorkspaceGroup_sptr getGroupWorkspace(QTreeWidgetItem *parentItem);
-  bool isTheWorkspaceToRenameIsaGroupMember(const QString & wsName,Mantid::API::WorkspaceGroup_sptr grpwsSptr );
-  QTreeWidgetItem* getparentWorkspaceItem(const QString & wsName);
+
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
   void deleteWorkspaces();
@@ -37,17 +33,27 @@ public slots:
 protected slots:
   void popupMenu(const QPoint & pos);
   void workspaceSelected();
+
 private slots:
-  void populateWorkspaceData(Mantid::API::Workspace_sptr workspace, QTreeWidgetItem* ws_item);
-  void updateWorkspaceEntry(const QString &, Mantid::API::Workspace_sptr);
-  void updateWorkspaceTreeafterRenaming(const QString &, const QString &);
-  void workspaceGroupRemoved(const QString &);
+  void addTreeEntry(const QString &, Mantid::API::Workspace_sptr);
+  void replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr);
+  void populateChildData(QTreeWidgetItem* item);
+  void unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr);
   void removeWorkspaceEntry(const QString &);
-  void populateWorkspaceTree(const QString & ws_name, Mantid::API::Workspace_sptr,bool isitParent);
   void treeSelectionChanged();
-  void groupOrungroupWorkspaces();
+  void groupingButtonClick();
   void plotSpectra();
 
+private:
+  bool processGroup(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
+  void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace_sptr workspace);
+  QTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
+  void updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
+  void updateWorkspaceGroupEntry(const QString & ws_name, Mantid::API::WorkspaceGroup_sptr workspace);
+  void populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
+  void populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item);
+  void populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
+  
 protected:
   MantidTreeWidget * m_tree;
   friend class MantidUI;
@@ -58,7 +64,8 @@ private:
   QPushButton *m_groupButton;
 
   static Mantid::Kernel::Logger& logObject;
-
+/// A list of workspace group members that will be added in subsequent add notifications
+  QHash<QString, char> m_wsgroup_members;
 };
 
 
@@ -74,7 +81,7 @@ public:
 
   QList<QString> getSelectedWorkspaceNames() const;
   QMultiMap<QString,int> chooseSpectrumFromSelected() const;
-
+  
 private:
   QPoint m_dragStartPosition;
   MantidUI *m_mantidUI;

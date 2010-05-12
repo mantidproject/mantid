@@ -16,6 +16,7 @@ namespace Mantid
 
 namespace API
 {
+
 /** The Analysis data service stores instances of the Workspace objects and
     anything that derives from template class DynamicFactory<Mantid::Kernel::IAlgorithm>.
     This is the primary data service that
@@ -51,6 +52,33 @@ namespace API
 */
 class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
+ public:
+  /** @name Extra notifications only applicable to the ADS */
+  //@{
+  /// GroupWorkspaces notification is send from GroupWorkspaces algorithm
+  class GroupWorkspacesNotification: public DataServiceNotification
+  {
+  public:
+    /// Constructor
+    GroupWorkspacesNotification(const std::vector<std::string>& wsnames) : 
+      DataServiceNotification("",boost::shared_ptr<API::Workspace>()), m_wsnames(wsnames){}
+    /// returns the workspace names
+    const std::vector<std::string>& inputworkspacenames()const { return m_wsnames; }
+  
+  private:
+      std::vector<std::string> m_wsnames;
+    };
+
+    /// UnGroupingWorkspace notification is sent from UnGroupWorkspace algorithm before the WorkspaceGroup is removed from the
+    /// DataService
+    class UnGroupingWorkspaceNotification: public DataServiceNotification
+    {
+    public:
+      /// Constructor
+      UnGroupingWorkspaceNotification(const std::string& name,const boost::shared_ptr<Workspace> &obj) : 
+	DataServiceNotification(name,obj) {}
+    };
+    //@}
 
  public:
   /// Overwridden add member to attach the name to the workspace when a workspace object is added to the service
@@ -104,11 +132,11 @@ typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>:
 typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification WorkspaceRenameNotification;
 typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::RenameNotification>& WorkspaceRenameNotification_ptr;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification WorkspacesGroupedNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::GroupWorkspacesNotification>& WorkspacesGroupedNotification_ptr;
+typedef AnalysisDataServiceImpl::GroupWorkspacesNotification WorkspacesGroupedNotification;
+typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification>& WorkspacesGroupedNotification_ptr;
 
-typedef Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification WorkspaceUnGroupedNotification;
-typedef const Poco::AutoPtr<Mantid::Kernel::DataService<Mantid::API::Workspace>::UnGroupWorkspaceNotification>& WorkspaceUnGroupedNotification_ptr;
+typedef AnalysisDataServiceImpl::UnGroupingWorkspaceNotification WorkspaceUnGroupingNotification;
+typedef const Poco::AutoPtr<AnalysisDataServiceImpl::UnGroupingWorkspaceNotification>& WorkspaceUnGroupingNotification_ptr;
 
 
 } // Namespace API

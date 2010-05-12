@@ -245,18 +245,18 @@ public:
 
 signals:
 
-    // These signals are to be fired from methods run in threads other than the main one
-    // (e.g. handlers of algorithm notifications)
+  // These signals are to be fired from methods run in threads other than the main one
+  // (e.g. handlers of algorithm notifications)
 
-    // Signals that the UI needs to be updated.
-    void workspace_added(const QString &, Mantid::API::Workspace_sptr);
-    void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
-    void workspace_removed(const QString &);
-    void workspaces_cleared();
-    void algorithms_updated();
-	void workspace_renamed(const QString &, const QString);
-	void workspaces_grouped(const QStringList&);
-	void workspace_ungrouped(const QString&);
+  // Signals that the UI needs to be updated.
+  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
+  void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
+  void workspace_removed(const QString &);
+  void workspaces_cleared();
+  void algorithms_updated();
+  void workspace_renamed(const QString &, const QString);
+  void workspaces_grouped(const QStringList&);
+  void workspace_ungrouped(const QString&, Mantid::API::Workspace_sptr);
 
     void needToCreateLoadDAEMantidMatrix(const QString&);
 
@@ -407,8 +407,8 @@ private:
   Poco::NObserver<MantidUI, Mantid::API::WorkspacesGroupedNotification> m_groupworkspacesObserver;
 
   //handles notification send by UnGroupworkspaces algorithm 
-  void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupedNotification_ptr pNf);
-  Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupedNotification> m_ungroupworkspaceObserver;
+  void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
+  Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupingNotification> m_ungroupworkspaceObserver;
 
  
 	//#678

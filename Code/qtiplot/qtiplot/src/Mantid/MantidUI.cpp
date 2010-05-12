@@ -1174,8 +1174,7 @@ void MantidUI::showAlgMonitor()
 
 void MantidUI::handleAddWorkspace(WorkspaceAddNotification_ptr pNf)
 {
-  // workspace_added ?
-  emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
+  emit workspace_added(QString::fromStdString(pNf->object_name()),(pNf->object()));
 }
 
 void MantidUI::handleReplaceWorkspace(WorkspaceAfterReplaceNotification_ptr pNf)
@@ -1212,9 +1211,9 @@ void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_
     }
   emit workspaces_grouped(wsList);
 }
-void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupedNotification_ptr pNf)
+void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf)
 {
-  emit workspace_ungrouped(QString::fromStdString(pNf->object_name()));
+  emit workspace_ungrouped(QString::fromStdString(pNf->object_name()), pNf->object());
 }
 
 void MantidUI::logMessage(const Poco::Message& msg)
