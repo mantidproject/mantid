@@ -17,12 +17,12 @@ trap "rm -f $LOCK_FILE" 0
 
 echo "Running $0"
 
-[ -d /tmp/mantid_build ] || mkdir /tmp/mantid_build
-cd /tmp/mantid_build
-n=`ls | wc -l`
+MBUILD=/tmp/mantid_build
+[ -d $MBUILD ] || mkdir $MBUILD
+n=`ls $MBUILD | wc -l`
 if [ $n -gt 0 ]; then
-    rev=`ls | head`
-    rm -f $rev
+    rev=`( cd $MBUILD; ls ) | head -1`
+    rm -f $MBUILD/$rev
     log_file=/var/www/html/buildlog/build_$rev.log
     echo "Building $rev"
     echo "Building $rev" > $log_file
