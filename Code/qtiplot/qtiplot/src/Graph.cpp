@@ -3561,6 +3561,18 @@ void Graph::closeEvent(QCloseEvent *e)
        e->accept();
 }
 
+void Graph::hideEvent(QHideEvent* e)
+{
+  for(int i=0;i<curves();++i)
+  {
+    PlotCurve* c = dynamic_cast<PlotCurve*>(curve(i));
+    if (c)
+    {
+      c->aboutToBeDeleted();
+    }
+  }
+}
+
 bool Graph::zoomOn()
 {
 	return (d_zoomer[0]->isEnabled() || d_zoomer[1]->isEnabled());

@@ -313,6 +313,7 @@ public slots:
   void contextMenuEvent(QContextMenuEvent *);
   void closeEvent(QCloseEvent *e);
   bool focusNextPrevChild ( bool next );
+  void hideEvent(QHideEvent* e);
   //@}
 
   //! Set axis scale
