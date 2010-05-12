@@ -219,6 +219,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CostFuncIgnorePosPeaks.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\CostFuncLeastSquares.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Fit.cpp"
 				>
 			</File>
@@ -357,6 +365,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidCurveFitting\CostFuncIgnorePosPeaks.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\CostFuncLeastSquares.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\Fit.h"
 				>
 			</File>
@@ -398,6 +414,10 @@
 			</File>
 			<File
 				RelativePath=".\test\GaussianTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\ICostFunction.h"
 				>
 			</File>
 			<File

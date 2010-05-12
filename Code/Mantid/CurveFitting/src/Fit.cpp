@@ -11,6 +11,9 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidCurveFitting/ICostFunction.h"
+#include "MantidCurveFitting/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFuncIgnorePosPeaks.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
@@ -93,6 +96,8 @@ namespace CurveFitting
     double * sqrtWeightData;
     /// pointer to instance of Fit
     Fit* fit;
+    /// pointer to the cost function
+    ICostFunction* costFunc;
     /// Jacobi matrix interface
     JacobianImpl1 J;
     /// To use the none least-squares gsl algorithms within the gsl least-squared framework
@@ -172,21 +177,10 @@ namespace CurveFitting
     struct FitData1 *p = (struct FitData1 *)params;
     double * l_holdCalculatedData = p->holdCalculatedData;
 
+    // calculate yCal and store in l_holdCalculatedData
     p->fit->function (x->data, l_holdCalculatedData, p->X, p->n);
 
-    // function() return calculated data values. Need to convert this values into
-    // calculated-observed devided by error values used by GSL
-    for (size_t i = 0; i<p->n; i++)
-      l_holdCalculatedData[i] = 
-      (  l_holdCalculatedData[i] - p->Y[i] ) * p->sqrtWeightData[i];
-
-    double retVal = 0.0;
-
-    for (unsigned int i = 0; i < p->n; i++)
-      retVal += l_holdCalculatedData[i]*l_holdCalculatedData[i];
-
-
-    return retVal;
+    return p->costFunc->val(p->Y, p->sqrtWeightData, l_holdCalculatedData, p->n);
   }
 
   /** Calculating derivatives of least-squared cost function
@@ -206,15 +200,8 @@ namespace CurveFitting
     p->J.setJ(p->holdCalculatedJacobian);
     p->fit->functionDeriv (x->data, &p->J, p->X, p->n);
 
-    for (size_t iP = 0; iP < p->p; iP++) 
-    {
-      df->data[iP] = 0.0;
-      for (size_t iY = 0; iY < p->n; iY++) 
-      {
-        df->data[iP] += 2.0*(l_holdCalculatedData[iY]-p->Y[iY]) * p->holdCalculatedJacobian->data[iY*p->p + iP] 
-                        * p->sqrtWeightData[iY]*p->sqrtWeightData[iY];
-      }
-    }
+    p->costFunc->deriv(p->Y, p->sqrtWeightData, l_holdCalculatedData, 
+                     p->holdCalculatedJacobian->data, df->data, p->p, p->n);
   }
 
   /** Return both derivatives and function value of least-squared cost function. This function is
@@ -277,6 +264,12 @@ namespace CurveFitting
     minimizerOptions.push_back("BFGS");
     declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
+
+    std::vector<std::string> costFuncOptions;
+    minimizerOptions.push_back("Least squares");
+    minimizerOptions.push_back("Ignore positive peaks");
+    declareProperty("CostFunction","Least squares",new ListValidator(minimizerOptions),
+      "The cost function to be used for the fit, default is Least squares", Direction::InOut);
   }
 
 
@@ -460,7 +453,6 @@ namespace CurveFitting
         gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
     }
 
-
     // set-up GSL container to be used with GSL simplex algorithm
 
     gsl_multimin_function gslSimplexContainer;
@@ -488,6 +480,33 @@ namespace CurveFitting
     gslLeastSquaresContainer.n = l_data.n;
     gslLeastSquaresContainer.p = l_data.p;
     gslLeastSquaresContainer.params = &l_data;
+
+
+    // set-up which cost function to use
+
+    std::string costFunction = getProperty("CostFunction");
+    if ( methodUsed.compare("Levenberg-Marquardt") == 0 )
+    {
+
+      if ( costFunction.compare("Least squares") != 0 )
+      {
+        g_log.information() << "Levenberg-Marquardt only works with Least squares"
+                          << " revert cost function to least squares\n";
+      }
+      costFunction = "Least squares";
+    }
+
+    if ( costFunction.compare("Least squares") == 0 )
+      l_data.costFunc = new CostFuncLeastSquares();
+    else if ( costFunction.compare("Ignore positive peaks") == 0 )
+      l_data.costFunc = new CostFuncIgnorePosPeaks();
+    else
+    {
+      g_log.error("Unrecognised cost function in Fit. Default to Least squares\n");
+      costFunction = "Least squares";
+      l_data.costFunc = new CostFuncLeastSquares();
+    }
+
 
     // set-up minimizer
 
@@ -768,6 +787,7 @@ namespace CurveFitting
     delete [] l_data.X;
     delete [] l_data.sqrtWeightData;
     delete [] l_data.holdCalculatedData;
+    delete l_data.costFunc;
     gsl_matrix_free (l_data.holdCalculatedJacobian);
     gsl_vector_free (initFuncArg);
     
