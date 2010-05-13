@@ -7,11 +7,6 @@
 #include "WorkspaceCreationHelper.hh"
 #include "MantidAlgorithms/Exponential.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/Workspace1D.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -39,7 +34,6 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
 
     AnalysisDataService::Instance().add("test_in11", work_in1);
-    //TS_ASSERT_THROWS_NOTHING(work_in1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_in1")));
     setError(work_in1);
 
     Exponential alg;
@@ -57,7 +51,7 @@ public:
     checkData(work_in1, work_out1);
 
     AnalysisDataService::Instance().remove("test_out1");
-    AnalysisDataService::Instance().remove("test_in12");
+    AnalysisDataService::Instance().remove("test_in11");
 
   }
 
