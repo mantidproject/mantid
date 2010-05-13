@@ -422,6 +422,9 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
       // If loading instrument definition file fails, run LoadInstrumentFromRaw instead
       if( !executionSuccessful )
       {
+        g_log.information() << "Instrument definition file " 
+          << fullPathIDF << " not found. Attempt to load information about \n"
+          << "the instrument from raw data file.\n";
         runLoadInstrumentFromRaw(localWorkspace);
       }
     }
@@ -429,9 +432,6 @@ Kernel::Property*  LoadRaw2::createPeriodLog(int period)const
     /// Run LoadInstrumentFromRaw as a sub-algorithm (only if loading from instrument definition file fails)
     void LoadRaw2::runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
-        << "the instrument from raw data file.\n";
-
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
       loadInst->setPropertyValue("Filename", m_filename);
       // Set the workspace property to be the same one filled above

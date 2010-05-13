@@ -549,6 +549,9 @@ void LoadRawHelper::runLoadInstrument(const std::string& fileName,DataObjects::W
   // If loading instrument definition file fails, run LoadInstrumentFromRaw instead
   if (!executionSuccessful)
   {
+    g_log.information() << "Instrument definition file " 
+      << fullPathIDF << " not found. Attempt to load information about \n"
+      << "the instrument from raw data file.\n";
     runLoadInstrumentFromRaw(fileName,localWorkspace);
   }
   else
@@ -565,9 +568,6 @@ void LoadRawHelper::runLoadInstrument(const std::string& fileName,DataObjects::W
 /// Run LoadInstrumentFromRaw as a sub-algorithm (only if loading from instrument definition file fails)
 void LoadRawHelper::runLoadInstrumentFromRaw(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace)
 {
-  g_log.information() << "Instrument definition file not found. Attempt to load information about \n"
-      << "the instrument from raw data file.\n";
-
   IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
   loadInst->setPropertyValue("Filename", fileName);
   // Set the workspace property to be the same one filled above
