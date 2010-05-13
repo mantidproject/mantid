@@ -28,7 +28,7 @@ namespace CurveFitting
       if ( yCal[i] <= 0.0 )
         retVal += yCal[i]*yCal[i];
       else
-        retVal += 6.0*log( a*yCal[i]*gsl_sf_erf(yCal[i]*b) );
+        retVal += 6.0*log( a*yCal[i]/gsl_sf_erf(yCal[i]*b) );
     }
 
     return retVal;
@@ -54,7 +54,7 @@ namespace CurveFitting
           double z = ( yData[iY] - yCal[iY] ) * inverseError[iY];
           double erf = gsl_sf_erf(b*z);
 
-          outDerivs[iP] -= jacobian[iY*p + iP]*6.0*(2.0*a*b*exp(-b*b*z*z)*z/sqrt(M_PI)+a*erf) / (a*z*erf);
+          outDerivs[iP] -= jacobian[iY*p + iP]*6.0*(-2.0*a*b*exp(-b*b*z*z)*z/sqrt(M_PI)+a*erf) / (a*z*erf);
         }
       }
     }
