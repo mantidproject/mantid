@@ -279,6 +279,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Exponential.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\ExponentialCorrection.cpp"
 				>
 			</File>
@@ -681,7 +685,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\Exponential.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\ExponentialCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\ExponentialTest.h"
 				>
 			</File>
 			<File
