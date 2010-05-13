@@ -104,6 +104,8 @@ public:
   void setOutputName(const std::string&);
   /// Get the minimizer
   std::string minimizer()const;
+  /// Get the cost function
+  std::string costFunction()const;
 
   /// Get the start X
   double startX()const;
@@ -276,6 +278,7 @@ private:
   QtProperty *m_endX;
   QtProperty *m_output;
   QtProperty *m_minimizer;
+  QtProperty *m_costFunction;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
@@ -287,6 +290,8 @@ private:
   mutable QStringList m_workspaceNames;
   /// A list of available minimizers
   mutable QStringList m_minimizers;
+  /// A list of available cost functions
+  mutable QStringList m_costFunctions;
 
   /// A copy of the edited function
   Mantid::API::CompositeFunction* m_compositeFunction;

@@ -114,12 +114,18 @@ m_autoBackground(NULL)
                << "BFGS";
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
 
+  m_costFunction = m_enumManager->addProperty("Cost function");
+  m_costFunctions << "Least squares"
+                  << "Ignore positive peaks";
+  m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
+
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
   settingsGroup->addSubProperty(m_startX);
   settingsGroup->addSubProperty(m_endX);
   settingsGroup->addSubProperty(m_output);
   settingsGroup->addSubProperty(m_minimizer);
+  settingsGroup->addSubProperty(m_costFunction);
 
      /* Create editors and assign them to the managers */
 
@@ -577,6 +583,13 @@ std::string FitPropertyBrowser::minimizer()const
   return m_minimizers[i].toStdString();
 }
 
+/// Get the cost function
+std::string FitPropertyBrowser::costFunction()const
+{
+  int i = m_enumManager->value(m_costFunction);
+  return m_costFunctions[i].toStdString();
+}
+
 /** Called when the function name property changed
  * @param prop A pointer to the function name property m_functionName
  */
@@ -911,6 +924,7 @@ void FitPropertyBrowser::fit()
       simpleFunction = true;
     }
     alg->setPropertyValue("Minimizer",minimizer());
+    alg->setPropertyValue("CostFunction",costFunction());
 
     observeFinish(alg);
     alg->executeAsync();
@@ -983,7 +997,7 @@ void FitPropertyBrowser::init()
 {
   populateFunctionNames();
   populateWorkspaceNames();
-  connect(m_appWindow->mantidUI,SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr)),
+  connect(m_appWindow->mantidUI,SIGNAL(workspace_added(const QString &, Mantid::API::Workspace_sptr)),
     this,SLOT(workspace_added(const QString &, Mantid::API::Workspace_sptr)));
   connect(m_appWindow->mantidUI,SIGNAL(workspace_removed(const QString &)),
     this,SLOT(workspace_removed(const QString &)));
