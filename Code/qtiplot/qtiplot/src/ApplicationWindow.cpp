@@ -577,9 +577,12 @@ void ApplicationWindow::initGlobalConstants()
 	canvasFrameWidth = 0;
 	defaultPlotMargin = 0;
 	drawBackbones = true;
-  xLogNotLin = true;
-  yLogNotLin = true;
-  zLogNotLin = true;
+
+	//these settings are overridden, but the default axes scales are linear
+	xaxisScale = "linear";
+	yaxisScale = "linear";
+	zaxisScale = "linear";
+
 	axesLineWidth = 1;
 	autoscale2DPlots = true;
 	autoScaleFonts = true;
@@ -2624,6 +2627,10 @@ void ApplicationWindow::setPreferences(Graph* g)
 	g->initTitle(titleOn, plotTitleFont);
 	g->setCanvasFrame(canvasFrameWidth);
 	g->plotWidget()->setMargin(defaultPlotMargin);
+	g->setScale(QwtPlot::xBottom, xaxisScale);
+	g->setScale(QwtPlot::yLeft, yaxisScale);
+	// yRight is the color bar, representing a third (z) dimension
+	g->setScale(QwtPlot::yRight, zaxisScale);
 	g->enableAutoscaling(autoscale2DPlots);
 	g->setAutoscaleFonts(autoScaleFonts);
     g->setIgnoreResizeEvents(!autoResizeLayers);
@@ -4684,9 +4691,9 @@ void ApplicationWindow::readSettings()
 	canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
 	defaultPlotMargin = settings.value("/Margin", 0).toInt();
 	drawBackbones = settings.value("/AxesBackbones", true).toBool();
-  xLogNotLin = settings.value("/AxisXLog", false).toBool();
-  yLogNotLin = settings.value("/AxisYLog", false).toBool();
-  zLogNotLin = settings.value("/AxisZLog", false).toBool();
+	xaxisScale = settings.value("/AxisXScale", "linear").toString();
+	yaxisScale = settings.value("/AxisYScale", "linear").toString();
+	zaxisScale = settings.value("/AxisZScale", "linear").toString();
 	axesLineWidth = settings.value("/AxesLineWidth", 1).toInt();
 	autoscale2DPlots = settings.value("/Autoscale", true).toBool();
 	autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
@@ -4987,9 +4994,9 @@ void ApplicationWindow::saveSettings()
 	settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
 	settings.setValue("/Margin", defaultPlotMargin);
 	settings.setValue("/AxesBackbones", drawBackbones);
-  settings.setValue("/AxisXLog", xLogNotLin);
-  settings.setValue("/AxisYLog", yLogNotLin);
-  settings.setValue("/AxisZLog", zLogNotLin);
+  settings.setValue("/AxisXScale", xaxisScale);
+  settings.setValue("/AxisYScale", yaxisScale);
+  settings.setValue("/AxisZScale", zaxisScale);
 	settings.setValue("/AxesLineWidth", axesLineWidth);
 	settings.setValue("/Autoscale", autoscale2DPlots);
 	settings.setValue("/AutoScaleFonts", autoScaleFonts);

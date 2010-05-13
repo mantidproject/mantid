@@ -260,85 +260,10 @@ void ConfigDialog::initPlotsPage()
 	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
 
 	plotsTabWidget = new QTabWidget();
-	plotOptions = new QWidget();
 
-	QVBoxLayout * optionsTabLayout = new QVBoxLayout( plotOptions );
-	optionsTabLayout->setSpacing(5);
+  initOptionsPage();
 
-	QGroupBox * groupBoxOptions = new QGroupBox();
-	optionsTabLayout->addWidget( groupBoxOptions );
-
-	QGridLayout * optionsLayout = new QGridLayout( groupBoxOptions );
-
-	boxAutoscaling = new QCheckBox();
-	boxAutoscaling->setChecked(app->autoscale2DPlots);
-	optionsLayout->addWidget( boxAutoscaling, 0, 0 );
-
-	boxScaleFonts = new QCheckBox();
-	boxScaleFonts->setChecked(app->autoScaleFonts);
-	optionsLayout->addWidget( boxScaleFonts, 0, 1 );
-
-	boxTitle = new QCheckBox();
-	boxTitle->setChecked(app->titleOn);
-	optionsLayout->addWidget( boxTitle, 1, 0 );
-
-	boxAllAxes = new QCheckBox();
-	boxAllAxes->setChecked (app->allAxesOn);
-	optionsLayout->addWidget( boxAllAxes, 1, 1 );
-
-	boxAntialiasing = new QCheckBox();
-	boxAntialiasing->setChecked(app->antialiasing2DPlots);
-	optionsLayout->addWidget( boxAntialiasing, 2, 0 );
-
-	boxBackbones= new QCheckBox();
-	boxBackbones->setChecked(app->drawBackbones);
-	optionsLayout->addWidget( boxBackbones, 2, 1 );
-
-	boxFrame = new QCheckBox();
-	boxFrame->setChecked(app->canvasFrameWidth > 0);
-	optionsLayout->addWidget( boxFrame, 3, 0 );
-
-	labelFrameWidth = new QLabel();
-	optionsLayout->addWidget( labelFrameWidth, 4, 0 );
-	boxFrameWidth= new QSpinBox();
-	optionsLayout->addWidget( boxFrameWidth, 4, 1 );
-	boxFrameWidth->setRange(1, 100);
-	boxFrameWidth->setValue(app->canvasFrameWidth);
-	if (!app->canvasFrameWidth)
-	{
-		labelFrameWidth->hide();
-		boxFrameWidth->hide();
-	}
-
-	lblAxesLineWidth = new QLabel();
-	optionsLayout->addWidget( lblAxesLineWidth, 5, 0 );
-	boxLineWidth= new QSpinBox();
-	boxLineWidth->setRange(0, 100);
-	boxLineWidth->setValue(app->axesLineWidth);
-	optionsLayout->addWidget( boxLineWidth, 5, 1 );
-
-	lblMargin = new QLabel();
-	optionsLayout->addWidget( lblMargin, 6, 0 );
-	boxMargin= new QSpinBox();
-	boxMargin->setRange(0, 1000);
-	boxMargin->setSingleStep(5);
-	boxMargin->setValue(app->defaultPlotMargin);
-	optionsLayout->addWidget( boxMargin, 6, 1 );
-
-	optionsLayout->setRowStretch( 7, 1 );
-
-	boxResize = new QCheckBox();
-	boxResize->setChecked(!app->autoResizeLayers);
-	if(boxResize->isChecked())
-		boxScaleFonts->setEnabled(false);
-
-	optionsTabLayout->addWidget( boxResize );
-
-    boxLabelsEditing = new QCheckBox();
-    boxLabelsEditing->setChecked(!app->d_in_place_editing);
-    optionsTabLayout->addWidget(boxLabelsEditing);
-
-	plotsTabWidget->addTab( plotOptions, QString() );
+  initAxesPage();
 
 	initCurvesPage();
 
@@ -682,6 +607,190 @@ void ConfigDialog::initAppPage()
 	connect( boxSave, SIGNAL( toggled(bool) ), boxMinutes, SLOT( setEnabled(bool) ) );
 }
 
+void ConfigDialog::initOptionsPage()
+{
+	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+
+  plotOptions = new QWidget();
+
+	QVBoxLayout * optionsTabLayout = new QVBoxLayout( plotOptions );
+	optionsTabLayout->setSpacing(5);
+
+	QGroupBox * groupBoxOptions = new QGroupBox();
+	optionsTabLayout->addWidget( groupBoxOptions );
+
+	QGridLayout * optionsLayout = new QGridLayout( groupBoxOptions );
+
+	boxAutoscaling = new QCheckBox();
+	boxAutoscaling->setChecked(app->autoscale2DPlots);
+	optionsLayout->addWidget( boxAutoscaling, 0, 0 );
+
+	boxScaleFonts = new QCheckBox();
+	boxScaleFonts->setChecked(app->autoScaleFonts);
+	optionsLayout->addWidget( boxScaleFonts, 0, 1 );
+
+	boxTitle = new QCheckBox();
+	boxTitle->setChecked(app->titleOn);
+	optionsLayout->addWidget( boxTitle, 1, 0 );
+
+	boxAntialiasing = new QCheckBox();
+	boxAntialiasing->setChecked(app->antialiasing2DPlots);
+	optionsLayout->addWidget( boxAntialiasing, 1, 1 );
+
+	boxFrame = new QCheckBox();
+	boxFrame->setChecked(app->canvasFrameWidth > 0);
+	optionsLayout->addWidget( boxFrame, 2, 0 );
+
+	labelFrameWidth = new QLabel();
+	optionsLayout->addWidget( labelFrameWidth, 3, 0 );
+	boxFrameWidth= new QSpinBox();
+	optionsLayout->addWidget( boxFrameWidth, 3, 1 );
+	boxFrameWidth->setRange(1, 100);
+	boxFrameWidth->setValue(app->canvasFrameWidth);
+	if (!app->canvasFrameWidth)
+	{
+		labelFrameWidth->hide();
+		boxFrameWidth->hide();
+	}
+
+	lblMargin = new QLabel();
+	optionsLayout->addWidget( lblMargin, 4, 0 );
+	boxMargin= new QSpinBox();
+	boxMargin->setRange(0, 1000);
+	boxMargin->setSingleStep(5);
+	boxMargin->setValue(app->defaultPlotMargin);
+	optionsLayout->addWidget( boxMargin, 4, 1 );
+
+	optionsLayout->setRowStretch( 7, 1 );
+
+	boxResize = new QCheckBox();
+	boxResize->setChecked(!app->autoResizeLayers);
+	if(boxResize->isChecked())
+		boxScaleFonts->setEnabled(false);
+
+	optionsTabLayout->addWidget( boxResize );
+
+  boxLabelsEditing = new QCheckBox();
+  boxLabelsEditing->setChecked(!app->d_in_place_editing);
+  optionsTabLayout->addWidget(boxLabelsEditing);
+
+  plotsTabWidget->addTab( plotOptions, QString() );
+}
+
+void ConfigDialog::initAxesPage()
+{
+	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+
+  plotAxes = new QWidget();
+
+  plotsTabWidget->addTab( plotAxes, QString() );
+
+	QGroupBox * axesGroupBox = new QGroupBox();
+	QGridLayout * axisBoxLayout = new QGridLayout( axesGroupBox );
+
+  lblXLogLin = new QLabel();
+	axisBoxLayout->addWidget( lblXLogLin, 0, 0 );
+
+  cbXLog = new QComboBox();
+  cbXLog->addItem(tr("linear"));
+  cbXLog->addItem("log");
+  if ( app->xaxisScale == "log" )
+  {
+    cbXLog->setCurrentIndex(1);
+  }
+  else
+  {
+    cbXLog->setCurrentIndex(0);
+  }
+	axisBoxLayout->addWidget(cbXLog, 0, 1);
+
+  lblYLogLin = new QLabel();
+	axisBoxLayout->addWidget( lblYLogLin, 1, 0 );
+
+  cbYLog = new QComboBox();
+  cbYLog->addItem(tr("linear"));
+  cbYLog->addItem("log");
+  if ( app->yaxisScale == "log" )
+  {
+    cbYLog->setCurrentIndex(1);
+  }
+  else
+  {
+    cbYLog->setCurrentIndex(0);
+  }
+	axisBoxLayout->addWidget(cbYLog, 1, 1);
+	
+  lblZLogLin = new QLabel();
+	axisBoxLayout->addWidget( lblZLogLin, 2, 0 );
+
+  cbZLog = new QComboBox();
+  cbZLog->addItem(tr("linear"));
+  cbZLog->addItem("log");
+  if ( app->zaxisScale == "log" )
+  {
+    cbZLog->setCurrentIndex(1);
+  }
+  else
+  {
+    cbZLog->setCurrentIndex(0);
+  }
+	axisBoxLayout->addWidget(cbZLog, 2, 1);
+
+  lblAxesLineWidth = new QLabel();
+	axisBoxLayout->addWidget( lblAxesLineWidth, 3, 0 );
+	boxLineWidth= new QSpinBox();
+	boxLineWidth->setRange(0, 100);
+	boxLineWidth->setValue(app->axesLineWidth);
+	axisBoxLayout->addWidget( boxLineWidth, 3, 1 );
+
+  boxAllAxes = new QCheckBox();
+	boxAllAxes->setChecked (app->allAxesOn);
+	axisBoxLayout->addWidget( boxAllAxes, 4, 0 );
+
+	boxBackbones= new QCheckBox();
+	boxBackbones->setChecked(app->drawBackbones);
+	axisBoxLayout->addWidget( boxBackbones, 4, 1 );
+
+	QHBoxLayout *axesPageLayout = new QHBoxLayout( plotAxes );
+	axesPageLayout->addWidget( axesGroupBox );
+}
+
+void ConfigDialog::initCurvesPage()
+{
+	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
+
+	curves = new QWidget();
+
+	QGroupBox * curvesGroupBox = new QGroupBox();
+	QGridLayout * curvesBoxLayout = new QGridLayout( curvesGroupBox );
+
+	lblCurveStyle = new QLabel();
+	curvesBoxLayout->addWidget( lblCurveStyle, 0, 0 );
+	boxCurveStyle = new QComboBox();
+	curvesBoxLayout->addWidget( boxCurveStyle, 0, 1 );
+
+	lblLineWidth = new QLabel();
+	curvesBoxLayout->addWidget( lblLineWidth, 1, 0 );
+	boxCurveLineWidth = new DoubleSpinBox('f');
+	boxCurveLineWidth->setLocale(app->locale());
+	boxCurveLineWidth->setSingleStep(0.1);
+	boxCurveLineWidth->setRange(0.1, 100);
+	boxCurveLineWidth->setValue(app->defaultCurveLineWidth);
+	curvesBoxLayout->addWidget( boxCurveLineWidth, 1, 1 );
+
+	lblSymbSize = new QLabel();
+	curvesBoxLayout->addWidget( lblSymbSize, 2, 0 );
+	boxSymbolSize = new QSpinBox();
+	boxSymbolSize->setRange(1,100);
+	boxSymbolSize->setValue(app->defaultSymbolSize/2);
+	curvesBoxLayout->addWidget( boxSymbolSize, 2, 1 );
+
+	curvesBoxLayout->setRowStretch( 3, 1 );
+
+	QHBoxLayout * curvesPageLayout = new QHBoxLayout( curves );
+	curvesPageLayout->addWidget( curvesGroupBox );
+}
+
 void ConfigDialog::initFittingPage()
 {
 	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
@@ -754,43 +863,6 @@ void ConfigDialog::initFittingPage()
 
 	connect(samePointsBtn, SIGNAL(toggled(bool)), this, SLOT(showPointsBox(bool)));
 	connect(generatePointsBtn, SIGNAL(toggled(bool)), this, SLOT(showPointsBox(bool)));
-}
-
-
-void ConfigDialog::initCurvesPage()
-{
-	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
-
-	curves = new QWidget();
-
-	QGroupBox * curvesGroupBox = new QGroupBox();
-	QGridLayout * curvesBoxLayout = new QGridLayout( curvesGroupBox );
-
-	lblCurveStyle = new QLabel();
-	curvesBoxLayout->addWidget( lblCurveStyle, 0, 0 );
-	boxCurveStyle = new QComboBox();
-	curvesBoxLayout->addWidget( boxCurveStyle, 0, 1 );
-
-	lblLineWidth = new QLabel();
-	curvesBoxLayout->addWidget( lblLineWidth, 1, 0 );
-	boxCurveLineWidth = new DoubleSpinBox('f');
-	boxCurveLineWidth->setLocale(app->locale());
-	boxCurveLineWidth->setSingleStep(0.1);
-	boxCurveLineWidth->setRange(0.1, 100);
-	boxCurveLineWidth->setValue(app->defaultCurveLineWidth);
-	curvesBoxLayout->addWidget( boxCurveLineWidth, 1, 1 );
-
-	lblSymbSize = new QLabel();
-	curvesBoxLayout->addWidget( lblSymbSize, 2, 0 );
-	boxSymbolSize = new QSpinBox();
-	boxSymbolSize->setRange(1,100);
-	boxSymbolSize->setValue(app->defaultSymbolSize/2);
-	curvesBoxLayout->addWidget( boxSymbolSize, 2, 1 );
-
-	curvesBoxLayout->setRowStretch( 3, 1 );
-
-	QHBoxLayout * curvesPageLayout = new QHBoxLayout( curves );
-	curvesPageLayout->addWidget( curvesGroupBox );
 }
 
 void ConfigDialog::initConfirmationsPage()
@@ -928,6 +1000,7 @@ void ConfigDialog::languageChange()
 
 	//plots 2D page
 	plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotOptions), tr("Options"));
+  plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotAxes), tr("Axes"));
 	plotsTabWidget->setTabText(plotsTabWidget->indexOf(curves), tr("Curves"));
 	plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotTicks), tr("Ticks"));
 	plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotFonts), tr("Fonts"));
@@ -936,6 +1009,10 @@ void ConfigDialog::languageChange()
     boxLabelsEditing->setText(tr("&Disable in-place editing"));
 	lblMinTicksLength->setText(tr("Length"));
 
+  lblXLogLin->setText(tr("Default X scale"));
+  lblYLogLin->setText(tr("Default Y scale"));
+  lblZLogLin->setText(tr("Default color scale"));
+
 	lblAxesLineWidth->setText(tr("Axes linewidth" ));
 	lblMajTicksLength->setText(tr("Length" ));
 	lblMajTicks->setText(tr("Major Ticks" ));
@@ -943,6 +1020,7 @@ void ConfigDialog::languageChange()
 
 	lblMargin->setText(tr("Margin" ));
 	labelFrameWidth->setText(tr("Frame width" ));
+
 	boxBackbones->setText(tr("Axes &backbones"));
 	boxFrame->setText(tr("Canvas Fra&me"));
 	boxAllAxes->setText(tr("Sho&w all axes"));
@@ -1185,6 +1263,11 @@ void ConfigDialog::apply()
 		app->canvasFrameWidth = 0;
 
 	app->drawBackbones = boxBackbones->isChecked();
+  
+  app->xaxisScale = cbXLog->currentText();
+  app->yaxisScale = cbYLog->currentText();
+  app->zaxisScale = cbZLog->currentText();
+
 	app->axesLineWidth = boxLineWidth->value();
 	app->defaultPlotMargin = boxMargin->value();
 	app->setGraphDefaultSettings(boxAutoscaling->isChecked(),boxScaleFonts->isChecked(),

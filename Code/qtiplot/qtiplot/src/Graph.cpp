@@ -1283,6 +1283,22 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
     scaleEng->breakWidth(),
     scaleEng->hasBreakDecoration());
 }
+/** This setScale() overload takes a string "log" or "linear"
+*  as the argument that sets the scale type
+*  @param axis the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
+*  @param logOrLin either "log" or "linear"
+*/
+void Graph::setScale(QwtPlot::Axis axis, QString logOrLin)
+{
+  if ( logOrLin == "log" )
+  {
+    setScale(axis, QwtScaleTransformation::Log10);
+  }
+  else if ( logOrLin == "linear" )
+  {
+    setScale(axis, QwtScaleTransformation::Linear);
+  }
+}
 
 void Graph::logLogAxes()
 {

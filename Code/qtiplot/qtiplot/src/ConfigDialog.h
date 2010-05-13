@@ -105,6 +105,8 @@ private slots:
 
 private:
 	void initPlotsPage();
+  void initOptionsPage();
+  void initAxesPage();
 	void initAppPage();
 	void initCurvesPage();
 	void initPlots3DPage();
@@ -125,12 +127,15 @@ private:
     QPushButton *buttonOk, *buttonCancel, *buttonApply;
 	QPushButton* buttonTextFont, *buttonHeaderFont;
 	QStackedWidget * generalDialog;
-	QWidget *appColors, *tables, *plotOptions, *plotTicks, *plotFonts, *confirm, *plotPrint;
+	QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
 	QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage;
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
 	QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
-	QCheckBox *boxSave, *boxBackbones, *boxAllAxes, *boxShowLegend, *boxSmoothMesh;
+	QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
+  QCheckBox *boxAllAxes;
+  QLabel *lblXLogLin, *lblYLogLin, *lblZLogLin;
+  QComboBox *cbXLog,  *cbYLog, *cbZLog;
 	QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize;
 	QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
 	QSpinBox *boxMinutes, *boxLineWidth, *boxFrameWidth, *boxResolution, *boxMargin, *boxPrecision, *boxAppPrecision;
