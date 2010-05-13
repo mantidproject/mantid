@@ -1,11 +1,10 @@
-
 #!/bin/sh
 # 
 # @file make_rpm.sh RPM build script for Mantid
 # @author Freddie Akeroyd, STFC ISIS Facility
 # @date 30/03/2009
 #
-function usage { 
+usage() { 
 cat << EOF
 Build an rpm file for Mantid
 
@@ -97,5 +96,9 @@ cp -f Mantid.spec $topdir/SPECS
 rm -f Mantid.spec
 cd $topdir/SPECS
 echo "Building RPM file in $topdir/RPMS"
-rpmbuild -ba Mantid.spec
+if test -e /etc/debian_version; then
+    rpmbuild --nodeps -ba Mantid.spec
+else
+    rpmbuild -ba Mantid.spec
+fi
 echo "Building complete - check $topdir/RPMS"

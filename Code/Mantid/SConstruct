@@ -108,23 +108,15 @@ if os.name == 'nt':
 
 else:
 
-	if not rpmBuild:
-		print "* COMMENCING LINUX BUILD *"
-		f=open('Build/Scons_Linux.conf', 'r')
-		for ln in f:
-			boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
-			poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
-			python_path=MantidBuild.procHeaderPath(ln,'PYTHON_LIB',python_path)
-			boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
-			nexus_path=MantidBuild.procHeader(ln,'NEXUS_ROOT',nexus_path)
-		f.close()
-	else:
-		boost_path=''
-		poco_path=''
-		third_party=''
-		python_path = ''
-		boost_append = ''
-		nexus_path= ''
+	print "* COMMENCING LINUX BUILD *"
+	f=open('Build/Scons_Linux.conf', 'r')
+	for ln in f:
+		boost_path=MantidBuild.procHeaderPath(ln,'BOOST_ROOT',boost_path)
+		poco_path=MantidBuild.procHeaderPath(ln,'POCO_ROOT',poco_path)
+		python_path=MantidBuild.procHeaderPath(ln,'PYTHON_LIB',python_path)
+		boost_append=MantidBuild.procHeader(ln,'BOOST_APPEND',boost_append)
+		nexus_path=MantidBuild.procHeader(ln,'NEXUS_ROOT',nexus_path)
+	f.close()
 		
 	# Store boost append and nexus path to pass to dependent SConscripts
 	env['BOOST_APPEND'] = boost_append

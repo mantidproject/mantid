@@ -3,6 +3,7 @@
 %define is_suse %(test -e /etc/SuSE-release && echo 1 || echo 0)
 %define is_fedora %(test -e /etc/fedora-release && echo 1 || echo 0)
 %define is_rhel %(test -e /etc/redhat-release && echo 1 || echo 0)
+%define is_debian %(test -e /etc/debian_version && echo 1 || echo 0)
 
 Name:		Mantid
 Summary:	Data Analysis For ISIS
@@ -109,11 +110,16 @@ for i in qtiplotrc.py qtiUtil.py mantidplotrc.py mantidplot.py; do
 done
 install -m755 Code/Mantid/PythonAPI/MantidFramework.py $RPM_BUILD_ROOT/%{mantidbindir}
 
+# on ubuntu sip goes into /usr/lib/pyshared etc
+# not sure why this is needed
+%if %{is_debian}
+%else
 install -m755 %{pythonsitepackages}/sip.so $RPM_BUILD_ROOT/%{mantidbindir}
 for i in %{pythonsitepackages}/PyQt4/*.so; do
     install -m755 $i $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4/`basename $i`
 done
 install -m755 %{pythonsitepackages}/PyQt4/__init__.py $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4/__init__.py
+%endif
 
 cp -r instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
 cp -r Code/Mantid/PythonAPI/scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
@@ -148,6 +154,8 @@ if test `whoami` = root; then ldconfig; fi
 if test `whoami` = root; then ldconfig; fi
 
 %changelog
+* Thu May 13 2010 Freddie Akeroyd <freddie.akeroyd@stfc.ac.uk> - 1.0.3
+- Configure Debian/Ubuntu builds via alien
 * Mon Apr 07 2010 Freddie Akeroyd <freddie.akeroyd@stfc.ac.uk> - 1.0.2
 - Create PythonAlgorithms directory
 * Mon Mar 30 2009 Freddie Akeroyd <freddie.akeroyd@stfc.ac.uk> - 1.0.1
