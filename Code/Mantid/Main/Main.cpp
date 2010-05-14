@@ -37,7 +37,7 @@ int main()
   //NOTE:  Any code in here is temporary for debugging purposes only, nothing is safe!
   //load a raw file
     IAlgorithm* loader = fm.createAlgorithm("LoadRaw");
-    loader->setPropertyValue("Filename", "../../../Test/Data/MER02257.raw");
+    loader->setPropertyValue("Filename", "../../Test/Data/MER02257.raw");
 
     std::string outputSpace = "outer";
     loader->setPropertyValue("OutputWorkspace", outputSpace);    
