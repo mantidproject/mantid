@@ -118,6 +118,51 @@ void PropertyHandler::init()
 
 }
 
+/**
+ * Attribute visitor to create a QtProperty. Depending on the attribute type
+ * the appropriate apply method is used.
+ */
+class CreateAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty*>
+{
+public:
+  CreateAttributeProperty(FitPropertyBrowser* browser,const QString& name)
+    :m_browser(browser),m_name(name){}
+protected:
+  /// Create string property
+  QtProperty* apply(const std::string& str)const
+  {
+    QtProperty* prop = NULL;
+    if (m_name.toLower() == "filename")
+    {
+      prop = m_browser->m_filenameManager->addProperty(m_name);
+      m_browser->m_filenameManager->setValue(prop,QString::fromStdString(str));
+    }
+    else
+    {
+      prop = m_browser->m_stringManager->addProperty(m_name);
+      m_browser->m_stringManager->setValue(prop,QString::fromStdString(str));
+    }
+    return prop;
+  }
+  /// Create double property
+  QtProperty* apply(const double& d)const
+  {
+    QtProperty* prop = m_browser->addDoubleProperty(m_name);
+    m_browser->m_doubleManager->setValue(prop,d);
+    return prop;
+  }
+  /// Create int property
+  QtProperty* apply(const int& i)const
+  {
+    QtProperty* prop = m_browser->m_intManager->addProperty(m_name);
+    m_browser->m_intManager->setValue(prop,i);
+    return prop;
+  }
+private:
+  FitPropertyBrowser* m_browser;
+  QString m_name;
+};
+
 void PropertyHandler::initAttributes()
 {
   std::vector<std::string> attNames = function()->getAttributeNames();
@@ -128,19 +173,10 @@ void PropertyHandler::initAttributes()
   m_attributes.clear();
   for(int i=0;i<attNames.size();i++)
   {
-    QtProperty* prop = 0;
     QString aName = QString::fromStdString(attNames[i]);
-    QString aValue = QString::fromStdString(function()->getAttribute(attNames[i]));
-    if (aName.toLower() == "filename")
-    {
-      prop = m_browser->m_filenameManager->addProperty(aName);
-      m_browser->m_filenameManager->setValue(prop,aValue);
-    }
-    else
-    {
-      prop = m_browser->m_stringManager->addProperty(aName);
-      m_browser->m_stringManager->setValue(prop,aValue);
-    }
+    Mantid::API::IFunction::Attribute att = function()->getAttribute(attNames[i]);
+    QtProperty* prop = att.apply(CreateAttributeProperty(m_browser,aName));
+//    m_fun->setAttribute(attNames[i],att);
     m_item->property()->addSubProperty(prop);
     m_attributes << prop;
   }
@@ -447,6 +483,44 @@ bool PropertyHandler::setParameter(QtProperty* prop)
 }
 
 /**
+ * Visitor setting new attribute value. Depending on the attribute type
+ * the appropriate apply method is used.
+ */
+class SetAttribute: public Mantid::API::IFunction::AttributeVisitor<>
+{
+public:
+  SetAttribute(FitPropertyBrowser* browser,QtProperty* prop)
+    :m_browser(browser),m_prop(prop){}
+protected:
+  /// Create string property
+  void apply(std::string& str)const
+  {
+    QString attName = m_prop->propertyName();
+    if (attName.toLower() == "filename")
+    {
+      str = m_browser->m_filenameManager->value(m_prop).toStdString();
+    }
+    else
+    {
+      str = m_browser->m_stringManager->value(m_prop).toStdString();
+    }
+  }
+  /// Create double property
+  void apply(double& d)const
+  {
+    d = m_browser->m_doubleManager->value(m_prop);
+  }
+  /// Create int property
+  void apply(int& i)const
+  {
+    i = m_browser->m_intManager->value(m_prop);
+  }
+private:
+  FitPropertyBrowser* m_browser;
+  QtProperty* m_prop;
+};
+
+/**
 * Set function attribute value read from a QtProperty
 * @param prop The (string) property with the new attribute value
 * @return true if successfull
@@ -456,18 +530,12 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
   if (m_attributes.contains(prop))
   {
     QString attName = prop->propertyName();
-    std::string attValue;
-    if (attName.toLower() == "filename")
-    {
-      attValue = m_browser->m_filenameManager->value(prop).toStdString();
-    }
-    else
-    {
-      attValue = m_browser->m_stringManager->value(prop).toStdString();
-    }
     try
     {
-      m_fun->setAttribute(attName.toStdString(),attValue);
+      Mantid::API::IFunction::Attribute att = 
+        m_fun->getAttribute(attName.toStdString());
+      att.apply(SetAttribute(m_browser,prop));
+      m_fun->setAttribute(attName.toStdString(),att);
       initParameters();
     }
     catch(std::exception& e)
@@ -476,6 +544,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
       {
         QMessageBox::critical(m_browser->m_appWindow,"Mantid - Error",e.what());
       }
+      return false;
     }
     return true;
   }
@@ -525,9 +594,19 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
     // Create new function
     int i = m_browser->m_enumManager->value(prop);
     const QString& fnName = m_browser->m_registeredFunctions[i];
-    Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().
-      createUnwrapped(fnName.toStdString());
-    f->initialize();
+    Mantid::API::IFunction* f = NULL;
+    try
+    {
+      f = Mantid::API::FunctionFactory::Instance().
+        createUnwrapped(fnName.toStdString());
+      f->initialize();
+    }
+    catch(std::exception& e)
+    {
+      QMessageBox::critical(NULL,"Mantid - Error","Cannot create function "+fnName+
+        "\n"+e.what());
+      return NULL;
+    }
 
     // turn of the change slots (doubleChanged() etc) to avoid infinite loop
     m_browser->m_changeSlotsEnabled = false;
@@ -565,6 +644,12 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
     PropertyHandler* h = new PropertyHandler(f,m_parent,m_browser,m_item);
     m_parent->replaceFunction(f_old,f);
     f->setHandler(h);
+    // calculate the baseline
+    if (h->pfun())
+    {
+      h->setCentre(h->centre()); // this sets m_ci
+      h->calcBase();
+    }
     // at this point this handler does not exist any more. only return is possible
     return f;
 

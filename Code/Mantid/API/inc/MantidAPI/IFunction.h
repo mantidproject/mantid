@@ -6,8 +6,10 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/Exception.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "boost/shared_ptr.hpp"
+#include "boost/variant.hpp"
 #include <string>
 #include <vector>
 
@@ -73,7 +75,14 @@ class FunctionHandler;
     The main method of IFunction is called function(out,xValues,nData). It calculates nData output values
     out[i] at arguments xValues[i]. Implement functionDeriv method for the function to be used with
     fitting algorithms using derivatives. functionDeriv calculates patrial derivatives of the
-    function 
+    function with respect to the fitting parameters.
+
+    Any non-fitting parameters can be implemented as attributes (class IFunction::Attribute). 
+    An attribute can have one of three types: std::string, int, or double. The type is set at construction
+    and cannot be changed later. To read or write the attributes there are two ways. If the type
+    is known the type specific accessors can be used, e.g. asString(), asInt(). Otherwise the
+    IFunction::AttributeVisitor can be used. It provides alternative virtual methods to access 
+    attributes of each type. 
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
@@ -101,6 +110,98 @@ class FunctionHandler;
 class DLLExport IFunction
 {
 public:
+
+  /**
+   * Atribute visitor class. It provides a separate access method
+   * for each attribute type. When applied to a particular attribue
+   * the appropriate method will be used. The child classes must
+   * implement the virtual AttributeVisitor::apply methods. See 
+   * implementation of Attribute::value() method for an example.
+   */
+  template<typename T = void>
+  class DLLExport AttributeVisitor: public boost::static_visitor<T>
+  {
+  public:
+    /// implements static_visitor's operator() for std::string
+    T operator()(std::string& str)const{return apply(str);}
+    /// implements static_visitor's operator() for double
+    T operator()(double& d)const{return apply(d);}
+    /// implements static_visitor's operator() for int
+    T operator()(int& i)const{return apply(i);}
+  protected:
+    /// Implement this mathod to access attribute as string
+    virtual T apply(std::string&)const = 0;
+    /// Implement this mathod to access attribute as double
+    virtual T apply(double&)const = 0;
+    /// Implement this mathod to access attribute as int
+    virtual T apply(int&)const = 0;
+  };
+
+  /**
+   * Const version of AttributeVisitor. 
+   */
+  template<typename T = void>
+  class DLLExport ConstAttributeVisitor: public boost::static_visitor<T>
+  {
+  public:
+    /// implements static_visitor's operator() for std::string
+    T operator()(std::string& str)const{return apply(str);}
+    /// implements static_visitor's operator() for double
+    T operator()(double& d)const{return apply(d);}
+    /// implements static_visitor's operator() for int
+    T operator()(int& i)const{return apply(i);}
+  protected:
+    /// Implement this mathod to access attribute as string
+    virtual T apply(const std::string& str)const = 0;
+    /// Implement this mathod to access attribute as double
+    virtual T apply(const double& d)const = 0;
+    /// Implement this mathod to access attribute as int
+    virtual T apply(const int& i)const = 0;
+  };
+
+  /// Attribute is a non-fitting parameter.
+  /// It can be one of the types: std::string, int, or double
+  /// Examples: file name, polinomial order
+  class DLLExport Attribute
+  {
+  public:
+    /// Create string attribute
+    explicit Attribute(const std::string& str):m_data(str){}
+    /// Create int attribute
+    explicit Attribute(const int& i):m_data(i){}
+    /// Create double attribute
+    explicit Attribute(const double& d):m_data(d){}
+    /// Apply an attribute visitor
+    template<typename T>
+    T apply(AttributeVisitor<T>& v){return boost::apply_visitor(v,m_data);}
+    /// Apply a const attribute visitor
+    template<typename T>
+    T apply(ConstAttributeVisitor<T>& v)const{return boost::apply_visitor(v,m_data);}
+    /// Returns type of the attribute
+    std::string type()const;
+    /// Returns the attribute value as a string
+    std::string value()const;
+    /// Returns string value if attribute is a string, throws exception otherwise
+    std::string asString()const;
+    /// Returns int value if attribute is a int, throws exception otherwise
+    int asInt()const;
+    /// Returns double value if attribute is a double, throws exception otherwise
+    double asDouble()const;
+    /// Sets new value if attribute is a string
+    void setString(const std::string& str);
+    /// Sets new value if attribute is a double
+    void setDouble(const double&);
+    /// Sets new value if attribute is a int
+    void setInt(const int&);
+    /// Set value from a string.
+    void fromString(const std::string& str);
+  private:
+    /// The data holder as boost variant
+    mutable boost::variant<std::string,int,double> m_data;
+  };
+
+  //---------------------------------------------------------//
+
   /// Constructor
   IFunction():m_handler(NULL){}
   /// Virtual destructor
@@ -211,10 +312,17 @@ public:
   /// Returns a list of attribute names
   virtual std::vector<std::string> getAttributeNames()const{return std::vector<std::string>();}
   /// Return a value of attribute attName
-  virtual std::string getAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName))const{return "";}
+  //virtual std::string getAttribute(const std::string& attName)const{return "";}
+  virtual Attribute getAttribute(const std::string& attName)const
+  {
+    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
+  }
   /// Set a value to attribute attName
-  virtual void setAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName),
-                            const std::string& IGNORE_IFUNCTION_ARGUMENT(value)){}
+  //virtual void setAttribute(const std::string& attName,const std::string& ){}
+  virtual void setAttribute(const std::string& attName,const Attribute& )
+  {
+    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
+  }
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string& IGNORE_IFUNCTION_ARGUMENT(attName))const{return false;}
 

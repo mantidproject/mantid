@@ -75,21 +75,26 @@ std::vector<std::string> Resolution::getAttributeNames()const
  * @param attName The attribute name
  * @param value The new value
  */
-void Resolution::setAttribute(const std::string& attName,const std::string& value)
+void Resolution::setAttribute(const std::string& attName,const IFunction::Attribute& value)
 {
   if (attName == "FileName")
   {
+    std::string fileName = value.asString();
     FileValidator fval;
-    std::string error = fval.isValid(value);
+    std::string error = fval.isValid(fileName);
     if (error == "")
     {
-      m_fileName = value;
+      m_fileName = fileName;
     }
     else
     {
       throw std::runtime_error(error);
     }
     load(m_fileName);
+  }
+  else
+  {
+    IFunction::setAttribute(attName,value);
   }
 }
 

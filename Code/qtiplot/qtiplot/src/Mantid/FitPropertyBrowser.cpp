@@ -1003,10 +1003,6 @@ void FitPropertyBrowser::init()
     this,SLOT(workspace_removed(const QString &)));
 }
 
-void FitPropertyBrowser::reinit()
-{
-}
-
 /** Check if the workspace can be used in the fit
  * @param ws The workspace
  */

@@ -115,7 +115,9 @@ namespace Mantid
           {// remove the double quotes
             parValue = parValue.substr(1,parValue.size()-2);
           }
-          fun->setAttribute(parName,parValue);
+          IFunction::Attribute att = fun->getAttribute(parName);
+          att.fromString(parValue);
+          fun->setAttribute(parName,att);
         }
         else if (parName.size() >= 10 && parName.substr(0,10) == "constraint")
         {// or it can be a list of constraints

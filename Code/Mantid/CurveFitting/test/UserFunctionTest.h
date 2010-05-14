@@ -35,7 +35,7 @@ public:
   void testIt()
   {
     UserFunction fun;
-    fun.setAttribute("Formula","h*sin(a*x-c)");
+    fun.setAttribute("Formula",IFunction::Attribute("h*sin(a*x-c)"));
     fun.setParameter("h",2.2);
     fun.setParameter("a",2.0);
     fun.setParameter("c",1.2);
@@ -44,7 +44,7 @@ public:
     TS_ASSERT_EQUALS(fun.getParameter("a") , 2.0);
     TS_ASSERT_EQUALS(fun.getParameter("c") , 1.2);
     TS_ASSERT_EQUALS(fun.asString(),"name=UserFunction,Formula=h*sin(a*x-c),h=2.2,a=2,c=1.2");
-    TS_ASSERT_EQUALS(fun.getAttribute("Formula"),"h*sin(a*x-c)");
+    TS_ASSERT_EQUALS(fun.getAttribute("Formula").asString(),"h*sin(a*x-c)");
 
     const size_t nParams = 3;
     const size_t nData = 10;

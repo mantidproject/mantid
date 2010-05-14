@@ -123,12 +123,6 @@ m_defaultPeakName("Gaussian")
 PeakPickerTool::~PeakPickerTool()
 {
   disconnect(d_graph,SIGNAL(curveRemoved()),this,SLOT(curveRemoved()));
-  d_graph->enableAxis(QwtPlot::yRight,false);
-  for(int i=0;i<d_graph->curves();i++)
-  {
-    QwtPlotCurve* c = d_graph->curve(i);
-    c->setAxis(QwtPlot::xBottom,QwtPlot::yLeft);
-  }
   detach();
   d_graph->plotWidget()->canvas()->unsetCursor();
   d_graph->plotWidget()->replot();

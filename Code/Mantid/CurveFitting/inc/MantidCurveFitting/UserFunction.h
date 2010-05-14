@@ -63,15 +63,14 @@ namespace Mantid
       /// Returns a list of attribute names
       std::vector<std::string> getAttributeNames()const{return std::vector<std::string>(1,"Formula");}
       /// Return a value of attribute attName
-      std::string getAttribute(const std::string& attName)const{return attName == "Formula"?m_formula:"";}
+      IFunction::Attribute getAttribute(const std::string& attName)const
+      {
+        return attName == "Formula"?IFunction::Attribute(m_formula):IFunction::getAttribute(attName);
+      }
       /// Set a value to attribute attName
-      void setAttribute(const std::string& attName,const std::string& value);
+      void setAttribute(const std::string& attName,const IFunction::Attribute& value);
       /// Check if attribute attName exists
       bool hasAttribute(const std::string& attName)const{return attName == "Formula";}
-
-    protected:
-
-      //void init();
 
     private:
       /// The formula

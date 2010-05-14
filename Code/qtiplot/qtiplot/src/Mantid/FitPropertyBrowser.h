@@ -138,7 +138,6 @@ public:
   QString getConstraintsString()const;
 
   void init();
-  void reinit();
 
   // send parameterChanged signal
   void sendParameterChanged(const Mantid::API::IFunction* f){emit parameterChanged(f);}
@@ -323,6 +322,8 @@ private:
   PropertyHandler* m_autoBackground;
 
   friend class PropertyHandler;
+  friend class CreateAttributeProperty;
+  friend class SetAttribute;
 
 };
 

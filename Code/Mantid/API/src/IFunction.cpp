@@ -16,6 +16,8 @@
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include "boost/lexical_cast.hpp"
+
 #include <sstream>
 #include <iostream> 
 
@@ -288,7 +290,7 @@ std::string IFunction::asString()const
   std::vector<std::string> attr = this->getAttributeNames();
   for(size_t i=0;i<attr.size();i++)
   {
-    ostr<<','<<attr[i]<<'='<<this->getAttribute(attr[i]);
+    ostr<<','<<attr[i]<<'='<<this->getAttribute(attr[i]).value();
   }
   for(int i=0;i<nParams();i++)
   {
@@ -360,6 +362,175 @@ std::ostream& operator<<(std::ostream& ostr,const IFunction& f)
   return ostr;
 }
 
+/**
+ * Const attribute visitor returning the type of the attribute
+ */
+class AttType: public IFunction::ConstAttributeVisitor<std::string>
+{
+protected:
+  /// Apply if string
+  std::string apply(const std::string&)const{return "std::string";}
+  /// Apply if int
+  std::string apply(const int&)const{return "int";}
+  /// Apply if double
+  std::string apply(const double&)const{return "double";}
+};
+
+std::string IFunction::Attribute::type()const
+{
+  return apply(AttType());
+}
+
+/**
+ * Const attribute visitor returning the type of the attribute
+ */
+class AttValue: public IFunction::ConstAttributeVisitor<std::string>
+{
+protected:
+  /// Apply if string
+  std::string apply(const std::string& str)const{return str;}
+  /// Apply if int
+  std::string apply(const int& i)const{return boost::lexical_cast<std::string>(i);}
+  /// Apply if double
+  std::string apply(const double& d)const{return boost::lexical_cast<std::string>(d);}
+};
+
+std::string IFunction::Attribute::value()const
+{
+  return apply(AttValue());
+}
+
+std::string IFunction::Attribute::asString()const
+{
+  try
+  {
+    return boost::get<std::string>(m_data);
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as string");
+  }
+}
+
+int IFunction::Attribute::asInt()const
+{
+  try
+  {
+    return boost::get<int>(m_data);
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as int");
+  }
+}
+
+double IFunction::Attribute::asDouble()const
+{
+  try
+  {
+    return boost::get<double>(m_data);
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as double");
+  }
+}
+
+/** Sets new value if attribute is a string. If the type is wrong 
+ * throws an exception
+ * @param str The new value
+ */
+void IFunction::Attribute::setString(const std::string& str)
+{
+  try
+  {
+    boost::get<std::string>(m_data) = str;
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as string");
+  }
+}
+
+/** Sets new value if attribute is a double. If the type is wrong 
+ * throws an exception
+ * @param d The new value
+ */
+void IFunction::Attribute::setDouble(const double& d)
+{
+  try
+  {
+    boost::get<double>(m_data) = d;
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as double");
+  }
+}
+
+/** Sets new value if attribute is an int. If the type is wrong 
+ * throws an exception
+ * @param i The new value
+ */
+void IFunction::Attribute::setInt(const int& i)
+{
+  try
+  {
+    boost::get<int>(m_data) = i;
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as int");
+  }
+}
+
+/**
+ * Attribute visitor setting new value to an attribute
+ */
+class SetValue: public IFunction::AttributeVisitor<>
+{
+public:
+  /**
+   * Constructor
+   * @param str The value to set
+   */
+  SetValue(const std::string& value):m_value(value){}
+protected:
+  /// Apply if string
+  void apply(std::string& str)const{str = m_value;}
+  /// Apply if int
+  void apply(int& i)const
+  {
+    std::istringstream istr(m_value+" ");
+    istr >> i;
+    if (!istr.good()) throw std::invalid_argument("Failed to set int attribute "
+      "from string "+m_value);
+  }
+  /// Apply if double
+  void apply(double& d)const
+  {
+    std::istringstream istr(m_value+" ");
+    istr >> d;
+    if (!istr.good()) throw std::invalid_argument("Failed to set double attribute "
+      "from string "+m_value);
+  }
+private:
+  std::string m_value;
+};
+
+/** Set value from a string. Throws exception if the string has wrong format
+ * @param str String representation of the new value
+ */
+void IFunction::Attribute::fromString(const std::string& str)
+{
+  apply(SetValue(str));
+}
 
 } // namespace API
 } // namespace Mantid

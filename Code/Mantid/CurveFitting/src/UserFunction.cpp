@@ -55,10 +55,11 @@ namespace Mantid
      * @param attName Attribute name, must be "Formula"
      * @param value The attribute value. For "Formula" it must be a mu::Parser expression string
      */
-    void UserFunction::setAttribute(const std::string& attName,const std::string& value)
+    void UserFunction::setAttribute(const std::string& attName,const IFunction::Attribute& value)
     {
       if (attName != "Formula")
       {
+        IFunction::setAttribute(attName,value);
         return;
       }
 
@@ -70,7 +71,7 @@ namespace Mantid
         mu::Parser tmp_parser;
         tmp_parser.SetVarFactory(AddVariable, this);
 
-        m_formula = value;
+        m_formula = value.asString();
         tmp_parser.SetExpr(m_formula);
 
         //Call Eval() to implicitly initialize the variables

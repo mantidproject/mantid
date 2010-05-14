@@ -17,7 +17,7 @@ using namespace Mantid::API;
 
 class FunctionFactoryTest_FunctA: public Function
 {
-  std::string m_attr;
+  int m_attr;
 public:
   FunctionFactoryTest_FunctA()
   {
@@ -32,19 +32,19 @@ public:
     if (attName == "attr") return true;
     return false;
   }
-  std::string getAttribute(const std::string& attName)const
+  IFunction::Attribute getAttribute(const std::string& attName)const
   {
-    if (attName == "attr") return m_attr;
-    return "";
+    if (attName == "attr") return IFunction::Attribute(m_attr);
+    return IFunction::getAttribute(attName);
   }
-  void setAttribute(const std::string& attName,const std::string& value)
+  void setAttribute(const std::string& attName,const IFunction::Attribute& value)
   {
     if (attName == "attr")
     {
-      int n = atoi(value.c_str());
+      int n = value.asInt();
       if (n > 0)
       {
-        m_attr = value;
+        m_attr = n;
         clearAllParameters();
         for(int i=0;i<n;i++)
         {
@@ -53,6 +53,10 @@ public:
           declareParameter(ostr.str());
         }
       }
+    }
+    else
+    {
+      IFunction::setAttribute(attName,value);
     }
   }
 };
@@ -91,14 +95,14 @@ public:
     if (attName == "attr") return true;
     return false;
   }
-  std::string getAttribute(const std::string& attName)const
+  IFunction::Attribute getAttribute(const std::string& attName)const
   {
-    if (attName == "attr") return m_attr;
-    return "";
+    if (attName == "attr") return IFunction::Attribute(m_attr);
+    return IFunction::getAttribute(attName);
   }
-  void setAttribute(const std::string& attName,const std::string& value)
+  void setAttribute(const std::string& attName,const IFunction::Attribute& value)
   {
-    m_attr = value;
+    m_attr = value.asString();
   }
 };
 
@@ -268,7 +272,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
     TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctA");
     TS_ASSERT(fun->hasAttribute("attr"));
-    TS_ASSERT_EQUALS(fun->getAttribute("attr"),"hello");
+    TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
     delete fun;
   }
 
@@ -370,7 +374,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
     TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctA");
     TS_ASSERT(fun->hasAttribute("attr"));
-    TS_ASSERT_EQUALS(fun->getAttribute("attr"),"hello");
+    TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
 
     IConstraint* c = fun->firstConstraint();
     TS_ASSERT(c);
@@ -408,7 +412,7 @@ public:
     TS_ASSERT_EQUALS(cf->getParameter(3),1.2);
     TS_ASSERT_EQUALS(fun->name(),"FunctionFactoryTest_CompFunctA");
     TS_ASSERT(fun->hasAttribute("attr"));
-    TS_ASSERT_EQUALS(fun->getAttribute("attr"),"hello");
+    TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
 
     IConstraint* c = fun->firstConstraint();
     TS_ASSERT(c);

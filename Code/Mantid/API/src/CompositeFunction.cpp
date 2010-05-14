@@ -541,6 +541,7 @@ void CompositeFunction::replaceFunction(const IFunction* f_old,IFunction* f_new)
   std::vector<IFunction*>::const_iterator it = 
     std::find(m_functions.begin(),m_functions.end(),f_old);
   if (it == m_functions.end()) return;
+  f_new->setWorkspace(f_old->getWorkspace(),f_old->getWorkspaceIndex(),-1,-1);
   int iFun = it - m_functions.begin();
   replaceFunction(iFun,f_new);
 }
