@@ -343,7 +343,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\logarithm.cpp"
+				RelativePath=".\src\Logarithm.cpp"
 				>
 			</File>
 			<File
@@ -785,11 +785,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidAlgorithms\logarithm.h"
+				RelativePath=".\inc\MantidAlgorithms\Logarithm.h"
 				>
 			</File>
 			<File
-				RelativePath=".\test\logarithmTest.h"
+				RelativePath=".\test\LogarithmTest.h"
 				>
 			</File>
 			<File
