@@ -49,7 +49,7 @@ void V3D::spherical(const double& R, const double& theta, const double& phi)
 
   /**
     Assignment operator
-    \param A :: V3D to copy
+    \param rhs :: V3D to copy
     \return *this
   */
 V3D& V3D::operator=(const V3D& rhs)

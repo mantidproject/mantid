@@ -75,6 +75,8 @@ namespace Mantid
       // Searches for a configuration property and returns its value
       template<typename T>
       int getValue(const std::string& keyName, T& out);
+      /// Return the user properties filename
+      std::string getUserFilename() const;
 
       // Searches for the given environment variable and returns it as a string
       std::string getEnvironment(const std::string& keyName);

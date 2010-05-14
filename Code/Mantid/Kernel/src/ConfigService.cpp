@@ -140,7 +140,7 @@ namespace Kernel
     //attempt to load the default properties file that resides in the directory of the executable
     updateConfig(getBaseDir() + m_properties_file_name,false,false);
     //and then append the user properties
-    updateConfig(getOutputDir() + m_user_properties_file_name,true,true);
+    updateConfig(getUserFilename(), true, true);
 
     g_log.debug() << "ConfigService created." << std::endl;
     g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
@@ -420,18 +420,17 @@ namespace Kernel
       std::string prefix_key = "instrument.prefixes." + *itr;
       std::string prefixes = getString(prefix_key);
       Poco::StringTokenizer instr_tokens(prefixes, ";", options);
+      std::vector<std::string> prefs;
       if( instr_tokens.count() > 0 )
       {
-	std::vector<std::string> prefs;
 	prefs.reserve(instr_tokens.count());
 	Poco::StringTokenizer::Iterator pref_end = instr_tokens.end();
 	for( Poco::StringTokenizer::Iterator pref_itr = instr_tokens.begin(); pref_itr != pref_end; ++pref_itr )
 	{
 	  prefs.push_back(*pref_itr);
 	}
-	m_instr_prefixes[*itr] = prefs;
       }
-	
+      m_instr_prefixes[*itr] = prefs;
     }
 
     
@@ -512,7 +511,7 @@ namespace Kernel
    *  @param filename The filename and optionally path of the file to load
    *  @param append   If false (default) then any previous configuration is discarded, 
    *                  otherwise the new keys are added, and repeated keys will override existing ones.
-   *  @param config_caches If true(default) then the various property caches are updated 
+   *  @param update_caches If true(default) then the various property caches are updated 
    */
   void ConfigServiceImpl::updateConfig(const std::string& filename, const bool append, const bool update_caches)
   {
@@ -694,6 +693,15 @@ namespace Kernel
     return result;
   }
 
+  /**
+   * Return the full filename of the user properties file
+   * @returns A string containg the full path to the user file
+   */
+  std::string ConfigServiceImpl::getUserFilename() const
+  {
+    return getOutputDir() + m_user_properties_file_name;
+  }
+
   /** Searches for the string within the environment variables and returns the 
    *  value as a string.
    *
@@ -798,6 +806,7 @@ namespace Kernel
 
   /**
    * Return the list of instrument prefixes for the given facility. If the facility if unknown then a NotFoundError is thrown.
+   * @param facility A string giving a facility name
    * @returns A vector of strings containing the instrument prefixes
    */
   const std::vector<std::string>& ConfigServiceImpl::getInstrumentPrefixes(const std::string& facility) const
@@ -805,11 +814,16 @@ namespace Kernel
     std::map<std::string, std::vector<std::string> >::const_iterator itr = m_instr_prefixes.find(facility);
     if( itr != m_instr_prefixes.end() )
     {
+      if( itr->second.empty() )
+      {
+	g_log.warning() << "Facility \"" << facility << "\" has no instruments defined. Check instrument.prefixes." 
+			<< facility << " key in properties file.\n";
+      }
       return itr->second;
     }
     else
     {
-      g_log.warning() << "Unknown facility \"" << facility << "\". No instrument prefixes defined.\n";
+      g_log.error() << "Unknown facility \"" << facility << "\". No instrument prefixes defined.\n";
       throw Exception::NotFoundError("Unknown facility name. No instrument prefixes defined.", facility);
     }
   }

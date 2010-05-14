@@ -174,7 +174,7 @@ void ParameterMap::addPositionCoordinate(const IComponent* comp,const std::strin
   * Assumed that name either equals "rotx", "roty" or "rotz" otherwise this method will not add/modify "rot" parameter
     @param comp Component
     @param name Parameter name
-    @param value Parameter value in degrees
+    @param deg Parameter value in degrees
   */
 void ParameterMap::addRotationParam(const IComponent* comp,const std::string& name, const double deg)
 {
