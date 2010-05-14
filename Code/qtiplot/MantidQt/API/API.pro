@@ -6,7 +6,7 @@ TEMPLATE = lib
 # Import the config file
 include(../mantidqt.pri)
 
-unix:system(mkdir '"$$MANTIDQTINCLUDES/MantidQtAPI"')
+unix:system(mkdir '$$MANTIDQTINCLUDES/MantidQtAPI')
 win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtAPI"')
 
 DEFINES += IN_MANTIDQT_API
@@ -46,7 +46,7 @@ HEADERS = \
 TARGET = MantidQtAPI
 
 
-unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '"$$MANTIDQTINCLUDES/MantidQtAPI"'
+unix:headercopy.commands = cd $$HEADERDIR && $(COPY) *.h '$$MANTIDQTINCLUDES/MantidQtAPI'
 win32:headercopy.commands = cd "$$HEADERDIR" && $(COPY) *.h '"$$MANTIDQTINCLUDES\MantidQtAPI"'
 PRE_TARGETDEPS = headercopy
 
