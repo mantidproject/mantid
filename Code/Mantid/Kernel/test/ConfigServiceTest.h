@@ -237,7 +237,7 @@ private:
     std::ifstream reader(filename.c_str(), std::ios::in);
     if( reader.bad() )
     {
-      TS_FAIL("Unable to open save config file.");
+      TS_FAIL("Unable to open config file for saving");
     }
     std::string line("");
     while(std::getline(reader, line))
@@ -245,6 +245,7 @@ private:
       if( line.empty() ) continue;
       else break;
     }
+    reader.close();
 
     std::string key_value = key + "=" + value;
     TS_ASSERT_EQUALS(line, key_value);
