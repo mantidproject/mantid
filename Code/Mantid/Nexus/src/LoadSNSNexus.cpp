@@ -508,7 +508,7 @@ void LoadSNSNexus::calcRotation(const Geometry::V3D& X,const Geometry::V3D& Y,co
  */
 void LoadSNSNexus::getBankOrientation(NXDetector nxDet, Geometry::V3D& shift, Geometry::Quat& rot)
 {
-    NXFloat translation = nxDet.openNXFloat("distance");
+    NXFloat translation = nxDet.openNXFloat("origin/translation/distance");
     translation.load();
     shift = Geometry::V3D(translation[0],translation[1],translation[2]);
 
