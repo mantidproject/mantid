@@ -195,10 +195,12 @@ public:
   void testSaveConfigCleanFile()
   {
     const std::string filename("user.settings");
+    Poco::File prop_file(filename);
+    // Start with a clean state
+    if( prop_file.exists() ) prop_file.remove();
+
     ConfigServiceImpl& settings = ConfigService::Instance();
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
-    
-    Poco::File prop_file(filename);
     
     // No changes yet, so no file
     TS_ASSERT_EQUALS(prop_file.exists(), false);
@@ -209,6 +211,9 @@ public:
   void testSaveConfigExistingSettings()
   {
     const std::string filename("user.settings");
+    Poco::File prop_file(filename);
+    if( prop_file.exists() ) prop_file.remove();
+
     ConfigServiceImpl& settings = ConfigService::Instance();
     
     std::ofstream writer(filename.c_str(),std::ios_base::trunc);
