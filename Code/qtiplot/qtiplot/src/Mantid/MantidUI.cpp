@@ -26,8 +26,9 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidKernel/EnvironmentHistory.h"
 
+#include "MantidKernel/EnvironmentHistory.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -145,6 +146,10 @@ void MantidUI::init()
 {
     MantidLog::connect(this);
     FrameworkManager::Instance();
+
+    // Check facility and instrument so that a log message appears if they aren't defined properly
+    std::string prop = Mantid::Kernel::ConfigService::Instance().getString("default.facility");
+    Mantid::Kernel::ConfigService::Instance().getInstrumentPrefixes(prop);
 
     // Now that the framework is initialized we need to populate the algorithm tree
     m_exploreAlgorithms->update();

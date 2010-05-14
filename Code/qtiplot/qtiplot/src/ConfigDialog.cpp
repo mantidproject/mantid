@@ -63,6 +63,9 @@
 #include <QFontMetrics>
 #include <QFileDialog>
 
+#include "MantidKernel/ConfigService.h"
+
+
 static const char* choose_folder_xpm[]={
     "16 16 11 1",
     "# c #000000",
@@ -116,12 +119,14 @@ ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
 	itemsList->setAlternatingRowColors( true );
 
 	initAppPage();
+	initMantidPage();
 	initTablesPage();
 	initPlotsPage();
 	initPlots3DPage();
 	initFittingPage();
 
 	generalDialog->addWidget(appTabWidget);
+	generalDialog->addWidget(mtdTabWidget);
 	generalDialog->addWidget(tables);
 	generalDialog->addWidget(plotsTabWidget);
 	generalDialog->addWidget(plots3D);
@@ -607,6 +612,74 @@ void ConfigDialog::initAppPage()
 	connect( boxSave, SIGNAL( toggled(bool) ), boxMinutes, SLOT( setEnabled(bool) ) );
 }
 
+/**
+ * Configure a Mantid page on the config dialog
+ */
+void ConfigDialog::initMantidPage()
+{
+  mtdTabWidget = new QTabWidget(generalDialog);
+  mtdTabWidget->setUsesScrollButtons(false);
+
+  instrument = new QWidget();
+  QVBoxLayout *instrTabLayout = new QVBoxLayout(instrument);
+  QGroupBox *frame = new QGroupBox();
+  instrTabLayout->addWidget(frame);
+  QGridLayout *grid = new QGridLayout(frame);
+
+  facility = new QComboBox();
+  grid->addWidget(new QLabel("Facility"), 0, 0);
+  grid->addWidget(facility, 0, 1);
+
+  mtdTabWidget->addTab(instrument, QString());
+  
+  instrPrefix = new QComboBox();
+  grid->addWidget(new QLabel("Default Prefix"), 1, 0);
+  grid->addWidget(instrPrefix, 1, 1);
+  grid->setRowStretch(2,1);  
+  
+  // Populate boxes
+  Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
+  QString property = QString::fromStdString(mantid_config.getString("supported.facilities"));
+  
+  QStringList prop_list = property.split(";", QString::SkipEmptyParts);
+  facility->addItems(prop_list);
+
+  // Set default property
+  property = QString::fromStdString(mantid_config.getString("default.facility"));
+  int index = facility->findText(property);
+  if( index < 0 )
+  {
+    index = 0;
+  }
+  facility->setCurrentIndex(index);    
+
+  std::string current_facility = facility->currentText().toStdString();
+  std::vector<std::string> prefixes(0); 
+  try
+  {
+    prefixes = mantid_config.getInstrumentPrefixes(current_facility);
+  }
+  catch(std::runtime_error&)
+  {
+  }
+
+  std::vector<std::string>::const_iterator iend = prefixes.end();
+  std::vector<std::string>::const_iterator iter = prefixes.begin();
+  for( ; iter != iend; ++iter )
+  {
+    instrPrefix->addItem(QString::fromStdString(*iter));
+  }
+  
+  property = QString::fromStdString(mantid_config.getString("default.instrument"));
+  index = instrPrefix->findText(property);
+  if( index < 0 )
+  {
+    index = 0;
+  }
+  instrPrefix->setCurrentIndex(index);    
+  
+}
+
 void ConfigDialog::initOptionsPage()
 {
 	ApplicationWindow *app = (ApplicationWindow *)parentWidget();
@@ -976,16 +1049,18 @@ void ConfigDialog::languageChange()
 	// pages list
 	itemsList->clear();
 	itemsList->addItem( tr( "General" ) );
+	itemsList->addItem( tr( "Mantid" ) );
 	itemsList->addItem( tr( "Tables" ) );
 	itemsList->addItem( tr( "2D Plots" ) );
 	itemsList->addItem( tr( "3D Plots" ) );
 	itemsList->addItem( tr( "Fitting" ) );
 	itemsList->setCurrentRow(0);
 	itemsList->item(0)->setIcon(QIcon(QPixmap(general_xpm)));
-	itemsList->item(1)->setIcon(QIcon(QPixmap(configTable_xpm)));
-	itemsList->item(2)->setIcon(QIcon(QPixmap(config_curves_xpm)));
-	itemsList->item(3)->setIcon(QIcon(QPixmap(logo_xpm)));
-	itemsList->item(4)->setIcon(QIcon(QPixmap(fit_xpm)));
+	itemsList->item(1)->setIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
+	itemsList->item(2)->setIcon(QIcon(QPixmap(configTable_xpm)));
+	itemsList->item(3)->setIcon(QIcon(QPixmap(config_curves_xpm)));
+	itemsList->item(4)->setIcon(QIcon(QPixmap(logo_xpm)));
+	itemsList->item(5)->setIcon(QIcon(QPixmap(fit_xpm)));
 	itemsList->setIconSize(QSize(32,32));
 	// calculate a sensible width for the items list
 	// (default QListWidget size is 256 which looks too big)
@@ -1068,13 +1143,15 @@ void ConfigDialog::languageChange()
 	buttonLegendFont->setText( tr( "&Legend" ) );
 	buttonTitleFont->setText( tr( "T&itle" ) );
 	boxPromptRenameTables->setText( tr( "Prompt on &renaming tables when appending projects" ) );
-
 	//application page
 	appTabWidget->setTabText(appTabWidget->indexOf(application), tr("Application"));
 	appTabWidget->setTabText(appTabWidget->indexOf(confirm), tr("Confirmations"));
 	appTabWidget->setTabText(appTabWidget->indexOf(appColors), tr("Colors"));
 	appTabWidget->setTabText(appTabWidget->indexOf(numericFormatPage), tr("Numeric Format"));
 	appTabWidget->setTabText(appTabWidget->indexOf(fileLocationsPage), tr("File Locations"));
+
+	//Mantid Page
+	mtdTabWidget->setTabText(mtdTabWidget->indexOf(instrument), tr("Instrument"));
 
 	lblLanguage->setText(tr("Language"));
 	lblStyle->setText(tr("Style"));
@@ -1393,6 +1470,20 @@ void ConfigDialog::apply()
 	itemsList->setMaximumWidth( itemsList->iconSize().width() + width + 50 );
 	// resize the list to the maximum width
 	itemsList->resize(itemsList->maximumWidth(),itemsList->height());
+
+	//Mantid 
+	QString instr = instrPrefix->currentText();
+	Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+	mantid_config.setString("default.instrument", instr.toStdString());
+	try
+	{
+	  mantid_config.saveConfig(mantid_config.getUserFilename());
+	}
+	catch(std::runtime_error&)
+	{
+	  QMessageBox::warning(this, "MantidPlot", 
+			       "Unable to update Mantid user properties file.\n");
+	}
 }
 
 int ConfigDialog::curveStyle()

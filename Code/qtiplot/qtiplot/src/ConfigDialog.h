@@ -105,9 +105,11 @@ private slots:
 
 private:
 	void initPlotsPage();
-  void initOptionsPage();
-  void initAxesPage();
+        void initOptionsPage();
+        void initAxesPage();
 	void initAppPage();
+        // Mantid
+        void initMantidPage();
 	void initCurvesPage();
 	void initPlots3DPage();
 	void initTablesPage();
@@ -119,7 +121,7 @@ private:
 	QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
 
 	QCheckBox *boxScaleLayersOnPrint, *boxPrintCropmarks, *boxUpdateSeparators, *linearFit2PointsBox;
-	QTabWidget *plotsTabWidget, *appTabWidget;
+        QTabWidget *plotsTabWidget, *appTabWidget, *mtdTabWidget;
 	ColorButton *btnBackground3D, *btnMesh, *btnAxes, *btnLabels, *btnNumbers;
 	ColorButton *btnFromColor, *btnToColor, *btnGrid;
 	QPushButton	*btnTitleFnt, *btnLabelsFnt, *btnNumFnt;
@@ -129,6 +131,10 @@ private:
 	QStackedWidget * generalDialog;
 	QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
 	QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage;
+        //Mantid
+        QWidget *instrument;
+        QComboBox *facility, *instrPrefix;
+  
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
 	QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
