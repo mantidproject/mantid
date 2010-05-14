@@ -1,7 +1,5 @@
 include(mantidqt.pri)
 
-system(mkdir '$$MANTIDQTINCLUDES')
-
 TEMPLATE = subdirs
 SUBDIRS = API MantidWidgets CustomDialogs CustomInterfaces
 
@@ -16,9 +14,9 @@ QMAKE_CLEAN += ./lib/* $$MANTIDQTINCLUDES/MantidQtAPI/*.h \
 }
 win32 {
 QMAKE_CLEAN += $$DESTDIR\*.lib $$DESTDIR\*.dll $$DESTDIR\*.dll.manifest \
-			   "$$MANTIDQTINCLUDES"\MantidQtAPI\*.h \
-               "$$MANTIDQTINCLUDES"\MantidQtCustomDialogs\*.h \
-			   "$$MANTIDQTINCLUDES"\MantidQtCustomInterfaces\*.h \
-			   "$$MANTIDQTINCLUDES"\MantidQtCustomWidgets\*.h \
+			   "$$MANTIDQTINCLUDES"\MantidQtAPI\*.h" \
+         "$$MANTIDQTINCLUDES"\MantidQtCustomDialogs\*.h" \
+			   "$$MANTIDQTINCLUDES"\MantidQtCustomInterfaces\*.h" \
+			   "$$MANTIDQTINCLUDES"\MantidQtCustomWidgets\*.h" \
 			   qtbuild\MantidQt\sip*
 }

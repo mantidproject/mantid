@@ -6,8 +6,9 @@ TEMPLATE = lib
 # Import the config file
 include(../mantidqt.pri)
 
-unix:system(mkdir '"$$MANTIDQTINCLUDES/MantidQtMantidWidgets"')
-win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtMantidWidgets"')
+!exists(\"$$MANTIDQTINCLUDES/MantidQtMantidWidgets\") {
+  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtMantidWidgets\")
+}
 
 # Need to link with the API
 unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI

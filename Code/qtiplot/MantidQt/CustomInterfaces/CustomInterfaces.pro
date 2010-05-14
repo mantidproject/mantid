@@ -7,8 +7,10 @@ TEMPLATE = lib
 # Import the global config file
 include(../mantidqt.pri)
 
-unix:system(mkdir '"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces"')
-win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtCustomInterfaces"')
+!exists(\"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces\") {
+  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtCustomInterfaces\")
+}
+
 
 # Link with the libraries it is CustomInterfaces uses
 unix:LIBS += -L$$TOPBUILDDIR/lib -lMantidQtAPI -lMantidWidgets

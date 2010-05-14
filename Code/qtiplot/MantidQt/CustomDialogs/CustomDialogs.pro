@@ -8,8 +8,10 @@ TEMPLATE = lib
 include(../mantidqt.pri)
 CONFIG += qt
 QT += opengl
-unix:system(mkdir '"$$MANTIDQTINCLUDES/MantidQtCustomDialogs"')
-win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtCustomDialogs"')
+
+!exists(\"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\") {
+  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtCustomDialogs\")
+}
 
 # Need to link with the API
 unix:LIBS += -L$$TOPBUILDDIR/lib \

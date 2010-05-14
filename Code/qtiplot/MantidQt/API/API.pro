@@ -6,8 +6,9 @@ TEMPLATE = lib
 # Import the config file
 include(../mantidqt.pri)
 
-unix:system(mkdir '$$MANTIDQTINCLUDES/MantidQtAPI')
-win32:system(mkdir '"$$MANTIDQTINCLUDES\MantidQtAPI"')
+!exists(\"$$MANTIDQTINCLUDES/MantidQtAPI\") {
+  system(mkdir \"$$MANTIDQTINCLUDES/MantidQtAPI\")
+}
 
 DEFINES += IN_MANTIDQT_API
 
