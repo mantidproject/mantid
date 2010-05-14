@@ -255,6 +255,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\GSLFunctions.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\IkedaCarpenterPV.cpp"
 				>
 			</File>
@@ -414,6 +418,10 @@
 			</File>
 			<File
 				RelativePath=".\test\GaussianTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\GSLFunctions.h"
 				>
 			</File>
 			<File

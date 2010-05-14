@@ -13,23 +13,6 @@ namespace Mantid
   namespace CurveFitting
   {
     using API::Jacobian;
-
-    /**
-     *  A copy of Jacobian definition. Including Jacobian from IFunction.h causes strange crashes.
-     */
-    //class Jacobian1D
-    //{
-    //public:
-    //  /**  Set a value to a Jacobian matrix element.
-    //  *   @param iY The index of a data point.
-    //  *   @param iP The index of an active? parameter.
-    //  *   @param value The derivative value.
-    //  */
-    //  virtual void set(int iY, int iP, double value) = 0;
-    //  /// Virtual destructor
-    //  virtual ~Jacobian1D() {};
-    //protected:
-    //};
   
     /**
     Abstract base class for 1D fitting functions.
