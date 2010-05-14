@@ -149,7 +149,7 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
         timeBins.load();
         MantidVec& X = ws->dataX(spec);
         X.assign(timeBins(),timeBins()+nBins+1);
-        NXFloat data = dataGroup.openFloatData();
+        NXInt data = dataGroup.openIntData();
         data.load();
         MantidVec& Y = ws->dataY(spec);
         Y.assign(data(),data()+nBins);
@@ -508,7 +508,7 @@ void LoadSNSNexus::calcRotation(const Geometry::V3D& X,const Geometry::V3D& Y,co
  */
 void LoadSNSNexus::getBankOrientation(NXDetector nxDet, Geometry::V3D& shift, Geometry::Quat& rot)
 {
-    NXFloat translation = nxDet.openNXFloat("origin/translation/distance");
+    NXFloat translation = nxDet.openNXFloat("distance");
     translation.load();
     shift = Geometry::V3D(translation[0],translation[1],translation[2]);
 
