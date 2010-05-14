@@ -84,11 +84,13 @@ namespace Kernel
   ConfigServiceImpl::ConfigServiceImpl() : 
     m_pConf(NULL), m_pSysConfig(NULL),
     g_log(Logger::get("ConfigService")), 
+    m_changed_keys(),
     m_ConfigPaths(), m_AbsolutePaths(),
     m_strBaseDir(""), m_PropertyString(""),
     m_properties_file_name("Mantid.properties"),
     m_user_properties_file_name("Mantid.user.properties"),
-    m_DataSearchDirs()
+    m_DataSearchDirs(),
+    m_instr_prefixes()
   {
     //getting at system details
     m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration>;
@@ -136,12 +138,9 @@ namespace Kernel
     m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories",true));
 
     //attempt to load the default properties file that resides in the directory of the executable
-    loadConfig( getBaseDir() + m_properties_file_name);
+    updateConfig(getBaseDir() + m_properties_file_name,false,false);
     //and then append the user properties
-    loadConfig( getOutputDir() + m_user_properties_file_name, true);
-
-    // Now start up the logging
-    configureLogging();
+    updateConfig(getOutputDir() + m_user_properties_file_name,true,true);
 
     g_log.debug() << "ConfigService created." << std::endl;
     g_log.debug() << "Configured base directory of application as " << getBaseDir() << std::endl;
@@ -180,13 +179,9 @@ namespace Kernel
 
     try
     {
-      std::ifstream propFile(filename.c_str(),std::ios::in);
-      bool good = propFile.good();
-
-      //slurp in entire file - extremely unlikely delimter used as an alternate to \n
+      //slurp in entire file
       std::string temp; 
-      getline(propFile,temp,'¬');
-      propFile.close();
+      bool good = readFile(filename, temp);      
 
       // check if we have failed to open the file
       if ((!good) || (temp==""))
@@ -230,6 +225,30 @@ namespace Kernel
     m_pConf = new WrappedObject<Poco::Util::PropertyFileConfiguration>(istr);
   }
 
+  /**
+   * Read a file and place its contents into the given string
+   * @param filename The filename of the file to read
+   * @param contents The file contents will be placed here
+   * @returns A boolean indicating whether opening the file was successful
+   */
+  bool ConfigServiceImpl::readFile(const std::string& filename, std::string & contents) const
+  {
+    std::ifstream propFile(filename.c_str(),std::ios::in);
+    bool good = propFile.good();
+    if( !good ) 
+    {
+      contents = "";
+      propFile.close();
+      return good;
+    }
+
+    //slurp in entire file - extremely unlikely delimter used as an alternate to \n
+    contents.clear();
+    getline(propFile,contents,'¬');
+    propFile.close();
+    return good;
+  }
+  
   /// Configures the Poco logging and starts it up
   void ConfigServiceImpl::configureLogging()
   {
@@ -258,10 +277,6 @@ namespace Kernel
       std::cerr << "Trouble configuring the logging framework " << e.what()<<std::endl;
     }
 
-    //Ensure that any relative paths given in the configuration file are relative to the current directory
-    convertRelativeToAbsolute();
-    //Configure search paths into a specially saved store as they will be used frequently
-    defineDataSearchPaths();
   }
 
   /**
@@ -366,7 +381,7 @@ namespace Kernel
    * Create the store of data search paths from the 'datasearch.directories' key within the Mantid.properties file.
    * The value of the key should be a semi-colon separated list of directories
    */
-  void ConfigServiceImpl::defineDataSearchPaths()
+  void ConfigServiceImpl::cacheDataSearchPaths()
   {
     m_DataSearchDirs.clear();
     std::string paths = getString("datasearch.directories");
@@ -380,6 +395,48 @@ namespace Kernel
     {
       m_DataSearchDirs.push_back(*itr);
     }
+  }
+
+  /**
+   * Create the map of facility to known instrument prefixes from the property file. The prefix list is specified using 
+   * instrument.prefixes.[facility] key where [facility] is replaced with a facility from the "supported.facilities" list
+   */
+  void ConfigServiceImpl::cacheInstrumentPrefixes()
+  {
+    m_instr_prefixes.clear();
+
+    std::string facilities = getString("supported.facilities");
+    if( facilities.empty() ) 
+    {
+      g_log.error() << "No supported facilties defined within the \"supported.facilities\" key.\n";
+      return;
+    }
+    int options = Poco::StringTokenizer::TOK_TRIM + Poco::StringTokenizer::TOK_IGNORE_EMPTY;
+    Poco::StringTokenizer fac_tokens(facilities, ";", options);
+    Poco::StringTokenizer::Iterator iend = fac_tokens.end();
+    for( Poco::StringTokenizer::Iterator itr = fac_tokens.begin(); itr != iend; ++itr )
+    {
+      // For each facility find the corresponding instrument list
+      std::string prefix_key = "instrument.prefixes." + *itr;
+      std::string prefixes = getString(prefix_key);
+      Poco::StringTokenizer instr_tokens(prefixes, ";", options);
+      if( instr_tokens.count() > 0 )
+      {
+	std::vector<std::string> prefs;
+	prefs.reserve(instr_tokens.count());
+	Poco::StringTokenizer::Iterator pref_end = instr_tokens.end();
+	for( Poco::StringTokenizer::Iterator pref_itr = instr_tokens.begin(); pref_itr != pref_end; ++pref_itr )
+	{
+	  prefs.push_back(*pref_itr);
+	}
+	m_instr_prefixes[*itr] = prefs;
+      }
+	
+    }
+
+    
+    
+
   }
 
   /**
@@ -455,26 +512,130 @@ namespace Kernel
    *  @param filename The filename and optionally path of the file to load
    *  @param append   If false (default) then any previous configuration is discarded, 
    *                  otherwise the new keys are added, and repeated keys will override existing ones.
+   *  @param config_caches If true(default) then the various property caches are updated 
    */
-  void ConfigServiceImpl::updateConfig(const std::string& filename, const bool append)
+  void ConfigServiceImpl::updateConfig(const std::string& filename, const bool append, const bool update_caches)
   {
     loadConfig(filename, append);
     configureLogging();
+    if( update_caches )
+    {
+      //Ensure that any relative paths given in the configuration file are relative to the correct directory
+      convertRelativeToAbsolute();
+      //Configure search paths into a specially saved store as they will be used frequently
+      cacheDataSearchPaths();
+      cacheInstrumentPrefixes();
+    }
   }
+
+  /** 
+   * Save the configuration to the user file
+   * @param filename The filename for the saved configuration
+   * @throws std::runtime_error if the file cannot be opened
+   */ 
+  void ConfigServiceImpl::saveConfig(const std::string & filename) const
+  {
+    if( m_changed_keys.empty() ) return;
+
+    // Open and read the user properties file
+    std::string updated_file("");
+    
+    std::ifstream reader(filename.c_str(), std::ios::in);
+    if( reader.bad() )
+    {
+      g_log.error() << "Error reading current user properties file. Cannot save updated configuration.\n";
+      throw std::runtime_error("Error opening user properties file. Cannot save updated configuration.");
+    }
+
+    std::string file_line(""), output("");
+    bool line_continuing(false);
+    while( std::getline(reader, file_line) )
+    {
+      char last = *(file_line.end() - 1);
+      if( last == '\\' )
+      {
+	line_continuing = true;
+	output += file_line + "\n";
+	continue;
+      }
+      else if( line_continuing )
+      {
+	output += file_line;
+	line_continuing = false;
+      }
+      else 
+      {
+	output = file_line;
+      }
+
+      std::set<std::string>::iterator iend = m_changed_keys.end();
+      std::set<std::string>::iterator itr = m_changed_keys.begin();
+      for( ; itr != iend; ++itr )
+      {
+	if( output.find(*itr) != std::string::npos )
+	{
+	  break;
+	}
+      }
+      
+      if( itr == iend )
+      {
+	updated_file += output;
+      }
+      else
+      {
+	std::string key = *itr;
+	std::string value = getString(*itr, false);
+	updated_file += key + "=" + value;
+	//Remove the key from the changed key list
+	m_changed_keys.erase(itr);
+      }
+      updated_file += "\n";
+
+    }
+
+    // Any remaining keys within the changed key store weren't present in the current user properties so append them
+    updated_file += "\n";
+    std::set<std::string>::iterator key_end = m_changed_keys.end();
+    for( std::set<std::string>::iterator key_itr = m_changed_keys.begin(); 
+	 key_itr != key_end; ++key_itr )
+    {
+      updated_file += *key_itr + "=";
+      updated_file += getString(*key_itr, false) + "\n";
+    }
+    m_changed_keys.clear();
+
+    // Write out the new file
+    std::ofstream writer(filename.c_str(), std::ios_base::trunc);
+    if( writer.bad() )
+    {
+      writer.close();
+      g_log.error() << "Error writing new user properties file. Cannot save current configuration.\n";
+      throw std::runtime_error("Error writing new user properties file. Cannot save current configuration.");
+    }
+    
+    writer.write(updated_file.c_str(), updated_file.size());
+    writer.close();
+  }
+
 
   /** Searches for a string within the currently loaded configuaration values and 
    *  returns the value as a string. If the key is one of those that was a possible relative path
    *  then the local store is searched first.
    *
    *  @param keyName The case sensitive name of the property that you need the value of.
+   *  @param use_cache If true, the local cache of directory names is queried first.
    *  @returns The string value of the property, or an empty string if the key cannot be found
    */
-  std::string ConfigServiceImpl::getString(const std::string& keyName)
+  std::string ConfigServiceImpl::getString(const std::string& keyName, bool use_cache) const
   {
-    std::map<std::string, std::string>::const_iterator mitr = m_AbsolutePaths.find(keyName);
-    if( mitr != m_AbsolutePaths.end() ) 
+    if( use_cache )
     {
-      return (*mitr).second;
+      std::map<std::string, std::string>::const_iterator mitr = m_AbsolutePaths.find(keyName);
+      if( mitr != m_AbsolutePaths.end() ) 
+      {
+	return (*mitr).second;
+      }
     }
     std::string retVal;
     try
@@ -487,6 +648,35 @@ namespace Kernel
       retVal = "";
     }
     return retVal;
+  }
+
+  /**
+   * Set a configuration property. An existing key will have its value updated.
+   * @param key The key to refer to this property
+   * @param value The value of the property
+   */
+  void ConfigServiceImpl::setString(const std::string & key, const std::string & value)
+  {
+    //Ensure we keep a correct full path
+    std::map<std::string, bool>::const_iterator itr = m_ConfigPaths.find(key);
+    if( itr != m_ConfigPaths.end() )
+    {
+      m_AbsolutePaths[key] = makeAbsolute(value, key);
+    }
+
+    if( key == "datasearch.directories" )
+    {
+      cacheDataSearchPaths();
+    }
+
+    // If this key exists within the loaded configuration then mark that its value will have 
+    // changed from the default
+    if( m_pConf->hasProperty(key) )
+    {
+      m_changed_keys.insert(key);
+    }
+
+    m_pConf->setString(key, value);
   }
 
   /** Searches for a string within the currently loaded configuaration values and 
@@ -597,9 +787,31 @@ namespace Kernel
 #endif
   }
 
+  /**
+   * Return the list of search paths
+   * @returns A vector of strings containing the defined search directories
+   */
   const std::vector<std::string>& ConfigServiceImpl::getDataSearchDirs() const
   {
     return m_DataSearchDirs;
+  }
+
+  /**
+   * Return the list of instrument prefixes for the given facility. If the facility if unknown then a NotFoundError is thrown.
+   * @returns A vector of strings containing the instrument prefixes
+   */
+  const std::vector<std::string>& ConfigServiceImpl::getInstrumentPrefixes(const std::string& facility) const
+  {
+    std::map<std::string, std::vector<std::string> >::const_iterator itr = m_instr_prefixes.find(facility);
+    if( itr != m_instr_prefixes.end() )
+    {
+      return itr->second;
+    }
+    else
+    {
+      g_log.warning() << "Unknown facility \"" << facility << "\". No instrument prefixes defined.\n";
+      throw Exception::NotFoundError("Unknown facility name. No instrument prefixes defined.", facility);
+    }
   }
 
   /// \cond TEMPLATE 

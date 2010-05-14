@@ -6,9 +6,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "Poco/Path.h"
+#include "Poco/File.h"
 #include "boost/shared_ptr.hpp"
 #include "TestChannel.hh"
 #include <string>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 
@@ -171,6 +173,87 @@ public:
 
 	}
 
+  void testInstrumentPrefixes()
+  {
+    //Test properties file contains a facility and some prefixes
+    const std::string test_facility("NewThing");
+    ConfigServiceImpl& settings = ConfigService::Instance();
+    std::vector<std::string> prefs;
+    TS_ASSERT_THROWS_NOTHING( prefs = settings.getInstrumentPrefixes(test_facility) );
+    TS_ASSERT_EQUALS(prefs.size(), 2);
+
+    if( prefs.size() == 2 )
+    {
+      TS_ASSERT_EQUALS(prefs[0], "ABC");
+      TS_ASSERT_EQUALS(prefs[1], "DEF");
+    }
+    
+    TS_ASSERT_THROWS(prefs = settings.getInstrumentPrefixes(test_facility + "IsRubbish"),std::runtime_error );
+
+  }
+
+  void testSaveConfigCleanFile()
+  {
+    const std::string filename("user.settings");
+    ConfigServiceImpl& settings = ConfigService::Instance();
+    TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
+    
+    Poco::File prop_file(filename);
+    
+    // No changes yet, so no file
+    TS_ASSERT_EQUALS(prop_file.exists(), false);
+
+    runSaveTest(filename);
+  }
+
+  void testSaveConfigExistingSettings()
+  {
+    const std::string filename("user.settings");
+    ConfigServiceImpl& settings = ConfigService::Instance();
+    
+    std::ofstream writer(filename.c_str(),std::ios_base::trunc);
+    writer << "mantid.legs = 6";
+    writer.close();
+
+    runSaveTest(filename);
+
+  }
+
+private:
+  void runSaveTest(const std::string& filename)
+  {
+    ConfigServiceImpl& settings = ConfigService::Instance();
+    // Make a change and save again
+    std::string key("mantid.legs");
+    std::string value("10");
+    TS_ASSERT_THROWS_NOTHING(settings.setString(key, value));
+    TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
+
+    // Should exist
+    Poco::File prop_file(filename);
+    TS_ASSERT_EQUALS(prop_file.exists(), true);
+
+    // Test the entry
+    std::ifstream reader(filename.c_str(), std::ios::in);
+    if( reader.bad() )
+    {
+      TS_FAIL("Unable to open save config file.");
+    }
+    std::string line("");
+    while(std::getline(reader, line))
+    {
+      if( line.empty() ) continue;
+      else break;
+    }
+
+    std::string key_value = key + "=" + value;
+    TS_ASSERT_EQUALS(line, key_value);
+
+    // Clean up
+    prop_file.remove();
+
+  }
+  
 };
 
 #endif /*MANTID_CONFIGSERVICETEST_H_*/

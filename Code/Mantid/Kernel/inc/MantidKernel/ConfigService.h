@@ -8,6 +8,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <vector>
 #include <map>
+#include <set>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -63,11 +64,14 @@ namespace Mantid
     class EXPORT_OPT_MANTID_KERNEL ConfigServiceImpl
     {
     public:
-      void updateConfig(const std::string& filename, const bool append=false);
-
-      // Searches for a configuration property
-      std::string getString(const std::string& keyName);
-
+      /// Wipe out the current configuration and load a new one
+      void updateConfig(const std::string& filename, const bool append=false, const bool update_caches=true);
+      /// Save the configuration to the user file
+      void saveConfig(const std::string &filename) const;
+      /// Searches for a configuration property
+      std::string getString(const std::string& keyName, bool use_cache=true) const;
+      /// Sets a configuration property
+      void setString(const std::string & keyName, const std::string & keyValue);
       // Searches for a configuration property and returns its value
       template<typename T>
       int getValue(const std::string& keyName, T& out);
@@ -87,6 +91,8 @@ namespace Mantid
 
       /// Get the list of search paths
       const std::vector<std::string>& getDataSearchDirs() const;
+      /// Get the list of known instrument prefixes for the given facility
+      const std::vector<std::string>& getInstrumentPrefixes(const std::string& facility) const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
@@ -98,8 +104,10 @@ namespace Mantid
 
       virtual ~ConfigServiceImpl();
 
-      // Loads a config file
+      /// Loads a config file
       void loadConfig(const std::string& filename, const bool append=false);
+      /// Read a file and place its contents into the given string
+      bool readFile(const std::string& filename, std::string & contents) const;
       // Starts up the logging
       void configureLogging();
       /// Provies a string of a default configuration
@@ -112,7 +120,9 @@ namespace Mantid
       ///Make a relative path or a list of relative paths into an absolute one.
       std::string makeAbsolute(const std::string & dir, const std::string & key) const;
       /// Create the storage of the data search directories
-      void defineDataSearchPaths();
+      void cacheDataSearchPaths();
+      /// Create the map of facility name to instrument prefix list
+      void cacheInstrumentPrefixes();
 
       // Forward declaration of inner class
       template <class T>
@@ -125,7 +135,11 @@ namespace Mantid
       /// reference to the logger class
       Logger& g_log;
 
-      /// A map storing string/key pairs where the string denotes a path that could be relative in the user properties file
+      /// A set of property keys that have been changed
+      mutable std::set<std::string> m_changed_keys;
+      
+      /// A map storing string/key pairs where the string denotes a path 
+      /// that could be relative in the user properties file
       /// The boolean indicates whether the path needs to exist or not
       std::map<std::string, bool> m_ConfigPaths;
       /// Local storage for the relative path key/values that have been changed 
@@ -140,6 +154,8 @@ namespace Mantid
       const std::string m_user_properties_file_name;
       /// Store a list of data search paths
       std::vector<std::string> m_DataSearchDirs;
+      /// A map of facilities to instruments
+      std::map<std::string,std::vector<std::string> > m_instr_prefixes;
     };
 
     /// Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
