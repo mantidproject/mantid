@@ -143,7 +143,7 @@ void AlgorithmProxy::removeObserver(const Poco::AbstractObserver& observer)const
 // Private methods
 //----------------------------------------------------------------------
 /**
- * Clean up when the real algorithm stops
+ * Clean up when the real algorithm stops
  */
 void AlgorithmProxy::stopped()
 {
@@ -163,7 +163,7 @@ void AlgorithmProxy::addObservers()
 }
 
 /** 
- * executeAsync() implementation. Calls execute and when it has finished  deletes the real algorithm.
+ * executeAsync() implementation. Calls execute and when it has finished  deletes the real algorithm.
 */
 bool AlgorithmProxy::executeAsyncImpl(const Poco::Void &)
 {
