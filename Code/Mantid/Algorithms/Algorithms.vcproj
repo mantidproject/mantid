@@ -343,6 +343,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\logarithm.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\MaskBins.cpp"
 				>
 			</File>
@@ -778,6 +782,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\InputWSDetectorInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\logarithm.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\logarithmTest.h"
 				>
 			</File>
 			<File

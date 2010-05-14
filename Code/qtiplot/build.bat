@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 
 SETLOCAL
 if "%1" == "" set ARCH=x86
@@ -16,7 +16,7 @@ python release_date.py
 
 CALL "%VCINSTALLDIR%"\vcvarsall.bat %ARCH%
 
-:: The top-level directory 
+:: The top-level directory
 SET ROOTDIR=%CD%
 
 :: First, build dialog library
