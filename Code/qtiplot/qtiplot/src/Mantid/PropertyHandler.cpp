@@ -175,8 +175,8 @@ void PropertyHandler::initAttributes()
   {
     QString aName = QString::fromStdString(attNames[i]);
     Mantid::API::IFunction::Attribute att = function()->getAttribute(attNames[i]);
-    QtProperty* prop = att.apply(CreateAttributeProperty(m_browser,aName));
-//    m_fun->setAttribute(attNames[i],att);
+    CreateAttributeProperty tmp(m_browser,aName);
+    QtProperty* prop = att.apply(tmp);
     m_item->property()->addSubProperty(prop);
     m_attributes << prop;
   }
@@ -534,7 +534,8 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
     {
       Mantid::API::IFunction::Attribute att = 
         m_fun->getAttribute(attName.toStdString());
-      att.apply(SetAttribute(m_browser,prop));
+      SetAttribute tmp(m_browser,prop);
+      att.apply(tmp);
       m_fun->setAttribute(attName.toStdString(),att);
       initParameters();
     }

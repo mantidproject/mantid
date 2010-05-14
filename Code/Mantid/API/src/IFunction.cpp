@@ -378,7 +378,8 @@ protected:
 
 std::string IFunction::Attribute::type()const
 {
-  return apply(AttType());
+  AttType tmp;
+  return apply(tmp);
 }
 
 /**
@@ -397,7 +398,8 @@ protected:
 
 std::string IFunction::Attribute::value()const
 {
-  return apply(AttValue());
+  AttValue tmp;
+  return apply(tmp);
 }
 
 std::string IFunction::Attribute::asString()const
@@ -529,7 +531,8 @@ private:
  */
 void IFunction::Attribute::fromString(const std::string& str)
 {
-  apply(SetValue(str));
+  SetValue tmp(str);
+  apply(tmp);
 }
 
 } // namespace API
