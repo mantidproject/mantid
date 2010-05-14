@@ -1,6 +1,6 @@
 include(mantidqt.pri)
 
-system(mkdir '"$$MANTIDQTINCLUDES"')
+system(mkdir '$$MANTIDQTINCLUDES')
 
 TEMPLATE = subdirs
 SUBDIRS = API MantidWidgets CustomDialogs CustomInterfaces
