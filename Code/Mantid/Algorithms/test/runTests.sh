@@ -17,17 +17,16 @@ rm -f *.properties
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
 #  - it's always a good idea to run your new/changed test on its own
-cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.pl
 if [ $# -eq 0 ]; then
-	perl $cxxtestgen --error-printer -o runner.cpp *.h
+	cxxtestgen.pl --error-printer -o runner.cpp *.h
 else
-	perl $cxxtestgen --error-printer -o runner.cpp $*
+	cxxtestgen.pl --error-printer -o runner.cpp $*
 fi
 echo
 
 echo "Compiling the test executable..."
 g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc -I ../../Geometry/inc -I ../../CurveFitting/inc \
-	                         -I ../../DataHandling/inc -I ../../Nexus/inc -I ../../../Third_Party/src/cxxtest \
+	                          -I ../../DataHandling/inc -I ../../Nexus/inc -I ../../../Third_Party/include \
 	                         -L ../../debug -L ../../Build \
 	                         -lMantidAlgorithms -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling -lMantidNexus -lMantidCurveFitting
 echo
