@@ -16,7 +16,7 @@ namespace Algorithms
     Required Properties:
     <UL>
     <LI> Workspace -The log data will be added to this workspace</LI>
-    <LI> LogName -The name the entry will be accessible through this name</LI>
+    <LI> LogName -The named entry will be accessible through this name</LI>
     Optional property:
     <LI> LogText -The log data</LI>
     </UL>

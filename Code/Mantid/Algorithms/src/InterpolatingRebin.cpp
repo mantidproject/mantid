@@ -233,7 +233,7 @@ namespace Mantid
           const double xNew) const
     {  
       //get the index of the first point that is higher in x, we'll base some of the error estimate on the error on this point 
-      const int indAbove =
+      const size_t indAbove =
         std::lower_bound(xsOld.begin(), xsOld.end(), xNew) - xsOld.begin();
       
       const double error1 = esOld[indAbove];
