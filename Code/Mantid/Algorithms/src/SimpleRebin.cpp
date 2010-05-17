@@ -26,10 +26,17 @@ namespace Mantid
     */
     void SimpleRebin::init()
     {
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output));
+      declareProperty(
+        new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),
+        "Workspace containing the input data");
+      declareProperty(
+        new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+        "The name to give the output workspace");
 
-      declareProperty(new ArrayProperty<double>("Params", new RebinParamsValidator));
+      declareProperty(
+        new ArrayProperty<double>("Params", new RebinParamsValidator),
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
+        "this can be folowed by a comma and more widths and last boundary pairs");
     }
 
     /** Executes the rebin algorithm

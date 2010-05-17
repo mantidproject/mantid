@@ -61,10 +61,10 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Rebin";}
 
-private:
+protected:
   // Overridden Algorithm methods
   void init();
-  void exec();
+  virtual void exec();
   
   void propagateMasks(API::MatrixWorkspace_const_sptr inputW, API::MatrixWorkspace_sptr outputW, int hist);
 };
