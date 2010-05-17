@@ -18,7 +18,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class MultiplyTest : public CxxTest::TestSuite
+class PowerTest : public CxxTest::TestSuite
 {
 public:
 
