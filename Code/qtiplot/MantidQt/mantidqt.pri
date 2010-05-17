@@ -6,7 +6,7 @@
 #------------------------
 # Compile mode
 #------------------------
-CONFIG += qt warn_on exceptions
+CONFIG += qt warn_on exceptions debug_and_release
 
 QMAKESPEC=win32-msvc2005
 
@@ -29,17 +29,14 @@ RESOURCES = "$$TOPBUILDDIR/../../../Images/images.qrc"
 
 # My variables
 MANTIDPATH = "$$TOPBUILDDIR/../../Mantid"
-MANTIDLIBPATH = "$$MANTIDPATH/Bin/Shared"
-win32 {
+build_pass:CONFIG(release, debug|release) {
+  # Put both Scons and Visual Studio output directories on the search path
+  LIBPATH += "$$MANTIDPATH/release"
+  MANTIDLIBPATH = "$$MANTIDPATH/Bin/Shared"
   LIBPATH += $$MANTIDLIBPATH
-  build_pass:CONFIG(release, debug|release) {
-    # Put both Scons and Visual Studio output directories on the search path
-    LIBPATH += "$$MANTIDPATH/release"
-  }
-  build_pass:CONFIG(debug, debug|release) {
-    MANTIDLIBPATH = "$$MANTIDPATH/debug"
-    LIBPATH += $$MANTIDLIBPATH
-  }
+} else{
+  MANTIDLIBPATH = "$$MANTIDPATH/debug"
+  LIBPATH += $$MANTIDLIBPATH
 }
 
 THIRDPARTY = "$$TOPBUILDDIR/../../Third_Party"
@@ -113,14 +110,10 @@ CONFIG(debug, debug|release) {
 }
 SIP_DIR = "$$TMPDIR"
 
-win32:build_pass:CONFIG(debug, debug|release) {
+build_pass:CONFIG(debug, debug|release) {
   # Put alongside Mantid libraries
   DESTDIR = "$$MANTIDLIBPATH"
 } else {
   # Put in local output directory
   DESTDIR = "$$TOPBUILDDIR/lib"
 }
-
-# This makes release the default build on running nmake. Must be here - after the config dependent parts above
-CONFIG += release
-

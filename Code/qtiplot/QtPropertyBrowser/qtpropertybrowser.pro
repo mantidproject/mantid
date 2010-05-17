@@ -1,6 +1,5 @@
 TEMPLATE=lib
-CONFIG += shared
-CONFIG += release_and_debug
+CONFIG += shared debug_and_release
 
 INCLUDEPATH += src
 DEPENDPATH += src
@@ -25,18 +24,19 @@ HEADERS += src/qtpropertybrowser.h \
         src/FilenameEditorFactory.h 
 RESOURCES += src/qtpropertybrowser.qrc
 
-win32 {
+build_pass:win32 {
     DEFINES += QT_QTPROPERTYBROWSER_EXPORT
 }
 
-win32:build_pass:CONFIG(debug, debug|release) {
+build_pass:CONFIG(debug, debug|release) {
   # Put alongside Mantid libraries
-  DESTDIR = ..\..\Mantid\debug
-  TARGET = QtPropertyBrowserd
+  DESTDIR = ../../Mantid/debug
+  win32:TARGET = QtPropertyBrowserd
+  unix:TARGET=QtPropertyBrowser
 } else {
   # Put in local output directory
   DESTDIR = lib
   TARGET = QtPropertyBrowser
 }
 
-CONFIG += release
+

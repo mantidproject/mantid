@@ -2,20 +2,6 @@
 ###################### USER-SERVICEABLE PART ################################
 #############################################################################
 
-win32 {
- QMAKESPEC=win32-msvc2005  
-}
-unix {
-QMAKE_CXXFLAGS_RELEASE += -g
-QMAKE_LFLAGS_RELEASE += -g
- macx{
- QMAKESPEC=macx-g++
- } else {
-# could also be linux-g++-64 so maybe best left to the system to determine
-# QMAKESPEC=linux-g++
- }
-}
-
 # building without muParser doesn't work yet
 SCRIPTING_LANGS += muParser
 SCRIPTING_LANGS += Python
@@ -40,13 +26,15 @@ RESOURCES        = ../../../Images/images.qrc
 ######################################################################################
 #CONFIG          += CustomInstall
 
+CONFIG += debug_and_release
+
 win32:build_pass:CONFIG(debug, debug|release) {
   CONFIG += console
 }
 
 build_pass:CONFIG(debug, debug|release) {
   # Put the debug version alongside the Mantid debug dlls to make sure it picks them up
-  DESTDIR = ../../Mantid/debug
+  DESTDIR = "../../Mantid/debug"
 } else {
   DESTDIR = ./
 }
@@ -145,21 +133,25 @@ macx {
 
   LIBS         += -lgsl -lgslcblas
 
-  LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
-  LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
-  LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
 
-  LIBS          += -L../QtPropertyBrowser/lib -lQtPropertyBrowser
-
-  LIBS   += -L../MantidQt/lib -lMantidQtAPI
-
-CONFIG(debug, debug|release) {
+build_pass:CONFIG(debug, debug|release) {				 
+  LIBS  += -L../../Mantid/debug
   LIBS	+= -lPocoUtild
   LIBS	+= -lPocoFoundationd
 } else {
+  LIBS  += -L../../Mantid/Bin/Shared	
+  LIBS  += -L../MantidQt/lib
+  LIBS  += -L../QtPropertyBrowser/lib
+
   LIBS	+= -lPocoUtil
   LIBS	+= -lPocoFoundation
+
  }
+ LIBS  += -lMantidAPI
+ LIBS  += -lMantidGeometry
+ LIBS  += -lMantidKernel
+ LIBS  += -lQtPropertyBrowser 
+ LIBS  += -lMantidQtAPI	
 }
 
 ##################### Windows ###############################################
@@ -212,8 +204,6 @@ win32 {
   LIBS += MantidKernel.lib
   LIBS += MantidQtAPI.lib
 
-  # This makes release the default build on running nmake. Must be here - after the config dependent parts above
-  CONFIG += release
 }
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################

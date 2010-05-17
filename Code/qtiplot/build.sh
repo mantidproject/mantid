@@ -2,12 +2,24 @@
 #
 # Build the Mantidplot user interface
 #
-#
-CLEAN="0"
-QMAKE_CONFIG=""
+build_library () {
+    if [ "$2" = "clean" -o ! -f Makefile ]; then
+	qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}" QMAKE_LINK="${CXX:-g++}"
+    fi
+    if [ "$2" = "clean" ]; then
+	make clean
+    fi
+    make
+    ERRORCODE=$?
+    if [ $ERRORCODE != 0 ]; then
+	echo "Error: $1 build failed with error code $ERRORCODE"
+	exit $ERRORCODE
+    fi
+}
+
+CLEAN=""
 if [ $# -ge 1 ]; then 
-    if [ $1 = "clean" ]; then CLEAN="1"; fi
-    if [ $2 = "--debug" ]; then QMAKE_CONFIG="CONFIG+=debug"; fi
+    if [ $1 = "clean" ]; then CLEAN=$1; fi
 fi
 if [ $# -ge 2 ]; then 
     VERSION=$2
@@ -23,43 +35,16 @@ ROOTDIR=`pwd`
 
 # First, build dialog library
 cd $ROOTDIR/MantidQt
-if [ $CLEAN = "1" ]; then 
-    make clean 
-    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}" QMAKE_LINK="${CXX:-g++}" ${QMAKE_CONFIG}
-fi
-
-make
-ERRORCODE=$?
-if [ $ERRORCODE != 0 ]; then
-    echo "Error: MantidQt build failed with error code $ERRORCODE"
-    exit $ERRORCODE
-fi
+build_library "MantidQt" $CLEAN
 
 # QtPropertyBrowser library
 cd $ROOTDIR/QtPropertyBrowser
-if [ $CLEAN = "1" ]; then 
-    make clean
-    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}" QMAKE_LINK="${CXX:-g++}" ${QMAKE_CONFIG}
-fi
-make -j2
-ERRORCODE=$?
-if [ $ERRORCODE != 0 ]; then
-    echo "Error: QtPropertyBrowser build failed with error code $ERRORCODE"
-    exit $ERRORCODE
-fi
+build_library "QtPropertyBrowser" $CLEAN
 
 # Now build qtiplot
 cd $ROOTDIR/qtiplot
-if [ $CLEAN = "1" ]; then 
-    make clean
-    qmake-qt4 QMAKE_CC="${CC:-gcc}" QMAKE_CXX="${CXX:-g++}" QMAKE_LINK="${CXX:-g++}" ${QMAKE_CONFIG}
-fi
-make -j2
-ERRORCODE=$?
-if [ $ERRORCODE != 0 ]; then
-    echo "Error: MantidPlot build failed with error code $ERRORCODE"
-    exit $ERRORCODE
-fi
+build_library "MantidPlot" $CLEAN
 
 # If we reached this point then the build was successful
 echo "MantidQt and MantidPlot build succeeded"
+cd $ROOTDIR
