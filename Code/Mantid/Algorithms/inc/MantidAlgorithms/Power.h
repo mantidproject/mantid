@@ -55,7 +55,7 @@ namespace Mantid
         /// Destructor
          virtual ~Power() {};
         /// Algorithm's name for identification overriding a virtual method
-        virtual const std::string name() const { return "Multiply";}
+        virtual const std::string name() const { return "Power";}
         /// Algorithm's version for identification overriding a virtual method
         virtual const int version() const { return 1;}
 
