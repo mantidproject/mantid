@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/BinaryOperation.h"
+#include "MantidAlgorithms/UnaryOperation.h"
 
 namespace Mantid
 {
@@ -47,31 +47,26 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       */
 
-   class DLLExport Power : public BinaryOperation
+   class DLLExport Power : public UnaryOperation
    {
    public:
-        /// Default constructor
-        Power() : BinaryOperation() {};
-        /// Destructor
+         /// Default constructor
+         Power() : UnaryOperation() {};
+         /// Destructor
          virtual ~Power() {};
-        /// Algorithm's name for identification overriding a virtual method
-        virtual const std::string name() const { return "Power";}
-        /// Algorithm's version for identification overriding a virtual method
-        virtual const int version() const { return 1;}
+         /// Algorithm's name for identification
+         virtual const std::string name() const { return "Power";}
+         /// Algorithm's version for identification
+         virtual const int version() const { return 1;}
 
-      private:
-        // Overridden BinaryOperation methods
-        void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                    const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
-        void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                    const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
-        void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
-
-        //Helper method to peform the power calculation
-        inline double CalculatePower(double base, double exponent);
-
-        //Check that unsigned exponents are not being used
-        inline void CheckExponent(double exponent);
+       private:
+         // Overridden UnaryOperation methods
+         void defineProperties();
+         void retrieveProperties();
+         void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
+         inline double CalculatePower(const double base, const double exponent);
+         //Exponent to raise the base workspace to
+         double m_exponent;
    };
 
   }

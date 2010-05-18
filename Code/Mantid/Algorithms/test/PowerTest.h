@@ -22,112 +22,125 @@ class PowerTest : public CxxTest::TestSuite
 {
 public:
 
-	void testInit()
-	{
-		Power alg;
-		TS_ASSERT_THROWS_NOTHING(alg.initialize());
-		TS_ASSERT(alg.isInitialized());
-		//Setting properties to input workspaces that don't exist throws
-		TSM_ASSERT_THROWS("Base must be numeric", alg.setPropertyValue("LHSWorkspace","n"), std::invalid_argument )
-		TSM_ASSERT_THROWS("Base must be numeric", alg.setPropertyValue("RHSWorkspace","n"), std::invalid_argument )
-	}
+void testName()
+{
+    Mantid::Algorithms::Power power;
+    TS_ASSERT_EQUALS  ( power.name(), "Power" )
+}
 
-	void testPowerCalculation()
-	{
-		WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-		WorkspaceSingleValue_sptr exponentWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-		AnalysisDataService::Instance().add("baseWsp",baseWs);
-		AnalysisDataService::Instance().add("exponentWsp",exponentWs);
+void testVersion()
+{
+  Mantid::Algorithms::Power power;
+  TS_ASSERT_EQUALS( power.version(), 1 )
+}
 
-		Power alg;
-		alg.initialize();
+void testInit()
+{
+  Mantid::Algorithms::Power power;
+  TS_ASSERT_THROWS_NOTHING( power.initialize() )
+  TS_ASSERT( power.isInitialized() )
 
-		alg.setPropertyValue("OutputWorkspace","OutputWsp");
-		alg.setPropertyValue("RHSWorkspace", "exponentWsp");
-		alg.setPropertyValue("LHSWorkspace", "baseWsp");
-		alg.execute();
+  const std::vector<Property*> props = power.getProperties();
+  TSM_ASSERT_EQUALS("There should only be 3 properties for this power algorithm", props.size(), 3);
 
-		WorkspaceSingleValue_sptr output =  boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("OutputWsp"));
-		Mantid::MantidVec expectedValue(1,4);
-		TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY());
+  TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" )
+  TS_ASSERT( props[0]->isDefault() )
+  TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[0]) )
 
+  TS_ASSERT_EQUALS( props[1]->name(), "OutputWorkspace" )
+  TS_ASSERT( props[1]->isDefault() )
+  TS_ASSERT( dynamic_cast<WorkspaceProperty<MatrixWorkspace>* >(props[1]) )
 
-		AnalysisDataService::Instance().remove("exponentWs");
-		AnalysisDataService::Instance().remove("baseWs");
-		AnalysisDataService::Instance().remove("OutputWsp");
-	}
+  TS_ASSERT_EQUALS( props[2]->name(), "Exponent" )
+  TS_ASSERT( props[2]->isDefault() )
+  TS_ASSERT( dynamic_cast<PropertyWithValue<double>* >(props[2]) )
+}
 
-	void testSignedExponent()
-	{
-		WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-		WorkspaceSingleValue_sptr exponentWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(-2);
-		AnalysisDataService::Instance().add("baseWs",baseWs);
-		AnalysisDataService::Instance().add("exponentWs",exponentWs);
+void testSetProperties()
+{
+  WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+  AnalysisDataService::Instance().add("InputWS", baseWs);
 
-		Power alg;
-		alg.initialize();
+  Power power;
+  power.initialize();
 
-		alg.setPropertyValue("OutputWorkspace","OutputWs");
-		alg.setPropertyValue("RHSWorkspace", "exponentWs");
-		alg.setPropertyValue("LHSWorkspace", "baseWs");
-		alg.execute();
-		TSM_ASSERT_EQUALS("Algorithm should not run with a negative exponent", alg.isExecuted(),false);
+  TS_ASSERT_THROWS_NOTHING( power.setPropertyValue("InputWorkspace","InputWS") )
+  TS_ASSERT_THROWS_NOTHING( power.setPropertyValue("OutputWorkspace","WSCor") )
+  TS_ASSERT_THROWS_NOTHING( power.setPropertyValue("Exponent","2.0") )
 
+  AnalysisDataService::Instance().remove("InputWS");
+  AnalysisDataService::Instance().remove("WSCor");
+}
 
-		AnalysisDataService::Instance().remove("exponentWs");
-		AnalysisDataService::Instance().remove("baseWs");
-		AnalysisDataService::Instance().remove("OutputWs");
-	}
+void testNonNumericExponent()
+{
 
-	void testMultivaluedWorkspaceAsExponent()
-	{
-		WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-		Workspace1D_sptr exponentWs = WorkspaceCreationHelper::Create1DWorkspaceRand(10);
-		AnalysisDataService::Instance().add("baseWs",baseWs);
-		AnalysisDataService::Instance().add("exponentWs",exponentWs);
+  Power power;
+  power.initialize();
 
-		Power alg;
-		alg.initialize();
+  TS_ASSERT_THROWS( power.setPropertyValue("Exponent","x"), std::invalid_argument )
 
-		alg.setPropertyValue("OutputWorkspace","OutputWs");
-		alg.setPropertyValue("RHSWorkspace", "exponentWs");
-		alg.setPropertyValue("LHSWorkspace", "baseWs");
-		alg.execute();
-		TSM_ASSERT_EQUALS("Exponent must be a single valued workspace", alg.isExecuted(),false);
+}
 
+void testNegativeExponent()
+{
 
-		AnalysisDataService::Instance().remove("exponentWs");
-		AnalysisDataService::Instance().remove("baseWs");
-		AnalysisDataService::Instance().remove("OutputWs");
-	}
+  Power power;
+  power.initialize();
 
-	void testPowerErrorCalculation()
-	{
-		//Workspace creation helper creates input error as sqrt of input value. So input error = 2.
+  TS_ASSERT_THROWS( power.setPropertyValue("Exponent","-1"), std::invalid_argument )
+}
 
-		//if x = p ^ y, then err_x = y * x * err_p / p
+void testPowerCalculation()
+{
+  WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+  AnalysisDataService::Instance().add("InputWS", baseWs);
 
-		WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4);
-		WorkspaceSingleValue_sptr exponentWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-		AnalysisDataService::Instance().add("baseWs",baseWs);
-		AnalysisDataService::Instance().add("exponentWs",exponentWs);
+  Power power;
+  power.initialize();
 
-		Power alg;
-		alg.initialize();
+  power.setPropertyValue("InputWorkspace","InputWS");
+  power.setPropertyValue("OutputWorkspace","WSCor");
+  power.setPropertyValue("Exponent","2.0");
 
-		alg.setPropertyValue("OutputWorkspace","OutputWs");
-		alg.setPropertyValue("RHSWorkspace", "exponentWs");
-		alg.setPropertyValue("LHSWorkspace", "baseWs");
-		alg.execute();
+  power.execute();
+  TS_ASSERT( power.isExecuted());
 
-		WorkspaceSingleValue_sptr output =  boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("OutputWs"));
-		Mantid::MantidVec expectedErrorValue(1,16);
-		TSM_ASSERT_EQUALS("Power algorithm error has not been determined properly.", expectedErrorValue, output->dataE());
+  WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
 
-		AnalysisDataService::Instance().remove("exponentWs");
-		AnalysisDataService::Instance().remove("baseWs");
-		AnalysisDataService::Instance().remove("OutputWs");
-	}
+  Mantid::MantidVec expectedValue(1,4);
+  TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY());
+
+  AnalysisDataService::Instance().remove("InputWS");
+  AnalysisDataService::Instance().remove("WSCor");
+}
+
+void testPowerErrorCalculation()
+{
+  //Workspace creation helper creates input error as sqrt of input value. So input error = 2.
+
+  //if x = p ^ y, then err_x = y * x * err_p / p
+
+  WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4);
+  AnalysisDataService::Instance().add("InputWS", baseWs);
+
+  Power power;
+  power.initialize();
+
+  power.setPropertyValue("InputWorkspace","InputWS");
+  power.setPropertyValue("OutputWorkspace","WSCor");
+  power.setPropertyValue("Exponent","2.0");
+
+  power.execute();
+
+  WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
+
+  Mantid::MantidVec expectedValue(1,16);
+  TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedValue, output->dataY());
+
+  AnalysisDataService::Instance().remove("InputWS");
+  AnalysisDataService::Instance().remove("WSCor");
+}
 };
 
 #endif
