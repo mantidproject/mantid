@@ -3,42 +3,44 @@
 # Will run all tests in the directory if no arguments are supplied,
 #      or alternatively just the test files given as arguments.
 #
-# This script is optimised for linuxs1 (i.e. it probably won't work anywhere else!)
-#
-# You will need to have the directories containing the Mantid and Third Party 
+# You will need to have the directories containing the Mantid
 #      .so libraries in your LD_LIBRARY_PATH environment variable
 #
 # Author: Russell Taylor, 07/11/07
 #
 
-# Remove previously generated files to ensure that they're not inadvertently run
-#   when something in the chain has failed.
-rm -f *.log
+# Clean up any old executable
 rm -rf runner.*
-rm -f *.properties
 
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of
 #  - it's always a good idea to run your new/changed test on its own
+test_files=""
 if [ $# -eq 0 ]; then
-	cxxtestgen.pl --error-printer -o runner.cpp *.h
+    test_files=*.h
 else
-	cxxtestgen.pl --error-printer -o runner.cpp $*
+    test_files=$*
 fi
+
+cxxtestgen=../../../Third_Party/src/cxxtest/cxxtestgen.py
+python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-# -lboost_filesystem added for the SaveCSVTest test
-g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../Kernel/inc -I ../../API/inc -I ../../DataObjects/inc \
-            -I ../../Geometry/inc  -I ../../../Third_Party/include \
-            -L../../debug -L../../Build \
-            -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects
+mantid_libpath=../../debug
+g++ -O0 -g3 -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
+    -I../../DataObjects/inc -I ../inc -I ../../../Third_Party/src/cxxtest \
+    -L$mantid_libpath -lMantidDataHandling -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects
 echo
-
 
 echo "Running the tests..."
 ln ../../Build/Tests/*.properties .
-./runner.exe
+LD_LIBRARY_PATH=$mantid_libpath:$LD_LIBRARY_PATH ./runner.exe
 echo
 
+# Remove the generated files to ensure that they're not inadvertently run
+#   when something in the chain has failed.
+echo "Cleaning up..."
+rm -f *.properties
+rm -f *Test.log
 echo "Done."
