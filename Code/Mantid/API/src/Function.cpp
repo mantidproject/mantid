@@ -55,7 +55,7 @@ void Function::addConstraint(IConstraint* ic)
 {
   int iPar = ic->getIndex();
   bool found = false;
-  for(int i=0;i<m_constraints.size();i++)
+  for(std::vector<IConstraint*>::size_type i=0;i<m_constraints.size();i++)
   {
     if (m_constraints[i]->getIndex() == iPar) 
     {
@@ -338,7 +338,7 @@ void Function::addTie(ParameterTie* tie)
 {
   int iPar = tie->getIndex();
   bool found = false;
-  for(int i=0;i<m_ties.size();i++)
+  for(std::vector<ParameterTie*>::size_type i=0;i<m_ties.size();i++)
   {
     if (m_ties[i]->getIndex() == iPar) 
     {

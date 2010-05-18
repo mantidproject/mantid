@@ -1,3 +1,6 @@
+// The odd line ending on this file is to prevent cxxtest attempting to parse this collection of helper functions as if
+// it were a test suite.
+
 #ifndef WORKSPACECREATIONHELPER_H_
 #define WORKSPACECREATIONHELPER_H_
 

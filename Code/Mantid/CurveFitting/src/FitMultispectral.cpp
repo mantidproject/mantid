@@ -205,7 +205,7 @@ namespace CurveFitting
         {
           params->addColumn("double","X");
           API::ColumnVector<std::string> names = out_p->getVector("Name");
-          for(size_t i=0;i<names.size();i++)
+          for(int i=0;i<names.size();i++)
           {
             params->addColumn("double",names[i]);
           }

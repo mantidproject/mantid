@@ -101,7 +101,7 @@ void LoadCanSAS1D::exec()
   int vecindex = 0;
   //iterate through each Idata element  and get the values of "Q",
   //"I" and "Idev" text nodes and fill X,Y,E vectors
-  for (int index = 0; index < idataCount; ++index)
+  for (unsigned long index = 0; index < idataCount; ++index)
   {
     Node* idataElem = idataElemList->item(index);
     Element* elem = dynamic_cast<Element*> (idataElem);

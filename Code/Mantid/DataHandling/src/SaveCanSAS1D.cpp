@@ -170,9 +170,9 @@ void SaveCanSAS1D::exec()
 void SaveCanSAS1D::searchandreplaceSpecialChars(std::string &input)
 {
 	 std::string specialchars="&<>'\"";
-	 int searchIndex=0;
-	 std::basic_string <char>::size_type  findIndex;
-	 for(int i=0;i<specialchars.size();++i)
+	 std::string::size_type searchIndex=0;
+	 std::string::size_type  findIndex;
+	 for(std::string::size_type i=0;i<specialchars.size();++i)
 	 {
 		 while(searchIndex<input.length())
 		 {

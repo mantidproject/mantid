@@ -132,7 +132,6 @@ double GetEi2::calculateEi(const double initial_guess)
   // Calculate actual peak postion for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};
-  const bool adjust_bins = getProperty("AdjustBins");
   for( unsigned int i = 0; i < 2; ++i )
   { 
     int ws_index = mon_indices[i]; 
@@ -276,7 +275,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(MatrixWorkspace_sptr data_ws, cons
   double peakY = Ys[iPeak];
   double peakE = Es[iPeak];
 
-  const unsigned int nxvals = Xs.size();
+  const std::vector<double>::size_type nxvals = Xs.size();
 
   //! Find data range that satisfies prominence criterion: im < ipk < ip will be nearest points that satisfy this
   int im = iPeak-1;
@@ -290,7 +289,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(MatrixWorkspace_sptr data_ws, cons
     }
   }
   
-  int ip = iPeak+1;
+  std::vector<double>::size_type ip = iPeak+1;
   for( ; ip < nxvals; ip++ )
   {
     const double ratio = Ys[ip]/peakY;

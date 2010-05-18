@@ -122,6 +122,8 @@ public:
   class DLLExport AttributeVisitor: public boost::static_visitor<T>
   {
   public:
+    /// Virtual destructor
+    virtual ~AttributeVisitor() {}
     /// implements static_visitor's operator() for std::string
     T operator()(std::string& str)const{return apply(str);}
     /// implements static_visitor's operator() for double
@@ -144,6 +146,8 @@ public:
   class DLLExport ConstAttributeVisitor: public boost::static_visitor<T>
   {
   public:
+    /// Virtual destructor
+    virtual ~ConstAttributeVisitor() {}
     /// implements static_visitor's operator() for std::string
     T operator()(std::string& str)const{return apply(str);}
     /// implements static_visitor's operator() for double
