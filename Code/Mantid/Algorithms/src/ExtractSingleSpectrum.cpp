@@ -39,10 +39,10 @@ void ExtractSingleSpectrum::exec()
     throw Exception::IndexError(desiredSpectrum,inputWorkspace->getNumberHistograms(),this->name());
   }
 
-  Progress p(this,0.0,1.0,1);
   // Now create a single spectrum workspace for the output
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,1,inputWorkspace->readX(0).size(),inputWorkspace->blocksize());
   
+  progress(0.5);
   // Copy in the data and spectrum number of the appropriate spectrum
   outputWorkspace->dataX(0) = inputWorkspace->readX(desiredSpectrum);
   outputWorkspace->dataY(0) = inputWorkspace->readY(desiredSpectrum);
@@ -50,7 +50,7 @@ void ExtractSingleSpectrum::exec()
   outputWorkspace->getAxis(1)->spectraNo(0) = inputWorkspace->getAxis(1)->spectraNo(desiredSpectrum);
   
   setProperty("OutputWorkspace",outputWorkspace);
-  p.report();
+  progress(1.0);
 }
 
 } // namespace Algorithms

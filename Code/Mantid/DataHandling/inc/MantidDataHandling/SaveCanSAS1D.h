@@ -50,17 +50,17 @@ namespace Mantid
         <SAScollimation/>
         <SASdetector>
           <name></name>
-		  <SDD></SDD>
+          <SDD></SDD>
         </SASdetector>
       </SASinstrument>
-	  <SASprocess>
-		<name></name>
-		<date></date>
-		<term name="svn"></term>
-		<term name="user_file"></term>
-	  </SASprocess>
+      <SASprocess>
+        <name></name>
+        <date></date>
+        <term name="svn"></term>
+        <term name="user_file"></term>
+      </SASprocess>
       <SASnote>
-	  </SASnote>
+      </SASnote>
     </SASentry>
   </SASroot>
   @endverbatim
@@ -114,36 +114,36 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-     /// this method searches for xml special characters and replace with entity references
-	  void searchandreplaceSpecialChars(std::string &input);
+      /// this method searches for xml special characters and replace with entity references
+      void searchandreplaceSpecialChars(std::string &input);
 
-	  /// replaces the charcter at index in the input string with xml entity reference(eg.replace '&' with "&amp;")
-	  void replacewithEntityReference(std::string& input,int index);
+      /// replaces the charcter at index in the input string with xml entity reference(eg.replace '&' with "&amp;")
+      void replacewithEntityReference(std::string& input, std::string::size_type index);
 
-	  /// sasroot element
-	  void createSASRootElement(std::string& rootElem);
+      /// sasroot element
+      void createSASRootElement(std::string& rootElem);
 
-	  /// this method creates sastitle element
-	  void createSASTitleElement(std::string& sasTitle);
+      /// this method creates sastitle element
+      void createSASTitleElement(std::string& sasTitle);
 
-	  /// this method creates sassample element
-	  void createSASSampleElement(std::string &sasSample);
+      /// this method creates sassample element
+      void createSASSampleElement(std::string &sasSample);
 
-	  /// this method creates sasRun Element
-	  void createSASRunElement(std::string& sasRun);
+      /// this method creates sasRun Element
+      void createSASRunElement(std::string& sasRun);
 
-	  /// this method creates SASData element
-	  void createSASDataElement(std::string& sasData);
+      /// this method creates SASData element
+      void createSASDataElement(std::string& sasData);
 
-	  /// this method creates SASSourcelement
-	  void createSASSourceElement(std::string& sasSource );
+      /// this method creates SASSourcelement
+      void createSASSourceElement(std::string& sasSource );
 
-	  ///this method creates sasDetector element
-	  void createSASDetectorElement(std::string& sasDet);
-	  
-	  ///this method creates sasProcess element
-	  void createSASProcessElement(std::string& sasProcess);
-	      
+      ///this method creates sasDetector element
+      void createSASDetectorElement(std::string& sasDet);
+
+      ///this method creates sasProcess element
+      void createSASProcessElement(std::string& sasProcess);
+
       API::MatrixWorkspace_sptr m_workspace; ///<workspace
     };
     
