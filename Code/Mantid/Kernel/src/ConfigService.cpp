@@ -538,7 +538,7 @@ namespace Kernel
 
     // Open and read the user properties file
     std::string updated_file("");
-    
+
     std::ifstream reader(filename.c_str(), std::ios::in);
     if( reader.bad() )
     {
@@ -550,44 +550,51 @@ namespace Kernel
     bool line_continuing(false);
     while( std::getline(reader, file_line) )
     {
-      char last = *(file_line.end() - 1);
-      if( last == '\\' )
+      if( !file_line.empty() ) 
       {
-	line_continuing = true;
-	output += file_line + "\n";
-	continue;
+        char last = *(file_line.end() - 1);
+        if( last == '\\' )
+        {
+          line_continuing = true;
+          output += file_line + "\n";
+          continue;
+        }
+        else if( line_continuing )
+        {
+          output += file_line;
+          line_continuing = false;
+        }
+        else 
+        {
+          output = file_line;
+        }
       }
-      else if( line_continuing )
+      else
       {
-	output += file_line;
-	line_continuing = false;
+        updated_file += "\n";
+        continue;
       }
-      else 
-      {
-	output = file_line;
-      }
-
       std::set<std::string>::iterator iend = m_changed_keys.end();
       std::set<std::string>::iterator itr = m_changed_keys.begin();
       for( ; itr != iend; ++itr )
       {
-	if( output.find(*itr) != std::string::npos )
-	{
-	  break;
-	}
+        if( output.find(*itr) != std::string::npos )
+        {
+          break;
+        }
       }
-      
+
       if( itr == iend )
       {
-	updated_file += output;
+        updated_file += output;
       }
       else
       {
-	std::string key = *itr;
-	std::string value = getString(*itr, false);
-	updated_file += key + "=" + value;
-	//Remove the key from the changed key list
-	m_changed_keys.erase(itr);
+        std::string key = *itr;
+        std::string value = getString(*itr, false);
+        updated_file += key + "=" + value;
+        //Remove the key from the changed key list
+        m_changed_keys.erase(itr);
       }
       updated_file += "\n";
 
@@ -597,7 +604,7 @@ namespace Kernel
     updated_file += "\n";
     std::set<std::string>::iterator key_end = m_changed_keys.end();
     for( std::set<std::string>::iterator key_itr = m_changed_keys.begin(); 
-	 key_itr != key_end; ++key_itr )
+      key_itr != key_end; ++key_itr )
     {
       updated_file += *key_itr + "=";
       updated_file += getString(*key_itr, false) + "\n";
@@ -612,7 +619,7 @@ namespace Kernel
       g_log.error() << "Error writing new user properties file. Cannot save current configuration.\n";
       throw std::runtime_error("Error writing new user properties file. Cannot save current configuration.");
     }
-    
+
     writer.write(updated_file.c_str(), updated_file.size());
     writer.close();
   }
