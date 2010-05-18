@@ -3,8 +3,6 @@
 # Will run all tests in the directory if no arguments are supplied,
 #      or alternatively just the test files given as arguments.
 #
-# This script is optimised for linuxs1 (i.e. it probably won't work anywhere else!)
-#
 # You will need to have the directories containing the Mantid and Third Party 
 #      .so libraries in your LD_LIBRARY_PATH environment variable
 #
@@ -25,8 +23,8 @@ fi
 echo
 
 echo "Compiling the test executable..."
-g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../../Third_Party/include \
-            -I ../../../Third_Party/src/cxxtest -L ../../debug -L ../../Build -lMantidKernel
+g++ -O0 -g3 -o runner.exe runner.cpp -I ../inc -I ../../../Third_Party/src/cxxtest \
+            -L ../../debug -L ../../Build -lMantidKernel
 echo
 
 echo "Running the tests..."
