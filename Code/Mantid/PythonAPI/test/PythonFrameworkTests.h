@@ -11,7 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/LibraryManager.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "Poco/File.h"
 
@@ -30,13 +30,12 @@ public:
   FrameworkManagerProxyTest()
   {
     mgr = new Mantid::PythonAPI::FrameworkManagerProxy;
-    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries("../../Debug");
   }
 
   void testCreateAlgorithmMethod1()
   {
-    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("HelloWorldAlgorithm");
-    TS_ASSERT_EQUALS(alg->name(), "HelloWorldAlgorithm");
+    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("ConvertUnits");
+    TS_ASSERT_EQUALS(alg->name(), "ConvertUnits");
   }
 
   void testCreateAlgorithmNotFoundThrows()
@@ -55,12 +54,18 @@ public:
 	
   void testCreateAlgorithmMethod2()
   {
-    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("PropertyAlgorithm", "10;1.23");
+    Mantid::API::MatrixWorkspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(10,22,1);
+    ws->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace1",ws);
+
+    Mantid::API::IAlgorithm* alg = mgr->createAlgorithm("ConvertUnits", "TestWorkspace1;TestWorkspace1;DeltaE;Direct;10.5;0");
 	  
     TS_ASSERT( alg->isInitialized() );
     TS_ASSERT( !alg->isExecuted() );
-    TS_ASSERT_EQUALS( alg->getPropertyValue("IntValue"), "10" );
-    TS_ASSERT_EQUALS( alg->getPropertyValue("DoubleValue"), "1.23" );
+    TS_ASSERT_EQUALS( alg->getPropertyValue("Target"), "DeltaE" );
+    TS_ASSERT_EQUALS( alg->getPropertyValue("EFixed"), "10.5" );
+
+    Mantid::API::AnalysisDataService::Instance().clear();
   }
 	
   void testgetWorkspaceNames()
