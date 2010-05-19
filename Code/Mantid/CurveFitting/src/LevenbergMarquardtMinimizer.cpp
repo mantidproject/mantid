@@ -11,6 +11,53 @@ namespace Mantid
 namespace CurveFitting
 {
 
+// Get a reference to the logger
+Kernel::Logger& LevenbergMarquardtMinimizer::g_log = Kernel::Logger::get("LevenbergMarquardtMinimizer");
+
+void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y, 
+                                             double *sqrtWeight, const int& nData, 
+                                             const int& nParam, gsl_vector* startGuess, 
+                                             Fit* fit, const std::string& costFunction)
+{
+  // set-up GSL container to be used with GSL simplex algorithm
+  m_data = new GSL_FitData(fit);  //,X, Y, sqrtWeight, nData, nParam);
+  m_data->p = nParam;
+  m_data->n = nData; 
+  m_data->X = X;
+  m_data->Y = Y;
+  m_data->sqrtWeightData = sqrtWeight;
+  m_data->holdCalculatedData = new double[nData];
+  m_data->holdCalculatedJacobian =  gsl_matrix_alloc (nData, nParam);
+
+  if ( costFunction.compare("Least squares") == 0 )
+    m_data->costFunc = new CostFuncLeastSquares();
+  else if ( costFunction.compare("Ignore positive peaks") == 0 )
+    m_data->costFunc = new CostFuncIgnorePosPeaks();
+  else
+  {
+    g_log.error("Unrecognised cost function. Default to Least squares\n");
+    m_data->costFunc = new CostFuncLeastSquares();
+  }
+
+  // specify the type of GSL solver to use
+  const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
+
+    gslContainer.f = &gsl_f;
+    gslContainer.df = &gsl_df;
+    gslContainer.fdf = &gsl_fdf;
+    gslContainer.n = nData;
+    gslContainer.p = nParam;
+    gslContainer.params = m_data;
+
+
+  // setup GSL solver
+  m_gslSolver = gsl_multifit_fdfsolver_alloc(T, nData, nParam);
+  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, startGuess);
+
+  m_function = fit->getFunction();
+
+}
+
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer(
   gsl_multifit_function_fdf& gslContainer, 
   gsl_vector* startGuess, API::IFunction* func) : m_name("Levenberg Marquardt") 
@@ -27,6 +74,11 @@ LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer(
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer()
 {
+  //delete [] m_data->holdCalculatedData;
+  //delete m_data->costFunc;
+  //gsl_matrix_free (m_data->holdCalculatedJacobian);
+  //delete m_data;
+
   gsl_multifit_fdfsolver_free(m_gslSolver);
 }
 

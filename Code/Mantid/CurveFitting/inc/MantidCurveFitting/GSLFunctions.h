@@ -80,9 +80,9 @@ namespace Mantid
   };
 
   /// Structure to contain least squares data and used by GSL
-  struct FitData1 {
+  struct GSL_FitData {
     /// Constructor
-    FitData1(Fit* f);
+    GSL_FitData(Fit* f);
     /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
     size_t n;
     /// number of (active) fit parameters

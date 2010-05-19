@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/IFuncMinimizer.h"
+#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 #include <gsl/gsl_multimin.h>
 
 namespace Mantid
@@ -42,7 +44,10 @@ class DLLExport SimplexMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~SimplexMinimizer();
-  SimplexMinimizer(gsl_multimin_function& gslContainer, gsl_vector* startGuess, const double& size);
+  SimplexMinimizer(): m_name("Simplex"), m_size(1.0) {}
+
+  void resetSize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
+    gsl_vector* startGuess, const double& size, Fit* fit, const std::string& costFunction);
 
   /// Overloading base class methods
   std::string name()const;
@@ -50,6 +55,8 @@ public:
   int hasConverged();
   double costFunctionVal();
   void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
+  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
+    gsl_vector* startGuess, Fit* fit, const std::string& costFunction);
 
 private:
   /// name of this minimizer
@@ -58,8 +65,23 @@ private:
   /// pointer to the GSL solver doing the work
   gsl_multimin_fminimizer *m_gslSolver;
 
+  /// clear memory
+  void clearMemory();
+
+  /// size of simplex
+  double m_size;
+
   /// used by GSL
   gsl_vector *m_simplexStepSize;
+
+  /// GSL data container
+  GSL_FitData *m_data;
+
+  /// GSL simplex minimizer container
+  gsl_multimin_function gslContainer;
+
+	/// Static reference to the logger class
+	static Kernel::Logger& g_log;
 };
 
 

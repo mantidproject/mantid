@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/ICostFunction.h"
+#include "MantidAPI/CompositeFunction.h"
 
 
 namespace Mantid
@@ -21,7 +22,7 @@ namespace CurveFitting
   */
   int gsl_f(const gsl_vector * x, void *params, gsl_vector * f) {
 
-    struct FitData1 *p = (struct FitData1 *)params;
+    struct GSL_FitData *p = (struct GSL_FitData *)params;
     p->fit->function (x->data, f->data, p->X, p->n);
 
     // function() return calculated data values. Need to convert this values into
@@ -42,7 +43,7 @@ namespace CurveFitting
   */
   int gsl_df(const gsl_vector * x, void *params, gsl_matrix * J) {
 
-    struct FitData1 *p = (struct FitData1 *)params;
+    struct GSL_FitData *p = (struct GSL_FitData *)params;
 
     p->J.setJ(J);
 
@@ -83,7 +84,7 @@ namespace CurveFitting
   double gsl_costFunction(const gsl_vector * x, void *params)
   {
 
-    struct FitData1 *p = (struct FitData1 *)params;
+    struct GSL_FitData *p = (struct GSL_FitData *)params;
     double * l_holdCalculatedData = p->holdCalculatedData;
 
     // calculate yCal and store in l_holdCalculatedData
@@ -101,7 +102,7 @@ namespace CurveFitting
   void gsl_costFunction_df(const gsl_vector * x, void *params, gsl_vector *df)
   {
 
-    struct FitData1 *p = (struct FitData1 *)params;
+    struct GSL_FitData *p = (struct GSL_FitData *)params;
     double * l_holdCalculatedData = p->holdCalculatedData;
 
     p->fit->function (x->data, l_holdCalculatedData, p->X, p->n);
@@ -127,6 +128,24 @@ namespace CurveFitting
     gsl_costFunction_df(x, params, df); 
   }
 
+  /**
+   * Constructor. Creates declared -> active index map
+   * @param f Pointer to the Fit algorithm
+   */
+  GSL_FitData::GSL_FitData(Fit* f):fit(f)
+  {
+    int j = 0;
+    for(int i=0;i<f->getFunction()->nParams();++i)
+    {
+      if (f->getFunction()->isActive(i))
+      {
+        J.m_index.push_back(j);
+        j++;
+      }
+      else
+        J.m_index.push_back(-1);
+    }
+  }
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -7,6 +7,8 @@
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include <gsl/gsl_multifit_nlin.h>
 #include "MantidAPI/IFunction.h"
+#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 
 namespace Mantid
 {
@@ -52,16 +54,27 @@ public:
   int hasConverged();
   double costFunctionVal();
   void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
+  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
+    gsl_vector* startGuess, Fit* fit, const std::string& costFunction);
 
 private:
   /// name of this minimizer
   const std::string m_name;
+
+  /// GSL data container
+  GSL_FitData *m_data;
+
+  /// GSL minimizer container
+  gsl_multifit_function_fdf gslContainer;
 
   /// pointer to the GSL solver doing the work
   gsl_multifit_fdfsolver *m_gslSolver;
 
   /// Stored to access IFunction interface in iterate()
   API::IFunction* m_function;
+
+	/// Static reference to the logger class
+	static Kernel::Logger& g_log;
 };
 
 

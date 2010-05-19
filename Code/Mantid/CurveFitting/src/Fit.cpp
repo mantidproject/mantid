@@ -12,8 +12,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidCurveFitting/ICostFunction.h"
-#include "MantidCurveFitting/CostFuncLeastSquares.h"
-#include "MantidCurveFitting/CostFuncIgnorePosPeaks.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
@@ -211,7 +209,7 @@ namespace CurveFitting
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
     // fitting parameter values.
 
-    FitData1 l_data(this);
+    GSL_FitData l_data(this);
 
     l_data.p = m_function->nActive();
     l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
@@ -282,10 +280,10 @@ namespace CurveFitting
 
     // set-up GSL container to be used with GSL simplex algorithm
 
-    gsl_multimin_function gslSimplexContainer;
+   /* gsl_multimin_function gslSimplexContainer;
     gslSimplexContainer.n = l_data.p;  // n here refers to number of parameters
     gslSimplexContainer.f = &gsl_costFunction;
-    gslSimplexContainer.params = &l_data;
+    gslSimplexContainer.params = &l_data;*/
 
 
     // set-up GSL container to be used with none-least squares GSL routines using derivatives
@@ -341,7 +339,11 @@ namespace CurveFitting
 
     if ( methodUsed.compare("Simplex") == 0 )
     {
-      minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
+      //minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
+      SimplexMinimizer* sm = new SimplexMinimizer;
+      sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                     initFuncArg, this, costFunction);
+      minimizer = sm;
     }
     else
     {
@@ -392,7 +394,10 @@ namespace CurveFitting
             methodUsed = "Simplex";
             //simplexFallBack = true;
             delete minimizer;
-            minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
+            SimplexMinimizer* sm = new SimplexMinimizer;
+            sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                           initFuncArg, this, costFunction);
+            minimizer = sm;
             iter = 0;
             g_log.warning() << "Fit algorithm using Levenberg-Marquardt failed "
               << "reporting the following: " << gsl_strerror(status) << "\n"
@@ -423,8 +428,14 @@ namespace CurveFitting
           { 
             g_log.information() << "Simplex step size reduced to 0.1\n";
             delete minimizer;
-            minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 0.1);
-            //iter = 0;
+            SimplexMinimizer* sm = new SimplexMinimizer;
+            sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                           initFuncArg, this, costFunction);
+            sm->resetSize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                           initFuncArg, 0.1, this, costFunction);
+            minimizer = sm;
+                  //sm = static_cast<SimplexMinimizer*>(minimizer);
+
             status = GSL_CONTINUE;
             continue;
           }
@@ -779,25 +790,6 @@ namespace CurveFitting
     double deriv = ( m_function->getParameter(j) - p0 ) / dap;
     m_function->setParameter(j,p0,false);
     return deriv;
-  }
-
-  /**
-   * Constructor. Creates declared -> active index map
-   * @param f Pointer to the Fit algorithm
-   */
-  FitData1::FitData1(Fit* f):fit(f)
-  {
-    int j = 0;
-    for(int i=0;i<f->m_function->nParams();++i)
-    {
-      if (f->m_function->isActive(i))
-      {
-        J.m_index.push_back(j);
-        j++;
-      }
-      else
-        J.m_index.push_back(-1);
-    }
   }
 
 } // namespace Algorithm
