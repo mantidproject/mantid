@@ -1,0 +1,75 @@
+#ifndef LOADSNSNEXUSTEST_H_
+#define LOADSNSNEXUSTEST_H_
+
+#include "MantidDataHandling/LoadInstrument.h" 
+
+#include "MantidNexus/LoadSNSNexus.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/FrameworkManager.h"
+using namespace Mantid::NeXus;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+#include <cxxtest/TestSuite.h>
+#include "MantidAPI/WorkspaceGroup.h"
+
+class LoadSNSNexusTest : public CxxTest::TestSuite
+{
+public:
+    void xtestExec()
+    {
+        Mantid::API::FrameworkManager::Instance();
+        LoadSNSNexus ld;
+        std::string outws_name = "nickr0x0r";
+        ld.initialize();
+        ld.setPropertyValue("Filename","../../../../Test/Nexus/SNS/REF_L_16055.nxs");
+        ld.setPropertyValue("OutputWorkspace",outws_name);
+        TS_ASSERT_THROWS_NOTHING(ld.execute());
+        TS_ASSERT(ld.isExecuted());
+
+        MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+        TS_ASSERT_EQUALS(ws->blocksize(),5);
+        TS_ASSERT_EQUALS(ws->getNumberHistograms(),17792);
+        TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
+        TS_ASSERT_EQUALS(ws->readX(0)[1],4005.);
+        TS_ASSERT_EQUALS(ws->readX(0)[2],8005.);
+        
+        TS_ASSERT_EQUALS(ws->readY(5)[1],1.);
+        TS_ASSERT_EQUALS(ws->readY(6)[0],1.);
+        TS_ASSERT_EQUALS(ws->readY(8)[3],1.);
+
+        TS_ASSERT_EQUALS(ws->spectraMap().nElements(),17792);
+
+        const std::vector< Property* >& logs = ws->sample().getLogData();
+        TS_ASSERT_EQUALS(logs.size(),25);
+
+        TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_event"));
+        TS_ASSERT(slog);
+        std::string str = slog->value();
+        TS_ASSERT_EQUALS(str.size(),1023);
+        TS_ASSERT_EQUALS(str.substr(0,37),"2009-Apr-28 09:20:29  CHANGE_PERIOD 1");
+
+        slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_debug"));
+        TS_ASSERT(slog);
+        TS_ASSERT_EQUALS(slog->size(),50);
+
+        TimeSeriesProperty<double>* dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->sample().getLogData("total_counts"));
+        TS_ASSERT(dlog);
+        TS_ASSERT_EQUALS(dlog->size(),172);
+
+        dlog = dynamic_cast<TimeSeriesProperty<double>*>(ws->sample().getLogData("period"));
+        TS_ASSERT(dlog);
+        TS_ASSERT_EQUALS(dlog->size(),172);
+
+        TimeSeriesProperty<bool>* blog = dynamic_cast<TimeSeriesProperty<bool>*>(ws->sample().getLogData("period 1"));
+        TS_ASSERT(blog);
+        TS_ASSERT_EQUALS(blog->size(),1);
+
+        TS_ASSERT_EQUALS(ws->sample().getName(),"");
+    }
+};
+
+#endif /*LOADSNSNEXUSTEST_H_*/
