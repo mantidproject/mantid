@@ -25,13 +25,13 @@ public:
 void testName()
 {
     Mantid::Algorithms::Power power;
-    TS_ASSERT_EQUALS  ( power.name(), "Power" )
+    TSM_ASSERT_EQUALS  ("Algorithm name should be Power", power.name(), "Power" )
 }
 
 void testVersion()
 {
   Mantid::Algorithms::Power power;
-  TS_ASSERT_EQUALS( power.version(), 1 )
+  TSM_ASSERT_EQUALS("Expected version is 1", power.version(), 1 )
 }
 
 void testInit()
@@ -64,9 +64,9 @@ void testSetProperties()
   Power power;
   power.initialize();
 
-  TS_ASSERT_THROWS_NOTHING( power.setPropertyValue("InputWorkspace","InputWS") )
-  TS_ASSERT_THROWS_NOTHING( power.setPropertyValue("OutputWorkspace","WSCor") )
-  TS_ASSERT_THROWS_NOTHING( power.setPropertyValue("Exponent","2.0") )
+  TSM_ASSERT_THROWS_NOTHING("InputWorkspace should be settable",  power.setPropertyValue("InputWorkspace","InputWS") )
+  TSM_ASSERT_THROWS_NOTHING("OutputWorkspace should be settable",  power.setPropertyValue("OutputWorkspace","WSCor") )
+  TSM_ASSERT_THROWS_NOTHING("Exponent should be settable", power.setPropertyValue("Exponent","2.0") )
 
   AnalysisDataService::Instance().remove("InputWS");
   AnalysisDataService::Instance().remove("WSCor");
@@ -78,8 +78,7 @@ void testNonNumericExponent()
   Power power;
   power.initialize();
 
-  TS_ASSERT_THROWS( power.setPropertyValue("Exponent","x"), std::invalid_argument )
-
+  TSM_ASSERT_THROWS("Exponent cannot be non-numeric", power.setPropertyValue("Exponent","x"), std::invalid_argument )
 }
 
 void testNegativeExponent()
@@ -88,7 +87,15 @@ void testNegativeExponent()
   Power power;
   power.initialize();
 
-  TS_ASSERT_THROWS( power.setPropertyValue("Exponent","-1"), std::invalid_argument )
+  TSM_ASSERT_THROWS("Exponent cannot be < 0", power.setPropertyValue("Exponent","-1"), std::invalid_argument )
+}
+
+void testdefaultExponent()
+{
+  Power power;
+  power.initialize();
+  std::string sz_InitalValue = power.getPropertyValue("Exponent");
+  TSM_ASSERT_EQUALS("The default exponent value should be 1", "1", sz_InitalValue);
 }
 
 void testPowerCalculation()
@@ -104,7 +111,7 @@ void testPowerCalculation()
   power.setPropertyValue("Exponent","2.0");
 
   power.execute();
-  TS_ASSERT( power.isExecuted());
+  TSM_ASSERT("The Power algorithm did not finish executing", power.isExecuted());
 
   WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
 
