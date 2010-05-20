@@ -8,6 +8,7 @@
 #include <string>
 #include <gsl/gsl_multifit_nlin.h>
 #include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/FuncMinimizerFactory.h"
 
 namespace Mantid
 {
@@ -74,5 +75,15 @@ public:
 
 } // namespace CurveFitting
 } // namespace Mantid
+
+/**
+ * Macro for declaring a new type of function to be used with the FunctionFactory
+ */
+#define DECLARE_FUNCMINIMIZER(classname) \
+        namespace { \
+	Mantid::Kernel::RegistrationHelper register_funcminimizer_##classname( \
+  ((Mantid::CurveFitting::FuncMinimizerFactory::Instance().subscribe<classname>(#classname)) \
+	, 0)); \
+	} 
 
 #endif /*MANTID_CURVEFITTING_IFUNCMINIMIZER_H_*/

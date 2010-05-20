@@ -8,6 +8,7 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+DECLARE_FUNCMINIMIZER(BFGS_Minimizer)
 
 // Get a reference to the logger
 Kernel::Logger& BFGS_Minimizer::g_log = Kernel::Logger::get("BFGS_Minimizer");

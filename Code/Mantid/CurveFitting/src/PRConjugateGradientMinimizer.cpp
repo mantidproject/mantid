@@ -8,6 +8,7 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+DECLARE_FUNCMINIMIZER(PRConjugateGradientMinimizer)
 
 // Get a reference to the logger
 Kernel::Logger& PRConjugateGradientMinimizer::g_log = Kernel::Logger::get("PRConjugateGradientMinimizer");

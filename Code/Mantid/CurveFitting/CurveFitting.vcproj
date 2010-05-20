@@ -243,6 +243,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\FuncMinimizerFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Gaussian.cpp"
 				>
 			</File>
@@ -394,6 +398,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\FRConjugateGradientMinimizer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\FuncMinimizerFactory.h"
 				>
 			</File>
 			<File
