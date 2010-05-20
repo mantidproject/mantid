@@ -18,14 +18,14 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
-class PowerTest : public CxxTest::TestSuite
+class PowerTest: public CxxTest::TestSuite
 {
 public:
 
-void testName()
-{
+  void testName()
+  {
     Mantid::Algorithms::Power power;
-    TSM_ASSERT_EQUALS  ("Algorithm name should be Power", power.name(), "Power" )
+TSM_ASSERT_EQUALS  ("Algorithm name should be Power", power.name(), "Power" )
 }
 
 void testVersion()
@@ -64,8 +64,8 @@ void testSetProperties()
   Power power;
   power.initialize();
 
-  TSM_ASSERT_THROWS_NOTHING("InputWorkspace should be settable",  power.setPropertyValue("InputWorkspace","InputWS") )
-  TSM_ASSERT_THROWS_NOTHING("OutputWorkspace should be settable",  power.setPropertyValue("OutputWorkspace","WSCor") )
+  TSM_ASSERT_THROWS_NOTHING("InputWorkspace should be settable", power.setPropertyValue("InputWorkspace","InputWS") )
+  TSM_ASSERT_THROWS_NOTHING("OutputWorkspace should be settable", power.setPropertyValue("OutputWorkspace","WSCor") )
   TSM_ASSERT_THROWS_NOTHING("Exponent should be settable", power.setPropertyValue("Exponent","2.0") )
 
   AnalysisDataService::Instance().remove("InputWS");
@@ -74,20 +74,16 @@ void testSetProperties()
 
 void testNonNumericExponent()
 {
-
   Power power;
   power.initialize();
-
   TSM_ASSERT_THROWS("Exponent cannot be non-numeric", power.setPropertyValue("Exponent","x"), std::invalid_argument )
 }
 
 void testNegativeExponent()
 {
-
   Power power;
   power.initialize();
-
-  TSM_ASSERT_THROWS("Exponent cannot be < 0", power.setPropertyValue("Exponent","-1"), std::invalid_argument )
+  TSM_ASSERT_THROWS_NOTHING("Negative exponents are allowed.", power.setPropertyValue("Exponent","-1"))
 }
 
 void testdefaultExponent()
@@ -122,6 +118,33 @@ void testPowerCalculation()
   AnalysisDataService::Instance().remove("WSCor");
 }
 
+void testPowerCalculationWithNegativeExponent()
+{
+  WorkspaceSingleValue_sptr baseWs = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+  AnalysisDataService::Instance().add("InputWS", baseWs);
+
+  Power power;
+  power.initialize();
+
+  power.setPropertyValue("InputWorkspace","InputWS");
+  power.setPropertyValue("OutputWorkspace","WSCor");
+  power.setPropertyValue("Exponent","-2.0");
+
+  power.execute();
+  TSM_ASSERT("The Power algorithm did not finish executing", power.isExecuted());
+
+  WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
+
+  Mantid::MantidVec expectedValue(1, 0.25);
+  TSM_ASSERT_EQUALS("Power has not been determined correctly", expectedValue, output->dataY());
+
+  Mantid::MantidVec expectedError(1, 0.35355);
+  TS_ASSERT_DELTA(0.353553391, output->dataE()[0], 0.001);
+
+  AnalysisDataService::Instance().remove("InputWS");
+  AnalysisDataService::Instance().remove("WSCor");
+}
+
 void testPowerErrorCalculation()
 {
   //Workspace creation helper creates input error as sqrt of input value. So input error = 2.
@@ -142,8 +165,8 @@ void testPowerErrorCalculation()
 
   WorkspaceSingleValue_sptr output = boost::dynamic_pointer_cast<WorkspaceSingleValue>(AnalysisDataService::Instance().retrieve("WSCor"));
 
-  Mantid::MantidVec expectedValue(1,16);
-  TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedValue, output->dataY());
+  Mantid::MantidVec expectedError(1,16);
+  TSM_ASSERT_EQUALS("Error has not been determined correctly", expectedError, output->dataE());
 
   AnalysisDataService::Instance().remove("InputWS");
   AnalysisDataService::Instance().remove("WSCor");
