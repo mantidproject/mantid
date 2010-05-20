@@ -48,75 +48,6 @@ Function::~Function()
   m_constraints.clear();
 }
 
-/** Add a constraint
- *  @param ic Pointer to a constraint.
- */
-void Function::addConstraint(IConstraint* ic)
-{
-  int iPar = ic->getIndex();
-  bool found = false;
-  for(std::vector<IConstraint*>::size_type i=0;i<m_constraints.size();i++)
-  {
-    if (m_constraints[i]->getIndex() == iPar) 
-    {
-      found = true;
-      delete m_constraints[i];
-      m_constraints[i] = ic;
-      break;
-    }
-  }
-  if (!found)
-  {
-    m_constraints.push_back(ic);
-  }
-}
-
-/// Get first constraint
-IConstraint* Function::firstConstraint()const
-{
-  m_iConstraint = 0;
-  if (m_constraints.size())
-  {
-    return m_constraints[0];
-  }
-  return 0;
-}
-
-/// Get next constraint
-IConstraint* Function::nextConstraint()const
-{
-  if (m_constraints.size() < 2 || m_iConstraint >= m_constraints.size() - 1)
-  {
-    return 0;
-  }
-  ++m_iConstraint;
-  return m_constraints[m_iConstraint];
-}
-
-/** Remove a constraint
- * @param parName The name of a parameter which constarint to remove.
- */
-void Function::removeConstraint(const std::string& parName)
-{
-  int iPar = parameterIndex(parName);
-  for(std::vector<IConstraint*>::iterator it=m_constraints.begin();it!=m_constraints.end();it++)
-  {
-    if (iPar == (**it).getIndex())
-    {
-      delete *it;
-      m_constraints.erase(it);
-      break;
-    }
-  }
-}
-
-void Function::setParametersToSatisfyConstraints()
-{
-  for (unsigned int i = 0; i < m_constraints.size(); i++)
-  {
-    m_constraints[i]->setParamToSatisfyConstraint();
-  }
-}
 
 /** Sets a new value to the i-th parameter.
  *  @param i The parameter index
@@ -368,18 +299,18 @@ void Function::applyTies()
 /**
  * Used to find ParameterTie for a parameter i
  */
-class TieEqual
+class ReferenceEqual
 {
   const int m_i;///< index to find
 public:
   /** Constructor
    * @param par A pointer to the parameter you want to search for
    */
-  TieEqual(int i):m_i(i){}
+  ReferenceEqual(int i):m_i(i){}
   /**
    * @return True if found
    */
-  bool operator()(ParameterTie* p)
+  bool operator()(ParameterReference* p)
   {
     return p->getIndex() == m_i;
   }
@@ -395,7 +326,7 @@ bool Function::removeTie(int i)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  std::vector<ParameterTie*>::iterator it = std::find_if(m_ties.begin(),m_ties.end(),TieEqual(i));
+  std::vector<ParameterTie*>::iterator it = std::find_if(m_ties.begin(),m_ties.end(),ReferenceEqual(i));
   if (it != m_ties.end())
   {
     delete *it;
@@ -416,7 +347,7 @@ ParameterTie* Function::getTie(int i)const
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
-  std::vector<ParameterTie*>::const_iterator it = std::find_if(m_ties.begin(),m_ties.end(),TieEqual(i));
+  std::vector<ParameterTie*>::const_iterator it = std::find_if(m_ties.begin(),m_ties.end(),ReferenceEqual(i));
   if (it != m_ties.end())
   {
     return *it;
@@ -435,6 +366,72 @@ void Function::clearTies()
     delete *it;
   }
   m_ties.clear();
+}
+
+/** Add a constraint
+ *  @param ic Pointer to a constraint.
+ */
+void Function::addConstraint(IConstraint* ic)
+{
+  int iPar = ic->getIndex();
+  bool found = false;
+  for(std::vector<IConstraint*>::size_type i=0;i<m_constraints.size();i++)
+  {
+    if (m_constraints[i]->getIndex() == iPar) 
+    {
+      found = true;
+      delete m_constraints[i];
+      m_constraints[i] = ic;
+      break;
+    }
+  }
+  if (!found)
+  {
+    m_constraints.push_back(ic);
+  }
+}
+
+/** Get constraint of parameter number i
+ * @param i The index of a declared parameter.
+ * @return A pointer to the constraint or NULL
+ */
+IConstraint* Function::getConstraint(int i)const
+{
+  if (i >= nParams() || i < 0)
+  {
+    throw std::out_of_range("Function parameter index out of range.");
+  }
+  std::vector<IConstraint*>::const_iterator it = std::find_if(m_constraints.begin(),m_constraints.end(),ReferenceEqual(i));
+  if (it != m_constraints.end())
+  {
+    return *it;
+  }
+  return NULL;
+}
+
+/** Remove a constraint
+ * @param parName The name of a parameter which constarint to remove.
+ */
+void Function::removeConstraint(const std::string& parName)
+{
+  int iPar = parameterIndex(parName);
+  for(std::vector<IConstraint*>::iterator it=m_constraints.begin();it!=m_constraints.end();it++)
+  {
+    if (iPar == (**it).getIndex())
+    {
+      delete *it;
+      m_constraints.erase(it);
+      break;
+    }
+  }
+}
+
+void Function::setParametersToSatisfyConstraints()
+{
+  for (unsigned int i = 0; i < m_constraints.size(); i++)
+  {
+    m_constraints[i]->setParamToSatisfyConstraint();
+  }
 }
 
 /// Nonvirtual member which removes all declared parameters

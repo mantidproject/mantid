@@ -307,7 +307,7 @@ public:
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
 
-    IConstraint* c = funa->firstConstraint();
+    IConstraint* c = funa->getConstraint(0);
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
 
@@ -332,7 +332,7 @@ public:
     TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
 
-    IConstraint* c0 = funa->firstConstraint();
+    IConstraint* c0 = funa->getConstraint(0);
     TS_ASSERT(c0);
     TS_ASSERT_EQUALS(c0->check(),0);
 
@@ -342,7 +342,7 @@ public:
     funa->setParameter("a0",-1);
     TS_ASSERT_EQUALS(c0->check(),1000);
 
-    IConstraint* c1 = funa->nextConstraint();
+    IConstraint* c1 = funa->getConstraint(1);
     TS_ASSERT(c1);
     TS_ASSERT_EQUALS(c1->check(),8900);
 
@@ -376,13 +376,13 @@ public:
     TS_ASSERT(fun->hasAttribute("attr"));
     TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
 
-    IConstraint* c = fun->firstConstraint();
+    IConstraint* c = fun->getConstraint(2);
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f1.b0",2);
     TS_ASSERT_EQUALS(c->check(),1000);
 
-    c = fun->nextConstraint();
+    c = fun->getConstraint(3);
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f1.b1",0.5);
@@ -414,13 +414,13 @@ public:
     TS_ASSERT(fun->hasAttribute("attr"));
     TS_ASSERT_EQUALS(fun->getAttribute("attr").asString(),"hello");
 
-    IConstraint* c = fun->firstConstraint();
+    IConstraint* c = fun->getConstraint(0);
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f0.a0",2);
     TS_ASSERT_EQUALS(c->check(),1000);
 
-    c = fun->nextConstraint();
+    c = fun->getConstraint(3);
     TS_ASSERT(c);
     TS_ASSERT_EQUALS(c->check(),0);
     fun->setParameter("f1.b1",0.5);

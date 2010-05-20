@@ -117,10 +117,8 @@ public:
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic);
-  /// Get first constraint
-  virtual IConstraint* firstConstraint()const;
-  /// Get next constraint
-  virtual IConstraint* nextConstraint()const;
+  /// Get constraint of i-th parameter
+  virtual IConstraint* getConstraint(int i)const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName);
  

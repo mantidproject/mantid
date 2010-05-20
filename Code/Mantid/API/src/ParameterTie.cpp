@@ -126,13 +126,14 @@ namespace API
   }
 
   /**
-   * 
+   * @param fun Function that can re-create the tie from the output string.
+   *   All parameters in the tie must be parameters of fun.
    */
   std::string ParameterTie::asString(const IFunction* fun)const
   {
     if (!fun)
     {
-      fun = getFunction();
+      fun = m_function1;
     }
     std::string res_expression;
     try

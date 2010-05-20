@@ -647,13 +647,14 @@ namespace CurveFitting
   
     // Add penalty factor to function if any constraint is violated
 
-    API::IConstraint* c = m_function->firstConstraint();
-    if (!c) return;
-
-    double penalty = c->check();
-    while( (c = m_function->nextConstraint()) )
+    double penalty = 0.;
+    for(int i=0;i<m_function->nParams();++i)
     {
-      penalty += c->check();
+      API::IConstraint* c = m_function->getConstraint(i);
+      if (c)
+      {
+        penalty += c->check();
+      }
     }
 
     // add penalty to first and last point and every 10th point in between
@@ -683,16 +684,15 @@ namespace CurveFitting
 
     if (nData <= 0) return;
 
-    API::IConstraint* c = m_function->firstConstraint();
-    if (!c) return;
-
-    do
+    for(int i=0;i<m_function->nParams();++i)
     {  
-      double penalty = c->checkDeriv();
-      int i = m_function->getParameterIndex(*c);
-      out->addNumberToColumn(penalty, m_function->activeIndex(i));
+      API::IConstraint* c = m_function->getConstraint(i);
+      if (c)
+      {
+        double penalty = c->checkDeriv();
+        out->addNumberToColumn(penalty, m_function->activeIndex(i));
+      }
     }
-    while( (c = m_function->nextConstraint()) );
 
     //std::cerr<<"-------------- Jacobian ---------------\n";
     //for(int i=0;i<nActive();i++)

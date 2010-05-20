@@ -1524,7 +1524,8 @@ void FitPropertyBrowser::loadFunction()
   {
     QString str = settings.value(name).toString();
   
-    clear();
+    getHandler()->removeAllPlots();
+    clearBrowser();
     createCompositeFunction(str);
   }
 }

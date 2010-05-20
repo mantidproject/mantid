@@ -122,11 +122,9 @@ public:
 
   /// Overwrite IFunction methods
   void addConstraint(IConstraint* ic);
+  /// Get constraint of i-th parameter
+  virtual IConstraint* getConstraint(int i)const;
   void setParametersToSatisfyConstraints();
-  /// Get first constraint
-  IConstraint* firstConstraint()const;
-  /// Get next constraint
-  IConstraint* nextConstraint()const;
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
 

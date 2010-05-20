@@ -343,11 +343,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Logarithm.cpp"
+				RelativePath=".\src\InterpolatingRebin.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\src\InterpolatingRebin.cpp"
+				RelativePath=".\src\Logarithm.cpp"
 				>
 			</File>
 			<File
@@ -420,6 +420,10 @@
 			</File>
 			<File
 				RelativePath=".\src\PolynomialCorrection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Power.cpp"
 				>
 			</File>
 			<File
@@ -789,15 +793,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\inc\MantidAlgorithms\InterpolatingRebin.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidAlgorithms\Logarithm.h"
 				>
 			</File>
 			<File
 				RelativePath=".\test\LogarithmTest.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidAlgorithms\InterpolatingRebin.h"
 				>
 			</File>
 			<File
@@ -910,6 +914,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidAlgorithms\PolynomialCorrection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidAlgorithms\Power.h"
 				>
 			</File>
 			<File

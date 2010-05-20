@@ -808,40 +808,10 @@ void CompositeFunction::setParametersToSatisfyConstraints()
 }
 
 /// Get first constraint
-IConstraint* CompositeFunction::firstConstraint()const
+IConstraint* CompositeFunction::getConstraint(int i)const
 {
-  m_iConstraintFunction = 0;
-  if (nFunctions() == 0) 
-  {
-    return 0;
-  }
-  IConstraint* c = 0;
-  while(m_iConstraintFunction < nFunctions()
-    && !(c = getFunction(m_iConstraintFunction)->firstConstraint()) )
-  {
-    m_iConstraintFunction++;
-  }
-  return c;
-}
-
-/// Get next constraint
-IConstraint* CompositeFunction::nextConstraint()const
-{
-  if (nFunctions() == 0) 
-  {
-    return 0;
-  }
-  if (m_iConstraintFunction >= nFunctions()-1)
-  {
-    return getFunction(m_iConstraintFunction)->nextConstraint();
-  }
-  IConstraint* c = getFunction(m_iConstraintFunction)->nextConstraint();
-  if (c)
-  {
-    return c;
-  }
-  ++m_iConstraintFunction;
-  return getFunction(m_iConstraintFunction)->firstConstraint();
+  int iFun = functionIndex(i);
+  return m_functions[ iFun ]->getConstraint(i - m_paramOffsets[iFun]);
 }
 
 /** Remove a constraint

@@ -159,7 +159,7 @@ public:
     IFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
     TS_ASSERT(fun);
 
-    IConstraint* c = fun->firstConstraint();
+    IConstraint* c = fun->getConstraint(2);
     TS_ASSERT(c);
     bc = dynamic_cast<BoundaryConstraint*>(c);
     TS_ASSERT(bc);
@@ -190,7 +190,7 @@ public:
     IFunction* fun = FunctionFactory::Instance().createInitialized(gaus);
     TS_ASSERT(fun);
 
-    IConstraint* c = fun->firstConstraint();
+    IConstraint* c = fun->getConstraint(2);
     TS_ASSERT(c);
     BoundaryConstraint* bc = dynamic_cast<BoundaryConstraint*>(c);
     TS_ASSERT(bc);
@@ -199,7 +199,7 @@ public:
     TS_ASSERT_DELTA( bc->upper(), 20 ,0.0001);
     TS_ASSERT( !bc->hasLower() );
 
-    c = fun->nextConstraint();
+    c = fun->getConstraint(0);
     TS_ASSERT(c);
     bc = dynamic_cast<BoundaryConstraint*>(c);
     TS_ASSERT(bc);

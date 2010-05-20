@@ -25,6 +25,7 @@ PropertyHandler::PropertyHandler(Mantid::API::IFunction* fun,
                 m_cf(dynamic_cast<Mantid::API::CompositeFunction*>(fun)),
                 m_pf(dynamic_cast<Mantid::API::IPeakFunction*>(fun)),
                 m_parent(parent),
+                m_type(NULL),
                 m_item(item),
                 m_base(0),
                 m_ci(0),
@@ -82,18 +83,22 @@ void PropertyHandler::init()
   QtProperty* fnProp = m_item->property();
 
   // create Type property
-  m_type = m_browser->m_enumManager->addProperty("Type");
-  fnProp->addSubProperty(m_type);
   int itype = m_browser->m_registeredFunctions.indexOf(QString::fromStdString(m_fun->name()));
-  if (m_parent)
+  if (!m_type)
   {
-    m_browser->m_enumManager->setEnumNames(m_type, m_browser->m_registeredFunctions);
-  }
-  else
-  {
-    QStringList functionNames;
-    functionNames << QString::fromStdString(m_fun->name());
-    m_browser->m_enumManager->setEnumNames(m_type, functionNames);
+    m_type = m_browser->m_enumManager->addProperty("Type");
+
+    fnProp->addSubProperty(m_type);
+    if (m_parent)
+    {
+      m_browser->m_enumManager->setEnumNames(m_type, m_browser->m_registeredFunctions);
+    }
+    else
+    {
+      QStringList functionNames;
+      functionNames << QString::fromStdString(m_fun->name());
+      m_browser->m_enumManager->setEnumNames(m_type, functionNames);
+    }
   }
   m_browser->m_enumManager->setValue(m_type,itype);
 
@@ -191,12 +196,73 @@ void PropertyHandler::initParameters()
   m_parameters.clear();
   for(int i=0;i<function()->nParams();i++)
   {
-    QtProperty* prop = m_browser->addDoubleProperty(
-      QString::fromStdString(function()->parameterName(i))
-      );
+    QString parName = QString::fromStdString(function()->parameterName(i));
+    if (parName.contains('.')) continue;
+    QtProperty* prop = m_browser->addDoubleProperty(parName);
     m_browser->m_doubleManager->setValue(prop,function()->getParameter(i));
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
+    // add tie property if this parameter has a tie
+    Mantid::API::ParameterTie* tie = m_fun->getTie(i);
+    if (tie)
+    {
+      QStringList qtie = 
+        QString::fromStdString(tie->asString(m_browser->theFunction())).split("=");
+      if (qtie.size() > 1)
+      {
+        QtProperty* tieProp = m_browser->m_stringManager->addProperty("Tie");
+        m_browser->m_stringManager->setValue(tieProp,qtie[1]);
+        prop->addSubProperty(tieProp);
+        m_ties[parName] = tieProp;
+      }
+    }
+    // add constraint properties
+    Mantid::API::IConstraint* c = m_fun->getConstraint(i);
+    if (c)
+    {
+      QStringList qc = QString::fromStdString(c->asString()).split("<");
+      bool lo = false;
+      bool up = false;
+      double loBound, upBound;
+      if (qc.size() == 2)
+      {
+        if (qc[0].contains(parName))
+        {
+          up = true;
+          upBound = qc[1].toDouble();
+        }
+        else
+        {
+          lo = true;
+          loBound = qc[0].toDouble();
+        }
+      }
+      else if (qc.size() == 3)
+      {
+        lo = up = true;
+        loBound = qc[0].toDouble();
+        upBound = qc[2].toDouble();
+      }
+      else
+      {
+        continue;
+      }
+      QtProperty* loProp = NULL;
+      QtProperty* upProp = NULL;
+      if (lo)
+      {
+        loProp = m_browser->addDoubleProperty("LowerBound");
+        m_browser->m_doubleManager->setValue(loProp,loBound);
+        prop->addSubProperty(loProp);
+      }
+      if (up)
+      {
+        upProp = m_browser->addDoubleProperty("UpperBound");
+        m_browser->m_doubleManager->setValue(upProp,upBound);
+        prop->addSubProperty(upProp);
+      }
+      m_constraints.insert(parName,std::pair<QtProperty*,QtProperty*>(loProp,upProp));
+    }
   }
 }
 
@@ -327,7 +393,21 @@ void PropertyHandler::removeFunction()
 
 void PropertyHandler::renameChildren()const
 {
+  m_browser->m_changeSlotsEnabled = false;
+  // update tie properties, as the parameter names may change
+  QMap<QString,QtProperty*>::iterator it = m_ties.begin();
+  for(;it!=m_ties.end();++it)
+  {
+    QtProperty* prop = it.value();
+    Mantid::API::ParameterTie* tie = 
+      m_fun->getTie(m_fun->parameterIndex(it.key().toStdString()));
+    if (!tie) continue;
+    QStringList qtie = QString::fromStdString(tie->asString()).split("=");
+    if (qtie.size() < 2) continue;
+    m_browser->m_stringManager->setValue(prop,qtie[1]);
+  }
   if (!m_cf) return;
+  // rename children
   for(int i=0;i<m_cf->nFunctions();i++)
   {
     PropertyHandler* h = getHandler(i);
@@ -336,6 +416,7 @@ void PropertyHandler::renameChildren()const
     nameProp->setPropertyName(h->functionName());
     h->renameChildren();
   }
+  m_browser->m_changeSlotsEnabled = true;
 }
 
 /// Creates name for this function to be displayed

@@ -82,7 +82,9 @@ class FunctionHandler;
     and cannot be changed later. To read or write the attributes there are two ways. If the type
     is known the type specific accessors can be used, e.g. asString(), asInt(). Otherwise the
     IFunction::AttributeVisitor can be used. It provides alternative virtual methods to access 
-    attributes of each type. 
+    attributes of each type. When creating a function from a string (using FunctionFactory::creaeInitialized(...))
+    the attributes must be set first, before any fitting parameter, as the number and names of the parameters
+    can depend on the attributes.
 
     @author Roman Tolchenov, Tessella Support Services plc
     @date 16/10/2009
@@ -297,10 +299,8 @@ public:
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
-  /// Get first constraint
-  virtual IConstraint* firstConstraint()const = 0;
-  /// Get next constraint
-  virtual IConstraint* nextConstraint()const = 0;
+  /// Get constraint of i-th parameter
+  virtual IConstraint* getConstraint(int i)const = 0;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName) = 0;
 
@@ -316,13 +316,11 @@ public:
   /// Returns a list of attribute names
   virtual std::vector<std::string> getAttributeNames()const{return std::vector<std::string>();}
   /// Return a value of attribute attName
-  //virtual std::string getAttribute(const std::string& attName)const{return "";}
   virtual Attribute getAttribute(const std::string& attName)const
   {
     throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
   }
   /// Set a value to attribute attName
-  //virtual void setAttribute(const std::string& attName,const std::string& ){}
   virtual void setAttribute(const std::string& attName,const Attribute& )
   {
     throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());

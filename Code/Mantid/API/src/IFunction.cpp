@@ -296,24 +296,28 @@ std::string IFunction::asString()const
   {
     ostr<<','<<parameterName(i)<<'='<<getParameter(i);
   }
-  IConstraint* c = this->firstConstraint();
-  if (c)
+  std::string constraints;
+  for(int i=0;i<nParams();i++)
   {
-    ostr << ",constraints=(";
+    const IConstraint* c = getConstraint(i);
+    if (c)
+    {
+      std::string tmp = c->asString();
+      if (!tmp.empty())
+      {
+        if (!constraints.empty())
+        {
+          constraints += ",";
+        }
+        constraints += tmp;
+      }
+    }
   }
-  while(c)
+  if (!constraints.empty())
   {
-    ostr << c->asString();
-    c = this->nextConstraint();
-    if (c) 
-    {
-      ostr << ',';
-    }
-    else
-    {
-      ostr << ")";
-    }
+    ostr << ",constraints=(" << constraints << ")";
   }
+
   std::string ties;
   for(int i=0;i<nParams();i++)
   {
