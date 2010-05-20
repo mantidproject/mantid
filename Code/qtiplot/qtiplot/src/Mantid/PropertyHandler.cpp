@@ -395,7 +395,7 @@ void PropertyHandler::renameChildren()const
 {
   m_browser->m_changeSlotsEnabled = false;
   // update tie properties, as the parameter names may change
-  QMap<QString,QtProperty*>::iterator it = m_ties.begin();
+  QMap<QString,QtProperty*>::const_iterator it = m_ties.begin();
   for(;it!=m_ties.end();++it)
   {
     QtProperty* prop = it.value();
@@ -819,8 +819,7 @@ void PropertyHandler::fix(const QString& parName)
   QString parValue = QString::number(m_browser->m_doubleManager->value(parProp));
   try
   {
-    Mantid::API::ParameterTie* tie = 
-      m_fun->tie(parName.toStdString(),parValue.toStdString());
+    m_fun->tie(parName.toStdString(),parValue.toStdString());
     m_browser->m_changeSlotsEnabled = false;
     QtProperty* tieProp = m_ties[parName];
     if (!tieProp)
