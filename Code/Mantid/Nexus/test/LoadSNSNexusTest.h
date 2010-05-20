@@ -20,10 +20,12 @@ using namespace Mantid::Kernel;
 class LoadSNSNexusTest : public CxxTest::TestSuite
 {
 public:
-    void xtestExec()
+    void testExec()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadSNSNexus ld;
+	std::cerr << "TESSST!";
+	std::cout << "this is cout";
         std::string outws_name = "nickr0x0r";
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/SNS/REF_L_16055.nxs");
