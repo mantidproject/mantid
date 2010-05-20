@@ -60,11 +60,10 @@ void GetEi2::init()
     "neutrons leaving the source (meV)");
   declareProperty("FixEi", false, "If true, the incident energy will be set to the value of the \n"
     "EnergyEstimate property.");
-  declareProperty("AdjustBins", false, "If true, the bins from the input workspace \n"
-    "will be offset by the first monitor peak and the source moved to the position of \n"
-    "the monitor defined by Monitor1Spec.");
   declareProperty("IncidentEnergy", -1.0, Direction::Output);
   declareProperty("FirstMonitorPeak", -1.0, Direction::Output);
+  declareProperty("FirstMonitorIndex", 0, Direction::Output);
+
 }
 
 /** Executes the algorithm
@@ -87,22 +86,10 @@ void GetEi2::exec()
   
   storeEi(incident_energy);
   
-  const bool adjust_bins = getProperty("AdjustBins");
-  if( adjust_bins )
-  {
-    try 
-    {
-      applyBinOffset();
-      moveNeutronSource();
-    }
-    catch(std::exception& e)
-    {
-      g_log.warning() << "Bin offsetting failed. " << e.what() << "\n";;
-    }
-  }
-
   setProperty("InputWorkspace", m_input_ws);
+  // Output properties
   setProperty("IncidentEnergy", incident_energy);
+  setProperty("FirstMonitorIndex", m_peak1_pos.first);
   setProperty("FirstMonitorPeak", m_peak1_pos.second);
 }
 
@@ -145,7 +132,7 @@ double GetEi2::calculateEi(const double initial_guess)
     }
     const double t_min = (1.0 - m_tof_window)*peak_guess;
     const double t_max = (1.0 + m_tof_window)*peak_guess;
-    g_log.information() << "Time-of-flight window for peak " << (i+1) << ": tmin = " << t_min << " microseconds, tmax = " << t_max << "microseconds\n";
+    g_log.information() << "Time-of-flight window for peak " << (i+1) << ": tmin = " << t_min << " microseconds, tmax = " << t_max << " microseconds\n";
     peak_times[i] = calculatePeakPosition(ws_index, t_min, t_max);
     g_log.information() << "Peak for monitor " << (i+1) << " = " << peak_times[i] << " microseconds\n";
     if( i == 0 )
@@ -614,67 +601,6 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
 
   integral_val *= 0.5;
   integral_err = 0.5*sqrt(integral_err);
-}
-
-/**
- * Offset the bins on the input workspace by the calculated time of the first monitor peak
- */
-void GetEi2::applyBinOffset()
-{
-  IAlgorithm_sptr child_alg = createSubAlgorithm("ChangeBinOffset");
-  child_alg->setProperty("InputWorkspace", m_input_ws);
-  child_alg->setProperty("Offset", -m_peak1_pos.second);
-
-  try
-  {
-    child_alg->execute();
-  }
-  catch(std::exception& e)
-  {
-    g_log.error() << e.what() << "\n";
-    g_log.error() << "Error executing ChangeBinOffset algorithm. Input bins kept.\n";
-  }
-  m_input_ws = child_alg->getProperty("OutputWorkspace");
-}
-
-/** 
- * Move the source of neutrons to the position defined by the first input monitor
- */
-void GetEi2::moveNeutronSource()
-{
-  Geometry::IDetector_sptr mon_1;
-  try
-  {
-    mon_1 = m_input_ws->getDetector(m_peak1_pos.first);
-  }
-  catch(std::exception&)
-  {
-    g_log.warning() << "Error retrieving detector corresponding workspace index " << m_peak1_pos.first << ". Cannot move component.";
-    return;
-  }
-
-  Geometry::IObjComponent_sptr neutron_src = m_input_ws->getInstrument()->getSource();
-  const Geometry::V3D mon1_pos = mon_1->getPos();
-
-  IAlgorithm_sptr child_alg = createSubAlgorithm("MoveInstrumentComponent");
-  child_alg->setProperty("Workspace", m_input_ws);
-  child_alg->setProperty("ComponentName", neutron_src->getName());
-  child_alg->setProperty("X", mon1_pos.X());
-  child_alg->setProperty("Y", mon1_pos.Y());
-  child_alg->setProperty("Z", mon1_pos.Z());
-  child_alg->setProperty("RelativePosition", "0");
-
-  try
-  {
-    child_alg->execute();
-  }
-  catch(std::exception& e)
-  {
-    g_log.error() << e.what() << "\n";
-    g_log.error() << "Error executing MoveInstrumentComponent as sub algorithm. Neutron source unmoved\n";
-  }
-  m_input_ws = child_alg->getProperty("Workspace");
-
 }
 
 /**

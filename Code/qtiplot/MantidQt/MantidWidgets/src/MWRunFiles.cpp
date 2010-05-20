@@ -119,19 +119,25 @@ void MWRunFiles::readRunNumAndRanges()
   }
 
   std::vector<std::string>::iterator i = m_files.begin(), end = m_files.end();
+  const int pad_size(5);
   for ( ; i != end; ++i )
   {
-    try
+  try
 	{
+    std::string run_str = *i;
 	  const unsigned int runNumber = boost::lexical_cast<unsigned int>(*i);
-	  *i = m_instrument.toStdString() + //instrument code
-	    boost::lexical_cast<std::string>(runNumber) +
-		".raw";                                      //only raw files are supported at the moment //??STEVES change this?
+    const int ndigits = static_cast<int>(run_str.size());
+    if( ndigits != pad_size )
+    {
+      run_str.insert(0, pad_size - ndigits, '0');
+    }
+	  *i = m_instrument.toStdString() + run_str + ".raw";                                      
 	}
-	catch ( boost::bad_lexical_cast )
+	catch ( boost::bad_lexical_cast &)
 	{// the entry doesn't read as a run number
 	}// the alternative is that they entered a filename and we leave that as it is
-    if ( errors.size() < MAX_FILE_NOT_FOUND_DISP )
+
+  if ( errors.size() < MAX_FILE_NOT_FOUND_DISP )
 	{
 	  std::string problem = loadData.setValue(*i);
 	  if ( ! problem.empty() )

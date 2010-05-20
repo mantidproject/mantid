@@ -35,7 +35,7 @@ HEADERS = \
   $$HEADERDIR/MantidWidget.h \
   $$HEADERDIR/MWRunFiles.h \
   $$HEADERDIR/pythonCalc.h \
-  $$HEADERDIR/WidgetsDllOption.h \
+  $$HEADERDIR/WidgetDllOption.h \
   $$HEADERDIR/DiagResults.h \
   $$HEADERDIR/MWDiag.h \
   $$HEADERDIR/MWDiagCalcs.h

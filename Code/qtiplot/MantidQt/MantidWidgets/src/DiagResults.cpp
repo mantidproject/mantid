@@ -3,15 +3,20 @@
 //----------------------
 #include "MantidQtMantidWidgets/DiagResults.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Exception.h"
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QGridLayout>
 #include <QPushButton>
 #include <QCloseEvent>
+#include <QHashIterator>
+
 #include <boost/lexical_cast.hpp>
 
+using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
+
 DiagResults::TestSummary::TestSummary(QString name) :
   test(name), status("Error"), numBad(NORESULTS) {}
 /** Reads the multi-line string created by the print statments in python scripts
@@ -19,16 +24,16 @@ DiagResults::TestSummary::TestSummary(QString name) :
 *  @return either data (or if numBad is set to NORESULTS then diagnositic output, or possibly nothing at all)
 *  @throw invalid_argument if output from the wrong test is passed to this function
 */
-QString DiagResults::TestSummary::pythonResults(const QString &pyhtonOut)
+QString DiagResults::TestSummary::pythonResults(const QString &pythonOut)
 {// set the number found bad to the not ready state incase there is an error below
   numBad = NORESULTS;
 
-  QStringList results = pyhtonOut.split("\n");
+  QStringList results = pythonOut.split("\n");
 
   if ( results.count() < 2 )
   {// there was an error in the python, disregard these results
     status = "Error", outputWS = "", inputWS = "", listBad = "";
-    return "Error \"" + pyhtonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
+    return "Error \"" + pythonOut + "\" found, while executing scripts, there may be more details in the Mantid or python log.";
   }
   if ( results[0] != "Created the workspaces:" )
   {// there was an error in the python, disregard these results
@@ -61,7 +66,7 @@ const QString DiagResults::TESTS[DiagResults::NUMTESTS] =
 // Public member functions
 //----------------------
 ///Constructor
-DiagResults::DiagResults(QWidget *parent): MantidWidget(parent),
+DiagResults::DiagResults(QWidget *parent): MantidQtDialog(parent),
   m_Grid(new QGridLayout), m_ListMapper(new QSignalMapper(this)),
   m_ViewMapper(new QSignalMapper(this))
 {
@@ -93,7 +98,7 @@ DiagResults::DiagResults(QWidget *parent): MantidWidget(parent),
 void DiagResults::addResults(const TestSummary &display)
 {
   // store with the test the location of the data, outputWS could be an empty string
-  m_outputWorkS[display.test] = display.outputWS;
+  m_outputWorkS.insert(display.test,display.outputWS);
 
   for ( int i = 0; i < NUMTESTS; i ++ )
   {
@@ -212,14 +217,12 @@ void DiagResults::setupButtons(int row, QString test)
 /// enables the run button on the parent window so the user can do more analysis
 void DiagResults::closeEvent(QCloseEvent *event)
 {
-  // remove all tempary workspaces
-  std::map<QString, QString>::const_iterator it = m_outputWorkS.begin();
-  // the last workspace is retained as the output workspace because all bad spectra are marked in this one
-  // change the next line if you'd  like, I couldn't get it != it.end()-1 to work but this is equivalent as keys are unique
-  for ( ; it->first != m_outputWorkS.rbegin()->first; ++it )
+  //// remove all tempary workspaces
+  QHashIterator<QString,QString> itr(m_outputWorkS);
+  while(itr.hasNext() )
   {
-    std::string toDel = it->second.toStdString();
-    Mantid::API::FrameworkManager::Instance().deleteWorkspace(toDel);
+    QString remove = itr.next().value();
+    Mantid::API::FrameworkManager::Instance().deleteWorkspace(remove.toStdString());
   }
   emit died();
   event->accept();
@@ -229,22 +232,22 @@ void DiagResults::tableList(const QString &name)
 {
   QString workspace = m_outputWorkS[name];
   QString tempOutp = QString("_FindBadDe") + workspace + QString("_temp");
+  QString temp_key = name + "_temp";
+  m_outputWorkS.insert(temp_key,tempOutp);
 
   QString viewTablePy = "import DetectorTestLib as functions\n";
-  viewTablePy.append("if functions.workspaceExists :\n");
+  viewTablePy.append("if mtd.workspaceExists('" + workspace + "'):\n");
   viewTablePy.append(
     "  bad = FindDetectorsOutsideLimits(InputWorkspace='"+workspace+"', OutputWorkspace='"+tempOutp+"', HighThreshold=10, LowThreshold=-1 )\n");
-  viewTablePy.append("  mantid.deleteWorkspace('"+tempOutp+"')\n");
   viewTablePy.append("  stBad = bad.getPropertyValue('BadSpectraNums')\n");
   viewTablePy.append("  liBad = stBad.split(',')\n");
   viewTablePy.append("else : liBad = ['The analysis data has been removed, run the detector efficiency tests again']\n");
   viewTablePy.append("tbBad = newTable('Failed Detector IDs -" + name + "', len(liBad), 1)\n");
-//  viewTablePy.append("tbBad.setC)\n");
   viewTablePy.append("for i in range(0, len(liBad) ) :\n");
   viewTablePy.append("  tbBad.setText( 1, i+1, liBad[i] )\n");
   viewTablePy.append("tbBad.show()");
 
-  runPython(viewTablePy);
+  emit runAsPythonScript(viewTablePy);
 }
 
 void DiagResults::instruView(const QString &name)
@@ -256,5 +259,6 @@ void DiagResults::instruView(const QString &name)
   startInstruViewPy.append("instrument_view.setWindowTitle('Failed detectors are marked 100 -" + name + "')\n");
   startInstruViewPy.append("instrument_view.setColorMapRange(0.,100.)\n");
   startInstruViewPy.append("instrument_view.showWindow()\n");
-  runPython(startInstruViewPy);
+  
+  emit runAsPythonScript(startInstruViewPy);
 }

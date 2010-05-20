@@ -299,7 +299,7 @@ void Homer::page1Tooltips()
 void Homer::setUpPage2()
 {/* The diag -detector diagnositics part of the form is a separate widget, all the work is coded in over there
  this second page is largely filled with the diag widget, previous settings, second argument, depends on the instrument and the detector diagnostic settings are kept separate in "diag/"*/
-  m_diagPage = new MWDiag(this, m_prev.group()+"/diag", m_uiForm.loadRun_cbInst, QApplication::activeWindow());
+  m_diagPage = new MWDiag(this, m_prev.group()+"/diag", m_uiForm.loadRun_cbInst);
 
   // set the default background region to the same as the default on this form
   emit MWDiag_updateTOFs(m_prev.value("TOFstart", G_START_WINDOW_TOF).toDouble(),
@@ -316,6 +316,7 @@ void Homer::setUpPage2()
   m_uiForm.ckRunDiag->setToolTip("Enable or disable all the controls on this page");
   // disenableDiag() enables or disables the detector diagnostics page depending on if the check box is clicked or not
   connect(m_uiForm.ckRunDiag, SIGNAL(clicked()), this, SLOT(disenableDiag()));
+
 }
 
 void Homer::setUpPage3()

@@ -1,12 +1,12 @@
 #ifndef MANTIDQTMANTIDWIDGETS_MANTIDWIDGETS_H_
 #define MANTIDQTMANTIDWIDGETS_MANTIDWIDGETS_H_
 
+#include <QWidget>
 #include "Poco/Path.h"
 #include "WidgetDllOption.h"
 #include <QGroupBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QWidget>
 #include <QString>
 #include <QHash>
 #include <string>
@@ -32,7 +32,7 @@ namespace MantidQt
       ///to stop MantidPlot from being terminated need to check that this is false before a script is run, then set it to true and return it to false once the script has terminated
       static bool g_pythonRunning;
 	  
-      MantidWidget(QWidget *interface);
+      MantidWidget(QWidget *parent);
   	  void renameWorkspace(const QString &oldName, const QString &newName);
       void setupValidator(QLabel *star);
 	    QLabel* newStar(const QGroupBox * const UI, int valRow, int valCol);

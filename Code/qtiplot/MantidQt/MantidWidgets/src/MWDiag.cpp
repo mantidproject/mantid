@@ -30,9 +30,9 @@ static const double START_WINDOW_TOF = 18000;
 static const double END_WINDOW_TOF = 19500;
 static const bool NO_ZERO_BG = true;
 
-MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru, QWidget *childHook):
+MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru):
   MantidWidget(parent),
-  m_dispDialog(NULL), m_mainApp(childHook), m_instru(instru), m_WBV1(NULL), m_WBV2(NULL),
+  m_dispDialog(NULL), m_instru(instru), m_WBV1(NULL), m_WBV2(NULL),
   m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1)
 {
   // allows saving and loading the values the user entered on to the form
@@ -46,6 +46,7 @@ MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const 
   connectSignals(parent);
   setUpValidators();
 }
+
 void MWDiag::insertFileWidgs()
 {
   // we create and place some new widgets on the form using it's grid layout
@@ -280,7 +281,7 @@ void MWDiag::browseClicked(const QString &buttonDis)
 */
 void MWDiag::raiseDialog()
 {// uses new to create the form and the form needs to execute setAttribute(Qt::WA_DeleteOnClose) so that its memory will be freed
-  m_dispDialog = new DiagResults(NULL);//QApplication::activeWindow());
+  m_dispDialog = new DiagResults(this->parentWidget());
   m_dispDialog->show();
   connect(m_dispDialog, SIGNAL(died()), this, SLOT(noDispDialog()));
   connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&)),

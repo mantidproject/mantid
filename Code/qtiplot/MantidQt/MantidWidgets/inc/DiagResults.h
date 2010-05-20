@@ -2,30 +2,26 @@
 #define MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_
 
 #include "MantidQtAPI/MantidQtDialog.h"
-#include "MantidQtMantidWidgets/MantidWidget.h"
 #include "WidgetDllOption.h"
-#include <map>
-#include <string>
-#include <QDialog>
+#include <QHash>
 #include <QSignalMapper>
 #include <QGridLayout>
-#include <climits>
 
 namespace MantidQt
 {
   namespace MantidWidgets
   {
 
-    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DiagResults : public MantidWidget
+    class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS DiagResults : public API::MantidQtDialog
     {
       Q_OBJECT
 
     public:
       // stores the informtion returned by the python scripts that look for bad detectors
-      struct EXPORT_OPT_MANTIDQT_MANTIDWIDGETS TestSummary
+      struct TestSummary
       {
         explicit TestSummary(QString name);
-        QString pythonResults(const QString &pyhtonOut);
+        QString pythonResults(const QString &pythonOut);
         void setStatus(QString &info) {status = info;}
         const QString& getStatus() const {return status;}
 		
@@ -48,6 +44,8 @@ namespace MantidQt
     signals:
       /// is emitted just before the window dies to let the window that created this know the pointer it has is invalid
       void died();
+      /// Run code in Python
+      void runAsPythonScript(const QString&);
 
     private:
       /// the layout that widgets are added to
@@ -57,7 +55,7 @@ namespace MantidQt
       /// points to the slot that deals with view buttons being pressed
       QSignalMapper *m_ViewMapper;
       /// stores the name of the workspaces that contains the results of each test
-      std::map<QString, QString> m_outputWorkS;
+      QHash<QString,QString> m_outputWorkS;
 
       int addRow(QString firstColumn, QString secondColumn);
       void addButtonsDisab(int row);

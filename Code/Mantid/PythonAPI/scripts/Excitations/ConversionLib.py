@@ -4,9 +4,6 @@ from mantidsimple import *
 import CommonFunctions as common
 import math
 
-# these are the defaults for different instruments. Need to be moved to parameter file
-import ExcitDefaults
-
 def mono_sample(inst_prefix, run_nums, Ei, d_rebin, wbrf, getEi=True, back='', norma='', det_map='', det_mask='', output_name = 'mono_sample_temporyWS') :
   """
   Calculate Ei and detector offsets for a mono-chromatic run.
@@ -19,8 +16,6 @@ def mono_sample(inst_prefix, run_nums, Ei, d_rebin, wbrf, getEi=True, back='', n
   instrument = result_ws.getInstrument()
   # The final workspace will take the X-values and instrument from the first workspace and so we don't need to rerun ChangeBinOffset(), MoveInstrumentComponent(), etc.
   common.sumWorkspaces(result_ws, inst_prefix, run_nums)
-  if det_eff_file != '':
-    LoadDetectorInfo(result_ws, det_eff_file)
 
   Ei, mon1_peak = calculateEi(result_ws, Ei, getEi,instrument)
   bin_offset = -mon1_peak
@@ -35,22 +30,25 @@ def mono_sample(inst_prefix, run_nums, Ei, d_rebin, wbrf, getEi=True, back='', n
 
   # deals with normalize to monitor (e.g.  norm = 'monitor-monitor 1'), current (if norm = 'protons (uAh)'), etc.
   NormaliseTo(norma, result_ws, bin_offset, instrument)
+  
+  if det_eff_file != '':
+    LoadDetectorInfo(result_ws, det_eff_file)
 
   ConvertUnits(result_ws, result_ws, 'DeltaE', 'Direct', Ei, AlignBins=0)
 
   if d_rebin != '':
     Rebin(result_ws, result_ws, common.listToString(d_rebin))
- 
+
   if det_eff_file != '':
     DetectorEfficiencyCor(result_ws, result_ws, Ei)
- 
+
   if det_mask != '' :
     MaskDetectors(Workspace=result_ws, SpectraList=common.listToString(det_mask))
   
   if det_map != '':
     GroupDetectors(result_ws, result_ws, det_map, KeepUngroupedSpectra=0)
   ConvertToDistribution(result_ws)
-  
+
   NormaliseToWhiteBeam(wbrf, result_ws, det_map, det_mask, norma, inst_prefix, instrument)
 
   # Overall scale factor
@@ -73,12 +71,20 @@ def calculateEi(input_ws, E_guess, getEi, instrument):
   monitor2_spec = int(instrument.getNumberParameter("ei-mon2-spec")[0])
   
   # Get incident energy
-  alg = GetEi(input_ws, monitor1_spec, monitor2_spec, E_guess,FixEi=fixei,AdjustBins=True)
+  alg = GetEi(input_ws, monitor1_spec, monitor2_spec, E_guess,FixEi=fixei)
   mon1_peak = float(alg.getPropertyValue("FirstMonitorPeak"))
+  mon1_index = int(alg.getPropertyValue("FirstMonitorIndex"))
   ei = float(input_ws.getSampleDetails().getLogData("Ei").value())
 
-  return ei, mon1_peak
+  ChangeBinOffset(input_ws, input_ws, -mon1_peak)
 
+  mon1_det = input_ws.getDetector(mon1_index)
+  mon1_pos = mon1_det.getPos()
+  src_name = input_ws.getInstrument().getSource().getName()
+  
+  MoveInstrumentComponent(input_ws, src_name, X=mon1_pos.getX(), Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+  
+  return ei, mon1_peak
 
 def NormaliseTo(scheme, data_ws, offset, instrument):
 
@@ -109,6 +115,7 @@ def NormaliseToWhiteBeam(WBRun, mono_ws, mapFile, detMask, scheme, prefix, instr
   wbnorm_ws = common.LoadNexRaw(common.getFileName(prefix, WBRun), wbnorm_name)[0]
   
   NormaliseTo(scheme, wbnorm_ws, 0., instrument)
+ 
   ConvertUnits(wbnorm_ws, wbnorm_ws, "Energy", AlignBins=0)
   # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
   low = instrument.getNumberParameter("wb-integr-min")[0]
@@ -124,6 +131,7 @@ def NormaliseToWhiteBeam(WBRun, mono_ws, mapFile, detMask, scheme, prefix, instr
 
   # White beam scale factor
   wb_scale_factor = instrument.getNumberParameter("wb-scale-factor")[0]
+  
   wbnorm_ws *= wb_scale_factor
   mono_ws /= wbnorm_ws
   

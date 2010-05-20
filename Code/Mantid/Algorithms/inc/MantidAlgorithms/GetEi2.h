@@ -81,10 +81,6 @@ namespace Algorithms
       API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr monitor_ws, const double first, const double width, const double end);
       /// Integrate the point data
       void integrate(double &integral_value, double &integral_err, const MantidVec &x, const MantidVec &s, const MantidVec &e, const double xmin, const double xmax) const;
-      /// Offset the bins on the input workspace by the calculated time of the first monitor peak
-      void applyBinOffset();
-      /// Move the source of neutrons to the position defined by the first input monitor
-      void moveNeutronSource();
       /// Store the incident energy within the sample object
       void storeEi(const double ei) const;
 

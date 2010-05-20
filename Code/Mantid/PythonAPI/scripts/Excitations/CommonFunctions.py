@@ -66,7 +66,7 @@ def getFileName(instrumentPref, runNumber):
     # means we weren't passed a number assume it is a valid file name and return it unprocessed
     return runNumber
   #only raw files are supported at the moment
-  return instrumentPref + runNumber + '.raw'
+  return instrumentPref + runNumber.zfill(5) + '.raw'
 
 def loadRun(prefix, runNum, workspace):
   return LoadNexRaw(getFileName(prefix, runNum), workspace)

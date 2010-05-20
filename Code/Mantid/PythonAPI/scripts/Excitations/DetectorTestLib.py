@@ -4,15 +4,12 @@
 # writing zeros to the histograms associated with those detectors
 ########################################################
 from os import remove
-#import sys
-#sys.path.append('C:/mantid/Code/Mantid/release')
 
 from mantidsimple import *
 import CommonFunctions as common
-# these are the defaults for different instruments
-import ExcitDefaults
 
 OUT_WS_PREFIX = 'mask_'
+DET_EFF_VAR = 1.1
 
 def appendMaskFile(inFname, outfile) :
   try:
@@ -37,11 +34,11 @@ def SingleWBV( inputWS, outputWS, HighAbsolute, LowAbsolute, HighMedian, LowMedi
     limitsTempFile = '_DetectorTest_swbv_FDOL_tempfile'
     MedianTempFile = '_DetectorTest_swbv_MDT_tempfile'
   
-  FDOL = FindDetectorsOutsideLimits( inputWS, outputWS, HighAbsolute, LowAbsolute, OutputFile=limitsTempFile )	#for usage see www.mantidproject.org/FindDetectorsOutsideLimits
-  MaskDetectors(Workspace=inputWS, SpectraList=FDOL.getPropertyValue('BadSpectraNums') )			#for usage see www.mantidproject.org/MaskDetectors
+  FDOL = FindDetectorsOutsideLimits( inputWS, outputWS, HighAbsolute, LowAbsolute, OutputFile=limitsTempFile )
+  MaskDetectors(Workspace=inputWS, SpectraList=FDOL.getPropertyValue('BadSpectraNums') )
   
-  MDT = MedianDetectorTest( InputWorkspace=inputWS, OutputWorkspace=outputWS, SignificanceTest=NumErrorBars, LowThreshold=LowMedian, HighThreshold=HighMedian, OutputFile=MedianTempFile )#for usage see www.mantidproject.org/
-  MaskDetectors(Workspace=inputWS, SpectraList=MDT.getPropertyValue('BadSpectraNums'))						#for usage see www.mantidproject.org/MaskDetectors
+  MDT = MedianDetectorTest( InputWorkspace=inputWS, OutputWorkspace=outputWS, SignificanceTest=NumErrorBars, LowThreshold=LowMedian, HighThreshold=HighMedian, OutputFile=MedianTempFile )
+  MaskDetectors(Workspace=inputWS, SpectraList=MDT.getPropertyValue('BadSpectraNums'))
   
   fileOutputs = ''
   #--get any file output to add to the main output file
@@ -60,12 +57,6 @@ def SingleWBV( inputWS, outputWS, HighAbsolute, LowAbsolute, HighMedian, LowMedi
 
   return (badList, len(badList))
   
-def workspaceExists(workS) :
-  allNames = mantid.getWorkspaceNames()
-  for aName in allNames :
-    if aName == workS : return True
-  return False
-
 #names of tempory workspaces that will get overwriten
 SINGLE_WHITE_WS = '_FindBadDets_WBV1_tempory'
 OUTPUTWS = '_FindBadDets_tempory'
@@ -82,7 +73,7 @@ def printSummary(outputWS, inputWS, testName, numFound):
 def printProblem(reason, testName) :
     print 'Error:'
     print reason
-    print 'found in ' + testName	
+    print 'found in ' + testName
 
 def single_white_van(wbrf, tiny, huge, median_hi, median_lo, error_bars, prevList='', oFile='', outWS=OUTPUTWS) :
   THISTEST = 'First white beam test'
@@ -128,7 +119,7 @@ def single_white_van(wbrf, tiny, huge, median_hi, median_lo, error_bars, prevLis
     
     raise Exception('A discription of the error has been printed')
  
-def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,previous_wb_ws,prevList=[], oFile='',r=ExcitDefaults.DetectorEfficiencyVariation_Variation, outWS=OUTPUTWS) :
+def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,previous_wb_ws,prevList=[], oFile='',r=DET_EFF_VAR, outWS=OUTPUTWS) :
 
    #--Start with settings
   THISTEST = 'Second white beam test'
@@ -192,7 +183,7 @@ def second_white_van(wbrf,tiny,huge,median_lo,median_hi,error_bars,previous_wb_w
     for workspace in mantid.getWorkspaceNames() :
       if (workspace == '_FindBadDetects ListofBad') : mantid.deleteWorkspace('_FindBadDetects ListofBad')
 
-def bgTest(instru, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, error_bars, prevList=[], wb_ws_comp='', oFile='', outWS = OUTPUTWS):
+def bgTest(inst_prefix, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, error_bars, prevList=[], wb_ws_comp='', oFile='', outWS = OUTPUTWS):
   THISTEST = 'Background test'
 
   #setup some workspace names (we need that they don't already exist because they will be overwriten) to make things easier to read later on
@@ -211,32 +202,39 @@ def bgTest(instru, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, error_b
   
   try:#------------Calculations Start---
     # make memory allocations easier by overwriting the workspaces of the same size, although it means that more comments are required here to make the code readable
-    instru.loadRun(run_nums[0], TEMPBIG)
+    common.loadRun(inst_prefix, run_nums[0], TEMPBIG)
+    instrument = mtd[TEMPBIG].getInstrument()
+    if TOFLow < -9.9e7:
+      #this means that (the start of the background range) wasn't specified, use the default
+      bmin = float(instrument.getNumberParameter('bkgd-range-min')[0])
+    if TOFHigh < -9.9e7:
+      bmax = float(instrument.getNumberParameter('bkgd-range-max')[0])
+
     # integrate the counts as soon as possible to reduce the size of the workspace
-    Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM, RangeLower=TOFLow, RangeUpper=TOFHigh)		#a Mantid algorithm
+    Integration(InputWorkspace=TEMPBIG, OutputWorkspace=SUM, RangeLower=TOFLow, RangeUpper=TOFHigh)
     if len(run_nums) > 1 :
       for toAdd in run_nums[ 1 : ] :
         # save the memory by overwriting the old workspaces
-        instru.loadRun(toAdd, '_FindBadDetects loading')
-        Integration('_FindBadDetects loading', '_FindBadDetects loading', TOFLow, TOFHigh)				#a Mantid algorithm
-        Plus(SUM, '_FindBadDetects loading', SUM)                                                                                        #for details see www.mantidproject.org/LoadDetectorInfo
+        common.loadRun(inst_prefix, toAdd, '_FindBadDetects loading')
+        Integration('_FindBadDetects loading', '_FindBadDetects loading', TOFLow, TOFHigh)
+        Plus(SUM, '_FindBadDetects loading', SUM)
       mantid.deleteWorkspace(TEMPBIG)
 
-    if len(prevList) > 0 :                                                                                                                #--mask the detectors that were found bad in the previous test
+    if len(prevList) > 0 :
       MD = MaskDetectors(Workspace=SUM, SpectraList=prevList)
-      prevList = MD.getPropertyValue('SpectraList')                                                                        #the algorithm expands out any ranges specified with '-'
+      prevList = MD.getPropertyValue('SpectraList')
   
     #--prepare to normalise the spectra against the WBV runs
     if wb_ws == '' : raise Exception('The name of a white beam vanadium workspace already into\nloaded into Mantid must be supplied (as wb_ws) for\nnormalisation')
-    Integration(InputWorkspace=wb_ws, OutputWorkspace=NORMA)					#a Mantid algorithm
+    Integration(InputWorkspace=wb_ws, OutputWorkspace=NORMA)
     if ( wb_ws_comp != '' ) :
       #--we have another white beam vanadium we'll combine it with the first white beam
-      Integration(InputWorkspace=wb_ws_comp, OutputWorkspace=wb_ws_comp)                #a Mantid algorithm
+      Integration(InputWorkspace=wb_ws_comp, OutputWorkspace=wb_ws_comp)
       #--the equaton is (the harmonic mean) 1/av = (1/Iwbv1 + 1/Iwbv2)/2     av = 2*Iwbv1*Iwbv2/(Iwbv1 + Iwbv2)
       #workspace reuse: NORMA is currently the integral of WBVanadium1
-      Multiply(wb_ws_comp, NORMA, NUMER)											#a Mantid algorithm
-      Plus(NORMA, wb_ws_comp, NORMA)												#for usage see www.mantidproject.org/Plus
-      Divide(NUMER, NORMA, NORMA)												#for usage see www.mantidproject.org/Divide
+      Multiply(wb_ws_comp, NORMA, NUMER)
+      Plus(NORMA, wb_ws_comp, NORMA)
+      Divide(NUMER, NORMA, NORMA)
       #--don't spend time on the factor of two in the harmonic as it will affect all histograms equally and so not affect the results
       mantid.deleteWorkspace(wb_ws_comp)
       mantid.deleteWorkspace(NUMER)
@@ -291,11 +289,8 @@ def bgTest(instru, run_nums, wb_ws, TOFLow, TOFHigh, threshold, rmZeros, error_b
       if (workspace == SUM) : mantid.deleteWorkspace(SUM)
       if (workspace == "_FindBadDetects loading") : mantid.deleteWorkspace("_FindBadDetects loading")
 
-def diagnose(instrum='',maskFile='',wbrf='',wbrf2='',runs='',zero='False',out_asc='', prevList='', tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,bmin=-1e8,bmax=-1e8, previousWS='', outWS = OUTPUTWS) :
+def diagnose(inst_prefix='',maskFile='',wbrf='',wbrf2='',runs='',zero='False',out_asc='', prevList='', tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,bmin=-1e8,bmax=-1e8, previousWS='', outWS = OUTPUTWS) :
   
-  #convert the run numbers, if one was passed into a run name
-  instru = ExcitDefaults.loadDefaults(instrum)
-
   try :
     failed = common.listToString(prevList)                                                      #failed will be a running total of all the bad detectors
     if (failed != '') and (failed[len(failed)-1] != ',') : failed += ','                #numbers are separated by commas, but avoid having two commas next to one another (from empty lists)
@@ -315,34 +310,28 @@ def diagnose(instrum='',maskFile='',wbrf='',wbrf2='',runs='',zero='False',out_as
       outFile=open(out_asc, 'w')
       if len(failed) > 0:
         outFile.write('--Hard Mask File List--\n')
-	data = common.stringToList(failed)
-	for datum in data : 
+        data = common.stringToList(failed)
+        for datum in data : 
           outFile.write(str(datum) + ' ')
         outFile.write('\n')
       outFile.close()
 
     #of the three detector functioning tests run the ones that there are data for
     if wbrf != '':
-      wbrf = instru.getFileName(wbrf)
+      wbrf = common.getFileName(inst_prefix, wbrf)
       failed = single_white_van(wbrf, tiny=tiny, huge=huge, median_lo=median_lo, median_hi=median_hi, error_bars=sv_sig, prevList=failed, oFile=out_asc, outWS=outWS)
       if (failed != '') and (failed[len(failed)-1] != ',') : failed += ','                #numbers are separated by commas, but avoid having two commas next to one another (from empty lists)
     
     if wbrf2 != '':
-      wbrf2 = instru.getFileName(wbrf2)
+      wbrf2 = common.getFileName(inst_prefix,wbrf2)
       failed = second_white_van(wbrf2, tiny=tiny, huge=huge, median_lo=median_lo, median_hi=median_hi, error_bars=sv_sig, oFile=out_asc,\
-	      prevList=failed, previous_wb_ws=SINGLE_WHITE_WS, outWS=outWS)
+          prevList=failed, previous_wb_ws=SINGLE_WHITE_WS, outWS=outWS)
       if (failed != '') and (failed[len(failed)-1] != ',') : failed += ','                #numbers are separated by commas, but avoid having two commas next to one another (from empty lists)
 
     if runs != '':
-      if bmin < -9.9e7:
-	#this means that (the start of the background range) wasn't specified, use the default
-        bmin = instru.backgroundRange[0]
-      if bmax < -9.9e7:
-        bmax = instru.backgroundRange[1]
-          
       run_nums = common.listToString(runs).split(',')
-      failed = bgTest(instru, run_nums, wb_ws=SINGLE_WHITE_WS, TOFLow=bmin, TOFHigh=bmax, threshold=bmedians, rmZeros=zero, error_bars=sv_sig, \
-	        prevList=failed, wb_ws_comp=previousWS,  oFile=out_asc, outWS=outWS)
+      failed = bgTest(inst_prefix, run_nums, wb_ws=SINGLE_WHITE_WS, TOFLow=bmin, TOFHigh=bmax, threshold=bmedians, rmZeros=zero, error_bars=sv_sig, \
+            prevList=failed, wb_ws_comp=previousWS,  oFile=out_asc, outWS=outWS)
 
     #pass back the list of those that failed but do nice, if tedious, things with the commas
     return common.stringToList(failed)
@@ -351,12 +340,3 @@ def diagnose(instrum='',maskFile='',wbrf='',wbrf2='',runs='',zero='False',out_as
   except Exception, reason:
     if reason != 'A discription of the error has been printed' :
       printProblem(reason, 'diagnose()')
- 
-#below is a quick test/example command to run this library, it must be commented out otherwise it is run when this file is imported
-#badSpectra = diagnose(instrum='MAR',wbrf='11060',wbrf2='11060',runs='',tiny=1e-10,huge=1e10,median_lo=0.1,median_hi=3.0,sv_sig=3.3,bmedians=5.0,zero='False', out_asc='C:/Users/wht13119/Desktop/docs/Excitations/test/test.msk',maskFile='C:/Users/wht13119/Desktop/docs/Excitations/test/33-66.msk')
-#print badSpectra
-#single_white_van(wbrf='MAR1106.raw',tiny=1e-10,huge=1e10,median_hi=3.0,median_lo=0.1, error_bars=3.3)
-#print common.listToString('[302, 430, 852, 1, 2, 3, 28]')
-#print diagnose('MAR', maskFile = '', wbrf = 'MAR11060.raw', out_asc = '', tiny = '0', huge = '1e10', median_hi = '3.0', median_lo = '0.1', sv_sig = '3.3', outWS = 'mask_MAR11001')
-#print common.listToString(diagnose('MAR', maskFile = '', wbrf = 'MAR11001.raw', out_asc = '', tiny = '0', huge = '1e10', median_hi = '3.0', median_lo = '0.1', sv_sig = '3.3', outWS = 'mask_MAR11001', prevList='33-44'))
-#diagnose('MAR', wbrf2 = 'MAR11015.raw', out_asc = 'C:/Users/wht13119/Desktop/docs/Excitations/test/test.msk', tiny = '0', huge = '1e10', median_hi = '3.0', median_lo = '0.1', sv_sig = '3.3', outWS = 'mask_MAR11001', prevList = '23,3')

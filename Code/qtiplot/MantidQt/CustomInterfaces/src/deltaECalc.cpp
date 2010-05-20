@@ -126,9 +126,6 @@ QString deltaECalc::createProcessingScript(const std::string &inFiles, const std
   createOutputStatmens(WSName, m_pyScript);
   
   m_pyScript.replace("|TEMPWS|", tempWS);
-
-  std::cerr << m_pyScript.toStdString() << "\n";
-
   return WSName;
 }
 /** Completes the Python statements that implement calculating the initial energy
