@@ -45,8 +45,7 @@ class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer(gsl_multifit_function_fdf& gslContainer, 
-    gsl_vector* startGuess, API::IFunction* func);
+  LevenbergMarquardtMinimizer(): m_name("Levenberg Marquardt") {}
 
   /// Overloading base class methods
   std::string name()const;

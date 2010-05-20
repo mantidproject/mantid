@@ -278,35 +278,6 @@ namespace CurveFitting
         gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
     }
 
-    // set-up GSL container to be used with GSL simplex algorithm
-
-   /* gsl_multimin_function gslSimplexContainer;
-    gslSimplexContainer.n = l_data.p;  // n here refers to number of parameters
-    gslSimplexContainer.f = &gsl_costFunction;
-    gslSimplexContainer.params = &l_data;*/
-
-
-    // set-up GSL container to be used with none-least squares GSL routines using derivatives
-
-    gsl_multimin_function_fdf gslMultiminContainer;
-    gslMultiminContainer.n = l_data.p;  // n here refers to number of parameters
-    gslMultiminContainer.f = &gsl_costFunction;
-    gslMultiminContainer.df = &gsl_costFunction_df;
-    gslMultiminContainer.fdf = &gsl_costFunction_fdf;
-    gslMultiminContainer.params = &l_data;
-
-
-    // set-up GSL least squares container
-
-    gsl_multifit_function_fdf gslLeastSquaresContainer;
-    gslLeastSquaresContainer.f = &gsl_f;
-    gslLeastSquaresContainer.df = &gsl_df;
-    gslLeastSquaresContainer.fdf = &gsl_fdf;
-    gslLeastSquaresContainer.n = l_data.n;
-    gslLeastSquaresContainer.p = l_data.p;
-    gslLeastSquaresContainer.params = &l_data;
-
-
     // set-up which cost function to use
 
     std::string costFunction = getProperty("CostFunction");
@@ -339,7 +310,6 @@ namespace CurveFitting
 
     if ( methodUsed.compare("Simplex") == 0 )
     {
-      //minimizer = new SimplexMinimizer(gslSimplexContainer, initFuncArg, 1.0);
       SimplexMinimizer* sm = new SimplexMinimizer;
       sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
                      initFuncArg, this, costFunction);
@@ -348,18 +318,42 @@ namespace CurveFitting
     else
     {
       if ( methodUsed.compare("Levenberg-Marquardt") == 0 )
-        minimizer = new LevenbergMarquardtMinimizer(gslLeastSquaresContainer, initFuncArg, m_function); 
+      {
+        LevenbergMarquardtMinimizer* sm = new LevenbergMarquardtMinimizer;
+        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                     initFuncArg, this, costFunction);
+        minimizer = sm; 
+      }
       else if ( methodUsed.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 )
-        minimizer = new FRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg, gslLeastSquaresContainer);
+      {
+        FRConjugateGradientMinimizer* sm = new FRConjugateGradientMinimizer;
+        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                     initFuncArg, this, costFunction);
+        minimizer = sm; 
+      }
       else if ( methodUsed.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 )
-        minimizer = new PRConjugateGradientMinimizer(gslMultiminContainer, initFuncArg, gslLeastSquaresContainer);
+      {
+        PRConjugateGradientMinimizer* sm = new PRConjugateGradientMinimizer;
+        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                     initFuncArg, this, costFunction);
+        minimizer = sm; 
+      }
       else if ( methodUsed.compare("BFGS") == 0 )
-        minimizer = new BFGS_Minimizer(gslMultiminContainer, initFuncArg, gslLeastSquaresContainer);
+      {
+        BFGS_Minimizer* sm = new BFGS_Minimizer;
+        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                     initFuncArg, this, costFunction);
+        minimizer = sm;
+      }
       else
       {
         g_log.error("Unrecognised minimizer in Fit. Default to Levenberg-Marquardt\n");
         methodUsed = "Levenberg-Marquardt";
-        minimizer = new LevenbergMarquardtMinimizer(gslLeastSquaresContainer, initFuncArg, m_function); 
+
+        LevenbergMarquardtMinimizer* sm = new LevenbergMarquardtMinimizer;
+        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                     initFuncArg, this, costFunction);
+        minimizer = sm;
       }
     }
     

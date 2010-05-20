@@ -31,24 +31,22 @@ void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y,
 
   if ( costFunction.compare("Least squares") == 0 )
     m_data->costFunc = new CostFuncLeastSquares();
-  else if ( costFunction.compare("Ignore positive peaks") == 0 )
-    m_data->costFunc = new CostFuncIgnorePosPeaks();
   else
   {
-    g_log.error("Unrecognised cost function. Default to Least squares\n");
+    g_log.warning("LevenbergMarquardt can only be used with Least squares cost function. Default to Least squares\n");
     m_data->costFunc = new CostFuncLeastSquares();
   }
 
   // specify the type of GSL solver to use
   const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
 
-    gslContainer.f = &gsl_f;
-    gslContainer.df = &gsl_df;
-    gslContainer.fdf = &gsl_fdf;
-    gslContainer.n = nData;
-    gslContainer.p = nParam;
-    gslContainer.params = m_data;
-
+  // setup GSL container
+  gslContainer.f = &gsl_f;
+  gslContainer.df = &gsl_df;
+  gslContainer.fdf = &gsl_fdf;
+  gslContainer.n = nData;
+  gslContainer.p = nParam;
+  gslContainer.params = m_data;
 
   // setup GSL solver
   m_gslSolver = gsl_multifit_fdfsolver_alloc(T, nData, nParam);
@@ -58,26 +56,13 @@ void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y,
 
 }
 
-LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer(
-  gsl_multifit_function_fdf& gslContainer, 
-  gsl_vector* startGuess, API::IFunction* func) : m_name("Levenberg Marquardt") 
-{
-  // specify the type of GSL solver to use
-  const gsl_multifit_fdfsolver_type *T = gsl_multifit_fdfsolver_lmsder;
-
-  // setup GSL solver
-  m_gslSolver = gsl_multifit_fdfsolver_alloc(T, gslContainer.n, gslContainer.p);
-  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, startGuess);
-
-  m_function = func;
-}
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer()
 {
-  //delete [] m_data->holdCalculatedData;
-  //delete m_data->costFunc;
-  //gsl_matrix_free (m_data->holdCalculatedJacobian);
-  //delete m_data;
+  delete [] m_data->holdCalculatedData;
+  delete m_data->costFunc;
+  gsl_matrix_free (m_data->holdCalculatedJacobian);
+  delete m_data;
 
   gsl_multifit_fdfsolver_free(m_gslSolver);
 }

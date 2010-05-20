@@ -7,6 +7,7 @@
 #include "MantidKernel/System.h"
 #include <string>
 #include <gsl/gsl_multifit_nlin.h>
+#include "MantidCurveFitting/Fit.h"
 
 namespace Mantid
 {
@@ -42,6 +43,10 @@ class DLLExport IFuncMinimizer
 public:
   /// Virtual destructor
   virtual ~IFuncMinimizer() {}
+
+  /// Initialize minimizer, i.e. pass costFunction, data etc
+  virtual void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
+    gsl_vector* startGuess, Fit* fit, const std::string& costFunction) = 0;
 
   /// Get name of minimizer
   virtual std::string name() const = 0;

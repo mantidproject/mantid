@@ -7,6 +7,8 @@
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_multifit_nlin.h>
+#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/GSLFunctions.h"
 
 namespace Mantid
 {
@@ -43,8 +45,7 @@ class DLLExport FRConjugateGradientMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~FRConjugateGradientMinimizer();
-  FRConjugateGradientMinimizer(gsl_multimin_function_fdf& gslContainer, gsl_vector* startGuess, 
-    gsl_multifit_function_fdf& gslLeastSquaresContainer );
+  FRConjugateGradientMinimizer(): m_name("Fletcher-Reeves conjugate gradient") {}
 
   /// Overloading base class methods
   std::string name()const;
@@ -52,6 +53,8 @@ public:
   int hasConverged();
   double costFunctionVal();
   void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
+  void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
+    gsl_vector* startGuess, Fit* fit, const std::string& costFunction);
 
 private:
   /// name of this minimizer
@@ -63,7 +66,16 @@ private:
   /// passed information about the derivative etc of fitting function
   /// rather than the derivative etc of cost function
   /// used for calculating covariance matrix
-  gsl_multifit_function_fdf* m_gslLeastSquaresContainer;
+  gsl_multifit_function_fdf m_gslLeastSquaresContainer;
+
+  /// GSL data container
+  GSL_FitData *m_data;
+
+  /// GSL container
+  gsl_multimin_function_fdf m_gslMultiminContainer;
+
+	/// Static reference to the logger class
+	static Kernel::Logger& g_log;
 };
 
 
