@@ -157,6 +157,7 @@ static const char *unzoom_xpm[]={
 #include <qwt_text_label.h>
 #include <qwt_color_map.h>
 
+#include <climits>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -1060,6 +1061,17 @@ void Graph::setAutoScale()
   }
 	d_plot->replot();
 	updateScale();
+  for (int i = 0; i < QwtPlot::axisCnt; i++)
+  {
+    if ( !m_fixed_axes.contains(i) )
+    {
+      ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(i);
+      if( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 )
+      {
+        niceLogScales(QwtPlot::Axis(i));
+      }
+    }
+  }
 	emit modifiedGraph();
 }
 
@@ -1157,10 +1169,13 @@ QwtDoubleInterval Graph::axisBoundingInterval(int axis)
     QwtPlotItemIterator it;
     for ( it = itmList.begin(); it != itmList.end(); ++it ){
         const QwtPlotItem *item = *it;
-        if (item->rtti() != QwtPlotItem::Rtti_PlotCurve)
-            continue;
 
-		if(axis != item->xAxis() && axis != item->yAxis())
+        if ( ( item->rtti() != QwtPlotItem::Rtti_PlotCurve )
+          && ( item->rtti() != QwtPlotItem::Rtti_PlotUserItem ) ){
+          continue;
+        }
+
+        if(axis != item->xAxis() && axis != item->yAxis())
             continue;
 
         const QwtDoubleRect rect = item->boundingRect();
@@ -1171,6 +1186,41 @@ QwtDoubleInterval Graph::axisBoundingInterval(int axis)
             intv |= QwtDoubleInterval(rect.top(), rect.bottom());
     }
     return intv;
+}
+/** Ensure that there are numbers on the log scale
+*  by setting the extreme ends of the scale to major tick
+*  numbers e.g. 1, 10, 100 etc.
+*/
+void Graph::niceLogScales(QwtPlot::Axis axis)
+{
+  const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(axis);
+  double start = QMIN(scDiv->lBound(), scDiv->hBound());
+  double end = QMAX(scDiv->lBound(), scDiv->hBound());
+  
+  // log scales can't represent zero or negative values, 1e-20 as a low range is enough to display all data but still be plottable on a log scale
+  start = start >= 0 ? start : 1e-20;
+  end = end >= 0 ? end : 1e20;
+  // improve the scale labelling by ensuring that the graph starts and ends on numbers that can have major ticks e.g. 0.1 or 1 or 100
+  const double exponent = floor(log10(start));
+  start = pow(10.0, exponent);
+  end = ceil(log10(end));
+  end = pow(10.0, end);
+  
+  ScaleEngine *scaleEng = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+
+  // call the QTiPlot function set scale which takes many arguments, fill the arguments with the same settings the plot already has
+  setScale(axis, start, end, axisStep(axis),
+    scDiv->ticks(QwtScaleDiv::MajorTick).count(),
+    d_plot->axisMaxMinor(axis),
+    QwtScaleTransformation::Log10,
+    scaleEng->testAttribute(QwtScaleEngine::Inverted),
+    scaleEng->axisBreakLeft(),
+    scaleEng->axisBreakRight(),
+    scaleEng->minTicksBeforeBreak(),
+    scaleEng->minTicksAfterBreak(),
+    scaleEng->log10ScaleAfterBreak(),
+    scaleEng->breakWidth(),
+    scaleEng->hasBreakDecoration());
 }
 
 void Graph::setScale(int axis, double start, double end, double step,
@@ -1257,8 +1307,8 @@ void Graph::setScale(int axis, double start, double end, double step,
 // 	d_plot->replot();
 // 	d_plot->axisWidget(axis)->repaint();
 }
-/** Overloads function setScale() with one with a much easier
-*  argument list
+/** Overload of setScale() to that only allows setting the axis type
+*  to linear or log
 *  @param axis the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
 *  @param scaleType either QwtScaleTransformation::Log10 or ::Linear
 */
@@ -1283,8 +1333,8 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
     scaleEng->breakWidth(),
     scaleEng->hasBreakDecoration());
 }
-/** This setScale() overload takes a string "log" or "linear"
-*  as the argument that sets the scale type
+/** This setScale overload allows setting the scale type by passing "linear"
+*  or "log" as a string
 *  @param axis the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
 *  @param logOrLin either "log" or "linear"
 */
@@ -1304,20 +1354,23 @@ void Graph::logLogAxes()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Log10);
 	setScale(QwtPlot::yLeft, QwtScaleTransformation::Log10);
-  notifyChanges();
+  setAutoScale();
+	notifyChanges();
 }
 
 void Graph::logXLinY()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Log10);
-  setScale(QwtPlot::yLeft, QwtScaleTransformation::Linear);
-  notifyChanges();
+	setScale(QwtPlot::yLeft, QwtScaleTransformation::Linear);
+  setAutoScale();
+	notifyChanges();
 }
 
 void Graph::logYlinX()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Linear);
 	setScale(QwtPlot::yLeft, QwtScaleTransformation::Log10);
+  setAutoScale();
   notifyChanges();
 }
 
@@ -1325,18 +1378,21 @@ void Graph::linearAxes()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Linear);
 	setScale(QwtPlot::yLeft, QwtScaleTransformation::Linear);
+  setAutoScale();
   notifyChanges();
 }
 
 void Graph::logColor()
 {
 	setScale(QwtPlot::yRight, QwtScaleTransformation::Log10);
+  setAutoScale();
   notifyChanges();
 }
 
 void Graph::linColor()
 {
 	setScale(QwtPlot::yRight, QwtScaleTransformation::Linear);
+  setAutoScale();
   notifyChanges();
 }
 
@@ -1357,16 +1413,9 @@ void Graph::setAxisScale(int axis, double start, double end, int type, double st
     sc_engine->setType(QwtScaleTransformation::Log10);
     if (start <= 0 || end <= 0)
     {
-      QwtDoubleInterval intv = axisBoundingInterval(axis);
-      if (start < end) start = intv.minValue();
-      else end = intv.minValue();
-	  if(start<1.0)
-	  {
-		  minstart =1.0;
-	  }
-	  else if (start >=1.0)
-	  {	  minstart=start;
-	  }
+      // log scales can't represent zero or negative values, 1e-20 as a low range is enough to display all data but still be plottable on a log scale
+      minstart = start >= 0 ? start : 1e-20;
+      end = end >= 0 ? end : 1e20;
     }
 	else 
 		minstart=start;

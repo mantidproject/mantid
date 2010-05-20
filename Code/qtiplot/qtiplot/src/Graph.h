@@ -739,6 +739,7 @@ signals:
 private:
   //! Finds bounding interval of the plot data.
   QwtDoubleInterval axisBoundingInterval(int axis);
+  void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
 	
