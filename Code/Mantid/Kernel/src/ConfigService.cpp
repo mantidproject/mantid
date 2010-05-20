@@ -571,6 +571,7 @@ namespace Kernel
       }
       else
       {
+        output = "";
         updated_file += "\n";
         continue;
       }

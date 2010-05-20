@@ -221,7 +221,56 @@ public:
     writer.close();
 
     runSaveTest(filename);
+  }
 
+  void testSaveConfigWithLineContinuation()
+  {
+    const std::string filename("user.settings");
+    Poco::File prop_file(filename);
+    if( prop_file.exists() ) prop_file.remove();
+
+    ConfigServiceImpl& settings = ConfigService::Instance();
+    
+    std::ofstream writer(filename.c_str(),std::ios_base::trunc);
+    writer << 
+      "mantid.legs=6\n\n"
+      "search.directories=/test1;\\\n"
+      "/test2;/test3;\\\n"
+      "/test4\n";
+    writer.close();
+
+    TS_ASSERT_THROWS_NOTHING(settings.setString("mantid.legs", "10"));
+
+    TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
+    // Should exist
+    TS_ASSERT_EQUALS(prop_file.exists(), true);
+
+    // Test the entry
+    std::ifstream reader(filename.c_str(), std::ios::in);
+    if( reader.bad() )
+    {
+      TS_FAIL("Unable to open config file for saving");
+    }
+    std::string line("");
+    std::map<int, std::string> prop_lines;
+    int line_index(0);
+    while(getline(reader, line))
+    {
+      prop_lines.insert(std::make_pair(line_index, line));
+      ++line_index;
+    }
+    reader.close();
+
+    //Saved file gets an extra new line
+    TS_ASSERT_EQUALS(prop_lines.size(), 6);
+    TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=10");
+    TS_ASSERT_EQUALS(prop_lines[1], "");
+    TS_ASSERT_EQUALS(prop_lines[2], "search.directories=/test1;\\");
+    TS_ASSERT_EQUALS(prop_lines[3], "/test2;/test3;\\");
+    TS_ASSERT_EQUALS(prop_lines[4], "/test4");
+
+    // Clean up
+    prop_file.remove();
   }
 
 private:
