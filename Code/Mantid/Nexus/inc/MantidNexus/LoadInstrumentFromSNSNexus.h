@@ -5,6 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/Sample.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
 {
@@ -93,6 +96,39 @@ namespace API
 
       /// The name and path of the input file
       std::string m_filename;
+
+
+      /// Class for comparing bank names in format "bank123" according to the numeric part of the name
+      class CompareBanks
+      {
+      public:
+          /** Compare operator
+          *  @param s1 First argument
+          *  @param s2 Second argument
+          */
+          bool operator()(const std::string& s1, const std::string& s2)
+          {
+              int i1 = atoi( s1.substr(4,s1.size()-4).c_str() );
+              int i2 = atoi( s2.substr(4,s2.size()-4).c_str() );
+              return i1 < i2;
+          }
+      };
+
+      /// The l1
+      double m_L1;
+
+      /// load the instrument
+      void loadInstrument(API::Workspace_sptr localWS,
+                          NXEntry entry);
+
+      // Get bank's position and orientation
+      void getBankOrientation(NXDetector nxDet, Geometry::V3D& shift, Geometry::Quat& rot);
+
+      // Calculate rotation axis from direction cosines
+      void calcRotation(const Geometry::V3D& X,const Geometry::V3D& Y,const Geometry::V3D& Z,double& angle, Geometry::V3D& axis);
+
+      /// Personal wrapper for sqrt to allow msvs to compile
+      static double dblSqrt(double in);
     };
 
   } // namespace NeXus
