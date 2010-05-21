@@ -35,31 +35,45 @@ namespace Mantid
       // retrieve the properties
       std::vector<double> rb_params=getProperty("Params");
 
-      // Get the input workspace
-      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
-
-      //this calculation requires a distribution workspace but deal with the situation when we don't get this
-      const bool distCon = ! inputW->isDistribution();
-      if (distCon)
-      {
-        g_log.debug() << "Converting the input workspace to a distribution\n";
-        WorkspaceHelpers::makeDistribution(inputW);
-      }
-
       DataObjects::Histogram1D::RCtype XValues_new;
       // create new output X axis
       const int ntcnew =
         VectorHelper::createAxisFromRebinParams(rb_params,XValues_new.access());
 
+      // Get the input workspace
+      MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
       const int nHists = inputW->getNumberHistograms();
       // make output Workspace the same type is the input, but with new length of signal array
       MatrixWorkspace_sptr outputW =
         WorkspaceFactory::Instance().create(inputW, nHists, ntcnew, ntcnew-1);
       // Copy over the 'vertical' axis
       if (inputW->axes() > 1) outputW->replaceAxis( 1, inputW->getAxis(1)->clone(outputW.get()) );
+      outputW->isDistribution(true);
 
-      //evaluate the rebinned data
-      outputXandEValues(inputW, XValues_new, outputW);
+      //this calculation requires a distribution workspace but deal with the situation when we don't get this
+      bool distCon(false);
+      if ( ! inputW->isDistribution() )
+      {
+        g_log.debug() << "Converting the input workspace to a distribution\n";
+        WorkspaceHelpers::makeDistribution(inputW);
+        distCon = true;
+      }
+      
+      try
+      {
+        //evaluate the rebinned data
+        outputYandEValues(inputW, XValues_new, outputW);
+      }
+      catch (std::exception &)
+      {
+
+        if (distCon)
+        {
+          //return the input workspace to the state it was found in
+          WorkspaceHelpers::makeDistribution(inputW, false);
+        }
+        throw;
+      }
 
       //check if there was a convert to distribution done previously
       if (distCon)
@@ -68,8 +82,8 @@ namespace Mantid
         WorkspaceHelpers::makeDistribution(inputW, false);
         // the calculation produces a distribution workspace but if they passed a non-distribution workspace they maybe not expect it, so convert back to the same form that was given
         WorkspaceHelpers::makeDistribution(outputW, false);
+        outputW->isDistribution(false);
       }
-      outputW->isDistribution( ! distCon );
 
       // Now propagate any masking correctly to the output workspace
       // More efficient to have this in a separate loop because 
@@ -95,7 +109,7 @@ namespace Mantid
     *  @param[in] XValues_new new x-values to interpolated to
     *  @param[out] outputW this will contain the interpolated data, the lengths of the histograms must corrospond with the number of x-values in XValues_new
     */
-    void InterpolatingRebin::outputXandEValues(API::MatrixWorkspace_const_sptr inputW, const DataObjects::Histogram1D::RCtype &XValues_new, API::MatrixWorkspace_sptr outputW)
+    void InterpolatingRebin::outputYandEValues(API::MatrixWorkspace_const_sptr inputW, const DataObjects::Histogram1D::RCtype &XValues_new, API::MatrixWorkspace_sptr outputW)
     {
       g_log.debug() << "Preparing to calculate y-values using splines and estimate errors\n";
 
@@ -104,10 +118,10 @@ namespace Mantid
 
       const int histnumber = inputW->getNumberHistograms();
       Progress prog(this,0.0,1.0,histnumber);
-      PARALLEL_FOR2(inputW,outputW)
+//      PARALLEL_FOR2(inputW,outputW)
       for (int hist=0; hist <  histnumber;++hist)
       {
-        PARALLEL_START_INTERUPT_REGION
+//        PARALLEL_START_INTERUPT_REGION
         // get const references to input Workspace arrays (no copying)
         const MantidVec& XValues = inputW->readX(hist);
         const MantidVec& YValues = inputW->readY(hist);
@@ -133,9 +147,9 @@ namespace Mantid
         outputW->setX(hist, XValues_new);
         
         prog.report();
-        PARALLEL_END_INTERUPT_REGION
+//        PARALLEL_END_INTERUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+//      PARALLEL_CHECK_INTERUPT_REGION
 
       gsl_set_error_handler(old_handler);
     }
@@ -183,19 +197,18 @@ namespace Mantid
       // find the range of input values whose x-values just suround the output x-values
       size_t oldIn1 =
         std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.front())
-        - xCensOld.begin() - 1;
+        - xCensOld.begin();
       size_t oldIn2 =
         std::lower_bound(xCensOld.begin(), xCensOld.end(), xCensNew.back())
         - xCensOld.begin();
-      //bring one point before and one point after into the inpolation to reduce any errors coming in from the edge
-      oldIn1 --;
-      oldIn2 ++;
-
-      //check that the end points are all within the arrays
-      if ( oldIn1<0 || oldIn2>=size_old || oldIn1>oldIn2 )
+      //check that the intepolation points fit well enough within the data for reliable intepolation to be done
+      if ( oldIn1<2 || oldIn2>=size_old-1 || oldIn1>oldIn2 )
       {
         throw std::invalid_argument("Problem with the requested x-values to intepolate to: There must be at\nleast two input data points below the range of intepolation points and\ntwo higher. Also the intepolation points must have monatomically increasing x-values.");
       }
+      //bring one point before and one point after into the inpolation to reduce any possible errors from running out of data
+      oldIn1 -= 2;
+      oldIn2 ++;
 
       //get the GSL to allocate the memory, if this wasn't already done
       gsl_interp_accel *acc = gsl_interp_accel_alloc();
