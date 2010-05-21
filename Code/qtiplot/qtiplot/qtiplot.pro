@@ -42,14 +42,13 @@ RESOURCES        = ../../../Images/images.qrc
 
 win32:build_pass:CONFIG(debug, debug|release) {
   CONFIG += console
+  # Make sure we don't link to the non-debug runtime
+  QMAKE_LFLAGS_CONSOLE += /NODEFAULTLIB:msvcrt.lib
 }
 
-build_pass:CONFIG(debug, debug|release) {
-  # Put the debug version alongside the Mantid debug dlls to make sure it picks them up
-  DESTDIR = ../../Mantid/debug
-} else {
-  DESTDIR = ./
-}
+# Put executable alongside the mantid framework libraries
+# Automatically switches destination to Mantid/debug if a debug build
+DESTDIR = ../../Mantid/release
 
 mac:CXXFLAGS+=-headerpad_max_install_names
 
@@ -166,7 +165,7 @@ CONFIG(debug, debug|release) {
 win32 {
   LIBPATH += C:/Python25/libs
 
-  LIBS += -lqscintilla2
+#  LIBS += -lqscintilla2
   
   CONFIG(build64)  {
     THIRD_PARTY = ../../Third_Party/lib/win64
@@ -183,12 +182,14 @@ win32 {
   LIBS += $${THIRD_PARTY}/gsl.lib
   LIBS += $${THIRD_PARTY}/cblas.lib
   build_pass:CONFIG(debug, debug|release) {
+    LIBS += -lqscintilla2d
     LIBS += $${THIRD_PARTY}/muparser_d.lib
     LIBS += $${THIRD_PARTY}/PocoUtild.lib
     LIBS += $${THIRD_PARTY}/PocoFoundationd.lib
     LIBS += $${THIRD_PARTY}/libboost_signals-vc80-mt-gd-1_34_1.lib
     LIBS += QtPropertyBrowserd.lib
   } else {
+    LIBS += -lqscintilla2
     LIBS += $${THIRD_PARTY}/muparser.lib
     LIBS += $${THIRD_PARTY}/PocoUtil.lib
     LIBS += $${THIRD_PARTY}/PocoFoundation.lib

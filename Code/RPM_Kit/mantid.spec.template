@@ -88,13 +88,13 @@ mkdir -p $RPM_BUILD_ROOT/%{mantidincludesdir}
 mkdir -p $RPM_BUILD_ROOT/%{mantidpythonalgdir}
 mkdir -p $RPM_BUILD_ROOT/etc/ld.so.conf.d
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
-install -m755 Code/qtiplot/MantidQt/lib/libMantidWidgets.so $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/qtiplot/MantidQt/lib/libMantidQtAPI.so $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/qtiplot/MantidQt/lib/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
-install -m755 Code/qtiplot/MantidQt/lib/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
-install -m755 Code/qtiplot/QtPropertyBrowser/lib/libQtPropertyBrowser.so $RPM_BUILD_ROOT/%{mantidlibdir}
-install -m755 Code/Mantid/Bin/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
-for i in Code/Mantid/Bin/Shared/*.so; do
+install -m755 Code/Mantid/release/libMantidWidgets.so $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 Code/Mantid/release/libMantidQtAPI.so $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 Code/Mantid/release/libMantidQtCustomDialogs.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
+install -m755 Code/Mantid/release/libMantidQtCustomInterfaces.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
+install -m755 Code/Mantid/release/libQtPropertyBrowser.so $RPM_BUILD_ROOT/%{mantidlibdir}
+install -m755 Code/Mantid/Build/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
+for i in Code/Mantid/release/*.so; do
     case `basename $i` in
 	libMantidAlgorithms.so | libMantidCurveFitting.so | libMantidDataHandling.so | libMantidDataObjects.so | libMantidNexus.so )
 	    install -m755 $i $RPM_BUILD_ROOT/%{mantidpluginsdir}
@@ -104,7 +104,7 @@ for i in Code/Mantid/Bin/Shared/*.so; do
 	    ;;
     esac
 done
-install -m755 Code/qtiplot/qtiplot/MantidPlot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
+install -m755 Code/Mantid/release/MantidPlot $RPM_BUILD_ROOT/%{mantidbindir}/MantidPlot
 for i in qtiplotrc.py qtiUtil.py mantidplotrc.py mantidplot.py; do
     install -m755 Code/qtiplot/qtiplot/$i $RPM_BUILD_ROOT/%{mantidbindir}/$i
 done

@@ -29,18 +29,14 @@ RESOURCES = "$$TOPBUILDDIR/../../../Images/images.qrc"
 
 # My variables
 MANTIDPATH = "$$TOPBUILDDIR/../../Mantid"
-MANTIDLIBPATH = "$$MANTIDPATH/Bin/Shared"
-win32 {
-  LIBPATH += $$MANTIDLIBPATH
-  build_pass:CONFIG(release, debug|release) {
-    # Put both Scons and Visual Studio output directories on the search path
-    LIBPATH += "$$MANTIDPATH/release"
-  }
-  build_pass:CONFIG(debug, debug|release) {
-    MANTIDLIBPATH = "$$MANTIDPATH/debug"
-    LIBPATH += $$MANTIDLIBPATH
-  }
+build_pass:CONFIG(release, debug|release) {
+  MANTIDLIBPATH += "$$MANTIDPATH/release"
 }
+build_pass:CONFIG(debug, debug|release) {
+  MANTIDLIBPATH = "$$MANTIDPATH/debug"
+}
+
+win32:LIBPATH += $$MANTIDLIBPATH
 
 THIRDPARTY = "$$TOPBUILDDIR/../../Third_Party"
 
@@ -113,13 +109,8 @@ CONFIG(debug, debug|release) {
 }
 SIP_DIR = "$$TMPDIR"
 
-win32:build_pass:CONFIG(debug, debug|release) {
-  # Put alongside Mantid libraries
-  DESTDIR = "$$MANTIDLIBPATH"
-} else {
-  # Put in local output directory
-  DESTDIR = "$$TOPBUILDDIR/lib"
-}
+# This automatically switches to $$MANTIDPATH/debug for a debug build
+DESTDIR = "$$MANTIDPATH/release"
 
 # This makes release the default build on running nmake. Must be here - after the config dependent parts above
 CONFIG += release

@@ -419,19 +419,19 @@ MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat','../Mantid/
 addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
 addFileV('MantidStartup','MStart.py','MantidStartup.py','../Mantid/PythonAPI/MantidStartup.py',MantidDlls)
 addFileV('MantidHeader','MHeader.py','MantidHeader.py','../Mantid/PythonAPI/MantidHeader.py',MantidDlls)
-addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd','../Mantid/Bin/Shared/MantidPythonAPI.pyd',MantidDlls)
-addFileV('MantidAPI','MAPI.dll','MantidAPI.dll','../Mantid/Bin/Shared/MantidAPI.dll',MantidDlls)
-addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll','../Mantid/Bin/Shared/MantidGeometry.dll',MantidDlls)
-addFileV('MantidKernel','MKern.dll','MantidKernel.dll','../Mantid/Bin/Shared/MantidKernel.dll',MantidDlls)
+addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd','../Mantid/release/MantidPythonAPI.pyd',MantidDlls)
+addFileV('MantidAPI','MAPI.dll','MantidAPI.dll','../Mantid/release/MantidAPI.dll',MantidDlls)
+addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll','../Mantid/release/MantidGeometry.dll',MantidDlls)
+addFileV('MantidKernel','MKern.dll','MantidKernel.dll','../Mantid/release/MantidKernel.dll',MantidDlls)
 
 # Add qt API  library
-addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll','../qtiplot/MantidQt/lib/MantidQtAPI.dll',MantidDlls)
-addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll','../qtiplot/MantidQt/lib/MantidWidgets.dll',MantidDlls)
+addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll','../Mantid/release/MantidQtAPI.dll',MantidDlls)
+addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll','../Mantid/release/lib/MantidWidgets.dll',MantidDlls)
 
 # Add Qt Property Browser
-addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll','../qtiplot/QtPropertyBrowser/lib/QtPropertyBrowser.dll',MantidDlls)
+addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll','../Mantid/release/QtPropertyBrowser.dll',MantidDlls)
 
-addDlls('../Mantid/Bin/Plugins','PnDll',MantidDlls)
+addDlls('../Mantid/Build/Plugins','PnDll',MantidDlls)
 addDlls('../Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
 
 addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','Part':'last','Value':'[PYTHON25DIR]'})
@@ -439,7 +439,7 @@ addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','
 # ---------------------- Matlab bindings -------------------------
 # Only on 32bit windows for the moment
 if ARCH == '32':
-    addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll','../Mantid/Bin/Shared/MantidMatlabAPI.dll',MantidDlls)
+    addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll','../Mantid/release/MantidMatlabAPI.dll',MantidDlls)
     Matlab=addCompList('MatlabMFiles','../Mantid/MatlabAPI/mfiles','Matlab',binDir)[0]
 
     #Add mantid_setup file
@@ -456,7 +456,7 @@ else:
 
 QTIPlot = addComponent('QTIPlot',comp_guid['QTIPlot'],binDir)
 addDlls(QTDIR,'qt',QTIPlot)
-QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../qtiplot/qtiplot/MantidPlot.exe',QTIPlot)
+QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe','../Mantid/release/MantidPlot.exe',QTIPlot)
 # TODO: Currently the MantidLauncher only works for the 32-bit system since the registry access seems more of a pain on a 64 bit system
 if ARCH== '32':
     MantidLauncher = addFileV('MantidLauncher','SMPlot.exe','StartMantidPlot.exe','MantidLauncher/Release/MantidLauncher.exe',QTIPlot)
@@ -478,7 +478,7 @@ for index, name in enumerate(files_to_remove):
     addTo(MantidDlls,'RemoveFile',{'Id':'RemFile_' + str(index),'On':'uninstall','LongName': name, 'Name':name[:8]})
 
 if (QTDIR == 'C:/Qt/4_4_0/bin'): 	 
-	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../qtiplot/qtiplot/MantidPlot.exe.manifest',QTIPlot)
+	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../Mantid/release/MantidPlot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
 addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':'../qtiplot/qtiplot/MantidPlot.exe'})
@@ -486,12 +486,12 @@ addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':'../qtiplot/qtiplot/Man
 #plugins
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
 Plugins = addComponent('Plugins',comp_guid['Plugins'],pluginsDir)
-addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll','../Mantid/Bin/Shared/MantidAlgorithms.dll',Plugins)
-addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll','../Mantid/Bin/Shared/MantidDataHandling.dll',Plugins)
-addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll','../Mantid/Bin/Shared/MantidDataObjects.dll',Plugins)
-addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll','../Mantid/Bin/Shared/MantidCurveFitting.dll',Plugins)
+addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll','../Mantid/release/MantidAlgorithms.dll',Plugins)
+addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll','../Mantid/release/MantidDataHandling.dll',Plugins)
+addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll','../Mantid/release/MantidDataObjects.dll',Plugins)
+addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll','../Mantid/release/MantidCurveFitting.dll',Plugins)
 
-addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/Bin/Shared/MantidNexus.dll',Plugins)
+addFileV('MantidNexus','MNex.dll','MantidNexus.dll','../Mantid/release/MantidNexus.dll',Plugins)
 addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
 #Add hdf4 for 32bit systems
 if ARCH == '32':
@@ -508,9 +508,9 @@ addAllFiles('../Mantid/PythonAPI/PythonAlgorithms','PyAlEx',pyalgsExamples)
 
 
 # Add qt custom dialogs library
-addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../qtiplot/MantidQt/lib/MantidQtCustomDialogs.dll',Plugins)
+addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll','../Mantid/release/MantidQtCustomDialogs.dll',Plugins)
 # Add qt custom interfaces library
-addFileV('MantidQtCustomInterfaces','MQTCInt.dll','MantidQtCustomInterfaces.dll','../qtiplot/MantidQt/lib/MantidQtCustomInterfaces.dll',Plugins)
+addFileV('MantidQtCustomInterfaces','MQTCInt.dll','MantidQtCustomInterfaces.dll','../Mantid/release/MantidQtCustomInterfaces.dll',Plugins)
 
 documentsDir = addDirectory('DocumentsDir','docs','docs',InstallDir)
 Documents = addComponent('Documents',comp_guid['Documents'],documentsDir)

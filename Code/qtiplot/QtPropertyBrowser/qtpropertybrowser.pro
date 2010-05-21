@@ -29,13 +29,13 @@ win32 {
     DEFINES += QT_QTPROPERTYBROWSER_EXPORT
 }
 
+# Put alongside Mantid libraries
 win32:build_pass:CONFIG(debug, debug|release) {
-  # Put alongside Mantid libraries
   DESTDIR = ..\..\Mantid\debug
   TARGET = QtPropertyBrowserd
 } else {
   # Put in local output directory
-  DESTDIR = lib
+  DESTDIR = ..\..\Mantid\release
   TARGET = QtPropertyBrowser
 }
 
