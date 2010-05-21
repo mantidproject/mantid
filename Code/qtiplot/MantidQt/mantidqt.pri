@@ -29,10 +29,7 @@ RESOURCES = "$$TOPBUILDDIR/../../../Images/images.qrc"
 
 # My variables
 MANTIDPATH = "$$TOPBUILDDIR/../../Mantid"
-MANTIDLIBPATH = ""
-build_pass:CONFIG(release, debug|release) {
-  MANTIDLIBPATH = "$$MANTIDPATH/release"
-}
+MANTIDLIBPATH = "$$MANTIDPATH/release"
 build_pass:CONFIG(debug, debug|release) {
   MANTIDLIBPATH = "$$MANTIDPATH/debug"
 }
@@ -58,6 +55,12 @@ INCLUDEPATH += "$$MANTIDPATH/Kernel/inc/"
 INCLUDEPATH += "$$MANTIDPATH/Geometry/inc/"
 INCLUDEPATH += "$$MANTIDPATH/API/inc/"
 INCLUDEPATH += "$$MANTIDQTINCLUDES"
+
+macx {
+  INCLUDEPATH += "$$THIRDPARTY/include"
+
+  LIBS += -L$$THIRDPARTY/lib/mac/ -lPocoFoundation
+}
 
 unix {
   LIBS += -L$$MANTIDLIBPATH -lMantidKernel
