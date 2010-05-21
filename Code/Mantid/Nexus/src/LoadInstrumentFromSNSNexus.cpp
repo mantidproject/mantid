@@ -57,13 +57,15 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
                             NXEntry entry)
 
 {
+
+    std::cout << "LoadInstrumentFromSNSNexus 00\n";
     std::set<std::string,CompareBanks> banks;
     std::set<std::string> monitors;
 
     for(std::vector<NXClassInfo>::const_iterator it=entry.groups().begin();it!=entry.groups().end();it++)
     if (it->nxclass == "NXdata") // Count detectors
     {
-        // std::cout << "Found bank " << it->nxname << "\n";
+      std::cout << "Found bank " << it->nxname << "\n";
         banks.insert(it->nxname); // sort the bank names
     }
     else if (it->nxclass == "NXmonitor") // Count monitors
@@ -139,7 +141,8 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
 
     for(std::set<std::string,CompareBanks>::const_iterator it=banks.begin();it!=banks.end();it++)
     {
-        // std::cout << "Opening bank " << *it << "\n";
+        std::cout << "Opening bank " << *it << "\n";
+
         NXDetector nxDet = nxInstr.openNXDetector(*it);
 
         NXFloat detSize = nxDet.openNXFloat("origin/shape/size");
@@ -163,10 +166,14 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
 
         Geometry::V3D shift;
         Geometry::Quat rot;
-        getBankOrientation(nxDet,shift,rot);
+        this->getBankOrientation(nxDet,shift,rot);
 
         NXFloat distance = nxDet.openDistance();
         distance.load();
+
+        std::cout << "distance.dim0()" << distance.dim0() << "\n";
+        std::cout << "distance.dim1()" << distance.dim1() << "\n";
+
         NXFloat azimuth = nxDet.openAzimuthalAngle();
         azimuth.load();
         NXFloat polar = nxDet.openPolarAngle();
@@ -256,7 +263,7 @@ void LoadInstrumentFromSNSNexus::calcRotation(const Geometry::V3D& X,const Geome
     }
     else
     {
-
+        std::cout << "The case of arbitrary direction cosines is not implemented yet7\n";
         throw std::runtime_error("The case of arbitrary direction cosines is not implemented yet");
 
         double A1 = xx - 1. + xz*zx/(1.-zz);
@@ -308,7 +315,7 @@ void LoadInstrumentFromSNSNexus::getBankOrientation(NXDetector nxDet, Geometry::
     Geometry::V3D Y(orientation[3],orientation[4],orientation[5]);
     Geometry::V3D Z = X.cross_prod(Y);
 
-    calcRotation(X,Y,Z,angle,axis);
+    this->calcRotation(X,Y,Z,angle,axis);
 
     std::cerr<<"rot axis "<<axis<<'\n';
     std::cerr<<"angle "<<angle<<'\n';

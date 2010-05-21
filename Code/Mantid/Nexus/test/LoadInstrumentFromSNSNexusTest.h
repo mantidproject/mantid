@@ -23,8 +23,10 @@ using namespace Mantid::Kernel;
 class LoadInstrumentFromSNSNexusTest : public CxxTest::TestSuite
 {
 public:
-    void testExec()
+    void xtestExec()
     {
+        std::cout << "Test starting?\n";
+
         Mantid::API::FrameworkManager::Instance();
         LoadInstrumentFromSNSNexus ld;
         std::string outws_name = "topaz_instrument";
@@ -37,6 +39,8 @@ public:
         //Put it in the object.
         ld.setProperty("Workspace", boost::dynamic_pointer_cast<Workspace>(ws));
 
+        std::cout << "Getting detectors\n";
+
         TS_ASSERT_THROWS_NOTHING(ld.execute());
 
         IInstrument_sptr inst = ws->getInstrument();
@@ -44,7 +48,7 @@ public:
         TS_ASSERT_EQUALS(inst->getName(), "TOPAZ");
 
         std::map<int, Geometry::IDetector_sptr> detectors = inst->getDetectors();
-        //TS_ASSERT_EQUALS(detectors.size(), 14)
+        TS_ASSERT_EQUALS(detectors.size(), 14);
         //std::cerr << inst->getDetector(0);
 
 
