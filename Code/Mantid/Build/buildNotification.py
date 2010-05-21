@@ -175,13 +175,13 @@ def moveToArchive(logfile, archiveDir):
 
 # Move send email
 def sendResultMail(message, logdir, sender, recipients=['mantid-buildserver@mantidproject.org'], \
-                   mailserver="outbox.rl.ac.uk", ):
+                   mailserver="outbox.rl.ac.uk"):
   #timeout in seconds
   socket.setdefaulttimeout(120)
   emailErr = open(logdir + 'email.log','w')
   try:
      #Send Email
-     session = smtplib.SMTP(smtpserver)
+     session = smtplib.SMTP(mailserver)
   except smtplib.socket.error, details:
     # Catch time out errors
     session = None
