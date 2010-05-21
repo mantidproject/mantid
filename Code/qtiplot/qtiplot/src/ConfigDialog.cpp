@@ -1467,7 +1467,7 @@ void ConfigDialog::apply()
 	QString setting = instrPrefix->currentText();
 	Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
 	mantid_config.setString("default.instrument", setting.toStdString());
-  std::string cur_facility = facility->currentText();
+  std::string cur_facility = facility->currentText().toStdString();
   mantid_config.setString("default.facility", cur_facility);
   setting = knownInstruments->text();
   setting.replace(QRegExp("\\W+"), QString(";"));
