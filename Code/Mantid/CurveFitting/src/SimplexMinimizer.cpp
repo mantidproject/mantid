@@ -9,7 +9,7 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-DECLARE_FUNCMINIMIZER(SimplexMinimizer)
+DECLARE_FUNCMINIMIZER(SimplexMinimizer,Simplex)
 
 // Get a reference to the logger
 Kernel::Logger& SimplexMinimizer::g_log = Kernel::Logger::get("SimplexMinimizer");

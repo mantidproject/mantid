@@ -45,7 +45,7 @@ class DLLExport FRConjugateGradientMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~FRConjugateGradientMinimizer();
-  FRConjugateGradientMinimizer(): m_name("Fletcher-Reeves conjugate gradient") {}
+  FRConjugateGradientMinimizer(): m_name("Conjugate gradient (Fletcher-Reeves imp.)") {}
 
   /// Overloading base class methods
   std::string name()const;

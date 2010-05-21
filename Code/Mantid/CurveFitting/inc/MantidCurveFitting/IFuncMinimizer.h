@@ -79,10 +79,10 @@ public:
 /**
  * Macro for declaring a new type of function to be used with the FunctionFactory
  */
-#define DECLARE_FUNCMINIMIZER(classname) \
+#define DECLARE_FUNCMINIMIZER(classname,username) \
         namespace { \
 	Mantid::Kernel::RegistrationHelper register_funcminimizer_##classname( \
-  ((Mantid::CurveFitting::FuncMinimizerFactory::Instance().subscribe<classname>(#classname)) \
+  ((Mantid::CurveFitting::FuncMinimizerFactory::Instance().subscribe<classname>(#username)) \
 	, 0)); \
 	} 
 

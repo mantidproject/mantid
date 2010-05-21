@@ -45,7 +45,7 @@ class DLLExport LevenbergMarquardtMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer(): m_name("Levenberg Marquardt") {}
+  LevenbergMarquardtMinimizer(): m_name("Levenberg-Marquardt") {}
 
   /// Overloading base class methods
   std::string name()const;

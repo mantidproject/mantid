@@ -10,7 +10,7 @@ namespace Mantid
 {
 namespace CurveFitting
 {
-DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer)
+DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer,Levenberg-Marquardt)
 
 // Get a reference to the logger
 Kernel::Logger& LevenbergMarquardtMinimizer::g_log = Kernel::Logger::get("LevenbergMarquardtMinimizer");

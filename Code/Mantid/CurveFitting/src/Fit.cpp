@@ -81,12 +81,8 @@ namespace CurveFitting
 
     declareProperty("Output","","If not empty OutputParameters TableWorksace and OutputWorkspace will be created.");
 
-    std::vector<std::string> minimizerOptions;
-    minimizerOptions.push_back("Levenberg-Marquardt");
-    minimizerOptions.push_back("Simplex");
-    minimizerOptions.push_back("Conjugate gradient (Fletcher-Reeves imp.)");
-    minimizerOptions.push_back("Conjugate gradient (Polak-Ribiere imp.)");
-    minimizerOptions.push_back("BFGS");
+    std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
+
     declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
@@ -306,56 +302,10 @@ namespace CurveFitting
 
     // set-up minimizer
 
-    IFuncMinimizer* minimizer = NULL;
-
-    if ( methodUsed.compare("Simplex") == 0 )
-    {
-      SimplexMinimizer* sm = new SimplexMinimizer;
-      sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+    //boost::shared_ptr<IFuncMinimizer> minimizer = FuncMinimizerFactory::Instance().create(methodUsed);
+    IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
+    minimizer->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
                      initFuncArg, this, costFunction);
-      minimizer = sm;
-    }
-    else
-    {
-      if ( methodUsed.compare("Levenberg-Marquardt") == 0 )
-      {
-        LevenbergMarquardtMinimizer* sm = new LevenbergMarquardtMinimizer;
-        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
-                     initFuncArg, this, costFunction);
-        minimizer = sm; 
-      }
-      else if ( methodUsed.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 )
-      {
-        FRConjugateGradientMinimizer* sm = new FRConjugateGradientMinimizer;
-        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
-                     initFuncArg, this, costFunction);
-        minimizer = sm; 
-      }
-      else if ( methodUsed.compare("Conjugate gradient (Polak-Ribiere imp.)") == 0 )
-      {
-        PRConjugateGradientMinimizer* sm = new PRConjugateGradientMinimizer;
-        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
-                     initFuncArg, this, costFunction);
-        minimizer = sm; 
-      }
-      else if ( methodUsed.compare("BFGS") == 0 )
-      {
-        BFGS_Minimizer* sm = new BFGS_Minimizer;
-        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
-                     initFuncArg, this, costFunction);
-        minimizer = sm;
-      }
-      else
-      {
-        g_log.error("Unrecognised minimizer in Fit. Default to Levenberg-Marquardt\n");
-        methodUsed = "Levenberg-Marquardt";
-
-        LevenbergMarquardtMinimizer* sm = new LevenbergMarquardtMinimizer;
-        sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
-                     initFuncArg, this, costFunction);
-        minimizer = sm;
-      }
-    }
     
 
     // finally do the fitting
@@ -386,12 +336,10 @@ namespace CurveFitting
           if (iter < 3)
           {
             methodUsed = "Simplex";
-            //simplexFallBack = true;
             delete minimizer;
-            SimplexMinimizer* sm = new SimplexMinimizer;
-            sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
-                           initFuncArg, this, costFunction);
-            minimizer = sm;
+            minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
+            minimizer->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+                                  initFuncArg, this, costFunction);
             iter = 0;
             g_log.warning() << "Fit algorithm using Levenberg-Marquardt failed "
               << "reporting the following: " << gsl_strerror(status) << "\n"
@@ -428,8 +376,6 @@ namespace CurveFitting
             sm->resetSize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
                            initFuncArg, 0.1, this, costFunction);
             minimizer = sm;
-                  //sm = static_cast<SimplexMinimizer*>(minimizer);
-
             status = GSL_CONTINUE;
             continue;
           }

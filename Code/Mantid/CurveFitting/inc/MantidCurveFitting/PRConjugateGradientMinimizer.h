@@ -45,7 +45,7 @@ class DLLExport PRConjugateGradientMinimizer : public IFuncMinimizer
 public:
   /// constructor and destructor
   ~PRConjugateGradientMinimizer();
-  PRConjugateGradientMinimizer(): m_name("Polak-Ribiere conjugate gradient") {}
+  PRConjugateGradientMinimizer(): m_name("Conjugate gradient (Polak-Ribiere imp.)") {}
 
   /// Overloading base class methods
   std::string name()const;
