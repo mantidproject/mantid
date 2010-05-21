@@ -144,9 +144,9 @@ macx {
 
   LIBS         += -lgsl -lgslcblas
 
-  LIBS		+= -L../../Mantid/Bin/Shared -lMantidAPI
-  LIBS		+= -L../../Mantid/Bin/Shared -lMantidGeometry
-  LIBS		+= -L../../Mantid/Bin/Shared -lMantidKernel
+  LIBS		+= -L../../Mantid/release -lMantidAPI
+  LIBS		+= -L../../Mantid/release -lMantidGeometry
+  LIBS		+= -L../../Mantid/release -lMantidKernel
 
   LIBS          += -L../QtPropertyBrowser/lib -lQtPropertyBrowser
 
@@ -202,10 +202,7 @@ win32 {
     LIBPATH += ../../Mantid/debug
   } else {
     # Look in the right place for both Scons and Visual Studio builds
-    LIBPATH += ../../Mantid/Bin/Shared
     LIBPATH += ../../Mantid/release
-    LIBPATH += ../MantidQt/lib
-    LIBPATH += ../QtPropertyBrowser/lib
   } 
 
   LIBS += MantidAPI.lib
