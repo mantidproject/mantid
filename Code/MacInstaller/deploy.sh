@@ -29,6 +29,7 @@ cp ../Mantid/release/libMantidAPI.dylib MantidPlot.app/Contents/MacOS/
 cp ../Mantid/release/libMantidQtAPI.1.dylib MantidPlot.app/Contents/MacOS/
 install_name_tool -change @executable_path/../Frameworks/libMantidQtAPI.1.dylib @executable_path/./libMantidQtAPI.1.dylib MantidPlot.app/Contents/MacOS/MantidPlot
 cp ../Mantid/release/libMantidWidgets.1.dylib MantidPlot.app/Contents/MacOS/
+install_name_tool -change libMantidQtAPI.1.dylib @executable_path/./libMantidQtAPI.1.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.1.dylib
 cp ../Mantid/release/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/Frameworks/
 
 # Now lots of dependencies
