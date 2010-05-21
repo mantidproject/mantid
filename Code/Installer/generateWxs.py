@@ -481,7 +481,7 @@ if (QTDIR == 'C:/Qt/4_4_0/bin'):
 	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest','../Mantid/release/MantidPlot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
-addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':'../qtiplot/qtiplot/MantidPlot.exe'})
+addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':'../Mantid/release/MantidPlot.exe'})
 
 #plugins
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
