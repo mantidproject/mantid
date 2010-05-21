@@ -87,7 +87,7 @@ else:
 
 # Send mail
 logfile = notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
-notifier.moveToArchive(logfile,remoteArchivePath)
+notifier.moveToArchive(logfile,remoteArchiveDir)
 
 if buildSuccess:
      sys.exit(0)
