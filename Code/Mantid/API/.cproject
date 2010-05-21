@@ -520,7 +520,6 @@
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/API/inc}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/Kernel/inc}&quot;"/>
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/Geometry/inc}&quot;"/>
-<listOptionValue builtIn="false" value="../../../Third_Party/include"/>
 </option>
 <option id="gnu.cpp.compiler.option.other.other.629064868" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -fPIC -fopenmp" valueType="string"/>
 <option id="gnu.cpp.compiler.option.warnings.pedantic.282199255" name="Pedantic (-pedantic)" superClass="gnu.cpp.compiler.option.warnings.pedantic" value="false" valueType="boolean"/>
