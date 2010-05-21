@@ -235,7 +235,8 @@ else:
 	subject += 'Tests Failed]\n'	
 
 # Send mail
-notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
+logfile = notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
+notifier.moveToArchive(logfile,remoteArchivePath)
 
 # Write out what happened with the tests. 
 # This is for deciding whether to build installer - only do so if tests both built and passed

@@ -86,7 +86,8 @@ else:
 	subject += '[MantidPlot Build Failed]\n\n\n'
 
 # Send mail
-notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
+logfile = notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
+notifier.moveToArchive(logfile,remoteArchivePath)
 
 if buildSuccess:
      sys.exit(0)

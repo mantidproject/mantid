@@ -178,7 +178,8 @@ def sendResultMail(message, logdir, sender, recipients=['mantid-buildserver@mant
                    mailserver="outbox.rl.ac.uk"):
   #timeout in seconds
   socket.setdefaulttimeout(120)
-  emailErr = open(logdir + 'email.log','w')
+  logfile = logdir + 'email.log'
+  emailErr = open(logfile,'w')
   try:
      #Send Email
      session = smtplib.SMTP(mailserver)
@@ -203,4 +204,5 @@ def sendResultMail(message, logdir, sender, recipients=['mantid-buildserver@mant
            %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
            emailErr.write(errstr)
     session.close()
-    emailErr.close()
+  return logfile
+  return 
