@@ -65,7 +65,10 @@ opencascade_path = ''
 python_path = ''
 win64 = ''
 
-dest_dir = './Bin/Shared'
+# Send debug and release builds to the right place
+dest_dir = './release'
+if int(debug) == 1:
+    dest_dir = './debug'
 
 #Get paths
 if os.name == 'nt': 
@@ -304,7 +307,7 @@ env.Install(dest_dir, ret['shared'])
 env.Append(MYLIBLIST='MantidCurveFitting')
 env.Append(CPPPATH='#/CurveFitting/inc')
 ret = SConscript(['UserAlgorithms/SConscript'])
-env.Install('Bin/Plugins', ret['shared'])
+env.Install('Build/Plugins', ret['shared'])
 
 # The unit tests
 skiptest=ARGUMENTS.get('skiptest',0)

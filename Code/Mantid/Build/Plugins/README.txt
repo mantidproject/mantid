@@ -1,0 +1,1 @@
+The UserAlgorithms shared library is built to this directory by Scons, for use by the unit tests.
