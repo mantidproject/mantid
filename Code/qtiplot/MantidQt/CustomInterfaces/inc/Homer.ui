@@ -126,21 +126,6 @@
          <property name="editable" >
           <bool>true</bool>
          </property>
-         <item>
-          <property name="text" >
-           <string>MAR</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>MAP</string>
-          </property>
-         </item>
-         <item>
-          <property name="text" >
-           <string>MER</string>
-          </property>
-         </item>
         </widget>
        </item>
        <item row="0" column="3" colspan="3" >
@@ -604,8 +589,8 @@
       <attribute name="title" >
        <string>Diagnose Detectors</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout" >
-       <item row="0" column="0" colspan="2" >
+      <layout class="QVBoxLayout" name="verticalLayout" >
+       <item>
         <widget class="QCheckBox" name="ckRunDiag" >
          <property name="enabled" >
           <bool>true</bool>
@@ -1183,7 +1168,6 @@
   <tabstop>pbBrowseSPE</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>
-  <tabstop>ckRunDiag</tabstop>
   <tabstop>ckRunAbsol</tabstop>
   <tabstop>leVanMass</tabstop>
   <tabstop>leSamMass</tabstop>

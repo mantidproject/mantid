@@ -46,6 +46,7 @@ class QListWidget;
 class ColorButton;
 class ColorBox;
 class DoubleSpinBox;
+class QMouseEvent;
 
 //! Preferences dialog
 class ConfigDialog : public QDialog
@@ -103,6 +104,9 @@ private slots:
 // 	void choosePythonConfigFolder();
 // #endif
 
+  //Mantid
+  void updateDefInstrList();
+
 private:
 	void initPlotsPage();
         void initOptionsPage();
@@ -131,9 +135,10 @@ private:
 	QStackedWidget * generalDialog;
 	QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
 	QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage;
-        //Mantid
-        QWidget *instrument;
-        QComboBox *facility, *instrPrefix;
+  //Mantid
+  QWidget *instrumentPage;
+  QComboBox *facility, *instrPrefix;
+  QLineEdit *knownInstruments;
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;

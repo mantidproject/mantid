@@ -62,6 +62,8 @@
 #include <QListWidget>
 #include <QFontMetrics>
 #include <QFileDialog>
+#include <QRegExp>
+#include <QMouseEvent>
 
 #include "MantidKernel/ConfigService.h"
 
@@ -620,23 +622,27 @@ void ConfigDialog::initMantidPage()
   mtdTabWidget = new QTabWidget(generalDialog);
   mtdTabWidget->setUsesScrollButtons(false);
 
-  instrument = new QWidget();
-  QVBoxLayout *instrTabLayout = new QVBoxLayout(instrument);
+  instrumentPage = new QWidget();
+  QVBoxLayout *instrTabLayout = new QVBoxLayout(instrumentPage);
   QGroupBox *frame = new QGroupBox();
   instrTabLayout->addWidget(frame);
   QGridLayout *grid = new QGridLayout(frame);
-
+  mtdTabWidget->addTab(instrumentPage, QString());
+  
   facility = new QComboBox();
   grid->addWidget(new QLabel("Facility"), 0, 0);
   grid->addWidget(facility, 0, 1);
 
-  mtdTabWidget->addTab(instrument, QString());
-  
+  knownInstruments = new QLineEdit();
+  connect(knownInstruments, SIGNAL(textChanged(const QString&)), this, SLOT(updateDefInstrList()));
+  grid->addWidget(new QLabel("Instrument Prefixes"), 1, 0);
+  grid->addWidget(knownInstruments, 1, 1);
+
   instrPrefix = new QComboBox();
-  grid->addWidget(new QLabel("Default Prefix"), 1, 0);
-  grid->addWidget(instrPrefix, 1, 1);
-  grid->setRowStretch(2,1);  
-  
+  grid->addWidget(new QLabel("Default Prefix"), 2, 0);
+  grid->addWidget(instrPrefix, 2, 1);
+  grid->setRowStretch(3,1);
+
   // Populate boxes
   Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
   QString property = QString::fromStdString(mantid_config.getString("supported.facilities"));
@@ -651,25 +657,11 @@ void ConfigDialog::initMantidPage()
   {
     index = 0;
   }
-  facility->setCurrentIndex(index);    
+  facility->setCurrentIndex(index);
 
-  std::string current_facility = facility->currentText().toStdString();
-  std::vector<std::string> prefixes(0); 
-  try
-  {
-    prefixes = mantid_config.getInstrumentPrefixes(current_facility);
-  }
-  catch(std::runtime_error&)
-  {
-  }
-
-  std::vector<std::string>::const_iterator iend = prefixes.end();
-  std::vector<std::string>::const_iterator iter = prefixes.begin();
-  for( ; iter != iend; ++iter )
-  {
-    instrPrefix->addItem(QString::fromStdString(*iter));
-  }
-  
+  property = QString::fromStdString(mantid_config.getString("instrument.prefixes." + property.toStdString()));
+  knownInstruments->setText(property);
+    
   property = QString::fromStdString(mantid_config.getString("default.instrument"));
   index = instrPrefix->findText(property);
   if( index < 0 )
@@ -1151,7 +1143,7 @@ void ConfigDialog::languageChange()
 	appTabWidget->setTabText(appTabWidget->indexOf(fileLocationsPage), tr("File Locations"));
 
 	//Mantid Page
-	mtdTabWidget->setTabText(mtdTabWidget->indexOf(instrument), tr("Instrument"));
+	mtdTabWidget->setTabText(mtdTabWidget->indexOf(instrumentPage), tr("Instrument"));
 
 	lblLanguage->setText(tr("Language"));
 	lblStyle->setText(tr("Style"));
@@ -1472,9 +1464,14 @@ void ConfigDialog::apply()
 	itemsList->resize(itemsList->maximumWidth(),itemsList->height());
 
 	//Mantid 
-	QString instr = instrPrefix->currentText();
+	QString setting = instrPrefix->currentText();
 	Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
-	mantid_config.setString("default.instrument", instr.toStdString());
+	mantid_config.setString("default.instrument", setting.toStdString());
+  std::string cur_facility = facility->currentText();
+  mantid_config.setString("default.facility", cur_facility);
+  setting = knownInstruments->text();
+  setting.replace(QRegExp("\\W+"), QString(";"));
+  mantid_config.setString("instrument.prefixes." + cur_facility, setting.toStdString());
 	try
 	{
 	  mantid_config.saveConfig(mantid_config.getUserFilename());
@@ -1482,7 +1479,8 @@ void ConfigDialog::apply()
 	catch(std::runtime_error&)
 	{
 	  QMessageBox::warning(this, "MantidPlot", 
-			       "Unable to update Mantid user properties file.\n");
+			       "Unable to update Mantid user properties file.\n"
+             "Configuration will not be saved.");
 	}
 }
 
@@ -1765,3 +1763,13 @@ void ConfigDialog::chooseHelpFolder()
 // 	}
 // }
 // #endif
+
+/**
+ * Update the default instrument combo box in response to changes within the known instrument list
+ */
+void ConfigDialog::updateDefInstrList()
+{
+  QStringList instruments = knownInstruments->text().split(QRegExp("\\W+"), QString::SkipEmptyParts);
+  instrPrefix->clear();
+  instrPrefix->addItems(instruments);
+}

@@ -119,28 +119,43 @@ void MWRunFiles::readRunNumAndRanges()
   }
 
   std::vector<std::string>::iterator i = m_files.begin(), end = m_files.end();
-  const int pad_size(5);
+  //
+  // @todo MG: There was no padding originally so this was added to work for TS1 and TS2 at ISIS
+  // but a uch more general solution is necessary.
+  //
   for ( ; i != end; ++i )
   {
+    std::string run_str = *i;
+    bool num_only(true);
   try
 	{
-    std::string run_str = *i;
-	  const unsigned int runNumber = boost::lexical_cast<unsigned int>(*i);
-    const int ndigits = static_cast<int>(run_str.size());
-    if( ndigits != pad_size )
-    {
-      run_str.insert(0, pad_size - ndigits, '0');
-    }
-	  *i = m_instrument.toStdString() + run_str + ".raw";                                      
+    boost::lexical_cast<unsigned int>(*i);
 	}
 	catch ( boost::bad_lexical_cast &)
 	{// the entry doesn't read as a run number
+    num_only = false;
 	}// the alternative is that they entered a filename and we leave that as it is
 
+  if( num_only )
+  {
+    // First pad to 5
+    int ndigits = static_cast<int>(run_str.size());
+    if( ndigits != 5 )
+    {
+      run_str.insert(0, 5 - ndigits, '0');
+    }
+    std::string problem = loadData.setValue(m_instrument.toStdString() + run_str + ".raw");
+    if( !problem.empty() )
+    {
+      //Try 8
+      run_str.insert(0, 3, '0');
+    }
+    *i = m_instrument.toStdString() + run_str + ".raw"; 
+  }
   if ( errors.size() < MAX_FILE_NOT_FOUND_DISP )
 	{
-	  std::string problem = loadData.setValue(*i);
-	  if ( ! problem.empty() )
+    std::string problem = loadData.setValue(*i);
+	  if ( !problem.empty() )
 	  {
 	    errors << QString::fromStdString(problem);
 	  }

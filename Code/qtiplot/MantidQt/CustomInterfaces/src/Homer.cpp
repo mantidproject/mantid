@@ -5,6 +5,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/ConfigService.h"
 #include "Poco/Path.h"
 #include <QFile>
 #include <QDir>
@@ -98,11 +99,26 @@ void Homer::pythonIsRunning(bool running)
 */
 QString Homer::setUpInstru()
 { 
+  // Populate the prefix box with the known instruments and set the default
+  Mantid::Kernel::ConfigServiceImpl & mtd_config = Mantid::Kernel::ConfigService::Instance();
+  // It's easier here to populate the combobox with a QStringList which can be formed using the split method
+  // than using getInstrumentPrefixes on the ConfigService
+  std::string key = std::string("instrument.prefixes.") + mtd_config.getString("default.facility");
+  QString prefixes = QString::fromStdString(mtd_config.getString(key));
+  QStringList pref_list = prefixes.split(";", QString::SkipEmptyParts);
+  m_uiForm.loadRun_cbInst->clear();
+  m_uiForm.loadRun_cbInst->addItems(pref_list);
+
   QString curInstru = m_prev.value("CustomInterfaces/Homer/instrument", "").toString();
   int index = m_uiForm.loadRun_cbInst->findText(curInstru);
   if( index < 0 )
   {
-    index = 0;
+    curInstru = QString::fromStdString(mtd_config.getString("default.instrument"));
+    index =  m_uiForm.loadRun_cbInst->findText(curInstru);
+    if( index < 0 )
+    {
+      index = 0;
+    }
   }
   m_uiForm.loadRun_cbInst->setCurrentIndex(index);
   return curInstru;
@@ -115,6 +131,10 @@ void Homer::setUpPage1()
   page1Defaults();
   page1Validators();
   page1Tooltips();
+
+  // Force a check of the instrument
+  instrSelectionChanged(m_uiForm.loadRun_cbInst->currentText());
+  connect(m_uiForm.loadRun_cbInst, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrSelectionChanged(const QString&)));
   
   connect(m_uiForm.pbBack, SIGNAL(clicked()), this, SLOT(bgRemoveClick()));
 
@@ -270,8 +290,8 @@ void Homer::hideValidators()
 /// set all the tooltips for the first tab
 void Homer::page1Tooltips()
 {  
-  m_uiForm.lbPrefix->setToolTip("For example MAR, MAP, ...");
-  m_uiForm.loadRun_cbInst->setToolTip("For example MAR, MAP, ...");
+  m_uiForm.lbPrefix->setToolTip("Default instrument prefix");
+  m_uiForm.loadRun_cbInst->setToolTip("Default instrument prefix");
 
   m_uiForm.gbExperiment->setToolTip("Files to process");
   m_uiForm.pbBack->setToolTip("Enabling this removes the mean number of counts per bin in the background region\n"
@@ -307,11 +327,14 @@ void Homer::setUpPage2()
 	
   // insert the widget on to the second tab page (index = 1) of the form
   QLayout *mapLayout = m_uiForm.tabWidget->widget(1)->layout();
-  QGridLayout *mapLay = qobject_cast<QGridLayout*>(mapLayout); 
+  QVBoxLayout *mapLay = qobject_cast<QVBoxLayout*>(mapLayout); 
   if (mapLay)
-  { // this should always happen because we layout to grid in the designer
-    mapLay->addWidget(m_diagPage, 1, 0, 6, 5);
+  {
+    mapLay->addWidget(m_diagPage);
   }
+
+  int height = m_uiForm.ckRunDiag->height() + m_diagPage->height();
+  this->resize(this->width(), height);
 
   m_uiForm.ckRunDiag->setToolTip("Enable or disable all the controls on this page");
   // disenableDiag() enables or disables the detector diagnostics page depending on if the check box is clicked or not
@@ -712,4 +735,31 @@ void Homer::bgRemoveReadSets()
   // send the values to the detector diagnostics form, they are used as suggested values
   emit MWDiag_updateTOFs(m_prev.value("TOFstart", G_START_WINDOW_TOF).toDouble(),
     m_prev.value("TOFend", G_END_WINDOW_TOF).toDouble());
+}
+
+/**
+ * Called when a new selection is made in the instrument box
+ */
+void Homer::instrSelectionChanged(const QString& prefix)
+{
+  // Need to check that there is a valid parameter file for the instrument else the
+  // analysis won't work
+  QString paramfile_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory"));
+  QDir paramdir(paramfile_dir);
+  paramdir.setFilter(QDir::Files);
+  QStringList filters;
+  filters << prefix + "*_Parameters.xml";
+  paramdir.setNameFilters(filters);
+
+  QStringList entries = paramdir.entryList();
+  if( entries.isEmpty() )
+  {
+    QMessageBox::warning(this, "MantidPlot", "Selected instrument does have a parameter file.\nCannot run analysis");
+    m_uiForm.pbRun->setEnabled(false);
+  }
+  else
+  {
+    m_uiForm.pbRun->setEnabled(true);
+  }
+  
 }

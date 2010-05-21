@@ -95,6 +95,7 @@ private:
     void setupNormBoxes(const QString &newText);
     void bgRemoveClick();
     void bgRemoveReadSets();
+    void instrSelectionChanged(const QString& prefix);
 };
 }
 }
