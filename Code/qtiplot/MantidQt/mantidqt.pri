@@ -6,7 +6,7 @@
 #------------------------
 # Compile mode
 #------------------------
-CONFIG += qt warn_on exceptions
+CONFIG += qt warn_on exceptions debug_and_release
 
 QMAKESPEC=win32-msvc2005
 
@@ -114,7 +114,7 @@ CONFIG(debug, debug|release) {
 SIP_DIR = "$$TMPDIR"
 
 # This automatically switches to $$MANTIDPATH/debug for a debug build
-DESTDIR = "$$MANTIDPATH/release"
+DESTDIR = "$$MANTIDLIBPATH"
 
 # This makes release the default build on running nmake. Must be here - after the config dependent parts above
 CONFIG += release

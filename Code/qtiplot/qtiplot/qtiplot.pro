@@ -40,15 +40,23 @@ RESOURCES        = ../../../Images/images.qrc
 ######################################################################################
 #CONFIG          += CustomInstall
 
+CONFIG += debug_and_release
+
 win32:build_pass:CONFIG(debug, debug|release) {
   CONFIG += console
   # Make sure we don't link to the non-debug runtime
   QMAKE_LFLAGS_CONSOLE += /NODEFAULTLIB:msvcrt.lib
 }
 
+MANTIDPATH = ../../Mantid
+MANTIDLIBPATH = $$MANTIDPATH/release
+build_pass:CONFIG(debug, debug|release) {
+  MANTIDLIBPATH = $$MANTIDPATH/debug
+}
+
 # Put executable alongside the mantid framework libraries
 # Automatically switches destination to Mantid/debug if a debug build
-DESTDIR = ../../Mantid/release
+DESTDIR = $$MANTIDLIBPATH
 
 mac:CXXFLAGS+=-headerpad_max_install_names
 
@@ -136,28 +144,28 @@ macx {
   }
   LIBS += -lboost_signals-mt
 
-  LIBS 		+= -Wl,-rpath,/opt/Mantid/bin
-  LIBS 		+= -Wl,-rpath,/opt/Mantid/plugins
-  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib64
-  LIBS 		+= -Wl,-rpath,/opt/OpenCASCADE/lib
+  LIBS += -Wl,-rpath,/opt/Mantid/bin
+  LIBS += -Wl,-rpath,/opt/Mantid/plugins
+  LIBS += -Wl,-rpath,/opt/OpenCASCADE/lib64
+  LIBS += -Wl,-rpath,/opt/OpenCASCADE/lib
 }
 
-  LIBS         += -lgsl -lgslcblas
+  LIBS += -lgsl -lgslcblas
 
-  LIBS		+= -L../../Mantid/release -lMantidAPI
-  LIBS		+= -L../../Mantid/release -lMantidGeometry
-  LIBS		+= -L../../Mantid/release -lMantidKernel
+  LIBS += -L$$MANTIDLIBPATH -lMantidAPI
+  LIBS += -lMantidGeometry
+  LIBS += -lMantidKernel
 
-  LIBS          += -L../QtPropertyBrowser/lib -lQtPropertyBrowser
-
-  LIBS   += -L../MantidQt/lib -lMantidQtAPI
+  LIBS += -lMantidQtAPI
 
 CONFIG(debug, debug|release) {
   LIBS	+= -lPocoUtild
   LIBS	+= -lPocoFoundationd
+  LIBS += -lQtPropertyBrowserd
 } else {
   LIBS	+= -lPocoUtil
   LIBS	+= -lPocoFoundation
+  LIBS += -lQtPropertyBrowser
  }
 }
 

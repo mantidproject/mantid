@@ -1,6 +1,6 @@
 TEMPLATE=lib
 CONFIG += shared
-CONFIG += release_and_debug
+CONFIG += debug_and_release
 
 INCLUDEPATH += src
 DEPENDPATH += src
@@ -30,7 +30,7 @@ win32 {
 }
 
 # Put alongside Mantid libraries
-win32:build_pass:CONFIG(debug, debug|release) {
+build_pass:CONFIG(debug, debug|release) {
   DESTDIR = ..\..\Mantid\debug
   TARGET = QtPropertyBrowserd
 } else {
