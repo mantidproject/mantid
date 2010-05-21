@@ -29,8 +29,9 @@ RESOURCES = "$$TOPBUILDDIR/../../../Images/images.qrc"
 
 # My variables
 MANTIDPATH = "$$TOPBUILDDIR/../../Mantid"
+MANTIDLIBPATH = ""
 build_pass:CONFIG(release, debug|release) {
-  MANTIDLIBPATH += "$$MANTIDPATH/release"
+  MANTIDLIBPATH = "$$MANTIDPATH/release"
 }
 build_pass:CONFIG(debug, debug|release) {
   MANTIDLIBPATH = "$$MANTIDPATH/debug"
