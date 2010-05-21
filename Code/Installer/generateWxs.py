@@ -426,7 +426,7 @@ addFileV('MantidKernel','MKern.dll','MantidKernel.dll','../Mantid/release/Mantid
 
 # Add qt API  library
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll','../Mantid/release/MantidQtAPI.dll',MantidDlls)
-addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll','../Mantid/release/lib/MantidWidgets.dll',MantidDlls)
+addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll','../Mantid/release/MantidWidgets.dll',MantidDlls)
 
 # Add Qt Property Browser
 addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll','../Mantid/release/QtPropertyBrowser.dll',MantidDlls)
