@@ -1,4 +1,5 @@
 import urllib2
+import smtplib
 import socket
 import os
 import sys
@@ -171,3 +172,35 @@ def moveToArchive(logfile, archiveDir):
     scplog = open(locallogs + '/scp.log','w')
     sp.call("scp " + logfile + " " + archiveDir + filename,stdout=scplog,shell=True)
     scplog.close()
+
+# Move send email
+def sendResultMail(message, logdir, sender, recipients=['mantid-buildserver@mantidproject.org'], \
+                   mailserver="outbox.rl.ac.uk", ):
+  #timeout in seconds
+  socket.setdefaulttimeout(120)
+  emailErr = open(logdir + 'email.log','w')
+  try:
+     #Send Email
+     session = smtplib.SMTP(smtpserver)
+  except smtplib.socket.error, details:
+    # Catch time out errors
+    session = None
+    emailErr.write(str(details) + "\n")
+
+  if session != None:
+    try:
+      smtpresult = session.sendmail(sender, recipients, message)
+    except smtplib.SMTPException, details:
+      emailErr.write(str(details) + "\n")
+      smtpresult = None
+
+    if smtpresult != None:
+      errstr = ""
+      for recip in smtpresult.keys():
+           errstr = """Could not deliver mail to: %s
+           Server said: %s
+           %s
+           %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
+           emailErr.write(errstr)
+    session.close()
+    emailErr.close()

@@ -9,12 +9,6 @@ sys.path.append('Build')
 import buildNotification as notifier
 from time import strftime
 
-#Email settings
-smtpserver = 'outbox.rl.ac.uk'
-
-#RECIPIENTS = ['russell.taylor@stfc.ac.uk']
-#RECIPIENTS=['martyn.gigg@stfc.ac.uk']
-RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system() 
 #Create Subject
 subject = 'Subject: ' + platform.system() 
@@ -240,25 +234,8 @@ if testsPass:
 else:
 	subject += 'Tests Failed]\n'	
 
-#timeout in seconds
-socket.setdefaulttimeout(120)
-emailErr = open(localLogDir + 'email.log','w')
-try:
-     #Send Email
-     session = smtplib.SMTP(smtpserver)
-     smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
-     
-     if smtpresult:
-          errstr = ""
-          for recip in smtpresult.keys():
-               errstr = """Could not deliver mail to: %s
-               Server said: %s
-               %s
-               %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
-               emailErr.write(errstr)
-except smtplib.SMTPException, details:
-     emailErr.write(str(details) + '\n')
-emailErr.close()
+# Send mail
+notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
 
 # Write out what happened with the tests. 
 # This is for deciding whether to build installer - only do so if tests both built and passed

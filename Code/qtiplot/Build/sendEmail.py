@@ -11,9 +11,6 @@ import buildNotification as notifier
 from time import strftime
 
 #Email settings
-smtpserver = 'outbox.rl.ac.uk'
-#RECIPIENTS = ['martyn.gigg@stfc.ac.uk']
-RECIPIENTS = ['mantid-buildserver@mantidproject.org']
 SENDER = platform.system() 
 #Create Subject
 subject = 'Subject: ' + platform.system()
@@ -83,31 +80,13 @@ message += 'MANTIDPLOT BUILD LOG\n\n'
 message += 'Build stdout <' + httpLinkToArchive + 'build.log>\n'
 message += 'Build stderr <' + httpLinkToArchive + 'error.log>\n'
 
-
 if buildSuccess:
 	subject += '[MantidPlot Build Successful]\n\n\n'
 else:
 	subject += '[MantidPlot Build Failed]\n\n\n'
 
-
-socket.setdefaulttimeout(120)
-emailErr = open(localLogDir + 'email.log','w')
-try:
-     #Send Email
-     session = smtplib.SMTP(smtpserver)
-     smtpresult  = session.sendmail(SENDER, RECIPIENTS, subject  + message)
-     
-     if smtpresult:
-          errstr = ""
-          for recip in smtpresult.keys():
-               errstr = """Could not deliver mail to: %s
-               Server said: %s
-               %s
-               %s""" % (recip, smtpresult[recip][0], smtpresult[recip][1], errstr)
-               emailErr.write(errstr)
-except smtplib.SMTPException, details:
-     emailErr.write(str(details) + '\n')
-emailErr.close()
+# Send mail
+notifier.sendResultMail(subject+message,localLogDir,sender=SENDER)
 
 if buildSuccess:
      sys.exit(0)
