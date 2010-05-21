@@ -26,9 +26,9 @@ buildNotification.sendTestStarted("Mantid")
 # On the Mac, need to set the path to the shared libraries
 # Hopefully can remove this when paths are correctly embedded by build
 if platform.system() == 'Darwin':
-    os.putenv('DYLD_LIBRARY_PATH',os.getcwd()+'/Bin/Shared:'+os.getcwd()+'/../Third_Party/lib/mac')
+    os.putenv('DYLD_LIBRARY_PATH',os.getcwd()+'/release:'+os.getcwd()+'/../Third_Party/lib/mac')
 elif platform.system() == 'Linux':
-    os.putenv('LD_LIBRARY_PATH',os.getcwd()+'/Bin/Shared:')
+    os.putenv('LD_LIBRARY_PATH',os.getcwd()+'/release:')
 else:
     pass
 
