@@ -1,7 +1,15 @@
 import os
 
 def getSVNRevision():
-  put, get = os.popen4("svnversion .")
+  try:
+    #To remove deprecation warning in later python version
+    import subprocess
+    p = subprocess.Popen("svnversion .", shell=True, bufsize=10000,
+          stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+    (put, get) = (p.stdin, p.stdout)
+  except:
+    put, get = os.popen4("svnversion .")
+
   line=get.readline()
   #remove non alphanumeric indicators
   line=line.replace("M","")
