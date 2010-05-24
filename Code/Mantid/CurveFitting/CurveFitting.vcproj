@@ -215,6 +215,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Chebyshev.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Convolution.cpp"
 				>
 			</File>
@@ -358,6 +362,10 @@
 			</File>
 			<File
 				RelativePath=".\test\BoundaryConstraintTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\Chebyshev.h"
 				>
 			</File>
 			<File

@@ -342,7 +342,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   }
   if (ws)
   {
-    f->setWorkspace(ws,wi,-1,-1);
+    m_browser->setWorkspace(f);
   }
 
   int nFunctions = m_cf->nFunctions()+1;
@@ -355,6 +355,8 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
 
   PropertyHandler* h = new PropertyHandler(f,m_cf,m_browser);
   f->setHandler(h);
+  h->setAttribute("StartX",m_browser->startX());
+  h->setAttribute("EndX",m_browser->endX());
 
   // enable the change slots
   m_browser->m_changeSlotsEnabled = true;
@@ -639,6 +641,35 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
     }
   }
   return false;
+}
+
+void PropertyHandler::setAttribute(const QString& attName, const double& attValue)
+{
+  if (m_fun->hasAttribute(attName.toStdString()))
+  {
+    try
+    {
+      m_fun->setAttribute(attName.toStdString(),Mantid::API::IFunction::Attribute(attValue));
+      foreach(QtProperty* prop,m_attributes)
+      {
+        if (prop->propertyName() == attName)
+        {
+          m_browser->m_changeSlotsEnabled = false;
+          m_browser->m_doubleManager->setValue(prop,attValue);
+          m_browser->m_changeSlotsEnabled = true;
+        }
+      }
+    }
+    catch(...){}
+  }
+  if (cfun())
+  {
+    for(int i=0;i<cfun()->nFunctions();++i)
+    {
+      PropertyHandler* h = getHandler(i);
+      h->setAttribute(attName,attValue);
+    }
+  }
 }
 
 /**

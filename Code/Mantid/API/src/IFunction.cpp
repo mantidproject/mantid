@@ -60,10 +60,12 @@ void IFunction::functionDeriv(Jacobian* out, const double* xValues, const int& n
  */
 void IFunction::setWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
 {
-  m_workspace = workspace;
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
   m_xMaxIndex = xMax;
+
+  if (m_workspace.get() == workspace.get()) return;
+  m_workspace = workspace;
 
   try
   {

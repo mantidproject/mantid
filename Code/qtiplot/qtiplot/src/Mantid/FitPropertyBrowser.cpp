@@ -655,6 +655,12 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
     }
     emit workspaceIndexChanged(wi);
   }
+  else
+  {// it could be an attribute
+    PropertyHandler* h = getHandler()->findHandler(prop);
+    if (!h) return;
+    h->setAttribute(prop);
+  }
 }
 
 /** Called when a double property changed
@@ -667,11 +673,17 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
   double value = m_doubleManager->value(prop);
   if (prop == m_startX )
   {
+    // call setWorkspace to change maxX in functions
+    setWorkspace(m_compositeFunction);
+    getHandler()->setAttribute("StartX",value);
     emit startXChanged(startX());
     return;
   }
   else if (prop == m_endX )
   {
+    // call setWorkspace to change minX in functions
+    setWorkspace(m_compositeFunction);
+    getHandler()->setAttribute("EndX",value);
     emit endXChanged(endX());
     return;
   }
@@ -685,17 +697,22 @@ void FitPropertyBrowser::doubleChanged(QtProperty* prop)
     if (!h) return;
 
     QtProperty* parProp = h->getParameterProperty(prop);
-    if (!parProp) return;
-
-    if (prop->propertyName() == "LowerBound")
+    if (parProp)
     {
-      double loBound = m_doubleManager->value(prop);
-      h->addConstraint(parProp,true,false,loBound,0);
+      if (prop->propertyName() == "LowerBound")
+      {
+        double loBound = m_doubleManager->value(prop);
+        h->addConstraint(parProp,true,false,loBound,0);
+      }
+      else if (prop->propertyName() == "UpperBound")
+      {
+        double upBound = m_doubleManager->value(prop);
+        h->addConstraint(parProp,false,true,0,upBound);
+      }
     }
-    else if (prop->propertyName() == "UpperBound")
-    {
-      double upBound = m_doubleManager->value(prop);
-      h->addConstraint(parProp,false,true,0,upBound);
+    else
+    {// it could be an attribute
+      h->setAttribute(prop);
     }
   }
 }
@@ -1554,7 +1571,20 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction* f)const
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
       if (ws)
       {
-        f->setWorkspace(ws,workspaceIndex(),-1,-1);
+        int xMin=-1,xMax;
+        double sX = startX();
+        double eX = endX();
+        const Mantid::MantidVec& X = ws->readX(workspaceIndex());
+        for(xMax = 0;xMax < ws->blocksize(); ++xMax)
+        {
+          if (X[xMax] < sX) continue;
+          else if (xMin < 0)
+          {
+            xMin = xMax;
+          }
+          if (X[xMax] > eX) break;
+        }
+        f->setWorkspace(ws,workspaceIndex(),xMin,xMax);
       }
     }
     catch(...){}

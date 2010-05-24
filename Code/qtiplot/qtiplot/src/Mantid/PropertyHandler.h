@@ -103,6 +103,13 @@ public:
   bool setAttribute(QtProperty* prop);
 
   /**
+   * Set function's double attribute
+   * @param attName The name of the attribute
+   * @param attValue The new attribute value
+   */
+  void setAttribute(const QString& attName, const double& attValue);
+
+  /**
    * Update the parameter properties
    */
   void updateParameters();
