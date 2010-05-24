@@ -58,14 +58,13 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
 
 {
 
-    std::cout << "LoadInstrumentFromSNSNexus 00\n";
+    // Here we go through all the entries in the NXS file to list the banks and monitors, and save them to 2 sets of strings
     std::set<std::string,CompareBanks> banks;
     std::set<std::string> monitors;
 
     for(std::vector<NXClassInfo>::const_iterator it=entry.groups().begin();it!=entry.groups().end();it++)
     if (it->nxclass == "NXdata") // Count detectors
     {
-      std::cout << "Found bank " << it->nxname << "\n";
         banks.insert(it->nxname); // sort the bank names
     }
     else if (it->nxclass == "NXmonitor") // Count monitors
@@ -73,6 +72,7 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
         monitors.insert(it->nxname);
     }
 
+    //Cast to the local workspace.
     DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(localWS);
 
     // Clear off any existing instrument for this workspace
@@ -89,11 +89,13 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
     Geometry::ShapeFactory shapeCreator;
     boost::shared_ptr<Geometry::Object> sphere = shapeCreator.createShape(xmlSphere);
 
+    //Sample is at 0,0,0 (center) by definition.
     Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample",sphere,instrument.get());
     instrument->add(samplepos);
     instrument->markAsSamplePos(samplepos);
     samplepos->setPos(0.0,0.0,0.0);
 
+    //Create the source. We will need to find its position next.
     Geometry::ObjComponent *source = new Geometry::ObjComponent("Source",sphere,instrument.get());
     instrument->add(source);
     instrument->markAsSource(source);
@@ -103,6 +105,7 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
     name.load();
     instrument->setName(name());
 
+    //L1 is the moderator distance.
     double l1;
     // If user has provided an L1, use that
     if ( ! Kernel::ConfigService::Instance().getValue("instrument.L1", l1) )
@@ -119,15 +122,21 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
             l1 = m_L1;
         }
     }
-    source->setPos(0.0,0.0,-1.0*l1);
+    //+Z goes with the neutron beam direction.
+    //Therefore the moderator is at a negative Z direction. X and Y are zero.
+    source->setPos(0.0, 0.0, -1.0*l1);
 
+    //Track detector IDs
     int det = 1;
+    //--- Now we go through the list of monitors we got before. ----
     for(std::set<std::string>::const_iterator it=monitors.begin();it!=monitors.end();it++)
     {
-
+        //Load the distance float.
         NXDouble z = entry.openNXDouble(*it + "/distance");
         z.load();
+        //Monitor is just a simple sphere. Don't care about its real shape.
         Geometry::Detector *detector = new Geometry::Detector("mon",sphere,samplepos);
+        //Assume that the monitor is in the horizontal plane, "distance" downstream.
         Geometry::V3D pos(0,0,*z());
 
         detector->setPos(pos);
@@ -139,17 +148,19 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
         det++;
     }
 
+    //--- Now we go through the list of detectors (banks) we got before. ----
     for(std::set<std::string,CompareBanks>::const_iterator it=banks.begin();it!=banks.end();it++)
     {
-        std::cout << "Opening bank " << *it << "\n";
-
+        // std::cout << "Opening bank " << *it << "\n";
+        //The detector nxs entry.
         NXDetector nxDet = nxInstr.openNXDetector(*it);
 
         NXFloat detSize = nxDet.openNXFloat("origin/shape/size");
         detSize.load();
-
+        //Size of the detector
         double szX = detSize[0] != detSize[0] ? 0.001 : detSize[0]/2;
         double szY = detSize[1] != detSize[1] ? 0.001 : detSize[1]/2;
+        //Fake 1mm thick detector.
         double szZ = 0.001; //detSize[2] != detSize[2] ? 0.001 : detSize[2]/2;
 
         std::ostringstream xmlShapeStream;
@@ -161,18 +172,16 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
             << "<right-front-bottom-point  x=\""<<szX<<"\" y=\""<<szY<<"\" z=\""<<-szZ<<"\"  /> "
             << "</cuboid>";
 
-        std::string xmlShape(xmlShapeStream.str());
-        boost::shared_ptr<Geometry::Object> shape = shapeCreator.createShape(xmlShape);
+        std::string xmlCuboidShape(xmlShapeStream.str());
+        boost::shared_ptr<Geometry::Object> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
 
+        //Now we calculate the bank orientation and shift
         Geometry::V3D shift;
         Geometry::Quat rot;
         this->getBankOrientation(nxDet,shift,rot);
 
         NXFloat distance = nxDet.openDistance();
         distance.load();
-
-        std::cout << "distance.dim0()" << distance.dim0() << "\n";
-        std::cout << "distance.dim1()" << distance.dim1() << "\n";
 
         NXFloat azimuth = nxDet.openAzimuthalAngle();
         azimuth.load();
@@ -194,7 +203,7 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
             }
 
             // Create a new detector. Instrument will take ownership of pointer so no need to delete.
-            Geometry::Detector *detector = new Geometry::Detector("det",shape,samplepos);
+            Geometry::Detector *detector = new Geometry::Detector("det",cuboidShape,samplepos);
             Geometry::V3D pos;
 
             pos.spherical(r, angle/M_PI*180., phi/M_PI*180.);
@@ -210,117 +219,42 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
     }
 }
 
-/** Calculate rotation axis from direction cosines.
- */
-//void LoadSNSNexus::calcRotation(double xx,double xy,double xz,double yx,double yy,double yz,double& angle, Geometry::V3D& axis)
-void LoadInstrumentFromSNSNexus::calcRotation(const Geometry::V3D& X,const Geometry::V3D& Y,const Geometry::V3D& Z,double& angle, Geometry::V3D& axis)
-{
-    //double angle1 = 10.;
-    //Geometry::V3D axis1(1,2,0);
-    //axis1.normalize();
-    //std::cerr<<"axis1 "<<axis1<<' '<<angle1<<'\n';
-    //Geometry::Quat rot(angle1,axis1);
-    //Geometry::V3D X1(1,0,0);
-    //Geometry::V3D Y1(0,1,0);
-    //Geometry::V3D Z1(0,0,1);
-    //rot.rotate(X1);
-    //rot.rotate(Y1);
-    //rot.rotate(Z1);
 
-    double xx = X.X();
-    double xy = X.Y();
-    double xz = X.Z();
-
-    //double yx = Y.X();
-    double yy = Y.Y();
-    double yz = Y.Z();
-
-    double zx = Z.X();
-    double zy = Z.Y();
-    double zz = Z.Z();
-
-    //std::cerr<<xx<<' '<<xy<<' '<<xz<<'\n';
-    //std::cerr<<yx<<' '<<yy<<' '<<yz<<'\n';
-    //std::cerr<<zx<<' '<<zy<<' '<<zz<<'\n';
-
-    if (xx == 1.)
-    {
-        axis(1,0,0);
-        angle = acos(yy)/M_PI*180.;
-        if (yz < 0) angle = -angle;
-    }
-    else if (yy == 1.)
-    {
-        axis(0,1,0);
-        angle = acos(zz)/M_PI*180.;
-        if (zx < 0) angle = -angle;
-    }
-    else if (zz == 1.)
-    {
-        axis(0,0,1);
-        angle = acos(xx)/M_PI*180.;
-        if (xy < 0) angle = -angle;
-    }
-    else
-    {
-        std::cout << "The case of arbitrary direction cosines is not implemented yet7\n";
-        throw std::runtime_error("The case of arbitrary direction cosines is not implemented yet");
-
-        double A1 = xx - 1. + xz*zx/(1.-zz);
-        double A2 = xy + xz*zy/(1.-zz);
-        double A = - A2 / A1;
-
-        double B = sqrt( (1. - xx)/(1. - yy) );
-
-        std::cerr<<"A,B="<<A<<' '<<B<<'\n';
-
-        double cosY = sqrt( (1. - B*B)/(A*A - B*B) );
-        double cosX = A*cosY;
-        double cosZ = sqrt( 1. - cosX*cosX - cosY*cosY );
-
-        Geometry::V3D N(cosX,cosY,cosZ);
-
-        double tstX = N.scalar_prod(X);
-        double tstY = N.scalar_prod(Y);
-        double tstZ = N.scalar_prod(Z);
-
-        std::cerr<<"Test:\n";
-        std::cerr<<cosX<<' '<<cosY<<' '<<cosZ<<'\n';
-        std::cerr<<tstX<<' '<<tstY<<' '<<tstZ<<'\n';
-
-        axis(cosX,cosY,cosZ);
-
-    }
-
-
-}
-
-/**  Get detector position and orientation
+/**  Get detector position and orientation from NXS file.
+ *
  *   @param nxDet The NXDetector element
  *   @param shift The translation of the detector
  *   @param rot The orientation of the detector
  */
 void LoadInstrumentFromSNSNexus::getBankOrientation(NXDetector nxDet, Geometry::V3D& shift, Geometry::Quat& rot)
 {
+    //Translation aka shift from the origin
     NXFloat translation = nxDet.openNXFloat("origin/translation/distance");
     translation.load();
     shift = Geometry::V3D(translation[0],translation[1],translation[2]);
 
     NXFloat orientation = nxDet.openNXFloat("origin/orientation/value");
     orientation.load();
-    double angle;
     Geometry::V3D axis;
 
+    /*
+     - NXGeometry/orientation reference: The orientation information is stored as direction cosines.
+     - It is a partial Direction Cosine Matrix or DCM?
+     - As of May 2010.
+     The direction cosines will be between the local coordinate directions and the reference directions
+     (to origin or relative NXgeometry). Calling the local unit vectors (x',y',z') and the reference
+     unit vectors (x,y,z) the six numbers will be
+     [x' dot x, x' dot y, x' dot z, y' dot x, y' dot y, y' dot z]
+     where "dot" is the scalar dot product (cosine of the angle between the unit vectors).
+     The unit vectors in both the local and reference coordinates are right-handed and orthonormal.}
+   */
     Geometry::V3D X(orientation[0],orientation[1],orientation[2]);
     Geometry::V3D Y(orientation[3],orientation[4],orientation[5]);
     Geometry::V3D Z = X.cross_prod(Y);
 
-    this->calcRotation(X,Y,Z,angle,axis);
-
-    std::cerr<<"rot axis "<<axis<<'\n';
-    std::cerr<<"angle "<<angle<<'\n';
-
-    rot = Geometry::Quat(angle,axis);
+    //Crate the quaternion, using the constructor that uses a rotated reference frame.
+    // See the Quat class for more info.
+    rot = Geometry::Quat(X,Y,Z);
 }
 
 double LoadInstrumentFromSNSNexus::dblSqrt(double in)
