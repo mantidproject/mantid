@@ -236,7 +236,7 @@ public:
     //std::cout << "Rotated v is" << v << "\n";
   }
 
-  void testConstructorFromDirectionCosineMatrix_trival()
+  void testSetFromDirectionCosineMatrix_trival()
   {
     Mantid::Geometry::V3D rX(1,0,0);
     Mantid::Geometry::V3D rY(0,1,0);
@@ -246,7 +246,7 @@ public:
     TS_ASSERT(p==q); //Trivial rotation
   }
 
-  void testConstructorFromDirectionCosineMatrix2()
+  void testSetFromDirectionCosineMatrix2()
   {
     //Rotate 90 deg around Y
     V3D rX(0,0,-1);
@@ -257,7 +257,7 @@ public:
     TS_ASSERT(p==q);
   }
 
-  void testConstructorFromDirectionCosineMatrix2b()
+  void testSetFromDirectionCosineMatrix2b()
   {
     //Rotate -45 deg around Y
     double a = sqrt(2)/2;
@@ -279,7 +279,7 @@ public:
     TS_ASSERT(oZ==rZ);
   }
 
-  void testConstructorFromDirectionCosineMatrix3()
+  void testSetFromDirectionCosineMatrix3()
   {
     //Rotate 90 deg around Z
     V3D rX(0,1,0);
@@ -290,7 +290,7 @@ public:
     TS_ASSERT(p==q);
   }
 
-  void testConstructorFromDirectionCosineMatrix4()
+  void testSetFromDirectionCosineMatrix4()
   {
     //Rotate 90 deg around X
     V3D rX(1,0,0);
@@ -331,7 +331,7 @@ public:
 //    std::cout << "Re-Rotated coordinates are " << oX << oY << oZ << "\n";
   }
 
-  void testConstructorFromDirectionCosineMatrix_arbitrary()
+  void testSetFromDirectionCosineMatrix_arbitrary()
   {
     Quat rotQ;
     //Try a couple of random rotations
@@ -341,6 +341,17 @@ public:
     this->compareArbitrary(rotQ);
     rotQ = Quat(34.0, V3D(-0.5, 0.5, sqrt(0.5))) * Quat(-25.0, V3D(0.1, 0.2, sqrt(0.95)));
     this->compareArbitrary(rotQ);
+  }
+
+  void testConstructorFromDirectionCosine()
+  {
+    double a = sqrt(2)/2;
+    V3D rX(a,0,a);
+    V3D rY(0,1,0);
+    V3D rZ(-a,0,a);
+    Quat rotQ = Quat(rX,rY,rZ);
+    p(-45.0, V3D(0,1,0));
+    TS_ASSERT(rotQ==p);
   }
 
 };

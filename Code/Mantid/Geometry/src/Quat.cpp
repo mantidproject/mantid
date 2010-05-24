@@ -65,7 +65,23 @@ Quat::Quat(const Quat& _q)
  * */
 Quat::Quat(const double _deg,const V3D& _axis)
 {
-	setAngleAxis(_deg,_axis);
+  setAngleAxis(_deg,_axis);
+}
+
+/*!
+ * Construct a Quaternion that performs a reference frame rotation.
+ *  Specify the X,Y,Z vectors of the rotated reference frame, assuming that
+ *  the initial X,Y,Z vectors are aligned as expected: X=(1,0,0), Y=(0,1,0), Z=(0,0,1).
+ *  The resuting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
+ *
+ * @param rX rotated X reference axis; unit vector.
+ * @param rY rotated Y reference axis; unit vector.
+ * @param rZ rotated Z reference axis; unit vector.
+ */
+Quat::Quat(const V3D& rX, const V3D& rY, const V3D& rZ)
+{
+  //Call the operator to do the setting
+  this->operator()(rX, rY, rZ);
 }
 
 /** Assignment Operator
