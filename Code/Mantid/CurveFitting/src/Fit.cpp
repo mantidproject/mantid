@@ -18,12 +18,6 @@
 #include "MantidCurveFitting/FRConjugateGradientMinimizer.h"
 #include "MantidCurveFitting/PRConjugateGradientMinimizer.h"
 #include "MantidCurveFitting/BFGS_Minimizer.h"
-#include "MantidCurveFitting/GSLFunctions.h"
-
-#include <gsl/gsl_statistics.h>
-#include <gsl/gsl_multifit_nlin.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_blas.h>
 
 namespace Mantid
 {
@@ -201,56 +195,53 @@ namespace CurveFitting
                           << " therefore Simplex method used for fitting\n";
     }
 
-    // create and populate GSL data container warn user if l_data.n < l_data.p 
+    // create and populate data containers. Warn user if nData < nParam 
     // since as a rule of thumb this is required as a minimum to obtained 'accurate'
     // fitting parameter values.
 
-    GSL_FitData l_data(this);
-
-    l_data.p = m_function->nActive();
-    l_data.n = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
-    if (l_data.p == 0)
+    const int nParam = m_function->nActive();
+    const int nData = m_maxX - m_minX; // m_minX and m_maxX are array index markers. I.e. e.g. 0 & 19.
+    if (nParam == 0)
     {
       g_log.error("There are no active parameters.");
       throw std::runtime_error("There are no active parameters.");
     }
-    if (l_data.n == 0)
+    if (nData == 0)
     {
       g_log.error("The data set is empty.");
       throw std::runtime_error("The data set is empty.");
     }
-    if (l_data.n < l_data.p)
+    if (nData < nParam)
     {
       g_log.error("Number of data points less than number of parameters to be fitted.");
       throw std::runtime_error("Number of data points less than number of parameters to be fitted.");
     }
-    l_data.X = new double[l_data.n];
-    l_data.sqrtWeightData = new double[l_data.n];
-    l_data.holdCalculatedData = new double[l_data.n];
-    l_data.holdCalculatedJacobian =  gsl_matrix_alloc (l_data.n, l_data.p);
+    double* X = new double[nData];
+    double* sqrtWeightData = new double[nData];
+
 
     // check if histogram data in which case use mid points of histogram bins
 
     const bool isHistogram = localworkspace->isHistogramData();
-    for (unsigned int i = 0; i < l_data.n; ++i)
+    for (unsigned int i = 0; i < nData; ++i)
     {
       if (isHistogram)
-        l_data.X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take mid-point if histogram bin
+        X[i] = 0.5*(XValues[m_minX+i]+XValues[m_minX+i+1]); // take mid-point if histogram bin
       else
-        l_data.X[i] = XValues[m_minX+i];
+        X[i] = XValues[m_minX+i];
     }
 
-    l_data.Y = &YValues[m_minX];
+    const double* Y = &YValues[m_minX];
 
 
     // check that no error is negative or zero
 
-    for (unsigned int i = 0; i < l_data.n; ++i)
+    for (unsigned int i = 0; i < nData; ++i)
     {
       if (YErrors[m_minX+i] <= 0.0)
-        l_data.sqrtWeightData[i] = 1.0;
+        sqrtWeightData[i] = 1.0;
       else
-        l_data.sqrtWeightData[i] = 1./YErrors[m_minX+i];
+        sqrtWeightData[i] = 1./YErrors[m_minX+i];
     }
 
     if (localworkspace->hasMaskedBins(histNumber))
@@ -259,7 +250,7 @@ namespace CurveFitting
       MatrixWorkspace::MaskList::const_iterator it = mlist.begin();
       for(;it!=mlist.end();it++)
       {
-        l_data.sqrtWeightData[it->first-m_minX] = 0.;
+        sqrtWeightData[it->first-m_minX] = 0.;
       }
     }
 
@@ -267,44 +258,19 @@ namespace CurveFitting
     // set-up initial guess for fit parameters
 
     gsl_vector *initFuncArg;
-    initFuncArg = gsl_vector_alloc(l_data.p);
+    initFuncArg = gsl_vector_alloc(nParam);
 
     for (size_t i = 0; i < nActive(); i++)
     {
         gsl_vector_set(initFuncArg, i, m_function->activeParameter(i));
     }
 
-    // set-up which cost function to use
-
-    std::string costFunction = getProperty("CostFunction");
-    if ( methodUsed.compare("Levenberg-Marquardt") == 0 )
-    {
-
-      if ( costFunction.compare("Least squares") != 0 )
-      {
-        g_log.information() << "Levenberg-Marquardt only works with Least squares"
-                          << " revert cost function to least squares\n";
-      }
-      costFunction = "Least squares";
-    }
-
-    if ( costFunction.compare("Least squares") == 0 )
-      l_data.costFunc = new CostFuncLeastSquares();
-    else if ( costFunction.compare("Ignore positive peaks") == 0 )
-      l_data.costFunc = new CostFuncIgnorePosPeaks();
-    else
-    {
-      g_log.error("Unrecognised cost function in Fit. Default to Least squares\n");
-      costFunction = "Least squares";
-      l_data.costFunc = new CostFuncLeastSquares();
-    }
-
 
     // set-up minimizer
 
-    //boost::shared_ptr<IFuncMinimizer> minimizer = FuncMinimizerFactory::Instance().create(methodUsed);
+    std::string costFunction = getProperty("CostFunction");
     IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-    minimizer->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+    minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
                      initFuncArg, this, costFunction);
     
 
@@ -312,9 +278,8 @@ namespace CurveFitting
 
     int iter = 0;
     int status = 0;
-    //bool simplexFallBack = false; // set to true if levenberg-marquardt fails
     double finalCostFuncVal = 0.0;
-    double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
+    double dof = nData - nParam;  // dof stands for degrees of freedom
 
     // Standard least-squares used if derivative function defined otherwise simplex
     Progress prog(this,0.0,1.0,maxInterations);
@@ -338,7 +303,7 @@ namespace CurveFitting
             methodUsed = "Simplex";
             delete minimizer;
             minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-            minimizer->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+            minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
                                   initFuncArg, this, costFunction);
             iter = 0;
             g_log.warning() << "Fit algorithm using Levenberg-Marquardt failed "
@@ -371,9 +336,9 @@ namespace CurveFitting
             g_log.information() << "Simplex step size reduced to 0.1\n";
             delete minimizer;
             SimplexMinimizer* sm = new SimplexMinimizer;
-            sm->initialize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+            sm->initialize(X, Y, sqrtWeightData, nData, nParam, 
                            initFuncArg, this, costFunction);
-            sm->resetSize(l_data.X, l_data.Y, l_data.sqrtWeightData, l_data.n, l_data.p, 
+            sm->resetSize(X, Y, sqrtWeightData, nData, nParam, 
                            initFuncArg, 0.1, this, costFunction);
             minimizer = sm;
             status = GSL_CONTINUE;
@@ -423,7 +388,7 @@ namespace CurveFitting
       if ( methodUsed.compare("Simplex") != 0 )    
       {
         // calculate covariance matrix
-        covar = gsl_matrix_alloc (l_data.p, l_data.p);
+        covar = gsl_matrix_alloc (nParam, nParam);
         minimizer->calCovarianceMatrix( 0.0, covar);
 
         // take standard deviations to be the square root of the diagonal elements of
@@ -461,11 +426,11 @@ namespace CurveFitting
           }
         }
 
-        for(size_t i=0;i<l_data.p;i++) 
+        for(size_t i=0;i<nParam;i++) 
         {
           Mantid::API::TableRow row = m_covariance->appendRow();
           row << paramThatAreFitted[i];
-          for(size_t j=0;j<l_data.p;j++)
+          for(size_t j=0;j<nParam;j++)
           {
             if (j == i)
               row << 1.0;
@@ -496,8 +461,6 @@ namespace CurveFitting
       m_result->addColumn("double","Value");
       if ( methodUsed.compare("Simplex") != 0 ) 
         m_result->addColumn("double","Error");
-      //Mantid::API::TableRow row = m_result->appendRow();
-      //row << "Chi^2/DoF" << finalCostFuncVal;
 
       for(int i=0;i<m_function->nParams();i++)
       {
@@ -522,8 +485,8 @@ namespace CurveFitting
         Mantid::API::WorkspaceFactory::Instance().create(
         "Workspace2D",
         3,
-        l_data.n + histN,
-        l_data.n)
+        nData + histN,
+        nData)
         );
       ws->setTitle("");
       ws->getAxis(0)->unit() = inputWorkspace->getAxis(0)->unit();//    UnitFactory::Instance().create("TOF");
@@ -533,17 +496,17 @@ namespace CurveFitting
 
       ws->dataY(0).assign(inputY.begin()+m_minX,inputY.begin()+m_maxX);
 
-      MantidVec& Y = ws->dataY(1);
+      MantidVec& Ycal = ws->dataY(1);
       MantidVec& E = ws->dataY(2);
 
 
-      double* lOut = new double[l_data.n];  // to capture output from call to function()
-      m_function->function( lOut, l_data.X, l_data.n);
+      double* lOut = new double[nData];  // to capture output from call to function()
+      m_function->function( lOut, X, nData);
 
-      for(unsigned int i=0; i<l_data.n; i++) 
+      for(unsigned int i=0; i<nData; i++) 
       {
-        Y[i] = lOut[i]; 
-        E[i] = l_data.Y[i] - Y[i];
+        Ycal[i] = lOut[i]; 
+        E[i] = Y[i] - Ycal[i];
       }
 
       delete [] lOut; 
@@ -562,11 +525,8 @@ namespace CurveFitting
 
     // clean up dynamically allocated gsl stuff
 
-    delete [] l_data.X;
-    delete [] l_data.sqrtWeightData;
-    delete [] l_data.holdCalculatedData;
-    delete l_data.costFunc;
-    gsl_matrix_free (l_data.holdCalculatedJacobian);
+    delete [] X;
+    delete [] sqrtWeightData;
     gsl_vector_free (initFuncArg);
     
     return;
