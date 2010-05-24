@@ -6,6 +6,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Math/Matrix.h"
+#include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
 {
@@ -109,7 +110,7 @@ namespace Mantid
       void read(std::istream&);
       void write(std::ostream&) const;
 
-      double volume() const { return fabs(x*y*z); }      ///< Calculate the volmue of a cube X*Y*Z
+      double volume() const { return fabs(x*y*z); }      ///< Calculate the volume of a cube X*Y*Z
 
       int reBase(const V3D&,const V3D&,const V3D&);         ///<rebase to new basis vector
       int masterDir(const double Tol =1e-3) const;               ///< Determine if there is a master direction

@@ -66,6 +66,8 @@ namespace Mantid
       void operator()(const Quat&);
       void operator()(const double ww, const double aa, const double bb, const double cc);
       void operator()(const double angle, const V3D&);
+      void operator()(const V3D& rX, const V3D& rY, const V3D& rZ);
+
       // Set quaternion from a 3x3 matrix
       //void operator()(const M33&);
       void set(const double ww, const double aa, const double bb, const double cc);

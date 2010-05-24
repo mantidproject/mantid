@@ -410,9 +410,9 @@ V3D::scalar_prod(const V3D& V) const
 }
 
   /**
-    Calculates the cross product
+    Calculates the cross product. Returns (this * v).
     \param v The second vector to include in the calculation
-    \return The cross product of the two vectors
+    \return The cross product of the two vectors (this * v)
   */
 V3D
 V3D::cross_prod(const V3D& v) const
@@ -451,7 +451,8 @@ double V3D::zenith(const V3D& v) const
   }
 }
 
-/** Calculates the angle between this and another vector
+/** Calculates the angle between this and another vector.
+ *
  *  \param v The other vector
  *  \return The angle between the vectors in radians (0 < theta < pi)
  */

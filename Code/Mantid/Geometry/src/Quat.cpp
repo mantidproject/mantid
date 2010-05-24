@@ -22,6 +22,7 @@ Quat::Quat():w(1),a(0),b(0),c(0)
 {
 }
 
+
 /*!
  * Construct a Quat between two vectors.
  * v=(src+des)/�src+des�
@@ -32,13 +33,13 @@ Quat::Quat():w(1),a(0),b(0),c(0)
  */
 Quat::Quat(const V3D& src,const V3D& des)
 {
-	V3D v = (src+des);
-	v.normalize();
-	V3D cross=v.cross_prod(des);
-	w = v.scalar_prod(des);
-	a = cross[0];
-	b = cross[1];
-	c = cross[2];
+  V3D v = (src+des);
+  v.normalize();
+  V3D cross=v.cross_prod(des);
+  w = v.scalar_prod(des);
+  a = cross[0];
+  b = cross[1];
+  c = cross[2];
 }
 
 //! Constructor with values
@@ -183,6 +184,57 @@ void Quat::operator()(const Quat& q)
 	return;
 }
 
+/*!
+ * Set a Quaternion that performs a reference frame rotation.
+ *  Specify the X,Y,Z vectors of the rotated reference frame, assuming that
+ *  the initial X,Y,Z vectors are aligned as expected: X=(1,0,0), Y=(0,1,0), Z=(0,0,1).
+ *  The resuting quaternion rotates XYZ axes onto the provided rX, rY, rZ.
+ *
+ * @param rX rotated X reference axis; unit vector.
+ * @param rY rotated Y reference axis; unit vector.
+ * @param rZ rotated Z reference axis; unit vector.
+ */
+void Quat::operator()(const V3D& rX, const V3D& rY, const V3D& rZ)
+{
+  //The quaternion will combine two quaternions.
+
+  //These are the original axes
+  V3D oX = V3D(1.,0.,0.);
+  V3D oY = V3D(0.,1.,0.);
+  V3D oZ = V3D(0.,0.,1.);
+
+  //Axis that rotates X
+  V3D ax1 = oX.cross_prod(rX);
+  //Rotation angle from oX to rX
+  double angle1 = oX.angle(rX);
+
+  //Create the first quaternion
+  Quat Q1(angle1 * 180.0/M_PI, ax1);
+
+  //Now we rotate the original Y using Q1
+  V3D roY = oY;
+  Q1.rotate(roY);
+  //Find the axis that rotates oYr onto rY
+  V3D ax2 = roY.cross_prod(rY);
+  double angle2 = roY.angle(rY);
+  double sign = 1.0;
+  if (ax2.scalar_prod(rX) < 0) { sign = -1.0; };
+  Quat Q2(angle2 * 180.0/M_PI, ax2);
+
+  //Final = those two rotations in succession; Q1 is done first.
+  Quat final = Q2 * Q1;
+
+  //Set it
+  this->operator()(final);
+
+ /*
+  std::cout << "Angle1 is: " << angle1 << "; axis " << ax1 << " ... ";
+  std::cout << "Q1 is: " << Q1 << "\n";
+  std::cout << "Angle2 is: " << angle2 << "; axis " << ax2 << " ... ";
+  std::cout << "Q2 is: " << Q2 << "\n";
+  std::cout << "Final is: " << final << "\n";
+ */
+}
 
 //! Destructor
 Quat::~Quat()

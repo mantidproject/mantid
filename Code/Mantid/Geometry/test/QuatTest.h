@@ -55,6 +55,7 @@ public:
 		TS_ASSERT_DELTA(q1[2],s,0.000001);
 		TS_ASSERT_DELTA(q1[3],s,0.000001);
 	}
+
 	void testoperatorassignmentfromdouble()
 	{
 		q(2,3,4,5);
@@ -73,7 +74,20 @@ public:
 		TS_ASSERT_DELTA(q[1],s,0.000001);
 		TS_ASSERT_DELTA(q[2],s,0.000001);
 		TS_ASSERT_DELTA(q[3],s,0.000001);
+
+    //Now rotate 45 degrees around y
+    q(45, V3D(0,1,0));
+    V3D X(1,0,0);
+    q.rotate(X);
+    double a = sqrt(2)/2;
+    TS_ASSERT(X==V3D(a,0,-a));
+    //Now rotate -45 degrees around y
+    q(-45, V3D(0,1,0));
+    X(1,0,0);
+    q.rotate(X);
+    TS_ASSERT(X==V3D(a,0,a));
 	}
+
 	void testoperatorequal()
 	{
 		q=p;
@@ -179,6 +193,8 @@ public:
 
   void testRotateVector()
   {
+    double a = sqrt(2)/2;
+
     //Trivial
     p(1,0,0,0);//Identity quaternion
     V3D v(1,0,0);
@@ -195,7 +211,12 @@ public:
     v = V3D(1,0,0);
     p(45., V3D(0,0,1));
     p.rotate(v);
-    TS_ASSERT(v==V3D(sqrt(2)/2, sqrt(2)/2, 0));
+    TS_ASSERT(v==V3D(a, a, 0));
+
+    v = V3D(1,0,0);
+    p(-45., V3D(0,0,1));
+    p.rotate(v);
+    TS_ASSERT(v==V3D(a, -a, 0));
 
     v = V3D(1,0,0);
     p(30., V3D(0,0,1));
@@ -207,11 +228,15 @@ public:
     p.rotate(v);
     TS_ASSERT(v==V3D(1,0,0));
 
+    //90 deg around +Z
+    p(90, V3D(0,0,1));
+    v = V3D(1,0,0);    p.rotate(v);    TS_ASSERT(v==V3D(0,1,0));
+    v = V3D(0,1,0);    p.rotate(v);    TS_ASSERT(v==V3D(-1,0,0));
+
     //std::cout << "Rotated v is" << v << "\n";
   }
 
-
-  void xtestConstructorFromDirectionCosineMatrix_trival()
+  void testConstructorFromDirectionCosineMatrix_trival()
   {
     Mantid::Geometry::V3D rX(1,0,0);
     Mantid::Geometry::V3D rY(0,1,0);
@@ -221,16 +246,101 @@ public:
     TS_ASSERT(p==q); //Trivial rotation
   }
 
-  void xtestConstructorFromDirectionCosineMatrix2()
+  void testConstructorFromDirectionCosineMatrix2()
+  {
+    //Rotate 90 deg around Y
+    V3D rX(0,0,-1);
+    V3D rY(0,1,0);
+    V3D rZ(1,0,0);
+    q(rX,rY,rZ);
+    p(90, V3D(0,1,0));
+    TS_ASSERT(p==q);
+  }
+
+  void testConstructorFromDirectionCosineMatrix2b()
+  {
+    //Rotate -45 deg around Y
+    double a = sqrt(2)/2;
+    V3D rX(a,0,a);
+    V3D rY(0,1,0);
+    V3D rZ(-a,0,a);
+    q(rX,rY,rZ);
+    p(-45.0, V3D(0,1,0));
+    TS_ASSERT(p==q);
+
+    V3D oX(1,0,0);
+    V3D oY(0,1,0);
+    V3D oZ(0,0,1);
+    q.rotate(oX);
+    q.rotate(oY);
+    q.rotate(oZ);
+    TS_ASSERT(oX==rX);
+    TS_ASSERT(oY==rY);
+    TS_ASSERT(oZ==rZ);
+  }
+
+  void testConstructorFromDirectionCosineMatrix3()
   {
     //Rotate 90 deg around Z
     V3D rX(0,1,0);
     V3D rY(-1,0,0);
     V3D rZ(0,0,1);
     q(rX,rY,rZ);
+    p(90, V3D(0,0,1));
+    TS_ASSERT(p==q);
+  }
 
-    std::cout << q << "\n";
-    TS_ASSERT(p!=q);
+  void testConstructorFromDirectionCosineMatrix4()
+  {
+    //Rotate 90 deg around X
+    V3D rX(1,0,0);
+    V3D rY(0,0,1);
+    V3D rZ(0,-1,0);
+    q(rX,rY,rZ);
+    p(90, V3D(1,0,0));
+    TS_ASSERT(p==q);
+  }
+
+  void compareArbitrary(const Quat& rotQ)
+  {
+    V3D oX(1,0,0);
+    V3D oY(0,1,0);
+    V3D oZ(0,0,1);
+    V3D rX = oX;
+    V3D rY = oY;
+    V3D rZ = oZ;
+
+    //Rotate the reference frame
+    rotQ.rotate(rX);
+    rotQ.rotate(rY);
+    rotQ.rotate(rZ);
+
+    //Now find it.
+    q(rX,rY,rZ);
+
+    q.rotate(oX);
+    q.rotate(oY);
+    q.rotate(oZ);
+    TS_ASSERT(oX==rX);
+    TS_ASSERT(oY==rY);
+    TS_ASSERT(oZ==rZ);
+    TS_ASSERT(rotQ==q);
+
+//    std::cout << "\nRotated coordinates are " << rX << rY << rZ << "\n";
+//    std::cout << "Expected (p) is" << p << "; got " << q << "\n";
+//    std::cout << "Re-Rotated coordinates are " << oX << oY << oZ << "\n";
+  }
+
+  void testConstructorFromDirectionCosineMatrix_arbitrary()
+  {
+    Quat rotQ;
+    //Try a couple of random rotations
+    rotQ = Quat(124.0, V3D(0.1, 0.2, sqrt(0.95)));
+    this->compareArbitrary(rotQ);
+    rotQ = Quat(-546.0, V3D(-0.5, 0.5, sqrt(0.5)));
+    this->compareArbitrary(rotQ);
+    rotQ = Quat(34.0, V3D(-0.5, 0.5, sqrt(0.5))) * Quat(-25.0, V3D(0.1, 0.2, sqrt(0.95)));
+    this->compareArbitrary(rotQ);
   }
 
 };
