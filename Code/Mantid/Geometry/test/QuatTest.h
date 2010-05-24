@@ -7,6 +7,8 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h" 
 
+using namespace Mantid::Geometry;
+
 class testQuat : public CxxTest::TestSuite
 {
 private:
@@ -104,7 +106,7 @@ public:
 		q.normalize();
 		TS_ASSERT_DELTA(q[0],0.125,0.000001);
 		TS_ASSERT_DELTA(q[1],0.125,0.000001);
-		TS_ASSERT_DELTA(q[2],0.125,0.000001)
+		TS_ASSERT_DELTA(q[2],0.125,0.000001);
 		TS_ASSERT_DELTA(q[3],0.125,0.000001);
 	}
 	void testconjugatemethod()
@@ -163,17 +165,74 @@ public:
 	void testoperatordoublequal()
 	{
 		p=q;
-		TS_ASSERT(p==q);
+    TS_ASSERT(p==q);
 		q(1,4,5,6);
 		TS_ASSERT(p!=q);
 	}
-	void testoperatornotequal()
-	{
-		q(1,2,3,4);
-		TS_ASSERT(p!=q);
-		p=q;
-		TS_ASSERT(!(p!=q));
-	}
-	};
+  void testoperatornotequal()
+  {
+    q(1,2,3,4);
+    TS_ASSERT(p!=q);
+    p=q;
+    TS_ASSERT(!(p!=q));
+  }
+
+  void testRotateVector()
+  {
+    //Trivial
+    p(1,0,0,0);//Identity quaternion
+    V3D v(1,0,0);
+    V3D orig_v = v;
+    p.rotate(v);
+    TS_ASSERT(orig_v==v);
+
+    //Now do more angles
+    v = V3D(1,0,0);
+    p(90., V3D(0,1,0)); //90 degrees, right-handed, around y
+    p.rotate(v);
+    TS_ASSERT(v==V3D(0,0,-1));
+
+    v = V3D(1,0,0);
+    p(45., V3D(0,0,1));
+    p.rotate(v);
+    TS_ASSERT(v==V3D(sqrt(2)/2, sqrt(2)/2, 0));
+
+    v = V3D(1,0,0);
+    p(30., V3D(0,0,1));
+    p.rotate(v);
+    TS_ASSERT(v==V3D(sqrt(3)/2, 0.5, 0));
+
+    v = V3D(1,0,0);
+    p(125., V3D(1,0,0));
+    p.rotate(v);
+    TS_ASSERT(v==V3D(1,0,0));
+
+    //std::cout << "Rotated v is" << v << "\n";
+  }
+
+
+  void xtestConstructorFromDirectionCosineMatrix_trival()
+  {
+    Mantid::Geometry::V3D rX(1,0,0);
+    Mantid::Geometry::V3D rY(0,1,0);
+    Mantid::Geometry::V3D rZ(0,0,1);
+    q(rX,rY,rZ);
+    p(1,0,0,0); //Identity quaternion
+    TS_ASSERT(p==q); //Trivial rotation
+  }
+
+  void xtestConstructorFromDirectionCosineMatrix2()
+  {
+    //Rotate 90 deg around Z
+    V3D rX(0,1,0);
+    V3D rY(-1,0,0);
+    V3D rZ(0,0,1);
+    q(rX,rY,rZ);
+
+    std::cout << q << "\n";
+    TS_ASSERT(p!=q);
+  }
+
+};
 
 #endif
