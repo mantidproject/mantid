@@ -27,27 +27,45 @@ V3D::V3D(const double xx, const double yy, const double zz) :
 V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
 {}
 
-  /**
-    Sets the vector position based on spherical coordinates
+/**
+  Sets the vector position based on spherical coordinates
 
-    \param R :: The R value (distance)
-    \param theta :: The theta value (in degrees) = the azimuthal angle, where 0 points along +X
-    \param phi :: The phi value (in degrees) = the polar angle away from the +Z axis.
-  */
-
-
+  \param R :: The R value (distance)
+  \param theta :: The theta value (in degrees) = the polar angle away from the +Z axis.
+  \param phi :: The phi value (in degrees) = the azimuthal angle, where 0 points along +X and rotates counter-clockwise in the XY plane
+*/
 void V3D::spherical(const double& R, const double& theta, const double& phi)
 {
-	const double deg2rad=M_PI/180.0;
-	z=R*cos(theta*deg2rad);
-	const double ct=sin(theta*deg2rad);
-	x=R*ct*cos(phi*deg2rad);
-	y=R*ct*sin(phi*deg2rad);
+const double deg2rad=M_PI/180.0;
+z=R*cos(theta*deg2rad);
+const double ct=sin(theta*deg2rad);
+x=R*ct*cos(phi*deg2rad);
+y=R*ct*sin(phi*deg2rad);
 
-	// Setting this way can lead to very small values of x & y that should really be zero.
-	// This can cause confusion for the atan2 function used in getSpherical.
-	if (std::abs(x) < Tolerance) x = 0.0;
-  if (std::abs(y) < Tolerance) y = 0.0;
+// Setting this way can lead to very small values of x & y that should really be zero.
+// This can cause confusion for the atan2 function used in getSpherical.
+if (std::abs(x) < Tolerance) x = 0.0;
+if (std::abs(y) < Tolerance) y = 0.0;
+}
+
+/**
+  Sets the vector position based on spherical coordinates, in radians
+
+  \param R :: The R value (distance)
+  \param azimuth :: the azimuthal angle (in radians), where 0 points along +X and rotates counter-clockwise in the XY plane
+  \param polar :: the polar angle (in radians) away from the +Z axis.
+*/
+void V3D::spherical_rad(const double& R, const double& azimuth, const double& polar)
+{
+z=R*cos(polar);
+const double ct=R*sin(polar);
+x=ct*cos(azimuth);
+y=ct*sin(azimuth);
+
+// Setting this way can lead to very small values of x & y that should really be zero.
+// This can cause confusion for the atan2 function used in getSpherical.
+if (std::abs(x) < Tolerance) x = 0.0;
+if (std::abs(y) < Tolerance) y = 0.0;
 }
 
 
