@@ -191,7 +191,7 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
                     MantidVec& oldX = ws->dataX(specData);
                     newX.assign(oldX.begin(),oldX.end());
                 }
-                data.load(j,i);
+                data.load(1,i,j);
                 ////-- simulate input --
                 //for(int k=0;k<nBins;k++)
                 //    data()[k] = float(i*1000 + j*100 + k);

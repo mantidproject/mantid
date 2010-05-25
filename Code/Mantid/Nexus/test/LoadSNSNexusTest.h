@@ -24,7 +24,7 @@ public:
     {
         Mantid::API::FrameworkManager::Instance();
         LoadSNSNexus ld;
-	std::string outws_name = "nickr0x0r";
+        std::string outws_name = "nickr0x0r";
         ld.initialize();
         ld.setPropertyValue("Filename","../../../../Test/Nexus/SNS/REF_L_16055.nxs");
         ld.setPropertyValue("OutputWorkspace",outws_name);
@@ -35,14 +35,14 @@ public:
         TS_ASSERT(ws);
         TS_ASSERT_EQUALS(ws->blocksize(),501);
         TS_ASSERT_EQUALS(ws->getNumberHistograms(),77824);
-    /*    TS_ASSERT_EQUALS(ws->readX(0)[0],5.);
-        TS_ASSERT_EQUALS(ws->readX(0)[1],4005.);
-        TS_ASSERT_EQUALS(ws->readX(0)[2],8005.);
-        
-        TS_ASSERT_EQUALS(ws->readY(5)[1],1.);
-        TS_ASSERT_EQUALS(ws->readY(6)[0],1.);
-        TS_ASSERT_EQUALS(ws->readY(8)[3],1.);
-*/
+        TS_ASSERT_EQUALS(ws->readX(0)[0],0.);
+        TS_ASSERT_EQUALS(ws->readX(0)[1],200.);
+        TS_ASSERT_EQUALS(ws->readX(0)[2],400.);
+
+        TS_ASSERT_EQUALS(ws->readY(41799)[62],191.);
+        TS_ASSERT_EQUALS(ws->readY(51223)[66],8.);
+        TS_ASSERT_EQUALS(ws->readY(13873)[227],1.);
+
         TS_ASSERT_EQUALS(ws->spectraMap().nElements(),77824);
 
         const std::vector< Property* >& logs = ws->sample().getLogData();
@@ -70,7 +70,7 @@ public:
         TS_ASSERT(blog);
         TS_ASSERT_EQUALS(blog->size(),1);
 */
-        TS_ASSERT_EQUALS(ws->sample().getName(),"NONE");
+        //TS_ASSERT_EQUALS(ws->sample().getName(),"NONE");
     }
 };
 
