@@ -8,6 +8,8 @@
 
 #include "MantidGeometry/V3D.h"
 
+using namespace Mantid::Geometry;
+
 class V3DTest : public CxxTest::TestSuite
 {
 private:
@@ -280,16 +282,16 @@ public:
 	{
 	  b(0.0,0.0,0.0);
 	  a(9.9,7.6,0.0);
-	  TS_ASSERT_EQUALS( a.zenith(a), 0.0 )
-	  TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001 )
+	  TS_ASSERT_EQUALS( a.zenith(a), 0.0 );
+	  TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001 );
 	  a(-1.1,0.0,0.0);
-    TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001 )
+    TS_ASSERT_DELTA( a.zenith(b), M_PI/2.0, 0.0001 );
     a(0.0,0.0,1.0);
-    TS_ASSERT_EQUALS( a.zenith(b), 0.0 )
+    TS_ASSERT_EQUALS( a.zenith(b), 0.0 );
     a(1.0,0.0,1.0);
-    TS_ASSERT_DELTA( a.zenith(b), M_PI/4.0, 0.0001 )
+    TS_ASSERT_DELTA( a.zenith(b), M_PI/4.0, 0.0001 );
     a(1.0,0.0,-1.0);
-    TS_ASSERT_DELTA( a.zenith(b), 3.0*M_PI/4.0, 0.0001 )
+    TS_ASSERT_DELTA( a.zenith(b), 3.0*M_PI/4.0, 0.0001 );
 	}
 
 	void testAngle()
@@ -298,10 +300,10 @@ public:
 	  b(0.0,1.0,0.0);
 	  c(1.0,1.0,0.0);
 	  d(-1.0,0.0,0.0);
-	  TS_ASSERT_DELTA( a.angle(a), 0.0, 0.0001 )
-	  TS_ASSERT_DELTA( a.angle(b), M_PI/2.0, 0.0001 )
-    TS_ASSERT_DELTA( a.angle(c), M_PI/4.0, 0.0001 )
-    TS_ASSERT_DELTA( a.angle(d), M_PI, 0.0001 )
+	  TS_ASSERT_DELTA( a.angle(a), 0.0, 0.0001 );
+	  TS_ASSERT_DELTA( a.angle(b), M_PI/2.0, 0.0001 );
+    TS_ASSERT_DELTA( a.angle(c), M_PI/4.0, 0.0001 );
+    TS_ASSERT_DELTA( a.angle(d), M_PI, 0.0001 );
 	}
 
   void testSpherical()
@@ -311,15 +313,30 @@ public:
     b(0.0,0.0,0.0);
     b.spherical(r,theta,phi);
     double d=a.distance(b);
-		TS_ASSERT_DELTA(d,r,0.0001);
-		TS_ASSERT_DELTA(b.X(), 1.5, 0.0001 )
-    TS_ASSERT_DELTA(b.Y(), 1.5, 0.0001 )
-    TS_ASSERT_DELTA(b.Z(), 3.0/sqrt(2.0), 0.0001 )
+    TS_ASSERT_DELTA(d,r,0.0001);
+    TS_ASSERT_DELTA(b.X(), 1.5, 0.0001 );
+    TS_ASSERT_DELTA(b.Y(), 1.5, 0.0001 );
+    TS_ASSERT_DELTA(b.Z(), 3.0/sqrt(2.0), 0.0001 );
     // Test getSpherical returns the original values
-    TS_ASSERT_THROWS_NOTHING( b.getSpherical(r,theta,phi) )
-    TS_ASSERT_EQUALS( r,     3.0 )
-    TS_ASSERT_EQUALS( theta, 45.0 )
-    TS_ASSERT_EQUALS( phi,   45.0 )
+    TS_ASSERT_THROWS_NOTHING( b.getSpherical(r,theta,phi) );
+    TS_ASSERT_EQUALS( r,     3.0 );
+    TS_ASSERT_EQUALS( theta, 45.0 );
+    TS_ASSERT_EQUALS( phi,   45.0 );
+  }
+
+  void test_azimuth_polar_SNS()
+  {
+    a(0.0,0.0,0.0);
+    a.azimuth_polar_SNS( 1.0, 0, M_PI/2);
+    TS_ASSERT(a == V3D(1.0, 0, 0) );
+    a.azimuth_polar_SNS( 1.0, M_PI/2, M_PI/2);
+    TS_ASSERT(a == V3D(0.0, 0, 1.0) );
+    a.azimuth_polar_SNS( 2, 0, 0);
+    TS_ASSERT(a == V3D(0, 2, 0) );
+    a.azimuth_polar_SNS( 2, 0, M_PI);
+    TS_ASSERT(a == V3D(0, -2, 0) );
+    a.azimuth_polar_SNS( 2, 0, M_PI/4);
+    TS_ASSERT(a == V3D(sqrt(2), sqrt(2), 0) );
   }
 
 };

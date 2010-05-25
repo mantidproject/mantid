@@ -29,10 +29,13 @@ V3D::V3D(const V3D& v):x(v.x),y(v.y),z(v.z)
 
   /**
     Sets the vector position based on spherical coordinates
-    \param R :: The R value
-    \param theta :: The theta value (in degrees)
-    \param phi :: The phi value (in degrees)
+
+    \param R :: The R value (distance)
+    \param theta :: The theta value (in degrees) = the azimuthal angle, where 0 points along +X
+    \param phi :: The phi value (in degrees) = the polar angle away from the +Z axis.
   */
+
+
 void V3D::spherical(const double& R, const double& theta, const double& phi)
 {
 	const double deg2rad=M_PI/180.0;
@@ -46,6 +49,31 @@ void V3D::spherical(const double& R, const double& theta, const double& phi)
 	if (std::abs(x) < Tolerance) x = 0.0;
   if (std::abs(y) < Tolerance) y = 0.0;
 }
+
+
+/**
+  Sets the vector position based on azimuth and polar angle, in RADIANS, in the SNS instrument coordinate system,
+    where +Z = beam direction, +Y = vertical.
+
+  \param R :: The R value (distance)
+  \param azimuth :: The azimuthal angle (in Radians)
+  \param polar :: The polar value (in Radians)
+*/
+
+void V3D::azimuth_polar_SNS(const double& R, const double& azimuth, const double& polar)
+{
+  y=R*cos(polar);
+  const double ct=R*sin(polar);
+  x=ct*cos(azimuth);
+  z=ct*sin(azimuth);
+
+  // Setting this way can lead to very small values of x & y that should really be zero.
+  // This can cause confusion for the atan2 function used in getSpherical.
+  if (std::abs(x) < Tolerance) x = 0.0;
+  if (std::abs(y) < Tolerance) y = 0.0;
+  if (std::abs(z) < Tolerance) z = 0.0;
+}
+
 
   /**
     Assignment operator

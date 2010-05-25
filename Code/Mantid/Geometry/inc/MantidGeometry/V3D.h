@@ -74,6 +74,7 @@ namespace Mantid
       // Setting x, y and z values
       void operator()(const double xx, const double yy, const double zz);
       void spherical(const double& R, const double& theta, const double& phi);
+      void azimuth_polar_SNS(const double& R, const double& azimuth, const double& polar);
       void setX(const double xx);
       void setY(const double yy);
       void setZ(const double zz);
