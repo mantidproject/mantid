@@ -31,7 +31,7 @@ void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y,
   m_data->holdCalculatedJacobian =  gsl_matrix_alloc (nData, nParam);
 
   if ( costFunction.compare("Least squares") == 0 )
-    m_data->costFunc = new CostFuncLeastSquares();
+    m_data->costFunc = CostFunctionFactory::Instance().createUnwrapped(costFunction);
   else
   {
     g_log.warning("LevenbergMarquardt can only be used with Least squares cost function. Default to Least squares\n");

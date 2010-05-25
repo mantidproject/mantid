@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include "MantidCurveFitting/CostFunctionFactory.h"
 
 namespace Mantid
 {
@@ -53,6 +54,16 @@ public:
   virtual void deriv(const double* yData, const double* inverseError, const double* yCal, 
                      const double* jacobian, double* outDerivs, const int& p, const int& n) = 0;
 };
+
+/**
+ * Macro for declaring a new type of cost functions to be used with the CostFunctionFactory
+ */
+#define DECLARE_COSTFUNCTION(classname,username) \
+        namespace { \
+	Mantid::Kernel::RegistrationHelper register_costfunction_##classname( \
+  ((Mantid::CurveFitting::CostFunctionFactory::Instance().subscribe<classname>(#username)) \
+	, 0)); \
+	} 
 
 } // namespace CurveFitting
 } // namespace Mantid

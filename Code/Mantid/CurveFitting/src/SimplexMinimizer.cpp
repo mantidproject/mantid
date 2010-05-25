@@ -34,16 +34,7 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
   m_data->sqrtWeightData = sqrtWeight;
   m_data->holdCalculatedData = new double[nData];
   m_data->holdCalculatedJacobian =  gsl_matrix_alloc (nData, nParam);
-
-  if ( costFunction.compare("Least squares") == 0 )
-    m_data->costFunc = new CostFuncLeastSquares();
-  else if ( costFunction.compare("Ignore positive peaks") == 0 )
-    m_data->costFunc = new CostFuncIgnorePosPeaks();
-  else
-  {
-    g_log.error("Unrecognised cost function. Default to Least squares\n");
-    m_data->costFunc = new CostFuncLeastSquares();
-  }
+  m_data->costFunc = CostFunctionFactory::Instance().createUnwrapped(costFunction);
 
   // setup simplex container
   gslContainer.n = nParam;  

@@ -11,13 +11,9 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidCurveFitting/ICostFunction.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
-#include "MantidCurveFitting/FRConjugateGradientMinimizer.h"
-#include "MantidCurveFitting/PRConjugateGradientMinimizer.h"
-#include "MantidCurveFitting/BFGS_Minimizer.h"
+
 
 namespace Mantid
 {
@@ -80,9 +76,9 @@ namespace CurveFitting
     declareProperty("Minimizer","Levenberg-Marquardt",new ListValidator(minimizerOptions),
       "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Direction::InOut);
 
-    std::vector<std::string> costFuncOptions;
-    costFuncOptions.push_back("Least squares");
-    costFuncOptions.push_back("Ignore positive peaks");
+    std::vector<std::string> costFuncOptions = CostFunctionFactory::Instance().getKeys();;
+    //costFuncOptions.push_back("Least squares");
+    //costFuncOptions.push_back("Ignore positive peaks");
     declareProperty("CostFunction","Least squares",new ListValidator(costFuncOptions),
       "The cost function to be used for the fit, default is Least squares", Direction::InOut);
   }

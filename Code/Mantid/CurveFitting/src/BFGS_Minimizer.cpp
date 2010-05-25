@@ -27,16 +27,7 @@ void BFGS_Minimizer::initialize(double* X, const double* Y,
   m_data->sqrtWeightData = sqrtWeight;
   m_data->holdCalculatedData = new double[nData];
   m_data->holdCalculatedJacobian =  gsl_matrix_alloc (nData, nParam);
-
-  if ( costFunction.compare("Least squares") == 0 )
-    m_data->costFunc = new CostFuncLeastSquares();
-  else if ( costFunction.compare("Ignore positive peaks") == 0 )
-    m_data->costFunc = new CostFuncIgnorePosPeaks();
-  else
-  {
-    g_log.error("Unrecognised cost function. Default to Least squares\n");
-    m_data->costFunc = new CostFuncLeastSquares();
-  }
+  m_data->costFunc = CostFunctionFactory::Instance().createUnwrapped(costFunction);
 
   const gsl_multimin_fdfminimizer_type *T = gsl_multimin_fdfminimizer_vector_bfgs2;
 

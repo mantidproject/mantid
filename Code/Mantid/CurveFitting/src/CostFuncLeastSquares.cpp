@@ -8,6 +8,8 @@ namespace Mantid
 namespace CurveFitting
 {
 
+DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
+
   /// Calculate value of cost function from observed
   /// and calculated values
   /// note yCal modified for computational efficiency

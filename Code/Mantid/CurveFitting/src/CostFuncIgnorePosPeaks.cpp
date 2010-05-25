@@ -11,6 +11,8 @@ namespace Mantid
 namespace CurveFitting
 {
 
+DECLARE_COSTFUNCTION(CostFuncIgnorePosPeaks,Ignore positive peaks)
+
   /// Calculate value of cost function from observed
   /// and calculated values
   /// note yCal modified for computational efficiency

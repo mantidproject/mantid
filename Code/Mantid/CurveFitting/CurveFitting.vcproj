@@ -231,6 +231,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\CostFunctionFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Fit.cpp"
 				>
 			</File>
@@ -386,6 +390,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\CostFuncLeastSquares.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\CostFunctionFactory.h"
 				>
 			</File>
 			<File

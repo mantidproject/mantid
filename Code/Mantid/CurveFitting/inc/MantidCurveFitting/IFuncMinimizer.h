@@ -77,7 +77,7 @@ public:
 } // namespace Mantid
 
 /**
- * Macro for declaring a new type of function to be used with the FunctionFactory
+ * Macro for declaring a new type of minimizers to be used with the FuncMinimizerFactory
  */
 #define DECLARE_FUNCMINIMIZER(classname,username) \
         namespace { \
