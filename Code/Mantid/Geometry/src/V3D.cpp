@@ -52,10 +52,10 @@ if (std::abs(y) < Tolerance) y = 0.0;
   Sets the vector position based on spherical coordinates, in radians
 
   \param R :: The R value (distance)
-  \param azimuth :: the azimuthal angle (in radians), where 0 points along +X and rotates counter-clockwise in the XY plane
   \param polar :: the polar angle (in radians) away from the +Z axis.
+  \param azimuth :: the azimuthal angle (in radians), where 0 points along +X and rotates counter-clockwise in the XY plane
 */
-void V3D::spherical_rad(const double& R, const double& azimuth, const double& polar)
+void V3D::spherical_rad(const double& R, const double& polar, const double& azimuth)
 {
 z=R*cos(polar);
 const double ct=R*sin(polar);

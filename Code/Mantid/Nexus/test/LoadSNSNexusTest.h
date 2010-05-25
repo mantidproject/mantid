@@ -2,13 +2,14 @@
 #define LOADSNSNEXUSTEST_H_
 
 #include "MantidDataHandling/LoadInstrument.h" 
-
 #include "MantidNexus/LoadSNSNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+using namespace Mantid;
+using namespace Mantid::Geometry;
 using namespace Mantid::NeXus;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -20,7 +21,7 @@ using namespace Mantid::Kernel;
 class LoadSNSNexusTest : public CxxTest::TestSuite
 {
 public:
-    void xtestExec()
+    void testExec()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadSNSNexus ld;
@@ -47,6 +48,24 @@ public:
 
         const std::vector< Property* >& logs = ws->sample().getLogData();
         TS_ASSERT_EQUALS(logs.size(),0);
+
+        //------------ Instrument Loading Sub-Test -----------------------
+        IInstrument_sptr inst = ws->getInstrument();
+
+        TS_ASSERT_EQUALS(inst->getName(), "REF_L");
+        std::map<int, Geometry::IDetector_sptr> detectors = inst->getDetectors();
+        TS_ASSERT_EQUALS(detectors.size(), 304*256); //304*256
+
+        V3D pos(0,0,0);
+        //Test a few pixels in bank 1
+        pos.spherical_rad(1.3571243, 0.1025134, -0.6979992);
+        TS_ASSERT(detectors[0]->getRelativePos() == pos);
+        TS_ASSERT_EQUALS(detectors[0]->getName(), "bank1, (0,0)");
+        //Pixel 303
+        pos.spherical_rad(1.3570696, 0.10212083, -2.4403417);
+        TS_ASSERT(detectors[303]->getRelativePos() == pos);
+        TS_ASSERT_EQUALS(detectors[304]->getName(), "bank1, (1,0)");
+
 /*
         TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(ws->sample().getLogData("icp_event"));
         TS_ASSERT(slog);

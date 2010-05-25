@@ -329,13 +329,13 @@ public:
     a(0.0,0.0,0.0);
     a.spherical_rad(1, 0, 0);
     TS_ASSERT(a == V3D(0, 0, 1) );
-    a.spherical_rad(1, 0, M_PI/2);
+    a.spherical_rad(1, M_PI/2, 0);
     TS_ASSERT(a == V3D(1, 0, 0) );
     a.spherical_rad(1, M_PI/2, M_PI/2);
     TS_ASSERT(a == V3D(0, 1, 0) );
-    a.spherical_rad(1, 0, M_PI);
+    a.spherical_rad(1, M_PI, 0);
     TS_ASSERT(a == V3D(0, 0, -1) );
-    a.spherical_rad(2, 0, M_PI/4);
+    a.spherical_rad(2, M_PI/4, 0);
     TS_ASSERT(a == V3D(sqrt(2.0), 0, sqrt(2.0)) );
   }
 

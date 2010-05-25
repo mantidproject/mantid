@@ -59,25 +59,25 @@ public:
         rot.rotate(pointer);
 
         V3D expected;
-        expected.spherical_rad(1.0, 0, -0.628319);
+        expected.spherical_rad(1.0, -0.628319, 0);
         TS_ASSERT(pointer == expected);
 
         //---------------------------------------------------
         V3D pos(0,0,0);
         double rad2deg = 180.0/M_PI;
         //Test a few pixels in bank 1
-        pos.spherical_rad(0.4104138, -2.6941562, 0.6783125);
+        pos.spherical_rad(0.4104138, 0.6783125, -2.6941562);
         TS_ASSERT(detectors[0]->getRelativePos() == pos);
         //Row 0, column 1 (I think!)
-        pos.spherical_rad(0.4102956, -2.6950939, 0.67695636);
+        pos.spherical_rad(0.4102956, 0.67695636, -2.6950939);
         TS_ASSERT(detectors[1]->getRelativePos() == pos);
         //Row 1, column 0
-        pos.spherical_rad(0.4102956, -2.6962788, 0.6789524);
+        pos.spherical_rad(0.4102956, 0.6789524, -2.6962788);
         TS_ASSERT(detectors[256]->getRelativePos() == pos);
 
         //Now try bank 10
         int offset = 9*256*256;
-        pos.spherical_rad(0.4393626, -0.5356482, 1.5707995);
+        pos.spherical_rad(0.4393626, 1.5707995, -0.5356482);
         TS_ASSERT(detectors[offset+0]->getRelativePos() == pos);
 
 

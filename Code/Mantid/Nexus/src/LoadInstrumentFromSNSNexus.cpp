@@ -12,6 +12,8 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include <fstream>
+#include <sstream>
+#include <boost/algorithm/string/replace.hpp>
 
 
 namespace Mantid
@@ -41,7 +43,6 @@ void LoadInstrumentFromSNSNexus::init()
 		  "attempt to load the instrument from. The file extension must either be\n"
 		  ".nxs or .NXS" );
 }
-
 
 
 
@@ -103,7 +104,10 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
     NXInstrument nxInstr = entry.openNXInstrument("instrument");
     NXChar name = nxInstr.openNXChar("name");
     name.load();
-    instrument->setName(name());
+    //Some names had a 0x7F character, which we remove.
+    std::string string_name = name();
+    boost::algorithm::replace_all(string_name, "\x7F", "");
+    instrument->setName(string_name);
 
     //L1 is the moderator distance.
     double l1;
@@ -155,13 +159,40 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
         //The detector nxs entry.
         NXDetector nxDet = nxInstr.openNXDetector(*it);
 
+        // Find the size of a pixel
+        NXFloat distance = nxDet.openDistance();
+        distance.load();
+        NXFloat azimuth = nxDet.openAzimuthalAngle();
+        azimuth.load();
+        NXFloat polar = nxDet.openPolarAngle();
+        polar.load();
+
+
+        Geometry::V3D pos_corner;
+        Geometry::V3D pos_x;
+        Geometry::V3D pos_y;
+        pos_corner.spherical_rad(distance(0,0), polar(0,0), azimuth(0,0));
+        pos_x.spherical_rad(distance(0,1), polar(0,1), azimuth(0,1));
+        pos_y.spherical_rad(distance(1,0), polar(1,0), azimuth(1,0));
+
+        double radius = 0.5*((pos_corner-pos_x).norm() + (pos_corner-pos_y).norm());
+
+        std::stringstream xmlPixelSphere;
+        xmlPixelSphere << "<sphere id=\"some-shape\">" "<centre x=\"0.0\"  y=\"0.0\" z=\"0.0\" />"
+                 "<radius val=\"" << radius << "\" />" "</sphere>";
+
+        boost::shared_ptr<Geometry::Object> pixel_sphere = shapeCreator.createShape(xmlPixelSphere.str());
+
+        /*
         NXFloat detSize = nxDet.openNXFloat("origin/shape/size");
         detSize.load();
+
         //Size of the detector
         double szX = detSize[0] != detSize[0] ? 0.001 : detSize[0]/2;
         double szY = detSize[1] != detSize[1] ? 0.001 : detSize[1]/2;
         //Fake 1mm thick detector.
         double szZ = 0.001; //detSize[2] != detSize[2] ? 0.001 : detSize[2]/2;
+
 
         std::ostringstream xmlShapeStream;
         xmlShapeStream
@@ -174,39 +205,35 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
 
         std::string xmlCuboidShape(xmlShapeStream.str());
         boost::shared_ptr<Geometry::Object> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
+        */
 
         //Now we calculate the bank orientation and shift
         Geometry::V3D shift;
         Geometry::Quat rot;
         this->getBankOrientation(nxDet,shift,rot);
 
-        NXFloat distance = nxDet.openDistance();
-        distance.load();
-
-        NXFloat azimuth = nxDet.openAzimuthalAngle();
-        azimuth.load();
-        NXFloat polar = nxDet.openPolarAngle();
-        polar.load();
         for(int i=0;i<distance.dim0();i++)
         for(int j=0;j<distance.dim1();j++)
         {
             float r = distance(i,j);
-            float angle = polar(i,j);
-            float phi = azimuth(i,j);
+            float polar_angle = polar(i,j);
+            float azimuth_angle = azimuth(i,j);
 
             // check for a NaN
-            if (r != r || angle != angle || phi != phi)
+            if (r != r || polar_angle != polar_angle || azimuth_angle != azimuth_angle)
             {
                 r = 0.;
-                angle = 0.;
-                phi = 0.;
+                polar_angle = 0.;
+                azimuth_angle = 0.;
             }
 
             // Create a new detector. Instrument will take ownership of pointer so no need to delete.
-            Geometry::Detector *detector = new Geometry::Detector("det",cuboidShape,samplepos);
+            std::stringstream detname;
+            detname << *it << ", (" << i << "," << j << ")";
+            Geometry::Detector *detector = new Geometry::Detector(detname.str(), pixel_sphere, samplepos);
             Geometry::V3D pos;
 
-            pos.spherical(r, angle/M_PI*180., phi/M_PI*180.);
+            pos.spherical_rad(r, polar_angle, azimuth_angle);
             detector->setPos(pos);
             detector->setRot(rot);
 
