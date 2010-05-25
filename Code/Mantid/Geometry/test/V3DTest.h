@@ -336,7 +336,7 @@ public:
     a.spherical_rad(1, 0, M_PI);
     TS_ASSERT(a == V3D(0, 0, -1) );
     a.spherical_rad(2, 0, M_PI/4);
-    TS_ASSERT(a == V3D(sqrt(2), 0, sqrt(2)) );
+    TS_ASSERT(a == V3D(sqrt(2.0), 0, sqrt(2.0)) );
   }
 
   void test_azimuth_polar_SNS()
@@ -351,7 +351,7 @@ public:
     a.azimuth_polar_SNS( 2, 0, M_PI);
     TS_ASSERT(a == V3D(0, -2, 0) );
     a.azimuth_polar_SNS( 2, 0, M_PI/4);
-    TS_ASSERT(a == V3D(sqrt(2), sqrt(2), 0) );
+    TS_ASSERT(a == V3D(sqrt(2.0), sqrt(2.0), 0) );
   }
 
 };
