@@ -167,8 +167,15 @@ elif platform.system() == 'Linux':
 elif platform.system() == 'Darwin':
 	cppPaths.append(third_party+'/include')
 	cppPaths.append(third_party+'/include/muParser')
-	libDirList.append(third_party+'/lib/mac')
 	env.Append(SHLINKFLAGS='-install_name @executable_path/./${TARGET.file}')
+	# Get the version as a tuple
+	mac_version = tuple(platform.mac_ver()[0].split(".")[0:2])
+	snow_leopard = ('10', '6')
+	if mac_version >= snow_leopard:
+		print '* Building for Mac OS X 10.6 (Snow Leopard) *'
+		libDirList.append(third_party+'/lib/mac-10.6')
+	else:
+		libDirList.append(third_party+'/lib/mac')
 	
 if os.name == 'posix':
 	cppPaths.append(USRINCLUDE+ '/python' + sys.version[0:3])
