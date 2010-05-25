@@ -127,7 +127,7 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
     source->setPos(0.0, 0.0, -1.0*l1);
 
     //Track detector IDs
-    int det = 1;
+    int det = 0;
     //--- Now we go through the list of monitors we got before. ----
     for(std::set<std::string>::const_iterator it=monitors.begin();it!=monitors.end();it++)
     {
