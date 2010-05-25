@@ -727,7 +727,8 @@ namespace Mantid
         {
           NXDataSet dset(*this,it->nxname);
           dset.open();
-          if (dset.attributes("signal") == "1") 
+          // std::cerr << "NXData signal of " << it->nxname << " = " << dset.attributes("signal") << "\n";
+          if (dset.attributes("signal") == "1")
           {
             return openNXDataSet<T>(it->nxname);
           }

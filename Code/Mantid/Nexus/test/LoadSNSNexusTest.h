@@ -21,7 +21,19 @@ using namespace Mantid::Kernel;
 class LoadSNSNexusTest : public CxxTest::TestSuite
 {
 public:
-    void testExec()
+  void xtestTopaz()
+  {
+      Mantid::API::FrameworkManager::Instance();
+      LoadSNSNexus ld;
+      std::string outws_name = "topaz_900";
+      ld.initialize();
+      ld.setPropertyValue("Filename","../../../../Test/Nexus/SNS/TOPAZ_900.nxs");
+      ld.setPropertyValue("OutputWorkspace",outws_name);
+      TS_ASSERT_THROWS_NOTHING(ld.execute());
+      TS_ASSERT(ld.isExecuted());
+  }
+
+  void testRefl()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadSNSNexus ld;

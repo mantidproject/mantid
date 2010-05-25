@@ -123,19 +123,21 @@ API::Workspace_sptr LoadSNSNexus::loadEntry(NXEntry entry,int period, double pro
     int nBins = 0;
         std::cerr << "loadEntry02:" << std::endl;// REMOVE
     for(std::vector<NXClassInfo>::const_iterator it=entry.groups().begin();it!=entry.groups().end();it++)
-    if (it->nxclass == "NXdata") // Count detectors
-    {    std::cerr << "loadEntry03:" << it->nxname << std::endl;// REMOVE
-            NXData dataGroup = entry.openNXData(it->nxname);
-            NXInt data = dataGroup.openIntData();
-            if (data.rank() != 3) throw std::runtime_error("SNS NXdata is expected to be a 3D array");
-            if (nBins == 0) nBins = data.dim2();
-            nSpectra += data.dim0() * data.dim1();
-            banks.insert(it->nxname); // sort the bank names
-    }
-    else if (it->nxclass == "NXmonitor") // Count monitors
-    {    std::cerr << "loadEntry04:" << std::endl;// REMOVE
-        nSpectra += 1;
-        monitors.insert(it->nxname);
+    {
+      if (it->nxclass == "NXdata") // Count detectors
+      {    std::cerr << "loadEntry03:" << it->nxname << std::endl;// REMOVE
+              NXData dataGroup = entry.openNXData(it->nxname);
+              NXInt data = dataGroup.openIntData();
+              if (data.rank() != 3) throw std::runtime_error("SNS NXdata is expected to be a 3D array");
+              if (nBins == 0) nBins = data.dim2();
+              nSpectra += data.dim0() * data.dim1();
+              banks.insert(it->nxname); // sort the bank names
+      }
+      else if (it->nxclass == "NXmonitor") // Count monitors
+      {    std::cerr << "loadEntry04:" << std::endl;// REMOVE
+          nSpectra += 1;
+          monitors.insert(it->nxname);
+      }
     }
 
     // Create the output workspace
