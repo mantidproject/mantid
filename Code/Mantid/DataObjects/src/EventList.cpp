@@ -80,6 +80,12 @@ namespace DataObjects
   {
   }
 
+  EventList& EventList::operator=(const EventList& eventlist)
+  {
+    throw NotImplementedError("EventList& operator=(const EventList& eventlist) is not implemented");
+  }
+
+
   EventList& EventList::operator+=(const TofEvent &event)
   {
     this->events.push_back(event);
