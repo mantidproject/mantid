@@ -105,7 +105,7 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   }
   else
     throw std::runtime_error("Unrecognized MantidCurve type " + type.toStdString());
-  if (workspace->isHistogramData())
+  if (workspace->isHistogramData() && !workspace->isDistribution())
   {
     setStyle(QwtPlotCurve::Steps);
     setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
