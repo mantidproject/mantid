@@ -132,6 +132,14 @@ void NXObject::getAttributes()
                 attributes.set(pName,buff.get());
                 break;
             }
+        case NX_UINT16:
+            {
+                short unsigned int value;
+                NXgetattr(m_fileID,pName,&value,&iLength,&iType);
+                sprintf(buff.get(),"%i",value);
+                attributes.set(pName,buff.get());
+                break;
+            }
         }
     };
 }
