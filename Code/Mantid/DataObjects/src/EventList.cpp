@@ -1,4 +1,4 @@
-#include "MantidDataObjects/EventHistogram.h"
+#include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Exception.h"
 
 using std::size_t;
@@ -44,30 +44,30 @@ namespace DataObjects
   }
 
   /// --------------------- TofEvent stuff
-  EventHistogram::EventHistogram()
+  EventList::EventList()
   {
   }
 
-  EventHistogram::EventHistogram(const EventHistogram& rhs)
+  EventList::EventList(const EventList& rhs)
   {
 	  this->events.assign(rhs.events.begin(), rhs.events.end());
   }
 
-  EventHistogram::EventHistogram(const vector<TofEvent> &events)
+  EventList::EventList(const vector<TofEvent> &events)
   {
     this->events.assign(events.begin(), events.end());
   }
 
-  EventHistogram::~EventHistogram()
+  EventList::~EventList()
   {
   }
 
-  EventHistogram& EventHistogram::operator+=(const TofEvent &event)
+  EventList& EventList::operator+=(const TofEvent &event)
   {
     this->events.push_back(event);
     return *this;
   }
-  EventHistogram& EventHistogram::operator+=(const std::vector<TofEvent> & events)
+  EventList& EventList::operator+=(const std::vector<TofEvent> & events)
   {
     this->events.insert(this->events.end(), events.begin(), events.end());
     return *this;

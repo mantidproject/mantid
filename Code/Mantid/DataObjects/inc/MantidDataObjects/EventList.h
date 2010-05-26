@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAOBJECTS_EVENTHISTOGRAM_H_
-#define MANTID_DATAOBJECTS_EVENTHISTOGRAM_H_ 1
+#ifndef MANTID_DATAOBJECTS_EVENTLIST_H_
+#define MANTID_DATAOBJECTS_EVENTLIST_H_ 1
 
 #ifdef _WIN32 /* _WIN32 */
 typedef unsigned uint32_t;
@@ -36,21 +36,21 @@ private:
 
 };
 
-class DLLExport EventHistogram
+class DLLExport EventList
 {
 public:
-  EventHistogram();
-  EventHistogram(const EventHistogram&);
-  EventHistogram(const std::vector<TofEvent> &);
-  EventHistogram& operator=(const EventHistogram&);
-  virtual ~EventHistogram();
+  EventList();
+  EventList(const EventList&);
+  EventList(const std::vector<TofEvent> &);
+  EventList& operator=(const EventList&);
+  virtual ~EventList();
   /** Add an event to the histogram. */
-  EventHistogram& operator+=(const TofEvent&);
-  EventHistogram& operator+=(const std::vector<TofEvent>&);
+  EventList& operator+=(const TofEvent&);
+  EventList& operator+=(const std::vector<TofEvent>&);
 private:
   std::vector<TofEvent> events;
 };
 
 } // DataObjects
 } // Mantid
-#endif /// MANTID_DATAOBJECTS_EVENTHISTOGRAM_H_
+#endif /// MANTID_DATAOBJECTS_EVENTLIST_H_
