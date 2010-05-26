@@ -47,7 +47,7 @@ namespace Mantid
     {
     public:
       /// Constructor
-      Chebyshev():m_n(-1),m_StartX(-1.),m_EndX(1.) {};
+      Chebyshev();
       /// Destructor
       ~Chebyshev() {};
 

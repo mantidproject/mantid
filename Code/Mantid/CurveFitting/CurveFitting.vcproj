@@ -373,6 +373,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\ChebyshevTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\test\CompositeFunctionTest.h"
 				>
 			</File>

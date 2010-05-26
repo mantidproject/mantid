@@ -16,6 +16,11 @@ using namespace API;
 
 DECLARE_FUNCTION(Chebyshev)
 
+Chebyshev::Chebyshev():m_n(0),m_StartX(-1.),m_EndX(1.) 
+{
+  declareParameter("A0");
+};
+
 void Chebyshev::function(double* out, const double* xValues, const int& nData)const
 {
   if (m_StartX >= m_EndX)
@@ -57,6 +62,7 @@ void Chebyshev::functionDeriv(Jacobian* out, const double* xValues, const int& n
     double x = a + b * xValues[i];
     double t1 = x;
     out->set(i,0, 1);
+    if (m_n == 0) continue;
     out->set(i,1, x);
     for(int j = 2; j <= m_n; ++j)
     {

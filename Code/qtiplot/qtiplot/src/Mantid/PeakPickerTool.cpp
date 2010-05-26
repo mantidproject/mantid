@@ -286,7 +286,7 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
       widthIsSet();
       if ((m_changingXMin || m_changingXMax) && fitBrowser()->isAutoBack())
       {
-        fitBrowser()->addAutoBackground();
+        fitBrowser()->refitAutoBackground();
       }
       resetting(false);
       changingXMin(false);
@@ -763,13 +763,16 @@ void PeakPickerTool::addBackground()
 {
   bool ok = false;
   QString fnName = 
-    QInputDialog::getItem(m_mantidUI->appWindow(), "MantidPlot - Fit", "Select background type", 
-         fitBrowser()->registeredBackgrounds(),0,false,&ok);
+    QInputDialog::getItem(m_mantidUI->appWindow(), 
+         "MantidPlot - Fit", "Select background type", 
+         fitBrowser()->registeredBackgrounds(),
+         fitBrowser()->registeredBackgrounds().indexOf("LinearBackground"),
+         false,&ok);
   if (ok)
   {
     if (fnName == "LinearBackground")
     {
-      fitBrowser()->setAutoBackgroundName(fnName.toStdString());
+      fitBrowser()->setAutoBackgroundName(fnName);
       fitBrowser()->addAutoBackground();
     }
     else

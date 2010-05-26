@@ -110,6 +110,14 @@ public:
   void setAttribute(const QString& attName, const double& attValue);
 
   /**
+   * Set function's attribute of any type.
+   * @param attName The name of the attribute
+   * @param attValue The new attribute value as a string. If the attValue's
+   *  format doesn't match the attribute's type it is ignored.
+   */
+  void setAttribute(const QString& attName, const QString& attValue);
+
+  /**
    * Update the parameter properties
    */
   void updateParameters();
@@ -158,6 +166,8 @@ public:
   void replot()const;
   void removePlot();
   void removeAllPlots();
+
+  void fit();
 
 protected slots:
 

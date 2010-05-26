@@ -145,7 +145,8 @@ public:
   /// Creates and adds the autobackground
   void addAutoBackground();
   bool isAutoBack()const{return m_autoBackground!=NULL;}
-  void setAutoBackgroundName(const std::string& aName);
+  void setAutoBackgroundName(const QString& aName);
+  void refitAutoBackground();
 
 public slots:
   void fit();
@@ -316,7 +317,9 @@ private:
   bool m_auto_back;
 
   /// Name of the autobackground function
-  std::string m_autoBgName;
+  QString m_autoBgName;
+  /// List of attributes of the autobackground function as name=value pairs separated by spaces
+  QString m_autoBgAttributes;
 
   /// The autobackground handler
   PropertyHandler* m_autoBackground;
@@ -324,6 +327,7 @@ private:
   friend class PropertyHandler;
   friend class CreateAttributeProperty;
   friend class SetAttribute;
+  friend class SetAttributeProperty;
 
 };
 

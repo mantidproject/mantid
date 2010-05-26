@@ -4,10 +4,12 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -308,37 +310,37 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
 
   // if it's a LinearBackground estimate its A0 and A1 parameters
   // from data values at the ends of the fitting interval
-  if (f->name() == "LinearBackground" && !m_browser->workspaceName().empty())
-  {
-    if (ws && wi >= 0 && wi < ws->getNumberHistograms())
+    if (f->name() == "LinearBackground" && !m_browser->workspaceName().empty())
     {
-      const Mantid::MantidVec& X = ws->readX(wi);
-      double istart = 0, iend = 0;
-      for(int i=0;i<X.size()-1;++i)
+      if (ws && wi >= 0 && wi < ws->getNumberHistograms())
       {
-        double x = X[i];
-        if (x < m_browser->startX())
+        const Mantid::MantidVec& X = ws->readX(wi);
+        double istart = 0, iend = 0;
+        for(int i=0;i<X.size()-1;++i)
         {
-          istart = i;
+          double x = X[i];
+          if (x < m_browser->startX())
+          {
+            istart = i;
+          }
+          if (x > m_browser->endX())
+          {
+            iend = i;
+            if (iend > 0) iend--;
+            break;
+          }
         }
-        if (x > m_browser->endX())
+        if (iend > istart)
         {
-          iend = i;
-          if (iend > 0) iend--;
-          break;
+          const Mantid::MantidVec& Y = ws->readY(wi);
+          double p0 = Y[istart];
+          double p1 = Y[iend];
+          double A1 = (p1-p0)/(X[iend]-X[istart]);
+          double A0 = p0 - A1*X[istart];
+          f->setParameter("A0",A0);
+          f->setParameter("A1",A1);
         }
       }
-      if (iend > istart)
-      {
-        const Mantid::MantidVec& Y = ws->readY(wi);
-        double p0 = Y[istart];
-        double p1 = Y[iend];
-        double A1 = (p1-p0)/(X[iend]-X[istart]);
-        double A0 = p0 - A1*X[istart];
-        f->setParameter("A0",A0);
-        f->setParameter("A1",A1);
-      }
-    }
   }
   if (ws)
   {
@@ -604,6 +606,50 @@ private:
 };
 
 /**
+ * Visitor setting new attribute value. Depending on the attribute type
+ * the appropriate apply method is used.
+ */
+class SetAttributeProperty: public Mantid::API::IFunction::ConstAttributeVisitor<>
+{
+public:
+  SetAttributeProperty(FitPropertyBrowser* browser,QtProperty* prop)
+    :m_browser(browser),m_prop(prop){}
+protected:
+  /// Set string property
+  void apply(const std::string& str)const
+  {
+    m_browser->m_changeSlotsEnabled = false;
+    QString attName = m_prop->propertyName();
+    if (attName.toLower() == "filename")
+    {
+       m_browser->m_filenameManager->setValue(m_prop,QString::fromStdString(str));
+    }
+    else
+    {
+      m_browser->m_stringManager->setValue(m_prop,QString::fromStdString(str));
+    }
+    m_browser->m_changeSlotsEnabled = true;
+  }
+  /// Set double property
+  void apply(const double& d)const
+  {
+    m_browser->m_changeSlotsEnabled = false;
+    m_browser->m_doubleManager->setValue(m_prop,d);
+    m_browser->m_changeSlotsEnabled = true;
+  }
+  /// Set int property
+  void apply(const int& i)const
+  {
+    m_browser->m_changeSlotsEnabled = false;
+    m_browser->m_intManager->setValue(m_prop,i);
+    m_browser->m_changeSlotsEnabled = true;
+  }
+private:
+  FitPropertyBrowser* m_browser;
+  QtProperty* m_prop;
+};
+
+/**
 * Set function attribute value read from a QtProperty
 * @param prop The (string) property with the new attribute value
 * @return true if successfull
@@ -620,7 +666,12 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
       SetAttribute tmp(m_browser,prop);
       att.apply(tmp);
       m_fun->setAttribute(attName.toStdString(),att);
+      m_browser->compositeFunction()->checkFunction();
       initParameters();
+      if (this == m_browser->m_autoBackground)
+      {
+        fit();
+      }
     }
     catch(std::exception& e)
     {
@@ -650,6 +701,7 @@ void PropertyHandler::setAttribute(const QString& attName, const double& attValu
     try
     {
       m_fun->setAttribute(attName.toStdString(),Mantid::API::IFunction::Attribute(attValue));
+      m_browser->compositeFunction()->checkFunction();
       foreach(QtProperty* prop,m_attributes)
       {
         if (prop->propertyName() == attName)
@@ -669,6 +721,29 @@ void PropertyHandler::setAttribute(const QString& attName, const double& attValu
       PropertyHandler* h = getHandler(i);
       h->setAttribute(attName,attValue);
     }
+  }
+}
+
+
+
+void PropertyHandler::setAttribute(const QString& attName, const QString& attValue)
+{
+  const std::string name = attName.toStdString();
+  if (m_fun->hasAttribute(name))
+  {
+    Mantid::API::IFunction::Attribute att = m_fun->getAttribute(name);
+    att.fromString(attValue.toStdString());
+    m_fun->setAttribute(name,att);
+    m_browser->compositeFunction()->checkFunction();
+    foreach(QtProperty* prop,m_attributes)
+    {
+      if (prop->propertyName() == attName)
+      {
+        SetAttributeProperty tmp(m_browser,prop);
+        att.apply(tmp);
+      }
+    }
+    initParameters();
   }
 }
 
@@ -755,6 +830,18 @@ Mantid::API::IFunction* PropertyHandler::changeType(QtProperty* prop)
 
     const Mantid::API::IFunction* f_old = function();
     PropertyHandler* h = new PropertyHandler(f,m_parent,m_browser,m_item);
+    if (this == m_browser->m_autoBackground)
+    {
+      if (dynamic_cast<Mantid::API::IBackgroundFunction*>(f))
+      {
+        m_browser->m_autoBackground = h;
+        h->fit();
+      }
+      else
+      {
+        m_browser->m_autoBackground = NULL;
+      }
+    }
     m_parent->replaceFunction(f_old,f);
     f->setHandler(h);
     // calculate the baseline
@@ -1215,3 +1302,31 @@ void PropertyHandler::removeAllPlots()
   }
 }
 
+void PropertyHandler::fit()
+{
+  try
+  {
+    if (m_browser->workspaceName().empty()) return;
+
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace",m_browser->workspaceName());
+    alg->setProperty("WorkspaceIndex",m_browser->workspaceIndex());
+    alg->setProperty("StartX",m_browser->startX());
+    alg->setProperty("EndX",m_browser->endX());
+    alg->setPropertyValue("Function",*m_fun);
+    alg->execute();
+    std::string fitFun = alg->getPropertyValue("Function");
+    Mantid::API::IFunction* f = Mantid::API::FunctionFactory::Instance().createInitialized(fitFun);
+    for(int i=0;i<f->nParams();++i)
+    {
+      m_fun->setParameter(i,f->getParameter(i));
+    }
+    delete f;
+    m_browser->getHandler()->calcBaseAll();
+    updateParameters();
+  }
+  catch(...)
+  {
+  }
+}

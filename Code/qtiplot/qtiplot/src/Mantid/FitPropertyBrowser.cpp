@@ -46,10 +46,10 @@ m_guessOutputName(true),
 m_changeSlotsEnabled(false),
 m_peakToolOn(false),
 m_auto_back(false),
-m_autoBgName(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground")),
+m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground"))),
 m_autoBackground(NULL)
 {
-  if (QString::fromStdString(m_autoBgName).toLower() == "none")
+  if (m_autoBgName.toLower() == "none")
   {
     m_autoBgName = "";
   }
@@ -1593,11 +1593,11 @@ void FitPropertyBrowser::setWorkspace(Mantid::API::IFunction* f)const
 
 void FitPropertyBrowser::addAutoBackground()
 {
-  if (m_autoBgName.empty()) return;
+  if (m_autoBgName.isEmpty()) return;
   bool hasPlot = false;
   PropertyHandler* ch = currentHandler();
   if (m_autoBackground)
-  {
+  {// remove old background
     if (ch == m_autoBackground)
     {
       ch = NULL;
@@ -1606,8 +1606,27 @@ void FitPropertyBrowser::addAutoBackground()
     m_autoBackground->removeFunction();
     m_autoBackground = NULL;
   }
-  PropertyHandler* h = getHandler()->addFunction(m_autoBgName);
+  // Create the function
+  PropertyHandler* h = getHandler()->addFunction(m_autoBgName.toStdString());
   if (!h) return;
+  if (!m_autoBgAttributes.isEmpty())
+  {// set attributes
+    QStringList attList = m_autoBgAttributes.split(' ');
+    foreach(QString att,attList)
+    {
+      QStringList name_value = att.split('=');
+      if (name_value.size() == 2)
+      {
+        QString name  = name_value[0].trimmed();
+        QString value = name_value[1].trimmed();
+        if (h->function()->hasAttribute(name.toStdString()))
+        {
+          h->setAttribute(name,value);
+        }
+      }
+    }
+  }
+  h->fit();
   m_autoBackground = h;
   getHandler()->calcBaseAll();
   if (hasPlot)
@@ -1621,14 +1640,35 @@ void FitPropertyBrowser::addAutoBackground()
   }
 }
 
-void FitPropertyBrowser::setAutoBackgroundName(const std::string& aName)
+void FitPropertyBrowser::refitAutoBackground()
+{
+  if (m_autoBackground)
+  {
+    m_autoBackground->fit();
+  }
+}
+
+/**
+  * Remember a background function name to be used for creating auto-background
+  * @param aName A name of the auto-background. The may be followed by function
+  * attributes as name=value pairs separated by spaces.
+  */
+void FitPropertyBrowser::setAutoBackgroundName(const QString& aName)
 {
   try
   {
+    QStringList nameList = aName.split(' ');
+    if (nameList.isEmpty()) return;
+    QString name = nameList[0];
     boost::shared_ptr<Mantid::API::IFunction> f = 
-      Mantid::API::FunctionFactory::Instance().create(aName);
+      Mantid::API::FunctionFactory::Instance().create(name.toStdString());
     m_auto_back = true;
-    m_autoBgName = aName;
+    m_autoBgName = name;
+    if (nameList.size() > 1)
+    {
+      nameList.removeFirst();
+      m_autoBgAttributes = nameList.join(" ");
+    }
   }
   catch(...)
   {

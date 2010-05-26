@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\LoadInstrumentFromSNSNexus.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\LoadISISNexus.cpp"
 				>
 			</File>
@@ -245,6 +249,10 @@
 			>
 			<File
 				RelativePath=".\inc\MantidNexus\LoadInstrumentFromNexus.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidNexus\LoadInstrumentFromSNSNexus.h"
 				>
 			</File>
 			<File
