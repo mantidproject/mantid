@@ -99,6 +99,12 @@ namespace DataObjects
     return *this;
   }
 
+  std::vector<TofEvent> EventList::getEvents()
+  {
+    return this->events;
+  }
+
+
   void EventList::sort(const EventSortType order)
   {
     if (order == UNSORTED)

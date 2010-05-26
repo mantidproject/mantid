@@ -11,6 +11,8 @@
 
 # Clean up any old executable
 rm -rf runner.*
+#Make sure you remove the old library
+rm ../Debug/libMantidGeometry.so
 
 echo "Generating the source file from the test header files..."
 # Chaining all tests together can have effects that you don't think of

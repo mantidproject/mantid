@@ -72,7 +72,7 @@ while True:
         while line != "":
             if len(line)>1:
                 line = line[:-1] #Remove trailing /n
-            if "Error:" in line:
+            if ("Error:" in line) or ("error:" in line):
                 #An error line!
                 #Print in red
                 print '\033[1;31m' + line  + '\033[1;m'

@@ -48,6 +48,7 @@ public:
     TS_ASSERT_EQUALS(e3.frame(), 321);
   }
 
+
 //  void testBadInputs()
 //  {
 //    e = TofEvent(-100,1);
@@ -79,11 +80,23 @@ public:
 
   void testInit()
   {
+    vector<TofEvent> rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 3);
   }
 
   void testPlusOperator()
   {
+    vector<TofEvent> mylist;
+    mylist.push_back(TofEvent(45,67));
+    mylist.push_back(TofEvent(89,12));
+    mylist.push_back(TofEvent(34,56));
+    el += mylist;
+    vector<TofEvent> rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 6);
 
+    el += TofEvent(999, 888);
+    rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 7);
   }
 
 };
