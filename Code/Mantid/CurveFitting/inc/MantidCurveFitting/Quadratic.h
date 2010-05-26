@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Function.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
 
 namespace Mantid
 {
@@ -44,7 +44,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport Quadratic : public API::Function
+    class DLLExport Quadratic : public BackgroundFunction
     {
     public:
       /// Destructor

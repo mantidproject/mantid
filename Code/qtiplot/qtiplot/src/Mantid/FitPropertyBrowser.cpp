@@ -3,6 +3,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -861,7 +862,7 @@ void FitPropertyBrowser::populateFunctionNames()
     {
       m_registeredPeaks << qfnName;
     }
-    else if (!cf)
+    else if (dynamic_cast<Mantid::API::IBackgroundFunction*>(f.get()))
     {
       m_registeredBackgrounds << qfnName;
     }
