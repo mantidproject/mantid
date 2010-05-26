@@ -54,6 +54,8 @@ namespace VectorHelper
   /// Convert an array of bin boundaries to bin centre values.
   void DLLExport convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
 
+  bool DLLExport isConstantValue(const std::vector<double> &arra, double &val);
+
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
   {

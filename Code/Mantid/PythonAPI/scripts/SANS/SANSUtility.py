@@ -234,7 +234,7 @@ def MaskByBinRange(workspace, timemask):
 			MaskBins(workspace, workspace, XMin= limits[0] ,XMax=limits[1])
 
 # Setup the transmission workspace
-def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, loqremovebins):
+def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
     tmpWS = inputWS + '_tmp'
     if loqremovebins == True:
         RemoveBins(inputWS,tmpWS, 19900, 20500, Interpolation='Linear')
@@ -244,7 +244,12 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
         inputWS = tmpWS
     # Convert and rebin
     ConvertUnits(inputWS,tmpWS,"Wavelength")
-    Rebin(tmpWS, tmpWS, wavbining)
+    
+    if interpolate :
+        InterpolatingRebin(tmpWS, tmpWS, wavbining)
+    else :
+        Rebin(tmpWS, tmpWS, wavbining)
+
     return tmpWS
 
 # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness

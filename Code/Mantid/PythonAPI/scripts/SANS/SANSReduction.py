@@ -104,11 +104,12 @@ BACKMON_END = None
 # S2D: front-detector or rear-detector 
 DETBANK = None
 
-# The monitor spectrum taken from the GUI. Is this still necessary?? or can I just deduce
-# it from the instrument name 
+# The monitor spectrum taken from the GUI
 MONITORSPECTRUM = None
 # agruments after MON/LENGTH need to take precendence over those after MON/SPECTRUM and this variable ensures that
 MONITORSPECLOCKED = False
+# if this is set InterpolationRebin will be used on the monitor spectrum used to normalise the sample
+SAMP_INTERPOLATE = False
 
 # Detector position information for SANS2D
 FRONT_DET_RADIUS = 306.0
@@ -155,6 +156,8 @@ TRANS_WAV2_FULL = None
 # Mon/Det for SANS2D
 TRANS_UDET_MON = 2
 TRANS_UDET_DET = 3
+# this is if to use InterpolatingRebin on the monitor spectrum used to normalise the transmission
+TRANS_INTERPOLATE = False
 
 ###################################################################################################################
 #
@@ -229,9 +232,8 @@ def printParameter(var):
 ########################### 
 def SANS2D():
     _printMessage('SANS2D()')
-    global INSTR_NAME, MONITORSPECTRUM, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
+    global INSTR_NAME, TRANS_WAV1, TRANS_WAV2, TRANS_WAV1_FULL, TRANS_WAV2_FULL
     INSTR_NAME = 'SANS2D'
-    MONITORSPECTRUM = 2
     TRANS_WAV1_FULL = TRANS_WAV1 = 2.0
     TRANS_WAV2_FULL = TRANS_WAV2 = 14.0
     if DETBANK != 'rear-detector':
@@ -741,6 +743,15 @@ def clearCurrentMaskDefaults():
     
     global BACKMON_START, BACKMON_END
     BACKMON_START = BACKMON_END = None
+    
+    global MONITORSPECTRUM, MONITORSPECLOCKED, SAMP_INTERPOLATE, TRANS_UDET_MON, TRANS_UDET_DET, TRANS_INTERPOLATE
+    MONITORSPECTRUM = None
+    MONITORSPECLOCKED = False
+    SAMP_INTERPOLATE = False
+    
+    TRANS_UDET_MON = 2
+    TRANS_UDET_DET = 3
+    TRANS_INTERPOLATE = False
 
 ####################################
 # Add a mask to the correct string
@@ -830,56 +841,25 @@ def MaskFile(filename):
         upper_line = line.upper()
         if upper_line.startswith('L/'):
             _readLimitValues(line)
+        
         elif upper_line.startswith('MON/'):
-            details = line[4:]
-            if details.upper().startswith('LENGTH'):
-                SuggestMonitorSpectrum(int(details.split()[1]))
-            elif details.upper().startswith('SPECTRUM'):
-                SetMonitorSpectrum(int(details.split('=')[1]))
-            elif 'DIRECT' in details.upper():
-                parts = details.split("=")
-                if len(parts) == 2:
-                    filepath = parts[1].rstrip()
-                    if '[' in filepath:
-                        idx = filepath.rfind(']')
-                        filepath = filepath[idx + 1:]
-                    if not os.path.isabs(filepath):
-                        filepath = os.path.join(USER_PATH, filepath)
-                    type = parts[0]
-                    parts = type.split("/")
-                    if len(parts) == 1:
-                        if parts[0] == 'DIRECT':
-                            SetRearEfficiencyFile(filepath)
-                            SetFrontEfficiencyFile(filepath)
-                        elif parts[0] == 'HAB':
-                            SetFrontEfficiencyFile(filepath)
-                        else:
-                            pass
-                    elif len(parts) == 2:
-                        detname = parts[1]
-                        if detname == 'REAR':
-                            SetRearEfficiencyFile(filepath)
-                        elif detname == 'FRONT' or detname == 'HAB':
-                            SetFrontEfficiencyFile(filepath)
-                        else:
-                            _issueWarning('Incorrect detector specified for efficiency file "' + line + '"')
-                    else:
-                        _issueWarning('Unable to parse monitor line "' + line + '"')
-                else:
-                    _issueWarning('Unable to parse monitor line "' + line + '"')
-            else:
-                continue
+            _readMONValues(line)
+        
         elif upper_line.startswith('MASK'):
             Mask(upper_line)
+        
         elif upper_line.startswith('SET CENTRE'):
             values = upper_line.split()
             SetCentre(float(values[2]), float(values[3]))
+        
         elif upper_line.startswith('SET SCALES'):
             values = upper_line.split()
             _SetScales(float(values[2]))
+        
         elif upper_line.startswith('SAMPLE/OFFSET'):
             values = upper_line.split()
             SetSampleOffset(values[1])
+        
         elif upper_line.startswith('DET/'):
             type = upper_line[4:]
             if type.startswith('CORR'):
@@ -887,6 +867,7 @@ def MaskFile(filename):
             else:
                 # This checks whether the type is correct and issues warnings if it is not
                 Detector(type)
+        
         elif upper_line.startswith('GRAVITY'):
             flag = upper_line[8:]
             if flag == 'ON':
@@ -896,6 +877,7 @@ def MaskFile(filename):
             else:
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                 Gravity(False)
+        
         elif upper_line.startswith('BACK/MON/TIMES'):
             tokens = upper_line.split()
             global BACKMON_START, BACKMON_END
@@ -906,6 +888,7 @@ def MaskFile(filename):
                 _issueWarning('Incorrectly formatted BACK/MON/TIMES line, not running FlatBackground.')
                 BACKMON_START = None
                 BACKMON_END = None
+        
         elif upper_line.startswith("FIT/TRANS/"):
             params = upper_line[10:].split()
             if len(params) == 3:
@@ -914,6 +897,7 @@ def MaskFile(filename):
             else:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, setting defaults to LOG and full range')
                 TransFit(TRANS_FIT_DEF)
+        
         else:
             continue
 
@@ -996,6 +980,59 @@ def _readLimitValues(limit_line):
     else:
         pass
 
+def _readMONValues(line):
+    details = line[4:].upper()
+
+    #MON/LENTH, MON/SPECTRUM and MON/TRANS all accept the INTERPOLATE option
+    interpolate = False
+    if details.endswith('/INTERPOLATE') :
+        interpolate = True
+        details = details.split('/INTERPOLATE')[0]
+
+    if details.startswith('LENGTH'):
+        SuggestMonitorSpectrum(int(details.split()[1]), interpolate)
+    
+    elif details.startswith('SPECTRUM'):
+        SetMonitorSpectrum(int(details.split('=')[1]), interpolate)
+    
+    elif details.startswith('TRANS'):
+        parts = details.split('=')
+        if len(parts) < 2 or parts[0] != 'TRANS/SPECTRUM' :
+            _issueWarning('Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=')
+        SetTransSpectrum(int(parts[1]), interpolate)
+
+    elif 'DIRECT' in details:
+        parts = details.split("=")
+        if len(parts) == 2:
+            filepath = parts[1].rstrip()
+            if '[' in filepath:
+                idx = filepath.rfind(']')
+                filepath = filepath[idx + 1:]
+            if not os.path.isabs(filepath):
+                filepath = os.path.join(USER_PATH, filepath)
+            type = parts[0]
+            parts = type.split("/")
+            if len(parts) == 1:
+                if parts[0] == 'DIRECT':
+                    SetRearEfficiencyFile(filepath)
+                    SetFrontEfficiencyFile(filepath)
+                elif parts[0] == 'HAB':
+                    SetFrontEfficiencyFile(filepath)
+                else:
+                    pass
+            elif len(parts) == 2:
+                detname = parts[1]
+                if detname == 'REAR':
+                    SetRearEfficiencyFile(filepath)
+                elif detname == 'FRONT' or detname == 'HAB':
+                    SetFrontEfficiencyFile(filepath)
+                else:
+                    _issueWarning('Incorrect detector specified for efficiency file "' + line + '"')
+            else:
+                _issueWarning('Unable to parse monitor line "' + line + '"')
+        else:
+            _issueWarning('Unable to parse monitor line "' + line + '"')
+
 def _readDetectorCorrections(details):
     values = details.split()
     det_name = values[0]
@@ -1031,17 +1068,33 @@ def SetSampleOffset(value):
     global SAMPLE_Z_CORR
     SAMPLE_Z_CORR = float(value)/1000.
 
-def SetMonitorSpectrum(spec):
+def SetMonitorSpectrum(specNum, interp=False):
     global MONITORSPECTRUM
-    MONITORSPECTRUM = spec
+    MONITORSPECTRUM = int(specNum)
+    
+    global SAMP_INTERPOLATE
+    SAMP_INTERPOLATE = bool(interp)
+
     global MONITORSPECLOCKED
     MONITORSPECLOCKED = True
 
-def SuggestMonitorSpectrum(spec):
+def SuggestMonitorSpectrum(specNum, interp=False):
     global MONITORSPECLOCKED
-    if not MONITORSPECLOCKED :
-        global MONITORSPECTRUM
-        MONITORSPECTRUM = spec
+    if MONITORSPECLOCKED :
+        return
+
+    global SAMP_INTERPOLATE
+    SAMP_INTERPOLATE = bool(interp)
+        
+    global MONITORSPECTRUM
+    MONITORSPECTRUM = int(specNum)
+
+def SetTransSpectrum(specNum, interp=False):
+    global TRANS_UDET_MON
+    TRANS_UDET_MON = int(specNum)
+
+    global TRANS_INTERPOLATE
+    TRANS_INTERPOLATE = bool(interp)
 
 def SetRearEfficiencyFile(filename):
     global DIRECT_BEAM_FILE_R
@@ -1225,17 +1278,19 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
             fit_type = 'Linear'
         else:
             fit_type = TRANS_FIT
+        #retrieve the user setting that tells us whether Rebin or InterpolatingRebin will be used during the normalisation 
+        global TRANS_INTERPOLATE
         if INSTR_NAME == 'LOQ':
             # Change the instrument definition to the correct one in the LOQ case
             LoadInstrument(trans_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
             LoadInstrument(direct_raw, INSTR_DIR + "/LOQ_trans_Definition.xml")
-            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, True)
-            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, True)
+            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, True)
+            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, True)
             CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength = translambda_min, MaxWavelength =  translambda_max, \
                                   FitMethod = fit_type, OutputUnfittedData=True)
         else:
-            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, False)
-            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, False)
+            trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, False)
+            direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw, '1,2', BACKMON_START, BACKMON_END, wavbin, TRANS_INTERPOLATE, False)
             CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, TRANS_UDET_MON, TRANS_UDET_DET, MinWavelength = translambda_min, \
                                   MaxWavelength = translambda_max, FitMethod = fit_type, OutputUnfittedData=True)
         # Remove temporaries
@@ -1388,7 +1443,11 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     # ConvertUnits does have a rebin option, but it's crude. In particular it rebins on linear scale.
     ConvertUnits(monitorWS, monitorWS, "Wavelength")
     wavbin =  str(wav_start) + "," + str(DWAV) + "," + str(wav_end)
-    Rebin(monitorWS, monitorWS,wavbin)
+    if SAMP_INTERPOLATE :
+        InterpolatingRebin(monitorWS, monitorWS,wavbin)
+    else :
+        Rebin(monitorWS, monitorWS,wavbin)
+        
     ConvertUnits(final_result,final_result,"Wavelength")
     Rebin(final_result,final_result,wavbin)
     ####################################################################################

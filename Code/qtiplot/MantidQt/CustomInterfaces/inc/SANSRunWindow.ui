@@ -1687,14 +1687,14 @@ p, li { white-space: pre-wrap; }
               </property>
              </widget>
             </item>
-            <item row="1" column="0" >
+            <item row="2" column="0" >
              <widget class="QLabel" name="label_43" >
               <property name="text" >
                <string>Detector</string>
               </property>
              </widget>
             </item>
-            <item row="1" column="1" colspan="2" >
+            <item row="2" column="1" colspan="3" >
              <widget class="QComboBox" name="detbank_sel" >
               <property name="sizePolicy" >
                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
@@ -1714,7 +1714,7 @@ p, li { white-space: pre-wrap; }
               </item>
              </widget>
             </item>
-            <item row="0" column="2" >
+            <item row="0" column="3" >
              <spacer name="horizontalSpacer_6" >
               <property name="orientation" >
                <enum>Qt::Horizontal</enum>
@@ -1726,6 +1726,43 @@ p, li { white-space: pre-wrap; }
                </size>
               </property>
              </spacer>
+            </item>
+            <item row="0" column="2" >
+             <widget class="QCheckBox" name="monitor_interp" >
+              <property name="text" >
+               <string>Interpolate</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" >
+             <widget class="QLabel" name="label_39" >
+              <property name="text" >
+               <string>Transmission monitor</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1" >
+             <widget class="QLineEdit" name="trans_monitor" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="maximumSize" >
+               <size>
+                <width>40</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2" >
+             <widget class="QCheckBox" name="trans_interp" >
+              <property name="text" >
+               <string>Interpolate</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>

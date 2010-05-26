@@ -4,6 +4,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
 #include <numeric>
+#include <limits>
 #include <iostream>
 
 namespace Mantid
@@ -304,6 +305,68 @@ void convertToBinCentre(const std::vector<double> & bin_edges, std::vector<doubl
   // remove the first element of the output
   bin_centres.erase(bin_centres.begin());
 }
+
+/** Assess if all the values in the vector are equal or if there are some different values
+
+*  @param[in] arra the vector to examine
+
+*  @param[out] val if there is only one value this variable takes that value, otherwise its contents are undefined
+
+*/
+
+bool isConstantValue(const std::vector<double> &arra, double &val)
+
+{
+
+  //make comparisons with the first value
+
+  std::vector<double>::const_iterator i = arra.begin();
+
+
+  if ( i == arra.end() )
+
+  {//empty array
+    return true;
+
+  }
+
+  
+
+  //this loop can be entered! NAN values make comparisons difficult because nan != nan, deal with these first
+
+  for ( val = *i; val != val ; )
+
+  {
+
+    ++i;
+
+    if ( i == arra.end() )
+
+    {
+
+      //all values are contant (NAN)
+
+      return true;
+
+    }
+
+    val = *i;
+
+  }
+
+  
+
+  for ( ; i != arra.end() ; ++i )
+  {
+    if ( *i != val )
+    {
+      return false;
+    }
+  }
+  //no different value was found and so every must be equal to c
+  return true;
+}
+
 
 } // End namespace VectorHelper
 } // End namespace Kernel

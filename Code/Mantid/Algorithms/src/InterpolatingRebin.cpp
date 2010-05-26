@@ -118,10 +118,8 @@ namespace Mantid
 
       const int histnumber = inputW->getNumberHistograms();
       Progress prog(this,0.0,1.0,histnumber);
-//      PARALLEL_FOR2(inputW,outputW)
       for (int hist=0; hist <  histnumber;++hist)
       {
-//        PARALLEL_START_INTERUPT_REGION
         // get const references to input Workspace arrays (no copying)
         const MantidVec& XValues = inputW->readX(hist);
         const MantidVec& YValues = inputW->readY(hist);
@@ -147,9 +145,7 @@ namespace Mantid
         outputW->setX(hist, XValues_new);
         
         prog.report();
-//        PARALLEL_END_INTERUPT_REGION
       }
-//      PARALLEL_CHECK_INTERUPT_REGION
 
       gsl_set_error_handler(old_handler);
     }
@@ -181,11 +177,13 @@ namespace Mantid
     {
       // Make sure y and e vectors are of correct sizes
       const size_t size_old = yOld.size();
+      if (size_old == 0 )
+        throw std::runtime_error("Empty spectrum found aborting");
       if (size_old != (xOld.size() - 1) || size_old != eOld.size() )
-        throw std::runtime_error("rebin: y and error vectors should be of same size & 1 shorter than x");
+        throw std::runtime_error("y and error vectors must be of same size & 1 shorter than x");
       const size_t size_new = yNew.size();
       if (size_new != (xNew.size() - 1) || size_new != eNew.size() )
-        throw std::runtime_error("rebin: y and error vectors should be of same size & 1 shorter than x");
+        throw std::runtime_error("y and error vectors must be of same size & 1 shorter than x");
    
       // get the bin centres of the input data
       std::vector<double> xCensOld(size_new);
@@ -204,34 +202,81 @@ namespace Mantid
       //check that the intepolation points fit well enough within the data for reliable intepolation to be done
       if ( oldIn1<2 || oldIn2>=size_old-1 || oldIn1>oldIn2 )
       {
-        throw std::invalid_argument("Problem with the requested x-values to intepolate to: There must be at\nleast two input data points below the range of intepolation points and\ntwo higher. Also the intepolation points must have monatomically increasing x-values.");
+        double constantVal = -1;
+        if (VectorHelper::isConstantValue(yOld, constantVal))
+        {
+          //this copies the single y-value into the output array, errors are still calculated from the nearest input data points
+          noInterpolation(xOld, constantVal, eOld, xNew, yNew, eNew);
+          //this is as much as we need to do in this (trival) case
+          return;
+        }
+        else
+        {
+          throw std::invalid_argument("Problem with the requested x-values to intepolate to: There must be at\nleast two input data points below the range of intepolation points and\ntwo higher. Also the intepolation points must have monatomically increasing x-values.");
+        }
       }
       //bring one point before and one point after into the inpolation to reduce any possible errors from running out of data
       oldIn1 -= 2;
       oldIn2 ++;
 
-      //get the GSL to allocate the memory, if this wasn't already done
-      gsl_interp_accel *acc = gsl_interp_accel_alloc();
-      const size_t nPoints = oldIn2 - oldIn1 + 1;
-      gsl_spline *spline = gsl_spline_alloc(gsl_interp_cspline, nPoints);
       
-      if ( ! acc || ! spline ||
-      //GSL calculates the splines
-        gsl_spline_init(spline, &xCensOld[oldIn1], &yOld[oldIn1], nPoints) )
+      //get the GSL to allocate the memory
+      gsl_interp_accel *acc = NULL;
+      gsl_spline *spline = NULL;
+      try
       {
-        throw std::runtime_error("Error setting up GSL spline functions");
-      }
+        acc = gsl_interp_accel_alloc();
+        const size_t nPoints = oldIn2 - oldIn1 + 1;
+        spline = gsl_spline_alloc(gsl_interp_cspline, nPoints);
       
-      for ( size_t i = 0; i < size_new; ++i )
-      {
-        yNew[i] = gsl_spline_eval(spline, xCensNew[i], acc);
-        //(basic) error estimate the based on a weighted mean of the errors of the surrounding input data points
-        eNew[i] = estimateError(xCensOld, eOld, xCensNew[i]);
-      }
+        //test the allocation
+        if ( ! acc || ! spline ||
+          //calculate those splines, GSL uses pointers to the vector array (which is always contiguous)
+          gsl_spline_init(spline, &xCensOld[oldIn1], &yOld[oldIn1], nPoints) )
+        {
+          throw std::runtime_error("Error setting up GSL spline functions");
+        }
       
+        for ( size_t i = 0; i < size_new; ++i )
+        {
+          yNew[i] = gsl_spline_eval(spline, xCensNew[i], acc);
+          //(basic) error estimate the based on a weighted mean of the errors of the surrounding input data points
+          eNew[i] = estimateError(xCensOld, eOld, xCensNew[i]);
+        }
+      }
       //for GSL to clear up its memory use
-      gsl_spline_free (spline);
-      gsl_interp_accel_free (acc);
+      catch (std::exception &)
+      {
+        if (acc)
+        {
+          if (spline)
+          {
+            gsl_spline_free(spline);
+          }
+          gsl_interp_accel_free(acc);
+        }
+        throw;
+      }
+      gsl_spline_free(spline);
+      gsl_interp_accel_free(acc);
+    }
+    /** This can be used whenever the original spectrum is filled with only one value. It is intended allow
+    *  some spectra with null like values, for example all zeros
+    *  @param[in] xOld the x-values of the input data
+    *  @param[in] yOld the value of y that will be copied to the output array
+    *  @param[in] eOld the error on each y-value, must be same length as yOld.
+    *  @param[in] xNew x-values to rebin to, must be monotonically increasing
+    *  @param[out] yNew is overwritten with the value repeated for as many times as there are x-values
+    *  @param[out] eNew is overwritten with errors from the errors on the nearest input data points
+    */
+    void InterpolatingRebin::noInterpolation(const MantidVec &xOld, const double yOld, const MantidVec &eOld,
+          const MantidVec& xNew, MantidVec &yNew, MantidVec &eNew) const
+    {
+      yNew.assign(yNew.size(), yOld);
+      for ( MantidVec::size_type i = 0; i < eNew.size(); ++i )
+      {
+        eNew[i] = estimateError(xOld, eOld, xNew[i]);
+      }
     }
     /**Estimates the error on each interpolated point by assuming it is similar to the errors in
     *  near by input data points. Output points with the same x-value as an input point have the
@@ -242,13 +287,23 @@ namespace Mantid
     *  @param[in] xNew the value of x for at the point of interest
     *  @return the estimated error at that point
     */
-    double InterpolatingRebin::estimateError(const std::vector<double>& xsOld, const std::vector<double>& esOld,
-          const double xNew) const
+    double InterpolatingRebin::estimateError(const MantidVec &xsOld, const MantidVec &esOld, const double xNew) const
     {  
-      //get the index of the first point that is higher in x, we'll base some of the error estimate on the error on this point 
+      //find the first point in the array that has a higher value of x, we'll base some of the error estimate on the error on this point 
       const size_t indAbove =
         std::lower_bound(xsOld.begin(), xsOld.end(), xNew) - xsOld.begin();
-      
+
+      //if the point's x-value is out of the range covered by the x-values in the input data return the error value at the end of the range
+      if ( indAbove == 0 )
+      {
+        return esOld.front();
+      }
+      //xsOld is 1 longer than xsOld
+      if ( indAbove >= esOld.size() )
+      {//cubicInterpolation() checks that that there are no empty histograms
+        return esOld.back();
+      }
+
       const double error1 = esOld[indAbove];
       // ratio of weightings will be inversely proportional to the distance between the points
       double weight1 = xsOld[indAbove] - xNew;
