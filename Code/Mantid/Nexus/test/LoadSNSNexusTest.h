@@ -33,7 +33,7 @@ public:
       TS_ASSERT(ld.isExecuted());
   }
 
-  void testRefl()
+  void xtestRefl()
     {
         Mantid::API::FrameworkManager::Instance();
         LoadSNSNexus ld;

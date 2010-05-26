@@ -733,8 +733,11 @@ namespace Mantid
             return openNXDataSet<T>(it->nxname);
           }
         }
-        throw std::runtime_error("NXData does not seem to contain the data");
-        return NXDataSetTyped<T>(*this,"");
+        //You failed to find the signal.
+        //So try to just open the "data" entry directly
+        return openNXDataSet<T>("data");
+        //throw std::runtime_error("NXData does not seem to contain the data");
+        //return NXDataSetTyped<T>(*this,"");
       }
       /// Opens data of double type
       NXDouble openDoubleData(){return openData<double>();}
