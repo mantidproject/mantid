@@ -15,6 +15,7 @@ import os
 import time
 import sys
 import glob
+import subprocess
 
 files_to_check = glob.glob("../../debug/*.so")
 files_to_check += glob.glob("./*.h")
@@ -57,11 +58,31 @@ while True:
     current_times = get_all_times(files_to_check)
     if times_changed(current_times, last_modified):
         print "File(s) changed! Running tests..."
-        print "-"*80
-        print "="*80
-        print "-"*80
+        print '\033[1;32m' + '-'*80 + '\033[1;m'
+        print '\033[1;32m' + '='*80 + '\033[1;m'
+        print '\033[1;32m' + '-'*80 + '\033[1;m'
         print ""
-        os.system(commandline)
+
+        #Start the subprocess (runTests.sh)
+        p = subprocess.Popen(commandline, shell=True, bufsize=10000,
+              stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
+        (put, get) = (p.stdin, p.stdout)
+
+        line=get.readline()
+        while line != "":
+            if len(line)>1:
+                line = line[:-1] #Remove trailing /n
+            if "Error:" in line:
+                #An error line!
+                #Print in red
+                print '\033[1;31m' + line  + '\033[1;m'
+            else:
+                #Print normally
+                print line
+            #Keep reading output.
+            line=get.readline()
+
+        #os.system(commandline)
         last_modified = current_times;
         print "\n\n--- Continuing to monitor changes to file ---"
 
