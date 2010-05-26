@@ -80,6 +80,9 @@ private:
   EventWorkspace(const EventWorkspace&);
   /// NO ASSIGNMENT ALLOWED
   EventWorkspace& operator=(const EventWorkspace&);
+
+  /// Static reference to the logger class
+  static Kernel::Logger & g_log;
 };
 
 }
