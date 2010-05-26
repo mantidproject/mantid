@@ -603,7 +603,6 @@ public slots:
 	void showScreenReader();
 	void pickPointerCursor();
 	void disableTools();
-	void selectPeak();
 	void selectMultiPeak();
 	void pickDataTool( QAction* action );
 
@@ -984,7 +983,6 @@ public slots:
 	//@}
 
 	void showToolBarsMenu();
-  void enableMantidPeakFit(bool yes);
   void savetoNexusFile();
   
 
@@ -1060,9 +1058,6 @@ private slots:
 	void showAllColumns();
 	void closedLastCopiedLayer(){lastCopiedLayer = NULL;};
 
-  //Mantid
-  void showPeakFitDialog();
-
   /// context menu for log window
   void showresultsContextMenu(const QPoint &p);
   ///
@@ -1074,7 +1069,7 @@ private slots:
 
   ///
   void showalgorithmDescriptions();
-	
+
 // TODO: a lot of this stuff should be private
 public:
 	//! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.
@@ -1243,7 +1238,6 @@ private:
 
   QToolBar *fileTools, *plotTools, *tableTools, *columnTools, *plot3DTools, *displayBar, *editTools, *plotMatrixBar;
 	QToolBar *formatToolBar;
-  QToolBar* mantidPeakFitTools;
 	QToolButton *btnResults;
 	QWidgetList *hiddenWindows;
 	QLineEdit *info;

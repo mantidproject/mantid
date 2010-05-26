@@ -312,10 +312,6 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
 
 void PeakPickerTool::windowStateChanged( Qt::WindowStates, Qt::WindowStates newState )
 {
-  if (newState.testFlag(Qt::WindowActive))
-    m_mantidUI->appWindow()->enableMantidPeakFit(true);
-  else
-    m_mantidUI->appWindow()->enableMantidPeakFit(false);
 }
 
 void PeakPickerTool::functionCleared()

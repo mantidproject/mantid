@@ -460,9 +460,7 @@ HEADERS  += src/ApplicationWindow.h \
         src/Mantid/MantidSampleLogDialog.h \
         src/Mantid/AlgorithmHistoryWindow.h\
         src/Mantid/MantidMatrixDialog.h \
-	    src/Mantid/PeakPickerTool1D.h \
 	    src/Mantid/PeakPickerTool.h \
-	    src/Mantid/PeakFitDialog.h \
 	    src/Mantid/MantidCurve.h \
 	    src/Mantid/WorkspaceObserver.h \
 	    src/Mantid/UserFitFunctionDialog.h \
@@ -493,7 +491,6 @@ HEADERS  += src/ApplicationWindow.h \
 ###################### FORMS ##############################################
 
 #FORMS += src/Mantid/WorkspaceMgr.ui
-FORMS += src/Mantid/PeakFitDialog.ui
 FORMS += src/Mantid/UserFitFunctionDialog.ui
 FORMS += src/Mantid/MantidAbout.ui
 FORMS += src/Mantid/RemoveErrorsDialog.ui
@@ -641,9 +638,7 @@ SOURCES  += src/ApplicationWindow.cpp \
         src/Mantid/MantidSampleLogDialog.cpp \
         src/Mantid/AlgorithmHistoryWindow.cpp\
         src/Mantid/MantidMatrixDialog.cpp \
-	    src/Mantid/PeakPickerTool1D.cpp \
 	    src/Mantid/PeakPickerTool.cpp \
-	    src/Mantid/PeakFitDialog.cpp \
 	    src/Mantid/MantidCurve.cpp \
             src/Mantid/WorkspaceObserver.cpp \
 	    src/Mantid/UserFitFunctionDialog.cpp \
