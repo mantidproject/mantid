@@ -74,12 +74,18 @@ public:
     mylist.push_back(TofEvent(100,200));
     mylist.push_back(TofEvent(3,4));
     mylist.push_back(TofEvent(50,60));
-//    el = EventList(mylist);
+    el = EventList(mylist);
   }
 
   void testInit()
   {
   }
+
+  void testPlusOperator()
+  {
+
+  }
+
 };
 
 

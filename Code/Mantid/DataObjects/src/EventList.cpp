@@ -80,9 +80,10 @@ namespace DataObjects
   {
   }
 
-  EventList& EventList::operator=(const EventList& eventlist)
+  EventList& EventList::operator=(const EventList& rhs)
   {
-    throw NotImplementedError("EventList& operator=(const EventList& eventlist) is not implemented");
+    this->events.assign(rhs.events.begin(), rhs.events.end());
+    this->order = UNSORTED;
   }
 
 
