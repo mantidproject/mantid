@@ -38,6 +38,9 @@ private:
   /** Constructor, copy from another TofEvent object */
   TofEvent(const TofEvent&);
 
+  /** Empty constructor, copy from another TofEvent object */
+  TofEvent();
+
   /** Copy into this object from another */
   TofEvent& operator=(const TofEvent&);
   virtual ~TofEvent();

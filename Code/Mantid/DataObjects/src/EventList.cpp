@@ -21,8 +21,14 @@ namespace DataObjects
 
   TofEvent::TofEvent(const TofEvent& rhs)
   {
-	  this->time_of_flight = rhs.time_of_flight;
-	  this->frame_index = rhs.frame_index;
+    this->time_of_flight = rhs.time_of_flight;
+    this->frame_index = rhs.frame_index;
+  }
+
+  TofEvent::TofEvent()
+  {
+    this->time_of_flight = 0;
+    this->frame_index = 0;
   }
 
   TofEvent::~TofEvent()
