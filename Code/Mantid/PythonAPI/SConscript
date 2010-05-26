@@ -1,6 +1,5 @@
 #For MantidPythonAPI
 
-import platform
 import os
 import sys
 import MantidBuild
@@ -21,10 +20,7 @@ if os.name == 'posix':
    mylibraries = ['stdc++'] + libraries
    myenv['MYLIBLIST'] = mylibraries
    myenv.Append(MYLIBLIST='python' + sys.version[0:3])
-   if platform.system() == 'Darwin':
-      myenv.Replace(SHLIBSUFFIX='.dylib')
-   else:
-      myenv.Replace(SHLIBSUFFIX='.so')
+   myenv.Replace(SHLIBSUFFIX='.so')
    myenv.Append(MYLIBLIST='boost_python' + myenv['BOOST_APPEND'])
 # windows
 else:
