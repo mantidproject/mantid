@@ -12,7 +12,7 @@ namespace DataObjects
 {
   using Kernel::Exception::NotImplementedError;
 
-  /// --------------------- TofEvent stuff
+  /// --------------------- TofEvent stuff ----------------------------------
   TofEvent::TofEvent(const size_t time_of_flight, const size_t frameid)
   {
 	  this->time_of_flight = time_of_flight;
@@ -45,7 +45,13 @@ namespace DataObjects
 	  return this->frame_index;
   }
 
-  /// --------------------- TofEvent stuff
+
+
+
+
+
+
+  /// --------------------- EventList stuff ----------------------------------
 
   EventList::EventList()
   {

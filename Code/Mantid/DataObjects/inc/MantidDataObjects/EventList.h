@@ -16,38 +16,66 @@ namespace Mantid
 namespace DataObjects
 {
 
+//==========================================================================================
+/** Info about a single event: the time of flight of the neutron, and the frame id
+ * in which it was detected.
+ */
 class DLLExport TofEvent {
 private:
-  /** The units of the time of flight index is nanoseconds. */
+  /** The units of the time of flight index in nanoseconds. */
   std::size_t time_of_flight;
+
   /**
    * The frame vector is not a member of this object, but it is necessary in
    * order to have the actual time for the data.
    */
   std::size_t frame_index;
+
  public:
-  TofEvent(const std::size_t, const std::size_t);
+  /** Constructor, specifying the time of flight and the frame id */
+  TofEvent(const std::size_t time_of_flight, const std::size_t frameid);
+
+  /** Constructor, copy from another TofEvent object */
   TofEvent(const TofEvent&);
+
+  /** Copy into this object from another */
   TofEvent& operator=(const TofEvent&);
   virtual ~TofEvent();
 
+  /** Return the time of flight, as an int, in nanoseconds.*/
   std::size_t tof();
+
+  /** Return the frame id */
   std::size_t frame();
 
 };
 
+
+
+//==========================================================================================
+/** A list of TofEvent objects, corresponding to all the events that were measured on a pixel.
+ *
+ */
 enum EventSortType {UNSORTED, TOF_SORT, FRAME_SORT};
 
 class DLLExport EventList
 {
 public:
   EventList();
+  /** Constructor copying from an existing event list */
   EventList(const EventList&);
+
+  /** Constructor, taking a vector of events */
   EventList(const std::vector<TofEvent> &);
+
+  /** Copy into this event list from another */
   EventList& operator=(const EventList&);
   virtual ~EventList();
-  /** Add an event to the histogram. */
+
+  /** Append an event to the histogram. */
   EventList& operator+=(const TofEvent&);
+
+  /** Append a list of events to the histogram. */
   EventList& operator+=(const std::vector<TofEvent>&);
   void sort(const EventSortType);
   void sortTof();
