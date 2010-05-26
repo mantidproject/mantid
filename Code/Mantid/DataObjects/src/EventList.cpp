@@ -135,5 +135,30 @@ namespace DataObjects
     }
     throw NotImplementedError("EventList::sortFrame() is not implemented");
   }
+
+  void EventList::emptyCache()
+  {
+    this->emptyX();
+    this->emptyY();
+    this->emptyE();
+  }
+
+  EventList::StorageType& EventList::emptyX()
+  {
+    this->refX.access().clear();
+    return this->refX.access();
+  }
+
+  EventList::StorageType& EventList::emptyY()
+  {
+    this->refY.access().clear();
+    return this->refY.access();
+  }
+
+  EventList::StorageType& EventList::emptyE()
+  {
+    this->refE.access().clear();
+    return this->refE.access();
+  }
 } /// namespace DataObjects
 } /// namespace Mantid

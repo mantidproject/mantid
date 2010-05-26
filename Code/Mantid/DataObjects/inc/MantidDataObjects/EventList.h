@@ -9,6 +9,7 @@ typedef unsigned uint32_t;
 #endif
 #include <cstddef>
 #include <vector>
+#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid
@@ -64,6 +65,11 @@ enum EventSortType {UNSORTED, TOF_SORT, FRAME_SORT};
 class DLLExport EventList
 {
 public:
+  /// The data storage type used internally in a Histogram1D
+  typedef std::vector<double> StorageType;
+  /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
+  typedef Kernel::cow_ptr<StorageType > RCtype;
+
   EventList();
   /** Constructor copying from an existing event list */
   EventList(const EventList&);
@@ -83,9 +89,19 @@ public:
   void sort(const EventSortType);
   void sortTof();
   void sortFrame();
+  void emptyCache();
+  StorageType& emptyX();
+  StorageType& emptyY();
+  StorageType& emptyE();
 private:
   std::vector<TofEvent> events;
   EventSortType order;
+  /** Cached version of the x axis. */
+  RCtype refX;
+  /** Cached version of the counts. */
+  RCtype refY;
+  /** Cached version of the uncertainties. */
+  RCtype refE;
 };
 
 } // DataObjects
