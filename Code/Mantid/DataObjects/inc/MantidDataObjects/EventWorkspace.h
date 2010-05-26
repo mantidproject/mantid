@@ -28,18 +28,8 @@ namespace DataObjects
     This class is intended to fulfill the design specified in 
     <https://svn.mantidproject.org/mantid/trunk/Documents/Design/Event WorkspaceDetailed Design Document.doc>
  */
-#ifdef _WIN32
-#ifdef IN_MANTID_DATA_OBJECTS
-  #define EventWorkspace_DllExport __declspec( dllexport )
-#else
-  #define EventWorkspace_DllExport __declspec( dllimport )
-#endif
-#else
-  #define EventWorkspace_DllExport
-  #define EventWorkspace_DllImport
-#endif
 
-class EventWorkspace_DllExport EventWorkspace: public API::MatrixWorkspace
+class DLLExport EventWorkspace : public API::MatrixWorkspace
 {
  public:
   /** The nae of the workspace type.
@@ -85,8 +75,10 @@ private:
   static Kernel::Logger & g_log;
 };
 
-}
 
-}
+
+} /// namespace DataObjects
+
+} /// namespace Mantid
 
 #endif /* MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ */
