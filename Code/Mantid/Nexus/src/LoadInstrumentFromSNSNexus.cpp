@@ -102,12 +102,7 @@ void LoadInstrumentFromSNSNexus::loadInstrument(API::Workspace_sptr localWS,
     instrument->markAsSource(source);
 
     NXInstrument nxInstr = entry.openNXInstrument("instrument");
-    NXChar name = nxInstr.openNXChar("name");
-    name.load();
-    //Some names had a 0x7F character, which we remove.
-    std::string string_name = name();
-    boost::algorithm::replace_all(string_name, "\x7F", "");
-    instrument->setName(string_name);
+    instrument->setName(nxInstr.getString("name"));
 
     //L1 is the moderator distance.
     double l1;
