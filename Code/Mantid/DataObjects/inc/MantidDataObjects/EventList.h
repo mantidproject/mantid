@@ -36,6 +36,8 @@ private:
 
 };
 
+enum EventSortType {UNSORTED, TOF_SORT, FRAME_SORT};
+
 class DLLExport EventList
 {
 public:
@@ -47,8 +49,12 @@ public:
   /** Add an event to the histogram. */
   EventList& operator+=(const TofEvent&);
   EventList& operator+=(const std::vector<TofEvent>&);
+  void sort(const EventSortType);
+  void sortTof();
+  void sortFrame();
 private:
   std::vector<TofEvent> events;
+  EventSortType order;
 };
 
 } // DataObjects
