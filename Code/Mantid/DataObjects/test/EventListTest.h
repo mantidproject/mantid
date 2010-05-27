@@ -116,6 +116,26 @@ public:
     rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 7);
     TS_ASSERT_EQUALS(rel[6].tof(), 999);
+
+    EventList el2;
+    el2 += TofEvent(1,2);
+    el2 += TofEvent(3,4);
+    el += el2;
+    rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 9);
+    el += el;
+    rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 18);
+  }
+
+  void testPlusOperator2()
+  {
+    vector<TofEvent> rel;
+    el += el;
+    rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 6);
+    TS_ASSERT_EQUALS(rel[3].tof(), 100);
+    TS_ASSERT_EQUALS(rel[5].tof(), 50);
   }
 
   void fake_data()

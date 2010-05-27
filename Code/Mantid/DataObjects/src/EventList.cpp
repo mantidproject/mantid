@@ -106,14 +106,22 @@ namespace DataObjects
     return *this;
   }
 
-  EventList& EventList::operator+=(const std::vector<TofEvent> & events)
+  EventList& EventList::operator+=(const std::vector<TofEvent> & more_events)
   {
-    this->events.insert(this->events.end(), events.begin(), events.end());
+    this->events.insert(this->events.end(), more_events.begin(), more_events.end());
     this->order = UNSORTED;
     return *this;
   }
 
-  std::vector<TofEvent> EventList::getEvents()
+  EventList& EventList::operator+=(EventList& more_events)
+  {
+    vector<TofEvent> rel = more_events.getEvents();
+    this->events.insert(this->events.end(), rel.begin(), rel.end());
+    this->order = UNSORTED;
+    return *this;
+  }
+
+  std::vector<TofEvent>& EventList::getEvents()
   {
     return this->events;
   }
@@ -123,7 +131,7 @@ namespace DataObjects
   {
     if (order == UNSORTED)
     {
-      return; // don't bother doing anything
+      return; // don't bother doing anything. Why did you ask to unsort?
     }
     else if (order == TOF_SORT)
     {

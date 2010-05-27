@@ -88,8 +88,11 @@ public:
   /** Append a list of events to the histogram. */
   EventList& operator+=(const std::vector<TofEvent>&);
 
+  /** Append a list of events to the histogram. */
+  EventList& operator+=(EventList&);
+
   /** Return the list of TofEvents contained. */
-  std::vector<TofEvent> getEvents();
+  std::vector<TofEvent>& getEvents();
 
   void sort(const EventSortType);
   void sortTof();
