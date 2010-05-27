@@ -182,9 +182,9 @@ private:
 		int total_columns=columnCount();
 		for (int count=0;count<total_columns;++count)
 		{
-			TableColumn_ptr<typename Type> tc_sptr= getColumn(count);
-			std::vector<typename Type> dataVec=tc_sptr->data();
-			std::vector<typename Type>::iterator itr;
+			TableColumn_ptr<Type> tc_sptr= getColumn(count);
+			std::vector<Type> dataVec=tc_sptr->data();
+			typename std::vector<Type>::iterator itr;
 			itr=std::find(dataVec.begin(),dataVec.end(),value);
 			if(itr!=dataVec.end())
 			{
