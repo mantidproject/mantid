@@ -51,12 +51,6 @@ namespace DataObjects
 	  return this->frame_index;
   }
 
-
-
-
-
-
-
   /// --------------------- EventList stuff ----------------------------------
 
   EventList::EventList()
@@ -144,29 +138,40 @@ namespace DataObjects
     throw NotImplementedError("EventList::sortFrame() is not implemented");
   }
 
+  void EventList::setX(const RCtype::ptr_type& X)
+  {
+    this->emptyCache();
+    this->refX = X;
+  }
+
+    const EventList::StorageType& EventList::dataX() const
+    {
+      return *(this->refX);
+    }
+    const EventList::StorageType& EventList::dataY()
+    {
+      this->generateHistogram();
+      return *(this->refY);
+    }
+
+    const EventList::StorageType& EventList::dataE()
+    {
+      this->generateHistogram();
+      return *(this->refE);
+    }
+
+
   void EventList::emptyCache()
   {
-    this->emptyX();
-    this->emptyY();
-    this->emptyE();
-  }
-
-  EventList::StorageType& EventList::emptyX()
-  {
     this->refX.access().clear();
-    return this->refX.access();
-  }
-
-  EventList::StorageType& EventList::emptyY()
-  {
     this->refY.access().clear();
-    return this->refY.access();
+    this->refE.access().clear();
   }
 
-  EventList::StorageType& EventList::emptyE()
+  void EventList::generateHistogram()
   {
-    this->refE.access().clear();
-    return this->refE.access();
+    throw NotImplementedError("EventList::generateHistogram() is not implemented");
   }
+
 } /// namespace DataObjects
 } /// namespace Mantid

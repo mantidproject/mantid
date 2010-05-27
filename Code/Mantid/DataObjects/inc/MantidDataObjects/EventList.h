@@ -9,6 +9,7 @@ typedef unsigned uint32_t;
 #endif
 #include <cstddef>
 #include <vector>
+#include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 
@@ -66,7 +67,7 @@ class DLLExport EventList
 {
 public:
   /// The data storage type used internally in a Histogram1D
-  typedef std::vector<double> StorageType;
+  typedef MantidVec StorageType;
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
   typedef Kernel::cow_ptr<StorageType > RCtype;
 
@@ -93,10 +94,25 @@ public:
   void sort(const EventSortType);
   void sortTof();
   void sortFrame();
+
+  /**
+   * Set the x-component for the histogram view. This will not cause the
+   * histogram to be calculated.
+   */
+  void setX(const RCtype::ptr_type& X);
+
+  /** Returns the x data const. */
+  virtual const StorageType& dataX() const;
+
+  /** Returns the y data const. */
+  virtual const StorageType& dataY();
+
+  /** Returns the error data const. */
+  virtual const StorageType& dataE();
+
+  /** Delete the cached version of the histogram data. */
   void emptyCache();
-  StorageType& emptyX();
-  StorageType& emptyY();
-  StorageType& emptyE();
+
 private:
   std::vector<TofEvent> events;
   EventSortType order;
@@ -106,6 +122,8 @@ private:
   RCtype refY;
   /** Cached version of the uncertainties. */
   RCtype refE;
+
+  void generateHistogram();
 };
 
 } // DataObjects
