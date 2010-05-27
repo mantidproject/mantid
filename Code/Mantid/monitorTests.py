@@ -51,6 +51,9 @@ def getSharedObjExt():
 
 def getTestDir(direc):
     import os
+    if direc is None:
+        direc = os.path.getcwd()
+    
     direc = os.path.abspath(direc)
     direc = os.path.normpath(direc)
 
@@ -84,12 +87,30 @@ def getkey():
         return True
     return False
 
+def argsToArgs(input_args):
+    import os
+    hpp = []
+    subproj = None
+    for arg in input_args:
+        if arg.endswith(".h"):
+            (direc, header) = os.path.split(arg)
+            subproj = direc
+            hpp.append(os.path.split(arg)[1])
+        else:
+            if subproj is None:
+                subproj = arg
+            elif subproj is arg:
+                pass
+            else:
+                raise RuntimeError("Can only watch one subproject")
+    return (subproj, hpp)
+
 if __name__ == "__main__":
     # set up a real command line parser
     import optparse
     epilog = "This program will watch the directory started in by default " \
              + "or can have  a directory specified as an argument"
-    parser = optparse.OptionParser("usage: %prog [options] <dir>",
+    parser = optparse.OptionParser("usage: %prog [options] <dir> <test>",
                                    epilog=epilog)
     parser.add_option("", "--release", dest="release_libs",
                       action="store_true",
@@ -106,14 +127,11 @@ if __name__ == "__main__":
         shared_objs = os.path.join(source_dir, "debug")
     shared_objs = os.path.join(shared_objs, "*" + getSharedObjExt())
 
-    # get the test directory
-    if len(args) == 0:
-        subproj = getTestDir(os.getcwd())
-    elif len(args) == 1:
-        subproj = getTestDir(args[0])
-    else:
-        parser.error("Too many subprojects specified " + str(len(args)))
+    # get the test directory and hpp files
+    (subproj, hpp_files) = argsToArgs(args)
+    subproj = getTestDir(subproj)
 
+    # create list of files to watch
     files_to_check = glob.glob(shared_objs)
     files_to_check += glob.glob(os.path.join(subproj, "*.h"))
 
@@ -122,8 +140,9 @@ if __name__ == "__main__":
           "and", \
           shared_objs.replace(source_dir, "$SRCDIR"), " for changes -------"
 
-    print "Will run ./runTests.sh in %s upon changes" % \
-          subproj.replace(source_dir, "$SRCDIR")
+    runtests_cmd = "./runTests.sh %s" % " ".join(hpp_files)
+    print "Will run %s in %s upon changes" % \
+          (runtests_cmd, subproj.replace(source_dir, "$SRCDIR"))
 
     last_modified = get_all_times(files_to_check)
     last_time = time.time()
@@ -155,7 +174,7 @@ if __name__ == "__main__":
             print ""
 
             #Start the subprocess (runTests.sh)
-            p = subprocess.Popen("./runTests.sh", shell=True, bufsize=10000,
+            p = subprocess.Popen(runtests_cmd, shell=True, bufsize=10000,
                                  cwd=subproj,
                                  stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE, close_fds=True)
