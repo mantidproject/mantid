@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::DataObjects;
 
@@ -43,9 +44,16 @@ public:
     TS_ASSERT_EQUALS(e2.tof(), 123);
     TS_ASSERT_EQUALS(e2.frame(), 456);
 
-    TofEvent e3 = TofEvent(890, 321);
-    TS_ASSERT_EQUALS(e3.tof(), 890);
+    TofEvent e3 = TofEvent(890.234, 321);
+    TS_ASSERT_EQUALS(e3.tof(), 890.234);
     TS_ASSERT_EQUALS(e3.frame(), 321);
+  }
+
+  void test_timestamp()
+  {
+    //Make an event workspace
+    //EventWorkspace ews =
+
   }
 
 
@@ -71,12 +79,17 @@ private:
 public:
   EventListTest()
   {
+  }
+
+  void setUp()
+  {
     vector<TofEvent> mylist;
     mylist.push_back(TofEvent(100,200));
-    mylist.push_back(TofEvent(3,400));
+    mylist.push_back(TofEvent(3.5, 400));
     mylist.push_back(TofEvent(50,60));
     el = EventList(mylist);
   }
+
 
   void testInit()
   {
@@ -118,41 +131,43 @@ public:
     }
   }
 
-//  void testSortTOF()
-//  {
-//    el.sortTof();
-//    vector<TofEvent> rel = el.getEvents();
-//    TS_ASSERT_EQUALS(rel[0].tof(), 3);
-//    TS_ASSERT_EQUALS(rel[1].tof(), 50);
-//    TS_ASSERT_EQUALS(rel[2].tof(), 100);
-//
-//    this->fake_data();
-//    el.sort(TOF_SORT);
-//    rel = el.getEvents();
-//    int i;
-//    for (i=1; i<100; i++)
-//    {
-//      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].tof(), rel[i].tof());
-//    }
-//  }
-//
-//  void testSortFrame()
-//  {
-//    el.sortFrame();
-//    vector<TofEvent> rel = el.getEvents();
-//    TS_ASSERT_EQUALS(rel[0].frame(), 60);
-//    TS_ASSERT_EQUALS(rel[1].frame(), 200);
-//    TS_ASSERT_EQUALS(rel[2].frame(), 400);
-//
-//    this->fake_data();
-//    el.sort(FRAME_SORT);
-//    rel = el.getEvents();
-//    int i;
-//    for (i=1; i<100; i++)
-//    {
-//      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].frame(), rel[i].frame());
-//    }
-//  }
+  void testSortTOF()
+  {
+    el.sortTof();
+    vector<TofEvent> rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 3);
+    TS_ASSERT_EQUALS(rel[0].tof(), 3.5);
+    TS_ASSERT_EQUALS(rel[1].tof(), 50);
+    TS_ASSERT_EQUALS(rel[2].tof(), 100);
+
+    this->fake_data();
+    el.sort(TOF_SORT);
+    rel = el.getEvents();
+    int i;
+    for (i=1; i<100; i++)
+    {
+      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].tof(), rel[i].tof());
+    }
+  }
+
+  void testSortFrame()
+  {
+    el.sortFrame();
+    vector<TofEvent> rel = el.getEvents();
+    TS_ASSERT_EQUALS(rel.size(), 3);
+    TS_ASSERT_EQUALS(rel[0].frame(), 60);
+    TS_ASSERT_EQUALS(rel[1].frame(), 200);
+    TS_ASSERT_EQUALS(rel[2].frame(), 400);
+
+    this->fake_data();
+    el.sort(FRAME_SORT);
+    rel = el.getEvents();
+    int i;
+    for (i=1; i<100; i++)
+    {
+      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].frame(), rel[i].frame());
+    }
+  }
 
 
 //  void test_readX()

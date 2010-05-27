@@ -25,7 +25,7 @@ namespace DataObjects
 class DLLExport TofEvent {
 private:
   /** The units of the time of flight index in nanoseconds. */
-  std::size_t time_of_flight;
+  double time_of_flight;
 
   /**
    * The frame vector is not a member of this object, but it is necessary in
@@ -35,7 +35,7 @@ private:
 
  public:
   /** Constructor, specifying the time of flight and the frame id */
-  TofEvent(const std::size_t time_of_flight, const std::size_t frameid);
+  TofEvent(double time_of_flight, const std::size_t frameid);
 
   /** Constructor, copy from another TofEvent object */
   TofEvent(const TofEvent&);
@@ -48,7 +48,7 @@ private:
   virtual ~TofEvent();
 
   /** Return the time of flight, as an int, in nanoseconds.*/
-  std::size_t tof();
+  double tof();
 
   /** Return the frame id */
   std::size_t frame();
