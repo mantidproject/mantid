@@ -10,12 +10,14 @@
 #
 
 
-import datetime
 import os
 import time
 import sys
 import glob
 import subprocess
+import select
+
+
 
 def get_all_times(filelist):
     """Return list of all file modified times."""
@@ -34,10 +36,19 @@ def times_changed(new_times, old_times):
             return True
     #If you get here, nothing changed.
     return False
-    
 
 
+def getkey():
+    """Non-blocking wait for keypress. Linux only"""
+    result = select.select([sys.stdin], [], [], 0.05)
+    if sys.stdin in result[0]:
+        sys.stdin.read(1) #Flush the buffer
+        return True
+    return False
+
+#==============================================================================
 if __name__ == "__main__":
+    # Get the list of files we want to check
     files_to_check = glob.glob("../../debug/*.so")
     files_to_check += glob.glob("./*.h")
 
@@ -46,19 +57,29 @@ if __name__ == "__main__":
     print "Will run the following command upon changes:\n%s\n" % commandline
 
     last_modified = get_all_times(files_to_check)
-
     last_time = time.time()
     while True:
         #Loop until stopped by Ctrl+C
         #Inform the user
         if time.time() - last_time > 60:
-            print "Still monitoring ..." 
+            print "Still monitoring; or press return to test now ..."
             last_time = time.time()
-    
-        time.sleep(1)
+
+        runTests = False
+
+        #--- Wait one second or until key pressed ---
+        for x in xrange(20):
+            if getkey():
+                runTests = True
+                break
+
+        #---- Check if a file changed ------
         current_times = get_all_times(files_to_check)
         if times_changed(current_times, last_modified):
             print "File(s) changed! Running tests..."
+            runTests = True
+
+        if runTests:
             print '\033[1;32m' + '-'*80 + '\033[1;m'
             print '\033[1;32m' + '='*80 + '\033[1;m'
             print '\033[1;32m' + '-'*80 + '\033[1;m'
@@ -86,4 +107,6 @@ if __name__ == "__main__":
 
             #os.system(commandline)
             last_modified = current_times;
-            print "\n\n--- Continuing to monitor changes to file ---"
+            print "\n\n--- continuing to monitor changes to file; or press return to test now ---"
+
+
