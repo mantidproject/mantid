@@ -17,7 +17,11 @@ import glob
 import subprocess
 import select
 
-
+COLOR = {"green":'\x1b[32m',
+         "red":'\x1b[31m',
+         "reset":'\x1b[0m',
+         "boldred":'\x1b[91m'
+         }
 
 def get_all_times(filelist):
     """Return list of all file modified times."""
@@ -36,7 +40,41 @@ def times_changed(new_times, old_times):
             return True
     #If you get here, nothing changed.
     return False
+def getSourceDir():
+    import sys
+    import os
+    script = os.path.abspath(sys.argv[0])
+    return os.path.dirname(script)
 
+def getSharedObjExt():
+    return ".so"
+
+def getTestDir(direc):
+    import os
+    direc = os.path.abspath(direc)
+    direc = os.path.normpath(direc)
+
+    source_dir = getSourceDir()
+    if not direc.startswith(source_dir):
+        raise RuntimeError("Trying to monitor test outside of the source " \
+                           + "directory: " + direc + " is not in " \
+                           + source_dir)
+
+    # if the test directory was supplied, then just carry on
+    if direc.endswith("test"):
+        if os.path.exists(direc):
+            return direc
+        else:
+            raise RuntimeError("test directory does not exist " + direc)
+
+    # determine which subproject
+    direc = os.path.join(direc, "test")
+    if os.path.exists(direc):
+        return direc
+
+    # error out
+    raise RuntimeError("Failed to determine subproject from directory " \
+                       + direc)
 
 def getkey():
     """Non-blocking wait for keypress. Linux only"""
@@ -46,15 +84,46 @@ def getkey():
         return True
     return False
 
-#==============================================================================
 if __name__ == "__main__":
-    # Get the list of files we want to check
-    files_to_check = glob.glob("../../debug/*.so")
-    files_to_check += glob.glob("./*.h")
+    # set up a real command line parser
+    import optparse
+    epilog = "This program will watch the directory started in by default " \
+             + "or can have  a directory specified as an argument"
+    parser = optparse.OptionParser("usage: %prog [options] <dir>",
+                                   epilog=epilog)
+    parser.add_option("", "--release", dest="release_libs",
+                      action="store_true",
+                      help="Watch for libraries in the release directory " \
+                           + "rather than the debug directory")
+    (options, args) = parser.parse_args()
 
-    print "\n------ Monitoring current working directory, and the ../../debug/ folder for changes -------"
-    commandline = "./runTests.sh " + " ".join(sys.argv[1:])
-    print "Will run the following command upon changes:\n%s\n" % commandline
+    # Convert the options into something more useful
+    source_dir = getSourceDir()
+    import os
+    if options.release_libs:
+        shared_objs = os.path.join(source_dir, "release")
+    else:
+        shared_objs = os.path.join(source_dir, "debug")
+    shared_objs = os.path.join(shared_objs, "*" + getSharedObjExt())
+
+    # get the test directory
+    if len(args) == 0:
+        subproj = getTestDir(os.getcwd())
+    elif len(args) == 1:
+        subproj = getTestDir(args[0])
+    else:
+        parser.error("Too many subprojects specified " + str(len(args)))
+
+    files_to_check = glob.glob(shared_objs)
+    files_to_check += glob.glob(os.path.join(subproj, "*.h"))
+
+    print "------ Monitoring tests in", \
+          subproj.replace(source_dir, "$SRCDIR"), \
+          "and", \
+          shared_objs.replace(source_dir, "$SRCDIR"), " for changes -------"
+
+    print "Will run ./runTests.sh in %s upon changes" % \
+          subproj.replace(source_dir, "$SRCDIR")
 
     last_modified = get_all_times(files_to_check)
     last_time = time.time()
@@ -80,13 +149,14 @@ if __name__ == "__main__":
             runTests = True
 
         if runTests:
-            print '\033[1;32m' + '-'*80 + '\033[1;m'
-            print '\033[1;32m' + '='*80 + '\033[1;m'
-            print '\033[1;32m' + '-'*80 + '\033[1;m'
+            print COLOR["green"] + '-'*80 + COLOR["reset"]
+            print COLOR["green"] + '='*80 + COLOR["reset"]
+            print COLOR["green"] + '-'*80 + COLOR["reset"]
             print ""
 
             #Start the subprocess (runTests.sh)
-            p = subprocess.Popen(commandline, shell=True, bufsize=10000,
+            p = subprocess.Popen("./runTests.sh", shell=True, bufsize=10000,
+                                 cwd=subproj,
                                  stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE, close_fds=True)
             (put, get) = (p.stdin, p.stdout)
@@ -103,7 +173,9 @@ if __name__ == "__main__":
                     
                     #An error line!
                     #Print in red
-                    print '\033[1;31m' + line  + '\033[1;m'
+                    print COLOR["red"] + line  + COLOR["reset"]
+                elif line.endswith("OK!"):
+                    print COLOR["green"] + line + COLOR["reset"]
                 else:
                     #Print normally
                     print line
