@@ -220,6 +220,7 @@ namespace Mantid
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
         declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>(prop_name + "1", base_name + "1", Direction::Output));
+        wksp_group->add(getPropertyValue("OutputWorkspace"));
         wksp_group->add(base_name + "1");
         setProperty(prop_name + "1", local_workspace);
 
@@ -443,7 +444,7 @@ namespace Mantid
           NXData monitor = entry.openNXData(it->second);
           NXInt mondata = monitor.openIntData();
           m_progress->report("Loading monitor");
-          mondata.load();
+          mondata.load(1,period-1);
           MantidVec& Y = local_workspace->dataY(hist_index);
           Y.assign(mondata(),mondata() + m_numberOfChannels);
           MantidVec& E = local_workspace->dataE(hist_index);

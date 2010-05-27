@@ -181,6 +181,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\EventList.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\EventWorkspace.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Histogram1D.cpp"
 				>
 			</File>
@@ -224,6 +232,14 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidDataObjects\CompressedWorkspace2D.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataObjects\EventList.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidDataObjects\EventWorkspace.h"
 				>
 			</File>
 			<File

@@ -84,6 +84,7 @@ namespace DataObjects
   {
     this->events.assign(rhs.events.begin(), rhs.events.end());
     this->order = UNSORTED;
+    return *this;
   }
 
 
