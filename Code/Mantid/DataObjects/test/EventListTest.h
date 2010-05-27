@@ -105,6 +105,19 @@ public:
     TS_ASSERT_EQUALS(rel[6].tof(), 999);
   }
 
+  void fake_data()
+  {
+    //Clear the list
+    el = EventList();
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (int i=0; i < 100; i++)
+    {
+      //Random tof up to 10 ms
+      el += TofEvent( 1e7*(rand()*1.0/RAND_MAX), rand()%1000);
+    }
+  }
+
 //  void testSortTOF()
 //  {
 //    el.sortTof();
@@ -112,6 +125,15 @@ public:
 //    TS_ASSERT_EQUALS(rel[0].tof(), 3);
 //    TS_ASSERT_EQUALS(rel[1].tof(), 50);
 //    TS_ASSERT_EQUALS(rel[2].tof(), 100);
+//
+//    this->fake_data();
+//    el.sort(TOF_SORT);
+//    rel = el.getEvents();
+//    int i;
+//    for (i=1; i<100; i++)
+//    {
+//      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].tof(), rel[i].tof());
+//    }
 //  }
 //
 //  void testSortFrame()
@@ -121,8 +143,23 @@ public:
 //    TS_ASSERT_EQUALS(rel[0].frame(), 60);
 //    TS_ASSERT_EQUALS(rel[1].frame(), 200);
 //    TS_ASSERT_EQUALS(rel[2].frame(), 400);
+//
+//    this->fake_data();
+//    el.sort(FRAME_SORT);
+//    rel = el.getEvents();
+//    int i;
+//    for (i=1; i<100; i++)
+//    {
+//      TS_ASSERT_LESS_THAN_EQUALS(rel[i-1].frame(), rel[i].frame());
+//    }
 //  }
 
+
+//  void test_readX()
+//  {
+//    this->fake_data();
+//    vector<double>x = el.readX();
+//  }
 };
 
 
