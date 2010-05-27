@@ -18,7 +18,7 @@ def getSVNRevision():
     while line != "":
         status = line[0]
         props = line[1]
-        if status=="A" or status=="D" or status=="M" or status=="R" or props!=" ":
+        if status=="A" or status=="D" or status=="M" or status=="R": #or props!=" ":
             #Change to file or stuff.
             filename = line[8:].strip()
             if (".cproject" in filename) or\

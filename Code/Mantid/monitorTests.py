@@ -87,21 +87,34 @@ if __name__ == "__main__":
 
             #Start the subprocess (runTests.sh)
             p = subprocess.Popen(commandline, shell=True, bufsize=10000,
-                                 stdin=subprocess.PIPE,
+                                 stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE, close_fds=True)
             (put, get) = (p.stdin, p.stdout)
+
 
             line=get.readline()
             while line != "":
                 if len(line)>1:
                     line = line[:-1] #Remove trailing /n
-                if ("Error:" in line) or ("error:" in line):
+                if ("Error:" in line) or ("error:" in line) \
+                    or ("terminate called after throwing an instance" in line) \
+                    or ("  what(): " in line) \
+                    :
+                    
                     #An error line!
                     #Print in red
                     print '\033[1;31m' + line  + '\033[1;m'
                 else:
                     #Print normally
                     print line
+
+#                #Any stderr?
+#                err = p.stderr.readline()
+#                while err != "":
+#                    if len(err)>1: err = err[:-1] #Remove trailing /n
+#                    print '\033[1;35m' + err + '\033[1;m'
+#                    err = p.stderr.readline()
+
                 #Keep reading output.
                 line=get.readline()
 

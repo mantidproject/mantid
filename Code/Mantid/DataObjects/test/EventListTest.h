@@ -73,7 +73,7 @@ public:
   {
     vector<TofEvent> mylist;
     mylist.push_back(TofEvent(100,200));
-    mylist.push_back(TofEvent(3,4));
+    mylist.push_back(TofEvent(3,400));
     mylist.push_back(TofEvent(50,60));
     el = EventList(mylist);
   }
@@ -82,6 +82,9 @@ public:
   {
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 3);
+    TS_ASSERT_EQUALS(rel[0].tof(), 100);
+    TS_ASSERT_EQUALS(rel[0].frame(), 200);
+    TS_ASSERT_EQUALS(rel[2].tof(), 50);
   }
 
   void testPlusOperator()
@@ -93,11 +96,32 @@ public:
     el += mylist;
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 6);
+    TS_ASSERT_EQUALS(rel[3].tof(), 45);
+    TS_ASSERT_EQUALS(rel[5].tof(), 34);
 
     el += TofEvent(999, 888);
     rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 7);
+    TS_ASSERT_EQUALS(rel[6].tof(), 999);
   }
+
+//  void testSortTOF()
+//  {
+//    el.sortTof();
+//    vector<TofEvent> rel = el.getEvents();
+//    TS_ASSERT_EQUALS(rel[0].tof(), 3);
+//    TS_ASSERT_EQUALS(rel[1].tof(), 50);
+//    TS_ASSERT_EQUALS(rel[2].tof(), 100);
+//  }
+//
+//  void testSortFrame()
+//  {
+//    el.sortFrame();
+//    vector<TofEvent> rel = el.getEvents();
+//    TS_ASSERT_EQUALS(rel[0].frame(), 60);
+//    TS_ASSERT_EQUALS(rel[1].frame(), 200);
+//    TS_ASSERT_EQUALS(rel[2].frame(), 400);
+//  }
 
 };
 
