@@ -140,7 +140,7 @@ public:
         TS_ASSERT_EQUALS(str,"Number")
         TS_ASSERT_EQUALS(j,row1.row())
         row1.Bool(3) = !tw.Bool(row1.row(),3);
-        TS_ASSERT_EQUALS(tw.Bool(row1.row(),3), row1.row()%2 != 0)
+		TS_ASSERT_EQUALS(tw.Bool(row1.row(),3), static_cast<Mantid::API::Boolean>(row1.row()%2 != 0))
     }while(row1.next());
 
   }
@@ -178,6 +178,51 @@ public:
   {
       std::cerr<<"Error: "<<e.what()<<'\n';
   }
+  }
+  void testFindMethod()
+  {
+	  TableWorkspace tw;
+	  tw.addColumn("str","Name");
+	  tw.addColumn("str","Format");
+	  tw.addColumn("str","Format Version");
+	  tw.addColumn("str","Format Type");
+	  tw.addColumn("str","Create Time");
+	 
+	   for (int i=1;i<10;++i)
+	  {
+		 std::stringstream s;
+		 TableRow t = tw.appendRow();
+		  s<<i;
+		  std::string name="Name";
+		  name+=s.str();
+		 
+		  t<<name;
+		  std::string format="Format";
+		  format+=s.str();
+		  t<<format;
+          std::string formatver="Format Version"; 
+		  formatver+=s.str();
+		  t<<formatver;
+		  std::string formattype="Format Type";
+		  formattype+=s.str();
+		  t<<formattype;
+		  std::string creationtime="Creation Time";
+		  creationtime+=s.str();
+		  t<<creationtime;
+
+	  }
+	  std::string searchstr="Name3";
+	  int row=0,col=0;
+	  tw.find(searchstr,row,col);
+	  TS_ASSERT_EQUALS(row,2);
+
+	  searchstr="Format Version8";
+	  tw.find(searchstr,row,col);
+	  TS_ASSERT_EQUALS(row,7);
+
+
+
+
   }
 
 

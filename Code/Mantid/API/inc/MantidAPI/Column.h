@@ -147,6 +147,10 @@ struct Column_DllExport Boolean
     Boolean(bool b):value(b){}
     /// Returns bool
     operator bool(){return value;}
+	/// equal to operator
+	bool operator==(const Boolean& b)const
+	{return(this->value==b.value);		
+	}
     bool value;///< boolean value
 };
 

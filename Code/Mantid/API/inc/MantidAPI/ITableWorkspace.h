@@ -8,6 +8,7 @@
 //#include "MantidKernel/System.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
+#include "MantidGeometry/V3D.h"
 
 #include <boost/shared_ptr.hpp>
 #include <sstream>
@@ -248,6 +249,19 @@ public:
     /**  Creates a TableRow object for the first row (\c row == 0).
      */
     TableRowHelper getFirstRow(){return TableRowHelper(this,0);}
+
+   /// find method to get the index of integer cell value in a table workspace
+	virtual void find(int value,int& row,int & col)=0;
+    /// find method to get the index of  double cell value in a table workspace
+	virtual void find (double  value,int& row,int & col)=0;
+	/// find method to get the index of  float cell value in a table workspace
+	virtual void find(float value,int& row,int & col)=0;
+	/// find method to get the index of  API::Boolean value cell in a table workspace
+	virtual void find(API::Boolean value,int& row,int & col)=0;
+	/// find method to get the index of cellstd::string  value in a table workspace
+	virtual void find(std::string value,int& row,int & col)=0;
+	/// find method to get the index of  Mantid::Geometry::V3D cell value in a table workspace
+	virtual void find(Mantid::Geometry::V3D value,int& row,int & col)=0;
 
 protected:
 
