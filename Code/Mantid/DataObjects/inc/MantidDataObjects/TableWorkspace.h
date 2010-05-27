@@ -175,16 +175,16 @@ public:
 private:
 	
 	/// template method to find a given value in a table.
-	template<class Type>
+	template<typename  Type>
 	void findValue(const Type value,int& row,int & col)
 	{
 		bool bfound=false;
 		int total_columns=columnCount();
 		for (int count=0;count<total_columns;++count)
 		{
-			TableColumn_ptr<Type> tc_sptr= getColumn(count);
-			std::vector<Type> dataVec=tc_sptr->data();
-			std::vector<Type>::iterator itr;
+			TableColumn_ptr<typename Type> tc_sptr= getColumn(count);
+			std::vector<typename Type> dataVec=tc_sptr->data();
+			std::vector<typename Type>::iterator itr;
 			itr=std::find(dataVec.begin(),dataVec.end(),value);
 			if(itr!=dataVec.end())
 			{
