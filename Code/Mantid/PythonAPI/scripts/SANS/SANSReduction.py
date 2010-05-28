@@ -37,6 +37,13 @@ TRANS_CAN = ''
 DIRECT_SAMPLE = ''
 DIRECT_CAN = ''
 DIRECT_CAN = ''
+# if the workspaces come from multi-period i.e. group workspaces, the number of periods in that group will be stored in the following variables. These variables corrospond with those above
+_SAMPLE_N_PERIODS = -1
+_CAN_N_PERIODS =-1
+_TRANS_SAMPLE_N_PERIODS = -1
+DIRECT_SAMPLE_N_PERIODS = -1
+TRANS_SAMPLE_N_CAN = -1
+DIRECT_SAMPLE_N_CAN = -1
 
 #This is stored as UserFile in the output workspace
 MASKFILE = '_ no file'
@@ -105,7 +112,7 @@ BACKMON_END = None
 DETBANK = None
 
 # The monitor spectrum taken from the GUI
-MONITORSPECTRUM = None
+MONITORSPECTRUM = 2
 # agruments after MON/LENGTH need to take precendence over those after MON/SPECTRUM and this variable ensures that
 MONITORSPECLOCKED = False
 # if this is set InterpolationRebin will be used on the monitor spectrum used to normalise the sample
@@ -292,11 +299,12 @@ def Set2D():
 ########################### 
 _SAMPLE_SETUP = None
 _SAMPLE_RUN = ''
-def AssignSample(sample_run, reload = True):
+def AssignSample(sample_run, reload = True, period = -1):
     _printMessage('AssignSample("' + sample_run + '")')
-    global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN
+    global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN, _SAMPLE_N_PERIODS
     
     __clearPrevious(SCATTER_SAMPLE,others=[SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
+    _SAMPLE_N_PERIODS = -1
     
     if( sample_run.startswith('.') or sample_run == '' or sample_run == None):
         _SAMPLE_SETUP = None
@@ -305,7 +313,7 @@ def AssignSample(sample_run, reload = True):
         return '', '()'
     
     _SAMPLE_RUN = sample_run
-    SCATTER_SAMPLE,reset,logname,filepath = _assignHelper(sample_run, False, reload)
+    SCATTER_SAMPLE,reset,logname,filepath, _SAMPLE_N_PERIODS = _assignHelper(sample_run, False, reload, period)
     if SCATTER_SAMPLE == '':
         _issueWarning('Unable to load sans sample run, cannot continue.')
         return '','()'
@@ -336,11 +344,12 @@ def AssignSample(sample_run, reload = True):
 ########################### 
 _CAN_SETUP = None
 _CAN_RUN = ''
-def AssignCan(can_run, reload = True):
+def AssignCan(can_run, reload = True, period = -1):
     _printMessage('AssignCan("' + can_run + '")')
-    global SCATTER_CAN, _CAN_SETUP, _CAN_RUN
+    global SCATTER_CAN, _CAN_SETUP, _CAN_RUN, _CAN_N_PERIODS
     
     __clearPrevious(SCATTER_CAN,others=[SCATTER_SAMPLE,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
+    _CAN_N_PERIODS = -1
     
     if( can_run.startswith('.') or can_run == '' or can_run == None):
         SCATTER_CAN = ''
@@ -349,7 +358,8 @@ def AssignCan(can_run, reload = True):
         return '', '()'
 
     _CAN_RUN = can_run
-    SCATTER_CAN ,reset, logname,filepath = _assignHelper(can_run, False, reload)
+    SCATTER_CAN ,reset, logname,filepath, _CAN_N_PERIODS = \
+        _assignHelper(can_run, False, reload, period)
     if SCATTER_CAN == '':
         _issueWarning('Unable to load sans can run, cannot continue.')
         return '','()'
@@ -396,38 +406,38 @@ def AssignCan(can_run, reload = True):
 ########################### 
 # Set the trans sample and measured raw workspaces
 ########################### 
-def TransmissionSample(sample, direct, reload = True):
+def TransmissionSample(sample, direct, reload = True, period = -1):
     _printMessage('TransmissionSample("' + sample + '","' + direct + '")')
-    global TRANS_SAMPLE, DIRECT_SAMPLE
+    global TRANS_SAMPLE, DIRECT_SAMPLE, _TRANS_SAMPLE_N_PERIODS, DIRECT_SAMPLE_N_PERIODS
     
     __clearPrevious(TRANS_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
     __clearPrevious(DIRECT_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_CAN])
     
-    TRANS_SAMPLE = _assignHelper(sample, True, reload)[0]
-    DIRECT_SAMPLE = _assignHelper(direct, True, reload)[0]
+    TRANS_SAMPLE = _assignHelper(sample, True, reload, period)[0]
+    DIRECT_SAMPLE = _assignHelper(direct, True, reload, period)[0]
     return TRANS_SAMPLE, DIRECT_SAMPLE
 
 ########################## 
 # Set the trans sample and measured raw workspaces
 ########################## 
-def TransmissionCan(can, direct, reload = True):
+def TransmissionCan(can, direct, reload = True, period = -1):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
-    global TRANS_CAN, DIRECT_CAN
+    global TRANS_CAN, DIRECT_CAN, TRANS_SAMPLE_N_CAN, DIRECT_SAMPLE_N_CAN
     
     __clearPrevious(TRANS_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,DIRECT_SAMPLE,DIRECT_CAN])
     __clearPrevious(DIRECT_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE])
 
-    TRANS_CAN = _assignHelper(can, True, reload)[0]
+    TRANS_CAN = _assignHelper(can, True, reload, period)[0]
     if direct == '' or direct == None:
         DIRECT_CAN = DIRECT_SAMPLE 
     else:
-        DIRECT_CAN = _assignHelper(direct, True, reload)[0]
+        DIRECT_CAN = _assignHelper(direct, True, reload, period)[0]
     return TRANS_CAN, DIRECT_CAN
 
 # Helper function
-def _assignHelper(run_string, is_trans, reload = True):
+def _assignHelper(run_string, is_trans, reload = True, period = -1):
     if run_string == '' or run_string.startswith('.'):
-        return '',True,'',''
+        return '',True,'','', -1
     pieces = run_string.split('.')
     if len(pieces) != 2 :
          _fatalError("Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format")
@@ -435,7 +445,7 @@ def _assignHelper(run_string, is_trans, reload = True):
         run_no = pieces[0]
         ext = pieces[1]
     if run_no == '':
-        return '',True,'',''
+        return '',True,'','', -1
         
     if INSTR_NAME == 'LOQ':
         field_width = 5
@@ -448,9 +458,9 @@ def _assignHelper(run_string, is_trans, reload = True):
         wkspname =  shortrun_no + '_trans_' + ext.lower()
     else:
         wkspname =  shortrun_no + '_sans_' + ext.lower()
-
+    
     if reload == False and mtd.workspaceExists(wkspname):
-        return wkspname,False,'',''
+        return wkspname,False,'','', -1
 
     basename = INSTR_NAME + fullrun_no
     filename = os.path.join(DATA_PATH,basename)
@@ -468,17 +478,18 @@ def _assignHelper(run_string, is_trans, reload = True):
                 specmin = None
                 specmax = 8
                 
-            filepath = _loadRawData(filename, wkspname, ext, specmin,specmax)
+            [filepath, wkspname, nPeriods] = \
+               _loadRawData(filename, wkspname, ext, specmin, specmax, period)
         except RuntimeError, err:
             _issueWarning(str(err))
-            return '',True,'',''
+            return '',True,'','', -1
     else:
         try:
-            filepath = _loadRawData(filename, wkspname, ext)
+            [filepath, wkspname, nPeriods] = _loadRawData(filename, wkspname, ext, None, None, period)
         except RuntimeError, details:
             _issueWarning(str(details))
-            return '',True,'',''
-    return wkspname,True, INSTR_NAME + logname, filepath
+            return '',True,'','', -1
+    return wkspname,True, INSTR_NAME + logname, filepath, nPeriods
 
 def padRunNumber(run_no, field_width):
     nchars = len(run_no)
@@ -503,14 +514,34 @@ def __clearPrevious(ws1, others = []):
 ##########################
 # Loader function
 ##########################
-def _loadRawData(filename, workspace, ext, spec_min = None, spec_max = None):
+def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period = -1):
     if ext.lower().startswith('n'):
-        alg = LoadNexus(filename + '.' + ext, workspace,SpectrumMin=spec_min,SpectrumMax=spec_max)
+        alg = LoadNexus(filename + '.' + ext, wsName,SpectrumMin=spec_min,SpectrumMax=spec_max)
     else:
-        alg = LoadRaw(filename + '.' + ext, workspace, SpectrumMin = spec_min,SpectrumMax = spec_max)
-        LoadSampleDetailsFromRaw(workspace, filename + '.' + ext)
+        alg = LoadRaw(filename + '.' + ext, wsName, SpectrumMin = spec_min,SpectrumMax = spec_max)
+        LoadSampleDetailsFromRaw(wsName, filename + '.' + ext)
 
-    sample_details = mtd.getMatrixWorkspace(workspace).getSampleDetails()
+    pWorksp = mtd[wsName]
+
+    if pWorksp.isGroup() :
+        #get the number of periods in a group using the fact that each period has a different name
+        nNames = len(pWorksp.getNames())
+        numPeriods = nNames - 1
+    else :
+        #if the work space isn't a group there is only one period
+        numPeriods = 1
+    #period greater than zero means we must be looking at a workspace group
+    if period > 0 :
+        if not pWorksp.isGroup() : raise exception('_loadRawData: A period number can only be specified for a group and workspace '+ workspace + ' is not a group')
+        wsName = _leaveSinglePeriod(pWorksp, period)
+	pWorksp = mtd[wsName]
+    else :
+        #if it is a group but they hadn't specified the period it means load the first spectrum
+        if pWorksp.isGroup() :
+            wsName = _leaveSinglePeriod(pWorksp, 1)
+	    pWorksp = mtd[wsName]
+    
+    sample_details = pWorksp.getSampleDetails()
     SampleGeometry(sample_details.getGeometryFlag())
     SampleThickness(sample_details.getThickness())
     SampleHeight(sample_details.getHeight())
@@ -518,7 +549,15 @@ def _loadRawData(filename, workspace, ext, spec_min = None, spec_max = None):
 
     # Return the filepath actually used to load the data
     fullpath = alg.getPropertyValue("Filename")
-    return os.path.dirname(fullpath)
+    return [ os.path.dirname(fullpath), wsName, numPeriods]
+
+def _leaveSinglePeriod(groupW, period):
+    oldName = groupW.getName()+'_'+str(period)
+    groupW.remove(oldName)
+    newName = groupW.getName() + '_p'+str(period)
+    RenameWorkspace(oldName, newName)
+    mtd.deleteWorkspace(groupW.getName())
+    return newName
 
 
 # Load the detector logs
@@ -1782,3 +1821,8 @@ def plotSpectrum(name, spec):
 
 def mergePlots(g1, g2):
     return qti.app.mantidUI.mergePlots(g1,g2)
+
+#testing code, remove 
+#print _loadRawData('c:/mantid/test/data/SANS2D/SANS2D00000992', '992boo', 'raw', None, None)
+#SCATTER_SAMPLE, logvalues = AssignSample('5511.raw', reload = True)
+#print SCATTER_SAMPLE, logvalues
