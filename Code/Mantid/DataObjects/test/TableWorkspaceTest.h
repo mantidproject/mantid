@@ -36,41 +36,41 @@ public:
     tw.addColumn("V3D","Position");
     tw.addColumn("Class","class");
 
-    TS_ASSERT_EQUALS(tw.rowCount(),3)
-    TS_ASSERT_EQUALS(tw.columnCount(),4)
+    TS_ASSERT_EQUALS(tw.rowCount(),3);
+    TS_ASSERT_EQUALS(tw.columnCount(),4);
 
     tw.getRef<int>("Number",1) = 17;
     tw.cell<std::string>(2,1) = "STRiNG";
 
     ColumnVector<int> cNumb = tw.getVector("Number");
-    TS_ASSERT_EQUALS(cNumb[1],17)
+    TS_ASSERT_EQUALS(cNumb[1],17);
 
     ColumnVector<string> str = tw.getVector("Name");
-    TS_ASSERT_EQUALS(str.size(),3)
-    TS_ASSERT_EQUALS(str[2],"STRiNG")
+    TS_ASSERT_EQUALS(str.size(),3);
+    TS_ASSERT_EQUALS(str[2],"STRiNG");
 
     ColumnVector<Class> cl = tw.getVector("class");
-    TS_ASSERT_EQUALS(cl.size(),3)
+    TS_ASSERT_EQUALS(cl.size(),3);
 
     for(int i=0;i<cNumb.size();i++)
         cNumb[i] = i+1;
 
     tw.insertRow(2);
     cNumb[2] = 4;
-    TS_ASSERT_EQUALS(tw.rowCount(),4)
-    TS_ASSERT_EQUALS(cNumb[3],3)
+    TS_ASSERT_EQUALS(tw.rowCount(),4);
+    TS_ASSERT_EQUALS(cNumb[3],3);
 
     tw.setRowCount(10);
-    TS_ASSERT_EQUALS(tw.rowCount(),10)
-    TS_ASSERT_EQUALS(cNumb[3],3)
+    TS_ASSERT_EQUALS(tw.rowCount(),10);
+    TS_ASSERT_EQUALS(cNumb[3],3);
 
     tw.removeRow(3);
-    TS_ASSERT_EQUALS(tw.rowCount(),9)
-    TS_ASSERT_EQUALS(cNumb[3],0)
+    TS_ASSERT_EQUALS(tw.rowCount(),9);
+    TS_ASSERT_EQUALS(cNumb[3],0);
 
     tw.setRowCount(2);
-    TS_ASSERT_EQUALS(tw.rowCount(),2)
-    TS_ASSERT_EQUALS(cNumb[1],2)
+    TS_ASSERT_EQUALS(tw.rowCount(),2);
+    TS_ASSERT_EQUALS(cNumb[1],2);
 
     str[0] = "First"; str[1] = "Second";
     cl[0].d = 11; cl[1].d = 22;
@@ -92,13 +92,13 @@ public:
 
     TableRow row = tw.getFirstRow();
 
-    TS_ASSERT_EQUALS(row.row(),0)
+    TS_ASSERT_EQUALS(row.row(),0);
 
     row << 18 << 3.14 << "FIRST";
 
-    TS_ASSERT_EQUALS(tw.Int(0,0),18)
-    TS_ASSERT_EQUALS(tw.Double(0,1),3.14)
-    TS_ASSERT_EQUALS(tw.String(0,2),"FIRST")
+    TS_ASSERT_EQUALS(tw.Int(0,0),18);
+    TS_ASSERT_EQUALS(tw.Double(0,1),3.14);
+    TS_ASSERT_EQUALS(tw.String(0,2),"FIRST");
 
     if (row.next())
     {

@@ -56,85 +56,85 @@ public:
   
   void testGetSetTitle()
   {
-    TS_ASSERT_EQUALS( ws->getTitle(), "" )
+    TS_ASSERT_EQUALS( ws->getTitle(), "" );
     ws->setTitle("something");
-    TS_ASSERT_EQUALS( ws->getTitle(), "something" )
+    TS_ASSERT_EQUALS( ws->getTitle(), "something" );
     ws->setTitle("");
   }
 
   void testGetSetComment()
   {
-    TS_ASSERT_EQUALS( ws->getComment(), "" )
+    TS_ASSERT_EQUALS( ws->getComment(), "" );
     ws->setComment("commenting");
-    TS_ASSERT_EQUALS( ws->getComment(), "commenting" )
+    TS_ASSERT_EQUALS( ws->getComment(), "commenting" );
     ws->setComment("");
   }
 
   void testGetInstrument()
   {
     boost::shared_ptr<IInstrument> i = ws->getInstrument();
-    TS_ASSERT_EQUALS( ws->getInstrument()->type(), "Instrument" )
+    TS_ASSERT_EQUALS( ws->getInstrument()->type(), "Instrument" );
   }
 
   void testSpectraMap()
   {
     MatrixWorkspace_sptr ws2 = WorkspaceFactory::Instance().create(ws,1,1,1);
     const SpectraDetectorMap &specs = ws2->spectraMap();
-    TS_ASSERT_EQUALS( &(ws->spectraMap()), &specs )
+    TS_ASSERT_EQUALS( &(ws->spectraMap()), &specs );
     SpectraDetectorMap &specs2 = ws2->mutableSpectraMap();
-    TS_ASSERT_DIFFERS( &(ws->spectraMap()), &specs2 )
+    TS_ASSERT_DIFFERS( &(ws->spectraMap()), &specs2 );
   }
 
   void testGetSetSample()
   {
-    TS_ASSERT( &ws->sample() )
+    TS_ASSERT( &ws->sample() );
 
     ws->mutableSample().setName("test");
-    TS_ASSERT_EQUALS( ws->sample().getName(), "test" )
+    TS_ASSERT_EQUALS( ws->sample().getName(), "test" );
   }
 
   void testGetMemorySize()
   {
-    TS_ASSERT_THROWS_NOTHING( ws->getMemorySize() )
+    TS_ASSERT_THROWS_NOTHING( ws->getMemorySize() );
   }
 
   void testHistory()
   {
-    TS_ASSERT_THROWS_NOTHING( WorkspaceHistory& h = ws->history() )
+    TS_ASSERT_THROWS_NOTHING( WorkspaceHistory& h = ws->history() );
     const Mantid::DataObjects::WorkspaceTester wsc;
-    TS_ASSERT_THROWS_NOTHING( const WorkspaceHistory& hh = wsc.getHistory() )
+    TS_ASSERT_THROWS_NOTHING( const WorkspaceHistory& hh = wsc.getHistory() );
   }
 
   void testAxes()
   {
-    TS_ASSERT_EQUALS( ws->axes(), 1 )
+    TS_ASSERT_EQUALS( ws->axes(), 1 );
   }
 
   void testGetAxis()
   {
-    TS_ASSERT_THROWS( ws->getAxis(-1), Exception::IndexError )
-    TS_ASSERT_THROWS_NOTHING( ws->getAxis(0) )
-    TS_ASSERT( ws->getAxis(0) )
-    TS_ASSERT( ws->getAxis(0)->isNumeric() )
-    TS_ASSERT_THROWS( ws->getAxis(1), Exception::IndexError )
+    TS_ASSERT_THROWS( ws->getAxis(-1), Exception::IndexError );
+    TS_ASSERT_THROWS_NOTHING( ws->getAxis(0) );
+    TS_ASSERT( ws->getAxis(0) );
+    TS_ASSERT( ws->getAxis(0)->isNumeric() );
+    TS_ASSERT_THROWS( ws->getAxis(1), Exception::IndexError );
   }
 
   void testReplaceAxis()
   {
     Axis* axBad = new Axis(AxisType::Spectra,5);
-    TS_ASSERT_THROWS( ws->replaceAxis(0,axBad), std::runtime_error )
+    TS_ASSERT_THROWS( ws->replaceAxis(0,axBad), std::runtime_error );
     delete axBad;
     Axis* ax = new Axis(AxisType::Spectra,1);
-    TS_ASSERT_THROWS( ws->replaceAxis(1,ax), Exception::IndexError )
-    TS_ASSERT_THROWS_NOTHING( ws->replaceAxis(0,ax) )
-    TS_ASSERT( ws->getAxis(0)->isSpectra() )
+    TS_ASSERT_THROWS( ws->replaceAxis(1,ax), Exception::IndexError );
+    TS_ASSERT_THROWS_NOTHING( ws->replaceAxis(0,ax) );
+    TS_ASSERT( ws->getAxis(0)->isSpectra() );
   }
 
   void testIsDistribution()
   {
-    TS_ASSERT( ! ws->isDistribution() )
-    TS_ASSERT( ws->isDistribution(true) )
-    TS_ASSERT( ws->isDistribution() )
+    TS_ASSERT( ! ws->isDistribution() );
+    TS_ASSERT( ws->isDistribution(true) );
+    TS_ASSERT( ws->isDistribution() );
   }
 
   void testGetSetYUnit()
@@ -148,41 +148,41 @@ public:
   {
     MatrixWorkspace *ws2 = new Mantid::DataObjects::WorkspaceTester;
     ws2->initialize(1,2,2);
-    TS_ASSERT( !ws2->hasMaskedBins(0) )
+    TS_ASSERT( !ws2->hasMaskedBins(0) );
     // Doesn't throw on invalid spectrum index, just returns false
-    TS_ASSERT( !ws2->hasMaskedBins(1) )
-    TS_ASSERT( !ws2->hasMaskedBins(-1) )
+    TS_ASSERT( !ws2->hasMaskedBins(1) );
+    TS_ASSERT( !ws2->hasMaskedBins(-1) );
     
     // Will throw if nothing masked for spectrum
-    TS_ASSERT_THROWS( ws2->maskedBins(0), Mantid::Kernel::Exception::IndexError )
+    TS_ASSERT_THROWS( ws2->maskedBins(0), Mantid::Kernel::Exception::IndexError );
     // Will throw if attempting to mask invalid spectrum
-    TS_ASSERT_THROWS( ws2->maskBin(-1,1), Mantid::Kernel::Exception::IndexError )
-    TS_ASSERT_THROWS( ws2->maskBin(1,1), Mantid::Kernel::Exception::IndexError )
+    TS_ASSERT_THROWS( ws2->maskBin(-1,1), Mantid::Kernel::Exception::IndexError );
+    TS_ASSERT_THROWS( ws2->maskBin(1,1), Mantid::Kernel::Exception::IndexError );
     // ...or an invalid bin
-    TS_ASSERT_THROWS( ws2->maskBin(0,-1), Mantid::Kernel::Exception::IndexError )
-    TS_ASSERT_THROWS( ws2->maskBin(0,2), Mantid::Kernel::Exception::IndexError )
+    TS_ASSERT_THROWS( ws2->maskBin(0,-1), Mantid::Kernel::Exception::IndexError );
+    TS_ASSERT_THROWS( ws2->maskBin(0,2), Mantid::Kernel::Exception::IndexError );
     
     // Now do a valid masking
-    TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,1,0.5) )
-    TS_ASSERT( ws2->hasMaskedBins(0) )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 1 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->first, 1 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 0.5 )
+    TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,1,0.5) );
+    TS_ASSERT( ws2->hasMaskedBins(0) );
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 1 );
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->first, 1 );
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 0.5 );
     // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
-    TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 )
+    TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 );
     
     // Now mask a bin earlier than above and check it's sorting properly
-    TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,0) )
-    TS_ASSERT( ws2->hasMaskedBins(0) )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 2 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->first, 0 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 1.0 )
+    TS_ASSERT_THROWS_NOTHING( ws2->maskBin(0,0) );
+    TS_ASSERT( ws2->hasMaskedBins(0) );
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).size(), 2 );
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->first, 0 );
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).begin()->second, 1.0 );
     // This will be 0.25 (1*0.5*0.5) because in the test class the same vector is used for both E & Y
-    TS_ASSERT_EQUALS( ws2->dataY(0)[0], 0.0 )
+    TS_ASSERT_EQUALS( ws2->dataY(0)[0], 0.0 );
     // Check the previous masking is still OK
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->first, 1 )
-    TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->second, 0.5 )
-    TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 )
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->first, 1 );
+    TS_ASSERT_EQUALS( ws2->maskedBins(0).rbegin()->second, 0.5 );
+    TS_ASSERT_EQUALS( ws2->dataY(0)[1], 0.25 );
     
     delete ws2;
   }

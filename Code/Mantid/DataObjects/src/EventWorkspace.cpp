@@ -38,23 +38,23 @@ namespace DataObjects
   }
 
   MantidVec& EventWorkspace::dataX(const int index)
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::dataX");
+  {
+    return this->data[index].dataX().access();
   }
 
   MantidVec& EventWorkspace::dataY(const int index)
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::dataY");
+  {
+    return this->data[index].dataY().access();
   }
 
   MantidVec& EventWorkspace::dataE(const int index)
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::dataE");
+  {
+    return this->data[index].dataE().access();
   }
 
   MantidVec& EventWorkspace::dataX(const int index) const
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::dataX const");
+  {
+    //return this->data[index].dataX();
   }
 
   MantidVec& EventWorkspace::dataY(const int index) const

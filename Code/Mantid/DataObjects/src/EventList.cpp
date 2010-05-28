@@ -213,20 +213,21 @@ namespace DataObjects
 
 
   // --- Return Data Vectors -------------------------------------------------------------
-  const EventList::StorageType& EventList::dataX() const
+  EventList::RCtype EventList::dataX()
   {
-    return *(this->refX);
-  }
-  const EventList::StorageType& EventList::dataY()
-  {
-    this->generateHistogram();
-    return *(this->refY);
+    return (this->refX);
   }
 
-  const EventList::StorageType& EventList::dataE()
+  EventList::RCtype EventList::dataY()
   {
     this->generateHistogram();
-    return *(this->refE);
+    return (this->refY);
+  }
+
+  EventList::RCtype EventList::dataE()
+  {
+    this->generateHistogram();
+    return (this->refE);
   }
 
 
@@ -258,6 +259,7 @@ namespace DataObjects
     //For slight speed=up.
     size_t x_size = X.size();
 
+    //TODO: Should we have a smarter check for this?
     if (Y.size() != x_size)
     {
       //Need to redo the histogram.

@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/EventList.h"
 
 namespace Mantid
 {
@@ -32,7 +33,7 @@ namespace DataObjects
 class DLLExport EventWorkspace : public API::MatrixWorkspace
 {
  public:
-  /** The nae of the workspace type.
+  /** The name of the workspace type.
       \return Standard name. */
   virtual const std::string id() const {return "EventWorkspace";}
 
@@ -44,24 +45,30 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   int size() const;
 
+  /** Get the blocksize, aka the number of bins in the histogram */
   int blocksize() const;
 
+  /** Get the number of histograms. aka the number of pixels or detectors. */
   const int getNumberHistograms() const;
 
+  /** Return the data (X Y or E) at a given pixel. */
   MantidVec& dataX(const int);
 
   MantidVec& dataY(const int);
 
   MantidVec& dataE(const int);
 
+  /** Return the const data (X Y or E) at a given pixel. */
   MantidVec& dataX(const int) const;
 
   MantidVec& dataY(const int) const;
 
   MantidVec& dataE(const int) const;
 
+  /** Get a pointer to the x data */
   Kernel::cow_ptr<MantidVec> refX(const int) const;
 
+  /** Set the x-axis data for the given pixel. */
   void setX(const int, const  Kernel::cow_ptr<MantidVec> &);
 
   void init(const int&, const int&, const int&);
@@ -70,6 +77,9 @@ private:
   EventWorkspace(const EventWorkspace&);
   /// NO ASSIGNMENT ALLOWED
   EventWorkspace& operator=(const EventWorkspace&);
+
+  /// A vector that holds the event list for each pixel.
+  std::vector<EventList> data;
 
   /// Static reference to the logger class
   static Kernel::Logger & g_log;

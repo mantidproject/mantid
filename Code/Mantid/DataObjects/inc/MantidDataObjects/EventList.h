@@ -28,33 +28,33 @@ namespace DataObjects
  */
 class DLLExport TofEvent {
 private:
-  /** The units of the time of flight index in nanoseconds. */
+  /*! The units of the time of flight index in nanoseconds. */
   double time_of_flight;
 
-  /**
+  /*!
    * The frame vector is not a member of this object, but it is necessary in
    * order to have the actual time for the data.
    */
   std::size_t frame_index;
 
  public:
-  /** Constructor, specifying the time of flight and the frame id */
+  /*! Constructor, specifying the time of flight and the frame id */
   TofEvent(double time_of_flight, const std::size_t frameid);
 
-  /** Constructor, copy from another TofEvent object */
+  /*! Constructor, copy from another TofEvent object */
   TofEvent(const TofEvent&);
 
-  /** Empty constructor, copy from another TofEvent object */
+  /*! Empty constructor, copy from another TofEvent object */
   TofEvent();
 
-  /** Copy into this object from another */
+  /*! Copy into this object from another */
   TofEvent& operator=(const TofEvent&);
   virtual ~TofEvent();
 
-  /** Return the time of flight, as an int, in nanoseconds.*/
+  /*! Return the time of flight, as a double, in nanoseconds.*/
   double tof();
 
-  /** Return the frame id */
+  /*! Return the frame id */
   std::size_t frame();
 
 };
@@ -106,25 +106,30 @@ public:
    * Set the x-component for the histogram view. This will not cause the
    * histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
-   * @param xUnit :: [Optional] pointer to the Unit of the X data.
+   * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void setX(const RCtype::ptr_type& X, Unit* xUnit = NULL);
+  void setX(const RCtype::ptr_type& X, Unit* set_xUnit = NULL);
 
-  void setX(const RCtype& X, Unit* xUnit = NULL);
+  void setX(const RCtype& X, Unit* set_xUnit = NULL);
 
-  void setX(const StorageType& X, Unit* xUnit = NULL);
-
-
+  void setX(const StorageType& X, Unit* set_xUnit = NULL);
 
 
-  /** Returns the x data const. */
-  virtual const StorageType& dataX() const;
 
-  /** Returns the y data const. */
-  virtual const StorageType& dataY();
+//
+//  /** Returns the x data const. */
+//  const StorageType& dataX() const;
+//
+//  /** Returns the y data const. */
+//  const StorageType& dataY();
+//
+//  /** Returns the error data const. */
+//  const StorageType& dataE();
 
-  /** Returns the error data const. */
-  virtual const StorageType& dataE();
+  /*! Non-const versions */
+  RCtype dataX();
+  RCtype dataY();
+  RCtype dataE();
 
   /** Delete the cached version of the histogram data. */
   void emptyCache();

@@ -47,16 +47,16 @@ public:
   {
     ManagedWorkspace2D ws;
     ws.setTitle("testInit");
-    TS_ASSERT_THROWS_NOTHING( ws.initialize(5,5,5) )
-    TS_ASSERT_EQUALS( ws.getNumberHistograms(), 5 )
-    TS_ASSERT_EQUALS( ws.blocksize(), 5 )
-    TS_ASSERT_EQUALS( ws.size(), 25 )
+    TS_ASSERT_THROWS_NOTHING( ws.initialize(5,5,5) );
+    TS_ASSERT_EQUALS( ws.getNumberHistograms(), 5 );
+    TS_ASSERT_EQUALS( ws.blocksize(), 5 );
+    TS_ASSERT_EQUALS( ws.size(), 25 );
 
     for (int i = 0; i < 5; ++i)
     {
-      TS_ASSERT_EQUALS( ws.dataX(i).size(), 5 )
-      TS_ASSERT_EQUALS( ws.dataY(i).size(), 5 )
-      TS_ASSERT_EQUALS( ws.dataE(i).size(), 5 )
+      TS_ASSERT_EQUALS( ws.dataX(i).size(), 5 );
+      TS_ASSERT_EQUALS( ws.dataY(i).size(), 5 );
+      TS_ASSERT_EQUALS( ws.dataE(i).size(), 5 );
     }
 
     // Test all is as it should be with the temporary file

@@ -208,7 +208,7 @@ public:
     }
     el.setX(shared_x);
     //Do we have the same data in X?
-    TS_ASSERT(el.dataX() == shared_x);
+    TS_ASSERT(el.dataX().access() == shared_x);
   }
 
   void test_empty_histogram()
@@ -220,8 +220,8 @@ public:
 
     this->test_setX(); //Set it up
     EventList::StorageType X, Y;
-    X = el.dataX();
-    Y = el.dataY();
+    X = el.dataX().access();
+    Y = el.dataY().access();
     for (int i=0; i<X.size(); i++)
     {
       TS_ASSERT_EQUALS(Y[i], 0);
@@ -246,8 +246,8 @@ public:
     this->fake_uniform_data();
     this->test_setX(); //Set it up
     EventList::StorageType X, Y;
-    X = el.dataX();
-    Y = el.dataY();
+    X = el.dataX().access();
+    Y = el.dataY().access();
     //The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
     for (int i=0; i<Y.size()-1; i++)
@@ -262,8 +262,8 @@ public:
     this->fake_data();
     this->test_setX();
     EventList::StorageType X, Y;
-    X = el.dataX();
-    Y = el.dataY();
+    X = el.dataX().access();
+    Y = el.dataY().access();
     for (int i=0; i<X.size()-1; i++)
     {
       //No data was generated above 10 ms.
