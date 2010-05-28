@@ -218,9 +218,11 @@ win32 {
   LIBS += MantidKernel.lib
   LIBS += MantidQtAPI.lib
 
-  # This makes release the default build on running nmake. Must be here - after the config dependent parts above
-  CONFIG += release
 }
+
+# This makes release the default build on running nmake. Must be here - after the config dependent parts above
+CONFIG += release
+
 #############################################################################
 ###################### END OF USER-SERVICEABLE PART #########################
 #############################################################################
