@@ -29,6 +29,7 @@ DEFINES         += SCRIPTING_DIALOG
 DEFINES         += GSL_DLL
 win32:DEFINES   += _WIN32_WINNT=0x0400
 win32:DEFINES   += _WIN32
+win32:DEFINES   += BOOST_SIGNALS_DYN_LINK
 RESOURCES        = ../../../Images/images.qrc
 
 # comment the following lines if you haven't subscribed for a QtiPlot binaries maintenance contract
@@ -183,25 +184,25 @@ win32 {
     message(SETTING FOR x86)
   }
   
-  LIBS += $${THIRD_PARTY}/qwtplot3d.lib
-  LIBS += $${THIRD_PARTY}/qwt.lib
-  LIBS += $${THIRD_PARTY}/zlib1.lib
+  LIBPATH += $${THIRD_PARTY}
+  
+  LIBS += qwtplot3d.lib
+  LIBS += qwt.lib
+  LIBS += zlib1.lib
   # Although we have debug versions of gsl & cblas, they appear to be missing some symbols
-  LIBS += $${THIRD_PARTY}/gsl.lib
-  LIBS += $${THIRD_PARTY}/cblas.lib
+  LIBS += gsl.lib
+  LIBS += cblas.lib
   build_pass:CONFIG(debug, debug|release) {
     LIBS += -lqscintilla2d
-    LIBS += $${THIRD_PARTY}/muparser_d.lib
-    LIBS += $${THIRD_PARTY}/PocoUtild.lib
-    LIBS += $${THIRD_PARTY}/PocoFoundationd.lib
-    LIBS += $${THIRD_PARTY}/libboost_signals-vc80-mt-gd-1_34_1.lib
+    LIBS += muparser_d.lib
+    LIBS += PocoUtild.lib
+    LIBS += PocoFoundationd.lib
     LIBS += QtPropertyBrowserd.lib
   } else {
     LIBS += -lqscintilla2
-    LIBS += $${THIRD_PARTY}/muparser.lib
-    LIBS += $${THIRD_PARTY}/PocoUtil.lib
-    LIBS += $${THIRD_PARTY}/PocoFoundation.lib
-    LIBS += $${THIRD_PARTY}/libboost_signals-vc80-mt-1_34_1.lib
+    LIBS += muparser.lib
+    LIBS += PocoUtil.lib
+    LIBS += PocoFoundation.lib
     LIBS += QtPropertyBrowser.lib
   }
   
@@ -217,7 +218,6 @@ win32 {
   LIBS += MantidGeometry.lib
   LIBS += MantidKernel.lib
   LIBS += MantidQtAPI.lib
-
 }
 
 # This makes release the default build on running nmake. Must be here - after the config dependent parts above

@@ -10,7 +10,7 @@ CONFIG += qt warn_on exceptions debug_and_release
 
 QMAKESPEC=win32-msvc2005
 
-win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS WIN32
+win32:DEFINES += QT_DLL QT_THREAD_SUPPORT  _WINDOWS WIN32 BOOST_ALL_DYN_LINK
 
 #-------------------------------
 # Paths, libraries and resources
@@ -96,11 +96,9 @@ CONFIG(build64)  {
   LIBS += "MantidAPI.lib"
   build_pass:CONFIG(release, debug|release) {
     LIBS += "PocoFoundation.lib"
-    LIBS += "libboost_signals-vc80-mt-1_34_1.lib"
   }
   build_pass:CONFIG(debug, debug|release) {
     LIBS += "PocoFoundationd.lib"
-    LIBS += "libboost_signals-vc80-mt-gd-1_34_1.lib"
   }
 }
 

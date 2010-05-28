@@ -39,7 +39,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
-				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -95,6 +95,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(SolutionDir)\PythonAPI\MantidFramework.py&quot; &quot;$(SolutionDir)\release&quot; /Y&#x0D;&#x0A;"
+				Outputs="$(SolutionDir)\release\MantidFramework.py"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -114,7 +116,7 @@
 				OmitFramePointers="true"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
-				PreprocessorDefinitions="IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="2"
 				OpenMP="false"
 			/>

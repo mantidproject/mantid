@@ -26,9 +26,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description="Copying dll to bin plugins"
-				CommandLine="copy &quot;$(OutDir)\$(SolutionName)$(ProjectName).dll&quot; &quot;$(SolutionDir)\Bin\Plugins\$(SolutionName)$(ProjectName).dll&quot; /Y&#x0D;&#x0A;"
-				Outputs="&quot;$(SolutionDir)\Bin\Plugins\$(SolutionName)$(ProjectName).dll&quot;"
+				Description="Copying dll to build plugins"
+				CommandLine="copy &quot;$(OutDir)\$(SolutionName)$(ProjectName).dll&quot; &quot;$(SolutionDir)\Build\Plugins\$(SolutionName)$(ProjectName).dll&quot; /Y&#x0D;&#x0A;"
+				Outputs="&quot;$(SolutionDir)\Build\Plugins\$(SolutionName)$(ProjectName).dll&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
