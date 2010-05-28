@@ -11,6 +11,10 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
+    Deprecation notice: instead of using this algorithm please use the Fit algorithm 
+    where the Function parameter of this algorithm is used 
+    to specified the fitting function. 
+
     Takes a histogram in a 2D workspace and fit it to a gaussian on top of a flat background.
     i.e. the function: BG0+Height*exp(-0.5*((x-PeakCentre)/Sigma)^2).
 

@@ -15,6 +15,9 @@ namespace Mantid
     using API::Jacobian;
   
     /**
+    Deprecation notice: instead of using this algorithm please use the Fit algorithm 
+    instead. 
+
     Abstract base class for 1D fitting functions.
 
     Properties common for all fitting functions:

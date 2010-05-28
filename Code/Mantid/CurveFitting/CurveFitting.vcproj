@@ -203,10 +203,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\BackToBackExponential1D.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\BFGS_Minimizer.cpp"
 				>
 			</File>
@@ -272,10 +268,6 @@
 			</File>
 			<File
 				RelativePath=".\src\IkedaCarpenterPV.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\IkedaCarpenterPV1D.cpp"
 				>
 			</File>
 			<File
@@ -345,14 +337,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\inc\MantidCurveFitting\BackToBackExponential1D.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\BackToBackExponential1DTest.h"
-				>
-			</File>
-			<File
 				RelativePath=".\test\BackToBackExponentialTest.h"
 				>
 			</File>
@@ -401,6 +385,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\test\CostFunctionFactoryTest.h"
+				>
+			</File>
+			<File
 				RelativePath=".\inc\MantidCurveFitting\Fit.h"
 				>
 			</File>
@@ -422,6 +410,10 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\FuncMinimizerFactory.h"
+				>
+			</File>
+			<File
+				RelativePath=".\test\FuncMinimizerFactoryTest.h"
 				>
 			</File>
 			<File
@@ -462,14 +454,6 @@
 			</File>
 			<File
 				RelativePath=".\inc\MantidCurveFitting\IkedaCarpenterPV.h"
-				>
-			</File>
-			<File
-				RelativePath=".\inc\MantidCurveFitting\IkedaCarpenterPV1D.h"
-				>
-			</File>
-			<File
-				RelativePath=".\test\IkedaCarpenterPV1DTest.h"
 				>
 			</File>
 			<File

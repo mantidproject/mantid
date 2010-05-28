@@ -12,6 +12,10 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
+    Deprecation notice: instead of using this algorithm please use the Fit algorithm 
+    where the Function parameter of this algorithm is used 
+    to specified the fitting function. 
+
     Takes a histogram in a 2D workspace and fit it to a Lorentzian on top of
     a linear background.
     i.e. a function: Height*( HWHM^2/((x-PeakCentre)^2+HWHM^2) ) + BG0 + BG1*x

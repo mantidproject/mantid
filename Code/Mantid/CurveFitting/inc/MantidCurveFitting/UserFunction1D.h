@@ -13,6 +13,10 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
+    Deprecation notice: instead of using this algorithm please use the Fit algorithm 
+    where the Function parameter of this algorithm is used 
+    to specified the fitting function. 
+
     Fits a histogram in a 2D workspace to a user defined function.
 
     Properties:
