@@ -12,6 +12,10 @@ typedef unsigned uint32_t;
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+
+using Mantid::Kernel::Unit;
 
 namespace Mantid
 {
@@ -78,7 +82,7 @@ public:
   /** Constructor, taking a vector of events */
   EventList(const std::vector<TofEvent> &);
 
-  /** Copy into this event list from another */
+  /** Copy into this event list frogreenm another */
   EventList& operator=(const EventList&);
   virtual ~EventList();
 
@@ -101,8 +105,17 @@ public:
   /**
    * Set the x-component for the histogram view. This will not cause the
    * histogram to be calculated.
+   * @param X :: The vector of doubles to set as the histogram limits.
+   * @param xUnit :: [Optional] pointer to the Unit of the X data.
    */
-  void setX(const RCtype::ptr_type& X);
+  void setX(const RCtype::ptr_type& X, Unit* xUnit = NULL);
+
+  void setX(const RCtype& X, Unit* xUnit = NULL);
+
+  void setX(const StorageType& X, Unit* xUnit = NULL);
+
+
+
 
   /** Returns the x data const. */
   virtual const StorageType& dataX() const;
@@ -116,8 +129,13 @@ public:
   /** Delete the cached version of the histogram data. */
   void emptyCache();
 
+
 private:
   std::vector<TofEvent> events;
+
+  /** Pointer to unit of the x-axis of the histogram */
+  Mantid::Kernel::Unit *xUnit;
+
   EventSortType order;
   /** Cached version of the x axis. */
   RCtype refX;
@@ -125,6 +143,11 @@ private:
   RCtype refY;
   /** Cached version of the uncertainties. */
   RCtype refE;
+
+  /** Delete the cached version of the CALCULATED histogram data.
+   * Necessary when modifying the event list.
+   * */
+  void emptyCacheData();
 
   void generateHistogram();
 };

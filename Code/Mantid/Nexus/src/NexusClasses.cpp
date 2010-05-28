@@ -372,6 +372,7 @@ NXRoot::NXRoot(const std::string& fname)
     NXstatus stat=NXopen(m_filename.c_str(), NXACC_READ, &m_fileID);
     if(stat==NX_ERROR)
     {
+        std::cout << "NXRoot: Error loading " << m_filename;
         throw Kernel::Exception::FileError("Unable to open File:" , m_filename);  
     }
     readAllInfo();

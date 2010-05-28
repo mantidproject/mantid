@@ -18,6 +18,7 @@ import subprocess
 import select
 
 COLOR = {"green":'\x1b[32m',
+         "blue":'\x1b[34m',
          "red":'\x1b[31m',
          "reset":'\x1b[0m',
          "boldred":'\x1b[91m'
@@ -40,6 +41,7 @@ def times_changed(new_times, old_times):
             return True
     #If you get here, nothing changed.
     return False
+
 def getSourceDir():
     import sys
     import os
@@ -80,7 +82,7 @@ def getTestDir(direc):
                        + direc)
 
 def getkey():
-    """Non-blocking wait for keypress. Linux only"""
+    """Non-blocking wait for keypress. Linux only. Only works with return, for some reason."""
     result = select.select([sys.stdin], [], [], 0.05)
     if sys.stdin in result[0]:
         sys.stdin.read(1) #Flush the buffer
@@ -168,9 +170,9 @@ if __name__ == "__main__":
             runTests = True
 
         if runTests:
-            print COLOR["green"] + '-'*80 + COLOR["reset"]
-            print COLOR["green"] + '='*80 + COLOR["reset"]
-            print COLOR["green"] + '-'*80 + COLOR["reset"]
+            print COLOR["blue"] + '-'*80 + COLOR["reset"]
+            print COLOR["blue"] + '='*80 + COLOR["reset"]
+            print COLOR["blue"] + '-'*80 + COLOR["reset"]
             print ""
 
             #Start the subprocess (runTests.sh)
@@ -188,12 +190,13 @@ if __name__ == "__main__":
                 if ("Error:" in line) or ("error:" in line) \
                     or ("terminate called after throwing an instance" in line) \
                     or ("  what(): " in line) \
+                    or ("Assertion" in line and " failed." in line) \
                     :
-                    
                     #An error line!
                     #Print in red
                     print COLOR["red"] + line  + COLOR["reset"]
                 elif line.endswith("OK!"):
+                    #Test was successful
                     print COLOR["green"] + line + COLOR["reset"]
                 else:
                     #Print normally
