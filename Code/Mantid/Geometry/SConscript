@@ -40,7 +40,7 @@ elif platform.system() == 'Linux':
 
 else:
    # Windows
-   myenv.Append(MYLIBLIST=['opengl32','glu32'])
+   myenv.Append(MYLIBLIST=['opengl32','glu32','boost_unit_test_framework-vc80-mt-1_43'])
    
 myenv.Append(MYLIBLIST=['TKBO','TKPrim','TKBRep','TKernel','TKTopAlgo','TKMath','TKMesh','TKG2d'])
 
