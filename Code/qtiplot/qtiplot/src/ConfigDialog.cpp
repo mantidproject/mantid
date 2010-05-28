@@ -670,6 +670,47 @@ void ConfigDialog::initMantidPage()
   }
   instrPrefix->setCurrentIndex(index);    
   
+  ///  Init Directories tab
+
+  directoriesPage = new QWidget();
+  QVBoxLayout *dirTabLayout = new QVBoxLayout(directoriesPage);
+  frame = new QGroupBox();
+  dirTabLayout->addWidget(frame);
+  grid = new QGridLayout(frame);
+  mtdTabWidget->addTab(directoriesPage, "Directories");
+
+  /// datasearch.directories
+
+  QLabel* label = new QLabel(tr("Data search"));
+	grid->addWidget(label, 0, 0);
+
+  std::string str = Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories");
+	leDataSearchDirs = new QLineEdit();
+  leDataSearchDirs->setText(QString::fromStdString(str));
+	grid->addWidget(leDataSearchDirs, 0, 1);
+
+	QPushButton *button = new QPushButton();
+	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	grid->addWidget(button, 0, 2);
+
+  connect( button, SIGNAL(clicked()), this, SLOT(addDataSearchDirs()) );
+
+  /// defaultsave.directory
+  label = new QLabel(tr("Default save"));
+	grid->addWidget(label, 1, 0);
+
+  str = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
+	leDefaultSaveDir = new QLineEdit();
+  leDefaultSaveDir->setText(QString::fromStdString(str));
+	grid->addWidget(leDefaultSaveDir, 1, 1);
+
+	button = new QPushButton();
+	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	grid->addWidget(button, 1, 2);
+
+  connect( button, SIGNAL(clicked()), this, SLOT(addDefaultSaveDir()) );
+
+  grid->setRowStretch(2,1);
 }
 
 void ConfigDialog::initOptionsPage()
@@ -1472,6 +1513,14 @@ void ConfigDialog::apply()
   setting = knownInstruments->text();
   setting.replace(QRegExp("\\W+"), QString(";"));
   mantid_config.setString("instrument.prefixes." + cur_facility, setting.toStdString());
+
+  setting = leDataSearchDirs->text();
+  setting.replace('\\','/');
+  mantid_config.setString("datasearch.directories",setting.toStdString());
+
+  setting = leDefaultSaveDir->text();
+  setting.replace('\\','/');
+  mantid_config.setString("defaultsave.directory",setting.toStdString());
 	try
 	{
 	  mantid_config.saveConfig(mantid_config.getUserFilename());
@@ -1772,4 +1821,30 @@ void ConfigDialog::updateDefInstrList()
   QStringList instruments = knownInstruments->text().split(QRegExp("\\W+"), QString::SkipEmptyParts);
   instrPrefix->clear();
   instrPrefix->addItems(instruments);
+}
+
+void ConfigDialog::addDataSearchDirs()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Add a data search directory"),
+			"", 0/*!QFileDialog::ShowDirsOnly*/);
+  if (!dir.isEmpty())
+  {
+    QString dirs = leDataSearchDirs->text();
+    if (!dirs.isEmpty())
+    {
+      dirs += ";";
+    }
+    dirs += dir;
+    leDataSearchDirs->setText(dirs);
+  }
+}
+
+void ConfigDialog::addDefaultSaveDir()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Select new default save directory"),
+			"", 0/*!QFileDialog::ShowDirsOnly*/);
+  if (!dir.isEmpty())
+  {
+    leDefaultSaveDir->setText(dir);
+  }
 }

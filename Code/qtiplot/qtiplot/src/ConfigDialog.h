@@ -106,6 +106,8 @@ private slots:
 
   //Mantid
   void updateDefInstrList();
+  void addDataSearchDirs();
+  void addDefaultSaveDir();
 
 private:
 	void initPlotsPage();
@@ -139,6 +141,11 @@ private:
   QWidget *instrumentPage;
   QComboBox *facility, *instrPrefix;
   QLineEdit *knownInstruments;
+
+  /// Mantid tab for setting directories
+  QWidget *directoriesPage;
+  QLineEdit* leDataSearchDirs;///< datasearch.directories
+  QLineEdit* leDefaultSaveDir;///< defaultsave.directory
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
