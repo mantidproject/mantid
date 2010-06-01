@@ -111,9 +111,9 @@ public:
     row.row(1);
     row>>i>>r>>str;
 
-    TS_ASSERT_EQUALS(i,36)
-    TS_ASSERT_EQUALS(r,6.28)
-    TS_ASSERT_EQUALS(str,"SECOND")
+    TS_ASSERT_EQUALS(i,36);
+    TS_ASSERT_EQUALS(r,6.28);
+    TS_ASSERT_EQUALS(str,"SECOND");
 
     for(int i=0;i<5;i++)
     {
@@ -124,23 +124,23 @@ public:
         row << 18*j << 3.14*j << ostr.str() << (j%2 == 0);
     }
 
-    TS_ASSERT_EQUALS(tw.rowCount(),7)
+    TS_ASSERT_EQUALS(tw.rowCount(),7);
 
     TableRow row1 = tw.getRow(2);
-    TS_ASSERT_EQUALS(row1.row(),2)
+    TS_ASSERT_EQUALS(row1.row(),2);
 
     do
     {
-        TS_ASSERT_EQUALS(row1.Int(0),row1.row()*18)
-        TS_ASSERT_EQUALS(row1.Double(1),row1.row()*3.14)
+        TS_ASSERT_EQUALS(row1.Int(0),row1.row()*18);
+        TS_ASSERT_EQUALS(row1.Double(1),row1.row()*3.14);
         std::istringstream istr(row1.String(2));
         std::string str;
         int j;
         istr>>str>>j;
-        TS_ASSERT_EQUALS(str,"Number")
-        TS_ASSERT_EQUALS(j,row1.row())
+        TS_ASSERT_EQUALS(str,"Number");
+        TS_ASSERT_EQUALS(j,row1.row());
         row1.Bool(3) = !tw.Bool(row1.row(),3);
-		TS_ASSERT_EQUALS(tw.Bool(row1.row(),3), static_cast<Mantid::API::Boolean>(row1.row()%2 != 0))
+		TS_ASSERT_EQUALS(tw.Bool(row1.row(),3), static_cast<Mantid::API::Boolean>(row1.row()%2 != 0));
     }while(row1.next());
 
   }

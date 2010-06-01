@@ -73,19 +73,19 @@ public:
         alg.setPropertyValue("Table","tst");
         alg.execute();
         TableWorkspace_sptr table;
-        TS_ASSERT_THROWS_NOTHING(table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("tst")))
-        TS_ASSERT( table )
-        TS_ASSERT_EQUALS( table->rowCount(), 10 )
+        TS_ASSERT_THROWS_NOTHING(table = boost::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve("tst")));
+        TS_ASSERT( table );
+        TS_ASSERT_EQUALS( table->rowCount(), 10 );
         TableRow r = table->getFirstRow();
         std::string s;
         int n;
         r >> s >> n;
-        TS_ASSERT_EQUALS( s, "FIRST" )
-        TS_ASSERT_EQUALS( n, 11 )
+        TS_ASSERT_EQUALS( s, "FIRST" );
+        TS_ASSERT_EQUALS( n, 11 );
         r.next();
         r >> s >> n;
-        TS_ASSERT_EQUALS( s, "SECOND" )
-        TS_ASSERT_EQUALS( n, 22 )
+        TS_ASSERT_EQUALS( s, "SECOND" );
+        TS_ASSERT_EQUALS( n, 22 );
     }
 private:
     boost::shared_ptr<TableWorkspace> t;
