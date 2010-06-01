@@ -3250,7 +3250,7 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
 /**  Insert a curve with its own data source. It doesnot have to be 
  *   a Table or a Function. The Graph takes ownership of the curve.
  */
-PlotCurve* Graph::insertCurve(PlotCurve* c)
+PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth)
 {
 	c_type.resize(++n_curves);
 	c_type[n_curves - 1] = User;	
@@ -3258,7 +3258,8 @@ PlotCurve* Graph::insertCurve(PlotCurve* c)
 	c_keys[n_curves - 1] = d_plot->insertCurve(c);
   int colorIndex , symbolIndex;
   guessUniqueCurveLayout(colorIndex, symbolIndex);
-  c->setPen(QPen(ColorBox::color(colorIndex), widthLine));
+  if (lineWidth < 0) lineWidth = widthLine;
+  c->setPen(QPen(ColorBox::color(colorIndex), lineWidth));
 
   addLegendItem();
   connect(c,SIGNAL(removeMe(PlotCurve*)),this,SLOT(removeCurve(PlotCurve*)));

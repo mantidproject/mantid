@@ -1170,6 +1170,7 @@ public:
 	Qt::PenStyle defaultArrowLineStyle;
 	int majTicksLength, minTicksLength, defaultPlotMargin;
 	int defaultCurveStyle, defaultSymbolSize;
+  bool applyCurveStyleToMantid; ///< if true defaultCurveStyle, defaultSymbolSize are applyed to MantidCurves
 	QFont appFont, plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
 	QFont tableTextFont, tableHeaderFont, plotAxesFont, plotLegendFont, plotNumbersFont, plotTitleFont;
 	QColor tableBkgdColor, tableTextColor, tableHeaderColor;

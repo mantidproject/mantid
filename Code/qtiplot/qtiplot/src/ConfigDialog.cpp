@@ -891,7 +891,18 @@ void ConfigDialog::initCurvesPage()
 	boxSymbolSize->setValue(app->defaultSymbolSize/2);
 	curvesBoxLayout->addWidget( boxSymbolSize, 2, 1 );
 
-	curvesBoxLayout->setRowStretch( 3, 1 );
+  cbApplyToMantid = new QCheckBox("Apply to Mantid");
+  if (app->applyCurveStyleToMantid)
+  {
+    cbApplyToMantid->setChecked(true);
+  }
+  else
+  {
+    cbApplyToMantid->setChecked(false);
+  }
+  curvesBoxLayout->addWidget(cbApplyToMantid, 3, 1);
+
+	curvesBoxLayout->setRowStretch( 4, 1 );
 
 	QHBoxLayout * curvesPageLayout = new QHBoxLayout( curves );
 	curvesPageLayout->addWidget( curvesGroupBox );
@@ -1386,6 +1397,7 @@ void ConfigDialog::apply()
 	app->defaultCurveStyle = curveStyle();
 	app->defaultCurveLineWidth = boxCurveLineWidth->value();
 	app->defaultSymbolSize = 2*boxSymbolSize->value() + 1;
+  app->applyCurveStyleToMantid = cbApplyToMantid->isChecked();
 	// 2D plots page: ticks tab
 	app->majTicksLength = boxMajTicksLength->value();
 	app->minTicksLength = boxMinTicksLength->value();

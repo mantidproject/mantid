@@ -3,10 +3,13 @@
 #include <MantidAPI/AnalysisDataService.h>
 
 #include "../Graph.h"
+#include "../ApplicationWindow.h"
+#include "../MultiLayer.h"
 
 #include <qpainter.h>
 #include <stdexcept>
 #include <limits>
+#include <typeinfo>
 
 using namespace Mantid::API;
 
@@ -105,7 +108,23 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   }
   else
     throw std::runtime_error("Unrecognized MantidCurve type " + type.toStdString());
-  if (workspace->isHistogramData() && !workspace->isDistribution())
+
+  int lineWidth = 1;
+  MultiLayer* ml = (MultiLayer*)(g->parent()->parent()->parent());
+  if (ml && ml->applicationWindow()->applyCurveStyleToMantid)
+  {
+    QwtPlotCurve::CurveStyle qwtStyle;
+    switch(ml->applicationWindow()->defaultCurveStyle)
+    {
+    case Graph::Line:    qwtStyle = QwtPlotCurve::Lines; break;
+    case Graph::Scatter: qwtStyle = QwtPlotCurve::Dots; break;
+    case 15: qwtStyle = QwtPlotCurve::Steps; break;  // should be Graph::HorizontalSteps but it doesn't work
+    default:  qwtStyle = QwtPlotCurve::Lines; break;
+    }
+    setStyle(qwtStyle);
+    lineWidth = ml->applicationWindow()->defaultCurveLineWidth;
+  }
+  else if (workspace->isHistogramData() && !workspace->isDistribution())
   {
     setStyle(QwtPlotCurve::Steps);
     setCurveAttribute(Inverted,true);// this is the Steps style modifier that makes horizontal steps
@@ -114,14 +133,13 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
     setStyle(QwtPlotCurve::Lines);
   if (g)
   {
-    g->insertCurve(this);
+    g->insertCurve(this,lineWidth);
   }
 }
 
 
 MantidCurve::~MantidCurve()
 {
-  //std::cerr<<"MantidCurve deleted...\n";
 }
 
 void MantidCurve::setData(const QwtData &data)

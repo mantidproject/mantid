@@ -182,6 +182,7 @@ private:
 	QLineEdit *translationsPathLine, *helpPathLine;
 	QSpinBox *undoStackSizeBox;
 	QComboBox *boxEndLine;
+  QCheckBox* cbApplyToMantid;
 #ifdef SCRIPTING_PYTHON
 	QLabel *lblPythonConfigDir;
 	QLineEdit *pythonConfigDirLine;
