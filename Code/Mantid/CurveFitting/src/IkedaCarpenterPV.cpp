@@ -288,8 +288,8 @@ void IkedaCarpenterPV::function(double* out, const double* xValues, const int& n
 
         N = 0.25*alpha*(1-k*k)/(k*k);
 
-        out[i] = I*N*( (1-eta)*(Nu*exp(u)*gsl_sf_erfc(yu)+Nv*exp(v)*gsl_sf_erfc(yv) + 
-                        Ns*exp(s)*gsl_sf_erfc(ys)+Nr*exp(r)*gsl_sf_erfc(yr)) -
+        out[i] = I*N*( (1-eta)*(Nu*exp(u+gsl_sf_log_erfc(yu))+Nv*exp(v+gsl_sf_log_erfc(yv)) + 
+                        Ns*exp(s+gsl_sf_log_erfc(ys))+Nr*exp(r+gsl_sf_log_erfc(yr))) -
                  eta*2.0/M_PI*(Nu*exponentialIntegral(zu).imag()+Nv*exponentialIntegral(zv).imag()
                               +Ns*exponentialIntegral(zs).imag()+Nr*exponentialIntegral(zr).imag()) );
     }
