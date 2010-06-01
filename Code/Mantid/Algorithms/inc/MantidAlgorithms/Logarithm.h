@@ -15,9 +15,9 @@ namespace Algorithms {
 
     Optional Properties (assume that you count from zero):
     <UL>
-	<LI> filler  -- A workspace can normally have zeros in it and the logarithm goes to minys infinity for zeros.
-	                This field keeps value, that should be placed in the workspace instead of minus infinity </LI>
-    <LI> natural -- Natural or base 10 logarithm. Default is natural </LI>
+    <LI> Filler  -- A workspace can normally have zeros in it and the logarithm goes to minys infinity for zeros.
+                    This field keeps value, that should be placed in the workspace instead of minus infinity </LI>
+    <LI> Natural -- Natural or base 10 logarithm. Default is natural </LI>
     </UL>
 
     @author AB,    ISIS, Rutherford Appleton Laboratory
@@ -48,9 +48,9 @@ public:
     Logarithm(void):UnaryOperation(),log_Min(0),is_natural(true){};
     virtual ~Logarithm(void){};
     /// Algorithm's name for identification
-	virtual const std::string name() const { return "log";}
+    virtual const std::string name() const { return "Logarithm";}
    /// Algorithm's version for identification
-	virtual const int version() const { return (1);}
+    virtual const int version() const { return (1);}
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Arithmetic";}
 private:
