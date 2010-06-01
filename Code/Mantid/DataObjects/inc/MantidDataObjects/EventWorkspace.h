@@ -58,12 +58,15 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   MantidVec& dataE(const int);
 
+
   /** Return the const data (X Y or E) at a given pixel. */
+
   MantidVec& dataX(const int) const;
 
   MantidVec& dataY(const int) const;
 
   MantidVec& dataE(const int) const;
+
 
   /** Get a pointer to the x data */
   Kernel::cow_ptr<MantidVec> refX(const int) const;
@@ -71,7 +74,9 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Set the x-axis data for the given pixel. */
   void setX(const int, const  Kernel::cow_ptr<MantidVec> &);
 
+  /** Initialize the pixels */
   void init(const int&, const int&, const int&);
+
 private:
   /// NO COPY ALLOWED
   EventWorkspace(const EventWorkspace&);
@@ -83,6 +88,9 @@ private:
 
   /// Static reference to the logger class
   static Kernel::Logger & g_log;
+
+  /// The number of vectors in the workspace
+  int m_noVectors;
 };
 
 

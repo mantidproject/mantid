@@ -23,6 +23,7 @@ using std::vector;
 class EventWorkspaceTest : public CxxTest::TestSuite
 {
 private:
+  EventWorkspace ev;
 
 public:
   EventWorkspaceTest()
@@ -31,11 +32,12 @@ public:
 
   void setUp()
   {
+    ev.init(5000, 1001, 1000);
   }
 
   void test_constructor()
   {
-    ;
+    TS_ASSERT_EQUALS( ev.getNumberHistograms(), 5000);
   }
 
 };
