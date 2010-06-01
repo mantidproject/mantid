@@ -53,7 +53,8 @@ namespace DataObjects
   }
 
   MantidVec& EventWorkspace::dataX(const int index) const
-  {
+  { // TODO implement
+    throw NotImplementedError("EventWorkspace::dataY const");
     //return this->data[index].dataX();
   }
 
