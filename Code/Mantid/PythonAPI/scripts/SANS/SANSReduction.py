@@ -413,8 +413,10 @@ def TransmissionSample(sample, direct, reload = True, period = -1):
     __clearPrevious(TRANS_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
     __clearPrevious(DIRECT_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_CAN])
     
-    TRANS_SAMPLE = _assignHelper(sample, True, reload, period)[0]
-    DIRECT_SAMPLE = _assignHelper(direct, True, reload, period)[0]
+    TRANS_SAMPLE, dummy1, dummy2, dummy3, _TRANS_SAMPLE_N_PERIODS = \
+        _assignHelper(sample, True, reload, period)
+    DIRECT_SAMPLE, dummy1, dummy2, dummy3, DIRECT_SAMPLE_N_PERIODS = \
+        _assignHelper(direct, True, reload, period)
     return TRANS_SAMPLE, DIRECT_SAMPLE
 
 ########################## 
@@ -422,16 +424,18 @@ def TransmissionSample(sample, direct, reload = True, period = -1):
 ########################## 
 def TransmissionCan(can, direct, reload = True, period = -1):
     _printMessage('TransmissionCan("' + can + '","' + direct + '")')
-    global TRANS_CAN, DIRECT_CAN, TRANS_SAMPLE_N_CAN, DIRECT_SAMPLE_N_CAN
+    global TRANS_CAN, DIRECT_CAN, TRANS_CAN_N_PERIODS, DIRECT_CAN_N_PERIODS
     
     __clearPrevious(TRANS_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,DIRECT_SAMPLE,DIRECT_CAN])
     __clearPrevious(DIRECT_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE])
 
-    TRANS_CAN = _assignHelper(can, True, reload, period)[0]
+    TRANS_CAN, dummy1, dummy2, dummy3, TRANS_CAN_N_PERIODS = \
+        _assignHelper(can, True, reload, period)
     if direct == '' or direct == None:
-        DIRECT_CAN = DIRECT_SAMPLE 
+        DIRECT_CAN, DIRECT_CAN_N_PERIODS = DIRECT_SAMPLE, DIRECT_SAMPLE_N_PERIODS
     else:
-        DIRECT_CAN = _assignHelper(direct, True, reload, period)[0]
+        DIRECT_CAN, dummy1, dummy2, dummy3, DIRECT_CAN_N_PERIODS = \
+            _assignHelper(direct, True, reload, period)
     return TRANS_CAN, DIRECT_CAN
 
 # Helper function
@@ -458,7 +462,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
         wkspname =  shortrun_no + '_trans_' + ext.lower()
     else:
         wkspname =  shortrun_no + '_sans_' + ext.lower()
-    
+
     if reload == False and mtd.workspaceExists(wkspname):
         return wkspname,False,'','', -1
 
@@ -530,9 +534,10 @@ def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period
     else :
         #if the work space isn't a group there is only one period
         numPeriods = 1
-    #period greater than zero means we must be looking at a workspace group
-    if period > 0 :
-        if not pWorksp.isGroup() : raise exception('_loadRawData: A period number can only be specified for a group and workspace '+ workspace + ' is not a group')
+        
+    #period greater than one means we must be looking at a workspace group
+    if period > 1 :
+        if not pWorksp.isGroup() : raise Exception('_loadRawData: A period number can only be specified for a group and workspace '+ pWorksp.getName() + ' is not a group')
         wsName = _leaveSinglePeriod(pWorksp, period)
 	pWorksp = mtd[wsName]
     else :
@@ -552,10 +557,21 @@ def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period
     return [ os.path.dirname(fullpath), wsName, numPeriods]
 
 def _leaveSinglePeriod(groupW, period):
+    #get the name of the individual workspace in the group
     oldName = groupW.getName()+'_'+str(period)
+    #move this workspace out of the group (this doesn't delete it)
     groupW.remove(oldName)
-    newName = groupW.getName() + '_p'+str(period)
+
+    discriptors = groupW.getName().split('_')       #information about the run (run number, if it's 1D or 2D, etc) is listed in the workspace name between '_'s
+    for i in range(0, len(discriptors) ):           #insert the period name after the run number
+        if i == 0 :                                 #the run number is the first part of the name
+            newName = discriptors[0]+'p'+str(period)#so add the period number here
+        else :
+            newName += '_'+discriptors[i]
+    newName = oldName#remove this line that disables the ones above oncee they are working
     RenameWorkspace(oldName, newName)
+
+    #remove the rest of the group
     mtd.deleteWorkspace(groupW.getName())
     return newName
 
@@ -784,7 +800,7 @@ def clearCurrentMaskDefaults():
     BACKMON_START = BACKMON_END = None
     
     global MONITORSPECTRUM, MONITORSPECLOCKED, SAMP_INTERPOLATE, TRANS_UDET_MON, TRANS_UDET_DET, TRANS_INTERPOLATE
-    MONITORSPECTRUM = None
+    MONITORSPECTRUM = 2
     MONITORSPECLOCKED = False
     SAMP_INTERPOLATE = False
     
@@ -1420,6 +1436,10 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     '''Performs the data reduction steps'''
     global SPECMIN, SPECMAX, MONITORSPECTRUM
     sample_raw = run_setup.getRawWorkspace()
+#but does the full run still exist at this point, doesn't matter  I'm changing the meaning of RawWorkspace get all references to it
+#but then what do we call the workspaces?
+
+#    period = run_setup.getPeriod()
     orientation = orientation=SANSUtility.Orientation.Horizontal
     if INSTR_NAME == "SANS2D":
         sample_run = sample_raw.split('_')[0]
@@ -1625,13 +1645,16 @@ def CalculateResidue():
         residueY += pow(yvalsA[indexA] - yvalsB[indexB], 2)
         indexB += 1
                         
-    if RESIDUE_GRAPH == None:
-        RESIDUE_GRAPH = plotSpectrum('Left', 0)
-        mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
-        mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
-        mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
-	
-    RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
+    try :
+        if RESIDUE_GRAPH == None:
+            RESIDUE_GRAPH = plotSpectrum('Left', 0)
+            mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
+            mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
+            mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
+	    RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
+    except :
+        #if the plotting environment is not setup we can contiune without plotting
+        pass    
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
     return residueX, residueY
 	
@@ -1824,5 +1847,7 @@ def mergePlots(g1, g2):
 
 #testing code, remove 
 #print _loadRawData('c:/mantid/test/data/SANS2D/SANS2D00000992', '992boo', 'raw', None, None)
-#SCATTER_SAMPLE, logvalues = AssignSample('5511.raw', reload = True)
+#SCATTER_SAMPLE, logvalues = AssignSample('5508.nxs', reload = True,period=13)
+#can, logcan = AssignCan('993.raw', reload = True, period=1)
 #print SCATTER_SAMPLE, logvalues
+#print can, logcan
