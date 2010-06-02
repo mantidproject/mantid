@@ -316,6 +316,10 @@ env.Append(CPPPATH='#/CurveFitting/inc')
 ret = SConscript(['UserAlgorithms/SConscript'])
 env.Install('Build/Plugins', ret['shared'])
 
+# Copy required files to the build destination
+Command(dest_dir+'/Mantid.properties','Properties/Mantid.properties',Copy("$TARGET","$SOURCE"))
+Command(dest_dir+'/MantidFramework.py','PythonAPI/MantidFramework.py',Copy("$TARGET","$SOURCE"))
+
 # The unit tests
 skiptest=ARGUMENTS.get('skiptest',0)
 if not int(skiptest) and not env.GetOption('clean'):
