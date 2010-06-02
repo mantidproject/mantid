@@ -116,14 +116,21 @@ public:
   void setX(const StorageType& X, Unit* set_xUnit = NULL);
 
 
-  /** Returns the x data const. */
+  /** Returns the x data. */
   virtual const StorageType& dataX() const;
 
-  /** Returns the y data const. */
-  virtual const StorageType& dataY();
+  /** Returns the y data. */
+  virtual const StorageType& dataY() const;
 
   /** Returns the error data const. */
-  virtual const StorageType& dataE();
+  virtual const StorageType& dataE() const;
+
+  /** These throw exceptions since non-const access is not allowed. */
+
+  virtual StorageType& dataX();
+  virtual StorageType& dataY();
+  virtual StorageType& dataE();
+
 
   /** Delete the cached version of the histogram data. */
   void emptyCache();

@@ -193,6 +193,7 @@ namespace DataObjects
     this->refX = X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
+    this->generateHistogram();
   }
 
   void EventList::setX(const RCtype& X, Unit* set_xUnit)
@@ -201,6 +202,7 @@ namespace DataObjects
     this->refX = X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
+    this->generateHistogram();
   }
 
   void EventList::setX(const StorageType& X, Unit* set_xUnit)
@@ -209,6 +211,7 @@ namespace DataObjects
     this->refX.access()=X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
+    this->generateHistogram();
   }
 
 
@@ -218,16 +221,29 @@ namespace DataObjects
     return *(this->refX);
   }
 
-  const EventList::StorageType& EventList::dataY()
+  const EventList::StorageType& EventList::dataY() const
   {
-    this->generateHistogram();
     return *(this->refY);
   }
 
-  const EventList::StorageType& EventList::dataE()
+  const EventList::StorageType& EventList::dataE() const
   {
-    this->generateHistogram();
     return *(this->refE);
+  }
+
+
+  // --- Non-const return Data Vectors throw exceptions! -------------------------------------------------------------
+  EventList::StorageType& EventList::dataX()
+  {
+    throw NotImplementedError("EventList::dataX cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
+  }
+  EventList::StorageType& EventList::dataY()
+  {
+    throw NotImplementedError("EventList::dataY cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
+  }
+  EventList::StorageType& EventList::dataE()
+  {
+    throw NotImplementedError("EventList::dataE cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
   }
 
 

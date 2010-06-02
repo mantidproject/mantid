@@ -79,7 +79,8 @@ namespace DataObjects
   {
     if (index<0 || index>=m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    return this->data[index].dataX();
+    //return this->data[index].dataX();
+    throw NotImplementedError("Const return is not possible???");
   }
 
   const MantidVec& EventWorkspace::dataY(const int index) const
