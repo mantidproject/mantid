@@ -98,14 +98,17 @@ public:
   /** Return the list of TofEvents contained. */
   std::vector<TofEvent>& getEvents();
 
+  /** Clear the list of events */
+  void clear();
+
   /** Sort events by TOF or Frame */
   void sort(const EventSortType);
   void sortTof();
   void sortFrame();
 
   /**
-   * Set the x-component for the histogram view. This will not cause the
-   * histogram to be calculated.
+   * Set the x-component for the histogram view. This will cause the
+   *  histogram to be calculated.
    * @param X :: The vector of doubles to set as the histogram limits.
    * @param set_xUnit :: [Optional] pointer to the Unit of the X data.
    */

@@ -5,6 +5,8 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
+using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
 using std::runtime_error;
@@ -208,78 +210,85 @@ public:
     }
     el.setX(shared_x);
     //Do we have the same data in X?
-    //const EventList::StorageType & read_x = el.dataX();
-
-//    std::cout << "It was " << read_x[0];
-//    read_x[0] =1234;
-//    std::cout << " now it is " << read_x[0];
-
-    //EventList::StorageType& read_x = const_cast<EventList::StorageType&>(el.dataX());
-    //TS_ASSERT(shared_x == read_x);
-    //TS_ASSERT(el.dataX()[0]==0);
+    const EventList el2(el);
+    TS_ASSERT(el2.dataX()==shared_x);
   }
 
-//
-//  void test_empty_histogram()
-//  {
-//    el = EventList(); //Clear any events
-//
-//    //Getting data before setting X throws
-//    TS_ASSERT_THROWS(el.dataY(), runtime_error);
-//
-//    this->test_setX(); //Set it up
-//    EventList::StorageType X, Y;
-//    X = el.dataX();
-//    Y = el.dataY();
-//    for (int i=0; i<X.size(); i++)
-//    {
-//      TS_ASSERT_EQUALS(Y[i], 0);
-//    }
-//  }
-//
-//  void fake_uniform_data()
-//  {
-//    //Clear the list
-//    el = EventList();
-//    //Create some mostly-reasonable fake data.
-//    srand(1234); //Fixed random seed
-//    for (double tof=100; tof < 20e6; tof += 5000)
-//    {
-//      //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
-//      el += TofEvent( tof, rand()%1000);
-//    }
-//  }
-//
-//  void test_histogram()
-//  {
-//    this->fake_uniform_data();
-//    this->test_setX(); //Set it up
-//    EventList::StorageType X, Y;
-//    X = el.dataX();
-//    Y = el.dataY();
-//    //The data was created so that there should be exactly 2 events per bin
-//    // The last bin entry will be 0 since we use it as the top boundary of i-1.
-//    for (int i=0; i<Y.size()-1; i++)
-//    {
-//      if (Y[i] != 2) std::cout << "Different at i=" << i << "\n";
-//      TS_ASSERT_EQUALS(Y[i], 2.0);
-//    }
-//  }
-//
-//  void test_random_histogram()
-//  {
-//    this->fake_data();
-//    this->test_setX();
-//    EventList::StorageType X, Y;
-//    X = el.dataX();
-//    Y = el.dataY();
-//    for (int i=0; i<X.size()-1; i++)
-//    {
-//      //No data was generated above 10 ms.
-//      if (X[i] > 10e6)
-//        TS_ASSERT_EQUALS(Y[i], 0.0);
-//    }
-//  }
+  void test_non_const_access()
+  {
+    this->test_setX();
+    TS_ASSERT_THROWS(el.dataX(), Exception::NotImplementedError);
+    TS_ASSERT_THROWS(el.dataY(), Exception::NotImplementedError);
+    TS_ASSERT_THROWS(el.dataE(), Exception::NotImplementedError);
+  }
+
+
+  void test_empty_histogram()
+  {
+    //Make sure there's no data
+    el.clear();
+    const EventList el2(el);
+
+    //Getting data before setting X throws
+    TS_ASSERT_THROWS(el2.dataY(), runtime_error);
+
+    this->test_setX(); //Set it up
+    EventList::StorageType X, Y;
+    const EventList el3(el);
+    X = el3.dataX();
+    Y = el3.dataY();
+    //Histogram is 0, since I cleared all the events
+    for (int i=0; i<X.size(); i++)
+    {
+      TS_ASSERT_EQUALS(Y[i], 0);
+    }
+  }
+
+  void fake_uniform_data()
+  {
+    //Clear the list
+    el = EventList();
+    //Create some mostly-reasonable fake data.
+    srand(1234); //Fixed random seed
+    for (double tof=100; tof < 20e6; tof += 5000)
+    {
+      //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+      el += TofEvent( tof, rand()%1000);
+    }
+  }
+
+  void test_histogram()
+  {
+    this->fake_uniform_data();
+    this->test_setX(); //Set it up
+    EventList::StorageType X, Y;
+    const EventList el3(el); //need to copy to a const method in order to access the data directly.
+    X = el3.dataX();
+    Y = el3.dataY();
+    //The data was created so that there should be exactly 2 events per bin
+    // The last bin entry will be 0 since we use it as the top boundary of i-1.
+    for (int i=0; i<Y.size()-1; i++)
+    {
+      if (Y[i] != 2) std::cout << "Different at i=" << i << "\n";
+      TS_ASSERT_EQUALS(Y[i], 2.0);
+    }
+  }
+
+  void test_random_histogram()
+  {
+    this->fake_data();
+    this->test_setX();
+    EventList::StorageType X, Y;
+    const EventList el3(el);
+    X = el3.dataX();
+    Y = el3.dataY();
+    for (int i=0; i<X.size()-1; i++)
+    {
+      //No data was generated above 10 ms.
+      if (X[i] > 10e6)
+        TS_ASSERT_EQUALS(Y[i], 0.0);
+    }
+  }
 
 
   //==================================================================================

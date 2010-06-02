@@ -73,6 +73,8 @@ namespace DataObjects
   // ---------------------- EventList stuff ----------------------------------
   //==========================================================================
 
+  // --- Constructors -------------------------------------------------------------------
+
   EventList::EventList()
   {
     this->order = UNSORTED;
@@ -103,9 +105,9 @@ namespace DataObjects
     //Copy all data from the rhs.
     this->events.assign(rhs.events.begin(), rhs.events.end());
     this->refX = rhs.refX;
-    //We will clear the histogram stuff instead of copying it. Recalculate it when necessary.
-    this->order = UNSORTED;
-    this->emptyCacheData();
+    this->refY = rhs.refY;
+    this->refE = rhs.refE;
+    this->order = rhs.order;
     return *this;
   }
 
@@ -134,11 +136,17 @@ namespace DataObjects
     return *this;
   }
 
+  // --- Handling the event list -------------------------------------------------------------------
   std::vector<TofEvent>& EventList::getEvents()
   {
     return this->events;
   }
 
+  void EventList::clear()
+  {
+    this->events.clear();
+    this->emptyCacheData();
+  }
 
   // --- Sorting functions -------------------------------------------------------------------
   void EventList::sort(const EventSortType order)
@@ -216,6 +224,12 @@ namespace DataObjects
 
 
   // --- Return Data Vectors -------------------------------------------------------------
+  // Note: these will only be called from a const class; e.g
+  // const EventList el;
+  // el.dataX(); <<<<< this works
+  // EventList el2;
+  // el2.dataX(); <<<<< this throws an error.
+
   const EventList::StorageType& EventList::dataX() const
   {
     return *(this->refX);
@@ -223,6 +237,8 @@ namespace DataObjects
 
   const EventList::StorageType& EventList::dataY() const
   {
+    if (refY->size() <= 0)
+      throw std::runtime_error("Histogram X not set!");
     return *(this->refY);
   }
 
