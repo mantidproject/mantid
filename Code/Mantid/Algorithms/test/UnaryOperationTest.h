@@ -26,7 +26,7 @@ public:
   const std::string outputPropName() const { return UnaryOperation::outputPropName(); }
   
 private:
-  void performUnaryOperation(const double&, const double&, const double&, double&, double&) {}
+  void performUnaryOperation(const double, const double, const double, double&, double&) {}
 };
 
 class UnaryOperationTest : public CxxTest::TestSuite
