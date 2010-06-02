@@ -13,6 +13,9 @@ namespace Mantid
     /** 
     UnaryOperation supports the implementation of a Unary operation on an input workspace.
     It inherits from the Algorithm class, and overrides the init() & exec() methods.
+    Concrete sub-classes should implement (or re-implement, if necessary) the protected
+    methods of this class. The init() & exec() methods should be extended only in
+    unusual circumstances, and NEVER overridden.
 
     Required Properties:
     <UL>
@@ -75,7 +78,7 @@ namespace Mantid
        *  @param YOut A reference to the output data
        *  @param EOut A reference to the output error
        */
-      virtual void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut) = 0;
+      virtual void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut) = 0;
     };
 
   } // namespace Algorithm

@@ -58,7 +58,7 @@ namespace Mantid
 
     private:
       // Overridden UnaryOperation methods
-      void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
+      void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut);
 
       /*
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,

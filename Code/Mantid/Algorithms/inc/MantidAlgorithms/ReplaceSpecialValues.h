@@ -27,7 +27,7 @@ namespace Algorithms
  @author Nicholas Draper, Tessella plc
  @date 18/06/2009
 
- Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+ Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
  This file is part of Mantid.
 
@@ -64,7 +64,7 @@ private:
   // Overridden UnaryOperation methods
   void defineProperties();
   void retrieveProperties();
-  void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut,
+  void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut,
       double& EOut);
 
   /// returns true if the value is NaN

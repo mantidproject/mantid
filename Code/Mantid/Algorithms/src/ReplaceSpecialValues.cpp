@@ -11,8 +11,9 @@ using namespace Mantid::Kernel;
 
 namespace Mantid
 {
-	namespace Algorithms
+namespace Algorithms
 {
+
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ReplaceSpecialValues)
 
@@ -55,8 +56,8 @@ void ReplaceSpecialValues::retrieveProperties()
   }
 }
 
-void ReplaceSpecialValues::performUnaryOperation(const double& XIn, const double& YIn,
-    const double& EIn, double& YOut, double& EOut)
+void ReplaceSpecialValues::performUnaryOperation(const double XIn, const double YIn,
+    const double EIn, double& YOut, double& EOut)
 {
   YOut = YIn;
   EOut = EIn;

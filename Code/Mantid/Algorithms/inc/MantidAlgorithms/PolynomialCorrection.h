@@ -60,7 +60,7 @@ namespace Mantid
       // Overridden UnaryOperation methods
       void defineProperties();
       void retrieveProperties();
-      void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
+      void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut);
 
       std::vector<double> m_coeffs;              ///< Holds the coefficients for the polynomial correction function
       std::vector<double>::size_type m_polySize; ///< The order of the polynomial

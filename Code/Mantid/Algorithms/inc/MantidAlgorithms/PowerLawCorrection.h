@@ -26,7 +26,7 @@ namespace Mantid
     @author Robert Dalgliesh ISIS, STFC
     @date 14/10/2009
 
-    Copyright &copy; 2009 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2009-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -61,7 +61,7 @@ namespace Mantid
       // Overridden UnaryOperation methods
       void defineProperties();
       void retrieveProperties();
-      void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
+      void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut);
 
       double m_c0;   ///< The constant by which to multiply 
       double m_c1;   ///< The power to raise by.

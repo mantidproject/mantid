@@ -54,22 +54,20 @@ public:
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Arithmetic";}
 private:
-  // Overridden Algorithm methods
-  void init();
-  //void exec();
   /// The value to replace ln(0)
   double log_Min;
   /// If the logarithm natural or 10-based
   bool   is_natural;
-  ///
 
+  /// Declare additional properties for this algorithm
+  virtual void defineProperties();
   /// get properties from GUI
   virtual void retrieveProperties();
- /// Actually the function, which is run on values when the operation is performed
-  virtual void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
-
+  /// Actually the function, which is run on values when the operation is performed
+  virtual void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut);
 
 };
+
 } // End namespace Algorithms
 } // End namespace Mantid
 #endif

@@ -35,7 +35,7 @@ namespace Algorithms
     m_divide = ( op == "Divide" ) ? true : false;
   }
   
-  void OneMinusExponentialCor::performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut)
+  void OneMinusExponentialCor::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut)
   {
     double factor = m_c1*(1.0 - exp(-1.0*m_c*XIn));
     if (m_divide) factor = 1.0/factor;

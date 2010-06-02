@@ -32,7 +32,7 @@ namespace Algorithms
     m_divide = ( op == "Divide" ) ? true : false;
   }
   
-  void ExponentialCorrection::performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut)
+  void ExponentialCorrection::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut)
   {
     double factor = m_c0 * exp(-1.0*m_c1*XIn);
     if (m_divide) factor = 1.0/factor;

@@ -13,7 +13,8 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Exponential)
-    void Exponential::performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut)
+
+    void Exponential::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut)
     {
       // Multiply the data and error by the correction factor
       YOut = exp(YIn);

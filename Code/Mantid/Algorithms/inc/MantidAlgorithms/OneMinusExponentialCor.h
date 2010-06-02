@@ -62,7 +62,7 @@ namespace Mantid
       // Overridden UnaryOperation methods
       void defineProperties();
       void retrieveProperties();
-      void performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut);
+      void performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut);
 
       double m_c;    ///< The constant term in the exponent
       double m_c1;    ///< The multiplier

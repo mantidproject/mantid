@@ -57,11 +57,13 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Arithmetic";}
 
-    protected:
+    //protected:
+    private:
       // Overridden Algorithm methods
       void init();
       void exec();
 
+    protected:
       /// The name of the first input workspace property
       virtual std::string inputPropName1() const { return "LHSWorkspace";}
       /// The name of the second input workspace property

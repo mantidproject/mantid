@@ -41,20 +41,20 @@ namespace Mantid
       Poco::Path systempDir = Poco::Path(Kernel::ConfigService::Instance().getTempDir());
       if( cacheDir.empty() )
       {
-	cacheDir = systempDir.toString();
-	mFileName = systempDir.resolve(Poco::Path(mFileName).getFileName()).toString();
+        cacheDir = systempDir.toString();
+        mFileName = systempDir.resolve(Poco::Path(mFileName).getFileName()).toString();
       }
       try
       {
-	if( !Poco::File(cacheDir).exists() )
-	{
-	  Poco::File(cacheDir).createDirectory();
-	}
+        if( !Poco::File(cacheDir).exists() )
+        {
+          Poco::File(cacheDir).createDirectory();
+        }
       }
-      catch(Poco::Exception& e)
+      catch(Poco::Exception&)
       {
-	PLog.warning("Cannot create instrument cache directory, using system temporary directory.");
-	mFileName = systempDir.resolve(Poco::Path(mFileName).getFileName()).toString();
+        PLog.warning("Cannot create instrument cache directory, using system temporary directory.");
+        mFileName = systempDir.resolve(Poco::Path(mFileName).getFileName()).toString();
       }
 
       mDoc=new Document();
@@ -137,7 +137,7 @@ namespace Mantid
       int i;
       for(i=0;i<noPts*3;i++)
       {
-	buf<<points[i]<<" ";
+        buf<<points[i]<<" ";
       }
       AutoPtr<Text> pPointText=mDoc->createTextNode(buf.str());
       pPtsDataArray->appendChild(pPointText);
@@ -154,7 +154,7 @@ namespace Mantid
       int* faces=handle->getTriangleFaces();
       for(i=0;i<noTris*3;i++)
       {
-	buf<<faces[i]<<" ";
+        buf<<faces[i]<<" ";
       }
       AutoPtr<Text> pTrisDataText=mDoc->createTextNode(buf.str());
       pTrisDataArray->appendChild(pTrisDataText);
@@ -168,7 +168,7 @@ namespace Mantid
       buf.str("");
       for(i=1;i<noTris+1;i++)
       {
-	buf<<i*3<<" ";
+        buf<<i*3<<" ";
       }
       AutoPtr<Text> pTrisOffsetDataText=mDoc->createTextNode(buf.str());
       pTrisOffsetDataArray->appendChild(pTrisOffsetDataText);
@@ -192,13 +192,13 @@ namespace Mantid
       std::ofstream file;
       try
       {
-	file.open(mFileName.c_str(),std::ios::trunc);
-	writer.writeNode(file, mDoc);
-	file.close();
+        file.open(mFileName.c_str(),std::ios::trunc);
+        writer.writeNode(file, mDoc);
+        file.close();
       }
       catch(...)
       {
-	PLog.error("Geometry Cache file writing exception");
+        PLog.error("Geometry Cache file writing exception");
       }
     }
   }

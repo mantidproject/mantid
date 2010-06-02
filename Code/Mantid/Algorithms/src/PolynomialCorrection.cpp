@@ -28,7 +28,7 @@ namespace Algorithms
     m_polySize = m_coeffs.size();
   }
   
-  void PolynomialCorrection::performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut)
+  void PolynomialCorrection::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut)
   {
     // The first value of the coefficients vector is for the zeroth power of X.
     double factor = m_coeffs[0];

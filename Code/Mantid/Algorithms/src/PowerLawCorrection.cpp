@@ -27,7 +27,7 @@ namespace Algorithms
     m_c1 = getProperty("C1");
   }
   
-  void PowerLawCorrection::performUnaryOperation(const double& XIn, const double& YIn, const double& EIn, double& YOut, double& EOut)
+  void PowerLawCorrection::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut)
   {
     double factor = m_c0*pow(XIn,m_c1);
     // Multiply the data and error by the correction factor
