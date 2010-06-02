@@ -220,6 +220,11 @@ win32 {
   LIBS += MantidQtAPI.lib
 }
 
+QMAKE_POST_LINK += $${QMAKE_COPY} qtiplotrc.py \"$$DESTDIR\" &
+QMAKE_POST_LINK += $${QMAKE_COPY} qtiUtil.py \"$$DESTDIR\" &
+QMAKE_POST_LINK += $${QMAKE_COPY} mantidplot.py \"$$DESTDIR\" &
+QMAKE_POST_LINK += $${QMAKE_COPY} mantidplotrc.py \"$$DESTDIR\"
+
 # This makes release the default build on running nmake. Must be here - after the config dependent parts above
 CONFIG += release
 
