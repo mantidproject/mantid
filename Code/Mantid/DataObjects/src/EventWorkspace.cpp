@@ -17,7 +17,7 @@ namespace DataObjects
   Kernel::Logger& EventWorkspace::g_log
                  = Kernel::Logger::get("EventWorkspace");
 
-  //-----------------------------------------------------------------------------
+  //---- Constructors -------------------------------------------------------------------
   EventWorkspace::EventWorkspace()
   {}
   EventWorkspace::~EventWorkspace()
@@ -59,44 +59,54 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   // --- Data Access ----
   //-----------------------------------------------------------------------------
+  // Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataX(const int index)
   {
-    throw NotImplementedError("EventWorkspace::dataX. You cannot get write access to the histogrammed event list in an EventWorkspace!");
+    if (index<0 || index>=m_noVectors)
+      throw std::range_error("EventWorkspace::dataX, histogram number out of range");
+    return this->data[index].dataX();
   }
 
   MantidVec& EventWorkspace::dataY(const int index)
   {
-    throw NotImplementedError("EventWorkspace::dataY. You cannot get write access to the histogrammed event list in an EventWorkspace!");
+    if (index<0 || index>=m_noVectors)
+      throw std::range_error("EventWorkspace::dataY, histogram number out of range");
+    return this->data[index].dataY();
   }
 
   MantidVec& EventWorkspace::dataE(const int index)
   {
-    throw NotImplementedError("EventWorkspace::dataE. You cannot get write access to the histogrammed event list in an EventWorkspace!");
+    if (index<0 || index>=m_noVectors)
+      throw std::range_error("EventWorkspace::dataE, histogram number out of range");
+    return this->data[index].dataE();
   }
 
 
+  //-----------------------------------------------------------------------------
+  // --- Const Data Access ----
+  //-----------------------------------------------------------------------------
   const MantidVec& EventWorkspace::dataX(const int index) const
   {
     if (index<0 || index>=m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    //return this->data[index].dataX();
-    throw NotImplementedError("Const return is not possible???");
+    //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
+    return this->data.find(index)->second.dataX();
   }
 
   const MantidVec& EventWorkspace::dataY(const int index) const
   {
     if (index<0 || index>=m_noVectors)
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
-    //return this->data[index].dataY();
-    throw NotImplementedError("Const return is not possible???");
+    //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
+    return this->data.find(index)->second.dataY();
   }
 
   const MantidVec& EventWorkspace::dataE(const int index) const
   {
     if (index<0 || index>=m_noVectors)
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    //return this->data[index].dataE();
-    throw NotImplementedError("Const return is not possible???");
+    //Can't use the [] operator for const access; you need to use find, which returns an iterator, that returns a struct with 2 members.
+    return this->data.find(index)->second.dataE();
   }
 
 
@@ -105,10 +115,13 @@ namespace DataObjects
     throw NotImplementedError("EventWorkspace::refX const");
   }
 
+  //-----------------------------------------------------------------------------
+  // --- Histogramming ----
+  //-----------------------------------------------------------------------------
   void EventWorkspace::setX(const int index,
 			    const Kernel::cow_ptr<MantidVec> &x)
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::setX const");
+  {
+    this->data[index].setX(x);
   }
 
 } // namespace DataObjects

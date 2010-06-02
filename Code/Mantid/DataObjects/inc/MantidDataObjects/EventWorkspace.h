@@ -83,7 +83,8 @@ private:
   EventWorkspace& operator=(const EventWorkspace&);
 
   /// A vector that holds the event list for each pixel.
-  std::vector<EventList> data;
+  std::map<const int, EventList> data;
+  //std::vector<EventList> data;
 
   /// Static reference to the logger class
   static Kernel::Logger & g_log;
