@@ -4281,9 +4281,10 @@ void ApplicationWindow::executeNotes()
 
 void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timestamp)
 {
-  if( error )
+  if( error || msg.contains("error",Qt::CaseInsensitive) )
   {
     console->setTextColor(Qt::red);
+    consoleWindow->show();
   }
   else
   {
@@ -4308,7 +4309,7 @@ void ApplicationWindow::scriptPrint(const QString &msg, bool error, bool timesta
     }
   }
 
-  console->textCursor().insertText(msg_to_print);    
+  console->textCursor().insertText(msg_to_print);
   console->moveCursor(QTextCursor::End);
 }
 
