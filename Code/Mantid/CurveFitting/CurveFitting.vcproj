@@ -291,6 +291,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\PlotPeakByLogValue.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\PRConjugateGradientMinimizer.cpp"
 				>
 			</File>
@@ -490,6 +494,10 @@
 			</File>
 			<File
 				RelativePath=".\test\LorentzianTest.h"
+				>
+			</File>
+			<File
+				RelativePath=".\inc\MantidCurveFitting\PlotPeakByLogValue.h"
 				>
 			</File>
 			<File
