@@ -17,8 +17,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"
 
-#include <iostream>
-
 namespace Mantid
 {
   namespace CurveFitting
@@ -63,6 +61,7 @@ namespace Mantid
       for(int iPar=0;iPar<ifun->nParams();++iPar)
       {
         result->addColumn("double",ifun->parameterName(iPar));
+        result->addColumn("double",ifun->parameterName(iPar)+"_Err");
       }
       delete ifun;
       setProperty("OutputWorkspace",result);
@@ -107,9 +106,10 @@ namespace Mantid
         TableRow row = result->appendRow();
         row << logValue;
         ifun = FunctionFactory::Instance().createInitialized(fit->getPropertyValue("Function"));
+        std::vector<double> errors = fit->getProperty("Errors");
         for(int iPar=0;iPar<ifun->nParams();++iPar)
         {
-          row << ifun->getParameter(iPar);
+          row << ifun->getParameter(iPar) << errors[iPar];
         }
         delete ifun;
       }

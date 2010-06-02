@@ -13,6 +13,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/SimplexMinimizer.h"
+#include "MantidKernel/ArrayProperty.h"
 
 
 namespace Mantid
@@ -374,36 +375,40 @@ namespace CurveFitting
 
     // if Output property is specified output additional workspaces
 
+    std::vector<double> standardDeviations;
     std::string output = getProperty("Output");
+    gsl_matrix *covar(NULL);
+
+    // only if derivative is defined for fitting function create covariance matrix output workspace
+    if ( methodUsed.compare("Simplex") != 0 )    
+    {
+      // calculate covariance matrix
+      covar = gsl_matrix_alloc (nParam, nParam);
+      minimizer->calCovarianceMatrix( 0.0, covar);
+
+      // take standard deviations to be the square root of the diagonal elements of
+      // the covariance matrix
+      int iPNotFixed = 0;
+      for(int i=0; i < m_function->nParams(); i++)
+      {
+        standardDeviations.push_back(1.0);
+        if (m_function->isActive(i))
+        {
+          standardDeviations[i] = sqrt(gsl_matrix_get(covar,iPNotFixed,iPNotFixed));
+          if (m_function->activeParameter(iPNotFixed) != m_function->getParameter(m_function->indexOfActive(iPNotFixed)))
+          {// it means the active param is not the same as declared but transformed
+            standardDeviations[i] *= fabs(transformationDerivative(iPNotFixed));
+          }
+          iPNotFixed++;
+        }
+      }
+    }
+
     if (!output.empty())
     {
-      gsl_matrix *covar(NULL);
-      std::vector<double> standardDeviations;
-
       // only if derivative is defined for fitting function create covariance matrix output workspace
       if ( methodUsed.compare("Simplex") != 0 )    
       {
-        // calculate covariance matrix
-        covar = gsl_matrix_alloc (nParam, nParam);
-        minimizer->calCovarianceMatrix( 0.0, covar);
-
-        // take standard deviations to be the square root of the diagonal elements of
-        // the covariance matrix
-        int iPNotFixed = 0;
-        for(int i=0; i < m_function->nParams(); i++)
-        {
-          standardDeviations.push_back(1.0);
-          if (m_function->isActive(i))
-          {
-            standardDeviations[i] = sqrt(gsl_matrix_get(covar,iPNotFixed,iPNotFixed));
-            if (m_function->activeParameter(iPNotFixed) != m_function->getParameter(m_function->indexOfActive(iPNotFixed)))
-            {// it means the active param is not the same as declared but transformed
-              standardDeviations[i] *= fabs(transformationDerivative(iPNotFixed));
-            }
-            iPNotFixed++;
-          }
-        }
-
         // Create covariance matrix output workspace
         declareProperty(
           new WorkspaceProperty<API::ITableWorkspace>("OutputNormalisedCovarianceMatrix","",Direction::Output),
@@ -512,8 +517,32 @@ namespace CurveFitting
       if ( methodUsed.compare("Simplex") != 0 ) 
         gsl_matrix_free(covar);
     }
+    else
+    {
 
+      declareProperty(new ArrayProperty<double> ("Parameters",new NullValidator<std::vector<double> >,Direction::Output));
+      declareProperty(new ArrayProperty<double> ("Errors",new NullValidator<std::vector<double> >,Direction::Output));
+      declareProperty(new ArrayProperty<std::string> ("ParameterNames",new NullValidator<std::vector<std::string> >,Direction::Output));
+      std::vector<double> params,errors;
+      std::vector<std::string> parNames;
 
+      for(int i=0;i<m_function->nParams();i++)
+      {
+        parNames.push_back(m_function->parameterName(i));
+        params.push_back(m_function->getParameter(i));
+        if (!standardDeviations.empty())
+        {
+          errors.push_back(standardDeviations[i]);
+        }
+        else
+        {
+          errors.push_back(0.);
+        }
+      }
+      setProperty("Parameters",params);
+      setProperty("Errors",errors);
+      setProperty("ParameterNames",parNames);
+    }
 
     // minimizer may have dynamically allocated memory hence make sure this memory is freed up
 
@@ -665,7 +694,6 @@ namespace CurveFitting
       }
       input += "ties=("+inputTies+")";
     }
-
     setFunction(API::FunctionFactory::Instance().createInitialized(input));
 
   }

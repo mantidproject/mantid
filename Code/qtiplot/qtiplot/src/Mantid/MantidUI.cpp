@@ -540,8 +540,14 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
     for(int i=0;i<ws->columnCount();i++)
     {
         Column_sptr c = ws->getColumn(i);
-        t->setColName(i,QString::fromStdString(c->name()));
+        QString colName = QString::fromStdString(c->name());
+        t->setColName(i,colName);
         t->setReadOnlyColumn(i);
+        if (colName.endsWith("_err",Qt::CaseInsensitive) || 
+            colName.endsWith("_error",Qt::CaseInsensitive))
+        {
+          t->setColPlotDesignation(i,Table::yErr);
+        }
         for(int j=0;j<ws->rowCount();j++)
         {
             std::ostringstream ostr;
