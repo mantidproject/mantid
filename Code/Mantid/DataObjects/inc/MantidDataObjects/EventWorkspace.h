@@ -60,12 +60,11 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
 
   /** Return the const data (X Y or E) at a given pixel. */
+  const MantidVec& dataX(const int) const;
 
-  MantidVec& dataX(const int) const;
+  const MantidVec& dataY(const int) const;
 
-  MantidVec& dataY(const int) const;
-
-  MantidVec& dataE(const int) const;
+  const MantidVec& dataE(const int) const;
 
 
   /** Get a pointer to the x data */

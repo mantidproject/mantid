@@ -213,21 +213,21 @@ namespace DataObjects
 
 
   // --- Return Data Vectors -------------------------------------------------------------
-  EventList::RCtype EventList::dataX()
+  const EventList::StorageType& EventList::dataX() const
   {
-    return (this->refX);
+    return *(this->refX);
   }
 
-  EventList::RCtype EventList::dataY()
+  const EventList::StorageType& EventList::dataY()
   {
     this->generateHistogram();
-    return (this->refY);
+    return *(this->refY);
   }
 
-  EventList::RCtype EventList::dataE()
+  const EventList::StorageType& EventList::dataE()
   {
     this->generateHistogram();
-    return (this->refE);
+    return *(this->refE);
   }
 
 
@@ -248,16 +248,16 @@ namespace DataObjects
 
   void EventList::generateHistogram()
   {
-    //TODO: Is this the right way to refer to the data?
-    StorageType & Y = refY.access();
-    StorageType & X = refX.access();
-    if (X.size() <= 1)
+    StorageType &Y = refY.access();
+    StorageType &X = refX.access();
+
+    //For slight speed=up.
+    size_t x_size = refX->size();
+
+    if (x_size <= 1)
     {
       throw runtime_error("EventList::generateHistogram() called without the X axis set previously.");
     }
-
-    //For slight speed=up.
-    size_t x_size = X.size();
 
     //TODO: Should we have a smarter check for this?
     if (Y.size() != x_size)

@@ -28,7 +28,7 @@ namespace DataObjects
           const int &YLength)
   {
     // Check validity of arguments
-    if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
+    if (NVectors <= 0)
     {
       g_log.error("All arguments to init must be positive and non-zero");
       throw std::out_of_range("All arguments to init must be positive and non-zero");
@@ -61,36 +61,41 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   MantidVec& EventWorkspace::dataX(const int index)
   {
-    return this->data[index].dataX().access();
+    throw NotImplementedError("EventWorkspace::dataX. You cannot get write access to the histogrammed event list in an EventWorkspace!");
   }
 
   MantidVec& EventWorkspace::dataY(const int index)
   {
-    return this->data[index].dataY().access();
+    throw NotImplementedError("EventWorkspace::dataY. You cannot get write access to the histogrammed event list in an EventWorkspace!");
   }
 
   MantidVec& EventWorkspace::dataE(const int index)
   {
+    throw NotImplementedError("EventWorkspace::dataE. You cannot get write access to the histogrammed event list in an EventWorkspace!");
+  }
+
+
+  const MantidVec& EventWorkspace::dataX(const int index) const
+  {
+    if (index<0 || index>=m_noVectors)
+      throw std::range_error("EventWorkspace::dataX, histogram number out of range");
+    return this->data[index].dataX();
+  }
+
+  const MantidVec& EventWorkspace::dataY(const int index) const
+  {
+    if (index<0 || index>=m_noVectors)
+      throw std::range_error("EventWorkspace::dataY, histogram number out of range");
+    //return this->data[index].dataY();
+    throw NotImplementedError("Const return is not possible???");
+  }
+
+  const MantidVec& EventWorkspace::dataE(const int index) const
+  {
     if (index<0 || index>=m_noVectors)
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
-    return this->data[index].dataE().access();
-  }
-
-
-  MantidVec& EventWorkspace::dataX(const int index) const
-  { // TODO implement
-    //return this->data[index].dataX().access();
-    throw NotImplementedError("EventWorkspace::dataY const");
-  }
-
-  MantidVec& EventWorkspace::dataY(const int index) const
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::dataY const");
-  }
-
-  MantidVec& EventWorkspace::dataE(const int index) const
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::dataE const");
+    //return this->data[index].dataE();
+    throw NotImplementedError("Const return is not possible???");
   }
 
 

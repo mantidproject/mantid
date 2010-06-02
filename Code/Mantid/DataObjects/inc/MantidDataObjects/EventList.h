@@ -98,6 +98,7 @@ public:
   /** Return the list of TofEvents contained. */
   std::vector<TofEvent>& getEvents();
 
+  /** Sort events by TOF or Frame */
   void sort(const EventSortType);
   void sortTof();
   void sortFrame();
@@ -115,21 +116,14 @@ public:
   void setX(const StorageType& X, Unit* set_xUnit = NULL);
 
 
+  /** Returns the x data const. */
+  virtual const StorageType& dataX() const;
 
-//
-//  /** Returns the x data const. */
-//  const StorageType& dataX() const;
-//
-//  /** Returns the y data const. */
-//  const StorageType& dataY();
-//
-//  /** Returns the error data const. */
-//  const StorageType& dataE();
+  /** Returns the y data const. */
+  virtual const StorageType& dataY();
 
-  /*! Non-const versions */
-  RCtype dataX();
-  RCtype dataY();
-  RCtype dataE();
+  /** Returns the error data const. */
+  virtual const StorageType& dataE();
 
   /** Delete the cached version of the histogram data. */
   void emptyCache();
