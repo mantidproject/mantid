@@ -46,8 +46,8 @@ namespace DataObjects
   }
 
   int EventWorkspace::blocksize() const
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::blocksize");
+  {
+    return refX(0)->size();
   }
 
   const int EventWorkspace::getNumberHistograms() const
@@ -59,6 +59,13 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   // --- Data Access ----
   //-----------------------------------------------------------------------------
+
+  EventList& EventWorkspace::getEventList(const int index)
+  {
+    return this->data[index];
+  }
+
+
   // Note: these non-const access methods will throw NotImplementedError
   MantidVec& EventWorkspace::dataX(const int index)
   {
@@ -110,18 +117,31 @@ namespace DataObjects
   }
 
 
-  Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int) const
-  { // TODO implement
+  Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
+  {
     throw NotImplementedError("EventWorkspace::refX const");
+    //return this->data[index].refX();
   }
 
   //-----------------------------------------------------------------------------
   // --- Histogramming ----
   //-----------------------------------------------------------------------------
   void EventWorkspace::setX(const int index,
-			    const Kernel::cow_ptr<MantidVec> &x)
+      const Kernel::cow_ptr<MantidVec> &x)
   {
     this->data[index].setX(x);
+  }
+
+  void EventWorkspace::setAllX(Kernel::cow_ptr<MantidVec> &x)
+  {
+    EventListMap::iterator i = this->data.begin();
+    for( ; i != this->data.end(); ++i )
+    {
+      // i->first is your key
+      //Set the x now.
+      i->second.setX(x);
+    }
+
   }
 
 } // namespace DataObjects

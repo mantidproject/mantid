@@ -149,7 +149,7 @@ namespace DataObjects
   }
 
   // --- Sorting functions -------------------------------------------------------------------
-  void EventList::sort(const EventSortType order)
+  void EventList::sort(const EventSortType order) const
   {
     if (order == UNSORTED)
     {
@@ -169,7 +169,7 @@ namespace DataObjects
     }
   }
 
-  void EventList::sortTof()
+  void EventList::sortTof() const
   {
     if (this->order == TOF_SORT)
     {
@@ -181,7 +181,7 @@ namespace DataObjects
     this->order = TOF_SORT;
   }
 
-  void EventList::sortFrame()
+  void EventList::sortFrame() const
   {
     if (this->order == FRAME_SORT)
     {
@@ -201,7 +201,6 @@ namespace DataObjects
     this->refX = X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
-    this->generateHistogram();
   }
 
   void EventList::setX(const RCtype& X, Unit* set_xUnit)
@@ -210,7 +209,6 @@ namespace DataObjects
     this->refX = X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
-    this->generateHistogram();
   }
 
   void EventList::setX(const StorageType& X, Unit* set_xUnit)
@@ -219,7 +217,6 @@ namespace DataObjects
     this->refX.access()=X;
     if (!(set_xUnit == NULL))
       this->xUnit = set_xUnit;
-    this->generateHistogram();
   }
 
 
@@ -237,13 +234,18 @@ namespace DataObjects
 
   const EventList::StorageType& EventList::dataY() const
   {
-    if (refY->size() <= 0)
+    if (refX->size() <= 0)
       throw std::runtime_error("Histogram X not set!");
+    //this->refY.access().push_back(1234.5678);
+    this->generateHistogram();
     return *(this->refY);
   }
 
   const EventList::StorageType& EventList::dataE() const
   {
+    if (refX->size() <= 0)
+      throw std::runtime_error("Histogram X not set!");
+    //this->generateHistogram();
     return *(this->refE);
   }
 
@@ -251,6 +253,7 @@ namespace DataObjects
   // --- Non-const return Data Vectors throw exceptions! -------------------------------------------------------------
   EventList::StorageType& EventList::dataX()
   {
+    //return *(this->refX);
     throw NotImplementedError("EventList::dataX cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
   }
   EventList::StorageType& EventList::dataY()
@@ -278,8 +281,9 @@ namespace DataObjects
   }
 
 
-  void EventList::generateHistogram()
+  void EventList::generateHistogram() const
   {
+
     StorageType &Y = refY.access();
     StorageType &X = refX.access();
 
@@ -340,6 +344,7 @@ namespace DataObjects
         }
       } // end if (there are any events to histogram)
     }// end if (we need to re-histogram)
+
 
   }
 

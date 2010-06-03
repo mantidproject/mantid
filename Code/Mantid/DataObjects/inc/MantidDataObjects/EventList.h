@@ -102,9 +102,9 @@ public:
   void clear();
 
   /** Sort events by TOF or Frame */
-  void sort(const EventSortType);
-  void sortTof();
-  void sortFrame();
+  void sort(const EventSortType) const;
+  void sortTof() const;
+  void sortFrame() const;
 
   /**
    * Set the x-component for the histogram view. This will cause the
@@ -140,25 +140,28 @@ public:
 
 
 private:
-  std::vector<TofEvent> events;
+  ///List of events.
+  mutable std::vector<TofEvent> events;
 
   /** Pointer to unit of the x-axis of the histogram */
   Mantid::Kernel::Unit *xUnit;
 
-  EventSortType order;
+  /// Last sorting order
+  mutable EventSortType order;
   /** Cached version of the x axis. */
-  RCtype refX;
+  mutable RCtype refX;
   /** Cached version of the counts. */
-  RCtype refY;
+  mutable RCtype refY;
   /** Cached version of the uncertainties. */
-  RCtype refE;
+  mutable RCtype refE;
 
   /** Delete the cached version of the CALCULATED histogram data.
    * Necessary when modifying the event list.
    * */
   void emptyCacheData();
 
-  void generateHistogram();
+  /// Make the histogram; ironically declared as const to allow data access.
+  void generateHistogram() const;
 };
 
 } // DataObjects

@@ -24,6 +24,12 @@ namespace Kernel
 namespace DataObjects
 {
 
+
+
+///Map to EventList objects, with an int as the index.
+typedef std::map<const int, EventList> EventListMap;
+
+
 /** \class EventWorkspace
 
     This class is intended to fulfill the design specified in 
@@ -73,8 +79,17 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Set the x-axis data for the given pixel. */
   void setX(const int, const  Kernel::cow_ptr<MantidVec> &);
 
+  /** Set the x-axis data (histogram bins) for all pixels */
+  void setAllX(Kernel::cow_ptr<MantidVec> &x);
+
   /** Initialize the pixels */
   void init(const int&, const int&, const int&);
+
+  /** Testing function - compare the
+  bool compareX(intMantidVec& expected); */
+
+  /** Get an EventList object at the given pixel number */
+  EventList& getEventList(const int index);
 
 private:
   /// NO COPY ALLOWED
@@ -83,7 +98,7 @@ private:
   EventWorkspace& operator=(const EventWorkspace&);
 
   /// A vector that holds the event list for each pixel.
-  std::map<const int, EventList> data;
+  mutable EventListMap data;
   //std::vector<EventList> data;
 
   /// Static reference to the logger class
@@ -92,6 +107,11 @@ private:
   /// The number of vectors in the workspace
   int m_noVectors;
 };
+
+///shared pointer to the EventWorkspace class
+typedef boost::shared_ptr<EventWorkspace> EventWorkspace_sptr;
+///shared pointer to a const Workspace2D
+typedef boost::shared_ptr<const EventWorkspace> EventWorkspace_const_sptr;
 
 
 
