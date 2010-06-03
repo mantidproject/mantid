@@ -59,11 +59,13 @@ namespace Mantid
         // Copy the X values over
         out_work->setX(i,in_work->refX(i));
         // Get references to the data
+        // Output (non-const) ones first because they may copy the vector
+        // if it's shared, which isn't thread-safe.
+        MantidVec& YOut = out_work->dataY(i);
+        MantidVec& EOut = out_work->dataE(i);
         const MantidVec& X = in_work->readX(i);
         const MantidVec& Y = in_work->readY(i);
         const MantidVec& E = in_work->readE(i);
-        MantidVec& YOut = out_work->dataY(i);
-        MantidVec& EOut = out_work->dataE(i);
         
         for (int j = 0; j < specSize; ++j)
         {
