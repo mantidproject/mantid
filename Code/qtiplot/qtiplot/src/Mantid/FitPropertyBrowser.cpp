@@ -1833,7 +1833,7 @@ std::string FitPropertyBrowser::getLogValue()const
   if (isWorkspaceAGroup() && m_logValue)
   {
     int i = m_enumManager->value(m_logValue);
-    if (i < m_logs.size()) return m_logs[i];
+    if (i < m_logs.size()) return m_logs[i].toStdString();
   }
   return "";
 }
