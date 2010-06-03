@@ -172,16 +172,17 @@ namespace Mantid
       std::string specialchars="&<>'\"";
       std::string::size_type searchIndex=0;
       std::string::size_type  findIndex;
-      for(std::string::size_type i=0;i<specialchars.size();++i)
+	  for(std::string::size_type i=0;i<specialchars.size();++i)
       {
         while(searchIndex<input.length())
         {
           findIndex=input.find(specialchars[i],searchIndex);
           if(findIndex!=std::string::npos)
           {
+			searchIndex=findIndex+1;
             //replace with xml entity refrence
             replacewithEntityReference(input,findIndex);
-            searchIndex=findIndex+1;
+		           
           }
           else
           {
@@ -198,7 +199,7 @@ namespace Mantid
      *  @param input -input string
      *  @param index  position of the special character in the input string
      */
-    void SaveCanSAS1D::replacewithEntityReference(std::string& input, std::string::size_type index)
+    void SaveCanSAS1D::replacewithEntityReference(std::string& input, const std::string::size_type& index)
     {
       std::basic_string <char>::reference  str=input.at(index);
       switch(str)

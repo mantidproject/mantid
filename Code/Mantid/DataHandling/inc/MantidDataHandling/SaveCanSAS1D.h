@@ -108,7 +108,7 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
 
-    private:
+	 private:
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method
@@ -118,7 +118,7 @@ namespace Mantid
       void searchandreplaceSpecialChars(std::string &input);
 
       /// replaces the charcter at index in the input string with xml entity reference(eg.replace '&' with "&amp;")
-      void replacewithEntityReference(std::string& input, std::string::size_type index);
+      void replacewithEntityReference(std::string& input, const std::string::size_type& index);
 
       /// sasroot element
       void createSASRootElement(std::string& rootElem);

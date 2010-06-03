@@ -8,15 +8,15 @@
 #include "Poco/Path.h"
 
 #include <fstream>
-
+using namespace Mantid::DataHandling;
+    using namespace Mantid::API;
 class SaveCAnSAS1DTest : public CxxTest::TestSuite
 {
 public:
 
   void testCanSAS1dXML()
   {
-    using namespace Mantid::DataHandling;
-    using namespace Mantid::API;
+    
 	
 	/*std::string s;
 	std::getline(std::cin,s);*/
@@ -91,6 +91,14 @@ public:
 	TS_ASSERT_EQUALS ( fileLine,idataline);
 
   }
+// testing of  searchandreplaceSpecialChars is done. 
+  //I made this method public and tested,changed back to private.
+ /* void xtestspecialcharacters()
+  {
+	  SaveCanSAS1D savealg;
+	  std::string input="sasdjksd<aw&gjkjk\"j";
+	  savealg.searchandreplaceSpecialChars(input);
+  }*/
   
 };
 
