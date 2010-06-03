@@ -31,7 +31,7 @@ from mantidsimple import *
 # The tags get replaced by input from the GUI
 # The workspaces
 SCATTER_SAMPLE = None
-SCATTER_CAN = ''
+SCATTER_CAN = SANSUtility.WorkspaceDetails('', -1)
 TRANS_SAMPLE = ''
 TRANS_CAN = ''
 DIRECT_SAMPLE = ''
@@ -314,7 +314,7 @@ def AssignSample(sample_run, reload = True, period = -1):
     
     _SAMPLE_RUN = sample_run
     SCATTER_SAMPLE,reset,logname,filepath, _SAMPLE_N_PERIODS = _assignHelper(sample_run, False, reload, period)
-    if SCATTER_SAMPLE == '':
+    if SCATTER_SAMPLE.getName() == '':
         _issueWarning('Unable to load sans sample run, cannot continue.')
         return '','()'
     if reset == True:
@@ -324,11 +324,11 @@ def AssignSample(sample_run, reload = True, period = -1):
         _MARKED_DETS_ = []
         logvalues = _loadDetectorLogs(logname,filepath)
         if logvalues == None:
-            mtd.deleteWorkspace(SCATTER_SAMPLE)
+            mtd.deleteWorkspace(SCATTER_SAMPLE.getName())
             _issueWarning("Sample logs cannot be loaded, cannot continue")
             return '','()'
     else:
-        return SCATTER_SAMPLE, None
+        return SCATTER_SAMPLE.getName(), None
         
     global FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X
     FRONT_DET_Z = float(logvalues['Front_Det_Z'])
@@ -337,7 +337,7 @@ def AssignSample(sample_run, reload = True, period = -1):
     REAR_DET_Z = float(logvalues['Rear_Det_Z'])
     REAR_DET_X = float(logvalues['Rear_Det_X'])
 
-    return SCATTER_SAMPLE, logvalues
+    return SCATTER_SAMPLE.getName(), logvalues
 
 ########################### 
 # Set the scattering can raw workspace
@@ -352,7 +352,7 @@ def AssignCan(can_run, reload = True, period = -1):
     _CAN_N_PERIODS = -1
     
     if( can_run.startswith('.') or can_run == '' or can_run == None):
-        SCATTER_CAN = ''
+        SCATTER_CAN.reset()
         _CAN_RUN = ''
         _CAN_SETUP = None
         return '', '()'
@@ -360,7 +360,7 @@ def AssignCan(can_run, reload = True, period = -1):
     _CAN_RUN = can_run
     SCATTER_CAN ,reset, logname,filepath, _CAN_N_PERIODS = \
         _assignHelper(can_run, False, reload, period)
-    if SCATTER_CAN == '':
+    if SCATTER_CAN.getName() == '':
         _issueWarning('Unable to load sans can run, cannot continue.')
         return '','()'
     if reset == True:
@@ -371,9 +371,9 @@ def AssignCan(can_run, reload = True, period = -1):
         logvalues = _loadDetectorLogs(logname,filepath)
         if logvalues == None:
             _issueWarning("Can logs could not be loaded, using sample values.")
-            return SCATTER_CAN, "()"
+            return SCATTER_CAN.getName(), "()"
     else:
-        return SCATTER_CAN, ""
+        return SCATTER_CAN.getName(), ""
     
     smp_values = []
     smp_values.append(FRONT_DET_Z + FRONT_DET_Z_CORR)
@@ -384,7 +384,7 @@ def AssignCan(can_run, reload = True, period = -1):
 
     # Check against sample values and warn if they are not the same but still continue reduction
     if len(logvalues) == 0:
-        return  SCATTER_CAN, logvalues
+        return  SCATTER_CAN.getName(), logvalues
     
     can_values = []
     can_values.append(float(logvalues['Front_Det_Z']) + FRONT_DET_Z_CORR)
@@ -401,7 +401,7 @@ def AssignCan(can_run, reload = True, period = -1):
                               ' , Can = ' + str(can_values[i]))
             _MARKED_DETS_.append(det_names[i])
     
-    return SCATTER_CAN, logvalues
+    return SCATTER_CAN.getName(), logvalues
 
 ########################### 
 # Set the trans sample and measured raw workspaces
@@ -413,10 +413,14 @@ def TransmissionSample(sample, direct, reload = True, period = -1):
     __clearPrevious(TRANS_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
     __clearPrevious(DIRECT_SAMPLE,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_CAN])
     
-    TRANS_SAMPLE, dummy1, dummy2, dummy3, _TRANS_SAMPLE_N_PERIODS = \
+    trans_ws, dummy1, dummy2, dummy3, _TRANS_SAMPLE_N_PERIODS = \
         _assignHelper(sample, True, reload, period)
-    DIRECT_SAMPLE, dummy1, dummy2, dummy3, DIRECT_SAMPLE_N_PERIODS = \
+    TRANS_SAMPLE = trans_ws.getName()
+    
+    direct_sample_ws, dummy1, dummy2, dummy3, DIRECT_SAMPLE_N_PERIODS = \
         _assignHelper(direct, True, reload, period)
+    DIRECT_SAMPLE = direct_sample_ws.getName()
+    
     return TRANS_SAMPLE, DIRECT_SAMPLE
 
 ########################## 
@@ -429,19 +433,21 @@ def TransmissionCan(can, direct, reload = True, period = -1):
     __clearPrevious(TRANS_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,DIRECT_SAMPLE,DIRECT_CAN])
     __clearPrevious(DIRECT_CAN,others=[SCATTER_SAMPLE,SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE])
 
-    TRANS_CAN, dummy1, dummy2, dummy3, TRANS_CAN_N_PERIODS = \
+    can_ws, dummy1, dummy2, dummy3, TRANS_CAN_N_PERIODS = \
         _assignHelper(can, True, reload, period)
+    TRANS_CAN = can_ws.getName()
     if direct == '' or direct == None:
         DIRECT_CAN, DIRECT_CAN_N_PERIODS = DIRECT_SAMPLE, DIRECT_SAMPLE_N_PERIODS
     else:
-        DIRECT_CAN, dummy1, dummy2, dummy3, DIRECT_CAN_N_PERIODS = \
+        direct_can_ws, dummy1, dummy2, dummy3, DIRECT_CAN_N_PERIODS = \
             _assignHelper(direct, True, reload, period)
+        DIRECT_CAN = direct_can_ws.getName()
     return TRANS_CAN, DIRECT_CAN
 
 # Helper function
 def _assignHelper(run_string, is_trans, reload = True, period = -1):
     if run_string == '' or run_string.startswith('.'):
-        return '',True,'','', -1
+        return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
     pieces = run_string.split('.')
     if len(pieces) != 2 :
          _fatalError("Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format")
@@ -449,7 +455,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
         run_no = pieces[0]
         ext = pieces[1]
     if run_no == '':
-        return '',True,'','', -1
+        return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
         
     if INSTR_NAME == 'LOQ':
         field_width = 5
@@ -464,7 +470,7 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
         wkspname =  shortrun_no + '_sans_' + ext.lower()
 
     if reload == False and mtd.workspaceExists(wkspname):
-        return wkspname,False,'','', -1
+        return WorkspaceDetails(wkspname, shortrun_no),False,'','', -1
 
     basename = INSTR_NAME + fullrun_no
     filename = os.path.join(DATA_PATH,basename)
@@ -486,14 +492,16 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
                _loadRawData(filename, wkspname, ext, specmin, specmax, period)
         except RuntimeError, err:
             _issueWarning(str(err))
-            return '',True,'','', -1
+            return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
     else:
         try:
             [filepath, wkspname, nPeriods] = _loadRawData(filename, wkspname, ext, None, None, period)
         except RuntimeError, details:
             _issueWarning(str(details))
-            return '',True,'','', -1
-    return wkspname,True, INSTR_NAME + logname, filepath, nPeriods
+            return SANSUtility.WorkspaceDetails('', -1),True,'','', -1
+            
+    inWS = SANSUtility.WorkspaceDetails(wkspname, shortrun_no)
+    return inWS,True, INSTR_NAME + logname, filepath, nPeriods
 
 def padRunNumber(run_no, field_width):
     nchars = len(run_no)
@@ -511,9 +519,12 @@ def padRunNumber(run_no, field_width):
         filebase = run_no[:digit_end].rjust(field_width, '0')
         return filebase + run_no[digit_end:], filebase, run_no[:digit_end]
 
-def __clearPrevious(ws1, others = []):
-    if type(ws1) == str and mtd.workspaceExists(ws1) and (not ws1 in others):
-        mtd.deleteWorkspace(ws1)
+def __clearPrevious(inWS, others = []):
+    if inWS != None:
+        if type(inWS) == SANSUtility.WorkspaceDetails:
+            inWS = inWS.getName()
+        if mtd.workspaceExists(inWS) and (not inWS in others):
+            mtd.deleteWorkspace(inWS)
 
 ##########################
 # Loader function
@@ -568,7 +579,7 @@ def _leaveSinglePeriod(groupW, period):
             newName = discriptors[0]+'p'+str(period)#so add the period number here
         else :
             newName += '_'+discriptors[i]
-    newName = oldName#remove this line that disables the ones above oncee they are working
+
     RenameWorkspace(oldName, newName)
 
     #remove the rest of the group
@@ -1193,7 +1204,7 @@ def _initReduction(xcentre = None, ycentre = None):
         _SAMPLE_SETUP = _init_run(SCATTER_SAMPLE, [xcentre, ycentre], False)
     
     global _CAN_SETUP
-    if SCATTER_CAN != '' and _CAN_SETUP == None:
+    if SCATTER_CAN.getName() != '' and _CAN_SETUP == None:
         _CAN_SETUP = _init_run(SCATTER_CAN, [xcentre, ycentre], True)
 
     # Instrument specific information using function in utility file
@@ -1285,7 +1296,7 @@ def _init_run(raw_ws, beamcoords, emptycell):
     if emptycell == True:
         final_ws = "can_temp_workspace"
     else:
-        final_ws = raw_ws.split('_')[0]
+        final_ws = raw_ws.getName().split('_')[0]
         if DETBANK == 'front-detector':
             final_ws += 'front'
         elif DETBANK == 'rear-detector':
@@ -1297,7 +1308,7 @@ def _init_run(raw_ws, beamcoords, emptycell):
         final_ws += '_' + CORRECTION_TYPE
 
     # Put the components in the correct positions
-    maskpt_rmin, maskpt_rmax = SetupComponentPositions(DETBANK, raw_ws, beamcoords[0], beamcoords[1])
+    maskpt_rmin, maskpt_rmax = SetupComponentPositions(DETBANK, raw_ws.getName(), beamcoords[0], beamcoords[1])
     
     # Create a run details object
     if emptycell == True:
@@ -1442,12 +1453,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
 #    period = run_setup.getPeriod()
     orientation = orientation=SANSUtility.Orientation.Horizontal
     if INSTR_NAME == "SANS2D":
-        sample_run = sample_raw.split('_')[0]
-        ndigits = len(sample_run)
-        if ndigits > 4:
-            base_runno = int(sample_run[ndigits-4:])
-        else:
-            base_runno = int(sample_run)
+        base_runno = sample_raw.getRunNumber()
         if base_runno < 568:
             MONITORSPECTRUM = 73730
             orientation=SANSUtility.Orientation.Vertical
@@ -1465,8 +1471,10 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     ############################# Setup workspaces ######################################
     monitorWS = "Monitor"
     _printMessage('monitor ' + str(MONITORSPECTRUM), True)
+    sample_name = sample_raw.getName()
     # Get the monitor ( StartWorkspaceIndex is off by one with cropworkspace)
-    CropWorkspace(sample_raw, monitorWS, StartWorkspaceIndex = str(MONITORSPECTRUM - 1), EndWorkspaceIndex = str(MONITORSPECTRUM - 1))
+    CropWorkspace(sample_name, monitorWS,
+        StartWorkspaceIndex = str(MONITORSPECTRUM - 1), EndWorkspaceIndex = str(MONITORSPECTRUM - 1))
     if INSTR_NAME == 'LOQ':
         RemoveBins(monitorWS, monitorWS, '19900', '20500', Interpolation="Linear")
     
@@ -1476,7 +1484,8 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     
     # Get the bank we are looking at
     final_result = run_setup.getReducedWorkspace()
-    CropWorkspace(sample_raw, final_result, StartWorkspaceIndex = (SPECMIN - 1), EndWorkspaceIndex = str(SPECMAX - 1))
+    CropWorkspace(sample_name, final_result,
+        StartWorkspaceIndex = (SPECMIN - 1), EndWorkspaceIndex = str(SPECMAX - 1))
     #####################################################################################
         
     ########################## Masking  ################################################
@@ -1645,16 +1654,16 @@ def CalculateResidue():
         residueY += pow(yvalsA[indexA] - yvalsB[indexB], 2)
         indexB += 1
                         
-    try :
-        if RESIDUE_GRAPH == None:
-            RESIDUE_GRAPH = plotSpectrum('Left', 0)
-            mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
-            mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
-            mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
-	    RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
-    except :
+#    try :
+    if RESIDUE_GRAPH == None:
+        RESIDUE_GRAPH = plotSpectrum('Left', 0)
+        mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
+        mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
+        mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
+    RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
+#    except :
         #if the plotting environment is not setup we can contiune without plotting
-        pass    
+ #       pass    
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
     return residueX, residueY
 	
@@ -1671,9 +1680,9 @@ def RunReduction(coords):
 
     # Do the correction
     if xshift != 0.0 or yshift != 0.0:
-        MoveInstrumentComponent(SCATTER_SAMPLE, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
-        if SCATTER_CAN != '':
-            MoveInstrumentComponent(SCATTER_CAN, ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
+        MoveInstrumentComponent(SCATTER_SAMPLE.getName(), ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
+        if SCATTER_CAN.getName() != '':
+            MoveInstrumentComponent(SCATTER_CAN.getName(), ComponentName = DETBANK, X = str(xshift), Y = str(yshift), RelativePosition="1")
 			
     _SAMPLE_SETUP.setMaskPtMin([0.0,0.0])
     _SAMPLE_SETUP.setMaskPtMax([xcentre, ycentre])
@@ -1846,8 +1855,9 @@ def mergePlots(g1, g2):
     return qti.app.mantidUI.mergePlots(g1,g2)
 
 #testing code, remove 
-#print _loadRawData('c:/mantid/test/data/SANS2D/SANS2D00000992', '992boo', 'raw', None, None)
-#SCATTER_SAMPLE, logvalues = AssignSample('5508.nxs', reload = True,period=13)
+#print _loadRawData('//isis/inst$/cycle_10_1/NDXSANS2D/SANS2D00005508', '992boo', 'raw', None, None)
+#SCATTER_SAMPLE, logvalues = AssignSample('5508.nxs', reload = True,period=11)
+#print _assignHelper('5508.nxs', False, True, 11)
 #can, logcan = AssignCan('993.raw', reload = True, period=1)
 #print SCATTER_SAMPLE, logvalues
 #print can, logcan

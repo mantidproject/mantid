@@ -11,7 +11,6 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IInstrument.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -32,6 +31,8 @@
 #include <QClipboard>
 #include <QTemporaryFile>
 #include <QDateTime>
+
+#include "boost/lexical_cast.hpp"
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -916,9 +917,14 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
   
   QString workspace_name = getWorkspaceName(0);
   if( workspace_name.isEmpty() ) return;
-
   Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
   Mantid::API::MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+  if ( !sample_workspace )
+  {//assume all geometry information is in the first member of the group and it is constant for all group members
+    //function throws if a fisrt member can't be retrieved
+    sample_workspace = getGroupMember(workspace_ptr, 1);
+  }
+
   Mantid::API::IInstrument_sptr instr = sample_workspace->getInstrument();
   boost::shared_ptr<Mantid::Geometry::IComponent> source = instr->getSource();
 
@@ -955,6 +961,12 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     {
       Mantid::API::Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
       Mantid::API::MatrixWorkspace_sptr can_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+      
+      if ( ! can_workspace )
+      {//assume all geometry information is in the first member of the group and it is constant for all group members
+        //function throws if a fisrt member can't be retrieved
+        can_workspace = getGroupMember(workspace_ptr, 1);
+      }
       setLOQGeometry(can_workspace, 1);
     }
   }
@@ -986,7 +998,14 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     {
       return;
     }
+
     Mantid::API::MatrixWorkspace_sptr can_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(workspace_ptr);
+    if ( !can_workspace )
+    {//assume all geometry information is in the first member of the group and it is constant for all group members
+      //function throws if a fisrt member can't be retrieved
+      can_workspace = getGroupMember(workspace_ptr, 1);
+    }
+
     setSANS2DGeometry(can_workspace, can_logs, 1);
 
     //Check for discrepancies
@@ -1305,7 +1324,12 @@ bool SANSRunWindow::handleLoadButtonClick()
     bool raw_data_ok = last_run->isExecuted();
     if( !raw_data_ok )
     {
-      showInformationBox("Error: Cannot load run \"" + run_no + "\", see results log for details.");
+      QString period("");
+      if ( getPeriod(key) > 1 )
+      {
+        period = QString("period ") + QString::number(getPeriod(key));
+      }
+      showInformationBox("Error: Cannot load run \""+run_no+"\" " + period + ", see results log for details.");
       break;
     }
     if( key == 0 ) 
@@ -1338,18 +1362,24 @@ bool SANSRunWindow::handleLoadButtonClick()
   // Sort out the log information
   setGeometryDetails(sample_logs, can_logs);
   
+  Mantid::API::Workspace_sptr baseWS =
+    Mantid::API::AnalysisDataService::Instance().retrieve(getWorkspaceName(0).toStdString());
   // Enter information from sample workspace on to analysis and geometry tab
-  Mantid::API::MatrixWorkspace_sptr sample_workspace;
-  try
+  Mantid::API::MatrixWorkspace_sptr sample_workspace =
+    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
+    
+  if ( ! sample_workspace )
   {
-    sample_workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-     (Mantid::API::AnalysisDataService::Instance().retrieve(getWorkspaceName(0).toStdString()));
-  }
-  catch(std::runtime_error &)
-  {
-    setProcessingState(false, -1);
-    showInformationBox("Error: Could not retrieve sample workspace from Mantid");
-    return false;
+    try
+    {
+      sample_workspace = getGroupMember(baseWS, m_uiForm.sct_smp_prd->text().toInt());
+    }
+    catch(std::exception &)
+    {
+      setProcessingState(false, -1);
+      showInformationBox("Error: Could not retrieve sample workspace from Mantid");
+      return false;
+    }
   }
   
   if( sample_workspace != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !sample_workspace->readX(0).empty() )
@@ -1376,7 +1406,7 @@ bool SANSRunWindow::handleLoadButtonClick()
       m_uiForm.sample_width->setText("8");
       m_uiForm.sample_height->setText("8");
       //Warn user
-      raiseOneTimeMessage("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.", 2);
+      showInformationBox("Warning: Incorrect geometry flag encountered: " + QString::number(geomid) +". Using default values.");
     }
   }
 
@@ -1996,16 +2026,37 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     {
       assign_fn = "TransmissionSample";
     }
-    assign_fn += "('" + run_number + "','" + direct_run + "')";
+    assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
+    assign_fn += ", " + QString::number(getPeriod(key))+")";
+    //assign the workspace name to a Python variable and read back some details
     QString ws_names = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
+    //read the informtion returned from Python
     QString trans_ws = ws_names.section(" ", 0,0);
     QString direct_ws = ws_names.section(" ", 1);
-    status = setNumberPeriods(key, trans_ws);
-    status &= setNumberPeriods(key + 3, direct_ws);
-    if( status )
-    {
+
+    status = ( ! trans_ws.isEmpty() ) && ( ! direct_ws.isEmpty() );
+
+    //if the workspaces have loaded
+    if (status)
+    {//save the workspace names
       m_workspace_names.insert(key, trans_ws);
       m_workspace_names.insert(key + 3, direct_ws);
+
+      //and display to the user how many periods are in the run
+      QString pythonVar = is_can ? "TRANS_CAN_N_PERIODS" : "_TRANS_SAMPLE_N_PERIODS";
+      int nPeriods =
+        runReduceScriptFunction("printParameter('"+pythonVar+"'),").toInt();
+      setNumberPeriods(key, nPeriods);
+      
+      pythonVar = is_can ? "DIRECT_CAN_N_PERIODS" : "DIRECT_SAMPLE_N_PERIODS";
+      nPeriods =
+        runReduceScriptFunction("printParameter('"+pythonVar+"'),").toInt();
+      setNumberPeriods(key + 3, nPeriods);
+    }
+    else
+    {//workspaces didn't load so remove the (out of date) period information
+      unSetPeriods(key);
+      unSetPeriods(key+3);
     }
   }
   else
@@ -2019,75 +2070,124 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     {
       assign_fn = "AssignSample";
     }
-    assign_fn += "('" + run_number + "', reload = True)";
-    QString run_info = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
-    QString base_workspace = run_info.section(" ",0,0);
+    assign_fn += "('" + run_number + "', reload = True";
+    assign_fn += ", period = " + QString::number(getPeriod(key)) + ")";
+    //assign the workspace name to a Python variable and read back some details
+    QString run_info = runReduceScriptFunction("SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE, logvalues");
+    //read the informtion returned from Python
+    QString base_workspace = run_info.section(" ", 0, 0);
+
     logs = run_info.section(" ", 1);
     if( !logs.isEmpty() )
     {
       trimPyMarkers(logs);
     }
-    status = setNumberPeriods(key, base_workspace);
-    if( status )
-    {
+    status = ! base_workspace.isEmpty();
+    
+    //if the workspace was loaded
+    if (status)
+    {//save the workspace name
       m_workspace_names.insert(key, base_workspace);
+      //and display to the user how many periods are in the run
+      QString pythonVar = is_can ? "_CAN_N_PERIODS" : "_SAMPLE_N_PERIODS";
+      int nPeriods =
+        runReduceScriptFunction("printParameter('"+pythonVar+"'),").toInt();
+      setNumberPeriods(key, nPeriods);
+    }
+    else
+    {
+      unSetPeriods(key);
     }
   }
   return status;
 }
-
- /** 
-  * Set number of periods for the given workspace
-  * @param key The box this applies to
-  * @param workspace_name The name of the workspace to check
-  * @returns A boolean indicating success/failure
-  */
-bool SANSRunWindow::setNumberPeriods(int key, const QString & workspace_name)
+/** gets the number entered into the periods box
+* @param key The box this applies to
+* @return the entry number the user entered into the box, or -1 if the box is empty
+*/
+int SANSRunWindow::getPeriod(const int key)
 {
-  int nperiods(0);
   QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
   QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
-  bool is_loaded(true);
-  using namespace Mantid::API;
-  if( workspaceExists(workspace_name) )
+
+  if ( ! userentry->text().isEmpty() )
   {
-    Mantid::API::Workspace_sptr wksp = Mantid::API::AnalysisDataService::Instance().retrieve(workspace_name.toStdString()); 
-    if( boost::shared_ptr<WorkspaceGroup> ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(wksp) )
-    {
-      nperiods = ws_group->getNames().size();
-    }
-    else
-    {
-      nperiods = 1;
-    }
-    label->setText("/ " + QString::number(nperiods));
-    userentry->setText("1");
+    return userentry->text().toInt();
   }
   else
   {
-    nperiods = 0;
+    return -1;
+  }
+}
+/** Set number of periods for the given workspace
+* @param key The box this applies to
+* @param num the number of periods there are known to be
+*/
+void SANSRunWindow::setNumberPeriods(const int key, const int num)
+{
+  QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
+  QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
+
+  if (num > 0)
+  {
+    label->setText("/ " + QString::number(num));
+    if (userentry->text().isEmpty())
+    {//default period to analysis is the first one
+      userentry->setText("1");
+    }
+  }
+  else
+  {
     userentry->clear();
     label->setText("/ ??");
-    is_loaded = false;
   }
-  return is_loaded;
 }
-
+/** Blank the periods information in a box
+* @param key The box this applies to
+*/
+void SANSRunWindow::unSetPeriods(const int key)
+{
+  setNumberPeriods(key, -1);
+}
+/** Checks if the workspace is a group and returns the first member of group, throws
+*  if nothing can be retrived
+*  @param[in] workspace the group to examine
+*  @param[in] member entry or period number of the requested workspace, these start at 1
+*  @return the first member of the passed group
+*  @throw NotFoundError if a workspace can't be returned
+*/
+Mantid::API::MatrixWorkspace_sptr SANSRunWindow::getGroupMember(Mantid::API::Workspace_const_sptr in, const int member) const
+{
+  Mantid::API::WorkspaceGroup_const_sptr group =
+    boost::dynamic_pointer_cast<const Mantid::API::WorkspaceGroup>(in);
+  if ( ! group )
+  {
+    throw Mantid::Kernel::Exception::NotFoundError("Problem retrieving workspace ", in->getName());
+  }
+  
+  const std::vector<std::string> &gNames = group->getNames();
+  //currently the names array starts with the name of the group
+  if ( gNames.size() < member + 1 )
+  {
+    throw Mantid::Kernel::Exception::NotFoundError("Workspace group" + in->getName() + " doesn't have " + boost::lexical_cast<std::string>(member) + " entries", member);
+  }
+  //throws NotFoundError if the workspace couldn't be found
+  Mantid::API::Workspace_sptr base = Mantid::API::AnalysisDataService::Instance().retrieve(gNames[member]);
+  Mantid::API::MatrixWorkspace_sptr memberWS =
+    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(base);
+  if ( ! memberWS )
+  {
+    throw Mantid::Kernel::Exception::NotFoundError("Problem getting period number " + boost::lexical_cast<std::string>(member) + " from group workspace " + base->getName(), member);
+  }
+  
+  return memberWS;
+}
 /**
  * Get a properly qualified workspace name for the given key
  */
 QString SANSRunWindow::getWorkspaceName(int key)
 {
-  QString name = m_workspace_names.value(key);
-  if( !name.isEmpty() )
-  {
-    QString period = qobject_cast<QLineEdit*>(m_period_lbls.value(key)->buddy())->text();
-    if( period != "1" )
-    {
-      name += "_" + period;
-    }
-  }
-  return name;
+  return m_workspace_names.value(key);
 }
 
 /**

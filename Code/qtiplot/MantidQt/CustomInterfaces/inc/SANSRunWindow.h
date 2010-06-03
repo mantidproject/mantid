@@ -10,6 +10,7 @@
 #include <QHash>
 #include "Poco/NObserver.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -93,6 +94,7 @@ private:
   void setProcessingState(bool running, int type);
   ///Check for workspace name in the AnalysisDataService
   bool workspaceExists(const QString & ws_name) const;
+  Mantid::API::MatrixWorkspace_sptr getGroupMember(Mantid::API::Workspace_const_sptr in, const int member) const;
   ///Construct a QStringList of the currently loaded workspaces
   QStringList currentWorkspaceList() const;
   ///Is the user file loaded
@@ -109,9 +111,9 @@ private:
   void markError(QLabel* label);
   /// Run an assign command
   bool runAssign(int key, QString & logs);
-  /// Get number of periods
-  bool setNumberPeriods(int key, const QString & workspace_name);
-  /// Get the workspace name for the given lineedit's key
+  int getPeriod(const int key);
+  void setNumberPeriods(const int key, const int num);
+  void unSetPeriods(const int key);
   QString getWorkspaceName(int key);
   /// Handle a delete notification from Mantid
   void handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf);

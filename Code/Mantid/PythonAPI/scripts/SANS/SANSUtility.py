@@ -327,6 +327,25 @@ def StripEndZeroes(workspace, flag_value = 0.0):
         CropWorkspace(workspace,workspace,startX,endX)
 
 ##
+# A small class holds the run number with the workspace name, because the run number is not contained in the workspace at the moment
+##
+class WorkspaceDetails(object):
+
+    def __init__(self, name, run_number):
+        self._name = name
+        self._run_number = int(run_number)
+        
+    def getName(self):
+        return self._name
+        
+    def getRunNumber(self):
+        return self._run_number
+
+    def reset(self):
+        self._name = ""
+        self._run_number = -1
+
+##
 # A small class to collect together run information, used to save passing tuples around
 ##
 class RunDetails(object):
@@ -346,8 +365,8 @@ class RunDetails(object):
 	def getReducedWorkspace(self):
 		return self._finalws
 
-	def setReducedWorkspace(self, final_ws):
-		self._finalws = final_ws
+	def setReducedWorkspace(self, wsName):
+		self._finalws = wsName
 
 	def getTransRaw(self):
 		return self._trans_raw
