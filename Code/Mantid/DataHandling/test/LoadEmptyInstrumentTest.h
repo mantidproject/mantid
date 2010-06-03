@@ -57,6 +57,36 @@ public:
     TS_ASSERT_EQUALS(output->spectraMap().nElements(),683);
   }
 
+  void testExecENGINEX()
+  {
+    LoadEmptyInstrument loaderSLS;
+
+    TS_ASSERT_THROWS_NOTHING(loaderSLS.initialize());
+    TS_ASSERT( loaderSLS.isInitialized() );
+    loaderSLS.setPropertyValue("Filename", "../../../../Test/Instrument/ENGINX_Definition.xml");
+    inputFile = loaderSLS.getPropertyValue("Filename");
+    wsName = "LoadEmptyInstrumentTestEngineX";
+    loaderSLS.setPropertyValue("OutputWorkspace", wsName);
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("Filename") )
+    TS_ASSERT_EQUALS( result, inputFile);
+
+    TS_ASSERT_THROWS_NOTHING( result = loaderSLS.getPropertyValue("OutputWorkspace") )
+    TS_ASSERT( ! result.compare(wsName));
+
+    TS_ASSERT_THROWS_NOTHING(loaderSLS.execute());
+
+    TS_ASSERT( loaderSLS.isExecuted() );
+
+
+    MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    
+    // Check the total number of elements in the map for SLS
+    TS_ASSERT_EQUALS(output->spectraMap().nElements(),2400);
+  }
+
 
   void testParameterTags()
   {
