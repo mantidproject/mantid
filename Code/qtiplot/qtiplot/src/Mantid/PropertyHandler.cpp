@@ -1239,7 +1239,7 @@ void PropertyHandler::plot(Graph* g)const
   {
     m_curve = new FunctionCurve(
       m_fun,
-      QString::fromStdString(m_browser->workspaceName()),
+      QString::fromStdString(m_browser->m_groupMember),//m_browser->workspaceName()),
       m_browser->workspaceIndex(),
       functionName());
     m_curve->setRange(m_browser->startX(),m_browser->endX());

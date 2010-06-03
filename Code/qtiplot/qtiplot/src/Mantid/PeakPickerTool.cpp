@@ -571,14 +571,35 @@ void PeakPickerTool::workspaceIndexChanged(int i)
 }
 
 /**
- * Slot. Called when the workspace name is changed in the FitBrowser
- * @param wsName The new workspace name.
- */
+  * Slot. Called when the workspace name is changed in the FitBrowser.
+  * It doesn't allow changing the workspace name unless it is a name of
+  * the workspace group containing m_wsName
+  * @param wsName The new workspace name.
+  */
 void PeakPickerTool::workspaceNameChanged(const QString& wsName)
 {
   if (wsName != m_wsName)
   {
-    fitBrowser()->setWorkspaceName(m_wsName);
+    Mantid::API::Workspace_sptr ws = m_mantidUI->getWorkspace(wsName);
+    Mantid::API::WorkspaceGroup_sptr wsg = 
+      boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    if (wsg)
+    {
+      std::vector<std::string> names = wsg->getNames();
+      for(int i=0;i<names.size();++i)
+      {
+        if (names[i] == m_wsName.toStdString()) 
+        {// accept the new name
+          return;
+        }
+      }
+      // reject the new name
+      fitBrowser()->setWorkspaceName(m_wsName);
+    }
+    else
+    {// reject the new name
+      fitBrowser()->setWorkspaceName(m_wsName);
+    }
   }
 }
 

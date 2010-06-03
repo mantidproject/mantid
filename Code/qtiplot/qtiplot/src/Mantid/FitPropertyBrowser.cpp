@@ -7,6 +7,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/IConstraint.h"
@@ -33,6 +34,8 @@
 #include <QApplication>
 #include <QClipboard>
 
+#include <algorithm>
+
 /**
  * Constructor
  * @param parent The parent widget - must be an ApplicationWindow
@@ -48,7 +51,8 @@ m_changeSlotsEnabled(false),
 m_peakToolOn(false),
 m_auto_back(false),
 m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("CurveFitting.AutoBackground"))),
-m_autoBackground(NULL)
+m_autoBackground(NULL),
+m_logValue(NULL)
 {
   if (m_autoBgName.toLower() == "none")
   {
@@ -60,7 +64,7 @@ m_autoBackground(NULL)
     std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
     if( !libpath.empty() )
     {
-      int loaded = Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
+      Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(libpath);
     }
     setAutoBackgroundName(m_autoBgName);
   }
@@ -278,10 +282,10 @@ void FitPropertyBrowser::popupMenu(const QPoint &)
   bool isFunction = getHandler()->findFunction(ci) != NULL;
   bool isCompositeFunction = isFunction && getHandler()->findCompositeFunction(ci);
 
-  if (!isFunction)
-  {
-    const Mantid::API::IFunction* h = getHandler()->findFunction(ci);
-  }
+  //if (!isFunction)
+  //{
+  //  const Mantid::API::IFunction* h = getHandler()->findFunction(ci);
+  //}
 
   PropertyHandler* h = getHandler()->findHandler(ci->property());
 
@@ -551,6 +555,10 @@ void FitPropertyBrowser::setWorkspaceName(const QString& wsName)
   {
     m_enumManager->setValue(m_workspace,i);
   }
+  if (!isWorkspaceAGroup())
+  {
+    m_groupMember = wsName.toStdString();
+  }
 }
 
 /// Get workspace index
@@ -602,7 +610,23 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
   {
     if (m_guessOutputName)
     {
-      m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()));
+      if (isWorkspaceAGroup())
+      {
+        m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()+"_params"));
+      }
+      else
+      {
+        m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()));
+      }
+    }
+    if (isWorkspaceAGroup())
+    {
+      setLogValue();
+    }
+    else
+    {
+      m_groupMember = workspaceName();
+      removeLogValue();
     }
     emit workspaceNameChanged(QString::fromStdString(workspaceName()));
   }
@@ -857,7 +881,7 @@ void FitPropertyBrowser::populateFunctionNames()
     boost::shared_ptr<Mantid::API::IFunction> f = Mantid::API::FunctionFactory::Instance().create(fnName);
     f->initialize();
     Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(f.get());
-    Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
+    //Mantid::API::CompositeFunction* cf = dynamic_cast<Mantid::API::CompositeFunction*>(f.get());
     if (pf)
     {
       m_registeredPeaks << qfnName;
@@ -923,29 +947,50 @@ void FitPropertyBrowser::fit()
     }
     m_btnUnFit->setEnabled(true);
 
-    bool simpleFunction;
-    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace",wsName);
-    alg->setProperty("WorkspaceIndex",workspaceIndex());
-    alg->setProperty("StartX",startX());
-    alg->setProperty("EndX",endX());
-    alg->setPropertyValue("Output",outputName());
+    std::string funStr;
     if (m_compositeFunction->nFunctions() > 1)
     {
-      alg->setPropertyValue("Function",*m_compositeFunction);
-      simpleFunction = false;
+      funStr = *m_compositeFunction;
     }
     else
     {
-      alg->setPropertyValue("Function",*(m_compositeFunction->getFunction(0)));
-      simpleFunction = true;
+      funStr = *(m_compositeFunction->getFunction(0));
     }
-    alg->setPropertyValue("Minimizer",minimizer());
-    alg->setPropertyValue("CostFunction",costFunction());
 
-    observeFinish(alg);
-    alg->executeAsync();
+    if (isWorkspaceAGroup())
+    {
+      Mantid::API::IAlgorithm_sptr alg = 
+        Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
+      alg->initialize();
+      alg->setPropertyValue("InputWorkspace",wsName);
+      alg->setProperty("WorkspaceIndex",workspaceIndex());
+      alg->setProperty("StartX",startX());
+      alg->setProperty("EndX",endX());
+      alg->setPropertyValue("OutputWorkspace",outputName());
+      alg->setPropertyValue("Function",funStr);
+      alg->setPropertyValue("LogValue",getLogValue());
+      //alg->setPropertyValue("Minimizer",minimizer());
+      //alg->setPropertyValue("CostFunction",costFunction());
+
+      observeFinish(alg);
+      alg->executeAsync();
+    }
+    else
+    {
+      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
+      alg->initialize();
+      alg->setPropertyValue("InputWorkspace",wsName);
+      alg->setProperty("WorkspaceIndex",workspaceIndex());
+      alg->setProperty("StartX",startX());
+      alg->setProperty("EndX",endX());
+      alg->setPropertyValue("Output",outputName());
+      alg->setPropertyValue("Function",funStr);
+      alg->setPropertyValue("Minimizer",minimizer());
+      alg->setPropertyValue("CostFunction",costFunction());
+
+      observeFinish(alg);
+      alg->executeAsync();
+    }
   }
   catch(std::exception& e)
   {
@@ -958,7 +1003,10 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm* alg)
 {
   std::string out = alg->getProperty("OutputWorkspace");
   getFitResults();
-  emit algorithmFinished(QString::fromStdString(out));
+  if (!isWorkspaceAGroup())
+  {
+    emit algorithmFinished(QString::fromStdString(out));
+  }
 }
 
 /// Get and store available workspace names
@@ -1021,12 +1069,53 @@ void FitPropertyBrowser::init()
     this,SLOT(workspace_removed(const QString &)));
 }
 
-/** Check if the workspace can be used in the fit
- * @param ws The workspace
- */
+/** Check if the workspace can be used in the fit. The accepted types are
+  * MatrixWorkspaces and WorkspaceGroups of same size MatrixWorkspaces
+  * @param ws The workspace
+  */
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
 {
-  return dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0;
+  if (dynamic_cast<Mantid::API::MatrixWorkspace*>(ws.get()) != 0)
+  {
+    return true;
+  }
+  Mantid::API::WorkspaceGroup* wsg = dynamic_cast<Mantid::API::WorkspaceGroup*>(ws.get());
+  if (wsg != 0)
+  {
+    int nBins = -1;
+    int nSpec = -1;
+    std::vector<std::string> wsNames = wsg->getNames();
+    for(int i=0;i<wsNames.size();++i)
+    {
+      std::string name = wsNames[i];
+      if (name == wsg->getName()) continue;
+      Mantid::API::Workspace_sptr ws = 
+           m_appWindow->mantidUI->getWorkspace(QString::fromStdString(name));
+      Mantid::API::MatrixWorkspace_sptr mws = 
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+      if (!ws) continue;
+      if (!mws) return false;
+      if ( nBins < 0 || nSpec < 0 )
+      {
+        nBins = mws->blocksize();
+        nSpec = mws->getNumberHistograms();
+      }
+      else
+      {
+        if (nBins != mws->blocksize()) return false;
+        if (nSpec != mws->getNumberHistograms()) return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+bool FitPropertyBrowser::isWorkspaceAGroup()const
+{
+  Mantid::API::Workspace_sptr ws = 
+    m_appWindow->mantidUI->getWorkspace(QString::fromStdString(workspaceName()));
+  return dynamic_cast<Mantid::API::WorkspaceGroup*>(ws.get()) != 0;
 }
 
 /// Is the current function a peak?
@@ -1127,33 +1216,60 @@ void FitPropertyBrowser::clearBrowser()
 /// Set the parameters to the fit outcome
 void FitPropertyBrowser::getFitResults()
 {
-  std::string wsName = outputName() + "_Parameters";
-  Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
-
-  if (ws)
+  if (isWorkspaceAGroup())
   {
-    try
+    std::string wsName = outputName();
+    Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+    if (ws)
     {
-      Mantid::API::TableRow row = ws->getFirstRow();
-      do
+      if ((ws->columnCount() - 1)/2 != compositeFunction()->nParams()) return;
+      Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()) );
+      std::vector<std::string> names = wsg->getNames();
+      std::vector<std::string>::iterator it = 
+        std::find(names.begin(),names.end(),m_groupMember);
+      if (it == names.end()) return;
+      int row = int(it - names.begin()) - 1;// take into account the group name
+      if (row >= ws->rowCount()) return;
+      for(int i=0;i<compositeFunction()->nParams();++i)
       {
-        std::string name;
-        double value;
-        row >> name >> value;
-        // In case of a single function Fit doesn't create a CompositeFunction
-        if (count() == 1)
-        {
-          name.insert(0,"f0.");
-        }
-        compositeFunction()->setParameter(name,value);
+        compositeFunction()->setParameter(i,ws->Double(row,2*i+1));
       }
-      while(row.next());
       updateParameters();
+      plotGuessAll();
     }
-    catch(...)
+  }
+  else
+  {
+    std::string wsName = outputName() + "_Parameters";
+    Mantid::API::ITableWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+
+    if (ws)
     {
-      // do nothing
+      try
+      {
+        Mantid::API::TableRow row = ws->getFirstRow();
+        do
+        {
+          std::string name;
+          double value;
+          row >> name >> value;
+          // In case of a single function Fit doesn't create a CompositeFunction
+          if (count() == 1)
+          {
+            name.insert(0,"f0.");
+          }
+          compositeFunction()->setParameter(name,value);
+        }
+        while(row.next());
+        updateParameters();
+      }
+      catch(...)
+      {
+        // do nothing
+      }
     }
   }
 }
@@ -1674,5 +1790,95 @@ void FitPropertyBrowser::setAutoBackgroundName(const QString& aName)
   catch(...)
   {
     m_auto_back = false;
+  }
+}
+
+/// Set LogValue for PlotPeakByLogValue
+void FitPropertyBrowser::setLogValue(const QString& lv)
+{
+  if (isWorkspaceAGroup())
+  {
+    validateGroupMember();
+    if (!m_logValue)
+    {
+      m_logValue = m_enumManager->addProperty("LogValue");
+      m_settingsGroup->property()->addSubProperty(m_logValue);
+    }
+    m_logs.clear();
+    m_logs << "";
+    if (!m_groupMember.empty())
+    {
+      Mantid::API::MatrixWorkspace_sptr ws = 
+        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve(m_groupMember)
+        );
+      if (ws)
+      {
+        const std::vector<Mantid::Kernel::Property*> logs = ws->sample().getLogData();
+        for(int i=0;i<logs.size();++i)
+        {
+          m_logs << QString::fromStdString(logs[i]->name());
+        }
+      }
+    }
+    m_enumManager->setEnumNames(m_logValue,m_logs);
+    int i = m_logs.indexOf(lv);
+    if (i < 0) i = 0;
+    m_enumManager->setValue(m_logValue,i);
+  }
+}
+
+std::string FitPropertyBrowser::getLogValue()const
+{
+  if (isWorkspaceAGroup() && m_logValue)
+  {
+    int i = m_enumManager->value(m_logValue);
+    if (i < m_logs.size()) return m_logs[i];
+  }
+  return "";
+}
+
+/// Remove LogValue from the browser
+void FitPropertyBrowser::removeLogValue()
+{
+  if (isWorkspaceAGroup()) return;
+  m_settingsGroup->property()->removeSubProperty(m_logValue);
+  m_logValue = NULL;
+}
+
+void FitPropertyBrowser::validateGroupMember()
+{
+  std::string wsName = workspaceName();
+  Mantid::API::WorkspaceGroup_sptr wsg = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+    Mantid::API::AnalysisDataService::Instance().retrieve(wsName) );
+  if (!wsg)
+  {
+    m_groupMember = workspaceName();
+    return;
+  }
+  std::vector<std::string> names = wsg->getNames();
+  if (names.empty())
+  {
+    m_groupMember = "";
+    return;
+  }
+  if (std::find(names.begin(),names.end(),m_groupMember) != names.end())
+  {
+    return;
+  }
+  if (names[0] == wsName)
+  {
+    if (names.size() > 1)
+    {
+      m_groupMember = names[1];
+    }
+    else
+    {
+      m_groupMember = "";
+    }
+  }
+  else
+  {
+    m_groupMember = names[0];
   }
 }

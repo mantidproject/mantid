@@ -116,6 +116,13 @@ public:
   /// Set the end X
   void setEndX(double);
 
+  /// Set LogValue for PlotPeakByLogValue
+  void setLogValue(const QString& lv = "");
+  /// Get LogValue
+  std::string getLogValue()const;
+  /// Remove LogValue from the browser
+  void removeLogValue();
+
   /// Return a list of registered functions
   const QStringList& registeredFunctions()const{return m_registeredFunctions;}
   /// Return a list of registered peaks
@@ -220,6 +227,8 @@ private:
   void populateFunctionNames();
   /// Check if the workspace can be used in the fit
   bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
+  /// Check if the input workspace is a group
+  bool isWorkspaceAGroup()const;
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm* alg);
   /// Find QtBrowserItem for a property prop among the chidren of 
@@ -243,6 +252,9 @@ private:
   void hasConstraints(QtProperty* parProp,bool& hasTie,bool& hasBounds)const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty* getTieProperty(QtProperty* parProp)const;
+
+  /// Make sure m_groupMember belongs to the group
+  void validateGroupMember();
 
   /// Button for doing fit
   QPushButton* m_btnFit;
@@ -279,6 +291,7 @@ private:
   QtProperty *m_output;
   QtProperty *m_minimizer;
   QtProperty *m_costFunction;
+  QtProperty *m_logValue;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;
@@ -323,6 +336,13 @@ private:
 
   /// The autobackground handler
   PropertyHandler* m_autoBackground;
+
+  /// if isWorkspaceAGroup() is true m_groupMember keeps name of the MatrixWorkspace
+  /// fitted with theFunction() 
+  std::string m_groupMember;
+
+  /// Log names
+  QStringList m_logs;
 
   friend class PropertyHandler;
   friend class CreateAttributeProperty;

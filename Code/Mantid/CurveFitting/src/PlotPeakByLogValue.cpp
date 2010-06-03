@@ -33,11 +33,20 @@ namespace Mantid
     */
     void PlotPeakByLogValue::init()
     {
-      declareProperty(new WorkspaceProperty<WorkspaceGroup>("InputWorkspace","",Direction::Input));
-      declareProperty("WorkspaceIndex", 0, Direction::Input);
+      declareProperty(new WorkspaceProperty<WorkspaceGroup>("InputWorkspace","",Direction::Input),
+        "Name of the input workspace group");
+      declareProperty("WorkspaceIndex", 0, "The index of a spectrum to be fitted in"
+        " each workspace of the input workspace group");
       declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output));
-      declareProperty("Function","",new MandatoryValidator<std::string>());
-      declareProperty("LogValue","");
+      declareProperty("Function","",new MandatoryValidator<std::string>(),
+        "The fitting function, common for all workspaces");
+      declareProperty("LogValue","","Name of the log value to plot the parameters against");
+      declareProperty("StartX", EMPTY_DBL(),
+        "A value of x in, or on the low x boundary of, the first bin to include in\n"
+        "the fit (default lowest value of x)" );
+      declareProperty("EndX", EMPTY_DBL(),
+        "A value in, or on the high x boundary of, the last bin the fitting range\n"
+        "(default the highest value of x)" );
     }
 
     /** 
@@ -100,6 +109,8 @@ namespace Mantid
         fit->setProperty("InputWorkspace",ws);
         fit->setProperty("WorkspaceIndex",wi);
         fit->setPropertyValue("Function",fun);
+        fit->setPropertyValue("StartX",getPropertyValue("StartX"));
+        fit->setPropertyValue("EndX",getPropertyValue("EndX"));
         fit->execute();
 
         // Extract the fitted parameters and put them into the result table
