@@ -32,8 +32,6 @@ namespace Mantid
 
     /// Empty default constructor
     LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus()
-      //m_filename(), m_entrynumber(0), m_numberOfSpectra(0), m_numberOfPeriods(0), m_list(false),
-      //m_interval(false), m_spec_list(), m_spec_min(0), m_spec_max(EMPTY_INT())
     {}
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -48,7 +46,7 @@ namespace Mantid
       NXRoot root(getPropertyValue("Filename"));
 
       int iEntry = getProperty("EntryNumber");
-      if (iEntry >= root.groups().size())
+      if (iEntry >= static_cast<int>(root.groups().size()) )
       {
         throw std::invalid_argument("EntryNumber is out of range");
       }
@@ -96,7 +94,7 @@ namespace Mantid
 
       std::string detectorName;
       // Only the first NXdata found
-      for(int i=0;i<entry.groups().size();i++)
+      for(unsigned int i=0; i< entry.groups().size(); i++)
       {
         std::string className = entry.groups()[i].nxclass;
         if (className == "NXdata")
@@ -236,41 +234,41 @@ namespace Mantid
     //  delete[] timeChannels;
     }
 
-    /// Validates the optional 'spectra to read' properties, if they have been set
-    void LoadMuonNexus2::checkOptionalProperties()
-    {
-      //read in the settings passed to the algorithm
-      m_spec_list = getProperty("SpectrumList");
-      m_spec_max = getProperty("SpectrumMax");
-      //Are we using a list of spectra or all the spectra in a range?
-      m_list = !m_spec_list.empty();
-      m_interval = (m_spec_max != EMPTY_INT());
-      if ( m_spec_max == EMPTY_INT() ) m_spec_max = 0;
-
-      // Check validity of spectra range, if set
-      if ( m_interval )
-      {
-        m_spec_min = getProperty("SpectrumMin");
-        if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
-        {
-          g_log.error("Invalid Spectrum min/max properties");
-          throw std::invalid_argument("Inconsistent properties defined"); 
-        }
-      }
-
-      // Check validity of spectra list property, if set
-      if ( m_list )
-      {
-        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
-        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
-        if ( maxlist > m_numberOfSpectra || minlist == 0)
-        {
-          g_log.error("Invalid list of spectra");
-          throw std::invalid_argument("Inconsistent properties defined"); 
-        } 
-      }
-
-    }
+//    /// Validates the optional 'spectra to read' properties, if they have been set
+//    void LoadMuonNexus2::checkOptionalProperties()
+//    {
+//      //read in the settings passed to the algorithm
+//      m_spec_list = getProperty("SpectrumList");
+//      m_spec_max = getProperty("SpectrumMax");
+//      //Are we using a list of spectra or all the spectra in a range?
+//      m_list = !m_spec_list.empty();
+//      m_interval = (m_spec_max != EMPTY_INT());
+//      if ( m_spec_max == EMPTY_INT() ) m_spec_max = 0;
+//
+//      // Check validity of spectra range, if set
+//      if ( m_interval )
+//      {
+//        m_spec_min = getProperty("SpectrumMin");
+//        if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
+//        {
+//          g_log.error("Invalid Spectrum min/max properties");
+//          throw std::invalid_argument("Inconsistent properties defined"); 
+//        }
+//      }
+//
+//      // Check validity of spectra list property, if set
+//      if ( m_list )
+//      {
+//        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+//        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+//        if ( maxlist > m_numberOfSpectra || minlist == 0)
+//        {
+//          g_log.error("Invalid list of spectra");
+//          throw std::invalid_argument("Inconsistent properties defined"); 
+//        } 
+//      }
+//
+//    }
 
     /** loadData
      *  Load the counts data from an NXInt into a workspace
@@ -282,10 +280,12 @@ namespace Mantid
       MantidVec& Y = localWorkspace->dataY(wsIndex);
       MantidVec& E = localWorkspace->dataE(wsIndex);
       int nBins = counts.dim2();
-      assert(nBins+1 == timeBins.size());
+      assert( nBins+1 == static_cast<int>(timeBins.size()) );
       X.assign(timeBins.begin(),timeBins.end());
       int *data = &counts(period,spec,0);
       Y.assign(data,data+nBins);
+      typedef double (*uf)(double);
+      uf dblSqrt = std::sqrt;
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
     }
 
@@ -363,11 +363,6 @@ namespace Mantid
 
       ws->populateInstrumentParameters();
     }
-
-    double LoadMuonNexus2::dblSqrt(double in)
-    {
-      return sqrt(in);
-    }
-
+    
   } // namespace DataHandling
 } // namespace Mantid

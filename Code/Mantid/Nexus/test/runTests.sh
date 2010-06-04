@@ -27,7 +27,7 @@ python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-mantid_libpath=../../Bin/Shared
+mantid_libpath=../../debug
 g++ -O0 -g3 -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I../../API/inc \
     -I../../DataObjects/inc -I../../DataHandling/inc -I ../inc -I ../../../Third_Party/src/cxxtest \
     -L$mantid_libpath -lMantidNexus -lMantidKernel -lMantidGeometry -lMantidAPI -lMantidDataObjects -lMantidDataHandling

@@ -396,7 +396,6 @@ namespace Mantid
       // Check validity of spectra list property, if set
       if ( m_list )
       {
-        m_list = true;
         const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
         const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
         if ( maxlist > m_numberOfSpectra || minlist == 0)
@@ -409,7 +408,6 @@ namespace Mantid
       // Check validity of spectra range, if set
       if ( m_interval )
       {
-        m_interval = true;
         m_spec_min = getProperty("SpectrumMin");
         if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
         {
@@ -428,7 +426,7 @@ namespace Mantid
     *  @param localWorkspace A pointer to the workspace in which the data will be stored
     */
     void LoadMuonNexus::loadData(const DataObjects::Histogram1D::RCtype::ptr_type& tcbs,int hist, int& i,
-      MuonNexusReader& nxload, const int& lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
+      MuonNexusReader& nxload, const int lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum
       // Put it into a vector, discarding the 1st entry, which is rubbish
@@ -438,6 +436,8 @@ namespace Mantid
       Y.assign(nxload.counts + i * lengthIn, nxload.counts + i * lengthIn + lengthIn);
       // Create and fill another vector for the errors, containing sqrt(count)
       MantidVec& E = localWorkspace->dataE(hist);
+      typedef double (*uf)(double);
+      uf dblSqrt = std::sqrt;
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
@@ -571,11 +571,6 @@ namespace Mantid
       }
 
 
-    }
-
-    double LoadMuonNexus::dblSqrt(double in)
-    {
-      return sqrt(in);
     }
 
   } // namespace DataHandling

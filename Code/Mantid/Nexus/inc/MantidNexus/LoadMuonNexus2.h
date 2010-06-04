@@ -4,12 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Sample.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidNexus/LoadMuonNexus.h"
-
-#include <climits>
 
 namespace Mantid
 {
@@ -21,8 +16,7 @@ namespace Mantid
     typedef NXDataSetTyped<int> NXInt;
     class NXEntry;
 
-    /** @class LoadMuonNexus LoadMuonNexus.h NeXus/LoadMuonNexus.h
-
+    /**
     Loads an file in Nexus Muon format and stores it in a 2D workspace 
     (Workspace2D class). LoadMuonNexus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
@@ -44,9 +38,7 @@ namespace Mantid
     <LI> auto_group - Determines whether the spectra are automatically grouped together based on the groupings in the NeXus file. </LI>
     </UL>
 
-    Based on LoadRaw by Russell Taylor, Tessella Support Services plc
-
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -80,47 +72,15 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling"; }
 
-    protected:
-
+    private:
       /// Overwrites Algorithm method
       void exec();
-
-    private:
-      void checkOptionalProperties();
+      
+      //void checkOptionalProperties();
       void loadData(const NXInt& counts,const std::vector<double>& timeBins,int wsIndex,
-        int period,int spec,API::MatrixWorkspace_sptr localWorkspace);
+                    int period,int spec,API::MatrixWorkspace_sptr localWorkspace);
       void runLoadInstrument(API::MatrixWorkspace_sptr localWorkspace);
       void loadLogs(API::MatrixWorkspace_sptr ws, NXEntry & entry,int period);
-
-      /// The name and path of the input file
-      std::string m_filename;
-      /// The instrument name from Nexus
-      std::string m_instrument_name;
-      /// The sample name read from Nexus
-      std::string m_samplename;
-
-      /// The number of the input entry
-      int m_entrynumber;
-
-      /// The number of spectra in the raw file
-      int m_numberOfSpectra;
-      /// The number of periods in the raw file
-      int m_numberOfPeriods;
-      /// Has the spectrum_list property been set?
-      bool m_list;
-      /// Have the spectrum_min/max properties been set?
-      bool m_interval;
-      /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
-      /// The value of the spectrum_min property
-      int m_spec_min;
-      /// The value of the spectrum_max property
-      int m_spec_max;
-      /// The group which each detector belongs to in order
-      std::vector<int> m_groupings;
-
-      /// Personal wrapper for sqrt to allow msvs to compile
-      static double dblSqrt(double in);
     };
 
   } // namespace NeXus

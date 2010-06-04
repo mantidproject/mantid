@@ -5,15 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Sample.h"
-#include "MantidNexus/MuonNexusReader.h"
-#include <climits>
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-//class MuonNexusReader;
+class MuonNexusReader;
 
 namespace Mantid
 {
@@ -42,9 +39,7 @@ namespace Mantid
     <LI> auto_group - Determines whether the spectra are automatically grouped together based on the groupings in the NeXus file. </LI>
     </UL>
     
-    Based on LoadRaw by Russell Taylor, Tessella Support Services plc
-
-    Copyright &copy; 2007-9 STFC Rutherford Appleton Laboratory
+    Copyright &copy; 2007-2010 STFC Rutherford Appleton Laboratory
 
     This file is part of Mantid.
 
@@ -79,26 +74,19 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling"; }
       
     protected:
-      /// Overwrites Algorithm method.
-      void init();
       /// Overwrites Algorithm method
       void exec();
-    private:
+      
       void checkOptionalProperties();
-      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int&, DataObjects::Workspace2D_sptr );
-      void runLoadInstrument(DataObjects::Workspace2D_sptr);
-      void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
-      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
-      void runLoadLog(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file
       std::string m_filename;
       /// The instrument name from Nexus
       std::string m_instrument_name;
-	  /// The sample name read from Nexus
-	  std::string m_samplename;
+      /// The sample name read from Nexus
+      std::string m_samplename;
 
-	   /// The number of the input entry
+      /// The number of the input entry
       int m_entrynumber;
      
       /// The number of spectra in the raw file
@@ -118,11 +106,15 @@ namespace Mantid
       /// The group which each detector belongs to in order
       std::vector<int> m_groupings;
 
-      ///a flag int value that indicates a value that wasn't set
-      static const int unSetInt = INT_MAX-15;
-
-      /// Personal wrapper for sqrt to allow msvs to compile
-			static double dblSqrt(double in);
+    private:
+      /// Overwrites Algorithm method.
+      void init();
+      
+      void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int, DataObjects::Workspace2D_sptr );
+      void runLoadInstrument(DataObjects::Workspace2D_sptr);
+      void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
+      void runLoadMappingTable(DataObjects::Workspace2D_sptr);
+      void runLoadLog(DataObjects::Workspace2D_sptr);
     };
 
   } // namespace NeXus
