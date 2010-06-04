@@ -710,7 +710,69 @@ void ConfigDialog::initMantidPage()
 
   connect( button, SIGNAL(clicked()), this, SLOT(addDefaultSaveDir()) );
 
-  grid->setRowStretch(2,1);
+  /// pythonscripts.directories
+
+  label = new QLabel(tr("Python scripts"));
+	grid->addWidget(label, 2, 0);
+
+  str = Mantid::Kernel::ConfigService::Instance().getString("pythonscripts.directories");
+	lePythonScriptsDirs = new QLineEdit();
+  lePythonScriptsDirs->setText(QString::fromStdString(str));
+	grid->addWidget(lePythonScriptsDirs, 2, 1);
+
+	button = new QPushButton();
+	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	grid->addWidget(button, 2, 2);
+
+  connect( button, SIGNAL(clicked()), this, SLOT(addPythonScriptsDirs()) );
+
+  /// pythonscripts.directories
+
+  label = new QLabel(tr("Python algorithms"));
+	grid->addWidget(label, 3, 0);
+
+  str = Mantid::Kernel::ConfigService::Instance().getString("pythonalgorithms.directories");
+	lePythonAlgorithmsDirs = new QLineEdit();
+  lePythonAlgorithmsDirs->setText(QString::fromStdString(str));
+	grid->addWidget(lePythonAlgorithmsDirs, 3, 1);
+
+	button = new QPushButton();
+	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	grid->addWidget(button, 3, 2);
+
+  connect( button, SIGNAL(clicked()), this, SLOT(addPythonAlgorithmsDirs()) );
+
+  /// instrumentDefinition.directory
+  label = new QLabel(tr("Instrument definitions"));
+	grid->addWidget(label, 4, 0);
+
+  str = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
+	leInstrumentDir = new QLineEdit();
+  leInstrumentDir->setText(QString::fromStdString(str));
+	grid->addWidget(leInstrumentDir, 4, 1);
+
+	button = new QPushButton();
+	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	grid->addWidget(button, 4, 2);
+
+  connect( button, SIGNAL(clicked()), this, SLOT(addInstrumentDir()) );
+
+  /// parameterDefinition.directory
+  label = new QLabel(tr("Instrument definitions"));
+	grid->addWidget(label, 5, 0);
+
+  str = Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory");
+	leParameterDir = new QLineEdit();
+  leParameterDir->setText(QString::fromStdString(str));
+	grid->addWidget(leParameterDir, 5, 1);
+
+	button = new QPushButton();
+	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
+	grid->addWidget(button, 5, 2);
+
+  connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
+
+  grid->setRowStretch(6,1);
 }
 
 void ConfigDialog::initOptionsPage()
@@ -1533,6 +1595,23 @@ void ConfigDialog::apply()
   setting = leDefaultSaveDir->text();
   setting.replace('\\','/');
   mantid_config.setString("defaultsave.directory",setting.toStdString());
+
+  setting = lePythonScriptsDirs->text();
+  setting.replace('\\','/');
+  mantid_config.setString("pythonscripts.directories",setting.toStdString());
+
+  setting = lePythonAlgorithmsDirs->text();
+  setting.replace('\\','/');
+  mantid_config.setString("pythonalgorithms.directories",setting.toStdString());
+
+  setting = leInstrumentDir->text();
+  setting.replace('\\','/');
+  mantid_config.setString("instrumentDefinition.directory",setting.toStdString());
+
+  setting = leParameterDir->text();
+  setting.replace('\\','/');
+  mantid_config.setString("parameterDefinition.directory",setting.toStdString());
+
 	try
 	{
 	  mantid_config.saveConfig(mantid_config.getUserFilename());
@@ -1858,5 +1937,57 @@ void ConfigDialog::addDefaultSaveDir()
   if (!dir.isEmpty())
   {
     leDefaultSaveDir->setText(dir);
+  }
+}
+
+void ConfigDialog::addPythonScriptsDirs()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Add a python scripts directory"),
+			"", 0/*!QFileDialog::ShowDirsOnly*/);
+  if (!dir.isEmpty())
+  {
+    QString dirs = lePythonScriptsDirs->text();
+    if (!dirs.isEmpty())
+    {
+      dirs += ";";
+    }
+    dirs += dir;
+    lePythonScriptsDirs->setText(dirs);
+  }
+}
+
+void ConfigDialog::addPythonAlgorithmsDirs()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Add a python algorithms directory"),
+			"", 0/*!QFileDialog::ShowDirsOnly*/);
+  if (!dir.isEmpty())
+  {
+    QString dirs = lePythonAlgorithmsDirs->text();
+    if (!dirs.isEmpty())
+    {
+      dirs += ";";
+    }
+    dirs += dir;
+    lePythonAlgorithmsDirs->setText(dirs);
+  }
+}
+
+void ConfigDialog::addInstrumentDir()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Select new instrument definition directory"),
+			"", 0);
+  if (!dir.isEmpty())
+  {
+    leInstrumentDir->setText(dir);
+  }
+}
+
+void ConfigDialog::addParameterDir()
+{
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Select new parameter definition directory"),
+			"", 0);
+  if (!dir.isEmpty())
+  {
+    leParameterDir->setText(dir);
   }
 }

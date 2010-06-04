@@ -108,6 +108,10 @@ private slots:
   void updateDefInstrList();
   void addDataSearchDirs();
   void addDefaultSaveDir();
+  void addPythonScriptsDirs();
+  void addPythonAlgorithmsDirs();
+  void addInstrumentDir();
+  void addParameterDir();
 
 private:
 	void initPlotsPage();
@@ -146,6 +150,10 @@ private:
   QWidget *directoriesPage;
   QLineEdit* leDataSearchDirs;///< datasearch.directories
   QLineEdit* leDefaultSaveDir;///< defaultsave.directory
+  QLineEdit* lePythonScriptsDirs;///< pythonscripts.directories
+  QLineEdit* lePythonAlgorithmsDirs;///< pythonalgorithms.directories
+  QLineEdit* leInstrumentDir;///< instrumentDefinition.directory
+  QLineEdit* leParameterDir;///< parameterDefinition.directory
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
