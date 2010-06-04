@@ -3,6 +3,7 @@
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FileProperty.h"
+#include "MantidKernel/System.h"
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadEventPreNeXus)
@@ -22,9 +23,6 @@ static const string PID_MAX_PARAM("Spectrum Max");
 static const string PID_PARAM("Spectrum List");
 static const string PERIOD_PARAM("Period List");
 static const string OUT_PARAM("OutputWorkspace");
-
-///a flag int value to indicate that the value wasn't set by users
-static const int unSetInt = INT_MAX-15;
 
 static Property * createLoadProperty(const string name, const string ext)
 {
@@ -57,7 +55,7 @@ void LoadEventPreNeXus::init()
   mustBePositive->setLower(1);
   this->declareProperty(PID_MIN_PARAM, 1, mustBePositive,
       "The index number of the first spectrum to read. Only used if the spectrum max is set.");
-  this->declareProperty(PID_MAX_PARAM, unSetInt, mustBePositive->clone(),
+  this->declareProperty(PID_MAX_PARAM, Mantid::EMPTY_INT(), mustBePositive->clone(),
       "The index number of the last spectrum to read. Used only if specifed");
   this->declareProperty(new ArrayProperty<int>(PID_PARAM),
       "A comma separated list of individual spectra to read. Only used if set.");
