@@ -10,6 +10,9 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "boost/date_time/posix_time/posix_time.hpp"
+
+using boost::posix_time::ptime;
 
 namespace Mantid
 {
@@ -49,6 +52,11 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /// Destructor
   virtual ~EventWorkspace();
 
+  /** Initialize the pixels */
+  void init(const int&, const int&, const int&);
+
+  //------------------------------------------------------------
+
   /// Returns the number of single indexable items in the workspace
   int size() const;
 
@@ -57,6 +65,8 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
 
   /** Get the number of histograms. aka the number of pixels or detectors. */
   const int getNumberHistograms() const;
+
+  //------------------------------------------------------------
 
   /** Return the data X vector at a given pixel. */
   MantidVec& dataX(const int);
@@ -81,18 +91,25 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Get a pointer to the x data */
   Kernel::cow_ptr<MantidVec> refX(const int) const;
 
+  //------------------------------------------------------------
+
   /** Set the x-axis data for the given pixel. */
   void setX(const int, const  Kernel::cow_ptr<MantidVec> &);
 
   /** Set the x-axis data (histogram bins) for all pixels */
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
-  /** Initialize the pixels */
-  void init(const int&, const int&, const int&);
-
-
   /** Get an EventList object at the given pixel number */
   EventList& getEventList(const int index);
+
+  //------------------------------------------------------------
+  /** Get the absolute time corresponding to the give frame ID */
+  ptime getTime(const size_t frameId);
+
+  /** Add ahe absolute time corresponding to the give frame ID */
+  void addTime(const size_t frameId, ptime absoluteTime);
+
+
 
 private:
   /// NO COPY ALLOWED
@@ -109,6 +126,9 @@ private:
 
   /// The number of vectors in the workspace
   int m_noVectors;
+
+  /// Vector where the index is the frameId and the value is the corresponding time, in Posix timing.
+  std::vector<ptime> frameTime;
 };
 
 ///shared pointer to the EventWorkspace class

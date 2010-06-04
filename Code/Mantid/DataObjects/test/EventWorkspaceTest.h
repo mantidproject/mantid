@@ -11,6 +11,8 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "boost/date_time/gregorian/gregorian.hpp"
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -23,11 +25,8 @@ using std::size_t;
 using std::vector;
 using std::cout;
 using std::endl;
+using namespace boost::posix_time;
 
-const int NUMPIXELS = 500;
-const int NUMBINS = 1001;
-const int NUMEVENTS = 100;
-const double BIN_DELTA = 1e3;
 
 
 //==========================================================================================
@@ -35,10 +34,16 @@ class EventWorkspaceTest : public CxxTest::TestSuite
 {
 private:
   EventWorkspace_sptr ew;
+  int NUMPIXELS, NUMBINS, NUMEVENTS, BIN_DELTA;
 
 public:
+
   EventWorkspaceTest()
   {
+    NUMPIXELS = 500;
+    NUMBINS = 1001;
+    NUMEVENTS = 100;
+    BIN_DELTA = 1e3;
   }
 
 
@@ -138,6 +143,25 @@ public:
     const EventList el1(ew->getEventList(1));
     TS_ASSERT_EQUALS( el1.dataX()[1], BIN_DELTA*1);
     TS_ASSERT_EQUALS( el1.dataY()[1], 1);
+  }
+
+  void test_frameTime()
+  {
+    //Nothing yet
+    TS_ASSERT_THROWS(ew->getTime(0), std::range_error);
+    //Add some times
+    ptime t;
+    t = microsec_clock::local_time();
+    ew->addTime(0, t );
+    TS_ASSERT_EQUALS(ew->getTime(0), t);
+    //Add another id
+    ew->addTime(1000, t+ minutes(5) );
+    TS_ASSERT_EQUALS(ew->getTime(1000), t+minutes(5));
+    //Intermediate ones are not-a-date
+    TS_ASSERT(ew->getTime(234).is_not_a_date_time());
+
+    //Invalid addition - doesn't work because -100 gets wrapped back to positive because of size_t
+    //TS_ASSERT_THROWS( ew->addTime(-100, t - minutes(5) ), std::range_error);
   }
 
 };

@@ -19,7 +19,10 @@ namespace DataObjects
 
   //---- Constructors -------------------------------------------------------------------
   EventWorkspace::EventWorkspace()
-  {}
+  {
+    //Initialize the  frame time.
+    this->frameTime = std::vector<ptime>();
+  }
   EventWorkspace::~EventWorkspace()
   {}
 
@@ -28,10 +31,10 @@ namespace DataObjects
           const int &YLength)
   {
     // Check validity of arguments
-    if (NVectors <= 0)
+    if (NVectors < 0)
     {
-      g_log.error("All arguments to init must be positive and non-zero");
-      throw std::out_of_range("All arguments to init must be positive and non-zero");
+      g_log.error("Negative Number of Pixels specified to EventWorkspace::init");
+      throw std::out_of_range("Negative Number of Pixels specified to EventWorkspace::init");
     }
     m_noVectors = NVectors;
     //Create all the event list objects from 0 to m_noVectors;
@@ -156,8 +159,34 @@ namespace DataObjects
       //Set the x now.
       i->second.setX(x);
     }
-
   }
+
+
+  //-----------------------------------------------------------------------------
+  // --- Frame Times ----
+  //-----------------------------------------------------------------------------
+
+  /** Get the absolute time corresponding to the give frame ID */
+  ptime EventWorkspace::getTime(const size_t frameId)
+  {
+    if ((frameId < 0) || (frameId >= this->frameTime.size()))
+      throw std::range_error("EventWorkspace::getTime called with a frameId outside the range.");
+
+    //Will throw an exception if you are out of bounds.
+    return this->frameTime.at(frameId);
+  }
+
+  /** Add ahe absolute time corresponding to the give frame ID */
+  void EventWorkspace::addTime(const size_t frameId, ptime absoluteTime)
+  {
+    if (frameId < 0)
+      throw std::range_error("EventWorkspace::addTime called with a frameId below 0.");
+    //Resize, if needed, and fill with the default ptime (which is not-a-time)
+    if (this->frameTime.size() <= frameId)
+      this->frameTime.resize(frameId+1, ptime());
+    this->frameTime[frameId] = absoluteTime;
+  }
+
 
 } // namespace DataObjects
 } // namespace Mantid
