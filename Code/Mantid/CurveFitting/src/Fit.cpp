@@ -297,15 +297,15 @@ namespace CurveFitting
           // gsl_multifit_fdfsolver_iterate has failed on the first or second hurdle
           if (iter < 3)
           {
+            g_log.warning() << "Fit algorithm using " << methodUsed << " failed "
+              << "reporting the following: " << gsl_strerror(status) << "\n"
+              << "Try using Simplex method instead\n";
+            methodUsed = "Simplex";
             delete minimizer;
             minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
             minimizer->initialize(X, Y, sqrtWeightData, nData, nParam, 
                                   initFuncArg, this, costFunction);
             iter = 0;
-            g_log.warning() << "Fit algorithm using " << methodUsed << " failed "
-              << "reporting the following: " << gsl_strerror(status) << "\n"
-              << "Try using Simplex method instead\n";
-            methodUsed = "Simplex";
           }
           break;
         }
