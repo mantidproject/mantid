@@ -24,6 +24,7 @@
 #include "MantidDataHandling/AlignDetectors.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidNexus/LoadNeXus.h"
+#include <limits>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -147,7 +148,6 @@ public:
     icpv->tie("Gamma", "1.0");
 
     alg2.setFunction(icpv);
-
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(

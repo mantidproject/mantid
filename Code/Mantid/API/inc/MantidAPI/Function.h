@@ -10,6 +10,7 @@
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
+#include <boost/shared_array.hpp>
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -121,8 +122,11 @@ public:
   virtual IConstraint* getConstraint(int i)const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName);
- 
+  /// Set parameters to satisfy constraints
   void setParametersToSatisfyConstraints();
+
+  /// Calculate numerical derivatives
+  void calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData);
 
   using IFunction::removeTie;
 
@@ -156,6 +160,10 @@ private:
   std::vector<bool> m_explicitlySet;
   /// Constraint counter for use in nextConstraint()
   mutable int m_iConstraint;
+  /// Temporary data storage used in functionDeriv
+  mutable boost::shared_array<double> m_tmpFunctionOutputMinusStep;
+  /// Temporary data storage used in functionDeriv
+  mutable boost::shared_array<double> m_tmpFunctionOutputPlusStep;
 };
 
 } // namespace API

@@ -295,6 +295,12 @@ void IkedaCarpenterPV::function(double* out, const double* xValues, const int& n
     }
 }
 
+void IkedaCarpenterPV::functionDeriv(API::Jacobian* out, const double* xValues, const int& nData)
+{
+  calNumericalDeriv(out, xValues, nData);
+}
+
+
 void IkedaCarpenterPV::setActiveParameter(int i,double value)
 {
   int j = indexOfActive(i);

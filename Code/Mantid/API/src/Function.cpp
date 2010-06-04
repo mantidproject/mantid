@@ -8,6 +8,7 @@
 
 #include <sstream>
 #include <iostream>
+#include <limits>
 
 namespace Mantid
 {
@@ -433,6 +434,58 @@ void Function::setParametersToSatisfyConstraints()
     m_constraints[i]->setParamToSatisfyConstraint();
   }
 }
+
+
+/** Calculate numerical derivatives.
+ * @param out Derivatives
+ * @param xValues X values for data points
+ * @param nData Number of data points
+ */
+void Function::calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData)
+{
+    double stepPercentage = 0.001; // step percentage
+    double step; // real step
+    double minDouble = std::numeric_limits<double>::min();
+    double cutoff = 100.0*minDouble/stepPercentage;
+    int nParam = nParams();
+
+    // allocate memory if not already done
+    if (!m_tmpFunctionOutputMinusStep && nData>0)
+    {
+      m_tmpFunctionOutputMinusStep.reset(new double[nData]);
+      m_tmpFunctionOutputPlusStep.reset(new double[nData]);
+    }
+
+    for (int iA = 0; iA < nParam; iA++)
+    {
+      const double& val = getParameter(iA);
+      if (val < cutoff)
+      {
+        step = cutoff;
+      }
+      else
+      {
+        step = val*stepPercentage;
+      }
+
+      double paramMstep = val - step;
+      setParameter(iA, paramMstep);
+      function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
+
+      double paramPstep = val + step;
+      setParameter(iA, paramPstep);
+      function(m_tmpFunctionOutputPlusStep.get(), xValues, nData);
+
+      step = paramPstep - val;
+      setParameter(iA, val);
+
+      for (int i = 0; i < nData; i++) {
+        out->set(i,iA, 
+          (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
+      }
+    }
+}
+
 
 /// Nonvirtual member which removes all declared parameters
 void Function::clearAllParameters()
