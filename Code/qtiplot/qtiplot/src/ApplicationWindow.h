@@ -1066,6 +1066,9 @@ private slots:
    /// show MantidPlot Help webpage
   void showmantidplotHelp();
 
+  /// for zooming the selected graph using mouse drag tool
+  void magnify();
+
 
   ///
   void showalgorithmDescriptions();
@@ -1321,6 +1324,7 @@ private:
     QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
     QAction *actionShowUndoStack;
     QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
+	QAction *actionMagnify;
 
     QList<QAction *> d_user_actions;
     QList<QMenu* > d_user_menus; //Mantid

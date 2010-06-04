@@ -752,6 +752,11 @@ void ApplicationWindow::initToolBars()
 	btnPointer->setChecked(true);
 	plotTools->addAction(btnPointer);
 
+	
+	actionMagnify->setActionGroup(dataTools);
+	actionMagnify->setCheckable( true );
+	plotTools->addAction(actionMagnify);
+
 	btnZoomIn = new QAction(tr("&Zoom In"), this);
 	btnZoomIn->setShortcut( tr("Ctrl++") );
 	btnZoomIn->setActionGroup(dataTools);
@@ -765,6 +770,7 @@ void ApplicationWindow::initToolBars()
 	btnZoomOut->setCheckable( true );
 	btnZoomOut->setIcon(QIcon(QPixmap(zoomOut_xpm)) );
 	plotTools->addAction(btnZoomOut);
+
 
 	btnCursor = new QAction(tr("&Data Reader"), this);
 	btnCursor->setShortcut( tr("CTRL+D") );
@@ -963,6 +969,8 @@ void ApplicationWindow::initToolBars()
 	formatToolBar->setEnabled(false);
 	formatToolBar->hide();
 
+	
+
 }
  
 void ApplicationWindow::insertTranslatedStrings()
@@ -1128,7 +1136,6 @@ void ApplicationWindow::initMainMenu()
 	
 	help = new QMenu(this);
 	help->setObjectName("helpMenu");
-
 		
 	help->addAction(actionHomePage);
 	help->addAction(actionMantidConcepts);
@@ -1204,6 +1211,7 @@ void ApplicationWindow::plotDataMenuAboutToShow()
 	plotDataMenu->addAction(btnPointer);
 	plotDataMenu->addAction(btnZoomIn);
 	plotDataMenu->addAction(btnZoomOut);
+	plotDataMenu->addAction(actionMagnify);
 	plotDataMenu->addAction(actionUnzoom);
 	plotDataMenu->insertSeparator();
 	plotDataMenu->addAction(btnCursor);
@@ -1213,6 +1221,7 @@ void ApplicationWindow::plotDataMenuAboutToShow()
 	plotDataMenu->addAction(actionDrawPoints);
 	plotDataMenu->addAction(btnMovePoints);
 	plotDataMenu->addAction(btnRemovePoints);
+	
 
     reloadCustomActions();
 }
@@ -1267,6 +1276,7 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	menuBar()->insertItem(tr("&Edit"), edit);
 	editMenuAboutToShow();
 	menuBar()->insertItem(tr("&View"), view);
+
 	
 	view->insertSeparator();
 	view->addAction(actionShowScriptWindow);//Mantid
@@ -1384,7 +1394,6 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
 	  QMenu* item = mIter.next();
 	  menuBar()->insertItem(tr(item->title()), item);
 	}
-
 	reloadCustomActions();
 }
 
@@ -11598,6 +11607,8 @@ void ApplicationWindow::pickDataTool( QAction* action )
 		drawLine();
 	else if (action == btnMultiPeakPick)
 		selectMultiPeak();
+	else if (action == actionMagnify)
+		magnify();
 }
 
 void ApplicationWindow::connectSurfacePlot(Graph3D *plot)
@@ -12508,6 +12519,11 @@ void ApplicationWindow::createActions()
 	actionclearAllMemory = new QAction("&Clear All Memory",this);
 	actionclearAllMemory->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
 	connect(actionclearAllMemory,SIGNAL(triggered()), mantidUI, SLOT(clearAllMemory() ));
+
+	actionMagnify = new QAction(QIcon(QPixmap(magnifier_xpm)), tr("Zoom &In/Out and Drag Canvas"), this);
+	connect(actionMagnify, SIGNAL(activated()), this, SLOT(magnify()));
+
+	
 }
 
 void ApplicationWindow::translateActionsStrings()
@@ -12996,6 +13012,9 @@ void ApplicationWindow::translateActionsStrings()
 	btnZoomOut->setShortcut(tr("Ctrl+-"));
 	btnZoomOut->setToolTip(tr("Zoom Out"));
 
+	actionMagnify->setMenuText(tr("Zoom &In/Out and Drag Canvas"));
+	actionMagnify->setToolTip(tr("Zoom In (Shift++) or Out (-) and Drag Canvas"));
+
 	btnCursor->setMenuText(tr("&Data Reader"));
 	btnCursor->setShortcut(tr("CTRL+D"));
 	btnCursor->setToolTip(tr("Data reader"));
@@ -13122,6 +13141,8 @@ void ApplicationWindow::translateActionsStrings()
 	actionFitFrame->setMenuText( tr( "Fit frame to window" ) );
 	actionFitFrame->setToolTip( tr( "Fit frame to window" ) );
 	actionFitFrame->setStatusTip( tr( "Fit frame to window" ) );
+
+	
 }
 
 Graph3D * ApplicationWindow::openMatrixPlot3D(const QString& caption, const QString& matrix_name,
@@ -13149,7 +13170,7 @@ Graph3D * ApplicationWindow::plot3DMatrix(Matrix *m, int style)
 	if (!m) {
         //Mantid
         Graph3D *plot = mantidUI->plot3DMatrix(style);
-        if (plot) return plot;
+		if (plot) return plot;
 		m = (Matrix*)activeWindow(MatrixWindow);
 		if (!m)
 			return 0;
@@ -16301,7 +16322,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
   {
     PlotToolInterface* tool = g->activeTool();
     if (g->zoomOn())
-      btnZoomIn->setOn(true);
+	     btnZoomIn->setOn(true);
+
     else if (g->areRangeSelectorsOn())
       btnSelect->setOn(true);
     //else if (dynamic_cast<PeakPickerTool1D*>(tool))
@@ -16356,5 +16378,25 @@ void ApplicationWindow::enablesaveNexus(const QString &wsName)
 {
 	if(actionSaveFile) actionSaveFile->setEnabled(true);
 	m_nexusInputWSName=wsName;
+}
+/* For zooming the selected graph using the drag canvas tool and mouse drag.
+*/
+void ApplicationWindow::magnify()
+{
+	MultiLayer *plot = (MultiLayer *)activeWindow(MultiLayerWindow);
+	if (!plot)
+		return;
+
+	if (plot->isEmpty()){
+		QMessageBox::warning(this, tr("QtiPlot - Warning"),
+				tr("<h4>There are no plot layers available in this window.</h4>"
+					"<p><h4>Please add a layer and try again!</h4>"));
+		btnPointer->setOn(true);
+		return;
+	}
+
+	QList<Graph *> layers = plot->layersList();
+    foreach(Graph *g, layers)
+    	g->enablePanningMagnifier();
 }
 

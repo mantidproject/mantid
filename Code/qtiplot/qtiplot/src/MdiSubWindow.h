@@ -137,8 +137,7 @@ public:
 	//! Initializes the pointer to the parent folder of the window
 	void setFolder(Folder* f){d_folder = f;};
 
-	//! Notifies the main application that the window has been modified
-	void notifyChanges(){emit modifiedWindow(this);};
+	
 
 	void setNormal();
 	void setMinimized();
@@ -159,6 +158,8 @@ public:
 	void setconfirmcloseFlag(bool closeflag){d_confirm_close=closeflag;}
 
 public slots:
+	//! Notifies the main application that the window has been modified
+	void notifyChanges(){emit modifiedWindow(this);};
 	virtual void print(){};
 
 signals:

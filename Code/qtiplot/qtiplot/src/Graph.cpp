@@ -174,6 +174,9 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 	d_selected_text = NULL;
 	d_legend = NULL; // no legend for an empty graph
 	d_peak_fit_tool = NULL;
+	d_magnifier = NULL;
+	d_panner=NULL;
+	
 	widthLine=1;
 	selectedMarker=-1;
 	drawTextOn=false;
@@ -4790,6 +4793,7 @@ void Graph::disableTools()
 {
 	if (zoomOn())
 		zoom(false);
+	enablePanningMagnifier(false);
 	if (drawLineActive())
 		drawLine(false);
 
@@ -5112,6 +5116,10 @@ Graph::~Graph()
 		delete d_range_selector;
 	if(d_peak_fit_tool)
         delete d_peak_fit_tool;
+	if (d_magnifier)
+		delete d_magnifier;
+	if (d_panner)
+		delete d_panner;
 	delete titlePicker;
 	delete scalePicker;
 	delete cp;
@@ -5448,3 +5456,28 @@ void Graph::changeIntensity(bool bIntensityChanged)
         }
 	}
 }
+/* This method zooms the selected grpah using using zoom tool and mouse drag
+ * @param on boolean parameter to   swicth on zooming
+*/
+void Graph::enablePanningMagnifier(bool on)
+{
+	if (d_magnifier)
+		delete d_magnifier;
+	if (d_panner)
+		delete d_panner;
+
+	QwtPlotCanvas *cnvs =d_plot->canvas(); //canvas();
+	if (on){
+		cnvs->setCursor(Qt::pointingHandCursor);
+		d_magnifier = new QwtPlotMagnifier(cnvs);
+		d_magnifier->setZoomInKey(Qt::Key_Plus, Qt::ShiftModifier);
+
+		d_panner = new QwtPlotPanner(cnvs);
+		connect(d_panner, SIGNAL(panned(int, int)), multiLayer(), SLOT(notifyChanges()));
+	} else {
+		cnvs->setCursor(Qt::arrowCursor);
+		d_magnifier = NULL;
+		d_panner = NULL;
+	}
+}
+

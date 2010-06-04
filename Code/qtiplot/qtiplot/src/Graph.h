@@ -178,6 +178,9 @@ public:
 
   ///seeting a boolean flag to when the intensity(start and end values) changed
   void changeIntensity(bool bIntensityChanged);
+
+ // This method zooms the selected grpah
+  void enablePanningMagnifier(bool on = true);
 	
 public slots:
   //! Accessor method for #d_plot.
@@ -735,6 +738,7 @@ signals:
   void currentFontChanged(const QFont&);
   void enableTextEditor(Graph *);
   void curveRemoved();
+  
 
 private:
   //! Finds bounding interval of the plot data.
@@ -742,6 +746,7 @@ private:
   void niceLogScales(QwtPlot::Axis axis);
   void deselectCurves();
   void addLegendItem();
+  
 	
   Plot *d_plot;
   QwtPlotZoomer *d_zoomer[2];
