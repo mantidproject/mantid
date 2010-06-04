@@ -234,8 +234,8 @@ namespace DataObjects
 
   const EventList::StorageType& EventList::dataY() const
   {
-    if (refX->size() <= 0)
-      throw std::runtime_error("Histogram X not set!");
+//    if (refX->size() <= 0)
+//      throw std::runtime_error("Histogram X not set!");
     //this->refY.access().push_back(1234.5678);
     this->generateHistogram();
     return *(this->refY);
@@ -243,12 +243,16 @@ namespace DataObjects
 
   const EventList::StorageType& EventList::dataE() const
   {
-    if (refX->size() <= 0)
-      throw std::runtime_error("Histogram X not set!");
+//    if (refX->size() <= 0)
+//      throw std::runtime_error("Histogram X not set!");
     //this->generateHistogram();
     return *(this->refE);
   }
 
+  Kernel::cow_ptr<MantidVec> EventList::getRefX() const
+  {
+    return refX;
+  }
 
   // --- Non-const return Data Vectors throw exceptions! -------------------------------------------------------------
   EventList::StorageType& EventList::dataX()
@@ -267,7 +271,7 @@ namespace DataObjects
 
 
   // --- Histogram functions -------------------------------------------------
-  void EventList::emptyCache()
+  void EventList::emptyCache() const
   {
     this->refX.access().clear();
     this->refY.access().clear();
@@ -283,7 +287,6 @@ namespace DataObjects
 
   void EventList::generateHistogram() const
   {
-
     StorageType &Y = refY.access();
     StorageType &X = refX.access();
 
@@ -292,7 +295,15 @@ namespace DataObjects
 
     if (x_size <= 1)
     {
-      throw runtime_error("EventList::generateHistogram() called without the X axis set previously.");
+      //throw runtime_error("EventList::generateHistogram() called without the X axis set previously.");
+
+      //By default, if no histogram bins are set, simply sum up all events!
+      // This is equivalent to a single bin from -inf to +inf.
+      Y.resize(1, 0);
+      //Set the single bin to the total # of events.
+      Y[0] = this->events.size();
+      //And we're done! That was easy.
+      return;
     }
 
     //TODO: Should we have a smarter check for this?

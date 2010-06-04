@@ -13,7 +13,6 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 
-
 //==========================================================================================
 class TofEventTest : public CxxTest::TestSuite
 {
@@ -77,6 +76,8 @@ class EventListTest : public CxxTest::TestSuite
 {
 private:
   EventList el;
+  static const int NUMEVENTS = 100;
+
 
 public:
   EventListTest()
@@ -149,7 +150,7 @@ public:
     el = EventList();
     //Create some mostly-reasonable fake data.
     srand(1234); //Fixed random seed
-    for (int i=0; i < 100; i++)
+    for (int i=0; i < NUMEVENTS; i++)
     {
       //Random tof up to 10 ms
       el += TofEvent( 1e7*(rand()*1.0/RAND_MAX), rand()%1000);
@@ -229,10 +230,12 @@ public:
     el.clear();
     const EventList el2(el);
 
-    //Getting data before setting X throws
-    TS_ASSERT_THROWS(el2.dataY(), runtime_error);
+    //Getting data before setting X makes a single bin, with all counts.
+    TS_ASSERT_EQUALS(el2.dataY().size(), 1);
+    TS_ASSERT_EQUALS(el2.dataY()[0], 0);
 
-    this->test_setX(); //Set it up
+    //Now do set up an X axis.
+    this->test_setX();
     EventList::StorageType X, Y;
     const EventList el3(el);
     X = el3.dataX();
@@ -242,6 +245,17 @@ public:
     {
       TS_ASSERT_EQUALS(Y[i], 0);
     }
+  }
+
+  void test_no_histogram_x()
+  {
+    //Make sure there's no data
+    el.clear();
+    //Now give it some fake data, with NUMEVENTS events in it.
+    this->fake_data();
+    const EventList el4(el);
+    TS_ASSERT_EQUALS(el4.dataY().size(), 1);
+    TS_ASSERT_EQUALS(el4.dataY()[0], NUMEVENTS);
   }
 
   void fake_uniform_data()

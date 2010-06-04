@@ -75,6 +75,7 @@ public:
   /// Data Store: NOTE:: CHANGED TO BREAK THE WRONG USEAGE OF SHARED_PTR
   typedef Kernel::cow_ptr<StorageType > RCtype;
 
+  /** Constructor (empty) */
   EventList();
   /** Constructor copying from an existing event list */
   EventList(const EventList&);
@@ -103,7 +104,9 @@ public:
 
   /** Sort events by TOF or Frame */
   void sort(const EventSortType) const;
+  /** Sort events by TOF */
   void sortTof() const;
+  /** Sort events by Frame */
   void sortFrame() const;
 
   /**
@@ -128,15 +131,22 @@ public:
   /** Returns the error data const. */
   virtual const StorageType& dataE() const;
 
-  /** These throw exceptions since non-const access is not allowed. */
+  /** Returns a reference to the X data */
+  Kernel::cow_ptr<MantidVec> getRefX() const;
 
+  /** This throws an exception since non-const access is not allowed. */
   virtual StorageType& dataX();
+
+  /** This throws an exception since non-const access is not allowed. */
   virtual StorageType& dataY();
+
+  /** This throws an exception since non-const access is not allowed. */
   virtual StorageType& dataE();
 
 
+
   /** Delete the cached version of the histogram data. */
-  void emptyCache();
+  void emptyCache() const;
 
 
 private:

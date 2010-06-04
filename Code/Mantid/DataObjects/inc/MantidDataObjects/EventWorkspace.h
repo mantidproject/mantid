@@ -49,6 +49,7 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /// Destructor
   virtual ~EventWorkspace();
 
+  /// Returns the number of single indexable items in the workspace
   int size() const;
 
   /** Get the blocksize, aka the number of bins in the histogram */
@@ -57,19 +58,23 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Get the number of histograms. aka the number of pixels or detectors. */
   const int getNumberHistograms() const;
 
-  /** Return the data (X Y or E) at a given pixel. */
+  /** Return the data X vector at a given pixel. */
   MantidVec& dataX(const int);
 
+  /** Return the data Y vector at a given pixel. */
   MantidVec& dataY(const int);
 
+  /** Return the data E vector at a given pixel. */
   MantidVec& dataE(const int);
 
 
-  /** Return the const data (X Y or E) at a given pixel. */
+  /** Return the const data X vector at a given pixel. */
   const MantidVec& dataX(const int) const;
 
+  /** Return the const data Y vector at a given pixel. */
   const MantidVec& dataY(const int) const;
 
+  /** Return the const data E vector at a given pixel. */
   const MantidVec& dataE(const int) const;
 
 
@@ -85,8 +90,6 @@ class DLLExport EventWorkspace : public API::MatrixWorkspace
   /** Initialize the pixels */
   void init(const int&, const int&, const int&);
 
-  /** Testing function - compare the
-  bool compareX(intMantidVec& expected); */
 
   /** Get an EventList object at the given pixel number */
   EventList& getEventList(const int index);

@@ -33,21 +33,35 @@ namespace DataObjects
       g_log.error("All arguments to init must be positive and non-zero");
       throw std::out_of_range("All arguments to init must be positive and non-zero");
     }
-    //throw NotImplementedError("EventWorkspace::init const");
     m_noVectors = NVectors;
+    //Create all the event list objects from 0 to m_noVectors;
+    for (int i=0; i < m_noVectors; i++)
+    {
+      data[i] = EventList();
+    }
+
   }
 
 
 
   //-----------------------------------------------------------------------------
   int EventWorkspace::size() const
-  { // TODO implement
-    throw NotImplementedError("EventWorkspace::size");
+  {
+    return this->data.size() * this->blocksize();
   }
 
   int EventWorkspace::blocksize() const
   {
-    return refX(0)->size();
+    // Pick the first pixel to find the blocksize.
+    EventListMap::iterator it = data.begin();
+    if (it == data.end())
+    {
+      throw std::range_error("EventWorkspace::blocksize, no pixels in workspace, therefore cannot determine blocksize (# of bins).");
+    }
+    else
+    {
+      return it->second.getRefX()->size();
+    }
   }
 
   const int EventWorkspace::getNumberHistograms() const
@@ -119,8 +133,9 @@ namespace DataObjects
 
   Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
   {
-    throw NotImplementedError("EventWorkspace::refX const");
-    //return this->data[index].refX();
+    if (index<0 || index>=m_noVectors)
+      throw std::range_error("EventWorkspace::refX, histogram number out of range");
+    return this->data[index].getRefX();
   }
 
   //-----------------------------------------------------------------------------
