@@ -2588,6 +2588,12 @@ void ApplicationWindow::setPreferences(Graph* g)
 			g->updateSecondaryAxis(QwtPlot::xTop);
 			g->updateSecondaryAxis(QwtPlot::yRight);
 		}
+    
+    //set the scale type i.e. log or linear
+    g->setScale(QwtPlot::xBottom, xaxisScale);
+    g->setScale(QwtPlot::yLeft, yaxisScale);
+    // yRight is the color bar, representing a third (z) dimension
+    g->setScale(QwtPlot::yRight, zaxisScale);
 
 		QList<int> ticksList;
 		ticksList<<majTicksStyle<<majTicksStyle<<majTicksStyle<<majTicksStyle;
@@ -2606,14 +2612,13 @@ void ApplicationWindow::setPreferences(Graph* g)
 	g->initTitle(titleOn, plotTitleFont);
 	g->setCanvasFrame(canvasFrameWidth);
 	g->plotWidget()->setMargin(defaultPlotMargin);
-	g->setScale(QwtPlot::xBottom, xaxisScale);
-	g->setScale(QwtPlot::yLeft, yaxisScale);
-	// yRight is the color bar, representing a third (z) dimension
-	g->setScale(QwtPlot::yRight, zaxisScale);
-	g->enableAutoscaling(autoscale2DPlots);
+
+
+  g->enableAutoscaling(autoscale2DPlots);
 	g->setAutoscaleFonts(autoScaleFonts);
     g->setIgnoreResizeEvents(!autoResizeLayers);
 	g->setAntialiasing(antialiasing2DPlots);
+
 }
 
 /*

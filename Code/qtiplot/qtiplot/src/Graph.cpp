@@ -1056,25 +1056,25 @@ void Graph::updateSecondaryAxis(int axis)
 void Graph::setAutoScale()
 {	
 	for (int i = 0; i < QwtPlot::axisCnt; i++)
-  {
-    if ( !m_fixed_axes.contains(i) )
-    {
-      d_plot->setAxisAutoScale(i);
-    }
-  }
+	{
+		if ( !m_fixed_axes.contains(i) )
+		{
+			d_plot->setAxisAutoScale(i);
+		}
+	}
 	d_plot->replot();
 	updateScale();
-  for (int i = 0; i < QwtPlot::axisCnt; i++)
-  {
-    if ( !m_fixed_axes.contains(i) )
-    {
-      ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(i);
-      if( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 )
-      {
-        niceLogScales(QwtPlot::Axis(i));
-      }
-    }
-  }
+	for (int i = 0; i < QwtPlot::axisCnt; i++)
+	{
+		if ( !m_fixed_axes.contains(i) )
+		{
+			ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(i);
+			if( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 )
+			{
+				niceLogScales(QwtPlot::Axis(i));
+			}
+		}
+	}
 	emit modifiedGraph();
 }
 
@@ -1200,9 +1200,8 @@ void Graph::niceLogScales(QwtPlot::Axis axis)
   double start = QMIN(scDiv->lBound(), scDiv->hBound());
   double end = QMAX(scDiv->lBound(), scDiv->hBound());
   
-  // log scales can't represent zero or negative values, 1e-20 as a low range is enough to display all data but still be plottable on a log scale
-  start = start >= 0 ? start : 1e-20;
-  end = end >= 0 ? end : 1e20;
+  // log scales can't represent zero or negative values, 1e-10 as a low range is enough to display all data but still be plottable on a log scale
+  start = start < 1e-90 ? 1e-10 : start;
   // improve the scale labelling by ensuring that the graph starts and ends on numbers that can have major ticks e.g. 0.1 or 1 or 100
   const double exponent = floor(log10(start));
   start = pow(10.0, exponent);
@@ -1311,12 +1310,27 @@ void Graph::setScale(int axis, double start, double end, double step,
 // 	d_plot->axisWidget(axis)->repaint();
 }
 /** Overload of setScale() to that only allows setting the axis type
-*  to linear or log
+*  to linear or log. Does nothing if the scale is already the that type
 *  @param axis the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
 *  @param scaleType either QwtScaleTransformation::Log10 or ::Linear
 */
 void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
 {
+  //check if the scale is already of the desired type, 
+  ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+  QwtScaleTransformation::Type type = sc_engine->type();
+  if ( scaleType == QwtScaleTransformation::Log10 )
+  {
+    if ( type == GraphOptions::Log10 )
+    {
+      return;
+    }
+  }
+  else if ( type == GraphOptions::Linear )
+  {
+    return;
+  }
+
   const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(axis);
   double start = QMIN(scDiv->lBound(), scDiv->hBound());
   double end = QMAX(scDiv->lBound(), scDiv->hBound());
@@ -1357,7 +1371,6 @@ void Graph::logLogAxes()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Log10);
 	setScale(QwtPlot::yLeft, QwtScaleTransformation::Log10);
-  setAutoScale();
 	notifyChanges();
 }
 
@@ -1365,7 +1378,6 @@ void Graph::logXLinY()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Log10);
 	setScale(QwtPlot::yLeft, QwtScaleTransformation::Linear);
-  setAutoScale();
 	notifyChanges();
 }
 
@@ -1373,7 +1385,6 @@ void Graph::logYlinX()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Linear);
 	setScale(QwtPlot::yLeft, QwtScaleTransformation::Log10);
-  setAutoScale();
   notifyChanges();
 }
 
@@ -1381,88 +1392,78 @@ void Graph::linearAxes()
 {
 	setScale(QwtPlot::xBottom, QwtScaleTransformation::Linear);
 	setScale(QwtPlot::yLeft, QwtScaleTransformation::Linear);
-  setAutoScale();
   notifyChanges();
 }
 
 void Graph::logColor()
 {
 	setScale(QwtPlot::yRight, QwtScaleTransformation::Log10);
-  setAutoScale();
   notifyChanges();
 }
 
 void Graph::linColor()
 {
 	setScale(QwtPlot::yRight, QwtScaleTransformation::Linear);
-  setAutoScale();
   notifyChanges();
 }
 
 void Graph::setAxisScale(int axis, double start, double end, int type, double step,
 				  int majorTicks, int minorTicks)
 {
-  ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+	ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
 /*QwtScaleEngine *qwtsc_engine=d_plot->axisScaleEngine(axis);
 	ScaleEngine *sc_engine =dynamic_cast<ScaleEngine*>(qwtsc_engine);*/
-  if( !sc_engine ) return;
-  double minstart=0.0;
+	if( !sc_engine ) return;
 
   // If not specified, keep the same as now
-  if( type < 0 ) type = axisType(axis);
+	if( type < 0 ) type = axisType(axis);
 
-  if (type == GraphOptions::Log10)
-  {
-    sc_engine->setType(QwtScaleTransformation::Log10);
-    if (start <= 0 || end <= 0)
-    {
-      // log scales can't represent zero or negative values, 1e-20 as a low range is enough to display all data but still be plottable on a log scale
-      minstart = start >= 0 ? start : 1e-20;
-      end = end >= 0 ? end : 1e20;
-    }
-	else 
-		minstart=start;
-  } 
-  else
-  {
-    sc_engine->setType(QwtScaleTransformation::Linear);
-	minstart=start;
-  }
+	if (type == GraphOptions::Log10)
+	{
+		sc_engine->setType(QwtScaleTransformation::Log10);
+    // log scales can't represent zero or negative values, 1e-10 is a low number that I hope will be lower than most of the data but is still sensible for many color plots
+		start = start < 1e-90 ? 1e-10 : start;
+	} 
+	else
+	{
+		sc_engine->setType(QwtScaleTransformation::Linear);
+	}
 
-  int max_min_intervals = minorTicks;
-  if (minorTicks == 1) max_min_intervals = 3;
-  if (minorTicks > 1) max_min_intervals = minorTicks + 1;
-  QwtScaleDiv div = sc_engine->divideScale (QMIN(minstart, end), QMAX(minstart, end), majorTicks, max_min_intervals, step);
-  d_plot->setAxisMaxMajor (axis, majorTicks);
-  d_plot->setAxisMaxMinor (axis, minorTicks);
+	for (int i=0; i<n_curves; i++){
+		QwtPlotItem *it = plotItem(i);
+		if (!it)
+			continue;
+		if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+			Spectrogram *sp = (Spectrogram *)it;
+			if(sp)
+			{
+				QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
+				if(rightAxis)
+				{
+					sp->mutableColorMap().changeScaleType((GraphOptions::ScaleType)type);
+					rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
+					sp->setColorMap(sp->getColorMap());
+          // we could check if(sp->isIntensityChanged()) but this doesn't work when one value is changing from zero to say 10^-10, which is a big problem for log plots
+					sp->changeIntensity( start,end);
+				}
+			}
+		}
+	}
 
-  d_plot->setAxisScaleDiv (axis, div);
-  for (int i=0; i<n_curves; i++){
-	  QwtPlotItem *it = plotItem(i);
-	  if (!it)
-		  continue;
-	  if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-		  Spectrogram *sp = (Spectrogram *)it;
-		  if(sp)
-		  {
-			  QwtScaleWidget *rightAxis = d_plot->axisWidget(QwtPlot::yRight);
-			  if(rightAxis)
-			  {
-			    sp->mutableColorMap().changeScaleType((GraphOptions::ScaleType)type);
-				 rightAxis->setColorMap(QwtDoubleInterval(start, end), sp->getColorMap());
-				  sp->setColorMap(sp->getColorMap());
-				 if(sp->isIntensityChanged())
-						sp->changeIntensity( start,end);
-	
-			  }
-		  }
-	  }
-  }
-  d_zoomer[0]->setZoomBase();
+	int max_min_intervals = minorTicks;
+	if (minorTicks == 1) max_min_intervals = 3;
+	if (minorTicks > 1) max_min_intervals = minorTicks + 1;
+	QwtScaleDiv div = sc_engine->divideScale (QMIN(start, end), QMAX(start, end), majorTicks, max_min_intervals, step);
+	d_plot->setAxisMaxMajor (axis, majorTicks);
+	d_plot->setAxisMaxMinor (axis, minorTicks);
+
+	d_plot->setAxisScaleDiv (axis, div);
+
+	d_zoomer[0]->setZoomBase();
     //below code is commented as it was zooming the right color  axis on scaling
-  d_zoomer[1]->setZoomBase();
+	d_zoomer[1]->setZoomBase();
 
-  d_user_step[axis] = step;
+	d_user_step[axis] = step;
 
   if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft)
   {

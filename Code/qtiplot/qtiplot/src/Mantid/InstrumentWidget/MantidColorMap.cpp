@@ -188,7 +188,8 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
   {
   case GraphOptions::Log10:
   default:
-   ratio = std::log10(value - interval.minValue()) / std::log10(width);
+    //the line below is equivalent to the following  ratio = ( std::log10(value) - std::log10(interval.minValue()) )/ ( std::log10(interval.maxValue())  - std::log10(interval.minValue()) );
+    ratio = std::log10(value/interval.minValue())/std::log10(interval.maxValue()/interval.minValue());
     break;
   case GraphOptions::Linear:
     ratio = (value - interval.minValue()) / width;
