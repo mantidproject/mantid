@@ -361,7 +361,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.798,0.01);
 
-    TS_ASSERT_DELTA( icpv->getParameter("I"), 73164.8 ,0.1);
+    TS_ASSERT_DELTA( icpv->getParameter("I"), 73164.8 ,1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.1);
     TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 3634.1 ,1);
@@ -472,7 +472,7 @@ public:
     double dummy = alg2.getProperty("Output Chi^2/DoF");
     TS_ASSERT_DELTA( dummy, 0.798,0.01);
 
-    TS_ASSERT_DELTA( icpv->getParameter("I"), 73164.8 ,0.1);
+    TS_ASSERT_DELTA( icpv->getParameter("I"), 73164.8 ,1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 0.734079 ,0.1);
     TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 2.067249 ,0.1);
     TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 3634.1 ,1);
