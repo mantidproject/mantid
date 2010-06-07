@@ -274,7 +274,7 @@ namespace Mantid
               it->second = i;
               g_log.information()<<"group "<<it->first<<": ";
               bool first = true;
-              int first_i,last_i;
+              int first_i(-INT_MAX),last_i(-INT_MAX);
               for(int i=0;i<numHists;i++)
                 if (m_groupings[i] == it->first)
                 {

@@ -227,48 +227,9 @@ namespace Mantid
           setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(localWorkspace));
         }
 
-
       } // loop over periods
 
-    //  // Clean up
-    //  delete[] timeChannels;
     }
-
-//    /// Validates the optional 'spectra to read' properties, if they have been set
-//    void LoadMuonNexus2::checkOptionalProperties()
-//    {
-//      //read in the settings passed to the algorithm
-//      m_spec_list = getProperty("SpectrumList");
-//      m_spec_max = getProperty("SpectrumMax");
-//      //Are we using a list of spectra or all the spectra in a range?
-//      m_list = !m_spec_list.empty();
-//      m_interval = (m_spec_max != EMPTY_INT());
-//      if ( m_spec_max == EMPTY_INT() ) m_spec_max = 0;
-//
-//      // Check validity of spectra range, if set
-//      if ( m_interval )
-//      {
-//        m_spec_min = getProperty("SpectrumMin");
-//        if ( m_spec_max < m_spec_min || m_spec_max > m_numberOfSpectra )
-//        {
-//          g_log.error("Invalid Spectrum min/max properties");
-//          throw std::invalid_argument("Inconsistent properties defined"); 
-//        }
-//      }
-//
-//      // Check validity of spectra list property, if set
-//      if ( m_list )
-//      {
-//        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
-//        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
-//        if ( maxlist > m_numberOfSpectra || minlist == 0)
-//        {
-//          g_log.error("Invalid list of spectra");
-//          throw std::invalid_argument("Inconsistent properties defined"); 
-//        } 
-//      }
-//
-//    }
 
     /** loadData
      *  Load the counts data from an NXInt into a workspace
@@ -287,55 +248,6 @@ namespace Mantid
       typedef double (*uf)(double);
       uf dblSqrt = std::sqrt;
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-    }
-
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
-    void LoadMuonNexus2::runLoadInstrument(API::MatrixWorkspace_sptr localWorkspace)
-    {
-      // Determine the search directory for XML instrument definition files (IDFs)
-      std::string directoryName = Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");      
-      if ( directoryName.empty() )
-      {
-        // This is the assumed deployment directory for IDFs, where we need to be relative to the
-        // directory of the executable, not the current working directory.
-        directoryName = Poco::Path(Mantid::Kernel::ConfigService::Instance().getBaseDir()).resolve("../Instrument").toString();  
-      }
-      //const int stripPath = m_filename.find_last_of("\\/");
-      // For Nexus, Instrument name given by MuonNexusReader from Nexus file
-      std::string instrumentID = m_instrument_name; //m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
-
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
-
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      bool executionSuccessful(true);
-      try
-      {
-        loadInst->setPropertyValue("Filename", fullPathIDF);
-        loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-        loadInst->execute();
-      }
-      catch( std::invalid_argument&)
-      {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
-        executionSuccessful = false;
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
-        executionSuccessful = false;
-      }
-
-      // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
-      // This does not work at present as the example files do not hold the necessary data
-      // but is a place holder. Hopefully the new version of Nexus Muon files should be more
-      // complete.
-      //if ( ! loadInst->isExecuted() )
-      //{
-      //    runLoadInstrumentFromNexus(localWorkspace);
-      //}
     }
 
     /**  Load logs from Nexus file. Logs are expected to be in

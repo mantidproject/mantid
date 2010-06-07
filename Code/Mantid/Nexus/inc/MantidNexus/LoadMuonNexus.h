@@ -28,7 +28,7 @@ namespace Mantid
     <LI> Filename - The name of and path to the input Nexus file </LI>
     <LI> OutputWorkspace - The name of the workspace in which to store the imported data 
          (a multiperiod file will store higher periods in workspaces called OutputWorkspace_PeriodNo)
-		 [ not yet implemented for Nexus ]</LI>
+         [ not yet implemented for Nexus ]</LI>
     </UL>
 
     Optional Properties: (note that these options are not available if reading a multiperiod file)
@@ -78,6 +78,7 @@ namespace Mantid
       void exec();
       
       void checkOptionalProperties();
+      void runLoadInstrument(DataObjects::Workspace2D_sptr);
 
       /// The name and path of the input file
       std::string m_filename;
@@ -111,7 +112,6 @@ namespace Mantid
       void init();
       
       void loadData(const DataObjects::Histogram1D::RCtype::ptr_type&,int, int&, MuonNexusReader& , const int, DataObjects::Workspace2D_sptr );
-      void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);
