@@ -32,7 +32,9 @@ else:
     pass
 
 # Update the local copy
-sp.call("svn up", shell=True)
+retcode = sp.call("svn up --accept theirs-full --non-interactive --trust-server-cert", shell=True)
+if retcode != 0:
+    sys.exit(1)
 
 # Update the header containing the revision number
 sp.call("python release_date.py",shell=True)
