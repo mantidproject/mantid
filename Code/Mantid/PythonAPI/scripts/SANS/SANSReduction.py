@@ -34,6 +34,7 @@ SCATTER_SAMPLE = None
 SCATTER_CAN = SANSUtility.WorkspaceDetails('', -1)
 TRANS_SAMPLE = ''
 TRANS_CAN = ''
+PERIOD_NOS = { "SCATTER_SAMPLE":1, "SCATTER_CAN":1 }
 DIRECT_SAMPLE = ''
 DIRECT_CAN = ''
 DIRECT_CAN = ''
@@ -301,7 +302,7 @@ _SAMPLE_SETUP = None
 _SAMPLE_RUN = ''
 def AssignSample(sample_run, reload = True, period = -1):
     _printMessage('AssignSample("' + sample_run + '")')
-    global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN, _SAMPLE_N_PERIODS
+    global SCATTER_SAMPLE, _SAMPLE_SETUP, _SAMPLE_RUN, _SAMPLE_N_PERIODS, PERIOD_NOS
     
     __clearPrevious(SCATTER_SAMPLE,others=[SCATTER_CAN,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
     _SAMPLE_N_PERIODS = -1
@@ -328,6 +329,7 @@ def AssignSample(sample_run, reload = True, period = -1):
             _issueWarning("Sample logs cannot be loaded, cannot continue")
             return '','()'
     else:
+        PERIOD_NOS["SCATTER_SAMPLE"] = period
         return SCATTER_SAMPLE.getName(), None
         
     global FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X
@@ -337,6 +339,7 @@ def AssignSample(sample_run, reload = True, period = -1):
     REAR_DET_Z = float(logvalues['Rear_Det_Z'])
     REAR_DET_X = float(logvalues['Rear_Det_X'])
 
+    PERIOD_NOS["SCATTER_SAMPLE"] = period
     return SCATTER_SAMPLE.getName(), logvalues
 
 ########################### 
@@ -346,7 +349,7 @@ _CAN_SETUP = None
 _CAN_RUN = ''
 def AssignCan(can_run, reload = True, period = -1):
     _printMessage('AssignCan("' + can_run + '")')
-    global SCATTER_CAN, _CAN_SETUP, _CAN_RUN, _CAN_N_PERIODS
+    global SCATTER_CAN, _CAN_SETUP, _CAN_RUN, _CAN_N_PERIODS, PERIOD_NOS
     
     __clearPrevious(SCATTER_CAN,others=[SCATTER_SAMPLE,TRANS_SAMPLE,TRANS_CAN,DIRECT_SAMPLE,DIRECT_CAN])
     _CAN_N_PERIODS = -1
@@ -373,6 +376,7 @@ def AssignCan(can_run, reload = True, period = -1):
             _issueWarning("Can logs could not be loaded, using sample values.")
             return SCATTER_CAN.getName(), "()"
     else:
+        PERIOD_NOS["SCATTER_CAN"] = period
         return SCATTER_CAN.getName(), ""
     
     smp_values = []
@@ -382,6 +386,7 @@ def AssignCan(can_run, reload = True, period = -1):
     smp_values.append(REAR_DET_Z + REAR_DET_Z_CORR)
     smp_values.append(REAR_DET_X + REAR_DET_X_CORR)
 
+    PERIOD_NOS["SCATTER_CAN"] = period
     # Check against sample values and warn if they are not the same but still continue reduction
     if len(logvalues) == 0:
         return  SCATTER_CAN.getName(), logvalues
@@ -477,7 +482,8 @@ def _assignHelper(run_string, is_trans, reload = True, period = -1):
     # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
     if not os.path.exists(filename + '.' + ext):
         filename = basename
-    
+    if period <= 0:
+        period = 1
     if is_trans:
         try:
             if INSTR_NAME == 'SANS2D' and int(shortrun_no) < 568:
@@ -547,7 +553,7 @@ def _loadRawData(filename, wsName, ext, spec_min = None, spec_max = None, period
         numPeriods = 1
         
     #period greater than one means we must be looking at a workspace group
-    if period > 1 :
+    if numPeriods > 1 :
         if not pWorksp.isGroup() : raise Exception('_loadRawData: A period number can only be specified for a group and workspace '+ pWorksp.getName() + ' is not a group')
         wsName = _leaveSinglePeriod(pWorksp, period)
 	pWorksp = mtd[wsName]
@@ -1270,7 +1276,6 @@ def WavRangeReduction(wav_start = None, wav_end = None, use_def_trans = DefaultT
         # Store the mask file within the final workspace so that it is saved to the CanSAS file
         AddSampleLog(final_workspace, "UserFile", MASKFILE)
     else:
-        UnGroupWorkspace(final_workspace)
         quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
         for key, value in quadrants.iteritems():
             old_name = final_workspace + '_' + str(key)
@@ -1606,7 +1611,6 @@ def GroupIntoQuadrants(reduced_ws, final_result, xcentre, ycentre, q_bins):
     # We don't need these now
     mantid.deleteWorkspace(final_result)                    
     mantid.deleteWorkspace(reduced_ws)
-    GroupWorkspaces(final_result, to_group.strip(','))
 
 # Calcluate the sum squared difference of the given workspaces. This assumes that a workspace with
 # one spectrum for each of the quadrants. The order should be L,R,U,D.
@@ -1654,16 +1658,13 @@ def CalculateResidue():
         residueY += pow(yvalsA[indexA] - yvalsB[indexB], 2)
         indexB += 1
                         
-#    try :
     if RESIDUE_GRAPH == None:
         RESIDUE_GRAPH = plotSpectrum('Left', 0)
         mergePlots(RESIDUE_GRAPH, plotSpectrum('Right', 0))
         mergePlots(RESIDUE_GRAPH, plotSpectrum('Up', 0))
         mergePlots(RESIDUE_GRAPH, plotSpectrum('Down', 0))
     RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
-#    except :
-        #if the plotting environment is not setup we can contiune without plotting
- #       pass    
+
     mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
     return residueX, residueY
 	
@@ -1745,10 +1746,10 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     
     # Reload the sample and can and reset the radius range
     global _SAMPLE_SETUP
-    _assignHelper(_SAMPLE_RUN, False)
+    _assignHelper(_SAMPLE_RUN, False, PERIOD_NOS["SCATTER_SAMPLE"])
     _SAMPLE_SETUP = None
     if _CAN_RUN != '':
-        _assignHelper(_CAN_RUN, False)
+        _assignHelper(_CAN_RUN, False, PERIOD_NOS["SCATTER_CAN"])
         global _CAN_SETUP
         _CAN_SETUP = None
     
@@ -1854,10 +1855,3 @@ def plotSpectrum(name, spec):
 def mergePlots(g1, g2):
     return qti.app.mantidUI.mergePlots(g1,g2)
 
-#testing code, remove 
-#print _loadRawData('//isis/inst$/cycle_10_1/NDXSANS2D/SANS2D00005508', '992boo', 'raw', None, None)
-#SCATTER_SAMPLE, logvalues = AssignSample('5508.nxs', reload = True,period=11)
-#print _assignHelper('5508.nxs', False, True, 11)
-#can, logcan = AssignCan('993.raw', reload = True, period=1)
-#print SCATTER_SAMPLE, logvalues
-#print can, logcan

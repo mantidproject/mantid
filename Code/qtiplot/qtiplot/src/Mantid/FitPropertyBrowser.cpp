@@ -1070,7 +1070,7 @@ void FitPropertyBrowser::init()
 }
 
 /** Check if the workspace can be used in the fit. The accepted types are
-  * MatrixWorkspaces and WorkspaceGroups of same size MatrixWorkspaces
+  * MatrixWorkspaces same size
   * @param ws The workspace
   */
 bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
@@ -1079,43 +1079,16 @@ bool FitPropertyBrowser::isWorkspaceValid(Mantid::API::Workspace_sptr ws)const
   {
     return true;
   }
-  Mantid::API::WorkspaceGroup* wsg = dynamic_cast<Mantid::API::WorkspaceGroup*>(ws.get());
-  if (wsg != 0)
+  else
   {
-    int nBins = -1;
-    int nSpec = -1;
-    std::vector<std::string> wsNames = wsg->getNames();
-    for(int i=0;i<wsNames.size();++i)
-    {
-      std::string name = wsNames[i];
-      if (name == wsg->getName()) continue;
-      Mantid::API::Workspace_sptr ws = 
-           m_appWindow->mantidUI->getWorkspace(QString::fromStdString(name));
-      Mantid::API::MatrixWorkspace_sptr mws = 
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
-      if (!ws) continue;
-      if (!mws) return false;
-      if ( nBins < 0 || nSpec < 0 )
-      {
-        nBins = mws->blocksize();
-        nSpec = mws->getNumberHistograms();
-      }
-      else
-      {
-        if (nBins != mws->blocksize()) return false;
-        if (nSpec != mws->getNumberHistograms()) return false;
-      }
-    }
-    return true;
+    return false;
   }
-  return false;
 }
 
 bool FitPropertyBrowser::isWorkspaceAGroup()const
 {
-  Mantid::API::Workspace_sptr ws = 
-    m_appWindow->mantidUI->getWorkspace(QString::fromStdString(workspaceName()));
-  return dynamic_cast<Mantid::API::WorkspaceGroup*>(ws.get()) != 0;
+  // MG: Disabled as there is an issue with replacing workspace groups and the browser
+  return false;
 }
 
 /// Is the current function a peak?
