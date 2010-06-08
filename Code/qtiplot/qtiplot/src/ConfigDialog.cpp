@@ -758,7 +758,7 @@ void ConfigDialog::initMantidPage()
   connect( button, SIGNAL(clicked()), this, SLOT(addInstrumentDir()) );
 
   /// parameterDefinition.directory
-  label = new QLabel(tr("Instrument definitions"));
+  label = new QLabel(tr("Parameter definitions"));
 	grid->addWidget(label, 5, 0);
 
   str = Mantid::Kernel::ConfigService::Instance().getString("parameterDefinition.directory");
@@ -769,6 +769,8 @@ void ConfigDialog::initMantidPage()
 	button = new QPushButton();
 	button->setIcon(QIcon(QPixmap(choose_folder_xpm)));
 	grid->addWidget(button, 5, 2);
+	button->setEnabled(false);
+  leParameterDir->setEnabled(false);
 
   connect( button, SIGNAL(clicked()), this, SLOT(addParameterDir()) );
 
