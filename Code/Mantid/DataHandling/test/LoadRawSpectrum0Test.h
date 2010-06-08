@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataHandling/LoadRawSpectrum0.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -28,6 +28,7 @@ public:
   {
     // Path to test input file assumes Test directory checked out from SVN
     inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/HET15869.RAW").toString();
+	 //  inputFile = Poco::Path(Poco::Path::current()).resolve("../../../../Test/Data/IRS38633.raw").toString();
   }
 
   void testInit()
@@ -38,6 +39,8 @@ public:
 
   void testExec()
   {
+	/* std::string s;
+	 std::getline(std::cin,s);*/
 	  if ( !loader.isInitialized() ) loader.initialize();
 
     // Should fail because mandatory parameter has not been set
@@ -61,17 +64,15 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file HET15869.RAW
-    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 2584);
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1);
     // Check two X vectors are the same
-    TS_ASSERT( (output2D->dataX(99)) == (output2D->dataX(1734)) );
-    // Check two Y arrays have the same number of elements
-    TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->dataY(2111).size() );
+   
     // Check one particular value
-    TS_ASSERT_EQUALS( output2D->dataY(999)[777], 9);
+    TS_ASSERT_EQUALS( output2D->dataY(0)[777], 355);
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS( output2D->dataE(999)[777], 3);
+	TS_ASSERT_EQUALS( output2D->dataE(0)[777],std::sqrt(output2D->dataY(0)[777]));
     // Check that the error on that value is correct
-    TS_ASSERT_EQUALS( output2D->dataX(999)[777], 554.1875);
+    TS_ASSERT_EQUALS( output2D->dataX(0)[777], 554.1875);
 
     // Check the unit has been set correctly
     TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF" )
@@ -85,11 +86,11 @@ public:
  
   void testMultiPeriod()
   {
-	LoadRaw3 loader5;
+	LoadRawSpectrum0 loader5;
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
-    loader5.setPropertyValue("SpectrumList", "10,50,100,195");
+    //loader5.setPropertyValue("SpectrumList", "10,50,100,195");
     
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
@@ -115,7 +116,7 @@ public:
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*itr1))));
-      TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 4 )
+      TS_ASSERT_EQUALS( outsptr->getNumberHistograms(),1 )
 
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
@@ -136,15 +137,15 @@ public:
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr3->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr4->dataX(0) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr5->dataX(1) )
-    TS_ASSERT_EQUALS( outsptr1->dataX(1), outsptr6->dataX(1) )
+    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr5->dataX(0) )
+    TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr6->dataX(0) )
 
     // But the data should be different
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr2->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr3->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr4->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr5->dataY(1)[555] )
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr6->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr2->dataY(0)[555] )
+    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr3->dataY(0)[555] )
+    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr4->dataY(0)[555] )
+    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr5->dataY(0)[555] )
+    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr6->dataY(0)[555] )
 
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr2->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr2->spectraMap()) )
@@ -159,7 +160,7 @@ public:
   }
   
 private:
-  LoadRaw3 loader,loader2,loader3;
+  LoadRawSpectrum0 loader;//,loader2,loader3;
   std::string inputFile;
   std::string outputSpace;
 };

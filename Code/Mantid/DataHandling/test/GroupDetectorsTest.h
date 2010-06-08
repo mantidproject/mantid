@@ -163,6 +163,7 @@ public:
     TS_ASSERT_THROWS( outputWS->getDetector(3), Exception::NotFoundError )
     TS_ASSERT_THROWS_NOTHING( det = outputWS->getDetector(4) )
     TS_ASSERT( boost::dynamic_pointer_cast<Detector>(det) )
+	AnalysisDataService::Instance().remove("GroupTestWS");
   }
 
 private:

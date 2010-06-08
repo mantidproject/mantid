@@ -143,7 +143,12 @@ namespace Mantid
 
 				progress(m_prog, "Reading raw file data...");
 				//isisRaw->readData(file, histToRead);
-				readData(file, histToRead);
+				//readData(file, histToRead);
+				//read spectrum 
+				if (!readData(file, histToRead))
+				{
+					throw std::runtime_error("Error reading raw file");
+				}
 
 				//set the workspace data
 			     setWorkspaceData(localWorkspace, timeChannelsVec, wsIndex, 0, m_noTimeRegimes,m_lengthIn,1);
@@ -158,7 +163,7 @@ namespace Mantid
 				}
 				if(m_numberOfPeriods>1)
 				{
-					setWorkspaceProperty(localWorkspace, wsgrp_sptr, 0, false);
+					setWorkspaceProperty(localWorkspace, wsgrp_sptr, period, false);
 					// progress for workspace groups 
 					m_prog = (double(period) / (m_numberOfPeriods - 1));
 				}

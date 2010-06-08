@@ -88,6 +88,8 @@ public:
     dummy = paramMap.getDouble("nickel-holder", "fjols-test-paramfile");
     TS_ASSERT_DELTA (dummy[0], 2000.0, 0.0001);
 
+	AnalysisDataService::Instance().remove(wsName);
+
   }
 
 

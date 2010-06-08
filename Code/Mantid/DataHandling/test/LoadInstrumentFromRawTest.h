@@ -104,6 +104,8 @@ public:
     TS_ASSERT( ! i->getDetector(1)->isMonitor() )
     TS_ASSERT( ! i->getDetector(101256)->isMonitor() )
     TS_ASSERT( ! i->getDetector(718048)->isMonitor() )
+
+	AnalysisDataService::Instance().remove(wsName);
   }
 
 

@@ -376,14 +376,31 @@ void LoadRawHelper::setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,
   Y.assign(isisRaw->dat1 + binStart, isisRaw->dat1 + lengthIn);
   // Fill the vector for the errors, containing sqrt(count)
   MantidVec& E = newWorkspace->dataE(wsIndex);
-  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+  std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt); 
+
+  newWorkspace->getAxis(1)->spectraNo(wsIndex) = nspecNum;
+  //for loadrawbin0
+  if(binStart==0)
+  {
+	  newWorkspace->setX(wsIndex, timeChannelsVec[0]);
+	  return ;
+  }
+  //for loadrawspectrum 0
+  if(nspecNum==0)
+  {
+	   newWorkspace->setX(wsIndex, timeChannelsVec[0]);
+	   return ;
+  }
   // Set the X vector pointer and spectrum number
   if (noTimeRegimes < 2)
     newWorkspace->setX(wsIndex, timeChannelsVec[0]);
   else
+  {
+	
     // Use std::vector::at just incase spectrum missing from spec array
     newWorkspace->setX(wsIndex, timeChannelsVec.at(m_specTimeRegimes[nspecNum] - 1));
-  newWorkspace->getAxis(1)->spectraNo(wsIndex) = nspecNum;
+  }
+ 
 }
 
 /** This method returns the monitor spectrum list 

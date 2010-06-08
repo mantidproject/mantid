@@ -1,5 +1,5 @@
-#ifndef LoadRawBin0Test_H_
-#define LoadRawBin0Test_H_
+#ifndef LoadRawBin0Test123_H_
+#define LoadRawBin0Test123_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -35,19 +35,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader.initialize());
     TS_ASSERT( loader.isInitialized() );
   }
-
   void testExec()
   {
-	
-	  if ( !loader.isInitialized() ) loader.initialize();
+	/* std::string s;
+	 std::getline(std::cin,s);*/
+	 if ( !loader.isInitialized() ) loader.initialize();
 
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(loader.execute(),std::runtime_error);
-
+	
     // Now set it...
     loader.setPropertyValue("Filename", inputFile);
 	
-    outputSpace = "outer";
+    outputSpace = "bin0";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
 
     std::string result;
@@ -69,7 +69,7 @@ public:
     TS_ASSERT_EQUALS( output2D->dataY(673).size(), output2D->dataY(2111).size() );
 
     // Check one particular value
-    //TS_ASSERT_EQUALS( output2D->dataY(3)[0], 24);
+    TS_ASSERT_EQUALS( output2D->dataY(3)[0], 24.0);
     // Check that the error on that value is correct
 	TS_ASSERT_EQUALS( output2D->dataE(2)[0], std::sqrt(output2D->dataY(2)[0]));
     
@@ -85,8 +85,7 @@ public:
  
   void testMultiPeriod()
   {  
-	/*std::string s;
-	std::getline(std::cin,s);*/
+	
 	LoadRawBin0 loader5;
     loader5.initialize();
     loader5.setPropertyValue("Filename", "../../../../Test/Data/EVS13895.raw");
@@ -151,11 +150,17 @@ public:
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
     TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr6->sample()) )
+
+	itr1=wsNamevec.begin();
+    for (;itr1!=wsNamevec.end();++itr1)
+	{
+		AnalysisDataService::Instance().remove(*itr);
+	}
 	
   }
   
 private:
-  LoadRawBin0 loader,loader2,loader3;
+  LoadRawBin0 loader;
   std::string inputFile;
   std::string outputSpace;
 };

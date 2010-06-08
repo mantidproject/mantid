@@ -79,6 +79,8 @@ public:
 
     // test that log file read in ok
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
+
+	AnalysisDataService::Instance().remove(outputSpace);
   }
 
 
@@ -146,6 +148,8 @@ public:
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,23), "2007-Nov-13 15:16:20  0" );
+
+	AnalysisDataService::Instance().remove(outputSpace);
   }
   
 
@@ -193,6 +197,8 @@ public:
     TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
     std::string timeSeriesString = l_timeSeriesString->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Nov-16 13:25:48   END" );
+
+	AnalysisDataService::Instance().remove(outputSpace);
   }
 
 void testExecWiththreecolumnLogfile()
@@ -249,6 +255,8 @@ void testExecWiththreecolumnLogfile()
     l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     timeSeriesString = l_timeSeriesDouble->value();
     TS_ASSERT_EQUALS( timeSeriesString.substr(0,20), "2009-Nov-10 10:14:03" );
+
+	AnalysisDataService::Instance().remove(outputSpace);
 	
 	    
   }
@@ -318,6 +326,8 @@ void testloadlogwithalternatedatastream()
 	std::map<dateAndTime,double>::const_iterator vmapb2v2itr;
 	for(vmapb2v2itr=vmapb2v2.begin();vmapb2v2itr!=vmapb2v2.end();++vmapb2v2itr)
 	{TS_ASSERT_EQUALS( vmapb2v2itr->second, -0.004 );}
+
+	AnalysisDataService::Instance().remove(outputSpace);
 
     
   }

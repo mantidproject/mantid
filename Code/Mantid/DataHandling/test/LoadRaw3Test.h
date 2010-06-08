@@ -311,6 +311,7 @@ public:
     loader3.setPropertyValue("SpectrumList", "999,2000");
     loader3.execute();
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWS));
+	AnalysisDataService::Instance().remove(outWS);
   }
 
   void testMultiPeriod()
@@ -386,6 +387,13 @@ public:
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
     TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr6->sample()) )
+
+	itr1=wsNamevec.begin();
+    for (;itr1!=wsNamevec.end();++itr1)
+    {	
+      AnalysisDataService::Instance().remove(*itr);
+
+    }
 	
   }
 
@@ -411,6 +419,7 @@ public:
 
     Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
     TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 140);
+	AnalysisDataService::Instance().remove("parameterIDF");
   }
 
   void testTwoTimeRegimes()
@@ -542,6 +551,9 @@ public:
     // Test that trying to get the Detector throws.
     std::vector<int> test = map.getDetectors(5);
     TS_ASSERT(test.empty());
+
+	AnalysisDataService::Instance().remove(outputSpace);
+	AnalysisDataService::Instance().remove(outputSpace+"_Monitors");
   }
   void testSeparateMonitorsMultiPeriod()
   {
@@ -564,8 +576,8 @@ public:
 	Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitors");
     WorkspaceGroup_sptr monitorsptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
 
-	std::vector<std::string>monitorwsNamevec;
-    monitorwsNamevec=monitorsptrWSGrp->getNames();
+	
+    const std::vector<std::string>monitorwsNamevec = monitorsptrWSGrp->getNames();
     int period=1;
     std::vector<std::string>::const_iterator it=monitorwsNamevec.begin();
     for (it++;it!=monitorwsNamevec.end();it++)
@@ -623,8 +635,8 @@ public:
 	
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-    std::vector<std::string>wsNamevec;
-    wsNamevec=sptrWSGrp->getNames();
+   
+    const  std::vector<std::string>wsNamevec=sptrWSGrp->getNames();
      period=1;
      it=wsNamevec.begin();
     for (it++;it!=wsNamevec.end();it++)
@@ -678,6 +690,19 @@ public:
     TS_ASSERT_EQUALS( outsptr1->getInstrument(), outsptr6->getInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->spectraMap()), &(outsptr6->spectraMap()) )
     TS_ASSERT_DIFFERS( &(outsptr1->sample()), &(outsptr6->sample() ) )
+
+	it=monitorwsNamevec.begin();
+    for (;it!=monitorwsNamevec.end();++it)
+	{
+		AnalysisDataService::Instance().remove(*it);
+	}
+	it=wsNamevec.begin();
+	for (;it!=wsNamevec.end();++it)
+	{
+		AnalysisDataService::Instance().remove(*it);
+	}
+	
+	
   }
  
   
@@ -860,6 +885,7 @@ public:
     TS_ASSERT_EQUALS( output2D->dataE(995)[777], 3);
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(995)[777], 554.1875);
+	AnalysisDataService::Instance().remove("outWS");
   }
 
   void testExcludeMonitorswithMaxMinLimits()
@@ -883,7 +909,7 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 6 for selected input
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 99);
-    // Check one particular value
+    AnalysisDataService::Instance().remove("outWS");
     
   }
   void testWithManagedWorkspace()
@@ -900,6 +926,8 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
     TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
+
+		AnalysisDataService::Instance().remove("managedws2");
 	
   }
  void testSeparateMonitorsWithManagedWorkspace()

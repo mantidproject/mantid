@@ -97,16 +97,7 @@ void LoadRawBin0::exec()
     // Calculate the size of a workspace, given its number of periods & spectra to read
      m_total_specs = calculateWorkspaceSize();
 
-  // If there is not enough memory use ManagedRawFileWorkspace2D.
-  if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(m_total_specs, m_lengthIn,
-      m_lengthIn-1) && m_total_specs == m_numberOfSpectra)
-  {
-	fclose(file);
-    goManagedRaw();
-    return;
-  }
-
-//no real X values for bin 0,so initialize this to zero
+ //no real X values for bin 0,so initialize this to zero
   boost::shared_ptr<MantidVec> channelsVec(new MantidVec(1,0));
   m_timeChannelsVec.push_back(channelsVec);
  
@@ -116,7 +107,7 @@ void LoadRawBin0::exec()
   int histTotal = m_total_specs * m_numberOfPeriods;
   int histCurrent = -1;
  
-  // Create the 2D workspace for the output
+  // Create the 2D workspace for the output xlength and ylength is one 
   DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, 1,1,title);
   Sample& sample = localWorkspace->mutableSample();
   if (bLoadlogFiles)
@@ -160,8 +151,14 @@ void LoadRawBin0::exec()
           i) != m_spec_list.end()))
       {
         progress(m_prog, "Reading raw file data...");
-        readData(file, histToRead);
-		setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,1,0);
+        //readData(file, histToRead);
+		//read spectrum 
+		if (!readData(file, histToRead))
+		{
+			throw std::runtime_error("Error reading raw file");
+		}
+		int binStart=0;
+		setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,1,binStart);
 		++wsIndex;
 
         if (m_numberOfPeriods == 1)
@@ -194,36 +191,6 @@ void LoadRawBin0::exec()
   fclose(file);
 }
 
-/// Creates a ManagedRawFileWorkspace2D
-void LoadRawBin0::goManagedRaw()
-{
-  const std::string cache_option = getPropertyValue("Cache");
-  bool bLoadlogFiles = getProperty("LoadLogFiles");
-  int option = find(m_cache_options.begin(), m_cache_options.end(), cache_option)
-    - m_cache_options.begin();
-  progress(m_prog, "Reading raw file data...");
-  DataObjects::Workspace2D_sptr localWorkspace = DataObjects::Workspace2D_sptr(
-    new ManagedRawFileWorkspace2D(m_filename, option));
-
-  m_prog = 0.5;
-  if (bLoadlogFiles)
-  {
-    runLoadLog(m_filename,localWorkspace);
-    Property* log=createPeriodLog(1);
-    if(log)localWorkspace->mutableSample().addLogData(log);
-  }
-  setProtonCharge(localWorkspace->mutableSample());
-  m_prog = 0.7;
-  progress(m_prog);
-  for (int i = 0; i < m_numberOfSpectra; ++i)
-  {
-    localWorkspace->getAxis(1)->spectraNo(i) = i + 1;
-  }
- 
-  m_prog = 1.0;
-  progress(m_prog);
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(localWorkspace));
-}
 /// This sets the optional property to the LoadRawHelper class
 void LoadRawBin0::setOptionalProperties()
 {

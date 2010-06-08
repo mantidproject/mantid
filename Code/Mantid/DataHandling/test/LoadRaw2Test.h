@@ -275,6 +275,12 @@ public:
     TS_ASSERT_DIFFERS( &(output1->sample()), &(output6->sample()) )
     
     AnalysisDataService::Instance().remove("multiperiod2");
+	AnalysisDataService::Instance().remove("multiperiod2_2");
+	AnalysisDataService::Instance().remove("multiperiod2_3");
+	AnalysisDataService::Instance().remove("multiperiod2_4");
+	AnalysisDataService::Instance().remove("multiperiod2_5");
+	AnalysisDataService::Instance().remove("multiperiod2_6");
+
   }
 
   void testWithManagedWorkspace()

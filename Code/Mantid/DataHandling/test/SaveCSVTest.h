@@ -100,7 +100,8 @@ public:
     
     
     // remove file created by this algorithm
-    Poco::File(outputFile).remove();    
+    Poco::File(outputFile).remove(); 
+	AnalysisDataService::Instance().remove("SAVECSVTEST-testSpace");
   
   }
 

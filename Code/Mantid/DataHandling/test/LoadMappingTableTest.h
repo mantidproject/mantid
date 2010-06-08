@@ -85,6 +85,7 @@ public:
 	    // Test that trying to get the Detector throws.
 	    std::vector<int> test = map.getDetectors(5);
 	    TS_ASSERT(test.empty());
+		AnalysisDataService::Instance().remove(outputSpace);
 	    return;
 }
 private:

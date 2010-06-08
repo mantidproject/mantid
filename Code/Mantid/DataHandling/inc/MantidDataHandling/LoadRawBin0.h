@@ -82,9 +82,6 @@ namespace Mantid
       /// Overwrites Algorithm method
       void exec();
 
-	  /// 
-      void goManagedRaw();
-
 	  ///
 	  void setOptionalProperties();
        

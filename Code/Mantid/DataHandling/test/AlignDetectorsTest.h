@@ -24,6 +24,7 @@ public:
     loader.setProperty("SpectrumMin",320);
     loader.setProperty("SpectrumMax",330);
     loader.execute();
+	
   }
 
   void testName()
@@ -75,6 +76,7 @@ public:
     TS_ASSERT_DELTA( outWS->dataX(2)[50], 0.7223, 0.0001 )
     TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] )
     TS_ASSERT_EQUALS( outWS->dataY(2)[50], inWS->dataY(1)[50] )
+	AnalysisDataService::Instance().remove(outputWS);
   }
 
 private:

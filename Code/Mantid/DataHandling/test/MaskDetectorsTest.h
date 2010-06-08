@@ -143,6 +143,8 @@ public:
     TS_ASSERT( i->getDetector(2)->isMasked() )
     TS_ASSERT( i->getDetector(3)->isMasked() )
     TS_ASSERT( ! i->getDetector(4)->isMasked() )
+
+	AnalysisDataService::Instance().remove("testSpace");
   }
 
 private:
