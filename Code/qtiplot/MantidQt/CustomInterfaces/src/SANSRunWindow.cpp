@@ -2027,7 +2027,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
       assign_fn = "TransmissionSample";
     }
     assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
-    assign_fn += ", " + QString::number(getPeriod(key))+")";
+    assign_fn += ", period = " + QString::number(getPeriod(key))+")";
     //assign the workspace name to a Python variable and read back some details
     QString ws_names = runReduceScriptFunction("t1, t2 = " + assign_fn + ";print t1,t2");
     //read the informtion returned from Python
