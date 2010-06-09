@@ -5471,9 +5471,11 @@ void Graph::enablePanningMagnifier(bool on)
 	if (on){
 		cnvs->setCursor(Qt::pointingHandCursor);
 		d_magnifier = new QwtPlotMagnifier(cnvs);
+		d_magnifier->setAxisEnabled(QwtPlot::yRight,false);
 		d_magnifier->setZoomInKey(Qt::Key_Plus, Qt::ShiftModifier);
 
 		d_panner = new QwtPlotPanner(cnvs);
+		d_panner->setAxisEnabled(QwtPlot::yRight,false);
 		connect(d_panner, SIGNAL(panned(int, int)), multiLayer(), SLOT(notifyChanges()));
 	} else {
 		cnvs->setCursor(Qt::arrowCursor);
