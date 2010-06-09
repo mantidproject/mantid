@@ -79,6 +79,13 @@ private:
   
   //A pointer to the MantidUI object
   MantidUI* m_mantidUI;
+  /// these values are used to specify the format of the log file, all of which are stored as strings
+  enum logType
+  {
+    string,                           ///< indicates the log is a string, no other known formating
+    numTSeries,                       ///< for time series properties that contain numbers
+    stringTSeries                     ///< for logs that are string time series properties
+  };
 };
 
 #endif //MANTIDSAMPLELOGDIALOG_H_

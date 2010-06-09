@@ -353,8 +353,9 @@ public slots:
     MultiLayer* plotInstrumentSpectrum(const QString&,int);
 	MultiLayer* plotInstrumentSpectrumList(const QString&,std::set<int>);
 
-	void importSampleLog(const QString & filename, const QString & data, bool numeric);
-	void importNumSampleLog(const QString &wsName, const QString & logname, int filter);
+	void importString(const QString &logName, const QString &data);
+	void importStrSeriesLog(const QString &logName, const QString &data);
+	void importNumSeriesLog(const QString &wsName, const QString &logname, int filter);
 
 	// Clear all Mantid related memory
 	void clearAllMemory();

@@ -1626,8 +1626,35 @@ Mantid::API::IAlgorithm_sptr MantidUI::findAlgorithmPointer(const QString & algN
   }
   return alg;
 }
+/** Displays a string in a Qtiplot table
+*  @param logName the title of the table is based on this
+*  @param data the string to display
+*/
+void MantidUI::importString(const QString &logName, const QString &data)
+{
+  Table* t = new Table(appWindow()->scriptingEnv(), 1, 1, "", appWindow(), 0);
+  if( !t ) return;
+  //Have to replace "_" since the legend widget uses them to separate things
+  QString label = logName;
+  label.replace("_","-");
 
-void MantidUI::importSampleLog(const QString & filename, const QString & data, bool numeric)
+  appWindow()->initTable(t, 
+    appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
+  t->setColName(0, "Log entry");
+
+  t->setText(0, 0, data);
+
+  //Show table
+  t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
+	    (QMIN(10,1)+1)*t->table()->verticalHeader()->sectionSize(0)+100);
+  t->setAttribute(Qt::WA_DeleteOnClose);
+  t->showNormal();
+}
+/** Displays a string in a Qtiplot table
+*  @param logName the title of the table is based on this
+*  @param data a formated string with the time series data to display
+*/
+void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
 {
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
 
@@ -1636,7 +1663,7 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
   if( !t ) return;
   //t->askOnCloseEvent(false);
   //Have to replace "_" since the legend widget uses them to separate things
-  QString label = filename;
+  QString label = logName;
   label.replace("_","-");
 
   appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
@@ -1651,14 +1678,10 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
   {
     QStringList ts = (*sItr).split(QRegExp("\\s+"));
     t->setText(row, 0, ts[1]);
-    if( numeric ) t->setCell(row, 1, ts[2].toDouble());
-    else
-    {
-        QStringList ds(ts);
-        ds.removeFirst();// remove date
-        ds.removeFirst();// and time
-        t->setText(row, 1, ds.join(" "));
-    }
+    QStringList ds(ts);
+    ds.removeFirst();// remove date
+    ds.removeFirst();// and time
+    t->setText(row, 1, ds.join(" "));
   }
 
   //Show table
@@ -1667,23 +1690,7 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
  // t->askOnCloseEvent(false);
   t->setAttribute(Qt::WA_DeleteOnClose);
   t->showNormal();
-
-  // For string data we are done
-  if( !numeric ) return;
-
-  MultiLayer *ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
- // ml->askOnCloseEvent(false);
-  ml->setAttribute(Qt::WA_DeleteOnClose);
-
-  Graph* g = ml->activeGraph();
-  g->setCurveStyle(0,3);
-  g->setXAxisTitle(t->colLabel(0));
-  g->setYAxisTitle(t->colLabel(1).section(".",0,0));
-  g->setTitle(label.section("-",0, 0));
-
-  ml->showNormal();
 }
-
 /**  Import a numeric log data. It will be shown in a graph and copied into a table
      @param wsName The workspace name which log data will be imported
      @param logname The name of the log property to import
@@ -1693,7 +1700,7 @@ void MantidUI::importSampleLog(const QString & filename, const QString & data, b
                 - 2 filter by period
                 - 3 filter by status & period
  */
-void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname, int filter)
+void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname, int filter)
 {
     Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
     if (!ws) return;
@@ -1732,13 +1739,13 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
                 if (f) flt.addFilter(f);
                 else
                 {
-                    importNumSampleLog(wsName,logname,0);
+                    importNumSeriesLog(wsName,logname,0);
                     return;
                 }
             }
             catch(...)
             {
-                importNumSampleLog(wsName,logname,0);
+                importNumSeriesLog(wsName,logname,0);
                 return;
             }
         }
@@ -1755,13 +1762,13 @@ void MantidUI::importNumSampleLog(const QString &wsName, const QString & logname
                         if (f) flt.addFilter(f);
                         else
                         {
-                            importNumSampleLog(wsName,logname,0);
+                            importNumSeriesLog(wsName,logname,0);
                             return;
                         }
                     }
                     catch(...)
                     {
-                        importNumSampleLog(wsName,logname,0);
+                        importNumSeriesLog(wsName,logname,0);
                         return;
                     }
 

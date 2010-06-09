@@ -118,20 +118,32 @@ void MantidSampleLogDialog::importSelectedFiles()
 /**
 * Import an item
 * @param item The item to be imported
+* @throw invalid_argument if format identifier for the item is wrong
 */
 void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
 {
-  if (item->data(1, Qt::UserRole).toBool())
+  //used in numeric time series below, the default filter value
+  int filter = 0;
+
+  switch (item->data(1, Qt::UserRole).toInt())
   {
-      int filter = 0;
+    case string :
+      m_mantidUI->importString(item->text(0),
+        item->data(0, Qt::UserRole).toString());
+      break;
+    case numTSeries :
       if (filterStatus->isChecked()) filter = 1;
       if (filterPeriod->isChecked()) filter = 2;
       if (filterStatusPeriod->isChecked()) filter = 3;
-      m_mantidUI->importNumSampleLog(m_wsname, item->text(0), filter);
+      m_mantidUI->importNumSeriesLog(m_wsname, item->text(0), filter);
+      break;
+    case stringTSeries :
+      m_mantidUI->importStrSeriesLog(item->text(0),
+                                     item->data(0, Qt::UserRole).toString());
+      break;
+    default :
+      throw std::invalid_argument("Error importing log entry, wrong dataa type"); 
   }
-  else
-      m_mantidUI->importSampleLog(item->text(0), item->data(0, Qt::UserRole).toString(), 
-			      item->data(1, Qt::UserRole).toBool());
 }
 
 
@@ -177,19 +189,28 @@ void MantidSampleLogDialog::init()
     QString filename = QFileInfo((**pItr).name().c_str()).fileName();
     if( filename.size() > max_length ) max_length = filename.size();
     QTreeWidgetItem *treeItem = new QTreeWidgetItem(QStringList(filename));
+    //store the log contents in the treeItem
     treeItem->setData(0, Qt::UserRole, QString::fromStdString((*pItr)->value()));
+    //this specifies the format of the data it should be overridden below or there is a problem
+    treeItem->setData(1, Qt::UserRole, -1);
     //See what type of data we have    
     if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(*pItr) ||
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(*pItr) ||
         dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*pItr) )
     {
-      treeItem->setText(1, "numeric");
-      treeItem->setData(1, Qt::UserRole, true);
+      treeItem->setText(1, "numeric series");
+      //state that the string we passed into data[0] is a time series -multiple lines with a time and then a number
+      treeItem->setData(1, Qt::UserRole, static_cast<int>(numTSeries));
     }
     else if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr) )
     {
+      treeItem->setText(1, "string series");
+      treeItem->setData(1, Qt::UserRole, static_cast<int>(stringTSeries));
+    }
+    else if( dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(*pItr) )
+    {
       treeItem->setText(1, "string");
-      treeItem->setData(1, Qt::UserRole, false);
+      treeItem->setData(1, Qt::UserRole, static_cast<int>(string));
     }
 
     //Add tree item
