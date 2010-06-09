@@ -1337,7 +1337,7 @@ void FitPropertyBrowser::addTieToFunction()
     // Pick out parameters with the same name as the one we're tying from
     if ( fun->parameterName(ref.getIndex()) == parName )
     {
-      if ( fun == h->function() ) // If this is the 'tied from' parameter, remember it
+      if ( iPar == -1 && fun == h->function() ) // If this is the 'tied from' parameter, remember it
       {
         iPar = i;
       }
