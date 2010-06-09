@@ -25,6 +25,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine="copy &quot;$(SolutionDir)\PythonAPI\MantidFramework.py&quot; &quot;$(SolutionDir)\debug&quot; /Y"
+				Outputs="$(SolutionDir)\debug\MantidFramework.py"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -39,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="inc;../API/inc;../Kernel/inc;../DataHandling/inc;../DataObjects/inc;../Geometry/inc;../../Third_Party/include;C:\python25\include"
-				PreprocessorDefinitions="BOOST_ALL_DYN_LINK;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="BOOST_DEBUG_PYTHON;BOOST_PYTHON_NO_LIB;IN_MANTID_PYTHON_API=1;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="3"
 				DebugInformationFormat="3"
 			/>
@@ -54,8 +56,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)API.lib"
-				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName).pyd"
+				AdditionalDependencies="$(SolutionName)Kernel.lib $(SolutionName)Geometry.lib $(SolutionName)API.lib boost_python-vc80-mt-gyd-1_43.lib"
+				OutputFile="$(OutDir)\$(SolutionName)$(ProjectName)_d.pyd"
 				AdditionalLibraryDirectories="../debug;../../Third_Party/lib/win32;c:\Python25\libs"
 				GenerateDebugInformation="true"
 			/>
