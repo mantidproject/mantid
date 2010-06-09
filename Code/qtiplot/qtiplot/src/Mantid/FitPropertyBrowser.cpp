@@ -1327,7 +1327,6 @@ void FitPropertyBrowser::addTieToFunction()
   if (!h) return;
   if (!h->isParameter(paramProp)) return;
   std::string parName = paramProp->propertyName().toStdString();
-  bool ok;
   QStringList fnNames;
 
   int iPar = -1;
@@ -1335,14 +1334,17 @@ void FitPropertyBrowser::addTieToFunction()
   {
     Mantid::API::ParameterReference ref(m_compositeFunction,i);
     Mantid::API::IFunction* fun = ref.getFunction();
-    if (fun == h->function())
+    // Pick out parameters with the same name as the one we're tying from
+    if ( fun->parameterName(ref.getIndex()) == parName )
     {
-      iPar = i;
-      continue;
-    }
-    if (fun->parameterName(ref.getIndex()) == parName)
-    {
-      fnNames << QString::fromStdString(m_compositeFunction->parameterName(i));
+      if ( fun == h->function() ) // If this is the 'tied from' parameter, remember it
+      {
+        iPar = i;
+      }
+      else  // Otherwise add it to the list of potential 'tyees'
+      {
+        fnNames << QString::fromStdString(m_compositeFunction->parameterName(i));
+      }
     }
   }
   if (fnNames.empty() || iPar < 0)
@@ -1351,7 +1353,8 @@ void FitPropertyBrowser::addTieToFunction()
     return;
   }
 
-  QString tieName = 
+  bool ok;
+  QString tieName =
     QInputDialog::getItem(this, "MantidPlot - Fit", "Select function", fnNames,0,false,&ok);
 
   if (!ok) return;

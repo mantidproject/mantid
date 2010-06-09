@@ -260,11 +260,11 @@ int CompositeFunction::parameterIndex(const std::string& name)const
   return getFunction(index)->parameterIndex(pname) + m_paramOffsets[index];
 }
 
-/**
- * Checks that a pointer points to a parameter of this function and returns its index.
- * @param p A pointer to a double variable.
- * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
- */
+///**
+// * Checks that a pointer points to a parameter of this function and returns its index.
+// * @param p A pointer to a double variable.
+// * @return The index of the parameter or -1 if p is not a pointer to any of the function's parameters.
+// */
 //int CompositeFunction::parameterIndex(const double* p)const
 //{
 //  for(int iFun=0;iFun<nFunctions();iFun++)
